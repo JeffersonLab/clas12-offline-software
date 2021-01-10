@@ -16,34 +16,36 @@ public class FTTRKConstantsLoader {
 	}
 
         // geometry constants
-	public static final int Nlayers = 4;   // 2 double layers, ordered as FTT1B+FTT1T, FTT3B+FTT3T
+	public static final int Nlayers = 4;        // 2 double layers, ordered as FTT1B+FTT1T, FTT3T+FTT3B, 0-4
         public static int NSupLayers = Nlayers/2;   // bottom+top makes a a SuperLayer
-	public static int Nstrips=768 ;// Number of strips
+	public static int Nstrips=768 ;             // Number of strips
         public static int SideHalfstrips;  
         public static int Longstrips=128;
-        public static double[] Zlayer = {175., 176., 177., 178.}; //Give z-coordinate of the layer
-//        public static double[] Alpha = {0.,0.5*Math.PI}; //Give the rotation angle to apply
-        public static double[] Alpha = {-0.5*Math.PI, 0.}; //Give the rotation angle to apply
-	public static double Pitch=0.056; //strip width
-	public static double Beamhole=14.086/2.;//Radius of the hole in the center for the beam (mm)
-//	public static double Interstrip ; //inter strip
+        public static double[] Zlayer = {177.676, 178.298, 179.699, 180.322};   // from MC mean position of gas layers (average z position of MC hits)
+
+        // identical layers (test): 0, 90, 0, 90 deg useful for debugging purposes
+        //   public static double[] Alpha = {0., 0.5*Math.PI, 0., 0.5*Math.PI};
+        // real geometry condition (gemc): -30, 60, 120, +30 deg
+        public static double[] Alpha = {-Math.PI/6., Math.PI/3., 2*Math.PI/3., Math.PI/6.};
+        
+        public static double Pitch=0.056;            //strip width
+	public static double Beamhole=14.086/2.;     //Radius of the hole in the center for the beam (mm)
         public static double InnerHole;
 	public static double Rmax;
         public static double[][][] stripsXloc; //Give the local end-points x-coordinates of the strip segment, per layer
         public static double[][][] stripsYloc; //Give the local end-points y-coordinates of the strip segment, per layer
-        public static double[] stripsXlocref; //Give the local ref-points x-coordinates of the strip segment
-        public static double[] stripsYlocref; //Give the local ref-points y-coordinates of the strip segment
-        public static double[][][] stripsX; //Give the  end-points x-coordinates of the strip segment rotated in the correct frame for the layer
-        public static double[][][] stripsY; //Give the  end-points y-coordinates of the strip segment
-        public static double[] stripslength; //Give the strip length
- ///       public static int[] UStrips, IStrips;   
+        public static double[] stripsXlocref;  //Give the local ref-points x-coordinates of the strip segment
+        public static double[] stripsYlocref;  //Give the local ref-points y-coordinates of the strip segment
+        public static double[][][] stripsX;    //Give the  end-points x-coordinates of the strip segment rotated in the correct frame for the layer
+        public static double[][][] stripsY;    //Give the  end-points y-coordinates of the strip segment
+        public static double[] stripslength;  //Give the strip length   
         
       
         public static synchronized void Load() {
 
-		SideHalfstrips =  (Nstrips -2*Longstrips)/4;    // 128
-		InnerHole = (double)SideHalfstrips*Pitch;       // 7.168 cm, exceeds Beamhole by 0.125 cm - reference as minimum radius       
-		Rmax = Pitch*(SideHalfstrips + Longstrips);     // 21.504
+		SideHalfstrips =  (Nstrips -2*Longstrips)/4;      // 128
+		InnerHole = (double)(SideHalfstrips)*Pitch;       // 7.168 cm, exceeds Beamhole by 0.125 cm - reference as minimum radius
+		Rmax = Pitch*(SideHalfstrips + Longstrips);       // 14.336
                 // 2d arrays: [0] origin, [1] segment endpoint
 		stripsXloc = new double[NSupLayers][Nstrips][2]; 
                 stripsYloc = new double[NSupLayers][Nstrips][2];
@@ -54,14 +56,7 @@ public class FTTRKConstantsLoader {
                 stripslength = new double[Nstrips]; 
                 
                 int debug = FTTRKReconstruction.debugMode;
-		
-                // fill the arrays with strip numbers ordered according to the module region. Start from 0.
-                /*
-                for(int i=0; i<Longstrips; i++){UStrips[i] = i;}
-                for(int i=Longstrips; i<(Longstrips+SideHalfstrips); i++){UStrips[i] = i;}
-                for(int i=(Longstrips+SideHalfstrips); i<(Longstrips+2*SideHalfstrips); i++){IStrips[i-Longstrips-SideHalfstrips] = i;}
-                for(int i=(Longstrips+2*SideHalfstrips); i<2*(Longstrips+SideHalfstrips); i++){UStrips[i-SideHalfstrips] = i;}    
-                */
+                double half = 0.5;
                 
                 // just the first two layers are enough, the second two are identical
                 for(int j=0; j<Nlayers/2; j++){
@@ -71,30 +66,17 @@ public class FTTRKConstantsLoader {
                         int localRegionY = getLocalRegionY(i);
                         //System.out.println("strip " + i + " local region Y " + localRegionY);
                         if(localRegionY == -1){ // bottom long strips+right side half strips
-                            stripsYloc[j][i][0] = stripsYloc[j][i][1] = -Rmax + (i + 0.5)*Pitch;
+                            stripsYloc[j][i][0] = stripsYloc[j][i][1] = -Rmax + (i + half)*Pitch;
                         }else if(localRegionY == -2){ // bottom left side half strips 
-//                           stripsYloc[j][i][0] = stripsYloc[j][i][1] = -Rmax + (i - SideHalfstrips - 0.5)*Pitch;
-                            stripsYloc[j][i][0] = stripsYloc[j][i][1] = -Rmax - (2*SideHalfstrips -i-0.5)*Pitch;
+                            stripsYloc[j][i][0] = stripsYloc[j][i][1] = -Rmax - (2*SideHalfstrips-half -i)*Pitch;
                         }else if(localRegionY == 1){ // top long strips + left side half strips
-                            stripsYloc[j][i][0] = stripsYloc[j][i][1] = Rmax - (Nstrips - i - 0.5)*Pitch;
+                            stripsYloc[j][i][0] = stripsYloc[j][i][1] = Rmax - (Nstrips - i -half)*Pitch;
                         }else if(localRegionY == 2){ // top right side half strips
-//                            stripsYloc[j][i][0] = stripsYloc[j][i][1] = Rmax - (i + 0.5)*Pitch;
-                            stripsYloc[j][i][0] = stripsYloc[j][i][1] = (i + 0.5 - 2*SideHalfstrips)*Pitch;
+                            stripsYloc[j][i][0] = stripsYloc[j][i][1] = (i + half - 2*SideHalfstrips)*Pitch;
                         }else{
                             System.out.println("**** check strip number, Y coordinate not assigned ****");
                         }     
                         stripsYlocref[i] = stripsYloc[j][i][0];
-                        
-                        /*
-			if (i<512){
-				stripsYloc[i][0]=-Rmax+(511-i+0.5)*Pitch;
-				stripsYloc[i][1]=-Rmax+(511-i+0.5)*Pitch;
-			} else {
-				stripsYloc[i][0]=Rmax-(1023-i+0.5)*Pitch;
-				stripsYloc[i][1]=Rmax-(1023-i+0.5)*Pitch;
-			}
-			stripsYlocref[i] = stripsYloc[i][0];
-                        */
                         
                         // reference geometry: bottom module (top are left/right symmetric
                         // Give the X of the middle of the strip
@@ -102,34 +84,19 @@ public class FTTRKConstantsLoader {
 //                        System.out.println("strip " + i + " localRegionX " + localRegionX);
                         if(localRegionX==1 || localRegionX==2 || localRegionX==4 || localRegionX==5){
                             // half strips, hole sides
-                            if(j%2 == 0){ // bottom layer
-                                if(localRegionX==1 || localRegionX==2){ // left (negative X) side
-                                    stripsXloc[j][i][0] = -Math.sqrt(Rmax*Rmax-stripsYloc[j][i][0]*stripsYloc[j][i][0]);
-                                    stripsXloc[j][i][1] = -Math.sqrt(InnerHole*InnerHole-stripsYloc[j][i][1]*stripsYloc[j][i][1]);
-                                    stripslength[i] = Math.abs(stripsXloc[j][i][0] - stripsXloc[j][i][1]);
-                                    stripsXlocref[i] = -stripslength[i]/2.;                                        
-                                }else if(localRegionX==4 || localRegionX==5){ // right (positive X) side
-                                    stripsXloc[j][i][0] = Math.sqrt(Rmax*Rmax-stripsYloc[j][i][0]*stripsYloc[j][i][0]);
-                                    stripsXloc[j][i][1] = Math.sqrt(InnerHole*InnerHole-stripsYloc[j][i][1]*stripsYloc[j][i][1]);
-                                    stripslength[i] = Math.abs(stripsXloc[j][i][0] - stripsXloc[j][i][1]);
-                                    stripsXlocref[i] = +stripslength[i]/2.;                                                                        
-                                }
-                            }else{ // top layer
+//                            if(j%2 == 0){ // bottom layer
+//                            if(j==0 || j==3){ // bottom layers
                                 if(localRegionX==1 || localRegionX==2){ // left (negative X) side
                                     stripsXloc[j][i][0] = Math.sqrt(Rmax*Rmax-stripsYloc[j][i][0]*stripsYloc[j][i][0]);
                                     stripsXloc[j][i][1] = Math.sqrt(InnerHole*InnerHole-stripsYloc[j][i][1]*stripsYloc[j][i][1]);
                                     stripslength[i] = Math.abs(stripsXloc[j][i][0] - stripsXloc[j][i][1]);
-                                    stripsXlocref[i] = stripslength[i]/2.;
-                                    double calc = InnerHole*InnerHole-stripsYloc[j][i][1]*stripsYloc[j][i][1];
-//                                    System.out.println("local coordinates strips j, i " + j + " " + i + " " + stripsXloc[j][i][1]);
-//                                    System.out.println("argument sqrt " + calc);
+                                    stripsXlocref[i] = stripslength[i]/2.;                                        
                                 }else if(localRegionX==4 || localRegionX==5){ // right (positive X) side
                                     stripsXloc[j][i][0] = -Math.sqrt(Rmax*Rmax-stripsYloc[j][i][0]*stripsYloc[j][i][0]);
                                     stripsXloc[j][i][1] = -Math.sqrt(InnerHole*InnerHole-stripsYloc[j][i][1]*stripsYloc[j][i][1]);
-                                    stripslength[i] = -Math.abs(stripsXloc[j][i][0] - stripsXloc[j][i][1]);
+                                    stripslength[i] = Math.abs(stripsXloc[j][i][0] - stripsXloc[j][i][1]);
                                     stripsXlocref[i] = -stripslength[i]/2.;                                                                        
                                 }
-                            }    
                         }else if(localRegionX==3 || localRegionX==6){
                             // long strips, same for bottom and top modules
                             stripslength[i] = 2.*Math.sqrt(Rmax*Rmax-stripsYloc[j][i][0]*stripsYloc[j][i][0]);
@@ -140,58 +107,16 @@ public class FTTRKConstantsLoader {
                             System.out.println("**** check strip number, X coordinate not assigned ****");
                         }
                         
-                        /*
-			switch(localRegion) {
-			case 2: case 4:
-				stripslength[i]=2*Rmax*Math.sin(Math.acos(Math.abs(stripsYloc[i][0])/Rmax));
-				stripsXloc[i][0] = -stripslength[i]/2.;
-				stripsXloc[i][1] =  stripslength[i]/2.;
-                                stripsXlocref[i] = 0;
-				break;
-			case 1:
-				stripslength[i]= Rmax*Math.sin(Math.acos(Math.abs(stripsYloc[i][0])/Rmax));
-				stripsXloc[i][1] = 0;
-				stripsXloc[i][0] = -stripslength[i];
-                                stripsXlocref[i] = -stripslength[i]/2;
-				if(Math.abs(stripsYloc[i][0])/Beamhole<1) {
-					stripslength[i]= Rmax*Math.sin(Math.acos(Math.abs(stripsYloc[i][0])/Rmax))-Beamhole*Math.sin(Math.acos(Math.abs(stripsYloc[i][0])/Beamhole));
-					stripsXloc[i][1] = -Beamhole*Math.sin(Math.acos(Math.abs(stripsYloc[i][0])/Beamhole));
-					stripsXloc[i][0] = -stripslength[i];
-                                        stripsXlocref[i] = -stripslength[i]/2-Beamhole*Math.sin(Math.acos(Math.abs(stripsYloc[i][0])/Beamhole));
-				}
-				break;
-			case 3:
-				stripslength[i]= Rmax*Math.sin(Math.acos(Math.abs(stripsYloc[i][0])/Rmax));
-				stripsXloc[i][0] = 0;
-				stripsXloc[i][1] = stripslength[i];
-                                stripsXlocref[i] = stripslength[i]/2;
-				if(Math.abs(stripsYloc[i][0])/Beamhole<1) {
-					stripslength[i]= Rmax*Math.sin(Math.acos(Math.abs(stripsYloc[i][0])/Rmax))-Beamhole*Math.sin(Math.acos(Math.abs(stripsYloc[i][0])/Beamhole));
-					stripsXloc[i][0] = Beamhole*Math.sin(Math.acos(Math.abs(stripsYloc[i][0])/Beamhole));
-					stripsXloc[i][1] = stripslength[i];
-                                        stripsXlocref[i] = stripslength[i]/2+Beamhole*Math.sin(Math.acos(Math.abs(stripsYloc[i][0])/Beamhole));
-				}
-				break;
-			}
-*/ 
-                        // flip all x,y local coordinates
-//                        for(int k=0; k<1; k++){
-//                            stripsXloc[j][i][k] = -stripsXloc[j][i][k];
-//                            stripsYloc[j][i][k] = -stripsYloc[j][i][k];
-//                        }
-                        
-                        
-                        // with a negative rotation of layer 1-3 the coordinates are matched to the spot on FTCAL
-                        // in this way the strip numbering is consistent with the MC geometry
+                                               
                         stripsX[j][i][0] = (stripsXloc[j][i][0]*Math.cos(Alpha[j]) - stripsYloc[j][i][0]*Math.sin(Alpha[j]));
                         stripsY[j][i][0] = stripsXloc[j][i][0]*Math.sin(Alpha[j]) + stripsYloc[j][i][0]*Math.cos(Alpha[j]);
                         stripsX[j][i][1] = (stripsXloc[j][i][1]*Math.cos(Alpha[j]) - stripsYloc[j][i][1]*Math.sin(Alpha[j]));
                         stripsY[j][i][1] = stripsXloc[j][i][1]*Math.sin(Alpha[j]) + stripsYloc[j][i][1]*Math.cos(Alpha[j]);
                         
-                        stripsX[j+2][i][0] = stripsX[j][i][0];
-                        stripsY[j+2][i][0] = stripsY[j][i][0];
-                        stripsX[j+2][i][1] = stripsX[j][i][1];
-                        stripsY[j+2][i][1] = stripsY[j][i][1];
+                        stripsX[j+2][i][0] = (stripsXloc[j][i][0]*Math.cos(Alpha[j+2]) - stripsYloc[j][i][0]*Math.sin(Alpha[j+2]));
+                        stripsY[j+2][i][0] = (stripsXloc[j][i][0]*Math.sin(Alpha[j+2]) + stripsYloc[j][i][0]*Math.cos(Alpha[j+2]));
+                        stripsX[j+2][i][1] = (stripsXloc[j][i][1]*Math.cos(Alpha[j+2]) - stripsYloc[j][i][1]*Math.sin(Alpha[j+2]));
+                        stripsY[j+2][i][1] = (stripsXloc[j][i][1]*Math.sin(Alpha[j+2]) + stripsYloc[j][i][1]*Math.cos(Alpha[j+2]));
                         
 			//if(debug>=1) System.out.println(Constants.getLocalRegion(i)+" strip-1 = "+i+" x' "+stripsXloc[i][1]+" y' "+stripsYloc[i][1]+" length "+stripslength[i]+" Beamhole "+Beamhole);
                     }

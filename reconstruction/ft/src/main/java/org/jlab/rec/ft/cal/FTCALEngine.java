@@ -12,6 +12,7 @@ import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.groot.data.H1F;
+import org.jlab.groot.data.H2F;
 import org.jlab.groot.graphics.EmbeddedCanvas;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -95,7 +96,9 @@ public class FTCALEngine extends ReconstructionEngine {
     public static void main (String arg[])  {
 		FTCALEngine cal = new FTCALEngine();
 		cal.init();
-		String input = "/Users/devita/Work/clas12/simulations/clas12Tags/4.4.0/out.hipo";
+		//		String input = "/Users/devita/Work/clas12/simulations/clas12Tags/4.4.0/out.hipo";
+//		String input = "/home/filippi/clas/ForwardTracker/DATA/out_realGeo_noMagField.data";
+                String input = "/home/filippi/clas/gemc/electronGun/gemc.hipo";
 		HipoDataSource  reader = new HipoDataSource();
 //		String input = "/Users/devita/Work/clas12/simulations/tests/detectors/clas12/ft/out_header.ev";
 //		EvioSource  reader = new EvioSource();
@@ -112,6 +115,8 @@ public class FTCALEngine extends ReconstructionEngine {
         h4.setOptStat(Integer.parseInt("1111")); h4.setTitleX("Phi Resolution(deg)");
         H1F h5 = new H1F("Time Resolution",100, -10, 10);         
         h5.setOptStat(Integer.parseInt("1111")); h5.setTitleX("Time Resolution(ns)");
+        H2F h6 = new H2F("cluster xy", 100, -15., 15., 100, -15., 15.);
+        h6.setTitleX("cluster x"); h6.setTitleY("cluster y");
 
         while(reader.hasEvent()){
             DataEvent event = (DataEvent) reader.getNextEvent();
@@ -147,6 +152,7 @@ public class FTCALEngine extends ReconstructionEngine {
 //                        System.out.println(cluster.x() + " " + cluster.y() + " " + cluster.z() + " ");
                         h4.fill(Math.toDegrees(cluster.phi()-gen.getGeneratedParticle(0).phi()));
                         h5.fill(bank.getFloat("time",i)-124.25);
+			h6.fill(cluster.x(), cluster.y());
                     }
                 }
 
@@ -160,6 +166,7 @@ public class FTCALEngine extends ReconstructionEngine {
         canvas.cd(1); canvas.draw(h2);
         canvas.cd(2); canvas.draw(h3);
         canvas.cd(3); canvas.draw(h4);
+	canvas.cd(4); canvas.draw(h6);
         canvas.cd(5); canvas.draw(h5);
         frame.add(canvas);
         frame.setLocationRelativeTo(null);

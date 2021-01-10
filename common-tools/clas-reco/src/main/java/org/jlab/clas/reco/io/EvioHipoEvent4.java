@@ -371,7 +371,9 @@ public class EvioHipoEvent4 {
                 hipoADC.putByte("order", i,(byte) 0);
                 hipoADC.putInt("ADC", i, evioBank.getInt("ADC", i));
                 double tdc = 0;
-                hipoADC.putFloat("time", i, (float) (tdc/25.0));
+//                hipoADC.putFloat("time", i, (float) (tdc/25.0));
+                double time = (float) evioBank.getFloat("time",i);
+                hipoADC.putFloat("time", i, (float) evioBank.getFloat("time",i));
             }
             hipoEvent.write(hipoADC);
         }

@@ -12,7 +12,7 @@ services:
     name: FTCAL
   - class: org.jlab.rec.ft.hodo.FTHODOEngine
     name: FTHODO
-  - class: org.jlab.rec.ft.trk.FTTRKEngine
+  - class: org.jlab.ft.trk.FTTRKEngine
     name: FTTRK
   - class: org.jlab.rec.ft.FTEBEngine
     name: FTEB
@@ -73,6 +73,9 @@ configuration:
 #    EBTB:
 #      variation: default
 #      timestamp: 08/22/2018
-
+    RTPC:
+      rtpcSimulation: "false"
+      rtpcCosmic: "true"
+      rtpcBeamlineFit: "false"
 mime-types:
   - binary/data-hipo
