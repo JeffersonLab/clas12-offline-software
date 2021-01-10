@@ -13,9 +13,11 @@ import java.util.Set;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataDescriptor;
 import org.jlab.io.base.DataDictionary;
-import org.jlab.jnp.hipo.data.HipoNode;
-import org.jlab.jnp.hipo.schema.Schema;
-import org.jlab.jnp.hipo.schema.SchemaFactory;
+import org.jlab.jnp.hipo4.data.Bank;
+import org.jlab.jnp.hipo4.data.Schema;
+import org.jlab.jnp.hipo4.data.SchemaFactory;
+
+
 
 
 /**
@@ -29,7 +31,11 @@ public class HipoDataDictionary implements DataDictionary {
     public HipoDataDictionary(){
         
         SchemaFactory factory = new SchemaFactory();
-        factory.initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
+        String envCLAS = System.getenv("CLAS12DIR");
+        if(envCLAS==null){
+            envCLAS = System.getProperty("CLAS12DIR");
+        }
+        factory.initFromDirectory(envCLAS + "/" + "etc/bankdefs/hipo4");
         List<Schema> entries = factory.getSchemaList();
         //System.out.println(" schema size = " + entries.size());
         for(Schema sch : entries){
@@ -71,9 +77,12 @@ public class HipoDataDictionary implements DataDictionary {
 
     @Override
     public DataBank createBank(String name, int rows) {
-        Map<Integer,HipoNode>  map = descriptors.get(name).getSchema().createNodeMap(rows);
-        HipoDataBank bank = new HipoDataBank(map,descriptors.get(name).getSchema());
-        return bank;
+        Schema schema = descriptors.get(name).getSchema();
+        Bank bank = new Bank(schema,rows);
+        HipoDataBank dataBank = new HipoDataBank(bank);
+        //Map<Integer,HipoNode>  map = descriptors.get(name).getSchema().createNodeMap(rows);
+        //HipoDataBank bank = new HipoDataBank(map,descriptors.get(name).getSchema());
+        return dataBank;
     }
     
     public static void main(String[] args){

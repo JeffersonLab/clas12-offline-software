@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.coda.jevio.EvioException;
@@ -25,6 +26,7 @@ import org.jlab.rec.tof.cluster.Cluster;
 import org.jlab.rec.tof.cluster.ClusterFinder;
 import org.jlab.rec.tof.hit.AHit;
 import org.jlab.rec.tof.hit.ctof.Hit;
+import org.jlab.rec.tof.track.Track;
 
 /**
  *
@@ -59,14 +61,17 @@ public class CTOFEngine extends ReconstructionEngine {
                     "/calibration/ctof/status",
                     "/calibration/ctof/gain_balance",
                     "/calibration/ctof/time_jitter",
-                    "/calibration/ctof/fadc_offset"
+                    "/calibration/ctof/fadc_offset",
+                    "/calibration/ctof/hpos",
+                    "/calibration/ctof/cluster"
                 };
         
         requireConstants(Arrays.asList(ctofTables));
        
        // Get the constants for the correct variation
         this.getConstantsManager().setVariation("default");
-        ConstantProvider cp = GeometryFactory.getConstants(DetectorType.CTOF, 11, "default");
+        String engineVariation = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
+        ConstantProvider cp = GeometryFactory.getConstants(DetectorType.CTOF, 11, engineVariation);
         geometry = new CTOFGeant4Factory(cp);
         
         return true;
@@ -81,7 +86,9 @@ public class CTOFEngine extends ReconstructionEngine {
         }
 
         DataBank bank = event.getBank("RUN::config");
-		
+//	System.out.println();
+//	System.out.println(bank.getInt("event", 0));
+        
         // Load the constants
         //-------------------
         final int newRun = bank.getInt("run", 0);
@@ -91,7 +98,7 @@ public class CTOFEngine extends ReconstructionEngine {
             return false;
         }
         if (timeStamp==-1) {
-            System.err.println("FTOFEngine:  got 0 timestamp, skipping event");
+            System.err.println("CTOFEngine:  got 0 timestamp, skipping event");
             return false;
         }
 
@@ -102,15 +109,13 @@ public class CTOFEngine extends ReconstructionEngine {
         // Get the list of track lines which will be used for matching the CTOF
         // hit to the CVT track
         TrackReader trkRead = new TrackReader();
-        trkRead.fetch_Trks(event);
-        List<Line3d> trkLines = trkRead.get_TrkLines();
-        double[] paths = trkRead.get_Paths();
-        int[] ids = trkRead.getTrkId();
+        ArrayList<Track> tracks = trkRead.fetch_Trks(event);
+        
         List<Hit> hits = new ArrayList<Hit>(); // all hits
         List<Cluster> clusters = new ArrayList<Cluster>(); // all clusters
         // read in the hits for CTOF
         HitReader hitRead = new HitReader();
-        hitRead.fetch_Hits(event, timeStamp, geometry, trkLines, paths, ids, 
+        hitRead.fetch_Hits(event, timeStamp, geometry, tracks, 
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/attenuation"),
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/effective_velocity"),
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/time_offsets"),
@@ -118,7 +123,8 @@ public class CTOFEngine extends ReconstructionEngine {
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/status"),
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/gain_balance"),
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/time_jitter"),
-            this.getConstantsManager().getConstants(newRun, "/calibration/ctof/fadc_offset"));
+            this.getConstantsManager().getConstants(newRun, "/calibration/ctof/fadc_offset"),
+            this.getConstantsManager().getConstants(newRun, "/calibration/ctof/hpos"));
 
         // 1) get the hits
         List<Hit> CTOFHits = hitRead.get_CTOFHits();
@@ -137,7 +143,8 @@ public class CTOFEngine extends ReconstructionEngine {
         Collections.sort(hits);
 
         // 2) find the clusters from these hits
-        ClusterFinder clusFinder = new ClusterFinder();
+        ClusterFinder clusFinder = new ClusterFinder(this.getConstantsManager().getConstants(newRun, "/calibration/ctof/cluster"));
+//        clusFinder.setDebug(true);
         int[] npaddles = Constants.NPAD;
         int npanels = 1;
         int nsectors = 1;
@@ -149,6 +156,8 @@ public class CTOFEngine extends ReconstructionEngine {
 
         if (CTOFClusters != null) {
             clusters.addAll(CTOFClusters);
+            // assign cluster IDs to hits
+            hitRead.setHitPointersToClusters(hits, clusters);       
         }
 
         // 2.1) exit if cluster list is empty but save the hits
@@ -156,6 +165,7 @@ public class CTOFEngine extends ReconstructionEngine {
             rbc.appendCTOFBanks(event, hits, null);
             return true;
         }
+        
         // continuing ... there are clusters
         if (Constants.DEBUGMODE) { // if running in DEBUG MODE print out the
             // reconstructed info about the hits and the
@@ -176,15 +186,8 @@ public class CTOFEngine extends ReconstructionEngine {
                         .println("---------------------------------------------");
             }
         }
-        //rbc.appendCTOFBanks( event, hits, clusters);
-        rbc.appendCTOFBanks(event, hits, null); // json file needs clusters...
-//        if(event.hasBank("CTOF::adc")) {
-//            if(event.hasBank("CTOF::adc")) event.getBank("CTOF::adc").show();
-//            if(event.hasBank("CTOF::tdc")) event.getBank("CTOF::tdc").show();
-//            if(event.hasBank("CTOF::rawhits")) event.getBank("CTOF::rawhits").show();
-//            if(event.hasBank("CTOF::hits")) event.getBank("CTOF::hits").show();
-//            if(event.hasBank("CVTRec::Tracks")) event.getBank("CVTRec::Tracks").show();
-//        }
+        rbc.appendCTOFBanks(event, hits, clusters); // json file needs clusters...
+
         return true;
 
     }

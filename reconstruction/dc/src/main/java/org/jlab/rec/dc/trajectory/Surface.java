@@ -5,19 +5,22 @@
  */
 package org.jlab.rec.dc.trajectory;
 
+import org.jlab.detector.base.DetectorType;
+
 /**
  *
  * @author ziegler
  */
 public class Surface {
     
-    private int _DetectorIndex;
-    public int getDetectorIndex() {
-        return _DetectorIndex;
+    private DetectorType _DetectorType;
+    public DetectorType getDetectorType() {
+        return _DetectorType;
     }
-    public void setDetectorIndex(int _DetectorIndex) {
-        this._DetectorIndex = _DetectorIndex;
+    public void setDetectorType(DetectorType _DetectorType) {
+        this._DetectorType = _DetectorType;
     }
+    
     private int _DetectorLayer;
     public int getDetectorLayer() {
         return _DetectorLayer;
@@ -26,19 +29,8 @@ public class Surface {
         this._DetectorLayer = _DetectorLayer;
     }
 
-    private String _DetectorName;
-
-    public String getDetectorName() {
-        return _DetectorName;
-    }
-
-    public void setDetectorName(String _DetectorName) {
-        this._DetectorName = _DetectorName;
-    }
-
-    public Surface (String name, int id, int layer, double d, double nx, double ny, double nz) {
-        _DetectorName = name;
-        _DetectorIndex = id;
+    public Surface (DetectorType type, int layer, double d, double nx, double ny, double nz) {
+        _DetectorType = type;
         _DetectorLayer = layer;
         _d = d;
         _nx = nx;

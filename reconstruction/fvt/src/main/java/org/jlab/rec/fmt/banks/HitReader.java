@@ -67,9 +67,9 @@ public class HitReader {
             for (int i = 0; i < rows; i++) {
 
                 id[i] = i + 1;
-                sector[i] = bankDGTZ.getInt("sector", i);
-                layer[i] = bankDGTZ.getInt("layer", i);
-                strip[i] = bankDGTZ.getInt("component", i);
+                sector[i] = bankDGTZ.getByte("sector", i);
+                layer[i] = bankDGTZ.getByte("layer", i);
+                strip[i] = bankDGTZ.getShort("component", i);
                 ADC[i] = bankDGTZ.getInt("ADC", i);
 
                 if(strip[i]==-1 || ADC[i]==0)

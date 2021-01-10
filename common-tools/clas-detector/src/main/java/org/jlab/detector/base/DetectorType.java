@@ -27,18 +27,13 @@ public enum DetectorType {
     RTPC      (19, "RTPC"),
     HEL       (20, "HEL"),
     BAND      (21, "BAND"),
+    TARGET    (100, "TARGET"),
     ECIN      (110, "ECIN"),
     ECOUT     (111, "ECOUT"),
     ECTOT     (112, "ECTOT"),
     LAC       (113, "LAC"),
     SC        (114, "SC"),
     CC        (115, "CC");
-//    SVT       (220, "SVT");
-
-    // FIXME add layer conventions here, e.g.:
-    // (or maybe they are defined somewhere else?)
-    // FTOF1A/1B/2 = 1/2/3
-    // PCAL/Inner/Outer = 1/4/7
     
     private final int detectorId;
     private final String detectorName;

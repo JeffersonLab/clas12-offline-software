@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.JFrame;
+import org.jlab.clas.detector.DetectorData;
+import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.physics.GenericKinematicFitter;
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.clas.reco.ReconstructionEngine;
@@ -15,6 +17,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioSource;
+import org.jlab.io.hipo.HipoDataSource;
 
 
 public class FTHODOEngine extends ReconstructionEngine {
@@ -72,11 +75,11 @@ public class FTHODOEngine extends ReconstructionEngine {
     
         if(event instanceof EvioDataEvent) {
             EvioDataBank bank = (EvioDataBank) event.getBank("RUN::config");
-            run = bank.getInt("Run")[0];
+            run = bank.getInt("Run",0);
         }
         else {
             DataBank bank = event.getBank("RUN::config");
-            run = bank.getInt("run")[0];
+            run = bank.getInt("run",0);
         }
 	return run;	
     }
@@ -87,8 +90,8 @@ public class FTHODOEngine extends ReconstructionEngine {
 		cal.init();
 //		String input = "/Users/devita/data/out_clasdispr.00.e11.000.emn0.75tmn.09.xs65.61nb.dis.1.V5.hipo";
 //		HipoDataSource  reader = new HipoDataSource();
-		String input = "/Users/devita/Work/clas12/simulations/tests/detectors/clas12/ft/out_header.ev";
-		EvioSource  reader = new EvioSource();
+		String input = "/Users/devita/test4.hipo";
+		HipoDataSource  reader = new HipoDataSource();
 		reader.open(input);
 		
 		// initialize histos
@@ -107,19 +110,17 @@ public class FTHODOEngine extends ReconstructionEngine {
             DataEvent event = (DataEvent) reader.getNextEvent();
             cal.processDataEvent(event);
 
-            GenericKinematicFitter      fitter = new GenericKinematicFitter(11);
-            PhysicsEvent                   gen = fitter.getGeneratedEvent((EvioDataEvent)event);
-//            DetectorEvent detectorEvent = DetectorData.readDetectorEvent(event);
-//            PhysicsEvent            gen = detectorEvent.getGeneratedEvent();
-            if(event.hasBank("FTHODORec::clusters")) {
-                DataBank bank = event.getBank("FTHODORec::clusters");
+            DetectorEvent detectorEvent = DetectorData.readDetectorEvent(event);
+            PhysicsEvent            gen = detectorEvent.getGeneratedEvent();
+            if(event.hasBank("FTHODO::clusters")) {
+                DataBank bank = event.getBank("FTHODO::clusters");
                 int nrows = bank.rows();
                 for(int i=0; i<nrows;i++) {
-                    h1.fill(bank.getDouble("clusterEnergy",i));
-                    h2.fill(bank.getDouble("clusterEnergy",i)-gen.getParticle("[11]").vector().p());
-                    h3.fill(bank.getDouble("clusterTheta",i)-gen.getParticle("[11]").theta()*180/Math.PI);
-                    h4.fill(bank.getDouble("clusterPhi",i)-gen.getParticle("[11]").phi()*180/Math.PI);
-                    h5.fill(bank.getDouble("clusterTime",i));
+                    h1.fill(bank.getFloat("energy",i));
+                    h2.fill(bank.getFloat("energy",i)-gen.getParticle("[11]").vector().p());
+//                    h3.fill(bank.getFloat("clusterTheta",i)-gen.getParticle("[11]").theta()*180/Math.PI);
+//                    h4.fill(bank.getFloat("clusterPhi",i)-gen.getParticle("[11]").phi()*180/Math.PI);
+                    h5.fill(bank.getFloat("time",i));
             	}
             }
         }

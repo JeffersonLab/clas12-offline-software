@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package org.jlab.io.task;
 
 import java.awt.BorderLayout;
@@ -28,6 +22,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventType;
 import org.jlab.io.evio.EvioETSource;
 import org.jlab.io.evio.EvioSource;
+import org.jlab.io.hipo3.Hipo3DataSource;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoRingSource;
 import org.jlab.io.ui.ConnectionDialog;
@@ -55,7 +50,8 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
     private JButton              sourceFile    = null;
     private JButton              sourceEt      = null;
     private int                  eventDelay    = 0;
-    private Color paneBackground        = Color.GRAY;
+    private Color paneBackground               = Color.GRAY;
+    public boolean               isHipo3Event  = false;          
         
     public DataSourceProcessorPane(){
         super();
@@ -86,11 +82,17 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         sourceFileEt.setToolTipText("Connect to ET ring");        
         sourceFileEt.addActionListener(this);
         
-        JButton sourceFileHipo = new JButton("H");
+        JButton sourceFileHipo3 = new JButton("H3");
         //sourceFileHipo.setPreferredSize(new Dimension(35, 35));
-        sourceFileHipo.setActionCommand("OpenFileHipo");
-        sourceFileHipo.setToolTipText("Open Hipo file");
-        sourceFileHipo.addActionListener(this);
+        sourceFileHipo3.setActionCommand("OpenFileHipo3");
+        sourceFileHipo3.setToolTipText("Open Hipo3 file");
+        sourceFileHipo3.addActionListener(this);
+        
+        JButton sourceFileHipo4 = new JButton("H4");
+        //sourceFileHipo.setPreferredSize(new Dimension(35, 35));
+        sourceFileHipo4.setActionCommand("OpenFileHipo4");
+        sourceFileHipo4.setToolTipText("Open Hipo4 file");
+        sourceFileHipo4.addActionListener(this);        
         
         JButton sourceFileRing = new JButton("HR");
         sourceFileRing.setActionCommand("OpenFileRing");
@@ -113,8 +115,9 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         //sourcePane.setBackground(Color.LIGHT_GRAY);
         sourcePane.add(sourceFile);
         sourcePane.add(sourceFileEt);
-        sourcePane.add(sourceFileHipo);
-        sourcePane.add(sourceFileRing);
+        sourcePane.add(sourceFileHipo3);
+        sourcePane.add(sourceFileHipo4);
+//        sourcePane.add(sourceFileRing);
         sourcePane.add(resetListeners);
         //this.add(openFile);
         //this.add(Box.createHorizontalStrut(30));
@@ -299,12 +302,38 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
             this.setDataFile(null);
         }
         
-        if(e.getActionCommand().compareTo("OpenFileHipo")==0){
+        if(e.getActionCommand().compareTo("OpenFileHipo3")==0){
             if(this.processTimer!=null){
                 this.processTimer.cancel();
                 this.processTimer = null;
             }
+            isHipo3Event = true;
+            JFileChooser fc = new JFileChooser();
+            fc.setCurrentDirectory(null);
+            int returnVal = fc.showOpenDialog(this);
             
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                String fileName = fc.getSelectedFile().getAbsolutePath();
+                System.out.println("file -> " + fileName);
+                Hipo3DataSource source = new Hipo3DataSource();
+                source.open(fileName);
+
+                //This is where a real application would open the file.
+                this.dataProcessor.setSource(source);
+                statusLabel.setText(dataProcessor.getStatusString());
+                mediaNext.setEnabled(true);
+                mediaPrev.setEnabled(true);
+                mediaPlay.setEnabled(true);
+                this.setDataFile(fileName);
+            }
+        }
+        
+        if(e.getActionCommand().compareTo("OpenFileHipo4")==0){
+            if(this.processTimer!=null){
+                this.processTimer.cancel();
+                this.processTimer = null;
+            }
+            isHipo3Event = false;
             JFileChooser fc = new JFileChooser();
             fc.setCurrentDirectory(null);
             int returnVal = fc.showOpenDialog(this);
@@ -322,10 +351,9 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
                 mediaPrev.setEnabled(true);
                 mediaPlay.setEnabled(true);
                 this.setDataFile(fileName);
-            } else {
-                
             }
         }
+        
     }
     
     private void startProcessorTimer(){

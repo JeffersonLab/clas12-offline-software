@@ -3,6 +3,8 @@ package org.jlab.rec.eb;
 public enum EBCCDBEnum {
     ELEC_SF,
     ELEC_SFS,
+    ELEC_SF_nsigma,
+    ELEC_PCAL_min_energy,
     PHOT_SF,
     PHOT_SFS,
     PCAL_MATCHING,
@@ -57,6 +59,11 @@ public enum EBCCDBEnum {
     FCUP_slope,
     FCUP_offset,
     FCUP_atten,
+    HELICITY_frequency,
+    HELICITY_delay,
+    HELICITY_pattern,
+    HELICITY_tsettle,
+    HELICITY_tstable,
     HWP_position;
 }
 

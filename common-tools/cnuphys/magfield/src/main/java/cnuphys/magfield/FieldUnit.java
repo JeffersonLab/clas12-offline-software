@@ -17,8 +17,7 @@ public enum FieldUnit {
     /**
      * Get the field unit from an integer
      * 
-     * @param val
-     *            the integer value
+	 * @param val the integer value
      * @return the field unit
      */
     public static FieldUnit fromInt(int val) {

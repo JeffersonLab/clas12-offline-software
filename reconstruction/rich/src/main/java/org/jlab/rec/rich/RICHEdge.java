@@ -111,10 +111,10 @@ public class RICHEdge implements Comparable<RICHEdge>{
 
     
     // ----------------
-    public static boolean passEdgeSelection(RICHEdge edge) {
+    public boolean passEdgeSelection() {
     // ----------------
         // a selection cut to pass the edge
-        if(edge.get_tdc() > 0) {
+        if(this.get_tdc() > 0) {
             return true;
         } else {
             return false;

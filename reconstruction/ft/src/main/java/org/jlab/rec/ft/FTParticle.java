@@ -1,6 +1,7 @@
 package org.jlab.rec.ft;
 
 import java.util.List;
+import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.utils.groups.IndexedTable;
@@ -11,7 +12,7 @@ public class FTParticle {
 	
 	private int _ID;                                          // track ID
 	private int _Charge;		         	          // 0/1 for photon/electron
-	private double _Time;      			          // time of impact on the FT 
+	private double _Time;      			          // time of the particle at the vertex
 	private double _Energy;			                  // total energy of the cluster including correction
 	private Vector3D _Position  = new Vector3D();             // position 
 	private Vector3D _Direction = new Vector3D();             // direction 
@@ -95,8 +96,8 @@ public class FTParticle {
             if(this._Charge==-1) {
                 double energy    = this._Energy;
                 double thetaCorr = Math.exp(thetaTable.getDoubleValue("thetacorr0", 1,1,0)+thetaTable.getDoubleValue("thetacorr1", 1,1,0)*energy)+
-			     	   Math.exp(thetaTable.getDoubleValue("thetacorr1", 1,1,0)+thetaTable.getDoubleValue("thetacorr3", 1,1,0)*energy);
-                thetaCorr        = Math.toRadians(thetaCorr * this._field);
+			     	   Math.exp(thetaTable.getDoubleValue("thetacorr2", 1,1,0)+thetaTable.getDoubleValue("thetacorr3", 1,1,0)*energy);
+                thetaCorr        = Math.toRadians(thetaCorr * Math.abs(this._field));
 		double phiCorr   = Math.exp(phiTable.getDoubleValue("phicorr0", 1,1,0)+phiTable.getDoubleValue("phicorr1", 1,1,0)*energy)+
 			     	   Math.exp(phiTable.getDoubleValue("phicorr2", 1,1,0)+phiTable.getDoubleValue("phicorr3", 1,1,0)*energy)+
 			     	   Math.exp(phiTable.getDoubleValue("phicorr4", 1,1,0)+phiTable.getDoubleValue("phicorr5", 1,1,0)*energy);
@@ -153,14 +154,17 @@ public class FTParticle {
                 FTResponse response = hitList.get(loop);
                 if(response.getAssociation()<0 && response.getType() == detectorType){
                     Line3D  dist = cross.distance(response.getPosition().toPoint3D());
-                    double hitdistance = dist.length();
-                    double timedistance = this.getTime()-response.getTime();
+                    double hitdistance  = dist.length();
+                    double timedistance = Math.abs(this.getTime()-(response.getTime()-response.getPosition().mag()/PhysicsConstants.speedOfLight()));
  //                   System.out.println(" LOOP = " + loop + "   distance = " + hitdistance);
                     if(timedistance<timeThresholds&&hitdistance<distanceThreshold&&hitdistance<minimumDistance){
                         minimumDistance = hitdistance;
                         bestIndex       = loop;
                     }
                 }
+            }
+            if(bestIndex>-1) {
+                if(hitList.get(bestIndex).getSize()<FTConstants.HODO_MIN_CLUSTER_SIZE) bestIndex=-1;
             }
             return bestIndex;
         }

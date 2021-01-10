@@ -1,6 +1,9 @@
 package org.jlab.rec.cnd.constants;
 
-import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+import java.util.ArrayList;
+import java.util.List;
+import org.jlab.detector.calib.utils.ConstantsManager;
+import org.jlab.utils.groups.IndexedTable;
 
 
 
@@ -11,216 +14,118 @@ import org.jlab.detector.calib.utils.DatabaseConstantProvider;
  */
 public class CalibrationConstantsLoader {
 
-	public CalibrationConstantsLoader() {
-		// TODO Auto-generated constructor stub
-	}
-	public static boolean CSTLOADED = false;
+        private final static String[]  cndTables = new String[]{
+                "/calibration/cnd/UturnEloss",
+                "/calibration/cnd/UturnTloss",
+                "/calibration/cnd/TimeOffsets_LR",
+                "/calibration/cnd/TDC_conv",
+                "/calibration/cnd/TimeOffsets_layer",
+                "/calibration/cnd/EffV",
+                "/calibration/cnd/Attenuation",
+                "/calibration/cnd/Status_LR",
+                "/calibration/cnd/Energy",
+                "/calibration/cnd/time_jitter",
+		"/geometry/cnd/cndgeom",
+		"/geometry/target"
+            };
 
-	// Instantiating the constants arrays
-	public static double[][] UTURNELOSS 		= new double[24][3];
-	public static double[][] UTURNTLOSS 		= new double[24][3];
-	public static double[][] TIMEOFFSETSLR 		= new double[24][3];	
-	public static double[][][] TDCTOTIMESLOPE	= new double[24][3][2];
-	public static double[][][] TDCTOTIMEOFFSET	= new double[24][3][2];	
-	public static double[][] TIMEOFFSETSECT 	= new double[24][3];
-	public static double[][][] EFFVEL 		= new double[24][3][2];
-	public static double[][][] ATNLEN               = new double[24][3][2];
-	public static double[][][] MIPDIRECT 		= new double[24][3][2];
-	public static double[][][] MIPINDIRECT		= new double[24][3][2];
-	public static int[][][] Status_LR 		= new int[24][3][2];
-	public static double JITTER_PERIOD              = 0;
-	public static int JITTER_PHASE                  = 0;
-	public static int JITTER_CYCLES                 = 0;
-	public static double[] LENGTH                   = new double[3];
-	public static double[] ZOFFSET                  = new double[3];
-	public static double[] THICKNESS                = new double[1];
-	public static double[] INNERRADIUS              = new double[1];
+        public CalibrationConstantsLoader(int run, ConstantsManager ccdb) {
+            this.Load(run, ccdb);
+        }
+
+        // Instantiating the constants arrays
+	public double[][] UTURNELOSS 		= new double[24][3];
+	public double[][] UTURNTLOSS 		= new double[24][3];
+	public double[][] TIMEOFFSETSLR 		= new double[24][3];	
+	public double[][][] TDCTOTIMESLOPE	= new double[24][3][2];
+	public double[][][] TDCTOTIMEOFFSET	= new double[24][3][2];	
+	public double[][] TIMEOFFSETSECT 	= new double[24][3];
+	public double[][][] EFFVEL 		= new double[24][3][2];
+	public double[][][] ATNLEN               = new double[24][3][2];
+	public double[][][] MIPDIRECT 		= new double[24][3][2];
+	public double[][][] MIPINDIRECT		= new double[24][3][2];
+	public int[][][] Status_LR 		= new int[24][3][2];
+	public double JITTER_PERIOD              = 0;
+	public int JITTER_PHASE                  = 0;
+	public int JITTER_CYCLES                 = 0;
+	public double[] LENGTH                   = new double[3];
+	public double[] ZOFFSET                  = new double[3];
+	public double[] THICKNESS                = new double[1];
+	public double[] INNERRADIUS              = new double[1];
+	public double[] ZTARGET                  = new double[1];
 	//Calibration and geometry parameters from DB    
 
-	public static boolean arEnergyibConstantsLoaded = false;
+        public static String[] getCndTables() {
+            return cndTables;
+        }
 
-	static DatabaseConstantProvider dbprovider = null;
+        
+	public final void Load(int run, ConstantsManager ccdb) {
 
-	public static synchronized void Load(int runno, String var) {
+            // load table reads entire table and makes an array of variables for each column in the table.
+            //tabJs(0): ("/calibration/cnd/UturnEloss");
+            //tabJs(1): ("/calibration/cnd/UturnTloss");
+            //tabJs(2): ("/calibration/cnd/TimeOffsets_LR");
+            //tabJs(3): ("/calibration/cnd/TDC_conv");
+            //tabJs(4): ("/calibration/cnd/TimeOffsets_layer");
+            //tabJs(5): ("/calibration/cnd/EffV");
+            //tabJs(6): ("/calibration/cnd/Attenuation");
+            //tabJs(7): ("/calibration/cnd/Status_LR");
+            //tabJs(8): ("/calibration/cnd/Energy");
+            //tabJs(9): ("/calibration/cnd/time_jitter");
+            //tabJs(10): ("/geometry/cnd/layer");
+            //tabJs(11): ("/geometry/cnd/cnd");
+            List<IndexedTable> tabJs = new ArrayList<IndexedTable>();
+            for(String tbStg : cndTables) {
+                tabJs.add(ccdb.getConstants(run, tbStg));
+            }
 
-		System.out.println(" LOADING CONSTANTS ");
-		dbprovider = new DatabaseConstantProvider(runno, var); // reset using the new variation
+            for (int iSec = 1; iSec <=24; iSec++) {
+                for(int iLay = 1; iLay <=3; iLay++) {
+                    UTURNELOSS[iSec-1][iLay-1] = tabJs.get(0).getDoubleValue("uturn_eloss", iSec, iLay, 1); // component is 1
+                    UTURNTLOSS[iSec-1][iLay-1] = tabJs.get(1).getDoubleValue("uturn_tloss", iSec, iLay, 1);
+                    TIMEOFFSETSLR[iSec-1][iLay-1] = tabJs.get(2).getDoubleValue("time_offset_LR", iSec, iLay, 1);
+                    TDCTOTIMESLOPE[iSec-1][iLay-1][0]  = tabJs.get(3).getDoubleValue("slope_L", iSec, iLay, 1);
+                    TDCTOTIMEOFFSET[iSec-1][iLay-1][0] = tabJs.get(3).getDoubleValue("offset_L", iSec, iLay, 1);
+                    TDCTOTIMESLOPE[iSec-1][iLay-1][1]  = tabJs.get(3).getDoubleValue("slope_R", iSec, iLay, 1);
+                    TDCTOTIMEOFFSET[iSec-1][iLay-1][1] = tabJs.get(3).getDoubleValue("offset_R", iSec, iLay, 1);
+                    TIMEOFFSETSECT[iSec-1][iLay-1] = tabJs.get(4).getDoubleValue("time_offset_layer", iSec, iLay, 1);
+                    EFFVEL[iSec-1][iLay-1][0] = tabJs.get(5).getDoubleValue("veff_L", iSec, iLay, 1);
+                    EFFVEL[iSec-1][iLay-1][1] = tabJs.get(5).getDoubleValue("veff_R", iSec, iLay, 1);
+                    ATNLEN[iSec-1][iLay-1][0] = tabJs.get(6).getDoubleValue("attlen_L", iSec, iLay, 1);
+                    ATNLEN[iSec-1][iLay-1][1] = tabJs.get(6).getDoubleValue("attlen_R", iSec, iLay, 1);
+                    Status_LR[iSec-1][iLay-1][0] = tabJs.get(7).getIntValue("status_L", iSec, iLay, 1);
+                    Status_LR[iSec-1][iLay-1][1] = tabJs.get(7).getIntValue("status_R", iSec, iLay, 1);
+                    MIPDIRECT[iSec-1][iLay-1][0]    = tabJs.get(8).getDoubleValue("mip_dir_L", iSec, iLay, 1);
+                    MIPINDIRECT[iSec-1][iLay-1][0]  = tabJs.get(8).getDoubleValue("mip_indir_L", iSec, iLay, 1);
+                    MIPDIRECT[iSec-1][iLay-1][1]    = tabJs.get(8).getDoubleValue("mip_dir_R", iSec, iLay, 1);
+                    MIPINDIRECT[iSec-1][iLay-1][1]  = tabJs.get(8).getDoubleValue("mip_indir_R", iSec, iLay, 1);
+                }
+            }
+            JITTER_PERIOD = tabJs.get(9).getDoubleValue("period", 0, 0, 0);
+            JITTER_PHASE  = tabJs.get(9).getIntValue("phase",  0, 0, 0);
+            JITTER_CYCLES = tabJs.get(9).getIntValue("cycles", 0, 0, 0);
 
-		// load table reads entire table and makes an array of variables for each column in the table.
-		dbprovider.loadTable("/calibration/cnd/UturnEloss");
-		dbprovider.loadTable("/calibration/cnd/UturnTloss");
-		dbprovider.loadTable("/calibration/cnd/TimeOffsets_LR");
-		dbprovider.loadTable("/calibration/cnd/TDC_conv");
-		dbprovider.loadTable("/calibration/cnd/TimeOffsets_layer");
-		dbprovider.loadTable("/calibration/cnd/EffV");
-		dbprovider.loadTable("/calibration/cnd/Attenuation");
-		dbprovider.loadTable("/calibration/cnd/Status_LR");
-		dbprovider.loadTable("/calibration/cnd/Energy");
-		dbprovider.loadTable("/calibration/cnd/time_jitter");
-		dbprovider.loadTable("/geometry/cnd/layer");
-		dbprovider.loadTable("/geometry/cnd/cnd");
+            for(int iLay = 1; iLay <=3; iLay++) {
+                LENGTH[iLay-1]  = 10.*tabJs.get(10).getDoubleValue("Length", 1, iLay, 1);
+                ZOFFSET[iLay-1] = 10.*tabJs.get(10).getDoubleValue("UpstreamZOffset", 1, iLay, 1);// not right structure for common tools
+            }
 
-		//disconncect from database. Important to do this after loading tables.
-		dbprovider.disconnect(); 
+            //LENGTH = new double[]{665.72, 700.0, 734.28};
+            INNERRADIUS[0] = 10.*tabJs.get(10).getDoubleValue("InnerRadius", 1, 1, 1);            
+            THICKNESS[0] = 10.*tabJs.get(10).getDoubleValue("Thickness", 1, 1, 1);  // not right structure for common tools
+	    
+	    ZTARGET[0] = tabJs.get(11).getDoubleValue("position", 0, 0, 0);  // not right structure for common tools
+            //INNERRADIUS[0] = 290.0;            
+            //THICKNESS[0] = 30.0;  
 
-		dbprovider.show();
+//            System.out.println("Target Position "+ZTARGET[0]);
+//            System.out.println("Radius and thickness "+INNERRADIUS[0]+" "+THICKNESS[0]);
+//            for(int iLay = 1; iLay <=3; iLay++) {
+//              System.out.println("Length and Zoff "+LENGTH[iLay-1]+" "+ZOFFSET[iLay-1]);
+//            }
 
-
-		//E-loss
-		for(int i =0; i< dbprovider.length("/calibration/cnd/UturnEloss/sector"); i++) {
-
-			int iSec = dbprovider.getInteger("/calibration/cnd/UturnEloss/sector", i);	    
-			int iLay = dbprovider.getInteger("/calibration/cnd/UturnEloss/layer", i);	       
-			double iEL = dbprovider.getDouble("/calibration/cnd/UturnEloss/uturn_eloss", i);
-
-			UTURNELOSS[iSec-1][iLay-1] = iEL;
-			//System.out.println("UturnEloss "+iEL);
-		}
-		//T-loss
-		for(int i =0; i< dbprovider.length("/calibration/cnd/UturnTloss/sector"); i++) {
-
-			int iSec = dbprovider.getInteger("/calibration/cnd/UturnTloss/sector", i);	    
-			int iLay = dbprovider.getInteger("/calibration/cnd/UturnTloss/layer", i);
-			double iTL = dbprovider.getDouble("/calibration/cnd/UturnTloss/uturn_tloss", i);
-
-			UTURNTLOSS[iSec-1][iLay-1] = iTL;
-			//System.out.println("UturnTloss "+iTL);
-		}
-		// Time offsets
-		for(int i =0; i< dbprovider.length("/calibration/cnd/TimeOffsets_LR/sector"); i++) {
-
-			int iSec = dbprovider.getInteger("/calibration/cnd/TimeOffsets_LR/sector", i);	    
-			int iLay = dbprovider.getInteger("/calibration/cnd/TimeOffsets_LR/layer", i);
-			double iTO = dbprovider.getDouble("/calibration/cnd/TimeOffsets_LR/time_offset_LR", i);
-
-			TIMEOFFSETSLR[iSec-1][iLay-1] = iTO;
-			//System.out.println("time_offset_LR "+iTO);
-		}
-		//TDC to time conversion
-		for(int i =0; i< dbprovider.length("/calibration/cnd/TDC_conv/sector"); i++) {
-
-			int iSec = dbprovider.getInteger("/calibration/cnd/TDC_conv/sector", i);	    
-			int iLay = dbprovider.getInteger("/calibration/cnd/TDC_conv/layer", i);
-			double iSlL = dbprovider.getDouble("/calibration/cnd/TDC_conv/slope_L", i);
-			double iSlR = dbprovider.getDouble("/calibration/cnd/TDC_conv/slope_R", i);
-			double iOfL = dbprovider.getDouble("/calibration/cnd/TDC_conv/offset_L", i);
-			double iOfR = dbprovider.getDouble("/calibration/cnd/TDC_conv/offset_R", i);
-
-			TDCTOTIMESLOPE[iSec-1][iLay-1][0] = iSlL;
-			TDCTOTIMEOFFSET[iSec-1][iLay-1][0] = iOfL;
-			TDCTOTIMESLOPE[iSec-1][iLay-1][1] = iSlR;
-			TDCTOTIMEOFFSET[iSec-1][iLay-1][1] = iOfR;
-			//System.out.println("TDCTOTIMESLOPE "+iSl);
-			//System.out.println("TDCTOTIMEOFFSET "+iOf);
-		}
-		// ?Time offsets _layer ... DB entry says time_offset_sector
-		for(int i =0; i< dbprovider.length("/calibration/cnd/TimeOffsets_layer/sector"); i++) {
-
-			int iSec = dbprovider.getInteger("/calibration/cnd/TimeOffsets_layer/sector", i);	    
-			int iLay = dbprovider.getInteger("/calibration/cnd/TimeOffsets_layer/layer", i);
-			double iTO = dbprovider.getDouble("/calibration/cnd/TimeOffsets_layer/time_offset_layer", i);
-
-			TIMEOFFSETSECT[iSec-1][iLay-1] = iTO;
-		}
-		// Attenuation length
-		for(int i =0; i< dbprovider.length("/calibration/cnd/Attenuation/sector"); i++) {
-
-			int iSec = dbprovider.getInteger("/calibration/cnd/Attenuation/sector", i);	    
-			int iLay = dbprovider.getInteger("/calibration/cnd/Attenuation/layer", i);
-			double iALL = dbprovider.getDouble("/calibration/cnd/Attenuation/attlen_L", i);
-			double iALR = dbprovider.getDouble("/calibration/cnd/Attenuation/attlen_R", i);
-
-			ATNLEN[iSec-1][iLay-1][0] = iALL;
-			ATNLEN[iSec-1][iLay-1][1] = iALR;
-		}
-		// Effective velocity
-		for(int i =0; i< dbprovider.length("/calibration/cnd/EffV/sector"); i++) {
-
-			int iSec = dbprovider.getInteger("/calibration/cnd/EffV/sector", i);	    
-			int iLay = dbprovider.getInteger("/calibration/cnd/EffV/layer", i);
-			double iVEL = dbprovider.getDouble("/calibration/cnd/EffV/veff_L", i);
-			double iVER = dbprovider.getDouble("/calibration/cnd/EffV/veff_R", i);
-
-			EFFVEL[iSec-1][iLay-1][0] = iVEL;
-			EFFVEL[iSec-1][iLay-1][1] = iVER;
-		}
-		// Energy
-		for(int i =0; i< dbprovider.length("/calibration/cnd/Energy/sector"); i++) {
-
-			int iSec = dbprovider.getInteger("/calibration/cnd/Energy/sector", i);	    
-			int iLay = dbprovider.getInteger("/calibration/cnd/Energy/layer", i);
-			double iMIPDL = dbprovider.getDouble("/calibration/cnd/Energy/mip_dir_L", i);
-			double iMIPIL = dbprovider.getDouble("/calibration/cnd/Energy/mip_indir_L", i);
-			double iMIPDR = dbprovider.getDouble("/calibration/cnd/Energy/mip_dir_R", i);
-			double iMIPIR = dbprovider.getDouble("/calibration/cnd/Energy/mip_indir_R", i);
-
-			MIPDIRECT[iSec-1][iLay-1][0] = iMIPDL;
-			MIPINDIRECT[iSec-1][iLay-1][0] = iMIPIL;
-			MIPDIRECT[iSec-1][iLay-1][1] = iMIPDR;
-			MIPINDIRECT[iSec-1][iLay-1][1] = iMIPIR;
-		}
-		// Status_LR
-		for(int i =0; i< dbprovider.length("/calibration/cnd/Status_LR/sector"); i++) {
-
-			int iSec = dbprovider.getInteger("/calibration/cnd/Status_LR/sector", i);	    
-			int iLay = dbprovider.getInteger("/calibration/cnd/Status_LR/layer", i);
-			int iStatL= dbprovider.getInteger("/calibration/cnd/Status_LR/status_L", i);
-			int iStatR= dbprovider.getInteger("/calibration/cnd/Status_LR/status_R", i);
-
-			Status_LR[iSec-1][iLay-1][0] = iStatL;
-			Status_LR[iSec-1][iLay-1][1] = iStatR;
-			//System.out.println("Status_LR "+iStat);
-		}
-		// TDC time jitter
-		JITTER_PERIOD = dbprovider.getDouble("/calibration/cnd/time_jitter/period", 0);
-		JITTER_PHASE  = dbprovider.getInteger("/calibration/cnd/time_jitter/phase", 0);
-		JITTER_CYCLES = dbprovider.getInteger("/calibration/cnd/time_jitter/cycles", 0);
-
-		// Geometry
-		for(int i =0; i< dbprovider.length("/geometry/cnd/layer/layer"); i++) {
-			int iLay = dbprovider.getInteger("/geometry/cnd/layer/layer", i);
-			double iLowerBase = dbprovider.getDouble("/geometry/cnd/layer/LowerBase", i);
-			double iHigherBase = dbprovider.getDouble("/geometry/cnd/layer/HigherBase", i);
-			double iLength = dbprovider.getDouble("/geometry/cnd/layer/Length", i);
-			double iUpstreamZOffset = dbprovider.getDouble("/geometry/cnd/layer/UpstreamZOffset", i);
-
-			LENGTH[iLay-1] = iLength;
-			ZOFFSET[iLay-1] = iUpstreamZOffset;               
-		}
-		
-		// +1 added
-		for(int i =0; i< dbprovider.length("/geometry/cnd/cnd")+1; i++) { 
-			int iCND = dbprovider.getInteger("/geometry/cnd/cnd", i);
-			double iInnerRadius = dbprovider.getDouble("/geometry/cnd/cnd/InnerRadius", i);            
-			double iOpenAngle = dbprovider.getDouble("/geometry/cnd/cnd/OpenAngle", i);            
-			double iThickness = dbprovider.getDouble("/geometry/cnd/cnd/Thickness", i);      
-			double iAzimuthalGap = dbprovider.getDouble("/geometry/cnd/cnd/AzimuthalGap", i);  
-			double iLateralGap = dbprovider.getDouble("/geometry/cnd/cnd/LateralGap", i);
-
-			INNERRADIUS[iCND] = iInnerRadius;               
-			THICKNESS[iCND] = iThickness;
-
-		}       
-		CSTLOADED = true;
-		System.out.println("SUCCESSFULLY LOADED CND CALIBRATION CONSTANTS....");
-
-		setDB(dbprovider);
-	} 
+    } 
 
 
-	private static DatabaseConstantProvider DB;
-
-	public static final DatabaseConstantProvider getDB() {
-		return DB;
-	}
-
-
-
-	public static final void setDB(DatabaseConstantProvider dB) {
-		DB = dB;
-	}
-
-	public static void main (String arg[]) {
-		CalibrationConstantsLoader.Load(10,"default");
-	}
 }

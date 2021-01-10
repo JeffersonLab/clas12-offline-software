@@ -15,9 +15,9 @@ import java.util.List;
  * <p>
  * The intersection of a line with a triangle can be calculated using the
  * intersection methods:
- * {@link #intersection(org.jlab.geom.prim.Line3D, org.jlab.geom.prim.Point3D) intersection(...)}, 
- * {@link #intersectionRay(org.jlab.geom.prim.Line3D, org.jlab.geom.prim.Point3D) intersectionRay(...)}, 
- * {@link #intersectionSegment(org.jlab.geom.prim.Line3D, org.jlab.geom.prim.Point3D) intersectionSegment(...)}.
+ * {@link #intersection(org.jlab.geom.prim.Line3D, List) intersection(...)}, 
+ * {@link #intersectionRay(org.jlab.geom.prim.Line3D, List) intersectionRay(...)}, 
+ * {@link #intersectionSegment(org.jlab.geom.prim.Line3D, List) intersectionSegment(...)}.
  *
  * @author gavalian
  */

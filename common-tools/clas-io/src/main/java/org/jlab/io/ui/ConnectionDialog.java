@@ -59,8 +59,6 @@ public class ConnectionDialog extends BasicDialog {
     
     /**
      * Create the panel for selected
-     * @param id
-     * @param level
      */
     public ConnectionDialog() {
         super("Connection.....", true, closeoutButtons);

@@ -8,6 +8,7 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
+import org.jlab.rec.tof.track.Track;
 
 /**
  *
@@ -20,102 +21,50 @@ public class TrackReader {
         // TODO Auto-generated constructor stub
     }
 
-    private List<Line3d> _TrkLines;
-    private double[] _Paths;
-    private int[] _TrkId;
 
-    public int[] getTrkId() {
-        return _TrkId;
-    }
+    public ArrayList<Track> setTracksFromBank(DataBank bankDC) {
 
-    public void setTrkId(int[] _TrkId) {
-        this._TrkId = _TrkId;
-    }
-    public List<Line3d> get_TrkLines() {
-        return _TrkLines;
-    }
+        ArrayList<Track> Tracks = new ArrayList<Track>();
 
-    public void set_TrkLines(List<Line3d> trkLines) {
-        this._TrkLines = trkLines;
-    }
-
-    public double[] get_Paths() {
-        return _Paths;
-    }
-
-    public void set_Paths(double[] paths) {
-        this._Paths = paths;
-    }
-
-    public void setTracksFromBank(DataBank bankDC) {
-        if(bankDC==null)
-            return;
-        // select good tracks
-        int rows = bankDC.rows();
-
-        double[] x = new double[rows]; // Region 3 cross x-position in the lab
-        // (in cm = default unit)
-        double[] y = new double[rows]; // Region 3 cross y-position in the lab
-        double[] z = new double[rows]; // Region 3 cross z-position in the lab
-        double[] ux = new double[rows]; // Region 3 cross x-unit-dir in the lab
-        double[] uy = new double[rows]; // Region 3 cross y-unit-dir in the lab
-        double[] uz = new double[rows]; // Region 3 cross z-unit-dir in the lab
-        double[] p = new double[rows]; // pathlength of the track from origin to
-        // DC R3
-        int[] tid = new int[rows]; // track id in HB bank
-        if (rows>0) {
-            // instanciates the list
-            // each arraylist corresponds to the tracks for a given sector
-            List<Line3d> trkLines = new ArrayList<Line3d>();
-            // each array of paths likewise corresponds to the tracks for a
-            // given sector
-            double[] paths = new double[rows];
-
+        if(bankDC!=null) {
+            // select good tracks
+            int rows = bankDC.rows();
             for (int i = 0; i < rows; i++) {
                 // if(fitChisq[i]>1)
                 // continue; // check this
-                tid[i] = bankDC.getShort("id", i);
-                x[i] = bankDC.getFloat("c3_x", i);
-                y[i] = bankDC.getFloat("c3_y", i);
-                z[i] = bankDC.getFloat("c3_z", i);
-                ux[i] = bankDC.getFloat("c3_ux", i);
-                uy[i] = bankDC.getFloat("c3_uy", i);
-                uz[i] = bankDC.getFloat("c3_uz", i);
-                p[i] = bankDC.getFloat("pathlength", i);
-                Line3d trk_path = new Line3d(new Vector3d(x[i], y[i], z[i]),
-                        new Vector3d(x[i] + 250 * ux[i], y[i] + 250 * uy[i],
-                                z[i] + 250 * uz[i]));
+                int id      = bankDC.getShort("id", i);
+                double x    = bankDC.getFloat("c3_x", i);
+                double y    = bankDC.getFloat("c3_y", i);
+                double z    = bankDC.getFloat("c3_z", i);
+                double ux   = bankDC.getFloat("c3_ux", i);
+                double uy   = bankDC.getFloat("c3_uy", i);
+                double uz   = bankDC.getFloat("c3_uz", i);
+                double path = bankDC.getFloat("pathlength", i);
 
-                // add this hit
-                trkLines.add(trk_path);
-                paths[i] = p[i];
+                Line3d line = new Line3d(new Vector3d(x,y,z), new Vector3d(x+5*ux,y+5*uy, z+5*uz));
+                Track track = new Track(id,line,path);
+                Tracks.add(track);
             }
-
-            // fill the list of TOF hits
-            this.set_TrkLines(trkLines);
-            this.set_Paths(paths);
-            this.setTrkId(tid);
         }
+        return Tracks;
     }
-    public void fetch_Trks(DataEvent event) {
+    
+    public ArrayList<Track> fetch_Trks(DataEvent event) {
 
-        if (event.hasBank("TimeBasedTrkg::TBTracks") == false && event.hasBank("HitBasedTrkg::HBTracks") == false) {
-            // System.err.println("there is no DC bank ");
-            _TrkLines = new ArrayList<Line3d>();
+        ArrayList<Track> Tracks = new ArrayList<Track>();
 
-            return;
+        if (event.hasBank("TimeBasedTrkg::TBTracks") == true || event.hasBank("HitBasedTrkg::HBTracks") == true) {
+            DataBank bankDC = null;
+            if(event.hasBank("TimeBasedTrkg::TBTracks") == true) {
+                bankDC = event.getBank("TimeBasedTrkg::TBTracks");
+                Tracks = this.setTracksFromBank(bankDC);
+            }
+            if(event.hasBank("HitBasedTrkg::HBTracks")==true && event.hasBank("TimeBasedTrkg::TBTracks") == false) {
+                bankDC = event.getBank("HitBasedTrkg::HBTracks");
+                Tracks = this.setTracksFromBank(bankDC);
+            }
         }
-        
-        
-        DataBank bankDC = null;
-        if(event.hasBank("TimeBasedTrkg::TBTracks") == true) {
-            bankDC = event.getBank("TimeBasedTrkg::TBTracks");
-            this.setTracksFromBank(bankDC);
-        }
-        if(event.hasBank("HitBasedTrkg::HBTracks")==true && event.hasBank("TimeBasedTrkg::TBTracks") == false) {
-            bankDC = event.getBank("HitBasedTrkg::HBTracks");
-            this.setTracksFromBank(bankDC);
-        }
+        return Tracks;
     }
 
 }

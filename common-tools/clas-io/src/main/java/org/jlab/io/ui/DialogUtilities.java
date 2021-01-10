@@ -62,8 +62,8 @@ public class DialogUtilities {
 	/**
 	 * Center a dialog
 	 * 
-	 * @param dialog
-	 *            the dialog to center
+	 * @param component
+	 *            the component to center
 	 */
 
 	public static void centerDialog(Component component) {

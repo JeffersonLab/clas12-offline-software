@@ -11,7 +11,7 @@ import org.jlab.rec.cnd.hit.HalfHit;
 public class HitReader {
 
 	// this method retrieves the half hits ie the adc/tdc signal from all the pmt for a given event
-	public static  ArrayList<HalfHit> getCndHalfHits(DataEvent event) {
+	public static  ArrayList<HalfHit> getCndHalfHits(DataEvent event, CalibrationConstantsLoader ccdb) {
 
 		if(event==null)
 			return new ArrayList<HalfHit>();
@@ -21,8 +21,8 @@ public class HitReader {
                 if(event.hasBank("RUN::config")) {
                     DataBank  bank = event.getBank("RUN::config");                       
                     long timeStamp = bank.getLong("timestamp", 0);
-                    if(CalibrationConstantsLoader.JITTER_CYCLES>0 && timeStamp!=-1) 
-                        triggerPhase=CalibrationConstantsLoader.JITTER_PERIOD*((timeStamp+CalibrationConstantsLoader.JITTER_PHASE)%CalibrationConstantsLoader.JITTER_CYCLES);
+                    if(ccdb.JITTER_CYCLES>0 && timeStamp!=-1) 
+                        triggerPhase=ccdb.JITTER_PERIOD*((timeStamp+ccdb.JITTER_PHASE)%ccdb.JITTER_CYCLES);
                 }
 
             // Check that the file has the dgtz bank for CND.	 
@@ -86,7 +86,7 @@ public class HitReader {
 			// First, carry out checks on the quality of the signals:	    	  
 			if (adc == 0 || tdc == 0 || tdc == Parameters.NullTDC || indextdc==-1) continue; // require good ADC and TDC values
 
-			newhit = new HalfHit(sector, layer, component, triggerPhase, adc, tdc, i,indextdc); 
+			newhit = new HalfHit(sector, layer, component, triggerPhase, adc, tdc, i,indextdc, ccdb); 
 
 			halfhits.add(newhit);
 		}

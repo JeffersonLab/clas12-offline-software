@@ -39,14 +39,18 @@ public class TrackSeederCA {
       	  if( cell.get_state() >= mstate-1 ){
           
 //             if the cell has been already used for one track candidate, then skip it
-      		  if( cell.is_used() ) continue;
-      		  if( cell.get_plane().equalsIgnoreCase("XY") ) {
-      			  if( cell.get_c1().is_usedInXYcand() || cell.get_c2().is_usedInXYcand() ) { continue;}
-      		  }
+            if( cell.is_used() ) continue;
+            if( cell.get_plane().equalsIgnoreCase("XY") ) {
+              if( cell.get_c1().is_usedInXYcand() || cell.get_c2().is_usedInXYcand() ) { continue;}
+            }
 
-      		  if( cell.get_plane().equalsIgnoreCase("ZR") ) {
-      			  if( cell.get_c1().is_usedInZRcand() || cell.get_c2().is_usedInZRcand() ) continue;
-      		  }
+            //if( cell.get_plane().equalsIgnoreCase("ZR") ) {
+              //if( cell.get_c1().is_usedInZRcand() || cell.get_c2().is_usedInZRcand() ) continue;
+            //}
+
+      		  //if( cell.get_plane().equalsIgnoreCase("ZR") ) {
+      			  //if( cell.get_c1().is_usedInZRcand() || cell.get_c2().is_usedInZRcand() ) continue;
+      		  //}
       		 
       		  int candlen = 1;
       		  ArrayList<Cell> cand = new ArrayList<Cell>();
@@ -430,7 +434,7 @@ public class TrackSeederCA {
 			   double r2 = org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l2-1][s2-1];
 			   double nstr2 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r2 - b)/m, l2, s2);
 			   
-			   if( Math.abs( c1 - nstr1 ) < 4 && Math.abs( c2 - nstr2 ) < 4 )			   
+			   if( Math.abs( c1 - nstr1 ) < 8 && Math.abs( c2 - nstr2 ) < 8 )
 				   seedCrosses.get(scsize-1).add(c);
           }
 
@@ -532,7 +536,7 @@ public class TrackSeederCA {
             if (bmtCSz >= 2) {
                 useSVTdipAngEst = 0;
             }
-
+            
             ((ArrayList<Double>) X).ensureCapacity(svtSz + bmtZSz);
             ((ArrayList<Double>) Y).ensureCapacity(svtSz + bmtZSz);
             ((ArrayList<Double>) Z).ensureCapacity(svtSz * useSVTdipAngEst + bmtCSz);
@@ -540,7 +544,7 @@ public class TrackSeederCA {
             ((ArrayList<Double>) ErrZ).ensureCapacity(svtSz * useSVTdipAngEst + bmtCSz);
             ((ArrayList<Double>) ErrRho).ensureCapacity(svtSz * useSVTdipAngEst + bmtCSz); // Try: don't use svt in dipdangle fit determination
             ((ArrayList<Double>) ErrRt).ensureCapacity(svtSz + bmtZSz);
-
+            
             cand = new Track(null, swimmer);
             cand.addAll(SVTCrosses);
             for (int j = 0; j < SVTCrosses.size(); j++) {
@@ -576,8 +580,8 @@ public class TrackSeederCA {
                     ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_PointErr().z());
                 }
             }
-            X.add((double) 0);
-            Y.add((double) 0);
+            X.add((double) org.jlab.rec.cvt.Constants.getXb());
+            Y.add((double) org.jlab.rec.cvt.Constants.getYb());
 
             ErrRt.add((double) 0.1);
             
@@ -594,15 +598,19 @@ public class TrackSeederCA {
             cand.addAll(BMTCrossesZ);
             
             cand.set_HelicalTrack(fitTrk.get_helix(), swimmer, b);
-            if( X.size()>3 )
+            if( X.size()>3 ) {
             	cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0]/(X.size()-3));
-            else 
+            }
+            else { 
             	cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0]*2); // penalize tracks with only 3 crosses 
+            }
             
-            if( Z.size() > 2 )
+            if( Z.size() > 2 ) {
             	cand.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1]/Z.size());
-            else
+            }
+            else {
             	cand.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1]*2);// penalize tracks with only 2 crosses
+            }
             	
             //if(shift==0)
 //            if (fitTrk.get_chisq()[0] < chisqMax) {

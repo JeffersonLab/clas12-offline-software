@@ -53,10 +53,17 @@ public class Sphere3D implements Transformable, Showable{
     }
 
     
+    public Point3D getCenter(){
+        return sphereCenter;
+    }
+
+    public double getRadius(){
+        return sphereRadius;
+    }
+
     public Vector3D getNormal(double x, double y, double z){
-        Vector3D  vect = new Vector3D();
-        
-        return vect;
+        Point3D point = new Point3D(x, y, z);
+        return point.vectorFrom(sphereCenter);
     }
     
     public int intersection(final Line3D line, List<Point3D> intersections) {

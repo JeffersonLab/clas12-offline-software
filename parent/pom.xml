@@ -3,7 +3,7 @@
 
   <groupId>org.jlab.clas</groupId>
   <artifactId>clas12rec</artifactId>
-  <version>5.7.4-SNAPSHOT</version>
+  <version>6.5.13-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <repositories>
@@ -23,7 +23,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.12</version>
+      <version>4.13.1</version>
       <scope>test</scope>
     </dependency>
 
@@ -38,7 +38,7 @@
     <dependency>
       <groupId>com.github.spotbugs</groupId>
       <artifactId>spotbugs</artifactId>
-      <version>3.1.0</version>
+      <version>3.1.12</version>
     </dependency>
   </dependencies>
 
@@ -68,7 +68,7 @@
       <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
-        <version>3.1.0-RC6</version>
+        <version>3.1.12</version>
         <configuration>
           <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
         </configuration>

@@ -297,7 +297,10 @@ public class AlignmentFactory
 	 */
 	public static void applyShift( Vector3d aPoint, double[] aShift, Vector3d aCenter, double aScaleT, double aScaleR ) throws IllegalArgumentException
 	{
-		if( aShift.length != NSHIFTDATARECLEN ){ throw new IllegalArgumentException("shift array must have "+NSHIFTDATARECLEN+" elements"); }
+                if(aShift==null){ throw new IllegalArgumentException("shift array is null "+
+                        Math.sqrt(aPoint.x*aPoint.x+aPoint.y*aPoint.y)); }
+			
+		if( aShift.length != NSHIFTDATARECLEN ){ throw new IllegalArgumentException("shift array must have "+NSHIFTDATARECLEN+" elements");}
 			
 		// double[] tarray = SVTConstants.getDataAlignmentSectorShift()[0];
 		// System.out.printf("Called applyShift. Shift[0][0]  = %8.4f ******************************************\n",tarray[0]);
@@ -385,10 +388,10 @@ public class AlignmentFactory
 		
 		if( VERBOSE )
 		{
-			System.out.printf("PN: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
-			System.out.printf("ST: % 8.3f % 8.3f % 8.3f\n", tx, ty, tz );
-			System.out.printf("SR: % 8.3f % 8.3f % 8.3f % 8.3f\n", rx, ry, rz, Math.toDegrees(ra) );
-			System.out.printf("SC: % 8.3f % 8.3f % 8.3f\n", aCenter.x, aCenter.y, aCenter.z );
+			System.out.printf("iPN: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
+			System.out.printf("iST: % 8.3f % 8.3f % 8.3f\n", tx, ty, tz );
+			System.out.printf("iSR: % 8.3f % 8.3f % 8.3f % 8.3f\n", rx, ry, rz, Math.toDegrees(ra) );
+			System.out.printf("iSC: % 8.3f % 8.3f % 8.3f\n", aCenter.x, aCenter.y, aCenter.z );
 		}
 			
 		// undo the translation.
