@@ -110,13 +110,27 @@ public class RecoBankWriter {
             bank.setFloat("B", i, (float) hitlist.get(i).getB());
             bank.setFloat("TProp", i, (float) hitlist.get(i).getTProp());
             bank.setFloat("TFlight", i, (float) hitlist.get(i).getTFlight());
-
+            if(i>0 && hitlist.get(i).get_Sector()==hitlist.get(i-1).get_Sector() && 
+                     hitlist.get(i).get_Superlayer()==hitlist.get(i-1).get_Superlayer() && 
+                     hitlist.get(i).get_Layer()==hitlist.get(i-1).get_Layer() && 
+                     Math.abs(hitlist.get(i).get_Wire()-hitlist.get(i-1).get_Wire())==1) {// fix for double hits
+                bank.setFloat("B", i, (float) hitlist.get(i-1).getB());
+                bank.setFloat("TProp", i, (float) hitlist.get(i-1).getTProp());
+                bank.setFloat("TFlight", i, (float) hitlist.get(i-1).getTFlight());
+            }
             if(hitlist.get(i).get_AssociatedHBTrackID()>-1 && !event.hasBank("MC::Particle")) {
                 bank.setFloat("TProp", i, (float) hitlist.get(i).getSignalPropagTimeAlongWire());
                 bank.setFloat("TFlight", i, (float) hitlist.get(i).getSignalTimeOfFlight());
+                if(i>0 && hitlist.get(i).get_Sector()==hitlist.get(i-1).get_Sector() && 
+                     hitlist.get(i).get_Superlayer()==hitlist.get(i-1).get_Superlayer() && 
+                     hitlist.get(i).get_Layer()==hitlist.get(i-1).get_Layer() && 
+                     Math.abs(hitlist.get(i).get_Wire()-hitlist.get(i-1).get_Wire())==1) {// fix for double hits
+                    bank.setFloat("TProp", i, (float) hitlist.get(i-1).getSignalPropagTimeAlongWire());
+                    bank.setFloat("TFlight", i, (float) hitlist.get(i-1).getSignalTimeOfFlight());
+                }
             }
         }
-   //bank.show();
+    //bank.show();
     return bank;
 
 }

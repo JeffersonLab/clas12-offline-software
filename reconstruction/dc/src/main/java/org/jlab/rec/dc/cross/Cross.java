@@ -392,7 +392,7 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
 	}
      */
 
-    void set_CrossDirIntersSegWires() {
+    public void set_CrossDirIntersSegWires() {
         double wy_over_wx = (FastMath.cos(Math.toRadians(6.)) / FastMath.sin(Math.toRadians(6.)));
         double val_sl1 = this._seg1.get_fittedCluster().get_clusterLineFitSlope();
         double val_sl2 = this._seg2.get_fittedCluster().get_clusterLineFitSlope();

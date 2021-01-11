@@ -124,6 +124,7 @@ public class DCHBPostCluster extends DCEngine {
                             dcDetector,
                             dcSwim);
                     for (Cross c : trk) {
+                        c.set_CrossDirIntersSegWires();
                         c.get_Segment1().isOnTrack = true;
                         c.get_Segment2().isOnTrack = true;
                         clusters.add(c.get_Segment1().get_fittedCluster());
@@ -218,7 +219,7 @@ public class DCHBPostCluster extends DCEngine {
                     for (Cross c : trk) {
                         c.get_Segment1().isOnTrack = true;
                         c.get_Segment2().isOnTrack = true;
-
+                        
                         for (FittedHit h1 : c.get_Segment1()) {
                             h1.set_AssociatedHBTrackID(trk.get_Id());
                         }
@@ -311,10 +312,15 @@ public class DCHBPostCluster extends DCEngine {
             //gather all the hits for pointer bank creation
             for (Track trk : trkcands) {
                 for (Cross c : trk) {
+                    c.set_CrossDirIntersSegWires();
                     for (FittedHit h1 : c.get_Segment1()) {
+                        h1.setSignalPropagTimeAlongWire(dcDetector);
+                        h1.setSignalTimeOfFlight(); 
                         fhits.add(h1);
                     }
                     for (FittedHit h2 : c.get_Segment2()) {
+                        h2.setSignalPropagTimeAlongWire(dcDetector);
+                        h2.setSignalTimeOfFlight(); 
                         fhits.add(h2);
                     }
                 }
