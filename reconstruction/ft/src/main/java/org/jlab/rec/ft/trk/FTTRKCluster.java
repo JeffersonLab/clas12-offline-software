@@ -90,11 +90,11 @@ import org.jlab.geom.prim.Vector3D;
 	 * @param _Id  the id of the cluster
 	 */
 	public void set_CId(int _Id) {
-		this._CId = _CId;
+		this._CId = _Id;
                 // update hits collection with the proper cluster index
                 for(int i=0; i<this.size(); i++){
                     FTTRKHit thehit = this.get(i);
-                    thehit.set_ClusterIndex(_CId);
+                    thehit.set_ClusterIndex(_Id);
                 } 
 	}
 
