@@ -3,6 +3,7 @@ package org.jlab.rec.tof.cluster.ftof;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
+import org.jlab.clas.pdg.PhysicsConstants;
 
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
@@ -94,7 +95,7 @@ public class ClusterMatcher {
         if (C1b.get_xTrk() == null || C1a.get_xTrk() == null) {
             return null; // no tracking info
         }
-        if (C1a.get(0)._AssociatedTrkId != C1b.get(0)._AssociatedTrkId) {
+        if (C1a.get(0).get_TrkId() != C1b.get(0).get_TrkId()) {
             return null; // not from the stame track
         }
         ArrayList<Cluster> ClsDoublet = new ArrayList<Cluster>(2);
@@ -111,7 +112,7 @@ public class ClusterMatcher {
         int rows = bank.rows();
         for (int i = 0; i < rows; i++) {
             if (bank.getByte("detector", i) == 6 &&
-                    bank.getShort("index", i) == C1a.get(0)._AssociatedTrkId - 1) {
+                    bank.getShort("index", i) == C1a.get(0).get_TrkId() - 1) {
                 this.Beta = event.getBank("RECHB::Particle").getFloat("beta",
                         bank.getShort("pindex", i));
             }
@@ -122,9 +123,9 @@ public class ClusterMatcher {
         double ux_mid = X2[1][0] - X1[1][0];
         double uy_mid = X2[1][1] - X1[1][1];
         double uz_mid = X2[1][2] - X1[1][2];
-        double C1a_x_etrapPan1b = C1a.get_x() - ux_mid;
-        double C1a_y_etrapPan1b = C1a.get_y() - uy_mid;
-        double C1a_z_etrapPan1b = C1a.get_z() - uz_mid;
+        double C1a_x_etrapPan1b = C1a.get_x() + ux_mid;
+        double C1a_y_etrapPan1b = C1a.get_y() + uy_mid;
+        double C1a_z_etrapPan1b = C1a.get_z() + uz_mid;
 
         // Matching the cluster position to the track position
         if (Math.abs(C1a.get_x() - C1a.get_xTrk()[0]) > Constants.CLS1ATRKMATCHXPAR
@@ -294,14 +295,14 @@ public class ClusterMatcher {
             // defined
             double delta_t1a = this.calc_deltaT(clus1A.get_Panel(),
                     CntrInPan1aWithEmax);
-            double delta_t1b = this.calc_deltaT(clus1A.get_Panel(),
+            double delta_t1b = this.calc_deltaT(clus1B.get_Panel(),
                     CntrInPan1bWithEmax);
 
             double term1 = clus1B.get_t() / delta_t1b;
             double term3 = 1. / delta_t1a + 1. / delta_t1b;
             for (int i = 0; i < 3; i++) {
                 if (this._deltaPathLen[i] > 0) {
-                    term2[i] = (clus1A.get_t() - this._deltaPathLen[i] / Beta) / delta_t1a;
+                    term2[i] = (clus1A.get_t() - this._deltaPathLen[i] / Beta/ PhysicsConstants.speedOfLight()) / delta_t1a;
                     tCorr[i] = (term1 + term2[i]) / term3;
                 }
             }

@@ -1,4 +1,3 @@
-
 <evio_dictionary>
     <bank name="RTPC" tag="1700" info="Simulated FMT Hit Information">
         <section name="true" tag="1701" num="0" info="True Values">
@@ -26,13 +25,17 @@
             <column name="mvz"     num="22" type="float64" info="z component of primary vertex of the mother of the particle entering the sensitive volume"/>
             <column name="avgT"    num="23" type="float64" info="Average time"/>
             <column name="nsteps"  num="24" type="int32"   info="Number of steps"/>
-            <column name="procID"  num="25" type="int32"   info="Process ID"/>
+            <column name="procID"  num="25" type="int32"   info="Process ID"/>         
             <column name="hitn"    num="99" type="int32"   info="Hit1 Number"/>
         </section>
         <section name="dgtz" tag="1702" num="0" info="Digitized information">
-            <column name="CellID" type="int32"    num="1" info="Pad CellId" />
-            <column name="ADC"    type="float64"  num="2" info="adc" />
-            <column name="Time"   type="float64"  num="3" info="tdc"/>
+            <column name="Sector"    type="int32"    num="1" info="Sector = 1" />
+            <column name="Layer"     type="int32"  num="2" info="Pad Column" />
+            <column name="Component"   type="int32"  num="3" info="Pad Row"/>
+            <column name="Order"   type="int32"  num="4" info="Order = 0"/>
+            <column name="Time"   type="float64"  num="5" info="Time [ns]"/>
+            <column name="ADC"   type="int32"  num="6" info="Energy deposition"/>
+            <column name="Ped"   type="float64"  num="7" info="Pedestal"/>
             <column name="hitn" type="int32" num="99" info="nstep"/>
         </section>
     </bank>

@@ -181,7 +181,10 @@ public class DatabaseConstantProvider implements ConstantProvider {
     }
     
     public final void setTimeStamp(String timestamp){
-        String pattern = "MM/dd/yyyy";
+        String pattern = "MM/dd/yyyy-HH:mm:ss";
+	if(timestamp.contains("-")==false){
+	    pattern = "MM/dd/yyyy";
+	}
         SimpleDateFormat format = new SimpleDateFormat(pattern);
         
         try {

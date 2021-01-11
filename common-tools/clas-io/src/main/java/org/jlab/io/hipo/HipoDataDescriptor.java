@@ -8,8 +8,8 @@ package org.jlab.io.hipo;
 import java.util.List;
 import org.jlab.io.base.DataDescriptor;
 import org.jlab.jnp.hipo.data.HipoNodeType;
-import org.jlab.jnp.hipo.schema.Schema;
-import org.jlab.jnp.hipo.schema.Schema.SchemaEntry;
+import org.jlab.jnp.hipo4.data.Schema;
+
 
 /**
  *
@@ -17,43 +17,48 @@ import org.jlab.jnp.hipo.schema.Schema.SchemaEntry;
  */
 public class HipoDataDescriptor implements DataDescriptor {
 
-    private final Schema hipoSchema = new Schema();
+    private  Schema hipoSchema = null;
     
     public HipoDataDescriptor(){
 
     }
      
     public HipoDataDescriptor(Schema schema){
-        this.init(schema);
+        //this.init(schema);
+        hipoSchema = schema;
     }
     
     public final void init(Schema schema){
-        hipoSchema.copy(schema);
+       // hipoSchema.copy(schema);
     }
     
     public void init(String s) {
-        this.hipoSchema.setFromText(s);
+        hipoSchema = Schema.fromJsonString(s);
     }
 
     @Override
     public String[] getEntryList() {
-        List<String>  entryList = hipoSchema.schemaEntryList();
-        String[] entries = new String[entryList.size()];
+        int elements = hipoSchema.getElements();
+        String[] entries = new String[elements];
         int counter = 0;
-        for(int i = 0; i < entryList.size(); i++){
-            entries[i] = entryList.get(i);
+        for(int i = 0; i < elements; i++){
+            entries[i] = hipoSchema.getElementName(i);
         }
         return entries;
     }
 
+    @Override
     public String getXML() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
     public boolean hasEntry(String entry) {
-        return (this.hipoSchema.getEntry(entry)!=null);
+        return hipoSchema.hasEntry(entry);
+        //return (this.hipoSchema.getEntry(entry)!=null);
     }
 
+    @Override
     public boolean hasEntries(String... entries) {
         for(String entry : entries){
             if(hasEntry(entry)==false) return false;
@@ -61,37 +66,36 @@ public class HipoDataDescriptor implements DataDescriptor {
         return true;
     }
 
+    @Override
     public int getProperty(String property_name, String entry_name) {
         if(property_name.compareTo("type")==0){
-            SchemaEntry entry = this.hipoSchema.getEntry(entry_name);
-            if(entry!=null){
-                if(entry.getType()==HipoNodeType.BYTE)  return 1;
-                if(entry.getType()==HipoNodeType.SHORT) return 2;
-                if(entry.getType()==HipoNodeType.INT) return 3;
-                if(entry.getType()==HipoNodeType.FLOAT) return 5;
-                if(entry.getType()==HipoNodeType.DOUBLE) return 6;
-                return 0;
-            }
+            int type = hipoSchema.getType(entry_name);
+            return type;
         }
         return 0;
     }
 
+    @Override
     public int getProperty(String property_name) {
         return 1;
     }
 
+    @Override
     public void setPropertyString(String name, String value) {
         
     }
 
+    @Override
     public String getPropertyString(String property_name) {
         return "undefined";
     }
 
+    @Override
     public void show() {
         System.out.println(this.hipoSchema.toString());
     }
 
+    @Override
     public String getName() {
         return this.hipoSchema.getName();
     }

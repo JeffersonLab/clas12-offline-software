@@ -64,15 +64,15 @@ public class KFitter {
         //take first plane along beam line with n = y-dir;
         sv.Layer.add(0);
         sv.Sector.add(0);
-        sv.X0.add((double) Constants.getXb());
-        sv.Y0.add((double) Constants.getYb());
+        sv.X0.add((double) org.jlab.rec.cvt.Constants.getXb());
+        sv.Y0.add((double) org.jlab.rec.cvt.Constants.getYb());
         sv.Z0.add((double) 0.0);
         for (int i = 1; i < mv.measurements.size(); i++) {
             sv.Layer.add(mv.measurements.get(i).layer);
             sv.Sector.add(mv.measurements.get(i).sector);
             //Point3D ref = geo.intersectionOfHelixWithPlane(mv.measurements.get(i).layer, mv.measurements.get(i).sector,  helix) ;
             //ref = new Point3D(0,Constants.MODULERADIUS[mv.measurements.get(i).layer-1][0], 0);
-            Point3D ref = new Point3D(Constants.getXb(), Constants.getYb(), 0);
+            Point3D ref = new Point3D(org.jlab.rec.cvt.Constants.getXb(), org.jlab.rec.cvt.Constants.getYb(), 0);
             sv.X0.add(ref.x());
             sv.Y0.add(ref.y());
             sv.Z0.add(ref.z());
@@ -93,28 +93,28 @@ public class KFitter {
                 if (sv.trackCov.get(k) == null || mv.measurements.get(k + 1) == null) {
                     return;
                 }
-                //System.out.println(" transporting state ");
                 sv.transport(k, k + 1, sv.trackTraj.get(k), sv.trackCov.get(k), sgeo, bgeo, mv.measurements.get(k + 1).type, swimmer);
-                //System.out.println((k)+"] trans "+sv.trackTraj.get(k).x+","+sv.trackTraj.get(k).y+","+
-                //		sv.trackTraj.get(k).z+" p "+1./sv.trackTraj.get(k).kappa+" measuremt "+mv.measurements.get(k+1).type); 
-                //System.out.println("To "+(k+1)+"] trans "+sv.trackTraj.get(k+1).x+","+sv.trackTraj.get(k+1).y+","+
-                //		sv.trackTraj.get(k+1).z+" p "+1./sv.trackTraj.get(k).kappa); 
-                //System.out.println(" Filtering state ...........................................");
                 this.filter(k + 1, sgeo, bgeo, swimmer);
-                //System.out.println((k+1)+"] filt "+sv.trackTraj.get(k+1).x+","+sv.trackTraj.get(k+1).y+","+
-                //		sv.trackTraj.get(k+1).z+" p "+1./sv.trackTraj.get(k).kappa); 
-                //System.out.println(" Energy loss \n pion "+ (float) sv.trackTraj.get(k+1).get_ELoss()[0]+"\n kaon "+ (float) sv.trackTraj.get(k+1).get_ELoss()[1]+"\n proton "+ (float) sv.trackTraj.get(k+1).get_ELoss()[2]);
             }
             
-            if (it < totNumIter - 1) {
-                this.Rinit(swimmer); 
+            for (int k =  sv.X0.size() - 1; k>1 ;k--) {
+                if (sv.trackCov.get(k) == null || mv.measurements.get(k - 1) == null) {
+                    return;
+                }
+                sv.transport(k, k - 1, sv.trackTraj.get(k), sv.trackCov.get(k), sgeo, bgeo, mv.measurements.get(k - 1).type, swimmer);
+                this.filter(k - 1, sgeo, bgeo, swimmer);
             }
+
+            //if (it < totNumIter - 1) {
+            //  this.Rinit(swimmer); 
+            //}
             this.chi2=this.calc_chi2(sgeo);
             if(this.chi2<newchisq) {
                 newchisq=this.chi2;
-                KFHelix = sv.setTrackPars(sv.X0.size() - 1);
+                KFHelix = sv.setTrackPars(1);
                 this.setTrajectory();
             } else {
+                this.chi2 =newchisq ;
                 break;
             }
         }

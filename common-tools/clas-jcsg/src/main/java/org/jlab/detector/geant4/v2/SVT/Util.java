@@ -321,7 +321,7 @@ public class Util
 	 * Length of cylinder is equal to magnitude of vector.
 	 * 
 	 * @param aName subvolumes will have _arrow# appended to aName
-	 * @param aVec direction to point
+	 * @param aLen length of FIXME 
 	 * @param aCapRadius radius of spherical caps
 	 * @param aPointerRadius radius of cylindrical shaft
 	 * @param aDisplayCapStart switch to show start cap

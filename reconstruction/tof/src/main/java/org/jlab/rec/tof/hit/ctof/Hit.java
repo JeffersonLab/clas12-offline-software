@@ -58,14 +58,16 @@ public class Hit extends AHit implements IGetCalibrationParams {
             IndexedTable constants1, 
             IndexedTable constants2, 
             IndexedTable constants3, 
-            IndexedTable constants5) {
+            IndexedTable constants5, 
+            IndexedTable constants8) {
         /*
         0: "/calibration/ctof/attenuation"),
         1: "/calibration/ctof/effective_velocity"),
         2: "/calibration/ctof/time_offsets"),
         3: "/calibration/ctof/tdc_conv"),
         4: "/calibration/ctof/status"),
-        5: "/calibration/ctof/gain_balance"));
+        5: "/calibration/ctof/gain_balance"),
+        5: "/calibration/ctof/hpos"));
         */
         double pl = this.get_paddleLine().length();
 
@@ -74,6 +76,18 @@ public class Hit extends AHit implements IGetCalibrationParams {
         double TW0D = this.TW02(null);
         double TW1U = this.TW11(null);
         double TW1D = this.TW12(null);
+        double TW1P = this.TW1P(null); 
+        double TW2P = this.TW2P(null);  
+        double TW0E = this.TW0E(null); 
+        double TW1E = this.TW1E(null); 
+        double TW2E = this.TW2E(null); 
+        double TW3E = this.TW3E(null); 
+        double TW4E = this.TW4E(null);
+        double HPOSa = this.HPOSa(constants8);
+        double HPOSb = this.HPOSb(constants8);
+        double HPOSc = this.HPOSc(constants8);
+        double HPOSd = this.HPOSd(constants8);
+        double HPOSe = this.HPOSe(constants8);
         double lambdaU = this.lambda1(constants0);
         this.set_lambda1(lambdaU);
         this.set_lambda1Unc(this.lambda1Unc(constants0));
@@ -103,8 +117,10 @@ public class Hit extends AHit implements IGetCalibrationParams {
         double DEDX_MIP = this.DEDX_MIP();
         double ScinBarThickn = this.get_barthickness();
 
-        this.set_HitParams(superlayer, TW0U, TW0D, TW1U, TW1D, lambdaU,
-                lambdaD, yOffset, vU, vD, vUUnc, vDUnc, PEDU, PEDD, PEDUUnc,
+        this.set_HitParams(superlayer, TW0U, TW0D, TW1U, TW1D, TW1P, TW2P, 
+                TW0E, TW1E, TW2E, TW3E, TW4E, 
+                HPOSa, HPOSb, HPOSc, HPOSd, HPOSe, lambdaU,lambdaD, 
+                yOffset, vU, vD, vUUnc, vDUnc, PEDU, PEDD, PEDUUnc,
                 PEDDUnc, paddle2paddle, RFPad, timeOffset, triggerPhase, LSBConv, LSBConvErr,
                 ADCUErr, ADCDErr, TDCUErr, TDCDErr, ADC_MIP, ADC_MIPErr,
                 DEDX_MIP, ScinBarThickn, pl);
@@ -162,6 +178,15 @@ public class Hit extends AHit implements IGetCalibrationParams {
         return hitPosition;
     }
 
+    @Override
+    public boolean isAdjacent(AHit arg0) {
+        boolean isClose = false;
+        if(this.get_Paddle()==arg0.get_Paddle()-1 || this.get_Paddle()==arg0.get_Paddle()+1) isClose=true;
+        if((this.get_Paddle()==1 && arg0.get_Paddle()==Constants.NPAD[0]) ||
+           (arg0.get_Paddle()==1 && this.get_Paddle()==Constants.NPAD[0])) isClose=true;    
+        return isClose;
+    }
+
     public void printInfo() {
         DecimalFormat form = new DecimalFormat("#.##");
         String s = " CTOF Hit in  Paddle " + this.get_Paddle()
@@ -188,24 +213,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
         }
         System.out.println(s);
     }
-
-    @Override
-    public int compareTo(AHit arg) {
-        // Sort by sector, panel, paddle
-        int return_val = 0;
-        int CompSec = this.get_Sector() < arg.get_Sector() ? -1 : this
-                .get_Sector() == arg.get_Sector() ? 0 : 1;
-        int CompPan = this.get_Panel() < arg.get_Panel() ? -1 : this
-                .get_Panel() == arg.get_Panel() ? 0 : 1;
-        int CompPad = this.get_Paddle() < arg.get_Paddle() ? -1 : this
-                .get_Paddle() == arg.get_Paddle() ? 0 : 1;
-
-        int return_val1 = ((CompPan == 0) ? CompPad : CompPan);
-        return_val = ((CompSec == 0) ? return_val1 : CompSec);
-
-        return return_val;
-    }
-
+    
     @Override
     public double TW01(IndexedTable tab) {
         //double TW0U = CCDBConstants.getTW0U()[this.get_Sector() - 1][this
@@ -232,6 +240,66 @@ public class Hit extends AHit implements IGetCalibrationParams {
         //double TW1D = CCDBConstants.getTW1D()[this.get_Sector() - 1][this
          //       .get_Panel() - 1][this.get_Paddle() - 1];
          return 0;
+    }
+
+    @Override
+    public double TW0E(IndexedTable tab) {
+         return 0;
+    }
+
+    @Override
+    public double TW1E(IndexedTable tab) {
+         return 0;
+    }
+
+    @Override
+    public double TW2E(IndexedTable tab) {
+         return 0;
+    }
+
+    @Override
+    public double TW3E(IndexedTable tab) {
+         return 0;
+    }
+
+    @Override
+    public double TW4E(IndexedTable tab) {
+         return 0;
+    }
+
+    @Override
+    public double HPOSa(IndexedTable tab) {
+         return tab.getDoubleValue("hposa", this.get_Sector(),this.get_Panel(),this.get_Paddle());
+    }
+
+    @Override
+    public double HPOSb(IndexedTable tab) {
+         return tab.getDoubleValue("hposb", this.get_Sector(),this.get_Panel(),this.get_Paddle());
+    }
+
+    @Override
+    public double HPOSc(IndexedTable tab) {
+         return tab.getDoubleValue("hposc", this.get_Sector(),this.get_Panel(),this.get_Paddle());
+    }
+
+    @Override
+    public double HPOSd(IndexedTable tab) {
+         return tab.getDoubleValue("hposd", this.get_Sector(),this.get_Panel(),this.get_Paddle());
+    }
+
+    @Override
+    public double HPOSe(IndexedTable tab) {
+         return tab.getDoubleValue("hpose", this.get_Sector(),this.get_Panel(),this.get_Paddle());
+    }
+
+    @Override
+    public double TW1P(IndexedTable tab) {
+        return 0;
+    }
+
+    @Override
+    public double TW2P(IndexedTable tab) {
+        return 0;
     }
 
     @Override

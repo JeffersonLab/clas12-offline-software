@@ -5,6 +5,8 @@ import org.jlab.io.base.DataEvent;
  *
  * Read the occaisonal scaler bank and store across events.
  *
+ * @deprecated Moved to decoding, see org.jlab.detector.decode.DaqScalers
+ *
  * See https://logbooks.jlab.org/comment/14616
  *
  * The EPICS equation for converting fcup scaler S to beam current I:

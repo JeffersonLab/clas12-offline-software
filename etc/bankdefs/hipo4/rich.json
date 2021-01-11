@@ -1,0 +1,201 @@
+[ 
+ {
+    "name": "RICH::hits",
+    "group": 21800,
+    "item" : 21,   
+    "info": "Reconstructed Hits in RICH",
+    "entries": [
+              {"name":"id",          "type":"S", "info":"Hit id"},
+              {"name":"sector",      "type":"S", "info":"Hit sector"},
+              {"name":"tile",        "type":"S", "info":"Hit tile"},
+              {"name":"pmt",         "type":"S", "info":"Hit pmt" },
+              {"name":"anode",       "type":"S", "info":"Hit anode" },
+              {"name":"x",           "type":"F", "info":"Hit x" },
+              {"name":"y",           "type":"F", "info":"Hit y" },
+              {"name":"z",           "type":"F", "info":"Hit z" },
+              {"name":"time",        "type":"F", "info":"Hit time" },
+              {"name":"rawtime",     "type":"F", "info":"Hit rawtime" },
+              {"name":"cluster",     "type":"S", "info":"Hit cluster" },
+              {"name":"xtalk",       "type":"S", "info":"Hit xtalk" },
+              {"name":"duration",    "type":"S", "info":"Hit duration" }
+     ]
+  },
+   {
+    "name": "RICH::clusters",
+    "group": 21800,
+    "item" : 22,   
+    "info": "Reconstructed Clusters in RICH",
+    "entries": [
+            {"name":"id",         "type":"S", "info":"Cluster id"},
+            {"name":"size",       "type":"S", "info":"Cluster size"},
+            {"name":"sector",     "type":"S", "info":"Cluster sector"},
+            {"name":"tile",       "type":"S", "info":"Cluster tile"},
+            {"name":"pmt",        "type":"S", "info":"Cluster pmt"},
+            {"name":"charge",     "type":"F", "info":"Cluster charge" },
+            {"name":"time",       "type":"F", "info":"Cluster time" },
+            {"name":"rawtime",    "type":"F", "info":"Cluster rawtime" },
+            {"name":"x",          "type":"F", "info":"Cluster x" },
+            {"name":"y",          "type":"F", "info":"Cluster y" },
+            {"name":"z",          "type":"F", "info":"Cluster z" },
+            {"name":"wtime",      "type":"F", "info":"Cluster wtime" },
+            {"name":"wx",         "type":"F", "info":"Cluster wx" },
+            {"name":"wy",         "type":"F", "info":"Cluster wy" },
+            {"name":"wz",         "type":"F", "info":"Cluster wz" }
+        ]
+  },
+   {
+    "name": "RICH::response",
+    "group": 21800,
+    "item" : 31,   
+    "info": "RICH Responses for Particles bank",
+    "entries": [
+            {"name":"index",        "type":"S", "info":"index of the clu in the specific detector bank"},
+            {"name":"pindex",       "type":"S", "info":"row number in the particle bank hit is associated with"},
+            {"name":"detector",     "type":"B",  "info":"Detector ID, defined in COATJAVA DetectorType"},
+            {"name":"sector",       "type":"B",  "info":"Sector of the Detector hit"},
+            {"name":"layer",        "type":"B",  "info":"Layer of the Detector hit"},
+            {"name":"energy",       "type":"F", "info":"Energy associated with the hit"},
+            {"name":"time",         "type":"F", "info":"Time associated with the hit"},
+            {"name":"path",         "type":"F", "info":"Path from vertex to the hit position"},
+            {"name":"chi2",         "type":"F", "info":"Chi2 (or quality) of hit-track matching"},
+            {"name":"x",            "type":"F", "info":"X coordinate of the hit"},
+            {"name":"y",            "type":"F", "info":"Y coordinate of the hit"},
+            {"name":"z",            "type":"F", "info":"Z coordinate of the hit"},
+            {"name":"hx",           "type":"F", "info":"X coordinate of the matched hit"},
+            {"name":"hy",           "type":"F", "info":"Y coordinate of the mathced hit"},
+            {"name":"hz",           "type":"F", "info":"Z coordinate of the matched hit"},
+            {"name":"status",       "type":"S", "info":"hit status"}
+     ]
+  },
+   {
+    "name": "RICH::hadrons",
+    "group": 21800,
+    "item" : 32,   
+    "info": "Reconstructed Hadrons in RICH",
+    "entries": [
+            {"name":"id",            "type":"S", "info":"hadron id" },
+            {"name":"hit_index",     "type":"S", "info":"row in the RICH clusters bank" },
+            {"name":"particle_index","type":"S", "info":"row in the REC  particle bank" },
+            {"name":"traced_the",    "type":"F", "info":"Lab theta angle for traced solution" },
+            {"name":"traced_phi",    "type":"F", "info":"Lab phi angle for traced solution" },
+            {"name":"traced_hitx",   "type":"F", "info":"Lab hitx angle for traced solution" },
+            {"name":"traced_hity",   "type":"F", "info":"Lab hity angle for traced solution" },
+            {"name":"traced_hitz",   "type":"F", "info":"Lab hitz angle for traced solution" },
+            {"name":"traced_time",   "type":"F", "info":"time for traced solution" },
+            {"name":"traced_path",   "type":"F", "info":"path for traced solution" },
+            {"name":"traced_ilay",   "type":"S", "info":"emission aero layer for traced solution" },
+            {"name":"traced_ico",    "type":"S", "info":"emission aero component for traced solution" },
+            {"name":"traced_emix",   "type":"F", "info":"emission point x for traced solution" },
+            {"name":"traced_emiy",   "type":"F", "info":"emission point y for traced solution" },
+            {"name":"traced_emiz",   "type":"F", "info":"emission point z for traced solution" },
+            {"name":"EtaC_ele",      "type":"F", "info":"expected EtaC for electron" },
+            {"name":"EtaC_pi",       "type":"F", "info":"expected EtaC for pion" },
+            {"name":"EtaC_k",        "type":"F", "info":"expected EtaC for kappa" },
+            {"name":"EtaC_pr",       "type":"F", "info":"expected EtaC for proton" },
+            {"name":"EtaC_min",      "type":"F", "info":"expected EtaC minimum " },
+            {"name":"EtaC_max",      "type":"F", "info":"expected EtaC maximum " }
+     ]
+  },
+   {
+    "name": "RICH::photons",
+    "group": 21800,
+    "item" : 33,   
+    "info": "Reconstructed Photons in RICH",
+    "entries": [
+            {"name":"id",             "type":"S", "info":"id" },
+            {"name":"type",           "type":"S", "info":"reconstructed (0) or expected from pion (1) kaon (2) proton (3) electron (5)" },
+            {"name":"hit_index",      "type":"S", "info":"row in the RICH  hits bank"},
+            {"name":"hadron_index",   "type":"S", "info":"row in the RICH  hadron bank"},
+            {"name":"start_time",     "type":"F", "info":"time at emission point"},
+
+            {"name":"analytic_the",   "type":"F", "info":"Lab theta angle for analytic solution" },
+            {"name":"analytic_phi",   "type":"F", "info":"Lab phi angle for analytic solution" },
+            {"name":"analytic_path",  "type":"F", "info":"path for analytic solution" },
+            {"name":"analytic_time",  "type":"F", "info":"time for analytic solution" },
+
+            {"name":"analytic_EtaC",  "type":"F", "info":"EtaC angle for analytic solution" },
+            {"name":"analytic_aeron", "type":"F", "info":"n for analytic solution" },
+            {"name":"analytic_elpr",  "type":"F", "info":"electron probability for analytic solution" },
+            {"name":"analytic_pipr",  "type":"F", "info":"pion probability for analytic solution" },
+            {"name":"analytic_kpr",   "type":"F", "info":"kaon probability for analytic solution" },
+            {"name":"analytic_prpr",  "type":"F", "info":"proton probability for analytic solution" },
+            {"name":"analytic_bgpr",  "type":"F", "info":"background probability for analytic solution" },
+
+            {"name":"traced_the",     "type":"F", "info":"Lab theta angle for traced solution" },
+            {"name":"traced_phi",     "type":"F", "info":"Lab phi angle for traced solution" },
+            {"name":"traced_hitx",    "type":"F", "info":"Lab hitx angle for traced solution" },
+            {"name":"traced_hity",    "type":"F", "info":"Lab hity angle for traced solution" },
+            {"name":"traced_hitz",    "type":"F", "info":"Lab hitz angle for traced solution" },
+            {"name":"traced_path",    "type":"F", "info":"path for traced solution" },
+            {"name":"traced_time",    "type":"F", "info":"time for traced solution" },
+            {"name":"traced_nrfl",    "type":"S", "info":"n reflections for traced solution" },
+            {"name":"traced_nrfr",    "type":"S", "info":"n refractions for traced solution" },
+            {"name":"traced_1rfl",    "type":"S", "info":"layer and component of the first reflection for traced solution" },
+
+            {"name":"traced_EtaC",    "type":"F", "info":"EtaC angle for traced solution" },
+            {"name":"traced_aeron",   "type":"F", "info":"n for traced solution" },
+            {"name":"traced_elpr",    "type":"F", "info":"electron probability for traced solution" },
+            {"name":"traced_pipr",    "type":"F", "info":"pion probability for traced solution" },
+            {"name":"traced_kpr",     "type":"F", "info":"kaon probability for traced solution" },
+            {"name":"traced_prpr",    "type":"F", "info":"proton probability for traced solution" },
+            {"name":"traced_bgpr",    "type":"F", "info":"background probability for traced solution" }
+    ]
+  },
+   {
+    "name": "RICH::ringCher",
+    "group": 21800,
+    "item" : 34,   
+    "info": "Reconstructed Cherenov nformation in RICH",
+    "entries": [
+            {"name":"id",             "type":"S", "info":"id" },
+            {"name":"hindex",         "type":"S", "info":"related row in the RICH::hits bank"},
+            {"name":"pindex",         "type":"B", "info":"related row in the REC::Particle bank"},
+
+            {"name":"pmt",            "type":"S", "info":"photon hit pmt" },
+            {"name":"anode",          "type":"B", "info":"photon hit anode" },
+            {"name":"time",           "type":"F", "info":"photon hit time" },
+
+            {"name":"apath",          "type":"F", "info":"photon path for analytic solution" },
+            {"name":"atime",          "type":"F", "info":"photon arrival time for analytic solution" },
+            {"name":"aEtaC",          "type":"F", "info":"Cherenkov angle as analytic solution" },
+
+            {"name":"tpath",          "type":"F", "info":"photon path for traced solution" },
+            {"name":"ttime",          "type":"F", "info":"photon arrival time for traced solution" },
+            {"name":"tEtaC",          "type":"F", "info":"Cherenkov angle as traced solution" },
+
+            {"name":"nrfl",           "type":"B", "info":"n reflections for traced solution" },
+            {"name":"1rfl",           "type":"S", "info":"layer and component of the first reflection for traced solution" }
+    ]
+  },
+  {
+    "name": "RICH::hadCher",
+    "group": 21800,
+    "item" : 35,
+    "info": "Reconstructed Cherenov information per track",
+    "entries": [
+            {"name":"id",             "type":"B", "info":"id"},
+            {"name":"hindex",         "type":"B", "info":"related row in the RICH::clusters bank (if any)"},
+            {"name":"pindex",         "type":"B", "info":"related row in the REC::Particle bank"},
+
+            {"name":"emilay",         "type":"B", "info":"aerogel layer of photon emission"},
+            {"name":"emico",          "type":"B", "info":"aerogel component of photon emission"},
+            {"name":"enico",          "type":"B", "info":"aerogel component of photon entrance point"},
+            {"name":"emqua",          "type":"S", "info":"aerogel quadrant of photon emission"},
+            {"name":"mchi2",          "type":"F", "info":"track-cluster matching chi2 (if any)"},
+
+            {"name":"ch_min",         "type":"F", "info":"minimum EtaC selection"},
+            {"name":"ch_max",         "type":"F", "info":"maximum EtaC selection"},
+            {"name":"dt_max",         "type":"F", "info":"maximum delta-time selection"},
+            {"name":"ch_dir",         "type":"F", "info":"average Cherenkov angle for direct photons"},
+            {"name":"ch_lat",         "type":"F", "info":"average Cherenkov angle for photons reflected by flat mirrors"},
+            {"name":"ch_spe",         "type":"F", "info":"average Cherenkov angle for photons reflected by spherical mirrors"},
+
+            {"name":"best_PID",       "type":"B", "info":"most probable PID choice"},
+            {"name":"RQ_prob",        "type":"F", "info":"goodness of choice parameter (1=anambiguos, 0=random)"},
+            {"name":"el_prob",        "type":"F", "info":"probability to be an electron"},
+            {"name":"pi_prob",        "type":"F", "info":"probability to be an pion"},
+            {"name":"k_prob",         "type":"F", "info":"probability to be an kaon"},
+            {"name":"pr_prob",        "type":"F", "info":"probability to be an proton"}
+    ]
+  }
+]

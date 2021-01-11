@@ -181,7 +181,7 @@ public class ClusterFitter {
             trkDir.unit();
             FitLine.set(pointOnTrk, trkDir);
             Point3D Wire = new Point3D(zWire, xWire, 0);
-
+            
             //double trkDocaMP = -xWire + (FitPars.slope()*FitArray[0][i]+FitPars.intercept());
             double trkDocaMP = FitLine.distance(Wire).length();
             double trkDoca = trkDocaMP * stereo;
@@ -213,7 +213,8 @@ public class ClusterFitter {
             }
 
             if (calcTimeResidual == true) {
-                double timeResidual = Math.abs(FitPars.slope() * FitArray.get(0).get(i) + FitPars.intercept()-xWire) - Math.abs(FitArray.get(2).get(i)-xWire);
+                double timeResidual = trkDoca - clus.get(i).get_Doca();
+                //Math.abs(FitPars.slope() * FitArray.get(0).get(i) + FitPars.intercept()-xWire) - Math.abs(FitArray.get(2).get(i)-xWire);
                 clus.get(i).set_TimeResidual(timeResidual);
             }
         }

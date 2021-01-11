@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
+import org.jlab.geom.base.Detector;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -214,6 +216,7 @@ public class TrackCandListFinder {
      */
     public ArrayList<Track> getHelicalTracks(CrossList crossList, 
             org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo,
+            CTOFGeant4Factory ctof_geo, Detector cnd_geo,
             Swim swimmer) {
 
         X.clear();
@@ -305,20 +308,20 @@ public class TrackCandListFinder {
         ArrayList<Track> passedcands = this.rmHelicalTrkClones(org.jlab.rec.cvt.svt.Constants.removeClones, cands);
         // loop over candidates and set the trajectories
         
-        for (int ic = 0; ic < passedcands.size(); ic++) {
-            Helix trkHelix = passedcands.get(ic).get_helix();
-            if(trkHelix!=null) {
-                TrajectoryFinder trjFind = new TrajectoryFinder();
-
-                //Trajectory traj = trjFind.findTrajectory(passedcands.get(ic).get_Id(), trkHelix, passedcands.get(ic), svt_geo, bmt_geo, "final");
-                Trajectory traj = trjFind.findTrajectory(ic+1, trkHelix, passedcands.get(ic), svt_geo, bmt_geo, "final");
-
-                passedcands.get(ic).set_Trajectory(traj.get_Trajectory());
-
-                passedcands.get(ic).set_Id(ic+1);
-            }
-
-        }
+//        for (int ic = 0; ic < passedcands.size(); ic++) {
+//            Helix trkHelix = passedcands.get(ic).get_helix();
+//            if(trkHelix!=null) {
+//                TrajectoryFinder trjFind = new TrajectoryFinder();
+//
+//                //Trajectory traj = trjFind.findTrajectory(passedcands.get(ic).get_Id(), trkHelix, passedcands.get(ic), svt_geo, bmt_geo, "final");
+//                Trajectory traj = trjFind.findTrajectory(ic+1, passedcands.get(ic), svt_geo, bmt_geo, ctof_geo, cnd_geo, swimmer, "final");
+//
+//                passedcands.get(ic).set_Trajectory(traj.get_Trajectory());
+//
+//                passedcands.get(ic).set_Id(ic+1);
+//            }
+//
+//        }
 
         return passedcands;
 

@@ -2,34 +2,97 @@ package org.jlab.rec.eb;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.pow;
+import java.util.List;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorParticle;
+import org.jlab.clas.detector.ScintillatorResponse;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.clas.pdg.PhysicsConstants;
 
 public class EBUtil {
 
      /**
+     * Central neutral veto logic from Adam Hobart.
+     *
+     * @param p
+     * @return whether to veto neutrality of p
+     *
+     * FIXME:  move float parameters to CCDB
+     */
+    public static boolean centralNeutralVeto(DetectorParticle p) {
+
+        ScintillatorResponse cnd=(ScintillatorResponse)p.getHit(DetectorType.CND);
+        ScintillatorResponse ctof=(ScintillatorResponse)p.getHit(DetectorType.CTOF);
+
+        if (cnd!=null || ctof!=null) {
+
+            // CTOF-only veto:
+            if (cnd == null) {
+                if (ctof.getEnergy() >= 18.0) {
+                    return true;
+                }
+            }
+
+            // CND-only veto:
+            else if (ctof == null) {
+                if (cnd.getClusterSize() > 3) {
+                    return true;
+                }
+                else if (cnd.getClusterSize() > 2) {
+                    if (cnd.getEnergy() > 10) {
+                        return true;
+                    }
+                }
+            }
+
+            // CTOF/CND-veto:
+            else if (ctof.getEnergy() >= 10.0) {
+                return true;
+            }
+            else if (cnd.getLayerMultiplicity()==1) {
+                if (cnd.getEnergy() >= 30.0) {
+                    return true;
+                }
+            }
+            else if (cnd.getLayerMultiplicity()==2) {
+                if (cnd.getClusterSize() > 2) {
+                    return true;
+                }
+                else if (cnd.getEnergy()+ctof.getEnergy() >= 10.0) {
+                    return true;
+                }
+            }
+            else {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+     /**
      * Perform a basic true/false identification for electrons.
      */
     public static boolean isSimpleElectron(DetectorParticle p,EBCCDBConstants ccdb) {
-        
-        final double pcalEnergy = p.getEnergy(DetectorType.ECAL,1);
+       
+        // require ECAL:
+        final int sector = p.getSector(DetectorType.ECAL);
+        if (sector<1) return false;
+       
+        // requre HTCC photoelectrons:
         final double nphe = p.getNphe(DetectorType.HTCC);
+        if (nphe < ccdb.getDouble(EBCCDBEnum.HTCC_NPHE_CUT)) return false;
+        
+        // require ECAL sampling fraction:
         final double sfNSigma = SamplingFractions.getNSigma(11,p,ccdb);
-
-        boolean isElectron=true;
-
-        if (nphe < EBConstants.HTCC_NPHE_CUT)
-            isElectron=false;
-        
-        else if (abs(sfNSigma) > EBConstants.ECAL_SF_NSIGMA)
-            isElectron=false;
-        
-        else if (pcalEnergy < EBConstants.PCAL_ELEC_MINENERGY)
-            isElectron=false;
-        
-        return isElectron;
+        final double nSigmaCut = ccdb.getSectorDouble(EBCCDBEnum.ELEC_SF_nsigma,sector);
+        if (abs(sfNSigma) > nSigmaCut) return false;
+       
+        // require PCAL minimum energy:
+        final double minPcalEnergy = ccdb.getSectorDouble(EBCCDBEnum.ELEC_PCAL_min_energy,sector);
+        final double pcalEnergy = p.getEnergy(DetectorType.ECAL,1);
+        if (pcalEnergy < minPcalEnergy) return false;
+       
+        return true;
     }
 
     /**
@@ -69,115 +132,10 @@ public class EBUtil {
             return 0.065;
         }
         else {
-            throw new RuntimeException("not ready for non-TOF");
+            return 0;//throw new RuntimeException("not ready for non-TOF");
         }
         return ccdb.getTable(tableName).
             getDoubleValue("tres",sector,layer,component);
-    }
-
-    /**
-     * Calculate beta for given detector type/layer, prioritized by layer:
-     */
-    public static double getNeutralBeta(DetectorParticle p, DetectorType type, int[] layers,double startTime) {
-        double beta=-9999;
-        for (int layer : layers) {
-            DetectorResponse resp = p.getHit(type,layer);
-            if (resp!=null) {
-                beta = resp.getPosition().mag() /
-                    (resp.getTime()-startTime) /
-                    PhysicsConstants.speedOfLight();
-                break;
-            }
-        }
-        return beta;
-    }
-
-    /**
-     * Calculate beta for given detector type:
-     */
-    public static double getNeutralBeta(DetectorParticle p, DetectorType type, int layer,double startTime) {
-        return getNeutralBeta(p,type,new int[]{layer},startTime);
-    }
-
-    /**
-     * Set particle status (goes in REC::Particle.status):
-     */
-    public static void setParticleStatus(DetectorParticle p,EBCCDBConstants ccdb) {
-        
-        final int centralStat=4000;
-        final int forwardStat=2000;
-        final int taggerStat=1000;
-        final int scintillatorStat=100;
-        final int calorimeterStat=10;
-        final int cherenkovStat=1;
-
-        int status = 0;
-        final int trackType = p.getTrackDetectorID();
-
-        // central:
-        if (p.hasHit(DetectorType.BMT)  ||
-            p.hasHit(DetectorType.BST)  ||
-            p.hasHit(DetectorType.CVT)  ||
-            p.hasHit(DetectorType.CTOF) ||
-            p.hasHit(DetectorType.CND)  ||
-            p.hasHit(DetectorType.RTPC)) {
-                status += centralStat;
-        }
-        else if (DetectorType.getType(trackType)==DetectorType.CVT) {
-            status += centralStat;
-        }
-
-        // forward:
-        if (p.hasHit(DetectorType.DC)     ||
-            p.hasHit(DetectorType.FMT)    ||
-            p.hasHit(DetectorType.ECAL,1) ||
-            p.hasHit(DetectorType.ECAL,4) ||
-            p.hasHit(DetectorType.ECAL,7) ||
-            p.hasHit(DetectorType.FTOF,1) ||
-            p.hasHit(DetectorType.FTOF,2) ||
-            p.hasHit(DetectorType.FTOF,3) ||
-            p.hasHit(DetectorType.HTCC)   ||
-            p.hasHit(DetectorType.LTCC)   ||
-            p.hasHit(DetectorType.RICH)) {
-            status += forwardStat;
-        }
-        else if (DetectorType.getType(trackType)==DetectorType.DC) {
-            status += forwardStat;
-        }
-
-        // tagger:
-        // need to fix broken response classes inheritance
-        /*
-        if (p.hasHit(DetectorType.FT)   ||
-            p.hasHit(DetectorType.FTCAL)  ||
-            p.hasHit(DetectorType.FTHODO) ||
-            p.hasHit(DetectorType.FTTRK)) {
-            status += taggerStat;
-        }
-        */
-        if (p.getHit(DetectorType.FTCAL)!=null) status += taggerStat;
-
-
-        // scintillators:
-        status += scintillatorStat*p.countResponses(DetectorType.FTOF);
-        status += scintillatorStat*p.countResponses(DetectorType.CTOF);
-        status += scintillatorStat*p.countResponses(DetectorType.FTHODO);
-
-        // calorimeters:
-        status += calorimeterStat*p.countResponses(DetectorType.CND);
-        status += calorimeterStat*p.countResponses(DetectorType.ECAL);
-        status += calorimeterStat*p.countResponses(DetectorType.FTCAL);
-
-        // cherenkovs:
-        if (p.getEnergy(DetectorType.LTCC) > ccdb.getDouble(EBCCDBEnum.LTCC_NPHE_CUT)) {
-            status += cherenkovStat;
-        }
-        if (p.getEnergy(DetectorType.HTCC) > ccdb.getDouble(EBCCDBEnum.HTCC_NPHE_CUT)) {
-            status += cherenkovStat;
-        }
-        status += cherenkovStat*p.countResponses(DetectorType.RICH);
-
-        p.setStatus(status);
     }
 
 }

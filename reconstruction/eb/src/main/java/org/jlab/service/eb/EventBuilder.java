@@ -6,22 +6,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataEvent;
-import org.jlab.clas.detector.DetectorData;
 
+import org.jlab.detector.base.DetectorType;
+
+import org.jlab.clas.detector.DetectorData;
 import org.jlab.clas.detector.DetectorHeader;
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
+import org.jlab.clas.detector.DetectorParticleTraj;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorTrack;
 import org.jlab.clas.detector.TaggerResponse;
 import org.jlab.clas.detector.CherenkovResponse;
+import org.jlab.clas.physics.Vector3;
 
-import org.jlab.rec.eb.EBConstants;
 import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
-import org.jlab.rec.eb.EBUtil;
 import org.jlab.rec.eb.SamplingFractions;
 
 /**
@@ -32,16 +33,22 @@ import org.jlab.rec.eb.SamplingFractions;
 public class EventBuilder {
 
     public EBCCDBConstants ccdb;
-    private DetectorEvent               detectorEvent = new DetectorEvent();
-    private List<DetectorResponse>  detectorResponses = new ArrayList<DetectorResponse>();
-    private List<Map<DetectorType,Integer>> ftIndices = new ArrayList<Map<DetectorType,Integer>>();
-    private int[]  TriggerList = new int[]{11,-11,211,-211,0};
-    private HashMap<Integer,Integer> pindex_map = new HashMap<Integer, Integer>();
+    private final DetectorEvent               detectorEvent = new DetectorEvent();
+    private final List<DetectorResponse>  detectorResponses = new ArrayList<>();
+    private final List<Map<DetectorType,Integer>> ftIndices = new ArrayList<>();
+    private final HashMap<Integer,Integer> pindex_map = new HashMap<>();
+    
+    private static final int[] TRIGGERLIST = new int[]{11,-11,211,-211,0};
 
+    private boolean usePOCA=false;
+    
     public EventBuilder(EBCCDBConstants ccdb){
         this.ccdb=ccdb;
     }
 
+    public void setUsePOCA(boolean val) {
+        usePOCA=val;
+    }
     public void initEvent() {
         detectorEvent.clear();
     }
@@ -65,8 +72,10 @@ public class EventBuilder {
      */
     public void addTracks(List<DetectorTrack> tracks) {
         for(int i = 0 ; i < tracks.size(); i++){
-            DetectorParticle particle = new DetectorParticle(tracks.get(i));
-            detectorEvent.addParticle(particle);
+            if (this.usePOCA)
+                detectorEvent.addParticle(new DetectorParticle(tracks.get(i)));
+            else
+                detectorEvent.addParticle(new DetectorParticleTraj(tracks.get(i)));
         }
     }
     
@@ -81,7 +90,10 @@ public class EventBuilder {
      */
     public void setParticleStatuses() {
         for (int ii=0; ii<this.detectorEvent.getParticles().size(); ii++) {
-            EBUtil.setParticleStatus(this.detectorEvent.getParticles().get(ii),ccdb);
+            this.detectorEvent.getParticle(ii).setStatus(
+                    ccdb.getDouble(EBCCDBEnum.HTCC_NPHE_CUT),
+                    ccdb.getDouble(EBCCDBEnum.LTCC_NPHE_CUT)
+                    );
         }
     }
 
@@ -133,8 +145,8 @@ public class EventBuilder {
             // only match with CTOF/CND if it's a central track:
             else if (p.getTrackDetectorID()==DetectorType.CVT.getDetectorId()) {
                 // NOTE:  Should we do 2-d matching in cylindrical coordinates for CD?
-                findMatchingHit(n,p,detectorResponses,DetectorType.CTOF,0, ccdb.getDouble(EBCCDBEnum.CTOF_DZ));
-                findMatchingHit(n,p,detectorResponses,DetectorType.CND, 0, ccdb.getDouble(EBCCDBEnum.CND_DZ));
+                findMatchingHit(n,p,detectorResponses,DetectorType.CTOF,1, ccdb.getDouble(EBCCDBEnum.CTOF_DZ));
+                findMatchingHit(n,p,detectorResponses,DetectorType.CND,-1, ccdb.getDouble(EBCCDBEnum.CND_DZ));
             }
 
         }
@@ -199,7 +211,7 @@ public class EventBuilder {
         final int index = particle.getDetectorHit(responses,type,layer,distance);
         if (index>=0) {
             particle.addResponse(responses.get(index),true);
-            responses.get(index).setAssociation(pindex);
+            responses.get(index).addAssociation(pindex);
             return true;
         }
         return false;
@@ -217,6 +229,14 @@ public class EventBuilder {
                 if(index>=0){
                     p.addResponse(this.detectorResponses.get(index));
                     this.detectorResponses.get(index).setAssociation(n);
+
+                    // make an artificial cross for FTHODO clusters:
+                    final double x=this.detectorResponses.get(index).getPosition().x();
+                    final double y=this.detectorResponses.get(index).getPosition().y();
+                    final double z=this.detectorResponses.get(index).getPosition().z();
+                    final double mag = Math.sqrt(x*x+y*y+z*z);
+                    p.getTrack().addCross(x,y,z,x/mag,y/mag,z/mag);
+                    p.getTrack().setPath(mag);
                 }
 
                 final int particle_hodoID = this.ftIndices.get(ftParticleCounter).get(DetectorType.FTHODO);
@@ -258,6 +278,21 @@ public class EventBuilder {
         forwardTaggerIDMatching();
     }
 
+    public void processBAND(List<DetectorResponse> bandHits) {
+        Vector3 vtx=new Vector3(0,0,0);
+        DetectorParticle trig=this.detectorEvent.getTriggerParticle();
+        if (trig!=null) vtx.copy(trig.vertex());
+        for (DetectorResponse r : bandHits) {
+            if (r.getDescriptor().getType()==DetectorType.BAND) {
+                // Non-zero BAND hits are ignored:
+                if (r.getStatus()!=0) continue;
+                DetectorParticle p=DetectorParticle.createNeutral(r, vtx);
+                r.setAssociation(this.detectorEvent.getParticles().size());
+                this.detectorEvent.addParticle(p);
+           }
+        }
+    }
+
 
     /*
      * processNeutralTracks
@@ -277,7 +312,7 @@ public class EventBuilder {
         // these have ECOUT but no PCAL nor ECIN (previous lines exhausted PCAL and ICIN):
         List<DetectorParticle> partsECOUT = ebm.findNeutrals(7);
         
-        List<DetectorParticle> particles=new ArrayList<DetectorParticle>();
+        List<DetectorParticle> particles=new ArrayList<>();
         particles.addAll(partsPCAL);
         particles.addAll(partsECIN);
         particles.addAll(partsECOUT);
@@ -329,7 +364,7 @@ public class EventBuilder {
     
     public List<DetectorResponse> getUnmatchedResponses(List<DetectorResponse> list, DetectorType type, int layer){
         if (list==null) list=detectorResponses;
-        List<DetectorResponse>  responses = new ArrayList<DetectorResponse>();
+        List<DetectorResponse>  responses = new ArrayList<>();
         for(DetectorResponse r : list){
             if(r.getDescriptor().getType()==type &&
                (r.getDescriptor().getLayer()==layer || layer<=0) &&
@@ -347,24 +382,28 @@ public class EventBuilder {
         boolean hasTrigger=false;
         while(hasTrigger==false) {
 
-            if(TriggerList[i]==11){
-                ElectronTriggerOption electron = new ElectronTriggerOption();
-                hasTrigger = electron.assignSoftwareTrigger(detectorEvent,ccdb);
-            }
-            else if(TriggerList[i]==-11){
-                PositronTriggerOption positron = new PositronTriggerOption();
-                hasTrigger= positron.assignSoftwareTrigger(detectorEvent,ccdb);
-            }
-            else if(TriggerList[i]==-211){
-                NegPionTriggerOption negpion = new NegPionTriggerOption();
-                hasTrigger = negpion.assignSoftwareTrigger(detectorEvent,ccdb);
-            }
-            else if(TriggerList[i]==211){
-                PosPionTriggerOption pospion = new PosPionTriggerOption();
-                hasTrigger = pospion.assignSoftwareTrigger(detectorEvent,ccdb);
-            }
-            else if(TriggerList[i]==0){
-                hasTrigger = true;
+            switch (TRIGGERLIST[i]) {
+                case 11:
+                    ElectronTriggerOption electron = new ElectronTriggerOption();
+                    hasTrigger = electron.assignSoftwareTrigger(detectorEvent,ccdb);
+                    break;
+                case -11:
+                    PositronTriggerOption positron = new PositronTriggerOption();
+                    hasTrigger= positron.assignSoftwareTrigger(detectorEvent,ccdb);
+                    break;
+                case -211:
+                    NegPionTriggerOption negpion = new NegPionTriggerOption();
+                    hasTrigger = negpion.assignSoftwareTrigger(detectorEvent,ccdb);
+                    break;
+                case 211:
+                    PosPionTriggerOption pospion = new PosPionTriggerOption();
+                    hasTrigger = pospion.assignSoftwareTrigger(detectorEvent,ccdb);
+                    break;
+                case 0:
+                    hasTrigger = true;
+                    break;
+                default:
+                    break;
             }
             i++;
         }
@@ -410,17 +449,24 @@ class TriggerOptions {
     
     public int getSoftwareTriggerScore(DetectorParticle p,EBCCDBConstants ccdb) {
 
-        final double npheCut = ccdb.getDouble(EBCCDBEnum.HTCC_NPHE_CUT);
-        final double sfNSigma = SamplingFractions.getNSigma(11,p,ccdb);
-
         int score = 0;
+
+        final double npheCut = ccdb.getDouble(EBCCDBEnum.HTCC_NPHE_CUT);
         if(p.getNphe(DetectorType.HTCC) > npheCut){
             score += 10;
         }
-        if(abs(sfNSigma) < EBConstants.ECAL_SF_NSIGMA &&
-            p.getEnergy(DetectorType.ECAL,1) > EBConstants.PCAL_ELEC_MINENERGY) {
-            score += 100;
+        
+        final int sector = p.getSector(DetectorType.ECAL);
+        if (sector > 0) {
+            final double nSigmaCut = ccdb.getSectorDouble(EBCCDBEnum.ELEC_SF_nsigma,sector);
+            final double sfNSigma = SamplingFractions.getNSigma(11,p,ccdb);
+            final double minPcalEnergy = ccdb.getSectorDouble(EBCCDBEnum.ELEC_PCAL_min_energy,sector);
+            if(abs(sfNSigma) < nSigmaCut &&
+                    p.getEnergy(DetectorType.ECAL,1) > minPcalEnergy) {
+                score += 100;
+            }
         }
+
         if(p.hasHit(DetectorType.FTOF,1)==true || p.hasHit(DetectorType.FTOF,2)==true){
             score += 1000;
         }

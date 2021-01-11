@@ -78,16 +78,43 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
                 Transformation3D trans = new Transformation3D();
                 if (superlayer.getSuperlayerId() == 0) {
                     double dist2tgt = cp.getDouble("/geometry/pcal/pcal/dist2tgt", 0)*0.1;
-                    trans.translateXYZ(0, 0, dist2tgt);
+                    double deltaX   = cp.getDouble("/geometry/pcal/alignment/deltaX", sector.getSectorId()); // displacements are already in cm
+                    double deltaY   = cp.getDouble("/geometry/pcal/alignment/deltaY", sector.getSectorId()); 
+                    double deltaZ   = cp.getDouble("/geometry/pcal/alignment/deltaZ", sector.getSectorId()); 
+                    double rotX     = cp.getDouble("/geometry/pcal/alignment/rotX", sector.getSectorId());   // rotations are in degrees
+                    double rotY     = cp.getDouble("/geometry/pcal/alignment/rotY", sector.getSectorId()); 
+                    double rotZ     = cp.getDouble("/geometry/pcal/alignment/rotZ", sector.getSectorId()); 
+                    trans.rotateX(Math.toRadians(rotX));
+                    trans.rotateY(Math.toRadians(rotY));
+                    trans.rotateZ(Math.toRadians(rotZ));
+                    trans.translateXYZ(deltaX, deltaY, deltaZ + dist2tgt);
                 } else if (superlayer.getSuperlayerId() == 1) {
                     double dist2tgt = cp.getDouble("/geometry/ec/ec/dist2tgt", 0)*0.1;
-                    trans.translateXYZ(0, 0, dist2tgt);
+                    double deltaX   = cp.getDouble("/geometry/ec/alignment/deltaX", sector.getSectorId()); // displacements are already in cm
+                    double deltaY   = cp.getDouble("/geometry/ec/alignment/deltaY", sector.getSectorId()); 
+                    double deltaZ   = cp.getDouble("/geometry/ec/alignment/deltaZ", sector.getSectorId()); 
+                    double rotX     = cp.getDouble("/geometry/ec/alignment/rotX", sector.getSectorId());   // rotations are in degrees
+                    double rotY     = cp.getDouble("/geometry/ec/alignment/rotY", sector.getSectorId()); 
+                    double rotZ     = cp.getDouble("/geometry/ec/alignment/rotZ", sector.getSectorId()); 
+                    trans.rotateX(Math.toRadians(rotX));
+                    trans.rotateY(Math.toRadians(rotY));
+                    trans.rotateZ(Math.toRadians(rotZ));
+                    trans.translateXYZ(deltaX, deltaY, deltaZ + dist2tgt);
                 } else {
                     double dist2tgt = cp.getDouble("/geometry/ec/ec/dist2tgt", 0)*0.1;
                     double strip_thick = cp.getDouble("/geometry/ec/ec/strip_thick", 0)*0.1;
                     double lead_thick = cp.getDouble("/geometry/ec/ec/lead_thick", 0)*0.1;
+                    double deltaX   = cp.getDouble("/geometry/ec/alignment/deltaX", sector.getSectorId()); // displacements are already in cm
+                    double deltaY   = cp.getDouble("/geometry/ec/alignment/deltaY", sector.getSectorId()); 
+                    double deltaZ   = cp.getDouble("/geometry/ec/alignment/deltaZ", sector.getSectorId()); 
+                    double rotX     = cp.getDouble("/geometry/ec/alignment/rotX", sector.getSectorId());   // rotations are in degrees
+                    double rotY     = cp.getDouble("/geometry/ec/alignment/rotY", sector.getSectorId()); 
+                    double rotZ     = cp.getDouble("/geometry/ec/alignment/rotZ", sector.getSectorId()); 
                     double dz = (strip_thick + lead_thick) * 15;
-                    trans.translateXYZ(0, 0, dist2tgt + dz);
+                    trans.rotateX(Math.toRadians(rotX));
+                    trans.rotateY(Math.toRadians(rotY));
+                    trans.rotateZ(Math.toRadians(rotZ));
+                    trans.translateXYZ(deltaX, deltaY, deltaZ + dist2tgt + dz);
                 }
                 superlayer.setTransformation(trans);
             }
@@ -120,16 +147,17 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
         if (!(0<=superlayerId && superlayerId<3))
             throw new IllegalArgumentException("Error: invalid superlayer="+superlayerId);
         ECSuperlayer superlayer = new ECSuperlayer(sectorId, superlayerId);
-        /*
+        
         int numLayers = (superlayerId == 0)? 15 : // PCAL
                         (superlayerId == 1)? 15 : // Inner EC
                         (superlayerId == 2)? 24 : // Outer EC
                         -1; // ??
-        */
+        /*
         int numLayers = (superlayerId == 0)? 3 : // PCAL
                         (superlayerId == 1)? 3 : // Inner EC
                         (superlayerId == 2)? 3 : // Outer EC
                         -1; // ??
+        */
         for (int layerId=0; layerId<numLayers; layerId++)
             superlayer.addLayer(createLayer(cp, sectorId, superlayerId, layerId));
         return superlayer;
@@ -175,11 +203,11 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
         final int numPaddlesPCalU = 68;
         final int numDoublePaddlesPCalU = 16;
         final double strip_thick = cp.getDouble("/geometry/pcal/pcal/strip_thick", 0)*0.1;
-        final double steel_thick = cp.getDouble("/geometry/pcal/pcal/steel_thick", 0)*0.1;
+        final double lead_thick = cp.getDouble("/geometry/pcal/pcal/lead_thick", 0)*0.1;
         final double strip_width = cp.getDouble("/geometry/pcal/pcal/strip_width", 0)*0.1;
         final double max_length = cp.getDouble("/geometry/pcal/Uview/max_length", 0)*0.1;
         final double yhigh = cp.getDouble("/geometry/pcal/pcal/yhigh", 0)*0.1;
-        final double dz = (strip_thick+steel_thick)*layerId;
+        final double dz = (strip_thick+lead_thick)*layerId;
         
         ECLayer layer = new ECLayer(sectorId, 0, layerId);
         
@@ -234,7 +262,7 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
         final int numPaddlesPCalVW = 62;
         final int numSinglePaddlesPCalVW = 47;
         final double strip_thick = cp.getDouble("/geometry/pcal/pcal/strip_thick", 0)*0.1;
-        final double steel_thick = cp.getDouble("/geometry/pcal/pcal/steel_thick", 0)*0.1;
+        final double lead_thick = cp.getDouble("/geometry/pcal/pcal/lead_thick", 0)*0.1;
         final double strip_width = cp.getDouble("/geometry/pcal/pcal/strip_width", 0)*0.1;
         final double max_length = cp.getDouble("/geometry/pcal/Vview/max_length", 0)*0.1;
         final double yhigh = cp.getDouble("/geometry/pcal/pcal/yhigh", 0)*0.1;
@@ -243,7 +271,7 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
         final double l0u = cp.getDouble("/geometry/pcal/Uview/max_length", 0)*0.1;
         final double height = l0u*0.5*Math.tan(view_angle);
         final double ylo = height - yhigh;
-        final double dz = (strip_thick+steel_thick)*layerId;
+        final double dz = (strip_thick+lead_thick)*layerId;
         
         ECLayer layer = new ECLayer(sectorId, 0, layerId);
         
@@ -313,7 +341,7 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
         final int numPaddlesPCalVW = 62;
         final int numSinglePaddlesPCalVW = 47;
         final double strip_thick = cp.getDouble("/geometry/pcal/pcal/strip_thick", 0)*0.1;
-        final double steel_thick = cp.getDouble("/geometry/pcal/pcal/steel_thick", 0)*0.1;
+        final double lead_thick = cp.getDouble("/geometry/pcal/pcal/lead_thick", 0)*0.1;
         final double strip_width = cp.getDouble("/geometry/pcal/pcal/strip_width", 0)*0.1;
         final double max_length = cp.getDouble("/geometry/pcal/Wview/max_length", 0)*0.1;
         final double yhigh = cp.getDouble("/geometry/pcal/pcal/yhigh", 0)*0.1;
@@ -323,7 +351,7 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
         final double height = l0u*0.5*Math.tan(view_angle);
         final double ylo = height - yhigh;
         
-        final double dz = (strip_thick+steel_thick)*layerId;
+        final double dz = (strip_thick+lead_thick)*layerId;
         
         ECLayer layer = new ECLayer(sectorId, 0, layerId);
         
@@ -402,8 +430,10 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
     private static void makePcalPlaneAndBoundary(ConstantProvider cp, ECLayer layer, double depth) {
         final double u_length = cp.getDouble("/geometry/pcal/Uview/max_length", 0)*0.1;
         final double yhigh = cp.getDouble("/geometry/pcal/pcal/yhigh", 0)*0.1;
+        final double strip_thick = cp.getDouble("/geometry/pcal/pcal/strip_thick", 0)*0.1;
+        final double lead_thick = cp.getDouble("/geometry/pcal/pcal/lead_thick", 0)*0.1;
         final double view_angle = Math.toRadians(cp.getDouble("/geometry/pcal/pcal/view_angle", 0));
-        
+
         double bz = depth;
         double by = u_length/2;
         double bx = yhigh - by*Math.tan(view_angle);
@@ -413,7 +443,8 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
         Point3D b2 = new Point3D(yhigh, -by, bz);
         layer.getBoundary().addFace(new Triangle3D(b0, b1, b2));
         
-        layer.getPlane().set(0, 0, bz, 0, 0, 1);
+        double plane_offset = strip_thick/2 + (strip_thick + lead_thick)/4;
+        layer.getPlane().set(0, 0, bz+plane_offset, 0, 0, 1);
     }
     
     private static ECLayer createECU(ConstantProvider cp, int sectorId, int layerId, int realLayer) {
@@ -469,8 +500,9 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
             layer.addComponent(paddle);
         }
       
+        double plane_offset = strip_thick/2 + (strip_thick + lead_thick)/4;
         layer.getPlane().set(0, 0, 0, 0, 0, 1);
-        layer.getPlane().translateXYZ(0, 0, dz);
+        layer.getPlane().translateXYZ(0, 0, dz+plane_offset);
         layer.getPlane().rotateZ(Math.toRadians(-90));
         
         layer.getBoundary().addFace(new Triangle3D(pA, pC, pB));
@@ -559,8 +591,9 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
             layer.addComponent(paddle);
         }
       
+        double plane_offset = strip_thick/2 + (strip_thick + lead_thick)/4;
         layer.getPlane().set(0, 0, 0, 0, 0, 1);
-        layer.getPlane().translateXYZ(0, 0, dz);
+        layer.getPlane().translateXYZ(0, 0, dz+plane_offset);
         layer.getPlane().rotateZ(Math.toRadians(-90));
         
         layer.getBoundary().addFace(new Triangle3D(pA, pC, pB));
@@ -649,8 +682,9 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
             layer.addComponent(paddle);
         }
       
+        double plane_offset = strip_thick/2 + (strip_thick + lead_thick)/4;
         layer.getPlane().set(0, 0, 0, 0, 0, 1);
-        layer.getPlane().translateXYZ(0, 0, dz);
+        layer.getPlane().translateXYZ(0, 0, dz+strip_thick);
         layer.getPlane().rotateZ(Math.toRadians(-90));
         
         layer.getBoundary().addFace(new Triangle3D(pA, pC, pB));

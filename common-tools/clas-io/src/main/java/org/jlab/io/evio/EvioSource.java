@@ -53,7 +53,7 @@ public class EvioSource implements DataSource {
 
 		EvioFactory.loadDictionary(dictionaryPath);
 		dictionary = EvioFactory.getDictionary();
-		System.err.println("[EvioSource] ---> Factory loaded descriptor count : " + dictionary.getDescriptorList().length);
+		System.out.println("[EvioSource] ---> Factory loaded descriptor count : " + dictionary.getDescriptorList().length);
 		// dictionary.show();
 	}
 
@@ -85,7 +85,7 @@ public class EvioSource implements DataSource {
 
 		EvioFactory.loadDictionary(dictionaryPath);
 		dictionary = EvioFactory.getDictionary();
-		System.err.println("[EvioSource] ---> Factory loaded descriptor count : " + dictionary.getDescriptorList().length);
+		System.out.println("[EvioSource] ---> Factory loaded descriptor count : " + dictionary.getDescriptorList().length);
 		dictionary.show();
 		this.open(filename);
 	}

@@ -1,0 +1,94 @@
+[ 
+ {
+    "name": "FTCAL::hits",
+    "group": 21000,
+    "item" : 21,
+    "info": "Reconstructed Hits in FT calorimeter",
+    "entries": [
+              {"name":"idx",       "type":"B", "info":"x id of grid"},
+              {"name":"idy",       "type":"B", "info":"y id of grid"},
+              {"name":"x",         "type":"F", "info":"Hit X position (cm)" },
+              {"name":"y",         "type":"F", "info":"Hit Y position (cm)" },
+              {"name":"z",         "type":"F", "info":"Hit Z position (cm)" },
+              {"name":"energy",    "type":"F", "info":"Hit Energy" },
+              {"name":"time",      "type":"F", "info":"Hit Time" },
+              {"name":"hitID", 	   "type":"S", "info":"Hit Pointer to ADC bank"},
+              {"name":"clusterID", "type":"S", "info":"Hit Pointer to Cluster Bank"}
+    ]
+  },
+ {
+    "name": "FTCAL::clusters",
+    "group": 21000,
+    "item" : 22,
+    "info": "Reconstructed Clusters in FT calorimeter",
+    "entries": [
+              {"name":"size",      "type":"S", "info":"Cluster size" },
+              {"name":"id",        "type":"S", "info":"Cluster ID" },
+              {"name":"x",         "type":"F", "info":"Cluster centroid X moment (cm)" },
+              {"name":"y",         "type":"F", "info":"Cluster centroid Y moment (cm)" },
+              {"name":"z",         "type":"F", "info":"Cluster centroid Z moment (cm)" },
+              {"name":"widthX",    "type":"F", "info":"Cluster width in x (cm)" },
+              {"name":"widthY",    "type":"F", "info":"Cluster width in y (cm)" },
+              {"name":"radius",    "type":"F", "info":"Cluster radius (cm)" },
+              {"name":"time",      "type":"F", "info":"Cluster timing information" },
+              {"name":"energy",    "type":"F", "info":"Cluster total energy" },
+              {"name":"maxEnergy", "type":"F", "info":"Cluster maximum energy" },
+              {"name":"recEnergy", "type":"F", "info":"Cluster reconstructed energy" }
+    ]
+  },
+ {
+    "name": "FTHODO::hits",
+    "group": 21100,
+    "item" : 21,
+    "info": "Reconstructed Hits in FT hodoscope",
+    "entries": [
+              {"name":"sector",    "type":"B", "info":"sector number"},
+              {"name":"layer",	   "type":"B", "info":"layer number"},
+              {"name":"component", "type":"S", "info":"component number"},
+              {"name":"x",         "type":"F", "info":"Hit X position (cm)" },
+              {"name":"y",         "type":"F", "info":"Hit Y position (cm)" },
+              {"name":"z",         "type":"F", "info":"Hit Z position (cm)" },
+              {"name":"energy",    "type":"F", "info":"Hit Energy" },
+              {"name":"time",      "type":"F", "info":"Hit Time" },
+              {"name":"hitID", 	   "type":"S", "info":"Hit Pointer to ADC bank"},
+              {"name":"clusterID", "type":"S", "info":"Hit Pointer to Cluster Bank"}
+    ]
+  },
+ {
+    "name": "FTHODO::clusters",
+    "group": 21100,
+    "item" : 22,
+    "info": "Reconstructed clusters in FT hodoscope",
+    "entries": [
+              {"name":"size",      "type":"S", "info":"Cluster size" },
+              {"name":"id",        "type":"S", "info":"Cluster ID" },
+              {"name":"x",         "type":"F", "info":"Cluster centroid X moment (cm)" },
+              {"name":"y",         "type":"F", "info":"Cluster centroid Y moment (cm)" },
+              {"name":"z",         "type":"F", "info":"Cluster centroid Z moment (cm)" },
+              {"name":"widthX",    "type":"F", "info":"Cluster width in x (cm)" },
+              {"name":"widthY",    "type":"F", "info":"Cluster width in y (cm)" },
+              {"name":"radius",    "type":"F", "info":"Cluster radius (cm)" },
+              {"name":"time",      "type":"F", "info":"Cluster timing information" },
+              {"name":"energy",    "type":"F", "info":"Cluster total energy" }
+    ]
+  },
+ {
+    "name": "FT::particles",
+    "group": 20900,
+    "item" : 24,
+    "info": "Reconstructed Particles in FT",
+    "entries": [
+              {"name":"id",     "type":"S", "info":"track ID"},
+              {"name":"charge", "type":"B", "info":"track Charge"},
+              {"name":"energy", "type":"F", "info":"track Energy" },
+              {"name":"cx",     "type":"F", "info":"track Cx" },
+              {"name":"cy",     "type":"F", "info":"track Cy" },
+              {"name":"cz",     "type":"F", "info":"track Cz" },
+              {"name":"time",   "type":"F", "info":"track Time" },
+              {"name":"calID",  "type":"S", "info":"pointer to cluster bank"},
+              {"name":"hodoID", "type":"S", "info":"pointer to signal bank"},
+              {"name":"trkID",  "type":"S", "info":"pointer to cross banks"}
+ 
+    ]
+  }
+]

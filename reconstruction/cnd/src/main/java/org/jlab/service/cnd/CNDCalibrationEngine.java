@@ -17,17 +17,15 @@ import org.jlab.rec.cnd.hit.HalfHit;
 import org.jlab.rec.cnd.hit.CndHitFinder;
 
 import java.lang.String;
-import java.lang.Double;
-import java.lang.Integer;
-import static java.lang.Math.abs;
-import static java.lang.Math.pow;
-import static java.lang.Math.sqrt;
-import static java.lang.Math.sin;
-import static java.lang.Math.cos;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.jlab.clas.physics.LorentzVector;
 
 import org.jlab.rec.cnd.cluster.CNDCluster;
 import org.jlab.rec.cnd.cluster.CNDClusterFinder;
+import org.jlab.utils.groups.IndexedTable;
 
 /**
  * Service to return reconstructed CND Hits - the output is in Hipo format
@@ -44,7 +42,7 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 	
 	}
 
-	int Run = -1;
+	//int Run = -1;
 	RecoBankWriter rbc;
 	//test
 	static int enb =0;
@@ -54,16 +52,34 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 	static int posmatch=0;
 	static int ctof=0;
 	static int ctoftot=0;
+        
+        private AtomicInteger Run = new AtomicInteger(0);
+        private int newRun = 0;
 
 	@Override
 	public boolean processDataEvent(DataEvent event) {
 
+            
+            if (!event.hasBank("RUN::config")) {
+            return true;
+            }
+
+           DataBank bank = event.getBank("RUN::config");
+
+            // Load the constants
+            //-------------------
+            int newRun = bank.getInt("run", 0);
+            if (newRun == 0)
+               return true;
+
+            if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {
+                 Run.set(newRun);
+            }
+            
+                CalibrationConstantsLoader constantsLoader = new CalibrationConstantsLoader(newRun, this.getConstantsManager());
 		//event.show();
 		//System.out.println("in data process ");
             
-		// update calibration constants based on run number if changed
-		setRunConditionsParameters(event);
-
                 ArrayList<HalfHit> halfhits = new ArrayList<HalfHit>();   
 		ArrayList<CndHit> hits = new ArrayList<CndHit>();
 
@@ -72,7 +88,7 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 //			hcvt++;
 //		}
 
-		halfhits = HitReader.getCndHalfHits(event);		
+		halfhits = HitReader.getCndHalfHits(event, constantsLoader);		
 		//1) exit if halfhit list is empty
 		if(halfhits.size()==0 ){
 			//			System.out.println("fin de process (0) : ");
@@ -82,14 +98,14 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 
 		//2) find the CND hits from these half-hits
 		CndHitFinder hitFinder = new CndHitFinder();
-		hits = hitFinder.findHits(halfhits,0);
+		hits = hitFinder.findHits(halfhits,0, constantsLoader);
 
 		CvtGetHTrack cvttry = new CvtGetHTrack();
-		cvttry.getCvtHTrack(event); // get the list of helix associated with the event
+		cvttry.getCvtHTrack(event,constantsLoader); // get the list of helix associated with the event
 
 		//int flag=0;
 		for (CndHit hit : hits){ // findlength for charged particles
-			double length =hitFinder.findLength(hit, cvttry.getHelices(),0);
+			double length =hitFinder.findLength(hit, cvttry.getHelices(),0,constantsLoader);
 			if (length!=0){
 				hit.set_tLength(length); // the path length is non zero only when there is a match with cvt track
 				//if(flag==0){match++;}
@@ -125,13 +141,24 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 		////		event.show();
 		//		return true;
 		//	}
+        
+        
+        
+
+        //// clustering of the CND hits
+        CNDClusterFinder cndclusterFinder = new CNDClusterFinder();
+        ArrayList<CNDCluster> cndclusters = cndclusterFinder.findClusters(hits);
+            
+        
+        
+        
 		if(hits.size()!=0){
 
 			//          DataBank outbank = RecoBankWriter.fillCndHitBanks(event, hits);
 			//          event.appendBanks(outbank);
 			// event.show();
 		//	System.out.println("in process event ");
-			rbc.appendCNDBanks(event,hits);
+			rbc.appendCNDBanks(event,hits,cndclusters);
 			//      ecnd++;
 			//      if(event.hasBank("CVTRec::Tracks")){
 			//              posmatch++;
@@ -144,34 +171,6 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 
 
 
-		//// clustering of the CND hits
-		CNDClusterFinder cndclusterFinder = new CNDClusterFinder();
-		ArrayList<CNDCluster> cndclusters = cndclusterFinder.findClusters(hits);
-	        
-
-	        /// Filling the banks of CND clusters
-	        int size = cndclusters.size();
-	        if(size>0){
-	                DataBank bank2 =  event.createBank("CND::clusters", size);
-	                if (bank2 == null) {
-	                        System.err.println("COULD NOT CREATE A CND::clusters BANK!!!!!!");
-	                        return false;
-	                }
-	                for(int i =0; i< size; i++) {
-	                        bank2.setInt("id",i, cndclusters.get(i).get_id() );
-	                        bank2.setInt("nhits",i, cndclusters.get(i).get_nhits() );
-				bank2.setByte("sector",i,  (byte)(1* cndclusters.get(i).get_sector()) );
-				bank2.setByte("layer",i,  (byte)(1*  cndclusters.get(i).get_layer()) );
-				bank2.setInt("component",i,  cndclusters.get(i).get_component() );
-	                        bank2.setFloat("energy",i,   (float)(1.0* cndclusters.get(i).get_energysum()) );
-	                        bank2.setFloat("x",i,   (float)(1.0* cndclusters.get(i).get_x()) );
-	                        bank2.setFloat("y",i,   (float)(1.0* cndclusters.get(i).get_y()) );
-	                        bank2.setFloat("z",i,   (float)(1.0* cndclusters.get(i).get_z()) );
-	                        bank2.setFloat("time",i,   (float)(1.0*  cndclusters.get(i).get_time()) );
-				bank2.setInt("status",i,   cndclusters.get(i).get_status());
-	                }
-	                event.appendBanks(bank2);
-	        }
 
 
 		return true;
@@ -180,34 +179,17 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 
 	@Override
 	public boolean init() {
-		// TODO Auto-generated method stub
-		rbc = new RecoBankWriter();
-		System.out.println("in init ");
-		return true;
+            // TODO Auto-generated method stub
+            rbc = new RecoBankWriter();
+            System.out.println("in init ");
+            
+            requireConstants(Arrays.asList(CalibrationConstantsLoader.getCndTables()));
+            this.getConstantsManager().setVariation("default");
+            return true;
 	}
 
 
-	public void setRunConditionsParameters(DataEvent event) {
-		if(event.hasBank("RUN::config")==false) {
-			System.err.println("RUN CONDITIONS NOT READ!");
-		}
-		else {
-			int newRun = Run;        
-
-			DataBank bank = event.getBank("RUN::config");
-			newRun = bank.getInt("run", 0);  
-			// Load the constants
-			//-------------------
-			if(Run!=newRun) {
-				CalibrationConstantsLoader.Load(newRun,"default"); 
-				Run = newRun;
-			}
-		}
-
-	}
-
-
-
+	
 	public static void main (String arg[]) {
 		CNDCalibrationEngine en = new CNDCalibrationEngine();
 
@@ -289,5 +271,4 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 	}
 
 }
-
 

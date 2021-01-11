@@ -73,5 +73,22 @@
       <maven.compiler.target>1.8</maven.compiler.target>
       <maven.compiler.source>1.8</maven.compiler.source>
     </properties>
-    
+
+  <!-- baltzell added this to get javadoc compiling,
+       because it doesn't like packages without any public methods-->
+  <build>
+      <plugins>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-javadoc-plugin</artifactId>
+              <version>3.1.0</version>
+              <configuration>
+                  <sourceFileExcludes>
+                      <sourceFileExclude>src/main/java/src/*/*</sourceFileExclude>
+                  </sourceFileExcludes>
+              </configuration>
+          </plugin>
+      </plugins>
+  </build>
+
 </project>

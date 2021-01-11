@@ -83,17 +83,26 @@ public class StateVec extends Matrix {
     public void setB(double b) {
         this.b = b;
     }
-    // KF projector
-    private double h;
+    // KF projector --> get Wire midPoint match
+    private double hw;
 
     public double getProjector() {
-        return h;
+        return hw;
     }
 
     public void setProjector(double h) {
+        this.hw = h;
+    }
+    // KF projector --> get fit doca
+    private double h;
+
+    public double getProjectorDoca() {
+        return h;
+    }
+
+    public void setProjectorDoca(double h) {
         this.h = h;
     }
-    
     /**
      * Sets the stateVec 
      *
