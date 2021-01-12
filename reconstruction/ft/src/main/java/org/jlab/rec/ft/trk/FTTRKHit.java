@@ -75,8 +75,8 @@ public class FTTRKHit implements Comparable<FTTRKHit>{
                     System.out.println("");
                 }
 	}
-		
-	/**
+
+  /**
 	 * 
 	 * @return the sector (1)
 	 */
@@ -108,8 +108,8 @@ public class FTTRKHit implements Comparable<FTTRKHit>{
 	public void set_Layer(int _Layer) {
 		this._Layer = _Layer;
 	}
-
-        /**
+  
+  /**
 	 * 
 	 * @return the superlayer: 0 for bottom modules 1+3, 1 for top modules 2+4
 	 */
@@ -298,7 +298,6 @@ public class FTTRKHit implements Comparable<FTTRKHit>{
 			return 0;
 		}
 	}
-        	
 	/**
 	 * 
 	 * @return print statement with hit information
@@ -307,5 +306,5 @@ public class FTTRKHit implements Comparable<FTTRKHit>{
 		String s = " Hit: ID "+this.get_Id()+" Sector "+this.get_Sector()+" Layer "+this.get_Layer()+" Strip "+this.get_Strip()+" Edep "+this.get_Edep();
 		return s;
 	}
-	
+ 	
 }

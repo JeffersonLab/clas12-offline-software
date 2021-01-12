@@ -57,7 +57,7 @@ public class FTTRKConstantsLoader {
                 
                 int debug = FTTRKReconstruction.debugMode;
                 double half = 0.5;
-                
+               
                 // just the first two layers are enough, the second two are identical
                 for(int j=0; j<Nlayers/2; j++){
                     for(int i=0;i<Nstrips;i++) {
@@ -78,7 +78,7 @@ public class FTTRKConstantsLoader {
                         }     
                         stripsYlocref[i] = stripsYloc[j][i][0];
                         
-                        // reference geometry: bottom module (top are left/right symmetric
+                       // reference geometry: bottom module (top are left/right symmetric
                         // Give the X of the middle of the strip
 			int localRegionX = getLocalRegionX(i);
 //                        System.out.println("strip " + i + " localRegionX " + localRegionX);
@@ -107,7 +107,6 @@ public class FTTRKConstantsLoader {
                             System.out.println("**** check strip number, X coordinate not assigned ****");
                         }
                         
-                                               
                         stripsX[j][i][0] = (stripsXloc[j][i][0]*Math.cos(Alpha[j]) - stripsYloc[j][i][0]*Math.sin(Alpha[j]));
                         stripsY[j][i][0] = stripsXloc[j][i][0]*Math.sin(Alpha[j]) + stripsYloc[j][i][0]*Math.cos(Alpha[j]);
                         stripsX[j][i][1] = (stripsXloc[j][i][1]*Math.cos(Alpha[j]) - stripsYloc[j][i][1]*Math.sin(Alpha[j]));
