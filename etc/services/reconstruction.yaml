@@ -12,7 +12,7 @@ services:
     name: FTCAL
   - class: org.jlab.rec.ft.hodo.FTHODOEngine
     name: FTHODO
-  - class: org.jlab.ft.trk.FTTRKEngine
+  - class: org.jlab.rec.ft.trk.FTTRKEngine
     name: FTTRK
   - class: org.jlab.rec.ft.FTEBEngine
     name: FTEB
