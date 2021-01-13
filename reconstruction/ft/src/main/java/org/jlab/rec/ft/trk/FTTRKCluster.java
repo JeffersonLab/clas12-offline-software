@@ -391,5 +391,5 @@ import org.jlab.geom.prim.Vector3D;
     public int compareTo(FTTRKCluster arg) {
         
         return this.get_Layer() < arg.get_Layer() ? -1 : this.get_Layer() == arg.get_Layer() ? 0 : 1;
-        
+    }   
 }
