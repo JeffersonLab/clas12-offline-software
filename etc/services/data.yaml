@@ -48,7 +48,7 @@ services:
   - class: org.jlab.service.eb.EBHBEngine
     name: EBHB
   - class: org.jlab.service.eb.EBHBAIEngine
-    name: EBHBAI
+    name: EBHAI
 # DC regular TB tracking    
   - class: org.jlab.service.dc.DCTBEngineConv
     name: DCRTB
@@ -60,7 +60,7 @@ services:
   - class: org.jlab.service.eb.EBTBEngine
     name: EBTB
   - class: org.jlab.service.eb.EBTBAIEngine
-    name: EBTBAI
+    name: EBTAI
   - class: org.jlab.rec.rich.RICHEBEngine
     name: RICH
   - class: org.jlab.service.rtpc.RTPCEngine
@@ -110,7 +110,11 @@ configuration:
       variation: rga_fall2018
     EBHB:
       variation: rga_fall2018
+    EBHAI:
+      variation: rga_fall2018
     EBTB:
+      variation: rga_fall2018
+    EBTAI:
       variation: rga_fall2018
 
 mime-types:
