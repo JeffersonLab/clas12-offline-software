@@ -418,7 +418,7 @@ public class StateVecsDoca {
         SVplus = this.reset(SVplus, stateVec);
         SVminus = this.reset(SVminus, stateVec);
         
-        double delt_x = 0.05;
+        double delt_x = 0.10;
         SVplus.x += delt_x/2.;
         SVminus.x-= delt_x/2.;
         
@@ -429,7 +429,7 @@ public class StateVecsDoca {
         SVplus = this.reset(SVplus, stateVec);
         SVminus = this.reset(SVminus, stateVec);
         
-        double delt_y = 0.05;
+        double delt_y = 0.20;
         SVplus.y += delt_y/2.;
         SVminus.y-= delt_y/2.;
         
