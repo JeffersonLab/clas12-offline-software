@@ -61,8 +61,6 @@ public class FTTRKReconstruction {
  	boolean[][] checked;
 	FTTRKHit[][] HitArray;        
         ArrayList<FTTRKCluster> clusters = new ArrayList<FTTRKCluster>();
-        FTTRKHit[] clusterHitAtBorder = new FTTRKHit[3];
-        int[] limitingStrip = {127, 383, 639};  // strip numbering from 0 to 767
         
         // a boolean array to avoid double counting at the numbering discontinuities
         checked = new boolean[Nstrips][Nlayers] ;

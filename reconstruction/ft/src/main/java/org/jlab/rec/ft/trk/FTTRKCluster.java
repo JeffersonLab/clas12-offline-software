@@ -158,7 +158,7 @@ import org.jlab.geom.prim.Vector3D;
 		double zCentEndPoint2 = 0;					// cluster energy-weighted Centroid z coordinate of the second end-point
 		
 		double totEn = 0.;					        // cluster total energy
-    double totEnSq = 0.;                                            // sum of energies squared
+                double totEnSq = 0.;                                            // sum of energies squared
 		double weightedStrp = 0;					// energy-weighted strip 
 		
 		double weightedStripEndPoint1X = 0;			// Energy-weighted x of the strip first end point
@@ -170,7 +170,7 @@ import org.jlab.geom.prim.Vector3D;
 		
 		int nbhits = this.size();
 
-    if(nbhits != 0) {
+                if(nbhits != 0) {
 			int min = 1000000;
 			int max = -1;
 			int seed = -1;
