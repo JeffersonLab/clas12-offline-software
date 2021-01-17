@@ -11,13 +11,13 @@ package org.jlab.rec.ft;
  */
 public class FTConstants {
     
-    public static final int     HODO_MIN_CLUSTER_SIZE = 2;          // minimum size of hodo clusters  for match to calorimeter
+    public static final int     HODO_MIN_CLUSTER_SIZE = 2;         // minimum size of hodo clusters  for match to calorimeter
 
     public static final double  CAL_HODO_DISTANCE_MATCHING = 3.0;   // matching distance in cm
-    public static final double  CAL_HODO_TIME_MATCHING     = 8;     // matching time in ns
+    public static final double  CAL_HODO_TIME_MATCHING     = 8;    // matching time in ns
     
-    public static final double  CAL_TRK_DISTANCE_MATCHING = 1.5;    // matching distance in cm
-    public static final double  CAL_TRK_TIME_MATCHING     = 30;     // matching time in ns TOBECORRECTED
+    public static final double  CAL_TRK_DISTANCE_MATCHING = 1.5;   // matching distance in cm
+    public static final double  CAL_TRK_TIME_MATCHING     = 30;   // matching time in ns TOBECORRECTED
     
     public static final double  TRK_MIN_CROSS_NUMBER = 2;           // minimum number of crosses to find a line in the tracker
     public static final double  TRK0_TRK1_DISTANCE_MATCHING = 0.01;  // matching distance between FTTRK points in cms
