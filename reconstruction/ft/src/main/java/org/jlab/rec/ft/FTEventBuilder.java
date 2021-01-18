@@ -87,8 +87,8 @@ public class FTEventBuilder {
                     resp.setSize(bank.getInt("size", i));
 //                    resp.setSize(nrows);
                     resp.setId(bank.getInt("id", i));
-                    resp.setEnergy(-9999.);
-                    resp.setTime(9999.);
+                    resp.setEnergy(bank.getFloat("energy", i));
+                    resp.setTime(bank.getFloat("time", i));
                     resp.setPosition(bank.getFloat("x", i), bank.getFloat("y", i), bank.getFloat("z", i));
                     if(debugMode>=1) System.out.println(" --------- id, cross x, y, z " + bank.getInt("id", i) + " " + bank.getFloat("x", i) + " " + bank.getFloat("y", i) + " " + bank.getFloat("z", i));
                     responses.add(resp);
@@ -140,8 +140,8 @@ public class FTEventBuilder {
             }
             if (event.hasBank("FTTRK::crosses") == true) {
                 DataBank bank = event.getBank("FTTRK::crosses");
-                DataBank bankClust = event.getBank("FTTRK::clusters");
-                DataBank bankHits = event.getBank("FTTRK::hits");
+                //DataBank bankClust = event.getBank("FTTRK::clusters");
+                //DataBank bankHits = event.getBank("FTTRK::hits");
                 int nrows = bank.rows();
                 for (int i = 0; i < nrows; i++) {
                     FTResponse resp = new FTResponse("FTTRK");
@@ -150,6 +150,8 @@ public class FTEventBuilder {
                     resp.setId(bank.getInt("id", i));
 //                    resp.setEnergy(-9999.);
 //                    resp.setTime(9999.);
+
+/*
                     // time and energy correspond to the energies of the clusters associated to the cross
                     int det = bank.getInt("detector", i);
                     int idCl1 = bank.getInt("Cluster1ID", i);
@@ -216,8 +218,10 @@ public class FTEventBuilder {
                         if(nHits2 != 0){timeCross2 /= nHits2;}else{timeCross2 = 9999.;};
                         meanTime = (timeCross1+timeCross2)/2.;
                     } 
-                    resp.setEnergy(meanEnergy);
-                    resp.setTime(meanTime);
+*/
+
+                    resp.setEnergy(bank.getFloat("energy", i));
+                    resp.setTime(bank.getFloat("time", i));
                     resp.setPosition(bank.getFloat("x", i), bank.getFloat("y", i), bank.getFloat("z", i));
                     if(debugMode>=1) System.out.println(" --------- id, cross x, y, z " + bank.getInt("id", i) + " " + bank.getFloat("x", i) + " " + bank.getFloat("y", i) + " " + bank.getFloat("z", i));
                     responses.add(resp);
