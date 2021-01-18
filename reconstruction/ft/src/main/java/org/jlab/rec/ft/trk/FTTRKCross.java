@@ -38,6 +38,9 @@ public class FTTRKCross implements Comparable<FTTRKCross> {
         private FTTRKCluster _clus1;
 	private FTTRKCluster _clus2;
         
+        private float _Energy;
+        private float _Time;
+        
         /**
 	 * 
 	 * @param sector the sector (1)
@@ -175,7 +178,22 @@ public class FTTRKCross implements Comparable<FTTRKCross> {
 		return serialVersionUID;
 	}
 
-
+        public void set_Energy(float energy){
+            this._Energy = energy;
+        }
+        
+        public void set_Time(float time){
+            this._Time = time;
+        }
+        
+        public float get_Energy(){
+            return this._Energy;
+        }
+        
+        public float get_Time(){
+            return this._Time;
+        }
+        
 	/**
 	 * Sorts crosses by azimuth angle values
 	 */
@@ -321,9 +339,45 @@ public class FTTRKCross implements Comparable<FTTRKCross> {
                    this.set_Point(error);
                    this.set_PointErr(error);
                 }
+                
+                this.evaluate_EnergyAndTime();
 	}
 
-	
+	public void evaluate_EnergyAndTime(){
+            FTTRKCluster cl1 = this._clus1; 
+            FTTRKCluster cl2 = this._clus2;
+            int idCl1 = cl1.get_CId();
+            int idCl2 = cl2.get_CId();
+            double meanEnergy = -9999.;
+            double meanTime = -9999.;
+            double timeCross1 = 0., timeCross2 = 0.;
+            int det;
+            int layer = cl1.get_Layer();
+            if(layer==1 || layer==2){
+                det = 0;
+            }else if(layer==3 || layer ==4){
+                det = 1;
+            }
+            meanEnergy = Math.sqrt(cl1.get_TotalEnergy() * cl2.get_TotalEnergy());
+            this.set_Energy((float)meanEnergy);
+            
+// to determine the time associated with the cross, the times of each hit forming each cluster must be retrieved
+            // loop on strips of each cluster
+            int nHits1 = cl1.size();
+            for(int i=0; i<nHits1; i++){
+                timeCross1 += cl1.get(i).get_Time();
+            }
+            int nHits2 = cl2.size();
+            for(int i=0; i<nHits2; i++){
+                timeCross2 += cl2.get(i).get_Time();
+            }
+            if(nHits1 != 0){timeCross1 /= nHits1;}else{timeCross1 = 9999.;};
+            if(nHits2 != 0){timeCross2 /= nHits2;}else{timeCross2 = 9999.;};
+            meanTime = (timeCross1+timeCross2)/2.; 
+            this.set_Time((float)meanTime);
+        }
+        
+        
 	
 	public void set_AssociatedElementsIDs() {
             this._clus1.set_AssociatedCrossID(this._Id);
