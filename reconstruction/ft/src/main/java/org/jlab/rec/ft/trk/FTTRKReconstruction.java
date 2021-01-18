@@ -511,8 +511,10 @@ public class FTTRKReconstruction {
                 bankCross.setFloat("x",          j, (float) crosses.get(j).get_Point().x());
                 bankCross.setFloat("y",          j, (float) crosses.get(j).get_Point().y());
                 bankCross.setFloat("z",          j, (float) crosses.get(j).get_Point().z());
-                bankCross.setShort("Cluster1ID", j, (short) crosses.get(j).get_Cluster1().get_CId());
-                bankCross.setShort("Cluster2ID", j, (short) crosses.get(j).get_Cluster2().get_CId());
+//                bankCross.setShort("Cluster1ID", j, (short) crosses.get(j).get_Cluster1().get_CId());
+//                bankCross.setShort("Cluster2ID", j, (short) crosses.get(j).get_Cluster2().get_CId());
+                bankCross.setFloat("energy", j, (float) crosses.get(j).get_Energy());
+                bankCross.setFloat("time", j, (float) crosses.get(j).get_Time());
             }
             event.appendBanks(bankCross);
         }
@@ -585,8 +587,8 @@ public class FTTRKReconstruction {
                 bankCross.setFloat("x",          j, (float) crosses.get(j).get_Point().x());
                 bankCross.setFloat("y",          j, (float) crosses.get(j).get_Point().y());
                 bankCross.setFloat("z",          j, (float) crosses.get(j).get_Point().z());
-                bankCross.setShort("Cluster1ID", j, (short) crosses.get(j).get_Cluster1().get_CId());
-                bankCross.setShort("Cluster2ID", j, (short) crosses.get(j).get_Cluster2().get_CId());
+                bankCross.setFloat("energy",     j, (float) crosses.get(j).get_Energy());
+                bankCross.setFloat("time",       j, (float) crosses.get(j).get_Time());
             }
             event.appendBanks(bankCross);
         }
