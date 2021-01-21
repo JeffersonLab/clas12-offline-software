@@ -152,7 +152,7 @@ public class MakerCA {
           		  else{
           			  double aphi = a.get_Point().toVector3D().phi() ;
           			  //if( ! bgeom.checkIsInSector( aphi, b.get_Sector(), 1, Math.toRadians(10) )  ) {
-                                  if(bgeom.getSector(b.get_Region()*2, aphi)>0) {
+                                  if(bgeom.getSector(b.get_Region()*2, aphi)==0) {
           				  if( this._debug) System.out.println("cross b and a are not in the same sector"); 
           				  continue;
       				  }
