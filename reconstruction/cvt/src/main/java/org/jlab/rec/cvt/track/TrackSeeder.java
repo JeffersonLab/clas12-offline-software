@@ -219,7 +219,7 @@ public class TrackSeeder {
         List<Cross> svt_crosses = new ArrayList<Cross>();
         List<Cross> bmtC_crosses = new ArrayList<Cross>();
         
-        if(bmt_crosses!=null) {
+        if(bmt_crosses!=null && bmt_crosses.size()>0) {
             for(Cross c : bmt_crosses) { 
                 if(c.get_DetectorType()==BMTType.Z) { 
                     if(this.unUsedHitsOnly == false) {
@@ -241,7 +241,7 @@ public class TrackSeeder {
                 }
             }
         }
-        if(bst_crosses!=null) {
+        if(bst_crosses!=null && bst_crosses.size()>0) {
             for(Cross c : bst_crosses) { 
                 if(this.unUsedHitsOnly == false) {
                         svt_crosses.add(c);
@@ -358,7 +358,7 @@ public class TrackSeeder {
             }
         }
        
-        for (Seed bseed : seedlist) {
+        for (Seed bseed : seedlist) { 
             for(Cross c : bseed.get_Crosses()) {
                 c.isInSeed = true;
             }
