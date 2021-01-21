@@ -34,7 +34,7 @@ public class CosmicTracksRec {
             List<ArrayList<Cross>> crosses,
             org.jlab.rec.cvt.svt.Geometry SVTGeom, org.jlab.rec.cvt.bmt.BMTGeometry BMTGeom,
             RecoBankWriter rbc,
-            double zShift) {
+            double zShift, boolean exLayrs) {
         // make list of crosses consistent with a track candidate
         
         CrossList crosslist = crossLister.findCosmicsCandidateCrossLists(crosses, SVTGeom,
@@ -57,8 +57,12 @@ public class CosmicTracksRec {
 
             return true;
         }
-        CosmicFitter fitTrk = new CosmicFitter();
-        cosmics = recUtil.reFit(cosmics, fitTrk,  trkcandFinder);
+        
+        
+        if(exLayrs==true) {
+            CosmicFitter fitTrk = new CosmicFitter();
+            cosmics = recUtil.reFit(cosmics, SVTGeom, fitTrk,  trkcandFinder);
+        }
         
         if (cosmics.size() > 0) {
             for (int k1 = 0; k1 < cosmics.size(); k1++) {

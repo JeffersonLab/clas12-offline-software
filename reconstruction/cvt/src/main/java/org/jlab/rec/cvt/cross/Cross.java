@@ -402,7 +402,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     
     public String printInfo() {
         String s = " cross:  " + this.get_Detector() + " ID " + this.get_Id() + " Sector " + this.get_Sector() + " Region " + this.get_Region()
-                + " Point " + this.get_Point().toString()
+                + " Point " + this.get_Point().toString()+ " Point0 " + this.get_Point0().toString()
                 + " sort "+this.getOrderedRegion();
         
         

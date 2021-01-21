@@ -347,7 +347,6 @@ public class StraightTrackSeeder {
                 }
             }
         }
-        
         return seedlist;
     }
     

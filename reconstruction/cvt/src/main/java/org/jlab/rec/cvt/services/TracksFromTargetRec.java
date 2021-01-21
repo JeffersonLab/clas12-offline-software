@@ -52,6 +52,9 @@ public class TracksFromTargetRec {
         if(Math.abs(Constants.getSolenoidVal())<0.001) {
             StraightTrackSeeder trseed = new StraightTrackSeeder();
             seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, isSVTonly);
+            if(exLayrs==true) {
+                seeds = recUtil.reFit(seeds, SVTGeom, BMTGeom, swimmer, trseed);
+            }
             //TrackSeederCA trseed = new TrackSeederCA();  // cellular automaton seeder
             //seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
         } else {
@@ -102,6 +105,7 @@ public class TracksFromTargetRec {
                     charge, Constants.getSolenoidVal(), org.jlab.rec.cvt.Constants.getXb(), 
                     org.jlab.rec.cvt.Constants.getYb(), org.jlab.clas.tracking.trackrep.Helix.Units.MM);
             Matrix cov = seed.get_Helix().get_covmatrix();
+            
             if(Math.abs(Constants.getSolenoidVal())>0.001 &&
                     Constants.LIGHTVEL * seed.get_Helix().radius() *Constants.getSolenoidVal()<Constants.PTCUT)
                 continue;

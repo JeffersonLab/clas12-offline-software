@@ -215,11 +215,13 @@ public class CVTRecNewKF extends ReconstructionEngine {
                 crosses_svtOnly.add(0, crosses.get(0));
                 crosses_svtOnly.add(1, new ArrayList<Cross>());
             } 
-            strgtTrksRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, SVTGeom, BMTGeom, rbc, shift);
+            strgtTrksRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
+                    crosses, SVTGeom, BMTGeom, rbc, shift, this.exclLayrs);
             
         } else {
             trksFromTargetRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
-                crosses, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, rbc, shift, swimmer, this.isSVTonly, this.exclLayrs);
+                crosses, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, rbc, shift, swimmer, 
+                this.isSVTonly, this.exclLayrs);
         }
         return true;
     }

@@ -234,7 +234,7 @@ public class BMTGeometry {
             if     (det == BMTType.C) phi = Constants.getCRCPHI()[region-1][sector-1];
             else if(det == BMTType.Z) phi = Constants.getCRZPHI()[region-1][sector-1];
         }
-        else System.out.println("ERROR: out of range inputs in getDPhi(int layer, int sector)");
+        else System.out.println("ERROR: out of range inputs in getDPhi(int layer, int sector)"+" layer "+layer+" sector "+sector);
         return phi;
     }
  
