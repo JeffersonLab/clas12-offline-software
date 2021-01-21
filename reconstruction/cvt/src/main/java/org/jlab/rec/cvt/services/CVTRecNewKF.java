@@ -58,6 +58,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
     int Run = -1;
     public boolean isSVTonly = false;
     public boolean isCosmic = false;
+    public boolean exclLayrs = false;
     
     public void setRunConditionsParameters(DataEvent event, String FieldsConfig, int iRun, boolean addMisAlignmts, String misAlgnFile) {
         if (event.hasBank("RUN::config") == false) {
@@ -127,9 +128,10 @@ public class CVTRecNewKF extends ReconstructionEngine {
     public void setFieldsConfig(String fieldsConfig) {
         FieldsConfig = fieldsConfig;
     }
+   
     @Override
     public boolean processDataEvent(DataEvent event) {
-        
+
         this.setRunConditionsParameters(event, FieldsConfig, Run, false, "");
         double shift = 0;//org.jlab.rec.cvt.Constants.getZoffset();
 
@@ -217,7 +219,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
             
         } else {
             trksFromTargetRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
-                crosses, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, rbc, shift, swimmer, this.isSVTonly);
+                crosses, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, rbc, shift, swimmer, this.isSVTonly, this.exclLayrs);
         }
         return true;
     }
@@ -302,6 +304,13 @@ public class CVTRecNewKF extends ReconstructionEngine {
         if (exLys==null) {
              System.out.println("["+this.getName()+"] run with all layer in fit (default) ");
         }
+        
+        int exlyrsnb = 0;
+        for(int ilayrs = 0; ilayrs<12; ilayrs++) {
+            exlyrsnb+=(int)org.jlab.rec.cvt.Constants.getLayersUsed().get(ilayrs+1);
+        }
+        if(exlyrsnb>0)
+            exclLayrs = true;
         // Load other geometries
         
         variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
