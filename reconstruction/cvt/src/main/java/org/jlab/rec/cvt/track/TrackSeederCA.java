@@ -237,10 +237,10 @@ public class TrackSeederCA {
 //        System.out.println(seedlist.size());
 	    for (int s = 0; s < seedCrosses.size(); s++) {
 	    	Collections.sort(seedCrosses.get(s));      // TODO: check why sorting matters
-		    Track cand = fitSeed(seedCrosses.get(s), svt_geo, 5, false, swimmer);
-		    if (cand != null) {
-		    	cands.add(cand);
-		    }
+                Track cand = fitSeed(seedCrosses.get(s), svt_geo, 5, false, swimmer);
+                if (cand != null) {
+                    cands.add(cand);
+                }
 	    }
 //	    for( int i=0;i<cands.size();i++)cands.get(i).set_Id(i+1);
 //	    cands = rmDuplicate( cands ); // TODO
@@ -251,7 +251,7 @@ public class TrackSeederCA {
 	        seed.set_Crosses(cand);
 	        seed.set_Helix(cand.get_helix());
 	        seedlist.add(seed);
-	        List<Cluster> clusters = new ArrayList<Cluster>();
+	        List<Cluster> clusters = new ArrayList<Cluster>(); 
 	        for(Cross c : seed.get_Crosses()) { 
 	            if(c.get_Detector().equalsIgnoreCase("SVT")) {
 	                clusters.add(c.get_Cluster1());
@@ -485,7 +485,7 @@ public class TrackSeederCA {
             org.jlab.rec.cvt.svt.Geometry svt_geo, int fitIter, boolean originConstraint,
             Swim swimmer) {
         double chisqMax = Double.POSITIVE_INFINITY;
-        
+        Collections.sort(VTCrosses);
         Track cand = null;
         HelicalTrackFitter fitTrk = new HelicalTrackFitter();
         for (int i = 0; i < fitIter; i++) {
@@ -513,7 +513,7 @@ public class TrackSeederCA {
             BMTCrossesC.clear();
             BMTCrossesZ.clear();
             SVTCrosses.clear();
-
+            
             for (Cross c : VTCrosses) {
                 if (!(Double.isNaN(c.get_Point().z()) || Double.isNaN(c.get_Point().x()))) {
                     SVTCrosses.add(c);
