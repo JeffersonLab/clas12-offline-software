@@ -178,8 +178,7 @@ public class HelixCrossListFinder {
             
             trkSeed.set_Crosses(s);
             List<Cluster> clusters = new ArrayList<Cluster>();
-            System.out.println(" seed crosses ");
-            for(Cross c : s ) { System.out.println(" --> "+c.printInfo());
+            for(Cross c : s ) { 
                 if(c.get_Detector().equalsIgnoreCase("SVT")) {
                     c.get_Cluster1().set_CentroidError(this.calcCentErr(c, c.get_Cluster1(), svt_geo));
                     c.get_Cluster2().set_CentroidError(this.calcCentErr(c, c.get_Cluster2(), svt_geo));
