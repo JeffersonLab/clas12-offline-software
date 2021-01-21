@@ -80,16 +80,20 @@ public class KFitter {
         sv.X0.add(Xb);
         sv.Y0.add(Yb);
         sv.Z0.add(0.0); 
+        this.NDF = -5;
         for (int i = 1; i < mv.measurements.size(); i++) {
             sv.Layer.add(mv.measurements.get(i).layer);
             sv.Sector.add(mv.measurements.get(i).sector);
+            if(mv.measurements.get(i).skip==false) {
+                this.NDF++;
+            }
             Point3D ref = new Point3D(Xb, Yb, 0.0);
             sv.X0.add(ref.x());
             sv.Y0.add(ref.y());
             sv.Z0.add(ref.z());
         }
         sv.init( helix, cov, this, swimmer);
-        this.NDF = mv.measurements.size()-6;
+        
     }
 
     /**
