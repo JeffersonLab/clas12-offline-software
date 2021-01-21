@@ -45,7 +45,7 @@ public class TracksFromTargetRec {
             RecoBankWriter rbc,
             double shift, 
             Swim swimmer,
-            boolean isSVTonly) {
+            boolean isSVTonly, boolean exLayrs) {
         // make list of crosses consistent with a track candidate
         
         List<Seed> seeds = null;
@@ -59,17 +59,17 @@ public class TracksFromTargetRec {
                 TrackSeeder trseed = new TrackSeeder();
                 trseed.unUsedHitsOnly = true;
                 seeds = trseed.findSeed(crosses.get(0), null, SVTGeom, BMTGeom, swimmer);
-                
-                seeds = recUtil.reFit(seeds, SVTGeom, swimmer, trseed);
             } else {
                 TrackSeederCA trseed = new TrackSeederCA();  // cellular automaton seeder
                 seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
                 //second seeding algorithm to search for SVT only tracks, and/or tracks missed by the CA
+                
                 TrackSeeder trseed2 = new TrackSeeder();
                 trseed2.unUsedHitsOnly = true;
                 seeds.addAll( trseed2.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer)); 
-                
-                seeds = recUtil.reFit(seeds, SVTGeom, swimmer, trseed2);
+                if(exLayrs==true) {
+                    seeds = recUtil.reFit(seeds, SVTGeom, BMTGeom, swimmer, trseed,trseed2);
+                }
             }
         }
         if(seeds ==null || seeds.size() == 0) {
