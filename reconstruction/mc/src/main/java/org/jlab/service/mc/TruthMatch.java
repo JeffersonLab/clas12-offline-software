@@ -515,7 +515,7 @@ public class TruthMatch extends ReconstructionEngine {
         }
 
         DataBank trkBank = event.getBank("REC::Track");
-
+        
         for (int iTrk = 0; iTrk < trkBank.rows(); iTrk++) {
             int det = trkBank.getInt("detector", iTrk);
 
@@ -832,12 +832,32 @@ public class TruthMatch extends ReconstructionEngine {
         DataBank adcBank = event.getBank("BST::adc");
         //System.out.println("The Keyset of recp is" + recp.keySet());
 //        System.out.println("The number of BSTRec::Clusters rows is " + clBank.rows());
+
+        //System.out.println("*** The content of the BSTRec::Clusters bank ");
+
         for (int iCL = 0; iCL < clBank.rows(); iCL++) {
 
             short clID = (short) iCL;
             short trkID = (short) (clBank.getShort("trkID", iCL) - 1);
 
             //short pindex = trkID >= 0 ? trkBank.getShort("pindex", trkID) : -1;  // THIS IS WRONG, the line below is correct way
+            
+//            System.out.println("============================== Inside getBSTHits ==============================");
+//            System.out.println("clID = " + clID);
+//            System.out.println("trkID = " + trkID);
+//            System.out.println("DetType = " + DetectorType.CVT.getDetectorId());
+            
+//            for( Map.Entry<Integer, Map<Short, Integer>> entry1 : trkID2Index.entrySet() ){
+//                
+//                System.out.println("***** The Entry Key (Detector ID) is " + entry1.getKey());
+//                
+//                for( Map.Entry<Short, Integer> entry2 : entry1.getValue().entrySet() ){
+//                    System.out.print("[" + entry2.getKey() + "," + entry2.getValue() + "] ");
+//                }
+//                System.out.println("");
+//            }
+//            System.out.println("============================== End in getBSTHits ==============================");
+            
             short pindex = trkID >= 0 ? trkBank.getShort("pindex", trkID2Index.get(DetectorType.CVT.getDetectorId()).get(trkID)) : -1;
 
             // The hardcoded 5 is the Max number of hits per Cl
