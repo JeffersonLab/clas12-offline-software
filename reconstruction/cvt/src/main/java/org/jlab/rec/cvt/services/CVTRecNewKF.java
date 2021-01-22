@@ -279,7 +279,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
         if (svtCosmics==null) {
              System.out.println("["+this.getName()+"] run with cosmics settings default = false");
         }
-        
+        //all layers used --> 1
         for(int i = 0; i < 12; i++)
             Constants.getLayersUsed().put(i+1, 1);
         
@@ -300,7 +300,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
                 String exlys = String.valueOf(exLys);
                 String[] values = exlys.split(",");
                 for(int k = 0; k < values.length; k++)
-                    Constants.getLayersUsed().put(Integer.valueOf(values[k]), 0);
+                    Constants.getLayersUsed().put(Integer.valueOf(values[k]), 0);// layer excluded --->0
             }
         }
         if (exLys==null) {
@@ -309,7 +309,10 @@ public class CVTRecNewKF extends ReconstructionEngine {
         
         int exlyrsnb = 0;
         for(int ilayrs = 0; ilayrs<12; ilayrs++) {
-            exlyrsnb+=(int)org.jlab.rec.cvt.Constants.getLayersUsed().get(ilayrs+1);
+            if((int)org.jlab.rec.cvt.Constants.getLayersUsed().get(ilayrs+1)<1) {
+                System.out.println("EXCLUDE CVT LAYER "+(ilayrs+1));
+                exlyrsnb++;
+            }
         }
         if(exlyrsnb>0)
             exclLayrs = true;
