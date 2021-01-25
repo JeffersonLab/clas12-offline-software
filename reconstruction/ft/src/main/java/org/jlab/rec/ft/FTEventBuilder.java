@@ -85,7 +85,6 @@ public class FTEventBuilder {
                     FTResponse resp = new FTResponse("FTTRK");
                     resp.setAssociation(-1);
                     resp.setSize(bank.getInt("size", i));
-//                    resp.setSize(nrows);
                     resp.setId(bank.getInt("id", i));
                     resp.setEnergy(bank.getFloat("energy", i));
                     resp.setTime(bank.getFloat("time", i));
@@ -140,86 +139,12 @@ public class FTEventBuilder {
             }
             if (event.hasBank("FTTRK::crosses") == true) {
                 DataBank bank = event.getBank("FTTRK::crosses");
-                //DataBank bankClust = event.getBank("FTTRK::clusters");
-                //DataBank bankHits = event.getBank("FTTRK::hits");
                 int nrows = bank.rows();
                 for (int i = 0; i < nrows; i++) {
                     FTResponse resp = new FTResponse("FTTRK");
                     resp.setAssociation(-1);                    
                     resp.setSize(bank.getInt("size", i));
                     resp.setId(bank.getInt("id", i));
-//                    resp.setEnergy(-9999.);
-//                    resp.setTime(9999.);
-
-/*
-                    // time and energy correspond to the energies of the clusters associated to the cross
-                    int det = bank.getInt("detector", i);
-                    int idCl1 = bank.getInt("Cluster1ID", i);
-                    int idCl2 = bank.getInt("Cluster2ID", i);
-                    double meanEnergy = -9999;
-                    double meanTime = -9999;
-                    double enCl1 = 0., enCl2 = 0., timeCross1 = 0., timeCross2 = 0.;
-                    int layer = -1;
-                    if(det==0){
-                        // find clusters on layers 1 and 2
-                        for(int j=0; j<bankClust.rows(); j++){
-                            layer = bankClust.getInt("layer", j);
-                            if(layer==1) enCl1 = bankClust.getFloat("energy", idCl1);
-                            if(layer==2) enCl2 = bankClust.getFloat("energy", idCl2);
-                        }
-                        meanEnergy = Math.sqrt(enCl1*enCl2);
-                        // find hits on layer 1 and 2 related to the cluster
-                        int nHits1=0, nHits2=0;
-                        for(int k=0; k<bankHits.rows(); k++){
-                            int clId  = bankHits.getInt("clusterID", k);
-                            int strip = bankHits.getInt("component", k);
-                            double t = bankHits.getFloat("time", k);
-                            layer = bankHits.getInt("layer",k);
-                            if(layer==1){
-                                if(clId==idCl1){
-                                    timeCross1 += bankHits.getFloat("time", k);
-                                    nHits1++; 
-                                }
-                            }else if(layer==2){
-                                if(clId==idCl2){
-                                    timeCross2 += bankHits.getFloat("time", k);
-                                    nHits2++;
-                                }
-                            }
-                        }
-                        if(nHits1 != 0){timeCross1 /= nHits1;}else{timeCross1 = 9999.;};
-                        if(nHits2 != 0){timeCross2 /= nHits2;}else{timeCross2 = 9999.;};
-                        meanTime = (timeCross1+timeCross2)/2.;                               
-                    }else if(det==1){
-                        for(int j=0; j<bankClust.rows(); j++){  // loop on clusters in a given layer
-                            layer = bankClust.getInt("layer", j);
-                            if(layer==3) enCl1 = bankClust.getFloat("energy", idCl1);
-                            if(layer==4) enCl2 = bankClust.getFloat("energy", idCl2);
-                        }
-                        meanEnergy = Math.sqrt(enCl1*enCl2);
-                        // find hits on layer 3 and 4 related to the cluster
-                        int nHits1=0, nHits2=0;
-                        for(int k=0; k<bankHits.rows(); k++){    // loop on hits of a given layer and cluster
-                            layer = bankHits.getInt("layer",k);
-                            int cl = bankHits.getInt("clusterID", k);
-                            if(layer==3){
-                                if(bankHits.getInt("clusterID",k)==idCl1){
-                                    timeCross1 += bankHits.getFloat("time", k);
-                                    nHits1++;
-                                }
-                            }else if(layer==4){
-                                if(bankHits.getInt("clusterID",k)==idCl2){
-                                    timeCross2 += bankHits.getFloat("time", k);
-                                    nHits2++;
-                                }
-                            }
-                        }
-                        if(nHits1 != 0){timeCross1 /= nHits1;}else{timeCross1 = 9999.;};
-                        if(nHits2 != 0){timeCross2 /= nHits2;}else{timeCross2 = 9999.;};
-                        meanTime = (timeCross1+timeCross2)/2.;
-                    } 
-*/
-
                     resp.setEnergy(bank.getFloat("energy", i));
                     resp.setTime(bank.getFloat("time", i));
                     resp.setPosition(bank.getFloat("x", i), bank.getFloat("y", i), bank.getFloat("z", i));
@@ -264,22 +189,6 @@ public class FTEventBuilder {
                 particles.add(track);
                 responses.get(i).setAssociation(particles.size()-1);
             }
-            
-            if (responses.get(i).getType() == "FTTRK") {
-                FTParticle track = new FTParticle(i);
-                track.setCharge(-999);  // provisional, one should take care of the nofield case
-                track.setField(this.solenoidField);
-                track.setEnergy(responses.get(i).getEnergy());
-                track.setPosition(responses.get(i).getPosition());
-                track.setDirection();
-                double trkTime = responses.get(i).getTime() - responses.get(i).getPosition().mag()/PhysicsConstants.speedOfLight();
-                if(trkTime>=0){track.setTime(trkTime);}else{track.setTime(0.);};  
-                track.setCalorimeterIndex(-1);
-                track.setHodoscopeIndex(-1);
-                track.setTrackerIndex(responses.get(i).getId());
-                particles.add(track);
-                responses.get(i).setAssociation(particles.size()-responses.size());
-            }            
         }
         if (debugMode >= 1) {
             for (int i = 0; i < particles.size(); i++) {
@@ -350,47 +259,6 @@ public class FTEventBuilder {
             }   
         }
     }
-   
-    /*
-    // alternative method, keep it provisionally 
-    public void matchTRKCrosses(List<FTResponse> responses){
-       // check whether the responses on opposite FTTRK detectors can belong to the same track
-        Point3D origin = new Point3D(0.,0.,0.);    
-        if(this.solenoidField == 0){   
-              for(int i=0; i<responses.size(); i++){
-           // is the response belonging to FTTRK?
-                FTResponse resp1 = responses.get(i);
-                if(resp1.getType() == "FTTRK" && resp1.getSector()==0){ // hit on the first cross
-                   // if no field draw the line between the origin and the hit on the first FTTRK detector
-                   Line3D line1 = new Line3D(origin, resp1.getPosition().toPoint3D());
-                   // look for another different hit on a different detector
-                   for(int j=responses.size(); j>i; j--){
-                       FTResponse resp2 = responses.get(j);
-                       if(resp2.getType() == "FTTRK" && resp2.getSector()==1){
-                           Line3D line2 = new Line3D(origin, resp2.getPosition().toPoint3D());                
-                           // check the distance of the lines at the z coordinate of the second hit
-                           double x2 = resp2.getPosition().toPoint3D().x();
-                           double y2 = resp2.getPosition().toPoint3D().y();
-                           double z2 = resp2.getPosition().toPoint3D().z();
-                           double t = line1.direction().z()/z2;
-                           double x1 = line1.direction().x() * t;
-                           double y1 = line1.direction().y() * t;
-                           Line3D diff = new Line3D(x1, y1, z2, x2, y2, z2);
-                           double distance = diff.length();
-                           // if distance is small than a given tolerance, validate both the responses
-                           double FTTRK_DISTANCE_TOLERANCE = 0.1; // cm
-                           if(distance < FTTRK_DISTANCE_TOLERANCE){
-                               responses.get(i).setAssociation(2);
-                               responses.get(j).setAssociation(2);
-                           }
-                        }
-                   }
-               }
-               
-           }
-       }
-    }
-    */
 
     public void showResponses(List<FTResponse> responses) {
         System.out.println("\nFound " + responses.size() + " clusters in FT detector");
