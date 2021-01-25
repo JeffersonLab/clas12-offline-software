@@ -123,24 +123,8 @@ public class FTTRKEngine extends ReconstructionEngine {
         int debug = FTTRKReconstruction.debugMode;
 	FTTRKEngine trk = new FTTRKEngine();
 	trk.init();
-//	String input =  "/disk2/Clas/ForwardTrackerReconstruction/DATA/out.hipo";
-//      String input =  "/disk2/Clas/ForwardTrackerReconstruction/DATA/out_allTracks.hipo";
-//        String input =  "/disk2/Clas/ForwardTrackerReconstruction/DATA/out_largeCoverage.hipo";
-//      String input =  "/disk2/Clas/ForwardTrackerReconstruction/DATA/out_noMagField_oldGeo.hipo";    
-//        String input = "/home/filippi/clas/ForwardTracker/DATA/out_electrons2.5GeV_3degTheta_10degPhi.hipo";
-////        String input = "/home/filippi/clas/gemc/electronGun/gemc.hipo";
-//        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-coatjava6.5.8/gemc_new.hipo";
-//        String input = "/disk2/Clas/ForwardTrackerReconstruction/DATA/out_realGeo_noMagField.data";
-//        String input = "/home/filippi/clas/ForwardTracker/DATA/out_realGeo_noMagField.data";
-//        String input = "/disk2/Clas/ForwardTrackerReconstruction/DATA/clas_004013.evio.111.hipo";
-//        String input =  "/home/filippi/clas/ForwardTracker/out_allTracks.hipo";
-//        String input =  "/home/filippi/clas/ForwardTracker/out.hipo";
-///          String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-coatjava6.5.8/gemc_singleEle_nofields_big_0.90.0.90.hipo";
-///        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-coatjava6.5.8/gemc_singleEle_nofields_big_0.90.0.90_spread1mdeg.hipo";
-        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-coatjava6.5.8/gemc_singleEle_nofields_big_-30.60.120.30.hipo";
-///        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-coatjava6.5.8/gemc_singleEle_nofields_big_-30.60.120.30_circle.hipo";
-///        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-coatjava6.5.8/gemc_singleEle_nofields_big_0.90.0.90_fullAcceptance.hipo";
-///        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-coatjava6.5.8/gemc_singleEle_nofields_big_-30.60.120.30_fullAcceptance.hipo";
+        // insert input filename here
+        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_singleEle_nofields_big_-30.60.120.30.hipo";
         System.out.println("input file " + input);
 	HipoDataSource  reader = new HipoDataSource();
 	reader.open(input);
@@ -190,8 +174,6 @@ public class FTTRKEngine extends ReconstructionEngine {
         H2F hHitL1 = new H2F("hHitL1","cross y vs x detector 1", 100, -lim, lim, 100, -lim, lim);
         H2F hHitL2 = new H2F("hHitL2","cross y vs x detector 2", 100, -lim, lim, 100, -lim, lim);
         H2F hHitMatch = new H2F("hHitL2","cross y vs x match", 100, -lim, lim, 100, -lim, lim);
-//        H2F hHitL3 = new H2F("hHitL3","hit y vs x layer 3", 100, -13., 13., 100, -13., 13.);
-//        H2F hHitL4 = new H2F("hHitL4","hit y vs x layer 4", 100, -13., 13., 100, -13., 13.);
         hHitL1.setTitleX("x cross detector 1"); hHitL1.setTitleY("y cross detector 1");
         hHitL2.setTitleX("x cross detector 2"); hHitL2.setTitleY("y cross detector 2");
         hHitMatch.setTitleX("x cross detector match"); hHitMatch.setTitleY("y cross detector match");                
@@ -308,9 +290,7 @@ public class FTTRKEngine extends ReconstructionEngine {
                                 " total mean energy of the cluster " + singleCluster.get_TotalEnergy());
                         segment[nStripsInClusters] = new DataLine(seg.origin().x(), seg.origin().y(), seg.end().x(), seg.end().y());
                         int lay = singleCluster.get_Layer();
- //                       lay = singleCluster.get(j).get_Layer();
                         segment[nStripsInClusters].setLineColor(lay);
- //                       canvasCl.cd(1); canvasCl.draw(hHitL1);
                         if(debug>=1) System.out.println("nStripsInCluster " + nStripsInClusters);
                         canvasCl.draw(segment[nStripsInClusters]);
                         h1clEn.fill(singleCluster.get_TotalEnergy());
@@ -377,7 +357,6 @@ public class FTTRKEngine extends ReconstructionEngine {
                     double diffRadTolerance = 0.5;
                     double diffPhiTolerance = 1.;
                     double thetaTolerance = 0.05;
-//                  if(minDistance < distTolerance) {
                     if(iBest>-1 && jBest>-1){
                     double r1 = Math.sqrt(x[iBest]*x[iBest]+y[iBest]*y[iBest]);
                     double r2 = Math.sqrt(x[jBest]*x[jBest]+y[jBest]*y[jBest]);
