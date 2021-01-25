@@ -60,7 +60,7 @@ public class TrackDisentangler {
                                 HITSLOOP:
                                 for(HitVector h1 : h1list){
                                     for(HitVector h2 : h2list){
-                                        if(compareHits(h1,h2)){
+                                        if(compareHitsTime(h1,h2)){
                                             NewTrackMap.mergeTracks(tid1, tid2); 
                                             NewTrackMap.getTrack(tid1).sortHits();
                                             removedtracks.add(tid2);
