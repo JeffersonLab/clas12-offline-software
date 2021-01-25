@@ -66,10 +66,12 @@ public class FTEBEngine extends ReconstructionEngine {
             reco.init(this.getSolenoid());
             FTresponses = reco.addResponses(event, this.getConstantsManager(), run);
             FTparticles = reco.initFTparticles(FTresponses);
-	    reco.matchToTRK(FTresponses, FTparticles);
-            reco.matchToHODO(FTresponses, FTparticles);
-            reco.correctDirection(FTparticles, this.getConstantsManager(), run);  // correction to be applied only to FTcal and FThodo
-            reco.writeBanks(event, FTparticles);
+            if(FTparticles.size()>0){
+                reco.matchToTRK(FTresponses, FTparticles);
+                reco.matchToHODO(FTresponses, FTparticles);
+                reco.correctDirection(FTparticles, this.getConstantsManager(), run);  // correction to be applied only to FTcal and FThodo
+                reco.writeBanks(event, FTparticles);
+            }
         }
         return true;
     }
@@ -143,9 +145,7 @@ public class FTEBEngine extends ReconstructionEngine {
         en.init();
         int debugMode = en.getDebugMode();
 //		String input = "/Users/devita/Work/clas12/simulations/tests/detectors/clas12/ft/elec_nofield_header.evio";
-//		EvioSource  reader = new EvioSource();
-        //String input = "/Users/devita/Work/clas12/simulations/clas12Tags/4.4.0/out.hipo";
-        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-coatjava6.5.8/gemc_singleEle_nofields_big_-30.60.120.30_fullAcceptance.hipo";
+        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_singleEle_nofields_big_-30.60.120.30.hipo";
         HipoDataSource reader = new HipoDataSource();
         reader.open(input);
 
@@ -222,18 +222,15 @@ public class FTEBEngine extends ReconstructionEngine {
         h109.setTitleX("trk2 phi residual (rad)");
         h109.setFillColor(51);
         
-//        H1F h202 = new H1F("trk1-trk2 x residual", 100, -.2, .2);
         H1F h202 = new H1F("trk1 x", 25, 9., 9.4);
         H1F h1202 = new H1F("trk1 x MC", 25, 9., 9.4);    
         h202.setOptStat(0);
         h202.setTitleX("trk1 x position (mm)");
-//        h202.setTitleY("counts/half strip width (28 um)"); // 14 bins
         h202.setTitleY("counts/strip width/sqrt(12) (16 um)"); // 25 bins
         h202.setLineColor(3);
         h202.setFillColor(3);
         h1202.setLineColor(9);
         h1202.setFillColor(49);
-  //      H1F h203 = new H1F("trk1-trk2 y residual", 100, -.2, .2);
         H1F h203 = new H1F("trk2 x", 25, 9., 9.4);
         H1F h1203 = new H1F("trk2 MC", 25, 9., 9.4);
         h203.setOptStat(0);
@@ -252,7 +249,6 @@ public class FTEBEngine extends ReconstructionEngine {
         h204.setFillColor(3);
         h1204.setLineColor(9);
         h1204.setFillColor(49);
-  //      H1F h203 = new H1F("trk1-trk2 y residual", 100, -.2, .2);
         H1F h205 = new H1F("trk2 y", 25, 1.4, 1.8);
         H1F h1205 = new H1F("trk2 y MC", 25, 1.4, 1.8);
         h205.setOptStat(0);
@@ -362,13 +358,8 @@ public class FTEBEngine extends ReconstructionEngine {
                         h1.fill(bank.getDouble("Energy", i));
                         h2.fill(bank.getDouble("Energy", i) - gen.getParticle("[11]").vector().p());
                         Vector3D part = new Vector3D(bank.getDouble("Cx", i), bank.getDouble("Cy", i), bank.getDouble("Cz", i));
-			/*
-                        h3.fill(gen.getParticle("[11]").vector().p(),Math.toDegrees(part.theta() - gen.getParticle("[11]").theta()));
-                        h4.fill(gen.getParticle("[11]").vector().p(),Math.toDegrees(part.phi() - gen.getParticle("[11]").phi()));
-			*/
                         h3.fill(Math.toDegrees(part.theta() - gen.getParticle("[11]").theta()));
                         h4.fill(Math.toDegrees(part.phi() - gen.getParticle("[11]").phi()));
-
                         h5.fill(bank.getDouble("Time", i));
                         h6.fill(bank.getDouble("Energy", i), bank.getDouble("Energy", i) - gen.getParticle("[11]").vector().p());
                     }
@@ -459,12 +450,16 @@ public class FTEBEngine extends ReconstructionEngine {
                     
                     for(int ip=0; ip<ipart; ip++){
                     // no magnetic field: the track is a straight line
-                        double cx = gen.getGeneratedParticle(ip).px()/gen.getGeneratedParticle(ip).p();
-                        double cy = gen.getGeneratedParticle(ip).py()/gen.getGeneratedParticle(ip).p();
-                        double cz = gen.getGeneratedParticle(ip).pz()/gen.getGeneratedParticle(ip).p();
+                        double P = gen.getGeneratedParticle(ip).p();    
+                        double cx = gen.getGeneratedParticle(ip).px()/P;    
+                        double cy = gen.getGeneratedParticle(ip).py()/P;
+                        double cz = gen.getGeneratedParticle(ip).pz()/P;
+                        double Pz = P*cz;
+                        double Pperp = P*Math.sqrt(cx*cx+cy*cy);
                         double x0 = gen.getGeneratedParticle(ip).vx();
                         double y0 = gen.getGeneratedParticle(ip).vy();
                         double z0 = gen.getGeneratedParticle(ip).vz();
+                        double q = Math.abs(gen.getGeneratedParticle(ip).charge());  // negative particles bend upwards
                         for (int i = 0; i < nrows; i++) {
                             int det =  banktrk.getInt("detector", i);
                             double xt = banktrk.getFloat("x", i);
@@ -480,6 +475,33 @@ public class FTEBEngine extends ReconstructionEngine {
                             Vector3D hitOnTrk = new Vector3D(xt, yt, zt);
                             Vector3D hitMCOnTrk = new Vector3D(x0+cx*t, y0+cy*t, zt);   
                         
+                            if(debugMode>0) System.out.println("MC before swimming in mag field x = " + hitMCOnTrk.x() + " y = " + hitMCOnTrk.y() + 
+                                    " z = " + hitMCOnTrk.z());
+                            // if the magnetic field is on, the coordinates must be swum along a helix
+                            double B = en.getSolenoid();
+                            if(B!=0.){
+                                double phi0 = Math.atan2(cy,cx);
+                                double R = Pperp/0.3/B/q*1.e2;  // R in cm
+                                double dAlpha = (zt-z0)*(B*q*0.3)/Pz*1.e-2; // deltaZ in meters
+                                double dAlphaDiv = dAlpha/2./Math.PI;       // check multiple turns
+                                int nturns = (int)dAlphaDiv;
+                                if(dAlpha>0){
+                                    dAlpha -= nturns*2.*Math.PI;
+                                }else{
+                                    dAlpha += nturns*2.*Math.PI;
+                                }
+                                double xc = -R*Math.sin(phi0);
+                                double yc =  R*Math.cos(phi0);
+                                if(R*dAlpha>0){
+                                    hitMCOnTrk.setX(xc + R*(Math.sin(phi0 + dAlpha)));
+                                    hitMCOnTrk.setY(yc - R*(Math.cos(phi0 + dAlpha)));
+                                }else{
+                                    System.out.println("check particle/curvature signs");
+                                }
+                            }
+                            if(debugMode>0) System.out.println("MC after swimming in mag field x = " + hitMCOnTrk.x() + " y = " + hitMCOnTrk.y() + 
+                                    " z = " + hitMCOnTrk.z());
+                            
                             // Montecarlo hit location on first detector middle plane
                             if(det==0) h2000.fill(hitMCOnTrk.x(), hitMCOnTrk.y());
                             if(det==1) h2001.fill(hitMCOnTrk.x(), hitMCOnTrk.y());
