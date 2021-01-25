@@ -159,13 +159,11 @@ public class FTParticle {
  //                   System.out.println(" LOOP = " + loop + "   distance = " + hitdistance);
  //                   if(timedistance<timeThresholds&&hitdistance<distanceThreshold&&hitdistance<minimumDistance){
  // provisional: no requirement on time distance (no info available yet fot time fof the hit
- //                 if the track passes through an FTCAL hit, check if the distance is within a tolerance
+ // if the track passes through an FTCAL hit, check if the distance is within a tolerance
                     boolean inTolerance = true;
+ // FTParticle always through FTCAL  
                     if(this.getCalorimeterIndex()>0){
                         if(hitdistance>distanceThreshold) inTolerance=false;
-                    }
-                    if(this.getTrackerIndex()>0){
-                        if(hitdistance>FTConstants.TRK0_TRK1_DISTANCE_MATCHING) inTolerance = false;
                     }
                     if(inTolerance && hitdistance<minimumDistance){
                         minimumDistance = hitdistance;
