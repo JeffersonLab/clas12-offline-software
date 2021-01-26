@@ -59,7 +59,7 @@ public class ADCTDCMerger {
             int adc         = bankDGTZ.getInt("ADC", i);
             float time      = bankDGTZ.getFloat("time", i);
             short ped       = bankDGTZ.getShort("ped", i);
-            if(adc<=0) continue;
+            if(adc<=0 && !(detector == DetectorType.BST.getName() || detector == DetectorType.BMT.getName())) continue;
             if(detector == DetectorType.BST.getName()) {
                 long timestamp = (int)bankDGTZ.getLong("timestamp", i);
                 adcData = new ADC(sector,layer,component,order,adc,time,ped,timestamp);
