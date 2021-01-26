@@ -28,5 +28,6 @@
     <module>band</module>
     <module>rtpc</module>
     <module>mlt</module>
+    <module>mltn</module>
   </modules>
 </project>
