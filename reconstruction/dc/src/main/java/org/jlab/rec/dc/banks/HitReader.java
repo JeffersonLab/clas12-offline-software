@@ -33,18 +33,20 @@ public class HitReader {
     private String[] _names;
     
     public HitReader() {
-        _names = new String[2];
+        _names = new String[3];
     }
              
     public HitReader(boolean aiAssist) {
         this._aiAssist = aiAssist;
-        _names = new String[2];
+        _names = new String[3];
         if(this._aiAssist==true) {
             _names[0] = "AI";
             _names[1] = "AI";
+            _names[2] = "HBAI";
         } else {
             _names[0] = "HB";
             _names[1] = "TB";
+            _names[2] = "HB";
         }
             
     }
@@ -277,6 +279,7 @@ public class HitReader {
         */
         String bankName = "HitBasedTrkg::"+_names[0]+"Hits";
         String pointName = "HitBasedTrkg::"+_names[0]+"HitTrkId";
+        String recBankName = "REC"+_names[2]+"::Event";
         
         if (!event.hasBank(bankName) || !event.hasBank(pointName) || event.getBank(pointName).rows()==0) {
             //    System.err.println("there is no HB dc bankAI for "+_names[0]);
@@ -352,20 +355,20 @@ public class HitReader {
             double T_0 = 0;
             double T_Start = 0;
             
-            if (!event.hasBank("RECHB::Event")) {
+            if (!event.hasBank(recBankName)) {
                 continue;
             }
             
-            if (event.hasBank("RECHB::Event") && 
-                    event.getBank("RECHB::Event").getFloat("startTime", 0)==-1000) {
+            if (event.hasBank(recBankName) && 
+                    event.getBank(recBankName).getFloat("startTime", 0)==-1000) {
                 continue;
             } 
             
             if (!event.hasBank("MC::Particle") &&
                     event.getBank("RUN::config").getInt("run", 0) > 100) {
                 //T_0 = this.get_T0(sector[i], slayer[i], layer[i], wire[i], T0, T0ERR)[0];
-                if (event.hasBank("RECHB::Event"))
-                    T_Start = event.getBank("RECHB::Event").getFloat("startTime", 0);
+                if (event.hasBank(recBankName))
+                    T_Start = event.getBank(recBankName).getFloat("startTime", 0);
             }  
             
             T_0 = this.get_T0(sector[i], slayer[i], layer[i], wire[i], T0, T0ERR)[0];
@@ -595,16 +598,17 @@ public class HitReader {
     
     private double readBeta(DataEvent event, int trkId) {
         double _beta = 1.0;
-
-        if (!event.hasBank("RECHB::Particle") || !event.hasBank("RECHB::Track"))
+        String partBankName = "REC"+_names[2]+"::Particle";
+        String trackBankName = "REC"+_names[2]+"::Track";
+        if (!event.hasBank(partBankName) || !event.hasBank(trackBankName))
             return _beta;
-        DataBank bank = event.getBank("RECHB::Track");
+        DataBank bank = event.getBank(trackBankName);
 
         int rows = bank.rows();
         for (int i = 0; i < rows; i++) {
             if (bank.getByte("detector", i) == 6 &&
                     bank.getShort("index", i) == trkId - 1) {
-                _beta = event.getBank("RECHB::Particle").getFloat("beta",
+                _beta = event.getBank(partBankName).getFloat("beta",
                         bank.getShort("pindex", i));
             }
         }
