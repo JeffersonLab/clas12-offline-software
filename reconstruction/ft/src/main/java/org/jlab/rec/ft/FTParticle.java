@@ -145,7 +145,7 @@ public class FTParticle {
 		this._Cross = _Cross;
 	}
 
-        public int getDetectorHit(List<FTResponse>  hitList, String detectorType, double distanceThreshold, double timeThresholds){
+        public int getDetectorHit(List<FTResponse>  hitList, String detectorType, double distanceThreshold, double timeThreshold){
         
             Line3D cross = this.getLastCross();
             double   minimumDistance = 500.0;
@@ -156,19 +156,10 @@ public class FTParticle {
                     Line3D  dist = cross.distance(response.getPosition().toPoint3D());
                     double hitdistance  = dist.length();
                     double timedistance = Math.abs(this.getTime()-(response.getTime()-response.getPosition().mag()/PhysicsConstants.speedOfLight()));
- //                   System.out.println(" LOOP = " + loop + "   distance = " + hitdistance);
- //                   if(timedistance<timeThresholds&&hitdistance<distanceThreshold&&hitdistance<minimumDistance){
- // provisional: no requirement on time distance (no info available yet fot time fof the hit
- // if the track passes through an FTCAL hit, check if the distance is within a tolerance
-                    boolean inTolerance = true;
- // FTParticle always through FTCAL  
-                    if(this.getCalorimeterIndex()>0){
-                        if(hitdistance>distanceThreshold) inTolerance=false;
-                    }
-                    if(inTolerance && hitdistance<minimumDistance){
+                    if(timedistance<timeThreshold && hitdistance<distanceThreshold && hitdistance<minimumDistance){
                         minimumDistance = hitdistance;
-                        bestIndex       = loop;
-                    }
+                        bestIndex = loop;
+                    } 
                 }
             }
             if(bestIndex>-1) {
