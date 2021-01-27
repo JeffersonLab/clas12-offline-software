@@ -180,12 +180,8 @@ public class FTParticle {
             return bestIndex;
         }
         
-        public void show() {
-            String dtype = "xxx";
-            if(this.getCalorimeterIndex()>0 && this.getTrackerIndex()<0){dtype = "FTCAL ";}else{dtype = "FTTRK ";}
-            
+        public void show() {            
             System.out.println( "FT Particle info " +
-                                " hit in "  + dtype +
                                 " Charge = "+ this.getCharge() +
                                 " E = "     + this.getEnergy() +                    
                                 " X = "     + this.getPosition().x() +
