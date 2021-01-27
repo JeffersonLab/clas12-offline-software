@@ -5,6 +5,7 @@
  */
 package org.jlab.service.mltn;
 
+import j4ml.clas12.Clas12TrackAnalyzer;
 import j4ml.clas12.Clas12TrackClassifier;
 import j4ml.clas12.track.ClusterCombinations;
 import org.jlab.clas.reco.ReconstructionEngine;
@@ -38,15 +39,29 @@ public class MLTNEngine extends ReconstructionEngine {
     public boolean processDataEvent(DataEvent de) {
         if(de.hasBank("HitBasedTrkg::HBClusters")==true){
             DataBank bank = de.getBank("HitBasedTrkg::HBClusters");
-            HipoDataBank hipoBank = (HipoDataBank) bank;
-            classifier.processBank(hipoBank.getBank());
-            writeBank(de,classifier);
+            
+            
+           HipoDataBank hipoBank = (HipoDataBank) bank;
+            //classifier.processBank(hipoBank.getBank());
+            
+            Clas12TrackAnalyzer analyzer = new Clas12TrackAnalyzer();
+            for(int sector = 1; sector <=6; sector++){
+                analyzer.readBank(hipoBank.getBank(), sector);
+                classifier.evaluate(analyzer.getCombinations());
+                //analyzer.getCombinations().analyze();
+                //System.out.println(analyzer.getCombinations());
+                classifier.evaluate5(analyzer.getCombinationsPartial());
+                analyzer.analyze();
+            }
+            
+            writeBank(de,analyzer.getTracks());             
+            
         }
         return true;
     }
     
-    public void writeBank(DataEvent event, Clas12TrackClassifier cl){
-        ClusterCombinations combi = cl.getTracks();
+    public void writeBank(DataEvent event, ClusterCombinations combi){
+        //ClusterCombinations combi = cl.getTracks();
         //System.out.println(">>> writing ai bank with entries = " + combi.getSize());
         DataBank bank = event.createBank("ai::tracks", combi.getSize());
         for(int i = 0; i < combi.getSize(); i++){
@@ -61,5 +76,22 @@ public class MLTNEngine extends ReconstructionEngine {
         //System.out.println("appending bank");
         event.appendBank(bank);
     }
+
+    /*public void writeBank(DataEvent event, Clas12TrackClassifier cl){
+        ClusterCombinations combi = cl.getTracks();
+        //System.out.println(">>> writing ai bank with entries = " + combi.getSize());
+        DataBank bank = event.createBank("ai::tracks", combi.getSize());
+        for(int i = 0; i < combi.getSize(); i++){
+            bank.setByte("id", i, (byte) (i+1));
+            bank.setByte("sector", i, (byte) 1);
+            int[] ids = combi.getLabels(i);
+            for(int c = 0; c < 6; c++){
+                int order = c+1;
+                bank.setShort("c"+order, i, (short) ids[c]);
+            }
+        }
+        //System.out.println("appending bank");
+        event.appendBank(bank);
+    }*/
     
 }
