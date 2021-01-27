@@ -565,30 +565,31 @@ public class HitReader {
     }
     private void set_ToPionHypothesis(DataEvent event, int trkId, FittedHit hit) {
         double piMass = 0.13957018;
-        
+        String partBankName = "REC"+_names[2]+"::Particle";
+        String trackBankName = "REC"+_names[2]+"::Track";
         double px=0;
         double py=0;
         double pz=0;
-        if (!event.hasBank("RECHB::Particle") || !event.hasBank("RECHB::Track"))
+        if (!event.hasBank(partBankName) || !event.hasBank(trackBankName))
             return ;
-        DataBank bank = event.getBank("RECHB::Track");
+        DataBank bank = event.getBank(trackBankName);
 
         int rows = bank.rows();
         for (int i = 0; i < rows; i++) {
             if (bank.getByte("detector", i) == 6 &&
                     bank.getShort("index", i) == trkId - 1) {
-                px = event.getBank("RECHB::Particle").getFloat("px",
+                px = event.getBank(partBankName).getFloat("px",
                         bank.getShort("pindex", i));
-                py = event.getBank("RECHB::Particle").getFloat("py",
+                py = event.getBank(partBankName).getFloat("py",
                         bank.getShort("pindex", i));
-                pz = event.getBank("RECHB::Particle").getFloat("pz",
+                pz = event.getBank(partBankName).getFloat("pz",
                         bank.getShort("pindex", i));
             }
         }
         
         double p = Math.sqrt(px*px+py*py+pz*pz);
         if(p == 0) {
-            System.err.println("DC Track not matched in EB");
+            //System.err.println("DC Track not matched in EB");
             return;
         }
         
