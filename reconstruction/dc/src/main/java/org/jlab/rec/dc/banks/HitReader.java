@@ -462,26 +462,27 @@ public class HitReader {
         }
         
         for (int i = 0; i < bank.rows(); i++) {
-            
-            Hit hit = new Hit(bank.getByte("sector", i), bank.getByte("superlayer", i), 
-                    bank.getByte("layer", i), bank.getShort("wire", i), bank.getInt("TDC", i), bank.getShort("id", i));
-            hit.set_Id(bank.getShort("id", i));
-            hit.calc_CellSize(DcDetector);
-            double posError = hit.get_CellSize() / Math.sqrt(12.);
-            hit.set_DocaErr(posError);
-            
             int clusterID = bank.getShort("clusterID", i);
             
-            if(this.aimatch.containsKey(clusterID)) { 
-                hit.NNTrkId  = (int) this.aimatch.get(clusterID)[3];
-                hit.NNClusId = clusterID;
-                hit.NNTrkP      = this.aimatch.get(clusterID)[0];
-                hit.NNTrkTheta  = this.aimatch.get(clusterID)[1];
-                hit.NNTrkPhi    = this.aimatch.get(clusterID)[2];
-                
+            if(clusterID>0) {
+                Hit hit = new Hit(bank.getByte("sector", i), bank.getByte("superlayer", i), 
+                        bank.getByte("layer", i), bank.getShort("wire", i), bank.getInt("TDC", i), bank.getShort("id", i));
+                hit.set_Id(bank.getShort("id", i));
+                hit.calc_CellSize(DcDetector);
+                double posError = hit.get_CellSize() / Math.sqrt(12.);
+                hit.set_DocaErr(posError);
+
+                if(this.aimatch.containsKey(clusterID)) { 
+                    hit.NNTrkId  = (int) this.aimatch.get(clusterID)[3];
+                    hit.NNClusId = clusterID;
+                    hit.NNTrkP      = this.aimatch.get(clusterID)[0];
+                    hit.NNTrkTheta  = this.aimatch.get(clusterID)[1];
+                    hit.NNTrkPhi    = this.aimatch.get(clusterID)[2];
+
+                }
+
+                hits.add(hit);
             }
-            
-            hits.add(hit);
         }
 
         this.set_DCHits(hits);
