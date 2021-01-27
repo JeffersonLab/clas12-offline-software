@@ -166,7 +166,8 @@ public class FTEventBuilder {
         IndexedTable phiCorr   = manager.getConstants(run, "/calibration/ft/ftcal/phicorr");
         for (int i = 0; i < particles.size(); i++) {
             FTParticle particle = particles.get(i);
-            if(particle.getCalorimeterIndex()>-1) particle.setDirection(thetaCorr, phiCorr);
+//            if(particle.getCalorimeterIndex()>-1) particle.setDirection(thetaCorr, phiCorr);
+        particle.setDirection(thetaCorr, phiCorr);
         }     
     }
 	
