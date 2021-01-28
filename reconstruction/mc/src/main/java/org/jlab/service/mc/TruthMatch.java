@@ -515,7 +515,7 @@ public class TruthMatch extends ReconstructionEngine {
         }
 
         DataBank trkBank = event.getBank("REC::Track");
-        
+
         for (int iTrk = 0; iTrk < trkBank.rows(); iTrk++) {
             int det = trkBank.getInt("detector", iTrk);
 
@@ -834,19 +834,16 @@ public class TruthMatch extends ReconstructionEngine {
 //        System.out.println("The number of BSTRec::Clusters rows is " + clBank.rows());
 
         //System.out.println("*** The content of the BSTRec::Clusters bank ");
-
         for (int iCL = 0; iCL < clBank.rows(); iCL++) {
 
             short clID = (short) iCL;
             short trkID = (short) (clBank.getShort("trkID", iCL) - 1);
 
             //short pindex = trkID >= 0 ? trkBank.getShort("pindex", trkID) : -1;  // THIS IS WRONG, the line below is correct way
-            
 //            System.out.println("============================== Inside getBSTHits ==============================");
 //            System.out.println("clID = " + clID);
 //            System.out.println("trkID = " + trkID);
 //            System.out.println("DetType = " + DetectorType.CVT.getDetectorId());
-            
 //            for( Map.Entry<Integer, Map<Short, Integer>> entry1 : trkID2Index.entrySet() ){
 //                
 //                System.out.println("***** The Entry Key (Detector ID) is " + entry1.getKey());
@@ -857,7 +854,6 @@ public class TruthMatch extends ReconstructionEngine {
 //                System.out.println("");
 //            }
 //            System.out.println("============================== End in getBSTHits ==============================");
-            
             short pindex = trkID >= 0 ? trkBank.getShort("pindex", trkID2Index.get(DetectorType.CVT.getDetectorId()).get(trkID)) : -1;
 
             // The hardcoded 5 is the Max number of hits per Cl
@@ -1680,5 +1676,40 @@ public class TruthMatch extends ReconstructionEngine {
         }
 
         return maxEntry.getKey();
+    }
+
+    /**
+     * This function returns the number of "set" bits in between bit1 (included)
+     * and bit2 (included) of the variable type Long
+     *
+     * @param word : The word we want to check
+     * @param bit1 : index of bit1
+     * @param bit2 : index of bit1
+     * @return : The number of set bits between bit1 and bit2
+     */
+    public Integer CountNSetBits(Long word, short bit1, short bit2) {
+        int count = 0;
+        
+        for (int i = bit1; i <= bit2; i++) {
+            count += (word >> i) & 1;
+        }
+
+        return count;
+    }
+    
+    
+    
+    public Boolean CheckDCAcceptance(Long word, short nMinSL, short nMinLayerPerSL){
+        short nSL = 0;
+        
+        for( short iSL = 0; iSL < 6; iSL++ ){
+            
+            short layersPerSL = 0;
+            
+            for( short ilayer = 0; ilayer < 6; ilayer++ ){
+                layersPerSL += (word>> (iSL*6 + ilayer) ) & 1;
+            }
+            
+        }
     }
 }
