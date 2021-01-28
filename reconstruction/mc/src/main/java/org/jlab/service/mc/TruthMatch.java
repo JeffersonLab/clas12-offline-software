@@ -1678,6 +1678,7 @@ public class TruthMatch extends ReconstructionEngine {
         return maxEntry.getKey();
     }
 
+
     /**
      * This function returns the number of "set" bits in between bit1 (included)
      * and bit2 (included) of the variable type Long
@@ -1722,5 +1723,4 @@ public class TruthMatch extends ReconstructionEngine {
 
         return nSL >= nMinSL;
     }
-
 }
