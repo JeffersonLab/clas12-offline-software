@@ -222,7 +222,8 @@ public class StraightTrackSeeder {
     List<Seed> BMTmatches = new ArrayList<Seed>();
     public List<Seed> findSeed(List<Cross> svt_crosses, List<Cross> bmt_crosses, 
             org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, boolean isSVTOnly) {
-        
+        BMTmatches.clear();
+        seedScan.clear() ;
         List<Seed> seedlist = new ArrayList<Seed>();
 
         List<Cross> crosses = new ArrayList<Cross>();
@@ -337,13 +338,12 @@ public class StraightTrackSeeder {
                             seed.set_Crosses(bseed.get_Crosses());
                             seed.set_Clusters(bseed.get_Clusters());
                             seed.set_Helix(bcand.get_helix());
-                            List<Cross> seedcrs2 = seed.get_Crosses();
                         }
                     }
 
                     seedlist.add(seed); 
-                } else { // no bmt
-                    seedlist.add(seed); 
+                } else { 
+                //    seedlist.add(seed); System.out.println("no BMT matched"+seed.get_Helix().get_Z0());
                 }
             }
         }

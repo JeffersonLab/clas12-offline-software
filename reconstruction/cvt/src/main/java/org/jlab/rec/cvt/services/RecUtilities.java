@@ -401,7 +401,7 @@ public class RecUtilities {
                 layr = c.getOrderedRegion()+3;
                 if((int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)>0) {
                     c.isInSeed = false;
-                //    System.out.println("refit "+c.printInfo());
+                    //System.out.println("refit "+c.printInfo());
                     refib.add(c);
                 }
             } else {
@@ -409,7 +409,7 @@ public class RecUtilities {
                 layr2 = c.get_Cluster2().get_Layer();
                 if((int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)>0 
                         && (int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr2)>0) {
-                    c.set_CrossParamsSVT(null, SVTGeom);
+                    c.set_CrossParamsSVT(null, SVTGeom); 
                     c.isInSeed = false;
                     refi.add(c); 
                 }

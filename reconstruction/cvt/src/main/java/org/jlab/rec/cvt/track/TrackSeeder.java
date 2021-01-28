@@ -353,7 +353,7 @@ public class TrackSeeder {
 
                     seedlist.add(seed);
                 } else { // no bmt
-                    seedlist.add(seed);
+                //    seedlist.add(seed);
                 }
             }
         }
