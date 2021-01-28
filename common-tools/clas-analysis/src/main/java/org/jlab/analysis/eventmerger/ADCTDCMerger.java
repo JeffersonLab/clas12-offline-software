@@ -59,17 +59,23 @@ public class ADCTDCMerger {
             int adc         = bankDGTZ.getInt("ADC", i);
             float time      = bankDGTZ.getFloat("time", i);
             short ped       = bankDGTZ.getShort("ped", i);
-            if(adc<=0) continue;
-            if(detector == DetectorType.BST.getName()) {
+            
+            if(adc<=0) 
+                if(!detector.equals(DetectorType.BST.getName()) && !detector.equals(DetectorType.BMT.getName())) 
+                    continue;
+            
+            if(detector.equals(DetectorType.BST.getName())) {
                 long timestamp = (int)bankDGTZ.getLong("timestamp", i);
                 adcData = new ADC(sector,layer,component,order,adc,time,ped,timestamp);
             }
-            else if(detector == DetectorType.BMT.getName() || detector==DetectorType.FMT.getName() || detector==DetectorType.FTTRK.getName()) {
+            else if(detector.equals(DetectorType.BMT.getName()) || 
+                    detector.equals(DetectorType.FMT.getName()) || 
+                    detector.equals(DetectorType.FTTRK.getName())) {
                 long timestamp = (int)bankDGTZ.getLong("timestamp", i);
                 int  integral   = bankDGTZ.getInt("integral", i);
                 adcData = new ADC(sector,layer,component,order,adc,time,ped,timestamp,integral);
             }
-            else if(detector == DetectorType.BAND.getName()) {
+            else if(detector.equals(DetectorType.BAND.getName())) {
                 int  amplitude   = bankDGTZ.getInt("amplitude", i);
                 adcData = new ADC(sector,layer,component,order,adc,time,ped,amplitude);
             }
@@ -78,6 +84,7 @@ public class ADCTDCMerger {
             }
             adcStore.add(adcData);
         }
+        if(debug) System.out.println("Reading bank " + detector + "::adc with " + bankDGTZ.rows() + ", collected " + adcStore.size() + " hits");
         
         return adcStore;
     }
