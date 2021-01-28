@@ -1689,27 +1689,38 @@ public class TruthMatch extends ReconstructionEngine {
      */
     public Integer CountNSetBits(Long word, short bit1, short bit2) {
         int count = 0;
-        
+
         for (int i = bit1; i <= bit2; i++) {
             count += (word >> i) & 1;
         }
 
         return count;
     }
-    
-    
-    
-    public Boolean CheckDCAcceptance(Long word, short nMinSL, short nMinLayerPerSL){
+
+    /**
+     * Check whether enough layers and SLs are hit to make the track reconstractable in DC
+     * @param word to be checked
+     * @param nMinSL : Minimum number of SLayers
+     * @param nMinLayerPerSL : minimum number of layer per SL, in order a SL to be counted as hit
+     * @return Whether the the DC track is reconstractable
+     */
+    public Boolean CheckDCAcceptance(Long word, short nMinSL, short nMinLayerPerSL) {
         short nSL = 0;
-        
-        for( short iSL = 0; iSL < 6; iSL++ ){
-            
+
+        for (short iSL = 0; iSL < 6; iSL++) {
+
             short layersPerSL = 0;
-            
-            for( short ilayer = 0; ilayer < 6; ilayer++ ){
-                layersPerSL += (word>> (iSL*6 + ilayer) ) & 1;
+
+            for (short ilayer = 0; ilayer < 6; ilayer++) {
+                layersPerSL += (word >> (iSL * 6 + ilayer)) & 1;
             }
-            
+
+            if (layersPerSL >= nMinLayerPerSL) {
+                nSL = (short) (nSL + 1);
+            }
         }
+
+        return nSL >= nMinSL;
     }
+
 }
