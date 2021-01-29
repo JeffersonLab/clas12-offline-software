@@ -41,7 +41,8 @@
 	    {"name":"c6",     "type":"S", "info":"cluster ID in superlayer 6"},
 	    {"name":"p",      "type":"F", "info":"momentum of the track"},
 	    {"name":"theta",  "type":"F", "info":"theta angle of the track"},
-	    {"name":"phi",    "type":"F", "info":"phi angle of the track"}
+	    {"name":"phi",    "type":"F", "info":"phi angle of the track"},
+	    {"name":"vz",     "type":"F", "info":"vertex Z component for predicted track"}
 	    ]
     }
 ]
