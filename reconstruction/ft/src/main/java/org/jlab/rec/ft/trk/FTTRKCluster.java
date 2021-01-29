@@ -7,6 +7,7 @@ package org.jlab.rec.ft.trk;
 
 import java.util.ArrayList;
 import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Vector3D;
 
 /**
  *
@@ -17,11 +18,11 @@ import org.jlab.geom.prim.Line3D;
 
 	private static final long serialVersionUID = 9153980362683755204L;
 
-
 	private int _Sector;      							
 	private int _Layer;    	 							
-	private int _Id;									
-	private Line3D _StripSegment ;
+	private int _CId;									
+
+  private Line3D _StripSegment ;
 	
 	/**
 	 * 
@@ -32,7 +33,7 @@ import org.jlab.geom.prim.Line3D;
 	public FTTRKCluster(int sector, int layer, int cid) {
 		this._Sector = sector;
 		this._Layer = layer;
-		this._Id = cid;
+		this._CId = cid;
 		
 		
 	}
@@ -56,7 +57,7 @@ import org.jlab.geom.prim.Line3D;
 	
 	/**
 	 * 
-	 * @param _Sector  sector of the cluster (1...24)
+	 * @param _Sector  sector of the cluster (1)
 	 */
 	public void set_Sector(int _Sector) {
 		this._Sector = _Sector;
@@ -82,42 +83,38 @@ import org.jlab.geom.prim.Line3D;
 	 * 
 	 * @return the id of the cluster
 	 */
-	public int get_Id() {
-		return _Id;
+	public int get_CId() {
+		return _CId;
 	}
 	
 	/**
 	 * 
 	 * @param _Id  the id of the cluster
 	 */
-	public void set_Id(int _Id) {
-		this._Id = _Id;
+	public void set_CId(int _Id) {
+		this._CId = _Id;
+                // update hits collection with the proper cluster index
+                for(int i=0; i<this.size(); i++){
+                    FTTRKHit thehit = this.get(i);
+                    thehit.set_ClusterIndex(_Id);
+                } 
 	}
 
        
 	/**
 	 * 
-	 * @return region (1...4) // this is not useful
+	 * @return region (1,2) // 
 	 */
         public int get_Region() {
                return (int) (this._Layer+1)/2;
         }
-//   
-//    /**
-//     * 
-//     * @return superlayer 1 or 2 in region (1...4)
-//     */
-//    public int get_RegionSlayer() {
-//    	return (this._Layer+1)%2+1;
-//	}
-//    
     
     /**
      * 
      * @return cluster info. about location and number of hits contained in it
      */
 	public String printInfo() {
-		String s = "FTTRK cluster: ID "+this.get_Id()+" Seed "+this.get_SeedStrip()+" Layer "+this.get_Layer()+" Size "+this.size();
+		String s = "FTTRK cluster: ID "+this.get_CId()+" Seed "+this.get_SeedStrip()+" Layer "+this.get_Layer()+" Size "+this.size();
 		return s;
 	}
 	
@@ -151,7 +148,8 @@ import org.jlab.geom.prim.Line3D;
 	public void calc_CentroidParams() {
 		// instantiation of variables
 		double stripNumCent = 0;					// cluster Lorentz-angle-corrected energy-weighted strip = centroid
-		
+		double stripYCent = 0;                                          // ebergy-weighted y coordinate of the centroid strip
+                
 		double xCentEndPoint1 = 0;					// cluster energy-weighted Centroid x coordinate of the first end-point
 		double yCentEndPoint1 = 0;					// cluster energy-weighted Centroid y coordinate of the first end-point
 		double zCentEndPoint1 = 0;					// cluster energy-weighted Centroid z coordinate of the first end-point
@@ -159,7 +157,8 @@ import org.jlab.geom.prim.Line3D;
 		double yCentEndPoint2 = 0;					// cluster energy-weighted Centroid y coordinate of the second end-point
 		double zCentEndPoint2 = 0;					// cluster energy-weighted Centroid z coordinate of the second end-point
 		
-		double totEn = 0.;							// cluster total energy
+		double totEn = 0.;					        // cluster total energy
+                double totEnSq = 0.;                                            // sum of energies squared
 		double weightedStrp = 0;					// energy-weighted strip 
 		
 		double weightedStripEndPoint1X = 0;			// Energy-weighted x of the strip first end point
@@ -170,17 +169,49 @@ import org.jlab.geom.prim.Line3D;
 		double weightedStripEndPoint2Z = 0;			// Energy-weighted z of the strip second end point
 		
 		int nbhits = this.size();
-		
-		if(nbhits != 0) {
+
+                if(nbhits != 0) {
 			int min = 1000000;
 			int max = -1;
 			int seed = -1;
 			double Emax = -1;
+                        int Slay = -1;
+                        // find the number of two two strips with the highest energy deposited (to be zeroed in case of a truncated mean which excludes the two highest signals)
+                        // sort the FTTRKHIT list to find the maximum
+                        double maxEn1 = -1;
+                        double maxEn2 = -1;
+                        int maxI = -1;
+                        int maxI2nd = -1;
+                        int maxStripsForTM = 20; // truncated mean: minimum energy
+                        if(nbhits>maxStripsForTM){
+                            // max energy strip
+                            for(int i=0; i< nbhits; i++){
+                                FTTRKHit oneHit = this.get(i);
+                                double stripEn = oneHit.get_Edep();
+                                if(stripEn> maxEn1){
+                                maxEn1 = stripEn;
+                                maxI = i;
+                                }
+                            }
+                            // 2nd to max energy strip
+                            for(int i=0; i < nbhits; i++){
+                                FTTRKHit oneHit = this.get(i);
+                                double stripEn = oneHit.get_Edep();
+                                if(i!=maxI && stripEn> maxEn2){
+                                maxEn2 = stripEn;
+                                maxI2nd = i;
+                                }
+                            }
+                        }
+                        
+                        
 			// looping over the number of hits in the cluster
 			for(int i=0;i<nbhits;i++) {
                             FTTRKHit thehit = this.get(i);
                             // gets the energy value of the strip
                             double strpEn = thehit.get_Edep();
+                            // if truncated mean on the maximun energy
+                            if(i==maxI || i==maxI2nd && Math.random()>0.5) {continue;}
                             // get strip informations
                             int strpNb = thehit.get_Strip();
                             double x1 = thehit.get_StripSegment().origin().x();
@@ -191,9 +222,13 @@ import org.jlab.geom.prim.Line3D;
                             double z2 = thehit.get_StripSegment().end().z();
 				
 			    totEn += strpEn;
+                            totEnSq += strpEn*strpEn;
                             int layer = thehit.get_Layer();
-                            int Slayer = thehit.get_SuperLayer(layer);
-			    weightedStrp+= strpEn*(double)FTTRKConstantsLoader.stripsYloc[Slayer][strpNb-1][0];	
+                            int Slayer = thehit.get_HalfLayer(layer);
+                            double y = (double)FTTRKConstantsLoader.stripsYloc[Slayer][strpNb-1][0];
+//                            double y = (double)FTTRKConstantsLoader.stripsY[Slayer][strpNb-1][0];  
+
+			    weightedStrp+= strpEn*y;	
 			    weightedStripEndPoint1X+= strpEn*x1;
 			    weightedStripEndPoint1Y+= strpEn*y1;
 			    weightedStripEndPoint1Z+= strpEn*z1;
@@ -209,9 +244,9 @@ import org.jlab.geom.prim.Line3D;
 			    // getting the seed strip which is defined as the strip with the largest deposited energy
 			    if(strpEn>=Emax) {
 					Emax = strpEn;
-					seed = strpNb;
+					seed = strpNb; // seed: hit with largest energy release
 				}
-			    
+			    Slay = 2*Slayer;
 			}
 			if(totEn==0) {
 				System.err.println(" Cluster energy is null .... exit");
@@ -222,23 +257,59 @@ import org.jlab.geom.prim.Line3D;
 			this.set_MaxStrip(max);
 			this.set_SeedStrip(seed);
 			this.set_SeedEnergy(Emax);
-			// calculates the centroid values and associated positions
-			stripNumCent = weightedStrp/totEn; //System.out.println("  --> centroid "+stripNumCent);
+			// calculates the centroid values and associated positions (in local RF)
+			stripYCent = weightedStrp/totEn;   //     
+                        //System.out.println("  --> centroid "+stripNumCent);
+                        // extreme points of the strip in global RF
 			xCentEndPoint1 = weightedStripEndPoint1X/totEn;
 			yCentEndPoint1 = weightedStripEndPoint1Y/totEn;
 			zCentEndPoint1 = weightedStripEndPoint1Z/totEn;
 			xCentEndPoint2 = weightedStripEndPoint2X/totEn;
 			yCentEndPoint2 = weightedStripEndPoint2Y/totEn;
 			zCentEndPoint2 = weightedStripEndPoint2Z/totEn;
-			
-		}
-		
+     
+                }
+                
+                // use the discrete coordinate of the seed strip x-y (for debug purposes only)
+                /*
+                int seed = this.get_SeedStrip();
+                if(this.get_Layer()==1 || this.get_Layer()==3){
+                        xCentEndPoint1 = (double)FTTRKConstantsLoader.stripsXloc[this.get_Region()-1][seed-1][0];
+                        xCentEndPoint2 = (double)FTTRKConstantsLoader.stripsXloc[this.get_Region()-1][seed-1][1];  
+                        yCentEndPoint1 = (double)FTTRKConstantsLoader.stripsYloc[this.get_Region()-1][seed-1][0];
+                        yCentEndPoint2 = (double)FTTRKConstantsLoader.stripsYloc[this.get_Region()-1][seed-1][1];  
+                }else{
+                        xCentEndPoint1 = -(double)FTTRKConstantsLoader.stripsYloc[this.get_Region()-1][seed-1][0];
+                        xCentEndPoint2 = -(double)FTTRKConstantsLoader.stripsYloc[this.get_Region()-1][seed-1][1];  
+                        yCentEndPoint1 = (double)FTTRKConstantsLoader.stripsXloc[this.get_Region()-1][seed-1][0];
+                        yCentEndPoint2 = (double)FTTRKConstantsLoader.stripsXloc[this.get_Region()-1][seed-1][1];  
+                }
+                */
+                
+                // use the weighted coordinate in both x and y directions (for debugging purposes only)
+                /*
+                int seed = this.get_SeedStrip();
+                if(seed>0){
+                    if(this.get_Layer()==1 || this.get_Layer()==3){
+                        xCentEndPoint1 = (double)FTTRKConstantsLoader.stripsXloc[this.get_Region()-1][seed-1][0];
+                        xCentEndPoint2 = (double)FTTRKConstantsLoader.stripsXloc[this.get_Region()-1][seed-1][1];        
+                    }else if(this.get_Layer()==2 || this.get_Layer()==4){
+                        yCentEndPoint1 = (double)FTTRKConstantsLoader.stripsXloc[this.get_Region()-1][seed-1][0];
+                        yCentEndPoint2 = (double)FTTRKConstantsLoader.stripsXloc[this.get_Region()-1][seed-1][1]; 
+                    }
+                }
+                */
+                
 		_TotalEnergy = totEn;
-		_Centroid = stripNumCent;
-                _CentroidError = Math.sqrt(this.size())*FTTRKConstantsLoader.Pitch/Math.sqrt(12);
+                double xmeanCent = (xCentEndPoint1+xCentEndPoint2)/2.;
+                stripNumCent = this.get(0).get_StripNumberFromLocalY(xmeanCent, stripYCent, this.get(0).get_Layer());
+                //centroid: centroid strip number in the measurement direction (local y of each layer)  
+                _Centroid = stripNumCent;
+                _CentroidError = FTTRKConstantsLoader.Pitch/Math.sqrt(12)*Math.sqrt(totEnSq);
 		_StripSegment = new Line3D();
 		_StripSegment.setOrigin(xCentEndPoint1, yCentEndPoint1, zCentEndPoint1);
 		_StripSegment.setEnd(xCentEndPoint2, yCentEndPoint2, zCentEndPoint2);
+                
 	}
 
 	
@@ -300,6 +371,12 @@ import org.jlab.geom.prim.Line3D;
 
 	public void set_AssociatedCrossID(int _AssociatedCrossID) {
 		this._AssociatedCrossID = _AssociatedCrossID;
+                // set the _AssociatedCrossID index to all hits belonging to the cluster    
+                for(int i=0; i<this.size(); i++){
+                    FTTRKHit thehit = this.get(i);
+                    thehit.set_CrossIndex(_AssociatedCrossID);
+                    this.set(i, thehit);
+                }
 	}
 
 	public int get_AssociatedTrackID() {
@@ -314,6 +391,5 @@ import org.jlab.geom.prim.Line3D;
     public int compareTo(FTTRKCluster arg) {
         
         return this.get_Layer() < arg.get_Layer() ? -1 : this.get_Layer() == arg.get_Layer() ? 0 : 1;
-        
-    }    
+    }   
 }

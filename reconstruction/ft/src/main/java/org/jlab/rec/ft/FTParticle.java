@@ -18,7 +18,7 @@ public class FTParticle {
 	private Vector3D _Direction = new Vector3D();             // direction 
         private int _Cluster;					  // track pointer to cluster information in FTCALRec::cluster bank
 	private int _Signal;					  // track pointer to signal information in FTHODORec::cluster bank
-	private int _Cross;					  // track pointer to cross information in FTTRKRec::cluster bank
+	private int _Cross;					  // track pointer to cross information in FTTRKRec::cross bank
         private double _field;
         	
 	// constructor
@@ -145,7 +145,7 @@ public class FTParticle {
 		this._Cross = _Cross;
 	}
 
-        public int getDetectorHit(List<FTResponse>  hitList, String detectorType, double distanceThreshold, double timeThresholds){
+        public int getDetectorHit(List<FTResponse>  hitList, String detectorType, double distanceThreshold, double timeThreshold){
         
             Line3D cross = this.getLastCross();
             double   minimumDistance = 500.0;
@@ -156,20 +156,22 @@ public class FTParticle {
                     Line3D  dist = cross.distance(response.getPosition().toPoint3D());
                     double hitdistance  = dist.length();
                     double timedistance = Math.abs(this.getTime()-(response.getTime()-response.getPosition().mag()/PhysicsConstants.speedOfLight()));
- //                   System.out.println(" LOOP = " + loop + "   distance = " + hitdistance);
-                    if(timedistance<timeThresholds&&hitdistance<distanceThreshold&&hitdistance<minimumDistance){
+                    if(timedistance<timeThreshold && hitdistance<distanceThreshold && hitdistance<minimumDistance){
                         minimumDistance = hitdistance;
-                        bestIndex       = loop;
-                    }
+                        bestIndex = loop;
+                    } 
                 }
             }
             if(bestIndex>-1) {
-                if(hitList.get(bestIndex).getSize()<FTConstants.HODO_MIN_CLUSTER_SIZE) bestIndex=-1;
+                // if bestHit is on hodo require at least two hits overall on HODO
+                if(detectorType=="HODO"){if(hitList.get(bestIndex).getSize()<FTConstants.HODO_MIN_CLUSTER_SIZE) bestIndex=-1;}
+                // if bestHit is on trk require at least two crosses overall in FTTRK
+                if(detectorType=="FTTRK"){if(hitList.get(bestIndex).getSize()<FTConstants.TRK_MIN_CROSS_NUMBER) bestIndex=-1;}
             }
             return bestIndex;
         }
         
-        public void show() {
+        public void show() {            
             System.out.println( "FT Particle info " +
                                 " Charge = "+ this.getCharge() +
                                 " E = "     + this.getEnergy() +                    

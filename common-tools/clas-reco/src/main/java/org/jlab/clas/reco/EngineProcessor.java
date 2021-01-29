@@ -84,7 +84,7 @@ public class EngineProcessor {
             "org.jlab.clas.swimtools.MagFieldsEngine",
             "org.jlab.rec.ft.cal.FTCALEngine",
             "org.jlab.rec.ft.hodo.FTHODOEngine",
-            "org.jlab.rec.ft.trk.FTTRKEngine",
+            "org.jlab.rec.ft.fttrk.FTTRKEngine",
             "org.jlab.rec.ft.FTEBEngine",
             "org.jlab.service.dc.DCHBEngine",
             "org.jlab.service.ftof.FTOFHBEngine",

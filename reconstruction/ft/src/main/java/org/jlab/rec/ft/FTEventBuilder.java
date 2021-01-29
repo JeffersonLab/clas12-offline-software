@@ -11,10 +11,13 @@ import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.rec.ft.cal.FTCALConstantsLoader;
 import org.jlab.utils.groups.IndexedTable;
+import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Vector3D;
+import org.jlab.geom.prim.Point3D;
 
 public class FTEventBuilder {
 
-    public int debugMode = 0;
+    public int debugMode = -1; 
 
     private double solenoidField;
 
@@ -41,6 +44,10 @@ public class FTEventBuilder {
         this.solenoidField = field;
     }
 
+    public void setDebugMode(int debug){
+        this.debugMode = debug;
+    }
+    
     public void init(double field) {
         if (debugMode >= 1) {
             System.out.println("New event");
@@ -69,7 +76,25 @@ public class FTEventBuilder {
                     resp.setPosition(bank.getDouble("clusX", i), bank.getDouble("clusY", i), FTCALConstantsLoader.CRYS_ZPOS + cluster.getDoubleValue("depth_z", 1, 1, 0));
                     responses.add(resp);
                 }
+	    }
+
+            if (event.hasBank("FTTRK::crosses") == true) {
+                DataBank bank = event.getBank("FTTRK::crosses");
+                int nrows = bank.rows();
+                for (int i = 0; i < nrows; i++) {
+                    FTResponse resp = new FTResponse("FTTRK");
+                    resp.setAssociation(-1);
+                    resp.setSize(bank.getInt("size", i));
+                    resp.setId(bank.getInt("id", i));
+                    resp.setEnergy(bank.getFloat("energy", i));
+                    resp.setTime(bank.getFloat("time", i));
+                    resp.setPosition(bank.getFloat("x", i), bank.getFloat("y", i), bank.getFloat("z", i));
+                    if(debugMode>=1) System.out.println(" --------- id, cross x, y, z " + bank.getInt("id", i) + " " + bank.getFloat("x", i) + " " + bank.getFloat("y", i) + " " + bank.getFloat("z", i));
+                    responses.add(resp);
+                }
+
             }
+
             if (event.hasBank("FTHODORec::clusters") == true) {
                 EvioDataBank bank = (EvioDataBank) event.getBank("FTHODORec::clusters");
                 int nrows = bank.rows();
@@ -112,23 +137,40 @@ public class FTEventBuilder {
                     responses.add(resp);
                 }
             }
+            if (event.hasBank("FTTRK::crosses") == true) {
+                DataBank bank = event.getBank("FTTRK::crosses");
+                int nrows = bank.rows();
+                for (int i = 0; i < nrows; i++) {
+                    FTResponse resp = new FTResponse("FTTRK");
+                    resp.setAssociation(-1);                    
+                    resp.setSize(bank.getInt("size", i));
+                    resp.setId(bank.getInt("id", i));
+                    resp.setEnergy(bank.getFloat("energy", i));
+                    resp.setTime(bank.getFloat("time", i));
+                    resp.setPosition(bank.getFloat("x", i), bank.getFloat("y", i), bank.getFloat("z", i));
+                    if(debugMode>=1) System.out.println(" --------- id, cross x, y, z " + bank.getInt("id", i) + " " + bank.getFloat("x", i) + " " + bank.getFloat("y", i) + " " + bank.getFloat("z", i));
+                    responses.add(resp);
+                }
+            }
+            
         }
         if (debugMode >= 1) {
             this.showResponses(responses);
         }
         return responses;
     }
-
+	
     public void correctDirection(List<FTParticle> particles, ConstantsManager manager, int run) {
         
         IndexedTable thetaCorr = manager.getConstants(run, "/calibration/ft/ftcal/thetacorr");
         IndexedTable phiCorr   = manager.getConstants(run, "/calibration/ft/ftcal/phicorr");
         for (int i = 0; i < particles.size(); i++) {
             FTParticle particle = particles.get(i);
-            particle.setDirection(thetaCorr, phiCorr);
+//            if(particle.getCalorimeterIndex()>-1) particle.setDirection(thetaCorr, phiCorr);
+        particle.setDirection(thetaCorr, phiCorr);
         }     
     }
-    
+	
     public List<FTParticle> initFTparticles(List<FTResponse> responses) {
         List<FTParticle> particles = new ArrayList<FTParticle>();
 //        this.FTparticles.clear();
@@ -166,7 +208,7 @@ public class FTEventBuilder {
             int iHodo = track.getDetectorHit(responses, "FTHODO", FTConstants.CAL_HODO_DISTANCE_MATCHING, FTConstants.CAL_HODO_TIME_MATCHING);
             if (iHodo > 0) {
                 if (debugMode >= 1) {
-                    System.out.println("found signal " + iHodo);
+                    System.out.println("found signal in the hodoscope " + iHodo);
                 }
                 track.setCharge(-1);
                 track.setHodoscopeIndex(responses.get(iHodo).getId());
@@ -175,6 +217,47 @@ public class FTEventBuilder {
             if (debugMode >= 1) {
                 track.show();
             }
+        }
+    }
+
+   public void matchToTRK(List<FTResponse> responses, List<FTParticle> particles) {
+        for (int i = 0; i < particles.size(); i++) {
+            FTParticle track = particles.get(i);
+            if (debugMode >= 1) {
+                System.out.println("Searching for matching signal in the tracker:");
+            }
+            int iTrk = track.getDetectorHit(responses, "FTTRK", FTConstants.CAL_TRK_DISTANCE_MATCHING, FTConstants.CAL_TRK_TIME_MATCHING);
+            if (iTrk > 0) {
+                if (debugMode >= 1) {
+                    System.out.println("found signal in FTTRK" + iTrk);
+                }
+                track.setCharge(-999); // provisional, for no field tracking
+                track.setTrackerIndex(responses.get(iTrk).getId());
+                responses.get(iTrk).setAssociation(i);
+            }
+            if (debugMode >= 1) track.show();
+        }
+    }
+    
+    public void matchTRKHits(List<FTResponse> responses, List<FTParticle> particles) {
+        for (int i = 0; i < particles.size(); i++) {
+            FTParticle track = particles.get(i);
+            if (debugMode >= 1) {
+                System.out.println("Searching for matching signal in the tracker:");
+            }
+            // consider FTParticles only through FTTRK detector
+            if(track.getCalorimeterIndex()<0){
+                int iTrk = track.getDetectorHit(responses, "FTTRK", FTConstants.CAL_TRK_DISTANCE_MATCHING, FTConstants.CAL_TRK_TIME_MATCHING);
+                if (iTrk > 0) {
+                    if (debugMode >= 1) {
+                        System.out.println("found signal in FTTRK" + iTrk);
+                    }
+                    track.setCharge(-999); // provisional, for no field tracking
+                    track.setTrackerIndex(responses.get(iTrk).getId());
+                    responses.get(iTrk).setAssociation(i);
+                }
+                if (debugMode >= 1) track.show();
+            }   
         }
     }
 
@@ -230,7 +313,6 @@ public class FTEventBuilder {
                     banktrack.setShort("hodoID", i, (short) particles.get(i).getHodoscopeIndex());
                     banktrack.setShort("trkID", i, (short) particles.get(i).getTrackerIndex());
                     if (debugMode >= 1) {
-                        particles.get(i).show();
                         particles.get(i).show();
                         System.out.println(particles.get(i).getDirection().x() + " " + particles.get(i).getDirection().y() + " " + particles.get(i).getDirection().z());
                     }
