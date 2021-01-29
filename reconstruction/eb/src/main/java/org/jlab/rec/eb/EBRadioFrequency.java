@@ -26,26 +26,40 @@ public class EBRadioFrequency {
     }
 
     /**
-     * new-style start time, based on one particle's vertex time (the trigger
-     * particle) and another's z-vertex (e.g. the hadron) 
-     * @param p the particle with which to determine the vertex time (e.g. the trigger particle)
+     * New-style start time, based on one particle's vertex time and position to
+     * determine the beam bunch and RF correction (the trigger particle), and
+     * another particle's z-vertex's (to correct for systematic z-vertex difference
+     * with the trigger particle)
+     * @param trigger the trigger particle
      * @param type type of detector to use for p's timing info
      * @param layer layer of detector to use for p's timing info
-     * @param vz the z-vertex to use for the correction
+     * @param vz the z-vertex of the non-trigger particle 
      * @return RF/vz-corrected start time 
      */
-    public double  getStartTime(DetectorParticle p,final DetectorType type,final int layer,final double vz) {
+    public double  getStartTime(DetectorParticle trigger,final DetectorType type,final int layer,final double vz) {
+
         final double tgpos = this.ccdb.getDouble(EBCCDBEnum.TARGET_POSITION);
+
         final double rfBucketLength = this.ccdb.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH);
-        final double vertexTime = p.getVertexTime(type,layer,p.getPid());
-        final double vzCorr = (tgpos - vz) / PhysicsConstants.speedOfLight();
+
+        final double vertexTime = trigger.getVertexTime(type,layer,trigger.getPid());
+
+        // use the trigger particle to determine the beam bucket and RF correction:
+        final double vzCorr = (tgpos - trigger.vertex().z()) / PhysicsConstants.speedOfLight();
+
         final double deltatr = - vertexTime - vzCorr
                 + this.rfTime + this.ccdb.getDouble(EBCCDBEnum.RF_OFFSET)
                 + (EBConstants.RF_LARGE_INTEGER+0.5)*rfBucketLength;
+
         final double rfCorr = deltatr % rfBucketLength - rfBucketLength/2;
-        return vertexTime + rfCorr;
+
+        // the start time based on the trigger particle:
+        final double startTime = vertexTime + rfCorr;
+
+        // correct flight time between trigger and non-trigger particles z-vertices:
+        return startTime + (vz - trigger.vertex().z()) / PhysicsConstants.speedOfLight();
     }
-  
+
     /**
      * "traditional" start time, based only on one particle
      * @param p the particle with which to determine the start time
