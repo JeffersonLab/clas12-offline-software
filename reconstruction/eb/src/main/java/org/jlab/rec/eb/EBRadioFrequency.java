@@ -29,34 +29,41 @@ public class EBRadioFrequency {
      * New-style start time, based on one particle's vertex time and position to
      * determine the beam bunch and RF correction (the trigger particle), and
      * another particle's z-vertex's (to correct for systematic z-vertex difference
-     * with the trigger particle)
+     * with the trigger particle).  All times/distances are in units of ns/cm.
      * @param trigger the trigger particle
-     * @param type type of detector to use for p's timing info
-     * @param layer layer of detector to use for p's timing info
+     * @param type type of timing detector to use for trigger particle
+     * @param layer layer of timing detector to use for trigger particle
      * @param vz the z-vertex of the non-trigger particle 
-     * @return RF/vz-corrected start time 
+     * @return start time corrected for RF and z-vertex
      */
     public double  getStartTime(DetectorParticle trigger,final DetectorType type,final int layer,final double vz) {
 
-        final double tgpos = this.ccdb.getDouble(EBCCDBEnum.TARGET_POSITION);
+        final double rfPeriod = this.ccdb.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH);
 
-        final double rfBucketLength = this.ccdb.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH);
+        // The RF calibration is relative to target center:
+        final double zTarget = this.ccdb.getDouble(EBCCDBEnum.TARGET_POSITION);
 
-        final double vertexTime = trigger.getVertexTime(type,layer,trigger.getPid());
+        // The trigger particles' vertex info:
+        final double tVertex = trigger.getVertexTime(type,layer,trigger.getPid());
+        final double dzTargetVertex = zTarget - trigger.vertex().z();
 
-        // use the trigger particle to determine the beam bucket and RF correction:
-        final double vzCorr = (tgpos - trigger.vertex().z()) / PhysicsConstants.speedOfLight();
-
-        final double deltatr = - vertexTime - vzCorr
+        // The RF time at the trigger particle's vertex:
+        // (Note, this is shifted forward by a large integer number of RF periods,
+        // to accommadate the modulus in the next step, as it was done in CLAS6.
+        // Probably this should be "simplified" with Math.IEEERemainder.)
+        final double tVertexRF = - tVertex - dzTargetVertex / PhysicsConstants.speedOfLight()
                 + this.rfTime + this.ccdb.getDouble(EBCCDBEnum.RF_OFFSET)
-                + (EBConstants.RF_LARGE_INTEGER+0.5)*rfBucketLength;
+                + (EBConstants.RF_LARGE_INTEGER+0.5)*rfPeriod;
 
-        final double rfCorr = deltatr % rfBucketLength - rfBucketLength/2;
+        // The relative, RF-beam-bucket-centering correction, based only on the
+        // trigger particle:
+        final double dtRF = tVertexRF % rfPeriod - rfPeriod/2;
 
-        // the start time based on the trigger particle:
-        final double startTime = vertexTime + rfCorr;
+        // The RF-corrected event start time, based only on the trigger particle:
+        final double startTime = tVertex + dtRF;
 
-        // correct flight time between trigger and non-trigger particles z-vertices:
+        // The RF-corrected event start time, now corrected for beam flight time
+        // between the trigger and non-trigger particles' z-vertices:
         return startTime + (vz - trigger.vertex().z()) / PhysicsConstants.speedOfLight();
     }
 
