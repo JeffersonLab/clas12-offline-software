@@ -46,16 +46,16 @@ public class TruthMatch extends ReconstructionEngine {
         //        + event.getBank("RUN::config").getInt("event", 0) + " =========================================");
         // check if the event contains the MC banks
         if (event.hasBank("MC::True") == false) {
-            System.err.print(" [ WARNING, TruthMatching ]: no MC::True bank found");
-            if (event.hasBank("RUN::config")) {
-                System.err.print(" ******* EVENT " + event.getBank("RUN::config").getInt("event", 0));
-            }
-            System.err.println();
+//            System.err.print(" [ WARNING, TruthMatching ]: no MC::True bank found");
+//            if (event.hasBank("RUN::config")) {
+//                System.err.print(" ******* EVENT " + event.getBank("RUN::config").getInt("event", 0));
+//            }
+//            System.err.println();
             return false;
         }
 
         if (event.hasBank("MC::Particle") == false) {
-            System.err.println(" [ WARNING, TruthMatching ]: no MC::Particle bank found");
+//            System.err.println(" [ WARNING, TruthMatching ]: no MC::Particle bank found");
             return false;
         }
 
@@ -1678,7 +1678,6 @@ public class TruthMatch extends ReconstructionEngine {
         return maxEntry.getKey();
     }
 
-
     /**
      * This function returns the number of "set" bits in between bit1 (included)
      * and bit2 (included) of the variable type Long
@@ -1699,10 +1698,13 @@ public class TruthMatch extends ReconstructionEngine {
     }
 
     /**
-     * Check whether enough layers and SLs are hit to make the track reconstractable in DC
+     * Check whether enough layers and SLs are hit to make the track
+     * reconstractable in DC
+     *
      * @param word to be checked
      * @param nMinSL : Minimum number of SLayers
-     * @param nMinLayerPerSL : minimum number of layer per SL, in order a SL to be counted as hit
+     * @param nMinLayerPerSL : minimum number of layer per SL, in order a SL to
+     * be counted as hit
      * @return Whether the the DC track is reconstractable
      */
     public Boolean CheckDCAcceptance(Long word, short nMinSL, short nMinLayerPerSL) {
