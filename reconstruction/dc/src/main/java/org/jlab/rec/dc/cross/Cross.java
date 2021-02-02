@@ -193,12 +193,18 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
         double theta_deg1 = (theta_rad1 / Math.PI * 180.) + (theta_rad1 > 0 ? 0 : 360.);
         double theta_rad2 = FastMath.atan2(arg.get_Point().y(), arg.get_Point().x());
         double theta_deg2 = (theta_rad2 / Math.PI * 180.) + (theta_rad2 > 0 ? 0 : 360.);
+        
 
-        if (theta_deg1 < theta_deg2) {
-            return 1;
-        } else {
-            return -1;
-        }
+        int RegComp = this.get_Region() < arg.get_Region() ? -1 : this.get_Region() == arg.get_Region() ? 0 : 1;
+        int AngComp = theta_deg1 < theta_deg2 ? -1 : theta_deg1 == theta_deg2 ? 0 : 1;
+
+        return ((RegComp == 0) ? AngComp : RegComp);
+        
+//        if (theta_deg1 < theta_deg2) {
+//            return 1;
+//        } else {
+//            return -1;
+//        }
     }
 
 

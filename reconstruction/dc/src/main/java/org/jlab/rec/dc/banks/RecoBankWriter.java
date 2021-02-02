@@ -139,14 +139,15 @@ public class RecoBankWriter {
  * @param event the EvioEvent
  * @return clusters bank
  */
-private DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist) {
+public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist) {
     String name = "HitBasedTrkg::"+_names[0]+"Clusters";
     DataBank bank = event.createBank(name, cluslist.size());
 
     int[] hitIdxArray = new int[12];
-
+    if(cluslist==null)
+        return bank;
     for (int i = 0; i < cluslist.size(); i++) {
-        if (cluslist.get(i).get_Id() == -1) {
+        if (cluslist.get(i) == null || cluslist.get(i).get_Id() == -1) {
             continue;
         }
         for (int j = 0; j < hitIdxArray.length; j++) {
@@ -770,6 +771,7 @@ private DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslis
                 bank.setFloat("t1_py", i, (float) candlist.get(i).get_Region1TrackP().y());
                 bank.setFloat("t1_pz", i, (float) candlist.get(i).get_Region1TrackP().z());
             }
+            
             bank.setFloat("pathlength", i, (float) candlist.get(i).get_TotPathLen());
             bank.setFloat("Vtx0_x", i, (float) candlist.get(i).get_Vtx0().x());
             bank.setFloat("Vtx0_y", i, (float) candlist.get(i).get_Vtx0().y());
@@ -777,7 +779,7 @@ private DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslis
             bank.setFloat("p0_x", i, (float) candlist.get(i).get_pAtOrig().x());
             bank.setFloat("p0_y", i, (float) candlist.get(i).get_pAtOrig().y());
             bank.setFloat("p0_z", i, (float) candlist.get(i).get_pAtOrig().z());
-            //fill associated IDs
+           //fill associated IDs
             for(int r = 0; r < 3; r++) {
                 bank.setShort("Cross"+String.valueOf(r+1)+"_ID", 
                     i, (short) -1);

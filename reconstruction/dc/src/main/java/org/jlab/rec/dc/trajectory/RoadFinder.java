@@ -17,7 +17,7 @@ import org.jlab.detector.geant4.v2.DCGeant4Factory;
 public class RoadFinder  {
 
     private SegmentTrajectory segTrj = new SegmentTrajectory();
-
+    public double fitPassingCut = 150;
     private ClusterFitter cf = new ClusterFitter();
     QuadraticFit qf = new QuadraticFit();
     public RoadFinder() {
@@ -46,7 +46,7 @@ public class RoadFinder  {
             superLayerLists.add(sLyrs);
         }
         //make an array sorted by sector, superlayers
-        for (Segment seg : segs) {
+        for (Segment seg : segs) { 
             if (seg.isOnTrack==false) {
                 superLayerLists.get(seg.get_Sector()-1).get(seg.get_Superlayer()-1).add((Segment) seg.clone());
             }
@@ -82,7 +82,7 @@ public class RoadFinder  {
                             if(sLyr.size()<3) 
                                 continue;
                             if (this.fitRoad(sLyr, DcDetector)==true) { 
-                                if(qf.chi2<150 && qf.chi2!=0 ) { // road is good --> pass w.out looking for missing segment
+                                if(qf.chi2<fitPassingCut && qf.chi2!=0 ) { // road is good --> pass w.out looking for missing segment
                                     sLyr.id=roadId;
                                     sLyr.a=qf.a;
                                     Roads.add(sLyr);

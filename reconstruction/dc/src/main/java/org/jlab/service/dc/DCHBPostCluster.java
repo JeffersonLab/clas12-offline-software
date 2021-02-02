@@ -1,6 +1,7 @@
 package org.jlab.service.dc;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.jlab.clas.swimtools.Swim;
@@ -92,6 +93,7 @@ public class DCHBPostCluster extends DCEngine {
             }
             PatternRec pr = new PatternRec();
             segments = pr.RecomposeSegments(hits, dcDetector);
+            Collections.sort(segments);
         
             if (segments.isEmpty()) {
                 return true;
@@ -103,13 +105,23 @@ public class DCHBPostCluster extends DCEngine {
             for (List<Cross> clist : crosslist) {
                 crosses.addAll(clist); 
             }
+            if (crosses.isEmpty()) {
+                for(Segment seg : segments) {
+                    clusters.add(seg.get_fittedCluster());
+                }
+                event.appendBanks(
+                        rbc.fillHBHitsBank(event, fhits),    
+                        rbc.fillHBClustersBank(event, clusters),
+                        rbc.fillHBSegmentsBank(event, segments));
+                return true;
+            } 
             //find the list of  track candidates
             TrackCandListFinder trkcandFinder = new TrackCandListFinder(Constants.HITBASE);
             trkcands = trkcandFinder.getTrackCands(crosslist,
                 dcDetector,
                 Swimmer.getTorScale(),
-                dcSwim);
-            
+                dcSwim, this.aiAssist);
+           
             // track found
             clusters = new ArrayList<FittedCluster>();
             int trkId = 1;
@@ -201,7 +213,7 @@ public class DCHBPostCluster extends DCEngine {
             trkcands = trkcandFinder.getTrackCands(crosslist,
                     dcDetector,
                     Swimmer.getTorScale(),
-                    dcSwim);
+                    dcSwim, this.aiAssist);
             /* 19 */
 
             // track found
@@ -284,7 +296,7 @@ public class DCHBPostCluster extends DCEngine {
             List<Track> mistrkcands = trkcandFinder.getTrackCands(pcrosslist,
                     dcDetector,
                     Swimmer.getTorScale(),
-                    dcSwim);
+                    dcSwim, this.aiAssist);
 
             // remove overlaps
             if (mistrkcands.size() > 0) {
@@ -329,19 +341,33 @@ public class DCHBPostCluster extends DCEngine {
         // no candidate found, stop here and save the hits,
         // the clusters, the segments, the crosses
         if (trkcands.isEmpty()) {
-            event.appendBanks(
-                rbc.fillHBHitsBank(event, fhits),    
-                rbc.fillHBSegmentsBank(event, segments),
-                rbc.fillHBCrossesBank(event, crosses));
+            if(this.aiAssist==true) {
+                event.appendBanks(
+                    rbc.fillHBHitsBank(event, fhits),    
+                    rbc.fillHBSegmentsBank(event, segments),
+                    rbc.fillHBCrossesBank(event, crosses));
+            } else {
+                event.appendBanks(
+                    rbc.fillHBSegmentsBank(event, segments),
+                    rbc.fillHBCrossesBank(event, crosses));
+            }
             return true;
         }
-        
+        if(this.aiAssist==true) {
         event.appendBanks(
             rbc.fillHBHitsBank(event, fhits),    
+            rbc.fillHBClustersBank(event, clusters),
             rbc.fillHBSegmentsBank(event, segments),
             rbc.fillHBCrossesBank(event, crosses),
             rbc.fillHBTracksBank(event, trkcands),
             rbc.fillHBHitsTrkIdBank(event, fhits) );
+        } else {
+            event.appendBanks(
+            rbc.fillHBSegmentsBank(event, segments),
+            rbc.fillHBCrossesBank(event, crosses),
+            rbc.fillHBTracksBank(event, trkcands),
+            rbc.fillHBHitsTrkIdBank(event, fhits) );
+        }
         return true;
     }
 

@@ -37,6 +37,10 @@ public class PatternRec {
     private CrossMaker crf = new CrossMaker();
     private RoadFinder rf = new RoadFinder();      
     
+    public PatternRec() {
+        rf.fitPassingCut = 1000;
+    }
+    
     public CrossList RecomposeCrossList(List<Segment> clusters,
             DCGeant4Factory DcDetector) {
         CrossList crossList = new CrossList();
@@ -91,8 +95,8 @@ public class PatternRec {
                                 r.a);
                         if (pSegment != null)
                             entry.getValue().add(pSegment);
+                        }
                     }
-                }
             crosses = crf.find_Crosses(entry.getValue(), DcDetector);  
             Collections.sort(crosses);   
             grpCrs.put(entry.getKey(), (ArrayList<Cross>) crosses);
@@ -104,7 +108,8 @@ public class PatternRec {
         Iterator<Map.Entry<Integer, ArrayList<Cross>>> citr = grpCrs.entrySet().iterator(); 
         while(citr.hasNext()) {
             Map.Entry<Integer, ArrayList<Cross>> entry = citr.next(); 
-            crossList.add(entry.getValue());
+            if(entry.getValue().size()==3)
+                crossList.add(entry.getValue());
         }
         return crossList;
     }

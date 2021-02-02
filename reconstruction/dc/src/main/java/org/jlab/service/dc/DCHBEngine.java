@@ -228,7 +228,7 @@ public class DCHBEngine extends DCEngine {
         List<Track> trkcands = trkcandFinder.getTrackCands(crosslist,
                 dcDetector,
                 Swimmer.getTorScale(),
-                dcSwim);
+                dcSwim, false);
         /* 19 */
 
         // track found
@@ -311,7 +311,7 @@ public class DCHBEngine extends DCEngine {
         List<Track> mistrkcands = trkcandFinder.getTrackCands(pcrosslist,
                 dcDetector,
                 Swimmer.getTorScale(),
-                dcSwim);
+                dcSwim, false);
 
         // remove overlaps
         if (mistrkcands.size() > 0) {

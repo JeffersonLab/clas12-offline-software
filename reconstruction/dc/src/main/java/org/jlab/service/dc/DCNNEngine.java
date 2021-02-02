@@ -121,7 +121,7 @@ public class DCNNEngine extends DCEngine {
         List<Track> trkcands = trkcandFinder.getTrackCands(crosslist,
                 dcDetector,
                 Swimmer.getTorScale(),
-                dcSwim);
+                dcSwim, true);
         
         // track found
         int trkId = 1;

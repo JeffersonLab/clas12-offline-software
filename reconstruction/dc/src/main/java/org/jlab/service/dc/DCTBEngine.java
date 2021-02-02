@@ -301,6 +301,15 @@ public class DCTBEngine extends DCEngine {
                     for(FittedHit h2 : c.get_Segment2()) {
                         h2.set_AssociatedTBTrackID(trk.get_Id());                              
                     }
+                    
+                    if (c.get_Segment1().get_Id() == -1) {
+                        trk.set_MissingSuperlayer(c.get_Segment1().get_Superlayer());
+                        trk.setSingleSuperlayer(c.get_Segment2());
+                    }
+                    if (c.get_Segment2().get_Id() == -1) {
+                        trk.set_MissingSuperlayer(c.get_Segment2().get_Superlayer());
+                        trk.setSingleSuperlayer(c.get_Segment1());
+                    }
                 }
                 //trkId++;
             }
@@ -337,12 +346,6 @@ public class DCTBEngine extends DCEngine {
                 } else {//missing sl in 1,3,4
                     track.setSingleSuperlayer(SegMap.get(l)); //isolated sl in 2,4,6
                 }
-                
-//                if(miss%2==0) {//missing sl in 2,4,6
-//                    track.setSingleSuperlayer(track.get_ListOfHBSegments().get(l));//isolated sl in 1,3,5
-//                } else {
-//                    track.setSingleSuperlayer(track.get_ListOfHBSegments().get(l+1));//isolated sl in 2,4,6
-//                }
             }
         }
         return miss;

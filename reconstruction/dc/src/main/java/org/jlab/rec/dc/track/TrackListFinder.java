@@ -25,9 +25,7 @@ public class TrackListFinder {
         int index = 0;
 
         for(Track trk : cands) {
-            if(cands.size()>1) {
-                System.out.print(" trk "+index+"  ");trk.printInfo();
-            }
+            
             index++;
         }
         return tracks;

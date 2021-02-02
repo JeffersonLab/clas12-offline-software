@@ -171,7 +171,7 @@ public class KFitterDoca {
             this.finalStateVec = sv.trackTraj.get(svzLength - 1);
             this.finalCovMat = sv.trackCov.get(svzLength - 1);
         }
-        this.calcFinalChisq(sector);
+        this.calcFinalChisq(sector); 
         if(Double.isNaN(chi2))
             this.setFitFailed = true;
         if(TBT==true) {
