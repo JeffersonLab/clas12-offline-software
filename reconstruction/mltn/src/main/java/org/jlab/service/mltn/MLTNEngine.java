@@ -67,6 +67,8 @@ public class MLTNEngine extends ReconstructionEngine {
         for(int i = 0; i < combi.getSize(); i++){
             bank.setByte("id", i, (byte) (i+1));
             bank.setByte("sector", i, (byte) 1);
+            bank.setByte("charge", i, (byte) combi.setRow(i).getStatus());
+            bank.setFloat("prob", i, (float) combi.setRow(i).getProbability());
             int[] ids = combi.getLabels(i);
             for(int c = 0; c < 6; c++){
                 int order = c+1;
