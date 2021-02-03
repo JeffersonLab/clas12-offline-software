@@ -251,14 +251,14 @@ public class JsonUtils {
             if (config.has("global")) {
                 JSONObject globals = config.getJSONObject("global");
                 for (String key : globals.keySet()) {
-                    ret.accumulate(key, globals.getString(key));
+                    ret.accumulate(key, globals.get(key).toString());
                 }
             }
             if (config.has("services")) {
                 if (config.getJSONObject("services").has(serviceName)) {
                     JSONObject service = config.getJSONObject("services").getJSONObject(serviceName);
                     for (String key : service.keySet()) {
-                        ret.put(key, service.getString(key));
+                        ret.put(key, service.get(key).toString());
                     }
                 }
             }
