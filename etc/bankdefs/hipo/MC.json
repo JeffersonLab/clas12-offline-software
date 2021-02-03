@@ -96,27 +96,18 @@
             {"name":"hitn",     "id":27, "type":"int32", "info":"Hit number"}
         ]
     },
-    {
-        "bank": "MC::IsParticleMatched",
+        {
+        "name": "MC::IsParticleMatched",
         "group": 45,
         "info": "MC Particle - Rec Track matching.",
         "items": [
-            {"name":"mcTindex",   "id":1,  "type":"int16",  "info":"MC Particle index, as in `tid`"},
-            {"name":"recTindex",  "id":2,  "type":"int16",  "info":"REC Track ID"},
-            {"name":"isInAcc",    "id":3,  "type":"int8",   "info":"Is reconstructable"},
-            {"name":"nMCclusters","id":4,  "type":"int16",  "info":"Number of rec clusters/hits created by the MC particle"},
-            {"name":"fraction",   "id":5,  "type":"float",  "info":"Fraction of clusters used"}
-        ]
-    },
-    {
-        "bank": "MC::MatchedClusters",
-        "group": 46,
-        "info": "Is the hit/rec cluster matched with MC::Particle?",
-        "items": [
-            {"name":"index",    "id":1,  "type":"int16",  "info":"Rec cluster ID"},
-            {"name":"detector", "id":2,  "type":"int8" ,  "info":"Detector id"},
-            {"name":"recTindex","id":3,  "type":"int16",  "info":"REC track index"},
-            {"name":"mcTindex", "id":4,  "type":"int16",  "info":"MC track id, as in `tid`"}
+            {"name":"mcTindex",      "type":"S",  "info":"MC Particle index, as in tid"},
+            {"name":"pindex",        "type":"S",  "info":"REC particle index"},
+            {"name":"MCLayersTrk",   "type":"L",  "info":"layers of tracker (mostly)  detectors that a given MCParticle hit. Each layer corresponds to a specific bit in this variable"},
+            {"name":"MCLayersNeut",  "type":"L",  "info":"layers of detectors (non tracker) that a givem MCParticle hit. Each layer corresponds to a specific bit in this variable"},
+            {"name":"RecLayersTrk",  "type":"L",  "info":"layers of tracker detectors (mostly) that, the matched RecParticle picked hits from"},
+            {"name":"RecLayersNeut", "type":"L",  "info":"layers of detectors (mostly) that, the matched RecParticle picked hits from"}
         ]
     }
+
 ]
