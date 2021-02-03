@@ -101,11 +101,17 @@ public class DCHBPostCluster extends DCEngine {
             //crossList
             CrossList crosslist = pr.RecomposeCrossList(segments, dcDetector);
             crosses = new ArrayList<Cross>();
-
+            if(Constants.DEBUG==true) 
+                System.out.println("num cands = "+crosslist.size());
             for (List<Cross> clist : crosslist) {
                 crosses.addAll(clist); 
+                if(Constants.DEBUG==true) {
+                    for(Cross c : clist)
+                        System.out.println("Pass Cross"+c.printInfo());
+                }
             }
             if (crosses.isEmpty()) {
+                clusters = new ArrayList<FittedCluster>();
                 for(Segment seg : segments) {
                     clusters.add(seg.get_fittedCluster());
                 }

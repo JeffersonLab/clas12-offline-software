@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
+import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.cluster.Cluster;
 import org.jlab.rec.dc.cluster.ClusterCleanerUtilities;
 import org.jlab.rec.dc.cluster.ClusterFinder;
@@ -109,7 +110,10 @@ public class PatternRec {
         while(citr.hasNext()) {
             Map.Entry<Integer, ArrayList<Cross>> entry = citr.next(); 
             if(entry.getValue().size()==3)
-                crossList.add(entry.getValue());
+                crossList.add(entry.getValue()); 
+                if(Constants.DEBUG==true)
+                    for(Cross c : entry.getValue()) System.out.println("AI"+c.printInfo()+
+                        c.get_Segment1().printInfo()+c.get_Segment2().printInfo());
         }
         return crossList;
     }

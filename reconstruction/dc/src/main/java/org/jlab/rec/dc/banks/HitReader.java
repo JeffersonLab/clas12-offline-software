@@ -479,7 +479,8 @@ public class HitReader {
                         hit.NNTrkP      = this.aimatch.get(clusterID)[0];
                         hit.NNTrkTheta  = this.aimatch.get(clusterID)[1];
                         hit.NNTrkPhi    = this.aimatch.get(clusterID)[2];
-                        //System.out.println("NN"+hit.printInfo());
+                        if(Constants.DEBUG==true)
+                            System.out.println("NN"+hit.printInfo());
                         hits.add(hit);
                     }
                 }
