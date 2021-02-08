@@ -71,6 +71,5 @@ configuration:
 #    EBTB:
 #      variation: default
 #      timestamp: 08/22/2018
-
 mime-types:
   - binary/data-hipo
