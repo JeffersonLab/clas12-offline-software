@@ -78,8 +78,7 @@ public class Geometry {
         //System.out.println(" GET MODULE O "+labFrameLine.origin().toString());
         //System.out.println(" GET MODULE 1 "+SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1)].toString());
         //System.out.println(" GET MODULE 2 "+new Point3D(SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1).x, SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1).y, SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1).z).toString());
-        if(SVTConstants.getLayerSectorAlignmentData()[sector-1][layer-1]==null)
-            System.out.println(" SHIFT ARRAY NULL FOR "+rm[0]+" sect "+(sector-1));
+
  	AlignmentFactory.applyShift(labFrameLine.origin(),SVTConstants.getLayerSectorAlignmentData()[sector-1][layer-1], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1),scaleT,scaleR );
         AlignmentFactory.applyShift(labFrameLine.end(),   SVTConstants.getLayerSectorAlignmentData()[sector-1][layer-1], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1),scaleT,scaleR );
  

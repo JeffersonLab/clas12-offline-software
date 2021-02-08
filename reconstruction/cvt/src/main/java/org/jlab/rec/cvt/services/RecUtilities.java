@@ -237,7 +237,6 @@ public class RecUtilities {
             }
             if(Math.abs(clsDoca)<cls.get_CentroidError()*5){ //5sigma cut
                 clusMap.put(clsKey, cls);
-                System.out.println("Added to seed ");cls.printInfo();
             }
         }
         return clusMap;
@@ -532,6 +531,7 @@ public class RecUtilities {
                     NewMeasArrays._ErrY_prime, NewMeasArrays._ErrZ);
             if(fitTrk.get_ray()!=null) {
                 cand = new StraightTrack(fitTrk.get_ray());
+                cand.addAll(refi);
                 seedlist.add(cand);
             }
         }

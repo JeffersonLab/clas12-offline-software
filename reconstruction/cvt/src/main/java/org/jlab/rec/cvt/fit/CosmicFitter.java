@@ -6,6 +6,7 @@ import java.util.List;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.trajectory.Ray;
+import trackfitter.fitter.utilities.ProbChi2perNDF;
 
 /**
  * A fitter which does sequential fit (for x, y coordinates) and then (for r, z
@@ -124,6 +125,7 @@ public class CosmicFitter {
             the_rayfitoutput.set_ray(the_ray);
             the_rayfitoutput.set_chisq(chisq);
             set_rayfitoutput(the_rayfitoutput);
+            _ray.chi2 = ProbChi2perNDF.prob(chisq[0]+chisq[1],errRt.size()+errZ.size());
         }
         return FitStatus.Successful;
     }

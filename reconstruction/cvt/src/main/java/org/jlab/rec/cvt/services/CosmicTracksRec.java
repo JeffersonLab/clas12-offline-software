@@ -36,7 +36,6 @@ public class CosmicTracksRec {
             RecoBankWriter rbc,
             double zShift, boolean exLayrs) {
         // make list of crosses consistent with a track candidate
-        
         CrossList crosslist = crossLister.findCosmicsCandidateCrossLists(crosses, SVTGeom,
                 BMTGeom, 3);
         if (crosslist == null || crosslist.size() == 0) {
@@ -44,7 +43,7 @@ public class CosmicTracksRec {
             rbc.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null, zShift);
 
             return true;
-        }
+        } 
         TrackCandListFinder trkcandFinder = new TrackCandListFinder();
         List<StraightTrack> cosmics = trkcandFinder.getStraightTracks(crosslist, crosses.get(1), SVTGeom, BMTGeom);
 
@@ -58,7 +57,6 @@ public class CosmicTracksRec {
             return true;
         }
         
-        
         if(exLayrs==true) {
             CosmicFitter fitTrk = new CosmicFitter();
             cosmics = recUtil.reFit(cosmics, SVTGeom, fitTrk,  trkcandFinder);
@@ -67,7 +65,7 @@ public class CosmicTracksRec {
         if (cosmics.size() > 0) {
             for (int k1 = 0; k1 < cosmics.size(); k1++) {
                 cosmics.get(k1).set_Id(k1 + 1);
-                for (int k2 = 0; k2 < cosmics.get(k1).size(); k2++) {
+                for (int k2 = 0; k2 < cosmics.get(k1).size(); k2++) { 
                     cosmics.get(k1).get(k2).set_AssociatedTrackID(cosmics.get(k1).get_Id()); // associate crosses
                     if (cosmics.get(k1).get(k2).get_Cluster1() != null) {
                         cosmics.get(k1).get(k2).get_Cluster1().set_AssociatedTrackID(cosmics.get(k1).get_Id()); // associate cluster1 in cross

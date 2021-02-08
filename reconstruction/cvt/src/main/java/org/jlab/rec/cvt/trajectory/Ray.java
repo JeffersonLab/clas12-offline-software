@@ -16,7 +16,8 @@ public class Ray {
     private double _yzslopeErr;
     private double _yxintercErr;
     private double _yzintercErr;
-
+    public double chi2;
+    
     public Ray(Point3D refPoint, Vector3D dirVec) {
         set_refPoint(refPoint);
         set_dirVec(dirVec);

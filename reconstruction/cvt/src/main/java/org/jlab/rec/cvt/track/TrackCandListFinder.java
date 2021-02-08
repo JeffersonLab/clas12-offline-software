@@ -807,7 +807,7 @@ public class TrackCandListFinder {
                     }
                 }
             }
-        }
+        } 
         return BMTCrossList;
     }
 
@@ -836,6 +836,7 @@ public class TrackCandListFinder {
             y[0] = (-sx * ix + Math.sqrt(D)) / (1 + sx * sx);
             y[1] = (-sx * ix - Math.sqrt(D)) / (1 + sx * sx);
         }
+        
         for (int j = 0; j < y.length; j++) {
             double x = sx * y[j] + ix;
             double phi = Math.atan2(y[j], x);
@@ -853,7 +854,7 @@ public class TrackCandListFinder {
                 if (MMCrosses.get(i).get_DetectorType()==BMTType.Z) {
                     continue;
                 }
-                double m_z = MMCrosses.get(i).get_Point().z();
+                double m_z = MMCrosses.get(i).get_Point().z();  
                 //int sector = geo.isInSector(MMCrosses.get(i).get_Region() * 2, phi, Math.toRadians(Constants.isInSectorJitter));
                 int sector = geo.getSector(MMCrosses.get(i).get_Region() * 2, phi);
                 if (sector != MMCrosses.get(i).get_Sector()) {
@@ -1049,7 +1050,7 @@ public class TrackCandListFinder {
         if(trajectory == null)
             return;
         Collections.sort(sVTclusters);
-        for (StateVec st : trajectory) {
+        for (StateVec st : trajectory) { 
             for (Cluster cls : sVTclusters) {
                 if (cls.get_AssociatedTrackID() != -1) {
                     continue;

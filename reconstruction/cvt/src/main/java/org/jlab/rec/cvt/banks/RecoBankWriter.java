@@ -430,8 +430,8 @@ public class RecoBankWriter {
 
 
             bank.setShort("ID", i, (short) cosmics.get(i).get_Id());
-            bank.setFloat("chi2", i, (float) cosmics.get(i).get_chi2());
-            bank.setShort("ndf", i, (short) cosmics.get(i).get_ndf());
+            bank.setFloat("chi2", i, (float) cosmics.get(i).get_ray().chi2);
+            bank.setShort("ndf", i, (short) (cosmics.get(i).size()-2));
             bank.setFloat("trkline_yx_slope", i, (float) cosmics.get(i).get_ray().get_yxslope());
             bank.setFloat("trkline_yx_interc", i, (float) (cosmics.get(i).get_ray().get_yxinterc()/10.));
             bank.setFloat("trkline_yz_slope", i, (float) cosmics.get(i).get_ray().get_yzslope());
@@ -442,11 +442,9 @@ public class RecoBankWriter {
             // calculate the theta and phi components of the ray direction vector in degrees
             bank.setFloat("theta", i, (float) Math.toDegrees(u.theta()));
             bank.setFloat("phi", i, (float) Math.toDegrees(u.phi()));
-
             // the array of cross ids is filled in order of the SVT cosmic region 1 to 8 starting from the bottom-most double layer
             for (int j = 0; j < cosmics.get(i).size(); j++) {
                 crossIdxArray.add(cosmics.get(i).get(j).get_Id());
-                
             }
             
 

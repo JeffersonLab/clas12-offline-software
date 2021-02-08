@@ -566,10 +566,8 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 
         // check that the correct lists are created
         for (int i = 0; i < theListsByRegion.size(); i++) {
-            System.out.println(" i " + i);
             for (int j = 0; j < theListsByRegion.get(i).size(); j++) {
                 Cross c = theListsByRegion.get(i).get(j);
-                System.out.println(c.get_Detector() + " " + c.get_Region() + " " + c.get_Point0().toVector3D().phi());
             }
         }
 

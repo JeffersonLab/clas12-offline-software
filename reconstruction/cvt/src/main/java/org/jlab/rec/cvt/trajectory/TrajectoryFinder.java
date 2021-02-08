@@ -599,7 +599,7 @@ public class TrajectoryFinder {
                 result[l][h][3] = -999;
                 result[l][h][4] = -999;
             }
-        }
+        } 
         //Layer 1-6:
         for (int l = start_layer - 1; l < 6; l++) {
             double[][] trkIntersCombinedInf = this.getIntersectionTrackWithBMTModules(l, ray.get_yxinterc(), ray.get_yxslope(), ray.get_yzinterc(), ray.get_yzslope(), bmt_geo);
@@ -607,10 +607,13 @@ public class TrajectoryFinder {
             //hemisphere 1-2
             for (int h = 0; h < 2; h++) {
                 double[] trkIntersInf = trkIntersCombinedInf[0];
-
+                
+                if(Double.isNaN(trkIntersInf[0]) || Double.isNaN(trkIntersInf[1]) || Double.isNaN(trkIntersInf[2]) )
+                    continue;
+                
                 Point3D p = new Point3D(trkIntersInf[0], trkIntersInf[1], trkIntersInf[2]);
 
-                if (p.toVector3D().mag() == 0) {
+                if (p.toVector3D().mag() == 0 ) {
                     continue;
                 }
 
@@ -760,7 +763,6 @@ public class TrajectoryFinder {
         inters_bottom[1] = Double.NaN;
         inters_bottom[2] = Double.NaN;
         inters_bottom[3] = Double.NaN;
-
         double R = 0;
         if (BMTGeometry.getDetectorType(l + 1) == BMTType.C) {
             R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[l / 2] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det;
@@ -778,11 +780,10 @@ public class TrajectoryFinder {
         double x_minus = _yxslope2 * y_minus + _yxinterc2;
 
         double z_plus = _yzslope2 * y_plus + _yzinterc2;
-        double z_minus = _yzslope2 * y_minus + _yzinterc2;
-
+        double z_minus = _yzslope2 * y_minus + _yzinterc2; 
         //if (geo.isInFiducial(x_plus, y_plus, z_plus, l + 1)) {
-        if(geo.inDetector(new Point3D(x_plus, y_plus, z_plus))) {
-        inters_top[0] = x_plus;
+        if(geo.inDetector(new Point3D(x_plus, y_plus, z_plus), org.jlab.rec.cvt.bmt.Constants.hStrip2Det)) { 
+            inters_top[0] = x_plus;
             inters_top[1] = y_plus;
             inters_top[2] = z_plus;
             if (l % 2 == 1) {
@@ -797,7 +798,7 @@ public class TrajectoryFinder {
             }
         }
         //if (geo.isInFiducial(x_minus, y_minus, z_minus, l + 1)) {
-        if(geo.inDetector(new Point3D(x_minus, y_minus, z_minus))) {
+        if(geo.inDetector(new Point3D(x_minus, y_minus, z_minus), org.jlab.rec.cvt.bmt.Constants.hStrip2Det)) { 
             inters_bottom[0] = x_minus;
             inters_bottom[1] = y_minus;
             inters_bottom[2] = z_minus;
@@ -815,7 +816,6 @@ public class TrajectoryFinder {
 
         inters[1] = inters_top;
         inters[0] = inters_bottom;
-
         return inters;
     }
 

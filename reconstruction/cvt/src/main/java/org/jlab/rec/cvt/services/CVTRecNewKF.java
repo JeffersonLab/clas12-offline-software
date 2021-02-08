@@ -131,7 +131,6 @@ public class CVTRecNewKF extends ReconstructionEngine {
    
     @Override
     public boolean processDataEvent(DataEvent event) {
-
         this.setRunConditionsParameters(event, FieldsConfig, Run, false, "");
         double shift = 0;//org.jlab.rec.cvt.Constants.getZoffset();
 
@@ -217,7 +216,6 @@ public class CVTRecNewKF extends ReconstructionEngine {
             } 
             strgtTrksRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
                     crosses, SVTGeom, BMTGeom, rbc, shift, this.exclLayrs);
-            
         } else {
             trksFromTargetRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
                 crosses, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, rbc, shift, swimmer, 
