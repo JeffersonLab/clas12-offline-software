@@ -1,24 +1,23 @@
 package cnuphys.magfield;
 
-import org.jlab.clas.clas.math.FastMath;
-
 /**
  *
  * @author gavalian
  */
 public class TorusProbe extends FieldProbe {
 
-	//cell used to cache corner information
+	// cell used to cache corner information
 	private Cell3D _cell;
-	
-	//the torus field
+
+	// the torus field
 	private Torus _torus;
-	
-	//12 -fold symmetry or full map?
+
+	// 12 -fold symmetry or full map?
 	private boolean _fullMap;
-		
+
 	/**
 	 * Create a probe for use with the torus
+	 * 
 	 * @param field the torus field
 	 */
 	public TorusProbe(Torus field) {
@@ -31,31 +30,57 @@ public class TorusProbe extends FieldProbe {
 
 		_cell = new Cell3D(this);
 		_fullMap = _torus.isFullMap();
-		
+
 		q1Coordinate = _torus.q1Coordinate.clone();
 		q2Coordinate = _torus.q2Coordinate.clone();
 		q3Coordinate = _torus.q3Coordinate.clone();
-		
+
 	}
-	
+
+	/**
+	 * Create a probe for use with the torus Used only for the weird DoubleTorus
+	 * 
+	 * @param field the torus field
+	 */
+	public TorusProbe(Torus field, boolean set) {
+		super(field);
+
+		if (set) {
+			if (MagneticFields.getInstance().getTorus() != field) {
+				MagneticFields.getInstance().setTorus(field);
+			}
+		}
+
+		_torus = field;
+
+		_cell = new Cell3D(this);
+		_fullMap = _torus.isFullMap();
+
+		q1Coordinate = _torus.q1Coordinate.clone();
+		q2Coordinate = _torus.q2Coordinate.clone();
+		q3Coordinate = _torus.q3Coordinate.clone();
+
+	}
+
 	/**
 	 * Get the field in kG
-	 * @param x the x coordinate in cm
-	 * @param y the y coordinate in cm
-	 * @param z the z coordinate in cm
+	 * 
+	 * @param x      the x coordinate in cm
+	 * @param y      the y coordinate in cm
+	 * @param z      the z coordinate in cm
 	 * @param result holds the resuts, the Cartesian coordinates of B in kG
 	 */
 	@Override
 	public void field(float x, float y, float z, float result[]) {
-		
+
 		if (isZeroField()) {
 			result[X] = 0f;
 			result[Y] = 0f;
 			result[Z] = 0f;
 			return;
 		}
-				
-		//note that the contains functions handles the shifts
+
+		// note that the contains functions handles the shifts
 		if (!contains(x, y, z)) {
 			result[0] = 0f;
 			result[1] = 0f;
@@ -63,7 +88,7 @@ public class TorusProbe extends FieldProbe {
 			return;
 		}
 
-		//apply the shifts
+		// apply the shifts
 		x -= _torus.getShiftX();
 		y -= _torus.getShiftY();
 		z -= _torus.getShiftZ();
@@ -72,18 +97,18 @@ public class TorusProbe extends FieldProbe {
 		double phi = FastMath.atan2Deg(y, x);
 		fieldCylindrical(_cell, phi, rho, z, result);
 	}
-		
+
 	/**
-	 * Get the field by trilinear interpolation.
-	 * Assumes all shifting from misalignment is done.
-	 * @param phi azimuthal angle in degrees.
-	 * @param rho the cylindrical rho coordinate in cm.
-	 * @param z coordinate in cm
+	 * Get the field by trilinear interpolation. Assumes all shifting from
+	 * misalignment is done.
+	 * 
+	 * @param phi    azimuthal angle in degrees.
+	 * @param rho    the cylindrical rho coordinate in cm.
+	 * @param z      coordinate in cm
 	 * @param result the result
 	 * @result a Cartesian vector holding the calculated field in kiloGauss.
 	 */
-	private void fieldCylindrical(Cell3D cell, double phi, double rho, double z,
-			float result[]) {
+	private void fieldCylindrical(Cell3D cell, double phi, double rho, double z, float result[]) {
 
 		// must deal with 12-fold symmetry possibility
 		if (_fullMap) {
@@ -99,7 +124,7 @@ public class TorusProbe extends FieldProbe {
 			boolean flip = (relativePhi < 0.0);
 
 			cell.calculate(Math.abs(relativePhi), rho, z, result);
-			
+
 			// negate change x and z components
 			if (flip) {
 				result[X] = -result[X];
@@ -107,7 +132,7 @@ public class TorusProbe extends FieldProbe {
 			}
 
 			// rotate onto to proper sector
-			
+
 			int sector = getSector(phi);
 
 			if (sector > 1) {
@@ -120,16 +145,15 @@ public class TorusProbe extends FieldProbe {
 			}
 
 		}
-		
+
 		double sf = _torus._scaleFactor;
 		result[X] *= sf;
 		result[Y] *= sf;
-		result[Z] *= sf;		
+		result[Z] *= sf;
 	}
-	
+
 	/**
-	 * Must deal with the fact that we only have the field between 0 and 30
-	 * degrees.
+	 * Must deal with the fact that we only have the field between 0 and 30 degrees.
 	 *
 	 * @param absolutePhi the absolute phi
 	 * @return the relative phi (-30, 30) from the nearest middle of a sector in
@@ -147,16 +171,13 @@ public class TorusProbe extends FieldProbe {
 		}
 		return relativePhi;
 	}
-	
+
 	/**
 	 * Check whether the field boundaries include the point
 	 * 
-	 * @param phi
-	 *            azimuthal angle in degrees.
-	 * @param rho
-	 *            the cylindrical rho coordinate in cm.
-	 * @param z
-	 *            coordinate in cm
+	 * @param phi azimuthal angle in degrees.
+	 * @param rho the cylindrical rho coordinate in cm.
+	 * @param z   coordinate in cm
 	 * @return <code>true</code> if the point is included in the boundary of the
 	 *         field
 	 * 
@@ -165,7 +186,5 @@ public class TorusProbe extends FieldProbe {
 //	public boolean containsCylindrical(double phi, double rho, double z) {	
 //		return _torus.contains(rho, z);
 //	}
-
-
 
 }

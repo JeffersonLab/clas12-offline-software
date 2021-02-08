@@ -1,7 +1,7 @@
 package org.jlab.analysis.eventmerger;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.jlab.detector.decode.DaqScalersSequence;
+import org.jlab.detector.scalers.DaqScalersSequence;
 import org.jlab.jnp.hipo4.data.*;
 import org.jlab.jnp.hipo4.io.HipoReader;
 import org.jlab.jnp.utils.data.TextHistogram;

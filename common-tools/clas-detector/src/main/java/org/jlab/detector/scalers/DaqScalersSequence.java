@@ -1,4 +1,4 @@
-package org.jlab.detector.decode;
+package org.jlab.detector.scalers;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -10,6 +10,7 @@ import org.jlab.jnp.hipo4.io.HipoReader;
 import org.jlab.jnp.hipo4.data.Event;
 import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
+import org.jlab.detector.scalers.DaqScalers;
 
 /**
  * For easy access to most recent scaler readout for any given event.
@@ -24,6 +25,8 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
     public static final double TI_CLOCK_FREQ = 250e6; // Hz
     
     protected final List<DaqScalers> scalers=new ArrayList<>();
+    
+    private Bank rcfgBank=null;
   
     public class Interval {
         private DaqScalers previous = null;
@@ -38,15 +41,15 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
         }
         public double getBeamChargeGated() {
             if (previous!=null && next!=null) {
-                return this.next.getBeamChargeGated()
-                      -this.previous.getBeamChargeGated();
+                return this.next.dsc2.getBeamChargeGated()
+                      -this.previous.dsc2.getBeamChargeGated();
             }
             return 0;
         }
         public double getBeamCharge() {
             if (previous!=null && next!=null) {
-                return this.next.getBeamCharge()
-                      -this.previous.getBeamCharge();
+                return this.next.dsc2.getBeamCharge()
+                      -this.previous.dsc2.getBeamCharge();
             }
             return 0;
         }
@@ -116,19 +119,51 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
     }
 
     /**
+     * @param event 
+     * @return the most recent DaqScalers for the given event
+     */
+    public DaqScalers get(Event event) {
+        event.read(this.rcfgBank);
+        return this.get(this.rcfgBank.getLong("timestamp", 0));
+    }
+
+    /**
      * @param timestamp TI timestamp (i.e. RUN::config.timestamp)
      * @return smallest interval of scaler readings around that timestamp
      */
     public Interval getInterval(long timestamp) {
         return this.getInterval(timestamp,timestamp);
     }
+    
+    /**
+     * @param event
+     * @return smallest interval of scaler readings around that event
+     */
+    public Interval getInterval(Event event) {
+        event.read(this.rcfgBank);
+        return this.getInterval(this.rcfgBank.getLong("timestamp", 0));
+    }
+
     /**
      * @param t1 first TI timestamp (i.e. RUN::config.timestamp)
      * @param t2 second TI timestamp
-     * @return an interval of scaler readings around those timestamps
+     * @return smallest interval of scaler readings around those timestamps
      */
     public Interval getInterval(long t1,long t2) {
         return new Interval(this,t1,t2);
+    }
+    
+    /**
+     * @param event1 first event
+     * @param event2 second event
+     * @return smallest interval of scaler readings around those events
+     */
+    public Interval getInterval(Event event1, Event event2) {
+        event1.read(this.rcfgBank);
+        final long t1 = this.rcfgBank.getLong("timestamp",0);
+        event2.read(this.rcfgBank);
+        final long t2 = this.rcfgBank.getLong("timestamp",0);
+        return this.getInterval(t1,t2);
     }
 
     /**
@@ -148,6 +183,10 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
             HipoReader reader = new HipoReader();
             reader.setTags(1);
             reader.open(filename);
+
+            if (seq.rcfgBank==null) {
+                seq.rcfgBank = new Bank(reader.getSchemaFactory().getSchema("RUN::config"));
+            }
         
             SchemaFactory schema = reader.getSchemaFactory();
         
@@ -226,7 +265,7 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
                 else {
                     good++;
                     // do something useful with beam charge here:
-                    System.out.println(timestamp+" "+ds.getBeamCharge()+" "+ds.getBeamChargeGated());
+                    System.out.println(timestamp+" "+ds.dsc2.getBeamCharge()+" "+ds.dsc2.getBeamChargeGated());
                 }
             }
 

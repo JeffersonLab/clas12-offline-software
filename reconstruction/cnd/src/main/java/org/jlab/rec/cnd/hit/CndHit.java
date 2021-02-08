@@ -242,4 +242,17 @@ public class CndHit extends ArrayList<HalfHit> implements Comparable<CndHit>{
 	public int get_AssociatedTrkId() {
 		return _Id ;
 	}
+    
+    
+    private int _AssociatedClusterID = -1;
+    
+    public int get_AssociatedClusterID() {
+        return _AssociatedClusterID;
+    }
+
+    public void set_AssociatedClusterID(int _AssociatedClusterID) {
+        this._AssociatedClusterID = _AssociatedClusterID;
+    }
+    
+    
 }

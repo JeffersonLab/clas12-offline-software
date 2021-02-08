@@ -19,14 +19,12 @@ public class CNDCluster extends ArrayList<CndHit> implements Comparable<CNDClust
 	private int _nhits;
 	private double _energysum;
 	private int _status;
-    //add Kitty's veto variable
-    private int _veto;
     //define layer multiplicity
     private int _layermultip;
     
-    private int _layer1;
-    private int _layer2;
-    private int _layer3;
+    private int _layer1=0;
+    private int _layer2=0;
+    private int _layer3=0;
     private double _pathLengthThruBar;
     
 	private ArrayList<CndHit> _cndhits;
@@ -47,13 +45,7 @@ public class CNDCluster extends ArrayList<CndHit> implements Comparable<CNDClust
         _pathLengthThruBar = pathLengthThruBar;
     }
     
-    public int get_veto(){
-        return _veto;
-    }
-    public void set_veto(int veto){
-        _veto = veto;
-    }
-    
+
     //get_layermultip and set_layermultip methods
     
     public int get_layermultip(){
