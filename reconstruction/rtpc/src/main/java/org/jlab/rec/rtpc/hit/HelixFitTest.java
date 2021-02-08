@@ -55,8 +55,8 @@ public class HelixFitTest {
     }
 
     private void findtrackparams(int TID, List<RecoHitVector> track, int iter){
-        szpos = new double[10000][3];
         int numhits = track.size();
+        szpos = new double[numhits][3];
         double ADCsum = 0;
         int hit = 0;
         for(hit = 0; hit < numhits; hit++){
