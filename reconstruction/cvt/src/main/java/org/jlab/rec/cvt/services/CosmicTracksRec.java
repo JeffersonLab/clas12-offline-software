@@ -24,8 +24,6 @@ import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 
 public class CosmicTracksRec {
     
-    private StraightTrackCrossListFinder crossLister = new StraightTrackCrossListFinder();
-     
     private RecUtilities recUtil = new RecUtilities();
     
     public boolean processEvent(DataEvent event,  
@@ -36,6 +34,7 @@ public class CosmicTracksRec {
             RecoBankWriter rbc,
             double zShift, boolean exLayrs) {
         // make list of crosses consistent with a track candidate
+        StraightTrackCrossListFinder crossLister = new StraightTrackCrossListFinder();
         CrossList crosslist = crossLister.findCosmicsCandidateCrossLists(crosses, SVTGeom,
                 BMTGeom, 3);
         if (crosslist == null || crosslist.size() == 0) {
