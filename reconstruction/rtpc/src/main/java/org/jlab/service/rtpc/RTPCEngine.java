@@ -94,7 +94,7 @@ public class RTPCEngine extends ReconstructionEngine{
 
         hits = hitRead.get_RTPCHits();
 
-        if(hits==null || hits.size()==0) {
+        if(hits==null || hits.size()==0 || hits.size() > 5000) {
             return true;
         }
 
