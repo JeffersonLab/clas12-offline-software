@@ -1,8 +1,0 @@
----
-services:
-  - class: org.jlab.service.dc.DCHBEngine
-    name: DCHB
-  - class: org.jlab.service.ftof.FTOFEngine
-    name: FTOF
-  - class: org.jlab.service.ec.ECEngine
-    name: EC
