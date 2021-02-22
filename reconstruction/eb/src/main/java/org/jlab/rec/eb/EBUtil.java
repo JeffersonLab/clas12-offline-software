@@ -2,12 +2,11 @@ package org.jlab.rec.eb;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.pow;
-import java.util.List;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.ScintillatorResponse;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.clas.pdg.PhysicsConstants;
+import org.jlab.detector.base.DetectorLayer;
 
 public class EBUtil {
 
@@ -89,9 +88,14 @@ public class EBUtil {
        
         // require PCAL minimum energy:
         final double minPcalEnergy = ccdb.getSectorDouble(EBCCDBEnum.ELEC_PCAL_min_energy,sector);
-        final double pcalEnergy = p.getEnergy(DetectorType.ECAL,1);
+        final double pcalEnergy = p.getEnergy(DetectorType.ECAL,DetectorLayer.PCAL);
         if (pcalEnergy < minPcalEnergy) return false;
-       
+      
+        // require sub-sampling criteria:
+        final double ecinEnergy = p.getEnergy(DetectorType.ECAL,DetectorLayer.EC_INNER);
+        //FIXME:  move parameters to CCDB:
+        if (ecinEnergy < 0.2 - pcalEnergy) return false;
+        
         return true;
     }
 
