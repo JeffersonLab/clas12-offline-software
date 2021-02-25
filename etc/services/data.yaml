@@ -45,10 +45,12 @@ services:
   - class: org.jlab.service.rtpc.RTPCEngine
     name: RTPC
 configuration:
+  global:
+      variation: rga_fall2018
+#      timestamp: 12/31/2020-00:00:00
   io-services:
     writer:
       compression: 2
-      variation: rga_fall2018
 #      schema_dir: "absolute-path-to-schema-folder"
 #      for example:
 #      schema_dir: "/home/clas12-1/chef/myClara/plugins/clas12/etc/bankdefs/dst"
