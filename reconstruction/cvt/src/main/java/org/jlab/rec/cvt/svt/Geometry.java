@@ -514,10 +514,9 @@ public class Geometry {
 
         Vector3D r = LocPoint.vectorTo(pointOnStrip); //
         Vector3D d = r.cross(vecAlongStrip);
-        
         Line3D l = new Line3D(pointOnStrip,
-                              pointOnStrip.toVector3D().add(vecAlongStrip.multiply(10)));
-        //fix for hemisphere
+                              vecAlongStrip );
+//fix for hemisphere
         return d.y()*Math.signum(this.findBSTPlaneNormal(sector, layer).y());
 
     }
