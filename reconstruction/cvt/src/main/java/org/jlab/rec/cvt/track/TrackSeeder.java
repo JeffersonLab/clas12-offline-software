@@ -627,7 +627,7 @@ public class TrackSeeder {
         //if (bmt_geo.isInSector(bmt_Ccross.get_Cluster1().get_Layer(), Math.atan2(phiHelixAtSurf.y(), phiHelixAtSurf.x()), Math.toRadians(10)) 
         //        != bmt_Ccross.get_Sector()) 
         int sector = bmt_geo.getSector(bmt_Ccross.get_Cluster1().get_Layer(), Math.atan2(phiHelixAtSurf.y(), phiHelixAtSurf.x()));
-        if(sector!= bmt_Ccross.get_Sector()){
+        if(sector!= bmt_Ccross.get_Sector() || sector ==0){
             return false;
         }
         double dzdr_bmt = z_bmt / r_bmt;
