@@ -686,7 +686,7 @@ public class RecoBankWriter {
 
         //found trajectories
         DataBank bank8 = this.fillStraightTracksTrajectoryBank(event, trks, zShift);
-        if (bank8 != null) {
+        if (bank8 != null) { 
             cvtbanks.add(bank8);
         }
 

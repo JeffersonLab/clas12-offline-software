@@ -144,7 +144,7 @@ public class TrackCandListFinder {
         List<Cross> list = cand.get_Crosses();
 
         if (list.size() == 0) {
-            System.err.print("Error in estimating track candidate trajectory: less than 3 crosses found");
+            //System.err.print("Error in estimating track candidate trajectory: less than 3 crosses found");
             return;
         }
         // instantiating the Helical Track fitter
@@ -397,7 +397,7 @@ public class TrackCandListFinder {
                 //System.err.println("Error in  Track fitting -- track not found -- refit FAILED");
             }
             cand.update_Crosses(cand.get_ray().get_yxslope(), cand.get_ray().get_yxinterc(), svt_geo);
-
+            
             // eliminate bad residuals
             this.EliminateStraightTrackOutliers(crossesToFit, fitTrk, svt_geo);
             if (crossesToFit.size() < 3) {
@@ -440,7 +440,7 @@ public class TrackCandListFinder {
                 NewMeasArrays = this.get_RayMeasurementsArrays(crossesToFitWithBMT, false, false);
                 fitTrk.fit(NewMeasArrays._X, NewMeasArrays._Y, NewMeasArrays._Z, NewMeasArrays._Y_prime, NewMeasArrays._ErrRt, NewMeasArrays._ErrY_prime, NewMeasArrays._ErrZ);
                 //create the cand
-                
+               
                 if (fitTrk.get_ray() != null) {
                     cand = new StraightTrack(fitTrk.get_ray()); 
                     cand.addAll(crossesToFitWithBMT);
@@ -733,26 +733,39 @@ public class TrackCandListFinder {
                 ErrRt.add(j, (double) 1);
             }
         }
-
+        
         for (int j = j0; j < j0 + BMTCdetcrossesInTrk.size(); j++) {
             Z.add(j, BMTCdetcrossesInTrk.get(j - j0).get_Point().z());
             Y_prime.add(j, BMTCdetcrossesInTrk.get(j - j0).get_Point().y());
             ErrY_prime.add(j, 0.);
             ErrZ.add(j, BMTCdetcrossesInTrk.get(j - j0).get_PointErr().z());
-
         }
         if (resetSVTMeas) {
             
             //System.err.println("Error in Helical Track fitting -- helix not found -- trying to refit using the uncorrected crosses...");
-            for (int j = 0; j < SVTcrossesInTrk.size(); j++) {
-                X.add(j, SVTcrossesInTrk.get(j).get_Point0().x());
-                Y.add(j, SVTcrossesInTrk.get(j).get_Point0().y());
-                Z.add(j, SVTcrossesInTrk.get(j).get_Point0().z());
-                ErrY_prime.add(j, SVTcrossesInTrk.get(j).get_Point0().y());
-                ErrZ.add(j, SVTcrossesInTrk.get(j).get_PointErr0().z());
-            }
+//            for (int j = 0; j < SVTcrossesInTrk.size(); j++) {
+//                X.add(j, SVTcrossesInTrk.get(j).get_Point0().x());
+//                Y.add(j, SVTcrossesInTrk.get(j).get_Point0().y());
+//                Z.add(j, SVTcrossesInTrk.get(j).get_Point0().z());
+//                ErrY_prime.add(j, SVTcrossesInTrk.get(j).get_Point0().y());
+//                ErrZ.add(j, SVTcrossesInTrk.get(j).get_PointErr0().z());
+//            }
         }
 
+        if(BMTCdetcrossesInTrk.size()>1) {
+            //System.out.print("RESETTING MEAS ARRAY");
+            Z.clear();
+            Y_prime.clear();
+            ErrZ.clear();
+            ErrY_prime.clear();
+            for (int j = 0; j < BMTCdetcrossesInTrk.size(); j++) {
+                Z.add(j, BMTCdetcrossesInTrk.get(j).get_Point().z());
+                Y_prime.add(j, BMTCdetcrossesInTrk.get(j).get_Point().y());
+                ErrY_prime.add(j, 0.);
+                ErrZ.add(j, BMTCdetcrossesInTrk.get(j).get_PointErr().z());
+
+            }
+        }
         RayMeasurements MeasArray = new RayMeasurements(X, Y, Z, Y_prime, ErrZ, ErrY_prime, ErrRt);
 
         return MeasArray;

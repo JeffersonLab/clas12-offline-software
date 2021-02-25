@@ -213,7 +213,6 @@ public class Constants {
         }
         
         LAYRGAP = MODULERADIUS[1][0] - MODULERADIUS[0][0];
-
         
         Geometry geo = new Geometry();
        for(int l =0; l < NLAYR; l++) {

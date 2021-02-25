@@ -11,6 +11,8 @@ import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.detector.hits.CTOFDetHit;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.geom.base.Detector;
+import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Line3d;
@@ -534,13 +536,18 @@ public class TrajectoryFinder {
      */
     public void setHitResolParams(String detector, int sector, int layer, Cluster cluster,
             StateVec stVec, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, boolean trajFinal) {
-
+System.out.println("SETTING HIT RESOL...");
         if (detector.equalsIgnoreCase("SVT") ) {
             double doca2Cls = svt_geo.getDOCAToStrip(sector, layer, cluster.get_Centroid(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
             double doca2Seed = svt_geo.getDOCAToStrip(sector, layer, (double) cluster.get_SeedStrip(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
             cluster.set_SeedResidual(doca2Seed); 
             cluster.set_CentroidResidual(doca2Cls);
-            
+//            Point3D endPt1 = cluster.getEndPoint1();
+//            Point3D endPt2 = cluster.getEndPoint2();
+//            Line3D l = new Line3D(endPt1,endPt2);
+//            Plane3D pl = new Plane3D(endPt1, svt_geo.findBSTPlaneNormal(sector, layer));
+//            double d = new Vector3D(stVec.x(), stVec.y(), stVec.z()).dot(pl.normal())-pl.point().toVector3D().dot(pl.normal());
+//            System.out.println(d+" calc "+l.distance(new Point3D(stVec.x(), stVec.y(), stVec.z())).length()+" d "+doca2Cls);
             for (FittedHit hit : cluster) {
                 double doca1 = svt_geo.getDOCAToStrip(sector, layer, (double) hit.get_Strip().get_Strip(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
                 double sigma1 = svt_geo.getSingleStripResolution(layer, hit.get_Strip().get_Strip(), stVec.z());
