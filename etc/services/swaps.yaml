@@ -8,7 +8,7 @@ io-services:
     class: org.jlab.clas.std.services.convertors.HipoToHipoWriter
     name: HipoToHipoWriter
 services:
-  - class: org.jlab.service.swaps.SwapEngine
+  - class: org.jlab.service.raw.SwapEngine
     name: SWAPS
 configuration:
   io-services:

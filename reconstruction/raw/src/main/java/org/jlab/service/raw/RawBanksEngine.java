@@ -1,36 +1,47 @@
-package org.jlab.service.swaps;
+package org.jlab.service.raw;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.jlab.detector.swaps.SwapManager;
 import org.jlab.clas.reco.ReconstructionEngine;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.raw.StatusManager;
+import org.jlab.detector.raw.SwapManager;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataBank;
 
 /**
  *
+ * Initializes StatusManager singleton based on this engine's standard
+ * variation and timestamp.
+ * 
  * Initializes SwapManager singleton based on two CCDB timestamps to allow
  * fixing cable swaps in decoded HIPO files.  Optionally modifies ADC/TDC banks.
  * 
+ * Then, downstream, can do:
+ * 
+ * int status = StatusManager.getInstance().getStatus(...)
+ * int[] slco = SwapManager.getInstance().get(...)
+ * 
  * @author baltzell
  */
-public class SwapEngine extends ReconstructionEngine {
+public class RawBanksEngine extends ReconstructionEngine {
 
+    private StatusManager statman = null;
     private SwapManager swapman = null;
     private boolean modifyBanks = false;
 
-    public SwapEngine() {
+    public RawBanksEngine() {
         super("SwapEngine","baltzell","1.0");
     }
 
-    private void updateBank(int run,DataBank bank) {
+    private void updateBank(int run,String tableName,DataBank bank) {
         for (int irow=0; irow<bank.rows(); irow++) {
-            final int[] slco = swapman.get(run,bank,irow);
-            bank.setByte("sector",irow,(byte)slco[0]);
-            bank.setByte("layer",irow,(byte)slco[1]);
-            bank.setShort("component",irow,(short)slco[2]);
-            bank.setByte("order",irow,(byte)slco[3]);
+            int[] slco = SwapManager.getInstance().get(run,bank,irow);
+            bank.setByte("sector",irow,(byte)swapman.get(run,tableName,"sector",slco));
+            bank.setByte("layer",irow,(byte)swapman.get(run,tableName,"layer",slco));
+            bank.setShort("component",irow,(short)swapman.get(run,tableName,"component",slco));
+            bank.setByte("order",irow,(byte)swapman.get(run,tableName,"order",slco));
         }
     }
 
@@ -39,11 +50,11 @@ public class SwapEngine extends ReconstructionEngine {
         if (modifyBanks) {
             DataBank bank = event.getBank("RUN::config");
             final int run = bank.getInt("run",0);
-            for (String detectorName : this.swapman.getDetectors()) {
-                for (String bankName : this.swapman.getBanks(detectorName)) {
+            for (DetectorType detector : this.swapman.getDetectors()) {
+                for (String bankName : this.swapman.getBanks(detector)) {
                     bank = event.getBank(bankName);
                     event.removeBank(bankName);
-                    this.updateBank(run,bank);
+                    this.updateBank(run,this.swapman.getTable(detector),bank);
                     event.appendBank(bank);
                 }
             }
@@ -98,7 +109,13 @@ public class SwapEngine extends ReconstructionEngine {
 
         this.swapman = SwapManager.getInstance();
         this.swapman.initialize(dets,previousTimestamp,currentTimestamp);
-       
+      
+        this.statman = StatusManager.getInstance();
+        this.statman.initialize(this.getConstantsManager());
+
+        // and then anywhere:
+        //StatusManager.getInstance().getStatus(100301, DetectorType.RTPC, 1,4,3);
+        
         System.out.println("["+this.getName()+"] --> swaps are ready....");
         return true;
     }

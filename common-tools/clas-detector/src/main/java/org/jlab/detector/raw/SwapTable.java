@@ -1,4 +1,4 @@
-package org.jlab.detector.swaps;
+package org.jlab.detector.raw;
 
 import java.util.HashMap;
 import java.util.Map;

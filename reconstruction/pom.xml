@@ -28,6 +28,6 @@
     <module>band</module>
     <module>mc</module>
     <module>rtpc</module>
-    <module>swaps</module>
+    <module>raw</module>
   </modules>
 </project>
