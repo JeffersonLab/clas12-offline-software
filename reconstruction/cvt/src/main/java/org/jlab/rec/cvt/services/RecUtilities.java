@@ -423,6 +423,8 @@ public class RecUtilities {
             org.jlab.rec.cvt.svt.Geometry SVTGeom,
             org.jlab.rec.cvt.bmt.BMTGeometry BMTGeom,
             Swim swimmer,  TrackSeederCA trseed,  TrackSeeder trseed2) {
+        trseed = new TrackSeederCA();
+        trseed2 = new TrackSeeder();
         List<Seed> filtlist = new ArrayList<Seed>();
         if(seedlist==null)
             return filtlist;
@@ -452,7 +454,7 @@ public class RecUtilities {
                 layr = c.getOrderedRegion()+3;
                 if((int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)>0) {
                     c.isInSeed = false;
-                //    System.out.println("refit "+c.printInfo());
+                    //System.out.println("refit BMT "+c.printInfo());
                     refib.add(c);
                 }
             } else {
@@ -478,6 +480,8 @@ public class RecUtilities {
     public List<StraightTrack> reFit(List<StraightTrack> seedlist, 
             org.jlab.rec.cvt.svt.Geometry SVTGeom,
             CosmicFitter fitTrk,  TrackCandListFinder trkfindr) {
+        fitTrk = new CosmicFitter();
+        trkfindr = new TrackCandListFinder();
         List<StraightTrack> filtlist = new ArrayList<StraightTrack>();
         if(seedlist==null)
             return filtlist;
