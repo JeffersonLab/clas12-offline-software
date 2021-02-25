@@ -2,7 +2,9 @@ package org.jlab.rec.cvt.cross;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -264,23 +266,68 @@ public class StraightTrackCrossListFinder {
     public CrossList findCosmicsCandidateCrossLists(List<ArrayList<Cross>> crosses,
             org.jlab.rec.cvt.svt.Geometry svt_geo,
             org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, int NbSVTRegions) {
+        CrossList crossLists = new CrossList();
         // start finding svt crosses
         ArrayList<Cross> svt_crosses = crosses.get(0);
         // if there are no svt crosses then return - there is no track
         if (svt_crosses.size() == 0) {
             return null;
         }
-
+        
+        Map svtMap = new HashMap<Integer, ArrayList<Cross>>();
+        for(Cross c : svt_crosses) {
+            if(svtMap.containsKey(c.get_Region())==false) {
+                ArrayList<Cross> list = new ArrayList<Cross>();
+                list.add(c);
+                svtMap.put(c.get_Region(), list);
+            } else {
+                ArrayList<Cross> list =  (ArrayList<Cross>) svtMap.get(c.get_Region());
+                list.add(c);
+            }
+        }
+        
+        int L[] = new int[3];
+        for(int i = 0; i<3; i++) {
+            if(svtMap.containsKey(i+1)==true) {
+                L[i]++;
+            }
+        }
+        for(int i = 0; i<3; i++) {
+            if(L[i]==0)
+                L[i]=1;
+        }
+        for(int i1 = 0; i1<L[0]; i1++) {
+            for(int i2 = 0; i2<L[1]; i2++) {
+                for(int i3 = 0; i3<L[2]; i3++) {
+                     ArrayList<Cross> list = new ArrayList<Cross>();
+                    if(svtMap.containsKey(1)==true) {
+                        ArrayList<Cross> list1 = (ArrayList<Cross>) svtMap.get(1);
+                        list.add(list1.get(i1));
+                    }
+                    if(svtMap.containsKey(2)==true) {
+                        ArrayList<Cross> list1 = (ArrayList<Cross>) svtMap.get(2);
+                        list.add(list1.get(i2));
+                    }
+                    if(svtMap.containsKey(3)==true) {
+                        ArrayList<Cross> list1 = (ArrayList<Cross>) svtMap.get(3);
+                        list.add(list1.get(i3));
+                    }
+                    crossLists.addAll(this.findTrackSeeds(list));
+                }
+            }
+        }
         // first look for seeds		
-        CrossList crossLists = this.findTrackSeeds(svt_crosses);
-
+        //CrossList crossLists = this.findTrackSeeds(svt_crosses);
+       
         // instantiate the resulting crosslist
         CrossList crossListFinal = new CrossList();
         ArrayList<ArrayList<Cross>> newCrossLists = new ArrayList<ArrayList<Cross>>();
 
         // loop over the list of crosslists
         for (int i = 0; i < crossLists.size(); i++) {
-            if (crossLists.get(i).size() > 0) {
+            if (crossLists.get(i).size() > 0) {System.out.println("In list :");
+                for(Cross c : crossLists.get(i))
+                    System.out.println("In  :"+c.printInfo());
                 ArrayList<Cross> crossList = new ArrayList<Cross>();
                 // find the trajectory for each crosslist
                 ArrayList<Cross> TrajPoints = get_XYTrajectory(crossLists.get(i), svt_geo, bmt_geo, NbSVTRegions);
@@ -340,6 +387,10 @@ public class StraightTrackCrossListFinder {
         for (int k = 0; k < newCrossLists.size(); k++) {
             if (newCrossLists.get(k).size() != 0) {
                 crossListFinal.add(newCrossLists.get(k));
+                System.out.println("In list :");
+                for(Cross c : newCrossLists.get(k))
+                    System.out.println("In  :"+c.printInfo());
+                
             }
         }
         return crossListFinal;
