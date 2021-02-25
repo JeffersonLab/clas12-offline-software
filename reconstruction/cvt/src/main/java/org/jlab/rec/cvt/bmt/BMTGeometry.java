@@ -488,7 +488,8 @@ public class BMTGeometry {
             }
         } 
         if(!full) {
-            if(delta<Math.cos(this.getDPhi(layer, sector))) sector=0;
+            if(sector!=0)
+                if(delta<Math.cos(this.getDPhi(layer, sector))) sector=0;
         } 
         return sector;
     }
@@ -502,6 +503,7 @@ public class BMTGeometry {
         int layer=0;
         
         int sector = this.getSector(0, Math.atan2(traj.y(), traj.x()));
+        if(sector ==0) return 0;
         for(int i=1; i<=Constants.NLAYERS; i++) {
             double radius = Constants.axes[i-1][sector-1].distance(traj).length();
             if(Math.abs(radius-this.getRadius(i)-strip2Det)<accuracy) {
@@ -521,6 +523,7 @@ public class BMTGeometry {
         
         int sector = this.getSector(0, Math.atan2(traj.y(), traj.x())); 
         int layer  = this.getLayer(traj, strip2Det); 
+        if(sector ==0 || layer ==0) return false;
         return this.inDetector(layer, sector, traj);
     }
 
