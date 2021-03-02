@@ -63,10 +63,13 @@ public class CodaEventDecoder {
     public List<DetectorDataDgtz> getDataEntries(EvioDataEvent event){
         
         int event_size = event.getHandler().getStructure().getByteBuffer().array().length;
-        if(event_size>600*1024){
-            System.out.println("error: >>>> EVENT SIZE EXCEEDS 600 kB");
-            return new ArrayList<DetectorDataDgtz>();
-        }
+    
+        // This had been inserted to accommodate large EVIO events that
+        // were unreadable in JEVIO versions prior to 6.2:
+        //if(event_size>600*1024){
+        //    System.out.println("error: >>>> EVENT SIZE EXCEEDS 600 kB");
+        //    return new ArrayList<DetectorDataDgtz>();
+        //}
         
         List<DetectorDataDgtz>  rawEntries = new ArrayList<DetectorDataDgtz>();
         List<EvioTreeBranch> branches = this.getEventBranches(event);
