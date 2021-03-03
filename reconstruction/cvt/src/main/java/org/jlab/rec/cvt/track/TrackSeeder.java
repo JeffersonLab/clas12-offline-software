@@ -339,26 +339,28 @@ public class TrackSeeder {
                     if (sameSectorCrosses.size() >= 0) {
                         BMTmatches = this.findCandUsingMicroMegas(seed, sameSectorCrosses, bmt_geo);
                     } 
-                    
-                    for (Seed bseed : BMTmatches) {
-                        //refit using the BMT
-                        Track bcand = fitSeed(bseed.get_Crosses(), svt_geo, 5, false, swimmer);
-                        if (bcand != null) {
-                            seed = new Seed();
-                            seed.set_Crosses(bseed.get_Crosses());
-                            seed.set_Clusters(bseed.get_Clusters());
-                            seed.set_Helix(bcand.get_helix());
+                    if(BMTmatches.size()==0) { // no bmt matches; save svt stand-alone
+                        seedlist.add(seed);
+                    } else { //bmt matches found 
+                        for (Seed bseed : BMTmatches) {
+                            //refit using the BMT
+                            Track bcand = fitSeed(bseed.get_Crosses(), svt_geo, 5, false, swimmer);
+                            if (bcand != null) {
+                                seed = new Seed();
+                                Collections.sort(bseed.get_Crosses());
+                                seed.set_Crosses(bseed.get_Crosses());
+                                seed.set_Clusters(bseed.get_Clusters());
+                                seed.set_Helix(bcand.get_helix());
+                                seedlist.add(seed);
+                            }
                         }
                     }
-
-                    seedlist.add(seed);
-                } else { // no bmt
-                //    seedlist.add(seed);
-                }
+                } 
             }
         }
        
         for (Seed bseed : seedlist) { 
+            bseed.trkStatus = 1;
             for(Cross c : bseed.get_Crosses()) {
                 c.isInSeed = true;
             }
