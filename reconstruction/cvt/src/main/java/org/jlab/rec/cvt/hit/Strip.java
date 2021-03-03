@@ -189,7 +189,7 @@ public class Strip {
             
             //Line3D L0 = geo.getZstrip(geo.getRegion(layer), sector, this.get_Strip());
             Line3D L = geo.getLCZstrip(geo.getRegion(layer), sector, this.get_Strip());
-            this.set_ImplantPoint(L.origin());
+            this.set_ImplantPoint(L.origin());  
             this.set_MidPoint(L.midpoint());
             this.set_EndPoint(L.end());
             this.set_StripDir(L.direction());

@@ -214,7 +214,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                         weightedZ2 += strpEn * stEP2.z();
                     }
                     if (this.get_DetectorType()==1) { // Z-detectors
-                        // for Z detectors Larentz-correction is applied to the strip
+                        // for Z detectors Lorentz-correction is applied to the strip
                         strpNb = thehit.get_Strip().get_LCStrip();
                         strpNb0 = thehit.get_Strip().get_Strip();
                         // for C detectors the phi of the centroid is calculated for the uncorrected and the Lorentz-angle-corrected centroid
