@@ -164,7 +164,12 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         double weightedY2 = 0;                  // SVT strip centroid positions of endpoints
         double weightedZ1 = 0;                  // SVT strip centroid positions of endpoints
         double weightedZ2 = 0;                  // SVT strip centroid positions of endpoints
-        
+        /*
+        this.set_ImplantPoint(arcLine.origin());
+            this.set_MidPoint(arcLine.center());
+            this.set_EndPoint(arcLine.end());
+            this.set_StripDir(arcLine.normal());
+        */
         int nbhits = this.size();
 
         if (nbhits != 0) {
@@ -199,6 +204,14 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                         // for C detector the Z of the centroid is calculated
                         weightedZ += strpEn * thehit.get_Strip().get_Z();
                         weightedZErrSq += (thehit.get_Strip().get_ZErr()) * (thehit.get_Strip().get_ZErr());
+                        Point3D stEP1 = thehit.get_Strip().get_ImplantPoint();
+                        Point3D stEP2 = thehit.get_Strip().get_EndPoint();
+                        weightedX1 += strpEn * stEP1.x();
+                        weightedY1 += strpEn * stEP1.y();
+                        weightedZ1 += strpEn * stEP1.z();
+                        weightedX2 += strpEn * stEP2.x();
+                        weightedY2 += strpEn * stEP2.y();
+                        weightedZ2 += strpEn * stEP2.z();
                     }
                     if (this.get_DetectorType()==1) { // Z-detectors
                         // for Z detectors Larentz-correction is applied to the strip
@@ -209,6 +222,12 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                         weightedPhiErrSq += (thehit.get_Strip().get_PhiErr()) * (thehit.get_Strip().get_PhiErr());
                         weightedPhi0 += strpEn * thehit.get_Strip().get_Phi0();
                         weightedPhiErrSq0 += (thehit.get_Strip().get_PhiErr0()) * (thehit.get_Strip().get_PhiErr0());
+                        Point3D stEP1 = thehit.get_Strip().get_ImplantPoint();
+                        Point3D stEP2 = thehit.get_Strip().get_EndPoint();
+                        weightedX1 += strpEn * stEP1.x();
+                        weightedY1 += strpEn * stEP1.y();
+                        weightedX2 += strpEn * stEP2.x();
+                        weightedY2 += strpEn * stEP2.y();
                     }
                 }
 
@@ -258,6 +277,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             //phiErrCent = Math.sqrt(weightedPhiErrSq);
             //phiErrCent0 = Math.sqrt(weightedPhiErrSq0);
             //zErrCent = Math.sqrt(weightedZErrSq);
+            //System.out.println("end Points "+this.getEndPoint1().toString()+this.getEndPoint2().toString()+" for"); this.printInfo();
         }
 
         _TotalEnergy = totEn;
