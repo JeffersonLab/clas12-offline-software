@@ -250,15 +250,17 @@ public class TrackSeederCA {
 	        Seed seed = new Seed();
 	        seed.set_Crosses(cand);
 	        seed.set_Helix(cand.get_helix());
+                seed.trkStatus = 2;
 	        seedlist.add(seed);
 	        List<Cluster> clusters = new ArrayList<Cluster>(); 
-	        for(Cross c : seed.get_Crosses()) { 
+                Collections.sort(seed.get_Crosses());System.out.println("CA seed : ");
+	        for(Cross c : seed.get_Crosses()) { System.out.println(c.printInfo());
 	            if(c.get_Detector().equalsIgnoreCase("SVT")) {
 	                clusters.add(c.get_Cluster1());
 	                clusters.add(c.get_Cluster2());
-            	} else {
-                	clusters.add(c.get_Cluster1());
-            	}
+                    } else {
+                            clusters.add(c.get_Cluster1());
+                    }
         	}
         	seed.set_Clusters(clusters);
 	    }
