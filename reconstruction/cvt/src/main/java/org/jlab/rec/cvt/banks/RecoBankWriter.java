@@ -314,18 +314,18 @@ public class RecoBankWriter {
         }
 
         DataBank bank = event.createBank("CVTRec::Tracks", trkcands.size());
-        // an array representing the ids of the crosses that belong to the track: for a helical track with the current
-        // 4 regions of SVT + 1 region of BMT there can be up to 4 crosses of type SVT and 2 of type BMT (1 for the C detector and 1 for the Z detector)
+        // an array representing the ids of the crosses that belong to the track
         List<Integer> crossIdxArray = new ArrayList<Integer>();
 
         for (int i = 0; i < trkcands.size(); i++) {
             if(trkcands.get(i)==null)
                 continue;
-            if(trkcands.get(i).getChi2()!=0) {
-                bank.setByte("fittingMethod", i, (byte) 2);
-            } else {
-                bank.setByte("fittingMethod", i, (byte) 0);
-            }
+//            if(trkcands.get(i).getChi2()!=0) {
+//                bank.setByte("fittingMethod", i, (byte) 2);
+//            } else {
+//                bank.setByte("fittingMethod", i, (byte) 0);
+//            }
+            bank.setByte("fittingMethod", i, (byte) trkcands.get(i).get_TrackingStatus());
             bank.setShort("ID", i, (short) trkcands.get(i).get_Id());
             bank.setByte("q", i, (byte)trkcands.get(i).get_Q());
             bank.setFloat("p", i, (float) trkcands.get(i).get_P());
