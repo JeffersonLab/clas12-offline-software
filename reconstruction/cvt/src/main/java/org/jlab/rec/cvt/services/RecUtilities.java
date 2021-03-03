@@ -21,6 +21,7 @@ import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.geom.prim.Line3D;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.fit.CosmicFitter;
 import org.jlab.rec.cvt.track.StraightTrack;
@@ -73,7 +74,9 @@ public class RecUtilities {
         }
     }
     
-    public List<Surface> setMeasVecs(Seed trkcand, org.jlab.rec.cvt.svt.Geometry sgeo) {
+    public List<Surface> setMeasVecs(Seed trkcand, 
+            org.jlab.rec.cvt.svt.Geometry sgeo,
+            org.jlab.rec.cvt.bmt.BMTGeometry bgeo) {
         //Collections.sort(trkcand.get_Crosses());
         List<Surface> KFSites = new ArrayList<Surface>();
         Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()),
@@ -118,11 +121,15 @@ public class RecUtilities {
         // adding the BMT
         for (int c = 0; c < trkcand.get_Crosses().size(); c++) {
             if (trkcand.get_Crosses().get(c).get_Detector().equalsIgnoreCase("BMT")) {
-                Cylindrical3D cyl = new Cylindrical3D();
-                cyl.baseArc().setCenter(new Point3D(0, 0, 0));
-                cyl.highArc().setCenter(new Point3D(0, 0, 0));
-                cyl.baseArc().setNormal(new Vector3D(0,1,0));
-                cyl.highArc().setNormal(new Vector3D(0,1,0));
+//                Cylindrical3D cyl = new Cylindrical3D();
+//                cyl.baseArc().setCenter(new Point3D(0, 0, 0));
+//                cyl.highArc().setCenter(new Point3D(0, 0, 0));
+//                cyl.baseArc().setNormal(new Vector3D(0,1,0));
+//                cyl.highArc().setNormal(new Vector3D(0,1,0));
+                int lyer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer();
+                int sec = trkcand.get_Crosses().get(c).get_Cluster1().get_Sector();
+                
+                Cylindrical3D cyl = bgeo.getCylinder(lyer, sec);
                 
                 int id = trkcand.get_Crosses().get(c).get_Cluster1().get_Id();
                 double ce = trkcand.get_Crosses().get(c).get_Cluster1().get_Centroid();
@@ -450,11 +457,12 @@ public class RecUtilities {
         for(Cross c : bseed.get_Crosses()) {
             int layr = 0;
             int layr2 = 0;
+            c.set_AssociatedTrackID(-1);
             if(c.get_Detector().equalsIgnoreCase("BMT")) {
                 layr = c.getOrderedRegion()+3;
                 if((int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)>0) {
                     c.isInSeed = false;
-                    //System.out.println("refit BMT "+c.printInfo());
+                    System.out.println("refit BMT "+c.printInfo());
                     refib.add(c);
                 }
             } else {
@@ -471,9 +479,21 @@ public class RecUtilities {
         }
         Collections.sort(refi);
         seedlist = trseed.findSeed(refi, refib, SVTGeom, BMTGeom, swimmer);
+        System.out.println("First Algo");
+        for(Seed s : seedlist) {
+            System.out.println("seed ");
+            for(Cross c : s.get_Crosses()) System.out.println(c.printInfo());
+         System.out.println("--------------------------");    
+        }
+        
         trseed2.unUsedHitsOnly = true;
         seedlist.addAll( trseed2.findSeed(refi, refib, SVTGeom, BMTGeom, swimmer)); 
-        
+        System.out.println("After Second Algo");
+        for(Seed s : seedlist) {
+            System.out.println("seed ");
+            for(Cross c : s.get_Crosses()) System.out.println(c.printInfo());
+         System.out.println("--------------------------");    
+        }
         return seedlist;
     }
     
@@ -529,12 +549,19 @@ public class RecUtilities {
         }
         if(refi.size()>=3) {
             TrackCandListFinder.RayMeasurements NewMeasArrays = trkfindr.
-                get_RayMeasurementsArrays((ArrayList<Cross>) refi, false, false);
+                get_RayMeasurementsArrays((ArrayList<Cross>) refi, false, false, true);
             fitTrk.fit(NewMeasArrays._X, NewMeasArrays._Y, NewMeasArrays._Z,
                     NewMeasArrays._Y_prime, NewMeasArrays._ErrRt, 
                     NewMeasArrays._ErrY_prime, NewMeasArrays._ErrZ);
             if(fitTrk.get_ray()!=null) {
                 cand = new StraightTrack(fitTrk.get_ray());
+                cand.addAll(refi);
+                //refit with the SVT included to determine the z profile
+                NewMeasArrays = trkfindr.
+                get_RayMeasurementsArrays((ArrayList<Cross>) refi, false, false, false);
+                fitTrk.fit(NewMeasArrays._X, NewMeasArrays._Y, NewMeasArrays._Z, 
+                        NewMeasArrays._Y_prime, NewMeasArrays._ErrRt, NewMeasArrays._ErrY_prime, NewMeasArrays._ErrZ);
+                cand = new StraightTrack(fitTrk.get_ray()); 
                 cand.addAll(refi);
                 seedlist.add(cand);
             }
