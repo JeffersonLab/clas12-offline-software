@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.bmt;
 import javax.swing.JFrame;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.geom.prim.Arc3D;
+import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -508,6 +509,28 @@ public class BMTGeometry {
         return arcline;
     }
    
+    /**
+     * 
+     * @param layer
+     * @param sector
+     * @return rotated cylinder corresponding to the BMT surface
+     */
+    public Cylindrical3D getCylinder(int layer, int sector) {
+        Cylindrical3D cyl = new Cylindrical3D();
+        cyl.baseArc().setCenter(new Point3D(0, 0, 0));
+        cyl.highArc().setCenter(new Point3D(0, 0, 0));
+        cyl.baseArc().setNormal(new Vector3D(0,1,0));
+        cyl.highArc().setNormal(new Vector3D(0,1,0));
+        
+        Point3D    offset = this.getOffset(layer, sector);
+        Vector3D rotation = this.getRotation(layer, sector);
+        cyl.rotateX(rotation.x());
+        cyl.rotateY(rotation.y());
+        cyl.rotateZ(rotation.z());
+        cyl.translateXYZ(offset.x(),offset.y(),offset.z());
+        
+        return cyl;
+    }
     /**
      * Return the sector number
      * @param layer [0-6]
