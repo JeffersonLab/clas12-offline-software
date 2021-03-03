@@ -1,5 +1,7 @@
 package org.jlab.rec.cvt.hit;
 
+import org.jlab.geom.prim.Arc3D;
+import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
@@ -145,12 +147,16 @@ public class Strip {
             // set z
             //double z = geo.CRCStrip_GetZ(layer, this.get_Strip());
             int region = (int) ((layer + 1) / 2 ); // region index (1...3) 1=layers 1&2, 2=layers 3&4, 3=layers 5&6
-            double z = geo.getCstrip(region, sector, this.get_Strip()).center().z();
+            Arc3D arcLine = geo.getCstrip(region, sector, this.get_Strip());
+            double z = arcLine.center().z();
             this.set_Z(z);
             // max z err
             //this.set_ZErr(geo.CRCStrip_GetPitch(layer, this.get_Strip()) / Math.sqrt(12.));
             this.set_ZErr(geo.getCPitch(region, this.get_Strip()) / Math.sqrt(12.));
-            
+            this.set_ImplantPoint(arcLine.origin());
+            this.set_MidPoint(arcLine.center());
+            this.set_EndPoint(arcLine.end());
+            this.set_StripDir(arcLine.normal());
         }
 
         if (BMTGeometry.getDetectorType(layer) == BMTType.Z) { // Z-detectors
@@ -180,6 +186,13 @@ public class Strip {
             this.set_PhiErr(Math.sqrt(phiErr * phiErr + phiErrL * phiErrL));
             //System.out.println("arcerr "+org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]+" * "+Math.toDegrees(sigma/org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]));
             this.set_PhiErr0(phiErr);
+            
+            //Line3D L0 = geo.getZstrip(geo.getRegion(layer), sector, this.get_Strip());
+            Line3D L = geo.getLCZstrip(geo.getRegion(layer), sector, this.get_Strip());
+            this.set_ImplantPoint(L.origin());
+            this.set_MidPoint(L.midpoint());
+            this.set_EndPoint(L.end());
+            this.set_StripDir(L.direction());
         }
 
     }
