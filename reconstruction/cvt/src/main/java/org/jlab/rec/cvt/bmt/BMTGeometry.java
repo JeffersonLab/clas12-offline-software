@@ -12,7 +12,6 @@ import org.jlab.groot.group.DataGroup;
 import static org.jlab.rec.cvt.bmt.Constants.E_DRIFT_FF;
 import static org.jlab.rec.cvt.bmt.Constants.E_DRIFT_MF;
 import static org.jlab.rec.cvt.bmt.Lorentz.getLorentzAngle;
-import org.jlab.rec.cvt.services.CVTRecNewKF;
 
 /**
  *
@@ -375,7 +374,7 @@ public class BMTGeometry {
         Point3D p1= new Point3D(radius, 0, zmin);
         p1.rotateZ(theLorentzCorrectedAngle);
         Point3D p2= new Point3D(radius, 0, zmax);
-        p2.rotateZ(angle);
+        p2.rotateZ(theLorentzCorrectedAngle);
                 
         Line3D stripline = new Line3D(p1,p2);
         
