@@ -355,6 +355,56 @@ public class BMTGeometry {
         
         return stripline;
     }
+    /**
+     * Returns Line3D for Z detector pseudostrip identified from region, sector, strip numbers, for ideal geometry
+     * After Loentz angle correction
+     * @param region
+     * @param sector
+     * @param strip
+     * @return Line3D
+     */
+    public Line3D getIdealLCZstrip(int region, int sector, int strip) {
+        
+        double radius = Constants.getCRZRADIUS()[region-1];
+        int layer = this.getLayer(region, BMTType.Z);
+        double zmin   = Constants.getCRCZMIN()[region-1];
+        double zmax   = Constants.getCRCZMAX()[region-1];
+        double angle  = Constants.getCRZPHI()[region-1][sector-1] - Constants.getCRZDPHI()[region-1][sector-1] 
+                      + ((double) strip-0.5) * Constants.getCRZWIDTH()[region-1] / Constants.getCRZRADIUS()[region-1];
+        double theLorentzCorrectedAngle = angle + this.LorentzAngleCorr(layer,sector);
+        Point3D p1= new Point3D(radius, 0, zmin);
+        p1.rotateZ(theLorentzCorrectedAngle);
+        Point3D p2= new Point3D(radius, 0, zmax);
+        p2.rotateZ(angle);
+                
+        Line3D stripline = new Line3D(p1,p2);
+        
+        return stripline;
+    }
+    
+    /**
+     * Returns Line3D for Z detector pseudo-strip identified from region, sector, strip numbers, for real geometry
+     * After Lorentz angle correction
+     * @param region
+     * @param sector
+     * @param strip
+     * @return stripline
+     */
+    public Line3D getLCZstrip(int region, int sector, int strip) {
+        
+        int layer = this.getLayer(region, BMTType.Z);
+        Line3D stripline = this.getIdealLCZstrip(region, sector, strip);
+        
+        Point3D offset = this.getOffset(layer, sector);
+        Vector3D rotation = this.getRotation(layer, sector);
+        stripline.rotateX(rotation.x());
+        stripline.rotateY(rotation.y());
+        stripline.rotateZ(rotation.z());
+        stripline.translateXYZ(offset.x(),offset.y(),offset.z());
+                
+        
+        return stripline;
+    }
     
     /**
      * Return the C detector strip group
@@ -409,7 +459,7 @@ public class BMTGeometry {
             double zmin  = Constants.getCRCGRPZMIN()[region-1][group-1];     // group minimum z
             double pitch = Constants.getCRCWIDTH()[region-1][group-1];       // group pitch
             int    nmin  = Constants.getCRCGRPNMIN()[region-1][group-1];
-            z  = zmin + (strip - nmin + 0.5) * pitch;
+            z  = zmin + (strip - nmin + 0.5) * pitch ;
         }
         return z;
     }
