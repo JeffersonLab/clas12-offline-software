@@ -14,6 +14,8 @@ import org.jlab.rec.cvt.trajectory.Helix;
  */
 public class Seed implements Comparable<Seed>{
 
+    public int trkStatus;
+
     public Seed() {
         // TODO Auto-generated constructor stub
     }
