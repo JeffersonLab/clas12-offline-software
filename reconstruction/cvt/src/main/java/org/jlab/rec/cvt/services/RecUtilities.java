@@ -462,7 +462,6 @@ public class RecUtilities {
                 layr = c.getOrderedRegion()+3;
                 if((int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)>0) {
                     c.isInSeed = false;
-                    System.out.println("refit BMT "+c.printInfo());
                     refib.add(c);
                 }
             } else {
@@ -479,21 +478,10 @@ public class RecUtilities {
         }
         Collections.sort(refi);
         seedlist = trseed.findSeed(refi, refib, SVTGeom, BMTGeom, swimmer);
-        System.out.println("First Algo");
-        for(Seed s : seedlist) {
-            System.out.println("seed ");
-            for(Cross c : s.get_Crosses()) System.out.println(c.printInfo());
-         System.out.println("--------------------------");    
-        }
         
         trseed2.unUsedHitsOnly = true;
         seedlist.addAll( trseed2.findSeed(refi, refib, SVTGeom, BMTGeom, swimmer)); 
-        System.out.println("After Second Algo");
-        for(Seed s : seedlist) {
-            System.out.println("seed ");
-            for(Cross c : s.get_Crosses()) System.out.println(c.printInfo());
-         System.out.println("--------------------------");    
-        }
+        
         return seedlist;
     }
     

@@ -325,9 +325,7 @@ public class StraightTrackCrossListFinder {
 
         // loop over the list of crosslists
         for (int i = 0; i < crossLists.size(); i++) {
-            if (crossLists.get(i).size() > 0) {System.out.println("In list :");
-                for(Cross c : crossLists.get(i))
-                    System.out.println("In  :"+c.printInfo());
+            if (crossLists.get(i).size() > 0) {
                 ArrayList<Cross> crossList = new ArrayList<Cross>();
                 // find the trajectory for each crosslist
                 ArrayList<Cross> TrajPoints = get_XYTrajectory(crossLists.get(i), svt_geo, bmt_geo, NbSVTRegions);
@@ -387,10 +385,6 @@ public class StraightTrackCrossListFinder {
         for (int k = 0; k < newCrossLists.size(); k++) {
             if (newCrossLists.get(k).size() != 0) {
                 crossListFinal.add(newCrossLists.get(k));
-                System.out.println("In list :");
-                for(Cross c : newCrossLists.get(k))
-                    System.out.println("In  :"+c.printInfo());
-                
             }
         }
         return crossListFinal;

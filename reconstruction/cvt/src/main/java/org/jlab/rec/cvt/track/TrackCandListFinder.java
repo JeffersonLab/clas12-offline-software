@@ -678,7 +678,7 @@ public class TrackCandListFinder {
         BMTZdetcrossesInTrk.clear();
 
         //make lists
-        for (Cross c : arrayList) { //System.out.println(" getting measurement arrays "+c.printInfo());
+        for (Cross c : arrayList) { 
             if (c.get_Detector().equalsIgnoreCase("SVT")) {
                 SVTcrossesInTrk.add(c);
             }
