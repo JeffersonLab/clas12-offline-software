@@ -1,6 +1,6 @@
 ---
 name: HipoToHipoWriter
-engine: org.jlab.clas.std.services.convertors.HipoToHipoWriter
+engine: org.jlab.io.clara.HipoToHipoWriter
 type: java
 
 author: Sebastián Mancilla

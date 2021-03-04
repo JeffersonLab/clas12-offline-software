@@ -1,6 +1,6 @@
 ---
 name: HipoToHipoReader
-engine: org.jlab.clas.std.services.convertors.HipoToHipoReader
+engine: org.jlab.io.clara.HipoToHipoReader
 type: java
 
 author: Sebastián Mancilla
