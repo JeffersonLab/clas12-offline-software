@@ -536,7 +536,7 @@ public class TrajectoryFinder {
      */
     public void setHitResolParams(String detector, int sector, int layer, Cluster cluster,
             StateVec stVec, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, boolean trajFinal) {
-System.out.println("SETTING HIT RESOL...");
+
         if (detector.equalsIgnoreCase("SVT") ) {
             double doca2Cls = svt_geo.getDOCAToStrip(sector, layer, cluster.get_Centroid(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
             double doca2Seed = svt_geo.getDOCAToStrip(sector, layer, (double) cluster.get_SeedStrip(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
