@@ -1,6 +1,5 @@
 package org.jlab.rec.ft;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,7 +42,8 @@ public class FTEBEngine extends ReconstructionEngine {
         String[] tables = new String[]{
             "/calibration/ft/ftcal/cluster",
             "/calibration/ft/ftcal/thetacorr",
-            "/calibration/ft/ftcal/phicorr"
+            "/calibration/ft/ftcal/phicorr",
+            "/geometry/target"
         };
         requireConstants(Arrays.asList(tables));
         this.getConstantsManager().setVariation("default");
@@ -60,7 +60,7 @@ public class FTEBEngine extends ReconstructionEngine {
         if (run>=0) {
             reco.init(this.getSolenoid());
             FTresponses = reco.addResponses(event, this.getConstantsManager(), run);
-            FTparticles = reco.initFTparticles(FTresponses);
+            FTparticles = reco.initFTparticles(FTresponses, this.getConstantsManager(), run);
             reco.matchToHODO(FTresponses, FTparticles);
             reco.correctDirection(FTparticles, this.getConstantsManager(), run);
             reco.writeBanks(event, FTparticles);
@@ -165,7 +165,7 @@ public class FTEBEngine extends ReconstructionEngine {
         H2F h10 = new H2F("Cluster Energy", 100, -180., 180., 100, -0.5, 0.5);
         h10.setTitleX("#phi");
         h10.setTitleY("Energy Resolution(GeV)");
-
+        
         while (reader.hasEvent()) {
             DataEvent event = (DataEvent) reader.getNextEvent();
             cal.processDataEvent(event);
@@ -191,7 +191,7 @@ public class FTEBEngine extends ReconstructionEngine {
             } else {
                 DetectorEvent detectorEvent = DetectorData.readDetectorEvent(event);
                 PhysicsEvent gen = detectorEvent.getGeneratedEvent();
-                if (event.hasBank("FT::particles")) {
+                     if (event.hasBank("FT::particles")) {
                     DataBank bank = event.getBank("FT::particles");
                     int nrows = bank.rows();
                     for (int i = 0; i < nrows; i++) {
