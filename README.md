@@ -1,4 +1,8 @@
-# clas12-offline-software [![Build Status](https://travis-ci.org/JeffersonLab/clas12-offline-software.svg?branch=development)](https://travis-ci.org/JeffersonLab/clas12-offline-software) [![codecov](https://codecov.io/gh/JeffersonLab/clas12-offline-software/branch/development/graph/badge.svg?precision=2)](https://codecov.io/gh/JeffersonLab/clas12-offline-software/branch/development)
+# clas12-offline-software
+[![Build Status](https://github.com/jeffersonlab/clas12-offline-software/workflows/Coatjava-CI/badge.svg)](https://github.com/jeffersonlab/clas12-offline-software/actions)
+[![codecov](https://codecov.io/gh/JeffersonLab/clas12-offline-software/branch/development/graph/badge.svg?precision=2)](https://codecov.io/gh/JeffersonLab/clas12-offline-software/branch/development)
+
+
 CLAS12 Offline Software
 
 ## Quick Start
