@@ -671,21 +671,41 @@ public abstract class MagneticField implements IMagField {
 	}
 
 	/**
-	 * @return the phiCoordinate
+	 * Get the phi coordinate which will be q1
+	 * @return the phi Coordinate 
 	 */
 	public GridCoordinate getPhiCoordinate() {
 		return q1Coordinate;
 	}
+	
+	/**
+	 * Get the x coordinate which will be q1
+	 * @return the x Coordinate 
+	 */
+	public GridCoordinate getXCoordinate() {
+		return q1Coordinate;
+	}
 
 	/**
-	 * @return the rCoordinate
+	 * Get the R (rho) coordinate which will be q2
+	 * @return the r (rho) coordinate
 	 */
 	public GridCoordinate getRCoordinate() {
 		return q2Coordinate;
 	}
 
+
 	/**
-	 * @return the zCoordinate
+	 * Get the y coordinate which will be q2
+	 * @return the y coordinate
+	 */
+	public GridCoordinate getYCoordinate() {
+		return q2Coordinate;
+	}
+
+	/**
+	 * Get the z coordinate which will be q3
+	 * @return the z coordinate
 	 */
 	public GridCoordinate getZCoordinate() {
 		return q3Coordinate;

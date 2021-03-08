@@ -937,7 +937,7 @@ public class MagTests {
 //			mf.initializeMagneticFields(mfdir.getPath(), "Symm_torus_r2501_phi16_z251_24Apr2018.dat",
 //					"SolenoidMarch2019_BIN.dat");
 			mf.initializeMagneticFields(mfdir.getPath(), "Symm_torus_r2501_phi16_z251_24Apr2018.dat",
-					"Symm_solenoid_r601_phi1_z1201_13June2018.dat");
+					"Symm_solenoid_r601_phi1_z1201_13June2018.dat", "Full_transsolenoid_x161_y81_z321_March2021.dat");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -1055,7 +1055,7 @@ public class MagTests {
 		System.out.println("mfdir exists: " + (mfdir.exists() && mfdir.isDirectory()));
 		try {
 			mf.initializeMagneticFields(mfdir.getPath(), "Full_torus_r251_phi181_z251_08May2018.dat",
-					"Symm_solenoid_r601_phi1_z1201_13June2018.dat");
+					"Symm_solenoid_r601_phi1_z1201_13June2018.dat", "Full_transsolenoid_x161_y81_z321_March2021.dat");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			System.exit(1);

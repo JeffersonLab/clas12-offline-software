@@ -231,34 +231,8 @@ public class Converter {
 			float rhomax = (float) gdata[RHO].max;
 			float zmin = (float) gdata[Z].min;
 			float zmax = (float) gdata[Z].max;
-
-			dos.writeInt(0xced);
-			dos.writeInt(0);
-			dos.writeInt(1);
-			dos.writeInt(0);
-			dos.writeInt(0);
-			dos.writeInt(0);
-			dos.writeFloat(phimin);
-			dos.writeFloat(phimax);
-			dos.writeInt(nPhi);
-			dos.writeFloat(rhomin);
-			dos.writeFloat(rhomax);
-			dos.writeInt(nRho);
-			dos.writeFloat(zmin);
-			dos.writeFloat(zmax);
-			dos.writeInt(nZ);
-
-			long unixTime = System.currentTimeMillis();
-
-			int high = (int) (unixTime >> 32);
-			int low = (int) unixTime;
-
-			// write reserved
-			dos.writeInt(high); // first word of unix time
-			dos.writeInt(low); // second word of unix time
-			dos.writeInt(0);
-			dos.writeInt(0);
-			dos.writeInt(0);
+			
+			MagneticFields.writeHeader(dos, 0, 1, 0, 0, 0, phimin, phimax, nPhi, rhomin, rhomax, nRho, zmin, zmax, nZ);
 
 			int size = 3 * 4 * nPhi * nRho * nZ;
 			System.err.println("FILE SIZE = " + size + " bytes");

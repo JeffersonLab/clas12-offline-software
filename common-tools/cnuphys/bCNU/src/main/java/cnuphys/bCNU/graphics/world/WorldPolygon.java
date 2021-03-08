@@ -1,73 +1,29 @@
 package cnuphys.bCNU.graphics.world;
 
-import java.awt.Point;
-
 import java.awt.Rectangle;
-import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import sun.awt.geom.Crossings;
 import java.util.Arrays;
 
-/**
- * Modified version of the Java Source class "Polygon" to allow for real world
- * points (aka doubles) rather then just integers. This Object MUST be painted 
- * using world graphics utilities or it will not paint properly. 
- */
-
-/*
- * @(#)Polygon.java	1.58 10/03/23
- *
- * Copyright (c) 2006, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- */
-
-/**
- * The <code>Polygon</code> class encapsulates a description of a closed,
- * two-dimensional region within a coordinate space. This region is bounded by
- * an arbitrary number of line segments, each of which is one side of the
- * polygon. Internally, a polygon comprises of a list of {@code (x,y)}
- * coordinate pairs, where each pair defines a <i>vertex</i> of the polygon, and
- * two successive pairs are the endpoints of a line that is a side of the
- * polygon. The first and final pairs of {@code (x,y)} points are joined by a
- * line segment that closes the polygon. This <code>Polygon</code> is defined
- * with an even-odd winding rule. See
- * {@link java.awt.geom.PathIterator#WIND_EVEN_ODD WIND_EVEN_ODD} for a
- * definition of the even-odd winding rule. This class's hit-testing methods,
- * which include the <code>contains</code>, <code>intersects</code> and
- * <code>inside</code> methods, use the <i>insideness</i> definition described
- * in the {@link Shape} class comments.
- * 
- * @version 1.26, 07/24/98
- * @author Sami Shaio
- * @see Shape
- * @author Herb Jellinek
- * @since 1.0
- */
-public class WorldPolygon implements Shape, java.io.Serializable {
-
+public class WorldPolygon {
+	
 	/**
 	 * The total number of points. The value of <code>npoints</code> represents
 	 * the number of valid points in this <code>Polygon</code> and might be less
 	 * than the number of elements in {@link #xpoints xpoints} or
 	 * {@link #ypoints ypoints}. This value can be NULL.
-	 * 
-	 * @serial
-	 * @since 1.0
 	 */
-	public int npoints;
 
+	public int npoints;
+	
 	/**
 	 * The array of X coordinates. The number of elements in this array might be
 	 * more than the number of X coordinates in this <code>Polygon</code>. The
 	 * extra elements allow new points to be added to this <code>Polygon</code>
 	 * without re-creating this array. The value of {@link #npoints npoints} is
 	 * equal to the number of valid points in this <code>Polygon</code>.
-	 * 
-	 * @serial
-	 * @since 1.0
 	 */
 	public double xpoints[];
 
@@ -85,19 +41,9 @@ public class WorldPolygon implements Shape, java.io.Serializable {
 
 	/**
 	 * The bounds of this {@code Polygon}. This value can be null.
-	 * 
-	 * @serial
-	 * @see #getBoundingBox()
-	 * @see #getBounds()
-	 * @since 1.0
 	 */
 	protected Rectangle2D.Double bounds;
-
-	/*
-	 * JDK 1.1 serialVersionUID
-	 */
-	private static final long serialVersionUID = -6460061437900069969L;
-
+	
 	/*
 	 * Default length for xpoints and ypoints.
 	 */
@@ -112,7 +58,7 @@ public class WorldPolygon implements Shape, java.io.Serializable {
 		xpoints = new double[MIN_LENGTH];
 		ypoints = new double[MIN_LENGTH];
 	}
-
+	
 	/**
 	 * Constructs and initializes a <code>Polygon</code> from the specified
 	 * parameters.
@@ -304,57 +250,8 @@ public class WorldPolygon implements Shape, java.io.Serializable {
 	 *         <code>Polygon</code>.
 	 * @since 1.1
 	 */
-	@Override
 	public Rectangle getBounds() {
 		return getBoundingBox();
-	}
-
-	/**
-	 * Returns the bounds of this <code>Polygon</code>.
-	 * 
-	 * @return the bounds of this <code>Polygon</code>.
-	 * @deprecated As of JDK version 1.1, replaced by <code>getBounds()</code>.
-	 * @since 1.0
-	 */
-	@Deprecated
-	public Rectangle getBoundingBox() {
-		if (npoints == 0) {
-			return new Rectangle();
-		}
-		if (bounds == null) {
-			calculateBounds(xpoints, ypoints, npoints);
-		}
-		return bounds.getBounds();
-	}
-
-	/**
-	 * Determines whether the specified {@link Point} is inside this
-	 * <code>Polygon</code>.
-	 * 
-	 * @param p
-	 *            the specified <code>Point</code> to be tested
-	 * @return <code>true</code> if the <code>Polygon</code> contains the
-	 *         <code>Point</code>; <code>false</code> otherwise.
-	 * @see #contains(double, double)
-	 * @since 1.0
-	 */
-	public boolean contains(Point p) {
-		return contains(p.x, p.y);
-	}
-
-	/**
-	 * Determines whether the specified {@link Point} is inside this
-	 * <code>Polygon</code>.
-	 * 
-	 * @param p
-	 *            the specified <code>Point</code> to be tested
-	 * @return <code>true</code> if the <code>Polygon</code> contains the
-	 *         <code>Point</code>; <code>false</code> otherwise.
-	 * @see #contains(double, double)
-	 * @since 1.0
-	 */
-	public boolean contains(Point2D.Double p) {
-		return contains(p.x, p.y);
 	}
 
 	/**
@@ -374,43 +271,12 @@ public class WorldPolygon implements Shape, java.io.Serializable {
 	public boolean contains(int x, int y) {
 		return contains((double) x, (double) y);
 	}
-
-	/**
-	 * Determines whether the specified coordinates are contained in this
-	 * <code>Polygon</code>.
-	 * 
-	 * @param x
-	 *            the specified X coordinate to be tested
-	 * @param y
-	 *            the specified Y coordinate to be tested
-	 * @return {@code true} if this {@code Polygon} contains the specified
-	 *         coordinates {@code (x,y)}; {@code false} otherwise.
-	 * @see #contains(double, double)
-	 * @deprecated As of JDK version 1.1, replaced by
-	 *             <code>contains(int, int)</code>.
-	 * @since 1.0
-	 */
-	@Deprecated
-	public boolean inside(int x, int y) {
-		return contains((double) x, (double) y);
-	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 * 
 	 * @since 1.2
 	 */
-	@Override
-	public Rectangle2D getBounds2D() {
-		return getBounds();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @since 1.2
-	 */
-	@Override
 	public boolean contains(double x, double y) {
 		if (npoints <= 2 || !getBoundingBox().contains(x, y)) {
 			return false;
@@ -474,94 +340,38 @@ public class WorldPolygon implements Shape, java.io.Serializable {
 		return ((hits & 1) != 0);
 	}
 
-	private Crossings getCrossings(double xlo, double ylo, double xhi,
-			double yhi) {
-		Crossings cross = new Crossings.EvenOdd(xlo, ylo, xhi, yhi);
-		double lastx = xpoints[npoints - 1];
-		double lasty = ypoints[npoints - 1];
-		double curx, cury;
-
-		// Walk the edges of the polygon
-		for (int i = 0; i < npoints; i++) {
-			curx = xpoints[i];
-			cury = ypoints[i];
-			if (cross.accumulateLine(lastx, lasty, curx, cury)) {
-				return null;
-			}
-			lastx = curx;
-			lasty = cury;
+	
+	/**
+	 * Returns the bounds of this <code>Polygon</code>.
+	 * 
+	 * @return the bounds of this <code>Polygon</code>.
+	 * @since 1.0
+	 */
+	public Rectangle getBoundingBox() {
+		if (npoints == 0) {
+			return new Rectangle();
 		}
-
-		return cross;
+		if (bounds == null) {
+			calculateBounds(xpoints, ypoints, npoints);
+		}
+		return bounds.getBounds();
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 * 
-	 * @since 1.2
 	 */
-	@Override
 	public boolean contains(Point2D p) {
 		return contains(p.getX(), p.getY());
 	}
+	
 
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @since 1.2
-	 */
-	@Override
-	public boolean intersects(double x, double y, double w, double h) {
-		if (npoints <= 0 || !getBoundingBox().intersects(x, y, w, h)) {
-			return false;
-		}
 
-		Crossings cross = getCrossings(x, y, x + w, y + h);
-		return (cross == null || !cross.isEmpty());
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @since 1.2
-	 */
-	@Override
-	public boolean intersects(Rectangle2D r) {
-		return intersects(r.getX(), r.getY(), r.getWidth(), r.getHeight());
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @since 1.2
-	 */
-	@Override
-	public boolean contains(double x, double y, double w, double h) {
-		if (npoints <= 0 || !getBoundingBox().intersects(x, y, w, h)) {
-			return false;
-		}
-
-		Crossings cross = getCrossings(x, y, x + w, y + h);
-		return (cross != null && cross.covers(y, y + h));
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @since 1.2
-	 */
-	@Override
-	public boolean contains(Rectangle2D r) {
-		return contains(r.getX(), r.getY(), r.getWidth(), r.getHeight());
-	}
-
-	@Override
 	public PathIterator getPathIterator(AffineTransform arg0) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public PathIterator getPathIterator(AffineTransform arg0, double arg1) {
 		// TODO Auto-generated method stub
 		return null;
