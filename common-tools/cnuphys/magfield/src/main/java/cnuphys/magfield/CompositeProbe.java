@@ -143,15 +143,20 @@ public class CompositeProbe extends FieldProbe {
 
 		return false;
 	}
+	
+	/**
+	 * Check whether we have a transverse solenoid field
+	 * 
+	 * @return <code>true</code> if we have a transverse solenoid
+	 */
+	public boolean hasTransverseSolenoid() {
+		for (IField probe : probes) {
+			if (probe instanceof TransverseSolenoidProbe) {
+				return true;
+			}
+		}
 
-//	@Override
-//	public boolean containsCylindrical(double phi, double rho, double z) {
-//		for (IField probe : probes) {
-//			if (probe.containsCylindrical(phi, rho, z)) {
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
+		return false;
+	}
 
 }

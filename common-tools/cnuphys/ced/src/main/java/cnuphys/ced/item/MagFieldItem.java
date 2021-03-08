@@ -425,7 +425,7 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 		int len = getTorusColors().length + 1;
 
 		double values[] = new double[len];
-		double min = 0.05;
+		double min = 0.0;
 		double max = MagneticFields.getInstance().maxFieldMagnitude() / 10.0;
 		double del = (max - min) / (len - 1);
 

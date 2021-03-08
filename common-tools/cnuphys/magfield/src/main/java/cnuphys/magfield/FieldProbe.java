@@ -227,13 +227,23 @@ public abstract class FieldProbe implements IField {
 
 			if (field instanceof Torus) {
 				return new TorusProbe((Torus) field);
-			} else if (field instanceof Solenoid) {
+			} 
+			else if (field instanceof Solenoid) {
 				return new SolenoidProbe((Solenoid) field);
-			} else if (field instanceof RotatedCompositeField) {
+			} 
+			else if (field instanceof TransverseSolenoid) {
+				return new TransverseSolenoidProbe((TransverseSolenoid) field);
+			} 
+			else if (field instanceof RotatedCompositeField) {
 				return new RotatedCompositeProbe((RotatedCompositeField) field);
-			} else if (field instanceof CompositeField) {
+			} 
+			else if (field instanceof RotatedCompositeField) {
+				return new RotatedCompositeProbe((RotatedCompositeField) field);
+			} 
+			else if (field instanceof CompositeField) {
 				return new CompositeProbe((CompositeField) field);
-			} else {
+			} 
+			else {
 				(new Throwable()).printStackTrace();
 				System.err.println("WARNING: cannot create probe for " + field.getName() + "  class: "
 						+ field.getClass().getName());

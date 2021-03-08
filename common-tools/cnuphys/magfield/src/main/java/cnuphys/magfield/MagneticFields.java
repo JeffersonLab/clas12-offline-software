@@ -2,13 +2,13 @@ package cnuphys.magfield;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
@@ -28,7 +28,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public class MagneticFields {
 
-	// 0.866...
+	// used for rotating to tilted sector coordinates
 	private static final double ROOT3OVER2 = Math.sqrt(3) / 2;
 	private static double _cosPhi[] = { Double.NaN, 1, 0.5, -0.5, -1, -0.5, 0.5 };
 	private static double _sinPhi[] = { Double.NaN, 0, ROOT3OVER2, ROOT3OVER2, 0, -ROOT3OVER2, -ROOT3OVER2 };
@@ -46,28 +46,37 @@ public class MagneticFields {
 	}
 
 	// version of mag field package
-	private static String VERSION = "1.096";
-
-	// initialize only once
-	private boolean _initialized = false;
-
+	private static String VERSION = "1.112";
+	
+	//transverse solenoidal field
+	private TransverseSolenoid _transverseSolenoid;
+	
 	// solenoidal field
 	private Solenoid _solenoid;
 
 	// torus field (with 12-fold symmetry)
 	private Torus _torus;
 
-	// composite field
+	// composite field solenoid and torus
 	private CompositeField _compositeField;
 
-	// composite rotated
+	// composite (solenoid and torus) rotated to tilted coordinates
 	private RotatedCompositeField _rotatedCompositeField;
+
+	// composite field transverse solenoid and torus
+	private CompositeField _transverseCompositeField;
+
+	// composite (transverse solenoid and torus) rotated to tilted coordinates
+	private RotatedCompositeField _transverseRotatedCompositeField;
 
 	// optional full path to torus set by command line argument in ced
 	private String _torusPath = sysPropOrEnvVar("TORUSMAP");
 
 	// optional full path to solenoid set by command line argument in ced
 	private String _solenoidPath = sysPropOrEnvVar("SOLENOIDMAP");
+	
+	// optional full path to tranverse solenoid set by command line argument in ced
+    private String _transverseSolenoidPath = sysPropOrEnvVar("TRANSVERSESOLENOIDMAP");
 
 	// singleton
 	private static MagneticFields instance;
@@ -75,12 +84,12 @@ public class MagneticFields {
 	// which field is active
 	private IMagField _activeField;
 
-	// directories to look for maps
-	private String[] _dataDirs;
-
 	// types of fields
 	public enum FieldType {
-		TORUS, SOLENOID, COMPOSITE, COMPOSITEROTATED, ZEROFIELD
+		TORUS, SOLENOID, TRANSVERSESOLENOID, 
+		COMPOSITE, COMPOSITEROTATED, 
+		TRANSVERSECOMPOSITE, TRANSVERSECOMPOSITEROTATED, 
+		ZEROFIELD
 	}
 
 	// List of magnetic field change listeners
@@ -90,11 +99,16 @@ public class MagneticFields {
 
 	private JMenuItem _loadNewTorusItem; // load different torus
 	private JMenuItem _loadNewSolenoidItem; // load different solenoid
+	private JMenuItem _loadNewTransverseSolenoidItem; // load different transverse solenoid
 
 	private JRadioButtonMenuItem _torusItem;
 	private JRadioButtonMenuItem _solenoidItem;
+	private JRadioButtonMenuItem _transverseSolenoidItem;
 	private JRadioButtonMenuItem _bothItem;
 	private JRadioButtonMenuItem _bothRotatedItem;
+	private JRadioButtonMenuItem _bothTransverseItem;
+	private JRadioButtonMenuItem _bothTransverseRotatedItem;
+
 	private JRadioButtonMenuItem _zeroItem;
 
 	private JRadioButtonMenuItem _interpolateItem;
@@ -103,6 +117,7 @@ public class MagneticFields {
 	// for scaling
 	private ScaleFieldPanel _scaleTorusPanel;
 	private ScaleFieldPanel _scaleSolenoidPanel;
+	private ScaleFieldPanel _scaleTransverseSolenoidPanel;
 
 	// for shifting
 	private MisplacedPanel _shiftSolenoidPanel;
@@ -207,6 +222,25 @@ public class MagneticFields {
 					_rotatedCompositeField.add(_torus);
 				}
 			}
+			
+			if (_transverseCompositeField != null) {
+				if (oldTorus != null) {
+					_transverseCompositeField.remove(oldTorus);
+				}
+				if (_torus != null) {
+					_transverseCompositeField.add(_torus);
+				}
+			}
+
+			if (_transverseRotatedCompositeField != null) {
+				if (oldTorus != null) {
+					_transverseRotatedCompositeField.remove(oldTorus);
+				}
+				if (_torus != null) {
+					_transverseRotatedCompositeField.add(_torus);
+				}
+			}
+
 		}
 
 		// System.out.println(_torus);
@@ -237,7 +271,31 @@ public class MagneticFields {
 			}
 		}
 	}
+	
+	/**
+	 * Open a new transverse solenoid map from the file selector
+	 */
+	protected void openNewTransverseSolenoid() {
 
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("dat", "map");
+
+		JFileChooser chooser = new JFileChooser(dataFilePath);
+		chooser.setSelectedFile(null);
+		chooser.setFileFilter(filter);
+		int returnVal = chooser.showOpenDialog(null);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = chooser.getSelectedFile();
+			try {
+				dataFilePath = file.getPath();
+				if (file.exists()) {
+					openNewTransverseSolenoid(file.getPath());
+				}
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	/**
 	 * Open a new solenoid map from a full path
 	 * 
@@ -286,6 +344,53 @@ public class MagneticFields {
 	}
 
 	/**
+	 * Open a new transverse solenoid map from a full path
+	 * 
+	 * @param path the path to the transverse solenoid map
+	 * @throws FileNotFoundException
+	 */
+	protected void openNewTransverseSolenoid(String path) throws FileNotFoundException {
+		File file = new File(path);
+		if (!file.exists()) {
+			throw new FileNotFoundException("No transverse solenoid at [" + path + "]");
+		}
+
+		TransverseSolenoid oldTransverseSolenoid = _transverseSolenoid;
+		boolean activeFieldWasTransverseSolenoid = (_activeField == oldTransverseSolenoid);
+
+		// load the transverse solenoid
+		_transverseSolenoid = null;
+		_transverseSolenoid = readTransverseSolenoid(path);
+
+		if (activeFieldWasTransverseSolenoid) {
+			_activeField = _transverseSolenoid;
+		}
+
+		if (_transverseSolenoid != null) {
+			if (_transverseCompositeField != null) {
+				if (oldTransverseSolenoid != null) {
+					_transverseCompositeField.remove(oldTransverseSolenoid);
+				}
+				if (_transverseSolenoid != null) {
+					_transverseCompositeField.add(_transverseSolenoid);
+				}
+			}
+
+			if (_transverseRotatedCompositeField != null) {
+				if (oldTransverseSolenoid != null) {
+					_transverseRotatedCompositeField.remove(oldTransverseSolenoid);
+				}
+				if (_transverseSolenoid != null) {
+					_transverseRotatedCompositeField.add(_transverseSolenoid);
+				}
+			}
+		}
+
+		notifyListeners();
+
+	}
+
+	/**
 	 * Shift the solenoid along Z for misplacement. A negative shift moved the
 	 * solenoid upstream. Kept for backwards compatibility
 	 * 
@@ -325,16 +430,30 @@ public class MagneticFields {
 		}
 
 	}
+	
+	/**
+	 * This programatically adjusts everything for new scale factors. This is used
+	 * when data found in the file. Two argument version for backwards compatibility.
+	 * 
+	 * @param torusScale    the torus scale factor
+	 * @param solenoidScale the solenoid scale factor
+	 */
+	public boolean changeFieldsAndMenus(double torusScale, double solenoidScale) {
+		return changeFieldsAndMenus(torusScale, solenoidScale, 1);
+	}
+	
 
 	/**
 	 * This programatically adjusts everything for new scale factors. This is used
 	 * when data found in the file
 	 * 
 	 * @param torusScale    the torus scale factor
-	 * @param solenoidScale the solenoid scale facter
+	 * @param solenoidScale the solenoid scale factor
+	 * @param transverseSolenoidScale the transverse solenoid scale factor
 	 */
-	public boolean changeFieldsAndMenus(double torusScale, double solenoidScale) {
+	public boolean changeFieldsAndMenus(double torusScale, double solenoidScale, double transverseSolenoidScale) {
 
+		boolean transverseSolenoidScaleChange = false;
 		boolean solenoidScaleChange = false;
 		boolean torusScaleChange = false;
 
@@ -342,14 +461,32 @@ public class MagneticFields {
 		FieldType currentType = getActiveFieldType();
 		boolean wantTorus = Math.abs(torusScale) > 0.01;
 		boolean wantSolenoid = Math.abs(solenoidScale) > 0.01;
+		
+		//cannot "want" both solenoid and transverse solenoid
+		boolean wantTransverseSolenoid = !wantSolenoid && Math.abs(transverseSolenoidScale) > 0.01;
+		
+		boolean wantAnySolenoid = wantSolenoid || wantTransverseSolenoid;
+
 		FieldType desiredFieldType = FieldType.ZEROFIELD;
 
 		if (wantTorus && wantSolenoid) {
 			desiredFieldType = FieldType.COMPOSITE;
-		} else if (wantTorus && !wantSolenoid) {
+		} 
+		
+		else if (wantTorus && wantTransverseSolenoid) {
+			desiredFieldType = FieldType.TRANSVERSECOMPOSITE;
+		}
+		
+		else if (wantTorus && !wantAnySolenoid) {
 			desiredFieldType = FieldType.TORUS;
-		} else if (!wantTorus && wantSolenoid) {
+		} 
+		
+		else if (!wantTorus && wantSolenoid) {
 			desiredFieldType = FieldType.SOLENOID;
+		} 
+		
+		else if (!wantTorus && wantTransverseSolenoid) {
+			desiredFieldType = FieldType.TRANSVERSESOLENOID;
 		}
 		boolean fieldChange = desiredFieldType != currentType;
 
@@ -364,34 +501,59 @@ public class MagneticFields {
 			double currentScale = _solenoid.getScaleFactor();
 			solenoidScaleChange = (Math.abs(currentScale - solenoidScale) > 0.001);
 		}
+		
+		// transverse solenoid scale change?
+		if (_transverseSolenoid != null) {
+			double currentScale = _transverseSolenoid.getScaleFactor();
+			transverseSolenoidScaleChange = (Math.abs(currentScale - transverseSolenoidScale) > 0.001);
+		}
 
-		if (torusScaleChange) {
+		if (torusScaleChange && (_torus != null)) {
 			// don't change scale if we aren't using torus
-			if ((desiredFieldType == FieldType.TORUS) || (desiredFieldType == FieldType.COMPOSITE)) {
+			if ((desiredFieldType == FieldType.TORUS) || (desiredFieldType == FieldType.COMPOSITE)
+					|| (desiredFieldType == FieldType.TRANSVERSECOMPOSITE)) {
 				_torus.setScaleFactor(torusScale);
 				_scaleTorusPanel.fixText();
 			}
 		}
-		if (solenoidScaleChange) {
+		if (solenoidScaleChange&& (_solenoid != null)) {
 			// don't change scale if we aren't using solenoid
 			if ((desiredFieldType == FieldType.SOLENOID) || (desiredFieldType == FieldType.COMPOSITE)) {
 				_solenoid.setScaleFactor(solenoidScale);
 			}
 			_scaleSolenoidPanel.fixText();
 		}
+		if (transverseSolenoidScaleChange && (_transverseSolenoid != null)) {
+			// don't change scale if we aren't using transverse solenoid
+			if ((desiredFieldType == FieldType.TRANSVERSESOLENOID) || (desiredFieldType == FieldType.TRANSVERSECOMPOSITE)) {
+				_transverseSolenoid.setScaleFactor(transverseSolenoidScale);
+			}
+			_scaleTransverseSolenoidPanel.fixText();
+		}
+		
+		
+		
 		if (fieldChange) {
 			setActiveField(desiredFieldType);
 			_torusItem.setSelected(desiredFieldType == FieldType.TORUS);
 			_solenoidItem.setSelected(desiredFieldType == FieldType.SOLENOID);
+			_transverseSolenoidItem.setSelected(desiredFieldType == FieldType.TRANSVERSESOLENOID);
+
+			
 			_bothItem.setSelected(desiredFieldType == FieldType.COMPOSITE);
+			_bothTransverseItem.setSelected(desiredFieldType == FieldType.TRANSVERSECOMPOSITE);
+			
 			if (_bothRotatedItem != null) {
 				_bothRotatedItem.setSelected(desiredFieldType == FieldType.COMPOSITEROTATED);
 			}
+			if (_bothTransverseRotatedItem != null) {
+				_bothTransverseRotatedItem.setSelected(desiredFieldType == FieldType.TRANSVERSECOMPOSITEROTATED);
+			}
+
 			_zeroItem.setSelected(desiredFieldType == FieldType.ZEROFIELD);
-			// _uniformItem.setSelected(desiredFieldType == FieldType.UNIFORM);
 		}
 
-		boolean changed = solenoidScaleChange || torusScaleChange || fieldChange;
+		boolean changed = solenoidScaleChange || transverseSolenoidScaleChange || torusScaleChange || fieldChange;
 		return changed;
 	}
 
@@ -405,17 +567,40 @@ public class MagneticFields {
 
 			if (_activeField == _torus) {
 				return FieldType.TORUS;
-			} else if (_activeField == _solenoid) {
+			} 
+			else if (_activeField == _solenoid) {
 				return FieldType.SOLENOID;
-			} else if (_activeField == _compositeField) {
+			} 
+			else if (_activeField == _transverseSolenoid) {
+				return FieldType.TRANSVERSESOLENOID;
+			} 
+			else if (_activeField == _compositeField) {
 				return FieldType.COMPOSITE;
-			} else if (_activeField == _rotatedCompositeField) {
+			} 
+			else if (_activeField == _rotatedCompositeField) {
 				return FieldType.COMPOSITEROTATED;
 			}
+			else if (_activeField == _transverseCompositeField) {
+				return FieldType.TRANSVERSECOMPOSITE;
+			} 
+			else if (_activeField == _transverseRotatedCompositeField)  {
+				return FieldType.TRANSVERSECOMPOSITEROTATED;
+			}
+
 		}
 
 		return FieldType.ZEROFIELD;
 	}
+	
+	/**
+	 * Is the active field transverse solenoid only
+	 * 
+	 * @return <code>true</code> of the active field is transverse solenoid only
+	 */
+	public boolean isTransverseSolenoidOnly() {
+		return ((_activeField != null) && (_activeField == _transverseSolenoid));
+	}
+
 
 	/**
 	 * Is the active field solenoid only
@@ -436,7 +621,7 @@ public class MagneticFields {
 	}
 
 	/**
-	 * Is the active field solenoid and torus composite
+	 * Is the active field composite
 	 * 
 	 * @return <code>true</code> of the active field is solenoid and torus composite
 	 */
@@ -444,7 +629,14 @@ public class MagneticFields {
 		return ((_activeField != null) && (_activeField == _compositeField));
 	}
 
-	// optional full path to solenoid set by command line argument in ced
+	/**
+	 * Is the active field transverse composite
+	 * 
+	 * @return <code>true</code> of the active field is transverse solenoid and torus composite
+	 */
+	public boolean isTransverseCompositeField() {
+		return ((_activeField != null) && (_activeField == _transverseCompositeField));
+	}
 
 	// get a property or environment variable
 	// the property takes precedence
@@ -486,6 +678,12 @@ public class MagneticFields {
 			break;
 		case COMPOSITEROTATED:
 			_activeField = _rotatedCompositeField;
+			break;
+		case TRANSVERSECOMPOSITE:
+			_activeField = _transverseCompositeField;
+			break;
+		case TRANSVERSECOMPOSITEROTATED:
+			_activeField = _transverseRotatedCompositeField;
 			break;
 		case ZEROFIELD:
 			_activeField = null;
@@ -529,15 +727,19 @@ public class MagneticFields {
 		case SOLENOID:
 			ifield = _solenoid;
 			break;
-		// case UNIFORM:
-		// ifield = _uniform;
-		// break;
 		case COMPOSITE:
 			ifield = _compositeField;
 			break;
 		case COMPOSITEROTATED:
 			ifield = _rotatedCompositeField;
 			break;
+		case TRANSVERSECOMPOSITE:
+			ifield = _transverseCompositeField;
+			break;
+		case TRANSVERSECOMPOSITEROTATED:
+			ifield = _transverseRotatedCompositeField;
+			break;
+
 		case ZEROFIELD:
 			ifield = null;
 			break;
@@ -558,20 +760,27 @@ public class MagneticFields {
 
 		switch (ftype) {
 		case TORUS:
-			if (_torus != null)
-				; {
-			scale = _torus.getScaleFactor();
-		}
+			if (_torus != null) {
+				scale = _torus.getScaleFactor();
+			}
 			break;
 		case SOLENOID:
-			if (_solenoid != null)
-				; {
-			scale = _solenoid.getScaleFactor();
-		}
+			if (_solenoid != null) {
+				scale = _solenoid.getScaleFactor();
+			}
+			break;
+		case TRANSVERSESOLENOID:
+			if (_transverseSolenoid != null) {
+				scale = _transverseSolenoid.getScaleFactor();
+			}
 			break;
 		case COMPOSITE:
 			break;
 		case COMPOSITEROTATED:
+			break;
+		case TRANSVERSECOMPOSITE:
+			break;
+		case TRANSVERSECOMPOSITEROTATED:
 			break;
 		case ZEROFIELD:
 			scale = 0;
@@ -593,20 +802,27 @@ public class MagneticFields {
 
 		switch (ftype) {
 		case TORUS:
-			if (_torus != null)
-				; {
-			shiftz = _torus.getShiftZ();
-		}
+			if (_torus != null) {
+				shiftz = _torus.getShiftZ();
+			}
 			break;
 		case SOLENOID:
-			if (_solenoid != null)
-				; {
-			shiftz = _solenoid.getShiftZ();
-		}
+			if (_solenoid != null) {
+				shiftz = _solenoid.getShiftZ();
+			}
+			break;
+		case TRANSVERSESOLENOID:
+			if (_solenoid != null) {
+				shiftz = _solenoid.getShiftZ();
+			}
 			break;
 		case COMPOSITE:
 			break;
 		case COMPOSITEROTATED:
+			break;
+		case TRANSVERSECOMPOSITE:
+			break;
+		case TRANSVERSECOMPOSITEROTATED:
 			break;
 		case ZEROFIELD:
 			shiftz = 0;
@@ -616,36 +832,21 @@ public class MagneticFields {
 		return shiftz;
 	}
 
-	// try to get the solenoid
-	private Solenoid getSolenoid(String baseName) {
-
-		if (_solenoid != null) {
-			return _solenoid;
-		}
-
-		System.err.println("Requested the solenoid, but it is currently null.");
-
-		Solenoid solenoid = null;
-
-		// try env variable first
-		if (_solenoidPath != null) {
-			solenoid = readSolenoid(_solenoidPath);
-			if (solenoid != null) {
-				return solenoid;
+	/**
+	 * In case someone loads a transverse solenoid externally.
+	 * 
+	 * @param transverseSolenoid the transverse solenoid
+	 */
+	public void setTransverseSolenoid(TransverseSolenoid transverseSolenoid) {
+		if (transverseSolenoid != null) {
+			if (transverseSolenoid != _transverseSolenoid) {
+				System.err.println("Manually setting solenoid");
+				_transverseSolenoid = transverseSolenoid;
+				notifyListeners();
 			}
 		}
-
-		for (String ds : _dataDirs) {
-			_solenoidPath = ds + "/" + baseName;
-			solenoid = readSolenoid(_solenoidPath);
-			if (solenoid != null) {
-				return solenoid;
-			}
-		}
-
-		return solenoid;
 	}
-
+	
 	/**
 	 * In case someone loads a solenoid externally.
 	 * 
@@ -680,10 +881,6 @@ public class MagneticFields {
 	// read the solenoidal field
 	private Solenoid readSolenoid(String fullPath) {
 
-		if (_solenoid != null) {
-			System.err.println("Reading a solenoid but already have one. Nothing changes");
-		}
-
 		File file = new File(fullPath);
 
 		Solenoid solenoid = null;
@@ -696,18 +893,29 @@ public class MagneticFields {
 
 		_solenoidPath = fullPath;
 
-		// System.out.println("\nAttempted to read solenoid from [" + cp + "]
-		// success: " + (solenoid != null));
 		return solenoid;
+	}
+	
+	// read the transverse solenoidal field
+	private TransverseSolenoid readTransverseSolenoid(String fullPath) {
+
+		File file = new File(fullPath);
+
+		TransverseSolenoid transverseSolenoid = null;
+		if (file.exists()) {
+			try {
+				transverseSolenoid = TransverseSolenoid.fromBinaryFile(file);
+			} catch (Exception e) {
+			}
+		}
+
+		_transverseSolenoidPath = fullPath;
+
+		return transverseSolenoid;
 	}
 
 	// read the torus field
 	private Torus readTorus(String fullPath) {
-
-		if (_torus != null) {
-			System.err.println("Reading a torus but already have one. Nothing changes");
-//			System.exit(1);
-		}
 
 		File file = new File(fullPath);
 
@@ -721,8 +929,6 @@ public class MagneticFields {
 		}
 
 		_torusPath = fullPath;
-		// System.out.println("\nAttempted to read torus from [" + cp + "]
-		// success: " + (torus != null));
 		return torus;
 	}
 
@@ -778,6 +984,7 @@ public class MagneticFields {
 
 	/**
 	 * Initialize the magnetic field package
+	 * Kept for backwards comnpatibilty
 	 * 
 	 * @param dataDir      the common data directory containing the torus and
 	 *                     solenoid
@@ -792,36 +999,53 @@ public class MagneticFields {
 	 */
 	public void initializeMagneticFields(String dataDir, String torusName, String solenoidName)
 			throws FileNotFoundException, MagneticFieldInitializationException {
-		initializeMagneticFields(dataDir, torusName, dataDir, solenoidName);
+		initializeMagneticFields(dataDir, torusName, solenoidName, null);
 	}
-
+	
 	/**
-	 * @param torusDataDir    the data directory containing the torus
-	 * @param torusName       the base name of the torus map
-	 * @param solenoidDataDir the data directory containing the solenoid
-	 * @param solenoidName    the base name of the solenoid map
-	 * @throws FileNotFoundException                if either path is not null but
-	 *                                              the corresponding file cannot be
-	 *                                              found
-	 * @throws MagneticFieldInitializationException if both paths are null. Will
-	 *                                              proceed as long as one path is
-	 *                                              not null.
+	 * Initialize the magnetic field package
+	 * 
+	 * @param dataDir      the common data directory containing the torus and
+	 *                     solenoid
+	 * @param torusName    the base name of the torus map
+	 * @param solenoidName the base name of the solenoid map
+	 * @throws FileNotFoundException                if either full path is not null
+	 *                                              but the corresponding file
+	 *                                              cannot be found
+	 * @throws MagneticFieldInitializationException if both full paths are null.
+	 *                                              Will proceed as long as one path
+	 *                                              is not null.
 	 */
-	public void initializeMagneticFields(String torusDataDir, String torusName, String solenoidDataDir,
-			String solenoidName) throws FileNotFoundException, MagneticFieldInitializationException {
+	public void initializeMagneticFields(String dataDir, String torusName, String solenoidName, String transverseSolenoidName)
+			throws FileNotFoundException, MagneticFieldInitializationException {
+		
+		if (dataDir == null) {
+			return;
+		}
+		
 		String torusPath = null;
 		String solenoidPath = null;
-		if (torusDataDir != null && torusName != null) {
-			torusPath = (new File(torusDataDir, torusName)).getPath();
+		String transverseSolenoidPath = null;
+		
+		
+		if (torusName != null) {
+			torusPath = (new File(dataDir, torusName)).getPath();
 		}
-		if (solenoidDataDir != null && solenoidName != null) {
-			solenoidPath = (new File(solenoidDataDir, solenoidName)).getPath();
+		if (solenoidName != null) {
+			solenoidPath = (new File(dataDir, solenoidName)).getPath();
 		}
-		initializeMagneticFieldsFromPath(torusPath, solenoidPath);
+		if (transverseSolenoidName != null) {
+			transverseSolenoidPath = (new File(dataDir, transverseSolenoidName)).getPath();
+		}
+
+		initializeMagneticFieldsFromPath(torusPath, solenoidPath, transverseSolenoidPath);
+
 	}
 
+	
 	/**
 	 * Initialize the field from the two full paths. One of them can be null.
+	 * This is kept for backwards compatibility.
 	 * 
 	 * @param torusPath    the full path to the torus map. Can be null.
 	 * @param solenoidPath the full path to the solenoid map. Can be null.
@@ -834,13 +1058,35 @@ public class MagneticFields {
 	 */
 	public void initializeMagneticFieldsFromPath(String torusPath, String solenoidPath)
 			throws MagneticFieldInitializationException, FileNotFoundException {
+		initializeMagneticFieldsFromPath(torusPath, solenoidPath, null);
+	}
+	
 
-		if ((torusPath == null) && (solenoidPath == null)) {
+
+	/**
+	 * Initialize the field from the two full paths. One of them can be null.
+	 * 
+	 * @param torusPath    the full path to the torus map. Can be null.
+	 * @param solenoidPath the full path to the solenoid map. Can be null.
+	 * @param transverseSolenoidPath the full path to the transverse solenoid map. Can be null.
+	 * @throws MagneticFieldInitializationException if both paths are null. Will
+	 *                                              proceed as long as one path is
+	 *                                              not null.
+	 * @throws FileNotFoundException                if either path is not null but
+	 *                                              the corresponding file cannot be
+	 *                                              found
+	 */
+	public void initializeMagneticFieldsFromPath(String torusPath, String solenoidPath, 
+			String transverseSolenoidPath)
+			throws MagneticFieldInitializationException, FileNotFoundException {
+
+		if ((torusPath == null) && (solenoidPath == null) && (transverseSolenoidPath == null)) {
 			throw new MagneticFieldInitializationException();
 		}
 
 		File torusFile = null;
 		File solenoidFile = null;
+		File transverseSolenoidFile = null;
 
 		if (torusPath != null) {
 			torusFile = new File(torusPath);
@@ -857,6 +1103,15 @@ public class MagneticFields {
 				throw new FileNotFoundException("SOLENOID map not found at [" + solenoidPath + "]");
 			}
 		}
+		
+		if (transverseSolenoidPath != null) {
+			transverseSolenoidFile = new File(transverseSolenoidPath);
+			if (!transverseSolenoidFile.exists()) {
+				transverseSolenoidFile = null;
+				throw new FileNotFoundException("TRANSVERSE SOLENOID map not found at [" + transverseSolenoidPath + "]");
+			}
+		}
+
 
 		System.out.println("===========================================");
 		System.out.println("  Initializing Magnetic Fields");
@@ -874,9 +1129,17 @@ public class MagneticFields {
 			// load the solenoid
 			_solenoid = readSolenoid(solenoidPath);
 		}
+		
+		if (transverseSolenoidFile != null) {
+			System.out.println("  TRANSVERSE SOLENOID: [" + transverseSolenoidPath + "]");
+			// load the transverse solenoid
+			_transverseSolenoid = readTransverseSolenoid(transverseSolenoidPath);
+		}
+
 
 		System.out.println("  Torus loaded: " + (_torus != null));
 		System.out.println("  Solenoid loaded: " + (_solenoid != null));
+		System.out.println("  Transverse Solenoid loaded: " + (_transverseSolenoid != null));
 		System.out.println("===========================================");
 
 		// _uniform = new Uniform(0, 0, 2);
@@ -885,6 +1148,7 @@ public class MagneticFields {
 
 		_torusPath = torusPath;
 		_solenoidPath = solenoidPath;
+		_transverseSolenoidPath = transverseSolenoidPath;
 
 	}
 
@@ -948,34 +1212,46 @@ public class MagneticFields {
 	}
 
 	private boolean initializeMagneticFields(File magdir) {
-
-		String defaultMap = "Symm_torus_LOWRES_2008.dat";
-		// Symm_torus_r2501_phi16_z251_24Apr2018
-//		String desiredMap = "Full_torus_r251_phi181_z251_08May2018.dat";
-		String desiredMap = "Symm_torus_r2501_phi16_z251_24Apr2018.dat";
-
-		File torusFile = new File(magdir, desiredMap);
-		if (!torusFile.exists() || !torusFile.canRead()) {
-			torusFile = new File(magdir, defaultMap);
-		}
-
-		if (torusFile.exists() && torusFile.canRead()) {
-//			File solenoidFile = new File(magdir, "Symm_solenoid_r601_phi1_z1201_2008.dat");
-			File solenoidFile = new File(magdir, "Symm_solenoid_r601_phi1_z1201_13June2018.dat");
-			if (solenoidFile.exists() && solenoidFile.canRead()) {
-				try {
-					MagneticFields.getInstance().initializeMagneticFieldsFromPath(torusFile.getPath(),
-							solenoidFile.getPath());
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-					return false;
-				} catch (MagneticFieldInitializationException e) {
-					e.printStackTrace();
-					return false;
-				}
+		
+		
+		String defaultTorus = "Symm_torus_r2501_phi16_z251_24Apr2018.dat";
+		File torusFile = new File(magdir, defaultTorus);
+		if (!torusFile.exists()) {
+			defaultTorus = "Symm_solenoid_r601_phi1_z1201_2008.dat";
+			if (!torusFile.exists()) {
+				torusFile = null;
 			}
 		}
+		
+		
+		String defaultSolenoid = "Symm_solenoid_r601_phi1_z1201_13June2018.dat";
+		File solenoidFile = new File(magdir, defaultSolenoid);
+		if (!solenoidFile.exists()) {
+			solenoidFile = null;
+		}
 
+		
+		String defaultTransverseSolenoid = "Full_transsolenoid_x161_y81_z321_March2021.dat";
+		File transverseSolenoidFile = new File(magdir, defaultTransverseSolenoid);
+		if (!transverseSolenoidFile.exists()) {
+			transverseSolenoidFile = null;
+		}
+		
+		defaultTorus = (torusFile == null) ? null : torusFile.getPath(); 
+		defaultSolenoid = (solenoidFile == null) ? null : solenoidFile.getPath(); 
+		defaultTransverseSolenoid = (transverseSolenoidFile == null) ? null : transverseSolenoidFile.getPath(); 
+		
+
+		try {
+			MagneticFields.getInstance().initializeMagneticFieldsFromPath(defaultTorus,
+					defaultSolenoid, defaultTransverseSolenoid);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return false;
+		} catch (MagneticFieldInitializationException e) {
+			e.printStackTrace();
+			return false;
+		}
 		return true;
 	}
 
@@ -993,118 +1269,51 @@ public class MagneticFields {
 		}
 	}
 
-	/**
-	 * Tries to load the magnetic fields from fieldmaps A unix like colon separated
-	 * path
-	 */
-	public synchronized void initializeMagneticFields(String dataPath, TorusMap torusMap) {
-
-		if (_initialized) {
-			return;
-		}
-
-		_dataDirs = tokens(dataPath, ":");
-		System.out.println("Number of possible data directories = " + _dataDirs.length);
-
-		_initialized = true;
-
-		System.out.println("===========================================");
-		System.out.println("=  Initializing Magnetic Fields");
-		System.out.println("=  Version " + VERSION);
-		System.out.println("===========================================");
-
-		initializeTorus(torusMap);
-
-		// will actually try env variable first
-		_solenoid = getSolenoid("clas12-fieldmap-solenoid.dat");
-
-		System.out.println("Torus found: " + (_torus != null));
-		System.out.println("Solenoid found: " + (_solenoid != null));
-
-		// _uniform = new Uniform(0, 0, 2);
-		//
-		finalInit();
-	}
-
-	// load the requested torus map
-	private void initializeTorus(TorusMap torusMap) {
-
-		// default to symmetric
-		if (torusMap == null) {
-			torusMap = TorusMap.SYMMETRIC;
-		}
-
-		// hopefully there are data dirs to search
-		if ((_dataDirs == null) || (_dataDirs.length < 1)) {
-			_dataDirs = new String[2];
-			_dataDirs[0] = "../../../data";
-			_dataDirs[1] = "~/fieldMaps";
-		}
-
-		// lets see which maps we find
-
-		for (TorusMap tmap : TorusMap.values()) {
-			String fName = tmap.getFileName();
-			for (String dataDir : _dataDirs) {
-				if (tmap.foundField()) {
-					break;
-				}
-				File file = new File(dataDir, fName);
-
-				// try {
-				// System.err.println("SEARCHING FOR TORUS IN [" +
-				// file.getCanonicalPath() +
-				// "]");
-				// } catch (IOException e) {
-				// // TODO Auto-generated catch block
-				// e.printStackTrace();
-				// }
-
-				if (file.exists()) {
-					tmap.setFound(true);
-					tmap.setDirName(dataDir);
-
-					// System.out.println("** FOUND Torus map [" + fName + "] in
-					// directory: [" + dataDir + "]");
-				}
-
-			}
-		}
-
-		// did we find the one we want?
-
-		if (torusMap.foundField()) {
-			_torus = readTorus(new File(torusMap.getDirName(), torusMap.getFileName()).getPath());
-		}
-
-	}
 
 	// make composite fields
 	private void makeComposites() {
 		_compositeField = new CompositeField();
 		_rotatedCompositeField = new RotatedCompositeField();
+		_transverseCompositeField = new CompositeField();
+		_transverseRotatedCompositeField = new RotatedCompositeField();
 
 		// print some features
 		if (_torus != null) {
-			// System.out.println("************ Torus: \n" + torus);
 			_compositeField.add(_torus);
 			_rotatedCompositeField.add(_torus);
+			_transverseCompositeField.add(_torus);
+			_transverseRotatedCompositeField.add(_torus);
+
 		}
 		if (_solenoid != null) {
-			// System.out.println("************ Solenoid: \n" + solenoid);
 			_compositeField.add(_solenoid);
 			_rotatedCompositeField.add(_solenoid);
 		}
+		if (_transverseSolenoid != null) {
+			_transverseCompositeField.add(_transverseSolenoid);
+			_transverseRotatedCompositeField.add(_transverseSolenoid);
+		}
+
 
 		// set the default active field
 		_activeField = null;
 		if ((_torus != null) && (_solenoid != null)) {
 			_activeField = _compositeField;
-		} else if (_torus != null) {
+		} 
+		else if ((_torus != null) && (_solenoid != null)) {
+			_activeField = _compositeField;
+		} 
+
+		else if (_torus != null) {
 			_activeField = _torus;
-		} else if (_solenoid != null) {
+		} 
+		else if (_solenoid != null) {
 			_activeField = _solenoid;
 		}
+		else if (_transverseSolenoid != null) {
+			_activeField = _transverseSolenoid;
+		}
+
 	}
 
 	// final initialziation
@@ -1127,12 +1336,8 @@ public class MagneticFields {
 	 * @return the magnetic field menu
 	 */
 	public JMenu getMagneticFieldMenu(boolean incRotatedField, boolean includeTestFields) {
-		// // init(); //harmless if already inited
+		
 		JMenu menu = new JMenu("Field");
-
-		// _torusMenu = TorusMenu.getInstance();
-		// menu.add(_torusMenu);
-		// menu.addSeparator();
 
 		// for the mutually exclusive options
 		ButtonGroup bg = new ButtonGroup();
@@ -1147,13 +1352,15 @@ public class MagneticFields {
 
 		_torusItem = createRadioMenuItem(_torus, "Torus", menu, bg, al);
 		_solenoidItem = createRadioMenuItem(_solenoid, "Solenoid", menu, bg, al);
-		_bothItem = createRadioMenuItem(_compositeField, "Composite", menu, bg, al);
+		_transverseSolenoidItem = createRadioMenuItem(_transverseSolenoid, "Transverse Solenoid", menu, bg, al);
+		_bothItem = createRadioMenuItem(_compositeField, "Composite (Torus and Solenoid)", menu, bg, al);
+		_bothTransverseItem = createRadioMenuItem(_transverseCompositeField, "Composite (Torus and Transverse Solenoid)", menu, bg, al);
 
 		if (incRotatedField) {
-			_bothRotatedItem = createRadioMenuItem(_rotatedCompositeField, "Rotated Composite", menu, bg, al);
+			_bothRotatedItem = createRadioMenuItem(_rotatedCompositeField, "Rotated Composite (Torus and Solenoid)", menu, bg, al);
+			_bothTransverseRotatedItem = createRadioMenuItem(_transverseRotatedCompositeField, "Rotated Composite (Torus and Transverse Solenoid)", menu, bg, al);
 		}
 
-		// _uniformItem = createRadioMenuItem(null, "Uniform", menu, bg, al);
 		_zeroItem = createRadioMenuItem(null, "No Field", menu, bg, al);
 
 		// interpolation related
@@ -1182,23 +1389,40 @@ public class MagneticFields {
 			menu.add(_scaleSolenoidPanel);
 			menu.add(_shiftSolenoidPanel);
 		}
+		
+		if (_transverseSolenoid != null) {
+			menu.addSeparator();
+			_scaleTransverseSolenoidPanel = new ScaleFieldPanel(FieldType.TRANSVERSESOLENOID, "Transverse Solenoid", _transverseSolenoid.getScaleFactor());
+			menu.add(_scaleTransverseSolenoidPanel);
+		}
+
 
 		_torusItem.setEnabled(_torus != null);
 		_solenoidItem.setEnabled(_solenoid != null);
+		_transverseSolenoidItem.setEnabled(_transverseSolenoid != null);
 		_bothItem.setEnabled((_torus != null) && (_solenoid != null));
+		_bothTransverseItem.setEnabled((_torus != null) && (_transverseSolenoid != null));
 
 		if (_bothRotatedItem != null) {
 			_bothRotatedItem.setEnabled((_torus != null) && (_solenoid != null));
 		}
-		// _uniformItem.setEnabled(_uniform != null);
+		if (_bothTransverseRotatedItem != null) {
+			_bothTransverseRotatedItem.setEnabled((_torus != null) && (_transverseSolenoid != null));
+		}
 
 		menu.addSeparator();
 		_loadNewTorusItem = new JMenuItem("Load a Different Torus...");
 		_loadNewTorusItem.addActionListener(al);
 		menu.add(_loadNewTorusItem);
+		
 		_loadNewSolenoidItem = new JMenuItem("Load a Different Solenoid...");
 		_loadNewSolenoidItem.addActionListener(al);
 		menu.add(_loadNewSolenoidItem);
+		
+		_loadNewTransverseSolenoidItem = new JMenuItem("Load a Different Transverse Solenoid...");
+		_loadNewTransverseSolenoidItem.addActionListener(al);
+		menu.add(_loadNewTransverseSolenoidItem);
+
 
 		return menu;
 	}
@@ -1209,26 +1433,42 @@ public class MagneticFields {
 
 		if (source == _torusItem) {
 			_activeField = _torus;
-		} else if (source == _solenoidItem) {
+		} 
+		else if (source == _solenoidItem) {
 			_activeField = _solenoid;
-		} else if (source == _bothItem) {
+		} 
+		else if (source == _transverseSolenoidItem) {
+			_activeField = _transverseSolenoid;
+		} 
+		else if (source == _bothItem) {
 			_activeField = _compositeField;
-		} else if ((_bothRotatedItem != null) && (source == _bothRotatedItem)) {
+		} 
+		else if (source == _bothTransverseItem) {
+			_activeField = _transverseCompositeField;
+		} 
+		else if ((_bothRotatedItem != null) && (source == _bothRotatedItem)) {
 			_activeField = _rotatedCompositeField;
-		} else if (source == _zeroItem) {
+		} 
+		else if ((_bothTransverseRotatedItem != null) && (source == _bothTransverseRotatedItem)) {
+			_activeField = _transverseRotatedCompositeField;
+		} 
+		else if (source == _zeroItem) {
 			_activeField = null;
 		}
-		// else if (source == _uniformItem) {
-		// _activeField = _uniform;
-		// }
 		else if (source == _interpolateItem) {
 			MagneticField.setInterpolate(true);
-		} else if (source == _nearestNeighborItem) {
+		} 
+		else if (source == _nearestNeighborItem) {
 			MagneticField.setInterpolate(false);
-		} else if (source == _loadNewTorusItem) {
+		} 
+		else if (source == _loadNewTorusItem) {
 			openNewTorus();
-		} else if (source == _loadNewSolenoidItem) {
+		} 
+		else if (source == _loadNewSolenoidItem) {
 			openNewSolenoid();
+		}
+		else if (source == _loadNewTransverseSolenoidItem) {
+			openNewTransverseSolenoid();
 		}
 
 		System.err.println("Active Field: " + getActiveFieldDescription());
@@ -1243,12 +1483,20 @@ public class MagneticFields {
 					_scaleTorusPanel._textField.setText(String.format("%7.3f", field.getScaleFactor()));
 				}
 				notifyListeners();
-			} else if (field == _solenoid) {
-				if (_scaleTorusPanel != null) {
+			} 
+			else if (field == _solenoid) {
+				if (_scaleSolenoidPanel != null) {
 					_scaleSolenoidPanel._textField.setText(String.format("%7.3f", field.getScaleFactor()));
 				}
 				notifyListeners();
 			}
+			else if (field == _transverseSolenoid) {
+				if (_scaleTransverseSolenoidPanel != null) {
+					_scaleTransverseSolenoidPanel._textField.setText(String.format("%7.3f", field.getScaleFactor()));
+				}
+				notifyListeners();
+			}
+
 		}
 	}
 
@@ -1304,8 +1552,6 @@ public class MagneticFields {
 		_listenerList.remove(MagneticFieldChangeListener.class, magChangeListener);
 		_listenerList.add(MagneticFieldChangeListener.class, magChangeListener);
 
-//		System.err.println("Added MagField Change Listener [" + _listenerList.getListenerCount() + "]");
-//		(new Throwable()).printStackTrace();
 	}
 
 	/**
@@ -1477,6 +1723,27 @@ public class MagneticFields {
 
 		return false;
 	}
+	
+	/**
+	 * Check whether we have an active transverse solenoid field
+	 * 
+	 * @return <code>true</code> if we have a transverse solenoid
+	 */
+	public boolean hasActiveTransverseSolenoid() {
+		if (_activeField != null) {
+			if (_activeField instanceof TransverseSolenoid) {
+				return true;
+			} else if (_activeField instanceof TransverseSolenoidProbe) {
+				return true;
+			} else if (_activeField instanceof CompositeProbe) {
+				return ((CompositeProbe) _activeField).hasTransverseSolenoid();
+			} else if (_activeField instanceof CompositeField) {
+				return ((CompositeField) _activeField).hasTransverseSolenoid();
+			}
+		}
+
+		return false;
+	}
 
 	/**
 	 * Get the torus field
@@ -1495,6 +1762,16 @@ public class MagneticFields {
 	public Solenoid getSolenoid() {
 		return _solenoid;
 	}
+	
+	/**
+	 * Get the transverse solenoid field
+	 * 
+	 * @return the transverse solenoid field
+	 */
+	public TransverseSolenoid getTransverseSolenoid() {
+		return _transverseSolenoid;
+	}
+
 
 	/**
 	 * Get the composite field
@@ -1512,6 +1789,24 @@ public class MagneticFields {
 	 */
 	public RotatedCompositeField getRotatedCompositeField() {
 		return _rotatedCompositeField;
+	}
+	
+	/**
+	 * Get the transverse composite field
+	 * 
+	 * @return the transverse composite field
+	 */
+	public CompositeField getTransverseCompositeField() {
+		return _transverseCompositeField;
+	}
+
+	/**
+	 * Get the transverse rotated composite field
+	 * 
+	 * @return the transverse rotated composite field
+	 */
+	public RotatedCompositeField getTransverseRotatedCompositeField() {
+		return _transverseRotatedCompositeField;
 	}
 
 	/**
@@ -1531,7 +1826,7 @@ public class MagneticFields {
 	/**
 	 * Get the full solenoid path
 	 * 
-	 * @return the full torus path
+	 * @return the full solenoid path
 	 */
 	public String getSolenoidPath() {
 
@@ -1540,6 +1835,20 @@ public class MagneticFields {
 		}
 
 		return _solenoidPath;
+	}
+	
+	/**
+	 * Get the full transverse solenoid path
+	 * 
+	 * @return the full transverse solenoid path
+	 */
+	public String getTransverseSolenoidPath() {
+
+		if (_transverseSolenoid == null) {
+			return null;
+		}
+
+		return _transverseSolenoidPath;
 	}
 
 	/**
@@ -1681,6 +1990,18 @@ public class MagneticFields {
 		}
 		return (new File(getSolenoidPath())).getName();
 	}
+	
+	/**
+	 * Get the transverse solenoid file base name
+	 * 
+	 * @return the transverse solenoid file base name
+	 */
+	public String getTransverseSolenoidBaseName() {
+		if (getTransverseSolenoidPath() == null) {
+			return null;
+		}
+		return (new File(getTransverseSolenoidPath())).getName();
+	}
 
 	/**
 	 * Get a description of the torus and solenoid base file names
@@ -1690,14 +2011,20 @@ public class MagneticFields {
 	public String fileBaseNames() {
 		String tbn = getTorusBaseName();
 		String sbn = getSolenoidBaseName();
+		String tsbn = getTransverseSolenoidBaseName();
+
 
 		String s = "";
 		if ((tbn != null) && ((_activeField == _torus) || (_activeField == _compositeField))) {
 			s = s + "Torus [" + tbn + "] ";
 		}
 		if ((sbn != null) && ((_activeField == _solenoid) || (_activeField == _compositeField))) {
-			s = s + "Solenoid [" + sbn + "]";
+			s = s + "Solenoid [" + sbn + "] ";
 		}
+		if ((tsbn != null) && ((_activeField == _transverseSolenoid) || (_activeField == _transverseCompositeField))) {
+			s = s + "Transverse Solenoid [" + tsbn + "] ";
+		}
+
 		return s;
 	}
 
@@ -1762,12 +2089,21 @@ public class MagneticFields {
 				s += _torus.getBaseFileName();
 			}
 			break;
+			
 		case SOLENOID:
 			if (!_solenoid.isZeroField()) {
 				s += " ";
 				s += _solenoid.getBaseFileName();
 			}
 			break;
+			
+		case TRANSVERSESOLENOID:
+			if (!_transverseSolenoid.isZeroField()) {
+				s += " ";
+				s += _transverseSolenoid.getBaseFileName();
+			}
+			break;
+
 		case COMPOSITE:
 		case COMPOSITEROTATED:
 			if (!_solenoid.isZeroField()) {
@@ -1779,6 +2115,20 @@ public class MagneticFields {
 				s += _torus.getBaseFileName();
 			}
 			break;
+			
+		case TRANSVERSECOMPOSITE:
+		case TRANSVERSECOMPOSITEROTATED:
+			if (!_transverseSolenoid.isZeroField()) {
+				s += " ";
+				s += _transverseSolenoid.getBaseFileName();
+			}
+			if (!_torus.isZeroField()) {
+				s += " ";
+				s += _torus.getBaseFileName();
+			}
+			break;
+
+			
 		case ZEROFIELD:
 			s += " zero field";
 			break;
@@ -1795,22 +2145,96 @@ public class MagneticFields {
 		case TORUS:
 			s += String.format("Torus [%s] scale: %-7.3f\n", _torus.getBaseFileName(), _torus.getScaleFactor());
 			break;
+			
 		case SOLENOID:
 			s += String.format("Solenoid [%s] scale: %-7.3f\n", _solenoid.getBaseFileName(),
 					_solenoid.getScaleFactor());
 			break;
+			
+		case TRANSVERSESOLENOID:
+			s += String.format("Transverse Solenoid [%s] scale: %-7.3f\n", _transverseSolenoid.getBaseFileName(),
+					_transverseSolenoid.getScaleFactor());
+			break;
+			
 		case COMPOSITE:
 		case COMPOSITEROTATED:
 			s += String.format("Solenoid [%s] scale: %-7.3f\n", _solenoid.getBaseFileName(),
 					_solenoid.getScaleFactor());
 			s += String.format("Torus [%s] scale: %-7.3f\n", _torus.getBaseFileName(), _torus.getScaleFactor());
 			break;
+			
+		case TRANSVERSECOMPOSITE:
+		case TRANSVERSECOMPOSITEROTATED:
+			s += String.format("Transverse Solenoid [%s] scale: %-7.3f\n", _transverseSolenoid.getBaseFileName(),
+					_transverseSolenoid.getScaleFactor());
+			s += String.format("Torus [%s] scale: %-7.3f\n", _torus.getBaseFileName(), _torus.getScaleFactor());
+			break;
+			
 		case ZEROFIELD:
 			s += " zero field";
 			break;
 		}
 
 		return s;
+	}
+
+	/**
+	 * Write the binary file header
+	 * @param dos the output stream
+	 * @param gridCS grid coordinate system [0: cylindrical, 1:Cartesian]
+	 * @param fieldCS field coordinate system [0: cylindrical, 1:Cartesian]
+	 * @param lenUnit length units [0:cm, 1:m]
+	 * @param angUnit angular units [0:deg, 1:radians]
+	 * @param fieldUnit field units [0:kG, 1:T]
+	 * @param q1Min first coordinate min
+	 * @param q1Max first coordinate max
+	 * @param nq1 first coordinate num grid points including ends
+	 * @param q2Min second coordinate min
+	 * @param q2Max second coordinate max
+	 * @param nq2 second coordinate num grid points including ends
+	 * @param q3Min third coordinate min
+	 * @param q3Max third coordinate max
+	 * @param nq3 third coordinate num grid points including ends
+	 */
+	public static void writeHeader(DataOutputStream dos, int gridCS,
+			int fieldCS, int lenUnit, int angUnit, int fieldUnit,
+			float q1Min, float q1Max, int nq1,
+			float q2Min, float q2Max, int nq2,
+			float q3Min, float q3Max, int nq3) {
+		try {
+			dos.writeInt(0xced);
+			dos.writeInt(gridCS);
+			dos.writeInt(fieldCS);
+			dos.writeInt(lenUnit);
+			dos.writeInt(angUnit);
+			dos.writeInt(fieldUnit);
+			dos.writeFloat(q1Min);
+			dos.writeFloat(q1Max);
+			dos.writeInt(nq1);
+			dos.writeFloat(q2Min);
+			dos.writeFloat(q2Max);
+			dos.writeInt(nq2);
+			dos.writeFloat(q3Min);
+			dos.writeFloat(q3Max);
+			dos.writeInt(nq3);
+			long unixTime = System.currentTimeMillis();
+
+			int high = (int) (unixTime >> 32);
+			int low = (int) unixTime;
+
+			// write time and reserved
+			dos.writeInt(high); // first word of unix time
+			dos.writeInt(low); // second word of unix time
+			dos.writeInt(0);
+			dos.writeInt(0);
+			dos.writeInt(0);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
+
 	}
 
 	/**

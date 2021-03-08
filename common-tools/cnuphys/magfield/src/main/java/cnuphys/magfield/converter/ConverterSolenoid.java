@@ -1,16 +1,20 @@
 package cnuphys.magfield.converter;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.StringTokenizer;
 
 import cnuphys.magfield.FloatVect;
+import cnuphys.magfield.MagneticFields;
 
 public class ConverterSolenoid {
 
@@ -182,34 +186,8 @@ public class ConverterSolenoid {
 			float rhomax = (float) gdata[RHO].max;
 			float zmin = (float) gdata[Z].min;
 			float zmax = (float) gdata[Z].max;
-
-			dos.writeInt(0xced);
-			dos.writeInt(0);
-			dos.writeInt(0);
-			dos.writeInt(0);
-			dos.writeInt(0);
-			dos.writeInt(0);
-			dos.writeFloat(phimin);
-			dos.writeFloat(phimax);
-			dos.writeInt(nPhi);
-			dos.writeFloat(rhomin);
-			dos.writeFloat(rhomax);
-			dos.writeInt(nRho);
-			dos.writeFloat(zmin);
-			dos.writeFloat(zmax);
-			dos.writeInt(nZ);
-
-			long unixTime = System.currentTimeMillis();
-
-			int high = (int) (unixTime >> 32);
-			int low = (int) unixTime;
-
-			// write reserved
-			dos.writeInt(high); // first word of unix time
-			dos.writeInt(low); // second word of unix time
-			dos.writeInt(0);
-			dos.writeInt(0);
-			dos.writeInt(0);
+			
+			MagneticFields.writeHeader(dos, 0, 0, 0, 0, 0, phimin, phimax, nPhi, rhomin, rhomax, nRho, zmin, zmax, nZ);
 
 			int size = 3 * 4 * nPhi * nRho * nZ;
 			System.err.println("FILE SIZE = " + size + " bytes");
@@ -317,6 +295,130 @@ public class ConverterSolenoid {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	/**
+	 * Get the next non comment line
+	 * 
+	 * @param bufferedReader a buffered reader which should be linked to an ascii
+	 *                       file
+	 * @return the next non comment line (or <code>null</code>)
+	 */
+	
+	private static String nextNonComment(BufferedReader bufferedReader) {
+		String s = null;
+		try {
+			s = bufferedReader.readLine();
+			if (s != null) {
+				s = s.trim();
+			}
+			
+			
+			while ((s != null) && (s.startsWith("<") || (s.length() < 1) || s.startsWith("r(mm"))) {
+				
+				s = bufferedReader.readLine();
+
+				if (s != null) {
+					s = s.trim();
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return s;
+	}
+	
+	//tokenize a string
+	private static String[] tokens(String str, String delimiter) {
+
+		StringTokenizer t = new StringTokenizer(str, delimiter);
+		int num = t.countTokens();
+		String lines[] = new String[num];
+
+		for (int i = 0; i < num; i++) {
+			lines[i] = t.nextToken();
+		}
+
+		return lines;
+	}
+
+	
+	/**
+	 * Convert the GEMCAsciiTransverseMap ToBinary
+	 */
+	public static void GEMCTransverseAsciiToBinary() {
+		
+		String fileName = _homeDir + "/transverseSolenoid/transverseNewMagnet.dat";
+		
+		File asciiFile = new File(fileName);
+		if (!asciiFile.exists()) {
+			System.out.println("File not found: " + asciiFile.getPath());
+			return;
+		} 
+
+		System.out.println("File found: " + asciiFile.getPath());
+		
+		FileReader fileReader;
+		try {
+			fileReader = new FileReader(asciiFile);
+			final BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+			// prepare the binary file
+			String binaryFileName = _homeDir + "/transverseSolenoid/transverseBinary.dat";
+			
+			// String binaryFileName = "data/solenoid-srr_V3.dat";
+			int nX = 161;
+			int nY = 81;
+			int nZ = 321;
+			float xmin = -40.0f;
+			float xmax = 40.0f;
+			float ymin = -20.0f;
+			float ymax = 20.0f;
+			float zmin = -80.0f;
+			float zmax = 80.0f;
+
+			DataOutputStream dos = new DataOutputStream(new FileOutputStream(binaryFileName));
+			MagneticFields.writeHeader(dos, 1, 1, 0, 0, 0, xmin, xmax, nX, ymin, ymax, nY, zmin, zmax, nZ);
+			
+			int lineCount = 0;
+			boolean reading = true;
+			while (reading) {
+				
+				String s = nextNonComment(bufferedReader);
+				
+				if (s != null) {
+					lineCount++;
+					String tokens[] = tokens(s, " ");
+					
+					//convert from Tesla to kG
+					dos.writeFloat(Float.parseFloat(tokens[3])*10);
+					dos.writeFloat(Float.parseFloat(tokens[4])*10);
+					dos.writeFloat(Float.parseFloat(tokens[5])*10);
+					
+					if ((lineCount % 1000) == 0) {
+						System.out.println("Processed line count: " + lineCount);
+					}
+					
+					// System.out.println(s);
+				} else {
+					reading = false;
+				}
+
+			}
+			
+			System.out.println("Total line count: " + lineCount);
+			
+			dos.close();
+
+			
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			return;
+		}
+		
+		System.out.println("Done.");
 	}
 
 	/**
@@ -585,36 +687,40 @@ public class ConverterSolenoid {
 
 	// MAIN PROGRAM
 	public static void main(String arg[]) {
-		String dataDir = getDataDir();
+		
+		GEMCTransverseAsciiToBinary();
+		
+		
+//		String dataDir = getDataDir();
+//
+//		ArrayList<File> files = dataFiles(dataDir);
+//		System.out.println("data dir = [" + dataDir + "]  file count: " + files.size());
+//
+//		// get z ordering
+//		ArrayList<ZFile> zfiles = zOrderFiles(files);
+//		System.out.println("Z ordered Files");
+//
+//		// USE THE ZFILE LIST!!!!!!
+//		// TODO implement from here using the zfile list
+//
+//		// preprocess to get the grid data
+//		GridData gdata[] = null;
+//		try {
+//			gdata = preProcessor(zfiles);
+//
+//			System.out.println("PHI: " + gdata[PHI]);
+//			System.out.println("RHO: " + gdata[RHO]);
+//			System.out.println("Z: " + gdata[Z]);
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		System.out.println("Preprocessed Files");
+//
+//		 //convertToBinary(zfiles, gdata);
+//		convertToGemc(zfiles, gdata);
 
-		ArrayList<File> files = dataFiles(dataDir);
-		System.out.println("data dir = [" + dataDir + "]  file count: " + files.size());
-
-		// get z ordering
-		ArrayList<ZFile> zfiles = zOrderFiles(files);
-		System.out.println("Z ordered Files");
-
-		// USE THE ZFILE LIST!!!!!!
-		// TODO implement from here using the zfile list
-
-		// preprocess to get the grid data
-		GridData gdata[] = null;
-		try {
-			gdata = preProcessor(zfiles);
-
-			System.out.println("PHI: " + gdata[PHI]);
-			System.out.println("RHO: " + gdata[RHO]);
-			System.out.println("Z: " + gdata[Z]);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		System.out.println("Preprocessed Files");
-
-		 //convertToBinary(zfiles, gdata);
-		convertToGemc(zfiles, gdata);
-
-		System.out.println("done");
+//		System.out.println("done");
 	}
 
 	class GridData {

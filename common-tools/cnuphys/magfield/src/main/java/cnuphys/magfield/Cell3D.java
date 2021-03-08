@@ -41,7 +41,7 @@ public class Cell3D {
 	private final FloatVect b[][][] = new FloatVect[2][2][2];
 
 	/**
-	 * Create a 3D cell (for Torus)
+	 * Create a 3D cell (for Torus and Transverse solenoid)
 	 * 
 	 * @param probe the magnetic probe
 	 */
@@ -209,12 +209,6 @@ public class Cell3D {
 		a[6] = f[0] * f[1] * g[2];
 		a[7] = f[0] * f[1] * f[2];
 
-//			double bx = b1_000 * aa[0] + b1_001 * aa[1] + b1_010 * aa[2] + b1_011 * aa[3] + b1_100 * aa[4]
-//					+ b1_101 * aa[5] + b1_110 * aa[6] + b1_111 * aa[7];
-//			double by = b2_000 * aa[0] + b2_001 * aa[1] + b2_010 * aa[2] + b2_011 * aa[3] + b2_100 * aa[4]
-//					+ b2_101 * aa[5] + b2_110 * aa[6] + b2_111 * aa[7];
-//			double bz = b3_000 * aa[0] + b3_001 * aa[1] + b3_010 * aa[2] + b3_011 * aa[3] + b3_100 * aa[4]
-//					+ b3_101 * aa[5] + b3_110 * aa[6] + b3_111 * aa[7];
 
 		double bx = b[0][0][0].x * a[0] + b[0][0][1].x * a[1] + b[0][1][0].x * a[2] + b[0][1][1].x * a[3]
 				+ b[1][0][0].x * a[4] + b[1][0][1].x * a[5] + b[1][1][0].x * a[6] + b[1][1][1].x * a[7];
@@ -226,12 +220,6 @@ public class Cell3D {
 		result[0] = (float) bx;
 		result[1] = (float) by;
 		result[2] = (float) bz;
-//		} 
-//	else {
-//			for (int i = 0; i < 3; i++) {
-//				result[i] = 0f;
-//			}
-//		}
 	}
 
 	// nearest neighbor algorithm
