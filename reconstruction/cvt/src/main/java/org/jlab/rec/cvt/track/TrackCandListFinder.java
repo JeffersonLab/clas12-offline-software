@@ -20,7 +20,6 @@ import org.jlab.rec.cvt.fit.HelicalTrackFitter;
 import org.jlab.rec.cvt.fit.LineFitter;
 import org.jlab.rec.cvt.fit.CosmicFitter;
 import org.jlab.rec.cvt.hit.FittedHit;
-import org.jlab.rec.cvt.svt.Geometry;
 import org.jlab.rec.cvt.trajectory.Ray;
 import org.jlab.rec.cvt.trajectory.StateVec;
 import org.jlab.rec.cvt.trajectory.Trajectory;
@@ -769,7 +768,6 @@ public class TrackCandListFinder {
 
             }
         }
-        //set_CrossParamsSVT(Vector3D dirAtBstPlane, Geometry geo)
         RayMeasurements MeasArray = new RayMeasurements(X, Y, Z, Y_prime, ErrZ, ErrY_prime, ErrRt);
 
         return MeasArray;

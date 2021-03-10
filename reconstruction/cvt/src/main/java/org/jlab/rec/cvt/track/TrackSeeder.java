@@ -339,28 +339,29 @@ public class TrackSeeder {
                     if (sameSectorCrosses.size() >= 0) {
                         BMTmatches = this.findCandUsingMicroMegas(seed, sameSectorCrosses, bmt_geo);
                     } 
-                    if(BMTmatches.size()==0) { // no bmt matches; save svt stand-alone
-                        seedlist.add(seed);
-                    } else { //bmt matches found 
-                        for (Seed bseed : BMTmatches) {
-                            //refit using the BMT
-                            Track bcand = fitSeed(bseed.get_Crosses(), svt_geo, 5, false, swimmer);
-                            if (bcand != null) {
-                                seed = new Seed();
-                                Collections.sort(bseed.get_Crosses());
-                                seed.set_Crosses(bseed.get_Crosses());
-                                seed.set_Clusters(bseed.get_Clusters());
-                                seed.set_Helix(bcand.get_helix());
-                                seedlist.add(seed);
-                            }
+                    Seed bestSeed = null;
+                    double chi2_Circ = Double.POSITIVE_INFINITY;
+                    double chi2_Line = Double.POSITIVE_INFINITY;
+                    
+                    for (Seed bseed : BMTmatches) {
+                        //refit using the BMT
+                        Track bcand = fitSeed(bseed.get_Crosses(), svt_geo, 5, false, swimmer);
+                        
+                        if (bcand != null && bcand.get_circleFitChi2PerNDF()<chi2_Circ
+                                && bcand.get_lineFitChi2PerNDF()<chi2_Line) {
+                            seed = new Seed();
+                            seed.set_Crosses(bseed.get_Crosses());
+                            seed.set_Clusters(bseed.get_Clusters());
+                            seed.set_Helix(bcand.get_helix());
+                    
                         }
                     }
+                    seedlist.add(seed);
                 } 
             }
         }
        
         for (Seed bseed : seedlist) { 
-            bseed.trkStatus = 1;
             for(Cross c : bseed.get_Crosses()) {
                 c.isInSeed = true;
             }
@@ -534,7 +535,11 @@ public class TrackSeeder {
         }
         //System.out.println(" Seed fitter "+fitTrk.get_chisq()[0]+" "+fitTrk.get_chisq()[1]); 
         if(chisqMax>Constants.CIRCLEFIT_MAXCHI2)
-            cand=null;
+            return null;
+        if(X.size() > 3)
+            cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0] / (int) (X.size() - 3)); // 3 fit params	
+        if(Z.size() > 2)
+            cand.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1] / (int) (Z.size() - 2)); // 2 fit params
         return cand;
     }
 
@@ -545,7 +550,7 @@ public class TrackSeeder {
         List<ArrayList<Cross>> BMTCcrosses = new ArrayList<ArrayList<Cross>>();
         
         ArrayList<Cross> matches = new ArrayList<Cross>();
-        List<Seed> AllSeeds = new ArrayList<Seed>();
+        Map<String, Seed> AllSeeds = new HashMap<String, Seed>();
         int[] S = new int[3];
        
         for (int r = 0; r < 3; r++) {
@@ -594,14 +599,16 @@ public class TrackSeeder {
                     }
                     
                     matches.addAll(trkCand.get_Crosses());
-                    
+                    Collections.sort(matches);
                     if (matches.size() > 0) {
                         Seed BMTTrkSeed = new Seed();
-                        
+                        String st = "";
+                        for(Cross c : matches)
+                            st+=c.get_Id();
                         BMTTrkSeed.set_Helix(trkCand.get_Helix());
                         BMTTrkSeed.set_Crosses(matches);
                         BMTTrkSeed.set_Clusters(trkCand.get_Clusters());
-                        AllSeeds.add(BMTTrkSeed);
+                        AllSeeds.put(st,BMTTrkSeed);
                         
                         //if (AllSeeds.size() > 200) {
                         //    AllSeeds.clear();
@@ -614,8 +621,11 @@ public class TrackSeeder {
             }
         }
         
+        List<Seed> outputSeeds = new ArrayList<Seed>();
+        for(Seed s : AllSeeds.values())
+            outputSeeds.add(s);
         
-        return AllSeeds;
+        return outputSeeds;
     }
 
     private boolean passCcross(Seed trkCand, Cross bmt_Ccross, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo) {
