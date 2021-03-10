@@ -91,6 +91,16 @@ public class Swimming {
 	public static ArrayList<SwimTrajectory> getReconTrajectories() {
 		return _reconTrajectories;
 	}
+	
+	/**
+	 * Get all the cached aux trajectories
+	 * 
+	 * @return all the cached aux trajectories
+	 */
+	public static ArrayList<SwimTrajectory> getAuxTrajectories() {
+		return _auxTrajectories;
+	}
+
 
 	/**
 	 * Add a trajectory to the mc collection
