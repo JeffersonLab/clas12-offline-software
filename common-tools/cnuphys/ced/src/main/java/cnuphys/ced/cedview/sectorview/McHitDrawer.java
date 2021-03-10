@@ -8,11 +8,10 @@ public class McHitDrawer extends AMcHitDrawer {
 		super(view);
 	}
 
-
 	@Override
 	protected boolean correctSector(int sector) {
 		boolean showPoint = false;
-		switch (((SectorView)_view).getDisplaySectors()) {
+		switch (((SectorView) _view).getDisplaySectors()) {
 		case SECTORS14:
 			showPoint = ((sector == 1) || (sector == 4));
 			break;

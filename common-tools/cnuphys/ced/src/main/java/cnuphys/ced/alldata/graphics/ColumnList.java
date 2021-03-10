@@ -17,7 +17,7 @@ public class ColumnList extends JList<String> {
 
 	private static Dimension _size = new Dimension(220, 250);
 
-	//the scroll pane
+	// the scroll pane
 	private JScrollPane _scrollPane;
 
 	public ColumnList() {
@@ -27,35 +27,36 @@ public class ColumnList extends JList<String> {
 		_scrollPane.setPreferredSize(_size);
 		_scrollPane.setBorder(new CommonBorder("Column Name"));
 	}
-	
+
 	private void clear() {
-	       DefaultListModel listModel = (DefaultListModel) getModel();
-	       listModel.removeAllElements();
+		DefaultListModel listModel = (DefaultListModel) getModel();
+		listModel.removeAllElements();
 	}
-	
+
 	/**
 	 * Set the list to the columns of the given bank
+	 * 
 	 * @param bankName the name of the bank
 	 */
 	public void setList(String bankName) {
+		
 		if (bankName != null) {
 			DataDescriptor dd = DataManager.getInstance().getDictionary().getDescriptor(bankName);
 			if (dd != null) {
 				String columns[] = dd.getEntryList();
 				Arrays.sort(columns);
 				setListData(columns);
-			}
-			else {
+			} else {
 				clear();
 			}
-		}
-		else {
+		} else {
 			clear();
 		}
 	}
-	
+
 	/**
 	 * Get the scroll pane
+	 * 
 	 * @return the scroll pane
 	 */
 	public JScrollPane getScrollPane() {

@@ -17,10 +17,8 @@ public class MessageQueue extends Vector<Message> {
 	/**
 	 * Create a MessageQueue
 	 * 
-	 * @param capacity
-	 *            the original capacity
-	 * @param increment
-	 *            the capacity increment
+	 * @param capacity  the original capacity
+	 * @param increment the capacity increment
 	 */
 	public MessageQueue(int capacity, int increment) {
 		super(capacity, increment);
@@ -29,8 +27,7 @@ public class MessageQueue extends Vector<Message> {
 	/**
 	 * Queue a MessageData object. Notify threads that are waiting.
 	 * 
-	 * @param message
-	 *            the data to queue
+	 * @param message the data to queue
 	 */
 	public synchronized void queue(Message message) {
 		add(message);
@@ -56,8 +53,7 @@ public class MessageQueue extends Vector<Message> {
 	/**
 	 * Determines whether queue will accept any new messages.
 	 * 
-	 * @param accept
-	 *            if false, will no longer queue messages
+	 * @param accept if false, will no longer queue messages
 	 */
 	public void setAccept(boolean accept) {
 		_accept = accept;
@@ -73,8 +69,7 @@ public class MessageQueue extends Vector<Message> {
 			try {
 				// wait until notified of arriving message
 				wait();
-			}
-			catch (InterruptedException e) {
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 				return null;
 			}

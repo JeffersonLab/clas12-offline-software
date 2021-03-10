@@ -20,8 +20,7 @@ public class TextButton extends ToolBarToggleButton {
 	/**
 	 * Create a button for creating annotated text items.
 	 * 
-	 * @param container
-	 *            the owner container.
+	 * @param container the owner container.
 	 */
 	public TextButton(IContainer container) {
 		super(container, "images/text.gif", "Use to annotate");
@@ -30,8 +29,7 @@ public class TextButton extends ToolBarToggleButton {
 	/**
 	 * The mouse was clicked.
 	 * 
-	 * @param mouseEvent
-	 *            the causal event.
+	 * @param mouseEvent the causal event.
 	 */
 	@Override
 	public void mouseClicked(MouseEvent mouseEvent) {
@@ -40,18 +38,15 @@ public class TextButton extends ToolBarToggleButton {
 		GraphicsUtilities.centerComponent(labelDialog);
 		labelDialog.setVisible(true);
 
-		String resultString = UnicodeSupport.specialCharReplace(labelDialog
-				.getText());
+		String resultString = UnicodeSupport.specialCharReplace(labelDialog.getText());
 
 		if ((resultString != null) && (resultString.length() > 0)) {
 			Font font = labelDialog.getSelectedFont();
 			if (font != null) {
 				Point2D.Double wp = new Point2D.Double();
 				container.localToWorld(mouseEvent.getPoint(), wp);
-				TextItem item = new TextItem(container.getAnnotationLayer(),
-						wp, font, resultString,
-						labelDialog.getTextForeground(),
-						labelDialog.getTextBackground(), null);
+				TextItem item = new TextItem(container.getAnnotationLayer(), wp, font, resultString,
+						labelDialog.getTextForeground(), labelDialog.getTextBackground(), null);
 				if (item != null) {
 					item.setDraggable(true);
 					item.setRotatable(true);

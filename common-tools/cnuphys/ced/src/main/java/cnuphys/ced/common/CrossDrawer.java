@@ -14,22 +14,26 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.event.data.AIHBCrosses;
+import cnuphys.ced.event.data.AITBCrosses;
 import cnuphys.ced.event.data.Cross;
 import cnuphys.ced.event.data.CrossList;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.HBCrosses;
 import cnuphys.ced.event.data.TBCrosses;
 
-public class CrossDrawer extends CedViewDrawer  {
+public class CrossDrawer extends CedViewDrawer {
 
-	public static final int HB = 0;
-	public static final int TB = 1;
+	public static final int HB = DataDrawSupport.HB_CROSS;
+	public static final int TB = DataDrawSupport.TB_CROSS;
+	public static final int AIHB = DataDrawSupport.AIHB_CROSS;
+	public static final int AITB = DataDrawSupport.AITB_CROSS;
 
-	protected static final int ARROWLEN = 30; // pixels
-	protected static final Stroke THICKLINE = new BasicStroke(1.5f);
+	public static final int ARROWLEN = 30; // pixels
+	public static final Stroke THICKLINE = new BasicStroke(1.5f);
 
 	// feedback string color
-	protected static String fbcolors[] = { "$wheat$", "$misty rose$" };
+	public static String fbcolors[] = { "$wheat$", "$misty rose$", "$light pink$", "$khaki$" };
 
 	protected int _mode = HB;
 
@@ -40,7 +44,6 @@ public class CrossDrawer extends CedViewDrawer  {
 	protected double unitx[];
 	protected double unity[];
 	protected double unitz[];
-
 
 	public CrossDrawer(CedView view) {
 		super(view);
@@ -54,7 +57,6 @@ public class CrossDrawer extends CedViewDrawer  {
 	public void setMode(int mode) {
 		_mode = mode;
 	}
-	
 
 	@Override
 	public void draw(Graphics g, IContainer container) {
@@ -71,10 +73,17 @@ public class CrossDrawer extends CedViewDrawer  {
 		CrossList crosses = null;
 		if (_mode == HB) {
 			crosses = HBCrosses.getInstance().getCrosses();
-		}
+		} 
 		else if (_mode == TB) {
 			crosses = TBCrosses.getInstance().getCrosses();
 		}
+		else if (_mode == AIHB) {
+			crosses = AIHBCrosses.getInstance().getCrosses();
+		}
+		else if (_mode == AITB) {
+			crosses = AITBCrosses.getInstance().getCrosses();
+		}
+		
 		if ((crosses == null) || crosses.isEmpty()) {
 			return;
 		}
@@ -87,15 +96,14 @@ public class CrossDrawer extends CedViewDrawer  {
 		double result[] = new double[3];
 		Point pp = new Point();
 		Point2D.Double wp = new Point2D.Double();
-		
-		int index = 0;
+
 		for (Cross cross : crosses) {
 			result[0] = cross.x;
 			result[1] = cross.y;
 			result[2] = cross.z;
 			_view.tiltedToSector(result, result);
 			_view.sectorToWorld(_view.getProjectionPlane(), wp, result, cross.sector);
-			
+
 			// right sector?
 			int mySector = _view.getSector(container, null, wp);
 			if (mySector == cross.sector) {
@@ -108,8 +116,7 @@ public class CrossDrawer extends CedViewDrawer  {
 				Point pp2 = new Point();
 
 				int pixlen = ARROWLEN;
-				double r = pixlen / WorldGraphicsUtilities
-						.getMeanPixelDensity(container);
+				double r = pixlen / WorldGraphicsUtilities.getMeanPixelDensity(container);
 
 				result[0] = cross.x + r * cross.ux;
 				result[1] = cross.y + r * cross.uy;
@@ -128,48 +135,49 @@ public class CrossDrawer extends CedViewDrawer  {
 				// the circles and crosses
 				DataDrawSupport.drawCross(g2, pp.x, pp.y, _mode);
 
-			} //sector match;	
-			index++;
-		} //loop over crosses
-
+			} // sector match;
+		} // loop over crosses
 
 		g2.setStroke(oldStroke);
 	}
-	
+
 	/**
 	 * Use what was drawn to generate feedback strings
 	 * 
-	 * @param container the drawing container
-	 * @param screenPoint the mouse location
-	 * @param worldPoint the corresponding world location
+	 * @param container       the drawing container
+	 * @param screenPoint     the mouse location
+	 * @param worldPoint      the corresponding world location
 	 * @param feedbackStrings add strings to this collection
 	 */
 	@Override
-	public void vdrawFeedback(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings,
-			int option) {
+	public void vdrawFeedback(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings, int option) {
 
-		
 		// any crosses?
 		CrossList crosses = null;
 		if (_mode == HB) {
 			crosses = HBCrosses.getInstance().getCrosses();
-		}
+		} 
 		else if (_mode == TB) {
 			crosses = TBCrosses.getInstance().getCrosses();
 		}
+		else if (_mode == AIHB) {
+			crosses = AIHBCrosses.getInstance().getCrosses();
+		}
+		else if (_mode == AITB) {
+			crosses = AITBCrosses.getInstance().getCrosses();
+		}
+		
 		if ((crosses == null) || crosses.isEmpty()) {
 			return;
 		}
-		
+
 		for (Cross cross : crosses) {
 			if (cross.contains(screenPoint)) {
-				feedbackStrings.add(fbcolors[_mode]
-						+ DataDrawSupport.prefix[_mode] + "cross ID: " + cross.id
+				feedbackStrings.add(fbcolors[_mode] + DataDrawSupport.prefix[_mode] + "cross ID: " + cross.id
 						+ "  sect: " + cross.sector + "  reg: " + cross.region);
 
-				feedbackStrings.add(
-						vecStr("cross loc tilted", cross.x, cross.y, cross.z));
+				feedbackStrings.add(vecStr("cross loc tilted", cross.x, cross.y, cross.z));
 				feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
 				feedbackStrings.add(vecStr("cross direc tilted", cross.ux, cross.uy, cross.uz));
 
@@ -178,27 +186,23 @@ public class CrossDrawer extends CedViewDrawer  {
 				result[1] = cross.y;
 				result[2] = cross.z;
 				_view.tiltedToSector(result, result);
-				feedbackStrings.add(vecStr("cross loc vector", result[0],
-						result[1], result[2]));
+				feedbackStrings.add(vecStr("cross loc vector", result[0], result[1], result[2]));
 
 				result[0] = cross.ux;
 				result[1] = cross.uy;
 				result[2] = cross.uz;
 				_view.tiltedToSector(result, result);
-				feedbackStrings.add(vecStr("cross direc vector", result[0],
-						result[1], result[2]));
+				feedbackStrings.add(vecStr("cross direc vector", result[0], result[1], result[2]));
 				break;
 			}
 		}
-		
+
 	}
 
 	// for writing out a vector
 	private String vecStr(String prompt, double vx, double vy, double vz) {
-		return fbcolors[_mode] + DataDrawSupport.prefix[_mode] + prompt + " ("
-				+ DoubleFormat.doubleFormat(vx, 2) + ", "
-				+ DoubleFormat.doubleFormat(vy, 2) + ", "
-				+ DoubleFormat.doubleFormat(vz, 2) + ")";
+		return fbcolors[_mode] + DataDrawSupport.prefix[_mode] + prompt + " (" + DoubleFormat.doubleFormat(vx, 2) + ", "
+				+ DoubleFormat.doubleFormat(vy, 2) + ", " + DoubleFormat.doubleFormat(vz, 2) + ")";
 	}
 
 }

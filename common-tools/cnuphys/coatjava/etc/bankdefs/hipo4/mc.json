@@ -1,0 +1,104 @@
+[ 
+    {
+        "name": "MC::Header",
+        "group": 40,
+        "item" : 0,
+        "info": "Head bank for the generated event",
+        "entries": [
+            {"name":"run",       "type":"I",  "info":"Run number"},
+            {"name":"event",     "type":"I",  "info":"Event number"},
+            {"name":"type",      "type":"B",  "info":"Event type"},
+            {"name":"helicity",  "type":"F",  "info":"Beam helicity"}
+        ]
+    },
+    {   "name": "MC::Event",
+        "group": 40,
+        "item" : 1,
+        "info": "Lund header bank for the generated event",
+        "entries": [
+            {"name":"npart",     "type":"S", "info":"number of particles in the event (User Defined)"},
+            {"name":"atarget",   "type":"S", "info":"Mass number of the target (User Defined)"},
+            {"name":"ztarget",   "type":"S", "info":"Atomic number oif the target (User Defined)"},
+            {"name":"ptarget",   "type":"F", "info":"Target polarization (User Defined)"},
+            {"name":"pbeam",     "type":"F", "info":"Beam polarization"},
+            {"name":"btype",     "type":"S", "info":"Beam type (User Defined)"},
+            {"name":"ebeam",     "type":"F", "info":"Beam energy (GeV) (User Defined)"},
+            {"name":"targetid",  "type":"S", "info":"Interacted nucleon ID (proton=2212, neutron=2112 (User Defined)"},
+            {"name":"processid", "type":"S", "info":"Process ID (User Defined)"},
+            {"name":"weight",    "type":"F", "info":"Event weight (User Defined)"}
+        ]
+    },
+    {
+        "name": "MC::Particle",
+        "group": 40,
+        "item" : 2,
+        "info": "Generated Particle information",
+        "entries": [
+            {"name":"pid",      "type":"I",  "info":"particle id"},
+            {"name":"px",       "type":"F",  "info":"x component of the momentum"},
+            {"name":"py",       "type":"F",  "info":"y component of the momentum"},
+            {"name":"pz",       "type":"F",  "info":"z component of the momentum"},
+            {"name":"vx",       "type":"F",  "info":"x component of the vertex"},
+            {"name":"vy",       "type":"F",  "info":"y component of the vertex"},
+            {"name":"vz",       "type":"F",  "info":"z component of the vertex"},
+            {"name":"vt",       "type":"F",  "info":"vertex time"}
+        ]
+    },
+    {
+        "name": "MC::Lund",
+        "group": 40,
+        "item" : 3,
+        "info": "Generated Particle information from Lund",
+        "entries": [
+            {"name":"index",    "type":"B", "info":"index"},
+            {"name":"lifetime", "type":"F", "info":"particle lifetime (ns) (User Defined)"},
+            {"name":"type",     "type":"B", "info":"particle type (1 is active)"},
+            {"name":"pid",      "type":"I", "info":"particle id"},
+            {"name":"parent",   "type":"B", "info":"index of the parent (User Defined)"},
+            {"name":"daughter", "type":"B", "info":"index of the first daughter (User Defined)"},
+            {"name":"px",       "type":"F", "info":"x component of the momentum (GeV)"},
+            {"name":"py",       "type":"F", "info":"y component of the momentum (GeV)"},
+            {"name":"pz",       "type":"F", "info":"z component of the momentum (GeV)"},
+            {"name":"energy",   "type":"F", "info":"Energy of the particle (GeV) (User Defined)"},
+            {"name":"mass",     "type":"F", "info":"mass of the particle (GeV) (User Defined)"},
+            {"name":"vx",       "type":"F", "info":"x component of the vertex (cm)"},
+            {"name":"vy",       "type":"F", "info":"y component of the vertex (cm)"},
+            {"name":"vz",       "type":"F", "info":"z component of the vertex (cm)"}
+        ]
+    },
+    {
+        "name": "MC::True",
+        "group": 40,
+        "item" : 4,
+        "info": "True detector information from GEANT4",
+        "entries": [
+            {"name":"detector", "type":"B", "info":"detector ID"},
+            {"name":"pid",      "type":"I", "info":"ID of the first particle entering the sensitive volume"},
+            {"name":"mpid",     "type":"I", "info":"ID of the mother of the first particle entering the sensitive volume"},
+            {"name":"tid",      "type":"I", "info":"Track ID of the first particle entering the sensitive volume"},
+            {"name":"mtid",     "type":"I", "info":"Track ID of the mother of the first particle entering the sensitive volume"},
+            {"name":"otid",     "type":"I", "info":"Track ID of the original track that generated the first particle entering the sensitive volume"},
+            {"name":"trackE",   "type":"F", "info":"Energy of the track"},
+            {"name":"totEdep",  "type":"F", "info":"Total Energy Deposited"},
+            {"name":"avgX",     "type":"F", "info":"Average X position in global reference system"},
+            {"name":"avgY",     "type":"F", "info":"Average Y position in global reference system"},
+            {"name":"avgZ",     "type":"F", "info":"Average Z position in global reference system"},
+            {"name":"avgLx",    "type":"F", "info":"Average X position in local reference system"},
+            {"name":"avgLy",    "type":"F", "info":"Average Y position in local reference system"},
+            {"name":"avgLz",    "type":"F", "info":"Average Z position in local reference system"},
+            {"name":"px",       "type":"F", "info":"x component of momentum of the particle entering the sensitive volume"},
+            {"name":"py",       "type":"F", "info":"y component of momentum of the particle entering the sensitive volume"},
+            {"name":"pz",       "type":"F", "info":"z component of momentum of the particle entering the sensitive volume"},
+            {"name":"vx",       "type":"F", "info":"x component of primary vertex of the particle entering the sensitive volume"},
+            {"name":"vy",       "type":"F", "info":"y component of primary vertex of the particle entering the sensitive volume"},
+            {"name":"vz",       "type":"F", "info":"z component of primary vertex of the particle entering the sensitive volume"},
+            {"name":"mvx",      "type":"F", "info":"x component of primary vertex of the mother of the particle entering the sensitive volume"},
+            {"name":"mvy",      "type":"F", "info":"y component of primary vertex of the mother of the particle entering the sensitive volume"},
+            {"name":"mvz",      "type":"F", "info":"z component of primary vertex of the mother of the particle entering the sensitive volume"},
+            {"name":"avgT",     "type":"F", "info":"Average time"},
+            {"name":"nsteps",   "type":"I", "info":"Number of geant4 steps"},
+            {"name":"procID",   "type":"I", "info":"Process that created the FP. see gemc.jlab.org"},
+            {"name":"hitn",     "type":"I", "info":"Hit number"}
+        ]
+    }
+]

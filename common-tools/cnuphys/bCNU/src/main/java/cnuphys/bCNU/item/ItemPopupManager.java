@@ -11,16 +11,12 @@ public class ItemPopupManager {
 	/**
 	 * prepare for popup. The ight click callback should call this/
 	 * 
-	 * @param item
-	 *            the item being popped up
-	 * @param container
-	 *            the container being rendered
-	 * @param pp
-	 *            the right click location
+	 * @param item      the item being popped up
+	 * @param container the container being rendered
+	 * @param pp        the right click location
 	 */
 
-	public static void prepareForPopup(AItem item, IContainer container,
-			Point pp) {
+	public static void prepareForPopup(AItem item, IContainer container, Point pp) {
 
 		if ((item == null) || (pp == null)) {
 			return;

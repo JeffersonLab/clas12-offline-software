@@ -23,12 +23,10 @@ public class EnumCheckBoxPanel extends JPanel {
 	/**
 	 * Create a panel of JCheckBox objects from an enum map.
 	 * 
-	 * @param enumMap
-	 *            an EnumMap<enum, String>. The enum is the key, and the string,
-	 *            which will become the label, is the value.
+	 * @param enumMap an EnumMap<enum, String>. The enum is the key, and the string,
+	 *                which will become the label, is the value.
 	 */
-	public EnumCheckBoxPanel(EnumMap<?, String> enumMap,
-			ItemListener itemListener, Font font) {
+	public EnumCheckBoxPanel(EnumMap<?, String> enumMap, ItemListener itemListener, Font font) {
 		Set<?> keySet = enumMap.keySet();
 
 		setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
@@ -72,8 +70,7 @@ public class EnumCheckBoxPanel extends JPanel {
 	/**
 	 * Obtain the enum from the checkbox
 	 * 
-	 * @param cb
-	 *            the check box in question.
+	 * @param cb the check box in question.
 	 * @return the corresponding enum.
 	 */
 	public Enum<?> getEnum(JCheckBox cb) {

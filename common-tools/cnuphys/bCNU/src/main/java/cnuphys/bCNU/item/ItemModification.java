@@ -70,25 +70,18 @@ public class ItemModification {
 	private Object userObject;
 
 	/**
-	 * Create an ItemModification. The type is the default: DRAG. It can be
-	 * changed via setType.
+	 * Create an ItemModification. The type is the default: DRAG. It can be changed
+	 * via setType.
 	 * 
-	 * @param item
-	 *            the item being modified.
-	 * @param container
-	 *            the item's container.
-	 * @param startMousePoint
-	 *            the mouse point where the item was grabbed.
-	 * @param currentMousePoint
-	 *            the current mouse point.
-	 * @param shift
-	 *            was shift pressed when modification began
-	 * @param control
-	 *            was control pressed when modification began
+	 * @param item              the item being modified.
+	 * @param container         the item's container.
+	 * @param startMousePoint   the mouse point where the item was grabbed.
+	 * @param currentMousePoint the current mouse point.
+	 * @param shift             was shift pressed when modification began
+	 * @param control           was control pressed when modification began
 	 */
-	public ItemModification(AItem item, IContainer container,
-			Point startMousePoint, Point currentMousePoint, boolean shift,
-			boolean control) {
+	public ItemModification(AItem item, IContainer container, Point startMousePoint, Point currentMousePoint,
+			boolean shift, boolean control) {
 		super();
 		this.item = item;
 		this.container = container;
@@ -100,8 +93,7 @@ public class ItemModification {
 		this.startLine = item.getLine();
 
 		if (item.getSecondaryPoints() != null) {
-			secondaryPath = WorldGraphicsUtilities.worldPolygonToPath(item
-					.getSecondaryPoints());
+			secondaryPath = WorldGraphicsUtilities.worldPolygonToPath(item.getSecondaryPoints());
 		}
 
 		startWorldPoint = new Point2D.Double();
@@ -131,8 +123,7 @@ public class ItemModification {
 	/**
 	 * Set the type of modification.
 	 * 
-	 * @param type
-	 *            the type to set
+	 * @param type the type to set
 	 */
 	public void setType(ModificationType type) {
 		this.type = type;
@@ -150,8 +141,7 @@ public class ItemModification {
 	/**
 	 * Set the current mouse location. This will be done by the PointerButton.
 	 * 
-	 * @param currentMousePoint
-	 *            the currentMousePoint to set
+	 * @param currentMousePoint the currentMousePoint to set
 	 */
 	public void setCurrentMousePoint(Point currentMousePoint) {
 		this.currentMousePoint = currentMousePoint;
@@ -159,8 +149,8 @@ public class ItemModification {
 	}
 
 	/**
-	 * The focus is the world reference point for the item. It might be its
-	 * location or its centroid. It has to be set by the item when
+	 * The focus is the world reference point for the item. It might be its location
+	 * or its centroid. It has to be set by the item when
 	 * 
 	 * @return the startFocus
 	 */
@@ -169,21 +159,19 @@ public class ItemModification {
 	}
 
 	/**
-	 * The focus is the world reference point for the item. It might be its
-	 * location or its centroid. It has to be set by the item when the
-	 * modification starts.
+	 * The focus is the world reference point for the item. It might be its location
+	 * or its centroid. It has to be set by the item when the modification starts.
 	 * 
-	 * @param startFocus
-	 *            the startFocus to set
+	 * @param startFocus the startFocus to set
 	 */
 	public void setStartFocus(Point2D.Double startFocus) {
 		this.startFocus = startFocus;
 	}
 
 	/**
-	 * The focus is the screen (pixel) version of reference point for the item.
-	 * It might be its location or its centroid. It has to be set by the item
-	 * when the modification starts.
+	 * The focus is the screen (pixel) version of reference point for the item. It
+	 * might be its location or its centroid. It has to be set by the item when the
+	 * modification starts.
 	 * 
 	 * @return the startFocusPoint
 	 */
@@ -193,20 +181,19 @@ public class ItemModification {
 
 	/**
 	 * The focus is the screen (pixel) version reference point for the item. It
-	 * might be its location or its centroid. It has to be set by the item when
-	 * the modification starts.
+	 * might be its location or its centroid. It has to be set by the item when the
+	 * modification starts.
 	 * 
-	 * @param startFocusPoint
-	 *            the startFocusPoint to set
+	 * @param startFocusPoint the startFocusPoint to set
 	 */
 	public void setStartFocusPoint(Point startFocusPoint) {
 		this.startFocusPoint = startFocusPoint;
 	}
 
 	/**
-	 * The selectIndex can be used by the item to cache the index of the
-	 * selectRect that started the modification. This is often needed for
-	 * resizing and rotating.
+	 * The selectIndex can be used by the item to cache the index of the selectRect
+	 * that started the modification. This is often needed for resizing and
+	 * rotating.
 	 * 
 	 * @return the selectIndex
 	 */
@@ -215,12 +202,11 @@ public class ItemModification {
 	}
 
 	/**
-	 * The selectIndex can be used by the item to cache the index of the
-	 * selectRect that started the modification. This is often needed for
-	 * resizing and rotating.
+	 * The selectIndex can be used by the item to cache the index of the selectRect
+	 * that started the modification. This is often needed for resizing and
+	 * rotating.
 	 * 
-	 * @param selectIndex
-	 *            the selectIndex to set
+	 * @param selectIndex the selectIndex to set
 	 */
 	public void setSelectIndex(int selectIndex) {
 		this.selectIndex = selectIndex;
@@ -317,8 +303,7 @@ public class ItemModification {
 	}
 
 	/**
-	 * @param startLocation
-	 *            the startLocation to set
+	 * @param startLocation the startLocation to set
 	 */
 	public void setStartLocation(Point startLocation) {
 		this.startLocation = startLocation;
@@ -332,8 +317,7 @@ public class ItemModification {
 	}
 
 	/**
-	 * @param userObject
-	 *            the userObject to set
+	 * @param userObject the userObject to set
 	 */
 	public void setUserObject(Object userObject) {
 		this.userObject = userObject;

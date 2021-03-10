@@ -30,18 +30,14 @@ public class RubberBandClearWindow extends Window {
 	/**
 	 * Create a translucent window
 	 * 
-	 * @param opacity
-	 *            the smaller the number, the more transparent
+	 * @param opacity the smaller the number, the more transparent
 	 * @throws HeadlessException
 	 */
-	RubberBandClearWindow(Component parent, float opacity)
-			throws HeadlessException {
+	RubberBandClearWindow(Component parent, float opacity) throws HeadlessException {
 		super(null);
 		try {
-			Class<?> awtUtilitiesClass = Class
-					.forName("com.sun.awt.AWTUtilities");
-			Method mSetWindowOpacity = awtUtilitiesClass.getMethod(
-					"setWindowOpacity", Window.class, float.class);
+			Class<?> awtUtilitiesClass = Class.forName("com.sun.awt.AWTUtilities");
+			Method mSetWindowOpacity = awtUtilitiesClass.getMethod("setWindowOpacity", Window.class, float.class);
 			mSetWindowOpacity.invoke(null, this, opacity);
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -58,8 +54,8 @@ public class RubberBandClearWindow extends Window {
 	public void paint(Graphics g) {
 		if (_rubberBandRectangle != null) {
 			g.setColor(shapeFill);
-			g.fillRect(_rubberBandRectangle.x, _rubberBandRectangle.y,
-					_rubberBandRectangle.width, _rubberBandRectangle.height);
+			g.fillRect(_rubberBandRectangle.x, _rubberBandRectangle.y, _rubberBandRectangle.width,
+					_rubberBandRectangle.height);
 		}
 	}
 

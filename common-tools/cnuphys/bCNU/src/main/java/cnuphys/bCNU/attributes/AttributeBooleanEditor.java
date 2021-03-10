@@ -16,10 +16,9 @@ public class AttributeBooleanEditor extends AttributeEditor<JCheckBox> implement
 	 * Create an Boolean editor.
 	 * 
 	 * @param attributeTable the owner table.
-	 * @param attribute the attribute
+	 * @param attribute      the attribute
 	 */
-	public AttributeBooleanEditor(AttributeTable attributeTable,
-			Attribute attribute) {
+	public AttributeBooleanEditor(AttributeTable attributeTable, Attribute attribute) {
 
 		super(attributeTable, attribute, new JCheckBox());
 
@@ -27,7 +26,7 @@ public class AttributeBooleanEditor extends AttributeEditor<JCheckBox> implement
 			return;
 		}
 
-		component.setSelected((Boolean)(attribute.getValue()));
+		component.setSelected((Boolean) (attribute.getValue()));
 		component.setBackground(Color.white);
 		component.addItemListener(this);
 	}
@@ -40,23 +39,21 @@ public class AttributeBooleanEditor extends AttributeEditor<JCheckBox> implement
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 		try {
-            attribute.setValue(component.isSelected());
-		}
-		catch (Exception ex) {
+			attribute.setValue(component.isSelected());
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}
-	
-	
+
 	/**
 	 * Render the value for display
+	 * 
 	 * @param value the
 	 */
 	@Override
 	public void renderValue(Object value) {
-		Boolean b = (Boolean)value;
+		Boolean b = (Boolean) value;
 		component.setSelected(b);
 	}
-
 
 }

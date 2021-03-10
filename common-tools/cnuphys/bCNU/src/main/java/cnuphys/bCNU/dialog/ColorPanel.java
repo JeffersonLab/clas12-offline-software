@@ -77,8 +77,7 @@ public class ColorPanel extends JPanel implements ItemListener, ChangeListener {
 			@Override
 			public Insets getInsets() {
 				Insets def = super.getInsets();
-				return new Insets(def.top + 2, def.left + 2, def.bottom + 2,
-						def.right + 2);
+				return new Insets(def.top + 2, def.left + 2, def.bottom + 2, def.right + 2);
 			}
 
 			/**
@@ -160,8 +159,7 @@ public class ColorPanel extends JPanel implements ItemListener, ChangeListener {
 	@Override
 	public Insets getInsets() {
 		Insets def = super.getInsets();
-		return new Insets(def.top + 6, def.left + 6, def.bottom + 6,
-				def.right + 6);
+		return new Insets(def.top + 6, def.left + 6, def.bottom + 6, def.right + 6);
 	}
 
 	@Override
@@ -191,8 +189,7 @@ public class ColorPanel extends JPanel implements ItemListener, ChangeListener {
 	/**
 	 * Set whether user is allowed to set gtransparency level
 	 * 
-	 * @param anc
-	 *            If true, use can select transparency
+	 * @param anc If true, use can select transparency
 	 */
 
 	public void enableTransparency(boolean anc) {
@@ -242,8 +239,7 @@ public class ColorPanel extends JPanel implements ItemListener, ChangeListener {
 		if (transparencySlider.isEnabled()) {
 			int alpha = (int) (2.5 * (transparencySlider.getValue()));
 			alpha = Math.max(0, Math.min(255, alpha));
-			return new Color(bcolor.getRed(), bcolor.getGreen(),
-					bcolor.getBlue(), alpha);
+			return new Color(bcolor.getRed(), bcolor.getGreen(), bcolor.getBlue(), alpha);
 
 		} else {
 			return bcolor;

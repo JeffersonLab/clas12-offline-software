@@ -10,8 +10,7 @@ public class ByteSwap {
 	/**
 	 * Swap 4-byte integer
 	 * 
-	 * @param val
-	 *            integer to swap
+	 * @param val integer to swap
 	 * @return swapped 4-byte integer
 	 */
 	public static int swapInt(int val) {
@@ -28,8 +27,7 @@ public class ByteSwap {
 	/**
 	 * Swap a 2-byte integer (a short)
 	 * 
-	 * @param val
-	 *            short to swap
+	 * @param val short to swap
 	 * @return swapped 2-byte integer (short)
 	 */
 	public static short swapShort(short val) {

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="splot" default="jar" basedir=".">
+
+
+	<!-- ================================= 
+          target: jar 
+          jar up images, etc             
+         ================================= -->
+	<target name="jar">
+		
+		<echo>Building bCNU3D jar</echo>
+		
+		<jar destfile="lib/bCNU3D.jar">
+			
+			<fileset dir="bin">
+				<include name="**/*.class"/>
+			</fileset>
+
+		</jar>
+
+	</target>
+
+</project>
+

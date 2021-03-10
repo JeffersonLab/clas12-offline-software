@@ -39,8 +39,7 @@ public class PointItem extends AItem {
 	/**
 	 * Constructor for a basic point item.
 	 * 
-	 * @param layer
-	 *            the Layer this item is on.
+	 * @param layer the Layer this item is on.
 	 */
 	public PointItem(LogicalLayer layer) {
 		super(layer);
@@ -50,10 +49,8 @@ public class PointItem extends AItem {
 	/**
 	 * Constructor for a basic point item.
 	 * 
-	 * @param layer
-	 *            the Layer this item is on.
-	 * @param icon
-	 *            an icon to draw at the point
+	 * @param layer the Layer this item is on.
+	 * @param icon  an icon to draw at the point
 	 */
 	public PointItem(LogicalLayer layer, ImageIcon icon) {
 		super(layer);
@@ -64,10 +61,8 @@ public class PointItem extends AItem {
 	/**
 	 * Constructor for a basic point item.
 	 * 
-	 * @param layer
-	 *            the Layer this item is on.
-	 * @param location
-	 *            the location for the point.
+	 * @param layer    the Layer this item is on.
+	 * @param location the location for the point.
 	 */
 	public PointItem(LogicalLayer layer, Point2D.Double location) {
 		super(layer);
@@ -77,10 +72,8 @@ public class PointItem extends AItem {
 	/**
 	 * Custom drawer for the item.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
@@ -129,16 +122,14 @@ public class PointItem extends AItem {
 	}
 
 	/**
-	 * Checks whether the item should be drawn. This is an additional check,
-	 * beyond the simple visibility flag check. For example, it might check
-	 * whether the item intersects the area being drawn.
+	 * Checks whether the item should be drawn. This is an additional check, beyond
+	 * the simple visibility flag check. For example, it might check whether the
+	 * item intersects the area being drawn.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
-	 * @return <code>true</code> if the item passes any and all tests, and
-	 *         should be drwan.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
+	 * @return <code>true</code> if the item passes any and all tests, and should be
+	 *         drwan.
 	 */
 	@Override
 	public boolean shouldDraw(Graphics g, IContainer container) {
@@ -152,8 +143,7 @@ public class PointItem extends AItem {
 	/**
 	 * get the bounding rect in pixels.
 	 * 
-	 * @param container
-	 *            the container being rendered
+	 * @param container the container being rendered
 	 * @return the box around the active part of the image.
 	 */
 	@Override
@@ -208,8 +198,7 @@ public class PointItem extends AItem {
 	@Override
 	public void startModification() {
 		_modification.setStartFocus(getFocus());
-		_modification.setStartFocusPoint(getFocusPoint(_modification
-				.getContainer()));
+		_modification.setStartFocusPoint(getFocusPoint(_modification.getContainer()));
 	}
 
 	/**
@@ -225,8 +214,7 @@ public class PointItem extends AItem {
 			int dx = currentMouse.x - startMouse.x;
 			int dy = currentMouse.y - startMouse.y;
 
-			Point newFocusPoint = new Point(startFocusPoint.x + dx,
-					startFocusPoint.y + dy);
+			Point newFocusPoint = new Point(startFocusPoint.x + dx, startFocusPoint.y + dy);
 			Point2D.Double wp = new Point2D.Double();
 			_modification.getContainer().localToWorld(newFocusPoint, wp);
 			setFocus(wp);
@@ -237,8 +225,7 @@ public class PointItem extends AItem {
 	/**
 	 * Set the current location.
 	 * 
-	 * @param currentLocation
-	 *            the new location to set
+	 * @param currentLocation the new location to set
 	 */
 	@Override
 	public void setFocus(Point2D.Double currentLocation) {
@@ -274,8 +261,7 @@ public class PointItem extends AItem {
 	/**
 	 * Set the horizontal alignment for the image icon
 	 * 
-	 * @param xAlignment
-	 *            the xAlignment to set
+	 * @param xAlignment the xAlignment to set
 	 */
 	public void setAlignmentH(int xAlignment) {
 		this._xAlignment = xAlignment;
@@ -293,8 +279,7 @@ public class PointItem extends AItem {
 	/**
 	 * Set the vertical alignment for the image icon
 	 * 
-	 * @param yAlignment
-	 *            the yAlignment to set
+	 * @param yAlignment the yAlignment to set
 	 */
 	public void setAlignmentV(int yAlignment) {
 		this._yAlignment = yAlignment;

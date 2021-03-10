@@ -8,109 +8,113 @@ import javax.swing.event.EventListenerList;
 import cnuphys.bCNU.attributes.Attributes;
 
 public abstract class Simulation implements Runnable {
-	
-	//current state of the simulation
+
+	// current state of the simulation
 	private SimulationState _simState = SimulationState.STOPPED;
-	
-	//common attribute keys
+
+	// common attribute keys
 	public static final String RANDSEED = "randseed";
 	public static final String COOLRATE = "coolrate";
-	public static final String MINTEMP  = "mintemp";
-	public static final String THERMALCOUNT  = "thermalcount";
-	public static final String SUCCESSCOUNT  = "successcount";
-	public static final String MAXSTEPS  = "maxsteps";
-	public static final String PLOTTITLE  = "plottitle";
-	public static final String XAXISLABEL  = "xaxislabel";
-	public static final String YAXISLABEL  = "yaxislabel";
-	public static final String USELOGTEMP  = "uselogtemp";
+	public static final String MINTEMP = "mintemp";
+	public static final String THERMALCOUNT = "thermalcount";
+	public static final String SUCCESSCOUNT = "successcount";
+	public static final String MAXSTEPS = "maxsteps";
+	public static final String PLOTTITLE = "plottitle";
+	public static final String XAXISLABEL = "xaxislabel";
+	public static final String YAXISLABEL = "yaxislabel";
+	public static final String USELOGTEMP = "uselogtemp";
 
-	//current solution
+	// current solution
 	protected Solution _currentSolution;
-		
-	//current temperature
+
+	// current temperature
 	protected double _temperature;
-	
-	//the cooling rate used this way,
-	//tNext = (1-coolrate)*tCurrent
+
+	// the cooling rate used this way,
+	// tNext = (1-coolrate)*tCurrent
 	protected double _coolRate = 0.1;
-		
-	//number of successes before lowering temp
+
+	// number of successes before lowering temp
 	protected int _successCount;
-	
-	//number of tries before lowering temp (unless
-	//_successCount reached first
+
+	// number of tries before lowering temp (unless
+	// _successCount reached first
 	protected int _thermalizationCount = 200;
-	
+
 	// Listener list for solution updates.
 	protected EventListenerList _listenerList;
-	
-	//random number generator
+
+	// random number generator
 	protected Random _rand;
-	
-	//simulation attributes
+
+	// simulation attributes
 	protected Attributes _attributes;
-	
-	//the min or stopping temperature
+
+	// the min or stopping temperature
 	protected double _minTemp;
-	
-	//max steps (temp reductions) until stop (unless min temp is reached)
+
+	// max steps (temp reductions) until stop (unless min temp is reached)
 	protected int _maxSteps = 100;
-	
-	//the initial solution. Saved to be available for reset.
+
+	// the initial solution. Saved to be available for reset.
 	protected Solution _initialSolution;
-	
-	//the thread that runs the simulation
+
+	// the thread that runs the simulation
 	protected Thread _thread;
-		
+
 	/**
 	 * Create a Simulation
+	 * 
 	 * @param props key-value properties of the simulation. Used for initialization.
 	 */
 	public Simulation() {
 
-		//call the subclass to set up attributes and create the initial solution
-		
+		// call the subclass to set up attributes and create the initial solution
+
 		_attributes = defaultAttributes();
 		setInitialAttributes(_attributes);
-		
-		//create the random number generator
+
+		// create the random number generator
 		createRandomGenerator();
 
-		//cache the initial solution and make a copy
+		// cache the initial solution and make a copy
 		_initialSolution = setInitialSolution();
 		_currentSolution = _initialSolution.copy();
 	}
-	
+
 	/**
 	 * Get the simulation state
+	 * 
 	 * @return the simulation state
 	 */
 	public SimulationState getSimulationState() {
 		return _simState;
 	}
-	
+
 	/**
 	 * Set the simulation state
+	 * 
 	 * @param simState the new simulation state
 	 */
 	public void setSimulationState(SimulationState simState) {
 		if (_simState == simState) {
 			return;
 		}
-		SimulationState oldState = _simState; 
+		SimulationState oldState = _simState;
 		_simState = simState;
 //		System.err.println("STATE IS NOW " + _simState);
 		notifyListeners(oldState, _simState);
 	}
-	
+
 	/**
 	 * Retrieve the initial solution
+	 * 
 	 * @return the initial solution
 	 */
 	public Solution getInitialSolution() {
 		return _initialSolution;
 	}
-	
+
 	private Attributes defaultAttributes() {
 		Attributes attributes = new Attributes();
 		attributes.add(Simulation.COOLRATE, 0.03);
@@ -118,7 +122,6 @@ public abstract class Simulation implements Runnable {
 		attributes.add(Simulation.THERMALCOUNT, 200);
 		attributes.add(Simulation.MAXSTEPS, 1000);
 
-		
 		attributes.add(Simulation.USELOGTEMP, false, false, false);
 		attributes.add(Simulation.PLOTTITLE, "Simulated Annealing", false, false);
 		attributes.add(Simulation.XAXISLABEL, "Temperature", false, false);
@@ -126,19 +129,21 @@ public abstract class Simulation implements Runnable {
 
 		return attributes;
 	}
-	
+
 	/**
 	 * Get the initial attributes
+	 * 
 	 * @return the initial attributes
 	 */
 	protected abstract void setInitialAttributes(Attributes attributes);
-	
+
 	/**
 	 * Create the initial solution
+	 * 
 	 * @return the initial solution
 	 */
 	protected abstract Solution setInitialSolution();
-	
+
 	/**
 	 * Reset the simulation
 	 */
@@ -148,42 +153,44 @@ public abstract class Simulation implements Runnable {
 		notifyListeners();
 //		notifyListeners(_initialSolution, _initialSolution);
 	}
-	
+
 	/**
 	 * Accessor for the attributes
+	 * 
 	 * @return the attributes
 	 */
 	public Attributes getAttributes() {
 		return _attributes;
 	}
-	
+
 	/**
 	 * Get the current solution
+	 * 
 	 * @return the current solution
 	 */
 	public Solution currentSolution() {
 		return _currentSolution;
 	}
-	
-	//make a guess for an initial temperature
+
+	// make a guess for an initial temperature
 	private void setInitialTemperature() {
-		//find a average energy step
-		
+		// find a average energy step
+
 		int n = 100;
 		double e0 = _currentSolution.getEnergy();
 		double sum = 0;
-		
-		for (int i  = 0; i < n; i++) {
+
+		for (int i = 0; i < n; i++) {
 			double e1 = _currentSolution.getRearrangement().getEnergy();
-			sum += Math.pow(e1-e0, 2);
+			sum += Math.pow(e1 - e0, 2);
 		}
-		
+
 //		_temperature = 10*Math.sqrt(sum/n);
-		_temperature = 1.2*Math.sqrt(sum/n);
-		
+		_temperature = 1.2 * Math.sqrt(sum / n);
+
 //		System.out.println("Initial temperature: " + _temperature);
 	}
-	
+
 	// create the random generator using a seed if provided
 	private void createRandomGenerator() {
 
@@ -239,43 +246,46 @@ public abstract class Simulation implements Runnable {
 		}
 
 	}
-	
+
 	/**
-	 * Get the cool rate. It is used this way:
-	 * tNext = (1-coolrate)*tCurrent
+	 * Get the cool rate. It is used this way: tNext = (1-coolrate)*tCurrent
+	 * 
 	 * @return the cool rate.
 	 */
 	public double getCoolRate() {
 		return _coolRate;
 	}
-	
+
 	/**
-	 * Set the cool rate. It is used this way:
-	 * tNext = (1-coolrate)*tCurrent
+	 * Set the cool rate. It is used this way: tNext = (1-coolrate)*tCurrent
+	 * 
 	 * @param coolRate the new cool rate
 	 */
 	public void setCoolRate(double coolRate) {
 		_coolRate = coolRate;
 	}
-	
+
 	/**
 	 * Get the temperature
+	 * 
 	 * @return the temperature
 	 */
 	public double getTemperature() {
 		return _temperature;
 	}
-	
+
 	/**
 	 * Get the number of reconfigure attempts at a given temperature
+	 * 
 	 * @return the number of reconfigure attempts at a given temperature
 	 */
 	public int getThermalizationCount() {
 		return _thermalizationCount;
 	}
-	
+
 	/**
 	 * Set the number of reconfigure attempts at a given temperature
+	 * 
 	 * @param thermalCount the number of reconfigure attempts at a given temperature
 	 */
 	public void setThermalizationCount(int thermalCount) {
@@ -283,44 +293,47 @@ public abstract class Simulation implements Runnable {
 	}
 
 	/**
-	 * Get the number of successful reconfigure attempts that will
-	 * short circuit the thermalization process
+	 * Get the number of successful reconfigure attempts that will short circuit the
+	 * thermalization process
+	 * 
 	 * @return the number of successful reconfigure attempts
 	 */
 	public int getSuccessCount() {
 		return _successCount;
 	}
-	
+
 	/**
 	 * Set the number of successful reconfigure attempts that will
+	 * 
 	 * @param successCount the number of successful reconfigure attempts
 	 */
 	public void setSuccessCount(int successCount) {
 		_successCount = successCount;
 	}
 
-	
 	/**
 	 * Get the minimum or stopping temperature
+	 * 
 	 * @return the minimum or stopping temperature
 	 */
 	public double getMinTemperature() {
 		return _minTemp;
 	}
-	
+
 	/**
 	 * Set the minimum or stopping temperature
+	 * 
 	 * @param minTemp the minimum or stopping temperature
 	 */
 	public void setMinTemperature(double minTemp) {
 		_minTemp = minTemp;
 	}
-	
+
 	/**
 	 * Start the simulation
 	 */
 	public void startSimulation() {
-		
+
 		if ((_thread != null) && _thread.isAlive()) {
 			_simState = SimulationState.STOPPED;
 			try {
@@ -331,7 +344,7 @@ public abstract class Simulation implements Runnable {
 				e.printStackTrace();
 			}
 		}
-		
+
 		setParametersFromAttributes();
 		setInitialTemperature();
 
@@ -339,7 +352,7 @@ public abstract class Simulation implements Runnable {
 		_simState = SimulationState.RUNNING;
 		_thread.start();
 	}
-	
+
 	/**
 	 * run the simulation
 	 */
@@ -354,14 +367,14 @@ public abstract class Simulation implements Runnable {
 		while ((_simState != SimulationState.STOPPED) && (step < _maxSteps) && (_temperature > _minTemp)) {
 
 			if (_simState == SimulationState.PAUSED) {
-				//sleep for a second
+				// sleep for a second
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 
-			} else if (_simState == SimulationState.RUNNING) {  //running
+			} else if (_simState == SimulationState.RUNNING) { // running
 				int succ = 0;
 
 				double eCurrent = _currentSolution.getEnergy();
@@ -383,27 +396,26 @@ public abstract class Simulation implements Runnable {
 
 				// reduce the temperature
 				_temperature *= factor;
-				
-	//			System.err.println("Current temp: " + _temperature);
+
+				// System.err.println("Current temp: " + _temperature);
 				step++;
 				notifyListeners(_currentSolution, oldSolution);
-			} //running
+			} // running
 		} // while
-		
+
 		setSimulationState(SimulationState.STOPPED);
 	}
-	
-		
-	//the Metropolis test
+
+	// the Metropolis test
 	private boolean metrop(double ebest, double etest) {
 		if (etest < ebest) {
 			return true;
 		}
-		double delE = etest - ebest; //> 0
-		double prob = Math.exp(-delE/_temperature);
+		double delE = etest - ebest; // > 0
+		double prob = Math.exp(-delE / _temperature);
 		return (_rand.nextDouble() < prob);
 	}
-	
+
 	/**
 	 * Notify listeners that the solution was updated
 	 */
@@ -419,13 +431,12 @@ public abstract class Simulation implements Runnable {
 		// those that are interested in this event
 		for (int i = listeners.length - 2; i >= 0; i -= 2) {
 			if (listeners[i] == IUpdateListener.class) {
-				((IUpdateListener) listeners[i + 1])
-						.updateSolution(this, newSolution, oldSolution);
+				((IUpdateListener) listeners[i + 1]).updateSolution(this, newSolution, oldSolution);
 			}
 		}
-		
+
 	}
-	
+
 	/**
 	 * Notify listeners that the simulation was reset
 	 */
@@ -444,9 +455,9 @@ public abstract class Simulation implements Runnable {
 				((IUpdateListener) listeners[i + 1]).reset(this);
 			}
 		}
-		
+
 	}
-	
+
 	/**
 	 * Notify listeners that the state changed
 	 */
@@ -465,17 +476,13 @@ public abstract class Simulation implements Runnable {
 				((IUpdateListener) listeners[i + 1]).stateChange(this, oldState, _simState);
 			}
 		}
-		
+
 	}
-
-
-	
 
 	/**
 	 * Remove a solution update listener.
 	 * 
-	 * @param listener
-	 *            the update listener to remove.
+	 * @param listener the update listener to remove.
 	 */
 	public void removeUpdateListener(IUpdateListener listener) {
 
@@ -489,8 +496,7 @@ public abstract class Simulation implements Runnable {
 	/**
 	 * Add a solution update listener.
 	 * 
-	 * @param listener
-	 *            the update listener to add.
+	 * @param listener the update listener to add.
 	 */
 	public void addUpdateListener(IUpdateListener listener) {
 
@@ -504,6 +510,5 @@ public abstract class Simulation implements Runnable {
 
 		_listenerList.add(IUpdateListener.class, listener);
 	}
-
 
 }

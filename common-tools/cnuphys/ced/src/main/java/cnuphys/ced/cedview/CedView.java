@@ -15,18 +15,18 @@ import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JSlider;
-import javax.swing.Timer;
 
 import cnuphys.bCNU.component.InfoWindow;
 import cnuphys.bCNU.component.TranslucentWindow;
 import cnuphys.bCNU.feedback.IFeedbackProvider;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
+import cnuphys.bCNU.graphics.colorscale.ColorScaleModel;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.bCNU.graphics.toolbar.ToolBarToggleButton;
 import cnuphys.bCNU.graphics.toolbar.UserToolBarComponent;
 import cnuphys.bCNU.layer.LogicalLayer;
+import cnuphys.bCNU.ping.IPing;
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.view.BaseView;
 import cnuphys.bCNU.view.ViewManager;
@@ -37,6 +37,7 @@ import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.MagFieldDisplayArray;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
+import cnuphys.ced.frame.Ced;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.lund.SwimTrajectoryListener;
@@ -54,18 +55,18 @@ import org.jlab.io.base.DataEvent;
 @SuppressWarnings("serial")
 public abstract class CedView extends BaseView implements IFeedbackProvider, SwimTrajectoryListener,
 		MagneticFieldChangeListener, IAccumulationListener, IClasIoEventListener {
-	
-	//for accumulation drawing
+
+	// for accumulation drawing
 	private double _medianRelSetting = 0.25;
 
 	// are we showing single events or are we showing accumulated data
 	public enum Mode {
 		SINGLE_EVENT, ACCUMULATED
 	};
-	
+
 	static protected FieldProbe _activeProbe;
-		
-	//to add separator for first clone
+
+	// to add separator for first clone
 	private static boolean _firstClone = true;
 
 	// used for computing world circles
@@ -80,7 +81,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 
 	// our mode
 	protected Mode _mode = Mode.SINGLE_EVENT;
-
+	
 	// basic toolbar bits
 	protected static final int TOOLBARBITS = BaseToolBar.NODRAWING & ~BaseToolBar.TEXTFIELD
 			& ~BaseToolBar.CONTROLPANELBUTTON & ~BaseToolBar.RECTGRIDBUTTON & ~BaseToolBar.TEXTBUTTON
@@ -91,20 +92,29 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	/**
 	 * A string that has r-theta-phi using unicode greek characters
 	 */
-	public static final String rThetaPhi = "r" + UnicodeSupport.THINSPACE +
-			UnicodeSupport.SMALL_THETA + UnicodeSupport.THINSPACE + UnicodeSupport.SMALL_PHI;
+	public static final String rThetaPhi = "r" + UnicodeSupport.THINSPACE + UnicodeSupport.SMALL_THETA
+			+ UnicodeSupport.THINSPACE + UnicodeSupport.SMALL_PHI;
 
 	/**
 	 * A string that has rho-theta-phi using unicode greek characters
 	 */
-	public static final String rhoZPhi = UnicodeSupport.SMALL_RHO + UnicodeSupport.THINSPACE + "z" +  UnicodeSupport.THINSPACE + UnicodeSupport.SMALL_PHI;
+	public static final String rhoZPhi = UnicodeSupport.SMALL_RHO + UnicodeSupport.THINSPACE + "z"
+			+ UnicodeSupport.THINSPACE + UnicodeSupport.SMALL_PHI;
+	
+	/**
+	 * A string that has xyz with small spaces
+	 */
+	public static final String xyz = "x" + UnicodeSupport.THINSPACE + "y"
+			+ UnicodeSupport.THINSPACE + "z";
+
 
 	/**
 	 * A string that has rho-phi using unicode greek characters for hex views
 	 */
 	public static final String rhoPhi = UnicodeSupport.SMALL_RHO + UnicodeSupport.THINSPACE + UnicodeSupport.SMALL_PHI;
 
-	private static final String evnumAppend = "  (Event# ";
+	//for appending event number to the titile
+	private static final String evnumAppend = "  (Seq Event# ";
 
 	/**
 	 * Name for the detector layer.
@@ -126,7 +136,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	private long minHoverTrigger = 1000; // ms
 	private long hoverStartCheck = -1;
 	private MouseEvent hoverMouseEvent;
-	
+
 	// last trajectory hovering response
 	protected String _lastTrajStr;
 
@@ -136,19 +146,39 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 
 	// the clasIO event manager
 	protected ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param keyVals variable length argument list
+	 */
+	public CedView(Object... keyVals) {
+		this(true, keyVals);
+	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param keyVals
-	 *            variable length argument list
+	 * @param keyVals variable length argument list
 	 */
-	public CedView(Object... keyVals) {
+	public CedView(boolean fullFeatures, Object... keyVals) {
 		super(keyVals);
+		IContainer container = getContainer();
+		
+		if (!fullFeatures) {
+			container.getFeedbackControl().addFeedbackProvider(this);
+			// add the magnetic field layer--mostly unused.
+			container.addLogicalLayer(_magneticFieldLayerName);
+			MagneticFields.getInstance().addMagneticFieldChangeListener(this);
+			if (_activeProbe == null) {
+				_activeProbe = FieldProbe.factory();
+			}
+
+			return;
+		}
 
 		_eventManager.addClasIoEventListener(this, 2);
 
-		IContainer container = getContainer();
 
 		if (container != null) {
 			container.getFeedbackControl().addFeedbackProvider(this);
@@ -171,15 +201,24 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 			getUserComponent().setUserDraw(_userComponentDrawer);
 		}
 
-		// create a heartbeat
-		createHeartbeat();
+		//use the ping to deal with hover
+		IPing pingListener = new IPing() {
+
+			@Override
+			public void ping() {
+				heartbeat();
+			}
+			
+		};
+		Ced.getCed().getPing().addPingListener(pingListener);
+		
 		// prepare to check for hovering
 		prepareForHovering();
 
 		AccumulationManager.getInstance().addAccumulationListener(this);
 
 		// add the next event button
-		
+
 		ActionListener al = new ActionListener() {
 
 			@Override
@@ -198,34 +237,22 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		GraphicsUtilities.setSizeMini(nextEvent);
 		getToolBar().add(Box.createHorizontalStrut(5), 0);
 		getToolBar().add(nextEvent, 0);
-		
+
 		if (_activeProbe == null) {
 			_activeProbe = FieldProbe.factory();
 		}
 	}
 
 	// called when heartbeat goes off.
-	protected void ping() {
-		// check for over
+	protected void heartbeat() {
+		// check for hover
+		
 		if (hoverStartCheck > 0) {
 			if ((System.currentTimeMillis() - hoverStartCheck) > minHoverTrigger) {
 				hovering(hoverMouseEvent);
 				hoverStartCheck = -1;
 			}
 		}
-	}
-
-	// create the heartbeat. Default implementation is 1 second
-	// Can overide to do nothing (so no heartbeat)
-	protected void createHeartbeat() {
-		int delay = 1000;
-		ActionListener taskPerformer = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent evt) {
-				ping();
-			}
-		};
-		new Timer(delay, taskPerformer).start();
 	}
 
 	// prepare hovering checker
@@ -295,8 +322,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	/**
 	 * Show or hide the annotation layer.
 	 * 
-	 * @param show
-	 *            the value of the display flag.
+	 * @param show the value of the display flag.
 	 */
 	public void showAnnotations(boolean show) {
 		if (getContainer().getAnnotationLayer() != null) {
@@ -307,8 +333,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	/**
 	 * Sets whether or not we display the magnetic field layer.
 	 * 
-	 * @param show
-	 *            the value of the display flag.
+	 * @param show the value of the display flag.
 	 */
 	public void showMagneticField(boolean show) {
 		if (getMagneticFieldLayer() != null) {
@@ -376,8 +401,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	/**
 	 * Convenience method to see it we show the bst reconstructed crosses.
 	 * 
-	 * @return <code>true</code> if we are to show the bst reconstructed
-	 *         crosses.
+	 * @return <code>true</code> if we are to show the bst reconstructed crosses.
 	 */
 	public boolean showCrosses() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
@@ -387,11 +411,10 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	}
 
 	/**
-	 * Convenience method to see it we show the dc hit-based reconstructed
-	 * crosses.
+	 * Convenience method to see it we show the dc hit-based reconstructed crosses.
 	 * 
-	 * @return <code>true</code> if we are to show the dc hit-based
-	 *         reconstructed crosses.
+	 * @return <code>true</code> if we are to show the dc hit-based reconstructed
+	 *         crosses.
 	 */
 	public boolean showDCHBCrosses() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
@@ -400,7 +423,57 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		return _controlPanel.getDisplayArray().showDCHBCrosses();
 	}
 	
+	/**
+	 * Convenience method to see it we show the dc time-based reconstructed crosses.
+	 * 
+	 * @return <code>true</code> if we are to show the dc time-based reconstructed
+	 *         crosses.
+	 */
+	public boolean showDCTBCrosses() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showDCTBCrosses();
+	}
+
+	/**
+	 * Convenience method to see it we show the AI dc hit-based reconstructed crosses.
+	 * 
+	 * @return <code>true</code> if we are to show the AI dc hit-based reconstructed
+	 *         crosses.
+	 */
+	public boolean showAIDCHBCrosses() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showAIDCHBCrosses();
+	}
 	
+	/**
+	 * Convenience method to see it we show the AI dc time-based reconstructed crosses.
+	 * 
+	 * @return <code>true</code> if we are to show the AI dc time-based reconstructed
+	 *         crosses.
+	 */
+	public boolean showAIDCTBCrosses() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showAIDCTBCrosses();
+	}
+	/**
+	 * Get the color scale model if there is one.
+	 * 
+	 * @return the color scale model for accumulation, etc.
+	 */
+	public ColorScaleModel getColorScaleModel() {
+		if (_controlPanel != null) {
+			return _controlPanel.getColorScaleModel();
+		}
+
+		return null;
+	}
+
 	/**
 	 * Convenience method global hit based display
 	 * 
@@ -424,12 +497,49 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		}
 		return _controlPanel.getDisplayArray().showTB();
 	}
+	
+
+	/**
+	 * Convenience method global AI hit based display
+	 * 
+	 * @return <code>true</code> if we are to show AI hb globally
+	 */
+	public boolean showAIHB() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showAIHB();
+	}
+
+	/**
+	 * Convenience method global AI time based display
+	 * 
+	 * @return <code>true</code> if we are to show AI tb globally
+	 */
+	public boolean showAITB() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showAITB();
+	}
+	
+	/**
+	 * Convenience method global neural net data
+	 * 
+	 * @return <code>true</code> if we are to show neural net globally
+	 */
+	public boolean showNN() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showNN();
+	}
+	
 
 	/**
 	 * Convenience method to see it we show the reconstructed clusters.
 	 * 
-	 * @return <code>true</code> if we are to show the the reconstructed
-	 *         clusters.
+	 * @return <code>true</code> if we are to show the the reconstructed clusters.
 	 */
 	public boolean showClusters() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
@@ -437,12 +547,12 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		}
 		return _controlPanel.getDisplayArray().showClusters();
 	}
-	
+
 	/**
 	 * Convenience method to see it we show the reconstructed FMT Crosses.
 	 * 
-	 * @return <code>true</code> if we are to show the the reconstructed
-	 *         FMT Crosses.
+	 * @return <code>true</code> if we are to show the the reconstructed FMT
+	 *         Crosses.
 	 */
 	public boolean showFMTCrosses() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
@@ -450,14 +560,38 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		}
 		return _controlPanel.getDisplayArray().showFMTCrosses();
 	}
+	
+	/**
+	 * Convenience method to see if we show the REC::Particle tracks.
+	 * 
+	 * @return <code>true</code> if we are to show REC::Particle tracks
+	 */
+	public boolean showRecPart() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showRecPart();
 
+	}
 
 	
 	/**
+	 * Convenience method to see if we show the sector change diamonds.
+	 * 
+	 * @return <code>true</code> if we are to show  sector change diamonds
+	 */
+	public boolean showSectorChange() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showSectorChange();
+	}
+
+
+	/**
 	 * Convenience method to see it we show the the reconstructed hits.
 	 * 
-	 * @return <code>true</code> if we are to show the the reconstructed
-	 *         hits.
+	 * @return <code>true</code> if we are to show the the reconstructed hits.
 	 */
 	public boolean showReconHits() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
@@ -465,12 +599,11 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		}
 		return _controlPanel.getDisplayArray().showReconHits();
 	}
-	
+
 	/**
 	 * Convenience method to see it we show the the adc hits.
 	 * 
-	 * @return <code>true</code> if we are to show the the adc
-	 *         hits.
+	 * @return <code>true</code> if we are to show the the adc hits.
 	 */
 	public boolean showADCHits() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
@@ -480,9 +613,9 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	}
 
 	/**
-	 * Convenience method to see if we show CVT reconstructed tracks.
-	 * These are ADC hits except 
-	 * @return <code>true</code> if we are to show ADC hits.
+	 * Convenience method to see if we show CVT reconstructed tracks. 
+	 * 
+	 * @return <code>true</code> if we are to show CVT reconstructed tracks.
 	 */
 	public boolean showCVTTracks() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
@@ -490,27 +623,98 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		}
 		return _controlPanel.getDisplayArray().showCVTTracks();
 	}
-
+	
 	/**
-	 * Convenience method to see it we show the dc time-based reconstructed
-	 * crosses.
+	 * Convenience method to see if we show CVT reconstructed tracks. CVT reconstructed trajectory data.
 	 * 
-	 * @return <code>true</code> if we are to show the dc time-based
-	 *         reconstructed crosses.
+	 * @return <code>true</code> if we are to show CVT reconstructed trajectory data.
 	 */
-	public boolean showDCTBCrosses() {
+	public boolean showCVTTraj() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
-		return _controlPanel.getDisplayArray().showDCTBCrosses();
+		return _controlPanel.getDisplayArray().showCVTTraj();
+	}
+
+
+	/**
+	 * Convenience method to see if we show the trkDoca column.
+	 * 
+	 * @return <code>true</code> if we are to show the trkDoca column.
+	 */
+	public boolean showTrkDoca() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showDoca();
 	}
 
 	/**
-	 * Convenience method to see it we show the dc hit based reconstructed
-	 * hits.
+	 * Convenience method to see if we show the doca column.
 	 * 
-	 * @return <code>true</code> if we are to show the dc hit-based
-	 *         reconstructed hits.
+	 * @return <code>true</code> if we are to show the doca column.
+	 */
+	public boolean showDoca() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showDoca();
+	}
+
+	/**
+	 * Convenience method to see if we show the HB trkDoca column.
+	 * 
+	 * @return <code>true</code> if we are to show HB trkDoca column.
+	 */
+	public boolean showHBTrkDoca() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showHBTrkDoca();
+	}
+
+	/**
+	 * Convenience method to see if we show the TB trkDoca column.
+	 * 
+	 * @return <code>true</code> if we are to show TB trkDoca column.
+	 */
+	public boolean showTBTrkDoca() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showTBTrkDoca();
+	}
+
+	/**
+	 * Convenience method to see if we show the HB doca column.
+	 * 
+	 * @return <code>true</code> if we are to show HB doca column.
+	 */
+	public boolean showHBDoca() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showHBDoca();
+	}
+
+	/**
+	 * Convenience method to see if we show the TB doca column.
+	 * 
+	 * @return <code>true</code> if we are to show TB doca column.
+	 */
+	public boolean showTBDoca() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showTBDoca();
+	}
+
+
+	/**
+	 * Convenience method to see it we show the dc hit based reconstructed hits.
+	 * 
+	 * @return <code>true</code> if we are to show the dc hit-based reconstructed
+	 *         hits.
 	 */
 	public boolean showDCHBHits() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
@@ -518,13 +722,12 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		}
 		return _controlPanel.getDisplayArray().showDCHBHits();
 	}
-	
+
 	/**
-	 * Convenience method to see it we show the dc time based reconstructed
-	 * hits.
+	 * Convenience method to see it we show the dc time based reconstructed hits.
 	 * 
-	 * @return <code>true</code> if we are to show the dc time-based
-	 *         reconstructed hits.
+	 * @return <code>true</code> if we are to show the dc time-based reconstructed
+	 *         hits.
 	 */
 	public boolean showDCTBHits() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
@@ -532,10 +735,79 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		}
 		return _controlPanel.getDisplayArray().showDCTBHits();
 	}
+	
+	/**
+	 * Convenience method to see if we show REC::Calorimeter data
+	 * 
+	 * @return <code>true</code> if we are to show REC::Calorimeter.
+	 */
+	public boolean showRecCal() {
+		return _controlPanel.getDisplayArray().showRecCal();
+	}
+
+	/**
+	 * Convenience method to see if we show field map grid
+	 * 
+	 * @return <code>true</code> if we are to show field map grid
+	 */
+	public boolean showMagGrid() {
+		return _controlPanel.getDisplayArray().showMagGrid();
+	}
+	
+	/**
+	 * Convenience method to see it we show the AI dc hit based reconstructed hits.
+	 * 
+	 * @return <code>true</code> if we are to show the AI dc hit-based reconstructed
+	 *         hits.
+	 */
+	public boolean showAIDCHBHits() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showAIDCHBHits();
+	}
+
+	/**
+	 * Convenience method to see it we show the AI dc time based reconstructed hits.
+	 * 
+	 * @return <code>true</code> if we are to show the AI dc time-based reconstructed
+	 *         hits.
+	 */
+	public boolean showAIDCTBHits() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showAIDCTBHits();
+	}
+	
+	/**
+	 * Convenience method to see if we show the dc HB reconstructed clusters.
+	 * 
+	 * @return <code>true</code> if we are to show dc HB reconstructed clusters.
+	 */
+	public boolean showDCHBClusters() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showDCHBClusters();
+	}
+	
+	/**
+	 * Convenience method to see if we show the dc TB reconstructed clusters.
+	 * 
+	 * @return <code>true</code> if we are to show dc TB reconstructed clusters.
+	 */
+	public boolean showDCTBClusters() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showDCTBClusters();
+	}
 
 
 	/**
 	 * Should we draw hit based segments
+	 * 
 	 * @return whether we should draw hits based segments
 	 */
 	public boolean showDCHBSegments() {
@@ -547,6 +819,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 
 	/**
 	 * Should we draw time based segments
+	 * 
 	 * @return whether we should draw time based segments
 	 */
 	public boolean showDCTBSegments() {
@@ -554,6 +827,31 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 			return false;
 		}
 		return _controlPanel.getDisplayArray().showDCTBSegments();
+	}
+
+	
+	/**
+	 * Should we draw AI hit based segments
+	 * 
+	 * @return whether we should draw AI hits based segments
+	 */
+	public boolean showAIDCHBSegments() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showAIDCHBSegments();
+	}
+
+	/**
+	 * Should we draw AI time based segments
+	 * 
+	 * @return whether we should draw AI time based segments
+	 */
+	public boolean showAIDCTBSegments() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showAIDCTBSegments();
 	}
 
 	/**
@@ -571,8 +869,8 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	/**
 	 * Convenience method to see it we show the montecarlo truth.
 	 * 
-	 * @return <code>true</code> if we are to show the montecarlo truth, if it
-	 *         is available.
+	 * @return <code>true</code> if we are to show the montecarlo truth, if it is
+	 *         available.
 	 */
 	public boolean showMcTruth() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
@@ -624,8 +922,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	/**
 	 * Should we show the strips
 	 * 
-	 * @param stripType
-	 *            U, V or W
+	 * @param stripType U, V or W
 	 * @return <code>true</code> if thebstrips of that type should be shown
 	 */
 	public boolean showStrips(int stripType) {
@@ -643,12 +940,9 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 * Every view should be able to say what sector the current point location
 	 * represents.
 	 * 
-	 * @param container
-	 *            the base container for the view.
-	 * @param screenPoint
-	 *            the pixel point
-	 * @param worldPoint
-	 *            the corresponding world location.
+	 * @param container   the base container for the view.
+	 * @param screenPoint the pixel point
+	 * @param worldPoint  the corresponding world location.
 	 * @return the sector [1..6] or -1 for none.
 	 */
 	public abstract int getSector(IContainer container, Point screenPoint, Point2D.Double worldPoint);
@@ -659,7 +953,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	@Override
 	public void magneticFieldChanged() {
 		_activeProbe = FieldProbe.factory();
-		getContainer().refresh();
+		TimedRefreshManager.getInstance().add(this);
 	}
 
 	// we are hovering
@@ -680,13 +974,11 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	}
 
 	/**
-	 * Convert sector coordinates to tilted sector coordinates. The two vectors
-	 * can be the same in which case it is overwritten.
+	 * Convert sector coordinates to tilted sector coordinates. The two vectors can
+	 * be the same in which case it is overwritten.
 	 * 
-	 * @param tiltedXYZ
-	 *            will hold the tilted coordinates
-	 * @param sectorXYZ
-	 *            the sector coordinates
+	 * @param tiltedXYZ will hold the tilted coordinates
+	 * @param sectorXYZ the sector coordinates
 	 */
 	public void sectorToTilted(double[] tiltedXYZ, double[] sectorXYZ) {
 		double sectx = sectorXYZ[0];
@@ -703,13 +995,11 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	}
 
 	/**
-	 * Convert tilted sector coordinates to sector coordinates. The two vectors
-	 * can be the same in which case it is overwritten.
+	 * Convert tilted sector coordinates to sector coordinates. The two vectors can
+	 * be the same in which case it is overwritten.
 	 * 
-	 * @param tiltedXYZ
-	 *            will hold the tilted coordinates
-	 * @param sectorXYZ
-	 *            the sector coordinates
+	 * @param tiltedXYZ will hold the tilted coordinates
+	 * @param sectorXYZ the sector coordinates
 	 */
 	public void tiltedToSector(double[] tiltedXYZ, double[] sectorXYZ) {
 		double tiltx = tiltedXYZ[0];
@@ -724,7 +1014,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		sectorXYZ[1] = secty;
 		sectorXYZ[2] = sectz;
 	}
-	
+
 	/**
 	 * Check whether the pointer bar is active on the tool bar
 	 * 
@@ -742,12 +1032,9 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 * Some common feedback. Subclasses should override and then call
 	 * super.getFeedbackStrings
 	 * 
-	 * @param container
-	 *            the base container for the view.
-	 * @param pp
-	 *            the pixel point
-	 * @param wp
-	 *            the corresponding world location.
+	 * @param container the base container for the view.
+	 * @param pp        the pixel point
+	 * @param wp        the corresponding world location.
 	 */
 	@Override
 	public void getFeedbackStrings(IContainer container, Point pp, Point2D.Double wp, List<String> feedbackStrings) {
@@ -768,8 +1055,16 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		if (!haveEvent) {
 			feedbackStrings.add("$orange red$No event");
 		} else {
-			feedbackStrings.add("$orange red$" + "event " + _eventManager.getEventNumber());
-			feedbackStrings.add("$orange red$" + _eventManager.getCurrentSourceDescription());
+			feedbackStrings.add("$orange red$" + "sequential event " + _eventManager.getSequentialEventNumber());
+			int trueEventNum = _eventManager.getTrueEventNumber();
+			feedbackStrings.add("$orange red$" + "true event " + ((trueEventNum < 0) ? "n/a" : trueEventNum ));
+			
+			String source = _eventManager.getCurrentSourceDescription();
+			
+			if ((source != null) && (source.length() > 31)) {
+				source = source.substring(0, 30) + "...";
+			}
+			feedbackStrings.add("$orange red$" + source);
 		}
 
 		// get the sector
@@ -827,21 +1122,19 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		return (_mode == Mode.ACCUMULATED);
 	}
 
-
 	/**
 	 * Set the mode for this view.
 	 * 
-	 * @param mode
-	 *            the mode to set. This is either Mode.SINGLE_EVENT or
-	 *            Mode.ACCUMULATED.
+	 * @param mode the mode to set. This is either Mode.SINGLE_EVENT or
+	 *             Mode.ACCUMULATED.
 	 */
 	public void setMode(Mode mode) {
 		_mode = mode;
-		
-		JSlider slider = _controlPanel.getAccumulationSlider();
-		if (slider != null) {
-			slider.setEnabled(_mode == Mode.ACCUMULATED);
-		}
+
+//		JSlider slider = _controlPanel.getAccumulationSlider();
+//		if (slider != null) {
+//			slider.setEnabled(_mode == Mode.ACCUMULATED);
+//		}
 	}
 
 	/**
@@ -858,11 +1151,10 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	}
 
 	/**
-	 * Convenience method for getting the user component on the view's toolbar,
-	 * if there is one.
+	 * Convenience method for getting the user component on the view's toolbar, if
+	 * there is one.
 	 * 
-	 * @return the the user component on the view's toolbar, or
-	 *         <code>null</code>.
+	 * @return the the user component on the view's toolbar, or <code>null</code>.
 	 */
 	@Override
 	public UserToolBarComponent getUserComponent() {
@@ -878,15 +1170,14 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	@Override
 	public void trajectoriesChanged() {
 		if (!_eventManager.isAccumulating()) {
-			getContainer().refresh();
+			TimedRefreshManager.getInstance().add(this);
 		}
 	}
 
 	/**
 	 * A new event has arrived.
 	 * 
-	 * @param event
-	 *            the new event.
+	 * @param event the new event.
 	 */
 	@Override
 	public void newClasIoEvent(final DataEvent event) {
@@ -898,11 +1189,10 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	}
 
 	/**
-	 * Fix the title of the view after an event arrives. The default is to
-	 * append the event number.
+	 * Fix the title of the view after an event arrives. The default is to append
+	 * the event number.
 	 * 
-	 * @param event
-	 *            the new event
+	 * @param event the new event
 	 */
 	protected void fixTitle(DataEvent event) {
 		String title = getTitle();
@@ -911,12 +1201,17 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 			title = title.substring(0, index);
 		}
 
-		int num = _eventManager.getEventNumber();
-		if (num > 0) {
-			setTitle(title + evnumAppend + num + ")");
+		int seqNum = _eventManager.getSequentialEventNumber();
+		int trueNum = _eventManager.getTrueEventNumber();
+		if (seqNum > 0) {
+			if (trueNum > 0) {
+				setTitle(title + evnumAppend + seqNum + "  True event# " + trueNum + ")");
+			}
+			else {
+			    setTitle(title + evnumAppend + seqNum + ")");
+			}
 		}
 	}
-	
 	/**
 	 * Override getName to return the title of the view.
 	 * 
@@ -932,12 +1227,10 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		return title;
 	}
 
-
 	/**
 	 * Opened a new event file
 	 * 
-	 * @param path
-	 *            the path to the new file
+	 * @param path the path to the new file
 	 */
 	@Override
 	public void openedNewEventFile(final String path) {
@@ -946,8 +1239,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	/**
 	 * Change the event source type
 	 * 
-	 * @param source
-	 *            the new source: File, ET
+	 * @param source the new source: File, ET
 	 */
 	@Override
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
@@ -981,10 +1273,8 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	/**
 	 * Compute a world polygon for (roughly) a circle centered about a point.
 	 * 
-	 * @param center
-	 *            the center point
-	 * @param radius
-	 *            the radius in cm
+	 * @param center the center point
+	 * @param radius the radius in cm
 	 */
 	public Point2D.Double[] getCenteredWorldCircle(Point2D.Double center, double radius) {
 
@@ -1018,16 +1308,11 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	/**
 	 * Convert sector to world (not global, but graphical world)
 	 * 
-	 * @param projPlane
-	 *            the projection plane
-	 * @param wp
-	 *            the world point
-	 * @param sectorXYZ
-	 *            the sector coordinates (cm)
-	 * @param projectionPlane
-	 *            the projection plane
-	 * @param the
-	 *            sector 1..6
+	 * @param projPlane       the projection plane
+	 * @param wp              the world point
+	 * @param sectorXYZ       the sector coordinates (cm)
+	 * @param projectionPlane the projection plane
+	 * @param the             sector 1..6
 	 */
 	public void sectorToWorld(Plane3D projPlane, Point2D.Double wp, double[] sectorXYZ, int sector) {
 		double sectx = sectorXYZ[0];
@@ -1043,16 +1328,11 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	/**
 	 * From detector xyz get the projected world point.
 	 * 
-	 * @param x
-	 *            the detector x coordinate
-	 * @param y
-	 *            the detector y coordinate
-	 * @param z
-	 *            the detector z coordinate
-	 * @param projectionPlane
-	 *            the projection plane
-	 * @param wp
-	 *            the projected 2D world point.
+	 * @param x               the detector x coordinate
+	 * @param y               the detector y coordinate
+	 * @param z               the detector z coordinate
+	 * @param projectionPlane the projection plane
+	 * @param wp              the projected 2D world point.
 	 */
 	public void projectClasToWorld(double x, double y, double z, Plane3D projectionPlane, Point2D.Double wp) {
 
@@ -1064,31 +1344,22 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	/**
 	 * From detector xyz get the projected world point.
 	 * 
-	 * @param clasPoint
-	 *            the point in lab (clas) coordinates
-	 * @param projectionPlane
-	 *            the projection plane
-	 * @param wp
-	 *            the projected 2D world point.
+	 * @param clasPoint       the point in lab (clas) coordinates
+	 * @param projectionPlane the projection plane
+	 * @param wp              the projected 2D world point.
 	 */
 	public void projectClasToWorld(Point3D clasPoint, Plane3D projectionPlane, Point2D.Double wp) {
 		projectClasToWorld(clasPoint.x(), clasPoint.y(), clasPoint.z(), projectionPlane, wp);
 	}
 
 	/**
-	 * Project a space point. Projected by finding the closest point on the
-	 * plane.
+	 * Project a space point. Projected by finding the closest point on the plane.
 	 * 
-	 * @param x
-	 *            the x coordinate
-	 * @param y
-	 *            the y coordinate
-	 * @param z
-	 *            the z coordinate
-	 * @param projectionPlane
-	 *            the projection plane
-	 * @param wp
-	 *            will hold the projected 2D world point
+	 * @param x               the x coordinate
+	 * @param y               the y coordinate
+	 * @param z               the z coordinate
+	 * @param projectionPlane the projection plane
+	 * @param wp              will hold the projected 2D world point
 	 * @return the projected 3D space point
 	 */
 	public Point3D projectedPoint(double x, double y, double z, Plane3D projectionPlane, Point2D.Double wp) {
@@ -1103,10 +1374,12 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		wp.y = Math.hypot(pisect.x(), pisect.y());
 		return pisect;
 	}
-	
+
 	/**
 	 * Tests whether this listener is interested in events while accumulating
-	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
+	 * 
+	 * @return <code>true</code> if this listener is NOT interested in events while
+	 *         accumulating
 	 */
 	@Override
 	public boolean ignoreIfAccumulating() {
@@ -1115,24 +1388,41 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 
 	/**
 	 * Get the median setting used in accumulation drawing
+	 * 
 	 * @return the median setting used in accumulation drawing
 	 */
 	public double getMedianSetting() {
 		return _medianRelSetting;
 	}
-	
+
 	/**
 	 * Set the median setting used in accumulation drawing
+	 * 
 	 * @param medianSetting the median setting used in accumulation drawing
 	 */
 	public void setMedianSetting(double medianSetting) {
 		_medianRelSetting = Math.max(0, Math.min(1, medianSetting));
 	}
 	
-
+	/**
+	 * Some views (e.g., RTPC) have a threshold. Thay must override.
+	 * @return the adc threshold for viewing hits
+	 */
+	public int getAdcThreshold() {
+		return 0;
+	}
 	
 	/**
-	 * Clone the view. 
+	 * Get the default value for the adc threshold
+	 * @return the default value for the adc threshold
+	 */
+	public int getAdcThresholdDefault() {
+		return 0;
+	}
+
+	/**
+	 * Clone the view.
+	 * 
 	 * @return the cloned view
 	 */
 	@Override

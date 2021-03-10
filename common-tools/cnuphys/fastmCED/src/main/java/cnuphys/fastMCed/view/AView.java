@@ -1,6 +1,5 @@
 package cnuphys.fastMCed.view;
 
-
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -12,7 +11,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
-import java.io.File;
 import java.util.List;
 
 import javax.swing.Box;
@@ -49,12 +47,12 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
 @SuppressWarnings("serial")
-public abstract class AView extends BaseView implements IFeedbackProvider, SwimTrajectoryListener,
-		MagneticFieldChangeListener, IPhysicsEventListener {
-		
+public abstract class AView extends BaseView
+		implements IFeedbackProvider, SwimTrajectoryListener, MagneticFieldChangeListener, IPhysicsEventListener {
+
 	static protected FieldProbe _activeProbe;
-		
-	//to add separator for first clone
+
+	// to add separator for first clone
 	private static boolean _firstClone = true;
 
 	// used for computing world circles
@@ -67,7 +65,6 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 	// phi plane. For other views, something else, or null;
 	protected Plane3D projectionPlane;
 
-
 	// basic toolbar bits
 	protected static final int TOOLBARBITS = BaseToolBar.NODRAWING & ~BaseToolBar.TEXTFIELD
 			& ~BaseToolBar.CONTROLPANELBUTTON & ~BaseToolBar.RECTGRIDBUTTON & ~BaseToolBar.TEXTBUTTON
@@ -78,13 +75,14 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 	/**
 	 * A string that has r-theta-phi using unicode greek characters
 	 */
-	public static final String rThetaPhi = "r" + UnicodeSupport.THINSPACE +
-			UnicodeSupport.SMALL_THETA + UnicodeSupport.THINSPACE + UnicodeSupport.SMALL_PHI;
+	public static final String rThetaPhi = "r" + UnicodeSupport.THINSPACE + UnicodeSupport.SMALL_THETA
+			+ UnicodeSupport.THINSPACE + UnicodeSupport.SMALL_PHI;
 
 	/**
 	 * A string that has rho-theta-phi using unicode greek characters
 	 */
-	public static final String rhoZPhi = UnicodeSupport.SMALL_RHO + UnicodeSupport.THINSPACE + "z" +  UnicodeSupport.THINSPACE + UnicodeSupport.SMALL_PHI;
+	public static final String rhoZPhi = UnicodeSupport.SMALL_RHO + UnicodeSupport.THINSPACE + "z"
+			+ UnicodeSupport.THINSPACE + UnicodeSupport.SMALL_PHI;
 
 	/**
 	 * A string that has rho-phi using unicode greek characters for hex views
@@ -113,7 +111,7 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 	private long minHoverTrigger = 1000; // ms
 	private long hoverStartCheck = -1;
 	private MouseEvent hoverMouseEvent;
-	
+
 	// last trajectory hovering response
 	protected String _lastTrajStr;
 
@@ -123,8 +121,7 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 	/**
 	 * Constructor
 	 * 
-	 * @param keyVals
-	 *            variable length argument list
+	 * @param keyVals variable length argument list
 	 */
 	public AView(Object... keyVals) {
 		super(keyVals);
@@ -160,7 +157,7 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 		prepareForHovering();
 
 		// add the next event button
-		
+
 		ActionListener al = new ActionListener() {
 
 			@Override
@@ -179,7 +176,7 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 		GraphicsUtilities.setSizeMini(nextEvent);
 		getToolBar().add(Box.createHorizontalStrut(5), 0);
 		getToolBar().add(nextEvent, 0);
-		
+
 		if (_activeProbe == null) {
 			_activeProbe = FieldProbe.factory();
 		}
@@ -288,8 +285,7 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 	/**
 	 * Show or hide the annotation layer.
 	 * 
-	 * @param show
-	 *            the value of the display flag.
+	 * @param show the value of the display flag.
 	 */
 	public void showAnnotations(boolean show) {
 		if (getContainer().getAnnotationLayer() != null) {
@@ -300,8 +296,7 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 	/**
 	 * Sets whether or not we display the magnetic field layer.
 	 * 
-	 * @param show
-	 *            the value of the display flag.
+	 * @param show the value of the display flag.
 	 */
 	public void showMagneticField(boolean show) {
 		if (getMagneticFieldLayer() != null) {
@@ -318,17 +313,13 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 		return true;
 	}
 
-
 	/**
 	 * Every view should be able to say what sector the current point location
 	 * represents.
 	 * 
-	 * @param container
-	 *            the base container for the view.
-	 * @param screenPoint
-	 *            the pixel point
-	 * @param worldPoint
-	 *            the corresponding world location.
+	 * @param container   the base container for the view.
+	 * @param screenPoint the pixel point
+	 * @param worldPoint  the corresponding world location.
 	 * @return the sector [1..6] or -1 for none.
 	 */
 	public abstract int getSector(IContainer container, Point screenPoint, Point2D.Double worldPoint);
@@ -359,7 +350,6 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 		}
 	}
 
-	
 	/**
 	 * Check whether the pointer bar is active on the tool bar
 	 * 
@@ -377,18 +367,14 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 	 * Some common feedback. Subclasses should override and then call
 	 * super.getFeedbackStrings
 	 * 
-	 * @param container
-	 *            the base container for the view.
-	 * @param pp
-	 *            the pixel point
-	 * @param wp
-	 *            the corresponding world location.
+	 * @param container the base container for the view.
+	 * @param pp        the pixel point
+	 * @param wp        the corresponding world location.
 	 */
 	@Override
 	public void getFeedbackStrings(IContainer container, Point pp, Point2D.Double wp, List<String> feedbackStrings) {
 
 		PhysicsEvent event = PhysicsEventManager.getInstance().getCurrentEvent();
-
 
 		// add some information about the current event
 		if (event == null) {
@@ -396,11 +382,11 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 		} else {
 			int evNum = PhysicsEventManager.getInstance().eventNumber();
 			int evCount = PhysicsEventManager.getInstance().getEventCount();
-			
+
 			String evStr = "event #" + evNum + " of " + evCount;
 
-			feedbackStrings.add("$orange red$" +evStr);
-			
+			feedbackStrings.add("$orange red$" + evStr);
+
 			feedbackStrings.add("$orange red$" + _eventManager.getGeneratorDescription());
 		}
 
@@ -446,11 +432,10 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 	}
 
 	/**
-	 * Convenience method for getting the user component on the view's toolbar,
-	 * if there is one.
+	 * Convenience method for getting the user component on the view's toolbar, if
+	 * there is one.
 	 * 
-	 * @return the the user component on the view's toolbar, or
-	 *         <code>null</code>.
+	 * @return the the user component on the view's toolbar, or <code>null</code>.
 	 */
 	@Override
 	public UserToolBarComponent getUserComponent() {
@@ -471,8 +456,7 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 	/**
 	 * A new event has arrived.
 	 * 
-	 * @param event
-	 *            the new event.
+	 * @param event the new event.
 	 */
 	@Override
 	public void newPhysicsEvent(final PhysicsEvent event, List<ParticleHits> particleHits) {
@@ -482,11 +466,10 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 	}
 
 	/**
-	 * Fix the title of the view after an event arrives. The default is to
-	 * append the event number.
+	 * Fix the title of the view after an event arrives. The default is to append
+	 * the event number.
 	 * 
-	 * @param event
-	 *            the new event
+	 * @param event the new event
 	 */
 	protected void fixTitle(PhysicsEvent event) {
 		String title = getTitle();
@@ -500,7 +483,7 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 			setTitle(title + evnumAppend + num + ")");
 		}
 	}
-	
+
 	/**
 	 * Override getName to return the title of the view.
 	 * 
@@ -516,15 +499,14 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 		return title;
 	}
 
-
 	/**
 	 * A new event generator is active
+	 * 
 	 * @param generator the now active generator
 	 */
 	@Override
 	public void newEventGenerator(final AEventGenerator generator) {
 	}
-
 
 	public Shape clipView(Graphics g) {
 		Shape oldClip = g.getClip();
@@ -535,14 +517,11 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 		return oldClip;
 	}
 
-
 	/**
 	 * Compute a world polygon for (roughly) a circle centered about a point.
 	 * 
-	 * @param center
-	 *            the center point
-	 * @param radius
-	 *            the radius in cm
+	 * @param center the center point
+	 * @param radius the radius in cm
 	 */
 	public Point2D.Double[] getCenteredWorldCircle(Point2D.Double center, double radius) {
 
@@ -576,16 +555,11 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 	/**
 	 * Convert sector to world (not global, but graphical world)
 	 * 
-	 * @param projPlane
-	 *            the projection plane
-	 * @param wp
-	 *            the world point
-	 * @param sectorXYZ
-	 *            the sector coordinates (cm)
-	 * @param projectionPlane
-	 *            the projection plane
-	 * @param the
-	 *            sector 1..6
+	 * @param projPlane       the projection plane
+	 * @param wp              the world point
+	 * @param sectorXYZ       the sector coordinates (cm)
+	 * @param projectionPlane the projection plane
+	 * @param the             sector 1..6
 	 */
 	public void sectorToWorld(Plane3D projPlane, Point2D.Double wp, double[] sectorXYZ, int sector) {
 		double sectx = sectorXYZ[0];
@@ -601,16 +575,11 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 	/**
 	 * From detector xyz get the projected world point.
 	 * 
-	 * @param x
-	 *            the detector x coordinate
-	 * @param y
-	 *            the detector y coordinate
-	 * @param z
-	 *            the detector z coordinate
-	 * @param projectionPlane
-	 *            the projection plane
-	 * @param wp
-	 *            the projected 2D world point.
+	 * @param x               the detector x coordinate
+	 * @param y               the detector y coordinate
+	 * @param z               the detector z coordinate
+	 * @param projectionPlane the projection plane
+	 * @param wp              the projected 2D world point.
 	 */
 	public void projectClasToWorld(double x, double y, double z, Plane3D projectionPlane, Point2D.Double wp) {
 
@@ -622,31 +591,22 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 	/**
 	 * From detector xyz get the projected world point.
 	 * 
-	 * @param clasPoint
-	 *            the point in lab (clas) coordinates
-	 * @param projectionPlane
-	 *            the projection plane
-	 * @param wp
-	 *            the projected 2D world point.
+	 * @param clasPoint       the point in lab (clas) coordinates
+	 * @param projectionPlane the projection plane
+	 * @param wp              the projected 2D world point.
 	 */
 	public void projectClasToWorld(Point3D clasPoint, Plane3D projectionPlane, Point2D.Double wp) {
 		projectClasToWorld(clasPoint.x(), clasPoint.y(), clasPoint.z(), projectionPlane, wp);
 	}
 
 	/**
-	 * Project a space point. Projected by finding the closest point on the
-	 * plane.
+	 * Project a space point. Projected by finding the closest point on the plane.
 	 * 
-	 * @param x
-	 *            the x coordinate
-	 * @param y
-	 *            the y coordinate
-	 * @param z
-	 *            the z coordinate
-	 * @param projectionPlane
-	 *            the projection plane
-	 * @param wp
-	 *            will hold the projected 2D world point
+	 * @param x               the x coordinate
+	 * @param y               the y coordinate
+	 * @param z               the z coordinate
+	 * @param projectionPlane the projection plane
+	 * @param wp              will hold the projected 2D world point
 	 * @return the projected 3D space point
 	 */
 	public Point3D projectedPoint(double x, double y, double z, Plane3D projectionPlane, Point2D.Double wp) {
@@ -661,7 +621,7 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 		wp.y = Math.hypot(pisect.x(), pisect.y());
 		return pisect;
 	}
-		
+
 	/**
 	 * Convenience method to see it we show results of the SNR analysis
 	 * 
@@ -699,7 +659,8 @@ public abstract class AView extends BaseView implements IFeedbackProvider, SwimT
 	}
 
 	/**
-	 * Clone the view. 
+	 * Clone the view.
+	 * 
 	 * @return the cloned view
 	 */
 	@Override

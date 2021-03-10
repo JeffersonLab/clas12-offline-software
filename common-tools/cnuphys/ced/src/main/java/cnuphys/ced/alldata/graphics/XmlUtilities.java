@@ -2,7 +2,7 @@ package cnuphys.ced.alldata.graphics;
 
 public class XmlUtilities {
 
-	//XML elements (upper case)
+	// XML elements (upper case)
 	public static final String XmlBinding = "BINDING";
 	public static final String XmlBounds = "BOUNDS";
 	public static final String XmlCed = "CED";
@@ -12,9 +12,8 @@ public class XmlUtilities {
 	public static final String XmlHistoData2D = "HISTODATA2D";
 	public static final String XmlPlot = "PLOT";
 	public static final String XmlRangeCut = "RANGECUT";
-	
-	
-	//XML attributes (lower case)
+
+	// XML attributes (lower case)
 	public static final String XmlActive = "active";
 	public static final String XmlBankColumn = "bankcolumn";
 	public static final String XmlCount = "count";

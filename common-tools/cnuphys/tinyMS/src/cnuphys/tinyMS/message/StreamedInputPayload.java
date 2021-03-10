@@ -4,16 +4,17 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 
 public class StreamedInputPayload extends DataInputStream {
-	
+
 	private byte[] _bytes;
-	
+
 	private StreamedInputPayload(byte[] bytes) {
 		super(new ByteArrayInputStream(bytes));
 		_bytes = bytes;
 	}
-	
+
 	/**
 	 * Get the input payload from a byte array
+	 * 
 	 * @param bytes the byte array
 	 * @return the SreamedInputPayload
 	 */
@@ -23,9 +24,10 @@ public class StreamedInputPayload extends DataInputStream {
 		}
 		return new StreamedInputPayload(bytes);
 	}
-	
+
 	/**
 	 * Get the input payload from a message
+	 * 
 	 * @param message the message
 	 * @return the SreamedInputPayload
 	 */
@@ -33,14 +35,13 @@ public class StreamedInputPayload extends DataInputStream {
 		if (message != null) {
 			return null;
 		}
-		
-		
+
 		return new StreamedInputPayload(message.getByteArray());
 	}
 
-	
 	/**
 	 * Get the payload data length in bytes
+	 * 
 	 * @return the payload data length in bytes
 	 */
 	public int length() {

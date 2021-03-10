@@ -22,20 +22,21 @@ import cnuphys.ced.event.IAccumulationListener;
 import cnuphys.lund.SwimTrajectoryListener;
 import cnuphys.swim.Swimming;
 
-public abstract class CedView3D extends BaseView implements
-		IClasIoEventListener, SwimTrajectoryListener, IAccumulationListener,
-		ActionListener {
+public abstract class CedView3D extends BaseView
+		implements IClasIoEventListener, SwimTrajectoryListener, IAccumulationListener, ActionListener {
 
 	// the menu bar
 	private final JMenuBar _menuBar;
-	
 
 	// the event manager
-	private final ClasIoEventManager _eventManager = ClasIoEventManager
-			.getInstance();
+	private final ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
 	// the 3D panel
 	protected final CedPanel3D _panel3D;
+	
+	//for appending event number to the titile
+	private static final String evnumAppend = "  (Seq Event# ";
+
 
 	// menu
 	private JMenuItem _printMenuItem;
@@ -44,6 +45,7 @@ public abstract class CedView3D extends BaseView implements
 
 	/**
 	 * Create a 3D view
+	 * 
 	 * @param title
 	 * @param angleX
 	 * @param angleY
@@ -52,11 +54,9 @@ public abstract class CedView3D extends BaseView implements
 	 * @param yDist
 	 * @param zDist
 	 */
-	public CedView3D(String title, float angleX, float angleY, float angleZ,
-			float xDist, float yDist, float zDist) {
-		super(PropertySupport.TITLE, title, PropertySupport.ICONIFIABLE, true,
-				PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE, true,
-				PropertySupport.RESIZABLE, true, PropertySupport.VISIBLE, true);
+	public CedView3D(String title, float angleX, float angleY, float angleZ, float xDist, float yDist, float zDist) {
+		super(PropertySupport.TITLE, title, PropertySupport.ICONIFIABLE, true, PropertySupport.MAXIMIZABLE, true,
+				PropertySupport.CLOSABLE, true, PropertySupport.RESIZABLE, true, PropertySupport.VISIBLE, true);
 
 		_eventManager.addClasIoEventListener(this, 2);
 
@@ -76,9 +76,9 @@ public abstract class CedView3D extends BaseView implements
 		AccumulationManager.getInstance().addAccumulationListener(this);
 	}
 
-	//make the 3d panel
-	protected abstract CedPanel3D make3DPanel(float angleX, float angleY,
-			float angleZ, float xDist, float yDist, float zDist);
+	// make the 3d panel
+	protected abstract CedPanel3D make3DPanel(float angleX, float angleY, float angleZ, float xDist, float yDist,
+			float zDist);
 
 	// add the menus
 	private void addMenus() {
@@ -101,26 +101,24 @@ public abstract class CedView3D extends BaseView implements
 	@Override
 	public void newClasIoEvent(DataEvent event) {
 		if (!_eventManager.isAccumulating()) {
-			// setData(event);
-			// setEventNumber(_eventManager.getEventNumber());
-			// fixButtons();
-			_panel3D.refresh();
+			fixTitle(event);
+			_panel3D.refreshQueued();
 		}
 	}
 
 	@Override
 	public void openedNewEventFile(String path) {
-		_panel3D.refresh();
+		_panel3D.refreshQueued();
 	}
-	
+
 	/**
 	 * Change the event source type
+	 * 
 	 * @param source the new source: File, ET
 	 */
 	@Override
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
 	}
-
 
 	@Override
 	public void accumulationEvent(int reason) {
@@ -129,10 +127,12 @@ public abstract class CedView3D extends BaseView implements
 			break;
 
 		case AccumulationManager.ACCUMULATION_CANCELLED:
+			fixTitle(_eventManager.getCurrentEvent());
 			_panel3D.refresh();
 			break;
 
 		case AccumulationManager.ACCUMULATION_FINISHED:
+			fixTitle(_eventManager.getCurrentEvent());
 			_panel3D.refresh();
 			break;
 		}
@@ -141,7 +141,7 @@ public abstract class CedView3D extends BaseView implements
 	@Override
 	public void trajectoriesChanged() {
 		if (!_eventManager.isAccumulating()) {
-			_panel3D.refresh();
+			_panel3D.refreshQueued();
 		}
 	}
 
@@ -157,24 +157,52 @@ public abstract class CedView3D extends BaseView implements
 			_panel3D.refresh();
 		}
 	}
-	
+
 	@Override
 	public void focusGained(FocusEvent e) {
 		if (_panel3D != null) {
 			_panel3D.requestFocus();
 		}
 	}
-	
+
 	@Override
 	public void refresh() {
 		if (_panel3D != null) {
 			_panel3D.refresh();
 		}
 	}
+	
+	/**
+	 * Fix the title of the view after an event arrives. The default is to append
+	 * the event number.
+	 * 
+	 * @param event the new event
+	 */
+	protected void fixTitle(DataEvent event) {
+		String title = getTitle();
+		int index = title.indexOf(evnumAppend);
+		if (index > 0) {
+			title = title.substring(0, index);
+		}
+
+		int seqNum = _eventManager.getSequentialEventNumber();
+		int trueNum = _eventManager.getTrueEventNumber();
+		if (seqNum > 0) {
+			if (trueNum > 0) {
+				setTitle(title + evnumAppend + seqNum + "  True event# " + trueNum + ")");
+			}
+			else {
+			    setTitle(title + evnumAppend + seqNum + ")");
+			}
+		}
+	}
+
 
 	/**
 	 * Tests whether this listener is interested in events while accumulating
-	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
+	 * 
+	 * @return <code>true</code> if this listener is NOT interested in events while
+	 *         accumulating
 	 */
 	@Override
 	public boolean ignoreIfAccumulating() {

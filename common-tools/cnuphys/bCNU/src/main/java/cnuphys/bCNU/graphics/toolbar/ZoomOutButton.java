@@ -16,8 +16,7 @@ public class ZoomOutButton extends ToolBarButton {
 	/**
 	 * Create the zoom-out button, which zooms out by a fixed amount.
 	 * 
-	 * @param container
-	 *            the container this button acts upon.
+	 * @param container the container this button acts upon.
 	 */
 	public ZoomOutButton(IContainer container) {
 		super(container, "images/zoom_out.gif", "Zoom out");
@@ -26,8 +25,7 @@ public class ZoomOutButton extends ToolBarButton {
 	/**
 	 * This is what I do if I am pressed
 	 * 
-	 * @param e
-	 *            the causal event.
+	 * @param e the causal event.
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {

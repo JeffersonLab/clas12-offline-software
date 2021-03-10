@@ -14,6 +14,8 @@ import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.event.data.AIHBCrosses;
+import cnuphys.ced.event.data.AITBCrosses;
 import cnuphys.ced.event.data.Cross;
 import cnuphys.ced.event.data.CrossList;
 import cnuphys.ced.event.data.DataDrawSupport;
@@ -23,18 +25,24 @@ import cnuphys.ced.item.HexSectorItem;
 
 public class CrossDrawer extends DCXYViewDrawer {
 
-	public static final int HB = 0;
-	public static final int TB = 1;
+	public static final int HB = cnuphys.ced.common.CrossDrawer.HB;
+	public static final int TB = cnuphys.ced.common.CrossDrawer.TB;
+	public static final int AIHB = cnuphys.ced.common.CrossDrawer.AIHB;
+	public static final int AITB = cnuphys.ced.common.CrossDrawer.AITB;
 
-	private static final int ARROWLEN = 30; // pixels
-	private static final Stroke THICKLINE = new BasicStroke(1.5f);
+
+	private static final int ARROWLEN = cnuphys.ced.common.CrossDrawer.ARROWLEN;
+	private static final Stroke THICKLINE = cnuphys.ced.common.CrossDrawer.THICKLINE;
 
 	// feedback string color
-	private static String fbcolors[] = { "$wheat$", "$misty rose$" };
+	private static String fbcolors[] = cnuphys.ced.common.CrossDrawer.fbcolors;
 
 	private int _mode = HB;
 
-
+	/**
+	 * A cross drawer for the DCXY view
+	 * @param view the view
+	 */
 	public CrossDrawer(DCXYView view) {
 		super(view);
 	}
@@ -51,7 +59,6 @@ public class CrossDrawer extends DCXYViewDrawer {
 	@Override
 	public void draw(Graphics g, IContainer container) {
 
-		
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
@@ -64,30 +71,34 @@ public class CrossDrawer extends DCXYViewDrawer {
 		CrossList crosses = null;
 		if (_mode == HB) {
 			crosses = HBCrosses.getInstance().getCrosses();
-		}
+		} 
 		else if (_mode == TB) {
 			crosses = TBCrosses.getInstance().getCrosses();
 		}
+		else if (_mode == AIHB) {
+			crosses = AIHBCrosses.getInstance().getCrosses();
+		}
+		else if (_mode == AITB) {
+			crosses = AITBCrosses.getInstance().getCrosses();
+		}
+		
 		if ((crosses == null) || crosses.isEmpty()) {
 			return;
 		}
 
 		Graphics2D g2 = (Graphics2D) g;
-		
+
 		Stroke oldStroke = g2.getStroke();
 		g2.setStroke(THICKLINE);
 
 		double result[] = new double[3];
 		Point pp = new Point();
-		
-		int index = 0;
+
 		for (Cross cross : crosses) {
 			HexSectorItem hsItem = _view.getHexSectorItem(cross.sector);
 
 			if (hsItem == null) {
-				System.err.println(
-						"null sector item in DCXY Cross Drawer sector: "
-								+ cross.sector);
+				System.err.println("null sector item in DCXY Cross Drawer sector: " + cross.sector);
 				break;
 			}
 
@@ -105,8 +116,7 @@ public class CrossDrawer extends DCXYViewDrawer {
 			Point pp2 = new Point();
 
 			int pixlen = ARROWLEN;
-			double r = pixlen
-					/ WorldGraphicsUtilities.getMeanPixelDensity(container);
+			double r = pixlen / WorldGraphicsUtilities.getMeanPixelDensity(container);
 
 			// System.err.println("ARROWLEN r = " + r + " absmaxx: " +
 			// DCGeometry.getAbsMaxWireX());
@@ -129,9 +139,7 @@ public class CrossDrawer extends DCXYViewDrawer {
 
 			// the circles and crosses
 			DataDrawSupport.drawCross(g, pp.x, pp.y, _mode);
-			
-			index++;
-		}		
+		}
 
 		g2.setStroke(oldStroke);
 	}
@@ -139,36 +147,40 @@ public class CrossDrawer extends DCXYViewDrawer {
 	/**
 	 * Use what was drawn to generate feedback strings
 	 * 
-	 * @param container the drawing container
-	 * @param screenPoint the mouse location
-	 * @param worldPoint the corresponding world location
+	 * @param container       the drawing container
+	 * @param screenPoint     the mouse location
+	 * @param worldPoint      the corresponding world location
 	 * @param feedbackStrings add strings to this collection
 	 */
 	@Override
-	public void feedback(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
-
+	public void feedback(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings) {
 
 		// any crosses?
 		CrossList crosses = null;
 		if (_mode == HB) {
 			crosses = HBCrosses.getInstance().getCrosses();
-		}
+		} 
 		else if (_mode == TB) {
 			crosses = TBCrosses.getInstance().getCrosses();
 		}
+		else if (_mode == AIHB) {
+			crosses = AIHBCrosses.getInstance().getCrosses();
+		}
+		else if (_mode == AITB) {
+			crosses = AITBCrosses.getInstance().getCrosses();
+		}
+		
 		if ((crosses == null) || crosses.isEmpty()) {
 			return;
 		}
-		
+
 		for (Cross cross : crosses) {
 			if (cross.contains(screenPoint)) {
-				feedbackStrings.add(fbcolors[_mode]
-						+ DataDrawSupport.prefix[_mode] + "cross ID: " + cross.id
+				feedbackStrings.add(fbcolors[_mode] + DataDrawSupport.prefix[_mode] + "cross ID: " + cross.id
 						+ "  sect: " + cross.sector + "  reg: " + cross.region);
 
-				feedbackStrings.add(
-						vecStr("cross loc tilted", cross.x, cross.y, cross.z));
+				feedbackStrings.add(vecStr("cross loc tilted", cross.x, cross.y, cross.z));
 				feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
 				feedbackStrings.add(vecStr("cross direc tilted", cross.ux, cross.uy, cross.uz));
 
@@ -177,27 +189,22 @@ public class CrossDrawer extends DCXYViewDrawer {
 				result[1] = cross.y;
 				result[2] = cross.z;
 				_view.tiltedToSector(result, result);
-				feedbackStrings.add(vecStr("cross loc vector", result[0],
-						result[1], result[2]));
+				feedbackStrings.add(vecStr("cross loc vector", result[0], result[1], result[2]));
 
 				result[0] = cross.ux;
 				result[1] = cross.uy;
 				result[2] = cross.uz;
 				_view.tiltedToSector(result, result);
-				feedbackStrings.add(vecStr("cross direc vector", result[0],
-						result[1], result[2]));
+				feedbackStrings.add(vecStr("cross direc vector", result[0], result[1], result[2]));
 				break;
 			}
 		}
 	}
 
-
 	// for writing out a vector
 	private String vecStr(String prompt, double vx, double vy, double vz) {
-		return fbcolors[_mode] + DataDrawSupport.prefix[_mode] + prompt + " ("
-				+ DoubleFormat.doubleFormat(vx, 2) + ", "
-				+ DoubleFormat.doubleFormat(vy, 2) + ", "
-				+ DoubleFormat.doubleFormat(vz, 2) + ")";
+		return fbcolors[_mode] + DataDrawSupport.prefix[_mode] + prompt + " (" + DoubleFormat.doubleFormat(vx, 2) + ", "
+				+ DoubleFormat.doubleFormat(vy, 2) + ", " + DoubleFormat.doubleFormat(vz, 2) + ")";
 	}
 
 	class FeedbackRects {

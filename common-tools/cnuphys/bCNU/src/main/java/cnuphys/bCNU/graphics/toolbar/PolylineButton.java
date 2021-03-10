@@ -18,14 +18,12 @@ import cnuphys.bCNU.item.AItem;
  *         Window - Preferences - Java - Code Style - Code Templates
  */
 @SuppressWarnings("serial")
-public class PolylineButton extends ToolBarToggleButton implements
-		IRubberbanded {
+public class PolylineButton extends ToolBarToggleButton implements IRubberbanded {
 
 	/**
 	 * Create a button for creating a polygon.
 	 * 
-	 * @param container
-	 *            the owner container.
+	 * @param container the owner container.
 	 */
 	public PolylineButton(IContainer container) {
 		super(container, "images/polyline.gif", "Create a polyline");
@@ -34,14 +32,12 @@ public class PolylineButton extends ToolBarToggleButton implements
 	/**
 	 * The mouse has been pressed, start rubber banding.
 	 * 
-	 * @param mouseEvent
-	 *            the causal mouse event.
+	 * @param mouseEvent the causal mouse event.
 	 */
 	@Override
 	public void mousePressed(MouseEvent mouseEvent) {
 		if (rubberband == null) {
-			rubberband = new Rubberband(container, this,
-					Rubberband.Policy.POLYLINE);
+			rubberband = new Rubberband(container, this, Rubberband.Policy.POLYLINE);
 			rubberband.setActive(true);
 			rubberband.startRubberbanding(mouseEvent.getPoint());
 		}
@@ -58,8 +54,7 @@ public class PolylineButton extends ToolBarToggleButton implements
 		if ((pp == null) || (pp.length < 2)) {
 			return;
 		}
-		AItem item = container.createPolylineItem(
-				container.getAnnotationLayer(), pp);
+		AItem item = container.createPolylineItem(container.getAnnotationLayer(), pp);
 		if (item != null) {
 			item.setRightClickable(true);
 			item.setDraggable(true);

@@ -14,42 +14,42 @@ import cnuphys.ced.clasio.RunData;
 
 public class HipoTest {
 
-	//data directory
+	// data directory
 	private static File _dataDir;
 	private static File _testFile;
-	
-	//hippo dictionary
+
+	// hippo dictionary
 //	private static HipoDataDictionary _dictionary;
 
 	private static RunData _runData = new RunData();
-	
-	//test peeking at some events
+
+	// test peeking at some events
 	private static boolean eventTest() {
 		HipoDataSource source = new HipoDataSource();
 		System.out.println("TEST FILE: " + _testFile.getAbsolutePath());
 		source.open(_testFile.getAbsolutePath());
 		System.out.println("event file size: " + source.getSize());
-		
+
 		DetectorResponse response;
 
 		int eventCount = 0;
-		while((eventCount < 3) && source.hasEvent()){
+		while ((eventCount < 3) && source.hasEvent()) {
 			eventCount++;
 			DataEvent dataEvent = source.getNextEvent();
 			System.out.println("GOT EVENT: " + source.getCurrentIndex() + "   with banks: ");
-			
+
 //			for (String bankName : _dictionary.getDescriptorList()) {
 //				DataBank bank = dataEvent.getBank(bankName);
 //				
 //				System.out.println("  Data bank for [" + bankName + "]  found: " + (bank != null));
 //			}
-			
+
 			String currentbankList[] = dataEvent.getBankList();
 			for (String bankName : currentbankList) {
 				System.out.println("   " + bankName);
 //				String columnList[] = dataEvent.getColumnList(bankName);
 				List<ColumnData> columnsWithData = DataManager.getInstance().hasData(dataEvent);
-				
+
 				for (ColumnData cd : columnsWithData) {
 					System.out.println("        " + cd.getFullName() + "   count: " + cd.length(dataEvent));
 				}
@@ -58,20 +58,19 @@ public class HipoTest {
 //					System.out.println("        " + columnName + "   count: " + cd.length(dataEvent));
 //				}
 			}
-			
+
 //			if (_runData.set(dataEvent)) {
 //				System.out.println(_runData.toString());
 //			}
 //			else {
 //				System.out.println("No Run Bank data");
 //			}
-		} 
-		
+		}
+
 		return true;
 	}
-	
-	
-	//test the hippo dictionary
+
+	// test the hippo dictionary
 	private static boolean testDictionary() {
 //		EvioDataDictionary dataDict = EvioFactory.getDictionary();
 //		if (dataDict != null) {
@@ -88,8 +87,7 @@ public class HipoTest {
 			for (ColumnData cd : columns) {
 				System.out.println(cd.toString());
 			}
-		}
-		else {
+		} else {
 			System.out.println("NO COLUMNS!");
 		}
 //		_dictionary = new HipoDataDictionary();
@@ -108,21 +106,21 @@ public class HipoTest {
 
 		return true;
 	}
-	
-	//look for necessary directories
+
+	// look for necessary directories
 	private static boolean findDirectories() {
 		_dataDir = new File("../../../data/HippoData");
 		if (!_dataDir.exists() || !_dataDir.isDirectory()) {
 			System.out.println("Could not find data dir at: " + _dataDir.getAbsolutePath());
 			return false;
 		}
-		
+
 		_testFile = new File(_dataDir, "test.hipo");
-		if (!_testFile.exists())  {
+		if (!_testFile.exists()) {
 			System.out.println("Could not open test file at: " + _testFile.getAbsolutePath());
 			return false;
 		}
-		
+
 		String clas12dir = System.getProperty("CLAS12DIR");
 		if (clas12dir == null) {
 			System.out.println("No CLAS12DIR property");
@@ -135,14 +133,13 @@ public class HipoTest {
 			return false;
 		}
 
-		
 		System.out.println("Good. All directories found.");
 		return true;
 	}
-	
-	
+
 	/**
 	 * main program for hippo test
+	 * 
 	 * @param arg command line arguments
 	 */
 	public static void main(String arg[]) {
@@ -155,7 +152,7 @@ public class HipoTest {
 			System.out.println("Failed dictionary test. Exiting.");
 			System.exit(1);
 		}
-		
+
 //		if (!eventTest()) {
 //			System.out.println("Failed event test. Exiting.");
 //			System.exit(1);

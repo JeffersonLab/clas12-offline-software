@@ -18,27 +18,27 @@ import cnuphys.splot.plot.PlotCanvas;
 import cnuphys.splot.plot.PlotPanel;
 
 public class Histogram2D extends PlotDialog {
-	
-	//the histgram data
+
+	// the histgram data
 	private Histo2DData _histoData;
-	
+
 	// the x and y column data
 	private ColumnData _colDatX;
 	private ColumnData _colDatY;
 
-	//the (alternative) x and y expressions
-	private String  _namedExpressionNameX;
-	private String  _namedExpressionNameY;
+	// the (alternative) x and y expressions
+	private String _namedExpressionNameX;
+	private String _namedExpressionNameY;
 	private NamedExpression _expressionX;
 	private NamedExpression _expressionY;
-	
+
 	public Histogram2D(Histo2DData histoData) {
 		super(histoData.getName());
 		_histoData = histoData;
-		
+
 		String xname = histoData.getXName();
 		String yname = histoData.getYName();
-		
+
 		boolean isColumnX = DataManager.getInstance().validColumnName(xname);
 		boolean isColumnY = DataManager.getInstance().validColumnName(yname);
 
@@ -56,38 +56,35 @@ public class Histogram2D extends PlotDialog {
 		_plotPanel = createPlotPanel(histoData);
 		add(_plotPanel, BorderLayout.CENTER);
 	}
-	
+
 	/**
 	 * Get the NamedExpression (for X) which might be null
+	 * 
 	 * @return the named expression
 	 */
 	public NamedExpression getNamedExpressionX() {
 		if (_expressionX != null) {
 			return _expressionX;
 		}
-		
-		_expressionX =  DefinitionManager.getInstance()
-				.getNamedExpression(_namedExpressionNameX);
+
+		_expressionX = DefinitionManager.getInstance().getNamedExpression(_namedExpressionNameX);
 		return _expressionX;
 	}
-	
-	
+
 	/**
 	 * Get the NamedExpression (for Y) which might be null
+	 * 
 	 * @return the named expression
 	 */
 	public NamedExpression getNamedExpressionY() {
 		if (_expressionY != null) {
 			return _expressionY;
 		}
-		
-		_expressionY =  DefinitionManager.getInstance()
-				.getNamedExpression(_namedExpressionNameY);
+
+		_expressionY = DefinitionManager.getInstance().getNamedExpression(_namedExpressionNameY);
 		return _expressionY;
 	}
 
-
-	
 	private PlotPanel createPlotPanel(Histo2DData h2) {
 		DataSet data;
 		try {
@@ -96,7 +93,7 @@ public class Histogram2D extends PlotDialog {
 			e.printStackTrace();
 			return null;
 		}
-		
+
 		PlotCanvas canvas = new PlotCanvas(data, h2.getName(), h2.getXName(), h2.getYName());
 
 		canvas.getParameters().setNumDecimalX(1);
@@ -105,43 +102,41 @@ public class Histogram2D extends PlotDialog {
 		canvas.getParameters().setAxesFont(Fonts.smallFont);
 		canvas.getParameters().setMinExponentY(4);
 		canvas.getParameters().setMinExponentX(4);
-		
+
 		canvas.getParameters().setXRange(h2.getMinX(), h2.getMaxX());
 		canvas.getParameters().setYRange(h2.getMinY(), h2.getMaxY());
 		canvas.getParameters().setTextFont(Fonts.smallFont);
-		
+
 		canvas.getParameters().setGradientDrawing(true);
-		
+
 		canvas.getPlotTicks().setDrawBinValue(false);
 		canvas.getPlotTicks().setNumMajorTickX(5);
 		canvas.getPlotTicks().setNumMajorTickY(5);
 		canvas.getPlotTicks().setNumMinorTickX(0);
 		canvas.getPlotTicks().setNumMinorTickY(0);
 		canvas.getPlotTicks().setTickFont(Fonts.smallFont);
-		
+
 		data.getCurve(0).getFit().setFitType(FitType.NOLINE);
-		
+
 		PlotPanel ppanel = new PlotPanel(canvas, PlotPanel.STANDARD);
 		ppanel.setColor(X11Colors.getX11Color("alice blue"));
 
 		ppanel.setBorder(BorderFactory.createEtchedBorder());
-		
+
 		return ppanel;
 	}
 
 	@Override
 	public void newClasIoEvent(DataEvent event) {
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
-			
-			
+
 			NamedExpression expX = getNamedExpressionX();
 			NamedExpression expY = getNamedExpressionY();
 
-			
 			int lenx = getMinLength(event, _colDatX, expX);
 			int leny = getMinLength(event, _colDatY, expY);
 			int len = Math.min(lenx, leny);
-			
+
 			for (int index = 0; index < len; index++) {
 				double valx = getValue(event, index, _colDatX, expX);
 				double valy = getValue(event, index, _colDatY, expY);
@@ -149,7 +144,7 @@ public class Histogram2D extends PlotDialog {
 					_histoData.add(valx, valy);
 				}
 			}
-		} //isAccumulating
+		} // isAccumulating
 	}
 
 	@Override
@@ -161,21 +156,24 @@ public class Histogram2D extends PlotDialog {
 
 	/**
 	 * Get the plot type for properties
+	 * 
 	 * @return the plot type
 	 */
 	@Override
 	public String getPlotType() {
 		return PlotDialog.HISTOGRAM2D;
 	}
-	
+
 	@Override
 	public void customXml(XmlPrintStreamWriter writer) {
 		writeHisto2DData(writer, _histoData);
 	}
-	
+
 	/**
 	 * Tests whether this listener is interested in events while accumulating
-	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
+	 * 
+	 * @return <code>true</code> if this listener is NOT interested in events while
+	 *         accumulating
 	 */
 	@Override
 	public boolean ignoreIfAccumulating() {

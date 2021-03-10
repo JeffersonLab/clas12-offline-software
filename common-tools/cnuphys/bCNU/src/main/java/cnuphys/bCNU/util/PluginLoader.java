@@ -41,26 +41,23 @@ public class PluginLoader {
 		@Override
 		public boolean accept(File dir, String name) {
 			File theFile = new File(dir, name);
-			//exclude jar files untill we need to include them
+			// exclude jar files untill we need to include them
 //			return (theFile.isDirectory() || name.endsWith(".class") || name.endsWith(".jar"));
 			return (theFile.isDirectory() || name.endsWith(".class"));
 		}
 
 	};
-	
+
 	private PluginLoader() {
-		
+
 	}
 
 	/**
 	 * Plugin (actually any object) loader for a given class
 	 * 
-	 * @param classPath
-	 *            the overall class path that will be searched
-	 * @param claz
-	 *            the class to look for
-	 * @param excludes
-	 *            a list of excluded classes
+	 * @param classPath the overall class path that will be searched
+	 * @param claz      the class to look for
+	 * @param excludes  a list of excluded classes
 	 */
 	public PluginLoader(String classPath, Class claz, Vector<String> excludes) {
 		_classPath = classPath;
@@ -71,11 +68,9 @@ public class PluginLoader {
 	/**
 	 * Plugin (actually any object) loader for a given class
 	 * 
-	 * @param classPath
-	 *            the overall class path that will be searched
+	 * @param classPath the overall class path that will be searched
 	 * @param className the class namme
-	 * @param excludes
-	 *            a list of excluded classes
+	 * @param excludes  a list of excluded classes
 	 */
 	public PluginLoader(String classPath, String className, Vector<String> excludes) {
 		_classPath = classPath;
@@ -148,8 +143,7 @@ public class PluginLoader {
 	/**
 	 * Create a plugin mananger
 	 * 
-	 * @param pluginFolder
-	 *            the base folder
+	 * @param pluginFolder the base folder
 	 */
 	private void dirSearch(String pluginFolder, List<Object> objects) {
 
@@ -192,9 +186,9 @@ public class PluginLoader {
 						// strip .class
 						int index = s.lastIndexOf(".class");
 						s = s.substring(0, index);
-	//					Log.getInstance().info("  entry: [" + s + "]");
+						// Log.getInstance().info(" entry: [" + s + "]");
 						Class claz = Class.forName(s);
-	//					Log.getInstance().info("  class found: [" + s + "]");
+						// Log.getInstance().info(" class found: [" + s + "]");
 
 						if (!isAbstract(claz) && !isAnonClass(claz) && (_claz.isAssignableFrom(claz))) {
 							Object o = claz.newInstance();
@@ -213,21 +207,20 @@ public class PluginLoader {
 		}
 		// System.exit(0);
 	}
-	
-	public static String getFullClassName(File file) throws IOException {           
- 
-        PluginLoader pl = new PluginLoader();
-        MCL mcl = pl.new MCL(file);
-        
-        String name = mcl.getClassname();
-        return name;
-    }
 
-	
+	public static String getFullClassName(File file) throws IOException {
+
+		PluginLoader pl = new PluginLoader();
+		MCL mcl = pl.new MCL(file);
+
+		String name = mcl.getClassname();
+		return name;
+	}
+
 	public static Object instantiateFromClassFile(File file, String className) {
 		URI uri = file.toURI();
 		try {
-			URL url[] = {uri.toURL()};
+			URL url[] = { uri.toURL() };
 			URLClassLoader ucl = new URLClassLoader(url);
 			Class claz = ucl.loadClass(className);
 			if (!isAbstract(claz)) {
@@ -242,7 +235,7 @@ public class PluginLoader {
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
 
@@ -265,10 +258,10 @@ public class PluginLoader {
 				for (PHolder ph : v) {
 					try {
 						Class claz = ucl.loadClass(ph.className);
-	
+
 						// make sure it is a subclass of Plugin And not abstract
 						if (!isAbstract(claz) && !isAnonClass(claz) && (_claz.isAssignableFrom(claz))) {
-						//	Log.getInstance().debug("Potential plugin: " + claz.getName());
+							// Log.getInstance().debug("Potential plugin: " + claz.getName());
 							try {
 								// call plugin's null constructor
 								objects.add(claz.newInstance());
@@ -283,7 +276,7 @@ public class PluginLoader {
 					}
 				} // for
 			} // ucl != null
-	
+
 //				try {
 //					ucl.close();
 //				} catch (IOException e) {
@@ -303,7 +296,7 @@ public class PluginLoader {
 
 		return Modifier.isAbstract(claz.getModifiers());
 	}
-	
+
 	private static boolean isAnonClass(Class claz) {
 		if (claz == null) {
 			return false;
@@ -312,14 +305,11 @@ public class PluginLoader {
 		return claz.getName().contains("$");
 	}
 
-
 	/**
 	 * Search a directory for classes that are plugins.
 	 * 
-	 * @param dir
-	 *            the file the is a directory in the classpath
-	 * @param v
-	 *            the vector to which we add any matching classes.
+	 * @param dir the file the is a directory in the classpath
+	 * @param v   the vector to which we add any matching classes.
 	 */
 	private void searchDir(File dir, Vector<PHolder> v) {
 		// System.out.println("Searching directory: " + dir.getAbsolutePath());
@@ -377,28 +367,27 @@ public class PluginLoader {
 			this.className = className;
 		}
 	}
-	
+
 	class MCL extends ClassLoader {
-		
+
 		ByteBuffer bb;
-		
+
 		public MCL(File file) {
-	        FileChannel roChannel;
+			FileChannel roChannel;
 			try {
 				roChannel = new RandomAccessFile(file, "r").getChannel();
-		        bb = roChannel.map(FileChannel.MapMode.READ_ONLY, 0, (int)roChannel.size());         
+				bb = roChannel.map(FileChannel.MapMode.READ_ONLY, 0, (int) roChannel.size());
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
-			} 
+			}
 
 		}
-		
-		
-    	public String getClassname() {
-     		Class<?> clazz = defineClass((String)null, bb, (ProtectionDomain)null);
-    		return (clazz == null) ? null : clazz.getName();
-    	}
+
+		public String getClassname() {
+			Class<?> clazz = defineClass((String) null, bb, (ProtectionDomain) null);
+			return (clazz == null) ? null : clazz.getName();
+		}
 	}
 }

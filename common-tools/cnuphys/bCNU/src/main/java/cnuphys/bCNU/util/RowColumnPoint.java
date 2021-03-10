@@ -31,10 +31,8 @@ public final class RowColumnPoint {
 	/**
 	 * Construct a RowColumn point.
 	 * 
-	 * @param row
-	 *            the row.
-	 * @param column
-	 *            the column.
+	 * @param row    the row.
+	 * @param column the column.
 	 */
 	public RowColumnPoint(int row, int column) {
 		_row = row;
@@ -73,10 +71,8 @@ public final class RowColumnPoint {
 	/**
 	 * Set the row and column indices.
 	 * 
-	 * @param row
-	 *            the row index.
-	 * @param column
-	 *            the column index.
+	 * @param row    the row index.
+	 * @param column the column index.
 	 */
 	public void set(int row, int column) {
 		_row = row;
@@ -86,8 +82,7 @@ public final class RowColumnPoint {
 	/**
 	 * Set just the column index.
 	 * 
-	 * @param column
-	 *            the column index.
+	 * @param column the column index.
 	 */
 	public void setColumn(int column) {
 		_column = column;
@@ -96,8 +91,7 @@ public final class RowColumnPoint {
 	/**
 	 * Set just the row index.
 	 * 
-	 * @param row
-	 *            the row index.
+	 * @param row the row index.
 	 */
 	public void setRow(int row) {
 		_row = row;

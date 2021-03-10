@@ -54,8 +54,7 @@ public class DateString {
 	/**
 	 * Returns the current time.
 	 * 
-	 * @param longtime
-	 *            the time in millis.
+	 * @param longtime the time in millis.
 	 * @return a string representation of the current time, down to minutes.
 	 */
 	public static String dateStringMM(long longtime) {
@@ -65,8 +64,7 @@ public class DateString {
 	/**
 	 * Returns the current time.
 	 * 
-	 * @param longtime
-	 *            The time in millis.
+	 * @param longtime The time in millis.
 	 * @return a string representation of the current time, down to seconds.
 	 */
 	public static String dateStringSS(long longtime) {
@@ -85,8 +83,7 @@ public class DateString {
 	/**
 	 * Returns the current time.
 	 * 
-	 * @param ltime
-	 *            a time in milliseconds.
+	 * @param ltime a time in milliseconds.
 	 * @return a string representation of the current time, down to seconds but
 	 *         without day information.
 	 */

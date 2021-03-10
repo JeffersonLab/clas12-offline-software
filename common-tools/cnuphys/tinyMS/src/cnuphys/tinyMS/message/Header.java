@@ -23,10 +23,10 @@ import cnuphys.tinyMS.log.Log;
  * 
  */
 public class Header {
-	
+
 	// used to validate a message and to see if byte swapping is necessary
 	public static final int MAGIC_WORD = 0xCEBAF; // 846767
-	
+
 	/** A reserved topic used by all administrative messages */
 	public static final String SERVER_TOPIC = "Server";
 
@@ -50,39 +50,34 @@ public class Header {
 	// If true, had to swap bytes when read to get
 	// magic number right
 	private boolean _swap = false;
-	
-	//the message topic. For administrative messages it is
-	//always the constant (reserved) SERVER_TOPIC
+
+	// the message topic. For administrative messages it is
+	// always the constant (reserved) SERVER_TOPIC
 	private String _topic = SERVER_TOPIC;
 
 	/**
 	 * Create a dataless Header with no user data
 	 * 
-	 * @param clientId
-	 *            the id of the source. The server ID is 0. Client IDs start at
-	 *            +1 and are handed out sequentially.
-	 * @param mtype
-	 *            the message type
+	 * @param clientId the id of the source. The server ID is 0. Client IDs start at
+	 *                 +1 and are handed out sequentially.
+	 * @param mtype    the message type
 	 * @see cnuphys.tinyMS.message.MessageType
 	 */
-	public Header(int clientId,  MessageType mtype) {
+	public Header(int clientId, MessageType mtype) {
 		this(clientId, mtype, (short) 0, SERVER_TOPIC);
 	}
 
 	/**
 	 * Create a message header
 	 * 
-	 * @param clientId
-	 *            the id of the source. The server ID is 0. Client IDs start at
-	 *            +1 and are handed out sequentially.
-	 * @param mtype
-	 *            the message type
-	 * @param tag
-	 *            for any purpose
-	 * @param topic the topic
+	 * @param clientId the id of the source. The server ID is 0. Client IDs start at
+	 *                 +1 and are handed out sequentially.
+	 * @param mtype    the message type
+	 * @param tag      for any purpose
+	 * @param topic    the topic
 	 * @see cnuphys.tinyMS.message.MessageType
 	 */
-	public Header(int clientId,  MessageType mtype, short tag, String topic) {
+	public Header(int clientId, MessageType mtype, short tag, String topic) {
 		_clientId = clientId;
 		_messageType = mtype;
 		_tag = tag;
@@ -100,7 +95,6 @@ public class Header {
 		return _clientId;
 	}
 
-
 	/**
 	 * Get the type of the message as a MessageType enum.
 	 * 
@@ -113,6 +107,7 @@ public class Header {
 
 	/**
 	 * Get the name of the message type
+	 * 
 	 * @return the name of the message type
 	 */
 	public String getMessageTypeName() {
@@ -127,9 +122,10 @@ public class Header {
 	public short getTag() {
 		return _tag;
 	}
-	
+
 	/**
 	 * Get the message topic
+	 * 
 	 * @return the message topic
 	 */
 	public String getTopic() {
@@ -149,11 +145,11 @@ public class Header {
 	}
 
 	/**
-	 * If true, the bytes were swapped when creating this header from a read of
-	 * a DataInputStream.
+	 * If true, the bytes were swapped when creating this header from a read of a
+	 * DataInputStream.
 	 * 
-	 * @return <code>true</code> if the header required a swap to match the
-	 *         magic word. If so, the payload will require swapping too.
+	 * @return <code>true</code> if the header required a swap to match the magic
+	 *         word. If so, the payload will require swapping too.
 	 */
 	public boolean isSwap() {
 		return _swap;
@@ -173,8 +169,7 @@ public class Header {
 	/**
 	 * Set the data type of the payload data.
 	 * 
-	 * @param dtype
-	 *            the data type of the payload data array.
+	 * @param dtype the data type of the payload data array.
 	 */
 	public void setDataType(DataType dtype) {
 		_dataType = dtype;
@@ -183,16 +178,15 @@ public class Header {
 	/**
 	 * Set the length of the payload array.
 	 * 
-	 * @param len
-	 *            the length of the payload array.
+	 * @param len the length of the payload array.
 	 */
 	public void setDataLength(int len) {
 		_length = len;
 	}
 
 	/**
-	 * Read a header from an input stream. This will be called as part of
-	 * reading in a message.
+	 * Read a header from an input stream. This will be called as part of reading in
+	 * a message.
 	 * 
 	 * @param inputStream
 	 * @return the Header if it is successful.
@@ -211,10 +205,9 @@ public class Header {
 
 			if (foundMagic) {
 				swap = true;
-			}
-			else {
+			} else {
 				Log.getInstance().error("Did not get magic word 0xCEBAF");
-	//			throw new IOException("Expected to find MAGIC WORD 0xCEBAF");
+				// throw new IOException("Expected to find MAGIC WORD 0xCEBAF");
 			}
 		}
 
@@ -247,11 +240,10 @@ public class Header {
 	}
 
 	/**
-	 * Write the header to an output stream. This will be called as part of
-	 * writing a message.
+	 * Write the header to an output stream. This will be called as part of writing
+	 * a message.
 	 * 
-	 * @param outputStream
-	 *            the output stream to write to.
+	 * @param outputStream the output stream to write to.
 	 * @throws IOException
 	 */
 	protected void writeHeader(DataOutputStream outputStream) throws IOException {
@@ -264,8 +256,7 @@ public class Header {
 			outputStream.writeUTF((_topic == null) ? SERVER_TOPIC : _topic);
 			outputStream.writeShort((short) _dataType.ordinal());
 			outputStream.writeInt(_length);
-		}
-		catch (SocketException e) {
+		} catch (SocketException e) {
 			e.printStackTrace();
 		}
 	}
@@ -286,9 +277,10 @@ public class Header {
 		sb.append("     length: " + _length + "\n");
 		return sb.toString();
 	}
-	
+
 	/**
 	 * Check whether a topic is acceptable
+	 * 
 	 * @param topic the topic to check
 	 * @return <code>true</code> if the topic is acceptable
 	 */
@@ -296,18 +288,18 @@ public class Header {
 		if (topic == null) {
 			return false;
 		}
-		
+
 		topic = topic.trim();
-		
+
 		if (topic.length() < 1) {
 			return false;
 		}
-		
-		//check any reserved
+
+		// check any reserved
 		if (SERVER_TOPIC.equalsIgnoreCase(topic)) {
 			return false;
 		}
-		
+
 		return true;
 	}
 }

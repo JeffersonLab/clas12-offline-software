@@ -47,8 +47,7 @@ public abstract class APixelBasedItem extends AItem {
 	/**
 	 * Create a pixel based item
 	 * 
-	 * @param layer
-	 *            the logical layer containing the item.
+	 * @param layer the logical layer containing the item.
 	 */
 	public APixelBasedItem(LogicalLayer layer) {
 		super(layer);
@@ -64,16 +63,14 @@ public abstract class APixelBasedItem extends AItem {
 	}
 
 	/**
-	 * Checks whether the item should be drawn. This is an additional check,
-	 * beyond the simple visibility flag check. For example, it might check
-	 * whether the item intersects the area being drawn.
+	 * Checks whether the item should be drawn. This is an additional check, beyond
+	 * the simple visibility flag check. For example, it might check whether the
+	 * item intersects the area being drawn.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
-	 * @return <code>true</code> if the item passes any and all tests, and
-	 *         should be drwan.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
+	 * @return <code>true</code> if the item passes any and all tests, and should be
+	 *         drwan.
 	 */
 	@Override
 	public boolean shouldDraw(Graphics g, IContainer container) {
@@ -88,8 +85,7 @@ public abstract class APixelBasedItem extends AItem {
 	}
 
 	/**
-	 * @param placementType
-	 *            the placementType to set
+	 * @param placementType the placementType to set
 	 */
 	public void setPlacementType(PlacementType placementType) {
 		this.placementType = placementType;
@@ -103,8 +99,7 @@ public abstract class APixelBasedItem extends AItem {
 	}
 
 	/**
-	 * @param horizontalPlacement
-	 *            the horizontalPlacement to set
+	 * @param horizontalPlacement the horizontalPlacement to set
 	 */
 	public void setHorizontalPlacement(PlacementEdge horizontalPlacement) {
 		this.horizontalPlacement = horizontalPlacement;
@@ -118,8 +113,7 @@ public abstract class APixelBasedItem extends AItem {
 	}
 
 	/**
-	 * @param verticalPlacement
-	 *            the verticalPlacement to set
+	 * @param verticalPlacement the verticalPlacement to set
 	 */
 	public void setVerticalPlacement(PlacementEdge verticalPlacement) {
 		this.verticalPlacement = verticalPlacement;
@@ -138,9 +132,8 @@ public abstract class APixelBasedItem extends AItem {
 	/**
 	 * Set the upper-left location of the item
 	 * 
-	 * @param location
-	 *            the location to set. The location is absolute for absolute
-	 *            placement and a delta for relative placement.
+	 * @param location the location to set. The location is absolute for absolute
+	 *                 placement and a delta for relative placement.
 	 */
 	public void setLocation(Point location) {
 		this.location = location;
@@ -158,8 +151,7 @@ public abstract class APixelBasedItem extends AItem {
 	/**
 	 * Set the width and height of the item
 	 * 
-	 * @param size
-	 *            the size to set for the item
+	 * @param size the size to set for the item
 	 */
 	public void setSize(Dimension size) {
 		this.size = size;

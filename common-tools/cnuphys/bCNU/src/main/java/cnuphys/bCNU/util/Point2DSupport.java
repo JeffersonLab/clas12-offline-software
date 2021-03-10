@@ -8,25 +8,21 @@ public class Point2DSupport {
 	private static final double TINY = 1.0e-40;
 
 	/**
-	 * This is creation by subtraction. Be very careful of the order. This
-	 * return wp2 - wp1
+	 * This is creation by subtraction. Be very careful of the order. This return
+	 * wp2 - wp1
 	 * 
-	 * @param wp1
-	 *            the first point
-	 * @param wp2
-	 *            the second point
+	 * @param wp1 the first point
+	 * @param wp2 the second point
 	 * @return the delta, wp2-wp1
 	 */
-	public static Point2D.Double pointDelta(Point2D.Double wp1,
-			Point2D.Double wp2) {
+	public static Point2D.Double pointDelta(Point2D.Double wp1, Point2D.Double wp2) {
 		return new Point2D.Double(wp2.x - wp1.x, wp2.y - wp1.y);
 	}
 
 	/**
 	 * The length of the vector
 	 * 
-	 * @param wp
-	 *            the point in question
+	 * @param wp the point in question
 	 * @return the usual vector magnitude
 	 */
 	public static double length(Point2D.Double wp) {
@@ -36,8 +32,7 @@ public class Point2DSupport {
 	/**
 	 * The length squared of the vector. This can be usefor for faster sorting.
 	 * 
-	 * @param wp
-	 *            the point in question
+	 * @param wp the point in question
 	 * @return the square of the usual vector magnitude
 	 */
 	public static double lengthSquare(Point2D.Double wp) {
@@ -47,8 +42,7 @@ public class Point2DSupport {
 	/**
 	 * Obtain a unit vector in the same direction as this vector
 	 * 
-	 * @param wp
-	 *            the point in question
+	 * @param wp the point in question
 	 * @return a unit vector in the same direction as this vector
 	 */
 	public static Point2D.Double unitVector(Point2D.Double wp) {
@@ -62,10 +56,8 @@ public class Point2DSupport {
 	/**
 	 * Usual inner product
 	 * 
-	 * @param v1
-	 *            one vector
-	 * @param v2
-	 *            another vector
+	 * @param v1 one vector
+	 * @param v2 another vector
 	 * @return the dot product
 	 */
 	public static double dot(Point2D.Double v1, Point2D.Double v2) {
@@ -73,13 +65,11 @@ public class Point2DSupport {
 	}
 
 	/**
-	 * Get the magnitude of the cross product. The sign tells us whether we are
-	 * in +z or -z direction.
+	 * Get the magnitude of the cross product. The sign tells us whether we are in
+	 * +z or -z direction.
 	 * 
-	 * @param v1
-	 *            one vector
-	 * @param v2
-	 *            another vector
+	 * @param v1 one vector
+	 * @param v2 another vector
 	 * @return the magnitude of the cross product
 	 */
 	public static double cross(Point2D.Double v1, Point2D.Double v2) {
@@ -89,10 +79,8 @@ public class Point2DSupport {
 	/**
 	 * Get the angle between two vectors
 	 * 
-	 * @param v1
-	 *            one vector
-	 * @param v2
-	 *            another vector
+	 * @param v1 one vector
+	 * @param v2 another vector
 	 * @return the angle between the vectors in degrees.
 	 */
 	public static double angleBetween(Point2D.Double v1, Point2D.Double v2) {
@@ -113,10 +101,8 @@ public class Point2DSupport {
 	/**
 	 * Project one vector onto another vector
 	 * 
-	 * @param v
-	 *            the vector being projected
-	 * @param a
-	 *            the vector defining the projection direction.
+	 * @param v the vector being projected
+	 * @param a the vector defining the projection direction.
 	 * @return the result of projecting v in the direction of a.
 	 */
 	public static Point2D.Double project(Point2D.Double v, Point2D.Double a) {
@@ -141,8 +127,7 @@ public class Point2DSupport {
 	/**
 	 * Computes the distance between this world point and another.
 	 * 
-	 * @param wp
-	 *            the other world point.
+	 * @param wp the other world point.
 	 * @return the distance, i.e., the length of (wp - this).
 	 */
 	public static double distance(Point2D.Double wp0, Point2D.Double wp1) {
@@ -154,8 +139,7 @@ public class Point2DSupport {
 	/**
 	 * Computes the azimuth between this world point and another.
 	 * 
-	 * @param wp
-	 *            the other world point.
+	 * @param wp the other world point.
 	 * @return the azimuth in degrees, where 0 is north, 90 east, etc.
 	 */
 	public static double azimuth(Point2D.Double wp0, Point2D.Double wp1) {

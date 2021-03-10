@@ -20,15 +20,13 @@ public class BoxZoomButton extends ToolBarToggleButton implements IRubberbanded 
 
 	// rubberbanding policy
 	private Rubberband.Policy _policy = Rubberband.Policy.RECTANGLE_PRESERVE_ASPECT;
-	
+
 	private boolean _xorMode = false;
-	
 
 	/**
 	 * Create the button for a rubber-band zoom.
 	 * 
-	 * @param container
-	 *            the owner container.
+	 * @param container the owner container.
 	 */
 	public BoxZoomButton(IContainer container) {
 		super(container, "images/box_zoom.gif", "Rubberband zoom");
@@ -38,8 +36,7 @@ public class BoxZoomButton extends ToolBarToggleButton implements IRubberbanded 
 	/**
 	 * Handle a mouse press (into the container) event (if this tool is active).
 	 * 
-	 * @param mouseEvent
-	 *            the causal event.
+	 * @param mouseEvent the causal event.
 	 */
 	@Override
 	public void mousePressed(MouseEvent mouseEvent) {
@@ -56,11 +53,12 @@ public class BoxZoomButton extends ToolBarToggleButton implements IRubberbanded 
 
 	/**
 	 * Set the xor mode
+	 * 
 	 * @param mode the xor mode
 	 */
 	public void setXorMode(boolean mode) {
-	    _xorMode = mode;
-	    rubberband = null;
+		_xorMode = mode;
+		rubberband = null;
 	}
 
 	/**
@@ -75,8 +73,7 @@ public class BoxZoomButton extends ToolBarToggleButton implements IRubberbanded 
 	}
 
 	/**
-	 * @param policy
-	 *            the policy to set
+	 * @param policy the policy to set
 	 */
 	public void setPolicy(Rubberband.Policy policy) {
 		_policy = policy;

@@ -8,8 +8,9 @@ import cnuphys.bCNU.xml.XmlPrintStreamWritable;
 import cnuphys.bCNU.xml.XmlPrintStreamWriter;
 
 /**
- * A simple class that binds a name like "x" or "theta" to abank.column,
- * like DC::dgtz.sector
+ * A simple class that binds a name like "x" or "theta" to abank.column, like
+ * DC::dgtz.sector
+ * 
  * @author heddle
  *
  */
@@ -17,20 +18,19 @@ public class NameBinding implements Comparable<NameBinding>, XmlPrintStreamWrita
 
 	public String varName;
 	public String bankColumnName;
-	
+
 	public NameBinding(String vname, String bcname) {
 		varName = vname;
 		bankColumnName = bcname;
 	}
-	
+
 	@Override
 	public int compareTo(NameBinding o) {
 		String lcv = varName.toLowerCase();
 		String lco = o.varName.toLowerCase();
 		return lcv.compareTo(lco);
 	}
-	
-	
+
 	@Override
 	public void writeXml(XmlPrintStreamWriter xmlPrintStreamWriter) {
 		Properties props = new Properties();
@@ -41,8 +41,7 @@ public class NameBinding implements Comparable<NameBinding>, XmlPrintStreamWrita
 		} catch (XMLStreamException e) {
 			e.printStackTrace();
 		}
-		
-	}
 
+	}
 
 }

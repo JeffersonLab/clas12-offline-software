@@ -5,16 +5,16 @@ import java.io.Serializable;
 import cnuphys.snr.ExtendedWord;
 
 public class SegmentSet implements Comparable<SegmentSet>, Serializable {
-	
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -9013901298231511907L;
 	private long _words[] = new long[12];
 	public int length = 12;
-	
+
 	private ReducedParticleRecord _particleRecord;
-	
+
 	/**
 	 * 
 	 * @param particleRecord
@@ -37,16 +37,17 @@ public class SegmentSet implements Comparable<SegmentSet>, Serializable {
 
 	/**
 	 * Get the associated general particle record
+	 * 
 	 * @return the associated general particle record
 	 */
 	public ReducedParticleRecord getReducedParticleRecord() {
 		return _particleRecord;
 	}
-	
+
 	public void setReducedParticleRecord(ReducedParticleRecord pr) {
-		_particleRecord = pr; 
+		_particleRecord = pr;
 	}
-	
+
 	@Override
 	public int compareTo(SegmentSet o) {
 		for (int i = 0; i < length; i++) {
@@ -59,7 +60,5 @@ public class SegmentSet implements Comparable<SegmentSet>, Serializable {
 		}
 		return 0;
 	}
-
-	
 
 }

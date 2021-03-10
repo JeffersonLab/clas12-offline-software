@@ -21,10 +21,8 @@ public class CutTableScrollPane extends JScrollPane {
 	/**
 	 * Constructor will also create the table itself.
 	 * 
-	 * @param cutList
-	 *            the list of cuts
-	 * @param label
-	 *            a label for the list
+	 * @param cutList the list of cuts
+	 * @param label   a label for the list
 	 */
 
 	public CutTableScrollPane(Vector<ICut> cutList, String label) {
@@ -32,8 +30,8 @@ public class CutTableScrollPane extends JScrollPane {
 		cutTable = new CutTable(cutList);
 		getViewport().add(cutTable);
 
-		setBorder(BorderFactory.createTitledBorder(null, label,
-				TitledBorder.LEADING, TitledBorder.TOP, null, Color.blue));
+		setBorder(BorderFactory.createTitledBorder(null, label, TitledBorder.LEADING, TitledBorder.TOP, null,
+				Color.blue));
 
 	}
 
@@ -67,18 +65,16 @@ public class CutTableScrollPane extends JScrollPane {
 
 		return (CutTableModel) (cutTable.getModel());
 	}
-	
+
 	/**
-	 * @param height
-	 *            The height to set.
+	 * @param height The height to set.
 	 */
 	public void setHeight(int height) {
 		this.height = height;
 	}
 
 	/**
-	 * @param width
-	 *            The width to set.
+	 * @param width The width to set.
 	 */
 	public void setWidth(int width) {
 		this.width = width;

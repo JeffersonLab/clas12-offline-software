@@ -1,0 +1,496 @@
+[
+  {
+    "name" : "BMT::adc",
+    "group": 20100,
+    "item" : 11,
+    "info": "ADC bank for the Barrel MicroMegas Tracker",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector"},
+      { "name":"layer"     , "type":"B", "info":"layer (1-6)"},
+      { "name":"component" , "type":"S", "info":"strips"},
+      { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
+      { "name":"ADC"       , "type":"I", "info":"ADC maximum"},
+      { "name":"time"      , "type":"F", "info":"time from pulse fit"},
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"},
+      { "name":"integral"  , "type":"I", "info":"ADC integral (sum over the pulse)"},
+      { "name":"timestamp" , "type":"L", "info":"timestamp"}
+    ]
+  },
+  {
+    "name" : "BST::adc",
+    "group": 20200,
+    "item" : 11,
+    "info": "ADC bank for the Barrel Silicon Tracker",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector"},
+      { "name":"layer"     , "type":"B", "info":"layer (1-6, 1-8 depending on configuration)"},
+      { "name":"component" , "type":"S", "info":"256 strips per module"},
+      { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
+      { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
+      { "name":"time"      , "type":"F", "info":"time from pulse fit"},
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"},
+      { "name":"timestamp" , "type":"L", "info":"timestamp"}
+    ]
+  },
+  {
+    "name" : "CND::adc",
+    "group": 20300,
+    "item" : 11,
+    "info": "ADC bank for the Central Neutron Detector",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (1-24)"},
+      { "name":"layer"     , "type":"B", "info":"layer (1-3)"},
+      { "name":"component" , "type":"S", "info":"component (=1)"},
+      { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
+      { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
+      { "name":"time"      , "type":"F", "info":"time from pulse fit"},
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
+    ]
+  },
+  {
+    "name" : "CND::tdc",
+    "group": 20300,
+    "item" : 12,
+    "info": "TDC bank for the Central Neutron Detector",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (1-24)"},
+      { "name":"layer"     , "type":"B", "info":"layer (1-3)"},
+      { "name":"component" , "type":"S", "info":"component (=1)"},
+      { "name":"order"     , "type":"B", "info":"order: 2 - TDCL , 3 - TDCR"},
+      { "name":"TDC"       , "type":"I", "info":"TDC value"}
+    ]
+  },
+  {
+    "name" : "CTOF::adc",
+    "group": 20400,
+    "item" : 11,
+    "info": "ADC bank for the Central Time of Flight",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (=1)"},
+      { "name":"layer"     , "type":"B", "info":"layer (=1)"},
+      { "name":"component" , "type":"S", "info":"paddle (1-48)"},
+      { "name":"order"     , "type":"B", "info":"order: 0 - ADCU , 1 - ADCD"},
+      { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
+      { "name":"time"      , "type":"F", "info":"time from pulse fit"},
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
+    ]
+  },
+  {
+    "name" : "CTOF::tdc",
+    "group": 20400,
+    "item" : 12,
+    "info": "TDC bank for the Central Time of Flight",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (=1)"},
+      { "name":"layer"     , "type":"B", "info":"layer (=1)"},
+      { "name":"component" , "type":"S", "info":"paddle (1-48)"},
+      { "name":"order"     , "type":"B", "info":"order: 2 - TDCU , 3 - TDCD"},
+      { "name":"TDC"       , "type":"I", "info":"TDC value"}
+    ]
+  },
+  {
+    "name" : "DC::tdc",
+    "group": 20600,
+    "item" : 12,
+    "info": "TDC bank for the Drift Chambers",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (1..6)"},
+      { "name":"layer"     , "type":"B", "info":"layer (1..36)"},
+      { "name":"component" , "type":"S", "info":"wire number (1..112)"},
+      { "name":"order"     , "type":"B", "info":"order: 2 - TDCL , 3 - TDCR"},
+      { "name":"TDC"       , "type":"I", "info":"TDC value"}
+    ]
+  },
+  {
+    "name" : "DC::doca",
+    "group": 20600,
+    "item" : 14,
+    "info": "Drift Chamber DOCA bank",
+    "entries":[
+      { "name":"LR"        , "type":"B", "info":"left right ambiguity"},
+      { "name":"doca"      , "type":"F", "info":"doca for the hit"},
+      { "name":"sdoca"     , "type":"F", "info":"smeared doca"},
+      { "name":"time"      , "type":"F", "info":"time for the hit"},
+      { "name":"stime"     , "type":"F", "info":"smeared time"}
+    ]
+  },
+  {
+    "name" : "ECAL::adc",
+    "group": 20700,
+    "item" : 11,
+    "info": "ADC bank for the Electromagnetic Calorimeter",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (1-6)"},
+      { "name":"layer"     , "type":"B", "info":"layer (1..9)"},
+      { "name":"component" , "type":"S", "info":"strip"},
+      { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
+      { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
+      { "name":"time"      , "type":"F", "info":"time from pulse fit"},
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
+    ]
+  },
+  {
+    "name" : "ECAL::tdc",
+    "group": 20700,
+    "item" : 12,
+    "info": "TDC bank for the Electromagnetic Calorimeter",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (1-6)"},
+      { "name":"layer"     , "type":"B", "info":"layer (1..9)"},
+      { "name":"component" , "type":"S", "info":"strip"},
+      { "name":"order"     , "type":"B", "info":"order: 2 - TDCL , 3 - TDCR"},
+      { "name":"TDC"       , "type":"I", "info":"TDC value"}
+    ]
+  },
+  {
+    "name" : "FMT::adc",
+    "group": 20800,
+    "item" : 11,
+    "info": "ADC bank for the Forward MicroMegas Tracker",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (=1)"},
+      { "name":"layer"     , "type":"B", "info":"layer (1-6)"},
+      { "name":"component" , "type":"S", "info":"strip"},
+      { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
+      { "name":"ADC"       , "type":"I", "info":"ADC maximum"},
+      { "name":"time"      , "type":"F", "info":"time from pulse fit"},
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"},
+      { "name":"integral"  , "type":"I", "info":"ADC integral (sum over the pulse)"},
+      { "name":"timestamp" , "type":"L", "info":"timestamp"}
+    ]
+  },
+  {
+    "name" : "FTCAL::adc",
+    "group": 21000,
+    "item" : 11,
+    "info": "ADC bank for the Forward Tagger Calorimeter",
+    "entries":[
+      {"name":"sector"     , "type":"B", "info":"sector (=1)"},
+      {"name":"layer"      , "type":"B", "info":"layer (=1)"},
+      {"name":"component"  , "type":"S", "info":"crystal id"},
+      { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
+      { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
+      { "name":"time"      , "type":"F", "info":"time from pulse fit"},
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
+    ]
+  },
+  {
+    "name" : "FTHODO::adc",
+    "group": 21100,
+    "item" : 11,
+    "info": "ADC bank for the Forward Tagger Hodoscope",
+    "entries":[
+      {"name":"sector"     , "type":"B", "info":"sector (1-8)"},
+      {"name":"layer"      , "type":"B", "info":"layer (1-2)"},
+      {"name":"component"  , "type":"S", "info":"tile id"},
+      { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
+      { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
+      { "name":"time"      , "type":"F", "info":"time from pulse fit"},
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
+    ]
+  },
+  {
+    "name" : "FTOF::adc",
+    "group": 21200,
+    "item" : 11,
+    "info": "ADC bank for the Forward Time of Flight",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (1-6)"},
+      { "name":"layer"     , "type":"B", "info":"panel (1-1A, 2-1B, 3-2B"},
+      { "name":"component" , "type":"S", "info":"paddle"},
+      { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
+      { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
+      { "name":"time"      , "type":"F", "info":"time from pulse fit"},
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
+    ]
+  },
+  {
+    "name" : "FTOF::tdc",
+    "group": 21200,
+    "item" : 12,
+    "info": "TDC bank for the Forward Time of Flight",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (1-6)"},
+      { "name":"layer"     , "type":"B", "info":"panel (1-1A, 2-1B, 3-2B"},
+      { "name":"component" , "type":"S", "info":"paddle"},
+      { "name":"order"     , "type":"B", "info":"order: 2 - TDCL , 3 - TDCR"},
+      { "name":"TDC"       , "type":"I", "info":"TDC value"}
+    ]
+  },
+  {
+    "name" : "FTTRK::adc",
+    "group": 21300,
+    "item" : 11,
+    "info": "ADC bank for the Forward Tagger Tracker",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (=1)"},
+      { "name":"layer"     , "type":"B", "info":"layer (1-4)"},
+      { "name":"component" , "type":"S", "info":"strips"},
+      { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
+      { "name":"ADC"       , "type":"I", "info":"ADC maximum"},
+      { "name":"time"      , "type":"F", "info":"time from pulse fit"},
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"},
+      { "name":"integral"  , "type":"I", "info":"ADC integral (sum over the pulse)"},
+      { "name":"timestamp" , "type":"L", "info":"timestamp"}
+    ]
+  },
+  {
+    "name" : "HTCC::adc",
+    "group": 21500,
+    "item" : 11,
+    "info": "ADC bank for the High Threshold Cerenkov Counter",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (1-6)"},
+      { "name":"layer"     , "type":"B", "info":"half sector (1 or 2)"},
+      { "name":"component" , "type":"S", "info":"ring (1,2,3,4)"},
+      { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
+      { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
+      { "name":"time"      , "type":"F", "info":"time from pulse fit"},
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
+    ]
+  },
+  {
+    "name" : "HTCC::tdc",
+    "group": 21500,
+    "item" : 12,
+    "info": "TDC bank for the High Threshold Cerenkov Counter",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (1-6)"},
+      { "name":"layer"     , "type":"B", "info":"half sector (1 or 2)"},
+      { "name":"component" , "type":"S", "info":"ring (1,2,3,4)"},
+      { "name":"order"     , "type":"B", "info":"order: 2 - TDCL , 3 - TDCR"},
+      { "name":"TDC"       , "type":"I", "info":"TDC value"}
+    ]
+  },
+  {
+    "name" : "LTCC::adc",
+    "group": 21600,
+    "item" : 11,
+    "info": "ADC bank for the Low Threshold Cerenkov Counter",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (1-6)"},
+      { "name":"layer"     , "type":"B", "info":"half sector (1 or 2)"},
+      { "name":"component" , "type":"S", "info":"pmt (1-18)"},
+      { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
+      { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
+      { "name":"time"      , "type":"F", "info":"time from pulse fit"},
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
+    ]
+  },
+  {
+    "name" : "LTCC::tdc",
+    "group": 21600,
+    "item" : 12,
+    "info": "TDC bank for the Low Threshold Cerenkov Counter",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (1-6)"},
+      { "name":"layer"     , "type":"B", "info":"half sector (1 or 2)"},
+      { "name":"component" , "type":"S", "info":"pmt (1-18)"},
+      { "name":"order"     , "type":"B", "info":"order: 2 - TDCL , 3 - TDCR"},
+      { "name":"TDC"       , "type":"I", "info":"TDC value"}
+    ]
+  },
+  {
+    "name" : "RF::adc",
+    "group": 21700,
+    "item" : 11,
+    "info": "ADC bank for the RF signals",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (=1)"},
+      { "name":"layer"     , "type":"B", "info":"layer (=1)"},
+      { "name":"component" , "type":"S", "info":"signal (1-2)"},
+      { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
+      { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
+      { "name":"time"      , "type":"F", "info":"time from pulse fit"},
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
+    ]
+  },
+  {
+    "name" : "RF::tdc",
+    "group": 21700,
+    "item" : 12,
+    "info": "TDC bank for the RF signals",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (=1)"},
+      { "name":"layer"     , "type":"B", "info":"layer (=1)"},
+      { "name":"component" , "type":"S", "info":"signal (1-2)"},
+      { "name":"order"     , "type":"B", "info":"order: 2 - TDCL , 3 - TDCR"},
+      { "name":"TDC"       , "type":"I", "info":"TDC value"}
+    ]
+  },
+  {
+    "name" : "RICH::tdc",
+    "group": 21800,
+    "item" : 12,
+    "info": "TDC bank for the Ring Imaging Cerenkov Counter",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector"},
+      { "name":"layer"     , "type":"B", "info":"tile id"},
+      { "name":"component" , "type":"S", "info":"MAROC channel id"},
+      { "name":"order"     , "type":"B", "info":"order: 2 - TDCL , 3 - TDCR"},
+      { "name":"TDC"       , "type":"I", "info":"TDC value"}
+    ]
+  },
+  {
+    "name" : "RTPC::adc",
+    "group": 21900,
+    "item" : 11,
+    "info": "ADC bank for the Radial TPC",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (=1)"},
+      { "name":"layer"     , "type":"B", "info":"layer (=1)"},
+      { "name":"component" , "type":"S", "info":"cell id"},
+      { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
+      { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
+      { "name":"time"      , "type":"F", "info":"time from pulse fit"},
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
+    ]
+  },
+  {
+    "name" : "RTPC::pos",
+    "group": 21900,
+    "item" : 14,
+    "info": "Digitized bank for the Radial TPC",
+    "entries":[
+      { "name":"step"      , "type":"I", "info":"step"},
+      { "name":"time"      , "type":"F", "info":"time (ns)"},
+      { "name":"energy"    , "type":"F", "info":"energy"},
+      { "name":"posx"      , "type":"F", "info":"x position (mm)"},
+      { "name":"posy"      , "type":"F", "info":"y position (mm)"},
+      { "name":"posz"      , "type":"F", "info":"z position (mm)"},
+      { "name":"phi"       , "type":"F", "info":"phi (rad)"},
+      { "name":"tid"       , "type":"I", "info":"track id"}
+    ]
+  },
+  {
+    "name" : "BAND::adc",
+    "group": 22100,
+    "item" : 11,
+    "info": "ADC bank for the Backward Angle Neutron Detector",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector"},
+      { "name":"layer"     , "type":"B", "info":"layer (1-6)"},
+      { "name":"component" , "type":"S", "info":"strips"},
+      { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
+      { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
+      { "name":"amplitude" , "type":"I", "info":"ADC maximum"},
+      { "name":"time"      , "type":"F", "info":"time from pulse fit"},
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
+    ]
+  },
+  {
+    "name" : "BAND::tdc",
+    "group": 22100,
+    "item" : 12,
+    "info": "TDC bank for the Backward Angle Neutron Detector",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (=1)"},
+      { "name":"layer"     , "type":"B", "info":"layer (=1)"},
+      { "name":"component" , "type":"S", "info":"signal (1-2)"},
+      { "name":"order"     , "type":"B", "info":"order: 2 - TDCL , 3 - TDCR"},
+      { "name":"TDC"       , "type":"I", "info":"TDC value"}
+    ]
+  },
+  {
+    "name" : "HEL::adc",
+    "group": 22000,
+    "item" : 11,
+    "info": "ADC bank for the Helicity signals.  Compoment 1/2/3 is helicity/sync/quartet.",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (=1)"},
+      { "name":"layer"     , "type":"B", "info":"layer (=1)"},
+      { "name":"component" , "type":"S", "info":"signal (1-3)"},
+      { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
+      { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
+      { "name":"time"      , "type":"F", "info":"time from pulse fit"},
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
+    ]
+  },
+  {
+      "name": "HEL::flip",
+      "group": 22000,
+      "item":  12,
+      "info":  "Helicity flips from ADC bank.  State values are -1/0/+1, where 0 is invalid.",
+      "entries": [
+          {"name":"run",         "type":"I", "info":"run number"},
+          {"name":"event",       "type":"I", "info":"event number"},
+          {"name":"timestamp",   "type":"L", "info":"timestamp (4ns)"},
+          {"name":"helicity",    "type":"B", "info":"helicity state with half-wave plate correction"},
+          {"name":"helicityRaw", "type":"B", "info":"helicity state without half-wave plate correction"},
+          {"name":"pair",        "type":"B", "info":"pair sync state"},
+          {"name":"pattern",     "type":"B", "info":"pattern sync state"},
+          {"name":"status",      "type":"B", "info":"status"}
+      ]
+  },
+  {
+      "name": "HEL::online",
+      "group": 22000,
+      "item":  13,
+      "info": "Helicity with online delay-correction in Level3 trigger",
+      "entries":[
+          {"name":"helicity",   "type":"B", "info":"online-delay-corrected helicity, with HWP-correction (0=UDF)"},
+          {"name":"helicityRaw","type":"B", "info":"online-delay-corrected helicity (0=UDF)"}
+      ]
+  },
+  {
+    "name" : "RAW::adc",
+    "group": 20000,
+    "item" : 11,
+    "info": "ADC bank for untranslated signals",
+    "entries":[
+      { "name":"crate"     , "type":"B", "info":"crate id"},
+      { "name":"slot"      , "type":"B", "info":"slot id"},
+      { "name":"channel"   , "type":"S", "info":"channel id"},
+      { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
+      { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
+      { "name":"time"      , "type":"F", "info":"time from pulse fit"},
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
+    ]
+  },
+  {
+    "name" : "RAW::tdc",
+    "group": 20000,
+    "item" : 12,
+    "info": "TDC bank for untranslated signals",
+    "entries":[
+      { "name":"crate"     , "type":"B", "info":"crate id"},
+      { "name":"slot"      , "type":"B", "info":"slot id"},
+      { "name":"channel"   , "type":"S", "info":"channel id"},
+      { "name":"order"     , "type":"B", "info":"order: 2 - TDCL , 3 - TDCR"},
+      { "name":"TDC"       , "type":"I", "info":"TDC value"}
+    ]
+  },
+  {
+    "name" : "RAW::scaler",
+    "group": 20000,
+    "item" : 13,
+    "info": "Scaler bank",
+    "entries":[
+      { "name":"crate"     , "type":"B", "info":"scaler crate"},
+      { "name":"slot"      , "type":"B", "info":"scaler slot"},
+      { "name":"channel"   , "type":"S", "info":"scaler channel (0/32 = FCUP, 1/33 = SLM, 2/24 = Clock)"},
+      { "name":"helicity"  , "type":"B", "info":"helicity"},
+      { "name":"quartet"   , "type":"B", "info":"quartet"},
+      { "name":"value"     , "type":"L", "info":"scaler value"}
+    ]
+  },
+  {
+    "name" : "RAW::vtp",
+    "group": 20000,
+    "item" : 14,
+    "info": "VTP bank",
+    "entries":[
+      { "name":"crate"     , "type":"B", "info":"crate number"},
+      { "name":"word"     , "type":"I", "info":"vtp value"}
+    ]
+  },
+  {
+    "name" : "RAW::epics",
+    "group": 20000,
+    "item" : 15,
+    "info" : "EPICS bank",
+    "entries":[
+        { "name":"json"    , "type":"B", "info":"json character" }
+    ]
+  }
+]

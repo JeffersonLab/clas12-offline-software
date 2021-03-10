@@ -25,16 +25,15 @@ public class PropertiesManager {
 		}
 		return _instance;
 	}
-	
+
 	public void putAndWrite(String key, String value) {
-		if ((_userPref != null) && (_upFile != null) &&
-				(key != null) && (value != null)) {
-			
+		if ((_userPref != null) && (_upFile != null) && (key != null) && (value != null)) {
+
 			_userPref.put(key, value);
 			writeProperties();
 		}
 	}
-	
+
 	public String get(String key) {
 		if ((_userPref != null) && (_upFile != null)) {
 			return _userPref.getProperty(key);
@@ -54,7 +53,7 @@ public class PropertiesManager {
 		try {
 			String homeDir = Environment.getInstance().getHomeDirectory();
 			_upFile = new File(homeDir, ".ced.user.pref");
-	//		System.err.println("User pref file: " + _upFile.getPath());
+			// System.err.println("User pref file: " + _upFile.getPath());
 			if (_upFile.exists()) {
 				_userPref = (Properties) SerialIO.serialRead(_upFile.getPath());
 			} else {

@@ -17,13 +17,13 @@ import cnuphys.ced.alldata.DataManager;
 import cnuphys.splot.pdata.Histo2DData;
 
 public class DefineHisto2DDialog extends JDialog implements ActionListener, PropertyChangeListener {
-	
+
 	private JButton _okButton;
 	private JButton _cancelButton;
 	private int _reason = DialogUtilities.CANCEL_RESPONSE;
 	private Histo2DPanel _histoPanel;
-	
-	//names resulting from selection
+
+	// names resulting from selection
 	private String _xName;
 	private String _yName;
 
@@ -32,45 +32,47 @@ public class DefineHisto2DDialog extends JDialog implements ActionListener, Prop
 		setModal(true);
 		setLayout(new BorderLayout(4, 4));
 		setIconImage(ImageManager.cnuIcon.getImage());
-		
+
 		_histoPanel = new Histo2DPanel();
 		add(_histoPanel, BorderLayout.CENTER);
 
 		_histoPanel.getSelectPanelX().addPropertyChangeListener(this);
 		_histoPanel.getSelectPanelY().addPropertyChangeListener(this);
-		
+
 		addSouth();
 		pack();
 		DialogUtilities.centerDialog(this);
 	}
-	
-	//add the buttons
-	private void addSouth(){
+
+	// add the buttons
+	private void addSouth() {
 		JPanel sp = new JPanel();
 		sp.setLayout(new FlowLayout(FlowLayout.CENTER, 200, 10));
-		
+
 		_okButton = new JButton("  OK  ");
 		_okButton.setEnabled(false);
 		_cancelButton = new JButton("Cancel");
-		
+
 		_okButton.addActionListener(this);
 		_cancelButton.addActionListener(this);
-		
+
 		sp.add(_okButton);
 		sp.add(_cancelButton);
 		add(sp, BorderLayout.SOUTH);
 	}
-	
+
 	/**
 	 * Get the reason the dialog closed
+	 * 
 	 * @return the reason the dialog closed
 	 */
 	public int getReason() {
 		return _reason;
 	}
-	
+
 	/**
 	 * Return a HistoData ready for filling if the user hit ok
+	 * 
 	 * @return a HistoData or <code>null</code>.
 	 */
 	public Histo2DData getHistoData() {
@@ -86,18 +88,15 @@ public class DefineHisto2DDialog extends JDialog implements ActionListener, Prop
 		if (o == _okButton) {
 			_reason = DialogUtilities.OK_RESPONSE;
 			setVisible(false);
-		}
-		else if (o == _cancelButton) {
+		} else if (o == _cancelButton) {
 			_reason = DialogUtilities.CANCEL_RESPONSE;
 			setVisible(false);
 		}
 	}
 
-	
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		
-		
+
 		Object o = evt.getSource();
 		String prop = evt.getPropertyName();
 		if ((prop.equals("newname")) || (prop.equals("expression"))) {
@@ -126,18 +125,19 @@ public class DefineHisto2DDialog extends JDialog implements ActionListener, Prop
 			_okButton.setEnabled(xvalid && yvalid);
 		}
 	}
-	
+
 	/**
 	 * Get the name for the x axis variable
+	 * 
 	 * @return the name for the x axis variable
 	 */
 	public String getXName() {
 		return _xName;
 	}
 
-	
 	/**
 	 * Get the name for the y axis variable
+	 * 
 	 * @return the name for the y axis variable
 	 */
 	public String getYName() {
@@ -150,11 +150,10 @@ public class DefineHisto2DDialog extends JDialog implements ActionListener, Prop
 		int reason = dialog.getReason();
 		if (reason == DialogUtilities.OK_RESPONSE) {
 			System.err.println("OK");
-		}
-		else {
+		} else {
 			System.err.println("CANCEL");
 		}
-		
+
 		System.exit(0);
 	}
 

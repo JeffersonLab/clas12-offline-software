@@ -37,24 +37,16 @@ public class TransientText {
 	/**
 	 * Transient text that will be written on the splash screen window.
 	 * 
-	 * @param text
-	 *            the text to be written
-	 * @param textColor
-	 *            the color of the text
-	 * @param startTime
-	 *            the time in milliseconds relative to the splash screen opening
-	 *            that the text will be drawn
-	 * @param duration
-	 *            the duration in milliseconds that the text will be visible
-	 * @param font
-	 *            the font for drawing the text
-	 * @param x
-	 *            the x location of the baseline relative to the left
-	 * @param y
-	 *            the y location of the baseline relative to the top
+	 * @param text      the text to be written
+	 * @param textColor the color of the text
+	 * @param startTime the time in milliseconds relative to the splash screen
+	 *                  opening that the text will be drawn
+	 * @param duration  the duration in milliseconds that the text will be visible
+	 * @param font      the font for drawing the text
+	 * @param x         the x location of the baseline relative to the left
+	 * @param y         the y location of the baseline relative to the top
 	 */
-	public TransientText(String text, Color textColor, long startTime,
-			long duration, Font font, int x, int y) {
+	public TransientText(String text, Color textColor, long startTime, long duration, Font font, int x, int y) {
 
 		_text = text;
 		_textColor = textColor != null ? textColor : Color.black;
@@ -70,10 +62,9 @@ public class TransientText {
 	/**
 	 * Draw the string if the time is right.
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param splashStartTime
-	 *            the system time in millis when the splashscreen started.
+	 * @param g               the graphics context
+	 * @param splashStartTime the system time in millis when the splashscreen
+	 *                        started.
 	 */
 	public void draw(Graphics g, long splashStartTime) {
 

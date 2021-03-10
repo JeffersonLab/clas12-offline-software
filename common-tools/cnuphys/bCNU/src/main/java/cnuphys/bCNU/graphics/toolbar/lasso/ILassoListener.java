@@ -11,8 +11,7 @@ public interface ILassoListener {
 	/**
 	 * Have lassoed a rectangle
 	 * 
-	 * @param wr
-	 *            the world rectangle of the lasso
+	 * @param wr the world rectangle of the lasso
 	 */
 	public void rectangleLasso(Rectangle2D.Double wr, boolean funnel);
 }

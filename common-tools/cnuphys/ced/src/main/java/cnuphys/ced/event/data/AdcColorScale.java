@@ -5,18 +5,17 @@ import cnuphys.bCNU.graphics.colorscale.ColorScaleModel;
 public class AdcColorScale extends ColorScaleModel {
 
 	private static AdcColorScale _instance;
-	
+
 	private AdcColorScale() {
 		super(getScaleValues(), ColorScaleModel.getWeatherMapColors(8));
 	}
-	
+
 	public static AdcColorScale getInstance() {
 		if (_instance == null) {
 			_instance = new AdcColorScale();
 		}
 		return _instance;
 	}
-	
 
 	/**
 	 * Get the values array for the color scale. Note the range is 0..1 so use
@@ -38,6 +37,5 @@ public class AdcColorScale extends ColorScaleModel {
 		}
 		return values;
 	}
-
 
 }

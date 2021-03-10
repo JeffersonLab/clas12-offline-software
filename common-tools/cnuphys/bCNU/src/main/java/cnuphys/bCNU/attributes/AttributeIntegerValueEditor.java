@@ -2,8 +2,7 @@ package cnuphys.bCNU.attributes;
 
 import java.text.NumberFormat;
 
-public abstract class AttributeIntegerValueEditor<T>  extends AttributeStringEditor { 
-	
+public abstract class AttributeIntegerValueEditor<T> extends AttributeStringEditor {
 
 	protected T startValue;
 
@@ -12,8 +11,7 @@ public abstract class AttributeIntegerValueEditor<T>  extends AttributeStringEdi
 	 */
 	protected AttributeTable attributeTable = null;
 
-	protected static NumberFormat numberFormat = NumberFormat
-			.getNumberInstance();
+	protected static NumberFormat numberFormat = NumberFormat.getNumberInstance();
 	static {
 		numberFormat.setMaximumFractionDigits(6);
 		numberFormat.setMinimumFractionDigits(0);
@@ -22,18 +20,16 @@ public abstract class AttributeIntegerValueEditor<T>  extends AttributeStringEdi
 	/**
 	 * Create an editor for Doubles.
 	 * 
-	 * @param propertyData the attribute being edited.
+	 * @param propertyData       the attribute being edited.
 	 * @param propertyCellEditor the owner Cell Editor.
 	 */
 
-	public AttributeIntegerValueEditor(AttributeTable attributeTable,
-			Attribute attribute) {
+	public AttributeIntegerValueEditor(AttributeTable attributeTable, Attribute attribute) {
 
 		super(attributeTable, attribute);
 	}
-	
+
 	protected abstract void setStartValue();
-	
 
 	/**
 	 * See if a string has changed. If so, fire a notice.
@@ -50,8 +46,7 @@ public abstract class AttributeIntegerValueEditor<T>  extends AttributeStringEdi
 			T newValue = startValue;
 			try {
 				newValue = parse(newText);
-			}
-			catch (NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				newValue = startValue;
 			}
 			if (newValue != startValue) {
@@ -59,23 +54,22 @@ public abstract class AttributeIntegerValueEditor<T>  extends AttributeStringEdi
 				startValue = newValue;
 			}
 
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 
 	}
-	
+
 	protected abstract T parse(String vtext);
-	
+
 	/**
 	 * Render the value for display
+	 * 
 	 * @param value the
 	 */
 	@Override
 	public void renderValue(Object value) {
 		component.setText("" + value);
 	}
-	
 
 }

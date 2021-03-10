@@ -34,8 +34,7 @@ public class FTOFPanelItem extends PolygonItem {
 	/**
 	 * Create a FTOFPanelItem
 	 * 
-	 * @param logLayer
-	 *            the Layer this item is on.
+	 * @param logLayer the Layer this item is on.
 	 */
 	public FTOFPanelItem(LogicalLayer logLayer, FTOFPanel panel, int sector) {
 		super(logLayer, getShell((SectorView) logLayer.getContainer().getView(), panel, sector));
@@ -54,10 +53,8 @@ public class FTOFPanelItem extends PolygonItem {
 	/**
 	 * Custom drawer for the item.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
@@ -80,16 +77,16 @@ public class FTOFPanelItem extends PolygonItem {
 
 		Point2D.Double wp[] = GeometryManager.allocate(4);
 
-		//draw a line marking paddle boundary
+		// draw a line marking paddle boundary
 		for (int i = 0; i < _ftofPanel.getCount(); i++) {
 			boolean isects = _ftofPanel.getPaddle(i, _view.getProjectionPlane(), wp);
 			if (isects) {
-			if (_sector > 3) {
-				wp[0].y = -wp[0].y;
-				wp[3].y = -wp[3].y;
-			}
+				if (_sector > 3) {
+					wp[0].y = -wp[0].y;
+					wp[3].y = -wp[3].y;
+				}
 
-			WorldGraphicsUtilities.drawWorldLine(g, container, wp[0], wp[3], _style);
+				WorldGraphicsUtilities.drawWorldLine(g, container, wp[0], wp[3], _style);
 			}
 		}
 
@@ -109,7 +106,7 @@ public class FTOFPanelItem extends PolygonItem {
 		int hits[][] = null;
 
 		int medianHit = 0;
-		
+
 		int panelType = _ftofPanel.getPanelType();
 		switch (panelType) {
 		case FTOF.PANEL_1A:
@@ -126,16 +123,14 @@ public class FTOFPanelItem extends PolygonItem {
 			break;
 		}
 
-		
 		if (hits != null) {
 			int sect0 = _sector - 1;
 			for (int paddle0 = 0; paddle0 < hits[sect0].length; paddle0++) {
 
 				int hitCount = hits[sect0][paddle0];
-				double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
+				double fract = _view.getMedianSetting() * (((double) hitCount) / (1 + medianHit));
 
-
-				Color fc = AccumulationManager.getInstance().getColor(fract);
+				Color fc = AccumulationManager.getInstance().getColor(_view.getColorScaleModel(), fract);
 				Point2D.Double wp[] = getPaddle(_view, paddle0, _ftofPanel, _sector);
 
 				if (wp != null) {
@@ -148,10 +143,9 @@ public class FTOFPanelItem extends PolygonItem {
 
 	}
 
-
 	// works for both showMcTruth and not
 	private void drawSingleModeHits(Graphics g, IContainer container) {
-		
+
 		// draw tdc adc hits
 		TdcAdcHitList hits = FTOF.getInstance().getTdcAdcHits();
 		if ((hits != null) && !hits.isEmpty()) {
@@ -172,8 +166,6 @@ public class FTOFPanelItem extends PolygonItem {
 			}
 		}
 
-
-
 	}
 
 	/**
@@ -188,23 +180,19 @@ public class FTOFPanelItem extends PolygonItem {
 	/**
 	 * Get a paddle outline of the tof panel.
 	 * 
-	 * @param view
-	 *            the view being rendered.
-	 * @param index
-	 *            the zero-based paddle index.
-	 * @param panel
-	 *            the panel holding the geometry data
-	 * @param sector
-	 *            the 1-based sector 1..6
+	 * @param view   the view being rendered.
+	 * @param index  the zero-based paddle index.
+	 * @param panel  the panel holding the geometry data
+	 * @param sector the 1-based sector 1..6
 	 * @return
 	 */
 	private static Point2D.Double[] getPaddle(SectorView view, int index, FTOFPanel panel, int sector) {
 
-		//hide if don't fully intersect, which happens as phi moves away from midplane
+		// hide if don't fully intersect, which happens as phi moves away from midplane
 		if (!doesPaddleFullIntersectPlane(view, index, panel)) {
 			return null;
 		}
-		
+
 		Point2D.Double wp[] = GeometryManager.allocate(4);
 
 		panel.getPaddle(index, view.getProjectionPlane(), wp);
@@ -218,25 +206,19 @@ public class FTOFPanelItem extends PolygonItem {
 
 		return wp;
 	}
-	
-	//does paddle fully intersect projection plane?
-	private static boolean doesPaddleFullIntersectPlane(SectorView view, int index, 
-			FTOFPanel panel) {
-	
+
+	// does paddle fully intersect projection plane?
+	private static boolean doesPaddleFullIntersectPlane(SectorView view, int index, FTOFPanel panel) {
+
 		return panel.paddleFullyIntersects(index, view.getProjectionPlane());
 	}
-	
-
 
 	/**
 	 * Get the shell of the tof panel.
 	 * 
-	 * @param view
-	 *            the view being rendered.
-	 * @param panel
-	 *            the panel holding the geometry data
-	 * @param sector
-	 *            the 1-based sector 1..6
+	 * @param view   the view being rendered.
+	 * @param panel  the panel holding the geometry data
+	 * @param sector the 1-based sector 1..6
 	 * @return
 	 */
 	private static Point2D.Double[] getShell(SectorView view, FTOFPanel panel, int sector) {
@@ -257,17 +239,13 @@ public class FTOFPanelItem extends PolygonItem {
 	}
 
 	/**
-	 * Add any appropriate feedback strings
-	 * panel. Default implementation returns the item's name.
+	 * Add any appropriate feedback strings panel. Default implementation returns
+	 * the item's name.
 	 * 
-	 * @param container
-	 *            the Base container.
-	 * @param screenPoint
-	 *            the mouse location.
-	 * @param worldPoint
-	 *            the corresponding world point.
-	 * @param feedbackStrings
-	 *            the List of feedback strings to add to.
+	 * @param container       the Base container.
+	 * @param screenPoint     the mouse location.
+	 * @param worldPoint      the corresponding world point.
+	 * @param feedbackStrings the List of feedback strings to add to.
 	 */
 	@Override
 	public void getFeedbackStrings(IContainer container, Point screenPoint, Point2D.Double worldPoint,
@@ -278,8 +256,7 @@ public class FTOFPanelItem extends PolygonItem {
 		for (int index = 0; index < _ftofPanel.getCount(); index++) {
 
 			Point2D.Double wp[] = getPaddle(_view, index, _ftofPanel, _sector);
-			
-			
+
 			if (wp != null) {
 				Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
 
@@ -297,8 +274,9 @@ public class FTOFPanelItem extends PolygonItem {
 						feedbackStrings
 								.add("$Orange Red$" + getName() + "  sector " + _sector + " paddle " + (index + 1));
 					}
-					feedbackStrings.add("$Orange Red$paddle length " + FTOFGeometry.getLength(_ftofPanel.getPanelType(), index) + " cm");
-					
+					feedbackStrings.add("$Orange Red$paddle length "
+							+ FTOFGeometry.getLength(_ftofPanel.getPanelType(), index) + " cm");
+
 					break;
 				} // path contains wp
 			} // end wp != null

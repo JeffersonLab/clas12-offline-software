@@ -11,34 +11,36 @@ import cnuphys.tinyMS.graphics.Fonts;
 import cnuphys.tinyMS.server.TinyMessageServer;
 
 public class TopicList extends JList<String> {
-	
+
 	public static final int WIDTH = 150;
 
-	//server owner
+	// server owner
 	private TinyMessageServer _server;
-	
-	//for scrolling the topics
+
+	// for scrolling the topics
 	private JScrollPane _scrollPane;
-	
+
 	/*
 	 * For the list of topics
-	 * @param 
+	 * 
+	 * @param
 	 */
 	public TopicList(TinyMessageServer server) {
 		super(new DefaultListModel());
 		_server = server;
 		setFont(Fonts.mediumFont);
 	}
-	
+
 	@Override
 	public Dimension getPreferredSize() {
 		Dimension d = super.getPreferredSize();
 		d.width = WIDTH;
 		return d;
 	}
-	
+
 	/**
 	 * Get the scroll pane
+	 * 
 	 * @return the scroll pane
 	 */
 	public JScrollPane getScrollPane() {
@@ -50,13 +52,13 @@ public class TopicList extends JList<String> {
 		}
 		return _scrollPane;
 	}
-	
+
 	public void addTopic(String topic) {
 		if (topic == null) {
 			return;
 		}
-		
-		DefaultListModel model = (DefaultListModel)getModel();
+
+		DefaultListModel model = (DefaultListModel) getModel();
 		if (!model.contains(topic)) {
 			model.addElement(topic);
 		}

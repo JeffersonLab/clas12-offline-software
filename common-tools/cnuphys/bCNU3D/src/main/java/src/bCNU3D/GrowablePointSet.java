@@ -23,10 +23,8 @@ public class GrowablePointSet extends ArrayList<Vector3f> {
 	/**
 	 * 
 	 * @param name
-	 * @param color
-	 *            the color of the points
-	 * @param pointSize
-	 *            the drawing size of the points
+	 * @param color     the color of the points
+	 * @param pointSize the drawing size of the points
 	 */
 	public GrowablePointSet(String name, Color color, float pointSize, boolean circular) {
 		_name = name;
@@ -35,19 +33,19 @@ public class GrowablePointSet extends ArrayList<Vector3f> {
 		_pointSize = pointSize;
 		_circular = circular;
 	}
-	
+
 	public String getName() {
 		return _name;
 	}
-	
+
 	public boolean isCircular() {
 		return _circular;
 	}
-	
+
 	public float getPointSize() {
 		return _pointSize;
 	}
-	
+
 	public Color getColor() {
 		return _color;
 	}
@@ -69,7 +67,7 @@ public class GrowablePointSet extends ArrayList<Vector3f> {
 		_dirty = true;
 		return super.add(v);
 	}
-	
+
 	@Override
 	public void clear() {
 		_dirty = true;
@@ -98,6 +96,6 @@ public class GrowablePointSet extends ArrayList<Vector3f> {
 	}
 
 	public void add(double x, double y, double z) {
-		add((float)x, (float)y, (float)z);
+		add((float) x, (float) y, (float) z);
 	}
 }

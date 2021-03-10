@@ -14,7 +14,7 @@ import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.X11Colors;
 
 public class HeaderRenderer extends JTextField implements TableCellRenderer {
-	
+
 	public HeaderRenderer() {
 		setBackground(X11Colors.getX11Color("wheat"));
 		setForeground(Color.black);
@@ -25,7 +25,6 @@ public class HeaderRenderer extends JTextField implements TableCellRenderer {
 		setBorder(BorderFactory.createCompoundBorder(lineBorder, emptyBorder));
 
 	}
-
 
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean arg2, boolean arg3, int arg4,

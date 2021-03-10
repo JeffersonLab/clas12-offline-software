@@ -45,23 +45,16 @@ public class TextItem extends RectangleItem {
 
 	/**
 	 * 
-	 * @param layer
-	 *            the layer which will hold the item.
-	 * @param location
-	 *            the location of the lower left
-	 * @param font
-	 *            the font to use.
-	 * @param text
-	 *            the text to display.
-	 * @param textColor
-	 *            the text foreground color.
-	 * @param fillColor
-	 *            the text background color.
-	 * @param lineColor
-	 *            the border color
+	 * @param layer     the layer which will hold the item.
+	 * @param location  the location of the lower left
+	 * @param font      the font to use.
+	 * @param text      the text to display.
+	 * @param textColor the text foreground color.
+	 * @param fillColor the text background color.
+	 * @param lineColor the border color
 	 */
-	public TextItem(LogicalLayer layer, Point2D.Double location, Font font,
-			String text, Color textColor, Color fillColor, Color lineColor) {
+	public TextItem(LogicalLayer layer, Point2D.Double location, Font font, String text, Color textColor,
+			Color fillColor, Color lineColor) {
 		super(layer, new Rectangle2D.Double(location.x, location.y, 1, 1));
 		setFont(font);
 		setText(text);
@@ -76,14 +69,12 @@ public class TextItem extends RectangleItem {
 	/**
 	 * Custom drawer for the text item.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
-		
+
 		Point2D.Double oldFocus = _focus;
 		setPath(getPoints(container));
 		_focus = oldFocus;
@@ -96,14 +87,13 @@ public class TextItem extends RectangleItem {
 		Point p = getFocusPoint(container);
 		g.setColor((_textColor != null) ? _textColor : Color.black);
 
-		GraphicsUtilities.drawSnippets(g, p.x, p.y, _font, _text,
-				container.getComponent(), getAzimuth());
+		GraphicsUtilities.drawSnippets(g, p.x, p.y, _font, _text, container.getComponent(), getAzimuth());
 		g.setFont(_font);
 	}
 
 	/**
-	 * Get the size of the text, including an invisible border of thickness
-	 * MARGIN all around.
+	 * Get the size of the text, including an invisible border of thickness MARGIN
+	 * all around.
 	 * 
 	 * @return the size of the text, including an invisible border of thickness
 	 *         MARGIN all around.
@@ -133,8 +123,7 @@ public class TextItem extends RectangleItem {
 	}
 
 	/**
-	 * @param font
-	 *            the font to set
+	 * @param font the font to set
 	 */
 	public void setFont(Font font) {
 		_font = font;
@@ -151,8 +140,7 @@ public class TextItem extends RectangleItem {
 	}
 
 	/**
-	 * @param text
-	 *            the text to set
+	 * @param text the text to set
 	 */
 	public void setText(String text) {
 		_text = UnicodeSupport.specialCharReplace(text);
@@ -171,8 +159,7 @@ public class TextItem extends RectangleItem {
 	/**
 	 * Set the text foreground color
 	 * 
-	 * @param textForeground
-	 *            the text foreground color to set
+	 * @param textForeground the text foreground color to set
 	 */
 	public void setTextColor(Color textForeground) {
 		_textColor = textForeground;
@@ -181,8 +168,7 @@ public class TextItem extends RectangleItem {
 	/**
 	 * Get the rotation point
 	 * 
-	 * @param container
-	 *            the container bing rendered
+	 * @param container the container bing rendered
 	 * @return the rotation point where rotations are initiated
 	 */
 	@Override
@@ -200,15 +186,14 @@ public class TextItem extends RectangleItem {
 	}
 
 	// get the world rectangle bounds
-	private static Rectangle2D.Double getWorldRectangle(IContainer container,
-			Point2D.Double location, Font font, String text) {
-		
+	private static Rectangle2D.Double getWorldRectangle(IContainer container, Point2D.Double location, Font font,
+			String text) {
+
 		Dimension size = sizeText(container.getComponent(), font, text);
 		FontMetrics fm = container.getComponent().getFontMetrics(font);
 		Point p = new Point();
 		container.worldToLocal(p, location);
-		Rectangle r = new Rectangle(p.x - MARGIN,
-				p.y - fm.getAscent() - MARGIN, size.width, size.height);
+		Rectangle r = new Rectangle(p.x - MARGIN, p.y - fm.getAscent() - MARGIN, size.width, size.height);
 		Rectangle2D.Double wr = new Rectangle2D.Double();
 		container.localToWorld(r, wr);
 		return wr;
@@ -217,16 +202,14 @@ public class TextItem extends RectangleItem {
 	// get the corners
 	private Point2D.Double[] getPoints(IContainer container) {
 		// step one: get unrotated worlds rect
-		Rectangle2D.Double wr = getWorldRectangle(container, _focus, _font,
-				_text);
+		Rectangle2D.Double wr = getWorldRectangle(container, _focus, _font, _text);
 
 		// step two: get rectangle points
 		Point2D.Double points[] = WorldGraphicsUtilities.getPoints(wr);
 
 		// rotate ?
 		if (Math.abs(getAzimuth()) > 0.001) {
-			AffineTransform at = AffineTransform.getRotateInstance(
-					Math.toRadians(-getAzimuth()), _focus.x, _focus.y);
+			AffineTransform at = AffineTransform.getRotateInstance(Math.toRadians(-getAzimuth()), _focus.x, _focus.y);
 			for (Point2D.Double wp : points) {
 				at.transform(wp, wp);
 			}
@@ -236,8 +219,7 @@ public class TextItem extends RectangleItem {
 
 	@Override
 	public void stopModification() {
-		_path = WorldGraphicsUtilities
-				.worldPolygonToPath(getPoints(getContainer()));
+		_path = WorldGraphicsUtilities.worldPolygonToPath(getPoints(getContainer()));
 		super.stopModification();
 	}
 
@@ -256,13 +238,10 @@ public class TextItem extends RectangleItem {
 		double oldFocusDx = center.x - startFocus.x;
 		double oldFocusDy = center.y - startFocus.y;
 
-		double scale = currentPoint.distance(center)
-				/ startPoint.distance(center);
-		AffineTransform at = AffineTransform.getTranslateInstance(center.x,
-				center.y);
+		double scale = currentPoint.distance(center) / startPoint.distance(center);
+		AffineTransform at = AffineTransform.getTranslateInstance(center.x, center.y);
 		at.concatenate(AffineTransform.getScaleInstance(scale, scale));
-		at.concatenate(AffineTransform.getTranslateInstance(-center.x,
-				-center.y));
+		at.concatenate(AffineTransform.getTranslateInstance(-center.x, -center.y));
 		_path.transform(at);
 
 		_focus.x = center.x - scale * oldFocusDx;
@@ -289,8 +268,7 @@ public class TextItem extends RectangleItem {
 			dely = y1 - y0;
 
 			// get present size requirement
-			Dimension size = sizeText(getContainer().getComponent(), _font,
-					_text);
+			Dimension size = sizeText(getContainer().getComponent(), _font, _text);
 
 			if (size.width > w) {
 				while (size.width > w) {

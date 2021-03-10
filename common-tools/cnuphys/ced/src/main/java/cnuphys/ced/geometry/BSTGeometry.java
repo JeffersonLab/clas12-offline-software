@@ -57,15 +57,11 @@ public class BSTGeometry {
 	/**
 	 * Get the strip as a line
 	 * 
-	 * @param sector
-	 *            (0-based) number of sectors are {10, 14, 18, 24} for
-	 *            superlayers {0, 1, 2, 3} respectively.
-	 * @param superlayer
-	 *            in the range [0..3]
-	 * @param layer
-	 *            either 0 or 1
-	 * @param strip
-	 *            should be in the range [0..255]
+	 * @param sector     (0-based) number of sectors are {10, 14, 18, 24} for
+	 *                   superlayers {0, 1, 2, 3} respectively.
+	 * @param superlayer in the range [0..3]
+	 * @param layer      either 0 or 1
+	 * @param strip      should be in the range [0..255]
 	 * @return the strip as a line
 	 */
 	public static Line3D getStrip(int sector, int superlayer, int layer, int strip) {
@@ -101,13 +97,10 @@ public class BSTGeometry {
 
 	/**
 	 * 
-	 * @param sector
-	 *            (0-based) number of sectors are {10, 14, 18, 24} for
-	 *            superlayers {0, 1, 2, 3} respectively.
-	 * @param superlayer
-	 *            in the range [0..3]
-	 * @param layer
-	 *            either 0 or 1
+	 * @param sector     (0-based) number of sectors are {10, 14, 18, 24} for
+	 *                   superlayers {0, 1, 2, 3} respectively.
+	 * @param superlayer in the range [0..3]
+	 * @param layer      either 0 or 1
 	 * @param p3d
 	 * @return
 	 */
@@ -123,23 +116,19 @@ public class BSTGeometry {
 	/**
 	 * Get the coordinates (a line) for a strip for 3D view
 	 * 
-	 * @param sector
-	 *            the 1-based layer dependent sector
-	 * @param layer
-	 *            the "big" layer 1..8
-	 * @param strip
-	 *            the strip 1..256
-	 * @param coords
-	 *            (dim = 6) will hold line as [x1,y1,z1,x2,y2,z2] in cm
+	 * @param sector the 1-based layer dependent sector
+	 * @param layer  the "big" layer 1..8
+	 * @param strip  the strip 1..256
+	 * @param coords (dim = 6) will hold line as [x1,y1,z1,x2,y2,z2] in cm
 	 */
 	public static void getStrip(int sector, int layer, int strip, float coords[]) {
 		// geom service uses 0-based superlayer and layer
 		int supl = ((layer - 1) / 2); // 0, 1, 2, 3 (ring)
 		int lay = ((layer - 1) % 2); // 0, 1, 0, 1
-		
+
 		int numSect = BSTGeometry.sectorsPerSuperlayer[supl];
 
-		//HACK fix mismatch reality vs. Geo database
+		// HACK fix mismatch reality vs. Geo database
 		sector = GeometryManager.getInstance().svtSectorHack(numSect, sector);
 
 //		System.err.print("STRIP: " + strip);
@@ -164,29 +153,24 @@ public class BSTGeometry {
 	/**
 	 * Get the triplet quad coordinates for 3D view
 	 * 
-	 * @param sector
-	 *            the 1-based layer dependent sector
-	 * @param layer
-	 *            the "big" layer 1..8
-	 * @param coords
-	 *            (dim = 26) will hold quads as [x1, y1, z1, ... x4, y4, z4] for
-	 *            quad 1 (12 numbers) [x1, y1, z1, ... x4, y4, z4] for quad 2
-	 *            (12 numbers) [x1, y1, z1, ... x4, y4, z4] for quad 3 (12
-	 *            numbers)
+	 * @param sector the 1-based layer dependent sector
+	 * @param layer  the "big" layer 1..8
+	 * @param coords (dim = 26) will hold quads as [x1, y1, z1, ... x4, y4, z4] for
+	 *               quad 1 (12 numbers) [x1, y1, z1, ... x4, y4, z4] for quad 2 (12
+	 *               numbers) [x1, y1, z1, ... x4, y4, z4] for quad 3 (12 numbers)
 	 */
 
 	public static void getLayerQuads(int sector, int layer, float coords[]) {
-		
+
 		// geom service uses 0-based superlayer and layer
 		int supl = ((layer - 1) / 2); // 0, 1, 2, 3 (ring)
 		int lay = ((layer - 1) % 2); // 0, 1, 0, 1
 
 		int numSect = BSTGeometry.sectorsPerSuperlayer[supl];
 
-		//HACK fix mismatch reality vs. Geo database
+		// HACK fix mismatch reality vs. Geo database
 		sector = GeometryManager.getInstance().svtSectorHack(numSect, sector);
-		
-		
+
 		double vals[] = new double[10];
 
 		BSTGeometry.getLimitValues(sector - 1, supl, lay, vals);
@@ -231,19 +215,15 @@ public class BSTGeometry {
 	}
 
 	/**
-	 * Get the points in the geometry service that were in the old file for
-	 * drawing in the BST views
+	 * Get the points in the geometry service that were in the old file for drawing
+	 * in the BST views
 	 * 
-	 * @param sector
-	 *            the 0-based sector
-	 * @param superlayer
-	 *            the superlayer [0..3]
-	 * @param layer
-	 *            the layer [0,1]
-	 * @param vals
-	 *            holds for (10) numbers. All are in mm. The first four are x,
-	 *            y, x, y for drawing the xy view. The last six are the six z
-	 *            values that define (in z) the three active regions
+	 * @param sector     the 0-based sector
+	 * @param superlayer the superlayer [0..3]
+	 * @param layer      the layer [0,1]
+	 * @param vals       holds for (10) numbers. All are in mm. The first four are
+	 *                   x, y, x, y for drawing the xy view. The last six are the
+	 *                   six z values that define (in z) the three active regions
 	 */
 	public static void getLimitValues(int sector, int superlayer, int layer, double vals[]) {
 		Line3D line = getStrip(sector, superlayer, layer, 0);
@@ -297,15 +277,11 @@ public class BSTGeometry {
 	/**
 	 * Get the XY coordinates of the midpoint of the line
 	 * 
-	 * @param sector
-	 *            number of sectors are {10, 14, 18, 24} for superlayers {0, 1,
-	 *            2, 3} respectively.
-	 * @param superlayer
-	 *            in the range [0..3]
-	 * @param layer
-	 *            either 0 or 1
-	 * @param strip
-	 *            should be in the range [0..255]
+	 * @param sector     number of sectors are {10, 14, 18, 24} for superlayers {0,
+	 *                   1, 2, 3} respectively.
+	 * @param superlayer in the range [0..3]
+	 * @param layer      either 0 or 1
+	 * @param strip      should be in the range [0..255]
 	 * @return the midpoint of the strip, with the z component dropped
 	 */
 	public static Point2D.Double getStripMidpoint(int sector, int superlayer, int layer, int strip) {

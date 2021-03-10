@@ -21,23 +21,20 @@ import cnuphys.splot.style.SymbolType;
 
 public class PThetaDialog extends APlotDialog {
 
-
 	private SNRDictionary _dictionary;
 
 	/**
 	 * Create the dialog for ploting the field
 	 * 
-	 * @param parent
-	 *            the parent dialog
-	 * @param modal
-	 *            the usual meaning
+	 * @param parent the parent dialog
+	 * @param modal  the usual meaning
 	 */
 	public PThetaDialog(JFrame parent, boolean modal, SNRDictionary dictionary) {
 		super(parent, "P-" + UnicodeSupport.SMALL_THETA + " Scatter Plot", modal, null);
 		_dictionary = dictionary;
 		setIconImage(ImageManager.cnuIcon.getImage());
 		_canvas.setPreferredSize(new Dimension(600, 600));
-		
+
 		DataSet ds = _canvas.getDataSet();
 		System.err.println("ADDING DATA TO PLOT");
 		for (String gprhash : dictionary.values()) {
@@ -50,8 +47,7 @@ public class PThetaDialog extends APlotDialog {
 				e.printStackTrace();
 			}
 		}
-		
-		
+
 		pack();
 	}
 
@@ -64,7 +60,7 @@ public class PThetaDialog extends APlotDialog {
 
 	@Override
 	protected String[] getColumnNames() {
-		String labels[] = { UnicodeSupport.SMALL_THETA, "P"};
+		String labels[] = { UnicodeSupport.SMALL_THETA, "P" };
 		return labels;
 	}
 
@@ -87,7 +83,6 @@ public class PThetaDialog extends APlotDialog {
 	public void fillData() {
 	}
 
-
 	@Override
 	public void setPreferences() {
 		Color fillColor = Color.black;
@@ -99,7 +94,7 @@ public class PThetaDialog extends APlotDialog {
 			dc.getStyle().setSymbolType(SymbolType.SQUARE);
 			dc.getStyle().setSymbolSize(3);
 			dc.getStyle().setFillColor(fillColor);
-			dc.getStyle().setLineColor(null);
+			dc.getStyle().setBorderColor(null);
 		}
 
 		// many options controlled via plot parameters
@@ -109,6 +104,5 @@ public class PThetaDialog extends APlotDialog {
 //		params.addPlotLine(new HorizontalLine(_canvas, 0));
 //		params.addPlotLine(new VerticalLine(_canvas, 0));
 	}
-
 
 }

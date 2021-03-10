@@ -17,8 +17,7 @@ public class CommonToolBarToggleButton extends JToggleButton {
 	/**
 	 * Handle a single click
 	 * 
-	 * @param mouseEvent
-	 *            the causal event
+	 * @param mouseEvent the causal event
 	 */
 	public void handleSingleClick(MouseEvent mouseEvent) {
 	}
@@ -26,8 +25,7 @@ public class CommonToolBarToggleButton extends JToggleButton {
 	/**
 	 * Handle a mouse dragged (on the map canvas) event (if this tool is active)
 	 * 
-	 * @param mouseEvent
-	 *            the causal event
+	 * @param mouseEvent the causal event
 	 */
 	public void mouseDragged(MouseEvent mouseEvent) {
 	}
@@ -35,8 +33,7 @@ public class CommonToolBarToggleButton extends JToggleButton {
 	/**
 	 * Handle a mouse move event.
 	 * 
-	 * @param mouseEvent
-	 *            the causal event
+	 * @param mouseEvent the causal event
 	 */
 	public void mouseMoved(MouseEvent mouseEvent) {
 	}
@@ -44,8 +41,7 @@ public class CommonToolBarToggleButton extends JToggleButton {
 	/**
 	 * Handle a mouse clicked event.
 	 * 
-	 * @param mouseEvent
-	 *            the causal event
+	 * @param mouseEvent the causal event
 	 */
 	public void mouseClicked(MouseEvent mouseEvent) {
 	}
@@ -53,8 +49,7 @@ public class CommonToolBarToggleButton extends JToggleButton {
 	/**
 	 * Handle a mouse double event.
 	 * 
-	 * @param mouseEvent
-	 *            the causal event
+	 * @param mouseEvent the causal event
 	 */
 	public void mouseDoubleClicked(MouseEvent mouseEvent) {
 	}
@@ -62,14 +57,14 @@ public class CommonToolBarToggleButton extends JToggleButton {
 	/**
 	 * Handle a mouse button 3 event.
 	 * 
-	 * @param mouseEvent
-	 *            the causal event
+	 * @param mouseEvent the causal event
 	 */
 	public void mouseButton3Click(MouseEvent mouseEvent) {
 	}
-	
+
 	/**
 	 * Handle popup trigger
+	 * 
 	 * @param mouseEvent the causal event
 	 */
 	public void popupTrigger(MouseEvent mouseEvent) {
@@ -78,8 +73,7 @@ public class CommonToolBarToggleButton extends JToggleButton {
 	/**
 	 * Handle a mouse press.
 	 * 
-	 * @param mouseEvent
-	 *            the causal event
+	 * @param mouseEvent the causal event
 	 */
 	public void mousePressed(MouseEvent mouseEvent) {
 	}
@@ -87,8 +81,7 @@ public class CommonToolBarToggleButton extends JToggleButton {
 	/**
 	 * Handle a mouse exited event (if this tool is active)
 	 * 
-	 * @param mouseEvent
-	 *            the causal event
+	 * @param mouseEvent the causal event
 	 */
 	public void mouseExited(MouseEvent mouseEvent) {
 	}
@@ -96,8 +89,7 @@ public class CommonToolBarToggleButton extends JToggleButton {
 	/**
 	 * Handle a mouse entered event (if this tool is active)
 	 * 
-	 * @param mouseEvent
-	 *            the causal event
+	 * @param mouseEvent the causal event
 	 */
 	public void mouseEntered(MouseEvent mouseEvent) {
 	}
@@ -105,8 +97,7 @@ public class CommonToolBarToggleButton extends JToggleButton {
 	/**
 	 * Handle a mouse released event (if this tool is active)
 	 * 
-	 * @param mouseEvent
-	 *            the causal event
+	 * @param mouseEvent the causal event
 	 */
 	public void mouseReleased(MouseEvent mouseEvent) {
 	}

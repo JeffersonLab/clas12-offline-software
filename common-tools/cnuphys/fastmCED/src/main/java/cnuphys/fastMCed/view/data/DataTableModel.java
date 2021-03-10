@@ -56,7 +56,7 @@ public class DataTableModel extends DefaultTableModel {
 		return w;
 	}
 
-	//modify the column names based on detector id
+	// modify the column names based on detector id
 	private static String[] getColumnNames(DetectorId detector) {
 		String[] cnames = { "Index", "PID", "Name", "Sector", "Superlayer", "Layer", "Component" };
 
@@ -107,7 +107,7 @@ public class DataTableModel extends DefaultTableModel {
 			HitAndID hitId = _data.get(row);
 			if (hitId != null) {
 
-				//everything in DetectorHit is zero based
+				// everything in DetectorHit is zero based
 				DetectorHit hit = hitId.hit;
 
 				switch (col) {
@@ -150,8 +150,7 @@ public class DataTableModel extends DefaultTableModel {
 	}
 
 	/**
-	 * @param data
-	 *            the data to set
+	 * @param data the data to set
 	 */
 	public void setData(List<ParticleHits> plist) {
 		_data.clear();

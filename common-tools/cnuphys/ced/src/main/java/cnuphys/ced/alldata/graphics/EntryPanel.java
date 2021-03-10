@@ -38,14 +38,14 @@ public class EntryPanel extends JPanel {
 		addCenter();
 	}
 
-	//add the center panel
+	// add the center panel
 	private void addCenter() {
 		JPanel centerPanel = new JPanel();
 		centerPanel.setLayout(new BorderLayout(4, 4));
 
 		createExpressionArea();
 		centerPanel.add(_expressionText, BorderLayout.CENTER);
-		
+
 		JPanel sp = new JPanel();
 		sp.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 2));
 
@@ -58,12 +58,12 @@ public class EntryPanel extends JPanel {
 
 		sp.setBorder(new CommonBorder("Name the Expression"));
 		centerPanel.add(sp, BorderLayout.SOUTH);
-		
+
 		add(centerPanel, BorderLayout.CENTER);
 
 	}
 
-	//add the north panel
+	// add the north panel
 	private void addNorth() {
 		// the functions
 		JTextArea fdef = new JTextArea("", 5, 40);
@@ -77,8 +77,7 @@ public class EntryPanel extends JPanel {
 				+ "OPERATORS: +, -, *, /, %, ^ (power, e.g., 2^x or x^y)\n\n"
 				+ "NOTE: Prepend named variables with an underscore, e.g., atan2(_y, _x)");
 
-		fdef.setBorder(new CommonBorder(
-				"Allowed functions (see Java Math class for use) and operators"));
+		fdef.setBorder(new CommonBorder("Allowed functions (see Java Math class for use) and operators"));
 		add(fdef, BorderLayout.NORTH);
 	}
 
@@ -94,7 +93,7 @@ public class EntryPanel extends JPanel {
 		add(_validationTF, BorderLayout.SOUTH);
 	}
 
-	//create the expression entry area
+	// create the expression entry area
 	private void createExpressionArea() {
 		_expressionText = new JTextArea();
 		_expressionText.setLineWrap(true);
@@ -104,7 +103,7 @@ public class EntryPanel extends JPanel {
 		_expressionText.setBorder(new CommonBorder("Enter the expression"));
 	}
 
-	//the expression name text field
+	// the expression name text field
 	private void createExpNameTF() {
 		_nameTF = new JTextField("", 20);
 		// _nameTF.setEnabled(false);
@@ -122,7 +121,7 @@ public class EntryPanel extends JPanel {
 		_nameTF.addKeyListener(kl);
 	}
 
-	//add the named expression
+	// add the named expression
 	private void nameExpression() {
 		// get the variable name
 		String ename = _nameTF.getText();
@@ -136,8 +135,7 @@ public class EntryPanel extends JPanel {
 		}
 
 		if (!Character.isLetter(ename.charAt(0))) {
-			JOptionPane.showMessageDialog(null,
-					"A valid name must start with a character.", "Invalid Name", 
+			JOptionPane.showMessageDialog(null, "A valid name must start with a character.", "Invalid Name",
 					JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
 			return;
 		}
@@ -164,9 +162,10 @@ public class EntryPanel extends JPanel {
 		String s = _expressionText.getText();
 		return NamedExpression.getExpression(s, _validationTF);
 	}
-	
+
 	/**
 	 * Edit a row from the table
+	 * 
 	 * @param row the zero-based row to edit
 	 */
 	public void editRow(int row) {
@@ -174,11 +173,11 @@ public class EntryPanel extends JPanel {
 		if (table == null) {
 			return;
 		}
-		
+
 		if ((row < 0) || (row >= table.getRowCount())) {
 			return;
 		}
-		
+
 		NamedExpression ne = _expressionPanel.removeRow(row);
 		if (ne != null) {
 			_nameTF.setText(ne._expName);

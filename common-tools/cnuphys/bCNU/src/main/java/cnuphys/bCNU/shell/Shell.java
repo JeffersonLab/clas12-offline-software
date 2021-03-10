@@ -43,8 +43,7 @@ public class Shell extends TextPaneScrollPane {
 	private static final String _cwdToFollow = "CWD_TO_FOLLOW";
 
 	// maintain a current working directory
-	private String _cwd = Environment.getInstance()
-			.getCurrentWorkingDirectory();
+	private String _cwd = Environment.getInstance().getCurrentWorkingDirectory();
 
 	// queued commands
 	private Vector<ProcessRecord> commands = new Vector<ProcessRecord>();
@@ -56,17 +55,14 @@ public class Shell extends TextPaneScrollPane {
 	private static String _userPath = "";
 	private static boolean _triedOnce = false;
 
-	private static final String forbiddenCommands[] = { "vi", "vim", "emacs",
-			"more", "less", "top", "edit" };
+	private static final String forbiddenCommands[] = { "vi", "vim", "emacs", "more", "less", "top", "edit" };
 
 	/**
 	 * Create a Shell object, which behaves like a micro shell and is used for
 	 * running OS processes
 	 * 
-	 * @param w
-	 *            width
-	 * @param h
-	 *            height
+	 * @param w width
+	 * @param h height
 	 */
 	public Shell(int w, int h) {
 
@@ -106,8 +102,7 @@ public class Shell extends TextPaneScrollPane {
 	 * Add a <code>IProcessListener</code>.
 	 * 
 	 * @see IProcessListener
-	 * @param processListener
-	 *            the <code>IProcessListener</code> to add.
+	 * @param processListener the <code>IProcessListener</code> to add.
 	 */
 	public void addProcessListener(IProcessListener processListener) {
 
@@ -126,8 +121,7 @@ public class Shell extends TextPaneScrollPane {
 	 * Remove a <code>IProcessListener</code>.
 	 * 
 	 * @see IProcessListener
-	 * @param processListener
-	 *            the <code>IProcessListener</code> to remove.
+	 * @param processListener the <code>IProcessListener</code> to remove.
 	 */
 	public void removeProcessListener(IProcessListener processListener) {
 
@@ -171,12 +165,9 @@ public class Shell extends TextPaneScrollPane {
 	/**
 	 * Execute a command in its own process
 	 * 
-	 * @param command
-	 *            the array of commands to execute
-	 * @param userId
-	 *            an optional user id
-	 * @param ptype
-	 *            an optional process type
+	 * @param command the array of commands to execute
+	 * @param userId  an optional user id
+	 * @param ptype   an optional process type
 	 * @return a process id
 	 */
 	public int execute(final String command, long userId, int ptype) {
@@ -186,14 +177,10 @@ public class Shell extends TextPaneScrollPane {
 	/**
 	 * Execute a command in its own process
 	 * 
-	 * @param command
-	 *            the array of commands to execute
-	 * @param dir
-	 *            first cd to this directory
-	 * @param userId
-	 *            an optional user id
-	 * @param ptype
-	 *            an optional process type
+	 * @param command the array of commands to execute
+	 * @param dir     first cd to this directory
+	 * @param userId  an optional user id
+	 * @param ptype   an optional process type
 	 * @return a process id
 	 */
 	public int execute(final String command, File dir, long userId, int ptype) {
@@ -212,8 +199,8 @@ public class Shell extends TextPaneScrollPane {
 				_cwd = dir.getPath();
 			}
 
-			ProcessRecord processRecord = new ProcessRecord(command,
-					dir == null ? null : dir.getPath(), _pid, userId, ptype);
+			ProcessRecord processRecord = new ProcessRecord(command, dir == null ? null : dir.getPath(), _pid, userId,
+					ptype);
 			commands.add(processRecord);
 			commands.notify();
 
@@ -329,12 +316,10 @@ public class Shell extends TextPaneScrollPane {
 		_triedOnce = true;
 
 		if (Environment.getInstance().isMac()) {
-			File pfile = new File(Environment.getInstance().getHomeDirectory(),
-					".profile");
+			File pfile = new File(Environment.getInstance().getHomeDirectory(), ".profile");
 			if (pfile.exists()) {
 				try {
-					final BufferedReader bufferedReader = new BufferedReader(
-							new FileReader(pfile));
+					final BufferedReader bufferedReader = new BufferedReader(new FileReader(pfile));
 					boolean reading = true;
 					while (reading) {
 						String line = bufferedReader.readLine();
@@ -411,10 +396,8 @@ public class Shell extends TextPaneScrollPane {
 
 				processRecord.setProcess(process);
 
-				final BufferedReader stdOutReader = new BufferedReader(
-						new InputStreamReader(process.getInputStream()));
-				final BufferedReader stdErrReader = new BufferedReader(
-						new InputStreamReader(process.getErrorStream()));
+				final BufferedReader stdOutReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+				final BufferedReader stdErrReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 
 				// this will just block until process ends
 				Runnable runnable = new Runnable() {

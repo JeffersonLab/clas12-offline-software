@@ -29,10 +29,8 @@ public class DCSuperLayer3D extends DetectorItem3D {
 	 * The owner panel
 	 * 
 	 * @param panel3d
-	 * @param sector
-	 *            one based sector [1..6]
-	 * @param superLayer
-	 *            one based superlayer [1..6]
+	 * @param sector     one based sector [1..6]
+	 * @param superLayer one based superlayer [1..6]
 	 */
 	public DCSuperLayer3D(CedPanel3D panel3D, int sector, int superLayer) {
 		super(panel3D);
@@ -46,24 +44,19 @@ public class DCSuperLayer3D extends DetectorItem3D {
 
 		Color outlineColor = X11Colors.getX11Color("wheat", getVolumeAlpha());
 
-		Support3D.drawTriangle(drawable, coords, 0, 1, 2, outlineColor, 1f,
-				frame);
-		Support3D.drawQuad(drawable, coords, 1, 4, 3, 0, outlineColor, 1f,
-				frame);
-		Support3D.drawQuad(drawable, coords, 0, 3, 5, 2, outlineColor, 1f,
-				frame);
-		Support3D.drawQuad(drawable, coords, 1, 4, 5, 2, outlineColor, 1f,
-				frame);
-		Support3D.drawTriangle(drawable, coords, 3, 4, 5, outlineColor, 1f,
-				frame);
+		Support3D.drawTriangle(drawable, coords, 0, 1, 2, outlineColor, 1f, frame);
+		Support3D.drawQuad(drawable, coords, 1, 4, 3, 0, outlineColor, 1f, frame);
+		Support3D.drawQuad(drawable, coords, 0, 3, 5, 2, outlineColor, 1f, frame);
+		Support3D.drawQuad(drawable, coords, 1, 4, 5, 2, outlineColor, 1f, frame);
+		Support3D.drawTriangle(drawable, coords, 3, 4, 5, outlineColor, 1f, frame);
 
 	}
 
 	@Override
 	public void drawData(GLAutoDrawable drawable) {
-		
+
 		float coords[] = new float[6];
-		
+
 		DCTdcHitList hits = DC.getInstance().getTDCHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			for (DCTdcHit hit : hits) {
@@ -73,7 +66,7 @@ public class DCSuperLayer3D extends DetectorItem3D {
 				}
 			}
 		}
-		
+
 //		int hitCount = DC.hitCount();
 //		
 //		if (hitCount > 0) {
@@ -128,9 +121,9 @@ public class DCSuperLayer3D extends DetectorItem3D {
 //			} //for
 //
 //		} //hitcount > 0
-		drawTBData(drawable);	
+		drawTBData(drawable);
 	}
-	
+
 	private void drawTBData(GLAutoDrawable drawable) {
 //		int hitCount = DC.timeBasedTrkgHitCount();
 //
@@ -190,8 +183,7 @@ public class DCSuperLayer3D extends DetectorItem3D {
 	}
 
 	private void getWire(int layer, int wire, float coords[]) {
-		org.jlab.geom.prim.Line3D dcwire = DCGeometry.getWire(_sector,
-				_superLayer, layer, wire);
+		org.jlab.geom.prim.Line3D dcwire = DCGeometry.getWire(_sector, _superLayer, layer, wire);
 		org.jlab.geom.prim.Point3D p0 = dcwire.origin();
 		org.jlab.geom.prim.Point3D p1 = dcwire.end();
 		coords[0] = (float) p0.x();

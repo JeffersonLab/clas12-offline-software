@@ -14,16 +14,16 @@
         "group": 41,
         "info": "Lund header bank for the generated event",
         "items": [
-            {"name":"npart",     "id":1,  "type":"int16", "info":"number of particles in the event"},
-            {"name":"atarget",   "id":2,  "type":"int16", "info":"Mass number of the target"},
-            {"name":"ztarget",   "id":3,  "type":"int16", "info":"Atomic number oif the target"},
-            {"name":"ptarget",   "id":4,  "type":"float", "info":"Target polarization"},
+            {"name":"npart",     "id":1,  "type":"int16", "info":"number of particles in the event (User Defined)"},
+            {"name":"atarget",   "id":2,  "type":"int16", "info":"Mass number of the target (User Defined)"},
+            {"name":"ztarget",   "id":3,  "type":"int16", "info":"Atomic number oif the target (User Defined)"},
+            {"name":"ptarget",   "id":4,  "type":"float", "info":"Target polarization (User Defined)"},
             {"name":"pbeam",     "id":5,  "type":"float", "info":"Beam polarization"},
-            {"name":"btype",     "id":6,  "type":"int16", "info":"Beam type, electron=11, photon=22"},
-            {"name":"ebeam",     "id":7,  "type":"float", "info":"Beam energy (GeV)"},
-            {"name":"targetid",  "id":8,  "type":"int16", "info":"Interacted nucleaon ID (proton=2212, neutron=2112"},
-            {"name":"processid", "id":9,  "type":"int16", "info":"Process ID"},
-            {"name":"weight",    "id":10, "type":"float", "info":"Event weight"}
+            {"name":"btype",     "id":6,  "type":"int16", "info":"Beam type (User Defined)"},
+            {"name":"ebeam",     "id":7,  "type":"float", "info":"Beam energy (GeV) (User Defined)"},
+            {"name":"targetid",  "id":8,  "type":"int16", "info":"Interacted nucleon ID (proton=2212, neutron=2112 (User Defined)"},
+            {"name":"processid", "id":9,  "type":"int16", "info":"Process ID (User Defined)"},
+            {"name":"weight",    "id":10, "type":"float", "info":"Event weight (User Defined)"}
         ]
     },
     {
@@ -46,20 +46,20 @@
         "group": 43,
         "info": "Generated Particle information from Lund",
         "items": [
-            {"name":"index",    "id":1,  "type":"int8",  "info":"index of the first daughter"},
-            {"name":"type",     "id":2,  "type":"int8",  "info":"particle type (1 is active)"},
-            {"name":"pid",      "id":3,  "type":"int32", "info":"particle id"},
-            {"name":"parent",   "id":4,  "type":"int8",  "info":"index of the parent"},
-            {"name":"daughter", "id":5,  "type":"int8",  "info":"index of the first daughter"},
-            {"name":"px",       "id":6,  "type":"float", "info":"x component of the momentum"},
-            {"name":"py",       "id":7,  "type":"float", "info":"y component of the momentum"},
-            {"name":"pz",       "id":8,  "type":"float", "info":"z component of the momentum"},
-            {"name":"E",        "id":9,  "type":"float", "info":"Energy of the particle"},
-            {"name":"mass",     "id":10, "type":"float", "info":"mass of the particle"},
-            {"name":"vx",       "id":11, "type":"float", "info":"x component of the vertex"},
-            {"name":"vy",       "id":12, "type":"float", "info":"y component of the vertex"},
-            {"name":"vz",       "id":13, "type":"float", "info":"z component of the vertex"},
-            {"name":"ltime",    "id":14, "type":"float", "info":"particle lifetime"}
+            {"name":"index",    "id":1,  "type":"int8",  "info":"index"},
+            {"name":"lifetime", "id":2,  "type":"float", "info":"particle lifetime (ns) (User Defined)"},
+            {"name":"type",     "id":3,  "type":"int8",  "info":"particle type (1 is active)"},
+            {"name":"pid",      "id":4,  "type":"int32", "info":"particle id"},
+            {"name":"parent",   "id":5,  "type":"int8",  "info":"index of the parent (User Defined)"},
+            {"name":"daughter", "id":6,  "type":"int8",  "info":"index of the first daughter (User Defined)"},
+            {"name":"px",       "id":7,  "type":"float", "info":"x component of the momentum (GeV)"},
+            {"name":"py",       "id":8,  "type":"float", "info":"y component of the momentum (GeV)"},
+            {"name":"pz",       "id":9,  "type":"float", "info":"z component of the momentum (GeV)"},
+            {"name":"energy",   "id":10, "type":"float", "info":"Energy of the particle (GeV) (User Defined)"},
+            {"name":"mass",     "id":11, "type":"float", "info":"mass of the particle (GeV) (User Defined)"},
+            {"name":"vx",       "id":12, "type":"float", "info":"x component of the vertex (cm)"},
+            {"name":"vy",       "id":13, "type":"float", "info":"y component of the vertex (cm)"},
+            {"name":"vz",       "id":14, "type":"float", "info":"z component of the vertex (cm)"}
         ]
     },
     {

@@ -15,23 +15,24 @@ import cnuphys.ced.clasio.table.HeaderRenderer;
 import cnuphys.ced.clasio.table.SimpleRenderer;
 
 public class BankDataTable extends JTable {
-	
+
 	private JScrollPane _scrollPane;
-	
+
 	public static final int COLWIDTH = 100;
 
 	/**
 	 * Create a bank table
+	 * 
 	 * @param bankName the name of the bank, e.g. "DC::tdc"
 	 */
 	public BankDataTable(String bankName) {
 		super(new BankTableModel(bankName));
 		getBankTableModel().setTable(this);
-		
+
 		HeaderRenderer hrender = new HeaderRenderer();
 		SimpleRenderer renderer = new SimpleRenderer();
 		setFont(Fonts.tweenFont);
-		
+
 		// set preferred widths
 		for (int i = 0; i < getColumnCount(); i++) {
 			TableColumn column = getColumnModel().getColumn(i);
@@ -54,9 +55,10 @@ public class BankDataTable extends JTable {
 		setGridColor(Color.gray);
 
 	}
-	
+
 	/**
 	 * Get all the TableColumns in an array
+	 * 
 	 * @return all the table columns
 	 */
 	public TableColumn[] getTableColumns() {
@@ -64,33 +66,36 @@ public class BankDataTable extends JTable {
 		if (size < 1) {
 			return null;
 		}
-		
+
 		TableColumn cols[] = new TableColumn[size];
 		for (int i = 0; i < size; i++) {
 			cols[i] = getColumnModel().getColumn(i);
 		}
-		
+
 		return cols;
 	}
-	
+
 	/**
 	 * Get the underlying model
+	 * 
 	 * @return the data model
 	 */
 	public BankTableModel getBankTableModel() {
-		return (BankTableModel)getModel();
+		return (BankTableModel) getModel();
 	}
-	
+
 	/**
 	 * Set the event for table display
+	 * 
 	 * @param event the event
 	 */
 	public void setEvent(DataEvent event) {
-		 getBankTableModel().setData(event);
+		getBankTableModel().setData(event);
 	}
-	
+
 	/**
 	 * Get the table's scroll pane
+	 * 
 	 * @return te table's scroll pane
 	 */
 	public JScrollPane getScrollPane() {
@@ -98,10 +103,9 @@ public class BankDataTable extends JTable {
 			_scrollPane = new JScrollPane(this) {
 				@Override
 				public Dimension getPreferredSize() {
-					int width = getModel().getColumnCount()*COLWIDTH + 20;
-					return new Dimension(Math.min(1000,  width), 550);
+					int width = getModel().getColumnCount() * COLWIDTH + 20;
+					return new Dimension(Math.min(1000, width), 550);
 				}
-				
 
 			};
 		}

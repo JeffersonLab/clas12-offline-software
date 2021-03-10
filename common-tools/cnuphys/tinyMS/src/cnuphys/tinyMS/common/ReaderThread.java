@@ -29,10 +29,8 @@ public class ReaderThread extends Thread {
 	 * Create a reader thread. This thread will be used to read messages off a
 	 * message queue.
 	 * 
-	 * @param socket
-	 *            the underlying socket
-	 * @param messenger
-	 *            the messenger with the queue
+	 * @param socket    the underlying socket
+	 * @param messenger the messenger with the queue
 	 * @throws IOException
 	 */
 	public ReaderThread(Socket socket, IMessenger messenger) throws IOException {
@@ -63,8 +61,7 @@ public class ReaderThread extends Thread {
 				if (safeToUse(message)) {
 					_messenger.getInboundQueue().queue(message);
 				}
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 //				e.printStackTrace();
 //				try {
 //				_messenger.close();

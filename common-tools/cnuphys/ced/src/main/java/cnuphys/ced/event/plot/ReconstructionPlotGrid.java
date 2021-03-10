@@ -16,8 +16,7 @@ import cnuphys.splot.plot.PlotParameters;
 import cnuphys.splot.plot.VerticalLine;
 import cnuphys.splot.style.LineStyle;
 
-public class ReconstructionPlotGrid extends PlotGridDialog implements
-		IAccumulationListener {
+public class ReconstructionPlotGrid extends PlotGridDialog implements IAccumulationListener {
 
 	private static int _numRow = 2;
 	private static int _numCol = 3;
@@ -25,8 +24,7 @@ public class ReconstructionPlotGrid extends PlotGridDialog implements
 	private static int _height = 400;
 
 	public ReconstructionPlotGrid() {
-		super(Ced.getFrame(), "Reconstruction Plots", false, _numRow,
-				_numCol, _numCol * _width, _numRow * _height);
+		super(Ced.getFrame(), "Reconstruction Plots", false, _numRow, _numCol, _numCol * _width, _numRow * _height);
 
 		AccumulationManager.getInstance().addAccumulationListener(this);
 
@@ -35,9 +33,8 @@ public class ReconstructionPlotGrid extends PlotGridDialog implements
 		for (int row = 0; row < _numRow; row++) {
 			for (int col = 0; col < _numCol; col++) {
 				try {
-					PlotCanvas canvas = new PlotCanvas(createDataSet(row, col),
-							getPlotTitle(row, col), getXAxisLabel(row, col),
-							getYAxisLabel(row, col));
+					PlotCanvas canvas = new PlotCanvas(createDataSet(row, col), getPlotTitle(row, col),
+							getXAxisLabel(row, col), getYAxisLabel(row, col));
 
 					setPreferences(canvas, row, col);
 
@@ -63,13 +60,13 @@ public class ReconstructionPlotGrid extends PlotGridDialog implements
 		params.setLegendLineLength(40);
 
 		VerticalLine vline = (new VerticalLine(canvas, 0));
-		vline.getStyle().setLineColor(Color.red);
-		vline.getStyle().setLineWidth(1.5f);
-		vline.getStyle().setLineStyle(LineStyle.DOT);
+		vline.getStyle().setBorderColor(Color.red);
+		vline.getStyle().setFitLineWidth(1.5f);
+		vline.getStyle().setFitLineStyle(LineStyle.DOT);
 		params.addPlotLine(vline);
 
 		ds.getCurveStyle(0).setFillColor(new Color(196, 196, 196, 64));
-		ds.getCurveStyle(0).setLineColor(Color.black);
+		ds.getCurveStyle(0).setFitLineColor(Color.black);
 		ds.getCurve(0).getFit().setFitType(FitType.GAUSSIANS);
 
 		params.setMinExponentY(6);

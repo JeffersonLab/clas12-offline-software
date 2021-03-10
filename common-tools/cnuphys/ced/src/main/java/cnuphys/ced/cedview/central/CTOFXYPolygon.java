@@ -3,8 +3,10 @@ package cnuphys.ced.cedview.central;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Polygon;
+import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
@@ -19,33 +21,30 @@ public class CTOFXYPolygon extends Polygon {
 	 */
 	public int paddleId;
 
-	//the quad
+	// the quad
 	private Point2D.Double[] wp;
-	
+
 	private Point2D.Double _centroid;
-	
+
 	private static Font _font = Fonts.mediumFont;
 
 	/**
 	 * Create a XY Polygon for the CND
 	 * 
-	 * @param paddleId
-	 *            the paddle ID 1..48
+	 * @param paddleId the paddle ID 1..48
 	 */
 	public CTOFXYPolygon(int paddleId) {
 		this.paddleId = paddleId;
 		wp = CTOFGeometry.getQuad(paddleId);
-		
+
 		_centroid = WorldGraphicsUtilities.getCentroid(wp);
 	}
 
 	/**
 	 * Draw the polygon
 	 * 
-	 * @param g
-	 *            the graphics object
-	 * @param container
-	 *            the drawing container
+	 * @param g         the graphics object
+	 * @param container the drawing container
 	 */
 	public void draw(Graphics g, IContainer container) {
 		reset();
@@ -61,16 +60,17 @@ public class CTOFXYPolygon extends Polygon {
 		g.drawPolygon(this);
 
 	}
-	
+
 	/**
 	 * Draw the polygon
 	 * 
-	 * @param g
-	 *            the graphics object
-	 * @param container
-	 *            the drawing container
+	 * @param g         the graphics object
+	 * @param container the drawing container
 	 */
 	public void draw(Graphics g, IContainer container, int index, Color color) {
+		Graphics2D g2 = (Graphics2D)g;
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		
 		reset();
 		Point pp = new Point();
 		for (int i = 0; i < 4; i++) {
@@ -82,14 +82,13 @@ public class CTOFXYPolygon extends Polygon {
 		g.fillPolygon(this);
 		g.setColor(Color.black);
 		g.drawPolygon(this);
-		
+
 		if (index > 0) {
 			container.worldToLocal(pp, _centroid);
 			g.setFont(_font);
-			g.drawString("" + index, pp.x-((index < 10) ? 4 : 8), pp.y+6);
+			g.drawString("" + index, pp.x - ((index < 10) ? 4 : 8), pp.y + 6);
 		}
 
 	}
-
 
 }

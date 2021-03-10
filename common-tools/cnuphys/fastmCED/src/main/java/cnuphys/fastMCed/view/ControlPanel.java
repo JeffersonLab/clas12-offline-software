@@ -28,7 +28,7 @@ import cnuphys.fastMCed.snr.NoisePanel;
  * @author heddle
  *
  */
-public class ControlPanel extends JPanel  {
+public class ControlPanel extends JPanel {
 
 	private static final int SLIDERWIDTH = 210;
 	private static final int FEEDBACKWIDTH = 220;
@@ -60,7 +60,7 @@ public class ControlPanel extends JPanel  {
 	 * Bit used to create a feedback pane
 	 */
 	public static final int FEEDBACK = 040;
-	
+
 	/**
 	 * Bit used to create a noise panel
 	 */
@@ -88,7 +88,7 @@ public class ControlPanel extends JPanel  {
 
 	// the feedback pane
 	private FeedbackPane _feedbackPane;
-	
+
 	// noise display panel
 	private NoisePanel _noisePanel;
 
@@ -101,13 +101,10 @@ public class ControlPanel extends JPanel  {
 	/**
 	 * Create a view control panel
 	 * 
-	 * @param container
-	 *            the parent container
-	 * @param controlPanelBits
-	 *            the bits fo which components are added
-	 * @param displayArrayBits
-	 *            the bits for which display flags are added to the display
-	 *            array.
+	 * @param container        the parent container
+	 * @param controlPanelBits the bits fo which components are added
+	 * @param displayArrayBits the bits for which display flags are added to the
+	 *                         display array.
 	 */
 	public ControlPanel(AView view, int controlPanelBits, int displayArrayBits, int nc, int hgap) {
 		_view = view;
@@ -156,8 +153,7 @@ public class ControlPanel extends JPanel  {
 	/**
 	 * Add a component to the south, below the feedback.
 	 * 
-	 * @param component
-	 *            the added component
+	 * @param component the added component
 	 */
 	public void addSouth(JComponent component) {
 		add(component, BorderLayout.SOUTH);
@@ -167,7 +163,7 @@ public class ControlPanel extends JPanel  {
 	private JTabbedPane addTabbedPane(AView view, int controlPanelBits, int displayArrayBits) {
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.setFont(Fonts.smallFont);
-		
+
 		// dc noise control
 		if (Bits.checkBit(controlPanelBits, NOISECONTROL)) {
 			_noisePanel = new NoisePanel(_view);
@@ -241,7 +237,7 @@ public class ControlPanel extends JPanel  {
 		if (addBasic) {
 			tabbedPane.add(basic, "basic");
 		}
-		
+
 		if (magFieldPanel != null) {
 			tabbedPane.add(magFieldPanel, "field");
 		}
@@ -357,7 +353,7 @@ public class ControlPanel extends JPanel  {
 	public DisplayArray getDisplayArray() {
 		return _displayArray;
 	}
-	
+
 	/**
 	 * Get the mag field options array
 	 * 

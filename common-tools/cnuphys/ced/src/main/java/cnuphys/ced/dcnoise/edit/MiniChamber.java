@@ -44,8 +44,7 @@ public class MiniChamber extends JComponent {
 	/**
 	 * Create a little display to show the parameters
 	 * 
-	 * @param parameters
-	 *            the initial values
+	 * @param parameters the initial values
 	 */
 	public MiniChamber() {
 	}
@@ -53,8 +52,7 @@ public class MiniChamber extends JComponent {
 	/**
 	 * Paint the MiniChamber.
 	 * 
-	 * @param g
-	 *            the Graphics context.
+	 * @param g the Graphics context.
 	 * @return
 	 */
 	@Override
@@ -89,8 +87,7 @@ public class MiniChamber extends JComponent {
 			Rectangle lr = getCell(layer, _NUMWIRES - 1);
 			g.drawLine(lr.x, lr.y, rr.x + rr.width, rr.y);
 			if (layer == 0) {
-				g.drawLine(lr.x, lr.y + lr.height, rr.x + rr.width, rr.y
-						+ rr.height);
+				g.drawLine(lr.x, lr.y + lr.height, rr.x + rr.width, rr.y + rr.height);
 			}
 		}
 
@@ -99,13 +96,11 @@ public class MiniChamber extends JComponent {
 			Rectangle tr = getCell(GeoConstants.NUM_LAYER - 1, wire);
 			g.drawLine(br.x, br.y + br.height, tr.x, tr.y);
 			if (wire == 0) {
-				g.drawLine(br.x + br.width, br.y + br.height, tr.x + tr.width,
-						tr.y);
+				g.drawLine(br.x + br.width, br.y + br.height, tr.x + tr.width, tr.y);
 			}
 		}
 
-		GraphicsUtilities.drawSimple3DRect(g, 0, 0, bounds.width - 1,
-				bounds.height - 1, true);
+		GraphicsUtilities.drawSimple3DRect(g, 0, 0, bounds.width - 1, bounds.height - 1, true);
 
 	}
 
@@ -113,10 +108,8 @@ public class MiniChamber extends JComponent {
 	 * Get the cell boundary for a given layer and wire. Mimic the traditional
 	 * layout--wires increase from right to left and layers from bottom to top.
 	 * 
-	 * @param layer
-	 *            the layer [0..(GeoConstants.NUM_LAYER-1)]
-	 * @param wire
-	 *            the wire [0..(_NUMWIRES-1)]
+	 * @param layer the layer [0..(GeoConstants.NUM_LAYER-1)]
+	 * @param wire  the wire [0..(_NUMWIRES-1)]
 	 * @return the rectangular boundary.
 	 */
 	private Rectangle getCell(int layer, int wire) {
@@ -147,8 +140,7 @@ public class MiniChamber extends JComponent {
 	/**
 	 * Set new display parameters.
 	 * 
-	 * @param parameters
-	 *            the parameters to set
+	 * @param parameters the parameters to set
 	 */
 	public void setParameters(NoiseReductionParameters parameters) {
 		_parameters = parameters;

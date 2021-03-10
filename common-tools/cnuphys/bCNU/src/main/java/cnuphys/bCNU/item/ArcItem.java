@@ -13,41 +13,34 @@ public class ArcItem extends PolylineItem {
 	/**
 	 * Create an arc item.
 	 * 
-	 * @param layer
-	 *            the Layer this item is on.
-	 * @param wpc
-	 *            the center of the arc
-	 * @param wp1
-	 *            the point at the end of the first leg. Thus wpc->wp1 determine
-	 *            the radius.
-	 * @param arcAngle
-	 *            the opening angle COUNTERCLOCKWISE in degrees.
+	 * @param layer    the Layer this item is on.
+	 * @param wpc      the center of the arc
+	 * @param wp1      the point at the end of the first leg. Thus wpc->wp1
+	 *                 determine the radius.
+	 * @param arcAngle the opening angle COUNTERCLOCKWISE in degrees.
 	 */
-	public ArcItem(LogicalLayer layer, Point2D.Double wpc, Point2D.Double wp1,
-			double arcAngle) {
+	public ArcItem(LogicalLayer layer, Point2D.Double wpc, Point2D.Double wp1, double arcAngle) {
 		super(layer, WorldGraphicsUtilities.getArcPoints(wpc, wp1, arcAngle));
 		setAzimuth(Point2DSupport.azimuth(wpc, wp1) - arcAngle / 2);
 		_focus = wpc;
 	}
-	
-	/**
-	 * Create an arc 
-	 * @param layer the Layer this item is on
-	 * @param wpc
-	 *            the center of the arc
-	 * @param radius the radius of the  arc
-	 * @param startAngle the starting angle
-	 * @param arcAngle the opening angle COUNTERCLOCKWISE in degrees.
-	 */
-	public ArcItem(LogicalLayer layer, Point2D.Double wpc, double radius, double startAngle, 
-			double arcAngle) {
-		this(layer, wpc, WorldGraphicsUtilities.radiusPoint(wpc, radius, startAngle), arcAngle);
-	}
-	
 
 	/**
-	 * Reshape the item based on the modification. Keep in mind that if control
-	 * or shift was pressed, the item will scale rather than coming here.
+	 * Create an arc
+	 * 
+	 * @param layer      the Layer this item is on
+	 * @param wpc        the center of the arc
+	 * @param radius     the radius of the arc
+	 * @param startAngle the starting angle
+	 * @param arcAngle   the opening angle COUNTERCLOCKWISE in degrees.
+	 */
+	public ArcItem(LogicalLayer layer, Point2D.Double wpc, double radius, double startAngle, double arcAngle) {
+		this(layer, wpc, WorldGraphicsUtilities.radiusPoint(wpc, radius, startAngle), arcAngle);
+	}
+
+	/**
+	 * Reshape the item based on the modification. Keep in mind that if control or
+	 * shift was pressed, the item will scale rather than coming here.
 	 */
 
 	@Override
@@ -89,8 +82,7 @@ public class ArcItem extends PolylineItem {
 	/**
 	 * Get the rotation point
 	 * 
-	 * @param container
-	 *            the container bing rendered
+	 * @param container the container bing rendered
 	 * @return the rotation point where rotations are initiated
 	 */
 	@Override

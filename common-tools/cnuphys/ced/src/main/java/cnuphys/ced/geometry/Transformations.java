@@ -37,7 +37,7 @@ public class Transformations {
 		case EC_OUTER:
 			initCal(2); // 2 for ec outer
 			break;
-			
+
 		case FTOT:
 			break;
 
@@ -50,8 +50,7 @@ public class Transformations {
 
 	// init for cal superlayer = (0,1,2) for PCAL, EC_IN, EC_OUT
 	private void initCal(int superlayer) {
-		ConstantProvider provider = 
-				GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.ECAL);
+		ConstantProvider provider = GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.ECAL);
 		ECFactory ecFactory = new ECFactory();
 
 		// detector in sector coordinates
@@ -72,9 +71,8 @@ public class Transformations {
 	/**
 	 * Convert from the local system to the sector system
 	 * 
-	 * @param txf
-	 *            a Transferable in the local system that will be modified to be
-	 *            in the sector system
+	 * @param txf a Transferable in the local system that will be modified to be in
+	 *            the sector system
 	 */
 	public void localToSector(Transformable txf) {
 		_localToSector.apply(txf);
@@ -83,9 +81,8 @@ public class Transformations {
 	/**
 	 * Convert from the sector system to the local system
 	 * 
-	 * @param txf
-	 *            a Transferable in the sector system that will be modified to
-	 *            be in the local system
+	 * @param txf a Transferable in the sector system that will be modified to be in
+	 *            the local system
 	 */
 	public void sectorToLocal(Transformable txf) {
 		_sectorToLocal.apply(txf);
@@ -94,10 +91,8 @@ public class Transformations {
 	/**
 	 * Convert from the local system to the sector system
 	 * 
-	 * @param localP
-	 *            a point in the local system (not modified)
-	 * @param sectorP
-	 *            a point in the sector system (modified)
+	 * @param localP  a point in the local system (not modified)
+	 * @param sectorP a point in the sector system (modified)
 	 */
 	public void localToSector(Point3D localP, Point3D sectorP) {
 		sectorP.set(localP.x(), localP.y(), localP.z());
@@ -107,10 +102,8 @@ public class Transformations {
 	/**
 	 * Convert from the sector system to the local system
 	 * 
-	 * @param localP
-	 *            a point in the local system (modified)
-	 * @param sectorP
-	 *            a point in the sector system (not modified)
+	 * @param localP  a point in the local system (modified)
+	 * @param sectorP a point in the sector system (not modified)
 	 */
 	public void sectorToLocal(Point3D localP, Point3D sectorP) {
 		localP.set(sectorP.x(), sectorP.y(), sectorP.z());
@@ -120,10 +113,8 @@ public class Transformations {
 	/**
 	 * Convert from the sector system to the local system
 	 * 
-	 * @param localP
-	 *            a point in the local system (modified)
-	 * @param clasP
-	 *            a point in the clas (lab) system (not modified)
+	 * @param localP a point in the local system (modified)
+	 * @param clasP  a point in the clas (lab) system (not modified)
 	 */
 	public void clasToLocal(Point3D localP, Point3D clasP) {
 		Point3D sectorP = new Point3D();
@@ -134,10 +125,8 @@ public class Transformations {
 	/**
 	 * Convert from the clas (lab) system to the local system
 	 * 
-	 * @param localP
-	 *            a point in the local system (not modified)
-	 * @param clasP
-	 *            a point in the clas (lab) system (modified)
+	 * @param localP a point in the local system (not modified)
+	 * @param clasP  a point in the clas (lab) system (modified)
 	 */
 	public void localToClas(int sector, Point3D localP, Point3D clasP) {
 		Point3D sectorP = new Point3D();

@@ -5,7 +5,6 @@ import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.management.modelmbean.InvalidTargetObjectTypeException;
 import javax.swing.JFrame;
 import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
@@ -17,16 +16,16 @@ import cnuphys.bCNU.simanneal.Solution;
 import cnuphys.bCNU.util.Fonts;
 
 public class TSSimulation extends Simulation {
-	
-	//custom attributes
+
+	// custom attributes
 	public static final String NUMCITY = "num city";
 	public static final String RIVER = "river penalty";
-	
+
 	private TSSolution _tsSolution;
-	
-	//for river penalty
+
+	// for river penalty
 	private JSlider _riverSlider;
-	
+
 	@Override
 	public Solution setInitialSolution() {
 		_tsSolution = new TSSolution(this);
@@ -35,20 +34,20 @@ public class TSSimulation extends Simulation {
 
 	@Override
 	protected void setInitialAttributes(Attributes attributes) {
-		
-		//change some defaults
+
+		// change some defaults
 		attributes.setValue(Simulation.PLOTTITLE, "Traveling Salesperson");
 		attributes.setValue(Simulation.YAXISLABEL, "Distance");
 		attributes.setValue(Simulation.XAXISLABEL, "Log(Temp)");
 		attributes.setValue(Simulation.USELOGTEMP, true);
-		
-		//custom
+
+		// custom
 		attributes.add(NUMCITY, 200);
-		
+
 		_riverSlider = new JSlider(-5, 5, 0);
-		
-		_riverSlider.setMajorTickSpacing((_riverSlider.getMaximum()-_riverSlider.getMinimum())/2);
-	//	_riverSlider.setPaintTicks(true);
+
+		_riverSlider.setMajorTickSpacing((_riverSlider.getMaximum() - _riverSlider.getMinimum()) / 2);
+		// _riverSlider.setPaintTicks(true);
 		_riverSlider.setPaintLabels(true);
 //		_riverSlider.setBorder(
 //                BorderFactory.createEmptyBorder(2, 2, 2, 2));
@@ -59,17 +58,17 @@ public class TSSimulation extends Simulation {
 		attributes.add(new Attribute(RIVER, _riverSlider));
 
 	}
-	
+
 	/**
 	 * Get the penalty (or bonus) for crossing the river
+	 * 
 	 * @return the penalty for crossing the river
 	 */
 	public double getRiverPenalty() {
-		return (0.5)*_riverSlider.getValue();
+		return (0.5) * _riverSlider.getValue();
 	}
 
-
-	//main program for testing
+	// main program for testing
 	public static void main(String arg[]) {
 
 		final JFrame frame = new JFrame();
@@ -85,11 +84,11 @@ public class TSSimulation extends Simulation {
 		frame.addWindowListener(windowAdapter);
 
 		frame.setLayout(new BorderLayout());
-		
+
 		TSSimulation simulation = new TSSimulation();
 
 		TSPanel tsPanel = new TSPanel(simulation);
-		
+
 		frame.add(tsPanel, BorderLayout.CENTER);
 
 		SwingUtilities.invokeLater(new Runnable() {

@@ -43,14 +43,10 @@ public class NoisePanel extends JPanel implements ActionListener, ItemListener {
 
 		ButtonGroup bg = new ButtonGroup();
 
-		_showSNRAnalysis = ComponentSupport.makeCheckBox("SNR analysis",
-				true, true, this);
-		_highlightNoise = ComponentSupport.makeRadioButton("Highlight noise",
-				bg, false, true, this);
-		_hideNoise = ComponentSupport.makeRadioButton("Hide noise", bg, false,
-				false, this);
-		_showMasks = ComponentSupport.makeCheckBox("Show masks", false, true,
-				this);
+		_showSNRAnalysis = ComponentSupport.makeCheckBox("SNR analysis", true, true, this);
+		_highlightNoise = ComponentSupport.makeRadioButton("Highlight noise", bg, false, true, this);
+		_hideNoise = ComponentSupport.makeRadioButton("Hide noise", bg, false, false, this);
+		_showMasks = ComponentSupport.makeCheckBox("Show masks", false, true, this);
 
 		JPanel subPanel1 = new JPanel();
 		subPanel1.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -91,8 +87,8 @@ public class NoisePanel extends JPanel implements ActionListener, ItemListener {
 	/**
 	 * Convenience method to see if we hide noise.
 	 * 
-	 * @return <code>true</code> if we are to hide noise. This is only relevant
-	 *         if we are using the noise analysis.
+	 * @return <code>true</code> if we are to hide noise. This is only relevant if
+	 *         we are using the noise analysis.
 	 */
 	public boolean hideNoise() {
 		return showSNRAnalysis() && _hideNoise.isSelected();

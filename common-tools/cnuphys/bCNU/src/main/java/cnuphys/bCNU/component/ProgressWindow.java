@@ -27,8 +27,7 @@ public class ProgressWindow extends JWindow {
 	// the progress bar
 	private JProgressBar _progressBar;
 
-	public ProgressWindow(String defaultHeader, String defaultFooter, int min,
-			int max) {
+	public ProgressWindow(String defaultHeader, String defaultFooter, int min, int max) {
 		setBackground(X11Colors.getX11Color("Alice Blue"));
 		setup(defaultHeader, defaultFooter, min, max);
 		pack();
@@ -37,13 +36,11 @@ public class ProgressWindow extends JWindow {
 	@Override
 	public Insets getInsets() {
 		Insets def = super.getInsets();
-		return new Insets(def.top + 2, def.left + 2, def.bottom + 2,
-				def.right + 2);
+		return new Insets(def.top + 2, def.left + 2, def.bottom + 2, def.right + 2);
 	}
 
 	// set up the components
-	private void setup(String defaultHeader, String defaultFooter, int min,
-			int max) {
+	private void setup(String defaultHeader, String defaultFooter, int min, int max) {
 		setLayout(new BorderLayout(2, 4));
 
 		JPanel panel = new JPanel();
@@ -84,21 +81,18 @@ public class ProgressWindow extends JWindow {
 	/**
 	 * Set the progress indicator to show/cancel indeterminate task mode
 	 * 
-	 * @param modeOn
-	 *            rurns indeterminant mode on or off.
+	 * @param modeOn rurns indeterminant mode on or off.
 	 */
 	public void setIndeterminant(boolean modeOn) {
 		_progressBar.setIndeterminate(modeOn);
 	}
 
 	/**
-	 * Set the min and max on the underlying progress bar. If max < min the
-	 * progress bar is set to indeterminant.
+	 * Set the min and max on the underlying progress bar. If max < min the progress
+	 * bar is set to indeterminant.
 	 * 
-	 * @param min
-	 *            the min of the progress bar
-	 * @param max
-	 *            the max of the progress bar
+	 * @param min the min of the progress bar
+	 * @param max the max of the progress bar
 	 */
 	public void setMinMax(int min, int max) {
 		if (max < min) {
@@ -114,8 +108,7 @@ public class ProgressWindow extends JWindow {
 	/**
 	 * Set the value of the underlying progress bar
 	 * 
-	 * @param value
-	 *            the value of the underlying progress bar
+	 * @param value the value of the underlying progress bar
 	 */
 	public void setValue(int value) {
 		_progressBar.setValue(value);
@@ -131,8 +124,7 @@ public class ProgressWindow extends JWindow {
 	/**
 	 * Set the message displayed abover the progress bar
 	 * 
-	 * @param text
-	 *            the header message to display
+	 * @param text the header message to display
 	 */
 	public void setHeader(String text) {
 		_header.setText(text == null ? "" : text);
@@ -141,8 +133,7 @@ public class ProgressWindow extends JWindow {
 	/**
 	 * Set the message displayed below the progress bar
 	 * 
-	 * @param text
-	 *            the footer message to display
+	 * @param text the footer message to display
 	 */
 	public void setFooter(String text) {
 		_footer.setText(text == null ? "" : text);

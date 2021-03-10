@@ -16,8 +16,7 @@ public class ZoomInButton extends ToolBarButton {
 	/**
 	 * Create the zoom-in button, which zooms in by a fixed amount.
 	 * 
-	 * @param container
-	 *            the container this button acts upon.
+	 * @param container the container this button acts upon.
 	 */
 	public ZoomInButton(IContainer container) {
 		super(container, "images/zoom_in.gif", "Zoom in");
@@ -26,8 +25,7 @@ public class ZoomInButton extends ToolBarButton {
 	/**
 	 * This is what I do if I am pressed
 	 * 
-	 * @param e
-	 *            The causal event.
+	 * @param e The causal event.
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {

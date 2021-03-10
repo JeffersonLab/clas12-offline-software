@@ -19,8 +19,7 @@ public class TrackerQueue extends Vector<Runnable> {
 	/**
 	 * Place a new Runnable job in the work queue.
 	 * 
-	 * @param r
-	 *            the <code>Runnable</code> job.
+	 * @param r the <code>Runnable</code> job.
 	 */
 	public synchronized void put(Runnable r) {
 		if (r != null) {
@@ -35,8 +34,7 @@ public class TrackerQueue extends Vector<Runnable> {
 	 * Place a new Runnable job in the work queue, removing anyone else already
 	 * there.
 	 * 
-	 * @param r
-	 *            the <code>Runnable</code> job.
+	 * @param r the <code>Runnable</code> job.
 	 */
 	public synchronized void supercede(Runnable r) {
 

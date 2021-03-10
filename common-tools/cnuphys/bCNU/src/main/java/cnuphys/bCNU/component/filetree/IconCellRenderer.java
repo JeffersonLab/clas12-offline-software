@@ -34,15 +34,13 @@ public class IconCellRenderer extends JLabel implements TreeCellRenderer {
 		m_textNonSelectionColor = UIManager.getColor("Tree.textForeground");
 		m_bkSelectionColor = UIManager.getColor("Tree.selectionBackground");
 		m_bkNonSelectionColor = UIManager.getColor("Tree.textBackground");
-		m_borderSelectionColor = UIManager
-				.getColor("Tree.selectionBorderColor");
+		m_borderSelectionColor = UIManager.getColor("Tree.selectionBorderColor");
 		setOpaque(false);
 	}
 
 	@Override
-	public Component getTreeCellRendererComponent(JTree tree, Object value,
-			boolean sel, boolean expanded, boolean leaf, int row,
-			boolean hasFocus) {
+	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf,
+			int row, boolean hasFocus) {
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
 		Object obj = node.getUserObject();
 		setText(obj.toString());

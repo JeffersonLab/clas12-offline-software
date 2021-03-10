@@ -22,8 +22,7 @@ public interface IVisible {
 	/**
 	 * Set whether the object is visible.
 	 * 
-	 * @param visible
-	 *            the value of the visibility flag.
+	 * @param visible the value of the visibility flag.
 	 */
 	public void setVisible(boolean visible);
 
@@ -37,8 +36,7 @@ public interface IVisible {
 	/**
 	 * Set whether the object is enabled.
 	 * 
-	 * @param enabled
-	 *            the value of the enabled flag.
+	 * @param enabled the value of the enabled flag.
 	 */
 	public void setEnabled(boolean enabled);
 

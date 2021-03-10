@@ -39,25 +39,19 @@ public class ColorLabel extends JComponent {
 	/**
 	 * Create a clickable color label.
 	 * 
-	 * @param colorChangeListener
-	 *            the listener for color changes.
-	 * @param intitialColor
-	 *            the intial color.
-	 * @param prompt
-	 *            the prompt string.
+	 * @param colorChangeListener the listener for color changes.
+	 * @param intitialColor       the intial color.
+	 * @param prompt              the prompt string.
 	 */
-	public ColorLabel(IColorChangeListener colorChangeListener,
-			Color intitialColor, String prompt) {
+	public ColorLabel(IColorChangeListener colorChangeListener, Color intitialColor, String prompt) {
 		this(colorChangeListener, intitialColor, prompt, -1);
 	}
 
 	/**
 	 * Create an inert color label.
 	 * 
-	 * @param color
-	 *            the color.
-	 * @param prompt
-	 *            the prompt string.
+	 * @param color  the color.
+	 * @param prompt the prompt string.
 	 */
 	public ColorLabel(Color color, Font font, String prompt) {
 
@@ -73,17 +67,12 @@ public class ColorLabel extends JComponent {
 	/**
 	 * Create a clickable color label.
 	 * 
-	 * @param colorChangeListener
-	 *            the listener for color changes.
-	 * @param intitialColor
-	 *            the initial color.
-	 * @param prompt
-	 *            the prompt string.
-	 * @param desiredWidth
-	 *            if positive the desired total width.
+	 * @param colorChangeListener the listener for color changes.
+	 * @param intitialColor       the initial color.
+	 * @param prompt              the prompt string.
+	 * @param desiredWidth        if positive the desired total width.
 	 */
-	public ColorLabel(IColorChangeListener colorChangeListener,
-			Color intitialColor, String prompt, int desiredWidth) {
+	public ColorLabel(IColorChangeListener colorChangeListener, Color intitialColor, String prompt, int desiredWidth) {
 		_colorChangeListener = colorChangeListener;
 		_currentColor = intitialColor;
 		_prompt = prompt;
@@ -156,8 +145,7 @@ public class ColorLabel extends JComponent {
 	/**
 	 * Set the new color.
 	 * 
-	 * @param newColor
-	 *            the new color index.
+	 * @param newColor the new color index.
 	 */
 	public void setColor(Color newColor) {
 		setBackground(newColor);

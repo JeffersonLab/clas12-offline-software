@@ -12,7 +12,7 @@ import cnuphys.fastMCed.streaming.StreamProcessStatus;
 import cnuphys.fastMCed.streaming.StreamReason;
 
 public class SNRShiftTestConsumer extends PhysicsEventConsumer {
-	
+
 	private SNRManager snr = SNRManager.getInstance();
 
 	String _errStr = "???";
@@ -35,16 +35,17 @@ public class SNRShiftTestConsumer extends PhysicsEventConsumer {
 		for (int supl0 = 0; supl0 < 6; supl0++) {
 			if (hholder.sectorUniqueLayerCount(0) > 34) {
 				if (hholder.superLayerUniqueLayerCount(0, supl0) > 4) {
-					
+
 					boolean rightSeg = snr.segmentInSuperlayer(0, supl0, SNRManager.RIGHT);
 					if (!rightSeg) {
 						boolean leftSeg = snr.segmentInSuperlayer(0, supl0, SNRManager.LEFT);
 						if (!leftSeg) {
-							_errStr = "Did not find L or R leaning segments in superlayer " + (supl0 + 1) + " as expected";
+							_errStr = "Did not find L or R leaning segments in superlayer " + (supl0 + 1)
+									+ " as expected";
 							return StreamProcessStatus.FLAG;
 						}
 					}
-				} //superlayer has 4 unique layers with hits
+				} // superlayer has 4 unique layers with hits
 			}
 		}
 

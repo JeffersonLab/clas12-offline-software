@@ -102,12 +102,9 @@ public final class Rubberband {
 	/**
 	 * Create a Rubberband
 	 * 
-	 * @param container
-	 *            the parent component being rubberbanded
-	 * @param rubberbanded
-	 *            who gets notified when we are done.
-	 * @param policy
-	 *            the stretching shape policy.
+	 * @param container    the parent component being rubberbanded
+	 * @param rubberbanded who gets notified when we are done.
+	 * @param policy       the stretching shape policy.
 	 */
 	public Rubberband(IContainer container, IRubberbanded rubberbanded, Policy policy) {
 		this(container, rubberbanded, policy, false);
@@ -116,12 +113,9 @@ public final class Rubberband {
 	/**
 	 * Create a Rubberband
 	 * 
-	 * @param container
-	 *            the parent component being rubberbanded
-	 * @param rubberbanded
-	 *            who gets notified when we are done.
-	 * @param policy
-	 *            the stretching shape policy.
+	 * @param container    the parent component being rubberbanded
+	 * @param rubberbanded who gets notified when we are done.
+	 * @param policy       the stretching shape policy.
 	 */
 	public Rubberband(IContainer container, IRubberbanded rubberbanded, Policy policy, boolean xorMode) {
 		_container = container;
@@ -134,15 +128,15 @@ public final class Rubberband {
 	/**
 	 * This activates or deactivates the rubber banding.
 	 * 
-	 * @param b
-	 *            the value of the active flag.
+	 * @param b the value of the active flag.
 	 */
 	public void setActive(boolean b) {
 		_active = b;
 	}
-	
+
 	/**
 	 * Set the rubberbanding policy
+	 * 
 	 * @param policy the new policy
 	 */
 	public void setPolicy(Policy policy) {
@@ -152,8 +146,7 @@ public final class Rubberband {
 	/**
 	 * Sets the component being controlled by this rubber band
 	 * 
-	 * @param component
-	 *            the component being rubberbanded.
+	 * @param component the component being rubberbanded.
 	 */
 	private void setComponent(Component component) {
 		_component = component;
@@ -249,12 +242,9 @@ public final class Rubberband {
 	/**
 	 * A hack that prevents the same point from being added consecutively.
 	 * 
-	 * @param p
-	 *            the polygon in question.
-	 * @param x
-	 *            the x coordinate.
-	 * @param y
-	 *            the y coordinate.
+	 * @param p the polygon in question.
+	 * @param x the x coordinate.
+	 * @param y the y coordinate.
 	 */
 	private void addPoint(Polygon p, int x, int y) {
 		int n = p.npoints;
@@ -306,11 +296,10 @@ public final class Rubberband {
 	}
 
 	/**
-	 * Draw the rubber band outline. Erasing is not necessary because we are
-	 * saving a background image.
+	 * Draw the rubber band outline. Erasing is not necessary because we are saving
+	 * a background image.
 	 * 
-	 * @param g
-	 *            the graphics context.
+	 * @param g the graphics context.
 	 */
 
 	private void draw(Graphics2D g) {
@@ -422,8 +411,7 @@ public final class Rubberband {
 	 * Here the current or stretched point can be modified to affect some
 	 * policy--such as preserve the aspect ratio. The default is to do nothing.
 	 * 
-	 * @param cp
-	 *            the new current point.
+	 * @param cp the new current point.
 	 */
 	private void modifyCurrentPoint(Point cp) {
 		Rectangle b = getComponent().getBounds();
@@ -470,8 +458,7 @@ public final class Rubberband {
 	 * Set the starting point to the given point. Essentially reset the
 	 * rubberbanding.
 	 * 
-	 * @param anchorPt
-	 *            the new starting screen point.
+	 * @param anchorPt the new starting screen point.
 	 */
 
 	public void startRubberbanding(Point anchorPt) {
@@ -509,8 +496,7 @@ public final class Rubberband {
 	/**
 	 * Set the current point to the given point.
 	 * 
-	 * @param newCurrentPoint
-	 *            the new current point.
+	 * @param newCurrentPoint the new current point.
 	 */
 	private void setCurrent(Point newCurrentPoint) {
 
@@ -559,8 +545,7 @@ public final class Rubberband {
 	/**
 	 * Set the end point.
 	 * 
-	 * @param p
-	 *            the end point.
+	 * @param p the end point.
 	 */
 	public void endRubberbanding(Point p) {
 
@@ -671,8 +656,7 @@ public final class Rubberband {
 	/**
 	 * Set the fill color for this rubber band.
 	 * 
-	 * @param color
-	 *            the new fill color.
+	 * @param color the new fill color.
 	 */
 	public void setFillColor(Color color) {
 		_fillColor = color;
@@ -681,8 +665,7 @@ public final class Rubberband {
 	/**
 	 * Set one of the highlight colors used to stipple draw the boundary.
 	 * 
-	 * @param highlightColor1
-	 *            the value for the highlight color.
+	 * @param highlightColor1 the value for the highlight color.
 	 */
 	public void setHighlightColor1(Color highlightColor1) {
 		_highlightColor1 = highlightColor1;
@@ -691,8 +674,7 @@ public final class Rubberband {
 	/**
 	 * Set the other highlight color used to stipple draw the boundary.
 	 * 
-	 * @param highlightColor2
-	 *            the value for the other highlight color.
+	 * @param highlightColor2 the value for the other highlight color.
 	 */
 	public void setHighlightColor2(Color highlightColor2) {
 		_highlightColor2 = highlightColor2;

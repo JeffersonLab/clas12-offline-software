@@ -40,8 +40,8 @@ public class PrePostList extends Vector {
 	}
 
 	/**
-	 * Translate a string s. (1) Trim spaces off. (2) Break s into words. (3)
-	 * For each word, substitute matching src word with dest.
+	 * Translate a string s. (1) Trim spaces off. (2) Break s into words. (3) For
+	 * each word, substitute matching src word with dest.
 	 */
 	public String translate(String s) {
 		String lines[] = new String[2];

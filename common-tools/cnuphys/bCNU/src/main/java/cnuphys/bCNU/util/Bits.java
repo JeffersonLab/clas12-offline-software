@@ -5,10 +5,8 @@ public class Bits {
 	/**
 	 * See if the control bit is set in the bits variable.
 	 * 
-	 * @param bits
-	 *            the int that holds the bits.
-	 * @param b
-	 *            the bit to check.
+	 * @param bits the int that holds the bits.
+	 * @param b    the bit to check.
 	 * @return <code>true</code> if the bit is set.
 	 */
 	public static boolean checkBit(int bits, int b) {
@@ -18,39 +16,32 @@ public class Bits {
 	/**
 	 * Sets the given control bit.
 	 * 
-	 * @param bits
-	 *            the int that holds the bits.
-	 * @param b
-	 *            the bit to set.
+	 * @param bits the int that holds the bits.
+	 * @param b    the bit to set.
 	 * @return the modified bits.
 	 */
 	public static int setBit(int bits, int b) {
 		bits |= b;
 		return bits;
 	}
-	
 
 	/**
 	 * Clear the given control bit.
 	 * 
-	 * @param bits
-	 *            the int that holds the bits.
-	 * @param b
-	 *            the bit to clear.
+	 * @param bits the int that holds the bits.
+	 * @param b    the bit to clear.
 	 * @return the modified bits.
 	 */
 	public static int clearBit(int bits, int b) {
 		bits &= (~b);
 		return bits;
 	}
-	
+
 	/**
 	 * Clear the given control bit.
 	 * 
-	 * @param bits
-	 *            the lonh that holds the bits.
-	 * @param b
-	 *            the bit to clear.
+	 * @param bits the lonh that holds the bits.
+	 * @param b    the bit to clear.
 	 * @return the modified bits.
 	 */
 	public static long clearBit(long bits, int b) {
@@ -58,14 +49,11 @@ public class Bits {
 		return bits;
 	}
 
-
 	/**
 	 * Toggle the given control bit.
 	 * 
-	 * @param bits
-	 *            the int that holds the bits.
-	 * @param b
-	 *            the bit to toggle.
+	 * @param bits the int that holds the bits.
+	 * @param b    the bit to toggle.
 	 * @return The modified bits.
 	 */
 	public static int toggleBit(int bits, int b) {
@@ -93,8 +81,7 @@ public class Bits {
 	/**
 	 * Count the bits turned on in a word.
 	 * 
-	 * @param x
-	 *            the word to count.
+	 * @param x the word to count.
 	 * @return the number of "on" bits in the word.
 	 */
 	public static int countBits(int x) {
@@ -107,14 +94,12 @@ public class Bits {
 		}
 		return b;
 	}
-	
+
 	/**
 	 * See if the control bit is set in the bits variable.
 	 * 
-	 * @param bits
-	 *            the long that holds the bits.
-	 * @param b
-	 *            the bit to check.
+	 * @param bits the long that holds the bits.
+	 * @param b    the bit to check.
 	 * @return <code>true</code> if the bit is set.
 	 */
 	public static boolean checkBit(long bits, long b) {
@@ -124,10 +109,8 @@ public class Bits {
 	/**
 	 * Sets the given control bit.
 	 * 
-	 * @param bits
-	 *            the long that holds the bits.
-	 * @param bitIndex
-	 *            the bit index [0..63] to set.
+	 * @param bits     the long that holds the bits.
+	 * @param bitIndex the bit index [0..63] to set.
 	 * @return the modified bits.
 	 */
 	public static long setBitAtLocation(long bits, long bitIndex) {
@@ -135,27 +118,22 @@ public class Bits {
 		return bits;
 	}
 
-
 	/**
 	 * Checks the given control bit.
 	 * 
-	 * @param bits
-	 *            the long that holds the bits.
-	 * @param bitIndex
-	 *            the bit index [0..63] to set.
+	 * @param bits     the long that holds the bits.
+	 * @param bitIndex the bit index [0..63] to set.
 	 * @return <code>true</code> if the given bit is set
 	 */
 	public static boolean checkBitAtLocation(long bits, int bitIndex) {
-		long bit  = (1L << bitIndex);
+		long bit = (1L << bitIndex);
 		return checkBit(bits, bit);
 	}
-
 
 	/**
 	 * Count the bits turned on in a word.
 	 * 
-	 * @param x
-	 *            the word to count.
+	 * @param x the word to count.
 	 * @return the number of "on" bits in the word.
 	 */
 	public static int countBits(long x) {

@@ -5,26 +5,26 @@ import com.jogamp.opengl.GLProfile;
 
 public class BasicManager3D {
 
-	//the singleton
+	// the singleton
 	private static BasicManager3D _instance;
-	
-	//the profile
+
+	// the profile
 	private final GLProfile _glProfile;
-	
-	//the capabilities
+
+	// the capabilities
 	private GLCapabilities _glCapabilities;
-	
-	
-	//private constructor for the singleton
+
+	// private constructor for the singleton
 	private BasicManager3D() {
-		
-		System.err.println("Default profile: " +  GLProfile.getDefault());
+
+		System.err.println("Default profile: " + GLProfile.getDefault());
 		_glProfile = GLProfile.getDefault();
 		_glCapabilities = new GLCapabilities(_glProfile);
 	}
-	
+
 	/**
 	 * Public access to the singleton
+	 * 
 	 * @return the singleton
 	 */
 	public static BasicManager3D getInstance() {
@@ -34,10 +34,3 @@ public class BasicManager3D {
 		return _instance;
 	}
 }
-
-
-
-
-
-
-

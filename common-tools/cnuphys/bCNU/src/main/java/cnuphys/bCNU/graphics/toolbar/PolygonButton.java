@@ -20,8 +20,7 @@ public class PolygonButton extends ToolBarToggleButton implements IRubberbanded 
 	/**
 	 * Create a button for creating a polygon.
 	 * 
-	 * @param container
-	 *            the owner container.
+	 * @param container the owner container.
 	 */
 	public PolygonButton(IContainer container) {
 		super(container, "images/polygon.gif", "Create a polygon");
@@ -30,14 +29,12 @@ public class PolygonButton extends ToolBarToggleButton implements IRubberbanded 
 	/**
 	 * The mouse has been pressed, start rubber banding.
 	 * 
-	 * @param mouseEvent
-	 *            the causal mouse event.
+	 * @param mouseEvent the causal mouse event.
 	 */
 	@Override
 	public void mousePressed(MouseEvent mouseEvent) {
 		if (rubberband == null) {
-			rubberband = new Rubberband(container, this,
-					Rubberband.Policy.POLYGON);
+			rubberband = new Rubberband(container, this, Rubberband.Policy.POLYGON);
 			rubberband.setActive(true);
 			rubberband.startRubberbanding(mouseEvent.getPoint());
 		}
@@ -54,8 +51,7 @@ public class PolygonButton extends ToolBarToggleButton implements IRubberbanded 
 		if ((pp == null) || (pp.length < 2)) {
 			return;
 		}
-		AItem item = container.createPolygonItem(
-				container.getAnnotationLayer(), pp);
+		AItem item = container.createPolygonItem(container.getAnnotationLayer(), pp);
 		if (item != null) {
 			item.setRightClickable(true);
 			item.setDraggable(true);

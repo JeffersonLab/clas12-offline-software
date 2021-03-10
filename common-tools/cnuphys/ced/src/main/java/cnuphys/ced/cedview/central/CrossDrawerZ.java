@@ -20,7 +20,7 @@ import cnuphys.ced.event.data.CrossList2;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.BSTCrosses;
 
-public class CrossDrawerZ extends CentralZViewDrawer  {
+public class CrossDrawerZ extends CentralZViewDrawer {
 
 	private static final int ARROWLEN = 30; // pixels
 	private static final Stroke THICKLINE = new BasicStroke(1.5f);
@@ -31,12 +31,13 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 
 	// cached rectangles for feedback
 	private Rectangle _svtFBRects[];
-	
+
 	// cached rectangles for feedback
 	private Rectangle _bmtFBRects[];
 
 	/**
 	 * A BST Cross drawer
+	 * 
 	 * @param view the owner vie
 	 */
 	public CrossDrawerZ(CentralZView view) {
@@ -48,7 +49,7 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
-		
+
 		if (!_view.isSingleEventMode()) {
 			return;
 		}
@@ -67,22 +68,22 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 
 	/**
 	 * Draw the reconstructed crosses on the BST Z view
-	 * @param g the graphics context
+	 * 
+	 * @param g         the graphics context
 	 * @param container the drawing container
 	 */
 	public void drawBSTCrosses(Graphics g, IContainer container) {
-		
+
 		CrossList2 crosses = BSTCrosses.getInstance().getCrosses();
-		
+
 		int len = (crosses == null) ? 0 : crosses.size();
-		
+
 		if (len == 0) {
 			_svtFBRects = null;
 		} else {
 			_svtFBRects = new Rectangle[len];
 		}
 
-		
 		if (len > 0) {
 			Point2D.Double wp = new Point2D.Double();
 			Point pp = new Point();
@@ -90,38 +91,37 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 			Point pp2 = new Point();
 			Point2D.Double wp3 = new Point2D.Double();
 			Point2D.Double wp4 = new Point2D.Double();
-			
+
 			// error bars
 			for (int i = 0; i < len; i++) {
 				Cross2 cross = crosses.elementAt(i);
 				// System.err.println("Draw Z error bars");
-				
-				//convert to mm
-				_view.labToWorld(10*cross.x, 10*cross.y, 10*cross.z, wp);
-				wp3.setLocation(wp.x - 10*cross.err_z, wp.y);
-				wp4.setLocation(wp.x + 10*cross.err_z, wp.y);
+
+				// convert to mm
+				_view.labToWorld(10 * cross.x, 10 * cross.y, 10 * cross.z, wp);
+				wp3.setLocation(wp.x - 10 * cross.err_z, wp.y);
+				wp4.setLocation(wp.x + 10 * cross.err_z, wp.y);
 				container.worldToLocal(pp, wp3);
 				container.worldToLocal(pp2, wp4);
 				g.setColor(ERROR);
-				g.fillRect(pp.x, pp.y - DataDrawSupport.CROSSHALF, pp2.x - pp.x,
-						2 * DataDrawSupport.CROSSHALF);
+				g.fillRect(pp.x, pp.y - DataDrawSupport.CROSSHALF, pp2.x - pp.x, 2 * DataDrawSupport.CROSSHALF);
 			}
 
 			for (int i = 0; i < len; i++) {
 				Cross2 cross = crosses.elementAt(i);
 
 				if (!cross.isFullLocationBad()) {
-					//convert to mm
-				_view.labToWorld(10*cross.x, 10*cross.y, 10*cross.z, wp);
+					// convert to mm
+					_view.labToWorld(10 * cross.x, 10 * cross.y, 10 * cross.z, wp);
 
 					// arrows
 
 					int pixlen = ARROWLEN;
 					double r = pixlen / WorldGraphicsUtilities.getMeanPixelDensity(container);
 
-					double xa = 10*cross.x + r * cross.ux;
-					double ya = 10*cross.y + r * cross.uy;
-					double za = 10*cross.z + r * cross.uz;
+					double xa = 10 * cross.x + r * cross.ux;
+					double ya = 10 * cross.y + r * cross.uy;
+					double za = 10 * cross.z + r * cross.uz;
 					_view.labToWorld(xa, ya, za, wp2);
 
 					container.worldToLocal(pp, wp);
@@ -145,22 +145,21 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 				}
 
 			}
-		} //len > 0
+		} // len > 0
 	}
-	
+
 	public void drawBMTCrosses(Graphics g, IContainer container) {
-		
+
 		CrossList2 crosses = BMTCrosses.getInstance().getCrosses();
-		
+
 		int len = (crosses == null) ? 0 : crosses.size();
-		
+
 		if (len == 0) {
 			_bmtFBRects = null;
 		} else {
 			_bmtFBRects = new Rectangle[len];
 		}
 
-		
 		if (len > 0) {
 			Point2D.Double wp = new Point2D.Double();
 			Point pp = new Point();
@@ -168,20 +167,19 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 			Point pp2 = new Point();
 			Point2D.Double wp3 = new Point2D.Double();
 			Point2D.Double wp4 = new Point2D.Double();
-			
+
 			// error bars
 			for (int i = 0; i < len; i++) {
 				Cross2 cross = crosses.elementAt(i);
 				if (!cross.isFullLocationBad() && !Float.isNaN(cross.err_z)) {
-					//convert to mm
-				_view.labToWorld(10*cross.x, 10*cross.y, 10*cross.z, wp);
-				wp3.setLocation(wp.x - 10*cross.err_z, wp.y);
-				wp4.setLocation(wp.x + 10*cross.err_z, wp.y);
-				container.worldToLocal(pp, wp3);
-				container.worldToLocal(pp2, wp4);
-				g.setColor(ERROR);
-				g.fillRect(pp.x, pp.y - DataDrawSupport.CROSSHALF, pp2.x - pp.x,
-						2 * DataDrawSupport.CROSSHALF);
+					// convert to mm
+					_view.labToWorld(10 * cross.x, 10 * cross.y, 10 * cross.z, wp);
+					wp3.setLocation(wp.x - 10 * cross.err_z, wp.y);
+					wp4.setLocation(wp.x + 10 * cross.err_z, wp.y);
+					container.worldToLocal(pp, wp3);
+					container.worldToLocal(pp2, wp4);
+					g.setColor(ERROR);
+					g.fillRect(pp.x, pp.y - DataDrawSupport.CROSSHALF, pp2.x - pp.x, 2 * DataDrawSupport.CROSSHALF);
 				}
 			}
 
@@ -189,17 +187,17 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 				Cross2 cross = crosses.elementAt(i);
 
 				if (!cross.isFullLocationBad()) {
-					//convert to mm
-					_view.labToWorld(10*cross.x, 10*cross.y, 10*cross.z, wp);
+					// convert to mm
+					_view.labToWorld(10 * cross.x, 10 * cross.y, 10 * cross.z, wp);
 
 					// arrows
 					if (!cross.isDirectionBad()) {
 						int pixlen = ARROWLEN;
 						double r = pixlen / WorldGraphicsUtilities.getMeanPixelDensity(container);
 
-						double xa = 10*cross.x + r * cross.ux;
-						double ya = 10*cross.y + r * cross.uy;
-						double za = 10*cross.z + r * cross.uz;
+						double xa = 10 * cross.x + r * cross.ux;
+						double ya = 10 * cross.y + r * cross.uy;
+						double za = 10 * cross.z + r * cross.uz;
 						_view.labToWorld(xa, ya, za, wp2);
 
 						container.worldToLocal(pp, wp);
@@ -218,37 +216,31 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 					// fbrects for quick feedback
 					_bmtFBRects[i] = new Rectangle(pp.x - DataDrawSupport.CROSSHALF, pp.y - DataDrawSupport.CROSSHALF,
 							2 * DataDrawSupport.CROSSHALF, 2 * DataDrawSupport.CROSSHALF);
-				}  // not NaN
+				} // not NaN
 				else {
-					_bmtFBRects[i] = new Rectangle(0,0,0,0);
+					_bmtFBRects[i] = new Rectangle(0, 0, 0, 0);
 				}
 			}
-		} //len > 0
+		} // len > 0
 	}
-	
-	
+
 	/**
 	 * Use what was drawn to generate feedback strings
 	 * 
-	 * @param container
-	 *            the drawing container
-	 * @param screenPoint
-	 *            the mouse location
-	 * @param worldPoint
-	 *            the corresponding world location
-	 * @param feedbackStrings
-	 *            add strings to this collection
+	 * @param container       the drawing container
+	 * @param screenPoint     the mouse location
+	 * @param worldPoint      the corresponding world location
+	 * @param feedbackStrings add strings to this collection
 	 */
 	@Override
-	public void feedback(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
+	public void feedback(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings) {
 
 		// svt crosses?
 		CrossList2 crosses = BSTCrosses.getInstance().getCrosses();
 		int len = (crosses == null) ? 0 : crosses.size();
 
-
-		if ((len > 0)  && (_svtFBRects != null) && (_svtFBRects.length == len)) {
+		if ((len > 0) && (_svtFBRects != null) && (_svtFBRects.length == len)) {
 			for (int i = 0; i < len; i++) {
 				if ((_svtFBRects[i] != null) && _svtFBRects[i].contains(screenPoint)) {
 
@@ -257,13 +249,14 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 							FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
 
 					if (!cross.isFullLocationBad()) {
-						feedbackStrings.add(vecStr("cross loc (lab)", 10*cross.x, 10*cross.y, 10*cross.z));
+						feedbackStrings.add(vecStr("cross loc (lab)", 10 * cross.x, 10 * cross.y, 10 * cross.z));
 					} else {
 						feedbackStrings.add("cross location contains NaN");
 					}
 
 					if (!cross.isErrorBad()) {
-						feedbackStrings.add(vecStr("cross error", 10*cross.err_x, 10*cross.err_y, 10*cross.err_z));
+						feedbackStrings
+								.add(vecStr("cross error", 10 * cross.err_x, 10 * cross.err_y, 10 * cross.err_z));
 					} else {
 						feedbackStrings.add("cross error contains NaN");
 					}
@@ -292,13 +285,14 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 							FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
 
 					if (!cross.isFullLocationBad()) {
-						feedbackStrings.add(vecStr("cross loc (lab)", 10*cross.x, 10*cross.y, 10*cross.z));
+						feedbackStrings.add(vecStr("cross loc (lab)", 10 * cross.x, 10 * cross.y, 10 * cross.z));
 					} else {
 						feedbackStrings.add("cross location contains NaN");
 					}
 
 					if (!cross.isErrorBad()) {
-						feedbackStrings.add(vecStr("cross error", 10*cross.err_x, 10*cross.err_y, 10*cross.err_z));
+						feedbackStrings
+								.add(vecStr("cross error", 10 * cross.err_x, 10 * cross.err_y, 10 * cross.err_z));
 					} else {
 						feedbackStrings.add("cross error contains NaN");
 					}
@@ -318,9 +312,8 @@ public class CrossDrawerZ extends CentralZViewDrawer  {
 
 	// for writing out a vector
 	private String vecStr(String prompt, double vx, double vy, double vz) {
-		return FBCOL + prompt + ": (" + DoubleFormat.doubleFormat(vx, 2) + ", "
-				+ DoubleFormat.doubleFormat(vy, 2) + ", "
-				+ DoubleFormat.doubleFormat(vz, 2) + ")";
+		return FBCOL + prompt + ": (" + DoubleFormat.doubleFormat(vx, 2) + ", " + DoubleFormat.doubleFormat(vy, 2)
+				+ ", " + DoubleFormat.doubleFormat(vz, 2) + ")";
 	}
 
 }

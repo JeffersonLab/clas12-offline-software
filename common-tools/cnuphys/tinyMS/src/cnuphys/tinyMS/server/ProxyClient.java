@@ -27,32 +27,31 @@ import cnuphys.tinyMS.message.Messenger;
 import cnuphys.tinyMS.table.ConnectionTable;
 
 public class ProxyClient extends Messenger {
-	
-	//log
+
+	// log
 	private Log _log = Log.getInstance();
-	
+
 	/** Remote client's descriptive name, e.g. "ced" */
 	private String _clientName = "???";
-	
+
 	/** Remote client's user name, e.g. "heddle" */
 	private String _userName = "???";
 
 	/** Remote client's operating system */
 	private String _osName = "???";
-	
+
 	/** Remote client's host name" */
 	private String _hostName = "???";
 
-    /** number of messages arriving at server */
+	/** number of messages arriving at server */
 	private long _messageCount = 0;
-	
+
 	/** the remote client's local port on the client machine */
 	private int _localPort;
-	
+
 	/** list of topics the client is subscribed to */
 	private Vector<String> _subscriptions = new Vector<String>();
 
-		
 	// time in seconds that a client has to get itself verified
 	private static final int VERIFY_SECONDS = 30;
 
@@ -95,8 +94,8 @@ public class ProxyClient extends Messenger {
 
 	// the system time of the last ping from this client
 	private long _lastPing = -1;
-	
-	//the round trip time of the last ping
+
+	// the round trip time of the last ping
 	private long _duration = -1;
 
 	// to avoid multiple closings
@@ -141,8 +140,7 @@ public class ProxyClient extends Messenger {
 					_log.warning("Closing unverified client [" + _id + "]");
 					try {
 						close();
-					}
-					catch (IOException e) {
+					} catch (IOException e) {
 						e.printStackTrace();
 					}
 				} // end not verified
@@ -195,10 +193,11 @@ public class ProxyClient extends Messenger {
 			table.fireTableDataChanged();
 		}
 	}
-	
+
 	/**
-	 * Get a string representation of the time since the last ping 
-	 * @return a string representation of the the last ping 
+	 * Get a string representation of the time since the last ping
+	 * 
+	 * @return a string representation of the the last ping
 	 */
 	public String getTimeSinceLastPing() {
 		if (_lastPing < 0) {
@@ -207,29 +206,33 @@ public class ProxyClient extends Messenger {
 		double lapse = (System.nanoTime() - _lastPing) / 1.0e9;
 		return String.format("%5.1f s", lapse);
 	}
-	
+
 	/**
-	 * Get a string representation of the the last ping 
-	 * @return a string representation of the the last ping 
+	 * Get a string representation of the the last ping
+	 * 
+	 * @return a string representation of the the last ping
 	 */
 	public String getLastPing() {
 		return DateString.dateStringSS(_lastPing);
 	}
-	
+
 	/**
 	 * Get a minimal string representation of the duration of the last ping.
+	 * 
 	 * @return a small string representation of the duration of the last ping.
 	 */
 	public String getLastPingDurationSmall() {
-		return String.format("%6.2f ms", _duration/1.0e6);
+		return String.format("%6.2f ms", _duration / 1.0e6);
 	}
-	
+
 	/**
 	 * Get a string representation of the duration of the last ping.
+	 * 
 	 * @return a string representation of the duration of the last ping.
 	 */
 	public String getLastPingDuration() {
-		return String.format("[id: " + getId() + "]  [cnt: " + getMessageCount() + "] " + getClientName() + " server round trip ping: %7.3f ms", _duration / 1.0e6);
+		return String.format("[id: " + getId() + "]  [cnt: " + getMessageCount() + "] " + getClientName()
+				+ " server round trip ping: %7.3f ms", _duration / 1.0e6);
 	}
 
 	/**
@@ -244,8 +247,8 @@ public class ProxyClient extends Messenger {
 	}
 
 	/**
-	 * Get the port used by the remote client. This will of course be different
-	 * from the server's port.
+	 * Get the port used by the remote client. This will of course be different from
+	 * the server's port.
 	 * 
 	 * @return the port used by the remote client.
 	 */
@@ -261,7 +264,6 @@ public class ProxyClient extends Messenger {
 	public InetAddress getInetAddress() {
 		return _socket.getInetAddress();
 	}
-
 
 	/**
 	 * Get the "closed" state of the remote client.
@@ -292,13 +294,11 @@ public class ProxyClient extends Messenger {
 			if (_outboundQueue.isEmpty()) {
 				System.out.println("Outbound queue for proxy is empty");
 				break;
-			}
-			else {
+			} else {
 				System.out.println("Outbound queue for proxy not empty");
 				try {
 					Thread.sleep(1000);
-				}
-				catch (InterruptedException e) {
+				} catch (InterruptedException e) {
 				}
 			}
 		}
@@ -306,7 +306,7 @@ public class ProxyClient extends Messenger {
 		_server.removeProxyClient(this);
 		_reader.stopReader();
 		_writer.stopWriter();
-		
+
 		System.out.println("** CLOSING PROXYCLIENT STREAMS");
 		_inputStream.close();
 		_outputStream.close();
@@ -314,12 +314,12 @@ public class ProxyClient extends Messenger {
 	}
 
 	/**
-	 * Shuts down the proxy client and notifies the remote (real) client. This
-	 * is done when the server is shutting down, or if for some reason the
-	 * server wants to manually remove a client.
+	 * Shuts down the proxy client and notifies the remote (real) client. This is
+	 * done when the server is shutting down, or if for some reason the server wants
+	 * to manually remove a client.
 	 */
 	public void shutdown() {
-		
+
 		_log.config("Server sending a shudown to: " + getClientName());
 
 		// send a shutdown
@@ -328,8 +328,7 @@ public class ProxyClient extends Messenger {
 
 		try {
 			close();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -360,8 +359,7 @@ public class ProxyClient extends Messenger {
 	/**
 	 * Set the message server
 	 * 
-	 * @param server
-	 *            the new message server
+	 * @param server the new message server
 	 */
 	public void setServer(TinyMessageServer server) {
 		_server = server;
@@ -377,8 +375,8 @@ public class ProxyClient extends Messenger {
 	}
 
 	/**
-	 * Get the data input stream. Messages will be read from this stream and
-	 * placed on the server's inbound queue, which is shared by all clients.
+	 * Get the data input stream. Messages will be read from this stream and placed
+	 * on the server's inbound queue, which is shared by all clients.
 	 * 
 	 * @return the data input stream
 	 */
@@ -388,8 +386,8 @@ public class ProxyClient extends Messenger {
 	}
 
 	/**
-	 * Get the data output stream. Messages will be removed from the outbound
-	 * queue and sent on this stream.
+	 * Get the data output stream. Messages will be removed from the outbound queue
+	 * and sent on this stream.
 	 * 
 	 * @return the data output stream
 	 */
@@ -402,8 +400,8 @@ public class ProxyClient extends Messenger {
 	 * A ReaderThread will be putting messages in this queue. It is owned by the
 	 * server, and shared by all remote clients.
 	 * 
-	 * @return the queue where we place inbound messages for the server to grab
-	 *         and process.
+	 * @return the queue where we place inbound messages for the server to grab and
+	 *         process.
 	 */
 	@Override
 	public MessageQueue getInboundQueue() {
@@ -412,13 +410,11 @@ public class ProxyClient extends Messenger {
 
 	/**
 	 * Get the queue where we place outbound messages. A WriterThread will be
-	 * grabbing the messages and sending them to their destination (to the
-	 * client on the other end). The server will be the object that puts message
-	 * on this queue when it has one that needs to be sent to the connected
-	 * client.
+	 * grabbing the messages and sending them to their destination (to the client on
+	 * the other end). The server will be the object that puts message on this queue
+	 * when it has one that needs to be sent to the connected client.
 	 * 
-	 * @return the queue where we place outbound messages ready for
-	 *         transmission.
+	 * @return the queue where we place outbound messages ready for transmission.
 	 */
 	@Override
 	public MessageQueue getOutboundQueue() {
@@ -437,17 +433,15 @@ public class ProxyClient extends Messenger {
 	/**
 	 * Set the verified flag.
 	 * 
-	 * @param verified
-	 *            the verified to set
+	 * @param verified the verified to set
 	 */
 	public void setVerified(boolean verified) {
 		_verified = verified;
 	}
 
-
 	/**
-	 * Get a descriptive name (e.g., "ced") of the remote client.
-	 * It might be the same as the juser name.
+	 * Get a descriptive name (e.g., "ced") of the remote client. It might be the
+	 * same as the juser name.
 	 * 
 	 * @return a name of the messenger
 	 */
@@ -455,7 +449,7 @@ public class ProxyClient extends Messenger {
 	public String getClientName() {
 		return _clientName;
 	}
-	
+
 	/**
 	 * Get the username of the remote client.
 	 * 
@@ -473,7 +467,7 @@ public class ProxyClient extends Messenger {
 	public String getOSName() {
 		return _osName;
 	}
-	
+
 	/**
 	 * Get the host name of the remote client.
 	 * 
@@ -482,17 +476,19 @@ public class ProxyClient extends Messenger {
 	public String getHostName() {
 		return _hostName;
 	}
-	
+
 	/**
 	 * Set the client name of the remote client
+	 * 
 	 * @param name client name of the remote client
 	 */
 	protected void setClientName(String name) {
 		_clientName = (name != null) ? name : "???";
 	}
-	
+
 	/**
 	 * Set the user name of the remote client
+	 * 
 	 * @param name user name of the remote client
 	 */
 	protected void setUserName(String name) {
@@ -501,6 +497,7 @@ public class ProxyClient extends Messenger {
 
 	/**
 	 * Set the name of the remote client
+	 * 
 	 * @param operating system name of the remote client
 	 */
 	protected void setOSName(String name) {
@@ -509,6 +506,7 @@ public class ProxyClient extends Messenger {
 
 	/**
 	 * Set the host name of the remote client
+	 * 
 	 * @param name host name of the remote client
 	 */
 	protected void setHostName(String name) {
@@ -517,14 +515,16 @@ public class ProxyClient extends Messenger {
 
 	/**
 	 * Set the local port of the remote client
+	 * 
 	 * @param localPort the local port
 	 */
 	public void setLocalPort(int localPort) {
 		_localPort = localPort;
 	}
-	
+
 	/**
 	 * Gt the local port of the remote client
+	 * 
 	 * @return localPort the local port
 	 */
 	public int getLocalPort() {
@@ -534,8 +534,7 @@ public class ProxyClient extends Messenger {
 	/**
 	 * Convert a list of ProxyClients into an array
 	 * 
-	 * @param pclist
-	 *            the list
+	 * @param pclist the list
 	 * @return the array
 	 */
 	public synchronized static ProxyClient[] toArray(List<ProxyClient> pclist) {
@@ -551,28 +550,29 @@ public class ProxyClient extends Messenger {
 
 		return array;
 	}
-	
+
 	/**
 	 * Increment the message count. The Server does this.
 	 */
 	protected void incrementMessageCount() {
 		_messageCount++;
 	}
-	
+
 	/**
 	 * Get the number of messages this remote client has sent to the server
+	 * 
 	 * @return the number of messages this remote client has sent to the server
 	 */
 	public long getMessageCount() {
 		return _messageCount;
 	}
 
-	
 	/**
 	 * Subscribe to a topic
-	 * @param topic the topic to subscribe to. This will be trimmed
-	 * of white space and converted to lower case, i.e., topics are 
-	 * NOT case sensitive.
+	 * 
+	 * @param topic the topic to subscribe to. This will be trimmed of white space
+	 *              and converted to lower case, i.e., topics are NOT case
+	 *              sensitive.
 	 */
 	protected void subscribe(String topic) {
 		if (topic != null) {
@@ -583,12 +583,13 @@ public class ProxyClient extends Messenger {
 			}
 		}
 	}
-	
+
 	/**
 	 * Unsubscribe to a topic
-	 * @param topic the topic to unsubscribe to. This will be trimmed
-	 * of white space and converted to lower case, i.e., topics are 
-	 * NOT case sensitive.
+	 * 
+	 * @param topic the topic to unsubscribe to. This will be trimmed of white space
+	 *              and converted to lower case, i.e., topics are NOT case
+	 *              sensitive.
 	 */
 	protected void unsubscribe(String topic) {
 		if (topic != null) {
@@ -598,12 +599,13 @@ public class ProxyClient extends Messenger {
 			}
 		}
 	}
-	
+
 	/**
 	 * Check whether this client subscribes to a topic
-	 * @param topic the topic to subscribe to. This will be trimmed
-	 * of white space and converted to lower case, i.e., topics are 
-	 * NOT case sensitive.
+	 * 
+	 * @param topic the topic to subscribe to. This will be trimmed of white space
+	 *              and converted to lower case, i.e., topics are NOT case
+	 *              sensitive.
 	 * @return <code>true</code> if this client is subscribed to the topic
 	 */
 	protected boolean isSubscribed(String topic) {
@@ -616,9 +618,9 @@ public class ProxyClient extends Messenger {
 		return false;
 	}
 
-	
 	/**
-	 * Send a message 
+	 * Send a message
+	 * 
 	 * @param message the message to send
 	 */
 	protected void send(Message message) {

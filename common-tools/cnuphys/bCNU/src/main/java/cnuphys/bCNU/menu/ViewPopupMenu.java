@@ -26,15 +26,13 @@ public class ViewPopupMenu extends JPopupMenu {
 	 * Add a quick zoom to the view's popup
 	 * 
 	 * @param title the title of the quickzoom
-	 * @param xmin min world x
-	 * @param ymin min world y
-	 * @param xmax min
+	 * @param xmin  min world x
+	 * @param ymin  min world y
+	 * @param xmax  min
 	 * @param ymax
 	 */
-	public void addQuickZoom(String title, final double xmin, final double ymin,
-			final double xmax, final double ymax) {
-		_quickZoomMenu.add(
-				new QuickZoomMenuItem(title, _view, xmin, ymin, xmax, ymax));
+	public void addQuickZoom(String title, final double xmin, final double ymin, final double xmax, final double ymax) {
+		_quickZoomMenu.add(new QuickZoomMenuItem(title, _view, xmin, ymin, xmax, ymax));
 	}
 
 }

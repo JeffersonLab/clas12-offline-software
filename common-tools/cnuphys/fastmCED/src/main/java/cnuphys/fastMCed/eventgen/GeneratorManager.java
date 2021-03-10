@@ -13,8 +13,8 @@ import cnuphys.fastMCed.eventgen.sweep.SweepEventGenerator;
 import cnuphys.fastMCed.eventio.PhysicsEventManager;
 
 public class GeneratorManager implements ActionListener {
-	
-	//suggestions
+
+	// suggestions
 	private static double _pMin = 0.5; // GeV/c
 	private static double _pMax = 8.5; // GeV/c
 	private static double _pPerpMax = 2.5; // GeV/c
@@ -22,22 +22,23 @@ public class GeneratorManager implements ActionListener {
 	private static double _thetaMax = 40.; // degrees
 	private static double _phiMin = -20; // degrees
 	private static double _phiMax = 20.; // degrees
-	
-	//menu stuff
+
+	// menu stuff
 	private JMenu _menu;
 	private static JRadioButtonMenuItem _fileGenerator;
 	private static JRadioButtonMenuItem _sweepGenerator;
 	private static JRadioButtonMenuItem _randomGenerator;
-		
-	//singleton
+
+	// singleton
 	private static GeneratorManager instance;
-	
-	//private constructor for 
+
+	// private constructor for
 	private GeneratorManager() {
 	}
-	
+
 	/**
 	 * Access to the singleton GeneratorManager
+	 * 
 	 * @return the GeneratorManager
 	 */
 	public static GeneratorManager getInstance() {
@@ -46,9 +47,10 @@ public class GeneratorManager implements ActionListener {
 		}
 		return instance;
 	}
-	
+
 	/**
 	 * Get the Generator menu
+	 * 
 	 * @return
 	 */
 	public JMenu getMenu() {
@@ -58,7 +60,7 @@ public class GeneratorManager implements ActionListener {
 		return _menu;
 	}
 
-	//create the menu
+	// create the menu
 	private void createMenu() {
 		ButtonGroup bgroup = new ButtonGroup();
 		_menu = new JMenu("Generators");
@@ -67,9 +69,9 @@ public class GeneratorManager implements ActionListener {
 		_sweepGenerator = menuItem("Sweep Generator...", bgroup);
 		_randomGenerator = menuItem("Random Generator...", bgroup);
 	}
-	
+
 	private JRadioButtonMenuItem menuItem(String label, ButtonGroup bg) {
-				
+
 		JRadioButtonMenuItem item = new JRadioButtonMenuItem(label);
 		bg.add(item);
 		item.addActionListener(this);
@@ -77,7 +79,7 @@ public class GeneratorManager implements ActionListener {
 
 		return item;
 	}
-	
+
 	/**
 	 * Set the file generator as the selected generator
 	 */
@@ -102,25 +104,26 @@ public class GeneratorManager implements ActionListener {
 			if (generator != null) {
 				PhysicsEventManager.getInstance().setEventGenerator(generator);
 			}
-		}
-		else if (source == _sweepGenerator) {
+		} else if (source == _sweepGenerator) {
 			SweepEventGenerator generator = SweepEventGenerator.createSweepGenerator();
 			if (generator != null) {
 				PhysicsEventManager.getInstance().setEventGenerator(generator);
 			}
 		}
 	}
-	
+
 	/**
 	 * Get the default value for p-perp (Gev/c)
+	 * 
 	 * @return the default value for p-perp
 	 */
 	public static double getPPerpMax() {
 		return _pPerpMax;
 	}
-	
+
 	/**
 	 * Set the default value for p-perp (Gev/c)
+	 * 
 	 * @param pPerpMax the default value for p-perp
 	 */
 	public static void setPPerpMax(double pPerpMax) {

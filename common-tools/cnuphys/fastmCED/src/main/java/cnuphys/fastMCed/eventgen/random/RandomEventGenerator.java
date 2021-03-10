@@ -7,35 +7,32 @@ import cnuphys.fastMCed.eventgen.AEventGenerator;
 import cnuphys.fastMCed.eventgen.IEventSource;
 
 public class RandomEventGenerator extends AEventGenerator {
-	
-	
-	
-	
-	//dialog used to generate random event event after it is closed
+
+	// dialog used to generate random event event after it is closed
 	private IEventSource _eventSource;
-	
-	//event number
+
+	// event number
 	private int _eventNumber = 0;
-	
-	//most recent event
+
+	// most recent event
 	private PhysicsEvent _currentEvent;
-	
+
 	private RandomEventGenerator(IEventSource source) {
 		_eventSource = source;
 	}
-	
+
 	/**
 	 * A Generator for random events
+	 * 
 	 * @return a random event generator
 	 */
 	public static RandomEventGenerator createRandomGenerator() {
 		RandomEvGenDialog dialog = new RandomEvGenDialog(null, 4);
 		dialog.setVisible(true);
-		
+
 		if (dialog.getReason() == DialogUtilities.OK_RESPONSE) {
 			return new RandomEventGenerator(dialog);
-		}
-		else {
+		} else {
 			return null;
 		}
 	}

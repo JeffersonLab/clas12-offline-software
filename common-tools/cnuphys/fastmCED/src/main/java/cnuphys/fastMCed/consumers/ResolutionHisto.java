@@ -14,16 +14,16 @@ import cnuphys.splot.pdata.HistoData;
 import cnuphys.splot.plot.PlotParameters;
 
 public class ResolutionHisto extends APlotDialog {
-	
+
 	public static int DEL = -40;
-	
+
 	public static final String TITLE = "title";
 	public static final String XLABEL = "xlabel";
 	public static final String YLABEL = "ylabel";
 	public static final String DATAMIN = "datamin";
 	public static final String DATAMAX = "datamax";
 	public static final String NUMBIN = "numbin";
-	
+
 	public ResolutionHisto(JFrame parent, Properties properties) {
 		super(parent, "", false, properties);
 		setSize(500, 500);
@@ -31,7 +31,7 @@ public class ResolutionHisto extends APlotDialog {
 		b.x += DEL;
 		b.y += DEL;
 		setBounds(b);
-		
+
 		DEL += 40;
 	}
 
@@ -67,12 +67,12 @@ public class ResolutionHisto extends APlotDialog {
 	@Override
 	public void fillData() {
 	}
-	
+
 	public DataSet getDataSet() {
 		DataSet ds = _canvas.getDataSet();
 		return ds;
 	}
-	
+
 	public void clearData() {
 		DataSet ds = getDataSet();
 		ds.clear();
@@ -82,13 +82,13 @@ public class ResolutionHisto extends APlotDialog {
 	public void setPreferences() {
 		DataSet ds = _canvas.getDataSet();
 		ds.getCurveStyle(0).setFillColor(new Color(196, 196, 196, 64));
-		ds.getCurveStyle(0).setLineColor(Color.black);
-		ds.getCurveStyle(0).setLineWidth(2f);
+		ds.getCurveStyle(0).setFitLineColor(Color.black);
+		ds.getCurveStyle(0).setFitLineWidth(2f);
 		ds.getCurve(0).getFit().setFitType(FitType.GAUSSIANS);
 		PlotParameters params = _canvas.getParameters();
 		params.setMinExponentY(6);
 		params.setNumDecimalY(0);
-		
+
 	}
 
 }

@@ -63,8 +63,7 @@ public abstract class PlotDialog extends JDialog
 	/**
 	 * Create a Plot Dialog
 	 * 
-	 * @param name
-	 *            the name of the plot
+	 * @param name the name of the plot
 	 */
 	public PlotDialog(String name) {
 		_name = name;
@@ -125,7 +124,7 @@ public abstract class PlotDialog extends JDialog
 
 	@Override
 	public void accumulationEvent(int reason) {
-		
+
 		System.err.println("Accumulation event in Plot Dialog");
 		switch (reason) {
 		case AccumulationManager.ACCUMULATION_STARTED:
@@ -152,8 +151,7 @@ public abstract class PlotDialog extends JDialog
 	/**
 	 * Change the event source type
 	 * 
-	 * @param source
-	 *            the new source: File, ET
+	 * @param source the new source: File, ET
 	 */
 	@Override
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
@@ -171,8 +169,7 @@ public abstract class PlotDialog extends JDialog
 	/**
 	 * Add a cut
 	 * 
-	 * @param cut
-	 *            the cut to add
+	 * @param cut the cut to add
 	 */
 	public void addCut(ICut cut) {
 		_cutPanel.addCut(cut);
@@ -224,8 +221,7 @@ public abstract class PlotDialog extends JDialog
 	/**
 	 * Write out the cuts of the plot dialog
 	 * 
-	 * @param xmlPrintStreamWriter
-	 *            the writer
+	 * @param xmlPrintStreamWriter the writer
 	 */
 	protected void writeCuts(XmlPrintStreamWriter xmlPrintStreamWriter) {
 		Vector<ICut> cuts = getCuts();
@@ -239,8 +235,7 @@ public abstract class PlotDialog extends JDialog
 	/**
 	 * Write out the bounds of the plot dialog
 	 * 
-	 * @param xmlPrintStreamWriter
-	 *            the writer
+	 * @param xmlPrintStreamWriter the writer
 	 */
 	protected void writeBounds(XmlPrintStreamWriter xmlPrintStreamWriter) {
 		Properties props = new Properties();
@@ -273,8 +268,7 @@ public abstract class PlotDialog extends JDialog
 	 * Write out 1D histo data
 	 * 
 	 * @param writer
-	 * @param hd
-	 *            the histo data
+	 * @param hd     the histo data
 	 */
 	protected void writeHisto2DData(XmlPrintStreamWriter writer, Histo2DData hd) {
 		Properties props = new Properties();
@@ -299,8 +293,7 @@ public abstract class PlotDialog extends JDialog
 	 * Write out 1D histo data
 	 * 
 	 * @param writer
-	 * @param hd
-	 *            the histo data
+	 * @param hd     the histo data
 	 */
 	protected void writeHistoData(XmlPrintStreamWriter writer, HistoData hd) {
 		Properties props = new Properties();
@@ -336,16 +329,16 @@ public abstract class PlotDialog extends JDialog
 	/**
 	 * Write out plot specific xml
 	 * 
-	 * @param writer
-	 *            the writer
+	 * @param writer the writer
 	 */
 	public abstract void customXml(XmlPrintStreamWriter writer);
 
 	/**
 	 * Get the effective length of the data
+	 * 
 	 * @param event the event
-	 * @param cd the column data
-	 * @param ne the named expression
+	 * @param cd    the column data
+	 * @param ne    the named expression
 	 * @return the effective length of the data
 	 */
 	public int getMinLength(DataEvent event, ColumnData cd, NamedExpression ne) {
@@ -360,12 +353,13 @@ public abstract class PlotDialog extends JDialog
 
 		return len;
 	}
-	
+
 	/**
 	 * Get a value for either the column data or the named expression
+	 * 
 	 * @param index the index
-	 * @param cd the column data
-	 * @param ne the named expression
+	 * @param cd    the column data
+	 * @param ne    the named expression
 	 * @return the value at the index or Double.NaN on error
 	 */
 	public double getValue(DataEvent event, int index, ColumnData cd, NamedExpression ne) {
@@ -375,7 +369,7 @@ public abstract class PlotDialog extends JDialog
 		if ((cd == null) && (ne == null)) {
 			return Double.NaN;
 		}
-		
+
 		double val = Double.NaN;
 
 		if (cd != null) {
@@ -383,8 +377,7 @@ public abstract class PlotDialog extends JDialog
 			if ((vals != null) && (index < vals.length)) {
 				val = vals[index];
 			}
-		}
-		else {  //expression
+		} else { // expression
 			if (ne.readyToCompute()) {
 				int len = ne.minLength(event);
 				if (index < len) {
@@ -392,8 +385,8 @@ public abstract class PlotDialog extends JDialog
 				}
 			}
 		}
-		
-		//cut?
+
+		// cut?
 		Vector<ICut> cuts = getCuts();
 		if (cuts != null) {
 			for (ICut cut : cuts) {

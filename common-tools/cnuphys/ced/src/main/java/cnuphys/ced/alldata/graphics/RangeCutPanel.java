@@ -18,7 +18,7 @@ public class RangeCutPanel extends JPanel implements PropertyChangeListener {
 	private JFormattedTextField _minValTF;
 
 	private JFormattedTextField _maxValTF;
-	
+
 	private SelectPanel _sp;
 
 	private double _minVal = 0;
@@ -31,7 +31,7 @@ public class RangeCutPanel extends JPanel implements PropertyChangeListener {
 		add(_sp, BorderLayout.CENTER);
 		addEast();
 	}
-	
+
 	/**
 	 * Get the select panel
 	 * 
@@ -44,21 +44,20 @@ public class RangeCutPanel extends JPanel implements PropertyChangeListener {
 	private void addEast() {
 		JPanel p = new JPanel();
 		p.setLayout(new BorderLayout(0, 0));
-		
+
 		JPanel sp = new JPanel();
 		sp.setLayout(new GridLayout(2, 1, 4, 4));
 		_minValTF = decimalField(sp, "Min Value", _minVal);
 		_maxValTF = decimalField(sp, "Max Value", _maxVal);
-		
+
 		_minValTF.addPropertyChangeListener("value", this);
 		_maxValTF.addPropertyChangeListener("value", this);
-		
+
 		p.add(sp, BorderLayout.NORTH);
 		add(p, BorderLayout.EAST);
 	}
 
-	private JFormattedTextField decimalField(JPanel p, String title,
-			double defValue) {
+	private JFormattedTextField decimalField(JPanel p, String title, double defValue) {
 		NumberFormat numberFormat = NumberFormat.getNumberInstance();
 		numberFormat.setMaximumFractionDigits(4);
 		numberFormat.setGroupingUsed(false);
@@ -81,9 +80,10 @@ public class RangeCutPanel extends JPanel implements PropertyChangeListener {
 		Environment.getInstance().commonize(pan, null);
 		return pan;
 	}
-	
+
 	/**
 	 * Return a RangeCut if the user hit ok
+	 * 
 	 * @return a Range or <code>null</code>.
 	 */
 	public RangeCut getRangeCut() {
@@ -100,8 +100,7 @@ public class RangeCutPanel extends JPanel implements PropertyChangeListener {
 		Object source = e.getSource();
 		if (source == _minValTF) {
 			_minVal = ((Number) _minValTF.getValue()).doubleValue();
-		}
-		else if (source == _maxValTF) {
+		} else if (source == _maxValTF) {
 			_maxVal = ((Number) _maxValTF.getValue()).doubleValue();
 		}
 	}

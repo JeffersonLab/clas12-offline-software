@@ -4,15 +4,12 @@ import cnuphys.ced.geometry.CTOFGeometry;
 
 public class CTOFPaddle3D extends Paddle3D {
 
-
 	/**
-	 * @param paddleId
-	 *            1-based paddle Id [1..48]
+	 * @param paddleId 1-based paddle Id [1..48]
 	 */
 	public CTOFPaddle3D(int paddleId) {
 		super(paddleId);
 	}
-
 
 	@Override
 	protected void fillVertices() {

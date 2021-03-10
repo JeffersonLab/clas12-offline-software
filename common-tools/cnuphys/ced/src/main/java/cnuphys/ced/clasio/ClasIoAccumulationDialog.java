@@ -116,8 +116,7 @@ public class ClasIoAccumulationDialog extends JDialog {
 
 		if (_numRemaining > 0) {
 			_pathLabel.setText(_eventManager.getCurrentSourceDescription());
-			_totalLabel.setText("Total number: "
-					+ _eventManager.getEventCount());
+			_totalLabel.setText("Total number: " + _eventManager.getEventCount());
 			_remainingLabel.setText("Remaining: " + _numRemaining);
 		} else {
 			_pathLabel.setText("No event file or source.");
@@ -218,8 +217,7 @@ public class ClasIoAccumulationDialog extends JDialog {
 			// if number field was not enabled treat as cancel.
 			if (!_numberField.isEnabled()) {
 				_reason = DialogUtilities.CANCEL_RESPONSE;
-				AccumulationManager.getInstance().notifyListeners(
-						AccumulationManager.ACCUMULATION_CANCELLED);
+				AccumulationManager.getInstance().notifyListeners(AccumulationManager.ACCUMULATION_CANCELLED);
 				setVisible(false);
 				return;
 			}
@@ -227,7 +225,7 @@ public class ClasIoAccumulationDialog extends JDialog {
 			// clear data?
 			boolean lastState = _clearButton.isSelected();
 			if (lastState) {
-	//			System.err.println("ClasIoAccum Clear");
+				// System.err.println("ClasIoAccum Clear");
 				_accumulator.clear();
 			}
 
@@ -237,7 +235,7 @@ public class ClasIoAccumulationDialog extends JDialog {
 					_reason = DialogUtilities.CANCEL_RESPONSE;
 				} else {
 					count = Math.min(count, MAXACCUMULATIONCOUNT);
-					count = Math.min(count, _numRemaining-1);
+					count = Math.min(count, _numRemaining - 1);
 				}
 				final int fcount = count;
 
@@ -251,24 +249,22 @@ public class ClasIoAccumulationDialog extends JDialog {
 
 						int count = 0;
 						while (isVisible() && (count < fcount)) {
-							
+
 							if (_eventManager.hasEvent()) {
 								DataEvent event = _eventManager.getNextEvent();
-								if (event ==  null) {
+								if (event == null) {
 									try {
-										
+
 										System.err.println("SLEEP count = " + count + "/" + fcount);
 										Thread.sleep(30);
 									} catch (InterruptedException e) {
 										e.printStackTrace();
 									}
-								}
-								else {
+								} else {
 									count++;
 								}
 							}
-							
-							
+
 //							try {
 //								EventSourceType estype = _eventManager.getEventSourceType();
 //								switch (estype) {
@@ -307,24 +303,20 @@ public class ClasIoAccumulationDialog extends JDialog {
 								}
 							}
 						}
-						
-						
+
 						// we are done accumulating
 						_eventManager.setAccumulating(false);
-						AccumulationManager.getInstance().notifyListeners(
-								AccumulationManager.ACCUMULATION_FINISHED);
-												
-						
+						AccumulationManager.getInstance().notifyListeners(AccumulationManager.ACCUMULATION_FINISHED);
+
 						SwingUtilities.invokeLater(new Runnable() {
 							@Override
 							public void run() {
 								setVisible(false);
-								//reload last event
+								// reload last event
 								_eventManager.reloadCurrentEvent();
 
-								ViewManager.getInstance()
-										.refreshAllViews();
-								
+								ViewManager.getInstance().refreshAllViews();
+
 							}
 						});
 
@@ -340,7 +332,7 @@ public class ClasIoAccumulationDialog extends JDialog {
 				_reason = DialogUtilities.CANCEL_RESPONSE;
 			}
 
-		} //ok
+		} // ok
 		else {
 			setVisible(false);
 		}
@@ -349,8 +341,7 @@ public class ClasIoAccumulationDialog extends JDialog {
 	/**
 	 * Why the dialog closed.
 	 * 
-	 * @return either DialogUtilities.OK_RESPONSE or
-	 *         DialogUtilities.CANCEL_RESPONSE
+	 * @return either DialogUtilities.OK_RESPONSE or DialogUtilities.CANCEL_RESPONSE
 	 */
 	public int getReason() {
 		return _reason;

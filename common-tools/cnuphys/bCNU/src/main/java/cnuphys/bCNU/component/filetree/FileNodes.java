@@ -23,8 +23,7 @@ public class FileNodes implements Transferable, Serializable {
 	}
 
 	@Override
-	public Object getTransferData(DataFlavor flavor)
-			throws UnsupportedFlavorException, IOException {
+	public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
 		if (flavor.equals(DataFlavor.javaFileListFlavor)) {
 			return files;
 		} else {

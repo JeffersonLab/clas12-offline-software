@@ -20,8 +20,40 @@
     ]
   },
  {
-    "bank": "FTOF::hits",
+    "bank": "FTOF::hbhits",
     "group": 21221,
+    "info": "reconstructed hit info from FTOF",
+    "items": [
+       {"name":"id",          "id":1, "type":"int16",  "info":"id of the hit"},
+       {"name":"status",      "id":2, "type":"int16",  "info":"status of the hit"},
+       {"name":"trackid",     "id":3, "type":"int16",  "info":"matched DC track id"},
+       {"name":"sector",      "id":4, "type":"int8",   "info":"sector of FTOF"},
+       {"name":"layer",       "id":5, "type":"int8",  "info":"panel id of FTOF (1-1A, 2-1B, 3-2"},
+       {"name":"component",   "id":6, "type":"int16", "info":"paddle id of FTOF"},
+       {"name":"energy",      "id":7, "type":"float", "info":"E dep (MeV) of hit"},
+       {"name":"time",        "id":8, "type":"float", "info":"Hit time (ns)"},
+       {"name":"energy_unc",  "id":9, "type":"float", "info":"E dep unc (MeV) of hit"},
+       {"name":"time_unc",    "id":10, "type":"float", "info":"Hit time unc (ns)"},
+       {"name":"x",           "id":11, "type":"float", "info":"Global X coor (cm) of hit"},
+       {"name":"y",           "id":12, "type":"float", "info":"Global Y coor (cm) of hit"},
+       {"name":"z",           "id":13, "type":"float", "info":"Global Z coor (cm) of hit"},
+       {"name":"x_unc",       "id":14, "type":"float", "info":"Global X coor unc (cm) of hit"},
+       {"name":"y_unc",       "id":15, "type":"float", "info":"Global Y coor unc (cm) of hit"},
+       {"name":"z_unc",       "id":16, "type":"float", "info":"Global Z coor unc (cm) of hit"},
+       {"name":"tx",          "id":17, "type":"float", "info":"Global X coor (cm) of hit from DC info - trackid index"},
+       {"name":"ty",          "id":18, "type":"float", "info":"Global Y coor (cm) of hit from DC info - trackid index"},
+       {"name":"tz",          "id":19, "type":"float", "info":"Global Z coor (cm) of hit from DC info - trackid index"},
+       {"name":"adc_idx1",    "id":20, "type":"int16", "info":"index of hit with ADCL in adc bank, starts at zero"},
+       {"name":"adc_idx2",    "id":21, "type":"int16", "info":"index of hit with ADCR in adc bank, starts at zero"},
+       {"name":"tdc_idx1",    "id":22, "type":"int16", "info":"index of hit with TDCL in tdc bank, starts at zero"},
+       {"name":"tdc_idx2",    "id":23, "type":"int16", "info":"index of hit with TDCR in tdc bank, starts at zero"},
+       {"name":"pathLength",        "id":24, "type":"float", "info":"pathlength of the track from the vertex (doca point to the beamline to the midpoint between the entrance and exit of the hit bar"},
+       {"name":"pathLengthThruBar", "id":25, "type":"float", "info":"pathlength of the track from the entrance point to the exit point through the hit bar "}
+    ]
+  },
+   {
+    "bank": "FTOF::hits",
+    "group": 21231,
     "info": "reconstructed hit info from FTOF",
     "items": [
        {"name":"id",          "id":1, "type":"int16",  "info":"id of the hit"},
@@ -53,7 +85,7 @@
   },
  {
     "bank": "FTOF::clusters",
-    "group": 21222,
+    "group": 21232,
     "info": "reconstructed clusters from FTOF",
     "items": [
         {"name":"id",          "id":1, "type":"int16",  "info":"id of the hit"},
@@ -76,7 +108,7 @@
  },
  {
     "bank": "FTOF::matchedclusters",
-    "group": 21223,
+    "group": 21233,
     "info": "matched clusters from FTOF",
     "items": [
         {"name":"sector",               "id":1, "type":"int8",   "info":"sector of FTOF"},

@@ -7,6 +7,7 @@ import java.awt.geom.Point2D;
 import java.util.List;
 
 import cnuphys.ced.cedview.central.CentralZView;
+import cnuphys.ced.cedview.magfieldview.MagfieldView;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.bCNU.graphics.container.IContainer;
@@ -23,8 +24,7 @@ public class BeamLineItem extends BaseBeamLineItem {
 	/**
 	 * Create a beamline item which is a glorified line.
 	 * 
-	 * @param layer
-	 *            the Layer this item is on.
+	 * @param layer the Layer this item is on.
 	 */
 	public BeamLineItem(LogicalLayer layer) {
 		super(layer);
@@ -33,10 +33,8 @@ public class BeamLineItem extends BaseBeamLineItem {
 	/**
 	 * Custom drawer for the item.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
@@ -53,6 +51,9 @@ public class BeamLineItem extends BaseBeamLineItem {
 			targetZ = ((SectorView) view).getTargetZ();
 		} else if (view instanceof CentralZView) {
 			targetZ = ((CentralZView) view).getTargetZ();
+		}
+		else if (view instanceof MagfieldView) {
+			targetZ =((MagfieldView) view).getTargetZ();
 		}
 
 		// draw it?
@@ -76,7 +77,6 @@ public class BeamLineItem extends BaseBeamLineItem {
 
 	// no feedback for beamline
 	@Override
-	public void getFeedbackStrings(IContainer container, Point pp,
-			Point2D.Double wp, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point pp, Point2D.Double wp, List<String> feedbackStrings) {
 	}
 }

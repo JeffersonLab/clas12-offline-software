@@ -5,14 +5,14 @@ import cnuphys.ced.geometry.bmt.ConstantsLoader;
 import cnuphys.ced.geometry.bmt.Geometry;
 
 public class BMTGeometry {
-	
+
 	private static Geometry _geometry;
 
 	/**
 	 * Initialize the BMT Geometry
 	 */
 	public static void initialize() {
-		
+
 		if (_geometry != null) {
 			return;
 		}
@@ -26,7 +26,7 @@ public class BMTGeometry {
 		_geometry = new Geometry();
 
 	}
-	
+
 	public static Geometry getGeometry() {
 		initialize();
 		return _geometry;

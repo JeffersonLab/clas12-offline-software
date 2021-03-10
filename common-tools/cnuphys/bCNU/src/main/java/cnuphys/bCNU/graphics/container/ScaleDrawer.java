@@ -55,10 +55,8 @@ public class ScaleDrawer extends DrawableAdapter {
 	/**
 	 * Draw the scale object on the lower right
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the container
+	 * @param g         the graphics context
+	 * @param container the container
 	 */
 	@Override
 	public void draw(Graphics g, IContainer container) {
@@ -124,8 +122,7 @@ public class ScaleDrawer extends DrawableAdapter {
 	}
 
 	// draws the scale i.e., does the dirty work
-	private void sdraw(Graphics g, int x, int y, String str, Color color,
-			FontMetrics fm) {
+	private void sdraw(Graphics g, int x, int y, String str, Color color, FontMetrics fm) {
 		int sw = fm.stringWidth(str);
 		g.setColor(color);
 		g.drawLine(x, y, x + SCALELEN, y);

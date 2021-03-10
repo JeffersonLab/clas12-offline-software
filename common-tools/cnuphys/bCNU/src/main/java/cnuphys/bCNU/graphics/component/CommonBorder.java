@@ -27,18 +27,18 @@ public class CommonBorder extends TitledBorder {
 		this();
 		setTitle(title);
 	}
-	
+
 	/**
 	 * Create a common border with an empty border around it
+	 * 
 	 * @param title the title
-	 * @param size the size of the empty border in pixels
+	 * @param size  the size of the empty border in pixels
 	 * @return the compound border
 	 */
 	public static Border withEmptyBorder(String title, int size) {
-		Border emptyBorder = BorderFactory
-				.createEmptyBorder(4, 4, 4, 4);
-		
+		Border emptyBorder = BorderFactory.createEmptyBorder(4, 4, 4, 4);
+
 		CommonBorder cborder = new CommonBorder(title);
-        return BorderFactory.createCompoundBorder(emptyBorder, cborder);
+		return BorderFactory.createCompoundBorder(emptyBorder, cborder);
 	}
 }

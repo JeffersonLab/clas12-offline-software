@@ -8,7 +8,7 @@ public class BoundVariableTable extends JTable {
 
 	public BoundVariableTable() {
 		super(new BoundVariableTableModel());
-		
+
 		// multiple selection
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
@@ -25,7 +25,7 @@ public class BoundVariableTable extends JTable {
 		getTableHeader().setReorderingAllowed(false);
 
 	}
-	
+
 	public BoundVariableTableModel getBoundVariableModel() {
 		return (BoundVariableTableModel) getModel();
 	}

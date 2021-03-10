@@ -20,8 +20,7 @@ public abstract class AsciiReader {
 	/**
 	 * Constructor
 	 * 
-	 * @param file
-	 *            the ascii file to be processed
+	 * @param file the ascii file to be processed
 	 * @throws FileNotFoundException
 	 */
 	public AsciiReader(File file) throws FileNotFoundException {
@@ -42,7 +41,7 @@ public abstract class AsciiReader {
 	}
 
 	/**
-	 * Process one non comment line from the file. 
+	 * Process one non comment line from the file.
 	 * 
 	 * @param line the line to be processed.
 	 */
@@ -54,7 +53,7 @@ public abstract class AsciiReader {
 	public int getNonCommentLineCount() {
 		return nonCommentLineCount;
 	}
-	
+
 	/** Done reading */
 	public abstract void done();
 

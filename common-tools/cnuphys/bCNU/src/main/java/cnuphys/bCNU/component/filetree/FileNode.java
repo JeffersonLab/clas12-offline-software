@@ -73,13 +73,11 @@ public class FileNode implements Transferable, Serializable {
 	 */
 	@Override
 	public String toString() {
-		return theFile.getName().length() > 0 ? theFile.getName() : theFile
-				.getPath();
+		return theFile.getName().length() > 0 ? theFile.getName() : theFile.getPath();
 	}
 
 	public boolean expand(DefaultMutableTreeNode parent) {
-		DefaultMutableTreeNode flag = (DefaultMutableTreeNode) parent
-				.getFirstChild();
+		DefaultMutableTreeNode flag = (DefaultMutableTreeNode) parent.getFirstChild();
 		if (flag == null) {
 			return false;
 		}
@@ -125,8 +123,7 @@ public class FileNode implements Transferable, Serializable {
 			if (nd.getFile().isFile()) {
 				idata = new IconData(FileTree.ICON_FILE, null, nd);
 			} else {
-				idata = new IconData(FileTree.ICON_FOLDER,
-						FileTree.ICON_EXPANDEDFOLDER, nd);
+				idata = new IconData(FileTree.ICON_FOLDER, FileTree.ICON_EXPANDEDFOLDER, nd);
 			}
 
 			DefaultMutableTreeNode node = new DefaultMutableTreeNode(idata);
@@ -162,11 +159,11 @@ public class FileNode implements Transferable, Serializable {
 	}
 
 	/**
-	 * returns true if underlying file cointains any files (that are accepred by
-	 * the filter, if there is one.
+	 * returns true if underlying file cointains any files (that are accepred by the
+	 * filter, if there is one.
 	 * 
-	 * @return True if this node contains files that are accepted by the filter
-	 *         (if there is a filter)
+	 * @return True if this node contains files that are accepted by the filter (if
+	 *         there is a filter)
 	 */
 
 	public boolean hasFiles() {
@@ -198,8 +195,7 @@ public class FileNode implements Transferable, Serializable {
 		try {
 			return theFile.listFiles();
 		} catch (Exception ex) {
-			JOptionPane.showMessageDialog(null, "Error reading directory "
-					+ theFile.getAbsolutePath(), "Warning",
+			JOptionPane.showMessageDialog(null, "Error reading directory " + theFile.getAbsolutePath(), "Warning",
 					JOptionPane.WARNING_MESSAGE, ImageManager.cnuIcon);
 			return null;
 		}
@@ -213,8 +209,7 @@ public class FileNode implements Transferable, Serializable {
 	}
 
 	/**
-	 * @param fileFilter
-	 *            The fileFilter to set.
+	 * @param fileFilter The fileFilter to set.
 	 */
 	public void setFileFilter(FileFilter fileFilter) {
 		this.fileFilter = fileFilter;
@@ -282,8 +277,7 @@ public class FileNode implements Transferable, Serializable {
 	}
 
 	@Override
-	public Object getTransferData(DataFlavor flavor)
-			throws UnsupportedFlavorException, IOException {
+	public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
 		if (flavor.equals(DataFlavor.javaFileListFlavor)) {
 			return getFileList();
 		} else {

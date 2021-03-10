@@ -20,29 +20,24 @@ public class NamedLabel extends JPanel {
 	private JTextField variableLabel;
 
 	/**
-	 * Create a NamedLabel--which has a fixed label (a prompt) and a variable
-	 * label. It is not editable.
+	 * Create a NamedLabel--which has a fixed label (a prompt) and a variable label.
+	 * It is not editable.
 	 *
-	 * @param name
-	 *            this is a constant label, like "event file:"
-	 * @param preferredWidth
-	 *            this is the preferred width of the variable label.
+	 * @param name           this is a constant label, like "event file:"
+	 * @param preferredWidth this is the preferred width of the variable label.
 	 */
 	public NamedLabel(String name, int preferredWidth) {
 		this(name, null, preferredWidth);
 	}
 
 	/**
-	 * Create a NamedLabel--which has a fixed label (a prompt) and a variable
-	 * label. It is not editable.
+	 * Create a NamedLabel--which has a fixed label (a prompt) and a variable label.
+	 * It is not editable.
 	 *
-	 * @param name
-	 *            this is a constant label, like "event file:"
-	 * @param sizingString
-	 *            this is used to size the fixed label, to help getting things
-	 *            to align.
-	 * @param preferredWidth
-	 *            this is the preferred width of the variable label.
+	 * @param name           this is a constant label, like "event file:"
+	 * @param sizingString   this is used to size the fixed label, to help getting
+	 *                       things to align.
+	 * @param preferredWidth this is the preferred width of the variable label.
 	 */
 	public NamedLabel(String name, String sizingString, int preferredWidth) {
 		JLabel fixedLabel = new JLabel(name);
@@ -78,8 +73,7 @@ public class NamedLabel extends JPanel {
 	/**
 	 * Set the text in the variable label.
 	 *
-	 * @param text
-	 *            the text to display in the variable label.
+	 * @param text the text to display in the variable label.
 	 */
 	public void setText(String text) {
 		variableLabel.setText(text);

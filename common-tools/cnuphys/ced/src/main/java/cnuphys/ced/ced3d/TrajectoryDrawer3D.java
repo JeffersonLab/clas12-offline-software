@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.List;
 import bCNU3D.Support3D;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.frame.CedColors;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundStyle;
 import cnuphys.lund.LundSupport;
@@ -18,7 +19,7 @@ import item3D.Item3D;
 public class TrajectoryDrawer3D extends Item3D {
 
 	private CedPanel3D _cedPanel3D;
-	
+
 	public TrajectoryDrawer3D(CedPanel3D panel3D) {
 		super(panel3D);
 		_cedPanel3D = panel3D;
@@ -31,13 +32,14 @@ public class TrajectoryDrawer3D extends Item3D {
 			return;
 		}
 
+		// mc tracks
 		if (SwimMenu.getInstance().showMonteCarloTracks()) {
 			List<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
 
 			if (trajectories != null) {
 
 				for (SwimTrajectory trajectory : trajectories) {
-					drawSwimTrajectory(drawable, trajectory);
+					drawSwimTrajectory(drawable, trajectory, null);
 				}
 
 			}
@@ -49,14 +51,41 @@ public class TrajectoryDrawer3D extends Item3D {
 
 			if (trajectories != null) {
 
-				boolean showHB = _cedPanel3D.showHBTrack();
-				boolean showTB = _cedPanel3D.showTBTrack();
-				boolean showCVT = _cedPanel3D.showCVTTrack();
-
 				for (SwimTrajectory trajectory : trajectories) {
+
+					boolean show = false;
+					Color color = null;
+
+					String source = trajectory.getSource();
+					if (source != null) {
+						if (source.contains("HitBasedTrkg::HBTracks")) {
+							show = _cedPanel3D.showHBTrack();
+							color = CedColors.HB_COLOR;
+						} else if (source.contains("TimeBasedTrkg::TBTracks")) {
+							show = _cedPanel3D.showTBTrack();
+							color = CedColors.TB_COLOR;
+						} else if (source.contains("HitBasedTrkg::AITracks")) {
+							show = _cedPanel3D.showAIHBTrack();
+							color = CedColors.AIHB_COLOR;
+						} else if (source.contains("TimeBasedTrkg::AITracks")) {
+							show = _cedPanel3D.showAITBTrack();
+							color = CedColors.AITB_COLOR;
+						} else if (source.contains("REC::Particle")) {
+							show = _cedPanel3D.showRecTrack();
+							color = Color.darkGray;
+						} else if (source.contains("CVTRec::Tracks")) {
+							show = _cedPanel3D.showCVTTrack();
+							color = CedColors.CVT_COLOR;
+						}
+					}
+
 					LundId lid = trajectory.getLundId();
-					if ((showCVT && LundSupport.isCVT(lid)) ||(showHB && LundSupport.isHB(lid)) || (showTB && LundSupport.isTB(lid))) {
-						drawSwimTrajectory(drawable, trajectory);
+					
+					if (lid != null) {
+						color = lid.getStyle().getLineColor();
+					}
+					if (show) {
+						drawSwimTrajectory(drawable, trajectory, color);
 					}
 				}
 
@@ -65,7 +94,7 @@ public class TrajectoryDrawer3D extends Item3D {
 	}
 
 	// draw a trajectory in 3D
-	private void drawSwimTrajectory(GLAutoDrawable drawable, SwimTrajectory traj) {
+	private void drawSwimTrajectory(GLAutoDrawable drawable, SwimTrajectory traj, Color color) {
 		int size = traj.size();
 		if (size < 2) {
 			return;
@@ -73,12 +102,15 @@ public class TrajectoryDrawer3D extends Item3D {
 
 		float coords[] = new float[3 * size];
 
-		LundId lid = traj.getLundId();
-		LundStyle style = LundStyle.getStyle(lid);
-		Color color = Color.black;
+		if (color == null) {
+			LundId lid = traj.getLundId();
+			LundStyle style = LundStyle.getStyle(lid);
 
-		if (style != null) {
-			color = style.getFillColor();
+			color = Color.black;
+
+			if (style != null) {
+				color = style.getFillColor();
+			}
 		}
 
 		for (int i = 0; i < size; i++) {

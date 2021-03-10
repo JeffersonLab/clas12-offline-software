@@ -68,10 +68,10 @@ public class ECViewPlane3D extends DetectorItem3D {
 
 	@Override
 	public void drawData(GLAutoDrawable drawable) {
-		
+
 		TdcAdcHitList hits = AllEC.getInstance().getHits();
 		if ((hits != null) && !hits.isEmpty()) {
-			
+
 			float coords[] = new float[24];
 
 			for (TdcAdcHit hit : hits) {
@@ -92,17 +92,13 @@ public class ECViewPlane3D extends DetectorItem3D {
 								drawStrip(drawable, color, coords);
 							}
 						}
-					}
-					catch (Exception e) {
+					} catch (Exception e) {
 						Log.getInstance().exception(e);
 					}
 				} // hit not null
-			} //hit loop
+			} // hit loop
 		} // have hits
-		
 
-		
-		
 //
 //		int hitCount = ECAL.hitCount();
 //		

@@ -14,29 +14,29 @@ import javax.swing.event.ListSelectionListener;
 public class BoundVariablePanel extends JPanel implements ActionListener, ListSelectionListener {
 
 	private BoundVariableTableScrollPane _scrollPane;
-	
-	//remove bindings from the table
+
+	// remove bindings from the table
 	private JButton _remove;
-	
+
 	public BoundVariablePanel() {
-		setLayout (new BorderLayout(4, 4));
-		
+		setLayout(new BorderLayout(4, 4));
+
 		_scrollPane = new BoundVariableTableScrollPane("Bound Variables");
 		add(_scrollPane, BorderLayout.CENTER);
-		
+
 		JPanel sp = new JPanel();
 		sp.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 2));
 		_remove = new JButton(" Remove ");
 		_remove.addActionListener(this);
-		
+
 		_remove.setEnabled(false);
 		sp.add(_remove);
 		add(sp, BorderLayout.SOUTH);
-		
+
 		getTable().getSelectionModel().addListSelectionListener(this);
 
 	}
-	
+
 	/**
 	 * Accessor for the underlying table.
 	 * 
@@ -66,13 +66,13 @@ public class BoundVariablePanel extends JPanel implements ActionListener, ListSe
 				for (int i = 0; i < len; i++) {
 					nbv.add(getBoundVariableModel().getNameBinding(rows[i]));
 				}
-				
+
 				getBoundVariableModel().getData().removeAll(nbv);
 				getBoundVariableModel().fireTableRowsDeleted(0, 0);
 
 			}
 		}
-		
+
 	}
 
 	@Override
@@ -82,6 +82,5 @@ public class BoundVariablePanel extends JPanel implements ActionListener, ListSe
 			_remove.setEnabled(row >= 0);
 		}
 	}
-
 
 }

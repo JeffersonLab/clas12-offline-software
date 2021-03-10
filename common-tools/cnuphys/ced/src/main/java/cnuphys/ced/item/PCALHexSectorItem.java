@@ -29,12 +29,12 @@ public class PCALHexSectorItem extends HexSectorItem {
 
 	public static final Color baseFillColor = new Color(139, 0, 0, 160);
 
-	private static int[] _stripCounts = PCALGeometry.PCAL_NUMSTRIP; //u,v,w
+	private static int[] _stripCounts = PCALGeometry.PCAL_NUMSTRIP; // u,v,w
 
 	/**
 	 * Get a hex sector item
 	 * 
-	 * @param layer the logical layer
+	 * @param layer  the logical layer
 	 * @param sector the 1-based sector
 	 */
 	public PCALHexSectorItem(LogicalLayer layer, PCALView view, int sector) {
@@ -45,7 +45,7 @@ public class PCALHexSectorItem extends HexSectorItem {
 	/**
 	 * Custom drawer for the item.
 	 * 
-	 * @param g the graphics context.
+	 * @param g         the graphics context.
 	 * @param container the graphical container being rendered.
 	 */
 	@Override
@@ -59,14 +59,13 @@ public class PCALHexSectorItem extends HexSectorItem {
 		for (int stripType = 0; stripType < 3; stripType++) {
 			if (_pcalView.showStrips(stripType)) {
 				for (int stripIndex = 0; stripIndex < PCALGeometry.PCAL_NUMSTRIP[stripType]; stripIndex++) {
-					Polygon poly = stripPolygon(container, stripType,
-							stripIndex);
+					Polygon poly = stripPolygon(container, stripType, stripIndex);
 
 					// _stripPoly[stripType][stripIndex] = poly;
 					g.setColor(Color.white);
 					g.fillPolygon(poly);
-					
-					//extension
+
+					// extension
 					poly = extensionPolygon(container, stripType, stripIndex, 1.0);
 					g.setColor(X11Colors.getX11Color("Antique White", 128));
 					g.fillPolygon(poly);
@@ -91,11 +90,10 @@ public class PCALHexSectorItem extends HexSectorItem {
 					// g.drawPolygon(_stripPoly[stripType][stripIndex]);
 
 					g.setColor(color);
-					Polygon poly = stripPolygon(container, stripType,
-							stripIndex);
+					Polygon poly = stripPolygon(container, stripType, stripIndex);
 					g.drawPolygon(poly);
-					
-					//extension
+
+					// extension
 					poly = extensionPolygon(container, stripType, stripIndex, 1.0);
 					g.setColor(X11Colors.getX11Color("coral", 128));
 					g.drawPolygon(poly);
@@ -103,17 +101,17 @@ public class PCALHexSectorItem extends HexSectorItem {
 			}
 		}
 	}
+
 	// draw the hits
-	private void drawPCALHits(Graphics g, IContainer container) {		
+	private void drawPCALHits(Graphics g, IContainer container) {
 		if (_pcalView.isSingleEventMode()) {
 			drawSingleEvent(g, container);
-		}
-		else {
+		} else {
 			drawAccumulatedHits(g, container);
 		}
 	}
 
-	//draw single event hit
+	// draw single event hit
 	private void drawSingleEvent(Graphics g, IContainer container) {
 
 		TdcAdcHitList hits = AllEC.getInstance().getHits();
@@ -128,18 +126,18 @@ public class PCALHexSectorItem extends HexSectorItem {
 							g.setColor(hits.adcColor(hit, AllEC.getInstance().getMaxPCALAdc()));
 							g.fillPolygon(poly);
 							g.drawPolygon(poly);
-							
-							int adcmax = Math.max(1,  AllEC.getInstance().getMaxPCALAdc());
-							double fract = ((double)hit.averageADC()/(double)adcmax);
-							fract = Math.max(0.15, Math.min(1.0,  fract));
-							
-							//extension
+
+							int adcmax = Math.max(1, AllEC.getInstance().getMaxPCALAdc());
+							double fract = ((double) hit.averageADC() / (double) adcmax);
+							fract = Math.max(0.15, Math.min(1.0, fract));
+
+							// extension
 							poly = extensionPolygon(container, view0, strip0, fract);
 							g.setColor(Color.yellow);
 							g.fillPolygon(poly);
 							g.setColor(X11Colors.getX11Color("dark red"));
 							g.drawPolygon(poly);
-							
+
 						}
 					} catch (Exception e) {
 						Log.getInstance().exception(e);
@@ -153,13 +151,12 @@ public class PCALHexSectorItem extends HexSectorItem {
 
 	}
 
-	//draw accumulated hits
+	// draw accumulated hits
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
-		
+
 		int medianHit = AccumulationManager.getInstance().getMedianPCALCount();
-		
-		int hits[][][] = AccumulationManager.getInstance()
-				.getAccumulatedPCALData();
+
+		int hits[][][] = AccumulationManager.getInstance().getAccumulatedPCALData();
 
 		int sect0 = getSector() - 1;
 
@@ -170,10 +167,9 @@ public class PCALHexSectorItem extends HexSectorItem {
 
 					int hitCount = hits[sect0][view0][strip0];
 					if (hitCount > 0) {
-						double fract = _pcalView.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
+						double fract = _pcalView.getMedianSetting() * (((double) hitCount) / (1 + medianHit));
 
-						Color color = AccumulationManager.colorScaleModel
-								.getAlphaColor(fract, 128);
+						Color color = _pcalView.getColorScaleModel().getAlphaColor(fract, 128);
 
 						g.setColor(color);
 						g.fillPolygon(poly);
@@ -184,7 +180,6 @@ public class PCALHexSectorItem extends HexSectorItem {
 		}
 
 	}
-
 
 	// mark the origin og the ijk system
 	private void drawIJKOrigin(Graphics g, IContainer container) {
@@ -202,7 +197,7 @@ public class PCALHexSectorItem extends HexSectorItem {
 	 * Convert ijk coordinates to world graphics coordinates
 	 * 
 	 * @param pijk the ijk coordinates
-	 * @param pp the screen coordinates
+	 * @param pp   the screen coordinates
 	 */
 	public void ijkToScreen(IContainer container, Point3D pijk, Point pp) {
 		Point2D.Double wp = new Point2D.Double();
@@ -214,7 +209,7 @@ public class PCALHexSectorItem extends HexSectorItem {
 	 * Convert ijk coordinates to world graphics coordinates
 	 * 
 	 * @param pijk the ijk coordinates
-	 * @param wp the world graphics coordinates
+	 * @param wp   the world graphics coordinates
 	 */
 	public void ijkToWorld(Point3D pijk, Point2D.Double wp) {
 		double sectorXYZ[] = new double[3];
@@ -227,12 +222,11 @@ public class PCALHexSectorItem extends HexSectorItem {
 	/**
 	 * Get the polygon for a u, v or w strip
 	 * 
-	 * @param stripType PCAL_U, PCAL_V, or PCAL_W [0..2]
+	 * @param stripType  PCAL_U, PCAL_V, or PCAL_W [0..2]
 	 * @param stripIndex the strip index [0..(EC_NUMSTRIP-1)]
 	 * @return the screen polygon
 	 */
-	public Polygon stripPolygon(IContainer container, int stripType,
-			int stripIndex) {
+	public Polygon stripPolygon(IContainer container, int stripType, int stripIndex) {
 		Polygon poly = new Polygon();
 		Point pp = new Point();
 
@@ -244,102 +238,100 @@ public class PCALHexSectorItem extends HexSectorItem {
 
 		return poly;
 	}
-	
 
 	/**
 	 * Get the world polygon for a strip
-	 * @param stripType PCAL_U, PCAL_V, or PCAL_W [0..2]
+	 * 
+	 * @param stripType  PCAL_U, PCAL_V, or PCAL_W [0..2]
 	 * @param stripIndex the strip index [0..]
 	 */
-	public void stripWorldPolygon(int stripType,
-			int stripIndex, Point2D.Double wp[]) {
+	public void stripWorldPolygon(int stripType, int stripIndex, Point2D.Double wp[]) {
 		for (int i = 0; i < 4; i++) {
 			Point3D pijk = PCALGeometry.getStripPoint(stripType, stripIndex, i);
 			ijkToWorld(pijk, wp[i]);
 		}
 	}
-	
-	//extend a line used to get the extension polygons
+
+	// extend a line used to get the extension polygons
 	private void extendLine(Point2D.Double wp0, Point2D.Double wp1, Point2D.Double wp, double t) {
 		double delx = wp1.x - wp0.x;
 		double dely = wp1.y - wp0.y;
-		
-		wp.x = wp0.x + delx*t;
-		wp.y = wp0.y + dely*t;
+
+		wp.x = wp0.x + delx * t;
+		wp.y = wp0.y + dely * t;
 	}
-	
+
 	/**
 	 * Get the extension of the strip polygon
-	 * @param stripType the type of strip UVW
+	 * 
+	 * @param stripType  the type of strip UVW
 	 * @param stripIndex the index of the strip
-	 * @param work workspace
-	 * @param extension the result
-	 * @param fract how filled is the extension
+	 * @param work       workspace
+	 * @param extension  the result
+	 * @param fract      how filled is the extension
 	 */
-	private void extensionPolygon(int stripType,
-			int stripIndex,  
-			Point2D.Double work[], Point2D.Double extension[], double fract) {
-		
+	private void extensionPolygon(int stripType, int stripIndex, Point2D.Double work[], Point2D.Double extension[],
+			double fract) {
+
 		double gap = 1.;
-		double len = fract*17;
+		double len = fract * 17;
 		stripWorldPolygon(stripType, stripIndex, work);
-		
+
 		double d1 = work[1].distance(work[2]);
-		double t1 = (1 + gap/d1);
-		double t2 = (1 + (gap+len)/d1);
-		
+		double t1 = (1 + gap / d1);
+		double t2 = (1 + (gap + len) / d1);
+
 		double d2 = work[0].distance(work[3]);
-		double t3 = (1 + gap/d2);
-		double t4 = (1 + (gap+len)/d2);
+		double t3 = (1 + gap / d2);
+		double t4 = (1 + (gap + len) / d2);
 
 		if (stripType == PCALGeometry.PCAL_W) {
 			extendLine(work[2], work[1], extension[0], t1);
 			extendLine(work[2], work[1], extension[1], t2);
 			extendLine(work[3], work[0], extension[2], t4);
 			extendLine(work[3], work[0], extension[3], t3);
-		}
-		else {
+		} else {
 			extendLine(work[1], work[2], extension[0], t1);
 			extendLine(work[1], work[2], extension[1], t2);
 			extendLine(work[0], work[3], extension[2], t4);
 			extendLine(work[0], work[3], extension[3], t3);
 		}
 	}
-	
+
 	/**
 	 * Get the extension of the strip polygon
+	 * 
 	 * @param container
 	 * @param stripType
 	 * @param stripIndex
 	 * @param fract
 	 * @return the screen polygon for the extension
 	 */
-	private Polygon extensionPolygon(IContainer container, int stripType,
-			int stripIndex, double fract) {
+	private Polygon extensionPolygon(IContainer container, int stripType, int stripIndex, double fract) {
 
 		Polygon poly = new Polygon();
 		Point pp = new Point();
 		Point2D.Double[] work = new Point2D.Double[4];
 		Point2D.Double[] extension = new Point2D.Double[4];
-		
+
 		for (int i = 0; i < 4; i++) {
 			work[i] = new Point2D.Double();
 			extension[i] = new Point2D.Double();
 		}
 
 		extensionPolygon(stripType, stripIndex, work, extension, fract);
-		
+
 		for (int i = 0; i < 4; i++) {
 			container.worldToLocal(pp, extension[i]);
 			poly.addPoint(pp.x, pp.y);
 		}
 		return poly;
 	}
-	
+
 	/**
 	 * Converts a graphical world point to sector xyz
 	 * 
-	 * @param wp the world graphical point
+	 * @param wp        the world graphical point
 	 * @param sectorXYZ the sector xyz point
 	 */
 	public void worldToSectorXYZ(Point2D.Double wp, double[] sectorXYZ) {
@@ -351,11 +343,10 @@ public class PCALHexSectorItem extends HexSectorItem {
 	}
 
 	@Override
-	public void getFeedbackStrings(IContainer container, Point pp,
-			Point2D.Double wp, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point pp, Point2D.Double wp, List<String> feedbackStrings) {
 
 		if (contains(container, pp)) {
-			
+
 			// get the sector xyz coordinates
 			double sectorXYZ[] = new double[3];
 			worldToSectorXYZ(wp, sectorXYZ);
@@ -387,16 +378,14 @@ public class PCALHexSectorItem extends HexSectorItem {
 
 			String labxyz = "$yellow$lab xyz " + vecStr(labXYZ) + " cm";
 			feedbackStrings.add(labxyz);
-			String labRhoPhi = String.format(
-					"$yellow$lab " + CedView.rhoPhi + " (%-6.2f, %-6.2f)",
-					labRho, (Math.toDegrees(labPhi)));
+			String labRhoPhi = String.format("$yellow$lab " + CedView.rhoPhi + " (%-6.2f, %-6.2f)", labRho,
+					(Math.toDegrees(labPhi)));
 			feedbackStrings.add(labRhoPhi);
 
 			String sectxyz = "$orange$sector xyz " + vecStr(sectorXYZ) + " cm";
 			feedbackStrings.add(sectxyz);
-			String sectRhoPhi = String.format(
-					"$orange$sector " + CedView.rhoPhi + " (%-6.2f, %-6.2f)",
-					sectRho, (Math.toDegrees(sectPhi)));
+			String sectRhoPhi = String.format("$orange$sector " + CedView.rhoPhi + " (%-6.2f, %-6.2f)", sectRho,
+					(Math.toDegrees(sectPhi)));
 			feedbackStrings.add(sectRhoPhi);
 
 			// now add the strings
@@ -428,8 +417,7 @@ public class PCALHexSectorItem extends HexSectorItem {
 	}
 
 	private String point3DString(Point3D p3d) {
-		return String.format("(%-6.3f, %-6.3f, %-6.3f)", p3d.x(), p3d.y(),
-				p3d.z());
+		return String.format("(%-6.3f, %-6.3f, %-6.3f)", p3d.x(), p3d.y(), p3d.z());
 	}
 
 	// convert screen point to a uvw 1-based triplet

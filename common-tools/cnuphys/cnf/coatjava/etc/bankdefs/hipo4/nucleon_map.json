@@ -1,0 +1,17 @@
+[
+	{   
+		"name" : "CNF::nucleon_map",
+		"group": 100,
+		"item" : 1,
+		"info" : "simple 3D vector cartesian map bank",
+		"entries" : [
+			{"name":"x","type":"F", "info":"x position of the grid point (fm)"},
+			{"name":"y","type":"F", "info":"y position of the grid point (fm)"},
+			{"name":"z","type":"F", "info":"z position of the grid point (fm)"},
+			{"name":"Bx","type":"F", "info":"Bx coordinates of the vector at grid point (GeV/fm)"},
+			{"name":"By","type":"F", "info":"By coordinates of the vector at grid point (GeV/fm)"},
+			{"name":"Bz","type":"F", "info":"Bz coordinates of the vector at grid point (GeV/fm)"},
+			{"name":"Del","type":"F", "info":"Total uncertainty on vector (GeV/fm)"}
+		]
+	}
+]

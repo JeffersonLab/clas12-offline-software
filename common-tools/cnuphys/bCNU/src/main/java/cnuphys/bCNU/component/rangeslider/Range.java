@@ -37,8 +37,7 @@ public class Range {
 	/**
 	 * Check whether the given value is in range. It is an inclusive check.
 	 * 
-	 * @param val
-	 *            the value to test.
+	 * @param val the value to test.
 	 * @return <code>true</code> if the value is equal to a limit or between the
 	 *         limits.
 	 */

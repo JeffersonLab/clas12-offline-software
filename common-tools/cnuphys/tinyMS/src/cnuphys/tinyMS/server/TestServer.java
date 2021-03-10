@@ -32,20 +32,16 @@ public class TestServer {
 				final TestClient client5 = new TestClient(true);
 //				testShutdown(server, client2);
 //				testLogout(server, client3);
-			}
-			catch (BadSocketException e) {
+			} catch (BadSocketException e) {
 				e.printStackTrace();
 			}
-			
 
-
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
 	}
-	
+
 	private static void testShutdown(TinyMessageServer server, DefaultClient client) {
 		TimerTask task = new TimerTask() {
 
@@ -66,7 +62,6 @@ public class TestServer {
 		timer.schedule(task, 5000L);
 	}
 
-	
 	private static void testLogout(TinyMessageServer server, DefaultClient client) {
 		TimerTask task = new TimerTask() {
 

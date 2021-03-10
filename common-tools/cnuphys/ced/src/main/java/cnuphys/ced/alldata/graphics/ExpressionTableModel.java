@@ -80,8 +80,6 @@ public class ExpressionTableModel extends DefaultTableModel {
 
 		return null;
 	}
-	
-	
 
 	/**
 	 * Get the collection of expressions
@@ -95,8 +93,7 @@ public class ExpressionTableModel extends DefaultTableModel {
 	/**
 	 * Get the named expression at a given row
 	 * 
-	 * @param row
-	 *            the zero based row
+	 * @param row the zero based row
 	 * @return the NamedExpression or null.
 	 */
 	public NamedExpression getNamedExpression(int row) {

@@ -25,13 +25,11 @@ public class MultilineHeaderRenderer extends JList implements TableCellRenderer 
 		setOpaque(true);
 		setForeground(X11Colors.getX11Color("dark blue"));
 		setBackground(new Color(212, 212, 212));
-		
-		
+
 		Border bevelBorder = BorderFactory.createBevelBorder(BevelBorder.RAISED);
 		Border emptyBorder = BorderFactory.createEmptyBorder(2, 2, 2, 2);
 		Border compoundBorder = new CompoundBorder(bevelBorder, emptyBorder);
 
-		
 		setBorder(compoundBorder);
 		ListCellRenderer renderer = getCellRenderer();
 		((JLabel) renderer).setHorizontalAlignment(SwingConstants.CENTER);
@@ -39,8 +37,8 @@ public class MultilineHeaderRenderer extends JList implements TableCellRenderer 
 	}
 
 	@Override
-	public Component getTableCellRendererComponent(JTable table, Object value,
-			boolean isSelected, boolean hasFocus, int row, int column) {
+	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+			int row, int column) {
 		setFont(table.getFont());
 		String str = (value == null) ? "" : value.toString();
 		BufferedReader br = new BufferedReader(new StringReader(str));

@@ -8,9 +8,8 @@ import java.text.NumberFormat;
 
 import javax.swing.JFormattedTextField;
 
-public abstract class AttributeRealValueEditor  extends AttributeEditor<JFormattedTextField> implements FocusListener,
-KeyListener { 
-	
+public abstract class AttributeRealValueEditor extends AttributeEditor<JFormattedTextField>
+		implements FocusListener, KeyListener {
 
 	String oldText = "";
 
@@ -19,8 +18,7 @@ KeyListener {
 	 */
 	protected AttributeTable attributeTable = null;
 
-	protected static NumberFormat numberFormat = NumberFormat
-			.getNumberInstance();
+	protected static NumberFormat numberFormat = NumberFormat.getNumberInstance();
 	static {
 		numberFormat.setMaximumFractionDigits(6);
 		numberFormat.setMinimumFractionDigits(0);
@@ -29,12 +27,11 @@ KeyListener {
 	/**
 	 * Create an editor for Doubles.
 	 * 
-	 * @param propertyData the attribute being edited.
+	 * @param propertyData       the attribute being edited.
 	 * @param propertyCellEditor the owner Cell Editor.
 	 */
 
-	public AttributeRealValueEditor(AttributeTable attributeTable,
-			Attribute attribute) {
+	public AttributeRealValueEditor(AttributeTable attributeTable, Attribute attribute) {
 
 		super(attributeTable, attribute, new JFormattedTextField(numberFormat));
 
@@ -46,7 +43,6 @@ KeyListener {
 		component.addFocusListener(this);
 		component.addKeyListener(this);
 	}
-	
 
 	/**
 	 * See if a string has changed. If so, fire a notice.
@@ -63,24 +59,21 @@ KeyListener {
 			}
 
 			if (oldText.compareTo(newText) != 0) {
-				
+
 				try {
 					parse(newText);
-				}
-				catch (NumberFormatException e) {
+				} catch (NumberFormatException e) {
 				}
 			}
 
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 
 	}
-	
+
 	protected abstract void parse(String vtext);
-	
-	
+
 	@Override
 	public void focusGained(FocusEvent e) {
 	}
@@ -102,6 +95,5 @@ KeyListener {
 	public void keyReleased(KeyEvent e) {
 		checkTextChange();
 	}
-
 
 }

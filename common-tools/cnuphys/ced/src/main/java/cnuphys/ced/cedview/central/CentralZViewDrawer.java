@@ -9,11 +9,10 @@ import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 
-public abstract class CentralZViewDrawer implements IDrawable  {
+public abstract class CentralZViewDrawer implements IDrawable {
 
 	// convenient access to the event manager
-	protected ClasIoEventManager _eventManager = ClasIoEventManager
-			.getInstance();
+	protected ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
 	// the CentralZView being rendered.
 	protected CentralZView _view;
@@ -59,16 +58,12 @@ public abstract class CentralZViewDrawer implements IDrawable  {
 	/**
 	 * Use what was drawn to generate feedback strings
 	 * 
-	 * @param container
-	 *            the drawing container
-	 * @param screenPoint
-	 *            the mouse location
-	 * @param worldPoint
-	 *            the corresponding world location
-	 * @param feedbackStrings
-	 *            add strings to this collection
+	 * @param container       the drawing container
+	 * @param screenPoint     the mouse location
+	 * @param worldPoint      the corresponding world location
+	 * @param feedbackStrings add strings to this collection
 	 */
-	public abstract void feedback(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings);
+	public abstract void feedback(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings);
 
 }

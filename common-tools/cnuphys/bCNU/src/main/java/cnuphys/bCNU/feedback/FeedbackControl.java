@@ -3,7 +3,6 @@ package cnuphys.bCNU.feedback;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
 import java.util.Vector;
 
 import javax.swing.event.EventListenerList;
@@ -38,10 +37,8 @@ public class FeedbackControl {
 	/**
 	 * Request feedback strings from all providers.
 	 * 
-	 * @param pp
-	 *            the screen location of the mouse.
-	 * @param wp
-	 *            the corresponding world points.
+	 * @param pp the screen location of the mouse.
+	 * @param wp the corresponding world points.
 	 */
 	private void requestFeedbackStrings(Point pp, Point2D.Double wp) {
 
@@ -59,8 +56,7 @@ public class FeedbackControl {
 		// order is flipped so it goes in order as added
 		for (int i = 0; i < listeners.length; i += 2) {
 			if (listeners[i] == IFeedbackProvider.class) {
-				((IFeedbackProvider) listeners[i + 1]).getFeedbackStrings(
-						_container, pp, wp, _newFeedbackStrings);
+				((IFeedbackProvider) listeners[i + 1]).getFeedbackStrings(_container, pp, wp, _newFeedbackStrings);
 			}
 		}
 	}
@@ -68,8 +64,7 @@ public class FeedbackControl {
 	/**
 	 * Add a Feedback provider.
 	 * 
-	 * @param provider
-	 *            the Feedback provider listener to add.
+	 * @param provider the Feedback provider listener to add.
 	 */
 	public void addFeedbackProvider(IFeedbackProvider provider) {
 
@@ -85,8 +80,7 @@ public class FeedbackControl {
 	/**
 	 * Remove a Feedback provider.
 	 * 
-	 * @param provider
-	 *            the Feedback provider to remove.
+	 * @param provider the Feedback provider to remove.
 	 */
 	public void removeFeedbackProvider(IFeedbackProvider provider) {
 
@@ -100,15 +94,11 @@ public class FeedbackControl {
 	/**
 	 * The mouse has moved, so update the feedback
 	 * 
-	 * @param mouseEvent
-	 *            the screen location
-	 * @param wp
-	 *            the corresponding world point.
-	 * @param dragging
-	 *            <code>true</code> if we are dragging
+	 * @param mouseEvent the screen location
+	 * @param wp         the corresponding world point.
+	 * @param dragging   <code>true</code> if we are dragging
 	 */
-	public void updateFeedback(MouseEvent mouseEvent, Point2D.Double wp,
-			boolean dragging) {
+	public void updateFeedback(MouseEvent mouseEvent, Point2D.Double wp, boolean dragging) {
 
 		// skip feedback if control down
 		if (mouseEvent.isControlDown()) {
@@ -117,24 +107,22 @@ public class FeedbackControl {
 
 		// get strings from all providers
 		requestFeedbackStrings(mouseEvent.getPoint(), wp);
-		
-		//don't update if same
-		if (TextUtilities.equalStringLists(_oldFeedbackStrings,
-				_newFeedbackStrings)) {
-					return;
-				}
 
+		// don't update if same
+		if (TextUtilities.equalStringLists(_oldFeedbackStrings, _newFeedbackStrings)) {
+			return;
+		}
 
 		// update feedback pane if there is one
 		if (_container.getFeedbackPane() != null) {
 			_container.getFeedbackPane().updateFeedback(_newFeedbackStrings);
 		}
-		
+
 		if (BaseMDIApplication.getHeadsUpDisplay() != null) {
 			System.err.println("HUD update");
 			BaseMDIApplication.getHeadsUpDisplay().update(_newFeedbackStrings);
 		}
-		
+
 		// swap old and new
 		Vector<String> temp = _oldFeedbackStrings;
 		_oldFeedbackStrings = _newFeedbackStrings;

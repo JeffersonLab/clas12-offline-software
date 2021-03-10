@@ -26,25 +26,25 @@ import cnuphys.splot.plot.PlotParameters;
 
 public class CutTablePanel extends JPanel implements ActionListener, ListSelectionListener, TableModelListener {
 
-	//parent plot
+	// parent plot
 	private PlotDialog _plotDialog;
-	
-	//buttons
+
+	// buttons
 	private JButton _plus;
 	private JButton _minus;
-	
+
 	private JTextArea _textArea;
 	private JTextArea _warningText;
-	
+
 	private CutTableScrollPane _cutPane;
-	
+
 	public CutTablePanel(PlotDialog plotDialog) {
 		_plotDialog = plotDialog;
-		
-		setLayout(new BorderLayout(4,4));
+
+		setLayout(new BorderLayout(4, 4));
 		addNorth();
 	}
-	
+
 	private void addNorth(JPanel p) {
 		JPanel sp = new JPanel();
 		sp.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 2));
@@ -52,7 +52,7 @@ public class CutTablePanel extends JPanel implements ActionListener, ListSelecti
 		_minus = new JButton("remove");
 		_plus.addActionListener(this);
 		_minus.addActionListener(this);
-		
+
 		_plus.setFont(Fonts.mediumFont);
 		_minus.setFont(Fonts.mediumFont);
 		_minus.setEnabled(false);
@@ -61,11 +61,11 @@ public class CutTablePanel extends JPanel implements ActionListener, ListSelecti
 		sp.setBorder(BorderFactory.createEtchedBorder());
 		p.add(sp, BorderLayout.NORTH);
 	}
-	
+
 	private void addSouth(JPanel p) {
 		JPanel sp = new JPanel();
 		sp.setLayout(new GridLayout(2, 1, 4, 0));
-		
+
 		_textArea = new JTextArea(" ", 4, 4);
 		_textArea.setLineWrap(true);
 
@@ -73,7 +73,7 @@ public class CutTablePanel extends JPanel implements ActionListener, ListSelecti
 		_textArea.setEditable(false);
 		_textArea.setBackground(Color.black);
 		_textArea.setForeground(Color.cyan);
-		
+
 		_warningText = new JTextArea(" ", 4, 4);
 		_warningText.setLineWrap(true);
 
@@ -81,36 +81,37 @@ public class CutTablePanel extends JPanel implements ActionListener, ListSelecti
 		_warningText.setEditable(false);
 		_warningText.setBackground(new Color(240, 240, 240));
 		_warningText.setForeground(Color.red);
-		_warningText.setText("Note: adding, removing,\nactivating, or deactivating\ncuts will result in all\ndata being cleared.");
+		_warningText.setText(
+				"Note: adding, removing,\nactivating, or deactivating\ncuts will result in all\ndata being cleared.");
 		_warningText.setBorder(new CommonBorder("Warning"));
-		
+
 		sp.add(_textArea);
 		sp.add(_warningText);
-		
+
 		p.add(sp, BorderLayout.SOUTH);
 	}
-	
+
 	private void addNorth() {
-		
+
 		JPanel sp = new JPanel();
-		sp.setLayout(new BorderLayout(0,0));
-		
+		sp.setLayout(new BorderLayout(0, 0));
+
 		_cutPane = new CutTableScrollPane(null, "Cuts");
 		_cutPane.setBorder(new CommonBorder("cuts"));
 		sp.add(_cutPane, BorderLayout.CENTER);
 		addNorth(sp);
 		addSouth(sp);
-		
+
 		add(sp, BorderLayout.NORTH);
-		
+
 		getTable().getSelectionModel().addListSelectionListener(this);
 		getTable().getModel().addTableModelListener(this);
 	}
-	
+
 	public CutTable getTable() {
 		return _cutPane.getCutTable();
 	}
-	
+
 	public CutTableModel getModel() {
 		return _cutPane.getCutTableModel();
 	}
@@ -120,12 +121,11 @@ public class CutTablePanel extends JPanel implements ActionListener, ListSelecti
 		Object o = e.getSource();
 		if (o == _plus) {
 			addCut();
-		}
-		else if (o == _minus) {
+		} else if (o == _minus) {
 			removeCut();
 		}
 	}
-	
+
 	private void addCut() {
 		DefineRangeCutDialog dialog = new DefineRangeCutDialog();
 		dialog.setVisible(true);
@@ -138,6 +138,7 @@ public class CutTablePanel extends JPanel implements ActionListener, ListSelecti
 
 	/**
 	 * Add a cut
+	 * 
 	 * @param cut the cut to add
 	 */
 	public void addCut(ICut cut) {
@@ -146,7 +147,7 @@ public class CutTablePanel extends JPanel implements ActionListener, ListSelecti
 			getModel().fireTableDataChanged();
 		}
 	}
-	
+
 	private void removeCut() {
 		int row = getTable().getSelectedRow();
 		if (row >= 0) {
@@ -160,25 +161,25 @@ public class CutTablePanel extends JPanel implements ActionListener, ListSelecti
 		if (!e.getValueIsAdjusting()) {
 			int row = getTable().getSelectedRow();
 			_minus.setEnabled(row >= 0);
-			
+
 			if (row < 0) {
 				_textArea.setText("");
-			}
-			else {
+			} else {
 				ICut cut = getModel().getCutAtRow(row);
 				_textArea.setText(cut.toString());
 			}
 		}
 	}
-	
+
 	/**
 	 * Get all the defined cuts, active or not
+	 * 
 	 * @return all the cuts
 	 */
 	protected Vector<ICut> getCuts() {
 		return getModel()._data;
 	}
-	
+
 	/**
 	 * Clear the data from the underlying plot
 	 */
@@ -193,9 +194,9 @@ public class CutTablePanel extends JPanel implements ActionListener, ListSelecti
 	 * Fix the plot to reflect the active plot strings
 	 */
 	public void fixStrings() {
-		PlotParameters params = _plotDialog.getParameters(); 
+		PlotParameters params = _plotDialog.getParameters();
 		String cs[] = null;
-		
+
 		Vector<ICut> cuts = getCuts();
 		if (cuts != null) {
 			int activeCount = 0;
@@ -204,9 +205,9 @@ public class CutTablePanel extends JPanel implements ActionListener, ListSelecti
 					activeCount++;
 				}
 			}
-			
+
 			System.err.println("FIX STR Active Count: " + activeCount);
-			
+
 			if (activeCount > 0) {
 				cs = new String[activeCount];
 				int idx = 0;
@@ -216,10 +217,10 @@ public class CutTablePanel extends JPanel implements ActionListener, ListSelecti
 						idx++;
 					}
 				}
-				
+
 			}
 		}
-		
+
 		params.setExtraStrings(cs);
 		PlotCanvas canvas = _plotDialog.getCanvas();
 		if ((canvas != null) && (canvas.getDataSet() != null)) {
@@ -231,7 +232,7 @@ public class CutTablePanel extends JPanel implements ActionListener, ListSelecti
 	public void tableChanged(TableModelEvent e) {
 		System.err.println("Table changed");
 		clearPlotData();
-		
+
 		fixStrings();
 	}
 }

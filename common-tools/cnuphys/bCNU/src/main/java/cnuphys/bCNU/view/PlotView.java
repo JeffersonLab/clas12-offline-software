@@ -16,7 +16,6 @@ import cnuphys.splot.plot.SplotMenus;
 @SuppressWarnings("serial")
 public class PlotView extends BaseView {
 
-
 	// the owner canvas
 	protected PlotCanvas _plotCanvas;
 
@@ -25,13 +24,15 @@ public class PlotView extends BaseView {
 
 	// all the menus and items
 	protected SplotMenus _menus;
-
+	
 	public PlotView() {
-		super(PropertySupport.TITLE, "sPlot", PropertySupport.ICONIFIABLE, true,
-				PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE, true,
-				PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 700,
-				PropertySupport.TOOLBAR, false,
-				PropertySupport.HEIGHT, 700, PropertySupport.VISIBLE, false);
+		this("sPlot");
+	}
+
+	public PlotView(String title) {
+		super(PropertySupport.TITLE, title, PropertySupport.ICONIFIABLE, true, PropertySupport.MAXIMIZABLE, true,
+				PropertySupport.CLOSABLE, true, PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 700,
+				PropertySupport.TOOLBAR, false, PropertySupport.HEIGHT, 700, PropertySupport.VISIBLE, false);
 		add(createPlotPanel());
 		addMenus();
 	}

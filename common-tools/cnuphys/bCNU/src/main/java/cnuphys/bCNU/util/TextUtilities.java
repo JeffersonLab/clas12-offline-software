@@ -20,14 +20,10 @@ public class TextUtilities {
 	/**
 	 * Draws "ghosted" text for the specified foreground and background colors.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param text
-	 *            the string to draw.
-	 * @param x
-	 *            the horizontal (left) position.
-	 * @param y
-	 *            the vertical (baseline) position.
+	 * @param g    the graphics context.
+	 * @param text the string to draw.
+	 * @param x    the horizontal (left) position.
+	 * @param y    the vertical (baseline) position.
 	 */
 	public static void drawGhostText(Graphics g, String text, int x, int y) {
 		drawGhostText(g, text, x, y, Color.white, Color.black);
@@ -36,21 +32,14 @@ public class TextUtilities {
 	/**
 	 * Draws "ghosted" text for the specified foreground and background colors.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param text
-	 *            the string to draw.
-	 * @param x
-	 *            the horizontal (left) position.
-	 * @param y
-	 *            the vertical (baseline) position.
-	 * @param fg
-	 *            the foreground color.
-	 * @param bg
-	 *            the background color.
+	 * @param g    the graphics context.
+	 * @param text the string to draw.
+	 * @param x    the horizontal (left) position.
+	 * @param y    the vertical (baseline) position.
+	 * @param fg   the foreground color.
+	 * @param bg   the background color.
 	 */
-	public static void drawGhostText(Graphics g, String text, int x, int y,
-			Color fg, Color bg) {
+	public static void drawGhostText(Graphics g, String text, int x, int y, Color fg, Color bg) {
 
 		if (g == null || bg == null) {
 			return;
@@ -64,14 +53,10 @@ public class TextUtilities {
 	/**
 	 * Draw halo text that is black with a white halo.
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param text
-	 *            the text to draw
-	 * @param x
-	 *            the horizontal (left) position.
-	 * @param y
-	 *            the vertical (baseline) position.
+	 * @param g    the graphics context
+	 * @param text the text to draw
+	 * @param x    the horizontal (left) position.
+	 * @param y    the vertical (baseline) position.
 	 */
 	public static void drawHaloText(Graphics g, String text, int x, int y) {
 		drawHaloText(g, text, x, y, Color.black, Color.white);
@@ -80,21 +65,14 @@ public class TextUtilities {
 	/**
 	 * Draw halo text (text that is outlined in a halo color)
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param text
-	 *            the text to draw
-	 * @param x
-	 *            the horizontal (left) position.
-	 * @param y
-	 *            the vertical (baseline) position.
-	 * @param textColor
-	 *            the color of the text.
-	 * @param haloColor
-	 *            the color of the halo outline.
+	 * @param g         the graphics context
+	 * @param text      the text to draw
+	 * @param x         the horizontal (left) position.
+	 * @param y         the vertical (baseline) position.
+	 * @param textColor the color of the text.
+	 * @param haloColor the color of the halo outline.
 	 */
-	public static void drawHaloText(Graphics g, String text, int x, int y,
-			Color textColor, Color haloColor) {
+	public static void drawHaloText(Graphics g, String text, int x, int y, Color textColor, Color haloColor) {
 		if (text == null) {
 			return;
 		}
@@ -111,14 +89,10 @@ public class TextUtilities {
 	/**
 	 * Return a string's bounding box.
 	 * 
-	 * @param c
-	 *            the component where the string will be rendered.
-	 * @param pp
-	 *            the pixel location of the base point.
-	 * @param s
-	 *            the string being rendered.
-	 * @param font
-	 *            the font being used.
+	 * @param c    the component where the string will be rendered.
+	 * @param pp   the pixel location of the base point.
+	 * @param s    the string being rendered.
+	 * @param font the font being used.
 	 * @return the bounding rectangle.
 	 */
 	public static Rectangle sizeText(Component c, Point pp, String s, Font font) {
@@ -132,8 +106,7 @@ public class TextUtilities {
 	/**
 	 * Shallow clone of ine string list onto another.
 	 * 
-	 * @param src
-	 *            the source list.
+	 * @param src the source list.
 	 * @return the destination list, which is a shallow cioy.
 	 */
 	public static List<String> cloneList(List<String> src) {
@@ -150,17 +123,14 @@ public class TextUtilities {
 	}
 
 	/**
-	 * Check to see if two vectors of strings are equal. Used by feedback 
-	 * to avoid redrawing identical strings.
+	 * Check to see if two vectors of strings are equal. Used by feedback to avoid
+	 * redrawing identical strings.
 	 * 
-	 * @param list1
-	 *            the first String vector.
-	 * @param list2
-	 *            the other String vector.
+	 * @param list1 the first String vector.
+	 * @param list2 the other String vector.
 	 * @return <code>true</code> if they are equal.
 	 */
-	public static boolean equalStringLists(List<String> list1,
-			List<String> list2) {
+	public static boolean equalStringLists(List<String> list1, List<String> list2) {
 		if ((list1 == null) && (list2 == null)) {
 			return true;
 		}
@@ -179,16 +149,14 @@ public class TextUtilities {
 		for (int i = 0; i < list1.size(); i++) {
 			String s1 = list1.get(i);
 			String s2 = list2.get(i);
-			
 
-			
 			if ((s1 == null) && (s2 != null)) {
 				return false;
 			}
 			if ((s1 != null) && (s2 == null)) {
 				return false;
 			}
-			
+
 			if ((s1 != null) && (s2 != null) && !(s1.equals(s2))) {
 				return false;
 			}
@@ -201,46 +169,38 @@ public class TextUtilities {
 	/**
 	 * Get the next smaller font.
 	 * 
-	 * @param font
-	 *            the base font
-	 * @param stepdown
-	 *            the step down (e.g., if the step down is 2 and the font size
-	 *            is 28, a font of size 26 is returned.
+	 * @param font     the base font
+	 * @param stepdown the step down (e.g., if the step down is 2 and the font size
+	 *                 is 28, a font of size 26 is returned.
 	 * @return a font a little bigger
 	 */
 	public static Font nextSmallerFont(Font font, int stepdown) {
 		if (font == null) {
 			return null;
 		}
-		return new Font(font.getFontName(), font.getStyle(), font.getSize()
-				- stepdown);
+		return new Font(font.getFontName(), font.getStyle(), font.getSize() - stepdown);
 	}
 
 	/**
 	 * Get the next bigger font.
 	 * 
-	 * @param font
-	 *            the base font
-	 * @param stepup
-	 *            the step up (e.g., if the step up is 2 and the font size is
-	 *            28, a font of size 30 is returned.
+	 * @param font   the base font
+	 * @param stepup the step up (e.g., if the step up is 2 and the font size is 28,
+	 *               a font of size 30 is returned.
 	 * @return a font a little bigger
 	 */
 	public static Font nextBiggerFont(Font font, int stepup) {
 		if (font == null) {
 			return null;
 		}
-		return new Font(font.getFontName(), font.getStyle(), font.getSize()
-				+ stepup);
+		return new Font(font.getFontName(), font.getStyle(), font.getSize() + stepup);
 	}
 
 	/**
 	 * This method breaks a string into an array of tokens.
 	 * 
-	 * @param str
-	 *            the string to decompose.
-	 * @param token
-	 *            the token
+	 * @param str   the string to decompose.
+	 * @param token the token
 	 * @return an array of tokens
 	 */
 

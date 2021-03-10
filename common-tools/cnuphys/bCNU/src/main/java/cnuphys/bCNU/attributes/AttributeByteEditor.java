@@ -6,18 +6,16 @@ public class AttributeByteEditor extends AttributeIntegerValueEditor<Byte> {
 	 * Create a Byte editor.
 	 * 
 	 * @param attributeTable the owner table.
-	 * @param attribute the attribute
+	 * @param attribute      the attribute
 	 */
-	public AttributeByteEditor(AttributeTable attributeTable,
-			Attribute attribute) {
+	public AttributeByteEditor(AttributeTable attributeTable, Attribute attribute) {
 		super(attributeTable, attribute);
 	}
-	
 
 	@Override
 	protected void setStartValue() {
 		startValue = Byte.MIN_VALUE;
-		
+
 	}
 
 	@Override
@@ -25,12 +23,10 @@ public class AttributeByteEditor extends AttributeIntegerValueEditor<Byte> {
 		Byte newValue = startValue;
 		try {
 			newValue = Byte.parseByte(vText);
-		}
-		catch (NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			newValue = startValue;
 		}
 		return newValue;
 	}
-
 
 }

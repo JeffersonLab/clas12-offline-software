@@ -16,7 +16,7 @@ import javax.swing.JComponent;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.event.data.DC;
+import cnuphys.ced.frame.CedColors;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundStyle;
 import cnuphys.splot.plot.GraphicsUtilities;
@@ -26,8 +26,7 @@ import cnuphys.splot.style.LineStyle;
 public class PIDLegend extends JComponent {
 
 	// convenience reference to event manager
-	private static ClasIoEventManager _eventManager = ClasIoEventManager
-			.getInstance();
+	private static ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
 	// used to get the text in the right place
 	private static int _fh = -1;
@@ -39,7 +38,7 @@ public class PIDLegend extends JComponent {
 	private static int _yodd = -1;
 
 	private static final Font labelFont = new Font("SansSerif", Font.PLAIN, 11);
-	
+
 	private static Stroke _stroke = GraphicsUtilities.getStroke(2, LineStyle.SOLID);
 
 	// the owner
@@ -51,8 +50,7 @@ public class PIDLegend extends JComponent {
 	/**
 	 * Create a User Component (on the toolbar) drawer for a given view.
 	 * 
-	 * @param view
-	 *            the view with a toolbar that has a user component.
+	 * @param view the view with a toolbar that has a user component.
 	 */
 	public PIDLegend(JComponent parent) {
 		_component = parent;
@@ -73,10 +71,8 @@ public class PIDLegend extends JComponent {
 	/**
 	 * Draw on the component.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on the view.
+	 * @param g         the graphics context.
+	 * @param container the container on the view.
 	 */
 	@Override
 	public void paintComponent(Graphics g) {
@@ -108,9 +104,9 @@ public class PIDLegend extends JComponent {
 
 		int x = 4;
 		int xoff = -15;
-		x += drawLineForLegend(g, x, _yeven, "HB", DC.HB_COLOR);
-		x += drawLineForLegend(g, x, _yodd, "TB", DC.TB_COLOR);
-		
+		x += drawLineForLegend(g, x, _yeven, "HB", CedColors.HB_COLOR);
+		x += drawLineForLegend(g, x, _yodd, "TB", CedColors.TB_COLOR);
+
 		if (numMC != 0) {
 
 			// now draw all of them. Sort so order stays the same
@@ -131,12 +127,9 @@ public class PIDLegend extends JComponent {
 	/**
 	 * Draw a line for use on a toolbar user component, most likely
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param x
-	 *            the horizontal staring point
-	 * @param yc
-	 *            the central vertical position
+	 * @param g  the graphics context
+	 * @param x  the horizontal staring point
+	 * @param yc the central vertical position
 	 * @return the offset
 	 */
 	public int drawLineForLegend(Graphics g, int x, int yc, LundId lid) {
@@ -144,16 +137,13 @@ public class PIDLegend extends JComponent {
 		LundStyle style = LundStyle.getStyle(lid);
 		return drawLineForLegend(g, x, yc, lid.getName(), style.getLineColor());
 	}
-	
+
 	/**
 	 * Draw a line for use on a toolbar user component, most likely
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param x
-	 *            the horizontal staring point
-	 * @param yc
-	 *            the central vertical position
+	 * @param g  the graphics context
+	 * @param x  the horizontal staring point
+	 * @param yc the central vertical position
 	 * @return the offset
 	 */
 	public int drawLineForLegend(Graphics g, int x, int yc, String name, Color color) {

@@ -15,10 +15,8 @@ import cnuphys.bCNU.graphics.ImageManager;
 @SuppressWarnings("serial")
 public class VisibilityTableModel extends DefaultTableModel {
 
-	protected static ImageIcon enabledIcon = ImageManager.getInstance()
-			.loadImageIcon("images/pointer13.png");
-	protected static ImageIcon disabledIcon = ImageManager.getInstance()
-			.loadImageIcon("images/no13.png");
+	protected static ImageIcon enabledIcon = ImageManager.getInstance().loadImageIcon("images/pointer13.png");
+	protected static ImageIcon disabledIcon = ImageManager.getInstance().loadImageIcon("images/no13.png");
 
 	/**
 	 * Constant used to designate display column;
@@ -85,12 +83,9 @@ public class VisibilityTableModel extends DefaultTableModel {
 	/**
 	 * Set the value at a given row and column.
 	 * 
-	 * @param value
-	 *            The string to set.
-	 * @param row
-	 *            The zero based row.
-	 * @param col
-	 *            The zero based column.
+	 * @param value The string to set.
+	 * @param row   The zero based row.
+	 * @param col   The zero based column.
 	 */
 
 	@Override
@@ -145,8 +140,7 @@ public class VisibilityTableModel extends DefaultTableModel {
 	/**
 	 * Add a new IVisible into the table.
 	 * 
-	 * @param ivis
-	 *            the new object to add to the model.
+	 * @param ivis the new object to add to the model.
 	 */
 	public synchronized void add(IDrawable ivis) {
 		if (ivis != null) {
@@ -157,8 +151,7 @@ public class VisibilityTableModel extends DefaultTableModel {
 	/**
 	 * remove an IVisible from the table.
 	 * 
-	 * @param ivis
-	 *            the IVisible to remove.
+	 * @param ivis the IVisible to remove.
 	 */
 	public synchronized void remove(IDrawable ivis) {
 		if (ivis != null) {
@@ -176,8 +169,7 @@ public class VisibilityTableModel extends DefaultTableModel {
 	}
 
 	/**
-	 * @param data
-	 *            the data to set
+	 * @param data the data to set
 	 */
 	public synchronized void setData(Vector<IDrawable> data) {
 		_data = data;
@@ -186,8 +178,7 @@ public class VisibilityTableModel extends DefaultTableModel {
 	/**
 	 * Get the drawable in the model at the given row.
 	 * 
-	 * @param row
-	 *            the zero based row
+	 * @param row the zero based row
 	 * @return the IDrawble corresponding to the row.
 	 */
 	public IDrawable getDrawableAtRow(int row) {

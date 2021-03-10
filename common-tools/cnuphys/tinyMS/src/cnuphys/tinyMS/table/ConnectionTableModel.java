@@ -8,7 +8,6 @@ import cnuphys.tinyMS.server.ProxyClient;
 import cnuphys.tinyMS.server.TinyMessageServer;
 
 public class ConnectionTableModel extends DefaultTableModel {
-	
 
 	/** Constant used to designate id column */
 	public static final int ID = 0;
@@ -33,45 +32,47 @@ public class ConnectionTableModel extends DefaultTableModel {
 
 	/** Constant used to designate the message count column */
 	public static final int MESSAGE_COUNT = 7;
-	
 
 	// the names of the columns
-	protected static final String colNames[] = { "ID", "Client\nName", "User\nName", "Host\nName", 
-			"OS\nName", "Last\nPing (ago)", "Ping\nDuration", "Message\nCount"};
-	
-	// the widths of the columns
-	protected static final int columnWidths[] = {40, 80, 90, 150, 110, 80, 80, 70};
+	protected static final String colNames[] = { "ID", "Client\nName", "User\nName", "Host\nName", "OS\nName",
+			"Last\nPing (ago)", "Ping\nDuration", "Message\nCount" };
 
-	//the server
+	// the widths of the columns
+	protected static final int columnWidths[] = { 40, 80, 90, 150, 110, 80, 80, 70 };
+
+	// the server
 	private TinyMessageServer _server;
-	
-	//the table
+
+	// the table
 	private ConnectionTable _table;
-	
+
 	/**
 	 * Create a model for the table data
+	 * 
 	 * @param server the controlling server
 	 */
 	public ConnectionTableModel(TinyMessageServer server) {
 		super(colNames, 0);
 		_server = server;
 	}
-	
+
 	/**
 	 * Set the client table
+	 * 
 	 * @param table the client table
 	 */
 	protected void setTable(ConnectionTable table) {
 		_table = table;
 	}
-	
+
 	// the data is the list maintained by the server
 	protected List<ProxyClient> getData() {
 		return (_server == null) ? null : _server.getProxyClients();
 	}
-	
+
 	/**
 	 * Get the client for a given row
+	 * 
 	 * @param row the zero-cased row
 	 * @return the client for the given row, or null
 	 */
@@ -79,27 +80,25 @@ public class ConnectionTableModel extends DefaultTableModel {
 		if (row < 0) {
 			return null;
 		}
-		
+
 		List<ProxyClient> clients = getData();
 		if (row < clients.size()) {
 			return clients.get(row);
 		}
 		return null;
 	}
-	
 
 	@Override
 	public int getRowCount() {
 		List<ProxyClient> clients = getData();
 		return (clients == null) ? 0 : clients.size();
 	}
-	
+
 	@Override
 	public int getColumnCount() {
 		return colNames.length;
 	}
 
-	
 	/**
 	 * Get the value at a given row and column
 	 * 
@@ -142,6 +141,5 @@ public class ConnectionTableModel extends DefaultTableModel {
 		}
 		return null;
 	}
-
 
 }

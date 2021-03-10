@@ -32,20 +32,19 @@ public class CameraButton extends ToolBarButton {
 	/**
 	 * This is what I do if I am pressed
 	 * 
-	 * @param actionEvent
-	 *            the causal event.
+	 * @param actionEvent the causal event.
 	 */
 	@Override
 	public void actionPerformed(ActionEvent actionEvent) {
-		
+
 		if (container == null) {
 			return;
 		}
-		
+
 		if (container.handledCamera()) {
 			return;
 		}
-		
+
 		Toolkit.getDefaultToolkit().beep();
 
 		try {
@@ -55,8 +54,7 @@ public class CameraButton extends ToolBarButton {
 			// try making a png
 			if (Environment.getInstance().getPngWriter() != null) {
 
-				file = FileUtilities.saveFile(dirname, "screencapture.png",
-						"PNG ImageFile", "png", "PNG");
+				file = FileUtilities.saveFile(dirname, "screencapture.png", "PNG ImageFile", "png", "PNG");
 
 				if (file != null) {
 
@@ -64,12 +62,10 @@ public class CameraButton extends ToolBarButton {
 					// view type
 					BufferedImage bi;
 
-					ImageOutputStream ios = ImageIO
-							.createImageOutputStream(file);
+					ImageOutputStream ios = ImageIO.createImageOutputStream(file);
 					Environment.getInstance().getPngWriter().setOutput(ios);
 
-					bi = GraphicsUtilities.getComponentImage(container
-							.getComponent());
+					bi = GraphicsUtilities.getComponentImage(container.getComponent());
 
 					Environment.getInstance().getPngWriter().write(bi);
 					ios.close();

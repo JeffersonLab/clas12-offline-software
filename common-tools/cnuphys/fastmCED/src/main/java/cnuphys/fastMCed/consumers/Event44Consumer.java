@@ -11,6 +11,7 @@ import cnuphys.fastMCed.streaming.StreamReason;
 
 /**
  * This is a test consumer that will flag event number 44 in the stream
+ * 
  * @author heddle
  *
  */
@@ -23,15 +24,14 @@ public class Event44Consumer extends PhysicsEventConsumer {
 
 	@Override
 	public void streamingChange(StreamReason reason) {
-		//ignore
+		// ignore
 	}
 
 	@Override
 	public StreamProcessStatus streamingPhysicsEvent(PhysicsEvent event, List<ParticleHits> particleHits) {
 		if (PhysicsEventManager.getInstance().eventNumber() == 44) {
 			return StreamProcessStatus.FLAG;
-		}
-		else {
+		} else {
 			return StreamProcessStatus.CONTINUE;
 		}
 	}

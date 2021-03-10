@@ -33,10 +33,9 @@ public class DemoApp2 extends BaseMDIApplication {
 	/**
 	 * Constructor (private--used to create singleton)
 	 * 
-	 * @param keyVals
-	 *            an optional variable length list of attributes in type-value
-	 *            pairs. For example, AttributeType.NAME, "my application",
-	 *            AttributeType.CENTER, true, etc.
+	 * @param keyVals an optional variable length list of attributes in type-value
+	 *                pairs. For example, AttributeType.NAME, "my application",
+	 *                AttributeType.CENTER, true, etc.
 	 */
 	private DemoApp2(Object... keyVals) {
 		super(keyVals);
@@ -49,10 +48,8 @@ public class DemoApp2 extends BaseMDIApplication {
 	 */
 	public static DemoApp2 getInstance() {
 		if (instance == null) {
-			instance = new DemoApp2(PropertySupport.TITLE,
-					"Demo Application of Generic bCNU Views",
-					PropertySupport.BACKGROUNDIMAGE, "images/cnu.png",
-					PropertySupport.FRACTION, 0.65);
+			instance = new DemoApp2(PropertySupport.TITLE, "Demo Application of Generic bCNU Views",
+					PropertySupport.BACKGROUNDIMAGE, "images/cnu.png", PropertySupport.FRACTION, 0.65);
 
 			instance.addInitialViews();
 		}
@@ -76,8 +73,7 @@ public class DemoApp2 extends BaseMDIApplication {
 		// center
 		try {
 			final BufferedImage img = ImageIO
-					.read(new URL(
-							"http://i5.photobucket.com/albums/y188/MsPurrl/Fictional%20Characters/Zippy.jpg"));
+					.read(new URL("http://i5.photobucket.com/albums/y188/MsPurrl/Fictional%20Characters/Zippy.jpg"));
 
 			JComponent comp = new JComponent() {
 				@Override
@@ -134,11 +130,10 @@ public class DemoApp2 extends BaseMDIApplication {
 	/**
 	 * Main program used for testing only.
 	 * <p>
-	 * Command line arguments:</br> -p [dir] dir is the optional default
-	 * directory for the file manager
+	 * Command line arguments:</br>
+	 * -p [dir] dir is the optional default directory for the file manager
 	 * 
-	 * @param arg
-	 *            the command line arguments.
+	 * @param arg the command line arguments.
 	 */
 	public static void main(String[] arg) {
 

@@ -29,21 +29,17 @@ public class NumericDocument extends PlainDocument {
 
 	// Insert string method
 	@Override
-	public void insertString(int offs, String str, AttributeSet a)
-			throws BadLocationException {
+	public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
 		if (str == null) {
 			return;
 		}
 		String oldString = getText(0, getLength());
-		String newString = oldString.substring(0, offs) + str
-				+ oldString.substring(offs);
+		String newString = oldString.substring(0, offs) + str + oldString.substring(offs);
 		try {
 			newString = newString.trim();
 			double val = 0.0;
 			if (newString.length() < 1) {
-			} else if ((newString.length() == 1)
-					&& ((newString.startsWith("-")) || (newString
-							.startsWith("+")))) {
+			} else if ((newString.length() == 1) && ((newString.startsWith("-")) || (newString.startsWith("+")))) {
 			} else {
 				val = Double.parseDouble(newString);
 			}

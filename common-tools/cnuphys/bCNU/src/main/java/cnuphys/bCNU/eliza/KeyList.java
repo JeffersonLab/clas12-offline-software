@@ -37,8 +37,8 @@ public class KeyList extends Vector {
 	}
 
 	/**
-	 * Break the string s into words. For each word, if isKey is true, then push
-	 * the key into the stack.
+	 * Break the string s into words. For each word, if isKey is true, then push the
+	 * key into the stack.
 	 */
 	public void buildKeyStack(KeyStack stack, String s) {
 		stack.reset();

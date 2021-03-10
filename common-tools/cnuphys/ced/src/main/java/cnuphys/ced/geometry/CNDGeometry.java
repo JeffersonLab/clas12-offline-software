@@ -62,68 +62,68 @@ public class CNDGeometry {
 		for (int i = 0; i < cndLayers.length; i++) {
 			cndLayers[i] = cndSuperlayer.getLayer(i);
 			for (int j = 0; j < 48; j++) {
-				
-				
+
 				paddles[i][j] = cndLayers[i].getComponent(j);
-				
-				//rotate do to geomtry change
+
+				// rotate do to geomtry change
 				paddles[i][j].rotateZ(Math.toRadians(7.5));
-				
+
 			}
 		}
 
 	}
-	
+
 	/**
-	 * Converts the numbering from Gagik's database to real. This should not
-	 * be necessary but yet it is.
-	 * @param geo the geo triplets where sect=1, layer=1..3, component = 1..48
-	 * @param real the real triplets where sector = 1..24, layer=1..3, component = 1..2
+	 * Converts the numbering from Gagik's database to real. This should not be
+	 * necessary but yet it is.
+	 * 
+	 * @param geo  the geo triplets where sect=1, layer=1..3, component = 1..48
+	 * @param real the real triplets where sector = 1..24, layer=1..3, component =
+	 *             1..2
 	 */
 	public static void geoTripletToRealTriplet(int geo[], int real[]) {
-		int gS = geo[0];  //should be 1
-		int gL = geo[1];  //1..3
-		int gC = geo[2];  //1.48
-		
+		int gS = geo[0]; // should be 1
+		int gL = geo[1]; // 1..3
+		int gC = geo[2]; // 1.48
+
 		int t = 1 + (gC % 48);
-		int s = 1 + ((t-1) / 2);
+		int s = 1 + ((t - 1) / 2);
 		int c = (t % 2) == 0 ? 2 : 1;
-		
+
 		real[0] = s;
 		real[1] = gL;
 		real[2] = c;
 	}
-	
+
 	/**
-	 * Converts the numbering from  real to Gagik's database to real. This should not
+	 * Converts the numbering from real to Gagik's database to real. This should not
 	 * be necessary but yet it is.
-	 * @param geo the geo triplets where sect=1, layer=1..3, component = 1..48
-	 * @param real the real triplets where sector = 1..24, layer=1..3, component = 1..2
+	 * 
+	 * @param geo  the geo triplets where sect=1, layer=1..3, component = 1..48
+	 * @param real the real triplets where sector = 1..24, layer=1..3, component =
+	 *             1..2
 	 */
 	public static void realTripletToGeoTriplet(int geo[], int real[]) {
-		int s = real[0];  //1..24
-		int l = real[1];  //1..3
-		int c = real[2];  //1..2
-		
-		int u = 2*(s-1) + c;
-		int gC = (u-1) % 48;
+		int s = real[0]; // 1..24
+		int l = real[1]; // 1..3
+		int c = real[2]; // 1..2
+
+		int u = 2 * (s - 1) + c;
+		int gC = (u - 1) % 48;
 		if (gC == 0) {
 			gC = 48;
 		}
-		
+
 		geo[0] = 1;
 		geo[1] = l;
 		geo[2] = gC;
 	}
 
-
 	/**
 	 * Get a scintillator paddle
 	 * 
-	 * @param layer
-	 *            the layer [1..3]
-	 * @param paddle
-	 *            the paddles [1..48]
+	 * @param layer  the layer [1..3]
+	 * @param paddle the paddles [1..48]
 	 * @return the paddle
 	 */
 	public static ScintillatorPaddle getPaddle(int layer, int paddle) {
@@ -136,12 +136,9 @@ public class CNDGeometry {
 	/**
 	 * Used by the 3D drawing
 	 * 
-	 * @param layer
-	 *            the 1-based layer 1..3
-	 * @param paddleId
-	 *            the 1-based paddle 1..48
-	 * @param coords
-	 *            holds 8*3 = 24 values [x1, y1, z1, ..., x8, y8, z8]
+	 * @param layer    the 1-based layer 1..3
+	 * @param paddleId the 1-based paddle 1..48
+	 * @param coords   holds 8*3 = 24 values [x1, y1, z1, ..., x8, y8, z8]
 	 */
 	public static void paddleVertices(int layer, int paddleId, float[] coords) {
 
@@ -163,15 +160,11 @@ public class CNDGeometry {
 	/**
 	 * Obtain the paddle xy corners for 2D view
 	 * 
-	 * @param layer
-	 *            the layer 1..3
-	 * @param paddleId
-	 *            the paddle ID 1..48
-	 * @param wp
-	 *            the four XY corners (cm)
+	 * @param layer    the layer 1..3
+	 * @param paddleId the paddle ID 1..48
+	 * @param wp       the four XY corners (cm)
 	 */
-	public static void paddleXYCorners(int layer, int paddleId,
-			Point2D.Double[] wp) {
+	public static void paddleXYCorners(int layer, int paddleId, Point2D.Double[] wp) {
 		ScintillatorPaddle paddle = getPaddle(layer, paddleId);
 		if (paddle == null) {
 			return;
@@ -195,15 +188,11 @@ public class CNDGeometry {
 	 * 6: xmax, ymax, zmin <br>
 	 * 7: xmin, ymax, zmin <br>
 	 * 
-	 * @param layer
-	 *            the layer 1..3
-	 * @param paddleId
-	 *            the paddle ID 1..48
-	 * @param corners
-	 *            the eight XYZ corners (cm)
+	 * @param layer    the layer 1..3
+	 * @param paddleId the paddle ID 1..48
+	 * @param corners  the eight XYZ corners (cm)
 	 */
-	public static void paddle3DCorners(int layer, int paddleId,
-			Point3D corners[]) {
+	public static void paddle3DCorners(int layer, int paddleId, Point3D corners[]) {
 		ScintillatorPaddle paddle = getPaddle(layer, paddleId);
 		if (paddle == null) {
 			return;
@@ -217,9 +206,9 @@ public class CNDGeometry {
 
 	public static void main(String arg[]) {
 		initialize();
-		
-		//test conversion geo to real and back
-		
+
+		// test conversion geo to real and back
+
 		int gS = 1;
 		int geo[] = new int[3];
 		int real[] = new int[3];
@@ -229,19 +218,18 @@ public class CNDGeometry {
 				geo[0] = gS;
 				geo[1] = gL;
 				geo[2] = gC;
-				
+
 				geoTripletToRealTriplet(geo, real);
 				realTripletToGeoTriplet(geo2, real);
-				
-				System.out.println(String.format("geo: [%d, %d, %d] real: [%d, %d, %d] geo2: [%d, %d, %d]", geo[0], geo[1], geo[2], real[0], real[1], real[2], geo2[0], geo2[1], geo2[2] ));
-				
+
+				System.out.println(String.format("geo: [%d, %d, %d] real: [%d, %d, %d] geo2: [%d, %d, %d]", geo[0],
+						geo[1], geo[2], real[0], real[1], real[2], geo2[0], geo2[1], geo2[2]));
+
 				if ((geo[0] != geo2[0]) || (geo[1] != geo2[1]) || (geo[2] != geo2[2])) {
 					System.out.println("BAD CONVERSION  ");
 				}
 			}
 		}
-		
-		
 
 //		System.out.println("num sectors: " + cndDetector.getNumSectors());
 //		System.out.println("num supl: " + cndSector.getNumSuperlayers());

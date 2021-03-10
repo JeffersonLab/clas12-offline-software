@@ -6,28 +6,27 @@ import cnuphys.bCNU.dialog.DialogUtilities;
 import cnuphys.fastMCed.eventgen.AEventGenerator;
 
 public class SweepEventGenerator extends AEventGenerator {
-	
-	//dialog used to generate random event event after it is closed
+
+	// dialog used to generate random event event after it is closed
 	private SweepEvGenDialog _dialog;
-	
-	//event number
+
+	// event number
 	private int _eventNumber = 0;
-	
-	//most recent event
+
+	// most recent event
 	private PhysicsEvent _currentEvent;
-	
+
 	private SweepEventGenerator(SweepEvGenDialog source) {
 		_dialog = source;
 	}
-	
+
 	public static SweepEventGenerator createSweepGenerator() {
 		SweepEvGenDialog dialog = new SweepEvGenDialog(null);
 		dialog.setVisible(true);
-		
+
 		if (dialog.getReason() == DialogUtilities.OK_RESPONSE) {
 			return new SweepEventGenerator(dialog);
-		}
-		else {
+		} else {
 			return null;
 		}
 	}
@@ -51,7 +50,7 @@ public class SweepEventGenerator extends AEventGenerator {
 
 	@Override
 	public int eventCount() {
-		return (int)_dialog.totalSteps();
+		return (int) _dialog.totalSteps();
 	}
 
 	@Override

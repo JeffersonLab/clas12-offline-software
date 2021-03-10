@@ -9,8 +9,8 @@ public class EString {
 	static final String num = "0123456789";
 
 	/**
-	 * Look for a match between the string and the pattern. Return count of
-	 * maching characters before * or #. Return -1 if strings do not match.
+	 * Look for a match between the string and the pattern. Return count of maching
+	 * characters before * or #. Return -1 if strings do not match.
 	 */
 	public static int amatch(String str, String pat) {
 		int count = 0;
@@ -33,8 +33,7 @@ public class EString {
 
 	/**
 	 * Search in successive positions of the string, looking for a match to the
-	 * pattern. Return the string position in str of the match, or -1 for no
-	 * match.
+	 * pattern. Return the string position in str of the match, or -1 for no match.
 	 */
 	public static int findPat(String str, String pat) {
 		int count = 0;
@@ -61,8 +60,8 @@ public class EString {
 	}
 
 	/**
-	 * Match the string against a pattern and fills in matches array with the
-	 * pieces that matched * and #
+	 * Match the string against a pattern and fills in matches array with the pieces
+	 * that matched * and #
 	 */
 	static boolean matchA(String str, String pat, String matches[]) {
 		int i = 0; // move through str
@@ -155,8 +154,8 @@ public class EString {
 	}
 
 	/*
-	 * Translates corresponding characters in src to dest. Src and dest must
-	 * have the same length.
+	 * Translates corresponding characters in src to dest. Src and dest must have
+	 * the same length.
 	 */
 	public static String translate(String str, String src, String dest) {
 		if (src.length() != dest.length()) {
@@ -170,8 +169,8 @@ public class EString {
 
 	/**
 	 * Compresses its input by: dropping space before space, comma, and period;
-	 * adding space before question, if char before is not a space; and copying
-	 * all others
+	 * adding space before question, if char before is not a space; and copying all
+	 * others
 	 */
 	public static String compress(String s) {
 		String dest = "";
@@ -179,9 +178,7 @@ public class EString {
 			return s;
 		char c = s.charAt(0);
 		for (int i = 1; i < s.length(); i++) {
-			if (c == ' '
-					&& ((s.charAt(i) == ' ') || (s.charAt(i) == ',') || (s
-							.charAt(i) == '.'))) {
+			if (c == ' ' && ((s.charAt(i) == ' ') || (s.charAt(i) == ',') || (s.charAt(i) == '.'))) {
 				// nothing
 			} else if (c != ' ' && s.charAt(i) == '?') {
 				dest += c + " ";

@@ -37,27 +37,25 @@ public class Styled implements IStyled {
 	/**
 	 * Create with all defaults but the given fill color.
 	 * 
-	 * @param fillColor
-	 *            the fill color to user.
+	 * @param fillColor the fill color to user.
 	 */
 	public Styled(Color fillColor) {
 		_fillColor = fillColor;
 	}
 
 	/**
-	 * Create with all defaults but the given fill color. The link color is set
-	 * a little darker or lighter.
+	 * Create with all defaults but the given fill color. The link color is set a
+	 * little darker or lighter.
 	 * 
-	 * @param fillColor
-	 *            the fill color to user.
-	 * @param darkerLineColor
-	 *            if true/false make line color darker/lighter than fill color.
+	 * @param fillColor       the fill color to user.
+	 * @param darkerLineColor if true/false make line color darker/lighter than fill
+	 *                        color.
 	 */
 	public Styled(Color fillColor, boolean darkerLineColor) {
 		_fillColor = fillColor;
 		if (darkerLineColor) {
 			_lineColor = fillColor.darker();
-		} else  {
+		} else {
 			_lineColor = fillColor.brighter();
 		}
 
@@ -126,8 +124,7 @@ public class Styled implements IStyled {
 	/**
 	 * Set symbol size (full width) in pixels.
 	 * 
-	 * @param symbolSize
-	 *            symbol size (full width) in pixels.
+	 * @param symbolSize symbol size (full width) in pixels.
 	 */
 	@Override
 	public void setSymbolSize(int symbolSize) {

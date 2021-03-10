@@ -30,8 +30,7 @@ public abstract class DirectionComparator<T> implements Comparator<T> {
 	/**
 	 * Set whether this is an ascending sort
 	 * 
-	 * @param ascendingSort
-	 *            the value of the sort direction flag.
+	 * @param ascendingSort the value of the sort direction flag.
 	 */
 	public void set_ascendingSort(boolean ascendingSort) {
 		_ascendingSort = ascendingSort;

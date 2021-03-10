@@ -13,13 +13,13 @@ import cnuphys.bCNU.util.Fonts;
 public class BusyPanel extends JPanel {
 
 	JLabel prompt;
-	
+
 	public BusyPanel() {
 		setLayout(new FlowLayout(FlowLayout.LEFT, 6, 2));
 		setBackground(Color.white);
-		
+
 		ImageIcon busyIcon = ImageManager.getInstance().loadImageIcon("images/activity.gif");
-		
+
 		if (busyIcon != null) {
 			JLabel ilab = new JLabel(busyIcon);
 			ilab.setOpaque(true);
@@ -28,7 +28,7 @@ public class BusyPanel extends JPanel {
 
 			add(ilab);
 		}
-		
+
 		prompt = new JLabel("");
 		prompt.setOpaque(true);
 		prompt.setBackground(Color.white);

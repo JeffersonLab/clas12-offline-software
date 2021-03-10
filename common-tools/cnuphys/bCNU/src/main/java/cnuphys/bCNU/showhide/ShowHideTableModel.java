@@ -58,7 +58,6 @@ public class ShowHideTableModel extends DefaultTableModel {
 		return _data.size();
 	}
 
-
 	/**
 	 * Get the value at a given row and column
 	 * 
@@ -88,8 +87,7 @@ public class ShowHideTableModel extends DefaultTableModel {
 	/**
 	 * Add a new IVisible into the table.
 	 * 
-	 * @param ivis
-	 *            the new object to add to the model.
+	 * @param ivis the new object to add to the model.
 	 */
 	public void add(IShowHide ivis) {
 		if (ivis != null) {
@@ -104,8 +102,7 @@ public class ShowHideTableModel extends DefaultTableModel {
 	/**
 	 * remove an IVisible from the table.
 	 * 
-	 * @param ivis
-	 *            the IVisible to remove
+	 * @param ivis the IVisible to remove
 	 */
 	public void remove(IShowHide ivis) {
 		if (ivis != null) {
@@ -125,8 +122,7 @@ public class ShowHideTableModel extends DefaultTableModel {
 	/**
 	 * Set the entire model
 	 * 
-	 * @param data
-	 *            the data to set
+	 * @param data the data to set
 	 */
 	public void setData(Vector<IShowHide> data) {
 		_data = data;
@@ -136,8 +132,7 @@ public class ShowHideTableModel extends DefaultTableModel {
 	/**
 	 * Get the IShowHide in the model at the given row.
 	 * 
-	 * @param row
-	 *            the zero based row
+	 * @param row the zero based row
 	 * @return the IShowHide corresponding to the row.
 	 */
 	public IShowHide getElementAtRow(int row) {
@@ -154,8 +149,7 @@ public class ShowHideTableModel extends DefaultTableModel {
 	 * Add an <code>IShowHideListener</code>.
 	 * 
 	 * @see IShowHideListener
-	 * @param modelListener
-	 *            the <code>IShowHideListener</code> to add.
+	 * @param modelListener the <code>IShowHideListener</code> to add.
 	 */
 	public void addModelListener(IShowHideListener modelListener) {
 
@@ -174,8 +168,7 @@ public class ShowHideTableModel extends DefaultTableModel {
 	 * Remove an <code>IShowHideListener</code>.
 	 * 
 	 * @see IShowHideListener
-	 * @param modelListener
-	 *            the <code>IShowHideListener</code> to remove.
+	 * @param modelListener the <code>IShowHideListener</code> to remove.
 	 */
 	public void removeModelListener(IShowHideListener modelListener) {
 

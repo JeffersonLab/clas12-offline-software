@@ -11,12 +11,13 @@
 		<property name="cnudir" value="../../../.."/>
 		
 		<!-- for making classpath -->
-		<property name="coat" value="coatjava/lib/clas/coat-libs-5.1-SNAPSHOT.jar"/>
+		<property name="coat" value="coatjava/lib/clas/coat-libs-6.5.13-SNAPSHOT.jar"/>
 		<property name="vecm" value="coatjava/lib/clas/vecmath-1.3.1-2.jar"/>
 		<property name="glue" value="JOGL/gluegen-rt.jar"/>
 		<property name="jogl" value="JOGL/jogl-all.jar"/>
 		<property name="f2j" value="numRec/lib/f2jutil.jar"/>
 		<property name="nr" value="numRec/lib/numRec.jar"/>
+		<property name="jfx" value="javafx/lib/jfxrt.jar"/>
 		
 		<!-- deleted existing dir -->
 		<delete dir="${destdir}"/>
@@ -27,13 +28,18 @@
 			<fileset includes="coatjava/etc/bankdefs/hipo/*.json, coatjava/lib/clas/*.jar"  
 							dir="${cnudir}" />
 		</copy>
+		<copy todir="${destdir}">
+			<fileset includes="coatjava/etc/bankdefs/hipo4/*.json, coatjava/lib/clas/*.jar"  
+							dir="${cnudir}" />
+		</copy>
 		
-		<!-- copy shell script -->
+		<!-- copy shell scripts -->
 		<copy file="${cnudir}/ced/ced.sh" todir="${destdir}"/>
+		<copy file="${cnudir}/ced/cedNO3D.sh" todir="${destdir}"/>
 		
 		<!-- copy data (field maps)-->
 		<copy todir="${destdir}">
-			<fileset includes="magfield/*" excludes="**/.project" dir="${homedir}" />
+			<fileset includes="magfield/*" excludes="**/.project  Full*.*" dir="${homedir}" />
 		</copy>
 		
 		<!-- copy jogl from home dir-->
@@ -53,6 +59,12 @@
 			<fileset includes="numRec/**" excludes="**/junit.jar **/bin/** **/src/** **/test/** **/*.txt **/*.xml"
 							dir="${cnudir}" />
 		</copy>
+		
+		<!-- copy javafx -->
+		<copy todir="${destdir}">
+			<fileset includes="javafx/**" dir="${cnudir}" />
+		</copy>
+		
 		
 		<!-- the ced jar-->
 		<jar destfile="${destdir}/ced.jar">
@@ -102,7 +114,7 @@
 			<!-- make it executable -->
 		    <manifest>
 		        <attribute name="Main-Class" value="cnuphys.ced.frame.Ced"/>
-		    	<attribute name="Class-Path" value="${coat} ${vecm} ${apache} ${glue} ${jogl} ${f2j} ${nr}"/>
+		    	<attribute name="Class-Path" value="${jfx} ${coat} ${vecm} ${apache} ${glue} ${jogl} ${f2j} ${nr}"/>
 		    </manifest>
 		</jar>
 		

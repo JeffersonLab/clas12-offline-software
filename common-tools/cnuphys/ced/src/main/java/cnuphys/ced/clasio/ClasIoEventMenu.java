@@ -30,8 +30,7 @@ import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.frame.Ced;
 import cnuphys.splot.plot.ImageManager;
 
-public class ClasIoEventMenu extends JMenu implements ActionListener,
-		IClasIoEventListener {
+public class ClasIoEventMenu extends JMenu implements ActionListener, IClasIoEventListener {
 
 	private ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
@@ -50,8 +49,12 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	// a hash table of menu items used by recent file feature
 	private static Hashtable<String, JMenuItem> _menuItems;
 
-	// for goto
-	private JTextField evnum;
+	// for goto sequential
+	private JTextField seqEvNum;
+	
+	// for goto true event from RUN::config
+	private JTextField trueEvNum;
+
 
 	// for auto next event
 	private JCheckBox _periodEvent;
@@ -70,32 +73,30 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 //			"Event Files", evioExtensions);
 
 	private static FileFilter _hipoEventFileFilter;
-	
+
 	private static EvioFileFilter _evioEventFileFilter = new EvioFileFilter();
 
-	//for both evio and hipo
+	// for both evio and hipo
 	private static FileFilter _compositeFilter;
 
 	/**
 	 * The event menu used for the clasio package
 	 * 
-	 * @param includeAccumulation
-	 *            include accumulation option
-	 * @param includeQuit
-	 *            include quite option
+	 * @param includeAccumulation include accumulation option
+	 * @param includeQuit         include quite option
 	 */
 	public ClasIoEventMenu(boolean includeAccumulation, boolean includeQuit) {
 		super("Events");
 
 		_eventManager.addClasIoEventListener(this, 1);
-		
+
 		if (_hipoEventFileFilter == null) {
 			_hipoEventFileFilter = new FileFilter() {
 
 				@Override
 				public boolean accept(File f) {
-					return f.getPath().endsWith(".hipo") 
-							|| f.getPath().endsWith(".hippo") || f.getPath().contains(".hipo.");
+					return f.getPath().endsWith(".hipo") || f.getPath().endsWith(".hippo")
+							|| f.getPath().contains(".hipo.");
 				}
 
 				@Override
@@ -121,11 +122,10 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 
 			};
 		}
-		
+
 		// accumulate
 		if (includeAccumulation) {
-			accumulationItem = addMenuItem("Accumulate Events...",
-					KeyEvent.VK_A);
+			accumulationItem = addMenuItem("Accumulate Events...", KeyEvent.VK_A);
 			addSeparator();
 		}
 
@@ -135,12 +135,15 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		// previous
 		prevItem = addMenuItem("Previous Event", KeyEvent.VK_P);
 
-		// goto
-		add(createGoToPanel());
+		// goto sequential
+		add(createGotoSequentialPanel());
+		
+		// goto true
+		add(createGotoTruePanel());
+
 
 		// periodic event
 		add(createEventPeriodPanel());
-
 
 		if (includeQuit) {
 			addSeparator();
@@ -151,9 +154,9 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		fixState();
 	}
 
-	
-	/** 
+	/**
 	 * Get the menu item to open a HIPO event file
+	 * 
 	 * @return the menu item to open an event file
 	 */
 	public static JMenuItem getOpenEventFileItem() {
@@ -209,9 +212,9 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 //		return item;
 //	}
 
-	
-	/** 
+	/**
 	 * Get the menu item to connect to any DAQ ring
+	 * 
 	 * @return the menu item to open any DAQ ring
 	 */
 //	public static JMenuItem getConnectAnyRingItem() {
@@ -229,7 +232,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 //		item.addActionListener(al);
 //		return item;
 //	}
-	
+
 	public static JMenuItem getConnectETItem() {
 		final JMenuItem item = new JMenuItem("Connect to ET Ring...");
 		item.setIcon(ImageManager.getInstance().loadImageIcon("images/et.png"));
@@ -245,14 +248,12 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		item.addActionListener(al);
 		return item;
 	}
-	
 
 	// convenience method to add menu item
 	private JMenuItem addMenuItem(String label, int accelKey) {
 		JMenuItem item = new JMenuItem(label);
 		if (accelKey > 0) {
-			item.setAccelerator(KeyStroke.getKeyStroke(accelKey,
-					ActionEvent.CTRL_MASK));
+			item.setAccelerator(KeyStroke.getKeyStroke(accelKey, ActionEvent.CTRL_MASK));
 		}
 
 		item.addActionListener(this);
@@ -269,12 +270,13 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		}
 
 		boolean nextOK = _eventManager.isNextOK();
-		
-	//	System.err.println("FIX STATE: nextOK: " + nextOK);
+
+		// System.err.println("FIX STATE: nextOK: " + nextOK);
 
 		nextItem.setEnabled(nextOK);
 		prevItem.setEnabled(_eventManager.isPrevOK());
-		evnum.setEnabled(_eventManager.isGotoOK());
+		seqEvNum.setEnabled(_eventManager.isGotoOK());
+		trueEvNum.setEnabled(_eventManager.isGotoOK() && (_eventManager.getTrueEventNumber() > -1));
 		_periodEvent.setEnabled(nextOK);
 		_periodTF.setEnabled(nextOK);
 
@@ -292,13 +294,12 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	/**
 	 * Set the default directory in which to look for event files.
 	 * 
-	 * @param defaultDataDir
-	 *            default directory in which to look for event files
+	 * @param defaultDataDir default directory in which to look for event files
 	 */
 	public static void setDefaultDataDir(String defaultDataDir) {
 		dataFilePath = defaultDataDir;
 	}
-	
+
 	/**
 	 * Select and open an event file.
 	 *
@@ -314,11 +315,10 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 			File file = chooser.getSelectedFile();
 			try {
 				dataFilePath = file.getPath();
-				
+
 				if (_hipoEventFileFilter.accept(file)) {
 					ClasIoEventManager.getInstance().openHipoEventFile(file);
-				}
-				else if (_evioEventFileFilter.accept(file)) {
+				} else if (_evioEventFileFilter.accept(file)) {
 					ClasIoEventManager.getInstance().openEvioEventFile(file);
 				}
 			} catch (FileNotFoundException e) {
@@ -330,8 +330,6 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 
 		return null;
 	}
-
-
 
 	/**
 	 * Get the menu from which you can choose a recently opened file
@@ -350,7 +348,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		if (recentFiles != null) {
 			for (String fn : recentFiles) {
 
-				//make sure the file still exists
+				// make sure the file still exists
 				File file = new File(fn);
 				if (file.exists()) {
 					addMenu(fn, false);
@@ -361,7 +359,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		return _recentMenu;
 	}
 
-	//use to open recent files
+	// use to open recent files
 	private static void addMenu(String path, boolean atTop) {
 
 		// if it is in the hash, remove from has and from menu
@@ -381,13 +379,12 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 				try {
 					String fn = ae.getActionCommand();
 					File file = new File(fn);
-					
+
 					if (file.exists()) {
 						try {
 							if (_hipoEventFileFilter.accept(file)) {
 								ClasIoEventManager.getInstance().openHipoEventFile(file);
-							}
-							else if (_evioEventFileFilter.accept(file)) {
+							} else if (_evioEventFileFilter.accept(file)) {
 								ClasIoEventManager.getInstance().openEvioEventFile(file);
 							}
 						} catch (FileNotFoundException e) {
@@ -416,15 +413,13 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	/**
 	 * Update the recent files for the recent file menu.
 	 * 
-	 * @param path
-	 *            the path to the file
+	 * @param path the path to the file
 	 */
 	private void updateRecentFiles(String path) {
 		if (path == null) {
 			return;
 		}
-		Vector<String> recentFiles = Environment.getInstance()
-				.getPreferenceList(_recentFileKey);
+		Vector<String> recentFiles = Environment.getInstance().getPreferenceList(_recentFileKey);
 		if (recentFiles == null) {
 			recentFiles = new Vector<String>(10);
 		}
@@ -435,20 +430,19 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		if (recentFiles.size() > 9) {
 			recentFiles.removeElementAt(9);
 		}
-		Environment.getInstance().savePreferenceList(_recentFileKey,
-				recentFiles);
+		Environment.getInstance().savePreferenceList(_recentFileKey, recentFiles);
 
 		// add to menu
 		addMenu(path, true);
 	}
-
-	// create the goto event widget
-	private JPanel createGoToPanel() {
+	
+	// create the goto sequential event widget
+	private JPanel createGotoSequentialPanel() {
 		JPanel sp = new TransparentPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
 
-		JLabel label = new JLabel("Go To Event: ");
+		JLabel label = new JLabel("Goto Sequential Event: ");
 
-		evnum = new JTextField("1", 10);
+		seqEvNum = new JTextField("1", 10);
 
 		KeyAdapter ka = new KeyAdapter() {
 			@Override
@@ -456,7 +450,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 				if (kev.getKeyCode() == KeyEvent.VK_ENTER) {
 					MenuSelectionManager.defaultManager().clearSelectedPath();
 					try {
-						int enumber = Integer.parseInt(evnum.getText());
+						int enumber = Integer.parseInt(seqEvNum.getText());
 						_eventManager.gotoEvent(enumber);
 					} catch (Exception e) {
 
@@ -464,13 +458,48 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 				}
 			}
 		};
-		evnum.addKeyListener(ka);
+		seqEvNum.addKeyListener(ka);
 
 		sp.add(label);
-		sp.add(evnum);
-		evnum.setEnabled(false);
+		sp.add(seqEvNum);
+		seqEvNum.setEnabled(false);
 		return sp;
 	}
+
+	// create the goto true event widget
+	private JPanel createGotoTruePanel() {
+		JPanel sp = new TransparentPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+
+		JLabel label = new JLabel("Goto True Event: ");
+
+		trueEvNum = new JTextField("1", 10);
+
+		KeyAdapter ka = new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent kev) {
+				if (kev.getKeyCode() == KeyEvent.VK_ENTER) {
+					MenuSelectionManager.defaultManager().clearSelectedPath();
+					int trueNum = _eventManager.getTrueEventNumber();
+					if (trueNum > -1) {
+						try {
+							int enumber = Integer.parseInt(trueEvNum.getText());
+							if (enumber != trueNum) {
+								_eventManager.gotoTrueEvent(enumber);
+							}
+						} catch (Exception e) {
+						}
+					}
+				}
+			}
+		};
+		trueEvNum.addKeyListener(ka);
+
+		sp.add(label);
+		sp.add(trueEvNum);
+		trueEvNum.setEnabled(false);
+		return sp;
+	}
+	
 
 	// create the event every so many seconds widget
 	private JPanel createEventPeriodPanel() {
@@ -486,22 +515,21 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 			public void actionPerformed(ActionEvent e) {
 				if (_periodEvent.isSelected()) {
 					if (_nextEventTimer == null) {
-						
+
 						float period = Float.parseFloat(_periodTF.getText());
 						_period = Math.max(0.001f, Math.min(60f, period));
-
 
 						ActionListener nextAl = new ActionListener() {
 
 							@Override
 							public void actionPerformed(ActionEvent e) {
-								//System.err.println("NEXT EVENT period = " + _period);
+								// System.err.println("NEXT EVENT period = " + _period);
 								_eventManager.getNextEvent();
 							}
 
 						};
 
-						int delay = (int)(1000 * _period);
+						int delay = (int) (1000 * _period);
 						_nextEventTimer = new Timer(delay, nextAl);
 
 					}
@@ -528,7 +556,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 						_period = Math.max(0.001f, Math.min(60f, period));
 
 						if (_nextEventTimer != null) {
-							int delay = (int)(1000 * _period);
+							int delay = (int) (1000 * _period);
 //							System.err.println("Set next event delay to " + delay + " ms");
 							_nextEventTimer.setDelay(delay);
 						}
@@ -557,8 +585,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		} else if (source == prevItem) {
 			_eventManager.getPreviousEvent();
 		} else if (source == accumulationItem) {
-			ClasIoAccumulationDialog dialog = new ClasIoAccumulationDialog(
-					AccumulationManager.getInstance());
+			ClasIoAccumulationDialog dialog = new ClasIoAccumulationDialog(AccumulationManager.getInstance());
 			dialog.setVisible(true);
 		} else if (source == quitItem) {
 			System.exit(0);
@@ -568,8 +595,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	/**
 	 * Part of the IClasIoEventListener interface
 	 * 
-	 * @param event
-	 *            the new current event
+	 * @param event the new current event
 	 */
 	@Override
 	public void newClasIoEvent(DataEvent event) {
@@ -579,8 +605,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	/**
 	 * Part of the IClasIoEventListener interface
 	 * 
-	 * @param path
-	 *            the new path to the event file
+	 * @param path the new path to the event file
 	 */
 	@Override
 	public void openedNewEventFile(String path) {
@@ -590,24 +615,26 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 		updateRecentFiles(path);
 		fixState();
 	}
-	
+
 	/**
 	 * Change the event source type
+	 * 
 	 * @param source the new source: File, ET
 	 */
 	@Override
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
 		fixState();
 	}
-	
+
 	/**
 	 * Tests whether this listener is interested in events while accumulating
-	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
+	 * 
+	 * @return <code>true</code> if this listener is NOT interested in events while
+	 *         accumulating
 	 */
 	@Override
 	public boolean ignoreIfAccumulating() {
 		return true;
 	}
-
 
 }

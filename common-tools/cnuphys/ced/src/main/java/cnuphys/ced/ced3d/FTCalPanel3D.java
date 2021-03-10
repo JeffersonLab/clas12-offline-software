@@ -20,20 +20,19 @@ public class FTCalPanel3D extends CedPanel3D {
 	private final float zmin = -50f;
 
 	// labels for the check box
-	private static final String _cbaLabels[] = { SHOW_VOLUMES, SHOW_TRUTH};
+	private static final String _cbaLabels[] = { SHOW_VOLUMES, SHOW_TRUTH };
 
-	public FTCalPanel3D(CedView3D view, float angleX, float angleY, float angleZ, float xDist,
-			float yDist, float zDist) {
-		super(view, angleX, angleY, angleZ, xDist, yDist, zDist, _cbaLabels);
+	public FTCalPanel3D(CedView3D view, float angleX, float angleY, float angleZ, float xDist, float yDist,
+			float zDist) {
+		super(view, angleX, angleY, angleZ, xDist, yDist, zDist, BGFEFAULT, BGFEFAULT, BGFEFAULT, _cbaLabels);
 	}
 
 	@Override
 	public void createInitialItems() {
 		// coordinate axes
-		Axes3D axes = new Axes3D(this, -xymax, xymax, -xymax, xymax, zmin,
-				zmax, null, FTCALGeometry.FTCAL_Z0, Color.darkGray, 1f, 6, 6, 6,
-				Color.black, X11Colors.getX11Color("Dark Green"), new Font(
-						"SansSerif", Font.PLAIN, 12), 0);
+		Axes3D axes = new Axes3D(this, -xymax, xymax, -xymax, xymax, zmin, zmax, null, FTCALGeometry.FTCAL_Z0,
+				Color.darkGray, 1f, 6, 6, 6, Color.black, X11Colors.getX11Color("Dark Green"),
+				new Font("SansSerif", Font.PLAIN, 12), 0);
 		addItem(axes);
 
 		// trajectory drawer
@@ -46,12 +45,11 @@ public class FTCalPanel3D extends CedPanel3D {
 		}
 
 	}
-	
 
 	/**
-	 * This gets the z step used by the mouse and key adapters, to see how fast
-	 * we move in or in in response to mouse wheel or up/down arrows. It should
-	 * be overridden to give something sensible. like the scale/100;
+	 * This gets the z step used by the mouse and key adapters, to see how fast we
+	 * move in or in in response to mouse wheel or up/down arrows. It should be
+	 * overridden to give something sensible. like the scale/100;
 	 * 
 	 * @return the z step (changes to zDist) for moving in and out
 	 */

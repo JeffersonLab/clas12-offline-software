@@ -23,24 +23,21 @@ public class ColorModelLegend extends JComponent {
 	private Dimension size;
 
 	private int _gap = 2;
-	private int left;
-	private int right;
 	private int top;
 	private int bottom;
 
 	/**
 	 * Create a color legend with the given color model.
 	 * 
-	 * @param model
-	 *            the model to display as a legend.
+	 * @param model        the model to display as a legend.
 	 * @param desiredWidth the width of the component (not including gap)
-	 * @param name the border text
-	 * @param gap left and right gap
+	 * @param name         the border text
+	 * @param gap          left and right gap
 	 */
 	public ColorModelLegend(ColorScaleModel model, int desiredWidth, String name, int gap) {
 
 		_gap = gap;
-		
+
 		if (desiredWidth > 0) {
 			size = new Dimension(desiredWidth + 2 * gap, 50);
 		}
@@ -49,14 +46,13 @@ public class ColorModelLegend extends JComponent {
 		setBorder(new CommonBorder(name));
 		setOpaque(true);
 	}
-	
+
 	/**
 	 * Create a color legend with the given color model.
 	 * 
-	 * @param model
-	 *            the model to display as a legend.
+	 * @param model        the model to display as a legend.
 	 * @param desiredWidth the width of the component (not including gap)
-	 * @param name the border text
+	 * @param name         the border text
 	 */
 	public ColorModelLegend(ColorScaleModel model, int desiredWidth, String name) {
 		this(model, desiredWidth, name, 2);
@@ -75,7 +71,7 @@ public class ColorModelLegend extends JComponent {
 //		if ((colors.length * dx) > (useableW - 8)) {
 //			dx -= 1;
 //		}
-		
+
 		double left = _gap + (useableW - (colors.length * dx)) / 2;
 		double right = left + dx;
 		int height = 12;
@@ -86,18 +82,17 @@ public class ColorModelLegend extends JComponent {
 		for (int i = 0; i < colors.length; i++) {
 			g.setColor(colors[i]);
 			g.setFont(Fonts.smallFont);
-			int xt = (int)left;
-			g.fillRect(xt, top, (int)(right-left), height);
-			g.drawRect(xt, top, (int)(right-left), height);
-			
+			int xt = (int) left;
+			g.fillRect(xt, top, (int) (right - left), height);
+			g.drawRect(xt, top, (int) (right - left), height);
+
 			if (i == 0) {
 				double val = _model.getMinValue();
 
 				g.setColor(Color.black);
 				if (Math.abs(val) < 1.0e-5) {
 					g.drawString("0", xt - 1, ytext);
-				}
-				else {
+				} else {
 					g.drawString(DoubleFormat.doubleFormat(val, _model.getPrecision()), xt - 3, ytext);
 				}
 			}
@@ -125,20 +120,38 @@ public class ColorModelLegend extends JComponent {
 				g.setColor(Color.black);
 				if (Math.abs(val - 1) < 1.0e-5) {
 					g.drawString("1", xt - 3, ytext);
-				}
-				else {
+				} else {
 					g.drawString(DoubleFormat.doubleFormat(val, _model.getPrecision()), xt - 5, ytext);
 				}
-			}			
-			
+			}
+
 			left = right;
 			right += dx;
-		}		
+		}
 
 		right = left;
 		left = _gap + (useableW - (colors.length * dx)) / 2;
-		GraphicsUtilities.drawSimple3DRect(g, (int)left, top-1, (int)(right - left), bottom - top + 1, false);
+		GraphicsUtilities.drawSimple3DRect(g, (int) left, top - 1, (int) (right - left), bottom - top + 1, false);
 
+	}
+
+	/**
+	 * Set the color model
+	 * 
+	 * @param model the new color model
+	 */
+	public void setColorScaleModel(ColorScaleModel model) {
+		_model = model;
+		repaint();
+	}
+
+	/**
+	 * Get the color scale model if there is one.
+	 * 
+	 * @return the color scale model for accumulation, etc.
+	 */
+	public ColorScaleModel getColorScaleModel() {
+		return _model;
 	}
 
 	@Override

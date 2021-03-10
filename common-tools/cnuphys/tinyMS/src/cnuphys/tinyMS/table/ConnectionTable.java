@@ -1,10 +1,7 @@
 package cnuphys.tinyMS.table;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
-import java.util.List;
-
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -18,24 +15,24 @@ import cnuphys.tinyMS.graphics.RowHeightController;
 import cnuphys.tinyMS.server.ProxyClient;
 import cnuphys.tinyMS.server.TinyMessageServer;
 
-
 public class ConnectionTable extends JTable {
-	
+
 	private static final Font _tableFont = Fonts.defaultFont;
-	
+
 	private JScrollPane _scrollPane;
-	
-	//grid and border color
-	private  Color _gridColor = Color.lightGray;
-	
-	//Controls row heights
+
+	// grid and border color
+	private Color _gridColor = Color.lightGray;
+
+	// Controls row heights
 	private RowHeightController _rowHeightControl;
-	
-	//the server
+
+	// the server
 	private TinyMessageServer _server;
-	
+
 	/**
 	 * Create the client table
+	 * 
 	 * @param server the servwer owner
 	 */
 	public ConnectionTable(TinyMessageServer server) {
@@ -48,9 +45,9 @@ public class ConnectionTable extends JTable {
 		getSelectionModel().addListSelectionListener(this);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		setRowSelectionAllowed(true);
-		
+
 		MultilineHeaderRenderer headerRenderer = new MultilineHeaderRenderer();
-		
+
 		// set preferred widths
 		for (int i = 0; i < getColumnCount(); i++) {
 			TableColumn column = getColumnModel().getColumn(i);
@@ -60,7 +57,6 @@ public class ConnectionTable extends JTable {
 //			column.setMinWidth(HermesMSELTableModel.columnWidths[i]);
 		}
 
-		
 		setDragEnabled(false);
 
 		setGridColor(_gridColor);
@@ -68,15 +64,16 @@ public class ConnectionTable extends JTable {
 
 		// no reordering
 		getTableHeader().setReorderingAllowed(false);
-		
+
 		setBorder(BorderFactory.createLineBorder(_gridColor));
-		
-	//	setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
+
+		// setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
 
 	}
-	
+
 	/**
 	 * Get the scroll pane
+	 * 
 	 * @return the scroll pane
 	 */
 	public JScrollPane getScrollPane() {
@@ -92,20 +89,20 @@ public class ConnectionTable extends JTable {
 		}
 		return _scrollPane;
 	}
-	
-	//Fix the row heights
+
+	// Fix the row heights
 	protected void fixRowHeights() {
 		_rowHeightControl.fixRowHeights();
 	}
 
 	/**
 	 * Get the ClientDataModel
+	 * 
 	 * @return he ClientDataModel
 	 */
 	protected ConnectionTableModel getConnectionModel() {
-		return (ConnectionTableModel)getModel();
+		return (ConnectionTableModel) getModel();
 	}
-	
 
 	/**
 	 * Convenience routine to fire a data changed event
@@ -118,9 +115,10 @@ public class ConnectionTable extends JTable {
 		}
 
 	}
-	
+
 	/**
 	 * Get the selected client
+	 * 
 	 * @return the selected client (or null)
 	 */
 	public ProxyClient getSelectedClient() {

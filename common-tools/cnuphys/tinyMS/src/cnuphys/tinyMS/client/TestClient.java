@@ -13,12 +13,13 @@ import cnuphys.tinyMS.message.TestObject;
 public class TestClient extends DefaultClient {
 
 	private static int count = 1;
-	
-	//am I a sender?
+
+	// am I a sender?
 	private boolean _sender;
 
 	/**
 	 * Create a TestClient
+	 * 
 	 * @param sender if true, this will send out test messages
 	 * @throws BadSocketException
 	 */
@@ -29,8 +30,8 @@ public class TestClient extends DefaultClient {
 
 	/**
 	 * This is a good place for clients to do custom initializations such as
-	 * subscriptions. It is not necessary, but convenient. It is called at the
-	 * end of the constructor.
+	 * subscriptions. It is not necessary, but convenient. It is called at the end
+	 * of the constructor.
 	 */
 	@Override
 	public void initialize() {
@@ -39,7 +40,7 @@ public class TestClient extends DefaultClient {
 		subscribe("Triggers");
 		subscribe("Alarms");
 
-		//If I'm a sender, run some tests
+		// If I'm a sender, run some tests
 		if (_sender) {
 //			testIntArray();
 //			testSerializedObject();
@@ -51,10 +52,10 @@ public class TestClient extends DefaultClient {
 			stressTest();
 		}
 	}
-	
-	//run a stress test
+
+	// run a stress test
 	private void stressTest() {
-		
+
 		TimerTask task = new TimerTask() {
 
 			@Override
@@ -62,25 +63,24 @@ public class TestClient extends DefaultClient {
 				int count = 1;
 				int len = 100;
 				int maxCount = 1000000;
-				
+
 				System.out.println("Start stress test...");
 				while (count <= maxCount) {
-					
+
 					if ((count % 1000) == 0) {
 						System.out.println("Count: " + count + " of " + maxCount);
 						System.gc();
 					}
-					
+
 					long larray[] = new long[len];
-					
+
 					larray[0] = count;
-					larray[len-1] = count;
-					
+					larray[len - 1] = count;
+
 					Message message = Message.createMessage(getId(), "Triggers");
 					message.setPayload(larray);
 					send(message);
 
-					
 //					try {
 //						Thread.sleep(25);
 //					} catch (InterruptedException e) {
@@ -207,9 +207,9 @@ public class TestClient extends DefaultClient {
 			case LONG_ARRAY:
 				long[] larray = message.getLongArray();
 				int len = larray.length;
-				
-				if (larray[0] != larray[len-1]) {
-					System.out.println("Bad array, 1st = " + larray[0] + "  last = " + larray[len-1]);
+
+				if (larray[0] != larray[len - 1]) {
+					System.out.println("Bad array, 1st = " + larray[0] + "  last = " + larray[len - 1]);
 					System.exit(1);
 				}
 //				System.out.print("\nClient: " + getClientName() + " got long array of len = " + len + 

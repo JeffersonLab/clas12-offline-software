@@ -12,8 +12,7 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 public abstract class ECViewDrawer implements IDrawable {
 
 	// convenient access to the event manager
-	protected ClasIoEventManager _eventManager = ClasIoEventManager
-			.getInstance();
+	protected ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
 	// the DCXYView being rendered.
 	protected ECView _view;
@@ -59,16 +58,12 @@ public abstract class ECViewDrawer implements IDrawable {
 	/**
 	 * Use what was drawn to generate feedback strings
 	 * 
-	 * @param container
-	 *            the drawing container
-	 * @param screenPoint
-	 *            the mouse location
-	 * @param worldPoint
-	 *            the corresponding world location
-	 * @param feedbackStrings
-	 *            add strings to this collection
+	 * @param container       the drawing container
+	 * @param screenPoint     the mouse location
+	 * @param worldPoint      the corresponding world location
+	 * @param feedbackStrings add strings to this collection
 	 */
-	public abstract void feedback(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings);
+	public abstract void feedback(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings);
 
 }

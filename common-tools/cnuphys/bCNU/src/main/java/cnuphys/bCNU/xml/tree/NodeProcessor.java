@@ -8,6 +8,5 @@ import javax.swing.tree.TreeNode;
  */
 public interface NodeProcessor {
 
-	public void processNode(SAXJTree tree, TreeNode node)
-			throws BadNodeException;
+	public void processNode(SAXJTree tree, TreeNode node) throws BadNodeException;
 }

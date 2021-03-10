@@ -8,8 +8,17 @@
           jar up images, etc             
          ================================= -->
 	<target name="imagesjar">
+		<echo>Building bcnu image jar</echo>
 		<jar destfile="lib/bcnuimages.jar">
 			<fileset includes="images/*.*, data/*" dir="../resources" />
+		</jar>
+		
+		<jar destfile="lib/bCNU.jar">
+			
+			<fileset dir="cnuphys/bin">
+				<include name="**/*.class"/>
+			</fileset>
+
 		</jar>
 		<echo>Building bcnu jar</echo>
 	</target>

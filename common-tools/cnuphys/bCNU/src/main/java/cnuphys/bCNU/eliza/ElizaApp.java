@@ -39,8 +39,7 @@ public class ElizaApp extends JFrame {
 	/**
 	 * Center a component.
 	 * 
-	 * @param component
-	 *            The Component to center.
+	 * @param component The Component to center.
 	 */
 	public static void centerComponent(Component component) {
 
@@ -48,7 +47,7 @@ public class ElizaApp extends JFrame {
 			return;
 
 		try {
-			
+
 			Dimension screenSize = null;
 			try {
 				GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
@@ -57,8 +56,7 @@ public class ElizaApp extends JFrame {
 				if ((width > 100) && (height > 100)) {
 					screenSize = new Dimension(width, height);
 				}
-			}
-			catch (Exception e) {	
+			} catch (Exception e) {
 			}
 
 			if (screenSize == null) {

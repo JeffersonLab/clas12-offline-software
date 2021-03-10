@@ -21,8 +21,7 @@ class TitledSeparator extends JPanel {
 			public void updateUI() {
 				super.updateUI();
 				setForeground(UIManager.getColor("TitledBorder.titleColor"));
-				setFont(UIManager.getFont("TitledBorder.font").deriveFont(
-						Font.BOLD));
+				setFont(UIManager.getFont("TitledBorder.font").deriveFont(Font.BOLD));
 			}
 		};
 
@@ -42,8 +41,7 @@ class TitledSeparator extends JPanel {
 		c.weighty = 0;
 		c.insets = new Insets(0, 0, 0, 4);
 		JSeparator separator = new JSeparator();
-		separator.setPreferredSize(new Dimension(8, (int) separator
-				.getPreferredSize().getHeight()));
+		separator.setPreferredSize(new Dimension(8, (int) separator.getPreferredSize().getHeight()));
 		this.add(separator, c);
 
 		c.gridy++;

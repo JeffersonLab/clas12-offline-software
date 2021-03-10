@@ -40,6 +40,7 @@ import cnuphys.bCNU.view.PlotView;
 import cnuphys.bCNU.view.ViewManager;
 import cnuphys.bCNU.view.VirtualView;
 import cnuphys.fastMCed.eventio.PhysicsEventManager;
+import cnuphys.fastMCed.eventio.RandomNoiseGenerator;
 import cnuphys.fastMCed.consumers.ConsumerManager;
 import cnuphys.fastMCed.eventgen.AEventGenerator;
 import cnuphys.fastMCed.eventgen.GeneratorManager;
@@ -80,16 +81,16 @@ public class FastMCed extends BaseMDIApplication
 
 	// release (version) string
 	private static final String _release = "build 0.52";
-	
+
 	// used for one time inits
 	private int _firstTime = 0;
-	
-	//stream "state" label;
+
+	// stream "state" label;
 	private static JLabel _streamLabel;
 
 	// event number label on menu bar
 	private static JLabel _eventNumberLabel;
-	
+
 	// generator
 	private static JLabel _generatorLabel;
 
@@ -98,14 +99,13 @@ public class FastMCed extends BaseMDIApplication
 
 	// Environment display
 	private TextDisplayDialog _envDisplay;
-		
-	//background string and related
+
+	// background string and related
 	private static final String backgroundStr = "FastMCed from CNU";
 	private int bstrW = -1;
 	private int bstrH = -1;
 	private static Font bstrFont = new Font("SansSerif", Font.ITALIC + Font.BOLD, 44);
 	private static final Color bstrColor = X11Colors.getX11Color("Navy", 100);
-
 
 	// the views
 	private VirtualView _virtualView;
@@ -119,20 +119,18 @@ public class FastMCed extends BaseMDIApplication
 	private PlotView _plotView;
 	private LogView _logView;
 
-	//consumer classes dir provide by -p command line argument
+	// consumer classes dir provide by -p command line argument
 	private static String _userConsumerDir;
 
 	/**
 	 * Constructor (private--used to create singleton)
 	 * 
-	 * @param keyVals
-	 *            an optional variable length list of attributes in type-value
-	 *            pairs. For example, PropertySupport.NAME, "my application",
-	 *            PropertySupport.CENTER, true, etc.
+	 * @param keyVals an optional variable length list of attributes in type-value
+	 *                pairs. For example, PropertySupport.NAME, "my application",
+	 *                PropertySupport.CENTER, true, etc.
 	 */
 	private FastMCed(Object... keyVals) {
 		super(keyVals);
-
 
 		ComponentListener cl = new ComponentListener() {
 
@@ -158,9 +156,9 @@ public class FastMCed extends BaseMDIApplication
 		};
 
 		addComponentListener(cl);
-		
-	//	addHeadsUp();
-		
+
+		// addHeadsUp();
+
 		DrawableAdapter drawable = new DrawableAdapter() {
 			@Override
 			public void draw(Graphics g, IContainer container) {
@@ -169,36 +167,35 @@ public class FastMCed extends BaseMDIApplication
 					bstrW = fm.stringWidth(backgroundStr);
 					bstrH = fm.getHeight();
 				}
-				
+
 				int hgap = 200;
 				int vgap = 200;
-				
+
 				int tileW = bstrW + hgap;
 				int tileH = bstrH + vgap;
-				
+
 				Rectangle b = Desktop.getInstance().getBounds();
-				
-				int numCol = 1 + b.width/tileW;
-				int numRow = 1 + b.height/tileH;
-				
-				
+
+				int numCol = 1 + b.width / tileW;
+				int numRow = 1 + b.height / tileH;
+
 				g.setFont(bstrFont);
 				g.setColor(bstrColor);
-				
+
 				for (int col = 0; col < numCol; col++) {
-					int x = 20 + col*tileW;
+					int x = 20 + col * tileW;
 					for (int row = 0; row < numRow; row++) {
-						int y = 80 + row*tileH;
+						int y = 80 + row * tileH;
 						g.drawString(backgroundStr, x, y);
 					}
 				}
 			}
 		};
-		
+
 		Desktop.getInstance().setAfterDraw(drawable);
-		
+
 	}
-	
+
 	// arrange the views on the virtual desktop
 	private void placeViewsOnVirtualDesktop() {
 		if (_firstTime == 1) {
@@ -218,7 +215,7 @@ public class FastMCed extends BaseMDIApplication
 	 * unaffected.
 	 */
 	private void restoreDefaultViewLocations() {
-		
+
 		_virtualView.moveToStart(_sectorView14, 0, VirtualView.UPPERLEFT);
 		_virtualView.moveToStart(_sectorView25, 0, VirtualView.UPPERLEFT);
 		_virtualView.moveToStart(_sectorView36, 0, VirtualView.UPPERLEFT);
@@ -248,12 +245,11 @@ public class FastMCed extends BaseMDIApplication
 		// add a virtual view
 		_virtualView = VirtualView.createVirtualView(8);
 		ViewManager.getInstance().getViewMenu().addSeparator();
-		
-		_sectorView36=SectorView.createSectorView(DisplaySectors.SECTORS36);
-		_sectorView25=SectorView.createSectorView(DisplaySectors.SECTORS25);
-		_sectorView14=SectorView.createSectorView(DisplaySectors.SECTORS14);
-		ViewManager.getInstance().getViewMenu().addSeparator();
 
+		_sectorView36 = SectorView.createSectorView(DisplaySectors.SECTORS36);
+		_sectorView25 = SectorView.createSectorView(DisplaySectors.SECTORS25);
+		_sectorView14 = SectorView.createSectorView(DisplaySectors.SECTORS14);
+		ViewManager.getInstance().getViewMenu().addSeparator();
 
 		// add an alldc view
 		_allDCView = AllDCView.createAllDCView();
@@ -264,13 +260,11 @@ public class FastMCed extends BaseMDIApplication
 		// data views
 		_dcDataView = new DataView("Drift Chamber Hits", DetectorId.DC);
 		_ftofDataView = new DataView("FTOF Hits", DetectorId.FTOF);
-		
+
 		ViewManager.getInstance().getViewMenu().addSeparator();
-		//plot view
+		// plot view
 		_plotView = new PlotView();
 		_logView = new LogView();
-
-
 
 		// log some environment info
 		Log.getInstance().config(Environment.getInstance().toString());
@@ -290,16 +284,15 @@ public class FastMCed extends BaseMDIApplication
 		if (_instance == null) {
 			_instance = new FastMCed(PropertySupport.TITLE, "fastmCED " + versionString(),
 //					PropertySupport.BACKGROUNDIMAGE, "images/cnuinv.png", 
-					PropertySupport.BACKGROUND, new Color(48, 48, 48),
-					PropertySupport.FRACTION, 0.9);
+					PropertySupport.BACKGROUND, new Color(48, 48, 48), PropertySupport.FRACTION, 0.9);
 
 			_instance.addInitialViews();
 			_instance.createMenus();
 			_instance.placeViewsOnVirtualDesktop();
 
-			_instance._generatorLabel= _instance.createLabel(" GENERATOR  none");
-	     	_instance._streamLabel= _instance.createLabel(" STREAM "  + StreamReason.STOPPED);
-			_instance._eventNumberLabel= _instance.createLabel("  Event #                 ");
+			FastMCed._generatorLabel = _instance.createLabel(" GENERATOR  none");
+			FastMCed._streamLabel = _instance.createLabel(" STREAM " + StreamReason.STOPPED);
+			FastMCed._eventNumberLabel = _instance.createLabel("  Event #                 ");
 			MagneticFields.getInstance().addMagneticFieldChangeListener(_instance);
 
 		}
@@ -328,11 +321,11 @@ public class FastMCed extends BaseMDIApplication
 
 		// the options menu
 		addToOptionMenu(mmgr.getOptionMenu());
-		
-		//the generator menu
+
+		// the generator menu
 		mmgr.addMenu(GeneratorManager.getInstance().getMenu());
-		
-		//consumer menu
+
+		// consumer menu
 		mmgr.addMenu(ConsumerManager.getInstance().getMenu());
 
 	}
@@ -341,7 +334,7 @@ public class FastMCed extends BaseMDIApplication
 	private void addToFileMenu() {
 		MenuManager mmgr = MenuManager.getInstance();
 		JMenu fmenu = mmgr.getFileMenu();
-		
+
 		fmenu.insertSeparator(0);
 
 		// restore default config
@@ -371,24 +364,23 @@ public class FastMCed extends BaseMDIApplication
 		ViewManager.getInstance().refreshAllViews();
 	}
 
-	//fix the event number label
+	// fix the event number label
 	private void fixEventNumberLabel() {
-		
+
 		int evNum = PhysicsEventManager.getInstance().eventNumber();
 		int evCount = PhysicsEventManager.getInstance().getEventCount();
-		
+
 		_eventNumberLabel.setText("  Event #" + evNum + " of " + evCount);
 	}
-	
-	
-	//fix the stream state label
+
+	// fix the stream state label
 	private void fixStreamLabel(StreamReason reason) {
-		_streamLabel.setText(" STREAM "  + reason);
+		_streamLabel.setText(" STREAM " + reason);
 	}
-	
-	//fix the generator label
+
+	// fix the generator label
 	private void fixGeneratorLabel() {
-		_generatorLabel.setText(" GENERATOR "  + PhysicsEventManager.getInstance().getGeneratorDescription());
+		_generatorLabel.setText(" GENERATOR " + PhysicsEventManager.getInstance().getGeneratorDescription());
 	}
 
 	/**
@@ -409,7 +401,7 @@ public class FastMCed extends BaseMDIApplication
 		return _release;
 	}
 
-	//create a label for the menu =bar
+	// create a label for the menu =bar
 	private JLabel createLabel(String defStr) {
 		JLabel label = new JLabel(defStr);
 		label.setOpaque(true);
@@ -430,15 +422,15 @@ public class FastMCed extends BaseMDIApplication
 		fixTitle();
 		PhysicsEventManager.getInstance().reloadCurrentEvent();
 	}
-	
+
 	/**
 	 * Get the plot view
+	 * 
 	 * @return the plot voew;
 	 */
 	public PlotView getPlotView() {
 		return _plotView;
 	}
-
 
 	/**
 	 * Fix the title of te main frame
@@ -467,12 +459,15 @@ public class FastMCed extends BaseMDIApplication
 		return _instance;
 	}
 
-	
 	// create the options menu
 	private void addToOptionMenu(JMenu omenu) {
+
+		RandomNoiseGenerator.getInstance().addToMenu(omenu);
+		omenu.addSeparator();
+
 		omenu.add(MagnifyWindow.magificationMenu());
 		omenu.addSeparator();
-		
+
 		final JMenuItem memPlot = new JMenuItem("Memory Usage...");
 		final JMenuItem environ = new JMenuItem("Environment...");
 		ActionListener al = new ActionListener() {
@@ -507,10 +502,10 @@ public class FastMCed extends BaseMDIApplication
 		omenu.add(memPlot);
 
 	}
-	
 
 	/**
 	 * A new event generator is active
+	 * 
 	 * @param generator the now active generator
 	 */
 	@Override
@@ -522,7 +517,7 @@ public class FastMCed extends BaseMDIApplication
 	public void newPhysicsEvent(PhysicsEvent event, List<ParticleHits> particleHits) {
 		fixEventNumberLabel();
 	}
-	
+
 	@Override
 	public void streamingChange(StreamReason reason) {
 		fixStreamLabel(reason);
@@ -537,26 +532,28 @@ public class FastMCed extends BaseMDIApplication
 	public String flagExplanation() {
 		return "This should not have happened (A).";
 	}
-	
+
 	/**
-	 * Get the optional consumer classes directory provide by -p command line argument
+	 * Get the optional consumer classes directory provide by -p command line
+	 * argument
+	 * 
 	 * @return the optional consumer classes directory path.
 	 */
 	public static String getUserConsumerDir() {
 		return _userConsumerDir;
 	}
-	
+
 	/**
 	 * Launch the FastMCed GUI
-	 * @param consumerPath an optional path to a folder that contains your consumer classes.
-	 * This allows you to load consumers at startup.
+	 * 
+	 * @param consumerPath an optional path to a folder that contains your consumer
+	 *                     classes. This allows you to load consumers at startup.
 	 */
 	public static void launch(String consumerPath) {
 		if (consumerPath == null) {
 			main(null);
-		}
-		else {
-			String arg[] = {"-p", consumerPath};
+		} else {
+			String arg[] = { "-p", consumerPath };
 			main(arg);
 		}
 	}
@@ -567,8 +564,7 @@ public class FastMCed extends BaseMDIApplication
 	 * Command line arguments:</br>
 	 * -p [dir] dir is the default directory
 	 * 
-	 * @param arg
-	 *            the command line arguments.
+	 * @param arg the command line arguments.
 	 */
 	public static void main(String[] arg) {
 		FastMath.setMathLib(FastMath.MathLib.SUPERFAST);
@@ -648,7 +644,5 @@ public class FastMCed extends BaseMDIApplication
 		Log.getInstance().info("fastmCED is ready.");
 
 	} // end main
-
-
 
 }

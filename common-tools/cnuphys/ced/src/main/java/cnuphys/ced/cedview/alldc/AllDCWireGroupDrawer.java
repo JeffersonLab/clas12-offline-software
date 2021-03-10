@@ -46,28 +46,19 @@ public abstract class AllDCWireGroupDrawer extends AWireGroupDrawer {
 	/**
 	 * draw the hull
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the rendering container
-	 * @param sector
-	 *            parallel array of sector ids
-	 * @param superlayer
-	 *            parallel array of superlayer ids
-	 * @param layer
-	 *            parallel array of layer ids
-	 * @param wire
-	 *            parallel array of wire ids
-	 * @param id
-	 *            parallel ray of object (e.g., segment or track candidate) idsw
-	 * @param fillcolor
-	 *            the fill color
-	 * @param drawLevel
-	 *            the drawing level
+	 * @param g          the graphics context
+	 * @param container  the rendering container
+	 * @param sector     parallel array of sector ids
+	 * @param superlayer parallel array of superlayer ids
+	 * @param layer      parallel array of layer ids
+	 * @param wire       parallel array of wire ids
+	 * @param id         parallel ray of object (e.g., segment or track candidate)
+	 *                   idsw
+	 * @param fillcolor  the fill color
+	 * @param drawLevel  the drawing level
 	 */
-	protected void drawHull(Graphics g, IContainer container, int sector[],
-			int superlayer[], int layer[], int wire[], int id[],
-			Color fillcolor, DrawLevel drawLevel) {
+	protected void drawHull(Graphics g, IContainer container, int sector[], int superlayer[], int layer[], int wire[],
+			int id[], Color fillcolor, DrawLevel drawLevel) {
 
 		int len = id.length;
 
@@ -82,8 +73,7 @@ public abstract class AllDCWireGroupDrawer extends AWireGroupDrawer {
 
 		// loop over object (e.g., segment id)
 		for (int i = ids.nextSetBit(0); i >= 0; i = ids.nextSetBit(i + 1)) {
-			Polygon poly[][] = getSuperLayerGroupOutlines(container, sector,
-					superlayer, layer, wire, id, i);
+			Polygon poly[][] = getSuperLayerGroupOutlines(container, sector, superlayer, layer, wire, id, i);
 
 			switch (drawLevel) {
 			case SUPERLAYER:
@@ -91,13 +81,10 @@ public abstract class AllDCWireGroupDrawer extends AWireGroupDrawer {
 				// draw all non-null polygons
 				for (int sect = 0; sect < 6; sect++) {
 					for (int supl = 0; supl < 6; supl++) {
-						if ((poly[sect][supl] != null)
-								&& (poly[sect][supl].npoints > 3)) {
+						if ((poly[sect][supl] != null) && (poly[sect][supl].npoints > 3)) {
 
-							Path2D.Double path = new Path2D.Double(
-									poly[sect][supl]);
-							Path2D hullPath = WorldGraphicsUtilities
-									.getConvexHull(path);
+							Path2D.Double path = new Path2D.Double(poly[sect][supl]);
+							Path2D hullPath = WorldGraphicsUtilities.getConvexHull(path);
 							drawShape(g2, fillcolor, hullPath);
 
 							drawShape(g2, fillcolor, poly[sect][supl]);
@@ -113,16 +100,13 @@ public abstract class AllDCWireGroupDrawer extends AWireGroupDrawer {
 						Path2D.Double path = new Path2D.Double();
 						int supla = 2 * region;
 						int suplb = supla + 1;
-						if ((poly[sect][supla] != null)
-								&& (poly[sect][supla].npoints > 3)) {
+						if ((poly[sect][supla] != null) && (poly[sect][supla].npoints > 3)) {
 							path.append(poly[sect][supla], false);
 						}
-						if ((poly[sect][suplb] != null)
-								&& (poly[sect][suplb].npoints > 3)) {
+						if ((poly[sect][suplb] != null) && (poly[sect][suplb].npoints > 3)) {
 							path.append(poly[sect][suplb], false);
 						}
-						Path2D hullPath = WorldGraphicsUtilities
-								.getConvexHull(path);
+						Path2D hullPath = WorldGraphicsUtilities.getConvexHull(path);
 						drawShape(g2, fillcolor, hullPath);
 					}
 				}
@@ -133,14 +117,12 @@ public abstract class AllDCWireGroupDrawer extends AWireGroupDrawer {
 					Path2D.Double path = new Path2D.Double();
 
 					for (int supl = 0; supl < 6; supl++) {
-						if ((poly[sect][supl] != null)
-								&& (poly[sect][supl].npoints > 3)) {
+						if ((poly[sect][supl] != null) && (poly[sect][supl].npoints > 3)) {
 							path.append(poly[sect][supl], false);
 						}
 					}
 
-					Path2D hullPath = WorldGraphicsUtilities
-							.getConvexHull(path);
+					Path2D hullPath = WorldGraphicsUtilities.getConvexHull(path);
 					drawShape(g2, fillcolor, hullPath);
 				}
 
@@ -168,26 +150,18 @@ public abstract class AllDCWireGroupDrawer extends AWireGroupDrawer {
 	/**
 	 * Gets the wire groupings for drawing, effectively, a convex hull;
 	 * 
-	 * @param container
-	 *            the rendering container
-	 * @param sector
-	 *            parallel array of 1-based sector ids
-	 * @param superlayer
-	 *            parallel array of 1-based superlayer ids
-	 * @param layer
-	 *            parallel array of 1-based layer ids
-	 * @param wire
-	 *            parallel array of 1-based wire ids
-	 * @param id
-	 *            parallel array of object (e.g. segment) ids
-	 * @param match
-	 *            the index (e.g., segment id) to draw
-	 * @return an array of polygons indexed by sector and superlayer, any of
-	 *         which might be null.
+	 * @param container  the rendering container
+	 * @param sector     parallel array of 1-based sector ids
+	 * @param superlayer parallel array of 1-based superlayer ids
+	 * @param layer      parallel array of 1-based layer ids
+	 * @param wire       parallel array of 1-based wire ids
+	 * @param id         parallel array of object (e.g. segment) ids
+	 * @param match      the index (e.g., segment id) to draw
+	 * @return an array of polygons indexed by sector and superlayer, any of which
+	 *         might be null.
 	 */
-	protected Polygon[][] getSuperLayerGroupOutlines(IContainer container,
-			int sector[], int superlayer[], int layer[], int wire[], int id[],
-			int match) {
+	protected Polygon[][] getSuperLayerGroupOutlines(IContainer container, int sector[], int superlayer[], int layer[],
+			int wire[], int id[], int match) {
 
 		// index for poly corresponds to sector and superlayer
 		Polygon[][] poly = new Polygon[6][6];

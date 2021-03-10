@@ -26,12 +26,11 @@ public class FileHandlerFactory {
 		if (extension != null) {
 			if (extension.equals("xml")) {
 				return new XMLFileHandler();
-			} 
+			}
 		}
 
 		Log.getInstance().warning(
-				"Could not create a file handler for file: " + file.getPath()
-						+ "\nIt had no recognized extension.");
+				"Could not create a file handler for file: " + file.getPath() + "\nIt had no recognized extension.");
 		return null;
 	}
 

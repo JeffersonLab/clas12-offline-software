@@ -35,8 +35,7 @@ import cnuphys.bCNU.util.Fonts;
  * 
  */
 @SuppressWarnings("serial")
-public class LabelDialog extends JDialog implements ListSelectionListener,
-		ItemListener {
+public class LabelDialog extends JDialog implements ListSelectionListener, ItemListener {
 
 	/**
 	 * The last selected family, used for default in null constructor.
@@ -79,9 +78,8 @@ public class LabelDialog extends JDialog implements ListSelectionListener,
 	private ColorLabel _textBackground;
 
 	// possible font sizes
-	private String fontSizes[] = { " 8 ", " 10 ", " 11 ", " 12 ", " 14 ",
-			" 16 ", " 18 ", " 20 ", " 24 ", " 30 ", " 36 ", " 40 ", " 48 ",
-			" 60 ", " 72 " };
+	private String fontSizes[] = { " 8 ", " 10 ", " 11 ", " 12 ", " 14 ", " 16 ", " 18 ", " 20 ", " 24 ", " 30 ",
+			" 36 ", " 40 ", " 48 ", " 60 ", " 72 " };
 
 	/**
 	 * The display area. Use a JLabel as the AWT label doesn't always honor
@@ -107,8 +105,8 @@ public class LabelDialog extends JDialog implements ListSelectionListener,
 	}
 
 	/**
-	 * Construct a FontChooser -- Sets title and gets array of fonts on the
-	 * system. Builds a GUI to let the user choose one font at one size.
+	 * Construct a FontChooser -- Sets title and gets array of fonts on the system.
+	 * Builds a GUI to let the user choose one font at one size.
 	 */
 	public LabelDialog(Font inFont) {
 		setTitle("String Parameters");
@@ -171,8 +169,7 @@ public class LabelDialog extends JDialog implements ListSelectionListener,
 	 * Create the font scroll lists *family and size) and add them to the given
 	 * panel.
 	 * 
-	 * @param panel
-	 *            the panel to hold the lists.
+	 * @param panel the panel to hold the lists.
 	 */
 	public void createScrollLists(JPanel panel) {
 		// create the list of font families
@@ -245,8 +242,7 @@ public class LabelDialog extends JDialog implements ListSelectionListener,
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				previewFont();
-				lastFont = new Font(returnFont.getFamily(), returnFont
-						.getStyle(), returnFont.getSize());
+				lastFont = new Font(returnFont.getFamily(), returnFont.getStyle(), returnFont.getSize());
 				dispose();
 				resultString = textField.getText();
 				setVisible(false);
@@ -275,8 +271,7 @@ public class LabelDialog extends JDialog implements ListSelectionListener,
 	 */
 	private JList createFontList() {
 
-		String[] fontList = GraphicsEnvironment.getLocalGraphicsEnvironment()
-				.getAvailableFontFamilyNames();
+		String[] fontList = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
 
 		JList list = new JList(fontList);
 
@@ -285,8 +280,8 @@ public class LabelDialog extends JDialog implements ListSelectionListener,
 	}
 
 	/**
-	 * Called from the action handlers to get the font info, build a font, and
-	 * set it.
+	 * Called from the action handlers to get the font info, build a font, and set
+	 * it.
 	 */
 	protected void previewFont() {
 		String resultName = (String) (fontFamilyList.getSelectedValue());
@@ -323,8 +318,7 @@ public class LabelDialog extends JDialog implements ListSelectionListener,
 	/**
 	 * One of the list's was selected. Redo the preview.
 	 * 
-	 * @param lse
-	 *            the list selection event.
+	 * @param lse the list selection event.
 	 */
 	@Override
 	public void valueChanged(ListSelectionEvent lse) {
@@ -334,8 +328,7 @@ public class LabelDialog extends JDialog implements ListSelectionListener,
 	/**
 	 * One of check boxes was selected.
 	 * 
-	 * @param ise
-	 *            the state changed event.
+	 * @param ise the state changed event.
 	 */
 	@Override
 	public void itemStateChanged(ItemEvent ise) {

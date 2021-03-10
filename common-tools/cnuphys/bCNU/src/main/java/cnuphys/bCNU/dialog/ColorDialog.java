@@ -19,10 +19,8 @@ public class ColorDialog extends JDialog {
 	/**
 	 * Constructor (transparency disabled).
 	 * 
-	 * @param initColor
-	 *            The initial color
-	 * @param allowNoColor
-	 *            If true, user can select "no color"
+	 * @param initColor    The initial color
+	 * @param allowNoColor If true, user can select "no color"
 	 */
 
 	public ColorDialog(Color initColor, boolean allowNoColor) {
@@ -32,16 +30,12 @@ public class ColorDialog extends JDialog {
 	/**
 	 * Constructor (transparency disabled).
 	 * 
-	 * @param initColor
-	 *            The initial color
-	 * @param allowNoColor
-	 *            If true, user can select "no color"
-	 * @param allowTransparency
-	 *            It true, alpha color slider is enabled.
+	 * @param initColor         The initial color
+	 * @param allowNoColor      If true, user can select "no color"
+	 * @param allowTransparency It true, alpha color slider is enabled.
 	 */
 
-	public ColorDialog(Color initColor, boolean allowNoColor,
-			boolean allowTransparency) {
+	public ColorDialog(Color initColor, boolean allowNoColor, boolean allowTransparency) {
 		setTitle("Color Selection");
 
 		setModal(true);
@@ -54,16 +48,12 @@ public class ColorDialog extends JDialog {
 	/**
 	 * Create the color panel
 	 * 
-	 * @param initColor
-	 *            The initial color
-	 * @param allowNoColor
-	 *            If true, user can select "no color"
-	 * @param allowTransparency
-	 *            It true, alpha color slider is enabled.
+	 * @param initColor         The initial color
+	 * @param allowNoColor      If true, user can select "no color"
+	 * @param allowTransparency It true, alpha color slider is enabled.
 	 */
 
-	private void addColorPanel(Color initColor, boolean allowNoColor,
-			boolean allowTransparency) {
+	private void addColorPanel(Color initColor, boolean allowNoColor, boolean allowTransparency) {
 		Container cp = getContentPane();
 		colorPanel = new ColorPanel();
 		cp.add("Center", colorPanel);
@@ -104,8 +94,7 @@ public class ColorDialog extends JDialog {
 
 		};
 
-		ButtonPanel bp = ButtonPanel.closeOutPanel(ButtonPanel.USE_OKCANCEL,
-				alist, 6);
+		ButtonPanel bp = ButtonPanel.closeOutPanel(ButtonPanel.USE_OKCANCEL, alist, 6);
 
 		cp.add("South", bp);
 

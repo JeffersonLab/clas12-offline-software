@@ -17,17 +17,14 @@ public class TranslucentWindow extends JWindow {
 	private static TranslucentWindow _transWindow;
 	private static JLabel _transLabel;
 
-	private static final Font _defaultInfoFont = new Font("SansSerif",
-			Font.PLAIN, 10);
+	private static final Font _defaultInfoFont = new Font("SansSerif", Font.PLAIN, 10);
 	private static final Color _defaultTextColor = Color.black;
-	private static final Color _defaultBackground = X11Colors
-			.getX11Color("Alice Blue");
+	private static final Color _defaultBackground = X11Colors.getX11Color("Alice Blue");
 
 	/**
 	 * Create a translucent window
 	 * 
-	 * @param opacity
-	 *            how opaque (0: transparent, 1: opaque)
+	 * @param opacity how opaque (0: transparent, 1: opaque)
 	 */
 	private TranslucentWindow(float opacity) {
 		setOpacity(opacity);
@@ -35,11 +32,10 @@ public class TranslucentWindow extends JWindow {
 	}
 
 	/**
-	 * Create (or reuse) a translucent window for displaying a label. Probably
-	 * used for hovering window.
+	 * Create (or reuse) a translucent window for displaying a label. Probably used
+	 * for hovering window.
 	 * 
-	 * @param label
-	 *            the label
+	 * @param label       the label
 	 * @param opacity
 	 * @param screenPoint
 	 */
@@ -72,8 +68,7 @@ public class TranslucentWindow extends JWindow {
 	@Override
 	public Insets getInsets() {
 		Insets def = super.getInsets();
-		return new Insets(def.top + 2, def.left + 2, def.bottom + 2,
-				def.right + 2);
+		return new Insets(def.top + 2, def.left + 2, def.bottom + 2, def.right + 2);
 	}
 
 	/**
@@ -82,11 +77,9 @@ public class TranslucentWindow extends JWindow {
 	 * @return
 	 */
 	public static boolean isTranslucencySupported() {
-		GraphicsEnvironment ge = GraphicsEnvironment
-				.getLocalGraphicsEnvironment();
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		GraphicsDevice gd = ge.getDefaultScreenDevice();
 
-		return gd
-				.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.TRANSLUCENT);
+		return gd.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.TRANSLUCENT);
 	}
 }

@@ -16,8 +16,8 @@ public abstract class Messenger implements IMessenger {
 	public abstract int getId();
 
 	/**
-	 * Get the data input stream. Messages will be read from this stream and
-	 * placed on an inbound queue.
+	 * Get the data input stream. Messages will be read from this stream and placed
+	 * on an inbound queue.
 	 * 
 	 * @return the data input stream
 	 */
@@ -25,8 +25,8 @@ public abstract class Messenger implements IMessenger {
 	public abstract DataInputStream getDataInputStream();
 
 	/**
-	 * Get the data output stream. Messages will be pulled from the outbound
-	 * queue and sent on this stream.
+	 * Get the data output stream. Messages will be pulled from the outbound queue
+	 * and sent on this stream.
 	 * 
 	 * @return the data output stream
 	 */
@@ -34,9 +34,8 @@ public abstract class Messenger implements IMessenger {
 	public abstract DataOutputStream getDataOutputStream();
 
 	/**
-	 * Get the queue where we grab inbound messages. One or more ReaderThreads
-	 * will be putting messages in this queue. They need to be dequeued and
-	 * processed,
+	 * Get the queue where we grab inbound messages. One or more ReaderThreads will
+	 * be putting messages in this queue. They need to be dequeued and processed,
 	 * 
 	 * @return the queue where we place inbound messages
 	 */
@@ -47,8 +46,7 @@ public abstract class Messenger implements IMessenger {
 	 * Get the queue where we place outbound messages. A WriterThread will be
 	 * grabbing the messages and sending them to their destination.
 	 * 
-	 * @return the queue where we place outbound messages ready for
-	 *         transmission.
+	 * @return the queue where we place outbound messages ready for transmission.
 	 */
 	@Override
 	public abstract MessageQueue getOutboundQueue();
@@ -56,8 +54,7 @@ public abstract class Messenger implements IMessenger {
 	/**
 	 * Send a message to its destination using the outbound stream.
 	 * 
-	 * @param message
-	 *            the message to send
+	 * @param message the message to send
 	 */
 	@Override
 	public void writeMessage(Message message) throws IOException {
@@ -79,5 +76,5 @@ public abstract class Messenger implements IMessenger {
 	public Message readMessage() throws SocketException, EOFException, IOException {
 		return Message.readMessage(getDataInputStream());
 	}
-	
+
 }

@@ -17,8 +17,7 @@ public class RadArcButton extends ToolBarToggleButton implements IRubberbanded {
 	/**
 	 * Create a button for creating rectangles by rubberbanding.
 	 * 
-	 * @param container
-	 *            the container using this button.
+	 * @param container the container using this button.
 	 */
 	public RadArcButton(IContainer container) {
 		super(container, "images/radarc.gif", "Create a radius-arc");
@@ -27,14 +26,12 @@ public class RadArcButton extends ToolBarToggleButton implements IRubberbanded {
 	/**
 	 * The mouse has been pressed, start rubber banding.
 	 * 
-	 * @param mouseEvent
-	 *            the causal mouse event.
+	 * @param mouseEvent the causal mouse event.
 	 */
 	@Override
 	public void mousePressed(MouseEvent mouseEvent) {
 		if (rubberband == null) {
-			rubberband = new Rubberband(container, this,
-					Rubberband.Policy.RADARC);
+			rubberband = new Rubberband(container, this, Rubberband.Policy.RADARC);
 			rubberband.setActive(true);
 			rubberband.startRubberbanding(mouseEvent.getPoint());
 		}
@@ -98,8 +95,7 @@ public class RadArcButton extends ToolBarToggleButton implements IRubberbanded {
 		}
 
 		// create a rad arc item
-		AItem item = container.createRadArcItem(container.getAnnotationLayer(),
-				pp[0], pp[1], arcAngle);
+		AItem item = container.createRadArcItem(container.getAnnotationLayer(), pp[0], pp[1], arcAngle);
 
 		if (item != null) {
 			item.setRightClickable(true);

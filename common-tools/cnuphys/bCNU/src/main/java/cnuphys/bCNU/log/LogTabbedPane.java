@@ -81,8 +81,7 @@ public class LogTabbedPane extends JTabbedPane implements ChangeListener {
 	/**
 	 * Fix the message so it gets appended nicely.
 	 * 
-	 * @param message
-	 *            the input message.
+	 * @param message the input message.
 	 * @return the fixed message.
 	 */
 	private String fixMessage(String message) {
@@ -99,8 +98,7 @@ public class LogTabbedPane extends JTabbedPane implements ChangeListener {
 	/**
 	 * The method from the ChangeListener interface.
 	 * 
-	 * @param ce
-	 *            the causal ChangeEvent.
+	 * @param ce the causal ChangeEvent.
 	 */
 	@Override
 	public void stateChanged(ChangeEvent ce) {

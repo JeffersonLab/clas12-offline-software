@@ -54,8 +54,7 @@ public class DrawableList extends Vector<IDrawable> implements IDrawable {
 	/**
 	 * Constructs a <code>DrawableList</code> with the specified name.
 	 * 
-	 * @param name
-	 *            the <code>DrawableList</code>'s name.
+	 * @param name the <code>DrawableList</code>'s name.
 	 */
 	public DrawableList(String name) {
 		super(100, 50);
@@ -66,8 +65,7 @@ public class DrawableList extends Vector<IDrawable> implements IDrawable {
 	 * Add an <code>IDrawableListener</code>.
 	 * 
 	 * @see IDrawableListener
-	 * @param drawableListener
-	 *            the <code>IDrawableListener</code> to add.
+	 * @param drawableListener the <code>IDrawableListener</code> to add.
 	 */
 	public void addDrawableListener(IDrawableListener drawableListener) {
 
@@ -86,8 +84,7 @@ public class DrawableList extends Vector<IDrawable> implements IDrawable {
 	 * Remove an <code>IDrawableListener</code>.
 	 * 
 	 * @see IDrawableListener
-	 * @param drawableListener
-	 *            the <code>IDrawableListener</code> to remove.
+	 * @param drawableListener the <code>IDrawableListener</code> to remove.
 	 */
 	public void removeDrawableListener(IDrawableListener drawableListener) {
 
@@ -101,14 +98,11 @@ public class DrawableList extends Vector<IDrawable> implements IDrawable {
 	/**
 	 * Notify interested parties that an <code>IDrawable</code> has changed
 	 * 
-	 * @param drawable
-	 *            the <code>IDrawable</code> in question.
-	 * @param type
-	 *            the type of change, e.g. one of the enum constants in the
-	 *            <code>DrawableChangeType</code> class.
+	 * @param drawable the <code>IDrawable</code> in question.
+	 * @param type     the type of change, e.g. one of the enum constants in the
+	 *                 <code>DrawableChangeType</code> class.
 	 */
-	public void notifyDrawableChangeListeners(IDrawable drawable,
-			DrawableChangeType type) {
+	public void notifyDrawableChangeListeners(IDrawable drawable, DrawableChangeType type) {
 
 		if (_listenerList == null) {
 			return;
@@ -121,8 +115,7 @@ public class DrawableList extends Vector<IDrawable> implements IDrawable {
 		// those that are interested in this event
 		for (int i = listeners.length - 2; i >= 0; i -= 2) {
 			if (listeners[i] == IDrawableListener.class) {
-				((IDrawableListener) listeners[i + 1]).drawableChanged(this,
-						drawable, type);
+				((IDrawableListener) listeners[i + 1]).drawableChanged(this, drawable, type);
 			}
 		}
 	}
@@ -130,8 +123,7 @@ public class DrawableList extends Vector<IDrawable> implements IDrawable {
 	/**
 	 * Adds an <code>IDrawable</code> to this list.
 	 * 
-	 * @param drawable
-	 *            the <code>IDrawable</code> to add.
+	 * @param drawable the <code>IDrawable</code> to add.
 	 * @return <code>true</code> (as specified by Collection.add(E))
 	 */
 	@Override
@@ -144,8 +136,7 @@ public class DrawableList extends Vector<IDrawable> implements IDrawable {
 	/**
 	 * Remove an <code>IDrawable</code> object from this list.
 	 * 
-	 * @param drawable
-	 *            the <code>IDrawable</code> to remove.
+	 * @param drawable the <code>IDrawable</code> to remove.
 	 * @return <code>true</code> if the list contained the specified IDrawable.
 	 */
 	public boolean remove(IDrawable drawable) {
@@ -170,10 +161,8 @@ public class DrawableList extends Vector<IDrawable> implements IDrawable {
 	/**
 	 * Draw all the <code>IDrawable</code> objects in this list.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphic container being rendered.
+	 * @param g         the graphics context.
+	 * @param container the graphic container being rendered.
 	 */
 	@Override
 	public void draw(Graphics g, IContainer container) {
@@ -204,8 +193,7 @@ public class DrawableList extends Vector<IDrawable> implements IDrawable {
 	 * Move an IDrawable upward in the list which has the effect of sending it
 	 * backward when drawn.
 	 * 
-	 * @param drawable
-	 *            the IDrawable to move backward.
+	 * @param drawable the IDrawable to move backward.
 	 */
 	public void sendBackward(IDrawable drawable) {
 
@@ -224,8 +212,7 @@ public class DrawableList extends Vector<IDrawable> implements IDrawable {
 	 * Move an IDrawable downward in the list which has the effect of sending it
 	 * forward when drawn.
 	 * 
-	 * @param drawable
-	 *            the IDrawable to move backward.
+	 * @param drawable the IDrawable to move backward.
 	 */
 	public void sendForward(IDrawable drawable) {
 
@@ -241,12 +228,11 @@ public class DrawableList extends Vector<IDrawable> implements IDrawable {
 	}
 
 	/**
-	 * Put an <code>IDrawable</code> at the top of the list, which has the
-	 * effect of sending to the back when drawn.
+	 * Put an <code>IDrawable</code> at the top of the list, which has the effect of
+	 * sending to the back when drawn.
 	 * 
-	 * @param drawable
-	 *            the <code>IDrawable</code> to put at the beginning of the
-	 *            list, which will result in being drawn on the bottom.
+	 * @param drawable the <code>IDrawable</code> to put at the beginning of the
+	 *                 list, which will result in being drawn on the bottom.
 	 */
 	public void sendToBack(IDrawable drawable) {
 
@@ -258,12 +244,11 @@ public class DrawableList extends Vector<IDrawable> implements IDrawable {
 	}
 
 	/**
-	 * Put an <code>IDrawable</code> at the bottom of the list, which has the
-	 * effect of sending to the front when drawn.
+	 * Put an <code>IDrawable</code> at the bottom of the list, which has the effect
+	 * of sending to the front when drawn.
 	 * 
-	 * @param drawable
-	 *            the <code>IDrawable</code> to put at the end of the list,
-	 *            which will result in being drawn on top.
+	 * @param drawable the <code>IDrawable</code> to put at the end of the list,
+	 *                 which will result in being drawn on top.
 	 */
 	public void sendToFront(IDrawable drawable) {
 
@@ -287,8 +272,7 @@ public class DrawableList extends Vector<IDrawable> implements IDrawable {
 	/**
 	 * Sets the visibility flag.
 	 * 
-	 * @param visible
-	 *            the new value of the flag.
+	 * @param visible the new value of the flag.
 	 */
 	@Override
 	public void setVisible(boolean visible) {
@@ -317,8 +301,7 @@ public class DrawableList extends Vector<IDrawable> implements IDrawable {
 	/**
 	 * Sets the lock flag.
 	 * 
-	 * @param locked
-	 *            the new value of the flag
+	 * @param locked the new value of the flag
 	 */
 	public void setLocked(boolean locked) {
 		this._locked = locked;
@@ -327,8 +310,7 @@ public class DrawableList extends Vector<IDrawable> implements IDrawable {
 	/**
 	 * Set the name for this list.
 	 * 
-	 * @param name
-	 *            the name to set.
+	 * @param name the name to set.
 	 */
 	public void setName(String name) {
 		this._name = name;
@@ -346,8 +328,7 @@ public class DrawableList extends Vector<IDrawable> implements IDrawable {
 	/**
 	 * Set the overall "show names" flag
 	 * 
-	 * @param showNames
-	 *            the value of the "show names" flag
+	 * @param showNames the value of the "show names" flag
 	 */
 	public void setShowNames(boolean showNames) {
 		this._showNames = showNames;
@@ -367,8 +348,7 @@ public class DrawableList extends Vector<IDrawable> implements IDrawable {
 		for (IDrawable drawable : this) {
 			String name = null;
 			if (drawable instanceof LogicalLayer) {
-				name = "  Layer: " + ((LogicalLayer) drawable).getName() + "["
-						+ indexOf(drawable) + "]";
+				name = "  Layer: " + ((LogicalLayer) drawable).getName() + "[" + indexOf(drawable) + "]";
 			} else if (drawable instanceof AItem) {
 				name = "  Item: " + ((AItem) drawable).getName();
 			} else {
@@ -381,14 +361,13 @@ public class DrawableList extends Vector<IDrawable> implements IDrawable {
 	}
 
 	/**
-	 * Convenience routine to set the dirty property for all items on this
-	 * layer. A dirty state is a signal that some cached calculations relevant
-	 * for display need to be redone. By careful use of the dirty states,
-	 * expensive calculations can be performed only when needed. The danger is
-	 * that something that makes the items "dirty" gets missed.
+	 * Convenience routine to set the dirty property for all items on this layer. A
+	 * dirty state is a signal that some cached calculations relevant for display
+	 * need to be redone. By careful use of the dirty states, expensive calculations
+	 * can be performed only when needed. The danger is that something that makes
+	 * the items "dirty" gets missed.
 	 * 
-	 * @param dirty
-	 *            the value to set for the <code>dirty</code> flag.
+	 * @param dirty the value to set for the <code>dirty</code> flag.
 	 */
 	@Override
 	public void setDirty(boolean dirty) {
@@ -424,11 +403,10 @@ public class DrawableList extends Vector<IDrawable> implements IDrawable {
 	}
 
 	/**
-	 * Set whether this logical layer is enabled. If a layer is not enabled,
-	 * items on the layer cannot be selected.
+	 * Set whether this logical layer is enabled. If a layer is not enabled, items
+	 * on the layer cannot be selected.
 	 * 
-	 * @param enabled
-	 *            the new value of the enabled flag.
+	 * @param enabled the new value of the enabled flag.
 	 */
 	@Override
 	public void setEnabled(boolean enabled) {

@@ -27,13 +27,13 @@ public class NamedExpression implements Comparable<NamedExpression>, XmlPrintStr
 
 	/** The actual expression */
 	protected Expression _expression;
-	
+
 	/** The variables of the expression */
 	protected String[] _variables;
-	
+
 	/** A matching array of ColumnData objects */
 	protected ColumnData[] _columnData;
-	
+
 	public NamedExpression(String eName, String eString) {
 		_expName = eName;
 		_expString = eString;
@@ -48,12 +48,13 @@ public class NamedExpression implements Comparable<NamedExpression>, XmlPrintStr
 
 	/**
 	 * Get the expression name
+	 * 
 	 * @return the expression name
 	 */
 	public String getExpressionName() {
 		return _expName;
 	}
-	
+
 	/**
 	 * Get the Expression for this NamedExpression
 	 * 
@@ -70,9 +71,9 @@ public class NamedExpression implements Comparable<NamedExpression>, XmlPrintStr
 					if (nb != null) {
 						_columnData[i] = DataManager.getInstance().getColumnData(nb.bankColumnName);
 					}
-					
+
 					System.err.println("var name: [" + _variables[i] + "]  columnData: " + _columnData[i]);
-				} //end for i
+				} // end for i
 			}
 			_expression = getExpression(_expString);
 		}
@@ -91,6 +92,7 @@ public class NamedExpression implements Comparable<NamedExpression>, XmlPrintStr
 
 	/**
 	 * Get an array of variables from the expression string
+	 * 
 	 * @param expStr the expression string
 	 * @return an array of variables which should have a leading underscore
 	 */
@@ -132,20 +134,20 @@ public class NamedExpression implements Comparable<NamedExpression>, XmlPrintStr
 //				System.err.println("VARIABLE [" + v + "]");
 //			}
 		}
-		
+
 		return vars;
 	}
-	
+
 	/**
 	 * Obtain a valid expression from an expression string
 	 * 
 	 * @param expStr the expression string
-	 * @param tf an optional textfield for messages
+	 * @param tf     an optional textfield for messages
 	 * @return an Expression, or null;
 	 */
 	public static Expression getExpression(String expStr, JTextComponent tf) {
 
-        // get the variables
+		// get the variables
 		String vars[] = getVariables(expStr);
 
 		Expression expression = null;
@@ -154,8 +156,7 @@ public class NamedExpression implements Comparable<NamedExpression>, XmlPrintStr
 		try {
 			if ((vars == null) || (vars.length < 1)) {
 				expression = new ExpressionBuilder(expStr).variables().build();
-			}
-			else {
+			} else {
 				expression = new ExpressionBuilder(expStr).variables(vars).build();
 			}
 		} catch (IllegalArgumentException ex) {
@@ -173,8 +174,7 @@ public class NamedExpression implements Comparable<NamedExpression>, XmlPrintStr
 				if (tf != null) {
 					tf.setText("Valid expression");
 				}
-			}
-			else {
+			} else {
 				expression = null;
 				String estr = "Invalid expression.";
 				for (String es : vres.getErrors()) {
@@ -192,15 +192,15 @@ public class NamedExpression implements Comparable<NamedExpression>, XmlPrintStr
 		if (!readyToCompute()) {
 			return 0;
 		}
-		
+
 		int len = (_columnData == null) ? 0 : _columnData.length;
 		if (len < 1) {
 			return 0;
 		}
-		
+
 		double a[] = _columnData[0].getAsDoubleArray(event);
 		int dataLen = (a == null) ? 0 : a.length;
-		
+
 		for (int i = 1; i < len; i++) {
 			a = _columnData[i].getAsDoubleArray(event);
 			int alen = (a == null) ? 0 : a.length;
@@ -210,9 +210,10 @@ public class NamedExpression implements Comparable<NamedExpression>, XmlPrintStr
 	}
 
 	/**
-	 * The named expression is ready to compute if it has an expression,
-	 * and the length of the variable array is the length of the ColumnData
-	 * array, and not of the ColumnData elements are <code>null</code>.
+	 * The named expression is ready to compute if it has an expression, and the
+	 * length of the variable array is the length of the ColumnData array, and not
+	 * of the ColumnData elements are <code>null</code>.
+	 * 
 	 * @return <code>true</code> if the named expression is eady to compute
 	 */
 	public boolean readyToCompute() {
@@ -220,25 +221,26 @@ public class NamedExpression implements Comparable<NamedExpression>, XmlPrintStr
 		if (_expression == null) {
 			return false;
 		}
-		
+
 		int vlen = (_variables == null) ? 0 : _variables.length;
 		int clen = (_columnData == null) ? 0 : _columnData.length;
-		
+
 		if (vlen != clen) {
 			return false;
 		}
-		
+
 		for (int i = 0; i < clen; i++) {
 			if (_columnData[i] == null) {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Compute the value of the expression
+	 * 
 	 * @param index the index into the data arrays
 	 * @return the value
 	 */
@@ -250,12 +252,12 @@ public class NamedExpression implements Comparable<NamedExpression>, XmlPrintStr
 				if (val == null) {
 					return Double.NaN;
 				}
-	//			System.err.println("EXP INDX: " + i + "  val = " + val[i]);
+				// System.err.println("EXP INDX: " + i + " val = " + val[i]);
 				_expression.setVariable(_variables[i], val[index]);
 			}
 			return _expression.evaluate();
 		}
-		
+
 		return Double.NaN;
 	}
 
@@ -269,7 +271,7 @@ public class NamedExpression implements Comparable<NamedExpression>, XmlPrintStr
 		} catch (XMLStreamException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 }

@@ -17,8 +17,7 @@ public class LineButton extends ToolBarToggleButton implements IRubberbanded {
 	/**
 	 * Create a button for creating rectangles by rubberbanding.
 	 * 
-	 * @param container
-	 *            the container using this button.
+	 * @param container the container using this button.
 	 */
 	public LineButton(IContainer container) {
 		super(container, "images/line.gif", "Create a line");
@@ -27,8 +26,7 @@ public class LineButton extends ToolBarToggleButton implements IRubberbanded {
 	/**
 	 * The mouse has been pressed, start rubber banding.
 	 * 
-	 * @param mouseEvent
-	 *            the causal mouse event.
+	 * @param mouseEvent the causal mouse event.
 	 */
 	@Override
 	public void mousePressed(MouseEvent mouseEvent) {
@@ -51,8 +49,7 @@ public class LineButton extends ToolBarToggleButton implements IRubberbanded {
 		// create a line item
 
 		if ((Math.abs(p0.x - p1.x) > 2) || (Math.abs(p0.y - p1.y) > 2)) {
-			AItem item = container.createLineItem(
-					container.getAnnotationLayer(), p0, p1);
+			AItem item = container.createLineItem(container.getAnnotationLayer(), p0, p1);
 			if (item != null) {
 				item.setRightClickable(true);
 				item.setDraggable(true);

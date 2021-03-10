@@ -38,8 +38,7 @@ public class ShellDialog extends SimpleDialog implements KeyListener {
 	private ShellDialog() {
 		super("Micro Shell", false, CLOSE);
 		setSize(WIDTH, HEIGHT);
-		appendInfo(Environment.getInstance().getUserName()
-				+ " micro shell started.\n");
+		appendInfo(Environment.getInstance().getUserName() + " micro shell started.\n");
 	}
 
 	/**
@@ -116,12 +115,9 @@ public class ShellDialog extends SimpleDialog implements KeyListener {
 	/**
 	 * Execute an OS command in a separate process
 	 * 
-	 * @param command
-	 *            the command to execute
-	 * @param userId
-	 *            an optional user id
-	 * @param ptype
-	 *            an optional process type
+	 * @param command the command to execute
+	 * @param userId  an optional user id
+	 * @param ptype   an optional process type
 	 * @return a process id
 	 */
 	public int execute(String command, long userId, int ptype) {
@@ -131,14 +127,10 @@ public class ShellDialog extends SimpleDialog implements KeyListener {
 	/**
 	 * Execute a command in its own process
 	 * 
-	 * @param command
-	 *            the command to execute
-	 * @param dir
-	 *            first cd to this directory
-	 * @param userId
-	 *            an optional user id
-	 * @param ptype
-	 *            an optional process type
+	 * @param command the command to execute
+	 * @param dir     first cd to this directory
+	 * @param userId  an optional user id
+	 * @param ptype   an optional process type
 	 * @return a process id
 	 */
 	public int execute(final String command, File dir, long userId, int ptype) {
@@ -191,8 +183,7 @@ public class ShellDialog extends SimpleDialog implements KeyListener {
 	 * Add an <code>IProcessListener</code>.
 	 * 
 	 * @see IProcessListener
-	 * @param processListener
-	 *            the <code>IProcessListener</code> to add.
+	 * @param processListener the <code>IProcessListener</code> to add.
 	 */
 	public void addProcessListener(IProcessListener processListener) {
 		shell.addProcessListener(processListener);
@@ -202,8 +193,7 @@ public class ShellDialog extends SimpleDialog implements KeyListener {
 	 * Remove an <code>IProcessListener</code>.
 	 * 
 	 * @see IProcessListener
-	 * @param processListener
-	 *            the <code>IProcessListener</code> to remove.
+	 * @param processListener the <code>IProcessListener</code> to remove.
 	 */
 	public void removeProcessListener(IProcessListener processListener) {
 		shell.removeProcessListener(processListener);

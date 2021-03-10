@@ -24,39 +24,31 @@ public class PixelRectangleItem extends AItem {
 
 	private double _startX;
 	private double _startY;
-	
-	
+
 	// the last upper right in world coordinates
-	protected Point2D.Double _lastUpperRight = new Point2D.Double(Double.NaN,
-			Double.NaN);
-	
+	protected Point2D.Double _lastUpperRight = new Point2D.Double(Double.NaN, Double.NaN);
+
 	/**
 	 * Create a rectangle whose location is based on world coordinates but whose
 	 * extent is in pixels. And example might be a plot item or image.
 	 * 
-	 * @param layer
-	 *            the Layer this item is on.
-	 * @param location
-	 *            the location of the lower-left in world coordinates
-	 * @param width
-	 *            the width in pixels
-	 * @param height
-	 *            the height in pixels
+	 * @param layer    the Layer this item is on.
+	 * @param location the location of the lower-left in world coordinates
+	 * @param width    the width in pixels
+	 * @param height   the height in pixels
 	 */
-	public PixelRectangleItem(LogicalLayer layer, Point2D.Double location,
-			int width, int height) {
+	public PixelRectangleItem(LogicalLayer layer, Point2D.Double location, int width, int height) {
 		super(layer);
 		_width = width;
 		_height = height;
 		_focus = new Point2D.Double(location.x, location.y);
 	}
-	
 
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
 		Graphics2D g2 = (Graphics2D) g;
 		Rectangle r = getBounds(container);
-		
+
 		// fill
 		if (_style.getFillColor() != null) {
 			g2.setColor(_style.getFillColor());
@@ -72,14 +64,13 @@ public class PixelRectangleItem extends AItem {
 			}
 
 			Stroke oldStroke = g2.getStroke();
-			Stroke newStroke = GraphicsUtilities.getStroke(flw,
-					_style.getLineStyle());
+			Stroke newStroke = GraphicsUtilities.getStroke(flw, _style.getLineStyle());
 			g2.setStroke(newStroke);
 			g2.setColor(_style.getLineColor());
 			g2.drawRect(r.x, r.y, r.width, r.height);
 			g2.setStroke(oldStroke);
 		}
-		
+
 	}
 
 	@Override
@@ -94,8 +85,7 @@ public class PixelRectangleItem extends AItem {
 	/**
 	 * get the bounding rect in pixels.
 	 * 
-	 * @param container
-	 *            the container being rendered
+	 * @param container the container being rendered
 	 * @return the box around the active part of the image.
 	 */
 	@Override
@@ -149,8 +139,7 @@ public class PixelRectangleItem extends AItem {
 			int dx = currentMouse.x - startMouse.x;
 			int dy = currentMouse.y - startMouse.y;
 
-			Point newFocusPoint = new Point(startFocusPoint.x + dx,
-					startFocusPoint.y + dy);
+			Point newFocusPoint = new Point(startFocusPoint.x + dx, startFocusPoint.y + dy);
 			Point2D.Double wp = new Point2D.Double();
 			_modification.getContainer().localToWorld(newFocusPoint, wp);
 			setFocus(wp);
@@ -159,8 +148,7 @@ public class PixelRectangleItem extends AItem {
 			break;
 
 		case ROTATE:
-			_layer.notifyDrawableChangeListeners(this,
-					DrawableChangeType.ROTATED);
+			_layer.notifyDrawableChangeListeners(this, DrawableChangeType.ROTATED);
 			break;
 
 		case RESIZE:
@@ -202,8 +190,7 @@ public class PixelRectangleItem extends AItem {
 			_height = Math.max(4, _height);
 
 			_modification.getContainer().refresh();
-			_layer.notifyDrawableChangeListeners(this,
-					DrawableChangeType.RESIZED);
+			_layer.notifyDrawableChangeListeners(this, DrawableChangeType.RESIZED);
 			break;
 		}
 	}
@@ -211,8 +198,7 @@ public class PixelRectangleItem extends AItem {
 	/**
 	 * Set the current location.
 	 * 
-	 * @param currentLocation
-	 *            the new location to set
+	 * @param currentLocation the new location to set
 	 */
 	@Override
 	public void setFocus(Point2D.Double currentLocation) {

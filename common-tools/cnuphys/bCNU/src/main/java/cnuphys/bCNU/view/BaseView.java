@@ -10,8 +10,8 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
@@ -48,17 +48,17 @@ import cnuphys.bCNU.util.PropertySupport;
  * 
  */
 @SuppressWarnings("serial")
-public class BaseView extends JInternalFrame implements FocusListener, MouseListener {
+public class BaseView extends JInternalFrame implements FocusListener, MouseListener, ComponentListener {
 
 	// use to stack views as added
 	private static int LASTLEFT = 0;
 	private static int LASTTOP = 0;
 	private static final int DEL_H = 40;
 	private static final int DEL_V = 20;
-	
-	//parent frame
-    private JFrame _parentFrame;
-	
+
+	// parent frame
+	private JFrame _parentFrame;
+
 	// The desktop owner of this view (internal frame.)
 	private JDesktopPane _desktop;
 
@@ -77,19 +77,19 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 
 	// virtual view item, if used
 	protected VirtualWindowItem _virtualItem;
-	
-	//optional scrollpane
+
+	// optional scrollpane
 	private JScrollPane _scrollPane;
-	
-    //starting location
+
+	// starting location
 	private Point _startingLocation = new Point();
 
 	/**
 	 * Constructor
 	 * 
-	 * @param keyVals an optional variable length list of propeties in
-	 *            type-value pairs. For example, PropertySupport.TITLE,
-	 *            "my application", PropertySupport.MAXIMIZABE, true, etc.
+	 * @param keyVals an optional variable length list of propeties in type-value
+	 *                pairs. For example, PropertySupport.TITLE, "my application",
+	 *                PropertySupport.MAXIMIZABE, true, etc.
 	 */
 	public BaseView(Object... keyVals) {
 
@@ -105,20 +105,19 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 
 		// setLayout(new BorderLayout());
 
-		_properties = PropertySupport.fromKeyValues(keyVals);		
-		
+		_properties = PropertySupport.fromKeyValues(keyVals);
+
 		// get the recognized attributes
 		String title = PropertySupport.getTitle(_properties);
 
 		// view decorations
-		boolean standardDecorations = PropertySupport
-				.getStandardViewDecorations(_properties);
+		boolean standardDecorations = PropertySupport.getStandardViewDecorations(_properties);
 		boolean iconifiable = PropertySupport.getIconifiable(_properties);
 		boolean maximizable = PropertySupport.getMaximizable(_properties);
 		boolean resizable = PropertySupport.getResizable(_properties);
 		boolean closable = PropertySupport.getClosable(_properties);
-		
-		//scrollable?
+
+		// scrollable?
 		boolean scrollable = PropertySupport.getScrollable(_properties);
 
 		// view visible
@@ -151,8 +150,7 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 		ViewManager.getInstance().add(this);
 
 		// if the world system is not null, add a container
-		Rectangle2D.Double worldSystem = PropertySupport
-				.getWorldSystem(_properties);
+		Rectangle2D.Double worldSystem = PropertySupport.getWorldSystem(_properties);
 		if (worldSystem != null) {
 			setLocation(left, top);
 
@@ -160,8 +158,7 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 			_container = PropertySupport.getContainer(_properties);
 			if (_container == null) {
 				_container = new BaseContainer(this, worldSystem);
-			}
-			else {
+			} else {
 				_container.setView(this);
 			}
 
@@ -175,8 +172,8 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 				_container.setRightMargin(rmargin);
 				_container.setBottomMargin(bmargin);
 			}
-			
-			//scrollable?
+
+			// scrollable?
 			if (scrollable && (_container.getComponent() != null)) {
 				_scrollPane = new JScrollPane(_container.getComponent());
 			}
@@ -188,24 +185,20 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 			}
 
 			if ((width > 0) && (height > 0)) {
-				_container.getComponent()
-						.setPreferredSize(new Dimension(width, height));
+				_container.getComponent().setPreferredSize(new Dimension(width, height));
 			}
 
 			// split west component? (like a file tree)
-			JComponent westComponent = PropertySupport
-					.getSplitWestComponent(_properties);
-			
+			JComponent westComponent = PropertySupport.getSplitWestComponent(_properties);
+
 			Component c = (_scrollPane == null) ? _container.getComponent() : _scrollPane;
 
 			if (westComponent != null) {
-				JSplitPane splitPane = new JSplitPane(
-						JSplitPane.HORIZONTAL_SPLIT, false, westComponent, c);
-				
+				JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, false, westComponent, c);
+
 				splitPane.setResizeWeight(0.0);
 				add(splitPane, BorderLayout.CENTER);
-			}
-			else {
+			} else {
 				add(c, BorderLayout.CENTER);
 			}
 
@@ -218,8 +211,7 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 				}
 				BaseToolBar toolBar = new BaseToolBar(_container, bits);
 				add(toolBar, BorderLayout.NORTH);
-			}
-			else {
+			} else {
 				// hack: invis toolbar, pointer selected
 				new BaseToolBar(_container, 1);
 				// add(toolBar, BorderLayout.NORTH);
@@ -230,12 +222,11 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 		else { // no container, e.g., log view
 			if ((width > 0) && (height > 0)) {
 				setBounds(left, top, width, height);
-			}
-			else {
+			} else {
 				setLocation(left, top);
 			}
 		}
-		
+
 		_startingLocation.setLocation(left, top);
 
 		// add to the desktop
@@ -261,48 +252,24 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 			});
 		}
 
-		// look for view resizes. It seems to be a hack, but at least for the
-		// open maps
-		// implementation I had to add this desktop repaint or when the view was
-		// made
-		// smaller it would leave garbage behind
-		ComponentAdapter ca = new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent ce) {
-				// hard to believe is necessary but funny things happen without
-				// it
-				if (_desktop != null) {
-					_desktop.repaint();
-				}
-			}
-
-			@Override
-			public void componentMoved(ComponentEvent ce) {
-				Point p = getLocation();
-				if (p.y < -9) {
-					p.y = -9;
-					setLocation(p);
-				}
-			}
-		};
-		addComponentListener(ca);
+		addComponentListener(this);
 	}
-	
+
 	/**
 	 * Get the starting upper-left of the view
+	 * 
 	 * @return the starting upper-left of the view
 	 */
 	public Point getStartingLocation() {
 		return _startingLocation;
 	}
-	
+
 	@Override
 	public Insets getInsets() {
 		Insets def = super.getInsets();
-		return new Insets(def.top, def.left, 2,
-				def.right);
+		return new Insets(def.top, def.left, 2, def.right);
 	}
-	
+
 	/**
 	 * Get the parent JFrame
 	 * 
@@ -310,14 +277,13 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 	 */
 	public JFrame getParentFrame() {
 		if (_parentFrame == null) {
-			_parentFrame = (JFrame) SwingUtilities
-					.getAncestorOfClass(Frame.class, this);
+			_parentFrame = (JFrame) SwingUtilities.getAncestorOfClass(Frame.class, this);
 		}
 		return _parentFrame;
 	}
 
 	/**
-	 * Checks whether this view is on top. 
+	 * Checks whether this view is on top.
 	 * 
 	 * @return <code>true</code> if this view (internal frame) is on top.
 	 */
@@ -346,8 +312,7 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 	/**
 	 * Get the view's layer and item container, which may be <code>null</code>.
 	 * 
-	 * @return the view's layer and item container, which may be
-	 *         <code>null</code>.
+	 * @return the view's layer and item container, which may be <code>null</code>.
 	 */
 	@SuppressWarnings("all")
 	public IContainer getContainer() {
@@ -374,8 +339,8 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 	}
 
 	/**
-	 * Called by a container when a right click is not handled. The usual reason
-	 * is that the right click was on an inert spot.
+	 * Called by a container when a right click is not handled. The usual reason is
+	 * that the right click was on an inert spot.
 	 * 
 	 * @param mouseEvent the causal event.
 	 * @return <code>true</code> if the event was consumed
@@ -424,11 +389,9 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 
 			// try to get world bounds and zoom
 			if (_container != null) {
-				Rectangle2D.Double wr = worldRectangleFromProperties(
-						properties);
+				Rectangle2D.Double wr = worldRectangleFromProperties(properties);
 				if (wr != null) {
-					_container.zoom(wr.getMinX(), wr.getMaxX(), wr.getMinY(),
-							wr.getMaxY());
+					_container.zoom(wr.getMinX(), wr.getMaxX(), wr.getMinY(), wr.getMaxY());
 				}
 			}
 		} // viewRect != null
@@ -453,8 +416,7 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 	}
 
 	// pull out a boolean property
-	private boolean getBoolean(String key, Properties properties,
-			boolean defVal) {
+	private boolean getBoolean(String key, Properties properties, boolean defVal) {
 		String str = properties.getProperty(key);
 		return str == null ? defVal : Boolean.parseBoolean(str);
 	}
@@ -489,8 +451,7 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 	}
 
 	/**
-	 * Obtain the properties of this view that can be used to save a
-	 * configuration.
+	 * Obtain the properties of this view that can be used to save a configuration.
 	 * 
 	 * @return the properties that define the configuration
 	 */
@@ -519,14 +480,10 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 				b.y = 0;
 				Rectangle2D.Double wr = new Rectangle2D.Double();
 				_container.localToWorld(b, wr);
-				properties.put(name + "xmin",
-						DoubleFormat.doubleFormat(wr.x, 8));
-				properties.put(name + "ymin",
-						DoubleFormat.doubleFormat(wr.y, 8));
-				properties.put(name + "xmax",
-						DoubleFormat.doubleFormat(wr.getMaxX(), 8));
-				properties.put(name + "ymax",
-						DoubleFormat.doubleFormat(wr.getMaxY(), 8));
+				properties.put(name + "xmin", DoubleFormat.doubleFormat(wr.x, 8));
+				properties.put(name + "ymin", DoubleFormat.doubleFormat(wr.y, 8));
+				properties.put(name + "xmax", DoubleFormat.doubleFormat(wr.getMaxX(), 8));
+				properties.put(name + "ymax", DoubleFormat.doubleFormat(wr.getMaxY(), 8));
 			}
 		}
 
@@ -534,8 +491,7 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 	}
 
 	// get a world rect from the properties
-	private Rectangle2D.Double worldRectangleFromProperties(
-			Properties properties) {
+	private Rectangle2D.Double worldRectangleFromProperties(Properties properties) {
 
 		String name = getName() + "."; // serves as prefix
 
@@ -552,8 +508,7 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 							double ymin = Double.parseDouble(yminStr);
 							double xmax = Double.parseDouble(xmaxStr);
 							double ymax = Double.parseDouble(ymaxStr);
-							return new Rectangle2D.Double(xmin, ymin,
-									xmax - xmin, ymax - ymin);
+							return new Rectangle2D.Double(xmin, ymin, xmax - xmin, ymax - ymin);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -689,11 +644,10 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 	}
 
 	/**
-	 * Convenience method for getting the user component on the view's toolbar,
-	 * if there is one.
+	 * Convenience method for getting the user component on the view's toolbar, if
+	 * there is one.
 	 * 
-	 * @return the the user component on the view's toolbar, or
-	 *         <code>null</code>.
+	 * @return the the user component on the view's toolbar, or <code>null</code>.
 	 */
 	public UserToolBarComponent getUserComponent() {
 		if (getToolBar() != null) {
@@ -737,27 +691,28 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 	 * Add a quick zoom to the view's popup
 	 * 
 	 * @param title the title of the quickzoom
-	 * @param xmin min world x
-	 * @param ymin min world y
-	 * @param xmax min
+	 * @param xmin  min world x
+	 * @param ymin  min world y
+	 * @param xmax  min
 	 * @param ymax
 	 */
-	public void addQuickZoom(String title, final double xmin, final double ymin,
-			final double xmax, final double ymax) {
+	public void addQuickZoom(String title, final double xmin, final double ymin, final double xmax, final double ymax) {
 
 		_viewPopupMenu.addQuickZoom(title, xmin, ymin, xmax, ymax);
 	}
-	
+
 	/**
 	 * Check whether this view is scrollable
+	 * 
 	 * @return <code>true</code> if this view is scrollable
 	 */
 	public boolean isScrollable() {
 		return (_scrollPane != null);
 	}
-	
+
 	/**
 	 * Get the scroll pane (often <code>null</code>)
+	 * 
 	 * @return the scroll pane
 	 */
 	public JScrollPane getScrollPane() {
@@ -771,14 +726,14 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 	@Override
 	public void focusLost(FocusEvent e) {
 	}
-	
+
 	/**
 	 * Clone the view. Default implementation does nothing.
 	 */
 	public BaseView cloneView() {
 		return null;
 	}
-	
+
 	/**
 	 * Refresh the view. Base implementation works only for container views.
 	 */
@@ -809,6 +764,31 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 		if (BaseMDIApplication.getHeadsUpDisplay() != null) {
 			BaseMDIApplication.getHeadsUpDisplay().clear();
 		}
+	}
+
+	@Override
+	public void componentHidden(ComponentEvent arg0) {
+	}
+
+	@Override
+	public void componentMoved(ComponentEvent arg0) {
+		Point p = getLocation();
+		if (p.y < -9) {
+			p.y = -9;
+			setLocation(p);
+		}
+	}
+
+	@Override
+	public void componentResized(ComponentEvent arg0) {
+		// hard to believe necessary but funny things happen without it
+		if (_desktop != null) {
+			_desktop.repaint();
+		}
+	}
+
+	@Override
+	public void componentShown(ComponentEvent arg0) {
 	}
 
 }

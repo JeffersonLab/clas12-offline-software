@@ -100,8 +100,7 @@ public class Log {
 	/**
 	 * Remove a LogListener.
 	 * 
-	 * @param logListener
-	 *            the LogListener to remove.
+	 * @param logListener the LogListener to remove.
 	 */
 
 	public void removeLogListener(ILogListener logListener) {
@@ -116,8 +115,7 @@ public class Log {
 	/**
 	 * Send a error string to the listeners.
 	 * 
-	 * @param message
-	 *            the error message string.
+	 * @param message the error message string.
 	 */
 	public void error(String message) {
 		notifyListeners(message, Level.ERROR);
@@ -126,8 +124,7 @@ public class Log {
 	/**
 	 * Send a config string to the listeners.
 	 * 
-	 * @param message
-	 *            the config message string.
+	 * @param message the config message string.
 	 */
 
 	public void config(String message) {
@@ -137,8 +134,7 @@ public class Log {
 	/**
 	 * Send a warning to the logger.
 	 * 
-	 * @param message
-	 *            the warning message.
+	 * @param message the warning message.
 	 */
 	public void warning(String message) {
 		notifyListeners(message, Level.WARNING);
@@ -147,8 +143,7 @@ public class Log {
 	/**
 	 * Send an info string to the logger.
 	 * 
-	 * @param message
-	 *            the informational string.
+	 * @param message the informational string.
 	 */
 	public void info(String message) {
 		notifyListeners(message, Level.INFO);
@@ -157,8 +152,7 @@ public class Log {
 	/**
 	 * Send an exception to the "severe" handler.
 	 * 
-	 * @param t
-	 *            a Throwable--usually an Exception.
+	 * @param t a Throwable--usually an Exception.
 	 */
 	public void exception(Throwable t) {
 		notifyListeners(throwableToString(t), Level.EXCEPTION);
@@ -167,8 +161,7 @@ public class Log {
 	/**
 	 * Place the stack trace from a throwable into a string.
 	 * 
-	 * @param t
-	 *            the Throwable (Exception or Error)
+	 * @param t the Throwable (Exception or Error)
 	 * @return the string with the stack trace info.
 	 */
 	private String throwableToString(Throwable t) {

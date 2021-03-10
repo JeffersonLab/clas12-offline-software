@@ -40,8 +40,7 @@ public class RowColumnGrid {
 	 * Create a grid with the same number of rows and columns. (I.e., a square
 	 * grid).
 	 * 
-	 * @param size
-	 *            the number of rows and columns.
+	 * @param size the number of rows and columns.
 	 */
 	public RowColumnGrid(int size) {
 		this(size, size);
@@ -50,10 +49,8 @@ public class RowColumnGrid {
 	/**
 	 * Construct a grid with the given number of rows and columns.
 	 * 
-	 * @param numRows
-	 *            the number of rows.
-	 * @param numColumns
-	 *            the number of columns.
+	 * @param numRows    the number of rows.
+	 * @param numColumns the number of columns.
 	 */
 	public RowColumnGrid(int numRows, int numColumns) {
 		super();
@@ -64,16 +61,12 @@ public class RowColumnGrid {
 	/**
 	 * Given world coordinates, this returns the row and column indices.
 	 * 
-	 * @param bounds
-	 *            an world rectangle defining the physical extent of the grid.
-	 * @param x
-	 *            the x coordinate.
-	 * @param y
-	 *            the y coordinate.
+	 * @param bounds an world rectangle defining the physical extent of the grid.
+	 * @param x      the x coordinate.
+	 * @param y      the y coordinate.
 	 * @return a RowColumnPoint that will hold the row and column indices.
 	 */
-	public RowColumnPoint getRowCol(Rectangle2D.Double bounds, double x,
-			double y) {
+	public RowColumnPoint getRowCol(Rectangle2D.Double bounds, double x, double y) {
 
 		try {
 
@@ -98,16 +91,12 @@ public class RowColumnGrid {
 	/**
 	 * Given a RowColumnPoint, and the size of the boundary
 	 * 
-	 * @param bounds
-	 *            a world rectangle describing the physical extent of the grid.
-	 * @param p
-	 *            a world point that will be modified--given the vale of the
-	 *            cell on the logical grid imposed on the world rectangle.
-	 * @param rc
-	 *            the input row and column.
+	 * @param bounds a world rectangle describing the physical extent of the grid.
+	 * @param p      a world point that will be modified--given the vale of the cell
+	 *               on the logical grid imposed on the world rectangle.
+	 * @param rc     the input row and column.
 	 */
-	public void setPointFromRowCol(Rectangle2D.Double bounds, Point2D.Double p,
-			RowColumnPoint rc) {
+	public void setPointFromRowCol(Rectangle2D.Double bounds, Point2D.Double p, RowColumnPoint rc) {
 		// grid fractional spacing
 		double fx = (double) rc.getColumn() / numColumns;
 		double fy = (double) rc.getRow() / numRows;

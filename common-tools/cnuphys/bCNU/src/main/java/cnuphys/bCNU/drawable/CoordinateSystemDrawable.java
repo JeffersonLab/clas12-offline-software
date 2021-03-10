@@ -38,15 +38,12 @@ public class CoordinateSystemDrawable extends DrawableAdapter {
 
 	/**
 	 * Create a little coordinate system indicator. Not very general-- assumes z
-	 * axis is to the right and x-y plane perpendicular ro screen with x
-	 * vertical if phi = 0.
+	 * axis is to the right and x-y plane perpendicular ro screen with x vertical if
+	 * phi = 0.
 	 * 
-	 * @param size
-	 *            the canvas size in pixels
-	 * @param xlabel
-	 *            the x axis label
-	 * @param ylabel
-	 *            the y axis label
+	 * @param size   the canvas size in pixels
+	 * @param xlabel the x axis label
+	 * @param ylabel the y axis label
 	 */
 	public CoordinateSystemDrawable(int size, String xlabel, String ylabel) {
 		_size = size;
@@ -57,10 +54,8 @@ public class CoordinateSystemDrawable extends DrawableAdapter {
 	/**
 	 * The drawing method
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the rendering container
+	 * @param g         the graphics context
+	 * @param container the rendering container
 	 */
 	@Override
 	public void draw(Graphics g, IContainer container) {
@@ -72,8 +67,7 @@ public class CoordinateSystemDrawable extends DrawableAdapter {
 		int x = _margin;
 		int y = b.height - _margin - _size;
 
-		GraphicsUtilities.drawSimple3DRect(g, x, y, _size, _size, _fillColor,
-				true);
+		GraphicsUtilities.drawSimple3DRect(g, x, y, _size, _size, _fillColor, true);
 		g.setColor(Color.black);
 		g.setFont(smallFont);
 

@@ -6,39 +6,36 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 public class MathUtilities {
-	
+
 	/**
 	 * Get an int as an unsigned long
+	 * 
 	 * @param x the int
 	 * @return the unsigned long
 	 */
 	public static long getUnsignedInt(int x) {
-	    return x & 0x00000000ffffffffL;
+		return x & 0x00000000ffffffffL;
 	}
 
 	/**
-	 * Given two points p0 and p1, imagine a line from p0 to p1. Take the line
-	 * to be parameterized by parameter t so that at t = 0 we are at p0 and t =
-	 * 1 we are at p1.
+	 * Given two points p0 and p1, imagine a line from p0 to p1. Take the line to be
+	 * parameterized by parameter t so that at t = 0 we are at p0 and t = 1 we are
+	 * at p1.
 	 * 
-	 * @param p0
-	 *            start point of main line
-	 * @param p1
-	 *            end point of main line
-	 * @param wp
-	 *            the point from which we drop a perpendicular to p0 -> p1
-	 * @param pintersect
-	 *            the intersection point of the perpendicular and the line
-	 *            containing p0-p1. It may or may not actually be between p0 and
-	 *            p1, as specified by the value of t.
-	 * @return the perpendicular distance to the line. If t is between 0 and 1
-	 *         the intersection is on the line. If t < 0 the intersection is on
-	 *         the "infinite line" but not on p0->p1, it is on the p0 side; this
-	 *         returns the distance to p0. If t > 1 the intersection is on the
-	 *         p1 side; this returns the distance to p1.
+	 * @param p0         start point of main line
+	 * @param p1         end point of main line
+	 * @param wp         the point from which we drop a perpendicular to p0 -> p1
+	 * @param pintersect the intersection point of the perpendicular and the line
+	 *                   containing p0-p1. It may or may not actually be between p0
+	 *                   and p1, as specified by the value of t.
+	 * @return the perpendicular distance to the line. If t is between 0 and 1 the
+	 *         intersection is on the line. If t < 0 the intersection is on the
+	 *         "infinite line" but not on p0->p1, it is on the p0 side; this returns
+	 *         the distance to p0. If t > 1 the intersection is on the p1 side; this
+	 *         returns the distance to p1.
 	 */
-	public static double perpendicularDistance(Point2D.Double p0,
-			Point2D.Double p1, Point2D.Double wp, Point2D.Double pintersect) {
+	public static double perpendicularDistance(Point2D.Double p0, Point2D.Double p1, Point2D.Double wp,
+			Point2D.Double pintersect) {
 		double delx = p1.x - p0.x;
 		double dely = p1.y - p0.y;
 
@@ -58,27 +55,23 @@ public class MathUtilities {
 	}
 
 	/**
-	 * Given two points p0 and p1, imagine a line from p0 to p1. Take the line
-	 * to be parameterized by parameter t so that at t = 0 we are at p0 and t =
-	 * 1 we are at p1.
+	 * Given two points p0 and p1, imagine a line from p0 to p1. Take the line to be
+	 * parameterized by parameter t so that at t = 0 we are at p0 and t = 1 we are
+	 * at p1.
 	 * 
-	 * @param p0
-	 *            start point of main line
-	 * @param p1
-	 *            end point of main line
-	 * @param wp
-	 *            the point from which we drop a perpendicular to p0 -> p1
-	 * @param pintersect
-	 *            the intersection point of the perpendicular and the line
-	 *            containing p0-p1. It may or may not actually be between p0 and
-	 *            p1, as specified by the return argument.
+	 * @param p0         start point of main line
+	 * @param p1         end point of main line
+	 * @param wp         the point from which we drop a perpendicular to p0 -> p1
+	 * @param pintersect the intersection point of the perpendicular and the line
+	 *                   containing p0-p1. It may or may not actually be between p0
+	 *                   and p1, as specified by the return argument.
 	 * @return the value of the t parameter. If it is between 0 and 1 the
 	 *         intersection is on the line. If t < 0 the intersection is on the
-	 *         "infinite line" but not on p0->p1, it is on the p0 side. If t > 1
-	 *         the intersection is on the p1 side.
+	 *         "infinite line" but not on p0->p1, it is on the p0 side. If t > 1 the
+	 *         intersection is on the p1 side.
 	 */
-	public static double perpendicularIntersection(Point2D.Double p0,
-			Point2D.Double p1, Point2D.Double wp, Point2D.Double pintersect) {
+	public static double perpendicularIntersection(Point2D.Double p0, Point2D.Double p1, Point2D.Double wp,
+			Point2D.Double pintersect) {
 		double delx = p1.x - p0.x;
 		double dely = p1.y - p0.y;
 
@@ -91,31 +84,25 @@ public class MathUtilities {
 	}
 
 	/**
-	 * Given two points p0 and p1, imagine a line from p0 to p1. Take the line
-	 * to be parameterized by parameter t so that at t = 0 we are at p0 and t =
-	 * 1 we are at p1.
+	 * Given two points p0 and p1, imagine a line from p0 to p1. Take the line to be
+	 * parameterized by parameter t so that at t = 0 we are at p0 and t = 1 we are
+	 * at p1.
 	 * 
-	 * @param x1
-	 *            x coordinate of one endpoint
-	 * @param y1
-	 *            y coordinate of one endpoint
-	 * @param x2
-	 *            x coordinate of other endpoint
-	 * @param y2
-	 *            y coordinate of other endpoint
-	 * @param wp
-	 *            the point from which we drop a perpendicular to p0 -> p1
-	 * @param pintersect
-	 *            the intersection point of the perpendicular and the line
-	 *            containing p0-p1. It may or may not actually be between p0 and
-	 *            p1, as specified by the return argument.
+	 * @param x1         x coordinate of one endpoint
+	 * @param y1         y coordinate of one endpoint
+	 * @param x2         x coordinate of other endpoint
+	 * @param y2         y coordinate of other endpoint
+	 * @param wp         the point from which we drop a perpendicular to p0 -> p1
+	 * @param pintersect the intersection point of the perpendicular and the line
+	 *                   containing p0-p1. It may or may not actually be between p0
+	 *                   and p1, as specified by the return argument.
 	 * @return the value of the t parameter. If it is between 0 and 1 the
 	 *         intersection is on the line. If t < 0 the intersection is on the
-	 *         "infinite line" but not on p0->p1, it is on the p0 side. If t > 1
-	 *         the intersection is on the p1 side.
+	 *         "infinite line" but not on p0->p1, it is on the p0 side. If t > 1 the
+	 *         intersection is on the p1 side.
 	 */
-	public static double perpendicularIntersection(double x1, double y1,
-			double x2, double y2, Point2D.Double wp, Point2D.Double pintersect) {
+	public static double perpendicularIntersection(double x1, double y1, double x2, double y2, Point2D.Double wp,
+			Point2D.Double pintersect) {
 		double delx = x2 - x1;
 		double dely = y2 - y1;
 
@@ -128,23 +115,19 @@ public class MathUtilities {
 	}
 
 	/**
-	 * Given two points p0 and p1, imagine a line from p0 to p1. Take the line
-	 * to be parameterized by parameter t so that at t = 0 we are at p0 and t =
-	 * 1 we are at p1.
+	 * Given two points p0 and p1, imagine a line from p0 to p1. Take the line to be
+	 * parameterized by parameter t so that at t = 0 we are at p0 and t = 1 we are
+	 * at p1.
 	 * 
-	 * @param p0
-	 *            start point of main line
-	 * @param p1
-	 *            end point of main line
-	 * @param wp
-	 *            the point from which we drop a perpendicular to p0 -> p1
+	 * @param p0 start point of main line
+	 * @param p1 end point of main line
+	 * @param wp the point from which we drop a perpendicular to p0 -> p1
 	 * @return the value of the t parameter. If it is between 0 and 1 the
 	 *         intersection is on the line. If t < 0 the intersection is on the
-	 *         "infinite line" but not on p0->p1, it is on the p0 side. If t > 1
-	 *         the intersection is on the p1 side.
+	 *         "infinite line" but not on p0->p1, it is on the p0 side. If t > 1 the
+	 *         intersection is on the p1 side.
 	 */
-	public static double perpendicularIntersection(Point2D.Double p0,
-			Point2D.Double p1, Point2D.Double wp) {
+	public static double perpendicularIntersection(Point2D.Double p0, Point2D.Double p1, Point2D.Double wp) {
 		double delx = p1.x - p0.x;
 		double dely = p1.y - p0.y;
 
@@ -155,14 +138,12 @@ public class MathUtilities {
 	}
 
 	/**
-	 * Given an array of pixel points, this rearranges the array into a convex
-	 * hull.
+	 * Given an array of pixel points, this rearranges the array into a convex hull.
 	 * 
-	 * @param points
-	 *            the array of pixel points.
-	 * @return an index which is less than or equal to the size of the points
-	 *         array. Use that many points as the convex hull. In other words,
-	 *         if points.length = 10 and this returns 6, then points[0] through
+	 * @param points the array of pixel points.
+	 * @return an index which is less than or equal to the size of the points array.
+	 *         Use that many points as the convex hull. In other words, if
+	 *         points.length = 10 and this returns 6, then points[0] through
 	 *         points[5] will be the convex hull.
 	 */
 	public static int getConvexHull(Point points[]) {
@@ -188,14 +169,12 @@ public class MathUtilities {
 	}
 
 	/**
-	 * Given an array of world points, this rearranges the array into a convex
-	 * hull.
+	 * Given an array of world points, this rearranges the array into a convex hull.
 	 * 
-	 * @param points
-	 *            the array of world points.
-	 * @return an index which is less than or equal to the size of the points
-	 *         array. Use that many points as the convex hull. In other words,
-	 *         if points.length = 10 and this returns 6, then points[0] through
+	 * @param points the array of world points.
+	 * @return an index which is less than or equal to the size of the points array.
+	 *         Use that many points as the convex hull. In other words, if
+	 *         points.length = 10 and this returns 6, then points[0] through
 	 *         points[5] will be the convex hull.
 	 */
 	public static int getConvexHull(Point2D.Double points[]) {
@@ -259,10 +238,8 @@ public class MathUtilities {
 
 			@Override
 			public int compare(Point2D.Double wp1, Point2D.Double wp2) {
-				Point2D.Double v1 = new Point2D.Double(wp1.x - p0.x, wp1.y
-						- p0.y);
-				Point2D.Double v2 = new Point2D.Double(wp2.x - p0.x, wp2.y
-						- p0.y);
+				Point2D.Double v1 = new Point2D.Double(wp1.x - p0.x, wp1.y - p0.y);
+				Point2D.Double v2 = new Point2D.Double(wp2.x - p0.x, wp2.y - p0.y);
 				double ang1 = Math.atan2(v1.y, v1.x);
 				double ang2 = Math.atan2(v2.y, v2.x);
 				if (ang1 < ang2) {
@@ -298,19 +275,16 @@ public class MathUtilities {
 	// ccw < 0, and collinear if ccw = 0 because ccw is a determinant that
 	// gives the signed area of the triangle formed by p1, p2, and p3.
 	// Used by convex hull algorithm
-	private static double ccw(Point2D.Double p1, Point2D.Double p2,
-			Point2D.Double p3) {
+	private static double ccw(Point2D.Double p1, Point2D.Double p2, Point2D.Double p3) {
 		return (p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x);
 	}
 
 	/**
 	 * Sort an array with an index sort
 	 * 
-	 * @param <T>
-	 * @param a
-	 *            the array to sort
-	 * @param c
-	 *            the comparator
+	 * @param   <T>
+	 * @param a the array to sort
+	 * @param c the comparator
 	 * @return the index sorted array
 	 */
 	public static <T> int[] indexSort(final T[] a, final Comparator<? super T> c) {
@@ -339,8 +313,7 @@ public class MathUtilities {
 	/**
 	 * Sort an array of doubles with an index sort
 	 * 
-	 * @param a
-	 *            the array to sort
+	 * @param a the array to sort
 	 * @return the resulting index sorted array.
 	 */
 	@SuppressWarnings("unchecked")
@@ -471,16 +444,14 @@ public class MathUtilities {
 		int indexArray[] = indexSort(array, c);
 
 		for (int i = 0; i < indexArray.length; i++) {
-			System.err.println(array[i] + ", " + indexArray[i] + ",  "
-					+ array[indexArray[i]]);
+			System.err.println(array[i] + ", " + indexArray[i] + ",  " + array[indexArray[i]]);
 		}
 
 		System.err.println("\ndouble array test");
 		double darray[] = { 23, 64, 10, 0, 6, 9, 6, 23, -27 };
 		indexArray = indexSort(darray);
 		for (int i = 0; i < indexArray.length; i++) {
-			System.err.println(darray[i] + ", " + indexArray[i] + ",  "
-					+ darray[indexArray[i]]);
+			System.err.println(darray[i] + ", " + indexArray[i] + ",  " + darray[indexArray[i]]);
 		}
 
 	}

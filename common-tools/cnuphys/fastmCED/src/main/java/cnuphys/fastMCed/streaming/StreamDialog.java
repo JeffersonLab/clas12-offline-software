@@ -1,6 +1,5 @@
 package cnuphys.fastMCed.streaming;
 
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -59,13 +58,11 @@ public class StreamDialog extends JDialog implements IStreamProcessor {
 
 	// the ClasIO event manager
 	private PhysicsEventManager _eventManager = PhysicsEventManager.getInstance();
-	
-	
-	//buttons
+
+	// buttons
 	private JButton _runButton;
 	private JButton _resumeButton;
 	private JButton _closeButton;
-
 
 	private static int lastCount = 1000;
 
@@ -99,14 +96,13 @@ public class StreamDialog extends JDialog implements IStreamProcessor {
 
 		Box box = Box.createVerticalBox();
 
-
 		// path label
 
 		Box subBox = Box.createVerticalBox();
 		_generatorLabel = new JLabel();
 		_totalLabel = new JLabel();
 		_remainingLabel = new JLabel();
-		
+
 		fixNumRemaining();
 
 		subBox.add(DialogUtilities.paddedPanel(6, 6, _generatorLabel));
@@ -140,20 +136,19 @@ public class StreamDialog extends JDialog implements IStreamProcessor {
 		add(Box.createHorizontalStrut(4), BorderLayout.WEST);
 
 	}
-	
+
 	private void fixNumRemaining() {
 		_numRemaining = _eventManager.getNumRemainingEvents();
 		if (_numRemaining > 0) {
 			_generatorLabel.setText(_eventManager.getGeneratorDescription());
-			_totalLabel.setText("Total number: "
-					+ _eventManager.getEventCount());
+			_totalLabel.setText("Total number: " + _eventManager.getEventCount());
 			_remainingLabel.setText("Remaining: " + _numRemaining);
 		} else {
 			_generatorLabel.setText("No event generator.");
 			_totalLabel.setText("Total number: 0");
 			_remainingLabel.setText("Remaining: 0");
 		}
-		
+
 	}
 
 	// the number-to-stream panel
@@ -173,16 +168,15 @@ public class StreamDialog extends JDialog implements IStreamProcessor {
 		return panel;
 	}
 
-	
 	/**
 	 * Create the button panel.
 	 * 
 	 * @return the button panel.
 	 */
 	private JPanel createButtonPanel() {
-		
+
 		JPanel panel = new JPanel();
-		
+
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 0));
 		_runButton = new JButton(" Run ");
 		_resumeButton = new JButton(" Resume ");
@@ -196,19 +190,16 @@ public class StreamDialog extends JDialog implements IStreamProcessor {
 
 				if (source == _runButton) {
 					handleRun();
-				}
-				else if (source == _resumeButton) {
+				} else if (source == _resumeButton) {
 					StreamManager.getInstance().setStreamState(StreamReason.STARTED);
-				}
-				else if (source == _closeButton) {
+				} else if (source == _closeButton) {
 					handleClose();
 				}
-
 
 			}
 
 		};
-		
+
 		_runButton.addActionListener(alist);
 		_resumeButton.addActionListener(alist);
 		_closeButton.addActionListener(alist);
@@ -216,25 +207,26 @@ public class StreamDialog extends JDialog implements IStreamProcessor {
 		panel.add(_runButton);
 		panel.add(_resumeButton);
 		panel.add(_closeButton);
-		
+
 		fixButtons(StreamManager.getInstance().getStreamState());
-		
+
 		return panel;
 
 	}
-	
+
 	private void handleClose() {
 		doClose(DialogUtilities.CANCEL_RESPONSE);
 	}
-	//convenience
+
+	// convenience
 	private StreamReason getState() {
 		return StreamManager.getInstance().getStreamState();
 	}
-	
+
 	private boolean isStarted() {
 		return getState() == StreamReason.STARTED;
 	}
-	
+
 	private boolean isPaused() {
 		return getState() == StreamReason.PAUSED;
 	}
@@ -248,7 +240,7 @@ public class StreamDialog extends JDialog implements IStreamProcessor {
 		}
 		super.setVisible(vis);
 	}
-	
+
 	private void handleRun() {
 
 		// if number field was not enabled treat as cancel.
@@ -257,7 +249,6 @@ public class StreamDialog extends JDialog implements IStreamProcessor {
 			setVisible(false);
 			return;
 		}
-
 
 		try {
 			int count = Integer.parseInt(_numberField.getText().trim());
@@ -273,7 +264,7 @@ public class StreamDialog extends JDialog implements IStreamProcessor {
 
 				@Override
 				public void run() {
-	//				_eventManager.setStreaming(true);
+					// _eventManager.setStreaming(true);
 
 					int modCount = Math.max(2, fcount / 100);
 
@@ -281,10 +272,10 @@ public class StreamDialog extends JDialog implements IStreamProcessor {
 					while ((isStarted() || isPaused()) && (count < fcount)) {
 
 						if (isPaused()) {
-							
+
 							try {
 								Thread.sleep(1000);
-								//System.err.println("Stream is paused.");
+								// System.err.println("Stream is paused.");
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 							}
@@ -303,13 +294,11 @@ public class StreamDialog extends JDialog implements IStreamProcessor {
 							}
 						}
 					}
-					
-					
+
 					// we are done streaming
-					
+
 					StreamManager.getInstance().setStreamState(StreamReason.STOPPED);
 
-					
 					setVisible(false);
 
 //					if (StreamManager.getInstance().isStopped()) {
@@ -317,22 +306,20 @@ public class StreamDialog extends JDialog implements IStreamProcessor {
 //					}
 //					
 //					//				_eventManager.setStreaming(false);
-										
-					
+
 					SwingUtilities.invokeLater(new Runnable() {
 						@Override
 						public void run() {
-							//reload last event
+							// reload last event
 							_eventManager.reloadCurrentEvent();
 
-							ViewManager.getInstance()
-									.refreshAllViews();
-							
+							ViewManager.getInstance().refreshAllViews();
+
 						}
 					});
 
 					fixNumRemaining();
-	//				doClose(DialogUtilities.OK_RESPONSE);
+					// doClose(DialogUtilities.OK_RESPONSE);
 
 				} // run
 			};
@@ -345,7 +332,7 @@ public class StreamDialog extends JDialog implements IStreamProcessor {
 		} catch (Exception e) {
 			_reason = DialogUtilities.CANCEL_RESPONSE;
 		}
-		
+
 	}
 
 	// user has hit ok or cancel
@@ -354,20 +341,18 @@ public class StreamDialog extends JDialog implements IStreamProcessor {
 		setVisible(false);
 	}
 
-	
 	/**
 	 * Why the dialog closed.
 	 * 
-	 * @return either DialogUtilities.OK_RESPONSE or
-	 *         DialogUtilities.CANCEL_RESPONSE
+	 * @return either DialogUtilities.OK_RESPONSE or DialogUtilities.CANCEL_RESPONSE
 	 */
 	public int getReason() {
 		return _reason;
 	}
-	
+
 	private void fixButtons(StreamReason reason) {
-		//fix buttons
-		switch(reason) {
+		// fix buttons
+		switch (reason) {
 		case STARTED:
 			_runButton.setEnabled(false);
 			_resumeButton.setEnabled(false);
@@ -384,7 +369,7 @@ public class StreamDialog extends JDialog implements IStreamProcessor {
 		}
 	}
 
-	//STARTED, STOPPED, PAUSED, FINISHED, RESUMED
+	// STARTED, STOPPED, PAUSED, FINISHED, RESUMED
 	@Override
 	public void streamingChange(StreamReason reason) {
 		fixButtons(reason);
@@ -399,6 +384,5 @@ public class StreamDialog extends JDialog implements IStreamProcessor {
 	public String flagExplanation() {
 		return "No way this happened.";
 	}
-	
 
 }

@@ -23,8 +23,7 @@ public class Unzip {
 	/**
 	 * Unzip a file into its current location
 	 * 
-	 * @param filename
-	 *            the full path to the zip file
+	 * @param filename the full path to the zip file
 	 * @return a vector of strings, each entry a full path to a created file
 	 */
 	public static Vector<String> unzip(String filename) throws IOException {
@@ -55,11 +54,9 @@ public class Unzip {
 	}
 
 	// write an entry to a zip file
-	private static void writeEntry(ZipFile zipFile, ZipEntry entry,
-			Vector<String> dirsMade, Vector<String> unzippedFiles)
-			throws IOException {
-		if ((zipFile == null) || (entry == null) || (dirsMade == null)
-				|| (unzippedFiles == null)) {
+	private static void writeEntry(ZipFile zipFile, ZipEntry entry, Vector<String> dirsMade,
+			Vector<String> unzippedFiles) throws IOException {
+		if ((zipFile == null) || (entry == null) || (dirsMade == null) || (unzippedFiles == null)) {
 			return;
 		}
 
@@ -94,8 +91,7 @@ public class Unzip {
 				if (!(d.exists() && d.isDirectory())) {
 					// Try to create the directory, warn if it fails
 					if (!d.mkdirs()) {
-						log.warning("Warning: unable to mkdir " + subDir
-								+ " [writeEntry in Zip]");
+						log.warning("Warning: unable to mkdir " + subDir + " [writeEntry in Zip]");
 					}
 					dirsMade.add(subDir);
 				}
@@ -144,8 +140,7 @@ public class Unzip {
 	}
 
 	// copy input stream to output stream
-	private static void copyInputStream(InputStream in, OutputStream out)
-			throws IOException {
+	private static void copyInputStream(InputStream in, OutputStream out) throws IOException {
 		byte[] buffer = new byte[1024];
 		int len;
 

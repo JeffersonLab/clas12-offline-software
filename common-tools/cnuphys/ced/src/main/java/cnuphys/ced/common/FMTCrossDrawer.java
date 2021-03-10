@@ -1,6 +1,5 @@
 package cnuphys.ced.common;
 
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -25,8 +24,7 @@ import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.FMTCrosses;
 import cnuphys.ced.geometry.GeometryManager;
 
-public class FMTCrossDrawer extends CedViewDrawer  {
-
+public class FMTCrossDrawer extends CedViewDrawer {
 
 	private static final int ARROWLEN = 30; // pixels
 	private static final Stroke THICKLINE = new BasicStroke(1.5f);
@@ -36,7 +34,6 @@ public class FMTCrossDrawer extends CedViewDrawer  {
 
 	// cached rectangles for feedback
 	private Rectangle _fmtFBRects[];
-	
 
 	public FMTCrossDrawer(CedView view) {
 		super(view);
@@ -44,16 +41,15 @@ public class FMTCrossDrawer extends CedViewDrawer  {
 
 	@Override
 	public void draw(Graphics g, IContainer container) {
-		
+
 		if (!_view.showFMTCrosses()) {
 			return;
 		}
-		
-		
+
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
-		
+
 		if (!_view.isSingleEventMode()) {
 			return;
 		}
@@ -76,21 +72,22 @@ public class FMTCrossDrawer extends CedViewDrawer  {
 
 	/**
 	 * Draw FMT crosses
-	 * @param g the graphics context
+	 * 
+	 * @param g         the graphics context
 	 * @param container the drawing container
 	 */
 	public void drawFMTCrosses(Graphics g, IContainer container) {
-		
-		//treat DCXY view separately
+
+		// treat DCXY view separately
 		if (_view instanceof DCXYView) {
 			drawFMTCrossesXY(g, container);
 			return;
 		}
-		
+
 		CrossList2 crosses = FMTCrosses.getInstance().getCrosses();
-		
+
 		int len = (crosses == null) ? 0 : crosses.size();
-		
+
 		if (len == 0) {
 			_fmtFBRects = null;
 		} else {
@@ -98,7 +95,7 @@ public class FMTCrossDrawer extends CedViewDrawer  {
 		}
 
 		double result[] = new double[3];
-		
+
 		if (len > 0) {
 			Point2D.Double wp = new Point2D.Double();
 			Point pp = new Point();
@@ -108,14 +105,14 @@ public class FMTCrossDrawer extends CedViewDrawer  {
 			for (int i = 0; i < len; i++) {
 				Cross2 cross = crosses.elementAt(i);
 
-				//lab coordinates
+				// lab coordinates
 				result[0] = cross.x;
 				result[1] = cross.y;
 				result[2] = cross.z;
-				
+
 				int crossSector = GeometryManager.labXYZToSectorNumber(result);
-				
-				_view.projectClasToWorld(result[0], result[1], result[2],  _view.getProjectionPlane(), wp);
+
+				_view.projectClasToWorld(result[0], result[1], result[2], _view.getProjectionPlane(), wp);
 
 				int mySector = _view.getSector(container, null, wp);
 				if (mySector == crossSector) {
@@ -127,12 +124,12 @@ public class FMTCrossDrawer extends CedViewDrawer  {
 
 					int pixlen = ARROWLEN;
 					double r = pixlen / WorldGraphicsUtilities.getMeanPixelDensity(container);
-					
-					//lab coordinates of end of arrow
+
+					// lab coordinates of end of arrow
 					result[0] = cross.x + r * cross.ux;
 					result[1] = cross.y + r * cross.uy;
 					result[2] = cross.z + r * cross.uz;
-					_view.projectClasToWorld(result[0], result[1], result[2],  _view.getProjectionPlane(), wp2);
+					_view.projectClasToWorld(result[0], result[1], result[2], _view.getProjectionPlane(), wp2);
 					container.worldToLocal(pp2, wp2);
 
 					g.setColor(Color.orange);
@@ -152,18 +149,19 @@ public class FMTCrossDrawer extends CedViewDrawer  {
 		} // len > 0
 
 	}
-	
+
 	/**
 	 * Draw FMT crosses
-	 * @param g the graphics context
+	 * 
+	 * @param g         the graphics context
 	 * @param container the drawing container
 	 */
 	public void drawFMTCrossesXY(Graphics g, IContainer container) {
-		
+
 		CrossList2 crosses = FMTCrosses.getInstance().getCrosses();
-		
+
 		int len = (crosses == null) ? 0 : crosses.size();
-		
+
 		if (len == 0) {
 			_fmtFBRects = null;
 		} else {
@@ -179,63 +177,60 @@ public class FMTCrossDrawer extends CedViewDrawer  {
 			for (int i = 0; i < len; i++) {
 				Cross2 cross = crosses.elementAt(i);
 
-				//lab coordinates
+				// lab coordinates
 				wp.setLocation(cross.x, cross.y);
-				
 
+				container.worldToLocal(pp, wp);
+				cross.setLocation(pp);
 
-					container.worldToLocal(pp, wp);
-					cross.setLocation(pp);
+				// arrows
 
-					// arrows
+				int pixlen = ARROWLEN;
+				double r = pixlen / WorldGraphicsUtilities.getMeanPixelDensity(container);
 
-					int pixlen = ARROWLEN;
-					double r = pixlen / WorldGraphicsUtilities.getMeanPixelDensity(container);
-					
-					//lab coordinates of end of arrow
-					wp2.setLocation(cross.x + r * cross.ux, cross.y + r * cross.uy);
-					container.worldToLocal(pp2, wp2);
+				// lab coordinates of end of arrow
+				wp2.setLocation(cross.x + r * cross.ux, cross.y + r * cross.uy);
+				container.worldToLocal(pp2, wp2);
 
-					g.setColor(Color.orange);
-					g.drawLine(pp.x + 1, pp.y, pp2.x + 1, pp2.y);
-					g.drawLine(pp.x, pp.y + 1, pp2.x, pp2.y + 1);
-					g.setColor(Color.darkGray);
-					g.drawLine(pp.x, pp.y, pp2.x, pp2.y);
+				g.setColor(Color.orange);
+				g.drawLine(pp.x + 1, pp.y, pp2.x + 1, pp2.y);
+				g.drawLine(pp.x, pp.y + 1, pp2.x, pp2.y + 1);
+				g.setColor(Color.darkGray);
+				g.drawLine(pp.x, pp.y, pp2.x, pp2.y);
 
-					// the circles and crosses
-					DataDrawSupport.drawCross(g, pp.x, pp.y, DataDrawSupport.FMT_CROSS);
+				// the circles and crosses
+				DataDrawSupport.drawCross(g, pp.x, pp.y, DataDrawSupport.FMT_CROSS);
 
-					// fbrects for quick feedback
-					_fmtFBRects[i] = new Rectangle(pp.x - DataDrawSupport.CROSSHALF, pp.y - DataDrawSupport.CROSSHALF,
-							2 * DataDrawSupport.CROSSHALF, 2 * DataDrawSupport.CROSSHALF);
+				// fbrects for quick feedback
+				_fmtFBRects[i] = new Rectangle(pp.x - DataDrawSupport.CROSSHALF, pp.y - DataDrawSupport.CROSSHALF,
+						2 * DataDrawSupport.CROSSHALF, 2 * DataDrawSupport.CROSSHALF);
 			} // loop over crosses
 		} // len > 0
 
 	}
 
-	
 	/**
 	 * Use what was drawn to generate feedback strings
 	 * 
-	 * @param container the drawing container
-	 * @param screenPoint the mouse location
-	 * @param worldPoint the corresponding world location
+	 * @param container       the drawing container
+	 * @param screenPoint     the mouse location
+	 * @param worldPoint      the corresponding world location
 	 * @param feedbackStrings add strings to this collection
 	 */
-	private void feedback(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
+	private void feedback(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings) {
 
 		// svt crosses?
 		CrossList2 crosses = FMTCrosses.getInstance().getCrosses();
 		int len = (crosses == null) ? 0 : crosses.size();
 
-
-		if ((len > 0)  && (_fmtFBRects != null) && (_fmtFBRects.length == len)) {
+		if ((len > 0) && (_fmtFBRects != null) && (_fmtFBRects.length == len)) {
 			for (int i = 0; i < len; i++) {
 				if ((_fmtFBRects[i] != null) && _fmtFBRects[i].contains(screenPoint)) {
 
 					Cross2 cross = crosses.elementAt(i);
-					feedbackStrings.add(FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
+					feedbackStrings.add(
+							FBCOL + "cross ID: " + cross.id + "  sect: " + cross.sector + "  reg: " + cross.region);
 
 					feedbackStrings.add(vecStr("cross loc (lab)", cross.x, cross.y, cross.z));
 					feedbackStrings.add(vecStr("cross error", cross.err_x, cross.err_y, cross.err_z));
@@ -245,27 +240,20 @@ public class FMTCrossDrawer extends CedViewDrawer  {
 				}
 			}
 		}
-		
 
-		
 	}
 
 	// for writing out a vector
 	private String vecStr(String prompt, double vx, double vy, double vz) {
-		return FBCOL + prompt + ": (" + DoubleFormat.doubleFormat(vx, 2) + ", "
-				+ DoubleFormat.doubleFormat(vy, 2) + ", "
-				+ DoubleFormat.doubleFormat(vz, 2) + ")";
+		return FBCOL + prompt + ": (" + DoubleFormat.doubleFormat(vx, 2) + ", " + DoubleFormat.doubleFormat(vy, 2)
+				+ ", " + DoubleFormat.doubleFormat(vz, 2) + ")";
 	}
 
 	@Override
-	public void vdrawFeedback(IContainer container,
-			Point screenPoint,
-			Double worldPoint,
-			List<String> feedbackStrings,
+	public void vdrawFeedback(IContainer container, Point screenPoint, Double worldPoint, List<String> feedbackStrings,
 			int option) {
 		feedback(container, screenPoint, worldPoint, feedbackStrings);
-		
-	}
 
+	}
 
 }

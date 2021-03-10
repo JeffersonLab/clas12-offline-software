@@ -12,33 +12,34 @@ import cnuphys.bCNU.util.FileUtilities;
 
 /**
  * Unix fortunes
+ * 
  * @author heddle
  *
  */
 public class FortuneManager {
-	
+
 	private static final String FFNAME = "data/fortunes";
-	
+
 	private static final String _noFortune = "I got nothing.";
-	
-	//the singleton
+
+	// the singleton
 	private static FortuneManager _instance;
-	
+
 	private static Random _random;
-	
+
 	private FortuneDialog _dialog;
-	
+
 	private FortuneManager() {
 
 	}
-	
+
 	public void showDialog() {
 		if (_dialog == null) {
 			_dialog = new FortuneDialog();
 		}
 		_dialog.setVisible(true);
 	}
-	
+
 	public String getFortune() {
 		BufferedReader bufferedReader = bufferedReaderFromFile();
 		if (bufferedReader == null) {
@@ -46,7 +47,7 @@ public class FortuneManager {
 		}
 
 		if (bufferedReader != null) {
-		
+
 			StringBuffer sb = new StringBuffer(362000);
 			int linecount = 0;
 			String line = null;
@@ -57,21 +58,19 @@ public class FortuneManager {
 						linecount++;
 						sb.append(line + "\n");
 					}
-				}
-				catch (IOException e) {
+				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			} while (line != null);
-			
+
 			try {
 				bufferedReader.close();
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
+
 //			System.out.println("read " + linecount + " lines");
-			
+
 			if (linecount > 100) {
 				String fullStr = sb.toString();
 //				System.out.println("full string size " + fullStr.length());
@@ -87,18 +86,18 @@ public class FortuneManager {
 					int rint = _random.nextInt(cookies.length);
 					return cookies[rint].trim();
 				}
-				
+
 //				for (int i = 0; i < 10; i++) {
 //					System.out.println("[" + cookies[i].trim() + "]");
 //				}
 			}
-			
+
 		}
-		
+
 		return _noFortune;
 	}
-	
-	//try from a local file
+
+	// try from a local file
 	private BufferedReader bufferedReaderFromFile() {
 		File file = new File(FFNAME);
 		BufferedReader br = null;
@@ -113,28 +112,26 @@ public class FortuneManager {
 		}
 		return br;
 	}
-	
-	//try from the jar
+
+	// try from the jar
 	private BufferedReader bufferedReaderFromResource() {
-		InputStream inStream = getClass().getClassLoader().getResourceAsStream(
-				FFNAME);
+		InputStream inStream = getClass().getClassLoader().getResourceAsStream(FFNAME);
 		return new BufferedReader(new InputStreamReader(inStream));
 	}
 
-
 	/**
 	 * Access to the singleton
+	 * 
 	 * @return the singleton FortuneManager
 	 */
 	public static FortuneManager getInstance() {
 		if (_instance == null) {
 			_instance = new FortuneManager();
 		}
-		
+
 		return _instance;
 	}
-	
-	
+
 	public static void main(String arg[]) {
 		FortuneManager fm = getInstance();
 		System.out.println(fm.getFortune());

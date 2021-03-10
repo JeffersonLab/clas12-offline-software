@@ -3,7 +3,6 @@ package cnuphys.ced.clasio;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Vector;
@@ -13,40 +12,54 @@ import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.event.EventListenerList;
 
-import org.jlab.detector.decode.CLASDecoder;
+import org.jlab.detector.decode.CLASDecoder4;
+import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataSource;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioETSource;
 import org.jlab.io.evio.EvioSource;
-import org.jlab.io.hipo.HipoDataBank;
 import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.io.hipo.HipoDataSource;
+import org.jlab.jnp.hipo4.data.Bank;
+import org.jlab.jnp.hipo4.data.Event;
+import org.jlab.jnp.hipo4.data.SchemaFactory;
+import org.jlab.utils.system.ClasUtilsFile;
 
 import cnuphys.bCNU.application.Desktop;
 import cnuphys.bCNU.dialog.DialogUtilities;
+
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.IpField;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
+import cnuphys.bCNU.util.RingBuffer;
 import cnuphys.ced.alldata.ColumnData;
 import cnuphys.ced.alldata.DataManager;
 import cnuphys.ced.alldata.graphics.DefinitionManager;
 import cnuphys.ced.alldata.graphics.PlotDialog;
 import cnuphys.ced.cedview.CedView;
+import cnuphys.ced.clasio.filter.FilterManager;
+import cnuphys.ced.clasio.filter.IEventFilter;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.ECAL;
 import cnuphys.ced.event.data.PCAL;
 import cnuphys.ced.frame.Ced;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
+import cnuphys.magfield.MagneticFields;
+import cnuphys.magfield.Solenoid;
+import cnuphys.magfield.Torus;
 import cnuphys.swim.SwimMenu;
 import cnuphys.swim.Swimming;
 
 public class ClasIoEventManager {
 
 	// Unique lund ids in the event (if any)
-	private Vector<LundId> _uniqueLundIds = new Vector<LundId>();
+	private Vector<LundId> _uniqueLundIds = new Vector<>();
+
+	// listen for events even in accumulation mode
+	private Vector<IClasIoEventListener> _specialListeners = new Vector<>();
 
 	// A sorted list of banks present in the current event
 	private String _currentBanks[];
@@ -64,17 +77,23 @@ public class ClasIoEventManager {
 	public JButton _connectButton;
 
 	// decode evio to hipo
-	private CLASDecoder _decoder;
+	private CLASDecoder4 _decoder;
+	private SchemaFactory _schemaFactory;
 
 	// reset everytime hipo or evio file is opened
-	private int _eventIndex;
+	private int _currentEventIndex;
+	
+	
+	//a ringbuffer for previous events
+	private RingBuffer<PrevIndexedEvent> _prevEventBuffer;
+	
+	//maps sequential event number to true event numbers
+	private long[] _numberMap;
+	private int _numberMapCount = 0;
 
-	// all the filters
-	private ArrayList<IEventFilter> _eventFilters = new ArrayList<>();
 
 	// sources of events (the type, not the actual source)
 	public enum EventSourceType {
-		// HIPOFILE, HIPORING, ET, EVIOFILE
 		HIPOFILE, ET, EVIOFILE
 	}
 
@@ -86,14 +105,7 @@ public class ClasIoEventManager {
 	private EventSourceType _sourceType = EventSourceType.HIPOFILE;
 
 	// ET dialog
-	// private ETDialog _etDialog;
-	// private ConnectionDialog _connectionDialog;
-
 	private ConnectETDialog _etDialog;
-
-	// hipo ring dialog
-	// private RingDialog _ringDialog;
-	// private ConnectionDialogHipo _hipoDialog;
 
 	// flag that set set to <code>true</code> if we are accumulating events
 	private boolean _accumulating = false;
@@ -111,8 +123,8 @@ public class ClasIoEventManager {
 
 	// someone who can swim all recon particles
 	private ISwimAll _allReconSwimmer;
-	
-	//the current port
+
+	// the current port
 	private int _currentPort;
 
 	// the current hipo event file
@@ -121,11 +133,6 @@ public class ClasIoEventManager {
 	// the current evio event file
 	private File _currentEvioFile;
 
-	// current ip address of HIPO ring
-	// private String _currentHIPOAddress;
-
-	// current ip address of ET ring
-	// private String _currentETAddress;
 	private String _currentMachine;
 	private String _currentStation;
 
@@ -140,21 +147,15 @@ public class ClasIoEventManager {
 
 	// the current event
 	private DataEvent _currentEvent;
+	
+	// the previous event and index
+	private PrevIndexedEvent _prevIndexedEvent = new PrevIndexedEvent(null, -1);
 
+	
 	// private constructor for singleton
 	private ClasIoEventManager() {
 		_dataSource = new HipoDataSource();
-
-		// test trigger filter
-		// TriggerFilter testFilter = new TriggerFilter.Builder()
-		// .setType(TriggerFilter.TRIG_FILT_TYPE.EXACT)
-		// .setBits(17)
-		// .setActive(true)
-		// .setName("Test Trigger")
-		// .build();
-		//
-		// this.addEventFilter(testFilter);
-
+		_prevEventBuffer = new RingBuffer<>(10);
 	}
 
 	/**
@@ -167,26 +168,30 @@ public class ClasIoEventManager {
 	}
 
 	/**
-	 * Set the next event (after a getNextEvent)
-	 * 
-	 * @param event
-	 *            the new event
+	 * Set the displayed event to the current event
 	 */
-	protected void setNextEvent(DataEvent event) {
-		_currentEvent = event;
-
-		if (event != null) {
-			// _runData.set(_currentEvent);
+	private void setCurrentEvent() {
+		
+		if (_currentEvent != null) {
 
 			if (isAccumulating()) {
-				AccumulationManager.getInstance().newClasIoEvent(event);
-				notifyAllDefinedPlots(event);
+				AccumulationManager.getInstance().newClasIoEvent(_currentEvent);
+				notifyAllDefinedPlots(_currentEvent);
+
+				// notify special listeners
+				// the get events even if we are accumulating
+				// e.g., AddDCAccumView
+				for (IClasIoEventListener listener : _specialListeners) {
+					listener.newClasIoEvent(_currentEvent);
+				}
+
 			} else {
 				_runData.set(_currentEvent);
 				notifyEventListeners();
 				// notifyAllDefinedPlots(event);
 			}
 		}
+		
 	}
 
 	/**
@@ -210,22 +215,13 @@ public class ClasIoEventManager {
 			String[] cbanks = _currentEvent.getBankList();
 			if (cbanks != null) {
 				for (String bankName : cbanks) {
-					if (bankName.contains("::true") || (bankName.equals("MC::Particle"))) {
-
-						// boolean hasBank = _currentEvent.hasBank(bankName);
-						//
-						//
-						// boolean hasData = (DataManager.getInstance().hasData(_currentEvent, bankName)
-						// != null);
-						// System.out.println("****** BANK NAME [" + bankName + "] + hasData: " +
-						// hasData + " hasBank: " + hasBank);
+					if (bankName.contains("::true") || bankName.contains("::Particle")
+							|| bankName.contains("::Lund")) {
 
 						ColumnData cd = DataManager.getInstance().getColumnData(bankName, "pid");
 
-						// System.out.println("****** pid column null: " + (cd == null));
-
 						if (cd != null) {
-							int pid[] = (int[]) (cd.getDataArray(_currentEvent));
+							int pid[] = (cd.getIntArray(_currentEvent));
 							if ((pid != null) && (pid.length > 0)) {
 								for (int pdgid : pid) {
 									LundId lid = LundSupport.getInstance().get(pdgid);
@@ -266,20 +262,6 @@ public class ClasIoEventManager {
 	}
 
 	/**
-	 * Get the HIPO decoder
-	 * 
-	 * @return the decoder
-	 */
-	public CLASDecoder getDecoder() {
-
-		if (_decoder == null) {
-			_decoder = new CLASDecoder();
-		}
-
-		return _decoder;
-	}
-
-	/**
 	 * @return the accumulating
 	 */
 	public boolean isAccumulating() {
@@ -287,21 +269,11 @@ public class ClasIoEventManager {
 	}
 
 	/**
-	 * @param accumulating
-	 *            the accumulating to set
+	 * @param accumulating the accumulating to set
 	 */
 	public void setAccumulating(boolean accumulating) {
 		_accumulating = accumulating;
 	}
-
-	// /**
-	// * Get the current event file
-	// *
-	// * @return the current file
-	// */
-	// public File getCurrentEventFile() {
-	// return _currentEventFile;
-	// }
 
 	/**
 	 * Get the current event
@@ -312,16 +284,10 @@ public class ClasIoEventManager {
 		return _currentEvent;
 	}
 
-	// /**
-	// * Get the path of the current file
-	// *
-	// * @return the path of the current file
-	// */
-	// public String getCurrentEventFilePath() {
-	// return (_currentEventFile == null) ? "(none)" :
-	// _currentEventFile.getPath();
-	// }
-
+	/**
+	 * Get a description of the current event source.
+	 * @return a description of the current event source.
+	 */
 	public String getCurrentSourceDescription() {
 
 		if ((_sourceType == EventSourceType.HIPOFILE) && (_currentHipoFile != null)) {
@@ -329,10 +295,6 @@ public class ClasIoEventManager {
 		} else if ((_sourceType == EventSourceType.EVIOFILE) && (_currentEvioFile != null)) {
 			return "Evio " + _currentEvioFile.getName();
 		}
-		// else if ((_sourceType == EventSourceType.HIPORING) && (_currentHIPOAddress !=
-		// null)) {
-		// return "Hipo Ring " + _currentHIPOAddress;
-		// }
 		else if ((_sourceType == EventSourceType.ET) && (_currentMachine != null) && (_currentETFile != null)) {
 			return "ET " + _currentMachine + " " + _currentETFile;
 		}
@@ -342,14 +304,11 @@ public class ClasIoEventManager {
 	/**
 	 * Open an event file
 	 * 
-	 * @param file
-	 *            the event file
+	 * @param file the event file
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
 	public void openHipoEventFile(File file) throws FileNotFoundException, IOException {
-
-		System.err.println("opening hipo file " + file.getPath());
 
 		if (!file.exists()) {
 			throw (new FileNotFoundException("Event event file not found"));
@@ -367,8 +326,11 @@ public class ClasIoEventManager {
 
 		_runData.reset();
 		_currentEvent = null;
-		_eventIndex = 0;
-
+		_prevIndexedEvent.reset();
+		_currentEventIndex = 0;
+		_prevEventBuffer.clear();
+		resetIndexMap();
+		
 		// TODO check if I need to skip the first event
 
 		try {
@@ -377,18 +339,23 @@ public class ClasIoEventManager {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Reset the index map
+	 */
+	public void resetIndexMap() {
+		_numberMap = null;
+		_numberMapCount = 0;
+	}
 
 	/**
 	 * Open an evio event file
 	 * 
-	 * @param file
-	 *            the event file
+	 * @param file the event file
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
 	public void openEvioEventFile(File file) throws FileNotFoundException, IOException {
-
-		System.err.println("opening evio file " + file.getPath());
 
 		if (!file.exists()) {
 			throw (new FileNotFoundException("Event event file not found"));
@@ -406,7 +373,10 @@ public class ClasIoEventManager {
 
 		_runData.reset();
 		_currentEvent = null;
-		_eventIndex = 0;
+		_prevIndexedEvent.reset();
+		_currentEventIndex = 0;
+		_prevEventBuffer.clear();
+		resetIndexMap();
 
 		// TODO check if I need to skip the first event
 
@@ -430,15 +400,16 @@ public class ClasIoEventManager {
 		if (_etDialog.reason() == DialogUtilities.OK_RESPONSE) {
 			_runData.reset();
 			_currentEvent = null;
-			_eventIndex = 0;
+			_prevIndexedEvent.reset();
+			_currentEventIndex = 0;
+			_prevEventBuffer.clear();
+			resetIndexMap();
 
 			_dataSource = null;
 			_currentMachine = _etDialog.getMachine();
 			_currentETFile = _etDialog.getFile();
 			_currentStation = _etDialog.getStation();
 			_currentPort = _etDialog.getPort();
-			
-	//		System.err.println("CURRENT PORT: " + _currentPort);
 
 			// does the file exist?
 
@@ -446,7 +417,6 @@ public class ClasIoEventManager {
 			Log.getInstance().info("ET Filename: [" + _currentETFile + "]");
 			Log.getInstance().info("ET Station Name: [" + _currentStation + "]");
 			System.err.println("ET File Name:_currentETFile [" + _currentETFile + "]");
-
 
 			try {
 				Log.getInstance().info("Attempting to create EvioETSource.");
@@ -473,52 +443,6 @@ public class ClasIoEventManager {
 
 	}
 
-	/**
-	 * Connect to a HIPO ring
-	 */
-	// public void ConnectToHipoRing() {
-	// if (_hipoDialog == null) {
-	// _hipoDialog = new ConnectionDialogHipo();
-	// _hipoDialog.setTitle("Connect to Hipo Ring");
-	// // _hipoDialog.setIconImage(ImageManager.cnuIcon.getImage());
-	// _hipoDialog.setIconImage(ImageManager.getInstance().loadImageIcon("images/hipo2.png").getImage());
-	// }
-	// _hipoDialog.setVisible(true);
-	// if (_hipoDialog.reason() == DialogUtilities.OK_RESPONSE) {
-	// _runData.reset();
-	// _currentEvent = null;
-	// _eventIndex = 0;
-	//
-	// _dataSource = null;
-	// _currentHIPOAddress = "";
-	// int connType = _hipoDialog.getConnectionType();
-	//
-	// // let's try to connect
-	// try {
-	// if (connType == RingDialog.CONNECTSPECIFIC) {
-	// _dataSource = new HipoRingSource();
-	// _currentHIPOAddress = _hipoDialog.getIpAddress();
-	// _dataSource.open(_currentHIPOAddress);
-	// } else if (connType == RingDialog.CONNECTDAQ) {
-	// _dataSource = HipoRingSource.createSourceDaq();
-	// _currentHIPOAddress = " DAQ ";
-	// }
-	// } catch (Exception e) {
-	// _dataSource = null;
-	// _currentHIPOAddress = "";
-	// Log.getInstance().warning(e.getMessage());
-	// }
-	//
-	// if (_dataSource != null) {
-	// setEventSourceType(EventSourceType.HIPORING);
-	// try {
-	// getNextEvent();
-	// } catch (Exception e) {
-	// e.printStackTrace();
-	// }
-	// }
-	// } //end ok
-	// }
 
 	/**
 	 * Get the current event source type
@@ -532,8 +456,7 @@ public class ClasIoEventManager {
 	/**
 	 * Set the soure type
 	 * 
-	 * @param type
-	 *            the new source type
+	 * @param type the new source type
 	 */
 	public void setEventSourceType(EventSourceType type) {
 		if (_sourceType != type) {
@@ -562,15 +485,6 @@ public class ClasIoEventManager {
 	}
 
 	/**
-	 * Check whether current event source type is the hippo ring
-	 * 
-	 * @return <code>true</code> is source type is the hippo ring.
-	 */
-	// public boolean isSourceHipoRing() {
-	// return getEventSourceType() == EventSourceType.HIPORING;
-	// }
-
-	/**
 	 * Check whether current event source type is the ET ring
 	 * 
 	 * @return <code>true</code> is source type is the ET ring.
@@ -592,9 +506,6 @@ public class ClasIoEventManager {
 		} else if (isSourceEvioFile()) {
 			evcount = (_dataSource == null) ? 0 : _dataSource.getSize();
 		}
-		// else if (isSourceHipoRing()) {
-		// return Integer.MAX_VALUE;
-		// }
 		else if (isSourceET()) {
 			return Integer.MAX_VALUE;
 		}
@@ -602,13 +513,33 @@ public class ClasIoEventManager {
 	}
 
 	/**
-	 * Get the number of the current event, 0 if there is none
+	 * Get the sequential number of the current event, 0 if there is none
 	 * 
-	 * @return the number of the current event.
+	 * @return the sequential number of the current event.
 	 */
-	public int getEventNumber() {
-		return _eventIndex;
+	public int getSequentialEventNumber() {
+		return _currentEventIndex;
 	}
+	
+	/**
+	 * Get the true event number of the current event, 1 if there is none.
+	 * The value comes from the RUN::config bank
+	 * 
+	 * @return the true number of the current event.
+	 */
+	public int getTrueEventNumber() {
+		if (_currentEvent != null) {
+			DataBank db = _currentEvent.getBank("RUN::config");
+			if (db != null) {
+				int[] ia = db.getInt("event");
+				if ((ia != null) && (ia.length > 0)) {
+					return ia[0];
+				}
+			}
+		}
+		return -1;
+	}
+
 
 	/**
 	 * Determines whether any next event control should be enabled.
@@ -622,12 +553,11 @@ public class ClasIoEventManager {
 
 		switch (estype) {
 		case HIPOFILE:
-			isOK = (isSourceHipoFile() && (getEventCount() > 0) && (getEventNumber() < getEventCount()));
+			isOK = (isSourceHipoFile() && (getEventCount() > 0) && (getSequentialEventNumber() < getEventCount()));
 			break;
 		case EVIOFILE:
-			isOK = (isSourceEvioFile() && (getEventCount() > 0) && (getEventNumber() < getEventCount()));
+			isOK = (isSourceEvioFile() && (getEventCount() > 0) && (getSequentialEventNumber() < getEventCount()));
 			break;
-		// case HIPORING:
 		case ET:
 			isOK = true;
 			break;
@@ -649,9 +579,8 @@ public class ClasIoEventManager {
 		switch (estype) {
 		case HIPOFILE:
 		case EVIOFILE:
-			numRemaining = getEventCount() - getEventNumber();
+			numRemaining = getEventCount() - getSequentialEventNumber();
 			break;
-		// case HIPORING:
 		case ET:
 			numRemaining = Integer.MAX_VALUE;
 		}
@@ -665,7 +594,7 @@ public class ClasIoEventManager {
 	 * @return <code>true</code> if any prev event control should be enabled.
 	 */
 	public boolean isPrevOK() {
-		return (isSourceHipoFile() || isSourceEvioFile()) && (_eventIndex > 1);
+		return (_prevEventBuffer.size() > 0);
 	}
 
 	/**
@@ -689,8 +618,7 @@ public class ClasIoEventManager {
 	/**
 	 * Set the object that can swim all MonteCarlo particles
 	 * 
-	 * @param allSwimmer
-	 *            the object that can swim all MonteCarlo particles
+	 * @param allSwimmer the object that can swim all MonteCarlo particles
 	 */
 	public void setAllMCSwimmer(ISwimAll allSwimmer) {
 		_allMCSwimmer = allSwimmer;
@@ -708,8 +636,7 @@ public class ClasIoEventManager {
 	/**
 	 * Set the object that can swim all reconstructed particles
 	 * 
-	 * @param allSwimmer
-	 *            the object that can swim all reconstructed particles
+	 * @param allSwimmer the object that can swim all reconstructed particles
 	 */
 	public void setAllReconSwimmer(ISwimAll allSwimmer) {
 		_allReconSwimmer = allSwimmer;
@@ -731,52 +658,88 @@ public class ClasIoEventManager {
 		}
 	}
 
+	// decode an evio event to hipo
+	private HipoDataEvent decodeEvioToHipo(EvioDataEvent event) {
+				
+		if (_decoder == null) {
+	        _schemaFactory  =  new SchemaFactory();
+	        
+	        String dir = ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4");
+	        _schemaFactory.initFromDirectory(dir);
+	        
+			_decoder = new CLASDecoder4();
+		}
+
+		Event decodedEvent = _decoder.getDataEvent(event);
+		
+		Bank trigger = _decoder.createTriggerBank();
+		
+        if(trigger != null) {
+        	decodedEvent.write(trigger);
+        }
+        
+        //best I can do since I don't have the actual
+        //values from the file
+        
+        Torus torus = MagneticFields.getInstance().getTorus();
+        Solenoid solenoid = MagneticFields.getInstance().getSolenoid();
+        
+        double tScale = (torus == null) ? -1 : torus.getScaleFactor();
+        double sScale = (solenoid == null) ? 1 : solenoid.getScaleFactor();
+        
+        Bank header= _decoder.createHeaderBank(-1, 0, (float)tScale, (float)sScale);
+        if(header != null) {
+        	decodedEvent.write(header);
+        }
+        
+        return new HipoDataEvent(decodedEvent, _schemaFactory);
+	}
+
 	/**
-	 * Get the next event from the current compact reader
-	 * 
+	 * Get the next event from the current  reader
 	 * @return the next event, if possible
 	 */
 	public DataEvent getNextEvent() {
+		return getNextEvent(true);
+	}
+
+	/**
+	 * Get the next event from the current  reader
+	 * @return the next event, if possible
+	 */
+	private DataEvent getNextEvent(boolean addToBuffer) {
 
 		EventSourceType estype = getEventSourceType();
+		boolean done = false; //for filters 
 
-		// System.err.println("ET DEBUG: in getNextEvent estype: " + estype);
+		if (addToBuffer) {
+			_prevIndexedEvent.set(_currentEvent, _currentEventIndex);
+		}
 
 		switch (estype) {
-		// case HIPORING:
-		// if (_dataSource.hasEvent()) {
-		// _currentEvent = _dataSource.getNextEvent();
-		//
-		// // look for the run bank
-		// _eventIndex++;
-		// ifPassSetEvent(_currentEvent, 0);
-		// }
-		// break;
-		case HIPOFILE:
-			if (_dataSource.hasEvent()) {
-				_currentEvent = _dataSource.getNextEvent();
-				_eventIndex++;
-				ifPassSetEvent(_currentEvent, 0);
-			}
-			break;
 
+		case HIPOFILE:
 		case EVIOFILE:
-			if (_dataSource.hasEvent()) {
-				_currentEvent = _dataSource.getNextEvent();
+
+			while (!done) {
+
+				if (_dataSource.hasEvent()) {
+					_currentEvent = _dataSource.getNextEvent();
+				} else {
+					_currentEvent = null;
+				}
 
 				if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
-					_currentEvent = getDecoder().getDataEvent(_currentEvent);
-					HipoDataBank trigger = _decoder.createTriggerBank(_currentEvent);
-					_currentEvent.appendBanks(trigger);
-
-					// System.err.println("Decoded to HIPO");
-					// _currentEvent.show();
-					_eventIndex++;
-					ifPassSetEvent(_currentEvent, 0);
+					_currentEvent = decodeEvioToHipo((EvioDataEvent) _currentEvent);
 				}
+
+				done = (_currentEvent == null) || FilterManager.getInstance().pass(_currentEvent);
+			}
+			if (_currentEvent != null) {
+				_currentEventIndex++;
 			}
 
-			break; // end case eviofile
+			break;
 
 		case ET:
 			int maxTries = 30;
@@ -794,75 +757,38 @@ public class ClasIoEventManager {
 			}
 
 			_currentEvent = null;
-			// boolean goodEvent = false;
 
 			if (_dataSource.hasEvent()) {
 
 				_currentEvent = _dataSource.getNextEvent();
 
 				if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
+					_currentEvent = decodeEvioToHipo((EvioDataEvent) _currentEvent);
+				}
 
-					// decode the event from evio to hipo
-					_currentEvent = getDecoder().getDataEvent(_currentEvent);
-
-					// manually create trigger bank
-					HipoDataBank trigger = _decoder.createTriggerBank(_currentEvent);
-					_currentEvent.appendBanks(trigger);
-
-					_eventIndex++;
-					ifPassSetEvent(_currentEvent, 0);
-					break;
+				if (FilterManager.getInstance().pass(_currentEvent)) {
+					_currentEventIndex++;
 				} else {
 					_currentEvent = null;
 				}
 
-			}
+				break;
+			} 
 
 			break; // end case ET
 
 		} // end switch
 
+		if (addToBuffer) {
+			if ((_prevIndexedEvent.event != null) && (_prevIndexedEvent.event != _currentEvent)) {
+				_prevEventBuffer.add(new PrevIndexedEvent(_prevIndexedEvent.event, _prevIndexedEvent.index));
+			}
+		}
+
+		setCurrentEvent();
 		return _currentEvent;
 	}
 
-	// set the event only if it passes filtering
-	private void ifPassSetEvent(DataEvent event, int option) {
-		if (event != null) {
-			if (passFilters(event)) {
-				setNextEvent(event);
-			} else {
-				if (option == 0) {
-					getNextEvent();
-				} else if (option == 1) {
-					if (_eventIndex == 0) {
-						setNextEvent(event);
-					} else {
-						getPreviousEvent();
-					}
-				}
-			}
-		}
-
-	}
-
-	/**
-	 * Get the bytes for serialization
-	 * 
-	 * @param dataEvent
-	 *            the dataEvent
-	 * @return bytes for serialization
-	 */
-	public byte[] getEventBytesForSerializing(DataEvent dataEvent) {
-
-		if (dataEvent != null) {
-			if (dataEvent instanceof HipoDataEvent) {
-				ByteBuffer bb = _currentEvent.getEventBuffer();
-				return bb.array();
-			}
-		}
-
-		return null;
-	}
 
 	/**
 	 * See if another event is available
@@ -873,11 +799,9 @@ public class ClasIoEventManager {
 		EventSourceType estype = getEventSourceType();
 		switch (estype) {
 		case HIPOFILE:
-			// case HIPORING:
 		case ET:
 		case EVIOFILE:
 			boolean hasETEvent = ((_dataSource != null) && _dataSource.hasEvent());
-			// System.err.println("ET DEBUG: has event: " + hasETEvent);
 			return hasETEvent;
 		default:
 			return true;
@@ -890,50 +814,31 @@ public class ClasIoEventManager {
 	 * @return the previous event, if possible.
 	 */
 	public DataEvent getPreviousEvent() {
-
-		EventSourceType estype = getEventSourceType();
-
-		switch (estype) {
-		// case HIPORING:
-		// _eventIndex--;
-		// break;
-		case HIPOFILE:
-			_eventIndex--;
-			System.err.println("EVENT INDEX: " + _eventIndex);
-			_currentEvent = _dataSource.getPreviousEvent();
-			break;
-
-		case EVIOFILE:
-			_currentEvent = _dataSource.getPreviousEvent();
-			if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
-
-				if (_decoder == null) {
-					_decoder = new CLASDecoder();
-				}
-				_eventIndex--;
-				_currentEvent = _decoder.getDataEvent(_currentEvent);
-
-				HipoDataBank trigger = _decoder.createTriggerBank(_currentEvent);
-				_currentEvent.appendBanks(trigger);
-			}
-			break; // end case eviofile
-
-		case ET:
-			_eventIndex--;
-			break;
+		
+		PrevIndexedEvent prev = _prevEventBuffer.previous();
+		if ((prev == null) || (prev.event == _currentEvent)) {
+			return _currentEvent;
 		}
-
-		ifPassSetEvent(_currentEvent, 1);
-
+		
+		_currentEvent = prev.event;
+		_currentEventIndex = prev.index;
+		
+		setCurrentEvent();
 		return _currentEvent;
 	}
 
+	// skip a number of events
 	private void skipEvents(int n) {
 		if (n < 1) {
 			return;
 		}
 
 		EventSourceType estype = getEventSourceType();
+		
+		if (_currentEvent != null) {
+			_prevEventBuffer.add(new PrevIndexedEvent(_currentEvent, _currentEventIndex));
+		}
+
 
 		switch (estype) {
 		case HIPOFILE:
@@ -941,30 +846,37 @@ public class ClasIoEventManager {
 			int numRemaining = getNumRemainingEvents();
 			n = Math.min(numRemaining, n);
 
-			for (int i = 0; i < n; i++) {
+			int stopIndex = _currentEventIndex + n;
+			boolean done = false;
+			
+			while (!done && (_currentEventIndex < stopIndex)) {
 				if (_dataSource.hasEvent()) {
-					_dataSource.getNextEvent();
-					_eventIndex++;
+					DataEvent event = _dataSource.getNextEvent();
+					if (FilterManager.getInstance().pass(event)) {
+						_currentEventIndex++;
+					}
+				}
+				else {
+					done = true;
 				}
 			}
 
 			break;
 
-		// case HIPORING:
 		case ET:
 			break;
 		}
 	}
-
+	
 	/**
-	 * 
-	 * @param eventNumber
-	 *            a 1-based number 1..num events in file
-	 * @return the event at the given number (if possible).
+	 * Go t the event with the desired true event number
+	 * @param desesiredTrueNumber the desired true event number
+	 * @return the event
 	 */
-	public DataEvent gotoEvent(int eventNumber) {
-
-		if ((eventNumber < 1) || (eventNumber == _eventIndex) || (eventNumber > getEventCount())) {
+	public DataEvent gotoTrueEvent(int desiredTrueNumber) {		
+		
+		int currentTrueEvent = getTrueEventNumber();
+		if (currentTrueEvent < 0) {
 			return _currentEvent;
 		}
 
@@ -972,14 +884,58 @@ public class ClasIoEventManager {
 		switch (estype) {
 
 		case HIPOFILE:
-			if (eventNumber > _eventIndex) {
-				int numToSkip = (eventNumber - _eventIndex) - 1;
+			break;
+
+		case EVIOFILE: // assume the event numbers are sequential
+			return gotoEvent(_currentEventIndex + (desiredTrueNumber - currentTrueEvent));
+
+		default:
+			return _currentEvent;
+		}
+		
+		
+		// only hipo
+
+		if (_numberMap == null) {
+			runThroughEvents(desiredTrueNumber);
+		} else {
+
+			int saveIndex = _currentEventIndex;
+			int seqIndex = getSequentialFromTrue(desiredTrueNumber);
+
+			if (seqIndex >= 0) {
+				gotoEvent(seqIndex);
+			} else {
+				gotoEvent(saveIndex);
+			}
+		}
+
+		return _currentEvent;
+	}
+
+	/**
+	 * 
+	 * @param eventNumber a 1-based number 1..num events in file
+	 * @return the event at the given number (if possible).
+	 */
+	public DataEvent gotoEvent(int eventNumber) {
+		
+		if ((eventNumber < 1) || (eventNumber == _currentEventIndex) || (eventNumber > getEventCount())) {
+			return _currentEvent;
+		}
+
+		EventSourceType estype = getEventSourceType();
+		switch (estype) {
+
+		case HIPOFILE:
+			if (eventNumber > _currentEventIndex) {
+				int numToSkip = (eventNumber - _currentEventIndex) - 1;
 				skipEvents(numToSkip);
-				getNextEvent();
+				getNextEvent(false);
 			} else {
 				_dataSource.close();
 				_currentEvent = null;
-				_eventIndex = 0;
+				_currentEventIndex = 0;
 				_dataSource.open(_currentHipoFile);
 				gotoEvent(eventNumber);
 			}
@@ -988,46 +944,18 @@ public class ClasIoEventManager {
 
 		case EVIOFILE:
 			_currentEvent = _dataSource.gotoEvent(eventNumber);
-			if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
-
-				if (_decoder == null) {
-					_decoder = new CLASDecoder();
-				}
-				_currentEvent = _decoder.getDataEvent(_currentEvent);
-				_eventIndex = eventNumber;
+			if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {		
+				_currentEvent = decodeEvioToHipo((EvioDataEvent)_currentEvent);
+				_currentEventIndex = eventNumber;
 			}
 			break;
+			
+			default:
+				break;
 		}
 
-		//
-		//
-		// if (isSourceHipoFile() && (eventNumber > 0) && (eventNumber <
-		// getEventCount())) {
-		//
-		// if (eventNumber > _eventIndex) {
-		// int numToGo = (eventNumber = _eventIndex);
-		// }
-		//
-		// _currentEvent = _dataSource.gotoEvent(eventNumber);
-		// _eventIndex = eventNumber;
-		// }
-		//
-		// else if (isSourceEvioFile() && (eventNumber > 0) && (eventNumber <
-		// getEventCount())) {
-		// _currentEvent = _dataSource.gotoEvent(eventNumber);
-		// if ((_currentEvent != null) && (_currentEvent instanceof
-		// EvioDataEvent)) {
-		//
-		// if (_decoder == null) {
-		// _decoder = new CLASDecoder();
-		// }
-		// _currentEvent = _decoder.getDataEvent(_currentEvent);
-		// _eventIndex = eventNumber;
-		// }
-		// }
 
-		setNextEvent(_currentEvent);
-
+		setCurrentEvent();
 		return _currentEvent;
 	}
 
@@ -1047,8 +975,7 @@ public class ClasIoEventManager {
 	/**
 	 * Notify listeners we have opened a new file
 	 * 
-	 * @param path
-	 *            the path to the new file
+	 * @param path the path to the new file
 	 */
 	private void notifyEventListeners(EventSourceType source) {
 
@@ -1057,7 +984,8 @@ public class ClasIoEventManager {
 		if (_dataSource != null) {
 			_dataSource.close();
 			_currentEvent = null;
-			_eventIndex = 0;
+			_currentEventIndex = 0;
+			_prevEventBuffer.clear();
 		}
 
 		for (int index = 0; index < 3; index++) {
@@ -1101,21 +1029,6 @@ public class ClasIoEventManager {
 
 	}
 
-	/**
-	 * Check if there are any active filters
-	 * 
-	 * @return <code>true</code> if there are any active filters
-	 */
-	public boolean isFilteringOn() {
-		if (_eventFilters != null) {
-			for (IEventFilter filter : _eventFilters) {
-				if (filter.isActive()) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
 
 	/**
 	 * Notify listeners we have a new event ready for display. All they may want is
@@ -1124,15 +1037,17 @@ public class ClasIoEventManager {
 	 */
 	protected void notifyEventListeners() {
 
-		Swimming.setNotifyOn(false); //prevent refreshes
+		Swimming.setNotifyOn(false); // prevent refreshes
 		Swimming.clearAllTrajectories();
-		Swimming.setNotifyOn(true); //prevent refreshes
-		
+		Swimming.setNotifyOn(true); // prevent refreshes
+
 		_uniqueLundIds = null;
 
-		Ced.getCed().setEventFilteringLabel(isFilteringOn());
-
+		Ced.getCed().setEventFilteringLabel(FilterManager.getInstance().isFilteringOn());
+						
 		_currentBanks = (_currentEvent == null) ? null : _currentEvent.getBankList();
+		
+		
 		if (_currentBanks != null) {
 			Arrays.sort(_currentBanks);
 		}
@@ -1170,14 +1085,13 @@ public class ClasIoEventManager {
 			return;
 		}
 
-		// System.err.println("FINAL STEPS");
 		// some scaling factors for gradient displays
 		computeSomeScalingFactors();
 
 		SwimMenu.getInstance().firePropertyChange(SWIM_ALL_MC_PROP, 0, 1);
 		SwimMenu.getInstance().firePropertyChange(SWIM_ALL_RECON_PROP, 0, 1);
 
-		Ced.setEventNumberLabel(getEventNumber());
+		Ced.setEventNumberLabel(getSequentialEventNumber());
 
 		for (JInternalFrame jif : Desktop.getInstance().getAllFrames()) {
 			if (jif instanceof CedView) {
@@ -1216,8 +1130,7 @@ public class ClasIoEventManager {
 	 * Get the maximum energy deposited in the cal for the current event. Might be
 	 * NaN if there are no "true" (gemc) banks
 	 * 
-	 * @param plane
-	 *            (0, 1, 2) for (PCAL, EC_INNER, EC_OUTER)
+	 * @param plane (0, 1, 2) for (PCAL, EC_INNER, EC_OUTER)
 	 * @return the max energy deposited in that cal plane in MeV
 	 */
 	public double getMaxEdepCal(int plane) {
@@ -1228,8 +1141,7 @@ public class ClasIoEventManager {
 	 * Remove a IClasIoEventListener. IClasIoEventListener listeners listen for new
 	 * events.
 	 * 
-	 * @param listener
-	 *            the IClasIoEventListener listener to remove.
+	 * @param listener the IClasIoEventListener listener to remove.
 	 */
 	public void removeClasIoEventListener(IClasIoEventListener listener) {
 
@@ -1248,13 +1160,12 @@ public class ClasIoEventManager {
 	 * Add a IClasIoEventListener. IClasIoEventListener listeners listen for new
 	 * events.
 	 * 
-	 * @param listener
-	 *            the IClasIoEventListener listener to add.
-	 * @param index
-	 *            Determines gross notification order. Those in index 0 are notified
-	 *            first. Then those in index 1. Finally those in index 2. The Data
-	 *            containers should be in index 0. The trajectory and noise in index
-	 *            1, and the regular views in index 2 (they are notified last)
+	 * @param listener the IClasIoEventListener listener to add.
+	 * @param index    Determines gross notification order. Those in index 0 are
+	 *                 notified first. Then those in index 1. Finally those in index
+	 *                 2. The Data containers should be in index 0. The trajectory
+	 *                 and noise in index 1, and the regular views in index 2 (they
+	 *                 are notified last)
 	 */
 	public void addClasIoEventListener(IClasIoEventListener listener, int index) {
 
@@ -1282,8 +1193,7 @@ public class ClasIoEventManager {
 	 * Checks if a bank, identified by a string such as "FTOF1B::dgtz", is in the
 	 * current event.
 	 * 
-	 * @param bankName
-	 *            the bank name
+	 * @param bankName the bank name
 	 * @return <code>true</code> if the bank is in the curent event.
 	 */
 	public boolean isBankInCurrentEvent(String bankName) {
@@ -1296,7 +1206,7 @@ public class ClasIoEventManager {
 	}
 
 	/**
-	 * Get a sorted list of known banks from the dictinary
+	 * Get a sorted list of known banks from the dictionary
 	 * 
 	 * @return a sorted list of known banks
 	 */
@@ -1307,8 +1217,7 @@ public class ClasIoEventManager {
 	/**
 	 * Check whether a given bank is a known bank
 	 * 
-	 * @param bankName
-	 *            the bank name
+	 * @param bankName the bank name
 	 * @return <code>true</code> if the name is recognized.
 	 */
 	public boolean isKnownBank(String bankName) {
@@ -1320,46 +1229,214 @@ public class ClasIoEventManager {
 		return index >= 0;
 	}
 
-	// does the event pass all the active filters?
-	private boolean passFilters(DataEvent event) {
 
-		if ((event != null) && !_eventFilters.isEmpty()) {
-			for (IEventFilter filter : _eventFilters) {
-				if (filter.isActive()) {
-					boolean pass = filter.pass(event);
-					if (!pass) {
-						return false;
+	/**
+	 * Add a special listener that gets events even if we are accumulating. Example:
+	 * AllDCAccumView
+	 * 
+	 * @param listener the event listener
+	 */
+	public void addSpecialEventListener(IClasIoEventListener listener) {
+		_specialListeners.remove(listener);
+		_specialListeners.add(listener);
+	}
+
+	
+	/**
+	 * Minimal event getter for running through events as fast as possible
+	 * @return the next event
+	 */
+	public DataEvent bareNextEvent() {
+
+		EventSourceType estype = getEventSourceType();
+		
+		boolean done = false;
+
+		switch (estype) {
+
+		case HIPOFILE:
+		case EVIOFILE:
+
+			while (!done) {
+				if (_currentEventIndex >= getEventCount()) {
+					return null;
+				}
+
+				try {
+					if (_dataSource.hasEvent()) {
+						_currentEvent = _dataSource.getNextEvent();
+					} else {
+						_currentEvent = null;
 					}
+				} catch (Exception e) {
+					System.err.println("Exception in bareNextEvent: " + e.getMessage());
+					_currentEvent = null;
+				}
+
+				done = (_currentEvent == null) || FilterManager.getInstance().pass(_currentEvent);
+
+				if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
+					_currentEvent = decodeEvioToHipo((EvioDataEvent) _currentEvent);
+				}
+
+				if (_currentEvent != null) {
+					_currentEventIndex++;
+				}
+
+				else {
+					return null;
 				}
 			}
+			break;
+
+		case ET:
+			break;
 		}
-
-		return true;
+		
+		
+		return _currentEvent;
 	}
+	
+	//the sequential index is in the lower 32 bits
+	private int getSequentialFromTrue(int trueIndex) {
+		int index =  Arrays.binarySearch(_numberMap, 0, _numberMapCount-1, ((long)trueIndex << 32));
+		
+		if (index < 0) {
+			index = -(index + 1); // now the insertion point.
+		}
+		
+		int seqIndex = 1;
+		try {
+			seqIndex = (int)(_numberMap[index] & 0xffffffffL);
+		}
+		catch (Exception e ) {
+			System.err.println("Problem in getSequentialFromTrue: " + e.getMessage());
+			System.err.println("Requested true index: " + trueIndex);
+			System.err.println("Index from binary search: " + index);
+			System.err.println("Length of map array: " + _numberMap.length);
+		}
+		
+		return seqIndex;
+	}
+	
+	//run through the hipo file to make a mapping of sequential to true
+	private void runThroughEvents(int gotoIndex) {
+		
+		int saveIndex = _currentEventIndex;
 
-	/**
-	 * Add an event filter
-	 * 
-	 * @param filter
-	 *            the filter to add
-	 */
-	public void addEventFilter(IEventFilter filter) {
-		if (filter != null) {
-			if (!_eventFilters.contains(filter)) {
-				_eventFilters.add(filter);
+		EventSourceType estype = getEventSourceType();
+		switch (estype) {
+
+		case HIPOFILE: 
+			gotoEvent(0);
+			
+			int count = getEventCount();
+
+			if (count > 0) {
+				_numberMap = new long[count];
+			} else {
+				_numberMap = null;
 			}
-		}
-	}
+			break;
+			
+		case EVIOFILE:
+			gotoEvent(0);
+			return;
 
-	/**
-	 * Do this late in ced initialization
-	 */
-	public void setUpFilterMenu() {
-		if (_eventFilters != null) {
-			for (IEventFilter filter : _eventFilters) {
-				Ced.getCed().getEventFilterMenu().add(filter.getMenuComponent());
+			
+			default:
+				return;
+		}
+		
+		int trueNum = getTrueEventNumber();
+		_numberMap[0] = ((long)trueNum << 32) + 1;
+
+		IRunThrough rthrough = new IRunThrough() {
+
+			int index = 1;
+
+			@Override
+			public void nextRunthroughEvent(DataEvent event) {
+				if ((event != null) && FilterManager.getInstance().pass(event)) {
+					try {
+						int trueNum = getTrueEventNumber();
+						_numberMap[index] = ((long)trueNum << 32) + index + 1;
+						_numberMapCount++;
+						index++;
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+				}
+				else {
+					System.err.println("null event in nextRunthroughEvent");
+				}
+
 			}
+
+			@Override
+			public void runThroughtDone() {		
+				
+				
+				int num = 50;
+				
+				System.err.println("Before sort");
+				for (int i = 0; i < num; i++) {
+					long v = _numberMap[i];
+					System.err.println("Seq: [" + (v & 0xffffffffL) + "]  true: " + (v >> 32));
+				}
+				
+				
+				Arrays.sort(_numberMap, 0, _numberMapCount-1);
+				
+				System.err.println("\nAfter sort");
+				for (int i = 0; i < num; i++) {
+					long v = _numberMap[i];
+					System.err.println("Seq: [" + (v & 0xffffffffL) + "]  true: " + (v >> 32));
+				}
+
+				
+				int seqIndex = getSequentialFromTrue(gotoIndex);
+
+				
+				if (seqIndex >= 0) {
+					gotoEvent(seqIndex);
+				} else {
+					gotoEvent(saveIndex);
+				}
+
+			}
+			
+		};
+		
+		RunThroughDialog dialog = new RunThroughDialog(rthrough);
+		dialog.setVisible(true);
+		dialog.process();
+
+	}
+	
+	
+	//inner class for storing previous events in a ring buffer
+	class PrevIndexedEvent {
+		public DataEvent event;
+		public int index;
+		
+		public PrevIndexedEvent(DataEvent event, int index) {
+			set(event, index);
+		}
+		
+		public void set(DataEvent event, int index) {
+			this.event = event;
+			this.index = index;			
+		}
+		
+		public void reset() {
+			set(null, -1);
 		}
 	}
 
+	
+	
 }
+
+

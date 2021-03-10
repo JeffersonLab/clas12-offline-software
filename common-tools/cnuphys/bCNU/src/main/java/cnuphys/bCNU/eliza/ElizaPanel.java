@@ -70,8 +70,7 @@ public class ElizaPanel extends JPanel {
 	/**
 	 * The doctor is speaking
 	 * 
-	 * @param s
-	 *            what she is saying
+	 * @param s what she is saying
 	 */
 	public void doctor(String s) {
 		Environment.getInstance().say(s);

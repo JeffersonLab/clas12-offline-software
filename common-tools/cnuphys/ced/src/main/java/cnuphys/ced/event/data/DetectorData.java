@@ -7,7 +7,7 @@ import cnuphys.ced.clasio.ClasIoEventManager.EventSourceType;
 import cnuphys.ced.clasio.IClasIoEventListener;
 
 public class DetectorData implements IClasIoEventListener {
-	
+
 	public DetectorData() {
 		ClasIoEventManager.getInstance().addClasIoEventListener(this, 0);
 	}
@@ -23,15 +23,16 @@ public class DetectorData implements IClasIoEventListener {
 	@Override
 	public void changedEventSource(EventSourceType source) {
 	}
-	
+
 	/**
 	 * Tests whether this listener is interested in events while accumulating
-	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
+	 * 
+	 * @return <code>true</code> if this listener is NOT interested in events while
+	 *         accumulating
 	 */
 	@Override
 	public boolean ignoreIfAccumulating() {
 		return true;
 	}
-
 
 }

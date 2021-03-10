@@ -21,11 +21,9 @@ public class ReferencedJCheckBoxMenuItem extends JCheckBoxMenuItem {
 	/**
 	 * Constructor. Uses the default state (unchecked.)
 	 * 
-	 * @param label
-	 *            the checkbox menu item label.
-	 * @param object
-	 *            the object that will be associated with this checkbox menu
-	 *            item.
+	 * @param label  the checkbox menu item label.
+	 * @param object the object that will be associated with this checkbox menu
+	 *               item.
 	 */
 	public ReferencedJCheckBoxMenuItem(String label, Object object) {
 		this(label, object, false, null, null);
@@ -34,54 +32,42 @@ public class ReferencedJCheckBoxMenuItem extends JCheckBoxMenuItem {
 	/**
 	 * Constructor
 	 * 
-	 * @param label
-	 *            the checkbox menu item label.
-	 * @param object
-	 *            the object that will be associated with this checkbox menu
-	 *            item.
-	 * @param state
-	 *            the default state, checked <code>true</code> or unchecked.
+	 * @param label  the checkbox menu item label.
+	 * @param object the object that will be associated with this checkbox menu
+	 *               item.
+	 * @param state  the default state, checked <code>true</code> or unchecked.
 	 */
-	public ReferencedJCheckBoxMenuItem(String label, Object object,
-			boolean state) {
+	public ReferencedJCheckBoxMenuItem(String label, Object object, boolean state) {
 		this(label, object, state, null, null);
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param label
-	 *            the checkbox menu item label.
-	 * @param object
-	 *            the object that will be associated with this checkbox menu
-	 *            item.
-	 * @param state
-	 *            the default state, checked <code>true</code> or unchecked.
-	 * @param itemListener
-	 *            an optional item listener.
+	 * @param label        the checkbox menu item label.
+	 * @param object       the object that will be associated with this checkbox
+	 *                     menu item.
+	 * @param state        the default state, checked <code>true</code> or
+	 *                     unchecked.
+	 * @param itemListener an optional item listener.
 	 */
-	public ReferencedJCheckBoxMenuItem(String label, Object object,
-			boolean state, ItemListener itemListener) {
+	public ReferencedJCheckBoxMenuItem(String label, Object object, boolean state, ItemListener itemListener) {
 		this(label, object, state, itemListener, null);
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param label
-	 *            the checkbox menu item label.
-	 * @param object
-	 *            the object that will be associated with this checkbox menu
-	 *            item.
-	 * @param state
-	 *            the default state, checked <code>true</code> or unchecked.
-	 * @param itemListener
-	 *            an optional item listener.
-	 * @param menu
-	 *            and optional menu to add this checkbox menu item to.
+	 * @param label        the checkbox menu item label.
+	 * @param object       the object that will be associated with this checkbox
+	 *                     menu item.
+	 * @param state        the default state, checked <code>true</code> or
+	 *                     unchecked.
+	 * @param itemListener an optional item listener.
+	 * @param menu         and optional menu to add this checkbox menu item to.
 	 */
-	public ReferencedJCheckBoxMenuItem(String label, Object object,
-			boolean state, ItemListener itemListener, JMenu menu) {
+	public ReferencedJCheckBoxMenuItem(String label, Object object, boolean state, ItemListener itemListener,
+			JMenu menu) {
 		super(label, state);
 		if (menu != null) {
 			menu.add(this);
@@ -106,8 +92,7 @@ public class ReferencedJCheckBoxMenuItem extends JCheckBoxMenuItem {
 	/**
 	 * Set the associated object.
 	 * 
-	 * @param object
-	 *            the associated object.
+	 * @param object the associated object.
 	 */
 	public void setObject(Object object) {
 		this._object = object;
