@@ -42,7 +42,9 @@ public abstract class ReconstructionEngine implements Engine {
 
     volatile ConcurrentMap<String,String>           engineConfigMap;
     volatile String                                 engineConfiguration = null;
-   
+  
+    volatile private boolean fatalError = false;
+    
     volatile boolean wroteConfig = false;
     
     String             engineName        = "UnknownEngine";
@@ -72,7 +74,7 @@ public abstract class ReconstructionEngine implements Engine {
     
     abstract public boolean processDataEvent(DataEvent event);
     abstract public boolean init();
-    
+   
     public void requireConstants(List<String> tables){
         if(constManagerMap.containsKey(this.getClass().getName())==false){
             System.out.println("[ConstantsManager] ---> create a new one for module : " + this.getClass().getName());
@@ -261,12 +263,19 @@ public abstract class ReconstructionEngine implements Engine {
         HipoDataEvent dataEventHipo = null;
         
         if(constantManagerStatus()==false){
-            String msg = String.format("HALT : DATABASE CONNECTION ERROR");           
+            String msg = String.format("["+this.getName()+"] HALT : DATABASE CONNECTION ERROR");           
             output.setStatus(EngineStatus.ERROR, 13);
             output.setDescription(msg);
             return output;
         }
-        
+
+        if (fatalError) {
+            String msg = String.format("["+this.getName()+"] HALT : FATAL ERROR");
+            output.setStatus(EngineStatus.ERROR, 13);
+            output.setDescription(msg);
+            return output;
+        }
+
         if(mt.compareTo("binary/data-hipo")==0){
             try {
                 Event hipoEvent = (Event) input.getData();
@@ -419,6 +428,14 @@ public abstract class ReconstructionEngine implements Engine {
 
     @Override
     public void destroy() {
+    }
+    
+    public void setFatal() {
+        this.fatalError = true;
+    }
+
+    public boolean getFatal() {
+        return this.fatalError;
     }
     
     

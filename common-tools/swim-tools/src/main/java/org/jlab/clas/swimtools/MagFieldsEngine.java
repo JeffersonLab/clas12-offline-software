@@ -21,7 +21,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
      * 
      * determine torus and solenoid map name from yaml, else env, else crash
      */
-    public void initializeMagneticFields() {
+    public boolean initializeMagneticFields() {
         String torusMap=this.getEngineConfigString("magfieldTorusMap");
         String solenoidMap=this.getEngineConfigString("magfieldSolenoidMap");
         if (torusMap!=null) {
@@ -54,6 +54,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
         }
         catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
 
          // Field Shifts
@@ -128,6 +129,8 @@ public class MagFieldsEngine extends ReconstructionEngine {
             System.out.println("["+this.getName()+"] run with torus z shift in tracking set to 0 cm");
             // this.solenoidShift = (float) 0;
         }
+
+        return true;
     }
     
     private void loadTables() {
@@ -164,7 +167,10 @@ public class MagFieldsEngine extends ReconstructionEngine {
     @Override
     public boolean init() {
         this.loadTables();
-        this.initializeMagneticFields();
+        if (!this.initializeMagneticFields()) {
+            System.err.println("\n\nCould not initialize magnetic fields.");
+            this.setFatal();
+        }
         return true;
     }
 
