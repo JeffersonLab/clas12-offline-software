@@ -115,6 +115,8 @@ public class ConstantsManager {
             } catch (Exception e) {
                 System.out.println("[ConstantsManager] ---> error reading table : "
                         + tableName);
+                // This happens if missing table or variation.  No point in trying
+                // again, just set error status to trigger abort.
                 requestStatus = -1;
             }
         }
