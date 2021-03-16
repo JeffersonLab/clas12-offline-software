@@ -5,7 +5,9 @@ import java.text.DecimalFormat;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.rec.dc.Constants;
 import org.jlab.utils.groups.IndexedTable;
-
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 public class TableLoader {
 
@@ -28,7 +30,7 @@ public class TableLoader {
     static int minBinIdxT  = 0;
     static int[][][][] maxBinIdxT  = new int[6][6][8][6];
     public static double[][][][][] DISTFROMTIME = new double[6][6][maxBinIdxB+1][maxBinIdxAlpha+1][nBinsT]; // sector slyr alpha Bfield time bins [s][r][ibfield][icosalpha][tbin]
-    
+    static double[] DELTADOCA = new double[nBinsT];
     //public static double[] distbetaValues = new double[]{0.16, 0.16, 0.08, 0.08, 0.08, 0.08};
     
     /*
@@ -62,7 +64,20 @@ public class TableLoader {
             }
     }
     
-    
+    public static synchronized void FillDeltaDocaTable(File file) throws FileNotFoundException {
+        Scanner input = new Scanner(file);
+
+        while(input.hasNext()) {
+            String nextLine = input.nextLine();
+            if (nextLine == null) break;
+            String[] fields = nextLine.split("\\s+");
+            int timeBin = Integer.parseInt(fields[0]);  
+            double deltaDoca = Double.parseDouble(fields[1]);
+            DELTADOCA[timeBin] = deltaDoca;
+        }
+
+        input.close();
+    }
     
     public static synchronized void FillT0Tables(int run, String variation) {
         if (T0LOADED) return;
@@ -223,6 +238,8 @@ public class TableLoader {
                             if(DISTFROMTIME[s][r][ibfield][icosalpha][tbin]!=0 && DISTFROMTIME[s][r][ibfield][icosalpha][tbin+1]==0) {
                                 DISTFROMTIME[s][r][ibfield][icosalpha][tbin+1] = DISTFROMTIME[s][r][ibfield][icosalpha][tbin];
                             }
+                            //Add delta doca:
+                            DISTFROMTIME[s][r][ibfield][icosalpha][tbin]+=DELTADOCA[tbin];
                         }
                         
                     }
