@@ -3,10 +3,14 @@ package org.jlab.service.dc;
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
+import java.io.File;
+import java.io.FileNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jlab.clas.swimtools.MagFieldsEngine;
 import org.jlab.clas.swimtools.Swim;
@@ -36,6 +40,7 @@ import org.jlab.rec.dc.track.TrackCandListFinder;
 import org.jlab.rec.dc.trajectory.RoadFinder;
 import org.jlab.rec.dc.trajectory.Road;
 import org.jlab.utils.groups.IndexedTable;
+import org.jlab.utils.system.ClasUtilsFile;
 
 /**
  * @author zigler
@@ -103,7 +108,14 @@ public class DCHBEngine extends DCEngine {
            int cycles = tabJ.getIntValue("cycles", 0, 0, 0);
 
            if (cycles > 0) triggerPhase = period * ((timeStamp + phase) % cycles);
-
+           
+           String toFile = ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/data/T2D_DeltaDoca.txt");
+           File file = new File(toFile);
+            try {
+                TableLoader.FillDeltaDocaTable(file);
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(DCHBEngine.class.getName()).log(Level.SEVERE, null, ex);
+            }
            TableLoader.FillT0Tables(newRun, super.variationName);
            TableLoader.Fill(super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST));
 
