@@ -398,9 +398,9 @@ public abstract class FieldProbe implements IField {
 	}
 
 	/**
-	 * Get B1 at a given index.
+	 * Get B1 at a given composite index.
 	 * 
-	 * @param index the index.
+	 * @param index the composite index.
 	 * @return the B1 at the given index.
 	 */
 	public final float getB1(int index) {
@@ -410,18 +410,18 @@ public abstract class FieldProbe implements IField {
 	/**
 	 * Get B2 at a given index.
 	 * 
-	 * @param index the index.
-	 * @return the B2 at the given index.
+	 * @param index the composite index.
+	 * @return the B2 at the given composite index.
 	 */
 	public final float getB2(int index) {
 		return _field.getB2(index);
 	}
 
 	/**
-	 * Get B3 at a given index.
+	 * Get B3 at a given composite index.
 	 * 
-	 * @param index the index.
-	 * @return the B3 at the given index.
+	 * @param index the composite index.
+	 * @return the B3 at the given composite index.
 	 */
 	public final float getB3(int index) {
 		return _field.getB3(index);

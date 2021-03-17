@@ -1,5 +1,7 @@
 package cnuphys.magfield;
 
+import java.io.PrintStream;
+
 /**
  *
  * @author gavalian
@@ -35,6 +37,10 @@ public class TorusProbe extends FieldProbe {
 		q2Coordinate = _torus.q2Coordinate.clone();
 		q3Coordinate = _torus.q3Coordinate.clone();
 
+	}
+	
+	public void writeDiagnostics(PrintStream ps) {
+		_cell.writeDiagnostics(ps);
 	}
 
 	/**

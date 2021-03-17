@@ -484,29 +484,131 @@ public class Converter {
 			writer.println(line);
 		}
 	}
-
-	public static void main(String arg[]) {
-		String dataDir = getDataDir();
-
-		ArrayList<File> files = dataFiles(dataDir);
-		System.out.println("data dir = [" + dataDir + "]  file count: " + files.size());
-
-		// preprocess to get the grid data
-		GridData gdata[] = null;
+	
+	public static void convertGEMCtoBinary(String name) {
+		File mfdir = new File(System.getProperty("user.home"), "magfield");
+		File file = new File(mfdir, name);
+		
+		File bfile = new File(mfdir, "gemcToBinary.dat");
+		DataOutputStream dos0 = null;
 		try {
-			gdata = preProcessor(files);
+			dos0 = new DataOutputStream(new FileOutputStream(bfile));
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+			System.exit(1);
+		}
+		final DataOutputStream dos = dos0;
 
-			System.out.println("PHI: " + gdata[PHI]);
-			System.out.println("RHO: " + gdata[RHO]);
-			System.out.println("Z: " + gdata[Z]);
+		int nPhi = 16;
+		int nRho = 2501;
+		int nZ = 251;
+		MagneticFields.writeHeader(dos, 0, 1, 0, 0, 0, 0, 30, nPhi, 0, 500, nRho, 100, 600, nZ);
 
-		} catch (Exception e) {
+		
+		try {
+			AsciiReader reader = new AsciiReader(file) {
+				
+				int count = 0;
+				
+				@Override
+				protected void processLine(String line) {
+					
+					if (line.startsWith("<")) {
+						return;
+					}
+										
+					if (count < 20) {
+						System.err.println("[" + line + "]");
+					}
+					count++;
+					
+					String tokens[] = AsciiReadSupport.tokens(line);
+					if (tokens.length != 6) {
+						System.err.println("BAD TOKENS");
+						System.exit(1);
+					}
+					
+					float bx = Float.parseFloat(tokens[3]);
+					float by = Float.parseFloat(tokens[4]);
+					float bz = Float.parseFloat(tokens[5]);
+
+					try {
+						dos.writeFloat(bx);
+						dos.writeFloat(by);
+						dos.writeFloat(bz);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					
+					if ((count % 10000) == 0) {
+						System.err.println("count = " + count);
+					}
+				}
+
+				@Override
+				public void done() {
+					System.err.println("final count = " + count);				
+					try {
+						dos.flush();
+						dos.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+
+				
+			};
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
+		
+		
 
-		convertToBinary(files, gdata);
-		// convertToGemc(files, gdata);
+	}
+	
+	/**
+	 * Convert a composite index back to the coordinate indices
+	 * 
+	 * @param index    the composite index.
+	 * @param qindices the coordinate indices
+	 */
+private static void getCoordinateIndices(int index, int N1, int N2, int N3, int qindices[]) {
+		int n3 = index % N3;
+		index = (index - n3) / N3;
 
+		int n2 = index % N2;
+		int n1 = (index - n2) / N2;
+		qindices[0] = n1;
+		qindices[1] = n2;
+		qindices[2] = n3;
+	}
+
+
+	public static void main(String arg[]) {
+//		String dataDir = getDataDir();
+//
+//		ArrayList<File> files = dataFiles(dataDir);
+//		System.out.println("data dir = [" + dataDir + "]  file count: " + files.size());
+//
+//		// preprocess to get the grid data
+//		GridData gdata[] = null;
+//		try {
+//			gdata = preProcessor(files);
+//
+//			System.out.println("PHI: " + gdata[PHI]);
+//			System.out.println("RHO: " + gdata[RHO]);
+//			System.out.println("Z: " + gdata[Z]);
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//
+//		convertToBinary(files, gdata);
+//		// convertToGemc(files, gdata);
+
+		convertGEMCtoBinary("April_24_TorusSymmetric.txt");
 		System.out.println("done");
 	}
 

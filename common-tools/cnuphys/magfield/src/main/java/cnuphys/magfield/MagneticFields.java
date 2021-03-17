@@ -1231,7 +1231,7 @@ public class MagneticFields {
 		}
 
 		
-		String defaultTransverseSolenoid = "Full_transsolenoid_x161_y81_z321_March2021.dat";
+		String defaultTransverseSolenoid = "Full_transsolenoid_x161_y161_z321_March2021.dat";
 		File transverseSolenoidFile = new File(magdir, defaultTransverseSolenoid);
 		if (!transverseSolenoidFile.exists()) {
 			transverseSolenoidFile = null;
@@ -1473,6 +1473,20 @@ public class MagneticFields {
 
 		System.err.println("Active Field: " + getActiveFieldDescription());
 		notifyListeners();
+	}
+	
+	/**
+	 * Make sure the menus are consistent.
+	 */
+	public void fixMenus() {
+		boolean interpolate = MagneticField.isInterpolate();
+		if (_nearestNeighborItem != null) {
+			_nearestNeighborItem.setSelected(!interpolate);
+		}
+		if (_interpolateItem != null) {
+			_interpolateItem.setSelected(interpolate);
+		}
+		
 	}
 
 	// mag field changed scale
