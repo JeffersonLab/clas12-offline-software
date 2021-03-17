@@ -1,6 +1,6 @@
 #!/bin/bash
 
-webDir=http://129.57.64.108/clas12offline/distribution/coatjava/validation_files/eb
+webDir=http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/eb
 webVersion=4.4.0-fid-r11
 webDir=$webDir/$webVersion
 
