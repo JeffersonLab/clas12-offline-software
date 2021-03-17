@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.detector.calib.utils;
 
 import java.util.ArrayList;
@@ -92,28 +87,24 @@ public class ConstantsManager {
 
         if(this.runConstants.containsKey(run)==true) return;
         
-         if(this.runConstantRequestHistory.containsKey(run)==false){
-                runConstantRequestHistory.put(run, 1);
-         } else {
-             int requests = runConstantRequestHistory.get(run);
-             runConstantRequestHistory.put(run, requests+1);
-             if(requests>maxRequests) {
-                 requestStatus = -1;
-                 System.out.println("[ConstantsManager] exceeded maximum requests " + requests + " for run " + run);
-             }
-         }
-        //String  historyString = 
-        //if()
+        if(this.runConstantRequestHistory.containsKey(run)==false){
+            runConstantRequestHistory.put(run, 1);
+        } else {
+            int requests = runConstantRequestHistory.get(run);
+            runConstantRequestHistory.put(run, requests+1);
+            if(requests>maxRequests) {
+                requestStatus = -1;
+                System.out.println("[ConstantsManager] exceeded maximum requests " + requests + " for run " + run);
+            }
+        }
+
         System.out.println("[ConstantsManager] --->  loading table for run = " + run);
         DatabaseConstantsDescriptor desc = defaultDescriptor.getCopy(run);
         DatabaseConstantProvider provider = new DatabaseConstantProvider(run,
                 this.databaseVariation, this.timeStamp);
-        
-        
+
         List<String>   tn = new ArrayList<String>(desc.getTableNames());
         List<String>   tk = new ArrayList<String>(desc.getTableKeys());
-        
-        //for(String tableName : desc.getTableNames())
         
         for(int i = 0; i < desc.getTableNames().size(); i++){                
             String tableName = tn.get(i);
@@ -121,16 +112,16 @@ public class ConstantsManager {
                 IndexedTable  table = provider.readTable(tableName);
                 desc.getMap().put(tk.get(i), table);
                 System.out.println(String.format("***** >>> adding : %14s / table = %s", tk.get(i),tableName));
-                //System.out.println("***** >>> adding : table " + tableName 
-                //        + "  key = " + tk.get(i));
             } catch (Exception e) {
                 System.out.println("[ConstantsManager] ---> error reading table : "
                         + tableName);
+                // This happens if missing table or variation.  No point in trying
+                // again, just set error status to trigger abort.
+                requestStatus = -1;
             }
         }
         provider.disconnect();
         this.runConstants.put(run, desc);
-        //System.out.println(this.toString());
 
         if (this.rcdbConstants.containsKey(run) == false) {
             RCDBProvider rcdbpro = new RCDBProvider();
@@ -248,7 +239,6 @@ public class ConstantsManager {
     
     
     public static void main(String[] args){
-        
         ConstantsManager  manager = new ConstantsManager("default");
         
         manager.init(Arrays.asList(new String[]{

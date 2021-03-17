@@ -37,10 +37,10 @@ rm install-claracre-clas.sh
 
 case $OS in
     'Linux')
-       wget --no-check-certificate http://129.57.64.108/clas12offline/distribution/coatjava/validation_files/twoTrackEvents_809_raw.evio.tar.gz
+       wget --no-check-certificate http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/twoTrackEvents_809_raw.evio.tar.gz
      ;;
      'Darwin')
-       curl -OL "http://129.57.64.108/clas12offline/distribution/coatjava/validation_files/twoTrackEvents_809_raw.evio.tar.gz" -o twoTrackEvents_809_raw.evio.tar.gz
+       curl -OL "http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/twoTrackEvents_809_raw.evio.tar.gz" -o twoTrackEvents_809_raw.evio.tar.gz
      ;;
      *) ;;
 esac

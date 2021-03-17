@@ -42,7 +42,7 @@ fi
 source `dirname $0`/bin/env.sh
 if [ $downloadMaps == "yes" ]; then
   echo 'Retrieving field maps ...'
-  webDir=http://129.57.64.108/clas12offline/magfield
+  webDir=http://clasweb.jlab.org/clas12offline/magfield
   locDir=etc/data/magfield
   mkdir -p $locDir
   cd $locDir
