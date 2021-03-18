@@ -117,6 +117,23 @@ public class TracksFromTargetRec {
                 kf.runFitter(swimmer);
                
                 if (kf.setFitFailed == false && kf.NDF>0) {
+                    Track fittedTrack = recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom);
+                    for(Cross c : fittedTrack) { 
+                        if(c.get_Detector().equalsIgnoreCase("SVT")) {
+                            c.get_Cluster1().set_AssociatedTrackID(0);
+                            c.get_Cluster2().set_AssociatedTrackID(0);
+                        }
+                    }
+                    //refit adding missing clusters
+                    List<Cluster> clsOnTrack = recUtil.FindClustersOnTrk(SVTclusters, fittedTrack.get_helix(), 
+                            fittedTrack.get_P(), fittedTrack.get_Q(), SVTGeom, swimmer);
+                    seed.get_Clusters().addAll(clsOnTrack);
+                    kf = new org.jlab.clas.tracking.kalmanfilter.helical.KFitter( hlx, cov, event,  swimmer, 
+                    org.jlab.rec.cvt.Constants.getXb(), 
+                    org.jlab.rec.cvt.Constants.getYb(),
+                    shift, 
+                    recUtil.setMeasVecs(seed, SVTGeom, BMTGeom)) ;
+                    kf.runFitter(swimmer);
                     trkcands.add(recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom));
                     trkcands.get(trkcands.size() - 1).set_TrackingStatus(seed.trkStatus);
                 }

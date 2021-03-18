@@ -56,19 +56,21 @@ public class TrackListFinder {
                         maxPathLength) ;
 
                 double[] pointAtCylRad = bstSwim.SwimRho(Constants.CTOFINNERRADIUS/10);
-                trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0]*10, pointAtCylRad[1]*10, pointAtCylRad[2]*10));
-                trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3]*10, pointAtCylRad[4]*10, pointAtCylRad[5]*10));
+                if(pointAtCylRad!=null) {
+                    trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0]*10, pointAtCylRad[1]*10, pointAtCylRad[2]*10));
+                    trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3]*10, pointAtCylRad[4]*10, pointAtCylRad[5]*10));
 
-                trk.set_pathLength(pointAtCylRad[6]*10);
+                    trk.set_pathLength(pointAtCylRad[6]*10);
 
-                TrajectoryFinder trjFind = new TrajectoryFinder();
+                    TrajectoryFinder trjFind = new TrajectoryFinder();
 
-                Trajectory traj = trjFind.findTrajectory(trk.get_Id(), trk, svt_geo, bmt_geo, ctof_geo, cnd_geo, bstSwim, "final");
+                    Trajectory traj = trjFind.findTrajectory(trk.get_Id(), trk, svt_geo, bmt_geo, ctof_geo, cnd_geo, bstSwim, "final");
 
-                trk.set_Trajectory(traj.get_Trajectory());
+                    trk.set_Trajectory(traj.get_Trajectory());
 
-                //if(trk.passCand == true)
-                tracks.add(trk);
+                    //if(trk.passCand == true)
+                    tracks.add(trk);
+                }
             }
 
         }

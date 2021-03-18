@@ -186,9 +186,9 @@ public class RecUtilities {
         }
         return KFSites;
     }
-    public Map<Integer, Cluster> FindClustersOnTrk (List<Cluster> allClusters, Helix helix, double P, int Q,
+    public List<Cluster> FindClustersOnTrk (List<Cluster> allClusters, Helix helix, double P, int Q,
             org.jlab.rec.cvt.svt.Geometry sgeo, 
-            Swim swimmer) {
+            Swim swimmer) { 
         Map<Integer, Cluster> clusMap = new HashMap<Integer, Cluster>();
         //Map<Integer, Double> stripMap = new HashMap<Integer, Double>();
         Map<Integer, Double> docaMap = new HashMap<Integer, Double>();
@@ -224,29 +224,37 @@ public class RecUtilities {
             Point3D p = sgeo.getPlaneModuleOrigin(sector, layer);
             double d = n.dot(p.toVector3D());
             inters = swimmer.SwimToPlaneBoundary(d/10.0, n, 1);
-            Point3D trp = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
-            double nearstp = sgeo.calcNearestStrip(inters[0]*10, inters[1]*10, inters[2]*10, layer, sector);
-            //stripMap.put((sector*1000+layer), nearstp);
-            docaMap.put((sector*1000+layer), sgeo.getDOCAToStrip(sector, layer, nearstp, trp)); 
-            trajMap.put((sector*1000+layer), trp); 
+            if(inters!=null) {
+                Point3D trp = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
+                double nearstp = sgeo.calcNearestStrip(inters[0]*10, inters[1]*10, inters[2]*10, layer, sector);
+                //stripMap.put((sector*1000+layer), nearstp);
+                docaMap.put((sector*1000+layer), sgeo.getDOCAToStrip(sector, layer, nearstp, trp)); 
+                trajMap.put((sector*1000+layer), trp); 
+            }
         }
         for(Cluster cls : allClusters) {
             int clsKey = cls.get_Sector()*1000+cls.get_Layer();
-            //double trjCent = stripMap.get(clsKey);
-            double clsDoca = sgeo.getDOCAToStrip(cls.get_Sector(), cls.get_Layer(), 
-                    cls.get_Centroid(), trajMap.get(clsKey));
-            if(clusMap.containsKey(clsKey)) {
-                //double filldCent = clusMap.get(clsKey).get_Centroid();
-                double filldDoca = docaMap.get(clsKey);
-                if(Math.abs(clsDoca)<Math.abs(filldDoca)) {//closer doca
-                    clusMap.put(clsKey, cls); //fill it
+            if(cls.get_AssociatedTrackID()==-1 && trajMap!=null && trajMap.get(clsKey)!=null) {
+                //double trjCent = stripMap.get(clsKey);
+                double clsDoca = sgeo.getDOCAToStrip(cls.get_Sector(), cls.get_Layer(), 
+                        cls.get_Centroid(), trajMap.get(clsKey));
+                if(clusMap.containsKey(clsKey)) {
+                    //double filldCent = clusMap.get(clsKey).get_Centroid();
+                    double filldDoca = docaMap.get(clsKey);
+                    if(Math.abs(clsDoca)<Math.abs(filldDoca)) {//closer doca
+                        clusMap.put(clsKey, cls); //fill it
+                    }
+                }
+                if(Math.abs(clsDoca)<cls.get_CentroidError()*5){ //5sigma cut
+                    clusMap.put(clsKey, cls);
                 }
             }
-            if(Math.abs(clsDoca)<cls.get_CentroidError()*5){ //5sigma cut
-                clusMap.put(clsKey, cls);
-            }
         }
-        return clusMap;
+        List<Cluster> clustersOnTrack = new ArrayList<Cluster>();
+        for(Cluster cl : clusMap.values()) {
+            clustersOnTrack.add(cl);
+        }
+        return clustersOnTrack;
     }
     
     public void MatchTrack2Traj(Seed trkcand, Map<Integer, 
@@ -349,11 +357,11 @@ public class RecUtilities {
         cand.setNDF(kf.NDF);
         cand.setChi2(kf.chi2);
         
-        for (Cross c : seed.get_Crosses()) {
-            if (c.get_Detector().equalsIgnoreCase("SVT")) {
-                continue;
-            }
-        }
+        //for (Cross c : seed.get_Crosses()) {
+        //    if (c.get_Detector().equalsIgnoreCase("SVT")) {
+        //        continue;
+        //    }
+        //}
         
         this.MatchTrack2Traj(seed, kf.TrjPoints, SVTGeom, BMTGeom);
         cand.addAll(seed.get_Crosses());

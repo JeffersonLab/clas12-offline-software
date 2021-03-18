@@ -499,9 +499,9 @@ public class Geometry {
         double b1 = SVTConstants.ACTIVESENWID - interc;
         double b2 = interc;
 
-        Vector3D vecAlongStrip = new Vector3D();
+        Vector3D  vecAlongStrip = new Vector3D();
         Point3D   pointOnStrip = new Point3D();
-        Point3D       LocPoint = this.transformToFrame(sector, layer, point0.x(), point0.y(), point0.z(), "local", "");
+        Point3D   LocPoint = this.transformToFrame(sector, layer, point0.x(), point0.y(), point0.z(), "local", "");
 
         if (layer % 2 == 0) { //layers 2,4,6 == top ==j ==>(2) : regular configuration
             vecAlongStrip = new Vector3D(m2, 0, 1).asUnit();
