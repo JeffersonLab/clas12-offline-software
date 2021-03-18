@@ -667,6 +667,9 @@ public abstract class MagneticField implements IMagField {
 	 */
 	public static final void setInterpolate(boolean interpolate) {
 		_interpolate = interpolate;
+		
+		MagneticFields.getInstance().fixMenus();
+		
 		System.out.println("Interpolating fields: " + _interpolate);
 	}
 
