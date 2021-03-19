@@ -104,7 +104,18 @@ public class SVTConstants
 	public static double MODULEWID; // || DZ | AZ | DZ ||
 	public static double SECTORLEN;
 	
-	/**
+         // faraday cup cage
+         public static double[] FARADAYCAGERMIN    = {113.80/2, 265.0/2, 115.1/2, 266.0/2};
+         public static double[] FARADAYCAGERMAX    = {114.30/2, 266.0/2, 264.0/2, 271.4/2};
+         public static double[] FARADAYCAGELENGTH  = {540.0, 553.7, 10.0, 540.0};
+         public static double[] FARADAYCAGEZPOS    = {0, 0, 270, 0};
+         
+         // region peek supports
+         public static double[] REGIONPEEKRMIN  = {117.6/2, 171.4/2, 223.4/2};
+         public static double[] REGIONPEEKRMAX  = {128.8/2, 184.0/2, 238.9/2};
+         public static double[] REGIONPEEKTHICK = { 15.0,    15.0,    15.0  };
+
+         /**
 	 * Loads the the necessary tables for the SVT geometry for a given DatabaseConstantProvider.
 	 * 
 	 * @return DatabaseConstantProvider the same thing

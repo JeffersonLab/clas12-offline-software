@@ -118,7 +118,7 @@ public class SVTVolumeFactory
 		// default behaviour
 		setRange( 1, SVTConstants.NREGIONS, new int[]{ 1, 1, 1, 1 }, SVTConstants.NSECTORS, 1, SVTConstants.NMODULES ); // all regions, sectors, and modules
 		
-		double rmin = SVTConstants.LAYERRADIUS[0][0]*0.9;
+		double rmin = SVTConstants.LAYERRADIUS[0][0]*0.87;
 		double rmax = SVTConstants.LAYERRADIUS[regionMax-1][1]*1.13;
 		double zlen = SVTConstants.SECTORLEN*1.404;
 		
@@ -217,6 +217,8 @@ public class SVTVolumeFactory
 		if( BUILDSENSORS ) System.out.println("  include sensor active and dead zones ? "+ BUILDSENSORZONES );
 		//System.out.println("  halve dimensions of boxes ? "+ HALFBOXES );
 		
+                  this.makeCage();
+                  
 		for( int region = regionMin-1; region < regionMax; region++ ) // NREGIONS
 		{
 			//if( VERBOSE ) System.out.println("r "+region);			
@@ -293,7 +295,7 @@ public class SVTVolumeFactory
 		double rfit = 4.0; // scale factor to encompass the entire volume of the sectors
 		double rcen = 0.5*(SVTConstants.LAYERRADIUS[aRegion][1] + SVTConstants.LAYERRADIUS[aRegion][0]);
 		double rthk = rfit*0.5*(SVTConstants.LAYERRADIUS[aRegion][1] - SVTConstants.LAYERRADIUS[aRegion][0]);
-		double rmin = rcen - rthk;
+		double rmin = SVTConstants.REGIONPEEKRMIN[aRegion]-1.0;
 		double rmax = rcen + rthk;
 		double zlen = SVTConstants.SECTORLEN; // same length as dummy sector volume
 		
@@ -309,8 +311,14 @@ public class SVTVolumeFactory
 		}
 		
 		Geant4Basic regionVol = new G4Tubs("region", rmin*0.1, rmax*0.1, zlen/2.0*0.1, 0, 360 );
-		
-		// create faraday cage here?
+
+                   // add the peek support
+                   Geant4Basic peekVol = new G4Tubs("peek", SVTConstants.REGIONPEEKRMIN[aRegion]*0.1
+                                                          , SVTConstants.REGIONPEEKRMAX[aRegion]*0.1
+                                                          , SVTConstants.REGIONPEEKTHICK[aRegion]/2.0*0.1
+                                                          , 0, 360 );
+		peekVol.setMother(regionVol);
+                   peekVol.setPosition(0, 0, (zlen-SVTConstants.REGIONPEEKTHICK[aRegion])/2.0*0.1);
 		
 		for( int sector = sectorMin[aRegion]-1; sector < sectorMax[aRegion]; sector++ ) // NSECTORS[region]
 		{
@@ -338,7 +346,20 @@ public class SVTVolumeFactory
 		return regionVol;
 	}
 	
-	
+	public void makeCage() {
+            
+              for(int i=0; i<SVTConstants.FARADAYCAGERMIN.length; i++) {
+                   Geant4Basic cage = new G4Tubs("faradayCage" + i, SVTConstants.FARADAYCAGERMIN[i]*0.1
+                                                                  , SVTConstants.FARADAYCAGERMAX[i]*0.1
+                                                                  , SVTConstants.FARADAYCAGELENGTH[i]/2*0.1
+                                                                  , 0, 360 );
+                   cage.setMother( motherVol );
+		cage.setPosition(0, 0, SVTConstants.FARADAYCAGEZPOS[i]*0.1); 
+			
+              }
+         }
+        
+        
 	/**
 	 * Returns one sector module, containing a pair of sensor modules and backing structure.
 	 * 
