@@ -1,5 +1,7 @@
-package org.jlab.detector.geant4.v2.SVT;
+package org.jlab.detector.volume;
 
+import org.jlab.geometry.prim.Operation;
+import org.jlab.detector.units.Measurement;
 import org.jlab.detector.volume.Geant4Basic;
 
 /**
@@ -20,6 +22,8 @@ public class G4Operation extends Geant4Basic {
 		}
 		
 		setType("Operation: "+expr);
+                
+                   setDimensions(new Measurement(0,"counts"));
 	}
 	
 }

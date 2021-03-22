@@ -105,15 +105,15 @@ public class SVTConstants
 	public static double SECTORLEN;
 	
          // faraday cup cage
-         public static double[] FARADAYCAGERMIN    = {113.80/2, 265.0/2, 115.1/2, 266.0/2};
-         public static double[] FARADAYCAGERMAX    = {114.30/2, 266.0/2, 264.0/2, 271.4/2};
-         public static double[] FARADAYCAGELENGTH  = {540.0, 553.7, 10.0, 540.0};
-         public static double[] FARADAYCAGEZPOS    = {0, 0, 270, 0};
+         public static double[] FARADAYCAGERMIN    = new double[4];
+         public static double[] FARADAYCAGERMAX    = new double[4];
+         public static double[] FARADAYCAGELENGTH  = new double[4];
+         public static double[] FARADAYCAGEZPOS    = new double[4];
          
          // region peek supports
-         public static double[] REGIONPEEKRMIN  = {117.6/2, 171.4/2, 223.4/2};
-         public static double[] REGIONPEEKRMAX  = {128.8/2, 184.0/2, 238.9/2};
-         public static double[] REGIONPEEKTHICK = { 15.0,    15.0,    15.0  };
+         public static double[] REGIONPEEKRMIN;
+         public static double[] REGIONPEEKRMAX;
+         public static double[] REGIONPEEKLENGTH;
 
          /**
 	 * Loads the the necessary tables for the SVT geometry for a given DatabaseConstantProvider.
@@ -128,6 +128,8 @@ public class SVTConstants
 		cp.loadTable( ccdbPath +"fiducial");
 		cp.loadTable( ccdbPath +"material/box");
 		cp.loadTable( ccdbPath +"material/tube");
+		cp.loadTable( ccdbPath +"material/faradaycage");
+		cp.loadTable( ccdbPath +"material/peeksupport");
 		cp.loadTable( ccdbPath +"alignment");
                 //shift by target
                 cp.loadTable("/geometry/target");
@@ -272,7 +274,26 @@ public class SVTConstants
 				mat++;
 			}
 			
-			
+			// region peek supports
+                            REGIONPEEKRMIN   = new double[NREGIONS];
+                            REGIONPEEKRMAX   = new double[NREGIONS];
+                            REGIONPEEKLENGTH = new double[NREGIONS];
+                            for(int i=0; i<NREGIONS; i++) {
+                                REGIONPEEKRMIN[i]   = cp.getDouble( ccdbPath+"material/peeksupport/rmin",   i);
+                                REGIONPEEKRMAX[i]   = cp.getDouble( ccdbPath+"material/peeksupport/rmax",   i);
+                                REGIONPEEKLENGTH[i] = cp.getDouble( ccdbPath+"material/peeksupport/length", i);
+                            }
+                            
+			// faraday cage
+                            for(int i=0; i<FARADAYCAGERMIN.length; i++) {
+                                FARADAYCAGERMIN[i]   = cp.getDouble( ccdbPath+"material/faradaycage/rmin",   i);
+                                FARADAYCAGERMAX[i]   = cp.getDouble( ccdbPath+"material/faradaycage/rmax",   i);
+                                FARADAYCAGELENGTH[i] = cp.getDouble( ccdbPath+"material/faradaycage/length", i);
+                                FARADAYCAGEZPOS[i]   = cp.getDouble( ccdbPath+"material/faradaycage/zpos",   i);
+                                System.out.println(FARADAYCAGERMIN[i] + " " + FARADAYCAGERMAX[i] + " " + FARADAYCAGELENGTH[i] + " " + FARADAYCAGEZPOS[i]);
+                            }
+                            
+                            
 			// calculate derived constants
 			NLAYERS = NMODULES*NREGIONS;
 			MODULELEN = NSENSORS*(ACTIVESENLEN + 2*DEADZNLEN) + (NSENSORS - 1)*MICROGAPLEN;
