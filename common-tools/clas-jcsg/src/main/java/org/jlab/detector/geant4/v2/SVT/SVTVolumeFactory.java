@@ -352,10 +352,10 @@ public class SVTVolumeFactory
               for(int i=0; i<SVTConstants.FARADAYCAGERMIN.length; i++) {
                    double zmin = Math.max(-SVTConstants.FARADAYCAGELENGTH[i]/2+SVTConstants.FARADAYCAGEZPOS[i], -this.motherVolumeLength/2);
                    double zmax = SVTConstants.FARADAYCAGELENGTH[i]/2+SVTConstants.FARADAYCAGEZPOS[i];                   
-                   Geant4Basic cage = new G4Tubs("faradayCage" + i, SVTConstants.FARADAYCAGERMIN[i]*0.1
-                                                                  , SVTConstants.FARADAYCAGERMAX[i]*0.1
-                                                                  , (zmax-zmin)/2*0.1
-                                                                  , 0, 360 );
+                   Geant4Basic cage = new G4Tubs("faradayCage" + SVTConstants.FARADAYCAGENAME[i], SVTConstants.FARADAYCAGERMIN[i]*0.1
+                                                                                                , SVTConstants.FARADAYCAGERMAX[i]*0.1
+                                                                                                , (zmax-zmin)/2*0.1
+                                                                                                , 0, 360 );
                    cage.setMother( motherVol );
 		cage.setPosition(0, 0, (zmax+zmin)/2*0.1); 
 			

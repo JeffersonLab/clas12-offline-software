@@ -7,8 +7,10 @@ import eu.mihosoft.vrl.v3d.Primitive;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
 
 /**
- * @author pdavies
+ * @author pdavies/devita
  */
+
+// FIXME: currently support only polyheadra defintion to gemc geometry
 public class Pgon implements Primitive {
 	
 	private final PropertyStorage properties = new PropertyStorage();

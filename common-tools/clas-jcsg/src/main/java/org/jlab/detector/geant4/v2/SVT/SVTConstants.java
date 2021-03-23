@@ -109,6 +109,7 @@ public class SVTConstants
          public static double[] FARADAYCAGERMAX    = new double[4];
          public static double[] FARADAYCAGELENGTH  = new double[4];
          public static double[] FARADAYCAGEZPOS    = new double[4];
+         public static String[] FARADAYCAGENAME    = new String[4];
          
          // region peek supports
          public static double[] REGIONPEEKRMIN;
@@ -174,7 +175,7 @@ public class SVTConstants
 	 *  
 	 * @param cp a ConstantProvider that has loaded the necessary tables
 	 */
-	public static synchronized void load( ConstantProvider cp )
+	public static synchronized void load( DatabaseConstantProvider cp )
 	{
 		if( !bLoadedConstants )
 		{			
@@ -290,7 +291,7 @@ public class SVTConstants
                                 FARADAYCAGERMAX[i]   = cp.getDouble( ccdbPath+"material/faradaycage/rmax",   i);
                                 FARADAYCAGELENGTH[i] = cp.getDouble( ccdbPath+"material/faradaycage/length", i);
                                 FARADAYCAGEZPOS[i]   = cp.getDouble( ccdbPath+"material/faradaycage/zpos",   i);
-                                System.out.println(FARADAYCAGERMIN[i] + " " + FARADAYCAGERMAX[i] + " " + FARADAYCAGELENGTH[i] + " " + FARADAYCAGEZPOS[i]);
+                                FARADAYCAGENAME[i]   = cp.getString( ccdbPath+"material/faradaycage/name",   i);
                             }
                             
                             
