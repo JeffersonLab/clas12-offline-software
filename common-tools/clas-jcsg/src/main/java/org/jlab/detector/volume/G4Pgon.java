@@ -1,15 +1,14 @@
 package org.jlab.detector.volume;
 
 import org.jlab.geometry.prim.Pgon;
-import java.util.ArrayList;
 import org.jlab.detector.units.Measurement;
 import org.jlab.detector.units.SystemOfUnits.Angle;
 import org.jlab.detector.units.SystemOfUnits.Length;
-import org.jlab.detector.volume.Geant4Basic;
 
 /**
- * @author pdavies
+ * @author pdavies/devita
  */
+// FIXME: currently support only polyheadra defintion to gemc geometry
 public class G4Pgon extends Geant4Basic {
 
 	public G4Pgon(String name, double phiStart, double phiTotal, int numSides, int numZPlanes,
