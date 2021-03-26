@@ -81,18 +81,25 @@ public class DCTBEngine extends DCEngine {
         }
         double T_Start = 0;
         if(Constants.isUSETSTART() == true) {
-            if(event.hasBank("RECHB::Event")==true) {
-                T_Start = event.getBank("RECHB::Event").getFloat("startTime", 0);
-                if(T_Start<0) {
+            String name;
+            if(this.aiAssist == true) {
+                name = "HBAI";
+            } else {
+                name = "HB";
+            }
+            String recBankName = "REC"+name+"::Event"; 
+            if(event.hasBank(recBankName)==true) {
+                T_Start = event.getBank(recBankName).getFloat("startTime", 0);
+                if(T_Start<0) { 
                     return true; // quit if start time not found in data
                 }
-            } else {
+            } else { 
                 return true; // no REC HB bank
             }
         }
         // get Field
         Swim dcSwim = new Swim();        
-        //System.out.println(" RUNNING TIME BASED....................................");
+       
         ClusterFitter cf = new ClusterFitter();
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
 
@@ -101,7 +108,9 @@ public class DCTBEngine extends DCEngine {
         List<Segment> segments = new ArrayList<Segment>();
         List<Cross> crosses = new ArrayList<Cross>();
         List<Track> trkcands = new ArrayList<Track>();
-
+        
+        if(Constants.DEBUG)
+            System.out.println("TB AI "+this.aiAssist);
         //instantiate bank writer
         RecoBankWriter rbc = new RecoBankWriter(aiAssist);
 
@@ -229,7 +238,7 @@ public class DCTBEngine extends DCEngine {
             crosses.addAll(TrackArray[i]);
             //if(TrackArray[i].get_FitChi2()>200) {
             //    resetTrackParams(TrackArray[i], new DCSwimmer());
-            //}
+            //} 
             KFitterDoca kFit = new KFitterDoca(TrackArray[i], dcDetector, true, dcSwim, 0);
              
             StateVec fn = new StateVec();
@@ -289,10 +298,21 @@ public class DCTBEngine extends DCEngine {
 //                            (float)trk.trajectory.get(j).getPathLen()+" "
 //                            );               
 //                }
- 
+
                 for(Cross c : trk) { 
+                    c.set_CrossDirIntersSegWires();
                     c.get_Segment1().isOnTrack=true;
                     c.get_Segment2().isOnTrack=true;
+                    clusters.add(c.get_Segment1().get_fittedCluster());
+                    clusters.add(c.get_Segment2().get_fittedCluster());
+                    for (FittedHit h1 : c.get_Segment1()) {
+                        h1.set_AssociatedHBTrackID(trk.get_Id());
+                        fhits.add(h1);
+                    }
+                    for (FittedHit h2 : c.get_Segment2()) {
+                        h2.set_AssociatedHBTrackID(trk.get_Id());
+                        fhits.add(h2);
+                    }
                     
                     for(FittedHit h1 : c.get_Segment1()) { 
                         h1.set_AssociatedTBTrackID(trk.get_Id());
@@ -343,11 +363,15 @@ public class DCTBEngine extends DCEngine {
                 miss=l+1;
                 if(miss%2==0) {//missing sl in 2,4,6
                     track.setSingleSuperlayer(SegMap.get(l)); //isolated sl in 1,3,5
-                } else {//missing sl in 1,3,4
-                    track.setSingleSuperlayer(SegMap.get(l)); //isolated sl in 2,4,6
+                    if(Constants.DEBUG)
+                        System.out.println("Missing superlayer "+miss+" seg "+SegMap.get(l).printInfo());
+                } else {//missing sl in 1,3,5
+                    track.setSingleSuperlayer(SegMap.get(l+2)); //isolated sl in 2,4,6
+                    if(Constants.DEBUG)
+                        System.out.println("Missing superlayer "+miss+" seg "+track.getSingleSuperlayer().printInfo());
                 }
             }
-        }
+        } 
         return miss;
     }
 
