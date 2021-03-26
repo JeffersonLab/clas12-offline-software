@@ -259,6 +259,7 @@ public class DCHBPostCluster extends DCEngine {
                 if (!c.get_Segment2().isOnTrack)
                     crossSegsNotOnTrack.add(c.get_Segment2());
             }
+            
             RoadFinder rf = new RoadFinder();
             List<Road> allRoads = rf.findRoads(segments, dcDetector);
             List<Segment> Segs2Road = new ArrayList<>();
@@ -273,7 +274,9 @@ public class DCHBPostCluster extends DCEngine {
                             missingSL = r.get(ri).get_Superlayer() - 1;
                         }
                     }
-                }
+                } 
+                if(missingSL==-1) 
+                    continue;
                 for (int ri = 0; ri < 3; ri++) {
                     for (Segment s : crossSegsNotOnTrack) {
                         if (s.get_Sector() == r.get(ri).get_Sector() &&
@@ -281,7 +284,7 @@ public class DCHBPostCluster extends DCEngine {
                                 s.associatedCrossId == r.get(ri).associatedCrossId &&
                                 r.get(ri).associatedCrossId != -1) {
                             if (s.get_Superlayer() % 2 == missingSL % 2)
-                                Segs2Road.add(s);
+                                Segs2Road.add(s); 
                         }
                     }
                 }
@@ -293,14 +296,18 @@ public class DCHBPostCluster extends DCEngine {
                         psegments.add(pSegment);
                 }
             }
+            
             segments.addAll(psegments);
             List<Cross> pcrosses = crossMake.find_Crosses(segments, dcDetector);
+            
             CrossList pcrosslist = crossLister.candCrossLists(event, pcrosses,
                     false,
                     super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST),
                     dcDetector,
                     null,
                     dcSwim);
+            pcrosslist.removeDuplicates(crosslist); 
+            
             List<Track> mistrkcands = trkcandFinder.getTrackCands(pcrosslist,
                     dcDetector,
                     Swimmer.getTorScale(),

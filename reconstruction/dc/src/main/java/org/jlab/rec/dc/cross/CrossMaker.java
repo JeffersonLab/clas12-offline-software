@@ -45,9 +45,9 @@ public class CrossMaker {
                             if (seg2.equals(seg1)) {
                                 continue;
                             } 
-                            if(seg1.associatedCrossId!=-1 && seg1.associatedCrossId==seg2.associatedCrossId) {
-                                continue;
-                            }
+                            //if(seg1.associatedCrossId!=-1 && seg1.associatedCrossId==seg2.associatedCrossId) {
+                            //    continue;
+                            //}
                             if (seg2.get_Sector() == s + 1 && seg2.get_RegionSlayer() == 2 && seg2.get_Region() == r + 1) {   //wire proximity                              
                                 if (seg1.isCloseTo(seg2) && seg2.hasConsistentSlope(seg1)) {
                                     Cross cross = new Cross(s + 1, r + 1, rid++);
@@ -59,7 +59,8 @@ public class CrossMaker {
                                     cross.set_Segment1(seg1c);
                                     cross.set_Segment2(seg2c);
                                     cross.set_CrossParams(DcDetector);
-                                    
+                                    seg1c.associatedCrossId = cross.get_Id();
+                                    seg2c.associatedCrossId = cross.get_Id();
                                     Point3D CS = cross.getCoordsInSector(cross.get_Point().x(), cross.get_Point().y(), cross.get_Point().z());
 
                                     if (CS.x() > 0) {

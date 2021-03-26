@@ -43,8 +43,16 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
     
     @Override
     public Object clone(){  
-      return (Segment)super.clone();  
-   }
+        Segment segClone = (Segment)super.clone();
+        segClone._ResiSum = this._ResiSum;                                                   // sum of residuals for hits in segment
+        segClone._TimeSum = this._TimeSum;                                                   // sum of times for hits in segment
+        segClone._fitPlane = this._fitPlane;
+        segClone._Trajectory = this._Trajectory;
+        segClone._Status = this._Status;
+        segClone._SegmentEndPoints = this._SegmentEndPoints;
+        segClone.associatedCrossId = this.associatedCrossId;
+        return segClone;
+    }
 	
     /**
      * Construct the segment from the fitted cluster.

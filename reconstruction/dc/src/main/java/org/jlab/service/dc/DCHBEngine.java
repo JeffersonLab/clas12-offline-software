@@ -308,6 +308,7 @@ public class DCHBEngine extends DCEngine {
                 dcDetector,
                 null,
                 dcSwim);
+        pcrosslist.removeDuplicates(crosslist);
         List<Track> mistrkcands = trkcandFinder.getTrackCands(pcrosslist,
                 dcDetector,
                 Swimmer.getTorScale(),
