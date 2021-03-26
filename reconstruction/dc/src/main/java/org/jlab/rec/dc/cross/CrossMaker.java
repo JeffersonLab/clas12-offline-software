@@ -49,10 +49,12 @@ public class CrossMaker {
                                 if (seg1.isCloseTo(seg2) && seg2.hasConsistentSlope(seg1)) {
                                     Cross cross = new Cross(s + 1, r + 1, rid++);
                                     cross.set_Id(seg1.get_Id()*1000+seg2.get_Id());
-                                    cross.add(seg1);
-                                    cross.add(seg2);
-                                    cross.set_Segment1(seg1);
-                                    cross.set_Segment2(seg2);
+                                    Segment seg1c = (Segment) seg1.clone();
+                                    Segment seg2c = (Segment) seg2.clone();
+                                    cross.add(seg1c);
+                                    cross.add(seg2c);
+                                    cross.set_Segment1(seg1c);
+                                    cross.set_Segment2(seg2c);
                                     cross.set_CrossParams(DcDetector);
                                     
                                     Point3D CS = cross.getCoordsInSector(cross.get_Point().x(), cross.get_Point().y(), cross.get_Point().z());

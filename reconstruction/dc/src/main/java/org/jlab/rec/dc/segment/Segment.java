@@ -19,7 +19,8 @@ import org.jlab.rec.dc.trajectory.SegmentTrajectory;
  * @author ziegler
  *
  */
-public class Segment extends ArrayList<FittedHit> implements Comparable<Segment> {
+public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>,
+        Cloneable {
 
     /**
      *
@@ -39,6 +40,12 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
     private int _Status = 1;
     private double[] _SegmentEndPoints;
     public int associatedCrossId = -1;
+    
+    @Override
+    public Object clone(){  
+      return (Segment)super.clone();  
+   }
+	
     /**
      * Construct the segment from the fitted cluster.
      *

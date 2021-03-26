@@ -54,7 +54,8 @@ public class DCHBPostCluster extends DCEngine {
             return true;
         }
         DataBank bank = event.getBank("RUN::config");
-       
+        if(Constants.DEBUG)
+            System.out.println("EVENT "+bank.getInt("event", 0));
         
         int newRun = bank.getInt("run", 0);
         if (newRun == 0)
@@ -70,7 +71,8 @@ public class DCHBPostCluster extends DCEngine {
         /* 2 */
         
         /* 5 */
-        
+        if(Constants.DEBUG)
+            System.out.println("HB AI "+this.aiAssist);
         /* 7 */
         RecoBankWriter rbc = new RecoBankWriter(this.aiAssist);
         /* 8 */

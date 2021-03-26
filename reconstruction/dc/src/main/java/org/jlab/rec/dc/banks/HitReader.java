@@ -280,7 +280,9 @@ public class HitReader {
         String bankName = "HitBasedTrkg::"+_names[0]+"Hits";
         String pointName = "HitBasedTrkg::"+_names[0]+"HitTrkId";
         String recBankName = "REC"+_names[2]+"::Event";
-        
+        if(Constants.DEBUG) {
+                System.out.println("Reading hb banks for "+_names[0]);
+        }
         if (!event.hasBank(bankName) || !event.hasBank(pointName) || event.getBank(pointName).rows()==0) {
             //    System.err.println("there is no HB dc bankAI for "+_names[0]);
             _HBHits = new ArrayList<>();
@@ -408,9 +410,14 @@ public class HitReader {
             hit.set_DocaErr(hit.get_PosErr(event, B[i], constants0, constants1, tde));
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
+            
             //if(hit.betaFlag == 0)
-            if(passHit(hit.betaFlag))
-                hits.add(hit);            
+            if(passHit(hit.betaFlag)) {
+                hits.add(hit);        
+                if(Constants.DEBUG) {
+                    System.out.println("Passing "+hit.printInfo()+" for "+_names[0]);
+                }
+            }
         }
 
         this.set_HBHits(hits);

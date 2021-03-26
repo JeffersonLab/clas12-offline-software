@@ -6,6 +6,7 @@ import org.jlab.clas.clas.math.FastMath;
 //import org.apache.commons.math3.util.FastMath;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 
@@ -404,7 +405,10 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
         double val_sl2 = this._seg2.get_fittedCluster().get_clusterLineFitSlope();
         double val_it1 = this._seg1.get_fittedCluster().get_clusterLineFitIntercept();
         double val_it2 = this._seg2.get_fittedCluster().get_clusterLineFitIntercept();
-
+        if(Constants.DEBUG)
+            System.out.println(this._seg1.printInfo()+this._seg2.printInfo()+" insterWire: seg1 "+new Point3D(val_sl1, val_it1,999).toString()+
+                    " seg2 "+new Point3D(val_sl2, val_it2,999).toString()
+                   );
         for(int i =0; i<this.get_Segment1().size(); i++) {
             this.calc_IntersectPlaneAtZ(this.get_Segment1().get(i).get_Z(), wy_over_wx, val_sl1, val_sl2, val_it1, val_it2, this.get_Segment1().get(i));
         }
@@ -415,10 +419,17 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
     }
    
     private void calc_IntersectPlaneAtZ(double z, double wy_over_wx, double val_sl1, double val_sl2, double val_it1, double val_it2, FittedHit hit) {
-       
+       if(Constants.DEBUG)
+            System.out.println(" .....insterWire: seg1 "+new Point3D(val_sl1, val_it1,z).toString()+
+                    " seg2 "+new Point3D(val_sl2, val_it2,z).toString()
+                   );
         double x = 0.5 * (val_it1 + val_it2) + 0.5 * z * (val_sl1 + val_sl2);
         double y = 0.5 * wy_over_wx * (val_it2 - val_it1) + 0.5 * wy_over_wx * z * (val_sl2 - val_sl1);
-        
+        if(Constants.DEBUG) {
+            if(hit.getCrossDirIntersWire()!=null && hit.getCrossDirIntersWire().x()!=x)
+                System.out.println("Already exists "+hit.getCrossDirIntersWire().toString()+" for "
+                +hit.printInfo() +"new "+new Point3D(x,y,z).toString());
+        }
         hit.setCrossDirIntersWire(new Point3D(x,y,z));
     } 
 }
