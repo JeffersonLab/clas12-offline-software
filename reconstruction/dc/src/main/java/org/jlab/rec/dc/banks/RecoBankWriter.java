@@ -66,30 +66,38 @@ public class RecoBankWriter {
 
     public DataBank fillHBHitsBank(DataEvent event, List<FittedHit> hitlist) {
         String name = "HitBasedTrkg::"+_names[0]+"Hits";
-        DataBank bank = event.createBank(name, hitlist.size());
-
+        
+        int rejCnt = 0;
         for (int i = 0; i < hitlist.size(); i++) {
-            if (hitlist.get(i).get_Id() == -1) {
+            if (hitlist.get(i).get_Id() == -1 || hitlist.get(i).get_Id()==0) {
+                rejCnt++;
+            }
+        }
+        DataBank bank = event.createBank(name, hitlist.size()-rejCnt);
+        rejCnt=0;
+        for (int i = 0; i < hitlist.size(); i++) {
+            if (hitlist.get(i).get_Id() == -1 || hitlist.get(i).get_Id()==0) {
+                rejCnt++;
                 continue;
         }
 
-        bank.setShort("id", i, (short) hitlist.get(i).get_Id());
-        bank.setShort("status", i, (short) 0);
-        bank.setByte("superlayer", i, (byte) hitlist.get(i).get_Superlayer());
-        bank.setByte("layer", i, (byte) hitlist.get(i).get_Layer());
-        bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
-        bank.setShort("wire", i, (short) hitlist.get(i).get_Wire());
-        bank.setFloat("docaError", i, (float) hitlist.get(i).get_DocaErr());
-        bank.setFloat("trkDoca", i, (float) hitlist.get(i).get_ClusFitDoca());
-        bank.setFloat("LocX", i, (float) hitlist.get(i).get_lX());
-        bank.setFloat("LocY", i, (float) hitlist.get(i).get_lY());
-        bank.setFloat("X", i, (float) hitlist.get(i).get_X());
-        bank.setFloat("Z", i, (float) hitlist.get(i).get_Z());
-        bank.setByte("LR", i, (byte) hitlist.get(i).get_LeftRightAmb());
-        bank.setShort("clusterID", i, (short) hitlist.get(i).get_AssociatedClusterID());
+        bank.setShort("id", i-rejCnt, (short) hitlist.get(i).get_Id());
+        bank.setShort("status", i-rejCnt, (short) 0);
+        bank.setByte("superlayer", i-rejCnt, (byte) hitlist.get(i).get_Superlayer());
+        bank.setByte("layer", i-rejCnt, (byte) hitlist.get(i).get_Layer());
+        bank.setByte("sector", i-rejCnt, (byte) hitlist.get(i).get_Sector());
+        bank.setShort("wire", i-rejCnt, (short) hitlist.get(i).get_Wire());
+        bank.setFloat("docaError", i-rejCnt, (float) hitlist.get(i).get_DocaErr());
+        bank.setFloat("trkDoca", i-rejCnt, (float) hitlist.get(i).get_ClusFitDoca());
+        bank.setFloat("LocX", i-rejCnt, (float) hitlist.get(i).get_lX());
+        bank.setFloat("LocY", i-rejCnt, (float) hitlist.get(i).get_lY());
+        bank.setFloat("X", i-rejCnt, (float) hitlist.get(i).get_X());
+        bank.setFloat("Z", i-rejCnt, (float) hitlist.get(i).get_Z());
+        bank.setByte("LR", i-rejCnt, (byte) hitlist.get(i).get_LeftRightAmb());
+        bank.setShort("clusterID", i-rejCnt, (short) hitlist.get(i).get_AssociatedClusterID());
         //bank.setByte("trkID", i, (byte) hitlist.get(i).get_AssociatedHBTrackID());
 
-        bank.setInt("TDC",i,hitlist.get(i).get_TDC());
+        bank.setInt("TDC",i-rejCnt,hitlist.get(i).get_TDC());
         
     }
 
@@ -99,34 +107,44 @@ public class RecoBankWriter {
     
     public DataBank fillHBHitsTrkIdBank(DataEvent event, List<FittedHit> hitlist) {
         String name = "HitBasedTrkg::"+_names[0]+"HitTrkId"; 
-        DataBank bank = event.createBank(name, hitlist.size());
+        int rejCnt = 0;
+        for (int i = 0; i < hitlist.size(); i++) {
+            if (hitlist.get(i).get_AssociatedHBTrackID() == -1 || hitlist.get(i).get_Id()==0 
+                    || hitlist.get(i).getTFlight()==0) {
+                rejCnt++;
+            }
+        }
+        DataBank bank = event.createBank(name, hitlist.size()-rejCnt);
+        rejCnt=0;
         for (int i = 0; i < hitlist.size(); i++) {
             //output only for HOTs
-            if (hitlist.get(i).get_AssociatedHBTrackID() == -1) {
+            if (hitlist.get(i).get_AssociatedHBTrackID() == -1 || hitlist.get(i).get_Id()==0 
+                    || hitlist.get(i).getTFlight()==0) {
+                rejCnt++;
                 continue;
             } 
-            bank.setShort("id", i, (short) hitlist.get(i).get_Id());
-            bank.setShort("tid", i, (short) hitlist.get(i).get_AssociatedHBTrackID());
-            bank.setFloat("B", i, (float) hitlist.get(i).getB());
-            bank.setFloat("TProp", i, (float) hitlist.get(i).getTProp());
-            bank.setFloat("TFlight", i, (float) hitlist.get(i).getTFlight());
+            bank.setShort("id", i-rejCnt, (short) hitlist.get(i).get_Id());
+            bank.setShort("tid", i-rejCnt, (short) hitlist.get(i).get_AssociatedHBTrackID());
+            bank.setFloat("B", i-rejCnt, (float) hitlist.get(i).getB());
+            bank.setFloat("TProp", i-rejCnt, (float) hitlist.get(i).getTProp());
+            bank.setFloat("TFlight", i-rejCnt, (float) hitlist.get(i).getTFlight());
             if(i>0 && hitlist.get(i).get_Sector()==hitlist.get(i-1).get_Sector() && 
                      hitlist.get(i).get_Superlayer()==hitlist.get(i-1).get_Superlayer() && 
                      hitlist.get(i).get_Layer()==hitlist.get(i-1).get_Layer() && 
                      Math.abs(hitlist.get(i).get_Wire()-hitlist.get(i-1).get_Wire())==1) {// fix for double hits
-                bank.setFloat("B", i, (float) hitlist.get(i-1).getB());
-                bank.setFloat("TProp", i, (float) hitlist.get(i-1).getTProp());
-                bank.setFloat("TFlight", i, (float) hitlist.get(i-1).getTFlight());
+                bank.setFloat("B", i-rejCnt, (float) hitlist.get(i-1).getB());
+                bank.setFloat("TProp", i-rejCnt, (float) hitlist.get(i-1).getTProp());
+                bank.setFloat("TFlight", i-rejCnt, (float) hitlist.get(i-1).getTFlight());
             }
             if(hitlist.get(i).get_AssociatedHBTrackID()>-1 && !event.hasBank("MC::Particle")) {
-                bank.setFloat("TProp", i, (float) hitlist.get(i).getSignalPropagTimeAlongWire());
-                bank.setFloat("TFlight", i, (float) hitlist.get(i).getSignalTimeOfFlight());
+                bank.setFloat("TProp", i-rejCnt, (float) hitlist.get(i).getSignalPropagTimeAlongWire());
+                bank.setFloat("TFlight", i-rejCnt, (float) hitlist.get(i).getSignalTimeOfFlight());
                 if(i>0 && hitlist.get(i).get_Sector()==hitlist.get(i-1).get_Sector() && 
                      hitlist.get(i).get_Superlayer()==hitlist.get(i-1).get_Superlayer() && 
                      hitlist.get(i).get_Layer()==hitlist.get(i-1).get_Layer() && 
                      Math.abs(hitlist.get(i).get_Wire()-hitlist.get(i-1).get_Wire())==1) {// fix for double hits
-                    bank.setFloat("TProp", i, (float) hitlist.get(i-1).getSignalPropagTimeAlongWire());
-                    bank.setFloat("TFlight", i, (float) hitlist.get(i-1).getSignalTimeOfFlight());
+                    bank.setFloat("TProp", i-rejCnt, (float) hitlist.get(i-1).getSignalPropagTimeAlongWire());
+                    bank.setFloat("TFlight", i-rejCnt, (float) hitlist.get(i-1).getSignalTimeOfFlight());
                 }
             }
         }
@@ -799,6 +817,8 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
             if(candlist.get(i).getSingleSuperlayer()!=null) {
                 bank.setShort("Cluster"+String.valueOf(candlist.get(i).getSingleSuperlayer().get_Superlayer())+"_ID", 
                         i, (short) candlist.get(i).getSingleSuperlayer().get_fittedCluster().get_Id());
+                System.out.println("Single Superlayer "+
+                        candlist.get(i).getSingleSuperlayer().get_Superlayer()+" id= "+candlist.get(i).getSingleSuperlayer().get_fittedCluster().get_Id());
             }
             bank.setFloat("chi2", i, (float) candlist.get(i).get_FitChi2());
             bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
