@@ -45,6 +45,9 @@ public class CrossMaker {
                             if (seg2.equals(seg1)) {
                                 continue;
                             } 
+                            if(seg1.associatedCrossId!=-1 && seg1.associatedCrossId==seg2.associatedCrossId) {
+                                continue;
+                            }
                             if (seg2.get_Sector() == s + 1 && seg2.get_RegionSlayer() == 2 && seg2.get_Region() == r + 1) {   //wire proximity                              
                                 if (seg1.isCloseTo(seg2) && seg2.hasConsistentSlope(seg1)) {
                                     Cross cross = new Cross(s + 1, r + 1, rid++);
