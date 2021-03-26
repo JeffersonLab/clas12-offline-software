@@ -601,6 +601,16 @@ public class TrackCandListFinder {
     }
 
     public void removeOverlappingTracks(List<Track> trkcands) {
+        if(Constants.DEBUG) {
+            System.out.println("Found "+trkcands.size()+" HB seeds ");
+            for(int i = 0; i< trkcands.size(); i++) {
+                System.out.println("cand "+i);
+                for(Cross c : trkcands.get(i)) {
+                    System.out.println(c.printInfo());
+                }
+                System.out.println("------------------------------------------------------------------ ");
+            }
+        }
         Map<Integer, Track> selectedTracksMap = new HashMap<Integer, Track>();
         List<Track> list = new ArrayList<Track>();
         int size = trkcands.size();
@@ -619,8 +629,18 @@ public class TrackCandListFinder {
         for (Map.Entry<Integer, Track> entry : selectedTracksMap.entrySet()) {
             trkcands.add(entry.getValue());
         }
+        if(Constants.DEBUG) {
+            System.out.println("After Overlap Remvr "+trkcands.size()+" HB seeds ");
+            for(int i = 0; i< trkcands.size(); i++) {
+                System.out.println("cand "+i);
+                for(Cross c : trkcands.get(i)) {
+                    System.out.println(c.printInfo());
+                }
+                System.out.println("------------------------------------------------------------------ ");
+            }
+        }
     }
-
+    
 //    public void removeOverlappingTracks(List<Track> trkcands) { 
 //        List<Track> selectedTracks = new ArrayList<Track>();
 //        List<Track> list = new ArrayList<Track>();

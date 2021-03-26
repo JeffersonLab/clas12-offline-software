@@ -262,7 +262,7 @@ public class DCHBPostCluster extends DCEngine {
             RoadFinder rf = new RoadFinder();
             List<Road> allRoads = rf.findRoads(segments, dcDetector);
             List<Segment> Segs2Road = new ArrayList<>();
-            for (Road r : allRoads) {
+            for (Road r : allRoads) { 
                 Segs2Road.clear();
                 int missingSL = -1;
                 for (int ri = 0; ri < 3; ri++) {
@@ -328,7 +328,18 @@ public class DCHBPostCluster extends DCEngine {
                     trkId++;
                 }
             }
+        
             trkcands.addAll(mistrkcands);
+            if(Constants.DEBUG) {
+            System.out.println("Found after 5STg "+mistrkcands.size()+" HB seeds ");
+                for(int i = 0; i< trkcands.size(); i++) {
+                    System.out.println("cand "+i);
+                    for(Cross c : trkcands.get(i)) {
+                        System.out.println(c.printInfo());
+                    }
+                    System.out.println("------------------------------------------------------------------ ");
+                }
+            }
             //gather all the hits for pointer bank creation
             for (Track trk : trkcands) {
                 for (Cross c : trk) {
