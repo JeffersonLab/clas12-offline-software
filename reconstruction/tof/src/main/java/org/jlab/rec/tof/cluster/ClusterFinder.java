@@ -17,11 +17,9 @@ import org.jlab.utils.groups.IndexedTable;
  */
 public class ClusterFinder {
 
-    private double minEnergy   = Constants.MINENERGY;
-    private double maxDistance = 20; // default set to 20 cm
-    private double deltaTime   = 10; // default set to 10 ns
-    private int    maxSize     = 2 ; // default set to cluster size of 2
     private IndexedTable clusterPar = null;
+    private IndexedTable timeRes    = null;
+    private IndexedTable vEff       = null;
     
     private boolean debug = false;
     
@@ -33,11 +31,77 @@ public class ClusterFinder {
         this.clusterPar=clusterPar;
     }
 
+    public ClusterFinder(IndexedTable clusterPar, IndexedTable timeRes, IndexedTable vEff) {
+        this.clusterPar=clusterPar;
+        this.timeRes=timeRes;
+        this.vEff=vEff;
+    }
 
     public void setDebug(boolean debug) {
         this.debug = debug;
     }
 
+    private double getMinEnergy(int sector, int layer) {
+        double eMin = Constants.MINENERGY;
+        // if db tables are supplied get cluster parameters from there
+        if(this.clusterPar!=null) {
+            eMin  = clusterPar.getDoubleValue("minEnergy", sector, layer, 0);
+        }
+        if(debug) System.out.println("Setting cluster hit minimum energy to " + eMin);
+        return eMin;
+    }
+    
+    private double getMaxSize(int sector, int layer) {
+        // default cluster max size is 2
+        double size = 2;
+        // if db tables are supplied get cluster parameters from there
+        if(this.clusterPar!=null) {
+            size   = clusterPar.getDoubleValue("maxClusterSize", sector, layer, 0);
+        }
+        if(debug) System.out.println("Setting cluster max size to " + size);
+        return size;
+    }
+    
+    private double getMaxDistance(int sector, int layer, int component1, int component2) {
+        double deltaY = 20; // 20 cm
+        // if db tables are supplied get cluster parameters from there
+        if(this.clusterPar!=null && (this.timeRes==null || this.vEff==null)) {
+           deltaY = clusterPar.getDoubleValue("maxDistance", sector, layer, 0);
+        }
+        // if the time resolutions and effective velocity are supplied, recalculte cluster parameters
+        else if(this.timeRes!=null && this.vEff!=null) {
+           double tres1 = this.timeRes.getDoubleValue("tres", sector, layer, component1);
+           double tres2 = this.timeRes.getDoubleValue("tres", sector, layer, component2);
+           double veff1 = (this.vEff.getDoubleValue("veff_left",  sector, layer, component1)+
+                           this.vEff.getDoubleValue("veff_right", sector, layer, component1))/2;
+           double veff2 = (this.vEff.getDoubleValue("veff_left",  sector, layer, component2)+
+                           this.vEff.getDoubleValue("veff_right", sector, layer, component2))/2;
+           double yres1 = veff1*tres1;        
+           double yres2 = veff2*tres2;        
+           double deltaYRes = Math.sqrt(yres1*yres1+yres2*yres2);
+           deltaY = deltaYRes*clusterPar.getDoubleValue("maxDistance", sector, layer, 0);
+        }
+        if(debug) System.out.println("Setting cluster deltaY to " + deltaY);
+        return deltaY;                                   
+    }
+    
+    private double getDeltaTime(int sector, int layer, int component1, int component2) {
+        double deltaT = 10; // 10 ns
+        // if db tables are supplied get cluster parameters from there
+        if(this.clusterPar!=null && this.timeRes==null) {
+           deltaT = clusterPar.getDoubleValue("maxTimeDifference", sector, layer, 0);
+        }
+        // if the time resolutions and effective velocity are supplied, recalculte cluster parameters
+        else if(this.timeRes!=null) {
+           double tres1 = this.timeRes.getDoubleValue("tres", sector, layer, component1);
+           double tres2 = this.timeRes.getDoubleValue("tres", sector, layer, component2);
+           double deltaTRes = Math.sqrt(tres1*tres1+tres2*tres2);
+           deltaT = deltaTRes*clusterPar.getDoubleValue("maxTimeDifference", sector, layer, 0);
+        }
+        if(debug) System.out.println("Setting cluster deltaT to " + deltaT);
+        return deltaT;                                   
+    }
+    
     
     public ArrayList<Cluster> findClusters(List<?> hits2, int nsectors, int npanels, int[] npaddles) {
         // allocate list of hits for each sector and layer
@@ -87,14 +151,6 @@ public class ClusterFinder {
             for (int s = 1; s <= nsectors; s++) {
                 for (int l = 1; l <= npanels; l++) {
                     if(HitList.hasItem(s,l)) {
-                        // use constants from CCDB if available to set cluster parameters
-                        if(this.clusterPar!=null) {
-                            this.minEnergy   = clusterPar.getDoubleValue("minEnergy", s, l, 0);
-                            this.maxDistance = clusterPar.getDoubleValue("maxDistance", s, l, 0);
-                            this.deltaTime   = clusterPar.getDoubleValue("maxTimeDifference", s, l, 0);
-                            this.maxSize     = clusterPar.getIntValue("maxClusterSize", s, l, 0);
-                            if(debug) System.out.println("Setting cluster parameters to " + this.minEnergy + "/" + this.maxDistance + " " + this.deltaTime + "/" + this.maxSize);
-                        }
                         // get hit list for given sector and layer
                         ArrayList<AHit> hitList = HitList.getItem(s,l);
                         for(int i=0; i<hitList.size(); i++) {
@@ -102,7 +158,7 @@ public class ClusterFinder {
                             AHit hit = hitList.get(i);
                             hit.set_AssociatedClusterID(0);
                             // reject hits below the selected threshold
-                            if (hit.get_Energy() < this.minEnergy) {
+                            if (hit.get_Energy() < this.getMinEnergy(s, l)) {
                                 continue;
                             }
                             // loop over all clusters 
@@ -110,13 +166,13 @@ public class ClusterFinder {
                             for(int j=0; j<clusters.size(); j++) {
                                 Cluster cluster = clusters.get(j);
                                 // if cluster siz is less than the max allowed
-                                if(cluster.size()<this.maxSize) {
+                                if(cluster.size()<this.getMaxSize(s, l)) {
                                     for(int k=0; k<cluster.size(); k++) {
                                         // check if hit can be associated to them
                                         AHit clusterHit=cluster.get(k);
                                         if(hit.isAdjacent(clusterHit)) {
-                                            if(Math.abs(hit.get_y()-clusterHit.get_y())<this.maxDistance &&
-                                               Math.abs(hit.get_t()-clusterHit.get_t())<this.deltaTime) {
+                                            if(Math.abs(hit.get_y()-clusterHit.get_y())<this.getMaxDistance(s, l, hit.get_Paddle(), clusterHit.get_Paddle()) &&
+                                               Math.abs(hit.get_t()-clusterHit.get_t())<this.getDeltaTime(s, l, hit.get_Paddle(), clusterHit.get_Paddle())) {
                                                 cluster.add(hit);
                                                 hit.set_AssociatedClusterID(cluster.get_Id());
                                                 if(debug) System.out.println("Adding hit " + hit.get_Sector() + " " + hit.get_Panel() + " " + hit.get_Paddle() 
