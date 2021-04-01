@@ -174,21 +174,19 @@ public class RecoBankWriter {
                 bank.setShort("size", i, (short) cluslist.get(i).size());
                 bank.setByte("sector", i, (byte) cluslist.get(i).get_Sector());
                 bank.setByte("layer", i, (byte) cluslist.get(i).get_Panel());
-                bank.setShort("component", i, (short) cluslist.get(i).get(0)
-                        .get_Paddle()); // paddle id of the cluster seed
+                bank.setShort("component", i, (short) cluslist.get(i).get(0).get_Paddle()); // paddle id of the cluster seed
                 int status = 0;
                 if (Integer.parseInt(cluslist.get(i).get_StatusWord()) == 1111) {
                     status = 1;
                 }
                 bank.setShort("status", i, (short) status);
                 bank.setFloat("energy", i, (float) cluslist.get(i).get_Energy());
-                bank.setFloat("energy_unc", i, (float) cluslist.get(i)
-                        .get_EnergyUnc());
-                bank.setFloat("time", i, (float) cluslist.get(i).get_t());
-                bank.setFloat("time_unc", i, (float) cluslist.get(i).get_tUnc());
-                bank.setFloat("x", i, (float) cluslist.get(i).get_x());
-                bank.setFloat("y", i, (float) cluslist.get(i).get_y());
-                bank.setFloat("z", i, (float) cluslist.get(i).get_z());
+                bank.setFloat("energy_unc", i, (float) cluslist.get(i).get_EnergyUnc());               
+                bank.setFloat("time", i, (float) cluslist.get(i).get(0).get_t());
+                bank.setFloat("time_unc", i, (float) cluslist.get(i).get(0).get_tUnc());            
+                bank.setFloat("x", i, (float) cluslist.get(i).get(0).get_Position().x());
+                bank.setFloat("y", i, (float) cluslist.get(i).get(0).get_Position().y());
+                bank.setFloat("z", i, (float) cluslist.get(i).get(0).get_Position().z());										
                 bank.setFloat("pathLengthThruBar", i, (float) cluslist.get(i).get_PathLengthThruBar());										
             }
 
