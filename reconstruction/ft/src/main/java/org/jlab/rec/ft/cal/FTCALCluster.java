@@ -14,18 +14,8 @@ public class FTCALCluster extends ArrayList<FTCALHit> {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private int _clusID;			   			// cluster ID
-//	private int _clusSize;						// number of crystals in the cluster
-//	private double _clusX, _clusY;       		// <X>, <Y> moments of the cluster
-//	private double _clusXX, _clusYY;     		// <XX>, <YY> moments of the cluster
-//	private double _clusSigmaX, _clusSigmaY; 	// Sigma of the cluster in X, Y
-//	private double _clusRadius; 				// cluster Radius 
-//	private double _clusTime;      				// centroid Time value
-//	private double _clusEnergy;			        // total energy of the cluster including correction
-//	private double _clusRecEnergy;				// reconstructed cluster Energy
-//	private double _clusMaxEnergy;				// cluster Max Energy
-//	private double _clusTheta, _clusPhi;		// cluster Polar and Azimuth angles in the lab
-	
+	private int     _clusID;		// cluster ID
+         private boolean _clusStat=true;       // cluster status flag (true==good, false==bad)
 	
 	// constructor
 	public FTCALCluster(int cid) {
@@ -192,15 +182,19 @@ public class FTCALCluster extends ArrayList<FTCALHit> {
             return phi;
 	}
 
-	public boolean isgoodCluster(IndexedTable clusterTable) {
+	public void setStatus(IndexedTable clusterTable) {
             if(this.getSize()  > clusterTable.getDoubleValue("cluster_min_size", 1,1,0) &&
                this.getEnergy()> clusterTable.getDoubleValue("cluster_min_energy", 1,1,0)/1000) {
-                    return true;
+               this._clusStat=true;
             }
             else {
-                    return false;
+               this._clusStat=false;
             }
-	}	
+	}
+        
+         public boolean getStatus() {
+             return this._clusStat;
+         }
 	
         private double weight(FTCALHit hit, double clusEnergy) {
             return Math.max(0., (3.45+Math.log(hit.get_Edep()/clusEnergy)));
@@ -219,20 +213,27 @@ public class FTCALCluster extends ArrayList<FTCALHit> {
             return addFlag;
         }
         
-        public void showCluster() {
-            System.out.println("\nCluster = "  + this._clusID); 
-            System.out.println("Size = "    + this.getSize() + 
-                               "\tE = "     + this.getEnergy() + 
-                               "\tTime = "  + this.getTime() + 
-                               "\tTheta = " + this.getTheta()  + 
-                               "\tPhi = "   + this.getPhi());
+        @Override
+        public String  toString(){
+            StringBuilder str = new StringBuilder();
+
+            str.append(String.format("Cluster: %4d\n",   this.getID()));            
+            str.append(String.format("\tStatus:  %b",    this.getStatus()));            
+            str.append(String.format("\tSize: %4d",      this.getSize()));
+            str.append(String.format("\tE: %7.3f",       this.getEnergy())); 
+            str.append(String.format("\tTime: %7.3f",    this.getTime())); 
+            str.append(String.format("\tTheta: %7.3f",   this.getTheta())); 
+            str.append(String.format("\tPhi: %7.3f\n",   this.getPhi()));
             for(int j = 0; j< this.size(); j++) {
-                System.out.println("hit # " + j + "\t" + this.get(j).get_IDX() + "\t" + this.get(j).get_IDY() + "\t" + this.get(j).get_Edep());
+                str.append(String.format("\thit #%d\t%d\t%d\t%7.3f\n", j, this.get(j).get_IDX(), this.get(j).get_IDY(), this.get(j).get_Edep()));
             }
+            return str.toString();
         }
     
-}
+        public void show() {
+            System.out.println(this.toString());
+        }
+}   
 	
 
 	
-

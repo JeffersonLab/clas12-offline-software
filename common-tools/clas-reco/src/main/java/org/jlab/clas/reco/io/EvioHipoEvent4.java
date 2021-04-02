@@ -573,6 +573,8 @@ public class EvioHipoEvent4 {
             int irow=0;
             for(int k = 0; k < bankNames.length; k++){
                 if(evioEvent.hasBank(bankNames[k]+"::true")==true){
+                    int offset = 0;
+                    if(bankNames[k].equals("EC") && evioEvent.hasBank("PCAL::dgtz")) offset = evioEvent.getBank("PCAL::dgtz").rows();
                     EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank(bankNames[k]+"::true");
                     for(int i = 0; i < evioBank.rows(); i++){
                         hipoBank.putByte("detector", irow, (byte)  bankTypes[k].getDetectorId());
@@ -601,7 +603,7 @@ public class EvioHipoEvent4 {
                         hipoBank.putFloat("avgT",    irow, (float) evioBank.getDouble("avgT",i));
                         hipoBank.putInt("nsteps",    irow,         evioBank.getInt("nsteps",i));
                         hipoBank.putInt("procID",    irow,         evioBank.getInt("procID",i));
-                        hipoBank.putInt("hitn",      irow,         evioBank.getInt("hitn",i));
+                        hipoBank.putInt("hitn",      irow,         evioBank.getInt("hitn",i)+offset);
                         irow++;
                     }
                 }

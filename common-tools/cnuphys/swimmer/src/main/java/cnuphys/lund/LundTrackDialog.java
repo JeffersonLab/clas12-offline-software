@@ -25,17 +25,13 @@ import javax.swing.JTextField;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
-import org.jlab.clas.clas.math.FastMath;
-import cnuphys.magfield.FieldProbe;
-import cnuphys.rk4.RungeKuttaException;
-import cnuphys.swim.DefaultSwimStopper;
+import cnuphys.adaptiveSwim.AdaptiveSwimException;
+import cnuphys.adaptiveSwim.AdaptiveSwimResult;
+import cnuphys.adaptiveSwim.AdaptiveSwimmer;
+import cnuphys.magfield.FastMath;
 import cnuphys.swim.SwimTrajectory;
-import cnuphys.swim.Swimmer;
 import cnuphys.swim.Swimming;
-import cnuphys.swimZ.SwimZ;
-import cnuphys.swimZ.SwimZException;
 import cnuphys.swimZ.SwimZResult;
-import cnuphys.swimZ.SwimZStateVector;
 
 @SuppressWarnings("serial")
 public class LundTrackDialog extends JDialog {
@@ -81,20 +77,12 @@ public class LundTrackDialog extends JDialog {
 	// text field for initial phi
 	private JTextField _phi;
 
-	// text field for cutoff
-	private JTextField _maxR;
-
 	// use standard cutoff
 	private JRadioButton _standardCutoff;
 
 	// fixed z cutoff
 	private JRadioButton _fixedZCutoff;
 
-	// use traditional swimmer
-	private JRadioButton _traditionalSwimmer;
-
-	// swimZ swimmer
-	private JRadioButton _swimZ;
 
 	// fixed Z value
 	private JTextField _fixedZ;
@@ -132,9 +120,8 @@ public class LundTrackDialog extends JDialog {
 	/**
 	 * Create a dialog used to swim a particle
 	 * 
-	 * @param swimmer
-	 *            Object that will swim (integrate) the particle through B
-	 *            field.
+	 * @param swimmer Object that will swim (integrate) the particle through B
+	 *                field.
 	 */
 	private LundTrackDialog() {
 		setTitle("Swim a Lund Particle");
@@ -229,10 +216,8 @@ public class LundTrackDialog extends JDialog {
 	 */
 	private void doCommonSwim() {
 		
-		Swimmer swimmer = new Swimmer();
+		AdaptiveSwimmer swimmer = new AdaptiveSwimmer();
 		
-		swimmer.getProbe().getField().printConfiguration(System.out);
-
 		try {
 			LundId lid = _lundComboBox.getSelectedId();
 
@@ -240,74 +225,43 @@ public class LundTrackDialog extends JDialog {
 			double xo = Double.parseDouble(_vertexX.getText()) / 100.;
 			double yo = Double.parseDouble(_vertexY.getText()) / 100.;
 			double zo = Double.parseDouble(_vertexZ.getText()) / 100.;
+			double momentum = Double.parseDouble(_momentumTextField.getText());
 			double theta = Double.parseDouble(_theta.getText());
 			double phi = Double.parseDouble(_phi.getText());
-			double rMax = Double.parseDouble(_maxR.getText());
-			double momentum = Double.parseDouble(_momentumTextField.getText());
-
-			// create a stopper
-			DefaultSwimStopper stopper = new DefaultSwimStopper(rMax);
-
+			
 			double stepSize = 5e-3; // m
 			double maxPathLen = 8.0; // m
-			double hdata[] = new double[3];
+			
+			double eps = 1.0e-6;
+			
+			AdaptiveSwimResult result = new AdaptiveSwimResult(true);
+			
+			if (_standardCutoff.isSelected()) {
+				swimmer.swim(lid.getCharge(), xo, yo, zo, momentum, theta, phi, maxPathLen, stepSize, eps, result);
+				SwimTrajectory traj = result.getTrajectory();
+				traj.setLundId(lid);
+				result.printOut(System.out, "RESULT from base swim");
 
-			try {
-				if (_standardCutoff.isSelected()) {
-					SwimTrajectory traj = swimmer.swim(lid.getCharge(), xo, yo, zo, momentum, theta, phi, stopper, 0,
-							maxPathLen, stepSize, Swimmer.CLAS_Tolerance, hdata);
-					traj.setLundId(lid);
-
-					double lastY[] = traj.lastElement();
-					printSummary("\nRESULT from adaptive stepsize method with storage and err vector", traj.size(),
-							momentum, lastY, hdata);
-
-					Swimming.addMCTrajectory(traj);
-				} else {
-
-					System.err.println("Fixed Z cutoff");
-
-					// which algorithm
-
-					double ztarget = Double.parseDouble(_fixedZ.getText()); // meters
-
-					SwimTrajectory traj = null;
-					if (_swimZ.isSelected()) {
-						System.err.println("SwimZ swimmer");
-						SwimZStateVector start = new SwimZStateVector(xo * 100, yo * 100, zo * 100, momentum, theta,
-								phi);
-						SwimZ sz = new SwimZ();
-
-						double adaptiveInitStepSize = 0.5;
-
-						SwimZResult result = sz.adaptiveRK(lid.getCharge(), momentum, start, ztarget,
-								adaptiveInitStepSize, hdata);
-						partialReport(result, "Z ADAPTIVE");
-						traj = result.toSwimTrajectory();
-
-					} else {
-						System.err.println("Traditional swimmer");
-						ztarget /= 100; // meters
-						// convert accuracy from microns to meters
-						double accuracy = Double.parseDouble(_accuracy.getText()) / 1.0e6;
-						traj = swimmer.swim(lid.getCharge(), xo, yo, zo, momentum, theta, phi, ztarget, accuracy,
-								maxPathLen, stepSize, Swimmer.CLAS_Tolerance, hdata);
-						traj.setLundId(lid);
-						double lastY[] = traj.lastElement();
-						printSummary("\nresult from adaptive stepsize method with storage and Z cutoff at " + ztarget,
-								traj.size(), momentum, lastY, hdata);
-					}
-					if (traj != null) {
-						Swimming.addMCTrajectory(traj);
-					}
-				}
-
-			} catch (RungeKuttaException e) {
-				e.printStackTrace();
+				Swimming.addMCTrajectory(traj);
 			}
-		} catch (SwimZException e) {
-			System.err.println("Swimming failed. See the log for more details.");
+			else {
+				// convert accuracy from microns to meters
+				double accuracy = Double.parseDouble(_accuracy.getText()) / 1.0e6;
+				double ztarget = Double.parseDouble(_fixedZ.getText())/100; // meters
+				swimmer.swimZ(lid.getCharge(), xo, yo, zo, momentum, theta, phi, ztarget, accuracy,  maxPathLen, stepSize, eps, result);
+				SwimTrajectory traj = result.getTrajectory();
+				traj.setLundId(lid);
+				result.printOut(System.out, "RESULT from fixed Z swim");
+
+				Swimming.addMCTrajectory(traj);
+			}
+
 		}
+		catch (AdaptiveSwimException e) {
+			e.printStackTrace();
+		}
+		
+
 	}
 
 	private static void partialReport(SwimZResult result, String name) {
@@ -482,19 +436,12 @@ public class LundTrackDialog extends JDialog {
 		Box box = Box.createVerticalBox();
 		box.add(cutoffType());
 
-		_maxR = new JTextField(8);
 		_fixedZ = new JTextField(8);
 		_accuracy = new JTextField(8);
 
-		_maxR.setText("7.0");
 		_fixedZ.setText("575.0");
 		_accuracy.setText("10");
 
-		_fixedZ.setEnabled(false);
-		_accuracy.setEnabled(false);
-
-		box.add(labeledTextField("Max Radial Coordinate", _maxR, "m", -1));
-		box.add(Box.createVerticalStrut(5));
 		box.add(Box.createVerticalStrut(5));
 		box.add(labeledTextField("      Stopping Z", _fixedZ, "cm", -1));
 		box.add(Box.createVerticalStrut(5));
@@ -509,23 +456,15 @@ public class LundTrackDialog extends JDialog {
 	public void setFixedZSelected(boolean selected) {
 		_standardCutoff.setSelected(!selected);
 		_fixedZCutoff.setSelected(selected);
-		_swimZ.setEnabled(_fixedZCutoff.isSelected());
-		_accuracy.setEnabled(_fixedZCutoff.isSelected());
 	}
 
 	private JPanel cutoffType() {
-		_traditionalSwimmer = new JRadioButton("Old Swimmer");
-		_swimZ = new JRadioButton("SwimZ");
-		_traditionalSwimmer.setSelected(true);
 
 		_standardCutoff = new JRadioButton("Standard");
 		_fixedZCutoff = new JRadioButton("Fixed Z");
 		_standardCutoff.setSelected(true);
-		_swimZ.setEnabled(_fixedZCutoff.isSelected());
 
 		ButtonGroup bga = new ButtonGroup();
-		bga.add(_traditionalSwimmer);
-		bga.add(_swimZ);
 
 		ButtonGroup bg = new ButtonGroup();
 		bg.add(_standardCutoff);
@@ -535,14 +474,6 @@ public class LundTrackDialog extends JDialog {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				_maxR.setEnabled(_standardCutoff.isSelected());
-				_accuracy.setEnabled(_fixedZCutoff.isSelected());
-				_fixedZ.setEnabled(_fixedZCutoff.isSelected());
-				_swimZ.setEnabled(_fixedZCutoff.isSelected());
-
-				if (!_fixedZCutoff.isSelected()) {
-					_traditionalSwimmer.setSelected(true);
-				}
 			}
 
 		};
@@ -554,14 +485,9 @@ public class LundTrackDialog extends JDialog {
 		spanel.add(_standardCutoff);
 		spanel.add(_fixedZCutoff);
 
-		JPanel spanel2 = new JPanel();
-		spanel2.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
-		spanel2.add(_traditionalSwimmer);
-		spanel2.add(_swimZ);
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		panel.add(spanel2);
 		panel.add(spanel);
 		return panel;
 	}
@@ -644,12 +570,9 @@ public class LundTrackDialog extends JDialog {
 	/**
 	 * Create a nice padded panel.
 	 * 
-	 * @param hpad
-	 *            the pixel pad on the left and right
-	 * @param vpad
-	 *            the pixel pad on the top and bottom
-	 * @param component
-	 *            the main component placed in the center.
+	 * @param hpad      the pixel pad on the left and right
+	 * @param vpad      the pixel pad on the top and bottom
+	 * @param component the main component placed in the center.
 	 * @return the padded panel
 	 */
 	public static JPanel paddedPanel(int hpad, int vpad, Component component) {
@@ -672,12 +595,9 @@ public class LundTrackDialog extends JDialog {
 	/**
 	 * Center a component.
 	 * 
-	 * @param component
-	 *            The Component to center.
-	 * @param dh
-	 *            offset from horizontal center.
-	 * @param dv
-	 *            offset from vertical center.
+	 * @param component The Component to center.
+	 * @param dh        offset from horizontal center.
+	 * @param dv        offset from vertical center.
 	 */
 	public static void centerComponent(Component component) {
 

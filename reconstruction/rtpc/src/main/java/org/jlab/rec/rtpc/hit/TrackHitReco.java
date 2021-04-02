@@ -15,50 +15,14 @@ import java.util.List;
 
 public class TrackHitReco {
     
-    //MAGBOLTZ PARAMETERS DO NOT TOUCH
-    /*final private double a_t1 = -2.48491E-4;
-    final private double a_t2 = 2.21413E-4;
-    final private double a_t3 = -3.11195E-3;
-    final private double a_t4 = -2.75206E-1;
-    final private double a_t5 = 1.74281E3;
-    private double a_t;
 
-    final private double b_t1 = 2.48873E-5;
-    final private double b_t2 = -1.19976E-4;
-    final private double b_t3 = -3.75962E-3;
-    final private double b_t4 = 5.33100E-2;
-    final private double b_t5 = -1.25647E2;
-    private double b_t;
-    
-    final private double a_phi1 = -3.32718E-8;
-    final private double a_phi2 = 1.92110E-7;
-    final private double a_phi3 = 2.16919E-6;
-    final private double a_phi4 = -8.10207E-5;
-    final private double a_phi5 = 1.68481E-1;
-    private double a_phi;
-    
-    final private double b_phi1 = -3.23019E-9;
-    final private double b_phi2 = -6.92075E-8;
-    final private double b_phi3 = 1.24731E-5;
-    final private double b_phi4 = 2.57684E-5;
-    final private double b_phi5 = 2.10680E-2;
-    private double b_phi;
-
-    final private double t_2GEM2 = 296.082;
-    final private double t_2GEM3 = 296.131;
-    final private double t_2PAD = 399.09;
-    final private double t_gap = t_2GEM2 + t_2GEM3 + t_2PAD;
-
-    final private double phi_2GEM2 = 0.0492538;
-    final private double phi_2GEM3 = 0.0470817;
-    final private double phi_2PAD = 0.0612122;
-    final private double phi_gap = phi_2GEM2 + phi_2GEM3 + phi_2PAD;
-    */
     
     private double larget;
     private double smallt;
     private HitVector smallthit;
     private HitVector largethit;
+    private double largez;
+    private double smallz; 
     private PadVector smalltpadvec;
     private PadVector largetpadvec;
     private double tcathode;
@@ -129,9 +93,11 @@ public class TrackHitReco {
             largethit = track.getLargeTHit();
             smallt = smallthit.time();
             larget = largethit.time();
+	    smallz = smallthit.z();
+	    largez = (largethit.z() + smallthit.z())/2;
             largetpad = largethit.pad();
-            tdiffshort = tcathode - smallt;
-            tdifflong = tcathode - larget;
+            tdiffshort = tcathode + get_rec_coef(a_t,smallz) - a_t[0] - smallt;
+            tdifflong = tcathode + get_rec_coef(a_t,smallz) + get_rec_coef(b_t,largez) - a_t[0] - b_t[0] - larget;
             tdiffshort *= tshiftfactorshort;
             tdifflong *= tshiftfactorlong;
             tdiff = tdiffshort + tdifflong;
@@ -184,7 +150,7 @@ public class TrackHitReco {
         double x = (t-at)/bt;
         double rmax = 70;
         double rmin = 30;
-        return Math.sqrt(rmax*rmax*(1-x) + rmin*rmin*x + ct*(1-x)*x);
+        return Math.sqrt(rmax*rmax*(1-x) + rmin*rmin*x);// + ct*(1-x)*x);
     }
     
     private double get_dphi(double z, double r, double magfield){

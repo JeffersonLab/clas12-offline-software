@@ -2,6 +2,7 @@ package org.jlab.analysis.postprocess;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.reco.ReconstructionEngine;
 
 import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.Event;
@@ -24,6 +25,8 @@ import org.jlab.utils.options.OptionParser;
  * and beam charge from tag-1 events, and outputs a file with modified
  * REC::Event.helicity/beamCharge/liveTime.
  * 
+ * Also, adds tag-1 events for configuration banks (e.g. SOFT::config)
+ * 
  * Usage: Tag1ToEvent outputFile inputFile1 [inputFile2 [inputFile3 [...]]]
  * 
  * FIXME:  DaqScalersSequence doesn't manage run numbers.  Until then, we
@@ -35,6 +38,10 @@ import org.jlab.utils.options.OptionParser;
 
 public class Tag1ToEvent {
 
+    public static final String[] CREATE_TAG1_EVENTS = {
+        ReconstructionEngine.CONFIG_BANK_NAME
+    };
+    
     public static void main(String[] args) {
 
         OptionParser parser = new OptionParser("postprocess");
@@ -75,12 +82,20 @@ public class Tag1ToEvent {
 			
         Event event = new Event();
 
+        Event configEvent = new Event();
+        
         // we're going to modify this bank:
         Bank recEventBank = new Bank(writer.getSchemaFactory().getSchema("REC::Event"));
         
         // we're going to modify this bank if doHelicityFlip is set:
         Bank helFlipBank = new Bank(writer.getSchemaFactory().getSchema("HEL::flip"));
 
+        // we're going to copy these banks to new tag-1 events:
+        List<Bank> configBanks = new ArrayList<>();
+        for (String bankName : CREATE_TAG1_EVENTS) {
+            configBanks.add(new Bank(writer.getSchemaFactory().getSchema(bankName)));
+        }
+        
         long badCharge = 0;
         long goodCharge = 0;
         long badHelicity = 0;
@@ -127,6 +142,16 @@ public class Tag1ToEvent {
                         recEventBank.putFloat("beamCharge",0, (float) ds.dsc2.getBeamChargeGated());
                         recEventBank.putDouble("liveTime",0,ds.dsc2.getLivetime());
                     }
+                }
+
+                // copy config banks to new tag-1 events:
+                configEvent.reset();
+                for (Bank bank : configBanks) {
+                    event.read(bank);
+                    if (bank.getRows()>0) {
+                        configEvent.write(bank);
+                    }
+                    writer.addEvent(configEvent,1);
                 }
 
                 // update the output file:

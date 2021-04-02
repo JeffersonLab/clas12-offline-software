@@ -37,6 +37,7 @@ public class RTPCEngine extends ReconstructionEngine{
     private boolean cosmic = false;
     private int fitToBeamline = 1;
     private boolean disentangle = true;
+    private boolean chi2culling = true; 
 
     @Override
     public boolean init() {
@@ -44,6 +45,7 @@ public class RTPCEngine extends ReconstructionEngine{
         String cosm = this.getEngineConfigString("rtpcCosmic");
         String beamfit = this.getEngineConfigString("rtpcBeamlineFit");
         String disentangler = this.getEngineConfigString("rtpcDisentangler");
+	String chi2cull = this.getEngineConfigString("rtpcChi2Cull");
         //System.out.println(sim + " " + cosm + " " + beamfit);
 
         if(sim != null){
@@ -61,6 +63,10 @@ public class RTPCEngine extends ReconstructionEngine{
         if(disentangler != null){
             disentangle = Boolean.valueOf(disentangler);
         }
+
+	if(chi2cull != null){
+	    chi2culling = Boolean.valueOf(chi2cull);
+	}
 
         String[] rtpcTables = new String[]{
             "/calibration/rtpc/time_offsets",
@@ -88,7 +94,7 @@ public class RTPCEngine extends ReconstructionEngine{
 
         hits = hitRead.get_RTPCHits();
 
-        if(hits==null || hits.size()==0) {
+        if(hits==null || hits.size()==0 || hits.size() > 5000) {
             return true;
         }
 
@@ -123,7 +129,7 @@ public class RTPCEngine extends ReconstructionEngine{
             //Reconstruct Hits in Drift Region
             TrackHitReco TR = new TrackHitReco(params,hits,cosmic,magfield);
             //Helix Fit Tracks to calculate Track Parameters
-            HelixFitTest HF = new HelixFitTest(params,fitToBeamline,Math.abs(magfield),cosmic);
+            HelixFitTest HF = new HelixFitTest(params,fitToBeamline,Math.abs(magfield),cosmic,chi2culling);
 
             RecoBankWriter writer = new RecoBankWriter();
             DataBank recoBank = writer.fillRTPCHitsBank(event,params);

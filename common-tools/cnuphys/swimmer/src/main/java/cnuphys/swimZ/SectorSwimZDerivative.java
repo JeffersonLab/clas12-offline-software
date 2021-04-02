@@ -1,6 +1,7 @@
 package cnuphys.swimZ;
 
-import org.jlab.clas.clas.math.FastMath;
+import cnuphys.magfield.FastMath;
+
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.RotatedCompositeProbe;
 

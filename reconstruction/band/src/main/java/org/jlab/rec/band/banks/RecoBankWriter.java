@@ -44,11 +44,12 @@ public class RecoBankWriter {
 			bank.setShort("component",i, (short) hitlist.get(i).GetComponent());
 
 			int barKey = hitlist.get(i).GetSector()*100+hitlist.get(i).GetLayer()*10+hitlist.get(i).GetComponent();
-			double energyconvert_params[] = CalibrationConstantsLoader.ENERGY_CONVERT.get( Integer.valueOf(barKey) );
-			double parA = energyconvert_params[0];
-			double parB = energyconvert_params[1];
-			double parC = energyconvert_params[2];
-			double combo_adc = Math.sqrt(hitlist.get(i).GetAdcLeft() * hitlist.get(i).GetAdcRight());
+                        double energyconvert_params[] = CalibrationConstantsLoader.ENERGY_CONVERT.get( Integer.valueOf(barKey) );                        
+                        double parA = energyconvert_params[0];
+                        double parB = energyconvert_params[1];
+                        double parC = energyconvert_params[2];                            
+                      
+                        double combo_adc = Math.sqrt(hitlist.get(i).GetAdcLeft() * hitlist.get(i).GetAdcRight());
 			combo_adc = parA + parB*combo_adc + parC*combo_adc*combo_adc;
 
 			//bank.setFloat("energy", i, (float) Math.sqrt(hitlist.get(i).GetAdcLeft() * hitlist.get(i).GetAdcRight()));

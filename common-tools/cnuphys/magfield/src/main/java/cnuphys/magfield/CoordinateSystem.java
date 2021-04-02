@@ -19,8 +19,7 @@ public enum CoordinateSystem {
 	/**
 	 * Get the coordinate system from an integer
 	 * 
-	 * @param val
-	 *            the integer value
+	 * @param val the integer value
 	 * @return the coordinate system
 	 */
 	public static CoordinateSystem fromInt(int val) {

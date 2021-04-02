@@ -3,6 +3,8 @@ package org.jlab.service.dc;
 //import Jama.Matrix;
 import org.jlab.jnp.matrix.*;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.jlab.clas.swimtools.Swim;
@@ -241,7 +243,7 @@ public class DCTBEngine extends DCEngine {
                 TrackArray[i].set_FitNDF(kFit.NDF);
                 TrackArray[i].set_Trajectory(kFit.kfStateVecsAlongTrajectory);
                 TrackArray[i].set_FitConvergenceStatus(kFit.ConvStatus);
-                TrackArray[i].set_Id(TrackArray[i].size()+1);
+                //TrackArray[i].set_Id(TrackArray[i].size()+1);
                 //TrackArray[i].set_CovMat(kFit.finalCovMat.covMat); 
                 if(TrackArray[i].get_Vtx0().toVector3D().mag()>500)
                     continue;
@@ -258,14 +260,15 @@ public class DCTBEngine extends DCEngine {
             crosses.get(i).set_Id(i+1);
         }
         // track found	
-        int trkId = 1;
+        //int trkId = 1;
 
         if(trkcands.size()>0) {
             //trkcandFinder.removeOverlappingTracks(trkcands);		// remove overlaps
 
             for(Track trk: trkcands) {
+                int trkId = trk.get_Id();
                 // reset the id
-                trk.set_Id(trkId);
+                //trk.set_Id(trkId);
                 trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector, dcSwim);
                 trk.calcTrajectory(trkId, dcSwim, trk.get_Vtx0().x(), trk.get_Vtx0().y(), trk.get_Vtx0().z(), 
                         trk.get_pAtOrig().x(), trk.get_pAtOrig().y(), trk.get_pAtOrig().z(), trk.get_Q(), 
@@ -295,7 +298,7 @@ public class DCTBEngine extends DCEngine {
                         h2.set_AssociatedTBTrackID(trk.get_Id());                              
                     }
                 }
-                trkId++;
+                //trkId++;
             }
         }    
        
@@ -304,6 +307,7 @@ public class DCTBEngine extends DCEngine {
             rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
             return true;
         }
+        this.ensureTrackUnique(trkcands);
         rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, crosses, trkcands);
 
         return true;
@@ -324,5 +328,21 @@ public class DCTBEngine extends DCEngine {
         }
         return miss;
     }
-       
+
+    private void ensureTrackUnique(List<Track> trkcands) {
+        List<Track> rmFrmList = new ArrayList<Track>();
+        trkcands.sort(Comparator.comparing(Track::get_Id).thenComparing(Track::get_FitChi2));
+        for(int i = 0; i < trkcands.size()-1; i++) {
+            if(trkcands.get(i).get_Id()==trkcands.get(i+1).get_Id()) {
+                double chi2_ov_ndf_i=trkcands.get(i).get_FitChi2()/(double)trkcands.get(i).get_FitNDF();
+                double chi2_ov_ndf_ip1=trkcands.get(i+1).get_FitChi2()/(double)trkcands.get(i+1).get_FitNDF();
+                if(chi2_ov_ndf_i<chi2_ov_ndf_ip1) {
+                    rmFrmList.add(trkcands.get(i+1));
+                } else {
+                    rmFrmList.add(trkcands.get(i));
+                }
+            }
+        }
+        trkcands.removeAll(rmFrmList);
+    }
 }

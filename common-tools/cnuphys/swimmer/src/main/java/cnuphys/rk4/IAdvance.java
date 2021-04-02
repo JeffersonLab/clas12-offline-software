@@ -9,10 +9,10 @@ public interface IAdvance {
 	 *            the value of the independent variable (e.g., t) (input).
 	 * @param y
 	 *            the values of the state vector (usually [x,y,z,dx/dt, dy/dt,
-	 *            dz/dt]) at t (input).
+	 *              dz/dt]) at t (input).
 	 * @param dydt
 	 *            values of the derivative at the current t (before advance)
-	 *            (input).
+	 *              (input).
 	 * @param h
 	 *            the current step size (input)
 	 * @param deriv
