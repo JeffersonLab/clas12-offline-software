@@ -1,5 +1,7 @@
 package cnuphys.magfield;
 
+import java.io.PrintStream;
+
 /**
  * Cells are used by the probes. 3D cells for the torus, 2D cells for the
  * solenoid.
@@ -161,6 +163,21 @@ public class Cell3D {
 		return ((q1 > q1Min) && (q1 < q1Max) && (q2 > q2Min) && (q2 < q2Max) && (q3 > q3Min) && (q3 < q3Max));
 	}
 
+	public void writeDiagnostics(PrintStream ps) {
+		ps.println(String.format("Cell indices: [%d, %d, %d]", _n1, _n2, _n3));
+		
+		Torus torus = MagneticFields.getInstance().getTorus();
+		GridCoordinate phiGrid = torus.q1Coordinate;
+		GridCoordinate rhoGrid = torus.q2Coordinate;
+		GridCoordinate zGrid = torus.q3Coordinate;
+		
+		ps.println(String.format("Cell phi range: %-6.2f to %-6.2f", phiGrid.getValue(_n1), phiGrid.getValue(_n1+1), zGrid.getValue(_n3)));
+		ps.println(String.format("Cell rho range: %-6.2f to %-6.2f", rhoGrid.getValue(_n2), rhoGrid.getValue(_n2+1), zGrid.getValue(_n3)));
+		ps.println(String.format("Cell   z range: %-6.2f to %-6.2f", zGrid.getValue(_n3), zGrid.getValue(_n3+1), zGrid.getValue(_n3)));
+	}
+
+
+	
 	/**
 	 * Calculate the field in kG
 	 * 
@@ -170,6 +187,12 @@ public class Cell3D {
 	 * @param result
 	 */
 	public void calculate(double q1, double q2, double q3, float[] result) {
+		
+		if (!MagneticField.isInterpolate()) {
+			nearestNeighbor(q1, q2, q3, result);
+			return;
+		}
+
 
 		// if (_probe.containsCylindrical(q1, q2, q3)) {
 		// do we need to reset?
@@ -183,10 +206,6 @@ public class Cell3D {
 			}
 		}
 
-		if (!MagneticField.isInterpolate()) {
-			nearestNeighbor(q1, q2, q3, result);
-			return;
-		}
 
 		f[0] = (q1 - q1Min) * q1Norm;/// (q1_max - q1Min);
 		f[1] = (q2 - q2Min) * q2Norm;// / (q2_max - q2Min);
@@ -224,19 +243,23 @@ public class Cell3D {
 
 	// nearest neighbor algorithm
 	private void nearestNeighbor(double phi, double rho, double z, float[] result) {
-		f[0] = (phi - q1Min) * q1Norm;
-		f[1] = (rho - q2Min) * q2Norm;
-		f[2] = (z - q3Min) * q3Norm;
+		
+		GridCoordinate q1Coord = _probe.q1Coordinate;
+		GridCoordinate q2Coord = _probe.q2Coordinate;
+		GridCoordinate q3Coord = _probe.q3Coordinate;
 
-		int N1 = (f[0] < 0.5) ? 0 : 1;
-		int N2 = (f[1] < 0.5) ? 0 : 1;
-		int N3 = (f[2] < 0.5) ? 0 : 1;
-
-		result[0] = b[N1][N2][N3].x;
-		result[1] = b[N1][N2][N3].y;
-		result[2] = b[N1][N2][N3].z;
+		
+		int n1 = q1Coord.getRoundedIndex(phi);
+		int n2 = q2Coord.getRoundedIndex(rho);
+		int n3 = q3Coord.getRoundedIndex(z);
+		
+		int index = _probe.getCompositeIndex(n1, n2, n3);
+		result[0] = _probe.getB1(index);
+		result[1] = _probe.getB2(index);
+		result[2] = _probe.getB3(index);
+		
 	}
-
+	
 	public void reset() {
 		q1Min = Double.POSITIVE_INFINITY;
 		q1Max = Double.NEGATIVE_INFINITY;

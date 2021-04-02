@@ -69,7 +69,6 @@ public class GeneralPlotParamPanel extends APreferencePanel {
 		_canvas.getParameters().setPlotTitle(_plotTitle.getText());
 		_canvas.getParameters().setXLabel(_xLabel.getText());
 		_canvas.getParameters().setYLabel(_yLabel.getText());
-		_canvas.repaint();
 	}
 
 }

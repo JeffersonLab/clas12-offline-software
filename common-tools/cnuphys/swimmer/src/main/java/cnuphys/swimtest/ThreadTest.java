@@ -57,12 +57,12 @@ public class ThreadTest {
 								Swimmer.CLAS_Tolerance, hdata);
 						
 						if (i == 0) {
-				            double lastY[] = traj.lastElement();
-				            SwimTest.printVect(lastY, "Thread " + Thread.currentThread().getName() + " first ");
+							double lastY[] = traj.lastElement();
+							SwimTest.printVect(lastY, "Thread " + Thread.currentThread().getName() + " first ");
 						}
 						if (i == (num-1)) {
-				            double lastY[] = traj.lastElement();
-				            SwimTest.printVect(lastY, "Thread " + Thread.currentThread().getName() + " last ");
+							double lastY[] = traj.lastElement();
+							SwimTest.printVect(lastY, "Thread " + Thread.currentThread().getName() + " last ");
 						}
 					} catch (RungeKuttaException e) {
 						// TODO Auto-generated catch block

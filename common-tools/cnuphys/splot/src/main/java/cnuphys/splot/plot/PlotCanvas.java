@@ -33,6 +33,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import cnuphys.splot.edit.DataEditor;
 import cnuphys.splot.edit.PlotPreferencesDialog;
+import cnuphys.splot.pdata.DataChangeListener;
 import cnuphys.splot.pdata.DataColumn;
 import cnuphys.splot.pdata.DataSet;
 import cnuphys.splot.pdata.DataSetException;
@@ -48,8 +49,7 @@ import cnuphys.splot.toolbar.ToolBarButton;
 import cnuphys.splot.toolbar.ToolBarToggleButton;
 
 public class PlotCanvas extends JComponent
-		implements MouseListener, MouseMotionListener, IRubberbanded,
-		IToolBarListener, TableModelListener {
+		implements MouseListener, MouseMotionListener, IRubberbanded, IToolBarListener, TableModelListener, DataChangeListener {
 
 	public static final String DONEDRAWINGPROP = "Done Drawing";
 	public static final String TITLECHANGEPROP = "Plot Title Change";
@@ -67,7 +67,7 @@ public class PlotCanvas extends JComponent
 	private int _rightMargin = 10;
 
 	// for saving files
-	private String _dataFilePath = Environment.getInstance().getHomeDirectory();
+	private static String _dataFilePath;
 
 	// the bounds of the plot
 	private Rectangle _activeBounds;
@@ -77,8 +77,7 @@ public class PlotCanvas extends JComponent
 	private boolean _needsRescale;
 
 	// the world system of the active area
-	private Rectangle2D.Double _worldSystem = new Rectangle2D.Double(0, 0, 1,
-			1);
+	private Rectangle2D.Double _worldSystem = new Rectangle2D.Double(0, 0, 1, 1);
 
 	// convert from screen to data
 	protected AffineTransform _localToWorld;
@@ -102,13 +101,13 @@ public class PlotCanvas extends JComponent
 
 	// legend and floating label dragging
 	private Legend _legend;
-	
+
 	// extra and floating label dragging
 	private ExtraText _extra;
-	
-	//color gradient
+
+	// color gradient
 	private Gradient _gradient;
-	
+
 	// data drawer
 	private DataDrawer _dataDrawer;
 
@@ -127,13 +126,16 @@ public class PlotCanvas extends JComponent
 	/**
 	 * Create a plot canvas for plotting a dataset
 	 * 
-	 * @param dataSet the dataset to plot. It might contain many curves
+	 * @param dataSet   the dataset to plot. It might contain many curves
 	 * @param plotTitle the plot title
-	 * @param xLabel the x axis label
-	 * @param yLabel the y axis label
+	 * @param xLabel    the x axis label
+	 * @param yLabel    the y axis label
 	 */
-	public PlotCanvas(DataSet dataSet, String plotTitle, String xLabel,
-			String yLabel) {
+	public PlotCanvas(DataSet dataSet, String plotTitle, String xLabel, String yLabel) {
+		
+		if (_dataFilePath == null) {
+			_dataFilePath = Environment.getInstance().getHomeDirectory();
+		}
 
 		setBackground(Color.white);
 		_parameters = new PlotParameters(this);
@@ -146,11 +148,11 @@ public class PlotCanvas extends JComponent
 		if (dataSet == null) {
 			try {
 				dataSet = new DataSet(DataSetType.XYY, "X", "Y");
-			} catch (DataSetException e) {
+			}
+			catch (DataSetException e) {
 				e.printStackTrace();
 			}
 		}
-		
 
 		setDataSet(dataSet);
 
@@ -193,6 +195,19 @@ public class PlotCanvas extends JComponent
 			}
 		};
 		new Timer(delay, taskPerformer).start();
+		
+	}
+	
+	/**
+	 * Get the DataSet type
+	 * 
+	 * @return the data set type
+	 */
+	public DataSetType getType() {
+		if (_dataSet == null) {
+			return DataSetType.UNKNOWN;
+		}
+		return _dataSet.getType();
 	}
 
 	/**
@@ -228,25 +243,31 @@ public class PlotCanvas extends JComponent
 	 * @param ds the new dataset
 	 */
 	public void setDataSet(DataSet ds) {
+
 		_dataSet = ds;
+		
+		ds.removeDataChangeListener(this);
+		ds.addDataChangeListener(this);
+
+		
 		if (_dataSet != null) {
 			_dataSet.notifyListeners();
 		}
-		setWorldSystem();
+//		setWorldSystem();
 		repaint();
 	}
 
-	/**
-	 * Clear the plot of all data. It will have a null dataset.
-	 */
-	public void clearPlot() {
-		_dataSet = null;
-		setWorldSystem();
-		_parameters.setPlotTitle("No Plot");
-
-		firePropertyChange(DATACLEAREDPROP, 0, 1);
-		repaint();
-	}
+//	/**
+//	 * Clear the plot of all data. It will have a null dataset.
+//	 */
+//	public void clearPlot() {
+//		_dataSet = null;
+//		setWorldSystem();
+//		_parameters.setPlotTitle("No Plot");
+//
+//		firePropertyChange(DATACLEAREDPROP, 0, 1);
+//		repaint();
+//	}
 
 	/**
 	 * Get the underlying dataset
@@ -267,10 +288,11 @@ public class PlotCanvas extends JComponent
 	}
 
 	/**
-	 * Set the world system based on the dataset
+	 * Set the world system based on the dataset This is where the plot limits are
+	 * set.
 	 */
 	public void setWorldSystem() {
-
+		
 		if (_worldSystem == null) {
 			_worldSystem = new Rectangle2D.Double();
 		}
@@ -291,37 +313,41 @@ public class PlotCanvas extends JComponent
 		double ymax = _dataSet.getYmax();
 
 		PlotParameters params = getParameters();
-
-		if (params.manualRangeX()) {
+		
+		LimitsMethod xMethod = params.getXLimitsMethod();
+		LimitsMethod yMethod = params.getYLimitsMethod();
+		
+		switch (xMethod) {
+		case MANUALLIMITS:
 			xmin = params.getManualXMin();
 			xmax = params.getManualXMax();
-		}
-		else if (_parameters.useXDataLimits()) {
-		}
-		else {
-			NiceScale ns = new NiceScale(xmin, xmax,
-					_plotTicks.getNumMajorTickX() + 2,
-					_parameters.includeXZero());
+			break;
+			
+		case ALGORITHMICLIMITS:
+			NiceScale ns = new NiceScale(xmin, xmax, _plotTicks.getNumMajorTickX() + 2, _parameters.includeXZero());
 			xmin = ns.getNiceMin();
 			xmax = ns.getNiceMax();
+			break;
+			
+		case USEDATALIMITS:  //do nothing
+			break;
 		}
-
-		if (params.manualRangeY()) {
+		
+		switch (yMethod) {
+		case MANUALLIMITS:
 			ymin = params.getManualYMin();
 			ymax = params.getManualYMax();
-		}
-		else if (_parameters.useYDataLimits()) {
-			// do nothing
-		}
-		else {
-			NiceScale ns = new NiceScale(ymin, ymax,
-					_plotTicks.getNumMajorTickY() + 2,
-					_parameters.includeYZero());
+			break;
+			
+		case ALGORITHMICLIMITS:
+			NiceScale ns = new NiceScale(ymin, ymax, _plotTicks.getNumMajorTickY() + 2, _parameters.includeYZero());
 			ymin = ns.getNiceMin();
 			ymax = ns.getNiceMax();
+			break;
+			
+		case USEDATALIMITS:  //do nothing
+			break;
 		}
-
-		// try nice values
 
 		_worldSystem.setFrame(xmin, ymin, xmax - xmin, ymax - ymin);
 	}
@@ -334,9 +360,9 @@ public class PlotCanvas extends JComponent
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-			
+
 		Rectangle b = getBounds();
-		
+
 		g.setColor(getBackground());
 		g.fillRect(0, 0, b.width, b.height);
 
@@ -348,16 +374,15 @@ public class PlotCanvas extends JComponent
 
 		// frame the active area
 		g.setColor(Color.black);
-		g.drawRect(_activeBounds.x, _activeBounds.y, _activeBounds.width,
-				_activeBounds.height);
+		g.drawRect(_activeBounds.x, _activeBounds.y, _activeBounds.width, _activeBounds.height);
 
 		// draw the ticks and legend
 		_plotTicks.draw(g);
 
-		if (_parameters.legendDrawing()) {
+		if (_parameters.isLegendDrawn()) {
 			_legend.draw(g);
 		}
-		
+
 		if (_parameters.extraDrawing()) {
 			_extra.draw(g);
 		}
@@ -373,8 +398,7 @@ public class PlotCanvas extends JComponent
 	/**
 	 * Data is being added, possibly very quickly, so lets schedule a redraw
 	 * 
-	 * @param rescale if <code>true</code> the world system will also be
-	 *            rescaled
+	 * @param rescale if <code>true</code> the world system will also be rescaled
 	 */
 	public void needsRedraw(boolean rescale) {
 		_needsRedraw = true;
@@ -413,7 +437,7 @@ public class PlotCanvas extends JComponent
 
 			left += leftMargin;
 			top += _topMargin;
-			right -= _rightMargin;			
+			right -= _rightMargin;
 			bottom -= bottomMargin;
 
 			if (_activeBounds == null) {
@@ -444,16 +468,14 @@ public class PlotCanvas extends JComponent
 		double scaleX = _worldSystem.width / _activeBounds.width;
 		double scaleY = _worldSystem.height / _activeBounds.height;
 
-		_localToWorld = AffineTransform.getTranslateInstance(_worldSystem.x,
-				_worldSystem.getMaxY());
-		_localToWorld
-				.concatenate(AffineTransform.getScaleInstance(scaleX, -scaleY));
-		_localToWorld.concatenate(AffineTransform
-				.getTranslateInstance(-_activeBounds.x, -_activeBounds.y));
+		_localToWorld = AffineTransform.getTranslateInstance(_worldSystem.x, _worldSystem.getMaxY());
+		_localToWorld.concatenate(AffineTransform.getScaleInstance(scaleX, -scaleY));
+		_localToWorld.concatenate(AffineTransform.getTranslateInstance(-_activeBounds.x, -_activeBounds.y));
 
 		try {
 			_worldToLocal = _localToWorld.createInverse();
-		} catch (NoninvertibleTransformException e) {
+		}
+		catch (NoninvertibleTransformException e) {
 			// e.printStackTrace();
 		}
 	}
@@ -477,7 +499,7 @@ public class PlotCanvas extends JComponent
 			_legend.setCurrentPoint(e.getPoint());
 			repaint();
 		}
-		
+
 		if (_extra.isDraggingPrimed()) {
 			_extra.setDragging(true);
 		}
@@ -490,7 +512,7 @@ public class PlotCanvas extends JComponent
 			_extra.setCurrentPoint(e.getPoint());
 			repaint();
 		}
-		
+
 		if (_gradient.isDraggingPrimed()) {
 			_gradient.setDragging(true);
 		}
@@ -503,7 +525,6 @@ public class PlotCanvas extends JComponent
 			_gradient.setCurrentPoint(e.getPoint());
 			repaint();
 		}
-
 
 	}
 
@@ -533,21 +554,18 @@ public class PlotCanvas extends JComponent
 			// pp.x -= _activeBounds.x;
 			// pp.y -= _activeBounds.y;
 			localToWorld(pp, _workPoint);
-			_locationString = String.format("<html>(x, y) = (%7.2f, %-7.2f)",
-					_workPoint.x, _workPoint.y);
+			_locationString = String.format("<html>(x, y) = (%7.2g, %-7.2g)<br>count = %d", _workPoint.x, _workPoint.y, _dataSet.size());
 
 			if (_dataSet.is1DHistoSet()) {
-				Vector<DataColumn> ycols = (Vector<DataColumn>) _dataSet
-						.getAllVisibleCurves();
+				Vector<DataColumn> ycols = (Vector<DataColumn>) _dataSet.getAllVisibleCurves();
 				int size = ycols.size();
 
 				for (int i = 0; i < size; i++) {
 					HistoData hd = ycols.get(i).getHistoData();
 					String s = HistoData.statusString(this, hd, pp, _workPoint);
 					if (s != null) {
-						Color lc = ycols.get(i).getStyle().getLineColor();
-						_locationString += "&nbsp&nbsp"
-								+ colorStr(s, GraphicsUtilities.colorToHex(lc));
+						Color lc = ycols.get(i).getStyle().getFitLineColor();
+						_locationString += "&nbsp&nbsp" + colorStr(s, GraphicsUtilities.colorToHex(lc));
 						// break;
 					}
 				}
@@ -557,8 +575,7 @@ public class PlotCanvas extends JComponent
 				String s = Histo2DData.statusString(this, h2d, pp, _workPoint);
 				if (s != null) {
 					Color lc = Color.red;
-					_locationString += "&nbsp&nbsp"
-							+ colorStr(s, GraphicsUtilities.colorToHex(lc));
+					_locationString += "&nbsp&nbsp" + colorStr(s, GraphicsUtilities.colorToHex(lc));
 					// break;
 				}
 			}
@@ -618,7 +635,7 @@ public class PlotCanvas extends JComponent
 		if (_rubberband != null) {
 			return;
 		}
-		if (_parameters.legendDrawing() && _legend.contains(e.getPoint())) {
+		if (_parameters.isLegendDrawn() && _legend.contains(e.getPoint())) {
 			return;
 		}
 
@@ -649,42 +666,35 @@ public class PlotCanvas extends JComponent
 
 		String command = toolbarCommand();
 
-		if (isPointer() && _parameters.legendDrawing()
-				&& _legend.contains(e.getPoint())) {
+		if (isPointer() && _parameters.isLegendDrawn() && _legend.contains(e.getPoint())) {
 			_legend.setDraggingPrimed(true);
 			_legend.setCurrentPoint(e.getPoint());
 		}
-		else if (isPointer() && _parameters.extraDrawing()
-				&& _extra.contains(e.getPoint())) {
+		else if (isPointer() && _parameters.extraDrawing() && _extra.contains(e.getPoint())) {
 			_extra.setDraggingPrimed(true);
 			_extra.setCurrentPoint(e.getPoint());
 		}
-		else if (isPointer() && _parameters.gradientDrawing()
-				&& _gradient.contains(e.getPoint())) {
+		else if (isPointer() && _parameters.gradientDrawing() && _gradient.contains(e.getPoint())) {
 			_gradient.setDraggingPrimed(true);
 			_gradient.setCurrentPoint(e.getPoint());
 		}
 
 		else {
 
-			if (CommonToolBar.BOXZOOM.equals(command)
-					&& (_rubberband == null)) {
-				
+			if (CommonToolBar.BOXZOOM.equals(command) && (_rubberband == null)) {
+
 				if (getDataSet().is1DHistoSet()) {
-					
+
 					if (e.isShiftDown()) {
-						_rubberband = new Rubberband(this, this,
-						Rubberband.Policy.XONLY);
+						_rubberband = new Rubberband(this, this, Rubberband.Policy.XONLY);
 					}
 					else {
-						_rubberband = new Rubberband(this, this,
-						Rubberband.Policy.YONLY);
+						_rubberband = new Rubberband(this, this, Rubberband.Policy.YONLY);
 					}
 
-			}
+				}
 				else {
-					_rubberband = new Rubberband(this, this,
-							Rubberband.Policy.RECTANGLE);
+					_rubberband = new Rubberband(this, this, Rubberband.Policy.RECTANGLE);
 				}
 				_rubberband.setActive(true);
 				_rubberband.startRubberbanding(e.getPoint());
@@ -696,13 +706,11 @@ public class PlotCanvas extends JComponent
 
 	// get the active toolbar toggle butto command
 	private String toolbarCommand() {
-		return (_toolbar != null) ? _toolbar.getActiveCommand()
-				: CommonToolBar.POINTER;
+		return (_toolbar != null) ? _toolbar.getActiveCommand() : CommonToolBar.POINTER;
 	}
 
 	/**
-	 * The mouse has been released on plot canvas. A release comes before the
-	 * click
+	 * The mouse has been released on plot canvas. A release comes before the click
 	 * 
 	 * @param e the mouseEvent
 	 */
@@ -786,7 +794,7 @@ public class PlotCanvas extends JComponent
 			_worldToLocal.transform(wp, pp);
 		}
 	}
-	
+
 	public void worldToLocal(Rectangle r, Rectangle.Double wr) {
 		// New version to accommodate world with x decreasing right
 		Point2D.Double wp0 = new Point2D.Double(wr.getMinX(), wr.getMinY());
@@ -886,7 +894,7 @@ public class PlotCanvas extends JComponent
 		_toolbar = toolbar;
 		doButtonAction(button.getActionCommand());
 	}
-	
+
 	public void doButtonAction(String command) {
 		if (CommonToolBar.ZOOMIN.equals(command)) {
 			scale(0.85);
@@ -906,7 +914,7 @@ public class PlotCanvas extends JComponent
 			takePicture();
 		}
 	}
-	
+
 	/**
 	 * Print
 	 */
@@ -915,8 +923,7 @@ public class PlotCanvas extends JComponent
 	}
 
 	public File getSavePngFile() {
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("PNG File",
-				"png", "PNG");
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("PNG File", "png", "PNG");
 
 		File selectedFile = null;
 		JFileChooser chooser = new JFileChooser(_dataFilePath);
@@ -929,10 +936,8 @@ public class PlotCanvas extends JComponent
 
 				if (selectedFile.exists()) {
 					int answer = JOptionPane.showConfirmDialog(null,
-							selectedFile.getAbsolutePath()
-									+ "  already exists. Do you want to overwrite it?",
-							"Overwite Existing File?",
-							JOptionPane.YES_NO_OPTION);
+							selectedFile.getAbsolutePath() + "  already exists. Do you want to overwrite it?",
+							"Overwite Existing File?", JOptionPane.YES_NO_OPTION);
 
 					if (answer != JFileChooser.APPROVE_OPTION) {
 						selectedFile = null;
@@ -944,10 +949,9 @@ public class PlotCanvas extends JComponent
 		return selectedFile;
 	}
 
-
-/**
- * Take a picture, sanve as png
- */
+	/**
+	 * Take a picture, sanve as png
+	 */
 	public void takePicture() {
 		try {
 
@@ -966,21 +970,20 @@ public class PlotCanvas extends JComponent
 				ImageOutputStream ios = ImageIO.createImageOutputStream(file);
 				Environment.getInstance().getPngWriter().setOutput(ios);
 
-				bi = GraphicsUtilities
-						.getComponentImage((_parent != null) ? _parent : this);
+				bi = GraphicsUtilities.getComponentImage((_parent != null) ? _parent : this);
 
 				Environment.getInstance().getPngWriter().write(bi);
 				ios.close();
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 
 	}
 
 	@Override
-	public void toggleButtonActivated(CommonToolBar toolbar,
-			ToolBarToggleButton button) {
+	public void toggleButtonActivated(CommonToolBar toolbar, ToolBarToggleButton button) {
 		_toolbar = toolbar;
 	}
 
@@ -1010,8 +1013,7 @@ public class PlotCanvas extends JComponent
 	 * @param oldValue
 	 * @param newValue
 	 */
-	public void remoteFirePropertyChange(String propName, Object oldValue,
-			Object newValue) {
+	public void remoteFirePropertyChange(String propName, Object oldValue, Object newValue) {
 		firePropertyChange(propName, oldValue, newValue);
 	}
 
@@ -1023,20 +1025,21 @@ public class PlotCanvas extends JComponent
 
 	/**
 	 * Get the canavas's plot ticks
+	 * 
 	 * @return the plot ticks
 	 */
 	public PlotTicks getPlotTicks() {
 		return _plotTicks;
 	}
-	
+
 	/**
 	 * Get the canvas's color gradient
+	 * 
 	 * @return the color gradient
 	 */
 	public Gradient getGradient() {
 		return _gradient;
 	}
-
 
 	/**
 	 * Set which toggle button is selected
@@ -1048,6 +1051,12 @@ public class PlotCanvas extends JComponent
 				ppan._toolbar.setSelectedToggle(s);
 			}
 		}
+	}
+
+	@Override
+	public void dataSetChanged(DataSet dataSet) {
+		setWorldSystem();
+		needsRedraw(false);
 	}
 
 }

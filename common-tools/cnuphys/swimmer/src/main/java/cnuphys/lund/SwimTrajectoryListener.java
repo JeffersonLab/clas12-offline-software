@@ -4,8 +4,8 @@ import java.util.EventListener;
 
 public interface SwimTrajectoryListener extends EventListener {
 
-    /**
-     * Swam a particle
-     */
-    public void trajectoriesChanged();
+	/**
+	 * Swam a particle
+	 */
+	public void trajectoriesChanged();
 }

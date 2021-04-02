@@ -4,7 +4,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 
 public class DraggableRectangle extends Rectangle implements Draggable {
-	
+
 	// are we being dragged
 	protected boolean _dragging;
 
@@ -13,7 +13,7 @@ public class DraggableRectangle extends Rectangle implements Draggable {
 
 	// current point
 	protected Point _currentPoint;
-	
+
 	protected boolean _beenMoved;
 
 	@Override

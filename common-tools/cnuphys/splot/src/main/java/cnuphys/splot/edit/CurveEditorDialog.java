@@ -1,8 +1,6 @@
 package cnuphys.splot.edit;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
-
 import cnuphys.splot.plot.PlotCanvas;
 
 public class CurveEditorDialog extends SimpleDialog {
@@ -26,7 +24,7 @@ public class CurveEditorDialog extends SimpleDialog {
 
 		// note components already created by super constructor
 		_plotCanvas = plotCanvas;
-		
+
 		_curvePanel = new CurveEditorPanel(_plotCanvas);
 		add(_curvePanel, BorderLayout.CENTER);
 		pack();

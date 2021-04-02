@@ -6,37 +6,38 @@ import java.util.Vector;
 
 public class PlotParameters {
 	
-	//for legend 
-	private Font _textFont = Environment.getInstance().getCommonFont(12);
-	private Color _textFillColor = new Color(240, 240, 240, 164);
+	// for legend
+	private Font _textFont = Environment.getInstance().getCommonFont(10);
+	private Color _textFillColor = new Color(248, 248, 248, 224);
 	private Color _textTextColor = Color.black;
 	private Color _textBorderColor = Color.black;
-	
-	//for extra text
+
+	// for extra text
 	private Font _extraFont = Environment.getInstance().getCommonFont(10);
-	private Color _extraFillColor = new Color(240, 240, 248, 164);
+	private Color _extraFillColor = new Color(248, 248, 248, 224);
 	private Color _extraTextColor = Color.black;
 	private Color _extraBorderColor = Color.black;
-	
+
 	// force include zero on plots?
 	private boolean _includeYzero = false;
 	private boolean _includeXzero = false;
+	
+	//how axis limits are determined
+	private LimitsMethod _xLimitsMethod = LimitsMethod.ALGORITHMICLIMITS;
+	private LimitsMethod _yLimitsMethod = LimitsMethod.ALGORITHMICLIMITS;
+	
 
-	// use data limits as plot limits
-	private boolean _useYDataLimits = false;
-	private boolean _useXDataLimits = false;
-
-	//legend related
+	// legend related
 	private int _legendLineLength = 70;
 	private boolean _legendBorder = true;
 	private boolean _drawLegend = true;
-	
-	//extra text
+
+	// extra text
 	private boolean _extraBorder = true;
 	private boolean _drawExtra = true;
 	private String[] _extraStrings;
-	
-	//color scale
+
+	// color scale
 	private boolean _drawGradient = false;
 
 	private Font _titleFont = Environment.getInstance().getCommonFont(20);
@@ -58,14 +59,12 @@ public class PlotParameters {
 	private int _numDecimalY = 2;
 	private int _minExponentY = 2;
 
-	// set ranges manually
-	private boolean _manualXRange;
-	private double _manualXmin;
-	private double _manualXmax;
+	// if we set ranges manually
+	private double _manualXmin = Double.NaN;
+	private double _manualXmax = Double.NaN;
 
-	private boolean _manualYRange;
-	private double _manualYmin;
-	private double _manualYmax;
+	private double _manualYmin = Double.NaN;
+	private double _manualYmax = Double.NaN;
 
 	/**
 	 * Create plot parameters for a canvas
@@ -93,23 +92,25 @@ public class PlotParameters {
 	public void mustIncludeYZero(boolean incZero) {
 		_includeYzero = incZero;
 	}
-	
+
 	/**
 	 * Get the extra strings for a second legend like display
+	 * 
 	 * @return the extra strings
 	 */
 	public String[] getExtraStrings() {
 		return _extraStrings;
 	}
-	
+
 	/**
 	 * Set the extra strings for a second legend like display
+	 * 
 	 * @param extraStrings the new extra strings array
 	 */
 	public void setExtraStrings(String... extraStrings) {
 		_extraStrings = extraStrings;
 	}
-	
+
 	/**
 	 * Check whether the extra text border is drawn
 	 * 
@@ -127,7 +128,6 @@ public class PlotParameters {
 	public void setExtraBorder(boolean extraBorder) {
 		_extraBorder = extraBorder;
 	}
-	
 
 	/**
 	 * Check whether the legend border is drawn
@@ -218,7 +218,6 @@ public class PlotParameters {
 	public Font getTextFont() {
 		return _textFont;
 	}
-	
 
 	/**
 	 * Set the extra text fill color
@@ -248,7 +247,7 @@ public class PlotParameters {
 	}
 
 	/**
-	 * Get the extra text  color
+	 * Get the extra text color
 	 * 
 	 * @return the extra text color
 	 */
@@ -365,44 +364,6 @@ public class PlotParameters {
 	}
 
 	/**
-	 * Check whether we should use x data limits rather than "nice values"
-	 * 
-	 * @return <code>true</code> we should use x data limits rather than
-	 *         "nice values"
-	 */
-	public boolean useXDataLimits() {
-		return _useXDataLimits;
-	}
-
-	/**
-	 * Set whether we should use x data limits rather than "nice values"
-	 * 
-	 * @param useDataLim the flag value
-	 */
-	public void setUseXDataLimits(boolean useDataLim) {
-		_useXDataLimits = useDataLim;
-	}
-
-	/**
-	 * Check whether we should use y data limits rather than "nice values"
-	 * 
-	 * @return <code>true</code> we should use y data limits rather than
-	 *         "nice values"
-	 */
-	public boolean useYDataLimits() {
-		return _useYDataLimits;
-	}
-
-	/**
-	 * Set whether we should use y data limits rather than "nice values"
-	 * 
-	 * @param useDataLim the flag value
-	 */
-	public void setUseYDataLimits(boolean useDataLim) {
-		_useYDataLimits = useDataLim;
-	}
-
-	/**
 	 * Check whether to include x = 0
 	 * 
 	 * @return <code>true</code> if we should include x = 0
@@ -463,8 +424,7 @@ public class PlotParameters {
 	 * @param title the plot title
 	 */
 	public void setPlotTitle(String title) {
-		_canvas.remoteFirePropertyChange(PlotCanvas.TITLECHANGEPROP,
-				getPlotTitle(), title);
+		_canvas.remoteFirePropertyChange(PlotCanvas.TITLECHANGEPROP, getPlotTitle(), title);
 		_plotTitle = title;
 	}
 
@@ -492,8 +452,7 @@ public class PlotParameters {
 	 * @param label the plot x axis label
 	 */
 	public void setXLabel(String label) {
-		_canvas.remoteFirePropertyChange(PlotCanvas.XLABELCHANGEPROP,
-				getXLabel(), label);
+		_canvas.remoteFirePropertyChange(PlotCanvas.XLABELCHANGEPROP, getXLabel(), label);
 		_xLabel = label;
 	}
 
@@ -503,8 +462,7 @@ public class PlotParameters {
 	 * @param label the plot y axis label
 	 */
 	public void setYLabel(String label) {
-		_canvas.remoteFirePropertyChange(PlotCanvas.YLABELCHANGEPROP,
-				getYLabel(), label);
+		_canvas.remoteFirePropertyChange(PlotCanvas.YLABELCHANGEPROP, getYLabel(), label);
 		_yLabel = label;
 	}
 
@@ -525,13 +483,13 @@ public class PlotParameters {
 	public void setExtraDrawing(boolean draw) {
 		_drawExtra = draw;
 	}
-	
+
 	/**
 	 * Check whether we should draw a legend
 	 * 
 	 * @return whether we should draw a legend
 	 */
-	public boolean legendDrawing() {
+	public boolean isLegendDrawn() {
 		return _drawLegend;
 	}
 
@@ -544,7 +502,6 @@ public class PlotParameters {
 		_drawLegend = draw;
 	}
 
-	
 	/**
 	 * Check whether we should draw a gradient
 	 * 
@@ -642,7 +599,7 @@ public class PlotParameters {
 	 * @param xmax the maximum x
 	 */
 	public void setXRange(double xmin, double xmax) {
-		_manualXRange = true;
+		setXLimitsMethod(LimitsMethod.MANUALLIMITS);
 		_manualXmin = xmin;
 		_manualXmax = xmax;
 		_canvas.setWorldSystem();
@@ -655,29 +612,12 @@ public class PlotParameters {
 	 * @param xmax the maximum y
 	 */
 	public void setYRange(double ymin, double ymax) {
-		_manualYRange = true;
+		setYLimitsMethod(LimitsMethod.MANUALLIMITS);
 		_manualYmin = ymin;
 		_manualYmax = ymax;
 		_canvas.setWorldSystem();
 	}
 
-	/**
-	 * Is the X plot range using manual limits
-	 * 
-	 * @return <code>true</code> if the X plot range using manual limits
-	 */
-	public boolean manualRangeX() {
-		return _manualXRange;
-	}
-
-	/**
-	 * Is the Y plot range using manual limits
-	 * 
-	 * @return <code>true</code> if the Y plot range using manual limits
-	 */
-	public boolean manualRangeY() {
-		return _manualYRange;
-	}
 
 	/**
 	 * Get the minimum value for a manual X range
@@ -714,4 +654,44 @@ public class PlotParameters {
 	public double getManualYMax() {
 		return _manualYmax;
 	}
+	
+	/**
+	 * Get the limit method for the x axis
+	 * @return the limit method for the x axis
+	 */
+	public LimitsMethod getXLimitsMethod() {
+		return _xLimitsMethod;
+	}
+	
+	/**
+	 * Set the limits method for the x axis
+	 * 
+	 * @param method the method
+	 */
+	public void setXLimitsMethod(LimitsMethod method) {
+		if (_xLimitsMethod != method) {
+			_xLimitsMethod = method;
+		}
+	}
+	
+	/**
+	 * Get the limit method for the y axis
+	 * @return the limit method for the y axis
+	 */
+	public LimitsMethod getYLimitsMethod() {
+		return _yLimitsMethod;
+	}
+	
+	/**
+	 * Set the limits method for the y axis
+	 * 
+	 * @param method the method
+	 */
+	public void setYLimitsMethod(LimitsMethod method) {
+		if (_yLimitsMethod != method) {
+			_yLimitsMethod = method;
+		}
+	}
+
+
 }

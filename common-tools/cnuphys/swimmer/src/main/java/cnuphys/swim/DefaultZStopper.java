@@ -19,10 +19,10 @@ public class DefaultZStopper implements IStopper {
 	
 	/**
 	 * Z stopper that doesn't check max R (does check max path length)
-	 * @param s0 starting path length in meters
-	 * @param sMax maximal path length in meters
-	 * @param targetZ stopping Z in meters
-	 * @param accuracy the accuracy in meters
+	 * @param s0              starting path length in meters
+	 * @param sMax            maximal path length in meters
+	 * @param targetZ         stopping Z in meters
+	 * @param accuracy        the accuracy in meters
 	 * @param normalDirection <code></code> if going smaller to larger z
 	 */
 	public DefaultZStopper(double s0, double sMax, double targetZ, double accuracy, boolean normalDirection) {
@@ -35,11 +35,11 @@ public class DefaultZStopper implements IStopper {
 	
 	/**
 	 * Z stopper that checks Rmax (and sMax)
-	 * @param s0 starting path length in meters
-	 * @param rMax maximal radius in meters
-	 * @param sMax maximal path length in meters
-	 * @param targetZ stopping Z in meters
-	 * @param accuracy the accuracy in meters
+	 * @param s0              starting path length in meters
+	 * @param rMax            maximal radius in meters
+	 * @param sMax            maximal path length in meters
+	 * @param targetZ         stopping Z in meters
+	 * @param accuracy        the accuracy in meters
 	 * @param normalDirection <code></code> if going smaller to larger z
 	 */
 	public DefaultZStopper(double s0, double rMax, double sMax, double targetZ, double accuracy, boolean normalDirection) {
@@ -113,7 +113,7 @@ public class DefaultZStopper implements IStopper {
 
 	/**
 	 * Is the current z within accuracy
-	 * @param z current z
+	 * @param z        current z
 	 * @param accuracy accuracy
 	 * @return <code>true</code> if current z with accuracy
 	 */
