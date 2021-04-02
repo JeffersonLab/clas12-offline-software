@@ -38,7 +38,7 @@ public class CrossListFinder  {
     public CrossList candCrossLists(DataEvent event,
             List<Cross> dccrosslist, boolean TimeBased, 
             IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde, 
-            Swim swimmer) {
+            Swim swimmer, boolean FOOS) {
         //List<List<Cross>> trkCnds = new ArrayList<List<Cross>>();
         trkCnds.clear();
 
@@ -79,7 +79,12 @@ public class CrossListFinder  {
                                 this.clear(X, Y, Z, errX, errY);
                                 continue;
                             }
-
+                            if(FOOS==true) {
+                                if(c1.get_Id()!=-1 && c2.get_Id()!=-1 && c3.get_Id()!=-1) {
+                                    this.clear(X, Y, Z, errX, errY);
+                                    continue;
+                                }
+                            }
                             Z[0] = c1.get_Point().z();
                             Y[0] = c1.get_Point().y();
                             X[0] = c1.get_Point().x();

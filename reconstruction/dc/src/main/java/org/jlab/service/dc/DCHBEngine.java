@@ -221,7 +221,7 @@ public class DCHBEngine extends DCEngine {
                 super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST),
                 dcDetector,
                 null,
-                dcSwim);
+                dcSwim, false);
         /* 18 */
         //6) find the list of  track candidates
         TrackCandListFinder trkcandFinder = new TrackCandListFinder(Constants.HITBASE);
@@ -307,8 +307,8 @@ public class DCHBEngine extends DCEngine {
                 super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST),
                 dcDetector,
                 null,
-                dcSwim);
-        pcrosslist.removeDuplicates(crosslist);
+                dcSwim, true);
+        //pcrosslist.removeDuplicates(crosslist);
         List<Track> mistrkcands = trkcandFinder.getTrackCands(pcrosslist,
                 dcDetector,
                 Swimmer.getTorScale(),

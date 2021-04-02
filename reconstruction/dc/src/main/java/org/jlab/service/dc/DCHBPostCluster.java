@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.swimtools.Swimmer;
 import org.jlab.io.base.DataBank;
@@ -214,7 +216,7 @@ public class DCHBPostCluster extends DCEngine {
                     super.getConstantsManager().getConstants(Run.get(), Constants.TIME2DIST),
                     dcDetector,
                     null,
-                    dcSwim);
+                    dcSwim, false);
             /* 18 */
             //6) find the list of  track candidates
             TrackCandListFinder trkcandFinder = new TrackCandListFinder(Constants.HITBASE);
@@ -305,8 +307,8 @@ public class DCHBPostCluster extends DCEngine {
                     super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST),
                     dcDetector,
                     null,
-                    dcSwim);
-            pcrosslist.removeDuplicates(crosslist); 
+                    dcSwim, true);
+            //pcrosslist.removeDuplicates(crosslist); 
             
             List<Track> mistrkcands = trkcandFinder.getTrackCands(pcrosslist,
                     dcDetector,
@@ -354,12 +356,25 @@ public class DCHBPostCluster extends DCEngine {
                     for (FittedHit h1 : c.get_Segment1()) {
                         h1.setSignalPropagTimeAlongWire(dcDetector);
                         h1.setSignalTimeOfFlight(); 
-                        fhits.add(h1);
+                        FittedHit h1c;
+                        try {
+                            h1c = h1.clone();
+                            fhits.add(h1c);
+                        } catch (CloneNotSupportedException ex) {
+                            Logger.getLogger(DCHBPostCluster.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        
                     }
                     for (FittedHit h2 : c.get_Segment2()) {
                         h2.setSignalPropagTimeAlongWire(dcDetector);
                         h2.setSignalTimeOfFlight(); 
-                        fhits.add(h2);
+                        FittedHit h2c;
+                        try {
+                            h2c = h2.clone();
+                            fhits.add(h2c);
+                        } catch (CloneNotSupportedException ex) {
+                            Logger.getLogger(DCHBPostCluster.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
                 }
             }

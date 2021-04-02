@@ -1004,6 +1004,9 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             hitClone.setTStart(this.getTStart());
             hitClone.setTProp(this.getTProp());
             hitClone.setTFlight(this.getTFlight());
+            hitClone._SignalPropagAlongWire = this._SignalPropagAlongWire;
+            hitClone._SignalPropagTimeAlongWire = this._SignalPropagTimeAlongWire;
+            hitClone._SignalTimeOfFlight = this._SignalTimeOfFlight;
             hitClone.set_Time(this.get_Time());
             hitClone.set_Id(this.get_Id());
             hitClone.set_ClusFitDoca(this.get_ClusFitDoca());

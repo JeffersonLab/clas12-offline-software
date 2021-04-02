@@ -36,15 +36,17 @@ public class CrossMaker {
             {
                 // looping over all segments
                 for (Segment seg1 : allSegments) { // first segment
-                    if(seg1.isOnTrack==true)
-                        continue;
+                    //if(seg1.isOnTrack==true)
+                    //    continue;
                     if (seg1.get_Sector() == s + 1 && seg1.get_RegionSlayer() == 1 && seg1.get_Region() == r + 1) { 
                         for (Segment seg2 : allSegments) { //second segment
-                            if(seg2.isOnTrack==true)
-                                continue;
                             if (seg2.equals(seg1)) {
                                 continue;
                             } 
+                            
+                            if(seg1.isOnTrack==true && seg2.isOnTrack==true && seg1.associatedCrossId==seg2.associatedCrossId)
+                                continue;
+                            
                             //if(seg1.associatedCrossId!=-1 && seg1.associatedCrossId==seg2.associatedCrossId) {
                             //    continue;
                             //}
@@ -52,15 +54,13 @@ public class CrossMaker {
                                 if (seg1.isCloseTo(seg2) && seg2.hasConsistentSlope(seg1)) {
                                     Cross cross = new Cross(s + 1, r + 1, rid++);
                                     cross.set_Id(seg1.get_Id()*1000+seg2.get_Id());
-                                    Segment seg1c = (Segment) seg1.clone();
-                                    Segment seg2c = (Segment) seg2.clone();
-                                    cross.add(seg1c);
-                                    cross.add(seg2c);
-                                    cross.set_Segment1(seg1c);
-                                    cross.set_Segment2(seg2c);
+                                    cross.add(seg1);
+                                    cross.add(seg2);
+                                    cross.set_Segment1(seg1);
+                                    cross.set_Segment2(seg2);
                                     cross.set_CrossParams(DcDetector);
-                                    seg1c.associatedCrossId = cross.get_Id();
-                                    seg2c.associatedCrossId = cross.get_Id();
+                                    seg1.associatedCrossId = cross.get_Id();
+                                    seg2.associatedCrossId = cross.get_Id();
                                     Point3D CS = cross.getCoordsInSector(cross.get_Point().x(), cross.get_Point().y(), cross.get_Point().z());
 
                                     if (CS.x() > 0) {

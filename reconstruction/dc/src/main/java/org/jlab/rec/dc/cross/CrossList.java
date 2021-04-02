@@ -1,8 +1,11 @@
 package org.jlab.rec.dc.cross;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-
+import java.util.Map;
 /**
  * List of DC crosses used to fit a track candidate
  */
@@ -14,20 +17,29 @@ public class CrossList extends ArrayList<List<Cross>> {
     private static final long serialVersionUID = 8509791607282273163L;
 
     public void removeDuplicates(CrossList crosslist) {
-
-        int size = this.size();
-        for(int i = 0; i< size; i++) {
+        Map<String, ArrayList<Cross>> crosslistUniq = new HashMap<String, ArrayList<Cross>>();
+        for(int i = 0; i< this.size(); i++) {
+            List<Cross> thisList = this.get(i);
             for(int j = 0; j< crosslist.size(); j++) {
-                List<Cross> thisList = this.get(i);
                 List<Cross> otherList = crosslist.get(j);
-                if(thisList.get(0).get_Id()==otherList.get(0).get_Id() ||
-                        thisList.get(1).get_Id()==otherList.get(1).get_Id() ||
-                            thisList.get(2).get_Id()==otherList.get(2).get_Id()) {
-                    this.remove(thisList);
-                    size--;
+                if(!(thisList.get(0).get_Id()==otherList.get(0).get_Id() &&
+                        thisList.get(1).get_Id()==otherList.get(1).get_Id() &&
+                            thisList.get(2).get_Id()==otherList.get(2).get_Id())) {
+                    String s = "";
+                    s+=thisList.get(0).get_Id()+thisList.get(1).get_Id()+thisList.get(2).get_Id();
+                    crosslistUniq.put(s, (ArrayList<Cross>) thisList);
                 }
             }
         }
+        this.clear();
+        Iterator<Map.Entry<String, ArrayList<Cross>>> itr = crosslistUniq.entrySet().iterator(); 
+        while(itr.hasNext()) {
+            Map.Entry<String, ArrayList<Cross>> entry = itr.next(); 
+            List<Cross> addedList = entry.getValue();
+            this.add(addedList); 
+        }
     }
 
+    
+    
 }

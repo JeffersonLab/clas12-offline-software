@@ -51,6 +51,7 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
         segClone._Status = this._Status;
         segClone._SegmentEndPoints = this._SegmentEndPoints;
         segClone.associatedCrossId = this.associatedCrossId;
+        segClone.isOnTrack = this.isOnTrack;
         return segClone;
     }
 	
