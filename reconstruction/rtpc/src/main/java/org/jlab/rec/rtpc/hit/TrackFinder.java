@@ -8,6 +8,7 @@ package org.jlab.rec.rtpc.hit;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -168,6 +169,30 @@ public class TrackFinder {
                 List<Integer> times = t.getAllTimeSlices();
                 Collections.sort(times);
                 if(times.get(times.size()-1) - times.get(0) > TFtotaltracktimeflag) t.flagTrack();
+		TRACKTIMELOOP:
+                for(int tx : times){
+                    List<Integer> pads = t.getTimeSlice(tx);
+                    if(pads.size() > 1){
+                        
+                        Collections.sort(pads, new Comparator<Integer>(){
+                            @Override 
+				public int compare(Integer p1, Integer p2){
+                                PadVector pv1 = params.get_padvector(p1);
+                                PadVector pv2 = params.get_padvector(p2);
+                                return Double.compare(pv2.z(),pv1.z());
+                            }
+			    });
+
+                        for(int index = 1; index < pads.size(); index ++){
+                            PadVector pparent = params.get_padvector(pads.get(index - 1));
+                            PadVector p = params.get_padvector(pads.get(index));
+                            if(!tutil.comparePads(pparent, p, method, cosmic, zthresh, zthreshgap, phithresh, phithreshgap)){
+                                t.flagTrack();
+                                break TRACKTIMELOOP;
+                            }
+                        }
+                    }
+                }
             }
         }
         

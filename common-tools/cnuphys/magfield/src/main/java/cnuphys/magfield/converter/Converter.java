@@ -11,6 +11,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 import cnuphys.magfield.FloatVect;
+import cnuphys.magfield.GridCoordinate;
+import cnuphys.magfield.MagneticFields;
+import cnuphys.magfield.Solenoid;
+import cnuphys.magfield.Torus;
 
 /**
  * Convert the new ascii maps to the old ascii format so that they can then be
@@ -227,34 +231,8 @@ public class Converter {
 			float rhomax = (float) gdata[RHO].max;
 			float zmin = (float) gdata[Z].min;
 			float zmax = (float) gdata[Z].max;
-
-			dos.writeInt(0xced);
-			dos.writeInt(0);
-			dos.writeInt(1);
-			dos.writeInt(0);
-			dos.writeInt(0);
-			dos.writeInt(0);
-			dos.writeFloat(phimin);
-			dos.writeFloat(phimax);
-			dos.writeInt(nPhi);
-			dos.writeFloat(rhomin);
-			dos.writeFloat(rhomax);
-			dos.writeInt(nRho);
-			dos.writeFloat(zmin);
-			dos.writeFloat(zmax);
-			dos.writeInt(nZ);
-
-			long unixTime = System.currentTimeMillis();
-
-			int high = (int) (unixTime >> 32);
-			int low = (int) unixTime;
-
-			// write reserved
-			dos.writeInt(high); // first word of unix time
-			dos.writeInt(low); // second word of unix time
-			dos.writeInt(0);
-			dos.writeInt(0);
-			dos.writeInt(0);
+			
+			MagneticFields.writeHeader(dos, 0, 1, 0, 0, 0, phimin, phimax, nPhi, rhomin, rhomax, nRho, zmin, zmax, nZ);
 
 			int size = 3 * 4 * nPhi * nRho * nZ;
 			System.err.println("FILE SIZE = " + size + " bytes");
@@ -292,9 +270,9 @@ public class Converter {
 									System.err.println(
 											"PHIINDX: " + phiIndex + "  RHOINDX: " + rhoIndex + "  ZINDX:  " + iVal);
 
-									double x = Double.parseDouble(tokens[0]) /10;
-									double y = Double.parseDouble(tokens[1]) /10;
-									double z = Double.parseDouble(tokens[2]) /10;
+									double x = Double.parseDouble(tokens[0]) / 10;
+									double y = Double.parseDouble(tokens[1]) / 10;
+									double z = Double.parseDouble(tokens[2]) / 10;
 									double phi = Math.toDegrees(Math.atan2(y, x));
 									double rho = Math.hypot(x, y);
 									System.err.println("PHI: " + phi + "   rho: " + rho + "   z: " + z);
@@ -506,29 +484,131 @@ public class Converter {
 			writer.println(line);
 		}
 	}
-
-	public static void main(String arg[]) {
-		String dataDir = getDataDir();
-
-		ArrayList<File> files = dataFiles(dataDir);
-		System.out.println("data dir = [" + dataDir + "]  file count: " + files.size());
-
-		// preprocess to get the grid data
-		GridData gdata[] = null;
+	
+	public static void convertGEMCtoBinary(String name) {
+		File mfdir = new File(System.getProperty("user.home"), "magfield");
+		File file = new File(mfdir, name);
+		
+		File bfile = new File(mfdir, "gemcToBinary.dat");
+		DataOutputStream dos0 = null;
 		try {
-			gdata = preProcessor(files);
+			dos0 = new DataOutputStream(new FileOutputStream(bfile));
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+			System.exit(1);
+		}
+		final DataOutputStream dos = dos0;
 
-			System.out.println("PHI: " + gdata[PHI]);
-			System.out.println("RHO: " + gdata[RHO]);
-			System.out.println("Z: " + gdata[Z]);
+		int nPhi = 16;
+		int nRho = 2501;
+		int nZ = 251;
+		MagneticFields.writeHeader(dos, 0, 1, 0, 0, 0, 0, 30, nPhi, 0, 500, nRho, 100, 600, nZ);
 
-		} catch (Exception e) {
+		
+		try {
+			AsciiReader reader = new AsciiReader(file) {
+				
+				int count = 0;
+				
+				@Override
+				protected void processLine(String line) {
+					
+					if (line.startsWith("<")) {
+						return;
+					}
+										
+					if (count < 20) {
+						System.err.println("[" + line + "]");
+					}
+					count++;
+					
+					String tokens[] = AsciiReadSupport.tokens(line);
+					if (tokens.length != 6) {
+						System.err.println("BAD TOKENS");
+						System.exit(1);
+					}
+					
+					float bx = Float.parseFloat(tokens[3]);
+					float by = Float.parseFloat(tokens[4]);
+					float bz = Float.parseFloat(tokens[5]);
+
+					try {
+						dos.writeFloat(bx);
+						dos.writeFloat(by);
+						dos.writeFloat(bz);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					
+					if ((count % 10000) == 0) {
+						System.err.println("count = " + count);
+					}
+				}
+
+				@Override
+				public void done() {
+					System.err.println("final count = " + count);				
+					try {
+						dos.flush();
+						dos.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+
+				
+			};
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
+		
+		
 
-		convertToBinary(files, gdata);
-		// convertToGemc(files, gdata);
+	}
+	
+	/**
+	 * Convert a composite index back to the coordinate indices
+	 * 
+	 * @param index    the composite index.
+	 * @param qindices the coordinate indices
+	 */
+private static void getCoordinateIndices(int index, int N1, int N2, int N3, int qindices[]) {
+		int n3 = index % N3;
+		index = (index - n3) / N3;
 
+		int n2 = index % N2;
+		int n1 = (index - n2) / N2;
+		qindices[0] = n1;
+		qindices[1] = n2;
+		qindices[2] = n3;
+	}
+
+
+	public static void main(String arg[]) {
+//		String dataDir = getDataDir();
+//
+//		ArrayList<File> files = dataFiles(dataDir);
+//		System.out.println("data dir = [" + dataDir + "]  file count: " + files.size());
+//
+//		// preprocess to get the grid data
+//		GridData gdata[] = null;
+//		try {
+//			gdata = preProcessor(files);
+//
+//			System.out.println("PHI: " + gdata[PHI]);
+//			System.out.println("RHO: " + gdata[RHO]);
+//			System.out.println("Z: " + gdata[Z]);
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//
+//		convertToBinary(files, gdata);
+//		// convertToGemc(files, gdata);
+
+		convertGEMCtoBinary("April_24_TorusSymmetric.txt");
 		System.out.println("done");
 	}
 
@@ -554,6 +634,218 @@ public class Converter {
 
 		public double del() {
 			return (max - min) / (n - 1);
+		}
+
+	}
+	
+	/**
+	 * Convert the in memory solenoid to GEMC format
+	 */
+	public static void memoryToGEMCSolenoidConverter() {
+		Solenoid solenoid = MagneticFields.getInstance().getSolenoid();
+		if (solenoid == null) {
+			System.err.println("No in-map solenoid.");
+			System.exit(-1);
+		}
+		
+		String mapCreationDate = solenoid.getCreationDate();
+		mapCreationDate=  mapCreationDate.replace("/", "_");
+		mapCreationDate=  mapCreationDate.replace(":", "_");
+		mapCreationDate=  mapCreationDate.replace(" ", "_");
+		
+
+		File afile = new File(getDataDir(), "gemc_solenoid_" + mapCreationDate + ".dat");
+		System.out.println("GEMC file at [" + afile.getPath() + "]");
+
+		if (afile.exists()) {
+			afile.delete();
+		}
+		
+		GridCoordinate gcR = solenoid.getQ2Coordinate();
+		GridCoordinate gcZ = solenoid.getQ3Coordinate();
+		
+		int nR = gcR.getNumPoints();
+		int nZ = gcZ.getNumPoints();
+		
+		double rMin = gcR.getMin()/100.;  //meters
+		double rMax = gcR.getMax()/100.;  //meters
+		double zMin = gcZ.getMin()/100.;  //meters
+		double zMax = gcZ.getMax()/100.;  //meters
+
+		try {
+			PrintWriter writer = new PrintWriter(new FileOutputStream(afile));
+			
+			// write the header
+
+			int indentLevel = 0;
+			writeln(writer, indentLevel, false, "<mfield>");
+			indentLevel++;
+
+			writeln(writer, indentLevel, true, "description name=\"" + "clas12-newSolenoid"
+					+ "\" factory=\"ASCII\" comment=\"clas12 superconducting solenoid\"");
+
+			writeln(writer, indentLevel, true,
+					"symmetry type=\"" + "cylindrical-z\""
+							+ " format=\"map\" integration=\"ClassicalRK4\" minStep=\"0.01*mm\"");
+
+			writeln(writer, indentLevel, false, "<map>");
+			indentLevel++;
+
+			writeln(writer, indentLevel, false, "<coordinate>");
+			indentLevel++;
+			
+			
+			String s1 = String.format("<%s name=\"%s\" npoints=\"%d\" min=\"%d\" max=\"%d\" units=\"%s\"/>", "first", "transverse", nR, (int)rMin, (int)rMax, "m");
+			String s2 = String.format("<%s name=\"%s\" npoints=\"%d\" min=\"%d\" max=\"%d\" units=\"%s\"/>", "second", "longitudinal", nZ, (int)zMin, (int)zMax, "m");
+
+			writeln(writer, indentLevel, false, s1);
+			writeln(writer, indentLevel, false, s2);
+
+			indentLevel--;
+			writeln(writer, indentLevel, false, "</coordinate>");
+
+			writeln(writer, indentLevel, true, "field unit=\"T\"");
+
+			indentLevel--;
+			writeln(writer, indentLevel, false, "</map>");
+
+			indentLevel--;
+			writeln(writer, indentLevel, false, "</mfield>");
+			
+			
+			double valuesR[] = gcR.getValues();
+			double valuesZ[] = gcZ.getValues();
+			
+			for (int iR = 0; iR < valuesR.length; iR++) {
+				double r = valuesR[iR];
+				for (int iZ = 0; iZ < valuesZ.length; iZ++) {
+					double z = valuesZ[iZ];
+					
+					int compIndex = solenoid.getCompositeIndex(0, iR, iZ);
+					
+					double bR = solenoid.getB2(compIndex);
+					double bZ = solenoid.getB3(compIndex);
+					
+					String s = String.format("%-6.3f %-6.3f %-11.5e %-11.5e", r/100, z/100, bR/10, bZ/10);
+					writeln(writer, 0, false, s);
+				}				
+			}
+						
+			
+			writer.flush();
+			writer.close();
+
+
+		}
+		catch (Exception e) {
+			
+		}
+
+	}
+	
+	
+	/**
+	 * Convert the in memory torus to GEMC format
+	 */
+	public static void memoryToGEMCTorusConverter() {
+		Torus torus = MagneticFields.getInstance().getTorus();
+		if (torus == null) {
+			System.err.println("No in-map torus.");
+			System.exit(-1);
+		}
+		
+		String mapCreationDate = torus.getCreationDate();
+		mapCreationDate=  mapCreationDate.replace("/", "_");
+		mapCreationDate=  mapCreationDate.replace(":", "_");
+		mapCreationDate=  mapCreationDate.replace(" ", "_");
+		
+
+		File afile = new File(getDataDir(), "gemc_torus_" + mapCreationDate + ".dat");
+		System.out.println("GEMC file at [" + afile.getPath() + "]");
+
+		if (afile.exists()) {
+			afile.delete();
+		}
+		
+		GridCoordinate gcP = torus.getQ1Coordinate();
+		GridCoordinate gcR = torus.getQ2Coordinate();
+		GridCoordinate gcZ = torus.getQ3Coordinate();
+		
+		int nR = gcR.getNumPoints();
+		int nZ = gcZ.getNumPoints();
+		
+		double rMin = gcR.getMin()/100.;  //meters
+		double rMax = gcR.getMax()/100.;  //meters
+		double zMin = gcZ.getMin()/100.;  //meters
+		double zMax = gcZ.getMax()/100.;  //meters
+
+		try {
+			PrintWriter writer = new PrintWriter(new FileOutputStream(afile));
+			
+			// write the header
+
+			int indentLevel = 0;
+			writeln(writer, indentLevel, false, "<mfield>");
+			indentLevel++;
+
+			writeln(writer, indentLevel, true, "description name=\"" + "clas12-newSolenoid"
+					+ "\" factory=\"ASCII\" comment=\"clas12 superconducting solenoid\"");
+
+			writeln(writer, indentLevel, true,
+					"symmetry type=\"" + "cylindrical-z\""
+							+ " format=\"map\" integration=\"ClassicalRK4\" minStep=\"0.01*mm\"");
+
+			writeln(writer, indentLevel, false, "<map>");
+			indentLevel++;
+
+			writeln(writer, indentLevel, false, "<coordinate>");
+			indentLevel++;
+			
+			
+			String s1 = String.format("<%s name=\"%s\" npoints=\"%d\" min=\"%d\" max=\"%d\" units=\"%s\"/>", "first", "transverse", nR, (int)rMin, (int)rMax, "m");
+			String s2 = String.format("<%s name=\"%s\" npoints=\"%d\" min=\"%d\" max=\"%d\" units=\"%s\"/>", "second", "longitudinal", nZ, (int)zMin, (int)zMax, "m");
+
+			writeln(writer, indentLevel, false, s1);
+			writeln(writer, indentLevel, false, s2);
+
+			indentLevel--;
+			writeln(writer, indentLevel, false, "</coordinate>");
+
+			writeln(writer, indentLevel, true, "field unit=\"T\"");
+
+			indentLevel--;
+			writeln(writer, indentLevel, false, "</map>");
+
+			indentLevel--;
+			writeln(writer, indentLevel, false, "</mfield>");
+			
+//			
+//			double valuesR[] = gcR.getValues();
+//			double valuesZ[] = gcZ.getValues();
+//			
+//			for (int iR = 0; iR < valuesR.length; iR++) {
+//				double r = valuesR[iR];
+//				for (int iZ = 0; iZ < valuesZ.length; iZ++) {
+//					double z = valuesZ[iZ];
+//					
+//					int compIndex = solenoid.getCompositeIndex(0, iR, iZ);
+//					
+//					double bR = solenoid.getB2(compIndex);
+//					double bZ = solenoid.getB3(compIndex);
+//					
+//					String s = String.format("%-6.3f %-6.3f %-11.8f %-11.8f", r/100, z/100, bR/10, bZ/10);
+//					writeln(writer, 0, false, s);
+//				}				
+//			}
+//						
+			
+			writer.flush();
+			writer.close();
+
+
+		}
+		catch (Exception e) {
+			
 		}
 
 	}

@@ -6,7 +6,6 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
@@ -38,46 +37,46 @@ public class CurveDrawer {
 
 	private static final Color _transGray = new Color(80, 80, 80, 16);
 
-	public static void drawHisto2D(Graphics g, PlotCanvas canvas,
-			DataColumn histoColumn) {
+	public static void drawHisto2D(Graphics g, PlotCanvas canvas, DataColumn histoColumn) {
 		Histo2DData hd2 = histoColumn.getHistoData2D();
-		
+
 		long maxCount = hd2.getMaxCount();
 		if (maxCount < 1) {
 			return;
 		}
-		
+
 		long counts[][] = hd2.getCounts();
-		
+
 		Gradient gradient = canvas.getGradient();
-		
+
 		Rectangle r = new Rectangle();
 		for (int xbin = 0; xbin < hd2.getNumberBinsX(); xbin++) {
 			for (int ybin = 0; ybin < hd2.getNumberBinsY(); ybin++) {
 				long count = counts[xbin][ybin];
-				double fract = ((double)count)/maxCount;
-								
+				double fract = ((double) count) / maxCount;
+
 				Color color = gradient.getColor(fract);
-				
+
 				Rectangle2D.Double wrect = hd2.getRectangle(xbin, ybin);
 //				System.err.println("WR: " + wrect);
 				canvas.worldToLocal(r, wrect);
-				
-				g.setColor(color);;
+
+				g.setColor(color);
+				;
 				g.fillRect(r.x, r.y, r.width, r.height);
-				
+
 			}
 		}
 	}
+
 	/**
 	 * Draw a 1D histogram
 	 * 
-	 * @param g the graphics context
-	 * @param plotCanvas the plot canvas
+	 * @param g           the graphics context
+	 * @param plotCanvas  the plot canvas
 	 * @param histoColumn the column (should contain a HistData object)
 	 */
-	public static void drawHisto1D(Graphics g, PlotCanvas canvas,
-			DataColumn histoColumn) {
+	public static void drawHisto1D(Graphics g, PlotCanvas canvas, DataColumn histoColumn) {
 
 		if (!histoColumn.isVisible()) {
 			return;
@@ -91,16 +90,15 @@ public class CurveDrawer {
 		g.setColor(style.getFillColor());
 		g.fillPolygon(poly);
 
-		Color lineColor = style.getLineColor();
-		Color borderColor;
-		if (lineColor == null) {
+		Color borderColor = style.getBorderColor();
+		if (borderColor == null) {
 			borderColor = _transGray;
 		}
 		else {
-			borderColor = new Color(lineColor.getRed(), lineColor.getGreen(),
-					lineColor.getBlue(), 16);
+			// borderColor = new Color(borderColor.getRed(), borderColor.getGreen(),
+			// borderColor.getBlue(), 16);
 		}
-		g.setColor(style.getLineColor());
+		g.setColor(borderColor);
 		g.drawPolygon(poly);
 
 		long counts[] = hd.getCounts();
@@ -153,8 +151,7 @@ public class CurveDrawer {
 		int n = poly.npoints;
 		g.setColor(borderColor);
 		for (int i = 0; i < n; i++) {
-			g.drawLine(poly.xpoints[i], poly.ypoints[i], poly.xpoints[i],
-					b.y + b.height);
+			g.drawLine(poly.xpoints[i], poly.ypoints[i], poly.xpoints[i], b.y + b.height);
 		}
 
 	}
@@ -162,29 +159,27 @@ public class CurveDrawer {
 	/**
 	 * Draw a curve with no error bars
 	 * 
-	 * @param g the graphics context
+	 * @param g          the graphics context
 	 * @param plotCanvas the plot canvas
-	 * @param xcol the x data column
-	 * @param ycol the y data column
+	 * @param xcol       the x data column
+	 * @param ycol       the y data column
 	 */
-	public static void drawCurve(Graphics g, PlotCanvas plotCanvas,
-			DataColumn xcol, DataColumn ycol) {
+	public static void drawCurve(Graphics g, PlotCanvas plotCanvas, DataColumn xcol, DataColumn ycol) {
 		drawCurve(g, plotCanvas, xcol, ycol, null, null);
 	}
 
 	/**
 	 * Draw a curve with x and y error bars
 	 * 
-	 * @param g the graphics context
+	 * @param g          the graphics context
 	 * @param plotCanvas the plot canvas
-	 * @param xcol the x data column
-	 * @param ycol the y data column
-	 * @param xerrCol the x error bar column (often <code>null</code>)
-	 * @param yerrCol the y error bar column
+	 * @param xcol       the x data column
+	 * @param ycol       the y data column
+	 * @param xerrCol    the x error bar column (often <code>null</code>)
+	 * @param yerrCol    the y error bar column
 	 */
-	public static void drawCurve(Graphics g, PlotCanvas plotCanvas,
-			DataColumn xcol, DataColumn ycol, DataColumn xerrCol,
-			DataColumn yerrCol) {
+	public static void drawCurve(Graphics g, PlotCanvas plotCanvas, DataColumn xcol, DataColumn ycol,
+			DataColumn xerrCol, DataColumn yerrCol) {
 
 		if (!ycol.isVisible()) {
 			return;
@@ -295,13 +290,11 @@ public class CurveDrawer {
 	}
 
 	// draw the fit
-	private static void drawFit(Graphics g, PlotCanvas plotCanvas, Fit yfit,
-			IStyled style) {
+	private static void drawFit(Graphics g, PlotCanvas plotCanvas, Fit yfit, IStyled style) {
 
 		if (yfit.size() < 2) {
 			return;
 		}
-
 
 		Point2D.Double wp = new Point2D.Double();
 		Point p0 = new Point();
@@ -310,16 +303,20 @@ public class CurveDrawer {
 		Graphics2D g2 = (Graphics2D) g;
 
 		Stroke oldStroke = g2.getStroke();
-		g2.setStroke(GraphicsUtilities.getStroke(style.getLineWidth(),
-				style.getLineStyle()));
-		
-		g2.setColor(style.getFitColor());
+		g2.setStroke(GraphicsUtilities.getStroke(style.getFitLineWidth(), style.getFitLineStyle()));
 
+		Color fitColor = style.getFitLineColor();
+		if (fitColor == null) {
+			return;
+		}
+		g2.setColor(fitColor);
 
 		double x[] = yfit.getX();
 		double y[] = yfit.getY();
 
-		switch (yfit.getFitType()) {
+		FitType fitType = yfit.getFitType();
+
+		switch (fitType) {
 		case NOLINE:
 			break;
 
@@ -351,7 +348,7 @@ public class CurveDrawer {
 				g2.setColor(style.getFillColor());
 				g.fillRect(p0.x, p0.y, p1.x - p0.x, bottom - p0.y);
 
-				g2.setColor(style.getFitColor());
+				g2.setColor(style.getFitLineColor());
 				g2.drawLine(p0.x, p0.y, p1.x, p0.y);
 				g2.drawLine(p1.x, p0.y, p1.x, p1.y);
 				p0.setLocation(p1);
@@ -362,7 +359,8 @@ public class CurveDrawer {
 			if (yfit.isDirty()) {
 				try {
 					FitUtilities.fitStraightLine(yfit);
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					System.err.println("Line Fit FAILED");
 					yfit.setDirty();
 					return;
@@ -383,7 +381,8 @@ public class CurveDrawer {
 				try {
 					// FitUtilities.doFit(yfit, "cnuphys.splot.fit.ErfFit");
 					FitUtilities.fitErf(yfit);
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					System.err.println("Erf Fit FAILED");
 					yfit.setDirty();
 					return;
@@ -402,7 +401,8 @@ public class CurveDrawer {
 					yfit.hold(1, 0.5);
 					// FitUtilities.doFit(yfit, "cnuphys.splot.fit.ErfcFit");
 					FitUtilities.fitErfc(yfit);
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					System.err.println("Erfc Fit FAILED");
 					yfit.setDirty();
 					return;
@@ -416,15 +416,14 @@ public class CurveDrawer {
 
 		case GAUSSIANS:
 			if (yfit.isDirty()) {
-				System.err.println("Gaussian fit with errors num: "
-						+ yfit.getNumGaussian());
+				System.err.println("Gaussian fit with errors num: " + yfit.getNumGaussian());
 				try {
 					// FitUtilities.doFit(yfit,
 					// "cnuphys.splot.fit.GaussianFit");
 					FitUtilities.fitGaussians(yfit);
-				} catch (Exception e) {
-					System.err
-							.println("Gaussian Fit FAILED: " + e.getMessage());
+				}
+				catch (Exception e) {
+					System.err.println("Gaussian Fit FAILED: " + e.getMessage());
 					yfit.setDirty();
 					return;
 				}
@@ -478,8 +477,7 @@ public class CurveDrawer {
 	}
 
 	// draw a value getter
-	private static void drawValueGetter(Graphics2D g, PlotCanvas plotCanvas,
-			IValueGetter ivg) {
+	private static void drawValueGetter(Graphics2D g, PlotCanvas plotCanvas, IValueGetter ivg) {
 
 		if (ivg == null) {
 			return;

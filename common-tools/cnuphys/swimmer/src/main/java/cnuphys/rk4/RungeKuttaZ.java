@@ -75,7 +75,7 @@ public class RungeKuttaZ {
 	 * @param relTolerance
 	 *            the error tolerance as fractional diffs. Note it is a vector,
 	 *            the same dimension of the problem, e.g., 6 for
-	 *            [x,y,z,vx,vy,vz].
+	 *                     [x,y,z,vx,vy,vz].
 	 * @param hdata
 	 *            if not null, should be double[3]. Upon return, hdata[0] is the
 	 *            min stepsize used, hdata[1] is the average stepsize used, and
@@ -204,14 +204,14 @@ public class RungeKuttaZ {
 	 *            specificity resides.
 	 * @param stopper
 	 *            if not <code>null</code> will be used to exit the integration
-	 *            early because some condition has been reached.
+	 *                 early because some condition has been reached.
 	 * @param listener
 	 *            listens for each step
 	 * @param advancer
 	 *            takes the next step
 	 * @param absError
 	 *            the absolute tolerance for eact of the state variables. Note
-	 *            it is a vector, the same
+	 *                 it is a vector, the same
 	 * @param hdata
 	 *            if not null, should be double[3]. Upon return, hdata[0] is the
 	 *            min stepsize used, hdata[1] is the average stepsize used, and
@@ -304,7 +304,7 @@ public class RungeKuttaZ {
 					throw (new RungeKuttaException("Step size too small in Runge Kutta driver (A)" +
 							"\nzo = " + to + "  zf = " + tf + "  h = " + h));
 				}
-			}
+				}
 			else { // accepted this step
 
 				if (hdata != null) {

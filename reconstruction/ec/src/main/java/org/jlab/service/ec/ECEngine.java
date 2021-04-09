@@ -58,6 +58,23 @@ public class ECEngine extends ReconstructionEngine {
         
         ECCommon.shareClustersEnergy(ecClusters);  // Repair 2 clusters which share the same peaks
        
+        for (int iCl = 0; iCl < ecClusters.size(); iCl++) {
+            // As clusters are already defined at this point, we can fill the clusterID of ECStrips belonging to the given cluster
+            // === U strips ===
+            for (ECStrip curStrip : ecClusters.get(iCl).getPeak(0).getStrips()) {
+                curStrip.setClusterId(iCl + 1);
+            }
+            // === V strips ===
+            for (ECStrip curStrip : ecClusters.get(iCl).getPeak(1).getStrips()) {
+                curStrip.setClusterId(iCl + 1);
+            }
+            // === W strips ===
+            for (ECStrip curStrip : ecClusters.get(iCl).getPeak(2).getStrips()) {
+                curStrip.setClusterId(iCl + 1);
+            }
+        }
+        
+        
         if (debug) {
             System.out.println(" STRIPS SIZE = " + ecStrips.size());
             for(ECStrip strip : ecStrips) System.out.println(strip);
@@ -102,6 +119,8 @@ public class ECEngine extends ReconstructionEngine {
             bankS.setByte("layer",   h,  (byte) strips.get(h).getDescriptor().getLayer());
             bankS.setByte("strip",   h,  (byte) strips.get(h).getDescriptor().getComponent());
             bankS.setByte("peakid",  h,  (byte) strips.get(h).getPeakId());
+            bankS.setShort("id", h, (short) strips.get(h).getID());
+            bankS.setShort("clusterId", h, (short) strips.get(h).getClusterId());
             bankS.setFloat("energy", h, (float) strips.get(h).getEnergy());
             bankS.setFloat("time",   h, (float) strips.get(h).getTime());                
         }

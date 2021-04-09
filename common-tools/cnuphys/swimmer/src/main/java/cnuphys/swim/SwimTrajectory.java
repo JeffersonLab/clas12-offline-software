@@ -1,10 +1,13 @@
 package cnuphys.swim;
 
+import java.io.PrintStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 
+import cnuphys.adaptiveSwim.AdaptiveSwimUtilities;
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.lund.LundId;
-import org.jlab.clas.clas.math.FastMath;
+import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.RotatedCompositeProbe;
 
@@ -17,9 +20,14 @@ import cnuphys.magfield.RotatedCompositeProbe;
  * @author heddle
  * 
  */
-@SuppressWarnings("serial")
-public class SwimTrajectory extends ArrayList<double[]> {
-	
+
+public class SwimTrajectory extends ArrayList<double[]>  implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3850772573951127304L;
+
 	// the particle that we swam
 	private GeneratedParticleRecord _genPartRec;
 
@@ -55,29 +63,38 @@ public class SwimTrajectory extends ArrayList<double[]> {
 
 	/** user object */
 	public Object userObject;
-	
+
 	/** The source of the trajectory e.g. hbtracking */
 	private String _source = "???";
 
 	/**
-	 * Create a one point trajectory. Used hrn the initial momentum is lower
-	 * than some minimum value.
+	 * Create a swim trajectory with no initial content
+	 */
+	public SwimTrajectory() {
+		super();
+	}
+	
+	/**
+	 * Clear the trajectory
+	 */
+	@Override
+	public void clear() {
+		super.clear();
+		_computedBDL = false;
+	}
+	
+	/**
+	 * Create a one point trajectory. Used hrn the initial momentum is lower than
+	 * some minimum value.
 	 * 
-	 * @param charge
-	 *            the charge of the particle (-1 for electron, +1 for proton,
-	 *            etc.)
-	 * @param xo
-	 *            the x vertex position in m
-	 * @param yo
-	 *            the y vertex position in m
-	 * @param zo
-	 *            the z vertex position in m
-	 * @param momentum
-	 *            initial momentum in GeV/c
-	 * @param theta
-	 *            initial polar angle in degrees
-	 * @param phi
-	 *            initial azimuthal angle in degrees
+	 * @param charge   the charge of the particle (-1 for electron, +1 for proton,
+	 *                 etc.)
+	 * @param xo       the x vertex position in m
+	 * @param yo       the y vertex position in m
+	 * @param zo       the z vertex position in m
+	 * @param momentum initial momentum in GeV/c
+	 * @param theta    initial polar angle in degrees
+	 * @param phi      initial azimuthal angle in degrees
 	 */
 	public SwimTrajectory(int charge, double xo, double yo, double zo, double momentum, double theta, double phi) {
 		this(charge, xo, yo, zo, momentum, theta, phi, 1);
@@ -98,26 +115,17 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		v[5] = pz;
 		add(0, v);
 	}
-	
-	
+
 	/**
-	 * @param charge
-	 *            the charge of the particle (-1 for electron, +1 for proton,
-	 *            etc.)
-	 * @param xo
-	 *            the x vertex position in m
-	 * @param yo
-	 *            the y vertex position in m
-	 * @param zo
-	 *            the z vertex position in m
-	 * @param momentum
-	 *            initial momentum in GeV/c
-	 * @param theta
-	 *            initial polar angle in degrees
-	 * @param phi
-	 *            initial azimuthal angle in degrees
-	 * @param initialCapacity
-	 *            the initial capacity of the trajectory list
+	 * @param charge          the charge of the particle (-1 for electron, +1 for
+	 *                        proton, etc.)
+	 * @param xo              the x vertex position in m
+	 * @param yo              the y vertex position in m
+	 * @param zo              the z vertex position in m
+	 * @param momentum        initial momentum in GeV/c
+	 * @param theta           initial polar angle in degrees
+	 * @param phi             initial azimuthal angle in degrees
+	 * @param initialCapacity the initial capacity of the trajectory list
 	 */
 	public SwimTrajectory(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
 			int initialCapacity) {
@@ -125,22 +133,38 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	}
 
 	/**
-	 * @param genPartRec
-	 *            the generated particle record
-	 * @param initialCapacity
-	 *            the initial capacity of the trajectory list
+	 * @param genPartRec      the generated particle record
+	 * @param initialCapacity the initial capacity of the trajectory list
 	 */
 	public SwimTrajectory(GeneratedParticleRecord genPartRec, int initialCapacity) {
 		super(initialCapacity);
+		
+		if (genPartRec == null) {
+			System.err.println("NULL GEN PART REC (A)");
+		}
+		
 		_genPartRec = genPartRec;
 	}
 
 	/**
-	 * Set the lund id. This is not needed for swimming, but is useful for ced
-	 * or when MonteCarlo truth is known.
+	 * Set the generated particle record
+	 * @param genPart the generated particle record
+	 */
+	public void setGeneratedParticleRecord(GeneratedParticleRecord genPart) {
+		
+		if (genPart == null) {
+			System.err.println("NULL GEN PART REC (A)");
+			(new Throwable()).printStackTrace();
+		}
+
+		
+		_genPartRec = genPart;
+	}
+	/**
+	 * Set the lund id. This is not needed for swimming, but is useful for ced or
+	 * when MonteCarlo truth is known.
 	 * 
-	 * @param lundId
-	 *            the Lund Id.
+	 * @param lundId the Lund Id.
 	 */
 	public void setLundId(LundId lundId) {
 		_lundId = lundId;
@@ -148,8 +172,8 @@ public class SwimTrajectory extends ArrayList<double[]> {
 
 	/**
 	 * Get the lund id. This is not needed for swimming, and may be
-	 * <code>null</code>. It is useful for ced or when MonteCarlo truth is
-	 * known. return the Lund Id.
+	 * <code>null</code>. It is useful for ced or when MonteCarlo truth is known.
+	 * return the Lund Id.
 	 */
 	public LundId getLundId() {
 		return _lundId;
@@ -182,9 +206,9 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		return _genPartRec.getPhi();
 	}
 
-	
 	/**
 	 * Get the r coordinate in cm for the given index
+	 * 
 	 * @param index the index
 	 * @return the r coordinate
 	 */
@@ -192,33 +216,53 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		if ((index < 0) || (index > size())) {
 			return Double.NaN;
 		}
-		
+
 		double v[] = get(index);
 		if (v == null) {
 			return Double.NaN;
 		}
-		
+
 		double x = v[0];
 		double y = v[1];
 		double z = v[2];
+
+		// convert to cm
+		return Math.sqrt(x * x + y * y + z * z) * 100.;
+	}
+
+	@Override
+	public boolean add(double u[]) {
+		if (u == null) {
+			return false;
+		}
 		
-		//convert to cm
-		return Math.sqrt(x*x + y*y + z*z)*100.;
+		int dim = u.length;
+		double ucopy[] = new double[dim];
+		System.arraycopy(u, 0, ucopy, 0, dim);
+		return super.add(ucopy);
 	}
 	
+	
+	public boolean add(double u[], double s) {
+		if (u == null) {
+			return false;
+		}
+		
+		int dim = u.length;
+		double ucopy[] = new double[dim+1];
+		System.arraycopy(u, 0, ucopy, 0, dim);
+		ucopy[dim] = s;
+		return super.add(ucopy);
+	}
+
+	
 	/**
-	 * @param xo
-	 *            the x vertex position in m
-	 * @param yo
-	 *            the y vertex position in m
-	 * @param zo
-	 *            the z vertex position in m
-	 * @param momentum
-	 *            initial momentum in GeV/c
-	 * @param theta
-	 *            initial polar angle in degrees
-	 * @param phi
-	 *            initial azimuthal angle in degrees
+	 * @param xo       the x vertex position in m
+	 * @param yo       the y vertex position in m
+	 * @param zo       the z vertex position in m
+	 * @param momentum initial momentum in GeV/c
+	 * @param theta    initial polar angle in degrees
+	 * @param phi      initial azimuthal angle in degrees
 	 */
 	public void add(double xo, double yo, double zo, double momentum, double theta, double phi) {
 		double thetRad = Math.toRadians(theta);
@@ -239,45 +283,44 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	}
 
 	/**
-	 * Get the average phi for this trajectory based on positions, not
-	 * directions
+	 * Get the average phi for this trajectory based on positions, not directions
 	 * 
 	 * @return the average phi value in degrees
 	 */
 	public double getAveragePhi() {
-		
+
 		double phi = getOriginalPhi();
 		if (size() < 6) {
 			return phi;
 		}
-		
+
 		double count = 1;
-		
+
 		int step = 1;
 		for (int i = step; i < size(); i += step) {
 			double pos[] = get(i);
 			double x = pos[X_IDX];
 			double y = pos[Y_IDX];
 			double tp = FastMath.atan2Deg(y, x);
-			
+
 			phi += tp;
 			count++;
 		}
 
 		return phi / count;
 	}
-		
+
 	/**
 	 * Get the last element
+	 * 
 	 * @return the last element
 	 */
 	public double[] lastElement() {
 		if (isEmpty()) {
 			return null;
 		}
-		return get(size()-1);
+		return get(size() - 1);
 	}
-	
 
 	/**
 	 * Get the final radial coordinate
@@ -306,7 +349,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 			return null;
 		}
 		double[] pos = new double[3];
-		double lastQ[] = get(this.size()-1);
+		double lastQ[] = get(this.size() - 1);
 //		double lastQ[] = lastElement();
 
 		for (int i = 0; i < 3; i++) {
@@ -314,20 +357,21 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		}
 		return pos;
 	}
-	
+
 	/**
 	 * Get the total BDL integral if computed
+	 * 
 	 * @return the total BDL integral in kG-m
 	 */
 	public double getComputedBDL() {
 		if (!_computedBDL) {
 			return Double.NaN;
 		}
-		
+
 		if (this.size() < 1) {
 			return 0;
 		}
-		
+
 		return this.lastElement()[BXDL_IDX];
 	}
 
@@ -337,20 +381,20 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	 * entry l is cumulative pathlength in m and the eighth entry bdl is the
 	 * cumulative integral bdl in kG-m.
 	 * 
-	 * @param probe
-	 *            the field getter
+	 * @param probe the field getter
 	 */
 	public void computeBDL(FieldProbe probe) {
 		if (_computedBDL) {
 			return;
 		}
-		
+
 		if (probe instanceof RotatedCompositeProbe) {
-			System.err.println("SHOULD NOT HAPPEN. In rotated composite field probe, should not call computeBDL without the sector argument.");
+			System.err.println(
+					"SHOULD NOT HAPPEN. In rotated composite field probe, should not call computeBDL without the sector argument.");
 
 			(new Throwable()).printStackTrace();
 			System.exit(1);
-			
+
 		}
 
 		Bxdl previous = new Bxdl();
@@ -361,7 +405,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		for (int i = 1; i < size(); i++) {
 			double[] p1 = get(i);
 			Bxdl.accumulate(previous, current, p0, p1, probe);
-			
+
 			augment(p1, current.getPathlength(), current.getIntegralBxdl(), i);
 			previous.set(current);
 			p0 = p1;
@@ -369,7 +413,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 
 		_computedBDL = true;
 	}
-	
+
 	/**
 	 * Compute the integral B cross dl. This will cause the state vector arrays to
 	 * expand by two, becoming [x, y, z, px/p, py/p, pz/p, l, bdl] where the 7th
@@ -377,14 +421,13 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	 * cumulative integral bdl in kG-m.
 	 * 
 	 * @param sector sector 1..6
-	 * @param probe
-	 *            the field getter
+	 * @param probe  the field getter
 	 */
 	public void sectorComputeBDL(int sector, RotatedCompositeProbe probe) {
 		if (_computedBDL) {
 			return;
 		}
-		
+
 		Bxdl previous = new Bxdl();
 		Bxdl current = new Bxdl();
 		double[] p0 = get(0);
@@ -393,7 +436,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		for (int i = 1; i < size(); i++) {
 			double[] p1 = get(i);
 			Bxdl.sectorAccumulate(sector, previous, current, p0, p1, probe);
-			
+
 			augment(p1, current.getPathlength(), current.getIntegralBxdl(), i);
 
 			previous.set(current);
@@ -401,7 +444,6 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		}
 		_computedBDL = true;
 	}
-
 
 	// replace the 6D state vector <at the given index with
 	// and 8D vector that appends pathelength (m) and integral
@@ -418,24 +460,24 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	/**
 	 * Check whether the accumulated integral bdl has been computed
 	 * 
-	 * @return <code>true</code> if the accumulated integral bdl has been
-	 *         computed
+	 * @return <code>true</code> if the accumulated integral bdl has been computed
 	 */
 	public boolean isBDLComputed() {
 		return _computedBDL;
 	}
-	
-	
+
 	/**
 	 * Get the source of the trajectory e.g. hbtracking
+	 * 
 	 * @return the source of the trajectory
 	 */
 	public String getSource() {
 		return _source;
 	}
-	
+
 	/**
 	 * Set the source of the trajectory e.g. hbtracking
+	 * 
 	 * @param source the source of the trajectory
 	 */
 	public void setSource(String source) {
@@ -444,6 +486,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 
 	/**
 	 * Get an array of elements of the state vector
+	 * 
 	 * @param index the desired element index
 	 * @return the array
 	 */
@@ -452,7 +495,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		if (size < 1) {
 			return null;
 		}
-		
+
 		double array[] = new double[size];
 		int i = 0;
 		for (double s[] : this) {
@@ -461,37 +504,51 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		}
 		return array;
 	}
-	
+
 	public double[] getX() {
 		double x[] = getArray(X_IDX);
 		if (x != null) {
 			for (int i = 0; i < x.length; i++) {
-				x[i] *= 100.; //convert to cm
+				x[i] *= 100.; // convert to cm
 			}
 		}
 		return x;
 	}
-	
+
 	public double[] getY() {
 		double y[] = getArray(Y_IDX);
 		if (y != null) {
 			for (int i = 0; i < y.length; i++) {
-				y[i] *= 100.; //convert to cm
+				y[i] *= 100.; // convert to cm
 			}
 		}
 		return y;
 	}
-	
+
 	public double[] getZ() {
 		double z[] = getArray(Z_IDX);
 		if (z != null) {
 			for (int i = 0; i < z.length; i++) {
-				z[i] *= 100.; //convert to cm
+				z[i] *= 100.; // convert to cm
 			}
 		}
 		return z;
 	}
-
-
+	
+	public void print(PrintStream ps) {
+		ps.println("Number of trajectory points: " + size());
+		
+		int i = 0;
+		for (double[] u : this) {
+			++i;
+			double x = u[0];
+			double y = u[1];
+			double z = u[2];
+			double rho = FastMath.hypot(x, y);
+			double phi = FastMath.atan2Deg(y, x);
+			String str = String.format("[%d]    x (m): %-8.4f  y (m): %-8.4f  z (m): %-8.4f  phi (deg):  %-7.3f,  rho (m): %-8.4f,   sector: %d", i,  x, y, z, phi, rho,  AdaptiveSwimUtilities.getSector(phi));
+			ps.println(str);
+		}
+	}
 
 }
