@@ -5,8 +5,11 @@
  */
 package org.jlab.service.mltn;
 
+import j4ml.clas12.ejml.EJMLTrackNeuralNetwork;
 import j4ml.clas12.network.Clas12TrackFinder;
 import j4ml.clas12.tracking.ClusterCombinations;
+import java.util.HashMap;
+import java.util.Map;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -18,19 +21,33 @@ import org.jlab.io.hipo.HipoDataBank;
  */
 public class MLTDEngine extends ReconstructionEngine {
     
-    Clas12TrackFinder trackFinder = null;
-    
+
+    EJMLTrackNeuralNetwork network = null;
     public MLTDEngine(){
         super("MLTD","gavalian","1.0");
     }
-       
+    
+    private String getPathWithEnvironment(String envDirectory,String relative){
+       if(envDirectory==null) return relative;
+       if(System.getenv(envDirectory)!=null) return System.getenv(envDirectory)+"/"+relative;
+       if(System.getProperty(envDirectory)!=null) return System.getProperty(envDirectory)+"/"+relative;
+       return relative;
+    }
     @Override
     public boolean init() {
-        trackFinder = Clas12TrackFinder.createEJML("CLAS12DIR","etc/ejml/ejmlclas12.network");
+
+        network = new EJMLTrackNeuralNetwork();        
+        Map<String,String>  files = new HashMap<String,String>();
+        files.put("classifier", "trackClassifier.network");
+        files.put("fixer", "trackFixer.network");        
+        String path = getPathWithEnvironment("CLAS12DIR","etc/ejml/ejmlclas12.network");        
+        network.initZip(path, "network/5038", files);
+        //trackFinder = Clas12TrackFinder.createEJML("CLAS12DIR","etc/ejml/ejmlclas12.network");
         //classifier.setEnvDirectory("CLAS12DIR");
         //classifier.setEnvPath("etc/nnet/neuroph");
         //classifier.load("trackClassifier.nnet", "trackFixer.nnet");
         System.out.println("[neural-network] info : Loading neural network files done...");
+        System.out.println("[neural-network] info : Only network is initialized...");
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         return true;
     }
@@ -53,6 +70,8 @@ public class MLTDEngine extends ReconstructionEngine {
                 classifier.evaluate5(analyzer.getCombinationsPartial());
                 analyzer.analyze();
             }*/            
+            Clas12TrackFinder trackFinder = new Clas12TrackFinder();
+            trackFinder.setTrackingNetwork(network);
             trackFinder.process(hipoBank.getBank());            
             writeBank(de,trackFinder.getResults());          
             
