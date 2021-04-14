@@ -9,22 +9,22 @@ class GEMCCompare {
 	public int gn2;
 	public int gn3;
 
-	
-	public float gbx;
-	public float gby;
-	public float gbz;
+	//fields in clas system
+	public float bX;
+	public float bY;
+	public float bZ;
 	
 	private float[] bced = new float[3];
 	private int[] nced = new int[3];
 	
-	private boolean verbose = true;
+	private boolean verbose = false;
 	private FieldProbe _probe;
 	
 	private  double rho;
  
 	private double phi;
 	
-	public GEMCCompare(FieldProbe probe, float x, float y, float z, int gn1, int gn2, int gn3, float gbx, float gby, float gbz) {
+	public GEMCCompare(FieldProbe probe, float x, float y, float z, int gn1, int gn2, int gn3, float bx, float by, float bz) {
 		super();
 		_probe = probe;
 		this.x = x;
@@ -33,9 +33,9 @@ class GEMCCompare {
 		this.gn1 = gn1;
 		this.gn2 = gn2;
 		this.gn3 = gn3;
-		this.gbx = gbx;
-		this.gby = gby;
-		this.gbz = gbz;
+		this.bX = bx;
+		this.bY = by;
+		this.bZ = bz;
 		
 		//get "ced" nearest neighbor indices
 		
@@ -46,7 +46,8 @@ class GEMCCompare {
 		// relativePhi (-30, 30) phi relative to middle of sector
 		phi = Math.abs(relativePhi(phi));
 		
-		nearestNeighbor(phi, rho, z, bced, nced);
+		cedIndices(phi, rho, z, nced);
+		probe.field(x, y, z, bced);
 
 	}
 
@@ -55,11 +56,11 @@ class GEMCCompare {
 		String s1 = String.format("---------------\nxyz = (%7.3f, %7.3f, %7.3f) cm \n",
 				x, y, z);
 		
-		s1 += String.format("GEMC grid indices [%2d, %4d, %3d]\n",  gn1, gn2, gn3);
-		s1 += String.format(" CED grid indices [%2d, %4d, %3d]\n",  nced[0], nced[1], nced[2]);
+//		s1 += String.format("GEMC grid indices [%2d, %4d, %3d]\n",  gn1, gn2, gn3);
+//		s1 += String.format(" CED grid indices [%2d, %4d, %3d]\n",  nced[0], nced[1], nced[2]);
 
-		s1 += String.format("GEMC field (%12.5e, %12.5e, %12.5e) T\n",   gbx, gby, gbz);
-		s1 += String.format(" CED field (%12.5e, %12.5e, %12.5e) T\n",   bced[0]/10, bced[1]/10, bced[2]/10);
+		s1 += String.format("GEMC field (%11.4e, %11.4e, %11.4e) kG\n",   10*bX, 10*bY, 10*bZ);
+		s1 += String.format(" CED field (%11.4e, %11.4e, %11.4e) kG\n",   bced[0], bced[1], bced[2]);
 
 		
 		String s2 = "";
@@ -82,21 +83,21 @@ class GEMCCompare {
 			s2 += String.format("ced cell rho limits: %-7.3f to %-7.3f \n", q2Coord.getValue(n2), q2Coord.getValue(n2+1));
 			s2 += String.format("ced cell   z limits: %-7.3f to %-7.3f \n", q3Coord.getValue(n3), q3Coord.getValue(n3+1));
 
-			for (int i = 0; i < 2; i++ ) {
-				int nn1 = n1 + i;
-				for (int j = 0; j < 2; j++ ) {
-					int nn2 = n2 + j;
-					for (int k = 0; k < 2; k++ ) {
-						int nn3 = n3 + k;
-						int index = _probe.getCompositeIndex(nn1, nn2, nn3);
-						float bx = _probe.getB1(index)/10;
-						float by = _probe.getB2(index)/10;
-						float bz = _probe.getB3(index)/10;
-						
-						s2 += String.format("corner[%1d, %1d, %1d] field: (%12.5e, %12.5e, %12.5e)\n", i, j, k, bx, by, bz);
-					}
-				}
-			}
+//			for (int i = 0; i < 2; i++ ) {
+//				int nn1 = n1 + i;
+//				for (int j = 0; j < 2; j++ ) {
+//					int nn2 = n2 + j;
+//					for (int k = 0; k < 2; k++ ) {
+//						int nn3 = n3 + k;
+//						int index = _probe.getCompositeIndex(nn1, nn2, nn3);
+//						float bx = _probe.getB1(index);
+//						float by = _probe.getB2(index);
+//						float bz = _probe.getB3(index);
+//						
+//						s2 += String.format("corner[%1d, %1d, %1d] field: (%12.5e, %12.5e, %12.5e) kG\n", i, j, k, bx, by, bz);
+//					}
+//				}
+//			}
 			
 			
 		}
@@ -107,7 +108,7 @@ class GEMCCompare {
 	
 	
 	// nearest neighbor algorithm
-	private void nearestNeighbor(double phi, double rho, double z, float[] result, int indices[]) {
+	private void cedIndices(double phi, double rho, double z, int indices[]) {
 		
 		GridCoordinate q1Coord = _probe.q1Coordinate;
 		GridCoordinate q2Coord = _probe.q2Coordinate;
@@ -117,11 +118,6 @@ class GEMCCompare {
 		int n1 = q1Coord.getRoundedIndex(phi);
 		int n2 = q2Coord.getRoundedIndex(rho);
 		int n3 = q3Coord.getRoundedIndex(z);
-		
-		int index = _probe.getCompositeIndex(n1, n2, n3);
-		result[0] = _probe.getB1(index);
-		result[1] = _probe.getB2(index);
-		result[2] = _probe.getB3(index);
 		
 		indices[0] = n1;
 		indices[1] = n2;
