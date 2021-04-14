@@ -343,6 +343,16 @@ public class AdaptiveSwimResult {
 	}
 	
 	/**
+	 * get the final rho in meters
+	 * @return the final rho in meters
+	 */
+	public double getFinalRho() {
+		double x = _uf[0];
+		double y = _uf[1];
+		return Math.sqrt(x*x + y*y);
+	}
+	
+	/**
 	 * get the final phi in degrees
 	 * @return the final phi in degrees
 	 */

@@ -17,8 +17,8 @@ public class DefaultRhoStopper implements IStopper {
 	private double _accuracy;
 	private double[] _uf; //final state vector
 	private double _s0; //starting path length
-//	private int _prevRdot = 0;
-//	public boolean rdotChanged;
+	
+	private boolean _crossedBoundary;
 	
 	private int _dim;   //dimension of our system
 	
@@ -41,6 +41,7 @@ public class DefaultRhoStopper implements IStopper {
 		_dim = uo.length;
 		
 		_uf = new double[_dim];
+		copy(uo, _uf);
 		
 		_targetRho = targetRho;
 		_totS = 0;
@@ -48,6 +49,8 @@ public class DefaultRhoStopper implements IStopper {
 		_sMax = sMax;
 		_accuracy = accuracy;
 		_startSign = sign(rho0);
+		
+		
 	}
 	
 	//get the sign based on the current rho
@@ -55,6 +58,13 @@ public class DefaultRhoStopper implements IStopper {
 		return ((currentRho < _targetRho) ? -1 : 1);
 	}
 
+	/**
+	 * Did we cross the boundary
+	 * @return true if we crossed the boundary
+	 */
+	public boolean crossedBoundary() {
+		return _crossedBoundary;
+	}
 
 	//array copy for state vectors
 	private void copy(double src[], double[] dest) {
@@ -73,18 +83,18 @@ public class DefaultRhoStopper implements IStopper {
             copy(u, _uf);
 			return true;
 		}
+		
+		//if exceeded max path length stop
+		if (getFinalT() > _sMax) {
+			return true;
+		}
 
-		//stop (and backup/reset to prev) if we crossed the boundary or exceeded smax
-		if ((getFinalT() > _sMax) || (sign(currentRho) != _startSign)) {
+		//if we crossed the boundary reset
+		_crossedBoundary = sign(currentRho) != _startSign;
+		if (_crossedBoundary) {
 			_totS = _prevS;
 			return true;
 		}
-		
-//		int rdSign = rhoDotSign(u);
-//		if ((_prevRdot != 0) && (rdSign != 0) && (_prevRdot != rdSign)) {
-//			rdotChanged = true;;
-//		}
-//		_prevRdot = rdSign;
 		
 		//copy current to previous
 		_prevS = _totS;
@@ -118,23 +128,6 @@ public class DefaultRhoStopper implements IStopper {
 		return _uf;
 	}
 	
-//	public int rhoDotSign(double u[]) {
-//		double val = u[0]*u[3] + u[1]*u[4];
-//		if (val == 0) {
-//			System.err.println("ZERO!");
-//		}
-//		
-//		if (val < 0) {
-//			return -1;
-//		}
-//		else if (val > 0) {
-//			return 1;
-//		}
-//		else {
-//			return 0;
-//		}
-//	}
-
 	/**
 	 * Generally this is the same as stop integration. So most will just return
 	 * stopIntegration(). But sometimes stop just means we reset and integrate more.

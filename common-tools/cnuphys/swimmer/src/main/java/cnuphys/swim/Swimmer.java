@@ -237,16 +237,15 @@ public final class Swimmer {
 					break;
 				}
 			}
-	//		ns += swim(charge, uf[0], uf[1], uf[2], momentum, theta, phi, stopper, null, sFinal, sMax, stepSize, relTolerance, null);
-	//		ns += swim(charge, uf[0], uf[1], uf[2], momentum, theta, phi, stopper, null, sMax, stepSize, relTolerance, null);
+			
 			ns += swim(charge, uf[0], uf[1], uf[2], momentum, theta, phi, stopper, null, sMax-sFinal, stepSize, relTolerance, null);
-
 			
 			System.arraycopy(stopper.getFinalU(), 0, result.getUf(), 0, result.getUf().length);
 			
 			sFinal = stopper.getFinalT();
 			
 			double rholast = Math.hypot(result.getUf()[0], result.getUf()[1]);
+						
 			del = Math.abs(rholast - fixedRho);
 			
 			if ((sFinal) > sCutoff) {
@@ -255,19 +254,26 @@ public final class Swimmer {
 			}
 			
 			count++;
-			stepSize = Math.min(stepSize, (sMax-sFinal)/4);
-//			stepSize /= 2;
+			
+			if (stopper.crossedBoundary()) {
+				stepSize /= 2;
+			}
+			
+//			stepSize = Math.min(stepSize, (sMax-sFinal)/4);
+			
 			
 		} // while
 
 		result.setNStep(ns);
 		result.setFinalS(sFinal);
 
-		if (del < accuracy) {
-			result.setStatus(0);
-		} else {
-			result.setStatus(-1);
-		}
+//		if (del < accuracy) {
+//			System.err.println(String.format("\nPASS del = %-11.6f    accuracy = %-11.6f   count = %d", del, accuracy, count));
+//			result.setStatus(0);
+//		} else {
+//			System.err.println(String.format("\nFAIL del = %-11.6f    accuracy = %-11.6f   count = %d", del, accuracy, count));
+//			result.setStatus(-1);
+//		}
 	}
 	
 

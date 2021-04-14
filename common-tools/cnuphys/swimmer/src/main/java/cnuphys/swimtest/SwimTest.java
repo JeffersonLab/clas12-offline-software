@@ -21,6 +21,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
+import cnuphys.adaptiveSwim.AdaptiveSwimResult;
 import cnuphys.adaptiveSwim.test.AdaptiveBeamlineSwimTest;
 import cnuphys.adaptiveSwim.test.AdaptiveSectorSwimTest;
 import cnuphys.adaptiveSwim.test.AdaptiveTests;
@@ -852,6 +853,76 @@ public class SwimTest {
 	//	BeamLineStopper.SwimToBeamLine(charge, xo, yo, zo, pTot, theta, phi, maxS, stepSize, distBetweenSaves, xB, yB);
 
 	}
+	
+	private static void swimToRhoTest(int n, long seed) {
+		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITE);
+		
+		System.err.println("Number of test swims: " + n);
+		
+		Swimmer swimmer = new Swimmer();
+		
+		//every distance is in meters
+		double accuracy = 20e-6; // 20 microns
+	    double stepSize = 5e-4; // 500 microns
+		
+	    double rho = 0.2; //200 mm
+	    
+	    //vertex in meters
+	    double xo = 0;
+	    double yo = 0;
+	    double zo = 0;
+	    
+	    double p = 1.0; //GeV
+	    
+	    Random rand = new Random(seed);
+	    
+	    int charge[] = new int[n];
+	    double theta[] = new double[n];
+	    double phi[] = new double[n];
+	    
+	    double sMax = 9;
+	    
+	    //the false means the whole trajectory is not saved
+	    AdaptiveSwimResult result = new AdaptiveSwimResult(false);
+	    
+	    for (int i = 0; i < n; i++) {
+	    	charge[i] = (rand.nextDouble() < 0.5) ? -1 : 1;
+	    	theta[i] = 25 + 20*rand.nextDouble();
+	    	phi[i] = 360*rand.nextDouble();
+	    }
+	    
+	    double delRhoMin = Double.POSITIVE_INFINITY;
+	    double delRhoMax = Double.NEGATIVE_INFINITY;
+	    
+	    int numFail = 0;
+	   
+	    
+	    for (int i = 0; i < n; i++) {
+	    	try {
+	    		
+				swimmer.swimRho(charge[i], xo, yo, zo, p, theta[i], phi[i], rho, accuracy, sMax, stepSize, Swimmer.CLAS_Tolerance, result);
+				double rhoFin = result.getFinalRho();
+
+				if (result.getStatus() != 0) {
+					numFail++;
+					System.err.println("rho final: " + rhoFin + "   status: " + result.getStatus());
+				}
+								
+				double del = Math.abs(rhoFin - rho);
+				delRhoMin = Math.min(delRhoMin, del);
+				delRhoMax = Math.max(delRhoMax, del);
+			} catch (RungeKuttaException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+	    
+	    System.err.println("Number of failures: " + numFail);
+	    String resStr = String.format("minDel = %-10.6f microns  maxDel = %-10.6f microns ", delRhoMin * 1.0e6, delRhoMax * 1.0e6);
+	    
+	    System.err.println(resStr);
+		System.err.println("Done with swim to rho test");
+	}
 
 	/**
 	 * main program
@@ -865,7 +936,7 @@ public class SwimTest {
 		File mfdir = new File(System.getProperty("user.home"), "magfield");
 		System.out.println("mfdir exists: " + (mfdir.exists() && mfdir.isDirectory()));
 		try {
-			mf.initializeMagneticFields(mfdir.getPath(), "Full_torus_r251_phi181_z251_08May2018.dat",
+			mf.initializeMagneticFields(mfdir.getPath(), "Full_torus_r251_phi181_z251_25Jan2021.dat",
 					"Symm_solenoid_r601_phi1_z1201_13June2018.dat");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -876,7 +947,7 @@ public class SwimTest {
 		}
 		
 		//test the swim to beam line
-		testSwimToBeamLine();
+		swimToRhoTest(1000000, 33557799);
 
 		// write out data file
 //		String path = (new File(_homeDir, "swimTestData")).getPath();
