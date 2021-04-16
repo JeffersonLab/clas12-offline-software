@@ -35,13 +35,6 @@ public interface IAdaptiveStopper {
 	public double getSmax();
 	
 	/**
-	 * Convenience method to get the remaining range,
-	 * i.e. sMax - s
-	 * @return the remaining range in meters
-	 */
-	public double getRemainingRange();
-	
-	/**
 	 * Get the max step size. This can vary with conditions, primarily
 	 * with the proximity to a target 
 	 * @return the current max step in meters

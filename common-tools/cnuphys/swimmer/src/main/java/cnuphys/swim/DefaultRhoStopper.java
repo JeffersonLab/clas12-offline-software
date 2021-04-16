@@ -12,13 +12,21 @@ public class DefaultRhoStopper implements IStopper {
 
 	private double _targetRho;
 	private double _totS; //total path length
-	private double _prevS; //previous step path length
 	private double _sMax;
 	private double _accuracy;
 	private double[] _uf; //final state vector
 	private double _s0; //starting path length
 	
+	//cache whether we have crossed the boundary
 	private boolean _crossedBoundary;
+	
+	//cache whether we have passed smax
+	private boolean _passedSmax;
+	
+	//the current rho
+	private double _rho;
+
+
 	
 	private int _dim;   //dimension of our system
 	
@@ -36,6 +44,7 @@ public class DefaultRhoStopper implements IStopper {
 	 */
 	public DefaultRhoStopper(double[] uo, double s0, double sMax, double rho0, double targetRho, double accuracy) {
 		
+		_rho = rho0;
 		
 		_s0 = s0;
 		_dim = uo.length;
@@ -45,10 +54,9 @@ public class DefaultRhoStopper implements IStopper {
 		
 		_targetRho = targetRho;
 		_totS = 0;
-		_prevS = 0;
 		_sMax = sMax;
 		_accuracy = accuracy;
-		_startSign = sign(rho0);
+		_startSign = sign(_rho);
 		
 		
 	}
@@ -57,6 +65,15 @@ public class DefaultRhoStopper implements IStopper {
 	private int sign(double currentRho) {
 		return ((currentRho < _targetRho) ? -1 : 1);
 	}
+	
+	/**
+	 * Did we pas the max path length?
+	 * @return true if we crossed the boundary
+	 */
+	public boolean passedSmax() {
+		return _passedSmax;
+	}
+
 
 	/**
 	 * Did we cross the boundary
@@ -65,6 +82,15 @@ public class DefaultRhoStopper implements IStopper {
 	public boolean crossedBoundary() {
 		return _crossedBoundary;
 	}
+	
+	/**
+	 * Get the current value of rho
+	 * @return the current value of rho
+	 */
+	public double getRho() {
+		return _rho;
+	}
+
 
 	//array copy for state vectors
 	private void copy(double src[], double[] dest) {
@@ -74,30 +100,36 @@ public class DefaultRhoStopper implements IStopper {
 	@Override
 	public boolean stopIntegration(double s, double[] u) {
 		
-		double currentRho = Math.hypot(u[0], u[1]);
-		_totS = s;
+		double newRho = Math.hypot(u[0], u[1]);
 
 		// within accuracy?
-		//note this could also result with s > smax
-		if (Math.abs(currentRho - _targetRho) < _accuracy) {
+		if (Math.abs(newRho - _targetRho) < _accuracy) {
+			_rho = newRho;
+			_totS = s;
             copy(u, _uf);
 			return true;
 		}
 		
-		//if exceeded max path length stop
-		if (getFinalT() > _sMax) {
+		//if we crossed the boundary (don't accept, reset)
+		_crossedBoundary = sign(newRho) != _startSign;
+		if (_crossedBoundary) {
 			return true;
 		}
 
-		//if we crossed the boundary reset
-		_crossedBoundary = sign(currentRho) != _startSign;
-		if (_crossedBoundary) {
-			_totS = _prevS;
-			return true;
-		}
 		
-		//copy current to previous
-		_prevS = _totS;
+		_passedSmax = (s > _sMax);
+		//if exceeded max path length accept and stop
+		if (_passedSmax) {
+			_rho = newRho;
+			_totS = s;
+            copy(u, _uf);
+			return true;
+		}		
+		
+		
+		//accept and continue
+		_rho = newRho;
+		_totS = s;
         copy(u, _uf);
 		return false;
 	}

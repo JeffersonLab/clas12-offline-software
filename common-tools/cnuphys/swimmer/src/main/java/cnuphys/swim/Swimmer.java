@@ -150,8 +150,7 @@ public final class Swimmer {
 
 	/**
 	 * Swims a particle with a built it stopper for the rho coordinate.
-	 * This does NOT cach the steps, so the result contains only the stopping point.
-	 * along the path. Uses an adaptive stepsize algorithm.
+     * Uses an adaptive stepsize algorithm.
 	 * 
 	 * @param charge       the charge: -1 for electron, 1 for proton, etc
 	 * @param xo           the x vertex position in meters
@@ -176,10 +175,11 @@ public final class Swimmer {
 	 * @throws RungeKuttaException
 	 */
 	
-	
 	public void swimRho(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
 			final double fixedRho, double accuracy, double sMax, double stepSize, double relTolerance[], AdaptiveSwimResult result)
 			throws RungeKuttaException {
+		
+		result.setInitialValues(charge, xo, yo, zo, momentum, theta, phi);
 
 		// set u to the starting state vector
 		double thetaRad = Math.toRadians(theta);
@@ -193,7 +193,7 @@ public final class Swimmer {
 		double uf[] = result.getUf();
 		uf[0] = xo;
 		uf[1] = yo;
-		uf[2] = xo;
+		uf[2] = zo;
 		uf[3] = px;
 		uf[4] = py;
 		uf[5] = pz;
@@ -210,7 +210,7 @@ public final class Swimmer {
 		double sCutoff = sMax - SMAX_TOLERANCE;
 		
 		double del = Double.POSITIVE_INFINITY;
-		int maxtry = 11;
+		int maxtry = 25;
 		int count = 0;
 		double sFinal = 0;
 		int ns = 0;
@@ -230,57 +230,42 @@ public final class Swimmer {
 			
 			DefaultRhoStopper stopper = new DefaultRhoStopper(uf, sFinal, sMax, rhoCurr, fixedRho, accuracy);
 			
-
-			if ((sFinal + stepSize) > sMax) {
-				stepSize = (sMax-sFinal)/4;
-				if (stepSize < 0) {
-					break;
-				}
-			}
 			
 			ns += swim(charge, uf[0], uf[1], uf[2], momentum, theta, phi, stopper, null, sMax-sFinal, stepSize, relTolerance, null);
 			
 			System.arraycopy(stopper.getFinalU(), 0, result.getUf(), 0, result.getUf().length);
 			
 			sFinal = stopper.getFinalT();
+									
+			del = Math.abs(stopper.getRho() - fixedRho);
 			
-			double rholast = Math.hypot(result.getUf()[0], result.getUf()[1]);
-						
-			del = Math.abs(rholast - fixedRho);
-			
-			if ((sFinal) > sCutoff) {
-//				System.out.println(" s final   " + (finalPathLength + stepSize) +  "  rhoLast = " + rholast);
+			// succeed?
+			if (del < accuracy) {
+				break;
+			}
+
+			// passed max path length?
+			if (stopper.passedSmax()) {
 				break;
 			}
 			
 			count++;
 			
 			if (stopper.crossedBoundary()) {
-				stepSize /= 2;
+				stepSize = Math.max(stepSize / 2, del / 5);
 			}
-			
-//			stepSize = Math.min(stepSize, (sMax-sFinal)/4);
 			
 			
 		} // while
 
 		result.setNStep(ns);
 		result.setFinalS(sFinal);
-
-//		if (del < accuracy) {
-//			System.err.println(String.format("\nPASS del = %-11.6f    accuracy = %-11.6f   count = %d", del, accuracy, count));
-//			result.setStatus(0);
-//		} else {
-//			System.err.println(String.format("\nFAIL del = %-11.6f    accuracy = %-11.6f   count = %d", del, accuracy, count));
-//			result.setStatus(-1);
-//		}
 	}
 	
 
 	/**
 	 * Swims a particle with a built it stopper for the rho coordinate.
-	 * This does NOT cach the steps, so the result contains only the stopping point.
-	 * along the path. Uses a fixed stepsize algorithm.
+	 * Uses a fixed stepsize algorithm.
 	 * 
 	 * @param charge               the charge: -1 for electron, 1 for proton, etc
 	 * @param xo                   the x vertex position in meters
@@ -306,8 +291,7 @@ public final class Swimmer {
 	public void swimRho(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
 			final double fixedRho, final double accuracy, double sMax, double stepSize, AdaptiveSwimResult result) {
 
-		
-		// set u to the starting state vector
+	// set u to the starting state vector
 		double thetaRad = Math.toRadians(theta);
 		double phiRad = Math.toRadians(phi);
 		double sinTheta = Math.sin(thetaRad);
@@ -319,7 +303,7 @@ public final class Swimmer {
 		double uf[] = result.getUf();
 		uf[0] = xo;
 		uf[1] = yo;
-		uf[2] = xo;
+		uf[2] = zo;
 		uf[3] = px;
 		uf[4] = py;
 		uf[5] = pz;
@@ -367,8 +351,6 @@ public final class Swimmer {
 			
 
 
-//			ns += swim(charge, uf[0], uf[1], uf[2], momentum, theta, phi, stopper, null, sFinal, sMax, stepSize);
-//			ns += swim(charge, uf[0], uf[1], uf[2], momentum, theta, phi, stopper, null, sMax, stepSize);
 			ns += swim(charge, uf[0], uf[1], uf[2], momentum, theta, phi, stopper, null, sMax-sFinal, stepSize);
 			
 			System.arraycopy(stopper.getFinalU(), 0, result.getUf(), 0, result.getUf().length);

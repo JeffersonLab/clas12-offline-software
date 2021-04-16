@@ -9,9 +9,9 @@ import cnuphys.swim.SwimTrajectory;
  */
 public class AdaptiveSStopper extends AAdaptiveStopper {
 	
-	//the desired accuract
+	//the desired accuracy
 	private double _accuracy;
-	
+		
 	/**
 	 * Pathlength  stopper 
 	 * @param u0          initial state vector
@@ -28,13 +28,14 @@ public class AdaptiveSStopper extends AAdaptiveStopper {
 	@Override
 	public boolean stopIntegration(double snew, double[] unew) {
 		
-		// within accuracy?
+		
+		// within accuracy? Accept and stop
 		if (Math.abs(snew - _s) < _accuracy) {
 			accept(snew, unew);
   			return true;
 		}
 
-		//stop and don't accept new data. We crossed the boundary or exceeded smax
+		//stop and don't accept new data. We crossed the boundary
 		if (snew > _sf) {
 			return true;
 		}
