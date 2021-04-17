@@ -44,7 +44,7 @@ public class Cell3D {
 	}
 
 	// reset because we have crossed into another cell
-	private void reset(double q1, double q2, double q3) {
+	private boolean reset(double q1, double q2, double q3) {
 		GridCoordinate q1Coord = _probe.q1Coordinate;
 		GridCoordinate q2Coord = _probe.q2Coordinate;
 		GridCoordinate q3Coord = _probe.q3Coordinate;
@@ -52,6 +52,10 @@ public class Cell3D {
 		_n1 = q1Coord.getIndex(q1);
 		_n2 = q2Coord.getIndex(q2);
 		_n3 = q3Coord.getIndex(q3);
+		
+		if ((_n1 < 0) || (_n2 < 0) || (_n3 < 0)) {
+			return false;
+		}
 
 		q1Min = q1Coord.getValue(_n1);
 		q1Max = q1Coord.getValue(_n1 + 1);
@@ -67,6 +71,10 @@ public class Cell3D {
 				for (int k = 0; k < 2; k++) {
 					int nn3 = _n3 + k;
 					int index = _probe.getCompositeIndex(nn1, nn2, nn3);
+					
+					if (index < 0) {
+						System.out.println();
+					}
 					c[i][j][k][0] = _probe.getB1(index);
 					c[i][j][k][1] = _probe.getB2(index);
 					c[i][j][k][2] = _probe.getB3(index);
@@ -75,6 +83,7 @@ public class Cell3D {
 			}
 		}
 
+		return true;
 	}
 
 	/**
@@ -146,8 +155,7 @@ public class Cell3D {
 
 		// do we need to reset?
 		if (!contained(q1, q2, q3)) {
-			reset(q1, q2, q3);
-			if ((_n1 < 0) || (_n2 < 0) || (_n3 < 0)) {
+			if (!reset(q1, q2, q3)) {
 				result[0] = 0;
 				result[1] = 0;
 				result[2] = 0;
