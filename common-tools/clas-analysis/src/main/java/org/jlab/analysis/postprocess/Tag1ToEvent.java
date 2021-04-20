@@ -77,7 +77,7 @@ public class Tag1ToEvent {
 
         HipoWriterSorted writer = new HipoWriterSorted();
         writer.getSchemaFactory().initFromDirectory(ClasUtilsFile.getResourceDir("COATJAVA", "etc/bankdefs/hipo4"));
-        writer.setCompressionType(1);
+        writer.setCompressionType(2);
         writer.open(fileout);
 			
         Event event = new Event();
