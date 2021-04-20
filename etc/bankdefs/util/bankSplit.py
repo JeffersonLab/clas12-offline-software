@@ -74,7 +74,7 @@ dst = rectb + mc + tag1 + dets
 dsthb = dst + rechb
 
 calib.extend(dsthb)
-mon.extend(dsthb)
+mon.extend(calib + dsthb)
 
 create("dst/", set(dst))
 create("dsthb/", set(dsthb))
