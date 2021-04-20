@@ -151,6 +151,8 @@ public class Tag1ToEvent {
                     if (bank.getRows()>0) {
                         configEvent.write(bank);
                     }
+                }
+                if (!configEvent.isEmpty()) {
                     writer.addEvent(configEvent,1);
                 }
 
