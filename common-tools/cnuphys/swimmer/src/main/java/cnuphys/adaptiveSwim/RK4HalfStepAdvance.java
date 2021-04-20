@@ -74,8 +74,6 @@ public class RK4HalfStepAdvance implements IAdaptiveAdvance {
 			// take the full step
 			AdaptiveSwimUtilities.singleRK4Step(s, u, du, h, deriv, _utemp);
 			
-	//		System.out.print(String.format("[%7.4f, %7.4f, %7.4f, %7.4f, %7.4f, %7.4f]", _utemp[0], _utemp[1], _utemp[2], _utemp[3], _utemp[4], _utemp[5]));
-
 			// compute the maximum error
 			double errMax = 0;
 			for (int i = 0; i < _nDim; i++) {
@@ -87,8 +85,6 @@ public class RK4HalfStepAdvance implements IAdaptiveAdvance {
 			// scale based on tolerance in eps
 			errMax = errMax / eps;
 			
-	//		System.out.println(String.format("  err: %-6.3f", errMax));
-
 			if (errMax > 1) {
 				//get smaller h, then try again since done = false
 				
@@ -102,7 +98,6 @@ public class RK4HalfStepAdvance implements IAdaptiveAdvance {
 				if (errMax > _errControl) {
 					double growFact = _safety * Math.pow(errMax, _pgrow);
 					hnew = h * growFact;
-//					hnew = Math.max(h, _safety * h * growFact);
 				} else {
 					hnew = 5 * h;
 				}
@@ -115,7 +110,7 @@ public class RK4HalfStepAdvance implements IAdaptiveAdvance {
 		} // !done
 
 		// mop up 5th order truncation error
-		//so result is actuallky 5th order
+		//so result is actually 5th order
 		for (int i = 0; i < _nDim; i++) {
 			uf[i] = uf[i] + _utemp[i] * _correctFifth;
 		}

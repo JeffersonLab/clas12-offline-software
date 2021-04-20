@@ -46,7 +46,7 @@ public class AdaptiveSwimResult {
 			_trajectory = new SwimTrajectory();
 		}
 	}
-	
+		
 	/**
 	 * Does this result hold a trajectory?
 	 * @return <code>true</code> if there is a trajectory
@@ -165,6 +165,7 @@ public class AdaptiveSwimResult {
 		if (_initialValues == null) {
 			_initialValues = new InitialValues();
 		}
+		_initialValues.charge = q;
 		_initialValues.xo = xo;
 		_initialValues.yo = yo;
 		_initialValues.zo = zo;
@@ -172,6 +173,25 @@ public class AdaptiveSwimResult {
 		_initialValues.theta = theta;
 		_initialValues.phi = phi;
 	}
+	
+	
+	
+	/**
+	 * A string containing the initial valies
+	 * @return
+	 */
+	public String initialValuesString() {
+		InitialValues v = _initialValues;
+		
+		if (v == null) {
+			return "";
+		}
+		
+		String s = String.format("charge = %d\nvertex = [%-10.7f, %-10.7f, %-10.7f] m\np = %-10.7f GeV/c\ntheta = %-10.7f deg\nphi = %-10.7f deg\n-------\n", v.charge, v.xo, v.yo, v.zo, v.p, v.theta, v.phi);
+		
+		return "\n-----------\nInitial values:\n"  + s;
+	}
+
 	
 	/**
 	 * Set the initial values
@@ -249,8 +269,11 @@ public class AdaptiveSwimResult {
 		if (hasTrajectory()) {
 			sb.append("\nBDL: "+ _trajectory.getComputedBDL());
 		}
+		else {
+			sb.append("\nNo trajectory.");
+		}
 
-		return sb.toString();
+		return initialValuesString() + sb.toString();
 	}
 	
 	//the location
@@ -343,6 +366,16 @@ public class AdaptiveSwimResult {
 	}
 	
 	/**
+	 * get the final rho in meters
+	 * @return the final rho in meters
+	 */
+	public double getFinalRho() {
+		double x = _uf[0];
+		double y = _uf[1];
+		return Math.sqrt(x*x + y*y);
+	}
+	
+	/**
 	 * get the final phi in degrees
 	 * @return the final phi in degrees
 	 */
@@ -389,5 +422,27 @@ public class AdaptiveSwimResult {
 		revIv.phi = FastMath.atan2Deg(tyf, txf);
 		
 		return revIv;
+	}
+	
+	/**
+	 * Get the Euclidean distance between the last point of two results.
+	 * Used for comparisons.
+	 * @param res the other result
+	 * @return the Euclidean distance between the last points.
+	 */
+	public double delDifference(AdaptiveSwimResult res) {
+	
+		double u[] = this.getLastTrajectoryPoint();
+		double v[] = res.getLastTrajectoryPoint();
+		
+		double sum = 0;
+		for (int i = 0 ; i < 3; i++) {
+			double del = v[i] - u[i];
+			sum += del*del;
+		}
+		
+		
+		return Math.sqrt(sum);
+		
 	}
 }
