@@ -84,7 +84,7 @@ public class CNDClusterFinder {
                     System.out.println("Z " + thisHit.Z() + " " + otherHit.Z() + " " + deltaZ);
                     System.out.println("T " + thisHit.Time() + " " + otherHit.Time() + " " + deltaT);*/
 
-                    if (deltaX/10.0 < 20 && deltaY/10.0 < 20 && deltaZ/10.0 < 30 && deltaT < 10) {
+                    if (deltaX/10.0 < 20 && deltaY/10.0 < 20 && deltaZ/10.0 < 10 && deltaT < 1.2) {
 
                         good_index = k;
 
