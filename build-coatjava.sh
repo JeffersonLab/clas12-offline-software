@@ -37,19 +37,35 @@ then
     mvn='mvn -q -B'
 fi
 
+command_exists () {
+    type "$1" &> /dev/null
+}
+download () {
+    if command_exists wget ; then
+        # -N only redownloads if timestamp/filesize is newer/different
+        $wget -N --no-check-certificate $1
+    elif command_exists curl ; then
+        if ! [ -e ${1##*/} ]; then
+          curl $1 -o ${1##*/}
+        fi
+    else
+        echo ERROR:  Could not find wget nor curl.
+    fi
+}
+
+
 # download the default field maps, as defined in bin/env.sh:
 # (and duplicated in etc/services/reconstruction.yaml):
 source `dirname $0`/bin/env.sh
 if [ $downloadMaps == "yes" ]; then
   echo 'Retrieving field maps ...'
-  webDir=http://clasweb.jlab.org/clas12offline/magfield
+  webDir=https://clasweb.jlab.org/clas12offline/magfield
   locDir=etc/data/magfield
   mkdir -p $locDir
   cd $locDir
   for map in $COAT_MAGFIELD_SOLENOIDMAP $COAT_MAGFIELD_TORUSMAP $COAT_MAGFIELD_TORUSSECONDARYMAP
   do
-    # -N only redownloads if timestamp/filesize is newer/different
-    $wget -N --no-check-certificate $webDir/$map
+    download $webDir/$map
   done
   cd -
 fi
