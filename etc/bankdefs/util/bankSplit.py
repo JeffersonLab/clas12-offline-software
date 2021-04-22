@@ -53,7 +53,7 @@ tag1 = ["RUN::config", "RAW::epics", "RAW::scaler", "RUN::scaler", "COAT::config
 
 # these are the output of the event builder:
 rectb = ["REC::Event","REC::Particle","REC::Calorimeter","REC::Cherenkov","REC::CovMat","REC::ForwardTagger","REC::Scintillator","REC::ScintExtras","REC::Track","REC::Traj","RECFT::Event","RECFT::Particle"]
-rechb = ["RECHB::Event","RECHB::Particle","RECHB::Calorimeter","RECHB::Cherenkov","RECHB::CovMat","RECHB::ForwardTagger","RECHB::Scintillator","RECHB::ScintExtras","RECHB::Track"]
+rechb = ["RECHB::Event","RECHB::Particle","RECHB::Calorimeter","RECHB::Cherenkov","RECHB::ForwardTagger","RECHB::Scintillator","RECHB::ScintExtras","RECHB::Track"]
 
 # special, detector-specific raw banks that are kept in DSTs (for now):
 band = ["BAND::laser"]
