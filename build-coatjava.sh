@@ -41,16 +41,21 @@ command_exists () {
     type "$1" &> /dev/null
 }
 download () {
+    ret=0
     if command_exists wget ; then
         # -N only redownloads if timestamp/filesize is newer/different
         $wget -N --no-check-certificate $1
+        ret=$?
     elif command_exists curl ; then
         if ! [ -e ${1##*/} ]; then
           curl $1 -o ${1##*/}
+          ret=$?
         fi
     else
-        echo ERROR:  Could not find wget nor curl.
+        ret=1
+        echo ERROR:::::::::::  Could not find wget nor curl.
     fi
+    return $ret
 }
 
 
@@ -66,6 +71,12 @@ if [ $downloadMaps == "yes" ]; then
   for map in $COAT_MAGFIELD_SOLENOIDMAP $COAT_MAGFIELD_TORUSMAP $COAT_MAGFIELD_TORUSSECONDARYMAP
   do
     download $webDir/$map
+    if [ $? -ne 0 ]; then
+        echo ERROR:::::::::::  Could not download field map:
+        echo $webDir/$map
+        echo One option is to download manually into etc/data/magfield and then run this build script with --nomaps
+        exit
+    fi
   done
   cd -
 fi
