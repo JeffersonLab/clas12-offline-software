@@ -77,7 +77,7 @@ public class EngineProcessor {
             "DCHB","FTOFHB","EC",
             "CVT","CTOF","CND","BAND",
             "HTCC","LTCC","EBHB",
-            "DCTB","FTOFTB","EBTB","RICHEB","RTPC"
+            "DCTB","FTOFTB","EBTB","RICHEB","RTPC", "MC"
         };
 
         String[] services = new String[]{
@@ -100,7 +100,8 @@ public class EngineProcessor {
             "org.jlab.service.ftof.FTOFTBEngine",
             "org.jlab.service.eb.EBTBEngine",
             "org.jlab.rec.rich.RICHEBEngine",
-            "org.jlab.service.rtpc.RTPCEngine"
+            "org.jlab.service.rtpc.RTPCEngine",
+	    "org.jlab.service.mc.TruthMatch"
         };
 
         for(int i = 0; i < names.length; i++){

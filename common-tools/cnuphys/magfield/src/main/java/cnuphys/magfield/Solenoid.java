@@ -149,8 +149,7 @@ public final class Solenoid extends MagneticField {
 				float zmax = 300.0f;
 
 				DataOutputStream dos = new DataOutputStream(new FileOutputStream(binaryFileName));
-				writeHeader(dos, phimin, phimax, nPhi, rhomin, rhomax,
-					 nRho, zmin, zmax, nZ);
+				MagneticFields.writeHeader(dos, 0, 0, 0, 0, 0, phimin, phimax, nPhi, rhomin, rhomax, nRho, zmin, zmax, nZ);
 
 				boolean reading = true;
 				while (reading) {
@@ -179,36 +178,7 @@ public final class Solenoid extends MagneticField {
 		}
 	}
 
-	private static void writeHeader(DataOutputStream dos, float phimin, float phimax, int nPhi, float rhomin, float rhomax,
-			int nRho, float zmin, float zmax, int nZ) {
-		try {
-			// write the header
-			dos.writeInt(0xced);
-			dos.writeInt(0);// cylindrical
-			dos.writeInt(0);// cylindrical
-			dos.writeInt(0);
-			dos.writeInt(0);
-			dos.writeInt(0);
-			dos.writeFloat(phimin);
-			dos.writeFloat(phimax);
-			dos.writeInt(nPhi);
-			dos.writeFloat(rhomin);
-			dos.writeFloat(rhomax);
-			dos.writeInt(nRho);
-			dos.writeFloat(zmin);
-			dos.writeFloat(zmax);
-			dos.writeInt(nZ);
-			dos.writeInt(0);
-			dos.writeInt(0);
-			dos.writeInt(0);
-			dos.writeInt(0);
-			dos.writeInt(0);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-	}
-
-	//process the file fro ODU
+	//process the file from ODU
 	private static void processODUMap() {
 		File asciiFile = new File("/Users/heddle/magfield/SolenoidMarch2019");
 		
@@ -240,8 +210,8 @@ public final class Solenoid extends MagneticField {
 
 
 			DataOutputStream dos = new DataOutputStream(new FileOutputStream(binaryFileName));
-			writeHeader(dos, phimin, phimax, nPhi, rhomin, rhomax,
-				 nRho, zmin, zmax, nZ);
+			
+			MagneticFields.writeHeader(dos, 0, 0, 0, 0, 0, phimin, phimax, nPhi, rhomin, rhomax, nRho, zmin, zmax, nZ);
 			
 			boolean reading = true;
 						

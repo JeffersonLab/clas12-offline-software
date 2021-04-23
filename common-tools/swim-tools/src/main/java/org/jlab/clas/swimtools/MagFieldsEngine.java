@@ -17,46 +17,62 @@ public class MagFieldsEngine extends ReconstructionEngine {
         super("MagFields","ziegler","1.0");
     }
     AtomicInteger Run = new AtomicInteger(0);
+
+    /**
+     * Choose one of YAML or ENV values.
+     * @param envVarName
+     * @param yamlVarName
+     * @return YAML else ENV else null
+     */
+    public String chooseEnvOrYaml(final String envVarName, final String yamlVarName) {
+        String value = this.getEngineConfigString(yamlVarName);
+        if (value!=null) {
+            System.out.println(String.format("[%s] Chose based on YAML: %s = %s",
+                    this.getName(), yamlVarName, value));
+        }
+        else {
+            value = System.getenv(envVarName);
+            if (value!=null) {
+                System.out.println(String.format("[%s] Chose based on ENV: %s = %s",
+                        this.getName(), envVarName, value));
+            }
+        }
+        return value;
+    }
+
     /**
      * 
-     * determine torus and solenoid map name from yaml, else env, else crash
+     * @return whether initialization was successful
      */
-    public void initializeMagneticFields() {
-        String torusMap=this.getEngineConfigString("magfieldTorusMap");
-        String solenoidMap=this.getEngineConfigString("magfieldSolenoidMap");
-        if (torusMap!=null) {
-            System.out.println("["+this.getName()+"] Torus Map chosen based on yaml: "+torusMap);
-        }
-        else {
-            torusMap = System.getenv("COAT_MAGFIELD_TORUSMAP");
-            if (torusMap!=null) {
-                System.out.println("["+this.getName()+"] Torus Map chosen based on env: "+torusMap);
-            }
-        }
+    public boolean initializeMagneticFields() {
+       
+        final String torusMap = this.chooseEnvOrYaml("COAT_MAGFIELD_TORUSMAP","magfieldTorusMap");
+        final String solenoidMap = this.chooseEnvOrYaml("COAT_MAGFIELD_SOLENOIDMAP","magfieldSolenoidMap");
+        final String transsolMap = this.chooseEnvOrYaml("COAT_MAGFIELD_TRANSSOLMAP","magfieldTranssolMap");
+        final String mapDir = CLASResources.getResourcePath("etc")+"/data/magfield";
+
         if (torusMap==null) {
-            throw new RuntimeException("["+this.getName()+"]  Failed to find torus map name in yaml or env.");
+            System.err.println("["+this.getName()+"] ERROR: torus field is undefined.");
+            return false;
         }
-        if (solenoidMap!=null) {
-            System.out.println("["+this.getName()+"] solenoid Map chosen based on yaml: "+solenoidMap);
+        if (solenoidMap!=null && transsolMap!=null) {
+            System.err.println("["+this.getName()+"] ERROR: both solenoid and transverse solenoid are defined.");
+            return false;
         }
-        else {
-            solenoidMap = System.getenv("COAT_MAGFIELD_SOLENOIDMAP");
-            if (solenoidMap!=null) {
-                System.out.println("["+this.getName()+"] Solenoid Map chosen based on env: "+solenoidMap);
-            }
+        if (solenoidMap==null && transsolMap==null) {
+            System.err.println("["+this.getName()+"] ERROR: both solenoid and transverse solenoid are undefined.");
+            return false;
         }
-        if (solenoidMap==null) {
-            throw new RuntimeException("["+this.getName()+"]  Failed to find solenoid map name in yaml or env.");
-        }
-        String mapDir = CLASResources.getResourcePath("etc")+"/data/magfield";
+
         try {
-            MagneticFields.getInstance().initializeMagneticFields(mapDir,torusMap,solenoidMap);
+            MagneticFields.getInstance().initializeMagneticFields(mapDir, torusMap, solenoidMap, transsolMap);
         }
         catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
 
-         // Field Shifts
+        // Field Shifts
         solShift = this.getEngineConfigString("magfieldSolenoidShift");
         
         if (solShift!=null) {
@@ -128,6 +144,8 @@ public class MagFieldsEngine extends ReconstructionEngine {
             System.out.println("["+this.getName()+"] run with torus z shift in tracking set to 0 cm");
             // this.solenoidShift = (float) 0;
         }
+
+        return true;
     }
     
     private void loadTables() {
@@ -164,7 +182,10 @@ public class MagFieldsEngine extends ReconstructionEngine {
     @Override
     public boolean init() {
         this.loadTables();
-        this.initializeMagneticFields();
+        if (!this.initializeMagneticFields()) {
+            System.err.println("\n\nCould not initialize magnetic fields.");
+            this.setFatal();
+        }
         return true;
     }
 

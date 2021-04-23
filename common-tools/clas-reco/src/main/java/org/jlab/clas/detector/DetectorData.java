@@ -673,9 +673,12 @@ public class DetectorData {
                 double cx   = bank.getFloat("cx",row);
                 double cy   = bank.getFloat("cy",row);
                 double cz   = bank.getFloat("cz",row);
+                double vx   = bank.getFloat("vx",row);
+                double vy   = bank.getFloat("vy",row);
+                double vz   = bank.getFloat("vz",row);
                 double energy = bank.getFloat("energy",row);
 
-                DetectorTrack track = new DetectorTrack(charge, cx*energy ,cy*energy, cz*energy);
+                DetectorTrack track = new DetectorTrack(charge, cx*energy ,cy*energy, cz*energy, vx, vy, vz);
                 track.setDetectorID(DetectorType.FTCAL.getDetectorId());
 
                 // FIXME:  FT not in trajectory bank

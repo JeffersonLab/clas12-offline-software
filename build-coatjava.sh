@@ -65,8 +65,6 @@ cp external-dependencies/JEventViewer-1.1.jar coatjava/lib/clas/
 cp external-dependencies/vecmath-1.3.1-2.jar coatjava/lib/clas/
 mkdir -p coatjava/lib/utils
 cp external-dependencies/jclara-4.3-SNAPSHOT.jar coatjava/lib/utils
-cp external-dependencies/clas12mon-3.1.jar coatjava/lib/utils
-cp external-dependencies/KPP-Plots-3.2.jar coatjava/lib/utils
 #cp external-dependencies/jaw-1.0.jar coatjava/lib/utils
 mkdir -p coatjava/lib/services
 
@@ -99,5 +97,6 @@ cd -
 
 cp common-tools/coat-lib/target/coat-libs-*-SNAPSHOT.jar coatjava/lib/clas/
 cp reconstruction/*/target/clas12detector-*-SNAPSHOT.jar coatjava/lib/services/
+
 
 echo "COATJAVA SUCCESSFULLY BUILT !"

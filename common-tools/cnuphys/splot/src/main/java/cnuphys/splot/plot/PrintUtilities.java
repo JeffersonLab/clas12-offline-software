@@ -3,7 +3,6 @@ package cnuphys.splot.plot;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
@@ -28,7 +27,8 @@ public class PrintUtilities implements Printable {
 		if (printJob.printDialog())
 			try {
 				printJob.print();
-			} catch (PrinterException pe) {
+			}
+			catch (PrinterException pe) {
 				System.out.println("Error printing: " + pe);
 			}
 	}
@@ -41,8 +41,7 @@ public class PrintUtilities implements Printable {
 		else {
 			Graphics2D g2d = (Graphics2D) g;
 
-			g2d.translate(pageFormat.getImageableX(),
-					pageFormat.getImageableY());
+			g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
 
 			// TODO CACULATE CORRECT SCALE FACTOR
 			g2d.scale(0.75, 0.75);

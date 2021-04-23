@@ -45,17 +45,13 @@ public class DefaultDerivative implements IDerivative {
 	 * Compute the derivatives given the value of s (path length) and the values
 	 * of the state vector.
 	 * 
-	 * @param s
-	 *            the value of the independent variable path length (input).
-	 * @param Q
-	 *            the values of the state vector ([x,y,z, px/p, py/p, pz/p]) at
-	 *            s (input).
-	 * @param dydt
-	 *            will be filled with the values of the derivatives at t
-	 *            (output).
+	 * @param s    the value of the independent variable path length (input).
+	 * @param u    the values of the state vector ([x,y,z, tx = px/p, ty = py/p, tz = pz/p]) at s
+	 *             (input).
+	 * @param du will be filled with the values of the derivatives at s (output).
 	 */
 	@Override
-	public void derivative(double s, double[] Q, double[] dQds) {
+	public void derivative(double s, double[] u, double[] du) {
 		double Bx = 0.0;
 		double By = 0.0;
 		double Bz = 0.0;
@@ -65,9 +61,9 @@ public class DefaultDerivative implements IDerivative {
 			float b[] = new float[3];
 
 			// convert to cm
-			double xx = Q[0] * 100;
-			double yy = Q[1] * 100;
-			double zz = Q[2] * 100;
+			double xx = u[0] * 100;
+			double yy = u[1] * 100;
+			double zz = u[2] * 100;
 
 			_probe.field((float) xx, (float) yy, (float) zz, b);
 			// convert to tesla
@@ -76,12 +72,12 @@ public class DefaultDerivative implements IDerivative {
 			Bz = b[2] / 10.0;
 		}
 
-		dQds[3] = _alpha * (Q[4] * Bz - Q[5] * By); // vyBz-vzBy
-		dQds[4] = _alpha * (Q[5] * Bx - Q[3] * Bz); // vzBx-vxBz
-		dQds[5] = _alpha * (Q[3] * By - Q[4] * Bx); // vxBy-vyBx
-		dQds[0] = Q[3];
-		dQds[1] = Q[4];
-		dQds[2] = Q[5];
+		du[3] = _alpha * (u[4] * Bz - u[5] * By); // vyBz-vzBy
+		du[4] = _alpha * (u[5] * Bx - u[3] * Bz); // vzBx-vxBz
+		du[5] = _alpha * (u[3] * By - u[4] * Bx); // vxBy-vyBx
+		du[0] = u[3];
+		du[1] = u[4];
+		du[2] = u[5];
 	}
 
 }
