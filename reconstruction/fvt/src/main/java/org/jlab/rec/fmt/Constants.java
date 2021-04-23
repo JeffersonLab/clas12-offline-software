@@ -139,12 +139,12 @@ public class Constants {
      *                layers, and columns are [deltaX, deltaY, deltaZ, rotX, rotY, rotZ].
      */
     public static void saveAlignmentTable(double[][] shArr) {
-        FVT_zShift = new double[FVT_Nlayers];
-        FVT_zRot   = new double[FVT_Nlayers];
         FVT_xShift = new double[FVT_Nlayers];
-        FVT_xRot   = new double[FVT_Nlayers];
         FVT_yShift = new double[FVT_Nlayers];
+        FVT_zShift = new double[FVT_Nlayers];
+        FVT_xRot   = new double[FVT_Nlayers];
         FVT_yRot   = new double[FVT_Nlayers];
+        FVT_zRot   = new double[FVT_Nlayers];
 
         for (int li=0; li<FVT_Nlayers; ++li) {
             FVT_xShift[li] = shArr[li][0];

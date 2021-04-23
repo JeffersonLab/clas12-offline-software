@@ -123,7 +123,7 @@ public class KFitter {
             }
 
             // Get the state vector's y position in the layer's local coordinates.
-            Point3D locPos = GeometryMethods.globalToLocal(
+            Point3D locPos = GeometryMethods.globalToLocalNoShift(
                     new Point3D(sv.trackTraj.get(closestSVID).x, sv.trackTraj.get(closestSVID).y, 0),
                     li-1);
 
