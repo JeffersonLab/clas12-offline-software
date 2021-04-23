@@ -46,7 +46,7 @@ public class MagneticFields {
 	}
 
 	// version of mag field package
-	private static String VERSION = "1.112";
+	private static String VERSION = "1.113";
 	
 	//transverse solenoidal field
 	private TransverseSolenoid _transverseSolenoid;
