@@ -58,7 +58,7 @@ rechb = ["RECHB::Event","RECHB::Particle","RECHB::Calorimeter","RECHB::Cherenkov
 # special, detector-specific raw banks that are kept in DSTs (for now):
 band = ["BAND::laser"]
 rich = ["RICH::tdc","RICH::ringCher","RICH::hadCher"]
-rtpc = ["RTPC::adc","RTPC::hits","RTPC::tracks"]
+rtpc = ["RTPC::hits","RTPC::tracks"]
 dets = band + rich + rtpc
 
 # additions for the calibration schema: 
