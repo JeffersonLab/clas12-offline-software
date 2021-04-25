@@ -87,17 +87,6 @@ public abstract class AAdaptiveStopper implements IAdaptiveStopper {
 	}
 	
 	/**
-	 * Convenience method to get the remaining range,
-	 * i.e. sMax - s
-	 * @return the remaining range in meters
-	 */
-	@Override
-	public double getRemainingRange() {
-		return _sf - _s;
-	}
-
-	
-	/**
 	 * Copy a state vector
 	 * @param uSrc the source
 	 * @param uDest the destination

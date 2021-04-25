@@ -374,7 +374,7 @@ public class SwimTrajectory extends ArrayList<double[]>  implements Serializable
 
 		return this.lastElement()[BXDL_IDX];
 	}
-
+	
 	/**
 	 * Compute the integral B cross dl. This will cause the state vector arrays to
 	 * expand by two, becoming [x, y, z, px/p, py/p, pz/p, l, bdl] where the 7th

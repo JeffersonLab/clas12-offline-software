@@ -11,10 +11,10 @@ public class AdaptiveSwimUtilities {
 	private static DebugLevel _debugLevel = DebugLevel.OFF;
 
 	//tolerance when swimmimg to a max path length
-	public static final double SMAX_TOLERANCE = 1.0e-4;  //meters
+//	public static final double SMAX_TOLERANCE = 1.0e-4;  //meters
 
 	//step size limits in meters
-	public static final double MIN_STEPSIZE = 1.0e-6; // meters
+	public static final double MIN_STEPSIZE = 1.0e-8; // meters
 	
 	//maximum number of integration steps
 	public static int MAX_NUMSTEP = 2000; 
@@ -63,12 +63,7 @@ public class AdaptiveSwimUtilities {
 		
 		//keep taking single steps until we reach the upper limit 
 		//or the stopper stops us
-		while (Math.abs(stopper.getRemainingRange())> SMAX_TOLERANCE) {
-			
-			if (h > stopper.getRemainingRange()) {
-				h = stopper.getRemainingRange();
-			}
-			
+		while (nstep < MAX_NUMSTEP) {
 			System.arraycopy(uf, 0, ut, 0, nDim);
 
 			//compute derivs at current step
@@ -77,11 +72,6 @@ public class AdaptiveSwimUtilities {
 			
 			double hnew = result.getHNew();
 			
-			if (hnew < MIN_STEPSIZE) {
-				if (_debugLevel == DebugLevel.VERBOSE) {
-					throw new AdaptiveSwimException("");
-				}
-			}
 			h = Math.max(MIN_STEPSIZE, Math.min(stopper.getMaxStepSize(), hnew));
 			double snew = result.getSNew();
 			

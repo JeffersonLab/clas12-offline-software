@@ -12,13 +12,21 @@ public class DefaultRhoStopper implements IStopper {
 
 	private double _targetRho;
 	private double _totS; //total path length
-	private double _prevS; //previous step path length
 	private double _sMax;
 	private double _accuracy;
 	private double[] _uf; //final state vector
 	private double _s0; //starting path length
-//	private int _prevRdot = 0;
-//	public boolean rdotChanged;
+	
+	//cache whether we have crossed the boundary
+	private boolean _crossedBoundary;
+	
+	//cache whether we have passed smax
+	private boolean _passedSmax;
+	
+	//the current rho
+	private double _rho;
+
+
 	
 	private int _dim;   //dimension of our system
 	
@@ -36,23 +44,51 @@ public class DefaultRhoStopper implements IStopper {
 	 */
 	public DefaultRhoStopper(double[] uo, double s0, double sMax, double rho0, double targetRho, double accuracy) {
 		
+		_rho = rho0;
 		
 		_s0 = s0;
 		_dim = uo.length;
 		
 		_uf = new double[_dim];
+		copy(uo, _uf);
 		
 		_targetRho = targetRho;
 		_totS = 0;
-		_prevS = 0;
 		_sMax = sMax;
 		_accuracy = accuracy;
-		_startSign = sign(rho0);
+		_startSign = sign(_rho);
+		
+		
 	}
 	
 	//get the sign based on the current rho
 	private int sign(double currentRho) {
 		return ((currentRho < _targetRho) ? -1 : 1);
+	}
+	
+	/**
+	 * Did we pas the max path length?
+	 * @return true if we crossed the boundary
+	 */
+	public boolean passedSmax() {
+		return _passedSmax;
+	}
+
+
+	/**
+	 * Did we cross the boundary
+	 * @return true if we crossed the boundary
+	 */
+	public boolean crossedBoundary() {
+		return _crossedBoundary;
+	}
+	
+	/**
+	 * Get the current value of rho
+	 * @return the current value of rho
+	 */
+	public double getRho() {
+		return _rho;
 	}
 
 
@@ -64,30 +100,36 @@ public class DefaultRhoStopper implements IStopper {
 	@Override
 	public boolean stopIntegration(double s, double[] u) {
 		
-		double currentRho = Math.hypot(u[0], u[1]);
-		_totS = s;
+		double newRho = Math.hypot(u[0], u[1]);
 
 		// within accuracy?
-		//note this could also result with s > smax
-		if (Math.abs(currentRho - _targetRho) < _accuracy) {
+		if (Math.abs(newRho - _targetRho) < _accuracy) {
+			_rho = newRho;
+			_totS = s;
             copy(u, _uf);
 			return true;
 		}
-
-		//stop (and backup/reset to prev) if we crossed the boundary or exceeded smax
-		if ((getFinalT() > _sMax) || (sign(currentRho) != _startSign)) {
-			_totS = _prevS;
+		
+		//if we crossed the boundary (don't accept, reset)
+		_crossedBoundary = sign(newRho) != _startSign;
+		if (_crossedBoundary) {
 			return true;
 		}
+
 		
-//		int rdSign = rhoDotSign(u);
-//		if ((_prevRdot != 0) && (rdSign != 0) && (_prevRdot != rdSign)) {
-//			rdotChanged = true;;
-//		}
-//		_prevRdot = rdSign;
+		_passedSmax = (s > _sMax);
+		//if exceeded max path length accept and stop
+		if (_passedSmax) {
+			_rho = newRho;
+			_totS = s;
+            copy(u, _uf);
+			return true;
+		}		
 		
-		//copy current to previous
-		_prevS = _totS;
+		
+		//accept and continue
+		_rho = newRho;
+		_totS = s;
         copy(u, _uf);
 		return false;
 	}
@@ -118,23 +160,6 @@ public class DefaultRhoStopper implements IStopper {
 		return _uf;
 	}
 	
-//	public int rhoDotSign(double u[]) {
-//		double val = u[0]*u[3] + u[1]*u[4];
-//		if (val == 0) {
-//			System.err.println("ZERO!");
-//		}
-//		
-//		if (val < 0) {
-//			return -1;
-//		}
-//		else if (val > 0) {
-//			return 1;
-//		}
-//		else {
-//			return 0;
-//		}
-//	}
-
 	/**
 	 * Generally this is the same as stop integration. So most will just return
 	 * stopIntegration(). But sometimes stop just means we reset and integrate more.
