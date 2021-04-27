@@ -30,6 +30,7 @@ import org.jlab.rec.cvt.banks.RecoBankReader;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
+import org.jlab.rec.cvt.bmt.Geometry;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.track.StraightTrack;
@@ -353,8 +354,8 @@ public class CVTAlignment extends ReconstructionEngine {
 		Vector3D u = new Vector3D(cd*Math.cos(phi), cd*Math.sin(phi), sd);
 		
 		
-		Point3D x = new Point3D(-d*Math.sin(phi)+xb,d*Math.cos(phi)+yb, z);
-		//Point3D x = new Point3D(-d*Math.sin(phi),d*Math.cos(phi), z);
+		//Point3D x = new Point3D(-d*Math.sin(phi)+xb,d*Math.cos(phi)+yb, z);
+		Point3D x = new Point3D(-d*Math.sin(phi),d*Math.cos(phi), z);
 		//if(u.y() <0)
 		//	u = u.multiply(-1);
 		//x = x.toVector3D().add(u.multiply(-x.y()/u.y())).toPoint3D();
