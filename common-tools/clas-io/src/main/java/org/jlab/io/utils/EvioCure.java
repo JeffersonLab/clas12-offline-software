@@ -16,13 +16,17 @@ import org.jlab.coda.jevio.EvioEvent;
 import org.jlab.coda.jevio.EvioException;
 import org.jlab.coda.jevio.EvioReader;
 import org.jlab.io.evio.EvioDataSync;
+import org.jlab.logging.DefaultLogger;
 
 /**
  *
  * @author gavalian
  */
 public class EvioCure {
+    private static Logger LOGGER = Logger.getLogger(EvioCure.class.getName());
+
     public static void main(String[] args){
+        DefaultLogger.debug();
         
         String  inputFile = args[0];
         String outputFile = args[1];
@@ -33,11 +37,11 @@ public class EvioCure {
         EventWriter evioWriter = null;
         try {
             EvioReader reader = new EvioReader(inputFile, false,false);
-            System.out.println(" READER OPENED " + reader.getEventCount());
+            LOGGER.log(Level.INFO," READER OPENED " + reader.getEventCount());
             String dictionary = "<xmlDict>\n" +
 		// EvioDictionaryGenerator.createDAQDictionary(CLASDetectors)
 		        "</xmlDict>\n";
-            System.out.println(" ENDIANNESS : " + reader.getByteOrder());
+            LOGGER.log(Level.INFO," ENDIANNESS : " + reader.getByteOrder());
             evioWriter = new EventWriter(new File(outputFile),8*1024,1000, reader.getByteOrder(),
                     null, null
             );//, dictionary, true);
@@ -65,14 +69,14 @@ public class EvioCure {
                 evioWriter.writeEvent(event);
             
             }*/
-            System.out.println(" RECOVERED EVENT " + icounter);
+            LOGGER.log(Level.INFO," RECOVERED EVENT " + icounter);
             evioWriter.close();
         } catch (EvioException ex) {
-            System.out.println(" RECOVERED EVENT (EVIO exception) " + icounter);
+            LOGGER.log(Level.WARNING," RECOVERED EVENT (EVIO exception) " + icounter, ex);
             ex.printStackTrace();
             evioWriter.close();
         } catch (IOException ex) {
-            System.out.println(" RECOVERED EVENT (IO Exception) " + icounter);
+            LOGGER.log(Level.WARNING," RECOVERED EVENT (IO Exception) " + icounter, ex);
             evioWriter.close();
         }
     }
