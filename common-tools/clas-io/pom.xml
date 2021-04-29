@@ -83,6 +83,12 @@
       <artifactId>clas-utils</artifactId>
       <version>6.5.13-SNAPSHOT</version>
     </dependency>
+      <dependency>
+          <groupId>org.jlab.clas</groupId>
+          <artifactId>clas-logging</artifactId>
+          <version>6.5.13-SNAPSHOT</version>
+          <scope>compile</scope>
+      </dependency>
   </dependencies>
 
   <properties>
