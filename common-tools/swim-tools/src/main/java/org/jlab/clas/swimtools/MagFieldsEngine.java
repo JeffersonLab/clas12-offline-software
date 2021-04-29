@@ -58,16 +58,16 @@ public class MagFieldsEngine extends ReconstructionEngine {
         final String mapDir = CLASResources.getResourcePath("etc") + "/data/magfield";
 
         if (torusMap == null) {
-            LOGGER.log(Level.ERROR, "[" + this.getName() + "] ERROR: torus field is undefined.");
+            LOGGER.log(Level.WARNING, "[" + this.getName() + "] ERROR: torus field is undefined.");
             return false;
         }
         if (solenoidMap != null && transsolMap != null) {
-            LOGGER.log(Level.ERROR,
+            LOGGER.log(Level.WARNING,
                     "[" + this.getName() + "] ERROR: both solenoid and transverse solenoid are defined.");
             return false;
         }
         if (solenoidMap == null && transsolMap == null) {
-            LOGGER.log(Level.ERROR,
+            LOGGER.log(Level.WARNING,
                     "[" + this.getName() + "] ERROR: both solenoid and transverse solenoid are undefined.");
             return false;
         }
