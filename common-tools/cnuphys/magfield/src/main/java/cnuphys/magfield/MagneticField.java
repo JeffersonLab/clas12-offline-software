@@ -432,8 +432,8 @@ public abstract class MagneticField implements IMagField {
 
 			boolean swap = false;
 			int magicnum = dos.readInt(); // magic number
-			
-			System.out.println(String.format("Magic number: %04x", magicnum));
+
+			LOGGER.log(Level.INFO,"Magic number: %04x", magicnum);
 
 			// TODO handle swapping if necessary
 			swap = (magicnum != MAGICNUMBER);
