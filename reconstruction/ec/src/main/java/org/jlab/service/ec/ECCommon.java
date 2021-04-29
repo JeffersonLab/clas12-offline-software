@@ -225,6 +225,7 @@ public class ECCommon {
                 
                 strip.setADC(adc);
                 strip.setTriggerPhase(triggerPhase);
+                strip.setID(i+1);
                 
                 double sca = (is==5)?AtoE5[ind[il-1]]:AtoE[ind[il-1]]; 
                 if (variation=="clas6") sca = 1.0;               
@@ -379,7 +380,7 @@ public class ECCommon {
             clusters.get(i).setEnergy(
             clusters.get(i).getEnergy(0) + 
             clusters.get(i).getEnergy(1) +
-            clusters.get(i).getEnergy(2));      
+            clusters.get(i).getEnergy(2));
         }  
         
         return clusters;

@@ -13,8 +13,6 @@ import java.util.Arrays;
  */
 public class GridCoordinate {
 
-	private boolean _isUniform = true;
-
 	/**
 	 * The overall minimum value.
 	 */
@@ -79,6 +77,18 @@ public class GridCoordinate {
 	public double[] getValues() {
 		return _values;
 	}
+	
+	/**
+	 * Gets the nearest index [0..numPoints-1] for nearest neighbor
+	 * @param val the value
+	 * @return the nearest index for nearest neighbor
+	 */
+	public int getRoundedIndex(double val) {
+		int uindex = (int) (((val - _min) / _delta) + 0.5);
+		uindex = Math.max(0, Math.min(uindex, (_numPoints - 1)));
+		return uindex;
+		
+	}
 
 	/**
 	 * Returns an index [0..numPoints-2] such that the grid values index and index+1
@@ -91,37 +101,17 @@ public class GridCoordinate {
 	 *         enclose the value.
 	 */
 	public int getIndex(double val) {
-		if ((val < _min) || (val > _max)) {
+		if ((val < _min) || (val >= _max)) {
 			return -1;
 		}
 
-		if (_isUniform) {
+		//truncates
 			int uindex = (int) ((val - _min) / _delta);
-			uindex = Math.max(0, Math.min(uindex, (_numPoints - 1)));
+		uindex = Math.max(0, Math.min(uindex, (_numPoints - 2)));
+		
+		
 			return uindex;
 		}
-
-		int index = Arrays.binarySearch(_values, val);
-		// index of the search key, if it is contained in the array; otherwise,
-		// (-(insertion point) - 1).
-		// The insertion point is defined as the point at which the key would be
-		// inserted into the array:
-		// the index of the first element greater than the key, or a.length if
-		// all elements in the array are less than the specified key.
-		// Note that this guarantees that the return value will be >= 0 if and
-		// only if the key is found.
-
-		if (index < 0) {
-			index = -(index + 1); // now the insertion point.
-			index = index - 1;
-		}
-		// pathology if val == max, we'd get numPoints-1
-		if (index == _numPoints - 1) {
-			index--;
-		}
-
-		return index;
-	}
 
 	/**
 	 * Get the value at a given index.

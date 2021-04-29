@@ -91,6 +91,7 @@ public class HipoDataSource implements DataSource {
         
     }
 
+    public  HipoReader getReader(){ return reader;}
     @Override
     public int getSize() {
         //return reader.

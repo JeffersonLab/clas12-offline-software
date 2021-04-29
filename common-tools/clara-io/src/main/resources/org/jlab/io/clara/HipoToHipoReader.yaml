@@ -1,0 +1,13 @@
+---
+name: HipoToHipoReader
+engine: org.jlab.io.clara.HipoToHipoReader
+type: java
+
+author: Sebastián Mancilla
+email: smancill@jlab.org
+
+version: 0.5
+description:
+  Reads EVIO events from a file.
+
+  Returns a new event on each request or an error if there was some problem.

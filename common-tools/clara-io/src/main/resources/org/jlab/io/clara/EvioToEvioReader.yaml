@@ -1,0 +1,121 @@
+---
+name: EvioToEvioReader
+engine: org.jlab.clas.std.services.convertors.EvioToEvioReader
+type: java
+
+author: Sebastián Mancilla
+email: smancill@jlab.org
+
+version: 1.4
+description:
+  Reads EVIO events from a file.
+
+  Returns a new event on each request or an error if there was some problem.
+
+config:
+- type: text/property-list
+  data:
+  - name: file
+    description:
+      The path to the input file.
+  - name: action
+    description:
+      Set 'open' to open the input file, or 'close' to close the file.
+  - name: report_done
+    optional: true
+    description:
+      Configure which service is going to report 'done' messages
+      every certain amount of read events.
+      Set 'true' if this service will report 'done',
+      or set a '<canonical_service_name>' if the given service will report
+      'done', or set 'false' to stop reporting.
+  - name: report_data
+    optional: true
+    description:
+      Configure which service is going to report 'data' messages
+      every certain amount of read events.
+      Set 'true' if this service will report the output data,
+      or set a '<canonical_service_name>' if the given service will report
+      its output data, or set 'false' to stop reporting.
+  - name: report_frequency
+    optional: true
+    description:
+      Set the frequency of the events that will report 'done' or 'data'.
+      For example, set it to 1000 to report every 1000 reads events.
+
+requests:
+- action:
+    Read and return the next sequential event from the input file.
+  input:
+    type: text/string
+    value: next
+  output:
+    type: binary/data-evio
+- action:
+    Return the byte order of the input file.
+  input:
+    type: text/string
+    value: order
+  output:
+    type: text/string
+    value:
+      - BIG_ENDIAN
+      - LITTLE_ENDIAN
+- action:
+    Return the number of events in the input file.
+  input:
+    type: text/string
+    value: count
+  output:
+    type: binary/int
+- action:
+    Read the event with the specific number from the input file,
+    in EVIO 4.1 format.
+  input:
+    type: text/property-list
+    data:
+      name: event
+      description: The desired event number.
+  output:
+    type: binary/data-evio
+
+errors:
+  - description:
+      EOF reached.
+      If the request was done by the standard writer in a reconstruction loop,
+      set the data to -1 when there are events on reconstruction yet,
+      and return 1 when all the events were reconstructed.
+      If the request was from outside the reconstruction loop, return 0.
+    text:
+      "End of file"
+  - description:
+      The service has not been configured to open an input file.
+    text:
+      "No open file"
+  - description:
+      The service could not open the input file.
+    text:
+      "Error opening the file <filepath>\n<stacktrace>"
+  - description:
+      The service could not read the next/specific event from the input file.
+    text:
+      "Error requesting event from file <filepath>\n\n<stacktrace>"
+  - description:
+      The mime-type of the input data was wrong.
+    text:
+      "Wrong input type '<type>'"
+  - description:
+      The value of the input string was wrong.
+    text:
+      "Wrong input data = '<string>'"
+  - description:
+      The value of the input property list was wrong.
+    text:
+      "Unrecognized properties = '<string>'"
+  - description:
+      The number of the requested specific event was wrong.
+    text:
+      "Wrong event number = '<num>'"
+
+changelog:
+  Description of changes to the service.
