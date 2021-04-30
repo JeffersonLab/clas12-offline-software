@@ -691,7 +691,7 @@ public class EvioHipoEvent4 {
         parser.addOption("-t","-1.0");
         parser.addOption("-s","1.0");
         parser.addOption("-n", "-1");
-        parser.addOption("-d","0","Debug level [0 - OFF/default, 1 - ON]");
+        parser.addOption("-d","1","Debug level [0 - OFF, 1 - ON/default]");
         
         parser.parse(args);
 

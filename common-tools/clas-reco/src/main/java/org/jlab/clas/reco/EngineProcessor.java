@@ -301,7 +301,7 @@ public class EngineProcessor {
         parser.addOption("-c","0","use default configuration [0 - no, 1 - yes/default, 2 - all services] ");
         parser.addOption("-n","-1","number of events to process");
         parser.addOption("-y","0","yaml file");
-        parser.addOption("-d","0","Debug level [0 - OFF/default, 1 - ON]");
+        parser.addOption("-d","1","Debug level [0 - OFF, 1 - ON/default]");
         parser.setDescription("previously known as notsouseful-util");
 
         parser.parse(args);
