@@ -5,11 +5,13 @@
  */
 package org.jlab.service.mltn;
 
+import j4ml.clas12.ejml.ArchiveProvider;
 import j4ml.clas12.ejml.EJMLTrackNeuralNetwork;
 import j4ml.clas12.network.Clas12TrackFinder;
 import j4ml.clas12.tracking.ClusterCombinations;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -22,7 +24,10 @@ import org.jlab.io.hipo.HipoDataBank;
 public class MLTDEngine extends ReconstructionEngine {
     
 
-    EJMLTrackNeuralNetwork network = null;
+    EJMLTrackNeuralNetwork       network = null;
+    private String         networkFlavor = "default";
+    private Integer           networkRun = 5038;
+    
     public MLTDEngine(){
         super("MLTD","gavalian","1.0");
     }
@@ -33,15 +38,33 @@ public class MLTDEngine extends ReconstructionEngine {
        if(System.getProperty(envDirectory)!=null) return System.getProperty(envDirectory)+"/"+relative;
        return relative;
     }
+    
     @Override
     public boolean init() {
-
+        networkFlavor = Optional.ofNullable(this.getEngineConfigString("flavor")).orElse("default");
+        String runNumber = Optional.ofNullable(this.getEngineConfigString("run")).orElse("5038");
+        networkRun = Integer.parseInt(runNumber);
+        
         network = new EJMLTrackNeuralNetwork();        
         Map<String,String>  files = new HashMap<String,String>();
         files.put("classifier", "trackClassifier.network");
         files.put("fixer", "trackFixer.network");        
         String path = getPathWithEnvironment("CLAS12DIR","etc/ejml/ejmlclas12.network");        
-        network.initZip(path, "network/5038", files);
+        
+        ArchiveProvider provider = new ArchiveProvider(path);
+        
+        //----- This will find in the archive the last run number closest
+        //----- to provided run number that contains trained network.
+        //----- it works similar to CCDB, but not exatly, for provided 
+        //----- run number it looks for run that has smaller number,
+        //----- however it the provided run # it lower than anything 
+        //----- existing in the arhive, it will return the closest run 
+        //----- number entry.
+        int adjustedRun = provider.findEntry(networkRun);
+        
+        String directory = String.format("network/%d/%d", adjustedRun, networkFlavor);
+        network.initZip(path,directory, files);
+        
         //trackFinder = Clas12TrackFinder.createEJML("CLAS12DIR","etc/ejml/ejmlclas12.network");
         //classifier.setEnvDirectory("CLAS12DIR");
         //classifier.setEnvPath("etc/nnet/neuroph");
