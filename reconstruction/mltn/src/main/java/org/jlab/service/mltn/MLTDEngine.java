@@ -41,6 +41,7 @@ public class MLTDEngine extends ReconstructionEngine {
     
     @Override
     public boolean init() {
+        
         networkFlavor = Optional.ofNullable(this.getEngineConfigString("flavor")).orElse("default");
         String runNumber = Optional.ofNullable(this.getEngineConfigString("run")).orElse("5038");
         networkRun = Integer.parseInt(runNumber);
@@ -62,7 +63,7 @@ public class MLTDEngine extends ReconstructionEngine {
         //----- number entry.
         int adjustedRun = provider.findEntry(networkRun);
         
-        String directory = String.format("network/%d/%d", adjustedRun, networkFlavor);
+        String directory = String.format("network/%d/%s", adjustedRun, networkFlavor);
         network.initZip(path,directory, files);
         
         //trackFinder = Clas12TrackFinder.createEJML("CLAS12DIR","etc/ejml/ejmlclas12.network");
@@ -96,15 +97,14 @@ public class MLTDEngine extends ReconstructionEngine {
             Clas12TrackFinder trackFinder = new Clas12TrackFinder();
             trackFinder.setTrackingNetwork(network);
             trackFinder.process(hipoBank.getBank());            
-            writeBank(de,trackFinder.getResults());          
-            
+            writeBank(de,trackFinder.getResults());            
         }
         return true;
     }
     
     public void writeBank(DataEvent event, ClusterCombinations combi){
         //ClusterCombinations combi = cl.getTracks();
-        //System.out.println(">>> writing ai bank with entries = " + combi.getSize());
+        //System.out.println(">>> writing ai bank with entries = " + combi.getSize());        
         DataBank bank = event.createBank("ai::tracks", combi.getSize());
         for(int i = 0; i < combi.getSize(); i++){
             bank.setByte("id", i, (byte) (i+1));
@@ -118,6 +118,7 @@ public class MLTDEngine extends ReconstructionEngine {
             }
         }
         //System.out.println("appending bank");
+        event.removeBank("ai::tracks");
         event.appendBank(bank);
     }
 
