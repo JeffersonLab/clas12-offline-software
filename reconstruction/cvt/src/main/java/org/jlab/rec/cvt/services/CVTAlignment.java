@@ -17,6 +17,7 @@ import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Arc3D;
+import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -113,8 +114,8 @@ public class CVTAlignment extends ReconstructionEngine {
 			if(Math.abs(SolenoidScale)<0.001)
 				Constants.setCosmicsData(true);
 
-			System.out.println(" LOADING BMT GEOMETRY...............................variation = "+variationName);
-			CCDBConstantsLoader.Load(new DatabaseConstantProvider(newRun, variationName));
+			//System.out.println(" LOADING BMT GEOMETRY...............................variation = "+variationName);
+			//CCDBConstantsLoader.Load(new DatabaseConstantProvider(newRun, variationName));
 			//            System.out.println("SVT LOADING WITH VARIATION "+variationName);
 			//            DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, variationName);
 			//            cp = SVTConstants.connect( cp );
@@ -694,12 +695,12 @@ public class CVTAlignment extends ReconstructionEngine {
 		//Z layer
 		if(centroid == org.jlab.rec.cvt.bmt.Constants.getCRZNSTRIPS()[region-1])
 			centroid = org.jlab.rec.cvt.bmt.Constants.getCRZNSTRIPS()[region-1]-.001;
-		Line3d line1 = convertLine(BMTGeom.getZstrip(region, sector, (int)Math.floor(centroid)-0));
-		Line3d line2 = convertLine(BMTGeom.getZstrip(region, sector, (int)Math.floor(centroid)+1)); 
+		Line3d line1 = convertLine(BMTGeom.getLCZstrip(region, sector, (int)Math.floor(centroid)-1));
+		Line3d line2 = convertLine(BMTGeom.getLCZstrip(region, sector, (int)Math.floor(centroid)+0)); 
 
 
 
-		Vector3d l = line1.diff().normalized().times(1-(centroid%1)).add(line2.diff().normalized().times((centroid%1))).normalized();
+		Vector3d l = line1.diff().normalized();//.times(1-(centroid%1)).add(line2.diff().normalized().times((centroid%1))).normalized();
 
 		Vector3d e1 = line1.origin();
 		Vector3d e2 = line2.origin();
