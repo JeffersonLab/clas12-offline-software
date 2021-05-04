@@ -68,7 +68,7 @@ public class FVTEngine extends ReconstructionEngine {
             "/geometry/fmt/alignment"
         };
         requireConstants(Arrays.asList(tables));
-        this.getConstantsManager().setVariation("default");
+        this.getConstantsManager().setVariation(geomDBVar);
 
         // Load the geometry
         String geoVariation = Optional.ofNullable(geomDBVar).orElse("default");
