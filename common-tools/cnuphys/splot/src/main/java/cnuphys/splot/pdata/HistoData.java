@@ -7,6 +7,7 @@ import cnuphys.splot.plot.DoubleFormat;
 import cnuphys.splot.plot.PlotCanvas;
 import cnuphys.splot.plot.PlotParameters;
 import cnuphys.splot.plot.UnicodeSupport;
+
 /**
  * Xontainer class for histogram data
  * 
@@ -54,23 +55,24 @@ public class HistoData {
 	/**
 	 * The data for a 1D histogram where the bin spacing is uniform.
 	 * 
-	 * @param name the curve name of the histogram
-	 * @param valMin the data min
-	 * @param valMax the data max
+	 * @param name    the curve name of the histogram
+	 * @param valMin  the data min
+	 * @param valMax  the data max
 	 * @param numBins the number of bins
 	 */
 	public HistoData(String name, double valMin, double valMax, int numBins) {
 		this(name, evenBins(valMin, valMax, numBins));
 		_uniformBins = true;
 	}
+	
 
 	/**
 	 * The data for a 1D histogram where the bin spacing is arbitrary (i.e., not
 	 * uniform)
 	 * 
 	 * @param name the curve name of the histogram
-	 * @param grid the binning grid. It must be in ascending order but is
-	 *            otherwise arbitrary.
+	 * @param grid the binning grid. It must be in ascending order but is otherwise
+	 *             arbitrary.
 	 */
 	public HistoData(String name, double[] grid) {
 		_name = name;
@@ -152,8 +154,8 @@ public class HistoData {
 	/**
 	 * Get the means and standard deviation
 	 * 
-	 * @return an array with the mean in the 0 index, standard deviation is the
-	 *         1 index, and rms in the 2 index
+	 * @return an array with the mean in the 0 index, standard deviation is the 1
+	 *         index, and rms in the 2 index
 	 */
 	public double[] getBasicStatistics() {
 
@@ -197,15 +199,11 @@ public class HistoData {
 	public String statStr() {
 		double res[] = getBasicStatistics();
 		if (_rmsInHistoLegend) {
-			return String.format(
-					UnicodeSupport.SMALL_MU + ": %-6.2f " + "rms: %-6.2f",
-					res[0], res[2]);
+			return String.format(UnicodeSupport.SMALL_MU + ": %-4.2g " + "rms: %-4.2g under: %d over: %d", res[0], res[2], _underCount, _overCount);
 		}
 		else {
-			return String.format(
-					UnicodeSupport.SMALL_MU + ": %-6.2f "
-							+ UnicodeSupport.SMALL_SIGMA + ": %-6.2f",
-					res[0], res[1]);
+			return String.format(UnicodeSupport.SMALL_MU + ": %-4.2g " + UnicodeSupport.SMALL_SIGMA + ": %-4.2g under: %d over: %d",
+					res[0], res[1], _underCount, _overCount);
 		}
 	}
 
@@ -245,8 +243,7 @@ public class HistoData {
 	}
 
 	/**
-	 * Get the number on entries in the histogram that were below the minimum
-	 * value
+	 * Get the number on entries in the histogram that were below the minimum value
 	 * 
 	 * @return the number of entries below the minimum value
 	 */
@@ -255,8 +252,7 @@ public class HistoData {
 	}
 
 	/**
-	 * Get the number on entries in the histogram that were above the maximum
-	 * value
+	 * Get the number on entries in the histogram that were above the maximum value
 	 * 
 	 * @return the number of entries above the maximum value
 	 */
@@ -283,16 +279,16 @@ public class HistoData {
 	}
 
 	/**
-	 * Get the minimum "y" value. The y axis corresponds to "counts", so this
-	 * always returns 0
+	 * Get the minimum "y" value. The y axis corresponds to "counts", so this always
+	 * returns 0
 	 */
 	public double getMinY() {
 		return 0.;
 	}
 
 	/**
-	 * Get the maximum "y" value. The y axis corresponds to "counts", so this
-	 * always returns the count of the bin with the most counts.
+	 * Get the maximum "y" value. The y axis corresponds to "counts", so this always
+	 * returns the count of the bin with the most counts.
 	 */
 	public double getMaxY() {
 		if (_counts == null) {
@@ -326,10 +322,11 @@ public class HistoData {
 		}
 
 	}
-	
+
 	/**
 	 * Set a bin to a given count
-	 * @param val the x val will determine bin
+	 * 
+	 * @param val   the x val will determine bin
 	 * @param count the count
 	 */
 	public void setCount(double val, int count) {
@@ -394,7 +391,6 @@ public class HistoData {
 		return _grid[bin];
 	}
 
-
 	/**
 	 * Get the bin for a given value. Will return the zero-based bin number or
 	 * UNDERFLOW or OVERFLOW.
@@ -427,14 +423,13 @@ public class HistoData {
 	/**
 	 * Get the status string
 	 * 
-	 * @param canvas the plot canvas
-	 * @param histo the histo data object
+	 * @param canvas     the plot canvas
+	 * @param histo      the histo data object
 	 * @param mousePoint where the mouse is
-	 * @param wp the data coordinates of the mouse
+	 * @param wp         the data coordinates of the mouse
 	 * @return a status string
 	 */
-	public static String statusString(PlotCanvas canvas, HistoData histo,
-			Point mousePoint, Point.Double wp) {
+	public static String statusString(PlotCanvas canvas, HistoData histo, Point mousePoint, Point.Double wp) {
 		String s = null;
 
 		Polygon poly = GetPolygon(canvas, histo);
@@ -442,13 +437,20 @@ public class HistoData {
 			int bin = histo.getBin(wp.x);
 
 			PlotParameters params = canvas.getParameters();
-			String minstr = DoubleFormat.doubleFormat(histo.getBinMinX(bin),
-					params.getNumDecimalX(), params.getMinExponentX());
-			String maxstr = DoubleFormat.doubleFormat(histo.getBinMaxX(bin),
-					params.getNumDecimalX(), params.getMinExponentX());
+			String minstr = DoubleFormat.doubleFormat(histo.getBinMinX(bin), params.getNumDecimalX(),
+					params.getMinExponentX());
+			String maxstr = DoubleFormat.doubleFormat(histo.getBinMaxX(bin), params.getNumDecimalX(),
+					params.getMinExponentX());
+			
+			String name = histo.getName();
+			if ((name != null) && (name.length() > 0)) {
+				name = "[" + name + "]";
+			}
+			else {
+				name = "";
+			}
 
-			s = "[" + histo.getName() + "] bin: " + bin + " [" + minstr + " - "
-					+ maxstr + "]";
+			s = name + " bin: " + bin + " [" + minstr + " - " + maxstr + "]";
 			s += " counts: " + histo.getCount(bin);
 		}
 
@@ -459,7 +461,7 @@ public class HistoData {
 	 * Get the drawing polygon
 	 * 
 	 * @param canvas the drawing canvas
-	 * @param histo the histo data
+	 * @param histo  the histo data
 	 * @return the polygon
 	 */
 	public static Polygon GetPolygon(PlotCanvas canvas, HistoData histo) {
@@ -530,7 +532,7 @@ public class HistoData {
 	public boolean drawStatisticalErrors() {
 		return _statErrors;
 	}
-	
+
 	public String maxBinString() {
 		long maxCount = -1;
 		long counts[] = getCounts();
@@ -540,12 +542,12 @@ public class HistoData {
 		if (maxCount < 1) {
 			return "";
 		}
-		
+
 		String s = "Max count: " + maxCount + " in 1-based bin(s):";
 		for (int bin = 0; bin < getNumberBins(); bin++) {
-			
+
 			if (counts[bin] == maxCount) {
-				s += " " + (bin+1); //make it 1-based
+				s += " " + (bin + 1); // make it 1-based
 			}
 		}
 		return s;

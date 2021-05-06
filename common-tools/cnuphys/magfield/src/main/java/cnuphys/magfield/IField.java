@@ -15,18 +15,6 @@ public interface IField {
 	public String getName();
 
 	/**
-	 * Get the field by trilinear interpolation.
-	 *
-	 * @param phi    azimuthal angle in degrees.
-	 * @param rho    the cylindrical rho coordinate in cm.
-	 * @param z      coordinate in cm
-	 * @param result the result
-	 * @result a Cartesian vector holding the calculated field in kiloGauss.
-	 */
-//    public void fieldCylindrical(double phi, double rho, double z,
-//	    float result[]);
-
-	/**
 	 * Obtain the magnetic field at a given location expressed in Cartesian
 	 * coordinates. The field is returned as a Cartesian vector in kiloGauss.
 	 *
@@ -53,29 +41,6 @@ public interface IField {
 	 */
 	public void field(int sector, float xs, float ys, float zs, float[] result);
 
-	/**
-	 * Get the field magnitude in kiloGauss at a given location expressed in
-	 * cylindrical coordinates.
-	 * 
-	 * @param phi azimuthal angle in degrees.
-	 * @param r   in cm.
-	 * @param z   in cm
-	 * @return the magnitude of the field in kiloGauss.
-	 */
-//    public float fieldMagnitudeCylindrical(double phi, double r, double z);
-
-	/**
-	 * Get the field magnitude in kiloGauss at a given location expressed in
-	 * cylindrical coordinates.
-	 * 
-	 * @param phi       azimuthal angle in degrees.
-	 * @param r         in cm.
-	 * @param z         in cm
-	 * @param workSpace a float[3] that can be reused. It will actually hold the
-	 *                  vector field
-	 * @return the magnitude of the field in kiloGauss.
-	 */
-//	public float fieldMagnitudeCylindrical(double phi, double r, double z, float[] workSpace);
 
 	/**
 	 * Get the field magnitude in kiloGauss at a given location expressed in
@@ -88,19 +53,6 @@ public interface IField {
 	 */
 	public float fieldMagnitude(float x, float y, float z);
 
-	/**
-	 * Obtain an approximation for the magnetic field gradient at a given location
-	 * expressed in cylindrical coordinates. The field is returned as a Cartesian
-	 * vector in kiloGauss/cm.
-	 *
-	 * @param phi    azimuthal angle in degrees.
-	 * @param rho    the cylindrical rho coordinate in cm.
-	 * @param z      coordinate in cm
-	 * @param result the result
-	 * @result a Cartesian vector holding the calculated field in kiloGauss.
-	 */
-//    public void gradientCylindrical(double phi, double rho, double z,
-//    	    float result[]);
 
 	/**
 	 * Obtain an approximation for the magnetic field gradient at a given location
@@ -141,15 +93,5 @@ public interface IField {
 	 */
 	public boolean contains(double x, double y, double z);
 
-	/**
-	 * Check whether the field boundaries include the point
-	 * 
-	 * @param rho the cylindrical rho coordinate in cm.
-	 * @param z   coordinate in cm
-	 * @return <code>true</code> if the point is included in the boundary of the
-	 *         field
-	 * 
-	 */
-//	public boolean contains(double rho, double z);
 
 }

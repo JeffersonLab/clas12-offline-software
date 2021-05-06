@@ -231,34 +231,8 @@ public class Converter {
 			float rhomax = (float) gdata[RHO].max;
 			float zmin = (float) gdata[Z].min;
 			float zmax = (float) gdata[Z].max;
-
-			dos.writeInt(0xced);
-			dos.writeInt(0);
-			dos.writeInt(1);
-			dos.writeInt(0);
-			dos.writeInt(0);
-			dos.writeInt(0);
-			dos.writeFloat(phimin);
-			dos.writeFloat(phimax);
-			dos.writeInt(nPhi);
-			dos.writeFloat(rhomin);
-			dos.writeFloat(rhomax);
-			dos.writeInt(nRho);
-			dos.writeFloat(zmin);
-			dos.writeFloat(zmax);
-			dos.writeInt(nZ);
-
-			long unixTime = System.currentTimeMillis();
-
-			int high = (int) (unixTime >> 32);
-			int low = (int) unixTime;
-
-			// write reserved
-			dos.writeInt(high); // first word of unix time
-			dos.writeInt(low); // second word of unix time
-			dos.writeInt(0);
-			dos.writeInt(0);
-			dos.writeInt(0);
+			
+			MagneticFields.writeHeader(dos, 0, 1, 0, 0, 0, phimin, phimax, nPhi, rhomin, rhomax, nRho, zmin, zmax, nZ);
 
 			int size = 3 * 4 * nPhi * nRho * nZ;
 			System.err.println("FILE SIZE = " + size + " bytes");
@@ -510,6 +484,107 @@ public class Converter {
 			writer.println(line);
 		}
 	}
+	
+	public static void convertGEMCtoBinary(String name) {
+		File mfdir = new File(System.getProperty("user.home"), "magfield");
+		File file = new File(mfdir, name);
+		
+		File bfile = new File(mfdir, "gemcToBinary.dat");
+		DataOutputStream dos0 = null;
+		try {
+			dos0 = new DataOutputStream(new FileOutputStream(bfile));
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+			System.exit(1);
+		}
+		final DataOutputStream dos = dos0;
+
+		int nPhi = 16;
+		int nRho = 2501;
+		int nZ = 251;
+		MagneticFields.writeHeader(dos, 0, 1, 0, 0, 0, 0, 30, nPhi, 0, 500, nRho, 100, 600, nZ);
+
+		
+		try {
+			AsciiReader reader = new AsciiReader(file) {
+				
+				int count = 0;
+				
+				@Override
+				protected void processLine(String line) {
+					
+					if (line.startsWith("<")) {
+						return;
+					}
+										
+					if (count < 20) {
+						System.err.println("[" + line + "]");
+					}
+					count++;
+					
+					String tokens[] = AsciiReadSupport.tokens(line);
+					if (tokens.length != 6) {
+						System.err.println("BAD TOKENS");
+						System.exit(1);
+					}
+					
+					float bx = Float.parseFloat(tokens[3]);
+					float by = Float.parseFloat(tokens[4]);
+					float bz = Float.parseFloat(tokens[5]);
+
+					try {
+						dos.writeFloat(bx);
+						dos.writeFloat(by);
+						dos.writeFloat(bz);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					
+					if ((count % 10000) == 0) {
+						System.err.println("count = " + count);
+					}
+				}
+
+				@Override
+				public void done() {
+					System.err.println("final count = " + count);				
+					try {
+						dos.flush();
+						dos.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+
+				
+			};
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		
+
+	}
+	
+	/**
+	 * Convert a composite index back to the coordinate indices
+	 * 
+	 * @param index    the composite index.
+	 * @param qindices the coordinate indices
+	 */
+private static void getCoordinateIndices(int index, int N1, int N2, int N3, int qindices[]) {
+		int n3 = index % N3;
+		index = (index - n3) / N3;
+
+		int n2 = index % N2;
+		int n1 = (index - n2) / N2;
+		qindices[0] = n1;
+		qindices[1] = n2;
+		qindices[2] = n3;
+	}
+
 
 	public static void main(String arg[]) {
 		String dataDir = getDataDir();
@@ -531,8 +606,9 @@ public class Converter {
 		}
 
 		convertToBinary(files, gdata);
-		// convertToGemc(files, gdata);
+//		// convertToGemc(files, gdata);
 
+//		convertGEMCtoBinary("April_24_TorusSymmetric.txt");
 		System.out.println("done");
 	}
 

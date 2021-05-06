@@ -48,8 +48,7 @@ public class VerticalLabelUI extends BasicLabelUI {
 	 * Constructs a <code>VerticalLabelUI</code> with the desired rotation.
 	 * <P>
 	 * 
-	 * @param clockwise
-	 *            true to rotate clockwise, false for anticlockwise
+	 * @param clockwise true to rotate clockwise, false for anticlockwise
 	 */
 	public VerticalLabelUI(boolean clockwise) {
 		this.clockwise = clockwise;
@@ -61,7 +60,8 @@ public class VerticalLabelUI extends BasicLabelUI {
 	public static ComponentUI createUI(JComponent c) {
 		if (System.getSecurityManager() != null) {
 			return SAFE_VERTICAL_LABEL_UI;
-		} else {
+		}
+		else {
 			return verticalLabelUI;
 		}
 	}
@@ -79,14 +79,13 @@ public class VerticalLabelUI extends BasicLabelUI {
 	}
 
 	/**
-	 * Overridden to always return Component.BaselineResizeBehavior.OTHER, since
-	 * a vertical label does not have a meaningful baseline
+	 * Overridden to always return Component.BaselineResizeBehavior.OTHER, since a
+	 * vertical label does not have a meaningful baseline
 	 * 
 	 * @see ComponentUI#getBaselineResizeBehavior(javax.swing.JComponent)
 	 */
 	@Override
-	public Component.BaselineResizeBehavior getBaselineResizeBehavior(
-			JComponent c) {
+	public Component.BaselineResizeBehavior getBaselineResizeBehavior(JComponent c) {
 		super.getBaselineResizeBehavior(c);
 		return Component.BaselineResizeBehavior.OTHER;
 	}
@@ -97,16 +96,14 @@ public class VerticalLabelUI extends BasicLabelUI {
 	 * {@link SwingUtilities#layoutCompoundLabel(FontMetrics, String, Icon, int, int, int, int, Rectangle, Rectangle, Rectangle, int)}
 	 */
 	@Override
-	protected String layoutCL(JLabel label, FontMetrics fontMetrics,
-			String text, Icon icon, Rectangle viewR, Rectangle iconR,
-			Rectangle textR) {
+	protected String layoutCL(JLabel label, FontMetrics fontMetrics, String text, Icon icon, Rectangle viewR,
+			Rectangle iconR, Rectangle textR) {
 
 		verticalViewR = transposeRectangle(viewR, verticalViewR);
 		verticalIconR = transposeRectangle(iconR, verticalIconR);
 		verticalTextR = transposeRectangle(textR, verticalTextR);
 
-		text = super.layoutCL(label, fontMetrics, text, icon, verticalViewR,
-				verticalIconR, verticalTextR);
+		text = super.layoutCL(label, fontMetrics, text, icon, verticalViewR, verticalIconR, verticalTextR);
 
 		copyRectangle(verticalViewR, viewR);
 		copyRectangle(verticalIconR, iconR);
@@ -115,17 +112,16 @@ public class VerticalLabelUI extends BasicLabelUI {
 	}
 
 	/**
-	 * Transforms the Graphics for vertical rendering and invokes the super
-	 * method.
+	 * Transforms the Graphics for vertical rendering and invokes the super method.
 	 */
 	@Override
 	public void paint(Graphics g, JComponent c) {
 		Graphics2D g2 = (Graphics2D) g.create();
 		if (clockwise) {
 			g2.rotate(Math.PI / 2, c.getSize().width / 2, c.getSize().width / 2);
-		} else {
-			g2.rotate(-Math.PI / 2, c.getSize().height / 2,
-					c.getSize().height / 2);
+		}
+		else {
+			g2.rotate(-Math.PI / 2, c.getSize().height / 2, c.getSize().height / 2);
 		}
 		super.paint(g2, c);
 	}

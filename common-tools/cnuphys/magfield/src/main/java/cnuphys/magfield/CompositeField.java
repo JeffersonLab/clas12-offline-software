@@ -92,6 +92,21 @@ public class CompositeField extends ArrayList<IMagField> implements IMagField {
 
 		return false;
 	}
+	
+	/**
+	 * Check whether we have a transverse solenoid field
+	 * 
+	 * @return <code>true</code> if we have a transverse solenoid
+	 */
+	public boolean hasTransverseSolenoid() {
+		for (IMagField field : this) {
+			if (field instanceof TransverseSolenoid) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	@Override
 	public float getB1(int index) {
