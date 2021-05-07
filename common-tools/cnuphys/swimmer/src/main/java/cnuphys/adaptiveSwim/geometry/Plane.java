@@ -11,17 +11,17 @@ package cnuphys.adaptiveSwim.geometry;
 public class Plane {
 
 	// unit vector normal to plane
-	public  final Vector norm;
+	public final Vector norm;
 
 	// point on the plane
 	public final Point p0;
-	
-	//for the form ax + by + cz = d;
+
+	// for the form ax + by + cz = d;
 	public final double a;
 	public final double b;
 	public final double c;
 	public final double d;
-	
+
 	private double _denom = Double.NaN;
 
 	/**
@@ -42,7 +42,21 @@ public class Plane {
 	}
 	
 	/**
+	 * Create a plane from the normal vector in an array of doubles and
+	 * a point in the plane in an array, both (x, y, z)
+	 * @param norm the normal
+	 * @param point the point in the plane
+	 */
+	public Plane(double norm[], double point[]) {
+		
+		this(new Vector(norm[0], norm[1], norm[2]), 
+				new Point(point[0], point[1], point[2]));
+	}
+
+
+	/**
 	 * Distance from a point to the plane
+	 * 
 	 * @param p the point in question
 	 * @return the distance to the plane
 	 */
@@ -52,41 +66,43 @@ public class Plane {
 
 	/**
 	 * Distance from a point to the plane
-	 * @param x the x coordinate 
-	 * @param y the y coordinate 
-	 * @param z the z coordinate 
+	 * 
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 * @param z the z coordinate
 	 * @return the distance to the plane
 	 */
 	public double distance(double x, double y, double z) {
 		return Math.abs(signedDistance(x, y, z));
 	}
-	
-	
+
 	/**
 	 * Signed distance from a point to the plane
+	 * 
 	 * @param p the point in question
-	 * @return the signed distance (indicates which side you are on where norm defines positive side)
+	 * @return the signed distance (indicates which side you are on where norm
+	 *         defines positive side)
 	 */
 	public double signedDistance(Point p) {
 		return signedDistance(p.x, p.y, p.z);
 	}
 
-	
 	/**
 	 * Signed distance from a point to the plane
-	 * @param x the x coordinate 
-	 * @param y the y coordinate 
-	 * @param z the z coordinate 
-	 * @return the signed distance (indicates which side you are on where norm defines positive side)
+	 * 
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 * @param z the z coordinate
+	 * @return the signed distance (indicates which side you are on where norm
+	 *         defines positive side)
 	 */
 	public double signedDistance(double x, double y, double z) {
 		if (Double.isNaN(_denom)) {
-			_denom = Math.sqrt(a*a + b*b + c*c);
+			_denom = Math.sqrt(a * a + b * b + c * c);
 		}
-		return (a*x + b*y + c*z - d)/_denom;
+		return (a * x + b * y + c * z - d) / _denom;
 	}
 
-	
 	/**
 	 * Compute the intersection of an infinite line with the plane
 	 * 
@@ -174,7 +190,9 @@ public class Plane {
 	}
 
 	/**
-	 * Obtain the line resulting from the intersection of this plane and another plane
+	 * Obtain the line resulting from the intersection of this plane and another
+	 * plane
+	 * 
 	 * @param plane the other plane
 	 * @return line formed by the intersection
 	 */
@@ -218,7 +236,7 @@ public class Plane {
 	// by Cramer's rule
 	private double[] solve(double a1, double b1, double d1, double a2, double b2, double d2) {
 		double deter = a1 * b2 - a2 * b1;
-		if (Math.abs(deter) < Constants.TINY) {
+		if (tiny(deter)) {
 			return null;
 		}
 
@@ -231,8 +249,155 @@ public class Plane {
 		return ans;
 	}
 
+	// is the value essentially 0?
+	private boolean tiny(double v) {
+		return Math.abs(v) < Constants.TINY;
+	}
+
+	/**
+	 * Find some coordinates suitable for drawing the plane as a Quad in 3D
+	 * 
+	 * @param scale an arbitrary big number, a couple times bigger than the drawing
+	 *              extent
+	 * @return the jogl coordinates for drawing a Quad
+	 */
+	public float[] planeQuadCoordinates(float scale) {
+
+		int[] i1 = { -1, -1, 1, 1 };
+		int[] i2 = { -1, 1, 1, -1 };
+
+		if (tiny(a) && tiny(b) && tiny(c)) {
+			return null;
+		}
+
+		float[] coords = new float[12];
+
+		// another point in the plane
+		Point p1 = new Point();
+
+		if (tiny(b) && tiny(c)) { // constant x plane
+			float fx = (float) (d / a);
+			for (int k = 0; k < 4; k++) {
+				int j = 3 * k;
+
+				float y = scale * i1[k];
+				float z = scale * i2[k];
+
+				coords[j] = fx;
+				coords[j + 1] = y;
+				coords[j + 2] = z;
+			}
+
+		} else if (tiny(a) && tiny(c)) { // constant y plane
+			float fy = (float) (d / b);
+			for (int k = 0; k < 4; k++) {
+				int j = 3 * k;
+
+				float x = scale * i1[k];
+				float z = scale * i2[k];
+
+				coords[j] = x;
+				coords[j + 1] = fy;
+				coords[j + 2] = z;
+			}
+		} else if (tiny(a) && tiny(b)) { // constant z plane
+			float fz = (float) (d / c);
+			for (int k = 0; k < 4; k++) {
+				int j = 3 * k;
+
+				float x = scale * i1[k];
+				float y = scale * i2[k];
+
+				coords[j] = x;
+				coords[j + 1] = y;
+				coords[j + 2] = fz;
+			}
+		}
+
+		else if (tiny(a)) {
+			for (int k = 0; k < 4; k++) {
+				int j = 3 * k;
+
+				float x = scale * i1[k];
+				float y = scale * i2[k];
+				float z = (float) ((d - b * y) / c);
+
+				coords[j] = x;
+				coords[j + 1] = y;
+				coords[j + 2] = z;
+			}
+		}
+
+		else if (tiny(b)) {
+			for (int k = 0; k < 4; k++) {
+				int j = 3 * k;
+
+				float x = scale * i1[k];
+				float y = scale * i2[k];
+				float z = (float) ((d - a * x) / c);
+
+				coords[j] = x;
+				coords[j + 1] = y;
+				coords[j + 2] = z;
+			}
+
+		}
+
+		else if (tiny(c)) {
+			for (int k = 0; k < 4; k++) {
+				int j = 3 * k;
+
+				float x = scale * i1[k];
+				float z = scale * i2[k];
+				float y = (float) ((d - a * x) / b);
+
+				coords[j] = x;
+				coords[j + 1] = y;
+				coords[j + 2] = z;
+			}
+
+		}
+		
+		else { //general case, no small constants
+			for (int k = 0; k < 4; k++) {
+				int j = 3 * k;
+
+				float x = scale * i1[k];
+				float y = scale * i2[k];
+				float z = (float) ((d - a * x - b * y) / c);
+
+				coords[j] = x;
+				coords[j + 1] = y;
+				coords[j + 2] = z;
+			}
+		}
+
+		return coords;
+	}
+	
+	private static void valCheck(Plane p, float[] coords, int index) {
+		int j = 3*index;
+		double x = coords[j];
+		double y = coords[j+1];
+		double z = coords[j+2];
+		double val = p.a*x + p.b*y + p.c*z - p.d;
+		System.out.println(String.format("  coord check [%d] (%-9.5f, %-9.5f, %-9.5f) val = %-9.5f (should be 0)", 
+				index, x, y, z, val));
+	}
+
 	public static void main(String arg[]) {
 //		Plane p = constantPhiPlane(30);
+
+		Point zero = new Point(0, 0, 0);
+		Vector nn = new Vector(0, 0, 1);
+		Plane zp = new Plane(nn, zero);
+		
+		float coords[] = zp.planeQuadCoordinates(1000);
+		for (int i = 0; i < 4; i++) {
+			Plane.valCheck(zp, coords, i);
+		}
+		
+		System.out.println();
 
 		Point p = new Point(1, 1, 1);
 		Vector norm = new Vector(1, 1, 1);
@@ -240,8 +405,13 @@ public class Plane {
 		Plane plane = new Plane(norm, p);
 
 		System.out.println("Init plane: " + plane);
-		
+
 		System.out.println("should be 0: " + plane.distance(p));
+		
+		coords = plane.planeQuadCoordinates(1000);
+		for (int i = 0; i < 4; i++) {
+			Plane.valCheck(plane, coords, i);
+		}
 
 		Point po = new Point(2, 4, -7);
 		Point p1 = new Point(0, 2, 5);
@@ -258,6 +428,12 @@ public class Plane {
 		t = plane.lineIntersection(line, intersection);
 		System.out.println(" t = " + t + "   intersect: " + intersection + "  phicheck = "
 				+ Math.toDegrees(Math.atan2(intersection.y, intersection.x)));
+		
+		coords = plane.planeQuadCoordinates(1000);
+		for (int i = 0; i < 4; i++) {
+			Plane.valCheck(plane, coords, i);
+		}
+
 
 		// intersection of two phi planes should be z axis
 		Plane pp1 = constantPhiPlane(57);

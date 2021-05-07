@@ -771,12 +771,6 @@ public class AdaptiveSwimmer {
 		ButcherAdvance advancer = new ButcherAdvance(6, ButcherTableau.CASH_KARP);
 		while (count < MAXTRIES) {
 			
-			if ((stopper.getS() + h) > stopper.getSmax()) {
-				h = (stopper.getSmax()-stopper.getS())/4;
-				if (h < 0) {
-					break;
-				}
-			}
 
 			//this will try to swim us the rest of the way to sf, but hopefully
 			//we'll get stopped earlier because we reach the target plane
@@ -797,10 +791,16 @@ public class AdaptiveSwimmer {
 			if (del < accuracy) {
 				break;
 			}
+			
+			if (stopper.passedSmax()) {
+				break;
+			}
 						
 			count++;
 			
-			h /= 2;
+			if (stopper.crossedBoundary()) {
+				h = Math.max(h / 2, del / 5);
+			}
 		}
 		
 		result.setFinalS(stopper.getS());

@@ -26,7 +26,9 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * @author heddle
  * 
  */
-public class MagneticFields {
+public class
+
+MagneticFields {
 
 	// used for rotating to tilted sector coordinates
 	private static final double ROOT3OVER2 = Math.sqrt(3) / 2;
