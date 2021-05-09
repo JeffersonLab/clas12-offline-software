@@ -17,16 +17,16 @@
 
   <repositories>
     <repository>
+        <id>freehep</id>
+        <url>https://java.freehep.org/maven2</url>
+    </repository>
+    <repository>
       <id>local-build</id>
       <url>https://clasweb.jlab.org/clas12maven</url>
     </repository>
     <repository>
       <id>jnp-build</id>
       <url>https://clasweb.jlab.org/jhep/maven</url>
-    </repository>
-    <repository>
-        <id>freehep</id>
-        <url>https://java.freehep.org/maven2</url>
     </repository>
   </repositories>
 
