@@ -29,12 +29,14 @@ do
     fi
 done
 
+top="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+
 wget='wget'
-mvn="mvn --settings $PWD/.mvn/local-settings.xml"
+mvn="mvn --settings $top/maven-settings.xml"
 if [ "$quiet" == "yes" ]
 then
     wget='wget --progress=dot:mega'
-    mvn="mvn -q -B --settings $PWD/.mvn/local-settings.xml"
+    mvn="mvn -q -B --settings $top/maven-settings.xml"
 fi
 
 command_exists () {
