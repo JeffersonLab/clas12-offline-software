@@ -30,11 +30,11 @@ do
 done
 
 wget='wget'
-mvn='mvn'
+mvn="mvn --settings $PWD/.mvn/local-settings.xml"
 if [ "$quiet" == "yes" ]
 then
     wget='wget --progress=dot:mega'
-    mvn='mvn -q -B'
+    mvn="mvn -q -B --settings $PWD/.mvn/local-settings.xml"
 fi
 
 command_exists () {
