@@ -24,6 +24,10 @@
       <id>jnp-build</id>
       <url>https://clasweb.jlab.org/jhep/maven</url>
     </repository>
+    <repository>
+        <id>freehep</id>
+        <url>https://java.freehep.org/maven2</url>
+    </repository>
   </repositories>
 
   <!-- project Dependencies -->
