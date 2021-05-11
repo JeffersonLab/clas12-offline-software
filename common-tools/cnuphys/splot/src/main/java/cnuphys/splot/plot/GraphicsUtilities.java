@@ -38,7 +38,6 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.plaf.metal.MetalIconFactory;
 
 import cnuphys.splot.style.LineStyle;
-import cnuphys.splot.style.Styled;
 
 public class GraphicsUtilities {
 
@@ -65,44 +64,42 @@ public class GraphicsUtilities {
 	/**
 	 * A stroke used for highlight drawing.
 	 */
-	final public static BasicStroke dash1 = new BasicStroke(1.0f,
-			BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f, DASH, 0.0f);
+	final public static BasicStroke dash1 = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
+			DASH, 0.0f);
 
 	/**
 	 * Another stroke used for highlight drawing.
 	 */
-	final public static BasicStroke dash2 = new BasicStroke(1.0f,
-			BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f, DASH, DASH[0]);
+	final public static BasicStroke dash2 = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
+			DASH, DASH[0]);
 
 	/**
 	 * A stroke used for highlight drawing.
 	 */
-	final public static BasicStroke dash1_2 = new BasicStroke(2.0f,
-			BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f, DASH, 0.0f);
+	final public static BasicStroke dash1_2 = new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
+			DASH, 0.0f);
 
 	/**
 	 * Another stroke used for highlight drawing.
 	 */
-	final public static BasicStroke dash2_2 = new BasicStroke(2.0f,
-			BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f, DASH, DASH[0]);
+	final public static BasicStroke dash2_2 = new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
+			DASH, DASH[0]);
 
 	/**
 	 * A stroke used for common dashed lines.
 	 */
-	final public static BasicStroke simpleDash = new BasicStroke(1.0f,
-			BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f, DASH, DASH[0]);
+	final public static BasicStroke simpleDash = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL,
+			8.0f, DASH, DASH[0]);
 
-	final public static BasicStroke simpleDash2 = new BasicStroke(1.0f,
-			BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f, DASH, 0.5f);
+	final public static BasicStroke simpleDash2 = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL,
+			8.0f, DASH, 0.5f);
 
 	/**
-	 * Hashtable of strokes. As strokes are created, they are cached so that
-	 * they aren't created over and over again. There should not be many--each
-	 * linewidth and solid or dashed combination--probably no more than six or
-	 * eight.
+	 * Hashtable of strokes. As strokes are created, they are cached so that they
+	 * aren't created over and over again. There should not be many--each linewidth
+	 * and solid or dashed combination--probably no more than six or eight.
 	 */
-	protected static Hashtable<String, Stroke> strokes = new Hashtable<String, Stroke>(
-			47);
+	protected static Hashtable<String, Stroke> strokes = new Hashtable<String, Stroke>(47);
 
 	/**
 	 * Set component to small size variant. Probably only works on Mac.
@@ -123,8 +120,8 @@ public class GraphicsUtilities {
 	}
 
 	/**
-	 * Set button for square style. For mac so you don't have to use those
-	 * wasteful oval buttons when space is tight
+	 * Set button for square style. For mac so you don't have to use those wasteful
+	 * oval buttons when space is tight
 	 * 
 	 * @param button the button to change style
 	 */
@@ -141,37 +138,37 @@ public class GraphicsUtilities {
 	public static void setTexturedButton(JButton button) {
 		button.putClientProperty("JButton.buttonType", "textured");
 	}
-	
+
 	/**
-	 * Compute a minimal clip from the intersection of the bounds of the current clip
-	 * and a rectangle
+	 * Compute a minimal clip from the intersection of the bounds of the current
+	 * clip and a rectangle
+	 * 
 	 * @param currentClip the current clip
-	 * @param rect the rectangle of interest
+	 * @param rect        the rectangle of interest
 	 * @return the intersection bounding rect, or <code>null</code>
 	 */
-	public static  Rectangle minClip(Shape currentClip, Rectangle rect) {
+	public static Rectangle minClip(Shape currentClip, Rectangle rect) {
 		if ((currentClip == null) || (rect == null)) {
 			return null;
 		}
-		
+
 		if ((rect.width == 0) || (rect.height == 0)) {
 			return null;
 		}
-		
+
 		Rectangle cb = currentClip.getBounds();
 		if ((cb == null) || (cb.width == 0) || (cb.height == 0)) {
 			return null;
 		}
-		
+
 		SwingUtilities.computeIntersection(rect.x, rect.y, rect.width, rect.height, cb);
 		return cb;
 	}
 
-
 	/**
 	 * Gets a stroke appropriate for the line width and line type. Try the hash
-	 * table first, if not found create the Stroke and place it in the hashtable
-	 * for future use.
+	 * table first, if not found create the Stroke and place it in the hashtable for
+	 * future use.
 	 * 
 	 * @param lineWidth the desired line width in pixels.
 	 * @param lineStyle the desired line style.
@@ -189,37 +186,30 @@ public class GraphicsUtilities {
 		if (stroke == null) { // not in hashtable
 			float fLineWidth = lineWidth;
 			if (lineStyle.equals(LineStyle.SOLID)) {
-				stroke = new BasicStroke(lineWidth, BasicStroke.CAP_ROUND,
-						BasicStroke.JOIN_ROUND);
+				stroke = new BasicStroke(lineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
 			}
 			else if (lineStyle.equals(LineStyle.DASH)) {
-				stroke = new BasicStroke(fLineWidth, BasicStroke.CAP_BUTT,
-						BasicStroke.JOIN_BEVEL, 8.0f,
+				stroke = new BasicStroke(fLineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
 						new float[] { 10.0f, 10.0f }, 0.0f);
 			}
 			else if (lineStyle.equals(LineStyle.DOT_DASH)) {
-				stroke = new BasicStroke(fLineWidth, BasicStroke.CAP_BUTT,
-						BasicStroke.JOIN_BEVEL, 8.0f,
+				stroke = new BasicStroke(fLineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
 						new float[] { 4.0f, 4.0f, 10.0f, 4.0f }, 0.0f);
 			}
 			else if (lineStyle.equals(LineStyle.DOT)) {
-				stroke = new BasicStroke(fLineWidth, BasicStroke.CAP_BUTT,
-						BasicStroke.JOIN_BEVEL, 8.0f, new float[] { 4.0f, 4f },
-						0.0f);
+				stroke = new BasicStroke(fLineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
+						new float[] { 4.0f, 4f }, 0.0f);
 			}
 			else if (lineStyle.equals(LineStyle.DOUBLE_DASH)) {
-				stroke = new BasicStroke(fLineWidth, BasicStroke.CAP_BUTT,
-						BasicStroke.JOIN_BEVEL, 8.0f,
+				stroke = new BasicStroke(fLineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
 						new float[] { 10.0f, 4.0f, 10.0f, 10.0f }, 0.0f);
 			}
 			else if (lineStyle.equals(LineStyle.LONG_DASH)) {
-				stroke = new BasicStroke(fLineWidth, BasicStroke.CAP_BUTT,
-						BasicStroke.JOIN_BEVEL, 8.0f,
+				stroke = new BasicStroke(fLineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
 						new float[] { 15.0f, 15.0f }, 0.0f);
 			}
 			else if (lineStyle.equals(LineStyle.LONG_DOT_DASH)) {
-				stroke = new BasicStroke(fLineWidth, BasicStroke.CAP_BUTT,
-						BasicStroke.JOIN_BEVEL, 8.0f,
+				stroke = new BasicStroke(fLineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
 						new float[] { 6.0f, 4.0f, 15.0f, 4.0f }, 0.0f);
 			}
 			else {
@@ -232,8 +222,8 @@ public class GraphicsUtilities {
 	}
 
 	/**
-	 * Create four points corresponding to the corners of a rectangle. Useful
-	 * for item selection points.
+	 * Create four points corresponding to the corners of a rectangle. Useful for
+	 * item selection points.
 	 * 
 	 * @param rect the rectangle in question.
 	 * @return points corresponding to the corners.
@@ -259,8 +249,7 @@ public class GraphicsUtilities {
 	 * @param c the component being rendered offscreen.
 	 * @return a translucent buffer big enough for offscreen drawing.
 	 */
-	public static BufferedImage getComponentTranslucentImageBuffer(
-			Component c) {
+	public static BufferedImage getComponentTranslucentImageBuffer(Component c) {
 		if (c == null) {
 			return null;
 		}
@@ -268,8 +257,7 @@ public class GraphicsUtilities {
 		if ((size.width < 1) || (size.height < 1)) {
 			return null;
 		}
-		BufferedImage myImage = new BufferedImage(size.width, size.height,
-				Transparency.TRANSLUCENT);
+		BufferedImage myImage = new BufferedImage(size.width, size.height, Transparency.TRANSLUCENT);
 		return myImage;
 	}
 
@@ -289,15 +277,14 @@ public class GraphicsUtilities {
 			return null;
 		}
 
-		BufferedImage myImage = new BufferedImage(size.width, size.height,
-				BufferedImage.TYPE_INT_RGB);
+		BufferedImage myImage = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
 		return myImage;
 	}
 
 	/**
 	 * Paints the component on an existing image.
 	 * 
-	 * @param c the component to paint.
+	 * @param c     the component to paint.
 	 * @param image the image to paint on, already created.
 	 */
 	public static void paintComponentOnImage(Component c, BufferedImage image) {
@@ -339,8 +326,8 @@ public class GraphicsUtilities {
 	 * Center a component.
 	 * 
 	 * @param component The Component to center.
-	 * @param dh offset from horizontal center.
-	 * @param dv offset from vertical center.
+	 * @param dh        offset from horizontal center.
+	 * @param dv        offset from vertical center.
 	 */
 	public static void centerComponent(Component component, int dh, int dv) {
 
@@ -349,8 +336,7 @@ public class GraphicsUtilities {
 
 		try {
 
-			GraphicsEnvironment env = GraphicsEnvironment
-					.getLocalGraphicsEnvironment();
+			GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
 			GraphicsDevice[] allScreens = env.getScreenDevices();
 			GraphicsConfiguration gc = allScreens[0].getDefaultConfiguration();
 
@@ -364,23 +350,23 @@ public class GraphicsUtilities {
 			}
 
 			int x = bounds.x + ((bounds.width - componentSize.width) / 2) + dh;
-			int y = bounds.y + ((bounds.height - componentSize.height) / 2)
-					+ dv;
+			int y = bounds.y + ((bounds.height - componentSize.height) / 2) + dv;
 
 			component.setLocation(x, y);
 
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			component.setLocation(200, 200);
 			e.printStackTrace();
 		}
 	}
 
 	/**
-	 * Returns a dimension that is a specified fraction of the screen size. This
-	 * is useful, for example, to make a farme 85% of the screen.
+	 * Returns a dimension that is a specified fraction of the screen size. This is
+	 * useful, for example, to make a farme 85% of the screen.
 	 * 
-	 * @param fraction the fraction desired, e.g., 0.85. No check for
-	 *            reasonableness is made.
+	 * @param fraction the fraction desired, e.g., 0.85. No check for reasonableness
+	 *                 is made.
 	 * @return the requested dimension.
 	 */
 	public static Dimension screenFraction(double fraction) {
@@ -392,13 +378,13 @@ public class GraphicsUtilities {
 
 	/**
 	 * Adjust a second point so that the rectangle it forms with the first point
-	 * matches an aspect ratio of a given rectangle. Useful for rubber banding
-	 * when you want to preserve the aspect ratio.
+	 * matches an aspect ratio of a given rectangle. Useful for rubber banding when
+	 * you want to preserve the aspect ratio.
 	 * 
-	 * @param r the rectangle whose aspect ration will be mayched.
+	 * @param r  the rectangle whose aspect ration will be mayched.
 	 * @param p0 anchor point
-	 * @param p will be adjusted so that p0, p form a rectangle with the same
-	 *            aspected ratio as r.
+	 * @param p  will be adjusted so that p0, p form a rectangle with the same
+	 *           aspected ratio as r.
 	 */
 
 	public static void rectangleARFixedAdjust(Rectangle r, Point p0, Point p) {
@@ -425,8 +411,8 @@ public class GraphicsUtilities {
 	}
 
 	/**
-	 * Get a rectangle with the same apsect ratio. Useful for rubber banding
-	 * when you want to preserve the sapect ratio.
+	 * Get a rectangle with the same apsect ratio. Useful for rubber banding when
+	 * you want to preserve the sapect ratio.
 	 */
 	public static Rectangle rectangleARFixed(Rectangle r, Point p0, Point p) {
 		rectangleARFixedAdjust(r, p0, p);
@@ -464,9 +450,8 @@ public class GraphicsUtilities {
 	/**
 	 * Size and center a JFrame relative to the screen.
 	 * 
-	 * @param frame the frame to size.
-	 * @param fractionalSize the fraction desired of the screen--e.g., 0.85 for
-	 *            85%.
+	 * @param frame          the frame to size.
+	 * @param fractionalSize the fraction desired of the screen--e.g., 0.85 for 85%.
 	 */
 	public void sizeToScreen(JFrame frame, double fractionalSize) {
 		Dimension d = screenFraction(fractionalSize);
@@ -477,15 +462,13 @@ public class GraphicsUtilities {
 	/**
 	 * Draw an oval with a 3D etching.
 	 * 
-	 * @param g the Graphics context.
-	 * @param r the bounding rectangle.
-	 * @param fc an optional fill color.
-	 * @param ic an optional inner fill color.
-	 * @param outsie if <code>true</code>, the 3D effect is "out", otherwise
-	 *            "in".
+	 * @param g      the Graphics context.
+	 * @param r      the bounding rectangle.
+	 * @param fc     an optional fill color.
+	 * @param ic     an optional inner fill color.
+	 * @param outsie if <code>true</code>, the 3D effect is "out", otherwise "in".
 	 */
-	static public void drawSimple3DOval(Graphics g, Rectangle r, Color fc,
-			Color ic, boolean outsie) {
+	static public void drawSimple3DOval(Graphics g, Rectangle r, Color fc, Color ic, boolean outsie) {
 
 		Color tc;
 		Color bc;
@@ -524,35 +507,31 @@ public class GraphicsUtilities {
 	/**
 	 * Draw a 3d "etching" around a rectangular area..
 	 * 
-	 * @param g the Graphics context.
-	 * @param x the left of the rectangle.
-	 * @param y the top of the rectangle.
-	 * @param w the width of the rectangle.
-	 * @param h the height of the rectangle.
-	 * @param outsie if <code>true</code>, the 3D effect is "out", otherwise
-	 *            "in".
+	 * @param g      the Graphics context.
+	 * @param x      the left of the rectangle.
+	 * @param y      the top of the rectangle.
+	 * @param w      the width of the rectangle.
+	 * @param h      the height of the rectangle.
+	 * @param outsie if <code>true</code>, the 3D effect is "out", otherwise "in".
 	 */
 
-	static public void drawSimple3DRect(Graphics g, int x, int y, int w, int h,
-			boolean outsie) {
+	static public void drawSimple3DRect(Graphics g, int x, int y, int w, int h, boolean outsie) {
 		drawSimple3DRect(g, x, y, w, h, null, outsie);
 	}
 
 	/**
 	 * Draw a 3d rectangle.
 	 * 
-	 * @param g the Graphics context.
-	 * @param x the left of the rectangle.
-	 * @param y the top of the rectangle.
-	 * @param w the width of the rectangle.
-	 * @param h the height of the rectangle.
-	 * @param fc the fill color (if null, no fill).
-	 * @param outsie if <code>true</code>, the 3D effect is "out", otherwise
-	 *            "in".
+	 * @param g      the Graphics context.
+	 * @param x      the left of the rectangle.
+	 * @param y      the top of the rectangle.
+	 * @param w      the width of the rectangle.
+	 * @param h      the height of the rectangle.
+	 * @param fc     the fill color (if null, no fill).
+	 * @param outsie if <code>true</code>, the 3D effect is "out", otherwise "in".
 	 */
 
-	static public void drawSimple3DRect(Graphics g, int x, int y, int w, int h,
-			Color fc, boolean outsie) {
+	static public void drawSimple3DRect(Graphics g, int x, int y, int w, int h, Color fc, boolean outsie) {
 
 		Color tc;
 		Color bc;
@@ -590,15 +569,13 @@ public class GraphicsUtilities {
 	/**
 	 * Draw a 3d rectangle.
 	 * 
-	 * @param g the Graphics context.
-	 * @param r the rectangle.
-	 * @param fc the fill color.
-	 * @param outsie if <code>true</code>, the 3D effect is "out", otherwise
-	 *            "in".
+	 * @param g      the Graphics context.
+	 * @param r      the rectangle.
+	 * @param fc     the fill color.
+	 * @param outsie if <code>true</code>, the 3D effect is "out", otherwise "in".
 	 */
 
-	static public void drawSimple3DRect(Graphics g, Rectangle r, Color fc,
-			boolean outsie) {
+	static public void drawSimple3DRect(Graphics g, Rectangle r, Color fc, boolean outsie) {
 
 		drawSimple3DRect(g, r.x, r.y, r.width - 1, r.height - 1, fc, outsie);
 	}
@@ -606,14 +583,13 @@ public class GraphicsUtilities {
 	/**
 	 * Fill and frame a rectangle
 	 * 
-	 * @param g the Graphics context.
-	 * @param r the bounding rectangle.
-	 * @param fill the fill color.
+	 * @param g     the Graphics context.
+	 * @param r     the bounding rectangle.
+	 * @param fill  the fill color.
 	 * @param frame the frame (line) color.
 	 */
 
-	public static void fillAndFrameRect(Graphics g, Rectangle r, Color fill,
-			Color frame) {
+	public static void fillAndFrameRect(Graphics g, Rectangle r, Color fill, Color frame) {
 
 		Color old = g.getColor();
 
@@ -634,15 +610,13 @@ public class GraphicsUtilities {
 	/**
 	 * Draw a 3d diamond.
 	 * 
-	 * @param g the Graphics context.
-	 * @param r the bounding rectangle.
-	 * @param fc the fill color.
-	 * @param outsie if <code>true</code>, the 3D effect is "out", otherwise
-	 *            "in".
+	 * @param g      the Graphics context.
+	 * @param r      the bounding rectangle.
+	 * @param fc     the fill color.
+	 * @param outsie if <code>true</code>, the 3D effect is "out", otherwise "in".
 	 */
 
-	static public void drawSimple3DDiamond(Graphics g, Rectangle r, Color fc,
-			boolean outsie) {
+	static public void drawSimple3DDiamond(Graphics g, Rectangle r, Color fc, boolean outsie) {
 		Color tc;
 		Color bc;
 		int x[] = new int[4];
@@ -703,17 +677,16 @@ public class GraphicsUtilities {
 	/**
 	 * Draw a simple rectangle symbol.
 	 * 
-	 * @param g the Graphics context.
-	 * @param x the horizontal center.
-	 * @param y the vertical center.
+	 * @param g  the Graphics context.
+	 * @param x  the horizontal center.
+	 * @param y  the vertical center.
 	 * @param w2 the half width.
 	 * @param h2 the half height.
 	 * @param lc the line color.
 	 * @param fc the fill color.
 	 */
 
-	public static void drawRectangle(Graphics g, int x, int y, int w2, int h2,
-			Color lc, Color fc) {
+	public static void drawRectangle(Graphics g, int x, int y, int w2, int h2, Color lc, Color fc) {
 
 		// this will ensure all symbols correct size
 		if (lc == null) {
@@ -733,17 +706,16 @@ public class GraphicsUtilities {
 	/**
 	 * Draw a simple oval symbol.
 	 * 
-	 * @param g the Graphics context.
-	 * @param x the horizontal center.
-	 * @param y the vertical center.
+	 * @param g  the Graphics context.
+	 * @param x  the horizontal center.
+	 * @param y  the vertical center.
 	 * @param w2 the half width.
 	 * @param h2 the half height.
 	 * @param lc the line color.
 	 * @param fc the fill color.
 	 */
 
-	public static void drawOval(Graphics g, int x, int y, int w2, int h2,
-			Color lc, Color fc) {
+	public static void drawOval(Graphics g, int x, int y, int w2, int h2, Color lc, Color fc) {
 
 		// this will ensure all symbols correct size
 		if (lc == null) {
@@ -763,16 +735,15 @@ public class GraphicsUtilities {
 	/**
 	 * Draw a simple up triangle symbol.
 	 * 
-	 * @param g the Graphics context.
-	 * @param x the horizontal center.
-	 * @param y the vertical center.
+	 * @param g  the Graphics context.
+	 * @param x  the horizontal center.
+	 * @param y  the vertical center.
 	 * @param s2 the half width.
 	 * @param lc the line color.
 	 * @param fc the fill color.
 	 */
 
-	public static void drawUpTriangle(Graphics g, int x, int y, int s2,
-			Color lc, Color fc) {
+	public static void drawUpTriangle(Graphics g, int x, int y, int s2, Color lc, Color fc) {
 
 		// this will ensure all symbols correct size
 		if (lc == null) {
@@ -800,16 +771,15 @@ public class GraphicsUtilities {
 	/**
 	 * Draw a simple down triangle symbol.
 	 * 
-	 * @param g the Graphics context.
-	 * @param x the horizontal center.
-	 * @param y the vertical center.
+	 * @param g  the Graphics context.
+	 * @param x  the horizontal center.
+	 * @param y  the vertical center.
 	 * @param s2 the half width.
 	 * @param lc the line color.
 	 * @param fc the fill color.
 	 */
 
-	public static void drawDownTriangle(Graphics g, int x, int y, int s2,
-			Color lc, Color fc) {
+	public static void drawDownTriangle(Graphics g, int x, int y, int s2, Color lc, Color fc) {
 
 		// this will ensure all symbols correct size
 		if (lc == null) {
@@ -837,9 +807,9 @@ public class GraphicsUtilities {
 	/**
 	 * Draw a simple cross symbol.
 	 * 
-	 * @param g the Graphics context.
-	 * @param x the horizontal center.
-	 * @param y the vertical center.
+	 * @param g  the Graphics context.
+	 * @param x  the horizontal center.
+	 * @param y  the vertical center.
 	 * @param s2 the half width.
 	 * @param lc the line color.
 	 */
@@ -856,9 +826,9 @@ public class GraphicsUtilities {
 	/**
 	 * Draw a simple "X" symbol.
 	 * 
-	 * @param g the Graphics context.
-	 * @param x the horizontal center.
-	 * @param y the vertical center.
+	 * @param g  the Graphics context.
+	 * @param x  the horizontal center.
+	 * @param y  the vertical center.
 	 * @param s2 the half width.
 	 * @param lc the line color.
 	 */
@@ -886,14 +856,13 @@ public class GraphicsUtilities {
 	/**
 	 * Draws a highlighted rectangle.
 	 * 
-	 * @param g the graphics context.
-	 * @param r the rectangle being highlighted.
+	 * @param g      the graphics context.
+	 * @param r      the rectangle being highlighted.
 	 * @param color1 one color for the alternating dash.
 	 * @param color2 the other color for the alternating dash.
 	 */
 
-	public static void drawHighlightedRectangle(Graphics g, Rectangle r,
-			Color color1, Color color2) {
+	public static void drawHighlightedRectangle(Graphics g, Rectangle r, Color color1, Color color2) {
 		if ((g == null) || (r == null)) {
 			return;
 		}
@@ -924,8 +893,7 @@ public class GraphicsUtilities {
 	 * @param color1
 	 * @param color2
 	 */
-	public static void drawHighlightedLine(Graphics g, int x1, int y1, int x2,
-			int y2, Color color1, Color color2) {
+	public static void drawHighlightedLine(Graphics g, int x1, int y1, int x2, int y2, Color color1, Color color2) {
 
 		Graphics2D g2 = (Graphics2D) g;
 
@@ -944,9 +912,8 @@ public class GraphicsUtilities {
 
 	}
 
-	public static void drawHighlightedArc(Graphics g, int x, int y, int width,
-			int height, int startAngle, int arcAngle, Color color1,
-			Color color2) {
+	public static void drawHighlightedArc(Graphics g, int x, int y, int width, int height, int startAngle, int arcAngle,
+			Color color1, Color color2) {
 		Graphics2D g2 = (Graphics2D) g;
 
 		Stroke oldStroke = g2.getStroke();
@@ -978,14 +945,13 @@ public class GraphicsUtilities {
 	/**
 	 * Draws a highlighted oval.
 	 * 
-	 * @param g the graphics context.
-	 * @param r the rectangle bounding the oval being highlighted.
+	 * @param g      the graphics context.
+	 * @param r      the rectangle bounding the oval being highlighted.
 	 * @param color1 one color for the alternating dash.
 	 * @param color2 the other color for the alternating dash.
 	 */
 
-	public static void drawHighlightedOval(Graphics g, Rectangle r,
-			Color color1, Color color2) {
+	public static void drawHighlightedOval(Graphics g, Rectangle r, Color color1, Color color2) {
 		if ((g == null) || (r == null)) {
 			return;
 		}
@@ -1008,8 +974,7 @@ public class GraphicsUtilities {
 	}
 
 	/**
-	 * Draws a highlighted polyline (set of unclosed points) using default
-	 * colors.
+	 * Draws a highlighted polyline (set of unclosed points) using default colors.
 	 * 
 	 * @param g the graphics context.
 	 * @param x the x coordinate array.
@@ -1017,24 +982,22 @@ public class GraphicsUtilities {
 	 * @param n the number of points to draw.
 	 */
 
-	public static void drawHighlightedPolyline(Graphics g, int x[], int y[],
-			int n) {
+	public static void drawHighlightedPolyline(Graphics g, int x[], int y[], int n) {
 		drawHighlightedPolyline(g, x, y, n, highlightColor1, highlightColor2);
 	}
 
 	/**
 	 * Draws a highlighted polyline (set of unclosed points).
 	 * 
-	 * @param g the graphics context.
-	 * @param x the x coordinate array.
-	 * @param y the y coordinate array.
-	 * @param n the number of points to draw.
+	 * @param g      the graphics context.
+	 * @param x      the x coordinate array.
+	 * @param y      the y coordinate array.
+	 * @param n      the number of points to draw.
 	 * @param color1 one color for the alternating dash.
 	 * @param color2 the other color for the alternating dash.
 	 */
 
-	public static void drawHighlightedPolyline(Graphics g, int x[], int y[],
-			int n, Color color1, Color color2) {
+	public static void drawHighlightedPolyline(Graphics g, int x[], int y[], int n, Color color1, Color color2) {
 
 		Graphics2D g2 = (Graphics2D) g;
 
@@ -1056,7 +1019,7 @@ public class GraphicsUtilities {
 	/**
 	 * Draws a highlighted shape using default colors.
 	 * 
-	 * @param g the graphics context.
+	 * @param g     the graphics context.
 	 * @param shape the shape being highlighted.
 	 */
 
@@ -1067,14 +1030,13 @@ public class GraphicsUtilities {
 	/**
 	 * Draws a highlighted shape.
 	 * 
-	 * @param g the graphics context.
-	 * @param shape the shape being highlighted.
+	 * @param g      the graphics context.
+	 * @param shape  the shape being highlighted.
 	 * @param color1 one color for the alternating dash.
 	 * @param color2 the other color for the alternating dash.
 	 */
 
-	public static void drawHighlightedShape(Graphics g, Shape shape,
-			Color color1, Color color2) {
+	public static void drawHighlightedShape(Graphics g, Shape shape, Color color1, Color color2) {
 		if ((g == null) || (shape == null)) {
 			return;
 		}
@@ -1096,19 +1058,18 @@ public class GraphicsUtilities {
 	}
 
 	/**
-	 * Returns <code>true</code> if the point is on the line, with an amount of
-	 * slop controlled by the class constant <code>SELECTRES</code>.
+	 * Returns <code>true</code> if the point is on the line, with an amount of slop
+	 * controlled by the class constant <code>SELECTRES</code>.
 	 * 
-	 * @param px the x coordinate of the point to test.
-	 * @param py the y coordinate of the point to test.
+	 * @param px     the x coordinate of the point to test.
+	 * @param py     the y coordinate of the point to test.
 	 * @param startx the x coordinate of the start of the line.
 	 * @param starty the y coordinate of the start of the line.
-	 * @param endx the x coordinate of the end of the line.
-	 * @param endy the y coordinate of the end of the line.
+	 * @param endx   the x coordinate of the end of the line.
+	 * @param endy   the y coordinate of the end of the line.
 	 * @return <code>true</code> if the point is on the line.
 	 */
-	public static boolean pointOnLine(int px, int py, int startx, int starty,
-			int endx, int endy) {
+	public static boolean pointOnLine(int px, int py, int startx, int starty, int endx, int endy) {
 
 		int delx = endx - startx;
 		int dely = endy - starty;
@@ -1162,12 +1123,12 @@ public class GraphicsUtilities {
 	}
 
 	/**
-	 * Returns <code>true</code> if the point is on the line, with an amount of
-	 * slop controlled by the class constant <code>SELECTRES</code>.
+	 * Returns <code>true</code> if the point is on the line, with an amount of slop
+	 * controlled by the class constant <code>SELECTRES</code>.
 	 * 
-	 * @param p the point to test.
+	 * @param p     the point to test.
 	 * @param start the start of the line.
-	 * @param end the end of the line.
+	 * @param end   the end of the line.
 	 * @return <code>true</code> if the point is on the line.
 	 */
 	public static boolean pointOnLine(Point p, Point start, Point end) {
@@ -1180,14 +1141,13 @@ public class GraphicsUtilities {
 	/**
 	 * Draw rotated text.
 	 * 
-	 * @param g the Graphics context.
-	 * @param s the text to draw.
-	 * @param x the x pixel coordinate of baseline.
-	 * @param y the y pixel coordinate of baseline.
+	 * @param g            the Graphics context.
+	 * @param s            the text to draw.
+	 * @param x            the x pixel coordinate of baseline.
+	 * @param y            the y pixel coordinate of baseline.
 	 * @param angleDegrees the angle of rotation in decimal degrees.
 	 */
-	public static void drawRotatedText(Graphics2D g, String s, Font font, int x,
-			int y, double angleDegrees) {
+	public static void drawRotatedText(Graphics2D g, String s, Font font, int x, int y, double angleDegrees) {
 
 		drawRotatedText(g, s, font, x, y, 0, 0, angleDegrees);
 	}
@@ -1195,19 +1155,18 @@ public class GraphicsUtilities {
 	/**
 	 * Draw rotated text.
 	 * 
-	 * @param g the Graphics context.
-	 * @param s the text to draw.
-	 * @param xo the x pixel coordinate of rotation point.
-	 * @param yo the y pixel coordinate of rotation point.
-	 * @param delX unrotated offset from rotation anchor
-	 * @param delY unrotated offset from rotation anchor
+	 * @param g            the Graphics context.
+	 * @param s            the text to draw.
+	 * @param xo           the x pixel coordinate of rotation point.
+	 * @param yo           the y pixel coordinate of rotation point.
+	 * @param delX         unrotated offset from rotation anchor
+	 * @param delY         unrotated offset from rotation anchor
 	 * @param angleDegrees the angle of rotation in decimal degrees.
 	 */
-	public static void drawRotatedText(Graphics2D g, String s, Font font,
-			int xo, int yo, int delX, int delY, double angleDegrees) {
+	public static void drawRotatedText(Graphics2D g, String s, Font font, int xo, int yo, int delX, int delY,
+			double angleDegrees) {
 
-		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-				RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
 		if (Math.abs(angleDegrees) < 0.5) {
 			g.setFont(font);
@@ -1222,8 +1181,7 @@ public class GraphicsUtilities {
 		Point2D.Double rotOffset = new Point2D.Double();
 		rotation.transform(offset, rotOffset);
 
-		AffineTransform translation = AffineTransform
-				.getTranslateInstance(xo + rotOffset.x, yo + rotOffset.y);
+		AffineTransform translation = AffineTransform.getTranslateInstance(xo + rotOffset.x, yo + rotOffset.y);
 
 		g.transform(translation);
 
@@ -1232,7 +1190,8 @@ public class GraphicsUtilities {
 		g.drawString(s, 0, 0);
 		try {
 			g.transform(translation.createInverse());
-		} catch (NoninvertibleTransformException e) {
+		}
+		catch (NoninvertibleTransformException e) {
 			e.printStackTrace();
 		}
 	}
@@ -1241,8 +1200,8 @@ public class GraphicsUtilities {
 	 * Draws an arrow on the given Graphics2D context
 	 * 
 	 * @param g1 The Graphics context to draw on
-	 * @param x The x location of the "tail" of the arrow
-	 * @param y The y location of the "tail" of the arrow
+	 * @param x  The x location of the "tail" of the arrow
+	 * @param y  The y location of the "tail" of the arrow
 	 * @param xx The x location of the "head" of the arrow
 	 * @param yy The y location of the "head" of the arrow
 	 */
@@ -1254,13 +1213,12 @@ public class GraphicsUtilities {
 	 * Draws an arrow on the given Graphics2D context
 	 * 
 	 * @param g1 The Graphics context to draw on
-	 * @param x The x location of the "tail" of the arrow
-	 * @param y The y location of the "tail" of the arrow
+	 * @param x  The x location of the "tail" of the arrow
+	 * @param y  The y location of the "tail" of the arrow
 	 * @param xx The x location of the "head" of the arrow
 	 * @param yy The y location of the "head" of the arrow
 	 */
-	public static void drawArrow(Graphics g1, int x, int y, int xx, int yy,
-			boolean highlight, Color c1, Color c2) {
+	public static void drawArrow(Graphics g1, int x, int y, int xx, int yy, boolean highlight, Color c1, Color c2) {
 
 		if ((Math.abs(x - xx) < 4) && (Math.abs(y - yy) < 4)) {
 			return;
@@ -1291,8 +1249,7 @@ public class GraphicsUtilities {
 		vecLeft[1] = vecLine[0];
 
 		// setup length parameters
-		fLength = (float) Math
-				.sqrt(vecLine[0] * vecLine[0] + vecLine[1] * vecLine[1]);
+		fLength = (float) Math.sqrt(vecLine[0] * vecLine[0] + vecLine[1] * vecLine[1]);
 		th = arrowWidth / (2.0f * fLength);
 		ta = arrowWidth / (2.0f * ((float) Math.tan(theta) / 2.0f) * fLength);
 
@@ -1324,21 +1281,20 @@ public class GraphicsUtilities {
 	/**
 	 * Draw a styled line
 	 * 
-	 * @param g the graphics context
+	 * @param g     the graphics context
 	 * @param style the style
-	 * @param x1 starting x
-	 * @param y1 starting y
-	 * @param x2 ending x
-	 * @param y2 ending y
+	 * @param x1    starting x
+	 * @param y1    starting y
+	 * @param x2    ending x
+	 * @param y2    ending y
 	 */
-	public static void drawStyleLine(Graphics g, Styled style, int x1, int y1,
+	public static void drawStyleLine(Graphics g, Color lineColor, float lineWidth, LineStyle lineStyle, int x1, int y1,
 			int x2, int y2) {
 		Graphics2D g2 = (Graphics2D) g;
-		g2.setColor(style.getLineColor());
+		g2.setColor(lineColor);
 
 		Stroke oldStroke = g2.getStroke();
-		g2.setStroke(GraphicsUtilities.getStroke(style.getLineWidth(),
-				style.getLineStyle()));
+		g2.setStroke(GraphicsUtilities.getStroke(lineWidth, lineStyle));
 
 		g2.drawLine(x1, y1, x2, y2);
 		g2.setStroke(oldStroke);
@@ -1364,8 +1320,8 @@ public class GraphicsUtilities {
 	}
 
 	/**
-	 * Obtain a color from a hex string in common internet format #rrggbbaa. The
-	 * "#" and the aa are optional
+	 * Obtain a color from a hex string in common internet format #rrggbbaa. The "#"
+	 * and the aa are optional
 	 * 
 	 * @param hex the hex string
 	 * @return the corresponding color or black on error.
@@ -1393,7 +1349,8 @@ public class GraphicsUtilities {
 			int b = Integer.parseInt(hex.substring(4, 6), 16);
 			int a = Integer.parseInt(hex.substring(6, 8), 16);
 			return new Color(r, g, b, a);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 			return Color.black;
 		}
@@ -1435,8 +1392,8 @@ public class GraphicsUtilities {
 
 		LookAndFeelInfo[] lnfinfo = UIManager.getInstalledLookAndFeels();
 
-		String preferredLnF[] = { "Mac OS X", "Windows", "Nimbus", "CDE/Motif",
-				"Metal", UIManager.getCrossPlatformLookAndFeelClassName() };
+		String preferredLnF[] = { "Mac OS X", "Windows", "Nimbus", "CDE/Motif", "Metal",
+				UIManager.getCrossPlatformLookAndFeelClassName() };
 
 		if ((lnfinfo == null) || (lnfinfo.length < 1)) {
 			return;
@@ -1454,11 +1411,11 @@ public class GraphicsUtilities {
 							// defaults.put("RadioButtonMenuItem.checkIcon",
 							// defaults.get("RadioButton.icon"));
 							defaults.put("RadioButtonMenuItem.checkIcon",
-									MetalIconFactory
-											.getRadioButtonMenuItemIcon());
+									MetalIconFactory.getRadioButtonMenuItemIcon());
 						}
 						return;
-					} catch (Exception e) {
+					}
+					catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
@@ -1467,8 +1424,7 @@ public class GraphicsUtilities {
 	}
 
 	public static void main(String arg[]) {
-		Color colors[] = { Color.red, Color.blue, Color.green,
-				new Color(16, 32, 64, 128) };
+		Color colors[] = { Color.red, Color.blue, Color.green, new Color(16, 32, 64, 128) };
 
 		for (Color c : colors) {
 			String s = colorToHex(c);

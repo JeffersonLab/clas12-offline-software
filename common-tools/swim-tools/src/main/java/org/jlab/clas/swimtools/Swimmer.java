@@ -65,9 +65,11 @@ public class Swimmer {
         }
         if(TorusScale==0)
             TorusScale=0.000001;
-        MagneticFields.getInstance().getTorus().setScaleFactor(TorusScale);
-        MagneticFields.getInstance().getSolenoid().setScaleFactor(SolenoidScale);
-        MagneticFields.getInstance().setSolenoidShift(shift);
+        if(MagneticFields.getInstance().getTorus()!=null) MagneticFields.getInstance().getTorus().setScaleFactor(TorusScale);
+        if(MagneticFields.getInstance().getSolenoid()!=null) {
+            MagneticFields.getInstance().getSolenoid().setScaleFactor(SolenoidScale);
+            MagneticFields.getInstance().setSolenoidShift(shift);
+        }
         setSolScale(SolenoidScale);
         setTorScale(TorusScale);
         //remove overlap for composite field
@@ -85,14 +87,18 @@ public class Swimmer {
         }
         if(TorusScale==0)
             TorusScale=0.000001;
-        MagneticFields.getInstance().getTorus().setScaleFactor(TorusScale);
-        MagneticFields.getInstance().getSolenoid().setScaleFactor(SolenoidScale);
-        MagneticFields.getInstance().getTorus().setShiftX(Tx);
-        MagneticFields.getInstance().getTorus().setShiftY(Ty);
-        MagneticFields.getInstance().getTorus().setShiftZ(Tz);
-        MagneticFields.getInstance().getSolenoid().setShiftX(Sx);
-        MagneticFields.getInstance().getSolenoid().setShiftY(Sy);
-        MagneticFields.getInstance().getSolenoid().setShiftZ(Sz);
+        if(MagneticFields.getInstance().getTorus()!=null) {
+            MagneticFields.getInstance().getTorus().setScaleFactor(TorusScale);
+            MagneticFields.getInstance().getTorus().setShiftX(Tx);
+            MagneticFields.getInstance().getTorus().setShiftY(Ty);
+            MagneticFields.getInstance().getTorus().setShiftZ(Tz);
+        }
+        if(MagneticFields.getInstance().getSolenoid()!=null) {
+            MagneticFields.getInstance().getSolenoid().setScaleFactor(SolenoidScale);
+            MagneticFields.getInstance().getSolenoid().setShiftX(Sx);
+            MagneticFields.getInstance().getSolenoid().setShiftY(Sy);
+            MagneticFields.getInstance().getSolenoid().setShiftZ(Sz);
+        }
         setSolScale(SolenoidScale);
         setTorScale(TorusScale);
         //remove overlap for composite field

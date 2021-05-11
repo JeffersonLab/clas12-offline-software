@@ -41,7 +41,7 @@ public class Histo2D extends AExample {
 		double sig = 20.0;
 		int seed = 33557799;
 		Normaldev normDevX = new Normaldev(mu, sig, seed);
-		
+
 		mu = 35;
 		seed = 777555;
 		Normaldev normDevY = new Normaldev(mu, sig, seed);
@@ -53,7 +53,8 @@ public class Histo2D extends AExample {
 //			System.err.print("X, Y: " + x + ", " + y);
 			try {
 				ds.add(x, y);
-			} catch (DataSetException e) {
+			}
+			catch (DataSetException e) {
 				e.printStackTrace();
 			}
 		}
@@ -62,12 +63,12 @@ public class Histo2D extends AExample {
 	@Override
 	public void setPreferences() {
 		PlotParameters params = _canvas.getParameters();
-		
+
 		Histo2DData h2d = _canvas.getDataSet().getColumn(0).getHistoData2D();
-		
+
 		params.setMinExponentY(6);
 		params.setNumDecimalY(0);
-		
+
 		params.setPlotTitle(h2d.getName());
 		params.setXLabel(h2d.getXName());
 		params.setYLabel(h2d.getYName());
@@ -77,7 +78,7 @@ public class Histo2D extends AExample {
 		params.setLegendDrawing(false);
 		params.setGradientDrawing(true);
 	}
-	
+
 	public static void main(String arg[]) {
 		final Histo2D example = new Histo2D();
 
@@ -88,6 +89,5 @@ public class Histo2D extends AExample {
 			}
 		});
 	}
-
 
 }

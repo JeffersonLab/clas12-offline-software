@@ -32,8 +32,7 @@ public class Cell2D {
 	/**
 	 * Create a 2D cell (for solenoid)
 	 * 
-	 * @param probe
-	 *            the magnetic probe
+	 * @param probe the magnetic probe
 	 */
 	public Cell2D(FieldProbe probe) {
 		this._probe = probe;
@@ -56,7 +55,8 @@ public class Cell2D {
 		if (_n2 < 0) {
 			if (!printedOnce) {
 				printedOnce = true;
-			//	System.err.println("WARNING Bad n2 in Cell2D.reset: " + _n2 + "  rho: " + rho);
+				// System.err.println("WARNING Bad n2 in Cell2D.reset: " + _n2 + " rho: " +
+				// rho);
 			}
 			return;
 		}
@@ -64,12 +64,12 @@ public class Cell2D {
 		if (_n3 < 0) {
 			if (!printedOnce) {
 				printedOnce = true;
-	//			System.err.println("WARNING Bad n3 in Cell2D.reset: " + _n3 + "  z: " + z);
+				// System.err.println("WARNING Bad n3 in Cell2D.reset: " + _n3 + " z: " + z);
 			}
 			return;
 		}
 
-		//precompute the boundaries and some factors
+		// precompute the boundaries and some factors
 		q2Min = q2Coord.getMin(_n2);
 		q2Max = q2Coord.getMax(_n2);
 		q2Norm = 1. / (q2Max - q2Min);
@@ -96,13 +96,10 @@ public class Cell2D {
 	}
 
 	/**
-	 * Check whether the cell boundaries (not the map boundaries) include the
-	 * point
+	 * Check whether the cell boundaries (not the map boundaries) include the point
 	 * 
-	 * @param rho
-	 *            the cylindrical rho coordinate in cm.
-	 * @param z
-	 *            coordinate in cm
+	 * @param rho the cylindrical rho coordinate in cm.
+	 * @param z   coordinate in cm
 	 * @return <code>true</code> if the point is included in the boundary of the
 	 *         field
 	 * 
@@ -112,49 +109,49 @@ public class Cell2D {
 	}
 
 	/**
-	 * Calculate the field in kG
+	 * Calculate the field in kG in cylindrical components
 	 * 
-	 * @param rho
-	 * @param z
-	 * @param result
+	 * @param rho rho coordinate in cm
+	 * @param z z coordinate in cm
+	 * @param result field in kG in cylindrical components
 	 */
 	public void calculate(double rho, double z, float[] result) {
-	//	if (_probe.containsCylindrical(0, rho, z)) {
-			// do we need to reset?
-			if (!containedCylindrical(rho, z)) {
-				reset(rho, z);
-				if ((_n2 < 0) || (_n3 < 0)) {
-					result[0] = 0;
-					result[1] = 0;
-					result[2] = 0;
-					return;
-				}
-			}
-
-			if (!MagneticField.isInterpolate()) {
-				nearestNeighbor(rho, z, result);
+		// if (_probe.containsCylindrical(0, rho, z)) {
+		// do we need to reset?
+		if (!containedCylindrical(rho, z)) {
+			reset(rho, z);
+			if ((_n2 < 0) || (_n3 < 0)) {
+				result[0] = 0;
+				result[1] = 0;
+				result[2] = 0;
 				return;
 			}
+		}
 
-			double f1 = (rho - q2Min) * q2Norm;
-			double f2 = (z - q3Min) * q3Norm;
+		if (!MagneticField.isInterpolate()) {
+			nearestNeighbor(rho, z, result);
+			return;
+		}
 
-			f1 = f1 - Math.floor(f1);
-			f2 = f2 - Math.floor(f2);
+		double f1 = (rho - q2Min) * q2Norm;
+		double f2 = (z - q3Min) * q3Norm;
 
-			double g1 = 1 - f1;
-			double g2 = 1 - f2;
+		f1 = f1 - Math.floor(f1);
+		f2 = f2 - Math.floor(f2);
 
-			double g1g2 = g1 * g2;
-			double f1g2 = f1 * g2;
-			double g1f2 = g1 * f2;
-			double f1f2 = f1 * f2;
+		double g1 = 1 - f1;
+		double g2 = 1 - f2;
 
-			double brho = b[0][0].x * g1g2 + b[0][1].x * g1f2 + b[1][0].x * f1g2 + b[1][1].x * f1f2;
-			double bz = b[0][0].z * g1g2 + b[0][1].z * g1f2 + b[1][0].z * f1g2 + b[1][1].z * f1f2;
-			result[0] = 0f; // bphi is 0
-			result[1] = (float) brho;
-			result[2] = (float) bz;
+		double g1g2 = g1 * g2;
+		double f1g2 = f1 * g2;
+		double g1f2 = g1 * f2;
+		double f1f2 = f1 * f2;
+
+		double brho = b[0][0].x * g1g2 + b[0][1].x * g1f2 + b[1][0].x * f1g2 + b[1][1].x * f1f2;
+		double bz = b[0][0].z * g1g2 + b[0][1].z * g1f2 + b[1][0].z * f1g2 + b[1][1].z * f1f2;
+		result[0] = 0f; // bphi is 0
+		result[1] = (float) brho;
+		result[2] = (float) bz;
 
 //		} 
 //	else {

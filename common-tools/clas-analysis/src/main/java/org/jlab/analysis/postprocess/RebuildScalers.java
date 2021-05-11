@@ -42,7 +42,7 @@ public class RebuildScalers {
         
         HipoWriterSorted writer = new HipoWriterSorted();
         writer.getSchemaFactory().initFromDirectory(ClasUtilsFile.getResourceDir("COATJAVA", "etc/bankdefs/hipo4"));
-        writer.setCompressionType(1);
+        writer.setCompressionType(2);
         writer.open(parser.getOption("-o").stringValue());
 			
         Event event = new Event();

@@ -102,6 +102,10 @@ public class ECPeak {
         return false;
     }
     
+    public List<ECStrip> getStrips(){
+        return this.peakStrips;
+    }
+    
     public int getADC(){
         int adc = 0;
         for(ECStrip s : this.peakStrips){
