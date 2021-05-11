@@ -17,21 +17,20 @@ import javax.swing.event.EventListenerList;
 
 import cnuphys.splot.plot.Environment;
 
-public class CommonToolBar extends JToolBar
-		implements ActionListener, ItemListener {
+public class CommonToolBar extends JToolBar implements ActionListener, ItemListener {
 
 	// make all the toggle buttons mutually exclusive
 	private ButtonGroup _buttonGroup = new ButtonGroup();
 
 	// the default button
 	private ToolBarToggleButton _pointerButton;
-	
-	//box zoom
+
+	// box zoom
 	private ToolBarToggleButton _boxZoomButton;
 
 	// recenter button
 	private ToolBarToggleButton _recenterButton;
-	
+
 	// List of toolBar listeners
 	private EventListenerList _listenerList;
 
@@ -50,7 +49,7 @@ public class CommonToolBar extends JToolBar
 	 * constructors call this constructor.
 	 * 
 	 * @param orientation the initial orientation -- it must be either
-	 *            <code>HORIZONTAL</code> or <code>VERTICAL</code>
+	 *                    <code>HORIZONTAL</code> or <code>VERTICAL</code>
 	 */
 	public CommonToolBar(int orientation) {
 		super("toolBar", orientation);
@@ -59,18 +58,18 @@ public class CommonToolBar extends JToolBar
 		Environment.getInstance().commonize(this, null);
 		setBorder(BorderFactory.createEtchedBorder());
 
-		_pointerButton = new ToolBarToggleButton("images/pointer.gif",
-				"Make selections", POINTER, 3, 1, "images/pointercursor.gif");
+		_pointerButton = new ToolBarToggleButton("images/pointer.gif", "Make selections", POINTER, 3, 1,
+				"images/pointercursor.gif");
 		_pointerButton.setSelected(true);
 		add(_pointerButton);
 
-		_boxZoomButton = new ToolBarToggleButton("images/box_zoom.gif", "Zoom to area",
-				BOXZOOM, 3, 1, "images/box_zoomcursor.gif");
+		_boxZoomButton = new ToolBarToggleButton("images/box_zoom.gif", "Zoom to area", BOXZOOM, 3, 1,
+				"images/box_zoomcursor.gif");
 		add(_boxZoomButton);
-		
-		_recenterButton = new ToolBarToggleButton("images/center.gif", "Recenter the plot",
-				CENTER, -1, -1, "images/centercursor.gif");
-		
+
+		_recenterButton = new ToolBarToggleButton("images/center.gif", "Recenter the plot", CENTER, -1, -1,
+				"images/centercursor.gif");
+
 		add(_recenterButton);
 
 		addHGap(8);
@@ -80,7 +79,7 @@ public class CommonToolBar extends JToolBar
 		add(new ToolBarButton("images/printer.gif", "Print the plot", PRINT));
 		add(new ToolBarButton("images/camera.gif", "Save as PNG", PNG));
 	}
-	
+
 	/**
 	 * Set which toggle buttonis selected
 	 */
@@ -89,10 +88,10 @@ public class CommonToolBar extends JToolBar
 			_pointerButton.setSelected(true);
 		}
 		else if (s.equals(BOXZOOM)) {
-			_boxZoomButton.setSelected(true);			
+			_boxZoomButton.setSelected(true);
 		}
 		else if (s.equals(CENTER)) {
-			_recenterButton.setSelected(true);			
+			_recenterButton.setSelected(true);
 		}
 		else {
 			_pointerButton.setSelected(true);
@@ -100,8 +99,7 @@ public class CommonToolBar extends JToolBar
 	}
 
 	/**
-	 * Get the primary button group so that we can add other buttons to the
-	 * group
+	 * Get the primary button group so that we can add other buttons to the group
 	 * 
 	 * @return the primary button group so that we can add other buttons to the
 	 *         group
@@ -138,7 +136,7 @@ public class CommonToolBar extends JToolBar
 	 * Add a toggle button to the toolbar.
 	 * 
 	 * @param toggleButton the button to add.
-	 * @param toGroup if <code>true</code> and to the primary button group
+	 * @param toGroup      if <code>true</code> and to the primary button group
 	 */
 	public void add(JToggleButton toggleButton, boolean toGroup) {
 		super.add(toggleButton);
@@ -168,8 +166,8 @@ public class CommonToolBar extends JToolBar
 	}
 
 	/**
-	 * Get the default toggle button. This will become active if you click an
-	 * active toggle button to turn it off.
+	 * Get the default toggle button. This will become active if you click an active
+	 * toggle button to turn it off.
 	 * 
 	 * @return the default toggle buton.
 	 */
@@ -178,13 +176,12 @@ public class CommonToolBar extends JToolBar
 	}
 
 	/**
-	 * Set the default toggle button. This will become active if you click an
-	 * active toggle button to turn it off.
+	 * Set the default toggle button. This will become active if you click an active
+	 * toggle button to turn it off.
 	 * 
 	 * @param defaultToggleButton the default toggle button.
 	 */
-	public void setDefaultToggleButton(
-			ToolBarToggleButton defaultToggleButton) {
+	public void setDefaultToggleButton(ToolBarToggleButton defaultToggleButton) {
 		_pointerButton = defaultToggleButton;
 	}
 
@@ -211,8 +208,8 @@ public class CommonToolBar extends JToolBar
 	/**
 	 * Get which tool bar toggle button from the primary button group is active
 	 * 
-	 * @return the active toolbar toggle button (from the primary button group),
-	 *         or null.
+	 * @return the active toolbar toggle button (from the primary button group), or
+	 *         null.
 	 */
 	public ToolBarToggleButton getActiveButton() {
 
@@ -221,14 +218,14 @@ public class CommonToolBar extends JToolBar
 		}
 
 		try {
-			for (Enumeration<AbstractButton> e = _buttonGroup.getElements(); e
-					.hasMoreElements();) {
+			for (Enumeration<AbstractButton> e = _buttonGroup.getElements(); e.hasMoreElements();) {
 				AbstractButton ab = e.nextElement();
 				if (ab.isSelected()) {
 					return (ToolBarToggleButton) ab;
 				}
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 
@@ -275,8 +272,7 @@ public class CommonToolBar extends JToolBar
 					listener.buttonPressed(this, (ToolBarButton) button);
 				}
 				if (button instanceof ToolBarToggleButton) {
-					listener.toggleButtonActivated(this,
-							(ToolBarToggleButton) button);
+					listener.toggleButtonActivated(this, (ToolBarToggleButton) button);
 				}
 			}
 
@@ -361,7 +357,7 @@ public class CommonToolBar extends JToolBar
 	 * Set a button enabled by the action command
 	 * 
 	 * @param actionCommand the action command
-	 * @param enabled the flag
+	 * @param enabled       the flag
 	 */
 	public void setButtonEnabled(String actionCommand, boolean enabled) {
 		AbstractButton b = getButton(actionCommand);

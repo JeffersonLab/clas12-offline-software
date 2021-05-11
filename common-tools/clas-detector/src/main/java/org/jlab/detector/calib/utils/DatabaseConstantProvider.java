@@ -399,6 +399,15 @@ public class DatabaseConstantProvider implements ConstantProvider {
         }
         return 0;
     }
+
+    public String getString(String string, int i) {
+        if(this.hasConstant(string)==true && i < this.length(string)){
+            return constantContainer.get(string)[i];
+        } else {
+            
+        }
+        return "";
+    }
     
     public void disconnect(){
         System.out.println("[DB] --->  database disconnect  : success");
