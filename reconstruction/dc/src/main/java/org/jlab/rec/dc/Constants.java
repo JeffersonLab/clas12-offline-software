@@ -1,6 +1,8 @@
 package org.jlab.rec.dc;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import cnuphys.snr.NoiseReductionParameters;
 
@@ -8,6 +10,7 @@ import cnuphys.snr.NoiseReductionParameters;
  * Constants used in the reconstruction
  */
 public class Constants {
+    public static Logger LOGGER = Logger.getLogger(Constants.class.getName());
 
     private static boolean ConstantsLoaded = false;
     // RECONSTRUCTION PARAMETERS
@@ -283,7 +286,7 @@ public class Constants {
             MAXENDPLTDEFLEC[2][5][0] = 0.;
             MAXENDPLTDEFLEC[2][5][1] = 0.;
             
-            System.out.println("CONSTANTS LOADED!!!");
+            LOGGER.log(Level.INFO,"CONSTANTS LOADED!!!");
 
     }
 

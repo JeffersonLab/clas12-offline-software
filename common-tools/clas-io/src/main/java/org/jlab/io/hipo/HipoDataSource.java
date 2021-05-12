@@ -7,6 +7,9 @@ package org.jlab.io.hipo;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventList;
 import org.jlab.io.base.DataEventType;
@@ -23,6 +26,8 @@ import org.jlab.jnp.hipo4.io.HipoReader;
  * @author gavalian
  */
 public class HipoDataSource implements DataSource {
+    public static Logger LOGGER = Logger.getLogger(HipoDataSource.class.getName());
+
 
     HipoReader  reader = null;
     EvioDataDictionary  dictionary = new EvioDataDictionary();
@@ -59,7 +64,7 @@ public class HipoDataSource implements DataSource {
     @Override
     public void open(String filename) {
         this.reader.open(filename);
-        System.out.println("[DataSourceDump] --> opened file with events # " );
+        LOGGER.log(Level.INFO,"[DataSourceDump] --> opened file with events # " );
         //this.reader.getSchemaFactory().show();
         /*
         HipoRecord header = this.reader.getHeaderRecord();

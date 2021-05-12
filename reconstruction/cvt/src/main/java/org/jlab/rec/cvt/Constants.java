@@ -1,6 +1,12 @@
 package org.jlab.rec.cvt;
 
+import org.jlab.detector.geant4.v2.SVT.SVTConstants;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class Constants {
+    public static Logger LOGGER = Logger.getLogger(Constants.class.getName());
 
     /**
      * Constants used in the reconstruction
@@ -263,7 +269,7 @@ public class Constants {
         org.jlab.rec.cvt.bmt.Constants.Load();
 
         areConstantsLoaded = true;
-        System.out.println("CVT constants loaded ? " + areConstantsLoaded);
+        LOGGER.log(Level.INFO,"CVT constants loaded ? " + areConstantsLoaded);
         
     }
 

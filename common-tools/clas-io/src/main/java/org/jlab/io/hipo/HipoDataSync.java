@@ -6,6 +6,9 @@
 package org.jlab.io.hipo;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataSync;
 
@@ -23,6 +26,7 @@ import org.jlab.jnp.hipo4.io.HipoWriterSorted;
  * @author gavalian
  */
 public class HipoDataSync implements DataSync {
+    public static Logger LOGGER = Logger.getLogger(HipoDataSync.class.getName());
     
     HipoWriterSorted writer = null;
     
@@ -31,7 +35,7 @@ public class HipoDataSync implements DataSync {
         this.writer.setCompressionType(2);
         String env = System.getenv("CLAS12DIR");
         writer.getSchemaFactory().initFromDirectory(env + "/etc/bankdefs/hipo4");
-        System.out.println("[HipoDataSync] ---> dictionary size = " + writer.getSchemaFactory().getSchemaList().size());
+        LOGGER.log(Level.INFO,"[HipoDataSync] ---> dictionary size = " + writer.getSchemaFactory().getSchemaList().size());
         //this.writer.getSchemaFactory().initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
         //this.writer.getSchemaFactory().show();
     }

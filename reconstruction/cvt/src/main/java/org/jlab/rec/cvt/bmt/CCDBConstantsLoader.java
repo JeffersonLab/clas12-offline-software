@@ -2,12 +2,16 @@ package org.jlab.rec.cvt.bmt;
 
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author ziegler
  *
  */
 public class CCDBConstantsLoader {
+    public static Logger LOGGER = Logger.getLogger(CCDBConstantsLoader.class.getName());
 
     public CCDBConstantsLoader() {
         // TODO Auto-generated constructor stub
@@ -99,7 +103,7 @@ public class CCDBConstantsLoader {
         // target position
         double ztarget = dbprovider.getDouble("/geometry/target/position", 0);
         
-        System.out.println(" ................READ TARGET SHIFT "+ztarget+" cm......."); 
+        LOGGER.log(Level.INFO," ................READ TARGET SHIFT "+ztarget+" cm.......");
       //  dbprovider.show();
         // Getting the Constants
         // 1) pitch info 
@@ -231,7 +235,7 @@ public class CCDBConstantsLoader {
         }
         
         if (GRID_SIZE!=dbprovider.length("/calibration/mvt/lorentz/angle")) {
-         System.out.println("WARNING... Lorentz angle grid is not the same size as the table in CCDBConstant");}
+         LOGGER.log(Level.WARNING,"WARNING... Lorentz angle grid is not the same size as the table in CCDBConstant");}
          for (int i = 0; i < dbprovider.length("/calibration/mvt/lorentz/angle"); i++) {
          	THETA_L_grid[i]=dbprovider.getDouble("/calibration/mvt/lorentz/angle",i);
          	ELEC_grid[i]=dbprovider.getDouble("/calibration/mvt/lorentz/Edrift",i);
@@ -260,7 +264,7 @@ public class CCDBConstantsLoader {
         org.jlab.rec.cvt.Constants.setXb(xb*10);
         org.jlab.rec.cvt.Constants.setYb(yb*10);
         org.jlab.rec.cvt.Constants.setRbErr(err*10);
-        System.out.println(" ................READ BEAM OFFSET PARAMETERS "+xb+" & "+yb+" cm.......");
+        LOGGER.log(Level.INFO," ................READ BEAM OFFSET PARAMETERS "+xb+" & "+yb+" cm.......");
         
         // target position
         org.jlab.rec.cvt.Constants.setZoffset(ztarget);
@@ -294,8 +298,7 @@ public class CCDBConstantsLoader {
         Constants.setE_drift(HV_DRIFT);
         dbprovider.disconnect();
         CSTLOADED = true;
-        System.out
-                .println("SUCCESSFULLY LOADED BMT CONSTANTS....");
+        LOGGER.log(Level.INFO,"SUCCESSFULLY LOADED BMT CONSTANTS....");
      //   setDB(dbprovider);
     }
 
