@@ -36,7 +36,8 @@
             {"name":"Hit3_ID",         "type":"S", "info":"Index of hit 3 in cluster"},
             {"name":"Hit4_ID",         "type":"S", "info":"Index of hit 4 in cluster"},
             {"name":"Hit5_ID",         "type":"S", "info":"Index of hit 5 in cluster"},
-            {"name":"trkID",           "type":"S", "info":"associated track ID"}
+            {"name":"trkID",           "type":"S", "info":"associated track ID"},
+            {"name":"Tmin",            "type":"F", "info":"min T between strips"}
         ]
     },
     {

@@ -66,7 +66,8 @@ public class ClusterFinder  {
 							hits.add(new FittedHit(HitArray[sj][l].get_Sector(),
                                                    HitArray[sj][l].get_Layer(),
                                                    HitArray[sj][l].get_Strip(),
-                                                   HitArray[sj][l].get_Edep()));
+                                                   HitArray[sj][l].get_Edep(),
+												   HitArray[sj][l].get_Time()));
 							sj++;
 						}
 					}
@@ -77,7 +78,8 @@ public class ClusterFinder  {
 							hits.add(new FittedHit(HitArray[sj][l].get_Sector(),
                                                    HitArray[sj][l].get_Layer(),
                                                    HitArray[sj][l].get_Strip(),
-                                                   HitArray[sj][l].get_Edep()));
+                                                   HitArray[sj][l].get_Edep(),
+												   HitArray[sj][l].get_Time()));
 							sj++;
 						}
 					}
@@ -88,7 +90,8 @@ public class ClusterFinder  {
 						hits.add(new FittedHit(HitArray[si][l].get_Sector(),
                                                HitArray[si][l].get_Layer(),
                                                HitArray[si][l].get_Strip(),
-                                               HitArray[si][l].get_Edep()));
+                                               HitArray[si][l].get_Edep(),
+											   HitArray[si][l].get_Time()));
 						if (si != 511) si++; // Since strip 512 is on a edge
 						else break;
 					}

@@ -51,6 +51,7 @@ public class HitReader {
         int[] layer  = new int[rows];
         int[] strip  = new int[rows];
         int[] ADC    = new int[rows];
+        double[] time = new double[rows];
 
         if (event.hasBank("FMT::adc")) {
             for (int i = 0; i < rows; i++) {
@@ -59,10 +60,11 @@ public class HitReader {
                 layer[i] = bankDGTZ.getByte("layer", i);
                 strip[i] = bankDGTZ.getShort("component", i);
                 ADC[i] = bankDGTZ.getInt("ADC", i);
+                time[i] = bankDGTZ.getFloat("time", i);
 
                 if (strip[i] == -1 || ADC[i] == 0) continue;
 
-                Hit hit = new Hit(sector[i], layer[i], strip[i], (double) ADC[i]);
+                Hit hit = new Hit(sector[i], layer[i], strip[i], (double) ADC[i], time[i]);
                 hit.set_Id(i+1);
                 hits.add(hit);
             }

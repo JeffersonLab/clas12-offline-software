@@ -20,11 +20,12 @@ public class Hit implements Comparable<Hit>{
 	 * @param strip
 	 * @param Edep (for gemc output without digitization)
 	 */
-	public Hit(int sector, int layer, int strip, double Edep) {
+	public Hit(int sector, int layer, int strip, double Edep, double time) {
 		this._Sector = sector;
 		this._Layer = layer;
 		this._Strip = strip;
 		this._Edep = Edep;
+		this._Time = time;
 
 		double x0 = Constants.FVT_stripsX[layer-1][strip-1][0];
 		double x1 = Constants.FVT_stripsX[layer-1][strip-1][1];
@@ -42,6 +43,7 @@ public class Hit implements Comparable<Hit>{
 	private int _Strip;    	 	  // strip [1...1024]
 
 	private double _Edep;      	  // Reconstructed time, for now it is the gemc time
+	private double _Time;		  // Hit time
 	private Line3D _StripSegment; // The geometry segment representing the strip position
 	private int _Id;			  // Hit Id
 
@@ -108,6 +110,14 @@ public class Hit implements Comparable<Hit>{
 	 */
 	public void set_Edep(double _Edep) {
 		this._Edep = _Edep;
+	}
+
+	public double get_Time() {
+		return _Time;
+	}
+
+	public void set_Time(double _Time) {
+		this._Time = _Time;
 	}
 
 	/**
