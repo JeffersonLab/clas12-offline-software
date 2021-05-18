@@ -154,11 +154,13 @@ public class CVTAlignment extends ReconstructionEngine {
 	public boolean processDataEvent(DataEvent event) {
 		int runNum = event.getBank("RUN::config").getInt("run", 0);
 		int eventNum = event.getBank("RUN::config").getInt("event", 0);
-		this.setRunConditionsParameters(event, FieldsConfig, Run, false, "");
-
+		
+		
+		
+		//this.setRunConditionsParameters(event, FieldsConfig, Run, false, "");
 		double shift = 0;//org.jlab.rec.cvt.Constants.getZoffset();;
 
-		this.FieldsConfig = this.getFieldsConfig();
+		//this.FieldsConfig = this.getFieldsConfig();
 
 
 		RecoBankReader reader = new RecoBankReader();
@@ -221,7 +223,7 @@ public class CVTAlignment extends ReconstructionEngine {
 				continue;
 			Ray ray = track.get_ray();
 			if(ray == null) {
-				ray = getRay(track.get_helix());
+				ray = getRay(track.get_helix(),xb,yb);
 				//System.out.println("curvature " +  track.get_helix().get_curvature());
 				//System.out.println("doca " +  track.get_helix().get_dca());
 				if(Math.abs(track.get_helix().get_curvature())>0.001) {
@@ -342,7 +344,7 @@ public class CVTAlignment extends ReconstructionEngine {
 	}
 	int nAlignables;
 
-	private Ray getRay(Helix h) {
+	private Ray getRay(Helix h,double xb, double yb) {
 		
 		double d = h.get_dca();
 		double z = h.get_Z0();
@@ -355,8 +357,8 @@ public class CVTAlignment extends ReconstructionEngine {
 		Vector3D u = new Vector3D(cd*Math.cos(phi), cd*Math.sin(phi), sd);
 		
 		
-		//Point3D x = new Point3D(-d*Math.sin(phi)+xb,d*Math.cos(phi)+yb, z);
-		Point3D x = new Point3D(-d*Math.sin(phi),d*Math.cos(phi), z);
+		Point3D x = new Point3D(-d*Math.sin(phi)+xb,d*Math.cos(phi)+yb, z);
+		//Point3D x = new Point3D(-d*Math.sin(phi),d*Math.cos(phi), z);
 		//if(u.y() <0)
 		//	u = u.multiply(-1);
 		//x = x.toVector3D().add(u.multiply(-x.y()/u.y())).toPoint3D();
@@ -693,10 +695,10 @@ public class CVTAlignment extends ReconstructionEngine {
 		int sector = cl.get_Sector();
 		double centroid = cl.get_Centroid();
 		//Z layer
-		if(centroid == org.jlab.rec.cvt.bmt.Constants.getCRZNSTRIPS()[region-1])
-			centroid = org.jlab.rec.cvt.bmt.Constants.getCRZNSTRIPS()[region-1]-.001;
-		Line3d line1 = convertLine(BMTGeom.getLCZstrip(region, sector, (int)Math.floor(centroid)-1));
-		Line3d line2 = convertLine(BMTGeom.getLCZstrip(region, sector, (int)Math.floor(centroid)+0)); 
+		//if(centroid == org.jlab.rec.cvt.bmt.Constants.getCRZNSTRIPS()[region-1])
+		//	centroid = org.jlab.rec.cvt.bmt.Constants.getCRZNSTRIPS()[region-1]-.001;
+		Line3d line1 = convertLine(BMTGeom.getLCZstrip(region, sector, (int)Math.floor(centroid)));
+		Line3d line2 = convertLine(BMTGeom.getLCZstrip(region, sector, (int)Math.floor(centroid)+1)); 
 
 
 
@@ -1018,7 +1020,8 @@ public class CVTAlignment extends ReconstructionEngine {
 	}
 
 	private Vector3d getModuleReferencePoint(int sector, int layer) {
-		return SVTAlignmentFactory.getIdealFiducialCenter((layer-1)/2, sector-1);
+		//return SVTAlignmentFactory.getIdealFiducialCenter((layer-1)/2, sector-1);
+		return new Vector3d(0,0,0);
 	}
 
 	@Override
@@ -1026,23 +1029,7 @@ public class CVTAlignment extends ReconstructionEngine {
 		if(this.getEngineConfiguration() == null || "null".equals(this.getEngineConfiguration())) {
 			return true; //prevents init from being run twice.
 		}
-		// Load config
-		String rmReg = this.getEngineConfigString("removeRegion");
-
-		if (rmReg!=null) {
-			System.out.println("["+this.getName()+"] run with region "+rmReg+"removed config chosen based on yaml");
-			Constants.setRmReg(Integer.valueOf(rmReg));
-		}
-		else {
-			rmReg = System.getenv("COAT_CVT_REMOVEREGION");
-			if (rmReg!=null) {
-				System.out.println("["+this.getName()+"] run with region "+rmReg+"removed config chosen based on env");
-				Constants.setRmReg(Integer.valueOf(rmReg));
-			}
-		}
-		if (rmReg==null) {
-			System.out.println("["+this.getName()+"] run with all region (default) ");
-		}
+		
 		//svt stand-alone
 		String svtStAl = this.getEngineConfigString("svtOnly");
 
@@ -1110,8 +1097,8 @@ public class CVTAlignment extends ReconstructionEngine {
 			}
 		}
 		if (svtTopBottomSep==null) {
-			System.out.println("["+this.getName()+"] run with SVT top and bottom as a single module (default) ");
-			this.svtTopBottomSep = false;
+			System.out.println("["+this.getName()+"] run with SVT top and bottom as separate modules (default) ");
+			this.svtTopBottomSep = true;
 		}
 
 		String alignVars = this.getEngineConfigString("alignVariables");
@@ -1154,7 +1141,6 @@ public class CVTAlignment extends ReconstructionEngine {
 			this.isCosmics = false;
 		}
 
-		//svt stand-alone
 		String maxResidual = this.getEngineConfigString("maxResidual");
 
 		if (maxResidual!=null) {
@@ -1176,7 +1162,7 @@ public class CVTAlignment extends ReconstructionEngine {
 
 		this.nAlignables = ((this.svtTopBottomSep ? 2*42 : 42) + (this.isSVTonly ? 0: 18) + (isCosmics? 0 : 1));
 		
-		//svt stand-alone
+		
 		String debug = this.getEngineConfigString("debug");
 
 		if (debug!=null) {
