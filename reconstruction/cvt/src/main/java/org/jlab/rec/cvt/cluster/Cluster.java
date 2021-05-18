@@ -1,7 +1,10 @@
 package org.jlab.rec.cvt.cluster;
 
 import java.util.ArrayList;
+import org.jlab.geom.prim.Cylindrical3D;
+import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
@@ -33,6 +36,26 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     private double _PhiErr0;
     private double _Z;    							// 		for C-detectors
     private double _ZErr;
+    
+    //added variables for alignment
+    private double _x1; //cluster first end point x
+    private double _y1; //svt cluster first end point y
+    private double _z1; //svt cluster first end point z
+    private double _x2; //svt cluster second end point x
+    private double _y2; //svt cluster second end point y
+    private double _z2; //svt cluster second end point z
+    private double _ox; //bmt cluster arc origin x
+    private double _oy; //bmt cluster arc origin y
+    private double _oz; //bmt cluster arc origin z
+    private double _cx; //bmt cluster arc center x
+    private double _cy; //bmt cluster arc center y
+    private double _cz; //bmt cluster arc center z
+    private double _theta; //bmt cluster arc theta
+    private Line3D _cyl; // bmt axis
+    private Vector3D _l; //svt vector along cluster pseudo-strip direction or bmt vector along cluster pseudo-strip direction in the middle of the arc
+    private Vector3D _s; //svt vector perpendicular to cluster pseudo-strip direction in the module plane or bmt vector perpendicular to cluster pseudo-strip in direction tangential to the cluster surface in the middle of the arc
+    private Vector3D _n; //svt vector normal to the cluster module plane or bmt vector normal to the cluster surface in the middle of the arc
+    
 
     public Cluster(int detector, int detectortype, int sector, int layer, int cid) {
         this._Detector = detector;
@@ -139,7 +162,8 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
      * (energy-weighted) value, the energy-weighted phi for Z detectors and the
      * energy-weighted z for C detectors
      */
-    public void calc_CentroidParams(org.jlab.rec.cvt.bmt.BMTGeometry geo) {
+    public void calc_CentroidParams(org.jlab.rec.cvt.svt.Geometry sgeo, 
+            org.jlab.rec.cvt.bmt.BMTGeometry geo) {
         // instantiation of variables
         double stripNumCent = 0;		// cluster Lorentz-angle-corrected energy-weighted strip = centroid
         double stripNumCent0 = 0;		// cluster uncorrected energy-weighted strip = centroid
@@ -158,12 +182,16 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         double weightedPhiErrSq0 = 0;           // Err^2 on uncorrected energy-weighted phi of the strip 
         double weightedZ = 0;			// Energy-weighted z of the strip
         double weightedZErrSq = 0;		// Err^2 on  energy-weighted z of the strip
-        double weightedX1 = 0;                  // SVT strip centroid positions of endpoints
-        double weightedX2 = 0;                  // SVT strip centroid positions of endpoints
-        double weightedY1 = 0;                  // SVT strip centroid positions of endpoints
-        double weightedY2 = 0;                  // SVT strip centroid positions of endpoints
-        double weightedZ1 = 0;                  // SVT strip centroid positions of endpoints
-        double weightedZ2 = 0;                  // SVT strip centroid positions of endpoints
+        double weightedX1 = 0;                  // SVT/BMT strip centroid positions of endpoints
+        double weightedX2 = 0;                  // SVT/BMT strip centroid positions of endpoints
+        double weightedXC = 0;                  // BMT strip centroid positions of arc center
+        double weightedY1 = 0;                  // SVT/BMT strip centroid positions of endpoints
+        double weightedY2 = 0;                  // SVT/BMT strip centroid positions of endpoints
+        double weightedYC = 0;                  // BMT strip centroid positions of arc center
+        double weightedZ1 = 0;                  // SVT/BMT strip centroid positions of endpoints
+        double weightedZ2 = 0;                  // SVT/BMT strip centroid positions of endpoints
+        double weightedZC = 0;                  // BMT strip centroid positions of arc center
+        
         /*
         this.set_ImplantPoint(arcLine.origin());
             this.set_MidPoint(arcLine.center());
@@ -198,20 +226,32 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     weightedZ2 += strpEn * stEP2.z();
                 }
                 if (this.get_Detector()==1) { 
+                    Point3D stEP1 = thehit.get_Strip().get_ImplantPoint();
+                    Point3D stEP2 = thehit.get_Strip().get_EndPoint();
+                    Point3D stCent = thehit.get_Strip().get_MidPoint();
+                    weightedX1 += strpEn * stEP1.x();
+                    weightedY1 += strpEn * stEP1.y();
+                    weightedZ1 += strpEn * stEP1.z();
+                    weightedX2 += strpEn * stEP2.x();
+                    weightedY2 += strpEn * stEP2.y();
+                    weightedZ2 += strpEn * stEP2.z();
+                    weightedXC += strpEn * stCent.x();
+                    weightedYC += strpEn * stCent.y();
+                    weightedZC += strpEn * stCent.z();
                     // for the BMT the analysis distinguishes between C and Z type detectors
                     if (this.get_DetectorType()==0) { // C-detectors
                         strpNb = thehit.get_Strip().get_Strip();
                         // for C detector the Z of the centroid is calculated
                         weightedZ += strpEn * thehit.get_Strip().get_Z();
                         weightedZErrSq += (thehit.get_Strip().get_ZErr()) * (thehit.get_Strip().get_ZErr());
-                        Point3D stEP1 = thehit.get_Strip().get_ImplantPoint();
-                        Point3D stEP2 = thehit.get_Strip().get_EndPoint();
-                        weightedX1 += strpEn * stEP1.x();
-                        weightedY1 += strpEn * stEP1.y();
-                        weightedZ1 += strpEn * stEP1.z();
-                        weightedX2 += strpEn * stEP2.x();
-                        weightedY2 += strpEn * stEP2.y();
-                        weightedZ2 += strpEn * stEP2.z();
+//                        Point3D stEP1 = thehit.get_Strip().get_ImplantPoint();
+//                        Point3D stEP2 = thehit.get_Strip().get_EndPoint();
+//                        weightedX1 += strpEn * stEP1.x();
+//                        weightedY1 += strpEn * stEP1.y();
+//                        weightedZ1 += strpEn * stEP1.z();
+//                        weightedX2 += strpEn * stEP2.x();
+//                        weightedY2 += strpEn * stEP2.y();
+//                        weightedZ2 += strpEn * stEP2.z();
                     }
                     if (this.get_DetectorType()==1) { // Z-detectors
                         // for Z detectors Lorentz-correction is applied to the strip
@@ -222,12 +262,14 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                         weightedPhiErrSq += (thehit.get_Strip().get_PhiErr()) * (thehit.get_Strip().get_PhiErr());
                         weightedPhi0 += strpEn * thehit.get_Strip().get_Phi0();
                         weightedPhiErrSq0 += (thehit.get_Strip().get_PhiErr0()) * (thehit.get_Strip().get_PhiErr0());
-                        Point3D stEP1 = thehit.get_Strip().get_ImplantPoint();
-                        Point3D stEP2 = thehit.get_Strip().get_EndPoint();
-                        weightedX1 += strpEn * stEP1.x();
-                        weightedY1 += strpEn * stEP1.y();
-                        weightedX2 += strpEn * stEP2.x();
-                        weightedY2 += strpEn * stEP2.y();
+//                        Point3D stEP1 = thehit.get_Strip().get_ImplantPoint();
+//                        Point3D stEP2 = thehit.get_Strip().get_EndPoint();
+//                        weightedX1 += strpEn * stEP1.x();
+//                        weightedY1 += strpEn * stEP1.y();
+//                        weightedZ1 += strpEn * stEP1.z();
+//                        weightedX2 += strpEn * stEP2.x();
+//                        weightedY2 += strpEn * stEP2.y();
+//                        weightedZ2 += strpEn * stEP2.z();
                     }
                 }
 
@@ -274,6 +316,85 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             zErrCent = Math.sqrt(weightedZErrSq);
             this.setEndPoint1(new Point3D(weightedX1/totEn, weightedY1/totEn, weightedZ1/totEn));
             this.setEndPoint2(new Point3D(weightedX2/totEn, weightedY2/totEn, weightedZ2/totEn));
+            //setting variables used for alignment
+            //-----------------------------------
+            if (this.get_Detector()==0) { //SVT
+                this.setX1(weightedX1/totEn);
+                this.setY1(weightedY1/totEn);
+                this.setZ1(weightedZ1/totEn);
+                this.setX2(weightedX2/totEn);
+                this.setY2(weightedY2/totEn);
+                this.setZ2(weightedZ2/totEn);
+                
+                Vector3D l = new Vector3D(weightedX2/totEn-weightedX1/totEn,
+                                          weightedY2/totEn-weightedY1/totEn, 
+                                          weightedZ2/totEn-weightedZ1/totEn).asUnit();
+                
+                Vector3D s = sgeo.getPlaneModuleOrigin(this.get_Sector(), this.get_Layer()).
+                        vectorTo(sgeo.getPlaneModuleOrigin(this.get_Sector(), this.get_Layer())).asUnit();
+                
+                Vector3D n = sgeo.findBSTPlaneNormal(this.get_Sector(), this.get_Layer());
+                
+                this.setL(l);
+                this.setS(s);
+                this.setN(n);
+            }
+            if (this.get_Detector()==1) { //BMT 
+                Cylindrical3D cyl = geo.getCylinder(this.get_Layer(), this.get_Sector()); 
+                // for the BMT the analysis distinguishes between C and Z type detectors
+                if (this.get_DetectorType()==0) { // C-detectors
+                    this.setOx(weightedX1/totEn);
+                    this.setOy(weightedY1/totEn);
+                    this.setOz(weightedZ1/totEn);
+                    this.setCx(weightedXC/totEn);
+                    this.setCy(weightedYC/totEn);
+                    this.setCz(weightedZC/totEn);
+                    Vector3D C2P1 = new Vector3D(weightedX1/totEn-weightedXC/totEn,
+                                                weightedY1/totEn-weightedYC/totEn, 
+                                                weightedZ1/totEn-weightedZC/totEn).asUnit();
+                    Vector3D C2P2 = new Vector3D(weightedX2/totEn-weightedXC/totEn,
+                                                weightedY2/totEn-weightedYC/totEn, 
+                                                weightedZ2/totEn-weightedZC/totEn).asUnit();
+                    double theta = Math.acos(C2P1.dot(C2P2));
+                    this.setTheta(theta);
+                    
+                    Vector3D s = C2P1.cross(C2P2).asUnit();
+                    Vector3D n = cyl.baseArc().normal();
+                    Vector3D t = cyl.baseArc().center().vectorTo(cyl.baseArc().point(theta/2));
+                    Vector3D l = s.cross(t).asUnit();
+                    
+                    this.setCylAxis(geo.getAxis(this.get_Layer(), this.get_Sector()));
+                    this.setL(l);
+                    this.setS(s);
+                    this.setN(n);
+                    
+                }
+                if (this.get_DetectorType()==1) { // Z-detectors
+                    // for Z detectors Lorentz-correction is applied to the strip
+                    this.setX1(weightedX1/totEn);
+                    this.setY1(weightedY1/totEn);
+                    this.setZ1(weightedZ1/totEn);
+                    this.setX2(weightedX2/totEn);
+                    this.setY2(weightedY2/totEn);
+                    this.setZ2(weightedZ2/totEn);
+                    
+                    Vector3D l = new Vector3D(weightedX2/totEn-weightedX1/totEn,
+                                                weightedY2/totEn-weightedY1/totEn, 
+                                                weightedZ2/totEn-weightedZ1/totEn).asUnit();
+                    Vector3D n = cyl.baseArc().center().vectorTo(new Point3D((weightedX2/totEn+weightedX1/totEn)/2,
+                                                (weightedY2/totEn+weightedY1/totEn)/2, 
+                                                (weightedZ2/totEn+weightedZ1/totEn)/2)).asUnit();
+                    Vector3D s = l.cross(n);
+                   
+                    
+                    this.setCylAxis(geo.getAxis(this.get_Layer(), this.get_Sector()));
+                    this.setL(l);
+                    this.setS(s);
+                    this.setN(n);
+                   
+                }
+            }
+           
             //phiErrCent = Math.sqrt(weightedPhiErrSq);
             //phiErrCent0 = Math.sqrt(weightedPhiErrSq0);
             //zErrCent = Math.sqrt(weightedZErrSq);
@@ -286,13 +407,14 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             set_Centroid0(stripNumCent0);
             _Phi = phiCent;
             _PhiErr = phiErrCent;
-
+            this.set_Error(geo.getRadius(_Layer)*phiErrCent);
             set_Phi0(phiCent0);
             set_PhiErr0(phiErrCent0);
         }
         if (this.get_DetectorType() == 0) {
             _Z = zCent;
             _ZErr = zErrCent;
+            this.set_Error(zErrCent);
         }
 
     }
@@ -539,6 +661,245 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     public void setEndPoint2(Point3D _EndPoint2) {
         this._EndPoint2 = _EndPoint2;
     }
+
+    /**
+     * @return the _x1
+     */
+    public double getX1() {
+        return _x1;
+    }
+
+    /**
+     * @param _x1 the _x1 to set
+     */
+    public void setX1(double _x1) {
+        this._x1 = _x1;
+    }
+
+    /**
+     * @return the _y1
+     */
+    public double getY1() {
+        return _y1;
+    }
+
+    /**
+     * @param _y1 the _y1 to set
+     */
+    public void setY1(double _y1) {
+        this._y1 = _y1;
+    }
+
+    /**
+     * @return the _z1
+     */
+    public double getZ1() {
+        return _z1;
+    }
+
+    /**
+     * @param _z1 the _z1 to set
+     */
+    public void setZ1(double _z1) {
+        this._z1 = _z1;
+    }
+
+    /**
+     * @return the _x2
+     */
+    public double getX2() {
+        return _x2;
+    }
+
+    /**
+     * @param _x2 the _x2 to set
+     */
+    public void setX2(double _x2) {
+        this._x2 = _x2;
+    }
+
+    /**
+     * @return the _y2
+     */
+    public double getY2() {
+        return _y2;
+    }
+
+    /**
+     * @param _y2 the _y2 to set
+     */
+    public void setY2(double _y2) {
+        this._y2 = _y2;
+    }
+
+    /**
+     * @return the _z2
+     */
+    public double getZ2() {
+        return _z2;
+    }
+
+    /**
+     * @param _z2 the _z2 to set
+     */
+    public void setZ2(double _z2) {
+        this._z2 = _z2;
+    }
+
+    /**
+     * @return the _ox
+     */
+    public double getOx() {
+        return _ox;
+    }
+
+    /**
+     * @param _ox the _ox to set
+     */
+    public void setOx(double _ox) {
+        this._ox = _ox;
+    }
+
+    /**
+     * @return the _oy
+     */
+    public double getOy() {
+        return _oy;
+    }
+
+    /**
+     * @param _oy the _oy to set
+     */
+    public void setOy(double _oy) {
+        this._oy = _oy;
+    }
+
+    /**
+     * @return the _oz
+     */
+    public double getOz() {
+        return _oz;
+    }
+
+    /**
+     * @param _oz the _oz to set
+     */
+    public void setOz(double _oz) {
+        this._oz = _oz;
+    }
+
+    /**
+     * @return the _cx
+     */
+    public double getCx() {
+        return _cx;
+    }
+
+    /**
+     * @param _cx the _cx to set
+     */
+    public void setCx(double _cx) {
+        this._cx = _cx;
+    }
+
+    /**
+     * @return the _cy
+     */
+    public double getCy() {
+        return _cy;
+    }
+
+    /**
+     * @param _cy the _cy to set
+     */
+    public void setCy(double _cy) {
+        this._cy = _cy;
+    }
+
+    /**
+     * @return the _cz
+     */
+    public double getCz() {
+        return _cz;
+    }
+
+    /**
+     * @param _cz the _cz to set
+     */
+    public void setCz(double _cz) {
+        this._cz = _cz;
+    }
+
+    /**
+     * @return the _theta
+     */
+    public double getTheta() {
+        return _theta;
+    }
+
+    /**
+     * @param _theta the _theta to set
+     */
+    public void setTheta(double _theta) {
+        this._theta = _theta;
+    }
+
+    /**
+     * @return the _cyl
+     */
+    public Line3D getCylAxis() {
+        return _cyl;
+    }
+
+    /**
+     * @param _cyl the _cyl to set
+     */
+    public void setCylAxis(Line3D _cyl) {
+        this._cyl = _cyl;
+    }
+
+    /**
+     * @return the _l
+     */
+    public Vector3D getL() {
+        return _l;
+    }
+
+    /**
+     * @param _l the _l to set
+     */
+    public void setL(Vector3D _l) {
+        this._l = _l;
+    }
+
+    /**
+     * @return the _s
+     */
+    public Vector3D getS() {
+        return _s;
+    }
+
+    /**
+     * @param _s the _s to set
+     */
+    public void setS(Vector3D _s) {
+        this._s = _s;
+    }
+
+    /**
+     * @return the _n
+     */
+    public Vector3D getN() {
+        return _n;
+    }
+
+    /**
+     * @param _n the _n to set
+     */
+    public void setN(Vector3D _n) {
+        this._n = _n;
+    }
+
 
     private Point3D _EndPoint1;
     private Point3D _EndPoint2;

@@ -102,9 +102,26 @@ public class RecoBankWriter {
                 hitStrg += "_ID";
                 bank.setShort(hitStrg, i, (short) hitIdxArray[j]);
             }
+            
+            bank.setFloat("x1",   i, (float)cluslist.get(i).getX1());
+            bank.setFloat("y1",   i, (float)cluslist.get(i).getY1());
+            bank.setFloat("z1",   i, (float)cluslist.get(i).getZ1());
+            bank.setFloat("x2",   i, (float)cluslist.get(i).getX2());
+            bank.setFloat("y2",   i, (float)cluslist.get(i).getY2());
+            bank.setFloat("z2",   i, (float)cluslist.get(i).getZ2()); 
+            bank.setFloat("lx",   i, (float)cluslist.get(i).getL().x());
+            bank.setFloat("ly",   i, (float)cluslist.get(i).getL().y());
+            bank.setFloat("lz",   i, (float)cluslist.get(i).getL().z());
+            bank.setFloat("sx",   i, (float)cluslist.get(i).getS().x());
+            bank.setFloat("sy",   i, (float)cluslist.get(i).getS().y());
+            bank.setFloat("sz",   i, (float)cluslist.get(i).getS().z());
+            bank.setFloat("nx",   i, (float)cluslist.get(i).getN().x());
+            bank.setFloat("ny",   i, (float)cluslist.get(i).getN().y());
+            bank.setFloat("nz",   i, (float)cluslist.get(i).getN().z());
+            bank.setFloat("e",    i, (float)cluslist.get(i).get_CentroidError());
 
         }
-        //bank.show();
+        bank.show();
         return bank;
 
     }
@@ -238,9 +255,39 @@ public class RecoBankWriter {
                 hitStrg += "_ID";
                 bank.setShort(hitStrg, i, (short) hitIdxArray[j]);
             }
+            
+            bank.setFloat("x1",   i, (float)cluslist.get(i).getX1());
+            bank.setFloat("y1",   i, (float)cluslist.get(i).getY1());
+            bank.setFloat("z1",   i, (float)cluslist.get(i).getZ1());
+            bank.setFloat("x2",   i, (float)cluslist.get(i).getX2());
+            bank.setFloat("y2",   i, (float)cluslist.get(i).getY2());
+            bank.setFloat("z2",   i, (float)cluslist.get(i).getZ2());
+            bank.setFloat("ox",   i, (float)cluslist.get(i).getOx());
+            bank.setFloat("oy",   i, (float)cluslist.get(i).getOy());
+            bank.setFloat("oz",   i, (float)cluslist.get(i).getOz());
+            bank.setFloat("cx",   i, (float)cluslist.get(i).getCx());
+            bank.setFloat("cy",   i, (float)cluslist.get(i).getCy());
+            bank.setFloat("cz",   i, (float)cluslist.get(i).getCz());
+            bank.setFloat("theta",i, (float)cluslist.get(i).getTheta());
+            bank.setFloat("ax1",  i, (float)cluslist.get(i).getCylAxis().origin().x());
+            bank.setFloat("ay1",  i, (float)cluslist.get(i).getCylAxis().origin().y());
+            bank.setFloat("az1",  i, (float)cluslist.get(i).getCylAxis().origin().z());
+            bank.setFloat("ax2",  i, (float)cluslist.get(i).getCylAxis().end().x());
+            bank.setFloat("ay2",  i, (float)cluslist.get(i).getCylAxis().end().y());
+            bank.setFloat("az2",  i, (float)cluslist.get(i).getCylAxis().end().z());
+            bank.setFloat("lx",   i, (float)cluslist.get(i).getL().x());
+            bank.setFloat("ly",   i, (float)cluslist.get(i).getL().y());
+            bank.setFloat("lz",   i, (float)cluslist.get(i).getL().z());
+            bank.setFloat("sx",   i, (float)cluslist.get(i).getS().x());
+            bank.setFloat("sy",   i, (float)cluslist.get(i).getS().y());
+            bank.setFloat("sz",   i, (float)cluslist.get(i).getS().z());
+            bank.setFloat("nx",   i, (float)cluslist.get(i).getN().x());
+            bank.setFloat("ny",   i, (float)cluslist.get(i).getN().y());
+            bank.setFloat("nz",   i, (float)cluslist.get(i).getN().z());
+            bank.setFloat("e",    i, (float)cluslist.get(i).get_Error());
 
         }
-
+        bank.show();
         return bank;
 
     }
