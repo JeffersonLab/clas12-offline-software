@@ -16,8 +16,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 	 *
 	 */
 
-	public FittedHit(int sector, int layer, int strip, double Edep) {
-		super(sector, layer, strip, Edep);
+	public FittedHit(int sector, int layer, int strip, double Edep, double time) {
+		super(sector, layer, strip, Edep, time);
 	}
 
 	private double _docaToTrk;             // 3-D distance of closest approach of the helix to the wire

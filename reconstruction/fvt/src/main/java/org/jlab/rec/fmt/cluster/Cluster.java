@@ -19,6 +19,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 	private int _Sector;
 	private int _Layer;
 	private int _Id;
+	private double _Tmin;
 	private Line3D _StripSegment;
 
     private double _TotalEnergy;
@@ -46,6 +47,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 		this._Sector = sector;
 		this._Layer = layer;
 		this._Id = cid;
+		this._Tmin = Double.POSITIVE_INFINITY;
 	}
 
 	/**
@@ -103,6 +105,14 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 	 */
 	public void set_Id(int _Id) {
 		this._Id = _Id;
+	}
+
+	public double get_Tmin() {
+		return this._Tmin;
+	}
+
+	public void set_Tmin(double Tmin) {
+		this._Tmin = Tmin;
 	}
 
 	/**
@@ -201,6 +211,11 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
                 // get the energy value of the strip
                 double strpEn = thehit.get_Edep();
+
+				// set the cluster's Tmin
+				if (this._Tmin > thehit.get_Time()) {
+					this._Tmin = thehit.get_Time();
+				}
 
                 // get strip informations
                 int strpNb = thehit.get_Strip();
