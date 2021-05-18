@@ -177,9 +177,9 @@ public class CVTRecNewKF extends ReconstructionEngine {
 
         //2) find the clusters from these hits
         ClusterFinder clusFinder = new ClusterFinder();
-        clusters.addAll(clusFinder.findClusters(svt_hits, BMTGeom));     
+        clusters.addAll(clusFinder.findClusters(svt_hits, SVTGeom, BMTGeom));     
         if(bmt_hits != null && bmt_hits.size() > 0)
-            clusters.addAll(clusFinder.findClusters(bmt_hits, BMTGeom)); 
+            clusters.addAll(clusFinder.findClusters(bmt_hits, SVTGeom, BMTGeom)); 
         
         if (clusters.size() == 0) {
             rbc.appendCVTBanks(event, SVThits, BMThits, null, null, null, null, shift);
