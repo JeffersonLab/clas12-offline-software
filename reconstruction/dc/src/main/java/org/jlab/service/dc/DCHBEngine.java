@@ -110,6 +110,7 @@ public class DCHBEngine extends DCEngine {
            if (cycles > 0) triggerPhase = period * ((timeStamp + phase) % cycles);
            
            String toFile = ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/data/T2D_DeltaDoca.txt");
+           System.out.println("*********** DELTA DOCA FOUND FILE "+toFile);
            File file = new File(toFile);
             try {
                 TableLoader.FillDeltaDocaTable(file);

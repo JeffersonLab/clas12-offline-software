@@ -74,6 +74,7 @@ public class TableLoader {
             int timeBin = Integer.parseInt(fields[0]);  
             double deltaDoca = Double.parseDouble(fields[1]);
             DELTADOCA[timeBin] = deltaDoca;
+            System.out.println("read deltaDOCA "+deltaDoca+" for time bin "+timeBin);
         }
 
         input.close();
