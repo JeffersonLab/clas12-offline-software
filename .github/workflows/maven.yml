@@ -20,7 +20,7 @@ jobs:
       with:
         java-version: 11
     - name: build
-      run: ./build-coatjava.sh --spotbugs --unittests
+      run: ./build-coatjava.sh --spotbugs --unittests --quiet
     - name: kpp-test
       run: cd validation/advanced-tests && ./run-advanced-tests.sh
     - name: eb-ep-test
