@@ -118,10 +118,10 @@ public class RecoBankWriter {
             bank.setFloat("nx",   i, (float)cluslist.get(i).getN().x());
             bank.setFloat("ny",   i, (float)cluslist.get(i).getN().y());
             bank.setFloat("nz",   i, (float)cluslist.get(i).getN().z());
-            bank.setFloat("e",    i, (float)cluslist.get(i).get_CentroidError());
+            bank.setFloat("e",    i, (float)cluslist.get(i).get_Error());
 
         }
-        bank.show();
+        //bank.show();
         return bank;
 
     }
@@ -287,7 +287,7 @@ public class RecoBankWriter {
             bank.setFloat("e",    i, (float)cluslist.get(i).get_Error());
 
         }
-        bank.show();
+        //bank.show();
         return bank;
 
     }

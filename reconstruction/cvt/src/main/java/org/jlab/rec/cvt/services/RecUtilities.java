@@ -21,7 +21,6 @@ import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.clas.swimtools.Swim;
-import org.jlab.geom.prim.Line3D;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.fit.CosmicFitter;
 import org.jlab.rec.cvt.track.StraightTrack;
@@ -103,6 +102,7 @@ public class RecUtilities {
                 meas.setSector(trkcand.get_Clusters().get(i).get_Sector());
                 meas.setLayer(trkcand.get_Clusters().get(i).get_Layer());
                 double err = trkcand.get_Clusters().get(i).get_Error();
+               
                 meas.setError(err*err); // CHECK THIS .... DOES KF take e or e^2?
                 //the thickness for multiple scattering.  MS is outward the thickness is set for the 1st layer in the superlayer
                 // air gap ignored
