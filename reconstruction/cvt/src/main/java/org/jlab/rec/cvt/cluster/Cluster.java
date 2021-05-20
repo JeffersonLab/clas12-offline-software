@@ -330,9 +330,13 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                                           weightedY2/totEn-weightedY1/totEn, 
                                           weightedZ2/totEn-weightedZ1/totEn).asUnit();
                 
-                Vector3D s = sgeo.getPlaneModuleOrigin(this.get_Sector(), this.get_Layer()).
-                        vectorTo(sgeo.getPlaneModuleOrigin(this.get_Sector(), this.get_Layer())).asUnit();
-                
+                //Vector3D s = sgeo.getPlaneModuleOrigin(this.get_Sector(), this.get_Layer()).
+                //        vectorTo(sgeo.getPlaneModuleEnd(this.get_Sector(), this.get_Layer())).asUnit();
+                double[][] Xi = sgeo.getStripEndPoints(1, (this.get_Layer() - 1) % 2);
+                double[][] Xf = sgeo.getStripEndPoints(100, (this.get_Layer() - 1) % 2);
+                Point3D EPi = sgeo.transformToFrame(this.get_Sector(), this.get_Layer(), Xi[0][0], 0, Xi[0][1], "lab", "");
+                Point3D EPf = sgeo.transformToFrame(this.get_Sector(), this.get_Layer(), Xf[0][0], 0, Xf[0][1], "lab", "");
+                Vector3D s = EPi.vectorTo(EPf).asUnit(); // in direction of increasing strips
                 Vector3D n = sgeo.findBSTPlaneNormal(this.get_Sector(), this.get_Layer());
                 
                 this.setL(l);

@@ -63,6 +63,12 @@ public class CrossMaker {
             List<Cluster> svt_innerlayrclus,
             List<Cluster> svt_outerlayrclus,
             org.jlab.rec.cvt.svt.Geometry svt_geo) {
+        for(Cluster cl : svt_innerlayrclus) {
+            cl.set_Error(cl.get_ResolutionAlongZ(0, svt_geo) );
+        }
+        for(Cluster cl : svt_outerlayrclus) {
+            cl.set_Error(cl.get_ResolutionAlongZ(0, svt_geo) );
+        }
         // instantiate the list of crosses
         ArrayList<Cross> crosses = new ArrayList<Cross>();
         int rid = 0; // cross id
