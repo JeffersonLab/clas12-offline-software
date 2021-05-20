@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
@@ -138,6 +139,41 @@ public class RecoBankReader {
 			cluster.set_CentroidResidual(bank.getFloat("centroidResidual",i));
 			cluster.set_SeedResidual(bank.getFloat("seedResidual",i));
 			cluster.set_AssociatedTrackID(bank.getShort("trkID",i));
+			
+			cluster.setX1(bank.getFloat("x1", i));
+			cluster.setX2(bank.getFloat("x2", i));
+			cluster.setY1(bank.getFloat("y1", i));
+			cluster.setY2(bank.getFloat("y2", i));
+			cluster.setZ1(bank.getFloat("z1", i));
+			cluster.setZ2(bank.getFloat("z2", i));
+			cluster.setS(new Vector3D(
+					bank.getFloat("sx", i),
+					bank.getFloat("sy", i),
+					bank.getFloat("sz", i)));
+			cluster.setN(new Vector3D(
+					bank.getFloat("nx", i),
+					bank.getFloat("ny", i),
+					bank.getFloat("nz", i)));
+			cluster.setL(new Vector3D(
+					bank.getFloat("lx", i),
+					bank.getFloat("ly", i),
+					bank.getFloat("lz", i)));
+			cluster.set_Error(bank.getFloat("e", i));
+			
+
+			cluster.setOx(bank.getFloat("ox", i));
+			cluster.setOy(bank.getFloat("oy", i));
+			cluster.setOz(bank.getFloat("oz", i));
+			cluster.setTheta(bank.getFloat("theta", i));
+			cluster.setCylAxis(new Line3D(
+					bank.getFloat("ax1", i),
+					bank.getFloat("ay1", i),
+					bank.getFloat("az1", i),
+					bank.getFloat("ax2", i),
+					bank.getFloat("ay2", i),
+					bank.getFloat("az2", i)));
+			
+			
 			//Since only up to 5 hits per track are written...
 			for (int j = 0; j < 5; j++) {
 				String hitStrg = "Hit";
@@ -344,6 +380,26 @@ public class RecoBankReader {
 			cluster.set_SeedResidual(bank.getFloat("seedResidual",i));
 			cluster.set_AssociatedTrackID(bank.getShort("trkID",i));
 
+			cluster.setX1(bank.getFloat("x1", i));
+			cluster.setX2(bank.getFloat("x2", i));
+			cluster.setY1(bank.getFloat("y1", i));
+			cluster.setY2(bank.getFloat("y2", i));
+			cluster.setZ1(bank.getFloat("z1", i));
+			cluster.setZ2(bank.getFloat("z2", i));
+			cluster.setS(new Vector3D(
+					bank.getFloat("sx", i),
+					bank.getFloat("sy", i),
+					bank.getFloat("sz", i)));
+			cluster.setN(new Vector3D(
+					bank.getFloat("nx", i),
+					bank.getFloat("ny", i),
+					bank.getFloat("nz", i)));
+			cluster.setL(new Vector3D(
+					bank.getFloat("lx", i),
+					bank.getFloat("ly", i),
+					bank.getFloat("lz", i)));
+			cluster.set_Error(bank.getFloat("e", i));
+			
 			//Since only up to 5 hits per track are written...
 			for (int j = 0; j < 5; j++) {
 				String hitStrg = "Hit";
@@ -398,6 +454,9 @@ public class RecoBankReader {
 			int id = bank.getShort("ID", i);
 			FittedHit hit = new FittedHit(0, 0, sector, layer, new Strip(strip, 0));
 
+			
+			
+			
 			hit.set_Id(id);
 			hit.set_docaToTrk(bank.getFloat("fitResidual", i));
 			hit.set_TrkgStatus(bank.getInt("trkingStat", i));

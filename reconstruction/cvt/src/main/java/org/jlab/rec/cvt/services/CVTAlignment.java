@@ -246,8 +246,35 @@ public class CVTAlignment extends ReconstructionEngine {
 			Matrix I = new Matrix(rows,1);
 			
 			int i = 0;
-
+			boolean useNewFillMatrices = true;
 			for(Cross cross : track) {
+				if(useNewFillMatrices) {
+					if(cross.get_Detector().equalsIgnoreCase("SVT")){
+						Cluster cl1 = cross.get_Cluster1();
+						boolean ok = fillMatricesNew(i,ray,cl1,A,B,V,m,c,I);
+						i++;
+						if(!ok) { //reject track if there's a cluster with really bad values.
+							if(debug) System.out.println("rejecting track due to problem in an SVT layer");
+							continue tracksLoop;
+						}
+						Cluster cl2 = cross.get_Cluster2();
+						 ok = fillMatricesNew(i,ray,cl2,A,B,V,m,c,I);
+						i++;
+						if(!ok) { //reject track if there's a cluster with really bad values.
+							if(debug) System.out.println("rejecting track due to problem in an SVT layer");
+							continue tracksLoop;
+						}
+					} else {
+						Cluster cl1 = cross.get_Cluster1();
+						boolean ok = fillMatricesNew(i,ray,cl1,A,B,V,m,c,I);
+						i++;
+						if(!ok) { //reject track if there's a cluster with really bad values.
+							if(debug) System.out.println("rejecting track due to problem in a BMT layer");
+							continue tracksLoop;
+						}
+					}
+					continue;
+				}
 				//System.out.println("cross " +cross.get_Point());
 				if(cross.get_Detector().equalsIgnoreCase("SVT"))
 				{
@@ -542,6 +569,132 @@ public class CVTAlignment extends ReconstructionEngine {
 		
 		return true;
 	}
+	
+	/**
+	 * generic method that uses any type of cluster.  
+	 * @param i
+	 * @param ray
+	 * @param cl
+	 * @param A
+	 * @param B
+	 * @param V
+	 * @param m
+	 * @param c
+	 * @param I
+	 * @return
+	 */
+	private boolean fillMatricesNew(int i, Ray ray, Cluster cl, Matrix A, Matrix B, Matrix V, Matrix m, Matrix c, Matrix I) {
+		int region = cl.get_Region();
+		int layer = cl.get_Layer();
+		int sector = cl.get_Sector();
+		//System.out.println("RLS " + region + " " + layer + " " + sector);
+		//System.out.println("th" + c.get_Phi());
+		double centroid = cl.get_Centroid();
+
+		
+		Vector3D l = cl.getL();
+		Vector3D s = cl.getS();
+		Vector3D n = cl.getN();
+		
+		//Vector3d e1 = cl.getX
+		Vector3D e = new Vector3D(cl.getX1(),cl.getY1(),cl.getZ1());
+
+		Vector3D xref = ray.get_refPoint().toVector3D();
+		Vector3D u = ray.get_dirVec(); 
+		double udotn = u.dot(n);
+		if(Math.abs(udotn)<0.01) {
+			if(debug) System.out.println("rejecting track:  abs(udotn)<0.01");
+			return false;	
+		}
+		double sdotu = s.dot(u);
+		Vector3D extrap = xref.add(u.multiply(n.dot(e.sub(xref))/udotn));
+
+
+		//System.out.println(extrap.toStlString());
+		double resolution = cl.get_Error();
+		//System.out.println("resolution:  " + resolution + "; z=" + extrap.z-);
+
+		V.set(i, i, Math.pow(resolution,2));
+
+
+		Vector3D sp = s.sub(n.multiply(sdotu/udotn));
+		if(sp.mag() > 10) {  //this can only happen if the angle between the track and the normal is small
+			if(debug) System.out.println("rejecting track:  sp.magnitude() > 10");
+			return false;
+		}
+		
+
+
+		Vector3D cref = new Vector3D(0,0,0);
+
+
+
+		
+
+		Vector3D dmdr =sp.cross(extrap).add(n.cross(cref).multiply(sdotu/udotn));
+		dmdr = dmdr.sub(n.cross(u).multiply(n.dot(e.sub(extrap))*sdotu/(udotn*udotn)));
+		if(orderTx >= 0)
+			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderTx, -sp.x());
+		if(orderTy >= 0)
+			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderTy, -sp.y());
+		if(orderTz >= 0)
+			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderTz, -sp.z());
+		if(orderRx >= 0)
+			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderRx, dmdr.x());
+		if(orderRy >= 0)
+			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderRy, dmdr.y());
+		if(orderRz >= 0)
+			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderRz, dmdr.z());
+
+
+		if(cl.get_Detector() == 0)
+			I.set(i, 0, getIndexSVT(layer-1,sector-1));
+		if(cl.get_Detector() == 1)
+			I.set(i, 0, getIndexBMT(layer-1,sector-1));
+		
+		Vector3D dmdu = sp.multiply(e.sub(xref).dot(n)/udotn);
+		if(!this.useDocaPhiZTandip) {
+			B.set(i,0, sp.x());
+			B.set(i,1, sp.z());
+			B.set(i,2, dmdu.x());
+			B.set(i,3, dmdu.z());
+		} else {
+
+			double phi = Math.atan2(u.y(),u.x());
+			Vector3D csphi = new Vector3D(Math.cos(phi), Math.sin(phi),0);
+			Vector3D mscphi = new Vector3D(-Math.sin(phi), Math.cos(phi),0);
+			double cosdip = Math.hypot(u.x(), u.y());
+			double d = mscphi.dot(xref);
+			B.set(i, 0, s.dot(mscphi.sub(u.multiply(n.dot(mscphi)/udotn))));
+			//B.set(i, 1, s.dot(csphi.times(-d)
+			//		.plus(mscphi.times(n.dot(e.minus(xref))/udotn))
+			//		.minus(u.times(mscphi.dot(n)*n.dot(e.minus(xref))/(udotn*udotn)))
+			//		.plus(u.times(d*n.dot(csphi)/udotn)))
+			//		);
+			B.set(i, 1, -s.dot(csphi)*d
+					+ cosdip*(s.dot(mscphi)/udotn-sdotu/(udotn*udotn)*n.dot(mscphi))*n.dot(e.sub(xref))
+					+ sdotu/udotn*d*n.dot(csphi));
+			B.set(i, 2, s.z()-sdotu*n.z()/udotn);
+			B.set(i, 3, (s.z()/udotn-n.z()*sdotu/(udotn*udotn))*n.dot(e.sub(xref)));
+
+
+		}
+		//dm.set(i,0, s.dot(e.minus(extrap)));
+		
+		double ci = s.dot(extrap);
+		double mi = s.dot(e);
+		if(Math.abs(ci-mi)>maxResidualCut) {
+			if(debug) System.out.println("rejecting track:  Math.abs(ci-mi)>maxResidualCut");
+			return false;
+		}
+		c.set(i,0,ci);
+		m.set(i,0,mi);
+		
+		
+		return true;
+		
+	}
+	
 
 	//returns false if there's a problem
 	private boolean fillMatricesSVT(int i, Ray ray, Cluster cl, Matrix A, Matrix B, Matrix V, Matrix m, Matrix c, Matrix I) {
