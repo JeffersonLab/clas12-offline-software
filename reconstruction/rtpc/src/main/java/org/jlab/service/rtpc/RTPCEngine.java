@@ -22,6 +22,8 @@ import org.jlab.rec.rtpc.hit.TrackDisentangler;
 import org.jlab.rec.rtpc.hit.TrackFinder;
 import org.jlab.rec.rtpc.hit.TrackHitReco;
 import org.jlab.rec.rtpc.hit.HelixFitTest;
+import org.jlab.detector.calib.utils.ConstantsManager;
+import org.jlab.utils.groups.IndexedTable;
 
 
 
@@ -94,11 +96,11 @@ public class RTPCEngine extends ReconstructionEngine{
 
         hits = hitRead.get_RTPCHits();
 
-        if(hits==null || hits.size()==0 || hits.size() > 5000) {
+        if(hits==null || hits.size()==0){
             return true;
         }
 
-        int runNo = 10;
+         int runNo = 10;
         double magfield = 50.0;
         double magfieldfactor = 1;
 
@@ -111,9 +113,13 @@ public class RTPCEngine extends ReconstructionEngine{
                 return false;
             }
         }
-
+	
         magfield = 50 * magfieldfactor;
-
+	IndexedTable time_offsets = this.getConstantsManager().getConstants(runNo, "/calibration/rtpc/time_offsets");
+	int hitsbound = 15000;
+	hitsbound = (int) time_offsets.getDoubleValue("tl",1,1,4);
+	if(hitsbound < 1) hitsbound = 15000; 
+	if(hits.size() > hitsbound) return true; 
 
         if(event.hasBank("RTPC::adc")){
             params.init(this.getConstantsManager(), runNo);
