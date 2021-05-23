@@ -27,12 +27,23 @@ public class ProbeCollection {
      * Gets rotated composite and composite fields, get corresponding probes
      */
     public ProbeCollection() {
-        RCP =   new RotatedCompositeProbe(MagneticFields.getInstance().getRotatedCompositeField());
-        CP  =   new CompositeProbe(MagneticFields.getInstance().getCompositeField());
-        
-        RCF_z   =   new SwimZ(MagneticFields.getInstance().getRotatedCompositeField());
-        CF_z    =   new SwimZ(MagneticFields.getInstance().getCompositeField());
-        RCF     =   new cnuphys.swim.Swimmer(MagneticFields.getInstance().getRotatedCompositeField());
-        CF      =   new cnuphys.swim.Swimmer(MagneticFields.getInstance().getCompositeField());
+        if(MagneticFields.getInstance().hasActiveTransverseSolenoid()) {
+            RCP =   new RotatedCompositeProbe(MagneticFields.getInstance().getTransverseRotatedCompositeField());
+            CP  =   new CompositeProbe(MagneticFields.getInstance().getTransverseCompositeField());
+
+            RCF_z   =   new SwimZ(MagneticFields.getInstance().getTransverseRotatedCompositeField());
+            CF_z    =   new SwimZ(MagneticFields.getInstance().getTransverseCompositeField());
+            RCF     =   new cnuphys.swim.Swimmer(MagneticFields.getInstance().getTransverseRotatedCompositeField());
+            CF      =   new cnuphys.swim.Swimmer(MagneticFields.getInstance().getTransverseCompositeField());
+        }
+        else {
+            RCP =   new RotatedCompositeProbe(MagneticFields.getInstance().getRotatedCompositeField());
+            CP  =   new CompositeProbe(MagneticFields.getInstance().getCompositeField());
+
+            RCF_z   =   new SwimZ(MagneticFields.getInstance().getRotatedCompositeField());
+            CF_z    =   new SwimZ(MagneticFields.getInstance().getCompositeField());
+            RCF     =   new cnuphys.swim.Swimmer(MagneticFields.getInstance().getRotatedCompositeField());
+            CF      =   new cnuphys.swim.Swimmer(MagneticFields.getInstance().getCompositeField());
+        }
     }
 }

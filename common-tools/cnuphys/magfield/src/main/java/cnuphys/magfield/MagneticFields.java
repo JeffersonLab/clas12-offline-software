@@ -1300,8 +1300,8 @@ public class MagneticFields {
 		if ((_torus != null) && (_solenoid != null)) {
 			_activeField = _compositeField;
 		} 
-		else if ((_torus != null) && (_solenoid != null)) {
-			_activeField = _compositeField;
+		else if ((_torus != null) && (_transverseSolenoid != null)) {
+			_activeField = _transverseCompositeField;
 		} 
 
 		else if (_torus != null) {
