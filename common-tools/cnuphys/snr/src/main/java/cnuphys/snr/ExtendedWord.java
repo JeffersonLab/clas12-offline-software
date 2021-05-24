@@ -278,7 +278,7 @@ public class ExtendedWord {
 
 	
 	/**
-	 * Shift the extended word right and or with self. 
+	 * Shift the extended word left and or with self. 
 	 * CURRENT LIMITATION: can only shift up to 64
 	 * bits.
 	 * 

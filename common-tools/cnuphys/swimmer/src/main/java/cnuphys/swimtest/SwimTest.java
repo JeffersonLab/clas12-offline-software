@@ -821,7 +821,7 @@ public class SwimTest {
 	    		
 				swimmer.swimCylinder(data.charge[i], data.xo[i], data.yo[i], data.zo[i], data.p[i], data.theta[i], data.phi[i], 
 						centerLineP1, centerLineP2, radius, accuracy, 
-						sMax, stepSize, Swimmer.CLAS_Tolerance, result);	
+						sMax, stepSize/10, Swimmer.CLAS_Tolerance, result);	
 				
 				adaptiveSwimmer.swimCylinder(data.charge[i], data.xo[i], data.yo[i], data.zo[i], data.p[i], data.theta[i], data.phi[i], 
 						targetCylinder, accuracy, sMax, stepSize, eps, result2);	
@@ -853,6 +853,36 @@ public class SwimTest {
 	    System.err.println(String.format("Max Euclidean diff old and new swims: %-7.4f microns at index = %d", maxDiff * 1.e6, maxIndex));
 	    System.err.println(String.format("Avg Euclidean diff old and new swims: %-7.4f microns", avgDiff * 1.e6));
 	    
+	    System.err.println("\nOld swimmer uniform step comparison.");
+
+	    InitialValues iv = result.getInitialValues();
+	    
+		swimmer.swimCylinder(iv.charge, iv.xo, iv.yo, iv.zo, iv.p, iv.theta, iv.phi, centerLineP1, centerLineP2, radius, accuracy, sMax, 0.01*stepSize, result);
+
+	    
+		System.err.println("\nDone with swimRho test");
+	    System.err.println("Uniform step last swim: " + result);
+	    
+	    
+//	    InitialValues iv = result.getInitialValues();
+//	    double sf = result.getFinalS();
+//	    System.err.println("\nUsing SwimS for comparison, old swimmer result, sf = " + sf);
+//		try {
+//			adaptiveSwimmer.swimS(iv.charge, iv.xo, iv.yo, iv.zo, iv.p, iv.theta, iv.phi, accuracy, sf, stepSize, eps, result);
+//		} catch (AdaptiveSwimException e) {
+//			e.printStackTrace();
+//		}
+//		System.err.println("Swim to old swimmer sf: " + result);
+//
+//	    
+//	    sf = result2.getFinalS();
+//	    System.err.println("\nUsing SwimS for comparison, new swimmer result, sf = " + sf);
+//		try {
+//			adaptiveSwimmer.swimS(iv.charge, iv.xo, iv.yo, iv.zo, iv.p, iv.theta, iv.phi, accuracy, sf, stepSize, eps, result2);
+//		} catch (AdaptiveSwimException e) {
+//			e.printStackTrace();
+//		}
+//		System.err.println("Swim to new swimmer sf: " + result2);
 
 	}
 	
