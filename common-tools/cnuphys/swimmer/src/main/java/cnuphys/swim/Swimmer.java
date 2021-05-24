@@ -264,6 +264,131 @@ public final class Swimmer {
 
 	}
 	
+	/**
+	 * Swims a particle with a built in stopper at the boundary of an
+	 * arbitrary cylinder. Uses a fixed stepsize algorithm.
+	 * 
+	 * @param charge               the charge: -1 for electron, 1 for proton, etc
+	 * @param xo                   the x vertex position in meters
+	 * @param yo                   the y vertex position in meters
+	 * @param zo                   the z vertex position in meters
+	 * @param momentum             initial momentum in GeV/c
+	 * @param theta                initial polar angle in degrees
+	 * @param phi                  initial azimuthal angle in degrees
+	 * @param centerLineP1 one point [array: (x, y, z)] on the infinite center line (meters)
+	 * @param centerLineP2 another point [array: (x, y, z)] on the infinite center line (meters)
+	 * @param radius       the radius of the cylinder in meters
+	 *                             maxPathLength if reached first)
+	 * @param accuracy             the accuracy of the fixed rho termination, in
+	 *                             meters
+	 * @param stopper              an optional object that can terminate the
+	 *                             swimming based on some condition
+	 * @param sMax                 in meters. This determines the max number of
+	 *                             steps based on the step size. If a stopper is
+	 *                             used, the integration might terminate before all
+	 *                             the steps are taken. A reasonable value for CLAS
+	 *                             is 8. meters
+	 * @param stepSize             the uniform step size in meters.
+	 * @param result upon return, results from the swim including the final state vector [x, y, z, px/p, py/p, pz/p]
+	 */
+	public void swimCylinder(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+			double centerLineP1[],
+			double centerLineP2[],
+			double radius,
+			final double accuracy, double sMax, double stepSize, AdaptiveSwimResult result) {
+
+	// set u to the starting state vector
+		double thetaRad = Math.toRadians(theta);
+		double phiRad = Math.toRadians(phi);
+		double sinTheta = Math.sin(thetaRad);
+
+		double px = sinTheta*Math.cos(phiRad); //px/p
+		double py = sinTheta*Math.sin(phiRad); //py/p
+		double pz = Math.cos(thetaRad); //pz/p
+		
+		double uf[] = result.getUf();
+		uf[0] = xo;
+		uf[1] = yo;
+		uf[2] = zo;
+		uf[3] = px;
+		uf[4] = py;
+		uf[5] = pz;
+		
+		if (momentum < MINMOMENTUM) {
+			System.err.println("Skipping low momentum fixed rho swim (A)");
+			result.setNStep(0);
+			result.setFinalS(0);
+			result.setStatus(-2);
+			return;
+		}
+		
+		Cylinder targetCylinder = new Cylinder(centerLineP1, centerLineP2, radius);
+
+		//cutoff value of s with tolerance 
+		double sCutoff = sMax - SMAX_TOLERANCE;
+	
+		double del = Double.POSITIVE_INFINITY;
+		int maxtry = 25;
+		int count = 0;
+		double sFinal = 0;
+		int ns = 0;
+
+		while ((count < maxtry) && (del > accuracy)) {
+			
+			
+			uf = result.getUf();
+			if (count > 0) {
+				px = uf[3];
+				py = uf[4];
+				pz = uf[5];
+				theta = FastMath.acos2Deg(pz);
+				phi = FastMath.atan2Deg(py, px);
+			}
+			
+			
+			DefaultCylinderStopper stopper = new DefaultCylinderStopper(uf, sFinal, sMax, targetCylinder, accuracy);
+			
+			if ((sFinal + stepSize) > sMax) {
+				stepSize = sMax-sFinal;
+				
+				if (stepSize < 0) {
+					break;
+				}
+			}
+			
+
+
+			ns += swim(charge, uf[0], uf[1], uf[2], momentum, theta, phi, stopper, null, sMax-sFinal, stepSize);
+			
+			System.arraycopy(stopper.getFinalU(), 0, result.getUf(), 0, result.getUf().length);
+			
+			sFinal = stopper.getFinalT();	
+			
+			
+			del = Math.abs(targetCylinder.distance(stopper.getFinalU()[0], stopper.getFinalU()[1], stopper.getFinalU()[2]));
+
+
+			if ((sFinal) > sCutoff) {
+				break;
+			}
+						
+			count++;
+			stepSize = Math.min(stepSize, (sMax-sFinal)/4);
+
+//			stepSize /= 2;
+
+		} // while
+
+		result.setNStep(ns);
+		result.setFinalS(sFinal);
+
+		if (del < accuracy) {
+			result.setStatus(0);
+		} else {
+			result.setStatus(-1);
+		}
+	}
+	
 
 	/**
 	 * Swims a particle with a built in stopper for the rho coordinate.
@@ -454,7 +579,6 @@ public final class Swimmer {
 			
 			if ((sFinal + stepSize) > sMax) {
 				stepSize = sMax-sFinal;
-				System.out.println(" UNI next s" + (sFinal + stepSize));
 				
 				if (stepSize < 0) {
 					break;

@@ -47,7 +47,7 @@ public class ToAscii {
 	/**
 	 * Write the Solenoid to Ascii
 	 */
-	public static void solenoidToAscii(SolenoidProbe solenoid, String path) {
+	public static void solenoidToAscii(StandardSolenoidProbe solenoid, String path) {
 		
 		_csv = true;
 		
@@ -125,7 +125,7 @@ public class ToAscii {
 		
 	}
 	
-	private static void writeSolenoidData(DataOutputStream dos, SolenoidProbe solenoid) {
+	private static void writeSolenoidData(DataOutputStream dos, StandardSolenoidProbe solenoid) {
 		
 		//needed from torus
 		GridCoordinate pCoord = solenoid.getPhiCoordinate();
