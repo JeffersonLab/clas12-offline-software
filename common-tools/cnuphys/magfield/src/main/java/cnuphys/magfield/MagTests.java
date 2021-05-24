@@ -726,7 +726,7 @@ public class MagTests {
 
 	// convert the solenoid to ASCII
 	private static void convertSolenoidToAscii() {
-		ToAscii.solenoidToAscii((SolenoidProbe) FieldProbe.factory(MagneticFields.getInstance().getSolenoid()),
+		ToAscii.solenoidToAscii((StandardSolenoidProbe) FieldProbe.factory(MagneticFields.getInstance().getSolenoid()),
 				"/Users/heddle/magfield/Solenoid.csv");
 	}
 
