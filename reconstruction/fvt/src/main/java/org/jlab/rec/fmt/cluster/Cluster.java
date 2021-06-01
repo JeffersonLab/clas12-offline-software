@@ -77,7 +77,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
 	/**
 	 *
-	 * @return the layer of the cluster (1...8)
+	 * @return the layer of the cluster (1...6)
 	 */
 	public int get_Layer() {
 		return _Layer;

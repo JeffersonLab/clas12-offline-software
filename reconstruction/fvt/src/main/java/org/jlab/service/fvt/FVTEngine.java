@@ -145,18 +145,17 @@ public class FVTEngine extends ReconstructionEngine {
         for (int j = 0; j < clusters.size(); j++) {
             for (int i = 0; i < dcTracks.size(); i++) {
                 List<Point3D> plist = dcTracks.get(i).getTraj();
-                if (plist == null)
-                    continue;
+                if (plist == null) continue;
 
                 for (int k = 0; k < plist.size(); k++) {
+                    if (clusters.get(j).get_Layer() != k+1) continue; // match the layers from traj
                     double x = plist.get(k).x();
                     double y = plist.get(k).y();
                     double z = plist.get(k).z();
-                    if (clusters.get(j).get_Layer() != k+1) // match the layers from traj
-                        continue;
                     double d = clusters.get(j).calcDoca(x, y, z);
                     if (d < Constants.CIRCLECONFUSION) {
-                        Cross this_cross = new Cross(clusters.get(j).get_Sector(), clusters.get(j).get_Layer(),crosses.size()+1);
+                        Cross this_cross = new Cross(clusters.get(j).get_Sector(),
+                                clusters.get(j).get_Layer(), crosses.size()+1);
                         this_cross.set_Point(clusters.get(j).calcCross(x, y, z));
                         this_cross.set_AssociatedTrackID(dcTracks.get(i).getId());
                         this_cross.set_Cluster1(clusters.get(j));
@@ -182,16 +181,22 @@ public class FVTEngine extends ReconstructionEngine {
                 for (int p = 0; p < 6; p++)
                     pars[p] = 0;
                 if (tr.getId() != id) continue;
-                List<Cluster> cls = new ArrayList<Cluster>();
+                Map<Integer, Cluster> cls = new HashMap<Integer, Cluster>();
                 List<Cross> crs = trj.get(id);
                 for(Cross c : crs) {
-                    cls.add(c.get_Cluster1());
+                    // Filter clusters to use only the best cluster (minimal Tmin) per FMT layer.
+                    int lyr = c.get_Cluster1().get_Layer();
+                    if (cls.get(lyr) == null || c.get_Cluster1().get_Tmin() < cls.get(lyr).get_Tmin())
+                        cls.put(lyr, c.get_Cluster1());
                 }
                 tr.setNMeas(cls.size());
+                // NOTE: KFitter expects a list, so a sneaky conversion is done here. This is not a
+                //       good programming practice, and KFitter should be adapted to accept a map.
                 kf = new KFitter(
-                        cls, tr.getSector(), tr.getX(), tr.getY(), tr.getZ(),
-                        tr.getPx(), tr.getPy(), tr.getPz(), tr.getQ(), swimmer, 0
+                        new ArrayList<Cluster>(cls.values()), tr.getSector(), tr.getX(), tr.getY(),
+                        tr.getZ(), tr.getPx(), tr.getPy(), tr.getPz(), tr.getQ(), swimmer, 0
                 );
+
                 kf.runFitter(tr.getSector());
 
                 if (kf.finalStateVec != null) {
