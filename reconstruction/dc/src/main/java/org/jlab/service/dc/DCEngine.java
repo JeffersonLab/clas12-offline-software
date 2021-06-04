@@ -209,7 +209,8 @@ public class DCEngine extends ReconstructionEngine {
             FVT_Z[i] += dbProvider.getDouble("/geometry/fmt/alignment/deltaZ", i)/10.; // z shift.
             FVT_Z[i] += dbProvider.getDouble("/geometry/fmt/fmt_global/hDrift", 0)/10. /2.; // h drift.
         }
-
+        dbProvider.disconnect();
+        
         // create the surfaces
         tSurf = new TrajectorySurfaces();
         // for debugging the end plates bowing:

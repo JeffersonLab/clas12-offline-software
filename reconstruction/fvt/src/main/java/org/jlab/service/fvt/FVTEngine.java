@@ -64,14 +64,15 @@ public class FVTEngine extends ReconstructionEngine {
             System.out.println("["+this.getName()+"] run with FMT default geometry");
         }
         this.setRun(10);
+        String geoVariation = Optional.ofNullable(geomDBVar).orElse("default");
+
         String[] tables = new String[]{
             "/geometry/fmt/alignment"
         };
         requireConstants(Arrays.asList(tables));
-        this.getConstantsManager().setVariation(geomDBVar);
+        this.getConstantsManager().setVariation(geoVariation);
 
         // Load the geometry
-        String geoVariation = Optional.ofNullable(geomDBVar).orElse("default");
         double[][] shiftsArray =
                 CCDBConstantsLoader.loadAlignmentTable(this.getRun(), this.getConstantsManager());
 

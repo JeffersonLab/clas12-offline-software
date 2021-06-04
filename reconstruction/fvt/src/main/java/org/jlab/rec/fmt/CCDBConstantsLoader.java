@@ -10,10 +10,8 @@ import org.jlab.utils.groups.IndexedTable;
  */
 public class CCDBConstantsLoader {
 
-    static boolean CSTLOADED = false;
 
     public static final synchronized void Load(int runNb, String variation) {
-        if (CSTLOADED) return;
 
         double[] EFF_Z_OVER_A;
         double[] EFFX0;
@@ -73,7 +71,6 @@ public class CCDBConstantsLoader {
 
         dbprovider.disconnect();
 
-        CSTLOADED = true;
         System.out.println("SUCCESSFULLY LOADED FMT material budget CONSTANTS....");
     }
 
