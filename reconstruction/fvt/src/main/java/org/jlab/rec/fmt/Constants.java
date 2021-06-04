@@ -62,7 +62,6 @@ public class Constants {
     public static double CIRCLECONFUSION = 1; // cm
 
     public static void Load() {
-        if (areConstantsLoaded) return;
 
         FVT_Sidestrips    = (FVT_Nstrips - 2*FVT_Halfstrips)/2;
         FVT_YCentral      = (double) FVT_Halfstrips*FVT_Pitch/2.;
@@ -129,9 +128,9 @@ public class Constants {
                 FVT_stripsY[j][i][1] =  -FVT_stripsXloc[i][1]*Math.sin(FVT_Alpha[j]) + FVT_stripsYloc[i][1]*Math.cos(FVT_Alpha[j]);
             }
         }
-        areConstantsLoaded = true;
+
         System.out.println("*****   FMT constants loaded!");
-	}
+    }
 
     /**
      * Save loaded alignment table to constants.

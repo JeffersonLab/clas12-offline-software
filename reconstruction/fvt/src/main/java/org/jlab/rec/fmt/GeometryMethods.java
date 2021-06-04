@@ -15,31 +15,31 @@ public class GeometryMethods{
      */
     public static Point3D globalToLocal(Point3D glPos, int layer) {
         // TODO: Apply x and y rot.
-        double x = (glPos.x() + Constants.FVT_xShift[layer]) * Math.cos(Constants.FVT_Alpha[layer])
-                 + (glPos.y() + Constants.FVT_yShift[layer]) * Math.sin(Constants.FVT_Alpha[layer]);
-        double y = (glPos.y() + Constants.FVT_yShift[layer]) * Math.cos(Constants.FVT_Alpha[layer])
-                 - (glPos.x() + Constants.FVT_xShift[layer]) * Math.sin(Constants.FVT_Alpha[layer]);
+        double x = (glPos.x() - Constants.FVT_xShift[layer]) * Math.cos(Constants.FVT_Alpha[layer])
+                 + (glPos.y() - Constants.FVT_yShift[layer]) * Math.sin(Constants.FVT_Alpha[layer]);
+        double y = (glPos.y() - Constants.FVT_yShift[layer]) * Math.cos(Constants.FVT_Alpha[layer])
+                 - (glPos.x() - Constants.FVT_xShift[layer]) * Math.sin(Constants.FVT_Alpha[layer]);
         double z = glPos.z();
 
         return new Point3D(x,y,z);
     }
 
-    /**
-     * Transform a Point3D from global to a FMT layer's local coordinates without applying the x-y
-     * alignment shifts.
-     * @param glPos: Point3D describing the position to be transformed in lab coordinates.
-     * @param layer: Target FMT layer.
-     */
-    public static Point3D globalToLocalNoShift(Point3D glPos, int layer) {
-        // TODO: Apply x and y rot.
-        double x = (glPos.x()) * Math.cos(Constants.FVT_Alpha[layer])
-                 + (glPos.y()) * Math.sin(Constants.FVT_Alpha[layer]);
-        double y = (glPos.y()) * Math.cos(Constants.FVT_Alpha[layer])
-                 - (glPos.x()) * Math.sin(Constants.FVT_Alpha[layer]);
-        double z = glPos.z();
-
-        return new Point3D(x,y,z);
-    }
+//    /**
+//     * Transform a Point3D from global to a FMT layer's local coordinates without applying the x-y
+//     * alignment shifts.
+//     * @param glPos: Point3D describing the position to be transformed in lab coordinates.
+//     * @param layer: Target FMT layer.
+//     */
+//    public static Point3D globalToLocalNoShift(Point3D glPos, int layer) {
+//        // TODO: Apply x and y rot.
+//        double x = (glPos.x()) * Math.cos(Constants.FVT_Alpha[layer])
+//                 + (glPos.y()) * Math.sin(Constants.FVT_Alpha[layer]);
+//        double y = (glPos.y()) * Math.cos(Constants.FVT_Alpha[layer])
+//                 - (glPos.x()) * Math.sin(Constants.FVT_Alpha[layer]);
+//        double z = glPos.z();
+//
+//        return new Point3D(x,y,z);
+//    }
 
     /**
      * Return the z coordinate of a layer + half the thickness of the drift region.
