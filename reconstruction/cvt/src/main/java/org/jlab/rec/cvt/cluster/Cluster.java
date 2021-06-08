@@ -36,6 +36,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     private double _PhiErr0;
     private double _Z;    							// 		for C-detectors
     private double _ZErr;
+    private Point3D _TrakInters; //track intersection with the cluster
     
     //added variables for alignment
     private double _x1; //cluster first end point x
@@ -563,6 +564,20 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
     public void set_CentroidResidual(double _CentroidResidual) {
         this._CentroidResidual = _CentroidResidual;
+    }
+
+    /**
+     * @return the _TrakInters
+     */
+    public Point3D getTrakInters() {
+        return _TrakInters;
+    }
+
+    /**
+     * @param _TrakInters the _TrakInters to set
+     */
+    public void setTrakInters(Point3D _TrakInters) {
+        this._TrakInters = _TrakInters;
     }
 
     /**

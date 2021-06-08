@@ -21,6 +21,7 @@ import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.geom.prim.Line3D;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.fit.CosmicFitter;
 import org.jlab.rec.cvt.track.StraightTrack;
@@ -365,6 +366,32 @@ public class RecUtilities {
         
         this.MatchTrack2Traj(seed, kf.TrjPoints, SVTGeom, BMTGeom);
         cand.addAll(seed.get_Crosses());
+        for(Cluster cl : seed.get_Clusters()) {
+            int layer = cl.get_Layer();
+            if(cl.get_Detector()==1){
+                layer = layer + 6;
+                
+                Cylindrical3D cyl = BMTGeom.getCylinder(cl.get_Layer(), cl.get_Sector()); 
+                Line3D cln = BMTGeom.getAxis(cl.get_Layer(), cl.get_Sector());
+                double v = (kf.TrjPoints.get(layer).z-cyl.baseArc().center().z())/cln.direction().z();
+                double x = cyl.baseArc().center().x()+v*cln.direction().x();
+                double y = cyl.baseArc().center().y()+v*cln.direction().y();
+                Vector3D n = new Point3D(x, y, kf.TrjPoints.get(layer).z).
+                        vectorTo(new Point3D(kf.TrjPoints.get(layer).x,kf.TrjPoints.get(layer).y,kf.TrjPoints.get(layer).z)).asUnit();
+                cl.setN(n);
+                if (cl.get_DetectorType()==0) {
+                    cl.setL(cl.getS().cross(n).asUnit());
+                } 
+            }
+            //double x = kf.TrjPoints.get(layer).x;
+            //double y = kf.TrjPoints.get(layer).y;
+            //double z = kf.TrjPoints.get(layer).z;
+            //double px = kf.TrjPoints.get(layer).px;
+            //double py = kf.TrjPoints.get(layer).py;
+            //double pz = kf.TrjPoints.get(layer).pz;
+            cl.setTrakInters(new Point3D(kf.TrjPoints.get(layer).x,kf.TrjPoints.get(layer).y,kf.TrjPoints.get(layer).z));
+        }
+        
         return cand;
         
     }
