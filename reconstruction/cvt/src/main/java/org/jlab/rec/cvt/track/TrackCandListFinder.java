@@ -361,7 +361,7 @@ public class TrackCandListFinder {
             }
 
             //fitTrk = new CosmicFitter();
-            RayMeasurements MeasArrays = this.get_RayMeasurementsArrays(crossesToFit, false, false, true);
+            RayMeasurements MeasArrays = this.get_RayMeasurementsArrays(crossesToFit, false, false, false);
 
             LineFitter linefitYX = new LineFitter();
             boolean linefitresultYX = linefitYX.fitStatus(MeasArrays._Y, MeasArrays._X, MeasArrays._ErrRt, null, MeasArrays._Y.size());
@@ -371,15 +371,19 @@ public class TrackCandListFinder {
             StraightTrack cand = new StraightTrack(null);
             cand.addAll(crossesToFit);
             if (linefitresultYX && linefitparsYX != null) {
-                cand.update_Crosses(linefitparsYX.slope(), 0, svt_geo);
+                cand.update_Crosses(linefitparsYX.slope(), 0, svt_geo); 
             }
             // update measurements
-            MeasArrays = this.get_RayMeasurementsArrays(crossesToFit, false, false, true);
+            MeasArrays = this.get_RayMeasurementsArrays(crossesToFit, false, false, false);
 
             // fit SVt crosses
             fitTrk.fit(MeasArrays._X, MeasArrays._Y, MeasArrays._Z, MeasArrays._Y_prime, MeasArrays._ErrRt, MeasArrays._ErrY_prime, MeasArrays._ErrZ);
             //create the cand
             if (fitTrk.get_ray() != null) {
+                //refit 
+                MeasArrays = this.get_RayMeasurementsArrays(crossesToFit, false, false, false);
+                fitTrk.fit(MeasArrays._X, MeasArrays._Y, MeasArrays._Z, MeasArrays._Y_prime, MeasArrays._ErrRt, MeasArrays._ErrY_prime, MeasArrays._ErrZ);
+   
                 cand = new StraightTrack(fitTrk.get_ray());
                 cand.addAll(crossesToFit);
             }
@@ -389,8 +393,13 @@ public class TrackCandListFinder {
 
                 fitTrk.fit(MeasArrays._X, MeasArrays._Y, MeasArrays._Z, MeasArrays._Y_prime, MeasArrays._ErrRt, MeasArrays._ErrY_prime, MeasArrays._ErrZ);
                 //create the cand
+                //refit 
+                MeasArrays = this.get_RayMeasurementsArrays(crossesToFit, false, false, false);
+                fitTrk.fit(MeasArrays._X, MeasArrays._Y, MeasArrays._Z, MeasArrays._Y_prime, MeasArrays._ErrRt, MeasArrays._ErrY_prime, MeasArrays._ErrZ);
+            
                 cand = new StraightTrack(fitTrk.get_ray());
                 cand.addAll(crossesToFit);
+                
                 if (fitTrk.get_ray() == null) {
                     continue;
                 }
@@ -426,7 +435,7 @@ public class TrackCandListFinder {
                 // refit with Micromegas
                 crossesToFitWithBMT.clear();
                 SVTmatches.clear();
-                for (Cross c : cand) {
+                for (Cross c : cand) { 
                     if (c.get_Detector().equalsIgnoreCase("SVT") && c.isInFiducial(svt_geo)) {
                         SVTmatches.add(c);
                     }
@@ -443,15 +452,16 @@ public class TrackCandListFinder {
                
                 if (fitTrk.get_ray() != null) {
                     cand = new StraightTrack(fitTrk.get_ray()); 
-                    cand.addAll(crossesToFitWithBMT);
+                    cand.addAll(crossesToFitWithBMT); 
                     cand.update_Crosses(cand.get_ray().get_yxslope(), cand.get_ray().get_yxinterc(), svt_geo);
                     //refit not using only BMT to fit the z profile
                     NewMeasArrays = this.get_RayMeasurementsArrays(crossesToFitWithBMT, false, false, false);
                     fitTrk.fit(NewMeasArrays._X, NewMeasArrays._Y, NewMeasArrays._Z, NewMeasArrays._Y_prime, NewMeasArrays._ErrRt, NewMeasArrays._ErrY_prime, NewMeasArrays._ErrZ);
                     cand = new StraightTrack(fitTrk.get_ray()); 
+                    cand.addAll(crossesToFitWithBMT);
                     cand.update_Crosses(cand.get_ray().get_yxslope(), cand.get_ray().get_yxinterc(), svt_geo);
                     cand.set_ndf(NewMeasArrays._Y.size() + NewMeasArrays._Y_prime.size() - 4);
-                    double chi2 = cand.calc_straightTrkChi2();
+                    double chi2 = cand.calc_straightTrkChi2(); 
                     cand.set_chi2(chi2);
                     cand.set_Id(cands.size() + 1);
                     crossNbs = new int[cand.size()];
@@ -755,7 +765,7 @@ public class TrackCandListFinder {
         }
 
         if(BMTCdetcrossesInTrk.size()>1 && useBMTCforZonly==true) {
-            //System.out.print("RESETTING MEAS ARRAY");
+            
             Z.clear();
             Y_prime.clear();
             ErrZ.clear();

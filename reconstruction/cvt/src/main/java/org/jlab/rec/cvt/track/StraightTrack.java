@@ -103,8 +103,8 @@ public class StraightTrack extends Trajectory {
         double yxSl = this.get_ray().get_yxslope();
         double yzSl = this.get_ray().get_yzslope();
         double yxIt = this.get_ray().get_yxinterc();
-        double yzIt = this.get_ray().get_yzinterc();
-
+        double yzIt = this.get_ray().get_yzinterc(); 
+        
         for (Cross c : this) {
             double errSq = c.get_PointErr().x() * c.get_PointErr().x() + c.get_PointErr().z() * c.get_PointErr().z();
             double y = c.get_Point().y();
