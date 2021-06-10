@@ -10,12 +10,22 @@ import org.jlab.rec.fvt.track.fit.StateVecs;
  */
 public class Track {
 
+    /**
+     *  The status variable explains the number of tracks and the quality of the reconstruction.
+     *
+     *  Its last digit is the number of FMT layers used in FVT tracking, so it can be any number
+     *  from 0 to 3. If it's 0, it means that no FMT layers were used and the FVT track should be
+     *  the same as the DC track.
+     *
+     *  If there was an error in swimming due to an odd track shape or anything, a 100 is added to
+     *  the variable to denote that.
+     */
     public int status = 0;
 
     private int _id;
     private int _sector;
     private int _q;
-    private int _nmeas;
+    private double _chi2;
     private double _x;
     private double _y;
     private double _z;
@@ -82,17 +92,17 @@ public class Track {
     }
 
     /**
-     * @return the number of measurements used in the track.
+     * @return the _chi^2.
      */
-    public int getNMeas() {
-        return _nmeas;
+    public double getChi2() {
+        return _chi2;
     }
 
     /**
-     * @param _nmeas the number of measurements to set.
+     * @param _chi2 the _chi2 to set
      */
-    public void setNMeas(int _nmeas) {
-        this._nmeas = _nmeas;
+    public void setChi2(double _chi2) {
+        this._chi2 = _chi2;
     }
 
     /**

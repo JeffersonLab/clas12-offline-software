@@ -27,7 +27,6 @@ public class KFitter {
     private double newChisq = Double.POSITIVE_INFINITY;
     public boolean filterOn = true;
     public double chi2 = 0;
-    private double chi2kf = 0;
     public int NDF = 0;
     public int ConvStatus = 1;
     public int interNum = 0;
@@ -62,12 +61,11 @@ public class KFitter {
     }
 
     public void runFitter(int sector) {
-        this.chi2 = 0;
         int svzLength = sv.Z.length;
 
         for (int i = 1; i <= totNumIter; i++) {
             interNum = i;
-            this.chi2kf = 0;
+            this.chi2 = 0;
             if (i > 1) {
                 for (int k = svzLength - 1; k > 0; k--) {
                     if (k >= 1) {
@@ -96,7 +94,7 @@ public class KFitter {
         }
 
         // Do one final pass to get the final chi^2 and the corresponding centroid residuals.
-        this.chi2kf = 0;
+        this.chi2 = 0;
         for (int k = svzLength - 1; k > 0; --k) {
             if (k >= 1) {
                 sv.transport(sector, k, k-1, sv.trackTraj.get(k), sv.trackCov.get(k));
@@ -183,7 +181,7 @@ public class KFitter {
             double ty_filt = sv.trackTraj.get(k).ty + 0*K[3] * (m-h);
             double Q_filt = sv.trackTraj.get(k).Q + 0*K[4] * (m-h);
 
-            chi2kf += c2;
+            chi2 += c2;
             if (filterOn) {
                 sv.trackTraj.get(k).x = x_filt;
                 sv.trackTraj.get(k).y = y_filt;
