@@ -8,8 +8,8 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.fvt.track.fit.StateVecs.CovMat;
 import org.jlab.rec.fvt.track.fit.StateVecs.StateVec;
 import org.jlab.jnp.matrix.*;
-import org.jlab.rec.fmt.GeometryMethods;
 import org.jlab.rec.fmt.cluster.Cluster;
+import org.jlab.rec.fmt.Geometry;
 
 /**
  * @author ziegler
@@ -115,7 +115,7 @@ public class KFitter {
             int closestSVID = -1;
             double closestSVDistance = Double.POSITIVE_INFINITY;
             for (int si = 0; si < sv.trackTraj.size(); ++si) {
-                double svDistance = Math.abs(sv.trackTraj.get(si).z - GeometryMethods.getLayerZ(li-1));
+                double svDistance = Math.abs(sv.trackTraj.get(si).z - Geometry.getLayerZ(li-1));
                 if (svDistance < closestSVDistance) {
                     closestSVID = si;
                     closestSVDistance = svDistance;
@@ -123,7 +123,7 @@ public class KFitter {
             }
 
             // Get the state vector's y position in the layer's local coordinates.
-            Point3D locPos = GeometryMethods.globalToLocal(
+            Point3D locPos = Geometry.globalToLocal(
                     new Point3D(sv.trackTraj.get(closestSVID).x, sv.trackTraj.get(closestSVID).y, 0),
                     li-1);
 
