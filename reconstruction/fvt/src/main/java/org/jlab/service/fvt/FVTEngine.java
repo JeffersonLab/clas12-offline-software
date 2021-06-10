@@ -190,7 +190,10 @@ public class FVTEngine extends ReconstructionEngine {
                     if (cls.get(lyr) == null || c.get_Cluster1().get_Tmin() < cls.get(lyr).get_Tmin())
                         cls.put(lyr, c.get_Cluster1());
                 }
-                tr.setNMeas(cls.size());
+                // Set status and stop if there are no measurements to fit against.
+                tr.status = cls.size();
+                if (cls.size() == 0) continue;
+
                 // NOTE: KFitter expects a list, so a sneaky conversion is done here. This is not a
                 //       good programming practice, and KFitter should be adapted to accept a map.
                 kf = new KFitter(
@@ -201,8 +204,10 @@ public class FVTEngine extends ReconstructionEngine {
                 kf.runFitter(tr.getSector());
 
                 if (kf.finalStateVec != null) {
-                    // set the track parameters
+                    // Set the track parameters.
                     tr.setQ((int)Math.signum(kf.finalStateVec.Q));
+                    tr.setChi2(kf.chi2); // TODO: I'm not sure, but we might need one last run to
+                                         //       the final Chi^2.
                     pars = tr.getLabPars(kf.finalStateVec);
                     swimmer.SetSwimParameters(pars[0],pars[1],pars[2],-pars[3],-pars[4],-pars[5],
                             -tr.getQ());
@@ -216,8 +221,6 @@ public class FVTEngine extends ReconstructionEngine {
                     tr.setPx(-Vt[3]);
                     tr.setPy(-Vt[4]);
                     tr.setPz(-Vt[5]);
-
-                    tr.status = 1;
                 }
             }
         }

@@ -79,7 +79,7 @@
             {"name":"p0_y",          "type":"F", "info":"3-momentum y-coordinate of the swam track to the DOCA to the beamline (in cm)"},
             {"name":"p0_z",          "type":"F", "info":"3-momentum z-coordinate of the swam track to the DOCA to the beamline (in cm)"},
             {"name":"q",        	 "type":"B", "info":"charge of the track"},
-            {"name":"nmeas",         "type":"S", "info":"FMT nb of measurements"}
+            {"name":"chi2",          "type":"F", "info":"chi^2 of the fit"}
         ]
     }
 ]
