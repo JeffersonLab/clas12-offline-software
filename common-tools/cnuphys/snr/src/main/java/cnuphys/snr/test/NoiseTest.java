@@ -180,7 +180,7 @@ public class NoiseTest extends JFrame {
 		JMenuItem nextItem = new JMenuItem("Next Pretend Event");
 
 		nextItem.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N,
-				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		nextItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
