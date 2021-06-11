@@ -553,14 +553,12 @@ public final class Swimmer {
 			return;
 		}
 		
-		//cutoff value of s with tolerance 
-		double sCutoff = sMax - SMAX_TOLERANCE;
-	
 		double del = Double.POSITIVE_INFINITY;
-		int maxtry = 11;
+		int maxtry = 25;
 		int count = 0;
 		double sFinal = 0;
 		int ns = 0;
+		
 
 		while ((count < maxtry) && (del > accuracy)) {
 			
@@ -573,50 +571,102 @@ public final class Swimmer {
 				phi = FastMath.atan2Deg(py, px);
 			}
 			
-			double rhoCurr = Math.hypot(uf[0], uf[1]);
-			
-			DefaultRhoStopper stopper = new DefaultRhoStopper(uf, sFinal, sMax, rhoCurr, fixedRho, accuracy);
-			
-			if ((sFinal + stepSize) > sMax) {
-				stepSize = sMax-sFinal;
-				
-				if (stepSize < 0) {
-					break;
-				}
-			}
-			
-
+			DefaultRhoStopper stopper = new DefaultRhoStopper(uf, sFinal, sMax, Math.hypot(uf[0], uf[1]), fixedRho, accuracy);
 
 			ns += swim(charge, uf[0], uf[1], uf[2], momentum, theta, phi, stopper, null, sMax-sFinal, stepSize);
 			
 			System.arraycopy(stopper.getFinalU(), 0, result.getUf(), 0, result.getUf().length);
 			
-			sFinal = stopper.getFinalT();	
+			sFinal = stopper.getFinalT();
+									
+			del = Math.abs(stopper.getRho() - fixedRho);
 			
-			
-			double rholast = Math.hypot(result.getUf()[0], result.getUf()[1]);
-			del = Math.abs(rholast - fixedRho);
-
-
-			if ((sFinal) > sCutoff) {
+			// succeed?
+			if (del < accuracy) {
 				break;
 			}
-						
+
+			// passed max path length?
+			if (stopper.passedSmax()) {
+				break;
+			}
+			
 			count++;
-			stepSize = Math.min(stepSize, (sMax-sFinal)/4);
-
-//			stepSize /= 2;
-
+			
+			if (stopper.crossedBoundary()) {
+				stepSize = Math.max(stepSize / 2, del / 5);
+			}
+			
+			
 		} // while
 
 		result.setNStep(ns);
 		result.setFinalS(sFinal);
-
-		if (del < accuracy) {
-			result.setStatus(0);
-		} else {
-			result.setStatus(-1);
-		}
+		
+//		//cutoff value of s with tolerance 
+//		double sCutoff = sMax - SMAX_TOLERANCE;
+//	
+//		double del = Double.POSITIVE_INFINITY;
+//		int maxtry = 25;
+//		int count = 0;
+//		double sFinal = 0;
+//		int ns = 0;
+//
+//		while ((count < maxtry) && (del > accuracy)) {
+//			
+//			uf = result.getUf();
+//			if (count > 0) {
+//				px = uf[3];
+//				py = uf[4];
+//				pz = uf[5];
+//				theta = FastMath.acos2Deg(pz);
+//				phi = FastMath.atan2Deg(py, px);
+//			}
+//			
+//			double rhoCurr = Math.hypot(uf[0], uf[1]);
+//			
+//			DefaultRhoStopper stopper = new DefaultRhoStopper(uf, sFinal, sMax, rhoCurr, fixedRho, accuracy);
+//			
+//			if ((sFinal + stepSize) > sMax) {
+//				stepSize = sMax-sFinal;
+//				
+//				if (stepSize < 0) {
+//					break;
+//				}
+//			}
+//			
+//
+//
+//			ns += swim(charge, uf[0], uf[1], uf[2], momentum, theta, phi, stopper, null, sMax-sFinal, stepSize);
+//			
+//			System.arraycopy(stopper.getFinalU(), 0, result.getUf(), 0, result.getUf().length);
+//			
+//			sFinal = stopper.getFinalT();	
+//			
+//			
+//			double rholast = Math.hypot(result.getUf()[0], result.getUf()[1]);
+//			del = Math.abs(rholast - fixedRho);
+//
+//
+//			if ((sFinal) > sCutoff) {
+//				break;
+//			}
+//						
+//			count++;
+//			stepSize = Math.min(stepSize, (sMax-sFinal)/4);
+//
+////			stepSize /= 2;
+//
+//		} // while
+//
+//		result.setNStep(ns);
+//		result.setFinalS(sFinal);
+//
+//		if (del < accuracy) {
+//			result.setStatus(0);
+//		} else {
+//			result.setStatus(-1);
+//		}
 	}
 
 
