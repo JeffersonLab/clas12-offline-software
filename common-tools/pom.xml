@@ -34,8 +34,8 @@
     <module>clas-detector</module>
     <module>cnuphys</module>
     <module>clas-reco</module> 
-    <module>clas-analysis</module> 
     <module>swim-tools</module>
+    <module>clas-analysis</module> 
     <module>clas-math</module>
     <module>clara-io</module>
 
