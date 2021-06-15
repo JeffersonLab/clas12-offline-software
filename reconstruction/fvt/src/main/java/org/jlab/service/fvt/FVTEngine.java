@@ -67,6 +67,7 @@ public class FVTEngine extends ReconstructionEngine {
         String geoVariation = Optional.ofNullable(geomDBVar).orElse("default");
 
         String[] tables = new String[]{
+            "/geometry/beam/position",
             "/geometry/fmt/alignment"
         };
         requireConstants(Arrays.asList(tables));
@@ -116,9 +117,14 @@ public class FVTEngine extends ReconstructionEngine {
         this.FieldsConfig = this.getFieldsConfig();
         this.Run = this.getRun();
 
-        // get Field
+        // Get field.
         Swim swimmer = new Swim();
         RecoBankWriter rbc = new RecoBankWriter();
+
+        // Get beam shift.
+        IndexedTable beamOffset = this.getConstantsManager().getConstants(this.getRun(), "/geometry/beam/position");
+        xB = beamOffset.getDoubleValue("x_offset", 0,0,0);
+        yB = beamOffset.getDoubleValue("y_offset", 0,0,0);
 
         // === HITS ================================================================================
         HitReader hitRead = new HitReader();
