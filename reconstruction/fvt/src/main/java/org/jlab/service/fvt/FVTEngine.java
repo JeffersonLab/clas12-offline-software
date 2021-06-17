@@ -39,8 +39,6 @@ public class FVTEngine extends ReconstructionEngine {
     private int Run = -1;
     CrossMaker crossMake;
     TrackList trkLister;
-    double xB = 0;
-    double yB = 0;
 
     public FVTEngine() {
         super("FVT", "ziegler", "4.0");
@@ -114,17 +112,20 @@ public class FVTEngine extends ReconstructionEngine {
         List<Track> dcTracks = null;
         KFitter kf;
 
-        this.FieldsConfig = this.getFieldsConfig();
-        this.Run = this.getRun();
+        // Set run number.
+        DataBank runcfgbank = event.getBank("RUN::config");
+        if (runcfgbank == null || runcfgbank.rows() == 0) return true;
+        this.setRun(runcfgbank.getInt("run", 0));
 
         // Get field.
+        this.FieldsConfig = this.getFieldsConfig();
         Swim swimmer = new Swim();
         RecoBankWriter rbc = new RecoBankWriter();
 
         // Get beam shift.
         IndexedTable beamOffset = this.getConstantsManager().getConstants(this.getRun(), "/geometry/beam/position");
-        xB = beamOffset.getDoubleValue("x_offset", 0,0,0);
-        yB = beamOffset.getDoubleValue("y_offset", 0,0,0);
+        double xB = beamOffset.getDoubleValue("x_offset", 0,0,0)/10.;
+        double yB = beamOffset.getDoubleValue("y_offset", 0,0,0)/10.;
 
         // === HITS ================================================================================
         HitReader hitRead = new HitReader();
