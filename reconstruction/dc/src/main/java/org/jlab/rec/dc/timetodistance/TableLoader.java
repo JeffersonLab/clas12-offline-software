@@ -73,8 +73,14 @@ public class TableLoader {
             String[] fields = nextLine.split("\\s+");
             int timeBin = Integer.parseInt(fields[0]);  
             double deltaDoca = Double.parseDouble(fields[1]);
-            DELTADOCA[timeBin] = deltaDoca;
-            System.out.println("read deltaDOCA "+deltaDoca+" for time bin "+timeBin);
+            if(timeBin<nBinsT && DELTADOCA[timeBin]==0)
+                DELTADOCA[timeBin] = deltaDoca;
+            if(timeBin+1<nBinsT && DELTADOCA[timeBin+1]==0)
+                DELTADOCA[timeBin+1] = deltaDoca;
+            if(DELTADOCA[timeBin]!=0) {
+                System.out.println("read deltaDOCA "+DELTADOCA[timeBin]+" for time bin "+timeBin
+                +"; "+DELTADOCA[timeBin+1]+" for time bin "+(timeBin+1));
+            }
         }
 
         input.close();
@@ -226,6 +232,7 @@ public class TableLoader {
      }
 
     private static void fillMissingTableBins() {
+        System.out.println(" UPDATING T2D TABLES...............");
         
         for(int s = 0; s<6; s++ ){ // loop over sectors
 
@@ -240,9 +247,10 @@ public class TableLoader {
                                 DISTFROMTIME[s][r][ibfield][icosalpha][tbin+1] = DISTFROMTIME[s][r][ibfield][icosalpha][tbin];
                             }
                             //Add delta doca:
-                            if(DELTADOCA[tbin]!=0) System.out.println("Adding delta doca to "+DISTFROMTIME[s][r][ibfield][icosalpha][tbin]);
+                            //if(tbin>600 && tbin<700) System.out.println("Adding delta doca to "+DISTFROMTIME[s][r][ibfield][icosalpha][tbin]);
                             DISTFROMTIME[s][r][ibfield][icosalpha][tbin]+=DELTADOCA[tbin];
-                            if(DELTADOCA[tbin]!=0) System.out.println("--> "+DISTFROMTIME[s][r][ibfield][icosalpha][tbin]+" for tbin "+tbin);
+                            //if(tbin>600 && tbin<700) System.out.println("--> "+DISTFROMTIME[s][r][ibfield][icosalpha][tbin]+" for tbin "+tbin);
+
                         }
                         
                     }
