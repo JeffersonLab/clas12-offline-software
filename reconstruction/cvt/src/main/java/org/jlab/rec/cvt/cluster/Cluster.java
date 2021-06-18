@@ -1,6 +1,7 @@
 package org.jlab.rec.cvt.cluster;
 
 import java.util.ArrayList;
+import org.jlab.clas.tracking.kalmanfilter.helical.StateVecs;
 import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
@@ -337,8 +338,10 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                 double[][] Xf = sgeo.getStripEndPoints(100, (this.get_Layer() - 1) % 2);
                 Point3D EPi = sgeo.transformToFrame(this.get_Sector(), this.get_Layer(), Xi[0][0], 0, Xi[0][1], "lab", "");
                 Point3D EPf = sgeo.transformToFrame(this.get_Sector(), this.get_Layer(), Xf[0][0], 0, Xf[0][1], "lab", "");
-                Vector3D s = EPi.vectorTo(EPf).asUnit(); // in direction of increasing strips
+                
+                Vector3D se = EPi.vectorTo(EPf).asUnit(); // in direction of increasing strips
                 Vector3D n = sgeo.findBSTPlaneNormal(this.get_Sector(), this.get_Layer());
+                Vector3D s = l.cross(n).asUnit();
                 
                 this.setL(l);
                 this.setS(s);
@@ -366,7 +369,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     Vector3D s = C2P1.cross(C2P2).asUnit();
                     Vector3D n = cyl.baseArc().normal();
                     Vector3D t = cyl.baseArc().center().vectorTo(cyl.baseArc().point(theta/2));
-                    Vector3D l = s.cross(t).asUnit();
+                    Vector3D l = s.cross(n).asUnit();
                     
                     this.setCylAxis(geo.getAxis(this.get_Layer(), this.get_Sector()));
                     this.setL(l);
@@ -386,12 +389,19 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     Vector3D l = new Vector3D(weightedX2/totEn-weightedX1/totEn,
                                                 weightedY2/totEn-weightedY1/totEn, 
                                                 weightedZ2/totEn-weightedZ1/totEn).asUnit();
-                    Vector3D n = cyl.baseArc().center().vectorTo(new Point3D((weightedX2/totEn+weightedX1/totEn)/2,
-                                                (weightedY2/totEn+weightedY1/totEn)/2, 
-                                                (weightedZ2/totEn+weightedZ1/totEn)/2)).asUnit();
-                    Vector3D s = l.cross(n);
-                   
                     
+                    
+                    this.setCylAxis(geo.getAxis(this.get_Layer(), this.get_Sector()));
+                    this.getCylAxis().setOrigin(this.getCylAxis().origin().x(), this.getCylAxis().origin().y(), weightedZ1/totEn);
+                    this.getCylAxis().setEnd(this.getCylAxis().end().x(), this.getCylAxis().end().y(), weightedZ2/totEn);
+                    Vector3D n = this.getN(weightedX1/totEn, weightedY1/totEn, weightedZ1/totEn, this.getCylAxis());
+                    //Vector3D n = cyl.baseArc().center().vectorTo(new Point3D((weightedX2/totEn+weightedX1/totEn)/2,
+                    //                            (weightedY2/totEn+weightedY1/totEn)/2, 
+                    //                            (weightedZ2/totEn+weightedZ1/totEn)/2)).asUnit();
+                    
+                    
+                    Vector3D s = l.cross(n).asUnit();
+                   
                     this.setCylAxis(geo.getAxis(this.get_Layer(), this.get_Sector()));
                     this.setL(l);
                     this.setS(s);
@@ -424,6 +434,18 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
     }
 
+    
+    public Vector3D getN(double x, double y, double z, Line3D cln) {
+        double v = (cln.origin().z()-z)/cln.direction().z();
+        double xs = x+v*cln.direction().x();
+        double ys = y+v*cln.direction().y();
+        
+        Vector3D n = new Point3D(cln.origin().x(), cln.origin().y(), cln.origin().z()).
+                vectorTo(new Point3D(xs,ys,cln.origin().z())).asUnit();
+        
+        return n;
+    }
+        
     public double get_Centroid() {
         return _Centroid;
     }

@@ -368,7 +368,7 @@ public class RecUtilities {
         cand.addAll(seed.get_Crosses());
         for(Cluster cl : seed.get_Clusters()) {
             int layer = cl.get_Layer();
-            if(cl.get_Detector()==1){
+            if(cl.get_Detector()==1 && cl.get_DetectorType()==0){
                 layer = layer + 6;
                 
                 Cylindrical3D cyl = BMTGeom.getCylinder(cl.get_Layer(), cl.get_Sector()); 
@@ -378,10 +378,9 @@ public class RecUtilities {
                 double y = cyl.baseArc().center().y()+v*cln.direction().y();
                 Vector3D n = new Point3D(x, y, kf.TrjPoints.get(layer).z).
                         vectorTo(new Point3D(kf.TrjPoints.get(layer).x,kf.TrjPoints.get(layer).y,kf.TrjPoints.get(layer).z)).asUnit();
-                cl.setN(n);
-                if (cl.get_DetectorType()==0) {
-                    cl.setL(cl.getS().cross(n).asUnit());
-                } 
+                cl.setN(cl.getN(kf.TrjPoints.get(layer).x,kf.TrjPoints.get(layer).y,kf.TrjPoints.get(layer).z,cln));
+                cl.setL(cl.getS().cross(n).asUnit());
+                
             }
             //double x = kf.TrjPoints.get(layer).x;
             //double y = kf.TrjPoints.get(layer).y;
