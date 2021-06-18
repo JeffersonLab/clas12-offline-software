@@ -240,7 +240,9 @@ public class TableLoader {
                                 DISTFROMTIME[s][r][ibfield][icosalpha][tbin+1] = DISTFROMTIME[s][r][ibfield][icosalpha][tbin];
                             }
                             //Add delta doca:
+                            if(DELTADOCA[tbin]!=0) System.out.println("Adding delta doca to "+DISTFROMTIME[s][r][ibfield][icosalpha][tbin]);
                             DISTFROMTIME[s][r][ibfield][icosalpha][tbin]+=DELTADOCA[tbin];
+                            if(DELTADOCA[tbin]!=0) System.out.println("--> "+DISTFROMTIME[s][r][ibfield][icosalpha][tbin]+" for tbin "+tbin);
                         }
                         
                     }
