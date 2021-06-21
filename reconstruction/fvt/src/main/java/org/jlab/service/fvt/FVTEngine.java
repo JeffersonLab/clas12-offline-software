@@ -124,8 +124,8 @@ public class FVTEngine extends ReconstructionEngine {
 
         // Get beam shift.
         IndexedTable beamOffset = this.getConstantsManager().getConstants(this.getRun(), "/geometry/beam/position");
-        double xB = beamOffset.getDoubleValue("x_offset", 0,0,0)/10.;
-        double yB = beamOffset.getDoubleValue("y_offset", 0,0,0)/10.;
+        double xB = beamOffset.getDoubleValue("x_offset", 0,0,0);
+        double yB = beamOffset.getDoubleValue("y_offset", 0,0,0);
 
         // === HITS ================================================================================
         HitReader hitRead = new HitReader();
