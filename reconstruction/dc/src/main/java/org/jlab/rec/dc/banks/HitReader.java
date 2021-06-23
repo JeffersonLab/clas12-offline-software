@@ -290,7 +290,6 @@ public class HitReader {
             if (event.hasBank("MC::Particle") ||
                     event.getBank("RUN::config").getInt("run", 0) < 100) {
                 tProp[i] = 0;
-                tFlight[i] = 0;
             }
         }
 
@@ -314,12 +313,9 @@ public class HitReader {
                 continue;
             }
         
-            if (!event.hasBank("MC::Particle") &&
-                    event.getBank("RUN::config").getInt("run", 0) > 100) {
-                //T_0 = this.get_T0(sector[i], slayer[i], layer[i], wire[i], T0, T0ERR)[0];
-                if (event.hasBank("RECHB::Event"))
-                    T_Start = event.getBank("RECHB::Event").getFloat("startTime", 0);
-            }
+            if (event.hasBank("RECHB::Event"))
+                T_Start = event.getBank("RECHB::Event").getFloat("startTime", 0);
+
             T_0 = this.get_T0(sector[i], slayer[i], layer[i], wire[i], T0, T0ERR)[0];
             FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], tdc[i], id[i]);
             hit.set_Id(id[i]);
