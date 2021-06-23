@@ -7,7 +7,9 @@ package org.jlab.rec.cvt.services;
 
 import Jama.Matrix;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.geom.base.Detector;
@@ -16,6 +18,7 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
@@ -101,22 +104,24 @@ public class TracksFromTargetRec {
                 charge = 1;
             xr += org.jlab.rec.cvt.Constants.getXb();
             yr += org.jlab.rec.cvt.Constants.getYb();
+            
             hlx = new org.jlab.clas.tracking.trackrep.Helix(xr,yr,zr,px,py,pz, 
                     charge, Constants.getSolenoidVal(), org.jlab.rec.cvt.Constants.getXb(), 
                     org.jlab.rec.cvt.Constants.getYb(), org.jlab.clas.tracking.trackrep.Helix.Units.MM);
+            
             Matrix cov = seed.get_Helix().get_covmatrix();
             
             if(Math.abs(Constants.getSolenoidVal())>0.001 &&
                     Constants.LIGHTVEL * seed.get_Helix().radius() *Constants.getSolenoidVal()<Constants.PTCUT)
                 continue;
+                
                 kf = new org.jlab.clas.tracking.kalmanfilter.helical.KFitter( hlx, cov, event,  swimmer, 
                     org.jlab.rec.cvt.Constants.getXb(), 
                     org.jlab.rec.cvt.Constants.getYb(),
                     shift, 
-                    recUtil.setMeasVecs(seed, SVTGeom, BMTGeom)) ;
+                    recUtil.setMeasVecs(seed, SVTGeom, BMTGeom, swimmer)) ;
                 kf.runFitter(swimmer);
-               
-                if (kf.setFitFailed == false && kf.NDF>0) {
+                if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null) { 
                     Track fittedTrack = recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom);
                     for(Cross c : fittedTrack) { 
                         if(c.get_Detector().equalsIgnoreCase("SVT")) {
@@ -127,13 +132,36 @@ public class TracksFromTargetRec {
                     //refit adding missing clusters
                     List<Cluster> clsOnTrack = recUtil.FindClustersOnTrk(SVTclusters, fittedTrack.get_helix(), 
                             fittedTrack.get_P(), fittedTrack.get_Q(), SVTGeom, swimmer);
-                    seed.get_Clusters().addAll(clsOnTrack);
+                    if(clsOnTrack.size()>0) {
+                        seed.get_Clusters().addAll(clsOnTrack);
+                    }
+                   
+                    //reset pars
+                    xr =  -fittedTrack.get_helix().get_dca()*Math.sin(fittedTrack.get_helix().get_phi_at_dca());
+                    yr =  fittedTrack.get_helix().get_dca()*Math.cos(fittedTrack.get_helix().get_phi_at_dca());
+                    zr =  fittedTrack.get_helix().get_Z0();
+                    pt = Constants.LIGHTVEL * fittedTrack.get_helix().radius() * Constants.getSolenoidVal();
+                    if(Math.abs(Constants.getSolenoidVal())<0.001)
+                        pt = 100;
+                    pz = pt*fittedTrack.get_helix().get_tandip();
+                    px = pt*Math.cos(fittedTrack.get_helix().get_phi_at_dca());
+                    py = pt*Math.sin(fittedTrack.get_helix().get_phi_at_dca());
+                    charge = (int) (Math.signum(Constants.getSolenoidscale())*fittedTrack.get_helix().get_charge());
+                    if(Math.abs(Constants.getSolenoidVal())<0.001)
+                        charge = 1;
+                    xr += org.jlab.rec.cvt.Constants.getXb();
+                    yr += org.jlab.rec.cvt.Constants.getYb();
+                    hlx = new org.jlab.clas.tracking.trackrep.Helix(xr,yr,zr,px,py,pz, 
+                            charge, Constants.getSolenoidVal(), org.jlab.rec.cvt.Constants.getXb(), 
+                            org.jlab.rec.cvt.Constants.getYb(), org.jlab.clas.tracking.trackrep.Helix.Units.MM);
+
                     kf = new org.jlab.clas.tracking.kalmanfilter.helical.KFitter( hlx, cov, event,  swimmer, 
                     org.jlab.rec.cvt.Constants.getXb(), 
                     org.jlab.rec.cvt.Constants.getYb(),
                     shift, 
-                    recUtil.setMeasVecs(seed, SVTGeom, BMTGeom)) ;
+                    recUtil.setMeasVecs(seed, SVTGeom, BMTGeom, swimmer)) ;
                     kf.runFitter(swimmer);
+                    
                     trkcands.add(recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom));
                     trkcands.get(trkcands.size() - 1).set_TrackingStatus(seed.trkStatus);
                 }
@@ -153,8 +181,10 @@ public class TracksFromTargetRec {
         //This last part does ELoss C
         TrackListFinder trkFinder = new TrackListFinder();
         List<Track> tracks = trkFinder.getTracks(trkcands, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, swimmer);
+
         for( int i=0;i<tracks.size();i++) { 
-            tracks.get(i).set_Id(i+1);         }
+            tracks.get(i).set_Id(i+1);         
+        }
 
         //System.out.println( " *** *** trkcands " + trkcands.size() + " * trks " + trks.size());
         trkFinder.removeOverlappingTracks(tracks); //turn off until debugged
@@ -219,12 +249,10 @@ public class TracksFromTargetRec {
                         c.set_Dir( new Vector3D(0,0,0));
                         c.set_DirErr( new Vector3D(0,0,0));
                         if( c.get_DetectorType()==BMTType.C) {
-    //        			System.out.println(c + " " + c.get_AssociatedTrackID());
-                                c.set_Point(new Point3D(Double.NaN,Double.NaN,c.get_Point().z()));
-    //        			System.out.println(c.get_Point());
+                            c.set_Point(new Point3D(Double.NaN,Double.NaN,c.get_Point().z()));
                         }
                         else {
-                                c.set_Point(new Point3D(c.get_Point().x(),c.get_Point().y(),Double.NaN));
+                            c.set_Point(new Point3D(c.get_Point().x(),c.get_Point().y(),Double.NaN));
                         }
                 }
         }
@@ -247,4 +275,4 @@ public class TracksFromTargetRec {
 
         }
     
-    }
+}

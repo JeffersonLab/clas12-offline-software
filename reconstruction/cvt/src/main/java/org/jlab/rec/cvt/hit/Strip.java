@@ -1,20 +1,22 @@
 package org.jlab.rec.cvt.hit;
 
+import org.jlab.clas.swimtools.Swim;
 import org.jlab.geom.prim.Arc3D;
+import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
-import org.jlab.rec.cvt.bmt.Constants;
-import org.jlab.rec.cvt.bmt.Geometry;
 
 public class Strip {
 
-    public Strip(int strip, double edep) {
+    public Strip(int strip, double edep, double time) {
         this._Strip = strip;
         this._Edep = edep;
+        this._Time = time;
     }
+    
 
     private int _Strip;    	 							//	   strip read from daq 
     private int _LCStrip;								//     strip number taking into account Lorentz angle correction (for MM Z detectors)
@@ -26,7 +28,8 @@ public class Strip {
     private double _Z;    								//     for MM C-detectors. the z position at the strip midwidth
     private double _ZErr;
     private double _Edep;      							//     for simulation this corresponds to the energy deposited on the strip, in data it should be an ADC converted value
-
+    private double _Time;
+    
     private Point3D _ImplantPoint;						// 	   the end-point of the strip at implant (lab frame)
     private Point3D _MidPoint;							//	   the mid-point of the strip (lab frame)
     private Point3D _EndPoint;							//	   the end-point of the strip (lab frame)
@@ -137,11 +140,25 @@ public class Strip {
     }
 
     /**
+     * @return the _Time
+     */
+    public double get_Time() {
+        return _Time;
+    }
+
+    /**
+     * @param _Time the _Time to set
+     */
+    public void set_Time(double _Time) {
+        this._Time = _Time;
+    }
+
+    /**
      *
      * @param geo the BMT geometry class Sets the Lorentz corrected phi and
      * strip number for Z detectors, the z position for C detectors
      */
-    public void calc_BMTStripParams(org.jlab.rec.cvt.bmt.BMTGeometry geo, int sector, int layer) {
+    public void calc_BMTStripParams(org.jlab.rec.cvt.bmt.BMTGeometry geo, int sector, int layer, Swim swim) {
 
         if (BMTGeometry.getDetectorType(layer) == BMTType.C) { // C-detectors
             // set z
@@ -160,24 +177,44 @@ public class Strip {
         }
 
         if (BMTGeometry.getDetectorType(layer) == BMTType.Z) { // Z-detectors
+            //Line3D L0 = geo.getZstrip(geo.getRegion(layer), sector, this.get_Strip());
+            Line3D L = geo.getLCZstrip(geo.getRegion(layer), sector, this.get_Strip(), swim);
+            this.set_ImplantPoint(L.origin());  
+            this.set_MidPoint(L.midpoint());
+            this.set_EndPoint(L.end());
+            this.set_StripDir(L.direction());
+            
+            Cylindrical3D cyl = geo.getCylinder(layer, sector);
+            Line3D cln = geo.getAxis(layer, sector);
+            cln.set(cln.origin().x(), cln.origin().y(), L.origin().z(), 
+                        cln.end().x(), cln.end().y(), L.end().z());
+               
+            double v = (L.origin().z()-cln.origin().z())/cln.direction().z();
+            double x = cln.origin().x()+v*cln.direction().x();
+            double y = cln.origin().y()+v*cln.direction().y();
+            Vector3D n = new Point3D(x, y, L.origin().z()).
+                    vectorTo(new Point3D(L.origin().x(),L.origin().y(),L.origin().z())).asUnit();
+
             double theMeasuredPhi = geo.CRZStrip_GetPhi(sector, layer, this.get_Strip());
-            double theLorentzCorrectedAngle = theMeasuredPhi + geo.LorentzAngleCorr(layer,sector);
+            //double theLorentzCorrectedAngle = L.midpoint().toVector3D().phi(); 
+            double theLorentzCorrectedAngle = n.phi(); 
             // set the phi 
             this.set_Phi(theLorentzCorrectedAngle);
             this.set_Phi0(theMeasuredPhi); // uncorrected
             //System.out.println(" sec "+sector+" strip "+this.get_Strip()+" LC strip "+geo.getZStrip(layer, theLorentzCorrectedAngle));
             //int theLorentzCorrectedStrip = geo.getZStrip(layer, theLorentzCorrectedAngle);
             int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6double Z0=0;           
-            double xl = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]*
-                    Math.cos(theLorentzCorrectedAngle);
-            double yl = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]*
-                    Math.sin(theLorentzCorrectedAngle);
-            int theLorentzCorrectedStrip = geo.getStrip( layer,  sector, 
-                    new Point3D(xl,yl,0));
+//            double xl = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]*
+//                    Math.cos(theLorentzCorrectedAngle);
+//            double yl = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]*
+//                    Math.sin(theLorentzCorrectedAngle);
+//            int theLorentzCorrectedStrip = geo.getStrip( layer,  sector, 
+//                    new Point3D(xl,yl,0));
+            int theLorentzCorrectedStrip = geo.getStrip( layer,  sector, L.midpoint());
             // get the strip number after correcting for Lorentz angle
             this.set_LCStrip(theLorentzCorrectedStrip);
-
-            double sigma = org.jlab.rec.cvt.bmt.Constants.SigmaDrift / Math.cos(org.jlab.rec.cvt.bmt.Constants.getThetaL()); // max sigma for drift distance  (hDrift) = total gap from top to mesh
+            
+            double sigma = org.jlab.rec.cvt.bmt.Constants.SigmaDrift / Math.cos(geo.getThetaLorentz(layer, sector)); // max sigma for drift distance  (hDrift) = total gap from top to mesh
 
             //max phi err
             double phiErrL = sigma / org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region];
@@ -187,12 +224,7 @@ public class Strip {
             //System.out.println("arcerr "+org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]+" * "+Math.toDegrees(sigma/org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]));
             this.set_PhiErr0(phiErr);
             
-            //Line3D L0 = geo.getZstrip(geo.getRegion(layer), sector, this.get_Strip());
-            Line3D L = geo.getLCZstrip(geo.getRegion(layer), sector, this.get_Strip());
-            this.set_ImplantPoint(L.origin());  
-            this.set_MidPoint(L.midpoint());
-            this.set_EndPoint(L.end());
-            this.set_StripDir(L.direction());
+            
         }
 
     }

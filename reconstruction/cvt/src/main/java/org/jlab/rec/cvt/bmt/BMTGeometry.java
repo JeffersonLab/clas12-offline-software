@@ -13,7 +13,7 @@ import org.jlab.groot.group.DataGroup;
 import static org.jlab.rec.cvt.bmt.Constants.E_DRIFT_FF;
 import static org.jlab.rec.cvt.bmt.Constants.E_DRIFT_MF;
 import static org.jlab.rec.cvt.bmt.Lorentz.getLorentzAngle;
-
+import org.jlab.clas.swimtools.Swim;
 /**
  *
  * @author devita
@@ -321,7 +321,7 @@ public class BMTGeometry {
         double zmin   = Constants.getCRCZMIN()[region-1];
         double zmax   = Constants.getCRCZMAX()[region-1];
         double angle  = Constants.getCRZPHI()[region-1][sector-1] - Constants.getCRZDPHI()[region-1][sector-1] 
-                      + ((double) strip-0.5) * Constants.getCRZWIDTH()[region-1] / Constants.getCRZRADIUS()[region-1];
+                      + ((double) strip-0.5-0.5) * Constants.getCRZWIDTH()[region-1] / Constants.getCRZRADIUS()[region-1];
         
         Point3D p1= new Point3D(radius, 0, zmin);
         p1.rotateZ(angle);
@@ -363,23 +363,35 @@ public class BMTGeometry {
      * @param strip
      * @return Line3D
      */
-    public Line3D getIdealLCZstrip(int region, int sector, int strip) {
+    public Line3D getIdealLCZstrip(int region, int sector, int strip, Swim swim) {
         
         double radius = Constants.getCRZRADIUS()[region-1];
         int layer = this.getLayer(region, BMTType.Z);
         double zmin   = Constants.getCRCZMIN()[region-1];
         double zmax   = Constants.getCRCZMAX()[region-1];
         double angle  = Constants.getCRZPHI()[region-1][sector-1] - Constants.getCRZDPHI()[region-1][sector-1] 
-                      + ((double) strip-0.5) * Constants.getCRZWIDTH()[region-1] / Constants.getCRZRADIUS()[region-1];
-        double theLorentzCorrectedAngle = angle + this.LorentzAngleCorr(layer,sector);
+                      + ((double) strip-0.5) * Constants.getCRZWIDTH()[region-1] / radius ;
+//        double theLorentzCorrectedAngle = angle + this.LorentzAngleCorr(layer,sector);
         Point3D p1= new Point3D(radius, 0, zmin);
-        p1.rotateZ(theLorentzCorrectedAngle);
+        p1.rotateZ(angle);
         Point3D p2= new Point3D(radius, 0, zmax);
-        p2.rotateZ(theLorentzCorrectedAngle);
-                
+        p2.rotateZ(angle);
         Line3D stripline = new Line3D(p1,p2);
+        double x = stripline.midpoint().x();
+        double y = stripline.midpoint().y();
+        double z = stripline.midpoint().z();
         
-        return stripline;
+        double alpha = this.getThetaLorentz(layer, sector, x,y,z,swim);    
+        double ralpha = Math.atan2(Constants.hStrip2Det*Math.tan(alpha), radius + Constants.hStrip2Det);
+        Point3D np1= new Point3D((radius+ Constants.hStrip2Det) * Math.cos(ralpha), 
+                (radius+Constants.hStrip2Det) * Math.sin(ralpha), zmin);
+        Point3D np2= new Point3D((radius+ Constants.hStrip2Det) * Math.cos(ralpha), 
+                (radius+Constants.hStrip2Det) * Math.sin(ralpha), zmax);
+        np1.rotateZ(angle);
+        np2.rotateZ(angle); 
+        
+        Line3D nstripline = new Line3D(np1,np2);
+        return nstripline;
     }
     
     /**
@@ -390,10 +402,10 @@ public class BMTGeometry {
      * @param strip
      * @return stripline
      */
-    public Line3D getLCZstrip(int region, int sector, int strip) {
+    public Line3D getLCZstrip(int region, int sector, int strip, Swim swim) {
         
         int layer = this.getLayer(region, BMTType.Z);
-        Line3D stripline = this.getIdealLCZstrip(region, sector, strip);
+        Line3D stripline = this.getIdealLCZstrip(region, sector, strip, swim);
         
         Point3D offset = this.getOffset(layer, sector);
         Vector3D rotation = this.getRotation(layer, sector);
@@ -767,6 +779,38 @@ public class BMTGeometry {
         return thetaL;
     }
 
+    /**
+     * Calculate Theta Lorentz based on solenoid scale and drift settings
+     * @param layer
+     * @param sector
+     * @return thetaL in radians
+     */
+    public double getThetaLorentz(int layer, int sector, double x, double y, double z, Swim swim) {
+         
+        double thetaL = 0;
+        float[] b = new float[3];
+        swim.BfieldLab(x/10, y/10, z/10, b);
+        double EDrift=0;
+        if(Constants.isMC == true) {
+            EDrift = 5000*Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale());
+        } else {
+            if(Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale())<0.8) {
+                EDrift = Constants.E_DRIFT_MF[layer-1][sector-1];
+            } else {
+                EDrift = Constants.E_DRIFT_FF[layer-1][sector-1];
+            }
+        }
+        if(Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale())<0.001) {
+            thetaL = 0;
+        }
+        else {
+            thetaL = Math.toRadians(getLorentzAngle(EDrift,Math.abs(b[2]*10)));
+        }
+        if (org.jlab.rec.cvt.Constants.getSolenoidscale()<0) thetaL=-thetaL; 
+        return thetaL;
+    }
+    
+    
     /**
      * Calculate Lorentz angle correction
      * @param layer

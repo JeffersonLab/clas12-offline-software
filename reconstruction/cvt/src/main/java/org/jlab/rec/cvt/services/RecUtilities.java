@@ -76,7 +76,7 @@ public class RecUtilities {
     
     public List<Surface> setMeasVecs(Seed trkcand, 
             org.jlab.rec.cvt.svt.Geometry sgeo,
-            org.jlab.rec.cvt.bmt.BMTGeometry bgeo) {
+            org.jlab.rec.cvt.bmt.BMTGeometry bgeo, Swim swim) {
         //Collections.sort(trkcand.get_Crosses());
         List<Surface> KFSites = new ArrayList<Surface>();
         Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()),
@@ -130,17 +130,37 @@ public class RecUtilities {
                 int sec = trkcand.get_Crosses().get(c).get_Cluster1().get_Sector();
                 
                 Cylindrical3D cyl = bgeo.getCylinder(lyer, sec);
-                
+                Line3D cln = bgeo.getAxis(lyer, sec);
+                Line3D l = bgeo.getLCZstrip(bgeo.getRegion(lyer), sec, 1, swim);
+                cln.set(cln.origin().x(), cln.origin().y(), l.origin().z(), 
+                        cln.end().x(), cln.end().y(), l.end().z());
+                cyl.setAxis(cln);
                 int id = trkcand.get_Crosses().get(c).get_Cluster1().get_Id();
                 double ce = trkcand.get_Crosses().get(c).get_Cluster1().get_Centroid();
                 if (trkcand.get_Crosses().get(c).get_DetectorType()==BMTType.Z) {
-                    double x = trkcand.get_Crosses().get(c).get_Point().x();
-                    double y = trkcand.get_Crosses().get(c).get_Point().y();
-                    double phi = Math.atan2(y,x);
-                    double err = trkcand.get_Crosses().get(c).get_Cluster1().get_PhiErr()
-                            *(org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+                    //double x = trkcand.get_Crosses().get(c).get_Point().x();
+                    //double y = trkcand.get_Crosses().get(c).get_Point().y();
+                    Point3D EP1 = trkcand.get_Crosses().get(c).get_Cluster1().getEndPoint1();
+                    //Point3D EP2 = trkcand.get_Crosses().get(c).get_Cluster1().getEndPoint2();
+                
+                    double v = (EP1.z()-cln.origin().z())/cln.direction().z();
+                    double x = cln.origin().x()+v*cln.direction().x();
+                    double y = cln.origin().y()+v*cln.direction().y();
+                    Vector3D n = new Point3D(x, y, EP1.z()).
+                            vectorTo(new Point3D(EP1.x(),EP1.y(),EP1.z())).asUnit();
+                
+                    double phi = n.phi();
+                   
+                    //double phi = Math.atan2(y,x);
+                    double err = trkcand.get_Crosses().get(c).get_Cluster1().get_PhiErr();
+                           // *(org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
                     
+                    //Strip strp = new Strip(id, ce, x, y, phi);
+                    //Point3D EP1 = trkcand.get_Crosses().get(c).get_Cluster1().getEndPoint1();
+                    //Point3D EP2 = trkcand.get_Crosses().get(c).get_Cluster1().getEndPoint2();
                     Strip strp = new Strip(id, ce, x, y, phi);
+                    //Strip strp = new Strip( id, ce, EP1.x(), EP1.y(), EP1.z(), EP2.x(), EP2.y(), EP2.z());
+                   
                     //cyl.baseArc().setRadius(Math.sqrt(x*x+y*y));
                     //cyl.highArc().setRadius(Math.sqrt(x*x+y*y));
                     cyl.baseArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
@@ -167,6 +187,7 @@ public class RecUtilities {
                     Strip strp = new Strip(id, ce, z);
                     cyl.baseArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
                     cyl.highArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);                   
+                    
                     Surface meas = new Surface(cyl, strp);
                     meas.setSector(trkcand.get_Crosses().get(c).get_Sector());
                     meas.setLayer(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer()+6);

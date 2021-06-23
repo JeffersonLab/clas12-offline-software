@@ -2,6 +2,7 @@ package org.jlab.rec.cvt.banks;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.swimtools.Swim;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -72,7 +73,7 @@ public class HitReader {
      * Edep for gemc, adc for cosmics)
      * @param geo the BMT geometry
      */
-    public void fetch_BMTHits(DataEvent event, ADCConvertor adcConv, org.jlab.rec.cvt.bmt.BMTGeometry geo) {
+    public void fetch_BMTHits(DataEvent event, ADCConvertor adcConv, org.jlab.rec.cvt.bmt.BMTGeometry geo, Swim swim) {
 
         // return if there is no BMT bank
         if (event.hasBank("BMT::adc") == false) {
@@ -103,9 +104,10 @@ public class HitReader {
                     continue;
                 }
                 // create the strip object for the BMT
-                Strip BmtStrip = new Strip((int) bankDGTZ.getShort("component", i), ADCtoEdep);
+                //Strip BmtStrip = new Strip((int) bankDGTZ.getShort("component", i), ADCtoEdep);
+                Strip BmtStrip = new Strip((int) bankDGTZ.getShort("component", i), ADCtoEdep, (double) bankDGTZ.getFloat("time", i));
                 // calculate the strip parameters for the BMT hit
-                BmtStrip.calc_BMTStripParams(geo,(int) bankDGTZ.getByte("sector", i),(int) bankDGTZ.getByte("layer", i)); // for Z detectors the Lorentz angle shifts the strip measurement; calc_Strip corrects for this effect
+                BmtStrip.calc_BMTStripParams(geo,(int) bankDGTZ.getByte("sector", i),(int) bankDGTZ.getByte("layer", i), swim); // for Z detectors the Lorentz angle shifts the strip measurement; calc_Strip corrects for this effect
                 // create the hit object for detector type BMT
                 
                 Hit hit = new Hit(1, this.getZorC((int) bankDGTZ.getByte("layer", i)),(int) bankDGTZ.getByte("sector", i),(int) bankDGTZ.getByte("layer", i), BmtStrip);
@@ -150,7 +152,8 @@ public class HitReader {
         int[] layer = new int[rows];
         int[] strip = new int[rows];
         int[] ADC = new int[rows];
-
+        float[] time = new float[rows];
+        
         if (event.hasBank("BST::adc") == true) {
             //bankDGTZ.show();
             for (int i = 0; i < rows; i++) {
@@ -195,7 +198,7 @@ public class HitReader {
                 //if(adcConv.SVTADCtoDAQ(ADC[i], event)<50)
                 //    continue;
                 // create the strip object with the adc value converted to daq value used for cluster-centroid estimate
-                Strip SvtStrip = new Strip(strip[i], adcConv.SVTADCtoDAQ(ADC[i], event)); 
+                Strip SvtStrip = new Strip(strip[i], adcConv.SVTADCtoDAQ(ADC[i], event), (double) time[i]); 
                 // get the strip endPoints
                  double[][] X = geo.getStripEndPoints(SvtStrip.get_Strip(), (layer[i] - 1) % 2);
                 Point3D EP1 = geo.transformToFrame(sector[i], layer[i], X[0][0], 0, X[0][1], "lab", "");

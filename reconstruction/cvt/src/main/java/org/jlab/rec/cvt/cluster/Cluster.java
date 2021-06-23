@@ -6,6 +6,8 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
 
+import java.util.Collections;
+import org.jlab.rec.cvt.bmt.Constants;
 /**
  * A cluster in the BST consists of an array of hits that are grouped together
  * according to the algorithm of the ClusterFinder class
@@ -171,21 +173,24 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             this.set_StripDir(arcLine.normal());
         */
         int nbhits = this.size();
-
+        //sort for bmt detector
+        //this.sort(Comparator.comparing(FittedHit.get_Strip()::get_Edep).thenComparing(FittedHit.get_Strip()::get_Edep));
+        Collections.sort(this);
         if (nbhits != 0) {
             int min = 1000000;
             int max = -1;
             int seed = -1;
             double Emax = -1;
+           
             // looping over the number of hits in the cluster
             for (int i = 0; i < nbhits; i++) {
                 FittedHit thehit = this.get(i);
                 // gets the energy value of the strip
-                double strpEn = thehit.get_Strip().get_Edep();
-                
+                double strpEn = -1;
                 int strpNb = -1;
                 int strpNb0 = -1; //before LC
                 if (this.get_Detector()==0) {
+                    strpEn = thehit.get_Strip().get_Edep();
                     // for the SVT the analysis only uses the centroid
                     strpNb = thehit.get_Strip().get_Strip();
                     Point3D stEP1 = thehit.get_Strip().get_ImplantPoint();
@@ -196,10 +201,23 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     weightedX2 += strpEn * stEP2.x();
                     weightedY2 += strpEn * stEP2.y();
                     weightedZ2 += strpEn * stEP2.z();
+                    
+                    totEn += strpEn;
+                    weightedStrp += strpEn * (double) strpNb;
+                    weightedStrp0 += strpEn * (double) strpNb0;
                 }
                 if (this.get_Detector()==1) { 
+                    if(Constants.newClustering) {
+                        strpEn = Math.sqrt(thehit.get_Strip().get_Edep());
+                    } else {
+                        //strpEn = thehit.get_Strip().get_Edep();
+                        strpEn = 1;
+                    }
+                    if(Constants.newClustering && nbhits>2 && i>1) 
+                        continue;
                     // for the BMT the analysis distinguishes between C and Z type detectors
                     if (this.get_DetectorType()==0) { // C-detectors
+                        //strpEn = Math.sqrt(thehit.get_Strip().get_Edep());
                         strpNb = thehit.get_Strip().get_Strip();
                         // for C detector the Z of the centroid is calculated
                         weightedZ += strpEn * thehit.get_Strip().get_Z();
@@ -226,14 +244,21 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                         Point3D stEP2 = thehit.get_Strip().get_EndPoint();
                         weightedX1 += strpEn * stEP1.x();
                         weightedY1 += strpEn * stEP1.y();
+                        weightedZ1 += strpEn * stEP1.z();
                         weightedX2 += strpEn * stEP2.x();
                         weightedY2 += strpEn * stEP2.y();
+                        weightedZ2 += strpEn * stEP2.z();
                     }
+                    
+                    totEn += strpEn;
+                    weightedStrp += strpEn * (double) strpNb;
+                    weightedStrp0 += strpEn * (double) strpNb0;
+                    
                 }
 
-                totEn += strpEn;
-                weightedStrp += strpEn * (double) strpNb;
-                weightedStrp0 += strpEn * (double) strpNb0;
+//                totEn += strpEn;
+//                weightedStrp += strpEn * (double) strpNb;
+//                weightedStrp0 += strpEn * (double) strpNb0;
                 
                 // getting the max and min strip number in the cluster
                 if (strpNb <= min) {

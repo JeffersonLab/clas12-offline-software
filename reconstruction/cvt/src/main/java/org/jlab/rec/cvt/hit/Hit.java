@@ -128,20 +128,31 @@ public class Hit implements Comparable<Hit> {
      * by wire is used in clustering.
      */
     @Override
-    public int compareTo(Hit arg0) {
-        if (this._Strip.get_Strip() > arg0._Strip.get_Strip()) {
-            return 1;
-        } else {
-            return 0;
-        }
-    }
+//    public int compareTo(Hit arg0) {
+//        if (this._Strip.get_Strip() > arg0._Strip.get_Strip()) {
+//            return 1;
+//        } else {
+//            return 0;
+//        }
+//    }
+    public int compareTo(Hit arg) {
+        //sort by layer, then time, then edep
+        int CompLyr = this.get_Layer() < arg.get_Layer() ? -1 : this.get_Layer() == arg.get_Layer() ? 0 : 1;
+        int CompEdep = this.get_Strip().get_Edep() > arg.get_Strip().get_Edep() ? -1 : this.get_Strip().get_Edep() == arg.get_Strip().get_Edep() ? 0 : 1;
+        int CompTime = this.get_Strip().get_Time() < arg.get_Strip().get_Time() ? -1 : this.get_Strip().get_Time() == arg.get_Strip().get_Time() ? 0 : 1;
 
+        int return_val1 = ((CompTime == 0) ? CompEdep : CompTime);
+        int return_val = ((CompLyr == 0) ? return_val1 : CompLyr);
+
+        return return_val;
+        }
     /**
      *
      * @return print statement with hit information
      */
     public void printInfo() {
-        String s = " Hit: Detector " + this.get_Detector() + "ID " + this.get_Id() + " Sector " + this.get_Sector() + " Layer " + this.get_Layer() + " Strip " + this.get_Strip().get_Strip() + " Edep " + this.get_Strip().get_Edep();
+        String s = " Hit: Detector " + this.get_Detector() + "ID " + this.get_Id() + " Sector " + this.get_Sector() + " Layer " + this.get_Layer() + " Strip " + this.get_Strip().get_Strip() 
+                + " Edep " + this.get_Strip().get_Edep()+ " Time " + this.get_Strip().get_Time();
         System.out.println(s);
     }
 

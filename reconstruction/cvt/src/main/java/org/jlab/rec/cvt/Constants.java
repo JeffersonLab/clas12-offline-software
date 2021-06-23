@@ -6,15 +6,13 @@ import java.util.Map;
 public class Constants {
 
     public static double PTCUT = 0.075;
+    
 
     /**
      * Constants used in the reconstruction
      */
     Constants() {
     }
-
-    // SIMULATION FLAG
-    public static boolean isSimulation = true;
 
     // CONSTANTS USED IN RECONSTRUCTION
     //---------------------------------
