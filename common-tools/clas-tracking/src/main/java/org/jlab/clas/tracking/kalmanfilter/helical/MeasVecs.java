@@ -13,8 +13,10 @@ import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.clas.tracking.kalmanfilter.Type;
 import org.jlab.clas.tracking.kalmanfilter.helical.StateVecs.StateVec;
 import org.jlab.clas.tracking.objects.Strip;
+import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 
 /**
  *
@@ -64,26 +66,65 @@ public class MeasVecs {
                 this.measurements.get(stateVec.k).surface.type == Type.CYLINDERWITHLINE) {
             Line3D l = new Line3D(this.measurements.get(stateVec.k).surface.lineEndPoint1, 
             this.measurements.get(stateVec.k).surface.lineEndPoint2);
-            value = l.distance(new Point3D(stateVec.x, stateVec.y, stateVec.z)).length();
+            //value = l.distance(new Point3D(stateVec.x, stateVec.y, stateVec.z)).length();
+            Line3D WL = new Line3D();
+            WL.copy(l);
+            WL.copy(WL.distance(new Point3D(stateVec.x, stateVec.y, stateVec.z)));
+            
+            value = WL.length();
         }
         if( this.measurements.get(stateVec.k).surface.type == Type.PLANEWITHSTRIP || 
                 this.measurements.get(stateVec.k).surface.type == Type.CYLINDERWITHSTRIP) { 
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.XYZ) {
                 Line3D l = new Line3D(this.measurements.get(stateVec.k).surface.lineEndPoint1, 
                 this.measurements.get(stateVec.k).surface.lineEndPoint2);
-                value = l.distance(new Point3D(stateVec.x, stateVec.y, stateVec.z)).length();
+                //value = l.distance(new Point3D(stateVec.x, stateVec.y, stateVec.z)).length(); 
+                if(l.direction().z()<0) {
+                    l.setEnd(this.measurements.get(stateVec.k).surface.lineEndPoint1);
+                    l.setOrigin(this.measurements.get(stateVec.k).surface.lineEndPoint2);
+                }
+                Line3D WL = new Line3D();
+                WL.copy(l);
+                Point3D svP = new Point3D(stateVec.x, stateVec.y, stateVec.z);
+                WL.copy(WL.distance(svP));
+                double sideStrip = Math.signum(l.direction().cross(WL.direction()).
+                        dot(this.measurements.get(stateVec.k).surface.plane.normal()));
+                //double sideStrip = Math.signum(l.direction().y()*WL.direction().x()+l.direction().x()*WL.direction().y());
+                value = WL.length()*sideStrip; 
             }
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.Z) { 
                 value = stateVec.z-this.measurements.get(stateVec.k).surface.strip.getZ();
             }
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.PHI) {
-               value = Math.atan2(stateVec.y, stateVec.x)-this.measurements.get(stateVec.k).surface.strip.getPhi();
+               value = this.getPhi(stateVec)-this.measurements.get(stateVec.k).surface.strip.getPhi();
             }
         }
         return value;
     }
     
-     
+    public double getPhiATZ(StateVec stateVec) {
+        Cylindrical3D cyl = this.measurements.get(stateVec.k).surface.cylinder;
+        Line3D cln = this.measurements.get(stateVec.k).surface.cylinder.getAxis();
+        double v = (stateVec.z-cyl.baseArc().center().z())/cln.direction().z();
+        double x = cyl.baseArc().center().x()+v*cln.direction().x();
+        double y = cyl.baseArc().center().y()+v*cln.direction().y();
+        Vector3D n = new Point3D(x, y, stateVec.z).
+                vectorTo(new Point3D(stateVec.x,stateVec.y,stateVec.z)).asUnit();
+        return n.phi();
+    }
+    
+    public double getPhi(StateVec stateVec) {
+        Line3D cln = this.measurements.get(stateVec.k).surface.cylinder.getAxis();
+        
+        double v = (cln.origin().z()-stateVec.z)/cln.direction().z();
+        double xs = stateVec.x+v*cln.direction().x();
+        double ys = stateVec.y+v*cln.direction().y();
+        
+        Vector3D n = new Point3D(cln.origin().x(), cln.origin().y(), cln.origin().z()).
+                vectorTo(new Point3D(xs,ys,cln.origin().z())).asUnit();
+        return n.phi();
+    }
+      
     public double h(int k, StateVec stateVec) {
         
         double value = Double.NaN;
@@ -113,13 +154,27 @@ public class MeasVecs {
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.XYZ) {
                 Line3D l = new Line3D(this.measurements.get(stateVec.k).surface.lineEndPoint1, 
                 this.measurements.get(stateVec.k).surface.lineEndPoint2);
-                value = l.distance(new Point3D(stateVec.x, stateVec.y, stateVec.z)).length();
+                //value = l.distance(new Point3D(stateVec.x, stateVec.y, stateVec.z)).length();
+                if(l.direction().z()<0) {
+                    l.setEnd(this.measurements.get(stateVec.k).surface.lineEndPoint1);
+                    l.setOrigin(this.measurements.get(stateVec.k).surface.lineEndPoint2);
+                }
+                Line3D WL = new Line3D();
+                WL.copy(l);
+                Point3D svP = new Point3D(stateVec.x, stateVec.y, stateVec.z);
+                WL.copy(WL.distance(svP));
+                double sideStrip = Math.signum(l.direction().cross(WL.direction()).
+                        dot(this.measurements.get(stateVec.k).surface.plane.normal())); 
+                //double sideStrip = Math.signum(l.direction().y()*WL.direction().x()+l.direction().x()*WL.direction().y());
+                value = WL.length()*sideStrip;
+                
             }
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.Z) {
                value = stateVec.z;
             }
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.PHI) {
-               value = Math.atan2(stateVec.y, stateVec.x);
+               //value = Math.atan2(stateVec.y, stateVec.x);
+               value = this.getPhi(stateVec);
             }
         }
         return value;
@@ -182,7 +237,7 @@ public class MeasVecs {
         
         return SVplus;
     }
-    
+     
     public class MeasVec implements Comparable<MeasVec> {
         public Surface surface;
         public int layer    = -1;
