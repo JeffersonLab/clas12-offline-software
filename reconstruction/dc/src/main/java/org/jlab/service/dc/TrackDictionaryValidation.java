@@ -57,6 +57,15 @@ public class TrackDictionaryValidation {
                                                                + this.dataGroups.getItem(2).getH2F("hi_ptheta_neg_missing").integral());
     }
     
+    /**
+     * create dictionary from event file
+     * @param inputFileName: input hipo file name
+     * @param dictName: output dictionary file name
+     * @param pidSelect: PID for track selection
+     * @param chargeSelect: charge for track selection
+     * @param thrs: momentum threshold for track selection
+     * @param duplicates: remove duplicate roads (0/1)
+     */
     public void createDictionary(String inputFileName, String dictName , int pidSelect, int chargeSelect, double thrs, int duplicates) {
         // create dictionary from event file
         System.out.println("\nCreating dictionary from file: " + inputFileName);
@@ -287,7 +296,7 @@ public class TrackDictionaryValidation {
                             part.setProperty("pcalE",  pcalE);
                             part.setProperty("ecinE",  ecinE);
                             part.setProperty("ecoutE", ecoutE);
-                            if(duplicates==0) wires.add(nevent);
+                            if(duplicates==1) wires.add(nevent);
                             // save roads to map
                             if(!newDictionary.containsKey(wires))  {
                                 newDictionary.put(wires, part);
@@ -711,7 +720,7 @@ public class TrackDictionaryValidation {
     }
 
 
-   public boolean init() {
+    public boolean init() {
         this.createHistos();
         return true;
     }
@@ -751,7 +760,19 @@ public class TrackDictionaryValidation {
         }
     }
     
-    public void processFile(String fileName, int wireSmear, int pcalSmear, int mode, int maxEvents, int pidSelect, int chargeSelect, double thrs) {
+    /**
+     * Test selected dictionary on input event file
+     * @param fileName: input event hipo file
+     * @param wireSmear: dc wire smearing
+     * @param pcalSmear: pcal strip smearing
+     * @param sectorDependence: sector-dependence mode (0=false, 1=true)
+     * @param mode: test mode
+     * @param maxEvents: max number of events to process
+     * @param pidSelect: pid for track selection
+     * @param chargeSelect: charge for track selection
+     * @param thrs: momentum threshold for track selection
+     */
+    public void processFile(String fileName, int wireSmear, int pcalSmear, int sectorDependence, int mode, int maxEvents, int pidSelect, int chargeSelect, double thrs) {
         // testing dictionary on event file
         
         System.out.println("\nTesting dictionary on file " + fileName);
@@ -994,7 +1015,7 @@ public class TrackDictionaryValidation {
                             wires.add((byte) pcalV);
                             wires.add((byte) pcalW);
                             wires.add((byte) htcc);
-                            wires.add((byte) trackSector);
+                            wires.add((byte) (trackSector*sectorDependence));
                             if(mode>0 && (paddle1b==0 || pcalU==0)) continue;
                             if(mode>1 && (paddle1b==0 || pcalU==0 || pcalV==0 || pcalW==0)) continue;
                             if(mode>2 && (paddle1b==0 || pcalU==0 || pcalV==0 || pcalW==0 || htcc==-1)) continue;
@@ -1039,8 +1060,14 @@ public class TrackDictionaryValidation {
 
     }
     
-    
-    public void readDictionary(String fileName, int mode, double thrs) {
+    /**
+     *
+     * @param fileName
+     * @param sec
+     * @param mode
+     * @param thrs
+     */
+    public void readDictionary(String fileName, int sec, int mode, double thrs) {
         
         this.dictionary = new HashMap<>();
         
@@ -1058,8 +1085,7 @@ public class TrackDictionaryValidation {
             while ((line = txtreader.readLine()) != null) {
                 nLines++;
                 if(nLines % 1000000 == 0) System.out.println("Read " + nLines + " roads");
-                String[] lineValues;
-                lineValues  = line.split("\t");
+                String[] lineValues = line.split("\t");
                 ArrayList<Byte> wires = new ArrayList<Byte>();
                 if(lineValues.length < 51) {
                     System.out.println("WARNING: dictionary line " + nLines + " incomplete: skipping");
@@ -1118,7 +1144,7 @@ public class TrackDictionaryValidation {
                     wires.add((byte) pcalv);
                     wires.add((byte) pcalw);
                     wires.add((byte) htcc);
-                    wires.add((byte) sector);
+                    wires.add((byte) (sector*sec));
                     nFull++;
                     if(this.dictionary.containsKey(wires)) {
                         nDupli++;
@@ -1215,40 +1241,66 @@ public class TrackDictionaryValidation {
     public static void main(String[] args) {
         
         OptionParser parser = new OptionParser("dict-validation");
-        parser.addOption("-d"    ,"dictionary.txt", "dictionary file name");
-        parser.addOption("-c"    ,  "", "create dictionary from event file");
-        parser.addOption("-i"    ,  "", "set event file for dictionary validation");
-        parser.addOption("-pid"  , "0", "select particle PID for dictonary creation (0: no selection)");
-        parser.addOption("-q"    , "0", "select particle charge for dictonary creation (0: no selection)");
-        parser.addOption("-w"    , "0", "wire smearing in road finding");
-        parser.addOption("-s"    , "0", "pcal strip smearing in road finding");
-        parser.addOption("-m"    , "0", "select test mode: 0-DC only, 1-DC-FTOF-pcalU, 2-DC-FTOF-pcalUVW, 3-DC-FTOF-pcalUVW-HTCC");
-        parser.addOption("-t"    , "1", "select roads momentum threshold in GeV");
-        parser.addOption("-n"    ,"-1", "maximum number of events to process");
-        parser.addOption("-dupli", "0", "remove duplicates in dictionary creation");
+        parser.addOption("-dict"     , "",  "dictionary file name");
+        parser.addOption("-create"   ,  "", "select filename for new dictionary created from event file");
+        parser.addOption("-i"        ,  "", "event file for dictionary test");
+        parser.addOption("-pid"      , "0", "select particle PID for new dictonary, 0: no selection,");
+        parser.addOption("-charge"   , "0", "select particle charge for new dictionary, 0: no selection");
+        parser.addOption("-wire"     , "0", "dc wire smearing in road finding");
+        parser.addOption("-strip"    , "0", "pcal strip smearing in road finding");
+        parser.addOption("-sector"   , "0", "sector dependent roads, 0=false, 1=true)");
+        parser.addOption("-mode"     , "0", "select test mode, 0: DC only, 1: DC-FTOF-pcalU, 2: DC-FTOF-pcalUVW, 3: DC-FTOF-pcalUVW-HTCC");
+        parser.addOption("-threshold", "1", "select roads momentum threshold in GeV");
+        parser.addOption("-n"        ,"-1", "maximum number of events to process for validation");
+        parser.addOption("-dupli"    , "1", "remove duplicates in dictionary creation, 0=false, 1=true");
         parser.parse(args);
         
         List<String> arguments = new ArrayList<String>();
         for(String item : args){ arguments.add(item); }
         
         String dictionaryFileName = null;
-        if(parser.hasOption("-d")==true) dictionaryFileName = parser.getOption("-d").stringValue();
+        if(parser.hasOption("-dict")==true) dictionaryFileName = parser.getOption("-dict").stringValue();
         
         String inputFileName = null;
-        if(parser.hasOption("-c")==true) inputFileName = parser.getOption("-c").stringValue();
+        if(parser.hasOption("-create")==true) inputFileName = parser.getOption("-create").stringValue();
             
         String testFileName = null;
         if(parser.hasOption("-i")==true) testFileName = parser.getOption("-i").stringValue();
             
         
         int pid        = parser.getOption("-pid").intValue();
-        int charge     = parser.getOption("-q").intValue();
-        int wireSmear  = parser.getOption("-w").intValue();
-        int pcalSmear  = parser.getOption("-s").intValue();
-        int mode       = parser.getOption("-m").intValue();
+        int charge     = parser.getOption("-charge").intValue();
+        if(Math.abs(charge)>1) {
+            System.out.println("\terror: invalid charge selection");
+            System.exit(1);
+        }
+        int wireSmear  = parser.getOption("-wire").intValue();
+        if(wireSmear<0) {
+            System.out.println("\terror: invalid dc wire smearing, value should be >0");
+            System.exit(1);
+        }
+        int pcalSmear  = parser.getOption("-strip").intValue();
+        if(pcalSmear<0) {
+            System.out.println("\terror: invalid pcal strip smearing, value should be >0");
+            System.exit(1);
+        }
+        int sector     = parser.getOption("-sector").intValue();
+        if(sector<0 || sector>1) {
+            System.out.println("\terror: invalid sector-dependence option, allowed values are 0=false or 1=true");
+            System.exit(1);
+        }
+        int mode       = parser.getOption("-mode").intValue();
+        if(mode<0 || mode>3) {
+            System.out.println("\terror: invalid test mode, allowed options are 0-DC only, 1-DC-FTOF-pcalU, 2-DC-FTOF-pcalUVW, 3-DC-FTOF-pcalUVW-HTCC");
+            System.exit(1);
+        }
         int maxEvents  = parser.getOption("-n").intValue();
         int duplicates = parser.getOption("-dupli").intValue();
-        double thrs    = parser.getOption("-t").doubleValue();
+        if(duplicates<0 || duplicates>1) {
+            System.out.println("\terror: invalid duplicate-removal option, allowed values are 0=false or 1=true");
+            System.exit(1);
+        }
+        double thrs    = parser.getOption("-threshold").doubleValue();
         
         System.out.println("Dictionary file name set to: " + dictionaryFileName);
         if(parser.containsOptions(arguments, "-c"))   System.out.println("Event file for dictionary creation set to:    " + inputFileName);
@@ -1258,6 +1310,7 @@ public class TrackDictionaryValidation {
         System.out.println("Momentum threshold set to:                                  " + thrs);
         System.out.println("Wire smearing for dictionary validation set to:             " + wireSmear);
         System.out.println("Pcal smearing for dictionary validation set to:             " + pcalSmear);
+        System.out.println("Sector dependence for dictionary validation set to:         " + sector);
         System.out.println("Test mode set to:                                           " + mode);
         System.out.println("Maximum number of events to process set to:                 " + maxEvents);
         System.out.println("Duplicates remove flag set to:                              " + duplicates);
@@ -1276,9 +1329,9 @@ public class TrackDictionaryValidation {
                 tm.createDictionary(inputFileName, dictionaryFileName, pid, charge, thrs, duplicates);
             }
             else if(parser.containsOptions(arguments, "-i") || debug) {
-                tm.readDictionary(dictionaryFileName,mode,thrs);                
+                tm.readDictionary(dictionaryFileName,sector,mode,thrs);                
     //        tm.printDictionary();
-                tm.processFile(testFileName,wireSmear,pcalSmear,mode,maxEvents, pid, charge,thrs);
+                tm.processFile(testFileName,wireSmear,pcalSmear,sector,mode,maxEvents, pid, charge,thrs);
 
                 JFrame frame = new JFrame("Tracking");
                 Dimension screensize = null;
