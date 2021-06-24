@@ -50,12 +50,14 @@ public class FVTEngine extends ReconstructionEngine {
         // Get the constants for the correct variation
         String geomDBVar = this.getEngineConfigString("variation");
         if (geomDBVar!=null) {
-            System.out.println("["+this.getName()+"] run with FMT geometry variation based on yaml = "+geomDBVar);
+            System.out.println("["+this.getName()+"] " +
+                    "run with FMT geometry variation based on yaml = " + geomDBVar);
         }
         else {
             geomDBVar = System.getenv("COAT_FMT_GEOMETRYVARIATION");
             if (geomDBVar!=null) {
-                System.out.println("["+this.getName()+"] run with FMT geometry variation chosen based on env = "+geomDBVar);
+                System.out.println("["+this.getName()+"] " +
+                        "run with FMT geometry variation chosen based on env = "+geomDBVar);
             }
         }
         if (geomDBVar == null) {
@@ -105,7 +107,7 @@ public class FVTEngine extends ReconstructionEngine {
 
     @Override
     public boolean processDataEvent(DataEvent event) {
-        // Initial setup
+        // Initial setup.
         ClusterFinder clusFinder = new ClusterFinder();
         List<Cluster> clusters = new ArrayList<Cluster>();
         List<Cross> crosses = new ArrayList<Cross>();
@@ -122,10 +124,12 @@ public class FVTEngine extends ReconstructionEngine {
         Swim swimmer = new Swim();
         RecoBankWriter rbc = new RecoBankWriter();
 
-        // Get beam shift.
-        IndexedTable beamOffset = this.getConstantsManager().getConstants(this.getRun(), "/geometry/beam/position");
-        double xB = beamOffset.getDoubleValue("x_offset", 0,0,0);
-        double yB = beamOffset.getDoubleValue("y_offset", 0,0,0);
+        // Set beam shift. NOTE: Set to zero for the time being, when beam alignment is done
+        //                       uncomment this code.
+        IndexedTable beamOffset =
+                this.getConstantsManager().getConstants(this.getRun(), "/geometry/beam/position");
+        double xB = 0; // beamOffset.getDoubleValue("x_offset", 0,0,0);
+        double yB = 0; // beamOffset.getDoubleValue("y_offset", 0,0,0);
 
         // === HITS ================================================================================
         HitReader hitRead = new HitReader();
@@ -156,7 +160,7 @@ public class FVTEngine extends ReconstructionEngine {
                 if (plist == null) continue;
 
                 for (int k = 0; k < plist.size(); k++) {
-                    if (clusters.get(j).get_Layer() != k+1) continue; // match the layers from traj
+                    if (clusters.get(j).get_Layer() != k+1) continue; // Match the layers from traj.
                     double x = plist.get(k).x();
                     double y = plist.get(k).y();
                     double z = plist.get(k).z();
@@ -183,20 +187,20 @@ public class FVTEngine extends ReconstructionEngine {
 
         // === TRACKS ==============================================================================
         double[] pars = new double[6];
-        // iterate on hashmap to run the fit
-         for (Integer id : trj.keySet()) {
-            for (Track tr:dcTracks) {
-                for (int p = 0; p < 6; p++)
-                    pars[p] = 0;
+        // Iterate on hashmap to run the fit.
+        for (Integer id : trj.keySet()) {
+            for (Track tr : dcTracks) {
+                for (int p = 0; p < 6; p++) pars[p] = 0;
                 if (tr.getId() != id) continue;
                 Map<Integer, Cluster> cls = new HashMap<Integer, Cluster>();
                 List<Cross> crs = trj.get(id);
                 for(Cross c : crs) {
-                    // Filter clusters to use only the best cluster (minimal Tmin) per FMT layer.
+                    // Filter clusters to use only the best cluster (minimum Tmin) per FMT layer.
                     int lyr = c.get_Cluster1().get_Layer();
                     if (cls.get(lyr) == null || c.get_Cluster1().get_Tmin() < cls.get(lyr).get_Tmin())
                         cls.put(lyr, c.get_Cluster1());
                 }
+
                 // Set status and stop if there are no measurements to fit against.
                 tr.status = cls.size();
                 if (cls.size() == 0) continue;
