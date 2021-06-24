@@ -207,20 +207,23 @@ public class FVTEngine extends ReconstructionEngine {
                         new ArrayList<Cluster>(cls.values()), tr.getSector(), tr.getX(), tr.getY(),
                         tr.getZ(), tr.getPx(), tr.getPy(), tr.getPz(), tr.getQ(), swimmer, 0
                 );
+                kf.runFitter(tr.getSector());
 
+                // Do one last KF pass with filtering off to get the final Chi^2.
+                kf.totNumIter = 1;
+                kf.filterOn   = false;
                 kf.runFitter(tr.getSector());
 
                 if (kf.finalStateVec != null) {
                     // Set the track parameters.
                     tr.setQ((int)Math.signum(kf.finalStateVec.Q));
-                    tr.setChi2(kf.chi2); // TODO: I'm not sure, but we might need one last run to
-                                         //       the final Chi^2.
+                    tr.setChi2(kf.chi2);
                     pars = tr.getLabPars(kf.finalStateVec);
                     swimmer.SetSwimParameters(pars[0],pars[1],pars[2],-pars[3],-pars[4],-pars[5],
                             -tr.getQ());
 
                     double[] Vt = swimmer.SwimToBeamLine(xB, yB);
-                    if (Vt == null) return true;
+                    if (Vt == null) continue;
 
                     tr.setX(Vt[0]);
                     tr.setY(Vt[1]);

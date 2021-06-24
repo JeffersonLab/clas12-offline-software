@@ -24,7 +24,6 @@ public class KFitter {
     public StateVec finalStateVec;
     public CovMat finalCovMat;
     public int totNumIter = 10;
-    private double newChisq = Double.POSITIVE_INFINITY;
     public boolean filterOn = true;
     public double chi2 = 0;
     public int NDF = 0;
@@ -164,16 +163,16 @@ public class KFitter {
             if (CaInv != null) sv.trackCov.get(k).covMat = CaInv;
             else return;
 
+            // Calculate the gain matrix.
             for (int j = 0; j < 5; j++) {
-                // the gain matrix
                 K[j] = 0;
                 for (int i = 0; i < 5; i++) K[j] += H[i] * sv.trackCov.get(k).covMat.get(j, i) / V ;
             }
 
+            // Update Chi^2 and filtered state vector.
             double h = mv.h(sv.trackTraj.get(k));
             double m = mv.measurements.get(k).centroid;
-
-            double c2 = (m-h)*(m-h);
+            this.chi2 += ((m-h)*(m-h))/mv.measurements.get(k).error;
 
             double x_filt = sv.trackTraj.get(k).x + K[0] * (m-h);
             double y_filt = sv.trackTraj.get(k).y + K[1] * (m-h);
@@ -181,7 +180,6 @@ public class KFitter {
             double ty_filt = sv.trackTraj.get(k).ty + 0*K[3] * (m-h);
             double Q_filt = sv.trackTraj.get(k).Q + 0*K[4] * (m-h);
 
-            chi2 += c2;
             if (filterOn) {
                 sv.trackTraj.get(k).x = x_filt;
                 sv.trackTraj.get(k).y = y_filt;
