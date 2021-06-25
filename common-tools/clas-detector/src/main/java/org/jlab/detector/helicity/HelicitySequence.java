@@ -148,6 +148,7 @@ class HelicitySequence {
      */
     protected final int searchIndex(long timestamp) {
         if (!this.analyzed) this.analyze();
+        if (this.size() == 0) return -1;
         if (timestamp < this.getTimestamp(0)) return -1;
         if (timestamp > this.getTimestamp(this.size()-1)) return -1;
         // make a fake state for timestamp search:

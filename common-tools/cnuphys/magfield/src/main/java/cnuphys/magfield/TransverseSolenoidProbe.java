@@ -1,6 +1,6 @@
 package cnuphys.magfield;
 
-public class TransverseSolenoidProbe extends FieldProbe {
+public class TransverseSolenoidProbe extends SolenoidProbe {
 	
 	// cell used to cache corner information
 	private Cell3D _cell;
@@ -12,15 +12,15 @@ public class TransverseSolenoidProbe extends FieldProbe {
 	/**
 	 * Create a probe for use with the transverse solenoid field
 	 * 
-	 * @param field the transverse soelnoid field
+	 * @param field the transverse solenoid field
 	 */
 	public TransverseSolenoidProbe(TransverseSolenoid field) {
 		super(field);
-		if (MagneticFields.getInstance().getTransverseSolenoid() != field) {
-			MagneticFields.getInstance().setTransverseSolenoid(field);
+		if (MagneticFields.getInstance().getSolenoid() != field) {
+			MagneticFields.getInstance().setSolenoid(field);
 		}
 
-		_transverseSolenoid = MagneticFields.getInstance().getTransverseSolenoid();
+		_transverseSolenoid = (TransverseSolenoid)MagneticFields.getInstance().getSolenoid();
 
 		_cell = new Cell3D(this);
 

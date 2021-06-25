@@ -9,8 +9,17 @@ public class AdaptiveCylinderStopper extends AAdaptiveStopper {
 	private Cylinder _targetCylinder;
 	
 	//the newest distance to the cylinder
-	private double _newDist;
+	private double _distance;
 	
+	//cache whether we have passed smax
+	private boolean _passedSmax;
+	
+	//cache whether we have crossed the boundary
+	private boolean _crossedBoundary;
+
+	//the start sign of the distance
+	private double _startSign;
+
 	
 	/**
 	 * Cylinder  stopper  (does check max path length)
@@ -23,7 +32,8 @@ public class AdaptiveCylinderStopper extends AAdaptiveStopper {
 	public AdaptiveCylinderStopper(final double[] u0, final double sf, Cylinder targetCylinder, double accuracy, SwimTrajectory trajectory) {
 		super(u0, sf, accuracy, trajectory);
 		_targetCylinder = targetCylinder;
-		
+		_distance = _targetCylinder.distance(u0[0], u0[1], u0[2]);
+		_startSign = Math.signum(_distance);
 	}
 	
 
@@ -31,45 +41,60 @@ public class AdaptiveCylinderStopper extends AAdaptiveStopper {
 	public boolean stopIntegration(double snew, double[] unew) {
 		
 		//a negative distance means we are inside the cylinder
-		//we don't care so take abs val
-		_newDist = Math.abs(_targetCylinder.distance(unew[0], unew[1], unew[2]));
+		double newDist = _targetCylinder.distance(unew[0], unew[1], unew[2]);
+		double newSign = Math.signum(newDist);
+		newDist = Math.abs(newDist);
 
 		// within accuracy?
-		//note this could also result with s > smax
-		if (_newDist < _accuracy) {
+		if (newDist < _accuracy) {
+			_distance = newDist;
 			accept(snew, unew);
   			return true;
 		}
-
-		//stop and don't accept new data. We exceeded smax
-		if (snew > _sf) {
+		
+		//if we crossed the boundary (don't accept, reset)
+		_crossedBoundary = newSign != _startSign;
+		if (_crossedBoundary) {
 			return true;
 		}
-				
+
+		_passedSmax = (snew > _sf);
+		//if exceeded max path length accept and stop
+		if (_passedSmax) {
+			_distance = newDist;
+			accept(snew, unew);
+			return true;
+		}
+
 		//accept new data and continue
+		_distance = newDist;
 		accept(snew, unew);
 		return false;
 	}
 
+	/**
+	 * Get the current value of the distance (positive definite)
+	 * @return the current value of distance
+	 */
+	public double getDistance() {
+		return _distance;
+	}
 
 	/**
-	 * Accept a new integration step
-	 * @param snew the new value of s in meters
-	 * @param unew the new state vector
+	 * Did we cross the boundary?
+	 * @return true if we crossed the boundary
 	 */
-	@Override
-	protected void accept(double snew, double[] unew) {
-		super.accept(snew, unew);
-		
-		//do not take a step that might leap us over the cylinder
-		//this is necessary because there is no crossover "side" for a cylinder
-		//like for a plane or fixed z,rho
-		
-//		double newRho = FastMath.hypot(unew[0], unew[1]);
-		double newMaxStep = Math.min(_THEMAXSTEP, Math.max(AdaptiveSwimUtilities.MIN_STEPSIZE, _newDist/5));
-//		System.out.println("NEW RHo:  " + newRho + "    NEW DIST: " + _newDist + "  new MAX STEP:  " + newMaxStep + "  sum:  " + (newRho + _newDist));
-	
-		setMaxStep(newMaxStep);
+	public boolean crossedBoundary() {
+		return _crossedBoundary;
 	}
+
+	/**
+	 * Did we pas the max path length?
+	 * @return true if we crossed the boundary
+	 */
+	public boolean passedSmax() {
+		return _passedSmax;
+	}
+
 
 }

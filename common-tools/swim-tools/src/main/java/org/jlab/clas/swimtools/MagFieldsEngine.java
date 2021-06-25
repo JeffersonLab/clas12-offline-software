@@ -48,24 +48,19 @@ public class MagFieldsEngine extends ReconstructionEngine {
        
         final String torusMap = this.chooseEnvOrYaml("COAT_MAGFIELD_TORUSMAP","magfieldTorusMap");
         final String solenoidMap = this.chooseEnvOrYaml("COAT_MAGFIELD_SOLENOIDMAP","magfieldSolenoidMap");
-        final String transsolMap = this.chooseEnvOrYaml("COAT_MAGFIELD_TRANSSOLMAP","magfieldTranssolMap");
         final String mapDir = CLASResources.getResourcePath("etc")+"/data/magfield";
 
         if (torusMap==null) {
             System.err.println("["+this.getName()+"] ERROR: torus field is undefined.");
             return false;
         }
-        if (solenoidMap!=null && transsolMap!=null) {
-            System.err.println("["+this.getName()+"] ERROR: both solenoid and transverse solenoid are defined.");
-            return false;
-        }
-        if (solenoidMap==null && transsolMap==null) {
-            System.err.println("["+this.getName()+"] ERROR: both solenoid and transverse solenoid are undefined.");
+        if (solenoidMap==null) {
+            System.err.println("["+this.getName()+"] ERROR: solenoid is undefined.");
             return false;
         }
 
         try {
-            MagneticFields.getInstance().initializeMagneticFields(mapDir, torusMap, solenoidMap, transsolMap);
+            MagneticFields.getInstance().initializeMagneticFields(mapDir, torusMap, solenoidMap);
         }
         catch (Exception e) {
             e.printStackTrace();

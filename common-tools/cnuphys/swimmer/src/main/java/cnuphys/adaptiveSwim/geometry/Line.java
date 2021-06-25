@@ -29,6 +29,15 @@ public class Line {
 	}
 	
 	/**
+	 * Create a line from two ponts passed as arrays
+	 * @param p1 one point as an xyz array
+	 * @param p2 another point as an xyz array
+	 */
+	public Line(double[] p1, double[] p2) {
+		this(new Point(p1), new Point(p2));
+	}
+	
+	/**
 	 * Copy constructor
 	 * @param line the line to copy
 	 */
@@ -36,6 +45,14 @@ public class Line {
 		_po = new Point(line._po);
 		_dp = new Vector(line._dp);
 		_dpLen = line._dpLen;
+	}
+	
+	/**
+	 * Create a line from the origing in the direction of a vector
+	 * @param v the vector
+	 */
+	public Line(Vector v) {
+		this(new Point(0,0,0), new Point(v.x, v.y, v.z));
 	}
 
 	/**

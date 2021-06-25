@@ -1,11 +1,9 @@
 package org.jlab.service.dc;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -59,7 +57,7 @@ public class TrackDictionaryMerger {
                 String[] lineValues;
                 lineValues  = line.split("\t");
                 ArrayList<Byte> wires = new ArrayList<Byte>();
-                if(lineValues.length < 47) {
+                if(lineValues.length < 51) {
                     System.out.println("WARNING: dictionary line " + nLines + " incomplete: skipping");
                 }
                 else {
@@ -87,6 +85,7 @@ public class TrackDictionaryMerger {
                     int pcalw    = Integer.parseInt(lineValues[45]);
                     int htcc     = Integer.parseInt(lineValues[46]);
                     int sector   = Integer.parseInt(lineValues[47]);
+                    
                     wires.add((byte) paddle1b);
                     wires.add((byte) paddle2);
                     wires.add((byte) pcalu);
@@ -94,6 +93,12 @@ public class TrackDictionaryMerger {
                     wires.add((byte) pcalw);
                     wires.add((byte) htcc);
                     wires.add((byte) sector);
+                    double pcalE   = Double.parseDouble(lineValues[48]);
+                    double ecinE   = Double.parseDouble(lineValues[49]);
+                    double ecoutE  = Double.parseDouble(lineValues[50]);
+                    road.setProperty("pcalE",  pcalE);
+                    road.setProperty("ecinE",  ecinE);
+                    road.setProperty("ecoutE", ecoutE);                    
                     nFull++;
                     this.nfull++;
                     if(this.dictionary.containsKey(wires)) {
@@ -156,7 +161,7 @@ public class TrackDictionaryMerger {
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%.2f\t%d\t%d\t%d\t%d\t"
-                    + "%d\t%d\n",
+                    + "%d\t%d\t%.1f\t%.1f\t%.1f\n",
                     //+ "%.1f\t %.1f\t %.1f\t %.1f\t %.1f\t %.1f\t\n", 
                     part.charge(), part.p(), Math.toDegrees(part.theta()), Math.toDegrees(part.phi()),
                     road.get(0), 0, 0, 0, 0, 0, 
@@ -165,7 +170,8 @@ public class TrackDictionaryMerger {
                     road.get(3), 0, 0, 0, 0, 0, 
                     road.get(4), 0, 0, 0, 0, 0, 
                     road.get(5), 0, 0, 0, 0, 0,  
-                    paddle1b, part.vz(), paddle2, pcalU, pcalV, pcalW, htcc, sector);
+                    paddle1b, part.vz(), paddle2, pcalU, pcalV, pcalW, htcc, sector,
+                    part.getProperty("pcalE"),part.getProperty("ecinE"),part.getProperty("ecoutE"));
                 }
             }
             pw.close();
@@ -179,7 +185,7 @@ public class TrackDictionaryMerger {
     
     public static void main(String[] args) {
         
-        OptionParser parser = new OptionParser("dict-validation");
+        OptionParser parser = new OptionParser("dict-merger");
         parser.addOption("-o","output.txt", "output dictionary file");
         parser.parse(args);
         

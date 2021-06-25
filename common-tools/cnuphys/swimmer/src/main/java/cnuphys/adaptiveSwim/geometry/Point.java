@@ -37,6 +37,14 @@ public class Point {
 		this.y = y;
 		this.z = z;
 	}
+	
+	/**
+	 * Create a point
+	 * @param p the point as an xyz array
+	 */
+	public Point(double[] p) {
+		this(p[0], p[1], p[2]);
+	}
 
 	/**
 	 * Set the components of the vector
