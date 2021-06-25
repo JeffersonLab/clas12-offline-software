@@ -367,19 +367,23 @@ public class RecUtilities {
         this.MatchTrack2Traj(seed, kf.TrjPoints, SVTGeom, BMTGeom);
         cand.addAll(seed.get_Crosses());
         for(Cluster cl : seed.get_Clusters()) {
+            
+        
             int layer = cl.get_Layer();
-            if(cl.get_Detector()==1 && cl.get_DetectorType()==0){
+            
+            if(cl.get_Detector()==1) {
+                
                 layer = layer + 6;
                 
+               if(cl.get_DetectorType()==0) {
+                   
                 Cylindrical3D cyl = BMTGeom.getCylinder(cl.get_Layer(), cl.get_Sector()); 
                 Line3D cln = BMTGeom.getAxis(cl.get_Layer(), cl.get_Sector());
-                double v = (kf.TrjPoints.get(layer).z-cyl.baseArc().center().z())/cln.direction().z();
-                double x = cyl.baseArc().center().x()+v*cln.direction().x();
-                double y = cyl.baseArc().center().y()+v*cln.direction().y();
-                Vector3D n = new Point3D(x, y, kf.TrjPoints.get(layer).z).
-                        vectorTo(new Point3D(kf.TrjPoints.get(layer).x,kf.TrjPoints.get(layer).y,kf.TrjPoints.get(layer).z)).asUnit();
+                
                 cl.setN(cl.getN(kf.TrjPoints.get(layer).x,kf.TrjPoints.get(layer).y,kf.TrjPoints.get(layer).z,cln));
-                cl.setL(cl.getS().cross(n).asUnit());
+                cl.setL(cl.getS().cross(cl.getN()).asUnit());
+                
+               }
                 
             }
             //double x = kf.TrjPoints.get(layer).x;
