@@ -517,17 +517,25 @@ public class BMTGeometry {
      */
     public Cylindrical3D getCylinder(int layer, int sector) {
         Cylindrical3D cyl = new Cylindrical3D();
-        cyl.baseArc().setCenter(new Point3D(0, 0, 0));
-        cyl.highArc().setCenter(new Point3D(0, 0, 0));
-        cyl.baseArc().setNormal(new Vector3D(0,1,0));
-        cyl.highArc().setNormal(new Vector3D(0,1,0));
         
+        Point3D cent = new Point3D(0, 0, 0);
+        Vector3D norm = new Vector3D(0,1,0);
         Point3D    offset = this.getOffset(layer, sector);
         Vector3D rotation = this.getRotation(layer, sector);
-        cyl.rotateX(rotation.x());
-        cyl.rotateY(rotation.y());
-        cyl.rotateZ(rotation.z());
-        cyl.translateXYZ(offset.x(),offset.y(),offset.z());
+        cent.rotateX(rotation.x());
+        cent.rotateY(rotation.y());
+        cent.rotateZ(rotation.z());
+        cent.translateXYZ(offset.x(),offset.y(),offset.z());
+        norm.rotateX(rotation.x());
+        norm.rotateY(rotation.y());
+        norm.rotateZ(rotation.z());
+        
+        cyl.baseArc().setCenter(cent);
+        cyl.highArc().setCenter(cent);
+        cyl.baseArc().setNormal(norm);
+        cyl.highArc().setNormal(norm);
+        
+        
         
         return cyl;
     }
