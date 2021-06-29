@@ -13,7 +13,7 @@
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../../parent/pom.xml</relativePath>
-    <version>6.5.12-SNAPSHOT</version>
+    <version>6.6.4-SNAPSHOT</version>
   </parent>
 
   <build>
@@ -47,19 +47,19 @@
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-jcsg</artifactId>
-      <version>6.5.12-SNAPSHOT</version>
+      <version>6.6.4-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-reco</artifactId>
-      <version>6.5.12-SNAPSHOT</version>
+      <version>6.6.4-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-analysis</artifactId>
-      <version>6.5.12-SNAPSHOT</version>
+      <version>6.6.4-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -95,7 +95,7 @@
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>swim-tools</artifactId>
-      <version>6.5.12-SNAPSHOT</version>
+      <version>6.6.4-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.jlab</groupId>
@@ -105,7 +105,7 @@
         <dependency>
             <groupId>org.jlab.clas</groupId>
             <artifactId>clas-tracking</artifactId>
-            <version>6.5.12-SNAPSHOT</version>
+            <version>6.6.4-SNAPSHOT</version>
         </dependency>
     </dependencies>
  </project>
