@@ -44,7 +44,7 @@ public class RecoBankWriter {
                 double y_rec = recotrackmap.get(TID).get(i).y();
                 double z_rec = recotrackmap.get(TID).get(i).z();
                 double time  = recotrackmap.get(TID).get(i).time();
-		double adc = recotrackmap.get(TID).get(i).adc();
+		        double adc = recotrackmap.get(TID).get(i).adc();
 
                 bank.setInt("trkID", row, TID);
                 bank.setInt("id", row, cellID);
@@ -52,7 +52,7 @@ public class RecoBankWriter {
                 bank.setFloat("x", row, (float) x_rec);
                 bank.setFloat("y", row, (float) y_rec);
                 bank.setFloat("z", row, (float) z_rec);		
-		bank.setFloat("adc", row, (float) adc);
+		        bank.setFloat("adc", row, (float) adc);
                 row++;
             }
         }
@@ -111,7 +111,7 @@ public class RecoBankWriter {
             bank.setFloat("max_radius", row, (float) listhits.get(0).r());
             bank.setFloat("min_phi", row, (float) listhits.get(listhits.size()-1).phi());
             bank.setFloat("max_phi", row, (float) listhits.get(0).phi());
-	    bank.setFloat("tdiff", row, (float) tdiff);
+	        bank.setFloat("tdiff", row, (float) tdiff);
             row++;
         }
         //bank.show();

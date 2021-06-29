@@ -49,22 +49,39 @@ public class TrackDisentangler {
                     for(int tid1 : newtidlist){
                         for(int tid2 : newtidlist){
                             if(tid1 != tid2 && !removedtracks.contains(tid1) && !removedtracks.contains(tid2)){
+                                boolean merged = false; 
                                 ReducedTrack t1 = NewTrackMap.getTrack(tid1);
                                 ReducedTrack t2 = NewTrackMap.getTrack(tid2);
-                                List<HitVector> h1list = new ArrayList<>();
-                                List<HitVector> h2list = new ArrayList<>();
-                                h1list.addAll(t1.getFirstNHits(2));
-                                h1list.addAll(t1.getLastNHits(2));
-                                h2list.addAll(t2.getFirstNHits(2));
-                                h2list.addAll(t2.getLastNHits(2));
-                                HITSLOOP:
-                                for(HitVector h1 : h1list){
-                                    for(HitVector h2 : h2list){
+                                List<HitVector> h1listfirst = new ArrayList<>();
+                                List<HitVector> h2listfirst = new ArrayList<>();
+                                List<HitVector> h1listlast = new ArrayList<>();
+                                List<HitVector> h2listlast = new ArrayList<>();
+                                h1listfirst.addAll(t1.getFirstNHits(2));
+                                h1listlast.addAll(t1.getLastNHits(2));
+                                h2listfirst.addAll(t2.getFirstNHits(2));
+                                h2listlast.addAll(t2.getLastNHits(2));
+                                FIRSTLAST:
+                                for(HitVector h1 : h1listlast){
+                                    for(HitVector h2: h2listlast){
                                         if(compareHitsTime(h1,h2)){
-                                            NewTrackMap.mergeTracks(tid1, tid2); 
+                                            NewTrackMap.mergeTracksBackbend(tid1, tid2); 
                                             NewTrackMap.getTrack(tid1).sortHits();
                                             removedtracks.add(tid2);
-                                            break HITSLOOP;
+                                            merged = true; 
+                                            break FIRSTLAST;
+                                        }
+                                    }
+                                }
+                                if(!merged)
+                                    HITSLOOP:
+                                    for(HitVector h1 : h1list){
+                                        for(HitVector h2 : h2list){
+                                            if(compareHitsTime(h1,h2)){
+                                                NewTrackMap.mergeTracks(tid1, tid2); 
+                                                NewTrackMap.getTrack(tid1).sortHits();
+                                                removedtracks.add(tid2);
+                                                break HITSLOOP;
+                                            }
                                         }
                                     }
                                 }
