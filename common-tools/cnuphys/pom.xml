@@ -29,9 +29,6 @@
     <module>snr</module>
     <module>magfield</module>
     <module>swimmer</module>
-    <module>bCNU</module>
-    <module>bCNU3D</module>
-    <!--<module>ced</module>-->
   </modules>
 
 </project>

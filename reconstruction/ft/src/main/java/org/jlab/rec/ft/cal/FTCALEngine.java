@@ -51,9 +51,7 @@ public class FTCALEngine extends ReconstructionEngine {
 	public boolean processDataEvent(DataEvent event) {
             List<FTCALHit>     allHits           = new ArrayList();
             List<FTCALHit>     selectedHits      = new ArrayList();
-            List<FTCALCluster> allClusters       = new ArrayList();
-            List<FTCALCluster> selectedClusters  = new ArrayList();
-            List<FTCALCluster> correctedClusters = new ArrayList();
+            List<FTCALCluster> clusters          = new ArrayList();
             
             // update calibration constants based on run number if changed
             int run = setRunConditionsParameters(event);
@@ -64,11 +62,11 @@ public class FTCALEngine extends ReconstructionEngine {
                 // select good hits and order them by energy
                 selectedHits = reco.selectHits(allHits,this.getConstantsManager(), run);
                 // create clusters
-                allClusters = reco.findClusters(selectedHits, this.getConstantsManager(), run);
-                // select good clusters
-                selectedClusters = reco.selectClusters(allClusters, this.getConstantsManager(), run);
+                clusters = reco.findClusters(selectedHits, this.getConstantsManager(), run);
+                // set cluster status
+                reco.selectClusters(clusters, this.getConstantsManager(), run);
                 // write output banks
-                reco.writeBanks(event, selectedHits, selectedClusters, this.getConstantsManager(), run);
+                reco.writeBanks(event, selectedHits, clusters, this.getConstantsManager(), run);
             }
             return true;
 	}
@@ -95,7 +93,7 @@ public class FTCALEngine extends ReconstructionEngine {
     public static void main (String arg[])  {
 		FTCALEngine cal = new FTCALEngine();
 		cal.init();
-		String input = "/Users/devita/Work/clas12/simulations/clas12Tags/4.4.0/out.hipo";
+		String input = "/Users/devita/Work/clas12/simulations/ft/out.hipo";
 		HipoDataSource  reader = new HipoDataSource();
 //		String input = "/Users/devita/Work/clas12/simulations/tests/detectors/clas12/ft/out_header.ev";
 //		EvioSource  reader = new EvioSource();
