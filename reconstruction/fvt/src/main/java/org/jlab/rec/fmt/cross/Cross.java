@@ -21,7 +21,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 
     private int _Sector; // sector[1...6]
 	private int _Region; // region [1,...3]
-	private int _Id;     // cross Id
+	private int _Index;     // cross Id
 
 	// point parameters:
 	private Point3D _Point;
@@ -33,7 +33,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     private Cluster _clus1;
     private Cluster _clus2;
 
-    private int _AssociatedTrackID=-1;
+    private int _TrackIndex=-1;
 
 	/**
 	 *
@@ -41,10 +41,10 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 	 * @param region the region (1...3)
 	 * @param rid the cross ID (if there are only 3 crosses in the event, the ID corresponds to the region index
 	 */
-	public Cross(int sector, int region, int rid) {
+	public Cross(int sector, int region, int index) {
 		this._Sector = sector;
 		this._Region = region;
-		this._Id = rid;
+		this._Index = index;
 	}
 
 	/**
@@ -83,16 +83,16 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 	 *
 	 * @return the id of the cross
 	 */
-	public int get_Id() {
-		return _Id;
+	public int get_Index() {
+		return _Index;
 	}
 
 	/**
 	 * Sets the cross ID
 	 * @param _Id  the id of the cross
 	 */
-	public void set_Id(int _Id) {
-		this._Id = _Id;
+	public void set_Index(int index) {
+		this._Index = index;
 	}
 
 	/**
@@ -220,16 +220,16 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 
 		// Getting the cross position from the calculated centroid segment line positions
 		//----------------------------------------------------
-		double x0_inner = inlayerclus.get_StripSegment().origin().x();
-		double x1_inner = inlayerclus.get_StripSegment().end().x();
-		double x0_outer = outlayerclus.get_StripSegment().origin().x();
-		double x1_outer = outlayerclus.get_StripSegment().end().x();
-		double y0_inner = inlayerclus.get_StripSegment().origin().y();
-		double y1_inner = inlayerclus.get_StripSegment().end().y();
-		double y0_outer = outlayerclus.get_StripSegment().origin().y();
-		double y1_outer = outlayerclus.get_StripSegment().end().y();
-		double z0_inner = inlayerclus.get_StripSegment().origin().z();
-		double z0_outer = outlayerclus.get_StripSegment().origin().z();
+		double x0_inner = inlayerclus.get_GlobalSegment().origin().x();
+		double x1_inner = inlayerclus.get_GlobalSegment().end().x();
+		double x0_outer = outlayerclus.get_GlobalSegment().origin().x();
+		double x1_outer = outlayerclus.get_GlobalSegment().end().x();
+		double y0_inner = inlayerclus.get_GlobalSegment().origin().y();
+		double y1_inner = inlayerclus.get_GlobalSegment().end().y();
+		double y0_outer = outlayerclus.get_GlobalSegment().origin().y();
+		double y1_outer = outlayerclus.get_GlobalSegment().end().y();
+		double z0_inner = inlayerclus.get_GlobalSegment().origin().z();
+		double z0_outer = outlayerclus.get_GlobalSegment().origin().z();
 
 		Point3D interPoint = Geometry.getStripsIntersection(x0_inner, x1_inner, x0_outer, x1_outer,
                                                             y0_inner, y1_inner, y0_outer, y1_outer,
@@ -239,23 +239,23 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 		this.set_PointErr(new Point3D(Constants.FVT_SigmaS/Math.sqrt(2.), Constants.FVT_SigmaS/Math.sqrt(2.), 0));
 	}
 
-	public int get_AssociatedTrackID() {
-		return _AssociatedTrackID;
+	public int get_TrackIndex() {
+		return _TrackIndex;
 	}
 
-	public void set_AssociatedTrackID(int _AssociatedTrackID) {
-		this._AssociatedTrackID = _AssociatedTrackID;
+	public void set_TrackIndex(int _AssociatedTrackID) {
+		this._TrackIndex = _AssociatedTrackID;
 	}
 
 	public void set_AssociatedElementsIDs() {
 		for (Cluster cluster : this) {
-			cluster.set_AssociatedCrossID(this._Id);
-			cluster.set_AssociatedTrackID(this._AssociatedTrackID);
+			cluster.set_CrossIndex(this._Index);
+			cluster.set_TrackIndex(this._TrackIndex);
 
             for (FittedHit hit : cluster) {
-				hit.set_AssociatedClusterID(cluster.get_Id());
-				hit.set_AssociatedCrossID(this._Id);
-				hit.set_AssociatedTrackID(this._AssociatedTrackID);
+				hit.set_ClusterIndex(cluster.get_Index());
+				hit.set_CrossIndex(this._Index);
+				hit.set_TrackIndex(this._TrackIndex);
 			}
 		}
 	}
@@ -265,9 +265,9 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 	 * @return the track info.
 	 */
 	public String printInfo() {
-		String s = "fmt cross: ID " + this.get_Id()     + " trkID "  + this.get_AssociatedTrackID() 
-                 + " Sector "       + this.get_Sector() + " Region " + this.get_Region()
-				 + " Point "        + this.get_Point().toString();
+		String s = "fmt cross: Index " + this.get_Index() + " trackIndex "  + this.get_TrackIndex() 
+                                     + " Sector " + this.get_Sector() + " Region " + this.get_Region()
+		                   + " Point " + this.get_Point().toString();
 		return s;
 	}
 }

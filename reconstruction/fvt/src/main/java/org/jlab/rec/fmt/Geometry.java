@@ -1,6 +1,5 @@
 package org.jlab.rec.fmt;
 
-import org.apache.commons.math3.special.Erf;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Line3D;
 
@@ -28,10 +27,10 @@ public class Geometry {
 	 */
 	public static Point3D globalToLocal(Point3D glPos, int layer) {
 		// TODO: Apply x and y rot.
-		double x = (glPos.x() - Constants.FVT_xShift[layer]) * Math.cos(Constants.FVT_Alpha[layer])
-				 + (glPos.y() - Constants.FVT_yShift[layer]) * Math.sin(Constants.FVT_Alpha[layer]);
-		double y = (glPos.y() - Constants.FVT_yShift[layer]) * Math.cos(Constants.FVT_Alpha[layer])
-				 - (glPos.x() - Constants.FVT_xShift[layer]) * Math.sin(Constants.FVT_Alpha[layer]);
+		double x = (glPos.x() - Constants.FVT_xShift[layer-1]) * Math.cos(Constants.FVT_Alpha[layer-1])
+				 + (glPos.y() - Constants.FVT_yShift[layer-1]) * Math.sin(Constants.FVT_Alpha[layer-1]);
+		double y = (glPos.y() - Constants.FVT_yShift[layer-1]) * Math.cos(Constants.FVT_Alpha[layer-1])
+				 - (glPos.x() - Constants.FVT_xShift[layer-1]) * Math.sin(Constants.FVT_Alpha[layer-1]);
 		double z = glPos.z();
 
 		return new Point3D(x,y,z);

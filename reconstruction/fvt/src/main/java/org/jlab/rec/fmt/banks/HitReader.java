@@ -1,6 +1,7 @@
 package org.jlab.rec.fmt.banks;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.jlab.rec.fmt.hit.Hit;
 import org.jlab.io.base.DataBank;
@@ -21,7 +22,7 @@ public class HitReader {
      *
      * @return a list of FMT hits
      */
-    public List<Hit> get_FMTHits() {
+    public List<Hit> getHits() {
         return _FMTHits;
     }
 
@@ -30,11 +31,11 @@ public class HitReader {
      *
      * @param _FMTHits list of FMT hits
      */
-    public void set_FMTHits(List<Hit> _FMTHits) {
+    public void setHits(List<Hit> _FMTHits) {
         this._FMTHits = _FMTHits;
     }
 
-    public void fetch_FMTHits(DataEvent event) {
+    public void fetchHits(DataEvent event) {
         if (!event.hasBank("FMT::adc")) {
             _FMTHits = new ArrayList<Hit>();
             return;
@@ -64,12 +65,12 @@ public class HitReader {
 
                 if (strip[i] == -1 || ADC[i] == 0) continue;
 
-                Hit hit = new Hit(sector[i], layer[i], strip[i], (double) ADC[i], time[i]);
-                hit.set_Id(i+1);
+                Hit hit = new Hit(i, sector[i], layer[i], strip[i], (double) ADC[i], time[i]);
                 hits.add(hit);
             }
         }
-
-        this.set_FMTHits(hits);
+        Collections.sort(hits);
+        
+        this.setHits(hits);
     }
 }

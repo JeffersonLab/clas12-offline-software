@@ -1,7 +1,14 @@
 package org.jlab.rec.fvt.track;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-import org.jlab.geom.prim.Point3D;
+import java.util.Map;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.io.base.DataBank;
+import org.jlab.io.base.DataEvent;
+import org.jlab.rec.fmt.Constants;
+import org.jlab.rec.fmt.cluster.Cluster;
 import org.jlab.rec.fvt.track.fit.StateVecs;
 
 /**
@@ -22,7 +29,7 @@ public class Track {
      */
     public int status = 0;
 
-    private int _id;
+    private int _index;
     private int _sector;
     private int _q;
     private double _chi2;
@@ -33,34 +40,83 @@ public class Track {
     private double _py;
     private double _pz;
 
-    private List<Point3D> _traj;
+    private Trajectory[] _DCtrajs  = new Trajectory[Constants.FVT_Nlayers];
+    private Cluster[]    _clusters = new Cluster[Constants.FVT_Nlayers];
+    private Trajectory[] _FMTtrajs = new Trajectory[Constants.FVT_Nlayers];
 
+    public Track() {
+    }
+
+
+    public Track(int _index, int _sector, int _q, double _x, double _y, double _z, 
+                 double _px, double _py, double _pz, List<Cluster> clusters) {
+        this._index = _index;
+        this._sector = _sector;
+        this._q = _q;
+        this._x = _x;
+        this._y = _y;
+        this._z = _z;
+        this._px = _px;
+        this._py = _py;
+        this._pz = _pz;
+        for(Cluster cluster : clusters) this.setCluster(cluster);
+    }
+
+    
+    
     /**
      * @return the _traj
      */
-    public List<Point3D> getTraj() {
-        return _traj;
+    public Trajectory getDCTraj(int layer) {
+        if(layer<=0 || layer>Constants.FVT_Nlayers) return null;
+        else return _DCtrajs[layer-1];
     }
 
     /**
      * @param _traj the _traj to set
      */
-    public void setTraj(List<Point3D> _traj) {
-        this._traj = _traj;
+    public void setDCTraj(Trajectory trj) {
+        this._DCtrajs[trj.getLayer()-1] = trj;
+    }
+
+    public List<Cluster> getClusters() {
+        List<Cluster> clusters = new ArrayList<>();
+        for(int i=0; i<Constants.FVT_Nlayers; i++) {
+            if(_clusters[i]!=null) clusters.add(_clusters[i]);
+        }
+        return clusters;
+    }
+
+    public Cluster getCluster(int layer) {
+        if(layer<=0 || layer>Constants.FVT_Nlayers) return null;
+        else return _clusters[layer-1];
+    }
+
+    public void setCluster(Cluster cluster) {
+        this._clusters[cluster.get_Layer()-1] = cluster;
+    }
+
+    public Trajectory getFMTtraj(int layer) {
+        if(layer<=0 || layer>Constants.FVT_Nlayers) return null;
+        return _FMTtrajs[layer-1];
+    }
+
+    public void setFMTtraj(Trajectory trj) {
+        this._FMTtrajs[trj.getLayer()-1] = trj;
     }
 
     /**
      * @return the _id
      */
-    public int getId() {
-        return _id;
+    public int getIndex() {
+        return _index;
     }
 
     /**
      * @param _id the _id to set
      */
-    public void setId(int _id) {
-        this._id = _id;
+    public void getIndex(int _id) {
+        this._index = _id;
     }
 
     /**
@@ -201,4 +257,70 @@ public class Track {
         double py = pz*ty;
         return new double[] {x,y,z,px,py,pz};
     }
+    
+    
+    public static Map<Integer, Track> getDCTracks(DataEvent event) {
+        Map<Integer, Track> tracks = new LinkedHashMap<Integer, Track>();
+                
+        
+        DataBank trackBank = null;
+        DataBank trajBank  = null;
+        if(event.hasBank("TimeBasedTrkg::TBTracks"))   trackBank = event.getBank("TimeBasedTrkg::TBTracks");
+        if(event.hasBank("TimeBasedTrkg::Trajectory")) trajBank  = event.getBank("TimeBasedTrkg::Trajectory");
+        if (trackBank!=null && trajBank!=null) {
+        
+            int trkrows = trackBank.rows();
+            for (int i = 0; i < trkrows; i++) {
+                Track trk = new Track();
+                int id = trackBank.getShort("id", i);
+                trk.getIndex(i);
+                trk.setSector(trackBank.getByte("sector", i));
+                trk.setQ(trackBank.getByte("q", i));
+                trk.setX(trackBank.getFloat("Vtx0_x", i));
+                trk.setY(trackBank.getFloat("Vtx0_y", i));
+                trk.setZ(trackBank.getFloat("Vtx0_z", i));
+                trk.setPx(trackBank.getFloat("p0_x", i));
+                trk.setPy(trackBank.getFloat("p0_y", i));
+                trk.setPz(trackBank.getFloat("p0_z", i));
+                tracks.put(id,trk);
+            }
+
+            int trkrows2 = trajBank.rows();
+            for (int i = 0; i < trkrows2; i++) {
+                if (trajBank.getShort("detector", i) == DetectorType.FMT.getDetectorId()) { 
+                    int id    = trajBank.getShort("id", i);
+                    int layer = trajBank.getByte("layer", i);
+                    Trajectory trj = new Trajectory(layer,
+                                                    trajBank.getFloat("x", i),
+                                                    trajBank.getFloat("y", i),
+                                                    trajBank.getFloat("z", i),
+                                                    trajBank.getFloat("tx", i),
+                                                    trajBank.getFloat("ty", i),
+                                                    trajBank.getFloat("tz", i),
+                                                    trajBank.getFloat("path", i));
+                    tracks.get(id).setDCTraj(trj);                
+                }
+            }
+        }
+        return tracks;
+    }
+    
+    @Override
+    public String toString() {
+        String str = "FMT track :" + " Index "  + this._index
+                                   + " Q  "     + this._q
+                                   + String.format(" P (%.4f,%.4f,%.4f)", this._px, this._py, this._pz)
+                                   + String.format(" D (%.4f,%.4f,%.4f)", this._x, this._y, this._z);
+        for(int i=0; i<Constants.FVT_Nlayers; i++) {
+            if(_DCtrajs[i]!=null) str = str + "\n\t" +_DCtrajs[i].toString() + String.format(" LocY %.4f",_DCtrajs[i].getLocalY());           
+        }
+        for(int i=0; i<Constants.FVT_Nlayers; i++) {
+            if(_clusters[i]!=null) str = str + "\n\t" + _clusters[i].toStringBrief();           
+        }
+        for(int i=0; i<Constants.FVT_Nlayers; i++) {
+            if(_FMTtrajs[i]!=null) str = str + "\n\t" + _FMTtrajs[i].toString() + String.format(" LocY %.4f",_FMTtrajs[i].getLocalY());           
+        }
+        return str;                           
+    }
+
 }

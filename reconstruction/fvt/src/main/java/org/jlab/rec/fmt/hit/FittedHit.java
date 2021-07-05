@@ -12,38 +12,32 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 	 * @param sector  (1...24)
 	 * @param layer (1...6)
 	 * @param strip (1...256)
-	 * @param Edep (for gemc output without digitization)
+	 * @param energy (for gemc output without digitization)
 	 *
 	 */
 
-	public FittedHit(int sector, int layer, int strip, double Edep, double time) {
-		super(sector, layer, strip, Edep, time);
+	public FittedHit(int index, int sector, int layer, int strip, double energy, double time) {
+		super(index, sector, layer, strip, energy, time);
 	}
+        
+         public FittedHit(Hit hit) {
+             super(hit.get_Index(), hit.get_Sector(), hit.get_Layer(), hit.get_Strip(), hit.get_Energy(), hit.get_Time());
+         }
 
-	private double _docaToTrk;             // 3-D distance of closest approach of the helix to the wire
-	private double _stripResolutionAtDoca; // position resolution at distance of closest approach of the helix to the wire
-	private int _TrkgStatus = -1 ;         //  TrkgStatusFlag factor (-1: no fit; 0: global helical fit; 1: KF fit)
+	private double _residual;             // distance to track intersect
+	private int _TrkgStatus = -1 ;        //  TrkgStatusFlag factor (-1: no fit; 0: global helical fit; 1: KF fit)
 
-    private int _AssociatedClusterID;
-    private int _AssociatedCrossID;
-    private int _AssociatedTrackID;
+         private int _AssociatedCrossIndex = -1;
+         private int _AssociatedTrackIndex = -1;
 
-    public double _QualityFac;
+         public double _QualityFac;
 
 	public double get_docaToTrk() {
-		return _docaToTrk;
+		return _residual;
 	}
 
 	public void set_docaToTrk(double _docaToTrk) {
-		this._docaToTrk = _docaToTrk;
-	}
-
-	public double get_stripResolutionAtDoca() {
-		return _stripResolutionAtDoca;
-	}
-
-	public void set_stripResolutionAtDoca(double _stripResolutionAtDoca) {
-		this._stripResolutionAtDoca = _stripResolutionAtDoca;
+		this._residual = _docaToTrk;
 	}
 
 	/**
@@ -83,31 +77,26 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 	}
 
 	public double get_Residual() {
-		if (get_stripResolutionAtDoca()==0) return Double.NaN;
-		return get_docaToTrk()/get_stripResolutionAtDoca();
+            return this._residual;
 	}
 
-	public int get_AssociatedClusterID() {
-		return _AssociatedClusterID;
+	public void set_Residual(double trackLocalY) {
+            this._residual = this.get_StripLocalSegment().origin().y()-trackLocalY;
 	}
 
-	public void set_AssociatedClusterID(int _AssociatedClusterID) {
-		this._AssociatedClusterID = _AssociatedClusterID;
+	public int get_CrossIndex() {
+		return _AssociatedCrossIndex;
 	}
 
-	public int get_AssociatedCrossID() {
-		return _AssociatedCrossID;
+	public void set_CrossIndex(int _AssociatedCrossIndex) {
+		this._AssociatedCrossIndex = _AssociatedCrossIndex;
 	}
 
-	public void set_AssociatedCrossID(int _AssociatedCrossID) {
-		this._AssociatedCrossID = _AssociatedCrossID;
+	public int get_TrackIndex() {
+		return _AssociatedTrackIndex;
 	}
 
-	public int get_AssociatedTrackID() {
-		return _AssociatedTrackID;
-	}
-
-	public void set_AssociatedTrackID(int _AssociatedTrackID) {
-		this._AssociatedTrackID = _AssociatedTrackID;
+	public void set_TrackIndex(int _AssociatedTrackIndex) {
+		this._AssociatedTrackIndex = _AssociatedTrackIndex;
 	}
 }
