@@ -3,10 +3,8 @@ package org.jlab.rec.fvt.track.fit;
 import org.jlab.jnp.matrix.*;
 import java.util.HashMap;
 import java.util.Map;
-import org.jlab.clas.clas.math.FastMath;
 import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
-import org.jlab.geom.prim.Point3D;
 
 /**
  *

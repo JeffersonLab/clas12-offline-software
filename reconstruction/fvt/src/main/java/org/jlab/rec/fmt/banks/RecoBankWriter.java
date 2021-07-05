@@ -1,9 +1,9 @@
 package org.jlab.rec.fmt.banks;
 
 import java.util.List;
+import java.util.Map;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.rec.fmt.cluster.Cluster;
 import org.jlab.rec.fmt.cross.Cross;
 import org.jlab.rec.fmt.hit.FittedHit;
@@ -19,14 +19,16 @@ public class RecoBankWriter {
         DataBank bank = event.createBank("FMTRec::Hits", hitlist.size());
 
         for (int i = 0; i < hitlist.size(); i++) {
-            bank.setShort("ID",          i, (short) hitlist.get(i).get_Id());
-            bank.setByte( "layer",       i, (byte)  hitlist.get(i).get_Layer());
-            bank.setByte( "sector",      i, (byte)  hitlist.get(i).get_Sector());
-            bank.setInt(  "strip",       i,         hitlist.get(i).get_Strip());
-            bank.setFloat("fitResidual", i, (float) hitlist.get(i).get_Residual());
-            bank.setInt(  "trkingStat",  i,         hitlist.get(i).get_TrkgStatus());
-            bank.setShort("clusterID",   i, (short) hitlist.get(i).get_AssociatedClusterID());
-            bank.setShort("trkID",       i, (short) hitlist.get(i).get_AssociatedTrackID());
+            bank.setByte( "layer",        i, (byte)  hitlist.get(i).get_Layer());
+            bank.setByte( "sector",       i, (byte)  hitlist.get(i).get_Sector());
+            bank.setShort("strip",        i, (short) hitlist.get(i).get_Strip());
+            bank.setFloat("energy",       i, (float) hitlist.get(i).get_Energy());
+            bank.setFloat("time",         i, (float) hitlist.get(i).get_Time());
+            bank.setFloat("localY",       i, (float) hitlist.get(i).get_StripLocalSegment().origin().y());
+            bank.setFloat("residual",     i, (float) hitlist.get(i).get_Residual());
+            bank.setShort("adcIndex",     i, (short) hitlist.get(i).get_Index());
+            bank.setShort("clusterIndex", i, (short) hitlist.get(i).get_ClusterIndex());
+            bank.setShort("trackIndex",   i, (short) hitlist.get(i).get_TrackIndex());
         }
 
         return bank;
@@ -44,27 +46,17 @@ public class RecoBankWriter {
         for (int i = 0; i < cluslist.size(); i++) {
             for (int j = 0; j < hitIdxArray.length; j++) hitIdxArray[j] = -1;
 
-            bank.setShort("ID",               i, (short) cluslist.get(i).get_Id());
+            bank.setShort("index",            i, (short) cluslist.get(i).get_Index());
             bank.setByte( "sector",           i, (byte)  cluslist.get(i).get_Sector());
             bank.setByte( "layer",            i, (byte)  cluslist.get(i).get_Layer());
             bank.setShort("size",             i, (short) cluslist.get(i).size());
-            bank.setFloat("ETot",             i, (float) cluslist.get(i).get_TotalEnergy());
-            bank.setInt(  "seedStrip",        i,         cluslist.get(i).get_SeedStrip());
             bank.setFloat("centroid",         i, (float) cluslist.get(i).get_Centroid());
-            bank.setFloat("seedE",            i, (float) cluslist.get(i).get_SeedEnergy());
-            bank.setFloat("Tmin",             i, (float) cluslist.get(i).get_Tmin());
-            bank.setFloat("centroidResidual", i, (float) cluslist.get(i).get_CentroidResidual());
-            bank.setShort("trkID",            i, (short) cluslist.get(i).get_AssociatedTrackID());
-
-            for (int j = 0; j < cluslist.get(i).size(); j++)
-                if (j < hitIdxArray.length) hitIdxArray[j] = cluslist.get(i).get(j).get_Id();
-
-            for (int j = 0; j < hitIdxArray.length; j++) {
-                String hitStrg = "Hit";
-                hitStrg += (j + 1);
-                hitStrg += "_ID";
-                bank.setShort(hitStrg, i, (short) hitIdxArray[j]);
-            }
+            bank.setFloat("residual",         i, (float) cluslist.get(i).get_CentroidResidual());
+            bank.setFloat("doca",             i, (float) cluslist.get(i).get_Doca());
+            bank.setFloat("energy",           i, (float) cluslist.get(i).get_TotalEnergy());
+            bank.setShort("seedStrip",        i, (short) cluslist.get(i).get_SeedStrip());
+            bank.setShort("seedIndex",        i, (short) cluslist.get(i).getSeedIndex());
+            bank.setShort("trackIndex",       i, (short) cluslist.get(i).get_TrackIndex());
         }
 
         return bank;
@@ -81,14 +73,14 @@ public class RecoBankWriter {
 
         int index = 0;
         for (int j = 0; j < crosses.size(); j++) {
-            bank.setShort("ID",          index, (short) crosses.get(j).get_Id());
+            bank.setShort("index",       index, (short) crosses.get(j).get_Index());
             bank.setByte( "sector",      index, (byte)  crosses.get(j).get_Sector());
             bank.setByte( "region",      index, (byte)  crosses.get(j).get_Region());
             bank.setFloat("x",           index, (float) crosses.get(j).get_Point().x());
             bank.setFloat("y",           index, (float) crosses.get(j).get_Point().y());
             bank.setFloat("z",           index, (float) crosses.get(j).get_Point().z());
-            bank.setShort("trkID",       index, (short) crosses.get(j).get_AssociatedTrackID());
-            bank.setShort("Cluster1_ID", index, (short) crosses.get(j).get_Cluster1().get_Id());
+            bank.setShort("trkID",       index, (short) crosses.get(j).get_TrackIndex());
+            bank.setShort("Cluster1_ID", index, (short) crosses.get(j).get_Cluster1().get_Index());
 
             index++;
         }
@@ -96,49 +88,49 @@ public class RecoBankWriter {
         return bank;
     }
 
-    private DataBank fillFMTTracksBank(DataEvent event, List<Track> candlist) {
+    private DataBank fillFMTTracksBank(DataEvent event, Map<Integer,Track> candlist) {
 
         DataBank bank = event.createBank("FMTRec::Tracks", candlist.size());
 
-        for (int i = 0; i < candlist.size(); i++) {
-            bank.setShort("id",     i, (short) candlist.get(i).getId());
-            bank.setShort("status", i, (short) candlist.get(i).status);
-            bank.setByte( "sector", i, (byte)  candlist.get(i).getSector());
-            bank.setByte( "q",      i, (byte)  candlist.get(i).getQ());
-            bank.setFloat("chi2",   i, (float) candlist.get(i).getChi2());
-            bank.setFloat("Vtx0_x", i, (float) candlist.get(i).getX());
-            bank.setFloat("Vtx0_y", i, (float) candlist.get(i).getY());
-            bank.setFloat("Vtx0_z", i, (float) candlist.get(i).getZ());
-            bank.setFloat("p0_x",   i, (float) candlist.get(i).getPx());
-            bank.setFloat("p0_y",   i, (float) candlist.get(i).getPy());
-            bank.setFloat("p0_z",   i, (float) candlist.get(i).getPz());
+        int i = 0;
+        for (int id : candlist.keySet()) {
+            bank.setShort("index",  i, (short) candlist.get(id).getIndex());
+            bank.setShort("status", i, (short) candlist.get(id).status);
+            bank.setByte( "sector", i, (byte)  candlist.get(id).getSector());
+            bank.setByte( "q",      i, (byte)  candlist.get(id).getQ());
+            bank.setFloat("chi2",   i, (float) candlist.get(id).getChi2());
+            bank.setFloat("Vtx0_x", i, (float) candlist.get(id).getX());
+            bank.setFloat("Vtx0_y", i, (float) candlist.get(id).getY());
+            bank.setFloat("Vtx0_z", i, (float) candlist.get(id).getZ());
+            bank.setFloat("p0_x",   i, (float) candlist.get(id).getPx());
+            bank.setFloat("p0_y",   i, (float) candlist.get(id).getPy());
+            bank.setFloat("p0_z",   i, (float) candlist.get(id).getPz());
+            i++;
         }
 
         return bank;
     }
 
     public void appendFMTBanks(DataEvent event, List<FittedHit> fhits, List<Cluster> clusters,
-            List<Cross> crosses, List<Track> tracks) {
+                               Map<Integer,Track> tracks) {
 
         if (event == null) return;
-        if (crosses != null && crosses.size() > 0 && tracks != null && tracks.size() > 0) {
-            event.appendBanks(this.fillFMTHitsBank(event, fhits),
-                    this.fillFMTClustersBank(event, clusters),
-                    this.fillFMTCrossesBank(event, crosses),
-                    this.fillFMTTracksBank(event, tracks));
-        }
-        if (crosses != null && crosses.size() > 0) {
-            event.appendBanks(this.fillFMTHitsBank(event, fhits),
-                    this.fillFMTClustersBank(event, clusters),
-                    this.fillFMTCrossesBank(event, crosses));
-        }
-        if (crosses == null || crosses.size()==0 && (clusters != null && clusters.size()>0)) {
-            event.appendBanks(this.fillFMTHitsBank(event, fhits),
-                    this.fillFMTClustersBank(event, clusters));
+        
+        if (fhits != null) {
+            event.appendBanks(this.fillFMTHitsBank(event, fhits));
+        }        
+        
+        if (clusters != null && clusters.size()>0) {
+            event.appendBanks(this.fillFMTClustersBank(event, clusters));
         }
 
-        if (fhits != null && (clusters == null || clusters.size() == 0) ) {
-            event.appendBanks(this.fillFMTHitsBank(event, fhits));
+//        if (crosses != null && crosses.size() > 0) {
+//            event.appendBanks(this.fillFMTCrossesBank(event, crosses));
+//        }
+        
+        if (tracks != null && tracks.size() > 0) {
+            event.appendBanks(this.fillFMTTracksBank(event, tracks));
         }
+
     }
 }

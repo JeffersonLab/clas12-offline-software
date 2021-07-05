@@ -1,13 +1,9 @@
 package org.jlab.rec.fvt.track.fit;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import org.apache.commons.math3.special.Erf;
-import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.fmt.Constants;
 import org.jlab.rec.fmt.cluster.Cluster;
-import org.jlab.rec.fmt.hit.Hit;
 import org.jlab.rec.fmt.Geometry;
 import org.jlab.rec.fvt.track.fit.StateVecs.StateVec;
 

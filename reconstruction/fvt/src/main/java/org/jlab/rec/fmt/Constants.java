@@ -1,10 +1,5 @@
 package org.jlab.rec.fmt;
 
-import java.util.Arrays;
-
-import org.jlab.geom.prim.Line3D;
-import org.jlab.geom.prim.Point3D;
-
 
 /**
  *
@@ -59,7 +54,7 @@ public class Constants {
     public static  double drdzcut  =  1.5;
 
     // ----- end cut based cand select
-    public static double CIRCLECONFUSION = 1; // cm
+    public static double CIRCLECONFUSION = 2; // cm
 
     public static void Load() {
 
@@ -180,20 +175,20 @@ public class Constants {
         }
     }
 
-	private static int getLocalRegion(int i) {
-		// To represent the geometry we divide the barrel micromega disk into 4 regions according to the strip numbering system.
-		// Here i = strip_number -1;
-		// Region 1 is the region in the negative x part of inner region: the strips range is from   1 to 320  (   0 <= i < 320)
-		// Region 2 is the region in the negative y part of outer region: the strips range is from 321 to 512  ( 320 <= i < 512)
-		// Region 3 is the region in the positive x part of inner region: the strips range is from 513 to 832  ( 512 <= i < 832)
-		// Region 4 is the region in the positive y part of outer region: the strips range is from 833 to 1024 ( 832 <= i < 1024)
-		if (i>=  0 && i< 320) return 1;
-		if (i>=320 && i< 512) return 2;
-		if (i>=512 && i< 832) return 3;
-		if (i>=832 && i<1024) return 4;
-		return 0;
-	}
-
+    private static int getLocalRegion(int i) {
+            // To represent the geometry we divide the barrel micromega disk into 4 regions according to the strip numbering system.
+            // Here i = strip_number -1;
+            // Region 1 is the region in the negative x part of inner region: the strips range is from   1 to 320  (   0 <= i < 320)
+            // Region 2 is the region in the negative y part of outer region: the strips range is from 321 to 512  ( 320 <= i < 512)
+            // Region 3 is the region in the positive x part of inner region: the strips range is from 513 to 832  ( 512 <= i < 832)
+            // Region 4 is the region in the positive y part of outer region: the strips range is from 833 to 1024 ( 832 <= i < 1024)
+            if (i>=  0 && i< 320) return 1;
+            if (i>=320 && i< 512) return 2;
+            if (i>=512 && i< 832) return 3;
+            if (i>=832 && i<1024) return 4;
+            return 0;
+    }
+    
     public static synchronized double[] getEFF_Z_OVER_A() {
         return EFF_Z_OVER_A;
     }

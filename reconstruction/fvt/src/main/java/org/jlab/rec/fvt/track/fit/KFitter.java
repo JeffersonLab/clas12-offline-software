@@ -1,6 +1,5 @@
 package org.jlab.rec.fvt.track.fit;
 
-import java.util.HashMap;
 import java.util.List;
 
 import org.jlab.clas.swimtools.Swim;
@@ -10,6 +9,8 @@ import org.jlab.rec.fvt.track.fit.StateVecs.StateVec;
 import org.jlab.jnp.matrix.*;
 import org.jlab.rec.fmt.cluster.Cluster;
 import org.jlab.rec.fmt.Geometry;
+import org.jlab.rec.fvt.track.Track;
+import org.jlab.rec.fvt.track.Trajectory;
 
 /**
  * @author ziegler
@@ -21,7 +22,7 @@ public class KFitter {
     private StateVecs sv;
     private MeasVecs mv = new MeasVecs();
 
-    public StateVec finalStateVec;
+    public StateVec finalStateVec = null;
     public CovMat finalCovMat;
     public int totNumIter = 10;
     public boolean filterOn = true;
@@ -36,16 +37,26 @@ public class KFitter {
     Matrix result_inv    = new Matrix();
     Matrix adj           = new Matrix();
 
-    List<Cluster> clusters;
+    Track track = null;
+    private List<Cluster> clusters;
+
+    public KFitter(Track track, Swim swimmer, int c) {
+        sv = new StateVecs(swimmer);
+        this.track = track;
+        this.clusters = track.getClusters();
+        this.init(clusters, track.getSector(), track.getX(), track.getY(), track.getZ(), 
+                            track.getPx(), track.getPy(), track.getPz(), track.getQ(), c);
+    }
 
     public KFitter(List<Cluster> clusters, int sector, double xVtx, double yVtx, double zVtx,
             double pxVtx, double pyVtx, double pzVtx, int q, Swim swimmer, int c) {
         sv = new StateVecs(swimmer);
+        this.track = new Track(0,sector, q, xVtx, yVtx, zVtx, pxVtx, pyVtx, pzVtx, clusters);
         this.clusters = clusters;
         this.init(clusters, sector, xVtx, yVtx, zVtx, pxVtx, pyVtx, pzVtx, q, c);
     }
 
-    public void init(List<Cluster> clusters, int sector, double xVtx, double yVtx, double zVtx,
+    private void init(List<Cluster> clusters, int sector, double xVtx, double yVtx, double zVtx,
             double pxVtx, double pyVtx, double pzVtx, int q, int c) {
         // initialize measVecs
         mv.setMeasVecs(clusters);
@@ -104,33 +115,48 @@ public class KFitter {
             sv.transport(sector, k, k+1, sv.trackTraj.get(k), sv.trackCov.get(k));
         }
 
-        for (int li = 1; li <= 6; ++li) {
-            // Get the state vector closest in z to the FMT layer.
-            // NOTE: A simple optimization would be to do this on another for loop with only the
-            //       state vectors, saving the ones closest to the FMT layers to use them later
-            //       instead of looping through them 6 times.
-            int closestSVID = -1;
-            double closestSVDistance = Double.POSITIVE_INFINITY;
-            for (int si = 0; si < sv.trackTraj.size(); ++si) {
-                double svDistance = Math.abs(sv.trackTraj.get(si).z - Geometry.getLayerZ(li-1));
-                if (svDistance < closestSVDistance) {
-                    closestSVID = si;
-                    closestSVDistance = svDistance;
-                }
-            }
-
-            // Get the state vector's y position in the layer's local coordinates.
-            Point3D locPos = Geometry.globalToLocal(
-                    new Point3D(sv.trackTraj.get(closestSVID).x, sv.trackTraj.get(closestSVID).y, 0),
-                    li-1);
-
-            // Store the cluster's residual.
-            for (Cluster cl : this.clusters) {
-                if (cl.get_Layer() == li) {
-                    cl.set_CentroidResidual(cl.get_Centroid() - locPos.y());
-                }
+        
+        // save final trajectory points
+        if(this.finalStateVec!=null) {
+            for (int k = 0; k < svzLength; ++k) {
+                Trajectory trj = new Trajectory(mv.measurements.get(k).layer,
+                                                sv.trackTraj.get(k).x,
+                                                sv.trackTraj.get(k).y,
+                                                sv.trackTraj.get(k).z,
+                                                sv.trackTraj.get(k).tx,
+                                                sv.trackTraj.get(k).ty,
+                                                0,
+                                                sv.trackTraj.get(k).deltaPath);
+                track.setFMTtraj(trj);
             }
         }
+        
+//        for (int li = 1; li <= 6; ++li) {
+//            // Get the state vector closest in z to the FMT layer.
+//            // NOTE: A simple optimization would be to do this on another for loop with only the
+//            //       state vectors, saving the ones closest to the FMT layers to use them later
+//            //       instead of looping through them 6 times.
+//            int closestSVID = -1;
+//            double closestSVDistance = Double.POSITIVE_INFINITY;
+//            for (int si = 0; si < sv.trackTraj.size(); ++si) {
+//                double svDistance = Math.abs(sv.trackTraj.get(si).z - Geometry.getLayerZ(li-1));
+//                if (svDistance < closestSVDistance) {
+//                    closestSVID = si;
+//                    closestSVDistance = svDistance;
+//                }
+//            }
+//
+//            // Get the state vector's y position in the layer's local coordinates.
+//            Point3D Pos = new Point3D(sv.trackTraj.get(closestSVID).x, sv.trackTraj.get(closestSVID).y, 0);
+//            Point3D locPos = Geometry.globalToLocal(Pos,li);
+//
+//            // Store the cluster's residual.
+//            for (Cluster cl : this.clusters) {
+//                if (cl.get_Layer() == li) {
+//                    cl.set_CentroidResidual(cl.get_Centroid() - locPos.y());
+//                }
+//            }
+//        }
     }
 
     public Matrix filterCovMat(double[] H, Matrix Ci, double V) {
@@ -172,7 +198,7 @@ public class KFitter {
             // Update Chi^2 and filtered state vector.
             double h = mv.h(sv.trackTraj.get(k));
             double m = mv.measurements.get(k).centroid;
-            this.chi2 += ((m-h)*(m-h))/mv.measurements.get(k).error;
+            this.chi2 += ((m-h)*(m-h)/mv.measurements.get(k).error);
 
             double x_filt = sv.trackTraj.get(k).x + K[0] * (m-h);
             double y_filt = sv.trackTraj.get(k).y + K[1] * (m-h);
