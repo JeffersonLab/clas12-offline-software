@@ -52,10 +52,16 @@ public class TrackDisentangler {
                                 boolean merged = false; 
                                 ReducedTrack t1 = NewTrackMap.getTrack(tid1);
                                 ReducedTrack t2 = NewTrackMap.getTrack(tid2);
+                                List<HitVector> h1list = new ArrayList<>();
+                                List<HitVector> h2list = new ArrayList<>();
                                 List<HitVector> h1listfirst = new ArrayList<>();
                                 List<HitVector> h2listfirst = new ArrayList<>();
                                 List<HitVector> h1listlast = new ArrayList<>();
                                 List<HitVector> h2listlast = new ArrayList<>();
+                                h1list.addAll(t1.getFirstNHits(2)); 
+                                h1list.addAll(t1.getLastNHits(2));
+                                h2list.addAll(t2.getFirstNHits(2));
+                                h2list.addAll(t2.getLastNHits(2)); 
                                 h1listfirst.addAll(t1.getFirstNHits(2));
                                 h1listlast.addAll(t1.getLastNHits(2));
                                 h2listfirst.addAll(t2.getFirstNHits(2));
@@ -72,7 +78,7 @@ public class TrackDisentangler {
                                         }
                                     }
                                 }
-                                if(!merged)
+                                if(!merged){
                                     HITSLOOP:
                                     for(HitVector h1 : h1list){
                                         for(HitVector h2 : h2list){
