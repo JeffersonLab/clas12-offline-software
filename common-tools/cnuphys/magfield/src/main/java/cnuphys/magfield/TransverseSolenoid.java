@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 
-public class TransverseSolenoid extends MagneticField {
+public class TransverseSolenoid extends Solenoid {
 	
 	/**
 	 * private constructor to instantiate a TransverseSolenoid
@@ -13,19 +13,6 @@ public class TransverseSolenoid extends MagneticField {
 		setCoordinateNames("x", "y", "z");
 	}
 
-	/**
-	 * Checks whether the field has been set to always return zero.
-	 * 
-	 * @return <code>true</code> if the field is set to return zero.
-	 */
-	@Override
-	public final boolean isZeroField() {
-		if (isActive()) {
-			return super.isZeroField();
-		} else {
-			return true;
-		}
-	}
 
 	@Override
 	public String getName() {
@@ -52,7 +39,7 @@ public class TransverseSolenoid extends MagneticField {
 	@Override
 	public void printConfiguration(PrintStream ps) {
 		ps.println(String.format("TRANSVERSE SOLENOID scale: %6.3f file: %s", _scaleFactor,
-				MagneticFields.getInstance().getTransverseSolenoidBaseName()));
+				MagneticFields.getInstance().getSolenoidBaseName()));
 	}
 
 
@@ -63,7 +50,7 @@ public class TransverseSolenoid extends MagneticField {
 	 */
 	@Override
 	public boolean isActive() {
-		return MagneticFields.getInstance().hasActiveTransverseSolenoid();
+		return MagneticFields.getInstance().hasActiveSolenoid();
 	}
 	
 	/**
@@ -118,6 +105,5 @@ public class TransverseSolenoid extends MagneticField {
 		
 		return true;
 	}
-
 
 }

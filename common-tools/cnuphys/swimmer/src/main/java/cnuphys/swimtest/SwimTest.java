@@ -24,6 +24,7 @@ import javax.swing.JPanel;
 import cnuphys.adaptiveSwim.AdaptiveSwimException;
 import cnuphys.adaptiveSwim.AdaptiveSwimResult;
 import cnuphys.adaptiveSwim.AdaptiveSwimmer;
+import cnuphys.adaptiveSwim.geometry.Cylinder;
 import cnuphys.adaptiveSwim.test.AdaptiveBeamlineSwimTest;
 import cnuphys.adaptiveSwim.test.AdaptiveSectorSwimTest;
 import cnuphys.adaptiveSwim.test.AdaptiveTests;
@@ -637,143 +638,6 @@ public class SwimTest {
 
 	}
 
-	private static void generateTestData(String path, int n, long seed) {
-
-		double rMax = 6;
-		double sMax = 8;
-		double stepSize = 1.0e-3; // m
-		double distanceBetweenSaves = stepSize;
-		
-		File file = new File(path);
-		file.delete();
-
-		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITE);
-		SwimTestData td = new SwimTestData(rMax, sMax, stepSize, distanceBetweenSaves, n);
-
-		Swimmer swimmer = new Swimmer();
-
-		System.out.println("TORUS: [" + td.torusFile + "]");
-		System.out.println("SOLENOID: [" + td.solenoidFile + "]");
-
-		Random rand = new Random(seed);
-
-		System.err.println("Generating test data...\n");
-
-		for (int i = 0; i < n; i++) {
-			if ((i % 50) == 0) {
-				System.err.print(".");
-			}
-			td.charge[i] = rand.nextBoolean() ? -1 : 1;
-			td.xo[i] = -.05 + 0.1 * rand.nextDouble();
-			td.yo[i] = -.05 + 0.1 * rand.nextDouble();
-			td.zo[i] = -.05 + 0.1 * rand.nextDouble();
-			td.p[i] = 1. + 6 * rand.nextDouble();
-			td.theta[i] = 10 + 30 * rand.nextDouble();
-			td.phi[i] = 360 * rand.nextDouble();
-
-			td.results[i] = swimmer.swim(td.charge[i], td.xo[i], td.yo[i], td.zo[i], td.p[i], td.theta[i], td.phi[i],
-					rMax, sMax, stepSize, distanceBetweenSaves);
-
-//			double finalStateVector[] = td.results[i].lastElement();
-//
-//			printSummary("\nresult from traditional swimmer", td.results[i].size(),
-//					td.p[i], finalStateVector, null);
-
-		}
-
-		System.err.println();
-
-		SwimTestData.serialWrite(td, path);
-
-	}
-	
-	private static void testTestData(String path) {
-		
-		File file = new File(path);
-
-		if (!file.exists()) {
-			System.err.println("FATAL ERROR did not find file [" + path + "]");
-			System.exit(1);
-		}
-
-		SwimTestData td = null;
-		try {
-			td = SwimTestData.serialRead(path);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-
-		System.err.println("Successfully deserialized TestData file.");
-		System.err.println("Number of data points: " + td.count());
-		
-		String javaVersion = System.getProperty("java.version");
-
-		boolean sameJava = td.javaVersion.contentEquals(javaVersion);
-
-		System.out.println(String.format("Data java version: [%s] This java version: [%s] same: %s", td.javaVersion,
-				javaVersion, sameJava));
-
-		// using the same fields?
-		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITE);
-		FieldProbe ifield = FieldProbe.factory();
-
-		String torusFile = new String(MagneticFields.getInstance().getTorusBaseName());
-
-		boolean sameTorus = td.torusFile.contentEquals(torusFile);
-		System.out.println(
-				String.format("Data Torus: [%s] This Torus: [%s] same: %s", td.torusFile, torusFile, sameTorus));
-
-		String solenoidFile = new String(MagneticFields.getInstance().getSolenoidBaseName());
-
-		boolean sameSolenoid = td.solenoidFile.contentEquals(solenoidFile);
-		System.out.println(String.format("Data Solenoid: [%s] This Solenoid: [%s] same: %s", td.solenoidFile,
-				solenoidFile, sameSolenoid));
-
-		Swimmer swimmer = new Swimmer();
-		
-		//now generate comparison trajectories
-		td.testResults = new SwimTrajectory[td.count()];
-		
-		for (int i = 0; i < td.count(); i++) {
-			td.testResults[i] = swimmer.swim(td.charge[i], td.xo[i], td.yo[i], td.zo[i], td.p[i], td.theta[i], td.phi[i],
-					td.rMax, td.sMax, td.stepSize, td.distanceBetweenSaves);
-		}
-		
-
-		for (int i = 0; i < td.count(); i++) {
-			double finalStateVector[] = td.results[i].lastElement();
-			double finalTestStateVector[] = td.testResults[i].lastElement();
-			
-			
-			double sum = 0;
-			for (int j = 0; j < finalStateVector.length; j++) {
-				double diff = (finalTestStateVector[j] - finalStateVector[j]);
-				sum = (diff*diff);
-			}
-			sum = Math.sqrt(sum);
-			
-			if (sum > 0) {
-				System.out.println("results differ diff = " + sum);
-				System.exit(1);
-			}
-			
-			if (i == td.count()-1) {
-				printSummary("\nresult from data", td.results[i].size(),
-						td.p[i], finalStateVector, null);
-				printSummary("\nresult from test", td.testResults[i].size(),
-						td.p[i], finalStateVector, null);
-
-
-			}
-			
-		}
-		
-
-		
-		System.out.println("Trajectories are identical.");
-		
-	}
 	
 	private static void testSwimToBeamLine() {
 		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITE);
@@ -815,6 +679,215 @@ public class SwimTest {
 
 	}
 	
+	//swim to a cylinder
+	private static void swimToCylinderTest(int n, long seed) {
+		
+		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITE);
+		
+		System.err.println("Number of test swims: " + n);
+		
+		Swimmer swimmer = new Swimmer();
+		
+		AdaptiveSwimmer adaptiveSwimmer = new AdaptiveSwimmer();
+		//every distance is in meters
+		double accuracy = 1e-6; // meters
+	    double stepSize = 5e-4; // 500 microns
+
+		
+	    RandomData data = new RandomData(n, seed, -0.01, 0.02, -0.01, 0.02, -0.01, 0.02,
+	    		0.9, 6, 25, 20, 0, 360);
+	    String resStr;
+	    //the false means the whole trajectory is not saved
+	    AdaptiveSwimResult result = new AdaptiveSwimResult(false);
+	    
+	    double delMin = Double.POSITIVE_INFINITY;
+	    double delMax = Double.NEGATIVE_INFINITY;
+
+	    
+	    int numFail = 0;
+		double eps = 1.0e-6;
+	    double sMax = 8;
+	    
+		double[] centerLineP1 = {0.5, 0.3, -125}; //cm
+		double[] centerLineP2 = {0.5, 0.3, 250};
+		double radius = 168/100; //meters
+		
+		//to meters
+		for (int i = 0; i < 3; i++) {
+			centerLineP1[i] /= 100;
+			centerLineP2[i] /= 100;
+		}
+		
+		//the target cylinder
+		Cylinder targetCylinder = new Cylinder(centerLineP1, centerLineP2, radius);
+
+		
+		long startTime = 0;
+	    for (int i = 0; i < n; i++) {
+	    	try {
+	    		
+	    		if (i == 99) {
+	    			startTime = System.currentTimeMillis();
+	    		}
+	    			    		
+				swimmer.swimCylinder(data.charge[i], data.xo[i], data.yo[i], data.zo[i], data.p[i], data.theta[i], data.phi[i], 
+						centerLineP1, centerLineP2, radius, accuracy, 
+						sMax, stepSize, Swimmer.CLAS_Tolerance, result);	
+
+				if (result.getStatus() != 0) {
+					numFail++;
+				}
+				else {
+					double u[] = result.getUf();
+					double del = Math.abs(targetCylinder.distance(u[0], u[1], u[2]));
+					delMin = Math.min(delMin, del);
+					delMax = Math.max(delMax, del);
+					
+				}
+								
+			} catch (RungeKuttaException e) {
+				e.printStackTrace();
+			}
+	    	
+	    }
+
+
+	    System.err.println("OLD SWIMMER Number of failures: " + numFail);
+	    System.err.println(String.format("%-8.3f sec", ((double)(System.currentTimeMillis() - startTime))/1000.));
+	    resStr = String.format("minDel = %-10.6f microns  maxDel = %-10.6f microns ", delMin * 1.0e6, delMax * 1.0e6);
+	    
+	    System.err.println(resStr);
+	    
+	    System.err.println("Last swim: " + result);
+
+	    
+		
+		startTime = 0;
+	    for (int i = 0; i < n; i++) {
+	    	try {
+	    		
+	    		if (i == 99) {
+	    			startTime = System.currentTimeMillis();
+	    		}
+	    			    		
+				adaptiveSwimmer.swimCylinder(data.charge[i], data.xo[i], data.yo[i], data.zo[i], data.p[i], data.theta[i], data.phi[i], 
+						targetCylinder, accuracy, sMax, stepSize, eps, result);	
+
+				if (result.getStatus() != 0) {
+					numFail++;
+				}
+				else {
+					double u[] = result.getUf();
+					double del = Math.abs(targetCylinder.distance(u[0], u[1], u[2]));
+					delMin = Math.min(delMin, del);
+					delMax = Math.max(delMax, del);
+					
+				}
+								
+			} catch (AdaptiveSwimException e) {
+				e.printStackTrace();
+			}
+	    	
+	    }
+	    
+	    
+
+	    
+	    System.err.println("NEW SWIMMER Number of failures: " + numFail);
+	    System.err.println(String.format("%-8.3f sec", ((double)(System.currentTimeMillis() - startTime))/1000.));
+	    resStr = String.format("minDel = %-10.6f microns  maxDel = %-10.6f microns ", delMin * 1.0e6, delMax * 1.0e6);
+	    
+	    System.err.println(resStr);
+	    
+	    System.err.println("Last swim: " + result);
+	    
+	    
+	    System.err.println("\nDifference test");
+	    AdaptiveSwimResult result2 = new AdaptiveSwimResult(false);
+	    
+	    double minDiff = Double.POSITIVE_INFINITY;
+	    double maxDiff = Double.NEGATIVE_INFINITY;
+	    double avgDiff = 0;
+	    
+	    int minIndex = -1;
+	    int maxIndex = -1;
+	    
+	    for (int i = 0; i < n; i++) {
+	    	try {
+	    		
+	    		if (i == 93449) {
+	    			System.err.println();
+	    		}
+	    		
+				swimmer.swimCylinder(data.charge[i], data.xo[i], data.yo[i], data.zo[i], data.p[i], data.theta[i], data.phi[i], 
+						centerLineP1, centerLineP2, radius, accuracy, 
+						sMax, stepSize/10, Swimmer.CLAS_Tolerance, result);	
+				
+				adaptiveSwimmer.swimCylinder(data.charge[i], data.xo[i], data.yo[i], data.zo[i], data.p[i], data.theta[i], data.phi[i], 
+						targetCylinder, accuracy, sMax, stepSize, eps, result2);	
+				
+				double diff = result.delDifference(result2);
+				avgDiff += diff;
+				
+				if (diff < minDiff) {
+					minDiff = diff;
+					minIndex = i;
+				}
+				
+				if (diff > maxDiff) {
+					maxDiff = diff;
+					maxIndex = i;
+				}
+
+				
+			} catch (AdaptiveSwimException e) {
+				e.printStackTrace();
+			} catch (RungeKuttaException e) {
+				e.printStackTrace();
+			}
+	    }
+	    
+	    avgDiff /= n;
+
+	    System.err.println(String.format("Min Euclidean diff old and new swims: %-7.4f microns at index = %d", minDiff * 1.e6, minIndex));
+	    System.err.println(String.format("Max Euclidean diff old and new swims: %-7.4f microns at index = %d", maxDiff * 1.e6, maxIndex));
+	    System.err.println(String.format("Avg Euclidean diff old and new swims: %-7.4f microns", avgDiff * 1.e6));
+	    
+	    System.err.println("\nOld swimmer uniform step comparison.");
+
+	    InitialValues iv = result.getInitialValues();
+	    
+		swimmer.swimCylinder(iv.charge, iv.xo, iv.yo, iv.zo, iv.p, iv.theta, iv.phi, centerLineP1, centerLineP2, radius, accuracy, sMax, 0.01*stepSize, result);
+
+	    
+		System.err.println("\nDone with swimRho test");
+	    System.err.println("Uniform step last swim: " + result);
+	    
+	    
+//	    InitialValues iv = result.getInitialValues();
+//	    double sf = result.getFinalS();
+//	    System.err.println("\nUsing SwimS for comparison, old swimmer result, sf = " + sf);
+//		try {
+//			adaptiveSwimmer.swimS(iv.charge, iv.xo, iv.yo, iv.zo, iv.p, iv.theta, iv.phi, accuracy, sf, stepSize, eps, result);
+//		} catch (AdaptiveSwimException e) {
+//			e.printStackTrace();
+//		}
+//		System.err.println("Swim to old swimmer sf: " + result);
+//
+//	    
+//	    sf = result2.getFinalS();
+//	    System.err.println("\nUsing SwimS for comparison, new swimmer result, sf = " + sf);
+//		try {
+//			adaptiveSwimmer.swimS(iv.charge, iv.xo, iv.yo, iv.zo, iv.p, iv.theta, iv.phi, accuracy, sf, stepSize, eps, result2);
+//		} catch (AdaptiveSwimException e) {
+//			e.printStackTrace();
+//		}
+//		System.err.println("Swim to new swimmer sf: " + result2);
+
+	}
+	
+	
+	//swim to a fixed rho
 	private static void swimToRhoTest(int n, long seed) {
 		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITE);
 		
@@ -830,40 +903,13 @@ public class SwimTest {
 		
 	    System.err.println(String.format("accuracy: %-6.2f microns", accuracy*1.0e6));
 	    
-	    double rho = 0.2; //200 mm
-	    
-	    //vertex in meters
-	    double xo[] = new double[n];
-	    double yo[] = new double[n];
-	    double zo[] = new double[n];
-	    
-	    double p = 0.9; //GeV
-	    
-	    Random rand = new Random(seed);
-	    
-	    int charge[] = new int[n];
-	    double theta[] = new double[n];
-	    double phi[] = new double[n];
-	    
+	    double rho = 0.2; //200 mm	    
 	    double sMax = 5;
+	    
+	    RandomData data = new RandomData(n, seed);
 	    
 	    //the false means the whole trajectory is not saved
 	    AdaptiveSwimResult result = new AdaptiveSwimResult(false);
-	    
-	    for (int i = 0; i < n; i++) {
-	    	charge[i] = (rand.nextDouble() < 0.5) ? -1 : 1;
-	    	theta[i] = 25 + 20*rand.nextDouble();
-	    	phi[i] = 360*rand.nextDouble();
-	    	
-	    	xo[i] = -0.01 + .02*rand.nextDouble();
-	    	yo[i] = -0.01 + .02*rand.nextDouble();
-	    	zo[i] = -0.01 + .02*rand.nextDouble();
-	    	
-//	    	xo[i] = 0;
-//	    	yo[i] = 0;
-//	    	zo[i] = 0;
-
-	    }
 	    
 	    double delRhoMin = Double.POSITIVE_INFINITY;
 	    double delRhoMax = Double.NEGATIVE_INFINITY;
@@ -884,7 +930,8 @@ public class SwimTest {
 	    		}
 
 	    		
-				swimmer.swimRho(charge[i], xo[i], yo[i], zo[i], p, theta[i], phi[i], rho, accuracy, sMax, stepSize, Swimmer.CLAS_Tolerance, result);
+				swimmer.swimRho(data.charge[i], data.xo[i], data.yo[i], data.zo[i], data.p[i], data.theta[i], data.phi[i], 
+						rho, accuracy, sMax, stepSize, Swimmer.CLAS_Tolerance, result);
 				double rhoFin = result.getFinalRho();
 
 				if (result.getStatus() != 0) {
@@ -916,7 +963,8 @@ public class SwimTest {
 	    			startTime = System.currentTimeMillis();
 	    		}
 	    		
-				adaptiveSwimmer.swimRho(charge[i], xo[i], yo[i], zo[i], p, theta[i], phi[i], rho, accuracy, sMax, stepSize, eps, result);
+				adaptiveSwimmer.swimRho(data.charge[i], data.xo[i], data.yo[i], data.zo[i], data.p[i], data.theta[i], data.phi[i], 
+						rho, accuracy, sMax, stepSize, eps, result);
 
 				double rhoFin = result.getFinalRho();
 
@@ -959,8 +1007,10 @@ public class SwimTest {
 	    for (int i = 0; i < n; i++) {
 	    	try {
 	    		
-				swimmer.swimRho(charge[i], xo[i], yo[i], zo[i], p, theta[i], phi[i], rho, accuracy, sMax, stepSize, Swimmer.CLAS_Tolerance, result);
-				adaptiveSwimmer.swimRho(charge[i], xo[i], yo[i], zo[i], p, theta[i], phi[i], rho, accuracy, sMax, stepSize, eps, result2);
+				swimmer.swimRho(data.charge[i], data.xo[i], data.yo[i], data.zo[i], data.p[i], data.theta[i], data.phi[i], 
+						rho, accuracy, sMax, stepSize, Swimmer.CLAS_Tolerance, result);
+				adaptiveSwimmer.swimRho(data.charge[i], data.xo[i], data.yo[i], data.zo[i], data.p[i], data.theta[i], data.phi[i], 
+						rho, accuracy, sMax, stepSize, eps, result2);
 				double diff = result.delDifference(result2);
 				avgDiff += diff;
 				
@@ -1029,7 +1079,7 @@ public class SwimTest {
 	 * 
 	 * @param arg command line arguments (ignored)
 	 */
-	public static void Xmain(String arg[]) {
+	public static void main(String arg[]) {
 		final MagneticFields mf = MagneticFields.getInstance();
 		FastMath.setMathLib(FastMath.MathLib.FAST);
 
@@ -1048,9 +1098,12 @@ public class SwimTest {
 			System.exit(1);
 		}
 		
-		//test the swim to beam line
-		//swimToRhoTest(7598, 33557799);
-		swimToRhoTest(100000, 33557799);
+		//test the swim to a fixed rho
+		//swimToRhoTest(10000, 33557799);
+		
+		//test the swim to a cylinder
+		swimToCylinderTest(93450, 33557799);
+
 
 		// write out data file
 //		String path = (new File(_homeDir, "swimTestData")).getPath();
@@ -1082,7 +1135,7 @@ public class SwimTest {
 	 * 
 	 * @param arg command line arguments (ignored)
 	 */
-	public static void main(String arg[]) {
+	public static void Xmain(String arg[]) {
 
 		initMagField();
 
@@ -1118,5 +1171,7 @@ public class SwimTest {
 		});
 
 	}
+	
+
 
 }
