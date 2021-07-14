@@ -371,7 +371,7 @@ public class Geometry {
         double b = SVTConstants.ACTIVESENWID;
         double P = SVTConstants.READOUTPITCH;
 
-        double s = -1;
+        double s = -1000;
 
         if (layer % 2 == 1) {//layers 1,3,5 == bottom ==i ==>(1) : regular configuration
             //m1,b1
@@ -437,10 +437,11 @@ public class Geometry {
             }
             s = newStrip;
         }
-        if (s <= 1) {
+        //allow 2 strips off
+        if (s <= 1 && s > -2) {
             s = 1;
         }
-        if (s >= 256) {
+        if (s >= 256 && s < 259) {
             s = 256;
         }
 

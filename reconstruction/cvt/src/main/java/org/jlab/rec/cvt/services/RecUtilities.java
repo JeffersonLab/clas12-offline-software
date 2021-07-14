@@ -30,6 +30,8 @@ import org.jlab.rec.cvt.track.TrackCandListFinder;
 import org.jlab.rec.cvt.track.TrackSeeder;
 import org.jlab.rec.cvt.track.TrackSeederCA;
 
+import java.util.Collections;
+import java.util.Comparator;
 /**
  * Service to return reconstructed TRACKS
  * format
@@ -207,6 +209,171 @@ public class RecUtilities {
         }
         return KFSites;
     }
+    
+    public List<Surface> setMeasVecs(StraightTrack trkcand, 
+            org.jlab.rec.cvt.svt.Geometry sgeo,
+            org.jlab.rec.cvt.bmt.BMTGeometry bgeo, Swim swim) {
+        //Collections.sort(trkcand.get_Crosses());
+        List<Surface> KFSites = new ArrayList<Surface>();
+        Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()),
+        new Vector3D(0,0,1));
+        Surface meas0 = new Surface(pln0,new Point3D(0,0,0),
+        new Point3D(-300,0,0), new Point3D(300,0,0));
+        meas0.setSector(0);
+        meas0.setLayer(0);
+        meas0.setError(1);
+        meas0.hemisphere = 1;
+        KFSites.add(meas0); 
+        Map<Integer, Cluster> clsMap = new HashMap<Integer, Cluster>();
+        
+        for (int i = 0; i < trkcand.size(); i++) { //SVT
+            
+            if(trkcand.get(i).get_Detector().equalsIgnoreCase("SVT")) {
+                List<Cluster> cls = new ArrayList<Cluster>();
+                if(trkcand.get(i).get_Point().y()>0) {
+                    cls.add(trkcand.get(i).get_Cluster1());
+                    cls.add(trkcand.get(i).get_Cluster2());
+                } else {
+                    cls.add(trkcand.get(i).get_Cluster2());
+                    cls.add(trkcand.get(i).get_Cluster1());
+                }
+                for (int j = 0; j < cls.size(); j++) { 
+                    int id = cls.get(j).get_Id();
+                    double ce = cls.get(j).get_Centroid();
+                    Point3D endPt1 = cls.get(j).getEndPoint1();
+                    Point3D endPt2 = cls.get(j).getEndPoint2();
+                    Strip strp = new Strip(id, ce, endPt1.x(), endPt1.y(), endPt1.z(),
+                                            endPt2.x(), endPt2.y(), endPt2.z());
+                    Plane3D pln = new Plane3D(endPt1,sgeo.findBSTPlaneNormal(cls.get(j).get_Sector(), 
+                            cls.get(j).get_Layer()));
+                    Point3D Or = sgeo.getPlaneModuleOrigin(cls.get(j).get_Sector(), cls.get(j).get_Layer());
+                    Point3D En = sgeo.getPlaneModuleEnd(cls.get(j).get_Sector(), cls.get(j).get_Layer());
+                    Surface meas = new Surface(pln, strp, Or, En);
+                    meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());
+                    meas.setSector(cls.get(j).get_Sector());
+                    //meas.setLayer(i+1);
+                    double err = cls.get(j).get_Error();
+                    meas.setError(err*err); // CHECK THIS .... DOES KF take e or e^2?
+                    //the thickness for multiple scattering.  MS is outward the thickness is set for the 1st layer in the superlayer
+                    // air gap ignored
+                    double thickn_ov_X0 = 0;
+                    if(cls.get(j).get_Layer()%2==1)
+                        thickn_ov_X0 = org.jlab.rec.cvt.svt.Constants.SILICONTHICK / org.jlab.rec.cvt.svt.Constants.SILICONRADLEN;
+                    meas.setl_over_X0(thickn_ov_X0);
+                    //if((int)Constants.getLayersUsed().get(meas.getLayer())<1)
+                    //    meas.notUsedInFit=true;
+                    
+                    KFSites.add(meas);
+                    clsMap.put(KFSites.size()-1, cls.get(j));
+                    trkcand.clsMap = clsMap;
+                }
+        }
+       
+        // adding the BMT
+        
+        if (trkcand.get(i).get_Detector().equalsIgnoreCase("BMT")) {
+            int lyer = trkcand.get(i).get_Cluster1().get_Layer();
+            int sec = trkcand.get(i).get_Cluster1().get_Sector();
+
+            Cylindrical3D cyl = bgeo.getCylinder(lyer, sec);
+            Line3D cln = bgeo.getAxis(lyer, sec);
+            Line3D l = bgeo.getLCZstrip(bgeo.getRegion(lyer), sec, 1, swim);
+            cln.set(cln.origin().x(), cln.origin().y(), l.origin().z(), 
+                    cln.end().x(), cln.end().y(), l.end().z());
+            cyl.setAxis(cln);
+            int id = trkcand.get(i).get_Cluster1().get_Id();
+            double ce = trkcand.get(i).get_Cluster1().get_Centroid();
+            
+                if (trkcand.get(i).get_DetectorType()==BMTType.Z) {
+                    //double x = trkcand.get_Crosses().get(c).get_Point().x();
+                    //double y = trkcand.get_Crosses().get(c).get_Point().y();
+                    Point3D EP1 = trkcand.get(i).get_Cluster1().getEndPoint1();
+                    //Point3D EP2 = trkcand.get_Crosses().get(c).get_Cluster1().getEndPoint2();
+
+                    double v = (EP1.z()-cln.origin().z())/cln.direction().z();
+                    double x = cln.origin().x()+v*cln.direction().x();
+                    double y = cln.origin().y()+v*cln.direction().y();
+                    Vector3D n = new Point3D(x, y, EP1.z()).
+                            vectorTo(new Point3D(EP1.x(),EP1.y(),EP1.z())).asUnit();
+
+                    double phi = n.phi();
+
+                    //double phi = Math.atan2(y,x);
+                    double err = trkcand.get(i).get_Cluster1().get_PhiErr();
+                           // *(org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+
+                    //Strip strp = new Strip(id, ce, x, y, phi);
+                    //Point3D EP1 = trkcand.get_Crosses().get(c).get_Cluster1().getEndPoint1();
+                    //Point3D EP2 = trkcand.get_Crosses().get(c).get_Cluster1().getEndPoint2();
+                    Strip strp = new Strip(id, ce, x, y, phi);
+                    //Strip strp = new Strip( id, ce, EP1.x(), EP1.y(), EP1.z(), EP2.x(), EP2.y(), EP2.z());
+
+                    //cyl.baseArc().setRadius(Math.sqrt(x*x+y*y));
+                    //cyl.highArc().setRadius(Math.sqrt(x*x+y*y));
+                    cyl.baseArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(trkcand.get(i).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+                    cyl.highArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(trkcand.get(i).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);                   
+                    Surface meas = new Surface(cyl, strp);
+                    meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());
+                    Point3D    offset = bgeo.getOffset(trkcand.get(i).get_Cluster1().get_Layer(), 
+                            trkcand.get(i).get_Sector()); 
+                    Vector3D rotation = bgeo.getRotation(trkcand.get(i).get_Cluster1().get_Layer(), 
+                            trkcand.get(i).get_Sector());
+                    meas.cylShift = offset;
+                    meas.cylRotation = rotation;
+                    
+                    meas.setSector(trkcand.get(i).get_Sector());
+                    //meas.setLayer(i+1);
+                    meas.setError(err*err); // CHECK THIS .... DOES KF take e or e^2?
+                    //for multiple scattering
+                    double thickn_ov_X0 = org.jlab.rec.cvt.bmt.Constants.get_T_OVER_X0()[(trkcand.get(i).get_Cluster1().get_Layer() + 1) / 2 - 1];
+                    meas.setl_over_X0(thickn_ov_X0);
+                    //if((int)Constants.getLayersUsed().get(meas.getLayer())<1) {
+                        //System.out.println("Exluding layer "+meas.getLayer()+trkcand.get_Crosses().get(c).printInfo());
+                        //meas.notUsedInFit=true;
+                    //}
+
+                    KFSites.add(meas);
+                    clsMap.put(KFSites.size()-1, trkcand.get(i).get_Cluster1());
+                }
+                if (trkcand.get(i).get_DetectorType()==BMTType.C) {
+                    double z = trkcand.get(i).get_Point().z();
+                    double err = trkcand.get(i).get_Cluster1().get_ZErr();
+
+                    Strip strp = new Strip(id, ce, z);
+                    cyl.baseArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[(trkcand.get(i).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+                    cyl.highArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[(trkcand.get(i).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);                   
+
+                    Surface meas = new Surface(cyl, strp);
+                    meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());
+                    Point3D    offset = bgeo.getOffset(trkcand.get(i).get_Cluster1().get_Layer(), 
+                            trkcand.get(i).get_Sector()); 
+                    Vector3D rotation = bgeo.getRotation(trkcand.get(i).get_Cluster1().get_Layer(), 
+                            trkcand.get(i).get_Sector());
+                    meas.cylShift = offset;
+                    meas.cylRotation = rotation;
+                    
+                    meas.setSector(trkcand.get(i).get_Sector());
+                    //meas.setLayer(i+1);
+                    meas.setError(err*err); // CHECK THIS .... DOES KF take e or e^2?
+                    //for multiple scattering
+                    double thickn_ov_X0 = org.jlab.rec.cvt.bmt.Constants.get_T_OVER_X0()[(trkcand.get(i).get_Cluster1().get_Layer() + 1) / 2 - 1];
+                    meas.setl_over_X0(thickn_ov_X0);
+                    //if((int)Constants.getLayersUsed().get(meas.getLayer())<1) {
+                    //    //System.out.println("Exluding layer "+meas.getLayer()+trkcand.get_Crosses().get(c).printInfo());
+                    //    meas.notUsedInFit=true;
+                    //}
+
+                    KFSites.add(meas);
+                    clsMap.put(KFSites.size()-1, trkcand.get(i).get_Cluster1());
+                }
+            }
+        }
+        for(int i = 0; i< KFSites.size(); i++) {
+            KFSites.get(i).setLayer(i);
+        }
+        return KFSites;
+    }
+    
     public List<Cluster> FindClustersOnTrk (List<Cluster> allClusters, Helix helix, double P, int Q,
             org.jlab.rec.cvt.svt.Geometry sgeo, 
             Swim swimmer) { 
@@ -386,6 +553,49 @@ public class RecUtilities {
         
         this.MatchTrack2Traj(seed, kf.TrjPoints, SVTGeom, BMTGeom);
         cand.addAll(seed.get_Crosses());
+        for(Cluster cl : seed.get_Clusters()) {
+            
+        
+            int layer = cl.get_Layer();
+            
+            if(cl.get_Detector()==1) {
+                
+                layer = layer + 6;
+                
+               if(cl.get_DetectorType()==0) {
+                   
+                Cylindrical3D cyl = BMTGeom.getCylinder(cl.get_Layer(), cl.get_Sector()); 
+                Line3D cln = BMTGeom.getAxis(cl.get_Layer(), cl.get_Sector());
+                
+                cl.setN(cl.getN(kf.TrjPoints.get(layer).x,kf.TrjPoints.get(layer).y,kf.TrjPoints.get(layer).z,cln));
+                cl.setL(cl.getS().cross(cl.getN()).asUnit());
+                
+               }
+                
+            }
+            //double x = kf.TrjPoints.get(layer).x;
+            //double y = kf.TrjPoints.get(layer).y;
+            //double z = kf.TrjPoints.get(layer).z;
+            //double px = kf.TrjPoints.get(layer).px;
+            //double py = kf.TrjPoints.get(layer).py;
+            //double pz = kf.TrjPoints.get(layer).pz;
+            cl.setTrakInters(new Point3D(kf.TrjPoints.get(layer).x,kf.TrjPoints.get(layer).y,kf.TrjPoints.get(layer).z));
+        }
+        
+        return cand;
+        
+    }
+    public Track OutputTrack(StraightTrack seed, org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf,
+            org.jlab.rec.cvt.svt.Geometry SVTGeom, org.jlab.rec.cvt.bmt.BMTGeometry BMTGeom) {
+        org.jlab.rec.cvt.trajectory.Helix helix = new org.jlab.rec.cvt.trajectory.Helix(kf.KFHelix.getD0(), 
+                kf.KFHelix.getPhi0(), kf.KFHelix.getOmega(), 
+                kf.KFHelix.getZ0(), kf.KFHelix.getTanL());
+        helix.B = kf.KFHelix.getB();
+        Track cand = new Track(helix);
+        cand.setNDF(kf.NDF);
+        cand.setChi2(kf.chi2); 
+        cand.addAll(seed); 
+        
         return cand;
         
     }

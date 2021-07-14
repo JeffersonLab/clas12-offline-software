@@ -15,6 +15,7 @@ import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.rec.cvt.trajectory.StateVec;
 
 import Jama.Matrix;
+import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTType;
 
 public class RecoBankWriter {
@@ -102,7 +103,34 @@ public class RecoBankWriter {
                 hitStrg += "_ID";
                 bank.setShort(hitStrg, i, (short) hitIdxArray[j]);
             }
-
+            
+            bank.setFloat("x1",   i, (float)cluslist.get(i).getX1());
+            bank.setFloat("y1",   i, (float)cluslist.get(i).getY1());
+            bank.setFloat("z1",   i, (float)cluslist.get(i).getZ1());
+            bank.setFloat("x2",   i, (float)cluslist.get(i).getX2());
+            bank.setFloat("y2",   i, (float)cluslist.get(i).getY2());
+            bank.setFloat("z2",   i, (float)cluslist.get(i).getZ2()); 
+            bank.setFloat("lx",   i, (float)cluslist.get(i).getL().x());
+            bank.setFloat("ly",   i, (float)cluslist.get(i).getL().y());
+            bank.setFloat("lz",   i, (float)cluslist.get(i).getL().z());
+            bank.setFloat("sx",   i, (float)cluslist.get(i).getS().x());
+            bank.setFloat("sy",   i, (float)cluslist.get(i).getS().y());
+            bank.setFloat("sz",   i, (float)cluslist.get(i).getS().z());
+            bank.setFloat("nx",   i, (float)cluslist.get(i).getN().x());
+            bank.setFloat("ny",   i, (float)cluslist.get(i).getN().y());
+            bank.setFloat("nz",   i, (float)cluslist.get(i).getN().z());
+            bank.setFloat("e",    i, (float)cluslist.get(i).get_Error());
+//            cluslist.get(i).printInfo();
+//            System.out.println("N "+cluslist.get(i).getN().toString()+" \n"+
+//                    " L "+cluslist.get(i).getL().toString()+" \n"+
+//                    " S "+cluslist.get(i).getS().toString()+" \n"+
+//                    " NxL "+cluslist.get(i).getN().cross(cluslist.get(i).getL()).toString()+" \n"+
+//                    " NxS "+cluslist.get(i).getN().cross(cluslist.get(i).getS()).toString()+" \n"+
+//                    " SxL "+cluslist.get(i).getS().cross(cluslist.get(i).getL()).toString()+" \n"+
+//                    " N.L "+cluslist.get(i).getN().dot(cluslist.get(i).getL())+
+//                    " N.S "+cluslist.get(i).getN().dot(cluslist.get(i).getS())+
+//                    " S.L "+cluslist.get(i).getS().dot(cluslist.get(i).getL())
+//            );
         }
         //bank.show();
         return bank;
@@ -238,9 +266,51 @@ public class RecoBankWriter {
                 hitStrg += "_ID";
                 bank.setShort(hitStrg, i, (short) hitIdxArray[j]);
             }
-
+            
+            bank.setFloat("x1",   i, (float)cluslist.get(i).getX1());
+            bank.setFloat("y1",   i, (float)cluslist.get(i).getY1());
+            bank.setFloat("z1",   i, (float)cluslist.get(i).getZ1());
+            bank.setFloat("x2",   i, (float)cluslist.get(i).getX2());
+            bank.setFloat("y2",   i, (float)cluslist.get(i).getY2());
+            bank.setFloat("z2",   i, (float)cluslist.get(i).getZ2());
+            bank.setFloat("ox",   i, (float)cluslist.get(i).getOx());
+            bank.setFloat("oy",   i, (float)cluslist.get(i).getOy());
+            bank.setFloat("oz",   i, (float)cluslist.get(i).getOz());
+            bank.setFloat("cx",   i, (float)cluslist.get(i).getCx());
+            bank.setFloat("cy",   i, (float)cluslist.get(i).getCy());
+            bank.setFloat("cz",   i, (float)cluslist.get(i).getCz());
+            bank.setFloat("theta",i, (float)cluslist.get(i).getTheta());
+            bank.setFloat("ax1",  i, (float)cluslist.get(i).getCylAxis().origin().x());
+            bank.setFloat("ay1",  i, (float)cluslist.get(i).getCylAxis().origin().y());
+            bank.setFloat("az1",  i, (float)cluslist.get(i).getCylAxis().origin().z());
+            bank.setFloat("ax2",  i, (float)cluslist.get(i).getCylAxis().end().x());
+            bank.setFloat("ay2",  i, (float)cluslist.get(i).getCylAxis().end().y());
+            bank.setFloat("az2",  i, (float)cluslist.get(i).getCylAxis().end().z());
+            bank.setFloat("lx",   i, (float)cluslist.get(i).getL().x());
+            bank.setFloat("ly",   i, (float)cluslist.get(i).getL().y());
+            bank.setFloat("lz",   i, (float)cluslist.get(i).getL().z());
+            bank.setFloat("sx",   i, (float)cluslist.get(i).getS().x());
+            bank.setFloat("sy",   i, (float)cluslist.get(i).getS().y());
+            bank.setFloat("sz",   i, (float)cluslist.get(i).getS().z());
+            bank.setFloat("nx",   i, (float)cluslist.get(i).getN().x());
+            bank.setFloat("ny",   i, (float)cluslist.get(i).getN().y());
+            bank.setFloat("nz",   i, (float)cluslist.get(i).getN().z());
+            bank.setFloat("e",    i, (float)cluslist.get(i).get_Error());
+//            if(cluslist.get(i).get_AssociatedTrackID()>0) {
+//            cluslist.get(i).printInfo();
+//                System.out.println("N "+cluslist.get(i).getN().toString()+" \n"+
+//                        " L "+cluslist.get(i).getL().toString()+" \n"+
+//                        " S "+cluslist.get(i).getS().toString()+" \n"+
+//                        " NxL "+cluslist.get(i).getN().cross(cluslist.get(i).getL()).toString()+" \n"+
+//                        " NxS "+cluslist.get(i).getN().cross(cluslist.get(i).getS()).toString()+" \n"+
+//                        " SxL "+cluslist.get(i).getS().cross(cluslist.get(i).getL()).toString()+" \n"+
+//                        " N.L "+cluslist.get(i).getN().dot(cluslist.get(i).getL())+
+//                        " N.S "+cluslist.get(i).getN().dot(cluslist.get(i).getS())+
+//                        " S.L "+cluslist.get(i).getS().dot(cluslist.get(i).getL())
+//                );
+//            }
         }
-
+        //bank.show();
         return bank;
 
     }
@@ -364,14 +434,15 @@ public class RecoBankWriter {
                 bank.setFloat("cov_z02", i, -999);
                 bank.setFloat("cov_tandip2", i, -999);
             }
-            bank.setFloat("c_x", i, (float) (trkcands.get(i).get_TrackPointAtCTOFRadius().x() / 10.)); // convert to cm
-            bank.setFloat("c_y", i, (float) (trkcands.get(i).get_TrackPointAtCTOFRadius().y() / 10.)); // convert to cm
-            bank.setFloat("c_z", i, (float) (trkcands.get(i).get_TrackPointAtCTOFRadius().z() / 10. + zShift/10)); // convert to cm
-            bank.setFloat("c_ux", i, (float) trkcands.get(i).get_TrackDirAtCTOFRadius().x());
-            bank.setFloat("c_uy", i, (float) trkcands.get(i).get_TrackDirAtCTOFRadius().y());
-            bank.setFloat("c_uz", i, (float) trkcands.get(i).get_TrackDirAtCTOFRadius().z());
-            bank.setFloat("pathlength", i, (float) (trkcands.get(i).get_pathLength() / 10.)); // conversion to cm
-
+            if(trkcands.get(i).get_TrackPointAtCTOFRadius()!=null) {
+                bank.setFloat("c_x", i, (float) (trkcands.get(i).get_TrackPointAtCTOFRadius().x() / 10.)); // convert to cm
+                bank.setFloat("c_y", i, (float) (trkcands.get(i).get_TrackPointAtCTOFRadius().y() / 10.)); // convert to cm
+                bank.setFloat("c_z", i, (float) (trkcands.get(i).get_TrackPointAtCTOFRadius().z() / 10. + zShift/10)); // convert to cm
+                bank.setFloat("c_ux", i, (float) trkcands.get(i).get_TrackDirAtCTOFRadius().x());
+                bank.setFloat("c_uy", i, (float) trkcands.get(i).get_TrackDirAtCTOFRadius().y());
+                bank.setFloat("c_uz", i, (float) trkcands.get(i).get_TrackDirAtCTOFRadius().z());
+                bank.setFloat("pathlength", i, (float) (trkcands.get(i).get_pathLength() / 10.)); // conversion to cm
+            }
             //for status word:
             int a = 0;
             int b = 0;

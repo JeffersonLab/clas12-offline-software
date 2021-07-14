@@ -296,6 +296,27 @@ public class BMTGeometry {
         return Constants.rotations[layer-1][sector-1];
     }
     
+    public Point3D getInverseOffset(int layer, int sector) {
+        
+        Point3D offset = new Point3D();
+        offset.copy(Constants.shifts[layer-1][sector-1]);
+        
+        return new Point3D(-offset.x(),-offset.y(),-offset.z());
+    }
+    
+    /**
+     * Return rotations for the selected tile, identified by layer and sector
+     * @param layer (1-6)
+     * @param sector (1-3)
+     * @return Point3D offset: 3D offset
+     */
+    public Vector3D getInverseRotation(int layer, int sector) {
+        
+        Vector3D rot = Constants.rotations[layer-1][sector-1];
+        
+        return new Vector3D(-rot.x(),-rot.y(),-rot.z());
+    }
+    
     /**
      * Return axis for the selected tile, identified by layer and sector
      * @param layer (1-6)
@@ -529,17 +550,25 @@ public class BMTGeometry {
      */
     public Cylindrical3D getCylinder(int layer, int sector) {
         Cylindrical3D cyl = new Cylindrical3D();
-        cyl.baseArc().setCenter(new Point3D(0, 0, 0));
-        cyl.highArc().setCenter(new Point3D(0, 0, 0));
-        cyl.baseArc().setNormal(new Vector3D(0,1,0));
-        cyl.highArc().setNormal(new Vector3D(0,1,0));
         
+        Point3D cent = new Point3D(0, 0, 0);
+        Vector3D norm = new Vector3D(0,1,0);
         Point3D    offset = this.getOffset(layer, sector);
         Vector3D rotation = this.getRotation(layer, sector);
-        cyl.rotateX(rotation.x());
-        cyl.rotateY(rotation.y());
-        cyl.rotateZ(rotation.z());
-        cyl.translateXYZ(offset.x(),offset.y(),offset.z());
+        cent.rotateX(rotation.x());
+        cent.rotateY(rotation.y());
+        cent.rotateZ(rotation.z());
+        cent.translateXYZ(offset.x(),offset.y(),offset.z());
+        norm.rotateX(rotation.x());
+        norm.rotateY(rotation.y());
+        norm.rotateZ(rotation.z());
+        
+        cyl.baseArc().setCenter(cent);
+        cyl.highArc().setCenter(cent);
+        cyl.baseArc().setNormal(norm);
+        cyl.highArc().setNormal(norm);
+        
+        
         
         return cyl;
     }
@@ -1405,5 +1434,12 @@ public class BMTGeometry {
 //        return zc; //in mm
 //    }
 
+
+    public void putInFrame(Point3D cent, Point3D offset, Vector3D rotation) {
+        cent.rotateX(rotation.x());
+        cent.rotateY(rotation.y());
+        cent.rotateZ(rotation.z());
+        cent.translateXYZ(offset.x(),offset.y(),offset.z());
+    }
 
 }

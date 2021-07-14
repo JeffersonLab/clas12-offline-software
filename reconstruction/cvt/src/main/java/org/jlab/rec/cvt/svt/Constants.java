@@ -141,8 +141,8 @@ public class Constants {
     public static int EMAXREADOUT = 1;
 
     // for cosmics
-    public static final double COSMICSMINRESIDUAL = 2;
-    public static final double COSMICSMINRESIDUALZ = 20;
+    public static final double COSMICSMINRESIDUAL = 12;
+    public static final double COSMICSMINRESIDUALZ = 120;
 
     public static ArrayList<ArrayList<Shape3D>> MODULEPLANES;
 
