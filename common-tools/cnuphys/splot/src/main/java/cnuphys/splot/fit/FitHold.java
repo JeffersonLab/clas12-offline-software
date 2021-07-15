@@ -16,14 +16,12 @@ public class FitHold {
 
 	/**
 	 * Create a hold on a fitting parameter. When the fit is performed, any
-	 * parameters that are "held" will be set to a fixed value and no changed in
-	 * the optimization
+	 * parameters that are "held" will be set to a fixed value and no changed in the
+	 * optimization
 	 * 
-	 * @param index
-	 *            the parameter index. All fits have a parameter array (usually
-	 *            called <code>a[]</code>. This is an index into that array.
-	 * @param value
-	 *            the value that should be held.
+	 * @param index the parameter index. All fits have a parameter array (usually
+	 *              called <code>a[]</code>. This is an index into that array.
+	 * @param value the value that should be held.
 	 */
 	protected FitHold(int index, double value) {
 		this.index = index;

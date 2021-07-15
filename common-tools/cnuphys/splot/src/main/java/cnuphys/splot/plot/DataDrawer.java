@@ -24,11 +24,11 @@ public class DataDrawer {
 	/**
 	 * Draw a data set on the canvas
 	 * 
-	 * @param g the graphics context
+	 * @param g  the graphics context
 	 * @param ds the DataSet to draw.
 	 */
 	public void draw(Graphics g, DataSet ds) {
-		
+
 		if ((ds == null) || ds.getSize() < 1) {
 			return;
 		}
@@ -37,9 +37,7 @@ public class DataDrawer {
 //			System.err.println("CLIP SKIP");
 			return;
 		}
-		
-		
-		
+
 		Rectangle clipRect = GraphicsUtilities.minClip(g.getClip(), _plotCanvas.getActiveBounds());
 		if ((clipRect == null) || (clipRect.width == 0) || (clipRect.height == 0)) {
 			return;
@@ -62,16 +60,14 @@ public class DataDrawer {
 		case XYEXYE:
 			for (int i = 0; i < ds.getColumnCount() / 3; i++) {
 				int j = 3 * i;
-				CurveDrawer.drawCurve(g, _plotCanvas, ds.getColumn(j),
-						ds.getColumn(j + 1), null, ds.getColumn(j + 2));
+				CurveDrawer.drawCurve(g, _plotCanvas, ds.getColumn(j), ds.getColumn(j + 1), null, ds.getColumn(j + 2));
 			}
 			break;
 
 		case XYEEXYEE:
 			for (int i = 0; i < ds.getColumnCount() / 4; i++) {
 				int j = 4 * i;
-				CurveDrawer.drawCurve(g, _plotCanvas, ds.getColumn(j),
-						ds.getColumn(j + 1), ds.getColumn(j + 2),
+				CurveDrawer.drawCurve(g, _plotCanvas, ds.getColumn(j), ds.getColumn(j + 1), ds.getColumn(j + 2),
 						ds.getColumn(j + 3));
 			}
 			break;
@@ -81,29 +77,26 @@ public class DataDrawer {
 				CurveDrawer.drawHisto1D(g, _plotCanvas, ds.getColumn(i));
 			}
 			break;
-			
+
 		case H2D:
 			CurveDrawer.drawHisto2D(g, _plotCanvas, ds.getColumn(0));
 			break;
 
 		case XYY: // share an x column
 			for (int i = 1; i < ds.getColumnCount(); i++) {
-				CurveDrawer.drawCurve(g, _plotCanvas, ds.getColumn(0),
-						ds.getColumn(i));
+				CurveDrawer.drawCurve(g, _plotCanvas, ds.getColumn(0), ds.getColumn(i));
 			}
 			break;
 
 		case XYXY:
 			for (int i = 0; i < ds.getColumnCount() / 2; i++) {
 				int j = 2 * i;
-				CurveDrawer.drawCurve(g, _plotCanvas, ds.getColumn(j),
-						ds.getColumn(j + 1));
+				CurveDrawer.drawCurve(g, _plotCanvas, ds.getColumn(j), ds.getColumn(j + 1));
 			}
 			break;
 
 		case STRIP:
-			CurveDrawer.drawCurve(g, _plotCanvas, ds.getColumn(0),
-					ds.getColumn(1));
+			CurveDrawer.drawCurve(g, _plotCanvas, ds.getColumn(0), ds.getColumn(1));
 			break;
 
 		case UNKNOWN:

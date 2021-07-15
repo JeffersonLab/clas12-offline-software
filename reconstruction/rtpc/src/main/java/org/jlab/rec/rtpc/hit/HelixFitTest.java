@@ -25,8 +25,10 @@ public class HelixFitTest {
     private HashMap<Integer, List<RecoHitVector>> newrecotrackmap = new HashMap<>();
     private HashMap<Integer, FinalTrackInfo> finaltrackinfomap = new HashMap<>();
     private boolean cosmic = false;
-    public HelixFitTest(HitParameters params, int fitToBeamline, double _magfield, boolean cosm){
+    private boolean chi2culling = true; 
+    public HelixFitTest(HitParameters params, int fitToBeamline, double _magfield, boolean cosm, boolean chi2cull){
         magfield = _magfield;
+	chi2culling = chi2cull; 
         fittobeamline = fitToBeamline;
         recotrackmap = params.get_recotrackmap();
         minhitcount = params.get_minhitspertrackreco();
@@ -41,16 +43,20 @@ public class HelixFitTest {
         params.set_finaltrackinfomap(finaltrackinfomap);
     }
     private double phichi2(double phi0, double r, double R){
-        return Math.toRadians(phi0) - Math.asin(r/(2*R));
+        double rterm = r/(2*R);
+	if(Math.abs(r) > (2 * Math.abs(R))) rterm = 1; 
+	return Math.toRadians(phi0) - Math.asin(rterm);
     }
     private double zchi2(double z0, double theta0, double r, double R){
         R = Math.abs(R);
-        return z0 + 2*R*Math.asin(r/(2*R))/Math.tan(Math.toRadians(theta0));
+	double rterm = r/(2*R);
+	if(Math.abs(r) > (2 * Math.abs(R))) rterm = 1; 
+        return z0 + 2*R*Math.asin(rterm)/Math.tan(Math.toRadians(theta0));
     }
 
     private void findtrackparams(int TID, List<RecoHitVector> track, int iter){
-        szpos = new double[10000][3];
         int numhits = track.size();
+        szpos = new double[numhits][3];
         double ADCsum = 0;
         int hit = 0;
         for(hit = 0; hit < numhits; hit++){
@@ -103,10 +109,10 @@ public class HelixFitTest {
             chi2zterm = (hitz - zchi2(vz,theta,hitr,R))*(hitz - zchi2(vz,theta,hitr,R))/denz;
             chi2term = chi2phiterm + chi2zterm;
             chi2 += chi2term;
-            if(chi2term > chi2termthreshold && iter == 0 && !cosmic) hitstoremove.add(hit); //if the hit messes up chi2 too much we are going to remove it
+            if(chi2term > chi2termthreshold && iter == 0 && !cosmic && chi2culling) hitstoremove.add(hit); //if the hit messes up chi2 too much we are going to remove it
         }
 
-        if(hitstoremove.size() > 0 && iter == 0 && !cosmic){ //make a new track containing the hits leftover and fit it again
+        if(hitstoremove.size() > 0 && iter == 0 && !cosmic && chi2culling){ //make a new track containing the hits leftover and fit it again
             if(((double)hitstoremove.size()/(double)numhits) >= chi2percthreshold/100) removehits = true;
             List<RecoHitVector> newtrack = new ArrayList<>();
             for(int i = 0; i < numhits; i++){

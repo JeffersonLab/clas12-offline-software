@@ -196,7 +196,13 @@ public class StateVecs {
                     } else {
 
                         this.setTrackPars(kVec, swim);
-                        swimPars = swim.SwimRho(r/units);
+                        Point3D p1 = new Point3D(mv.surface.cylinder.getAxis().origin().x()/units,
+                                                 mv.surface.cylinder.getAxis().origin().y()/units,
+                                                 mv.surface.cylinder.getAxis().origin().z()/units) ;
+                        Point3D p2 = new Point3D(mv.surface.cylinder.getAxis().end().x()/units,
+                                                 mv.surface.cylinder.getAxis().end().y()/units,
+                                                 mv.surface.cylinder.getAxis().end().z()/units) ;
+                        swimPars = swim.SwimGenCylinder(p1,p2,r/units);
                         if(swimPars==null)
                             return null;
                         for(int j =0; j < 3; j++) {

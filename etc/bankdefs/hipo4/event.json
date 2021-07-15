@@ -358,7 +358,8 @@
             {"name":"status",   "type":"S", "info":"status of the track"},
             {"name":"q",        "type":"B", "info":"charge of the track"},
             {"name":"chi2",     "type":"F", "info":"Chi2 (or quality) track fitting"},
-            {"name":"NDF",      "type":"S", "info":"number of degrees of freedom in track fitting"}
+            {"name":"NDF",      "type":"S", "info":"number of degrees of freedom in track fitting"},
+            {"name":"hbindex",  "type":"S", "info":"row number of corresponding track in RECHB::Track"}
         ]
     },
     {

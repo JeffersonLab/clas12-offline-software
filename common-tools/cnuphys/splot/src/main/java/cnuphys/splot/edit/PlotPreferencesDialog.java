@@ -14,11 +14,11 @@ public class PlotPreferencesDialog extends SimpleDialog {
 	protected static final String APPLY = "Apply";
 	protected static final String CLOSE = "Close";
 
-	// tabbed pane
-	// JTabbedPane _tabbedPane;
-
-	// plot labels
+	// plot labels and title
 	protected GeneralPlotParamPanel _genPanel;
+	
+	//axes limits
+	private AxesLimitsPanel _axesPanel;
 
 	/**
 	 * Edit the plot preferences
@@ -31,6 +31,7 @@ public class PlotPreferencesDialog extends SimpleDialog {
 		// note components already created by super constructor
 		_plotCanvas = plotCanvas;
 		addCenter();
+		addNorth();
 		pack();
 	}
 
@@ -44,18 +45,30 @@ public class PlotPreferencesDialog extends SimpleDialog {
 	}
 
 	/**
-	 * Override to create the component that goes in the center. Usually this is
-	 * the "main" component.
+	 * Override to create the component that goes in the center. Usually this is the
+	 * "main" component.
 	 * 
 	 * @return the component that is placed in the center
 	 */
-	protected Component addCenter() {
+	private Component addNorth() {
 		// _tabbedPane = new JTabbedPane();
 
 		_genPanel = new GeneralPlotParamPanel(_plotCanvas);
 
-		add(_genPanel, BorderLayout.CENTER);
+		add(_genPanel, BorderLayout.NORTH);
 		return _genPanel;
+	}
+	
+	/**
+	 * Override to create the component that goes in the center. Usually this is the
+	 * "main" component.
+	 * 
+	 * @return the component that is placed in the center
+	 */
+	protected Component addCenter() {
+		_axesPanel = new AxesLimitsPanel(_plotCanvas);
+		add(_axesPanel, BorderLayout.CENTER);
+		return _axesPanel;
 	}
 
 	/**
@@ -70,6 +83,9 @@ public class PlotPreferencesDialog extends SimpleDialog {
 		}
 		else if (APPLY.equals(command)) {
 			_genPanel.apply();
+			_axesPanel.apply();
+			_plotCanvas.setWorldSystem();
+			_plotCanvas.repaint();
 		}
 	}
 

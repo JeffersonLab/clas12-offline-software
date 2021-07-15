@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="splot" default="jar" basedir=".">
+
+
+	<!-- ================================= 
+          target: jar 
+          jar up images, etc             
+         ================================= -->
+	<target name="jar">
+		
+		<echo>Building splot image jar</echo>
+
+		<jar destfile="lib/splotimages.jar">
+			<fileset includes="images/*.*, data/*" dir="../.." />
+		</jar>
+		<echo>Building splot jar</echo>
+		
+		<jar destfile="lib/splot.jar">
+			
+			<fileset dir="cnuphys/bin">
+				<include name="**/*.class"/>
+			</fileset>
+
+		</jar>
+
+	</target>
+
+</project>
+

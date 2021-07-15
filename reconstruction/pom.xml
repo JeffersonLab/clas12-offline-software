@@ -26,6 +26,7 @@
     <module>fvt</module>
     <module>eb</module>
     <module>band</module>
+    <module>mc</module>
     <module>rtpc</module>
     <module>swaps</module>
   </modules>

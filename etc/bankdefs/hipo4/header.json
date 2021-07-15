@@ -72,5 +72,14 @@
             {"name":"helicity",   "type":"B", "info":"Helicity state, HWP-corrected"},
             {"name":"helicityRaw","type":"B", "info":"Helicity state"}
         ]
+    },
+    {
+        "name" : "COAT::config",
+        "group": 10000,
+        "item" : 17,
+        "info" : "COATJAVA configuration, e.g. version numbers, CLARA YAML settings",
+        "entries":[
+            { "name":"json"    , "type":"B", "info":"json character" }
+        ]
     }
 ]

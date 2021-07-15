@@ -48,6 +48,8 @@ public class TrackUtils {
     private boolean phizMethod(PadVector p1, PadVector p2) {
         double p1phi = p1.phi();
         double p2phi = p2.phi();
+        if(p1phi < 0) p1phi += 2*Math.PI;
+        if(p2phi < 0) p2phi += 2*Math.PI;
         double p1z = p1.z();
         double p2z = p2.z();
         double phidiff = Math.abs(p2phi-p1phi);

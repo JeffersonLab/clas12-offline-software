@@ -21,8 +21,8 @@ public class TCanvasP extends TCanvas {
 		this.divide(nColumns, nRows);
 	}
 	
-	@Override
-	public void divide(int nColumns, int nRows) {
+        @Override
+	public TCanvasP divide(int nColumns, int nRows) {
 		super.divide(nColumns, nRows);
 		this.nColumns = nColumns;
 		this.nRows = nRows;
@@ -30,6 +30,7 @@ public class TCanvasP extends TCanvas {
 		else if(nColumns*nRows > 9 && nColumns*nRows <= 16) setFontSizes(20);
 		else if(nColumns*nRows > 16 && nColumns*nRows <= 25) setFontSizes(16);
 		else setFontSizes(14);
+            return this;
 	}
 	
 	public void setFontSizes(int size) {

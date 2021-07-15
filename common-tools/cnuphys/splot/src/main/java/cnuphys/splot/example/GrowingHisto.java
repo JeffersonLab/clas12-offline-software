@@ -46,7 +46,7 @@ public class GrowingHisto extends AExample {
 	public void setPreferences() {
 		DataSet ds = _canvas.getDataSet();
 		ds.getCurveStyle(0).setFillColor(new Color(196, 196, 196, 64));
-		ds.getCurveStyle(0).setLineColor(Color.black);
+		ds.getCurveStyle(0).setFitLineColor(Color.black);
 		ds.getCurve(0).getFit().setFitType(FitType.GAUSSIANS);
 		PlotParameters params = _canvas.getParameters();
 		params.setMinExponentY(6);
@@ -80,11 +80,13 @@ public class GrowingHisto extends AExample {
 				try {
 					ds.add(y);
 					example.getPlotCanvas().needsRedraw(true);
-				} catch (DataSetException e) {
+				}
+				catch (DataSetException e) {
 					e.printStackTrace();
 				}
 				Thread.sleep(250);
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
