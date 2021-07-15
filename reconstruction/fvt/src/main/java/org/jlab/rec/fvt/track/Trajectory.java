@@ -11,7 +11,7 @@ import org.jlab.rec.fmt.Geometry;
 public class Trajectory {
     
     private Point3D  position = null;
-    private double   localY    = 0;
+    private Point3D  localPosition = null;
     private Vector3D direction = null;
     private int      layer = 0;
     private double   path  = 0;
@@ -24,11 +24,11 @@ public class Trajectory {
     }
 
     public Trajectory(int layer, double x, double y, double z, double tx, double ty, double tz, double path) {
-        this.layer     = layer;
-        this.position  = new Point3D(x,y,z);
-        this.localY    = Geometry.globalToLocal(position, layer).y();
-        this.direction = new Vector3D(tx,ty,tz);
-        this.path      = path;
+        this.layer         = layer;
+        this.position      = new Point3D(x,y,z);
+        this.localPosition = Geometry.globalToLocal(position, layer);
+        this.direction     = new Vector3D(tx,ty,tz);
+        this.path          = path;
     }
     
     
@@ -40,12 +40,12 @@ public class Trajectory {
         this.position = position;
     }
 
-    public double getLocalY() {
-        return localY;
+    public Point3D getLocalPosition() {
+        return this.localPosition;
     }
 
-    public void setLocalY(double y) {
-        this.localY = y;
+    public void setLocalPosition(Point3D p) {
+        this.localPosition = p;
     }
 
     public Vector3D getDirection() {
@@ -72,10 +72,18 @@ public class Trajectory {
         this.path = path;
     }
     
-    public String toString() {
+    public String toStringBrief() {
         String str = "Trajectory :" + " Layer "     + this.layer 
                                     + " Position "  + this.position.toStringBrief(4)
                                     + " Direction " + this.direction.toStringBrief(4);
+        return str;
+    }
+    
+    @Override
+    public String toString() {
+        String str = this.toStringBrief()
+                   + String.format(" LocX %.4f",this.getLocalPosition().x())
+                   + String.format(" LocY %.4f",this.getLocalPosition().y());
         return str;
     }
     

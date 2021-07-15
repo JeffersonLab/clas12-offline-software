@@ -8,14 +8,14 @@ package org.jlab.rec.fmt;
 public class Constants {
 
     public static final int FVT_Nlayers = 6;
-    public static int FVT_Nstrips; // Number of strips
+    public static int FVT_Nstrips; // Number of strips: 1024
     public static int FVT_Halfstrips; // In the middle of the FMT, 320 strips are split in two.
-    public static int FVT_Sidestrips;
+    public static int FVT_Sidestrips; // 192
 
     // units = cm
     public static int MAX_NB_CROSSES = 30;
 
-    public static double FVT_Pitch; // strip width
+    public static double FVT_Pitch; // strip width 525 um
     public static double FVT_Interstrip; // inter strip
     public static double FVT_YCentral;
     public static double FVT_Rmax;
@@ -54,13 +54,16 @@ public class Constants {
     public static  double drdzcut  =  1.5;
 
     // ----- end cut based cand select
-    public static double CIRCLECONFUSION = 2; // cm
+    public static double CIRCLECONFUSION = 1.2; // cm
 
+    // min path for final swimming to beamline to reject failed swimming
+    public static double MIN_SWIM_PATH = 0.2; 
+    
     public static void Load() {
 
-        FVT_Sidestrips    = (FVT_Nstrips - 2*FVT_Halfstrips)/2;
+        FVT_Sidestrips    = (FVT_Nstrips - 2*FVT_Halfstrips)/2;                  // 192
         FVT_YCentral      = (double) FVT_Halfstrips*FVT_Pitch/2.;
-        FVT_Rmax          = FVT_Pitch * (FVT_Halfstrips + 2*FVT_Sidestrips)/2.;
+        FVT_Rmax          = FVT_Pitch * (FVT_Halfstrips + 2*FVT_Sidestrips)/2.; // 184.8 mm
         FVT_SigmaS        = FVT_Pitch/Math.sqrt(12);
         FVT_stripsXloc    = new double[FVT_Nstrips][2];
         FVT_stripsYloc    = new double[FVT_Nstrips][2];

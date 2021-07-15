@@ -24,19 +24,26 @@ public class Geometry {
 	 * shifts in the process.
 	 * @param glPos: Point3D describing the position to be transformed in lab coordinates.
 	 * @param layer: Target FMT layer.
+          * @return 
 	 */
 	public static Point3D globalToLocal(Point3D glPos, int layer) {
 		// TODO: Apply x and y rot.
-		double x = (glPos.x() - Constants.FVT_xShift[layer-1]) * Math.cos(Constants.FVT_Alpha[layer-1])
-				 + (glPos.y() - Constants.FVT_yShift[layer-1]) * Math.sin(Constants.FVT_Alpha[layer-1]);
+		double x = -(glPos.x() - Constants.FVT_xShift[layer-1]) * Math.cos(Constants.FVT_Alpha[layer-1])
+		           -(glPos.y() - Constants.FVT_yShift[layer-1]) * Math.sin(Constants.FVT_Alpha[layer-1]);
 		double y = (glPos.y() - Constants.FVT_yShift[layer-1]) * Math.cos(Constants.FVT_Alpha[layer-1])
-				 - (glPos.x() - Constants.FVT_xShift[layer-1]) * Math.sin(Constants.FVT_Alpha[layer-1]);
+			- (glPos.x() - Constants.FVT_xShift[layer-1]) * Math.sin(Constants.FVT_Alpha[layer-1]);
 		double z = glPos.z();
 
 		return new Point3D(x,y,z);
 	}
 
-	/**
+	public static Point3D globalToLocal(double x, double y, double z, int layer) {
+		// TODO: Apply x and y rot.
+		return globalToLocal(new Point3D(x,y,z), layer);
+
+	}
+        
+    /**
      * Return the z coordinate of a layer + half the thickness of the drift region.
      * @param layer: Target FMT layer.
      */

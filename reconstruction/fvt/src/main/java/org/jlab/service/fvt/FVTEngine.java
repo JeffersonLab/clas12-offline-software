@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.clas.swimtools.Swim;
@@ -21,6 +20,7 @@ import org.jlab.rec.fmt.CCDBConstantsLoader;
 import org.jlab.rec.fvt.track.Track;
 import org.jlab.rec.fvt.track.Trajectory;
 import org.jlab.rec.fvt.track.fit.KFitter;
+import org.jlab.rec.fvt.track.fit.StateVecs.StateVec;
 
 /**
  * Service to return reconstructed track candidates - the output is in hipo format
@@ -47,30 +47,31 @@ public class FVTEngine extends ReconstructionEngine {
 
         
         // Get the constants for the correct variation
-        String geoVariation = this.getEngineConfigString("variation");
-        if (geoVariation!=null) {
+        String variation = this.getEngineConfigString("variation");
+        if (variation!=null) {
             System.out.println("["+this.getName()+"] " +
-                    "run with FMT geometry variation based on yaml = " + geoVariation);
+                    "run with FMT geometry variation based on yaml = " + variation);
         }
         else {
-            geoVariation = "default";
+            variation = "default";
             System.out.println("["+this.getName()+"] run with FMT default geometry");
         }
         
 
         String[] tables = new String[]{
             "/geometry/beam/position",
-            "/geometry/fmt/alignment"
+            "/geometry/fmt/alignment",
+            "/calibration/mvt/fmt_status"
         };
         requireConstants(Arrays.asList(tables));
-        this.getConstantsManager().setVariation(geoVariation);
+        this.getConstantsManager().setVariation(variation);
 
         // Load the geometry
         int run = 10;
         double[][] shiftsArray =
                 CCDBConstantsLoader.loadAlignmentTable(run, this.getConstantsManager());
 
-        CCDBConstantsLoader.Load(run, geoVariation);
+        CCDBConstantsLoader.Load(run, variation);
         Constants.saveAlignmentTable(shiftsArray);
         Constants.applyZShifts();
         Constants.Load();
@@ -99,13 +100,15 @@ public class FVTEngine extends ReconstructionEngine {
 
         // Set beam shift. NOTE: Set to zero for the time being, when beam alignment is done
         //                       uncomment this code.
-        IndexedTable beamOffset =
-                this.getConstantsManager().getConstants(run, "/geometry/beam/position");
+        IndexedTable beamOffset = this.getConstantsManager().getConstants(run, "/geometry/beam/position");
         double xB = 0; // beamOffset.getDoubleValue("x_offset", 0,0,0);
         double yB = 0; // beamOffset.getDoubleValue("y_offset", 0,0,0);
+        
+        // get status table
+        IndexedTable status = this.getConstantsManager().getConstants(run, "/calibration/mvt/fmt_status");
 
         // === HITS ================================================================================
-        List<Hit> hits = Hit.fetchHits(event);
+        List<Hit> hits = Hit.fetchHits(event, status);
         if (hits.size() == 0) return true;
         
         // === CLUSTERS ============================================================================
@@ -123,70 +126,71 @@ public class FVTEngine extends ReconstructionEngine {
         }
         
         // === DC TRACKS ===========================================================================
-        Map<Integer,Track> tracks = Track.getDCTracks(event);
+        List<Track> tracks = Track.getDCTracks(event);
         if(tracks.size()==0) return true;
         
         // === SEEDS =============================================================================
-        for(Entry<Integer,Track> entry: tracks.entrySet()) {
-            Track track = entry.getValue();                
+        for(int i=0; i<tracks.size(); i++) {
+            Track track = tracks.get(i);                
            
-            double[] doca = new double[Constants.FVT_Nlayers];
-            for(int i=0; i<Constants.FVT_Nlayers; i++) doca[i]=Constants.CIRCLECONFUSION;
-                
             for(int j=0; j<clusters.size(); j++) {
                     
                 Cluster cluster = clusters.get(j);                    
                 
                 Trajectory trj = track.getDCTraj(cluster.get_Layer());
-                if (trj==null) continue; // Match the layers from traj.
+                if (trj==null) continue; 
 
+                // Match the layers from traj.
                 double d = cluster.distance(trj.getPosition());
-//                System.out.println(trj.toString());
-//                System.out.println(cluster.toStringBrief());
-//                System.out.println(d);
-                if (d < doca[cluster.get_Layer()-1]) {
-                    track.setCluster(cluster);
-                    track.getCluster(cluster.get_Layer()).set_Doca(d);
-                    doca[cluster.get_Layer()-1] = d;
-//                    Cross cross = new Cross(clusters.get(j).get_Sector(),
-//                            clusters.get(j).get_Layer(), crosses.size()+1);
-//                    cross.set_Point(clusters.get(j).calcCross(trj.getPosition()));
-//                    cross.set_AssociatedTrackID(track.getId());
-//                    cross.set_Cluster1(clusters.get(j));
-//                    cross.get_Cluster1().set_Doca(d);
-//                    cross.get_Cluster1().set_TrackID(track.getId());
-//                    crosses.add(cross);
-//                    // add to seed
-//                    if (crossesMap.get(track.getId()) == null) {
-//                        crossesMap.put(track.getId(), new ArrayList<Cross>());
-//                        crossesMap.get(track.getId()).add(cross);
-//                    } else {
-//                        crossesMap.get(track.getId()).add(cross);
-//                    }
+                if (d < Constants.CIRCLECONFUSION) {
+                    track.addCluster(cluster);
+//                    track.getCluster(cluster.get_Layer()).set_Doca(d);
+//                    doca[cluster.get_Layer()-1] = d;
                 }
             }
             
-            for(int i=0; i<Constants.FVT_Nlayers; i++) {
-                if(track.getCluster(i+1)!=null) {
-                    if(track.getCluster(i+1).get_TrackIndex()<=0) {
-                        track.getCluster(i+1).set_TrackIndex(track.getIndex());
+            if(debug) System.out.println(track.toString());
+            
+            track.filterClusters(0);
+        }
+            
+        // === Check for duplicate cluster assignment ============================================
+        boolean clusterDoubleAssignment = false;
+        for(int i=0; i<tracks.size(); i++) {
+            Track track = tracks.get(i);                
+           
+            for(int layer=1; layer<=Constants.FVT_Nlayers; layer++) {
+                Cluster cluster = track.getCluster(layer);
+                if(cluster!=null) {
+                    double doca = cluster.distance(track.getDCTraj(layer).getPosition());
+                    // cluster is not assigned
+                    if(cluster.get_TrackIndex()<0) {
+                        cluster.set_TrackIndex(track.getIndex());
+                        cluster.set_Doca(doca);
                     }
-                    else System.out.println("WARNING: double cluster assignment");
+                    // cluster is already assigned
+                    else {
+                        if(debug) System.out.println("WARNING: double cluster assignment for cluster "
+                                  + cluster.get_Index() + " tracks " + cluster.get_TrackIndex() + "/" + track.getIndex());
+                        clusterDoubleAssignment = debug;
+                        Track other = tracks.get(cluster.get_TrackIndex());
+                        if(track.getSeedQuality()>other.getSeedQuality()) {
+                            other.clearClusters(layer);
+                            cluster.set_TrackIndex(track.getIndex());
+                            cluster.set_Doca(doca);                        
+                        }
+                    }
                 }
             }
         }
 
         // === TRACKS ==============================================================================
         KFitter kf = null;
-        double[] pars = new double[6];
         
-        // Iterate on hashmap to run the fit.
-        for(Entry<Integer,Track> entry: tracks.entrySet()) {
-            Track track = entry.getValue();                
-            int   id    = entry.getKey();
-            
-            for (int p = 0; p < 6; p++) pars[p] = 0;
-                
+        // Iterate on list to run the fit.
+        for(int i=0; i<tracks.size(); i++) {
+            Track track = tracks.get(i);                
+                            
 //            List<Cross> crs = crossesMap.get(id);
 //            for(Cross c : crs) {
 //                // Filter clusters to use only the best cluster (minimum Tmin) per FMT layer.
@@ -198,8 +202,7 @@ public class FVTEngine extends ReconstructionEngine {
 
             // Set status and stop if there are no measurements to fit against.
             List<Cluster> trackClusters = track.getClusters();
-            track.status = trackClusters.size();
-            if (track.status == 0) continue;
+            if (trackClusters.isEmpty()) continue;
 
             kf = new KFitter(track, swimmer, 0);
             kf.runFitter(track.getSector());
@@ -210,16 +213,19 @@ public class FVTEngine extends ReconstructionEngine {
             kf.runFitter(track.getSector());
 
             if (kf.finalStateVec != null) {
-                // Set the track parameters.
-                track.setQ((int)Math.signum(kf.finalStateVec.Q));
-                track.setChi2(kf.chi2);
-                pars = track.getLabPars(kf.finalStateVec);
-                swimmer.SetSwimParameters(pars[0],pars[1],pars[2],-pars[3],-pars[4],-pars[5],
-                        -track.getQ());
-
+                StateVec sv = kf.finalStateVec;
+                
+                // swim to beamline to get vertex parameters
+                int charge = (int)Math.signum(sv.Q);
+                swimmer.SetSwimParameters(sv.x,sv.y,sv.z,-sv.getPx(),-sv.getPy(),-sv.getPz(),-charge);
                 double[] Vt = swimmer.SwimToBeamLine(xB, yB);
-                if (Vt == null) continue;
-
+                
+                // if successful, save track parameters
+                if(Vt == null || Vt[6]<Constants.MIN_SWIM_PATH) continue;
+                track.setStatus(1);
+                track.setNDF(trackClusters.size());
+                track.setQ(charge);
+                track.setChi2(kf.chi2);
                 track.setX(Vt[0]);
                 track.setY(Vt[1]);
                 track.setZ(Vt[2]);
@@ -230,16 +236,17 @@ public class FVTEngine extends ReconstructionEngine {
         }
         
         // propagate fit information to cluster/hit and write banks
-        for(Entry<Integer,Track> entry : tracks.entrySet()) {
-            Track track = entry.getValue();
+        for(int i=0; i<tracks.size(); i++) {
+            Track track = tracks.get(i);                
             for(int layer=1; layer<=Constants.FVT_Nlayers; layer++) {
-                if(track.getFMTtraj(layer)!=null) {
-                    double localY = track.getFMTtraj(layer).getLocalY();
+                if(track.getFMTTraj(layer)!=null) {
+                    double localY = track.getFMTTraj(layer).getLocalPosition().y();
                     track.getCluster(layer).set_CentroidResidual(localY);
                 }
             }
-            if(debug) System.out.println("Track " + track.toString());
+            if(debug || clusterDoubleAssignment) System.out.println("Track " + track.toString());
         }
+        if(clusterDoubleAssignment) for(int i=0; i<clusters.size(); i++) System.out.println(clusters.get(i).toStringBrief());
         
         RecoBankWriter rbc = new RecoBankWriter();
         rbc.appendFMTBanks(event, fittedhits, clusters, tracks);
@@ -249,13 +256,13 @@ public class FVTEngine extends ReconstructionEngine {
     
     public void dropBanks(DataEvent de) {
         if (this.alreadyDroppedBanks==false) {
-            System.out.println("["+this.getName()+"]  dropping FMTRec banks!\n");
+            System.out.println("["+this.getName()+"]  dropping FMT reconstruction banks!\n");
             this.alreadyDroppedBanks=true;
         }
-        de.removeBank("FMTRec::Hits");
-        de.removeBank("FMTRec::Clusters");
-        de.removeBank("FMTRec::Crosses");
-        de.removeBank("FMTRec::Tracks");
+        de.removeBank("FMT::Hits");
+        de.removeBank("FMT::Clusters");
+        de.removeBank("FMT::Crosses");
+        de.removeBank("FMT::Tracks");
         
     }
 

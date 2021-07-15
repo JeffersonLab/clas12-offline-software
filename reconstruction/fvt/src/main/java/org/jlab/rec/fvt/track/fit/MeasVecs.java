@@ -2,9 +2,9 @@ package org.jlab.rec.fvt.track.fit;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.rec.fmt.Constants;
 import org.jlab.rec.fmt.cluster.Cluster;
 import org.jlab.rec.fmt.Geometry;
+import static org.jlab.rec.fmt.Geometry.globalToLocal;
 import org.jlab.rec.fvt.track.fit.StateVecs.StateVec;
 
 public class MeasVecs {
@@ -62,8 +62,7 @@ public class MeasVecs {
 
         int layer = this.measurements.get(stateVec.k).layer;
 
-        return (stateVec.y-Constants.FVT_yShift[layer-1])*Math.cos(Constants.FVT_Alpha[layer-1])
-                - (stateVec.x-Constants.FVT_xShift[layer-1])*Math.sin(Constants.FVT_Alpha[layer-1]);
+        return globalToLocal(stateVec.x, stateVec.y, stateVec.z, layer).y();
     }
 
     public double[] H(StateVec stateVec, StateVecs sv) {

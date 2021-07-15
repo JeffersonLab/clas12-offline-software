@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.geom.prim.Line3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.fmt.Constants;
 import org.jlab.rec.fmt.cluster.Cluster;
-import org.jlab.rec.fvt.track.fit.StateVecs;
 
 /**
  *
@@ -27,8 +28,8 @@ public class Track {
      *  If there was an error in swimming due to an odd track shape or anything, a 100 is added to
      *  the variable to denote that.
      */
-    public int status = 0;
-
+    private int status;
+    private int _id;
     private int _index;
     private int _sector;
     private int _q;
@@ -39,11 +40,12 @@ public class Track {
     private double _px;
     private double _py;
     private double _pz;
+    private int _NDF;
 
-    private Trajectory[] _DCtrajs  = new Trajectory[Constants.FVT_Nlayers];
-    private Cluster[]    _clusters = new Cluster[Constants.FVT_Nlayers];
-    private Trajectory[] _FMTtrajs = new Trajectory[Constants.FVT_Nlayers];
-
+    private Trajectory[]    _DCtrajs  = new Trajectory[Constants.FVT_Nlayers];
+    private List<Cluster>[] _clusters = new ArrayList[Constants.FVT_Nlayers];
+    private Trajectory[]    _FMTtrajs = new Trajectory[Constants.FVT_Nlayers];
+            
     public Track() {
     }
 
@@ -59,7 +61,7 @@ public class Track {
         this._px = _px;
         this._py = _py;
         this._pz = _pz;
-        for(Cluster cluster : clusters) this.setCluster(cluster);
+        for(Cluster cluster : clusters) this.addCluster(cluster);
     }
 
     
@@ -82,27 +84,55 @@ public class Track {
     public List<Cluster> getClusters() {
         List<Cluster> clusters = new ArrayList<>();
         for(int i=0; i<Constants.FVT_Nlayers; i++) {
-            if(_clusters[i]!=null) clusters.add(_clusters[i]);
+            if(_clusters[i]!=null) clusters.addAll(_clusters[i]);
         }
         return clusters;
     }
 
-    public Cluster getCluster(int layer) {
+    public List<Cluster> getClusters(int layer) {
         if(layer<=0 || layer>Constants.FVT_Nlayers) return null;
         else return _clusters[layer-1];
     }
 
-    public void setCluster(Cluster cluster) {
-        this._clusters[cluster.get_Layer()-1] = cluster;
+    public Cluster getCluster(int layer) {
+        if(layer<=0 || layer>Constants.FVT_Nlayers) return null;
+        else if(_clusters[layer-1]== null || _clusters[layer-1].size()==0) return null;
+        else return _clusters[layer-1].get(0);
     }
 
-    public Trajectory getFMTtraj(int layer) {
+    public int getClusterLayers() {
+        int n = 0;
+        for(int i=0; i<Constants.FVT_Nlayers; i++) {
+            if(_clusters[i]!=null) n ++;
+        }
+        return n;
+    }
+
+    public void addCluster(Cluster cluster) {
+        if(this._clusters[cluster.get_Layer()-1]==null)
+            this._clusters[cluster.get_Layer()-1] = new ArrayList<>();
+        this._clusters[cluster.get_Layer()-1].add(cluster);
+    }
+
+    public void clearClusters(int layer) {
+        this._clusters[layer-1].clear();
+    }
+    
+    public Trajectory getFMTTraj(int layer) {
         if(layer<=0 || layer>Constants.FVT_Nlayers) return null;
         return _FMTtrajs[layer-1];
     }
 
     public void setFMTtraj(Trajectory trj) {
         this._FMTtrajs[trj.getLayer()-1] = trj;
+    }
+
+    public int getId() {
+        return _id;
+    }
+
+    public void setId(int _id) {
+        this._id = _id;
     }
 
     /**
@@ -115,7 +145,7 @@ public class Track {
     /**
      * @param _id the _id to set
      */
-    public void getIndex(int _id) {
+    public void setIndex(int _id) {
         this._index = _id;
     }
 
@@ -159,6 +189,22 @@ public class Track {
      */
     public void setChi2(double _chi2) {
         this._chi2 = _chi2;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public int getNDF() {
+        return _NDF;
+    }
+
+    public void setNDF(int _NDF) {
+        this._NDF = _NDF;
     }
 
     /**
@@ -245,23 +291,73 @@ public class Track {
         this._pz = _pz;
     }
 
-    public double[] getLabPars(StateVecs.StateVec sv) {
-        double x = sv.x;
-        double y = sv.y;
-        double z = sv.z;
-        double p = 1./Math.abs(sv.Q);
-        double tx = sv.tx;
-        double ty = sv.ty;
-        double pz = p/Math.sqrt(tx*tx+ty*ty+1);
-        double px = pz*tx;
-        double py = pz*ty;
-        return new double[] {x,y,z,px,py,pz};
+    public double getSeedQuality() {
+        double quality=99;
+        if(this.getClusters().size()>=3 && this.getClusterLayers()==3) {
+            Line3D seg1 = this.getClusters(1).get(0).get_GlobalSegment();
+            Line3D seg2 = this.getClusters(2).get(0).get_GlobalSegment();
+            Line3D seg3 = this.getClusters(3).get(0).get_GlobalSegment();
+            quality = seg1.distanceSegments(seg3).distanceSegments(seg2).length(); 
+        }
+        return quality;
+    }
+
+    
+    //  FIXME: THIS METHOD SHOULD BE GENERALIZED
+    public void filterClusters(int mode) {
+        
+        if(this.getClusters().size()<3 || this.getClusterLayers()!=3) return;
+        
+        double dref = Double.POSITIVE_INFINITY;
+        
+        int[] ibest = new int[Constants.FVT_Nlayers];
+        for(int i=0; i<Constants.FVT_Nlayers; i++) ibest[i] = -1;
+        
+        if(mode==1) {
+            for(int i1=0; i1<this.getClusters(1).size(); i1++) {
+                Line3D seg1 = this.getClusters(1).get(i1).get_GlobalSegment();
+                for(int i2=0; i2<this.getClusters(2).size(); i2++) {
+                    Line3D seg2 = this.getClusters(2).get(i2).get_GlobalSegment();
+                    for(int i3=0; i3<this.getClusters(3).size(); i3++) {
+                        Line3D seg3 = this.getClusters(3).get(i3).get_GlobalSegment();
+
+                        double d = seg1.distanceSegments(seg3).distanceSegments(seg2).length();
+                        if(d<dref) {
+                            ibest[0] = i1; ibest[1]=i2; ibest[2]=i3;
+                            dref = d;
+                        }
+                    }    
+                }    
+            }
+        }
+        else {
+            for(int layer=1; layer<=Constants.FVT_Nlayers; layer++) {
+                
+                if(this.getClusters(layer)==null) continue;
+                
+                dref = Double.POSITIVE_INFINITY;
+                for(int j=0; j<this.getClusters(layer).size(); j++) {
+                    double d = this.getClusters(layer).get(j).distance(this.getDCTraj(layer).getPosition());
+                    if(d<dref) {
+                        dref = d;
+                        ibest[layer-1]=j;
+                    }
+                }
+            }
+        }
+        
+        for(int i=0; i<Constants.FVT_Nlayers; i++) {
+            if(ibest[i]>=0) {
+                List<Cluster> cls = new ArrayList<>();
+                cls.add(_clusters[i].get(ibest[i]));
+                _clusters[i] = cls; 
+            }
+        }
     }
     
-    
-    public static Map<Integer, Track> getDCTracks(DataEvent event) {
-        Map<Integer, Track> tracks = new LinkedHashMap<Integer, Track>();
-                
+    public static List<Track> getDCTracks(DataEvent event) {
+        
+        Map<Integer, Track> trackmap = new LinkedHashMap<Integer, Track>();        
         
         DataBank trackBank = null;
         DataBank trajBank  = null;
@@ -269,11 +365,11 @@ public class Track {
         if(event.hasBank("TimeBasedTrkg::Trajectory")) trajBank  = event.getBank("TimeBasedTrkg::Trajectory");
         if (trackBank!=null && trajBank!=null) {
         
-            int trkrows = trackBank.rows();
-            for (int i = 0; i < trkrows; i++) {
+            for (int i = 0; i < trackBank.rows(); i++) {
                 Track trk = new Track();
                 int id = trackBank.getShort("id", i);
-                trk.getIndex(i);
+                trk.setId(id);
+                trk.setIndex(i);
                 trk.setSector(trackBank.getByte("sector", i));
                 trk.setQ(trackBank.getByte("q", i));
                 trk.setX(trackBank.getFloat("Vtx0_x", i));
@@ -282,11 +378,9 @@ public class Track {
                 trk.setPx(trackBank.getFloat("p0_x", i));
                 trk.setPy(trackBank.getFloat("p0_y", i));
                 trk.setPz(trackBank.getFloat("p0_z", i));
-                tracks.put(id,trk);
+                trackmap.put(id,trk);
             }
-
-            int trkrows2 = trajBank.rows();
-            for (int i = 0; i < trkrows2; i++) {
+            for (int i = 0; i < trajBank.rows(); i++) {
                 if (trajBank.getShort("detector", i) == DetectorType.FMT.getDetectorId()) { 
                     int id    = trajBank.getShort("id", i);
                     int layer = trajBank.getByte("layer", i);
@@ -298,9 +392,13 @@ public class Track {
                                                     trajBank.getFloat("ty", i),
                                                     trajBank.getFloat("tz", i),
                                                     trajBank.getFloat("path", i));
-                    tracks.get(id).setDCTraj(trj);                
+                    trackmap.get(id).setDCTraj(trj);                
                 }
             }
+        }
+        List<Track> tracks = new ArrayList<>();
+        for(Entry<Integer,Track> entry: trackmap.entrySet()) {
+            tracks.add(entry.getValue());
         }
         return tracks;
     }
@@ -310,15 +408,18 @@ public class Track {
         String str = "FMT track :" + " Index "  + this._index
                                    + " Q  "     + this._q
                                    + String.format(" P (%.4f,%.4f,%.4f)", this._px, this._py, this._pz)
-                                   + String.format(" D (%.4f,%.4f,%.4f)", this._x, this._y, this._z);
+                                   + String.format(" D (%.4f,%.4f,%.4f)", this._x, this._y, this._z)
+                                   + String.format(" chi2 %.4f seed quality %.4f", this._chi2, this.getSeedQuality());
         for(int i=0; i<Constants.FVT_Nlayers; i++) {
-            if(_DCtrajs[i]!=null) str = str + "\n\t" +_DCtrajs[i].toString() + String.format(" LocY %.4f",_DCtrajs[i].getLocalY());           
+            if(_DCtrajs[i]!=null) str = str + "\n\t" +_DCtrajs[i].toString();           
         }
         for(int i=0; i<Constants.FVT_Nlayers; i++) {
-            if(_clusters[i]!=null) str = str + "\n\t" + _clusters[i].toStringBrief();           
+            if(_clusters[i]!=null) {
+                for(int j=0; j<_clusters[i].size(); j++) str = str + "\n\t" + _clusters[i].get(j).toStringBrief();
+            }           
         }
         for(int i=0; i<Constants.FVT_Nlayers; i++) {
-            if(_FMTtrajs[i]!=null) str = str + "\n\t" + _FMTtrajs[i].toString() + String.format(" LocY %.4f",_FMTtrajs[i].getLocalY());           
+            if(_FMTtrajs[i]!=null) str = str + "\n\t" + _FMTtrajs[i].toString();           
         }
         return str;                           
     }
