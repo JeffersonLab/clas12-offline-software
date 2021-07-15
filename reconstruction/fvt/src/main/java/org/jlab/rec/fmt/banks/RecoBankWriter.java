@@ -1,9 +1,10 @@
 package org.jlab.rec.fmt.banks;
 
 import java.util.List;
-import java.util.Map;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.rec.fmt.Constants;
 import org.jlab.rec.fmt.cluster.Cluster;
 import org.jlab.rec.fmt.cross.Cross;
 import org.jlab.rec.fmt.hit.FittedHit;
@@ -16,7 +17,7 @@ import org.jlab.rec.fvt.track.Track;
 public class RecoBankWriter {
 
         public DataBank fillFMTHitsBank(DataEvent event, List<FittedHit> hitlist) {
-        DataBank bank = event.createBank("FMTRec::Hits", hitlist.size());
+        DataBank bank = event.createBank("FMT::Hits", hitlist.size());
 
         for (int i = 0; i < hitlist.size(); i++) {
             bank.setByte( "layer",        i, (byte)  hitlist.get(i).get_Layer());
@@ -40,20 +41,20 @@ public class RecoBankWriter {
      */
     public DataBank fillFMTClustersBank(DataEvent event, List<Cluster> cluslist) {
 
-        DataBank bank = event.createBank("FMTRec::Clusters", cluslist.size());
-        int[] hitIdxArray = new int[5];
+        DataBank bank = event.createBank("FMT::Clusters", cluslist.size());
 
         for (int i = 0; i < cluslist.size(); i++) {
-            for (int j = 0; j < hitIdxArray.length; j++) hitIdxArray[j] = -1;
 
             bank.setShort("index",            i, (short) cluslist.get(i).get_Index());
             bank.setByte( "sector",           i, (byte)  cluslist.get(i).get_Sector());
             bank.setByte( "layer",            i, (byte)  cluslist.get(i).get_Layer());
             bank.setShort("size",             i, (short) cluslist.get(i).size());
             bank.setFloat("centroid",         i, (float) cluslist.get(i).get_Centroid());
+            bank.setFloat("centroidError",    i, (float) cluslist.get(i).get_CentroidError());
             bank.setFloat("residual",         i, (float) cluslist.get(i).get_CentroidResidual());
             bank.setFloat("doca",             i, (float) cluslist.get(i).get_Doca());
             bank.setFloat("energy",           i, (float) cluslist.get(i).get_TotalEnergy());
+            bank.setFloat("time",             i, (float) cluslist.get(i).get_Time());
             bank.setShort("seedStrip",        i, (short) cluslist.get(i).get_SeedStrip());
             bank.setShort("seedIndex",        i, (short) cluslist.get(i).getSeedIndex());
             bank.setShort("trackIndex",       i, (short) cluslist.get(i).get_TrackIndex());
@@ -69,7 +70,7 @@ public class RecoBankWriter {
      */
     public DataBank fillFMTCrossesBank(DataEvent event, List<Cross> crosses) {
 
-        DataBank bank = event.createBank("FMTRec::Crosses", crosses.size());
+        DataBank bank = event.createBank("FMT::Crosses", crosses.size());
 
         int index = 0;
         for (int j = 0; j < crosses.size(); j++) {
@@ -88,31 +89,69 @@ public class RecoBankWriter {
         return bank;
     }
 
-    private DataBank fillFMTTracksBank(DataEvent event, Map<Integer,Track> candlist) {
+    private DataBank fillFMTTracksBank(DataEvent event,List<Track> candlist) {
 
-        DataBank bank = event.createBank("FMTRec::Tracks", candlist.size());
+        DataBank bank = event.createBank("FMT::Tracks", candlist.size());
 
-        int i = 0;
-        for (int id : candlist.keySet()) {
-            bank.setShort("index",  i, (short) candlist.get(id).getIndex());
-            bank.setShort("status", i, (short) candlist.get(id).status);
-            bank.setByte( "sector", i, (byte)  candlist.get(id).getSector());
-            bank.setByte( "q",      i, (byte)  candlist.get(id).getQ());
-            bank.setFloat("chi2",   i, (float) candlist.get(id).getChi2());
-            bank.setFloat("Vtx0_x", i, (float) candlist.get(id).getX());
-            bank.setFloat("Vtx0_y", i, (float) candlist.get(id).getY());
-            bank.setFloat("Vtx0_z", i, (float) candlist.get(id).getZ());
-            bank.setFloat("p0_x",   i, (float) candlist.get(id).getPx());
-            bank.setFloat("p0_y",   i, (float) candlist.get(id).getPy());
-            bank.setFloat("p0_z",   i, (float) candlist.get(id).getPz());
-            i++;
+        for (int i=0; i<candlist.size(); i++) {
+            bank.setShort("index",  i, (short) candlist.get(i).getIndex());
+            bank.setByte( "status", i, (byte)  candlist.get(i).getStatus());
+            bank.setByte( "sector", i, (byte)  candlist.get(i).getSector());
+            bank.setByte( "q",      i, (byte)  candlist.get(i).getQ());
+            bank.setFloat("chi2",   i, (float) candlist.get(i).getChi2());
+            bank.setByte( "NDF",    i, (byte)  candlist.get(i).getNDF());
+            bank.setFloat("Vtx0_x", i, (float) candlist.get(i).getX());
+            bank.setFloat("Vtx0_y", i, (float) candlist.get(i).getY());
+            bank.setFloat("Vtx0_z", i, (float) candlist.get(i).getZ());
+            bank.setFloat("p0_x",   i, (float) candlist.get(i).getPx());
+            bank.setFloat("p0_y",   i, (float) candlist.get(i).getPy());
+            bank.setFloat("p0_z",   i, (float) candlist.get(i).getPz());
         }
 
         return bank;
     }
 
+    private DataBank fillFMTTrajectoryBank(DataEvent event,List<Track> candlist) {
+
+        DataBank bank = event.createBank("FMT::Trajectory", candlist.size()*Constants.FVT_Nlayers);
+
+        int row = 0;
+        for (int i=0; i<candlist.size(); i++) {
+            Track track = candlist.get(i);
+            for (int j=0; j<Constants.FVT_Nlayers; j++) {
+                int layer = j+1;
+                bank.setShort("index",    row, (short) track.getIndex());
+                bank.setByte( "detector", row, (byte)  DetectorType.FMT.getDetectorId());
+                bank.setByte( "layer",    row, (byte)  layer);
+                if(track.getDCTraj(layer)!=null) {
+                    bank.setFloat("dx",       row, (float) track.getDCTraj(layer).getLocalPosition().x());
+                    bank.setFloat("dy",       row, (float) track.getDCTraj(layer).getLocalPosition().y());
+                    bank.setFloat("dz",       row, (float) track.getDCTraj(layer).getLocalPosition().z());  
+                }
+//                else {
+//                    System.out.println(layer + " " + track.toString());
+//                    event.getBank("TimeBasedTrkg::Trajectory").show();
+//                }
+                if(track.getFMTTraj(layer)!=null) {
+                    bank.setFloat("x",        row, (float) track.getFMTTraj(layer).getPosition().x());
+                    bank.setFloat("y",        row, (float) track.getFMTTraj(layer).getPosition().y());
+                    bank.setFloat("z",        row, (float) track.getFMTTraj(layer).getPosition().z());
+                    bank.setFloat("tx",       row, (float) track.getFMTTraj(layer).getDirection().x());
+                    bank.setFloat("ty",       row, (float) track.getFMTTraj(layer).getDirection().y());
+                    bank.setFloat("tz",       row, (float) track.getFMTTraj(layer).getDirection().z());
+                    bank.setFloat("lx",       row, (float) track.getFMTTraj(layer).getLocalPosition().x());
+                    bank.setFloat("ly",       row, (float) track.getFMTTraj(layer).getLocalPosition().y());
+                    bank.setFloat("lz",       row, (float) track.getFMTTraj(layer).getLocalPosition().z());
+                    bank.setFloat("path",     row, (float) track.getFMTTraj(layer).getPath());
+                }
+                row++;
+            }
+        }
+        return bank;
+    }
+
     public void appendFMTBanks(DataEvent event, List<FittedHit> fhits, List<Cluster> clusters,
-                               Map<Integer,Track> tracks) {
+                               List<Track> tracks) {
 
         if (event == null) return;
         
@@ -130,6 +169,7 @@ public class RecoBankWriter {
         
         if (tracks != null && tracks.size() > 0) {
             event.appendBanks(this.fillFMTTracksBank(event, tracks));
+            event.appendBanks(this.fillFMTTrajectoryBank(event, tracks));
         }
 
     }

@@ -463,6 +463,25 @@ public class StateVecs {
             this.k = k;
         }
 
+        public double getPx() {
+            return this.getPz()*tx;
+        }
+
+        public double getPy() {
+            return this.getPz()*ty;
+        }
+
+        public double getPz() {
+            double pz = this.getP()/Math.sqrt(tx*tx+ty*ty+1);
+            return pz;
+        }
+
+        public double getP() {
+            return 1./Math.abs(this.Q);
+        }
+        
+        
+
         String printInfo() {
             return this.k+"] = "+(float)this.x+", "+(float)this.y+", "+(float)this.z+", "
                     +(float)this.tx+", "+(float)this.ty+", "+(float)this.Q+" B = "+(float)this.B;

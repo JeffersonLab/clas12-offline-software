@@ -1,6 +1,6 @@
 [
     {
-        "name": "FMTRec::Hits",
+        "name": "FMT::Hits",
         "group": 20800,
         "item" : 21,
         "info": "reconstructed FMT hits",
@@ -18,7 +18,7 @@
         ]
     },
     {
-        "name": "FMTRec::Clusters",
+        "name": "FMT::Clusters",
         "group": 20800,
         "item" : 22,
         "info": "reconstructed FMT clusters",
@@ -28,16 +28,18 @@
             {"name":"layer",           "type":"B", "info":"layer"},
             {"name":"size",            "type":"S", "info":"cluster size"},
             {"name":"centroid",        "type":"F", "info":"centroid position in local coordinates"},
+            {"name":"centroidError",   "type":"F", "info":"centroid position error"},
             {"name":"residual",        "type":"F", "info":"centroid residual"},
-            {"name":"doca",            "type":"F", "info":"dc track residual"},
+            {"name":"doca",            "type":"F", "info":"dc track doca"},
             {"name":"energy",          "type":"F", "info":"cluster total energy"},
-            {"name":"seedStrip",       "type":"S", "info":"seed strip"},
-            {"name":"seedIndex",       "type":"S", "info":"seed index in Hits bank"},
+            {"name":"time",            "type":"F", "info":"cluster time"},
+            {"name":"seedStrip",       "type":"S", "info":"seed strip number"},
+            {"name":"seedIndex",       "type":"S", "info":"seed index in hits bank"},
             {"name":"trackIndex",      "type":"S", "info":"associated track index"}
         ]
     },
     {
-        "name": "FMTRec::Crosses",
+        "name": "FMT::Crosses",
         "group": 20800,
         "item" : 25,
         "info": "reconstructed FMT crosses",
@@ -60,13 +62,13 @@
         ]
     },
     {
-        "name": "FMTRec::Tracks",
+        "name": "FMT::Tracks",
         "group": 20800,
         "item" : 36,
         "info": "reconstructed tracks using FMT information",
         "entries": [
             {"name":"index",         "type":"S", "info":"index of the track in the DC bank"},
-            {"name":"status",        "type":"S", "info":"status of the track (0: not refit using FMT, 1: refit using FMT)"},
+            {"name":"status",        "type":"B", "info":"status of the track (0: not refit using FMT, 1: refit using FMT)"},
             {"name":"sector",        "type":"B", "info":"sector of the track in DC"},
             {"name":"Vtx0_x",        "type":"F", "info":"Vertex x-position of the swam track to the DOCA to the beamline (in cm)"},
             {"name":"Vtx0_y",        "type":"F", "info":"Vertex y-position of the swam track to the DOCA to the beamline (in cm)"},
@@ -75,7 +77,32 @@
             {"name":"p0_y",          "type":"F", "info":"3-momentum y-coordinate of the swam track to the DOCA to the beamline (in cm)"},
             {"name":"p0_z",          "type":"F", "info":"3-momentum z-coordinate of the swam track to the DOCA to the beamline (in cm)"},
             {"name":"q",             "type":"B", "info":"charge of the track"},
-            {"name":"chi2",          "type":"F", "info":"chi^2 of the fit"}
+            {"name":"chi2",          "type":"F", "info":"chi^2 of the fit"},
+            {"name":"NDF",           "type":"B", "info":"number of degrees of freedom of the fit"}
+        ]
+    },
+    {
+        "name": "FMT::Trajectory",
+        "group": 20800,
+        "item" : 37,
+        "info": "FMT tracks trajectory bank",
+        "entries": [
+            {"name":"index",    "type":"S", "info":"index of the track in the DC bank"},
+            {"name":"detector", "type":"B", "info":"id of the detector"},
+            {"name":"layer",    "type":"B", "info":"id of the layer"},
+            {"name":"x",        "type":"F", "info":"track x position at detector surface (cm)"},
+            {"name":"y",        "type":"F", "info":"track y position at detector surface (cm)"},
+            {"name":"z",        "type":"F", "info":"track z position at detector surface (cm)"},
+            {"name":"tx",       "type":"F", "info":"track unit direction vector x component at detector surface"},
+            {"name":"ty",       "type":"F", "info":"track unit direction vector y component at detector surface"},
+            {"name":"tz",       "type":"F", "info":"track unit direction vector z component at detector surface"},
+            {"name":"lx",       "type":"F", "info":"track x position in local coordinates (cm)"},
+            {"name":"ly",       "type":"F", "info":"track y position in local coordinates (cm)"},
+            {"name":"lz",       "type":"F", "info":"track z position in local coordinates (cm)"},
+            {"name":"dx",       "type":"F", "info":"DC track x position in local coordinates (cm)"},
+            {"name":"dy",       "type":"F", "info":"DC track y position in local coordinates (cm)"},
+            {"name":"dz",       "type":"F", "info":"DC track z position in local coordinates (cm)"},
+            {"name":"path",     "type":"F", "info":"pathlength of the track from the track vertex to the detector surface (cm)"}
         ]
     }
 ]

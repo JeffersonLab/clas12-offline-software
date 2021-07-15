@@ -9,6 +9,7 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.fmt.Constants;
 import org.jlab.rec.fmt.Geometry;
+import org.jlab.utils.groups.IndexedTable;
 
 /**
  *
@@ -240,7 +241,7 @@ public class Hit implements Comparable<Hit> {
             this._ClusterIndex = _AssociatedClusterIndex;
         }
 
-        public static List<Hit> fetchHits(DataEvent event) {
+        public static List<Hit> fetchHits(DataEvent event, IndexedTable statuses) {
 
             List<Hit> hits = new ArrayList<Hit>();
 
@@ -257,7 +258,9 @@ public class Hit implements Comparable<Hit> {
                     if (strip == -1 || ADC == 0) continue;
 
                     Hit hit = new Hit(i, sector, layer, strip, (double) ADC, time);
-                    hits.add(hit);
+                    
+                    int status = statuses.getIntValue("status", sector, layer, strip);
+                    if(status==0) hits.add(hit);
                 }
             }
             Collections.sort(hits);

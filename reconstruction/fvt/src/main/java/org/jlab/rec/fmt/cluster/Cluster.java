@@ -29,6 +29,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         private double _Centroid;
         private double _CentroidError;
         private double _CentroidResidual;
+        private double _Time;
 
         private int _MinStrip;
         private int _MaxStrip;
@@ -142,6 +143,14 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
         public void set_TotalEnergy(double _TotalEnergy) {
             this._TotalEnergy = _TotalEnergy;
+        }
+
+        public double get_Time() {
+            return _Time;
+        }
+
+        public void set_Time(double _Time) {
+            this._Time = _Time;
         }
 
         public int get_MinStrip() {
@@ -262,7 +271,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                 }
             }
             
-            for(int i=0; i<clusters.size(); i++) clusters.get(i).calc_CentroidParams();
+            for(int i=0; i<clusters.size(); i++) clusters.get(i).calc_CentroidParams(true);
             
             return clusters;
         }
@@ -270,14 +279,16 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         /**
          * Sets energy-weighted parameters; these are the strip centroid
          * (energy-weighted) value, the energy-weighted phi for Z detectors and the
-         * energy-weighted z for C detectors
+         * energy-weighted z for C detectorsting
+         * @param eweight set to true for energy weighting
          */
-        public void calc_CentroidParams() {
+        public void calc_CentroidParams(boolean eweight) {
             // instantiation of variables
             double stripNumCent = 0;			// cluster Lorentz-angle-corrected energy-weighted strip = centroid
 
 
-            double totEn = 0.;					// cluster total energy
+            double totEn = 0.;			// cluster total energy
+            double totWeight = 0;
             double weightedStrp = 0;			// energy-weighted strip
 
             double weightedStripEndPoint1X = 0;	// Energy-weighted x of the strip first end point
@@ -294,11 +305,13 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             double weightedLocStripEndPoint2Y = 0;	// Energy-weighted y of the strip second end point
             double weightedLocStripEndPoint2Z = 0;	// Energy-weighted z of the strip second end point
 
+            double averageTime = 0;
+
             int nbhits = this.size();
 
             if (nbhits != 0) {
                 int min = Integer.MAX_VALUE;
-                int max = -1;
+                int max = Integer.MIN_VALUE;
                 int seed = -1;
                 double Emax = -1;
                 double Time = -1;
@@ -310,7 +323,9 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     // get the energy value of the strip
                     double strpEn = thehit.get_Energy();
                     double strpTm = thehit.get_Time();
-
+                    
+                    double weight = 1;
+                    if(eweight) weight = strpEn;
 //                    // set the cluster's Tmin
 //                    if (this._Tmin > thehit.get_Time()) {
 //                            this._Tmin = thehit.get_Time();
@@ -333,20 +348,23 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     double lz2 = thehit.get_StripLocalSegment().end().z();
 
                     totEn += strpEn;
-                    weightedStrp += strpEn * thehit.get_StripLocalSegment().origin().y();
-                    weightedStripEndPoint1X += strpEn * x1;
-                    weightedStripEndPoint1Y += strpEn * y1;
-                    weightedStripEndPoint1Z += strpEn * z1;
-                    weightedStripEndPoint2X += strpEn * x2;
-                    weightedStripEndPoint2Y += strpEn * y2;
-                    weightedStripEndPoint2Z += strpEn * z2;
+                    totWeight += weight;
+                    weightedStrp += weight * thehit.get_StripLocalSegment().origin().y();
+                    weightedStripEndPoint1X += weight * x1;
+                    weightedStripEndPoint1Y += weight * y1;
+                    weightedStripEndPoint1Z += weight * z1;
+                    weightedStripEndPoint2X += weight * x2;
+                    weightedStripEndPoint2Y += weight * y2;
+                    weightedStripEndPoint2Z += weight * z2;
 
-                    weightedLocStripEndPoint1X += strpEn * lx1;
-                    weightedLocStripEndPoint1Y += strpEn * ly1;
-                    weightedLocStripEndPoint1Z += strpEn * lz1;
-                    weightedLocStripEndPoint2X += strpEn * lx2;
-                    weightedLocStripEndPoint2Y += strpEn * ly2;
-                    weightedLocStripEndPoint2Z += strpEn * lz2;
+                    weightedLocStripEndPoint1X += weight * lx1;
+                    weightedLocStripEndPoint1Y += weight * ly1;
+                    weightedLocStripEndPoint1Z += weight * lz1;
+                    weightedLocStripEndPoint2X += weight * lx2;
+                    weightedLocStripEndPoint2Y += weight * ly2;
+                    weightedLocStripEndPoint2Z += weight * lz2;
+                    
+                    averageTime += strpTm;
 
                     // getting the max and min strip number in the cluster
                     if (strpNb <= min) {
@@ -356,67 +374,73 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                         max = strpNb;
                     }
 
-                    // getting the seed strip which is defined as the strip with the largest deposited energy
-                    if (strpEn >= Emax) {
-                        Emax = strpEn;
-                        Time = strpTm;
-                        seed = strpNb;
+//                if (totEn == 0) {
+//                    System.err.println(" Cluster energy is zero .... exit");
+//                    return;
+//                }
+                }
+                
+                // calculates the centroid values and associated positions
+                stripNumCent = weightedStrp / totWeight;
+                weightedStripEndPoint1X = weightedStripEndPoint1X / totWeight;
+                weightedStripEndPoint1Y = weightedStripEndPoint1Y / totWeight;
+                weightedStripEndPoint1Z = weightedStripEndPoint1Z / totWeight;
+                weightedStripEndPoint2X = weightedStripEndPoint2X / totWeight;
+                weightedStripEndPoint2Y = weightedStripEndPoint2Y / totWeight;
+                weightedStripEndPoint2Z = weightedStripEndPoint2Z / totWeight;
+                weightedLocStripEndPoint1X = weightedLocStripEndPoint1X / totWeight;
+                weightedLocStripEndPoint1Y = weightedLocStripEndPoint1Y / totWeight;
+                weightedLocStripEndPoint1Z = weightedLocStripEndPoint1Z / totWeight;
+                weightedLocStripEndPoint2X = weightedLocStripEndPoint2X / totWeight;
+                weightedLocStripEndPoint2Y = weightedLocStripEndPoint2Y / totWeight;
+                weightedLocStripEndPoint2Z = weightedLocStripEndPoint2Z / totWeight;                
+                averageTime /= this.size();
+
+                double delta = Double.POSITIVE_INFINITY;
+                for (int i = 0; i < nbhits; i++) {
+                    FittedHit thehit = this.get(i);
+                    if(Math.abs(thehit.get_Strip()-stripNumCent)<delta) {
+                        delta = Math.abs(thehit.get_Strip()-stripNumCent);
+                        seed = thehit.get_Strip();
+                        Emax = thehit.get_Energy();
+                        Time = thehit.get_Time();
                     }
                 }
 
-                if (totEn == 0) {
-                    System.err.println(" Cluster energy is zero .... exit");
-                    return;
-                }
-
-                this.set_MinStrip(min);
-                this.set_MaxStrip(max);
-                this.set_SeedStrip(seed);
-                this.set_SeedEnergy(Emax);
-
-                // calculates the centroid values and associated positions
-                stripNumCent = weightedStrp / totEn;
-                weightedStripEndPoint1X = weightedStripEndPoint1X / totEn;
-                weightedStripEndPoint1Y = weightedStripEndPoint1Y / totEn;
-                weightedStripEndPoint1Z = weightedStripEndPoint1Z / totEn;
-                weightedStripEndPoint2X = weightedStripEndPoint2X / totEn;
-                weightedStripEndPoint2Y = weightedStripEndPoint2Y / totEn;
-                weightedStripEndPoint2Z = weightedStripEndPoint2Z / totEn;
-                weightedLocStripEndPoint1X = weightedLocStripEndPoint1X / totEn;
-                weightedLocStripEndPoint1Y = weightedLocStripEndPoint1Y / totEn;
-                weightedLocStripEndPoint1Z = weightedLocStripEndPoint1Z / totEn;
-                weightedLocStripEndPoint2X = weightedLocStripEndPoint2X / totEn;
-                weightedLocStripEndPoint2Y = weightedLocStripEndPoint2Y / totEn;
-                weightedLocStripEndPoint2Z = weightedLocStripEndPoint2Z / totEn;
+                _TotalEnergy   = totEn;
+                _Centroid      = stripNumCent;
+                _CentroidError = Math.sqrt(this.size()) * Constants.FVT_SigmaS;
+                _GlobalSegment = new Line3D(weightedStripEndPoint1X,weightedStripEndPoint1Y,weightedStripEndPoint1Z,
+                                           weightedStripEndPoint2X,weightedStripEndPoint2Y,weightedStripEndPoint2Z);
+                _LocalSegment  = new Line3D(weightedLocStripEndPoint1X,weightedLocStripEndPoint1Y,weightedLocStripEndPoint1Z,
+                                           weightedLocStripEndPoint2X,weightedLocStripEndPoint2Y,weightedLocStripEndPoint2Z);
+                _Time          = averageTime;
+                _SeedStrip     = seed;
+                _SeedEnergy    = Emax;
+                _SeedTime      = Time;
+                _MinStrip      = min;
+                _MaxStrip      = max;
             }
-
-            _TotalEnergy = totEn;
-            _Centroid = stripNumCent;
-            _CentroidError = Math.sqrt(this.size()) * Constants.FVT_SigmaS;
-            _GlobalSegment = new Line3D(weightedStripEndPoint1X,weightedStripEndPoint1Y,weightedStripEndPoint1Z,
-                                       weightedStripEndPoint2X,weightedStripEndPoint2Y,weightedStripEndPoint2Z);
-            _LocalSegment = new Line3D(weightedLocStripEndPoint1X,weightedLocStripEndPoint1Y,weightedLocStripEndPoint1Z,
-                                       weightedLocStripEndPoint2X,weightedLocStripEndPoint2Y,weightedLocStripEndPoint2Z);
             
         }
 
 
         public double distance(double x, double y, double z) {
             Point3D trkPoint = new Point3D(x, y, z);
-            return _GlobalSegment.distance(trkPoint).length();
+            return _GlobalSegment.distanceSegment(trkPoint).length();
         }
 
         public double distance(Point3D point) {
-            return _GlobalSegment.distance(point).length();
+            return _GlobalSegment.distanceSegment(point).length();
         }
 
         public Point3D calcCross(double x, double y, double z) {
             Point3D trkPoint = new Point3D(x, y, z);
-            return _GlobalSegment.distance(trkPoint).origin();
+            return _GlobalSegment.distanceSegment(trkPoint).origin();
         }
 
         public Point3D calcCross(Point3D point) {
-            return _GlobalSegment.distance(point).origin();
+            return _GlobalSegment.distanceSegment(point).origin();
         }
 
         @Override
@@ -440,7 +464,8 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                                   + ", Layer " + this.get_Layer()
                                   + ", Seed "  + this.get_SeedStrip()
                                   + ", Size "  + this.size()
-                                  + ", LocY "  + String.format("%.4f", this.get_LocalSegment().origin().y());
+                                  + ", LocX "  + String.format("%.4f", this.get_LocalSegment().midpoint().x())
+                                  + ", LocY "  + String.format("%.4f", this.get_LocalSegment().midpoint().y());
             return str;
         }
 
