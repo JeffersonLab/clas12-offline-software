@@ -277,11 +277,13 @@ public class BMTGeometry {
      * @return Point3D offset: 3D offset
      */
     public Point3D getOffset(int layer, int sector) {
-        
         Point3D offset = new Point3D();
-        offset.copy(Constants.shifts[layer-1][sector-1]);
-//        offset.translateXYZ(0, 0, org.jlab.rec.cvt.Constants.getZoffset());
-        
+        if(layer>0 && layer<Constants.NLAYERS+1 && sector > 0 && sector<Constants.NSECTORS+1) {    
+            offset.copy(Constants.shifts[layer-1][sector-1]); 
+        }
+       else {
+            System.out.println("ERROR: out of layer number in getOffset(int layer, region)");
+        }
         return offset;
     }
     
@@ -292,16 +294,25 @@ public class BMTGeometry {
      * @return Point3D offset: 3D offset
      */
     public Vector3D getRotation(int layer, int sector) {
-        
-        return Constants.rotations[layer-1][sector-1];
+        if(layer>0 && layer<Constants.NLAYERS+1 && sector > 0 && sector<Constants.NSECTORS+1) {    
+            return Constants.rotations[layer-1][sector-1];
+        } else {
+            System.out.println("ERROR: out of layer sector number in getRotation(int layer, region)");
+            return new Vector3D();
+        }
     }
     
     public Point3D getInverseOffset(int layer, int sector) {
         
         Point3D offset = new Point3D();
-        offset.copy(Constants.shifts[layer-1][sector-1]);
+        if(layer>0 && layer<Constants.NLAYERS+1 && sector > 0 && sector<Constants.NSECTORS+1) { 
+            offset.copy(Constants.shifts[layer-1][sector-1]);
+            return new Point3D(-offset.x(),-offset.y(),-offset.z());
+        } else {
+            System.out.println("ERROR: out of layer  sector number in getRotation(int layer, region)");
+                return new Point3D();
+        }
         
-        return new Point3D(-offset.x(),-offset.y(),-offset.z());
     }
     
     /**
@@ -311,10 +322,13 @@ public class BMTGeometry {
      * @return Point3D offset: 3D offset
      */
     public Vector3D getInverseRotation(int layer, int sector) {
-        
-        Vector3D rot = Constants.rotations[layer-1][sector-1];
-        
-        return new Vector3D(-rot.x(),-rot.y(),-rot.z());
+        if(layer>0 && layer<Constants.NLAYERS+1) { 
+            Vector3D rot = Constants.rotations[layer-1][sector-1];
+            return new Vector3D(-rot.x(),-rot.y(),-rot.z());
+        } else {
+            System.out.println("ERROR: out of layer sector number in getInverseRotation(int layer, region)");
+            return new Vector3D();
+        }
     }
     
     /**
@@ -324,8 +338,12 @@ public class BMTGeometry {
      * @return Point3D offset: 3D offset
      */
     public Line3D getAxis(int layer, int sector) {
-        
-        return Constants.axes[layer-1][sector-1];
+        if(layer>0 && layer<Constants.NLAYERS+1) { 
+            return Constants.axes[layer-1][sector-1];
+        } else {
+            System.out.println("ERROR: out of layer sector number in getAxis(int layer, region)");
+            return new Line3D();
+        }
     }
     
     
@@ -342,7 +360,7 @@ public class BMTGeometry {
         double zmin   = Constants.getCRCZMIN()[region-1];
         double zmax   = Constants.getCRCZMAX()[region-1];
         double angle  = Constants.getCRZPHI()[region-1][sector-1] - Constants.getCRZDPHI()[region-1][sector-1] 
-                      + ((double) strip-0.5-0.5) * Constants.getCRZWIDTH()[region-1] / Constants.getCRZRADIUS()[region-1];
+                      + ((double) strip-0.5) * Constants.getCRZWIDTH()[region-1] / Constants.getCRZRADIUS()[region-1];
         
         Point3D p1= new Point3D(radius, 0, zmin);
         p1.rotateZ(angle);
