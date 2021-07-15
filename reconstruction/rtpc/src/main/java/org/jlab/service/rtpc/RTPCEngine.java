@@ -47,7 +47,7 @@ public class RTPCEngine extends ReconstructionEngine{
         String cosm = this.getEngineConfigString("rtpcCosmic");
         String beamfit = this.getEngineConfigString("rtpcBeamlineFit");
         String disentangler = this.getEngineConfigString("rtpcDisentangler");
-	String chi2cull = this.getEngineConfigString("rtpcChi2Cull");
+	    String chi2cull = this.getEngineConfigString("rtpcChi2Cull");
         //System.out.println(sim + " " + cosm + " " + beamfit);
 
         if(sim != null){
@@ -66,9 +66,9 @@ public class RTPCEngine extends ReconstructionEngine{
             disentangle = Boolean.valueOf(disentangler);
         }
 
-	if(chi2cull != null){
-	    chi2culling = Boolean.valueOf(chi2cull);
-	}
+        if(chi2cull != null){
+            chi2culling = Boolean.valueOf(chi2cull);
+        }
 
         String[] rtpcTables = new String[]{
             "/calibration/rtpc/time_offsets",
@@ -115,11 +115,11 @@ public class RTPCEngine extends ReconstructionEngine{
         }
 	
         magfield = 50 * magfieldfactor;
-	IndexedTable time_offsets = this.getConstantsManager().getConstants(runNo, "/calibration/rtpc/time_offsets");
-	int hitsbound = 15000;
-	hitsbound = (int) time_offsets.getDoubleValue("tl",1,1,4);
-	if(hitsbound < 1) hitsbound = 15000; 
-	if(hits.size() > hitsbound) return true; 
+        IndexedTable global_parms = this.getConstantsManager().getConstants(runNo, "/calibration/rtpc/global_parms");
+        int hitsbound = 15000;
+        hitsbound = (int) global_parms.getDoubleValue("MaxHitsEvent",0,0,0);
+        if(hitsbound < 1) hitsbound = 15000; 
+        if(hits.size() > hitsbound) return true; 
 
         if(event.hasBank("RTPC::adc")){
             params.init(this.getConstantsManager(), runNo);
