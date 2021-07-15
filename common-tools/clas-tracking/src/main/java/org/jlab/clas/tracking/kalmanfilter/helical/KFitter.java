@@ -24,7 +24,7 @@ public class KFitter {
     StateVecs sv = new StateVecs();
     
     MeasVecs mv = new MeasVecs();
-    
+    public boolean filterOn = true;
     public StateVec finalStateVec;
     private double _tarShift; //targetshift
     private double _Xb; //beam axis pars
@@ -91,7 +91,7 @@ public class KFitter {
             sv.X0.add(ref.x());
             sv.Y0.add(ref.y());
             sv.Z0.add(ref.z());
-        }
+        } 
         sv.init( helix, cov, this, swimmer);
         
     }
@@ -214,7 +214,7 @@ public class KFitter {
     private void filter(int k, Swim swimmer, int dir) {
 
         if (sv.trackTraj.get(k) != null && sv.trackCov.get(k).covMat != null 
-                && mv.measurements.get(k).skip == false) {
+                && mv.measurements.get(k).skip == false && filterOn) {
 
             double[] K = new double[5];
             double V = mv.measurements.get(k).error;

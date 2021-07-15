@@ -15,11 +15,13 @@ import trackfitter.fitter.utilities.ProbChi2perNDF;
 public class CosmicFitter {
 
     private Ray _ray;  // fit ray
-
+    private LineFitter _linefitRhoZ = new LineFitter();
     private LineFitter _linefitYX = new LineFitter();
     private LineFitter _linefitY_primeZ = new LineFitter();
     private CosmicFitPars _rayfitoutput;
-
+    
+    private LineFitPars _linefitparsRhoZ;
+    private LineFitPars _linefitparsYX;
     /**
      * Status of the HelicalTrackFit
      */
@@ -102,11 +104,9 @@ public class CosmicFitter {
         double y_ref = 0; // calc the ref point at the plane y =0
         double x_ref = yx_interc;
         double z_ref = yz_interc;
-
         Point3D refPoint = new Point3D(x_ref, y_ref, z_ref);
-
         Vector3D refDir = new Vector3D(yx_slope, 1, yz_slope).asUnit();
-
+        
         Ray the_ray = new Ray(refPoint, refDir);
 
         the_ray.set_yxslope(yx_slope);
@@ -117,7 +117,7 @@ public class CosmicFitter {
         the_ray.set_yxintercErr(yx_interc_err);
         the_ray.set_yzinterc(yz_interc);
         the_ray.set_yzintercErr(yz_interc_err);
-
+        
         double[] chisq = new double[]{_linefitYX.getFit().chisq(), _linefitY_primeZ.getFit().chisq()};
         if (the_ray != null) {
             CosmicFitPars the_rayfitoutput = new CosmicFitPars(the_ray, chisq);
@@ -127,6 +127,86 @@ public class CosmicFitter {
             set_rayfitoutput(the_rayfitoutput);
             _ray.chi2 = ProbChi2perNDF.prob(chisq[0]+chisq[1],errRt.size()+errZ.size());
         }
+        return FitStatus.Successful;
+    }
+
+    public FitStatus fit2(List<Double> X, List<Double> Y, List<Double> Z, List<Double> Rho, List<Double> errRt, List<Double> errRho, List<Double> ErrZ) {
+        //  Initialize the various fitter outputs
+        
+        _linefitRhoZ = null;
+        _linefitYX = null;
+        _linefitY_primeZ = null;
+        set_rayfitoutput(null);
+
+        for (int j = 0; j < errRt.size(); j++) {
+            if (errRt.get(j) == 0) {
+                System.err.println("Point errors ill-defined --  fit exiting");
+                return FitStatus.LineFitFailed;
+            }
+        }
+
+        for (int j = 0; j < ErrZ.size(); j++) {
+            if (ErrZ.get(j) == 0) {
+                System.err.println("Point errors ill-defined --  fit exiting");
+                return FitStatus.LineFitFailed;
+            }
+        }
+       
+        for (int j = 0; j < X.size(); j++) {
+            
+            if (errRt.get(j) == 0) {
+                System.err.println("Point errors ill-defined -- helical fit exiting");
+                return FitStatus.LineFitFailed;
+            }
+        }
+
+        
+
+        //Line fits
+        _linefitYX = new LineFitter();
+        boolean linefitstatusXYOK = _linefitYX.fitStatus(Y, X, errRt, new ArrayList<Double>(X.size()), X.size());
+
+        _linefitRhoZ = new LineFitter();
+        boolean linefitstatusOK = _linefitRhoZ.fitStatus(Rho, Z, errRho, ErrZ, Z.size());
+
+        if (!linefitstatusOK) {
+            return FitStatus.LineFitFailed; 
+        }
+        //  Get the results of the fits
+        _linefitparsRhoZ = _linefitRhoZ.getFit();
+        _linefitparsYX = _linefitYX.getFit();
+
+        double fit_tandip = _linefitparsRhoZ.slope();
+        double fit_Z0 = _linefitparsRhoZ.intercept();
+        
+        double yx_slope = _linefitYX.getFit().slope();
+        double yz_slope = fit_tandip*Math.sqrt(1+yx_slope*yx_slope);
+        double yx_interc = _linefitYX.getFit().intercept();
+        double yz_interc = fit_Z0 + fit_tandip*Math.abs(yx_interc);
+        
+        double y_ref = 0; // calc the ref point at the plane y =0
+        double x_ref = yx_slope*y_ref + yx_interc;
+        double z_ref = yz_slope*y_ref + yz_interc ;
+        
+        Point3D refPoint = new Point3D(x_ref, y_ref, z_ref);
+        Vector3D refDir = new Vector3D(yx_slope, 1, yz_slope).asUnit();
+        Ray the_ray = new Ray(refPoint, refDir);
+
+        the_ray.set_yxslope(yx_slope);
+        the_ray.set_yzslope(yz_slope);
+        the_ray.set_yxinterc(yx_interc);
+        the_ray.set_yzinterc(yz_interc);
+
+        double[] chisq = new double[]{_linefitYX.getFit().chisq(), _linefitRhoZ.getFit().chisq()};
+        if (the_ray != null) {
+            CosmicFitPars the_rayfitoutput = new CosmicFitPars(the_ray, chisq);
+            _ray = the_ray;
+            the_rayfitoutput.set_ray(the_ray);
+            the_rayfitoutput.set_chisq(chisq);
+            set_rayfitoutput(the_rayfitoutput);
+            _ray.chi2 = ProbChi2perNDF.prob(chisq[0]+chisq[1],errRt.size()+ErrZ.size());
+        }
+        System.out.println(refPoint.toString()+"yzslope "+yz_slope+" yz_interc "+yz_interc+" c2 "+_linefitRhoZ.getFit().chisq());
         return FitStatus.Successful;
     }
 

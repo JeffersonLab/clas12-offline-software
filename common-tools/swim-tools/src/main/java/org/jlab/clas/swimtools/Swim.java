@@ -7,7 +7,6 @@ package org.jlab.clas.swimtools;
 
 import cnuphys.rk4.IStopper;
 import cnuphys.rk4.RungeKuttaException;
-import cnuphys.swim.SwimResult;
 import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.util.Plane;
 import cnuphys.swimZ.SwimZException;
@@ -15,7 +14,9 @@ import cnuphys.swimZ.SwimZResult;
 import cnuphys.swimZ.SwimZStateVector;
 import org.apache.commons.math3.util.FastMath;
 import org.jlab.geom.prim.Vector3D;
-
+import org.jlab.geom.prim.Point3D;
+import cnuphys.adaptiveSwim.AdaptiveSwimResult;
+import cnuphys.adaptiveSwim.geometry.Cylinder;
 /**
  *
  * @author ziegler
@@ -486,9 +487,9 @@ public class Swim {
 
         try {
         
-            SwimResult result = new SwimResult(6);
+            AdaptiveSwimResult result = new AdaptiveSwimResult(false);
             
-            PC.CF.swimRho(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, radius/100, accuracy*2, _rMax, stepSize*10, cnuphys.swim.Swimmer.CLAS_Tolerance, result);
+            PC.CF.swimRho(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, radius/100, accuracy, _rMax, stepSize, cnuphys.swim.Swimmer.CLAS_Tolerance, result);
 
             value[0] = result.getUf()[0] * 100; // convert back to cm
             value[1] = result.getUf()[1] * 100; // convert back to cm
@@ -498,7 +499,7 @@ public class Swim {
             value[5] = result.getUf()[5] * _pTot;
             value[6] = result.getFinalS() * 100;
             value[7] = 0; // Conversion from kG.m to T.cm
-
+            
                     
         } catch (RungeKuttaException e) {
                 e.printStackTrace();
@@ -506,7 +507,55 @@ public class Swim {
         return value;
 
     }
+    
+    /**
+     * 
+     * @param axisPoint1 in cm
+     * @param axisPoint2 in cm 
+     * @param radius in cm 
+     * @return swam trajectory to the cylinder
+     */
+    public double[] SwimGenCylinder(Point3D axisPoint1, Point3D axisPoint2, double radius)  {
 
+        double[] value = new double[8];
+        double[] p1 = new double[3];
+        double[] p2 = new double[3];
+        p1[0] = axisPoint1.x()/100;
+        p1[1] = axisPoint1.y()/100;
+        p1[2] = axisPoint1.z()/100;
+        p2[0] = axisPoint2.x()/100;
+        p2[1] = axisPoint2.y()/100;
+        p2[2] = axisPoint2.z()/100;
+        
+        Cylinder targCyl = new Cylinder(p1, p2, radius/100);
+        // using adaptive stepsize
+        if(this.SwimUnPhys)
+            return null;
+
+        try {
+        
+            AdaptiveSwimResult result = new AdaptiveSwimResult(false);
+            
+            PC.CF.swimCylinder(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, 
+                    p1, p2, radius/100, accuracy, _rMax, stepSize, cnuphys.swim.Swimmer.CLAS_Tolerance, result);
+            
+
+            value[0] = result.getUf()[0] * 100; // convert back to cm
+            value[1] = result.getUf()[1] * 100; // convert back to cm
+            value[2] = result.getUf()[2] * 100; // convert back to cm
+            value[3] = result.getUf()[3] * _pTot; // normalized values
+            value[4] = result.getUf()[4] * _pTot;
+            value[5] = result.getUf()[5] * _pTot;
+            value[6] = result.getFinalS() * 100;
+            value[7] = 0; // Conversion from kG.m to T.cm
+            
+                    
+        } catch (RungeKuttaException e) {
+                e.printStackTrace();
+        }
+        return value;
+
+    }
     private class SphericalBoundarySwimStopper implements IStopper {
 
         private double _finalPathLength = Double.NaN;

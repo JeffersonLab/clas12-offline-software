@@ -10,6 +10,7 @@ import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Arc3D;
 import org.jlab.geom.prim.Cylindrical3D;
+import org.jlab.geom.prim.Vector3D;
 
 /**
  *
@@ -25,6 +26,8 @@ public class Surface implements Comparable<Surface> {
     public Point3D finitePlaneCorner1;
     public Point3D finitePlaneCorner2;
     public Cylindrical3D cylinder;
+    public Point3D cylShift;
+    public Vector3D cylRotation;
     public Arc3D arc;
     public Strip strip;
     private double error;
@@ -35,6 +38,7 @@ public class Surface implements Comparable<Surface> {
     //this is for energy loss
     private double _Z_over_A_times_l;
     public boolean notUsedInFit = false;
+    public double hemisphere = 1;
     
     public Surface(Plane3D plane3d, Point3D refrPoint, Point3D c1, Point3D c2) {
         type = Type.PLANEWITHPOINT;

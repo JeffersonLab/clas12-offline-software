@@ -437,7 +437,7 @@ public class Helix {
     }
     public Point3D getHelixPointAtZ(double z) {
         double l = getLAtZ( z);
-        return new Point3D(getX(l),getY(l),getZ(l));
+        return new Point3D(getX(l),getY(l),z);
     }
     public Vector3D getMomentumAtZ(double z) {
         double l = getLAtZ( z);

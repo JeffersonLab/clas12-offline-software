@@ -12,13 +12,21 @@ public class DefaultRhoStopper implements IStopper {
 
 	private double _targetRho;
 	private double _totS; //total path length
-	private double _prevS; //previous step path length
-	private double _maxS;
+	private double _sMax;
 	private double _accuracy;
-	private double _currentRho = Double.NaN;
 	private double[] _uf; //final state vector
-	private double[] _uprev; //last u with the same sign
 	private double _s0; //starting path length
+	
+	//cache whether we have crossed the boundary
+	private boolean _crossedBoundary;
+	
+	//cache whether we have passed smax
+	private boolean _passedSmax;
+	
+	//the current rho
+	private double _rho;
+
+
 	
 	private int _dim;   //dimension of our system
 	
@@ -36,26 +44,55 @@ public class DefaultRhoStopper implements IStopper {
 	 */
 	public DefaultRhoStopper(double[] uo, double s0, double sMax, double rho0, double targetRho, double accuracy) {
 		
+		_rho = rho0;
+		
 		_s0 = s0;
 		_dim = uo.length;
 		
 		_uf = new double[_dim];
-		_uprev = new double[_dim];
+		copy(uo, _uf);
 		
 		_targetRho = targetRho;
 		_totS = 0;
-		_prevS = 0;
-		_maxS = sMax;
+		_sMax = sMax;
 		_accuracy = accuracy;
-		_startSign = sign(rho0);
+		_startSign = sign(_rho);
+		
+		
 	}
 	
 	//get the sign based on the current rho
 	private int sign(double currentRho) {
 		return ((currentRho < _targetRho) ? -1 : 1);
 	}
+	
+	/**
+	 * Did we pas the max path length?
+	 * @return true if we crossed the boundary
+	 */
+	public boolean passedSmax() {
+		return _passedSmax;
+	}
 
 
+	/**
+	 * Did we cross the boundary
+	 * @return true if we crossed the boundary
+	 */
+	public boolean crossedBoundary() {
+		return _crossedBoundary;
+	}
+	
+	/**
+	 * Get the current value of rho
+	 * @return the current value of rho
+	 */
+	public double getRho() {
+		return _rho;
+	}
+
+
+	//array copy for state vectors
 	private void copy(double src[], double[] dest) {
 		System.arraycopy(src, 0, dest, 0, _dim);
 	}
@@ -63,31 +100,37 @@ public class DefaultRhoStopper implements IStopper {
 	@Override
 	public boolean stopIntegration(double s, double[] u) {
 		
-		_currentRho = Math.hypot(u[0], u[1]);
-		_totS = s;
+		double newRho = Math.hypot(u[0], u[1]);
 
 		// within accuracy?
-		if (Math.abs(_currentRho - _targetRho) < _accuracy) {
+		if (Math.abs(newRho - _targetRho) < _accuracy) {
+			_rho = newRho;
+			_totS = s;
             copy(u, _uf);
 			return true;
 		}
-
-		// independent variable s is the path length
-		if (s > _maxS) {
-			copy(u, _uf);
-			return true;
-		}
-
-		//stop (and backup/reset to prev) if we crossed the boundary
-		if (sign(_currentRho) != _startSign) {
-			_totS = _prevS;
-			copy(_uprev, _uf);	
-			return true;
-		}
 		
-		//copy current to previous
-		_prevS = _totS;
-		copy(u, _uprev);	
+		//if we crossed the boundary (don't accept, reset)
+		_crossedBoundary = sign(newRho) != _startSign;
+		if (_crossedBoundary) {
+			return true;
+		}
+
+		
+		_passedSmax = (s > _sMax);
+		//if exceeded max path length accept and stop
+		if (_passedSmax) {
+			_rho = newRho;
+			_totS = s;
+            copy(u, _uf);
+			return true;
+		}		
+		
+		
+		//accept and continue
+		_rho = newRho;
+		_totS = s;
+        copy(u, _uf);
 		return false;
 	}
 
@@ -99,17 +142,6 @@ public class DefaultRhoStopper implements IStopper {
 	@Override
 	public double getFinalT() {
 		return _s0 + _totS;
-	}
-
-	/**
-	 * Is the current rho within accuracy
-	 * 
-	 * @param rho        current rho
-	 * @param accuracy accuracy
-	 * @return <code>true</code> if current z with accuracy
-	 */
-	public boolean withinAccuracy(double rho, double accuracy) {
-		return Math.abs(rho - _targetRho) < accuracy;
 	}
 
 	@Override
@@ -127,6 +159,7 @@ public class DefaultRhoStopper implements IStopper {
 		}
 		return _uf;
 	}
+	
 	/**
 	 * Generally this is the same as stop integration. So most will just return
 	 * stopIntegration(). But sometimes stop just means we reset and integrate more.
@@ -140,13 +173,9 @@ public class DefaultRhoStopper implements IStopper {
 	 */
 	@Override
 	public boolean terminateIntegration(double t, double y[]) {
-		boolean stop = Math.abs(_currentRho - _targetRho) < _accuracy;
-		
-		if (stop) {
-			copy(_uf, y);	
-		}
-
-		return stop;
+		System.err.println("Should not be called. Ever.");
+		System.exit(1);
+		return false;
 	}
 
 }

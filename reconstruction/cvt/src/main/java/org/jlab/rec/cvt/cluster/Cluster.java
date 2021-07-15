@@ -10,6 +10,8 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
 
+import java.util.Collections;
+import org.jlab.rec.cvt.bmt.Constants;
 /**
  * A cluster in the BST consists of an array of hits that are grouped together
  * according to the algorithm of the ClusterFinder class
@@ -38,7 +40,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     private double _Z;    							// 		for C-detectors
     private double _ZErr;
     private Point3D _TrakInters; //track intersection with the cluster
-    
+
     //added variables for alignment
     private double _x1; //cluster first end point x
     private double _y1; //svt cluster first end point y
@@ -201,21 +203,24 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             this.set_StripDir(arcLine.normal());
         */
         int nbhits = this.size();
-
+        //sort for bmt detector
+        //this.sort(Comparator.comparing(FittedHit.get_Strip()::get_Edep).thenComparing(FittedHit.get_Strip()::get_Edep));
+        Collections.sort(this);
         if (nbhits != 0) {
             int min = 1000000;
             int max = -1;
             int seed = -1;
             double Emax = -1;
+           
             // looping over the number of hits in the cluster
             for (int i = 0; i < nbhits; i++) {
                 FittedHit thehit = this.get(i);
                 // gets the energy value of the strip
-                double strpEn = thehit.get_Strip().get_Edep();
-                
+                double strpEn = -1;
                 int strpNb = -1;
                 int strpNb0 = -1; //before LC
                 if (this.get_Detector()==0) {
+                    strpEn = thehit.get_Strip().get_Edep();
                     // for the SVT the analysis only uses the centroid
                     strpNb = thehit.get_Strip().get_Strip();
                     Point3D stEP1 = thehit.get_Strip().get_ImplantPoint();
@@ -228,6 +233,16 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     weightedZ2 += strpEn * stEP2.z();
                 }
                 if (this.get_Detector()==1) { 
+                    if(Constants.newClustering) {
+                        strpEn = Math.sqrt(thehit.get_Strip().get_Edep());
+                    } else {
+                        //strpEn = thehit.get_Strip().get_Edep();
+                        strpEn = 1;
+                    }
+                    if(Constants.newClustering && nbhits>2 && i>1) 
+                        continue;
+                    
+                    //end points:
                     Point3D stEP1 = thehit.get_Strip().get_ImplantPoint();
                     Point3D stEP2 = thehit.get_Strip().get_EndPoint();
                     Point3D stCent = thehit.get_Strip().get_MidPoint();
@@ -240,20 +255,15 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     weightedXC += strpEn * stCent.x();
                     weightedYC += strpEn * stCent.y();
                     weightedZC += strpEn * stCent.z();
+
                     // for the BMT the analysis distinguishes between C and Z type detectors
                     if (this.get_DetectorType()==0) { // C-detectors
+                        //strpEn = Math.sqrt(thehit.get_Strip().get_Edep());
                         strpNb = thehit.get_Strip().get_Strip();
                         // for C detector the Z of the centroid is calculated
                         weightedZ += strpEn * thehit.get_Strip().get_Z();
                         weightedZErrSq += (thehit.get_Strip().get_ZErr()) * (thehit.get_Strip().get_ZErr());
-//                        Point3D stEP1 = thehit.get_Strip().get_ImplantPoint();
-//                        Point3D stEP2 = thehit.get_Strip().get_EndPoint();
-//                        weightedX1 += strpEn * stEP1.x();
-//                        weightedY1 += strpEn * stEP1.y();
-//                        weightedZ1 += strpEn * stEP1.z();
-//                        weightedX2 += strpEn * stEP2.x();
-//                        weightedY2 += strpEn * stEP2.y();
-//                        weightedZ2 += strpEn * stEP2.z();
+                        
                     }
                     if (this.get_DetectorType()==1) { // Z-detectors
                         // for Z detectors Lorentz-correction is applied to the strip
@@ -264,15 +274,9 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                         weightedPhiErrSq += (thehit.get_Strip().get_PhiErr()) * (thehit.get_Strip().get_PhiErr());
                         weightedPhi0 += strpEn * thehit.get_Strip().get_Phi0();
                         weightedPhiErrSq0 += (thehit.get_Strip().get_PhiErr0()) * (thehit.get_Strip().get_PhiErr0());
-//                        Point3D stEP1 = thehit.get_Strip().get_ImplantPoint();
-//                        Point3D stEP2 = thehit.get_Strip().get_EndPoint();
-//                        weightedX1 += strpEn * stEP1.x();
-//                        weightedY1 += strpEn * stEP1.y();
-//                        weightedZ1 += strpEn * stEP1.z();
-//                        weightedX2 += strpEn * stEP2.x();
-//                        weightedY2 += strpEn * stEP2.y();
-//                        weightedZ2 += strpEn * stEP2.z();
+                        
                     }
+                    
                 }
 
                 totEn += strpEn;
@@ -419,7 +423,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             set_Centroid0(stripNumCent0);
             _Phi = phiCent;
             _PhiErr = phiErrCent;
-            this.set_Error(geo.getRadius(_Layer)*phiErrCent);
+           // this.set_Error(geo.getRadius(_Layer)*phiErrCent);
             set_Phi0(phiCent0);
             set_PhiErr0(phiErrCent0);
         }
@@ -533,7 +537,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
     private double _SeedResidual;               // residual is doca to seed strip from trk intersection with module plane
     private double _CentroidResidual;           // residual is doca to centroid of cluster to trk inters with module plane
-
+    
     public int get_MinStrip() {
         return _MinStrip;
     }

@@ -297,7 +297,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
             int RegComp = this.y() < arg.y() ? -1 : this.y() == arg.y() ? 0 : 1;
             int IDComp = this.get_ID() < arg.get_ID() ? -1 : this.get_ID() == arg.get_ID() ? 0 : 1;
 
-            return_val = ((RegComp == 0) ? IDComp : RegComp);
+            return_val = RegComp;//((RegComp == 0) ? IDComp : RegComp);
         }
 
         return return_val;

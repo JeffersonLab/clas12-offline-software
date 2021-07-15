@@ -1,0 +1,60 @@
+---
+name: EvioToEvioWriter
+engine: org.jlab.clas.std.services.convertors.EvioToEvioWriter
+type: java
+
+author: Sebastián Mancilla
+email: smancill@jlab.org
+
+version: 1.4
+description:
+  Writes EVIO events to a file.
+
+  Saves the received event to disk or report an error if there was some
+  problem.
+
+config:
+- type: text/property-list
+  data:
+  - name: file
+    description:
+      The path to the output file.
+  - name: action
+    description:
+      Set 'open' to open the output file, or 'close' to close it.
+  - name: order
+    optional: true
+    description:
+      Set the byte order of the output file (BIG_ENDIAN or LITTLE_ENDIAN).
+
+requests:
+- action:
+    Save the received EVIO 4.1 event in the output file.
+  input:
+    type: binary/data-evio
+  output:
+    type: text/string
+    description:
+      An internal string that can be forwarded to request the standard reader
+      to read a new event.
+
+errors:
+  - description:
+      The service has not been configured to open an output file.
+    text:
+      "No open file"
+  - description:
+      The service could not open the output file.
+    text:
+      "Error opening the file <filepath>\n<stacktrace>"
+  - description:
+      The service could not write the event to the output file.
+    text:
+      "Error saving event to file <filepath>\n\n<stacktrace>"
+  - description:
+      The mime-type of the input data was wrong.
+    text:
+      "Wrong input type '<type>'"
+
+changelog:
+  Description of changes to the service.

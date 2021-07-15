@@ -5,14 +5,15 @@
     "item" : 21,
     "info": "ECAL hits",
     "entries": [
-       {"name":"id",       "type":"S", "info":"id of the hit"},
-       {"name":"status",   "type":"S", "info":"status of the hit"},
-       {"name":"sector",   "type":"B",  "info":"sector of ECAL"},
-       {"name":"layer",    "type":"B",  "info":"Layer of ECAL (1-3:PCAL, 4-6:ECIN, 7-9:ECOUT"},
-       {"name":"strip",    "type":"B",  "info":"Strip number"},
-       {"name":"peakid",   "type":"B",  "info":"Peak id"},
-       {"name":"energy",   "type":"F", "info":"Energy of the hit"},
-       {"name":"time",     "type":"F", "info":"Time of the hit"}
+       {"name":"id",         "type":"S",  "info":"id of the hit"},
+       {"name":"clusterId",  "type":"S",  "info":"id of the cluster the hit belongs to"},
+       {"name":"status",     "type":"S",  "info":"status of the hit"},
+       {"name":"sector",     "type":"B",  "info":"sector of ECAL"},
+       {"name":"layer",      "type":"B",  "info":"Layer of ECAL (1-3:PCAL, 4-6:ECIN, 7-9:ECOUT"},
+       {"name":"strip",      "type":"B",  "info":"Strip number"},
+       {"name":"peakid",     "type":"B",  "info":"Peak id"},
+       {"name":"energy",     "type":"F",  "info":"Energy of the hit"},
+       {"name":"time",       "type":"F",  "info":"Time of the hit"}
     ]
   },
   {

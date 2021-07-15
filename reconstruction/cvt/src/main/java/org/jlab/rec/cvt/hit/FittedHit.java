@@ -66,13 +66,23 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * @param arg0 the other hit
      * @return an int used to sort a collection of hits by layer number
      */
-    public int compareTo(FittedHit arg0) {
-        if (this.get_Layer() > arg0.get_Layer()) {
-            return 1;
-        } else {
-            return 0;
+    public int compareTo(FittedHit arg) {
+//        if (this.get_Layer() > arg.get_Layer()) {
+//            return 1;
+//        } else {
+//            return 0;
+//        }
+        
+        //sort by layer, then time, then edep
+        int CompLyr = this.get_Layer() < arg.get_Layer() ? -1 : this.get_Layer() == arg.get_Layer() ? 0 : 1;
+        int CompEdep = this.get_Strip().get_Edep() > arg.get_Strip().get_Edep() ? -1 : this.get_Strip().get_Edep() == arg.get_Strip().get_Edep() ? 0 : 1;
+        int CompTime = this.get_Strip().get_Time() < arg.get_Strip().get_Time() ? -1 : this.get_Strip().get_Time() == arg.get_Strip().get_Time() ? 0 : 1;
+
+        int return_val1 = ((CompTime == 0) ? CompEdep : CompTime);
+        int return_val = ((CompLyr == 0) ? return_val1 : CompLyr);
+        
+        return return_val;
         }
-    }
 
     public double _QualityFac;	// a quality factor depending on the hit status and goodness of fit
 

@@ -24,7 +24,8 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      */
     private static final long serialVersionUID = 5317526429163382618L;
     public boolean isInSeed = false;
-
+    private double cCrossRadius = 0;
+    
     /**
      * @param detector SVT or BMT
      * @param detectortype detector type for BMT, C or Z detector
@@ -520,6 +521,20 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 
     public void set_AssociatedTrackID(int associatedTrackID) {
         AssociatedTrackID = associatedTrackID;
+    }
+
+    /**
+     * @return the cCrossRadius
+     */
+    public double getcCrossRadius() {
+        return cCrossRadius;
+    }
+
+    /**
+     * @param cCrossRadius the cCrossRadius to set
+     */
+    public void setcCrossRadius(double cCrossRadius) {
+        this.cCrossRadius = cCrossRadius;
     }
 
     public static void main(String arg[]) {

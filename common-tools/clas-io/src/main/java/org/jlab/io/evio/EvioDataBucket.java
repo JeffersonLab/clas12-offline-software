@@ -72,7 +72,7 @@ public class EvioDataBucket {
         this.eventBuffer = ByteBuffer.allocate(this.MAX_BUFFER_SIZE);
         this.eventBuffer.order(ByteOrder.LITTLE_ENDIAN);
         try {
-            writer = new EventWriter(this.eventBuffer, 256, 200, null, null);
+            writer = new EventWriter(this.eventBuffer, null);
         } catch (EvioException ex) {
             Logger.getLogger(EvioDataBucket.class.getName()).log(Level.SEVERE, null, ex);
         }

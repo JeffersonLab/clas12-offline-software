@@ -14,7 +14,7 @@ import java.util.List;
 public final class Cylindrical3D implements Face3D {
     private final Arc3D baseArc = new Arc3D();
     private double height;
-
+    private final Line3D axis = new Line3D();
     /**
      * Constructs a new {@code Cylindrical3D} such that the arc of the surface
      * is centered around the z axis, the radius is one, the arc begins at x=1
@@ -69,6 +69,20 @@ public final class Cylindrical3D implements Face3D {
      */
     public void setArc(Arc3D arc) {
         this.baseArc.copy(arc);
+    }
+    
+    /**
+     * Sets the axis of this cylinder.
+     * @param axis the base of the cylindrical segment
+     */
+    public void setAxis(Line3D axis) {
+        this.axis.copy(axis);
+    }
+    /**
+     * returns the axis of this cylinder.
+     */
+    public Line3D getAxis() {
+        return this.axis;
     }
     
     /**

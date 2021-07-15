@@ -13,7 +13,7 @@
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../../parent/pom.xml</relativePath>
-    <version>6.5.12-SNAPSHOT</version>
+    <version>6.6.4-SNAPSHOT</version>
   </parent>
 
   <build>
@@ -24,6 +24,28 @@
               <configuration>
                   <source>1.8</source>
                   <target>1.8</target>
+              </configuration>
+          </plugin>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-jar-plugin</artifactId>
+              <configuration>
+                  <archive>
+                      <manifest>
+                          <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                          <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                      </manifest>
+                      <manifestSections>
+                          <manifestSection>
+                              <name>${project.name}</name>
+                              <manifestEntries>
+                                  <groupId>${project.groupId}</groupId>
+                                  <artifactId>${project.artifactId}</artifactId>
+                                  <version>${project.version}</version>
+                              </manifestEntries>
+                          </manifestSection>
+                      </manifestSections>
+                  </archive>
               </configuration>
           </plugin>
       </plugins>
@@ -47,19 +69,19 @@
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-jcsg</artifactId>
-      <version>6.5.12-SNAPSHOT</version>
+      <version>6.6.4-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-reco</artifactId>
-      <version>6.5.12-SNAPSHOT</version>
+      <version>6.6.4-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-analysis</artifactId>
-      <version>6.5.12-SNAPSHOT</version>
+      <version>6.6.4-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -95,17 +117,17 @@
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>swim-tools</artifactId>
-      <version>6.5.12-SNAPSHOT</version>
+      <version>6.6.4-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.jlab</groupId>
       <artifactId>groot</artifactId>
-      <version>2.2.0-SNAPSHOT</version>
+      <version>3.0.0-SNAPSHOT</version>
     </dependency>
         <dependency>
             <groupId>org.jlab.clas</groupId>
             <artifactId>clas-tracking</artifactId>
-            <version>6.5.12-SNAPSHOT</version>
+            <version>6.6.4-SNAPSHOT</version>
         </dependency>
     </dependencies>
  </project>

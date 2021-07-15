@@ -1,6 +1,9 @@
 package org.jlab.rec.cvt.track;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.svt.Geometry;
 import org.jlab.rec.cvt.trajectory.Ray;
@@ -20,7 +23,7 @@ public class StraightTrack extends Trajectory {
 
     private double _ndf;
     private double _chi2;
-
+    public Map<Integer, Cluster> clsMap;
     /**
      * updates the crosses in the track position based on the track straight
      * line fit parameters
@@ -32,8 +35,17 @@ public class StraightTrack extends Trajectory {
     public void update_Crosses(double fit_yxslope, double fit_yzslope, Geometry geo) {
         for (Cross c : this) {
             if (c.get_Detector().equalsIgnoreCase("SVT")) //only update for the svt
-            {
+            { 
                 update_Cross(c, fit_yxslope, fit_yzslope, geo);
+            }
+
+        }
+    }
+    public void reset_Crosses() {
+        for (Cross c : this) {
+            if (c.get_Detector().equalsIgnoreCase("SVT")) //only update for the svt
+            { 
+                c.set_Point(c.get_Point0());
             }
 
         }
@@ -103,8 +115,8 @@ public class StraightTrack extends Trajectory {
         double yxSl = this.get_ray().get_yxslope();
         double yzSl = this.get_ray().get_yzslope();
         double yxIt = this.get_ray().get_yxinterc();
-        double yzIt = this.get_ray().get_yzinterc();
-
+        double yzIt = this.get_ray().get_yzinterc(); 
+        
         for (Cross c : this) {
             double errSq = c.get_PointErr().x() * c.get_PointErr().x() + c.get_PointErr().z() * c.get_PointErr().z();
             double y = c.get_Point().y();

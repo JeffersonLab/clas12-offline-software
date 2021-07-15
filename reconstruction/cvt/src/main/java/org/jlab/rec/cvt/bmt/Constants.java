@@ -9,8 +9,8 @@ public class Constants {
     private Constants() {
 
     }
-
-
+    public static boolean newClustering = false;
+    public static boolean isMC = true;
     /*
  * The algorithm to describe the geometry of the Barrel Micromegas is provided by Franck Sabatie and implemented into the Java framework.
  * This version is for the last region of the BMT only.
@@ -415,15 +415,15 @@ public class Constants {
    public static synchronized void setPar_grid() {
     double pe=0;
     double pb=0;
-
+    Ne=15;
+    Nb=27;
     for (int j=0;j<405;j++) {	
             if(Ne==0 && Nb==0 ){
                     emin = E_grid[j];
                     emax = E_grid[j];
                     bmin = B_grid[j];
                     bmax = B_grid[j];
-                    Ne=15;
-                    Nb=27;
+                   
                     pe = E_grid[j];
                     pb = B_grid[j];
                     continue;
@@ -446,7 +446,7 @@ public class Constants {
    public static synchronized void setE_drift_FF(double[][] cHV_drift) {
    	for (int i=0; i<2*NREGIONS;i++) {
             for (int j=0; j<3;j++) {	
-                    E_DRIFT_FF[i][j]  = 10*cHV_drift[i][j]/hDrift;
+                    E_DRIFT_FF[i][j] = 10*cHV_drift[i][j]/hDrift;
             }	
    	}
   }

@@ -6,15 +6,13 @@ import java.util.Map;
 public class Constants {
 
     public static double PTCUT = 0.075;
+    
 
     /**
      * Constants used in the reconstruction
      */
     Constants() {
     }
-
-    // SIMULATION FLAG
-    public static boolean isSimulation = true;
 
     // CONSTANTS USED IN RECONSTRUCTION
     //---------------------------------
@@ -23,7 +21,7 @@ public class Constants {
     // selection cuts for helical tracks
     public static final double MINRADCURV = 200.00; //in cm
 
-    private static boolean isCosmicsData = true;
+    private static boolean isCosmicsData = false;
 
     private static boolean SVTOnly = false;
 

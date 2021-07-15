@@ -104,7 +104,19 @@ public class SVTConstants
 	public static double MODULEWID; // || DZ | AZ | DZ ||
 	public static double SECTORLEN;
 	
-	/**
+         // faraday cup cage
+         public static double[] FARADAYCAGERMIN    = new double[4];
+         public static double[] FARADAYCAGERMAX    = new double[4];
+         public static double[] FARADAYCAGELENGTH  = new double[4];
+         public static double[] FARADAYCAGEZPOS    = new double[4];
+         public static String[] FARADAYCAGENAME    = new String[4];
+         
+         // region peek supports
+         public static double[] REGIONPEEKRMIN;
+         public static double[] REGIONPEEKRMAX;
+         public static double[] REGIONPEEKLENGTH;
+
+         /**
 	 * Loads the the necessary tables for the SVT geometry for a given DatabaseConstantProvider.
 	 * 
 	 * @return DatabaseConstantProvider the same thing
@@ -162,7 +174,7 @@ public class SVTConstants
 	 *  
 	 * @param cp a ConstantProvider that has loaded the necessary tables
 	 */
-	public static synchronized void load( ConstantProvider cp )
+	public static synchronized void load( DatabaseConstantProvider cp )
 	{
                 // read constants from svt table
                 NREGIONS = cp.getInteger( ccdbPath+"svt/nRegions", 0 );
