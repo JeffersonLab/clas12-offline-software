@@ -369,8 +369,8 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 //                                                weightedY2/totEn-weightedYC/totEn, 
 //                                                weightedZ2/totEn-weightedZC/totEn).asUnit();
                     
-                    double theta = Math.acos(this.getN(weightedX1/totEn, weightedY1/totEn, weightedZ1/totEn, this.getCylAxis())
-                            .dot(this.getN(weightedX2/totEn, weightedY2/totEn, weightedZ2/totEn, this.getCylAxis())));
+                    double theta = Math.acos(this.getNFromTraj(weightedX1/totEn, weightedY1/totEn, weightedZ1/totEn, this.getCylAxis())
+                            .dot(this.getNFromTraj(weightedX2/totEn, weightedY2/totEn, weightedZ2/totEn, this.getCylAxis())));
                     this.setTheta(theta);
                     
                     //Vector3D s = C2P1.cross(C2P2).asUnit();
@@ -395,7 +395,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     Vector3D l = this.getCylAxis().direction().asUnit();
                     //this.getCylAxis().setOrigin(this.getCylAxis().origin().x(), this.getCylAxis().origin().y(), weightedZ1/totEn);
                     //this.getCylAxis().setEnd(this.getCylAxis().end().x(), this.getCylAxis().end().y(), weightedZ2/totEn);
-                    Vector3D n = this.getN(weightedX1/totEn, weightedY1/totEn, weightedZ1/totEn, this.getCylAxis());
+                    Vector3D n = this.getNFromTraj(weightedX1/totEn, weightedY1/totEn, weightedZ1/totEn, this.getCylAxis());
                     //Vector3D n = cyl.baseArc().center().vectorTo(new Point3D((weightedX2/totEn+weightedX1/totEn)/2,
                     //                            (weightedY2/totEn+weightedY1/totEn)/2, 
                     //                            (weightedZ2/totEn+weightedZ1/totEn)/2)).asUnit();
@@ -406,7 +406,6 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     this.setL(l);
                     this.setS(s);
                     this.setN(n);
-                   //System.out.println("bmtz"+l.toString()+" "+s.toString()+" "+n.toString()+" \n"+s.cross(l).toString()+" "+s.cross(n).toString());
                    
                 }
             }
@@ -436,11 +435,10 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     }
 
     
-    public Vector3D getN(double x, double y, double z, Line3D cln) {
+    public Vector3D getNFromTraj(double x, double y, double z, Line3D cln) {
         Point3D trk = new Point3D(x,y,z);
         Point3D Or = cln.distance(new Point3D(x,y,z)).origin();
         Vector3D n = Or.vectorTo(trk).asUnit();
-        
         return n;
     }
         

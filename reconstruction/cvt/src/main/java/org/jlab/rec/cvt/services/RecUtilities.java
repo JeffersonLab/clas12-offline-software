@@ -135,8 +135,8 @@ public class RecUtilities {
                 Cylindrical3D cyl = bgeo.getCylinder(lyer, sec);
                 Line3D cln = bgeo.getAxis(lyer, sec);
                 Line3D l = bgeo.getLCZstrip(bgeo.getRegion(lyer), sec, 1, swim);
-                cln.set(cln.origin().x(), cln.origin().y(), l.origin().z(), 
-                        cln.end().x(), cln.end().y(), l.end().z());
+                //cln.set(cln.origin().x(), cln.origin().y(), l.origin().z(), 
+                //        cln.end().x(), cln.end().y(), l.end().z());
                 cyl.setAxis(cln);
                 int id = trkcand.get_Crosses().get(c).get_Cluster1().get_Id();
                 double ce = trkcand.get_Crosses().get(c).get_Cluster1().get_Centroid();
@@ -279,8 +279,8 @@ public class RecUtilities {
             Cylindrical3D cyl = bgeo.getCylinder(lyer, sec);
             Line3D cln = bgeo.getAxis(lyer, sec);
             Line3D l = bgeo.getLCZstrip(bgeo.getRegion(lyer), sec, 1, swim);
-            cln.set(cln.origin().x(), cln.origin().y(), l.origin().z(), 
-                    cln.end().x(), cln.end().y(), l.end().z());
+            //cln.set(cln.origin().x(), cln.origin().y(), l.origin().z(), 
+            //        cln.end().x(), cln.end().y(), l.end().z());
             cyl.setAxis(cln);
             int id = trkcand.get(i).get_Cluster1().get_Id();
             double ce = trkcand.get(i).get_Cluster1().get_Centroid();
@@ -563,14 +563,13 @@ public class RecUtilities {
                 
                 layer = layer + 6;
                 
-               if(cl.get_DetectorType()==0) {
+               if(cl.get_DetectorType()==1) {
                    
                 Cylindrical3D cyl = BMTGeom.getCylinder(cl.get_Layer(), cl.get_Sector()); 
-                Line3D cln = BMTGeom.getAxis(cl.get_Layer(), cl.get_Sector());
-                
-                cl.setN(cl.getN(kf.TrjPoints.get(layer).x,kf.TrjPoints.get(layer).y,kf.TrjPoints.get(layer).z,cln));
-                cl.setL(cl.getS().cross(cl.getN()).asUnit());
-                
+                Line3D cln = cl.getCylAxis();
+                cl.setN(cl.getNFromTraj(kf.TrjPoints.get(layer).x,kf.TrjPoints.get(layer).y,kf.TrjPoints.get(layer).z,cln));
+                cl.setS(cl.getL().cross(cl.getN()).asUnit());
+                 
                }
                 
             }

@@ -212,13 +212,8 @@ public class CosmicTracksRec {
                         }
                     }
                     if (cl.get_Detector()==1 ) {
-                        Cylindrical3D cyl = BMTGeom.getCylinder(cl.get_Layer(), cl.get_Sector()); 
-                        Line3D cln = BMTGeom.getAxis(cl.get_Layer(), cl.get_Sector());
-
-                        cl.setN(cl.getN(tj.x(),tj.y(),tj.z(),cln));
-                        cl.setL(cl.getS().cross(cl.getN()).asUnit());
                         
-                        if (BMTGeometry.getDetectorType(layer) == BMTType.C) { //C-detector measuring z
+                        if (cl.get_DetectorType()==0) { //C-detector measuring z
                             double doca2Cls = tj.z() -cl.get_Z();
                             cl.set_CentroidResidual(resi);
                             for (FittedHit h1 : cl) {
@@ -233,7 +228,9 @@ public class CosmicTracksRec {
 
                             }
                         }
-                        if (BMTGeometry.getDetectorType(layer) == BMTType.Z) { //Z-detector measuring phi
+                        if (cl.get_DetectorType()==1) { //Z-detector measuring phi
+                            Cylindrical3D cyl = BMTGeom.getCylinder(cl.get_Layer(), cl.get_Sector()); 
+                            Line3D cln = cl.getCylAxis();
                             double doca2Cls =  org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cl.get_Layer() + 1) / 2 - 1] *(Math.atan2(tj.y(), tj.x())- cl.get_Phi());               
                             cl.set_CentroidResidual((org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cl.get_Layer() + 1) / 2 - 1] +org.jlab.rec.cvt.bmt.Constants.hStrip2Det)*resi);  
                             // calculate the hit residuals
