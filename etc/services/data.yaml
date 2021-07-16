@@ -42,8 +42,8 @@ services:
     name: EBTB
   - class: org.jlab.rec.rich.RICHEBEngine
     name: RICH
-  - class: org.jlab.service.fvt.FVTEngine
-    name: FVT
+  - class: org.jlab.service.fmt.FMTEngine
+    name: FMT
 configuration:
   io-services:
     writer:
