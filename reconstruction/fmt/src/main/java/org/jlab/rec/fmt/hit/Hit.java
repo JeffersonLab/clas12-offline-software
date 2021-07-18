@@ -7,7 +7,7 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.rec.fmt.Geometry;
+import org.jlab.rec.fmt.Constants;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -28,32 +28,34 @@ public class Hit implements Comparable<Hit> {
         private double _Energy;      	  // Reconstructed time, for now it is the gemc time
         private double _Time;	  // Hit time
         private double _Error;	  // Hit time
-        private Line3D _LocalSegment;  // The geometry point representing the strip position in the local frame
+        private Line3D _LocalSegment;  // The geometry segment representing the strip position in the local frame
         private Line3D _GlobalSegment; // The geometry segment representing the strip position in the global frame
         private int _Index;		  // Hit Id
         private int _ClusterIndex = -1;
 
         
         /**
+         * @param index
          * @param layer
          * @param strip
-         * @param Energy (for gemc output without digitization)
+         * @param energy
+         * @param time
          */
         public Hit(int index, int layer, int strip, double energy, double time) {
             this._Index = index;
             this._Layer = layer;
             this._Strip = strip;
             this._Energy = energy;
-            this._Time = time;
-            this._Error = Geometry.pitch/Math.sqrt(12);
-
+            this._Time  = time;
+            this._Error = Constants.getPitch()/Math.sqrt(12);
+            
 //            double x0 = Constants.FVT_stripsX[layer - 1][strip - 1][0];
 //            double x1 = Constants.FVT_stripsX[layer - 1][strip - 1][1];
 //            double y0 = Constants.FVT_stripsY[layer - 1][strip - 1][0];
 //            double y1 = Constants.FVT_stripsY[layer - 1][strip - 1][1];
 //            double z  = Geometry.getLayerZ(layer - 1);
-            this._GlobalSegment = new Line3D(Geometry.stripGlobal[layer-1][strip-1]);
-            this._LocalSegment  = new Line3D(Geometry.stripLocal[strip-1]);
+            this._GlobalSegment = Constants.getStrip(layer, strip);
+            this._LocalSegment  = Constants.getLocalStrip(layer, strip);
         }
 
         /**
@@ -166,8 +168,8 @@ public class Hit implements Comparable<Hit> {
             return _LocalSegment;
         }
 
-        
-        public double getDoca(double x, double y, double z) {
+
+         public double getDoca(double x, double y, double z) {
             Point3D trkPoint = new Point3D(x, y, z);
             return _GlobalSegment.distance(trkPoint).length();
         }
@@ -213,7 +215,7 @@ public class Hit implements Comparable<Hit> {
          */
         public boolean isClose(Hit other) {
             if (this.get_Layer() == other.get_Layer()) {
-                return Geometry.areClose(this.get_Strip(),other.get_Strip());
+                return Constants.areClose(this.get_Layer(),this.get_Strip(),other.get_Strip());
             }
             return false;
         }
@@ -241,7 +243,7 @@ public class Hit implements Comparable<Hit> {
                     double time = bankDGTZ.getFloat("time", i);
 
                     if (strip == -1 || ADC == 0) continue;
-
+                    
                     Hit hit = new Hit(i, layer, strip, (double) ADC, time);
                     
                     int status = statuses.getIntValue("status", sector, layer, strip);

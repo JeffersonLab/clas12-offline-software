@@ -292,6 +292,7 @@ public class Track {
         this._pz = _pz;
     }
 
+    //  FIXME: THIS METHOD SHOULD BE GENERALIZED
     public double getSeedQuality() {
         double quality=99;
         if(this.getClusters().size()>=3 && this.getClusterLayers()==3) {
