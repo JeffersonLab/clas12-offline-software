@@ -11,11 +11,11 @@ package org.jlab.rec.fmt.hit;
 public class FittedHit extends Hit implements Comparable<Hit> {
 
 	/**
-	 * @param sector  (1...24)
+          * @param index
 	 * @param layer (1...6)
-	 * @param strip (1...256)
-	 * @param energy (for gemc output without digitization)
-	 *
+	 * @param strip (1...1024)
+          * @param time
+	 * @param energy 
 	 */
 
 	public FittedHit(int index, int layer, int strip, double energy, double time) {
@@ -32,9 +32,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
          private int _AssociatedCrossIndex = -1;
          private int _AssociatedTrackIndex = -1;
 
-         public double _QualityFac;
-
-	public double get_docaToTrk() {
+         public double get_docaToTrk() {
 		return _residual;
 	}
 
@@ -68,14 +66,6 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 	public int compareTo(FittedHit arg0) {
 		if (this.get_Layer() > arg0.get_Layer()) return 1;
 		else                                     return 0;
-	}
-
-	public double get_QualityFac() {
-		return _QualityFac;
-	}
-
-	public void set_QualityFac(double QF) {
-		_QualityFac = QF;
 	}
 
 	public double get_Residual() {

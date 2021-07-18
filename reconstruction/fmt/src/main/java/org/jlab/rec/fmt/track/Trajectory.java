@@ -2,7 +2,7 @@ package org.jlab.rec.fmt.track;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.rec.fmt.Geometry;
+import org.jlab.rec.fmt.Constants;
 
 /**
  *
@@ -26,7 +26,7 @@ public class Trajectory {
     public Trajectory(int layer, double x, double y, double z, double tx, double ty, double tz, double path) {
         this.layer         = layer;
         this.position      = new Point3D(x,y,z);
-        this.localPosition = Geometry.globalToLocal(position, layer);
+        this.localPosition = Constants.toLocal(layer, position);
         this.direction     = new Vector3D(tx,ty,tz);
         this.path          = path;
     }

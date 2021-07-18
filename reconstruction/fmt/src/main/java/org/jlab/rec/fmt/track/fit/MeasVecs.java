@@ -2,7 +2,8 @@ package org.jlab.rec.fmt.track.fit;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.rec.fmt.Geometry;
+import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.fmt.Constants;
 import org.jlab.rec.fmt.cluster.Cluster;
 import org.jlab.rec.fmt.track.fit.StateVecs.StateVec;
 
@@ -37,23 +38,23 @@ public class MeasVecs {
 
         for (int i = 0; i < clusters.size(); i++) {
             int l = clusters.get(i).get_Layer()-1;
-            double cent = clusters.get(i).get_Centroid();
+            double cent  = clusters.get(i).get_Centroid();
+            double error = clusters.get(i).get_CentroidError();
+            double z     = clusters.get(i).get_GlobalSegment().origin().z();
             int seed = clusters.get(i).get_SeedStrip();
-            int size = clusters.get(i).size();
             MeasVec meas = new MeasVec();
-            meas = this.setMeasVec(l, cent, seed, size);
+            meas = this.setMeasVec(l, cent, error, z, seed);
             measurements.add(meas);
         }
     }
 
-    public MeasVec setMeasVec(int l, double cent, int seed, int size) {
+    public MeasVec setMeasVec(int l, double cent, double error, double z, int seed) {
 
         MeasVec meas     = new MeasVec();
-        double err       = (double) Geometry.stripSigma;
-        meas.error       = err*err*size;
         meas.layer       = l+1;
-        if (l>-1) meas.z = Geometry.getZ(l+1);
         meas.centroid    = cent;
+        meas.error       = error;
+        meas.z           = z; 
         meas.seed        = seed;
 
         return meas;
@@ -65,12 +66,13 @@ public class MeasVecs {
 
         int layer = this.measurements.get(stateVec.k).layer;
 
-        return Geometry.globalToLocal(stateVec.x, stateVec.y, stateVec.z, layer).y();
+        return Constants.toLocal(layer, stateVec.x, stateVec.y, stateVec.z).y();
     }
 
     public double[] H(StateVec stateVec, StateVecs sv) {
         int layer = this.measurements.get(stateVec.k).layer;
-        double[] H = new double[]{Geometry.getDx(layer), Geometry.getDy(layer), 0, 0, 0};
+        Vector3D derivatives = Constants.getDerivatives(layer, stateVec.x, stateVec.y, stateVec.z);
+        double[] H = new double[]{derivatives.x(), derivatives.y(), 0, 0, 0};
         return H;
     }
 

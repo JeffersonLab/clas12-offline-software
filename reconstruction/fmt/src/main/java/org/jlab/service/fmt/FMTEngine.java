@@ -6,11 +6,12 @@ import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.GeometryFactory;
 import org.jlab.utils.groups.IndexedTable;
 import org.jlab.io.base.*;
 import org.jlab.rec.fmt.Constants;
 
-import org.jlab.rec.fmt.Geometry;
 import org.jlab.rec.fmt.banks.RecoBankWriter;
 import org.jlab.rec.fmt.cluster.Cluster;
 import org.jlab.rec.fmt.hit.FittedHit;
@@ -65,8 +66,20 @@ public class FMTEngine extends ReconstructionEngine {
 
         // Load the geometry
         int run = 10;
-        Geometry.Load(run, variation);
-
+        Constants.setDetector(GeometryFactory.getDetector(DetectorType.FMT,run, variation));
+//        System.out.println(Geometry.getZ(1) + " " + fmtDetector.getSector(0).getSuperlayer(0).getLayer(0).getPlane().point().toString());
+//        for(int il=0; il<fmtDetector.getSector(0).getSuperlayer(0).getNumLayers(); il++) {
+//            FMTLayer layer = (FMTLayer) fmtDetector.getSector(0).getSuperlayer(0).getLayer(il);
+//            Transformation3D inverse = layer.getTransformation().inverse(); 
+//            for(int is=0; is<layer.getNumComponents(); is++) {
+//                TrackerStrip strip = layer.getComponent(is);
+//                Line3D local = new Line3D(strip.getLine());
+//                inverse.apply(local);
+//                System.out.println("Layer/strip=" + (il+1) + "/" + (is+1) + " " + strip.getWidth() + " " + strip.getThickness());
+//                System.out.println(strip.getLine().toString());
+//                System.out.println(Geometry.stripLocal[is].toString());
+//            }
+//        }
         return true;
     }
 

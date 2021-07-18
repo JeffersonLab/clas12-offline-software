@@ -25,6 +25,7 @@ public class DCEngine extends ReconstructionEngine {
     DCGeant4Factory dcDetector;
     FTOFGeant4Factory ftofDetector;
     Detector          ecalDetector = null;
+    Detector          fmtDetector = null;
     TrajectorySurfaces tSurf;
     String clasDictionaryPath ;
     String variationName;
@@ -191,25 +192,11 @@ public class DCEngine extends ReconstructionEngine {
         // Load other geometries
         ConstantProvider providerFTOF = GeometryFactory.getConstants(DetectorType.FTOF, 11, geoVariation);
         ftofDetector = new FTOFGeant4Factory(providerFTOF);
-        ConstantProvider providerEC = GeometryFactory.getConstants(DetectorType.ECAL, 11, geoVariation);
+//        ConstantProvider providerEC = GeometryFactory.getConstants(DetectorType.ECAL, 11, geoVariation);
         ecalDetector =  GeometryFactory.getDetector(DetectorType.ECAL, 11, geoVariation);
+//        ConstantProvider providerFMT = GeometryFactory.getConstants(DetectorType.FMT, 11, geoVariation);
+        fmtDetector =  GeometryFactory.getDetector(DetectorType.FMT, 11, geoVariation);
         System.out.println(" -- Det Geometry constants are Loaded " );
-
-        // Load FMT geometry
-        DatabaseConstantProvider dbProvider = new DatabaseConstantProvider(10, geoVariation); // TODO: Why 10?
-        // 1. Load FMT layers z position.
-        dbProvider.loadTable("/geometry/fmt/fmt_layer_noshim");
-        dbProvider.loadTable("/geometry/fmt/alignment");
-        dbProvider.loadTable("/geometry/fmt/fmt_global");
-
-        int fmtNLayers = dbProvider.length("/geometry/fmt/fmt_layer_noshim/Z");
-        double[] FVT_Z = new double[fmtNLayers];
-        for (int i=0; i<fmtNLayers; ++i) {
-            FVT_Z[i] =  dbProvider.getDouble("/geometry/fmt/fmt_layer_noshim/Z", i)/10.; // layer z.
-            FVT_Z[i] += dbProvider.getDouble("/geometry/fmt/alignment/deltaZ", i)/10.; // z shift.
-            FVT_Z[i] += dbProvider.getDouble("/geometry/fmt/fmt_global/hDrift", 0)/10. /2.; // h drift.
-        }
-        dbProvider.disconnect();
         
         // create the surfaces
         tSurf = new TrajectorySurfaces();
@@ -220,7 +207,7 @@ public class DCEngine extends ReconstructionEngine {
         //} catch (FileNotFoundException ex) {
         //    Logger.getLogger(DCEngine.class.getName()).log(Level.SEVERE, null, ex);
         //}
-        tSurf.LoadSurfaces(targetPosition, targetLength, dcDetector, ftofDetector, ecalDetector, FVT_Z);
+        tSurf.LoadSurfaces(targetPosition, targetLength, dcDetector, ftofDetector, ecalDetector, fmtDetector);
 
         // Get the constants for the correct variation
         String ccDBVar = this.getEngineConfigString("variation");

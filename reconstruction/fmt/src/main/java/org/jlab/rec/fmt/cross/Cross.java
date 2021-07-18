@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.rec.fmt.Geometry;
 import org.jlab.rec.fmt.cluster.Cluster;
 import org.jlab.rec.fmt.hit.FittedHit;
 
@@ -234,7 +233,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         Point3D interPoint = inlayerclus.get_GlobalSegment().distanceSegments(outlayerclus.get_GlobalSegment()).midpoint();
 
         this.set_Point(interPoint);
-        this.set_PointErr(new Point3D(Geometry.stripSigma / Math.sqrt(2.), Geometry.stripSigma / Math.sqrt(2.), 0));
+        this.set_PointErr(new Point3D(inlayerclus.get_CentroidError() / Math.sqrt(2.), outlayerclus.get_CentroidError() / Math.sqrt(2.), 0));
     }
 
     public int get_TrackIndex() {
