@@ -15,11 +15,12 @@ import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.rec.cvt.trajectory.StateVec;
 
 import Jama.Matrix;
+import org.jlab.geom.prim.Line3D;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTType;
 
 public class RecoBankWriter {
-
+    boolean debug = false;
     /**
      *
      * @param hitlist the list of hits that are of the type FittedHit. If the
@@ -296,21 +297,23 @@ public class RecoBankWriter {
             bank.setFloat("ny",   i, (float)cluslist.get(i).getN().y());
             bank.setFloat("nz",   i, (float)cluslist.get(i).getN().z());
             bank.setFloat("e",    i, (float)cluslist.get(i).get_Error());
-            if(cluslist.get(i).get_AssociatedTrackID()>0) {
-                if(cluslist.get(i).getN().dot(cluslist.get(i).getL())>1.e-06 
-                        || cluslist.get(i).getN().dot(cluslist.get(i).getS())>1.e-06
-                        || cluslist.get(i).getS().dot(cluslist.get(i).getL())>1.e-06) {
-                    System.out.println("Error: N "+cluslist.get(i).getN().toString()+" \n"+
-                        " L "+cluslist.get(i).getL().toString()+" \n"+
-                        " S "+cluslist.get(i).getS().toString()+" \n"+
-                        " NxL "+cluslist.get(i).getN().cross(cluslist.get(i).getL()).toString()+" \n"+
-                        " NxS "+cluslist.get(i).getN().cross(cluslist.get(i).getS()).toString()+" \n"+
-                        " SxL "+cluslist.get(i).getS().cross(cluslist.get(i).getL()).toString()+" \n"+
-                        " N.L "+cluslist.get(i).getN().dot(cluslist.get(i).getL())+
-                        " N.S "+cluslist.get(i).getN().dot(cluslist.get(i).getS())+
-                        " S.L "+cluslist.get(i).getS().dot(cluslist.get(i).getL())
-                );
-                }
+            if(debug && cluslist.get(i).get_AssociatedTrackID()>0 && cluslist.get(i).get_DetectorType()==1) {
+                Line3D cln = new Line3D(cluslist.get(i).getEndPoint1(), cluslist.get(i).getEndPoint2());
+                System.out.println("Check: N "+cluslist.get(i).getN().toString()+" \n"+
+                    " L "+cluslist.get(i).getL().toString()+" \n"+
+                    " S "+cluslist.get(i).getS().toString()+" \n"+
+                    " NxL "+cluslist.get(i).getN().cross(cluslist.get(i).getL()).toString()+" \n"+
+                    " NxS "+cluslist.get(i).getN().cross(cluslist.get(i).getS()).toString()+" \n"+
+                    " SxL "+cluslist.get(i).getS().cross(cluslist.get(i).getL()).toString()+" \n"+
+                    " line "+cln.toString()+" \n"
+                            +" line dir . L "+cln.direction().asUnit().dot(cluslist.get(i).getL())
+                            +" line dir . S "+cln.direction().asUnit().dot(cluslist.get(i).getS())
+                            +" line dir . N "+cln.direction().asUnit().dot(cluslist.get(i).getN())+
+                    "\n N.L "+cluslist.get(i).getN().dot(cluslist.get(i).getL())+
+                    " N.S "+cluslist.get(i).getN().dot(cluslist.get(i).getS())+
+                    " S.L "+cluslist.get(i).getS().dot(cluslist.get(i).getL())
+            );
+            
             }
         }
         //bank.show();
