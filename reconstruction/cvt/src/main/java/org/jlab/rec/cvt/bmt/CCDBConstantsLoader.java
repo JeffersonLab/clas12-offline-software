@@ -301,11 +301,16 @@ public class CCDBConstantsLoader {
             Point3D shift = new Point3D(dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaX", row),
                                         dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaY", row),
                                         dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaZ", row)); 
+
             shift.translateXYZ(xpos, ypos, zpos);
             Vector3D rot = new Vector3D(dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotX", row),
                                         dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotY", row),
-                                        dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotZ", row));  
-            Line3D axis = new Line3D(new Point3D(0,0,0), new Vector3D(0,0,1));
+                                        dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotZ", row)); 
+
+            int region = (int) Math.floor((layer+1)/2);
+            double Zmin = CRZZMIN[region - 1];
+            double Zmax = CRZZMAX[region - 1];
+            Line3D axis = new Line3D(new Point3D(0,0,Zmin), new Vector3D(0,0,Zmax));
             axis.rotateX(rot.x());
             axis.rotateY(rot.y());
             axis.rotateZ(rot.z());

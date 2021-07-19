@@ -294,8 +294,10 @@ public class BMTGeometry {
      * @return Point3D offset: 3D offset
      */
     public Vector3D getRotation(int layer, int sector) {
+        Vector3D rot = new Vector3D();
         if(layer>0 && layer<Constants.NLAYERS+1 && sector > 0 && sector<Constants.NSECTORS+1) {    
-            return Constants.rotations[layer-1][sector-1];
+            rot.copy(Constants.rotations[layer-1][sector-1]);
+            return rot;
         } else {
             System.out.println("ERROR: out of layer sector number in getRotation(int layer, region)");
             return new Vector3D();
@@ -322,8 +324,9 @@ public class BMTGeometry {
      * @return Point3D offset: 3D offset
      */
     public Vector3D getInverseRotation(int layer, int sector) {
+        Vector3D rot = new Vector3D();
         if(layer>0 && layer<Constants.NLAYERS+1) { 
-            Vector3D rot = Constants.rotations[layer-1][sector-1];
+            rot.copy(Constants.rotations[layer-1][sector-1]);
             return new Vector3D(-rot.x(),-rot.y(),-rot.z());
         } else {
             System.out.println("ERROR: out of layer sector number in getInverseRotation(int layer, region)");
@@ -338,8 +341,10 @@ public class BMTGeometry {
      * @return Point3D offset: 3D offset
      */
     public Line3D getAxis(int layer, int sector) {
+        Line3D axis = new Line3D();
         if(layer>0 && layer<Constants.NLAYERS+1) { 
-            return Constants.axes[layer-1][sector-1];
+            axis.copy(Constants.axes[layer-1][sector-1]);
+            return axis;
         } else {
             System.out.println("ERROR: out of layer sector number in getAxis(int layer, region)");
             return new Line3D();
@@ -390,7 +395,6 @@ public class BMTGeometry {
         stripline.rotateY(rotation.y());
         stripline.rotateZ(rotation.z());
         stripline.translateXYZ(offset.x(),offset.y(),offset.z());
-                
         
         return stripline;
     }
@@ -452,7 +456,7 @@ public class BMTGeometry {
         stripline.rotateY(rotation.y());
         stripline.rotateZ(rotation.z());
         stripline.translateXYZ(offset.x(),offset.y(),offset.z());
-                
+        
         
         return stripline;
     }
@@ -817,7 +821,7 @@ public class BMTGeometry {
         }
         else {
             if(Math.abs(solenoidScale)<0.8) {
-                thetaL = Math.toRadians(getLorentzAngle(Constants.E_DRIFT_MF[layer-1][sector-1],Math.abs(solenoidScale*50)));
+                thetaL = Math.toRadians(getLorentzAngle(E_DRIFT_MF[layer-1][sector-1],Math.abs(solenoidScale*50)));
             } else {
                 thetaL = Math.toRadians(getLorentzAngle(E_DRIFT_FF[layer-1][sector-1],Math.abs(solenoidScale*50)));
             }
