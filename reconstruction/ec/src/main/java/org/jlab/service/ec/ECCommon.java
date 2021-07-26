@@ -182,6 +182,7 @@ public class ECCommon {
 		IndexedTable       fgo = manager.getConstants(run, "/calibration/ec/fadc_global_offset");
 		IndexedTable       gtw = manager.getConstants(run, "/calibration/ec/global_time_walk");
 		IndexedTable    tmfcut = manager.getConstants(run,  "/calibration/ec/tmf_window");
+	        IndexedTable    status = manager.getConstants(run,  "/calibration/ec/status");
         
         double PERIOD  = jitter.getDoubleValue("period",0,0,0);
         int    PHASE   = jitter.getIntValue("phase",0,0,0); 
@@ -204,6 +205,9 @@ public class ECCommon {
                 int  il = bank.getByte("layer",i);
                 int  ip = bank.getShort("component",i);    
                 int tdc = bank.getInt("TDC",i);
+		
+		if(status.getIntValue("status",is,il,ip)==2) continue;
+		    
                 if(tdc>0) {                       
                     if(!tdcs.hasItem(is,il,ip)) tdcs.add(new ArrayList<Integer>(),is,il,ip);
                         tdcs.getItem(is,il,ip).add(tdc);       
@@ -221,6 +225,8 @@ public class ECCommon {
                 float t = bank.getFloat("time", i) + (float) tmf.getDoubleValue("offset",is,il,ip) // FADC-TDC offset (sector, layer, PMT)
                                                    + (float)  fo.getDoubleValue("offset",is,il,0); // FADC-TDC offset (sector, layer) 
                 
+		if(status.getIntValue("status",is,il,ip)==3) continue;    
+		    
                 ECStrip  strip = new ECStrip(is, il, ip); 
                 
                 strip.setADC(adc);
