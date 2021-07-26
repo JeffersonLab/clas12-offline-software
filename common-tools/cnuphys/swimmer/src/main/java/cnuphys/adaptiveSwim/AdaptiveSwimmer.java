@@ -43,7 +43,7 @@ public class AdaptiveSwimmer {
 	public static final double MINMOMENTUM = 5e-05;
 
 	//max tries to reset if swam passed a target
-	private static final int MAXTRIES = 11;
+	private static final int MAXTRIES = 60;
 
 
 	// The magnetic field probe.
@@ -191,6 +191,8 @@ public class AdaptiveSwimmer {
 			final double accuracy, final double sf, final double h0, final double eps, AdaptiveSwimResult result)
 			throws AdaptiveSwimException {
 		
+		result.setInitialValues(charge, xo, yo, zo, momentum, theta, phi);
+
 		double uf[] = init(charge, xo, yo, zo, momentum, theta, phi, result);
 		
 		if (charge == 0) {
@@ -222,36 +224,28 @@ public class AdaptiveSwimmer {
 		ButcherAdvance advancer = new ButcherAdvance(6, ButcherTableau.CASH_KARP);
 		while (count < MAXTRIES) {
 			
-			if ((stopper.getS() + h) > stopper.getSmax()) {
-				h = stopper.getSmax()-stopper.getS();
-				if (h < 0) {
-					break;
-				}
-			}
-
 			//this will try to swim us the rest of the way to sf, but hopefully
-			//we'll get stopped earlier because we reach the target z
+			//we'll get stopped earlier because we reach the target rho
 			
 			try {
 				ns += AdaptiveSwimUtilities.driver(h, deriv, stopper, advancer, eps, uf);
 			} catch (AdaptiveSwimException e) {
+				e.printStackTrace();
 				//put in a message that allows us to reproduce the track
 			}
 						
-			if ((stopper.getS()) > stopper.getSmax()) {
-				break;
-			}
+			del = Math.abs(stopper.getS() - sf);
 			
-			del = Math.abs((stopper.getS()) - stopper.getSmax());
-			
-			//succeed?
+			// succeed?
 			if (del < accuracy) {
 				break;
 			}
-						
+
 			count++;
-			
-			h /= 2;
+
+			if (stopper.getS() > sf) {
+				h = Math.max(h / 2, del / 5);
+			}
 		}
 		
 		result.setFinalS(stopper.getS());
@@ -482,6 +476,9 @@ public class AdaptiveSwimmer {
 			final double targetRho, final double accuracy, final double sf, final double h0, final double eps, AdaptiveSwimResult result)
 			throws AdaptiveSwimException {
 		
+		result.setInitialValues(charge, xo, yo, zo, momentum, theta, phi);
+
+		
 		double uf[] = init(charge, xo, yo, zo, momentum, theta, phi, result);
 		double h = h0; //running stepsize
 				
@@ -507,39 +504,38 @@ public class AdaptiveSwimmer {
 		ButcherAdvance advancer = new ButcherAdvance(6, ButcherTableau.CASH_KARP);
 		while (count < MAXTRIES) {
 			
-			if ((stopper.getS() + h) > stopper.getSmax()) {
-				h = (stopper.getSmax()-stopper.getS())/4;
-				if (h < 0) {
-					break;
-				}
-			}
-
 			//this will try to swim us the rest of the way to sf, but hopefully
 			//we'll get stopped earlier because we reach the target rho
 			
 			try {
 				ns += AdaptiveSwimUtilities.driver(h, deriv, stopper, advancer, eps, uf);
 			} catch (AdaptiveSwimException e) {
+				e.printStackTrace();
 				//put in a message that allows us to reproduce the track
 			}
 						
-			if ((stopper.getS()) > stopper.getSmax()) {
-				break;
-			}
+			del = Math.abs(stopper.getRho() - targetRho);
 			
-			double rholast = FastMath.hypot(stopper.getU()[0], stopper.getU()[1]);
-			del = Math.abs(rholast - targetRho);
-			
-			//succeed?
+			// succeed?
 			if (del < accuracy) {
 				break;
 			}
-						
+
+			// passed max path length?
+			if (stopper.passedSmax()) {
+				break;
+			}
+
 			count++;
-			
-			h /= 2;
-		}
-		
+
+			if (stopper.crossedBoundary()) {
+				h = Math.max(h / 2, del / 5);
+			}
+
+		} // while
+
+		// System.err.println("count = " + count);
+
 		result.setFinalS(stopper.getS());
 		stopper.copy(stopper.getU(), uf);
 		result.setNStep(ns);
@@ -775,12 +771,6 @@ public class AdaptiveSwimmer {
 		ButcherAdvance advancer = new ButcherAdvance(6, ButcherTableau.CASH_KARP);
 		while (count < MAXTRIES) {
 			
-			if ((stopper.getS() + h) > stopper.getSmax()) {
-				h = (stopper.getSmax()-stopper.getS())/4;
-				if (h < 0) {
-					break;
-				}
-			}
 
 			//this will try to swim us the rest of the way to sf, but hopefully
 			//we'll get stopped earlier because we reach the target plane
@@ -801,10 +791,16 @@ public class AdaptiveSwimmer {
 			if (del < accuracy) {
 				break;
 			}
+			
+			if (stopper.passedSmax()) {
+				break;
+			}
 						
 			count++;
 			
-			h /= 2;
+			if (stopper.crossedBoundary()) {
+				h = Math.max(h / 2, del / 5);
+			}
 		}
 		
 		result.setFinalS(stopper.getS());

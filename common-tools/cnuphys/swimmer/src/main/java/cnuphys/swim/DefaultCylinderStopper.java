@@ -1,21 +1,25 @@
 package cnuphys.swim;
 
+import cnuphys.adaptiveSwim.geometry.Cylinder;
 import cnuphys.rk4.IStopper;
 
 /**
- * This stopper is to stop at a fixed value of the cylindrical coordinate rho. It can
- * also be considered a cylindrical stopper if the cylinder is centered on the z axis.
+ * This stopper is to stop at the boundary of an arbitrary cylinder
  * @author heddle
  *
  */
-public class DefaultRhoStopper implements IStopper {
 
-	private double _targetRho;
+public class DefaultCylinderStopper implements IStopper {
+	
 	private double _totS; //total path length
 	private double _sMax;
 	private double _accuracy;
 	private double[] _uf; //final state vector
 	private double _s0; //starting path length
+	
+	//the newest distance to the cylinder
+	private double _distance;
+
 	
 	//cache whether we have crossed the boundary
 	private boolean _crossedBoundary;
@@ -23,49 +27,86 @@ public class DefaultRhoStopper implements IStopper {
 	//cache whether we have passed smax
 	private boolean _passedSmax;
 	
-	//the current rho
-	private double _rho;
-
-
-	
 	private int _dim;   //dimension of our system
 	
-	private int _startSign; //is starting val bigger or smaller than targ value
+	//the start sign of the distance
+	private double _startSign;
+
+	//the target cylinder
+	private Cylinder _targetCylinder;
 
 	/**
-	 * Rho  stopper that doesn't check max R (does check max path length)
+	 * Cylinder stopper that looks at boundary (does check max path length)
 	 * 
-	 * @param uo              starting state vector
+	 * @param u0              starting state vector
 	 * @param s0              starting path length in meters
 	 * @param sMax            maximal path length in meters
-	 * @param targetRho       stopping rho in meters
+	 * @param targetCylinder       target Cylinder
 	 * @param accuracy        the accuracy in meters
 	 * @param normalDirection <code></code> if going smaller to larger rho
 	 */
-	public DefaultRhoStopper(double[] uo, double s0, double sMax, double rho0, double targetRho, double accuracy) {
-		
-		_rho = rho0;
+	public DefaultCylinderStopper(double[] u0, double s0, double sMax, Cylinder targetCylinder, double accuracy) {
+
 		
 		_s0 = s0;
-		_dim = uo.length;
+		_dim = u0.length;
 		
 		_uf = new double[_dim];
-		copy(uo, _uf);
+		copy(u0, _uf);
 		
-		_targetRho = targetRho;
+		_targetCylinder = targetCylinder;
+		_distance = _targetCylinder.distance(u0[0], u0[1], u0[2]);
 		_totS = 0;
 		_sMax = sMax;
 		_accuracy = accuracy;
-		_startSign = sign(_rho);
-		
-		
+		_startSign = Math.signum(_distance);
 	}
 	
-	//get the sign based on the current rho
-	private int sign(double currentRho) {
-		return ((currentRho < _targetRho) ? -1 : 1);
+	@Override
+	public boolean stopIntegration(double s, double[] unew) {
+		
+		//a negative distance means we are inside the cylinder
+		double newDist = _targetCylinder.distance(unew[0], unew[1], unew[2]);
+		double newSign = Math.signum(newDist);
+		newDist = Math.abs(newDist);
+
+		// within accuracy?
+		if (newDist < _accuracy) {
+			_distance = newDist;
+			_totS = s;
+            copy(unew, _uf);
+			return true;
+		}
+		
+		//if we crossed the boundary (don't accept, reset)
+		_crossedBoundary = newSign != _startSign;
+		if (_crossedBoundary) {
+			return true;
+		}
+
+		
+		_passedSmax = (s > _sMax);
+		//if exceeded max path length accept and stop
+		if (_passedSmax) {
+			_distance = newDist;
+			_totS = s;
+            copy(unew, _uf);
+			return true;
+		}		
+		
+		
+		//accept and continue
+		_distance = newDist;
+		_totS = s;
+        copy(unew, _uf);
+		return false;
 	}
-	
+
+	//array copy for state vectors
+	private void copy(double src[], double[] dest) {
+		System.arraycopy(src, 0, dest, 0, _dim);
+	}
+
 	/**
 	 * Did we pas the max path length?
 	 * @return true if we crossed the boundary
@@ -81,57 +122,6 @@ public class DefaultRhoStopper implements IStopper {
 	 */
 	public boolean crossedBoundary() {
 		return _crossedBoundary;
-	}
-	
-	/**
-	 * Get the current value of rho
-	 * @return the current value of rho
-	 */
-	public double getRho() {
-		return _rho;
-	}
-
-
-	//array copy for state vectors
-	private void copy(double src[], double[] dest) {
-		System.arraycopy(src, 0, dest, 0, _dim);
-	}
-	
-	@Override
-	public boolean stopIntegration(double s, double[] u) {
-		
-		double newRho = Math.hypot(u[0], u[1]);
-
-		// within accuracy?
-		if (Math.abs(newRho - _targetRho) < _accuracy) {
-			_rho = newRho;
-			_totS = s;
-            copy(u, _uf);
-			return true;
-		}
-		
-		//if we crossed the boundary (don't accept, reset)
-		_crossedBoundary = sign(newRho) != _startSign;
-		if (_crossedBoundary) {
-			return true;
-		}
-
-		
-		_passedSmax = (s > _sMax);
-		//if exceeded max path length accept and stop
-		if (_passedSmax) {
-			_rho = newRho;
-			_totS = s;
-            copy(u, _uf);
-			return true;
-		}		
-		
-		
-		//accept and continue
-		_rho = newRho;
-		_totS = s;
-        copy(u, _uf);
-		return false;
 	}
 
 	/**

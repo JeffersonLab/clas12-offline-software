@@ -39,10 +39,6 @@ public class TorusProbe extends FieldProbe {
 
 	}
 	
-	public void writeDiagnostics(PrintStream ps) {
-		_cell.writeDiagnostics(ps);
-	}
-
 	/**
 	 * Create a probe for use with the torus Used only for the weird DoubleTorus
 	 * 

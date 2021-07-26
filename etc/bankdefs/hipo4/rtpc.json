@@ -11,7 +11,7 @@
 	    {"name":"x",          "type":"F", "info":"x pos (mm)"},
 	    {"name":"y",          "type":"F", "info":"y pos (mm)"},
 	    {"name":"z",          "type":"F", "info":"z pos (mm)"},
-	    {"name":"tdiff",      "type":"F", "info":"Time shift (ns)"}
+            {"name":"adc",        "type":"F", "info":"adc"}
 	]
     },
     {
@@ -44,7 +44,8 @@
 	    {"name":"min_radius", "type":"F", "info":"Smallest reconstructed radius (mm)"},
 	    {"name":"max_radius", "type":"F", "info":"Largest reconstructed radius (mm)"},
 	    {"name":"min_phi", "type":"F", "info":"Smallest reconstructed phi (rad)"},
-	    {"name":"max_phi", "type":"F", "info":"Largest reconstructed phi (rad)"}
+	    {"name":"max_phi", "type":"F", "info":"Largest reconstructed phi (rad)"},
+	    {"name":"tdiff",      "type":"F", "info":"Time shift (ns)"}
 	]
     }	
 ]

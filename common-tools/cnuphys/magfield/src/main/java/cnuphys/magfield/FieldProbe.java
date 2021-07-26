@@ -228,8 +228,8 @@ public abstract class FieldProbe implements IField {
 			if (field instanceof Torus) {
 				return new TorusProbe((Torus) field);
 			} 
-			else if (field instanceof Solenoid) {
-				return new SolenoidProbe((Solenoid) field);
+			else if (field instanceof StandardSolenoid) {
+				return new StandardSolenoidProbe((StandardSolenoid) field);
 			} 
 			else if (field instanceof TransverseSolenoid) {
 				return new TransverseSolenoidProbe((TransverseSolenoid) field);
