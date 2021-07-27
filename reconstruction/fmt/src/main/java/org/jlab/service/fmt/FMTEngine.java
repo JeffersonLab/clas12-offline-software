@@ -33,7 +33,7 @@ public class FMTEngine extends ReconstructionEngine {
     boolean alreadyDroppedBanks = false;
 
     public FMTEngine() {
-        super("FVT", "ziegler", "4.0");
+        super("FMT", "ziegler", "5.0");
     }
 
     @Override
@@ -155,9 +155,11 @@ public class FMTEngine extends ReconstructionEngine {
                 }
             }
             
-            if(debug) System.out.println(track.toString());
+            if(debug) System.out.println("After first matching\n" + track.toString());
             
             track.filterClusters(0);
+            
+            if(debug) System.out.println("After cluster filtering\n" + track.toString());
         }
             
         // === Check for duplicate cluster assignment ============================================
@@ -250,7 +252,7 @@ public class FMTEngine extends ReconstructionEngine {
                     track.getCluster(layer).set_CentroidResidual(localY);
                 }
             }
-            if(debug || clusterDoubleAssignment) System.out.println("Track " + track.toString());
+            if(debug || clusterDoubleAssignment || track.getNDF()>3) System.out.println("Track " + track.toString());
         }
         if(clusterDoubleAssignment) for(int i=0; i<clusters.size(); i++) System.out.println(clusters.get(i).toStringBrief());
         
