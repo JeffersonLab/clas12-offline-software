@@ -109,6 +109,11 @@ public class Track {
         return n;
     }
 
+    public int getClusterLayer(int layer) {
+        if(_clusters[layer-1]!=null) return _clusters[layer-1].size();
+        else return 0;
+    }
+
     public void addCluster(Cluster cluster) {
         if(this._clusters[cluster.get_Layer()-1]==null)
             this._clusters[cluster.get_Layer()-1] = new ArrayList<>();
@@ -295,7 +300,7 @@ public class Track {
     //  FIXME: THIS METHOD SHOULD BE GENERALIZED
     public double getSeedQuality() {
         double quality=99;
-        if(this.getClusters().size()>=3 && this.getClusterLayers()==3) {
+        if(this.getClusterLayer(1)>0 && this.getClusterLayer(2)>0 && this.getClusterLayer(3)>0) {
             Line3D seg1 = this.getClusters(1).get(0).get_GlobalSegment();
             Line3D seg2 = this.getClusters(2).get(0).get_GlobalSegment();
             Line3D seg3 = this.getClusters(3).get(0).get_GlobalSegment();
@@ -307,15 +312,13 @@ public class Track {
     
     //  FIXME: THIS METHOD SHOULD BE GENERALIZED
     public void filterClusters(int mode) {
-        
-        if(this.getClusters().size()<3 || this.getClusterLayers()!=3) return;
-        
+                
         double dref = Double.POSITIVE_INFINITY;
         
         int[] ibest = new int[Constants.NLAYERS];
         for(int i=0; i<Constants.NLAYERS; i++) ibest[i] = -1;
         
-        if(mode==1) {
+        if(mode==1 && this.getClusterLayer(1)>0 && this.getClusterLayer(2)>0 && this.getClusterLayer(3)>0) {
             for(int i1=0; i1<this.getClusters(1).size(); i1++) {
                 Line3D seg1 = this.getClusters(1).get(i1).get_GlobalSegment();
                 for(int i2=0; i2<this.getClusters(2).size(); i2++) {
