@@ -123,13 +123,15 @@ public class SVTConstants
 	 */
 	public static DatabaseConstantProvider connect( DatabaseConstantProvider cp )
 	{
-		cp.loadTable( ccdbPath +"svt");
-		cp.loadTable( ccdbPath +"region");
-		cp.loadTable( ccdbPath +"support");
-		cp.loadTable( ccdbPath +"fiducial");
-		cp.loadTable( ccdbPath +"material/box");
-		cp.loadTable( ccdbPath +"material/tube");
-		cp.loadTable( ccdbPath +"layeralignment");
+                cp.loadTable( ccdbPath +"svt");
+                cp.loadTable( ccdbPath +"region");
+                cp.loadTable( ccdbPath +"support");
+                cp.loadTable( ccdbPath +"fiducial");
+                cp.loadTable( ccdbPath +"material/box");
+                cp.loadTable( ccdbPath +"material/tube");
+                cp.loadTable( ccdbPath +"material/faradaycage");
+                cp.loadTable( ccdbPath +"material/peeksupport");
+                cp.loadTable( ccdbPath +"layeralignment");
                 cp.loadTable( ccdbPath +"position");
                 //shift by target
 //                cp.loadTable("/geometry/target");
@@ -272,7 +274,25 @@ public class SVTConstants
                         mat++;
                 }
 
+                // region peek supports
+                REGIONPEEKRMIN   = new double[NREGIONS];
+                REGIONPEEKRMAX   = new double[NREGIONS];
+                REGIONPEEKLENGTH = new double[NREGIONS];
+                for(int i=0; i<NREGIONS; i++) {
+                    REGIONPEEKRMIN[i]   = cp.getDouble( ccdbPath+"material/peeksupport/rmin",   i);
+                    REGIONPEEKRMAX[i]   = cp.getDouble( ccdbPath+"material/peeksupport/rmax",   i);
+                    REGIONPEEKLENGTH[i] = cp.getDouble( ccdbPath+"material/peeksupport/length", i);
+                }
 
+                // faraday cage
+                for(int i=0; i<FARADAYCAGERMIN.length; i++) {
+                    FARADAYCAGERMIN[i]   = cp.getDouble( ccdbPath+"material/faradaycage/rmin",   i);
+                    FARADAYCAGERMAX[i]   = cp.getDouble( ccdbPath+"material/faradaycage/rmax",   i);
+                    FARADAYCAGELENGTH[i] = cp.getDouble( ccdbPath+"material/faradaycage/length", i);
+                    FARADAYCAGEZPOS[i]   = cp.getDouble( ccdbPath+"material/faradaycage/zpos",   i);
+                    FARADAYCAGENAME[i]   = cp.getString( ccdbPath+"material/faradaycage/name",   i);
+                }
+                                                     
                 // calculate derived constants
                 NLAYERS = NMODULES*NREGIONS;
                 MODULELEN = NSENSORS*(ACTIVESENLEN + 2*DEADZNLEN) + (NSENSORS - 1)*MICROGAPLEN;
