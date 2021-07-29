@@ -9,7 +9,7 @@ import org.jlab.rec.cvt.svt.Geometry;
 import org.jlab.rec.cvt.trajectory.Ray;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 
-public class StraightTrack extends Trajectory {
+public class StraightTrack extends Trajectory{
 
     public StraightTrack(Ray ray) {
         super(ray);
