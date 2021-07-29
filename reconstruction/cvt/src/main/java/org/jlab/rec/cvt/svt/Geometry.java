@@ -487,38 +487,22 @@ public class Geometry {
     //****
 
     public double getDOCAToStrip(int sector, int layer, double centroidstrip, Point3D point0) {
-
-        // local angle of  line graded from 0 to 3 deg.
-        double ialpha = (centroidstrip - 1) * SVTConstants.STEREOANGLE / (double) (SVTConstants.NSTRIPS - 1);
-        //the active area starts at the first strip 	
-        double interc = (centroidstrip - 0.5) * SVTConstants.READOUTPITCH + SVTConstants.STRIPOFFSETWID;
-
-        // Equation for strip line is x = mz + b [i.e. z is the direction of the length of the module]
-        // -------------------------------------
-        double m1 = -Math.tan(ialpha);
-        double m2 = Math.tan(ialpha);
-        double b1 = SVTConstants.ACTIVESENWID - interc;
-        double b2 = interc;
-
-        Vector3D  vecAlongStrip = new Vector3D();
-        Point3D   pointOnStrip = new Point3D();
-        Point3D   LocPoint = this.transformToFrame(sector, layer, point0.x(), point0.y(), point0.z(), "local", "");
-
-        if (layer % 2 == 0) { //layers 2,4,6 == top ==j ==>(2) : regular configuration
-            vecAlongStrip = new Vector3D(m2, 0, 1).asUnit();
-            pointOnStrip  = new Point3D(b2,  0, 0);
+        double[][] X = this.getStripEndPoints(centroidstrip, (layer - 1) % 2);
+        Point3D EP1 = this.transformToFrame(sector, layer, X[0][0], 0, X[0][1], "lab", "");
+        Point3D EP2 = this.transformToFrame(sector, layer, X[1][0], 0, X[1][1], "lab", "");
+        Line3D l = new Line3D(EP1, EP2);
+        if(l.direction().z()<0) {
+            l.setEnd(EP1);
+            l.setOrigin(EP2);
         }
-        if (layer % 2 == 1) { //layers 1,3,5 == bottom ==i ==>(1) : regular configuration
-            vecAlongStrip = new Vector3D(m1, 0, 1).asUnit();
-            pointOnStrip  = new Point3D(b1,  0, 0);
-        }
-
-        Vector3D r = LocPoint.vectorTo(pointOnStrip); //
-        Vector3D d = r.cross(vecAlongStrip);
-        Line3D l = new Line3D(pointOnStrip,
-                              vecAlongStrip );
-//fix for hemisphere
-        return d.y()*Math.signum(this.findBSTPlaneNormal(sector, layer).y());
+        Line3D WL = new Line3D();
+        WL.copy(l);
+        WL.copy(WL.distance(point0));
+        double sideStrip = Math.signum(l.direction().cross(WL.direction()).
+                dot(this.findBSTPlaneNormal(sector, layer)));
+        //double sideStrip = Math.signum(l.direction().y()*WL.direction().x()+l.direction().x()*WL.direction().y());
+        return WL.length()*sideStrip; 
+        
 
     }
     //****
@@ -693,7 +677,7 @@ public class Geometry {
       return shiftedStrip;
     }
 
-    public double[][] getStripEndPoints(int strip, int slyr) { //1 top, 0 bottom
+    public double[][] getStripEndPoints(double strip, int slyr) { //1 top, 0 bottom
 
         double[][] X = new double[2][2];
 

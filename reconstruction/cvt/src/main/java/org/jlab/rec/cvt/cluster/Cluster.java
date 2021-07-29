@@ -214,7 +214,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
            
             // looping over the number of hits in the cluster
             for (int i = 0; i < nbhits; i++) {
-                FittedHit thehit = this.get(i);
+                FittedHit thehit = this.get(i); 
                 // gets the energy value of the strip
                 double strpEn = -1;
                 int strpNb = -1;
@@ -233,15 +233,15 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     weightedZ2 += strpEn * stEP2.z();
                 }
                 if (this.get_Detector()==1) { 
-                    if(Constants.newClustering) {
+                    if(Constants.newClustering || Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale())<0.0001) {
                         strpEn = Math.sqrt(thehit.get_Strip().get_Edep());
                     } else {
                         //strpEn = thehit.get_Strip().get_Edep();
-                        strpEn = 1;
+                       strpEn = 1;
                     }
-                    if(Constants.newClustering && nbhits>2 && i>1) 
+                    if((Constants.newClustering && nbhits>2 && i>1) 
+                            || Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale())<0.0001 && nbhits>2 && i>1) 
                         continue;
-                    
                     //end points:
                     Point3D stEP1 = thehit.get_Strip().get_ImplantPoint();
                     Point3D stEP2 = thehit.get_Strip().get_EndPoint();
@@ -362,6 +362,12 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     this.setCx(weightedXC/totEn);
                     this.setCy(weightedYC/totEn);
                     this.setCz(weightedZC/totEn);
+                    this.setX1(weightedX1/totEn);
+                    this.setY1(weightedY1/totEn);
+                    this.setZ1(weightedZ1/totEn);
+                    this.setX2(weightedX2/totEn);
+                    this.setY2(weightedY2/totEn);
+                    this.setZ2(weightedZ2/totEn);
 //                    Vector3D C2P1 = new Vector3D(weightedX1/totEn-weightedXC/totEn,
 //                                                weightedY1/totEn-weightedYC/totEn, 
 //                                                weightedZ1/totEn-weightedZC/totEn).asUnit();

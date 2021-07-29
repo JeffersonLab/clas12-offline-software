@@ -87,7 +87,7 @@ public class MeasVecs {
                 WL.copy(l);
                 Point3D svP = new Point3D(stateVec.x, stateVec.y, stateVec.z);
                 WL.copy(WL.distance(svP));
-                double sideStrip = Math.signum(l.direction().cross(WL.direction()).
+                double sideStrip = -Math.signum(l.direction().cross(WL.direction()).
                         dot(this.measurements.get(stateVec.k).surface.plane.normal()));
                 //double sideStrip = Math.signum(l.direction().y()*WL.direction().x()+l.direction().x()*WL.direction().y());
                 value = WL.length()*sideStrip; 
@@ -163,7 +163,7 @@ public class MeasVecs {
                 WL.copy(l);
                 Point3D svP = new Point3D(stateVec.x, stateVec.y, stateVec.z);
                 WL.copy(WL.distance(svP));
-                double sideStrip = Math.signum(l.direction().cross(WL.direction()).
+                double sideStrip = -Math.signum(l.direction().cross(WL.direction()).
                         dot(this.measurements.get(stateVec.k).surface.plane.normal())); 
                 //double sideStrip = Math.signum(l.direction().y()*WL.direction().x()+l.direction().x()*WL.direction().y());
                 value = WL.length()*sideStrip;

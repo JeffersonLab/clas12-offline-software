@@ -89,7 +89,7 @@ public class MeasVecs {
                 WL.copy(l);
                 Point3D svP = new Point3D(stateVec.x, stateVec.y, stateVec.z);
                 WL.copy(WL.distance(svP));
-                double sideStrip = Math.signum(l.direction().cross(WL.direction()).
+                double sideStrip = -Math.signum(l.direction().cross(WL.direction()).
                         dot(this.measurements.get(stateVec.k).surface.plane.normal()));
                 //double sideStrip = Math.signum(l.direction().y()*WL.direction().x()+l.direction().x()*WL.direction().y());
                 value = WL.length()*sideStrip; 
@@ -165,7 +165,7 @@ public class MeasVecs {
                 WL.copy(l);
                 Point3D svP = new Point3D(stateVec.x, stateVec.y, stateVec.z);
                 WL.copy(WL.distance(svP));
-                double sideStrip = Math.signum(l.direction().cross(WL.direction()).
+                double sideStrip = -Math.signum(l.direction().cross(WL.direction()).
                         dot(this.measurements.get(stateVec.k).surface.plane.normal())); 
                 //double sideStrip = Math.signum(l.direction().y()*WL.direction().x()+l.direction().x()*WL.direction().y());
                 value = WL.length()*sideStrip;
@@ -182,16 +182,16 @@ public class MeasVecs {
         return value;
     }
 
-    private double[] delta_d_a = new double[5];//{1, Math.toRadians(0.25),  0.05, 1, 0.01};
+    public double[] delta_d_a = new double[5];//{1, Math.toRadians(0.25),  0.05, 1, 0.01};
     double sqrt_epsilon = Math.sqrt(2.2*1.e-16);
     private double[] Hval = new double[5];
     public double[] H(StateVecs.StateVec stateVec, StateVecs sv, MeasVec mv, Swim swimmer, int dir) {
         StateVecs.StateVec SVplus = null;// = new StateVec(stateVec.k);
         StateVecs.StateVec SVminus = null;// = new StateVec(stateVec.k);
-        delta_d_a[0]=2*sqrt_epsilon*(stateVec.x0+1);
-        delta_d_a[1]=2*sqrt_epsilon*(stateVec.z0+1);
-        delta_d_a[2]=2*sqrt_epsilon*(stateVec.tx+1);
-        delta_d_a[3]=2*sqrt_epsilon*(stateVec.tz+1);
+        //delta_d_a[0]=2*sqrt_epsilon*(stateVec.x0+1);
+        //delta_d_a[1]=2*sqrt_epsilon*(stateVec.z0+1);
+        //delta_d_a[2]=2*sqrt_epsilon*(stateVec.tx+1);
+        //delta_d_a[3]=2*sqrt_epsilon*(stateVec.tz+1);
         
         for(int i = 0; i < getHval().length; i++)
             getHval()[i] = 0;
@@ -219,7 +219,6 @@ public class MeasVecs {
             SVminus = sv.newStateVecAtMeasSite(stateVec.k, SVminus, mv, swimmer, false);
             Hval[i] = (this.h(stateVec.k, SVplus) - this.h(stateVec.k, SVminus)) / getDelta_d_a()[i] ;
         }
-       
         return getHval();
     }
 

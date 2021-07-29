@@ -32,9 +32,9 @@ public class StateVecs {
     public Matrix F;
     MeasVecs mv = new MeasVecs();
 
-    public List<Double> X0;
-    public List<Double> Y0;
-    public List<Double> Z0; // reference points
+    //public List<Double> X0;
+    //public List<Double> Y0;
+    //public List<Double> Z0; // reference points
     public double shift; // target shift
     public List<Integer> Layer;
     public List<Integer> Sector;
@@ -64,12 +64,12 @@ public class StateVecs {
         kVec.z0 = iVec.z0;
         kVec.tx = iVec.tx;
         kVec.tz = iVec.tz;
-        kVec.dl = iVec.dl;
+        kVec.dl = 0;
 
         if(mv.surface!=null) {
-            double x = X0.get(0) + kVec.x0 ;
-            double y = Y0.get(0) ;
-            double z = Z0.get(0) + kVec.z0;
+            double x = kVec.x0 ;
+            double y = 0 ;
+            double z = kVec.z0;
             
             Point3D ref = new Point3D(x,y,z);
             
@@ -80,7 +80,7 @@ public class StateVecs {
             double px = tx*py;
             double pz = tz*py;
             
-            Vector3D u = new Vector3D(px, py, pz); 
+            Vector3D u = new Vector3D(px, py, pz).asUnit(); 
             
             if(k==0) {
                 value[0] = x;
@@ -188,14 +188,14 @@ public class StateVecs {
 
         fVec.x0 = iVec.x0;
         fVec.z0 = iVec.z0;
-        fVec.x = iVec.x;
-        fVec.y = iVec.y;
-        fVec.z = iVec.z;
+        fVec.x = iVec.x0;
+        fVec.y = 0;
+        fVec.z = iVec.z0;
         fVec.tx = iVec.tx;
         fVec.tz = iVec.tz;
-        fVec.dl = iVec.dl;
-
-        this.newStateVecAtMeasSite(f, fVec, mv, swimmer, true);
+        fVec.dl = 0;
+        if(f>0)
+            this.newStateVecAtMeasSite(f, fVec, mv, swimmer, true);
 
         return fVec;
     }
@@ -250,11 +250,11 @@ public class StateVecs {
             double tz = uz/uy;
             double cosEntranceAngle = Math.abs((x * ux + y * uy + z * uz) / Math.sqrt(x * x + y * y + z * z));
 
-            double p = Math.sqrt(ux * ux + uy * uy + uz * uz);
+            double p = 1;
              double sctRMS = 0;
             double t_ov_X0 = mVec.l_over_X0;
             double mass = piMass;   // assume given mass hypothesis 
-            double beta = p / Math.sqrt(p * p + mass * mass); // use particle momentum
+            double beta = 1; // use particle momentum
             t_ov_X0 = t_ov_X0 / cosEntranceAngle;
             if(t_ov_X0!=0) {
             // Highland-Lynch-Dahl formula
@@ -275,7 +275,6 @@ public class StateVecs {
                 {0, 0, cov_txtz, cov_tztz, 0},
                 {0, 0, 0, 0, 0}
             });
-            
             
         }
 
@@ -416,9 +415,9 @@ public class StateVecs {
             double px = tx*py;
             double pz = tz*py;
             
-            double x = X0.get(kf) + this.trackTraj.get(kf).x0 + px ;
-            double y = Y0.get(kf)+this.trackTraj.get(kf).dl*py ;
-            double z = Z0.get(kf) + this.trackTraj.get(kf).z0 + this.trackTraj.get(kf).dl*pz ;
+            double x = this.trackTraj.get(kf).x0 + px ;
+            double y = this.trackTraj.get(kf).dl*py ;
+            double z = this.trackTraj.get(kf).z0 + this.trackTraj.get(kf).dl*pz ;
 
             return new Vector3D(x, y, z);
         } else {

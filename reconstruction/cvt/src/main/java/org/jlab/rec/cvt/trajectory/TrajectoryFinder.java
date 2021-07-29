@@ -5,7 +5,9 @@ import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
@@ -69,11 +71,26 @@ public class TrajectoryFinder {
 
         ArrayList<Cross> SVTCrossList = new ArrayList<Cross>();
         ArrayList<Cross> BMTCrossList = new ArrayList<Cross>();
-
+        Map<String, Double> ClsMap = new HashMap<String, Double>();
         for (Cross c : candCrossList) {
             if (c.get_Detector().equalsIgnoreCase("SVT")) {
+                String svtSt1 = "1.";
+                svtSt1+=c.get_Cluster1().get_Sector();
+                svtSt1 += ".";
+                svtSt1+=c.get_Cluster1().get_Layer();
+                ClsMap.put(svtSt1, c.get_Cluster1().get_Centroid());
+                String svtSt2 = "1.";
+                svtSt2+=c.get_Cluster2().get_Sector();
+                svtSt2 += ".";
+                svtSt2+=c.get_Cluster2().get_Layer();
+                ClsMap.put(svtSt2, c.get_Cluster2().get_Centroid());
                 SVTCrossList.add(c);
             } else {
+                String bmtSt1 = "2.";
+                bmtSt1+=c.get_Cluster1().get_Sector();
+                bmtSt1 += ".";
+                bmtSt1+=c.get_Cluster1().get_Layer();
+                ClsMap.put(bmtSt1, c.get_Cluster1().get_Centroid());
                 BMTCrossList.add(c);
             }
         }
@@ -138,7 +155,14 @@ public class TrajectoryFinder {
             stVec.set_Path(path*10);
             stVec.set_ID(id);
             stateVecs.add(stVec);
-
+            String svtSt1 = "1.";
+            svtSt1+=sector;
+            svtSt1 += ".";
+            svtSt1+=layer;
+            if(ClsMap.get(svtSt1)!=null) { 
+                double cent = ClsMap.get(svtSt1);
+                stVec.set_CalcCentroidStrip(cent); 
+            }
             // loops over the crosses to get the strip resolutions
         //    for (Cross c : SVTCrossList) {
         //        if (matchCrossToStateVec(c, stVec, layer, sector) == false) {
@@ -206,7 +230,18 @@ public class TrajectoryFinder {
                     this.fill_HelicalTrkAngleWRTBMTTangentPlane(dir, stVec);
                     //stVec.set_CalcCentroidStrip(bmt_geo.getCStrip(BMTRegIdx+1, stVec.z()));
                     stVec.set_CalcCentroidStrip(bmt_geo.getCstrip(BMTRegIdx+1, 
-                            new Point3D(stVec.x(),stVec.y(),stVec.z())));
+                           new Point3D(stVec.x(),stVec.y(),stVec.z())));
+                    stVec.set_Path(path*10);
+                    stVec.set_ID(id);
+                    
+                    String bmtSt1 = "2.";
+                    bmtSt1+=sector;
+                    bmtSt1 += ".";
+                    bmtSt1+=(l+1);
+                    if(ClsMap.get(bmtSt1)!=null) { 
+                        double cent = ClsMap.get(bmtSt1);
+                        stVec.set_CalcCentroidStrip(cent); 
+                    }
                     stateVecs.add(stVec);
                 //}
                 //else {
@@ -323,7 +358,8 @@ public class TrajectoryFinder {
 
     }
 
-    public Trajectory findTrajectory(int id, Ray ray, ArrayList<Cross> candCrossList, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo) {
+    public Trajectory findTrajectory(int id, Ray ray, ArrayList<Cross> candCrossList, 
+            org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo) {
         Trajectory traj = new Trajectory(ray);
         traj.set_Id(id);
 
@@ -334,10 +370,26 @@ public class TrajectoryFinder {
         ArrayList<Cross> SVTCrossList = new ArrayList<Cross>();
         ArrayList<Cross> BMTCrossList = new ArrayList<Cross>();
 
+        Map<String, Double> ClsMap = new HashMap<String, Double>();
         for (Cross c : candCrossList) {
             if (c.get_Detector().equalsIgnoreCase("SVT")) {
-                SVTCrossList.add(c); 
+                String svtSt1 = "1.";
+                svtSt1+=c.get_Cluster1().get_Sector();
+                svtSt1 += ".";
+                svtSt1+=c.get_Cluster1().get_Layer();
+                ClsMap.put(svtSt1, c.get_Cluster1().get_Centroid());
+                String svtSt2 = "1.";
+                svtSt2+=c.get_Cluster2().get_Sector();
+                svtSt2 += ".";
+                svtSt2+=c.get_Cluster2().get_Layer();
+                ClsMap.put(svtSt2, c.get_Cluster2().get_Centroid());
+                SVTCrossList.add(c);
             } else {
+                String bmtSt1 = "2.";
+                bmtSt1+=c.get_Cluster1().get_Sector();
+                bmtSt1 += ".";
+                bmtSt1+=c.get_Cluster1().get_Layer();
+                ClsMap.put(bmtSt1, c.get_Cluster1().get_Centroid());
                 BMTCrossList.add(c);
             }
         }
@@ -371,6 +423,14 @@ public class TrajectoryFinder {
                     stVec.set_TrkThetaAtSurface(ThetaTrackIntersPlane);
                     stVec.set_TrkToModuleAngle(trkToMPlnAngl);
                     stVec.set_CalcCentroidStrip(CalcCentroidStrip);
+                    String svtSt1 = "1.";
+                    svtSt1+=SectorTrackIntersPlane;
+                    svtSt1 += ".";
+                    svtSt1+=LayerTrackIntersPlane;
+                    if(ClsMap.get(svtSt1)!=null) { 
+                        double cent = ClsMap.get(svtSt1);
+                        stVec.set_CalcCentroidStrip(cent); 
+                    }
                     if(stateVecs.size()>0 
                             && stateVecs.get(stateVecs.size()-1).x()==stVec.x()
                             && stateVecs.get(stateVecs.size()-1).y()==stVec.y()
@@ -433,8 +493,15 @@ public class TrajectoryFinder {
                     stVec.set_TrkPhiAtSurface(PhiTrackIntersSurf);
                     stVec.set_TrkThetaAtSurface(ThetaTrackIntersSurf);
                     stVec.set_TrkToModuleAngle(trkToMPlnAngl);
-                    stVec.set_CalcCentroidStrip(CalcCentroidStrip);
-
+                    stVec.set_CalcCentroidStrip(CalcCentroidStrip); 
+                    String bmtSt1 = "2.";
+                    bmtSt1+=SectorTrackIntersSurf;
+                    bmtSt1 += ".";
+                    bmtSt1+=LayerTrackIntersSurf;
+                    if(ClsMap.get(bmtSt1)!=null) { 
+                        double cent = ClsMap.get(bmtSt1);
+                        stVec.set_CalcCentroidStrip(cent); 
+                    }
                      if(stateVecs.size()>0 
                             && stateVecs.get(stateVecs.size()-1).x()==stVec.x()
                             && stateVecs.get(stateVecs.size()-1).y()==stVec.y()
@@ -608,6 +675,7 @@ public class TrajectoryFinder {
     }
 
     private double[][][] calc_trackIntersBMT(Ray ray, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, int start_layer) {
+
         //[l][hemisphere], [0,1,2,3,4]=x,y,z,phi,theta,estimated centroid strip; hemisphere = [1]top or [0]bottom
         double[][][] result = new double[6][2][7];
         for (int l = start_layer - 1; l < 6; l++) {
@@ -732,7 +800,7 @@ public class TrajectoryFinder {
         return result;
     }
 
-    private double[] getIntersectionTrackWithSVTModule(int s, int l,
+    public double[] getIntersectionTrackWithSVTModule(int s, int l,
             double _yxinterc2, double _yxslope2, double _yzinterc2,
             double _yzslope2, org.jlab.rec.cvt.svt.Geometry geo) {
         // array [][][][] =[x][y][z][stripCentroid]
@@ -974,11 +1042,12 @@ public class TrajectoryFinder {
         
         if(this.checkBMTAcceptance(ipos, lyer,geo)) {
             if(offset!=null && rotation!=null)
-                geo.putInFrame(ineg, offset, rotation);
+                geo.putInFrame(ipos, offset, rotation);
         } else {
             ipos.set(0,0,0);
         }
         if(this.checkBMTAcceptance(ineg, lyer,geo)) {
+            
             if(offset!=null && rotation!=null)
                 geo.putInFrame(ineg, offset, rotation);
         } else {
