@@ -32,6 +32,8 @@ import org.jlab.rec.cvt.track.TrackSeederCA;
 
 import java.util.Collections;
 import java.util.Comparator;
+import org.jlab.rec.cvt.trajectory.Ray;
+import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 /**
  * Service to return reconstructed TRACKS
  * format
@@ -209,14 +211,14 @@ public class RecUtilities {
         }
         return KFSites;
     }
-    
+    private TrajectoryFinder tf = new TrajectoryFinder();
     public List<Surface> setMeasVecs(StraightTrack trkcand, 
             org.jlab.rec.cvt.svt.Geometry sgeo,
             org.jlab.rec.cvt.bmt.BMTGeometry bgeo, Swim swim) {
         //Collections.sort(trkcand.get_Crosses());
         List<Surface> KFSites = new ArrayList<Surface>();
         Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()),
-        new Vector3D(0,0,1));
+                                    new Vector3D(0,0,1));
         Surface meas0 = new Surface(pln0,new Point3D(0,0,0),
         new Point3D(-300,0,0), new Point3D(300,0,0));
         meas0.setSector(0);
@@ -225,12 +227,20 @@ public class RecUtilities {
         meas0.hemisphere = 1;
         KFSites.add(meas0); 
         Map<Integer, Cluster> clsMap = new HashMap<Integer, Cluster>();
-        
+        trkcand.sort(Comparator.comparing(Cross::getY).reversed());
         for (int i = 0; i < trkcand.size(); i++) { //SVT
-            
             if(trkcand.get(i).get_Detector().equalsIgnoreCase("SVT")) {
                 List<Cluster> cls = new ArrayList<Cluster>();
-                if(trkcand.get(i).get_Point().y()>0) {
+                int s = trkcand.get(i).get_Cluster1().get_Sector()-1;
+                int lt = trkcand.get(i).get_Cluster1().get_Layer()-1;
+                int lb = trkcand.get(i).get_Cluster2().get_Layer()-1;
+                Ray ray = trkcand.get_ray();
+                double yt= tf.getIntersectionTrackWithSVTModule(s, lt, 
+                        ray.get_yxinterc(), ray.get_yxslope(), ray.get_yzinterc(), ray.get_yzslope(), sgeo)[1];
+                double yb= tf.getIntersectionTrackWithSVTModule(s, lb, 
+                        ray.get_yxinterc(), ray.get_yxslope(), ray.get_yzinterc(), ray.get_yzslope(), sgeo)[1];
+               
+                if(yt>yb) {
                     cls.add(trkcand.get(i).get_Cluster1());
                     cls.add(trkcand.get(i).get_Cluster2());
                 } else {
@@ -484,7 +494,7 @@ public class RecUtilities {
             }
             if (trkcand.get_Crosses().get(c).get_Detector().equalsIgnoreCase("BMT")) {
                 double ce = trkcand.get_Crosses().get(c).get_Cluster1().get_Centroid();
-                int layer = trkcand.get_Crosses().get(c).getOrderedRegion()+3;
+                int layer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer()+6;
                 Cluster cluster = trkcand.get_Crosses().get(c).get_Cluster1();
                 Point3D p = new Point3D(traj.get(layer).x, traj.get(layer).y, traj.get(layer).z);
                 Vector3D v = new Vector3D(traj.get(layer).px, traj.get(layer).py, traj.get(layer).pz).asUnit();
