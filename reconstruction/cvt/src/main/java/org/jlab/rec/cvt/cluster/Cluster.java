@@ -428,7 +428,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             set_Centroid0(stripNumCent0);
             _Phi = phiCent;
             _PhiErr = phiErrCent;
-           // this.set_Error(geo.getRadius(_Layer)*phiErrCent);
+            this.set_Error((geo.getRadius(_Layer)+org.jlab.rec.cvt.bmt.Constants.hStrip2Det)*phiErrCent);
             set_Phi0(phiCent0);
             set_PhiErr0(phiErrCent0);
         }
