@@ -229,7 +229,10 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     public void set_Point(Point3D _Point) {
         this._Point = _Point;
     }
-
+    
+    public double getY() {
+        return this._Point.y();
+    }
     /**
      *
      * @return a 3-dimensional error on the 3-D point characterizing the
