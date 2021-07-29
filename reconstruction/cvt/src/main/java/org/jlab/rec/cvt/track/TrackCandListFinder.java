@@ -484,23 +484,23 @@ public class TrackCandListFinder {
         //ArrayList<StraightTrack> passedcands = this.rmStraightTrkClones(org.jlab.rec.cvt.svt.Constants.removeClones, cands);
         ArrayList<StraightTrack> passedcands = this.rmStraightTrkClones(true, cands);
 
-        for (int ic = 0; ic < passedcands.size(); ic++) {
-            
-            Ray trkRay = passedcands.get(ic).get_ray();
-            if(trkRay!=null) {
-                TrajectoryFinder trjFind = new TrajectoryFinder();
-
-                //Trajectory traj = trjFind.findTrajectory(passedcands.get(ic).get_Id(), trkRay, passedcands.get(ic), svt_geo, bmt_geo);
-                Trajectory traj = trjFind.findTrajectory(ic+1, trkRay, passedcands.get(ic), svt_geo, bmt_geo);
-
-                passedcands.get(ic).set_Trajectory(traj.get_Trajectory());
-
-                passedcands.get(ic).set_Id(ic+1);
-
-                this.upDateCrossesFromTraj(passedcands.get(ic), traj, svt_geo);
-            }
-
-        }
+//        for (int ic = 0; ic < passedcands.size(); ic++) {
+//            
+//            Ray trkRay = passedcands.get(ic).get_ray();
+//            if(trkRay!=null) {
+//                TrajectoryFinder trjFind = new TrajectoryFinder();
+//
+//                //Trajectory traj = trjFind.findTrajectory(passedcands.get(ic).get_Id(), trkRay, passedcands.get(ic), svt_geo, bmt_geo);
+//                Trajectory traj = trjFind.findTrajectory(ic+1, trkRay, passedcands.get(ic), svt_geo, bmt_geo);
+//
+//                passedcands.get(ic).set_Trajectory(traj.get_Trajectory());
+//
+//                passedcands.get(ic).set_Id(ic+1);
+//
+//                this.upDateCrossesFromTraj(passedcands.get(ic), traj, svt_geo);
+//            }
+//
+//        }
 
         return passedcands;
     }
