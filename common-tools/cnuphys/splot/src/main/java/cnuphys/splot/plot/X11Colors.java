@@ -6,13 +6,12 @@ import java.util.Hashtable;
 public class X11Colors {
 
 	// hash of the X11 colors, filled as requested.
-	private static Hashtable<String, Color> x11colors = new Hashtable<String, Color>(
-			521);
+	private static Hashtable<String, Color> x11colors = new Hashtable<String, Color>(521);
 
 	/**
 	 * Gets an X11 color and sets the alpha
 	 * 
-	 * @param name the name of the color
+	 * @param name  the name of the color
 	 * @param alpha [0..255] (255 is opaque)
 	 * @return the corresponding x11 color (not from cache)
 	 */

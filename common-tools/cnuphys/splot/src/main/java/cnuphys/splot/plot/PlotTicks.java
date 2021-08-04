@@ -19,10 +19,10 @@ public class PlotTicks {
 	private int numMinorTickX = 4; // interior ticks
 	private int numMajorTickY = 4; // interior ticks
 	private int numMinorTickY = 4; // interior ticks
-	
-	//draw 1-based bin instead of value
+
+	// draw 1-based bin instead of value
 	private boolean drawBinValue;
-	
+
 	private Color _tickColor = Color.black;
 
 	private Font _tickFont = Environment.getInstance().getCommonFont(11);
@@ -37,14 +37,15 @@ public class PlotTicks {
 	public PlotTicks(PlotCanvas plotCanvas) {
 		_plotCanvas = plotCanvas;
 	}
-	
+
 	public void setTickFont(Font font) {
 		_tickFont = font;
 	}
-	
+
 	/**
-	 * Sets whether we want to draw the bin values on the x axis.
-	 * Only relevant for histograms
+	 * Sets whether we want to draw the bin values on the x axis. Only relevant for
+	 * histograms
+	 * 
 	 * @param drawBinVal the value
 	 */
 	public void setDrawBinValue(boolean drawBinVal) {
@@ -52,7 +53,6 @@ public class PlotTicks {
 			drawBinValue = drawBinVal;
 		}
 	}
-
 
 	/**
 	 * Draw the plot ticks
@@ -82,31 +82,27 @@ public class PlotTicks {
 		double dely = (ymax - ymin) / (numMajorTickY + 1);
 
 		// major ticks
-		drawXTicks(g, xmin, xmax, world.getCenterY(), majorTickLen,
-				numMajorTickX, ab, true);
-		drawYTicks(g, ymin, ymax, world.getCenterX(), majorTickLen,
-				numMajorTickY, ab, true);
+		drawXTicks(g, xmin, xmax, world.getCenterY(), majorTickLen, numMajorTickX, ab, true);
+		drawYTicks(g, ymin, ymax, world.getCenterX(), majorTickLen, numMajorTickY, ab, true);
 
 		// minor ticks
 		for (int i = 0; i <= numMajorTickX; i++) {
 			double xxmin = xmin + i * delx;
-			drawXTicks(g, xxmin, xxmin + delx, world.getCenterY(), minorTickLen,
-					numMinorTickX, ab, false);
+			drawXTicks(g, xxmin, xxmin + delx, world.getCenterY(), minorTickLen, numMinorTickX, ab, false);
 		}
 
 		// minor ticks
 		for (int i = 0; i <= numMajorTickY; i++) {
 			double yymin = ymin + i * dely;
-			drawYTicks(g, yymin, yymin + dely, world.getCenterX(), minorTickLen,
-					numMinorTickY, ab, false);
+			drawYTicks(g, yymin, yymin + dely, world.getCenterX(), minorTickLen, numMinorTickY, ab, false);
 		}
 
 	}
 
-	//draw hisogram bin values
-	private void drawBinValues(Graphics g, double xmin, double xmax, double yc,
-			int ticklen, int numtick, Rectangle ab, boolean drawVal) {
-		
+	// draw hisogram bin values
+	private void drawBinValues(Graphics g, double xmin, double xmax, double yc, int ticklen, int numtick, Rectangle ab,
+			boolean drawVal) {
+
 		DataSet ds = _plotCanvas.getDataSet();
 		if (!ds.is1DHistoSet()) {
 			return;
@@ -115,17 +111,17 @@ public class PlotTicks {
 		if (hd == null) {
 			return;
 		}
-		
+
 		PlotParameters params = _plotCanvas.getParameters();
 		FontMetrics fm = _plotCanvas.getFontMetrics(_tickFont);
 		double delx = (xmax - xmin) / (numtick + 1);
-		
+
 		int t = ab.y;
 		int b = t + ab.height;
 		int sb = b + fm.getHeight();
-		
-		for (int i = 1; i <= (numtick+1); i++) {
-			double value = xmin + (i-0.5) * delx;
+
+		for (int i = 1; i <= (numtick + 1); i++) {
+			double value = xmin + (i - 0.5) * delx;
 			_wp.setLocation(value, yc);
 			_plotCanvas.worldToLocal(_pp, _wp);
 			g.drawLine(_pp.x, b, _pp.x, b - ticklen);
@@ -143,15 +139,14 @@ public class PlotTicks {
 	}
 
 	// draw x tick marks
-	private void drawXTicks(Graphics g, double xmin, double xmax, double yc,
-			int ticklen, int numtick, Rectangle ab, boolean drawVal) {
+	private void drawXTicks(Graphics g, double xmin, double xmax, double yc, int ticklen, int numtick, Rectangle ab,
+			boolean drawVal) {
 		if (numtick < 1) {
 			return;
 		}
-		
+
 		if (drawBinValue) {
-			drawBinValues(g, xmin, xmax, yc,
-					ticklen, numtick, ab, drawVal);
+			drawBinValues(g, xmin, xmax, yc, ticklen, numtick, ab, drawVal);
 			return;
 		}
 
@@ -171,8 +166,7 @@ public class PlotTicks {
 			g.drawLine(_pp.x, t, _pp.x, t + ticklen);
 
 			if (drawVal) {
-				String valStr = DoubleFormat.doubleFormat(value,
-						params.getNumDecimalX(), params.getMinExponentX());
+				String valStr = DoubleFormat.doubleFormat(value, params.getNumDecimalX(), params.getMinExponentX());
 				int sw = fm.stringWidth(valStr);
 				g.drawString(valStr, _pp.x - sw / 2, sb);
 
@@ -182,8 +176,8 @@ public class PlotTicks {
 	}
 
 	// draw y tick marks
-	private void drawYTicks(Graphics g, double ymin, double ymax, double xc,
-			int ticklen, int numtick, Rectangle ab, boolean drawVal) {
+	private void drawYTicks(Graphics g, double ymin, double ymax, double xc, int ticklen, int numtick, Rectangle ab,
+			boolean drawVal) {
 		if (numtick < 1) {
 			return;
 		}
@@ -204,11 +198,9 @@ public class PlotTicks {
 				g.drawLine(l, _pp.y, l + ticklen, _pp.y);
 				g.drawLine(r, _pp.y, r - ticklen, _pp.y);
 				if (drawVal) {
-					String valstr = DoubleFormat.doubleFormat(value,
-							params.getNumDecimalY(), params.getMinExponentY());
+					String valstr = DoubleFormat.doubleFormat(value, params.getNumDecimalY(), params.getMinExponentY());
 					int sw = fm.stringWidth(valstr);
-					GraphicsUtilities.drawRotatedText((Graphics2D) g, valstr,
-							_tickFont, sb, _pp.y + sw / 2, 0, 0, -90);
+					GraphicsUtilities.drawRotatedText((Graphics2D) g, valstr, _tickFont, sb, _pp.y + sw / 2, 0, 0, -90);
 				}
 			}
 		}
@@ -246,7 +238,7 @@ public class PlotTicks {
 	public void setNumMinorTickY(int numMinorTickY) {
 		this.numMinorTickY = numMinorTickY;
 	}
-	
+
 	public int getMajorTickLen() {
 		return majorTickLen;
 	}

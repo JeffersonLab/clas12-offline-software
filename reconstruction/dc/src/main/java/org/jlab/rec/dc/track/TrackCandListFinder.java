@@ -483,10 +483,10 @@ public class TrackCandListFinder {
 
         // swimming to a ref points outside of the last DC region
         double[] VecAtTarOut = dcSwim.SwimToPlaneTiltSecSys(cand.get(0).get_Sector(), 592);
-        if (VecAtTarOut == null) {
+        if(VecAtTarOut==null) {
+            cand.fit_Successful = false;
             return;
         }
-
         double xOuter = VecAtTarOut[0];
         double yOuter = VecAtTarOut[1];
         double zOuter = VecAtTarOut[2];
@@ -544,11 +544,12 @@ public class TrackCandListFinder {
                 -cand.get_Q());
 
         double[] Vt = dcSwim.SwimToBeamLine(xB, yB);
-        if (Vt == null) {
+        if(Vt==null) {
+            cand.fit_Successful = false;
             return;
         }
-
-        // recalc new vertex using plane stopper
+        
+       // recalc new vertex using plane stopper
         //int sector = cand.get(2).get_Sector();
         //double[] Vt = null;
         //int sector = cand.get(cand.size() - 1).get_Sector();
@@ -582,6 +583,10 @@ public class TrackCandListFinder {
                 pxOrFix, pyOrFix, pzOrFix,
                 cand.get_Q());
         double[] VecAtHtccSurf = dcSwim.SwimToSphere(175);
+        if(VecAtHtccSurf==null) {
+            cand.fit_Successful = false;
+            return;
+        }
         double xInner = VecAtHtccSurf[0];
         double yInner = VecAtHtccSurf[1];
         double zInner = VecAtHtccSurf[2];
@@ -900,15 +905,17 @@ public class TrackCandListFinder {
                         cand.set_P(1. / Math.abs(kFit.finalStateVec.Q));
                         cand.set_Q((int) Math.signum(kFit.finalStateVec.Q));
                         this.setTrackPars(cand, traj, trjFind, fn, kFit.finalStateVec.z, DcDetector, dcSwim);
-                        // candidate parameters are set from the state vector
-                        cand.set_FitChi2(kFit.chi2);
-                        cand.set_FitNDF(kFit.NDF);
-                        cand.set_FitConvergenceStatus(kFit.ConvStatus);
-                        cand.set_Id(cands.size() + 1);
-                        cand.set_CovMat(kFit.finalCovMat.covMat);
-                        cand.set_Trajectory(kFit.kfStateVecsAlongTrajectory);
-                        // add candidate to list of tracks
-                        cands.add(cand);
+                        if(cand.fit_Successful==true) {
+                            // candidate parameters are set from the state vector
+                            cand.set_FitChi2(kFit.chi2);
+                            cand.set_FitNDF(kFit.NDF);
+                            cand.set_FitConvergenceStatus(kFit.ConvStatus);
+                            cand.set_Id(cands.size() + 1);
+                            cand.set_CovMat(kFit.finalCovMat.covMat);
+                            cand.set_Trajectory(kFit.kfStateVecsAlongTrajectory);
+                            // add candidate to list of tracks
+                            cands.add(cand);
+                        }
                     }
                     //this.matchHits(traj.get_Trajectory(), cand, DcDetector);
                     cands.add(cand);

@@ -48,7 +48,8 @@ public class CodaEventDecoder {
     JsonObject  epicsData = new JsonObject();
 
     private final long timeStampTolerance = 0L;
-
+    private int tiMaster = -1; 
+            
     public CodaEventDecoder(){
 
     }
@@ -62,10 +63,13 @@ public class CodaEventDecoder {
     public List<DetectorDataDgtz> getDataEntries(EvioDataEvent event){
         
         int event_size = event.getHandler().getStructure().getByteBuffer().array().length;
-        if(event_size>600*1024){
-            System.out.println("error: >>>> EVENT SIZE EXCEEDS 600 kB");
-            return new ArrayList<DetectorDataDgtz>();
-        }
+    
+        // This had been inserted to accommodate large EVIO events that
+        // were unreadable in JEVIO versions prior to 6.2:
+        //if(event_size>600*1024){
+        //    System.out.println("error: >>>> EVENT SIZE EXCEEDS 600 kB");
+        //    return new ArrayList<DetectorDataDgtz>();
+        //}
         
         List<DetectorDataDgtz>  rawEntries = new ArrayList<DetectorDataDgtz>();
         List<EvioTreeBranch> branches = this.getEventBranches(event);
@@ -128,29 +132,45 @@ public class CodaEventDecoder {
     }
 
     public void setTimeStamp(EvioDataEvent event) {
+
+        long ts = -1;
+
         List<DetectorDataDgtz> tiEntries = this.getDataEntries_TI(event);
-        boolean tiSync=true;
-        if(tiEntries.size()>0) {
-            long ts = tiEntries.get(0).getTimeStamp();
-            for(int i=1; i<tiEntries.size(); i++) {
-                if(Math.abs(tiEntries.get(i).getTimeStamp()-ts)>this.timeStampTolerance) {
+                
+        if(tiEntries.size()==1) {
+            ts = tiEntries.get(0).getTimeStamp();
+        }
+        else if(tiEntries.size()>1) {
+            // check sychronization
+            boolean tiSync=true;
+            int  i0 = -1;
+            // set reference timestamp from first entry which is not the tiMaster
+            for(int i=0; i<tiEntries.size(); i++) {
+                if(tiEntries.get(i).getDescriptor().getCrate()!=this.tiMaster) {
+                    i0 = i;
+                    break;
+                }   
+            }
+            for(int i=0; i<tiEntries.size(); i++) {
+                long deltaTS = this.timeStampTolerance;       
+                if(tiEntries.get(i).getDescriptor().getCrate()==this.tiMaster) deltaTS = deltaTS + 1;  // add 1 click tolerance for tiMaster
+                if(Math.abs(tiEntries.get(i).getTimeStamp()-tiEntries.get(i0).getTimeStamp())>deltaTS) {
                     tiSync=false;
                     if(this.timeStampErrors<100) {
-                        System.out.println("WARNING: mismatch in TI time stamps: crate " 
+                        System.err.println("WARNING: mismatch in TI time stamps: crate " 
                                         + tiEntries.get(i).getDescriptor().getCrate() + " reports " 
                                         + tiEntries.get(i).getTimeStamp() + " instead of the " + ts
-                                        + " from crate " + tiEntries.get(0).getDescriptor().getCrate());
-                        this.timeStampErrors++;
+                                        + " from crate " + tiEntries.get(i0).getDescriptor().getCrate());
                     }
-                }
-                if(this.timeStampErrors==100) {
-                    System.out.println("Reached the maximum number of timeStamp errors (100)");
+                    else if(this.timeStampErrors==100) {
+                        System.err.println("WARNING: reached the maximum number of timeStamp errors (100), supressing future warnings.");
+                    }
                     this.timeStampErrors++;
                 }
             }
-            if(tiSync) this.timeStamp = ts ;
-            else       this.timeStamp = -1 ;
+            if(tiSync) ts = tiEntries.get(i0).getTimeStamp();
         }
+        this.timeStamp = ts ;
     }
 
     public long getTriggerBits() {
@@ -236,7 +256,7 @@ public class CodaEventDecoder {
                 //  This is regular integrated pulse mode, used for FTOF
                 // FTCAL and EC/PCAL
                 //return this.getDataEntries_57602(crate, node, event);
-
+                this.tiMaster = crate;
                 this.readHeaderBank(crate, node, event);
                 //return this.getDataEntriesMode_7(crate,node, event);
             }

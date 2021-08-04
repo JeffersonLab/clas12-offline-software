@@ -2,6 +2,7 @@ package org.jlab.analysis.postprocess;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.reco.ReconstructionEngine;
 
 import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.Event;
@@ -11,8 +12,8 @@ import org.jlab.jnp.hipo4.io.HipoWriterSorted;
 
 import org.jlab.utils.system.ClasUtilsFile;
 
-import org.jlab.detector.decode.DaqScalers;
-import org.jlab.detector.decode.DaqScalersSequence;
+import org.jlab.detector.scalers.DaqScalers;
+import org.jlab.detector.scalers.DaqScalersSequence;
 
 import org.jlab.detector.helicity.HelicityBit;
 import org.jlab.detector.helicity.HelicitySequenceManager;
@@ -23,6 +24,8 @@ import org.jlab.utils.options.OptionParser;
  * Calls routines to do analysis and per-event lookup of delayed helicity
  * and beam charge from tag-1 events, and outputs a file with modified
  * REC::Event.helicity/beamCharge/liveTime.
+ * 
+ * Also, adds tag-1 events for configuration banks (e.g. SOFT::config)
  * 
  * Usage: Tag1ToEvent outputFile inputFile1 [inputFile2 [inputFile3 [...]]]
  * 
@@ -35,6 +38,10 @@ import org.jlab.utils.options.OptionParser;
 
 public class Tag1ToEvent {
 
+    public static final String[] CREATE_TAG1_EVENTS = {
+        ReconstructionEngine.CONFIG_BANK_NAME
+    };
+    
     public static void main(String[] args) {
 
         OptionParser parser = new OptionParser("postprocess");
@@ -70,17 +77,25 @@ public class Tag1ToEvent {
 
         HipoWriterSorted writer = new HipoWriterSorted();
         writer.getSchemaFactory().initFromDirectory(ClasUtilsFile.getResourceDir("COATJAVA", "etc/bankdefs/hipo4"));
-        writer.setCompressionType(1);
+        writer.setCompressionType(2);
         writer.open(fileout);
 			
         Event event = new Event();
 
+        Event configEvent = new Event();
+        
         // we're going to modify this bank:
         Bank recEventBank = new Bank(writer.getSchemaFactory().getSchema("REC::Event"));
         
         // we're going to modify this bank if doHelicityFlip is set:
         Bank helFlipBank = new Bank(writer.getSchemaFactory().getSchema("HEL::flip"));
 
+        // we're going to copy these banks to new tag-1 events:
+        List<Bank> configBanks = new ArrayList<>();
+        for (String bankName : CREATE_TAG1_EVENTS) {
+            configBanks.add(new Bank(writer.getSchemaFactory().getSchema(bankName)));
+        }
+        
         long badCharge = 0;
         long goodCharge = 0;
         long badHelicity = 0;
@@ -110,9 +125,11 @@ public class Tag1ToEvent {
                 HelicityBit hb = helSeq.search(event);
                 DaqScalers ds = chargeSeq.get(event);
 
-                // write helicity to REC::Event:
+                // count helicity good/bad;
                 if (Math.abs(hb.value())==1) goodHelicity++;
                 else badHelicity++;
+
+                // write heliicty to REC::Event:
                 if (doHelicity) {
                     recEventBank.putByte("helicity",0,hb.value());
                 }
@@ -122,9 +139,21 @@ public class Tag1ToEvent {
                 else {
                     goodCharge++;
                     if (doBeamCharge) {
-                        recEventBank.putFloat("beamCharge",0,ds.getBeamChargeGated());
-                        recEventBank.putDouble("liveTime",0,ds.getLivetime());
+                        recEventBank.putFloat("beamCharge",0, (float) ds.dsc2.getBeamChargeGated());
+                        recEventBank.putDouble("liveTime",0,ds.dsc2.getLivetime());
                     }
+                }
+
+                // copy config banks to new tag-1 events:
+                configEvent.reset();
+                for (Bank bank : configBanks) {
+                    event.read(bank);
+                    if (bank.getRows()>0) {
+                        configEvent.write(bank);
+                    }
+                }
+                if (!configEvent.isEmpty()) {
+                    writer.addEvent(configEvent,1);
                 }
 
                 // update the output file:

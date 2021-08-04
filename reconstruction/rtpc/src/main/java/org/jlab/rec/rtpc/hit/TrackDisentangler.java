@@ -60,7 +60,7 @@ public class TrackDisentangler {
                                 HITSLOOP:
                                 for(HitVector h1 : h1list){
                                     for(HitVector h2 : h2list){
-                                        if(compareHits(h1,h2)){
+                                        if(compareHitsTime(h1,h2)){
                                             NewTrackMap.mergeTracks(tid1, tid2); 
                                             NewTrackMap.getTrack(tid1).sortHits();
                                             removedtracks.add(tid2);
@@ -103,8 +103,12 @@ public class TrackDisentangler {
     }
     
     private boolean compareHits(HitVector a, HitVector b){
+        double phi1 = a.phi();
+        double phi2 = b.phi();
+        if(phi1 < 0) phi1 += 2*Math.PI;
+        if(phi2 < 0) phi2 += 2*Math.PI;
         double zdiff = a.z() - b.z();
-        double phidiff = Math.abs(a.phi() - b.phi());
+        double phidiff = Math.abs(phi1 - phi2);
         if(phidiff > Math.PI){
             return Math.abs(phidiff - 2*Math.PI) < maxdeltaphigap && zdiff < maxdeltazgap;
         }else{
@@ -113,8 +117,12 @@ public class TrackDisentangler {
     }
     
     private boolean compareHitsTime(HitVector a, HitVector b){
+        double phi1 = a.phi();
+        double phi2 = b.phi();
+        if(phi1 < 0) phi1 += 2*Math.PI;
+        if(phi2 < 0) phi2 += 2*Math.PI;
         double zdiff = a.z() - b.z();
-        double phidiff = Math.abs(a.phi() - b.phi());
+        double phidiff = Math.abs(phi1 - phi2);
         boolean torder = false;
         if(a.time() < b.time()) torder = true;
         if(phidiff > Math.PI){

@@ -5,6 +5,7 @@
  */
 package org.jlab.detector.decode;
 
+import org.jlab.detector.scalers.DaqScalers;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -564,7 +565,7 @@ public class CLASDecoder4 {
      *
      * FIXME:  refactor this out more cleanly
      */
-    public Bank createReconScalerBank(Event event){
+    public Bank[] createReconScalerBanks(Event event){
 
         // abort if run number corresponds to simulation:
         if (this.detectorDecoder.getRunNumber() < 1000) return null;
@@ -581,9 +582,11 @@ public class CLASDecoder4 {
         event.read(rawScalerBank);
         if (configBank.getRows()<1 || rawScalerBank.getRows()<1) return null;
 
-        // retrieve fcup calibrations from CCDB:
+        // retrieve fcup/slm calibrations from slm:
         IndexedTable fcupTable = this.detectorDecoder.scalerManager.
                 getConstants(this.detectorDecoder.getRunNumber(),"/runcontrol/fcup");
+        IndexedTable slmTable = this.detectorDecoder.scalerManager.
+                getConstants(this.detectorDecoder.getRunNumber(),"/runcontrol/slm");
 
         // get unix event time (in seconds), and convert to Java's date (via milliseconds):
         Date uet=new Date(configBank.getInt("unixtime",0)*1000L);
@@ -598,26 +601,7 @@ public class CLASDecoder4 {
             // abort if no RCDB access (e.g. offsite)
             return null;
         }
-
-        // seconds since 00:00:00, on their given day:
-        final double s1 = rst.getSeconds()+60*rst.getMinutes()+60*60*rst.getHours();
-        final double s2 = uet.getSeconds()+60*uet.getMinutes()+60*60*uet.getHours();
-
-        // Run duration in seconds.  Nasty but works, until RCDB (uses java.sql.Time)
-        // is changed to support full date and not just HH:MM:SS.  Meanwhile just
-        // requires that runs last less than 24 hours.
-        final double seconds = s2<s1 ? s2+60*60*24-s1 : s2-s1;
-
-        // interpret/calibrate RAW::scaler into RUN::scaler:
-        DaqScalers r = DaqScalers.create(rawScalerBank,fcupTable,seconds);
-        if (r==null) return null;
-
-        Bank scalerBank = new Bank(schemaFactory.getSchema("RUN::scaler"),1);
-        scalerBank.putFloat("fcup",0,r.getBeamCharge());
-        scalerBank.putFloat("fcupgated",0,r.getBeamChargeGated());
-        scalerBank.putFloat("livetime",0,r.getLivetime());
-
-        return scalerBank;
+        return DaqScalers.createBanks(schemaFactory,rawScalerBank,fcupTable,slmTable,rst,uet);
     }
     
     public Bank createBonusBank(){
@@ -807,10 +791,12 @@ public class CLASDecoder4 {
                         if(rawScaler.getRows()>0) scalerEvent.write(rawScaler);
                         if(rawRunConf.getRows()>0) scalerEvent.write(rawRunConf);
 
-                        Bank recScaler = decoder.createReconScalerBank(decodedEvent);
-                        if (recScaler != null) {
-                            decodedEvent.write(recScaler);
-                            scalerEvent.write(recScaler);
+                        Bank[] scalers = decoder.createReconScalerBanks(decodedEvent);
+                        if (scalers != null) {
+                            for (Bank b : scalers) {
+                                decodedEvent.write(b);
+                                scalerEvent.write(b);
+                            }
                         }
 
                         if (epics!=null) {

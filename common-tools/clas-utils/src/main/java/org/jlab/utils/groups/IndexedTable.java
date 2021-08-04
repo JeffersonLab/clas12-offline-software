@@ -202,9 +202,9 @@ public class IndexedTable extends DefaultTableModel {
 
         for(int i = 0; i < this.entryNames.size(); i++){
             if(entryTypes.get(entryNames.get(i)).compareTo("D")==0){
-                entries.getItem(index).setValue(i, Double.parseDouble(values[i+3]));
+                entries.getItem(index).setValue(i, Double.parseDouble(values[i+indexNames.size()]));
             } else {
-                entries.getItem(index).setValue(i, Integer.parseInt(values[i+3]));
+                entries.getItem(index).setValue(i, Integer.parseInt(values[i+indexNames.size()]));
             }
         }
     }
