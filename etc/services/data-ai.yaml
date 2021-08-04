@@ -1,9 +1,9 @@
 io-services:
   reader:
-    class: org.jlab.clas.std.services.convertors.HipoToHipoReader
+    class: org.jlab.io.clara.HipoToHipoReader
     name: HipoToHipoReader
   writer:
-    class: org.jlab.clas.std.services.convertors.HipoToHipoWriter
+    class: org.jlab.io.clara.HipoToHipoWriter
     name: HipoToHipoWriter
 services:
   - class: org.jlab.clas.swimtools.MagFieldsEngine
@@ -52,7 +52,7 @@ services:
 # DC regular TB tracking    
   - class: org.jlab.service.dc.DCTBEngineConv
     name: DCRTB
-# DC Ai assisted TB tracking    
+# DC AI assisted TB tracking    
   - class: org.jlab.service.dc.DCTBEngineAI
     name: DCATB  
   - class: org.jlab.service.ftof.FTOFTBEngine
@@ -83,8 +83,6 @@ configuration:
       dcGeometryVariation: rga_fall2018
       dcT2DFunc: "Polynomial"
       dcWireDistortion: "true"
-#      sectorSelect: "1"
-      dcFOOST: "true"
     DCRC:
       dcGeometryVariation: rga_fall2018
     DCRPC:

@@ -1,9 +1,9 @@
 io-services:
   reader:
-    class: org.jlab.clas.std.services.convertors.HipoToHipoReader
+    class: org.jlab.io.clara.HipoToHipoReader
     name: HipoToHipoReader
   writer:
-    class: org.jlab.clas.std.services.convertors.HipoToHipoWriter
+    class: org.jlab.io.clara.HipoToHipoWriter
     name: HipoToHipoWriter
 services:
   - class: org.jlab.clas.swimtools.MagFieldsEngine
@@ -21,8 +21,8 @@ services:
   - class: org.jlab.service.dc.DCHBClustering
     name: DCRC
 # This is where the AI plugin would go.  THe AI code reads the HB clusters.  
-  - class: org.jlab.service.mlt.MLTEngine
-    name: MLT
+  - class: org.jlab.service.mltn.MLTDEngine
+    name: MLTD
 # DC using clustering: regular HB tracking
   - class: org.jlab.service.dc.DCHBPostClusterConv
     name: DCRPC

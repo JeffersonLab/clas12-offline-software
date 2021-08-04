@@ -125,6 +125,6 @@ if [ $? != 0 ] ; then echo "mvn package failure" ; exit 1 ; fi
 cd -
 
 cp common-tools/coat-lib/target/coat-libs-*-SNAPSHOT.jar coatjava/lib/clas/
-cp reconstruction/*/target/clas12detector-*-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/*/target/clas12detector-*-SNAPSHOT*.jar coatjava/lib/services/
 
 echo "COATJAVA SUCCESSFULLY BUILT !"
