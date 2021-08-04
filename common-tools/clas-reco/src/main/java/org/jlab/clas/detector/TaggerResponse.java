@@ -29,7 +29,16 @@ public class TaggerResponse extends DetectorResponse {
     public int getSize(){return hitSize;}
     public int getID(){return hitID;}
     public double getRadius() {return this.hitRadius;}
-    
+   
+    public void copy(TaggerResponse r) {
+        super.copy(r);
+        hitID = r.hitID;
+        hitSize = r.hitSize;
+        hitRadius = r.hitRadius;
+        hitMomentum.copy(r.hitMomentum);
+        hitWidth.copy(r.hitWidth);
+    }
+
     public Vector3D getMomentum(){
         return this.hitMomentum;
     }
