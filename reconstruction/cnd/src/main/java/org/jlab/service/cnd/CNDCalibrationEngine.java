@@ -183,11 +183,7 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
             rbc = new RecoBankWriter();
             System.out.println("in init ");
 
-			String[]  cndTable = new String[]{
-				"/calibration/cnd/cluster"
-			};
 
-            requireConstants(Arrays.asList(cndTable));
 
             requireConstants(Arrays.asList(CalibrationConstantsLoader.getCndTables()));
             this.getConstantsManager().setVariation("default");

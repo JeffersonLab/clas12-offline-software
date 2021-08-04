@@ -62,7 +62,7 @@ public class CNDClusterFinder {
         double dY = ccdb.DY;
         double dZ = ccdb.DZ;
         double dT = ccdb.DT;
-        System.out.println(dX + " " + dY + " " + dZ + " " + dT);
+        //System.out.println(dX + " " + dY + " " + dZ + " " + dT);
 
         int size = hits.size();
 
