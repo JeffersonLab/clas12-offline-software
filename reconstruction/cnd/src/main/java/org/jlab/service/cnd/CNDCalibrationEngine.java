@@ -147,7 +147,7 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 
         //// clustering of the CND hits
         CNDClusterFinder cndclusterFinder = new CNDClusterFinder();
-        ArrayList<CNDCluster> cndclusters = cndclusterFinder.findClusters(hits);
+        ArrayList<CNDCluster> cndclusters = cndclusterFinder.findClusters(hits,constantsLoader);
             
         
         
@@ -182,7 +182,13 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
             // TODO Auto-generated method stub
             rbc = new RecoBankWriter();
             System.out.println("in init ");
-            
+
+			String[]  cndTable = new String[]{
+				"/calibration/cnd/cluster"
+			};
+
+            requireConstants(Arrays.asList(cndTable));
+
             requireConstants(Arrays.asList(CalibrationConstantsLoader.getCndTables()));
             this.getConstantsManager().setVariation("default");
             return true;

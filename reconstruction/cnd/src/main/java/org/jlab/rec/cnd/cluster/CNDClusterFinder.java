@@ -12,6 +12,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cnd.hit.CndHit;
 
 import org.jlab.rec.cnd.cluster.CNDCluster;
+import org.jlab.rec.cnd.constants.CalibrationConstantsLoader;
 
 import java.lang.String;
 import java.lang.Double;
@@ -25,7 +26,7 @@ import org.jlab.clas.physics.LorentzVector;
 
 public class CNDClusterFinder {
 
-    private double cluster_size_ = 5;// apparently 5 cm according to Rong, no!!!
+    private double cluster_size_ = 5;
     private boolean debug = false;
 
     public CNDClusterFinder() {
@@ -36,7 +37,7 @@ public class CNDClusterFinder {
         this.debug = debug;
     }
 
-    public ArrayList<CNDCluster> findClusters(ArrayList<CndHit> hits) {
+    public ArrayList<CNDCluster> findClusters(ArrayList<CndHit> hits, CalibrationConstantsLoader ccdb) {
 
         // sort hits by energy
         Collections.sort(hits, new sortByEnergy());
@@ -56,6 +57,13 @@ public class CNDClusterFinder {
         int j = 0;
         double closest_distance = 1.0e15;
         int good_index = -1;
+
+        double dX = ccdb.DX;
+        double dY = ccdb.DY;
+        double dZ = ccdb.DZ;
+        double dT = ccdb.DT;
+        System.out.println(dX + " " + dY + " " + dZ + " " + dT);
+
         int size = hits.size();
 
         for (int i = 0; i < size; i++) {
@@ -78,13 +86,18 @@ public class CNDClusterFinder {
                     double deltaY = Math.abs(thisHit.Y() - otherHit.Y());
                     double deltaZ = Math.abs(thisHit.Z() - otherHit.Z());
                     double deltaT = Math.abs(thisHit.Time() - otherHit.Time());
+                    double deltaLayer = Math.abs(thisHit.Layer() - otherHit.Layer());
 
-                    /*System.out.println("X " + thisHit.X() + " " + otherHit.X() + " " + deltaX);
-                    System.out.println("Y " + thisHit.Y() + " " + otherHit.Y() + " " + deltaY);
-                    System.out.println("Z " + thisHit.Z() + " " + otherHit.Z() + " " + deltaZ);
-                    System.out.println("T " + thisHit.Time() + " " + otherHit.Time() + " " + deltaT);*/
+                    /*
+                     * System.out.println("X " + thisHit.X() + " " + otherHit.X() + " " + deltaX);
+                     * System.out.println("Y " + thisHit.Y() + " " + otherHit.Y() + " " + deltaY);
+                     * System.out.println("Z " + thisHit.Z() + " " + otherHit.Z() + " " + deltaZ);
+                     * System.out.println("T " + thisHit.Time() + " " + otherHit.Time() + " " +
+                     * deltaT);
+                     */
 
-                    if (deltaX/10.0 < 20 && deltaY/10.0 < 20 && deltaZ/10.0 < 10 && deltaT < 1.2) {
+                    if (deltaX / 10.0 < dX && deltaY / 10.0 < dY && deltaZ / 10.0 < dZ && deltaT < dT
+                            && deltaLayer == 0) {
 
                         good_index = k;
 
