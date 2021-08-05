@@ -296,6 +296,8 @@ public class RecoBankReader {
 		float xbs[] = bank.getFloat("xb");
 		float ybs[] = bank.getFloat("yb");
 		
+		
+		
 		float curvatures[];
 		try {
 			curvatures = bank.getFloat("curvature");
@@ -430,7 +432,7 @@ public class RecoBankReader {
 			int sector = bank.getByte("sector", i);
 			int strip = bank.getInt("strip", i);
 			int id = bank.getShort("ID", i);
-			FittedHit hit = new FittedHit(0, 0, sector, layer, new Strip(strip, 0));
+			FittedHit hit = new FittedHit(0, 0, sector, layer, new Strip(strip, 0, 0));
 
 			hit.set_Id(id);
 			hit.set_docaToTrk(bank.getFloat("fitResidual", i));
@@ -452,7 +454,7 @@ public class RecoBankReader {
 			int sector = bank.getByte("sector", i);
 			int strip = bank.getInt("strip", i);
 			int id = bank.getShort("ID", i);
-			FittedHit hit = new FittedHit(0, 0, sector, layer, new Strip(strip, 0));
+			FittedHit hit = new FittedHit(0, 0, sector, layer, new Strip(strip, 0, 0));
 
 			
 			
