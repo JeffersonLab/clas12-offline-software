@@ -191,7 +191,7 @@ public class CVTAlignment extends ReconstructionEngine {
 		List<Matrix> cs = new ArrayList<Matrix>();
 		List<Integer> trackIDs = new ArrayList<Integer>();
 
-
+		if (tracks.size() < 3)
 		tracksLoop : for (Trajectory track : tracks) {
 
 			if(Math.abs(getDoca(track))>maxDocaCut)
@@ -234,8 +234,8 @@ public class CVTAlignment extends ReconstructionEngine {
 			//System.out.println(ray.get_dirVec().toString());
 			//System.out.println(ray.get_refPoint().toString());
 
-			
-			
+
+
 			int colsA = nAlignVars*((svtTopBottomSep ? 2*nCrossSVT : nCrossSVT) + nCrossBMT + (isCosmics ? 0:1));
 			int rows = 2*nCrossSVT+nCrossBMT + (isCosmics ? 0:1);
 			Matrix A = new Matrix(rows, colsA);//not sure why there aren't 6 columns
@@ -244,21 +244,23 @@ public class CVTAlignment extends ReconstructionEngine {
 			Matrix m = new Matrix(rows,1);
 			Matrix c = new Matrix(rows,1);
 			Matrix I = new Matrix(rows,1);
-			
+
 			int i = 0;
 			boolean useNewFillMatrices = true;
 			for(Cross cross : track) {
 				if(useNewFillMatrices) {
 					if(cross.get_Detector().equalsIgnoreCase("SVT")){
 						Cluster cl1 = cross.get_Cluster1();
-						boolean ok = fillMatricesNew(i,ray,cl1,A,B,V,m,c,I);
+						//fillMatricesSVT(i,ray,cl1,A,B,V,m,c,I);
+						boolean ok = fillMatricesNew(i,ray,cl1,A,B,V,m,c,I,"SVT",false);
 						i++;
 						if(!ok) { //reject track if there's a cluster with really bad values.
 							if(debug) System.out.println("rejecting track due to problem in an SVT layer");
 							continue tracksLoop;
 						}
 						Cluster cl2 = cross.get_Cluster2();
-						 ok = fillMatricesNew(i,ray,cl2,A,B,V,m,c,I);
+						//fillMatricesSVT(i,ray,cl1,A,B,V,m,c,I);
+						ok = fillMatricesNew(i,ray,cl2,A,B,V,m,c,I,"SVT",false);
 						i++;
 						if(!ok) { //reject track if there's a cluster with really bad values.
 							if(debug) System.out.println("rejecting track due to problem in an SVT layer");
@@ -266,55 +268,67 @@ public class CVTAlignment extends ReconstructionEngine {
 						}
 					} else {
 						Cluster cl1 = cross.get_Cluster1();
-						boolean ok = fillMatricesNew(i,ray,cl1,A,B,V,m,c,I);
+						//if(cross.get_DetectorType() == BMTType.Z) 
+						//	fillMatricesBMTZ(i,ray,cl1,A,B,V,m,c,I);
+						//if(cross.get_DetectorType() == BMTType.C) 
+						//	fillMatricesBMTC(i,ray,cl1,A,B,V,m,c,I);
+						//if(cross.get_DetectorType() == BMTType.Z){
+						boolean ok = fillMatricesNew(i,ray,cl1,A,B,V,m,c,I,
+								(cross.get_DetectorType() == BMTType.Z ? "BMTZ":"BMTC"),true);
+						if(cross.get_DetectorType() == BMTType.C) 
+							fillMatricesBMTC(i,ray,cl1,A,B,V,m,c,I);
 						i++;
-						if(!ok) { //reject track if there's a cluster with really bad values.
+						if(!ok && cross.get_DetectorType() == BMTType.Z) { //reject track if there's a cluster with really bad values.
 							if(debug) System.out.println("rejecting track due to problem in a BMT layer");
 							continue tracksLoop;
 						}
+						//}
 					}
 					continue;
 				}
-				//System.out.println("cross " +cross.get_Point());
-				if(cross.get_Detector().equalsIgnoreCase("SVT"))
-				{
-					if(isBMTonly)
-						continue;
-					Cluster cl1 = cross.get_Cluster1();
-					boolean ok = fillMatricesSVT(i,ray,cl1,A,B,V,m,c,I);
-					i++;
-					if(!ok) { //reject track if there's a cluster with really bad values.
-						if(debug) System.out.println("rejecting track due to problem in an SVT layer");
-						continue tracksLoop;
-					}
-					Cluster cl2 = cross.get_Cluster2();
-					ok = fillMatricesSVT(i,ray,cl2,A,B,V,m,c,I);
-					i++;
-					if(!ok) { //reject track if there's a cluster with really bad values.
-						if(debug) System.out.println("rejecting track due to problem in an SVT layer");
-						continue tracksLoop;
-					}
-				} else {
-					if(isSVTonly)
-						continue;
-					Cluster cl = cross.get_Cluster1();
-					
-					
-					if(cross.get_DetectorType() == BMTType.Z) {
-						boolean ok = fillMatricesBMTZ(i,ray,cl,A,B,V,m,c,I);
+				else {
+					//System.out.println("cross " +cross.get_Point());
+					if(cross.get_Detector().equalsIgnoreCase("SVT"))
+					{
+						if(isBMTonly)
+							continue;
+						Cluster cl1 = cross.get_Cluster1();
+						boolean ok = fillMatricesSVT(i,ray,cl1,A,B,V,m,c,I);
 						i++;
 						if(!ok) { //reject track if there's a cluster with really bad values.
-							if(debug) System.out.println("rejecting track due to problem in a BMT Z layer");
+							if(debug) System.out.println("rejecting track due to problem in an SVT layer");
 							continue tracksLoop;
 						}
-					}
-					else if(cross.get_DetectorType() == BMTType.C) {
-						boolean ok = fillMatricesBMTC(i,ray,cl,A,B,V,m,c,I);
+						Cluster cl2 = cross.get_Cluster2();
+						ok = fillMatricesSVT(i,ray,cl2,A,B,V,m,c,I);
 						i++;
 						if(!ok) { //reject track if there's a cluster with really bad values.
-							if(debug) System.out.println("rejecting track due to problem in a BMT C layer");
+							if(debug) System.out.println("rejecting track due to problem in an SVT layer");
 							continue tracksLoop;
 						}
+					} else {
+						if(isSVTonly)
+							continue;
+						Cluster cl = cross.get_Cluster1();
+
+
+						if(cross.get_DetectorType() == BMTType.Z) {
+							boolean ok = fillMatricesBMTZ(i,ray,cl,A,B,V,m,c,I);
+							i++;
+							if(!ok) { //reject track if there's a cluster with really bad values.
+								if(debug) System.out.println("rejecting track due to problem in a BMT Z layer");
+								continue tracksLoop;
+							}
+						}
+						else if(cross.get_DetectorType() == BMTType.C) {
+							boolean ok = fillMatricesBMTC(i,ray,cl,A,B,V,m,c,I);
+							i++;
+							if(!ok) { //reject track if there's a cluster with really bad values.
+								if(debug) System.out.println("rejecting track due to problem in a BMT C layer");
+								continue tracksLoop;
+							}
+						}
+
 					}
 					
 				}
@@ -337,12 +351,12 @@ public class CVTAlignment extends ReconstructionEngine {
 			System.out.println("track chi2: " + dm.transpose().times(V.inverse()).times(dm).get(0, 0));
 			System.out.println();*/
 
-			for(double res : c.minus(m).getRowPackedCopy()) {
+			/*for(double res : c.minus(m).getRowPackedCopy()) {
 				if(Math.abs(res)>maxResidualCut) {
 					System.out.println("rejecting track due to large residual");
 					continue tracksLoop;
 				}
-			}
+			}*/
 			As.add(A);
 			Bs.add(B);
 			Vs.add(V);
@@ -382,8 +396,8 @@ public class CVTAlignment extends ReconstructionEngine {
 		//Vector3D u = new Vector3D(-cd*Math.sin(phi), cd*Math.cos(phi), sd);
 		//Point3D x = new Point3D(d*Math.cos(phi),d*Math.sin(phi), z);
 		Vector3D u = new Vector3D(cd*Math.cos(phi), cd*Math.sin(phi), sd);
-		
-		
+
+
 		Point3D x = new Point3D(-d*Math.sin(phi)+xb,d*Math.cos(phi)+yb, z);
 		//Point3D x = new Point3D(-d*Math.sin(phi),d*Math.cos(phi), z);
 		//if(u.y() <0)
@@ -415,8 +429,12 @@ public class CVTAlignment extends ReconstructionEngine {
 			bank.setInt("run", i, runNum);
 			bank.setInt("event", i, eventNum);
 			Matrix c = cs.get(i), m = ms.get(i), V = Vs.get(i);
-			bank.setFloat("chi2", i, (float)(m.minus(c)).transpose().times(V.inverse()).times(m.minus(c)).get(0, 0));
-
+			if(V.det() != 0)
+				bank.setFloat("chi2", i, (float)(m.minus(c)).transpose().times(V.inverse()).times(m.minus(c)).get(0, 0));
+			else {
+				System.out.println("Error:  V is singular: ");
+				V.print(5, 5);
+			}
 			bank.setShort("ndof", i, (short)(Vs.get(i).getRowDimension()-4));
 			bank.setShort("track", i, (short)(int)trackIDs.get(i));
 			bank.setShort("nalignables", i, (short)this.nAlignables);
@@ -447,18 +465,18 @@ public class CVTAlignment extends ReconstructionEngine {
 			Matrix I){
 		// a point along the beam
 		Vector3d xref = convertVector(ray.get_refPoint().toVector3D());
-		System.out.println("xref:  " + xref.toStlString());
+		//System.out.println("xref:  " + xref.toStlString());
 		Vector3d u = convertVector(ray.get_dirVec()); 
-		
+
 		Vector3d e = new Vector3d(xb,yb,0);
 		Vector3d l = new Vector3d(0,0,1);
-		
+
 		//in this case 
 		Vector3d n = new Vector3d(u.x, u.y, 0);
 		n = n.normalized();
 		Vector3d s = l.cross(n);
 
-		
+
 		double udotn = u.dot(n);
 		if(Math.abs(udotn)<0.01)
 			return false;
@@ -505,7 +523,7 @@ public class CVTAlignment extends ReconstructionEngine {
 		A.set(i, (svtTopBottomSep? i : i/2)*6 + 3, dmdr.x);
 		A.set(i, (svtTopBottomSep? i : i/2)*6 + 4, dmdr.y);
 		A.set(i, (svtTopBottomSep? i : i/2)*6 + 5, dmdr.z);*/
-		
+
 		//System.out.println("i = " + i + "; rows = " + A.getRowDimension() + "; cols = " + + A.getColumnDimension());
 		if(orderTx >= 0)
 			A.set(i, i*nAlignVars + orderTx, -sp.x);
@@ -557,11 +575,12 @@ public class CVTAlignment extends ReconstructionEngine {
 		double mi = s.dot(e);
 		
 
-		System.out.println(extrap.toStlString());
-		System.out.println(e.toStlString());
-		System.out.println(extrap.minus(e).toStlString());
-		System.out.println(s.toStlString());
-		
+
+		//System.out.println(extrap.toStlString());
+		//System.out.println(e.toStlString());
+		//System.out.println(extrap.minus(e).toStlString());
+		//System.out.println(s.toStlString());
+
 		if(Math.abs(ci-mi)>maxResidualCut)
 			return false;
 		c.set(i,0,ci);
@@ -581,33 +600,110 @@ public class CVTAlignment extends ReconstructionEngine {
 	 * @param m
 	 * @param c
 	 * @param I
+	 * @param string 
 	 * @return
 	 */
-	private boolean fillMatricesNew(int i, Ray ray, Cluster cl, Matrix A, Matrix B, Matrix V, Matrix m, Matrix c, Matrix I) {
-		int region = cl.get_Region();
+	private boolean fillMatricesNew(int i, Ray ray, Cluster cl, Matrix A, Matrix B, Matrix V, Matrix m, 
+			Matrix c, Matrix I, String detector, boolean debug) {
 		int layer = cl.get_Layer();
 		int sector = cl.get_Sector();
 		//System.out.println("RLS " + region + " " + layer + " " + sector);
 		//System.out.println("th" + c.get_Phi());
-		double centroid = cl.get_Centroid();
 
-		
+
 		Vector3D l = cl.getL();
 		Vector3D s = cl.getS();
 		Vector3D n = cl.getN();
+		if(debug) {
+			System.out.println("\n\nNew method " + detector);
+			System.out.println("s: " + s);
+			System.out.println("n: " + n);
+			System.out.println("l: " + l);
+			
+			
+			System.out.println("s: " + s.toString() + "\nn: "+n.toString() + "\nl: " + l.toString());
+			System.out.println("check s.n, s.l, l.n should be zero: " + s.dot(n)
+					+ " " + l.dot(s) +  " "+ l.dot(n) );
+			System.out.println("check s.s, n.n, l.l should be one: " + s.dot(s)
+			+ " " + n.dot(n) +  " " + l.dot(l));
+			
+			
+			Vector3D deltaE = new Vector3D(cl.getX1()-cl.getX2(),cl.getY1()-cl.getY2(),cl.getZ1()-cl.getZ2());
+			System.out.println("(e1-e2):" + deltaE); 
+					
+			System.out.println("check s.(e1-e2) and n.(e1-e2) should be zero for lines: " + 
+			      s.dot(deltaE)+ " " + n.dot(deltaE));
+			System.out.println("angle between (e1-e2) and l should equal 0 for lines: " + 
+				      l.angle(deltaE));
+			if(detector.equals("BMTC")) {
+				System.out.println("cylinder axis: " + cl.getCylAxis());
+				System.out.println("track id: " + cl.get_AssociatedTrackID());
+				System.out.println("C: " + cl.getCx() + " " + cl.getCy() + " " + cl.getCz());
+				System.out.println("O: " + cl.getOx() + " " + cl.getOy() + " " + cl.getOz());
+				System.out.println("theta: " + cl.getTheta());
+				System.out.println("angle between cylinder axis and s should be zero: "+cl.getCylAxis().direction().angle(s));
+				System.out.println("dot between cylinder axis and l should be zero: "+cl.getCylAxis().direction().dot(l));
+				System.out.println("dot between cylinder axis and n should be zero: "+cl.getCylAxis().direction().dot(n));
+				System.out.println("track interesection: "+cl.getTrakInters());
+			}
+		}
+		n = n.sub(l.multiply(n.dot(l))).asUnit();
+		s= s.sub(l.multiply(s.dot(l))).asUnit();
 		
-		//Vector3d e1 = cl.getX
-		Vector3D e = new Vector3D(cl.getX1(),cl.getY1(),cl.getZ1());
+
 
 		Vector3D xref = ray.get_refPoint().toVector3D();
 		Vector3D u = ray.get_dirVec(); 
+		
+	
+
+
+
+
 		double udotn = u.dot(n);
 		if(Math.abs(udotn)<0.01) {
-			if(debug) System.out.println("rejecting track:  abs(udotn)<0.01");
+			if(debug) {
+				System.out.println("rejecting track:  abs(udotn)<0.01");
+				System.out.println("u = " + u.toString());
+				System.out.println("n = " + n.toString());
+			}
 			return false;	
 		}
 		double sdotu = s.dot(u);
-		Vector3D extrap = xref.add(u.multiply(n.dot(e.sub(xref))/udotn));
+
+
+		//Vector3d e1 = cl.getX
+		Vector3D e = null;
+		Vector3D extrap = null;
+		if(detector.equals("SVT") || detector.equals("BMTZ")) {
+			e= new Vector3D(cl.getX1(),cl.getY1(),cl.getZ1());
+			e= new Vector3D((cl.getX1()+cl.getX2())/2,
+					(cl.getY1()+cl.getY2())/2,
+					(cl.getZ1()+cl.getZ2())/2);
+			extrap= xref.clone().add(u.multiply(n.dot(e.clone().sub(xref))/udotn));
+		}
+		else {
+			e= new Vector3D(cl.getCx()+cl.getOx(),
+					cl.getCy()+cl.getOy(),
+					cl.getCz()+cl.getOz());
+			e= new Vector3D(cl.getOx(),
+					cl.getOy(),
+					cl.getOz());
+			extrap= xref.clone().add(u.multiply(n.dot(e.clone().sub(xref))/udotn));
+		}
+		if(debug) {
+			//System.out.println("new method");
+			System.out.println("e: " + e.toString());
+		}
+		//Vector3d extrap = xref.plus(u.times(n.dot(e.minus(xref))/udotn));
+
+		if(detector.equals("BMTZ") && debug) {
+			Vector3D diff = xref.clone();
+			double check = l.cross(u).dot(diff);
+			System.out.println("distance between track and strip, phi,r: " + check + " " + u.phi() + " "+ e.mag());
+		}
+		
+
 
 
 		//System.out.println(extrap.toStlString());
@@ -615,24 +711,28 @@ public class CVTAlignment extends ReconstructionEngine {
 		//System.out.println("resolution:  " + resolution + "; z=" + extrap.z-);
 
 		V.set(i, i, Math.pow(resolution,2));
+		if(debug) {
+			System.out.println("resolution "+ resolution);
+		}
 
-
-		Vector3D sp = s.sub(n.multiply(sdotu/udotn));
+		Vector3D sp = s.clone().sub(n.multiply(sdotu/udotn));
 		if(sp.mag() > 10) {  //this can only happen if the angle between the track and the normal is small
 			if(debug) System.out.println("rejecting track:  sp.magnitude() > 10");
 			return false;
 		}
-		
+
 
 
 		Vector3D cref = new Vector3D(0,0,0);
 
 
 
-		
 
-		Vector3D dmdr =sp.cross(extrap).add(n.cross(cref).multiply(sdotu/udotn));
-		dmdr = dmdr.sub(n.cross(u).multiply(n.dot(e.sub(extrap))*sdotu/(udotn*udotn)));
+
+		//Vector3D dmdr =sp.cross(extrap).add(n.cross(cref).multiply(sdotu/udotn));
+		//dmdr = dmdr.sub(n.cross(u).multiply(n.dot(e.clone().sub(extrap))*sdotu/(udotn*udotn)));
+		Vector3D dmdr =sp.cross(extrap).sub(sp.cross(u).multiply(n.dot(xref.clone().sub(e))/udotn));
+		
 		if(orderTx >= 0)
 			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderTx, -sp.x());
 		if(orderTy >= 0)
@@ -647,12 +747,12 @@ public class CVTAlignment extends ReconstructionEngine {
 			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderRz, dmdr.z());
 
 
-		if(cl.get_Detector() == 0)
+		if(detector.equals("SVT"))
 			I.set(i, 0, getIndexSVT(layer-1,sector-1));
-		if(cl.get_Detector() == 1)
+		if(detector.equals("BMTZ") || detector.equals("BMTC"))
 			I.set(i, 0, getIndexBMT(layer-1,sector-1));
-		
-		Vector3D dmdu = sp.multiply(e.sub(xref).dot(n)/udotn);
+
+		Vector3D dmdu = sp.multiply(e.clone().sub(xref).dot(n)/udotn);
 		if(!this.useDocaPhiZTandip) {
 			B.set(i,0, sp.x());
 			B.set(i,1, sp.z());
@@ -665,36 +765,48 @@ public class CVTAlignment extends ReconstructionEngine {
 			Vector3D mscphi = new Vector3D(-Math.sin(phi), Math.cos(phi),0);
 			double cosdip = Math.hypot(u.x(), u.y());
 			double d = mscphi.dot(xref);
-			B.set(i, 0, s.dot(mscphi.sub(u.multiply(n.dot(mscphi)/udotn))));
+			B.set(i, 0, s.dot(mscphi.clone().sub(u.multiply(n.dot(mscphi)/udotn))));
 			//B.set(i, 1, s.dot(csphi.times(-d)
 			//		.plus(mscphi.times(n.dot(e.minus(xref))/udotn))
 			//		.minus(u.times(mscphi.dot(n)*n.dot(e.minus(xref))/(udotn*udotn)))
 			//		.plus(u.times(d*n.dot(csphi)/udotn)))
 			//		);
 			B.set(i, 1, -s.dot(csphi)*d
-					+ cosdip*(s.dot(mscphi)/udotn-sdotu/(udotn*udotn)*n.dot(mscphi))*n.dot(e.sub(xref))
+					+ cosdip*(s.dot(mscphi)/udotn-sdotu/(udotn*udotn)*n.dot(mscphi))*n.dot(e.clone().sub(xref))
 					+ sdotu/udotn*d*n.dot(csphi));
 			B.set(i, 2, s.z()-sdotu*n.z()/udotn);
-			B.set(i, 3, (s.z()/udotn-n.z()*sdotu/(udotn*udotn))*n.dot(e.sub(xref)));
+			B.set(i, 3, (s.z()/udotn-n.z()*sdotu/(udotn*udotn))*n.dot(e.clone().sub(xref)));
 
 
 		}
 		//dm.set(i,0, s.dot(e.minus(extrap)));
-		
+
 		double ci = s.dot(extrap);
 		double mi = s.dot(e);
+		
+		c.set(i,0,ci);
+		m.set(i,0,mi);
+		if(debug) {
+			System.out.println("n.(e-xref): "+ n.dot(e.clone().sub(xref)));
+			System.out.println("u.n: "+ udotn);
+			System.out.println("s: " + s.toString());
+			System.out.println("sp: " + sp.toString());
+			System.out.println("extrap: " + extrap.toString());
+			System.out.println("n: " + n.toString());
+			System.out.println("e: " + e.toString());
+			System.out.println("xref: " + xref.toString());
+			System.out.println("u: " + u.toString());
+			System.out.println("m: " + mi);
+			System.out.println("c: " + ci);
+		}
 		if(Math.abs(ci-mi)>maxResidualCut) {
 			if(debug) System.out.println("rejecting track:  Math.abs(ci-mi)>maxResidualCut");
 			return false;
 		}
-		c.set(i,0,ci);
-		m.set(i,0,mi);
-		
-		
 		return true;
-		
+
 	}
-	
+
 
 	//returns false if there's a problem
 	private boolean fillMatricesSVT(int i, Ray ray, Cluster cl, Matrix A, Matrix B, Matrix V, Matrix m, Matrix c, Matrix I) {
@@ -824,7 +936,7 @@ public class CVTAlignment extends ReconstructionEngine {
 
 		}
 		//dm.set(i,0, s.dot(e.minus(extrap)));
-		
+
 		double ci = s.dot(extrap);
 		double mi = s.dot(e);
 		if(Math.abs(ci-mi)>maxResidualCut) {
@@ -833,14 +945,25 @@ public class CVTAlignment extends ReconstructionEngine {
 		}
 		c.set(i,0,ci);
 		m.set(i,0,mi);
-		
-		
+
+		System.out.println("\nold method");
+		System.out.println("n.(e-xref): "+ n.dot(e.minus(xref)));
+		System.out.println("u.n: "+ udotn);
+		System.out.println("s: " + s.toString());
+		System.out.println("sp: " + sp.toString());
+		System.out.println("extrap: " + extrap.toString());
+		System.out.println("n: " + n.toString());
+		System.out.println("e: " + e.toString());
+		System.out.println("xref: " + xref.toString());
+		System.out.println("u: " + u.toString());
+
+
 		return true;
 
 	}
 	boolean debug = false;
 
-	
+
 	private boolean fillMatricesBMTZ(int i, Ray ray, Cluster cl, Matrix A, Matrix B, Matrix V, Matrix m, Matrix c,
 			Matrix I) {
 		int region = cl.get_Region();
@@ -850,8 +973,8 @@ public class CVTAlignment extends ReconstructionEngine {
 		//Z layer
 		//if(centroid == org.jlab.rec.cvt.bmt.Constants.getCRZNSTRIPS()[region-1])
 		//	centroid = org.jlab.rec.cvt.bmt.Constants.getCRZNSTRIPS()[region-1]-.001;
-		Line3d line1 = convertLine(BMTGeom.getLCZstrip(region, sector, (int)Math.floor(centroid)));
-		Line3d line2 = convertLine(BMTGeom.getLCZstrip(region, sector, (int)Math.floor(centroid)+1)); 
+		Line3d line1 = convertLine(BMTGeom.getLCZstrip(region, sector, (int)Math.floor(centroid), null));
+		Line3d line2 = convertLine(BMTGeom.getLCZstrip(region, sector, (int)Math.floor(centroid)+1, null)); 
 
 
 
@@ -878,8 +1001,8 @@ public class CVTAlignment extends ReconstructionEngine {
 
 		//System.out.println(extrap.toStlString());
 		double resolution = e1.distance(e2)/Math.sqrt(12);
-		
-		
+
+
 		V.set(i, i, Math.pow(resolution,2));
 
 
@@ -965,16 +1088,33 @@ public class CVTAlignment extends ReconstructionEngine {
 		double mi = e1.distance(e2)*centroid;
 		double ci = mi+s.dot(extrap.minus(e));
 		m.set(i, 0, mi);
+		
+		c.set(i, 0, ci);
+
+		//Vector3d extrap = xref.plus(u.times(n.dot(e.minus(xref))/udotn));
+
+		System.out.println("\nold method");
+		System.out.println("n.(e-xref): "+ n.dot(e.minus(xref)));
+		System.out.println("u.n: "+ udotn);
+		System.out.println("s: " + s.toString());
+		System.out.println("sp: " + sp.toString());
+		System.out.println("extrap: " + extrap.toString());
+		System.out.println("n: " + n.toString());
+		System.out.println("e: " + e.toString());
+		System.out.println("xref: " + xref.toString());
+		System.out.println("u: " + u.toString());
+		System.out.println("m: " + mi);
+		System.out.println("c: " + ci);
 		if(Math.abs(ci-mi)>maxResidualCut)
 			return false;
-		c.set(i, 0, ci);
-		
+
 		return true;
 
 	}
 	private boolean fillMatricesBMTC(int i, Ray ray, Cluster cl, Matrix A, Matrix B, Matrix V, Matrix m, Matrix c,
 			Matrix I) {
-
+		
+		System.out.println("\nOld method BMTC");
 		int region = cl.get_Region();
 		int layer = cl.get_Layer();
 		int sector = cl.get_Sector();
@@ -982,13 +1122,13 @@ public class CVTAlignment extends ReconstructionEngine {
 		double centroid = cl.get_Centroid();
 		if(centroid == org.jlab.rec.cvt.bmt.Constants.getCRCNSTRIPS()[region-1])
 			centroid = org.jlab.rec.cvt.bmt.Constants.getCRCNSTRIPS()[region-1]-.001;
-		
+
 		Vector3d xref = convertVector(ray.get_refPoint().toVector3D());
 		Vector3d u = convertVector(ray.get_dirVec()); 
-		
+
 		Arc3D arc1 = BMTGeom.getCstrip(region, sector, (int)Math.floor(centroid)-1);
 		Arc3D arc2 = BMTGeom.getCstrip(region, sector, (int)Math.floor(centroid)-0); 
-		
+
 		//find the extrapolation point to the cylinder
 		double R = arc1.radius();
 		//cylindrical axis
@@ -1009,12 +1149,12 @@ public class CVTAlignment extends ReconstructionEngine {
 			extrap = extrap2;
 		else
 			extrap = extrap1;
-		
+
 		Vector3d s = axis;
 		Vector3d n = extrap.minus(center);
 		n = n.minus(axis.times(axis.dot(n))).normalized();
 		Vector3d l = s.cross(n);
-		
+
 
 		//System.out.printf("s vector %f %f %f\n", s.x,s.y,s.z);
 		//System.out.printf("n vector %f %f %f\n", n.x,n.y,n.z);
@@ -1028,19 +1168,19 @@ public class CVTAlignment extends ReconstructionEngine {
 		//s = s.minus(l.times(s.dot(l))).normalized();
 
 
-		
+
 		double udotn = u.dot(n);
 		if(Math.abs(udotn)<0.01)
 			return false;
 		double sdotu = s.dot(u);
 
-		
+
 		//org.jlab.rec.cvt.bmt.Constants.
 		//Vector3d extrap = xref.plus(u.times(n.dot(e.minus(xref))/udotn));
 
 		//System.out.println(extrap.toStlString());
-		
-			
+
+
 		double resolution = e1.distance(e2)/Math.sqrt(12);
 		//fake resolution 
 		resolution = 1;	
@@ -1080,6 +1220,10 @@ public class CVTAlignment extends ReconstructionEngine {
 			A.set(i, i*nAlignVars + orderRz, dmdr.z);
 
 
+		if(debug) {
+			System.out.println("moduleindex:  "+ index + " A: " +  (-sp.x) + " "+  (-sp.y) + " "+  (-sp.z)
+					+ " " +  (dmdr.x) + " " +  (dmdr.y) + " " + (dmdr.z));
+		}
 
 		I.set(i, 0, index);
 
@@ -1113,16 +1257,23 @@ public class CVTAlignment extends ReconstructionEngine {
 		//dm.set(i,0, s.dot(e.minus(extrap)));
 		double ci = s.dot(extrap);
 		double mi = s.dot(e);
+		if(debug) {
+			System.out.println("m: " + mi);
+			System.out.println("c: " + ci);
+		}
+		
 		if(Math.abs(ci-mi)>maxResidualCut)
 			return false;
 		c.set(i,0,ci);
 		m.set(i,0,mi);
+
+		
 		
 		return true;
 	}
 
 	private Vector3d midpoint(Arc3D arc1) {
-		
+
 		return convertVector(arc1.point(arc1.theta()/2).toVector3D());
 	}
 
@@ -1182,7 +1333,7 @@ public class CVTAlignment extends ReconstructionEngine {
 		if(this.getEngineConfiguration() == null || "null".equals(this.getEngineConfiguration())) {
 			return true; //prevents init from being run twice.
 		}
-		
+
 		//svt stand-alone
 		String svtStAl = this.getEngineConfigString("svtOnly");
 
@@ -1201,9 +1352,9 @@ public class CVTAlignment extends ReconstructionEngine {
 			System.out.println("["+this.getName()+"] align SVT only (default) ");
 			this.isSVTonly = true;
 		}
-		
+
 		String bmtOnly = this.getEngineConfigString("bmtOnly");
-		
+
 		if (bmtOnly!=null) {
 			System.out.println("["+this.getName()+"] align BMT only "+bmtOnly+" config chosen based on yaml");
 			this.isBMTonly= Boolean.valueOf(bmtOnly);
@@ -1231,9 +1382,9 @@ public class CVTAlignment extends ReconstructionEngine {
 		cp.disconnect();  
 		CCDBConstantsLoader.Load(new DatabaseConstantProvider(11, variationName));
 		xb = org.jlab.rec.cvt.Constants.getXb();
-	    yb = org.jlab.rec.cvt.Constants.getYb();
-		System.out.println("Check SVT Geom lay1 sec1:  " + Arrays.toString(SVTConstants.getLayerSectorAlignmentData()[0][0]));
-		System.out.println("Check SVT Geom lay1 sec1:  " + Arrays.toString(SVTConstants.getLayerSectorAlignmentData()[0][1]));
+		yb = org.jlab.rec.cvt.Constants.getYb();
+		//System.out.println("Check SVT Geom lay1 sec1:  " + Arrays.toString(SVTConstants.getLayerSectorAlignmentData()[0][0]));
+		//System.out.println("Check SVT Geom lay1 sec1:  " + Arrays.toString(SVTConstants.getLayerSectorAlignmentData()[0][1]));
 		SVTStripFactory svtFac = new SVTStripFactory(cp, true);
 		SVTGeom.setSvtStripFactory(svtFac);
 
@@ -1314,8 +1465,8 @@ public class CVTAlignment extends ReconstructionEngine {
 		}
 
 		this.nAlignables = ((this.svtTopBottomSep ? 2*42 : 42) + (this.isSVTonly ? 0: 18) + (isCosmics? 0 : 1));
-		
-		
+
+
 		String debug = this.getEngineConfigString("debug");
 
 		if (debug!=null) {
@@ -1325,13 +1476,13 @@ public class CVTAlignment extends ReconstructionEngine {
 			System.out.println("["+this.getName()+"] debug false; config chosen based on yaml");
 			this.debug =  false;
 		}
-		
-		
+
+
 		return true;
 	}
 
 	double xb, yb;
-	
+
 	double maxResidualCut;
 
 	double maxDocaCut;
