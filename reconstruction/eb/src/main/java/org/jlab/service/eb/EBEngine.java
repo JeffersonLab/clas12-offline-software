@@ -305,7 +305,6 @@ public class EBEngine extends ReconstructionEngine {
 
         requireConstants(EBCCDBConstants.getAllTableNames());
         this.getConstantsManager().setVariation("default");
-        System.out.println("["+this.getName()+"] --> event builder is ready....");
         return true;
     }
     
