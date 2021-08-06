@@ -92,9 +92,9 @@ public class EBUtil {
         if (pcalEnergy < minPcalEnergy) return false;
       
         // require sub-sampling criteria:
-        final double ecinEnergy = p.getEnergy(DetectorType.ECAL,DetectorLayer.EC_INNER);
+        //final double ecinEnergy = p.getEnergy(DetectorType.ECAL,DetectorLayer.EC_INNER);
         //FIXME:  move parameters to CCDB:
-        if ( (ecinEnergy+pcalEnergy)/p.vector().mag() < 0.2 ) return false;
+        //if ( (ecinEnergy+pcalEnergy)/p.vector().mag() < 0.2 ) return false;
        
         return true;
     }

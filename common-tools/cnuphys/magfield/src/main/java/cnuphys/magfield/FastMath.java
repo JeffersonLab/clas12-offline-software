@@ -8,7 +8,7 @@ public class FastMath {
 	}
 
 	// controls which algorithms to use
-	private static MathLib _mathLib = MathLib.FAST;
+	private static MathLib _mathLib = MathLib.DEFAULT;
 
 	/**
 	 * Might use standard or fast atan2

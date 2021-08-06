@@ -1,7 +1,8 @@
-package org.jlab.detector.geant4.v2.SVT;
+package org.jlab.geometry.prim;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.Primitive;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
@@ -9,21 +10,20 @@ import eu.mihosoft.vrl.v3d.PropertyStorage;
 /**
  * @author pdavies
  */
-public class Pgon implements Primitive {
+public class Operation implements Primitive {
 	
 	private final PropertyStorage properties = new PropertyStorage();
-	private int pN;
-	private double pPhi, pDphi;
-	
-	public Pgon( int pN, double pPhi, double pDphi )
+	private String pOp;
+	private String[] pOps;
+
+	public Operation( String operation, String[] operands )
 	{
-		if( pN < 0 || pPhi < 0 || pDphi <= 0 ) {
-            throw new IllegalArgumentException("Illegal arguments for Polyhedra Primitive!");
+		if( operation.isEmpty() || operands.length == 0 ) {
+            throw new IllegalArgumentException("Illegal arguments for Operation Primitive!");
         }
 		
-		this.pN = pN;
-		this.pPhi = pPhi;
-		this.pDphi = pDphi;
+		this.pOp = operation;
+		this.pOps = operands;
 	}
 
 	@Override
@@ -37,7 +37,6 @@ public class Pgon implements Primitive {
 	@Override
 	public PropertyStorage getProperties()
 	{
-		
 		return null;
 	}
 

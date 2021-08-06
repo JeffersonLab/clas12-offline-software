@@ -20,6 +20,13 @@ public class AdaptiveRhoStopper extends AAdaptiveStopper {
 	//the current rho
 	private double _rho;
 			
+	//cache whether we have crossed the boundary
+	private boolean _crossedBoundary;
+	
+	//cache whether we have passed smax
+	private boolean _passedSmax;
+
+
 	/**
 	 * Rho  stopper  (does check max path length)
 	 * @param u0           initial state vector
@@ -31,31 +38,49 @@ public class AdaptiveRhoStopper extends AAdaptiveStopper {
 	public AdaptiveRhoStopper(final double[] u0, final double sf, final double targetRho, double accuracy, SwimTrajectory trajectory) {
 		super(u0, sf, accuracy, trajectory);
 		_targetRho = targetRho;
-		double rho0 = FastMath.hypot(u0[0], u0[1]);
-		_startSign = sign(rho0);
+		_rho = FastMath.hypot(u0[0], u0[1]);
+		_startSign = sign(_rho);
 	}
 
 	
 	@Override
 	public boolean stopIntegration(double snew, double[] unew) {
 		
-		_rho = Math.hypot(unew[0], unew[1]);
+		double newRho = Math.hypot(unew[0], unew[1]);
 
 		// within accuracy?
-		//note this could also result with s > smax
-		if (Math.abs(_rho - _targetRho) < _accuracy) {
+		if (Math.abs(newRho - _targetRho) < _accuracy) {
+			_rho = newRho;
 			accept(snew, unew);
   			return true;
 		}
-
-		//stop and don't accept new data. We crossed the boundary or exceeded smax
-		if ((snew > _sf) || (sign(_rho) != _startSign)) {
+		
+		//if we crossed the boundary (don't accept, reset)
+		_crossedBoundary = sign(newRho) != _startSign;
+		if (_crossedBoundary) {
+			return true;
+		}
+		
+		_passedSmax = (snew > _sf);
+		//if exceeded max path length accept and stop
+		if (_passedSmax) {
+			_rho = newRho;
+			accept(snew, unew);
 			return true;
 		}
 				
 		//accept new data and continue
+		_rho = newRho;
 		accept(snew, unew);
 		return false;
+	}
+	
+	/**
+	 * Get the current value of rho
+	 * @return the current value of rho
+	 */
+	public double getRho() {
+		return _rho;
 	}
 	
 	
@@ -63,5 +88,22 @@ public class AdaptiveRhoStopper extends AAdaptiveStopper {
 	private int sign(double currentRho) {
 		return ((currentRho < _targetRho) ? -1 : 1);
 	}
+	
+	/**
+	 * Did we cross the boundary?
+	 * @return true if we crossed the boundary
+	 */
+	public boolean crossedBoundary() {
+		return _crossedBoundary;
+	}
+	
+	/**
+	 * Did we pas the max path length?
+	 * @return true if we crossed the boundary
+	 */
+	public boolean passedSmax() {
+		return _passedSmax;
+	}
+
 	
 }

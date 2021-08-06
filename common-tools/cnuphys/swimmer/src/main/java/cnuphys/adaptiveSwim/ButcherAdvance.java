@@ -56,8 +56,6 @@ public class ButcherAdvance implements IAdaptiveAdvance {
 
 			AdaptiveSwimUtilities.singleButcherStep(eps, u, du, h, deriv, uf, _error, _tableau);
 
-//			System.out.print(String.format("[%7.4f, %7.4f, %7.4f, %7.4f, %7.4f, %7.4f]", uf[0], uf[1], uf[2], uf[3], uf[4], uf[5]));
-
 			double errMax = 0;
 			for (int i = 0; i < _nDim; i++) {
 				// set utemp to be the difference between the two step solution and the one step
@@ -82,7 +80,7 @@ public class ButcherAdvance implements IAdaptiveAdvance {
 					double growFact = _safety * Math.pow(errMax, _pgrow);
 					hnew = h * growFact;		
 				} else {
-					hnew = 5 * h;
+					hnew = 2 * h;
 				}
 
 				result.setHNew(hnew);

@@ -500,9 +500,10 @@ public class MagTests {
 	
 	private static void parseMauriFiles(FieldProbe probe, final ArrayList<GEMCCompare> compares) {
 		File mfdir = new File(System.getProperty("user.home"), "magfield");
-		File file = new File(mfdir, "gemctorusNone.txt");
+//		File file = new File(mfdir, "gemctorusNone.txt");
+		File file = new File(mfdir, "gemctorusLinear.txt");
 		
-		String lines[] = new String[5];
+		String lines[] = new String[6];
 		
 		try {
 			AsciiReader ar = new AsciiReader(file) {
@@ -522,11 +523,11 @@ public class MagTests {
 					
 					lines[index] = new String(line);
 					
-					if (index == 4) {
+					if (index == 5) {
 						parse();
 					}
 					
-					index = (index + 1) % 5;
+					index = (index + 1) % 6;
 					
 				}
 
@@ -546,12 +547,18 @@ public class MagTests {
 					int n2 = Integer.parseInt(tokens[1]);
 					int n3 = Integer.parseInt(tokens[2]);
 							
-					tokens = MagneticFields.tokens(lines[4], " ");
-					float bx = Float.parseFloat(tokens[0]);
-					float by = Float.parseFloat(tokens[1]);
-					float bz = Float.parseFloat(tokens[2]);
+//					tokens = MagneticFields.tokens(lines[4], " ");
+//					float bx = Float.parseFloat(tokens[0]);
+//					float by = Float.parseFloat(tokens[1]);
+//					float bz = Float.parseFloat(tokens[2]);
 					
-					compares.add(new GEMCCompare(probe, x, y, z, n1, n2, n3, bx, by, bz));
+					tokens = MagneticFields.tokens(lines[5], " ");
+					float globalbx = Float.parseFloat(tokens[0]);
+					float globalby = Float.parseFloat(tokens[1]);
+					float globalbz = Float.parseFloat(tokens[2]);
+
+					
+					compares.add(new GEMCCompare(probe, x, y, z, n1, n2, n3, globalbx, globalby, globalbz));
 					
 				}
 				
@@ -573,7 +580,7 @@ public class MagTests {
 		
 		Torus torus = MagneticFields.getInstance().getTorus();
 		torus.setScaleFactor(1.0);
-		MagneticField.setInterpolate(false);
+		MagneticField.setInterpolate(true);
 		
 		ArrayList<GEMCCompare> compares = new ArrayList<>();
 		parseMauriFiles(torusProbe, compares);
@@ -586,25 +593,6 @@ public class MagTests {
 		}
 
 		
-		System.err.println("\n\n======================\n");
-		float[] intRes = new float[3];
-		float[] nnRes = new float[3];
-		for (GEMCCompare compare : compares) {
-			MagneticField.setInterpolate(false);
-			ifield.field(compare.x, compare.y, compare.z, nnRes);
-			MagneticField.setInterpolate(true);
-			ifield.field(compare.x, compare.y, compare.z, intRes);
-
-			String s1 = String.format("---------------\nxyz = (%7.3f, %7.3f, %7.3f) cm \n",
-					compare.x, compare.y, compare.z);
-			
-			s1 += String.format("        GEMC field (%12.5e, %12.5e, %12.5e) T\n",   compare.gbx, compare.gby, compare.gbz);
-			s1 += String.format("(NN)     CED field (%12.5e, %12.5e, %12.5e) T\n",   nnRes[0]/10, nnRes[1]/10, nnRes[2]/10);
-			s1 += String.format("(Interp) CED field (%12.5e, %12.5e, %12.5e) T",   intRes[0]/10, intRes[1]/10, intRes[2]/10);
-
-			System.err.println(s1);
-		}
-
 
 
 	}
@@ -738,7 +726,7 @@ public class MagTests {
 
 	// convert the solenoid to ASCII
 	private static void convertSolenoidToAscii() {
-		ToAscii.solenoidToAscii((SolenoidProbe) FieldProbe.factory(MagneticFields.getInstance().getSolenoid()),
+		ToAscii.solenoidToAscii((StandardSolenoidProbe) FieldProbe.factory(MagneticFields.getInstance().getSolenoid()),
 				"/Users/heddle/magfield/Solenoid.csv");
 	}
 

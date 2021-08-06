@@ -587,28 +587,28 @@ private static void getCoordinateIndices(int index, int N1, int N2, int N3, int 
 
 
 	public static void main(String arg[]) {
-//		String dataDir = getDataDir();
-//
-//		ArrayList<File> files = dataFiles(dataDir);
-//		System.out.println("data dir = [" + dataDir + "]  file count: " + files.size());
-//
-//		// preprocess to get the grid data
-//		GridData gdata[] = null;
-//		try {
-//			gdata = preProcessor(files);
-//
-//			System.out.println("PHI: " + gdata[PHI]);
-//			System.out.println("RHO: " + gdata[RHO]);
-//			System.out.println("Z: " + gdata[Z]);
-//
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//
-//		convertToBinary(files, gdata);
+		String dataDir = getDataDir();
+
+		ArrayList<File> files = dataFiles(dataDir);
+		System.out.println("data dir = [" + dataDir + "]  file count: " + files.size());
+
+		// preprocess to get the grid data
+		GridData gdata[] = null;
+		try {
+			gdata = preProcessor(files);
+
+			System.out.println("PHI: " + gdata[PHI]);
+			System.out.println("RHO: " + gdata[RHO]);
+			System.out.println("Z: " + gdata[Z]);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		convertToBinary(files, gdata);
 //		// convertToGemc(files, gdata);
 
-		convertGEMCtoBinary("April_24_TorusSymmetric.txt");
+//		convertGEMCtoBinary("April_24_TorusSymmetric.txt");
 		System.out.println("done");
 	}
 

@@ -228,7 +228,7 @@ public class SwimEngine extends ReconstructionEngine {
          
          File solenoidFile = new File(solenoidFileName);
          try {
-             solenoid = Solenoid.fromBinaryFile(solenoidFile);
+             solenoid.readBinaryMagneticField(solenoidFile);
          } catch (FileNotFoundException e) {
              e.printStackTrace();
          }

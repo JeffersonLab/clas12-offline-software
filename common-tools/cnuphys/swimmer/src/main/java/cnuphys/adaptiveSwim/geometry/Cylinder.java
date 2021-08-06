@@ -23,6 +23,16 @@ public class Cylinder {
 		_radius = radius;
 	}
 	
+	/**
+	 * Create a cylinder
+	 * @param p1 one point of center line as an xyz array
+	 * @param p2 another point of center line as an xyz array
+	 * @param radius
+	 */
+	public Cylinder(double[] p1, double[] p2, double radius) {
+		this(new Line(p1, p2), radius);
+	}
+
 
 	/**
 	 * Get the shortest distance between the surface of this infinite cylinder and a point.
