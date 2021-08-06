@@ -206,9 +206,7 @@ public class FTOFEngine extends ReconstructionEngine {
         }
 
         // 4) matching clusters ... not used at this stage...
-        ClusterMatcher clsMatch = new ClusterMatcher();
-        ArrayList<ArrayList<Cluster>> matchedClusters = clsMatch
-                .MatchedClusters(clusters, event);
+        ArrayList<ClusterMatcher> matchedClusters = ClusterMatcher.matchClusters(clusters, event);
         if (matchedClusters.size() == 0) {
             rbc.appendFTOFBanks(event, hits, clusters, null, TrkType);
             return true;
