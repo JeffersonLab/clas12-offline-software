@@ -179,7 +179,7 @@ public class DCEngine extends ReconstructionEngine {
         dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, endplatesBowing);
         for(int l=0; l<6; l++) {
             Constants.wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
-            System.out.println("****************** WPDIST READ *********FROM "+geoVariation+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
+            //System.out.println("****************** WPDIST READ *********FROM "+geoVariation+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
         }
         // Load target
         ConstantProvider providerTG = GeometryFactory.getConstants(DetectorType.TARGET, 11, geoVariation);
@@ -190,7 +190,6 @@ public class DCEngine extends ReconstructionEngine {
         ftofDetector = new FTOFGeant4Factory(providerFTOF);        
         ConstantProvider providerEC = GeometryFactory.getConstants(DetectorType.ECAL, 11, geoVariation);
         ecalDetector =  GeometryFactory.getDetector(DetectorType.ECAL, 11, geoVariation);
-        System.out.println(" -- Det Geometry constants are Loaded " );
 
         // create the surfaces
         tSurf = new TrajectorySurfaces();

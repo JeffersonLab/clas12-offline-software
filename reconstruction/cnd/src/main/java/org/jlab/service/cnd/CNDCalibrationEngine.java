@@ -181,7 +181,6 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 	public boolean init() {
             // TODO Auto-generated method stub
             rbc = new RecoBankWriter();
-            System.out.println("in init ");
             
             requireConstants(Arrays.asList(CalibrationConstantsLoader.getCndTables()));
             this.getConstantsManager().setVariation("default");

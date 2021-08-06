@@ -64,7 +64,6 @@ public class TrajectorySurfaces {
         Vector3D n;
         for(int is =0; is<6; is++) {
 
-            System.out.println(" CREATING SURFACES FOR SECTOR "+(is+1));
             this._DetectorPlanes.add(new ArrayList<Surface>());
             
             // add target center and downstream wall
