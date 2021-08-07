@@ -344,7 +344,6 @@ public class Constants {
         }
 
         areConstantsLoaded = true;
-        System.out.println(" SVT geometry constants loaded ? " + areConstantsLoaded);
 
     }
 

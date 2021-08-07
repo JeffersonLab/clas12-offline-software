@@ -62,7 +62,6 @@ public class HTCCReconstructionService extends ReconstructionEngine{
         };
         
         requireConstants(Arrays.asList(htccTables));
-        System.out.println("-----> INITIALIZING HTCC as a SERVICE...");
         return true;
     }
 

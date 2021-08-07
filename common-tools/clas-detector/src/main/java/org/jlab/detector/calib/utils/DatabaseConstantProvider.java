@@ -336,7 +336,6 @@ public class DatabaseConstantProvider implements ConstantProvider {
             Vector<TypeTableColumn> typecolumn = asgmt.getTypeTable().getColumns();
             System.out.println("[DB LOAD] ---> loading data table : " + table_name);
             System.out.println("[DB LOAD] ---> number of columns  : " + typecolumn.size());
-            System.out.println();
             for(int loop = 0; loop < ncolumns; loop++){
                 //System.out.println("Reading column number " + loop 
                 //+ "  " + typecolumn.elementAt(loop).getCellType()
