@@ -154,9 +154,9 @@ public class CVTAlignment extends ReconstructionEngine {
 	public boolean processDataEvent(DataEvent event) {
 		int runNum = event.getBank("RUN::config").getInt("run", 0);
 		int eventNum = event.getBank("RUN::config").getInt("event", 0);
-		
-		
-		
+
+
+
 		//this.setRunConditionsParameters(event, FieldsConfig, Run, false, "");
 		double shift = 0;//org.jlab.rec.cvt.Constants.getZoffset();;
 
@@ -175,12 +175,13 @@ public class CVTAlignment extends ReconstructionEngine {
 			reader.fetch_Tracks(event, SVTGeom, shift);
 			tracks = reader.get_Tracks();
 		}
+		
 		/*System.out.println(reader.get_ClustersSVT().size()+ " clusters found in SVT");
 		System.out.println(reader.get_ClustersBMT().size()+ " clusters found in BMT");
 		System.out.println(reader.get_CrossesSVT().size() + " crosses found in SVT");
 		System.out.println(reader.get_CrossesBMT().size() + " crosses found in BMT");
 		System.out.println(tracks.size() + " tracks found");*/
-		
+
 
 		//System.out.println("H");
 		List<Matrix> Is = new ArrayList<Matrix>();
@@ -272,13 +273,15 @@ public class CVTAlignment extends ReconstructionEngine {
 						//	fillMatricesBMTZ(i,ray,cl1,A,B,V,m,c,I);
 						//if(cross.get_DetectorType() == BMTType.C) 
 						//	fillMatricesBMTC(i,ray,cl1,A,B,V,m,c,I);
-						//if(cross.get_DetectorType() == BMTType.Z){
-						boolean ok = fillMatricesNew(i,ray,cl1,A,B,V,m,c,I,
+						boolean ok = true;
+						if(cross.get_DetectorType() == BMTType.Z){
+						     ok = fillMatricesNew(i,ray,cl1,A,B,V,m,c,I,
 								(cross.get_DetectorType() == BMTType.Z ? "BMTZ":"BMTC"),true);
+						}
 						if(cross.get_DetectorType() == BMTType.C) 
-							fillMatricesBMTC(i,ray,cl1,A,B,V,m,c,I);
+							ok = fillMatricesBMTC(i,ray,cl1,A,B,V,m,c,I);
 						i++;
-						if(!ok && cross.get_DetectorType() == BMTType.Z) { //reject track if there's a cluster with really bad values.
+						if(!ok) { //reject track if there's a cluster with really bad values.
 							if(debug) System.out.println("rejecting track due to problem in a BMT layer");
 							continue tracksLoop;
 						}
@@ -330,7 +333,6 @@ public class CVTAlignment extends ReconstructionEngine {
 						}
 
 					}
-					
 				}
 
 			}
@@ -351,12 +353,12 @@ public class CVTAlignment extends ReconstructionEngine {
 			System.out.println("track chi2: " + dm.transpose().times(V.inverse()).times(dm).get(0, 0));
 			System.out.println();*/
 
-			/*for(double res : c.minus(m).getRowPackedCopy()) {
-				if(Math.abs(res)>maxResidualCut) {
-					System.out.println("rejecting track due to large residual");
-					continue tracksLoop;
-				}
-			}*/
+			for(double res : c.minus(m).getRowPackedCopy()) {
+				//if(Math.abs(res)>maxResidualCut) {
+				//	System.out.println("rejecting track due to large residual");
+				//	continue tracksLoop;
+				//}
+			}
 			As.add(A);
 			Bs.add(B);
 			Vs.add(V);
@@ -386,7 +388,7 @@ public class CVTAlignment extends ReconstructionEngine {
 	int nAlignables;
 
 	private Ray getRay(Helix h,double xb, double yb) {
-		
+
 		double d = h.get_dca();
 		double z = h.get_Z0();
 		double phi = h.get_phi_at_dca();
@@ -482,11 +484,11 @@ public class CVTAlignment extends ReconstructionEngine {
 			return false;
 		double sdotu = s.dot(u);
 		Vector3d extrap = xref.plus(u.times(n.dot(e.minus(xref))/udotn));
-		
+
 
 		//this should be about equal to the beam width
 		double resolution = 0.2;
-		
+
 
 		V.set(i, i, Math.pow(resolution,2));
 
@@ -570,10 +572,9 @@ public class CVTAlignment extends ReconstructionEngine {
 
 		}
 		//dm.set(i,0, s.dot(e.minus(extrap)));
-		
+
 		double ci = s.dot(extrap);
 		double mi = s.dot(e);
-		
 
 
 		//System.out.println(extrap.toStlString());
@@ -585,10 +586,10 @@ public class CVTAlignment extends ReconstructionEngine {
 			return false;
 		c.set(i,0,ci);
 		m.set(i,0,mi);
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * generic method that uses any type of cluster.  
 	 * @param i
@@ -731,7 +732,7 @@ public class CVTAlignment extends ReconstructionEngine {
 
 		//Vector3D dmdr =sp.cross(extrap).add(n.cross(cref).multiply(sdotu/udotn));
 		//dmdr = dmdr.sub(n.cross(u).multiply(n.dot(e.clone().sub(extrap))*sdotu/(udotn*udotn)));
-		Vector3D dmdr =sp.cross(extrap).sub(sp.cross(u).multiply(n.dot(xref.clone().sub(e))/udotn));
+		Vector3D dmdr =sp.cross(xref).sub(sp.cross(u).multiply(n.dot(xref.clone().sub(e))/udotn));
 		
 		if(orderTx >= 0)
 			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderTx, -sp.x());
@@ -1220,10 +1221,6 @@ public class CVTAlignment extends ReconstructionEngine {
 			A.set(i, i*nAlignVars + orderRz, dmdr.z);
 
 
-		if(debug) {
-			System.out.println("moduleindex:  "+ index + " A: " +  (-sp.x) + " "+  (-sp.y) + " "+  (-sp.z)
-					+ " " +  (dmdr.x) + " " +  (dmdr.y) + " " + (dmdr.z));
-		}
 
 		I.set(i, 0, index);
 

@@ -454,7 +454,7 @@ public class RecoBankReader {
 			int sector = bank.getByte("sector", i);
 			int strip = bank.getInt("strip", i);
 			int id = bank.getShort("ID", i);
-			FittedHit hit = new FittedHit(0, 0, sector, layer, new Strip(strip, 0, 0));
+			FittedHit hit = new FittedHit(0, BMTGeometry.getDetectorType(layer).getDetectorId(), sector, layer, new Strip(strip, 0, 0));
 
 			
 			
