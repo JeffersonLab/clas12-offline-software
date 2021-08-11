@@ -13,7 +13,9 @@ import java.util.Arrays;
 public class LTCCEngine extends ReconstructionEngine {
     private static final boolean DEBUG = false;
     private static final List<String> CC_TABLES = 
-        Arrays.asList("/calibration/ltcc/spe");
+        Arrays.asList("/calibration/ltcc/spe",
+                      "/calibration/ltcc/status"
+                );
     
     public LTCCEngine() {
     	super("LTCC", "joosten", "1.0");
