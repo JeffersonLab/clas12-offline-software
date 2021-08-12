@@ -254,7 +254,8 @@ public class ECEngine extends ReconstructionEngine {
             "/calibration/ec/global_time_walk",
             "/calibration/ec/effective_velocity",
             "/calibration/ec/tmf_offset",
-            "/calibration/ec/tmf_window"
+            "/calibration/ec/tmf_window",
+	    "/calibration/ec/status"
         };
         
         

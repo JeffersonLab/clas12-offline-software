@@ -24,6 +24,7 @@ public class FTHODOReconstruction {
 
         IndexedTable charge2Energy = manager.getConstants(run, "/calibration/ft/fthodo/charge_to_energy");
         IndexedTable timeOffsets   = manager.getConstants(run, "/calibration/ft/fthodo/time_offsets");
+        IndexedTable status        = manager.getConstants(run, "/calibration/ft/fthodo/status");
         IndexedTable geometry      = manager.getConstants(run, "/geometry/ft/fthodo");
         
         if(debugMode>=1) System.out.println("\nAnalyzing new event");
@@ -34,7 +35,7 @@ public class FTHODOReconstruction {
         }
         
         if(event instanceof HipoDataEvent) {
-            allhits = this.readRawHitsHipo(event,charge2Energy,timeOffsets,geometry);
+            allhits = this.readRawHitsHipo(event,charge2Energy,timeOffsets,status,geometry);
         }
         if(debugMode>=1) {
             System.out.println("Found " + allhits.size() + " hits");
@@ -224,7 +225,7 @@ public class FTHODOReconstruction {
         return hits;
     }
     
-    public List<FTHODOHit> readRawHitsHipo(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable geometry) {
+    public List<FTHODOHit> readRawHitsHipo(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable status, IndexedTable geometry) {
         // getting raw data bank
 	if(debugMode>=1) System.out.println("Getting raw hits from FTHODO:adc bank");
 
@@ -239,7 +240,7 @@ public class FTHODOReconstruction {
                 int iorder      = bankDGTZ.getByte("order",row);
                 int adc         = bankDGTZ.getInt("ADC",row);
                 float time      = bankDGTZ.getFloat("time",row);
-                if(adc!=-1 && time!=-1){
+                if(adc!=-1 && time!=-1 && status.getIntValue("status", isector, ilayer, icomponent)==0){
                     FTHODOHit hit = new FTHODOHit(row,isector,ilayer,icomponent, adc, time, charge2Energy,timeOffsets,geometry);
 	             hits.add(hit); 
 	        }	          
