@@ -5,6 +5,7 @@
  */
 package org.jlab.clas.tracking.objects;
 
+import org.jlab.geom.prim.Arc3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Vector3D;
 /**
@@ -222,6 +223,20 @@ public class Strip extends TObject {
     public void setPhie(double _phie) {
         this._phie = _phie;
     }
+
+    /**
+     * @return the _arc
+     */
+    public Arc3D getArc() {
+        return _arc;
+    }
+
+    /**
+     * @param _arc the _arc to set
+     */
+    public void setArc(Arc3D _arc) {
+        this._arc = _arc;
+    }
     
     public Strip(int id, double centroid, double x1, double y1, double z1, 
             double x2, double y2, double z2) {
@@ -265,6 +280,14 @@ public class Strip extends TObject {
         _z = z;
         type = Type.Z;
     }
+    
+    public Strip(int id, double centroid, Arc3D arc) {
+        super(id, -999, -999, arc.center().z());
+        _c = centroid;
+        _arc = arc;
+        type = Type.ARC;
+    }
+    
     @Override
     public boolean equals(Object o) { 
   
@@ -302,10 +325,12 @@ public class Strip extends TObject {
     private double _ce; //centroid error
     private double _phi;
     private double _phie; //phi error
+    private Arc3D _arc;
+    
     public Type type;
     
     public enum Type {
-        UDF(-1), XYZ(0), Z(1), PHI(2);
+        UDF(-1), XYZ(0), Z(1), PHI(2), ARC(3);
         private final int value;
 
         Type(int value) {

@@ -13,6 +13,7 @@ import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.clas.tracking.kalmanfilter.Type;
 import org.jlab.clas.tracking.kalmanfilter.helical.StateVecs.StateVec;
 import org.jlab.clas.tracking.objects.Strip;
+import org.jlab.geom.prim.Arc3D;
 import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
@@ -95,6 +96,23 @@ public class MeasVecs {
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.Z) { 
                 value = stateVec.z-this.measurements.get(stateVec.k).surface.strip.getZ();
             }
+            if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.ARC) {
+                Point3D offset =this.measurements.get(stateVec.k).surface.cylShift;
+                Vector3D rotation = this.measurements.get(stateVec.k).surface.cylRotation;
+                Arc3D arc = new Arc3D();
+                arc.copy(this.measurements.get(stateVec.k).surface.strip.getArc());
+                Point3D arccen = arc.center();
+                arccen.translateXYZ(-offset.x(), -offset.y(), -offset.z());
+                arccen.rotateZ(-rotation.z());
+                arccen.rotateY(-rotation.y());
+                arccen.rotateX(-rotation.x());
+                Point3D stV = new Point3D(stateVec.x, stateVec.y, stateVec.z);
+                stV.translateXYZ(-offset.x(), -offset.y(), -offset.z());
+                stV.rotateZ(-rotation.z());
+                stV.rotateY(-rotation.y());
+                stV.rotateX(-rotation.x());
+                value = stV.z()-arccen.z();
+            }
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.PHI) {
                value = this.getPhi(stateVec)-this.measurements.get(stateVec.k).surface.strip.getPhi();
             }
@@ -171,6 +189,16 @@ public class MeasVecs {
             }
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.Z) {
                value = stateVec.z;
+            }
+            if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.ARC) {
+                Point3D offset =this.measurements.get(stateVec.k).surface.cylShift;
+                Vector3D rotation = this.measurements.get(stateVec.k).surface.cylRotation;
+                Point3D stV = new Point3D(stateVec.x, stateVec.y, stateVec.z);
+                stV.translateXYZ(-offset.x(), -offset.y(), -offset.z());
+                stV.rotateZ(-rotation.z());
+                stV.rotateY(-rotation.y());
+                stV.rotateX(-rotation.x());
+                value = stV.z();
             }
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.PHI) {
                //value = Math.atan2(stateVec.y, stateVec.x);
