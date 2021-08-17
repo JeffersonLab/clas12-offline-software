@@ -219,16 +219,16 @@ public final class Arc3D implements Transformable, Showable {
 
     @Override
     public void rotateY(double angle) {
-        origin.rotateX(angle);
-        center.rotateX(angle);
-        normal.rotateX(angle);
+        origin.rotateY(angle);
+        center.rotateY(angle);
+        normal.rotateY(angle);
     }
 
     @Override
     public void rotateZ(double angle) {
-        origin.rotateX(angle);
-        center.rotateX(angle);
-        normal.rotateX(angle);
+        origin.rotateZ(angle);
+        center.rotateZ(angle);
+        normal.rotateZ(angle);
     }
     
     /**
