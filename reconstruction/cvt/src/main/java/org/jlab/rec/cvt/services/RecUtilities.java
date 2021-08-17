@@ -32,6 +32,7 @@ import org.jlab.rec.cvt.track.TrackSeederCA;
 
 import java.util.Collections;
 import java.util.Comparator;
+import org.jlab.geom.prim.Arc3D;
 import org.jlab.rec.cvt.trajectory.Ray;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 /**
@@ -170,6 +171,13 @@ public class RecUtilities {
                     cyl.baseArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
                     cyl.highArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);                   
                     Surface meas = new Surface(cyl, strp);
+                    Point3D    offset = bgeo.getOffset(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer(), 
+                            trkcand.get_Crosses().get(c).get_Sector()); 
+                    Vector3D rotation = bgeo.getRotation(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer(), 
+                            trkcand.get_Crosses().get(c).get_Sector());
+                    meas.cylShift = offset;
+                    meas.cylRotation = rotation;
+                    
                     meas.setSector(trkcand.get_Crosses().get(c).get_Sector());
                     meas.setLayer(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer()+6);
                     meas.setError(err*err); // CHECK THIS .... DOES KF take e or e^2?
@@ -187,12 +195,29 @@ public class RecUtilities {
                 if (trkcand.get_Crosses().get(c).get_DetectorType()==BMTType.C) {
                     double z = trkcand.get_Crosses().get(c).get_Point().z();
                     double err = trkcand.get_Crosses().get(c).get_Cluster1().get_ZErr();
-                    
-                    Strip strp = new Strip(id, ce, z);
+                    int clInt = (int)trkcand.get_Crosses().get(c).get_Cluster1().get_Centroid();
+                    Arc3D arc = bgeo.getCstrip(bgeo.getRegion(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer()),
+                            trkcand.get_Crosses().get(c).get_Cluster1().get_Sector(), clInt);
+                    Point3D ct = new Point3D(trkcand.get_Crosses().get(c).get_Cluster1().getCx(),
+                             trkcand.get_Crosses().get(c).get_Cluster1().getCy(),
+                             trkcand.get_Crosses().get(c).get_Cluster1().getCz());
+                    Point3D og = new Point3D(trkcand.get_Crosses().get(c).get_Cluster1().getOx(),
+                             trkcand.get_Crosses().get(c).get_Cluster1().getOy(),
+                             trkcand.get_Crosses().get(c).get_Cluster1().getOz());
+                    arc.setCenter(ct);
+                    arc.setOrigin(og);
+                    Strip strp = new Strip(id, ce, arc);
                     cyl.baseArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
                     cyl.highArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);                   
                     
                     Surface meas = new Surface(cyl, strp);
+                    Point3D    offset = bgeo.getOffset(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer(), 
+                            trkcand.get_Crosses().get(c).get_Sector()); 
+                    Vector3D rotation = bgeo.getRotation(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer(), 
+                            trkcand.get_Crosses().get(c).get_Sector());
+                    meas.cylShift = offset;
+                    meas.cylRotation = rotation;
+                    
                     meas.setSector(trkcand.get_Crosses().get(c).get_Sector());
                     meas.setLayer(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer()+6);
                     meas.setError(err*err); // CHECK THIS .... DOES KF take e or e^2?
@@ -348,8 +373,18 @@ public class RecUtilities {
                 if (trkcand.get(i).get_DetectorType()==BMTType.C) {
                     double z = trkcand.get(i).get_Point().z();
                     double err = trkcand.get(i).get_Cluster1().get_ZErr();
-
-                    Strip strp = new Strip(id, ce, z);
+                    int clInt = (int)trkcand.get(i).get_Cluster1().get_Centroid();
+                    Arc3D arc = bgeo.getCstrip(bgeo.getRegion(trkcand.get(i).get_Cluster1().get_Layer()), 
+                            trkcand.get(i).get_Cluster1().get_Sector(), clInt);
+                    Point3D ct = new Point3D(trkcand.get(i).get_Cluster1().getCx(),
+                             trkcand.get(i).get_Cluster1().getCy(),
+                             trkcand.get(i).get_Cluster1().getCz());
+                    Point3D og = new Point3D(trkcand.get(i).get_Cluster1().getOx(),
+                             trkcand.get(i).get_Cluster1().getOy(),
+                             trkcand.get(i).get_Cluster1().getOz());
+                    arc.setCenter(ct);
+                    arc.setOrigin(og);
+                    Strip strp = new Strip(id, ce, arc);
                     cyl.baseArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[(trkcand.get(i).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
                     cyl.highArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[(trkcand.get(i).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);                   
 
