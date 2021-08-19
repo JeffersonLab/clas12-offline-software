@@ -2,6 +2,7 @@ package org.jlab.clas.reco;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,7 +47,10 @@ public abstract class ReconstructionEngine implements Engine {
     volatile private boolean fatalError = false;
     
     volatile boolean wroteConfig = false;
-    
+
+    private boolean dropOutputBanks = false;
+    private final Set<String> outputBanks = new HashSet<String>();
+
     String             engineName        = "UnknownEngine";
     String             engineAuthor      = "N.T.";
     String             engineVersion     = "0.0";
@@ -71,7 +75,12 @@ public abstract class ReconstructionEngine implements Engine {
     public Map<String,String> getConfigMap() {
         return new ConcurrentHashMap<>(engineConfigMap);
     }
-    
+
+    public void registerOutputBank(String... bankName) {
+        outputBanks.addAll(Arrays.asList(bankName));
+        System.out.println(String.format("[%s]  dropping banks:  %s",this.getName(), Arrays.toString(bankName)));
+    }
+
     abstract public boolean processDataEvent(DataEvent event);
     abstract public boolean init();
    
@@ -134,6 +143,10 @@ public abstract class ReconstructionEngine implements Engine {
           engineDictionary = new SchemaFactory();
       System.out.println("--- engine configuration is called " + this.getDescription());
       try {
+          if (this.getEngineConfigString("dropBanks")!=null &&
+                  this.getEngineConfigString("dropBanks").equals("true")) {
+              dropOutputBanks=true;
+          }
           this.init();
       } catch (Exception e){
           System.out.println("[Wooops] ---> something went wrong with " + this.getDescription());
@@ -291,6 +304,13 @@ public abstract class ReconstructionEngine implements Engine {
                 if (!this.wroteConfig) {
                     this.wroteConfig = true;
                     JsonUtils.extend(dataEventHipo, CONFIG_BANK_NAME, "json", this.generateConfig());
+                }
+                if (this.dropOutputBanks) {
+                    for (String bankName : this.outputBanks) {
+                        if (dataEventHipo.hasBank(bankName)) {
+                            dataEventHipo.removeBank(bankName);
+                        }
+                    }
                 }
                 this.processDataEvent(dataEventHipo);
                 output.setData(mt, dataEventHipo.getHipoEvent());
