@@ -48,6 +48,10 @@ public class FTEBEngine extends ReconstructionEngine {
         requireConstants(Arrays.asList(tables));
         this.getConstantsManager().setVariation("default");
 
+        this.registerOutputBank("FTCAL::hits","FTCAL::clusters");
+        this.registerOutputBank("FTHODO::hits","FTHODO::clusters");
+        this.registerOutputBank("FT::particles");
+
         return true;
     }
 

@@ -42,7 +42,8 @@ public class LTCCEngine extends ReconstructionEngine {
         
     @Override
         public boolean init() {
-            this.requireConstants(CC_TABLES);
+            this.requireConstants(CC_TABLES);            
+            this.registerOutputBank("LTCC::clusters");
             return true;
         }
        
