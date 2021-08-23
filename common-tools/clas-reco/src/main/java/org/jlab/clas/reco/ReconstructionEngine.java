@@ -78,7 +78,9 @@ public abstract class ReconstructionEngine implements Engine {
 
     public void registerOutputBank(String... bankName) {
         outputBanks.addAll(Arrays.asList(bankName));
-        System.out.println(String.format("[%s]  dropping banks:  %s",this.getName(), Arrays.toString(bankName)));
+        if (this.dropOutputBanks) {
+            System.out.println(String.format("[%s]  dropping banks:  %s",this.getName(), Arrays.toString(bankName)));
+        }
     }
 
     abstract public boolean processDataEvent(DataEvent event);

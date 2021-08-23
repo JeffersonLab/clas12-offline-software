@@ -77,6 +77,9 @@ public class FTOFEngine extends ReconstructionEngine {
         ConstantProvider db = GeometryFactory.getConstants(DetectorType.FTOF, 11, engineVariation);
         geometry = new FTOFGeant4Factory(db);
 
+        this.registerOutputBank("FTOF::rawhits","FTOF::hbhits","FTOF::hbclusters");
+        this.registerOutputBank("FTOF::hits","FTIF::clusters","FTOF::matchedClusters");
+
         return true;
     }
 

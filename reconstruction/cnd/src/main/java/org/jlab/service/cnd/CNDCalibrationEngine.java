@@ -184,6 +184,9 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
             
             requireConstants(Arrays.asList(CalibrationConstantsLoader.getCndTables()));
             this.getConstantsManager().setVariation("default");
+
+            this.registerOutputBank("CND::hits","CND::clusters");
+
             return true;
 	}
 

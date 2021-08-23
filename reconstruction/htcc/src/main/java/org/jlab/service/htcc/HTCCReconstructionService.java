@@ -62,6 +62,8 @@ public class HTCCReconstructionService extends ReconstructionEngine{
             "/geometry/htcc/htcc", 
     
         };
+            
+        this.registerOutputBank("HTCC::rec");
         
         requireConstants(Arrays.asList(htccTables));
         return true;
