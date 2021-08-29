@@ -4,6 +4,8 @@
  * and open the template in the editor.
  */
 package org.jlab.rec.ft.trk;
+import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+import org.jlab.geom.prim.Line3D;
 
 /**
  *
@@ -14,10 +16,26 @@ public class FTTRKConstantsLoader {
 
 	FTTRKConstantsLoader() {
 	}
-
-        // geometry constants
-	public static final int Nlayers = 4;        // 2 double layers, ordered as FTT1B+FTT1T, FTT3T+FTT3B, 0-4
+//  read all relevant constants from DB
+        
+        public static final int Nlayers = 4;        // 2 double layers, ordered as FTT1B+FTT1T, FTT3T+FTT3B, 0-4
         public static int NSupLayers = Nlayers/2;   // bottom+top makes a a SuperLayer
+	
+        public static int Nstrips;             // Number of strips 
+        public static int Longstrips;
+        public static int SideHalfstrips; 
+        public static double[] Zlayer;   // from MC mean position of gas layers (average z position of MC hits)
+
+        // identical layers (test): 0, 90, 0, 90 deg useful for debugging purposes
+        //   public static double[] Alpha = {0., 0.5*Math.PI, 0., 0.5*Math.PI};
+        // real geometry condition (gemc): -30, 60, 120, +30 deg
+        public static double[] Alpha;
+        
+        public static double Pitch;            //strip width
+	public static double Beamhole;     //Radius of the hole in the center for the beam (mm)
+        
+        /*
+        // geometry constants
 	public static int Nstrips=768 ;             // Number of strips
         public static int SideHalfstrips;  
         public static int Longstrips=128;
@@ -30,6 +48,8 @@ public class FTTRKConstantsLoader {
         
         public static double Pitch=0.056;            //strip width
 	public static double Beamhole=14.086/2.;     //Radius of the hole in the center for the beam (mm)
+        */
+     
         public static double InnerHole;
 	public static double Rmax;
         public static double[][][] stripsXloc; //Give the local end-points x-coordinates of the strip segment, per layer
@@ -39,10 +59,71 @@ public class FTTRKConstantsLoader {
         public static double[][][] stripsX;    //Give the  end-points x-coordinates of the strip segment rotated in the correct frame for the layer
         public static double[][][] stripsY;    //Give the  end-points y-coordinates of the strip segment
         public static double[] stripslength;  //Give the strip length   
+      
+        public static boolean CSTLOADED = false;
+        static DatabaseConstantProvider dbprovider = null;
         
       
-        public static synchronized void Load() {
+        public static synchronized void Load(int run, String var) {
 
+            // get constants from database table
+            System.out.println(" LOADING CONSTANTS ");
+//	    if(CSTLOADED == true) return null;
+            dbprovider = new DatabaseConstantProvider(run, var); // reset using the new variation
+				
+//	    // load table reads entire table and makes an array of variables for each column in the table.
+	    dbprovider.loadTable("/geometry/ft/fttrk");
+	    dbprovider.disconnect(); 
+	    dbprovider.show();          
+                       
+            Nstrips = dbprovider.getInteger("/geometry/ft/fttrk/nstrips", 0) ;             // Number of strips
+            Longstrips = dbprovider.getInteger("/geometry/ft/fttrk/nlongstrips", 0);
+            Pitch = dbprovider.getDouble("/geometry/ft/fttrk/pitch", 0);
+            Beamhole = dbprovider.getDouble("/geometry/ft/fttrk/innerradius", 0);          // radius of the central hole for beam (mm)
+
+            
+            double innerRadiusActive = dbprovider.getDouble("/geometry/ft/fttrk/innerradiusactive", 0);
+            Zlayer = new double[Nlayers];
+            Alpha = new double[Nlayers];
+            for(int lay=0; lay<Nlayers; lay++){
+                Zlayer[lay] = (double) dbprovider.getDouble("/geometry/ft/fttrk/z", lay);
+                Alpha[lay] = (double) dbprovider.getInteger("/geometry/ft/fttrk/angle", lay);
+                
+                //if(lay==1) Alpha[lay] += 5.;
+                Alpha[lay] *= Math.PI/180.;     // convert to radians
+                ////if(lay!=1) Alpha[lay] -= Math.PI;        // only for real data
+                
+                //if(lay>1) Alpha[lay] += Math.PI;   
+                ////// if(lay==0 || lay==1) Alpha[lay] += (Math.PI-Math.PI/3.); 
+                //if(lay==3) Alpha[lay] += Math.PI;
+                //if(lay!=1) Alpha[lay] += Math.PI;
+                /*
+                if(lay==0){
+                    Alpha[lay] = 0.;
+                }else if(lay==1){
+                    Alpha[lay] = Math.PI/2.;
+                }else if(lay==2){
+                    Alpha[lay] = Math.PI/2.;
+                }else if(lay==3){
+                    Alpha[lay] = 0.;
+                }
+                */
+                
+            }
+            
+            /*
+            Alpha[0] = (150)*Math.PI/180.;
+            Alpha[1] = (60.)*Math.PI/180.;
+            Alpha[2] = (-60.)*Math.PI/180.;
+            Alpha[3] = (-150.)*Math.PI/180.;
+            */
+            
+            CSTLOADED = true;
+            System.out.println("SUCCESFULLY LOADED FTTRK GEOMETRY CONSTANTS");
+            
+            
+            
+            
 		SideHalfstrips =  (Nstrips -2*Longstrips)/4;      // 128
 		InnerHole = (double)(SideHalfstrips)*Pitch;       // 7.168 cm, exceeds Beamhole by 0.125 cm - reference as minimum radius
 		Rmax = Pitch*(SideHalfstrips + Longstrips);       // 14.336
@@ -118,6 +199,44 @@ public class FTTRKConstantsLoader {
                         stripsY[j+2][i][1] = (stripsXloc[j][i][1]*Math.sin(Alpha[j+2]) + stripsYloc[j][i][1]*Math.cos(Alpha[j+2]));
                         
 			//if(debug>=1) System.out.println(Constants.getLocalRegion(i)+" strip-1 = "+i+" x' "+stripsXloc[i][1]+" y' "+stripsYloc[i][1]+" length "+stripslength[i]+" Beamhole "+Beamhole);
+                        /*
+                        // inversione x con y
+                        double xyinv = stripsX[j][i][0];
+                        stripsX[j][i][0] = stripsY[j][i][0];
+                        stripsY[j][i][0] = xyinv;
+                        xyinv = stripsX[j][i][1];
+                        stripsX[j][i][1] = stripsY[j][i][1];
+                        stripsY[j][i][1] = xyinv;
+                        xyinv = stripsX[j+2][i][0];
+                        stripsX[j+2][i][0] = stripsY[j+2][i][0];
+                        stripsY[j+2][i][0] = xyinv;
+                        xyinv = stripsX[j+2][i][1];
+                        stripsX[j+2][i][1] = stripsY[j+2][i][1];
+                        stripsY[j+2][i][1] = xyinv;
+                        */
+                        
+                        // alignment: global translation: x-y coordinates layer 0,1
+                        double tX1 = 0.; double tY1 = 0.;
+                        double tX2 = 0.; double tY2 = 0.; 
+                        /*
+                        tX1 = -0.006; tY1 = 0.051;   // first tenative alignment
+                        tX2 = 0.046; tY2 = 0.008;
+//                        tX1 = 1.5;
+                        */
+
+                        stripsX[j][i][0] += tX1;  // cm
+                        stripsX[j][i][1] += tX1;  
+                        stripsY[j][i][0] += tY1;
+                        stripsY[j][i][1] += tY1;
+                            
+                        stripsX[j+2][i][0] += tX2;  // cm
+                        stripsX[j+2][i][1] += tX2;  
+                        stripsY[j+2][i][0] += tY2;
+                        stripsY[j+2][i][1] += tY2;
+                        
+                        
+                        
+                        
                     }
                 }
 		System.out.println("*****    FTTRK constants loaded");
@@ -163,5 +282,11 @@ public class FTTRKConstantsLoader {
                 return regionX;
         }
         
-        
+        public static Line3D getStripSegmentLab(int layer, int seed){
+            Line3D stripSegment = new Line3D(stripsX[layer-1][seed-1][0], stripsY[layer-1][seed-1][0], Zlayer[layer-1], 
+                                             stripsX[layer-1][seed-1][1], stripsY[layer-1][seed-1][1], Zlayer[layer-1]);
+            stripSegment.show();
+            
+            return stripSegment;
+        }
 }
