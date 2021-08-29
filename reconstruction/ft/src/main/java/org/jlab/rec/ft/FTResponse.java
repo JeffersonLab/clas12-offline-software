@@ -17,6 +17,8 @@ public class FTResponse extends DetectorResponse {
     private int    _size;            // cluster multiplicity
     private int    _id;              // response ID
 
+    private float  _crTime;            // provisional: detector time (for crosses only: the location in the bank is overwritten)
+    private float  _crEnergy;          // provisional: detector energy (for crosses only same reason)
 
     
     public FTResponse() {
@@ -50,6 +52,21 @@ public class FTResponse extends DetectorResponse {
         this._id = id;
     }
         
+    /////////////////////////// provisional (info must be present in banks)
+    public void setCrTime(float crTime){
+        this._crTime = crTime;
+    }
+    public float getCrTime(){
+            return _crTime;
+    }
+    public void setCrEnergy(float crEnergy){
+        this._crEnergy = crEnergy;
+    }
+    public float getCrEnergy(){
+            return _crEnergy;
+    }
+    //////////////////////////        
+            
     public void show() {
         System.out.println("ID = "+ this.getId()
                     + " Type = "  + this.getType()
