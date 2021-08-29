@@ -139,7 +139,9 @@
              {"name":"y",           "type":"F", "info":"Cross Y position (cm)"},
              {"name":"z",           "type":"F", "info":"Cross Z position (cm)"},
              {"name":"energy",      "type":"F", "info":"Energy assigned to the Cross"},
-             {"name":"time",        "type":"F", "info":"Time assigned to the Cross"}
+             {"name":"time",        "type":"F", "info":"Time assigned to the Cross"},
+             {"name":"Cluster1ID",  "type":"S", "info":"ID of the bottom layer cluster in the Cross"},
+             {"name":"Cluster2ID",  "type":"S", "info":"ID of the top layer cluster in the Cross"}
     ]
   }
 
