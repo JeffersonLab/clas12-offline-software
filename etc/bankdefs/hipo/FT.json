@@ -113,7 +113,9 @@
              {"name":"y",           "id":6,  "type":"float", "info":"Cross Y position (cm)"},
              {"name":"z",           "id":7,  "type":"float", "info":"Cross Z position (cm)"},
              {"name":"energy",      "id":8,  "type":"float", "info":"Energy associated to the Cross"},
-             {"name":"time",        "id":9,  "type":"float", "info":"Time associated to the Cross"}
+             {"name":"time",        "id":9,  "type":"float", "info":"Time associated to the Cross"},
+             {"name":"Cluster1ID",  "id":10, "type":"int16", "info":"ID of the bottom layer cluster in the Cross"},
+             {"name":"Cluster2ID",  "id":11, "type":"int16", "info":"ID of the top layer cluster in the Cross"}             
     ]
   },
  {
