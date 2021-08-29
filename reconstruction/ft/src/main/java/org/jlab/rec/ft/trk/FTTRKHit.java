@@ -37,13 +37,14 @@ public class FTTRKHit implements Comparable<FTTRKHit>{
 	 * @param strip 
 	 * @param Edep (for gemc output without digitization)
 	 */
-	public FTTRKHit(int sector, int layer, int strip, double Edep, int id) {
+	public FTTRKHit(int sector, int layer, int strip, double Edep, double time, int id) {
                 int debug = FTTRKReconstruction.debugMode;        // gets the debug flag from FTTRKReconstruction
 		this._Sector = sector;
 		this._Layer = layer;  
 		this._Strip = strip;
 		this._Edep = Edep;	
                 this._Id = id;
+                this._Time = time;
                 // update associations after crosses are found
                 this._DGTZIndex = -1;
                 this._ClusterIndex = -1;
