@@ -268,7 +268,38 @@ public class FTCALReconstruction {
                 float time      = bankDGTZ.getFloat("time",row);
                 if(adc!=-1 && time!=-1){
                     FTCALHit hit = new FTCALHit(row,icomponent, adc, time, charge2Energy, timeOffsets, timeWalk, cluster);
-	             hits.add(hit); 
+//	            if(icomponent>=90 && icomponent<=98) hits.add(hit); // select only crystals in a given region
+//                    if(icomponent>= 90 && icomponent<=107)
+//                  if(icomponent == 92)
+//                   if(icomponent == 105)
+//                   if(icomponent == 400)
+//                   if(icomponent == 412)
+// select one vertical stip of crystals left of the hole
+//                     if(icomponent == 472 || icomponent == 450 || icomponent == 428 || icomponent == 406 || icomponent == 384 ||
+//                        icomponent == 362 || icomponent == 340)
+// select one vertical strip of crystals right of the hole
+//                    if(icomponent == 473 || icomponent == 451 || icomponent == 429 || icomponent == 407 || icomponent == 385 ||
+//                        icomponent == 363 || icomponent == 341)
+//                     if(icomponent == 454 || icomponent == 432 || icomponent == 410 || icomponent == 388 || icomponent == 366 ||
+//                        icomponent == 344 || icomponent == 322 || icomponent == 300)
+//                    if(icomponent == 402 || icomponent == 401 || icomponent == 400 || icomponent == 380 || icomponent == 379 ||
+//                        icomponent == 378 || icomponent == 358 || icomponent == 357 || icomponent == 356)
+//                   if(icomponent == 381 || icomponent == 380 || icomponent == 379 || icomponent == 359 || icomponent == 358 ||
+//                        icomponent == 357 || icomponent == 337 || icomponent == 336 || icomponent == 335)  
+//                    if(icomponent == 340 || icomponent == 339 || icomponent == 316 || icomponent == 293 || icomponent == 270 ||
+//                        icomponent == 248)  
+//                    if(icomponent == 341 || icomponent == 342 || icomponent == 321 || icomponent == 300 || icomponent == 279 ||
+//                        icomponent == 257)  
+//                    if(icomponent == 226 || icomponent == 204 || icomponent == 183 || icomponent == 162 || icomponent == 141  ||
+//                        icomponent == 142) 
+//                    if(icomponent == 235 || icomponent == 213 || icomponent == 190 || icomponent == 167 || icomponent == 144  ||
+//                        icomponent == 143) 
+//                      if(icomponent == 241 || icomponent == 218 || icomponent == 195 || icomponent == 172 || icomponent == 149  ||
+//                        icomponent == 126 || icomponent == 103 || icomponent == 80 || icomponent == 57 || icomponent == 34 || 
+//                        icomponent == 11)
+//                     if(icomponent >=341 && icomponent<=350)
+ //                     if(icomponent==347) 
+                   hits.add(hit);
 	        }	          
             }
         }
