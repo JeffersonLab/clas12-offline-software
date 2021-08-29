@@ -5,7 +5,7 @@ import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.utils.groups.IndexedTable;
-
+import org.jlab.rec.ft.FTEBEngine;
 
 public class FTParticle {
 
@@ -155,11 +155,35 @@ public class FTParticle {
                 if(response.getAssociation()<0 && response.getType() == detectorType){
                     Line3D  dist = cross.distance(response.getPosition().toPoint3D());
                     double hitdistance  = dist.length();
-                    double timedistance = Math.abs(this.getTime()-(response.getTime()-response.getPosition().mag()/PhysicsConstants.speedOfLight()));
-                    if(timedistance<timeThreshold && hitdistance<distanceThreshold && hitdistance<minimumDistance){
-                        minimumDistance = hitdistance;
-                        bestIndex = loop;
-                    } 
+                    double timedistance = Math.abs(this.getTime() - (response.getTime()-response.getPosition().mag()/PhysicsConstants.speedOfLight()));       
+//                    FTEBEngine.h600.fill(timedistance);
+//                    FTEBEngine.h601.fill(response.getTime());
+
+                    if(detectorType=="FTTRK") {
+                        double t=response.getTime();
+                        System.out.println(this.getTime() + " to be compard to " + response.getPosition().mag()/PhysicsConstants.speedOfLight());
+                        FTEBEngine.h600.fill(response.getPosition().mag()/PhysicsConstants.speedOfLight());
+                        FTEBEngine.h601.fill(response.getCrTime(), response.getPosition().mag()/PhysicsConstants.speedOfLight());
+                        if(response.getId()==0){
+                            FTEBEngine.h602.fill(response.getCrTime());
+                        }
+                        if(response.getId()==1){
+                            FTEBEngine.h603.fill(response.getCrTime());
+                        }
+                    }
+                    
+//                    if(detectorType=="FTHODO") FTEBEngine.h502.fill(timedistance);
+//                    if((timedistanceTRK || timedistance<2.*timeThreshold) && hitdistance<distanceThreshold && hitdistance<minimumDistance){
+                    if(hitdistance<distanceThreshold && hitdistance<minimumDistance){                    
+                        if(detectorType=="FTTRK" && timedistance<timeThreshold){
+                           minimumDistance = hitdistance;
+                           bestIndex = loop;
+                           System.out.println("best hit distance and time " + minimumDistance + " " + timedistance);
+                        }else if(detectorType=="FTHODO" && timedistance<timeThreshold){
+                           minimumDistance = hitdistance; 
+                           bestIndex = loop;
+                        } 
+                    }
                 }
             }
             if(bestIndex>-1) {
