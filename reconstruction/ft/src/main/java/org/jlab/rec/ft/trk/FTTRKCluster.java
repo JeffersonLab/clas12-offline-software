@@ -158,6 +158,7 @@ import org.jlab.geom.prim.Vector3D;
 		double zCentEndPoint2 = 0;					// cluster energy-weighted Centroid z coordinate of the second end-point
 		
 		double totEn = 0.;					        // cluster total energy
+                double totEnergy = 0.;
                 double totEnSq = 0.;                                            // sum of energies squared
 		double weightedStrp = 0;					// energy-weighted strip 
 		
@@ -210,6 +211,8 @@ import org.jlab.geom.prim.Vector3D;
                             FTTRKHit thehit = this.get(i);
                             // gets the energy value of the strip
                             double strpEn = thehit.get_Edep();
+                            totEnergy += strpEn;
+                            strpEn = 1.; // fix to 1 if no energy weighted mean is required - seems to have better efficiency
                             // if truncated mean on the maximun energy
                             if(i==maxI || i==maxI2nd && Math.random()>0.5) {continue;}
                             // get strip informations
@@ -235,7 +238,6 @@ import org.jlab.geom.prim.Vector3D;
 			    weightedStripEndPoint2X+= strpEn*x2;
 			    weightedStripEndPoint2Y+= strpEn*y2;
 			    weightedStripEndPoint2Z+= strpEn*z2;
-			    //System.out.println(" making a cluster with strip "+strpNb+" ref var "+Constants.FVT_stripsYloc[strpNb-1][0]);
 			    // getting the max and min strip number in the cluster
 			    if(strpNb<=min) 
 					min = strpNb;
@@ -300,7 +302,7 @@ import org.jlab.geom.prim.Vector3D;
                 }
                 */
                 
-		_TotalEnergy = totEn;
+		_TotalEnergy = totEnergy;
                 double xmeanCent = (xCentEndPoint1+xCentEndPoint2)/2.;
                 stripNumCent = this.get(0).get_StripNumberFromLocalY(xmeanCent, stripYCent, this.get(0).get_Layer());
                 //centroid: centroid strip number in the measurement direction (local y of each layer)  
