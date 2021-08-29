@@ -14,6 +14,7 @@ import org.jlab.utils.groups.IndexedTable;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.rec.ft.trk.FTTRKReconstruction;
 
 public class FTEventBuilder {
 
@@ -147,6 +148,10 @@ public class FTEventBuilder {
                     resp.setId(bank.getInt("id", i));
                     resp.setEnergy(bank.getFloat("energy", i));
                     resp.setTime(bank.getFloat("time", i));
+                    ////////////////////////////// provisional
+                    resp.setCrEnergy(FTTRKReconstruction.crEnergy[i]);
+                    resp.setCrTime(FTTRKReconstruction.crTime[i]);
+                    //////////////////////////////
                     resp.setPosition(bank.getFloat("x", i), bank.getFloat("y", i), bank.getFloat("z", i));
                     if(debugMode>=1) System.out.println(" --------- id, cross x, y, z " + bank.getInt("id", i) + " " + bank.getFloat("x", i) + " " + bank.getFloat("y", i) + " " + bank.getFloat("z", i));
                     responses.add(resp);
@@ -238,7 +243,40 @@ public class FTEventBuilder {
             if (debugMode >= 1) track.show();
         }
     }
-    
+  
+   
+    public void matchToFTCal(List<FTResponse> responses, List<FTParticle> particles) {
+        for (int i = 0; i < particles.size(); i++) {
+            FTParticle track = particles.get(i);
+            
+            int iHodo = track.getDetectorHit(responses, "FTHODO", FTConstants.CAL_HODO_DISTANCE_MATCHING, FTConstants.CAL_HODO_TIME_MATCHING);
+            if (iHodo > 0) {
+                if (debugMode >= 1) {
+                    System.out.println("found signal in the hodoscope " + iHodo);
+                }
+                track.setCharge(-1);
+                track.setHodoscopeIndex(responses.get(iHodo).getId());
+                responses.get(iHodo).setAssociation(i);
+            }
+            
+            int iTrk = track.getDetectorHit(responses, "FTTRK", FTConstants.CAL_TRK_DISTANCE_MATCHING, FTConstants.CAL_TRK_TIME_MATCHING);
+            if (iTrk > 0) {
+                if (debugMode >= 1) {
+                    System.out.println("found signal in FTTRK" + iTrk);
+                }
+                track.setCharge(-999); // provisional, for no field tracking
+                track.setTrackerIndex(responses.get(iTrk).getId());
+                responses.get(iTrk).setAssociation(i);
+            }
+            
+            if (debugMode >= 1) track.show();
+            
+        }
+    }
+   
+   
+/*
+    // version to match FTTRK hits ony, to be dropped
     public void matchTRKHits(List<FTResponse> responses, List<FTParticle> particles) {
         for (int i = 0; i < particles.size(); i++) {
             FTParticle track = particles.get(i);
@@ -260,6 +298,7 @@ public class FTEventBuilder {
             }   
         }
     }
+*/
 
     public void showResponses(List<FTResponse> responses) {
         System.out.println("\nFound " + responses.size() + " clusters in FT detector");
