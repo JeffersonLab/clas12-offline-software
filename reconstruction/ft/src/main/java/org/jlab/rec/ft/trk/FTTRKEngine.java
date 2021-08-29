@@ -41,20 +41,34 @@ public class FTTRKEngine extends ReconstructionEngine {
 	
 	@Override
 	public boolean init() {
-            
-            FTTRKConstantsLoader.Load();
-            
-		reco = new FTTRKReconstruction();
-//		reco.debugMode=0;
 
             String[]  tables = new String[]{ 
                 "/calibration/ft/fthodo/charge_to_energy",
                 "/calibration/ft/fthodo/time_offsets",
                 "/calibration/ft/fthodo/status",
-                "/geometry/ft/fthodo"
+                "/geometry/ft/fthodo",
+                "/geometry/ft/fttrk"
             };
             requireConstants(Arrays.asList(tables));
             this.getConstantsManager().setVariation("default");
+            
+            // use 11 provisionally as run number to download the basic FTTK geometry constants
+            FTTRKConstantsLoader.Load(11, this.getConstantsManager().getVariation());
+            reco = new FTTRKReconstruction();
+	    reco.debugMode=0;
+
+/*
+            String[]  tables = new String[]{ 
+                "/calibration/ft/fthodo/charge_to_energy",
+                "/calibration/ft/fthodo/time_offsets",
+                "/calibration/ft/fthodo/status",
+                "/geometry/ft/fthodo",
+                "/geometry/ft/fttrk"
+            };
+            requireConstants(Arrays.asList(tables));
+            this.getConstantsManager().setVariation("default");
+*/            
+            
 
             return true;
 	}
@@ -124,7 +138,11 @@ public class FTTRKEngine extends ReconstructionEngine {
 	FTTRKEngine trk = new FTTRKEngine();
 	trk.init();
         // insert input filename here
-        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_singleEle_nofields_big_-30.60.120.30.hipo";
+//        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_singleEle_nofields_big_-30.60.120.30.hipo";
+///        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_dis.hipo";
+///        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_test.hipo";
+        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/ft_005038.evio.01231.hipo";
+//        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_fullAcceptance_singleTrack.hipo";
         System.out.println("input file " + input);
 	HipoDataSource  reader = new HipoDataSource();
 	reader.open(input);
@@ -133,11 +151,23 @@ public class FTTRKEngine extends ReconstructionEngine {
         H2F h1 = new H2F("h1", "Layer vs. Component", 768, 0., 769., 4, 0.5, 4.5);
         h1.setTitleX("Component");
         h1.setTitleY("Layer");
-        H1F h2 = new H1F("Energy",100, 0, 100);         
+        H1F h2 = new H1F("Energy",100, 0, 1000.);         
         h2.setOptStat(Integer.parseInt("1111")); h2.setTitleX("Energy"); h2.setTitleY("Counts");
-        H1F h3 = new H1F("Time",100, 0., 1.e-3);
+        H1F h3 = new H1F("Time",100, 0., 500.); // was 1e-3
         h3.setOptStat(Integer.parseInt("1111")); h3.setTitleX("Time"); h3.setTitleY("Counts");
-        H1F h1clEn = new H1F("Cluster energy", 100, 0., 100.);
+        H2F h333 = new H2F("energy vs time",100, 0., 410., 100, 0., 410.); 
+        h333.setTitleX("strip Time"); h333.setTitleY("strip Energy");
+        H2F h444 = new H2F("strip vs time",100, 0., 500., 768, 0., 769.); 
+        h444.setTitleX("strip Time"); h444.setTitleY("strip number");
+        H2F h445 = new H2F("strip lay 1 vs time",100, 0., 500., 768, 0., 769.); 
+        h445.setTitleX("strip Time"); h445.setTitleY("strip number");
+        H2F h446 = new H2F("strip lay 2 vs time",100, 0., 500., 768, 0., 769.); 
+        h446.setTitleX("strip Time"); h446.setTitleY("strip number");
+        H2F h447 = new H2F("strip lay 3 vs time",100, 0., 500., 768, 0., 769.); 
+        h447.setTitleX("strip Time"); h447.setTitleY("strip number");
+        H2F h448 = new H2F("strip lay 4 vs time",100, 0., 500., 768, 0., 769.); 
+        h448.setTitleX("strip Time"); h448.setTitleY("strip number");
+        H1F h1clEn = new H1F("Cluster energy", 100, 0., 1000.);
         h1clEn.setOptStat(Integer.parseInt("1111")); h1clEn.setTitleX("centroid energy of clusters"); 
         H1F hOccupancy1 = new H1F("hOccupancy1", 768, 0., 769.); hOccupancy1.setTitleX("Component layer 1"); 
         hOccupancy1.setLineColor(1); hOccupancy1.setFillColor(1);
@@ -188,12 +218,12 @@ public class FTTRKEngine extends ReconstructionEngine {
         canvasClSingleLay.divide(2,2);
         
         int nc1 = 0, nc2 = 0, ncmatch = 0;
-        int nev=-1;
-        while(reader.hasEvent()){
-//        int nev1 = 0; int nev2 = nev1+6150; for(nev=nev1; nev<nev2; nev++){   // debug only a set of events (uncomment while loop in case)
-           DataEvent event = (DataEvent) reader.getNextEvent();
-            if(debug>=1) System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~ processing event ~~~~~~~~~~~ " + ++nev); 
-//            if(nev!=6146) continue;    // select one event only for debugging purposes
+        int nev=0;
+//        while(reader.hasEvent()){
+        int nev1 = 0; int nev2 = 10000; for(nev=nev1; nev<nev2; nev++){   // debug only a set of events (uncomment while loop in case)
+            DataEvent event = (DataEvent) reader.getNextEvent();
+            if(debug>=1) System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~ processing event ~~~~~~~~~~~ " + nev); 
+//            if(nev != 8) continue;    // select one event only for debugging purposes
             
             ArrayList<FTTRKCluster> clusters = new ArrayList();
             
@@ -217,6 +247,19 @@ public class FTTRKEngine extends ReconstructionEngine {
                     h1.fill(comp,layer);
                     h2.fill(energy);
                     h3.fill(time);
+                    h333.fill(time, energy);
+                    
+                    h444.fill(time, comp);
+                    if(layer==1){
+                       h445.fill(time, comp);    
+                    }else if(layer==2){
+                       h446.fill(time, comp);
+                    }else if(layer==3){
+                       h447.fill(time, comp); 
+                    }else if(layer==4){
+                       h448.fill(time, comp); 
+                    }
+                    
                     if(layer==1){
                         if(debug>=1) System.out.println("component layer 1 " + comp + " event number " + nev + " n rows " + nrows);
                         hOccupancy1.fill(comp);
@@ -380,16 +423,30 @@ public class FTTRKEngine extends ReconstructionEngine {
         if(debug>=1) System.out.println("number of found crosses: module 1: " + nc1 + " module 2: " + nc2 + " matching crosses " + ncmatch);
         
         JFrame frame = new JFrame("FT Reconstruction");
-        frame.setSize(800,800);
+        frame.setSize(1200,800);
         EmbeddedCanvas canvas = new EmbeddedCanvas();
-        canvas.divide(2,2);
+        canvas.divide(2,3);
         canvas.cd(0); canvas.draw(h1);
         canvas.cd(1); canvas.draw(h2);
         canvas.cd(2); canvas.draw(h3);
-        canvas.cd(3); canvas.draw(h1clEn);
+        canvas.cd(3); canvas.draw(h333);
+        canvas.cd(4); canvas.draw(h1clEn);
+        canvas.cd(5); canvas.draw(h444);
         frame.add(canvas);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true); 
+        
+        JFrame framest = new JFrame("FT strip vs time in layers");
+        framest.setSize(800,800);
+        EmbeddedCanvas canvast = new EmbeddedCanvas();
+        canvast.divide(2,2);
+        canvast.cd(0); canvast.draw(h445);
+        canvast.cd(1); canvast.draw(h446);
+        canvast.cd(2); canvast.draw(h447);
+        canvast.cd(3); canvast.draw(h448);
+        framest.add(canvast);
+        framest.setLocationRelativeTo(null);
+        framest.setVisible(true); 
         
         JFrame frameDiff = new JFrame("Strip Difference");
         frameDiff.setSize(800,800);
@@ -441,10 +498,74 @@ public class FTTRKEngine extends ReconstructionEngine {
         EmbeddedCanvas canvas3 = new EmbeddedCanvas();
         canvas3.divide(2,2);
         int ic=-1;
+        double upl = 100.;
+        DataLine l1 = new DataLine(64., 0., 64., upl);
+        DataLine l2 = new DataLine(129., 0., 129., upl);
+        DataLine l3 = new DataLine(162., 0., 162., upl);
+        DataLine l4 = new DataLine(193., 0., 193., upl);
+        DataLine l5 = new DataLine(224., 0., 224., upl); //
+        DataLine l6 = new DataLine(256., 0., 256., upl); 
+        DataLine l7 = new DataLine(288., 0., 288., upl); //
+        DataLine l8 = new DataLine(321., 0., 321., upl); 
+        DataLine l9 = new DataLine(353., 0., 353., upl); 
+        DataLine l10 = new DataLine(385., 0., 385., upl); 
+        DataLine l11 = new DataLine(417., 0., 417., upl); 
+        DataLine l12 = new DataLine(449., 0., 449., upl);
+        DataLine l13 = new DataLine(480., 0., 480., upl); //
+        DataLine l14 = new DataLine(513., 0., 513., upl);
+        DataLine l15 = new DataLine(544., 0., 544., upl); //
+        DataLine l16 = new DataLine(578., 0., 578., upl);
+        DataLine l17 = new DataLine(611., 0., 611., upl); 
+        DataLine l18 = new DataLine(641., 0., 641., upl);
+        DataLine l19 = new DataLine(705., 0., 705., upl); 
+        DataLine l20 = new DataLine(768., 0., 768., upl);
+        l1.setLineColor(6); l2.setLineColor(6); l3.setLineColor(6); 
+        l4.setLineColor(6); l5.setLineColor(6); l6.setLineColor(6); 
+        l7.setLineColor(6); l8.setLineColor(6); l9.setLineColor(6); l10.setLineColor(6);
+        l11.setLineColor(6); l12.setLineColor(6); l13.setLineColor(6); l14.setLineColor(4); l15.setLineColor(6);
+        l16.setLineColor(6); l17.setLineColor(6); l18.setLineColor(6); l19.setLineColor(6); l20.setLineColor(6);
+        l1.setLineStyle(3); l2.setLineStyle(3); l3.setLineStyle(3); l4.setLineStyle(3); l5.setLineStyle(3);
+        
         canvas3.cd(++ic); canvas3.draw(hOccupancy1);
+        canvas3.draw(l1); canvas3.draw(l2); canvas3.draw(l3); 
+        canvas3.draw(l4); //canvas3.draw(l5); 
+        canvas3.draw(l6); //canvas3.draw(l7); 
+        canvas3.draw(l8); canvas3.draw(l9); 
+        canvas3.draw(l10); canvas3.draw(l11); 
+        canvas3.draw(l12); //canvas3.draw(l13); 
+        canvas3.draw(l14); //canvas3.draw(l15); 
+        canvas3.draw(l16); canvas3.draw(l17); 
+        canvas3.draw(l18); canvas3.draw(l19); canvas3.draw(l20);
         canvas3.cd(++ic); canvas3.draw(hOccupancy2);
+        canvas3.draw(l1); canvas3.draw(l2); canvas3.draw(l3); 
+        canvas3.draw(l4); //canvas3.draw(l5); 
+        canvas3.draw(l6); //canvas3.draw(l7); 
+        canvas3.draw(l8); canvas3.draw(l9); 
+        canvas3.draw(l10); canvas3.draw(l11); 
+        canvas3.draw(l12); //canvas3.draw(l13); 
+        canvas3.draw(l14); //canvas3.draw(l15); 
+        canvas3.draw(l16); canvas3.draw(l17); 
+        canvas3.draw(l18); canvas3.draw(l19); canvas3.draw(l20);
         canvas3.cd(++ic); canvas3.draw(hOccupancy3);
+        canvas3.draw(l1); canvas3.draw(l2); canvas3.draw(l3); 
+        canvas3.draw(l4); //canvas3.draw(l5); 
+        canvas3.draw(l6); //canvas3.draw(l7); 
+        canvas3.draw(l8); canvas3.draw(l9); 
+        canvas3.draw(l10); canvas3.draw(l11); 
+        canvas3.draw(l12); //canvas3.draw(l13); 
+        canvas3.draw(l14); //canvas3.draw(l15); 
+        canvas3.draw(l16); //canvas3.draw(l17); 
+        canvas3.draw(l18); canvas3.draw(l19); canvas3.draw(l20);
         canvas3.cd(++ic); canvas3.draw(hOccupancy4);
+        canvas3.draw(l1); canvas3.draw(l2); canvas3.draw(l3); 
+        canvas3.draw(l4); //canvas3.draw(l5); 
+        canvas3.draw(l6); //canvas3.draw(l7); 
+        canvas3.draw(l8); canvas3.draw(l9); 
+        canvas3.draw(l10); canvas3.draw(l11); 
+        canvas3.draw(l12); //canvas3.draw(l13); 
+        canvas3.draw(l14); //canvas3.draw(l15); 
+        canvas3.draw(l16); //canvas3.draw(l17); 
+        canvas3.draw(l18); canvas3.draw(l19); canvas3.draw(l20);
         frame3.add(canvas3);
         frame3.setLocationRelativeTo(null);
         frame3.setVisible(true); 
