@@ -57,6 +57,7 @@ public class DCHBEngine extends DCEngine {
         Constants.Load();
         super.setOptions();
         super.LoadTables();
+        super.LoadGeometry();
 //        newRun = 809;
 //        long timeStamp = 371468548086L;
 //        if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {

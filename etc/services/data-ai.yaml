@@ -82,17 +82,7 @@ configuration:
     DCI:
       dcGeometryVariation: rga_fall2018
       dcT2DFunc: "Polynomial"
-      dcWireDistortion: "true"
-    DCRC:
-      dcGeometryVariation: rga_fall2018
-    DCRPC:
-      dcGeometryVariation: rga_fall2018
-    DCAC:
-      dcGeometryVariation: rga_fall2018
-    DCRTB:
-      dcGeometryVariation: rga_fall2018
-    DCATB:
-      dcGeometryVariation: rga_fall2018 
+      dcWireDistortion: "true" 
 
 mime-types:
   - binary/data-hipo
