@@ -61,6 +61,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         MagFieldsEngine mf = new MagFieldsEngine();
         mf.initializeMagneticFields();
         super.LoadTables();
+        super.LoadGeometry();
         return true;
     }
     public void processFile(int duplicates, float torScale, float solScale, int charge, int n, long seed,
@@ -96,7 +97,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
             this.r.setSeed(seed);
             System.out.println("\n Random generator seed set to: " + seed);
             System.out.println("\n Dictionary file name: " + fileName + "\n");
-            this.ProcessTracks(pw, dcDetector, ftofDetector, ecalDetector, sw, charge, n, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax,duplicates);
+            this.ProcessTracks(pw, Constants.dcDetector, Constants.ftofDetector, Constants.ecalDetector, sw, charge, n, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax,duplicates);
             pw.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(TrackDictionaryMakerRNG.class.getName()).log(Level.SEVERE, null, ex);
@@ -671,7 +672,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
 
     private void resetGeom(String geomDBVar) {
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, Optional.ofNullable(geomDBVar).orElse("default"));
-        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, DCGeant4Factory.ENDPLATESBOWON);
+        Constants.dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, DCGeant4Factory.ENDPLATESBOWON);
         
         for(int l=0; l<6; l++) {
             Constants.wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);

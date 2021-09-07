@@ -3,6 +3,10 @@ package org.jlab.rec.dc;
 import java.util.ArrayList;
 
 import cnuphys.snr.NoiseReductionParameters;
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
+import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
+import org.jlab.geom.base.Detector;
+import org.jlab.rec.dc.trajectory.TrajectorySurfaces;
 
 /**
  * Constants used in the reconstruction
@@ -196,7 +200,8 @@ public class Constants {
     public static void setUSETIMETBETA(boolean USETIMETBETA) {
         Constants.USETIMETBETA = USETIMETBETA;
     }
-    
+       
+    public static boolean ENDPLATESBOWING = false;
     
     private static double WIREDIST = 0.0;
 
@@ -318,6 +323,11 @@ public class Constants {
     }
 
     // geometry constants not yet read from CCDB of from geometry services
+    public static DCGeant4Factory    dcDetector   = null;
+    public static FTOFGeant4Factory  ftofDetector = null;
+    public static Detector           ecalDetector = null;
+    public static TrajectorySurfaces tSurf        = null;
+    
     public static double htccRadius=175;
     public static double ltccPlane=653.09;
         

@@ -56,7 +56,8 @@ public class MeasVecsDoca {
         for (int c = 0; c < 3; c++) {
             for (int s = 0; s < 2; s++) {
                 for (int h = 0; h < trkcand.get(c).get(s).size(); h++) {
-                    if (trkcand.get(c).get(s).get(h).get_Id() == -1 || trkcand.get(c).get(s).get(h).get_Id() == 0) {
+//                    if (trkcand.get(c).get(s).get(h).get_Id() == -1 /*|| trkcand.get(c).get(s).get(h).get_Id() == 0*/) { //PASS1
+                    if (trkcand.get(c).get(s).get(h).get_Id() == -1 || trkcand.get(c).get(s).get(h).get_Id() == 0) { 
                         continue;
                     }
                     trkcand.get(c).get(s).get(h).calc_CellSize(DcDetector);

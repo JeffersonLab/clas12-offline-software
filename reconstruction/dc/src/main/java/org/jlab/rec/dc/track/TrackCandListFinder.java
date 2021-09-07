@@ -605,7 +605,7 @@ public class TrackCandListFinder {
                 + trk.get(2).get_Id();
     }
 
-    public void removeOverlappingTracks(List<Track> trkcands) {
+    public void removeOverlappingTracksOld(List<Track> trkcands) {
         if(Constants.DEBUG) {
             System.out.println("Found "+trkcands.size()+" HB seeds ");
             for(int i = 0; i< trkcands.size(); i++) {
@@ -644,6 +644,37 @@ public class TrackCandListFinder {
                 System.out.println("------------------------------------------------------------------ ");
             }
         }
+    }
+    
+    public void removeOverlappingTracks(List<Track> trkcands) {
+        if(Constants.DEBUG) {
+            System.out.println("Found "+trkcands.size()+" HB seeds ");
+            for(int i = 0; i< trkcands.size(); i++) {
+                System.out.println("cand "+i);
+                for(Cross c : trkcands.get(i)) {
+                    System.out.println(c.printInfo());
+                }
+                System.out.println("------------------------------------------------------------------ ");
+            }
+        }
+        
+        List<Track> selectedTracks =  new ArrayList<>();
+        for (int i = 0; i < trkcands.size(); i++) {
+            boolean overlap = false;
+            Track t1 = trkcands.get(i);
+            for(int j=0; j<trkcands.size(); j++ ) {
+                Track t2 = trkcands.get(j);
+//                System.out.println("Checking overlaps for tracks ");
+//                t1.printInfo();t2.printInfo();
+                if(i!=j && t1.overlaps(t2) && !t1.bestChi2(t2)) {
+                    overlap=true;
+                }
+//               System.out.println(overlap);
+            }
+            if(!overlap) selectedTracks.add(t1);
+        }
+        trkcands.removeAll(trkcands);
+        trkcands.addAll(selectedTracks);
     }
     
 //    public void removeOverlappingTracks(List<Track> trkcands) { 

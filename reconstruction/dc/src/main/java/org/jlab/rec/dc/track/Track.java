@@ -397,6 +397,24 @@ public class Track extends Trajectory implements Comparable<Track>{
         return _hitsOnTrack;
     }
     
+    public boolean overlaps(Track o) {
+        boolean value = false;
+        for(int i=0; i<this.size(); i++) {
+            int ct = this.get(i).get_Id();
+            int co = o.get(i).get_Id();
+            if(ct!=-1 && ct==co) value = true;
+        }
+        return value;
+    }
+    
+    public boolean bestChi2(Track o) {
+        if(this.get_FitChi2()<o.get_FitChi2()) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     
     public boolean isGood() {
         boolean isGood=true;
@@ -407,7 +425,9 @@ public class Track extends Trajectory implements Comparable<Track>{
      * Basic track info
      */
     public void printInfo() {
-        System.out.println("Track "+this._Id+" Q= "+this._Q+" P= "+this._P);
+        String str = "Track "+this._Id+" Sector= "+this.get_Sector()+" Q= "+this._Q+" P= "+this._P+" chi2="+this.get_FitChi2();
+        for(int i=0; i<this.size(); i++) str += " cross" + (i+1) + "= " + this.get(i).get_Id();
+        System.out.println(str);
     }
     @Override
     public int compareTo(Track arg) {

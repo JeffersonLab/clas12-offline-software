@@ -1,17 +1,13 @@
 package org.jlab.service.dc;
 
-import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.geom.base.ConstantProvider;
-import org.jlab.geom.base.Detector;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.trajectory.TrajectorySurfaces;
@@ -21,13 +17,8 @@ public class DCEngine extends ReconstructionEngine {
 
     //String FieldsConfig="";
     //AtomicInteger Run = new AtomicInteger(0);
-    DCGeant4Factory dcDetector;
-    FTOFGeant4Factory ftofDetector;
-    Detector          ecalDetector = null;
-    TrajectorySurfaces tSurf;
     String clasDictionaryPath ;
     String variationName;
-    boolean endplatesBowing;
     public DCEngine(String name) {
         super(name,"ziegler","5.0");
     }
@@ -75,10 +66,10 @@ public class DCEngine extends ReconstructionEngine {
             System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on yaml = "+wireDistortionsFlag);
             if(Boolean.valueOf(wireDistortionsFlag)==true) {
                 //Constants.setWIREDIST(1.0);
-                endplatesBowing = DCGeant4Factory.ENDPLATESBOWON;
+                Constants.ENDPLATESBOWING = DCGeant4Factory.ENDPLATESBOWON;
             } else {
                 //Constants.setWIREDIST(0);
-                endplatesBowing = DCGeant4Factory.ENDPLATESBOWOFF;
+                Constants.ENDPLATESBOWING = DCGeant4Factory.ENDPLATESBOWOFF;
             }
         }
         else {
@@ -87,10 +78,10 @@ public class DCEngine extends ReconstructionEngine {
                 System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on env = "+wireDistortionsFlag);
                 if(Boolean.valueOf(wireDistortionsFlag)==true) {
                     //Constants.setWIREDIST(1.0);
-                    endplatesBowing = DCGeant4Factory.ENDPLATESBOWON;
+                    Constants.ENDPLATESBOWING = DCGeant4Factory.ENDPLATESBOWON;
                 } else {
                     //Constants.setWIREDIST(0);
-                    endplatesBowing = DCGeant4Factory.ENDPLATESBOWOFF;
+                    Constants.ENDPLATESBOWING = DCGeant4Factory.ENDPLATESBOWOFF;
                 }
             }
         }
@@ -203,51 +194,6 @@ public class DCEngine extends ReconstructionEngine {
 
         requireConstants(Arrays.asList(dcTables));
         // Get the constants for the correct variation
-        String geomDBVar = this.getEngineConfigString("dcGeometryVariation");
-        if (geomDBVar!=null) {
-            System.out.println("["+this.getName()+"] run with geometry variation based on yaml = "+geomDBVar);
-        }
-        else {
-            geomDBVar = System.getenv("COAT_DC_GEOMETRYVARIATION");
-            if (geomDBVar!=null) {
-                System.out.println("["+this.getName()+"] run with geometry variation chosen based on env = "+geomDBVar);
-            }
-        } 
-        if (geomDBVar==null) {
-            System.out.println("["+this.getName()+"] run with default geometry");
-        }
-        
-        // Load the geometry
-        String geoVariation = Optional.ofNullable(geomDBVar).orElse("default");
-        ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, geoVariation);
-        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, endplatesBowing);
-        for(int l=0; l<6; l++) {
-            Constants.wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
-            System.out.println("****************** WPDIST READ *********FROM "+geoVariation+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
-        }
-        // Load target
-        ConstantProvider providerTG = GeometryFactory.getConstants(DetectorType.TARGET, 11, geoVariation);
-        double targetPosition = providerTG.getDouble("/geometry/target/position",0);
-        double targetLength   = providerTG.getDouble("/geometry/target/length",0);
-        // Load other geometries
-        ConstantProvider providerFTOF = GeometryFactory.getConstants(DetectorType.FTOF, 11, geoVariation);
-        ftofDetector = new FTOFGeant4Factory(providerFTOF);        
-        ConstantProvider providerEC = GeometryFactory.getConstants(DetectorType.ECAL, 11, geoVariation);
-        ecalDetector =  GeometryFactory.getDetector(DetectorType.ECAL, 11, geoVariation);
-        System.out.println(" -- Det Geometry constants are Loaded " );
-
-        // create the surfaces
-        tSurf = new TrajectorySurfaces();
-        // for debugging the end plates bowing:
-        //====================================
-        //try {
-        //    tSurf.checkDCGeometry(dcDetector);
-        //} catch (FileNotFoundException ex) {
-        //    Logger.getLogger(DCEngine.class.getName()).log(Level.SEVERE, null, ex);
-        //}
-        tSurf.LoadSurfaces(targetPosition, targetLength,dcDetector, ftofDetector, ecalDetector);
-        
-        // Get the constants for the correct variation
         String ccDBVar = this.getEngineConfigString("variation");
         if (ccDBVar!=null) {
             System.out.println("["+this.getName()+"] run with constants variation based on yaml = "+ccDBVar);
@@ -265,6 +211,54 @@ public class DCEngine extends ReconstructionEngine {
         String dcvariationName = Optional.ofNullable(ccDBVar).orElse("default");
         variationName = dcvariationName;
         this.getConstantsManager().setVariation(dcvariationName);
+    }
+    
+    public void LoadGeometry() {
+        // Get the constants for the correct variation
+        String geomDBVar = this.getEngineConfigString("dcGeometryVariation");
+        if (geomDBVar!=null) {
+            System.out.println("["+this.getName()+"] run with geometry variation based on yaml = "+geomDBVar);
+        }
+        else {
+            geomDBVar = System.getenv("COAT_DC_GEOMETRYVARIATION");
+            if (geomDBVar!=null) {
+                System.out.println("["+this.getName()+"] run with geometry variation chosen based on env = "+geomDBVar);
+            }
+        } 
+        if (geomDBVar==null) {
+            System.out.println("["+this.getName()+"] run with default geometry");
+        }
+        
+        // Load the geometry
+        String geoVariation = Optional.ofNullable(geomDBVar).orElse("default");
+        ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, geoVariation);
+        Constants.dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, Constants.ENDPLATESBOWING);
+        for(int l=0; l<6; l++) {
+            Constants.wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
+            System.out.println("****************** WPDIST READ *********FROM "+geoVariation+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
+        }
+        // Load target
+        ConstantProvider providerTG = GeometryFactory.getConstants(DetectorType.TARGET, 11, geoVariation);
+        double targetPosition = providerTG.getDouble("/geometry/target/position",0);
+        double targetLength   = providerTG.getDouble("/geometry/target/length",0);
+        // Load other geometries
+        ConstantProvider providerFTOF = GeometryFactory.getConstants(DetectorType.FTOF, 11, geoVariation);
+        Constants.ftofDetector = new FTOFGeant4Factory(providerFTOF);        
+        ConstantProvider providerEC = GeometryFactory.getConstants(DetectorType.ECAL, 11, geoVariation);
+        Constants.ecalDetector =  GeometryFactory.getDetector(DetectorType.ECAL, 11, geoVariation);
+        System.out.println(" -- Det Geometry constants are Loaded " );
+
+        // create the surfaces
+        Constants.tSurf = new TrajectorySurfaces();
+        // for debugging the end plates bowing:
+        //====================================
+        //try {
+        //    tSurf.checkDCGeometry(dcDetector);
+        //} catch (FileNotFoundException ex) {
+        //    Logger.getLogger(DCEngine.class.getName()).log(Level.SEVERE, null, ex);
+        //}
+        Constants.tSurf.LoadSurfaces(targetPosition, targetLength,Constants.dcDetector, Constants.ftofDetector, Constants.ecalDetector);
+        
     }
     
     @Override

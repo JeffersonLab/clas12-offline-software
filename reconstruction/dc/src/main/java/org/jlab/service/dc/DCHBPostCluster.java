@@ -85,7 +85,7 @@ public class DCHBPostCluster extends DCEngine {
         List<Segment> segments = null;
         List<FittedHit> fhits = null;
         if(this.aiAssist==true) {
-            hitRead.read_NNHits(event, dcDetector, triggerPhase);
+            hitRead.read_NNHits(event, Constants.dcDetector, triggerPhase);
 
             //I) get the lists
             List<Hit> hits = hitRead.get_DCHits();
@@ -96,14 +96,14 @@ public class DCHBPostCluster extends DCEngine {
                 return true;
             }
             PatternRec pr = new PatternRec();
-            segments = pr.RecomposeSegments(hits, dcDetector);
+            segments = pr.RecomposeSegments(hits, Constants.dcDetector);
             Collections.sort(segments);
         
             if (segments.isEmpty()) {
                 return true;
             } 
             //crossList
-            CrossList crosslist = pr.RecomposeCrossList(segments, dcDetector);
+            CrossList crosslist = pr.RecomposeCrossList(segments, Constants.dcDetector);
             crosses = new ArrayList<Cross>();
             if(Constants.DEBUG==true) 
                 System.out.println("num cands = "+crosslist.size());
@@ -128,7 +128,7 @@ public class DCHBPostCluster extends DCEngine {
             //find the list of  track candidates
             TrackCandListFinder trkcandFinder = new TrackCandListFinder(Constants.HITBASE);
             trkcands = trkcandFinder.getTrackCands(crosslist,
-                dcDetector,
+                Constants.dcDetector,
                 Swimmer.getTorScale(),
                 dcSwim, this.aiAssist);
            
@@ -143,7 +143,7 @@ public class DCHBPostCluster extends DCEngine {
                     trk.set_Id(trkId);
                     trkcandFinder.matchHits(trk.get_Trajectory(),
                             trk,
-                            dcDetector,
+                            Constants.dcDetector,
                             dcSwim);
                     for (Cross c : trk) {
                         c.set_CrossDirIntersSegWires();
@@ -169,7 +169,7 @@ public class DCHBPostCluster extends DCEngine {
             fhits = new ArrayList<FittedHit>();
             ClusterFinder clusFinder = new ClusterFinder();
             ClusterFitter cf = new ClusterFitter();
-            clusters = clusFinder.RecomposeClusters(event, dcDetector, cf);
+            clusters = clusFinder.RecomposeClusters(event, Constants.dcDetector, cf);
             if (clusters ==null || clusters.isEmpty()) {
                 return true;
             }
@@ -178,7 +178,7 @@ public class DCHBPostCluster extends DCEngine {
             SegmentFinder segFinder = new SegmentFinder();
             segments = segFinder.get_Segments(clusters,
                     event,
-                    dcDetector, false);
+                    Constants.dcDetector, false);
             
             /* 15 */
             // need 6 segments to make a trajectory
@@ -202,7 +202,7 @@ public class DCHBPostCluster extends DCEngine {
                 return true;
             /* 16 */
             CrossMaker crossMake = new CrossMaker();
-            crosses = crossMake.find_Crosses(segments, dcDetector);
+            crosses = crossMake.find_Crosses(segments, Constants.dcDetector);
             if (crosses.isEmpty()) {
                 event.appendBanks(
                         rbc.fillHBSegmentsBank(event, segments));
@@ -214,14 +214,14 @@ public class DCHBPostCluster extends DCEngine {
             CrossList crosslist = crossLister.candCrossLists(event, crosses,
                     false,
                     super.getConstantsManager().getConstants(Run.get(), Constants.TIME2DIST),
-                    dcDetector,
+                    Constants.dcDetector,
                     null,
                     dcSwim, false);
             /* 18 */
             //6) find the list of  track candidates
             TrackCandListFinder trkcandFinder = new TrackCandListFinder(Constants.HITBASE);
             trkcands = trkcandFinder.getTrackCands(crosslist,
-                    dcDetector,
+                    Constants.dcDetector,
                     Swimmer.getTorScale(),
                     dcSwim, this.aiAssist);
             /* 19 */
@@ -236,7 +236,7 @@ public class DCHBPostCluster extends DCEngine {
                     trk.set_Id(trkId);
                     trkcandFinder.matchHits(trk.get_Trajectory(),
                             trk,
-                            dcDetector,
+                            Constants.dcDetector,
                             dcSwim);
                     for (Cross c : trk) {
                         c.get_Segment1().isOnTrack = true;
@@ -263,7 +263,7 @@ public class DCHBPostCluster extends DCEngine {
             }
             
             RoadFinder rf = new RoadFinder();
-            List<Road> allRoads = rf.findRoads(segments, dcDetector);
+            List<Road> allRoads = rf.findRoads(segments, Constants.dcDetector);
             List<Segment> Segs2Road = new ArrayList<>();
             for (Road r : allRoads) { 
                 Segs2Road.clear();
@@ -292,7 +292,7 @@ public class DCHBPostCluster extends DCEngine {
                 }
                 if (Segs2Road.size() == 2) {
                     Segment pSegment = rf.findRoadMissingSegment(Segs2Road,
-                            dcDetector,
+                            Constants.dcDetector,
                             r.a);
                     if (pSegment != null)
                         psegments.add(pSegment);
@@ -300,18 +300,18 @@ public class DCHBPostCluster extends DCEngine {
             }
             
             segments.addAll(psegments);
-            List<Cross> pcrosses = crossMake.find_Crosses(segments, dcDetector);
+            List<Cross> pcrosses = crossMake.find_Crosses(segments, Constants.dcDetector);
             
             CrossList pcrosslist = crossLister.candCrossLists(event, pcrosses,
                     false,
                     super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST),
-                    dcDetector,
+                    Constants.dcDetector,
                     null,
                     dcSwim, true);
             //pcrosslist.removeDuplicates(crosslist); 
             
             List<Track> mistrkcands = trkcandFinder.getTrackCands(pcrosslist,
-                    dcDetector,
+                    Constants.dcDetector,
                     Swimmer.getTorScale(),
                     dcSwim, this.aiAssist);
 
@@ -324,7 +324,7 @@ public class DCHBPostCluster extends DCEngine {
                     trk.set_Id(trkId);
                     trkcandFinder.matchHits(trk.get_Trajectory(),
                             trk,
-                            dcDetector,
+                            Constants.dcDetector,
                             dcSwim);
                     for (Cross c : trk) {
                         for (FittedHit h1 : c.get_Segment1()) {
@@ -354,31 +354,22 @@ public class DCHBPostCluster extends DCEngine {
                 for (Cross c : trk) {
                     c.set_CrossDirIntersSegWires();
                     for (FittedHit h1 : c.get_Segment1()) {
-                        h1.setSignalPropagTimeAlongWire(dcDetector);
-                        h1.setSignalTimeOfFlight(); 
-                        FittedHit h1c;
-                        try {
-                            h1c = h1.clone();
-                            fhits.add(h1c);
-                        } catch (CloneNotSupportedException ex) {
-                            Logger.getLogger(DCHBPostCluster.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+//                        h1.setSignalPropagTimeAlongWire(dcDetector); //PASS1, not necessary because hits were already updated in trkcandFinder.matchHits
+//                        h1.setSignalTimeOfFlight();                  //PASS1
+                        FittedHit h1c = h1.clone();
+                        fhits.add(h1c);
                         
                     }
                     for (FittedHit h2 : c.get_Segment2()) {
-                        h2.setSignalPropagTimeAlongWire(dcDetector);
-                        h2.setSignalTimeOfFlight(); 
-                        FittedHit h2c;
-                        try {
-                            h2c = h2.clone();
-                            fhits.add(h2c);
-                        } catch (CloneNotSupportedException ex) {
-                            Logger.getLogger(DCHBPostCluster.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+//                        h2.setSignalPropagTimeAlongWire(dcDetector); //PASS1
+//                        h2.setSignalTimeOfFlight();                  //PASS1
+                        FittedHit h2c = h2.clone();
+                        fhits.add(h2c);
                     }
                 }
             }
         }
+        
         // no candidate found, stop here and save the hits,
         // the clusters, the segments, the crosses
         if (trkcands.isEmpty()) {

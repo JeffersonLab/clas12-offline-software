@@ -393,7 +393,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             //distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.getCorrectedTime(this.get_Time(), deltatime_beta), secIdx, slIdx) ;
             
         }
-        
+     
         this.set_Doca(distance);
         this._TimeToDistance = distance;
     }
@@ -703,9 +703,12 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     public String printInfo() {
         //double xr = this._X*FastMath.cos(Math.toRadians(25.))+this._Z*FastMath.sin(Math.toRadians(25.));		
         //double zr = this._Z*FastMath.cos(Math.toRadians(25.))-this._X*FastMath.sin(Math.toRadians(25.));
-        String s = "DC Fitted Hit: ID " + this.get_Id() + " Sector " + this.get_Sector() + " Superlayer " + this.get_Superlayer() + " Layer " + this.get_Layer() + " Wire " + this.get_Wire() + " TDC " + this.get_TDC()+ " Time " + this.get_Time()
-                + "  LR " + this.get_LeftRightAmb() + " doca " + (float)this.get_TimeToDistance()+ " +/- " +(float)this.get_DocaErr() + " updated pos  " + (float)this._X + " clus "
-                + this._AssociatedClusterID;
+        String s = String.format("DC Fitted Hit: ID %d  Sector %d  Superlayer %d  Layer %d  Wire %d  TDC %d  Time %.4f  LR %d  Doca %.4f +/- %.4f\n",
+                   this.get_Id(),this.get_Sector(),this.get_Superlayer(),this.get_Layer(),this.get_Wire(),this.get_TDC(),
+                   this.get_Time(),this.get_LeftRightAmb(),this.get_TimeToDistance(),this.get_DocaErr());
+        s = s +    String.format("               clusID %d  trkID %d  Tflight %.4f  Tprop %.4f  T0 %.4f  TStart %.4f  Beta %.4f  B %.4f",
+                   this.get_AssociatedClusterID(), this.get_AssociatedHBTrackID(), this.getTFlight(), this.getTProp(), this.getT0(), this.getTStart(), this.get_Beta(), this.getB());
+        s = s +    String.format("               clusFitDoca %.4f  X %.4f  Z%.4f", this.get_ClusFitDoca(), this.get_X(), this.get_Z());
         return s;
     }
 
@@ -992,7 +995,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     }
     
     //make a  copy
-    public FittedHit clone() throws CloneNotSupportedException {
+    @Override
+    public FittedHit clone() {
         FittedHit hitClone = new FittedHit(this.get_Sector(), this.get_Superlayer(), this.get_Layer(), this.get_Wire(),
                     this.get_TDC(), this.get_Id());
             hitClone.set_Doca(this.get_Doca());
@@ -1021,6 +1025,6 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             
         return hitClone;
     }
+
     
-  
 }

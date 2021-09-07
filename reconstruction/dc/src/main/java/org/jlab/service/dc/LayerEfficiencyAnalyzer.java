@@ -92,6 +92,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         Constants.Load();
         super.setOptions();
         super.LoadTables();
+        super.LoadGeometry();
         Constants.setT2D(1);
         
         maxDoca[0]=0.8;maxDoca[1]=0.9;maxDoca[2]=1.3;maxDoca[3]=1.4;maxDoca[4]=1.9;maxDoca[5]=2.0;
@@ -263,7 +264,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         hitRead.read_HBHits(event, 
             super.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
             super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"),
-            Constants.getT0(), Constants.getT0Err(), dcDetector, tde);
+            Constants.getT0(), Constants.getT0Err(), Constants.dcDetector, tde);
         //hitRead.read_TBHits(event, 
         //    super.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
         //    super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), tde, Constants.getT0(), Constants.getT0Err());
@@ -287,7 +288,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         ClusterFinder clusFinder = new ClusterFinder();
 
         clusters = clusFinder.FindTimeBasedClusters(event, hits, cf, ct, 
-                super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, tde);
+                super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), Constants.dcDetector, tde);
 
         if(clusters.isEmpty()) {
             return true;
@@ -298,7 +299,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
 
         List<FittedCluster> pclusters = segFinder.selectTimeBasedSegments(clusters);
 
-        segments =  segFinder.get_Segments(pclusters, event, dcDetector, true);
+        segments =  segFinder.get_Segments(pclusters, event, Constants.dcDetector, true);
         
         if(segments!=null && segments.size()>0) {
             DataBank bankE = event.createBank("TimeBasedTrkg::TBSegmentTrajectory", segments.size() * 6);

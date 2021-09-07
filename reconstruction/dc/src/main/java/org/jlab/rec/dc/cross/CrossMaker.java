@@ -59,8 +59,7 @@ public class CrossMaker {
                                     cross.set_Segment1(seg1);
                                     cross.set_Segment2(seg2);
                                     cross.set_CrossParams(DcDetector);
-                                    seg1.associatedCrossId = cross.get_Id();
-                                    seg2.associatedCrossId = cross.get_Id();
+
                                     Point3D CS = cross.getCoordsInSector(cross.get_Point().x(), cross.get_Point().y(), cross.get_Point().z());
 
                                     if (CS.x() > 0) {

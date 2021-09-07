@@ -46,7 +46,7 @@ public class RecoBankWriter {
 
     public void updateListsWithClusterInfo(List<FittedHit> fhits,
             List<FittedCluster> clusters) {
-
+        
         for (int i = 0; i < clusters.size(); i++) {
             clusters.get(i).set_Id(i + 1);
             for (int j = 0; j < clusters.get(i).size(); j++) {
@@ -57,9 +57,9 @@ public class RecoBankWriter {
                         fhits.remove(k);
                         fhits.add(clusters.get(i).get(j));
 
-                    }
                 }
             }
+        }
         }
 
     }
@@ -69,6 +69,7 @@ public class RecoBankWriter {
         
         int rejCnt = 0;
         for (int i = 0; i < hitlist.size(); i++) {
+//            if (hitlist.get(i).get_Id() == -1 /*|| hitlist.get(i).get_Id()==0*/) { //PASS1
             if (hitlist.get(i).get_Id() == -1 || hitlist.get(i).get_Id()==0) {
                 rejCnt++;
             }
@@ -76,6 +77,7 @@ public class RecoBankWriter {
         DataBank bank = event.createBank(name, hitlist.size()-rejCnt);
         rejCnt=0;
         for (int i = 0; i < hitlist.size(); i++) {
+//            if (hitlist.get(i).get_Id() == -1 /*|| hitlist.get(i).get_Id()==0*/) { //PASS1
             if (hitlist.get(i).get_Id() == -1 || hitlist.get(i).get_Id()==0) {
                 rejCnt++;
                 continue;
@@ -109,8 +111,10 @@ public class RecoBankWriter {
         String name = "HitBasedTrkg::"+_names[0]+"HitTrkId"; 
         int rejCnt = 0;
         for (int i = 0; i < hitlist.size(); i++) {
-            if (hitlist.get(i).get_AssociatedHBTrackID() == -1 || hitlist.get(i).get_Id()==0 
-                    || hitlist.get(i).getTFlight()==0) {
+//            if (hitlist.get(i).get_AssociatedHBTrackID() == -1 /*|| hitlist.get(i).get_Id()==0*/ //PASS1
+//                    /*|| hitlist.get(i).getTFlight()==0*/) {
+            if (hitlist.get(i).get_AssociatedHBTrackID() == -1 || hitlist.get(i).get_Id()==0 ){
+//                    || hitlist.get(i).getTFlight()==0) {
                 rejCnt++;
             }
         }
@@ -118,8 +122,10 @@ public class RecoBankWriter {
         rejCnt=0;
         for (int i = 0; i < hitlist.size(); i++) {
             //output only for HOTs
-            if (hitlist.get(i).get_AssociatedHBTrackID() == -1 || hitlist.get(i).get_Id()==0 
-                    || hitlist.get(i).getTFlight()==0) {
+//            if (hitlist.get(i).get_AssociatedHBTrackID() == -1 || hitlist.get(i).get_Id()==0 //PASS1
+//                    /*|| hitlist.get(i).getTFlight()==0*/) {
+            if (hitlist.get(i).get_AssociatedHBTrackID() == -1 || hitlist.get(i).get_Id()==0 ) {
+//                    || hitlist.get(i).getTFlight()==0) {
                 rejCnt++;
                 continue;
             } 
@@ -128,24 +134,28 @@ public class RecoBankWriter {
             bank.setFloat("B", i-rejCnt, (float) hitlist.get(i).getB());
             bank.setFloat("TProp", i-rejCnt, (float) hitlist.get(i).getTProp());
             bank.setFloat("TFlight", i-rejCnt, (float) hitlist.get(i).getTFlight());
-            if(i>0 && hitlist.get(i).get_Sector()==hitlist.get(i-1).get_Sector() && 
-                     hitlist.get(i).get_Superlayer()==hitlist.get(i-1).get_Superlayer() && 
-                     hitlist.get(i).get_Layer()==hitlist.get(i-1).get_Layer() && 
-                     Math.abs(hitlist.get(i).get_Wire()-hitlist.get(i-1).get_Wire())==1) {// fix for double hits
-                bank.setFloat("B", i-rejCnt, (float) hitlist.get(i-1).getB());
-                bank.setFloat("TProp", i-rejCnt, (float) hitlist.get(i-1).getTProp());
-                bank.setFloat("TFlight", i-rejCnt, (float) hitlist.get(i-1).getTFlight());
-            }
+//            if(i>0 && hitlist.get(i).get_Sector()==hitlist.get(i-1).get_Sector() && 
+//                     hitlist.get(i).get_Superlayer()==hitlist.get(i-1).get_Superlayer() && 
+//                     hitlist.get(i).get_Layer()==hitlist.get(i-1).get_Layer() && 
+//                     Math.abs(hitlist.get(i).get_Wire()-hitlist.get(i-1).get_Wire())==1 &&
+//                     hitlist.get(i-1).getTFlight()>0) {// fix for double hits
+//                System.out.println("i-1 " + hitlist.get(i-1).printInfo());
+//                System.out.println("i   " + hitlist.get(i).printInfo());
+//                bank.setFloat("B", i-rejCnt, (float) hitlist.get(i-1).getB());
+//                bank.setFloat("TProp", i-rejCnt, (float) hitlist.get(i-1).getTProp());
+//                bank.setFloat("TFlight", i-rejCnt, (float) hitlist.get(i-1).getTFlight());
+//            }
             if(hitlist.get(i).get_AssociatedHBTrackID()>-1 && !event.hasBank("MC::Particle")) {
                 bank.setFloat("TProp", i-rejCnt, (float) hitlist.get(i).getSignalPropagTimeAlongWire());
                 bank.setFloat("TFlight", i-rejCnt, (float) hitlist.get(i).getSignalTimeOfFlight());
-                if(i>0 && hitlist.get(i).get_Sector()==hitlist.get(i-1).get_Sector() && 
-                     hitlist.get(i).get_Superlayer()==hitlist.get(i-1).get_Superlayer() && 
-                     hitlist.get(i).get_Layer()==hitlist.get(i-1).get_Layer() && 
-                     Math.abs(hitlist.get(i).get_Wire()-hitlist.get(i-1).get_Wire())==1) {// fix for double hits
-                    bank.setFloat("TProp", i-rejCnt, (float) hitlist.get(i-1).getSignalPropagTimeAlongWire());
-                    bank.setFloat("TFlight", i-rejCnt, (float) hitlist.get(i-1).getSignalTimeOfFlight());
-                }
+//                if(i>0 && hitlist.get(i).get_Sector()==hitlist.get(i-1).get_Sector() && 
+//                     hitlist.get(i).get_Superlayer()==hitlist.get(i-1).get_Superlayer() && 
+//                     hitlist.get(i).get_Layer()==hitlist.get(i-1).get_Layer() && 
+//                     Math.abs(hitlist.get(i).get_Wire()-hitlist.get(i-1).get_Wire())==1 &&
+//                     hitlist.get(i-1).getTFlight()>0) {// fix for double hits
+//                    bank.setFloat("TProp", i-rejCnt, (float) hitlist.get(i-1).getSignalPropagTimeAlongWire());
+//                    bank.setFloat("TFlight", i-rejCnt, (float) hitlist.get(i-1).getSignalTimeOfFlight());
+//                }
             }
         }
     //bank.show();
@@ -207,7 +217,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
             hitStrg += (j + 1);
             hitStrg += "_ID";
             bank.setShort(hitStrg, i, (short) hitIdxArray[j]);
-        }
+    }
     }
 
     return bank;
@@ -902,26 +912,26 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
             );
 
         }
-        if (crosses != null && trkcands == null) {
+        else if (crosses != null && trkcands == null) {
             event.appendBanks(rbc.fillHBHitsBank(event, fhits),
                     rbc.fillHBClustersBank(event, clusters),
                     rbc.fillHBSegmentsBank(event, segments),
                     rbc.fillHBCrossesBank(event, crosses)
             );
         }
-        if (segments != null && crosses == null) {
+        else if (segments != null && crosses == null) {
             event.appendBanks(rbc.fillHBHitsBank(event, fhits),
                     rbc.fillHBClustersBank(event, clusters),
                     rbc.fillHBSegmentsBank(event, segments)
             );
         }
-        if (clusters != null && segments == null) {
+        else if (clusters != null && segments == null) {
 
             event.appendBanks(rbc.fillHBHitsBank(event, fhits),
                     rbc.fillHBClustersBank(event, clusters)
             );
         }
-        if (fhits != null && clusters == null) {
+        else if (fhits != null && clusters == null) {
             event.appendBanks(rbc.fillHBHitsBank(event, fhits)
             );
         }

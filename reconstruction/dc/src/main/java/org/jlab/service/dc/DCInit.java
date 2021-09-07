@@ -30,6 +30,7 @@ public class DCInit extends DCEngine {
         // Load cuts
         Constants.Load();
         super.setOptions();
+        super.LoadGeometry();
         super.LoadTables();
         return true;
     }

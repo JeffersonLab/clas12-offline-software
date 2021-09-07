@@ -91,7 +91,7 @@ public class DCNNEngine extends DCEngine {
        
         HitReader hitRead = new HitReader();
        
-        hitRead.read_NNHits(event, dcDetector, triggerPhase);
+        hitRead.read_NNHits(event, Constants.dcDetector, triggerPhase);
        
         //I) get the lists
         List<Hit> hits = hitRead.get_DCHits();
@@ -103,14 +103,14 @@ public class DCNNEngine extends DCEngine {
             return true;
         }
         PatternRec pr = new PatternRec();
-        List<Segment> segments = pr.RecomposeSegments(hits, dcDetector);
+        List<Segment> segments = pr.RecomposeSegments(hits, Constants.dcDetector);
         
         if (segments.isEmpty()) {
             return true;
         }
         
         //crossList
-        CrossList crosslist = pr.RecomposeCrossList(segments, dcDetector);
+        CrossList crosslist = pr.RecomposeCrossList(segments, Constants.dcDetector);
         List<Cross> crosses = new ArrayList<Cross>();
 
         for (List<Cross> clist : crosslist) {
@@ -119,7 +119,7 @@ public class DCNNEngine extends DCEngine {
         //find the list of  track candidates
         TrackCandListFinder trkcandFinder = new TrackCandListFinder(Constants.HITBASE);
         List<Track> trkcands = trkcandFinder.getTrackCands(crosslist,
-                dcDetector,
+                Constants.dcDetector,
                 Swimmer.getTorScale(),
                 dcSwim, true);
         
@@ -133,7 +133,7 @@ public class DCNNEngine extends DCEngine {
                 trk.set_Id(trkId);
                 trkcandFinder.matchHits(trk.get_Trajectory(),
                         trk,
-                        dcDetector,
+                        Constants.dcDetector,
                         dcSwim);
                 for (Cross c : trk) {
                     c.get_Segment1().isOnTrack = true;
