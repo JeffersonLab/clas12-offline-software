@@ -123,7 +123,23 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.6</version>
-                <configuration>
+              <configuration>
+                  <archive>
+                      <manifest>
+                          <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                          <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                      </manifest>
+                      <manifestSections>
+                          <manifestSection>
+                              <name>${project.name}</name>
+                              <manifestEntries>
+                                  <groupId>${project.groupId}</groupId>
+                                  <artifactId>${project.artifactId}</artifactId>
+                                  <version>${project.version}</version>
+                              </manifestEntries>
+                          </manifestSection>
+                      </manifestSections>
+                  </archive>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
