@@ -125,6 +125,13 @@ public class DCHBPostCluster extends DCEngine {
                         rbc.fillHBSegmentsBank(event, segments));
                 return true;
             } 
+            // update B field
+            CrossListFinder crossLister = new CrossListFinder();
+            for(Cross cr : crosses) {
+                crossLister.updateBFittedHits(event, cr, 
+                    super.getConstantsManager().getConstants(Run.get(), Constants.TIME2DIST),
+                    Constants.dcDetector, null, dcSwim);
+            }
             //find the list of  track candidates
             TrackCandListFinder trkcandFinder = new TrackCandListFinder(Constants.HITBASE);
             trkcands = trkcandFinder.getTrackCands(crosslist,
@@ -147,17 +154,15 @@ public class DCHBPostCluster extends DCEngine {
                             dcSwim);
                     for (Cross c : trk) {
                         c.set_CrossDirIntersSegWires();
-                        c.get_Segment1().isOnTrack = true;
-                        c.get_Segment2().isOnTrack = true;
                         clusters.add(c.get_Segment1().get_fittedCluster());
                         clusters.add(c.get_Segment2().get_fittedCluster());
+                        trkcandFinder.setHitDoubletsInfo(c.get_Segment1());
+                        trkcandFinder.setHitDoubletsInfo(c.get_Segment2());
                         for (FittedHit h1 : c.get_Segment1()) {
-                            h1.set_AssociatedHBTrackID(trk.get_Id());
-                            fhits.add(h1);
+                            if(h1.get_AssociatedHBTrackID()>0) fhits.add(h1);
                         }
                         for (FittedHit h2 : c.get_Segment2()) {
-                            h2.set_AssociatedHBTrackID(trk.get_Id());
-                            fhits.add(h2);
+                            if(h2.get_AssociatedHBTrackID()>0) fhits.add(h2);
                         }
                     }
                     trkId++;
@@ -225,7 +230,6 @@ public class DCHBPostCluster extends DCEngine {
                     Swimmer.getTorScale(),
                     dcSwim, this.aiAssist);
             /* 19 */
-
             // track found
             int trkId = 1;
             if (trkcands.size() > 0) {
@@ -238,17 +242,6 @@ public class DCHBPostCluster extends DCEngine {
                             trk,
                             Constants.dcDetector,
                             dcSwim);
-                    for (Cross c : trk) {
-                        c.get_Segment1().isOnTrack = true;
-                        c.get_Segment2().isOnTrack = true;
-                        
-                        for (FittedHit h1 : c.get_Segment1()) {
-                            h1.set_AssociatedHBTrackID(trk.get_Id());
-                        }
-                        for (FittedHit h2 : c.get_Segment2()) {
-                            h2.set_AssociatedHBTrackID(trk.get_Id());
-                        }
-                    }
                     trkId++;
                 }
             }
@@ -326,14 +319,6 @@ public class DCHBPostCluster extends DCEngine {
                             trk,
                             Constants.dcDetector,
                             dcSwim);
-                    for (Cross c : trk) {
-                        for (FittedHit h1 : c.get_Segment1()) {
-                            h1.set_AssociatedHBTrackID(trk.get_Id());
-                        }
-                        for (FittedHit h2 : c.get_Segment2()) {
-                            h2.set_AssociatedHBTrackID(trk.get_Id());
-                        }
-                    }
                     trkId++;
                 }
             }
@@ -353,18 +338,17 @@ public class DCHBPostCluster extends DCEngine {
             for (Track trk : trkcands) {
                 for (Cross c : trk) {
                     c.set_CrossDirIntersSegWires();
+                    trkcandFinder.setHitDoubletsInfo(c.get_Segment1());
+                    trkcandFinder.setHitDoubletsInfo(c.get_Segment2());
                     for (FittedHit h1 : c.get_Segment1()) {
 //                        h1.setSignalPropagTimeAlongWire(dcDetector); //PASS1, not necessary because hits were already updated in trkcandFinder.matchHits
 //                        h1.setSignalTimeOfFlight();                  //PASS1
-                        FittedHit h1c = h1.clone();
-                        fhits.add(h1c);
-                        
+                        if(h1.get_AssociatedHBTrackID()>0) fhits.add(h1);
                     }
                     for (FittedHit h2 : c.get_Segment2()) {
 //                        h2.setSignalPropagTimeAlongWire(dcDetector); //PASS1
 //                        h2.setSignalTimeOfFlight();                  //PASS1
-                        FittedHit h2c = h2.clone();
-                        fhits.add(h2c);
+                        if(h2.get_AssociatedHBTrackID()>0) fhits.add(h2);
                     }
                 }
             }

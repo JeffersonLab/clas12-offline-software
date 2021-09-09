@@ -255,7 +255,7 @@ public class CrossListFinder  {
      * @param tde  time-to-distance utility
      * Updates the B-field information of the hits in the cross segments
      */
-    private void updateBFittedHits(DataEvent event, Cross c, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde, Swim swimmer) {
+    public void updateBFittedHits(DataEvent event, Cross c, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde, Swim swimmer) {
         for(int i =0; i<c.get_Segment1().size(); i++) {
             Point3D ref =c.get_Segment1().get(i).getCrossDirIntersWire(); 
             float[] result = new float[3];

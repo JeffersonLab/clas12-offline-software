@@ -244,17 +244,6 @@ public class DCHBEngine extends DCEngine {
                         trk,
                         Constants.dcDetector,
                         dcSwim);
-                for (Cross c : trk) {
-                    c.get_Segment1().isOnTrack = true;
-                    c.get_Segment2().isOnTrack = true;
-
-                    for (FittedHit h1 : c.get_Segment1()) {
-                        h1.set_AssociatedHBTrackID(trk.get_Id());
-                    }
-                    for (FittedHit h2 : c.get_Segment2()) {
-                        h2.set_AssociatedHBTrackID(trk.get_Id());
-                    }
-                }
                 trkId++;
             }
         }
@@ -327,12 +316,9 @@ public class DCHBEngine extends DCEngine {
                         Constants.dcDetector,
                         dcSwim);
                 for (Cross c : trk) {
-                    for (FittedHit h1 : c.get_Segment1()) {
-                        h1.set_AssociatedHBTrackID(trk.get_Id());
-                    }
-                    for (FittedHit h2 : c.get_Segment2()) {
-                        h2.set_AssociatedHBTrackID(trk.get_Id());
-                    }
+                    c.set_CrossDirIntersSegWires();
+                    trkcandFinder.setHitDoubletsInfo(c.get_Segment1());
+                    trkcandFinder.setHitDoubletsInfo(c.get_Segment2());
                 }
                 trkId++;
             }

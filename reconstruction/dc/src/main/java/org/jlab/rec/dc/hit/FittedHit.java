@@ -706,9 +706,10 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         String s = String.format("DC Fitted Hit: ID %d  Sector %d  Superlayer %d  Layer %d  Wire %d  TDC %d  Time %.4f  LR %d  Doca %.4f +/- %.4f\n",
                    this.get_Id(),this.get_Sector(),this.get_Superlayer(),this.get_Layer(),this.get_Wire(),this.get_TDC(),
                    this.get_Time(),this.get_LeftRightAmb(),this.get_TimeToDistance(),this.get_DocaErr());
-        s = s +    String.format("               clusID %d  trkID %d  Tflight %.4f  Tprop %.4f  T0 %.4f  TStart %.4f  Beta %.4f  B %.4f",
+        s = s +    String.format("               clusID %d  trkID %d  Tflight %.4f  Tprop %.4f  T0 %.4f  TStart %.4f  Beta %.4f  B %.4f\n",
                    this.get_AssociatedClusterID(), this.get_AssociatedHBTrackID(), this.getTFlight(), this.getTProp(), this.getT0(), this.getTStart(), this.get_Beta(), this.getB());
-        s = s +    String.format("               clusFitDoca %.4f  X %.4f  Z%.4f", this.get_ClusFitDoca(), this.get_X(), this.get_Z());
+        s = s +    String.format("               clusFitDoca %.4f  X %.4f  Z %.4f", this.get_ClusFitDoca(), this.get_X(), this.get_Z());
+        if(this.getCrossDirIntersWire()!=null) s = s + " " +  this.getCrossDirIntersWire().toString();
         return s;
     }
 
@@ -851,6 +852,16 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 
     /**
      * 
+     * @param DcDetector DC detector geometry
+     */
+    public void setSignalPropagTimeAlongWire(double X, double Y, DCGeant4Factory DcDetector) {
+        this._SignalPropagAlongWire = this.calc_SignalPropagAlongWire(X,Y, DcDetector);
+        this._SignalPropagTimeAlongWire = this._SignalPropagAlongWire/(Constants.SPEEDLIGHT*0.7);
+        this._tProp= this._SignalPropagTimeAlongWire;
+    }
+
+    /**
+     * 
      * @return signal time of flight to the track doca to the hit wire in ns
      */
     public double getSignalTimeOfFlight() {
@@ -962,6 +973,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     public void set_DeltaTimeBeta(double deltatime_beta) {
         _deltatime_beta = deltatime_beta;
     }
+
     public double get_DeltaTimeBeta() {
         return _deltatime_beta ;
     }
@@ -994,9 +1006,36 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         return beta;
     }
     
+    public void updateHitfromSV(StateVec st, DCGeant4Factory DcDetector) {
+//        this.set_Id(this.get_Id());
+//        this.set_TDC(this.get_TDC());
+//        this.set_AssociatedHBTrackID(trk.get_Id());
+//        this.set_AssociatedClusterID(this.get_AssociatedClusterID());
+        this.setAssociatedStateVec(st);
+        this.set_TrkResid(this.get_Doca() * Math.signum(st.getProjectorDoca()) - st.getProjectorDoca());
+        this.setB(st.getB());
+        this.setSignalPropagTimeAlongWire(st.x(), st.y(), DcDetector);
+        this.setSignalTimeOfFlight();
+        this.set_Doca(this.get_Doca());
+        this.set_ClusFitDoca(this.get_ClusFitDoca());
+//        this.set_DocaErr(this.get_DocaErr());
+//        this.setT0(this.getT0());
+//        this.set_Beta(this.get_Beta());
+//        this.set_DeltaTimeBeta(this.get_DeltaTimeBeta());
+//        this.setTStart(this.getTStart());
+        this.set_Time(this.get_Time()
+                + this.getSignalPropagTimeAlongWire() - this.getSignalPropagTimeAlongWire()
+                + this.getTProp() - this.getTProp());
+//        this.set_Id(this.get_Id());
+//        this.set_TrkgStatus(this.get_TrkgStatus());
+//        this.calc_CellSize(DcDetector);
+//        this.set_LeftRightAmb(this.get_LeftRightAmb());
+
+    }
+    
     //make a  copy
     @Override
-    public FittedHit clone() {
+    public FittedHit clone() throws CloneNotSupportedException {
         FittedHit hitClone = new FittedHit(this.get_Sector(), this.get_Superlayer(), this.get_Layer(), this.get_Wire(),
                     this.get_TDC(), this.get_Id());
             hitClone.set_Doca(this.get_Doca());

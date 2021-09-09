@@ -770,73 +770,58 @@ public class TrackCandListFinder {
             }
 
             for (Cross c : trk) {
+                c.get_Segment1().isOnTrack=true;
+                c.get_Segment2().isOnTrack=true;
                 for (FittedHit h1 : c.get_Segment1()) {
                     if (Math.abs(st.getZ() - h1.get_Z()) < 0.1 && c.get_Segment1().get_Id() > -1
                             && (h1.get_XWire() - st.getProjector()) < 0.1) {
 
-                        h1.set_Id(h1.get_Id());
-                        h1.set_TDC(h1.get_TDC());
                         h1.set_AssociatedHBTrackID(trk.get_Id());
-                        h1.set_AssociatedClusterID(h1.get_AssociatedClusterID());
-                        h1.setAssociatedStateVec(st);
-                        h1.set_TrkResid(h1.get_Doca() * Math.signum(st.getProjectorDoca()) - st.getProjectorDoca());
-                        h1.setB(st.getB());
-                        h1.calc_SignalPropagAlongWire(st.x(), st.y(), DcDetector);
-                        h1.setSignalPropagTimeAlongWire(DcDetector);
-                        h1.setSignalTimeOfFlight();
-                        h1.set_Doca(h1.get_Doca());
-                        h1.set_ClusFitDoca(h1.get_ClusFitDoca());
-                        h1.set_DocaErr(h1.get_DocaErr());
-                        h1.setT0(h1.getT0());
-                        h1.set_Beta(h1.get_Beta());
-                        h1.set_DeltaTimeBeta(h1.get_DeltaTimeBeta());
-                        h1.setTStart(h1.getTStart());
-                        h1.set_Time(h1.get_Time()
-                                + h1.getSignalPropagTimeAlongWire() - h1.getSignalPropagTimeAlongWire()
-                                + h1.getTProp() - h1.getTProp());
-                        h1.set_Id(h1.get_Id());
-                        h1.set_TrkgStatus(h1.get_TrkgStatus());
-                        h1.calc_CellSize(DcDetector);
-                        h1.set_LeftRightAmb(h1.get_LeftRightAmb());
+                        h1.updateHitfromSV(st, DcDetector);
                         fhits.add(h1);
-
                     }
                 }
                 for (FittedHit h1 : c.get_Segment2()) {
                     if (Math.abs(st.getZ() - h1.get_Z()) < 0.1 && c.get_Segment2().get_Id() > -1
                             && (h1.get_XWire() - st.getProjector()) < 0.1) {
 
-                        h1.set_Id(h1.get_Id());
-                        h1.set_TDC(h1.get_TDC());
                         h1.set_AssociatedHBTrackID(trk.get_Id());
-                        h1.set_AssociatedClusterID(h1.get_AssociatedClusterID());
-                        h1.setAssociatedStateVec(st);
-                        h1.set_TrkResid(h1.get_Doca() * Math.signum(st.getProjectorDoca()) - st.getProjectorDoca());
-                        h1.setB(st.getB());
-                        h1.calc_SignalPropagAlongWire(st.x(), st.y(), DcDetector);
-                        h1.setSignalPropagTimeAlongWire(DcDetector);
-                        h1.setSignalTimeOfFlight();
-                        h1.set_ClusFitDoca(h1.get_ClusFitDoca());
-                        h1.set_Doca(h1.get_Doca());
-                        h1.set_DocaErr(h1.get_DocaErr());
-                        h1.setT0(h1.getT0());
-                        h1.set_Beta(h1.get_Beta());
-                        h1.set_DeltaTimeBeta(h1.get_DeltaTimeBeta());
-                        h1.setTStart(h1.getTStart());
-                        h1.set_Time(h1.get_Time()
-                                + h1.getSignalPropagTimeAlongWire() - h1.getSignalPropagTimeAlongWire()
-                                + h1.getTProp() - h1.getTProp());
-                        h1.set_Id(h1.get_Id());
-                        h1.set_TrkgStatus(h1.get_TrkgStatus());
-                        h1.calc_CellSize(DcDetector);
-                        h1.set_LeftRightAmb(h1.get_LeftRightAmb());
+                        h1.updateHitfromSV(st, DcDetector);
                         fhits.add(h1);
-
                     }
                 }
             }
         }
         trk.setHitsOnTrack(fhits);
+    }
+
+    public void setHitDoubletsInfo(Segment seg) {
+        if(seg.isOnTrack) {
+            for(FittedHit h : seg) {
+                // for hits with no timing information, check if there is a neighbor hit 
+                // in the same layer and copy time info from there
+                if(h.get_AssociatedHBTrackID()==-1 || h.getTFlight()==0) {
+                    for(FittedHit o :seg) {
+                        if(h.get_Id()!=o.get_Id() && 
+                           o.get_AssociatedHBTrackID()>0 && 
+                           o.getTFlight()>0 && 
+                           h.get_Layer()==o.get_Layer() && 
+                           Math.abs(h.get_Wire()-o.get_Wire())==1) {
+                            h.set_AssociatedHBTrackID(o.get_AssociatedHBTrackID());
+                            h.setB(o.getB());
+                            h.setTProp(o.getTProp());
+                            h.setTFlight(o.getTFlight());
+                        }
+                    }
+                }
+                // if time info is still not available, reset the hit trkID
+                if(h.get_AssociatedHBTrackID()>0 && h.getTFlight()==0)
+                    h.set_AssociatedHBTrackID(-1);
+            }          
+        }
+        else {
+            System.out.println("setHitDoubletsInfo : this method should be used only for segments on track");
+        }
     }
 
     private double calcCurvSign(Track cand) {
