@@ -1,6 +1,7 @@
 package org.jlab.rec.cvt.cluster;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.jlab.rec.cvt.hit.FittedHit;
@@ -16,7 +17,7 @@ public class ClusterFinder {
     public ClusterFinder() {
 
     }
-
+    
     // cluster finding algorithm
     // the loop is done over sectors 
     Hit[][][] HitArray;
@@ -74,21 +75,36 @@ public class ClusterFinder {
                             }
                             si++;
                         }
-
+                    
                         // define new cluster 
                         Cluster this_cluster = new Cluster(hits.get(0).get_Detector(), hits.get(0).get_DetectorType(), hits.get(0).get_Sector(), l + 1, cid++);
                         this_cluster.set_Id(clusters.size() + 1);
                         // add hits to the cluster
                         this_cluster.addAll(hits); 
-                        for (FittedHit h : hits) { 
-                            h.set_AssociatedClusterID(this_cluster.get_Id());
+                        if(hits.size()>2) {
+                            for(int hi = 1; hi<hits.size()-1; hi++) { //interpolate between neighboring strips
+                                if(hits.get(hi).get_Strip().get_Edep()<hits.get(hi-1).get_Strip().get_Edep()
+                                        && hits.get(hi).get_Strip().get_Edep()<hits.get(hi+1).get_Strip().get_Edep()) {
+                                    hits.get(hi).get_Strip().set_Edep(0.5*(hits.get(hi-1).get_Strip().get_Edep()+hits.get(hi+1).get_Strip().get_Edep()));
+                                }
+                            }
                         }
-
+                        for (FittedHit h : hits) {
+                            h.set_AssociatedClusterID(this_cluster.get_Id());
+                            h.newClustering = true; 
+                        }
+                        
                         this_cluster.calc_CentroidParams(geo_bst,geo_bmt);
-                        //make arraylist
+                       
+                        for (FittedHit h : this_cluster) {
+                            h.newClustering = false;
+                        }
+                        Collections.sort(this_cluster);
+                       
+                        //make list of clusters
                         clusters.add(this_cluster);
-
                     }
+                    
                     // if no hits, check for next wire coordinate
                     si++;
                 }

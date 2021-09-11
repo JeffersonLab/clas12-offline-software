@@ -25,7 +25,7 @@ public class Strip {
     private double _Phi0;  								//     for MM Z-detectors, the azimuth angle at the strip midwidth before LC
     private double _PhiErr0;
 
-    private double _Z;    								//     for MM C-detectors. the z position at the strip midwidth
+    private Arc3D _Arc;    								//     for MM C-detectors. the arc position at the strip midwidth
     private double _ZErr;
     private double _Edep;      							//     for simulation this corresponds to the energy deposited on the strip, in data it should be an ADC converted value
     private double _Time;
@@ -115,12 +115,12 @@ public class Strip {
         this._PhiErr0 = _PhiErr0;
     }
 
-    public double get_Z() {
-        return _Z;
+    public Arc3D get_Arc() {
+        return _Arc;
     }
 
-    public void set_Z(double _Z) {
-        this._Z = _Z;
+    public void set_Arc(Arc3D _Arc) {
+        this._Arc = _Arc;
     }
 
     public double get_ZErr() {
@@ -165,8 +165,8 @@ public class Strip {
             //double z = geo.CRCStrip_GetZ(layer, this.get_Strip());
             int region = (int) ((layer + 1) / 2 ); // region index (1...3) 1=layers 1&2, 2=layers 3&4, 3=layers 5&6
             Arc3D arcLine = geo.getCstrip(region, sector, this.get_Strip());
-            double z = arcLine.center().z();
-            this.set_Z(z);
+            //double z = arcLine.center().z();
+            this.set_Arc(arcLine);
             // max z err
             //this.set_ZErr(geo.CRCStrip_GetPitch(layer, this.get_Strip()) / Math.sqrt(12.));
             this.set_ZErr(geo.getCPitch(region, this.get_Strip()) / Math.sqrt(12.));

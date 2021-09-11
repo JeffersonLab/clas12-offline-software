@@ -9,7 +9,7 @@ public class Constants {
     private Constants() {
 
     }
-    public static boolean newClustering = false;
+    
     public static boolean isMC = true;
     /*
  * The algorithm to describe the geometry of the Barrel Micromegas is provided by Franck Sabatie and implemented into the Java framework.
@@ -18,6 +18,7 @@ public class Constants {
    The angles are defined with theZ-axis oriented from the accelerator to the beam dump.
      */
     //CUTS
+    public static double MAXCLUSSIZE = 5;
     public static int MAXBMTHITS = 700;
     // THE GEOMETRY CONSTANTS
     public static final int NREGIONS = 3;						// 3 regions of MM 

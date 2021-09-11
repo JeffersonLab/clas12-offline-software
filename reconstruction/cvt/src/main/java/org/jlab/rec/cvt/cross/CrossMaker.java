@@ -244,7 +244,7 @@ public class CrossMaker {
                 }
 
                 if (BMTGeometry.getDetectorType(theclus.get_Layer()) == BMTType.C) {
-                    bmt_Clayrclus.add(theclus);
+                    bmt_Clayrclus.add(theclus); 
                 }
 
             }

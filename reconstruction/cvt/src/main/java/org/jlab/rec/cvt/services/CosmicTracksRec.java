@@ -197,60 +197,18 @@ public class CosmicTracksRec {
                     int sector = cl.get_Sector();
                     
                     cosmics.get(k1).clsMap.get(keys.get(i)).setTrakInters(tj);
-                    if (cl.get_Detector()==0 ) {
-                        double doca2Cls = SVTGeom.getDOCAToStrip(sector, layer, cl.get_Centroid(), tj);
-                        double doca2Seed = SVTGeom.getDOCAToStrip(sector, layer, (double) cl.get_SeedStrip(), tj);
-                        cl.set_SeedResidual(doca2Seed); 
-                        cl.set_CentroidResidual(resi);
-                        
-                        for (FittedHit hit : cl) {
-                            double doca1 = SVTGeom.getDOCAToStrip(sector, layer, (double) hit.get_Strip().get_Strip(), tj);
-                            double sigma1 = SVTGeom.getSingleStripResolution(layer, hit.get_Strip().get_Strip(), tj.z());
-                            hit.set_stripResolutionAtDoca(sigma1);
-                            hit.set_docaToTrk(doca1);  
-                            hit.set_TrkgStatus(1);
-                        }
-                    }
+                    cl.set_CentroidResidual(resi);
+                    
                     if (cl.get_Detector()==1 ) {
                         
-                        if (cl.get_DetectorType()==0) { //C-detector measuring z
-                            double doca2Cls = tj.z() -cl.get_Z();
-                            cl.set_CentroidResidual(doca2Cls); 
-                            for (FittedHit h1 : cl) {
-                                // calculate the hit residuals
-                                double docaToTrk = tj.z() - h1.get_Strip().get_Z();
-                                double stripResol = h1.get_Strip().get_ZErr();
-                                h1.set_docaToTrk(docaToTrk);
-                                h1.set_stripResolutionAtDoca(stripResol);
-                                if(h1.get_Strip().get_Strip()==cl.get_SeedStrip())
-                                    cl.set_SeedResidual(docaToTrk); 
-                                h1.set_TrkgStatus(1);
-                            }
-                        }
                         if (cl.get_DetectorType()==1) { //Z-detector measuring phi
                             Cylindrical3D cyl = BMTGeom.getCylinder(cl.get_Layer(), cl.get_Sector()); 
                             Line3D cln = cl.getCylAxis();
-                            double doca2Cls =  org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cl.get_Layer() + 1) / 2 - 1] *(Math.atan2(tj.y(), tj.x())- cl.get_Phi());               
-                            cl.set_CentroidResidual((org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cl.get_Layer() + 1) / 2 - 1] +org.jlab.rec.cvt.bmt.Constants.hStrip2Det)*resi);  
-                            
+                            double r = BMTGeom.getRadius(layer)+org.jlab.rec.cvt.bmt.Constants.hStrip2Det;
+                            cl.set_CentroidResidual(resi*r);
                             cl.setN(cl.getNFromTraj(tj.x(),tj.y(),tj.z(),cln));
                             cl.setS(cl.getL().cross(cl.getN()).asUnit());    
 
-                            // calculate the hit residuals
-                            for (FittedHit h1 : cl) {
-                                double StripX = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cl.get_Layer() + 1) / 2 - 1] * Math.cos(h1.get_Strip().get_Phi());
-                                double StripY = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cl.get_Layer() + 1) / 2 - 1] * Math.sin(h1.get_Strip().get_Phi());
-
-                                double Sign = Math.signum(Math.atan2(StripY - tj.y(), StripX - tj.x()));
-                                double docaToTrk = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cl.get_Layer() + 1) / 2 - 1] *(Math.atan2(tj.y(), tj.x())- h1.get_Strip().get_Phi());
-                                double stripResol = h1.get_Strip().get_PhiErr();
-                                h1.set_docaToTrk(docaToTrk);
-                                h1.set_stripResolutionAtDoca(stripResol);
-                                if(h1.get_Strip().get_Strip()==cl.get_SeedStrip())
-                                    cl.set_SeedResidual(docaToTrk);
-                                h1.set_TrkgStatus(1);
-
-                            }
                         }
                     }
                 }

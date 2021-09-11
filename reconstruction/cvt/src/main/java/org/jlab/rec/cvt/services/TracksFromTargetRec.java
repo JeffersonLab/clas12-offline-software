@@ -104,7 +104,9 @@ public class TracksFromTargetRec {
                 charge = 1;
             xr += org.jlab.rec.cvt.Constants.getXb();
             yr += org.jlab.rec.cvt.Constants.getYb();
-            
+            //Uncomment to force to MC truth:
+            //double[] pars = recUtil.MCtrackPars(event);
+            //xr = pars[0];yr=pars[1];zr=pars[2];px=pars[3];py=pars[4];pz=pars[5];
             hlx = new org.jlab.clas.tracking.trackrep.Helix(xr,yr,zr,px,py,pz, 
                     charge, Constants.getSolenoidVal(), org.jlab.rec.cvt.Constants.getXb(), 
                     org.jlab.rec.cvt.Constants.getYb(), org.jlab.clas.tracking.trackrep.Helix.Units.MM);
@@ -120,6 +122,8 @@ public class TracksFromTargetRec {
                     org.jlab.rec.cvt.Constants.getYb(),
                     shift, 
                     recUtil.setMeasVecs(seed, SVTGeom, BMTGeom, swimmer)) ;
+                //Uncomment to let track be fitted
+                //kf.filterOn=false;
                 kf.runFitter(swimmer);
                 if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null) { 
                     Track fittedTrack = recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom);
@@ -160,9 +164,14 @@ public class TracksFromTargetRec {
                     org.jlab.rec.cvt.Constants.getYb(),
                     shift, 
                     recUtil.setMeasVecs(seed, SVTGeom, BMTGeom, swimmer)) ;
+                    //Uncomment to let track be fitted
+                    //kf.filterOn = false;
                     kf.runFitter(swimmer);
                     
-                    trkcands.add(recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom));
+                    Track trk = recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom);
+                    
+                    trkcands.add(trk);
+                    
                     trkcands.get(trkcands.size() - 1).set_TrackingStatus(seed.trkStatus);
                 }
             //} else {

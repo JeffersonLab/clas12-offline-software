@@ -40,6 +40,7 @@ public class MeasVecs {
                 mvec.error = mvec.surface.getError();
             mvec.l_over_X0 = mvec.surface.getl_over_X0(); 
             mvec.skip = mvec.surface.notUsedInFit;
+            mvec.hemisphere = measSurfaces.get(i).hemisphere;
             measurements.add(mvec);
         }
     }
@@ -100,18 +101,14 @@ public class MeasVecs {
                 Point3D offset =this.measurements.get(stateVec.k).surface.cylShift;
                 Vector3D rotation = this.measurements.get(stateVec.k).surface.cylRotation;
                 Arc3D arc = new Arc3D();
-                arc.copy(this.measurements.get(stateVec.k).surface.strip.getArc());
-                Point3D arccen = arc.center();
-                arccen.translateXYZ(-offset.x(), -offset.y(), -offset.z());
-                arccen.rotateZ(-rotation.z());
-                arccen.rotateY(-rotation.y());
-                arccen.rotateX(-rotation.x());
-                Point3D stV = new Point3D(stateVec.x, stateVec.y, stateVec.z);
+                arc.copy(this.measurements.get(stateVec.k).surface.strip.getArc()); 
+                this.antiAlignArc(offset, rotation, arc);
+                Point3D stV = new Point3D(stateVec.x, stateVec.y, stateVec.z); 
                 stV.translateXYZ(-offset.x(), -offset.y(), -offset.z());
                 stV.rotateZ(-rotation.z());
                 stV.rotateY(-rotation.y());
-                stV.rotateX(-rotation.x());
-                value = stV.z()-arccen.z();
+                stV.rotateX(-rotation.x()); 
+                value = stV.z()-arc.center().z(); 
             }
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.PHI) {
                value = this.getPhi(stateVec)-this.measurements.get(stateVec.k).surface.strip.getPhi();
@@ -120,6 +117,23 @@ public class MeasVecs {
         return value;
     }
     
+    
+    private void antiAlignArc(Point3D offset, Vector3D rotation, Arc3D arcline) {
+        Point3D origin  = arcline.origin();
+        Vector3D normal = arcline.normal();
+        Point3D center  = arcline.center();
+        origin.translateXYZ(-offset.x(),-offset.y(),-offset.z());
+        origin.rotateZ(-rotation.z());
+        origin.rotateY(-rotation.y());
+        origin.rotateX(-rotation.x());
+        center.translateXYZ(-offset.x(),-offset.y(),-offset.z());
+        center.rotateZ(-rotation.z());
+        center.rotateY(-rotation.y());
+        center.rotateX(-rotation.x());
+        normal.rotateZ(-rotation.z());
+        normal.rotateY(-rotation.y());
+        normal.rotateX(-rotation.x());
+    }
     public double getPhiATZ(StateVec stateVec) {
         Cylindrical3D cyl = this.measurements.get(stateVec.k).surface.cylinder;
         Line3D cln = this.measurements.get(stateVec.k).surface.cylinder.getAxis();
@@ -277,7 +291,7 @@ public class MeasVecs {
         public double l_over_X0;
         //this is for energy loss
         public double Z_over_A_times_l;
-    
+        public double hemisphere = 1;
 
 
         @Override

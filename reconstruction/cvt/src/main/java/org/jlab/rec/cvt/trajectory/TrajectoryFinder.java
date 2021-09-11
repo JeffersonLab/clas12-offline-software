@@ -14,6 +14,7 @@ import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.detector.hits.CTOFDetHit;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.geom.base.Detector;
+import org.jlab.geom.prim.Arc3D;
 import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
@@ -633,38 +634,62 @@ public class TrajectoryFinder {
         }
         if (detector.equalsIgnoreCase("BMT")) { 
             cluster.setTrakInters(new Point3D(stVec.x(), stVec.y(), stVec.z()));
+            Point3D    offset = bmt_geo.getOffset(cluster.get_Layer(), cluster.get_Sector()); 
+            Vector3D rotation = bmt_geo.getRotation(cluster.get_Layer(), cluster.get_Sector());
+            double ce = cluster.get_Centroid();    
+            Point3D p = new Point3D(stVec.x(), stVec.y(), stVec.z());
             if (BMTGeometry.getDetectorType(layer) == BMTType.C) { //C-detector measuring z
-                double doca2Cls = stVec.z() -cluster.get_Z();
+                Arc3D arcC = cluster.get_Arc();
+                double doca2Cls = bmt_geo.getBMTCresi(arcC, p, offset, rotation);
                 cluster.set_CentroidResidual(doca2Cls);
                 for (FittedHit h1 : cluster) {
                     // calculate the hit residuals
-                    double docaToTrk = stVec.z() - h1.get_Strip().get_Z();
-                    double stripResol = h1.get_Strip().get_ZErr();
-                    h1.set_docaToTrk(docaToTrk);
-                    h1.set_stripResolutionAtDoca(stripResol);
+                    Arc3D arcH = h1.get_Strip().get_Arc();
+                    double doca1 = bmt_geo.getBMTCresi(arcH, p, offset, rotation);
+                    //double doca1 = p.z()-hit.get_Strip().get_Z();
                     if(h1.get_Strip().get_Strip()==cluster.get_SeedStrip())
-                        cluster.set_SeedResidual(docaToTrk);
+                        cluster.set_SeedResidual(doca1); 
+                    h1.set_TrkgStatus(1);
+                    h1.set_docaToTrk(doca1);
                     h1.set_TrkgStatus(1);
                     if (trajFinal) {
                         h1.set_TrkgStatus(2);
                     }
                 }
+                
             }
             if (BMTGeometry.getDetectorType(layer) == BMTType.Z) { //Z-detector measuring phi
-                double doca2Cls =  org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cluster.get_Layer() + 1) / 2 - 1] *(Math.atan2(stVec.y(), stVec.x())- cluster.get_Phi());               
-                cluster.set_CentroidResidual(doca2Cls);    
-                // calculate the hit residuals
-                for (FittedHit h1 : cluster) {
-                    double StripX = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cluster.get_Layer() + 1) / 2 - 1] * Math.cos(h1.get_Strip().get_Phi());
-                    double StripY = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cluster.get_Layer() + 1) / 2 - 1] * Math.sin(h1.get_Strip().get_Phi());
+                int bsector = cluster.get_Sector();
+                int blayer = cluster.get_Layer();
+                double cxh = Math.cos(cluster.get_Phi())*
+                            (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[cluster.get_Region() - 1] 
+                            + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+                double cyh = Math.sin(cluster.get_Phi())*
+                        (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[cluster.get_Region() - 1] 
+                        + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+                double phic = bmt_geo.getPhi(new Point3D(cxh,cyh,0), bsector, blayer);
+                double phit = bmt_geo.getPhi(p, sector, blayer);
+                double doca2Cls = (phic-phit)*
+                        (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[cluster.get_Region() - 1] 
+                        + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+                cluster.set_CentroidResidual(doca2Cls);
 
-                    double Sign = Math.signum(Math.atan2(StripY - stVec.y(), StripX - stVec.x()));
-                    double docaToTrk = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cluster.get_Layer() + 1) / 2 - 1] *(Math.atan2(stVec.y(), stVec.x())- h1.get_Strip().get_Phi());
-                    double stripResol = h1.get_Strip().get_PhiErr();
-                    h1.set_docaToTrk(docaToTrk);
-                    h1.set_stripResolutionAtDoca(stripResol);
+                for (FittedHit h1 : cluster) {
+                    double xh = Math.cos(h1.get_Strip().get_Phi())*
+                            (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[cluster.get_Region() - 1] 
+                            + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+                    double yh = Math.sin(h1.get_Strip().get_Phi())*
+                            (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[cluster.get_Region() - 1] 
+                            + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+                    double hphic = bmt_geo.getPhi(new Point3D(xh,yh,0), sector, blayer);
+                    double hphit = bmt_geo.getPhi(p, sector, blayer);
+                    double doca1 = (hphic-hphit)*
+                            (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[cluster.get_Region() - 1] 
+                            + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+
                     if(h1.get_Strip().get_Strip()==cluster.get_SeedStrip())
-                        cluster.set_SeedResidual(docaToTrk);
+                        cluster.set_SeedResidual(doca1); 
+                    
                     h1.set_TrkgStatus(1);
                     if (trajFinal) {
                         h1.set_TrkgStatus(2);
@@ -800,6 +825,7 @@ public class TrajectoryFinder {
         return result;
     }
 
+    
     public double[] getIntersectionTrackWithSVTModule(int s, int l,
             double _yxinterc2, double _yxslope2, double _yzinterc2,
             double _yzslope2, org.jlab.rec.cvt.svt.Geometry geo) {
@@ -898,8 +924,8 @@ public class TrajectoryFinder {
             rotation = geo.getRotation(lyer, topsec);
             ioffset = geo.getInverseOffset(lyer, topsec);
             irotation = geo.getInverseRotation(lyer, topsec);
-            geo.putInFrame(trkOr, ioffset, irotation);
-            geo.putInFrame(trkEn, ioffset, irotation);
+            geo.putInFrame(trkOr, ioffset, irotation, true);
+            geo.putInFrame(trkEn, ioffset, irotation, true);
             intersNominal = this.getIntersBMT(lyer, radius, x_minus,y_minus, z_minus, trkOr,trkEn, offset, rotation, geo);
             top = intersNominal.get(0); 
             topstp = geo.getStrip( l + 1,  topsec,  top);
@@ -910,23 +936,24 @@ public class TrajectoryFinder {
             rotation = geo.getRotation(lyer, bottomsec);
             ioffset = geo.getInverseOffset(lyer, bottomsec);
             irotation = geo.getInverseRotation(lyer, bottomsec);
-            geo.putInFrame(trkOr, ioffset, irotation);
-            geo.putInFrame(trkEn, ioffset, irotation);
+            geo.putInFrame(trkOr, ioffset, irotation, true);
+            geo.putInFrame(trkEn, ioffset, irotation, true);
             intersNominal = this.getIntersBMT(lyer, radius, x_minus,y_minus, z_minus, trkOr,trkEn, offset, rotation, geo);
             bottom = intersNominal.get(1); 
             bottomstp = geo.getStrip( l + 1,  bottomsec,  bottom);
         }
+        
         if(top.toVector3D().mag()>0) {
             inters_top[0] = top.x();
             inters_top[1] = top.y();
             inters_top[2] = top.z();
-            inters_top[3] = topstp;
+            inters_top[3] = geo.getStrip( l + 1,  bottomsec,  top);
         }
         if(bottom.toVector3D().mag()>0) {
             inters_bottom[0] = bottom.x();
             inters_bottom[1] = bottom.y();
             inters_bottom[2] = bottom.z();
-            inters_bottom[3]= bottomstp;
+            inters_bottom[3]= geo.getStrip( l + 1,  bottomsec,  bottom);
         }
 
         inters[0] = inters_top;
@@ -1042,14 +1069,14 @@ public class TrajectoryFinder {
         
         if(this.checkBMTAcceptance(ipos, lyer,geo)) {
             if(offset!=null && rotation!=null)
-                geo.putInFrame(ipos, offset, rotation);
+                geo.putInFrame(ipos, offset, rotation, false);
         } else {
             ipos.set(0,0,0);
         }
         if(this.checkBMTAcceptance(ineg, lyer,geo)) {
             
             if(offset!=null && rotation!=null)
-                geo.putInFrame(ineg, offset, rotation);
+                geo.putInFrame(ineg, offset, rotation, false);
         } else {
             ineg.set(0,0,0);
         }

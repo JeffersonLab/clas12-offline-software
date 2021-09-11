@@ -120,17 +120,18 @@ public class StateVecs {
                     } 
                     
                     Point3D cylInt = new Point3D(ref.x()+l*u.x(),ref.y()+l*u.y(),ref.z()+l*u.z());
-                    cylInt.translateXYZ(offset.x(), offset.y(), offset.z());
-                    cylInt.rotateZ(rotation.z());
-                    cylInt.rotateY(rotation.y());
                     cylInt.rotateX(rotation.x());
-                    ref.translateXYZ(offset.x(), offset.y(), offset.z());
-                    ref.rotateZ(rotation.z());
-                    ref.rotateY(rotation.y());
+                    cylInt.rotateY(rotation.y());
+                    cylInt.rotateZ(rotation.z());
+                    cylInt.translateXYZ(offset.x(), offset.y(), offset.z());
+                    
                     ref.rotateX(rotation.x());
-                    u.rotateZ(rotation.z());
-                    u.rotateY(rotation.y());
+                    ref.rotateY(rotation.y());
+                    ref.rotateZ(rotation.z());
+                    ref.translateXYZ(offset.x(), offset.y(), offset.z());
                     u.rotateX(rotation.x());
+                    u.rotateY(rotation.y());
+                    u.rotateZ(rotation.z());
                     kVec.dl = l;
                     kVec.x = cylInt.x();
                     kVec.y = cylInt.y();

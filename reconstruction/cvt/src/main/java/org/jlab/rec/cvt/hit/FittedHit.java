@@ -17,12 +17,10 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      */
     public FittedHit(int detector, int detectortype, int sector, int layer, Strip strip) {
         super(detector, detectortype, sector, layer, strip);
-
     }
 
     private double _docaToTrk;                                                  // 3-D distance of closest approach of the helix to the wire 
-    private double _stripResolutionAtDoca;                                      // position resolution at distance of closest approach of the helix to the wire 
-
+    private double _stripResolutionAtDoca;    
     private int _TrkgStatus = -1;                                               //  TrkgStatusFlag factor (-1: no fit; 0: global helical fit; 1: KF fit)
 
     public double get_docaToTrk() {
@@ -61,29 +59,24 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         _TrkgStatus = trkgStatus;
     }
 
-    /**
-     *
-     * @param arg0 the other hit
-     * @return an int used to sort a collection of hits by layer number
-     */
-    public int compareTo(FittedHit arg) {
-//        if (this.get_Layer() > arg.get_Layer()) {
-//            return 1;
-//        } else {
-//            return 0;
-//        }
-        
-        //sort by layer, then time, then edep
-        int CompLyr = this.get_Layer() < arg.get_Layer() ? -1 : this.get_Layer() == arg.get_Layer() ? 0 : 1;
-        int CompEdep = this.get_Strip().get_Edep() > arg.get_Strip().get_Edep() ? -1 : this.get_Strip().get_Edep() == arg.get_Strip().get_Edep() ? 0 : 1;
-        int CompTime = this.get_Strip().get_Time() < arg.get_Strip().get_Time() ? -1 : this.get_Strip().get_Time() == arg.get_Strip().get_Time() ? 0 : 1;
-
-        int return_val1 = ((CompTime == 0) ? CompEdep : CompTime);
-        int return_val = ((CompLyr == 0) ? return_val1 : CompLyr);
-        
-        return return_val;
-        }
-
+//    /**
+//     *
+//     * @param arg0 the other hit
+//     * @return an int used to sort a collection of hits by layer number
+//     */
+//    public int compareTo(FittedHit arg) {
+//
+//        //sort by layer, then time, then edep
+//        int CompLyr = this.get_Layer() < arg.get_Layer() ? -1 : this.get_Layer() == arg.get_Layer() ? 0 : 1;
+//        int CompEdep = this.get_Strip().get_Edep() > arg.get_Strip().get_Edep() ? -1 : this.get_Strip().get_Edep() == arg.get_Strip().get_Edep() ? 0 : 1;
+//        int CompTime = this.get_Strip().get_Time() < arg.get_Strip().get_Time() ? -1 : this.get_Strip().get_Time() == arg.get_Strip().get_Time() ? 0 : 1;
+//
+//        int return_val1 = ((CompTime == 0) ? CompEdep : CompTime);
+//        int return_val = ((CompLyr == 0) ? return_val1 : CompLyr);
+//        
+//        return return_val;
+//    }
+    
     public double _QualityFac;	// a quality factor depending on the hit status and goodness of fit
 
     public double get_QualityFac() {

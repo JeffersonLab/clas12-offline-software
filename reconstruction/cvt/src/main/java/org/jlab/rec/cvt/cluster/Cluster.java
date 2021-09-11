@@ -11,6 +11,7 @@ import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
 
 import java.util.Collections;
+import org.jlab.geom.prim.Arc3D;
 import org.jlab.rec.cvt.bmt.Constants;
 /**
  * A cluster in the BST consists of an array of hits that are grouped together
@@ -30,7 +31,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     private int _Id;								//		cluster Id
     private double _Centroid; 							// 		after LC (Lorentz Correction)
     private double _CentroidError;
-    private double _Error;                                              //              strip resolution    
+    private double _Error;                                                      //              strip resolution    
     private double _Centroid0; 							// 		before LC
     private double _TotalEnergy;
     private double _Phi;  							// 		for Z-detectors
@@ -39,7 +40,9 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     private double _PhiErr0;
     private double _Z;    							// 		for C-detectors
     private double _ZErr;
+    private Arc3D _Arc;
     private Point3D _TrakInters; //track intersection with the cluster
+    private double _Radius;
 
     //added variables for alignment
     private double _x1; //cluster first end point x
@@ -162,6 +165,20 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     }
 
     /**
+     * @return the _Radius
+     */
+    public double getRadius() {
+        return _Radius;
+    }
+
+    /**
+     * @param _Radius the _Radius to set
+     */
+    public void setRadius(double _Radius) {
+        this._Radius = _Radius;
+    }
+
+    /**
      * sets energy-weighted parameters; these are the strip centroid
      * (energy-weighted) value, the energy-weighted phi for Z detectors and the
      * energy-weighted z for C detectors
@@ -205,6 +222,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         int nbhits = this.size();
         //sort for bmt detector
         //this.sort(Comparator.comparing(FittedHit.get_Strip()::get_Edep).thenComparing(FittedHit.get_Strip()::get_Edep));
+        
         Collections.sort(this);
         if (nbhits != 0) {
             int min = 1000000;
@@ -233,14 +251,9 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     weightedZ2 += strpEn * stEP2.z();
                 }
                 if (this.get_Detector()==1) { 
-                    if(Constants.newClustering || Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale())<0.0001) {
-                        strpEn = Math.sqrt(thehit.get_Strip().get_Edep());
-                    } else {
-                        //strpEn = thehit.get_Strip().get_Edep();
-                       strpEn = 1;
-                    }
-                    if((Constants.newClustering && nbhits>2 && i>1) 
-                            || Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale())<0.0001 && nbhits>2 && i>1) 
+                    
+                    strpEn = this.getBMTStripEnergy(thehit);
+                    if(thehit.newClustering && nbhits>Constants.MAXCLUSSIZE && i>Constants.MAXCLUSSIZE-1) 
                         continue;
                     //end points:
                     Point3D stEP1 = thehit.get_Strip().get_ImplantPoint();
@@ -261,7 +274,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                         //strpEn = Math.sqrt(thehit.get_Strip().get_Edep());
                         strpNb = thehit.get_Strip().get_Strip();
                         // for C detector the Z of the centroid is calculated
-                        weightedZ += strpEn * thehit.get_Strip().get_Z();
+                        //weightedZ += strpEn * thehit.get_Strip().get_Z();
                         weightedZErrSq += (thehit.get_Strip().get_ZErr()) * (thehit.get_Strip().get_ZErr());
                     }
                     if (this.get_DetectorType()==1) { // Z-detectors
@@ -315,7 +328,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             phiCent = weightedPhi / totEn;
             //phiCent = geo.LorentzAngleCorr(phiCent0,this.get_Layer());
             phiCent0 = weightedPhi0 / totEn;
-            zCent = weightedZ / totEn;
+            //zCent = weightedZ / totEn;
             phiErrCent = Math.sqrt(weightedPhiErrSq);
             phiErrCent0 = Math.sqrt(weightedPhiErrSq0);
             zErrCent = Math.sqrt(weightedZErrSq);
@@ -351,6 +364,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                 this.setN(n);
             }
             if (this.get_Detector()==1) { //BMT 
+                this.setRadius(geo.getRadius(_Layer));
                 Cylindrical3D cyl = geo.getCylinder(this.get_Layer(), this.get_Sector()); 
                 this.setCylAxis(geo.getAxis(this.get_Layer(), this.get_Sector()));
                 // for the BMT the analysis distinguishes between C and Z type detectors
@@ -386,6 +400,8 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     this.setL(l);
                     this.setS(s);
                     this.setN(n);
+                    this.set_Arc(geo.getCstrip(this.get_Region(), this.get_Sector(), this));
+                    //this.set_Z(this.get_Arc().center().z());
                     
                 }
                 if (this.get_DetectorType()==1) { // Z-detectors
@@ -432,11 +448,11 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             set_PhiErr0(phiErrCent0);
         }
         if (this.get_DetectorType() == 0) {
-            _Z = zCent;
+            //_Z = zCent;
             _ZErr = zErrCent;
             this.set_Error(zErrCent);
         }
-
+        
     }
 
     
@@ -525,6 +541,21 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         this._ZErr = _ZErr;
     }
 
+    /**
+     * @return the _Arc
+     */
+    public Arc3D get_Arc() {
+        return _Arc;
+    }
+
+    /**
+     * @param _Arc the _Arc to set
+     */
+    public void set_Arc(Arc3D _Arc) {
+        this._Arc = _Arc;
+        this.set_Z(this._Arc.center().z());
+    }
+
     public double get_TotalEnergy() {
         return _TotalEnergy;
     }
@@ -608,7 +639,8 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
      * @return cluster info. about location and number of hits contained in it
      */
     public void printInfo() {
-        String s = " cluster: Detector " + this.get_Detector() +"  Detector Type " + this.get_DetectorType() + " ID " + this.get_Id() + " Sector " + this.get_Sector() + " Layer " + this.get_Layer() + " Size " + this.size() +" centroid "+this.get_Centroid();
+        String s = " cluster: Detector " + this.get_Detector() +"  Detector Type " + this.get_DetectorType() + " ID " + this.get_Id() + " Sector " + this.get_Sector() 
+                + " Layer " + this.get_Layer() + " Radius " + this.getRadius()+ " Size " + this.size() +" centroid "+this.get_Centroid();
         System.out.println(s);
     }
 
@@ -945,6 +977,13 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
     private Point3D _EndPoint1;
     private Point3D _EndPoint2;
+
+    public double getBMTStripEnergy(FittedHit thehit) {
+        double strpEn = thehit.get_Strip().get_Edep();
+            
+        return strpEn ; 
+    }
     
     
+
 }
