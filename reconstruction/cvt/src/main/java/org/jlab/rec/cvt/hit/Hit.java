@@ -1,7 +1,5 @@
 package org.jlab.rec.cvt.hit;
 
-import org.jlab.rec.cvt.bmt.Constants;
-
 /**
  * A hit characterized by layer, sector, wire number, and Edep. The ADC to time
  * conversion has been done.

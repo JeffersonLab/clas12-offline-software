@@ -19,6 +19,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.banks.HitReader;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cluster.ClusterFinder;
@@ -27,6 +28,7 @@ import org.jlab.rec.cvt.cross.CrossMaker;
 import org.jlab.rec.cvt.hit.ADCConvertor;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
+import org.jlab.rec.cvt.svt.SVTGeometry;
 
 /**
  * Service to return reconstructed TRACKS
@@ -37,8 +39,8 @@ import org.jlab.rec.cvt.hit.Hit;
  */
 public class CVTRecNewKF extends ReconstructionEngine {
 
-    org.jlab.rec.cvt.svt.Geometry SVTGeom;
-    org.jlab.rec.cvt.bmt.BMTGeometry BMTGeom;
+    SVTGeometry       SVTGeom;
+    BMTGeometry       BMTGeom;
     CTOFGeant4Factory CTOFGeom;
     Detector          CNDGeom ;
     SVTStripFactory svtIdealStripFactory;
@@ -48,8 +50,8 @@ public class CVTRecNewKF extends ReconstructionEngine {
     public CVTRecNewKF() {
         super("CVTTracks", "ziegler", "4.0");
         
-        SVTGeom = new org.jlab.rec.cvt.svt.Geometry();
-        BMTGeom = new org.jlab.rec.cvt.bmt.BMTGeometry();
+        SVTGeom = new SVTGeometry();
+        BMTGeom = new BMTGeometry();
         strgtTrksRec = new CosmicTracksRec();
         trksFromTargetRec = new TracksFromTargetRec();
     }

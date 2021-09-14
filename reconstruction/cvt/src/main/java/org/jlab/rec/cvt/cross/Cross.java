@@ -8,7 +8,7 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.svt.Constants;
-import org.jlab.rec.cvt.svt.Geometry;
+import org.jlab.rec.cvt.svt.SVTGeometry;
 
 /**
  * The crosses are objects used to find tracks and are characterized by a 3-D
@@ -358,7 +358,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     /**
      * Sets the cross parameters: the position and direction unit vector
      */
-    public void set_CrossParamsSVT(Vector3D dirAtBstPlane, Geometry geo) {
+    public void set_CrossParamsSVT(Vector3D dirAtBstPlane, SVTGeometry geo) {
 
         Cluster inlayerclus = this.get_Cluster1();
         Cluster outlayerclus = this.get_Cluster2();
@@ -591,7 +591,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 
     }
 
-    public boolean isInFiducial(Geometry svt_geo) {
+    public boolean isInFiducial(SVTGeometry svt_geo) {
         boolean pass = true;
         Point3D LC = svt_geo.transformToFrame(this.get_Sector(), this.get_Cluster1().get_Layer(), this.get_Point().x(), this.get_Point().y(), this.get_Point().z(), "local", "");
         if (((LC.x() < -0.10 || LC.x() > Constants.ACTIVESENWIDTH + 0.10))

@@ -11,8 +11,8 @@ import org.jlab.geom.base.Detector;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
-import org.jlab.rec.cvt.bmt.Constants;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.CrossList;
@@ -20,6 +20,7 @@ import org.jlab.rec.cvt.fit.HelicalTrackFitter;
 import org.jlab.rec.cvt.fit.LineFitter;
 import org.jlab.rec.cvt.fit.CosmicFitter;
 import org.jlab.rec.cvt.hit.FittedHit;
+import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.trajectory.Ray;
 import org.jlab.rec.cvt.trajectory.StateVec;
 import org.jlab.rec.cvt.trajectory.Trajectory;
@@ -132,7 +133,7 @@ public class TrackCandListFinder {
      * @param list the input list of crosses
      * @return an array list of track candidates in the SVT
      */
-    public void getHelicalTrack(Seed cand, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo) {
+    public void getHelicalTrack(Seed cand, SVTGeometry svt_geo, BMTGeometry bmt_geo) {
         X.clear();
         Y.clear();
         Z.clear();
@@ -217,7 +218,7 @@ public class TrackCandListFinder {
      * @return an array list of track candidates in the SVT
      */
     public ArrayList<Track> getHelicalTracks(CrossList crossList, 
-            org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo,
+            SVTGeometry svt_geo, BMTGeometry bmt_geo,
             CTOFGeant4Factory ctof_geo, Detector cnd_geo,
             Swim swimmer) {
 
@@ -334,7 +335,7 @@ public class TrackCandListFinder {
      * @param SVTCrossList the input list of crosses
      * @return an array list of track candidates in the SVT
      */
-    public ArrayList<StraightTrack> getStraightTracks(CrossList SVTCrosses, List<Cross> BMTCrosses, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo) {
+    public ArrayList<StraightTrack> getStraightTracks(CrossList SVTCrosses, List<Cross> BMTCrosses, SVTGeometry svt_geo, BMTGeometry bmt_geo) {
 
         ArrayList<StraightTrack> cands = new ArrayList<StraightTrack>();
         Map<String, StraightTrack> candMap= new HashMap<String, StraightTrack>();
@@ -505,7 +506,7 @@ public class TrackCandListFinder {
         return passedcands;
     }
 
-    public void upDateCrossesFromTraj(StraightTrack cand, Trajectory trj, org.jlab.rec.cvt.svt.Geometry geo) {
+    public void upDateCrossesFromTraj(StraightTrack cand, Trajectory trj, SVTGeometry geo) {
 
         double[][][] trajPlaneInters = trj.get_SVTIntersections();
         ArrayList<Cross> hitsOnTrack = new ArrayList<Cross>();
@@ -648,7 +649,8 @@ public class TrackCandListFinder {
 
         for (int j = shift + j0; j < shift + j0 + BMTCdetcrossesInTrk.size(); j++) {
             Z.add(j, BMTCdetcrossesInTrk.get(j - shift - j0).get_Point().z());
-            Rho.add(j, org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTCdetcrossesInTrk.get(j - shift - j0).get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+            Rho.add(j, org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTCdetcrossesInTrk.get(j - shift - j0).get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hDrift/2);
+            System.out.println(BMTCdetcrossesInTrk.get(j - shift - j0).get_Point().toString() + " " + org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTCdetcrossesInTrk.get(j - shift - j0).get_Region() - 1]);
             ErrRho.add(j, 0.01); // check this error on thickness measurement					
             ErrZ.add(j, BMTCdetcrossesInTrk.get(j - shift - j0).get_PointErr().z());
 
@@ -791,7 +793,7 @@ public class TrackCandListFinder {
         return MeasArray;
     }
 
-    private void resetUnusedCross(Cross cross, org.jlab.rec.cvt.svt.Geometry geo) {
+    private void resetUnusedCross(Cross cross, SVTGeometry geo) {
 
         cross.set_Dir(new Vector3D(0, 0, 0));
 
@@ -805,7 +807,7 @@ public class TrackCandListFinder {
      * @param geo the BMT geometry
      * @return an arraylist of BMT crosses matched to the track
      */
-    public ArrayList<Cross> matchTrackToMM(List<Cross> MMCrosses, StraightTrack thecand, org.jlab.rec.cvt.bmt.BMTGeometry geo) {
+    public ArrayList<Cross> matchTrackToMM(List<Cross> MMCrosses, StraightTrack thecand, BMTGeometry geo) {
 
         double matchCutOff = org.jlab.rec.cvt.svt.Constants.COSMICSMINRESIDUAL; // ?  guess
 
@@ -822,7 +824,7 @@ public class TrackCandListFinder {
         // for configuration in 3 double SVT layers + 3 double BMT layers
         //------------------------------------------------------------------------------------------------------
         for (int regionIdx = 0; regionIdx < 3; regionIdx++) {
-            ArrayList<Cross> MatchedMMCrossZDet = this.MatchMMCrossZ(regionIdx + 1, thecand2.get_ray(), MMCrosses, Math.toRadians(2)); // 2 degrees opening angle
+            ArrayList<Cross> MatchedMMCrossZDet = this.MatchMMCrossZ(regionIdx + 1, thecand2.get_ray(), MMCrosses, Math.toRadians(2), geo); // 2 degrees opening angle
             if (MatchedMMCrossZDet.size() > 0) {
                 BMTCrossList.addAll(MatchedMMCrossZDet);
             }
@@ -844,11 +846,11 @@ public class TrackCandListFinder {
         return BMTCrossList;
     }
 
-    private ArrayList<Cross> MatchMMCrossC(int Region, Ray ray, List<Cross> MMCrosses, double matchCutOff, org.jlab.rec.cvt.bmt.BMTGeometry geo) {
+    private ArrayList<Cross> MatchMMCrossC(int Region, Ray ray, List<Cross> MMCrosses, double matchCutOff, BMTGeometry geo) {
 
         ArrayList<Cross> matchedMMCrosses = new ArrayList<Cross>();
 
-        double R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[Region - 1] + org.jlab.rec.cvt.bmt.Constants.hDrift / 2;		     // R for C detector
+        double R = geo.getRadiusMidDrift(geo.getLayer(Region,BMTType.C));		     // R for C detector
 
         double sx = ray.get_yxslope();
         double ix = ray.get_yxinterc();
@@ -915,11 +917,11 @@ public class TrackCandListFinder {
         return matchedMMCrosses;
     }
 
-    private ArrayList<Cross> MatchMMCrossZ(int Region, Ray ray, List<Cross> MMCrosses, double matchCutOff) {
+    private ArrayList<Cross> MatchMMCrossZ(int Region, Ray ray, List<Cross> MMCrosses, double matchCutOff, BMTGeometry geo) {
 
         ArrayList<Cross> matchedMMCrosses = new ArrayList<Cross>();
 
-        double R = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Region - 1] + org.jlab.rec.cvt.bmt.Constants.hDrift / 2;		     // R for Z detector
+        double R = geo.getRadiusMidDrift(geo.getLayer(Region,BMTType.Z));		     // R for Z detector
         double sx = ray.get_yxslope();
         double ix = ray.get_yxinterc();
         double sz = ray.get_yzslope();
@@ -1068,7 +1070,7 @@ public class TrackCandListFinder {
     }
 
     private void EliminateStraightTrackOutliers(ArrayList<Cross> crossesToFit,
-            CosmicFitter fitTrk, org.jlab.rec.cvt.svt.Geometry svt_geo) {
+            CosmicFitter fitTrk, SVTGeometry svt_geo) {
         for (int j = 0; j < crossesToFit.size(); j++) {
             if (Math.abs(fitTrk.get_ray().get_yxslope() * crossesToFit.get(j).get_Point().y() + fitTrk.get_ray().get_yxinterc() - crossesToFit.get(j).get_Point().x()) > org.jlab.rec.cvt.svt.Constants.COSMICSMINRESIDUAL
                     || Math.abs(fitTrk.get_ray().get_yzslope() * crossesToFit.get(j).get_Point().y() + fitTrk.get_ray().get_yzinterc() - crossesToFit.get(j).get_Point().z()) > org.jlab.rec.cvt.svt.Constants.COSMICSMINRESIDUALZ) {
@@ -1078,7 +1080,7 @@ public class TrackCandListFinder {
         }
     }
 
-    public void matchClusters(List<Cluster> sVTclusters, TrajectoryFinder tf, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, boolean trajFinal,
+    public void matchClusters(List<Cluster> sVTclusters, TrajectoryFinder tf, SVTGeometry svt_geo, BMTGeometry bmt_geo, boolean trajFinal,
             ArrayList<StateVec> trajectory, int k) {
         if(trajectory == null)
             return;

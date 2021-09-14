@@ -214,7 +214,7 @@ public class Constants {
         
         LAYRGAP = MODULERADIUS[1][0] - MODULERADIUS[0][0];
         
-        Geometry geo = new Geometry();
+        SVTGeometry geo = new SVTGeometry();
        for(int l =0; l < NLAYR; l++) {
            for(int j = 0; j< NSECT[l]; j++) {
                for(int k = 0; k<NSTRIP; k++) {

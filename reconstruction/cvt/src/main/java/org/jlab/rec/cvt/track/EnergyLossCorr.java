@@ -2,7 +2,7 @@ package org.jlab.rec.cvt.track;
 
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.rec.cvt.svt.Constants;
-import org.jlab.rec.cvt.svt.Geometry;
+import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.trajectory.Helix;
 
 /**

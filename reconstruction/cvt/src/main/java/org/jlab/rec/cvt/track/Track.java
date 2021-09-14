@@ -4,7 +4,7 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.Constants;
-import org.jlab.rec.cvt.svt.Geometry;
+import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 
@@ -134,7 +134,7 @@ public class Track extends Trajectory implements Comparable<Track> {
      *
      * @param geo the SVT geometry
      */
-    public void update_Crosses(Geometry geo) {
+    public void update_Crosses(SVTGeometry geo) {
         if (this.get_helix() != null && this.get_helix().get_curvature() != 0) {
 
             Helix helix = this.get_helix();
@@ -164,7 +164,7 @@ public class Track extends Trajectory implements Comparable<Track> {
 
     }
 
-    public void finalUpdate_Crosses(Geometry geo) {
+    public void finalUpdate_Crosses(SVTGeometry geo) {
         if (this.get_helix() != null && this.get_helix().get_curvature() != 0) {
 
             Helix helix = this.get_helix();

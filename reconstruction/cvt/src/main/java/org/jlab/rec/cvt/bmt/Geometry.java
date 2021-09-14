@@ -1,6 +1,7 @@
 package org.jlab.rec.cvt.bmt;
 
 import javax.swing.JFrame;
+import java.util.ArrayList;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.geom.prim.Arc3D;
 import org.jlab.geom.prim.Cylindrical3D;
@@ -8,18 +9,21 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.groot.data.H2F;
-import org.jlab.groot.graphics.EmbeddedCanvas;
 import org.jlab.groot.group.DataGroup;
 import static org.jlab.rec.cvt.bmt.Constants.E_DRIFT_FF;
 import static org.jlab.rec.cvt.bmt.Constants.E_DRIFT_MF;
 import static org.jlab.rec.cvt.bmt.Lorentz.getLorentzAngle;
 import org.jlab.clas.swimtools.Swim;
-
+import org.jlab.detector.base.DetectorType;
+import org.jlab.geom.prim.Transformation3D;
+import org.jlab.groot.data.H1F;
+import org.jlab.groot.graphics.EmbeddedCanvasTabbed;
+import org.jlab.io.base.DataBank;
+import org.jlab.io.base.DataEvent;
+import org.jlab.io.hipo.HipoDataSource;
 /**
  *
  * @author devita
- * 
- * additions 
  */
 public class Geometry {
 
@@ -32,6 +36,10 @@ public class Geometry {
      * Handles BMT geometry
      */
     public Geometry() {
+    }
+    
+    public int getNLayers() {
+        return Constants.NLAYERS;
     }
     
     /**
@@ -85,7 +93,7 @@ public class Geometry {
     
     
     /**
-     * Return radius of the selected layer
+     * Return radius of the selected strip layer
      * @param layer (1-6)
      * @return radius (=0 if layer is out of range)
      */
@@ -100,6 +108,26 @@ public class Geometry {
             else if(det == BMTType.Z) radius = Constants.getCRZRADIUS()[region-1];
         }
         else System.out.println("ERROR: out of range layer number in getRadius(int layer)");
+        return radius;
+    }
+    
+    /**
+     * Return radius of the selected layer corresponding to the center of the drift gap
+     * @param layer (1-6)
+     * @return radius (=0 if layer is out of range)
+     */
+    public double getRadiusMidDrift(int layer) {
+        
+        int region = this.getRegion(layer);
+        BMTType det = this.getDetectorType(layer);
+        
+        double radius = 0;
+        if(region>0 && det!=null) {
+            if     (det == BMTType.C) radius = Constants.getCRCRADIUS()[region-1];
+            else if(det == BMTType.Z) radius = Constants.getCRZRADIUS()[region-1];
+        }
+        else System.out.println("ERROR: out of range layer number in getRadius(int layer)");
+        radius += Constants.hDrift/2;
         return radius;
     }
     
@@ -148,7 +176,7 @@ public class Geometry {
      * @param strip
      * @return pitch (0 if region or strip are out of range
      */
-    public double getCPitch(int region, int strip) {
+    private double getCPitch(int region, int strip) {
         double pitch=0;
         
         if(region>=1 && region<=3) {
@@ -168,7 +196,7 @@ public class Geometry {
      * @param strip
      * @return pitch (0 if region or strip are out of range
      */
-    public double getZPitch(int region, int strip) {
+    private double getZPitch(int region, int strip) {
         double pitch=0;
         
         if(region>=1 && region<=3) {
@@ -307,6 +335,23 @@ public class Geometry {
         }
     }
     
+    public Transformation3D getTransformation3D(int layer, int sector) {
+        Transformation3D transform = new Transformation3D();
+        
+        if(!(0<layer && layer<=Constants.NLAYERS))
+            throw new IllegalArgumentException("Error: invalid layer="+layer);
+        if(!(0<sector && sector<=Constants.NSECTORS))
+            throw new IllegalArgumentException("Error: invalid layer="+layer);
+        
+        transform.rotateX(Constants.rotations[layer-1][sector-1].x());
+        transform.rotateY(Constants.rotations[layer-1][sector-1].y());
+        transform.rotateZ(Constants.rotations[layer-1][sector-1].z());
+        transform.translateXYZ(Constants.shifts[layer-1][sector-1].x(),
+                               Constants.shifts[layer-1][sector-1].y(),
+                               Constants.shifts[layer-1][sector-1].z());
+        return transform;
+    }
+    
     public Point3D getInverseOffset(int layer, int sector) {
         
         Point3D offset = new Point3D();
@@ -354,6 +399,58 @@ public class Geometry {
         }
     }
     
+    public Point3D toLocal(Point3D global, int layer, int sector) {
+        Point3D local = new Point3D(global);
+        Point3D    offset = this.getOffset(layer, sector);
+        Vector3D rotation = this.getRotation(layer, sector);
+        local.translateXYZ(-offset.x(),-offset.y(),-offset.z());
+        local.rotateZ(-rotation.z());
+        local.rotateY(-rotation.y());
+        local.rotateX(-rotation.x());
+        return local;
+    }
+    
+    public Point3D toGlobal(Point3D local, int layer, int sector) {
+        Point3D global = new Point3D(local);
+        Point3D    offset = this.getOffset(layer, sector);
+        Vector3D rotation = this.getRotation(layer, sector);
+        global.rotateX(rotation.x());
+        global.rotateY(rotation.y());
+        global.rotateZ(rotation.z());
+        global.translateXYZ(offset.x(), offset.y(), offset.z());
+        return global;
+    }
+      
+    public double getResidual(Point3D traj, int layer, int sector, int strip) {
+        BMTType type  = this.getDetectorType(layer);
+        switch (type) {
+            case C:
+                return this.getCResidual(traj, layer, sector, strip);
+            case Z:
+                return this.getZResidual(traj, layer, sector, strip);
+            default:
+                return 0;
+        } 
+    }
+    
+    private double getCResidual(Point3D traj, int layer, int sector, int strip) {
+        int region    = this.getRegion(layer);
+        Point3D local = this.toLocal(traj, layer, sector);
+        return local.z()-this.getCstripZ(region, strip);
+    }
+    
+    
+    private double getZResidual(Point3D traj, int layer, int sector, int strip) {
+        int region     = this.getRegion(layer);
+        Point3D local  = this.toLocal(traj, layer, sector);
+        
+        double  phi    = Math.atan2(local.y(),local.x());
+        double  radius = this.getRadius(layer)+this.getThickness()/2;
+        double  dphi   = phi-this.getZstripPhi(region, sector, strip);
+        if(dphi>2*Math.PI)       dphi -= 2*Math.PI;
+        else if(dphi<-2*Math.PI) dphi += 2*Math.PI;
+        return radius*dphi;
+    }
     
     /**
      * Returns Line3D for Z detector strip identified from region, sector, strip numbers, for ideal geometry
@@ -362,13 +459,12 @@ public class Geometry {
      * @param strip
      * @return Line3D
      */
-    public Line3D getIdealZstrip(int region, int sector, int strip) {
+    private Line3D getIdealZstrip(int region, int sector, int strip) {
         
         double radius = Constants.getCRZRADIUS()[region-1];
         double zmin   = Constants.getCRCZMIN()[region-1];
         double zmax   = Constants.getCRCZMAX()[region-1];
-        double angle  = Constants.getCRZPHI()[region-1][sector-1] - Constants.getCRZDPHI()[region-1][sector-1] 
-                      + ((double) strip-0.5) * Constants.getCRZWIDTH()[region-1] / Constants.getCRZRADIUS()[region-1];
+        double angle  = this.getZstripPhi(region,sector,strip);
         
         Point3D p1= new Point3D(radius, 0, zmin);
         p1.rotateZ(angle);
@@ -401,6 +497,7 @@ public class Geometry {
         
         return stripline;
     }
+
     /**
      * Returns Line3D for Z detector pseudostrip identified from region, sector, strip numbers, for ideal geometry
      * After Loentz angle correction
@@ -428,11 +525,11 @@ public class Geometry {
         double z = stripline.midpoint().z();
         
         double alpha = this.getThetaLorentz(layer, sector, x,y,z,swim);    
-        double ralpha = Math.atan2(Constants.hStrip2Det*Math.tan(alpha), radius + Constants.hStrip2Det);
-        Point3D np1= new Point3D((radius+ Constants.hStrip2Det) * Math.cos(ralpha), 
-                (radius+Constants.hStrip2Det) * Math.sin(ralpha), zmin);
-        Point3D np2= new Point3D((radius+ Constants.hStrip2Det) * Math.cos(ralpha), 
-                (radius+Constants.hStrip2Det) * Math.sin(ralpha), zmax);
+        double ralpha = Math.atan2(this.getThickness()/2*Math.tan(alpha), this.getRadiusMidDrift(layer));
+        Point3D np1= new Point3D(this.getRadiusMidDrift(layer) * Math.cos(ralpha), 
+                this.getRadiusMidDrift(layer) * Math.sin(ralpha), zmin);
+        Point3D np2= new Point3D(this.getRadiusMidDrift(layer) * Math.cos(ralpha), 
+                this.getRadiusMidDrift(layer) * Math.sin(ralpha), zmax);
         np1.rotateZ(angle);
         np2.rotateZ(angle); 
         
@@ -464,6 +561,18 @@ public class Geometry {
         return stripline;
     }
     
+    /**
+     * @param region
+     * @param sector
+     * @param strip
+     * @return the phi angle of the strip center in radians
+     */
+    public double getZstripPhi(int region, int sector, int strip) {
+        double angle = Constants.getCRZPHI()[region-1][sector-1] - Constants.getCRZDPHI()[region-1][sector-1] 
+                     + ((double) strip-0.5) * Constants.getCRZWIDTH()[region-1] / Constants.getCRZRADIUS()[region-1];
+        return angle; //in rad 
+    }
+
     /**
      * Return the C detector strip group
      * @param region [1-3]
@@ -538,9 +647,8 @@ public class Geometry {
          
         Point3D origin  = new Point3D(radius,0,z);
         origin.rotateZ(angle);
-        Vector3D normal = new Vector3D(0,1,0);
-        normal.rotateZ(angle);
         Point3D center  = new Point3D(0,0,z);
+        Vector3D normal = new Vector3D(0,0,1);
         
         Arc3D striparc = new Arc3D(origin,center,normal,theta);
         return striparc;        
@@ -556,22 +664,16 @@ public class Geometry {
     public Arc3D getCstrip(int region, int sector, int strip) {
 
         int layer = this.getLayer(region, BMTType.C);
+        Arc3D arcline = this.getIdealCstrip(region, sector, strip);
+        
         Point3D    offset = this.getOffset(layer, sector);
         Vector3D rotation = this.getRotation(layer, sector);
+        arcline.rotateX(rotation.x());
+        arcline.rotateY(rotation.y());
+        arcline.rotateZ(rotation.z());
+        arcline.translateXYZ(offset.x(),offset.y(),offset.z());
         
-        double radius = Constants.getCRCRADIUS()[region-1];
-        double angle  = Constants.getCRCPHI()[region-1][sector-1] - Constants.getCRCDPHI()[region-1][sector-1];
-        double theta  = Constants.getCRCDPHI()[region-1][sector-1]*2;
-        double z      = this.getCstripZ(region, strip);
-         
-        Point3D origin  = new Point3D(radius,0,z);
-        origin.rotateZ(angle);
-        Vector3D normal = new Vector3D(0,1,0);
-        normal.rotateZ(angle);
-        Point3D center  = new Point3D(0,0,z);
-        Arc3D striparc = new Arc3D(origin,center,normal,theta);
-        this.alignArc(offset, rotation, striparc);
-        return striparc;    
+        return arcline;
     }
     
     public void alignArc(Point3D offset, Vector3D rotation, Arc3D arcline) {
@@ -639,6 +741,26 @@ public class Geometry {
         
         return cyl;
     }
+    
+    public Cylindrical3D getSurface(int layer, int sector) {
+        double phMin  = this.getPhi(layer, sector)-this.getDPhi(layer, sector);
+        double radius = this.getRadius(layer)+this.getThickness()/2;
+        Point3D origin = new Point3D(radius*Math.cos(phMin), 
+                                     radius*Math.sin(phMin),
+                                     this.getZmin(layer));
+        Point3D  center = new Point3D(0,0,this.getZmin(layer));
+        Vector3D axis   = new Vector3D(0,0,1);
+        Arc3D base = new Arc3D(origin, center, axis, 2*this.getDPhi(layer, sector));
+        Cylindrical3D surface = new Cylindrical3D(base, this.getZmax(layer)-this.getZmin(layer));
+        Point3D    offset = this.getOffset(layer, sector);
+        Vector3D rotation = this.getRotation(layer, sector);
+        surface.rotateX(rotation.x());
+        surface.rotateY(rotation.y());
+        surface.rotateZ(rotation.z());
+        surface.translateXYZ(offset.x(), offset.y(), offset.z());
+        return surface;
+    }
+    
     /**
      * Return the sector number
      * @param layer [0-6]
@@ -674,6 +796,16 @@ public class Geometry {
         return sector;
     }
     
+    
+    /**
+     * Return the sector number
+     * @param layer [0-6]
+     * @param localTraj trajectory point in the local frame
+     * @return sector [1-3] (not) accounting for dead areas if layer (0) [1-6] or 0 if layer is undefined
+     */
+    public int getSector(int layer, Point3D localTraj)  {
+        return this.getSector(layer, Math.atan2(localTraj.y(), localTraj.x()));
+    }
     /**
      * Return the layer number
      * @param traj point on one of the detector surfaces
@@ -927,7 +1059,7 @@ public class Geometry {
         CCDBConstantsLoader.Load(new DatabaseConstantProvider(11, "default"));
         
         OldGeometry    oldGeo = new OldGeometry();
-        Geometry newGeo = new Geometry();
+        BMTGeometry newGeo = new BMTGeometry();
         
         System.out.println("\nLayer number for region and detector type:");
         System.out.println("\tRegion\tType\tLayer");
@@ -1011,8 +1143,10 @@ public class Geometry {
                     String snew2 = String.format("%.4f", ngeo2);
                     String sold2 = String.format("%.4f", ogeo2);
                     String scom2 = String.format("%.4f", ngeo2-ogeo2);
-                    if(j==1 || j==Constants.getCRZNSTRIPS()[i-1])
-                    System.out.println("\t" + i + "\t" + k + "\t" + j + "\t" + snew + "/" + sold + "/" + scom + "\t" + snew1 + "/" + sold1 + "/" + scom1 + "\t" + snew2 + "/" + sold2 + "/" + scom2);
+                    if(j==1 || j==Constants.getCRZNSTRIPS()[i-1]) {
+                        System.out.println("\t" + i + "\t" + k + "\t" + j + "\t" + snew + "/" + sold + "/" + scom + "\t" + snew1 + "/" + sold1 + "/" + scom1 + "\t" + snew2 + "/" + sold2 + "/" + scom2);
+                        System.out.println(newGeo.getZstrip(i, k, j).origin().toString() + " " + newGeo.getZstrip(i, k, j).end().toString());
+                    }
                 }
             }
         }
@@ -1095,15 +1229,110 @@ public class Geometry {
                 double z   = Math.random()*(zmax-zmin)+zmin;
                 double phi = Math.random()*2*Math.PI;
                 Point3D traj = new Point3D(radius*Math.cos(phi),radius*Math.sin(phi),z);
-                if(i!=newGeo.getLayer(traj,0)) System.out.println("Error in getLayer");
+//                if(i!=newGeo.getLayer(traj,0)) System.out.println("Error in getLayer");
                 if(newGeo.inDetector(i, newGeo.getSector(i, phi), traj)) 
                     hi_acc.fill(z, Math.toDegrees(phi));
             }
         }
-        JFrame frame = new JFrame("FT Reconstruction");
+        
+        DataGroup dgBMT = new DataGroup(4, 3);
+        for (int i = 0; i < 3; i++) {
+            int region = i+1;
+            H2F hiz_res_z = new H2F("hiz_res_z" + region, "BMTZ R" + region, 500, -150, 150, 500, -5, 5);
+            hiz_res_z.setTitleX("z (cm)");
+            hiz_res_z.setTitleY("Residual (mm)");
+            H1F hiz_res = new H1F("hiz_res" + region, "BMTZ R" + region, 500, -5, 5);
+            hiz_res.setTitleX("Residual (mm)");
+            hiz_res.setTitleY("Counts");
+            H2F hic_res_z = new H2F("hic_res_z" + region, "BMTC R" + region, 500, -150, 150, 500, -5, 5);
+            hic_res_z.setTitleX("z (cm)");
+            hic_res_z.setTitleY("Residual (mm)");
+            H1F hic_res = new H1F("hic_res" + region, "BMTC R" + region, 500, -5, 5);
+            hic_res.setTitleX("Residual (mm)");
+            hic_res.setTitleY("Counts");
+            dgBMT.addDataSet(hiz_res_z, 0 + i * 4);
+            dgBMT.addDataSet(hiz_res,   1 + i * 4);
+            dgBMT.addDataSet(hic_res_z, 2 + i * 4);
+            dgBMT.addDataSet(hic_res,   3 + i * 4);
+        }
+        
+        Vector3D dir = new Vector3D(0,Math.sin(Math.toRadians(60)),Math.cos(Math.toRadians(60)));
+        Line3D particle = new Line3D();
+        particle.set(new Point3D(0,0,0), dir);        
+        
+        HipoDataSource reader = new HipoDataSource();
+        reader.open("/Users/devita/Work/clas12/simulations/bmt/out.rec.hipo");
+        while (reader.hasEvent() == true) {
+            DataEvent event = reader.getNextEvent();
+            DataBank bmtADC = null;
+            DataBank bmtHit = null;
+            DataBank bmtCluster = null;
+            DataBank bmtCross = null;
+            DataBank mcTrue = null;
+
+            if (event.hasBank("BMT::adc")) {
+                bmtADC = event.getBank("BMT::adc");
+            }
+            if (event.hasBank("BMTRec::Hits")) {
+                bmtHit = event.getBank("BMTRec::Hits");
+            }
+            if (event.hasBank("BMTRec::Clusters")) {
+                bmtCluster = event.getBank("BMTRec::Clusters");
+            }
+            if (event.hasBank("BMTRec::Crosses")) {
+                bmtCross = event.getBank("BMTRec::Crosses");
+            }
+            if (event.hasBank("MC::True")) {
+                mcTrue = event.getBank("MC::True");
+            }
+
+            if (bmtCluster != null && bmtHit != null && bmtADC != null && mcTrue != null) {
+                for (int j = 0; j < bmtHit.rows(); j++) {
+                    int id     = bmtHit.getShort("ID", j);
+                    int sector = bmtHit.getByte("sector", j);
+                    int layer  = bmtHit.getByte("layer", j);
+                    int strip  = bmtHit.getInt("strip", j);
+                    int iclus  = bmtHit.getShort("clusterID", j)-1;
+                    int region = newGeo.getRegion(layer);
+                    int seed   = bmtCluster.getInt("seedStrip", iclus);
+                    double centroid = bmtCluster.getFloat("centroid", iclus);
+                    
+                    ArrayList<Point3D> trajs = new ArrayList<>();
+                    newGeo.getSurface(layer,sector).intersection(particle, trajs);
+                    if(trajs.size()==0) continue;
+ //                   for(Point3D traj : trajs) System.out.println(layer + " " + sector + " " + newGeo.getRadius(layer) + " " + traj.toString());
+                    
+                    for (int k = 0; k < mcTrue.rows(); k++) {
+                        if (mcTrue.getInt("hitn", k) == id && mcTrue.getByte("detector", k) == DetectorType.BMT.getDetectorId()) {
+                            double xTrue = mcTrue.getFloat("avgX", k);
+                            double yTrue = mcTrue.getFloat("avgY", k);
+                            double zTrue = mcTrue.getFloat("avgZ", k);
+                            Point3D hit = new Point3D(xTrue, yTrue, zTrue);
+//                            Line3D hitR = newGeo.getAxis(layer, sector).distance(hit);
+//                            Line3D hitR = new Line3D(new Point3D(0,0,0), hit);
+//                            hit = hitR.lerpPoint(newGeo.getRadius(layer)/(newGeo.getRadius(layer)+newGeo.getThickness()/2));
+                            double residual = -newGeo.getResidual(trajs.get(0), layer, sector, seed);
+                            if(BMTGeometry.getDetectorType(layer) == BMTType.Z) {
+//                                Line3D strip = newGeo.getZstrip(region, sector, component);                       
+//                                Line3D dist  = strip.distance(hit);
+                                dgBMT.getH1F("hiz_res" + region).fill(residual);
+  //                              System.out.println(newGeo.getCylinder(layer, sector).getAxis().distance(hit).length() + " " + newGeo.getRadius(layer));
+                                dgBMT.getH2F("hiz_res_z" + region).fill(zTrue, residual);
+                            }
+                            else {
+                                dgBMT.getH1F("hic_res" + region).fill(residual);
+                                dgBMT.getH2F("hic_res_z" + region).fill(zTrue, residual);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        JFrame frame = new JFrame("BMT geometry");
         frame.setSize(1200, 800);
-        EmbeddedCanvas canvas = new EmbeddedCanvas();
-        canvas.draw(acceptance);
+        EmbeddedCanvasTabbed canvas = new EmbeddedCanvasTabbed("BMT");
+        canvas.getCanvas("BMT").draw(dgBMT);
         frame.add(canvas);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
@@ -1199,25 +1428,7 @@ public class Geometry {
 //
 //        return Constants.getCRCWIDTH()[num_region][group]; //
 //    }
-/**
-     *
-     * @param sector the sector in CLAS12 1...3
-     * @param layer the layer 1...6
-     * @param strip the strip number (starts at 1)
-     * @return the angle to localize the center of strip
-     */
-    public double CRZStrip_GetPhi(int sector, int layer, int strip) {
 
-        // Sector = num_detector + 1;	
-        // num_detector = 0 (region A), 1 (region B), 2, (region C)
-        //For CRZ, this function returns the angle to localize the  center of strip "num_strip" for the "num_detector"
-        int num_detector = sector - 1;				// index of the detector (0...2)
-
-        int num_strip = strip - 1;     									// index of the strip (starts at 0)
-        int num_region = (int) (layer + 1) / 2 - 1; 						// region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
-        double angle = Constants.getCRZEDGE1()[num_region][num_detector] + ((double) num_strip+0.5) * Constants.getCRZWIDTH()[num_region] / Constants.getCRZRADIUS()[num_region];
-        return angle; //in rad 
-    }
 //    /**
 //     *
 //     * @param layer the layer 1...6

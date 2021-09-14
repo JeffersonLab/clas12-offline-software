@@ -1,7 +1,6 @@
 package org.jlab.rec.cvt.track;
 import java.util.*;
 
-import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import org.jlab.rec.cvt.bmt.BMTGeometry;

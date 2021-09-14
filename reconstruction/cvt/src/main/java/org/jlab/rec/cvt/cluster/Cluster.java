@@ -1,15 +1,14 @@
 package org.jlab.rec.cvt.cluster;
 
 import java.util.ArrayList;
-import org.jlab.clas.tracking.kalmanfilter.helical.StateVecs;
 import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
-
+import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
-
+import org.jlab.rec.cvt.svt.SVTGeometry;
 import java.util.Collections;
 import org.jlab.geom.prim.Arc3D;
 import org.jlab.rec.cvt.bmt.Constants;
@@ -183,8 +182,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
      * (energy-weighted) value, the energy-weighted phi for Z detectors and the
      * energy-weighted z for C detectors
      */
-    public void calc_CentroidParams(org.jlab.rec.cvt.svt.Geometry sgeo, 
-            org.jlab.rec.cvt.bmt.BMTGeometry geo) {
+    public void calc_CentroidParams(SVTGeometry sgeo, BMTGeometry geo) {
         // instantiation of variables
         double stripNumCent = 0;		// cluster Lorentz-angle-corrected energy-weighted strip = centroid
         double stripNumCent0 = 0;		// cluster uncorrected energy-weighted strip = centroid
@@ -443,7 +441,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             set_Centroid0(stripNumCent0);
             _Phi = phiCent;
             _PhiErr = phiErrCent;
-            this.set_Error((geo.getRadius(_Layer)+org.jlab.rec.cvt.bmt.Constants.hStrip2Det)*phiErrCent);
+            this.set_Error(geo.getRadiusMidDrift(_Layer)*phiErrCent);
             set_Phi0(phiCent0);
             set_PhiErr0(phiErrCent0);
         }
@@ -652,7 +650,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
      * SVT
      *
      */
-    public double get_ResolutionAlongZ(double Z, org.jlab.rec.cvt.svt.Geometry geo) {
+    public double get_ResolutionAlongZ(double Z, SVTGeometry geo) {
 
         // returns the total resolution for a group of strips in a cluster
         // the single strip resolution varies at each point along the strip as a function of Z (due to the graded angle of the strips) and 

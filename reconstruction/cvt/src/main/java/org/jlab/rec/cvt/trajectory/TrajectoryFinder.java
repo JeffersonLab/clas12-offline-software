@@ -3,7 +3,6 @@ package org.jlab.rec.cvt.trajectory;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -15,9 +14,7 @@ import org.jlab.detector.hits.CTOFDetHit;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Arc3D;
-import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Line3D;
-import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Line3d;
@@ -28,6 +25,7 @@ import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.svt.Constants;
+import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.track.Track;
 
 /**
@@ -50,8 +48,8 @@ public class TrajectoryFinder {
      * @param isFinal
      * @return a trajectory object
      */
-    public Trajectory findTrajectory(int id, Track trk, 
-                                    org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, 
+    public Trajectory findTrajectory(Track trk, 
+                                    SVTGeometry svt_geo, BMTGeometry bmt_geo, 
                                     CTOFGeant4Factory ctof_geo, Detector cnd_geo,
                                     Swim swimmer, String isFinal) {
         Helix helix = trk.get_helix(); 
@@ -63,7 +61,7 @@ public class TrajectoryFinder {
             traj.isFinal = true;
         }
 
-        traj.set_Id(id);
+        traj.set_Id(trk.get_Id());
 
         if (candCrossList.size() == 0) {
             System.err.print("Trajectory Error:  cross list is empty");
@@ -154,7 +152,7 @@ public class TrajectoryFinder {
             this.fill_HelicalTrkAngleWRTSVTPlane(sector, layer, dir, svt_geo, stVec);
             stVec.set_CalcCentroidStrip(svt_geo.calcNearestStrip(inters[0]*10, inters[1]*10, inters[2]*10, layer, sector));
             stVec.set_Path(path*10);
-            stVec.set_ID(id);
+            stVec.set_ID(trk.get_Id());
             stateVecs.add(stVec);
             String svtSt1 = "1.";
             svtSt1+=sector;
@@ -186,7 +184,7 @@ public class TrajectoryFinder {
         inters = null;
         path = 0;
         //BMT
-        for (int l = org.jlab.rec.cvt.svt.Constants.NLAYR; l < org.jlab.rec.cvt.svt.Constants.NLAYR + 2 * org.jlab.rec.cvt.bmt.Constants.NREGIONS; l++) {
+        for (int l = org.jlab.rec.cvt.svt.Constants.NLAYR; l < org.jlab.rec.cvt.svt.Constants.NLAYR + bmt_geo.getNLayers(); l++) {
             // re-initilize swimmer from last surface
             if(inters!=null) {
                 double intersPhi   = Math.atan2(inters[4], inters[3]);
@@ -194,46 +192,43 @@ public class TrajectoryFinder {
                 swimmer.SetSwimParameters(inters[0], inters[1], inters[2], Math.toDegrees(intersPhi), Math.toDegrees(intersTheta), trk.get_P(), trk.get_Q(), maxPathLength) ;
             }
             if(inters!=null || l==org.jlab.rec.cvt.svt.Constants.NLAYR) { // don't swim if previous layers was not reached
-                int BMTRegIdx = (l - org.jlab.rec.cvt.svt.Constants.NLAYR) / 2;
-
-                if (org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTRegIdx] == 0) {
-                    continue; // Use the correctly defined geometry
-                }
-                double R = 0;
-
-                if (BMTGeometry.getDetectorType(l + 1-6) == BMTType.Z) {
-                    R = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[BMTRegIdx] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det;
-                }
-                if (BMTGeometry.getDetectorType(l + 1-6) == BMTType.C) {
-                    R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTRegIdx] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det;
-                }
-
-    //            swimmer.SetSwimParameters((trk.get_helix().xdca()+org.jlab.rec.cvt.Constants.getXb()) / 10, (trk.get_helix().ydca()+org.jlab.rec.cvt.Constants.getYb()) / 10, trk.get_helix().get_Z0() / 10, 
+                int layer  = l - org.jlab.rec.cvt.svt.Constants.NLAYR + 1;
+                int region = bmt_geo.getRegion(layer);
+                
+                // RDV: tried using this to determine the sector but t is giving bogus number
+                //Point3D helixTrj = trk.get_helix().getPointAtRadius(bmt_geo.getRadiusMidDrift(layer)); 
+                double radius  = bmt_geo.getRadiusMidDrift(layer)/10;                
+                inters = swimmer.SwimRho(radius);
+                int sector = bmt_geo.getSector(0, Math.atan2(inters[1],inters[0]));
+                
+                Line3D axis    = bmt_geo.getAxis(layer, sector);
+                Point3D axisP1 = new Point3D(axis.origin().x()/10,axis.origin().y()/10, axis.origin().z()/10);
+                Point3D axisP2 = new Point3D(axis.end().x()/10,axis.end().y()/10, axis.end().z()/10);
+                    //            swimmer.SetSwimParameters((trk.get_helix().xdca()+org.jlab.rec.cvt.Constants.getXb()) / 10, (trk.get_helix().ydca()+org.jlab.rec.cvt.Constants.getYb()) / 10, trk.get_helix().get_Z0() / 10, 
     //                    Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
     //                    trk.get_P(), trk.get_Q(), 
     //                    5.0) ;
-                inters = swimmer.SwimToCylinder(R/10);
+                inters = swimmer.SwimGenCylinder(axisP1, axisP2, radius);
                 double r = Math.sqrt(inters[0]*inters[0]+inters[1]*inters[1]);
                 path  = path + inters[6];
-                
-                //if(r>(R - org.jlab.rec.cvt.bmt.Constants.LYRTHICKN)/10) {
+                //if(r>(radius - org.jlab.rec.cvt.bmt.Constants.LYRTHICKN)/10) {
                     StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
                     stVec.set_planeIdx(l);  
-                    double phiPos = Math.atan2(stVec.y(),stVec.x());
-                    //int sector = bmt_geo.isInSector(BMTRegIdx+1,phiPos, 0);
-                    int sector = bmt_geo.getSector(2*(BMTRegIdx+1),phiPos);
+//                    double phiPos = Math.atan2(stVec.y(),stVec.x());
+//                    //int sector = bmt_geo.isInSector(BMTRegIdx+1,phiPos, 0);
+//                    int sector = bmt_geo.getSector(layer,phiPos);
                     stVec.set_SurfaceDetector(DetectorType.CVT.getDetectorId());
                     stVec.set_SurfaceSector(sector);
                     stVec.set_SurfaceLayer(l+1); 
-                    stVec.set_ID(id);
+                    stVec.set_ID(trk.get_Id());
                     stVec.set_Path(path*10);
                     Vector3D dir = new Vector3D(inters[3], inters[4], inters[5]).asUnit();
                     this.fill_HelicalTrkAngleWRTBMTTangentPlane(dir, stVec);
                     //stVec.set_CalcCentroidStrip(bmt_geo.getCStrip(BMTRegIdx+1, stVec.z()));
-                    stVec.set_CalcCentroidStrip(bmt_geo.getCstrip(BMTRegIdx+1, 
+                    stVec.set_CalcCentroidStrip(bmt_geo.getCstrip(region, 
                            new Point3D(stVec.x(),stVec.y(),stVec.z())));
                     stVec.set_Path(path*10);
-                    stVec.set_ID(id);
+                    stVec.set_ID(trk.get_Id());
                     
                     String bmtSt1 = "2.";
                     bmtSt1+=sector;
@@ -258,7 +253,7 @@ public class TrajectoryFinder {
             swimmer.SetSwimParameters(inters[0], inters[1], inters[2], Math.toDegrees(intersPhi), Math.toDegrees(intersTheta), trk.get_P(), trk.get_Q(), maxPathLength) ;
             // swim to CTOF
             double radius = ctof_geo.getRadius(1);
-            inters = swimmer.SwimToCylinder(radius);
+            inters = swimmer.SwimGenCylinder(new Point3D(0,0,0), new Point3D(0,0,1), radius);
             // update parameters
             double r = Math.sqrt(inters[0]*inters[0]+inters[1]*inters[1]);
             intersPhi   = Math.atan2(inters[4], inters[3]);
@@ -269,7 +264,7 @@ public class TrajectoryFinder {
                 stVec.set_SurfaceDetector(DetectorType.CTOF.getDetectorId());
                 stVec.set_SurfaceSector(1);
                 stVec.set_SurfaceLayer(1); 
-                stVec.set_ID(id);
+                stVec.set_ID(trk.get_Id());
                 stVec.set_TrkPhiAtSurface(intersPhi);
                 stVec.set_TrkThetaAtSurface(intersTheta);
                 stVec.set_TrkToModuleAngle(0);
@@ -292,8 +287,8 @@ public class TrajectoryFinder {
                 // swim to CTOF
                 Point3D center = cnd_geo.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getMidpoint();
                 double radius  = Math.sqrt(center.x()*center.x()+center.y()*center.y());
-                inters = swimmer.SwimToCylinder(radius);
-                // update parameters
+                inters = swimmer.SwimGenCylinder(new Point3D(0,0,0), new Point3D(0,0,1), radius);
+            // update parameters
                 double r = Math.sqrt(inters[0]*inters[0]+inters[1]*inters[1]);
                 intersPhi   = Math.atan2(inters[4], inters[3]);
                 intersTheta = Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]));
@@ -303,12 +298,12 @@ public class TrajectoryFinder {
                 stVec.set_SurfaceDetector(DetectorType.CND.getDetectorId());
                 stVec.set_SurfaceSector(1);
                 stVec.set_SurfaceLayer(ilayer+1); 
-                stVec.set_ID(id);
+                stVec.set_ID(trk.get_Id());
                 stVec.set_TrkPhiAtSurface(intersPhi);
                 stVec.set_TrkThetaAtSurface(intersTheta);
                 stVec.set_TrkToModuleAngle(0);
                 stVec.set_Path(path*10);
-               stateVecs.add(stVec);
+                stateVecs.add(stVec);
             }
         }
                
@@ -338,7 +333,7 @@ public class TrajectoryFinder {
     }
     
     private void fill_HelicalTrkAngleWRTSVTPlane(int sector, int layer,
-        Vector3D trkDir, org.jlab.rec.cvt.svt.Geometry svt_geo, StateVec stVec) {
+        Vector3D trkDir, SVTGeometry svt_geo, StateVec stVec) {
         Vector3D n = svt_geo.findBSTPlaneNormal(sector, layer);
         Vector3D ui = new Vector3D(n.y(), -n.x(), 0); //longitudinal vector along the local x direction of the module			
         Vector3D uj = ui.cross(n); //longitudinal vector along the local z direction of the module		    
@@ -360,7 +355,7 @@ public class TrajectoryFinder {
     }
 
     public Trajectory findTrajectory(int id, Ray ray, ArrayList<Cross> candCrossList, 
-            org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo) {
+            SVTGeometry svt_geo, BMTGeometry bmt_geo) {
         Trajectory traj = new Trajectory(ray);
         traj.set_Id(id);
 
@@ -607,7 +602,7 @@ public class TrajectoryFinder {
      * @param stVec stateVec
      */
     public void setHitResolParams(String detector, int sector, int layer, Cluster cluster,
-            StateVec stVec, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, boolean trajFinal) {
+            StateVec stVec, SVTGeometry svt_geo, BMTGeometry bmt_geo, boolean trajFinal) {
 
         if (detector.equalsIgnoreCase("SVT") ) {
             double doca2Cls = svt_geo.getDOCAToStrip(sector, layer, cluster.get_Centroid(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
@@ -661,31 +656,19 @@ public class TrajectoryFinder {
             if (BMTGeometry.getDetectorType(layer) == BMTType.Z) { //Z-detector measuring phi
                 int bsector = cluster.get_Sector();
                 int blayer = cluster.get_Layer();
-                double cxh = Math.cos(cluster.get_Phi())*
-                            (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[cluster.get_Region() - 1] 
-                            + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
-                double cyh = Math.sin(cluster.get_Phi())*
-                        (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[cluster.get_Region() - 1] 
-                        + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+                double cxh = Math.cos(cluster.get_Phi())*bmt_geo.getRadiusMidDrift(blayer);
+                double cyh = Math.sin(cluster.get_Phi())*bmt_geo.getRadiusMidDrift(blayer);
                 double phic = bmt_geo.getPhi(new Point3D(cxh,cyh,0), bsector, blayer);
                 double phit = bmt_geo.getPhi(p, sector, blayer);
-                double doca2Cls = (phic-phit)*
-                        (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[cluster.get_Region() - 1] 
-                        + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+                double doca2Cls = (phic-phit)*bmt_geo.getRadiusMidDrift(blayer);
                 cluster.set_CentroidResidual(doca2Cls);
 
                 for (FittedHit h1 : cluster) {
-                    double xh = Math.cos(h1.get_Strip().get_Phi())*
-                            (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[cluster.get_Region() - 1] 
-                            + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
-                    double yh = Math.sin(h1.get_Strip().get_Phi())*
-                            (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[cluster.get_Region() - 1] 
-                            + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+                    double xh = Math.cos(h1.get_Strip().get_Phi())*bmt_geo.getRadiusMidDrift(blayer);
+                    double yh = Math.sin(h1.get_Strip().get_Phi())*bmt_geo.getRadiusMidDrift(blayer);
                     double hphic = bmt_geo.getPhi(new Point3D(xh,yh,0), sector, blayer);
                     double hphit = bmt_geo.getPhi(p, sector, blayer);
-                    double doca1 = (hphic-hphit)*
-                            (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[cluster.get_Region() - 1] 
-                            + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+                    double doca1 = (hphic-hphit)*bmt_geo.getRadiusMidDrift(blayer);
 
                     if(h1.get_Strip().get_Strip()==cluster.get_SeedStrip())
                         cluster.set_SeedResidual(doca1); 
@@ -699,7 +682,7 @@ public class TrajectoryFinder {
         }
     }
 
-    private double[][][] calc_trackIntersBMT(Ray ray, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, int start_layer) {
+    private double[][][] calc_trackIntersBMT(Ray ray, BMTGeometry bmt_geo, int start_layer) {
 
         //[l][hemisphere], [0,1,2,3,4]=x,y,z,phi,theta,estimated centroid strip; hemisphere = [1]top or [0]bottom
         double[][][] result = new double[6][2][7];
@@ -764,7 +747,7 @@ public class TrajectoryFinder {
         return result;
     }
 
-    private double[][][] calc_trackIntersSVT(Ray ray, org.jlab.rec.cvt.svt.Geometry svt_geo) {
+    private double[][][] calc_trackIntersSVT(Ray ray, SVTGeometry svt_geo) {
         //[l][s], [0,1,2,3,4]=x,y,z,phi,theta,estimated centroid strip
         double[][][] result = new double[org.jlab.rec.cvt.svt.Constants.NLAYR][org.jlab.rec.cvt.svt.Constants.NSECT[org.jlab.rec.cvt.svt.Constants.NLAYR - 1]][7];
         for (int l = 0; l < org.jlab.rec.cvt.svt.Constants.NLAYR; l++) {
@@ -828,7 +811,7 @@ public class TrajectoryFinder {
     
     public double[] getIntersectionTrackWithSVTModule(int s, int l,
             double _yxinterc2, double _yxslope2, double _yzinterc2,
-            double _yzslope2, org.jlab.rec.cvt.svt.Geometry geo) {
+            double _yzslope2, SVTGeometry geo) {
         // array [][][][] =[x][y][z][stripCentroid]
         double[] inters = new double[4];
         inters[0] = Double.NaN;
@@ -874,7 +857,7 @@ public class TrajectoryFinder {
 
     private double[][] getIntersectionTrackWithBMTModules(int l,
             double _yxinterc2, double _yxslope2, double _yzinterc2,
-            double _yzslope2, org.jlab.rec.cvt.bmt.BMTGeometry geo) {
+            double _yzslope2, BMTGeometry geo) {
         
         // array [][][][] =[x][y][z][stripCentroid]
         double[][] inters = new double[2][4];
@@ -893,7 +876,7 @@ public class TrajectoryFinder {
         
         int lyer = l+1;
         
-        double radius = geo.getRadius(lyer)+org.jlab.rec.cvt.bmt.Constants.hStrip2Det;
+        double radius = geo.getRadiusMidDrift(lyer);
         
         double y_minus = -300;
         double y_plus = 350;
@@ -1042,7 +1025,7 @@ public class TrajectoryFinder {
     }
 
     private List<Point3D> getIntersBMT(int lyer, double radius, double x_minus, double y_minus, double z_minus, 
-            Point3D trkOr, Point3D trkEn, Point3D offset, Vector3D rotation, org.jlab.rec.cvt.bmt.BMTGeometry geo) {
+            Point3D trkOr, Point3D trkEn, Point3D offset, Vector3D rotation, BMTGeometry geo) {
         
         List<Point3D> result = new ArrayList<Point3D>();
         Line3D trk = new Line3D(trkOr, trkEn);

@@ -12,7 +12,6 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.trajectory.Ray;
-import org.yaml.snakeyaml.scanner.Constant;
 
 /**
  *
@@ -21,7 +20,7 @@ import org.yaml.snakeyaml.scanner.Constant;
 public class BMTGeometry extends Geometry {
     
     public Arc3D getCstrip(int region, int sector, Cluster clus) {
-        double radius = Constants.getCRCRADIUS()[region-1]+Constants.hStrip2Det;
+        double radius = this.getRadiusMidDrift(this.getLayer(region, BMTType.C));
         double angle  = Constants.getCRCPHI()[region-1][sector-1] - Constants.getCRCDPHI()[region-1][sector-1];
         double theta  = Constants.getCRCDPHI()[region-1][sector-1]*2;
         double z = 0;

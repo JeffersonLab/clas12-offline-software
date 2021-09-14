@@ -11,6 +11,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.hit.ADCConvertor;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.hit.Strip;
+import org.jlab.rec.cvt.svt.SVTGeometry;
 
 /**
  * A class to fill in lists of hits corresponding to reconstructed hits
@@ -132,7 +133,7 @@ public class HitReader {
      * @param adcConv converter from adc to daq values
      * @param geo the SVT geometry
      */
-    public void fetch_SVTHits(DataEvent event, ADCConvertor adcConv, int omitLayer, int omitHemisphere, org.jlab.rec.cvt.svt.Geometry geo) {
+    public void fetch_SVTHits(DataEvent event, ADCConvertor adcConv, int omitLayer, int omitHemisphere, SVTGeometry geo) {
 
         if (event.hasBank("BST::adc") == false) {
             //System.err.println("there is no BST bank ");

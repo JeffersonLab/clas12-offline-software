@@ -295,7 +295,7 @@ public class CCDBConstantsLoader {
         double xpos = dbprovider.getDouble("/geometry/cvt/mvt/position/x", 0 );
         double ypos = dbprovider.getDouble("/geometry/cvt/mvt/position/y", 0 );
         double zpos = dbprovider.getDouble("/geometry/cvt/mvt/position/z", 0 );
-        
+        double angle = -0;//Math.toDegrees(0.003);
         for (int row = 0; row<NLAYERS*NSECTORS; row++) {
             int sector = dbprovider.getInteger("/geometry/cvt/mvt/alignment/sector", row);
             int layer  = dbprovider.getInteger("/geometry/cvt/mvt/alignment/layer", row);
@@ -303,12 +303,11 @@ public class CCDBConstantsLoader {
                                         dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaY", row),
                                         dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaZ", row)); 
      
-            //shift.setY(0.284); shift.setZ(-0.0004);
-            shift.translateXYZ(xpos, ypos, zpos);
-            Vector3D rot = new Vector3D(dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotX", row),
+            shift.translateXYZ(xpos, ypos-94.7*Math.sin(Math.toRadians(angle)), zpos+94.7*(1-Math.cos(Math.toRadians(angle))));
+            Vector3D rot = new Vector3D(dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotX", row)+Math.toRadians(angle),
                                         dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotY", row),
                                         dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotZ", row)); 
-            //rot.setX(-0.003);
+
             int region = (int) Math.floor((layer+1)/2);
             double Zmin = CRZZMIN[region - 1];
             double Zmax = CRZZMAX[region - 1];

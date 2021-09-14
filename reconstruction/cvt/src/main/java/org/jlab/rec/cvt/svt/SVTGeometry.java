@@ -15,7 +15,7 @@ import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
 import org.jlab.detector.geant4.v2.SVT.AlignmentFactory;
 import org.jlab.geometry.prim.Line3d;
 
-public class Geometry {
+public class SVTGeometry {
 
     private SVTStripFactory _svtStripFactory;
 
@@ -27,7 +27,7 @@ public class Geometry {
         this._svtStripFactory = _svtStripFactory;
     }
     
-    public Geometry() {
+    public SVTGeometry() {
         //AlignmentFactory.VERBOSE=true;
     }
 

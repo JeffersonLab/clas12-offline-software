@@ -9,8 +9,10 @@ import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cross.Cross;
+import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 
@@ -24,14 +26,18 @@ public class TrackListFinder {
      *
      * @param cands the list of track candidates
      * @param svt_geo the svt geometry
+     * @param bmt_geo
+     * @param ctof_geo
+     * @param cnd_geo
+     * @param cvtSwim
      * @return the list of selected tracks
      */
     public List<Track> getTracks(List<Track> cands, 
-            org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo,
+            SVTGeometry svt_geo, BMTGeometry bmt_geo,
             CTOFGeant4Factory ctof_geo, Detector cnd_geo,
-            Swim bstSwim) {
-        List<Track> tracks = new ArrayList<Track>();
-        if (cands.size() == 0) {
+            Swim cvtSwim) {
+        List<Track> tracks = new ArrayList<>();
+        if (cands.isEmpty()) {
             System.err.print("Error no tracks found");
             return cands;
         }
@@ -50,12 +56,12 @@ public class TrackListFinder {
 
                 int charge = trk.get_Q();
                 double maxPathLength = 5.0;//very loose cut 
-                bstSwim.SetSwimParameters((trk.get_helix().xdca()+org.jlab.rec.cvt.Constants.getXb()) / 10, (trk.get_helix().ydca()+org.jlab.rec.cvt.Constants.getYb()) / 10, trk.get_helix().get_Z0() / 10 , 
+                cvtSwim.SetSwimParameters((trk.get_helix().xdca()+org.jlab.rec.cvt.Constants.getXb()) / 10, (trk.get_helix().ydca()+org.jlab.rec.cvt.Constants.getYb()) / 10, trk.get_helix().get_Z0() / 10 , 
                         Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
                         trk.get_P(), charge, 
                         maxPathLength) ;
 
-                double[] pointAtCylRad = bstSwim.SwimRho(Constants.CTOFINNERRADIUS/10);
+                double[] pointAtCylRad = cvtSwim.SwimRho(Constants.CTOFINNERRADIUS/10);
                 if(pointAtCylRad!=null) {
                     trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0]*10, pointAtCylRad[1]*10, pointAtCylRad[2]*10));
                     trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3]*10, pointAtCylRad[4]*10, pointAtCylRad[5]*10));
@@ -64,7 +70,7 @@ public class TrackListFinder {
 
                     TrajectoryFinder trjFind = new TrajectoryFinder();
 
-                    Trajectory traj = trjFind.findTrajectory(trk.get_Id(), trk, svt_geo, bmt_geo, ctof_geo, cnd_geo, bstSwim, "final");
+                    Trajectory traj = trjFind.findTrajectory(trk, svt_geo, bmt_geo, ctof_geo, cnd_geo, cvtSwim, "final");
 
                     trk.set_Trajectory(traj.get_Trajectory());
 

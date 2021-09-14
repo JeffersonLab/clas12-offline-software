@@ -8,6 +8,7 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
+import org.jlab.rec.cvt.bmt.Constants;
 
 public class Strip {
 
@@ -158,18 +159,19 @@ public class Strip {
      * @param geo the BMT geometry class Sets the Lorentz corrected phi and
      * strip number for Z detectors, the z position for C detectors
      */
-    public void calc_BMTStripParams(org.jlab.rec.cvt.bmt.BMTGeometry geo, int sector, int layer, Swim swim) {
+    public void calc_BMTStripParams(BMTGeometry geo, int sector, int layer, Swim swim) {
 
+        int region = geo.getRegion(layer); // region index (1...3) 1=layers 1&2, 2=layers 3&4, 3=layers 5&6
+        
         if (BMTGeometry.getDetectorType(layer) == BMTType.C) { // C-detectors
             // set z
             //double z = geo.CRCStrip_GetZ(layer, this.get_Strip());
-            int region = (int) ((layer + 1) / 2 ); // region index (1...3) 1=layers 1&2, 2=layers 3&4, 3=layers 5&6
             Arc3D arcLine = geo.getCstrip(region, sector, this.get_Strip());
             //double z = arcLine.center().z();
             this.set_Arc(arcLine);
             // max z err
             //this.set_ZErr(geo.CRCStrip_GetPitch(layer, this.get_Strip()) / Math.sqrt(12.));
-            this.set_ZErr(geo.getCPitch(region, this.get_Strip()) / Math.sqrt(12.));
+            this.set_ZErr(geo.getPitch(layer, this.get_Strip()) / Math.sqrt(12.));
             this.set_ImplantPoint(arcLine.origin());
             this.set_MidPoint(arcLine.center());
             this.set_EndPoint(arcLine.end());
@@ -195,7 +197,7 @@ public class Strip {
             Vector3D n = new Point3D(x, y, L.origin().z()).
                     vectorTo(new Point3D(L.origin().x(),L.origin().y(),L.origin().z())).asUnit();
 
-            double theMeasuredPhi = geo.CRZStrip_GetPhi(sector, layer, this.get_Strip());
+            double theMeasuredPhi = geo.getZstripPhi(geo.getRegion(layer), sector, this.get_Strip());
             //double theLorentzCorrectedAngle = L.midpoint().toVector3D().phi(); 
             double theLorentzCorrectedAngle = n.phi(); 
             // set the phi 
@@ -203,8 +205,7 @@ public class Strip {
             this.set_Phi0(theMeasuredPhi); // uncorrected
             //System.out.println(" sec "+sector+" strip "+this.get_Strip()+" LC strip "+geo.getZStrip(layer, theLorentzCorrectedAngle));
             //int theLorentzCorrectedStrip = geo.getZStrip(layer, theLorentzCorrectedAngle);
-            int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6double Z0=0;           
-//            double xl = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]*
+            //            double xl = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]*
 //                    Math.cos(theLorentzCorrectedAngle);
 //            double yl = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]*
 //                    Math.sin(theLorentzCorrectedAngle);
@@ -214,12 +215,12 @@ public class Strip {
             // get the strip number after correcting for Lorentz angle
             this.set_LCStrip(theLorentzCorrectedStrip);
             
-            double sigma = org.jlab.rec.cvt.bmt.Constants.SigmaDrift / Math.cos(geo.getThetaLorentz(layer, sector)); // max sigma for drift distance  (hDrift) = total gap from top to mesh
+            double sigma = Constants.SigmaDrift / Math.cos(geo.getThetaLorentz(layer, sector)); // max sigma for drift distance  (hDrift) = total gap from top to mesh
 
             //max phi err
-            double phiErrL = sigma / org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region];
+            double phiErrL = sigma / geo.getRadius(layer);
 
-            double phiErr = org.jlab.rec.cvt.bmt.Constants.getCRZWIDTH()[num_region] / org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region] / Math.sqrt(12.);
+            double phiErr = geo.getPitch(layer, this.get_Strip()) / geo.getRadius(layer) / Math.sqrt(12.);
             this.set_PhiErr(Math.sqrt(phiErr * phiErr + phiErrL * phiErrL));
             //System.out.println("arcerr "+org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]+" * "+Math.toDegrees(sigma/org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]));
             this.set_PhiErr0(phiErr);

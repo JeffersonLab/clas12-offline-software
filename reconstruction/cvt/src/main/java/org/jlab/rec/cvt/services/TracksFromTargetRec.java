@@ -20,6 +20,7 @@ import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
+import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.StraightTrackCrossListFinder;
@@ -43,7 +44,7 @@ public class TracksFromTargetRec {
             List<FittedHit> SVThits, List<FittedHit> BMThits, 
             List<Cluster> SVTclusters, List<Cluster> BMTclusters, 
             List<ArrayList<Cross>> crosses,
-            org.jlab.rec.cvt.svt.Geometry SVTGeom, org.jlab.rec.cvt.bmt.BMTGeometry BMTGeom,
+            SVTGeometry SVTGeom, BMTGeometry BMTGeom,
             CTOFGeant4Factory CTOFGeom, Detector CNDGeom,
             RecoBankWriter rbc,
             double shift, 
@@ -90,7 +91,7 @@ public class TracksFromTargetRec {
         for (Seed seed : seeds) { 
             org.jlab.clas.tracking.trackrep.Helix hlx = null ;
             
-            double xr =  -seed.get_Helix().get_dca()*Math.sin(seed.get_Helix().get_phi_at_dca());
+            double xr = -seed.get_Helix().get_dca()*Math.sin(seed.get_Helix().get_phi_at_dca());
             double yr =  seed.get_Helix().get_dca()*Math.cos(seed.get_Helix().get_phi_at_dca());
             double zr =  seed.get_Helix().get_Z0();
             double pt = Constants.LIGHTVEL * seed.get_Helix().radius() * Constants.getSolenoidVal();
@@ -196,6 +197,7 @@ public class TracksFromTargetRec {
         }
 
         //System.out.println( " *** *** trkcands " + trkcands.size() + " * trks " + trks.size());
+        // RDV: can it be done before doing trajectories??
         trkFinder.removeOverlappingTracks(tracks); //turn off until debugged
         // reset cross IDs
         for(int a = 0; a<2; a++) {

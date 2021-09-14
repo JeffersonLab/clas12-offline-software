@@ -3,9 +3,10 @@ package org.jlab.rec.cvt.cluster;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
+import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
+import org.jlab.rec.cvt.svt.SVTGeometry;
 
 /**
  *
@@ -24,7 +25,7 @@ public class ClusterFinder {
     int nstrip = 1200; // max number of strips
     int nlayr = 6;
     int nsec = 18;
-    public ArrayList<Cluster> findClusters(List<Hit> hits2,org.jlab.rec.cvt.svt.Geometry geo_bst,org.jlab.rec.cvt.bmt.BMTGeometry geo_bmt) // the number of strips depends on the layer 
+    public ArrayList<Cluster> findClusters(List<Hit> hits2, SVTGeometry geo_bst, BMTGeometry geo_bmt) // the number of strips depends on the layer 
     {
         ArrayList<Cluster> clusters = new ArrayList<Cluster>();
 

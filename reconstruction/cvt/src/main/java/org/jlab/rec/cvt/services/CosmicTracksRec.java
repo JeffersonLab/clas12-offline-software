@@ -6,7 +6,6 @@
 package org.jlab.rec.cvt.services;
 import Jama.Matrix;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
@@ -17,22 +16,19 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataEvent;
-import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
-import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.CrossList;
 import org.jlab.rec.cvt.cross.StraightTrackCrossListFinder;
 import org.jlab.rec.cvt.fit.CosmicFitter;
 import org.jlab.rec.cvt.hit.FittedHit;
+import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.track.StraightTrack;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.track.TrackCandListFinder;
-import org.jlab.rec.cvt.track.TrackListFinder;
 import org.jlab.rec.cvt.trajectory.Ray;
-import org.jlab.rec.cvt.trajectory.StateVec;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 /**
@@ -48,7 +44,7 @@ public class CosmicTracksRec {
             List<FittedHit> SVThits, List<FittedHit> BMThits, 
             List<Cluster> SVTclusters, List<Cluster> BMTclusters, 
             List<ArrayList<Cross>> crosses,
-            org.jlab.rec.cvt.svt.Geometry SVTGeom, org.jlab.rec.cvt.bmt.BMTGeometry BMTGeom,
+            SVTGeometry SVTGeom, BMTGeometry BMTGeom,
             CTOFGeant4Factory CTOFGeom, Detector CNDGeom,
             RecoBankWriter rbc,
             double zShift, boolean exLayrs, Swim swimmer) {
@@ -204,7 +200,7 @@ public class CosmicTracksRec {
                         if (cl.get_DetectorType()==1) { //Z-detector measuring phi
                             Cylindrical3D cyl = BMTGeom.getCylinder(cl.get_Layer(), cl.get_Sector()); 
                             Line3D cln = cl.getCylAxis();
-                            double r = BMTGeom.getRadius(layer)+org.jlab.rec.cvt.bmt.Constants.hStrip2Det;
+                            double r = BMTGeom.getRadiusMidDrift(layer);
                             cl.set_CentroidResidual(resi*r);
                             cl.setN(cl.getNFromTraj(tj.x(),tj.y(),tj.z(),cln));
                             cl.setS(cl.getL().cross(cl.getN()).asUnit());    

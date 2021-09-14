@@ -36,6 +36,8 @@ import org.jlab.geom.prim.Arc3D;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
+import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.trajectory.Ray;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 /**
@@ -48,7 +50,7 @@ import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 public class RecUtilities {
 
     public void CleanupSpuriousCrosses(List<ArrayList<Cross>> crosses, List<Track> trks,
-            org.jlab.rec.cvt.svt.Geometry SVTGeom) {
+            SVTGeometry SVTGeom) {
         List<Cross> rmCrosses = new ArrayList<Cross>();
         
         for(Cross c : crosses.get(0)) {
@@ -82,9 +84,7 @@ public class RecUtilities {
         }
     }
     
-    public List<Surface> setMeasVecs(Seed trkcand, 
-            org.jlab.rec.cvt.svt.Geometry sgeo,
-            org.jlab.rec.cvt.bmt.BMTGeometry bgeo, Swim swim) {
+    public List<Surface> setMeasVecs(Seed trkcand, SVTGeometry sgeo, BMTGeometry bgeo, Swim swim) {
         //Collections.sort(trkcand.get_Crosses());
         List<Surface> KFSites = new ArrayList<Surface>();
         Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()),
@@ -173,8 +173,8 @@ public class RecUtilities {
                    
                     //cyl.baseArc().setRadius(Math.sqrt(x*x+y*y));
                     //cyl.highArc().setRadius(Math.sqrt(x*x+y*y));
-                    cyl.baseArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
-                    cyl.highArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);                   
+                    cyl.baseArc().setRadius(bgeo.getRadiusMidDrift(lyer));
+                    cyl.highArc().setRadius(bgeo.getRadiusMidDrift(lyer));                   
                     Surface meas = new Surface(cyl, strp);
                     Point3D    offset = bgeo.getOffset(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer(), 
                             trkcand.get_Crosses().get(c).get_Sector()); 
@@ -212,8 +212,8 @@ public class RecUtilities {
                     //arc.setCenter(ct);
                     //arc.setOrigin(og);
                     Strip strp = new Strip(id, ce, arc);
-                    cyl.baseArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
-                    cyl.highArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);                   
+                    cyl.baseArc().setRadius(bgeo.getRadiusMidDrift(lyer));
+                    cyl.highArc().setRadius(bgeo.getRadiusMidDrift(lyer));                   
                     
                     Surface meas = new Surface(cyl, strp);
                     
@@ -245,8 +245,7 @@ public class RecUtilities {
     }
     private TrajectoryFinder tf = new TrajectoryFinder();
     public List<Surface> setMeasVecs(StraightTrack trkcand, 
-            org.jlab.rec.cvt.svt.Geometry sgeo,
-            org.jlab.rec.cvt.bmt.BMTGeometry bgeo, Swim swim) {
+            SVTGeometry sgeo, BMTGeometry bgeo, Swim swim) {
         //Collections.sort(trkcand.get_Crosses());
         List<Surface> KFSites = new ArrayList<Surface>();
         Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()),
@@ -352,8 +351,8 @@ public class RecUtilities {
 
                     //cyl.baseArc().setRadius(Math.sqrt(x*x+y*y));
                     //cyl.highArc().setRadius(Math.sqrt(x*x+y*y));
-                    cyl.baseArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(trkcand.get(i).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
-                    cyl.highArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(trkcand.get(i).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);                   
+                    cyl.baseArc().setRadius(bgeo.getRadiusMidDrift(lyer));
+                    cyl.highArc().setRadius(bgeo.getRadiusMidDrift(lyer));                   
                     Surface meas = new Surface(cyl, strp);
                     meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());
                     Point3D    offset = bgeo.getOffset(trkcand.get(i).get_Cluster1().get_Layer(), 
@@ -390,8 +389,8 @@ public class RecUtilities {
                     //arc.setCenter(ct);
                     //arc.setOrigin(og);
                     Strip strp = new Strip(id, ce, arc);
-                    cyl.baseArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[(trkcand.get(i).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
-                    cyl.highArc().setRadius(org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[(trkcand.get(i).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);                   
+                    cyl.baseArc().setRadius(bgeo.getRadiusMidDrift(lyer));
+                    cyl.highArc().setRadius(bgeo.getRadiusMidDrift(lyer));                   
 
                     Surface meas = new Surface(cyl, strp);
                     meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());
@@ -425,8 +424,7 @@ public class RecUtilities {
     }
     
     public List<Cluster> FindClustersOnTrk (List<Cluster> allClusters, Helix helix, double P, int Q,
-            org.jlab.rec.cvt.svt.Geometry sgeo, 
-            Swim swimmer) { 
+            SVTGeometry sgeo, Swim swimmer) { 
         Map<Integer, Cluster> clusMap = new HashMap<Integer, Cluster>();
         //Map<Integer, Double> stripMap = new HashMap<Integer, Double>();
         Map<Integer, Double> docaMap = new HashMap<Integer, Double>();
@@ -497,7 +495,7 @@ public class RecUtilities {
     
     public void MatchTrack2Traj(Seed trkcand, Map<Integer, 
             org.jlab.clas.tracking.kalmanfilter.helical.KFitter.HitOnTrack> traj, 
-            org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.BMTGeometry bgeo) {
+            SVTGeometry sgeo, BMTGeometry bgeo) {
         
         for (int i = 0; i < trkcand.get_Clusters().size(); i++) { //SVT
             if(trkcand.get_Clusters().get(i).get_Detector()==0) {
@@ -551,31 +549,19 @@ public class RecUtilities {
                     //double yc = trkcand.get_Crosses().get(c).get_Point().y();
                     int bsector = trkcand.get_Crosses().get(c).get_Sector();
                     int blayer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer();
-                    double cxh = Math.cos(cluster.get_Phi())*
-                            (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[cluster.get_Region() - 1] 
-                            + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
-                    double cyh = Math.sin(cluster.get_Phi())*
-                            (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[cluster.get_Region() - 1] 
-                            + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+                    double cxh = Math.cos(cluster.get_Phi())*bgeo.getRadiusMidDrift(blayer);
+                    double cyh = Math.sin(cluster.get_Phi())*bgeo.getRadiusMidDrift(blayer);
                     double phic = bgeo.getPhi(new Point3D(cxh,cyh,0), bsector, blayer);
                     double phit = bgeo.getPhi(p, bsector, blayer);
-                    double doca2Cls = (phic-phit)*
-                            (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[cluster.get_Region() - 1] 
-                            + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+                    double doca2Cls = (phic-phit)*bgeo.getRadiusMidDrift(blayer);
                     cluster.set_CentroidResidual(traj.get(layer).resi);
 
                     for (FittedHit hit : cluster) {
-                        double xh = Math.cos(hit.get_Strip().get_Phi())*
-                                (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[cluster.get_Region() - 1] 
-                                + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
-                        double yh = Math.sin(hit.get_Strip().get_Phi())*
-                                (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[cluster.get_Region() - 1] 
-                                + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+                        double xh = Math.cos(hit.get_Strip().get_Phi())*bgeo.getRadiusMidDrift(blayer);
+                        double yh = Math.sin(hit.get_Strip().get_Phi())*bgeo.getRadiusMidDrift(blayer);
                         double hphic = bgeo.getPhi(new Point3D(xh,yh,0), bsector, blayer);
                         double hphit = bgeo.getPhi(p, bsector, blayer);
-                        double doca1 = (hphic-hphit)*
-                                (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[cluster.get_Region() - 1] 
-                                + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+                        double doca1 = (hphic-hphit)*bgeo.getRadiusMidDrift(blayer);
                         
                         if(hit.get_Strip().get_Strip()==cluster.get_SeedStrip())
                             cluster.set_SeedResidual(doca1); 
@@ -612,7 +598,7 @@ public class RecUtilities {
     }
     
     public Track OutputTrack(Seed seed, org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf,
-            org.jlab.rec.cvt.svt.Geometry SVTGeom, org.jlab.rec.cvt.bmt.BMTGeometry BMTGeom) {
+            SVTGeometry SVTGeom, BMTGeometry BMTGeom) {
         org.jlab.rec.cvt.trajectory.Helix helix = new org.jlab.rec.cvt.trajectory.Helix(kf.KFHelix.getD0(), 
                 kf.KFHelix.getPhi0(), kf.KFHelix.getOmega(), 
                 kf.KFHelix.getZ0(), kf.KFHelix.getTanL());
@@ -660,7 +646,7 @@ public class RecUtilities {
         
     }
     public Track OutputTrack(StraightTrack seed, org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf,
-            org.jlab.rec.cvt.svt.Geometry SVTGeom, org.jlab.rec.cvt.bmt.BMTGeometry BMTGeom) {
+            SVTGeometry SVTGeom, BMTGeometry BMTGeom) {
         org.jlab.rec.cvt.trajectory.Helix helix = new org.jlab.rec.cvt.trajectory.Helix(kf.KFHelix.getD0(), 
                 kf.KFHelix.getPhi0(), kf.KFHelix.getOmega(), 
                 kf.KFHelix.getZ0(), kf.KFHelix.getTanL());
@@ -688,8 +674,7 @@ public class RecUtilities {
     }
     
     public List<Seed> reFit(List<Seed> seedlist,
-            org.jlab.rec.cvt.svt.Geometry SVTGeom,
-            org.jlab.rec.cvt.bmt.BMTGeometry BMTGeom,
+            SVTGeometry SVTGeom, BMTGeometry BMTGeom,
             Swim swimmer,  StraightTrackSeeder trseed) {
         List<Seed> filtlist = new ArrayList<Seed>();
         if(seedlist==null)
@@ -706,8 +691,7 @@ public class RecUtilities {
     }        
     
     public List<Seed> reFitSeed(Seed bseed, 
-            org.jlab.rec.cvt.svt.Geometry SVTGeom,
-            org.jlab.rec.cvt.bmt.BMTGeometry BMTGeom,
+            SVTGeometry SVTGeom, BMTGeometry BMTGeom,
             StraightTrackSeeder trseed) {
         
         List<Seed> seedlist = new ArrayList<Seed>();
@@ -740,8 +724,7 @@ public class RecUtilities {
     }
     
     public List<Seed> reFit(List<Seed> seedlist,
-            org.jlab.rec.cvt.svt.Geometry SVTGeom,
-            org.jlab.rec.cvt.bmt.BMTGeometry BMTGeom,
+            SVTGeometry SVTGeom, BMTGeometry BMTGeom,
             Swim swimmer,  TrackSeederCA trseed,  TrackSeeder trseed2) {
         trseed = new TrackSeederCA();
         trseed2 = new TrackSeeder();
@@ -759,8 +742,7 @@ public class RecUtilities {
         return filtlist;
     }
     public List<Seed> reFitSeed(Seed bseed, 
-            org.jlab.rec.cvt.svt.Geometry SVTGeom,
-            org.jlab.rec.cvt.bmt.BMTGeometry BMTGeom,
+            SVTGeometry SVTGeom, BMTGeometry BMTGeom,
             Swim swimmer,  TrackSeederCA trseed,  TrackSeeder trseed2) {
         boolean pass = true;
 
@@ -799,8 +781,7 @@ public class RecUtilities {
     }
     
     public List<StraightTrack> reFit(List<StraightTrack> seedlist, 
-            org.jlab.rec.cvt.svt.Geometry SVTGeom,
-            CosmicFitter fitTrk,  TrackCandListFinder trkfindr) {
+            SVTGeometry SVTGeom, CosmicFitter fitTrk,  TrackCandListFinder trkfindr) {
         fitTrk = new CosmicFitter();
         trkfindr = new TrackCandListFinder();
         List<StraightTrack> filtlist = new ArrayList<StraightTrack>();
@@ -819,8 +800,7 @@ public class RecUtilities {
     
     
     public List<StraightTrack> reFitSeed(StraightTrack cand, 
-            org.jlab.rec.cvt.svt.Geometry SVTGeom,
-            CosmicFitter fitTrk,  TrackCandListFinder trkfindr) {
+            SVTGeometry SVTGeom, CosmicFitter fitTrk,TrackCandListFinder trkfindr) {
         boolean pass = true;
 
         List<StraightTrack> seedlist = new ArrayList<StraightTrack>();
