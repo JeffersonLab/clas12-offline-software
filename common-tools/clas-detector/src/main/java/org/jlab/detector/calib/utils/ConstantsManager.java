@@ -294,11 +294,14 @@ public class ConstantsManager {
         ConstantsManager conman = new ConstantsManager("default");
         Map<String,Integer> tables = new HashMap<>();
         tables.put("/calibration/dc/time_corrections/T0Corrections",4);
+        tables.put("/calibration/dc/time_corrections/timingcuts",3);
         conman.init(tables);
-        IndexedTable table = conman.getConstants(4013, "/calibration/dc/time_corrections/T0Corrections");
-        System.out.println("4conman:  "+table.getColumnCount());
-        System.out.println("4conman:  "+table.toString());
-        System.out.println("4conman:  1/4/6/1:  "+table.getDoubleValue("T0Correction", 1,4,6,1));
+        IndexedTable t4 = conman.getConstants(4013, "/calibration/dc/time_corrections/T0Corrections");
+        IndexedTable t3 = conman.getConstants(4013, "/calibration/dc/time_corrections/timingcuts");
+        System.out.println("4conman:  "+t4.getColumnCount());
+        System.out.println("4conman:  "+t4.toString());
+        System.out.println("4conman:  1/4/6/1:  "+t4.getDoubleValue("T0Correction", 1,4,6,1));
+        System.out.println("3conman:  1/2/56:   "+t3.getDoubleValue("LinearCoeff",0,2,56));
         
     }
 }
