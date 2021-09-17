@@ -86,6 +86,19 @@ public abstract class ReconstructionEngine implements Engine {
     abstract public boolean processDataEvent(DataEvent event);
     abstract public boolean init();
    
+    /**
+     * Use a map just to avoid name clash in ConstantsManager.
+     * @param tables map of table names to #indices
+     */
+    public void requireConstants(Map<String,Integer> tables){
+        if(constManagerMap.containsKey(this.getClass().getName())==false){
+            System.out.println("[ConstantsManager] ---> create a new one for module : " + this.getClass().getName());
+            ConstantsManager manager = new ConstantsManager();
+            manager.init(tables);
+            constManagerMap.put(this.getClass().getName(), manager);
+        }
+    }
+
     public void requireConstants(List<String> tables){
         if(constManagerMap.containsKey(this.getClass().getName())==false){
             System.out.println("[ConstantsManager] ---> create a new one for module : " + this.getClass().getName());

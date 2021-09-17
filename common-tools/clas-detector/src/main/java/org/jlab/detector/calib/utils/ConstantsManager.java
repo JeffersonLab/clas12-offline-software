@@ -49,6 +49,14 @@ public class ConstantsManager {
         this.defaultDescriptor.addTables(tables);
     }
     
+    /**
+     * use a map just to avoid name clash
+     * @param tables map of table_name to #indices 
+     */
+    public synchronized void init(Map<String,Integer>  tables){
+        this.defaultDescriptor.addTables(tables);
+    }
+    
     public int getRequestStatus(){
         return requestStatus;
     }
@@ -109,7 +117,7 @@ public class ConstantsManager {
         for(int i = 0; i < desc.getTableNames().size(); i++){                
             String tableName = tn.get(i);
             try {
-                IndexedTable  table = provider.readTable(tableName);
+                IndexedTable  table = provider.readTable(tableName, desc.getTableIndices().get(i));
                 desc.getMap().put(tk.get(i), table);
                 System.out.println(String.format("***** >>> adding : %14s / table = %s", tk.get(i),tableName));
             } catch (Exception e) {
@@ -155,7 +163,7 @@ public class ConstantsManager {
         
         private String  descName   = "descriptor";
         private int     runNumber  = 10;
-        private int     nIndex     = 3;
+        List<Integer>  tableIndices = new ArrayList<Integer>();
         
         Set<String>    tableNames  = new LinkedHashSet<String>();
         
@@ -166,19 +174,24 @@ public class ConstantsManager {
         public DatabaseConstantsDescriptor(){
             
         }
-        
-        public void addTables(String[] tables){
-            tableNames.addAll(Arrays.asList(tables));
-            mapKeys.addAll(Arrays.asList(tables));
+       
+        public void addTable(String table, int indices) {
+            if (tableNames.add(table)) {
+                mapKeys.add(table);
+                tableIndices.add(indices);
+            }
         }
-        
+
         public void addTables(List<String> tables){
             for(String table : tables){
-                tableNames.add(table);
-                mapKeys.add(table);
+                addTable(table, DatabaseConstantProvider.DEFAULT_INDICES);
             }
         }
         
+        public void addTables(String[] tables){
+            addTables(Arrays.asList(tables));
+        }
+       
         public void addTables(Set<String> keys, Set<String> tables){
             if(keys.size()!=tables.size()){
                 System.out.println("[DatabaseConstantsDescriptor] error --> "
@@ -186,10 +199,35 @@ public class ConstantsManager {
                         + " tables ("+tables.size()+")");
             } else {
                 mapKeys.addAll(keys);
-                tableNames.addAll(tables);                
+                tableNames.addAll(tables);
+                for (int i=0; i<mapKeys.size(); i++) {
+                    tableIndices.add(DatabaseConstantProvider.DEFAULT_INDICES);
+                }
             }
         }
-        
+
+        public void addTables(Set<String> keys, Set<String> tables, List<Integer> indices){
+            if(keys.size()!=tables.size()){
+                System.out.println("[DatabaseConstantsDescriptor] error --> "
+                + " size of keys ("+keys.size()+") does not match size of"
+                        + " tables ("+tables.size()+")");
+            } else {
+                mapKeys.addAll(keys);
+                tableNames.addAll(tables);
+                tableIndices.addAll(indices);
+            }
+        }
+
+        /**
+         * 
+         * @param tables 
+         */
+        public void addTables(Map<String,Integer> tables) {
+            for (String table : tables.keySet()) {
+                addTable(table, tables.get(table));
+            } 
+        }
+
         public boolean hasTable(String name){
             return hashTables.containsKey(name);
         }
@@ -217,10 +255,14 @@ public class ConstantsManager {
         public Set<String>  getTableKeys(){
             return this.mapKeys;
         }
-        
+       
+        public List<Integer> getTableIndices(){
+            return this.tableIndices;
+        }
+
         public DatabaseConstantsDescriptor  getCopy(int run){
             DatabaseConstantsDescriptor desc = new DatabaseConstantsDescriptor();
-            desc.addTables(this.getTableKeys(),this.getTableNames());
+            desc.addTables(this.getTableKeys(),this.getTableNames(),this.getTableIndices());
             return desc;
         }
         
