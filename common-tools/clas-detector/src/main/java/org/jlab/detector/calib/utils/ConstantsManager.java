@@ -2,6 +2,7 @@ package org.jlab.detector.calib.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -277,17 +278,27 @@ public class ConstantsManager {
     
     
     public static void main(String[] args){
+
         ConstantsManager  manager = new ConstantsManager("default");
         
         manager.init(Arrays.asList(new String[]{
             "/daq/fadc/ec",
             "/daq/fadc/ftof","/daq/fadc/htcc"}));
-        for(int i = 0; i < 5 ; i++){
+        for(int i = 0; i < 3 ; i++){
             IndexedTable  table1 = manager.getConstants(10, "/daq/fadc/htcc");
             IndexedTable  table2 = manager.getConstants(10, "/daq/fadc/ec");
-            IndexedTable  table3 = manager.getConstants(12, "/daq/fadc/htcc");
             manager.reset();
             System.out.println("\n\n STATUS = " + manager.getRequestStatus());
         }
+
+        ConstantsManager conman = new ConstantsManager("default");
+        Map<String,Integer> tables = new HashMap<>();
+        tables.put("/calibration/dc/time_corrections/T0Corrections",4);
+        conman.init(tables);
+        IndexedTable table = conman.getConstants(4013, "/calibration/dc/time_corrections/T0Corrections");
+        System.out.println("4conman:  "+table.getColumnCount());
+        System.out.println("4conman:  "+table.toString());
+        System.out.println("4conman:  1/4/6/1:  "+table.getDoubleValue("T0Correction", 1,4,6,1));
+        
     }
 }
