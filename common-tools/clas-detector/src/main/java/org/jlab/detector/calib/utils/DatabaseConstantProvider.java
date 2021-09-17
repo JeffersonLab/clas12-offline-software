@@ -49,6 +49,8 @@ public class DatabaseConstantProvider implements ConstantProvider {
     private Integer dataMonth      = 1;
     private Date    databaseDate   = new Date();
     
+    public static final int DEFAULT_INDICES = 3;
+    
     private org.jlab.ccdb.JDBCProvider provider;
     
     private int          debugMode = 1;
@@ -202,26 +204,26 @@ public class DatabaseConstantProvider implements ConstantProvider {
      * @param table_name
      * @return 
      */
-    public CalibrationConstants  readConstants(String table_name){
+    public CalibrationConstants  readConstants(String table_name, int nindex){
         
         Assignment asgmt = provider.getData(table_name);
         int ncolumns = asgmt.getColumnCount();
         Vector<TypeTableColumn> typecolumn = asgmt.getTypeTable().getColumns();
-        String[] format = new String[ncolumns-3];
+        String[] format = new String[ncolumns-nindex];
 
-        for(int loop = 3; loop < ncolumns; loop++){
+        for(int loop = nindex; loop < ncolumns; loop++){
             //System.out.println("COLUMN " + typecolumn.get(loop).getName() 
             //        + "  " + typecolumn.get(loop).getCellType().name());
             if(typecolumn.get(loop).getCellType().name().compareTo("DOUBLE")==0){
-                format[loop-3] = typecolumn.get(loop).getName() + "/D";
+                format[loop-nindex] = typecolumn.get(loop).getName() + "/D";
             } else {
-                format[loop-3] = typecolumn.get(loop).getName() + "/I";
+                format[loop-nindex] = typecolumn.get(loop).getName() + "/I";
             }
             //format[loop-3] = 
         }
         
-        CalibrationConstants  table = new CalibrationConstants(3,format);
-        for(int i = 0; i < 3; i++){
+        CalibrationConstants  table = new CalibrationConstants(nindex,format);
+        for(int i = 0; i < nindex; i++){
             table.setIndexName(i, typecolumn.get(i).getName());
         }
         table.show();
@@ -261,8 +263,12 @@ public class DatabaseConstantProvider implements ConstantProvider {
         return table;  
     }
     
+    public CalibrationConstants  readConstants(String table_name){
+        return this.readConstants(table_name, DEFAULT_INDICES);
+    }
+
     public IndexedTable  readTable(String table_name){
-        return this.readTable(table_name, 3);
+        return this.readTable(table_name, DEFAULT_INDICES);
     }
     
     public IndexedTable  readTable(String table_name,int nindex){
