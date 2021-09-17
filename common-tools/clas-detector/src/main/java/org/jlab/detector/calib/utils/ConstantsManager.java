@@ -164,11 +164,8 @@ public class ConstantsManager {
         private String  descName   = "descriptor";
         private int     runNumber  = 10;
         List<Integer>  tableIndices = new ArrayList<Integer>();
-        
         Set<String>    tableNames  = new LinkedHashSet<String>();
-        
         Set<String>    mapKeys     = new LinkedHashSet<String>();
-        
         Map<String,IndexedTable>  hashTables = new LinkedHashMap<String,IndexedTable>();
         
         public DatabaseConstantsDescriptor(){
@@ -271,7 +268,6 @@ public class ConstantsManager {
             StringBuilder str = new StringBuilder();
             int i = 0;
             for(String name : tableNames){
-                //for(int i = 0; i < this.tableNames.size();i++){
                 str.append(String.format("%4d : %s\n", i , name));
                 i++;
             }
