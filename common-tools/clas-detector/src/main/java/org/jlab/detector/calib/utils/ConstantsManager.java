@@ -301,7 +301,7 @@ public class ConstantsManager {
         System.out.println("4conman:  "+t4.getColumnCount());
         System.out.println("4conman:  "+t4.toString());
         System.out.println("4conman:  1/4/6/1:  "+t4.getDoubleValue("T0Correction", 1,4,6,1));
-        System.out.println("3conman:  1/2/56:   "+t3.getDoubleValue("LinearCoeff",0,2,56));
+        System.out.println("3conman:  0/2/56:   "+t3.getDoubleValue("LinearCoeff",0,2,56));
         
     }
 }
