@@ -102,15 +102,8 @@ public class StateVecs {
                     
                 }
                 if(mv.surface.cylinder!=null) {
-                    Point3D offset = mv.surface.cylShift;
-                    Vector3D rotation = mv.surface.cylRotation;
-                    ref.translateXYZ(-offset.x(), -offset.y(), -offset.z());
-                    ref.rotateZ(-rotation.z());
-                    ref.rotateY(-rotation.y());
-                    ref.rotateX(-rotation.x());
-                    u.rotateZ(-rotation.z());
-                    u.rotateY(-rotation.y());
-                    u.rotateX(-rotation.x());
+                    mv.surface.toLocal().apply(ref);
+                    mv.surface.toLocal().apply(u);
                     double r = 0.5*(mv.surface.cylinder.baseArc().radius()+mv.surface.cylinder.highArc().radius());
                     double delta = Math.sqrt((ref.x()*u.x()+ref.y()*u.y())*(ref.x()*u.x()+ref.y()*u.y())
                             -(-r*r+ref.x()*ref.x()+ref.y()*ref.y())*(u.x()*u.x()+u.y()*u.y()));
@@ -120,18 +113,10 @@ public class StateVecs {
                     } 
                     
                     Point3D cylInt = new Point3D(ref.x()+l*u.x(),ref.y()+l*u.y(),ref.z()+l*u.z());
-                    cylInt.rotateX(rotation.x());
-                    cylInt.rotateY(rotation.y());
-                    cylInt.rotateZ(rotation.z());
-                    cylInt.translateXYZ(offset.x(), offset.y(), offset.z());
-                    
-                    ref.rotateX(rotation.x());
-                    ref.rotateY(rotation.y());
-                    ref.rotateZ(rotation.z());
-                    ref.translateXYZ(offset.x(), offset.y(), offset.z());
-                    u.rotateX(rotation.x());
-                    u.rotateY(rotation.y());
-                    u.rotateZ(rotation.z());
+                    mv.surface.toGlobal().apply(cylInt);
+//                    mv.surface.toGlobal().apply(ref);
+//                    mv.surface.toGlobal().apply(u);
+
                     kVec.dl = l;
                     kVec.x = cylInt.x();
                     kVec.y = cylInt.y();

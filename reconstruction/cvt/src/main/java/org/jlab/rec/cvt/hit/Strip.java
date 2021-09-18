@@ -2,9 +2,9 @@ package org.jlab.rec.cvt.hit;
 
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.geom.prim.Arc3D;
-import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
@@ -19,23 +19,24 @@ public class Strip {
     }
     
 
-    private int _Strip;    	 							//	   strip read from daq 
+    private int _Strip;    	 							//     strip read from daq 
+    private double _Edep;      							//     for simulation this corresponds to the energy deposited on the strip, in data it should be an ADC converted value
+    private double _Time;
+    
     private int _LCStrip;								//     strip number taking into account Lorentz angle correction (for MM Z detectors)
     private double _Phi;  								//     for MM Z-detectors, the azimuth angle at the strip midwidth after LC
     private double _PhiErr;
     private double _Phi0;  								//     for MM Z-detectors, the azimuth angle at the strip midwidth before LC
     private double _PhiErr0;
-
-    private Arc3D _Arc;    								//     for MM C-detectors. the arc position at the strip midwidth
+    private double _Z;
     private double _ZErr;
-    private double _Edep;      							//     for simulation this corresponds to the energy deposited on the strip, in data it should be an ADC converted value
-    private double _Time;
     
-    private Point3D _ImplantPoint;						// 	   the end-point of the strip at implant (lab frame)
-    private Point3D _MidPoint;							//	   the mid-point of the strip (lab frame)
-    private Point3D _EndPoint;							//	   the end-point of the strip (lab frame)
-    private Vector3D _StripDir;							// 	   unit direction vector along the strip (lab frame)
-
+    private Arc3D _Arc;
+    private Line3D _Line;
+    private Line3D _Axis;
+    private Transformation3D toLocal;
+    private Transformation3D toGlobal;
+    
     public int get_Strip() {
         return _Strip;
     }
@@ -44,36 +45,44 @@ public class Strip {
         this._Strip = _Strip;
     }
 
-    public Point3D get_ImplantPoint() {
-        return _ImplantPoint;
+    public Arc3D get_Arc() {
+        return _Arc;
     }
 
-    public void set_ImplantPoint(Point3D _ImplantPoint) {
-        this._ImplantPoint = _ImplantPoint;
+    public void set_Arc(Arc3D _Arc) {
+        this._Arc = _Arc;
     }
 
-    public Point3D get_MidPoint() {
-        return _MidPoint;
+    public Line3D get_Line() {
+        return _Line;
     }
 
-    public void set_MidPoint(Point3D _MidPoint) {
-        this._MidPoint = _MidPoint;
+    public void set_Line(Line3D _Line) {
+        this._Line = _Line;
     }
 
-    public Point3D get_EndPoint() {
-        return _EndPoint;
+    public Line3D get_Axis() {
+        return _Axis;
     }
 
-    public void set_EndPoint(Point3D _EndPoint) {
-        this._EndPoint = _EndPoint;
-    }
-    
-    public Vector3D get_StripDir() {
-        return _StripDir;
+    public void set_Axis(Line3D _Axis) {
+        this._Axis = _Axis;
     }
 
-    public void set_StripDir(Vector3D _StripDir) {
-        this._StripDir = _StripDir;
+    public Transformation3D toLocal() {
+        return toLocal;
+    }
+
+    public void setToLocal(Transformation3D toLocal) {
+        this.toLocal = toLocal;
+    }
+
+    public Transformation3D toGlobal() {
+        return toGlobal;
+    }
+
+    public void setToGlobal(Transformation3D toGlobal) {
+        this.toGlobal = toGlobal;
     }
 
     public int get_LCStrip() {
@@ -116,12 +125,12 @@ public class Strip {
         this._PhiErr0 = _PhiErr0;
     }
 
-    public Arc3D get_Arc() {
-        return _Arc;
+    public double get_Z() {
+        return _Z;
     }
 
-    public void set_Arc(Arc3D _Arc) {
-        this._Arc = _Arc;
+    public void set_Z(double _Z) {
+        this._Z = _Z;
     }
 
     public double get_ZErr() {
@@ -162,43 +171,39 @@ public class Strip {
     public void calc_BMTStripParams(BMTGeometry geo, int sector, int layer, Swim swim) {
 
         int region = geo.getRegion(layer); // region index (1...3) 1=layers 1&2, 2=layers 3&4, 3=layers 5&6
+        this.setToGlobal(geo.toGlobal(layer, sector));
+        this.setToLocal(geo.toLocal(layer, sector));
         
         if (BMTGeometry.getDetectorType(layer) == BMTType.C) { // C-detectors
             // set z
             //double z = geo.CRCStrip_GetZ(layer, this.get_Strip());
             Arc3D arcLine = geo.getCstrip(region, sector, this.get_Strip());
-            //double z = arcLine.center().z();
             this.set_Arc(arcLine);
+            this.set_Axis(geo.getAxis(layer, sector));
             // max z err
-            //this.set_ZErr(geo.CRCStrip_GetPitch(layer, this.get_Strip()) / Math.sqrt(12.));
+            this.set_Z(geo.getCstripZ(geo.getRegion(layer),this.get_Strip()));
             this.set_ZErr(geo.getPitch(layer, this.get_Strip()) / Math.sqrt(12.));
-            this.set_ImplantPoint(arcLine.origin());
-            this.set_MidPoint(arcLine.center());
-            this.set_EndPoint(arcLine.end());
-            this.set_StripDir(arcLine.normal());
+
         }
 
         if (BMTGeometry.getDetectorType(layer) == BMTType.Z) { // Z-detectors
             //Line3D L0 = geo.getZstrip(geo.getRegion(layer), sector, this.get_Strip());
-            Line3D L = geo.getLCZstrip(geo.getRegion(layer), sector, this.get_Strip(), swim);
-            this.set_ImplantPoint(L.origin());  
-            this.set_MidPoint(L.midpoint());
-            this.set_EndPoint(L.end());
-            this.set_StripDir(L.direction());
+            Line3D line = geo.getLCZstrip(geo.getRegion(layer), sector, this.get_Strip(), swim);
+            this.set_Line(line);
+            this.set_Axis(geo.getAxis(layer, sector));
             
-            Cylindrical3D cyl = geo.getCylinder(layer, sector);
             Line3D cln = geo.getAxis(layer, sector);
-            cln.set(cln.origin().x(), cln.origin().y(), L.origin().z(), 
-                        cln.end().x(), cln.end().y(), L.end().z());
+            cln.set(cln.origin().x(), cln.origin().y(), line.origin().z(), 
+                        cln.end().x(), cln.end().y(), line.end().z());
                
-            double v = (L.origin().z()-cln.origin().z())/cln.direction().z();
+            double v = (line.origin().z()-cln.origin().z())/cln.direction().z();
             double x = cln.origin().x()+v*cln.direction().x();
             double y = cln.origin().y()+v*cln.direction().y();
-            Vector3D n = new Point3D(x, y, L.origin().z()).
-                    vectorTo(new Point3D(L.origin().x(),L.origin().y(),L.origin().z())).asUnit();
+            Vector3D n = new Point3D(x, y, line.origin().z()).
+                    vectorTo(new Point3D(line.origin().x(),line.origin().y(),line.origin().z())).asUnit();
 
             double theMeasuredPhi = geo.getZstripPhi(geo.getRegion(layer), sector, this.get_Strip());
-            //double theLorentzCorrectedAngle = L.midpoint().toVector3D().phi(); 
+            //double theLorentzCorrectedAngle = line.midpoint().toVector3D().phi(); 
             double theLorentzCorrectedAngle = n.phi(); 
             // set the phi 
             this.set_Phi(theLorentzCorrectedAngle);
@@ -211,7 +216,7 @@ public class Strip {
 //                    Math.sin(theLorentzCorrectedAngle);
 //            int theLorentzCorrectedStrip = geo.getStrip( layer,  sector, 
 //                    new Point3D(xl,yl,0));
-            int theLorentzCorrectedStrip = geo.getStrip( layer,  sector, L.midpoint());
+            int theLorentzCorrectedStrip = geo.getStrip(layer,  sector, line.midpoint());
             // get the strip number after correcting for Lorentz angle
             this.set_LCStrip(theLorentzCorrectedStrip);
             

@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.bmt;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Vector3D;
 
 /**
@@ -295,7 +296,7 @@ public class CCDBConstantsLoader {
         double xpos = dbprovider.getDouble("/geometry/cvt/mvt/position/x", 0 );
         double ypos = dbprovider.getDouble("/geometry/cvt/mvt/position/y", 0 );
         double zpos = dbprovider.getDouble("/geometry/cvt/mvt/position/z", 0 );
-        double angle = -0;//Math.toDegrees(0.003);
+        double angle = -2;//Math.toDegrees(0.003);
         for (int row = 0; row<NLAYERS*NSECTORS; row++) {
             int sector = dbprovider.getInteger("/geometry/cvt/mvt/alignment/sector", row);
             int layer  = dbprovider.getInteger("/geometry/cvt/mvt/alignment/layer", row);
@@ -311,15 +312,20 @@ public class CCDBConstantsLoader {
             int region = (int) Math.floor((layer+1)/2);
             double Zmin = CRZZMIN[region - 1];
             double Zmax = CRZZMAX[region - 1];
+            Transformation3D transform = new Transformation3D();
+            transform.rotateX(rot.x());
+            transform.rotateY(rot.y());
+            transform.rotateZ(rot.z());
+            transform.translateXYZ(shift.x(), shift.y(), shift.z());
             Line3D axis = new Line3D(new Point3D(0,0,Zmin), new Vector3D(0,0,Zmax));
-            axis.rotateX(rot.x());
-            axis.rotateY(rot.y());
-            axis.rotateZ(rot.z());
-            axis.translateXYZ(shift.x(), shift.y(), shift.z());//+ztarget*10);
-            Constants.shifts[layer-1][sector-1] = shift;
+            transform.apply(axis);
+            Constants.shifts[layer-1][sector-1]    = shift;
             Constants.rotations[layer-1][sector-1] = rot;
-            Constants.axes[layer-1][sector-1] = axis;
+            Constants.axes[layer-1][sector-1]      = axis;
+            Constants.toGlobal[layer-1][sector-1]  = transform;
+            Constants.toLocal[layer-1][sector-1]   = transform.inverse();
         }
+        
          
         // beam offset
         double xb = dbprovider.getDouble("/geometry/beam/position/x_offset", 0);     

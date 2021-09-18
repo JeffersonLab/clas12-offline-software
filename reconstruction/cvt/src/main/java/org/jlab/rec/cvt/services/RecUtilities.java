@@ -32,6 +32,7 @@ import org.jlab.rec.cvt.track.TrackSeederCA;
 
 import java.util.Collections;
 import java.util.Comparator;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Arc3D;
 
 import org.jlab.io.base.DataBank;
@@ -95,18 +96,19 @@ public class RecUtilities {
         meas0.setLayer(0);
         meas0.setError(1);
         KFSites.add(meas0); 
-        for (int i = 0; i < trkcand.get_Clusters().size(); i++) { //SVT
-            if(trkcand.get_Clusters().get(i).get_Detector()==0) {
-                int id = trkcand.get_Clusters().get(i).get_Id();
-                double ce = trkcand.get_Clusters().get(i).get_Centroid();
-                Point3D endPt1 = trkcand.get_Clusters().get(i).getEndPoint1();
-                Point3D endPt2 = trkcand.get_Clusters().get(i).getEndPoint2();
-                Strip strp = new Strip(id, ce, endPt1.x(), endPt1.y(), endPt1.z(),
-                                        endPt2.x(), endPt2.y(), endPt2.z());
-                Plane3D pln = new Plane3D(endPt1,sgeo.findBSTPlaneNormal(trkcand.get_Clusters().get(i).get_Sector(), 
-                        trkcand.get_Clusters().get(i).get_Layer()));
-                Point3D Or = sgeo.getPlaneModuleOrigin(trkcand.get_Clusters().get(i).get_Sector(), trkcand.get_Clusters().get(i).get_Layer());
-                Point3D En = sgeo.getPlaneModuleEnd(trkcand.get_Clusters().get(i).get_Sector(), trkcand.get_Clusters().get(i).get_Layer());
+        
+        // SVT measurements
+        for (int i = 0; i < trkcand.get_Clusters().size(); i++) { 
+            if(trkcand.get_Clusters().get(i).get_Detector()==DetectorType.BST) {
+                int id      = trkcand.get_Clusters().get(i).get_Id();
+                int layer   = trkcand.get_Clusters().get(i).get_Layer();
+                int sector  = trkcand.get_Clusters().get(i).get_Sector();
+                double ce   = trkcand.get_Clusters().get(i).get_Centroid();
+                Line3D line = trkcand.get_Clusters().get(i).getLine();
+                Strip strp  = new Strip(id, ce, line);
+                Plane3D pln = new Plane3D(line.origin(),sgeo.findBSTPlaneNormal(sector,layer));
+                Point3D Or  = sgeo.getPlaneModuleOrigin(sector,layer);
+                Point3D En  = sgeo.getPlaneModuleEnd(sector,layer);
                 Surface meas = new Surface(pln, strp, Or, En);
                 meas.setSector(trkcand.get_Clusters().get(i).get_Sector());
                 meas.setLayer(trkcand.get_Clusters().get(i).get_Layer());
@@ -128,31 +130,24 @@ public class RecUtilities {
        
         // adding the BMT
         for (int c = 0; c < trkcand.get_Crosses().size(); c++) {
-            if (trkcand.get_Crosses().get(c).get_Detector().equalsIgnoreCase("BMT")) {
-//                Cylindrical3D cyl = new Cylindrical3D();
-//                cyl.baseArc().setCenter(new Point3D(0, 0, 0));
-//                cyl.highArc().setCenter(new Point3D(0, 0, 0));
-//                cyl.baseArc().setNormal(new Vector3D(0,1,0));
-//                cyl.highArc().setNormal(new Vector3D(0,1,0));
-                int lyer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer();
-                int sec = trkcand.get_Crosses().get(c).get_Cluster1().get_Sector();
+            if (trkcand.get_Crosses().get(c).get_Detector()==DetectorType.BMT) {
                 
-                Cylindrical3D cyl = bgeo.getCylinder(lyer, sec);
-                Line3D cln = bgeo.getAxis(lyer, sec);
-                Line3D l = bgeo.getLCZstrip(bgeo.getRegion(lyer), sec, 1, swim);
+                int layer  = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer();
+                int sector = trkcand.get_Crosses().get(c).get_Cluster1().get_Sector();
+                
+                Cylindrical3D cyl = bgeo.getTileSurface(layer, sector);
+                Line3D cln = bgeo.getAxis(layer, sector);
+                Line3D l = bgeo.getLCZstrip(bgeo.getRegion(layer), sector, 1, swim);
                 //cln.set(cln.origin().x(), cln.origin().y(), l.origin().z(), 
                 //        cln.end().x(), cln.end().y(), l.end().z());
-                cyl.setAxis(cln);
-                int id = trkcand.get_Crosses().get(c).get_Cluster1().get_Id();
+                //cyl.setAxis(cln);
+                int id    = trkcand.get_Crosses().get(c).get_Cluster1().get_Id();
                 double ce = trkcand.get_Crosses().get(c).get_Cluster1().get_Centroid();
                 
                 double hemisp = trkcand.get_Helix().getPointAtRadius(300).y();
-                if (trkcand.get_Crosses().get(c).get_DetectorType()==BMTType.Z) {
-                    //double x = trkcand.get_Crosses().get(c).get_Point().x();
-                    //double y = trkcand.get_Crosses().get(c).get_Point().y();
-                    Point3D EP1 = trkcand.get_Crosses().get(c).get_Cluster1().getEndPoint1();
-                    //Point3D EP2 = trkcand.get_Crosses().get(c).get_Cluster1().getEndPoint2();
-                
+                if (trkcand.get_Crosses().get(c).get_Type()==BMTType.Z) {
+                    Point3D EP1 = trkcand.get_Crosses().get(c).get_Cluster1().getLine().origin();
+                    
                     double v = (EP1.z()-cln.origin().z())/cln.direction().z();
                     double x = cln.origin().x()+v*cln.direction().x();
                     double y = cln.origin().y()+v*cln.direction().y();
@@ -173,15 +168,11 @@ public class RecUtilities {
                    
                     //cyl.baseArc().setRadius(Math.sqrt(x*x+y*y));
                     //cyl.highArc().setRadius(Math.sqrt(x*x+y*y));
-                    cyl.baseArc().setRadius(bgeo.getRadiusMidDrift(lyer));
-                    cyl.highArc().setRadius(bgeo.getRadiusMidDrift(lyer));                   
+                    cyl.baseArc().setRadius(bgeo.getRadiusMidDrift(layer));
+                    cyl.highArc().setRadius(bgeo.getRadiusMidDrift(layer));                   
                     Surface meas = new Surface(cyl, strp);
-                    Point3D    offset = bgeo.getOffset(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer(), 
-                            trkcand.get_Crosses().get(c).get_Sector()); 
-                    Vector3D rotation = bgeo.getRotation(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer(), 
-                            trkcand.get_Crosses().get(c).get_Sector());
-                    meas.cylShift = offset;
-                    meas.cylRotation = rotation;
+
+                    meas.setTransformation(bgeo.toGlobal(layer,sector)); 
                     
                     meas.setSector(trkcand.get_Crosses().get(c).get_Sector());
                     meas.setLayer(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer()+6);
@@ -198,7 +189,7 @@ public class RecUtilities {
                     meas.hemisphere = hemisp;
                     KFSites.add(meas);
                 }
-                if (trkcand.get_Crosses().get(c).get_DetectorType()==BMTType.C) {
+                if (trkcand.get_Crosses().get(c).get_Type()==BMTType.C) {
                     double z = trkcand.get_Crosses().get(c).get_Point().z();
                     double err = trkcand.get_Crosses().get(c).get_Cluster1().get_ZErr();
                     
@@ -212,17 +203,13 @@ public class RecUtilities {
                     //arc.setCenter(ct);
                     //arc.setOrigin(og);
                     Strip strp = new Strip(id, ce, arc);
-                    cyl.baseArc().setRadius(bgeo.getRadiusMidDrift(lyer));
-                    cyl.highArc().setRadius(bgeo.getRadiusMidDrift(lyer));                   
+                    cyl.baseArc().setRadius(bgeo.getRadiusMidDrift(layer));
+                    cyl.highArc().setRadius(bgeo.getRadiusMidDrift(layer));                   
                     
                     Surface meas = new Surface(cyl, strp);
                     
-                    Point3D    offset = bgeo.getOffset(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer(), 
-                            trkcand.get_Crosses().get(c).get_Sector()); 
-                    Vector3D rotation = bgeo.getRotation(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer(), 
-                            trkcand.get_Crosses().get(c).get_Sector());
-                    meas.cylShift = offset;
-                    meas.cylRotation = rotation;
+                    meas.setTransformation(bgeo.toGlobal(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer(), 
+                            trkcand.get_Crosses().get(c).get_Sector())); 
                     
                     meas.setSector(trkcand.get_Crosses().get(c).get_Sector());
                     meas.setLayer(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer()+6);
@@ -244,6 +231,8 @@ public class RecUtilities {
         return KFSites;
     }
     private TrajectoryFinder tf = new TrajectoryFinder();
+    
+    
     public List<Surface> setMeasVecs(StraightTrack trkcand, 
             SVTGeometry sgeo, BMTGeometry bgeo, Swim swim) {
         //Collections.sort(trkcand.get_Crosses());
@@ -260,7 +249,7 @@ public class RecUtilities {
         Map<Integer, Cluster> clsMap = new HashMap<Integer, Cluster>();
         trkcand.sort(Comparator.comparing(Cross::getY).reversed());
         for (int i = 0; i < trkcand.size(); i++) { //SVT
-            if(trkcand.get(i).get_Detector().equalsIgnoreCase("SVT")) {
+            if(trkcand.get(i).get_Detector()==DetectorType.BST) {
                 List<Cluster> cls = new ArrayList<Cluster>();
                 int s = trkcand.get(i).get_Cluster1().get_Sector()-1;
                 int lt = trkcand.get(i).get_Cluster1().get_Layer()-1;
@@ -281,8 +270,8 @@ public class RecUtilities {
                 for (int j = 0; j < cls.size(); j++) { 
                     int id = cls.get(j).get_Id();
                     double ce = cls.get(j).get_Centroid();
-                    Point3D endPt1 = cls.get(j).getEndPoint1();
-                    Point3D endPt2 = cls.get(j).getEndPoint2();
+                    Point3D endPt1 = cls.get(j).getLine().origin();
+                    Point3D endPt2 = cls.get(j).getLine().end();
                     Strip strp = new Strip(id, ce, endPt1.x(), endPt1.y(), endPt1.z(),
                                             endPt2.x(), endPt2.y(), endPt2.z());
                     Plane3D pln = new Plane3D(endPt1,sgeo.findBSTPlaneNormal(cls.get(j).get_Sector(), 
@@ -292,7 +281,6 @@ public class RecUtilities {
                     Surface meas = new Surface(pln, strp, Or, En);
                     meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());
                     meas.setSector(cls.get(j).get_Sector());
-                    //meas.setLayer(i+1);
                     double err = cls.get(j).get_Error();
                     meas.setError(err*err); // CHECK THIS .... DOES KF take e or e^2?
                     //the thickness for multiple scattering.  MS is outward the thickness is set for the 1st layer in the superlayer
@@ -312,105 +300,45 @@ public class RecUtilities {
        
         // adding the BMT
         
-        if (trkcand.get(i).get_Detector().equalsIgnoreCase("BMT")) {
-            int lyer = trkcand.get(i).get_Cluster1().get_Layer();
-            int sec = trkcand.get(i).get_Cluster1().get_Sector();
+        if (trkcand.get(i).get_Detector()==DetectorType.BMT) {
+            int layer  = trkcand.get(i).get_Cluster1().get_Layer();
+            int sector = trkcand.get(i).get_Cluster1().get_Sector();
 
-            Cylindrical3D cyl = bgeo.getCylinder(lyer, sec);
-            Line3D cln = bgeo.getAxis(lyer, sec);
-            Line3D l = bgeo.getLCZstrip(bgeo.getRegion(lyer), sec, 1, swim);
-            //cln.set(cln.origin().x(), cln.origin().y(), l.origin().z(), 
-            //        cln.end().x(), cln.end().y(), l.end().z());
-            cyl.setAxis(cln);
             int id = trkcand.get(i).get_Cluster1().get_Id();
             double ce = trkcand.get(i).get_Cluster1().get_Centroid();
             
-                if (trkcand.get(i).get_DetectorType()==BMTType.Z) {
-                    //double x = trkcand.get_Crosses().get(c).get_Point().x();
-                    //double y = trkcand.get_Crosses().get(c).get_Point().y();
-                    Point3D EP1 = trkcand.get(i).get_Cluster1().getEndPoint1();
-                    //Point3D EP2 = trkcand.get_Crosses().get(c).get_Cluster1().getEndPoint2();
-
-                    double v = (EP1.z()-cln.origin().z())/cln.direction().z();
-                    double x = cln.origin().x()+v*cln.direction().x();
-                    double y = cln.origin().y()+v*cln.direction().y();
-                    Vector3D n = new Point3D(x, y, EP1.z()).
-                            vectorTo(new Point3D(EP1.x(),EP1.y(),EP1.z())).asUnit();
-
-                    double phi = n.phi();
-
-                    //double phi = Math.atan2(y,x);
+                if (trkcand.get(i).get_Type()==BMTType.Z) {
+                    Point3D point = trkcand.get(i).get_Cluster1().getLine().origin();
+                    double phi = bgeo.getPhi(layer, sector, point);
                     double err = trkcand.get(i).get_Cluster1().get_PhiErr();
-                           // *(org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
-
-                    //Strip strp = new Strip(id, ce, x, y, phi);
-                    //Point3D EP1 = trkcand.get_Crosses().get(c).get_Cluster1().getEndPoint1();
-                    //Point3D EP2 = trkcand.get_Crosses().get(c).get_Cluster1().getEndPoint2();
-                    Strip strp = new Strip(id, ce, x, y, phi);
-                    //Strip strp = new Strip( id, ce, EP1.x(), EP1.y(), EP1.z(), EP2.x(), EP2.y(), EP2.z());
-
-                    //cyl.baseArc().setRadius(Math.sqrt(x*x+y*y));
-                    //cyl.highArc().setRadius(Math.sqrt(x*x+y*y));
-                    cyl.baseArc().setRadius(bgeo.getRadiusMidDrift(lyer));
-                    cyl.highArc().setRadius(bgeo.getRadiusMidDrift(lyer));                   
-                    Surface meas = new Surface(cyl, strp);
-                    meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());
-                    Point3D    offset = bgeo.getOffset(trkcand.get(i).get_Cluster1().get_Layer(), 
-                            trkcand.get(i).get_Sector()); 
-                    Vector3D rotation = bgeo.getRotation(trkcand.get(i).get_Cluster1().get_Layer(), 
-                            trkcand.get(i).get_Sector());
-                    meas.cylShift = offset;
-                    meas.cylRotation = rotation;
+                    bgeo.toLocal(point, layer, sector);
+                    Strip strp = new Strip(id, ce, point.x(), point.y(), phi);  
                     
+                    Surface meas = new Surface(bgeo.getTileSurface(layer, sector), strp);
+                    meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());
+                    meas.setTransformation(bgeo.toGlobal(layer,sector));                     
                     meas.setSector(trkcand.get(i).get_Sector());
-                    //meas.setLayer(i+1);
                     meas.setError(err*err); // CHECK THIS .... DOES KF take e or e^2?
                     //for multiple scattering
-                    double thickn_ov_X0 = org.jlab.rec.cvt.bmt.Constants.get_T_OVER_X0()[(trkcand.get(i).get_Cluster1().get_Layer() + 1) / 2 - 1];
-                    meas.setl_over_X0(thickn_ov_X0);
-                    //if((int)Constants.getLayersUsed().get(meas.getLayer())<1) {
-                        //System.out.println("Exluding layer "+meas.getLayer()+trkcand.get_Crosses().get(c).printInfo());
-                        //meas.notUsedInFit=true;
-                    //}
+                    meas.setl_over_X0(bgeo.getToverX0(layer));
 
                     KFSites.add(meas);
                     clsMap.put(KFSites.size()-1, trkcand.get(i).get_Cluster1());
                 }
-                if (trkcand.get(i).get_DetectorType()==BMTType.C) {
-                    double z = trkcand.get(i).get_Point().z();
+                else if (trkcand.get(i).get_Type()==BMTType.C) {
+                    double z   = trkcand.get(i).get_Point().z();
                     double err = trkcand.get(i).get_Cluster1().get_ZErr();
-                    Arc3D arc = trkcand.get(i).get_Cluster1().get_Arc();
-                    //Point3D ct = new Point3D(trkcand.get(i).get_Cluster1().getCx(),
-                    //         trkcand.get(i).get_Cluster1().getCy(),
-                    //         trkcand.get(i).get_Cluster1().getCz());
-                    // Point3D og = new Point3D(trkcand.get(i).get_Cluster1().getOx(),
-                    //         trkcand.get(i).get_Cluster1().getOy(),
-                    //         trkcand.get(i).get_Cluster1().getOz());
-                    //arc.setCenter(ct);
-                    //arc.setOrigin(og);
+                    Arc3D arc  = trkcand.get(i).get_Cluster1().get_Arc();
                     Strip strp = new Strip(id, ce, arc);
-                    cyl.baseArc().setRadius(bgeo.getRadiusMidDrift(lyer));
-                    cyl.highArc().setRadius(bgeo.getRadiusMidDrift(lyer));                   
-
-                    Surface meas = new Surface(cyl, strp);
+         
+                    Surface meas = new Surface(bgeo.getTileSurface(layer, sector), strp);
                     meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());
-                    Point3D    offset = bgeo.getOffset(trkcand.get(i).get_Cluster1().get_Layer(), 
-                            trkcand.get(i).get_Sector()); 
-                    Vector3D rotation = bgeo.getRotation(trkcand.get(i).get_Cluster1().get_Layer(), 
-                            trkcand.get(i).get_Sector());
-                    meas.cylShift = offset;
-                    meas.cylRotation = rotation;
+                    meas.setTransformation(bgeo.toGlobal(layer,sector)); 
                     
-                    meas.setSector(trkcand.get(i).get_Sector());
-                    //meas.setLayer(i+1);
+                    meas.setSector(sector);
                     meas.setError(err*err); // CHECK THIS .... DOES KF take e or e^2?
                     //for multiple scattering
-                    double thickn_ov_X0 = org.jlab.rec.cvt.bmt.Constants.get_T_OVER_X0()[(trkcand.get(i).get_Cluster1().get_Layer() + 1) / 2 - 1];
-                    meas.setl_over_X0(thickn_ov_X0);
-                    //if((int)Constants.getLayersUsed().get(meas.getLayer())<1) {
-                    //    //System.out.println("Exluding layer "+meas.getLayer()+trkcand.get_Crosses().get(c).printInfo());
-                    //    meas.notUsedInFit=true;
-                    //}
+                    meas.setl_over_X0(bgeo.getToverX0(layer));
 
                     KFSites.add(meas);
                     clsMap.put(KFSites.size()-1, trkcand.get(i).get_Cluster1());
@@ -498,13 +426,13 @@ public class RecUtilities {
             SVTGeometry sgeo, BMTGeometry bgeo) {
         
         for (int i = 0; i < trkcand.get_Clusters().size(); i++) { //SVT
-            if(trkcand.get_Clusters().get(i).get_Detector()==0) {
+            if(trkcand.get_Clusters().get(i).get_Detector()==DetectorType.BST) {
                 Cluster cluster = trkcand.get_Clusters().get(i);
                 int layer = trkcand.get_Clusters().get(i).get_Layer();
                 int sector = trkcand.get_Clusters().get(i).get_Sector();
                 Point3D p = new Point3D(traj.get(layer).x, traj.get(layer).y, traj.get(layer).z);
                 double doca2Cls = sgeo.getDOCAToStrip(sector, layer, cluster.get_Centroid(), p);
-                double doca2Seed = sgeo.getDOCAToStrip(sector, layer, (double) cluster.get_SeedStrip(), p);
+                double doca2Seed = sgeo.getDOCAToStrip(sector, layer, (double) cluster.get_SeedStrip().get_Strip(), p);
                 cluster.set_SeedResidual(doca2Seed); 
                 cluster.set_CentroidResidual(doca2Cls);
             
@@ -521,7 +449,7 @@ public class RecUtilities {
 
         // adding the cross infos
         for (int c = 0; c < trkcand.get_Crosses().size(); c++) {
-            if (trkcand.get_Crosses().get(c).get_Detector().equalsIgnoreCase("SVT")) {
+            if (trkcand.get_Crosses().get(c).get_Detector()==DetectorType.BST) {
                 int layer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer();
                 Point3D p = new Point3D(trkcand.get_Crosses().get(c).get_Point().x(), 
                         trkcand.get_Crosses().get(c).get_Point().y(), 
@@ -530,12 +458,7 @@ public class RecUtilities {
                 trkcand.get_Crosses().get(c).set_Point(p);
                 trkcand.get_Crosses().get(c).set_Dir(d);
             }
-            if (trkcand.get_Crosses().get(c).get_Detector().equalsIgnoreCase("BMT")) {
-                
-                Point3D    offset = bgeo.getOffset(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer(), 
-                            trkcand.get_Crosses().get(c).get_Sector()); 
-                Vector3D rotation = bgeo.getRotation(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer(), 
-                            trkcand.get_Crosses().get(c).get_Sector());
+            if (trkcand.get_Crosses().get(c).get_Detector()==DetectorType.BMT) {
                 
                 double ce = trkcand.get_Crosses().get(c).get_Cluster1().get_Centroid();
                 int layer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer()+6;
@@ -543,27 +466,27 @@ public class RecUtilities {
                 Point3D p = new Point3D(traj.get(layer).x, traj.get(layer).y, traj.get(layer).z);
                 Vector3D v = new Vector3D(traj.get(layer).px, traj.get(layer).py, traj.get(layer).pz).asUnit();
                 trkcand.get_Crosses().get(c).set_Dir(v); 
-                if (trkcand.get_Crosses().get(c).get_DetectorType()==BMTType.Z) {
+                if (trkcand.get_Crosses().get(c).get_Type()==BMTType.Z) {
                     trkcand.get_Crosses().get(c).set_Point(new Point3D(trkcand.get_Crosses().get(c).get_Point().x(),trkcand.get_Crosses().get(c).get_Point().y(),p.z()));
+                    cluster.set_CentroidResidual(traj.get(layer).resi);
                     //double xc = trkcand.get_Crosses().get(c).get_Point().x();
                     //double yc = trkcand.get_Crosses().get(c).get_Point().y();
                     int bsector = trkcand.get_Crosses().get(c).get_Sector();
                     int blayer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer();
-                    double cxh = Math.cos(cluster.get_Phi())*bgeo.getRadiusMidDrift(blayer);
-                    double cyh = Math.sin(cluster.get_Phi())*bgeo.getRadiusMidDrift(blayer);
-                    double phic = bgeo.getPhi(new Point3D(cxh,cyh,0), bsector, blayer);
-                    double phit = bgeo.getPhi(p, bsector, blayer);
-                    double doca2Cls = (phic-phit)*bgeo.getRadiusMidDrift(blayer);
-                    cluster.set_CentroidResidual(traj.get(layer).resi);
-
+//                    double cxh = Math.cos(cluster.get_Phi())*bgeo.getRadiusMidDrift(blayer);
+//                    double cyh = Math.sin(cluster.get_Phi())*bgeo.getRadiusMidDrift(blayer);
+//                    double phic = bgeo.getPhi(blayer, bsector, new Point3D(cxh,cyh,0));
+//                    double phit = bgeo.getPhi(blayer, bsector, p);
+//                    double doca2Cls = (phic-phit)*bgeo.getRadiusMidDrift(blayer);
+                    
                     for (FittedHit hit : cluster) {
                         double xh = Math.cos(hit.get_Strip().get_Phi())*bgeo.getRadiusMidDrift(blayer);
                         double yh = Math.sin(hit.get_Strip().get_Phi())*bgeo.getRadiusMidDrift(blayer);
-                        double hphic = bgeo.getPhi(new Point3D(xh,yh,0), bsector, blayer);
-                        double hphit = bgeo.getPhi(p, bsector, blayer);
+                        double hphic = bgeo.getPhi(blayer, bsector, new Point3D(xh,yh,0));
+                        double hphit = bgeo.getPhi(blayer, bsector, p);
                         double doca1 = (hphic-hphit)*bgeo.getRadiusMidDrift(blayer);
                         
-                        if(hit.get_Strip().get_Strip()==cluster.get_SeedStrip())
+                        if(hit.get_Strip().get_Strip()==cluster.get_SeedStrip().get_Strip())
                             cluster.set_SeedResidual(doca1); 
                         if(traj.get(layer).isMeasUsed)
                             hit.set_TrkgStatus(1);
@@ -571,25 +494,17 @@ public class RecUtilities {
 
                     }
                 }
-                if (trkcand.get_Crosses().get(c).get_DetectorType()==BMTType.C) {
+                if (trkcand.get_Crosses().get(c).get_Type()==BMTType.C) {
                     double z = trkcand.get_Crosses().get(c).get_Point().z();
                     double err = trkcand.get_Crosses().get(c).get_Cluster1().get_ZErr();
                     trkcand.get_Crosses().get(c).set_Point(new Point3D(p.x(),p.y(),
-                            trkcand.get_Crosses().get(c).get_Cluster1().get_Z()));
-                    //double doca2Cls = p.z()-cluster.get_Z();
-                    Arc3D arcC = cluster.get_Arc();
-                    double doca2Cls = bgeo.getBMTCresi(arcC, p, offset, rotation);
-                    //cluster.set_CentroidResidual(doca2Cls);
+                            trkcand.get_Crosses().get(c).get_Cluster1().center().z()));
                     cluster.set_CentroidResidual(traj.get(layer).resi);
+                    cluster.set_SeedResidual(p); 
                     for (FittedHit hit : cluster) {
-                        Arc3D arcH = hit.get_Strip().get_Arc();
-                        double doca1 = bgeo.getBMTCresi(arcH, p, offset, rotation);
-                        //double doca1 = p.z()-hit.get_Strip().get_Z();
-                        if(hit.get_Strip().get_Strip()==cluster.get_SeedStrip())
-                            cluster.set_SeedResidual(doca1); 
                         if(traj.get(layer).isMeasUsed)
                             hit.set_TrkgStatus(1);
-                        hit.set_docaToTrk(doca1);  
+                        hit.set_docaToTrk(p);  
 
                     }
                 }
@@ -608,7 +523,7 @@ public class RecUtilities {
         cand.setChi2(kf.chi2);
         
         for (Cross c : seed.get_Crosses()) {
-            if (c.get_Detector().equalsIgnoreCase("SVT")) {
+            if (c.get_Detector()==DetectorType.BST) {
                 continue;
             }
         }
@@ -618,16 +533,16 @@ public class RecUtilities {
         for(Cluster cl : seed.get_Clusters()) {
             
             int layer = cl.get_Layer();
+            int sector = cl.get_Sector();
             
-            if(cl.get_Detector()==1) {
+            if(cl.get_Detector()==DetectorType.BMT) {
                 
                 layer = layer + 6;
                 
-               if(cl.get_DetectorType()==1) {
+               if(cl.get_Type() == BMTType.Z) {
                    
-                Cylindrical3D cyl = BMTGeom.getCylinder(cl.get_Layer(), cl.get_Sector()); 
-                Line3D cln = cl.getCylAxis();
-                cl.setN(cl.getNFromTraj(kf.TrjPoints.get(layer).x,kf.TrjPoints.get(layer).y,kf.TrjPoints.get(layer).z,cln));
+                Line3D cln = cl.getAxis();
+                cl.setN(cln.distance(new Point3D(kf.TrjPoints.get(layer).x,kf.TrjPoints.get(layer).y,kf.TrjPoints.get(layer).z)).direction().asUnit());
                 cl.setS(cl.getL().cross(cl.getN()).asUnit());
                  
                }
@@ -664,7 +579,7 @@ public class RecUtilities {
         Track cand = new Track(seed.get_Helix());
         
         for (Cross c : seed.get_Crosses()) {
-            if (c.get_Detector().equalsIgnoreCase("SVT")) {
+            if (c.get_Detector()==DetectorType.BST) {
                 continue;
             }
         }
@@ -700,7 +615,7 @@ public class RecUtilities {
         for(Cross c : bseed.get_Crosses()) {
             int layr = 0;
             int layr2 = 0;
-            if(c.get_Detector().equalsIgnoreCase("BMT")) {
+            if(c.get_Detector()==DetectorType.BMT) {
                 layr = c.getOrderedRegion()+3;
                 if((int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)>0) {
                     c.isInSeed = false;
@@ -753,7 +668,7 @@ public class RecUtilities {
             int layr = 0;
             int layr2 = 0;
             c.set_AssociatedTrackID(-1);
-            if(c.get_Detector().equalsIgnoreCase("BMT")) {
+            if(c.get_Detector()==DetectorType.BMT) {
                 layr = c.getOrderedRegion()+3;
                 if((int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)>0) {
                     c.isInSeed = false;
@@ -809,7 +724,7 @@ public class RecUtilities {
         for(Cross c : cand) {
             int layr = 0;
             int layr2 = 0;
-            if(c.get_Detector().equalsIgnoreCase("BMT")) {
+            if(c.get_Detector()==DetectorType.BMT) {
                 layr = c.getOrderedRegion()+3;
                 if((int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)>0) {
                     c.isInSeed = false;

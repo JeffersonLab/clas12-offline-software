@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.geom.base.Detector;
 
@@ -437,7 +438,7 @@ public class TrackCandListFinder {
                 crossesToFitWithBMT.clear();
                 SVTmatches.clear();
                 for (Cross c : cand) { 
-                    if (c.get_Detector().equalsIgnoreCase("SVT") && c.isInFiducial(svt_geo)) {
+                    if (c.get_Detector()==DetectorType.BST && c.isInFiducial(svt_geo)) {
                         SVTmatches.add(c);
                     }
                 }
@@ -511,7 +512,7 @@ public class TrackCandListFinder {
         double[][][] trajPlaneInters = trj.get_SVTIntersections();
         ArrayList<Cross> hitsOnTrack = new ArrayList<Cross>();
         for (Cross c : cand) {
-            if (c.get_Detector().equalsIgnoreCase("SVT")) {
+            if (c.get_Detector()==DetectorType.BST) {
                 hitsOnTrack.add(c);
             }
         }
@@ -562,14 +563,14 @@ public class TrackCandListFinder {
         //make lists
         for (Cross c : list) {
 
-            if (c.get_Detector().equalsIgnoreCase("SVT")) {
+            if (c.get_Detector()==DetectorType.BST) {
                 SVTcrossesInTrk.add(c);
             }
-            if (c.get_Detector().equalsIgnoreCase("BMT")) { // Micromegas
-                if (c.get_DetectorType() == BMTType.C) {//C-detector --> only Z defined
+            if (c.get_Detector()==DetectorType.BMT) { // Micromegas
+                if (c.get_Type() == BMTType.C) {//C-detector --> only Z defined
                     BMTCdetcrossesInTrk.add(c);
                 }
-                if (c.get_DetectorType() == BMTType.Z) {//Z-detector --> only phi defined
+                if (c.get_Type() == BMTType.Z) {//Z-detector --> only phi defined
                     BMTZdetcrossesInTrk.add(c);
                 }
             }
@@ -698,14 +699,14 @@ public class TrackCandListFinder {
 
         //make lists
         for (Cross c : arrayList) { 
-            if (c.get_Detector().equalsIgnoreCase("SVT")) {
+            if (c.get_Detector()==DetectorType.BST) {
                 SVTcrossesInTrk.add(c);
             }
-            if (c.get_Detector().equalsIgnoreCase("BMT")) { // Micromegas
-                if (c.get_DetectorType() == BMTType.C) {//C-detector --> only Z defined
+            if (c.get_Detector()==DetectorType.BMT) { // Micromegas
+                if (c.get_Type() == BMTType.C) {//C-detector --> only Z defined
                     BMTCdetcrossesInTrk.add(c);
                 }
-                if (c.get_DetectorType()==BMTType.Z) {//Z-detector --> only phi defined
+                if (c.get_Type()==BMTType.Z) {//Z-detector --> only phi defined
                     BMTZdetcrossesInTrk.add(c);
                 }
             }
@@ -886,7 +887,7 @@ public class TrackCandListFinder {
                     continue;
                 }
                 //if(Double.isNaN(MMCrosses.get(i).get_Point0().z()))
-                if (MMCrosses.get(i).get_DetectorType()==BMTType.Z) {
+                if (MMCrosses.get(i).get_Type()==BMTType.Z) {
                     continue;
                 }
                 double m_z = MMCrosses.get(i).get_Point().z();  
@@ -954,7 +955,7 @@ public class TrackCandListFinder {
                 }
                 // measuring phi
                 //if(Double.isNaN(MMCrosses.get(i).get_Point0().x()))
-                if (MMCrosses.get(i).get_DetectorType()==BMTType.C) {
+                if (MMCrosses.get(i).get_Type()==BMTType.C) {
                     continue;
                 }
                 double m_x = MMCrosses.get(i).get_Point().x();

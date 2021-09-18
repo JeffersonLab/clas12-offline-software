@@ -1,5 +1,9 @@
 package org.jlab.rec.cvt.hit;
 
+import org.jlab.detector.base.DetectorType;
+import org.jlab.geom.prim.Point3D;
+import org.jlab.rec.cvt.bmt.BMTType;
+
 /**
  * A hit that is used in a fitted track.
  *
@@ -10,13 +14,13 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 
     /**
      * @param detector SVT (0) or BMT (1)
+     * @param type
      * @param sector (1...)
      * @param layer (1...)
      * @param strip (1...)
-     * @param Edep (for gemc output without digitization)
      */
-    public FittedHit(int detector, int detectortype, int sector, int layer, Strip strip) {
-        super(detector, detectortype, sector, layer, strip);
+    public FittedHit(DetectorType detector, BMTType type, int sector, int layer, Strip strip) {
+        super(detector, type, sector, layer, strip);
     }
 
     private double _docaToTrk;                                                  // 3-D distance of closest approach of the helix to the wire 
@@ -31,6 +35,26 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         this._docaToTrk = _docaToTrk;
     }
 
+    public void set_docaToTrk(Point3D traj) {
+        this.set_docaToTrk(this.residual(traj));
+    }
+    
+    public double residual(Point3D traj) {
+        double value = 0;
+        if(this.get_Detector()==DetectorType.BST)
+            ;
+        else {
+            Point3D local = new Point3D(traj);
+            this.get_Strip().toLocal().apply(local);
+            if(this.get_Type()==BMTType.C)                
+                value = local.z()-this.get_Strip().get_Z();
+            else
+                ;
+        }      
+        return value;
+    }
+    
+    
     public double get_stripResolutionAtDoca() {
         return _stripResolutionAtDoca;
     }

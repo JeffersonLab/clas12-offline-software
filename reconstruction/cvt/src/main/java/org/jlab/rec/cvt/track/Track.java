@@ -1,5 +1,6 @@
 package org.jlab.rec.cvt.track;
 
+import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cross.Cross;
@@ -139,7 +140,7 @@ public class Track extends Trajectory implements Comparable<Track> {
 
             Helix helix = this.get_helix();
             for (int i = 0; i < this.size(); i++) {
-                if (!this.get(i).get_Detector().equalsIgnoreCase("SVT")) {
+                if (this.get(i).get_Detector()!=DetectorType.BST) {
                     continue;
                 }
                 double R = Math.sqrt(this.get(i).get_Point().x() * this.get(i).get_Point().x() + this.get(i).get_Point().y() * this.get(i).get_Point().y());
@@ -169,7 +170,7 @@ public class Track extends Trajectory implements Comparable<Track> {
 
             Helix helix = this.get_helix();
             for (int i = 0; i < this.size(); i++) {
-                if (!this.get(i).get_Detector().equalsIgnoreCase("SVT")) {
+                if (this.get(i).get_Detector()!=DetectorType.BST) {
                     continue;
                 }
                 double R = Math.sqrt(this.get(i).get_Point().x() * this.get(i).get_Point().x() + this.get(i).get_Point().y() * this.get(i).get_Point().y());

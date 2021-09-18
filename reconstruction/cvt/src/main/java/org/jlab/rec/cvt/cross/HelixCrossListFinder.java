@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
@@ -88,11 +89,11 @@ public class HelixCrossListFinder {
         }
         for(Cross c : allCrossList){
             //System.out.println(" CROSSLISTER "+c.printInfo());
-            if(c.get_Detector().equalsIgnoreCase("SVT"))
+            if(c.get_Detector()==DetectorType.BST)
                 theListsByRegion.get(c.get_Region()-1).add(c);
-            if(c.get_Detector().equalsIgnoreCase("BMT") && c.get_DetectorType()==BMTType.Z)
+            if(c.get_Detector()==DetectorType.BMT && c.get_Type()==BMTType.Z)
                 theListsByRegion.get(c.get_Region()+2).add(c);
-            if(c.get_Detector().equalsIgnoreCase("BMT") && c.get_DetectorType()==BMTType.C)
+            if(c.get_Detector()==DetectorType.BMT && c.get_Type()==BMTType.C)
                 theListsByRegionBMTC.get(c.get_Region()-1).add(c);
         }
         // 
@@ -180,14 +181,14 @@ public class HelixCrossListFinder {
             trkSeed.set_Crosses(s);
             List<Cluster> clusters = new ArrayList<Cluster>();
             for(Cross c : s ) { 
-                if(c.get_Detector().equalsIgnoreCase("SVT")) {
+                if(c.get_Detector()==DetectorType.BST) {
                     c.get_Cluster1().set_CentroidError(this.calcCentErr(c, c.get_Cluster1(), svt_geo));
                     c.get_Cluster2().set_CentroidError(this.calcCentErr(c, c.get_Cluster2(), svt_geo));
                     
                     clusters.add(c.get_Cluster1());
                     clusters.add(c.get_Cluster2());
                 }
-                if(c.get_Detector().equalsIgnoreCase("BMT")) {
+                if(c.get_Detector()==DetectorType.BMT) {
                     clusters.add(c.get_Cluster1());
                     
                 }
@@ -235,7 +236,7 @@ public class HelixCrossListFinder {
         double avg_tandip =0;
         int countCrosses =0;
         for(Cross c : trkCand) {
-            if(c.get_Detector().equalsIgnoreCase("SVT")) {
+            if(c.get_Detector()==DetectorType.BST) {
                 countCrosses++;
                 avg_tandip+=c.get_Point().z()/Math.sqrt(c.get_Point().x()*c.get_Point().x()+c.get_Point().y()*c.get_Point().y());
             }

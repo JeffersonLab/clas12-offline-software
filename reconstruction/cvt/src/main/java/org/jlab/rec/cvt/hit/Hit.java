@@ -1,5 +1,8 @@
 package org.jlab.rec.cvt.hit;
 
+import org.jlab.detector.base.DetectorType;
+import org.jlab.rec.cvt.bmt.BMTType;
+
 /**
  * A hit characterized by layer, sector, wire number, and Edep. The ADC to time
  * conversion has been done.
@@ -10,41 +13,41 @@ package org.jlab.rec.cvt.hit;
 public class Hit implements Comparable<Hit> {
     // class implements Comparable interface to allow for sorting a collection of hits by wire number values
 
+    private DetectorType _Detector;	       //   the detector SVT or BMT
+    private BMTType      _Type;             //   for the BMT, either C or Z
+
+    private int _Sector;      	       //	   sector[1...24] for SVT, [1..3] for BMT
+    private int _Layer;    	 	       //	   layer [1,...]
+    private Strip _Strip;    	       //	   Strip object
+
+    private int _Id;		       //    Hit Id
+    private int _Status; 		       //    Status -1 dead, 0 noisy, 1 good
+
     // constructor
-    public Hit(int detector, int detectortype, int sector, int layer, Strip strip) {
-        this._Detector = detector;                                              // 0 = SVT, 1 = BMT
-        this._DetectorType = detectortype;                                      // 0 = C, 1 = Z
-        this._Sector = sector;
-        this._Layer = layer;
-        this._Strip = strip;
+    public Hit(DetectorType detector, BMTType type, int sector, int layer, Strip strip) {
+        this._Detector = detector;                   // 0 = SVT, 1 = BMT
+        this._Type     = type;               // set according to BMTType
+        this._Sector   = sector;
+        this._Layer    = layer;
+        this._Strip    = strip;
 
     }
 
-    public int get_Detector() {
+    public DetectorType get_Detector() {
         return _Detector;
     }
 
-    public void set_Detector(int _detector) {
+    public void set_Detector(DetectorType _detector) {
         this._Detector = _detector;
     }
 
-    public int get_DetectorType() {
-        return _DetectorType;
+    public BMTType get_Type() {
+        return _Type;
     }
 
-    public void set_DetectorType(int _DetectorType) {
-        this._DetectorType = _DetectorType;
+    public void set_Type(BMTType type) {
+        this._Type = type;
     }
-
-    private int _Detector;							//       the detector SVT or BMT
-    private int _DetectorType;                                                  //       for the BMT, either C or Z
-
-    private int _Sector;      							//	   sector[1...24] for SVT, [1..3] for BMT
-    private int _Layer;    	 						//	   layer [1,...]
-    private Strip _Strip;    	 						//	   Strip object
-
-    private int _Id;								//		Hit Id
-    private int _Status; 							//      Status -1 dead, 0 noisy, 1 good
 
     /**
      *

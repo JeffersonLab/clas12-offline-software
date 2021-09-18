@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 
 import org.jlab.rec.cvt.bmt.BMTType;
@@ -76,7 +77,7 @@ public class TrackSeederCA {
       				  if( cn.get_state() >= ms ){
       					  ms = cn.get_state();
       					  if( neighbour.get_plane().equalsIgnoreCase("ZR") &&
-      							neighbour.get_c1().get_Detector().equalsIgnoreCase("SVT")  ){
+      							neighbour.get_c1().get_Detector()==DetectorType.BST){
 	      					  if( cn.get_length() < dist ){
 	      						  dist = cn.get_length();
 	      						  id = ic;
@@ -203,9 +204,9 @@ public class TrackSeederCA {
 //        Collections.sort(crosses);
         
         for(Cross c : bmt_crosses) { 
-            if(c.get_DetectorType()==BMTType.Z)
+            if(c.get_Type()==BMTType.Z)
                 crosses.add(c);
-            if(c.get_DetectorType()==BMTType.C) {
+            if(c.get_Type()==BMTType.C) {
                 bmtC_crosses.get(c.get_Sector()-1).add(c);	
             }
         }
@@ -251,7 +252,7 @@ public class TrackSeederCA {
 	        List<Cluster> clusters = new ArrayList<Cluster>(); 
                 Collections.sort(seed.get_Crosses());
 	        for(Cross c : seed.get_Crosses()) { 
-	            if(c.get_Detector().equalsIgnoreCase("SVT")) {
+	            if(c.get_Detector()==DetectorType.BST) {
 	                clusters.add(c.get_Cluster1());
 	                clusters.add(c.get_Cluster2());
                     } else {
@@ -348,7 +349,7 @@ public class TrackSeederCA {
         //------------------------------------------------------------------
         int sector = -1;
         for( Cross c : xycross ){
-          if( c.get_Detector().equalsIgnoreCase("SVT")){
+          if( c.get_Detector()==DetectorType.BST){
             svtcrs.add(c);
 //            System.out.print( " " + c.get_Id() + " " +c.get_Detector() + " " + c.get_DetectorType() + " ; " );
           }
@@ -449,14 +450,14 @@ public class TrackSeederCA {
 
           // add bmt z
           for( Cross c : xycross ){
-            if( c.get_Detector().equalsIgnoreCase("BMT")){
+            if( c.get_Detector()==DetectorType.BMT){
               seedCrosses.get(scsize-1).add(c); 
             }              
           }
 
           // add bmt c
           for( Cross c : zrcross ){
-            if( c.get_Detector().equalsIgnoreCase("BMT")){
+            if( c.get_Detector()==DetectorType.BMT){
               seedCrosses.get(scsize-1).add(c); 
             }              
           }

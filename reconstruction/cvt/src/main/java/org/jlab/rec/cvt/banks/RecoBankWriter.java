@@ -15,8 +15,8 @@ import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.rec.cvt.trajectory.StateVec;
 
 import Jama.Matrix;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
-import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTType;
 
 public class RecoBankWriter {
@@ -85,9 +85,9 @@ public class RecoBankWriter {
             bank.setByte("layer", i, (byte) cluslist.get(i).get_Layer());
             bank.setShort("size", i, (short) cluslist.get(i).size());
             bank.setFloat("ETot", i, (float) cluslist.get(i).get_TotalEnergy());
-            bank.setInt("seedStrip", i, cluslist.get(i).get_SeedStrip());
+            bank.setInt("seedStrip", i, cluslist.get(i).get_SeedStrip().get_Strip());
             bank.setFloat("centroid", i, (float) cluslist.get(i).get_Centroid());
-            bank.setFloat("seedE", i, (float) cluslist.get(i).get_SeedEnergy());
+            bank.setFloat("seedE", i, (float) cluslist.get(i).get_SeedStrip().get_Edep());
             bank.setFloat("centroidResidual", i, (float) cluslist.get(i).get_CentroidResidual());
             bank.setFloat("seedResidual", i, (float) cluslist.get(i).get_SeedResidual()); 
             bank.setShort("trkID", i, (short) cluslist.get(i).get_AssociatedTrackID());
@@ -105,12 +105,12 @@ public class RecoBankWriter {
                 bank.setShort(hitStrg, i, (short) hitIdxArray[j]);
             }
             
-            bank.setFloat("x1",   i, (float)cluslist.get(i).getX1());
-            bank.setFloat("y1",   i, (float)cluslist.get(i).getY1());
-            bank.setFloat("z1",   i, (float)cluslist.get(i).getZ1());
-            bank.setFloat("x2",   i, (float)cluslist.get(i).getX2());
-            bank.setFloat("y2",   i, (float)cluslist.get(i).getY2());
-            bank.setFloat("z2",   i, (float)cluslist.get(i).getZ2()); 
+            bank.setFloat("x1",   i, (float)cluslist.get(i).origin().x());
+            bank.setFloat("y1",   i, (float)cluslist.get(i).origin().y());
+            bank.setFloat("z1",   i, (float)cluslist.get(i).origin().z());
+            bank.setFloat("x2",   i, (float)cluslist.get(i).end().x());
+            bank.setFloat("y2",   i, (float)cluslist.get(i).end().y());
+            bank.setFloat("z2",   i, (float)cluslist.get(i).end().z()); 
             bank.setFloat("lx",   i, (float)cluslist.get(i).getL().x());
             bank.setFloat("ly",   i, (float)cluslist.get(i).getL().y());
             bank.setFloat("lz",   i, (float)cluslist.get(i).getL().z());
@@ -249,11 +249,11 @@ public class RecoBankWriter {
             bank.setByte("layer", i, (byte) cluslist.get(i).get_Layer());
             bank.setShort("size", i, (short) cluslist.get(i).size());
             bank.setFloat("ETot", i, (float) cluslist.get(i).get_TotalEnergy());
-            bank.setInt("seedStrip", i, cluslist.get(i).get_SeedStrip());
+            bank.setInt("seedStrip", i, cluslist.get(i).get_SeedStrip().get_Strip());
             bank.setFloat("centroid", i, (float) cluslist.get(i).get_Centroid());
             bank.setFloat("centroidResidual", i, (float) cluslist.get(i).get_CentroidResidual());
             bank.setFloat("seedResidual", i, (float) cluslist.get(i).get_SeedResidual()); 
-            bank.setFloat("seedE", i, (float) cluslist.get(i).get_SeedEnergy());
+            bank.setFloat("seedE", i, (float) cluslist.get(i).get_SeedStrip().get_Edep());
             bank.setShort("trkID", i, (short) cluslist.get(i).get_AssociatedTrackID());
             for (int j = 0; j < cluslist.get(i).size(); j++) {
                 if (j < hitIdxArray.length) {
@@ -267,26 +267,22 @@ public class RecoBankWriter {
                 hitStrg += "_ID";
                 bank.setShort(hitStrg, i, (short) hitIdxArray[j]);
             }
-            
-            bank.setFloat("x1",   i, (float)cluslist.get(i).getX1());
-            bank.setFloat("y1",   i, (float)cluslist.get(i).getY1());
-            bank.setFloat("z1",   i, (float)cluslist.get(i).getZ1());
-            bank.setFloat("x2",   i, (float)cluslist.get(i).getX2());
-            bank.setFloat("y2",   i, (float)cluslist.get(i).getY2());
-            bank.setFloat("z2",   i, (float)cluslist.get(i).getZ2());
-            bank.setFloat("ox",   i, (float)cluslist.get(i).getOx());
-            bank.setFloat("oy",   i, (float)cluslist.get(i).getOy());
-            bank.setFloat("oz",   i, (float)cluslist.get(i).getOz());
-            bank.setFloat("cx",   i, (float)cluslist.get(i).getCx());
-            bank.setFloat("cy",   i, (float)cluslist.get(i).getCy());
-            bank.setFloat("cz",   i, (float)cluslist.get(i).getCz());
-            bank.setFloat("theta",i, (float)cluslist.get(i).getTheta());
-            bank.setFloat("ax1",  i, (float)cluslist.get(i).getCylAxis().origin().x());
-            bank.setFloat("ay1",  i, (float)cluslist.get(i).getCylAxis().origin().y());
-            bank.setFloat("az1",  i, (float)cluslist.get(i).getCylAxis().origin().z());
-            bank.setFloat("ax2",  i, (float)cluslist.get(i).getCylAxis().end().x());
-            bank.setFloat("ay2",  i, (float)cluslist.get(i).getCylAxis().end().y());
-            bank.setFloat("az2",  i, (float)cluslist.get(i).getCylAxis().end().z());
+            bank.setFloat("x1",   i, (float)cluslist.get(i).origin().x());
+            bank.setFloat("y1",   i, (float)cluslist.get(i).origin().y());
+            bank.setFloat("z1",   i, (float)cluslist.get(i).origin().z());
+            bank.setFloat("x2",   i, (float)cluslist.get(i).end().x());
+            bank.setFloat("y2",   i, (float)cluslist.get(i).end().y());
+            bank.setFloat("z2",   i, (float)cluslist.get(i).end().z());
+            bank.setFloat("cx",   i, (float)cluslist.get(i).center().x());
+            bank.setFloat("cy",   i, (float)cluslist.get(i).center().y());
+            bank.setFloat("cz",   i, (float)cluslist.get(i).center().z());
+            bank.setFloat("theta",i, (float)cluslist.get(i).theta());
+            bank.setFloat("ax1",  i, (float)cluslist.get(i).getAxis().origin().x());
+            bank.setFloat("ay1",  i, (float)cluslist.get(i).getAxis().origin().y());
+            bank.setFloat("az1",  i, (float)cluslist.get(i).getAxis().origin().z());
+            bank.setFloat("ax2",  i, (float)cluslist.get(i).getAxis().end().x());
+            bank.setFloat("ay2",  i, (float)cluslist.get(i).getAxis().end().y());
+            bank.setFloat("az2",  i, (float)cluslist.get(i).getAxis().end().z());
             bank.setFloat("lx",   i, (float)cluslist.get(i).getL().x());
             bank.setFloat("ly",   i, (float)cluslist.get(i).getL().y());
             bank.setFloat("lz",   i, (float)cluslist.get(i).getL().z());
@@ -297,8 +293,8 @@ public class RecoBankWriter {
             bank.setFloat("ny",   i, (float)cluslist.get(i).getN().y());
             bank.setFloat("nz",   i, (float)cluslist.get(i).getN().z());
             bank.setFloat("e",    i, (float)cluslist.get(i).get_Error());
-            if(debug && cluslist.get(i).get_AssociatedTrackID()>0 && cluslist.get(i).get_DetectorType()==1) {
-                Line3D cln = new Line3D(cluslist.get(i).getEndPoint1(), cluslist.get(i).getEndPoint2());
+            if(debug && cluslist.get(i).get_AssociatedTrackID()>0 && cluslist.get(i).get_Type()==BMTType.Z) {
+                Line3D cln = new Line3D(cluslist.get(i).origin(), cluslist.get(i).end());
                 System.out.println("Check: N "+cluslist.get(i).getN().toString()+" \n"+
                     " L "+cluslist.get(i).getL().toString()+" \n"+
                     " S "+cluslist.get(i).getS().toString()+" \n"+
@@ -462,13 +458,13 @@ public class RecoBankWriter {
                 bank.setShort(hitStrg, i, (short) trkcands.get(i).get(j).get_Id());
                 }
                 // counter to get status word    
-                if(trkcands.get(i).get(j).get_Detector().equalsIgnoreCase("SVT"))
+                if(trkcands.get(i).get(j).get_Detector()==DetectorType.BST)
                     a++;
-                if(trkcands.get(i).get(j).get_Detector().equalsIgnoreCase("BMT") 
-                    && trkcands.get(i).get(j).get_DetectorType()==BMTType.Z)
+                if(trkcands.get(i).get(j).get_Detector()==DetectorType.BMT 
+                    && trkcands.get(i).get(j).get_Type()==BMTType.Z)
                     b++;
-                if(trkcands.get(i).get(j).get_Detector().equalsIgnoreCase("BMT") 
-                    && trkcands.get(i).get(j).get_DetectorType()==BMTType.C)
+                if(trkcands.get(i).get(j).get_Detector()==DetectorType.BMT
+                    && trkcands.get(i).get(j).get_Type()==BMTType.C)
                     c++;
             }
             bank.setShort("status", i, (short) ((short) 1000+a*100+b*10+c));

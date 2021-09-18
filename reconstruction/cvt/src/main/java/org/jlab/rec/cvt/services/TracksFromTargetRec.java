@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Point3D;
@@ -129,7 +130,7 @@ public class TracksFromTargetRec {
                 if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null) { 
                     Track fittedTrack = recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom);
                     for(Cross c : fittedTrack) { 
-                        if(c.get_Detector().equalsIgnoreCase("SVT")) {
+                        if(c.get_Detector()==DetectorType.BST) {
                             c.get_Cluster1().set_AssociatedTrackID(0);
                             c.get_Cluster2().set_AssociatedTrackID(0);
                         }
@@ -259,7 +260,7 @@ public class TracksFromTargetRec {
                 if( c.get_AssociatedTrackID() < 0 ) {
                         c.set_Dir( new Vector3D(0,0,0));
                         c.set_DirErr( new Vector3D(0,0,0));
-                        if( c.get_DetectorType()==BMTType.C) {
+                        if( c.get_Type()==BMTType.C) {
                             c.set_Point(new Point3D(Double.NaN,Double.NaN,c.get_Point().z()));
                         }
                         else {

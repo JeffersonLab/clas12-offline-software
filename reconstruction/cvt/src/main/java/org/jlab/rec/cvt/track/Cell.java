@@ -6,6 +6,7 @@ import java.util.*;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
+import org.jlab.detector.base.DetectorType;
 
 /**
  * Base cell for the cellular automaton
@@ -78,7 +79,7 @@ public class Cell implements Comparable<Cell> {
 		}
 		if( vw.equalsIgnoreCase("ZR")){
 			double R = 0.;
-			if( cross.get_Detector().equalsIgnoreCase("SVT")){
+			if( cross.get_Detector()==DetectorType.BST){
 				R = Math.sqrt(cross.get_Point().x()*cross.get_Point().x() + 
 						      cross.get_Point().y()*cross.get_Point().y() );
 			}

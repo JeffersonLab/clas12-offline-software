@@ -10,6 +10,7 @@ import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Arc3D;
 import org.jlab.geom.prim.Cylindrical3D;
+import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Vector3D;
 
 /**
@@ -26,8 +27,10 @@ public class Surface implements Comparable<Surface> {
     public Point3D finitePlaneCorner1;
     public Point3D finitePlaneCorner2;
     public Cylindrical3D cylinder;
-    public Point3D cylShift;
-    public Vector3D cylRotation;
+//    public Point3D cylShift;
+//    public Vector3D cylRotation;
+    private Transformation3D toGlobal;
+    private Transformation3D toLocal;
     public Arc3D arc;
     public Strip strip;
     private double error;
@@ -156,6 +159,20 @@ public class Surface implements Comparable<Surface> {
     public void setZ_over_A_times_l(double _Z_over_A_times_l) {
         this._Z_over_A_times_l = _Z_over_A_times_l;
     }
+
+    public Transformation3D toGlobal() {
+        return toGlobal;
+    }
+
+    public Transformation3D toLocal() {
+        return toLocal;
+    }
+
+    public void setTransformation(Transformation3D transform) {
+        this.toGlobal = transform;
+        this.toLocal  = transform.inverse();
+    }
+        
     public Surface(Cylindrical3D cylinder3d, Arc3D refArc, 
             Point3D endPoint1, Point3D endPoint2) {
         type = Type.CYLINDERWITHARC;

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Cylindrical3D;
@@ -18,6 +19,7 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
+import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.CrossList;
@@ -111,7 +113,7 @@ public class CosmicTracksRec {
             for (int k1 = 0; k1 < cosmics.size(); k1++) { 
                 cosmics.get(k1).set_Id(k1 + 1);
                 for (int k2 = 0; k2 < cosmics.get(k1).size(); k2++) {
-                    if(cosmics.get(k1).get(k2).get_Detector().equalsIgnoreCase("SVT")==true)
+                    if(cosmics.get(k1).get(k2).get_Detector()==DetectorType.BST)
                         continue;
                     bmtCrossesRm.add(cosmics.get(k1).get(k2));
                     cosmics.get(k1).get(k2).set_AssociatedTrackID(k1+1);
@@ -195,14 +197,13 @@ public class CosmicTracksRec {
                     cosmics.get(k1).clsMap.get(keys.get(i)).setTrakInters(tj);
                     cl.set_CentroidResidual(resi);
                     
-                    if (cl.get_Detector()==1 ) {
+                    if (cl.get_Detector()==DetectorType.BMT) {
                         
-                        if (cl.get_DetectorType()==1) { //Z-detector measuring phi
-                            Cylindrical3D cyl = BMTGeom.getCylinder(cl.get_Layer(), cl.get_Sector()); 
-                            Line3D cln = cl.getCylAxis();
+                        if (cl.get_Type()==BMTType.Z) { //Z-detector measuring phi
+                            Line3D cln = BMTGeom.getAxis(layer, sector);
                             double r = BMTGeom.getRadiusMidDrift(layer);
                             cl.set_CentroidResidual(resi*r);
-                            cl.setN(cl.getNFromTraj(tj.x(),tj.y(),tj.z(),cln));
+                            cl.setN(cln.distance(refPoint).direction().asUnit());
                             cl.setS(cl.getL().cross(cl.getN()).asUnit());    
 
                         }

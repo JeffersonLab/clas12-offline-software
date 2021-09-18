@@ -2,6 +2,7 @@ package org.jlab.rec.cvt.cross;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import org.jlab.detector.base.DetectorType;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -34,9 +35,9 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @param rid the cross ID (if there are only 3 crosses in the event, the ID
      * corresponds to the region index
      */
-    public Cross(String detector, BMTType detectortype, int sector, int region, int crid) {
+    public Cross(DetectorType detector, BMTType detectortype, int sector, int region, int crid) {
         this._Detector = detector;
-        this._DetectorType = detectortype;
+        this._Type = detectortype;
         this._Sector = sector;
         this._Region = region;
         this._Id = crid;
@@ -44,8 +45,8 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         this._usedInZRcand = false;
     }
     
-    private String _Detector;							//      the detector SVT or BMT
-    private BMTType _DetectorType;						//      the detector type for BMT, C or Z detector	
+    private DetectorType _Detector;							//      the detector SVT or BMT
+    private BMTType _Type;						//      the detector type for BMT, C or Z detector	
     private int _Sector;      							//	    sector [1...]
     private int _Region;    		 					//	    region [1,...]
     private int _OrderedRegion;                                                 // 1...3:SVT; 4...9: BMT
@@ -92,20 +93,20 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 		return true;
 	}
     
-    public String get_Detector() {
+    public DetectorType get_Detector() {
         return _Detector;
     }
 
-    public void set_Detector(String _Detector) {
+    public void set_Detector(DetectorType _Detector) {
         this._Detector = _Detector;
     }
 
-    public BMTType get_DetectorType() {
-        return _DetectorType;
+    public BMTType get_Type() {
+        return _Type;
     }
 
-    public void set_DetectorType(BMTType _DetectorType) {
-        this._DetectorType = _DetectorType;
+    public void set_Type(BMTType type) {
+        this._Type = type;
     }
 
     /**
@@ -416,7 +417,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     public int get_SVTCosmicsRegion() {
 
         int theRegion = 0;
-        if (this.get_Detector().equalsIgnoreCase("SVT")) {
+        if (this.get_Detector()==DetectorType.BST) {
             /*
             if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[6][0] + Constants.MODULERADIUS[7][0]) * 0.5 < 15) {
                 if (this.get_Point0().y() > 0) {
@@ -548,18 +549,18 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         ArrayList<Cross> testList = new ArrayList<Cross>();
 
         for (int i = 0; i < 5; i++) {
-            Cross c1 = new Cross("SVT", BMTType.UNDEFINED, 1, 1, 1 + i);
+            Cross c1 = new Cross(DetectorType.BST, BMTType.UNDEFINED, 1, 1, 1 + i);
             c1.set_Point0(new Point3D(-1.2 - i, 66.87, 0));
             testList.add(c1);
         }
         for (int i = 0; i < 5; i++) {
-            Cross c1 = new Cross("SVT", BMTType.UNDEFINED, 1, 3, 1 + i);
+            Cross c1 = new Cross(DetectorType.BST, BMTType.UNDEFINED, 1, 3, 1 + i);
             c1.set_Point0(new Point3D(-1.2 + i, 123, 0));
             testList.add(c1);
         }
 
         for (int i = 0; i < 5; i++) {
-            Cross c1 = new Cross("SVT", BMTType.UNDEFINED, 1, 2, 1 + i);
+            Cross c1 = new Cross(DetectorType.BST, BMTType.UNDEFINED, 1, 2, 1 + i);
             c1.set_Point0(new Point3D(-1.2 - i, 95, 0));
             testList.add(c1);
         }

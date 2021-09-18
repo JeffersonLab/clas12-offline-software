@@ -13,6 +13,7 @@ import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.helical.MeasVecs.MeasVec;
 import org.jlab.clas.tracking.trackrep.Helix;
 import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Transformation3D;
 
 
 public class StateVecs {
@@ -100,18 +101,10 @@ public class StateVecs {
                     
                 }
                 if(mv.surface.cylinder!=null) {
-                    Point3D offset =mv.surface.cylShift;
-                    Vector3D rotation = mv.surface.cylRotation;
-
-                    Point3D st = new Point3D(x,y,z); 
-                    Point3D stu = new Point3D(u.x(),u.y(),u.z());
-                    st.translateXYZ(-offset.x(), -offset.y(), -offset.z());
-                    st.rotateZ(-rotation.z());
-                    st.rotateY(-rotation.y());
-                    st.rotateX(-rotation.x());
-                    stu.rotateZ(-rotation.z());
-                    stu.rotateY(-rotation.y());
-                    stu.rotateX(-rotation.x());
+                    Point3D st   = new Point3D(x,y,z); 
+                    Vector3D stu = new Vector3D(u.x(),u.y(),u.z());
+                    mv.surface.toLocal().apply(st);
+                    mv.surface.toLocal().apply(stu);
                 
                     double r = 0.5*(mv.surface.cylinder.baseArc().radius()+mv.surface.cylinder.highArc().radius());
                     double delta = Math.sqrt((st.x()*stu.x()+st.y()*stu.y())*(st.x()*stu.x()+st.y()*stu.y())-(-r*r+st.x()*st.x()+st.y()*st.y())*(u.x()*stu.x()+stu.y()*stu.y()));
@@ -120,10 +113,7 @@ public class StateVecs {
                         l = (-(st.x()*stu.x()+st.y()*stu.y())-delta)/(stu.x()*stu.x()+stu.y()*stu.y()); 
                     } 
                     Point3D cylInt = new Point3D(st.x()+l*stu.x(),st.y()+l*stu.y(),st.z()+l*stu.z());
-                    cylInt.rotateX(rotation.x());
-                    cylInt.rotateY(rotation.y());
-                    cylInt.rotateZ(rotation.z());
-                    cylInt.translateXYZ(offset.x(), offset.y(), offset.z());
+                    mv.surface.toGlobal().apply(cylInt);
                     
                     kVec.x = cylInt.x();
                     kVec.y = cylInt.y();

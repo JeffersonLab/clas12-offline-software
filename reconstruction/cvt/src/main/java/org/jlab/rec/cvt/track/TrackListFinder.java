@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.track;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.geom.base.Detector;
 
@@ -88,7 +89,7 @@ public class TrackListFinder {
         int NbHits = 0;
         double TotE = 0;
         for (int i = 0; i < trk.size(); i++) {
-            if (trk.get(i).get_Detector() != "SVT") {
+            if (trk.get(i).get_Detector() != DetectorType.BST) {
                 continue;
             }
             for (int j = 0; j < trk.get(i).get_Cluster1().size(); j++) {
@@ -170,7 +171,7 @@ public class TrackListFinder {
     		for( Cross c : t ) {
 
           // do not check on BMTC
-          if( c.get_DetectorType()==BMTType.C == true ) continue;
+          if( c.get_Type()==BMTType.C) continue;
 
     			if( track.contains(c) ) { N++;  }
     		}

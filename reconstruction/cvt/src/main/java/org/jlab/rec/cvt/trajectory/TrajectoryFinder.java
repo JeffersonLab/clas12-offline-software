@@ -72,7 +72,7 @@ public class TrajectoryFinder {
         ArrayList<Cross> BMTCrossList = new ArrayList<Cross>();
         Map<String, Double> ClsMap = new HashMap<String, Double>();
         for (Cross c : candCrossList) {
-            if (c.get_Detector().equalsIgnoreCase("SVT")) {
+            if (c.get_Detector()==DetectorType.BST) {
                 String svtSt1 = "1.";
                 svtSt1+=c.get_Cluster1().get_Sector();
                 svtSt1 += ".";
@@ -368,7 +368,7 @@ public class TrajectoryFinder {
 
         Map<String, Double> ClsMap = new HashMap<String, Double>();
         for (Cross c : candCrossList) {
-            if (c.get_Detector().equalsIgnoreCase("SVT")) {
+            if (c.get_Detector()==DetectorType.BST) {
                 String svtSt1 = "1.";
                 svtSt1+=c.get_Cluster1().get_Sector();
                 svtSt1 += ".";
@@ -518,7 +518,7 @@ public class TrajectoryFinder {
                             continue;
                         } 
                         
-                        if (c.get_DetectorType()==BMTType.C) { //C-detector measuring Z
+                        if (c.get_Type()==BMTType.C) { //C-detector measuring Z
                             //if(traj.isFinal) { // reset the cross only for final trajectory
 
                             c.set_Point(new Point3D(XtrackIntersSurf, YtrackIntersSurf, c.get_Point().z()));
@@ -530,7 +530,7 @@ public class TrajectoryFinder {
                                     stVec, svt_geo, bmt_geo, traj.isFinal);
 
                         }
-                        if (c.get_DetectorType()==BMTType.Z) { //Z-detector measuring phi
+                        if (c.get_Type()==BMTType.Z) { //Z-detector measuring phi
                             //if(traj.isFinal) {
 
                             c.set_Point(new Point3D(c.get_Point().x(), c.get_Point().y(), ZtrackIntersSurf));
@@ -562,7 +562,7 @@ public class TrajectoryFinder {
 
     private boolean matchCrossToStateVec(Cross c, StateVec stVec, int layer, int sector) {
         
-        if (c.get_Detector().equalsIgnoreCase("SVT")) {
+        if (c.get_Detector()==DetectorType.BST) {
             int l = layer - 1;
             
             if (c.get_Region() != (int) (l / 2) + 1) {
@@ -577,7 +577,7 @@ public class TrajectoryFinder {
             }
         }
 
-        if (c.get_Detector().equalsIgnoreCase("BMT")) { // BMT
+        if (c.get_Detector()==DetectorType.BMT) { // BMT
             
             double Rsv = Math.sqrt(stVec.x()*stVec.x()+stVec.y()*stVec.y());
             double Rcs = Math.sqrt(c.get_Point().x()*c.get_Point().x()+c.get_Point().y()*c.get_Point().y());
@@ -606,7 +606,7 @@ public class TrajectoryFinder {
 
         if (detector.equalsIgnoreCase("SVT") ) {
             double doca2Cls = svt_geo.getDOCAToStrip(sector, layer, cluster.get_Centroid(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
-            double doca2Seed = svt_geo.getDOCAToStrip(sector, layer, (double) cluster.get_SeedStrip(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
+            double doca2Seed = svt_geo.getDOCAToStrip(sector, layer, (double) cluster.get_SeedStrip().get_Strip(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
             cluster.set_SeedResidual(doca2Seed); 
             cluster.set_CentroidResidual(doca2Cls);
             cluster.setTrakInters(new Point3D(stVec.x(), stVec.y(), stVec.z()));
@@ -634,18 +634,12 @@ public class TrajectoryFinder {
             double ce = cluster.get_Centroid();    
             Point3D p = new Point3D(stVec.x(), stVec.y(), stVec.z());
             if (BMTGeometry.getDetectorType(layer) == BMTType.C) { //C-detector measuring z
-                Arc3D arcC = cluster.get_Arc();
-                double doca2Cls = bmt_geo.getBMTCresi(arcC, p, offset, rotation);
-                cluster.set_CentroidResidual(doca2Cls);
+                cluster.set_CentroidResidual(p);
+                cluster.set_SeedResidual(p);
                 for (FittedHit h1 : cluster) {
                     // calculate the hit residuals
-                    Arc3D arcH = h1.get_Strip().get_Arc();
-                    double doca1 = bmt_geo.getBMTCresi(arcH, p, offset, rotation);
-                    //double doca1 = p.z()-hit.get_Strip().get_Z();
-                    if(h1.get_Strip().get_Strip()==cluster.get_SeedStrip())
-                        cluster.set_SeedResidual(doca1); 
                     h1.set_TrkgStatus(1);
-                    h1.set_docaToTrk(doca1);
+                    h1.set_docaToTrk(p);
                     h1.set_TrkgStatus(1);
                     if (trajFinal) {
                         h1.set_TrkgStatus(2);
@@ -658,19 +652,19 @@ public class TrajectoryFinder {
                 int blayer = cluster.get_Layer();
                 double cxh = Math.cos(cluster.get_Phi())*bmt_geo.getRadiusMidDrift(blayer);
                 double cyh = Math.sin(cluster.get_Phi())*bmt_geo.getRadiusMidDrift(blayer);
-                double phic = bmt_geo.getPhi(new Point3D(cxh,cyh,0), bsector, blayer);
-                double phit = bmt_geo.getPhi(p, sector, blayer);
+                double phic = bmt_geo.getPhi(blayer, bsector, new Point3D(cxh,cyh,0));
+                double phit = bmt_geo.getPhi(blayer, bsector, p);
                 double doca2Cls = (phic-phit)*bmt_geo.getRadiusMidDrift(blayer);
                 cluster.set_CentroidResidual(doca2Cls);
 
                 for (FittedHit h1 : cluster) {
                     double xh = Math.cos(h1.get_Strip().get_Phi())*bmt_geo.getRadiusMidDrift(blayer);
                     double yh = Math.sin(h1.get_Strip().get_Phi())*bmt_geo.getRadiusMidDrift(blayer);
-                    double hphic = bmt_geo.getPhi(new Point3D(xh,yh,0), sector, blayer);
-                    double hphit = bmt_geo.getPhi(p, sector, blayer);
+                    double hphic = bmt_geo.getPhi(blayer, bsector, new Point3D(xh,yh,0));
+                    double hphit = bmt_geo.getPhi(blayer, bsector, p);
                     double doca1 = (hphic-hphit)*bmt_geo.getRadiusMidDrift(blayer);
 
-                    if(h1.get_Strip().get_Strip()==cluster.get_SeedStrip())
+                    if(h1.get_Strip().get_Strip()==cluster.get_SeedStrip().get_Strip())
                         cluster.set_SeedResidual(doca1); 
                     
                     h1.set_TrkgStatus(1);
@@ -903,24 +897,16 @@ public class TrajectoryFinder {
         int bottomstp = 0;
         if(top.toVector3D().mag()>0 && geo.getSector(lyer, top.toVector3D().phi())>0) {
             topsec = geo.getSector(lyer, top.toVector3D().phi());
-            offset = geo.getOffset(lyer, topsec); 
-            rotation = geo.getRotation(lyer, topsec);
-            ioffset = geo.getInverseOffset(lyer, topsec);
-            irotation = geo.getInverseRotation(lyer, topsec);
-            geo.putInFrame(trkOr, ioffset, irotation, true);
-            geo.putInFrame(trkEn, ioffset, irotation, true);
+            trkOr = geo.toLocal(trkOr, lyer, topsec);
+            trkEn = geo.toLocal(trkEn, lyer, topsec);
             intersNominal = this.getIntersBMT(lyer, radius, x_minus,y_minus, z_minus, trkOr,trkEn, offset, rotation, geo);
             top = intersNominal.get(0); 
             topstp = geo.getStrip( l + 1,  topsec,  top);
         }
         if(bottom.toVector3D().mag()>0 && geo.getSector(lyer, bottom.toVector3D().phi())>0) {
             bottomsec = geo.getSector(lyer, bottom.toVector3D().phi());
-            offset = geo.getOffset(lyer, bottomsec); 
-            rotation = geo.getRotation(lyer, bottomsec);
-            ioffset = geo.getInverseOffset(lyer, bottomsec);
-            irotation = geo.getInverseRotation(lyer, bottomsec);
-            geo.putInFrame(trkOr, ioffset, irotation, true);
-            geo.putInFrame(trkEn, ioffset, irotation, true);
+            trkOr = geo.toLocal(trkOr, lyer, bottomsec);
+            trkEn = geo.toLocal(trkEn, lyer, bottomsec);
             intersNominal = this.getIntersBMT(lyer, radius, x_minus,y_minus, z_minus, trkOr,trkEn, offset, rotation, geo);
             bottom = intersNominal.get(1); 
             bottomstp = geo.getStrip( l + 1,  bottomsec,  bottom);

@@ -2,6 +2,7 @@ package org.jlab.rec.cvt.bmt;
 
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Vector3D;
 
 public class Constants {
@@ -73,6 +74,8 @@ public class Constants {
     public static Point3D[][]  shifts    = new Point3D[NLAYERS][NSECTORS];  // detector alignment shifts
     public static Vector3D[][] rotations = new Vector3D[NLAYERS][NSECTORS]; // detector alignment rotations
     public static Line3D[][]   axes = new Line3D[NLAYERS][NSECTORS];        // detector axes
+    public static Transformation3D[][] toLocal  = new Transformation3D[NLAYERS][NSECTORS];
+    public static Transformation3D[][] toGlobal = new Transformation3D[NLAYERS][NSECTORS];
     public static double[][] Rx= new double[NREGIONS*2][3];   //Angle to rotate the det around x-axis
     public static double[][] Ry= new double[NREGIONS*2][3];   //Angle to rotate the det around y-axis
     public static double[][] Rz= new double[NREGIONS*2][3];   //Angle to rotate the det around z-axis

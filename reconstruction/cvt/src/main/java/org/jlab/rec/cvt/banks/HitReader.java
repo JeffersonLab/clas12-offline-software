@@ -3,11 +3,15 @@ package org.jlab.rec.cvt.banks;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.geom.prim.Line3D;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
+import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.hit.ADCConvertor;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.hit.Strip;
@@ -74,7 +78,7 @@ public class HitReader {
      * Edep for gemc, adc for cosmics)
      * @param geo the BMT geometry
      */
-    public void fetch_BMTHits(DataEvent event, ADCConvertor adcConv, org.jlab.rec.cvt.bmt.BMTGeometry geo, Swim swim) {
+    public void fetch_BMTHits(DataEvent event, ADCConvertor adcConv, BMTGeometry geo, Swim swim) {
 
         // return if there is no BMT bank
         if (event.hasBank("BMT::adc") == false) {
@@ -111,7 +115,7 @@ public class HitReader {
                 BmtStrip.calc_BMTStripParams(geo,(int) bankDGTZ.getByte("sector", i),(int) bankDGTZ.getByte("layer", i), swim); // for Z detectors the Lorentz angle shifts the strip measurement; calc_Strip corrects for this effect
                 // create the hit object for detector type BMT
                 
-                Hit hit = new Hit(1, this.getZorC((int) bankDGTZ.getByte("layer", i)),(int) bankDGTZ.getByte("sector", i),(int) bankDGTZ.getByte("layer", i), BmtStrip);
+                Hit hit = new Hit(DetectorType.BMT, BMTGeometry.getDetectorType(bankDGTZ.getByte("layer", i)),(int) bankDGTZ.getByte("sector", i),(int) bankDGTZ.getByte("layer", i), BmtStrip);
                 // a place holder to set the status of the hit, for simulated data if the strip number is in range and the Edep is above threshold the hit has status 1, useable
                 hit.set_Status(1);
                 //if(BmtStrip.get_Edep()==0)
@@ -204,10 +208,7 @@ public class HitReader {
                  double[][] X = geo.getStripEndPoints(SvtStrip.get_Strip(), (layer[i] - 1) % 2);
                 Point3D EP1 = geo.transformToFrame(sector[i], layer[i], X[0][0], 0, X[0][1], "lab", "");
                 Point3D EP2 = geo.transformToFrame(sector[i], layer[i], X[1][0], 0, X[1][1], "lab", "");
-                Point3D MP = new Point3D((EP1.x() + EP2.x()) / 2., (EP1.y() + EP2.y()) / 2., (EP1.z() + EP2.z()) / 2.);
-                Vector3D Dir = new Vector3D((-EP1.x() + EP2.x()), (-EP1.y() + EP2.y()), (-EP1.z() + EP2.z()));
-                SvtStrip.set_ImplantPoint(EP1); 
-                SvtStrip.set_EndPoint(EP2); 
+                SvtStrip.set_Line(new Line3D(EP1, EP2));
                 // BMTGeometry implementation using the geometry package:  Charles Platt
 //                Line3d shiftedStrip   = geo.getStrip(layer[i]-1, sector[i]-1, strip[i]-1);
 //
@@ -223,11 +224,10 @@ public class HitReader {
 
 //                Point3D passVals = new Point3D(o1.x, o1.y, o1.z); //switch from Vector3d to Point3D
 //                SvtStrip.set_ImplantPoint(passVals);
-                SvtStrip.set_MidPoint(MP);
-                SvtStrip.set_StripDir(Dir);
+
 
                 // create the hit object
-                Hit hit = new Hit(0, -1, sector[i], layer[i], SvtStrip);
+                Hit hit = new Hit(DetectorType.BST, BMTType.UNDEFINED, sector[i], layer[i], SvtStrip);
                 // if the hit is useable in the analysis its status is 1
                 hit.set_Status(1);
                 if (SvtStrip.get_Edep() == 0) {
@@ -244,14 +244,6 @@ public class HitReader {
         // fill the list of SVT hits
         this.set_SVTHits(hits);
 
-    }
-    // moved this method from geometry here... check for duplicate usages
-    private int getZorC(int layer) { // 1=Z detector, 0=Cdetector
-        int axis = 0;
-        if (layer == 2 || layer == 3 || layer == 5) {
-            axis = 1;
-        }
-        return axis;
     }
 
 }

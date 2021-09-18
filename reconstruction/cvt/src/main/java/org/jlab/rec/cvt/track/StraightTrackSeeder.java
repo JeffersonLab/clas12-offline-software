@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.jlab.detector.base.DetectorType;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
@@ -97,7 +98,7 @@ public class StraightTrackSeeder {
         Ys.add(0, org.jlab.rec.cvt.Constants.getYb());
         Ws.add(0,0.1);
         for (Cross c : seedcrs ) { 
-            if(c.get_DetectorType()==BMTType.C ) System.err.println("WRONG CROSS TYPE");
+            if(c.get_Type()==BMTType.C ) System.err.println("WRONG CROSS TYPE");
             Xs.add(c.get_Point().x()); 
             Ys.add(c.get_Point().y());
             Ws.add(1. / (c.get_PointErr().x()*c.get_PointErr().x()+c.get_PointErr().y()*c.get_PointErr().y()));
@@ -233,9 +234,9 @@ public class StraightTrackSeeder {
         
         if(isSVTOnly == false ) {
             for(Cross c : bmt_crosses) { 
-                if(c.get_DetectorType()== BMTType.Z)
+                if(c.get_Type()== BMTType.Z)
                     crosses.add(c);
-                if(c.get_DetectorType()==BMTType.C)
+                if(c.get_Type()==BMTType.C)
                     bmtC_crosses.add(c);
             }
         }
@@ -248,7 +249,7 @@ public class StraightTrackSeeder {
             List<Cross> seedcrs = mseed.get_Crosses();
             
             for (Cross c : seedcrs ) { 
-                if(c.get_DetectorType()==BMTType.C ) continue;
+                if(c.get_Type()==BMTType.C ) continue;
                 c.set_AssociatedTrackID(122220);
             }
           // loop until a good circular fit. removing far crosses each time
@@ -265,7 +266,7 @@ public class StraightTrackSeeder {
             Ys.add(0, org.jlab.rec.cvt.Constants.getYb());
             Ws.add(0, 0.1);
             for (Cross c : seedcrs ) { 
-                if(c.get_DetectorType()==BMTType.C ) continue;
+                if(c.get_Type()==BMTType.C ) continue;
                 c.set_AssociatedTrackID(122221);
                 Xs.add(c.get_Point().x()); 
                 Ys.add(c.get_Point().y());
@@ -284,7 +285,7 @@ public class StraightTrackSeeder {
               double r = pars.rho();
               double f = pars.phi();
               for (Cross c : seedcrs ) { 
-                if(c.get_DetectorType()==BMTType.C ) continue;
+                if(c.get_Type()==BMTType.C ) continue;
                 c.set_AssociatedTrackID(122222);
                     double xi = c.get_Point().x(); 
                     double yi = c.get_Point().y();
@@ -314,7 +315,7 @@ public class StraightTrackSeeder {
                 List<Cluster> clusters = new ArrayList<Cluster>();
                 for(Cross c : seed.get_Crosses()) { 
                     c.set_AssociatedTrackID(1111);
-                    if(c.get_Detector().equalsIgnoreCase("SVT")) {
+                    if(c.get_Detector()==DetectorType.BST) {
                         clusters.add(c.get_Cluster1());
                         clusters.add(c.get_Cluster2());
                     } else {
@@ -527,7 +528,7 @@ public class StraightTrackSeeder {
         //}
 
         for (Cross bmt_cross : bmt_crosses) { 
-            if (bmt_cross.get_DetectorType()==BMTType.C) {// C-detector
+            if (bmt_cross.get_Type()==BMTType.C) {// C-detector
                 BMTCcrosses.get(bmt_cross.get_Region() - 1).add(bmt_cross); 
             }
         }

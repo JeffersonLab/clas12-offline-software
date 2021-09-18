@@ -253,6 +253,21 @@ public class Strip extends TObject {
         _c = centroid;
         type = Type.XYZ;
     }
+
+    public Strip(int id, double centroid, Line3D line) {
+        super(id, line.origin().x(), line.origin().y(), line.origin().z());
+        Vector3D dir = line.direction().asUnit();
+        _x      = line.origin().x();
+        _y      = line.origin().y();
+        _z      = line.origin().z();
+        _ux     = dir.x();
+        _uy     = dir.y();
+        _uz     = dir.z();
+        _length = line.length();
+        _c = centroid;
+        type = Type.XYZ;
+    }
+
     public Strip(int id, double centroid, double x, double y, double z, 
             double ux, double uy, double uz, double length) {
         super(id, x, y, z);

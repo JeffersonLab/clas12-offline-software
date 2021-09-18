@@ -1,6 +1,7 @@
 package org.jlab.rec.cvt.track;
 
 import java.util.Map;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
@@ -33,7 +34,7 @@ public class StraightTrack extends Trajectory{
      */
     public void update_Crosses(double fit_yxslope, double fit_yzslope, SVTGeometry geo) {
         for (Cross c : this) {
-            if (c.get_Detector().equalsIgnoreCase("SVT")) //only update for the svt
+            if (c.get_Detector()==DetectorType.BST) //only update for the svt
             { 
                 update_Cross(c, fit_yxslope, fit_yzslope, geo);
             }
@@ -42,7 +43,7 @@ public class StraightTrack extends Trajectory{
     }
     public void reset_Crosses() {
         for (Cross c : this) {
-            if (c.get_Detector().equalsIgnoreCase("SVT")) //only update for the svt
+            if (c.get_Detector()==DetectorType.BST) //only update for the svt
             { 
                 c.set_Point(c.get_Point0());
             }

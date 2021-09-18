@@ -194,11 +194,11 @@ public class CVTRecNewKF extends ReconstructionEngine {
         // fill the fitted hits list.
         if (clusters.size() != 0) {
             for (int i = 0; i < clusters.size(); i++) {
-                if (clusters.get(i).get_Detector() == 0) {
+                if (clusters.get(i).get_Detector() == DetectorType.BST) {
                     SVTclusters.add(clusters.get(i));
                     SVThits.addAll(clusters.get(i));
                 }
-                if (clusters.get(i).get_Detector() == 1) {
+                if (clusters.get(i).get_Detector() == DetectorType.BMT) {
                     BMTclusters.add(clusters.get(i));
                     BMThits.addAll(clusters.get(i));
                 }
