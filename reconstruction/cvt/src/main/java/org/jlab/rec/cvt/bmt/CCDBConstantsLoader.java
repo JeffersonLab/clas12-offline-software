@@ -296,7 +296,7 @@ public class CCDBConstantsLoader {
         double xpos = dbprovider.getDouble("/geometry/cvt/mvt/position/x", 0 );
         double ypos = dbprovider.getDouble("/geometry/cvt/mvt/position/y", 0 );
         double zpos = dbprovider.getDouble("/geometry/cvt/mvt/position/z", 0 );
-        double angle = -2;//Math.toDegrees(0.003);
+        double angle = 0;//Math.toDegrees(0.003);
         for (int row = 0; row<NLAYERS*NSECTORS; row++) {
             int sector = dbprovider.getInteger("/geometry/cvt/mvt/alignment/sector", row);
             int layer  = dbprovider.getInteger("/geometry/cvt/mvt/alignment/layer", row);
