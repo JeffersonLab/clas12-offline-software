@@ -875,7 +875,7 @@ public class BMTGeometry {
         
         double solenoidScale = org.jlab.rec.cvt.Constants.getSolenoidscale();
         
-        if(Math.abs(solenoidScale)<0.001 || true) {
+        if(Math.abs(solenoidScale)<0.001) {
             thetaL = 0;
         }
         else {
