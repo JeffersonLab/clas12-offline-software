@@ -213,6 +213,7 @@ public class CVTAlignment extends ReconstructionEngine {
 
 			//System.out.println("BMT crosses");
 			int nCrossSVT = 0, nCrossBMT = 0;
+			int countBMTZ = 0, countBMTC = 0;
 			for(Cross c : track) {
 				if(c.get_Detector().equalsIgnoreCase("SVT") && !isBMTonly) {
 					nCrossSVT++;
@@ -222,10 +223,12 @@ public class CVTAlignment extends ReconstructionEngine {
 					if (c.get_DetectorType() != BMTType.C || ! skipBMTC)
 						nCrossBMT++;
 					if (c.get_DetectorType() == BMTType.C) {
+						countBMTC++;
 						gCountBMTC++;
 					}
 					if(c.get_DetectorType() == BMTType.Z) {
 						gCountBMTZ++;
+						countBMTZ++;
 					}
 					//System.out.println(c.get_Sector()+" "+c.get_Region() + " " + c.get_Cluster1().get_Centroid()+" " + c.get_Id());
 				}
@@ -234,6 +237,15 @@ public class CVTAlignment extends ReconstructionEngine {
 					System.exit(0);
 				}
 			}
+			
+			
+			if(nCrossSVT*2<minClustersSVT)
+				continue;
+			if(countBMTZ<minClustersBMTZ)
+				continue;
+			if(countBMTC<minClustersBMTC)
+				continue;
+			
 			int nCross = nCrossSVT + nCrossBMT;
 			if(nCross <= 2)
 				continue;
@@ -268,7 +280,7 @@ public class CVTAlignment extends ReconstructionEngine {
 					if(cross.get_Detector().equalsIgnoreCase("SVT")){
 						Cluster cl1 = cross.get_Cluster1();
 						//fillMatricesSVT(i,ray,cl1,A,B,V,m,c,I);
-						boolean ok = fillMatricesNew(i,ray,cl1,A,B,V,m,c,I,"SVT",false);
+						boolean ok = fillMatricesNew(i,ray,cl1,A,B,V,m,c,I,"SVT",debug);
 						i++;
 						if(!ok) { //reject track if there's a cluster with really bad values.
 							if(debug) System.out.println("rejecting track due to problem in an SVT layer");
@@ -276,7 +288,7 @@ public class CVTAlignment extends ReconstructionEngine {
 						}
 						Cluster cl2 = cross.get_Cluster2();
 						//fillMatricesSVT(i,ray,cl1,A,B,V,m,c,I);
-						ok = fillMatricesNew(i,ray,cl2,A,B,V,m,c,I,"SVT",false);
+						ok = fillMatricesNew(i,ray,cl2,A,B,V,m,c,I,"SVT",debug);
 						i++;
 						if(!ok) { //reject track if there's a cluster with really bad values.
 							if(debug) System.out.println("rejecting track due to problem in an SVT layer");
@@ -291,7 +303,7 @@ public class CVTAlignment extends ReconstructionEngine {
 						boolean ok = true;
 						if(cross.get_DetectorType() == BMTType.Z || !skipBMTC){
 						     ok = fillMatricesNew(i,ray,cl1,A,B,V,m,c,I,
-								(cross.get_DetectorType() == BMTType.Z ? "BMTZ":"BMTC"), cross.get_DetectorType() == BMTType.C);
+								(cross.get_DetectorType() == BMTType.Z ? "BMTZ":"BMTC"), this.debug);
 						}
 						
 						/*if(cross.get_DetectorType() == BMTType.C) {
@@ -605,8 +617,8 @@ public class CVTAlignment extends ReconstructionEngine {
 		//System.out.println(extrap.minus(e).toStlString());
 		//System.out.println(s.toStlString());
 
-		if(Math.abs(ci-mi)>maxResidualCut)
-			return false;
+		//if(Math.abs(ci-mi)>50)
+		//	return false;
 		c.set(i,0,ci);
 		m.set(i,0,mi);
 
@@ -676,35 +688,45 @@ public class CVTAlignment extends ReconstructionEngine {
 		else { // BMTC
 			Vector3D a = cl.getCylAxis().direction().asUnit();
 			
-			
-			System.out.println("a: " +a);
+			if(debug)
+				System.out.println("a: " +a);
 			Vector3D cc = cl.getCylAxis().origin().toVector3D();
 			Vector3D uT = perp(u,a);
 			
+			Vector3D tmp1 = perp(xref.clone().sub(cc),a);
+			
 			Vector3D endpoint = new Vector3D(cl.getX1(),cl.getY1(),cl.getZ1());
+			
 			double R = perp(endpoint.clone().sub(cc),a).mag();
-			System.out.println("R:  " + R);
+			if(debug)
+				System.out.println("R:  " + R);
 			double AA = uT.mag2();
-			double BB = -2*xref.clone().sub(cc).dot(uT);
-			double CC = perp(xref.clone().sub(cc),a).mag2()-R*R;
+			
+			
+			double BB = 2*tmp1.dot(uT);
+			double CC = tmp1.mag2()-R*R;
 			double lambda_plus = (-BB+Math.sqrt(BB*BB-4*AA*CC))/(2*AA); 
 			double lambda_minus = (-BB-Math.sqrt(BB*BB-4*AA*CC))/(2*AA);
 			Vector3D extrap_plus = xref.clone().add(u.multiply(lambda_plus));
 			Vector3D extrap_minus = xref.clone().add(u.multiply(lambda_minus));
 			
-			
-			//if(extrap_plus.clone().sub(O).mag()<extrap_minus.clone().sub(O).mag())
+			if(debug) {
+				System.out.println("extrap is on cylinder:  this should be zero: " + (perp(extrap_plus.clone().sub(cc),a).mag()-R));
+			}
+			//if(extrap_plus.clone().sub(midpoint).mag()<extrap_minus.clone().sub(midpoint).mag())
 				extrap = extrap_plus;
 			//else
 			//	extrap = extrap_minus;
 			e = extrap.clone().add(endpoint.clone().sub(extrap).projection(a));
 			s = a;
-			n = e.clone().sub(cc);
-			n = n.sub(n.projection(a)).asUnit();
+			n = perp(extrap.clone().sub(cc),a).asUnit();
 			l = s.cross(n);
 			//cl.get
 			
 		}
+		
+		n = n.sub(l.multiply(n.dot(l))).asUnit();
+ 		s= s.sub(l.multiply(s.dot(l))).asUnit();
 		
 		if(debug) {
 			System.out.println("s: " + s);
@@ -863,7 +885,9 @@ public class CVTAlignment extends ReconstructionEngine {
 			System.out.println("m: " + mi);
 			System.out.println("c: " + ci);
 		}
-		if(Math.abs(ci-mi)>maxResidualCut) {
+		if(Math.abs(ci-mi)>maxResidualCutSVT && detector.equals("SVT") || 
+				Math.abs(ci-mi)>maxResidualCutBMTZ && detector.equals("BMTZ") ||
+				Math.abs(ci-mi)>maxResidualCutBMTC && detector.equals("BMTC")) {
 			if(debug) System.out.println("rejecting track:  Math.abs(ci-mi)>maxResidualCut");
 			return false;
 		}
@@ -1006,7 +1030,7 @@ public class CVTAlignment extends ReconstructionEngine {
 
 		double ci = s.dot(extrap);
 		double mi = s.dot(e);
-		if(Math.abs(ci-mi)>maxResidualCut) {
+		if(Math.abs(ci-mi)>maxResidualCutSVT) {
 			if(debug) System.out.println("rejecting track:  Math.abs(ci-mi)>maxResidualCut");
 			return false;
 		}
@@ -1029,6 +1053,9 @@ public class CVTAlignment extends ReconstructionEngine {
 
 	}
 	boolean debug = false;
+	private int minClustersSVT = 0;
+	private int minClustersBMTC = 0;
+	private int minClustersBMTZ = 0;
 
 
 	private boolean fillMatricesBMTZ(int i, Ray ray, Cluster cl, Matrix A, Matrix B, Matrix V, Matrix m, Matrix c,
@@ -1172,7 +1199,7 @@ public class CVTAlignment extends ReconstructionEngine {
 		System.out.println("u: " + u.toString());
 		System.out.println("m: " + mi);
 		System.out.println("c: " + ci);
-		if(Math.abs(ci-mi)>maxResidualCut)
+		if(Math.abs(ci-mi)>maxResidualCutBMTZ)
 			return false;
 
 		return true;
@@ -1325,7 +1352,7 @@ public class CVTAlignment extends ReconstructionEngine {
 			System.out.println("c: " + ci);
 		}
 		
-		if(Math.abs(ci-mi)>maxResidualCut)
+		if(Math.abs(ci-mi)>maxResidualCutBMTC)
 			return false;
 		c.set(i,0,ci);
 		m.set(i,0,mi);
@@ -1512,14 +1539,58 @@ public class CVTAlignment extends ReconstructionEngine {
 
 		if (maxResidual!=null) {
 			System.out.println("["+this.getName()+"] run with cut on maximum residual "+maxResidual+" config chosen based on yaml");
-			this.maxResidualCut =  Double.valueOf(maxResidual);
+			this.maxResidualCutBMTZ = this.maxResidualCutBMTC = this.maxResidualCutSVT =  Double.valueOf(maxResidual);
 		}
 
 		if (maxResidual==null) {
 			System.out.println("["+this.getName()+"] run with maximum residual cut setting default = none");
-			this.maxResidualCut = Double.MAX_VALUE;
+			this.maxResidualCutBMTC = Double.MAX_VALUE;
+			this.maxResidualCutBMTZ = Double.MAX_VALUE;
+			this.maxResidualCutSVT = Double.MAX_VALUE;
+		}
+		
+		maxResidual = this.getEngineConfigString("maxResidualBMTZ");
+
+		if (maxResidual!=null) {
+			System.out.println("["+this.getName()+"] run with cut on maximum BMTZ residual "+maxResidual+" config chosen based on yaml");
+			this.maxResidualCutBMTZ =  Double.valueOf(maxResidual);
 		}
 
+		maxResidual = this.getEngineConfigString("maxResidualBMTC");
+
+		if (maxResidual!=null) {
+			System.out.println("["+this.getName()+"] run with cut on maximum BMTC residual "+maxResidual+" config chosen based on yaml");
+			this.maxResidualCutBMTC =  Double.valueOf(maxResidual);
+		}
+
+		maxResidual = this.getEngineConfigString("maxResidualSVT");
+
+		if (maxResidual!=null) {
+			System.out.println("["+this.getName()+"] run with cut on maximum SVT residual "+maxResidual+" config chosen based on yaml");
+			this.maxResidualCutSVT =  Double.valueOf(maxResidual);
+		}
+		
+		String minClusters = this.getEngineConfigString("minClustersSVT");
+
+		if (minClusters!=null) {
+			System.out.println("["+this.getName()+"] run with cut on minimum SVT clusters "+minClusters+" config chosen based on yaml");
+			this.minClustersSVT  =  Integer.valueOf(minClusters);
+		}
+
+		minClusters = this.getEngineConfigString("minClustersBMTZ");
+
+		if (minClusters!=null) {
+			System.out.println("["+this.getName()+"] run with cut on minimum BMTZ clusters "+minClusters+" config chosen based on yaml");
+			this.minClustersBMTZ =  Integer.valueOf(minClusters);
+		}
+		
+		minClusters = this.getEngineConfigString("minClustersBMTC");
+
+		if (minClusters!=null) {
+			System.out.println("["+this.getName()+"] run with cut on minimum BMTZ clusters "+minClusters+" config chosen based on yaml");
+			this.minClustersBMTC =  Integer.valueOf(minClusters);
+		}
+		
 		for(int layer = 0; layer<6; layer++)
 		{
 			Line3d line = SVTGeom.getStrip(layer, 0, 0);
@@ -1546,7 +1617,9 @@ public class CVTAlignment extends ReconstructionEngine {
 
 	double xb, yb;
 
-	double maxResidualCut;
+	double maxResidualCutSVT;
+	double maxResidualCutBMTC;
+	double maxResidualCutBMTZ;
 
 	double maxDocaCut;
 

@@ -160,7 +160,9 @@ public class RecoBankReader {
 					bank.getFloat("lz", i)));
 			cluster.set_Error(bank.getFloat("e", i));
 			
-
+			cluster.setCx(bank.getFloat("cx", i));
+			cluster.setCy(bank.getFloat("cy", i));
+			cluster.setCz(bank.getFloat("cz", i));
 			cluster.setOx(bank.getFloat("ox", i));
 			cluster.setOy(bank.getFloat("oy", i));
 			cluster.setOz(bank.getFloat("oz", i));
@@ -299,11 +301,11 @@ public class RecoBankReader {
 		
 		
 		float curvatures[];
-		try {
-			curvatures = bank.getFloat("curvature");
-		}catch(Exception e){
+		//try {
+		//	curvatures = bank.getFloat("curvature");
+		//}catch(Exception e){
 			curvatures =  new float[ids.length];
-		}
+		//}
 		
 		 /*bank.setFloat("phi0", i, (float) helix.get_phi_at_dca());
          bank.setFloat("tandip", i, (float) helix.get_tandip());
