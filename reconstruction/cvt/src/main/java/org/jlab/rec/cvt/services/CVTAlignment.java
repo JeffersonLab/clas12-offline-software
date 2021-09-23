@@ -196,6 +196,7 @@ public class CVTAlignment extends ReconstructionEngine {
 		List<Matrix> Vs = new ArrayList<Matrix>();
 		List<Matrix> ms = new ArrayList<Matrix>();
 		List<Matrix> cs = new ArrayList<Matrix>();
+		List<Matrix> qs = new ArrayList<Matrix>();
 		List<Integer> trackIDs = new ArrayList<Integer>();
 
 		if (tracks.size() < 3)
@@ -272,7 +273,15 @@ public class CVTAlignment extends ReconstructionEngine {
 			Matrix m = new Matrix(rows,1);
 			Matrix c = new Matrix(rows,1);
 			Matrix I = new Matrix(rows,1);
-
+			Matrix q = new Matrix(4, 1); //track parameters, for plotting kinematic dependence.  Not used in KFA.  
+			
+			q.set(0, 0, track.get_helix().get_dca());
+			q.set(1, 0, track.get_helix().get_phi_at_dca());
+			q.set(2, 0, track.get_helix().get_Z0());
+			q.set(3, 0, track.get_helix().get_tandip());
+			
+			q.print(4, 4);
+			
 			int i = 0;
 			boolean useNewFillMatrices = true;
 			for(Cross cross : track) {
@@ -396,6 +405,7 @@ public class CVTAlignment extends ReconstructionEngine {
 			ms.add(m);
 			cs.add(c);
 			Is.add(I);
+			qs.add(q);
 
 
 			//c.print(7, 4);
@@ -410,6 +420,7 @@ public class CVTAlignment extends ReconstructionEngine {
 		writer.write_Matrix(event, "V", Vs);
 		writer.write_Matrix(event, "m", ms);
 		writer.write_Matrix(event, "c", cs);
+		writer.write_Matrix(event, "q", qs);
 		fillMisc(event,runNum,eventNum,trackIDs,As,Bs,Vs,ms,cs,Is);
 		System.out.println("BMTC total clusters: " + gCountBMTC+"; BMTZ total clusters: " + gCountBMTZ+"; SVT total crosses: "+ gCountSVT);
 		//event.show();
