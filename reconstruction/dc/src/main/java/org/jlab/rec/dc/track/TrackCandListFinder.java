@@ -749,7 +749,7 @@ public class TrackCandListFinder {
     public void matchHits(List<StateVec> stateVecAtPlanesList, Track trk,
             DCGeant4Factory DcDetector, Swim dcSwim) {
 
-        if (stateVecAtPlanesList == null) {
+        if (stateVecAtPlanesList == null || trk.get_Vtx0()==null) {
             return;
         }
 
@@ -818,9 +818,6 @@ public class TrackCandListFinder {
                 if(h.get_AssociatedHBTrackID()>0 && h.getTFlight()==0)
                     h.set_AssociatedHBTrackID(-1);
             }          
-        }
-        else {
-            System.out.println("setHitDoubletsInfo : this method should be used only for segments on track");
         }
     }
 

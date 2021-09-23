@@ -219,9 +219,11 @@ public class DCTBEngine extends DCEngine {
             return true; // HB tracks not saved correctly
         }
         for(Segment seg : segments) {
-            TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].get_ListOfHBSegments().add(seg); 
-            if(seg.get_Status()==1)
-                TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].set_Status(1);
+            if(seg.get(0).get_AssociatedHBTrackID()>0) {
+                    TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].get_ListOfHBSegments().add(seg); 
+                    if(seg.get_Status()==1)
+                        TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].set_Status(1);
+            }
         }
         
         //6) find the list of  track candidates
