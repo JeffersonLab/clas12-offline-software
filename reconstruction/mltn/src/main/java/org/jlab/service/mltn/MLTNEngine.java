@@ -16,6 +16,7 @@ import org.jlab.io.hipo.HipoDataBank;
 /**
  *
  * @author gavalian
+ @deprecated 
  */
 public class MLTNEngine extends ReconstructionEngine {
     
