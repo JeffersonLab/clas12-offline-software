@@ -64,6 +64,22 @@ public class EBEngine extends ReconstructionEngine {
         throw new RuntimeException("EBEngine cannot be used directly.  Use EBTBEngine/EBHBEngine instead.");
     }
 
+    public void setOutputBankPrefix(String prefix) {
+        this.setEventBank(prefix+"::Event");
+        this.setParticleBank(prefix+"::Particle");
+        this.setEventBankFT(prefix+"FT::Event");
+        this.setParticleBankFT(prefix+"FT::Particle");
+        this.setCalorimeterBank(prefix+"::Calorimeter");
+        this.setCherenkovBank(prefix+"::Cherenkov");
+        this.setScintillatorBank(prefix+"::Scintillator");
+        this.setScintClusterBank(prefix+"::ScintExtras");
+        this.setTrackBank(prefix+"::Track");
+        this.setCrossBank(prefix+"::TrackCross");
+        this.setCovMatrixBank(prefix+"::CovMat");
+        this.setTrajectoryBank(prefix+"::Traj");        
+        this.setFTBank(prefix+"::ForwardTagger");
+    }
+
     public boolean processDataEvent(DataEvent de,EBScalers ebs) {
 
         if (this.dropBanks==true) this.dropBanks(de);
@@ -301,6 +317,10 @@ public class EBEngine extends ReconstructionEngine {
         if (this.getEngineConfigString("dropBanks")!=null &&
                 this.getEngineConfigString("dropBanks").equals("true")) {
             dropBanks=true;
+        }
+
+	if (this.getEngineConfigString("outputBankPrefix")!=null) {
+	    this.setOutputBankPrefix(this.getEngineConfigString("outputBankPrefix"));
         }
 
         requireConstants(EBCCDBConstants.getAllTableNames());
