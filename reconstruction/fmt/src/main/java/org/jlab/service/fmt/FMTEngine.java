@@ -110,6 +110,8 @@ public class FMTEngine extends ReconstructionEngine {
         double xB = 0; // beamOffset.getDoubleValue("x_offset", 0,0,0);
         double yB = 0; // beamOffset.getDoubleValue("y_offset", 0,0,0);
         
+        double xB = beamOffset.getDoubleValue("x_offset", 0,0,0);
+        double yB = beamOffset.getDoubleValue("y_offset", 0,0,0);
         // get status table
         IndexedTable status = this.getConstantsManager().getConstants(run, "/calibration/mvt/fmt_status");
 
