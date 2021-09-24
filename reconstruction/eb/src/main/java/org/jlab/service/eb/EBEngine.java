@@ -75,8 +75,10 @@ public class EBEngine extends ReconstructionEngine {
         this.setScintClusterBank(prefix+"::ScintExtras");
         this.setTrackBank(prefix+"::Track");
         this.setCrossBank(prefix+"::TrackCross");
-        this.setCovMatrixBank(prefix+"::CovMat");
-        this.setTrajectoryBank(prefix+"::Traj");        
+        if (!this.getClass().isAssignableFrom(EBHBEngine.class)) {
+            this.setCovMatrixBank(prefix+"::CovMat");
+            this.setTrajectoryBank(prefix+"::Traj");        
+        }
         this.setFTBank(prefix+"::ForwardTagger");
     }
 
