@@ -12,7 +12,23 @@ package org.jlab.service.dc;
 public class DCTBEngineConv extends DCTBEngine {
     public DCTBEngineConv() {
         super("DCTBCONV");
-        super.aiAssist = false;
-        super._name = "HB";
+    }
+    
+    @Override
+    public void initBankNames() {
+        this.getBankNames().setHitsInputBank("HitBasedTrkg::HBHits");
+        this.getBankNames().setClustersInputBank("HitBasedTrkg::HBClusters");
+        this.getBankNames().setTracksInputBank("HitBasedTrkg::HBTracks");
+        this.getBankNames().setIdsBank("HitBasedTrkg::HBHitTrkId");
+        this.getBankNames().setHitsBank("TimeBasedTrkg::TBHits");
+        this.getBankNames().setClustersBank("TimeBasedTrkg::TBClusters");
+        this.getBankNames().setSegmentsBank("TimeBasedTrkg::TBSegments");
+        this.getBankNames().setCrossesBank("TimeBasedTrkg::TBCrosses");
+        this.getBankNames().setTracksBank("TimeBasedTrkg::TBTracks");
+        this.getBankNames().setTrajBank("TimeBasedTrkg::Trajectory");
+        this.getBankNames().setCovmatBank("TimeBasedTrkg::TBCovMat");
+        this.getBankNames().setRecEventBank("RECHB::Event");
+        this.getBankNames().setRecPartBank("RECHB::Particle");
+        this.getBankNames().setRecTrackBank("RECHB::Track");
     }
 }

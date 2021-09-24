@@ -29,25 +29,10 @@ import org.jlab.utils.groups.IndexedTable;
  */
 public class HitReader {
 
-    private boolean _aiAssist = false;
-    private String[] _names;
+    private Banks bankNames;
     
-    public HitReader() {
-        _names = new String[3];
-    }
-             
-    public HitReader(boolean aiAssist) {
-        this._aiAssist = aiAssist;
-        _names = new String[3];
-        if(this._aiAssist==true) {
-            _names[0] = "AI";
-            _names[1] = "AI";
-            _names[2] = "HBAI";
-        } else {
-            _names[0] = "HB";
-            _names[1] = "TB";
-            _names[2] = "HB";
-        }
+    public HitReader(Banks names) {
+        this.bankNames= names;
             
     }
     private List<Hit> _DCHits;
@@ -117,21 +102,21 @@ public class HitReader {
                              DCGeant4Factory DcDetector,
                              double triggerPhase) {
 
-        if (!event.hasBank("DC::tdc")) {
+        if (!event.hasBank(bankNames.getTdcBank())) {
             _DCHits = new ArrayList<>();
 
             return;
         }
 
         //cut on max number of hits
-        if (event.getBank("DC::tdc").rows()>Constants.MAXHITS) {
+        if (event.getBank(bankNames.getTdcBank()).rows()>Constants.MAXHITS) {
             _DCHits = new ArrayList<>();
 
             return;
         }
 //        if(true)return;// DDD BREAK BREAK BREAK
 
-        DataBank bankDGTZ = event.getBank("DC::tdc");
+        DataBank bankDGTZ = event.getBank(bankNames.getTdcBank());
 
         int rows = bankDGTZ.rows();
         int[] sector = new int[rows];
@@ -149,8 +134,8 @@ public class HitReader {
         }
 
 
-        if (event.hasBank("DC::doca")) {
-            DataBank bankD = event.getBank("DC::doca");
+        if (event.hasBank(bankNames.getDocaBank())) {
+            DataBank bankD = event.getBank(bankNames.getDocaBank());
             int bd_rows = bankD.rows();
             for (int i = 0; i < bd_rows; i++) {
                 if (bankD.getFloat("stime", i) < 0) {
@@ -277,11 +262,11 @@ public class HitReader {
         0: this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
         1: this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d")
         */
-        String bankName = "HitBasedTrkg::"+_names[0]+"Hits";
-        String pointName = "HitBasedTrkg::"+_names[0]+"HitTrkId";
-        String recBankName = "REC"+_names[2]+"::Event";
+        String bankName    = bankNames.getHitsInputBank();
+        String pointName   = bankNames.getIdsBank();
+        String recBankName = bankNames.getRecEventBank();
         if(Constants.DEBUG) {
-                System.out.println("Reading hb banks for "+_names[0]);
+                System.out.println("Reading hb banks for "+ bankNames.getHitsInputBank());
         }
         if (!event.hasBank(bankName) || !event.hasBank(pointName) || event.getBank(pointName).rows()==0) {
             //    System.err.println("there is no HB dc bankAI for "+_names[0]);
@@ -415,7 +400,7 @@ public class HitReader {
             if(passHit(hit.betaFlag)) {
                 hits.add(hit);        
                 if(Constants.DEBUG) {
-                    System.out.println("Passing "+hit.printInfo()+" for "+_names[0]);
+                    System.out.println("Passing "+hit.printInfo()+" for "+ bankNames.getHitsBank());
                 }
             }
         }
@@ -436,18 +421,18 @@ public class HitReader {
         return pass;
     }
     //new way of fetching ai id'ed hits
-    public void read_NNHits(DataEvent event, DCGeant4Factory DcDetector,
-                             double triggerPhase) {
+    public void read_NNHits(DataEvent event, DCGeant4Factory DcDetector) {
         
-        if (!(event.hasBank("HitBasedTrkg::HBHits") && event.hasBank("HitBasedTrkg::HBClusters")
-                && event.hasBank("ai::tracks")  )) {
+        if (!(event.hasBank(bankNames.getHitsInputBank()) 
+           && event.hasBank(bankNames.getClustersInputBank())
+           && event.hasBank(bankNames.getAiBank())  )) {
             _DCHits = new ArrayList<>();
             return;
         }
         List<Hit> hits = new ArrayList<>();
         
-        DataBank bankAI = event.getBank("ai::tracks");
-        DataBank bank = event.getBank("HitBasedTrkg::HBHits");
+        DataBank bankAI = event.getBank(bankNames.getAiBank());
+        DataBank bank = event.getBank(bankNames.getHitsInputBank());
 
         int[] Ids  ;     //  1-6 = cluster ids for slyrs 1 - 6
         double[] tPars ; // NN trk pars p, theta, phi ; last idx = track id;
@@ -570,8 +555,8 @@ public class HitReader {
     }
     private void set_ToPionHypothesis(DataEvent event, int trkId, FittedHit hit) {
         double piMass = 0.13957018;
-        String partBankName = "REC"+_names[2]+"::Particle";
-        String trackBankName = "REC"+_names[2]+"::Track";
+        String partBankName = bankNames.getRecPartBank();
+        String trackBankName = bankNames.getRecTrackBank();
         double px=0;
         double py=0;
         double pz=0;
@@ -604,8 +589,8 @@ public class HitReader {
     
     private double readBeta(DataEvent event, int trkId) {
         double _beta = 1.0;
-        String partBankName = "REC"+_names[2]+"::Particle";
-        String trackBankName = "REC"+_names[2]+"::Track";
+        String partBankName = bankNames.getRecPartBank();
+        String trackBankName = bankNames.getRecTrackBank();
         if (!event.hasBank(partBankName) || !event.hasBank(trackBankName))
             return _beta;
         DataBank bank = event.getBank(trackBankName);

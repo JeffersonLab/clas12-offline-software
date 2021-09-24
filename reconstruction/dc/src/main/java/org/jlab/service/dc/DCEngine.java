@@ -8,17 +8,22 @@ import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.geom.base.ConstantProvider;
+import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
+import org.jlab.rec.dc.banks.Banks;
+import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.trajectory.TrajectorySurfaces;
 import org.jlab.utils.CLASResources;
+import org.jlab.utils.groups.IndexedTable;
 
 public class DCEngine extends ReconstructionEngine {
 
-    //String FieldsConfig="";
-    //AtomicInteger Run = new AtomicInteger(0);
+    private Banks  bankNames = new Banks();
+    
     String clasDictionaryPath ;
     String variationName;
+    
     public DCEngine(String name) {
         super(name,"ziegler","5.0");
     }
@@ -183,9 +188,8 @@ public class DCEngine extends ReconstructionEngine {
         clasDictionaryPath= CLASResources.getResourcePath("etc");
         String[]  dcTables = new String[]{
             "/calibration/dc/signal_generation/doca_resolution",
-          //  "/calibration/dc/time_to_distance/t2d",
             "/calibration/dc/time_to_distance/time2dist",
-         //   "/calibration/dc/time_corrections/T0_correction",
+            "/calibration/dc/time_corrections/T0Corrections",
             "/calibration/dc/time_corrections/tdctimingcuts",
             "/calibration/dc/time_jitter",
             "/calibration/dc/tracking/wire_status",
@@ -271,4 +275,44 @@ public class DCEngine extends ReconstructionEngine {
         return true;
     }
 
+     public void initBankNames() {
+        //Initialize bank names
+    }
+
+    public double getTriggerPhase(DataEvent event) {
+        DataBank  bank = event.getBank("RUN::config");
+        int        run = bank.getInt("run", 0);
+        long timeStamp = bank.getLong("timestamp", 0);
+        
+        double triggerPhase = 0;
+        if (run>0 && timeStamp>=0) {
+           IndexedTable tabJ = super.getConstantsManager().getConstants(run, Constants.TIMEJITTER);
+           double period = tabJ.getDoubleValue("period", 0, 0, 0);
+           int    phase  = tabJ.getIntValue("phase", 0, 0, 0);
+           int    cycles = tabJ.getIntValue("cycles", 0, 0, 0);
+
+           if (cycles > 0) triggerPhase = period * ((timeStamp + phase) % cycles);
+        }
+        return triggerPhase;
+    }
+
+    public int getRun(DataEvent event) {
+        if (!event.hasBank("RUN::config")) {
+            return 0;
+        }
+        DataBank bank = event.getBank("RUN::config");
+        if(Constants.DEBUG)
+            System.out.println("EVENT "+bank.getInt("event", 0));
+        
+        int run = bank.getInt("run", 0);
+        return run;
+    }
+
+    public Banks getBankNames() {
+        return bankNames;
+    }
+
+    public void setBankNames(Banks bankNames) {
+        this.bankNames = bankNames;
+    }
 }

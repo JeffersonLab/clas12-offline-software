@@ -1,46 +1,25 @@
 package org.jlab.service.dc;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.jlab.clas.swimtools.Swim;
-import org.jlab.clas.swimtools.Swimmer;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
-import org.jlab.rec.dc.banks.HitReader;
-import org.jlab.rec.dc.banks.RecoBankWriter;
-import org.jlab.rec.dc.cluster.ClusterFinder;
-import org.jlab.rec.dc.cluster.ClusterFitter;
-import org.jlab.rec.dc.cluster.FittedCluster;
-import org.jlab.rec.dc.cross.Cross;
-import org.jlab.rec.dc.cross.CrossList;
-import org.jlab.rec.dc.cross.CrossListFinder;
-import org.jlab.rec.dc.cross.CrossMaker;
-import org.jlab.rec.dc.hit.FittedHit;
-import org.jlab.rec.dc.hit.Hit;
-import org.jlab.rec.dc.nn.PatternRec;
-import org.jlab.rec.dc.segment.Segment;
-import org.jlab.rec.dc.segment.SegmentFinder;
-import org.jlab.rec.dc.track.Track;
-import org.jlab.rec.dc.track.TrackCandListFinder;
-import org.jlab.rec.dc.trajectory.RoadFinder;
-import org.jlab.rec.dc.trajectory.Road;
+import org.jlab.rec.dc.banks.Banks;
 
 /**
  * @author zigler
  */
 public class DCHBPostCluster extends DCEngine {
 
-    private AtomicInteger Run = new AtomicInteger(0);
     private double triggerPhase;
-    private int newRun = 0;
-
+    private Banks  bankNames = new Banks();
+    
     public DCHBPostCluster(String trking) {
         super(trking);
+        this.initBankNames();
+    }
+
+    public void initBankNames() {
+        //Initialize bank names
     }
 
     @Override
@@ -48,343 +27,35 @@ public class DCHBPostCluster extends DCEngine {
         super.LoadTables();
         return true;
     }
-    public boolean aiAssist;
-    
-    @Override
-    public boolean processDataEvent(DataEvent event) {
+
+    public double getTriggerPhase() {
+        return triggerPhase;
+    }
+
+    public void setTriggerPhase(double triggerPhase) {
+        this.triggerPhase = triggerPhase;
+    }
+
+    public int getRun(DataEvent event) {
         if (!event.hasBank("RUN::config")) {
-            return true;
+            return 0;
         }
         DataBank bank = event.getBank("RUN::config");
         if(Constants.DEBUG)
             System.out.println("EVENT "+bank.getInt("event", 0));
         
-        int newRun = bank.getInt("run", 0);
-        if (newRun == 0)
-           return true;
-
-        if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) 
-            Run.set(newRun);
-
-        /* 1 */
-        HitReader hitRead = new HitReader();
-        // get Field
-        Swim dcSwim = new Swim();
-        /* 2 */
-        
-        /* 5 */
-        if(Constants.DEBUG)
-            System.out.println("HB AI "+this.aiAssist);
-        /* 7 */
-        RecoBankWriter rbc = new RecoBankWriter(this.aiAssist);
-        /* 8 */
-        //AI
-        List<Track> trkcands = null;
-        List<Cross> crosses = null;
-        List<FittedCluster> clusters = null;
-        List<Segment> segments = null;
-        List<FittedHit> fhits = null;
-        if(this.aiAssist==true) {
-            hitRead.read_NNHits(event, Constants.dcDetector, triggerPhase);
-
-            //I) get the lists
-            List<Hit> hits = hitRead.get_DCHits();
-            fhits = new ArrayList<FittedHit>();
-            //II) process the hits
-            //1) exit if hit list is empty
-            if (hits.isEmpty()) {
-                return true;
-            }
-            PatternRec pr = new PatternRec();
-            segments = pr.RecomposeSegments(hits, Constants.dcDetector);
-            Collections.sort(segments);
-        
-            if (segments.isEmpty()) {
-                return true;
-            } 
-            //crossList
-            CrossList crosslist = pr.RecomposeCrossList(segments, Constants.dcDetector);
-            crosses = new ArrayList<Cross>();
-            if(Constants.DEBUG==true) 
-                System.out.println("num cands = "+crosslist.size());
-            for (List<Cross> clist : crosslist) {
-                crosses.addAll(clist); 
-                if(Constants.DEBUG==true) {
-                    for(Cross c : clist)
-                        System.out.println("Pass Cross"+c.printInfo());
-                }
-            }
-            if (crosses.isEmpty()) {
-                clusters = new ArrayList<FittedCluster>();
-                for(Segment seg : segments) {
-                    clusters.add(seg.get_fittedCluster());
-                }
-                event.appendBanks(
-                        rbc.fillHBHitsBank(event, fhits),    
-                        rbc.fillHBClustersBank(event, clusters),
-                        rbc.fillHBSegmentsBank(event, segments));
-                return true;
-            } 
-            // update B field
-            CrossListFinder crossLister = new CrossListFinder();
-            for(Cross cr : crosses) {
-                crossLister.updateBFittedHits(event, cr, 
-                    super.getConstantsManager().getConstants(Run.get(), Constants.TIME2DIST),
-                    Constants.dcDetector, null, dcSwim);
-            }
-            //find the list of  track candidates
-            TrackCandListFinder trkcandFinder = new TrackCandListFinder(Constants.HITBASE);
-            trkcands = trkcandFinder.getTrackCands(crosslist,
-                Constants.dcDetector,
-                Swimmer.getTorScale(),
-                dcSwim, this.aiAssist);
-           
-            // track found
-            clusters = new ArrayList<FittedCluster>();
-            int trkId = 1;
-            if (trkcands.size() > 0) {
-                // remove overlaps
-                trkcandFinder.removeOverlappingTracks(trkcands);
-                for (Track trk : trkcands) {
-                    // reset the id
-                    trk.set_Id(trkId);
-                    trkcandFinder.matchHits(trk.get_Trajectory(),
-                            trk,
-                            Constants.dcDetector,
-                            dcSwim);
-                    for (Cross c : trk) {
-                        c.set_CrossDirIntersSegWires();
-                        clusters.add(c.get_Segment1().get_fittedCluster());
-                        clusters.add(c.get_Segment2().get_fittedCluster());
-                        trkcandFinder.setHitDoubletsInfo(c.get_Segment1());
-                        trkcandFinder.setHitDoubletsInfo(c.get_Segment2());
-                        for (FittedHit h1 : c.get_Segment1()) {
-                            if(h1.get_AssociatedHBTrackID()>0) fhits.add(h1);
-                        }
-                        for (FittedHit h2 : c.get_Segment2()) {
-                            if(h2.get_AssociatedHBTrackID()>0) fhits.add(h2);
-                        }
-                    }
-                    trkId++;
-                }
-            }
-        } else {
-        //non-AI
-          //2) find the clusters from these hits
-            fhits = new ArrayList<FittedHit>();
-            ClusterFinder clusFinder = new ClusterFinder();
-            ClusterFitter cf = new ClusterFitter();
-            clusters = clusFinder.RecomposeClusters(event, Constants.dcDetector, cf);
-            if (clusters ==null || clusters.isEmpty()) {
-                return true;
-            }
-
-            //3) find the segments from the fitted clusters
-            SegmentFinder segFinder = new SegmentFinder();
-            segments = segFinder.get_Segments(clusters,
-                    event,
-                    Constants.dcDetector, false);
-            
-            /* 15 */
-            // need 6 segments to make a trajectory
-            if (segments.isEmpty()) {
-                return true;
-            }
-            List<Segment> rmSegs = new ArrayList<>();
-            // clean up hit-based segments
-            double trkDocOverCellSize;
-            for (Segment se : segments) {
-                trkDocOverCellSize = 0;
-                for (FittedHit fh : se.get_fittedCluster()) {
-                    trkDocOverCellSize += fh.get_ClusFitDoca() / fh.get_CellSize();
-                }
-                if (trkDocOverCellSize / se.size() > 1.1) {
-                    rmSegs.add(se);
-                }
-            }
-            segments.removeAll(rmSegs);
-            if(segments == null || segments.isEmpty())
-                return true;
-            /* 16 */
-            CrossMaker crossMake = new CrossMaker();
-            crosses = crossMake.find_Crosses(segments, Constants.dcDetector);
-            if (crosses.isEmpty()) {
-                event.appendBanks(
-                        rbc.fillHBSegmentsBank(event, segments));
-                return true;
-            }
-            /* 17 */
-            CrossListFinder crossLister = new CrossListFinder();
-
-            CrossList crosslist = crossLister.candCrossLists(event, crosses,
-                    false,
-                    super.getConstantsManager().getConstants(Run.get(), Constants.TIME2DIST),
-                    Constants.dcDetector,
-                    null,
-                    dcSwim, false);
-            /* 18 */
-            //6) find the list of  track candidates
-            TrackCandListFinder trkcandFinder = new TrackCandListFinder(Constants.HITBASE);
-            trkcands = trkcandFinder.getTrackCands(crosslist,
-                    Constants.dcDetector,
-                    Swimmer.getTorScale(),
-                    dcSwim, this.aiAssist);
-            /* 19 */
-            // track found
-            int trkId = 1;
-            if (trkcands.size() > 0) {
-                // remove overlaps
-                trkcandFinder.removeOverlappingTracks(trkcands);
-                for (Track trk : trkcands) {
-                    // reset the id
-                    trk.set_Id(trkId);
-                    trkcandFinder.matchHits(trk.get_Trajectory(),
-                            trk,
-                            Constants.dcDetector,
-                            dcSwim);
-                    trkId++;
-                }
-            }
-            List<Segment> crossSegsNotOnTrack = new ArrayList<>();
-            List<Segment> psegments = new ArrayList<>();
-
-            for (Cross c : crosses) {
-                if (!c.get_Segment1().isOnTrack)
-                    crossSegsNotOnTrack.add(c.get_Segment1());
-                if (!c.get_Segment2().isOnTrack)
-                    crossSegsNotOnTrack.add(c.get_Segment2());
-            }
-            
-            RoadFinder rf = new RoadFinder();
-            List<Road> allRoads = rf.findRoads(segments, Constants.dcDetector);
-            List<Segment> Segs2Road = new ArrayList<>();
-            for (Road r : allRoads) { 
-                Segs2Road.clear();
-                int missingSL = -1;
-                for (int ri = 0; ri < 3; ri++) {
-                    if (r.get(ri).associatedCrossId == -1) {
-                        if (r.get(ri).get_Superlayer() % 2 == 1) {
-                            missingSL = r.get(ri).get_Superlayer() + 1;
-                        } else {
-                            missingSL = r.get(ri).get_Superlayer() - 1;
-                        }
-                    }
-                } 
-                if(missingSL==-1) 
-                    continue;
-                for (int ri = 0; ri < 3; ri++) {
-                    for (Segment s : crossSegsNotOnTrack) {
-                        if (s.get_Sector() == r.get(ri).get_Sector() &&
-                                s.get_Region() == r.get(ri).get_Region() &&
-                                s.associatedCrossId == r.get(ri).associatedCrossId &&
-                                r.get(ri).associatedCrossId != -1) {
-                            if (s.get_Superlayer() % 2 == missingSL % 2)
-                                Segs2Road.add(s); 
-                        }
-                    }
-                }
-                if (Segs2Road.size() == 2) {
-                    Segment pSegment = rf.findRoadMissingSegment(Segs2Road,
-                            Constants.dcDetector,
-                            r.a);
-                    if (pSegment != null)
-                        psegments.add(pSegment);
-                }
-            }
-            
-            segments.addAll(psegments);
-            List<Cross> pcrosses = crossMake.find_Crosses(segments, Constants.dcDetector);
-            
-            CrossList pcrosslist = crossLister.candCrossLists(event, pcrosses,
-                    false,
-                    super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST),
-                    Constants.dcDetector,
-                    null,
-                    dcSwim, true);
-            //pcrosslist.removeDuplicates(crosslist); 
-            
-            List<Track> mistrkcands = trkcandFinder.getTrackCands(pcrosslist,
-                    Constants.dcDetector,
-                    Swimmer.getTorScale(),
-                    dcSwim, this.aiAssist);
-
-            // remove overlaps
-            if (mistrkcands.size() > 0) {
-                trkcandFinder.removeOverlappingTracks(mistrkcands);
-                for (Track trk : mistrkcands) {
-
-                    // reset the id
-                    trk.set_Id(trkId);
-                    trkcandFinder.matchHits(trk.get_Trajectory(),
-                            trk,
-                            Constants.dcDetector,
-                            dcSwim);
-                    trkId++;
-                }
-            }
-        
-            trkcands.addAll(mistrkcands);
-            if(Constants.DEBUG) {
-            System.out.println("Found after 5STg "+mistrkcands.size()+" HB seeds ");
-                for(int i = 0; i< trkcands.size(); i++) {
-                    System.out.println("cand "+i);
-                    for(Cross c : trkcands.get(i)) {
-                        System.out.println(c.printInfo());
-                    }
-                    System.out.println("------------------------------------------------------------------ ");
-                }
-            }
-            //gather all the hits for pointer bank creation
-            for (Track trk : trkcands) {
-                for (Cross c : trk) {
-                    c.set_CrossDirIntersSegWires();
-                    trkcandFinder.setHitDoubletsInfo(c.get_Segment1());
-                    trkcandFinder.setHitDoubletsInfo(c.get_Segment2());
-                    for (FittedHit h1 : c.get_Segment1()) {
-//                        h1.setSignalPropagTimeAlongWire(dcDetector); //PASS1, not necessary because hits were already updated in trkcandFinder.matchHits
-//                        h1.setSignalTimeOfFlight();                  //PASS1
-                        if(h1.get_AssociatedHBTrackID()>0) fhits.add(h1);
-                    }
-                    for (FittedHit h2 : c.get_Segment2()) {
-//                        h2.setSignalPropagTimeAlongWire(dcDetector); //PASS1
-//                        h2.setSignalTimeOfFlight();                  //PASS1
-                        if(h2.get_AssociatedHBTrackID()>0) fhits.add(h2);
-                    }
-                }
-            }
-        }
-        
-        // no candidate found, stop here and save the hits,
-        // the clusters, the segments, the crosses
-        if (trkcands.isEmpty()) {
-            if(this.aiAssist==true) {
-                event.appendBanks(
-                    rbc.fillHBHitsBank(event, fhits),    
-                    rbc.fillHBSegmentsBank(event, segments),
-                    rbc.fillHBCrossesBank(event, crosses));
-            } else {
-                event.appendBanks(
-                    rbc.fillHBSegmentsBank(event, segments),
-                    rbc.fillHBCrossesBank(event, crosses));
-            }
-            return true;
-        }
-        if(this.aiAssist==true) {
-        event.appendBanks(
-            rbc.fillHBHitsBank(event, fhits),    
-            rbc.fillHBClustersBank(event, clusters),
-            rbc.fillHBSegmentsBank(event, segments),
-            rbc.fillHBCrossesBank(event, crosses),
-            rbc.fillHBTracksBank(event, trkcands),
-            rbc.fillHBHitsTrkIdBank(event, fhits) );
-        } else {
-            event.appendBanks(
-            rbc.fillHBSegmentsBank(event, segments),
-            rbc.fillHBCrossesBank(event, crosses),
-            rbc.fillHBTracksBank(event, trkcands),
-            rbc.fillHBHitsTrkIdBank(event, fhits) );
-        }
-        return true;
+        int run = bank.getInt("run", 0);
+        return run;
     }
 
+    public Banks getBankNames() {
+        return bankNames;
+    }
+
+    public void setBankNames(Banks bankNames) {
+        this.bankNames = bankNames;
+    }
+
+    
+    
 }

@@ -22,26 +22,16 @@ import trackfitter.fitter.utilities.*;
  *
  */
 public class RecoBankWriter {
-
+    
+    Banks bankNames = null;
 //    /**
 //     *
 //     * Writes output banks
 //     *
 //     */
     
-    private boolean _aiAssist;
-    private String[] _names;
-    public RecoBankWriter(boolean aiAssist) {
-        this._aiAssist = aiAssist;
-        _names = new String[2];
-        if(this._aiAssist==true) {
-            _names[0] = "AI";
-            _names[1] = "AI";
-        } else {
-            _names[0] = "HB";
-            _names[1] = "TB";
-        }
-            
+    public RecoBankWriter(Banks names) {
+        this.bankNames= names;
     }
 
     public void updateListsWithClusterInfo(List<FittedHit> fhits,
@@ -65,7 +55,7 @@ public class RecoBankWriter {
     }
 
     public DataBank fillHBHitsBank(DataEvent event, List<FittedHit> hitlist) {
-        String name = "HitBasedTrkg::"+_names[0]+"Hits";
+        String name = bankNames.getHitsBank();
         
         int rejCnt = 0;
         for (int i = 0; i < hitlist.size(); i++) {
@@ -108,7 +98,7 @@ public class RecoBankWriter {
     }   
     
     public DataBank fillHBHitsTrkIdBank(DataEvent event, List<FittedHit> hitlist) {
-        String name = "HitBasedTrkg::"+_names[0]+"HitTrkId"; 
+        String name = bankNames.getIdsBank(); 
         int rejCnt = 0;
         for (int i = 0; i < hitlist.size(); i++) {
 //            if (hitlist.get(i).get_AssociatedHBTrackID() == -1 /*|| hitlist.get(i).get_Id()==0*/ //PASS1
@@ -168,7 +158,7 @@ public class RecoBankWriter {
  * @return clusters bank
  */
 public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist) {
-    String name = "HitBasedTrkg::"+_names[0]+"Clusters";
+    String name = bankNames.getClustersBank();
     DataBank bank = event.createBank(name, cluslist.size());
 
     int[] hitIdxArray = new int[12];
@@ -230,7 +220,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
      * @return segments bank
      */
     public DataBank fillHBSegmentsBank(DataEvent event, List<Segment> seglist) {
-        String name = "HitBasedTrkg::"+_names[0]+"Segments";
+        String name = bankNames.getSegmentsBank();
         DataBank bank = event.createBank(name, seglist.size());
         int[] hitIdxArray = new int[12]; // only saving 12 hits for now
 
@@ -331,7 +321,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
             if (aCrosslist1.get_Id() != -1)
                 banksize++;
         }
-        String name = "HitBasedTrkg::"+_names[0]+"Crosses";
+        String name = bankNames.getCrossesBank();
         DataBank bank = event.createBank(name, banksize); 
 
         int index=0;
@@ -362,7 +352,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
     }
 
     public DataBank fillHBTracksBank(DataEvent event, List<Track> candlist) {
-        String name = "HitBasedTrkg::"+_names[0]+"Tracks";
+        String name = bankNames.getTracksBank();
         DataBank bank = event.createBank(name, candlist.size()); 
 
         for (int i = 0; i < candlist.size(); i++) {
@@ -443,7 +433,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
      */
     private DataBank fillTrackCovMatBank(DataEvent event, List<Track> candlist) {
 
-        DataBank bank = event.createBank("TimeBasedTrkg::TBCovMat", candlist.size());
+        DataBank bank = event.createBank(bankNames.getCovmatBank(), candlist.size());
 
         for (int i = 0; i < candlist.size(); i++) {
             bank.setShort("id", i, (short) candlist.get(i).get_Id());
@@ -485,7 +475,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
      *
      */
      private DataBank fillTBHitsBank(DataEvent event, List<FittedHit> hitlist) {
-        String name = "TimeBasedTrkg::"+_names[1]+"Hits";
+        String name = bankNames.getHitsBank();
         DataBank bank = event.createBank(name, hitlist.size());
         
         for (int i = 0; i < hitlist.size(); i++) {
@@ -564,7 +554,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
      * @return clusters bank
      */
     private DataBank fillTBClustersBank(DataEvent event, List<FittedCluster> cluslist) {
-        String name = "TimeBasedTrkg::"+_names[1]+"Clusters";
+        String name = bankNames.getClustersBank();
         DataBank bank = event.createBank(name, cluslist.size());
         
         int[] hitIdxArray = new int[12];
@@ -625,7 +615,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
      * @return segments bank
      */
     private DataBank fillTBSegmentsBank(DataEvent event, List<Segment> seglist) {
-        String name = "TimeBasedTrkg::"+_names[1]+"Segments";
+        String name = bankNames.getSegmentsBank();
         DataBank bank = event.createBank(name, seglist.size());
         
         int[] hitIdxArray = new int[12];
@@ -730,7 +720,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
             if (aCrosslist1.get_Id() != -1)
                 banksize++;
         }
-        String name = "TimeBasedTrkg::"+_names[1]+"Crosses";
+        String name = bankNames.getCrossesBank();
         DataBank bank = event.createBank(name, banksize);
         
         int index=0;
@@ -767,7 +757,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
      */
     private DataBank fillTBTracksBank(DataEvent event, List<Track> candlist) {
        
-        String name = "TimeBasedTrkg::"+_names[1]+"Tracks"; 
+        String name = bankNames.getTracksBank(); 
         DataBank bank = event.createBank(name, candlist.size());
         for (int i = 0; i < candlist.size(); i++) {
             bank.setShort("id", i, (short) candlist.get(i).get_Id());
@@ -844,12 +834,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
                 continue;
             size+=track.trajectory.size();
         }       
-        DataBank bank ;
-        if(this._aiAssist==true) {
-            bank = event.createBank("TimeBasedTrkg::AITrajectory", size);
-        } else {
-            bank = event.createBank("TimeBasedTrkg::Trajectory", size);
-        }
+        DataBank bank = event.createBank(bankNames.getTrajBank(), size);
         int i1=0;
         for (Track track : tracks) {
             if (track == null)
@@ -893,7 +878,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
         return fhits;
     }
 
-    public void fillAllHBBanks(DataEvent event, RecoBankWriter rbc, List<FittedHit> fhits, List<FittedCluster> clusters,
+    public void fillAllHBBanks(DataEvent event, List<FittedHit> fhits, List<FittedCluster> clusters,
             List<Segment> segments, List<Cross> crosses,
             List<Track> trkcands) {
 
@@ -902,42 +887,42 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
         }
 
         if (trkcands != null) {
-            event.appendBanks(rbc.fillHBHitsBank(event, fhits),
-                    rbc.fillHBClustersBank(event, clusters),
-                    rbc.fillHBSegmentsBank(event, segments),
-                    rbc.fillHBCrossesBank(event, crosses),
-                    rbc.fillHBTracksBank(event, trkcands),
-                    rbc.fillHBHitsTrkIdBank(event, fhits)
-                    //rbc.fillTrackCovMatBank(event, trkcands)
+            event.appendBanks(this.fillHBHitsBank(event, fhits),
+                    this.fillHBClustersBank(event, clusters),
+                    this.fillHBSegmentsBank(event, segments),
+                    this.fillHBCrossesBank(event, crosses),
+                    this.fillHBTracksBank(event, trkcands),
+                    this.fillHBHitsTrkIdBank(event, fhits)
+                    //this.fillTrackCovMatBank(event, trkcands)
             );
 
         }
         else if (crosses != null && trkcands == null) {
-            event.appendBanks(rbc.fillHBHitsBank(event, fhits),
-                    rbc.fillHBClustersBank(event, clusters),
-                    rbc.fillHBSegmentsBank(event, segments),
-                    rbc.fillHBCrossesBank(event, crosses)
+            event.appendBanks(this.fillHBHitsBank(event, fhits),
+                    this.fillHBClustersBank(event, clusters),
+                    this.fillHBSegmentsBank(event, segments),
+                    this.fillHBCrossesBank(event, crosses)
             );
         }
         else if (segments != null && crosses == null) {
-            event.appendBanks(rbc.fillHBHitsBank(event, fhits),
-                    rbc.fillHBClustersBank(event, clusters),
-                    rbc.fillHBSegmentsBank(event, segments)
+            event.appendBanks(this.fillHBHitsBank(event, fhits),
+                    this.fillHBClustersBank(event, clusters),
+                    this.fillHBSegmentsBank(event, segments)
             );
         }
         else if (clusters != null && segments == null) {
 
-            event.appendBanks(rbc.fillHBHitsBank(event, fhits),
-                    rbc.fillHBClustersBank(event, clusters)
+            event.appendBanks(this.fillHBHitsBank(event, fhits),
+                    this.fillHBClustersBank(event, clusters)
             );
         }
         else if (fhits != null && clusters == null) {
-            event.appendBanks(rbc.fillHBHitsBank(event, fhits)
+            event.appendBanks(this.fillHBHitsBank(event, fhits)
             );
         }
     }
 
-    public void fillAllTBBanks(DataEvent event, RecoBankWriter rbc, List<FittedHit> fhits, List<FittedCluster> clusters,
+    public void fillAllTBBanks(DataEvent event, List<FittedHit> fhits, List<FittedCluster> clusters,
             List<Segment> segments, List<Cross> crosses,
             List<Track> trkcands) {
 
@@ -946,44 +931,34 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
         }
 
         if (trkcands != null) {
-            if(this._aiAssist) { // fill only trajectory for conv bank for now
-                event.appendBanks(rbc.fillTBHitsBank(event, fhits),
-                        rbc.fillTBClustersBank(event, clusters),
-                        rbc.fillTBSegmentsBank(event, segments),
-                        rbc.fillTBCrossesBank(event, crosses),
-                        rbc.fillTBTracksBank(event, trkcands),
-                        rbc.fillTrajectoryBank(event, trkcands)
-                );
-            } else {
-                event.appendBanks(rbc.fillTBHitsBank(event, fhits),
-                    rbc.fillTBClustersBank(event, clusters),
-                    rbc.fillTBSegmentsBank(event, segments),
-                    rbc.fillTBCrossesBank(event, crosses),
-                    rbc.fillTBTracksBank(event, trkcands),
-                    rbc.fillTrajectoryBank(event, trkcands),
-                    rbc.fillTrackCovMatBank(event, trkcands)
-                );
-            }
+            event.appendBanks(this.fillTBHitsBank(event, fhits),
+                    this.fillTBClustersBank(event, clusters),
+                    this.fillTBSegmentsBank(event, segments),
+                    this.fillTBCrossesBank(event, crosses),
+                    this.fillTBTracksBank(event, trkcands),
+                    this.fillTrajectoryBank(event, trkcands)
+//                    this.fillTrackCovMatBank(event, trkcands)
+                    );
         }
         if (crosses != null && trkcands == null) {
-            event.appendBanks(rbc.fillTBHitsBank(event, fhits),
-                    rbc.fillTBClustersBank(event, clusters),
-                    rbc.fillTBSegmentsBank(event, segments),
-                    rbc.fillTBCrossesBank(event, crosses));
+            event.appendBanks(this.fillTBHitsBank(event, fhits),
+                    this.fillTBClustersBank(event, clusters),
+                    this.fillTBSegmentsBank(event, segments),
+                    this.fillTBCrossesBank(event, crosses));
         }
         if (segments != null && crosses == null) {
-            event.appendBanks(rbc.fillTBHitsBank(event, fhits),
-                    rbc.fillTBClustersBank(event, clusters),
-                    rbc.fillTBSegmentsBank(event, segments));
+            event.appendBanks(this.fillTBHitsBank(event, fhits),
+                    this.fillTBClustersBank(event, clusters),
+                    this.fillTBSegmentsBank(event, segments));
         }
 
         if (clusters != null && segments == null) {
-            event.appendBanks(rbc.fillTBHitsBank(event, fhits),
-                    rbc.fillTBClustersBank(event, clusters));
+            event.appendBanks(this.fillTBHitsBank(event, fhits),
+                    this.fillTBClustersBank(event, clusters));
         }
 
         if (fhits != null && clusters == null) {
-            event.appendBanks(rbc.fillTBHitsBank(event, fhits));
+            event.appendBanks(this.fillTBHitsBank(event, fhits));
         }
     }
 }

@@ -33,15 +33,7 @@ import org.jlab.rec.dc.trajectory.TrajectoryFinder;
 import org.jlab.utils.groups.IndexedTable;
 
 public class DCTBEngine extends DCEngine {
-
-//    DCGeant4Factory dcDetector;
-//    FTOFGeant4Factory ftofDetector;
-//    ECGeant4Factory ecDetector;
-//    PCALGeant4Factory pcalDetector; 
-//    TrajectorySurfaces tSurf;
-    private AtomicInteger Run = new AtomicInteger(0);
     
-    private int newRun = 0;
     private TimeToDistanceEstimator tde;
 
     public DCTBEngine(String trking) {
@@ -50,44 +42,43 @@ public class DCTBEngine extends DCEngine {
     }
     public DCTBEngine() { // if not specified use conventional tracking
         super("DCTB");
-        this.aiAssist = false;
-        this._name = "HB";
         tde = new TimeToDistanceEstimator();
     }
+    
     @Override
     public boolean init() {
         super.LoadTables();
+        this.initBankNames();
         return true;
     }
-    public boolean aiAssist;
-    public String _name;
+    
+    @Override
+    public void initBankNames() {
+        this.getBankNames().setHitsInputBank("HitBasedTrkg::HBHits");
+        this.getBankNames().setClustersInputBank("HitBasedTrkg::HBClusters");
+        this.getBankNames().setTracksInputBank("HitBasedTrkg::HBTracks");
+        this.getBankNames().setIdsBank("HitBasedTrkg::HBHitTrkId");
+        this.getBankNames().setHitsBank("TimeBasedTrkg::TBHits");
+        this.getBankNames().setClustersBank("TimeBasedTrkg::TBClusters");
+        this.getBankNames().setSegmentsBank("TimeBasedTrkg::TBSegments");
+        this.getBankNames().setCrossesBank("TimeBasedTrkg::TBCrosses");
+        this.getBankNames().setTracksBank("TimeBasedTrkg::TBTracks");
+        this.getBankNames().setTrajBank("TimeBasedTrkg::Trajectory");
+        this.getBankNames().setCovmatBank("TimeBasedTrkg::TBCovMat");
+        this.getBankNames().setRecEventBank("RECHB::Event");
+        this.getBankNames().setRecPartBank("RECHB::Particle");
+        this.getBankNames().setRecTrackBank("RECHB::Track");
+    }
+    
     @Override
     public boolean processDataEvent(DataEvent event) {
-        //setRunConditionsParameters( event) ;
-        if(event.hasBank("RUN::config")==false) {
-            System.err.println("RUN CONDITIONS NOT READ AT TIMEBASED LEVEL!");
-            return true;
-        }
-        //if(event.getBank("RECHB::Event").getFloat("startTime", 0)<0)
-        //    return true; // require the start time to reconstruct the tracks in the event
-        DataBank bank = event.getBank("RUN::config");
-        // Load the constants
-        //-------------------
-        newRun = bank.getInt("run", 0);
-        if(newRun==0)
-            return true;
-        if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {
-           Run.set(newRun);
-        }
+
+        int run = this.getRun(event);
+        if(run==0) return true;
+        
         double T_Start = 0;
         if(Constants.isUSETSTART() == true) {
-            String name;
-            if(this.aiAssist == true) {
-                name = "HBAI";
-            } else {
-                name = "HB";
-            }
-            String recBankName = "REC"+name+"::Event"; 
+            String recBankName = this.getBankNames().getRecEventBank();
             if(event.hasBank(recBankName)==true) {
                 T_Start = event.getBank(recBankName).getFloat("startTime", 0);
                 if(T_Start<0) { 
@@ -113,14 +104,14 @@ public class DCTBEngine extends DCEngine {
         List<FittedCluster> tclusters = new ArrayList<FittedCluster>();
         
         if(Constants.DEBUG)
-            System.out.println("TB AI "+this.aiAssist);
+            System.out.println("TB AI "+ this.getName());
         //instantiate bank writer
-        RecoBankWriter rbc = new RecoBankWriter(aiAssist);
+        RecoBankWriter rbc = new RecoBankWriter(this.getBankNames());
 
-        HitReader hitRead = new HitReader(aiAssist); //vz; modified reader to read regular or ai hits
+        HitReader hitRead = new HitReader(this.getBankNames()); //vz; modified reader to read regular or ai hits
         hitRead.read_HBHits(event, 
-            super.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
-            super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"),
+            super.getConstantsManager().getConstants(run, "/calibration/dc/signal_generation/doca_resolution"),
+            super.getConstantsManager().getConstants(run, "/calibration/dc/time_to_distance/time2dist"),
             Constants.getT0(), Constants.getT0Err(), Constants.dcDetector, tde);
         List<FittedHit> hits = new ArrayList<FittedHit>();
         //I) get the hits
@@ -135,12 +126,12 @@ public class DCTBEngine extends DCEngine {
         ClusterFinder clusFinder = new ClusterFinder();
 
         clusters = clusFinder.FindTimeBasedClusters(event, hits, cf, ct, 
-                super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), Constants.dcDetector, tde);
+                super.getConstantsManager().getConstants(run, "/calibration/dc/time_to_distance/time2dist"), Constants.dcDetector, tde);
         for(FittedCluster c : clusters) {
             c.set_Id(c.get(0).get_AssociatedClusterID());
         }
         if(clusters.isEmpty()) {
-            rbc.fillAllTBBanks(event, rbc, hits, null, null, null, null);
+            rbc.fillAllTBBanks(event, hits, null, null, null, null);
             return true;
         }
 
@@ -159,7 +150,7 @@ public class DCTBEngine extends DCEngine {
                     fhits.add(hit);						
                 }
             }
-            rbc.fillAllTBBanks( event, rbc, fhits, clusters, null, null, null);
+            rbc.fillAllTBBanks( event, fhits, clusters, null, null, null);
             return true;
         }
                 
@@ -179,11 +170,11 @@ public class DCTBEngine extends DCEngine {
         
         //
         // also need Track bank
-        if (event.hasBank("HitBasedTrkg::"+_name+"Tracks") == false) { 
+        if (event.hasBank(this.getBankNames().getTracksInputBank()) == false) { 
             return true;
         }
         
-        DataBank trkbank = event.getBank("HitBasedTrkg::"+_name+"Tracks");
+        DataBank trkbank = event.getBank(this.getBankNames().getTracksInputBank());
         //DataBank trkcovbank = event.getBank("TimeBasedTrkg::TBCovMat");
         int trkrows = trkbank.rows();
         //if(trkbank.rows()!=trkcovbank.rows()) {
@@ -228,7 +219,7 @@ public class DCTBEngine extends DCEngine {
         
         //6) find the list of  track candidates
         // read beam offsets from database
-        IndexedTable beamOffset = this.getConstantsManager().getConstants(newRun, "/geometry/beam/position");
+        IndexedTable beamOffset = this.getConstantsManager().getConstants(run, "/geometry/beam/position");
         double beamXoffset = beamOffset.getDoubleValue("x_offset", 0,0,0);
         double beamYoffset = beamOffset.getDoubleValue("y_offset", 0,0,0);
         TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
@@ -344,11 +335,11 @@ public class DCTBEngine extends DCEngine {
        
         if(trkcands.isEmpty()) {
 
-            rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
+            rbc.fillAllTBBanks(event, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
             return true;
         }
         this.ensureTrackUnique(trkcands);
-        rbc.fillAllTBBanks(event, rbc, thits, tclusters, segments, crosses, trkcands);
+        rbc.fillAllTBBanks(event, thits, tclusters, segments, crosses, trkcands);
         //if(this.aiAssist) 
         //    event.getBank("TimeBasedTrkg::"+_name+"Tracks").show();
         return true;

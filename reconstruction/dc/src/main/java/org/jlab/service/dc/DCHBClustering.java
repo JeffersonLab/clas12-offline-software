@@ -5,10 +5,7 @@ import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.jlab.clas.swimtools.Swim;
-import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.banks.HitReader;
@@ -20,18 +17,12 @@ import org.jlab.rec.dc.cluster.FittedCluster;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.hit.Hit;
 /**
- * @author zigler
+ * @author ziegler
  * 
- * Reads either TDC or NN hit bank
- * Loads the Tables for the rest of the tracking
- * Creates regular banks or banks storing AI assisted output
  */
 public class DCHBClustering extends DCEngine {
     //some identifier for the type of clustering,
     //ability to plug in more than once
-    private AtomicInteger Run = new AtomicInteger(0);
-    private double triggerPhase;
-    private int newRun = 0;
 
     public DCHBClustering() {
         super("DCHB");
@@ -40,24 +31,26 @@ public class DCHBClustering extends DCEngine {
     @Override
     public boolean init() {
         super.LoadTables();
+        this.initBankNames();
         return true;
     }
-    boolean aiAssist = false;
+    
+    @Override
+    public void initBankNames() {
+        this.getBankNames().setHitsBank("HitBasedTrkg::HBHits");
+        this.getBankNames().setClustersBank("HitBasedTrkg::HBClusters");
+    }
+    
     public static int sectorSelect;
+    
     @Override
     public boolean processDataEvent(DataEvent event) {
-        if (!event.hasBank("RUN::config")) {
-            return true;
-        }
-        DataBank bank = event.getBank("RUN::config");
-       
-        int newRun = bank.getInt("run", 0);
-        if (newRun == 0)
-           return true;
-
-        if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) 
-            Run.set(newRun);
-
+        
+        int run = this.getRun(event);
+        if(run==0) return true;
+        
+        double triggerPhase = this.getTriggerPhase(event);
+        triggerPhase=0; 
         /* 1 */
         // get Field
         Swim dcSwim = new Swim();
@@ -77,17 +70,17 @@ public class DCHBClustering extends DCEngine {
         /* 6 */
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
         /* 7 */
-        RecoBankWriter rbc = new RecoBankWriter(this.aiAssist);
+        RecoBankWriter rbc = new RecoBankWriter(this.getBankNames());
         /* 8 */
-        HitReader hitRead = new HitReader();
+        HitReader hitRead = new HitReader(this.getBankNames());
         /* 9 */
         hitRead.fetch_DCHits(event,
                 noiseAnalysis,
                 parameters,
                 results,
-                super.getConstantsManager().getConstants(Run.get(), Constants.TIME2DIST),
-                super.getConstantsManager().getConstants(Run.get(), Constants.TDCTCUTS),
-                super.getConstantsManager().getConstants(Run.get(), Constants.WIRESTAT),
+                super.getConstantsManager().getConstants(run, Constants.TIME2DIST),
+                super.getConstantsManager().getConstants(run, Constants.TDCTCUTS),
+                super.getConstantsManager().getConstants(run, Constants.WIRESTAT),
                 Constants.dcDetector,
                 triggerPhase);
         /* 10 */
@@ -112,7 +105,6 @@ public class DCHBClustering extends DCEngine {
             /* 13 */
             rbc.updateListsWithClusterInfo(fhits, clusters);
             rbc.fillAllHBBanks(event,
-                    rbc,
                     fhits,
                     clusters,
                     null,

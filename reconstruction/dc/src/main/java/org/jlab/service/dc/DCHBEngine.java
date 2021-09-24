@@ -6,15 +6,10 @@ import cnuphys.snr.clas12.Clas12NoiseResult;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import org.jlab.clas.swimtools.MagFieldsEngine;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.swimtools.Swimmer;
-import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.hipo.HipoDataSource;
-import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.banks.HitReader;
 import org.jlab.rec.dc.banks.RecoBankWriter;
@@ -35,7 +30,6 @@ import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
 import org.jlab.rec.dc.trajectory.RoadFinder;
 import org.jlab.rec.dc.trajectory.Road;
-import org.jlab.utils.groups.IndexedTable;
 
 /**
  * @author zigler
@@ -43,9 +37,6 @@ import org.jlab.utils.groups.IndexedTable;
  */
 public class DCHBEngine extends DCEngine {
 
-    private AtomicInteger Run = new AtomicInteger(0);
-    private double triggerPhase;
-    private int newRun = 0;
 
     public DCHBEngine() {
         super("DCHB");
@@ -58,62 +49,34 @@ public class DCHBEngine extends DCEngine {
         super.setOptions();
         super.LoadTables();
         super.LoadGeometry();
-//        newRun = 809;
-//        long timeStamp = 371468548086L;
-//        if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {
-//            IndexedTable tabJ = super.getConstantsManager().getConstants(newRun, Constants.TIMEJITTER);
-//            double period = tabJ.getDoubleValue("period", 0, 0, 0);
-//            int phase = tabJ.getIntValue("phase", 0, 0, 0);
-//            int cycles = tabJ.getIntValue("cycles", 0, 0, 0);
-//
-//            if (cycles > 0) triggerPhase = period * ((timeStamp + phase) % cycles);
-//
-//            TableLoader.FillT0Tables(newRun, super.variationName);
-//            TableLoader.Fill(super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST));
-//
-//            Run.set(newRun);
-//        }
+        this.initBankNames();
         return true;
     }
 
     @Override
+    public void initBankNames() {
+        this.getBankNames().setHitsBank("HitBasedTrkg::HBHits");
+        this.getBankNames().setClustersBank("HitBasedTrkg::HBClusters");
+        this.getBankNames().setSegmentsBank("HitBasedTrkg::HBSegments");
+        this.getBankNames().setCrossesBank("HitBasedTrkg::HBCrosses");
+        this.getBankNames().setTracksBank("HitBasedTrkg::HBTracks");
+        this.getBankNames().setIdsBank("HitBasedTrkg::HBHitTrkId");
+    }
+    
+    @Override
     public boolean processDataEvent(DataEvent event) {
-//        long startTime = 0;
-        //setRunConditionsParameters( event) ;
-        if (!event.hasBank("RUN::config")) {
-            return true;
-        }
 
-       DataBank bank = event.getBank("RUN::config");
-       long timeStamp = bank.getLong("timestamp", 0);
-       double triggerPhase = 0;
+        int run = this.getRun(event);
+        if(run==0) return true;
+        
+        double triggerPhase = this.getTriggerPhase(event);
 
-        // Load the constants
-        //-------------------
-        int newRun = bank.getInt("run", 0);
-       if (newRun == 0)
-           return true;
+       
+       TableLoader.FillT0Tables(run, super.variationName);
+       TableLoader.Fill(super.getConstantsManager().getConstants(run, Constants.TIME2DIST));
 
-       if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {
-           if (timeStamp == -1)
-               return true;
- //          if (debug.get()) startTime = System.currentTimeMillis();
-           IndexedTable tabJ = super.getConstantsManager().getConstants(newRun, Constants.TIMEJITTER);
-           double period = tabJ.getDoubleValue("period", 0, 0, 0);
-           int phase = tabJ.getIntValue("phase", 0, 0, 0);
-           int cycles = tabJ.getIntValue("cycles", 0, 0, 0);
-
-           if (cycles > 0) triggerPhase = period * ((timeStamp + phase) % cycles);
-
-           TableLoader.FillT0Tables(newRun, super.variationName);
-           TableLoader.Fill(super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST));
-
-           Run.set(newRun);
-           if (event.hasBank("MC::Particle") && this.getEngineConfigString("wireDistort")==null) {
-               Constants.setWIREDIST(0);
-           }
-
- //          if (debug.get()) System.out.println("NEW RUN INIT = " + (System.currentTimeMillis() - startTime));
+       if (event.hasBank("MC::Particle") && this.getEngineConfigString("wireDistort")==null) {
+           Constants.setWIREDIST(0);
        }
 
         /* 1 */
@@ -135,17 +98,17 @@ public class DCHBEngine extends DCEngine {
         /* 6 */
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
         /* 7 */
-        RecoBankWriter rbc = new RecoBankWriter(false);
+        RecoBankWriter rbc = new RecoBankWriter(this.getBankNames());
         /* 8 */
-        HitReader hitRead = new HitReader();
+        HitReader hitRead = new HitReader(this.getBankNames());
         /* 9 */
         hitRead.fetch_DCHits(event,
                 noiseAnalysis,
                 parameters,
                 results,
-                super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST),
-                super.getConstantsManager().getConstants(newRun, Constants.TDCTCUTS),
-                super.getConstantsManager().getConstants(newRun, Constants.WIRESTAT),
+                super.getConstantsManager().getConstants(run, Constants.TIME2DIST),
+                super.getConstantsManager().getConstants(run, Constants.TDCTCUTS),
+                super.getConstantsManager().getConstants(run, Constants.WIRESTAT),
                 Constants.dcDetector,
                 triggerPhase);
         /* 10 */
@@ -180,7 +143,6 @@ public class DCHBEngine extends DCEngine {
         // need 6 segments to make a trajectory
         if (segments.isEmpty()) {
             rbc.fillAllHBBanks(event,
-                    rbc,
                     fhits,
                     clusters,
                     null,
@@ -206,7 +168,6 @@ public class DCHBEngine extends DCEngine {
         List<Cross> crosses = crossMake.find_Crosses(segments, Constants.dcDetector);
         if (crosses.isEmpty()) {
             rbc.fillAllHBBanks(event,
-                    rbc,
                     fhits,
                     clusters,
                     segments,
@@ -219,7 +180,7 @@ public class DCHBEngine extends DCEngine {
 
         CrossList crosslist = crossLister.candCrossLists(event, crosses,
                 false,
-                super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST),
+                super.getConstantsManager().getConstants(run, Constants.TIME2DIST),
                 Constants.dcDetector,
                 null,
                 dcSwim, false);
@@ -294,7 +255,7 @@ public class DCHBEngine extends DCEngine {
         List<Cross> pcrosses = crossMake.find_Crosses(segments, Constants.dcDetector);
         CrossList pcrosslist = crossLister.candCrossLists(event, pcrosses,
                 false,
-                super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST),
+                super.getConstantsManager().getConstants(run, Constants.TIME2DIST),
                 Constants.dcDetector,
                 null,
                 dcSwim, true);
@@ -329,7 +290,6 @@ public class DCHBEngine extends DCEngine {
         // the clusters, the segments, the crosses
         if (trkcands.isEmpty()) {
             rbc.fillAllHBBanks(event,
-                    rbc,
                     fhits,
                     clusters,
                     segments,
@@ -338,7 +298,6 @@ public class DCHBEngine extends DCEngine {
             return true;
         }
         rbc.fillAllHBBanks(event,
-                rbc,
                 fhits,
                 clusters,
                 segments,

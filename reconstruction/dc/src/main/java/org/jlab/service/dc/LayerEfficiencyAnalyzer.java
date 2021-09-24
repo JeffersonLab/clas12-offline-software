@@ -93,6 +93,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         super.setOptions();
         super.LoadTables();
         super.LoadGeometry();
+        this.initBankNames();
         Constants.setT2D(1);
         
         maxDoca[0]=0.8;maxDoca[1]=0.9;maxDoca[2]=1.3;maxDoca[3]=1.4;maxDoca[4]=1.9;maxDoca[5]=2.0;
@@ -159,6 +160,21 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
     }
 
     @Override
+    public void initBankNames() {
+        this.getBankNames().setHitsInputBank("HitBasedTrkg::HBHits");
+        this.getBankNames().setClustersInputBank("HitBasedTrkg::HBClusters");
+        this.getBankNames().setHitsBank("HitBasedTrkg::HBHits");
+        this.getBankNames().setClustersBank("HitBasedTrkg::HBClusters");
+        this.getBankNames().setSegmentsBank("HitBasedTrkg::HBSegments");
+        this.getBankNames().setCrossesBank("HitBasedTrkg::HBCrosses");
+        this.getBankNames().setTracksBank("HitBasedTrkg::HBTracks");
+        this.getBankNames().setIdsBank("HitBasedTrkg::HBHitTrkId");
+        this.getBankNames().setRecEventBank("RECHB::Event");
+        this.getBankNames().setRecPartBank("RECHB::Particle");
+        this.getBankNames().setRecTrackBank("RECH::Track");
+    }
+
+    @Override
     public void dataEventAction(DataEvent event) {
         ProcessLayerEffs(event);
     }
@@ -215,45 +231,19 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
     private ArrayList<HashMap<Coordinate, H1F>> LayerEffs = new ArrayList<HashMap<Coordinate, H1F>>();
     private ArrayList<HashMap<Coordinate, H1F>> LayerEffsTrkD = new ArrayList<HashMap<Coordinate, H1F>>();
     
-    //instantiate bank writer
-    RecoBankWriter rbc = new RecoBankWriter(false);
-    HitReader hitRead = new HitReader();
-
     @Override
     public boolean processDataEvent(DataEvent event) {
-        if (!event.hasBank("RUN::config")) {
-            return true;
-        }
+        
+        int run = this.getRun(event);
+        if(run==0) return true;
+        
+        double triggerPhase = this.getTriggerPhase(event);
 
-       DataBank bank = event.getBank("RUN::config");
-       long timeStamp = bank.getLong("timestamp", 0);
-       double triggerPhase = 0;
+       
+       TableLoader.FillT0Tables(run, super.variationName);
+       TableLoader.Fill(super.getConstantsManager().getConstants(run, Constants.TIME2DIST));
 
-        // Load the constants
-        //-------------------
-        int newRun = bank.getInt("run", 0);
-        if (newRun == 0)
-           return true;
-
-       if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {
-           if (timeStamp == -1)
-               return true;
- //          if (debug.get()) startTime = System.currentTimeMillis();
-           IndexedTable tabJ = super.getConstantsManager().getConstants(newRun, Constants.TIMEJITTER);
-           double period = tabJ.getDoubleValue("period", 0, 0, 0);
-           int phase = tabJ.getIntValue("phase", 0, 0, 0);
-           int cycles = tabJ.getIntValue("cycles", 0, 0, 0);
-
-           if (cycles > 0) triggerPhase = period * ((timeStamp + phase) % cycles);
-
-           TableLoader.FillT0Tables(newRun, super.variationName);
-           TableLoader.Fill(super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST));
-
-           Run.set(newRun);
-           if (event.hasBank("MC::Particle") && this.getEngineConfigString("wireDistort")==null) {
-               Constants.setWIREDIST(0);
-           }
-       }
+       
         //System.out.println(" RUNNING TIME BASED....................................");
         ClusterFitter cf = new ClusterFitter();
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
@@ -261,7 +251,10 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         List<FittedCluster> clusters = new ArrayList<FittedCluster>();
         List<Segment> segments = new ArrayList<Segment>();
         
-        hitRead.read_HBHits(event, 
+        //instantiate bank writer
+        HitReader hitRead = new HitReader(this.getBankNames());
+
+            hitRead.read_HBHits(event, 
             super.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
             super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"),
             Constants.getT0(), Constants.getT0Err(), Constants.dcDetector, tde);

@@ -10,9 +10,26 @@ package org.jlab.service.dc;
  * @author ziegler
  */
 public class DCTBEngineAI extends DCTBEngine {
+    
     public DCTBEngineAI() {
         super("DCTBAI");
-        super.aiAssist = true;
-        super._name = "AI";
+    }
+    
+    @Override
+    public void initBankNames() {
+        this.getBankNames().setHitsInputBank("HitBasedTrkg::AIHits");
+        this.getBankNames().setClustersInputBank("HitBasedTrkg::AIClusters");
+        this.getBankNames().setTracksInputBank("HitBasedTrkg::AITracks");
+        this.getBankNames().setIdsBank("HitBasedTrkg::AIHitTrkId");
+        this.getBankNames().setHitsBank("TimeBasedTrkg::AIHits");
+        this.getBankNames().setClustersBank("TimeBasedTrkg::AIClusters");
+        this.getBankNames().setSegmentsBank("TimeBasedTrkg::AISegments");
+        this.getBankNames().setCrossesBank("TimeBasedTrkg::AICrosses");
+        this.getBankNames().setTracksBank("TimeBasedTrkg::AITracks");
+        this.getBankNames().setTrajBank("TimeBasedTrkg::AITrajectory");
+        this.getBankNames().setCovmatBank("TimeBasedTrkg::AICovMat");
+        this.getBankNames().setRecEventBank("RECHBAI::Event");
+        this.getBankNames().setRecPartBank("RECHBAI::Particle");
+        this.getBankNames().setRecTrackBank("RECHBAI::Track");
     }
 }
