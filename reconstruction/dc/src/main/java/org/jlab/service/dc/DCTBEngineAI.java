@@ -31,5 +31,14 @@ public class DCTBEngineAI extends DCTBEngine {
         this.getBankNames().setRecEventBank("RECHBAI::Event");
         this.getBankNames().setRecPartBank("RECHBAI::Particle");
         this.getBankNames().setRecTrackBank("RECHBAI::Track");
+        
+                
+        super.registerOutputBank("TimeBasedTrkg::AIHits");
+        super.registerOutputBank("TimeBasedTrkg::AIClusters");
+        super.registerOutputBank("TimeBasedTrkg::AISegments");
+        super.registerOutputBank("TimeBasedTrkg::AICrosses");
+        super.registerOutputBank("TimeBasedTrkg::AITracks");
+        super.registerOutputBank("TimeBasedTrkg::AICovMat");
+        super.registerOutputBank("TimeBasedTrkg::AITrajectory");
     }
 }

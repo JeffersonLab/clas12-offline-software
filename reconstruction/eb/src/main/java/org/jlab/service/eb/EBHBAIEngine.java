@@ -33,7 +33,7 @@ public class EBHBAIEngine extends EBEngine {
         this.setTrackBank("RECHBAI::Track");
         this.setCrossBank("RECHBAI::TrackCross");
         this.setTrackType("HitBasedTrkg::AITracks");
-        this.setFTOFHitsType("FTOF::hbhits");
+        this.setFTOFHitsType("FTOF::hbclusters");
         this.setFTBank("RECHBAI::ForwardTagger");
     }
     

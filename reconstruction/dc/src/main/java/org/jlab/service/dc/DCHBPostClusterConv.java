@@ -54,6 +54,11 @@ public class DCHBPostClusterConv extends DCEngine {
         this.getBankNames().setCrossesBank("HitBasedTrkg::HBCrosses");
         this.getBankNames().setTracksBank("HitBasedTrkg::HBTracks");
         this.getBankNames().setIdsBank("HitBasedTrkg::HBHitTrkId");
+        
+        super.registerOutputBank("HitBasedTrkg::HBSegments");
+        super.registerOutputBank("HitBasedTrkg::HBCrosses");
+        super.registerOutputBank("HitBasedTrkg::HBTracks");
+        super.registerOutputBank("HitBasedTrkg::HBHitTrkId");
     }
         
     @Override

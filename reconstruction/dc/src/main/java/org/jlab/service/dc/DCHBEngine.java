@@ -61,6 +61,13 @@ public class DCHBEngine extends DCEngine {
         this.getBankNames().setCrossesBank("HitBasedTrkg::HBCrosses");
         this.getBankNames().setTracksBank("HitBasedTrkg::HBTracks");
         this.getBankNames().setIdsBank("HitBasedTrkg::HBHitTrkId");
+        
+        super.registerOutputBank("HitBasedTrkg::HBHits");
+        super.registerOutputBank("HitBasedTrkg::HBClusters");
+        super.registerOutputBank("HitBasedTrkg::HBSegments");
+        super.registerOutputBank("HitBasedTrkg::HBCrosses");
+        super.registerOutputBank("HitBasedTrkg::HBTracks");
+        super.registerOutputBank("HitBasedTrkg::HBHitTrkId");
     }
     
     @Override

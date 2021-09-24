@@ -39,6 +39,9 @@ public class DCHBClustering extends DCEngine {
     public void initBankNames() {
         this.getBankNames().setHitsBank("HitBasedTrkg::HBHits");
         this.getBankNames().setClustersBank("HitBasedTrkg::HBClusters");
+        
+        super.registerOutputBank("HitBasedTrkg::HBHits");
+        super.registerOutputBank("HitBasedTrkg::HBClusters");
     }
     
     public static int sectorSelect;

@@ -79,6 +79,8 @@ public class RTPCEngine extends ReconstructionEngine{
 
         requireConstants(Arrays.asList(rtpcTables));
 
+        this.registerOutputBank("RTPC::hits","RTPC::tracks");
+
         return true;
     }
 

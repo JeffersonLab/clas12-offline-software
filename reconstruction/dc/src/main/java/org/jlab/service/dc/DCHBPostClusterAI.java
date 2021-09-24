@@ -52,6 +52,13 @@ public class DCHBPostClusterAI extends DCEngine {
         this.getBankNames().setCrossesBank("HitBasedTrkg::AICrosses");
         this.getBankNames().setTracksBank("HitBasedTrkg::AITracks");
         this.getBankNames().setIdsBank("HitBasedTrkg::AIHitTrkId");
+        
+        super.registerOutputBank("HitBasedTrkg::AIHits");
+        super.registerOutputBank("HitBasedTrkg::AIClusters");
+        super.registerOutputBank("HitBasedTrkg::AISegments");
+        super.registerOutputBank("HitBasedTrkg::AICrosses");
+        super.registerOutputBank("HitBasedTrkg::AITracks");
+        super.registerOutputBank("HitBasedTrkg::AIHitTrkId");
     }
     
     @Override

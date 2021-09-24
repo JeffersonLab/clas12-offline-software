@@ -37,7 +37,7 @@ public class EBTBAIEngine extends EBEngine {
         this.setCovMatrixBank("RECAI::CovMat");
         this.setTrajectoryBank("RECAI::Traj");        
         this.setFTBank("RECAI::ForwardTagger");
-        this.setFTOFHitsType("FTOF::hits");
+        this.setFTOFHitsType("FTOF::clusters");
         this.setTrackType("TimeBasedTrkg::AITracks");
         this.setTrajectoryType("TimeBasedTrkg::AITrajectory");
         this.setCovMatrixType("TimeBasedTrkg::AICovMat");

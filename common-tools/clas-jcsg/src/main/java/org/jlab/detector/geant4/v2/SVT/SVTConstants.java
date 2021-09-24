@@ -356,7 +356,7 @@ public class SVTConstants
 			// |			  | radius					  | radius
 			// |			  | 						  |
 			// o==============v===========================v===================================-> z (beamline)
-			System.out.println("SVT READ Z SHIFT VALUE "+cp.getDouble("/geometry/target/position", 0));
+			//System.out.println("SVT READ Z SHIFT VALUE "+cp.getDouble("/geometry/target/position", 0));
 			// LAYERRADIUS and ZSTARTACTIVE are used primarily by the Reconstruction and getStrip()
 			for( int region = 0; region < NREGIONS; region++ )
 			{
@@ -391,10 +391,10 @@ public class SVTConstants
                             for( int aSector = 0; aSector < NSECTORS[aRegion]; aSector++ )
                             {
                                 RSI[aRegion][aSector] = convertRegionSector2Index( aRegion, aSector );
-                                System.out.println(" a Region "+aRegion +" aSector "+aSector+" RSI "+RSI[aRegion][aSector] );
+                                //System.out.println(" a Region "+aRegion +" aSector "+aSector+" RSI "+RSI[aRegion][aSector] );
                             }
                         }
-			System.out.println("Reading alignment shifts from database");
+			//System.out.println("Reading alignment shifts from database");
 		
                         SECTORSHIFTDATA = new double[NTOTALSECTORS][];
                         

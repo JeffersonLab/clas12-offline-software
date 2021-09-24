@@ -12,7 +12,6 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.banks.Banks;
-import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.trajectory.TrajectorySurfaces;
 import org.jlab.utils.CLASResources;
 import org.jlab.utils.groups.IndexedTable;
@@ -239,7 +238,7 @@ public class DCEngine extends ReconstructionEngine {
         Constants.dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, Constants.ENDPLATESBOWING);
         for(int l=0; l<6; l++) {
             Constants.wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
-            System.out.println("****************** WPDIST READ *********FROM "+geoVariation+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
+            //System.out.println("****************** WPDIST READ *********FROM "+geoVariation+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
         }
         // Load target
         ConstantProvider providerTG = GeometryFactory.getConstants(DetectorType.TARGET, 11, geoVariation);
@@ -250,7 +249,6 @@ public class DCEngine extends ReconstructionEngine {
         Constants.ftofDetector = new FTOFGeant4Factory(providerFTOF);        
         ConstantProvider providerEC = GeometryFactory.getConstants(DetectorType.ECAL, 11, geoVariation);
         Constants.ecalDetector =  GeometryFactory.getDetector(DetectorType.ECAL, 11, geoVariation);
-        System.out.println(" -- Det Geometry constants are Loaded " );
 
         // create the surfaces
         Constants.tSurf = new TrajectorySurfaces();
@@ -315,4 +313,5 @@ public class DCEngine extends ReconstructionEngine {
     public void setBankNames(Banks bankNames) {
         this.bankNames = bankNames;
     }
+
 }

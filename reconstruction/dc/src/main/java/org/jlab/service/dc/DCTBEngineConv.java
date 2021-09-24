@@ -30,5 +30,13 @@ public class DCTBEngineConv extends DCTBEngine {
         this.getBankNames().setRecEventBank("RECHB::Event");
         this.getBankNames().setRecPartBank("RECHB::Particle");
         this.getBankNames().setRecTrackBank("RECHB::Track");
+                
+        super.registerOutputBank("TimeBasedTrkg::TBHits");
+        super.registerOutputBank("TimeBasedTrkg::TBClusters");
+        super.registerOutputBank("TimeBasedTrkg::TBSegments");
+        super.registerOutputBank("TimeBasedTrkg::TBCrosses");
+        super.registerOutputBank("TimeBasedTrkg::TBTracks");
+        super.registerOutputBank("TimeBasedTrkg::TBCovMat");
+        super.registerOutputBank("TimeBasedTrkg::Trajectory");
     }
 }

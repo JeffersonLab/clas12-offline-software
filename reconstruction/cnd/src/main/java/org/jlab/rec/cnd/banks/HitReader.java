@@ -84,7 +84,7 @@ public class HitReader {
 			HalfHit newhit = null;
 
 			// First, carry out checks on the quality of the signals:	    	  
-			if (adc == 0 || tdc == 0 || tdc == Parameters.NullTDC || indextdc==-1) continue; // require good ADC and TDC values
+			if (adc == 0 || tdc == 0 || tdc == Parameters.NullTDC || indextdc==-1 || ccdb.Status_LR[sector-1][layer-1][order]!=0) continue; // require good ADC and TDC values
 
 			newhit = new HalfHit(sector, layer, component, triggerPhase, adc, tdc, i,indextdc, ccdb); 
 

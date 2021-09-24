@@ -36,7 +36,8 @@ public class HTCCReconstructionService extends ReconstructionEngine{
               reco.gain       = this.getConstantsManager().getConstants(runNo, "/calibration/htcc/gain");
               reco.time       = this.getConstantsManager().getConstants(runNo, "/calibration/htcc/time");
               reco.ring_time  = this.getConstantsManager().getConstants(runNo, "/calibration/htcc/ring_time");
-              reco.cluster_par    = this.getConstantsManager().getConstants(runNo, "/calibration/htcc/cluster");
+              reco.cluster_par= this.getConstantsManager().getConstants(runNo, "/calibration/htcc/cluster");
+              reco.status     = this.getConstantsManager().getConstants(runNo, "/calibration/htcc/status");
               reco.geometry   = this.getConstantsManager().getConstants(runNo, "/geometry/htcc/htcc");
               reco.processEvent(event);
         } catch (Exception e){
@@ -57,12 +58,14 @@ public class HTCCReconstructionService extends ReconstructionEngine{
             "/calibration/htcc/time", 
             "/calibration/htcc/ring_time", 
             "/calibration/htcc/cluster", 
+            "/calibration/htcc/status", 
             "/geometry/htcc/htcc", 
     
         };
+            
+        this.registerOutputBank("HTCC::rec");
         
         requireConstants(Arrays.asList(htccTables));
-        System.out.println("-----> INITIALIZING HTCC as a SERVICE...");
         return true;
     }
 
