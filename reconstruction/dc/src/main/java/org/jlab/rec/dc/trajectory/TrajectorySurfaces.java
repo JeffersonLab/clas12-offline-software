@@ -35,7 +35,7 @@ public class TrajectorySurfaces {
     }
 
     public void LoadSurfaces(double targetPosition, double targetLength, DCGeant4Factory dcDetector,
-            FTOFGeant4Factory ftofDetector, Detector ecalDetector, double[] FVT_Z) {
+            FTOFGeant4Factory ftofDetector, Detector ecalDetector, Detector fmtDetector) {
         // creating Boundaries for MS
         Constants.Z[0]= targetPosition;
         Constants.Z[1]= dcDetector.getWireMidpoint(0, 0, 0, 0).z;
@@ -53,10 +53,9 @@ public class TrajectorySurfaces {
         //DcDetector.getWireMidpoint(this.get_Sector()-1, this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).z;
 
         double d = 0;
-        Vector3D n;
+        Vector3D n,P;
         for(int is=0; is<6; is++) {
-            int index = 0;
-
+            
             System.out.println(" CREATING SURFACES FOR SECTOR "+(is+1));
             this._DetectorPlanes.add(new ArrayList<Surface>());
 
@@ -65,9 +64,12 @@ public class TrajectorySurfaces {
             this._DetectorPlanes.get(is).add(new Surface(DetectorType.TARGET, DetectorLayer.TARGET_CENTER, targetPosition, 0., 0., 1.));
 
             // Add FMT layers
-            for (int li=0; li<6; ++li)
-                this._DetectorPlanes.get(is).add(new Surface(DetectorType.FMT, li+1, FVT_Z[li], 0., 0., 1.));
-            index=7; // end of MM + HTCC(7)
+            for (int li=0; li<6; ++li) {
+                P = fmtDetector.getSector(0).getSuperlayer(0).getLayer(li).getPlane().point().toVector3D();
+                n = fmtDetector.getSector(0).getSuperlayer(0).getLayer(li).getPlane().normal();
+                d = P.dot(n);
+                this._DetectorPlanes.get(is).add(new Surface(DetectorType.FMT, li+1, d,  n.x(), n.y(), n.z()));
+            }
             // Add DC
             //n = this.RotateFromTSCtoLabC(0,0,1, is+1).toVector3D();
             // don't rotate to the lab
@@ -81,7 +83,7 @@ public class TrajectorySurfaces {
             }
             //outer detectors
              //FTOF 2
-            Vector3D  P = ftofDetector.getMidPlane(is+1, DetectorLayer.FTOF2).point().toVector3D();
+            P = ftofDetector.getMidPlane(is+1, DetectorLayer.FTOF2).point().toVector3D();
             n = ftofDetector.getMidPlane(is+1, DetectorLayer.FTOF2).normal();
             d = P.dot(n);
             this._DetectorPlanes.get(is).add(new Surface(DetectorType.FTOF, DetectorLayer.FTOF2, -d, -n.x(), -n.y(), -n.z()));
