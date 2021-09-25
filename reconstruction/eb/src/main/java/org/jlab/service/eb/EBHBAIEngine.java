@@ -24,17 +24,10 @@ public class EBHBAIEngine extends EBEngine {
 
     @Override
     public void initBankNames() {
-        this.setEventBank("RECHBAI::Event");
-        this.setParticleBank("RECHBAI::Particle");
-        this.setCalorimeterBank("RECHBAI::Calorimeter");
-        this.setCherenkovBank("RECHBAI::Cherenkov");
-        this.setScintillatorBank("RECHBAI::Scintillator");
-        this.setScintClusterBank("RECHBAI::ScintExtras");
-        this.setTrackBank("RECHBAI::Track");
-        this.setCrossBank("RECHBAI::TrackCross");
-        this.setTrackType("HitBasedTrkg::AITracks");
-        this.setFTOFHitsType("FTOF::hbclusters");
-        this.setFTBank("RECHBAI::ForwardTagger");
+	this.setOutputBankPrefix("RECHBAI");
+
+	this.setTrackType("HitBasedTrkg::AITracks");
+         this.setFTOFHitsType("FTOF::hbclusters");
     }
     
 }

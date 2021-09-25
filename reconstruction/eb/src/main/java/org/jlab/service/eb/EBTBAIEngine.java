@@ -24,19 +24,8 @@ public class EBTBAIEngine extends EBEngine {
 
     @Override
     public void initBankNames() {
-        this.setEventBank("RECAI::Event");
-        this.setParticleBank("RECAI::Particle");
-        this.setEventBankFT("RECFTAI::Event");
-        this.setParticleBankFT("RECFTAI::Particle");
-        this.setCalorimeterBank("RECAI::Calorimeter");
-        this.setCherenkovBank("RECAI::Cherenkov");
-        this.setScintillatorBank("RECAI::Scintillator");
-        this.setScintClusterBank("RECAI::ScintExtras");
-        this.setTrackBank("RECAI::Track");
-        this.setCrossBank("RECAI::TrackCross");
-        this.setCovMatrixBank("RECAI::CovMat");
-        this.setTrajectoryBank("RECAI::Traj");        
-        this.setFTBank("RECAI::ForwardTagger");
+        this.setOutputBankPrefix("RECAI");
+
         this.setFTOFHitsType("FTOF::clusters");
         this.setTrackType("TimeBasedTrkg::AITracks");
         this.setTrajectoryType("TimeBasedTrkg::AITrajectory");

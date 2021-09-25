@@ -12,7 +12,7 @@ package org.jlab.service.dc;
 public class DCTBEngineAI extends DCTBEngine {
     
     public DCTBEngineAI() {
-        super("DCTBAI");
+        super("DCTAI");
     }
     
     @Override

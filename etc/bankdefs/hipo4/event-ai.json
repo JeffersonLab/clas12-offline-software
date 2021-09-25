@@ -452,7 +452,7 @@
         ]
     },
     {
-        "name": "RECFTAI::Event",
+        "name": "RECAIFT::Event",
         "group": 400,
         "item": 41,
         "info": "Event Header Bank, shadowing RECAI::Event with FT-based start time",
@@ -462,7 +462,7 @@
         ]
     },
     {
-        "name": "RECFTAI::Particle",
+        "name": "RECAIFT::Particle",
         "group": 400,
         "item" : 42,
         "info": "Reconstructed Particle Information, shadowing RECAI::Particle with FT-based start time",

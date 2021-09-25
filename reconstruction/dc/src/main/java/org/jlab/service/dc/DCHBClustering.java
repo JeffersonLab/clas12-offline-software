@@ -25,7 +25,7 @@ public class DCHBClustering extends DCEngine {
     //ability to plug in more than once
 
     public DCHBClustering() {
-        super("DCHB");
+        super("DCCR");
     }
     
     @Override

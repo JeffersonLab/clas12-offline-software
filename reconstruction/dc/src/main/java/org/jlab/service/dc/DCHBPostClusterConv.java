@@ -34,7 +34,7 @@ import org.jlab.rec.dc.trajectory.RoadFinder;
  */
 public class DCHBPostClusterConv extends DCEngine {
     public DCHBPostClusterConv() {
-        super("DCHBCONV");
+        super("DCHB");
     }
     
     @Override

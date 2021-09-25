@@ -16,16 +16,16 @@ services:
     name: FTEB
 # DC clustering: nominal algoritm, filled the cluster bank for ai and conventional tracking
   - class: org.jlab.service.dc.DCHBClustering
-    name: DCRC
+    name: DCCR
 # This is where the AI plugin would go.  THe AI code reads the HB clusters.  
   - class: org.jlab.service.mltn.MLTDEngine
     name: MLTD
 # DC using clustering: regular HB tracking
   - class: org.jlab.service.dc.DCHBPostClusterConv
-    name: DCRPC
+    name: DCHB
 # DC using clustering on AI hits: NN assisted HB tracking
   - class: org.jlab.service.dc.DCHBPostClusterAI
-    name: DCAC
+    name: DCHAI
   - class: org.jlab.service.ftof.FTOFHBEngine
     name: FTOFHB
   - class: org.jlab.service.ec.ECEngine
@@ -48,10 +48,10 @@ services:
     name: EBHAI
 # DC regular TB tracking    
   - class: org.jlab.service.dc.DCTBEngineConv
-    name: DCRTB
+    name: DCTB
 # DC AI assisted TB tracking    
   - class: org.jlab.service.dc.DCTBEngineAI
-    name: DCATB  
+    name: DCTAI  
   - class: org.jlab.service.ftof.FTOFTBEngine
     name: FTOFTB
   - class: org.jlab.service.eb.EBTBEngine

@@ -11,7 +11,7 @@ package org.jlab.service.dc;
  */
 public class DCTBEngineConv extends DCTBEngine {
     public DCTBEngineConv() {
-        super("DCTBCONV");
+        super("DCTB");
     }
     
     @Override

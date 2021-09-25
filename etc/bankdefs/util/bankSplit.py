@@ -54,7 +54,7 @@ tag1 = ["RUN::config", "RAW::epics", "RAW::scaler", "RUN::scaler", "COAT::config
 # these are the output of the event builder:
 rectb   = ["REC::Event","REC::Particle","REC::Calorimeter","REC::Cherenkov","REC::CovMat","REC::ForwardTagger","REC::Scintillator","REC::ScintExtras","REC::Track","REC::Traj","RECFT::Event","RECFT::Particle"]
 rechb   = ["RECHB::Event","RECHB::Particle","RECHB::Calorimeter","RECHB::Cherenkov","RECHB::ForwardTagger","RECHB::Scintillator","RECHB::ScintExtras","RECHB::Track"]
-rectbai = ["RECAI::Event","RECAI::Particle","RECAI::Calorimeter","RECAI::Cherenkov","RECAI::CovMat","RECAI::ForwardTagger","RECAI::Scintillator","RECAI::ScintExtras","RECAI::Track","RECAI::Traj","RECFTAI::Event","RECFTAI::Particle"]
+rectbai = ["RECAI::Event","RECAI::Particle","RECAI::Calorimeter","RECAI::Cherenkov","RECAI::CovMat","RECAI::ForwardTagger","RECAI::Scintillator","RECAI::ScintExtras","RECAI::Track","RECAI::Traj","RECAIFT::Event","RECAIFT::Particle"]
 rechbai = ["RECHBAI::Event","RECHBAI::Particle","RECHBAI::Calorimeter","RECHBAI::Cherenkov","RECHBAI::ForwardTagger","RECHBAI::Scintillator","RECHBAI::ScintExtras","RECHBAI::Track"]
 
 # special, detector-specific raw banks that are kept in DSTs (for now):

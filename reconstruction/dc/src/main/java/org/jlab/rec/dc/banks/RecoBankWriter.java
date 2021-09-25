@@ -936,8 +936,8 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
                     this.fillTBSegmentsBank(event, segments),
                     this.fillTBCrossesBank(event, crosses),
                     this.fillTBTracksBank(event, trkcands),
-                    this.fillTrajectoryBank(event, trkcands)
-//                    this.fillTrackCovMatBank(event, trkcands)
+                    this.fillTrajectoryBank(event, trkcands),
+                    this.fillTrackCovMatBank(event, trkcands)
                     );
         }
         if (crosses != null && trkcands == null) {

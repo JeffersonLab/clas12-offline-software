@@ -32,7 +32,7 @@ import org.jlab.rec.dc.track.TrackCandListFinder;
 public class DCHBPostClusterAI extends DCEngine {
 
     public DCHBPostClusterAI() {
-        super("DCHBAI");
+        super("DCHAI");
     }
     
     
