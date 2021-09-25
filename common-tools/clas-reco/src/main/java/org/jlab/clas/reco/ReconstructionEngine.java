@@ -112,6 +112,28 @@ public abstract class ReconstructionEngine implements Engine {
     }
 
     /**
+     * Choose one of YAML or ENV values.
+     * @param envVarName
+     * @param yamlVarName
+     * @return YAML else ENV else null
+     */
+    public String chooseEnvOrYaml(final String envVarName, final String yamlVarName) {
+        String value = this.getEngineConfigString(yamlVarName);
+        if (value!=null) {
+            System.out.println(String.format("[%s] Chose based on YAML: %s = %s",
+                    this.getName(), yamlVarName, value));
+        }
+        else {
+            value = System.getenv(envVarName);
+            if (value!=null) {
+                System.out.println(String.format("[%s] Chose based on ENV: %s = %s",
+                        this.getName(), envVarName, value));
+            }
+        }
+        return value;
+    }
+
+    /**
      *
      * @param ed
      * @return
