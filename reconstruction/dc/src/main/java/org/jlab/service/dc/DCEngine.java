@@ -32,59 +32,33 @@ public class DCEngine extends ReconstructionEngine {
     public void setOptions() {
         
         // Get the constants for the correct variation
-        geoVariation = this.getEngineConfigString("dcGeometryVariation");
-        if (geoVariation!=null) {
-            System.out.println("["+this.getName()+"] run with geometry variation based on yaml = "+geoVariation);
-        }
-        else {
-            geoVariation = System.getenv("COAT_DC_GEOMETRYVARIATION");
-            if (geoVariation!=null) {
-                System.out.println("["+this.getName()+"] run with geometry variation chosen based on env = "+geoVariation);
-            }
-        } 
+        geoVariation = this.chooseEnvOrYaml("COAT_DC_GEOMETRYVARIATION", "dcGeometryVariation");
         if (geoVariation==null) {
             geoVariation = "default";
             System.out.println("["+this.getName()+"] run with default geometry");
         }
         
-    //AI settings for selecting specific sector
-        String sectorSelect = this.getEngineConfigString("sectorSelect");
+        //AI settings for selecting specific sector
+        String sectorSelect = this.chooseEnvOrYaml("COAT_DC_SECTORSELECT","sectorSelect");
         if (sectorSelect!=null) {
-            System.out.println("["+this.getName()+"] run with sector config chosen based on yaml = "+sectorSelect);
-            selectedSector=Integer.parseInt(sectorSelect); 
+             selectedSector=Integer.parseInt(sectorSelect);
         }
         else {
-            sectorSelect = System.getenv("COAT_DC_SECTORSELECT");
-            if (sectorSelect!=null) {
-                System.out.println("["+this.getName()+"] run with sector config chosen based on env = "+sectorSelect);
-                selectedSector=Integer.parseInt(sectorSelect);
-            }
+            System.out.println("["+this.getName()+"] run with sector config chosen based on default = "+selectedSector);
         }
-        if (sectorSelect==null) {
-             System.out.println("["+this.getName()+"] run with sector config chosen based on default = "+sectorSelect);
-        }
-        
+            
         // Load config
-        String useSTTConf = this.getEngineConfigString("dcUseStartTime");
+        String useSTTConf = this.chooseEnvOrYaml("COAT_DC_USESTARTTIME","dcUseStartTime");
         if (useSTTConf!=null) {
-            System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on yaml = "+useSTTConf);
             useStartTime = Boolean.valueOf(useSTTConf);
         }
         else {
-            useSTTConf = System.getenv("COAT_DC_USESTARTTIME");
-            if (useSTTConf!=null) {
-                System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on env = "+useSTTConf);
-                useStartTime = Boolean.valueOf(useSTTConf);
-            }
-        }
-        if (useSTTConf==null) {
-             System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on default = "+Constants.isUSETSTART());
+            System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on default = "+useStartTime);
         }
         
         // Wire distortions
-        String wireDistortionsFlag = this.getEngineConfigString("dcWireDistortion");        
+        String wireDistortionsFlag = this.chooseEnvOrYaml("COAT_DC_WIREDISTORTION","dcWireDistortion");        
         if (wireDistortionsFlag!=null) {
-            System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on yaml = "+wireDistortionsFlag);
             if(Boolean.valueOf(wireDistortionsFlag)==true) {
                 //Constants.setWIREDIST(1.0);
                 wireDistortion = DCGeant4Factory.ENDPLATESBOWON;
@@ -94,62 +68,30 @@ public class DCEngine extends ReconstructionEngine {
             }
         }
         else {
-            wireDistortionsFlag = System.getenv("COAT_DC_WIREDISTORTION"); 
-            if (wireDistortionsFlag!=null) {
-                System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on env = "+wireDistortionsFlag);
-                if(Boolean.valueOf(wireDistortionsFlag)==true) {
-                    //Constants.setWIREDIST(1.0);
-                    wireDistortion = DCGeant4Factory.ENDPLATESBOWON;
-                } else {
-                    //Constants.setWIREDIST(0);
-                    wireDistortion = DCGeant4Factory.ENDPLATESBOWOFF;
-                }
-            }
+            System.out.println("["+this.getName()+"] run with default setting for wire distortions in tracking (MC-off/Data-on)");
         }
-        if (wireDistortionsFlag==null) {
-             System.out.println("["+this.getName()+"] run with default setting for wire distortions in tracking (MC-off/Data-on)");
-        }
-        //Use time in tBeta function (true: use time; false: use track doca)
-        String useTIMETBETA = this.getEngineConfigString("dcTimeTBeta");
         
+        //Use time in tBeta function (true: use time; false: use track doca)
+        String useTIMETBETA = this.chooseEnvOrYaml("COAT_DC_USETIMETBETA","dcTimeTBeta");
         if (useTIMETBETA!=null) {
-            System.out.println("["+this.getName()+"] run with new tBeta chosen based on yaml = "+useTIMETBETA);
             useTimeBeta = (Boolean.valueOf(useTIMETBETA));
         }
         else {
-            useTIMETBETA = System.getenv("COAT_DC_USETIMETBETA");
-            if (useTIMETBETA!=null) {
-                System.out.println("["+this.getName()+"] run with with new tBeta config chosen based on env = "+useTIMETBETA);
-                useTimeBeta = (Boolean.valueOf(useTIMETBETA));
-            }
-        }
-        if (useTIMETBETA==null) {
-             System.out.println("["+this.getName()+"] run with with new tBeta config chosen based on default = "+Constants.useUSETIMETBETA());
+            System.out.println("["+this.getName()+"] run with with new tBeta config chosen based on default = "+useTimeBeta);
         }
         //CHECKBETA
         //Use beta cut(true: use time; false: use track doca)
-        String useBETACUT = this.getEngineConfigString("dcBetaCut");
-        
+        String useBETACUT = this.chooseEnvOrYaml("COAT_DC_USEBETACUT","dcBetaCut");
         if (useBETACUT!=null) {
-            System.out.println("["+this.getName()+"] run with Beta cut chosen based on yaml = "+useBETACUT);
             useBetaCut =Boolean.valueOf(useBETACUT);
         }
         else {
-            useBETACUT = System.getenv("COAT_DC_USEBETACUT");
-            if (useBETACUT!=null) {
-                System.out.println("["+this.getName()+"] run with with with Beta cut config chosen based on env = "+useBETACUT);
-                useBetaCut = Boolean.valueOf(useBETACUT);
-            }
-        }
-        if (useBETACUT==null) {
-             System.out.println("["+this.getName()+"] run with with Beta cut config chosen based on default = "+useBetaCut);
+            System.out.println("["+this.getName()+"] run with with Beta cut config chosen based on default = "+useBetaCut);
         }
         
         //T2D Function
-        String T2Dfcn = this.getEngineConfigString("dcT2DFunc");
-        
+        String T2Dfcn = this.chooseEnvOrYaml("COAT_DC_T2DFUNC","dcT2DFunc");       
         if (T2Dfcn!=null) {
-            System.out.println("["+this.getName()+"] run with time to distance function in tracking config chosen based on yaml = "+T2Dfcn);
             if(T2Dfcn.equalsIgnoreCase("Polynomial")) {
                 t2d=1;
             } else {
@@ -157,44 +99,20 @@ public class DCEngine extends ReconstructionEngine {
             }
         }
         else {
-            T2Dfcn = System.getenv("COAT_DC_T2DFUNC");
-            if (T2Dfcn!=null) {
-                System.out.println("["+this.getName()+"] run with time to distance function in config chosen based on env = "+T2Dfcn);
-                if(T2Dfcn.equalsIgnoreCase("Polynomial")) {
-                t2d=1;
-            } else {
-                t2d=0;
-            }
-            }
+            System.out.println("["+this.getName()+"] run with time to distance exponential function in tracking ");
         }
-        if (T2Dfcn==null) {
-             System.out.println("["+this.getName()+"] run with time to distance exponential function in tracking ");
-        }
+        
         //NSUPERLAYERTRACKING
-        String useFOOST = this.getEngineConfigString("dcFOOST");        
+        String useFOOST = this.chooseEnvOrYaml("COAT_DC_USEFOOST","dcFOOST");        
         if (useFOOST!=null) {
             if(Boolean.valueOf(useFOOST)==true) {
                 nSuperLayer =5;
             } else {
                 nSuperLayer =6;
-            }
-            System.out.println("["+this.getName()+"] run with Five-out-of-six-superlayer-trkg chosen based on yaml = "+nSuperLayer);
-                
+            }    
         }
         else {
-            useFOOST = System.getenv("COAT_DC_USEFOOST");
-            if (useFOOST!=null) {
-                if(Boolean.valueOf(useFOOST)==true) {
-                    nSuperLayer =5;
-                } else {
-                    nSuperLayer =6;
-                }
-                System.out.println("["+this.getName()+"] run with with with Five-out-of-six-superlayer-trkg config chosen based on env = "+nSuperLayer);               
-            }
-        }
-        if (useFOOST==null) {
-             System.out.println("["+this.getName()+"] run with with Five-out-of-six-superlayer-trkg config chosen based on default = "+nSuperLayer);
-             nSuperLayer =5;
+            System.out.println("["+this.getName()+"] run with with Five-out-of-six-superlayer-trkg config chosen based on default = "+nSuperLayer);
         }
     }
     
