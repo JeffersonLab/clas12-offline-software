@@ -3,8 +3,12 @@ package org.jlab.rec.dc;
 import java.util.ArrayList;
 
 import cnuphys.snr.NoiseReductionParameters;
+import java.util.Optional;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
+import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.base.Detector;
 import org.jlab.rec.dc.trajectory.TrajectorySurfaces;
 
@@ -13,16 +17,64 @@ import org.jlab.rec.dc.trajectory.TrajectorySurfaces;
  */
 public class Constants {
 
-    private static boolean ConstantsLoaded = false;
-    // RECONSTRUCTION PARAMETERS
-    public static final int DC_MIN_NLAYERS = 4;
-    public static final double SPEEDLIGHT = 29.97924580;
-    // DATABASE VARIATION
-    //public static final String DBVAR = "default";
-    public static double NSUPERLAYERTRACKING = 5;
-    public static double TSTARTEST = 560.;
-    // GEOMETRY PARAMETERS
+    // private constructor for a singleton
+    private Constants() {
+    }
+    
+    // singleton
+    private static Constants instance = null;
+    
+    /**
+     * public access to the singleton
+     * 
+     * @return the dc constants singleton
+     */
+    public static Constants getInstance() {
+            if (instance == null) {
+                    instance = new Constants();
+            }
+            return instance;
+    }
 
+    private static boolean ConstantsLoaded = false;
+    
+    public static boolean DEBUG = false;
+
+    // PHYSICS CONSTANTS
+    public static final double SPEEDLIGHT = 29.97924580;
+    public static final double LIGHTVEL = 0.00299792458;        // velocity of light (cm/ns) - conversion factor from radius in cm to momentum in GeV/c
+
+    // CONFIGURABLE PARAMETERS
+    private static String  GEOVARIATION = "default";    
+    private static boolean ENDPLATESBOWING = false;
+    private static double  WIREDIST = 0.0;
+    public static int      SECTORSELECT = 0;
+    public static double   NSUPERLAYERTRACKING = 5;
+    private static boolean USETSTART = true;
+    private static boolean USETIMETBETA = false;
+    private static boolean CHECKBETA = false;
+    private static double  T2D = 0;     
+    
+    public static final String DOCARES      = "/calibration/dc/signal_generation/doca_resolution";
+    public static final String TIME2DIST    = "/calibration/dc/time_to_distance/time2dist";
+    public static final String T0CORRECTION = "/calibration/dc/time_corrections/T0Corrections";
+    public static final String TDCTCUTS     = "/calibration/dc/time_corrections/tdctimingcuts";
+    public static final String WIRESTAT     = "/calibration/dc/tracking/wire_status";
+    public static final String TIMEJITTER   = "/calibration/dc/time_jitter";
+    public static final String BEAMPOS      = "/geometry/beam/position";
+
+    public static final String HITBASE = "HitBased";
+    
+    // GEOMETRY PARAMETERS
+    // geometry constants not yet read from CCDB of from geometry services
+    public static DCGeant4Factory    dcDetector   = null;
+    public static FTOFGeant4Factory  ftofDetector = null;
+    public static Detector           ecalDetector = null;
+    public static TrajectorySurfaces tSurf        = null;
+    
+    public static double htccRadius=175;
+    public static double ltccPlane=653.09;
+    
     // other CLAS12 parameters
     public static final  int NSECT  = 6;
     public static final  int NSLAY  = 6;
@@ -40,9 +92,22 @@ public class Constants {
     public static final double[] TIMEWINMINEDGE = {-25.0,-25.0,-25.0};
     public static final double[] TIMEWINMAXEDGE = {275.0,350.0,750.0};
 
+    public static double SEEDCUT = 5000;
+    public static double MINPATH = 200;
+    public static double BETAHIGH = 1.5;
+    public static double BETALOW = 0.15;
+    //max number of hits allowed in the event to do tracking
+    public static double MAXHITS = 2000;
+    public static double TSTARTEST = 560.;
 
-    public static final double LIGHTVEL = 0.00299792458;        // velocity of light (cm/ns) - conversion factor from radius in cm to momentum in GeV/c
+    public static double TRANSVTXCUT = 20;
+    
+    public static double AVEDRIFTVEL = 0.0027; //velocity in cm / ns. [CLAS-Note 96-008]
+    public static double DOCASUMMAXFAC = 1.6;
 
+
+    // RECONSTRUCTION PARAMETERS
+    public static final int DC_MIN_NLAYERS = 4;
     // V0 averaged value in t(beta) term denominator
     public static final double V0AVERAGED = 0.005; //was 0.007 - modified 05/28/2019
     /// A region-segment contains two segments if they are in the same sector
@@ -65,7 +130,6 @@ public class Constants {
      * All clusters below this size are passed at hit-based tracking level; we do not attempt to split clusters with size smaller than this.
      */
     public static final int HITBASEDTRKGNONSPLITTABLECLSSIZE = 8;
-
     /**
      * The number of end cells to keep in a column of hits -- this applies to the DC-hit pruning algorithm
      */
@@ -74,7 +138,6 @@ public class Constants {
      * The number of end cells to keep in a column of 4 hits but less than 10 hit -- this applies to the DC-hit pruning algorithm
      */
     public static final int NBENDCELLSTOKEEPMORETHAN4HITSINCOLUMN = 2;
-
 
     public static final double TRACKSELECTQFMINCHSQ = 10000; 
     public static final double TCHISQPROBFITXZ = 0.01;
@@ -168,22 +231,8 @@ public class Constants {
 
     public static int[][] STBLOC;
 
-    private static boolean USETSTART = true;
-    private static boolean USETIMETBETA = false;
+    public static final double[][][] MAXENDPLTDEFLEC = new double[3][6][2];
     
-    public static double SEEDCUT = 5000;
-    public static double MINPATH = 200;
-    public static double BETAHIGH = 1.5;
-    public static double BETALOW = 0.15;
-    //max number of hits allowed in the event to do tracking
-    public static double MAXHITS = 2000;
-    ;
-    public static double TRANSVTXCUT = 20;
-    
-    public static double AVEDRIFTVEL = 0.0027; //velocity in cm / ns. [CLAS-Note 96-008]
-    public static boolean CHECKBETA = false;
-    public static double DOCASUMMAXFAC = 1.6;
-    public static boolean DEBUG = false;
 
     public static boolean isUSETSTART() {
         return USETSTART;
@@ -201,29 +250,83 @@ public class Constants {
         Constants.USETIMETBETA = USETIMETBETA;
     }
        
-    public static boolean ENDPLATESBOWING = false;
-    
-    private static double WIREDIST = 0.0;
-
-    /**
-     * @return the WIREDIST
-     */
     public static double getWIREDIST() {
         return WIREDIST;
     }
 
-    /**
-     * @param aMCDIST the WIREDIST to set
-     */
     public static void setWIREDIST(double aDIST) {
         WIREDIST = aDIST;
     }
+
+    public static String getGEOVARIATION() {
+        return GEOVARIATION;
+    }
+
+    public static void setGEOVARIATION(String GEOVARIATION) {
+        Constants.GEOVARIATION = GEOVARIATION;
+    }
+
+    public static boolean ENDPLATESBOWING() {
+        return ENDPLATESBOWING;
+    }
+
+    public static void setENDPLATESBOWING(boolean ENDPLATESBOWING) {
+        Constants.ENDPLATESBOWING = ENDPLATESBOWING;
+    }
+
+    public static boolean USEBETACUT() {
+        return CHECKBETA;
+    }
+
+    public static void setBETACUT(boolean CHECKBETA) {
+        Constants.CHECKBETA = CHECKBETA;
+    }
+
+    public static void  setT2D(int i) {
+        Constants.T2D = i;
+    }
+    public static double getT2D() {
+        return Constants.T2D;
+    }
+
+    public synchronized void initialize(String variation, 
+                                               boolean wireDistortion,
+                                               boolean useStartTime,
+                                               boolean useTimeBeta,
+                                               boolean useBetaCut,
+                                               int t2d, int nSuperLayer,
+                                               int selectedSector) {
+        if (ConstantsLoaded) return;
+        
+        GEOVARIATION    = variation;
+        ENDPLATESBOWING = wireDistortion;
+        USETSTART       = useStartTime;
+        USETIMETBETA    = useTimeBeta;
+        CHECKBETA       = useBetaCut;
+        T2D             = t2d;
+        NSUPERLAYERTRACKING = nSuperLayer;
+        SECTORSELECT    = selectedSector;
+        
+        LoadConstants();
+        
+        LoadGeometry(GEOVARIATION);
+        
+        ConstantsLoaded = true;
+    }
     
-    public static final double[][][] MAXENDPLTDEFLEC = new double[3][6][2];
+    public synchronized void initialize() {
+        if (ConstantsLoaded) return;
+        
+        LoadConstants();
+        
+        LoadGeometry(GEOVARIATION);
+        
+        ConstantsLoaded = true;
+    }
     
-    public static synchronized void Load() {
-        if (ConstantsLoaded)
-                return;
+    
+    private static synchronized void LoadConstants() {
+        CombArray.clear();
         CombArray.add(CombArray1Layer);
         CombArray.add(CombArray2Layers);
         CombArray.add(CombArray3Layers);
@@ -248,84 +351,69 @@ public class Constants {
             STBLOC[5][sl]=-1;
         }
 
-            NoiseReductionParameters.setLookForTracks(false);
+        NoiseReductionParameters.setLookForTracks(false);
 
-            MAXENDPLTDEFLEC[0][0][0] = 0.20;
-            MAXENDPLTDEFLEC[0][0][1] = 0.23;
-            MAXENDPLTDEFLEC[0][1][0] = 0.24;
-            MAXENDPLTDEFLEC[0][1][1] = 0.21;
-            MAXENDPLTDEFLEC[0][2][0] = 0.21;
-            MAXENDPLTDEFLEC[0][2][1] = 0.24;
-            MAXENDPLTDEFLEC[0][3][0] = 0.23;
-            MAXENDPLTDEFLEC[0][3][1] = 0.20;
-            MAXENDPLTDEFLEC[0][4][0] = 0.20;
-            MAXENDPLTDEFLEC[0][4][1] = 0.26;
-            MAXENDPLTDEFLEC[0][5][0] = 0.26;
-            MAXENDPLTDEFLEC[0][5][1] = 0.20;
+        MAXENDPLTDEFLEC[0][0][0] = 0.20;
+        MAXENDPLTDEFLEC[0][0][1] = 0.23;
+        MAXENDPLTDEFLEC[0][1][0] = 0.24;
+        MAXENDPLTDEFLEC[0][1][1] = 0.21;
+        MAXENDPLTDEFLEC[0][2][0] = 0.21;
+        MAXENDPLTDEFLEC[0][2][1] = 0.24;
+        MAXENDPLTDEFLEC[0][3][0] = 0.23;
+        MAXENDPLTDEFLEC[0][3][1] = 0.20;
+        MAXENDPLTDEFLEC[0][4][0] = 0.20;
+        MAXENDPLTDEFLEC[0][4][1] = 0.26;
+        MAXENDPLTDEFLEC[0][5][0] = 0.26;
+        MAXENDPLTDEFLEC[0][5][1] = 0.20;
+
+        MAXENDPLTDEFLEC[1][0][0] = 0.085;
+        MAXENDPLTDEFLEC[1][0][1] = 0.180;
+        MAXENDPLTDEFLEC[1][1][0] = 0.121;
+        MAXENDPLTDEFLEC[1][1][1] = 0.123;
+        MAXENDPLTDEFLEC[1][2][0] = 0.123;
+        MAXENDPLTDEFLEC[1][2][1] = 0.121;
+        MAXENDPLTDEFLEC[1][3][0] = 0.180;
+        MAXENDPLTDEFLEC[1][3][1] = 0.085;
+        MAXENDPLTDEFLEC[1][4][0] = 0.190;
+        MAXENDPLTDEFLEC[1][4][1] = 0.095;
+        MAXENDPLTDEFLEC[1][5][0] = 0.095;
+        MAXENDPLTDEFLEC[1][5][1] = 0.190;
+
+        MAXENDPLTDEFLEC[2][0][0] = 0.;
+        MAXENDPLTDEFLEC[2][0][1] = 0.;
+        MAXENDPLTDEFLEC[2][1][0] = 0.;
+        MAXENDPLTDEFLEC[2][1][1] = 0.;
+        MAXENDPLTDEFLEC[2][2][0] = 0.;
+        MAXENDPLTDEFLEC[2][2][1] = 0.;
+        MAXENDPLTDEFLEC[2][3][0] = 0.;
+        MAXENDPLTDEFLEC[2][3][1] = 0.;
+        MAXENDPLTDEFLEC[2][4][0] = 0.;
+        MAXENDPLTDEFLEC[2][4][1] = 0.;
+        MAXENDPLTDEFLEC[2][5][0] = 0.;
+        MAXENDPLTDEFLEC[2][5][1] = 0.;
             
-            MAXENDPLTDEFLEC[1][0][0] = 0.085;
-            MAXENDPLTDEFLEC[1][0][1] = 0.180;
-            MAXENDPLTDEFLEC[1][1][0] = 0.121;
-            MAXENDPLTDEFLEC[1][1][1] = 0.123;
-            MAXENDPLTDEFLEC[1][2][0] = 0.123;
-            MAXENDPLTDEFLEC[1][2][1] = 0.121;
-            MAXENDPLTDEFLEC[1][3][0] = 0.180;
-            MAXENDPLTDEFLEC[1][3][1] = 0.085;
-            MAXENDPLTDEFLEC[1][4][0] = 0.190;
-            MAXENDPLTDEFLEC[1][4][1] = 0.095;
-            MAXENDPLTDEFLEC[1][5][0] = 0.095;
-            MAXENDPLTDEFLEC[1][5][1] = 0.190;
-            
-            MAXENDPLTDEFLEC[2][0][0] = 0.;
-            MAXENDPLTDEFLEC[2][0][1] = 0.;
-            MAXENDPLTDEFLEC[2][1][0] = 0.;
-            MAXENDPLTDEFLEC[2][1][1] = 0.;
-            MAXENDPLTDEFLEC[2][2][0] = 0.;
-            MAXENDPLTDEFLEC[2][2][1] = 0.;
-            MAXENDPLTDEFLEC[2][3][0] = 0.;
-            MAXENDPLTDEFLEC[2][3][1] = 0.;
-            MAXENDPLTDEFLEC[2][4][0] = 0.;
-            MAXENDPLTDEFLEC[2][4][1] = 0.;
-            MAXENDPLTDEFLEC[2][5][0] = 0.;
-            MAXENDPLTDEFLEC[2][5][1] = 0.;
     }
 
-    private static double[][][][] _T0 = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables --- with TStart calibration 
-    private static double[][][][] _T0ERR = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables --- with TStart calibration 
-    public static synchronized void setT0(double[][][][] T0) {
-        _T0 = T0;
+    private static synchronized void LoadGeometry(String geoVariation) {
+        // Load the geometry
+        ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, geoVariation);
+        Constants.dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, Constants.ENDPLATESBOWING);
+        for(int l=0; l<6; l++) {
+            Constants.wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
+        }
+        // Load target
+        ConstantProvider providerTG = GeometryFactory.getConstants(DetectorType.TARGET, 11, geoVariation);
+        double targetPosition = providerTG.getDouble("/geometry/target/position",0);
+        double targetLength   = providerTG.getDouble("/geometry/target/length",0);
+        // Load other geometries
+        ConstantProvider providerFTOF = GeometryFactory.getConstants(DetectorType.FTOF, 11, geoVariation);
+        Constants.ftofDetector = new FTOFGeant4Factory(providerFTOF);        
+        ConstantProvider providerEC = GeometryFactory.getConstants(DetectorType.ECAL, 11, geoVariation);
+        Constants.ecalDetector =  GeometryFactory.getDetector(DetectorType.ECAL, 11, geoVariation);
+        // create the surfaces
+        Constants.tSurf = new TrajectorySurfaces();
+        Constants.tSurf.LoadSurfaces(targetPosition, targetLength,Constants.dcDetector, Constants.ftofDetector, Constants.ecalDetector);        
     }
-    public static synchronized void setT0Err(double[][][][] T0ERR) {
-        _T0ERR = T0ERR;
-    }
-    public static double[][][][] getT0() {
-        return _T0;
-    }
-    public static double[][][][] getT0Err() {
-        return _T0ERR;
-    }
+   
 
-    public static final String TIME2DIST = "/calibration/dc/time_to_distance/time2dist";
-    public static final String TDCTCUTS = "/calibration/dc/time_corrections/tdctimingcuts";
-    public static final String WIRESTAT = "/calibration/dc/tracking/wire_status";
-    public static final String TIMEJITTER = "/calibration/dc/time_jitter";
-    public static final String HITBASE = "HitBased";
-
-    private static double T2D = 0; 
-    public static void  setT2D(int i) {
-        Constants.T2D = i;
-    }
-    public static double getT2D() {
-        return Constants.T2D;
-    }
-
-    // geometry constants not yet read from CCDB of from geometry services
-    public static DCGeant4Factory    dcDetector   = null;
-    public static FTOFGeant4Factory  ftofDetector = null;
-    public static Detector           ecalDetector = null;
-    public static TrajectorySurfaces tSurf        = null;
-    
-    public static double htccRadius=175;
-    public static double ltccPlane=653.09;
-        
 }

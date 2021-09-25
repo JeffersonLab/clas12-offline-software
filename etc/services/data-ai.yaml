@@ -14,9 +14,6 @@ services:
     name: FTHODO
   - class: org.jlab.rec.ft.FTEBEngine
     name: FTEB
-# DC initializer: passes geometry and constants to all DC services
-  - class: org.jlab.service.dc.DCInit
-    name: DCI
 # DC clustering: nominal algoritm, filled the cluster bank for ai and conventional tracking
   - class: org.jlab.service.dc.DCHBClustering
     name: DCRC

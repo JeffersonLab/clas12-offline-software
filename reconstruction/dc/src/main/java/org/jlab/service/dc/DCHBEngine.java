@@ -25,7 +25,6 @@ import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.hit.Hit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.segment.SegmentFinder;
-import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
 import org.jlab.rec.dc.trajectory.RoadFinder;
@@ -42,16 +41,6 @@ public class DCHBEngine extends DCEngine {
         super("DCHB");
     }
 
-    @Override
-    public boolean init() {
-        // Load cuts
-        Constants.Load();
-        super.setOptions();
-        super.LoadTables();
-        super.LoadGeometry();
-        this.initBankNames();
-        return true;
-    }
 
     @Override
     public void initBankNames() {
@@ -79,9 +68,6 @@ public class DCHBEngine extends DCEngine {
         double triggerPhase = this.getTriggerPhase(event);
 
        
-       TableLoader.FillT0Tables(run, super.variationName);
-       TableLoader.Fill(super.getConstantsManager().getConstants(run, Constants.TIME2DIST));
-
        if (event.hasBank("MC::Particle") && this.getEngineConfigString("wireDistort")==null) {
            Constants.setWIREDIST(0);
        }

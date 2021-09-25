@@ -2,7 +2,6 @@ package org.jlab.rec.dc.timetodistance;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.rec.dc.Constants;
 import org.jlab.utils.groups.IndexedTable;
 
@@ -64,35 +63,35 @@ public class TableLoader {
     
     
     
-    public static synchronized void FillT0Tables(int run, String variation) {
-        if (T0LOADED) return;
-        System.out.println(" T0 TABLE FILLED..... for Run "+run+" with VARIATION "+variation);
-        DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(run, variation);
-        dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
-        //disconnect from database. Important to do this after loading tables.
-        dbprovider.disconnect();
-        // T0-subtraction
-        double[][][][] T0 ;
-        double[][][][] T0ERR ;
-        //T0s
-        T0 = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
-        T0ERR = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
-        for (int i = 0; i < dbprovider.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {
-            int iSec = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Sector", i);
-            int iSly = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Superlayer", i);
-            int iSlot = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Slot", i);
-            int iCab = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Cable", i);
-            double t0 = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Correction", i);
-            double t0Error = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
-
-            T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0; 
-            T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
-            Constants.setT0(T0);
-            Constants.setT0Err(T0ERR);
-            //System.out.println("T0 = "+t0);
-        }
-        T0LOADED = true;
-    }
+//    public static synchronized void FillT0Tables(int run, String variation) {
+//        if (T0LOADED) return;
+//        System.out.println(" T0 TABLE FILLED..... for Run "+run+" with VARIATION "+variation);
+//        DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(run, variation);
+//        dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
+//        //disconnect from database. Important to do this after loading tables.
+//        dbprovider.disconnect();
+//        // T0-subtraction
+//        double[][][][] T0 ;
+//        double[][][][] T0ERR ;
+//        //T0s
+//        T0 = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
+//        T0ERR = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
+//        for (int i = 0; i < dbprovider.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {
+//            int iSec = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Sector", i);
+//            int iSly = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Superlayer", i);
+//            int iSlot = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Slot", i);
+//            int iCab = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Cable", i);
+//            double t0 = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Correction", i);
+//            double t0Error = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
+//
+//            T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0; 
+//            T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
+//            Constants.setT0(T0);
+//            Constants.setT0Err(T0ERR);
+//            //System.out.println("T0 = "+t0);
+//        }
+//        T0LOADED = true;
+//    }
     public static int getAlphaBin(double Alpha) {
         int bin = 0;
         for(int b =0; b<6; b++) {

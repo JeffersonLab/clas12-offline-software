@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -23,6 +22,7 @@ import org.jlab.rec.dc.cross.CrossMaker;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.segment.SegmentFinder;
+import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
@@ -43,13 +43,6 @@ public class DCTBEngine extends DCEngine {
     public DCTBEngine() { // if not specified use conventional tracking
         super("DCTB");
         tde = new TimeToDistanceEstimator();
-    }
-    
-    @Override
-    public boolean init() {
-        super.LoadTables();
-        this.initBankNames();
-        return true;
     }
     
     @Override
@@ -99,6 +92,9 @@ public class DCTBEngine extends DCEngine {
         // get Field
         Swim dcSwim = new Swim();        
        
+        // fill T2D table
+        TableLoader.Fill(super.getConstantsManager().getConstants(run, Constants.TIME2DIST));
+
         ClusterFitter cf = new ClusterFitter();
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
 
@@ -118,9 +114,10 @@ public class DCTBEngine extends DCEngine {
 
         HitReader hitRead = new HitReader(this.getBankNames()); //vz; modified reader to read regular or ai hits
         hitRead.read_HBHits(event, 
-            super.getConstantsManager().getConstants(run, "/calibration/dc/signal_generation/doca_resolution"),
-            super.getConstantsManager().getConstants(run, "/calibration/dc/time_to_distance/time2dist"),
-            Constants.getT0(), Constants.getT0Err(), Constants.dcDetector, tde);
+            super.getConstantsManager().getConstants(run, Constants.DOCARES),
+            super.getConstantsManager().getConstants(run, Constants.TIME2DIST),
+            super.getConstantsManager().getConstants(run, Constants.T0CORRECTION),
+            Constants.dcDetector, tde);
         List<FittedHit> hits = new ArrayList<FittedHit>();
         //I) get the hits
         hits = hitRead.get_HBHits();
@@ -134,7 +131,7 @@ public class DCTBEngine extends DCEngine {
         ClusterFinder clusFinder = new ClusterFinder();
 
         clusters = clusFinder.FindTimeBasedClusters(event, hits, cf, ct, 
-                super.getConstantsManager().getConstants(run, "/calibration/dc/time_to_distance/time2dist"), Constants.dcDetector, tde);
+                super.getConstantsManager().getConstants(run, Constants.TIME2DIST), Constants.dcDetector, tde);
         for(FittedCluster c : clusters) {
             c.set_Id(c.get(0).get_AssociatedClusterID());
         }
@@ -227,7 +224,7 @@ public class DCTBEngine extends DCEngine {
         
         //6) find the list of  track candidates
         // read beam offsets from database
-        IndexedTable beamOffset = this.getConstantsManager().getConstants(run, "/geometry/beam/position");
+        IndexedTable beamOffset = this.getConstantsManager().getConstants(run, Constants.BEAMPOS);
         double beamXoffset = beamOffset.getDoubleValue("x_offset", 0,0,0);
         double beamYoffset = beamOffset.getDoubleValue("y_offset", 0,0,0);
         TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");

@@ -22,7 +22,6 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
-import org.jlab.detector.geant4.v2.PCALGeant4Factory;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.FTOFDetHit;
 import org.jlab.geom.base.ConstantProvider;
@@ -32,7 +31,6 @@ import org.jlab.rec.dc.Constants;
 import org.jlab.utils.options.OptionParser;
 
 import java.util.Random;
-import org.jlab.detector.hits.PCALDetHit;
 import org.jlab.geom.DetectorHit;
 import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Path3D;
@@ -60,8 +58,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         r = new Random();
         MagFieldsEngine mf = new MagFieldsEngine();
         mf.initializeMagneticFields();
-        super.LoadTables();
-        super.LoadGeometry();
+        super.init();
         return true;
     }
     public void processFile(int duplicates, float torScale, float solScale, int charge, int n, long seed,

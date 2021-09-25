@@ -29,13 +29,6 @@ public class DCHBClustering extends DCEngine {
     }
     
     @Override
-    public boolean init() {
-        super.LoadTables();
-        this.initBankNames();
-        return true;
-    }
-    
-    @Override
     public void initBankNames() {
         this.getBankNames().setHitsBank("HitBasedTrkg::HBHits");
         this.getBankNames().setClustersBank("HitBasedTrkg::HBClusters");

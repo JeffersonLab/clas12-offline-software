@@ -36,13 +36,6 @@ public class DCHBPostClusterConv extends DCEngine {
     public DCHBPostClusterConv() {
         super("DCHBCONV");
     }
-
-    @Override
-    public boolean init() {
-        super.LoadTables();
-        this.initBankNames();
-        return true;
-    }
     
     @Override
     public void initBankNames() {
@@ -127,7 +120,7 @@ public class DCHBPostClusterConv extends DCEngine {
 
         CrossList crosslist = crossLister.candCrossLists(event, crosses,
                 false,
-                super.getConstantsManager().getConstants(run, Constants.TIME2DIST),
+                null,
                 Constants.dcDetector,
                 null,
                 dcSwim, false);
@@ -206,7 +199,7 @@ public class DCHBPostClusterConv extends DCEngine {
 
         CrossList pcrosslist = crossLister.candCrossLists(event, pcrosses,
                 false,
-                super.getConstantsManager().getConstants(run, Constants.TIME2DIST),
+                null,
                 Constants.dcDetector,
                 null,
                 dcSwim, true);

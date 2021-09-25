@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -28,7 +26,6 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.task.DataSourceProcessorPane;
 import org.jlab.io.task.IDataEventListener;
 import org.jlab.rec.dc.banks.HitReader;
-import org.jlab.rec.dc.banks.RecoBankWriter;
 import org.jlab.rec.dc.cluster.ClusterCleanerUtilities;
 import org.jlab.rec.dc.cluster.ClusterFinder;
 import org.jlab.rec.dc.cluster.ClusterFitter;
@@ -36,10 +33,8 @@ import org.jlab.rec.dc.cluster.FittedCluster;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.segment.SegmentFinder;
-import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.trajectory.SegmentTrajectory;
-import org.jlab.utils.groups.IndexedTable;
 
 public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListener{
     
@@ -83,18 +78,14 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
     
     public double[] maxDoca = new double[6];
     
-    private AtomicInteger Run = new AtomicInteger(0);
-    
-    private int newRun = 0;
     @Override
     public boolean init() {
         
-        Constants.Load();
-        super.setOptions();
-        super.LoadTables();
-        super.LoadGeometry();
-        this.initBankNames();
+        this.setOptions();
+        Constants.getInstance().initialize();
         Constants.setT2D(1);
+        this.LoadTables();
+        
         
         maxDoca[0]=0.8;maxDoca[1]=0.9;maxDoca[2]=1.3;maxDoca[3]=1.4;maxDoca[4]=1.9;maxDoca[5]=2.0;
         //plots
@@ -237,13 +228,6 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         int run = this.getRun(event);
         if(run==0) return true;
         
-        double triggerPhase = this.getTriggerPhase(event);
-
-       
-       TableLoader.FillT0Tables(run, super.variationName);
-       TableLoader.Fill(super.getConstantsManager().getConstants(run, Constants.TIME2DIST));
-
-       
         //System.out.println(" RUNNING TIME BASED....................................");
         ClusterFitter cf = new ClusterFitter();
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
@@ -255,12 +239,13 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         HitReader hitRead = new HitReader(this.getBankNames());
 
             hitRead.read_HBHits(event, 
-            super.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
-            super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"),
-            Constants.getT0(), Constants.getT0Err(), Constants.dcDetector, tde);
+            super.getConstantsManager().getConstants(run, Constants.DOCARES),
+            super.getConstantsManager().getConstants(run, Constants.TIME2DIST),
+            super.getConstantsManager().getConstants(run, Constants.T0CORRECTION),
+            Constants.dcDetector, tde);
         //hitRead.read_TBHits(event, 
-        //    super.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
-        //    super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), tde, Constants.getT0(), Constants.getT0Err());
+        //    super.getConstantsManager().getConstants(newRun, Constants.DOCARES),
+        //    super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST), tde, Constants.getT0(), Constants.getT0Err());
         List<FittedHit> hits = new ArrayList<FittedHit>();
         //I) get the hits
         if(hitRead.get_HBHits()==null)
@@ -281,7 +266,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         ClusterFinder clusFinder = new ClusterFinder();
 
         clusters = clusFinder.FindTimeBasedClusters(event, hits, cf, ct, 
-                super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), Constants.dcDetector, tde);
+                super.getConstantsManager().getConstants(run, Constants.TIME2DIST), Constants.dcDetector, tde);
 
         if(clusters.isEmpty()) {
             return true;

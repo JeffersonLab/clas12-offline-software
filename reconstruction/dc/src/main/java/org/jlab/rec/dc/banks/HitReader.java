@@ -251,13 +251,12 @@ public class HitReader {
      * @param event      .
      * @param constants0 .
      * @param constants1 .
-     * @param T0         .
-     * @param T0ERR      .
+     * @param t0Table
      * @param DcDetector .
      * @param tde        .
      */
-    public void read_HBHits(DataEvent event, IndexedTable constants0, IndexedTable constants1, double[][][][] T0,
-                            double[][][][] T0ERR, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
+    public void read_HBHits(DataEvent event, IndexedTable constants0, IndexedTable constants1, IndexedTable t0Table, 
+            DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
         /*
         0: this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
         1: this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d")
@@ -358,7 +357,7 @@ public class HitReader {
                     T_Start = event.getBank(recBankName).getFloat("startTime", 0);
             }  
             
-            T_0 = this.get_T0(sector[i], slayer[i], layer[i], wire[i], T0, T0ERR)[0];
+            T_0 = this.get_T0(sector[i], slayer[i], layer[i], wire[i], t0Table)[0];
             FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], tdc[i], id[i]);
             hit.set_Id(id[i]);
             hit.setB(B[i]);
@@ -410,7 +409,7 @@ public class HitReader {
     
     private boolean passHit(int betaFlag) {
         boolean pass = true;
-        if(Constants.CHECKBETA) {
+        if(Constants.USEBETACUT()) {
             //if(betaFlag != 0) { //all beta cuts
             //    pass = false;
             //}
@@ -610,14 +609,14 @@ public class HitReader {
 
 
     private double[] get_T0(int sector, int superlayer,
-                            int layer, int wire, double[][][][] T0, double[][][][] T0ERR) {
+                            int layer, int wire, IndexedTable t0Table) {
         double[] T0Corr = new double[2];
 
         int cable = this.getCableID1to6(layer, wire);
         int slot = this.getSlotID1to7(wire);
 
-        double t0 = T0[sector - 1][superlayer - 1][slot - 1][cable - 1];      //nSec*nSL*nSlots*nCables
-        double t0E = T0ERR[sector - 1][superlayer - 1][slot - 1][cable - 1];
+        double t0  = t0Table.getDoubleValue("T0Correction", sector, superlayer, slot, cable);
+        double t0E = t0Table.getDoubleValue("T0Error", sector, superlayer, slot, cable);
 
         T0Corr[0] = t0;
         T0Corr[1] = t0E;

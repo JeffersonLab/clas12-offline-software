@@ -35,12 +35,6 @@ public class DCHBPostClusterAI extends DCEngine {
         super("DCHBAI");
     }
     
-    @Override
-    public boolean init() {
-        super.LoadTables();
-        this.initBankNames();
-        return true;
-    }
     
     @Override
     public void initBankNames() {
@@ -132,9 +126,7 @@ public class DCHBPostClusterAI extends DCEngine {
         // update B field
         CrossListFinder crossLister = new CrossListFinder();
         for(Cross cr : crosses) {
-            crossLister.updateBFittedHits(event, cr, 
-                super.getConstantsManager().getConstants(this.getRun(event), Constants.TIME2DIST),
-                Constants.dcDetector, null, dcSwim);
+            crossLister.updateBFittedHits(event, cr, null, Constants.dcDetector, null, dcSwim);
         }
         //find the list of  track candidates
         TrackCandListFinder trkcandFinder = new TrackCandListFinder(Constants.HITBASE);
