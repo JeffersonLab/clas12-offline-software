@@ -3,7 +3,6 @@ package org.jlab.service.dc;
 import java.util.HashMap;
 import java.util.Map;
 import org.jlab.clas.reco.ReconstructionEngine;
-import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
@@ -31,89 +30,52 @@ public class DCEngine extends ReconstructionEngine {
 
     public void setOptions() {
         
-        // Get the constants for the correct variation
-        geoVariation = this.chooseEnvOrYaml("COAT_DC_GEOMETRYVARIATION", "dcGeometryVariation");
-        if (geoVariation==null) {
-            geoVariation = "default";
-            System.out.println("["+this.getName()+"] run with default geometry");
-        }
+        // set the geometry variation, if dcGeometryVariation is undefined, default to variation
+        if(this.getEngineConfigString("dcGeometryVariation")!=null) 
+            geoVariation = this.getEngineConfigString("dcGeometryVariation");
+        else if(this.getEngineConfigString("variation")!=null) 
+            geoVariation = this.getEngineConfigString("variation");
+        System.out.println("["+this.getName()+"] run with variation = " + geoVariation);
         
         //AI settings for selecting specific sector
-        String sectorSelect = this.chooseEnvOrYaml("COAT_DC_SECTORSELECT","sectorSelect");
-        if (sectorSelect!=null) {
-             selectedSector=Integer.parseInt(sectorSelect);
-        }
-        else {
-            System.out.println("["+this.getName()+"] run with sector config chosen based on default = "+selectedSector);
-        }
+        if(this.getEngineConfigString("sectorSelect")!=null) 
+            selectedSector=Integer.parseInt(this.getEngineConfigString("sectorSelect"));
+        System.out.println("["+this.getName()+"] run with sector selection = " + selectedSector);
             
         // Load config
-        String useSTTConf = this.chooseEnvOrYaml("COAT_DC_USESTARTTIME","dcUseStartTime");
-        if (useSTTConf!=null) {
-            useStartTime = Boolean.valueOf(useSTTConf);
-        }
-        else {
-            System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on default = "+useStartTime);
-        }
-        
+        if(this.getEngineConfigString("dcUseStartTime")!=null)
+            useStartTime = Boolean.valueOf(this.getEngineConfigString("dcUseStartTime"));
+        System.out.println("["+this.getName()+"] run with start time option = " + useStartTime);
+      
         // Wire distortions
-        String wireDistortionsFlag = this.chooseEnvOrYaml("COAT_DC_WIREDISTORTION","dcWireDistortion");        
-        if (wireDistortionsFlag!=null) {
-            if(Boolean.valueOf(wireDistortionsFlag)==true) {
-                //Constants.setWIREDIST(1.0);
-                wireDistortion = DCGeant4Factory.ENDPLATESBOWON;
-            } else {
-                //Constants.setWIREDIST(0);
-                wireDistortion = DCGeant4Factory.ENDPLATESBOWOFF;
-            }
-        }
-        else {
-            System.out.println("["+this.getName()+"] run with default setting for wire distortions in tracking (MC-off/Data-on)");
-        }
+        if(this.getEngineConfigString("dcWireDistortion")!=null)       
+            wireDistortion = Boolean.parseBoolean(this.getEngineConfigString("dcWireDistortion"));
+        System.out.println("["+this.getName()+"] run with wire distortions = " + wireDistortion);
         
         //Use time in tBeta function (true: use time; false: use track doca)
-        String useTIMETBETA = this.chooseEnvOrYaml("COAT_DC_USETIMETBETA","dcTimeTBeta");
-        if (useTIMETBETA!=null) {
-            useTimeBeta = (Boolean.valueOf(useTIMETBETA));
-        }
-        else {
-            System.out.println("["+this.getName()+"] run with with new tBeta config chosen based on default = "+useTimeBeta);
-        }
-        //CHECKBETA
+        if(this.getEngineConfigString("dcTimeTBeta")!=null)
+            useTimeBeta = (Boolean.valueOf(this.getEngineConfigString("dcTimeTBeta")));
+        System.out.println("["+this.getName()+"] run with with new tBeta configuration = " + useTimeBeta);
+        
         //Use beta cut(true: use time; false: use track doca)
-        String useBETACUT = this.chooseEnvOrYaml("COAT_DC_USEBETACUT","dcBetaCut");
-        if (useBETACUT!=null) {
-            useBetaCut =Boolean.valueOf(useBETACUT);
-        }
-        else {
-            System.out.println("["+this.getName()+"] run with with Beta cut config chosen based on default = "+useBetaCut);
-        }
+        if(this.getEngineConfigString("dcBetaCut")!=null)
+            useBetaCut =Boolean.valueOf(this.getEngineConfigString("dcBetaCut"));
+        System.out.println("["+this.getName()+"] run with with Beta cut = " + useBetaCut);
         
         //T2D Function
-        String T2Dfcn = this.chooseEnvOrYaml("COAT_DC_T2DFUNC","dcT2DFunc");       
-        if (T2Dfcn!=null) {
-            if(T2Dfcn.equalsIgnoreCase("Polynomial")) {
+        if(this.getEngineConfigString("dcT2DFunc")!=null)       
+            if(this.getEngineConfigString("dcT2DFunc").equalsIgnoreCase("Polynomial")) {
                 t2d=1;
-            } else {
-                t2d=0;
             }
-        }
-        else {
-            System.out.println("["+this.getName()+"] run with time to distance exponential function in tracking ");
-        }
+        System.out.println("["+this.getName()+"] run with time to distance function set to exponential/polynomial (0/1) = " + t2d);
         
         //NSUPERLAYERTRACKING
-        String useFOOST = this.chooseEnvOrYaml("COAT_DC_USEFOOST","dcFOOST");        
-        if (useFOOST!=null) {
-            if(Boolean.valueOf(useFOOST)==true) {
-                nSuperLayer =5;
-            } else {
+        if(this.getEngineConfigString("dcFOOST")!=null)
+            if(!Boolean.valueOf(this.getEngineConfigString("dcFOOST"))) {
                 nSuperLayer =6;
             }    
-        }
-        else {
-            System.out.println("["+this.getName()+"] run with with Five-out-of-six-superlayer-trkg config chosen based on default = "+nSuperLayer);
-        }
+        System.out.println("["+this.getName()+"] run with with Five-out-of-six-superlayer-trkg = " + nSuperLayer);
+        
     }
     
     
