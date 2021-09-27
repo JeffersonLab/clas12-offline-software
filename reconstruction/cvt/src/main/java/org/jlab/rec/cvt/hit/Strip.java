@@ -2,6 +2,7 @@ package org.jlab.rec.cvt.hit;
 
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.geom.prim.Arc3D;
+import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
@@ -31,9 +32,13 @@ public class Strip {
     private double _Z;
     private double _ZErr;
     
-    private Arc3D _Arc;
+    private double _Pitch;
+    private Arc3D  _Arc;
     private Line3D _Line;
-    private Line3D _Axis;
+    private Cylindrical3D _Tile;
+    private Line3D _Module;
+    private Vector3D _Normal;
+    private double _ToverX0;
     private Transformation3D toLocal;
     private Transformation3D toGlobal;
     
@@ -43,6 +48,14 @@ public class Strip {
 
     public void set_Strip(int _Strip) {
         this._Strip = _Strip;
+    }
+
+    public double get_Pitch() {
+        return _Pitch;
+    }
+
+    public void set_Pitch(double _Pitch) {
+        this._Pitch = _Pitch;
     }
 
     public Arc3D get_Arc() {
@@ -61,12 +74,36 @@ public class Strip {
         this._Line = _Line;
     }
 
-    public Line3D get_Axis() {
-        return _Axis;
+    public Cylindrical3D get_Tile() {
+        return _Tile;
     }
 
-    public void set_Axis(Line3D _Axis) {
-        this._Axis = _Axis;
+    public void set_Tile(Cylindrical3D _Tile) {
+        this._Tile = _Tile;
+    }
+
+    public Line3D get_Module() {
+        return _Module;
+    }
+
+    public void set_Module(Line3D _Module) {
+        this._Module = _Module;
+    }
+
+    public Vector3D get_Normal() {
+        return _Normal;
+    }
+
+    public void set_Normal(Vector3D _Normal) {
+        this._Normal = _Normal;
+    }
+
+    public double getToverX0() {
+        return _ToverX0;
+    }
+
+    public void setToverX0(double _ToverX0) {
+        this._ToverX0 = _ToverX0;
     }
 
     public Transformation3D toLocal() {
@@ -173,13 +210,16 @@ public class Strip {
         int region = geo.getRegion(layer); // region index (1...3) 1=layers 1&2, 2=layers 3&4, 3=layers 5&6
         this.setToGlobal(geo.toGlobal(layer, sector));
         this.setToLocal(geo.toLocal(layer, sector));
+        this.set_Tile(geo.getTileSurface(layer, sector));
+        this.set_Pitch(geo.getPitch(layer, this.get_Strip()));
+        this.setToverX0(geo.getToverX0(layer));
         
         if (BMTGeometry.getDetectorType(layer) == BMTType.C) { // C-detectors
             // set z
             //double z = geo.CRCStrip_GetZ(layer, this.get_Strip());
             Arc3D arcLine = geo.getCstrip(region, sector, this.get_Strip());
             this.set_Arc(arcLine);
-            this.set_Axis(geo.getAxis(layer, sector));
+            this.set_Normal(arcLine.bisect());
             // max z err
             this.set_Z(geo.getCstripZ(geo.getRegion(layer),this.get_Strip()));
             this.set_ZErr(geo.getPitch(layer, this.get_Strip()) / Math.sqrt(12.));
@@ -187,37 +227,18 @@ public class Strip {
         }
 
         if (BMTGeometry.getDetectorType(layer) == BMTType.Z) { // Z-detectors
-            //Line3D L0 = geo.getZstrip(geo.getRegion(layer), sector, this.get_Strip());
             Line3D line = geo.getLCZstrip(geo.getRegion(layer), sector, this.get_Strip(), swim);
             this.set_Line(line);
-            this.set_Axis(geo.getAxis(layer, sector));
-            
-            Line3D cln = geo.getAxis(layer, sector);
-            cln.set(cln.origin().x(), cln.origin().y(), line.origin().z(), 
-                        cln.end().x(), cln.end().y(), line.end().z());
-               
-            double v = (line.origin().z()-cln.origin().z())/cln.direction().z();
-            double x = cln.origin().x()+v*cln.direction().x();
-            double y = cln.origin().y()+v*cln.direction().y();
-            Vector3D n = new Point3D(x, y, line.origin().z()).
-                    vectorTo(new Point3D(line.origin().x(),line.origin().y(),line.origin().z())).asUnit();
-
-            double theMeasuredPhi = geo.getZstripPhi(geo.getRegion(layer), sector, this.get_Strip());
-            //double theLorentzCorrectedAngle = line.midpoint().toVector3D().phi(); 
-            double theLorentzCorrectedAngle = n.phi(); 
+            this.set_Normal(this.get_Tile().getAxis().distance(line.midpoint()).direction().asUnit());            
             // set the phi 
+            Point3D local = geo.getIdealLCZstrip(region, sector, this.get_Strip(), swim).midpoint();
+            double theMeasuredPhi = geo.getZstripPhi(geo.getRegion(layer), sector, this.get_Strip());
+            double theLorentzCorrectedAngle = local.toVector3D().phi();
             this.set_Phi(theLorentzCorrectedAngle);
-            this.set_Phi0(theMeasuredPhi); // uncorrected
-            //System.out.println(" sec "+sector+" strip "+this.get_Strip()+" LC strip "+geo.getZStrip(layer, theLorentzCorrectedAngle));
-            //int theLorentzCorrectedStrip = geo.getZStrip(layer, theLorentzCorrectedAngle);
-            //            double xl = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]*
-//                    Math.cos(theLorentzCorrectedAngle);
-//            double yl = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]*
-//                    Math.sin(theLorentzCorrectedAngle);
-//            int theLorentzCorrectedStrip = geo.getStrip( layer,  sector, 
-//                    new Point3D(xl,yl,0));
-            int theLorentzCorrectedStrip = geo.getStrip(layer,  sector, line.midpoint());
+            this.set_Phi0(theMeasuredPhi); // uncorrected, can be outside of -pi,pi
+
             // get the strip number after correcting for Lorentz angle
+            int theLorentzCorrectedStrip = geo.getStrip(layer,  sector, line.midpoint());
             this.set_LCStrip(theLorentzCorrectedStrip);
             
             double sigma = Constants.SigmaDrift / Math.cos(geo.getThetaLorentz(layer, sector)); // max sigma for drift distance  (hDrift) = total gap from top to mesh
@@ -227,7 +248,6 @@ public class Strip {
 
             double phiErr = geo.getPitch(layer, this.get_Strip()) / geo.getRadius(layer) / Math.sqrt(12.);
             this.set_PhiErr(Math.sqrt(phiErr * phiErr + phiErrL * phiErrL));
-            //System.out.println("arcerr "+org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]+" * "+Math.toDegrees(sigma/org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]));
             this.set_PhiErr0(phiErr);
             
             

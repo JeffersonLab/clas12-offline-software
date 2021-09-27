@@ -164,7 +164,8 @@ public class Track extends Trajectory implements Comparable<Track> {
         }
 
     }
-
+    
+    // not used
     public void finalUpdate_Crosses(SVTGeometry geo) {
         if (this.get_helix() != null && this.get_helix().get_curvature() != 0) {
 

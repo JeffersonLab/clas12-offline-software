@@ -192,16 +192,20 @@ public class Helix {
 
     public Point3D getPointAtRadius(double r) {
         // a method to return a point (as a vector) at a given radial position.	
-        if (_curvature == 0) {
-            return null;
-        }
-
         double d0 = _dca;
         double omega = _curvature;
         double charge = this.get_charge();
         double phi0 = _phi_at_dca;
         double tandip = _tandip;
         double z0 = _Z0;
+
+        if (_curvature <1E-5) { // R > 100 m, assume it's straight track
+            double x =  r*Math.cos(phi0);
+            double y =  r*Math.sin(phi0);
+            double z =  r*tandip;
+            return new Point3D(x, y, z);
+        }
+
 
         double par = 1. - ((r * r - d0 * d0) * omega * omega) / (2. * (1. + d0 * Math.abs(omega)));
         double newPathLength = Math.abs(Math.acos(par) / omega);
@@ -243,6 +247,12 @@ public class Helix {
         return trkDir.asUnit();
     }
 
+    @Override
+    public String toString() {
+        String s = String.format("Helix: Z0=%.4f  R=%.4e  DCA=%.4f  Phi=%.4f  Tan=%.4f", this._Z0,this._curvature,this._dca,this._phi_at_dca,this._tandip);
+        return s;
+    }
+    
     public static void main(String arg[]) {
         //  	Helix h = new Helix(0, 0, 1/5., 0, -999, null);
 

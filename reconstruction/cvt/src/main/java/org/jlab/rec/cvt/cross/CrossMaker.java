@@ -127,7 +127,7 @@ public class CrossMaker {
         if(Z>Constants.ACTIVESENLEN)
             Z=Constants.ACTIVESENLEN;
         Cluster1.set_CentroidError(Cluster1.get_ResolutionAlongZ(Z, svt_geo) / (Constants.PITCH / Math.sqrt(12.)));
-        Cluster1.set_Error(Cluster1.get_ResolutionAlongZ(Z, svt_geo) );
+        Cluster1.set_Resolution(Cluster1.get_ResolutionAlongZ(Z, svt_geo) );
     }
     /**
      *

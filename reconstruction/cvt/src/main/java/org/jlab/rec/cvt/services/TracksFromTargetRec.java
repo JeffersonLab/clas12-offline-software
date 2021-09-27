@@ -107,8 +107,9 @@ public class TracksFromTargetRec {
             xr += org.jlab.rec.cvt.Constants.getXb();
             yr += org.jlab.rec.cvt.Constants.getYb();
             //Uncomment to force to MC truth:
-            //double[] pars = recUtil.MCtrackPars(event);
-            //xr = pars[0];yr=pars[1];zr=pars[2];px=pars[3];py=pars[4];pz=pars[5];
+//            double[] pars = recUtil.MCtrackPars(event);
+//            xr = pars[0];yr=pars[1];zr=pars[2];px=pars[3];py=pars[4];pz=pars[5];
+//            System.out.println(xr + " " + yr + " " + zr + " " + px + " " + py + " " + pz);
             hlx = new org.jlab.clas.tracking.trackrep.Helix(xr,yr,zr,px,py,pz, 
                     charge, Constants.getSolenoidVal(), org.jlab.rec.cvt.Constants.getXb(), 
                     org.jlab.rec.cvt.Constants.getYb(), org.jlab.clas.tracking.trackrep.Helix.Units.MM);
@@ -123,7 +124,7 @@ public class TracksFromTargetRec {
                     org.jlab.rec.cvt.Constants.getXb(), 
                     org.jlab.rec.cvt.Constants.getYb(),
                     shift, 
-                    recUtil.setMeasVecs(seed, SVTGeom, BMTGeom, swimmer)) ;
+                    recUtil.setMeasVecs(seed, swimmer)) ;
                 //Uncomment to let track be fitted
                 //kf.filterOn=false;
                 kf.runFitter(swimmer);
@@ -157,6 +158,7 @@ public class TracksFromTargetRec {
                         charge = 1;
                     xr += org.jlab.rec.cvt.Constants.getXb();
                     yr += org.jlab.rec.cvt.Constants.getYb();
+//                    System.out.println(xr + " " + yr + " " + zr + " " + px + " " + py + " " + pz);
                     hlx = new org.jlab.clas.tracking.trackrep.Helix(xr,yr,zr,px,py,pz, 
                             charge, Constants.getSolenoidVal(), org.jlab.rec.cvt.Constants.getXb(), 
                             org.jlab.rec.cvt.Constants.getYb(), org.jlab.clas.tracking.trackrep.Helix.Units.MM);
@@ -165,7 +167,7 @@ public class TracksFromTargetRec {
                     org.jlab.rec.cvt.Constants.getXb(), 
                     org.jlab.rec.cvt.Constants.getYb(),
                     shift, 
-                    recUtil.setMeasVecs(seed, SVTGeom, BMTGeom, swimmer)) ;
+                    recUtil.setMeasVecs(seed, swimmer)) ;
                     //Uncomment to let track be fitted
                     //kf.filterOn = false;
                     kf.runFitter(swimmer);

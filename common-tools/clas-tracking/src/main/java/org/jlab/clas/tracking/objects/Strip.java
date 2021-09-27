@@ -303,6 +303,20 @@ public class Strip extends TObject {
         type = Type.ARC;
     }
     
+    public String toString() {
+        String s = String.format("Strip id: %d",super.getId());
+        if(this.type==Type.XYZ) {
+            s = s + String.format("\n\tPoint=(%.4f,%.4f,%.4f)  Dir=(%.4f,%.4f,%.4f) Length=%.4f Centroid=%.4f", _x,_y,_z,_ux,_uy,_uz,_length,_c);
+        }
+        else if(this.type==Type.PHI) {
+            s = s + String.format("\n\tXY=(%.4f,%.4f)  Phi=%.4f Centroid=%.4f",super.getX(),super.getY(), _phi,_c);
+        }
+        else if(this.type==Type.ARC) {
+            s = s + "\n\t" +_arc.toString() + String.format("\n\tCentroid=%.4f",_c);
+        }
+        return s;
+    }
+    
     @Override
     public boolean equals(Object o) { 
   

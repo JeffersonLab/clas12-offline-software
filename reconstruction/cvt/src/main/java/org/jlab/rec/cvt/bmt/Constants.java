@@ -86,10 +86,10 @@ public class Constants {
     public static double[] E_grid = new double[405];         //Electric field value of the grid
     public static double[] B_grid = new double[405];        //Magnetic field value of the grid
     public static double ThetaL = 0; 						// the Lorentz angle for 5-T B-field
-    public static double emin=0;                          //Emin of the grid
+    public static double emin=Double.MAX_VALUE;           //Emin of the grid
     public static double emax=0;                          //Emax of the grid
     public static double bmax=0;                          //Bmax of the grid
-    public static double bmin=0;                          //Bmin of the grid
+    public static double bmin=Double.MAX_VALUE;           //Bmin of the grid
     public static int Ne=0;                               //Number of step for the electric field
     public static int Nb=0;                               //Number of step for the magnetic field
   

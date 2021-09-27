@@ -4,13 +4,15 @@ import java.util.ArrayList;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import java.util.Collections;
+import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Arc3D;
+import org.jlab.geom.prim.Cylindrical3D;
+import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Transformation3D;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.bmt.Constants;
@@ -26,25 +28,28 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
     private static final long serialVersionUID = 9153980362683755204L;
 
-    private DetectorType _Detector;							//              The detector SVT or BMT
-    private BMTType  _Type;                                                  //              The detector type  for BMT C or Z
-    private int _Sector;      							//	        sector[1...]
-    private int _Layer;    	 						//	        layer [1,...]
-    private int _Id;								//		cluster Id
-    private double _Centroid; 							// 		after LC (Lorentz Correction)
-    private double _CentroidError;
-    private double _Error;                                                      //              strip resolution    
-    private double _Centroid0; 							// 		before LC
+    private DetectorType _Detector;		//  The detector SVT or BMT
+    private BMTType  _Type;                   //   The detector type  for BMT C or Z
+    private int _Sector;      		//	sector[1...]
+    private int _Layer;    	 		//	layer [1,...]
+    private int _Id;			//	cluster Id
+    private double _Centroid; 		// after LC (Lorentz Correction)
+    private double _Centroid0; 		// before LC
+    private double _CentroidValue;            // the value used in the KF
+    private double _CentroidError;            // for BMT error or Z or phi
+    private double _Resolution;               // cluster spatial resolution    
     private double _TotalEnergy;
-    private double _Phi;  							// 		for Z-detectors
+    private double _Phi;  			// local LC phi and error for BMT-Z
     private double _PhiErr;
-    private double _Phi0;  							// 		for Z-detectors before LC
-    private double _PhiErr0;                                                        //      local Z
-    private double _Z;    							// 		for C-detectors
-    private double _ZErr;
-    private Line3D _Line;
-    private Arc3D  _Arc;
-    private Point3D _TrakInters; //track intersection with the cluster
+    private double _Phi0;  			// local uncorrected phi and error for BMT-Z 
+    private double _PhiErr0;                                                        
+    private double _Z;    			// local Z and correspondng error for BMT-C
+    private double _ZErr;                       
+    private Line3D _Line;                     // 3D line for SVT and BMT-Z
+    private Arc3D  _Arc;                      // 3D Arc for BMT-C
+    private Point3D _TrakInters;              //track intersection with the cluster
+    private int AssociatedTrackID = -1;       // the track ID associated with that hit
+
 
     private int _MinStrip;			// the min strip number in the cluster
     private int _MaxStrip;			// the max strip number in the cluster
@@ -53,21 +58,6 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     private double _SeedResidual;               // residual is doca to seed strip from trk intersection with module plane
     private double _CentroidResidual;           // residual is doca to centroid of cluster to trk inters with module plane
 
-    //added variables for alignment
-//    private double _x1; //cluster first end point x
-//    private double _y1; //svt cluster first end point y
-//    private double _z1; //svt cluster first end point z
-//    private double _x2; //svt cluster second end point x
-//    private double _y2; //svt cluster second end point y
-//    private double _z2; //svt cluster second end point z
-//    private double _ox; //bmt cluster arc origin x
-//    private double _oy; //bmt cluster arc origin y
-//    private double _oz; //bmt cluster arc origin z
-//    private double _cx; //bmt cluster arc center x
-//    private double _cy; //bmt cluster arc center y
-//    private double _cz; //bmt cluster arc center z
-//    private double _theta; //bmt cluster arc theta
-//    private Line3D _cyl; // bmt axis
     private Vector3D _l; //svt vector along cluster pseudo-strip direction or bmt vector along cluster pseudo-strip direction in the middle of the arc
     private Vector3D _s; //svt vector perpendicular to cluster pseudo-strip direction in the module plane or bmt vector perpendicular to cluster pseudo-strip in direction tangential to the cluster surface in the middle of the arc
     private Vector3D _n; //svt vector normal to the cluster module plane or bmt vector normal to the cluster surface in the middle of the arc
@@ -180,37 +170,32 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         if(this.get_Detector()==DetectorType.BST)
             return 0;
         else {
-            if(this.get_Type()==BMTType.C)
-                return this.get_Arc().radius();
-            else
-                return this.get(0).get_Strip().get_Axis().distance(this.getLine()).length();
+            return this.get(0).get_Strip().get_Tile().baseArc().radius();
         }
     }
 
     public Line3D getAxis() {
-        if(this.get_Detector()==DetectorType.BST || true)
+        if(this.get_Detector()==DetectorType.BST)
             return new Line3D();
         else {
-            return this.get(0).get_Strip().get_Axis();
+            return this.get(0).get_Strip().get_Tile().getAxis();
+        }
+    }
+
+    public Cylindrical3D getTile() {
+        if(this.get_Detector()==DetectorType.BST)
+            return null;
+        else {
+            return this.get(0).get_Strip().get_Tile();
         }
     }
     /**
      * sets energy-weighted parameters; these are the strip centroid
      * (energy-weighted) value, the energy-weighted phi for Z detectors and the
      * energy-weighted z for C detectors
-     * @param sgeo
-     * @param geo
      */
-    public void calc_CentroidParams(SVTGeometry sgeo, BMTGeometry geo) {
+    public void calc_CentroidParams() {
         // instantiation of variables
-        double stripNumCent = 0;		// cluster Lorentz-angle-corrected energy-weighted strip = centroid
-        double stripNumCent0 = 0;		// cluster uncorrected energy-weighted strip = centroid
-        double phiCent = 0;			// cluster Lorentz-angle-corrected energy-weighted phi
-        double phiErrCent = 0;			// cluster Lorentz-angle-corrected energy-weighted phi error
-        double phiCent0 = 0;			// cluster uncorrected energy-weighted phi
-        double phiErrCent0 = 0;			// cluster uncorrected energy-weighted phi error
-        double zCent = 0;			// cluster energy-weighted z
-        double zErrCent = 0;			// cluster energy-weighted z error
         double totEn = 0.;			// cluster total energy
         double weightedStrp = 0;		// Lorentz-angle-corrected energy-weighted strip 
         double weightedStrp0 = 0;		// uncorrected energy-weighted strip 
@@ -248,9 +233,10 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                 int strpNb0 = -1; //before LC
 
                 //strip points:
-                Point3D stEP1  = null;
-                Point3D stEP2  = null;
-                Point3D stCent = null;
+                Point3D stEP1   = null;
+                Point3D stEP2   = null;
+                Point3D stCent  = null;
+ 
                 // strip energy
                 double strpEn = thehit.get_Strip().get_Edep();
 
@@ -284,9 +270,9 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                         strpNb0 = thehit.get_Strip().get_Strip();
                         stEP1  = thehit.get_Strip().get_Line().origin();
                         stEP2  = thehit.get_Strip().get_Line().end();
-                        stCent = thehit.get_Strip().get_Line().midpoint();
+                        // RDV: should remove stuff that is not used or necessary from cluster strips and so on
                         // for C detectors the phi of the centroid is calculated for the uncorrected and the Lorentz-angle-corrected centroid
-                        weightedPhi += strpEn * thehit.get_Strip().get_Phi();
+                        stCent = new Point3D(Math.cos(thehit.get_Strip().get_Phi()),Math.sin(thehit.get_Strip().get_Phi()),0);
                         weightedPhiErrSq += (thehit.get_Strip().get_PhiErr()) * (thehit.get_Strip().get_PhiErr());
                         weightedPhi0 += strpEn * thehit.get_Strip().get_Phi0();
                         weightedPhiErrSq0 += (thehit.get_Strip().get_PhiErr0()) * (thehit.get_Strip().get_PhiErr0());
@@ -331,27 +317,33 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             this.set_MaxStrip(max);
             this.set_Seed(seed);
             // calculates the centroid values and associated errors
-            stripNumCent  = weightedStrp / totEn;
-            stripNumCent0 = weightedStrp0 / totEn;
-
+            weightedStrp  /= totEn;
+            weightedStrp0 /= totEn;
+            weightedX1 /= totEn;
+            weightedY1 /= totEn;
+            weightedZ1 /= totEn;
+            weightedX2 /= totEn;
+            weightedY2 /= totEn;
+            weightedZ2 /= totEn;
+            weightedXC /= totEn;
+            weightedYC /= totEn;
+            weightedZC /= totEn;
+            weightedZ /= totEn;
+            weightedPhi = Math.atan2(weightedYC, weightedXC);
+            weightedPhi0 /= totEn;
+            
+            this.set_Centroid(weightedStrp);
+            this.set_TotalEnergy(totEn);
+            
             //setting final variables, including the ones used for alignment
             //-----------------------------------
             if (this.get_Detector()==DetectorType.BST) { //SVT
                 
-                this.setLine(new Line3D(weightedX1/totEn, weightedY1/totEn, weightedZ1/totEn, weightedX2/totEn, weightedY2/totEn, weightedZ2/totEn));
+                this.setLine(new Line3D(weightedX1, weightedY1, weightedZ1, weightedX2, weightedY2, weightedZ2));
                 Vector3D l = new Vector3D(this.getLine().direction().asUnit());
-                
-//                //Vector3D s = sgeo.getPlaneModuleOrigin(this.get_Sector(), this.get_Layer()).
-//                //        vectorTo(sgeo.getPlaneModuleEnd(this.get_Sector(), this.get_Layer())).asUnit();
-//                double[][] Xi = sgeo.getStripEndPoints(1, (this.get_Layer() - 1) % 2);
-//                double[][] Xf = sgeo.getStripEndPoints(100, (this.get_Layer() - 1) % 2);
-//                Point3D EPi = sgeo.transformToFrame(this.get_Sector(), this.get_Layer(), Xi[0][0], 0, Xi[0][1], "lab", "");
-//                Point3D EPf = sgeo.transformToFrame(this.get_Sector(), this.get_Layer(), Xf[0][0], 0, Xf[0][1], "lab", "");
-//                
-//                Vector3D se = EPi.vectorTo(EPf).asUnit(); // in direction of increasing strips
-                Vector3D n = sgeo.findBSTPlaneNormal(this.get_Sector(), this.get_Layer());
+                Vector3D n = this.get(0).get_Strip().get_Normal();
                 Vector3D s = l.cross(n).asUnit();
-                
+                                
                 this.setL(l);
                 this.setS(s);
                 this.setN(n);
@@ -359,8 +351,8 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             else if (this.get_Detector()==DetectorType.BMT) { //BMT 
                 // for the BMT the analysis distinguishes between C and Z type detectors
                 if (this.get_Type()==BMTType.C) { // C-detectors
-                    Point3D  origin = new Point3D(weightedX1/totEn, weightedY1/totEn, weightedZ1/totEn);
-                    Point3D  center = new Point3D(weightedXC/totEn, weightedYC/totEn, weightedZC/totEn);
+                    Point3D  origin = new Point3D(weightedX1, weightedY1, weightedZ1);
+                    Point3D  center = new Point3D(weightedXC, weightedYC, weightedZC);
                     Vector3D normal = this.get(0).get_Strip().get_Arc().normal();
                     double   theta  = this.get(0).get_Strip().get_Arc().theta();
                     this.set_Arc(new Arc3D(origin,center,normal,theta));
@@ -373,35 +365,28 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     this.setS(s);
                     this.setN(n);
                     
-                    zCent    = weightedZ/totEn;
-                    zErrCent = Math.sqrt(weightedZErrSq);
-                    
-                    _Z = zCent;
-                    _ZErr = zErrCent;
-                    this.set_Error(zErrCent);
+                    this.set_Z(weightedZ);
+                    this.set_ZErr(Math.sqrt(weightedZErrSq));
+                    this.set_CentroidValue(weightedZ);
+                    this.set_CentroidError(Math.sqrt(weightedZErrSq));
+                    this.set_Resolution(Math.sqrt(weightedZErrSq));
                 }
                 if (this.get_Type()==BMTType.Z) { // Z-detectors
             
-                    //phiCent = geo.LorentzAngleCorr(phiCent0,this.get_Layer());
-                    phiCent = weightedPhi / totEn;
-                    phiCent0 = weightedPhi0 / totEn;
-                    //zCent = weightedZ / totEn;
-                    phiErrCent = Math.sqrt(weightedPhiErrSq);
-                    phiErrCent0 = Math.sqrt(weightedPhiErrSq0);
-                
-                    set_Centroid0(stripNumCent0);
-                    _Phi = phiCent;
-                    _PhiErr = phiErrCent;
-                    this.set_Error(geo.getRadiusMidDrift(_Layer)*phiErrCent);
-                    set_Phi0(phiCent0);
-                    set_PhiErr0(phiErrCent0);
+                    this.set_Centroid0(weightedStrp0);
+                    this.set_Phi(weightedPhi);
+                    this.set_PhiErr(Math.sqrt(weightedPhiErrSq));
+                    this.set_Phi0(weightedPhi0);
+                    this.set_PhiErr0(Math.sqrt(weightedPhiErrSq0));
+                    this.set_CentroidValue(weightedPhi);
+                    this.set_CentroidError(Math.sqrt(weightedPhiErrSq));
+                    this.set_Resolution(this.getTile().baseArc().radius()*Math.sqrt(weightedPhiErrSq));
                     
                     // for Z detectors Lorentz-correction is applied to the strip
-                    this.setLine(new Line3D(weightedX1/totEn, weightedY1/totEn, weightedZ1/totEn, weightedX2/totEn, weightedY2/totEn, weightedZ2/totEn));
+                    this.setLine(new Line3D(weightedX1, weightedY1, weightedZ1, weightedX2, weightedY2, weightedZ2));
                     
-                    Vector3D l = new Vector3D(this.getLine().direction().asUnit());
-                                    
-                    Vector3D n = geo.getAxis(_Layer, _Sector).distance(_Line).direction().asUnit();
+                    Vector3D l = this.getLine().direction().asUnit();                                    
+                    Vector3D n = this.getAxis().distance(this.getLine().midpoint()).direction().asUnit();
                     Vector3D s = l.cross(n).asUnit();
                    
                     this.setL(l);
@@ -411,18 +396,8 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                 }
             }
         }
-
-        _TotalEnergy = totEn;
-        _Centroid = stripNumCent;
     }
 
-//    
-//    public Vector3D getNFromTraj(double x, double y, double z, Line3D cln) {
-//        Point3D trk = new Point3D(x,y,z);
-//        Point3D Or = cln.distance(new Point3D(x,y,z)).origin();
-//        Vector3D n = Or.vectorTo(trk).asUnit();
-//        return n;
-//    }
         
     public double get_Centroid() {
         return _Centroid;
@@ -432,19 +407,12 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         this._Centroid = _Centroid;
     }
     
-    public double get_CentroidError() {
-        return _CentroidError;
+    public double get_Resolution() {
+        return _Resolution;
     }
 
-    public void set_CentroidError(double _CentroidE) {
-        this._CentroidError = _CentroidE;
-    }
-    public double get_Error() {
-        return _Error;
-    }
-
-    public void set_Error(double E) {
-        this._Error = E;
+    public void set_Resolution(double E) {
+        this._Resolution = E;
     }
     public double get_Centroid0() {
         return _Centroid0;
@@ -502,6 +470,22 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         this._ZErr = _ZErr;
     }
 
+    public void set_CentroidValue(double _CentroidValue) {
+        this._CentroidValue = _CentroidValue;
+    }
+
+    public double get_CentroidValue() {
+        return this._CentroidValue;
+    }
+
+    public double get_CentroidError() {
+        return this._CentroidError;
+    }
+
+    public void set_CentroidError(double _CentroidError) {
+        this._CentroidError = _CentroidError;
+    }
+    
     /**
      * @return the _Arc
      */
@@ -543,7 +527,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             return this.getLine().midpoint();
         else {
             if(this.get_Type()==BMTType.C)
-                return this.get_Arc().center();
+                return this.get_Arc().point(this.get_Arc().theta()/2);
             else
                 return this.getLine().midpoint();
         }
@@ -570,15 +554,20 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     
     public double residual(Point3D traj) {
         double value = 0;
-        if(this.get_Detector()==DetectorType.BST)
-            ;
+        if(this.get_Detector()==DetectorType.BST) {
+            Line3D dist = this.getLine().distance(traj);
+            double side = -Math.signum(this.getLine().direction().cross(dist.direction()).dot(this.getN()));
+            value = dist.length()*side;
+        }
         else {
             Point3D local = new Point3D(traj);
             this.toLocal().apply(local);
             if(this.get_Type()==BMTType.C)                
-                value = local.z()-this.get_Z();
-            else
-                ;
+                value = local.z()-this.get_Centroid();
+            else {
+                value = local.toVector3D().phi()-this.get_Centroid();
+                if(Math.abs(value)>2*Math.PI) value-=Math.signum(value)*2*Math.PI;
+            }
         }     
         return value;
     }
@@ -657,6 +646,47 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         this._TrakInters = _TrakInters;
     }
 
+    public Surface measurement(int mlayer) {
+        Surface surface = null;
+        if(this.get_Detector()==DetectorType.BST) {
+            Point3D endPt1 = this.getLine().origin();
+            Point3D endPt2 = this.getLine().end();
+            org.jlab.clas.tracking.objects.Strip strp = new org.jlab.clas.tracking.objects.Strip(this.get_Id(), this.get_Centroid(), 
+                                                                                                 endPt1.x(), endPt1.y(), endPt1.z(),
+                                                                                                 endPt2.x(), endPt2.y(), endPt2.z());
+            Plane3D plane = new Plane3D(endPt1, this.getN());
+            Line3D module = this.get(0).get_Strip().get_Module();
+            surface = new Surface(plane, strp, module.origin(), module.end());
+            surface.hemisphere = Math.signum(this.center().y());
+            surface.setLayer(mlayer);
+            surface.setSector(this.get_Sector());
+            surface.setError(this.get_Resolution()*this.get_Resolution()); 
+            surface.setl_over_X0(this.get(0).get_Strip().getToverX0());
+        }
+        else {
+            if(this.get_Type()==BMTType.C) {
+                org.jlab.clas.tracking.objects.Strip strp = new org.jlab.clas.tracking.objects.Strip(this.get_Id(), this.get_Centroid(), this.get_CentroidValue());
+                surface = new Surface(this.get(0).get_Strip().get_Tile(), strp);
+                double error = this.get_CentroidError();
+                surface.setError(error*error);
+            }
+            else {
+                Point3D point = new Point3D(this.getLine().midpoint());
+                this.toLocal().apply(point);
+                org.jlab.clas.tracking.objects.Strip strp = new org.jlab.clas.tracking.objects.Strip(this.get_Id(), this.get_Centroid(), point.x(), point.y(), this.get_CentroidValue());  
+                surface = new Surface(this.getTile(), strp);
+                double error = this.get_CentroidError();///this.getTile().baseArc().radius();
+                surface.setError(error*error);
+            
+            }
+            surface.setTransformation(this.toGlobal()); 
+            surface.setLayer(mlayer);
+            surface.setSector(this.get_Sector());
+            surface.setl_over_X0(this.get(0).get_Strip().getToverX0());
+        }
+        return surface;
+    }
+        
     /**
      *
      * @return cluster info. about location and number of hits contained in it
@@ -694,8 +724,6 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         }
         return Math.sqrt(res);
     }
-
-    private int AssociatedTrackID = -1; // the track ID associated with that hit
 
     public int get_AssociatedTrackID() {
         return AssociatedTrackID;

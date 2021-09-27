@@ -25,7 +25,7 @@ public class ClusterFinder {
     int nstrip = 1200; // max number of strips
     int nlayr = 6;
     int nsec = 18;
-    public ArrayList<Cluster> findClusters(List<Hit> hits2, SVTGeometry geo_bst, BMTGeometry geo_bmt) // the number of strips depends on the layer 
+    public ArrayList<Cluster> findClusters(List<Hit> hits2) // the number of strips depends on the layer 
     {
         ArrayList<Cluster> clusters = new ArrayList<Cluster>();
 
@@ -95,7 +95,7 @@ public class ClusterFinder {
                             h.newClustering = true; 
                         }
                         
-                        this_cluster.calc_CentroidParams(geo_bst,geo_bmt);
+                        this_cluster.calc_CentroidParams();
                        
                         for (FittedHit h : this_cluster) {
                             h.newClustering = false;

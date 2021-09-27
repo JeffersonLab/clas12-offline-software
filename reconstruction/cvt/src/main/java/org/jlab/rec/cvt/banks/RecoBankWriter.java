@@ -120,7 +120,7 @@ public class RecoBankWriter {
             bank.setFloat("nx",   i, (float)cluslist.get(i).getN().x());
             bank.setFloat("ny",   i, (float)cluslist.get(i).getN().y());
             bank.setFloat("nz",   i, (float)cluslist.get(i).getN().z());
-            bank.setFloat("e",    i, (float)cluslist.get(i).get_Error());
+            bank.setFloat("e",    i, (float)cluslist.get(i).get_Resolution());
 //            cluslist.get(i).printInfo();
 //            System.out.println("N "+cluslist.get(i).getNFromTraj().toString()+" \n"+
 //                    " L "+cluslist.get(i).getL().toString()+" \n"+
@@ -251,6 +251,8 @@ public class RecoBankWriter {
             bank.setFloat("ETot", i, (float) cluslist.get(i).get_TotalEnergy());
             bank.setInt("seedStrip", i, cluslist.get(i).get_SeedStrip().get_Strip());
             bank.setFloat("centroid", i, (float) cluslist.get(i).get_Centroid());
+            bank.setFloat("centroidValue", i, (float) cluslist.get(i).get_CentroidValue());
+            bank.setFloat("centroidError", i, (float) cluslist.get(i).get_CentroidError());
             bank.setFloat("centroidResidual", i, (float) cluslist.get(i).get_CentroidResidual());
             bank.setFloat("seedResidual", i, (float) cluslist.get(i).get_SeedResidual()); 
             bank.setFloat("seedE", i, (float) cluslist.get(i).get_SeedStrip().get_Edep());
@@ -292,7 +294,7 @@ public class RecoBankWriter {
             bank.setFloat("nx",   i, (float)cluslist.get(i).getN().x());
             bank.setFloat("ny",   i, (float)cluslist.get(i).getN().y());
             bank.setFloat("nz",   i, (float)cluslist.get(i).getN().z());
-            bank.setFloat("e",    i, (float)cluslist.get(i).get_Error());
+            bank.setFloat("e",    i, (float)cluslist.get(i).get_Resolution());
             if(debug && cluslist.get(i).get_AssociatedTrackID()>0 && cluslist.get(i).get_Type()==BMTType.Z) {
                 Line3D cln = new Line3D(cluslist.get(i).origin(), cluslist.get(i).end());
                 System.out.println("Check: N "+cluslist.get(i).getN().toString()+" \n"+

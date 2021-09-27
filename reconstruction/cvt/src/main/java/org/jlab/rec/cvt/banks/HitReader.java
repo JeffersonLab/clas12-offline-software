@@ -7,7 +7,6 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 
 import org.jlab.geom.prim.Point3D;
-import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
@@ -15,6 +14,7 @@ import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.hit.ADCConvertor;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.hit.Strip;
+import org.jlab.rec.cvt.svt.Constants;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 
 /**
@@ -204,11 +204,20 @@ public class HitReader {
                 //    continue;
                 // create the strip object with the adc value converted to daq value used for cluster-centroid estimate
                 Strip SvtStrip = new Strip(strip[i], adcConv.SVTADCtoDAQ(ADC[i], event), (double) time[i]); 
+                SvtStrip.set_Pitch(Constants.PITCH);
                 // get the strip endPoints
                  double[][] X = geo.getStripEndPoints(SvtStrip.get_Strip(), (layer[i] - 1) % 2);
                 Point3D EP1 = geo.transformToFrame(sector[i], layer[i], X[0][0], 0, X[0][1], "lab", "");
                 Point3D EP2 = geo.transformToFrame(sector[i], layer[i], X[1][0], 0, X[1][1], "lab", "");
                 SvtStrip.set_Line(new Line3D(EP1, EP2));
+                SvtStrip.set_Normal(geo.findBSTPlaneNormal(sector[i], layer[i])); // add normal to the plane defined from the strip midpoint
+                SvtStrip.set_Module(new Line3D(geo.getPlaneModuleOrigin(sector[i], layer[i]), geo.getPlaneModuleEnd(sector[i], layer[i])));
+                if(layer[i]%2==1) {
+                    SvtStrip.setToverX0(Constants.SILICONTHICK / Constants.SILICONRADLEN);
+                }
+                else {
+                    SvtStrip.setToverX0(0);
+                }
                 // BMTGeometry implementation using the geometry package:  Charles Platt
 //                Line3d shiftedStrip   = geo.getStrip(layer[i]-1, sector[i]-1, strip[i]-1);
 //

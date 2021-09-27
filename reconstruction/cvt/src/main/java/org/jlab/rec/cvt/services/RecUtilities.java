@@ -85,7 +85,7 @@ public class RecUtilities {
         }
     }
     
-    public List<Surface> setMeasVecs(Seed trkcand, SVTGeometry sgeo, BMTGeometry bgeo, Swim swim) {
+    public List<Surface> setMeasVecs(Seed trkcand, Swim swim) {
         //Collections.sort(trkcand.get_Crosses());
         List<Surface> KFSites = new ArrayList<Surface>();
         Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()),
@@ -100,26 +100,8 @@ public class RecUtilities {
         // SVT measurements
         for (int i = 0; i < trkcand.get_Clusters().size(); i++) { 
             if(trkcand.get_Clusters().get(i).get_Detector()==DetectorType.BST) {
-                int id      = trkcand.get_Clusters().get(i).get_Id();
-                int layer   = trkcand.get_Clusters().get(i).get_Layer();
-                int sector  = trkcand.get_Clusters().get(i).get_Sector();
-                double ce   = trkcand.get_Clusters().get(i).get_Centroid();
-                Line3D line = trkcand.get_Clusters().get(i).getLine();
-                Strip strp  = new Strip(id, ce, line);
-                Plane3D pln = new Plane3D(line.origin(),sgeo.findBSTPlaneNormal(sector,layer));
-                Point3D Or  = sgeo.getPlaneModuleOrigin(sector,layer);
-                Point3D En  = sgeo.getPlaneModuleEnd(sector,layer);
-                Surface meas = new Surface(pln, strp, Or, En);
-                meas.setSector(trkcand.get_Clusters().get(i).get_Sector());
-                meas.setLayer(trkcand.get_Clusters().get(i).get_Layer());
-                double err = trkcand.get_Clusters().get(i).get_Error();
-                meas.setError(err*err); // CHECK THIS .... DOES KF take e or e^2?
-                //the thickness for multiple scattering.  MS is outward the thickness is set for the 1st layer in the superlayer
-                // air gap ignored
-                double thickn_ov_X0 = 0;
-                if(trkcand.get_Clusters().get(i).get_Layer()%2==1)
-                    thickn_ov_X0 = org.jlab.rec.cvt.svt.Constants.SILICONTHICK / org.jlab.rec.cvt.svt.Constants.SILICONRADLEN;
-                meas.setl_over_X0(thickn_ov_X0);
+                int mlayer = trkcand.get_Clusters().get(i).get_Layer();
+                Surface meas = trkcand.get_Clusters().get(i).measurement(mlayer);
                 if((int)Constants.getLayersUsed().get(meas.getLayer())<1)
                     meas.notUsedInFit=true;
                 if(i>0 && KFSites.get(KFSites.size()-1).getLayer()==meas.getLayer())
@@ -129,110 +111,29 @@ public class RecUtilities {
         }
        
         // adding the BMT
+        double hemisp = Math.signum(trkcand.get_Helix().getPointAtRadius(300).y());
         for (int c = 0; c < trkcand.get_Crosses().size(); c++) {
-            if (trkcand.get_Crosses().get(c).get_Detector()==DetectorType.BMT) {
-                
-                int layer  = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer();
-                int sector = trkcand.get_Crosses().get(c).get_Cluster1().get_Sector();
-                
-                Cylindrical3D cyl = bgeo.getTileSurface(layer, sector);
-                Line3D cln = bgeo.getAxis(layer, sector);
-                Line3D l = bgeo.getLCZstrip(bgeo.getRegion(layer), sector, 1, swim);
-                //cln.set(cln.origin().x(), cln.origin().y(), l.origin().z(), 
-                //        cln.end().x(), cln.end().y(), l.end().z());
-                //cyl.setAxis(cln);
-                int id    = trkcand.get_Crosses().get(c).get_Cluster1().get_Id();
-                double ce = trkcand.get_Crosses().get(c).get_Cluster1().get_Centroid();
-                
-                double hemisp = trkcand.get_Helix().getPointAtRadius(300).y();
-                if (trkcand.get_Crosses().get(c).get_Type()==BMTType.Z) {
-                    Point3D EP1 = trkcand.get_Crosses().get(c).get_Cluster1().getLine().origin();
-                    
-                    double v = (EP1.z()-cln.origin().z())/cln.direction().z();
-                    double x = cln.origin().x()+v*cln.direction().x();
-                    double y = cln.origin().y()+v*cln.direction().y();
-                    Vector3D n = new Point3D(x, y, EP1.z()).
-                            vectorTo(new Point3D(EP1.x(),EP1.y(),EP1.z())).asUnit();
-                
-                    double phi = n.phi();
-                   
-                    //double phi = Math.atan2(y,x);
-                    double err = trkcand.get_Crosses().get(c).get_Cluster1().get_PhiErr();
-                           // *(org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 1) / 2 - 1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
-                    
-                    //Strip strp = new Strip(id, ce, x, y, phi);
-                    //Point3D EP1 = trkcand.get_Crosses().get(c).get_Cluster1().getEndPoint1();
-                    //Point3D EP2 = trkcand.get_Crosses().get(c).get_Cluster1().getEndPoint2();
-                    Strip strp = new Strip(id, ce, x, y, phi);
-                    //Strip strp = new Strip( id, ce, EP1.x(), EP1.y(), EP1.z(), EP2.x(), EP2.y(), EP2.z());
-                   
-                    //cyl.baseArc().setRadius(Math.sqrt(x*x+y*y));
-                    //cyl.highArc().setRadius(Math.sqrt(x*x+y*y));
-                    cyl.baseArc().setRadius(bgeo.getRadiusMidDrift(layer));
-                    cyl.highArc().setRadius(bgeo.getRadiusMidDrift(layer));                   
-                    Surface meas = new Surface(cyl, strp);
-
-                    meas.setTransformation(bgeo.toGlobal(layer,sector)); 
-                    
-                    meas.setSector(trkcand.get_Crosses().get(c).get_Sector());
-                    meas.setLayer(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer()+6);
-                    meas.setError(err*err); // CHECK THIS .... DOES KF take e or e^2?
-                    //for multiple scattering
-                    double thickn_ov_X0 = org.jlab.rec.cvt.bmt.Constants.get_T_OVER_X0()[(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 1) / 2 - 1];
-                    meas.setl_over_X0(thickn_ov_X0);
-                    if((int)Constants.getLayersUsed().get(meas.getLayer())<1) {
-                        //System.out.println("Exluding layer "+meas.getLayer()+trkcand.get_Crosses().get(c).printInfo());
-                        meas.notUsedInFit=true;
-                    }
-                    if(c>0 && KFSites.get(KFSites.size()-1).getLayer()==meas.getLayer())
-                        continue;
-                    meas.hemisphere = hemisp;
-                    KFSites.add(meas);
+            if (trkcand.get_Crosses().get(c).get_Detector()==DetectorType.BMT) {                
+                int mlayer=trkcand.get_Crosses().get(c).get_Cluster1().get_Layer()+6;
+                Surface meas = trkcand.get_Crosses().get(c).get_Cluster1().measurement(mlayer);
+                meas.hemisphere = hemisp;
+                if((int)Constants.getLayersUsed().get(meas.getLayer())<1) {
+                    //System.out.println("Exluding layer "+meas.getLayer()+trkcand.get_Crosses().get(c).printInfo());
+                    meas.notUsedInFit=true;
                 }
-                if (trkcand.get_Crosses().get(c).get_Type()==BMTType.C) {
-                    double z = trkcand.get_Crosses().get(c).get_Point().z();
-                    double err = trkcand.get_Crosses().get(c).get_Cluster1().get_ZErr();
-                    
-                    Arc3D arc = trkcand.get_Crosses().get(c).get_Cluster1().get_Arc();
-                    //Point3D ct = new Point3D(trkcand.get(i).get_Cluster1().getCx(),
-                    //         trkcand.get(i).get_Cluster1().getCy(),
-                    //         trkcand.get(i).get_Cluster1().getCz());
-                    // Point3D og = new Point3D(trkcand.get(i).get_Cluster1().getOx(),
-                    //         trkcand.get(i).get_Cluster1().getOy(),
-                    //         trkcand.get(i).get_Cluster1().getOz());
-                    //arc.setCenter(ct);
-                    //arc.setOrigin(og);
-                    Strip strp = new Strip(id, ce, arc);
-                    cyl.baseArc().setRadius(bgeo.getRadiusMidDrift(layer));
-                    cyl.highArc().setRadius(bgeo.getRadiusMidDrift(layer));                   
-                    
-                    Surface meas = new Surface(cyl, strp);
-                    
-                    meas.setTransformation(bgeo.toGlobal(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer(), 
-                            trkcand.get_Crosses().get(c).get_Sector())); 
-                    
-                    meas.setSector(trkcand.get_Crosses().get(c).get_Sector());
-                    meas.setLayer(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer()+6);
-                    meas.setError(err*err); // CHECK THIS .... DOES KF take e or e^2?
-                    //for multiple scattering
-                    double thickn_ov_X0 = org.jlab.rec.cvt.bmt.Constants.get_T_OVER_X0()[(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 1) / 2 - 1];
-                    meas.setl_over_X0(thickn_ov_X0);
-                    if((int)Constants.getLayersUsed().get(meas.getLayer())<1) {
-                        //System.out.println("Exluding layer "+meas.getLayer()+trkcand.get_Crosses().get(c).printInfo());
-                        meas.notUsedInFit=true;
-                    }
-                    meas.hemisphere = hemisp;
-                    if(c>0 && KFSites.get(KFSites.size()-1).getLayer()==meas.getLayer())
-                        continue;
-                    KFSites.add(meas);
-                }
+                if(c>0 && KFSites.get(KFSites.size()-1).getLayer()==meas.getLayer())
+                    continue;
+                KFSites.add(meas);
             }
         }
+//        for(int i=0; i<KFSites.size(); i++) System.out.println(KFSites.get(i).toString());
         return KFSites;
     }
     private TrajectoryFinder tf = new TrajectoryFinder();
     
     
+    
+    // RDV: switch to cluster.mesurement()
     public List<Surface> setMeasVecs(StraightTrack trkcand, 
             SVTGeometry sgeo, BMTGeometry bgeo, Swim swim) {
         //Collections.sort(trkcand.get_Crosses());
@@ -281,7 +182,7 @@ public class RecUtilities {
                     Surface meas = new Surface(pln, strp, Or, En);
                     meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());
                     meas.setSector(cls.get(j).get_Sector());
-                    double err = cls.get(j).get_Error();
+                    double err = cls.get(j).get_Resolution();
                     meas.setError(err*err); // CHECK THIS .... DOES KF take e or e^2?
                     //the thickness for multiple scattering.  MS is outward the thickness is set for the 1st layer in the superlayer
                     // air gap ignored
@@ -468,7 +369,7 @@ public class RecUtilities {
                 trkcand.get_Crosses().get(c).set_Dir(v); 
                 if (trkcand.get_Crosses().get(c).get_Type()==BMTType.Z) {
                     trkcand.get_Crosses().get(c).set_Point(new Point3D(trkcand.get_Crosses().get(c).get_Point().x(),trkcand.get_Crosses().get(c).get_Point().y(),p.z()));
-                    cluster.set_CentroidResidual(traj.get(layer).resi);
+                    cluster.set_CentroidResidual(traj.get(layer).resi*cluster.getTile().baseArc().radius());
                     //double xc = trkcand.get_Crosses().get(c).get_Point().x();
                     //double yc = trkcand.get_Crosses().get(c).get_Point().y();
                     int bsector = trkcand.get_Crosses().get(c).get_Sector();

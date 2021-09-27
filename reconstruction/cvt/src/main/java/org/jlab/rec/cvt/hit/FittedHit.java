@@ -1,6 +1,7 @@
 package org.jlab.rec.cvt.hit;
 
 import org.jlab.detector.base.DetectorType;
+import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.bmt.BMTType;
 
@@ -41,18 +42,23 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     
     public double residual(Point3D traj) {
         double value = 0;
-        if(this.get_Detector()==DetectorType.BST)
-            ;
+        if(this.get_Detector()==DetectorType.BST) {
+            Line3D dist = this.get_Strip().get_Line().distance(traj);
+            double side = -Math.signum(this.get_Strip().get_Line().direction().cross(dist.direction()).dot(this.get_Strip().get_Normal()));
+            value = dist.length()*side;
+        }
         else {
             Point3D local = new Point3D(traj);
             this.get_Strip().toLocal().apply(local);
             if(this.get_Type()==BMTType.C)                
                 value = local.z()-this.get_Strip().get_Z();
-            else
-                ;
-        }      
+            else {
+                value = Math.atan2(local.y(),local.x())-this.get_Strip().get_Phi();
+                value = (value + 8*Math.PI) % (2*Math.PI);
+            }
+        }     
         return value;
-    }
+    }   
     
     
     public double get_stripResolutionAtDoca() {
