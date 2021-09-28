@@ -387,36 +387,36 @@ public class BMTGeometry {
         return global;
     }
       
-    public double getResidual(Point3D traj, int layer, int sector, int strip) {
-        BMTType type  = BMTGeometry.getDetectorType(layer);
-        switch (type) {
-            case C:
-                return this.getCResidual(traj, layer, sector, strip);
-            case Z:
-                return this.getZResidual(traj, layer, sector, strip);
-            default:
-                return 0;
-        } 
-    }
-    
-    private double getCResidual(Point3D traj, int layer, int sector, int strip) {
-        int region    = this.getRegion(layer);
-        Point3D local = this.toLocal(traj, layer, sector);
-        return local.z()-this.getCstripZ(region, strip);
-    }
-    
-    
-    private double getZResidual(Point3D traj, int layer, int sector, int strip) {
-        int region     = this.getRegion(layer);
-        Point3D local  = this.toLocal(traj, layer, sector);
-        
-        double  phi    = Math.atan2(local.y(),local.x());
-        double  radius = this.getRadius(layer)+this.getThickness()/2;
-        double  dphi   = phi-this.getZstripPhi(region, sector, strip);
-        if(dphi>2*Math.PI)       dphi -= 2*Math.PI;
-        else if(dphi<-2*Math.PI) dphi += 2*Math.PI;
-        return radius*dphi;
-    }
+//    public double getResidual(Point3D traj, int layer, int sector, int strip) {
+//        BMTType type  = BMTGeometry.getDetectorType(layer);
+//        switch (type) {
+//            case C:
+//                return this.getCResidual(traj, layer, sector, strip);
+//            case Z:
+//                return this.getZResidual(traj, layer, sector, strip);
+//            default:
+//                return 0;
+//        } 
+//    }
+//    
+//    private double getCResidual(Point3D traj, int layer, int sector, int strip) {
+//        int region    = this.getRegion(layer);
+//        Point3D local = this.toLocal(traj, layer, sector);
+//        return local.z()-this.getCstripZ(region, strip);
+//    }
+//    
+//    
+//    private double getZResidual(Point3D traj, int layer, int sector, int strip) {
+//        int region     = this.getRegion(layer);
+//        Point3D local  = this.toLocal(traj, layer, sector);
+//        
+//        double  phi    = Math.atan2(local.y(),local.x());
+//        double  radius = this.getRadius(layer)+this.getThickness()/2;
+//        double  dphi   = phi-this.getZstripPhi(region, sector, strip);
+//        if(dphi>2*Math.PI)       dphi -= 2*Math.PI;
+//        else if(dphi<-2*Math.PI) dphi += 2*Math.PI;
+//        return radius*dphi;
+//    }
     
     /**
      * Returns Line3D for Z detector strip identified from region, sector, strip numbers, for ideal geometry
@@ -526,6 +526,7 @@ public class BMTGeometry {
             throw new IllegalArgumentException("Error: invalid region="+region);
         double angle = Constants.getCRZPHI()[region-1][sector-1] - Constants.getCRZDPHI()[region-1][sector-1] 
                      + ((double) strip-0.5) * Constants.getCRZWIDTH()[region-1] / Constants.getCRZRADIUS()[region-1];
+        if(Math.abs(angle)>Math.PI) angle -= 2*Math.PI*Math.signum(angle);
         return angle; //in rad 
     }
 

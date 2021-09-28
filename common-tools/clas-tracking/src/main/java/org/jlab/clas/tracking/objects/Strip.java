@@ -314,6 +314,9 @@ public class Strip extends TObject {
         else if(this.type==Type.ARC) {
             s = s + "\n\t" +_arc.toString() + String.format("\n\tCentroid=%.4f",_c);
         }
+        else if(this.type==Type.Z) {
+            s = s + String.format("\n\tZ=%.4f Centroid=%.4f", _z,_c);
+        }
         return s;
     }
     

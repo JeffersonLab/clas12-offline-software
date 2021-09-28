@@ -207,13 +207,16 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         double weightedZErrSq = 0;		  // Err^2 on  energy-weighted z of the strip
         double weightedX1 = 0;                  // SVT/BMT strip centroid positions of endpoints
         double weightedX2 = 0;                  // SVT/BMT strip centroid positions of endpoints
-        double weightedXC = 0;                  // BMT strip centroid positions of arc center
+        double weightedXC = 0;                  // BMT strip centroid positions of strip midpoint
+        double weightedX0 = 0;                  // BMT strip centroid positions of strip position with no LC
         double weightedY1 = 0;                  // SVT/BMT strip centroid positions of endpoints
         double weightedY2 = 0;                  // SVT/BMT strip centroid positions of endpoints
-        double weightedYC = 0;                  // BMT strip centroid positions of arc center
+        double weightedYC = 0;                  // BMT strip centroid positions of strip midpoint
+        double weightedY0 = 0;                  // BMT strip centroid positions of strip midpoint with no LC
         double weightedZ1 = 0;                  // SVT/BMT strip centroid positions of endpoints
         double weightedZ2 = 0;                  // SVT/BMT strip centroid positions of endpoints
-        double weightedZC = 0;                  // BMT strip centroid positions of arc center
+        double weightedZC = 0;                  // BMT strip centroid positions of strip midpoint
+        double weightedZ0 = 0;                  // BMT strip centroid positions of strip midpoint with no LC
         
         int nbhits = this.size();
         //sort for bmt detector
@@ -236,17 +239,18 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                 Point3D stEP1   = null;
                 Point3D stEP2   = null;
                 Point3D stCent  = null;
+                Point3D stCent0 = null;
  
                 // strip energy
                 double strpEn = thehit.get_Strip().get_Edep();
 
                 if (this.get_Detector()==DetectorType.BST) {
                    // for the SVT the analysis only uses the centroid
-                    strpNb = thehit.get_Strip().get_Strip();
-                    stEP1  = thehit.get_Strip().get_Line().origin();
-                    stEP2  = thehit.get_Strip().get_Line().end();
-                    stCent = thehit.get_Strip().get_Line().midpoint();
-                
+                    strpNb  = thehit.get_Strip().get_Strip();
+                    stEP1   = thehit.get_Strip().get_Line().origin();
+                    stEP2   = thehit.get_Strip().get_Line().end();
+                    stCent  = thehit.get_Strip().get_Line().midpoint();
+                    stCent0 = thehit.get_Strip().get_Line().midpoint();                
                }
                 else if (this.get_Detector()==DetectorType.BMT) { 
                     
@@ -256,10 +260,11 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     // for the BMT the analysis distinguishes between C and Z type detectors
                     if (this.get_Type()==BMTType.C) { // C-detectors
                         //strpEn = Math.sqrt(thehit.get_Strip().get_Edep());
-                        strpNb = thehit.get_Strip().get_Strip();
-                        stEP1  = thehit.get_Strip().get_Arc().origin();
-                        stEP2  = thehit.get_Strip().get_Arc().end();
-                        stCent = thehit.get_Strip().get_Arc().center();
+                        strpNb  = thehit.get_Strip().get_Strip();
+                        stEP1   = thehit.get_Strip().get_Arc().origin();
+                        stEP2   = thehit.get_Strip().get_Arc().end();
+                        stCent  = thehit.get_Strip().get_Arc().center();
+                        stCent0 = thehit.get_Strip().get_Arc().center();
                         // for C detector the Z of the centroid is calculated
                         weightedZ += strpEn * thehit.get_Strip().get_Z();
                         weightedZErrSq += (thehit.get_Strip().get_ZErr()) * (thehit.get_Strip().get_ZErr());
@@ -272,9 +277,9 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                         stEP2  = thehit.get_Strip().get_Line().end();
                         // RDV: should remove stuff that is not used or necessary from cluster strips and so on
                         // for C detectors the phi of the centroid is calculated for the uncorrected and the Lorentz-angle-corrected centroid
-                        stCent = new Point3D(Math.cos(thehit.get_Strip().get_Phi()),Math.sin(thehit.get_Strip().get_Phi()),0);
-                        weightedPhiErrSq += (thehit.get_Strip().get_PhiErr()) * (thehit.get_Strip().get_PhiErr());
-                        weightedPhi0 += strpEn * thehit.get_Strip().get_Phi0();
+                        stCent  = new Point3D(Math.cos(thehit.get_Strip().get_Phi()),Math.sin(thehit.get_Strip().get_Phi()),0);
+                        stCent0 = new Point3D(Math.cos(thehit.get_Strip().get_Phi0()),Math.sin(thehit.get_Strip().get_Phi0()),0);
+                        weightedPhiErrSq  += (thehit.get_Strip().get_PhiErr())  * (thehit.get_Strip().get_PhiErr());
                         weightedPhiErrSq0 += (thehit.get_Strip().get_PhiErr0()) * (thehit.get_Strip().get_PhiErr0());
                         
                     }
@@ -291,6 +296,9 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                 weightedXC += strpEn * stCent.x();
                 weightedYC += strpEn * stCent.y();
                 weightedZC += strpEn * stCent.z();
+                weightedX0 += strpEn * stCent0.x();
+                weightedY0 += strpEn * stCent0.y();
+                weightedZ0 += strpEn * stCent0.z();
                 weightedStrp += strpEn * (double) strpNb;
                 weightedStrp0 += strpEn * (double) strpNb0;
                 
@@ -328,10 +336,12 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             weightedXC /= totEn;
             weightedYC /= totEn;
             weightedZC /= totEn;
+            weightedX0 /= totEn;
+            weightedY0 /= totEn;
+            weightedZ0 /= totEn;
             weightedZ /= totEn;
-            weightedPhi = Math.atan2(weightedYC, weightedXC);
-            weightedPhi0 /= totEn;
-            
+            weightedPhi  = Math.atan2(weightedYC, weightedXC);
+            weightedPhi0 = Math.atan2(weightedY0, weightedX0);
             this.set_Centroid(weightedStrp);
             this.set_TotalEnergy(totEn);
             
