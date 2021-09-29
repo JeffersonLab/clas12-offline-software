@@ -12,7 +12,7 @@ package org.jlab.rec.dc.timetodistance;
 public class T2DFunctions {
     
     
-    public static synchronized double ExpoFcn(double x, double alpha, double bfield, double v_0, double delta_nm, double R,
+    public static double ExpoFcn(double x, double alpha, double bfield, double v_0, double delta_nm, double R,
         double tmax, double dmax, double delBf, double Bb1, double Bb2, double Bb3, double Bb4, int superlayer)  {
 
         if(x>dmax)
@@ -71,7 +71,7 @@ public class T2DFunctions {
      * @param Bb4 Bfield dependence parametrization coefficient
      * @return  time
      */
-    public static synchronized double polyFcnP5(double x, double alpha, double bfield, double v_0, double vm, double R, 
+    public static double polyFcnP5(double x, double alpha, double bfield, double v_0, double vm, double R, 
             double tmax, double dmax, double delBf, double Bb1, double Bb2, double Bb3, double Bb4, int superlayer) {
         
         if(x>dmax)
@@ -179,7 +179,7 @@ public class T2DFunctions {
      * @param Bb4 Bfield dependence parametrization coefficient
      * @return  time
      */
-    public static synchronized double polyFcnDmaxV0Constraint(double x, double alpha, double bfield, double v_0, double vm, double R, 
+    public static double polyFcnDmaxV0Constraint(double x, double alpha, double bfield, double v_0, double vm, double R, 
             double tmax, double dmax, double delBf, double Bb1, double Bb2, double Bb3, double Bb4, int superlayer) {
         
         if(x>dmax)
@@ -262,7 +262,7 @@ public class T2DFunctions {
      * @param Bb4 Bfield dependence parametrization coefficient
      * @return  time
      */
-    public static synchronized double polyFcnNoDmaxV0Constraint(double x, double alpha, double bfield, double v_0, double vm, double R, 
+    public static double polyFcnNoDmaxV0Constraint(double x, double alpha, double bfield, double v_0, double vm, double R, 
             double tmax, double dmax, double delBf, double Bb1, double Bb2, double Bb3, double Bb4, int superlayer) {
         
         if(x>dmax)
@@ -310,7 +310,7 @@ public class T2DFunctions {
         
         return time;
     }
-    public static synchronized double polyFcnMac(double x, double alpha, double bfield, double v_0, double vm, double R, 
+    public static double polyFcnMac(double x, double alpha, double bfield, double v_0, double vm, double R, 
             double tmax, double dmax, double delBf, double Bb1, double Bb2, double Bb3, double Bb4, int superlayer) {
         
         if(x>dmax)
@@ -341,7 +341,7 @@ public class T2DFunctions {
         
         return time;
     }
-    public static synchronized double polyFcnSpline(double x, double alpha, double bfield, double v_0, double vm, double R, 
+    public static double polyFcnSpline(double x, double alpha, double bfield, double v_0, double vm, double R, 
             double tmax, double dmax, double delBf, double Bb1, double Bb2, double Bb3, double Bb4, int superlayer) {
         
         if(x>dmax)

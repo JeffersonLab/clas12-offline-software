@@ -2,9 +2,6 @@ package org.jlab.rec.dc.timetodistance;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import org.jlab.rec.dc.Constants;
-import static org.jlab.rec.dc.timetodistance.TableLoader.BfieldValues;
-import static org.jlab.rec.dc.timetodistance.TableLoader.maxTBin;
 
 
 public class TimeToDistanceEstimator {
@@ -56,15 +53,15 @@ public class TimeToDistanceEstimator {
             binhighB = TableLoader.maxBinIdxB;
         }
 
-        double B1 = BfieldValues[binlowB];
-        double B2 = BfieldValues[binhighB];
+        double B1 = TableLoader.getInstance().BfieldValues[binlowB];
+        double B2 = TableLoader.getInstance().BfieldValues[binhighB];
 
          // for alpha ranges		
         int binlowAlpha  = this.getAlphaIdx(alpha);
         int binhighAlpha = binlowAlpha + 1;
 
-        if(binhighAlpha > TableLoader.maxBinIdxAlpha) {
-            binhighAlpha = TableLoader.maxBinIdxAlpha;
+        if(binhighAlpha > TableLoader.getInstance().maxBinIdxAlpha) {
+            binhighAlpha = TableLoader.getInstance().maxBinIdxAlpha;
         }
         //if(binhighAlpha==binlowAlpha) {
         //    binlowAlpha=binhighAlpha-1;
@@ -75,17 +72,17 @@ public class TimeToDistanceEstimator {
         
         // interpolate in B:
         double f_B_alpha1_t1 = interpolateLinear(B*B, B1*B1, B2*B2, 
-                    TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binlowB][binlowAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binlowAlpha)],
-                    TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binhighB][binlowAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binhighB, binlowAlpha)]);
+                    TableLoader.getInstance().DISTFROMTIME[SecIdx][SlyrIdx][binlowB][binlowAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binlowAlpha)],
+                    TableLoader.getInstance().DISTFROMTIME[SecIdx][SlyrIdx][binhighB][binlowAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binhighB, binlowAlpha)]);
         double f_B_alpha2_t1 = interpolateLinear(B*B, B1*B1, B2*B2, 
-                    TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binlowB][binhighAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binhighAlpha)],
-                    TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binhighB][binhighAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binhighB, binhighAlpha)]);
+                    TableLoader.getInstance().DISTFROMTIME[SecIdx][SlyrIdx][binlowB][binhighAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binhighAlpha)],
+                    TableLoader.getInstance().DISTFROMTIME[SecIdx][SlyrIdx][binhighB][binhighAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binhighB, binhighAlpha)]);
         double f_B_alpha1_t2 = interpolateLinear(B*B, B1*B1, B2*B2, 
-                    TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binlowB][binlowAlpha][this.getTimeNextIdx(t, SecIdx, SlyrIdx, binlowB, binlowAlpha)],
-                    TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binhighB][binlowAlpha][this.getTimeNextIdx(t, SecIdx, SlyrIdx, binhighB, binlowAlpha)]);
+                    TableLoader.getInstance().DISTFROMTIME[SecIdx][SlyrIdx][binlowB][binlowAlpha][this.getTimeNextIdx(t, SecIdx, SlyrIdx, binlowB, binlowAlpha)],
+                    TableLoader.getInstance().DISTFROMTIME[SecIdx][SlyrIdx][binhighB][binlowAlpha][this.getTimeNextIdx(t, SecIdx, SlyrIdx, binhighB, binlowAlpha)]);
         double f_B_alpha2_t2 = interpolateLinear(B*B, B1*B1, B2*B2, 
-                    TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binlowB][binhighAlpha][this.getTimeNextIdx(t, SecIdx, SlyrIdx, binlowB, binhighAlpha)],
-                    TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binhighB][binhighAlpha][this.getTimeNextIdx(t, SecIdx, SlyrIdx, binhighB, binhighAlpha)]);
+                    TableLoader.getInstance().DISTFROMTIME[SecIdx][SlyrIdx][binlowB][binhighAlpha][this.getTimeNextIdx(t, SecIdx, SlyrIdx, binlowB, binhighAlpha)],
+                    TableLoader.getInstance().DISTFROMTIME[SecIdx][SlyrIdx][binhighB][binhighAlpha][this.getTimeNextIdx(t, SecIdx, SlyrIdx, binhighB, binhighAlpha)]);
          // interpolate in d for 2 values of alpha:		 
         double f_B_alpha1_t = interpolateLinear(t, this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binlowAlpha)*2., this.getTimeNextIdx(t, SecIdx, SlyrIdx, binhighB, binlowAlpha)*2., f_B_alpha1_t1, f_B_alpha1_t2);
         double f_B_alpha2_t = interpolateLinear(t, this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binhighAlpha)*2., this.getTimeNextIdx(t, SecIdx, SlyrIdx, binhighB, binhighAlpha)*2., f_B_alpha2_t1, f_B_alpha2_t2);
@@ -164,10 +161,10 @@ public class TimeToDistanceEstimator {
             System.out.println(" time bin error "+t1+" ");
         }
         if(binIdx<0) {
-            binIdx = TableLoader.minBinIdxT;
+            binIdx = TableLoader.getInstance().minBinIdxT;
         }
-        if(binIdx>maxTBin) {
-            binIdx = maxTBin ;
+        if(binIdx>TableLoader.getInstance().maxTBin) {
+            binIdx = TableLoader.getInstance().maxTBin ;
         }
 
         return binIdx;
@@ -186,7 +183,7 @@ public class TimeToDistanceEstimator {
 //        if(binIdx>TableLoader.maxBinIdxB) {
 //            binIdx = TableLoader.maxBinIdxB;
 //        }
-        int maxBinIdxB = TableLoader.BfieldValues.length-1;
+        int maxBinIdxB = TableLoader.getInstance().BfieldValues.length-1;
         DecimalFormat df = new DecimalFormat("#");
         df.setRoundingMode(RoundingMode.CEILING);
        
@@ -213,10 +210,10 @@ public class TimeToDistanceEstimator {
         double Cicosalpha = (Ccos30minusalpha - Math.cos(Math.toRadians(30.)))/((1. - Math.cos(Math.toRadians(30.)))/5.);
         int binIdx = (int)  Cicosalpha; 
         if(binIdx<0) {
-            binIdx = TableLoader.minBinIdxAlpha;
+            binIdx = TableLoader.getInstance().minBinIdxAlpha;
         }
-        if(binIdx>TableLoader.maxBinIdxAlpha) {
-            binIdx = TableLoader.maxBinIdxAlpha;
+        if(binIdx>TableLoader.getInstance().maxBinIdxAlpha) {
+            binIdx = TableLoader.getInstance().maxBinIdxAlpha;
         } 
         return binIdx;
     }
@@ -225,8 +222,8 @@ public class TimeToDistanceEstimator {
         int binlowT = this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binlowAlpha);  
         int binhighT = binlowT + 1; 
 
-        if(binhighT>TableLoader.maxBinIdxT[SecIdx][SlyrIdx][binlowB][binlowAlpha]) {
-            binhighT=TableLoader.maxBinIdxT[SecIdx][SlyrIdx][binlowB][binlowAlpha];
+        if(binhighT>TableLoader.getInstance().maxBinIdxT[SecIdx][SlyrIdx][binlowB][binlowAlpha]) {
+            binhighT=TableLoader.getInstance().maxBinIdxT[SecIdx][SlyrIdx][binlowB][binlowAlpha];
         }
         return binhighT;
     }

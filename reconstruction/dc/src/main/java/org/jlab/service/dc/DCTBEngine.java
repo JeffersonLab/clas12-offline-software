@@ -34,7 +34,7 @@ import org.jlab.utils.groups.IndexedTable;
 
 public class DCTBEngine extends DCEngine {
     
-    private TimeToDistanceEstimator tde;
+    private TimeToDistanceEstimator tde = null;
 
     public DCTBEngine(String trking) {
         super(trking);
@@ -93,7 +93,7 @@ public class DCTBEngine extends DCEngine {
         Swim dcSwim = new Swim();        
        
         // fill T2D table
-        TableLoader.Fill(super.getConstantsManager().getConstants(run, Constants.TIME2DIST));
+        TableLoader.getInstance().Fill(this.getConstantsManager().getConstants(run, Constants.TIME2DIST));
 
         ClusterFitter cf = new ClusterFitter();
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
@@ -114,9 +114,9 @@ public class DCTBEngine extends DCEngine {
 
         HitReader hitRead = new HitReader(this.getBankNames()); //vz; modified reader to read regular or ai hits
         hitRead.read_HBHits(event, 
-            super.getConstantsManager().getConstants(run, Constants.DOCARES),
-            super.getConstantsManager().getConstants(run, Constants.TIME2DIST),
-            super.getConstantsManager().getConstants(run, Constants.T0CORRECTION),
+            this.getConstantsManager().getConstants(run, Constants.DOCARES),
+            this.getConstantsManager().getConstants(run, Constants.TIME2DIST),
+            this.getConstantsManager().getConstants(run, Constants.T0CORRECTION),
             Constants.dcDetector, tde);
         List<FittedHit> hits = new ArrayList<FittedHit>();
         //I) get the hits
@@ -131,7 +131,7 @@ public class DCTBEngine extends DCEngine {
         ClusterFinder clusFinder = new ClusterFinder();
 
         clusters = clusFinder.FindTimeBasedClusters(event, hits, cf, ct, 
-                super.getConstantsManager().getConstants(run, Constants.TIME2DIST), Constants.dcDetector, tde);
+                this.getConstantsManager().getConstants(run, Constants.TIME2DIST), Constants.dcDetector, tde);
         for(FittedCluster c : clusters) {
             c.set_Id(c.get(0).get_AssociatedClusterID());
         }

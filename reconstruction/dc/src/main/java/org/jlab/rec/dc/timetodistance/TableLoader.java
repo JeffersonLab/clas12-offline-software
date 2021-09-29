@@ -8,27 +8,43 @@ import org.jlab.utils.groups.IndexedTable;
 
 public class TableLoader {
 
-    public TableLoader() {
-            // TODO Auto-generated constructor stub
+    private TableLoader() {
+            
     }
-    static final protected int nBinsT=2000;
+    
+    // singleton
+    private static TableLoader instance = null;
+    
+    /**
+     * public access to the singleton
+     * 
+     * @return the dc constants singleton
+     */
+    public static TableLoader getInstance() {
+            if (instance == null) {
+                    instance = new TableLoader();
+            }
+            return instance;
+    }
+
+    private static final int nBinsT=2000;
     //public static double[][][][][] DISTFROMTIME = new double[6][6][6][6][850]; // sector slyr alpha Bfield time bins
     
-    static boolean T2DLOADED = false;
-    static boolean T0LOADED = false;
+    private static boolean T2DLOADED = false;
+//    static boolean T0LOADED = false;
     
-    public static double[] BfieldValues = new double[]{0.0000, 1.0000, 1.4142, 1.7321, 2.0000, 2.2361, 2.4495, 2.6458};
-    static int minBinIdxB = 0;
-    static int maxBinIdxB = BfieldValues.length-1;
-    static int minBinIdxAlpha = 0;
-    static int maxBinIdxAlpha = 5;
-    public static double[] AlphaMid = new double[6];
-    public static double[][] AlphaBounds = new double[6][2];
-    static int minBinIdxT  = 0;
-    static int[][][][] maxBinIdxT  = new int[6][6][8][6];
-    public static double[][][][][] DISTFROMTIME = new double[6][6][maxBinIdxB+1][maxBinIdxAlpha+1][nBinsT]; // sector slyr alpha Bfield time bins [s][r][ibfield][icosalpha][tbin]
-    
-    //public static double[] distbetaValues = new double[]{0.16, 0.16, 0.08, 0.08, 0.08, 0.08};
+    public static final double[] BfieldValues = new double[]{0.0000, 1.0000, 1.4142, 1.7321, 2.0000, 2.2361, 2.4495, 2.6458};
+    public static int minBinIdxB = 0;
+    public static int maxBinIdxB = BfieldValues.length-1;
+    public static int minBinIdxAlpha = 0;
+    public static int maxBinIdxAlpha = 5;
+    private static double[] AlphaMid = new double[6];
+    private static double[][] AlphaBounds = new double[6][2];
+    public static int minBinIdxT  = 0;
+    public static int[][][][] maxBinIdxT  = new int[6][6][8][6];
+    public static double[][][][][] DISTFROMTIME = new double[6][6][maxBinIdxB+1][maxBinIdxAlpha+1][nBinsT]; // sector slyr alpha Bfield time bins [s][r][ibfield][icosalpha][tbin]    
+    public static int maxTBin = -1;
+        //public static double[] distbetaValues = new double[]{0.16, 0.16, 0.08, 0.08, 0.08, 0.08};
     
     /*
      * 
@@ -92,7 +108,7 @@ public class TableLoader {
 //        }
 //        T0LOADED = true;
 //    }
-    public static int getAlphaBin(double Alpha) {
+    private static int getAlphaBin(double Alpha) {
         int bin = 0;
         for(int b =0; b<6; b++) {
             if(Alpha>=AlphaBounds[b][0] && Alpha<=AlphaBounds[b][1] )
@@ -100,8 +116,8 @@ public class TableLoader {
         }
         return bin;
     }
-    public static int maxTBin = -1;
-    public static synchronized void FillAlpha() {
+    
+    private static synchronized void FillAlpha() {
         for(int icosalpha =0; icosalpha<maxBinIdxAlpha+1; icosalpha++) {
 
             double cos30minusalphaM = Math.cos(Math.toRadians(30.)) + (double) 
@@ -122,6 +138,7 @@ public class TableLoader {
         AlphaBounds[0][0] = 0;
         AlphaBounds[5][1] = 30;
     }
+    
     public static synchronized void Fill(IndexedTable tab) {
         //CCDBTables 0 =  "/calibration/dc/signal_generation/doca_resolution";
         //CCDBTables 1 =  "/calibration/dc/time_to_distance/t2d";
@@ -207,7 +224,7 @@ public class TableLoader {
         T2DLOADED = true;
      }
 
-    private static void fillMissingTableBins() {
+    private static synchronized void fillMissingTableBins() {
         
         for(int s = 0; s<6; s++ ){ // loop over sectors
 
