@@ -75,7 +75,7 @@ public class TrackCandListFinder {
             }
         }
         // if more superlayers are missing than the required number in the analysis - skip the track
-        if (NbMissingSl > 6 - Constants.NSUPERLAYERTRACKING) {
+        if (NbMissingSl > 6 - Constants.getInstance().NSUPERLAYERTRACKING) {
             pass = false;
         }
         return pass;

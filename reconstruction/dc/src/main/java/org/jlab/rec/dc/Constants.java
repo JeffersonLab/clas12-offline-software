@@ -44,15 +44,15 @@ public class Constants {
     public static final double LIGHTVEL = 0.00299792458;        // velocity of light (cm/ns) - conversion factor from radius in cm to momentum in GeV/c
 
     // CONFIGURABLE PARAMETERS
-    private static String  GEOVARIATION = "default";    
-    private static boolean ENDPLATESBOWING = false;
-    private static double  WIREDIST = 0.0;
-    public static int      SECTORSELECT = 0;
-    public static double   NSUPERLAYERTRACKING = 5;
-    private static boolean USETSTART = true;
-    private static boolean USETIMETBETA = false;
-    private static boolean CHECKBETA = false;
-    private static double  T2D = 0;     
+    private String  GEOVARIATION = "default";    
+    private boolean ENDPLATESBOWING = false;
+    private double  WIREDIST = 0.0;
+    public  int     SECTORSELECT = 0;
+    public  int     NSUPERLAYERTRACKING = 5;
+    private boolean USETSTART = true;
+    private boolean USETIMETBETA = false;
+    private boolean CHECKBETA = false;
+    private int     T2D = 0;     
     
     public static final String DOCARES      = "/calibration/dc/signal_generation/doca_resolution";
     public static final String TIME2DIST    = "/calibration/dc/time_to_distance/time2dist";
@@ -66,13 +66,13 @@ public class Constants {
     
     // GEOMETRY PARAMETERS
     // geometry constants not yet read from CCDB of from geometry services
-    public static DCGeant4Factory    dcDetector   = null;
-    public static FTOFGeant4Factory  ftofDetector = null;
-    public static Detector           ecalDetector = null;
-    public static TrajectorySurfaces tSurf        = null;
+    public DCGeant4Factory    dcDetector   = null;
+    public FTOFGeant4Factory  ftofDetector = null;
+    public Detector           ecalDetector = null;
+    public TrajectorySurfaces tSurf        = null;
     
-    public static double htccRadius=175;
-    public static double ltccPlane=653.09;
+    public static final double htccRadius=175;
+    public static final double ltccPlane=653.09;
     
     // other CLAS12 parameters
     public static final  int NSECT  = 6;
@@ -83,7 +83,7 @@ public class Constants {
     public static final  int NWIRE  = 114; //1 guard + 112 sense + 1 guard
 
     public static final double z_extrap_to_LowFieldReg = 592.; // z in cm in the region outside of DC-R3 [used for extrapolation of the track to the outer detectors]
-    public static final double[] wpdist = new double[6];//= {0.386160,0.404220,0.621906,0.658597,0.935140,0.977982};
+    public double[] wpdist = new double[6];//= {0.386160,0.404220,0.621906,0.658597,0.935140,0.977982};
 
     // CONSTANTS USED IN RECONSTRUCTION
     //---------------------------------
@@ -177,7 +177,7 @@ public class Constants {
     public static final  int[] SNR_LEFTSHIFTS  = {0,1,2,2,4,4};	
 
     // Z Range for MS
-    public static double[] Z = new double[13];
+    public double[] Z = new double[13];
 
     // Arrays for combinatorial cluster compositions
     private static final int[][] CombArray1Layer = new int[][]{
@@ -226,105 +226,125 @@ public class Constants {
             {0,0,0,1,1,1}, {1,0,0,1,1,1}, {0,1,0,1,1,1}, {1,1,0,1,1,1},
             {0,0,1,1,1,1}, {1,0,1,1,1,1}, {0,1,1,1,1,1}, {1,1,1,1,1,1}};
 
-    public static final ArrayList<int[][]> CombArray = new ArrayList<>(6);
+    public final ArrayList<int[][]> CombArray = new ArrayList<>(6);
 
-    public static int[][] STBLOC;
+    public final int[][] STBLOC = new int[6][6];
 
-    public static final double[][][] MAXENDPLTDEFLEC = new double[3][6][2];
+    public final double[][][] MAXENDPLTDEFLEC = new double[3][6][2];
     
 
-    public static boolean isUSETSTART() {
+    public boolean isUSETSTART() {
         return USETSTART;
     }
 
-    public static void setUSETSTART(boolean USETSTART) {
-        Constants.USETSTART = USETSTART;
+    public void setUSETSTART(boolean usetstart) {
+        USETSTART = usetstart;
     }
     
-    public static boolean useUSETIMETBETA() {
+    public boolean useUSETIMETBETA() {
         return USETIMETBETA;
     }
 
-    public static void setUSETIMETBETA(boolean USETIMETBETA) {
-        Constants.USETIMETBETA = USETIMETBETA;
+    public void setUSETIMETBETA(boolean usetimebeta) {
+        USETIMETBETA = usetimebeta;
     }
        
-    public static double getWIREDIST() {
+    public double getWIREDIST() {
         return WIREDIST;
     }
 
-    public static void setWIREDIST(double aDIST) {
+    public void setWIREDIST(double aDIST) {
         WIREDIST = aDIST;
     }
 
-    public static String getGEOVARIATION() {
+    public String getGEOVARIATION() {
         return GEOVARIATION;
     }
 
-    public static void setGEOVARIATION(String GEOVARIATION) {
-        Constants.GEOVARIATION = GEOVARIATION;
+    public void setGEOVARIATION(String geovariation) {
+        GEOVARIATION = geovariation;
     }
 
-    public static boolean ENDPLATESBOWING() {
+    public boolean ENDPLATESBOWING() {
         return ENDPLATESBOWING;
     }
 
-    public static void setENDPLATESBOWING(boolean ENDPLATESBOWING) {
-        Constants.ENDPLATESBOWING = ENDPLATESBOWING;
+    public void setENDPLATESBOWING(boolean endplatesbowing) {
+        ENDPLATESBOWING = endplatesbowing;
     }
 
-    public static boolean USEBETACUT() {
+    public boolean USEBETACUT() {
         return CHECKBETA;
     }
 
-    public static void setBETACUT(boolean CHECKBETA) {
-        Constants.CHECKBETA = CHECKBETA;
+    public void setBETACUT(boolean checkbeta) {
+        CHECKBETA = checkbeta;
     }
 
-    public static void  setT2D(int i) {
-        Constants.T2D = i;
+    public void  setT2D(int i) {
+        T2D = i;
     }
-    public static double getT2D() {
-        return Constants.T2D;
+    public int getT2D() {
+        return T2D;
     }
 
-    public synchronized void initialize(String variation, 
+    public synchronized void initialize(String engine,
+                                               String variation, 
                                                boolean wireDistortion,
                                                boolean useStartTime,
                                                boolean useTimeBeta,
                                                boolean useBetaCut,
                                                int t2d, int nSuperLayer,
                                                int selectedSector) {
-        if (ConstantsLoaded) return;
-        
-        GEOVARIATION    = variation;
-        ENDPLATESBOWING = wireDistortion;
-        USETSTART       = useStartTime;
-        USETIMETBETA    = useTimeBeta;
-        CHECKBETA       = useBetaCut;
-        T2D             = t2d;
-        NSUPERLAYERTRACKING = nSuperLayer;
-        SECTORSELECT    = selectedSector;
+        if (ConstantsLoaded) {
+            printConfig(engine);
+            return;
+        }
+        else {
+            GEOVARIATION    = variation;
+            ENDPLATESBOWING = wireDistortion;
+            USETSTART       = useStartTime;
+            USETIMETBETA    = useTimeBeta;
+            CHECKBETA       = useBetaCut;
+            T2D             = t2d;
+            NSUPERLAYERTRACKING = nSuperLayer;
+            SECTORSELECT    = selectedSector;
+
+            LoadConstants();
+
+            LoadGeometry(GEOVARIATION);
+
+            ConstantsLoaded = true;
+            printConfig(engine);
+        }
+    }
+    
+    public synchronized void initialize(String engine) {
+        if (ConstantsLoaded) {
+            printConfig(engine);
+            return;
+        }
         
         LoadConstants();
         
         LoadGeometry(GEOVARIATION);
         
         ConstantsLoaded = true;
+        printConfig(engine);
     }
     
-    public synchronized void initialize() {
-        if (ConstantsLoaded) return;
-        
-        LoadConstants();
-        
-        LoadGeometry(GEOVARIATION);
-        
-        ConstantsLoaded = true;
+    public void printConfig(String engine) {
+        System.out.println("["+engine+"] run with variation = " + GEOVARIATION);
+        System.out.println("["+engine+"] run with sector selection = " + SECTORSELECT);
+        System.out.println("["+engine+"] run with start time option = " + USETSTART);
+        System.out.println("["+engine+"] run with wire distortions = " + ENDPLATESBOWING);
+        System.out.println("["+engine+"] run with with new tBeta configuration = " + USETIMETBETA);
+        System.out.println("["+engine+"] run with with Beta cut = " + CHECKBETA);
+        System.out.println("["+engine+"] run with time to distance function set to exponential/polynomial (0/1) = " + T2D);
+        System.out.println("["+engine+"] run with with Five-out-of-six-superlayer-trkg = " + NSUPERLAYERTRACKING);        
     }
     
-    
-    private static synchronized void LoadConstants() {
+    private synchronized void LoadConstants() {
         CombArray.clear();
         CombArray.add(CombArray1Layer);
         CombArray.add(CombArray2Layers);
@@ -333,7 +353,6 @@ public class Constants {
         CombArray.add(CombArray5Layers);
         CombArray.add(CombArray6Layers);
 
-        STBLOC = new int[6][6];
         for(int s =0; s<6; s++) {
             STBLOC[s][0]=1;
             STBLOC[s][1]=-1;
@@ -393,12 +412,12 @@ public class Constants {
             
     }
 
-    private static synchronized void LoadGeometry(String geoVariation) {
+    private synchronized void LoadGeometry(String geoVariation) {
         // Load the geometry
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, geoVariation);
-        Constants.dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, Constants.ENDPLATESBOWING);
+        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, ENDPLATESBOWING);
         for(int l=0; l<6; l++) {
-            Constants.wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
+            wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
         }
         // Load target
         ConstantProvider providerTG = GeometryFactory.getConstants(DetectorType.TARGET, 11, geoVariation);
@@ -406,12 +425,12 @@ public class Constants {
         double targetLength   = providerTG.getDouble("/geometry/target/length",0);
         // Load other geometries
         ConstantProvider providerFTOF = GeometryFactory.getConstants(DetectorType.FTOF, 11, geoVariation);
-        Constants.ftofDetector = new FTOFGeant4Factory(providerFTOF);        
+        ftofDetector = new FTOFGeant4Factory(providerFTOF);        
         ConstantProvider providerEC = GeometryFactory.getConstants(DetectorType.ECAL, 11, geoVariation);
-        Constants.ecalDetector =  GeometryFactory.getDetector(DetectorType.ECAL, 11, geoVariation);
+        ecalDetector =  GeometryFactory.getDetector(DetectorType.ECAL, 11, geoVariation);
         // create the surfaces
-        Constants.tSurf = new TrajectorySurfaces();
-        Constants.tSurf.LoadSurfaces(targetPosition, targetLength,Constants.dcDetector, Constants.ftofDetector, Constants.ecalDetector);        
+        tSurf = new TrajectorySurfaces();
+        tSurf.LoadSurfaces(targetPosition, targetLength,dcDetector, ftofDetector, ecalDetector);        
     }
    
 

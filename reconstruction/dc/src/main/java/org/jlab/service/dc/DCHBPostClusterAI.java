@@ -83,7 +83,7 @@ public class DCHBPostClusterAI extends DCEngine {
         List<Segment> segments = null;
         List<FittedHit> fhits = null;
 
-        reader.read_NNHits(event, Constants.dcDetector);
+        reader.read_NNHits(event, Constants.getInstance().dcDetector);
 
         //I) get the lists
         List<Hit> hits = reader.get_DCHits();
@@ -94,14 +94,14 @@ public class DCHBPostClusterAI extends DCEngine {
             return true;
         }
         PatternRec pr = new PatternRec();
-        segments = pr.RecomposeSegments(hits, Constants.dcDetector);
+        segments = pr.RecomposeSegments(hits, Constants.getInstance().dcDetector);
         Collections.sort(segments);
 
         if (segments.isEmpty()) {
             return true;
         } 
         //crossList
-        CrossList crosslist = pr.RecomposeCrossList(segments, Constants.dcDetector);
+        CrossList crosslist = pr.RecomposeCrossList(segments, Constants.getInstance().dcDetector);
         crosses = new ArrayList<Cross>();
         if(Constants.DEBUG==true) 
             System.out.println("num cands = "+crosslist.size());
@@ -126,12 +126,12 @@ public class DCHBPostClusterAI extends DCEngine {
         // update B field
         CrossListFinder crossLister = new CrossListFinder();
         for(Cross cr : crosses) {
-            crossLister.updateBFittedHits(event, cr, null, Constants.dcDetector, null, dcSwim);
+            crossLister.updateBFittedHits(event, cr, null, Constants.getInstance().dcDetector, null, dcSwim);
         }
         //find the list of  track candidates
         TrackCandListFinder trkcandFinder = new TrackCandListFinder(Constants.HITBASE);
         trkcands = trkcandFinder.getTrackCands(crosslist,
-            Constants.dcDetector,
+            Constants.getInstance().dcDetector,
             Swimmer.getTorScale(),
             dcSwim, true);
 
@@ -146,7 +146,7 @@ public class DCHBPostClusterAI extends DCEngine {
                 trk.set_Id(trkId);
                 trkcandFinder.matchHits(trk.get_Trajectory(),
                         trk,
-                        Constants.dcDetector,
+                        Constants.getInstance().dcDetector,
                         dcSwim);
                 for (Cross c : trk) {
                     c.set_CrossDirIntersSegWires();

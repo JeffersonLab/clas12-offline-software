@@ -45,19 +45,19 @@ public class TrajectorySurfaces {
             FTOFGeant4Factory ftofDetector,
             Detector ecalDetector) {
         // creating Boundaries for MS 
-        Constants.Z[0]= targetPosition;
-        Constants.Z[1]= dcDetector.getWireMidpoint(0, 0, 0, 0).z;
-        Constants.Z[2]= dcDetector.getWireMidpoint(0, 0, 5, 0).z;
-        Constants.Z[3]= dcDetector.getWireMidpoint(0, 1, 0, 0).z;
-        Constants.Z[4]= dcDetector.getWireMidpoint(0, 1, 5, 0).z;
-        Constants.Z[5]= dcDetector.getWireMidpoint(0, 2, 0, 0).z;
-        Constants.Z[6]= dcDetector.getWireMidpoint(0, 2, 5, 0).z;
-        Constants.Z[7]= dcDetector.getWireMidpoint(0, 3, 0, 0).z;
-        Constants.Z[8]= dcDetector.getWireMidpoint(0, 3, 5, 0).z;
-        Constants.Z[9]= dcDetector.getWireMidpoint(0, 4, 0, 0).z;
-        Constants.Z[10]= dcDetector.getWireMidpoint(0, 4, 5, 0).z;
-        Constants.Z[11]= dcDetector.getWireMidpoint(0, 5, 0, 0).z;
-        Constants.Z[12]= dcDetector.getWireMidpoint(0, 5, 5, 0).z;
+        Constants.getInstance().Z[0]= targetPosition;
+        Constants.getInstance().Z[1]= dcDetector.getWireMidpoint(0, 0, 0, 0).z;
+        Constants.getInstance().Z[2]= dcDetector.getWireMidpoint(0, 0, 5, 0).z;
+        Constants.getInstance().Z[3]= dcDetector.getWireMidpoint(0, 1, 0, 0).z;
+        Constants.getInstance().Z[4]= dcDetector.getWireMidpoint(0, 1, 5, 0).z;
+        Constants.getInstance().Z[5]= dcDetector.getWireMidpoint(0, 2, 0, 0).z;
+        Constants.getInstance().Z[6]= dcDetector.getWireMidpoint(0, 2, 5, 0).z;
+        Constants.getInstance().Z[7]= dcDetector.getWireMidpoint(0, 3, 0, 0).z;
+        Constants.getInstance().Z[8]= dcDetector.getWireMidpoint(0, 3, 5, 0).z;
+        Constants.getInstance().Z[9]= dcDetector.getWireMidpoint(0, 4, 0, 0).z;
+        Constants.getInstance().Z[10]= dcDetector.getWireMidpoint(0, 4, 5, 0).z;
+        Constants.getInstance().Z[11]= dcDetector.getWireMidpoint(0, 5, 0, 0).z;
+        Constants.getInstance().Z[12]= dcDetector.getWireMidpoint(0, 5, 5, 0).z;
         //DcDetector.getWireMidpoint(this.get_Sector()-1, this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).z;
         
         double d = 0;

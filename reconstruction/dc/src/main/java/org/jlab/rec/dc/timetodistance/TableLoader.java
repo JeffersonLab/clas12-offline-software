@@ -167,7 +167,7 @@ public class TableLoader {
                     Tmax[s][r] = tab.getDoubleValue("tmax", s+1,r+1,0);
                     // end fill constants
                     //System.out.println(v0[s][r]+" "+vmid[s][r]+" "+FracDmaxAtMinVel[s][r]);
-                    double dmax = 2.*Constants.wpdist[r]; 
+                    double dmax = 2.*Constants.getInstance().wpdist[r]; 
                     //double tmax = CCDBConstants.getTMAXSUPERLAYER()[s][r];
                     for(int ibfield =0; ibfield<maxBinIdxB+1; ibfield++) {
                         double bfield = BfieldValues[ibfield];
@@ -257,7 +257,7 @@ public class TableLoader {
     public static synchronized double calc_Time(double x, double alpha, double bfield, int sector, int superlayer) {
         int s = sector - 1;
         int r = superlayer - 1;
-        double dmax = 2.*Constants.wpdist[r]; 
+        double dmax = 2.*Constants.getInstance().wpdist[r]; 
         double tmax = Tmax[s][r];
         double delBf = delta_bfield_coefficient[s][r]; 
         double Bb1 = b1[s][r];
@@ -267,7 +267,7 @@ public class TableLoader {
         if(x>dmax)
             x=dmax;
         
-        if(Constants.getT2D()==0) {
+        if(Constants.getInstance().getT2D()==0) {
             
             return T2DFunctions.ExpoFcn(x, alpha, bfield, v0[s][r], deltanm[s][r], 0.615, 
                 tmax, dmax, delBf, Bb1, Bb2, Bb3, Bb4, superlayer) + delta_T0[s][r];

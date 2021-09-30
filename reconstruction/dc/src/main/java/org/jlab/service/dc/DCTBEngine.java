@@ -78,7 +78,7 @@ public class DCTBEngine extends DCEngine {
         if(run==0) return true;
         
         double T_Start = 0;
-        if(Constants.isUSETSTART() == true) {
+        if(Constants.getInstance().isUSETSTART() == true) {
             String recBankName = this.getBankNames().getRecEventBank();
             if(event.hasBank(recBankName)==true) {
                 T_Start = event.getBank(recBankName).getFloat("startTime", 0);
@@ -117,7 +117,7 @@ public class DCTBEngine extends DCEngine {
             this.getConstantsManager().getConstants(run, Constants.DOCARES),
             this.getConstantsManager().getConstants(run, Constants.TIME2DIST),
             this.getConstantsManager().getConstants(run, Constants.T0CORRECTION),
-            Constants.dcDetector, tde);
+            Constants.getInstance().dcDetector, tde);
         List<FittedHit> hits = new ArrayList<FittedHit>();
         //I) get the hits
         hits = hitRead.get_HBHits();
@@ -131,7 +131,7 @@ public class DCTBEngine extends DCEngine {
         ClusterFinder clusFinder = new ClusterFinder();
 
         clusters = clusFinder.FindTimeBasedClusters(event, hits, cf, ct, 
-                this.getConstantsManager().getConstants(run, Constants.TIME2DIST), Constants.dcDetector, tde);
+                this.getConstantsManager().getConstants(run, Constants.TIME2DIST), Constants.getInstance().dcDetector, tde);
         for(FittedCluster c : clusters) {
             c.set_Id(c.get(0).get_AssociatedClusterID());
         }
@@ -145,7 +145,7 @@ public class DCTBEngine extends DCEngine {
 
         List<FittedCluster> pclusters = segFinder.selectTimeBasedSegments(clusters);
 
-        segments =  segFinder.get_Segments(pclusters, event, Constants.dcDetector, false);
+        segments =  segFinder.get_Segments(pclusters, event, Constants.getInstance().dcDetector, false);
 
         if(segments.isEmpty()) { // need 6 segments to make a trajectory
             for(FittedCluster c : clusters) {					
@@ -233,14 +233,14 @@ public class DCTBEngine extends DCEngine {
             if(TrackArray[i]==null || TrackArray[i].get_ListOfHBSegments()==null || TrackArray[i].get_ListOfHBSegments().size()<4)
                 continue;
             TrackArray[i].set_MissingSuperlayer(get_Status(TrackArray[i]));
-            TrackArray[i].addAll(crossMake.find_Crosses(TrackArray[i].get_ListOfHBSegments(), Constants.dcDetector));
+            TrackArray[i].addAll(crossMake.find_Crosses(TrackArray[i].get_ListOfHBSegments(), Constants.getInstance().dcDetector));
             if(TrackArray[i].size()<1)
                 continue;
             crosses.addAll(TrackArray[i]);
             //if(TrackArray[i].get_FitChi2()>200) {
             //    resetTrackParams(TrackArray[i], new DCSwimmer());
             //} 
-            KFitterDoca kFit = new KFitterDoca(TrackArray[i], Constants.dcDetector, true, dcSwim, 0);
+            KFitterDoca kFit = new KFitterDoca(TrackArray[i], Constants.getInstance().dcDetector, true, dcSwim, 0);
              
             StateVec fn = new StateVec();
             kFit.runFitter(TrackArray[i].get(0).get_Sector());
@@ -252,7 +252,7 @@ public class DCTBEngine extends DCEngine {
                 TrackArray[i].set_P(1./Math.abs(kFit.finalStateVec.Q));
                 TrackArray[i].set_Q((int)Math.signum(kFit.finalStateVec.Q));
                 trkcandFinder.setTrackPars(TrackArray[i], new Trajectory(), trjFind, fn, 
-                        kFit.finalStateVec.z, Constants.dcDetector, dcSwim, beamXoffset, beamYoffset);
+                        kFit.finalStateVec.z, Constants.getInstance().dcDetector, dcSwim, beamXoffset, beamYoffset);
                 // candidate parameters are set from the state vector
                 if(TrackArray[i].fit_Successful==false)
                     continue;
@@ -285,10 +285,10 @@ public class DCTBEngine extends DCEngine {
                 int trkId = trk.get_Id();
                 // reset the id
                 //trk.set_Id(trkId);
-                trkcandFinder.matchHits(trk.get_Trajectory(), trk, Constants.dcDetector, dcSwim);
+                trkcandFinder.matchHits(trk.get_Trajectory(), trk, Constants.getInstance().dcDetector, dcSwim);
                 trk.calcTrajectory(trkId, dcSwim, trk.get_Vtx0().x(), trk.get_Vtx0().y(), trk.get_Vtx0().z(), 
                         trk.get_pAtOrig().x(), trk.get_pAtOrig().y(), trk.get_pAtOrig().z(), trk.get_Q(), 
-                        Constants.tSurf);
+                        Constants.getInstance().tSurf);
 //                for(int j = 0; j< trk.trajectory.size(); j++) {
 //                System.out.println(trk.get_Id()+" "+trk.trajectory.size()+" ("+trk.trajectory.get(j).getDetId()+") ["+
 //                            trk.trajectory.get(j).getDetName()+"] "+

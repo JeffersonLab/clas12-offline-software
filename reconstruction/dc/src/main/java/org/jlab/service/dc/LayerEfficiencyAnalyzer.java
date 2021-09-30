@@ -82,8 +82,8 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
     public boolean init() {
         
         this.setOptions();
-        Constants.getInstance().initialize();
-        Constants.setT2D(1);
+        Constants.getInstance().initialize("LayerEfficiency");
+        Constants.getInstance().setT2D(1);
         this.LoadTables();
         
         
@@ -242,7 +242,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
             super.getConstantsManager().getConstants(run, Constants.DOCARES),
             super.getConstantsManager().getConstants(run, Constants.TIME2DIST),
             super.getConstantsManager().getConstants(run, Constants.T0CORRECTION),
-            Constants.dcDetector, tde);
+            Constants.getInstance().dcDetector, tde);
         //hitRead.read_TBHits(event, 
         //    super.getConstantsManager().getConstants(newRun, Constants.DOCARES),
         //    super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST), tde, Constants.getT0(), Constants.getT0Err());
@@ -266,7 +266,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         ClusterFinder clusFinder = new ClusterFinder();
 
         clusters = clusFinder.FindTimeBasedClusters(event, hits, cf, ct, 
-                super.getConstantsManager().getConstants(run, Constants.TIME2DIST), Constants.dcDetector, tde);
+                super.getConstantsManager().getConstants(run, Constants.TIME2DIST), Constants.getInstance().dcDetector, tde);
 
         if(clusters.isEmpty()) {
             return true;
@@ -277,7 +277,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
 
         List<FittedCluster> pclusters = segFinder.selectTimeBasedSegments(clusters);
 
-        segments =  segFinder.get_Segments(pclusters, event, Constants.dcDetector, true);
+        segments =  segFinder.get_Segments(pclusters, event, Constants.getInstance().dcDetector, true);
         
         if(segments!=null && segments.size()>0) {
             DataBank bankE = event.createBank("TimeBasedTrkg::TBSegmentTrajectory", segments.size() * 6);

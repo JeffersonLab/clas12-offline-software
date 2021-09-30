@@ -656,12 +656,12 @@ public class ClusterCleanerUtilities {
 
         if (nbLyr > 0) {
 
-            for (int clusIdx = 0; clusIdx < Constants.CombArray.get(nbLyr - 1).length; clusIdx++) {
+            for (int clusIdx = 0; clusIdx < Constants.getInstance().CombArray.get(nbLyr - 1).length; clusIdx++) {
                 ArrayList<FittedHit> hitsInClusterCand = new ArrayList<FittedHit>();
                 hitsInClusterCand.addAll(baseClusterHits);
 
-                for (int k = 0; k < Constants.CombArray.get(nbLyr - 1)[clusIdx].length; k++) {
-                    hitsInClusterCand.add(hitsInSameLayerLists.get(k).get(Constants.CombArray.get(nbLyr - 1)[clusIdx][k]));
+                for (int k = 0; k < Constants.getInstance().CombArray.get(nbLyr - 1)[clusIdx].length; k++) {
+                    hitsInClusterCand.add(hitsInSameLayerLists.get(k).get(Constants.getInstance().CombArray.get(nbLyr - 1)[clusIdx][k]));
                 }
                 hitsInClusCandLists.add(hitsInClusterCand);
             }
@@ -941,12 +941,12 @@ public class ClusterCleanerUtilities {
 
         if (nbLyr > 0) {
 
-            for (int clusIdx = 0; clusIdx < Constants.CombArray.get(nbLyr - 1).length; clusIdx++) {
+            for (int clusIdx = 0; clusIdx < Constants.getInstance().CombArray.get(nbLyr - 1).length; clusIdx++) {
                 ArrayList<FittedHit> hitsInClusterCand = new ArrayList<FittedHit>();
                 hitsInClusterCand.addAll(baseClusterHits);
 
-                for (int k = 0; k < Constants.CombArray.get(nbLyr - 1)[clusIdx].length; k++) {
-                    hitsInClusterCand.add(hitsInSameLayerLists.get(k).get(Constants.CombArray.get(nbLyr - 1)[clusIdx][k]));
+                for (int k = 0; k < Constants.getInstance().CombArray.get(nbLyr - 1)[clusIdx].length; k++) {
+                    hitsInClusterCand.add(hitsInSameLayerLists.get(k).get(Constants.getInstance().CombArray.get(nbLyr - 1)[clusIdx][k]));
                 }
                 hitsInClusCandLists.add(hitsInClusterCand);
             }

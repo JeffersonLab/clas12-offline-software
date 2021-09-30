@@ -65,7 +65,8 @@ public class TrackDictionaryMaker extends DCEngine{
                     +"Charge"+String.valueOf(charge)+"InvPBinSizeiGeV"+String.valueOf(pBinSize)
                     +"PhiMinDeg" +String.valueOf(phiMin)+"PhiMaxDeg" +String.valueOf(phiMax)
                     +"VzCm" +String.valueOf(vz)+".txt");
-            this.ProcessTracks(pw, Constants.dcDetector, Constants.ftofDetector, Constants.ecalDetector, sw, charge, pBinSize, phiMin, phiMax, vz);
+            this.ProcessTracks(pw, Constants.getInstance().dcDetector, Constants.getInstance().ftofDetector, 
+                                   Constants.getInstance().ecalDetector, sw, charge, pBinSize, phiMin, phiMax, vz);
             pw.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(TrackDictionaryMaker.class.getName()).log(Level.SEVERE, null, ex);
@@ -616,10 +617,10 @@ public class TrackDictionaryMaker extends DCEngine{
 
     private void resetGeom(String geomDBVar) {
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, Optional.ofNullable(geomDBVar).orElse("default"));
-        Constants.dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, DCGeant4Factory.ENDPLATESBOWON);
+        Constants.getInstance().dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, DCGeant4Factory.ENDPLATESBOWON);
         
         for(int l=0; l<6; l++) {
-            Constants.wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
+            Constants.getInstance().wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
             System.out.println("****************** WPDIST READ *********FROM RELOADED "+geomDBVar+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
         }
         

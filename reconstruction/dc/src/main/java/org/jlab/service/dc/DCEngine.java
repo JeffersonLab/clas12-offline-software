@@ -35,46 +35,38 @@ public class DCEngine extends ReconstructionEngine {
             geoVariation = this.getEngineConfigString("dcGeometryVariation");
         else if(this.getEngineConfigString("variation")!=null) 
             geoVariation = this.getEngineConfigString("variation");
-        System.out.println("["+this.getName()+"] run with variation = " + geoVariation);
         
         //AI settings for selecting specific sector
         if(this.getEngineConfigString("sectorSelect")!=null) 
             selectedSector=Integer.parseInt(this.getEngineConfigString("sectorSelect"));
-        System.out.println("["+this.getName()+"] run with sector selection = " + selectedSector);
             
         // Load config
         if(this.getEngineConfigString("dcUseStartTime")!=null)
             useStartTime = Boolean.valueOf(this.getEngineConfigString("dcUseStartTime"));
-        System.out.println("["+this.getName()+"] run with start time option = " + useStartTime);
       
         // Wire distortions
         if(this.getEngineConfigString("dcWireDistortion")!=null)       
             wireDistortion = Boolean.parseBoolean(this.getEngineConfigString("dcWireDistortion"));
-        System.out.println("["+this.getName()+"] run with wire distortions = " + wireDistortion);
         
         //Use time in tBeta function (true: use time; false: use track doca)
         if(this.getEngineConfigString("dcTimeTBeta")!=null)
             useTimeBeta = (Boolean.valueOf(this.getEngineConfigString("dcTimeTBeta")));
-        System.out.println("["+this.getName()+"] run with with new tBeta configuration = " + useTimeBeta);
         
         //Use beta cut(true: use time; false: use track doca)
         if(this.getEngineConfigString("dcBetaCut")!=null)
             useBetaCut =Boolean.valueOf(this.getEngineConfigString("dcBetaCut"));
-        System.out.println("["+this.getName()+"] run with with Beta cut = " + useBetaCut);
         
         //T2D Function
         if(this.getEngineConfigString("dcT2DFunc")!=null)       
             if(this.getEngineConfigString("dcT2DFunc").equalsIgnoreCase("Polynomial")) {
                 t2d=1;
             }
-        System.out.println("["+this.getName()+"] run with time to distance function set to exponential/polynomial (0/1) = " + t2d);
         
         //NSUPERLAYERTRACKING
         if(this.getEngineConfigString("dcFOOST")!=null)
             if(!Boolean.valueOf(this.getEngineConfigString("dcFOOST"))) {
                 nSuperLayer =6;
             }    
-        System.out.println("["+this.getName()+"] run with with Five-out-of-six-superlayer-trkg = " + nSuperLayer);
         
     }
     
@@ -104,7 +96,8 @@ public class DCEngine extends ReconstructionEngine {
     @Override
     public boolean init() {
         this.setOptions();
-        Constants.getInstance().initialize(geoVariation, 
+        Constants.getInstance().initialize(this.getName(),
+                                           geoVariation, 
                                            wireDistortion, 
                                            useStartTime, 
                                            useTimeBeta, 

@@ -77,7 +77,7 @@ public class DCHBClustering extends DCEngine {
                 super.getConstantsManager().getConstants(run, Constants.TIME2DIST),
                 super.getConstantsManager().getConstants(run, Constants.TDCTCUTS),
                 super.getConstantsManager().getConstants(run, Constants.WIRESTAT),
-                Constants.dcDetector,
+                Constants.getInstance().dcDetector,
                 triggerPhase);
         /* 10 */
         //I) get the hits
@@ -93,7 +93,7 @@ public class DCHBClustering extends DCEngine {
         List<FittedCluster> clusters = clusFinder.FindHitBasedClusters(hits,
                 ct,
                 cf,
-                Constants.dcDetector);
+                Constants.getInstance().dcDetector);
         if (clusters.isEmpty()) {
             return true;
         } else {

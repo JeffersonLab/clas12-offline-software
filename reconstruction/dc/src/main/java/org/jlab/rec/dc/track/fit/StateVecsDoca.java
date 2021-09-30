@@ -231,10 +231,10 @@ public class StateVecsDoca {
     public double getX0(double z) {
         double X0 = Constants.AIRRADLEN;
         double tolerance = 0.01;
-        for(int i = 1; i <Constants.Z.length; i++) {
+        for(int i = 1; i <Constants.getInstance().Z.length; i++) {
             if(i%2==0)
                 continue;
-            if(z>=Constants.Z[i]-tolerance && z<=Constants.Z[i+1]+tolerance) { 
+            if(z>=Constants.getInstance().Z[i]-tolerance && z<=Constants.getInstance().Z[i+1]+tolerance) { 
                 return Constants.ARGONRADLEN; 
             }
         }

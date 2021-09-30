@@ -372,7 +372,7 @@ public class HitReader {
             //hit.setSignalTimeOfFlight(); 
             double T0Sub = (tdc[i] - tProp[i] - tFlight[i] - T_0);
 
-            if (Constants.isUSETSTART()) {
+            if (Constants.getInstance().isUSETSTART()) {
                 T0Sub -= T_Start;
             }
             hit.set_Time(T0Sub);
@@ -409,7 +409,7 @@ public class HitReader {
     
     private boolean passHit(int betaFlag) {
         boolean pass = true;
-        if(Constants.USEBETACUT()) {
+        if(Constants.getInstance().USEBETACUT()) {
             //if(betaFlag != 0) { //all beta cuts
             //    pass = false;
             //}

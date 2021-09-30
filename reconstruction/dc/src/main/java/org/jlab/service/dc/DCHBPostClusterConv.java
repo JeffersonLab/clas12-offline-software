@@ -76,7 +76,7 @@ public class DCHBPostClusterConv extends DCEngine {
         fhits = new ArrayList<FittedHit>();
         ClusterFinder clusFinder = new ClusterFinder();
         ClusterFitter cf = new ClusterFitter();
-        clusters = clusFinder.RecomposeClusters(event, Constants.dcDetector, cf);
+        clusters = clusFinder.RecomposeClusters(event, Constants.getInstance().dcDetector, cf);
         if (clusters ==null || clusters.isEmpty()) {
             return true;
         }
@@ -85,7 +85,7 @@ public class DCHBPostClusterConv extends DCEngine {
         SegmentFinder segFinder = new SegmentFinder();
         segments = segFinder.get_Segments(clusters,
                 event,
-                Constants.dcDetector, false);
+                Constants.getInstance().dcDetector, false);
 
         /* 15 */
         // need 6 segments to make a trajectory
@@ -109,7 +109,7 @@ public class DCHBPostClusterConv extends DCEngine {
             return true;
         /* 16 */
         CrossMaker crossMake = new CrossMaker();
-        crosses = crossMake.find_Crosses(segments, Constants.dcDetector);
+        crosses = crossMake.find_Crosses(segments, Constants.getInstance().dcDetector);
         if (crosses.isEmpty()) {
             event.appendBanks(
                     writer.fillHBSegmentsBank(event, segments));
@@ -121,14 +121,14 @@ public class DCHBPostClusterConv extends DCEngine {
         CrossList crosslist = crossLister.candCrossLists(event, crosses,
                 false,
                 null,
-                Constants.dcDetector,
+                Constants.getInstance().dcDetector,
                 null,
                 dcSwim, false);
         /* 18 */
         //6) find the list of  track candidates
         TrackCandListFinder trkcandFinder = new TrackCandListFinder(Constants.HITBASE);
         trkcands = trkcandFinder.getTrackCands(crosslist,
-                Constants.dcDetector,
+                Constants.getInstance().dcDetector,
                 Swimmer.getTorScale(),
                 dcSwim, false);
         /* 19 */
@@ -142,7 +142,7 @@ public class DCHBPostClusterConv extends DCEngine {
                 trk.set_Id(trkId);
                 trkcandFinder.matchHits(trk.get_Trajectory(),
                         trk,
-                        Constants.dcDetector,
+                        Constants.getInstance().dcDetector,
                         dcSwim);
                 trkId++;
             }
@@ -158,7 +158,7 @@ public class DCHBPostClusterConv extends DCEngine {
         }
 
         RoadFinder rf = new RoadFinder();
-        List<Road> allRoads = rf.findRoads(segments, Constants.dcDetector);
+        List<Road> allRoads = rf.findRoads(segments, Constants.getInstance().dcDetector);
         List<Segment> Segs2Road = new ArrayList<>();
         for (Road r : allRoads) { 
             Segs2Road.clear();
@@ -187,7 +187,7 @@ public class DCHBPostClusterConv extends DCEngine {
             }
             if (Segs2Road.size() == 2) {
                 Segment pSegment = rf.findRoadMissingSegment(Segs2Road,
-                        Constants.dcDetector,
+                        Constants.getInstance().dcDetector,
                         r.a);
                 if (pSegment != null)
                     psegments.add(pSegment);
@@ -195,18 +195,18 @@ public class DCHBPostClusterConv extends DCEngine {
         }
 
         segments.addAll(psegments);
-        List<Cross> pcrosses = crossMake.find_Crosses(segments, Constants.dcDetector);
+        List<Cross> pcrosses = crossMake.find_Crosses(segments, Constants.getInstance().dcDetector);
 
         CrossList pcrosslist = crossLister.candCrossLists(event, pcrosses,
                 false,
                 null,
-                Constants.dcDetector,
+                Constants.getInstance().dcDetector,
                 null,
                 dcSwim, true);
         //pcrosslist.removeDuplicates(crosslist); 
 
         List<Track> mistrkcands = trkcandFinder.getTrackCands(pcrosslist,
-                Constants.dcDetector,
+                Constants.getInstance().dcDetector,
                 Swimmer.getTorScale(),
                 dcSwim, false);
 
@@ -219,7 +219,7 @@ public class DCHBPostClusterConv extends DCEngine {
                 trk.set_Id(trkId);
                 trkcandFinder.matchHits(trk.get_Trajectory(),
                         trk,
-                        Constants.dcDetector,
+                        Constants.getInstance().dcDetector,
                         dcSwim);
                 trkId++;
             }

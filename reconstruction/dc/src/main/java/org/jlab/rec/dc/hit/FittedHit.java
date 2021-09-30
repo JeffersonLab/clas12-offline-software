@@ -371,7 +371,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             double deltatime_beta2 = 0;
             
             if (x != -1) {
-                if(Constants.useUSETIMETBETA()==true) {
+                if(Constants.getInstance().useUSETIMETBETA()==true) {
                     deltatime_beta = calcDeltaTimeBetaTFCN(this.get_Time(), tab, beta);
                     deltatime_beta2 = calcDeltaTimeBeta(this.get_Time(), tab, beta);
                 } else {
@@ -646,7 +646,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                 throw new RuntimeException("invalid region");
         }    
         
-        double MaxSag = Constants.getWIREDIST()*A*C*wire*wire*FastMath.cos(Math.toRadians(25.))*FastMath.cos(Math.toRadians(30.));
+        double MaxSag = Constants.getInstance().getWIREDIST()*A*C*wire*wire*FastMath.cos(Math.toRadians(25.))*FastMath.cos(Math.toRadians(30.));
         
         double delta_x = MaxSag*(1.-Math.abs(y)/(0.5*wireLen))*(1.-Math.abs(y)/(0.5*wireLen));
         
@@ -789,7 +789,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     public double calc_SignalPropagAlongWire(DCGeant4Factory DcDetector) {
         
         Vector3d WireEnd;
-        int end = Constants.STBLOC[this.get_Sector()-1][this.get_Superlayer()-1];
+        int end = Constants.getInstance().STBLOC[this.get_Sector()-1][this.get_Superlayer()-1];
         if(end>0) {
             WireEnd = DcDetector.getWireRightend(this.get_Sector()-1, this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1);
         } else {
@@ -807,7 +807,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     public double calc_SignalPropagAlongWire(double X, double Y, DCGeant4Factory DcDetector) {
         
         Vector3d WireEnd;
-        int end = Constants.STBLOC[this.get_Sector()-1][this.get_Superlayer()-1];
+        int end = Constants.getInstance().STBLOC[this.get_Sector()-1][this.get_Superlayer()-1];
         if(end>0) {
             WireEnd = DcDetector.getWireRightend(this.get_Sector()-1, this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1);
         } else {

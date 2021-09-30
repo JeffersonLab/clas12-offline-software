@@ -70,7 +70,7 @@ public class DCHBEngine extends DCEngine {
 
        
        if (event.hasBank("MC::Particle") && this.getEngineConfigString("wireDistort")==null) {
-           Constants.setWIREDIST(0);
+           Constants.getInstance().setWIREDIST(0);
        }
 
         /* 1 */
@@ -103,7 +103,7 @@ public class DCHBEngine extends DCEngine {
                 super.getConstantsManager().getConstants(run, Constants.TIME2DIST),
                 super.getConstantsManager().getConstants(run, Constants.TDCTCUTS),
                 super.getConstantsManager().getConstants(run, Constants.WIRESTAT),
-                Constants.dcDetector,
+                Constants.getInstance().dcDetector,
                 triggerPhase);
         /* 10 */
         //I) get the hits
@@ -119,7 +119,7 @@ public class DCHBEngine extends DCEngine {
         List<FittedCluster> clusters = clusFinder.FindHitBasedClusters(hits,
                 ct,
                 cf,
-                Constants.dcDetector);
+                Constants.getInstance().dcDetector);
         if (clusters.isEmpty()) {
             return true;
         }
@@ -132,7 +132,7 @@ public class DCHBEngine extends DCEngine {
         SegmentFinder segFinder = new SegmentFinder();
         List<Segment> segments = segFinder.get_Segments(clusters,
                 event,
-                Constants.dcDetector, false);
+                Constants.getInstance().dcDetector, false);
         /* 15 */
         // need 6 segments to make a trajectory
         if (segments.isEmpty()) {
@@ -159,7 +159,7 @@ public class DCHBEngine extends DCEngine {
         segments.removeAll(rmSegs);
         /* 16 */
         CrossMaker crossMake = new CrossMaker();
-        List<Cross> crosses = crossMake.find_Crosses(segments, Constants.dcDetector);
+        List<Cross> crosses = crossMake.find_Crosses(segments, Constants.getInstance().dcDetector);
         if (crosses.isEmpty()) {
             rbc.fillAllHBBanks(event,
                     fhits,
@@ -175,14 +175,14 @@ public class DCHBEngine extends DCEngine {
         CrossList crosslist = crossLister.candCrossLists(event, crosses,
                 false,
                 super.getConstantsManager().getConstants(run, Constants.TIME2DIST),
-                Constants.dcDetector,
+                Constants.getInstance().dcDetector,
                 null,
                 dcSwim, false);
         /* 18 */
         //6) find the list of  track candidates
         TrackCandListFinder trkcandFinder = new TrackCandListFinder(Constants.HITBASE);
         List<Track> trkcands = trkcandFinder.getTrackCands(crosslist,
-                Constants.dcDetector,
+                Constants.getInstance().dcDetector,
                 Swimmer.getTorScale(),
                 dcSwim, false);
         /* 19 */
@@ -197,7 +197,7 @@ public class DCHBEngine extends DCEngine {
                 trk.set_Id(trkId);
                 trkcandFinder.matchHits(trk.get_Trajectory(),
                         trk,
-                        Constants.dcDetector,
+                        Constants.getInstance().dcDetector,
                         dcSwim);
                 trkId++;
             }
@@ -212,7 +212,7 @@ public class DCHBEngine extends DCEngine {
                 crossSegsNotOnTrack.add(c.get_Segment2());
         }
         RoadFinder rf = new RoadFinder();
-        List<Road> allRoads = rf.findRoads(segments, Constants.dcDetector);
+        List<Road> allRoads = rf.findRoads(segments, Constants.getInstance().dcDetector);
         List<Segment> Segs2Road = new ArrayList<>();
         for (Road r : allRoads) {
             Segs2Road.clear();
@@ -239,23 +239,23 @@ public class DCHBEngine extends DCEngine {
             }
             if (Segs2Road.size() == 2) {
                 Segment pSegment = rf.findRoadMissingSegment(Segs2Road,
-                        Constants.dcDetector,
+                        Constants.getInstance().dcDetector,
                         r.a);
                 if (pSegment != null)
                     psegments.add(pSegment);
             }
         }
         segments.addAll(psegments);
-        List<Cross> pcrosses = crossMake.find_Crosses(segments, Constants.dcDetector);
+        List<Cross> pcrosses = crossMake.find_Crosses(segments, Constants.getInstance().dcDetector);
         CrossList pcrosslist = crossLister.candCrossLists(event, pcrosses,
                 false,
                 super.getConstantsManager().getConstants(run, Constants.TIME2DIST),
-                Constants.dcDetector,
+                Constants.getInstance().dcDetector,
                 null,
                 dcSwim, true);
         //pcrosslist.removeDuplicates(crosslist);
         List<Track> mistrkcands = trkcandFinder.getTrackCands(pcrosslist,
-                Constants.dcDetector,
+                Constants.getInstance().dcDetector,
                 Swimmer.getTorScale(),
                 dcSwim, false);
 
@@ -268,7 +268,7 @@ public class DCHBEngine extends DCEngine {
                 trk.set_Id(trkId);
                 trkcandFinder.matchHits(trk.get_Trajectory(),
                         trk,
-                        Constants.dcDetector,
+                        Constants.getInstance().dcDetector,
                         dcSwim);
                 for (Cross c : trk) {
                     c.set_CrossDirIntersSegWires();
