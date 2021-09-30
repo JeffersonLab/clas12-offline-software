@@ -324,13 +324,14 @@ public class Constants {
             printConfig(engine);
             return;
         }
-        
-        LoadConstants();
-        
-        LoadGeometry(GEOVARIATION);
-        
-        ConstantsLoaded = true;
-        printConfig(engine);
+        else {
+            LoadConstants();
+
+            LoadGeometry(GEOVARIATION);
+
+            ConstantsLoaded = true;
+            printConfig(engine);
+        }
     }
     
     public void printConfig(String engine) {
