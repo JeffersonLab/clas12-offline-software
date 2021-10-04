@@ -13,7 +13,6 @@ import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.detector.hits.CTOFDetHit;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.geom.base.Detector;
-import org.jlab.geom.prim.Arc3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -24,7 +23,6 @@ import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
-import org.jlab.rec.cvt.svt.Constants;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.track.Track;
 
@@ -96,7 +94,7 @@ public class TrajectoryFinder {
 
         traj.addAll(SVTCrossList);
 
-        int[] Sectors = new int[org.jlab.rec.cvt.svt.Constants.NLAYR];
+        int[] Sectors = new int[SVTGeometry.NLAYERS];
         for (int k = 0; k < SVTCrossList.size(); k++) {
             int l = SVTCrossList.get(k).get_Region() * 2 - 1;
             Sectors[l - 1] = SVTCrossList.get(k).get_Sector();
@@ -106,9 +104,9 @@ public class TrajectoryFinder {
         for (int a = 0; a < Sectors.length; a++) {
             if (Sectors[a] == 0) {
 
-                Point3D I = helix.getPointAtRadius(org.jlab.rec.cvt.svt.Constants.MODULERADIUS[a][0]);
+                Point3D I = helix.getPointAtRadius(svt_geo.getLayerRadius(a+1));
 
-                int sec = svt_geo.findSectorFromAngle(a + 1, I);
+                int sec = svt_geo.getSector(a+1, I);
                 
                 Sectors[a] = sec;
             }
@@ -126,7 +124,7 @@ public class TrajectoryFinder {
         double[] inters = null;
         double     path = 0;
         // SVT
-        for (int l = 0; l < org.jlab.rec.cvt.svt.Constants.NLAYR; l++) {
+        for (int l = 0; l < SVTGeometry.NLAYERS; l++) {
             // reinitilize swimmer from last surface
             if(inters!=null) {
                 double intersPhi   = Math.atan2(inters[4], inters[3]);
@@ -138,8 +136,8 @@ public class TrajectoryFinder {
             if(sector == -1)
                 continue;
             
-            Vector3D n = svt_geo.findBSTPlaneNormal(sector, layer);
-            Point3D p = svt_geo.getPlaneModuleOrigin(sector, layer);
+            Vector3D n = svt_geo.getNormal(layer, sector);
+            Point3D p  = svt_geo.getModule(layer, sector).origin();
             double d = n.dot(p.toVector3D());
             inters = swimmer.SwimToPlaneBoundary(d/10.0, n, 1);
             path  = path + inters[6];
@@ -184,15 +182,15 @@ public class TrajectoryFinder {
         inters = null;
         path = 0;
         //BMT
-        for (int l = org.jlab.rec.cvt.svt.Constants.NLAYR; l < org.jlab.rec.cvt.svt.Constants.NLAYR + bmt_geo.getNLayers(); l++) {
+        for (int l = SVTGeometry.NLAYERS; l < SVTGeometry.NLAYERS + bmt_geo.getNLayers(); l++) {
             // re-initilize swimmer from last surface
             if(inters!=null) {
                 double intersPhi   = Math.atan2(inters[4], inters[3]);
                 double intersTheta = Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]));
                 swimmer.SetSwimParameters(inters[0], inters[1], inters[2], Math.toDegrees(intersPhi), Math.toDegrees(intersTheta), trk.get_P(), trk.get_Q(), maxPathLength) ;
             }
-            if(inters!=null || l==org.jlab.rec.cvt.svt.Constants.NLAYR) { // don't swim if previous layers was not reached
-                int layer  = l - org.jlab.rec.cvt.svt.Constants.NLAYR + 1;
+            if(inters!=null || l==SVTGeometry.NLAYERS) { // don't swim if previous layers was not reached
+                int layer  = l - SVTGeometry.NLAYERS + 1;
                 int region = bmt_geo.getRegion(layer);
                 
                 // RDV: tried using this to determine the sector but t is giving bogus number
@@ -334,7 +332,7 @@ public class TrajectoryFinder {
     
     private void fill_HelicalTrkAngleWRTSVTPlane(int sector, int layer,
         Vector3D trkDir, SVTGeometry svt_geo, StateVec stVec) {
-        Vector3D n = svt_geo.findBSTPlaneNormal(sector, layer);
+        Vector3D n  = svt_geo.getNormal(layer,sector);
         Vector3D ui = new Vector3D(n.y(), -n.x(), 0); //longitudinal vector along the local x direction of the module			
         Vector3D uj = ui.cross(n); //longitudinal vector along the local z direction of the module		    
         Vector3D u = new Vector3D(trkDir.x(), trkDir.y(), trkDir.z());
@@ -396,8 +394,8 @@ public class TrajectoryFinder {
 
         double[][][] SVTIntersections = calc_trackIntersSVT(ray, svt_geo);
 
-        for (int l = 0; l < Constants.NLAYR; l++) {
-            for (int s = 0; s < Constants.NSECT[l]; s++) {
+        for (int l = 0; l < SVTGeometry.NLAYERS; l++) {
+            for (int s = 0; s < SVTGeometry.NSECTORS[l]; s++) {
 
                 if (SVTIntersections[l][s][0] != -999) {
 
@@ -572,7 +570,7 @@ public class TrajectoryFinder {
                 return false;		// same sector 
             } 
             double deltaXt = Math.sqrt((stVec.x() - c.get_Point().x()) * (stVec.x() - c.get_Point().x()) + (stVec.y() - c.get_Point().y()) * (stVec.y() - c.get_Point().y()));
-            if (deltaXt > org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH / 2) {
+            if (deltaXt > SVTGeometry.getActiveSensorWidth() / 2) {
                 return false; // within 1/2 module width
             }
         }
@@ -605,8 +603,8 @@ public class TrajectoryFinder {
             StateVec stVec, SVTGeometry svt_geo, BMTGeometry bmt_geo, boolean trajFinal) {
 
         if (detector.equalsIgnoreCase("SVT") ) {
-            double doca2Cls = svt_geo.getDOCAToStrip(sector, layer, cluster.get_Centroid(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
-            double doca2Seed = svt_geo.getDOCAToStrip(sector, layer, (double) cluster.get_SeedStrip().get_Strip(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
+            double doca2Cls = cluster.residual(new Point3D(stVec.x(), stVec.y(), stVec.z()));
+            double doca2Seed = cluster.get(0).residual(new Point3D(stVec.x(), stVec.y(), stVec.z()));
             cluster.set_SeedResidual(doca2Seed); 
             cluster.set_CentroidResidual(doca2Cls);
             cluster.setTrakInters(new Point3D(stVec.x(), stVec.y(), stVec.z()));
@@ -617,7 +615,7 @@ public class TrajectoryFinder {
 //            double d = new Vector3D(stVec.x(), stVec.y(), stVec.z()).dot(pl.normal())-pl.point().toVector3D().dot(pl.normal());
 //            System.out.println(d+" calc "+l.distance(new Point3D(stVec.x(), stVec.y(), stVec.z())).length()+" d "+doca2Cls);
             for (FittedHit hit : cluster) {
-                double doca1 = svt_geo.getDOCAToStrip(sector, layer, (double) hit.get_Strip().get_Strip(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
+                double doca1 = hit.residual(new Point3D(stVec.x(), stVec.y(), stVec.z()));
                 double sigma1 = svt_geo.getSingleStripResolution(layer, hit.get_Strip().get_Strip(), stVec.z());
                 hit.set_stripResolutionAtDoca(sigma1);
                 hit.set_docaToTrk(doca1);  
@@ -743,9 +741,9 @@ public class TrajectoryFinder {
 
     private double[][][] calc_trackIntersSVT(Ray ray, SVTGeometry svt_geo) {
         //[l][s], [0,1,2,3,4]=x,y,z,phi,theta,estimated centroid strip
-        double[][][] result = new double[org.jlab.rec.cvt.svt.Constants.NLAYR][org.jlab.rec.cvt.svt.Constants.NSECT[org.jlab.rec.cvt.svt.Constants.NLAYR - 1]][7];
-        for (int l = 0; l < org.jlab.rec.cvt.svt.Constants.NLAYR; l++) {
-            for (int s = 0; s < org.jlab.rec.cvt.svt.Constants.NSECT[l]; s++) {
+        double[][][] result = new double[SVTGeometry.NLAYERS][SVTGeometry.NSECTORS[SVTGeometry.NLAYERS-1]][7];
+        for (int l = 0; l < SVTGeometry.NLAYERS; l++) {
+            for (int s = 0; s < SVTGeometry.NSECTORS[l]; s++) {
                 result[l][s][0] = -999;
                 result[l][s][1] = -999;
                 result[l][s][2] = -999;
@@ -754,8 +752,8 @@ public class TrajectoryFinder {
             }
         }
         //Layer 1-8:
-        for (int l = 0; l < org.jlab.rec.cvt.svt.Constants.NLAYR; l++) {
-            for (int s = 0; s < org.jlab.rec.cvt.svt.Constants.NSECT[l]; s++) {
+        for (int l = 0; l < SVTGeometry.NLAYERS; l++) {
+            for (int s = 0; s < SVTGeometry.NSECTORS[l]; s++) {
 
                 double[] trkIntersInf = this.getIntersectionTrackWithSVTModule(s, l, ray.get_yxinterc(), ray.get_yxslope(), ray.get_yzinterc(), ray.get_yzslope(), svt_geo);
 
@@ -765,9 +763,9 @@ public class TrajectoryFinder {
                     continue;
                 }
 
-                if ((Math.sqrt(p.x() * p.x() + p.y() * p.y()) <= Math.sqrt(0.25 * Constants.ACTIVESENLEN * Constants.ACTIVESENWIDTH + Constants.MODULERADIUS[l][0] * Constants.MODULERADIUS[l][0]))) {
+                if ((Math.sqrt(p.x() * p.x() + p.y() * p.y()) <= Math.sqrt(0.25 * SVTGeometry.getActiveSensorLength() * SVTGeometry.getActiveSensorWidth() + Math.pow(SVTGeometry.getLayerRadius(l+1),2.0)))) {
 
-                    Vector3D n = svt_geo.findBSTPlaneNormal(s + 1, l + 1);
+                    Vector3D n = svt_geo.getNormal(l+1, s+1);
                     Vector3D ui = new Vector3D(n.y(), -n.x(), 0); //longitudinal vector along the local x direction of the module
 
                     Vector3D uj = ui.cross(n); //longitudinal vector along the local z direction of the module
@@ -821,9 +819,10 @@ public class TrajectoryFinder {
         double z_plus = _yzslope2 * y_plus + _yzinterc2;
         double z_minus = _yzslope2 * y_minus + _yzinterc2; 
 
-        Vector3D n = geo.findBSTPlaneNormal(s + 1, l + 1);
-        Point3D Or = geo.getPlaneModuleOrigin(s + 1, l + 1);
-        Point3D En = geo.getPlaneModuleEnd(s + 1, l + 1);
+        Vector3D n = geo.getNormal(l+1, s+1);
+        Line3D mod = geo.getModule(l+1, s+1);
+        Point3D Or = mod.origin();
+        Point3D En = mod.end();
         
         
         Vector3D u = new Vector3D(x_plus-x_minus,y_plus-y_minus,z_plus-z_minus).asUnit();
@@ -936,7 +935,7 @@ public class TrajectoryFinder {
         if (hits2 == null) {
             return;
         }
-        HitArray = new Hit[Constants.NLAYR][Constants.NSECT[Constants.NLAYR - 1]][Constants.NSTRIP];
+        HitArray = new Hit[SVTGeometry.NLAYERS][SVTGeometry.NSECTORS[SVTGeometry.NLAYERS - 1]][SVTGeometry.NSTRIPS];
 
         // initializing non-zero Hit Array entries
         // with valid hits

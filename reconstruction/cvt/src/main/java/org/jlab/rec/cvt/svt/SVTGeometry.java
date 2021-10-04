@@ -1,162 +1,144 @@
 package org.jlab.rec.cvt.svt;
 
-//import java.io.File;
 import eu.mihosoft.vrl.v3d.Vector3d;
-import java.io.FileNotFoundException;
-import org.jlab.geom.prim.Line3D;
-
-import org.jlab.geom.prim.Point3D;
-import org.jlab.geom.prim.Vector3D;
-import org.jlab.rec.cvt.trajectory.Helix;
-
-import org.jlab.detector.geant4.v2.SVT.*;
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
-import org.jlab.detector.geant4.v2.SVT.AlignmentFactory;
+import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Line3d;
 
 public class SVTGeometry {
 
-    private SVTStripFactory _svtStripFactory;
-
-    public SVTStripFactory getStripFactory() {
-        return _svtStripFactory;
+    private final SVTStripFactory _svtStripFactory;
+    public static final int NREGIONS = 3;
+    public static final int NLAYERS  = 6;
+    public static final int NSTRIPS  = SVTConstants.NSTRIPS;
+    public static final int[] NSECTORS = new int[NLAYERS];
+    
+    
+    
+    public SVTGeometry(SVTStripFactory factory) {
+        this._svtStripFactory = factory;
+        this.init();
     }
-
-    public void setSvtStripFactory(SVTStripFactory _svtStripFactory) {
-        this._svtStripFactory = _svtStripFactory;
+  
+    private void init() {
+        for(int ilayer=0; ilayer<NLAYERS; ilayer++) {
+            int iregion = ilayer/2;
+            NSECTORS[ilayer] = SVTConstants.NSECTORS[iregion];
+        }
     }
     
-    public SVTGeometry() {
-        //AlignmentFactory.VERBOSE=true;
+//    public SVTStripFactory getStripFactory() {
+//        return _svtStripFactory;
+//    }
+
+    public static double getLayerRadius(int layer) {
+        int[] rm = SVTConstants.convertLayer2RegionModule(layer-1);
+        return SVTConstants.LAYERRADIUS[rm[0]][rm[1]];
     }
-
-    // Comments on the Geometry of the BST 
-    //------------------------------------
-    // The BST geometry consists of 3 (or 4) superlayers of modules. 
-    // Each superlayer contains two layers of modules, labeled A and B. 
-    // Layer B corresponds to the top layer as seen from the outside of the detector, 
-    // and Layer A to the layer underneath Layer B looking from the outside.  
-    // Each module contains 3 sensors (hybrid, intermediate, far).
-    // The hybrid, intermediate and far sensors are aligned in the direction of the beam 
-    // corresponding to the positive z-axis in the laboratory frame.  
-    // The coordinate system in the lab frame (center of the target) is a right handed system, with 
-    // the z unit vector in the direction of the beam, and the y unit vector pointing up; 
-    // the x unit vector points therefore to the left when looking in the direction of the beam.
-    // The numbering convention for the sectors is as follows:
-    // sector 1 modules oriented at 90 deg (80 deg) with respect to the y-axis for superlayers 1,2,4 (3); 
-    // sector numbers increase in the clockwise direction (viewed in the direction of the beam).  
-    // The strips in the hybrid sensor of Layer B are connected to the pitch adapter and 
-    // and implanted with 156 micron pitch.  There are 256 strips oriented at graded angle 
-    // from 0 to +3 deg with respect to the bottom edge of layer B which corresponds to the z-direction. 
-    // Strip number 1 in Layer B is parallel to the bottom of the sensor.
-
-    //for making BST outline fig (shift local origin to physical origin instead of active area):
-
-    /* * * * * * * *
-    Vector3d[] corners = this._svtStripFactory.getLayerCorners(layer-1, sector-1);
-    returns array of 4 corners in order [origin, max width, max width and max length, max length]
-    defined as:
-      corners[0] = new Vector3d( 0,                         0, 0                        );
-		  corners[1] = new Vector3d( SVTConstants.ACTIVESENWID, 0, 0                        );
-		  corners[2] = new Vector3d( SVTConstants.ACTIVESENWID, 0, SVTConstants.STRIPLENMAX );
-      corners[3] = new Vector3d( 0,                         0, SVTConstants.STRIPLENMAX );
-    * * * * * * * */
-    // Geometry implementation using the geometry package:  Charles Platt
-    public Point3D getPlaneModuleOrigin(int sector, int layer) {
+    
+    public static double getRegionRadius(int region) {
+        return (SVTConstants.LAYERRADIUS[region-1][0]+SVTConstants.LAYERRADIUS[region-1][1])/2;
+    }
+    
+    public static double getLayerGap() {
+        return (SVTConstants.LAYERRADIUS[0][1]-SVTConstants.LAYERRADIUS[0][0]);
+    }
+    
+    public static double getLayerZ0(int layer) {
+        int[] rm = SVTConstants.convertLayer2RegionModule(layer-1);
+        return SVTConstants.Z0ACTIVE[rm[0]];
+    }
+    
+    public static double getSectorPhi(int layer, int sector) {
+        int[] rm = SVTConstants.convertLayer2RegionModule(layer-1);
+        return SVTConstants.getPhi(rm[0], sector-1);
+    }
+    
+    public static double getPitch() {
+        return SVTConstants.READOUTPITCH;
+    }
+    
+    public static double getActiveSensorWidth() {
+        return SVTConstants.ACTIVESENWID;
+    }
+    
+    public static double getActiveSensorLength() {
+        return SVTConstants.ACTIVESENLEN;
+    }
+    
+    public static double getModuleLength() {
+        return SVTConstants.MODULELEN;
+    }
+    
+    public static double getToverX0() {
+        return SVTConstants.SILICONTHK/SVTConstants.SILICONRADLEN;
+    }
+    
+    public Line3D getStrip(int layer, int sector, int strip) {
+        Line3d line = this._svtStripFactory.getShiftedStrip(layer-1, sector-1, strip-1);
+        return new Line3D(line.origin().x,line.origin().y,line.origin().z,
+                          line.end().x,   line.end().y,   line.end().z);
+    }
+    
+    public Line3D getModule(int layer, int sector) {
+        Line3d line = this._svtStripFactory.getModuleEndPoints(layer-1, sector-1);
+        return new Line3D(line.origin().x,line.origin().y,line.origin().z,
+                          line.end().x,   line.end().y,   line.end().z);        
+    }
+    
+    public Vector3D getNormal(int layer, int sector) {
+        Vector3d normal = this._svtStripFactory.getModuleNormal(layer-1, sector-1);
+        return new Vector3D(normal.x, normal.y, normal.z);
+    }
+    
+    public Point3D toLocal(int layer, int sector, Point3D traj) {
+        Vector3d local = this._svtStripFactory.transformToLocal(layer-1, sector-1, traj.x(), traj.y(), traj.z());
+        return new Point3D(local.x, local.y, local.z);
+    }
+    
+    public Point3D toGlobal(int layer, int sector, Point3D traj) {
+        Vector3d lab = this._svtStripFactory.transformToLab(layer-1, sector-1, traj.x(), traj.y(), traj.z());
+        return new Point3D(lab.x, lab.y, lab.z);
+    }
+    
+    public Vector3D toLocal(int layer, int sector, Vector3D dir) {
+        Vector3d local = this._svtStripFactory.transformToLocal(layer-1, sector-1, dir.x(), dir.y(), dir.z());
+        Vector3d zero  = this._svtStripFactory.transformToLocal(layer-1, sector-1, 0, 0, 0);
+        return new Vector3D(local.x-zero.x, local.y-zero.y, local.z-zero.z);
+    }
+    
+    public Vector3D toGlobal(int layer, int sector, Vector3D dir) {
+        Vector3d lab  = this._svtStripFactory.transformToLab(layer-1, sector-1, dir.x(), dir.y(), dir.z());
+        Vector3d zero = this._svtStripFactory.transformToLab(layer-1, sector-1, 0, 0, 0);
+        return new Vector3D(lab.x-zero.x, lab.y-zero.y, lab.z-zero.z);
+    }
+    
+    public int getSector(int layer, Point3D traj) {
         
         int[] rm = SVTConstants.convertLayer2RegionModule(layer-1);
-
-        Line3d localLine = new Line3d(new Vector3d(-1-SVTConstants.ACTIVESENWID/2, 0, 0                        ),
-                                      new Vector3d(-1-SVTConstants.ACTIVESENWID/2, 0, SVTConstants.ACTIVESENLEN) );
-        Line3d labFrameLine = localLine.transformed(SVTConstants.getLabFrame( rm[0],
-                                                                              sector-1,
-                                                                              SVTConstants.LAYERRADIUS[ rm[0] ][ rm[1]],
-                                                                              SVTConstants.Z0ACTIVE[    rm[0] ] ));
-        // apply the shifts to both ends of labFrameLine
- 	double scaleT = 1.0, scaleR = -1.0;// scale factors used for visualization. Not relevant here.
-        //System.out.println(" GET MODULE O "+labFrameLine.origin().toString());
-        //System.out.println(" GET MODULE 1 "+SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1)].toString());
-        //System.out.println(" GET MODULE 2 "+new Point3D(SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1).x, SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1).y, SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1).z).toString());
-
- 	AlignmentFactory.applyShift(labFrameLine.origin(),SVTConstants.getLayerSectorAlignmentData()[sector-1][layer-1], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1),scaleT,scaleR );
-        AlignmentFactory.applyShift(labFrameLine.end(),   SVTConstants.getLayerSectorAlignmentData()[sector-1][layer-1], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1),scaleT,scaleR );
- 
- 	// return only the origin of the line.
- 
- 	return new Point3D(labFrameLine.origin().x, labFrameLine.origin().y, labFrameLine.origin().z);
-
-      /* * * * * * * *
-      // returns NPE:
-        Vector3d[] corners = this._svtStripFactory.getLayerCorners(layer-1, sector-1);
-
-        return new Point3D(corners[0].x, corners[0].y, corners[0].z);
-      * * * * * * * */
-    }
-
-    public Point3D getPlaneModuleEnd(int sector, int layer) {
-        int[] rm = SVTConstants.convertLayer2RegionModule(layer-1);
-
-        Line3d localLine = new Line3d(new Vector3d( 1+SVTConstants.ACTIVESENWID/2, 0, 0                        ),
-                                      new Vector3d( 1+SVTConstants.ACTIVESENWID/2, 0, SVTConstants.ACTIVESENLEN) );
-        Line3d labFrameLine = localLine.transformed(SVTConstants.getLabFrame( rm[0],
-                                                                              sector-1,
-                                                                              SVTConstants.LAYERRADIUS[ rm[0] ][ rm[1]],
-                                                                              SVTConstants.Z0ACTIVE[    rm[0] ] ));
-        // apply the shifts to both ends of labFrameLine
- 	double scaleT = 1.0, scaleR = -1.0;// scale factors used for visualization. Not relevant here.
- 	AlignmentFactory.applyShift(labFrameLine.origin(),SVTConstants.getLayerSectorAlignmentData()[sector-1][layer-1], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1),scaleT,scaleR );
-        AlignmentFactory.applyShift(labFrameLine.end(),   SVTConstants.getLayerSectorAlignmentData()[sector-1][layer-1], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1),scaleT,scaleR );
- 
- 	// return only the origin of this line.
-        return new Point3D(labFrameLine.origin().x, labFrameLine.origin().y, labFrameLine.origin().z);
-    }
-
-    //*** 
-    public int findSectorFromAngle(int layer, Point3D trkPoint) {
-        if(trkPoint==null)
-            return 0;
-        int[] rm = SVTConstants.convertLayer2RegionModule(layer-1);
         int Sect = -1;
-        for (int s = 0; s < SVTConstants.NSECTORS[rm[0]] - 1; s++) {
+        for (int s = 0; s < SVTConstants.NSECTORS[rm[0]]; s++) {
             int sector = s + 1;
-            Vector3D orig = new Vector3D(getPlaneModuleOrigin(sector, layer).x(),
-                                         getPlaneModuleOrigin(sector, layer).y(), 0);
-            Vector3D end  = new Vector3D(getPlaneModuleEnd(   sector, layer).x(),
-                                         getPlaneModuleEnd(   sector, layer).y(), 0);
-            Vector3D trk  = new Vector3D(                           trkPoint.x(),
-                                                                    trkPoint.y(), 0);
+            Line3D module = this.getModule(layer, sector);
+            Vector3D orig = module.origin().toVector3D().asUnit();
+            Vector3D end  = module.end().toVector3D().asUnit();
+            Vector3D trk  = new Vector3D(traj.x(), traj.y(), 0);
             orig.unit();
             end.unit();
             trk.unit();
 
-            double phi1 = orig.dot(trk);
-            double phi2 = trk.dot(end);
-            double phiRange = orig.dot(end);
+            double phi1 = Math.acos(orig.dot(trk));
+            double phi2 = Math.acos(trk.dot(end));
+            double phiRange = Math.acos(orig.dot(end));
 
-            if (Math.acos(phi1) < Math.acos(phiRange) && Math.acos(phi2) < Math.acos(phiRange)) {
+            if (phi1<phiRange && phi2<phiRange) {
                 Sect = sector;
             }
         }
         return Sect;
-    }
-
-    //***
-    public Vector3D findBSTPlaneNormal(int sector, int layer) {
-
-        int region        = (int) (layer + 1) / 2; // min. value 1: (1+1)/2 -> 1; max. value 8: (8+1)/2 -> 4.5 -> 5?
-        int myLayerIndex  = 2*(region - 1);        // always even
-        int mySectorIndex = sector - 1;
-
-        Line3d l1 = this._svtStripFactory.getStrip(myLayerIndex, mySectorIndex, 0);
-        Line3d l2 = this._svtStripFactory.getStrip(myLayerIndex, mySectorIndex, 255);
-
-        // subtracts origin of first strip from end of first strip; substracts origin of last strip from end of last strip;
-        Vector3d u1 = l1.end().sub(l1.origin());
-        Vector3d u2 = l2.end().sub(l2.origin());
-        
-        Vector3d n = u1.cross(u2).normalized();
-        return new Vector3D(n.x, n.y, 0);
     }
 
     //***
@@ -208,65 +190,11 @@ public class SVTGeometry {
         return Xerr;
 
     }
+     
 
-    public Point3D transformToFrame(int sector, int layer, double x, double y, double z, String frame, String MiddlePlane) {
-
-        int[] rm  = SVTConstants.convertLayer2RegionModule(layer-1);
-
-        double gap = 0;
-
-        if (MiddlePlane.equals("middle")) {
-            if ((layer - 1) % 2 == 0) { // for a cross take the bottom layer;
-                int[] rm1 = SVTConstants.convertLayer2RegionModule(layer);
-                int[] rm2 = SVTConstants.convertLayer2RegionModule(layer-1);
-                //gap = SVTConstants.LAYERRADIUS[rm1[0]][rm1[1]]
-                //    - SVTConstants.LAYERRADIUS[rm2[0]][rm2[1]]; //gap+=0.004;
-            }
-        }
-        Point3D transf = null;
-        if (frame.equals("lab")) {
-            Line3d localLine = new Line3d(new Vector3d(x-SVTConstants.ACTIVESENWID/2, y, z),
-                                          new Vector3d(x-SVTConstants.ACTIVESENWID/2, y, z)) ;
-            Line3d labFrameLine = localLine.transformed(SVTConstants.getLabFrame( (int)((layer+1)/2) -1,
-                                                                                  sector-1,
-                                                                                  //= SVTConstants.LAYERRADIUS[rm[0]][rm[1]]
-                                                                                  SVTConstants.LAYERRADIUS[rm[0]][rm[1]]+gap/2,
-                                                                                  SVTConstants.Z0ACTIVE[rm[0]] ));
-              
-              
-            //gpg apply the shifts to both ends of labFrameLine.
- 	    double scaleT = 1.0, scaleR = -1.0;// scale factors used for visualization. Not relevant here.
- 	    AlignmentFactory.applyShift(labFrameLine.origin(),SVTConstants.getLayerSectorAlignmentData()[sector-1][layer-1], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1),scaleT,scaleR );
- 	    AlignmentFactory.applyShift(labFrameLine.end(),   SVTConstants.getLayerSectorAlignmentData()[sector-1][layer-1], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1),scaleT,scaleR );
-
-            transf= new Point3D(labFrameLine.origin().x,
-                                labFrameLine.origin().y,
-                                labFrameLine.origin().z);
-        }
-        if (frame.equals("local")) {
-            Line3d glLine = new Line3d(new Vector3d(x,y,z),
-                                       new Vector3d(x,y,z)) ;
-            boolean flip = true;
-            
-            //gpg need to apply the reverse survey shifts here.
- 	    double scaleT = 1.0, scaleR = -1.0;// scale factors used for visualization. Not relevant here.
- 	    AlignmentFactory.applyInverseShift( glLine.origin(), SVTConstants.getLayerSectorAlignmentData()[sector-1][layer-1], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1 ), scaleT, scaleR );
- 	    AlignmentFactory.applyInverseShift( glLine.end(), SVTConstants.getLayerSectorAlignmentData()[sector-1][layer-1], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1 ), scaleT, scaleR );
-  
-            Line3d localLine = glLine.transformed(SVTConstants.getLabFrame( (int)((layer+1)/2) -1,
-                                                                            sector-1,
-                                                                            SVTConstants.LAYERRADIUS[rm[0]][rm[1]]+gap/2, 
-                                                                            SVTConstants.Z0ACTIVE[rm[0]] ).invert());
-            transf= new Point3D(localLine.origin().x+SVTConstants.ACTIVESENWID/2,
-                                localLine.origin().y,
-                                localLine.origin().z);
-        }
-        return transf;
-    }
-    //*** point and its error
-
-    public double[] getCrossPars(int sector, int upperlayer, double s1, double s2, String frame, Vector3D trkDir) {
-        double[] vals = new double[6];
+    public double[] getCrossPars(int sector, int upperlayer, double s1, double s2, Vector3D trkDir) {
+        
+        double[] vals = new double[]{Double.NaN, 0, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
 
         // if first iteration trkDir == null
         double s2corr = s2;
@@ -282,28 +210,24 @@ public class SVTGeometry {
             s2corr = s2;
         }
 
-        double[] LC = getLocCoord(s1, s2corr);
-        double LC_x = LC[0];
-        double LC_z = LC[1];
-
-        Point3D crPoint = transformToFrame(sector, upperlayer - 1, LC_x, 0, LC_z, "lab", "middle");
-
-        vals[0] = crPoint.x();
-        vals[1] = crPoint.y();
-        vals[2] = crPoint.z();
+        double[] LC    = getLocCoord(s1, s2corr);
         double[] LCErr = getLocCoordErrs(upperlayer - 1, upperlayer, s1, s2corr, zf);
+        
+        Point3D crPoint = this.toGlobal(upperlayer-1, sector, new Point3D(LC[0], 0, LC[1]));
+        Vector3D  crErr = this.toGlobal(upperlayer-1, sector, new Vector3D(LCErr[0], 0, LCErr[1]));
+        
         double LCErr_x = LCErr[0];
         double LCErr_z = LCErr[1];
 
-        // global rotation angle to get the error in the lab frame
-        int layerIdx = upperlayer - 1;
+        // global rotation angle to get the error in the local frame
         int[] rm = SVTConstants.convertLayer2RegionModule(upperlayer-1);
 
         // global rotation angle
         double Glob_rangl = ((double) -(sector - 1) / (double) SVTConstants.NSECTORS[rm[0]])
                                               * 2. * Math.PI + SVTConstants.PHI0;
         // angle to rotate to global frame
-        double Loc_to_Glob_rangl = Glob_rangl - org.jlab.rec.cvt.svt.Constants.LOCZAXISROTATION;
+        double LOCZAXISROTATION = -Math.toRadians(90.);
+        double Loc_to_Glob_rangl = Glob_rangl - LOCZAXISROTATION;
 
         double cosRotation = Math.cos(Loc_to_Glob_rangl);
         double sinRotation = Math.sin(Loc_to_Glob_rangl);
@@ -311,31 +235,30 @@ public class SVTGeometry {
         double yerr = Math.abs(cosRotation * LCErr_x);
         double xerr = Math.abs(sinRotation * LCErr_x);
 
-        vals[3] = xerr;
-        vals[4] = yerr;
-        vals[5] = LCErr_z;
-
-        if (LC_z > SVTConstants.MODULELEN + org.jlab.rec.cvt.svt.Constants.TOLTOMODULELEN * 2) {
-            return new double[]{Double.NaN, 0, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
+        // RDV: check because old errors seems to be rotated by 90 deg
+//        System.out.println("Cross:\n" + xerr + " " + yerr + " " + LCErr_z);
+//        System.out.println(crErr.toString());
+//        System.out.println(crPoint.toString());
+        
+        if (LC[1] < -SVTConstants.LENGTHTOL || LC[1] > SVTConstants.MODULELEN + SVTConstants.LENGTHTOL * 2) {
+            return vals;
         }
-
         // once there is a trk, the cross should be well calculated
         //if the local cross is not in the fiducial volume it is not physical
-        if ((trkDir != null && (LC_x < 0 || LC_x > SVTConstants.ACTIVESENWID + org.jlab.rec.cvt.svt.Constants.TOLTOMODULEEDGE))
-         || (trkDir != null && (LC_z < -org.jlab.rec.cvt.svt.Constants.TOLTOMODULELEN
-                                         || LC_z > SVTConstants.MODULELEN   + org.jlab.rec.cvt.svt.Constants.TOLTOMODULELEN))) {
-            return new double[]{Double.NaN, 0, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
+        else if ((trkDir != null && (LC[0] < -SVTConstants.SIDETOL   || LC[0] > SVTConstants.ACTIVESENWID + SVTConstants.SIDETOL))
+              || (trkDir != null && (LC[1] < -SVTConstants.LENGTHTOL || LC[1] > SVTConstants.MODULELEN+ SVTConstants.LENGTHTOL))) {
+            return vals;
+        }
+        else {
+            vals[0] = crPoint.x();
+            vals[1] = crPoint.y();
+            vals[2] = crPoint.z();
+            vals[3] = Math.abs(crErr.x());
+            vals[4] = Math.abs(crErr.y());
+            vals[5] = Math.abs(crErr.z());
         }
 
-        double[] values = new double[6];
-        if (frame.equals("lab")) {
-            values = vals;
-        }
-        if (frame.equals("local")) {
-            values = new double[]{LC_x, 0, LC_z, LCErr_x, 0, LCErr_z};
-        }
-
-        return values;
+        return vals;
 
     }
 
@@ -361,10 +284,10 @@ public class SVTGeometry {
 
     public double calcNearestStrip(double X, double Y, double Z, int layer, int sect) {
 
-        Point3D LocPoint = this.transformToFrame(sect, layer, X, Y, Z, "local", "");
+        Vector3d LocPoint = this._svtStripFactory.transformToLocal(layer-1, sect-1, X, Y, Z);
 
-        double x = LocPoint.x();
-        double z = LocPoint.z();
+        double x = LocPoint.x;
+        double z = LocPoint.y;
 
         double alpha = SVTConstants.STEREOANGLE / (double) (SVTConstants.NSTRIPS - 1);
 
@@ -486,27 +409,6 @@ public class SVTGeometry {
     }
     //****
 
-    public double getDOCAToStrip(int sector, int layer, double centroidstrip, Point3D point0) {
-        double[][] X = this.getStripEndPoints(centroidstrip, (layer - 1) % 2);
-        Point3D EP1 = this.transformToFrame(sector, layer, X[0][0], 0, X[0][1], "lab", "");
-        Point3D EP2 = this.transformToFrame(sector, layer, X[1][0], 0, X[1][1], "lab", "");
-        Line3D l = new Line3D(EP1, EP2);
-        if(l.direction().z()<0) {
-            l.setEnd(EP1);
-            l.setOrigin(EP2);
-        }
-        Line3D WL = new Line3D();
-        WL.copy(l);
-        WL.copy(WL.distance(point0));
-        double sideStrip = Math.signum(l.direction().cross(WL.direction()).
-                dot(this.findBSTPlaneNormal(sector, layer)));
-        //double sideStrip = Math.signum(l.direction().y()*WL.direction().x()+l.direction().x()*WL.direction().y());
-        return WL.length()*sideStrip; 
-        
-
-    }
-    //****
-    // in the local coordinate system 
 
     public double getXAtZ(int layer, double centroidstrip, double Z) {
         double X = 0;
@@ -536,15 +438,12 @@ public class SVTGeometry {
 
         double tx = trkDir.x();
         double ty = trkDir.y();
-        Vector3D trkDir_t = new Vector3D(tx / Math.sqrt(tx * tx + ty * ty),
-                                         ty / Math.sqrt(tx * tx + ty * ty),
-                                         0                                 );
-        Vector3D n = findBSTPlaneNormal(sector, layer);
-
-        if (org.jlab.rec.cvt.Constants.isCosmicsData() && Math.acos(n.dot(trkDir_t)) > Math.PI / 2) { // flip track dir for y<0 for cosmics:
-            trkDir_t = new Vector3D(-trkDir_t.x(),
-                                    -trkDir_t.y(),
-                                     0            );
+        Vector3D trkDir_t = new Vector3D(tx,ty,0);
+        trkDir_t.unit();
+        Vector3D n = this.getNormal(layer, sector);
+        
+        if (Math.acos(n.dot(trkDir_t)) > Math.PI / 2) { // flip track dir for y<0 for cosmics:
+            trkDir_t.negative();
         }
 
         double TrkToPlnNormRelatAngl = Math.acos(n.dot(trkDir_t));
@@ -574,173 +473,15 @@ public class SVTGeometry {
     }
     //***
 
-    public double planeNormDotTrkDir(int sector, int layer, Point3D trkDir, double s2, double z) {
-        double tx = trkDir.x();
-        double ty = trkDir.y();
-        Vector3D trkDir_t = new Vector3D(tx / Math.sqrt(tx * tx + ty * ty), ty / Math.sqrt(tx * tx + ty * ty), 0);
-        Vector3D n = findBSTPlaneNormal(sector, layer);
-
-        return Math.abs(n.dot(trkDir_t));
-    }
-
-    //***
-    public Point3D intersectionOfHelixWithPlane(int layer, int sector, Helix helix) {
+    public boolean isInFiducial(int layer, int sector, Point3D traj) {
         
-        int[] rm  = SVTConstants.convertLayer2RegionModule(layer-1);
-
-        int nstep = 1;
-        double stepSize = 0.001;
-
-        double Theta = Math.atan2((SVTConstants.ACTIVESENWID / 2),
-                                   SVTConstants.LAYERRADIUS[rm[0]][rm[1]]); // = 
-
-        double RMin = SVTConstants.LAYERRADIUS[rm[0]][rm[1]];
-        double RMax = RMin / Math.cos(Theta);
-        double R = RMin;
-
-        Point3D InterPoint = helix.getPointAtRadius(R);
-
-        double minDelta = RMax - RMin;
-
-        while (R < RMax) {
-
-            Point3D I = helix.getPointAtRadius(R);
-            Vector3D Inorm = I.toVector3D().asUnit();
-
-            double Rinter = RMin / findBSTPlaneNormal(sector, layer).dot(Inorm);
-            double y_rho = Math.sqrt(I.x() * I.x() + I.y() * I.y());
-            if (Math.abs(Rinter - y_rho) < minDelta) {
-                InterPoint = I;
-                minDelta = Math.abs(Rinter - y_rho);
-            }
-            R += nstep * stepSize;
-            nstep++;
-
-        }
-        return InterPoint;
-
-    }
-
-    public Point3D recalcCrossFromTrajectoryIntersWithModulePlanes(int s, double s1, double s2, int l1, int l2,
-                                                                   double trajX1, double trajY1, double trajZ1,
-                                                                   double trajX2, double trajY2, double trajZ2) {
-        Point3D LocPoint1 = this.transformToFrame(s, l1, trajX1, trajY1, trajZ1, "local", "");
-        Point3D LocPoint2 = this.transformToFrame(s, l2, trajX2, trajY2, trajZ2, "local", "");
-        double m = (LocPoint1.x() - LocPoint2.x()) /
-                   (LocPoint1.z() - LocPoint2.z());
-        double b = LocPoint1.x() - m * LocPoint1.z();
-
-        double ialpha1 = (s1 - 1) * SVTConstants.STEREOANGLE / (double) (SVTConstants.NSTRIPS - 1);
-        //the active area starts at the first strip 	
-        double interc1 = (s1 - 0.5) * SVTConstants.READOUTPITCH + SVTConstants.STRIPOFFSETWID;
-        double ialpha2 = (s2 - 1) * SVTConstants.STEREOANGLE / (double) (SVTConstants.NSTRIPS - 1);
-        //the active area starts at the first strip 	
-        double interc2 = (s2 - 0.5) * SVTConstants.READOUTPITCH + SVTConstants.STRIPOFFSETWID;
-
-        // Equation for strip line is x = mz + b [i.e. z is the direction of the length of the module]
-        // -------------------------------------
-        double m1 = -Math.tan(ialpha1);
-        double m2 = Math.tan(ialpha2);
-        double b1 = SVTConstants.ACTIVESENWID - interc1;
-        double b2 = interc2;
-
-        double z1 = (b - b1) / (m1 - m);
-        double x1 = m1 * z1 + b1;
-        double z2 = (b - b2) / (m2 - m);
-        double x2 = m2 * z2 + b2;
-
-        Point3D Point1 = this.transformToFrame(s, l1, x1, 0, z1, "lab", "");
-        Point3D Point2 = this.transformToFrame(s, l2, x2, 0, z2, "lab", "");
-        // unit vec along dir of track
-        Vector3D t = new Vector3D(Point2.x() - Point1.x(), Point2.y() - Point1.y(), Point2.z() - Point1.z()).asUnit();
-        //normal to plane of module
-        Vector3D n = this.findBSTPlaneNormal(s, l1);
-
-        int[] rm1  = SVTConstants.convertLayer2RegionModule(l1-1);
-        int[] rm2  = SVTConstants.convertLayer2RegionModule(l2-1);
-
-        //path length tranversed inbetween modules
-        double l = (SVTConstants.LAYERRADIUS[rm1[0]][rm1[1]] - SVTConstants.LAYERRADIUS[rm2[0]][rm2[1]]) / (n.dot(t));
-        //Point inbetween the modules			
-
-        Point3D Point = new Point3D(Point1.x() + t.x() * ((double) l / 2),
-                                    Point1.y() + t.y() * ((double) l / 2),
-                                    Point1.z() + t.z() * ((double) l / 2) );
-
-        return Point;
-    }
-
-    public Line3d getStrip(int alayer, int asector, int astrip) {
-
-      Line3d shiftedStrip = this._svtStripFactory.getStrip(alayer, asector, astrip); // shifted if bshift = true
-
-      return shiftedStrip;
-    }
-
-    public double[][] getStripEndPoints(double strip, int slyr) { //1 top, 0 bottom
-
-        double[][] X = new double[2][2];
-
-        double z1 = 0;
-        double x1 = 0;
-        double z2 = 0;
-        double x2 = 0;
-
-        // Equation for strip line is x = mz + b [i.e. z is the direction of the length of the module]
-        // -------------------------------------
-        if (slyr == 0) {
-            double s1 = strip;
-            double ialpha1 = (s1 - 1) * SVTConstants.STEREOANGLE / (double) (SVTConstants.NSTRIPS - 1);
-            //the active area starts at the first strip 	
-            double interc1 = (s1 - 0.5) * SVTConstants.READOUTPITCH + SVTConstants.STRIPOFFSETWID;
-            double m1 = -Math.tan(ialpha1);
-            double b1 = SVTConstants.ACTIVESENWID - interc1;
-
-            z1 = 0;
-            x1 = m1 * z1 + b1;
-            z2 = SVTConstants.MODULELEN;
-            x2 = m1 * z2 + b1;
-
-            if (x2 < 0) {
-                x2 = 0;
-                z2 = -b1 / m1;
-            }
-        }
-
-        if (slyr == 1) {
-            double s2 = strip;
-            double ialpha2 = (s2 - 1) * SVTConstants.STEREOANGLE / (double) (SVTConstants.NSTRIPS - 1);
-            //the active area starts at the first strip 	
-            double interc2 = (s2 - 0.5) * SVTConstants.READOUTPITCH + SVTConstants.STRIPOFFSETWID;
-            double m2 = Math.tan(ialpha2);
-            double b2 = interc2;
-
-            z1 = 0;
-            x1 = m2 * z1 + b2;
-            z2 = SVTConstants.MODULELEN;
-            x2 = m2 * z2 + b2;
-
-            if (x2 > SVTConstants.ACTIVESENWID) {
-                x2 = SVTConstants.ACTIVESENWID;
-                z2 = (x2 - b2) / m2;
-            }
-        }
-        X[0][0] = x1;
-        X[0][1] = z1;
-        X[1][0] = x2;
-        X[1][1] = z2;
-
-/*        
-        System.out.println("createIdealStrip: " + this._svtStripFactory.createIdealStrip(strip, slyr));
-        System.out.println("X: " + strip + " + " + slyr );
-        System.out.println(" x1: " + X[0][0] );
-        System.out.println(" z1: " + X[0][1] );
-        System.out.println(" x2: " + X[1][0] );
-        System.out.println(" z2: " + X[1][1] );
-*/
-        return X;
-    }
-
-    public static void main(String arg[]) throws FileNotFoundException {
+        Point3D local = this.toLocal(layer, sector, traj);
+        
+        if(local.x()<-SVTConstants.SIDETOL || local.x()>(SVTConstants.ACTIVESENWID+SVTConstants.SIDETOL))
+            return false;
+        else if(local.z()<-SVTConstants.LENGTHTOL || local.z()>(SVTConstants.MODULELEN+SVTConstants.LENGTHTOL))
+            return false;
+        else
+            return true;
     }
 }

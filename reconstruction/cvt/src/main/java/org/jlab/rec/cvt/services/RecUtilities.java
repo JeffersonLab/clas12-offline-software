@@ -1,7 +1,6 @@
 package org.jlab.rec.cvt.services;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import java.util.Map;
@@ -9,8 +8,6 @@ import java.util.HashMap;
 import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.clas.tracking.objects.Strip;
-import org.jlab.detector.geant4.v2.SVT.SVTConstants;
-import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -55,8 +52,11 @@ public class RecUtilities {
         List<Cross> rmCrosses = new ArrayList<Cross>();
         
         for(Cross c : crosses.get(0)) {
-            double z = SVTGeom.transformToFrame(c.get_Sector(), c.get_Region()*2, c.get_Point().x(), c.get_Point().y(),c.get_Point().z(), "local", "").z();
-            if(z<-0.1 || z>SVTConstants.MODULELEN) {
+            double z = SVTGeom.toLocal(c.get_Region()*2-1,
+                                       c.get_Sector(),
+                                       c.get_Point()).z();
+        
+            if(z<-0.1 || z>SVTGeometry.getModuleLength()) {
                 rmCrosses.add(c);
             }
         }
@@ -126,7 +126,6 @@ public class RecUtilities {
                 KFSites.add(meas);
             }
         }
-//        for(int i=0; i<KFSites.size(); i++) System.out.println(KFSites.get(i).toString());
         return KFSites;
     }
     private TrajectoryFinder tf = new TrajectoryFinder();
@@ -175,11 +174,12 @@ public class RecUtilities {
                     Point3D endPt2 = cls.get(j).getLine().end();
                     Strip strp = new Strip(id, ce, endPt1.x(), endPt1.y(), endPt1.z(),
                                             endPt2.x(), endPt2.y(), endPt2.z());
-                    Plane3D pln = new Plane3D(endPt1,sgeo.findBSTPlaneNormal(cls.get(j).get_Sector(), 
-                            cls.get(j).get_Layer()));
-                    Point3D Or = sgeo.getPlaneModuleOrigin(cls.get(j).get_Sector(), cls.get(j).get_Layer());
-                    Point3D En = sgeo.getPlaneModuleEnd(cls.get(j).get_Sector(), cls.get(j).get_Layer());
-                    Surface meas = new Surface(pln, strp, Or, En);
+//                    Plane3D pln = new Plane3D(endPt1,sgeo.findBSTPlaneNormal(cls.get(j).get_Sector(), 
+//                            cls.get(j).get_Layer()));
+                    Plane3D pln = new Plane3D(endPt1,cls.get(j).getN());
+//                    Point3D Or = sgeo.getPlaneModuleOrigin(cls.get(j).get_Sector(), cls.get(j).get_Layer());
+//                    Point3D En = sgeo.getPlaneModuleEnd(cls.get(j).get_Sector(), cls.get(j).get_Layer());
+                    Surface meas = new Surface(pln, strp, cls.get(j).origin(), cls.get(j).end());
                     meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());
                     meas.setSector(cls.get(j).get_Sector());
                     double err = cls.get(j).get_Resolution();
@@ -188,7 +188,7 @@ public class RecUtilities {
                     // air gap ignored
                     double thickn_ov_X0 = 0;
                     if(cls.get(j).get_Layer()%2==1)
-                        thickn_ov_X0 = org.jlab.rec.cvt.svt.Constants.SILICONTHICK / org.jlab.rec.cvt.svt.Constants.SILICONRADLEN;
+                        thickn_ov_X0 = cls.get(j).get(0).get_Strip().getToverX0();
                     meas.setl_over_X0(thickn_ov_X0);
                     //if((int)Constants.getLayersUsed().get(meas.getLayer())<1)
                     //    meas.notUsedInFit=true;
@@ -252,17 +252,15 @@ public class RecUtilities {
         return KFSites;
     }
     
-    public List<Cluster> FindClustersOnTrk (List<Cluster> allClusters, Helix helix, double P, int Q,
+    public List<Cluster> FindClustersOnTrkNew (List<Cluster> allClusters, Helix helix, double P, int Q,
             SVTGeometry sgeo, Swim swimmer) { 
-        Map<Integer, Cluster> clusMap = new HashMap<Integer, Cluster>();
-        //Map<Integer, Double> stripMap = new HashMap<Integer, Double>();
-        Map<Integer, Double> docaMap = new HashMap<Integer, Double>();
-        Map<Integer, Point3D> trajMap = new HashMap<Integer, Point3D>();
-        int[] Sectors = new int[org.jlab.rec.cvt.svt.Constants.NLAYR];
-        for (int a = 0; a < Sectors.length; a++) {
-            Point3D I = helix.getPointAtRadius(org.jlab.rec.cvt.svt.Constants.MODULERADIUS[a][0]);
-            int sec = sgeo.findSectorFromAngle(a + 1, I);                
-            Sectors[a] = sec;
+
+        int[] Sectors = new int[SVTGeometry.NLAYERS];
+        // RDV it is not correct for tiltes/shifted geometry
+        for (int ilayer = 0; ilayer < SVTGeometry.NLAYERS; ilayer++) {
+            Point3D traj = helix.getPointAtRadius(sgeo.getLayerRadius(ilayer+1));
+            int sec = sgeo.getSector(ilayer+1, traj);   
+            Sectors[ilayer] = sec;
         }
         // initialize swimmer starting from the track vertex
         double maxPathLength = 1; 
@@ -272,7 +270,8 @@ public class RecUtilities {
         double[] inters = null;
         double     path = 0;
         // SVT
-        for (int l = 0; l < org.jlab.rec.cvt.svt.Constants.NLAYR; l++) {
+        List<Cluster> clustersOnTrack = new ArrayList<Cluster>();
+        for (int l = 0; l < SVTGeometry.NLAYERS; l++) {
             // reinitilize swimmer from last surface
             if(inters!=null) {
                 double intersPhi   = Math.atan2(inters[4], inters[3]);
@@ -285,15 +284,77 @@ public class RecUtilities {
             if(sector == -1)
                 continue;
             
-            Vector3D n = sgeo.findBSTPlaneNormal(sector, layer);
-            Point3D p = sgeo.getPlaneModuleOrigin(sector, layer);
+            double  doca    = Double.MAX_VALUE;
+            Point3D traj    = null;
+            Cluster cluster = null;
+            for(Cluster cls : allClusters) {
+                if(cls.get_AssociatedTrackID()==-1 && cls.get_Sector()==sector && cls.get_Layer()==layer) {
+                    // for first relevant cluster, swim to the plane to get the trajectory
+                    if(traj==null) {
+                        Vector3D n = cls.get(0).get_Strip().get_Normal();
+                        Point3D p  = cls.get(0).get_Strip().get_Module().origin();
+                        double d = n.dot(p.toVector3D());
+                        inters = swimmer.SwimToPlaneBoundary(d/10.0, n, 1);
+                        if(inters!=null)
+                            traj = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
+                    }
+                    if(traj!=null) {
+                        double clsDoca = cls.residual(traj);
+                        if(Math.abs(clsDoca)<Math.abs(doca) && Math.abs(clsDoca)<cls.get_CentroidError()*5) {
+                            cluster = cls;
+                            doca    = clsDoca;
+                        }                           
+                    }
+                }
+            }
+            if(cluster!=null) clustersOnTrack.add(cluster);
+        }
+        return clustersOnTrack;        
+    }
+    
+    public List<Cluster> FindClustersOnTrk (List<Cluster> allClusters, Helix helix, double P, int Q,
+            SVTGeometry sgeo, Swim swimmer) { 
+        Map<Integer, Cluster> clusMap = new HashMap<Integer, Cluster>();
+        //Map<Integer, Double> stripMap = new HashMap<Integer, Double>();
+        Map<Integer, Double> docaMap = new HashMap<Integer, Double>();
+        Map<Integer, Point3D> trajMap = new HashMap<Integer, Point3D>();
+        int[] Sectors = new int[SVTGeometry.NLAYERS];
+        // RDV it is not correct for tilte/shifted geometry
+        for (int a = 0; a < Sectors.length; a++) {
+            Point3D I = helix.getPointAtRadius(sgeo.getLayerRadius(a+1));
+           int sec = sgeo.getSector(a+1, I);   
+           Sectors[a] = sec;
+        }
+        // initialize swimmer starting from the track vertex
+        double maxPathLength = 1; 
+        swimmer.SetSwimParameters((helix.xdca()+org.jlab.rec.cvt.Constants.getXb()) / 10, (helix.ydca()+org.jlab.rec.cvt.Constants.getYb()) / 10, helix.get_Z0() / 10, 
+                     Math.toDegrees(helix.get_phi_at_dca()), Math.toDegrees(Math.acos(helix.costheta())),
+                     P, Q, maxPathLength) ;
+        double[] inters = null;
+        double     path = 0;
+        // SVT
+        for (int l = 0; l < SVTGeometry.NLAYERS; l++) {
+            // reinitilize swimmer from last surface
+            if(inters!=null) {
+                double intersPhi   = Math.atan2(inters[4], inters[3]);
+                double intersTheta = Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]));
+                swimmer.SetSwimParameters(inters[0], inters[1], inters[2], Math.toDegrees(intersPhi), Math.toDegrees(intersTheta), 
+                        P, Q, maxPathLength) ;
+            }
+            int layer = l + 1;
+            int sector = Sectors[l];
+            if(sector == -1)
+                continue;
+            
+            Vector3D n = sgeo.getNormal(layer, sector);
+            Point3D  p = sgeo.getModule(layer, sector).origin();
             double d = n.dot(p.toVector3D());
             inters = swimmer.SwimToPlaneBoundary(d/10.0, n, 1);
             if(inters!=null) {
                 Point3D trp = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
                 double nearstp = sgeo.calcNearestStrip(inters[0]*10, inters[1]*10, inters[2]*10, layer, sector);
                 //stripMap.put((sector*1000+layer), nearstp);
-                docaMap.put((sector*1000+layer), sgeo.getDOCAToStrip(sector, layer, nearstp, trp)); 
+                docaMap.put((sector*1000+layer), 10.0);//sgeo.getDOCAToStrip(sector, layer, nearstp, trp)); 
                 trajMap.put((sector*1000+layer), trp); 
             }
         }
@@ -301,8 +362,7 @@ public class RecUtilities {
             int clsKey = cls.get_Sector()*1000+cls.get_Layer();
             if(cls.get_AssociatedTrackID()==-1 && trajMap!=null && trajMap.get(clsKey)!=null) {
                 //double trjCent = stripMap.get(clsKey);
-                double clsDoca = sgeo.getDOCAToStrip(cls.get_Sector(), cls.get_Layer(), 
-                        cls.get_Centroid(), trajMap.get(clsKey));
+                double clsDoca = cls.residual(trajMap.get(clsKey));
                 if(clusMap.containsKey(clsKey)) {
                     //double filldCent = clusMap.get(clsKey).get_Centroid();
                     double filldDoca = docaMap.get(clsKey);
@@ -332,13 +392,14 @@ public class RecUtilities {
                 int layer = trkcand.get_Clusters().get(i).get_Layer();
                 int sector = trkcand.get_Clusters().get(i).get_Sector();
                 Point3D p = new Point3D(traj.get(layer).x, traj.get(layer).y, traj.get(layer).z);
-                double doca2Cls = sgeo.getDOCAToStrip(sector, layer, cluster.get_Centroid(), p);
-                double doca2Seed = sgeo.getDOCAToStrip(sector, layer, (double) cluster.get_SeedStrip().get_Strip(), p);
-                cluster.set_SeedResidual(doca2Seed); 
-                cluster.set_CentroidResidual(doca2Cls);
+//                double doca2Cls = sgeo.getDOCAToStrip(sector, layer, cluster.get_Centroid(), p);
+//                double doca2Seed = sgeo.getDOCAToStrip(sector, layer, (double) cluster.get_SeedStrip().get_Strip(), p);
+//                cluster.set_SeedResidual(doca2Seed); 
+                cluster.set_CentroidResidual(traj.get(layer).resi);
+                cluster.set_SeedResidual(p); 
             
                 for (FittedHit hit : cluster) {
-                    double doca1 = sgeo.getDOCAToStrip(sector, layer, (double) hit.get_Strip().get_Strip(), p);
+                    double doca1 = hit.residual(p);
                     double sigma1 = sgeo.getSingleStripResolution(layer, hit.get_Strip().get_Strip(), traj.get(layer).z);
                     hit.set_stripResolutionAtDoca(sigma1);
                     hit.set_docaToTrk(doca1);  
@@ -379,7 +440,7 @@ public class RecUtilities {
 //                    double phic = bgeo.getPhi(blayer, bsector, new Point3D(cxh,cyh,0));
 //                    double phit = bgeo.getPhi(blayer, bsector, p);
 //                    double doca2Cls = (phic-phit)*bgeo.getRadiusMidDrift(blayer);
-                    
+                    // RDV switch to use methogds from fitted hit
                     for (FittedHit hit : cluster) {
                         double xh = Math.cos(hit.get_Strip().get_Phi())*bgeo.getRadiusMidDrift(blayer);
                         double yh = Math.sin(hit.get_Strip().get_Phi())*bgeo.getRadiusMidDrift(blayer);

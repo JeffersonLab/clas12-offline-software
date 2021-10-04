@@ -1,8 +1,7 @@
 package org.jlab.rec.cvt.track;
 
 import org.jlab.clas.swimtools.Swim;
-import org.jlab.rec.cvt.svt.Constants;
-import org.jlab.rec.cvt.svt.SVTGeometry;
+import org.jlab.rec.cvt.svt.SVTParameters;
 import org.jlab.rec.cvt.trajectory.Helix;
 
 /**
@@ -64,11 +63,11 @@ public class EnergyLossCorr {
         double pt0 = trkcand.get_Pt() + ELossMax * stepSize;// Assumes the max ELoss is 600 MeV
 
         double pt = pt0;
-        double curv = (Constants.LIGHTVEL * Math.abs(B)) * Math.signum(this.OrigTrack.get_curvature()) / pt;
+        double curv = (SVTParameters.LIGHTVEL * Math.abs(B)) * Math.signum(this.OrigTrack.get_curvature()) / pt;
 
         for (int j = 0; j < nbins; j++) {
             if (Math.abs(this.OrigTrack.get_curvature()) < Math.abs(curv)) {
-                double correctedCurv = (Constants.LIGHTVEL * Math.abs(B)) * Math.signum(this.OrigTrack.get_curvature()) / (pt + stepSize);
+                double correctedCurv = (SVTParameters.LIGHTVEL * Math.abs(B)) * Math.signum(this.OrigTrack.get_curvature()) / (pt + stepSize);
                 trkcand.get_helix().set_curvature(correctedCurv);
                 trkcand.set_HelicalTrack(trkcand.get_helix());
                 return;
@@ -143,7 +142,7 @@ public class EnergyLossCorr {
         double delta = 0.;
 
         //double dEdx = 0.0001535*(Constants.detMatZ/Constants.detMatA)*(Math.log(logterm)-2*beta*beta-delta)/(beta*beta);
-        double dEdx = 0.00001535 * Constants.detMatZ_ov_A_timesThickn * (Math.log(logterm) - 2 * beta * beta - delta) / (beta * beta);
+        double dEdx = 0.00001535 * SVTParameters.detMatZ_ov_A_timesThickn * (Math.log(logterm) - 2 * beta * beta - delta) / (beta * beta);
 
         double tmpPtot = p;
 
@@ -155,7 +154,7 @@ public class EnergyLossCorr {
 
         double newPt = Math.sqrt(tmpPtotCorrSq / (1 + tanL * tanL));
 
-        double newCurv = (Constants.LIGHTVEL * Math.abs(B)) * Math.signum(this.OrigTrack.get_curvature()) / newPt;
+        double newCurv = (SVTParameters.LIGHTVEL * Math.abs(B)) * Math.signum(this.OrigTrack.get_curvature()) / newPt;
 
         return newCurv;
 

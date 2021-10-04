@@ -1,5 +1,6 @@
 package org.jlab.rec.cvt.cross;
 
+import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
 import java.util.Collections;
 import org.jlab.detector.base.DetectorType;
@@ -8,7 +9,6 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
-import org.jlab.rec.cvt.svt.Constants;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 
 /**
@@ -368,7 +368,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         }
 
         double[] Params = geo.getCrossPars(outlayerclus.get_Sector(), outlayerclus.get_Layer(),
-                inlayerclus.get_Centroid(), outlayerclus.get_Centroid(), "lab", dirAtBstPlane);
+                inlayerclus.get_Centroid(), outlayerclus.get_Centroid(), dirAtBstPlane);
 
         double val = Params[0];
         if (Double.isNaN(val)) {
@@ -453,7 +453,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
             */
              
 
-            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[4][0] + Constants.MODULERADIUS[5][0]) * 0.5 < 15) {
+            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(3) < 15) {
                 if (this.get_Point0().y() > 0) {
                     theRegion = 6;
                 } else {
@@ -461,7 +461,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
                 }
             }
 
-            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[2][0] + Constants.MODULERADIUS[3][0]) * 0.5 < 15) {
+            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(2) < 15) {
                 if (this.get_Point0().y() > 0) {
                     theRegion = 5;
                 } else {
@@ -469,7 +469,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
                 }
             }
 
-            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[0][0] + Constants.MODULERADIUS[1][0]) * 0.5 < 15) {
+            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(1) < 15) {
                 if (this.get_Point0().y() > 0) {
                     theRegion = 4;
                 } else {
@@ -543,7 +543,6 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 
     public static void main(String arg[]) {
 
-        Constants.Load();
         // Geometry geo = new Geometry();
 
         ArrayList<Cross> testList = new ArrayList<Cross>();
@@ -590,16 +589,6 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
             }
         }
 
-    }
-
-    public boolean isInFiducial(SVTGeometry svt_geo) {
-        boolean pass = true;
-        Point3D LC = svt_geo.transformToFrame(this.get_Sector(), this.get_Cluster1().get_Layer(), this.get_Point().x(), this.get_Point().y(), this.get_Point().z(), "local", "");
-        if (((LC.x() < -0.10 || LC.x() > Constants.ACTIVESENWIDTH + 0.10))
-                || ((LC.z() < -1 || LC.z() > Constants.MODULELENGTH + 1))) {
-            pass = false;
-        }
-        return pass;
     }
 
 }

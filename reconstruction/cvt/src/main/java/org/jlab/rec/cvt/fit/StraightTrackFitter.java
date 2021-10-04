@@ -3,12 +3,12 @@ package org.jlab.rec.cvt.fit;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jlab.rec.cvt.svt.Constants;
 import org.jlab.rec.cvt.trajectory.Helix;
 
 import Jama.Matrix;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.rec.cvt.svt.SVTGeometry;
 
 /**
  * A fitter which does sequential fit (for r, phi coordinates) to a circle using
@@ -115,7 +115,7 @@ public class StraightTrackFitter {
         double fit_Z0 = _linefitpars.intercept();
         //fit_Z0 = (Math.abs(fit_dca)-_linefitpars.intercept())/ _linefitpars.slope() ; //reset for displaced vertex
         //require vertex position inside of the inner barrel
-            if (Math.abs(fit_dca) > Constants.MODULERADIUS[0][0] || Math.abs(fit_Z0) > 100) {
+            if (Math.abs(fit_dca) > SVTGeometry.getLayerRadius(1) || Math.abs(fit_Z0) > 100) {
             return null;
         }
 

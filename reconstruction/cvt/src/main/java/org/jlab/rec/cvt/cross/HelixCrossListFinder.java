@@ -9,8 +9,8 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
-import org.jlab.rec.cvt.svt.Constants;
 import org.jlab.rec.cvt.svt.SVTGeometry;
+import org.jlab.rec.cvt.svt.SVTParameters;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.track.TrackSeeder;
 
@@ -248,7 +248,7 @@ public class HelixCrossListFinder {
         double r_bmt = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[bmt_Ccross.get_Region() - 1];
         System.out.println(bmt_Ccross.get_Point().toString() + " " + bmt_Ccross.getcCrossRadius());
         double dzdr_bmt = z_bmt / r_bmt;
-        if (Math.abs(1 - (dzdrsum / (double) (countCrosses)) / ((dzdrsum + dzdr_bmt) / (double) (countCrosses + 1))) <= Constants.dzdrcut) // add this to the track
+        if (Math.abs(1 - (dzdrsum / (double) (countCrosses)) / ((dzdrsum + dzdr_bmt) / (double) (countCrosses + 1))) <= SVTParameters.dzdrcut) // add this to the track
             pass = true;
         
         return pass;
@@ -291,47 +291,47 @@ public class HelixCrossListFinder {
         if(c1==null || c2==null || c3==null || c4==null || c5==null)
             return null;
         double phi12 = Math.abs(relPhi(c1, c2));
-        if (phi12 > Constants.phi12cut) {
+        if (phi12 > SVTParameters.phi12cut) {
             return null;
         }
         double phi13 = Math.abs(relPhi(c1, c3));
-        if (phi13 > Constants.phi13cut) {
+        if (phi13 > SVTParameters.phi13cut) {
             return null;
         }
         double phi14 = Math.abs(relPhi(c1, c4));
-        if (phi14 > Constants.phi14cut) {
+        if (phi14 > SVTParameters.phi14cut) {
             return null;
         }
         double phi15 = Math.abs(relPhi(c1, c5));
-        if (phi15 > Constants.phi14cut) {
+        if (phi15 > SVTParameters.phi14cut) {
             return null;
         }
         double rad123 = radCurvature(c1, c2, c3);
-        if (Math.abs(rad123) < Constants.radcut) {
+        if (Math.abs(rad123) < SVTParameters.radcut) {
             return null;
         }
         double rad124 = radCurvature(c1, c2, c4);
-        if (Math.abs(rad124) < Constants.radcut) {
+        if (Math.abs(rad124) < SVTParameters.radcut) {
             return null;
         }
         double rad134 = radCurvature(c1, c3, c4);
-        if (Math.abs(rad134) < Constants.radcut) {
+        if (Math.abs(rad134) < SVTParameters.radcut) {
             return null;
         }
         double rad234 = radCurvature(c2, c3, c4);
-        if (Math.abs(rad234) < Constants.radcut) {
+        if (Math.abs(rad234) < SVTParameters.radcut) {
             return null;
         }
         double rad135 = radCurvature(c1, c3, c5);
-        if (Math.abs(rad135) < Constants.radcut) {
+        if (Math.abs(rad135) < SVTParameters.radcut) {
             return null;
         }
         double rad235 = radCurvature(c2, c3, c5);
-        if (Math.abs(rad235) < Constants.radcut) {
+        if (Math.abs(rad235) < SVTParameters.radcut) {
             return null;
         }
         double rad245 = radCurvature(c2, c4, c5);
-        if (Math.abs(rad245) < Constants.radcut) {
+        if (Math.abs(rad245) < SVTParameters.radcut) {
             return null;
         }
         double[] seed_delta_phi = {phi12, phi13, phi14, phi15};
@@ -351,31 +351,31 @@ public class HelixCrossListFinder {
             return null;
         
         double phi12 = Math.abs(relPhi(c1, c2));
-        if (phi12 > Constants.phi12cut) {
+        if (phi12 > SVTParameters.phi12cut) {
             return null;
         }
         double phi13 = Math.abs(relPhi(c1, c3));
-        if (phi13 > Constants.phi13cut) {
+        if (phi13 > SVTParameters.phi13cut) {
             return null;
         }
         double phi14 = Math.abs(relPhi(c1, c4));
-        if (phi14 > Constants.phi14cut) {
+        if (phi14 > SVTParameters.phi14cut) {
             return null;
         }
         double rad123 = radCurvature(c1, c2, c3);
-        if (Math.abs(rad123) < Constants.radcut) {
+        if (Math.abs(rad123) < SVTParameters.radcut) {
             return null;
         }
         double rad124 = radCurvature(c1, c2, c4);
-        if (Math.abs(rad124) < Constants.radcut) {
+        if (Math.abs(rad124) < SVTParameters.radcut) {
             return null;
         }
         double rad134 = radCurvature(c1, c3, c4);
-        if (Math.abs(rad134) < Constants.radcut) {
+        if (Math.abs(rad134) < SVTParameters.radcut) {
             return null;
         }
         double rad234 = radCurvature(c2, c3, c4);
-        if (Math.abs(rad234) < Constants.radcut) {
+        if (Math.abs(rad234) < SVTParameters.radcut) {
             return null;
         }
         double[] seed_delta_phi = {phi12, phi13, phi14};
@@ -394,15 +394,15 @@ public class HelixCrossListFinder {
         if(c1==null || c2==null || c3==null)
             return null;
         double phi12 = Math.abs(relPhi(c1,c2));
-        if (phi12 > Constants.phi12cut) {
+        if (phi12 > SVTParameters.phi12cut) {
             return null;
         }
         double phi13 = Math.abs(relPhi(c1, c3));
-        if (phi13 > Constants.phi13cut) {
+        if (phi13 > SVTParameters.phi13cut) {
             return null;
         }
         double rad123 = radCurvature(c1, c2, c3);
-        if (Math.abs(rad123) < Constants.radcut) {
+        if (Math.abs(rad123) < SVTParameters.radcut) {
             return null;
         }
         
@@ -458,7 +458,7 @@ public class HelixCrossListFinder {
         if(cand==null)
             return;
          
-        Point3D trkAtR1 =cand.get_helix().getPointAtRadius(org.jlab.rec.cvt.svt.Constants.MODULERADIUS[0][0]+org.jlab.rec.cvt.svt.Constants.LAYRGAP/2);
+        Point3D trkAtR1 =cand.get_helix().getPointAtRadius(svt_geo.getRegionRadius(1));
         List<Cross> candMatches = new ArrayList<Cross>();
         for (int i = 0; i < R1Crosses.size(); i++) {
             if(R1Crosses.get(i)==null)
@@ -468,14 +468,14 @@ public class HelixCrossListFinder {
                     Math.sqrt(R1Crosses.get(i).get_Point().x()*R1Crosses.get(i).get_Point().x()+R1Crosses.get(i).get_Point().y()*R1Crosses.get(i).get_Point().y()))<2)
                 candMatches.add(R1Crosses.get(i));
         }
-        Point3D trkAtL1 =cand.get_helix().getPointAtRadius(org.jlab.rec.cvt.svt.Constants.MODULERADIUS[0][0]);
-        Point3D trkAtL2 =cand.get_helix().getPointAtRadius(org.jlab.rec.cvt.svt.Constants.MODULERADIUS[0][0]+org.jlab.rec.cvt.svt.Constants.LAYRGAP);
+        Point3D trkAtL1 =cand.get_helix().getPointAtRadius(svt_geo.getLayerRadius(1));
+        Point3D trkAtL2 =cand.get_helix().getPointAtRadius(svt_geo.getLayerRadius(2));
         
         double dMin = Double.POSITIVE_INFINITY;
         Cross cMatch = null;
         for (int i = 0; i < candMatches.size(); i++) {//find cross for which the distance of the track to the 2 clusters in the double layers is minimal
-            double d = svt_geo.getDOCAToStrip(candMatches.get(i).get_Sector(), candMatches.get(i).get_Cluster1().get_Layer(), candMatches.get(i).get_Cluster1().get_Centroid(), trkAtL1)
-                    +svt_geo.getDOCAToStrip(candMatches.get(i).get_Sector(), candMatches.get(i).get_Cluster2().get_Layer(), candMatches.get(i).get_Cluster2().get_Centroid(), trkAtL2);
+            double d = candMatches.get(i).get_Cluster1().residual(trkAtL1)
+                     + candMatches.get(i).get_Cluster1().residual(trkAtL2);
             if(d<dMin) {
                 dMin =d;
                 cMatch = (Cross) candMatches.get(i).clone();
@@ -533,12 +533,14 @@ public class HelixCrossListFinder {
     }
 
     private double calcCentErr(Cross c, Cluster Cluster1, SVTGeometry svt_geo) {
-        double Z = svt_geo.transformToFrame(Cluster1.get_Sector(), Cluster1.get_Layer(), c.get_Point().x(), c.get_Point().y(), c.get_Point().z(), "local", "").z();
+        double Z = svt_geo.toLocal(Cluster1.get_Layer(),
+                                   Cluster1.get_Sector(),
+                                   c.get_Point()).z();
         if(Z<0)
             Z=0;
-        if(Z>Constants.ACTIVESENLEN)
-            Z=Constants.ACTIVESENLEN;
-        return Cluster1.get_ResolutionAlongZ(Z, svt_geo) / (Constants.PITCH / Math.sqrt(12.));
+        if(Z>SVTGeometry.getActiveSensorLength())
+            Z=SVTGeometry.getActiveSensorLength();
+        return Cluster1.get_ResolutionAlongZ(Z, svt_geo) / (SVTGeometry.getPitch() / Math.sqrt(12.));
     }
     /**
      * A class representing the seed object. The seed of a track is the initial

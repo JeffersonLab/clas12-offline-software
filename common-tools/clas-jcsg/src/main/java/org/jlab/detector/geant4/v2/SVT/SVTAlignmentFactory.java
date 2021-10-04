@@ -307,10 +307,10 @@ public class SVTAlignmentFactory
 		double heatSinkTotalThk = SVTConstants.MATERIALDIMENSIONS.get("heatSink")[1];
 		double radius = SVTConstants.SUPPORTRADIUS[aRegion] + heatSinkTotalThk;
 		
-		Transform labFrame = SVTConstants.getLabFrame( aRegion, aSector, radius, fidOriginZ );
+		Transform detFrame = SVTConstants.getDetectorFrame( aRegion, aSector, radius, fidOriginZ );
 		
 		for( int f = 0; f < SVTConstants.NFIDUCIALS; f++ )
-			fidPos3Ds[f].transform(labFrame);
+			fidPos3Ds[f].transform(detFrame);
 		
 		return fidPos3Ds;
 	}

@@ -4,6 +4,7 @@ import java.util.Random;
 import org.jlab.io.base.DataEvent;
 
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.svt.SVTParameters;
 
 public class ADCConvertor {
 
@@ -34,8 +35,8 @@ public class ADCConvertor {
         int START[] = new int[8];
         int END[] = new int[8];
         for (int i = 0; i < 8; i++) {
-            START[i] = org.jlab.rec.cvt.svt.Constants.initThresholds + org.jlab.rec.cvt.svt.Constants.deltaThresholds * i;
-            END[i] = org.jlab.rec.cvt.svt.Constants.initThresholds + org.jlab.rec.cvt.svt.Constants.deltaThresholds * (i + 1);
+            START[i] = SVTParameters.initThresholds + SVTParameters.deltaThresholds * i;
+            END[i] = SVTParameters.initThresholds + SVTParameters.deltaThresholds * (i + 1);
         }
         END[7] = 1000; //overflow
 

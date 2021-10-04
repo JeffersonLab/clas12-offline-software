@@ -1,12 +1,14 @@
 package org.jlab.rec.cvt.banks;
 
+import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 
-import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
+import org.jlab.geometry.prim.Line3d;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
@@ -14,7 +16,6 @@ import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.hit.ADCConvertor;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.hit.Strip;
-import org.jlab.rec.cvt.svt.Constants;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 
 /**
@@ -174,7 +175,7 @@ public class HitReader {
                 strip[i] = bankDGTZ.getShort("component", i);
                 ADC[i] = bankDGTZ.getInt("ADC", i);
                 
-                double angle = 2. * Math.PI * ((double) (sector[i] - 1) / (double) org.jlab.rec.cvt.svt.Constants.NSECT[layer[i] - 1]) + org.jlab.rec.cvt.svt.Constants.PHI0[layer[i] - 1];
+                double angle = geo.getSectorPhi(layer[i], sector[i]);
                 int hemisphere = (int) Math.signum(Math.sin(angle));
                 if (sector[i] == 7 && layer[i] > 6) {
                     hemisphere = 1;
@@ -204,16 +205,31 @@ public class HitReader {
                 //    continue;
                 // create the strip object with the adc value converted to daq value used for cluster-centroid estimate
                 Strip SvtStrip = new Strip(strip[i], adcConv.SVTADCtoDAQ(ADC[i], event), (double) time[i]); 
-                SvtStrip.set_Pitch(Constants.PITCH);
-                // get the strip endPoints
-                 double[][] X = geo.getStripEndPoints(SvtStrip.get_Strip(), (layer[i] - 1) % 2);
-                Point3D EP1 = geo.transformToFrame(sector[i], layer[i], X[0][0], 0, X[0][1], "lab", "");
-                Point3D EP2 = geo.transformToFrame(sector[i], layer[i], X[1][0], 0, X[1][1], "lab", "");
-                SvtStrip.set_Line(new Line3D(EP1, EP2));
-                SvtStrip.set_Normal(geo.findBSTPlaneNormal(sector[i], layer[i])); // add normal to the plane defined from the strip midpoint
-                SvtStrip.set_Module(new Line3D(geo.getPlaneModuleOrigin(sector[i], layer[i]), geo.getPlaneModuleEnd(sector[i], layer[i])));
+                SvtStrip.set_Pitch(SVTGeometry.getPitch());
+                // get the strip line
+                SvtStrip.set_Line(geo.getStrip(layer[i], sector[i], strip[i]));
+                SvtStrip.set_Module(geo.getModule(layer[i], sector[i]));
+                SvtStrip.set_Normal(geo.getNormal(layer[i], sector[i])); 
+                      
+//                 double[][] X = geo.getStripEndPoints(SvtStrip.get_Strip(), (layer[i] - 1) % 2);
+//                Point3D EP1 = geo.transformToFrame(sector[i], layer[i], X[0][0], 0, X[0][1], "lab", "");
+//                Point3D EP2 = geo.transformToFrame(sector[i], layer[i], X[1][0], 0, X[1][1], "lab", "");
+////                SvtStrip.set_Line(new Line3D(EP1, EP2));
+////                if(Constants.geoDebug) System.out.println("Strip: layer " + layer[i] + " sector " + sector[i] + "\n" + SvtStrip.get_Line().toString());
+////                SvtStrip.set_Normal(geo.findBSTPlaneNormal(sector[i], layer[i])); // add normal to the plane defined from the strip midpoint
+////                SvtStrip.set_Module(new Line3D(geo.getPlaneModuleOrigin(sector[i], layer[i]), geo.getPlaneModuleEnd(sector[i], layer[i])));
+//                if(Constants.geoDebug) {
+//                    Vector3D nn = geo.findBSTPlaneNormal(sector[i], layer[i]);
+//                    Point3D l1 = geo.getPlaneModuleOrigin(sector[i], layer[i]);
+//                    Point3D l2 = geo.getPlaneModuleEnd(sector[i], layer[i]);
+//                    if(EP1.distance(SvtStrip.get_Module().origin())>1E-3 || EP2.distance(SvtStrip.get_Module().end())>1E-3 || 
+//                       l1.distance(SvtStrip.get_Line().origin())>1E-3 || l2.distance(SvtStrip.get_Line().end())>1E-3 || nn.cross(SvtStrip.get_Normal()).mag()>1E-6) {
+//                        System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+//                        System.out.println("Module \n" + SvtStrip.get_Module().toString());
+//                   }
+//                }
                 if(layer[i]%2==1) {
-                    SvtStrip.setToverX0(Constants.SILICONTHICK / Constants.SILICONRADLEN);
+                    SvtStrip.setToverX0(SVTGeometry.getToverX0());
                 }
                 else {
                     SvtStrip.setToverX0(0);

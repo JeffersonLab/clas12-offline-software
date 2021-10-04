@@ -8,8 +8,8 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
-import org.jlab.rec.cvt.svt.Constants;
 import org.jlab.rec.cvt.svt.SVTGeometry;
+import org.jlab.rec.cvt.svt.SVTParameters;
 
 /**
  * Driver class to make crosses
@@ -71,11 +71,11 @@ public class CrossMaker {
         //loop over the clusters
         // inner clusters
         for (Cluster inlayerclus : svt_innerlayrclus) {
-            if(inlayerclus.get_TotalEnergy()<org.jlab.rec.cvt.svt.Constants.ETOTCUT)
+            if(inlayerclus.get_TotalEnergy()<SVTParameters.ETOTCUT)
                 continue;
             // outer clusters
             for (Cluster outlayerclus : svt_outerlayrclus) {
-                if(outlayerclus.get_TotalEnergy()<org.jlab.rec.cvt.svt.Constants.ETOTCUT)
+                if(outlayerclus.get_TotalEnergy()<SVTParameters.ETOTCUT)
                     continue;
                 // the diffence in layers between outer and inner is 1 for a double layer
                 if (outlayerclus.get_Layer() - inlayerclus.get_Layer() != 1) {
@@ -88,8 +88,8 @@ public class CrossMaker {
                 
                     // define new cross ))
                 // a cut to avoid looping over all strips - from geometry there is a minimum (maximum) strip sum of inner and outer layers that can give a strip intersection
-                if ((inlayerclus.get_MinStrip() + outlayerclus.get_MinStrip() > Constants.sumStpNumMin)
-                        && (inlayerclus.get_MaxStrip() + outlayerclus.get_MaxStrip() < Constants.sumStpNumMax)) { // the intersection is valid
+                if ((inlayerclus.get_MinStrip() + outlayerclus.get_MinStrip() > SVTParameters.sumStpNumMin)
+                        && (inlayerclus.get_MaxStrip() + outlayerclus.get_MaxStrip() < SVTParameters.sumStpNumMax)) { // the intersection is valid
 
                     // define new cross 
                     Cross this_cross = new Cross(DetectorType.BST, BMTType.UNDEFINED, inlayerclus.get_Sector(), inlayerclus.get_Region(), rid++);
@@ -121,12 +121,14 @@ public class CrossMaker {
     }
 
     private void calcCentErr(Cross c, Cluster Cluster1, SVTGeometry svt_geo) {
-        double Z = svt_geo.transformToFrame(Cluster1.get_Sector(), Cluster1.get_Layer(), c.get_Point().x(), c.get_Point().y(), c.get_Point().z(), "local", "").z();
+        double Z = svt_geo.toLocal(Cluster1.get_Layer(),
+                                   Cluster1.get_Sector(),
+                                   c.get_Point()).z();        
         if(Z<0)
             Z=0;
-        if(Z>Constants.ACTIVESENLEN)
-            Z=Constants.ACTIVESENLEN;
-        Cluster1.set_CentroidError(Cluster1.get_ResolutionAlongZ(Z, svt_geo) / (Constants.PITCH / Math.sqrt(12.)));
+        if(Z>SVTGeometry.getActiveSensorLength())
+            Z=SVTGeometry.getActiveSensorLength();
+        Cluster1.set_CentroidError(Cluster1.get_ResolutionAlongZ(Z, svt_geo) /(SVTGeometry.getPitch() / Math.sqrt(12.)));
         Cluster1.set_Resolution(Cluster1.get_ResolutionAlongZ(Z, svt_geo) );
     }
     /**
@@ -279,14 +281,14 @@ public class CrossMaker {
      */
     public List<Cross> crossLooperCands(List<ArrayList<Cross>> crosses) {
         // nb SVT layers
-        int nlayr = Constants.NLAYR;
+        int nlayr = SVTGeometry.NLAYERS;
         // list of crosses in a sector
         ArrayList<ArrayList<ArrayList<Cross>>> secList = new ArrayList<ArrayList<ArrayList<Cross>>>();
 
         //initialize
         for (int i = 0; i < nlayr; i++) {
             secList.add(i, new ArrayList<ArrayList<Cross>>());
-            for (int j = 0; j < Constants.NSECT[i]; j++) {
+            for (int j = 0; j < SVTGeometry.NSECTORS[i]; j++) {
                 secList.get(i).add(j, new ArrayList<Cross>());
             }
         }
@@ -303,9 +305,9 @@ public class CrossMaker {
         ArrayList<Cross> listOfCrossesToRm = new ArrayList<Cross>();
 
         for (int i = 0; i < nlayr; i++) {
-            for (int j = 0; j < Constants.NSECT[i]; j++) {
+            for (int j = 0; j < SVTGeometry.NSECTORS[i]; j++) {
                 //System.out.println(" number of crosses in sector "+(j+1)+" = "+secList.get(i).get(j).size());
-                if (secList.get(i).get(j).size() > Constants.MAXNUMCROSSESINMODULE) {
+                if (secList.get(i).get(j).size() > SVTParameters.MAXNUMCROSSESINMODULE) {
                     listOfCrossesToRm.addAll(secList.get(i).get(j));
                 }
             }

@@ -14,6 +14,7 @@ import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.svt.SVTGeometry;
+import org.jlab.rec.cvt.svt.SVTParameters;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 
@@ -103,10 +104,10 @@ public class TrackListFinder {
         }
         TotE /= (double) NbHits;
 
-        if (TotE <= org.jlab.rec.cvt.svt.Constants.PIDCUTOFF) {
+        if (TotE <= SVTParameters.PIDCUTOFF) {
             trk.set_PID("pion");
         }
-        if (TotE > org.jlab.rec.cvt.svt.Constants.PIDCUTOFF) {
+        if (TotE > SVTParameters.PIDCUTOFF) {
             trk.set_PID("proton");
         }
     }

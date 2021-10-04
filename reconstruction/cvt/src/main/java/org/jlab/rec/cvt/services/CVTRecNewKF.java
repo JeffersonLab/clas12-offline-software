@@ -29,6 +29,7 @@ import org.jlab.rec.cvt.hit.ADCConvertor;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.svt.SVTGeometry;
+import org.jlab.rec.cvt.svt.SVTParameters;
 
 /**
  * Service to return reconstructed TRACKS
@@ -50,7 +51,6 @@ public class CVTRecNewKF extends ReconstructionEngine {
     public CVTRecNewKF() {
         super("CVTTracks", "ziegler", "4.0");
         
-        SVTGeom = new SVTGeometry();
         BMTGeom = new BMTGeometry();
         strgtTrksRec = new CosmicTracksRec();
         trksFromTargetRec = new TracksFromTargetRec();
@@ -154,7 +154,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
         List<Hit> hits = new ArrayList<Hit>();
         //I) get the hits
         List<Hit> svt_hits = hitRead.get_SVTHits();
-        if(svt_hits.size()>org.jlab.rec.cvt.svt.Constants.MAXSVTHITS)
+        if(svt_hits.size()>SVTParameters.MAXSVTHITS)
             return true;
         if (svt_hits != null && svt_hits.size() > 0) {
             hits.addAll(svt_hits);
@@ -208,7 +208,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
         List<ArrayList<Cross>> crosses = new ArrayList<ArrayList<Cross>>();
         CrossMaker crossMake = new CrossMaker();
         crosses = crossMake.findCrosses(clusters, SVTGeom, BMTGeom);
-        if(crosses.get(0).size() > org.jlab.rec.cvt.svt.Constants.MAXSVTCROSSES ) {
+        if(crosses.get(0).size() > SVTParameters.MAXSVTCROSSES ) {
             rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, null, null, shift);
             return true; 
         }
@@ -357,7 +357,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
         cp = SVTConstants.connect( cp );
         cp.disconnect();  
         SVTStripFactory svtFac = new SVTStripFactory(cp, true);
-        SVTGeom.setSvtStripFactory(svtFac);
+        SVTGeom = new SVTGeometry(svtFac);
 
         return true;
     }

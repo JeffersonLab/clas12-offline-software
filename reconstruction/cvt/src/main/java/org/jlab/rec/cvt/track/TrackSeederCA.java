@@ -13,8 +13,8 @@ import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.fit.HelicalTrackFitter;
 import org.jlab.rec.cvt.fit.LineFitPars;
 import org.jlab.rec.cvt.fit.LineFitter;
-import org.jlab.rec.cvt.svt.Constants;
 import org.jlab.rec.cvt.svt.SVTGeometry;
+import org.jlab.rec.cvt.svt.SVTParameters;
 
 public class TrackSeederCA {
 
@@ -429,13 +429,13 @@ public class TrackSeederCA {
 			   int l1 = c.get_Cluster1().get_Layer();
 			   int s1 = c.get_Cluster1().get_Sector();
 			   double c1 = c.get_Cluster1().get_Centroid();
-			   double r1 = org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l1-1][s1-1];
+			   double r1 = svt_geo.getLayerRadius(l1);
 			   double nstr1 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r1 - b)/m, l1, s1);
 
 			   int l2 = c.get_Cluster2().get_Layer();
 			   int s2 = c.get_Cluster2().get_Sector();
 			   double c2 = c.get_Cluster2().get_Centroid();
-			   double r2 = org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l2-1][s2-1];
+			   double r2 = svt_geo.getLayerRadius(l2);
 			   double nstr2 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r2 - b)/m, l2, s2);
 			   
 			   if( Math.abs( c1 - nstr1 ) < 8 && Math.abs( c2 - nstr2 ) < 8 )
@@ -618,7 +618,7 @@ public class TrackSeederCA {
             //if(shift==0)
             if (fitTrk.get_chisq()[0] < chisqMax) {
                 chisqMax = fitTrk.get_chisq()[0];
-                if(chisqMax<Constants.CIRCLEFIT_MAXCHI2)
+                if(chisqMax<SVTParameters.CIRCLEFIT_MAXCHI2)
                     cand.update_Crosses(svt_geo);
 //                //i=fitIter;
             }

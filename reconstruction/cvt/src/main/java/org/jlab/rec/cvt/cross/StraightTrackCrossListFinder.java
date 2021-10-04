@@ -1,5 +1,6 @@
 package org.jlab.rec.cvt.cross;
 
+import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.fit.LineFitPars;
 import org.jlab.rec.cvt.fit.LineFitter;
 import org.jlab.rec.cvt.svt.SVTGeometry;
+import org.jlab.rec.cvt.svt.SVTParameters;
 
 /**
  * A class with methods used to find lists of crosses. This is the Pattern
@@ -351,7 +353,7 @@ public class StraightTrackCrossListFinder {
                     }
                     if (closestCross != null) // if there is a closest point it has to be within the cuts
                     {
-                        if (Math.abs(closestCross.get_Point0().x() - p.get_Point0().x()) < org.jlab.rec.cvt.svt.Constants.MAXDISTTOTRAJXY && Math.abs(closestCross.get_Point0().y() - p.get_Point0().y()) < org.jlab.rec.cvt.svt.Constants.MAXDISTTOTRAJXY) {
+                        if (Math.abs(closestCross.get_Point0().x() - p.get_Point0().x()) < SVTParameters.MAXDISTTOTRAJXY && Math.abs(closestCross.get_Point0().y() - p.get_Point0().y()) < SVTParameters.MAXDISTTOTRAJXY) {
                             crossList.add(closestCross);
 
                         }
@@ -461,17 +463,18 @@ public class StraightTrackCrossListFinder {
                 continue;
             }
 
-            for (int s = 0; s < org.jlab.rec.cvt.svt.Constants.NSECT[l]; s++) {
+            for (int s = 0; s < SVTGeometry.NSECTORS[l]; s++) {
 
                 double epsilon = 1e-6;
-                Vector3D n = svt_geo.findBSTPlaneNormal(s + 1, l + 1);
-
+//                Vector3D n = svt_geo.findBSTPlaneNormal(s + 1, l + 1);
+                Vector3D n = svt_geo.getNormal(l+1, s+1);
+                
                 double dot = (n.x() * yxslope + n.y());
 
                 if (Math.abs(dot) < epsilon) {
                     continue;
                 }
-                double R = (org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l][0] + org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l + 1][0]) / 2.;
+                double R = svt_geo.getRegionRadius(l/2+1);
 
                 Vector3D w = new Vector3D(yxinterc - R * n.x(), -R * n.y(), 0);
 
@@ -479,7 +482,7 @@ public class StraightTrackCrossListFinder {
 
                 Vector3D Delt = new Vector3D(fac * yxslope + yxinterc - R * n.x(), fac - R * n.y(), 0);
 
-                if (Delt.mag() < org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH / 2) {
+                if (Delt.mag() < SVTGeometry.getActiveSensorWidth() / 2) {
                     double tX = fac * yxslope + yxinterc;
                     double tY = fac;
                     Cross cross2D = new Cross(DetectorType.BST, BMTType.UNDEFINED, s + 1, (int) (l + 2) / 2, -1); // 2-dimentional cross object corresponding to a point on the trajectory line in the xy plane

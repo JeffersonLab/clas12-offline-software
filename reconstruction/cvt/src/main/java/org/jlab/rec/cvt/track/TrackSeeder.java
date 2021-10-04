@@ -16,8 +16,8 @@ import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.fit.CircleFitter;
 import org.jlab.rec.cvt.fit.CircleFitPars;
 import org.jlab.rec.cvt.fit.HelicalTrackFitter;
-import org.jlab.rec.cvt.svt.Constants;
 import org.jlab.rec.cvt.svt.SVTGeometry;
+import org.jlab.rec.cvt.svt.SVTParameters;
 
 public class TrackSeeder {
     int NBINS = 36;
@@ -67,7 +67,7 @@ public class TrackSeeder {
                     double fi = Math.atan2(yi,xi) ;
 
                     double res = this.calcResi(r, ri, d, f, fi);
-                    if(Math.abs(res)<Constants.RESIMAX) { 
+                    if(Math.abs(res)<SVTParameters.RESIMAX) { 
                         c.set_AssociatedTrackID(22222);
                         // add to seed    
                         seed.get_Crosses().add((Cross) c.clone());
@@ -110,7 +110,7 @@ public class TrackSeeder {
             double fi = Math.atan2(yi,xi) ;
             
             double res = this.calcResi(r, ri, d, f, fi);
-            if(Math.abs(res)>Constants.RESIMAX) { 
+            if(Math.abs(res)>SVTParameters.RESIMAX) { 
                 failed = true;
                 return;
             }
@@ -304,7 +304,7 @@ public class TrackSeeder {
                     double ri = Math.sqrt(xi*xi+yi*yi);
                     double fi = Math.atan2(yi,xi) ;
                     double res = this.calcResi(r, ri, d, f, fi);
-                    if(Math.abs(res)>Constants.RESIMAX) {
+                    if(Math.abs(res)>SVTParameters.RESIMAX) {
                         //System.out.println(" remove detector " + c .get_Detector() + " region " + c.get_Region() + " sector " + c.get_Sector()  );
                         seedcrs.remove(c);
                         break;
@@ -530,13 +530,13 @@ public class TrackSeeder {
             //if(shift==0)
             if (fitTrk.get_chisq()[0] < chisqMax) {
                 chisqMax = fitTrk.get_chisq()[0];
-                if(chisqMax<Constants.CIRCLEFIT_MAXCHI2)
+                if(chisqMax<SVTParameters.CIRCLEFIT_MAXCHI2)
                     cand.update_Crosses(svt_geo);
                 //i=fitIter;
             }
         }
         //System.out.println(" Seed fitter "+fitTrk.get_chisq()[0]+" "+fitTrk.get_chisq()[1]); 
-        if(chisqMax>Constants.CIRCLEFIT_MAXCHI2)
+        if(chisqMax>SVTParameters.CIRCLEFIT_MAXCHI2)
             return null;
         if(X.size() > 3)
             cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0] / (int) (X.size() - 3)); // 3 fit params	
@@ -645,7 +645,7 @@ public class TrackSeeder {
             return false;
         }
         double dzdr_bmt = z_bmt / r_bmt;
-        if (Math.abs(1 - (dzdrsum / (double) (trkCand.get_Crosses().size())) / ((dzdrsum + dzdr_bmt) / (double) (trkCand.get_Crosses().size() + 1))) <= Constants.dzdrcut) // add this to the track
+        if (Math.abs(1 - (dzdrsum / (double) (trkCand.get_Crosses().size())) / ((dzdrsum + dzdr_bmt) / (double) (trkCand.get_Crosses().size() + 1))) <= SVTParameters.dzdrcut) // add this to the track
         {
             pass = true;
         } 

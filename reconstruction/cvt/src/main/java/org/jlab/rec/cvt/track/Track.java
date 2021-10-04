@@ -1,6 +1,7 @@
 package org.jlab.rec.cvt.track;
 
 import org.jlab.detector.base.DetectorType;
+import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cross.Cross;
@@ -151,8 +152,9 @@ public class Track extends Trajectory implements Comparable<Track> {
                     double z = helix.getPointAtRadius(R).z();
                     double x = this.get(i).get_Point().x();
                     double y = this.get(i).get_Point().y();
-                    double z1 = geo.getPlaneModuleOrigin(this.get(i).get_Cluster2().get_Sector(), this.get(i).get_Cluster2().get_Layer()).z();
-                    double z2 = geo.getPlaneModuleEnd(this.get(i).get_Cluster2().get_Sector(), this.get(i).get_Cluster2().get_Layer()).z();
+                    Line3D module = this.get(i).get_Cluster2().get(0).get_Strip().get_Module();
+                    double z1 = module.origin().z();
+                    double z2 = module.end().z();
                     if (z - z1 < z2 - z1) {
                         this.get(i).set_Point(new Point3D(x, y, z));
                     }
