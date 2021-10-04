@@ -406,7 +406,7 @@ public class SVTConstants
 
                 System.out.println("Reading alignment shifts from database");
 
-                double[] myShift = {2, 2,-2, 0, 0, 0, 0,};
+                double[] myShift = {0, 0, 0, 0, 0, 0, 0,};
                 LAYERSHIFTDATA = new double[NSECTORS[3]][NLAYERS-2][];
                 for( int i = 0; i < (NTOTALSECTORS-NSECTORS[3])*2; i++ )    // layeralignment tables doesn't cover region 4
                 {
