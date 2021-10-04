@@ -30,9 +30,6 @@ public class SVTGeometry {
         }
     }
     
-//    public SVTStripFactory getStripFactory() {
-//        return _svtStripFactory;
-//    }
 
     public static double getLayerRadius(int layer) {
         int[] rm = SVTConstants.convertLayer2RegionModule(layer-1);
@@ -284,10 +281,10 @@ public class SVTGeometry {
 
     public double calcNearestStrip(double X, double Y, double Z, int layer, int sect) {
 
-        Vector3d LocPoint = this._svtStripFactory.transformToLocal(layer-1, sect-1, X, Y, Z);
+        Point3D LocPoint = this.toLocal(layer, sect, new Point3D(X,Y,Z));
 
-        double x = LocPoint.x;
-        double z = LocPoint.y;
+        double x = LocPoint.x();
+        double z = LocPoint.z();
 
         double alpha = SVTConstants.STEREOANGLE / (double) (SVTConstants.NSTRIPS - 1);
 

@@ -52,7 +52,7 @@ public class RecUtilities {
         List<Cross> rmCrosses = new ArrayList<Cross>();
         
         for(Cross c : crosses.get(0)) {
-            double z = SVTGeom.toLocal(c.get_Region()*2-1,
+            double z = SVTGeom.toLocal(c.get_Region()*2,
                                        c.get_Sector(),
                                        c.get_Point()).z();
         
