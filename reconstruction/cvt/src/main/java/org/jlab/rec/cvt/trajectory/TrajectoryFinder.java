@@ -762,8 +762,8 @@ public class TrajectoryFinder {
                 if (p.toVector3D().mag() == 0) {
                     continue;
                 }
-
-                if ((Math.sqrt(p.x() * p.x() + p.y() * p.y()) <= Math.sqrt(0.25 * SVTGeometry.getActiveSensorLength() * SVTGeometry.getActiveSensorWidth() + Math.pow(SVTGeometry.getLayerRadius(l+1),2.0)))) {
+                // RDV check me
+                if ((Math.sqrt(p.x() * p.x() + p.y() * p.y()) <= Math.sqrt(0.25 * SVTGeometry.getModuleLength()* SVTGeometry.getActiveSensorWidth() + Math.pow(SVTGeometry.getLayerRadius(l+1),2.0)))) {
 
                     Vector3D n = svt_geo.getNormal(l+1, s+1);
                     Vector3D ui = new Vector3D(n.y(), -n.x(), 0); //longitudinal vector along the local x direction of the module

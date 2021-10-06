@@ -243,7 +243,7 @@ public class SVTGeometry {
         // once there is a trk, the cross should be well calculated
         //if the local cross is not in the fiducial volume it is not physical
         else if ((trkDir != null && (LC[0] < -SVTConstants.SIDETOL   || LC[0] > SVTConstants.ACTIVESENWID + SVTConstants.SIDETOL))
-              || (trkDir != null && (LC[1] < -SVTConstants.LENGTHTOL || LC[1] > SVTConstants.MODULELEN+ SVTConstants.LENGTHTOL))) {
+              || (trkDir != null && (LC[1] < -SVTConstants.LENGTHTOL || LC[1] > SVTConstants.MODULELEN    + SVTConstants.LENGTHTOL))) {
             return vals;
         }
         else {

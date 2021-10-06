@@ -11,7 +11,7 @@ public class SVTParameters {
      */
     SVTParameters() {
     }
-    public static boolean geoDebug = false;
+    
     //CUTS
     public static int MAXSVTHITS = 700;
     public static int MAXSVTCROSSES = 1000;
@@ -22,68 +22,13 @@ public class SVTParameters {
     public static int deltaThresholds = 15;
 
     // RECONSTRUCTION CONSTANTS
-//    public static final double RHOVTXCONSTRAINT = 1. / Math.sqrt(12.);//0.1;
-//    public static final double ZVTXCONSTRAINT = 50. / Math.sqrt(12);//5cm
     public static double ETOTCUT = 10.0;
-    // GEOMETRY PARAMETERS
-//    public static final int[] NSECT = new int[8];
-//    public static final int NSLAYR = 2;
-//    public static final int NLAYR = 6;
-//    public static final int NREG = 3;
-      //public static final int NREG = 4;
-//    public static final int NSTRIP = 256;
-
-//    public static final int MAXNUMSECT = 18;
-    
-//    public static Point3D[][][] LEP = new Point3D[MAXNUMSECT][NLAYR][NSTRIP]; //left strip end point
-//    public static Point3D[][][] REP = new Point3D[MAXNUMSECT][NLAYR][NSTRIP]; //right strip end point
-    
-//    public static double  FIDCUX = 17.35;
-//    public static double  FIDCUZ = 3.75;
-//    public static double  FIDPKX = 3.5;
-//    public static double  FIDPKZ0 = 402.624;
-//    public static double  FIDPKZ1 = 2.50;
-//    public static double  OriginZ = 62.13;
-    
-// d    public static double[] Z0 = new double[NLAYR]; // the z-position of a BST module in the lab-frame
-// d    public static double[] PHI0 = new double[NLAYR]; // the angle of the mid plane of the hybrid sensor for the first sector
-
-//    public static double PITCH = 0.156;
-//    public static double STEREOANGLE = Math.toRadians(3.); // value of stereo angle
-
-    //----------------
-    // the unit is mm		
-    //----------------
-//    public static final double SILICONTHICK = 0.320;    // Silicon sensor width
-
-    //public static final double ACTIVESENWIDTH = 40.052; 
-//    public static final double ACTIVESENWIDTH = 40.032;
-//    public static final double STRIPTSTART = 0.048;
-    
-    //public static double LAYRGAP = 3.262; //<-- GEMC value--> should be 3.236
-//    public static double ACTIVESENLEN = 109.955;
-//    static double TOTSENLEN = 111.625;
-//    static double MICROGAP = 0.112;
-    //public static double DEADZNLEN = TOTSENLEN-ACTIVESENLEN; 
-//    public static final double DEADZNLEN = 0.835;
-    //MODULELEN = NSENSORS*(ACTIVESENLEN + 2*DEADZNLEN) + (NSENSORS - 1)*MICROGAPLEN;
-    //STRIPLENMAX = MODULELEN - 2*DEADZNLEN;
-
-    
-    // RDV CHECK CHECK
-    //public static final double MODULELENGTH = 3*ACTIVESENLEN+2*DEADZNLEN+2*MICROGAP; // active area for 3 sensors including inbetween dead zones
-//    public static final double MODULELENGTH = 3 * ACTIVESENLEN + 4 * DEADZNLEN + 2 * MICROGAP; // active area for 3 sensors including inbetween dead zones
-//    public static final double LOCZAXISROTATION = -Math.toRadians(90.);
-
-    // CONSTANTS USED IN RECONSTRUCTION
-    //---------------------------------
-    public static double LIGHTVEL = 0.000299792458;       // velocity of light (mm/ns) - conversion factor from radius in mm to momentum in GeV/c 
+    // cut on Edep min;
+    public static double EDEPMIN = 0.020; //20keV=0.020
 
     // selection cuts for helical tracks
     public static final double MINRADCURV = 200.00; //in cm
 
-    // cut on Edep min;
-    public static double edep_min = 0.020; //20keV=0.020
     // sum of strip numbers for valid intersection:
     //public static int sumStpNumMin = 174;
     //public static int sumStpNumMax = 259;
@@ -136,8 +81,6 @@ public class SVTParameters {
     public static boolean hasWidthResolution = false;
 
     public static boolean ignoreErr = false;
-
-    public static boolean areConstantsLoaded = false;
 
     public static boolean removeClones = true;
 

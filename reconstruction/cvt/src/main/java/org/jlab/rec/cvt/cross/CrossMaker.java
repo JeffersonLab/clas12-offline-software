@@ -124,10 +124,8 @@ public class CrossMaker {
         double Z = svt_geo.toLocal(Cluster1.get_Layer(),
                                    Cluster1.get_Sector(),
                                    c.get_Point()).z();        
-        if(Z<0)
-            Z=0;
-        if(Z>SVTGeometry.getActiveSensorLength())
-            Z=SVTGeometry.getActiveSensorLength();
+        if(Z>SVTGeometry.getModuleLength()) Z=SVTGeometry.getModuleLength();
+        else if(Z<0) Z=0;
         Cluster1.set_CentroidError(Cluster1.get_ResolutionAlongZ(Z, svt_geo) /(SVTGeometry.getPitch() / Math.sqrt(12.)));
         Cluster1.set_Resolution(Cluster1.get_ResolutionAlongZ(Z, svt_geo) );
     }
