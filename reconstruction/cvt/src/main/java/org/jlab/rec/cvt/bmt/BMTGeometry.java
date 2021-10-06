@@ -328,36 +328,6 @@ public class BMTGeometry {
         return Constants.toLocal[layer-1][sector-1];
     }
     
-//    public Point3D getInverseOffset(int layer, int sector) {
-//        
-//        Point3D offset = new Point3D();
-//        if(layer>0 && layer<Constants.NLAYERS+1 && sector > 0 && sector<Constants.NSECTORS+1) { 
-//            offset.copy(Constants.shifts[layer-1][sector-1]);
-//            return new Point3D(-offset.x(),-offset.y(),-offset.z());
-//        } else {
-//            System.out.println("ERROR: out of layer  sector number in getRotation(int layer, region)");
-//                return new Point3D();
-//        }
-//        
-//    }
-//    
-//    /**
-//     * Return rotations for the selected tile, identified by layer and sector
-//     * @param layer (1-6)
-//     * @param sector (1-3)
-//     * @return Point3D offset: 3D offset
-//     */
-//    public Vector3D getInverseRotation(int layer, int sector) {
-//        Vector3D rot = new Vector3D();
-//        if(layer>0 && layer<Constants.NLAYERS+1) { 
-//            rot.copy(Constants.rotations[layer-1][sector-1]);
-//            return new Vector3D(-rot.x(),-rot.y(),-rot.z());
-//        } else {
-//            System.out.println("ERROR: out of layer sector number in getInverseRotation(int layer, region)");
-//            return new Vector3D();
-//        }
-//    }
-    
     /**
      * Return axis for the selected tile, identified by layer and sector
      * @param layer (1-6)
@@ -429,9 +399,11 @@ public class BMTGeometry {
         if(!(0<region && region<=3))
             throw new IllegalArgumentException("Error: invalid region="+region);
         
-        double radius = Constants.getCRZRADIUS()[region-1];
-        double zmin   = Constants.getCRCZMIN()[region-1];
-        double zmax   = Constants.getCRCZMAX()[region-1];
+        int layer = this.getLayer(region, BMTType.Z);
+        
+        double radius = this.getRadiusMidDrift(layer);
+        double zmin   = this.getZmin(layer);
+        double zmax   = this.getZmax(layer);
         double angle  = this.getZstripPhi(region,sector,strip);
         
         Point3D p1= new Point3D(radius, 0, zmin);
@@ -474,9 +446,10 @@ public class BMTGeometry {
         
         if(!(0<region && region<=3))
             throw new IllegalArgumentException("Error: invalid region="+region);
-
-        double radius = Constants.getCRZRADIUS()[region-1];
+       
         int layer = this.getLayer(region, BMTType.Z);
+        double radius = this.getRadiusMidDrift(layer);
+        
         Line3D stripline = this.getZstrip(region, sector, strip);
         double x = stripline.midpoint().x();
         double y = stripline.midpoint().y();
@@ -485,10 +458,8 @@ public class BMTGeometry {
         double ralpha = Math.atan2(this.getThickness()/2*Math.tan(alpha), this.getRadius(layer));
 //        System.out.println(region + " " + alpha + " " + ralpha);
         
-        Point3D np1= new Point3D(this.getRadius(layer) * Math.cos(ralpha), 
-                this.getRadius(layer) * Math.sin(ralpha), this.getZmin(layer));
-        Point3D np2= new Point3D(this.getRadius(layer) * Math.cos(ralpha), 
-                this.getRadius(layer) * Math.sin(ralpha), this.getZmax(layer));
+        Point3D np1= new Point3D(radius * Math.cos(ralpha), radius * Math.sin(ralpha), this.getZmin(layer));
+        Point3D np2= new Point3D(radius * Math.cos(ralpha), radius * Math.sin(ralpha), this.getZmax(layer));
         Line3D nstripline = new Line3D(np1,np2);
         nstripline.rotateZ(this.getZstripPhi(region, sector, strip));
         
@@ -602,10 +573,12 @@ public class BMTGeometry {
         
         if(!(0<region && region<=3))
             throw new IllegalArgumentException("Error: invalid region="+region);
-
-        double radius = Constants.getCRCRADIUS()[region-1];
-        double angle  = Constants.getCRCPHI()[region-1][sector-1] - Constants.getCRCDPHI()[region-1][sector-1];
-        double theta  = Constants.getCRCDPHI()[region-1][sector-1]*2;
+        
+        int layer = this.getLayer(region, BMTType.C);
+        
+        double radius = this.getRadiusMidDrift(layer);
+        double angle  = this.getPhi(layer, sector) - this.getDPhi(layer, sector);
+        double theta  = this.getDPhi(layer, sector)*2;
         double z      = this.getCstripZ(region, strip);
          
         Point3D origin  = new Point3D(radius,0,z);
@@ -651,10 +624,10 @@ public class BMTGeometry {
     /**
      * Return the sector number
      * @param layer [0-6]
-     * @param angle angle in the local frame in radians
+     * @param localangle localangle in the local frame in radians
      * @return sector [1-3] (not) accounting for dead areas if layer (0) [1-6] or 0 if layer is undefined
      */
-    public int getSector(int layer, double angle) {
+    public int getSector(int layer, double localAngle) {
         boolean full = false;
         if(layer==0) {
             full  = true;
@@ -662,8 +635,8 @@ public class BMTGeometry {
         }
         int region = this.getRegion(layer);   
         
-        Vector3D vec = new Vector3D(Math.cos(angle),Math.sin(angle),0);
-        if(Double.isNaN(angle)) vec = null;
+        Vector3D vec = new Vector3D(Math.cos(localAngle),Math.sin(localAngle),0);
+        if(Double.isNaN(localAngle)) vec = null;
         int sector = 0;
         double width = 0.5; // Math.cos(60deg);
         double delta = -1;
@@ -695,37 +668,23 @@ public class BMTGeometry {
     }
     /**
      * Return the layer number
-     * @param traj point on one of the detector surfaces
+     * @param localtraj point on one of the detector surfaces
      * @param strip2Det
      * @return layer [1-6] or 0 if undefined
      */
-    public int getLayer(Point3D traj, double strip2Det) {
+    public int getLayer(Point3D localtraj, double strip2Det) {
         int layer=0;
         
-        int sector = this.getSector(0, Math.atan2(traj.y(), traj.x()));
+        int sector = this.getSector(0, Math.atan2(localtraj.y(), localtraj.x()));
         if(sector ==0) return 0;
         for(int i=1; i<=Constants.NLAYERS; i++) {
-            double radius = Constants.axes[i-1][sector-1].distance(traj).length();
-            if(Math.abs(radius-this.getRadius(i)-strip2Det)<accuracy) {
+            double radius = Constants.axes[i-1][sector-1].distance(localtraj).length();
+            if(Math.abs(radius-this.getRadiusMidDrift(i)-strip2Det)<accuracy) {
                 layer = i;
                 break;
             }
         }
         return layer;
-    }
-    
-    /**
-     * Checks whether a trajectory point is within the active area of a tile
-     * @param traj
-     * @param strip2Det
-     * @return true/false
-     */
-    public boolean inDetector(Point3D traj, double strip2Det) {
-        
-        int sector = this.getSector(0, Math.atan2(traj.y(), traj.x())); 
-        int layer  = this.getLayer(traj, strip2Det); 
-        if(sector ==0 || layer ==0) return false;
-        return this.inDetector(layer, sector, traj);
     }
 
     /**
@@ -817,29 +776,29 @@ public class BMTGeometry {
      * Return the number of the closest strip to the given trajectory point
      * in the detector local frame
      * @param region (1-3)
-     * @param traj trajectory point on the layer surface in the local frame
+     * @param localTraj trajectory point on the layer surface in the local frame
      * @return strip number (0 if the point is not within the active area)
      */
-    public int getZstrip(int region, Point3D traj) {
+    public int getZstrip(int region, Point3D localTraj) {
         
         int strip = 0;
         
         int layer = getLayer(region, BMTType.Z);
         
-        double angle = Math.atan2(traj.y(), traj.x());
+        double angle = Math.atan2(localTraj.y(), localTraj.x());
         if(angle<0) angle += 2*Math.PI;
         
         int sector = getSector(layer,angle);
         if(sector>=1 && sector <=Constants.NSECTORS) {
             // CHECKME
-            double edge   = Constants.getCRZPHI()[region-1][sector-1] - Constants.getCRZDPHI()[region-1][sector-1]; // 30 150 270
-            double pitch  = Constants.getCRZWIDTH()[region-1];
-            double radius = Constants.getCRZRADIUS()[region-1];
+            double edge   = this.getPhi(layer, sector) - this.getDPhi(layer, sector); // 30 150 270
+            double pitch  = this.getZPitch(region,1);
+            double radius = this.getRadiusMidDrift(layer);
             double dphi = angle - edge; 
             if(dphi<0) dphi += 2*Math.PI;
             strip = (int) Math.floor(dphi*radius/pitch) + 1;
 //            System.out.println(Math.toDegrees(angle) + " " + Math.toDegrees(dphi) + " " + sector + " " + strip_calc);
-            if (strip < 1 || strip > Constants.getCRZNSTRIPS()[region-1]) {
+            if (strip < 1 || strip > this.getNStrips(layer)) {
                 strip = -1;
             }
         }
