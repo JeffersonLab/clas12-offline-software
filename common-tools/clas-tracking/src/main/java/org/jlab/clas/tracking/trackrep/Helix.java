@@ -389,7 +389,7 @@ public class Helix {
         double xm = 0;
         double yp = 0;
         double ym = 0;
-        if( getYc() >1.e-09) {
+        if( Math.abs(getYc()) >1.e-09) {
         double a = 0.5 * (r * r - getR() * getR() + getXc() * getXc() + getYc() * getYc()) / getYc();
             double b = -getXc() / getYc();
 

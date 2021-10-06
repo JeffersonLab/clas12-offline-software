@@ -86,6 +86,10 @@ public class SVTGeometry {
                           line.end().x,   line.end().y,   line.end().z);        
     }
     
+    public int getModuleId(int layer, int sector) {
+        return layer*100+sector;
+    }
+    
     public Vector3D getNormal(int layer, int sector) {
         Vector3d normal = this._svtStripFactory.getModuleNormal(layer-1, sector-1);
         return new Vector3D(normal.x, normal.y, normal.z);
@@ -113,6 +117,8 @@ public class SVTGeometry {
         return new Vector3D(lab.x-zero.x, lab.y-zero.y, lab.z-zero.z);
     }
     
+    
+    @Deprecated
     public int getSector(int layer, Point3D traj) {
         
         int[] rm = SVTConstants.convertLayer2RegionModule(layer-1);
@@ -259,6 +265,16 @@ public class SVTGeometry {
 
     }
 
+    public double getDoca(int layer, int sector, int strip, Point3D traj) {
+        return this.getStrip(layer, sector, strip).distance(traj).length();
+    }
+    
+    public double getResidual(int layer, int sector, int strip, Point3D traj) {
+        Line3D dist = this.getStrip(layer, sector, strip).distance(traj);
+        double side = -Math.signum(this.getStrip(layer, sector, strip).direction().cross(dist.direction()).dot(this.getNormal(layer, sector)));            
+        return dist.length()*side;
+    }
+    
     private double getCorrectedStrip(int sector, int upperlayer, double s2, Vector3D trkDir, double ZalongModule) {
         double s2corr = s2;
         // second iteration: there is a track direction
@@ -279,7 +295,7 @@ public class SVTGeometry {
         return s2corr;
     }
 
-    public double calcNearestStrip(double X, double Y, double Z, int layer, int sect) {
+    public int calcNearestStrip(double X, double Y, double Z, int layer, int sect) {
 
         Point3D LocPoint = this.toLocal(layer, sect, new Point3D(X,Y,Z));
 
@@ -366,7 +382,7 @@ public class SVTGeometry {
         }
 
         //System.out.println(" layer "+layer+" sector "+sect+" strip "+s);
-        return s;
+        return (int) s;
     }
     //****
 
