@@ -7,6 +7,7 @@ import org.jlab.rec.rtpc.hit.RecoHitVector;
 import java.util.List;
 import java.util.HashMap;
 import org.jlab.rec.rtpc.hit.FinalTrackInfo;
+import org.jlab.rec.rtpc.hit.PadVector;
 
 public class RecoBankWriter {
 
@@ -17,10 +18,7 @@ public class RecoBankWriter {
      *
      */
     public  DataBank fillRTPCHitsBank(DataEvent event, HitParameters params) {
-        /*if(hitlist==null)
-                return null;
-        if(hitlist.size()==0)
-                return null;*/
+
         int listsize = 0;
         int row = 0;
         HashMap<Integer, List<RecoHitVector>> recotrackmap = params.get_recotrackmap();
@@ -30,8 +28,8 @@ public class RecoBankWriter {
                     listsize++;
             }
         }
-
-        DataBank bank = event.createBank("RTPC::rec", listsize);
+        if(listsize == 0) return null;
+        DataBank bank = event.createBank("RTPC::hits", listsize);
         
         
         if (bank == null) {
@@ -46,34 +44,32 @@ public class RecoBankWriter {
                 double y_rec = recotrackmap.get(TID).get(i).y();
                 double z_rec = recotrackmap.get(TID).get(i).z();
                 double time  = recotrackmap.get(TID).get(i).time();
-                double tdiff = recotrackmap.get(TID).get(i).dt();
+		double adc = recotrackmap.get(TID).get(i).adc();
 
-                bank.setInt("TID", row, TID);
-                bank.setInt("cellID", row, cellID);
+                bank.setInt("trkID", row, TID);
+                bank.setInt("id", row, cellID);
                 bank.setFloat("time", row, (float) time);
-                bank.setFloat("posX", row, (float) x_rec);
-                bank.setFloat("posY", row, (float) y_rec);
-                bank.setFloat("posZ", row, (float) z_rec);				
-                bank.setFloat("tdiff", row, (float) tdiff);
-
+                bank.setFloat("x", row, (float) x_rec);
+                bank.setFloat("y", row, (float) y_rec);
+                bank.setFloat("z", row, (float) z_rec);		
+		bank.setFloat("adc", row, (float) adc);
                 row++;
             }
         }
-
+        //bank.show();
         return bank;
     }	
     
     public  DataBank fillRTPCTrackBank(DataEvent event, HitParameters params) {
-        /*if(hitlist==null)
-                return null;
-        if(hitlist.size()==0)
-                return null;*/
+
         HashMap<Integer, FinalTrackInfo> finaltrackinfomap = params.get_finaltrackinfomap();
+        HashMap<Integer, List<RecoHitVector>> recotrackmap = params.get_recotrackmap();
         int listsize = finaltrackinfomap.size();
+        if(listsize == 0) return null;
         int row = 0;
 
         
-        DataBank bank = event.createBank("RTPC::trackinfo", listsize);
+        DataBank bank = event.createBank("RTPC::tracks", listsize);
         
         
         if (bank == null) {
@@ -82,18 +78,43 @@ public class RecoBankWriter {
         }
 		
         for(int TID : finaltrackinfomap.keySet()) {
+            FinalTrackInfo track = finaltrackinfomap.get(TID);
+            List<RecoHitVector> listhits = recotrackmap.get(TID);
+            RecoHitVector hitvec = recotrackmap.get(TID).get(0);
+            PadVector smallpad = params.get_padvector(hitvec.smallhit().pad());
+            PadVector largepad = params.get_padvector(hitvec.largehit().pad());
+            double tdiff = hitvec.dt();
 
-                bank.setInt("TID", row, TID);
-                bank.setFloat("px", row, (float) finaltrackinfomap.get(TID).get_px());
-                bank.setFloat("py", row, (float) finaltrackinfomap.get(TID).get_py());
-                bank.setFloat("pz", row, (float) finaltrackinfomap.get(TID).get_pz());
-                bank.setFloat("vz", row, (float) finaltrackinfomap.get(TID).get_vz());
-                bank.setFloat("trackl", row, (float) finaltrackinfomap.get(TID).get_tl());
-                bank.setFloat("dEdx", row, (float) finaltrackinfomap.get(TID).get_dEdx());
-                row++;
             
+            bank.setInt("trkID", row, TID);
+            bank.setFloat("px", row, (float) track.get_px()/1000);
+            bank.setFloat("py", row, (float) track.get_py()/1000);
+            bank.setFloat("pz", row, (float) track.get_pz()/1000);
+            bank.setFloat("vz", row, (float) track.get_vz()/10);
+            bank.setFloat("theta", row, (float) track.get_theta());
+            bank.setFloat("phi", row, (float) track.get_phi());
+            bank.setInt("nhits", row, track.get_numhits());
+            bank.setFloat("path", row, (float) track.get_tl());
+            bank.setFloat("adcsum", row, (float) track.get_ADCsum());
+            bank.setFloat("dedx", row, (float) track.get_dEdx());
+            bank.setFloat("r_helix", row, (float) track.get_R());
+            bank.setFloat("x_helix", row, (float) track.get_A());
+            bank.setFloat("y_helix", row, (float) track.get_B());
+            bank.setFloat("chi2_helix", row, (float) track.get_chi2());
+            bank.setFloat("min_row", row, (float) smallpad.row());
+            bank.setFloat("min_col", row, (float) smallpad.col());
+            bank.setFloat("max_row", row, (float) largepad.row());
+            bank.setFloat("max_col", row, (float) largepad.col());
+            bank.setFloat("min_time", row, (float) hitvec.smallhit().time());
+            bank.setFloat("max_time", row, (float) hitvec.largehit().time());
+            bank.setFloat("min_radius", row, (float) listhits.get(listhits.size()-1).r());
+            bank.setFloat("max_radius", row, (float) listhits.get(0).r());
+            bank.setFloat("min_phi", row, (float) listhits.get(listhits.size()-1).phi());
+            bank.setFloat("max_phi", row, (float) listhits.get(0).phi());
+	    bank.setFloat("tdiff", row, (float) tdiff);
+            row++;
         }
-
+        //bank.show();
         return bank;
     }	
 }

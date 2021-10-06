@@ -16,6 +16,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.rec.tof.banks.BaseHit;
 import org.jlab.rec.tof.banks.BaseHitReader;
 import org.jlab.rec.tof.banks.IMatchedHit;
+import org.jlab.rec.tof.cluster.Cluster;
 import org.jlab.rec.tof.hit.ctof.Hit;
 import org.jlab.rec.tof.track.Track;
 import org.jlab.utils.groups.IndexedList;
@@ -239,7 +240,7 @@ public class HitReader implements IMatchedHit {
 //                    System.out.println(trkHit.getPaddle() + " " + dir);
                     if(dir>0) {
                         // create the new track updating the path to the intersection point
-                        Track ctofTrkHit = new Track(trk.getId(),trk.getLine(),trk.getPath()+trk.getLine().origin().distance(hit.mid()));
+                        Track ctofTrkHit = new Track(trk.getId(),trk.getLine(),trk.getPath());
                         ctofTrkHit.setHit(trkHit);
                         // if map entry for the given paddle doesn't already exist, add it
                         if(!trkHitsMap.hasItem(trkHit.getPaddle())) { 
@@ -274,7 +275,7 @@ public class HitReader implements IMatchedHit {
             }
             if(matchedTrk!=null) {
                 CTOFDetHit trkHit = new CTOFDetHit(matchedTrk.getHit());
-                ctofHit._AssociatedTrkId = matchedTrk.getId();
+                ctofHit.set_TrkId(matchedTrk.getId());
                 ctofHit.set_matchedTrackHit(trkHit);
                 ctofHit.set_matchedTrack(matchedTrk.getLine());
                 ctofHit.set_TrkPathLenThruBar(trkHit.origin().distance(trkHit.end()));
@@ -282,7 +283,9 @@ public class HitReader implements IMatchedHit {
                 // get the coordinates for the track hit, which is defined
                 // as the mid-point between its entrance and its exit from
                 // the bar
-                ctofHit.set_TrkPosition(new Point3D(trkHit.mid().x,trkHit.mid().y, trkHit.mid().z));
+                ctofHit.set_TrkPosition(new Point3D((matchedTrk.getLine().origin().x+matchedTrk.getLine().end().x)/2,
+                                                    (matchedTrk.getLine().origin().y+matchedTrk.getLine().end().y)/2,
+                                                    (matchedTrk.getLine().origin().z+matchedTrk.getLine().end().z)/2));
                 // compute the local y at the middle of the bar :
                 // ----------------------------------------------
                 Point3D origPaddleLine = ctofHit.get_paddleLine().origin();
@@ -571,4 +574,19 @@ public class HitReader implements IMatchedHit {
 //        System.out.println(period + " " + phase + " " + cycles + " " + timestamp + " " + triggerphase);
         return triggerphase;
     }
+    
+    public void setHitPointersToClusters(List<Hit> hits, List<Cluster> clusters) {
+        for(int j=0; j<clusters.size(); j++) {
+            Cluster cluster=clusters.get(j);
+            for(int k=0; k<cluster.size(); k++) {
+                for(int i=0; i<hits.size(); i++) {
+                    if(hits.get(i).get_Id()==cluster.get(k).get_Id()) {
+                        hits.get(i).set_AssociatedClusterID(cluster.get_Id());
+                    }
+                }
+            }
+        }
+    }
+    
+    
 }

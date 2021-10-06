@@ -178,6 +178,7 @@ public class Constants {
     
     public static double AVEDRIFTVEL = 0.0027; //velocity in cm / ns. [CLAS-Note 96-008]
     public static boolean CHECKBETA = false;
+    public static double DOCASUMMAXFAC = 1.6;
 
     public static boolean isUSETSTART() {
         return USETSTART;
@@ -281,9 +282,6 @@ public class Constants {
             MAXENDPLTDEFLEC[2][4][1] = 0.;
             MAXENDPLTDEFLEC[2][5][0] = 0.;
             MAXENDPLTDEFLEC[2][5][1] = 0.;
-            
-            System.out.println("CONSTANTS LOADED!!!");
-
     }
 
     private static double[][][][] _T0 = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables --- with TStart calibration 
@@ -315,6 +313,8 @@ public class Constants {
         return Constants.T2D;
     }
 
-
-   
+    // geometry constants not yet read from CCDB of from geometry services
+    public static double htccRadius=175;
+    public static double ltccPlane=653.09;
+        
 }

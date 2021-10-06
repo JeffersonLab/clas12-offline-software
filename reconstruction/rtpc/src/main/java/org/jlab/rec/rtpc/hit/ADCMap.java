@@ -66,6 +66,13 @@ public class ADCMap {
         return _ADCMap.get(pad)[time];
     }
     
+    public void addSignal(int pad, int time, double edep){
+        if(!_intADCMap.containsKey(pad)){
+            _intADCMap.put(pad, new double[TrigWindSize]);
+        }
+        _intADCMap.get(pad)[time] = edep;
+    }
+    
     private double getSignalAtBin(double tsignal, double t, double edep){
 
         double signal_height;
@@ -79,8 +86,7 @@ public class ADCMap {
             signal_height = p0+edep*p2*Math.exp(-(t-tsignal)*(t-tsignal)/(2*p3*p3))/(0.5*(p3+p4)*Math.sqrt(2*Math.PI));
         }else{
             signal_height = p0+edep*p2*Math.exp(-(t-tsignal)*(t-tsignal)/(2*p4*p4))/(0.5*(p3+p4)*Math.sqrt(2*Math.PI));
-        } 
-
+        }
         return signal_height;
     }
     

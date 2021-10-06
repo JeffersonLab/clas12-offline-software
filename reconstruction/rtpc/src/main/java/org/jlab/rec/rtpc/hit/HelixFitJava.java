@@ -1,6 +1,8 @@
 package org.jlab.rec.rtpc.hit;
 
 
+
+
 public class HelixFitJava {
 
 	void rwsmav(double r[], double a[], double v[], int n)
@@ -198,14 +200,14 @@ public class HelixFitJava {
 
 
 	  {
-		  int ITMAX = 15;    
-		  int IOWRIT = 6;
-		  double EPS    = (double)1.0e-16;   
-	double ONEPI = (double)3.1415927;  
-	double PI =   (double)3.1415927; 
-	double TWOPI = (double)6.2831854;
-	double PIBY2 = (double)1.57074635;
-	int MAX_HITS_ON_CHAIN = 200;
+            int ITMAX = 15;    
+            int IOWRIT = 6;
+            double EPS    = (double)1.0e-16;   
+            double ONEPI = (double)3.1415927;  
+            double PI =   (double)3.1415927; 
+            double TWOPI = (double)6.2831854;
+            double PIBY2 = (double)1.57074635;
+            int MAX_HITS_ON_CHAIN = 200;
 
 	    double[]   sp2 = new double[MAX_HITS_ON_CHAIN],  vv1 = new double[5];
 	    double[]   sxy = new double[MAX_HITS_ON_CHAIN],   ss0 = new double[MAX_HITS_ON_CHAIN]; 
@@ -768,7 +770,7 @@ public class HelixFitJava {
 	      rf[npt]= 0.0001;  //rf=0 will cause chi2=nan problem
 	      pf[npt]= 0.0;
 	      zf[npt]= 0.0; 
-	      wfi[npt]= 1.0;
+	      wfi[npt]= 10.0;
 	      wzf[npt]= 0.0; /* zero weight for Z on the beamline point*/
 	      //This means that don't calculate the chi square for Z on the beamline point
 	      npt++;
@@ -818,23 +820,29 @@ public class HelixFitJava {
 	  }
 
 	  /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-	  HelixFitObject HelixFit(int PointNum, double szPos[][], int fit_track_to_beamline )// double R, double A, double B,
+	  HelixFitObject HelixFit(int PointNum, double szPos[][], int fit_track_to_beamline)// double R, double A, double B,
 	    //double Phi_deg, double Theta_deg, double Z0, int fit_track_to_beamline )
 	  {
 	    double PI=Math.acos(0.0)*2;
 	    //double Rho=0,Phi=0,Theta=0,X0=0,Y0=0,DCA=0,Chi2=0;
-            double R;
             double Phi_deg;
             double Theta_deg;
             
 	    HelixFitObject h = helix_fit(PointNum, szPos, fit_track_to_beamline);
 	    
-	    R=Math.abs(h.get_Rho());
-	    Phi_deg=h.get_Phi()*180./PI;
-	    Theta_deg=h.get_Theta()*180./PI; 
-            h.set_Rho(R);
+	    Phi_deg=Math.toDegrees(h.get_Phi());
+            if(Phi_deg >= 180){
+                Phi_deg -= 360;
+            }
+            if(Phi_deg < -180){
+                Phi_deg += 360;
+            }
+	    Theta_deg=Math.toDegrees(h.get_Theta()); 
             h.set_Phi(Phi_deg);
             h.set_Theta(Theta_deg);
+            
+
+            //System.out.println("DOCA " + h.get_DCA());
 	    return h;
 	  }
 

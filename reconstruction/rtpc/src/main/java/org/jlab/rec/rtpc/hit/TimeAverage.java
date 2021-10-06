@@ -8,10 +8,15 @@
 
 package org.jlab.rec.rtpc.hit;
 
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.jlab.detector.calib.utils.ConstantsManager;
+import org.jlab.utils.groups.IndexedTable;
+
 
 public class TimeAverage {
 	
@@ -27,38 +32,47 @@ public class TimeAverage {
     private double adcthresh = 0; 
     private double sumnum = 0; 
     private double sumden = 0; 
+    private double gain = 1;
+    private int row = 0;
+    private int col = 0;
+    private double TFtotaltracktimeflag = 5000;
+            
     
-    public TimeAverage(HitParameters params) {
+    public TimeAverage(ConstantsManager manager, HitParameters params, int runNo) {
         /*	
          *Initializations 
          */
         TIDMap = params.get_trackmap();
         ADCMap = params.get_ADCMap();
         tids = TIDMap.getAllTrackIDs();
-
+        IndexedTable gains = manager.getConstants(runNo, "/calibration/rtpc/gain_balance");
+        TFtotaltracktimeflag = params.get_TFtotaltracktimeflag();
+        
         /*
          * Main Algorithm
          */
-		
+        
         for(int tid : tids) { //Loop over all tracks
             track = TIDMap.getTrack(tid);
             boolean trackflag = track.isTrackFlagged();
             rtrack = new ReducedTrack();
-            if(trackflag) {rtrack.flagTrack();}
+            if(trackflag) rtrack.flagTrack();
             Set<Integer> l = track.uniquePadList();
             Set<Integer> timesbypad = new HashSet<>();
             for(int pad : l) {
+                //g.add(new GraphErrors());
                 adcmax = 0; 
                 sumnum = 0; 
                 sumden = 0; 
                 timesbypad = track.PadTimeList(pad);
                 for(int time : timesbypad) { //Loop to calculate maximum adc value
-                    adc = ADCMap.getADC(pad,time);
+                    adc = ADCMap.getADC(pad,time);                 
                     if(adc > adcmax) {
                         adcmax = adc; 
                     }
                 }
-                adcthresh = adcmax/2;
+                
+                adcthresh = adcmax/4;
                 for(int time : timesbypad) { //Loop to calculate weighted average time using ADC values which are above half of the maximum
                     adc = ADCMap.getADC(pad,time);
                     if(adc > adcthresh) { 
@@ -68,16 +82,22 @@ public class TimeAverage {
                 }
                 averagetime = sumnum/sumden;
                 PadVector p = params.get_padvector(pad);
-                HitVector v = new HitVector(pad,p.z(),p.phi(),averagetime,sumden);
+                
+                gain = gains.getDoubleValue("gain", 1,(int)p.row(),(int)p.col());
+                //System.out.println("gain" + (int)p.col() + " " + (int)p.row() + " " + gain);
+                if(gain == 0) gain = 1;
+                HitVector v = new HitVector(pad,p.z(),p.phi(),averagetime,sumden/gain);
                 rtrack.addHit(v);
             }
+            rtrack.sortHits();
+            if(Math.abs(rtrack.getLargeT()-rtrack.getSmallT()) < TFtotaltracktimeflag) rtrack.flagTrack();
             RTIDMap.addTrack(rtrack);			
         }
-		
+
         /*
          * Output
          */
 
         params.set_rtrackmap(RTIDMap);		
-    }	
+    }
 }

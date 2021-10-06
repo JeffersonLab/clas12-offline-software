@@ -31,7 +31,7 @@ public class RkTest {
 	 *            specificity resides.
 	 * @param stopper
 	 *            if not <code>null</code> will be used to exit the integration
-	 *            early because some condition has been reached.
+	 *                 early because some condition has been reached.
 	 * @param listener
 	 *            listens for each step
 	 * @param answer
@@ -81,7 +81,7 @@ public class RkTest {
 			
 		};
 		
-	    long startTime = System.nanoTime();
+		long startTime = System.nanoTime();
 		TestUniform(yo, to, tf, h, CoshLike, null, listener, answer);
 		long estimatedTime = System.nanoTime() - startTime;
 		double time = (1.0e-9*estimatedTime)/ITERATIONS;

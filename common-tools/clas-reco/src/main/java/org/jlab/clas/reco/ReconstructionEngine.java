@@ -1,12 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.reco;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -28,9 +25,9 @@ import org.jlab.io.evio.EvioFactory;
 import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.jnp.hipo4.data.Event;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
+import org.jlab.utils.JsonUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-import static org.json.JSONObject.quote;
 
 /**
  *
@@ -38,13 +35,22 @@ import static org.json.JSONObject.quote;
  */
 public abstract class ReconstructionEngine implements Engine {
 
+    public static final String CONFIG_BANK_NAME = "COAT::config";
+    
     volatile ConstantsManager                       constantsManager;
     volatile ConcurrentMap<String,ConstantsManager> constManagerMap;
     volatile SchemaFactory                          engineDictionary;
 
     volatile ConcurrentMap<String,String>           engineConfigMap;
     volatile String                                 engineConfiguration = null;
+  
+    volatile private boolean fatalError = false;
     
+    volatile boolean wroteConfig = false;
+
+    private boolean dropOutputBanks = false;
+    private final Set<String> outputBanks = new HashSet<String>();
+
     String             engineName        = "UnknownEngine";
     String             engineAuthor      = "N.T.";
     String             engineVersion     = "0.0";
@@ -54,17 +60,45 @@ public abstract class ReconstructionEngine implements Engine {
         engineName    = name;
         engineAuthor  = author;
         engineVersion = version;
-        constManagerMap   = new ConcurrentHashMap<String,ConstantsManager>();
+        constManagerMap   = new ConcurrentHashMap<>();
         engineDictionary  = new SchemaFactory();
-        engineConfigMap   = new ConcurrentHashMap<String,String>();
+        engineConfigMap   = new ConcurrentHashMap<>();
         String env = System.getenv("CLAS12DIR");
         engineDictionary.initFromDirectory( env +  "/etc/bankdefs/hipo4");
-        //System.out.println("[Engine] >>>>> constants manager : " + getConstantsManager().toString());
+    }
+   
+    public ReconstructionEngine(String name, String author){ 
+        this(name,author,"0.0");
+        engineVersion = this.getClass().getPackage().getImplementationVersion();
+    }
+
+    public Map<String,String> getConfigMap() {
+        return new ConcurrentHashMap<>(engineConfigMap);
+    }
+
+    public void registerOutputBank(String... bankName) {
+        outputBanks.addAll(Arrays.asList(bankName));
+        if (this.dropOutputBanks) {
+            System.out.println(String.format("[%s]  dropping banks:  %s",this.getName(), Arrays.toString(bankName)));
+        }
     }
 
     abstract public boolean processDataEvent(DataEvent event);
     abstract public boolean init();
-    
+   
+    /**
+     * Use a map just to avoid name clash in ConstantsManager.
+     * @param tables map of table names to #indices
+     */
+    public void requireConstants(Map<String,Integer> tables){
+        if(constManagerMap.containsKey(this.getClass().getName())==false){
+            System.out.println("[ConstantsManager] ---> create a new one for module : " + this.getClass().getName());
+            ConstantsManager manager = new ConstantsManager();
+            manager.init(tables);
+            constManagerMap.put(this.getClass().getName(), manager);
+        }
+    }
+
     public void requireConstants(List<String> tables){
         if(constManagerMap.containsKey(this.getClass().getName())==false){
             System.out.println("[ConstantsManager] ---> create a new one for module : " + this.getClass().getName());
@@ -107,7 +141,7 @@ public abstract class ReconstructionEngine implements Engine {
         }
        
         // store yaml contents for easy access by engines:
-        engineConfigMap = new ConcurrentHashMap<String,String>();
+        engineConfigMap = new ConcurrentHashMap<>();
         try {
             JSONObject base = new JSONObject(this.engineConfiguration);
             for (String key : base.keySet()) {
@@ -119,41 +153,43 @@ public abstract class ReconstructionEngine implements Engine {
 
         
       if(constManagerMap == null)
-      constManagerMap   = new ConcurrentHashMap<String,ConstantsManager>();
+          constManagerMap = new ConcurrentHashMap<>();
       if(engineDictionary == null)
-      engineDictionary  = new SchemaFactory();
-        //EngineData data = new EngineData();
-        System.out.println("--- engine configuration is called " + this.getDescription());
-        try {
-            this.init();
-        } catch (Exception e){
-            System.out.println("[Wooops] ---> something went wrong with " + this.getDescription());
-            e.printStackTrace();
-        }
-        System.out.println("----> I am doing nothing");
+          engineDictionary = new SchemaFactory();
+      System.out.println("--- engine configuration is called " + this.getDescription());
+      try {
+          if (this.getEngineConfigString("dropBanks")!=null &&
+                  this.getEngineConfigString("dropBanks").equals("true")) {
+              dropOutputBanks=true;
+          }
+          this.init();
+      } catch (Exception e){
+          System.out.println("[Wooops] ---> something went wrong with " + this.getDescription());
+          e.printStackTrace();
+      }
+      System.out.println("----> I am doing nothing");
         
-        try {
-            if(engineConfiguration.length()>2){
-//                String variation = this.getStringConfigParameter(engineConfiguration, "services", "variation");
-                String variation = this.getStringConfigParameter(engineConfiguration, "variation");
-                System.out.println("[CONFIGURE]["+ this.getName() +"] ---->  Setting variation : " + variation);
-                if(variation.length()>2) this.setVariation(variation);
-                String timestamp = this.getStringConfigParameter(engineConfiguration, "timestamp");
-                System.out.println("[CONFIGURE]["+ this.getName() +"] ---->  Setting timestamp : " + timestamp);
-                if(timestamp.length()>2) this.setTimeStamp(timestamp);
-            } else {
-                System.out.println("[CONFIGURE][" + this.getName() +"] *** WARNING *** ---> configuration string is too short ("
-                 + this.engineConfiguration + ")");
-            }
+      try {
+          if(engineConfiguration.length()>2){
+              String variation = this.getStringConfigParameter(engineConfiguration, "variation");
+              System.out.println("[CONFIGURE]["+ this.getName() +"] ---->  Setting variation : " + variation);
+              if(variation.length()>2)
+                  this.setVariation(variation);
+              String timestamp = this.getStringConfigParameter(engineConfiguration, "timestamp");
+              System.out.println("[CONFIGURE]["+ this.getName() +"] ---->  Setting timestamp : " + timestamp);
+              if(timestamp.length()>2)
+                  this.setTimeStamp(timestamp);
+          } else {
+              System.out.println("[CONFIGURE][" + this.getName() + "] *** WARNING *** ---> configuration string is too short (" + this.engineConfiguration + ")");
+          }
         } catch (Exception e){
             System.out.println("[Engine] " + getName() + " failet to set variation");
         }
         return ed;
     }
     
-    
-       protected String getStringConfigParameter(String jsonString,                                             
-                                              String key)  throws Exception {
+    protected String getStringConfigParameter(String jsonString,                                             
+            String key)  throws Exception {
         Object js;
         String variation = "";
         try {
@@ -176,6 +212,7 @@ public abstract class ReconstructionEngine implements Engine {
         }
         return variation;
     }
+
     /**
      * Method helps to extract configuration parameters defined in the Clara YAML file.
      *
@@ -218,25 +255,59 @@ public abstract class ReconstructionEngine implements Engine {
        }
     }
     
+    protected boolean constantManagerStatus(){
+        for(Map.Entry<String,ConstantsManager> entry : this.constManagerMap.entrySet()){
+            if(entry.getValue().getRequestStatus()<0) return false;
+        }
+        return true;
+    }
+  
+    /**
+     * Generate a configuration section to drop in a HIPO bank, as the
+     * engineConfigMap appended with the software version.  Here the top level
+     * is "yaml" to facilitate merging JSON banks later.
+     * @return 
+     */
+    public Map<String,Object> generateConfig() {
+        Map<String,String> cfg = new HashMap<>(this.engineConfigMap);
+        cfg.put("version",this.getClass().getPackage().getImplementationVersion());
+        cfg.put("class",this.getClass().getCanonicalName());
+        Map<String,Object> service = new HashMap<>();
+        service.put(this.engineName,cfg);
+        Map<String,Object> coatjava = new HashMap<>();
+        coatjava.put("version",ConstantsManager.class.getPackage().getImplementationVersion());
+        Map<String,Object> ret = new HashMap<>();
+        service.put("COATJAVA", coatjava);
+        ret.put("yaml", service);
+        return ret;
+    }
+    
     @Override
     public EngineData execute(EngineData input) {
 
         EngineData output = input;
 
-        //return output;
-
         String mt = input.getMimeType();
-        //System.out.println(" DATA TYPE = [" + mt + "]");
         HipoDataEvent dataEventHipo = null;
+        
+        if(constantManagerStatus()==false){
+            String msg = String.format("["+this.getName()+"] HALT : DATABASE CONNECTION ERROR");           
+            output.setStatus(EngineStatus.ERROR, 13);
+            output.setDescription(msg);
+            return output;
+        }
+
+        if (fatalError) {
+            String msg = String.format("["+this.getName()+"] HALT : FATAL ERROR");
+            output.setStatus(EngineStatus.ERROR, 13);
+            output.setDescription(msg);
+            return output;
+        }
+
         if(mt.compareTo("binary/data-hipo")==0){
             try {
-                //ByteBuffer bb = (ByteBuffer) input.getData();
                 Event hipoEvent = (Event) input.getData();
-                //hipoEvent.setSchemaFactory(engineDictionary, false);
                 dataEventHipo = new HipoDataEvent(hipoEvent,engineDictionary);
-                
-                //dataEventHipo.initDictionary(engineDictionary);
-                //dataEventHipo = new HipoDataEvent(bb.array(),this.engineDictionary);
             } catch (Exception e) {
                 String msg = String.format("Error reading input event%n%n%s", ClaraUtil.reportException(e));
                 output.setStatus(EngineStatus.ERROR);
@@ -245,10 +316,18 @@ public abstract class ReconstructionEngine implements Engine {
             }
 
             try {
+                if (!this.wroteConfig) {
+                    this.wroteConfig = true;
+                    JsonUtils.extend(dataEventHipo, CONFIG_BANK_NAME, "json", this.generateConfig());
+                }
+                if (this.dropOutputBanks) {
+                    for (String bankName : this.outputBanks) {
+                        if (dataEventHipo.hasBank(bankName)) {
+                            dataEventHipo.removeBank(bankName);
+                        }
+                    }
+                }
                 this.processDataEvent(dataEventHipo);
-                ByteBuffer  bbo = dataEventHipo.getEventBuffer();
-                //byte[] buffero = bbo.array();
-                //output.setData(mt, bbo);
                 output.setData(mt, dataEventHipo.getHipoEvent());
             } catch (Exception e) {
                 String msg = String.format("Error processing input event%n%n%s", ClaraUtil.reportException(e));
@@ -331,7 +410,6 @@ public abstract class ReconstructionEngine implements Engine {
     @Override
     public EngineData executeGroup(Set<EngineData> set) {
         return null;
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -340,10 +418,6 @@ public abstract class ReconstructionEngine implements Engine {
                 Clas12Types.HIPO,
                 EngineDataType.JSON,
                 EngineDataType.STRING);
-        //Set<EngineDataType> types = new HashSet<EngineDataType>();
-        //types.add(EngineDataType.BYTES);
-        //return types;
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -352,15 +426,10 @@ public abstract class ReconstructionEngine implements Engine {
                 Clas12Types.HIPO,
                 EngineDataType.JSON,
                 EngineDataType.STRING);
-        //Set<EngineDataType> types = new HashSet<EngineDataType>();
-        //types.add(EngineDataType.BYTES);
-        //return types;
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public Set<String> getStates() {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         return new HashSet<String>();
     }
 
@@ -381,23 +450,27 @@ public abstract class ReconstructionEngine implements Engine {
     @Override
     public String getVersion() {
         return this.engineVersion;
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public String getAuthor() {
         return this.engineAuthor;
-        // new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public void reset() {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public void destroy() {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    public void setFatal() {
+        this.fatalError = true;
+    }
+
+    public boolean getFatal() {
+        return this.fatalError;
     }
     
     

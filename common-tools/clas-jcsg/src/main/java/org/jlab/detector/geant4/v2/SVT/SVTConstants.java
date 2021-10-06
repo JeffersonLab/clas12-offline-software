@@ -59,6 +59,7 @@ public class SVTConstants
 	public static double STEREOANGLE; // total angle swept by sensor strips
 	public static int[] STATUS; // whether a region is used in Reconstruction
 	//
+        public static int[][] RSI;
 	// position and orientation of layers
 	public static double PHI0;
 	public static double SECTOR0;
@@ -103,7 +104,19 @@ public class SVTConstants
 	public static double MODULEWID; // || DZ | AZ | DZ ||
 	public static double SECTORLEN;
 	
-	/**
+         // faraday cup cage
+         public static double[] FARADAYCAGERMIN    = new double[4];
+         public static double[] FARADAYCAGERMAX    = new double[4];
+         public static double[] FARADAYCAGELENGTH  = new double[4];
+         public static double[] FARADAYCAGEZPOS    = new double[4];
+         public static String[] FARADAYCAGENAME    = new String[4];
+         
+         // region peek supports
+         public static double[] REGIONPEEKRMIN;
+         public static double[] REGIONPEEKRMAX;
+         public static double[] REGIONPEEKLENGTH;
+
+         /**
 	 * Loads the the necessary tables for the SVT geometry for a given DatabaseConstantProvider.
 	 * 
 	 * @return DatabaseConstantProvider the same thing
@@ -116,12 +129,16 @@ public class SVTConstants
 		cp.loadTable( ccdbPath +"fiducial");
 		cp.loadTable( ccdbPath +"material/box");
 		cp.loadTable( ccdbPath +"material/tube");
+		cp.loadTable( ccdbPath +"material/faradaycage");
+		cp.loadTable( ccdbPath +"material/peeksupport");
 		cp.loadTable( ccdbPath +"alignment");
+                //shift by target
+                cp.loadTable("/geometry/target");
+                
 		//if( loadAlignmentTables ) cp.loadTable( ccdbPath +"alignment/sector"); // possible future tables
 		//if( loadAlignmentTables ) cp.loadTable( ccdbPath +"alignment/layer");
 		
 		load( cp );
-		
 		return cp;
 	}
 	
@@ -158,7 +175,7 @@ public class SVTConstants
 	 *  
 	 * @param cp a ConstantProvider that has loaded the necessary tables
 	 */
-	public static void load( ConstantProvider cp )
+	public static synchronized void load( DatabaseConstantProvider cp )
 	{
 		if( !bLoadedConstants )
 		{			
@@ -258,7 +275,26 @@ public class SVTConstants
 				mat++;
 			}
 			
-			
+			// region peek supports
+                            REGIONPEEKRMIN   = new double[NREGIONS];
+                            REGIONPEEKRMAX   = new double[NREGIONS];
+                            REGIONPEEKLENGTH = new double[NREGIONS];
+                            for(int i=0; i<NREGIONS; i++) {
+                                REGIONPEEKRMIN[i]   = cp.getDouble( ccdbPath+"material/peeksupport/rmin",   i);
+                                REGIONPEEKRMAX[i]   = cp.getDouble( ccdbPath+"material/peeksupport/rmax",   i);
+                                REGIONPEEKLENGTH[i] = cp.getDouble( ccdbPath+"material/peeksupport/length", i);
+                            }
+                            
+			// faraday cage
+                            for(int i=0; i<FARADAYCAGERMIN.length; i++) {
+                                FARADAYCAGERMIN[i]   = cp.getDouble( ccdbPath+"material/faradaycage/rmin",   i);
+                                FARADAYCAGERMAX[i]   = cp.getDouble( ccdbPath+"material/faradaycage/rmax",   i);
+                                FARADAYCAGELENGTH[i] = cp.getDouble( ccdbPath+"material/faradaycage/length", i);
+                                FARADAYCAGEZPOS[i]   = cp.getDouble( ccdbPath+"material/faradaycage/zpos",   i);
+                                FARADAYCAGENAME[i]   = cp.getString( ccdbPath+"material/faradaycage/name",   i);
+                            }
+                            
+                            
 			// calculate derived constants
 			NLAYERS = NMODULES*NREGIONS;
 			MODULELEN = NSENSORS*(ACTIVESENLEN + 2*DEADZNLEN) + (NSENSORS - 1)*MICROGAPLEN;
@@ -320,11 +356,12 @@ public class SVTConstants
 			// |			  | radius					  | radius
 			// |			  | 						  |
 			// o==============v===========================v===================================-> z (beamline)
-			
+			//System.out.println("SVT READ Z SHIFT VALUE "+cp.getDouble("/geometry/target/position", 0));
 			// LAYERRADIUS and ZSTARTACTIVE are used primarily by the Reconstruction and getStrip()
 			for( int region = 0; region < NREGIONS; region++ )
 			{
 				NSECTORS[region] = cp.getInteger(ccdbPath+"region/nSectors", region );
+                                
 				STATUS[region] = cp.getInteger(ccdbPath+"region/status", region );
 				Z0ACTIVE[region] = cp.getDouble(ccdbPath+"region/zStart", region ); // Cu edge of hybrid sensor's active volume
 				REFRADIUS[region] = cp.getDouble(ccdbPath+"region/UlayerOuterRadius", region); // radius to outer side of U (inner) module
@@ -344,7 +381,37 @@ public class SVTConstants
 					//System.out.println("LAYERRADIUS "+ LAYERRADIUS[region][m]);
 				}
 			}
+                        
+                        NTOTALSECTORS = convertRegionSector2Index( NREGIONS-1, NSECTORS[NREGIONS-1]-1 )+1;
+			NTOTALFIDUCIALS = convertRegionSectorFiducial2Index(NREGIONS-1, NSECTORS[NREGIONS-1]-1, NFIDUCIALS-1  )+1;
 			
+                        RSI = new int[NREGIONS][NTOTALSECTORS];
+                        for( int aRegion = 0; aRegion < NREGIONS; aRegion++ )
+			{
+                            for( int aSector = 0; aSector < NSECTORS[aRegion]; aSector++ )
+                            {
+                                RSI[aRegion][aSector] = convertRegionSector2Index( aRegion, aSector );
+                                //System.out.println(" a Region "+aRegion +" aSector "+aSector+" RSI "+RSI[aRegion][aSector] );
+                            }
+                        }
+			//System.out.println("Reading alignment shifts from database");
+		
+                        SECTORSHIFTDATA = new double[NTOTALSECTORS][];
+                        
+                        for( int i = 0; i < NTOTALSECTORS; i++ )
+                        {
+                                double tx = cp.getDouble(ccdbPath+"alignment/tx", i );
+                                double ty = cp.getDouble(ccdbPath+"alignment/ty", i );
+                                double tz = cp.getDouble(ccdbPath+"alignment/tz", i );
+                                double rx = cp.getDouble(ccdbPath+"alignment/rx", i );
+                                double ry = cp.getDouble(ccdbPath+"alignment/ry", i );
+                                double rz = cp.getDouble(ccdbPath+"alignment/rz", i );
+                                double ra = cp.getDouble(ccdbPath+"alignment/ra", i );
+
+                                SECTORSHIFTDATA[i] = new double[]{ tx, ty, tz, rx, ry, rz, Math.toRadians(ra) };
+
+                        }
+                        
 			if( VERBOSE )
 			{
 				System.out.println("NSECTORS STATUS Z0ACTIVE REFRADIUS SUPPORTRADIUS LAYERRADIUS (U,V)");
@@ -360,9 +427,8 @@ public class SVTConstants
 				}
 			}
 			
-			NTOTALSECTORS = convertRegionSector2Index( NREGIONS-1, NSECTORS[NREGIONS-1]-1 )+1;
-			NTOTALFIDUCIALS = convertRegionSectorFiducial2Index(NREGIONS-1, NSECTORS[NREGIONS-1]-1, NFIDUCIALS-1  )+1;
 			
+                         
 			// check one constant from each table
 			//if( NREGIONS == 0 || NSECTORS[0] == 0 || FIDCUX == 0 || MATERIALS[0][0] == 0 || SUPPORTRADIUS[0] == 0 )
 				//throw new NullPointerException("please load the following tables from CCDB in "+ccdbPath+"\n svt\n region\n support\n fiducial\n material\n");
@@ -427,6 +493,7 @@ public class SVTConstants
 					System.out.println();
 				}
 			}
+                       
 		}
 	}
 	
@@ -436,7 +503,7 @@ public class SVTConstants
 	 * 
 	 * @param cp a DatabaseConstantProvider that has loaded the "alignment" table
 	 */
-	public static void loadAlignmentShifts( ConstantProvider cp )
+	public static synchronized void loadAlignmentShifts( ConstantProvider cp )
 	{
 		System.out.println("reading alignment shifts from database");
 		
@@ -478,7 +545,8 @@ public class SVTConstants
 				SECTORSHIFTDATA[i] = new double[]{ ltx, lty, ltz, lrx, lry, lrz, Math.toRadians(lra) };
 			}*/
 		}
-		if( VERBOSE ) showSectorShiftData();
+		//if( VERBOSE ) 
+                    showSectorShiftData();
 	}
 	
 	
@@ -648,6 +716,7 @@ public class SVTConstants
 		if( aRegion < 0 || aRegion > NREGIONS-1 ){ throw new IllegalArgumentException("region out of bounds"); }
 		if( aSector < 0 || aSector > NSECTORS[aRegion]-1 ){ throw new IllegalArgumentException("sector out of bounds"); }
 		return Util.subArraySum( NSECTORS, aRegion ) + aSector;
+                
 	}
 	
 	

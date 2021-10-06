@@ -328,6 +328,7 @@ public class Swim {
     }
 
     private void checkR(double _x0, double _y0, double _z0) {
+        this.SwimUnPhys=false;
         if(Math.sqrt(_x0*_x0 + _y0*_y0)>this._rMax || 
                 Math.sqrt(_x0*_x0 + _y0*_y0 + _z0*_z0)>this._maxPathLength)
             this.SwimUnPhys=true;
@@ -369,10 +370,11 @@ public class Swim {
 
         @Override
         public boolean stopIntegration(double t, double[] y) {
-
+            
             double r = Math.sqrt(y[0] * y[0] + y[1] * y[1]) * 100.;
-            if(r>max ) 
-                max = r;
+//            if(r>max ) 
+//                max = r;
+//            else System.out.println(r + " " + max + " " + t);
             //if(cutOff) {
                 return (r < max || r > _Rad); // stop intergration at closest distance to the cylinder
             //}
@@ -499,7 +501,7 @@ public class Swim {
         if(this.SwimUnPhys==true)
             return null;
         SphericalBoundarySwimStopper stopper = new SphericalBoundarySwimStopper(Rad);
-
+            
         SwimTrajectory st = PC.CF.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize,
                         0.0005);
         if(st==null)

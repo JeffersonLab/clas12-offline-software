@@ -21,8 +21,7 @@ import org.jlab.rec.eb.EBRadioFrequency;
  */
 public class EBEngine extends ReconstructionEngine {
 
-    boolean dropBanks = false;
-    boolean alreadyDroppedBanks = false;
+    boolean usePOCA = false;
 
     // output banks:
     String eventBank        = null;
@@ -31,6 +30,7 @@ public class EBEngine extends ReconstructionEngine {
     String particleBankFT   = null;
     String calorimeterBank  = null;
     String scintillatorBank = null;
+    String scintextrasBank = null;
     String cherenkovBank    = null;
     String trackBank        = null;
     String crossBank        = null;
@@ -53,14 +53,16 @@ public class EBEngine extends ReconstructionEngine {
         //Initialize bank names
     }
 
+    public void setUsePOCA(boolean val) {
+        this.usePOCA=val;
+    }
+
     @Override
     public boolean processDataEvent(DataEvent de) {
         throw new RuntimeException("EBEngine cannot be used directly.  Use EBTBEngine/EBHBEngine instead.");
     }
 
     public boolean processDataEvent(DataEvent de,EBScalers ebs) {
-
-        if (this.dropBanks==true) this.dropBanks(de);
 
         // check run number, get constants from CCDB:
         int run=-1;
@@ -77,6 +79,7 @@ public class EBEngine extends ReconstructionEngine {
         DetectorHeader head = EBio.readHeader(de,ebs,ccdb);
 
         EventBuilder eb = new EventBuilder(ccdb);
+        eb.setUsePOCA(this.usePOCA);
         eb.initEvent(head); // clear particles
 
         EBMatching ebm = new EBMatching(eb);
@@ -87,14 +90,16 @@ public class EBEngine extends ReconstructionEngine {
         
         List<DetectorResponse> responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.ECAL,"ECAL::moments");
         List<DetectorResponse> responseFTOF = ScintillatorResponse.readHipoEvent(de, ftofHitsType, DetectorType.FTOF);
-        List<DetectorResponse> responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF);
+        List<DetectorResponse> responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::clusters", DetectorType.CTOF);
         List<DetectorResponse> responseCND  = ScintillatorResponse.readHipoEvent(de, "CND::clusters", DetectorType.CND);
+        List<DetectorResponse> responseBAND = ScintillatorResponse.readHipoEvent(de, "BAND::hits", DetectorType.BAND);
         List<DetectorResponse> responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
         List<DetectorResponse> responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::clusters",DetectorType.LTCC);
-        
+
         eb.addDetectorResponses(responseFTOF);
         eb.addDetectorResponses(responseCTOF);
         eb.addDetectorResponses(responseCND);
+        eb.addDetectorResponses(responseBAND);
         eb.addDetectorResponses(responseECAL);
         eb.addDetectorResponses(responseHTCC);
         eb.addDetectorResponses(responseLTCC);
@@ -124,6 +129,9 @@ public class EBEngine extends ReconstructionEngine {
         // Create central neutrals:
         ebm.addCentralNeutrals(eb.getEvent());
 
+        // Add BAND particles:
+        eb.processBAND(responseBAND);
+        
         // Do PID etc:
         EBAnalyzer analyzer = new EBAnalyzer(ccdb,rf);
         analyzer.processEvent(eb.getEvent());
@@ -154,6 +162,8 @@ public class EBEngine extends ReconstructionEngine {
             if(scintillatorBank!=null && scintillators.size()>0) {
                 DataBank bankSci = DetectorData.getScintillatorResponseBank(scintillators, de, scintillatorBank);
                 de.appendBanks(bankSci);               
+                DataBank eaxtbankSci = DetectorData.getScintExtrasResponseBank(scintillators, de, scintextrasBank);
+                de.appendBanks(eaxtbankSci);               
             }
             List<DetectorResponse> cherenkovs = eb.getEvent().getCherenkovResponseList();
             if(cherenkovBank!=null && cherenkovs.size()>0) {
@@ -218,6 +228,10 @@ public class EBEngine extends ReconstructionEngine {
         this.scintillatorBank = scintillatorBank;
     }
 
+    public void setScintClusterBank(String scintclusterBank) {
+        this.scintextrasBank = scintclusterBank;
+    }
+
     public void setCherenkovBank(String cherenkovBank) {
         this.cherenkovBank = cherenkovBank;
     }
@@ -258,34 +272,26 @@ public class EBEngine extends ReconstructionEngine {
         this.trajectoryType = trajectoryType;
     }
 
-    public void dropBanks(DataEvent de) {
-        if (this.alreadyDroppedBanks==false) {
-            System.out.println("["+this.getName()+"]  dropping REC banks!\n");
-            this.alreadyDroppedBanks=true;
-        }
-        de.removeBank(eventBank);
-        de.removeBank(particleBank);
-        de.removeBank(calorimeterBank);
-        de.removeBank(scintillatorBank);
-        de.removeBank(cherenkovBank);
-        de.removeBank(trackBank);
-        de.removeBank(crossBank);
-        de.removeBank(ftBank);
-        de.removeBank(trajectoryBank);
-        de.removeBank(covMatrixBank);
-    }
-
     @Override
     public boolean init() {
 
-        if (this.getEngineConfigString("dropBanks")!=null &&
-                this.getEngineConfigString("dropBanks").equals("true")) {
-            dropBanks=true;
-        }
+        this.registerOutputBank(eventBank);
+        this.registerOutputBank(particleBank);
+        this.registerOutputBank(eventBankFT);
+        this.registerOutputBank(particleBankFT);
+        this.registerOutputBank(calorimeterBank);
+        this.registerOutputBank(scintillatorBank);
+        this.registerOutputBank(cherenkovBank);
+        this.registerOutputBank(trackBank);
+        this.registerOutputBank(crossBank);
+        this.registerOutputBank(ftBank);
+        this.registerOutputBank(trajectoryBank);
+        this.registerOutputBank(covMatrixBank);
 
         requireConstants(EBCCDBConstants.getAllTableNames());
+
         this.getConstantsManager().setVariation("default");
-        System.out.println("["+this.getName()+"] --> event builder is ready....");
+
         return true;
     }
     

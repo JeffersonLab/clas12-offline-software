@@ -28,6 +28,7 @@ public class RICHSolution {
       }
 
     private int   type;                               //      Solution type
+    private int   OK = -1;                            //      Solution type
 
     private float EtaC=0;                             //      Cherenkov angle
     private float aeron=0;                            //      Aerogel refrative index
@@ -37,6 +38,7 @@ public class RICHSolution {
     private int   nrefle=0;                           //      Number of photon reflections 
     private int   nrefra=0;                           //      Number of photon refractions
     private float time=0;                             //      Transit time within the RICH (solution dependent)
+    private double machi2 = 0.0;                      //      chi2 of the hit-trajectory matching
     private Vector3d hit = new Vector3d(0,0,0);;      //      Impact point of photon on the PMT
 
     private ArrayList<RICHRay> raytracks = new ArrayList<RICHRay>(); // Detailed path of the photon
@@ -47,6 +49,16 @@ public class RICHSolution {
     private double prprob = 0.0;                       //      Cherenkov probability for proton
     private double bgprob = 0.0;                       //      Cherenkov probability for background
 
+    private int    ndir   = 0;                         //      Number of direct photons
+    private double chdir  = 0.0;                       //      Mean Cherenkov angle for direct photons
+    private double sdir   = 0.0;                       //      RMS Cherenkov angle for direct photons
+    private int    nlat   = 0;                         //      Number of photons reflected by lateral mirrors
+    private double chlat  = 0.0;                       //      Mean Cherenkov angle for photons reflected by lateral mirrors
+    private double slat   = 0.0;                       //      RMS Cherenkov angle for photons reflected by lateral mirrors
+    private int    nspe   = 0;                         //      Number of photons reflected by ssperical mirrors
+    private double chspe  = 0.0;                       //      Mean Cherenkov angle for photons reflected by ssperical mirrors
+    private double sspe   = 0.0;                       //      RMS Cherenkov angle for photons reflected by ssperical mirrors
+
     private double bestprob = 0.0;                     //      best Cherenkov probability for hadron ID
     private double secprob  = 0.0;                     //      second best Cherenkov probability for hadron ID
     private int bestH = 0;                             //      best Cherenkov probability for hadron ID
@@ -55,6 +67,10 @@ public class RICHSolution {
 
     // ----------------
     public int get_type() { return type; }
+    // ----------------
+
+    // ----------------
+    public int get_OK() { return OK; }
     // ----------------
 
     // ----------------
@@ -79,6 +95,10 @@ public class RICHSolution {
 
     // ----------------
     public float get_time() { return time; }
+    // ----------------
+
+    // ----------------
+    public double get_machi2() { return machi2; }
     // ----------------
 
     // ----------------
@@ -108,11 +128,29 @@ public class RICHSolution {
     }
 
     // ----------------
-    public int get_firstrefle() {
+    public int get_FirstRefle() {
     // ----------------
 
         if(raytracks.size()>2) return raytracks.get(2).get_type();
-        return -1;
+        return 0;
+
+    }
+
+    // ----------------
+    public int get_RefleType() {
+    // ----------------
+
+        int ifirst = get_FirstRefle();
+        int ilay = (int) (ifirst-10000)/100;
+        if(ifirst<10000){
+            return 0;
+        }else{
+            if(ilay==11){
+                return 2;
+            }else{
+                return 1;
+            }
+        }
 
     }
 
@@ -171,27 +209,63 @@ public class RICHSolution {
     // ----------------
 
     // ----------------
-    public double get_elprob() { return elprob; }
+    public double get_ElProb() { return elprob; }
     // ----------------
 
     // ----------------
-    public double get_piprob() { return piprob; }
+    public double get_PiProb() { return piprob; }
     // ----------------
 
     // ----------------
-    public double get_kprob() { return kprob; }
+    public double get_KProb() { return kprob; }
     // ----------------
 
     // ----------------
-    public double get_prprob() { return prprob; }
+    public double get_PrProb() { return prprob; }
     // ----------------
 
     // ----------------
-    public double get_bgprob() { return bgprob; }
+    public double get_BgProb() { return bgprob; }
     // ----------------
 
     // ----------------
-    public int get_bestH() { return bestH; }
+    public int get_Ndir() { return ndir; }
+    // ----------------
+
+    // ----------------
+    public double get_Chdir() { return chdir; }
+    // ----------------
+
+    // ----------------
+    public double get_RMSdir() { return sdir; }
+    // ----------------
+
+    // ----------------
+    public int get_Nlat() { return nlat; }
+    // ----------------
+
+    // ----------------
+    public double get_Chlat() { return chlat; }
+    // ----------------
+
+    // ----------------
+    public double get_RMSlat() { return slat; }
+    // ----------------
+
+    // ----------------
+    public int get_Nspe() { return nspe; }
+    // ----------------
+
+    // ----------------
+    public double get_Chspe() { return chspe; }
+    // ----------------
+
+    // ----------------
+    public double get_RMSspe() { return sspe; }
+    // ----------------
+
+    // ----------------
+    public int get_BestH() { return bestH; }
     // ----------------
 
     // ----------------
@@ -199,7 +273,7 @@ public class RICHSolution {
     // ----------------
 
     // ----------------
-    public double get_bestprob() { return bestprob; }
+    public double get_Bestprob() { return bestprob; }
     // ----------------
 
     // ----------------
@@ -214,11 +288,11 @@ public class RICHSolution {
     public double assign_PID(double lh_el, double lh_pi, double lh_k, double lh_pr, double lh_bg) { 
     // ----------------
 
-        this.set_elprob(lh_el);
-        this.set_piprob(lh_pi);
-        this.set_kprob(lh_k);
-        this.set_prprob(lh_pr);
-        this.set_bgprob(lh_bg);
+        this.set_ElProb(lh_el);
+        this.set_PiProb(lh_pi);
+        this.set_KProb(lh_k);
+        this.set_PrProb(lh_pr);
+        this.set_BgProb(lh_bg);
 
         double likeh[] = {this.piprob, this.kprob, this.prprob};
         Arrays.sort(likeh);
@@ -239,6 +313,10 @@ public class RICHSolution {
 
     // ----------------
     public void set_type(int type) { this.type = type; }
+    // ----------------
+
+    // ----------------
+    public void set_OK(int ok) { this.OK = ok; }
     // ----------------
 
     // ----------------
@@ -263,6 +341,10 @@ public class RICHSolution {
 
     // ----------------
     public void set_time(float time) { this.time = time; }
+    // ----------------
+
+    // ----------------
+    public void set_machi2(double machi2) { this.machi2 = machi2; }
     // ----------------
 
     // ----------------
@@ -302,23 +384,59 @@ public class RICHSolution {
     // ----------------
 
     // ----------------
-    public void set_elprob(double elprob) { this.elprob = elprob; }
+    public void set_ElProb(double elprob) { this.elprob = elprob; }
     // ----------------
 
     // ----------------
-    public void set_piprob(double piprob) { this.piprob = piprob; }
+    public void set_PiProb(double piprob) { this.piprob = piprob; }
     // ----------------
 
     // ----------------
-    public void set_kprob(double kprob) { this.kprob = kprob; }
+    public void set_KProb(double kprob) { this.kprob = kprob; }
     // ----------------
 
     // ----------------
-    public void set_prprob(double prprob) { this.prprob = prprob; }
+    public void set_PrProb(double prprob) { this.prprob = prprob; }
     // ----------------
 
     // ----------------
-    public void set_bgprob(double bgprob) { this.bgprob = bgprob; }
+    public void set_BgProb(double bgprob) { this.bgprob = bgprob; }
+    // ----------------
+
+    // ----------------
+    public void set_Ndir(int ndir) { this.ndir= ndir; }
+    // ----------------
+
+    // ----------------
+    public void set_Chdir(double chdir) { this.chdir= chdir; }
+    // ----------------
+
+    // ----------------
+    public void set_RMSdir(double sdir) { this.sdir= sdir; }
+    // ----------------
+
+    // ----------------
+    public void set_Nlat(int nlat) { this.nlat= nlat; }
+    // ----------------
+
+    // ----------------
+    public void set_Chlat(double chlat) { this.chlat= chlat; }
+    // ----------------
+
+    // ----------------
+    public void set_RMSlat(double slat) { this.slat= slat; }
+    // ----------------
+
+    // ----------------
+    public void set_Nspe(int nspe) { this.nspe= nspe; }
+    // ----------------
+
+    // ----------------
+    public void set_Chspe(double chspe) { this.chspe= chspe; }
+    // ----------------
+
+    // ----------------
+    public void set_RMSspe(double sspe) { this.sspe= sspe; }
     // ----------------
 
     // ----------------
@@ -360,7 +478,7 @@ public class RICHSolution {
     // ----------------
         System.out.format("SOL type %3d  EtaC %8.3f  n %6.4f  the %7.3f  phi %7.3f  hit %6.1f %6.1 %6.1f  path %6.1f  time %6.2f  nrfl %2d  nfr %2d  pel %7.5f  pi %7.5g  k %7.5g  pr %7.5g  bg %7.5g \n",
              get_type(), get_EtaC(), get_aeron(), get_theta(), get_phi(), get_hit().x, get_hit().y, get_hit().z, get_path(), get_time(), get_nrefle(), get_nrefra(), 
-             get_elprob(), get_piprob(), get_kprob(), get_prprob(), get_bgprob());
+             get_ElProb(), get_PiProb(), get_KProb(), get_PrProb(), get_BgProb());
     }
             
 }

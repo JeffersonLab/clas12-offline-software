@@ -181,7 +181,7 @@ public class DCEngine extends ReconstructionEngine {
         dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, endplatesBowing);
         for(int l=0; l<6; l++) {
             Constants.wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
-            System.out.println("****************** WPDIST READ *********FROM "+geoVariation+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
+            //System.out.println("****************** WPDIST READ *********FROM "+geoVariation+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
         }
 
         // Load target
@@ -197,7 +197,7 @@ public class DCEngine extends ReconstructionEngine {
 //        ConstantProvider providerFMT = GeometryFactory.getConstants(DetectorType.FMT, 11, geoVariation);
         fmtDetector =  GeometryFactory.getDetector(DetectorType.FMT, 11, geoVariation);
         System.out.println(" -- Det Geometry constants are Loaded " );
-        
+
         // create the surfaces
         tSurf = new TrajectorySurfaces();
         // for debugging the end plates bowing:

@@ -160,6 +160,7 @@ public class CherenkovResponse extends DetectorResponse {
                 che.setTime(time);
                 che.getDescriptor().setSector(sector);
                 che.getDescriptor().setType(type);
+                che.getDescriptor().setLayer(1);
 
                 // only LTCC currently reports status:
                 if (type==DetectorType.LTCC) che.setStatus(bank.getInt("status",row));

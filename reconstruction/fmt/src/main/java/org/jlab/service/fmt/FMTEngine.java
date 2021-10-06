@@ -29,7 +29,6 @@ import org.jlab.rec.fmt.track.fit.StateVecs.StateVec;
 public class FMTEngine extends ReconstructionEngine {
 
     boolean debug = false;
-    boolean dropBanks = false;
     boolean alreadyDroppedBanks = false;
 
     public FMTEngine() {
@@ -38,12 +37,6 @@ public class FMTEngine extends ReconstructionEngine {
 
     @Override
     public boolean init() {
-        
-        if (this.getEngineConfigString("dropBanks")!=null &&
-            this.getEngineConfigString("dropBanks").equals("true")) {
-            dropBanks=true;
-        }
-
         
         // Get the constants for the correct variation
         String variation = this.getEngineConfigString("variation");
@@ -67,19 +60,13 @@ public class FMTEngine extends ReconstructionEngine {
         // Load the geometry
         int run = 10;
         Constants.setDetector(GeometryFactory.getDetector(DetectorType.FMT,run, variation));
-//        System.out.println(Geometry.getZ(1) + " " + fmtDetector.getSector(0).getSuperlayer(0).getLayer(0).getPlane().point().toString());
-//        for(int il=0; il<fmtDetector.getSector(0).getSuperlayer(0).getNumLayers(); il++) {
-//            FMTLayer layer = (FMTLayer) fmtDetector.getSector(0).getSuperlayer(0).getLayer(il);
-//            Transformation3D inverse = layer.getTransformation().inverse(); 
-//            for(int is=0; is<layer.getNumComponents(); is++) {
-//                TrackerStrip strip = layer.getComponent(is);
-//                Line3D local = new Line3D(strip.getLine());
-//                inverse.apply(local);
-//                System.out.println("Layer/strip=" + (il+1) + "/" + (is+1) + " " + strip.getWidth() + " " + strip.getThickness());
-//                System.out.println(strip.getLine().toString());
-//                System.out.println(Geometry.stripLocal[is].toString());
-//            }
-//        }
+
+        // Register output banks
+        super.registerOutputBank("FMT::Hits");
+        super.registerOutputBank("FMT::Clusters");
+        super.registerOutputBank("FMT::Crosses");
+        super.registerOutputBank("FMT::Tracks");
+        
         return true;
     }
 
@@ -87,8 +74,6 @@ public class FMTEngine extends ReconstructionEngine {
     public boolean processDataEvent(DataEvent event) {
         // Initial setup.
         if(debug) System.out.println("\nNew event");
-        
-        if (this.dropBanks==true) this.dropBanks(event);        
         
         // Set run number.
         DataBank runConfig = event.getBank("RUN::config");
@@ -107,11 +92,9 @@ public class FMTEngine extends ReconstructionEngine {
         // Set beam shift. NOTE: Set to zero for the time being, when beam alignment is done
         //                       uncomment this code.
         IndexedTable beamOffset = this.getConstantsManager().getConstants(run, "/geometry/beam/position");
-        double xB = 0; // beamOffset.getDoubleValue("x_offset", 0,0,0);
-        double yB = 0; // beamOffset.getDoubleValue("y_offset", 0,0,0);
-        
         double xB = beamOffset.getDoubleValue("x_offset", 0,0,0);
         double yB = beamOffset.getDoubleValue("y_offset", 0,0,0);
+        
         // get status table
         IndexedTable status = this.getConstantsManager().getConstants(run, "/calibration/mvt/fmt_status");
 
@@ -263,17 +246,5 @@ public class FMTEngine extends ReconstructionEngine {
 
         return true;
    }
-    
-    public void dropBanks(DataEvent de) {
-        if (this.alreadyDroppedBanks==false) {
-            System.out.println("["+this.getName()+"]  dropping FMT reconstruction banks!\n");
-            this.alreadyDroppedBanks=true;
-        }
-        de.removeBank("FMT::Hits");
-        de.removeBank("FMT::Clusters");
-        de.removeBank("FMT::Crosses");
-        de.removeBank("FMT::Tracks");
-        
-    }
 
 }

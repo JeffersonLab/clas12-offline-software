@@ -20,7 +20,7 @@ public class TrajectoryTableModel extends DefaultTableModel {
 			70, // lund id
 			82, // name
 			137, // mass
-			60,  // charge
+			60, // charge
 			122, // xo
 			122, // yo
 			122, // zo

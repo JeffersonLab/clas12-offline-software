@@ -7,8 +7,13 @@
 package org.jlab.rec.rtpc.hit;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import org.jlab.detector.calib.utils.ConstantsManager;
+
 
 public class TrackFinder {
     
@@ -20,7 +25,7 @@ public class TrackFinder {
     private List<Integer> PadList;
     private int TrigWindSize;
     private int StepSize = 120;//Bin Size of Dream Electronics Output
-    private double adcthresh = 5e-4; 
+    private double adcthresh = 0; 
     private int padloopsize;// = PadList.size();
     private boolean padSorted = false; 
     private List<Integer> padTIDlist = new ArrayList<>();
@@ -31,16 +36,33 @@ public class TrackFinder {
     private int parenttid = -1;
     private String method = "phiz";
     private int minhitcount = 5; 
+    private double zthresh = 16;
+    private double phithresh = 0.16;
+    private double zthreshgap = 20;
+    private double phithreshgap = 0.20;
+    private double TFtotaltracktimeflag = 5000;
+    private double TFtotalpadtimeflag = 1000;
+    
 
-    public TrackFinder(HitParameters params) {
+    public TrackFinder(HitParameters params, boolean cosmic) {
         /*	
          *Initializations 
          */
-        
+        timeadjlimit = params.get_timeadjlimit();
+        adcthresh = params.get_adcthresh();
+        minhitcount = params.get_minhitspertrack();
+        zthresh = params.get_zthreshTF();
+        phithresh = params.get_phithreshTF();
+        zthreshgap = params.get_zthreshTFgap();
+        phithreshgap = params.get_phithreshTFgap();
         ADCMap = params.get_ADCMap();
         PadList = params.get_PadList();
+        TFtotaltracktimeflag = params.get_TFtotaltracktimeflag();
+        TFtotalpadtimeflag = params.get_TFtotalpadtimeflag();
+        
         TrigWindSize = params.get_TrigWindSize();
         padloopsize = PadList.size();
+        
         /*
          * Main Algorithm
          */
@@ -53,8 +75,11 @@ public class TrackFinder {
                 padTIDlist.clear(); //List of all TIDs assigned to the pad starts empty
                 pad = PadList.get(padindex);	
                 adc = ADCMap.getADC(pad,time);
+                
+                
 
                 if(adc > adcthresh) { //pad adc threshold check
+
                     PadVector PadVec = params.get_padvector(pad); //initializes the x,y,z,phi for pad
                     TIDList = TIDMap.getAllTrackIDs(); //Retrieve list of all available TIDs
 
@@ -69,7 +94,7 @@ public class TrackFinder {
                                 PADCHECKLOOP: //Loop over pads 
                                 for(int checkpad : padlist) {		
                                     PadVector checkpadvec = params.get_padvector(checkpad);	
-                                    if(tutil.comparePads(PadVec, checkpadvec, method)) { //compares the position of two pads
+                                    if(tutil.comparePads(PadVec, checkpadvec, method, cosmic, zthresh, zthreshgap, phithresh, phithreshgap)) { //compares the position of two pads
                                         track.addPad(time, pad);			//assign pad to track
                                         padSorted = true;				//flag set
                                         padTIDlist.add(tid);				//track the TID assigned
@@ -108,7 +133,7 @@ public class TrackFinder {
             } //END PADLOOP
 
         } //END TIMELOOP
-
+        
         //END MAIN ALGORITHM
 
         /*
@@ -121,18 +146,61 @@ public class TrackFinder {
                     TIDMap.removeTrack(tid);
             }
         }
+              
+        
+        if(!cosmic){
+            //Flag crossing tracks
+            int tmax = 0;
+            int tmin = 0;
+            for(int tid : TIDMap.getAllTrackIDs()) {          
+                Track t = TIDMap.getTrack(tid); 
+                for(int pad : t.uniquePadList()){
+                    tmax = 0;
+                    tmin = 1000000;
+                    for(int time : t.PadTimeList(pad)){
+                        if(time > tmax) tmax = time;
+                        if(time < tmin) tmin = time;
+                    }
+                    if(tmax - tmin > TFtotalpadtimeflag){
+                        t.flagTrack();
+                        break;
+                    }
+                }
+                List<Integer> times = t.getAllTimeSlices();
+                Collections.sort(times);
+                if(times.get(times.size()-1) - times.get(0) > TFtotaltracktimeflag) t.flagTrack();
+		TRACKTIMELOOP:
+                for(int tx : times){
+                    List<Integer> pads = t.getTimeSlice(tx);
+                    if(pads.size() > 1){
+                        
+                        Collections.sort(pads, new Comparator<Integer>(){
+                            @Override 
+				public int compare(Integer p1, Integer p2){
+                                PadVector pv1 = params.get_padvector(p1);
+                                PadVector pv2 = params.get_padvector(p2);
+                                return Double.compare(pv2.z(),pv1.z());
+                            }
+			    });
 
-        //System.out.println("This event has " + TIDMap.getAllTrackIDs().size() + " tracks");
-
-        //TODO Flag crossing tracks; for now flag all tracks
-        for(int tid : TIDMap.getAllTrackIDs()) {
-            Track t = TIDMap.getTrack(tid);
-            t.flagTrack();
+                        for(int index = 1; index < pads.size(); index ++){
+                            PadVector pparent = params.get_padvector(pads.get(index - 1));
+                            PadVector p = params.get_padvector(pads.get(index));
+                            if(!tutil.comparePads(pparent, p, method, cosmic, zthresh, zthreshgap, phithresh, phithreshgap)){
+                                t.flagTrack();
+                                break TRACKTIMELOOP;
+                            }
+                        }
+                    }
+                }
+            }
         }
-
+        
+        
         /*
          * Output
          */
+       
 
         params.set_trackmap(TIDMap);
 

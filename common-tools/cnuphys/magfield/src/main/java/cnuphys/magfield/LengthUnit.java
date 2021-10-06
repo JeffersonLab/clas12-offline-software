@@ -16,8 +16,7 @@ public enum LengthUnit {
     /**
      * Get the length unit from an integer
      * 
-     * @param val
-     *            the integer value
+     * @param val the integer value
      * @return the length unit
      */
     public static LengthUnit fromInt(int val) {

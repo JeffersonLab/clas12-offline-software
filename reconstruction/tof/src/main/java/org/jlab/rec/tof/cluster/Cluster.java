@@ -38,8 +38,6 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
     private double _Energy; // the total energy of the cluster
 
     private double _t; // the cluster time
-    private double[] _tCorr; // corrected time using 3 algorithms to compute
-    // deltaR
 
     private double _y_locUnc; // uncertainty in y in the local cluster
     // coordinate system
@@ -47,6 +45,9 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
     private double _tUn; // uncertainty in cluster time
 
     private String _StatusWord; // a status word for each hit: 1111 - fully
+    
+    private double _pathLengthThruBar; // total pathlength of the track throught the bars of the cluster
+    
     // functioning, 0111-noADC[L,U],
     // 1011-noTDC[L,U], 1101-noADC[R,D],
     // 1110-noTDC[R,D]; the cluster word is the
@@ -154,14 +155,6 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
         this._t = _t;
     }
 
-    public double[] get_tCorr() {
-        return _tCorr;
-    }
-
-    public void set_tCorr(double[] _tCorr) {
-        this._tCorr = _tCorr;
-    }
-
     public double get_y_locUnc() {
         return _y_locUnc;
     }
@@ -186,6 +179,14 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
         this._tUn = _tUn;
     }
 
+    public double get_PathLengthThruBar() {
+        return _pathLengthThruBar;
+    }
+
+    public void set_PathLengthThruBar(double _pathLengthThruBar) {
+        this._pathLengthThruBar = _pathLengthThruBar;
+    }
+
     /**
      *
      * @return the energy-weighted strip number
@@ -207,6 +208,7 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
             double averageZ = 0; // average z
             double weightedYloc = 0; // weighted local y
             double weightedT = 0; // weighted time
+            double pathThroughCluster = 0.; // pathlength through the cluster bars
 
             double errESq = 0; // contribution factor to uncertainty in E
             double errYlocSq = 0; // contribution factor to uncertainty in local
@@ -259,6 +261,8 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
                 errTSq += E * thehit.get_tUnc() * E * thehit.get_tUnc()
                         + thehit.get_t() * thehit.get_EnergyUnc()
                         * thehit.get_t() * thehit.get_EnergyUnc();
+                
+                pathThroughCluster += thehit.get_TrkPathLenThruBar();
 
             }
 
@@ -283,6 +287,7 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
             this.set_EnergyUnc(Math.sqrt(errESq));
             this.set_y_locUnc(Math.sqrt(errYlocSq) / totEn);
             this.set_tUnc(Math.sqrt(errTSq) / totEn);
+            this.set_PathLengthThruBar(pathThroughCluster);
             this.set_StatusWord(statusWord);
 
         }
@@ -308,8 +313,6 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
         System.out.println(s);
     }
 
-    public int[] indexesClusHitsMatchedToTrk;
-
     public void matchToTrack() {
         double xTrk = 0;
         double yTrk = 0;
@@ -317,19 +320,19 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
         int id =0;
         int[] iClusHitsMatchedToTrk = new int[this.size()];
         int totNbMatches = 0;
-        if(this.size()<1 || this.get(0)._AssociatedTrkId<1)
+        if(this.size()<1 || this.get(0).get_TrkId()<1)
             return;
-        id = this.get(0)._AssociatedTrkId;
+        id = this.get(0).get_TrkId();
         for (int i = 0; i < this.size(); i++) {
             iClusHitsMatchedToTrk[i] = -1;
 
             AHit h = this.get(i);
             
             if (h.get_TrkPosition() == null
-                    || Double.isNaN(h.get_TrkPosition().x()) || this.get(i)._AssociatedTrkId!=id) {
+                    || Double.isNaN(h.get_TrkPosition().x()) || this.get(i).get_TrkId()!=id) {
                 continue;
             }
-            id = h._AssociatedTrkId;
+            id = h.get_TrkId();
             xTrk = h.get_TrkPosition().x();
             yTrk = h.get_TrkPosition().y();
             zTrk = h.get_TrkPosition().z();

@@ -1,16 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 
-source `dirname $0`/env.sh 
+. `dirname $0`/env.sh 
 
-CLARA_HOME=`dirname $0`/..
-CLAS12DIR=`dirname $0`/..
-CLAS12DIR=`dirname $0`/.. ; export CLAS12DIR
+export CLAS12DIR=`dirname $0`/..
  
-CLARA_SERVICES=$CLAS12DIR/lib/services ; export CLARA_SERVICES
-
-#JYTHONPATH=${CLAS12DIR}/lib/jython
-#echo ${JYTHONPATH}
-
 #--------------------------------------------------------------
 # Adding supporting COAT jar files
 for i in `ls -a $CLAS12DIR/lib/clas/*.jar`
@@ -56,5 +49,5 @@ echo "*    Version : 3a  Release : 2016       *"
 echo "*****************************************"
 echo " "
 echo " "
-JAVA_OPTS="-Dsun.java2d.pmoffscreen=false -Xms1024m -Xmx2048m"; export JAVA_OPTS
+export JAVA_OPTS="-Dsun.java2d.pmoffscreen=false -Xms1024m -Xmx2048m"
 groovy -cp "$JYPATH" $*

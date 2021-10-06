@@ -38,9 +38,7 @@ public class EvioCure {
 		// EvioDictionaryGenerator.createDAQDictionary(CLASDetectors)
 		        "</xmlDict>\n";
             System.out.println(" ENDIANNESS : " + reader.getByteOrder());
-            evioWriter = new EventWriter(new File(outputFile),8*1024,1000, reader.getByteOrder(),
-                    null, null
-            );//, dictionary, true);
+            evioWriter = new EventWriter(outputFile,false, reader.getByteOrder());
             //EvioWriter writer = new EvioDataSync();
             boolean isActive = true;
             reader.rewind();

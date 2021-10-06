@@ -20,11 +20,13 @@ public class RICHHit implements Comparable<RICHHit>{
     private int idy;                                  //         anode local  idy (within PMT)
     private int glx;                                  //         anode global idx (onto RICH plane)
     private int gly;                                  //         anode global idy (onto RICH plane)
+
     private float x;                                  //         anode global x (within CLAS)
     private float y;                                  //         anode global y (within CLAS)
     private float z;                                  //         anode global z (within CLAS)
     private float time;                               //         Hit time
     private float rawtime;                            //         Hit rawtime
+
     private int duration;                             //         Hit duration
     private int cluster;                              //         parent cluster ID
     private int xtalk;                                //         xtalk type
@@ -44,7 +46,7 @@ public class RICHHit implements Comparable<RICHHit>{
         this.id        = hid;
         this.sector    = lead.get_sector();
         this.tile      = lead.get_tile();
-        this.pmt       = tool.Tile2PMT(tile, lead.get_channel());  // run from1  to 64
+        this.pmt       = tool.Tile2PMT(tile, lead.get_channel());  // run from1  to 391
         this.channel   = (lead.get_channel()-1)%64;     
         this.anode     = tool.Maroc2Anode(channel);                // run from 1 to 64
         this.idx       = tool.Anode2idx(anode);

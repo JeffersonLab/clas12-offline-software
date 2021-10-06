@@ -6,6 +6,8 @@
 package org.jlab.clas.fastmc;
 
 import cnuphys.magfield.CompositeField;
+import cnuphys.magfield.MagneticFieldInitializationException;
+import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.Solenoid;
 import cnuphys.magfield.Torus;
 import cnuphys.rk4.RungeKuttaException;
@@ -15,6 +17,8 @@ import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.Swimmer;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jlab.clas.physics.Particle;
 import org.jlab.geom.prim.Path3D;
 import org.jlab.utils.CLASResources;
@@ -24,20 +28,19 @@ import org.jlab.utils.CLASResources;
  * @author gavalian
  */
 public class ParticleSwimmer {
-    private  CompositeField compositeField;
-    private static final double rmax = 8.0;
+    private static final double rmax = 10.0;
     private static final double maxPathLength = 12.5;
     private static final double hdata[] = new double[3];
     private  Swimmer swimmer = null;
     
     public ParticleSwimmer(){
-        this.initFiled(-1.0, 1.0);
-        swimmer = new Swimmer(this.compositeField);
+        this.initField(-1.0, 1.0);
+        swimmer = new Swimmer(MagneticFields.getInstance().getCompositeField());
     }
     
     public ParticleSwimmer(double torusScale, double solenoidScale){
-        this.initFiled(torusScale, solenoidScale);
-        swimmer = new Swimmer(this.compositeField);
+        this.initField(torusScale, solenoidScale);
+        swimmer = new Swimmer(MagneticFields.getInstance().getCompositeField());
     }
     /**
      * initializes the magnetic field. it should be located in the COATJAVA
@@ -45,48 +48,29 @@ public class ParticleSwimmer {
      * @param torusScale scale of the toroidal field
      * @param solenoidScale scale of the solenoid field
      */
-    private void initFiled(Double torusScale, Double solenoidScale){
+    private void initField(Double torusScale, Double solenoidScale){
         Torus torus = null;
-         Solenoid solenoid = null;
-         //will read mag field assuming 
-         String clasDictionaryPath = CLASResources.getResourcePath("etc");
-         String magfieldDir = clasDictionaryPath + "/data/magfield/";
+        Solenoid solenoid = null;
+        //will read mag field assuming 
+        String clasDictionaryPath = CLASResources.getResourcePath("etc");
+        String magfieldDir = clasDictionaryPath + "/data/magfield/";
 
-         String torusFileName = System.getenv("COAT_MAGFIELD_TORUSMAP");
-         if (torusFileName==null) torusFileName = "clas12-fieldmap-torus.dat";
-         File torusFile = new File(magfieldDir + torusFileName);
-         try {
-             torus = Torus.fromBinaryFile(torusFile);
-         } catch (FileNotFoundException e) {
-             e.printStackTrace();
-         }
+        String torusFileName = System.getenv("COAT_MAGFIELD_TORUSMAP");
+        if (torusFileName==null) torusFileName = "clas12-fieldmap-torus.dat";
+
+        String solenoidFileName = System.getenv("COAT_MAGFIELD_SOLENOIDMAP");
+        if (solenoidFileName==null) solenoidFileName = "clas12-fieldmap-solenoid.dat";
+         
+        try {
+            MagneticFields.getInstance().initializeMagneticFields(magfieldDir,torusFileName,solenoidFileName);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ParticleSwimmer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (MagneticFieldInitializationException ex) {
+            Logger.getLogger(ParticleSwimmer.class.getName()).log(Level.SEVERE, null, ex);
+        }
 		
-         //OK, see if we can create a Solenoid
-         String solenoidFileName = System.getenv("COAT_MAGFIELD_SOLENOIDMAP");
-         if (solenoidFileName==null) solenoidFileName = "clas12-fieldmap-solenoid.dat";
-         //OK, see if we can create a Torus
-         if(clasDictionaryPath == "../clasJLib")
-             solenoidFileName = clasDictionaryPath + "/data/solenoid/v1.0/solenoid-srr.dat";
-         
-         File solenoidFile = new File(magfieldDir + solenoidFileName);
-         try {
-             solenoid = Solenoid.fromBinaryFile(solenoidFile);
-         } catch (FileNotFoundException e) {
-             e.printStackTrace();
-         }
-         
-		
-         compositeField = new CompositeField();
-         
-         if (torus != null) {             
-             torus.setScaleFactor(torusScale);             
-             compositeField.add(torus);
-         }
-         
-         if (solenoid != null) {
-             solenoid.setScaleFactor(solenoidScale);             
-             compositeField.add(solenoid);             
-         }
+        MagneticFields.getInstance().getTorus().setScaleFactor(torusScale);
+        MagneticFields.getInstance().getSolenoid().setScaleFactor(solenoidScale);
     }
     
     /**
@@ -124,7 +108,7 @@ public class ParticleSwimmer {
                     stopper, listener, maxPathLength,
                     stepSize, Swimmer.CLAS_Tolerance, hdata);*/
             SwimTrajectory traj = swimmer.swim(charge, 
-                                        part.vertex().x(),part.vertex().y(),part.vertex().z(),
+                                        part.vertex().x()/100,part.vertex().y()/100,part.vertex().z()/100,
                                         part.vector().p(),
                                         Math.toDegrees(part.vector().theta()),
                                         Math.toDegrees(part.vector().phi()),
