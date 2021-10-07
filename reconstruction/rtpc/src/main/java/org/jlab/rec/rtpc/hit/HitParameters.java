@@ -36,6 +36,7 @@ public class HitParameters {
     private TrackMap _trackmap = new TrackMap();
     private ReducedTrackMap _rtrackmap = new ReducedTrackMap();
     private HashMap<Integer, FinalTrackInfo> _finaltrackinfomap;
+    private HashMap<Integer, KalmanFilterTrackInfo> _kftrackinfomap;
     private int _timeadjlimit = 4;
     private double _zthreshTF = 16;
     private double _phithreshTF = 0.16;
@@ -125,7 +126,8 @@ public class HitParameters {
         _c3 = global_parms.getDoubleValue("c3",0,0,0);
         _c4 = global_parms.getDoubleValue("c4",0,0,0);
     }
-    
+
+    public HashMap<Integer, KalmanFilterTrackInfo> get_kftrackinfomap() {return _kftrackinfomap;}    
     public int get_SignalStepSize(){return _SignalStepSize;} // step size of the signal before integration (arbitrary value)
     public int get_BinSize(){return _BinSize;} // electronics integrates the signal over 40 ns
     public int get_NBinKept(){return _NBinKept;} // only 1 bin over 3 is kept by the daq
@@ -222,7 +224,7 @@ public class HitParameters {
     public void set_trackmap(TrackMap _trackmap) {this._trackmap = _trackmap;}
     public void set_rtrackmap(ReducedTrackMap _rtrackmap) {this._rtrackmap = _rtrackmap;}
     public void set_finaltrackinfomap(HashMap<Integer, FinalTrackInfo> _finaltrackinfomap) {this._finaltrackinfomap = _finaltrackinfomap;}
-
+    public void set_kftrackinfomap(HashMap<Integer, KalmanFilterTrackInfo> _kftrackinfomap) {this._kftrackinfomap = _kftrackinfomap;}
     
     public HitParameters() {}
 
