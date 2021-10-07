@@ -189,7 +189,7 @@ public class HelixFitTest {
         if(tl != 0 && !Double.isNaN(tl)) dEdx = ADCsum/tl;
         if(TID != 0 && numhits > minhitcount){
             newrecotrackmap.put(TID, originaltrack);
-            finaltrackinfomap.put(TID, new FinalTrackInfo(px,py,pz,vz,theta,phi,numhits,tl,ADCsum,dEdx,ho.get_Rho(),A,B,chi2));
+            finaltrackinfomap.put(TID, new FinalTrackInfo(px,py,pz,vz,theta,phi,numhits,tl,ADCsum,dEdx,ho.get_Rho(),A,B,chi2,ho.get_d0(),ho.get_tanL()));
         }
     }
 }
