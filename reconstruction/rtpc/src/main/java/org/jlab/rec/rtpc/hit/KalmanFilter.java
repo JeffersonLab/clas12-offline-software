@@ -1596,9 +1596,9 @@ public class KalmanFilter {
      * @return
      */
     public SimpleMatrix R(SimpleMatrix z) {
-        double deltaR = 70. / z.get(0, 0);
-        double deltaPhi = Math.toRadians(1.);
-        double deltaZ = 2; 
+        double deltaR = 70. / z.get(0, 0) * 5;
+        double deltaPhi = Math.toRadians(1.) * 5;
+        double deltaZ = 2 * 5; 
 
         return new SimpleMatrix(
                 new double[][] { { deltaR * deltaR, 0, 0 }, { 0, deltaPhi * deltaPhi, 0 }, { 0, 0, deltaZ * deltaZ } });
