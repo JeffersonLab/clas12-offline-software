@@ -64,9 +64,9 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         return true;
     }
     public void processFile(int duplicates, float torScale, float solScale, int charge, int n, long seed,
-            float pMin, float pMax, float thMin, float thMax, float phiMin, float phiMax, float vzMin, float vzMax) {
+            float pMin, float pMax, float thMin, float thMax, float phiMin, float phiMax, float vzMin, float vzMax, float zSol) {
         
-        Swimmer.setMagneticFieldsScales(solScale, torScale, -1.9);
+        Swimmer.setMagneticFieldsScales(solScale, torScale, zSol);
         Swim sw = new Swim();
         PrintWriter pw = null;
         try {
@@ -82,6 +82,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     +"\n PhiMaxDeg:\t" +String.valueOf(phiMax)
                     +"\n VzMinCm:\t"   +String.valueOf(vzMin)
                     +"\n VzMaxCm:\t"   +String.valueOf(vzMax)
+                    +"\n ZSol:\t"      +String.valueOf(zSol)
                     +"\n Seed:\t\t"    +String.valueOf(seed)
                     +"\n NTracks:\t"   +String.valueOf(n)
                     +"\n Duplicates:\t"+String.valueOf(duplicates));
@@ -91,7 +92,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     +"ThMinDeg" +String.valueOf(thMin)+"ThMaxDeg" +String.valueOf(thMax)
                     +"PhiMinDeg" +String.valueOf(phiMin)+"PhiMaxDeg" +String.valueOf(phiMax)
                     +"VzMinCm" +String.valueOf(vzMin)+"VzMaxCm" +String.valueOf(vzMax)
-                    +"Duplicates" +String.valueOf(duplicates)+".txt";
+                    +"ZSol" +String.valueOf(zSol)+"Duplicates" +String.valueOf(duplicates)+".txt";
             pw = new PrintWriter(fileName);
             this.r.setSeed(seed);
             System.out.println("\n Random generator seed set to: " + seed);
@@ -699,6 +700,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         parser.addOption("-var","default");
         parser.addOption("-vzmin","-5.0");
         parser.addOption("-vzmax","5.0");
+        parser.addOption("-zsol","0.0");
         parser.parse(args);
         
 
@@ -718,11 +720,12 @@ public class TrackDictionaryMakerRNG extends DCEngine{
             float phiMax = (float) parser.getOption("-phimax").doubleValue();
             float vzMin = (float) parser.getOption("-vzmin").doubleValue();
             float vzMax = (float) parser.getOption("-vzmax").doubleValue();
+            float zSol  = (float) parser.getOption("-zsol").doubleValue();
             long seed = (long)parser.getOption("-seed").intValue();
 //            tm.r.setSeed(seed);
             String dcVar = parser.getOption("-var").stringValue();
             tm.resetGeom(dcVar);
-            tm.processFile(duplicates,torus, solenoid, charge, n, seed, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax);
+            tm.processFile(duplicates,torus, solenoid, charge, n, seed, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax, zSol);
         } else {
             System.out.println(" FIELDS NOT SET");
         }
