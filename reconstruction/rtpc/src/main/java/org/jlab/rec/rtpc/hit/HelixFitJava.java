@@ -815,7 +815,7 @@ public class HelixFitJava {
 	    //By Jixie: apply correction, only useful for RTPC12 
 	    //user should provide the next subroutine, it is detector dependence thing
 	    //CorrHelixRPhi(Rho,Phi);
-	    return new HelixFitObject(Rho,A,B,Phi,Theta,X0,Y0,Z0,DCA,Chi2);
+	    return new HelixFitObject(Rho,A,B,Phi,Theta,X0,Y0,Z0,DCA,Chi2,vv0[3],vv0[1]);
 
 	  }
 
