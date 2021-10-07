@@ -97,6 +97,19 @@
       <artifactId>clas-analysis</artifactId>
       <version>7.0.0-SNAPSHOT</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.jlab.clas</groupId>
+      <artifactId>swim-tools</artifactId>
+      <version>7.0.0-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ejml</groupId>
+      <artifactId>ejml-all</artifactId>
+      <version>0.40</version>
+    </dependency>
     
   </dependencies>
 
