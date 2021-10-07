@@ -386,7 +386,7 @@ public class Track {
                 trackmap.put(id,trk);
             }
             for (int i = 0; i < trajBank.rows(); i++) {
-                if (trajBank.getShort("detector", i) == DetectorType.FMT.getDetectorId()) { 
+                if (trajBank.getByte("detector", i) == DetectorType.FMT.getDetectorId()) { 
                     int id    = trajBank.getShort("id", i);
                     int layer = trajBank.getByte("layer", i);
                     Trajectory trj = new Trajectory(layer,
