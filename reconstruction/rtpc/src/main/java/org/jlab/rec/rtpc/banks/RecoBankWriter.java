@@ -3,6 +3,7 @@ package org.jlab.rec.rtpc.banks;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.rtpc.hit.HitParameters;
+import org.jlab.rec.rtpc.hit.KalmanFilterTrackInfo;
 import org.jlab.rec.rtpc.hit.RecoHitVector;
 import java.util.List;
 import java.util.HashMap;
@@ -117,4 +118,29 @@ public class RecoBankWriter {
         //bank.show();
         return bank;
     }	
+
+    public DataBank fillRTPCKFBank(DataEvent event, HitParameters params){
+        HashMap<Integer, KalmanFilterTrackInfo> kMap = params.get_kftrackinfomap();
+        int listsize = kMap.size();
+        int row = 0;
+        DataBank bank = event.createBank("RTPC::KalmanFilter", listsize);
+
+        if (bank == null) {
+            System.err.println("COULD NOT CREATE A BANK!!!!!!");
+            return null;
+        }
+
+        for(int TID : kMap.keySet()) {
+            KalmanFilterTrackInfo kf = kMap.get(TID);
+            bank.setInt("trkID", row, TID);
+            bank.setFloat("px", row, (float) kf.get_px());
+            bank.setFloat("py", row, (float) kf.get_py());
+            bank.setFloat("pz", row, (float) kf.get_pz());
+            bank.setFloat("theta", row, (float) kf.get_theta());
+            bank.setFloat("phi", row, (float) kf.get_phi());
+            row++;
+        }
+
+        return bank;
+    }
 }
