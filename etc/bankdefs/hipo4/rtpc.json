@@ -47,5 +47,48 @@
 	    {"name":"max_phi", "type":"F", "info":"Largest reconstructed phi (rad)"},
 	    {"name":"tdiff",      "type":"F", "info":"Time shift (ns)"}
 	]
-    }	
+	},
+	{
+		"name": "RTPC::KalmanFilter",
+		"group": 21900,
+		"item": 23,
+		"info": "kalman filter track info",
+		"entries": [
+		  {
+			"name": "trkID",
+			"type": "I",
+			"info": "Track ID of the track"
+		  },
+		  {
+			"name": "px",
+			"type": "F",
+			"info": "X component of the momentum (GeV)"
+		  },
+		  {
+			"name": "py",
+			"type": "F",
+			"info": "Y component of the momentum (GeV)"
+		  },
+		  {
+			"name": "pz",
+			"type": "F",
+			"info": "Z component of the momentum (GeV)"
+		  },
+		  {
+			"name": "vz",
+			"type": "F",
+			"info": "Z component of the reconstructed vertex (cm)"
+		  },
+		  {
+			"name": "theta",
+			"type": "F",
+			"info": "Theta from the Helix fit of the track (deg)"
+		  },
+		  {
+			"name": "phi",
+			"type": "F",
+			"info": "Phi from the Helix fit of the track (deg)"
+		  }
+		]
+	  }
 ]
