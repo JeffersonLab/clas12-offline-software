@@ -219,6 +219,9 @@ public class EngineProcessor {
                     JsonUtils.extend(event, ReconstructionEngine.CONFIG_BANK_NAME, "json",
                             engine.getValue().generateConfig());
                 }
+                if (engine.getValue().dropOutputBanks) {
+                    engine.getValue().dropBanks(event);
+                }
                 engine.getValue().processDataEvent(event);
             } catch (Exception e){
 
