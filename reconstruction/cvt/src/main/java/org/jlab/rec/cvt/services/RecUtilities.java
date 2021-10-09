@@ -29,6 +29,7 @@ import org.jlab.rec.cvt.track.TrackSeederCA;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Map.Entry;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Arc3D;
 
@@ -173,11 +174,11 @@ public class RecUtilities {
                     Point3D endPt2 = cls.get(j).getLine().end();
                     Strip strp = new Strip(id, ce, endPt1.x(), endPt1.y(), endPt1.z(),
                                             endPt2.x(), endPt2.y(), endPt2.z());
-//                    Plane3D pln = new Plane3D(endPt1,sgeo.findBSTPlaneNormal(cls.get(j).get_Sector(), 
-//                            cls.get(j).get_Layer()));
+//                    Plane3D pln = new Plane3D(endPt1,sgeo.findBSTPlaneNormal(cluster.get(j).get_Sector(), 
+//                            cluster.get(j).get_Layer()));
                     Plane3D pln = new Plane3D(endPt1,cls.get(j).getN());
-//                    Point3D Or = sgeo.getPlaneModuleOrigin(cls.get(j).get_Sector(), cls.get(j).get_Layer());
-//                    Point3D En = sgeo.getPlaneModuleEnd(cls.get(j).get_Sector(), cls.get(j).get_Layer());
+//                    Point3D Or = sgeo.getPlaneModuleOrigin(cluster.get(j).get_Sector(), cluster.get(j).get_Layer());
+//                    Point3D En = sgeo.getPlaneModuleEnd(cluster.get(j).get_Sector(), cluster.get(j).get_Layer());
                     Surface meas = new Surface(pln, strp, cls.get(j).origin(), cls.get(j).end());
                     meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());
                     meas.setSector(cls.get(j).get_Sector());
@@ -226,7 +227,7 @@ public class RecUtilities {
                     clsMap.put(KFSites.size()-1, trkcand.get(i).get_Cluster1());
                 }
                 else if (trkcand.get(i).get_Type()==BMTType.C) {
-                    double z   = trkcand.get(i).get_Point().z();
+                    double z   = trkcand.get(i).get_Cluster1().get_Z();
                     double err = trkcand.get(i).get_Cluster1().get_ZErr();
                     Arc3D arc  = trkcand.get(i).get_Cluster1().get_Arc();
                     Strip strp = new Strip(id, ce, arc);
@@ -251,26 +252,26 @@ public class RecUtilities {
         return KFSites;
     }
     
-    public List<Cluster> FindClustersOnTrkNew (List<Cluster> allClusters, Helix helix, double P, int Q,
+    public List<Cluster> FindClustersOnTrkNew (List<Cluster> allClusters, List<Cluster> seedCluster, Helix helix, double P, int Q,
             SVTGeometry sgeo, Swim swimmer) { 
 
-        int[] Sectors = new int[SVTGeometry.NLAYERS];
-        // RDV it is not correct for tiltes/shifted geometry
-        for (int ilayer = 0; ilayer < SVTGeometry.NLAYERS; ilayer++) {
-            Point3D traj = helix.getPointAtRadius(sgeo.getLayerRadius(ilayer+1));
-            int sec = sgeo.getSector(ilayer+1, traj);   
-            Sectors[ilayer] = sec;
-        }
         // initialize swimmer starting from the track vertex
         double maxPathLength = 1; 
         swimmer.SetSwimParameters((helix.xdca()+org.jlab.rec.cvt.Constants.getXb()) / 10, (helix.ydca()+org.jlab.rec.cvt.Constants.getYb()) / 10, helix.get_Z0() / 10, 
                      Math.toDegrees(helix.get_phi_at_dca()), Math.toDegrees(Math.acos(helix.costheta())),
                      P, Q, maxPathLength) ;
         double[] inters = null;
-        double     path = 0;
-        // SVT
-        List<Cluster> clustersOnTrack = new ArrayList<Cluster>();
-        for (int l = 0; l < SVTGeometry.NLAYERS; l++) {
+
+        // load SVT clusters that are in the seed
+        Map<Integer,Cluster> clusterMap = new HashMap<>();
+        for(Cluster cluster : seedCluster) {
+            if(cluster.get_Detector() == DetectorType.BMT)
+                continue;
+            clusterMap.put(sgeo.getModuleId(cluster.get_Layer(), cluster.get_Sector()), cluster);
+        }   
+        
+        // for each layer
+        for (int ilayer = 0; ilayer < SVTGeometry.NLAYERS; ilayer++) {
             // reinitilize swimmer from last surface
             if(inters!=null) {
                 double intersPhi   = Math.atan2(inters[4], inters[3]);
@@ -278,40 +279,52 @@ public class RecUtilities {
                 swimmer.SetSwimParameters(inters[0], inters[1], inters[2], Math.toDegrees(intersPhi), Math.toDegrees(intersTheta), 
                         P, Q, maxPathLength) ;
             }
-            int layer = l + 1;
-            int sector = Sectors[l];
-            if(sector == -1)
-                continue;
+            int layer = ilayer + 1;
             
-            double  doca    = Double.MAX_VALUE;
-            Point3D traj    = null;
-            Cluster cluster = null;
-            for(Cluster cls : allClusters) {
-                if(cls.get_AssociatedTrackID()==-1 && cls.get_Sector()==sector && cls.get_Layer()==layer) {
-                    // for first relevant cluster, swim to the plane to get the trajectory
-                    if(traj==null) {
-                        Vector3D n = cls.get(0).get_Strip().get_Normal();
-                        Point3D p  = cls.get(0).get_Strip().get_Module().origin();
-                        double d = n.dot(p.toVector3D());
-                        inters = swimmer.SwimToPlaneBoundary(d/10.0, n, 1);
-                        if(inters!=null)
-                            traj = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
+            for(int isector=0; isector<SVTGeometry.NSECTORS[ilayer]; isector++) {
+                int sector = isector+1;
+                int key = sgeo.getModuleId(layer, sector);
+                
+                // calculate trajectory
+                Point3D traj    = null;
+                Vector3D n = sgeo.getNormal(layer, sector);
+                Point3D  p = sgeo.getModule(layer, sector).origin();
+                double d = n.dot(p.toVector3D());
+                inters = swimmer.SwimToPlaneBoundary(d/10.0, n, 1);
+                if(inters!=null) {
+                    traj = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
+                }
+                // if trajectory is valid, look for missing clusters
+                if(traj!=null && sgeo.isInFiducial(layer, sector, traj)) {
+                    Cluster cluster = null;
+                    double  doca    = Double.MAX_VALUE;
+                    if(clusterMap.containsKey(key)) {
+                        cluster = clusterMap.get(key);
+                        doca    = cluster.residual(traj);
                     }
-                    if(traj!=null) {
-                        double clsDoca = cls.residual(traj);
-                        if(Math.abs(clsDoca)<Math.abs(doca) && Math.abs(clsDoca)<cls.get_CentroidError()*5) {
-                            cluster = cls;
-                            doca    = clsDoca;
-                        }                           
+                    // loop over all clusters in the same sector and layer that are noy associated to s track
+                    for(Cluster cls : allClusters) {
+                        if(cls.get_AssociatedTrackID()==-1 && cls.get_Sector()==sector && cls.get_Layer()==layer) {
+                            double clsDoca = cls.residual(traj);
+                            // save the ones that have better doca
+                            if(Math.abs(clsDoca)<Math.abs(doca) && Math.abs(clsDoca)<cls.get_CentroidError()*5) {
+                                clusterMap.replace(key, cls);
+                                doca = clsDoca;
+                            }                           
+                        }
                     }
                 }
             }
-            if(cluster!=null) clustersOnTrack.add(cluster);
         }
-        return clustersOnTrack;        
+        // if any lost cluster with doca better than the seed is found, save it
+        List<Cluster> clustersOnTrack = new ArrayList<>();
+        for(Entry<Integer,Cluster> entry : clusterMap.entrySet()) {
+            if(entry.getValue().get_AssociatedTrackID()==-1) clustersOnTrack.add(entry.getValue());
+        }
+        return clustersOnTrack;
     }
     
-    public List<Cluster> FindClustersOnTrk (List<Cluster> allClusters, Helix helix, double P, int Q,
+    public List<Cluster> FindClustersOnTrk (List<Cluster> allClusters, List<Cluster> seedCluster, Helix helix, double P, int Q,
             SVTGeometry sgeo, Swim swimmer) { 
         Map<Integer, Cluster> clusMap = new HashMap<Integer, Cluster>();
         //Map<Integer, Double> stripMap = new HashMap<Integer, Double>();
@@ -351,13 +364,21 @@ public class RecUtilities {
             inters = swimmer.SwimToPlaneBoundary(d/10.0, n, 1);
             if(inters!=null) {
                 Point3D trp = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
-                double nearstp = sgeo.calcNearestStrip(inters[0]*10, inters[1]*10, inters[2]*10, layer, sector);
+                int nearstp = sgeo.calcNearestStrip(inters[0]*10, inters[1]*10, inters[2]*10, layer, sector);
                 //stripMap.put((sector*1000+layer), nearstp);
-                docaMap.put((sector*1000+layer), 10.0);//sgeo.getDOCAToStrip(sector, layer, nearstp, trp)); 
+                docaMap.put((sector*1000+layer), sgeo.getDoca(layer, sector, nearstp, trp)); 
                 trajMap.put((sector*1000+layer), trp); 
             }
         }
+        for(Cluster cls : seedCluster) {
+            if(cls.get_Detector() == DetectorType.BMT)
+                continue;
+            int clsKey = cls.get_Sector()*1000+cls.get_Layer();
+            clusMap.put(clsKey, cls);
+        }
         for(Cluster cls : allClusters) {
+            if(cls.get_Detector() == DetectorType.BMT)
+                continue;
             int clsKey = cls.get_Sector()*1000+cls.get_Layer();
             if(cls.get_AssociatedTrackID()==-1 && trajMap!=null && trajMap.get(clsKey)!=null) {
                 //double trjCent = stripMap.get(clsKey);
@@ -377,6 +398,11 @@ public class RecUtilities {
         List<Cluster> clustersOnTrack = new ArrayList<Cluster>();
         for(Cluster cl : clusMap.values()) {
             clustersOnTrack.add(cl);
+        }
+        // RDV can lead to duplicates
+        for(Cluster cls : seedCluster) {
+            if(cls.get_Detector() == DetectorType.BMT)
+                clustersOnTrack.add(cls);
         }
         return clustersOnTrack;
     }
@@ -458,8 +484,18 @@ public class RecUtilities {
                 if (trkcand.get_Crosses().get(c).get_Type()==BMTType.C) {
                     double z = trkcand.get_Crosses().get(c).get_Point().z();
                     double err = trkcand.get_Crosses().get(c).get_Cluster1().get_ZErr();
-                    trkcand.get_Crosses().get(c).set_Point(new Point3D(p.x(),p.y(),
-                            trkcand.get_Crosses().get(c).get_Cluster1().center().z()));
+                    //trkcand.get_Crosses().get(c).set_Point(new Point3D(p.x(),p.y(),
+                    //        trkcand.get_Crosses().get(c).get_Cluster1().center().z()));
+                    Point3D localArc = new Point3D(trkcand.get_Crosses().get(c).get_Cluster1().center());
+                    trkcand.get_Crosses().get(c).get_Cluster1().toLocal().apply(localArc);
+                    Point3D localTrj = new Point3D(p);
+                    trkcand.get_Crosses().get(c).get_Cluster1().toLocal().apply(localArc);
+                    trkcand.get_Crosses().get(c).get_Cluster1().toLocal().apply(localTrj);
+                    Point3D crs = new Point3D(localTrj.x(), localTrj.y(),localArc.z());
+                   
+                    Point3D newCrossPoint = new Point3D(localTrj.x(),localTrj.y(),localArc.z());
+                    trkcand.get_Crosses().get(c).get_Cluster1().toGlobal().apply(newCrossPoint);
+                    trkcand.get_Crosses().get(c).set_Point(p);
                     cluster.set_CentroidResidual(traj.get(layer).resi);
                     cluster.set_SeedResidual(p); 
                     for (FittedHit hit : cluster) {

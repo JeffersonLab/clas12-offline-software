@@ -385,18 +385,27 @@ public class Helix {
         
         double x;
         double y;
-        
+        double xp = 0;
+        double xm = 0;
+        double yp = 0;
+        double ym = 0;
+        if( Math.abs(getYc()) >1.e-09) {
         double a = 0.5 * (r * r - getR() * getR() + getXc() * getXc() + getYc() * getYc()) / getYc();
-        double b = -getXc() / getYc();
+            double b = -getXc() / getYc();
 
-        double delta = a * a * b * b - (1 + b * b) * (a * a - r * r);
+            double delta = a * a * b * b - (1 + b * b) * (a * a - r * r);
 
-        double xp = (-a * b + Math.sqrt(delta)) / (1 + b * b);
-        double xm = (-a * b - Math.sqrt(delta)) / (1 + b * b);
+            xp = (-a * b + Math.sqrt(delta)) / (1 + b * b);
+            xm = (-a * b - Math.sqrt(delta)) / (1 + b * b);
 
-        double yp = a + b * xp;
-        double ym = a + b * xm;
-        
+            yp = a + b * xp;
+            ym = a + b * xm;
+        } else {
+            xm = (getXc()*getXc()-getR()*getR()+r*r)/(2*getXc());
+            xp = xm;
+            ym = Math.sqrt(r*r-xm*xm); 
+            yp = Math.sqrt(r*r-xp*xp);
+        }
         //double Cp = new Vector3D(xp,yp,0).asUnit().dot(new Vector3D(Math.cos(getPhi0()), Math.sin(getPhi0()),0));
         //double Cm = new Vector3D(xm,ym,0).asUnit().dot(new Vector3D(Math.cos(getPhi0()), Math.sin(getPhi0()),0));
         double Np = Math.sqrt(xp*xp+yp*yp);

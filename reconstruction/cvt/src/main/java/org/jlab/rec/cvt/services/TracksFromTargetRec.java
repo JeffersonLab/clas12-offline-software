@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.rec.cvt.services;
 
 import Jama.Matrix;
@@ -135,7 +130,7 @@ public class TracksFromTargetRec {
                         }
                     }
                     //refit adding missing clusters
-                    List<Cluster> clsOnTrack = recUtil.FindClustersOnTrkNew(SVTclusters, fittedTrack.get_helix(), 
+                    List<Cluster> clsOnTrack = recUtil.FindClustersOnTrkNew(SVTclusters, seed.get_Clusters(), fittedTrack.get_helix(), 
                             fittedTrack.get_P(), fittedTrack.get_Q(), SVTGeom, swimmer);
                     if(clsOnTrack.size()>0) {
                         seed.get_Clusters().addAll(clsOnTrack);
