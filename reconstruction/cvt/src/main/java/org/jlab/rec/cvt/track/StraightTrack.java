@@ -1,11 +1,11 @@
 package org.jlab.rec.cvt.track;
 
-import java.util.HashMap;
 import java.util.Map;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
-import org.jlab.rec.cvt.svt.Geometry;
+import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.trajectory.Ray;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 
@@ -32,9 +32,9 @@ public class StraightTrack extends Trajectory{
      * @param fit_yzslope
      * @param geo
      */
-    public void update_Crosses(double fit_yxslope, double fit_yzslope, Geometry geo) {
+    public void update_Crosses(double fit_yxslope, double fit_yzslope, SVTGeometry geo) {
         for (Cross c : this) {
-            if (c.get_Detector().equalsIgnoreCase("SVT")) //only update for the svt
+            if (c.get_Detector()==DetectorType.BST) //only update for the svt
             { 
                 update_Cross(c, fit_yxslope, fit_yzslope, geo);
             }
@@ -43,7 +43,7 @@ public class StraightTrack extends Trajectory{
     }
     public void reset_Crosses() {
         for (Cross c : this) {
-            if (c.get_Detector().equalsIgnoreCase("SVT")) //only update for the svt
+            if (c.get_Detector()==DetectorType.BST) //only update for the svt
             { 
                 c.set_Point(c.get_Point0());
             }
@@ -60,7 +60,7 @@ public class StraightTrack extends Trajectory{
      * @param fit_yzslope
      * @param geo
      */
-    public void update_Cross(Cross cross, double fit_yxslope, double fit_yzslope, Geometry geo) {
+    public void update_Cross(Cross cross, double fit_yxslope, double fit_yzslope, SVTGeometry geo) {
 
         double x = fit_yxslope / Math.sqrt(fit_yxslope * fit_yxslope + fit_yzslope * fit_yzslope + 1);
         double y = 1. / Math.sqrt(fit_yxslope * fit_yxslope + fit_yzslope * fit_yzslope + 1);

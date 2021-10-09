@@ -19,6 +19,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.banks.HitReader;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cluster.ClusterFinder;
@@ -27,6 +28,8 @@ import org.jlab.rec.cvt.cross.CrossMaker;
 import org.jlab.rec.cvt.hit.ADCConvertor;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
+import org.jlab.rec.cvt.svt.SVTGeometry;
+import org.jlab.rec.cvt.svt.SVTParameters;
 
 /**
  * Service to return reconstructed TRACKS
@@ -37,8 +40,8 @@ import org.jlab.rec.cvt.hit.Hit;
  */
 public class CVTRecNewKF extends ReconstructionEngine {
 
-    org.jlab.rec.cvt.svt.Geometry SVTGeom;
-    org.jlab.rec.cvt.bmt.BMTGeometry BMTGeom;
+    SVTGeometry       SVTGeom;
+    BMTGeometry       BMTGeom;
     CTOFGeant4Factory CTOFGeom;
     Detector          CNDGeom ;
     SVTStripFactory svtIdealStripFactory;
@@ -48,8 +51,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
     public CVTRecNewKF() {
         super("CVTTracks", "ziegler", "4.0");
         
-        SVTGeom = new org.jlab.rec.cvt.svt.Geometry();
-        BMTGeom = new org.jlab.rec.cvt.bmt.BMTGeometry();
+        BMTGeom = new BMTGeometry();
         strgtTrksRec = new CosmicTracksRec();
         trksFromTargetRec = new TracksFromTargetRec();
     }
@@ -88,7 +90,6 @@ public class CVTRecNewKF extends ReconstructionEngine {
             this.setFieldsConfig(newConfig);
         }
         FieldsConfig = newConfig;
-
         // Load the constants
         //-------------------
         int newRun = bank.getInt("run", 0); 
@@ -105,7 +106,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
             Constants.setSolenoidVal(Math.abs(b[2]));
             Constants.Load(isCosmics, isSVTonly);
             this.setRun(newRun); 
-            
+           
             if(newRun<100) { 
                 org.jlab.rec.cvt.bmt.Constants.isMC = true;
             } else {
@@ -153,7 +154,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
         List<Hit> hits = new ArrayList<Hit>();
         //I) get the hits
         List<Hit> svt_hits = hitRead.get_SVTHits();
-        if(svt_hits.size()>org.jlab.rec.cvt.svt.Constants.MAXSVTHITS)
+        if(svt_hits.size()>SVTParameters.MAXSVTHITS)
             return true;
         if (svt_hits != null && svt_hits.size() > 0) {
             hits.addAll(svt_hits);
@@ -181,9 +182,9 @@ public class CVTRecNewKF extends ReconstructionEngine {
 
         //2) find the clusters from these hits
         ClusterFinder clusFinder = new ClusterFinder();
-        clusters.addAll(clusFinder.findClusters(svt_hits, SVTGeom, BMTGeom));     
+        clusters.addAll(clusFinder.findClusters(svt_hits));     
         if(bmt_hits != null && bmt_hits.size() > 0) {
-            clusters.addAll(clusFinder.findClusters(bmt_hits, SVTGeom, BMTGeom)); 
+            clusters.addAll(clusFinder.findClusters(bmt_hits)); 
         }
         if (clusters.size() == 0) {
             rbc.appendCVTBanks(event, SVThits, BMThits, null, null, null, null, shift);
@@ -193,11 +194,11 @@ public class CVTRecNewKF extends ReconstructionEngine {
         // fill the fitted hits list.
         if (clusters.size() != 0) {
             for (int i = 0; i < clusters.size(); i++) {
-                if (clusters.get(i).get_Detector() == 0) {
+                if (clusters.get(i).get_Detector() == DetectorType.BST) {
                     SVTclusters.add(clusters.get(i));
                     SVThits.addAll(clusters.get(i));
                 }
-                if (clusters.get(i).get_Detector() == 1) {
+                if (clusters.get(i).get_Detector() == DetectorType.BMT) {
                     BMTclusters.add(clusters.get(i));
                     BMThits.addAll(clusters.get(i));
                 }
@@ -207,7 +208,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
         List<ArrayList<Cross>> crosses = new ArrayList<ArrayList<Cross>>();
         CrossMaker crossMake = new CrossMaker();
         crosses = crossMake.findCrosses(clusters, SVTGeom, BMTGeom);
-        if(crosses.get(0).size() > org.jlab.rec.cvt.svt.Constants.MAXSVTCROSSES ) {
+        if(crosses.get(0).size() > SVTParameters.MAXSVTCROSSES ) {
             rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, null, null, shift);
             return true; 
         }
@@ -321,23 +322,23 @@ public class CVTRecNewKF extends ReconstructionEngine {
         if(exlyrsnb>0)
             exclLayrs = true;
         
-        //new clustering
-        String newClustering = this.getEngineConfigString("newclustering");
-        
-        if (newClustering!=null) {
-            System.out.println("["+this.getName()+"] run with new clustering settings "+newClustering+" config chosen based on yaml");
-            org.jlab.rec.cvt.bmt.Constants.newClustering= Boolean.valueOf(newClustering);
-        }
-        else {
-            newClustering = System.getenv("COAT_CVT_NEWCLUSTERING");
-            if (newClustering!=null) {
-                System.out.println("["+this.getName()+"] run with new clustering settings "+newClustering+" config chosen based on env");
-                org.jlab.rec.cvt.bmt.Constants.newClustering= Boolean.valueOf(newClustering);
-            }
-        }
-        if (newClustering==null) {
-             System.out.println("["+this.getName()+"] run with newclustering settings default = false");
-        }
+//        //new clustering
+//        String newClustering = this.getEngineConfigString("newclustering");
+//        
+//        if (newClustering!=null) {
+//            System.out.println("["+this.getName()+"] run with new clustering settings "+newClustering+" config chosen based on yaml");
+//            org.jlab.rec.cvt.bmt.Constants.newClustering= Boolean.valueOf(newClustering);
+//        }
+//        else {
+//            newClustering = System.getenv("COAT_CVT_NEWCLUSTERING");
+//            if (newClustering!=null) {
+//                System.out.println("["+this.getName()+"] run with new clustering settings "+newClustering+" config chosen based on env");
+//                org.jlab.rec.cvt.bmt.Constants.newClustering= Boolean.valueOf(newClustering);
+//            }
+//        }
+//        if (newClustering==null) {
+//             System.out.println("["+this.getName()+"] run with newclustering settings default = false");
+//        }
         
         // Load other geometries
         
@@ -356,7 +357,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
         cp = SVTConstants.connect( cp );
         cp.disconnect();  
         SVTStripFactory svtFac = new SVTStripFactory(cp, true);
-        SVTGeom.setSvtStripFactory(svtFac);
+        SVTGeom = new SVTGeometry(svtFac);
 
         return true;
     }

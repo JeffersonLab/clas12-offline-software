@@ -2,13 +2,13 @@ package org.jlab.rec.cvt.bmt;
 
 import java.util.Random;
 
-public class Geometry {
+public class OldGeometry {
 
-    public Geometry() {
+    public OldGeometry() {
 
     }
 
-    // Comments on the Geometry of the BMT 
+    // Comments on the OldGeometry of the BMT 
     //------------------------------------
     // The BMT geometry consists of 3 cylindical double layers of MicroMegas. 
     // The inner (i.e. closest to beam in double layer) layer contain longitudinal strips oriented in the Z direction. 
@@ -265,7 +265,7 @@ public class Geometry {
 
         int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
         //double sigma = Constants.SigmaDrift * Math.sqrt((Math.sqrt(x * x + y * y) - Constants.getCRCRADIUS()[num_region] + Constants.hStrip2Det) / Constants.hDrift);
-        double sigma = Constants.SigmaDrift * ((Math.sqrt(x * x + y * y) - Constants.getCRZRADIUS()[num_region] + Constants.hStrip2Det) / Constants.hDrift / Math.cos(Constants.getThetaL()));
+        double sigma = Constants.SigmaDrift * ((Math.sqrt(x * x + y * y) - Constants.getCRZRADIUS()[num_region] + Constants.hDrift/2) / Constants.hDrift / Math.cos(Constants.getThetaL()));
   
         return sigma;
 
@@ -282,7 +282,7 @@ public class Geometry {
     public double getSigmaAzimuth(int layer, double x, double y) { // sigma for Z-detectors
 
         int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6double Z0=0;
-        double sigma = Constants.SigmaDrift * Math.sqrt((Math.sqrt(x * x + y * y) - Constants.getCRZRADIUS()[num_region] + Constants.hStrip2Det) / Constants.hDrift / Math.cos(Constants.getThetaL()));
+        double sigma = Constants.SigmaDrift * Math.sqrt((Math.sqrt(x * x + y * y) - Constants.getCRZRADIUS()[num_region] + Constants.hDrift/2) / Constants.hDrift / Math.cos(Constants.getThetaL()));
 
         return sigma;
 
@@ -423,10 +423,10 @@ public class Geometry {
 
         double R_i = 0; // inner radius init
         double R_f = 0; // outer radius init for a C or Z detector
-        if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer) == 1) {
+        if (org.jlab.rec.cvt.bmt.OldGeometry.getZorC(layer) == 1) {
             R_i = Constants.getCRZRADIUS()[num_region]; // Z layer
         }
-        if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer) == 0) {
+        if (org.jlab.rec.cvt.bmt.OldGeometry.getZorC(layer) == 0) {
             R_i = Constants.getCRCRADIUS()[num_region]; // // C-dtectors 
         }
         R_f = R_i + Constants.hDrift;
@@ -549,7 +549,7 @@ public class Geometry {
         int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
         //return phi +( Constants.hDrift/2*Math.tan(Constants.getThetaL()) )/Constants.getCRZRADIUS()[num_region];
         //return phi + (Constants.hDrift * Math.tan(Constants.getThetaL())) / (Constants.getCRZRADIUS()[num_region]);
-        return phi + (Constants.hStrip2Det * Math.tan(Constants.getThetaL())) / (Constants.getCRZRADIUS()[num_region]);
+        return phi + (Constants.hDrift/2 * Math.tan(Constants.getThetaL())) / (Constants.getCRZRADIUS()[num_region]);
     }
     public void SetLorentzAngle(int layer, int sector) {
      	org.jlab.rec.cvt.bmt.Constants.setThetaL(layer, sector); 
@@ -566,7 +566,7 @@ public class Geometry {
     public static void main(String arg[]) {
 
         Constants.Load();
-        Geometry geo = new Geometry();
+        OldGeometry geo = new OldGeometry();
 
         double trk_z = 0;
 
@@ -635,7 +635,7 @@ public class Geometry {
 
         int num_region = (int) (layer + 1) / 2 - 1;
 
-        int axis = Geometry.getZorC(layer);
+        int axis = OldGeometry.getZorC(layer);
 
         double R = 0;
         if (axis == 0) {

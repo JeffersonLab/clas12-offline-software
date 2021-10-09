@@ -166,12 +166,12 @@ public class KFitter {
             double y = sv.trackTraj.get(k).y;
             double z = sv.trackTraj.get(k).z;
             double azi = sv.trackTraj.get(k).phi0 + sv.trackTraj.get(k).phi;
-            //System.out.println("Trj "+x+","+y+","+z);
             double invKappa = 1. / Math.abs(sv.trackTraj.get(k).kappa);
             double px = -invKappa * Math.sin(azi);
             double py = invKappa * Math.cos(azi);
             double pz = invKappa * sv.trackTraj.get(k).tanL;
-            TrjPoints.put(layer, new HitOnTrack(layer, x, y, z, px, py, pz));
+            double resi = mv.dh(k, sv.trackTraj.get(k));
+            TrjPoints.put(layer, new HitOnTrack(layer, x, y, z, px, py, pz, resi));
             if(mv.measurements.get(k).skip)
                 TrjPoints.get(layer).isMeasUsed = false;
             //System.out.println(" Traj layer "+layer+" x "+TrjPoints.get(layer).x+" y "+TrjPoints.get(layer).y+" z "+TrjPoints.get(layer).z);
@@ -411,9 +411,10 @@ public class KFitter {
         public double px;
         public double py;
         public double pz;
+        public double resi;
         public boolean isMeasUsed = true;
         
-        HitOnTrack(int layer, double x, double y, double z, double px, double py, double pz) {
+        HitOnTrack(int layer, double x, double y, double z, double px, double py, double pz, double resi) {
             this.layer = layer;
             this.x = x;
             this.y = y;
@@ -421,7 +422,7 @@ public class KFitter {
             this.px = px;
             this.py = py;
             this.pz = pz;
-
+            this.resi = resi;
         }
     }
 

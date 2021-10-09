@@ -18,6 +18,7 @@ import org.jlab.geom.prim.Arc3D;
 import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Vector3D;
 
 /**
@@ -100,21 +101,13 @@ public class MeasVecs {
             }
             
              if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.ARC) {
-                Point3D offset =this.measurements.get(stateVec.k).surface.cylShift;
-                Vector3D rotation = this.measurements.get(stateVec.k).surface.cylRotation;
+                Transformation3D toLocal =this.measurements.get(stateVec.k).surface.toLocal();
                 Arc3D arc = new Arc3D();
-                arc.copy(this.measurements.get(stateVec.k).surface.strip.getArc());
-                Point3D arccen = arc.center();
-                arccen.translateXYZ(-offset.x(), -offset.y(), -offset.z());
-                arccen.rotateZ(-rotation.z());
-                arccen.rotateY(-rotation.y());
-                arccen.rotateX(-rotation.x());
-                Point3D stV = new Point3D(stateVec.x, stateVec.y, stateVec.z);
-                stV.translateXYZ(-offset.x(), -offset.y(), -offset.z());
-                stV.rotateZ(-rotation.z());
-                stV.rotateY(-rotation.y());
-                stV.rotateX(-rotation.x());
-                value = stV.z()-arccen.z();
+                arc.copy(this.measurements.get(stateVec.k).surface.strip.getArc()); 
+                toLocal.apply(arc);
+                Point3D stV = new Point3D(stateVec.x, stateVec.y, stateVec.z); 
+                toLocal.apply(stV);
+                value = stV.z()-arc.center().z(); 
             }
              
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.PHI) {
@@ -195,14 +188,10 @@ public class MeasVecs {
                value = stateVec.z;
             }
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.ARC) {
-                Point3D offset =this.measurements.get(stateVec.k).surface.cylShift;
-                Vector3D rotation = this.measurements.get(stateVec.k).surface.cylRotation;
-                Point3D stV = new Point3D(stateVec.x, stateVec.y, stateVec.z);
-                stV.translateXYZ(-offset.x(), -offset.y(), -offset.z());
-                stV.rotateZ(-rotation.z());
-                stV.rotateY(-rotation.y());
-                stV.rotateX(-rotation.x());
-                value = stV.z();
+                Transformation3D toLocal =this.measurements.get(stateVec.k).surface.toLocal();
+                Point3D stV = new Point3D(stateVec.x, stateVec.y, stateVec.z); 
+                toLocal.apply(stV);
+                value = stV.z(); 
             }
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.PHI) {
                //value = Math.atan2(stateVec.y, stateVec.x);

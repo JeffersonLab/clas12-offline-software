@@ -1,8 +1,8 @@
 package org.jlab.rec.cvt.cluster;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
 
@@ -16,14 +16,14 @@ public class ClusterFinder {
     public ClusterFinder() {
 
     }
-
+    
     // cluster finding algorithm
     // the loop is done over sectors 
     Hit[][][] HitArray;
     int nstrip = 1200; // max number of strips
     int nlayr = 6;
     int nsec = 18;
-    public ArrayList<Cluster> findClusters(List<Hit> hits2,org.jlab.rec.cvt.svt.Geometry geo_bst,org.jlab.rec.cvt.bmt.BMTGeometry geo_bmt) // the number of strips depends on the layer 
+    public ArrayList<Cluster> findClusters(List<Hit> hits2) // the number of strips depends on the layer 
     {
         ArrayList<Cluster> clusters = new ArrayList<Cluster>();
 
@@ -67,28 +67,43 @@ public class ClusterFinder {
                         // strip until there's a strip with no hit
                         while ((si < nstrip - 1 && HitArray[si + 1][l][s] != null) || (HitArray[si][l][s] != null && si < nstrip)) {
                             if (HitArray[si][l][s] != null) { // continue clustering skipping over bad hit
-                                FittedHit hitInCls = new FittedHit(HitArray[si][l][s].get_Detector(), HitArray[si][l][s].get_DetectorType(), HitArray[si][l][s].get_Sector(), HitArray[si][l][s].get_Layer(), HitArray[si][l][s].get_Strip());
+                                FittedHit hitInCls = new FittedHit(HitArray[si][l][s].get_Detector(), HitArray[si][l][s].get_Type(), HitArray[si][l][s].get_Sector(), HitArray[si][l][s].get_Layer(), HitArray[si][l][s].get_Strip());
                                 hitInCls.set_Id(HitArray[si][l][s].get_Id());
 
                                 hits.add(hitInCls);
                             }
                             si++;
                         }
-
+                    
                         // define new cluster 
-                        Cluster this_cluster = new Cluster(hits.get(0).get_Detector(), hits.get(0).get_DetectorType(), hits.get(0).get_Sector(), l + 1, cid++);
+                        Cluster this_cluster = new Cluster(hits.get(0).get_Detector(), hits.get(0).get_Type(), hits.get(0).get_Sector(), l + 1, cid++);
                         this_cluster.set_Id(clusters.size() + 1);
                         // add hits to the cluster
                         this_cluster.addAll(hits); 
-                        for (FittedHit h : hits) { 
-                            h.set_AssociatedClusterID(this_cluster.get_Id());
+                        if(hits.size()>2) {
+                            for(int hi = 1; hi<hits.size()-1; hi++) { //interpolate between neighboring strips
+                                if(hits.get(hi).get_Strip().get_Edep()<hits.get(hi-1).get_Strip().get_Edep()
+                                        && hits.get(hi).get_Strip().get_Edep()<hits.get(hi+1).get_Strip().get_Edep()) {
+                                    hits.get(hi).get_Strip().set_Edep(0.5*(hits.get(hi-1).get_Strip().get_Edep()+hits.get(hi+1).get_Strip().get_Edep()));
+                                }
+                            }
                         }
-
-                        this_cluster.calc_CentroidParams(geo_bst,geo_bmt);
-                        //make arraylist
+                        for (FittedHit h : hits) {
+                            h.set_AssociatedClusterID(this_cluster.get_Id());
+                            h.newClustering = true; 
+                        }
+                        
+                        this_cluster.calc_CentroidParams();
+                       
+                        for (FittedHit h : this_cluster) {
+                            h.newClustering = false;
+                        }
+                        Collections.sort(this_cluster);
+                       
+                        //make list of clusters
                         clusters.add(this_cluster);
-
                     }
+                    
                     // if no hits, check for next wire coordinate
                     si++;
                 }

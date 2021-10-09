@@ -2,6 +2,7 @@ package org.jlab.rec.cvt.bmt;
 
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Vector3D;
 
 public class Constants {
@@ -9,7 +10,7 @@ public class Constants {
     private Constants() {
 
     }
-    public static boolean newClustering = false;
+    
     public static boolean isMC = true;
     /*
  * The algorithm to describe the geometry of the Barrel Micromegas is provided by Franck Sabatie and implemented into the Java framework.
@@ -18,13 +19,14 @@ public class Constants {
    The angles are defined with theZ-axis oriented from the accelerator to the beam dump.
      */
     //CUTS
+    public static double MAXCLUSSIZE = 5;
     public static int MAXBMTHITS = 700;
+    //public static final int STARTINGLAYR = 5;						// current configuration is 3 SVT + 3BMT (outermost BST ring)
+    public static double ETOTCUT = 0.0;
     // THE GEOMETRY CONSTANTS
     public static final int NREGIONS = 3;						// 3 regions of MM 
     public static final int NLAYERS   = NREGIONS*2;					// 6 layer
     public static final int NSECTORS  = 3;						// 3 sectors or tiles per layer
-    //public static final int STARTINGLAYR = 5;						// current configuration is 3 SVT + 3BMT (outermost BST ring)
-    public static double ETOTCUT = 0.0;
     //Z detector characteristics
     private static double[] CRZRADIUS = new double[NREGIONS]; 		// the radius of the Z detector in mm
     private static int[] CRZNSTRIPS = new int[NREGIONS]; 			// the number of strips
@@ -68,11 +70,12 @@ public class Constants {
     public static final double SigmaDrift = 0.036; 				// Max transverse diffusion value (GEMC value)
     
     public static final double hDrift = 3.0; 					// Size of the drift gap
-    public static final double hStrip2Det = hDrift / 2;                         // distance between strips and the middle of the conversion gap (~half the drift gap)
-
+    
     public static Point3D[][]  shifts    = new Point3D[NLAYERS][NSECTORS];  // detector alignment shifts
     public static Vector3D[][] rotations = new Vector3D[NLAYERS][NSECTORS]; // detector alignment rotations
     public static Line3D[][]   axes = new Line3D[NLAYERS][NSECTORS];        // detector axes
+    public static Transformation3D[][] toLocal  = new Transformation3D[NLAYERS][NSECTORS];
+    public static Transformation3D[][] toGlobal = new Transformation3D[NLAYERS][NSECTORS];
     public static double[][] Rx= new double[NREGIONS*2][3];   //Angle to rotate the det around x-axis
     public static double[][] Ry= new double[NREGIONS*2][3];   //Angle to rotate the det around y-axis
     public static double[][] Rz= new double[NREGIONS*2][3];   //Angle to rotate the det around z-axis
@@ -83,10 +86,10 @@ public class Constants {
     public static double[] E_grid = new double[405];         //Electric field value of the grid
     public static double[] B_grid = new double[405];        //Magnetic field value of the grid
     public static double ThetaL = 0; 						// the Lorentz angle for 5-T B-field
-    public static double emin=0;                          //Emin of the grid
+    public static double emin=Double.MAX_VALUE;           //Emin of the grid
     public static double emax=0;                          //Emax of the grid
     public static double bmax=0;                          //Bmax of the grid
-    public static double bmin=0;                          //Bmin of the grid
+    public static double bmin=Double.MAX_VALUE;           //Bmin of the grid
     public static int Ne=0;                               //Number of step for the electric field
     public static int Nb=0;                               //Number of step for the magnetic field
   

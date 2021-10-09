@@ -204,6 +204,12 @@ public final class Arc3D implements Transformable, Showable {
         return new Point3D(center, v);
     }
     
+    public Vector3D bisect() {
+        Point3D  midpoint = this.point(theta/2);
+        Vector3D bisect   = center.vectorTo(midpoint).asUnit();
+        return bisect;
+    }
+    
     @Override
     public void translateXYZ(double dx, double dy, double dz) {
         origin.translateXYZ(dx, dy, dz);

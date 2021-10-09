@@ -7,10 +7,9 @@ package org.jlab.rec.cvt.services;
 
 import Jama.Matrix;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Point3D;
@@ -20,6 +19,7 @@ import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
+import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.StraightTrackCrossListFinder;
@@ -43,7 +43,7 @@ public class TracksFromTargetRec {
             List<FittedHit> SVThits, List<FittedHit> BMThits, 
             List<Cluster> SVTclusters, List<Cluster> BMTclusters, 
             List<ArrayList<Cross>> crosses,
-            org.jlab.rec.cvt.svt.Geometry SVTGeom, org.jlab.rec.cvt.bmt.BMTGeometry BMTGeom,
+            SVTGeometry SVTGeom, BMTGeometry BMTGeom,
             CTOFGeant4Factory CTOFGeom, Detector CNDGeom,
             RecoBankWriter rbc,
             double shift, 
@@ -90,7 +90,7 @@ public class TracksFromTargetRec {
         for (Seed seed : seeds) { 
             org.jlab.clas.tracking.trackrep.Helix hlx = null ;
             
-            double xr =  -seed.get_Helix().get_dca()*Math.sin(seed.get_Helix().get_phi_at_dca());
+            double xr = -seed.get_Helix().get_dca()*Math.sin(seed.get_Helix().get_phi_at_dca());
             double yr =  seed.get_Helix().get_dca()*Math.cos(seed.get_Helix().get_phi_at_dca());
             double zr =  seed.get_Helix().get_Z0();
             double pt = Constants.LIGHTVEL * seed.get_Helix().radius() * Constants.getSolenoidVal();
@@ -104,7 +104,10 @@ public class TracksFromTargetRec {
                 charge = 1;
             xr += org.jlab.rec.cvt.Constants.getXb();
             yr += org.jlab.rec.cvt.Constants.getYb();
-            
+            //Uncomment to force to MC truth:
+//            double[] pars = recUtil.MCtrackPars(event);
+//            xr = pars[0];yr=pars[1];zr=pars[2];px=pars[3];py=pars[4];pz=pars[5];
+//            System.out.println(xr + " " + yr + " " + zr + " " + px + " " + py + " " + pz);
             hlx = new org.jlab.clas.tracking.trackrep.Helix(xr,yr,zr,px,py,pz, 
                     charge, Constants.getSolenoidVal(), org.jlab.rec.cvt.Constants.getXb(), 
                     org.jlab.rec.cvt.Constants.getYb(), org.jlab.clas.tracking.trackrep.Helix.Units.MM);
@@ -119,18 +122,20 @@ public class TracksFromTargetRec {
                     org.jlab.rec.cvt.Constants.getXb(), 
                     org.jlab.rec.cvt.Constants.getYb(),
                     shift, 
-                    recUtil.setMeasVecs(seed, SVTGeom, BMTGeom, swimmer)) ;
+                    recUtil.setMeasVecs(seed, swimmer)) ;
+                //Uncomment to let track be fitted
+                //kf.filterOn=false;
                 kf.runFitter(swimmer);
                 if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null) { 
                     Track fittedTrack = recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom);
                     for(Cross c : fittedTrack) { 
-                        if(c.get_Detector().equalsIgnoreCase("SVT")) {
+                        if(c.get_Detector()==DetectorType.BST) {
                             c.get_Cluster1().set_AssociatedTrackID(0);
                             c.get_Cluster2().set_AssociatedTrackID(0);
                         }
                     }
                     //refit adding missing clusters
-                    List<Cluster> clsOnTrack = recUtil.FindClustersOnTrk(SVTclusters, fittedTrack.get_helix(), 
+                    List<Cluster> clsOnTrack = recUtil.FindClustersOnTrkNew(SVTclusters, fittedTrack.get_helix(), 
                             fittedTrack.get_P(), fittedTrack.get_Q(), SVTGeom, swimmer);
                     if(clsOnTrack.size()>0) {
                         seed.get_Clusters().addAll(clsOnTrack);
@@ -151,6 +156,7 @@ public class TracksFromTargetRec {
                         charge = 1;
                     xr += org.jlab.rec.cvt.Constants.getXb();
                     yr += org.jlab.rec.cvt.Constants.getYb();
+//                    System.out.println(xr + " " + yr + " " + zr + " " + px + " " + py + " " + pz);
                     hlx = new org.jlab.clas.tracking.trackrep.Helix(xr,yr,zr,px,py,pz, 
                             charge, Constants.getSolenoidVal(), org.jlab.rec.cvt.Constants.getXb(), 
                             org.jlab.rec.cvt.Constants.getYb(), org.jlab.clas.tracking.trackrep.Helix.Units.MM);
@@ -159,10 +165,15 @@ public class TracksFromTargetRec {
                     org.jlab.rec.cvt.Constants.getXb(), 
                     org.jlab.rec.cvt.Constants.getYb(),
                     shift, 
-                    recUtil.setMeasVecs(seed, SVTGeom, BMTGeom, swimmer)) ;
+                    recUtil.setMeasVecs(seed, swimmer)) ;
+                    //Uncomment to let track be fitted
+                    //kf.filterOn = false;
                     kf.runFitter(swimmer);
                     
-                    trkcands.add(recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom));
+                    Track trk = recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom);
+                    
+                    trkcands.add(trk);
+                    
                     trkcands.get(trkcands.size() - 1).set_TrackingStatus(seed.trkStatus);
                 }
             //} else {
@@ -187,6 +198,7 @@ public class TracksFromTargetRec {
         }
 
         //System.out.println( " *** *** trkcands " + trkcands.size() + " * trks " + trks.size());
+        // RDV: can it be done before doing trajectories??
         trkFinder.removeOverlappingTracks(tracks); //turn off until debugged
         // reset cross IDs
         for(int a = 0; a<2; a++) {
@@ -248,7 +260,7 @@ public class TracksFromTargetRec {
                 if( c.get_AssociatedTrackID() < 0 ) {
                         c.set_Dir( new Vector3D(0,0,0));
                         c.set_DirErr( new Vector3D(0,0,0));
-                        if( c.get_DetectorType()==BMTType.C) {
+                        if( c.get_Type()==BMTType.C) {
                             c.set_Point(new Point3D(Double.NaN,Double.NaN,c.get_Point().z()));
                         }
                         else {

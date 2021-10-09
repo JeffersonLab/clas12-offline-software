@@ -17,6 +17,7 @@ import org.jlab.geom.prim.Arc3D;
 import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Vector3D;
 
 /**
@@ -40,6 +41,7 @@ public class MeasVecs {
                 mvec.error = mvec.surface.getError();
             mvec.l_over_X0 = mvec.surface.getl_over_X0(); 
             mvec.skip = mvec.surface.notUsedInFit;
+            mvec.hemisphere = measSurfaces.get(i).hemisphere;
             measurements.add(mvec);
         }
     }
@@ -94,31 +96,31 @@ public class MeasVecs {
                 value = WL.length()*sideStrip; 
             }
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.Z) { 
-                value = stateVec.z-this.measurements.get(stateVec.k).surface.strip.getZ();
+                Transformation3D toLocal =this.measurements.get(stateVec.k).surface.toLocal();
+                Point3D stV = new Point3D(stateVec.x, stateVec.y, stateVec.z); 
+                toLocal.apply(stV);
+                value = stV.z()-this.measurements.get(stateVec.k).surface.strip.getZ();
             }
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.ARC) {
-                Point3D offset =this.measurements.get(stateVec.k).surface.cylShift;
-                Vector3D rotation = this.measurements.get(stateVec.k).surface.cylRotation;
+                Transformation3D toLocal =this.measurements.get(stateVec.k).surface.toLocal();
                 Arc3D arc = new Arc3D();
-                arc.copy(this.measurements.get(stateVec.k).surface.strip.getArc());
-                Point3D arccen = arc.center();
-                arccen.translateXYZ(-offset.x(), -offset.y(), -offset.z());
-                arccen.rotateZ(-rotation.z());
-                arccen.rotateY(-rotation.y());
-                arccen.rotateX(-rotation.x());
-                Point3D stV = new Point3D(stateVec.x, stateVec.y, stateVec.z);
-                stV.translateXYZ(-offset.x(), -offset.y(), -offset.z());
-                stV.rotateZ(-rotation.z());
-                stV.rotateY(-rotation.y());
-                stV.rotateX(-rotation.x());
-                value = stV.z()-arccen.z();
+                arc.copy(this.measurements.get(stateVec.k).surface.strip.getArc()); 
+                toLocal.apply(arc);
+                Point3D stV = new Point3D(stateVec.x, stateVec.y, stateVec.z); 
+                toLocal.apply(stV);
+                value = stV.z()-arc.center().z(); 
             }
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.PHI) {
-               value = this.getPhi(stateVec)-this.measurements.get(stateVec.k).surface.strip.getPhi();
+                Transformation3D toLocal =this.measurements.get(stateVec.k).surface.toLocal();
+                Point3D sv = new Point3D(stateVec.x, stateVec.y, stateVec.z);
+                toLocal.apply(sv);
+                value = sv.toVector3D().phi()-this.measurements.get(stateVec.k).surface.strip.getPhi();
+                if(Math.abs(value)>2*Math.PI) value-=Math.signum(value)*2*Math.PI;
             }
         }
         return value;
     }
+    
     
     public double getPhiATZ(StateVec stateVec) {
         Cylindrical3D cyl = this.measurements.get(stateVec.k).surface.cylinder;
@@ -132,15 +134,9 @@ public class MeasVecs {
     }
     
     public double getPhi(StateVec stateVec) {
-        Line3D cln = this.measurements.get(stateVec.k).surface.cylinder.getAxis();
-        
-        double v = (cln.origin().z()-stateVec.z)/cln.direction().z();
-        double xs = stateVec.x+v*cln.direction().x();
-        double ys = stateVec.y+v*cln.direction().y();
-        
-        Vector3D n = new Point3D(cln.origin().x(), cln.origin().y(), cln.origin().z()).
-                vectorTo(new Point3D(xs,ys,cln.origin().z())).asUnit();
-        return n.phi();
+        Point3D sv = new Point3D(stateVec.x, stateVec.y, stateVec.z);
+        this.measurements.get(stateVec.k).surface.toLocal().apply(sv);
+        return sv.toVector3D().phi();
     }
       
     public double h(int k, StateVec stateVec) {
@@ -191,14 +187,10 @@ public class MeasVecs {
                value = stateVec.z;
             }
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.ARC) {
-                Point3D offset =this.measurements.get(stateVec.k).surface.cylShift;
-                Vector3D rotation = this.measurements.get(stateVec.k).surface.cylRotation;
-                Point3D stV = new Point3D(stateVec.x, stateVec.y, stateVec.z);
-                stV.translateXYZ(-offset.x(), -offset.y(), -offset.z());
-                stV.rotateZ(-rotation.z());
-                stV.rotateY(-rotation.y());
-                stV.rotateX(-rotation.x());
-                value = stV.z();
+                Transformation3D toLocal =this.measurements.get(stateVec.k).surface.toLocal();
+                Point3D stV = new Point3D(stateVec.x, stateVec.y, stateVec.z); 
+                toLocal.apply(stV);
+                value = stV.z(); 
             }
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.PHI) {
                //value = Math.atan2(stateVec.y, stateVec.x);
@@ -277,7 +269,7 @@ public class MeasVecs {
         public double l_over_X0;
         //this is for energy loss
         public double Z_over_A_times_l;
-    
+        public double hemisphere = 1;
 
 
         @Override

@@ -1,17 +1,21 @@
 package org.jlab.rec.cvt.cross;
 
+import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.jlab.detector.base.DetectorType;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
-import org.jlab.rec.cvt.bmt.Constants;
 import org.jlab.rec.cvt.fit.LineFitPars;
 import org.jlab.rec.cvt.fit.LineFitter;
+import org.jlab.rec.cvt.svt.SVTGeometry;
+import org.jlab.rec.cvt.svt.SVTParameters;
 
 /**
  * A class with methods used to find lists of crosses. This is the Pattern
@@ -264,8 +268,7 @@ public class StraightTrackCrossListFinder {
      * @return find track guess with svt only
      */
     public CrossList findCosmicsCandidateCrossLists(List<ArrayList<Cross>> crosses,
-            org.jlab.rec.cvt.svt.Geometry svt_geo,
-            org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, int NbSVTRegions) {
+            SVTGeometry svt_geo, BMTGeometry bmt_geo, int NbSVTRegions) {
         CrossList crossLists = new CrossList();
         // start finding svt crosses
         ArrayList<Cross> svt_crosses = crosses.get(0);
@@ -350,7 +353,7 @@ public class StraightTrackCrossListFinder {
                     }
                     if (closestCross != null) // if there is a closest point it has to be within the cuts
                     {
-                        if (Math.abs(closestCross.get_Point0().x() - p.get_Point0().x()) < org.jlab.rec.cvt.svt.Constants.MAXDISTTOTRAJXY && Math.abs(closestCross.get_Point0().y() - p.get_Point0().y()) < org.jlab.rec.cvt.svt.Constants.MAXDISTTOTRAJXY) {
+                        if (Math.abs(closestCross.get_Point0().x() - p.get_Point0().x()) < SVTParameters.MAXDISTTOTRAJXY && Math.abs(closestCross.get_Point0().y() - p.get_Point0().y()) < SVTParameters.MAXDISTTOTRAJXY) {
                             crossList.add(closestCross);
 
                         }
@@ -394,8 +397,8 @@ public class StraightTrackCrossListFinder {
     private List<Double> errX = new ArrayList<Double>();
     private List<Double> errY = new ArrayList<Double>();
 
-    private ArrayList<Cross> get_XYTrajectory(List<Cross> crosses, org.jlab.rec.cvt.svt.Geometry svt_geo,
-            org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, int NbSVTRegions) {
+    private ArrayList<Cross> get_XYTrajectory(List<Cross> crosses, SVTGeometry svt_geo,
+            BMTGeometry bmt_geo, int NbSVTRegions) {
 
         ArrayList<Cross> projectedCrosses = new ArrayList<Cross>();
 
@@ -451,8 +454,7 @@ public class StraightTrackCrossListFinder {
      * @return calculated crosses on the trajectory in the xy plane
      */
     private ArrayList<Cross> get_CalcHitsOnTrackXY(double yxslope,
-            double yxinterc, org.jlab.rec.cvt.svt.Geometry svt_geo,
-            org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, int NbSVTRegions) {
+            double yxinterc, SVTGeometry svt_geo, BMTGeometry bmt_geo, int NbSVTRegions) {
 
         ArrayList<Cross> projectedCrosses = new ArrayList<Cross>();
         //Layer 1-8:
@@ -461,17 +463,18 @@ public class StraightTrackCrossListFinder {
                 continue;
             }
 
-            for (int s = 0; s < org.jlab.rec.cvt.svt.Constants.NSECT[l]; s++) {
+            for (int s = 0; s < SVTGeometry.NSECTORS[l]; s++) {
 
                 double epsilon = 1e-6;
-                Vector3D n = svt_geo.findBSTPlaneNormal(s + 1, l + 1);
-
+//                Vector3D n = svt_geo.findBSTPlaneNormal(s + 1, l + 1);
+                Vector3D n = svt_geo.getNormal(l+1, s+1);
+                
                 double dot = (n.x() * yxslope + n.y());
 
                 if (Math.abs(dot) < epsilon) {
                     continue;
                 }
-                double R = (org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l][0] + org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l + 1][0]) / 2.;
+                double R = svt_geo.getRegionRadius(l/2+1);
 
                 Vector3D w = new Vector3D(yxinterc - R * n.x(), -R * n.y(), 0);
 
@@ -479,10 +482,10 @@ public class StraightTrackCrossListFinder {
 
                 Vector3D Delt = new Vector3D(fac * yxslope + yxinterc - R * n.x(), fac - R * n.y(), 0);
 
-                if (Delt.mag() < org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH / 2) {
+                if (Delt.mag() < SVTGeometry.getActiveSensorWidth() / 2) {
                     double tX = fac * yxslope + yxinterc;
                     double tY = fac;
-                    Cross cross2D = new Cross("SVT", BMTType.UNDEFINED, s + 1, (int) (l + 2) / 2, -1); // 2-dimentional cross object corresponding to a point on the trajectory line in the xy plane
+                    Cross cross2D = new Cross(DetectorType.BST, BMTType.UNDEFINED, s + 1, (int) (l + 2) / 2, -1); // 2-dimentional cross object corresponding to a point on the trajectory line in the xy plane
                     cross2D.set_Point0(new Point3D(tX, tY, 0));
                     projectedCrosses.add(cross2D);
                 }
@@ -493,31 +496,30 @@ public class StraightTrackCrossListFinder {
         double[] t = new double[4];
         for (int r = 0; r < 3; r++) {
 
-            this.calcBMT2DPoint(yxslope,
-                    yxinterc, org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[r] + org.jlab.rec.cvt.bmt.Constants.hDrift, t);
+            this.calcBMT2DPoint(yxslope, yxinterc, bmt_geo.getRadiusMidDrift(bmt_geo.getLayer(r+1, BMTType.C)), t);
 
             //Cross cross2D1 = new Cross("BMT", BMTType.C, bmt_geo.isInSector((r + 1) * 2, Math.atan2(t[1], t[0]), Math.toRadians(Constants.isInSectorJitter)), r + 1, -1);
-            Cross cross2D1 = new Cross("BMT", BMTType.C, bmt_geo.getSector((r + 1) * 2, Math.atan2(t[1], t[0])), r + 1, -1);
+            Cross cross2D1 = new Cross(DetectorType.BMT, BMTType.C, bmt_geo.getSector((r + 1) * 2, Math.atan2(t[1], t[0])), r + 1, -1);
             cross2D1.set_Point0(new Point3D(t[0], t[1], 0)); 
             projectedCrosses.add(cross2D1);
             if (t[3] != t[1] && t[2] != t[0]) {
 
                 //Cross cross2D2 = new Cross("BMT", BMTType.C, bmt_geo.isInSector((r + 1) * 2, Math.atan2(t[3], t[2]), Math.toRadians(Constants.isInSectorJitter)), r + 1, -1);
-                Cross cross2D2 = new Cross("BMT", BMTType.C, bmt_geo.getSector((r + 1) * 2, Math.atan2(t[3], t[2])), r + 1, -1);
+                Cross cross2D2 = new Cross(DetectorType.BMT, BMTType.C, bmt_geo.getSector((r + 1) * 2, Math.atan2(t[3], t[2])), r + 1, -1);
                 cross2D2.set_Point0(new Point3D(t[2], t[3], 0)); 
                 projectedCrosses.add(cross2D2);
             }
             this.calcBMT2DPoint(yxslope,
-                    yxinterc, org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[r] + org.jlab.rec.cvt.bmt.Constants.hDrift, t);
+                    yxinterc, bmt_geo.getRadiusMidDrift(bmt_geo.getLayer(r+1, BMTType.Z)), t);
 
             //Cross cross2D3 = new Cross("BMT", BMTType.Z, bmt_geo.isInSector((r + 1) * 2, Math.atan2(t[1], t[0]), Math.toRadians(Constants.isInSectorJitter)), r + 1, -1);
-            Cross cross2D3 = new Cross("BMT", BMTType.Z, bmt_geo.getSector((r + 1) * 2, Math.atan2(t[1], t[0])), r + 1, -1);
+            Cross cross2D3 = new Cross(DetectorType.BMT, BMTType.Z, bmt_geo.getSector((r + 1) * 2, Math.atan2(t[1], t[0])), r + 1, -1);
             cross2D3.set_Point0(new Point3D(t[0], t[1], 0)); 
             projectedCrosses.add(cross2D3);
             if (t[3] != t[1] && t[2] != t[0]) {
 
                 //Cross cross2D4 = new Cross("BMT", BMTType.Z, bmt_geo.isInSector((r + 1) * 2, Math.atan2(t[3], t[2]), Math.toRadians(Constants.isInSectorJitter)), r + 1, -1);
-                Cross cross2D4 = new Cross("BMT", BMTType.Z, bmt_geo.getSector((r + 1) * 2, Math.atan2(t[3], t[2])), r + 1, -1);
+                Cross cross2D4 = new Cross(DetectorType.BMT, BMTType.Z, bmt_geo.getSector((r + 1) * 2, Math.atan2(t[3], t[2])), r + 1, -1);
                 cross2D4.set_Point0(new Point3D(t[2], t[3], 0)); 
                 projectedCrosses.add(cross2D4);
             }

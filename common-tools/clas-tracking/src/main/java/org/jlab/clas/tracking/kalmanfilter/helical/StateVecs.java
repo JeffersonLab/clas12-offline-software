@@ -12,6 +12,7 @@ import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.helical.MeasVecs.MeasVec;
 import org.jlab.clas.tracking.trackrep.Helix;
+import org.jlab.geom.prim.Line3D;
 
 
 public class StateVecs {
@@ -85,35 +86,44 @@ public class StateVecs {
             }
             
             if(this.straight) {
-                Vector3D u = new Vector3D(-(Math.signum(kVec.kappa)) * Math.sin(kVec.phi0),
-                                        (Math.signum(kVec.kappa)) * Math.cos(kVec.phi0),
-                                        (Math.signum(kVec.kappa)) * kVec.tanL).asUnit();
+                Vector3D u = new Vector3D((Math.signum(kVec.kappa)) * Math.sin(kVec.phi0),
+                                         -(Math.signum(kVec.kappa)) * Math.cos(kVec.phi0),
+                                         -(Math.signum(kVec.kappa)) * kVec.tanL).asUnit();
                 
                 if(mv.surface.plane!=null) {
-                    double alpha = (mv.surface.finitePlaneCorner2.y() - mv.surface.finitePlaneCorner1.y()) /
-                            (mv.surface.finitePlaneCorner2.x() - mv.surface.finitePlaneCorner1.x());
-                    double l = (alpha*(x-mv.surface.finitePlaneCorner1.x()) -(y-mv.surface.finitePlaneCorner1.y()))/(u.y() - alpha*u.x());
-                    
-                    kVec.x = x+l*u.x();
-                    kVec.y = y+l*u.y();
-                    kVec.z = z+l*u.z();
+                    Line3D toPln = new Line3D(new Point3D(x,y,z),u);
+                    Point3D inters = new Point3D();
+                    int ints = mv.surface.plane.intersection(toPln, inters);
+                    kVec.x = inters.x()  ;
+                    kVec.y = inters.y()  ;
+                    kVec.z = inters.z()  ;                    
                     
                 }
-                if(mv.surface.cylinder!=null) {
-                    double r = 0.5*(mv.surface.cylinder.baseArc().radius()+mv.surface.cylinder.highArc().radius());
-                    double delta = Math.sqrt((x*u.x()+y*u.y())*(x*u.x()+y*u.y())-(-r*r+x*x+y*y)*(u.x()*u.x()+u.y()*u.y()));
-                    double l = (-(x*u.x()+y*u.y())+delta)/(u.x()*u.x()+u.y()*u.y());
-                    double phi = Math.atan2(trackTraj.get(k-1).y,trackTraj.get(k-1).x);
-                    double phiref = Math.atan2(y+l*u.y(), x+l*u.x());
-                    
-                    if(Math.abs(phiref-phi)>Math.PI/2) {
-                        l = (-(x*u.x()+y*u.y())-delta)/(u.x()*u.x()+u.y()*u.y()); 
+                else if(mv.surface.cylinder!=null) {
+                    Point3D st   = new Point3D(x,y,z); 
+                    Vector3D stu = new Vector3D(u.x(),u.y(),u.z());
+                    mv.surface.toLocal().apply(st);
+                    mv.surface.toLocal().apply(stu);
+                
+                    double r = mv.surface.cylinder.baseArc().radius();
+                    double delta = Math.sqrt((st.x()*stu.x()+st.y()*stu.y())*(st.x()*stu.x()+st.y()*stu.y())-(-r*r+st.x()*st.x()+st.y()*st.y())*(stu.x()*stu.x()+stu.y()*stu.y()));
+                    double l = (-(st.x()*stu.x()+st.y()*stu.y())+delta)/(stu.x()*stu.x()+stu.y()*stu.y());
+                    if(Math.signum(st.y()+l*stu.y())!=mv.hemisphere) {
+                        l = (-(st.x()*stu.x()+st.y()*stu.y())-delta)/(stu.x()*stu.x()+stu.y()*stu.y()); 
                     } 
-                    
-                    kVec.x = x+l*u.x();
-                    kVec.y = y+l*u.y();
-                    kVec.z = z+l*u.z();
-                     
+                    Point3D cylInt = new Point3D(st.x()+l*stu.x(),st.y()+l*stu.y(),st.z()+l*stu.z());
+                    mv.surface.toGlobal().apply(cylInt);
+                    // RDV: should switch to use clas-geometry intersection method, not done now to alwys return a value
+//                    List<Point3D> inters = new ArrayList<>();
+//                    int ints = mv.surface.cylinder.intersection(toPln, inters);
+//                    if(ints==1) {
+//                        kVec.x = inters.get(0).x();
+//                        kVec.y = inters.get(0).y();
+//                        kVec.z = inters.get(0).z();
+//                    }
+                    kVec.x = cylInt.x();
+                    kVec.y = cylInt.y();
+                    kVec.z = cylInt.z();
                 }
                 value[0] = kVec.x;
                 value[1] = kVec.y;
@@ -171,7 +181,7 @@ public class StateVecs {
 
                 }
                 if(mv.surface.cylinder!=null) {
-                    double r = 0.5*(mv.surface.cylinder.baseArc().radius()+mv.surface.cylinder.highArc().radius());
+                    double r = mv.surface.cylinder.baseArc().radius();
                     if(useSwimmer==false) {
                         double stepSize = 5; //mm
                         int nSteps = (int) (r/stepSize);
@@ -194,7 +204,6 @@ public class StateVecs {
                         if(swimPars==null)
                             return null;
                     } else {
-
                         this.setTrackPars(kVec, swim);
                         Point3D p1 = new Point3D(mv.surface.cylinder.getAxis().origin().x()/units,
                                                  mv.surface.cylinder.getAxis().origin().y()/units,

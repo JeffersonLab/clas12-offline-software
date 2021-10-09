@@ -1,14 +1,15 @@
 package org.jlab.rec.cvt.cross;
 
+import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
 import java.util.Collections;
+import org.jlab.detector.base.DetectorType;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
-import org.jlab.rec.cvt.svt.Constants;
-import org.jlab.rec.cvt.svt.Geometry;
+import org.jlab.rec.cvt.svt.SVTGeometry;
 
 /**
  * The crosses are objects used to find tracks and are characterized by a 3-D
@@ -34,9 +35,9 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @param rid the cross ID (if there are only 3 crosses in the event, the ID
      * corresponds to the region index
      */
-    public Cross(String detector, BMTType detectortype, int sector, int region, int crid) {
+    public Cross(DetectorType detector, BMTType detectortype, int sector, int region, int crid) {
         this._Detector = detector;
-        this._DetectorType = detectortype;
+        this._Type = detectortype;
         this._Sector = sector;
         this._Region = region;
         this._Id = crid;
@@ -44,8 +45,8 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         this._usedInZRcand = false;
     }
     
-    private String _Detector;							//      the detector SVT or BMT
-    private BMTType _DetectorType;						//      the detector type for BMT, C or Z detector	
+    private DetectorType _Detector;							//      the detector SVT or BMT
+    private BMTType _Type;						//      the detector type for BMT, C or Z detector	
     private int _Sector;      							//	    sector [1...]
     private int _Region;    		 					//	    region [1,...]
     private int _OrderedRegion;                                                 // 1...3:SVT; 4...9: BMT
@@ -92,20 +93,20 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 		return true;
 	}
     
-    public String get_Detector() {
+    public DetectorType get_Detector() {
         return _Detector;
     }
 
-    public void set_Detector(String _Detector) {
+    public void set_Detector(DetectorType _Detector) {
         this._Detector = _Detector;
     }
 
-    public BMTType get_DetectorType() {
-        return _DetectorType;
+    public BMTType get_Type() {
+        return _Type;
     }
 
-    public void set_DetectorType(BMTType _DetectorType) {
-        this._DetectorType = _DetectorType;
+    public void set_Type(BMTType type) {
+        this._Type = type;
     }
 
     /**
@@ -358,7 +359,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     /**
      * Sets the cross parameters: the position and direction unit vector
      */
-    public void set_CrossParamsSVT(Vector3D dirAtBstPlane, Geometry geo) {
+    public void set_CrossParamsSVT(Vector3D dirAtBstPlane, SVTGeometry geo) {
 
         Cluster inlayerclus = this.get_Cluster1();
         Cluster outlayerclus = this.get_Cluster2();
@@ -367,7 +368,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         }
 
         double[] Params = geo.getCrossPars(outlayerclus.get_Sector(), outlayerclus.get_Layer(),
-                inlayerclus.get_Centroid(), outlayerclus.get_Centroid(), "lab", dirAtBstPlane);
+                inlayerclus.get_Centroid(), outlayerclus.get_Centroid(), dirAtBstPlane);
 
         double val = Params[0];
         if (Double.isNaN(val)) {
@@ -416,7 +417,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     public int get_SVTCosmicsRegion() {
 
         int theRegion = 0;
-        if (this.get_Detector().equalsIgnoreCase("SVT")) {
+        if (this.get_Detector()==DetectorType.BST) {
             /*
             if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[6][0] + Constants.MODULERADIUS[7][0]) * 0.5 < 15) {
                 if (this.get_Point0().y() > 0) {
@@ -452,7 +453,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
             */
              
 
-            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[4][0] + Constants.MODULERADIUS[5][0]) * 0.5 < 15) {
+            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(3) < 15) {
                 if (this.get_Point0().y() > 0) {
                     theRegion = 6;
                 } else {
@@ -460,7 +461,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
                 }
             }
 
-            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[2][0] + Constants.MODULERADIUS[3][0]) * 0.5 < 15) {
+            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(2) < 15) {
                 if (this.get_Point0().y() > 0) {
                     theRegion = 5;
                 } else {
@@ -468,7 +469,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
                 }
             }
 
-            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[0][0] + Constants.MODULERADIUS[1][0]) * 0.5 < 15) {
+            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(1) < 15) {
                 if (this.get_Point0().y() > 0) {
                     theRegion = 4;
                 } else {
@@ -542,24 +543,23 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 
     public static void main(String arg[]) {
 
-        Constants.Load();
         // Geometry geo = new Geometry();
 
         ArrayList<Cross> testList = new ArrayList<Cross>();
 
         for (int i = 0; i < 5; i++) {
-            Cross c1 = new Cross("SVT", BMTType.UNDEFINED, 1, 1, 1 + i);
+            Cross c1 = new Cross(DetectorType.BST, BMTType.UNDEFINED, 1, 1, 1 + i);
             c1.set_Point0(new Point3D(-1.2 - i, 66.87, 0));
             testList.add(c1);
         }
         for (int i = 0; i < 5; i++) {
-            Cross c1 = new Cross("SVT", BMTType.UNDEFINED, 1, 3, 1 + i);
+            Cross c1 = new Cross(DetectorType.BST, BMTType.UNDEFINED, 1, 3, 1 + i);
             c1.set_Point0(new Point3D(-1.2 + i, 123, 0));
             testList.add(c1);
         }
 
         for (int i = 0; i < 5; i++) {
-            Cross c1 = new Cross("SVT", BMTType.UNDEFINED, 1, 2, 1 + i);
+            Cross c1 = new Cross(DetectorType.BST, BMTType.UNDEFINED, 1, 2, 1 + i);
             c1.set_Point0(new Point3D(-1.2 - i, 95, 0));
             testList.add(c1);
         }
@@ -589,16 +589,6 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
             }
         }
 
-    }
-
-    public boolean isInFiducial(Geometry svt_geo) {
-        boolean pass = true;
-        Point3D LC = svt_geo.transformToFrame(this.get_Sector(), this.get_Cluster1().get_Layer(), this.get_Point().x(), this.get_Point().y(), this.get_Point().z(), "local", "");
-        if (((LC.x() < -0.10 || LC.x() > Constants.ACTIVESENWIDTH + 0.10))
-                || ((LC.z() < -1 || LC.z() > Constants.MODULELENGTH + 1))) {
-            pass = false;
-        }
-        return pass;
     }
 
 }

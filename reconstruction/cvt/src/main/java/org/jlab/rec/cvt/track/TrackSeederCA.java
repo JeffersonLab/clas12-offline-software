@@ -1,21 +1,20 @@
 package org.jlab.rec.cvt.track;
-import org.jlab.rec.cvt.track.MakerCA;
-import org.jlab.rec.cvt.track.Cell;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
 
-import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
-import org.jlab.rec.cvt.fit.CircleFitter;
 import org.jlab.rec.cvt.fit.HelicalTrackFitter;
 import org.jlab.rec.cvt.fit.LineFitPars;
 import org.jlab.rec.cvt.fit.LineFitter;
-import org.jlab.rec.cvt.svt.Constants;
+import org.jlab.rec.cvt.svt.SVTGeometry;
+import org.jlab.rec.cvt.svt.SVTParameters;
 
 public class TrackSeederCA {
 
@@ -28,8 +27,8 @@ public class TrackSeederCA {
     // Retrieve lists of crosses as track candidates
     // from the output of the cellular automaton   
     // it looks only for the maximum state, TODO: remove found candidate and continue
-    public List<ArrayList<Cross>> getCAcandidates( List<Cell> nodes, org.jlab.rec.cvt.svt.Geometry svt_geo, 
-            Swim swimmer ) {
+    public List<ArrayList<Cross>> getCAcandidates( List<Cell> nodes, SVTGeometry svt_geo, 
+            BMTGeometry bmt_geo, Swim swimmer ) {
 //System.out.println("\n\n\t ____inside get candidates___");
         List<ArrayList<Cross>> trCands = new ArrayList<ArrayList<Cross>>();
         List<ArrayList<Cell>> cellCands = new ArrayList<ArrayList<Cell>>();
@@ -78,7 +77,7 @@ public class TrackSeederCA {
       				  if( cn.get_state() >= ms ){
       					  ms = cn.get_state();
       					  if( neighbour.get_plane().equalsIgnoreCase("ZR") &&
-      							neighbour.get_c1().get_Detector().equalsIgnoreCase("SVT")  ){
+      							neighbour.get_c1().get_Detector()==DetectorType.BST){
 	      					  if( cn.get_length() < dist ){
 	      						  dist = cn.get_length();
 	      						  id = ic;
@@ -117,7 +116,7 @@ public class TrackSeederCA {
 //      		  System.out.println(" ");
       		  if( cand.get(0).get_plane().equalsIgnoreCase("XY")) {
 	  			  if( candlen > 2 ){
-	  				  if( fitSeed(getCrossFromCells(cand), svt_geo, 2, false, swimmer) != null) {
+	  				  if( fitSeed(getCrossFromCells(cand), svt_geo, bmt_geo, 2, false, swimmer) != null) {
 	  					  cellCands.add(cand);
 	  					  
 	  					  for( Cell n : cand ) {
@@ -192,9 +191,7 @@ public class TrackSeederCA {
     }
     TrackListFinder trkFinder = new TrackListFinder();
     public List<Seed> findSeed(List<Cross> svt_crosses, List<Cross> bmt_crosses, 
-    						   org.jlab.rec.cvt.svt.Geometry svt_geo, 
-    						   org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, 
-                                                   Swim swimmer) {
+    			   SVTGeometry svt_geo, BMTGeometry bmt_geo, Swim swimmer) {
        
         List<Seed> seedlist = new ArrayList<Seed>();
 
@@ -207,9 +204,9 @@ public class TrackSeederCA {
 //        Collections.sort(crosses);
         
         for(Cross c : bmt_crosses) { 
-            if(c.get_DetectorType()==BMTType.Z)
+            if(c.get_Type()==BMTType.Z)
                 crosses.add(c);
-            if(c.get_DetectorType()==BMTType.C) {
+            if(c.get_Type()==BMTType.C) {
                 bmtC_crosses.get(c.get_Sector()-1).add(c);	
             }
         }
@@ -219,7 +216,7 @@ public class TrackSeederCA {
         // run the cellular automaton over SVT and BMT_Z crosses
 
         List<Cell> xynodes = runCAMaker( "XY", 5, crosses, bmt_geo, swimmer); 
-        List<ArrayList<Cross>> xytracks =  getCAcandidates( xynodes, svt_geo, swimmer);
+        List<ArrayList<Cross>> xytracks =  getCAcandidates( xynodes, svt_geo, bmt_geo, swimmer);
 
 //        System.out.println( " XY tracks " + xytracks );
         //// TODO: TEST TEST TEST
@@ -237,7 +234,7 @@ public class TrackSeederCA {
 //        System.out.println(seedlist.size());
 	    for (int s = 0; s < seedCrosses.size(); s++) {
 	    	Collections.sort(seedCrosses.get(s));      // TODO: check why sorting matters
-                Track cand = fitSeed(seedCrosses.get(s), svt_geo, 5, false, swimmer);
+                Track cand = fitSeed(seedCrosses.get(s), svt_geo, bmt_geo, 5, false, swimmer);
                 if (cand != null) {
                     cands.add(cand);
                 }
@@ -255,7 +252,7 @@ public class TrackSeederCA {
 	        List<Cluster> clusters = new ArrayList<Cluster>(); 
                 Collections.sort(seed.get_Crosses());
 	        for(Cross c : seed.get_Crosses()) { 
-	            if(c.get_Detector().equalsIgnoreCase("SVT")) {
+	            if(c.get_Detector()==DetectorType.BST) {
 	                clusters.add(c.get_Cluster1());
 	                clusters.add(c.get_Cluster2());
                     } else {
@@ -332,8 +329,7 @@ public class TrackSeederCA {
     public List<ArrayList<Cross>> CAonRZ( 
                                         List<ArrayList<Cross>>xytracks , 
                                         List<ArrayList<Cross>> bmtC_crosses,
-                                        org.jlab.rec.cvt.svt.Geometry svt_geo, 
-                                        org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, 
+                                        SVTGeometry svt_geo, BMTGeometry bmt_geo, 
                                         Swim swimmer) {
       
       List<ArrayList<Cross>> seedCrosses = new ArrayList<ArrayList<Cross>>();
@@ -353,7 +349,7 @@ public class TrackSeederCA {
         //------------------------------------------------------------------
         int sector = -1;
         for( Cross c : xycross ){
-          if( c.get_Detector().equalsIgnoreCase("SVT")){
+          if( c.get_Detector()==DetectorType.BST){
             svtcrs.add(c);
 //            System.out.print( " " + c.get_Id() + " " +c.get_Detector() + " " + c.get_DetectorType() + " ; " );
           }
@@ -388,7 +384,7 @@ public class TrackSeederCA {
         // run the CAmaker
         List<Cell> zrnodes = runCAMaker( "ZR", 5, crsZR, bmt_geo, swimmer);
 //System.out.println(zrnodes);
-        List<ArrayList<Cross>> zrtracks =  getCAcandidates( zrnodes, svt_geo, swimmer);
+        List<ArrayList<Cross>> zrtracks =  getCAcandidates( zrnodes, svt_geo, bmt_geo, swimmer);
 
 //        System.out.println("sector" + sector + " len " + zrtracks.size());  
         
@@ -412,7 +408,7 @@ public class TrackSeederCA {
     		List<Double> EZ= new ArrayList<Double>();
     		
     		for( Cross c : zrcross ) {
-    			R.add( org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[c.get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det );
+    			R.add( bmt_geo.getRadiusMidDrift(c.get_Cluster1().get_Layer()));
     			Z.add( c.get_Point().z() );
     			EZ.add( c.get_PointErr().z());
     		}
@@ -433,13 +429,13 @@ public class TrackSeederCA {
 			   int l1 = c.get_Cluster1().get_Layer();
 			   int s1 = c.get_Cluster1().get_Sector();
 			   double c1 = c.get_Cluster1().get_Centroid();
-			   double r1 = org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l1-1][s1-1];
+			   double r1 = svt_geo.getLayerRadius(l1);
 			   double nstr1 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r1 - b)/m, l1, s1);
 
 			   int l2 = c.get_Cluster2().get_Layer();
 			   int s2 = c.get_Cluster2().get_Sector();
 			   double c2 = c.get_Cluster2().get_Centroid();
-			   double r2 = org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l2-1][s2-1];
+			   double r2 = svt_geo.getLayerRadius(l2);
 			   double nstr2 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r2 - b)/m, l2, s2);
 			   
 			   if( Math.abs( c1 - nstr1 ) < 8 && Math.abs( c2 - nstr2 ) < 8 )
@@ -454,14 +450,14 @@ public class TrackSeederCA {
 
           // add bmt z
           for( Cross c : xycross ){
-            if( c.get_Detector().equalsIgnoreCase("BMT")){
+            if( c.get_Detector()==DetectorType.BMT){
               seedCrosses.get(scsize-1).add(c); 
             }              
           }
 
           // add bmt c
           for( Cross c : zrcross ){
-            if( c.get_Detector().equalsIgnoreCase("BMT")){
+            if( c.get_Detector()==DetectorType.BMT){
               seedCrosses.get(scsize-1).add(c); 
             }              
           }
@@ -484,7 +480,7 @@ public class TrackSeederCA {
     float b[] = new float[3];
     
     public Track fitSeed(List<Cross> VTCrosses, 
-            org.jlab.rec.cvt.svt.Geometry svt_geo, int fitIter, boolean originConstraint,
+            SVTGeometry svt_geo, BMTGeometry bmt_geo, int fitIter, boolean originConstraint,
             Swim swimmer) {
         double chisqMax = Double.POSITIVE_INFINITY;
         Collections.sort(VTCrosses);
@@ -577,10 +573,9 @@ public class TrackSeederCA {
             if (bmtCSz > 0) {
                 for (int j = svtSz * useSVTdipAngEst; j < svtSz * useSVTdipAngEst + bmtCSz; j++) {
                     Z.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_Point().z());
-                    Rho.add(j, org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_Region() - 1]
-                            + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+                    Rho.add(j, bmt_geo.getRadiusMidDrift(BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_Cluster1().get_Layer()));
                     
-                    ErrRho.add(j, org.jlab.rec.cvt.bmt.Constants.hStrip2Det / Math.sqrt(12.));
+                    ErrRho.add(j, bmt_geo.getThickness()/2 / Math.sqrt(12.));
                     ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_PointErr().z());
                 }
             }
@@ -623,7 +618,7 @@ public class TrackSeederCA {
             //if(shift==0)
             if (fitTrk.get_chisq()[0] < chisqMax) {
                 chisqMax = fitTrk.get_chisq()[0];
-                if(chisqMax<Constants.CIRCLEFIT_MAXCHI2)
+                if(chisqMax<SVTParameters.CIRCLEFIT_MAXCHI2)
                     cand.update_Crosses(svt_geo);
 //                //i=fitIter;
             }

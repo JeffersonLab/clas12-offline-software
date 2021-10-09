@@ -1,5 +1,8 @@
 package org.jlab.rec.cvt.hit;
 
+import org.jlab.detector.base.DetectorType;
+import org.jlab.rec.cvt.bmt.BMTType;
+
 /**
  * A hit characterized by layer, sector, wire number, and Edep. The ADC to time
  * conversion has been done.
@@ -10,41 +13,41 @@ package org.jlab.rec.cvt.hit;
 public class Hit implements Comparable<Hit> {
     // class implements Comparable interface to allow for sorting a collection of hits by wire number values
 
+    private DetectorType _Detector;	       //   the detector SVT or BMT
+    private BMTType      _Type;             //   for the BMT, either C or Z
+
+    private int _Sector;      	       //	   sector[1...24] for SVT, [1..3] for BMT
+    private int _Layer;    	 	       //	   layer [1,...]
+    private Strip _Strip;    	       //	   Strip object
+
+    private int _Id;		       //    Hit Id
+    private int _Status; 		       //    Status -1 dead, 0 noisy, 1 good
+
     // constructor
-    public Hit(int detector, int detectortype, int sector, int layer, Strip strip) {
-        this._Detector = detector;                                              // 0 = SVT, 1 = BMT
-        this._DetectorType = detectortype;                                      // 0 = C, 1 = Z
-        this._Sector = sector;
-        this._Layer = layer;
-        this._Strip = strip;
+    public Hit(DetectorType detector, BMTType type, int sector, int layer, Strip strip) {
+        this._Detector = detector;                   // 0 = SVT, 1 = BMT
+        this._Type     = type;               // set according to BMTType
+        this._Sector   = sector;
+        this._Layer    = layer;
+        this._Strip    = strip;
 
     }
 
-    public int get_Detector() {
+    public DetectorType get_Detector() {
         return _Detector;
     }
 
-    public void set_Detector(int _detector) {
+    public void set_Detector(DetectorType _detector) {
         this._Detector = _detector;
     }
 
-    public int get_DetectorType() {
-        return _DetectorType;
+    public BMTType get_Type() {
+        return _Type;
     }
 
-    public void set_DetectorType(int _DetectorType) {
-        this._DetectorType = _DetectorType;
+    public void set_Type(BMTType type) {
+        this._Type = type;
     }
-
-    private int _Detector;							//       the detector SVT or BMT
-    private int _DetectorType;                                                  //       for the BMT, either C or Z
-
-    private int _Sector;      							//	   sector[1...24] for SVT, [1..3] for BMT
-    private int _Layer;    	 						//	   layer [1,...]
-    private Strip _Strip;    	 						//	   Strip object
-
-    private int _Id;								//		Hit Id
-    private int _Status; 							//      Status -1 dead, 0 noisy, 1 good
 
     /**
      *
@@ -120,7 +123,7 @@ public class Hit implements Comparable<Hit> {
     public int get_RegionSlayer() {
         return (this._Layer + 1) % 2 + 1;
     }
-
+    public boolean newClustering = false;
     /**
      *
      * @param arg0 the other hit
@@ -128,24 +131,23 @@ public class Hit implements Comparable<Hit> {
      * by wire is used in clustering.
      */
     @Override
-//    public int compareTo(Hit arg0) {
-//        if (this._Strip.get_Strip() > arg0._Strip.get_Strip()) {
-//            return 1;
-//        } else {
-//            return 0;
-//        }
-//    }
     public int compareTo(Hit arg) {
-        //sort by layer, then time, then edep
-        int CompLyr = this.get_Layer() < arg.get_Layer() ? -1 : this.get_Layer() == arg.get_Layer() ? 0 : 1;
-        int CompEdep = this.get_Strip().get_Edep() > arg.get_Strip().get_Edep() ? -1 : this.get_Strip().get_Edep() == arg.get_Strip().get_Edep() ? 0 : 1;
-        int CompTime = this.get_Strip().get_Time() < arg.get_Strip().get_Time() ? -1 : this.get_Strip().get_Time() == arg.get_Strip().get_Time() ? 0 : 1;
+        if(this.newClustering) {
+            //sort by layer, then time, then edep
+            int CompLyr = this.get_Layer() < arg.get_Layer() ? -1 : this.get_Layer() == arg.get_Layer() ? 0 : 1;
+            int CompEdep = this.get_Strip().get_Edep() > arg.get_Strip().get_Edep() ? -1 : this.get_Strip().get_Edep() == arg.get_Strip().get_Edep() ? 0 : 1;
+            int CompTime = this.get_Strip().get_Time() < arg.get_Strip().get_Time() ? -1 : this.get_Strip().get_Time() == arg.get_Strip().get_Time() ? 0 : 1;
 
-        int return_val1 = ((CompTime == 0) ? CompEdep : CompTime);
-        int return_val = ((CompLyr == 0) ? return_val1 : CompLyr);
+            int return_val1 = ((CompTime == 0) ? CompEdep : CompTime);
+            int return_val = ((CompLyr == 0) ? return_val1 : CompLyr);
 
-        return return_val;
+            return return_val;
+        } else {
+            int CompLyr = this.get_Layer() < arg.get_Layer() ? -1 : this.get_Layer() == arg.get_Layer() ? 0 : 1;         
+            int return_val1 = this.get_Strip().get_Strip() < arg.get_Strip().get_Strip() ? -1 : this.get_Strip().get_Strip() == arg.get_Strip().get_Strip() ? 0 : 1;
+            return ((CompLyr == 0) ? return_val1 : CompLyr);
         }
+    }
     /**
      *
      * @return print statement with hit information

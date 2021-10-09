@@ -278,7 +278,6 @@ public class Constants {
         Constants.setCosmicsData(false);
         setSVTOnly(isSVTonly);
 
-        org.jlab.rec.cvt.svt.Constants.Load();
         org.jlab.rec.cvt.bmt.Constants.Load();
 
         areConstantsLoaded = true;

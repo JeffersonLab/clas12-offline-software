@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.bmt;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Vector3D;
 
 /**
@@ -295,30 +296,42 @@ public class CCDBConstantsLoader {
         double xpos = dbprovider.getDouble("/geometry/cvt/mvt/position/x", 0 );
         double ypos = dbprovider.getDouble("/geometry/cvt/mvt/position/y", 0 );
         double zpos = dbprovider.getDouble("/geometry/cvt/mvt/position/z", 0 );
+        // hardcode gemc rotation: set angles to 0 to null it
+        Vector3D  gemcRot = new Vector3D(0,0,0);
+        Point3D bmtCenter = new Point3D(0,0,-94.7); // the original BMT Center
+        Point3D bmtShift  = new Point3D(bmtCenter);
+        bmtCenter.rotateZ(Math.toRadians(gemcRot.z()));
+        bmtCenter.rotateY(Math.toRadians(gemcRot.y()));
+        bmtCenter.rotateX(Math.toRadians(gemcRot.x()));
+        bmtShift.translateXYZ(-bmtCenter.x(), -bmtCenter.y(), -bmtCenter.z());
         for (int row = 0; row<NLAYERS*NSECTORS; row++) {
             int sector = dbprovider.getInteger("/geometry/cvt/mvt/alignment/sector", row);
             int layer  = dbprovider.getInteger("/geometry/cvt/mvt/alignment/layer", row);
             Point3D shift = new Point3D(dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaX", row),
                                         dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaY", row),
                                         dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaZ", row)); 
-
-            shift.translateXYZ(xpos, ypos, zpos);
-            Vector3D rot = new Vector3D(dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotX", row),
-                                        dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotY", row),
-                                        dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotZ", row)); 
+            shift.translateXYZ(xpos+bmtShift.x(), ypos+bmtShift.y(), zpos+bmtShift.z());
+            Vector3D rot = new Vector3D(dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotX", row)+Math.toRadians(gemcRot.x()),
+                                        dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotY", row)+Math.toRadians(gemcRot.y()),
+                                        dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotZ", row)+Math.toRadians(gemcRot.z())); 
 
             int region = (int) Math.floor((layer+1)/2);
             double Zmin = CRZZMIN[region - 1];
             double Zmax = CRZZMAX[region - 1];
+            Transformation3D transform = new Transformation3D();
+            transform.rotateZ(rot.z());
+            transform.rotateY(rot.y());
+            transform.rotateX(rot.x());
+            transform.translateXYZ(shift.x(), shift.y(), shift.z());
             Line3D axis = new Line3D(new Point3D(0,0,Zmin), new Vector3D(0,0,Zmax));
-            axis.rotateX(rot.x());
-            axis.rotateY(rot.y());
-            axis.rotateZ(rot.z());
-            axis.translateXYZ(shift.x(), shift.y(), shift.z());//+ztarget*10);
-            Constants.shifts[layer-1][sector-1] = shift;
+            transform.apply(axis);
+            Constants.shifts[layer-1][sector-1]    = shift;
             Constants.rotations[layer-1][sector-1] = rot;
-            Constants.axes[layer-1][sector-1] = axis;
+            Constants.axes[layer-1][sector-1]      = axis;
+            Constants.toGlobal[layer-1][sector-1]  = transform;
+            Constants.toLocal[layer-1][sector-1]   = transform.inverse();
         }
+        
          
         // beam offset
         double xb = dbprovider.getDouble("/geometry/beam/position/x_offset", 0);     

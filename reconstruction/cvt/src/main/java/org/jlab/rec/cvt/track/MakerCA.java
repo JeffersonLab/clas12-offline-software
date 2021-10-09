@@ -1,8 +1,8 @@
 package org.jlab.rec.cvt.track;
 import java.util.*;
 
-import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
+import org.jlab.detector.base.DetectorType;
 
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
@@ -41,10 +41,10 @@ public class MakerCA {
 	
 	
 	private double getCrossRadius( Cross c ) {  // TODO: can this be moved inside the Cross class?
-		if( c.get_Detector().equalsIgnoreCase("SVT") ) 
+		if( c.get_Detector()==DetectorType.BST) 
 			return Math.sqrt(c.get_Point().x()*c.get_Point().x()+c.get_Point().y()*c.get_Point().y());
 		
-		if( c.get_DetectorType()==BMTType.Z )
+		if( c.get_Type()==BMTType.Z )
 			return org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[c.get_Region()-1 ];
 		
 		return org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[c.get_Region()-1 ];
@@ -76,8 +76,8 @@ public class MakerCA {
 		if( this._plane.equalsIgnoreCase("ZR")) {
 			// on ZR, make loose selection on SVT
 			// and tight selections on BMT
-			if( cell.get_c1().get_Detector().equalsIgnoreCase("SVT")) {
-				if( cell.get_c2().get_Detector().equalsIgnoreCase("SVT")) {
+			if( cell.get_c1().get_Detector()==DetectorType.BST) {
+				if( cell.get_c2().get_Detector()==DetectorType.BST) {
 					if( Math.toDegrees(va.angle(vb)) > 30. ) return false;
 				}
 				else
@@ -101,12 +101,12 @@ public class MakerCA {
         for( int ic=0;ic<crs.size();ic++){
       	  Cross a = crs.get(ic);
       	  int aReg = a.get_Region();
-      	  if( a.get_Detector().equalsIgnoreCase("BMT")) {
-      		  aReg = 3 + bgeom.getLayer( aReg , a.get_DetectorType() );
+      	  if( a.get_Detector()==DetectorType.BMT) {
+      		  aReg = 3 + bgeom.getLayer( aReg , a.get_Type() );
       	  }
       	  
       	  if( this._debug ) {
-      		  System.out.println( "\n cross a " + a.get_Id() + " " + a.get_Detector() +a.get_DetectorType() + " sect:" + a.get_Sector() + " reg:" 
+      		  System.out.println( "\n cross a " + a.get_Id() + " " + a.get_Detector().getName() +a.get_Type().getName() + " sect:" + a.get_Sector() + " reg:" 
       				  + aReg + " phi:" + a.get_Point().toVector3D().phi() + " in BMT sector:" + 
       				  bgeom.getSector(1, a.get_Point().toVector3D().phi()));
       	  }
@@ -118,12 +118,12 @@ public class MakerCA {
           	  
           	  // we skip same region crosses
           	  int bReg = b.get_Region();
-          	  if( b.get_Detector().equalsIgnoreCase("BMT")) {
-          		  bReg = 3 + bgeom.getLayer( bReg , b.get_DetectorType() );
+          	  if( b.get_Detector()==DetectorType.BMT) {
+          		  bReg = 3 + bgeom.getLayer( bReg , b.get_Type() );
           	  }
           	  
           	  if( this._debug ) {
-          		  System.out.println( " cross b " + b.get_Id() + " " + b.get_Detector() +b.get_DetectorType() + " sect:" + b.get_Sector() + " reg:" 
+          		  System.out.println( " cross b " + b.get_Id() + " " + b.get_Detector().getName() +b.get_Type().getName() + " sect:" + b.get_Sector() + " reg:" 
           				  + bReg + " phi:" + b.get_Point().toVector3D().phi() + " in BMT sector:" + 
           				  bgeom.getSector(1, b.get_Point().toVector3D().phi() ));
           	  }
@@ -145,8 +145,8 @@ public class MakerCA {
           	  }
 
           	  // stay in the same BMT sector
-          	  if( b.get_Detector().equalsIgnoreCase("BMT") ){
-          		  if( a.get_Detector().equalsIgnoreCase("BMT")){
+          	  if( b.get_Detector()==DetectorType.BMT){
+          		  if( a.get_Detector()==DetectorType.BMT){
           			  if(b.get_Sector() != a.get_Sector() ) continue;
           		  }
           		  else{
@@ -174,7 +174,7 @@ public class MakerCA {
       		  // when running on ZR
       		  // if both cells are SVT, check that they are "ok" in xy
       		  if( this._plane.equalsIgnoreCase("ZR")){
-      			  if( b.get_Detector().equalsIgnoreCase("SVT") ){
+      			  if( b.get_Detector()==DetectorType.BST){
               		  double xaxy = scell.get_Crs2D(1, "XY").x;
               		  double yaxy = scell.get_Crs2D(1, "XY").y;
               		  Vector2d vaxy = new Vector2d(xaxy,yaxy);

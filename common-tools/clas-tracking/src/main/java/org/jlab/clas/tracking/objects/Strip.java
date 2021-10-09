@@ -253,6 +253,21 @@ public class Strip extends TObject {
         _c = centroid;
         type = Type.XYZ;
     }
+
+    public Strip(int id, double centroid, Line3D line) {
+        super(id, line.origin().x(), line.origin().y(), line.origin().z());
+        Vector3D dir = line.direction().asUnit();
+        _x      = line.origin().x();
+        _y      = line.origin().y();
+        _z      = line.origin().z();
+        _ux     = dir.x();
+        _uy     = dir.y();
+        _uz     = dir.z();
+        _length = line.length();
+        _c = centroid;
+        type = Type.XYZ;
+    }
+
     public Strip(int id, double centroid, double x, double y, double z, 
             double ux, double uy, double uz, double length) {
         super(id, x, y, z);
@@ -286,6 +301,23 @@ public class Strip extends TObject {
         _c = centroid;
         _arc = arc;
         type = Type.ARC;
+    }
+    
+    public String toString() {
+        String s = String.format("Strip id: %d",super.getId());
+        if(this.type==Type.XYZ) {
+            s = s + String.format("\n\tPoint=(%.4f,%.4f,%.4f)  Dir=(%.4f,%.4f,%.4f) Length=%.4f Centroid=%.4f", _x,_y,_z,_ux,_uy,_uz,_length,_c);
+        }
+        else if(this.type==Type.PHI) {
+            s = s + String.format("\n\tXY=(%.4f,%.4f)  Phi=%.4f Centroid=%.4f",super.getX(),super.getY(), _phi,_c);
+        }
+        else if(this.type==Type.ARC) {
+            s = s + "\n\t" +_arc.toString() + String.format("\n\tCentroid=%.4f",_c);
+        }
+        else if(this.type==Type.Z) {
+            s = s + String.format("\n\tZ=%.4f Centroid=%.4f", _z,_c);
+        }
+        return s;
     }
     
     @Override

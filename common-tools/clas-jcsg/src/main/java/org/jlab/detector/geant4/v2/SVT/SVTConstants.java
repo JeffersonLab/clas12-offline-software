@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.jlab.detector.calib.utils.DatabaseConstantProvider; // coatjava-3.0
-import org.jlab.geom.base.ConstantProvider;
 
 import eu.mihosoft.vrl.v3d.Transform;
 
@@ -59,7 +58,7 @@ public class SVTConstants
 	public static double STEREOANGLE; // total angle swept by sensor strips
 	public static int[] STATUS; // whether a region is used in Reconstruction
 	//
-        public static int[][] RSI;
+         public static int[][] RSI;
 	// position and orientation of layers
 	public static double PHI0;
 	public static double SECTOR0;
@@ -103,7 +102,9 @@ public class SVTConstants
 	public static double STRIPLENMAX;  //      ||  AZ  | DZ |MG| DZ |  AZ  | DZ |MG| DZ |  AZ  ||
 	public static double MODULEWID; // || DZ | AZ | DZ ||
 	public static double SECTORLEN;
-	
+         public static final double SIDETOL   = 1.0;  // extra width used in defining the module corners
+	public static final double LENGTHTOL = 10.0; // extra length for track intersection
+    
          // faraday cup cage
          public static double[] FARADAYCAGERMIN    = new double[4];
          public static double[] FARADAYCAGERMAX    = new double[4];
@@ -115,6 +116,10 @@ public class SVTConstants
          public static double[] REGIONPEEKRMIN;
          public static double[] REGIONPEEKRMAX;
          public static double[] REGIONPEEKLENGTH;
+         
+         // material and radiation length information
+         public static final double SILICONRADLEN = 9.36 * 10; //check this - converted to mm
+
 
          /**
 	 * Loads the the necessary tables for the SVT geometry for a given DatabaseConstantProvider.
@@ -401,7 +406,7 @@ public class SVTConstants
 
                 System.out.println("Reading alignment shifts from database");
 
-
+                double[] myShift = {0, 0, 0, 0, 0, 0, 0,};
                 LAYERSHIFTDATA = new double[NSECTORS[3]][NLAYERS-2][];
                 for( int i = 0; i < (NTOTALSECTORS-NSECTORS[3])*2; i++ )    // layeralignment tables doesn't cover region 4
                 {
@@ -419,6 +424,11 @@ public class SVTConstants
                         ty += ypos;
                         tz += zpos;
                         LAYERSHIFTDATA[sector-1][layer-1] = new double[]{ tx, ty, tz, rx, ry, rz, ra };
+                        if (layer == 1 || layer == 2) {
+                            for(int j=0; j<LAYERSHIFTDATA[sector-1][layer-1].length; j++) {
+                                LAYERSHIFTDATA[sector-1][layer-1][j] += myShift[j];
+                            }
+                        }                        
                 }
                 if( VERBOSE ) showLayerShiftData();
 
@@ -726,7 +736,8 @@ public class SVTConstants
 	
 	
 	/**
-	 * Returns a transformation from the local frame to the lab frame, for a given sector module.
+	 * Returns a transformation from the local frame to the ideal lab frame 
+         * (not accounting for shifts and rotations), for a given sector module.
 	 * 
 	 * @param aRegion an index starting from 0
 	 * @param aSector an index starting from 0
@@ -735,7 +746,7 @@ public class SVTConstants
 	 * @return Transformation3D a sequence of transformations
 	 * @throws IllegalArgumentException indices out of bounds
 	 */
-	public static Transform getLabFrame( int aRegion, int aSector, double aRadius, double aZ ) throws IllegalArgumentException
+	public static Transform getDetectorFrame( int aRegion, int aSector, double aRadius, double aZ ) throws IllegalArgumentException
 	{
 		if( aRegion < 0 || aRegion > NREGIONS-1 ){ throw new IllegalArgumentException("region out of bounds"); }
 		if( aSector < 0 || aSector > NSECTORS[aRegion]-1 ){ throw new IllegalArgumentException("sector out of bounds"); }
