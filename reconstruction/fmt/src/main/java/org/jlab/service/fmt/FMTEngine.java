@@ -66,6 +66,7 @@ public class FMTEngine extends ReconstructionEngine {
         super.registerOutputBank("FMT::Clusters");
         super.registerOutputBank("FMT::Crosses");
         super.registerOutputBank("FMT::Tracks");
+        super.registerOutputBank("FMT::Trajectory");
         
         return true;
     }
