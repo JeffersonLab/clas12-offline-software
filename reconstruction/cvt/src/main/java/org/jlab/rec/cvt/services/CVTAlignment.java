@@ -521,8 +521,8 @@ public class CVTAlignment extends ReconstructionEngine {
 		System.out.println(layer + " "+phi1 + " " + phi2 + " " + dphi);
 		 */
 
-		Vector3D dmdr =sp.cross(extrap);
-		dmdr = dmdr.clone().sub(n.cross(u).multiply(n.dot(e.clone().sub(extrap))*sdotu/(udotn*udotn)));
+		//Vector3D dmdr =sp.cross(extrap);
+		//dmdr = dmdr.clone().sub(n.cross(u).multiply(n.dot(e.clone().sub(extrap))*sdotu/(udotn*udotn)));
 		/*A.set(i, (svtTopBottomSep? i : i/2)*6 + 0, -sp.x);
 		A.set(i, (svtTopBottomSep? i : i/2)*6 + 1, -sp.y);
 		A.set(i, (svtTopBottomSep? i : i/2)*6 + 2, -sp.z);
@@ -531,12 +531,13 @@ public class CVTAlignment extends ReconstructionEngine {
 		A.set(i, (svtTopBottomSep? i : i/2)*6 + 5, dmdr.z);*/
 
 		//System.out.println("i = " + i + "; rows = " + A.getRowDimension() + "; cols = " + + A.getColumnDimension());
+		Vector3D dmdr = sp.cross(xref).sub(sp.cross(u).multiply(n.dot(xref.clone().sub(e))/udotn));
 		if(orderTx >= 0)
-			A.set(i, i*nAlignVars + orderTx, -sp.x());
+			A.set(i, i*nAlignVars + orderTx, sp.x());
 		if(orderTy >= 0)
-			A.set(i, i*nAlignVars + orderTy, -sp.y());
+			A.set(i, i*nAlignVars + orderTy, sp.y());
 		if(orderTz >= 0)
-			A.set(i, i*nAlignVars + orderTz, -sp.z());
+			A.set(i, i*nAlignVars + orderTz, sp.z());
 		if(orderRx >= 0)
 			A.set(i, i*nAlignVars + orderRx, dmdr.x());
 		if(orderRy >= 0)
@@ -561,17 +562,10 @@ public class CVTAlignment extends ReconstructionEngine {
 			Vector3D mscphi = new Vector3D(-Math.sin(phi), Math.cos(phi),0);
 			double cosdip = Math.hypot(u.x(), u.y());
 			double d = mscphi.dot(xref);
-			B.set(i, 0, s.dot(mscphi.clone().sub(u.multiply(n.dot(mscphi)/udotn))));
-			//B.set(i, 1, s.dot(csphi.times(-d)
-			//		.plus(mscphi.times(n.dot(e.clone().subtract(xref))/udotn))
-			//		.clone().subtract(u.times(mscphi.dot(n)*n.dot(e.clone().subtract(xref))/(udotn*udotn)))
-			//		.plus(u.times(d*n.dot(csphi)/udotn)))
-			//		);
-			B.set(i, 1, -s.dot(csphi)*d
-					+ cosdip*(s.dot(mscphi)/udotn-sdotu/(udotn*udotn)*n.dot(mscphi))*n.dot(e.clone().clone().sub(xref))
-					+ sdotu/udotn*d*n.dot(csphi));
-			B.set(i, 2, s.z()-sdotu*n.z()/udotn);
-			B.set(i, 3, (s.z()/udotn-n.z()*sdotu/(udotn*udotn))*n.dot(e.clone().sub(xref)));
+			B.set(i, 0, -sp.dot(mscphi));
+			B.set(i, 1, -sp.dot(mscphi)*n.dot(e.clone().sub(xref))*cosdip/udotn+sp.dot(csphi)*d);
+			B.set(i, 2, -sp.z());
+			B.set(i, 3, -sp.z()*n.dot(e.clone().sub(xref))/udotn);
 
 
 		}
@@ -793,17 +787,17 @@ public class CVTAlignment extends ReconstructionEngine {
 		Vector3D dmdr =sp.cross(xref).sub(sp.cross(u).multiply(n.dot(xref.clone().sub(e))/udotn));
 		
 		if(orderTx >= 0)
-			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderTx, -sp.x());
+			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderTx, sp.x());
 		if(orderTy >= 0)
-			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderTy, -sp.y());
+			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderTy, sp.y());
 		if(orderTz >= 0)
-			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderTz, -sp.z());
+			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderTz, sp.z());
 		if(orderRx >= 0)
-			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderRx, dmdr.x());
+			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderRx, -dmdr.x());
 		if(orderRy >= 0)
-			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderRy, dmdr.y());
+			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderRy, -dmdr.y());
 		if(orderRz >= 0)
-			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderRz, dmdr.z());
+			A.set(i, (svtTopBottomSep? i : i/2)*nAlignVars + orderRz, -dmdr.z());
 
 
 		if(detector == DetectorType.BST)
@@ -813,10 +807,10 @@ public class CVTAlignment extends ReconstructionEngine {
 
 		Vector3D dmdu = sp.multiply(e.clone().sub(xref).dot(n)/udotn);
 		if(!this.useDocaPhiZTandip) {
-			B.set(i,0, sp.x());
-			B.set(i,1, sp.z());
-			B.set(i,2, dmdu.x());
-			B.set(i,3, dmdu.z());
+			B.set(i,0, -sp.x());
+			B.set(i,1, -sp.z());
+			B.set(i,2, -dmdu.x());
+			B.set(i,3, -dmdu.z());
 		} else {
 
 			double phi = Math.atan2(u.y(),u.x());
@@ -824,17 +818,10 @@ public class CVTAlignment extends ReconstructionEngine {
 			Vector3D mscphi = new Vector3D(-Math.sin(phi), Math.cos(phi),0);
 			double cosdip = Math.hypot(u.x(), u.y());
 			double d = mscphi.dot(xref);
-			B.set(i, 0, s.dot(mscphi.clone().sub(u.multiply(n.dot(mscphi)/udotn))));
-			//B.set(i, 1, s.dot(csphi.times(-d)
-			//		.plus(mscphi.times(n.dot(e.minus(xref))/udotn))
-			//		.minus(u.times(mscphi.dot(n)*n.dot(e.minus(xref))/(udotn*udotn)))
-			//		.plus(u.times(d*n.dot(csphi)/udotn)))
-			//		);
-			B.set(i, 1, -s.dot(csphi)*d
-					+ cosdip*(s.dot(mscphi)/udotn-sdotu/(udotn*udotn)*n.dot(mscphi))*n.dot(e.clone().sub(xref))
-					+ sdotu/udotn*d*n.dot(csphi));
-			B.set(i, 2, s.z()-sdotu*n.z()/udotn);
-			B.set(i, 3, (s.z()/udotn-n.z()*sdotu/(udotn*udotn))*n.dot(e.clone().sub(xref)));
+			B.set(i, 0, -sp.dot(mscphi));
+			B.set(i, 1, -sp.dot(mscphi)*n.dot(e.clone().sub(xref))*cosdip/udotn+sp.dot(csphi)*d);
+			B.set(i, 2, -sp.z());
+			B.set(i, 3, -sp.z()*n.dot(e.clone().sub(xref))/udotn);
 
 
 		}
