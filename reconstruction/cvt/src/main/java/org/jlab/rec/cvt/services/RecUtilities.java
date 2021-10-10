@@ -273,6 +273,11 @@ public class RecUtilities {
         
         // for each layer
         for (int ilayer = 0; ilayer < SVTGeometry.NLAYERS; ilayer++) {
+            int layer = ilayer + 1;
+
+            // identify the sector the track may be going through (this doesn't account for misalignments
+            Point3D helixPoint = helix.getPointAtRadius(sgeo.getLayerRadius(layer));
+            
             // reinitilize swimmer from last surface
             if(inters!=null) {
                 double intersPhi   = Math.atan2(inters[4], inters[3]);
@@ -280,15 +285,20 @@ public class RecUtilities {
                 swimmer.SetSwimParameters(inters[0], inters[1], inters[2], Math.toDegrees(intersPhi), Math.toDegrees(intersTheta), 
                         P, Q, maxPathLength) ;
             }
-            int layer = ilayer + 1;
             
             for(int isector=0; isector<SVTGeometry.NSECTORS[ilayer]; isector++) {
                 int sector = isector+1;
+                
+                // check the angle between the trajectory point and the sector 
+                // and skip sectors that are too far (more than the sector angular coverage)
+                Vector3D n = sgeo.getNormal(layer, sector);
+                double deltaPhi = Math.acos(helixPoint.toVector3D().asUnit().dot(n));
+                if(Math.abs(deltaPhi)>2*Math.PI/SVTGeometry.NSECTORS[ilayer]) continue;
+                
                 int key = sgeo.getModuleId(layer, sector);
                 
                 // calculate trajectory
-                Point3D traj    = null;
-                Vector3D n = sgeo.getNormal(layer, sector);
+                Point3D traj = null;
                 Point3D  p = sgeo.getModule(layer, sector).origin();
                 double d = n.dot(p.toVector3D());
                 inters = swimmer.SwimToPlaneBoundary(d/10.0, n, 1);
@@ -297,11 +307,10 @@ public class RecUtilities {
                 }
                 // if trajectory is valid, look for missing clusters
                 if(traj!=null && sgeo.isInFiducial(layer, sector, traj)) {
-                    Cluster cluster = null;
                     double  doca    = Double.MAX_VALUE;
                     if(clusterMap.containsKey(key)) {
-                        cluster = clusterMap.get(key);
-                        doca    = cluster.residual(traj);
+                        Cluster cluster = clusterMap.get(key);
+                        doca = cluster.residual(traj);
                     }
                     // loop over all clusters in the same sector and layer that are noy associated to s track
                     for(Cluster cls : allClusters) {
@@ -625,7 +634,7 @@ public class RecUtilities {
                 layr2 = c.get_Cluster2().get_Layer();
                 if((int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)>0 
                         && (int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr2)>0) {
-                    c.set_CrossParamsSVT(null, SVTGeom); 
+                    c.setSVTCrossPosition(null, SVTGeom); 
                     c.isInSeed = false;
                     refi.add(c); 
                 }
@@ -677,7 +686,7 @@ public class RecUtilities {
                 layr2 = c.get_Cluster2().get_Layer();
                 if((int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)>0 
                         && (int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr2)>0) {
-                    c.set_CrossParamsSVT(null, SVTGeom);
+                    c.setSVTCrossPosition(null, SVTGeom);
                     c.isInSeed = false;
                    // System.out.println("refit "+c.printInfo());
                     refi.add(c); 
@@ -734,7 +743,7 @@ public class RecUtilities {
                 layr2 = c.get_Cluster2().get_Layer();
                 if((int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)>0 
                         && (int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr2)>0) {
-                    c.set_CrossParamsSVT(null, SVTGeom);
+                    c.setSVTCrossPosition(null, SVTGeom);
                     c.isInSeed = false;
                    // System.out.println("refit "+c.printInfo());
                     refi.add(c); 

@@ -1,9 +1,9 @@
 package org.jlab.rec.cvt.cross;
 
-import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
 import java.util.Collections;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.geom.prim.Line3D;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -32,8 +32,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @param detectortype detector type for BMT, C or Z detector
      * @param sector the sector (1...)
      * @param region the region (1...)
-     * @param rid the cross ID (if there are only 3 crosses in the event, the ID
-     * corresponds to the region index
+     * @param crid
      */
     public Cross(DetectorType detector, BMTType detectortype, int sector, int region, int crid) {
         this._Detector = detector;
@@ -359,37 +358,156 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     /**
      * Sets the cross parameters: the position and direction unit vector
      */
-    public void set_CrossParamsSVT(Vector3D dirAtBstPlane, SVTGeometry geo) {
+    public void setBMTCrossPosition(Point3D trackPos) {
 
-        Cluster inlayerclus = this.get_Cluster1();
+        Cluster cluster  = this.get_Cluster1();
+        
+        if(this.get_Detector()!=DetectorType.BMT) return;
+
+        Point3D  crossPoint = this.getBMTCrossPoint(trackPos);
+        Vector3D crossError = this.getBMTCrossError(trackPos);
+        if (trackPos == null) {
+            this.set_Point0(crossPoint);
+            this.set_PointErr0(crossError.toPoint3D());
+        }
+        this.set_Point(crossPoint);
+        this.set_PointErr(crossError.toPoint3D());
+    }
+
+    private Point3D getBMTCrossPoint(Point3D trackPos) {
+        Cluster cluster = this.get_Cluster1();
+        
+        Point3D cross = cluster.center();
+        
+        if(trackPos!=null) {
+            Point3D local = new Point3D(trackPos);
+            cluster.get_SeedStrip().toLocal().apply(local);
+            if(this.get_Type()==BMTType.C) {
+                double phi  = Math.atan2(local.y(), local.x());
+                double phi0 = Math.atan2(cluster.origin().y(), cluster.origin().x());
+                double t = phi-phi0;
+                if(Math.abs(t)>Math.PI) t-=Math.signum(t)*2*Math.PI;
+                if(t<0) 
+                    cross = cluster.origin();
+                else if(t>cluster.get_Arc().theta())
+                    cross = cluster.end();
+                else {
+                    cross = cluster.get_Arc().point(t);
+                }
+            }
+            else {
+                cross = cluster.getLine().distanceSegment(trackPos).origin();
+            }
+        }
+        return cross;
+    }   
+    
+
+    private Vector3D getBMTCrossError(Point3D trackPos) {
+        Cluster cluster = this.get_Cluster1();
+        Point3D cross   = this.getBMTCrossPoint(trackPos);
+        
+        Point3D local = new Point3D(cross);
+        cluster.get_SeedStrip().toLocal().apply(local);
+        
+        Vector3D error = new Vector3D(cluster.getS());
+        error.scale(cluster.get_Resolution());
+        error.setXYZ(Math.abs(error.x()), Math.abs(error.y()), Math.abs(error.z()));
+        return error;
+    }   
+    
+    /**
+     * Sets the cross parameters: the position and direction unit vector
+     */
+    public void setSVTCrossPosition(Vector3D trackDir, SVTGeometry geo) {
+
+        Cluster inlayerclus  = this.get_Cluster1();
         Cluster outlayerclus = this.get_Cluster2();
         if (inlayerclus == null || outlayerclus == null) { 
             return;
         }
-
-        double[] Params = geo.getCrossPars(outlayerclus.get_Sector(), outlayerclus.get_Layer(),
-                inlayerclus.get_Centroid(), outlayerclus.get_Centroid(), dirAtBstPlane);
-
-        double val = Params[0];
-        if (Double.isNaN(val)) {
-            return; // cross not withing fiducial region
+        // RDV: z error is now smaller because resulting from strip resolution instead of +/- 1 strip
+        Point3D  crossPoint = this.getSVTCrossPoint(trackDir, geo);
+        Vector3D crossError = this.getSVTCrossError(trackDir, geo);
+        
+        if(crossPoint==null || crossError==null) {
+            return;
         }
-        Point3D interPoint = new Point3D(Params[0], Params[1], Params[2]);
-
-        Point3D interPointErr = new Point3D(Params[3], Params[4], Params[5]);
-
-        if (dirAtBstPlane == null) {
-            this.set_Point0(interPoint);
-            this.set_PointErr0(interPointErr);
+        
+        if (trackDir == null) {
+            this.set_Point0(crossPoint);
+            this.set_PointErr0(crossError.toPoint3D());
         }
 
-        this.set_Point(interPoint);
-        this.set_Dir(dirAtBstPlane);
-        this.set_PointErr(interPointErr);
+        this.set_Point(crossPoint);
+//        this.set_Dir(trackDir);
+        this.set_PointErr(crossError.toPoint3D());
 
-        //System.out.println("[Cross] in setCrossPars interPoint "+interPoint.toString());
-        //if(dirAtBstPlane!=null)
-        //	System.out.println("                              dirAtBstPlane "+dirAtBstPlane.toString());
+    }
+
+    /**
+     * Calculate the cross point from the two strips and the track direction
+     * @param trackDir track direction
+     * @param geo      SVT geometry class
+     * @return
+     */
+    public Point3D getSVTCrossPoint(Vector3D trackDir, SVTGeometry geo) {
+        
+        int layer  = this.get_Cluster1().get_Layer();
+        int sector = this.get_Cluster1().get_Sector();
+        
+        Point3D cross = geo.getCross(sector, layer, this.get_Cluster1().getLine(), this.get_Cluster2().getLine(), trackDir);
+  
+        return cross;
+    }
+
+        /**
+     * Calculate the cross position error from the two strips and the track direction
+     * @param trackDir track direction
+     * @param geo      VT geometry
+     * @return
+     */
+    public Vector3D getSVTCrossError(Vector3D trackDir, SVTGeometry geo) {
+        Vector3D error = null;
+       
+        int layer  = this.get_Cluster1().get_Layer();
+        int sector = this.get_Cluster1().get_Sector();
+
+        Point3D cross = this.getSVTCrossPoint(trackDir, geo);
+        if(cross!=null) {
+            // get the strip resolution
+            Point3D local = geo.toLocal(layer, sector, cross);
+            double sigma1 = geo.getSingleStripResolution(layer, this.get_Cluster1().get_SeedStrip().get_Strip(), local.z());
+            double sigma2 = geo.getSingleStripResolution(layer, this.get_Cluster2().get_SeedStrip().get_Strip(), local.z());
+            
+            double delta = 1e-3; // 1micron shift
+            Line3D strip1 = this.get_Cluster1().getLine();
+            Line3D strip2 = this.get_Cluster2().getLine();
+            
+            Vector3D t1 = strip1.direction().asUnit().cross(this.get_Cluster1().getN()).multiply(delta);
+            Line3D strip1Plus  = new Line3D(strip1); 
+            Line3D strip1Minus = new Line3D(strip1); 
+            strip1Plus.translateXYZ(t1.x(), t1.y(), t1.z());
+            strip1Minus.translateXYZ(-t1.x(),-t1.y(),-t1.z());
+            
+            Vector3D t2 = strip2.direction().asUnit().cross(this.get_Cluster2().getN()).multiply(delta);
+            Line3D strip2Plus  = new Line3D(strip2); 
+            Line3D strip2Minus = new Line3D(strip2); 
+            strip2Plus.translateXYZ(t2.x(), t2.y(), t2.z());
+            strip2Minus.translateXYZ(-t2.x(),-t2.y(),-t2.z());
+            
+            Point3D cross1Plus  = geo.getCross(sector, layer, strip1Plus, strip2, trackDir);
+            Point3D cross1Minus = geo.getCross(sector, layer, strip1Minus, strip2, trackDir);
+            Point3D cross2Plus  = geo.getCross(sector, layer, strip1, strip2Plus,  trackDir);
+            Point3D cross2Minus = geo.getCross(sector, layer, strip1, strip2Minus, trackDir);
+            Vector3D error1 = cross1Minus.vectorTo(cross1Plus).multiply(sigma1/delta);
+            Vector3D error2 = cross2Minus.vectorTo(cross2Plus).multiply(sigma2/delta);
+            error = new Vector3D(Math.sqrt(error1.x()*error1.x()+error2.x()*error2.x()),
+                                 Math.sqrt(error1.y()*error1.y()+error2.y()*error2.y()),
+                                 Math.sqrt(error1.z()*error1.z()+error2.z()*error2.z()));
+            if(error.x()==0 && error.y()==0) System.out.println(cross.toString() + "\n" + error.toString());
+        }
+        return error;
     }
 
     @Override

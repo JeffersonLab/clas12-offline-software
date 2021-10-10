@@ -131,7 +131,7 @@ public class TrackCandListFinder {
     }
 
     /**
-     *
+     * NOT Used
      * @param list the input list of crosses
      * @return an array list of track candidates in the SVT
      */
@@ -799,7 +799,7 @@ public class TrackCandListFinder {
 
         cross.set_Dir(new Vector3D(0, 0, 0));
 
-        cross.set_CrossParamsSVT(null, geo);
+        cross.setSVTCrossPosition(null, geo);
     }
 
     /**

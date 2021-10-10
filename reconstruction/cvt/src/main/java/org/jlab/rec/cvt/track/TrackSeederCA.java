@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 
 import org.jlab.rec.cvt.bmt.BMTType;
@@ -14,7 +15,6 @@ import org.jlab.rec.cvt.fit.HelicalTrackFitter;
 import org.jlab.rec.cvt.fit.LineFitPars;
 import org.jlab.rec.cvt.fit.LineFitter;
 import org.jlab.rec.cvt.svt.SVTGeometry;
-import org.jlab.rec.cvt.svt.SVTParameters;
 
 public class TrackSeederCA {
 
@@ -429,13 +429,13 @@ public class TrackSeederCA {
 			   int l1 = c.get_Cluster1().get_Layer();
 			   int s1 = c.get_Cluster1().get_Sector();
 			   double c1 = c.get_Cluster1().get_Centroid();
-			   double r1 = svt_geo.getLayerRadius(l1);
+			   double r1 = SVTGeometry.getLayerRadius(l1);
 			   double nstr1 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r1 - b)/m, l1, s1);
 
 			   int l2 = c.get_Cluster2().get_Layer();
 			   int s2 = c.get_Cluster2().get_Sector();
 			   double c2 = c.get_Cluster2().get_Centroid();
-			   double r2 = svt_geo.getLayerRadius(l2);
+			   double r2 = SVTGeometry.getLayerRadius(l2);
 			   double nstr2 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r2 - b)/m, l2, s2);
 			   
 			   if( Math.abs( c1 - nstr1 ) < 8 && Math.abs( c2 - nstr2 ) < 8 )
@@ -513,14 +513,13 @@ public class TrackSeederCA {
             SVTCrosses.clear();
             
             for (Cross c : VTCrosses) {
-                if (!(Double.isNaN(c.get_Point().z()) || Double.isNaN(c.get_Point().x()))) {
+                if (c.get_Detector()==DetectorType.BST) {
                     SVTCrosses.add(c);
                 }
-
-                if (Double.isNaN(c.get_Point().x())) {
+                else if (c.get_Detector()==DetectorType.BMT && c.get_Type()==BMTType.C ) {
                     BMTCrossesC.add(c);
                 }
-                if (Double.isNaN(c.get_Point().z())) {
+                else if (c.get_Detector()==DetectorType.BMT && c.get_Type()==BMTType.Z ) {
                     BMTCrossesZ.add(c);
                 }
             }
@@ -618,8 +617,8 @@ public class TrackSeederCA {
             //if(shift==0)
             if (fitTrk.get_chisq()[0] < chisqMax) {
                 chisqMax = fitTrk.get_chisq()[0];
-                if(chisqMax<SVTParameters.CIRCLEFIT_MAXCHI2)
-                    cand.update_Crosses(svt_geo);
+                if(chisqMax<Constants.CIRCLEFIT_MAXCHI2)
+                    cand.update_Crosses(svt_geo, bmt_geo);
 //                //i=fitIter;
             }
         }

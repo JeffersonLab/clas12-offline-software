@@ -1,11 +1,13 @@
 package org.jlab.rec.cvt.track;
 
+import org.jlab.clas.swimtools.Swimmer;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.rec.cvt.trajectory.Trajectory;
@@ -130,6 +132,28 @@ public class Track extends Trajectory implements Comparable<Track> {
         }
     }
 
+    public void update_Crosses(SVTGeometry sgeo, BMTGeometry bgeo) {
+        if (this.get_helix() != null && this.get_helix().get_curvature() != 0) {
+//            System.out.println("Updating crosses");
+        
+            Helix helix = this.get_helix();
+            for (int i = 0; i < this.size(); i++) {
+                Cross cross = this.get(i);
+                double R = Math.sqrt(cross.get_Point().x() * cross.get_Point().x() + cross.get_Point().y() * cross.get_Point().y());
+                Point3D  helixPos = helix.getPointAtRadius(R);
+                Vector3D helixDir = helix.getTrackDirectionAtRadius(R);
+//                System.out.println("Traj  " + cross.get_Cluster1().get_Layer() + " " + helixPos.toString());
+//                System.out.println("Cross " + cross.get_Detector().getName() + " " + cross.get_Point().toString());
+                if(cross.get_Detector()==DetectorType.BST) 
+                    cross.setSVTCrossPosition(helixDir, sgeo);
+                else if(cross.get_Detector()==DetectorType.BMT)
+                    cross.setBMTCrossPosition(helixPos);
+            }
+
+        }
+
+    }
+
     /**
      * updates the crosses positions based on the track direction for a helical
      * trajectory
@@ -146,7 +170,7 @@ public class Track extends Trajectory implements Comparable<Track> {
                 }
                 double R = Math.sqrt(this.get(i).get_Point().x() * this.get(i).get_Point().x() + this.get(i).get_Point().y() * this.get(i).get_Point().y());
                 Vector3D helixTanVecAtLayer = helix.getTrackDirectionAtRadius(R);
-                this.get(i).set_CrossParamsSVT(helixTanVecAtLayer, geo);
+                this.get(i).setSVTCrossPosition(helixTanVecAtLayer, geo);
                 if (this.get(i).get_Cluster2().get_Centroid() <= 1) {
                     //recalculate z using track pars:
                     double z = helix.getPointAtRadius(R).z();

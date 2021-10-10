@@ -4,6 +4,7 @@ import eu.mihosoft.vrl.v3d.Vector3d;
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
 import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Line3d;
@@ -95,6 +96,37 @@ public class SVTGeometry {
         return new Vector3D(normal.x, normal.y, normal.z);
     }
     
+    public Plane3D getPlane(int layer, int sector) {
+        return new Plane3D(this.getModule(layer, sector).midpoint(), this.getNormal(layer, sector));
+    }
+    
+    public Line3D getStripProjection(Line3D strip, Plane3D plane, Vector3D dir) {
+        Point3D stripO = new Point3D();
+        plane.intersection(new Line3D(strip.origin(),dir), stripO);
+        Point3D stripE = new Point3D();
+        plane.intersection(new Line3D(strip.end(),dir), stripE);
+        
+        return new Line3D(stripO, stripE);
+    }
+    
+    public Point3D getCross(int sector, int layer, Line3D strip1, Line3D strip2, Vector3D dir) {
+        Point3D cross = null;
+        
+        // if direction is not provided, use normal to the plane
+        Vector3D n = this.getNormal(layer, sector);
+        if(dir != null) {
+            n = new Vector3D(dir);
+            n.unit();
+        }
+        
+        Line3D strip2Projection = this.getStripProjection(strip2, this.getPlane(layer, sector), n);
+        if(strip2Projection!=null) {
+            cross = strip1.distance(strip2Projection).origin();
+            if(dir!=null && !this.isInFiducial(layer, sector, cross)) cross = null;
+        }
+        return cross;
+    }
+    
     public Point3D toLocal(int layer, int sector, Point3D traj) {
         Vector3d local = this._svtStripFactory.transformToLocal(layer-1, sector-1, traj.x(), traj.y(), traj.z());
         return new Point3D(local.x, local.y, local.z);
@@ -117,6 +149,15 @@ public class SVTGeometry {
         return new Vector3D(lab.x-zero.x, lab.y-zero.y, lab.z-zero.z);
     }
     
+    public double getDoca(int layer, int sector, int strip, Point3D traj) {
+        return this.getStrip(layer, sector, strip).distance(traj).length();
+    }
+    
+    public double getResidual(int layer, int sector, int strip, Point3D traj) {
+        Line3D dist = this.getStrip(layer, sector, strip).distance(traj);
+        double side = -Math.signum(this.getStrip(layer, sector, strip).direction().cross(dist.direction()).dot(this.getNormal(layer, sector)));            
+        return dist.length()*side;
+    }
     
     @Deprecated
     public int getSector(int layer, Point3D traj) {
@@ -144,156 +185,146 @@ public class SVTGeometry {
         return Sect;
     }
 
-    //***
-    public double[] getLocCoord(double s1, double s2) { //2 top, 1 bottom
-
-        double[] X = new double[2];
-        double ialpha1 = (s1 - 1)   * SVTConstants.STEREOANGLE / (double) (SVTConstants.NSTRIPS - 1);
-        //the active area starts at the first strip 	
-        double interc1 = (s1 - 0.5) * SVTConstants.READOUTPITCH + SVTConstants.STRIPOFFSETWID;
-        double ialpha2 = (s2 - 1)   * SVTConstants.STEREOANGLE / (double) (SVTConstants.NSTRIPS - 1);
-        //the active area starts at the first strip 	
-        double interc2 = (s2 - 0.5) * SVTConstants.READOUTPITCH + SVTConstants.STRIPOFFSETWID;
-
-        // Equation for strip line is x = mz + b [i.e. z is the direction of the length of the module]
-        // -------------------------------------
-        double m1 = -Math.tan(ialpha1);
-        double m2 = Math.tan(ialpha2);
-        double b1 = SVTConstants.ACTIVESENWID - interc1;
-        double b2 = interc2;
-
-        double z = (b2 - b1) / (m1 - m2);
-        double x = m1 * z + b1;
-        X[0] = x;
-        X[1] = z;
-
-        return X;
-    }
-
-    public double[] getLocCoordErrs(int lay1, int lay2, double s1, double s2, double z) {
-        double[] Xerr = new double[2];
-
-        double sigma1 = getSingleStripResolution(lay1, (int) s1, z);
-        double sigma2 = getSingleStripResolution(lay2, (int) s2, z);
-
-        Xerr[0] = Math.sqrt(sigma1 * sigma1 + sigma2 * sigma2);
-
-        Xerr[1] = (getLocCoord(s1 - 0.5, s2 - 0.5)[1]
-                - getLocCoord(s1 + 0.5, s2 + 0.5)[1]);
-
-        if (s1 <= 1) {
-            Xerr[1] = (getLocCoord(s1, s2 - 0.5)[1]
-                    - getLocCoord(s1 + 1.5, s2 + 0.5)[1]);
-        }
-        if (s2 <= 1) {
-            Xerr[1] = (getLocCoord(s1 - 0.5, s2)[1]
-                    -  getLocCoord(s1 + 1.5, s2 + 2.5)[1]);
-        }
-
-        return Xerr;
-
-    }
+//    //***
+//    public double[] getLocCoord(double s1, double s2) { //2 top, 1 bottom
+//
+//        double[] X = new double[2];
+//        double ialpha1 = (s1 - 1)   * SVTConstants.STEREOANGLE / (double) (SVTConstants.NSTRIPS - 1);
+//        //the active area starts at the first strip 	
+//        double interc1 = (s1 - 0.5) * SVTConstants.READOUTPITCH + SVTConstants.STRIPOFFSETWID;
+//        double ialpha2 = (s2 - 1)   * SVTConstants.STEREOANGLE / (double) (SVTConstants.NSTRIPS - 1);
+//        //the active area starts at the first strip 	
+//        double interc2 = (s2 - 0.5) * SVTConstants.READOUTPITCH + SVTConstants.STRIPOFFSETWID;
+//
+//        // Equation for strip line is x = mz + b [i.e. z is the direction of the length of the module]
+//        // -------------------------------------
+//        double m1 = -Math.tan(ialpha1);
+//        double m2 = Math.tan(ialpha2);
+//        double b1 = SVTConstants.ACTIVESENWID - interc1;
+//        double b2 = interc2;
+//
+//        double z = (b2 - b1) / (m1 - m2);
+//        double x = m1 * z + b1;
+//        X[0] = x;
+//        X[1] = z;
+//
+//        return X;
+//    }
+//
+//    public double[] getLocCoordErrs(int lay1, int lay2, double s1, double s2, double z) {
+//        double[] Xerr = new double[2];
+//
+//        double sigma1 = getSingleStripResolution(lay1, (int) s1, z);
+//        double sigma2 = getSingleStripResolution(lay2, (int) s2, z);
+//
+//        Xerr[0] = Math.sqrt(sigma1 * sigma1 + sigma2 * sigma2);
+//
+//        Xerr[1] = (getLocCoord(s1 - 0.5, s2 - 0.5)[1]
+//                - getLocCoord(s1 + 0.5, s2 + 0.5)[1]);
+//
+//        if (s1 <= 1) {
+//            Xerr[1] = (getLocCoord(s1, s2 - 0.5)[1]
+//                    - getLocCoord(s1 + 1.5, s2 + 0.5)[1]);
+//        }
+//        if (s2 <= 1) {
+//            Xerr[1] = (getLocCoord(s1 - 0.5, s2)[1]
+//                    -  getLocCoord(s1 + 1.5, s2 + 2.5)[1]);
+//        }
+//
+//        return Xerr;
+//
+//    }
      
-
-    public double[] getCrossPars(int sector, int upperlayer, double s1, double s2, Vector3D trkDir) {
-        
-        double[] vals = new double[]{Double.NaN, 0, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
-
-        // if first iteration trkDir == null
-        double s2corr = s2;
-        // now use track info
-        s2corr = this.getCorrectedStrip(sector, upperlayer, s2, trkDir, SVTConstants.MODULELEN);
-        double z = getLocCoord(s1, s2corr)[1];
-        //update using the corrected z
-        s2corr = this.getCorrectedStrip(sector, upperlayer, s2, trkDir, z);
-        double zf = getLocCoord(s1, s2corr)[1];
-
-        if (upperlayer % 2 != 0) // should not happen as is upper layer...but just in case
-        {
-            s2corr = s2;
-        }
-
-        double[] LC    = getLocCoord(s1, s2corr);
-        double[] LCErr = getLocCoordErrs(upperlayer - 1, upperlayer, s1, s2corr, zf);
-        
-        Point3D crPoint = this.toGlobal(upperlayer-1, sector, new Point3D(LC[0], 0, LC[1]));
-        Vector3D  crErr = this.toGlobal(upperlayer-1, sector, new Vector3D(LCErr[0], 0, LCErr[1]));
-        
-        double LCErr_x = LCErr[0];
-        double LCErr_z = LCErr[1];
-
-        // global rotation angle to get the error in the local frame
-        int[] rm = SVTConstants.convertLayer2RegionModule(upperlayer-1);
-
-        // global rotation angle
-        double Glob_rangl = ((double) -(sector - 1) / (double) SVTConstants.NSECTORS[rm[0]])
-                                              * 2. * Math.PI + SVTConstants.PHI0;
-        // angle to rotate to global frame
-        double LOCZAXISROTATION = -Math.toRadians(90.);
-        double Loc_to_Glob_rangl = Glob_rangl - LOCZAXISROTATION;
-
-        double cosRotation = Math.cos(Loc_to_Glob_rangl);
-        double sinRotation = Math.sin(Loc_to_Glob_rangl);
-
-        double yerr = Math.abs(cosRotation * LCErr_x);
-        double xerr = Math.abs(sinRotation * LCErr_x);
-
-        // RDV: check because old errors seems to be rotated by 90 deg
-//        System.out.println("Cross:\n" + xerr + " " + yerr + " " + LCErr_z);
-//        System.out.println(crErr.toString());
-//        System.out.println(crPoint.toString());
-        
-        if (LC[1] < -SVTConstants.LENGTHTOL || LC[1] > SVTConstants.MODULELEN + SVTConstants.LENGTHTOL * 2) {
-            return vals;
-        }
-        // once there is a trk, the cross should be well calculated
-        //if the local cross is not in the fiducial volume it is not physical
-        else if ((trkDir != null && (LC[0] < -SVTConstants.SIDETOL   || LC[0] > SVTConstants.ACTIVESENWID + SVTConstants.SIDETOL))
-              || (trkDir != null && (LC[1] < -SVTConstants.LENGTHTOL || LC[1] > SVTConstants.MODULELEN    + SVTConstants.LENGTHTOL))) {
-            return vals;
-        }
-        else {
-            vals[0] = crPoint.x();
-            vals[1] = crPoint.y();
-            vals[2] = crPoint.z();
-            vals[3] = Math.abs(crErr.x());
-            vals[4] = Math.abs(crErr.y());
-            vals[5] = Math.abs(crErr.z());
-        }
-
-        return vals;
-
-    }
-
-    public double getDoca(int layer, int sector, int strip, Point3D traj) {
-        return this.getStrip(layer, sector, strip).distance(traj).length();
-    }
     
-    public double getResidual(int layer, int sector, int strip, Point3D traj) {
-        Line3D dist = this.getStrip(layer, sector, strip).distance(traj);
-        double side = -Math.signum(this.getStrip(layer, sector, strip).direction().cross(dist.direction()).dot(this.getNormal(layer, sector)));            
-        return dist.length()*side;
-    }
+//    public double[] getCrossPars(int sector, int upperlayer, double s1, double s2, Vector3D trkDir) {
+//        
+//        double[] vals = new double[]{Double.NaN, 0, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
+//
+//        // if first iteration trkDir == null
+//        double s2corr = s2;
+//        // now use track info
+//        s2corr = this.getCorrectedStrip(sector, upperlayer, s2, trkDir, SVTConstants.MODULELEN);
+//        double z = getLocCoord(s1, s2corr)[1];
+//        //update using the corrected z
+//        s2corr = this.getCorrectedStrip(sector, upperlayer, s2, trkDir, z);
+//        double zf = getLocCoord(s1, s2corr)[1];
+//
+//        if (upperlayer % 2 != 0) // should not happen as is upper layer...but just in case
+//        {
+//            s2corr = s2;
+//        }
+//
+//        double[] LC    = getLocCoord(s1, s2corr);
+//        double[] LCErr = getLocCoordErrs(upperlayer - 1, upperlayer, s1, s2corr, zf);
+//        
+//        Point3D crPoint = this.toGlobal(upperlayer-1, sector, new Point3D(LC[0], 0, LC[1]));
+//        Vector3D  crErr = this.toGlobal(upperlayer-1, sector, new Vector3D(LCErr[0], 0, LCErr[1]));
+//        
+//        double LCErr_x = LCErr[0];
+//        double LCErr_z = LCErr[1];
+//
+//        // global rotation angle to get the error in the local frame
+//        int[] rm = SVTConstants.convertLayer2RegionModule(upperlayer-1);
+//
+//        // global rotation angle
+//        double Glob_rangl = ((double) -(sector - 1) / (double) SVTConstants.NSECTORS[rm[0]])
+//                                              * 2. * Math.PI + SVTConstants.PHI0;
+//        // angle to rotate to global frame
+//        double LOCZAXISROTATION = -Math.toRadians(90.);
+//        double Loc_to_Glob_rangl = Glob_rangl - LOCZAXISROTATION;
+//
+//        double cosRotation = Math.cos(Loc_to_Glob_rangl);
+//        double sinRotation = Math.sin(Loc_to_Glob_rangl);
+//
+//        double yerr = Math.abs(cosRotation * LCErr_x);
+//        double xerr = Math.abs(sinRotation * LCErr_x);
+//
+//        // RDV: check because old errors seems to be rotated by 90 deg
+////        System.out.println("Cross:\n" + xerr + " " + yerr + " " + LCErr_z);
+////        System.out.println(crErr.toString());
+////        System.out.println(crPoint.toString());
+//        
+//        if (LC[1] < -SVTConstants.LENGTHTOL || LC[1] > SVTConstants.MODULELEN + SVTConstants.LENGTHTOL * 2) {
+//            return vals;
+//        }
+//        // once there is a trk, the cross should be well calculated
+//        //if the local cross is not in the fiducial volume it is not physical
+//        else if ((trkDir != null && (LC[0] < -SVTConstants.SIDETOL   || LC[0] > SVTConstants.ACTIVESENWID + SVTConstants.SIDETOL))
+//              || (trkDir != null && (LC[1] < -SVTConstants.LENGTHTOL || LC[1] > SVTConstants.MODULELEN    + SVTConstants.LENGTHTOL))) {
+//            return vals;
+//        }
+//        else {
+//            vals[0] = crPoint.x();
+//            vals[1] = crPoint.y();
+//            vals[2] = crPoint.z();
+//            vals[3] = Math.abs(crErr.x());
+//            vals[4] = Math.abs(crErr.y());
+//            vals[5] = Math.abs(crErr.z());
+//        }
+//
+//        return vals;
+//
+//    }
     
-    private double getCorrectedStrip(int sector, int upperlayer, double s2, Vector3D trkDir, double ZalongModule) {
-        double s2corr = s2;
-        // second iteration: there is a track direction
-        if (trkDir != null) {
-            double stripCorr = getStripIndexShift(sector, upperlayer, trkDir, s2, ZalongModule);
-            if (s2 > 1) {
-                s2corr = s2 + stripCorr;
-            }
-            if (s2 == 1) {
-                if (stripCorr >= 0) {
-                    s2corr = s2 + stripCorr;
-                }
-                if (stripCorr < 0) {
-                    s2corr = s2;
-                }
-            }
-        }
-        return s2corr;
-    }
+//    private double getCorrectedStrip(int sector, int upperlayer, double s2, Vector3D trkDir, double ZalongModule) {
+//        double s2corr = s2;
+//        // second iteration: there is a track direction
+//        if (trkDir != null) {
+//            double stripCorr = getStripIndexShift(sector, upperlayer, trkDir, s2, ZalongModule);
+//            if (s2 > 1) {
+//                s2corr = s2 + stripCorr;
+//            }
+//            if (s2 == 1) {
+//                if (stripCorr >= 0) {
+//                    s2corr = s2 + stripCorr;
+//                }
+//                if (stripCorr < 0) {
+//                    s2corr = s2;
+//                }
+//            }
+//        }
+//        return s2corr;
+//    }
 
     public int calcNearestStrip(double X, double Y, double Z, int layer, int sect) {
 
@@ -447,43 +478,43 @@ public class SVTGeometry {
     }
 
     //***
-    public double getStripIndexShift(int sector, int layer, Vector3D trkDir, double s2, double z) {
-
-        double tx = trkDir.x();
-        double ty = trkDir.y();
-        Vector3D trkDir_t = new Vector3D(tx,ty,0);
-        trkDir_t.unit();
-        Vector3D n = this.getNormal(layer, sector);
-        
-        if (Math.acos(n.dot(trkDir_t)) > Math.PI / 2) { // flip track dir for y<0 for cosmics:
-            trkDir_t.negative();
-        }
-
-        double TrkToPlnNormRelatAngl = Math.acos(n.dot(trkDir_t));
-        double sign = Math.signum(n.cross(trkDir_t).z());
-
-        //correction to the pitch to take into account the grading of the angle -- get the upper or lower strip depending on the trkdir
-        double pitchcorr = SVTConstants.READOUTPITCH;
-
-        if (s2 > 2 && s2 < 255) {
-            double pitchToNextStrp = Math.abs(getXAtZ(layer, (double) s2 + 1, z) - getXAtZ(layer, (double) s2, z));
-            double pitchToPrevStrp = Math.abs(getXAtZ(layer, (double) s2 - 1, z) - getXAtZ(layer, (double) s2, z));
-            pitchcorr = (pitchToNextStrp + pitchToPrevStrp) / 2.;
-        }
-        if (s2 <= 2) {
-            pitchcorr = Math.abs(getXAtZ(layer, (double) s2 + 1, z) - getXAtZ(layer, (double) s2, z));
-        }
-        if (s2 == 256) {
-            pitchcorr = Math.abs(getXAtZ(layer, (double) s2 - 1, z) - getXAtZ(layer, (double) s2, z));
-        }
-
-        double layerGap = SVTConstants.LAYERRADIUS[0][1]  // MODULERADIUS[1][0] = 65.447 + LAYRGAP + MODULEPOSFAC * SILICONTHICK = SVTConstants.LAYERRADIUS[0][1]
-                        - SVTConstants.LAYERRADIUS[0][0]; // MODULERADIUS[0][0] = 65.447 - MODULEPOSFAC * SILICONTHICK           = SVTConstants.LAYERRADIUS[0][0]
-
-        double shift = sign * layerGap * Math.tan(TrkToPlnNormRelatAngl) / pitchcorr;
-
-        return -shift;
-    }
+//    public double getStripIndexShift(int sector, int layer, Vector3D trkDir, double s2, double z) {
+//
+//        double tx = trkDir.x();
+//        double ty = trkDir.y();
+//        Vector3D trkDir_t = new Vector3D(tx,ty,0);
+//        trkDir_t.unit();
+//        Vector3D n = this.getNormal(layer, sector);
+//        
+//        if (Math.acos(n.dot(trkDir_t)) > Math.PI / 2) { // flip track dir for y<0 for cosmics:
+//            trkDir_t.negative();
+//        }
+//
+//        double TrkToPlnNormRelatAngl = Math.acos(n.dot(trkDir_t));
+//        double sign = Math.signum(n.cross(trkDir_t).z());
+//
+//        //correction to the pitch to take into account the grading of the angle -- get the upper or lower strip depending on the trkdir
+//        double pitchcorr = SVTConstants.READOUTPITCH;
+//
+//        if (s2 > 2 && s2 < 255) {
+//            double pitchToNextStrp = Math.abs(getXAtZ(layer, (double) s2 + 1, z) - getXAtZ(layer, (double) s2, z));
+//            double pitchToPrevStrp = Math.abs(getXAtZ(layer, (double) s2 - 1, z) - getXAtZ(layer, (double) s2, z));
+//            pitchcorr = (pitchToNextStrp + pitchToPrevStrp) / 2.;
+//        }
+//        if (s2 <= 2) {
+//            pitchcorr = Math.abs(getXAtZ(layer, (double) s2 + 1, z) - getXAtZ(layer, (double) s2, z));
+//        }
+//        if (s2 == 256) {
+//            pitchcorr = Math.abs(getXAtZ(layer, (double) s2 - 1, z) - getXAtZ(layer, (double) s2, z));
+//        }
+//
+//        double layerGap = SVTConstants.LAYERRADIUS[0][1]  // MODULERADIUS[1][0] = 65.447 + LAYRGAP + MODULEPOSFAC * SILICONTHICK = SVTConstants.LAYERRADIUS[0][1]
+//                        - SVTConstants.LAYERRADIUS[0][0]; // MODULERADIUS[0][0] = 65.447 - MODULEPOSFAC * SILICONTHICK           = SVTConstants.LAYERRADIUS[0][0]
+//
+//        double shift = sign * layerGap * Math.tan(TrkToPlnNormRelatAngl) / pitchcorr;
+//
+//        return -shift;
+//    }
     //***
 
     public boolean isInFiducial(int layer, int sector, Point3D traj) {

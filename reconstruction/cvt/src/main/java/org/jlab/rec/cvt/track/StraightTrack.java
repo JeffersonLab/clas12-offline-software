@@ -69,7 +69,7 @@ public class StraightTrack extends Trajectory{
         Vector3D trkDir = new Vector3D(x, y, z);
 
         if (trkDir != null) {
-            cross.set_CrossParamsSVT(trkDir, geo);
+            cross.setSVTCrossPosition(trkDir, geo);
         }
 
     }

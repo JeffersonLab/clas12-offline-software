@@ -21,6 +21,8 @@ public class Constants {
     // selection cuts for helical tracks
     public static final double MINRADCURV = 200.00; //in cm
 
+    public static final double CIRCLEFIT_MAXCHI2 = 100;
+
     private static boolean isCosmicsData = false;
 
     private static boolean SVTOnly = false;
