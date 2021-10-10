@@ -297,7 +297,7 @@ public class CCDBConstantsLoader {
         double ypos = dbprovider.getDouble("/geometry/cvt/mvt/position/y", 0 );
         double zpos = dbprovider.getDouble("/geometry/cvt/mvt/position/z", 0 );
         // hardcode gemc rotation: set angles to 0 to null it
-        Vector3D  gemcRot = new Vector3D(-2,0,0);
+        Vector3D  gemcRot = new Vector3D(0,0,0);
         Point3D bmtCenter = new Point3D(0,0,-94.7); // the original BMT Center
         Point3D bmtShift  = new Point3D(bmtCenter);
         bmtCenter.rotateZ(Math.toRadians(gemcRot.z()));
