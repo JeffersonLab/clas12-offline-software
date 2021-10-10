@@ -59,8 +59,6 @@ public class SVTParameters {
 //    public static boolean isRadialMisalignmentTest = false;
  //   public static final double RadSpecs = 0.750;
 
-    public static final double CIRCLEFIT_MAXCHI2 = 100;
-
     public static final int BSTTRKINGNUMBERITERATIONS = 3;
 
     public static final int MAXNUMCROSSES = 50;

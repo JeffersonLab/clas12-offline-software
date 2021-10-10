@@ -8,6 +8,7 @@ import java.util.Map;
 import org.jlab.detector.base.DetectorType;
 
 import org.jlab.geom.prim.Point3D;
+import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
@@ -413,14 +414,11 @@ public class StraightTrackSeeder {
             SVTCrosses.clear();
 
             for (Cross c : VTCrosses) {
-                if (!(Double.isNaN(c.get_Point().z()) || Double.isNaN(c.get_Point().x()))) {
+                if (c.get_Detector() == DetectorType.BST) {
                     SVTCrosses.add(c);
-                }
-
-                if (Double.isNaN(c.get_Point().x())) {
+                } else if (c.get_Detector() == DetectorType.BMT && c.get_Type() == BMTType.C) {
                     BMTCrossesC.add(c);
-                }
-                if (Double.isNaN(c.get_Point().z())) {
+                } else if (c.get_Detector() == DetectorType.BMT && c.get_Type() == BMTType.Z) {
                     BMTCrossesZ.add(c);
                 }
             }
@@ -492,19 +490,24 @@ public class StraightTrackSeeder {
             cand = new Track(fitTrk.get_helix());
             //cand.addAll(SVTCrosses);
             cand.addAll(SVTCrosses);
+            cand.addAll(BMTCrossesZ);
+            cand.addAll(BMTCrossesC);
             
             fitTrk.get_helix().B = 0;
             cand.set_HelicalTrack(fitTrk.get_helix());
             //if(shift==0)
+//            if(i==0) System.out.println();
+//            System.out.println(fitTrk.get_chisq()[0] + " " + chisqMax + " " + Constants.CIRCLEFIT_MAXCHI2);
+            cand.update_Crosses(svt_geo, bmt_geo);
             if (fitTrk.get_chisq()[0] < chisqMax) {
                 chisqMax = fitTrk.get_chisq()[0];
-                if(chisqMax<SVTParameters.CIRCLEFIT_MAXCHI2)
-                    cand.update_Crosses(svt_geo);
+//                if(chisqMax<Constants.CIRCLEFIT_MAXCHI2)
+//                    cand.update_Crosses(svt_geo, bmt_geo);
                 //i=fitIter;
             }
         }
         //System.out.println(" Seed fitter "+fitTrk.get_chisq()[0]+" "+fitTrk.get_chisq()[1]); 
-        if(chisqMax>SVTParameters.CIRCLEFIT_MAXCHI2)
+        if(chisqMax>Constants.CIRCLEFIT_MAXCHI2)
             cand=null;
         return cand;
     }

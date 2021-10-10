@@ -119,7 +119,7 @@ public class TracksFromTargetRec {
                     shift, 
                     recUtil.setMeasVecs(seed, swimmer)) ;
                 //Uncomment to let track be fitted
-                //kf.filterOn=false;
+                kf.filterOn=false;
                 kf.runFitter(swimmer);
                 if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null) { 
                     Track fittedTrack = recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom);
@@ -162,7 +162,7 @@ public class TracksFromTargetRec {
                     shift, 
                     recUtil.setMeasVecs(seed, swimmer)) ;
                     //Uncomment to let track be fitted
-                    //kf.filterOn = false;
+                    kf.filterOn = false;
                     kf.runFitter(swimmer);
                     
                     Track trk = recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom);
