@@ -134,6 +134,7 @@ public class RecoBankReader {
 
 			int size = bank.getInt("size", i);
 			cluster.set_TotalEnergy(bank.getFloat("ETot", i));
+			
 			//cluster.set_Seed(bank.getInt("seedStrip", i));
 			cluster.set_Centroid(bank.getFloat("centroid",i));
 			//cluster.set_SeedEnergy(bank.getFloat("seedE",i));
@@ -164,26 +165,36 @@ public class RecoBankReader {
 			cluster.set_Resolution(bank.getFloat("e", i));
 			
 			
+			Point3D x1 = new Point3D(
+					bank.getFloat("x1", i),
+					bank.getFloat("y1", i),
+					bank.getFloat("z1", i));
+			/*Point3D x2 = new Point3D(
+					bank.getFloat("x2", i),
+					bank.getFloat("y2", i),
+					bank.getFloat("z2", i));
+			Point3D c = new Point3D(
+					bank.getFloat("cx", i),
+					bank.getFloat("cy", i),
+					bank.getFloat("cz", i));*/
+			Point3D a1 = new Point3D(
+					bank.getFloat("ax1", i),
+					bank.getFloat("ay1", i),
+					bank.getFloat("az1", i));
+			Point3D a2 = new Point3D(
+					bank.getFloat("ax2", i),
+					bank.getFloat("ay2", i),
+					bank.getFloat("az2", i));
+			
+			Vector3D a = a1.vectorTo(a2).asUnit();
+			Point3D arccenter = a1.toVector3D().add(a.multiply(a.dot(a1.vectorTo(x1)))).toPoint3D();
+			
 			cluster.set_Arc(new Arc3D(
-					new Point3D(
-							bank.getFloat("x1", i),
-							bank.getFloat("y1", i),
-							bank.getFloat("z1", i)),
-					new Point3D(
-							bank.getFloat("cx", i),
-							bank.getFloat("cy", i),
-							bank.getFloat("cz", i)),
-					new Point3D(
-							bank.getFloat("ax1", i),
-							bank.getFloat("ay1", i),
-							bank.getFloat("az1", i))
-					.vectorTo(new Point3D(
-							bank.getFloat("ax2", i),
-							bank.getFloat("ay2", i),
-							bank.getFloat("az2", i))).asUnit(),
+					x1,
+					arccenter, a,
 					bank.getFloat("theta", i)
 					));
-			
+			cluster.set_Type(BMTGeometry.getDetectorType(layer));
 			
 			//Since only up to 5 hits per track are written...
 			for (int j = 0; j < 5; j++) {
