@@ -15,7 +15,7 @@ import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Transformation3D;
 import org.jlab.rec.cvt.bmt.BMTType;
-import org.jlab.rec.cvt.bmt.Constants;
+import org.jlab.rec.cvt.bmt.BMTConstants;
 import org.jlab.rec.cvt.hit.Strip;
 /**
  * A cluster in the BST consists of an array of hits that are grouped together
@@ -254,7 +254,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                }
                 else if (this.get_Detector()==DetectorType.BMT) { 
                     
-                    if(thehit.newClustering && nbhits>Constants.MAXCLUSSIZE && i>Constants.MAXCLUSSIZE-1) 
+                    if(thehit.newClustering && nbhits>BMTConstants.MAXCLUSSIZE && i>BMTConstants.MAXCLUSSIZE-1) 
                         continue;
 
                     // for the BMT the analysis distinguishes between C and Z type detectors

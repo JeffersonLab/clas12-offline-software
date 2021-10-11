@@ -3,8 +3,8 @@ package org.jlab.rec.cvt.cross;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.rec.cvt.bmt.BMTConstants;
 
-import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
@@ -146,7 +146,7 @@ public class CrossMaker {
         // For BMT start id at 1000
         int pid = 1000;
         for (Cluster Zlayerclus : Zlayrclus) {
-            if (Zlayerclus.get_TotalEnergy() < org.jlab.rec.cvt.bmt.Constants.ETOTCUT) {
+            if (Zlayerclus.get_TotalEnergy() < BMTConstants.ETOTCUT) {
                 continue;
             }
             // Z detector --> meas phi
@@ -155,31 +155,6 @@ public class CrossMaker {
             this_cross.set_Id(pid);
             this_cross.set_Cluster1(Zlayerclus); 
             this_cross.setBMTCrossPosition(null);
-//            //the uncorrected x,y position of the Z detector cluster centroid.  This is calculated from the measured strips 
-//            // in the cluster prior to taking Lorentz angle correction into account
-//            double radius = Zlayerclus.getRadius();
-//            double x0 = radius * Math.cos(Zlayerclus.get_Phi0());
-//            double y0 = radius * Math.sin(Zlayerclus.get_Phi0());
-//            double x0Er = radius * Math.sin(Zlayerclus.get_Phi0()) * Zlayerclus.get_PhiErr0();
-//            double y0Er = radius * Math.cos(Zlayerclus.get_Phi0()) * Zlayerclus.get_PhiErr0();
-//            // set only the coordinates for which there is a measurement
-//            this_cross.set_Point0(new Point3D(x0, y0, Double.NaN));
-//            this_cross.set_PointErr0(new Point3D(x0Er, y0Er, Double.NaN));
-//            //the x,y position of the Z detector cluster centroid.  This is calculated from the Lorentz angle corrected strips 
-//            //double x = (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det) * Math.cos(Zlayerclus.get_Phi());
-//            //double y = (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det) * Math.sin(Zlayerclus.get_Phi());
-//            double x = Zlayerclus.center().x();
-//            double y = Zlayerclus.center().y();
-//            double xEr = radius * Math.sin(Zlayerclus.get_Phi()) * Zlayerclus.get_PhiErr();
-//            double yEr = radius * Math.cos(Zlayerclus.get_Phi()) * Zlayerclus.get_PhiErr();
-//            System.out.println(this_cross.get_Point().toString());
-//            System.out.println(this_cross.get_PointErr().toString());
-//            System.out.println(x + " " + y + " " + xEr + " " + yEr);
-//            
-//            // set only the coordinates for which there is a measurement (x,y)
-//            this_cross.set_Point(new Point3D(x, y, Double.NaN));
-//            this_cross.set_PointErr(new Point3D(Math.abs(xEr), Math.abs(yEr), Double.NaN));
-//            this_cross.set_Cluster1(Zlayerclus);
             if (this_cross.get_Point0() != null) {
                 //make arraylist
                 crosses.add(this_cross);
@@ -188,23 +163,13 @@ public class CrossMaker {
         }
 
         for (Cluster Clayerclus : Clayrclus) {
-            if (Clayerclus.get_TotalEnergy() < org.jlab.rec.cvt.bmt.Constants.ETOTCUT) {
+            if (Clayerclus.get_TotalEnergy() < BMTConstants.ETOTCUT) {
                 continue;
             }
             // C detector --> meas z
             // define new cross 
             Cross this_cross = new Cross(DetectorType.BMT, BMTType.C, Clayerclus.get_Sector(), Clayerclus.get_Region(), pid++);
             this_cross.set_Id(pid);
-
-            // measurement of z
-//            double z = Clayerclus.center().z();
-//            double zErr = Clayerclus.get_ZErr();
-//            // there is no measurement of x,y, hence only the z component is set
-//            this_cross.set_Point0(new Point3D(Double.NaN, Double.NaN, z));
-//            this_cross.set_PointErr0(new Point3D(Double.NaN, Double.NaN, zErr));
-//            // at this stage there is no additional correction to the measured centroid
-//            this_cross.set_Point(Clayerclus.center());
-//            this_cross.set_PointErr(new Point3D(Double.NaN, Double.NaN, zErr));
             this_cross.set_Cluster1(Clayerclus);
             this_cross.setBMTCrossPosition(null);
             if (this_cross.get_Point0() != null) {
@@ -212,11 +177,7 @@ public class CrossMaker {
                 crosses.add(this_cross);
             }
         }
-        //for (Cross c : crosses) {
-        //    int rg  = (c.get_Detector().equalsIgnoreCase("BMT"))  ? 3 + 
-        //            bmt_geo.getLayer( c.get_Region(), c.get_DetectorType()) : c.get_Region();
-        //    c.setOrderedRegion(rg);
-        //}
+
         for (Cross c : crosses) {
             int rg  =  3 + 
                     bmt_geo.getLayer( c.get_Region(), c.get_Type()) ;

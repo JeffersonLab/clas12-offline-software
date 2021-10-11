@@ -5,6 +5,7 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.cvt.Constants;
 
 /**
  *
@@ -26,9 +27,9 @@ public class CCDBConstantsLoader {
     public static final synchronized void Load(DatabaseConstantProvider dbprovider) {
         // initialize the constants
         //Z detector characteristics
-        int NREGIONS = Constants.NREGIONS;
-        int NSECTORS = Constants.NSECTORS;
-        int NLAYERS  = Constants.NLAYERS;
+        int NREGIONS = BMTConstants.NREGIONS;
+        int NSECTORS = BMTConstants.NSECTORS;
+        int NLAYERS  = BMTConstants.NLAYERS;
         double[] CRZRADIUS = new double[NREGIONS]; 		// the radius of the Z detector in mm
         int[] CRZNSTRIPS = new int[NREGIONS]; 			// the number of strips
         double[] CRZSPACING = new double[NREGIONS]; 	// the strip spacing in mm
@@ -120,7 +121,7 @@ public class CCDBConstantsLoader {
         
 //        System.out.println(" ................READ TARGET SHIFT "+ztarget+" cm......."); 
       //  dbprovider.show();
-        // Getting the Constants
+        // Getting the BMTConstants
         // 1) pitch info 
         int[] C_Layers = {1, 4, 6};
         for (int j = 0; j < NREGIONS; j++) {
@@ -154,7 +155,7 @@ public class CCDBConstantsLoader {
         CRZWIDTH[1] = dbprovider.getDouble("/geometry/cvt/mvt/bmt_strip_L3/Pitch", 0);
         CRZWIDTH[2] = dbprovider.getDouble("/geometry/cvt/mvt/bmt_strip_L5/Pitch", 0);
 
-        // Getting the Constants
+        // Getting the BMTConstants
         // 2) Layer info 
         for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_layer_noshim/Layer"); i++) {
 
@@ -325,11 +326,11 @@ public class CCDBConstantsLoader {
             transform.translateXYZ(shift.x(), shift.y(), shift.z());
             Line3D axis = new Line3D(new Point3D(0,0,Zmin), new Vector3D(0,0,Zmax));
             transform.apply(axis);
-            Constants.shifts[layer-1][sector-1]    = shift;
-            Constants.rotations[layer-1][sector-1] = rot;
-            Constants.axes[layer-1][sector-1]      = axis;
-            Constants.toGlobal[layer-1][sector-1]  = transform;
-            Constants.toLocal[layer-1][sector-1]   = transform.inverse();
+            BMTConstants.shifts[layer-1][sector-1]    = shift;
+            BMTConstants.rotations[layer-1][sector-1] = rot;
+            BMTConstants.axes[layer-1][sector-1]      = axis;
+            BMTConstants.toGlobal[layer-1][sector-1]  = transform;
+            BMTConstants.toLocal[layer-1][sector-1]   = transform.inverse();
         }
         
          
@@ -341,50 +342,50 @@ public class CCDBConstantsLoader {
         double err = 0;
         if(Math.sqrt(xb*xb+yb*yb)!=0) err = Math.sqrt((Math.pow(xb*exb,2)+Math.pow(yb*eyb,2))/(xb*xb+yb*yb));
         
-        org.jlab.rec.cvt.Constants.setXb(xb*10);
-        org.jlab.rec.cvt.Constants.setYb(yb*10);
-        org.jlab.rec.cvt.Constants.setRbErr(err*10);
+        Constants.setXb(xb*10);
+        Constants.setYb(yb*10);
+        Constants.setRbErr(err*10);
         System.out.println(" ................READ BEAM OFFSET PARAMETERS "+xb+" & "+yb+" cm.......");
         
         // target position mm
-        org.jlab.rec.cvt.Constants.setZoffset(ztarget*10);
+        Constants.setZoffset(ztarget*10);
         
-        Constants.setCRCRADIUS(CRCRADIUS);
-        Constants.setCRZRADIUS(CRZRADIUS);
-        Constants.setCRZNSTRIPS(CRZNSTRIPS);
-        Constants.setCRZZMIN(CRZZMIN);
-        Constants.setCRZZMAX(CRZZMAX);
-        Constants.setCRZLENGTH(CRZLENGTH);
-        Constants.setCRZSPACING(CRZSPACING);
-        Constants.setCRZPHI(CRZPHI);
-        Constants.setCRZDPHI(CRZDPHI);
-        Constants.setCRZEDGE1(CRZEDGE1);
-        Constants.setCRZEDGE2(CRZEDGE2);
-        Constants.setCRCRADIUS(CRCRADIUS);
-        Constants.setCRCNSTRIPS(CRCNSTRIPS);
-        Constants.setCRCZMIN(CRCZMIN);
-        Constants.setCRCZMAX(CRCZMAX);
-        Constants.setCRCLENGTH(CRCLENGTH);
-        Constants.setCRCSPACING(CRCSPACING);
-        Constants.setCRCPHI(CRCPHI);
-        Constants.setCRCDPHI(CRCDPHI);
-        Constants.setCRCEDGE1(CRCEDGE1);
-        Constants.setCRCEDGE2(CRCEDGE2);
-        Constants.setCRCGROUP(CRCGROUP);
-        Constants.setCRCWIDTH(CRCWIDTH);
-        Constants.setCRCGRPZMIN(CRCGRPZMIN);
-        Constants.setCRCGRPZMAX(CRCGRPZMAX);
-        Constants.setCRCGRPNMIN(CRCGRPNMIN);
-        Constants.setCRCGRPNMAX(CRCGRPNMAX);
-        Constants.setCRZWIDTH(CRZWIDTH);
-        Constants.setEFF_Z_OVER_A(EFF_Z_OVER_A);
-        Constants.set_T_OVER_X0(T_OVER_X0);
-        Constants.setTHETAL_grid(THETA_L_grid);
-        Constants.setE_grid(ELEC_grid);
-        Constants.setB_grid(MAG_grid);
-        Constants.setPar_grid();
-        Constants.setE_drift_FF(HV_DRIFT_FF);
-        Constants.setE_drift_MF(HV_DRIFT_MF);
+        BMTConstants.setCRCRADIUS(CRCRADIUS);
+        BMTConstants.setCRZRADIUS(CRZRADIUS);
+        BMTConstants.setCRZNSTRIPS(CRZNSTRIPS);
+        BMTConstants.setCRZZMIN(CRZZMIN);
+        BMTConstants.setCRZZMAX(CRZZMAX);
+        BMTConstants.setCRZLENGTH(CRZLENGTH);
+        BMTConstants.setCRZSPACING(CRZSPACING);
+        BMTConstants.setCRZPHI(CRZPHI);
+        BMTConstants.setCRZDPHI(CRZDPHI);
+        BMTConstants.setCRZEDGE1(CRZEDGE1);
+        BMTConstants.setCRZEDGE2(CRZEDGE2);
+        BMTConstants.setCRCRADIUS(CRCRADIUS);
+        BMTConstants.setCRCNSTRIPS(CRCNSTRIPS);
+        BMTConstants.setCRCZMIN(CRCZMIN);
+        BMTConstants.setCRCZMAX(CRCZMAX);
+        BMTConstants.setCRCLENGTH(CRCLENGTH);
+        BMTConstants.setCRCSPACING(CRCSPACING);
+        BMTConstants.setCRCPHI(CRCPHI);
+        BMTConstants.setCRCDPHI(CRCDPHI);
+        BMTConstants.setCRCEDGE1(CRCEDGE1);
+        BMTConstants.setCRCEDGE2(CRCEDGE2);
+        BMTConstants.setCRCGROUP(CRCGROUP);
+        BMTConstants.setCRCWIDTH(CRCWIDTH);
+        BMTConstants.setCRCGRPZMIN(CRCGRPZMIN);
+        BMTConstants.setCRCGRPZMAX(CRCGRPZMAX);
+        BMTConstants.setCRCGRPNMIN(CRCGRPNMIN);
+        BMTConstants.setCRCGRPNMAX(CRCGRPNMAX);
+        BMTConstants.setCRZWIDTH(CRZWIDTH);
+        BMTConstants.setEFF_Z_OVER_A(EFF_Z_OVER_A);
+        BMTConstants.set_T_OVER_X0(T_OVER_X0);
+        BMTConstants.setTHETAL_grid(THETA_L_grid);
+        BMTConstants.setE_grid(ELEC_grid);
+        BMTConstants.setB_grid(MAG_grid);
+        BMTConstants.setPar_grid();
+        BMTConstants.setE_drift_FF(HV_DRIFT_FF);
+        BMTConstants.setE_drift_MF(HV_DRIFT_MF);
         dbprovider.disconnect();
         CSTLOADED = true;
         System.out

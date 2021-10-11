@@ -1,9 +1,12 @@
 package org.jlab.rec.cvt.services;
 
 import Jama.Matrix;
+import cnuphys.magfield.MagneticFields;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.clas.tracking.kalmanfilter.helical.KFitter;
+import org.jlab.clas.tracking.trackrep.Helix;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.geom.base.Detector;
@@ -44,10 +47,15 @@ public class TracksFromTargetRec {
             double shift, 
             Swim swimmer,
             boolean isSVTonly, boolean exLayrs) {
-        // make list of crosses consistent with a track candidate
         
+        
+        // get field value and scale
+        double solenoidScale = Constants.getSolenoidScale();
+        double solenoidValue = Constants.getSolenoidMagnitude(); // already the absolute value
+        
+        // make list of crosses consistent with a track candidate
         List<Seed> seeds = null;
-        if(Math.abs(Constants.getSolenoidVal())<0.001) {
+        if(solenoidValue<0.001) {
             StraightTrackSeeder trseed = new StraightTrackSeeder();
             seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, isSVTonly);
             if(exLayrs==true) {
@@ -79,47 +87,38 @@ public class TracksFromTargetRec {
             return true;
         }   
         
-        org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf = null;
+        KFitter kf = null;
         List<Track> trkcands = new ArrayList<Track>();
         
-        for (Seed seed : seeds) { 
-            org.jlab.clas.tracking.trackrep.Helix hlx = null ;
-            
-            double xr = -seed.get_Helix().get_dca()*Math.sin(seed.get_Helix().get_phi_at_dca());
-            double yr =  seed.get_Helix().get_dca()*Math.cos(seed.get_Helix().get_phi_at_dca());
-            double zr =  seed.get_Helix().get_Z0();
-            double pt = Constants.LIGHTVEL * seed.get_Helix().radius() * Constants.getSolenoidVal();
-            if(Math.abs(Constants.getSolenoidVal())<0.001)
-                pt = 100;
-            double pz = pt*seed.get_Helix().get_tandip();
-            double px = pt*Math.cos(seed.get_Helix().get_phi_at_dca());
-            double py = pt*Math.sin(seed.get_Helix().get_phi_at_dca());
-            int charge = (int) (Math.signum(Constants.getSolenoidscale())*seed.get_Helix().get_charge());
-            if(Math.abs(Constants.getSolenoidVal())<0.001)
+        for (Seed seed : seeds) {             
+            Point3D  v = seed.get_Helix().getVertex();
+            Vector3D p = seed.get_Helix().getPXYZ(solenoidValue);
+            int charge = (int) (Math.signum(solenoidScale)*seed.get_Helix().get_charge());
+            if(solenoidValue<0.001)
                 charge = 1;
-            xr += org.jlab.rec.cvt.Constants.getXb();
-            yr += org.jlab.rec.cvt.Constants.getYb();
+            v.translateXYZ(Constants.getXb(),
+                           Constants.getYb(),
+                           0);
             //Uncomment to force to MC truth:
-//            double[] pars = recUtil.MCtrackPars(event);
-//            xr = pars[0];yr=pars[1];zr=pars[2];px=pars[3];py=pars[4];pz=pars[5];
-//            System.out.println(xr + " " + yr + " " + zr + " " + px + " " + py + " " + pz);
-            hlx = new org.jlab.clas.tracking.trackrep.Helix(xr,yr,zr,px,py,pz, 
-                    charge, Constants.getSolenoidVal(), org.jlab.rec.cvt.Constants.getXb(), 
-                    org.jlab.rec.cvt.Constants.getYb(), org.jlab.clas.tracking.trackrep.Helix.Units.MM);
+            //double[] pars = recUtil.MCtrackPars(event);
+            //v = new Point3D(pars[0],pars[1],pars[2]);
+            //p = new Vector3D(pars[3],pars[4],pars[5]);
+            Helix hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
+                            solenoidValue, Constants.getXb(), Constants.getYb(), Helix.Units.MM);
             
             Matrix cov = seed.get_Helix().get_covmatrix();
             
-            if(Math.abs(Constants.getSolenoidVal())>0.001 &&
-                    Constants.LIGHTVEL * seed.get_Helix().radius() *Constants.getSolenoidVal()<Constants.PTCUT)
+            if(solenoidValue>0.001 &&
+                    Constants.LIGHTVEL * seed.get_Helix().radius() *solenoidValue<Constants.PTCUT)
                 continue;
                 
-                kf = new org.jlab.clas.tracking.kalmanfilter.helical.KFitter( hlx, cov, event,  swimmer, 
-                    org.jlab.rec.cvt.Constants.getXb(), 
-                    org.jlab.rec.cvt.Constants.getYb(),
+                kf = new KFitter( hlx, cov, event,  swimmer, 
+                    Constants.getXb(), 
+                    Constants.getYb(),
                     shift, 
                     recUtil.setMeasVecs(seed, swimmer)) ;
                 //Uncomment to let track be fitted
-                kf.filterOn=false;
+                //kf.filterOn=false;
                 kf.runFitter(swimmer);
                 if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null) { 
                     Track fittedTrack = recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom);
@@ -137,38 +136,27 @@ public class TracksFromTargetRec {
                     }
                    
                     //reset pars
-                    xr =  -fittedTrack.get_helix().get_dca()*Math.sin(fittedTrack.get_helix().get_phi_at_dca());
-                    yr =  fittedTrack.get_helix().get_dca()*Math.cos(fittedTrack.get_helix().get_phi_at_dca());
-                    zr =  fittedTrack.get_helix().get_Z0();
-                    pt = Constants.LIGHTVEL * fittedTrack.get_helix().radius() * Constants.getSolenoidVal();
-                    if(Math.abs(Constants.getSolenoidVal())<0.001)
-                        pt = 100;
-                    pz = pt*fittedTrack.get_helix().get_tandip();
-                    px = pt*Math.cos(fittedTrack.get_helix().get_phi_at_dca());
-                    py = pt*Math.sin(fittedTrack.get_helix().get_phi_at_dca());
-                    charge = (int) (Math.signum(Constants.getSolenoidscale())*fittedTrack.get_helix().get_charge());
-                    if(Math.abs(Constants.getSolenoidVal())<0.001)
+                    v = fittedTrack.get_helix().getVertex();
+                    p = fittedTrack.get_helix().getPXYZ(solenoidValue);
+                    charge = (int) (Math.signum(solenoidScale)*fittedTrack.get_helix().get_charge());
+                    if(solenoidValue<0.001)
                         charge = 1;
-                    xr += org.jlab.rec.cvt.Constants.getXb();
-                    yr += org.jlab.rec.cvt.Constants.getYb();
-//                    System.out.println(xr + " " + yr + " " + zr + " " + px + " " + py + " " + pz);
-                    hlx = new org.jlab.clas.tracking.trackrep.Helix(xr,yr,zr,px,py,pz, 
-                            charge, Constants.getSolenoidVal(), org.jlab.rec.cvt.Constants.getXb(), 
-                            org.jlab.rec.cvt.Constants.getYb(), org.jlab.clas.tracking.trackrep.Helix.Units.MM);
+                    v.translateXYZ(Constants.getXb(),Constants.getYb(), 0);
+                    hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
+                                    solenoidValue, Constants.getXb(), Constants.getYb(), Helix.Units.MM);
 
-                    kf = new org.jlab.clas.tracking.kalmanfilter.helical.KFitter( hlx, cov, event,  swimmer, 
-                    org.jlab.rec.cvt.Constants.getXb(), 
-                    org.jlab.rec.cvt.Constants.getYb(),
+                    kf = new KFitter( hlx, cov, event,  swimmer, 
+                    Constants.getXb(), 
+                    Constants.getYb(),
                     shift, 
                     recUtil.setMeasVecs(seed, swimmer)) ;
                     //Uncomment to let track be fitted
-                    kf.filterOn = false;
+                    //kf.filterOn = false;
                     kf.runFitter(swimmer);
                     
                     Track trk = recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom);
                     
                     trkcands.add(trk);
-                    
                     trkcands.get(trkcands.size() - 1).set_TrackingStatus(seed.trkStatus);
                 }
             //} else {

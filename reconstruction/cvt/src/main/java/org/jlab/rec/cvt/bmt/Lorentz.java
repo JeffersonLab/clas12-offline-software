@@ -16,20 +16,20 @@ public class Lorentz {
         if (xe == 0 || xb == 0) {
             return 0;
         }
-        double de = (Constants.emax - Constants.emin) / (Constants.Ne - 1);
-        double db = (Constants.bmax - Constants.bmin) / (Constants.Nb - 1);
+        double de = (BMTConstants.emax - BMTConstants.emin) / (BMTConstants.Ne - 1);
+        double db = (BMTConstants.bmax - BMTConstants.bmin) / (BMTConstants.Nb - 1);
 
-        if (xe < Constants.emin) {
-            xe = Constants.emin;
+        if (xe < BMTConstants.emin) {
+            xe = BMTConstants.emin;
             System.err.println("Warning: E out of grid... setting it to Emin");
         }
-        if (xe >= Constants.emax) {
-            xe = Constants.emax;
+        if (xe >= BMTConstants.emax) {
+            xe = BMTConstants.emax;
             System.err.println("Warning: E out of grid... setting it to Emax");
         }
-        if (xb > Constants.bmax) {
-            xb = Constants.bmax;
-            //System.err.println("Warning: B field out of grid... setting it to Bmax = "+Constants.bmax);
+        if (xb > BMTConstants.bmax) {
+            xb = BMTConstants.bmax;
+            //System.err.println("Warning: B field out of grid... setting it to Bmax = "+BMTConstants.bmax);
         }
 
         int i11 = getBin(xe, xb);
@@ -41,28 +41,28 @@ public class Lorentz {
         double Q12 = 0;
         double Q21 = 0;
         double Q22 = 0;
-        double e1 = Constants.emin;
-        double e2 = Constants.emax;
+        double e1 = BMTConstants.emin;
+        double e2 = BMTConstants.emax;
         double b1 = 0; // RDV check if it should be 0 or bmin
-        double b2 = Constants.bmax;
+        double b2 = BMTConstants.bmax;
         if (i11 >= 0) {
-            Q11 = Constants.ThetaL_grid[i11];
-            e1 = Constants.E_grid[i11];
-            b1 = Constants.B_grid[i11];
+            Q11 = BMTConstants.ThetaL_grid[i11];
+            e1 = BMTConstants.E_grid[i11];
+            b1 = BMTConstants.B_grid[i11];
         }
         if (i12 >= 0) {
-            Q12 = Constants.ThetaL_grid[i12];
+            Q12 = BMTConstants.ThetaL_grid[i12];
         }
-        if (xb >= Constants.bmin) {
-            Q21 = Constants.ThetaL_grid[i21];
+        if (xb >= BMTConstants.bmin) {
+            Q21 = BMTConstants.ThetaL_grid[i21];
         }
-        if (xb < Constants.bmin) {
+        if (xb < BMTConstants.bmin) {
             Q21 = 0;
         }
         if (i22 >= 0) {
-            Q22 = Constants.ThetaL_grid[i22];
-            e2 = Constants.E_grid[i22];
-            b2 = Constants.B_grid[i22];
+            Q22 = BMTConstants.ThetaL_grid[i22];
+            e2 = BMTConstants.E_grid[i22];
+            b2 = BMTConstants.B_grid[i22];
         }
 
         double R1 = linInterp(xe, e1, e2, Q11, Q21);
@@ -84,12 +84,12 @@ public class Lorentz {
 
     
     public static int getBin(double e, double b) {
-        double de = (Constants.emax - Constants.emin) / (Constants.Ne - 1);
-        double db = (Constants.bmax - Constants.bmin) / (Constants.Nb - 1);
+        double de = (BMTConstants.emax - BMTConstants.emin) / (BMTConstants.Ne - 1);
+        double db = (BMTConstants.bmax - BMTConstants.bmin) / (BMTConstants.Nb - 1);
 
-        int ie = (int) Math.floor((e - Constants.emin) / de);
-        int ib = (int) Math.floor((b - Constants.bmin) / db);
+        int ie = (int) Math.floor((e - BMTConstants.emin) / de);
+        int ib = (int) Math.floor((b - BMTConstants.bmin) / db);
 
-        return ib + Constants.Nb * ie;
+        return ib + BMTConstants.Nb * ie;
     }
 }

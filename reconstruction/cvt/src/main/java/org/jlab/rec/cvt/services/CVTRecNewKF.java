@@ -19,6 +19,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.banks.HitReader;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
+import org.jlab.rec.cvt.bmt.BMTConstants;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
 import org.jlab.rec.cvt.cluster.Cluster;
@@ -85,7 +86,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
         String newConfig = "SOLENOID" + bank.getFloat("solenoid", 0);
 
         if (FieldsConfig.equals(newConfig) == false) {
-            // Load the Constants
+            // Load the BMTConstants
             
             this.setFieldsConfig(newConfig);
         }
@@ -94,23 +95,14 @@ public class CVTRecNewKF extends ReconstructionEngine {
         //-------------------
         int newRun = bank.getInt("run", 0); 
         if (Run != newRun) {
-            boolean align=false;
-            //Load field scale
-            double SolenoidScale =(double) bank.getFloat("solenoid", 0);
-            if(SolenoidScale==0)
-                SolenoidScale=0.000001;
-            Constants.setSolenoidscale(SolenoidScale);
-            float[]b = new float[3];
-            Swim swimmer = new Swim();
-            swimmer.BfieldLab(0, 0, 0, b);
-            Constants.setSolenoidVal(Math.abs(b[2]));
+
             Constants.Load(isCosmics, isSVTonly);
             this.setRun(newRun); 
            
             if(newRun<100) { 
-                org.jlab.rec.cvt.bmt.Constants.isMC = true;
+                Constants.isMC = true;
             } else {
-                org.jlab.rec.cvt.bmt.Constants.isMC = false;
+                Constants.isMC = false;
             }
         }
       
@@ -137,7 +129,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
     @Override
     public boolean processDataEvent(DataEvent event) {
         this.setRunConditionsParameters(event, FieldsConfig, Run, false, "");
-        double shift = 0;//org.jlab.rec.cvt.Constants.getZoffset();
+        double shift = 0;//org.jlab.rec.cvt.BMTConstants.getZoffset();
 
         this.FieldsConfig = this.getFieldsConfig();
         
@@ -164,7 +156,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
         if (bmt_hits != null && bmt_hits.size() > 0) {
             hits.addAll(bmt_hits);
 
-            if(bmt_hits.size()>org.jlab.rec.cvt.bmt.Constants.MAXBMTHITS)
+            if(bmt_hits.size()>BMTConstants.MAXBMTHITS)
                  return true;
         }
 
@@ -271,14 +263,14 @@ public class CVTRecNewKF extends ReconstructionEngine {
         if (svtCosmics!=null) {
             System.out.println("["+this.getName()+"] run with cosmics settings "+svtCosmics+" config chosen based on yaml");
             this.isCosmic= Boolean.valueOf(svtCosmics);
-            org.jlab.rec.cvt.Constants.setCosmicsData(isCosmic);
+            Constants.setCosmicsData(isCosmic);
         }
         else {
             svtCosmics = System.getenv("COAT_CVT_COSMICS");
             if (svtCosmics!=null) {
                 System.out.println("["+this.getName()+"] run with cosmics settings "+svtCosmics+" config chosen based on env");
                 this.isCosmic= Boolean.valueOf(svtCosmics);
-                org.jlab.rec.cvt.Constants.setCosmicsData(isCosmic);
+                Constants.setCosmicsData(isCosmic);
             }
         }
         if (svtCosmics==null) {
@@ -314,7 +306,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
         
         int exlyrsnb = 0;
         for(int ilayrs = 0; ilayrs<12; ilayrs++) {
-            if((int)org.jlab.rec.cvt.Constants.getLayersUsed().get(ilayrs+1)<1) {
+            if((int)Constants.getLayersUsed().get(ilayrs+1)<1) {
                 System.out.println("EXCLUDE CVT LAYER "+(ilayrs+1));
                 exlyrsnb++;
             }
@@ -327,13 +319,13 @@ public class CVTRecNewKF extends ReconstructionEngine {
 //        
 //        if (newClustering!=null) {
 //            System.out.println("["+this.getName()+"] run with new clustering settings "+newClustering+" config chosen based on yaml");
-//            org.jlab.rec.cvt.bmt.Constants.newClustering= Boolean.valueOf(newClustering);
+//            BMTConstants.newClustering= Boolean.valueOf(newClustering);
 //        }
 //        else {
 //            newClustering = System.getenv("COAT_CVT_NEWCLUSTERING");
 //            if (newClustering!=null) {
 //                System.out.println("["+this.getName()+"] run with new clustering settings "+newClustering+" config chosen based on env");
-//                org.jlab.rec.cvt.bmt.Constants.newClustering= Boolean.valueOf(newClustering);
+//                BMTConstants.newClustering= Boolean.valueOf(newClustering);
 //            }
 //        }
 //        if (newClustering==null) {

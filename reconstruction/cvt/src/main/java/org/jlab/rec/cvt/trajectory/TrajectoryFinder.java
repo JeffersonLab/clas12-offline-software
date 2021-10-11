@@ -17,6 +17,8 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Line3d;
+import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.bmt.BMTConstants;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
@@ -118,7 +120,7 @@ public class TrajectoryFinder {
         
         // initialize swimmer starting from the track vertex
         double maxPathLength = 1;  
-        swimmer.SetSwimParameters((trk.get_helix().xdca()+org.jlab.rec.cvt.Constants.getXb()) / 10, (trk.get_helix().ydca()+org.jlab.rec.cvt.Constants.getYb()) / 10, trk.get_helix().get_Z0() / 10, 
+        swimmer.SetSwimParameters((trk.get_helix().xdca()+Constants.getXb()) / 10, (trk.get_helix().ydca()+Constants.getYb()) / 10, trk.get_helix().get_Z0() / 10, 
                      Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
                      trk.get_P(), trk.get_Q(), maxPathLength) ;
         double[] inters = null;
@@ -137,9 +139,9 @@ public class TrajectoryFinder {
                 continue;
             
             Vector3D n = svt_geo.getNormal(layer, sector);
-            Point3D p  = svt_geo.getModule(layer, sector).origin();
-            double d = n.dot(p.toVector3D());
-            inters = swimmer.SwimToPlaneBoundary(d/10.0, n, 1);
+            Point3D  p = svt_geo.getModule(layer, sector).origin();
+            Point3D pm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
+            inters = swimmer.SwimPlane(n, pm, 5E-4);
             path  = path + inters[6];
             StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
             stVec.set_planeIdx(l);
@@ -176,7 +178,7 @@ public class TrajectoryFinder {
         }
         // reinitialize from vertex
         maxPathLength = 1.5;  
-        swimmer.SetSwimParameters((trk.get_helix().xdca()+org.jlab.rec.cvt.Constants.getXb()) / 10, (trk.get_helix().ydca()+org.jlab.rec.cvt.Constants.getYb()) / 10, trk.get_helix().get_Z0() / 10, 
+        swimmer.SetSwimParameters((trk.get_helix().xdca()+Constants.getXb()) / 10, (trk.get_helix().ydca()+Constants.getYb()) / 10, trk.get_helix().get_Z0() / 10, 
                      Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
                      trk.get_P(), trk.get_Q(), maxPathLength) ;
         inters = null;
@@ -202,14 +204,14 @@ public class TrajectoryFinder {
                 Line3D axis    = bmt_geo.getAxis(layer, sector);
                 Point3D axisP1 = new Point3D(axis.origin().x()/10,axis.origin().y()/10, axis.origin().z()/10);
                 Point3D axisP2 = new Point3D(axis.end().x()/10,axis.end().y()/10, axis.end().z()/10);
-                    //            swimmer.SetSwimParameters((trk.get_helix().xdca()+org.jlab.rec.cvt.Constants.getXb()) / 10, (trk.get_helix().ydca()+org.jlab.rec.cvt.Constants.getYb()) / 10, trk.get_helix().get_Z0() / 10, 
+                    //            swimmer.SetSwimParameters((trk.get_helix().xdca()+org.jlab.rec.cvt.BMTConstants.getXb()) / 10, (trk.get_helix().ydca()+org.jlab.rec.cvt.BMTConstants.getYb()) / 10, trk.get_helix().get_Z0() / 10, 
     //                    Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
     //                    trk.get_P(), trk.get_Q(), 
     //                    5.0) ;
                 inters = swimmer.SwimGenCylinder(axisP1, axisP2, radius);
                 double r = Math.sqrt(inters[0]*inters[0]+inters[1]*inters[1]);
                 path  = path + inters[6];
-                //if(r>(radius - org.jlab.rec.cvt.bmt.Constants.LYRTHICKN)/10) {
+                //if(r>(radius - BMTConstants.LYRTHICKN)/10) {
                     StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
                     stVec.set_planeIdx(l);  
 //                    double phiPos = Math.atan2(stVec.y(),stVec.x());
@@ -460,9 +462,9 @@ public class TrajectoryFinder {
             }
         }
         
-        double[][][] BMTIntersections = calc_trackIntersBMT(ray, bmt_geo, org.jlab.rec.cvt.bmt.Constants.STARTINGLAYR);
+        double[][][] BMTIntersections = calc_trackIntersBMT(ray, bmt_geo, BMTConstants.STARTINGLAYR);
 
-        for (int l = org.jlab.rec.cvt.bmt.Constants.STARTINGLAYR - 1; l < 6; l++) {
+        for (int l = BMTConstants.STARTINGLAYR - 1; l < 6; l++) {
             //hemisphere 1-2
             for (int h = 0; h < 2; h++) {
 
@@ -472,7 +474,7 @@ public class TrajectoryFinder {
                     double XtrackIntersSurf = BMTIntersections[l][h][0];
                     double YtrackIntersSurf = BMTIntersections[l][h][1];
                     double ZtrackIntersSurf = BMTIntersections[l][h][2];
-                    //int SectorTrackIntersSurf = bmt_geo.isInSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf), Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter));
+                    //int SectorTrackIntersSurf = bmt_geo.isInSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf), Math.toRadians(BMTConstants.isInSectorJitter));
                     int SectorTrackIntersSurf = bmt_geo.getSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf));
                     double PhiTrackIntersSurf = BMTIntersections[l][h][3];
                     double ThetaTrackIntersSurf = BMTIntersections[l][h][4];

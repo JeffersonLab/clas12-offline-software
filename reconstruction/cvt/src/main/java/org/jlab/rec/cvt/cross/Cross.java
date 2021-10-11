@@ -7,6 +7,7 @@ import org.jlab.geom.prim.Line3D;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.svt.SVTGeometry;
@@ -440,7 +441,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         }
 
         this.set_Point(crossPoint);
-//        this.set_Dir(trackDir);
+        this.set_Dir(trackDir);
         this.set_PointErr(crossError.toPoint3D());
 
     }
@@ -606,7 +607,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     public int compareTo(Cross arg) {
 
         int return_val = 0;
-        if (org.jlab.rec.cvt.Constants.isCosmicsData() == true) {
+        if (Constants.isCosmicsData() == true) {
             int RegComp = this.get_SVTCosmicsRegion() < arg.get_SVTCosmicsRegion() ? -1 : this.get_SVTCosmicsRegion() == arg.get_SVTCosmicsRegion() ? 0 : 1;
             int IDComp = this.get_Id() < arg.get_Id() ? -1 : this.get_Id() == arg.get_Id() ? 0 : 1;
 

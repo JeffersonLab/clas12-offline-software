@@ -3,6 +3,7 @@ import java.util.*;
 
 import javax.vecmath.Vector2d;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.rec.cvt.bmt.BMTConstants;
 
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
@@ -45,9 +46,9 @@ public class MakerCA {
 			return Math.sqrt(c.get_Point().x()*c.get_Point().x()+c.get_Point().y()*c.get_Point().y());
 		
 		if( c.get_Type()==BMTType.Z )
-			return org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[c.get_Region()-1 ];
+			return BMTConstants.getCRZRADIUS()[c.get_Region()-1 ];
 		
-		return org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[c.get_Region()-1 ];
+		return BMTConstants.getCRCRADIUS()[c.get_Region()-1 ];
 	}
 	
 	private boolean checkAngles( Cell cell ) {

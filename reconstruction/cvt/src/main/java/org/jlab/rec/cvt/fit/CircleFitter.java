@@ -43,8 +43,8 @@ public class CircleFitter {
      * Constructor Sets the reference point to (0,0)
      */
     public CircleFitter() {
-        _xref = org.jlab.rec.cvt.Constants.getXb();
-        _yref = org.jlab.rec.cvt.Constants.getYb();
+        _xref = Constants.getXb();
+        _yref = Constants.getYb();
         _covr = new double[6];
     }
     // Now set the reference point for the fit

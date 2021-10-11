@@ -11,6 +11,7 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Line3d;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.hit.ADCConvertor;
@@ -123,7 +124,7 @@ public class HitReader {
                 //	hit.set_Status(-1);
                 hit.set_Id(i+1);
                 // add this hit
-                if(hit.get_Layer()+3!=org.jlab.rec.cvt.Constants.getRmReg())
+                if(hit.get_Layer()+3!=Constants.getRmReg())
                     hits.add(hit);
             }
             // fills the list of BMT hits
@@ -262,7 +263,7 @@ public class HitReader {
                 
                 hit.set_Id(id[i]);
                 // add this hit
-                if(SvtStrip.get_Edep()>0 && hit.get_Region()!=org.jlab.rec.cvt.Constants.getRmReg())      
+                if(SvtStrip.get_Edep()>0 && hit.get_Region()!=Constants.getRmReg())      
                     hits.add(hit);
             }
         }
