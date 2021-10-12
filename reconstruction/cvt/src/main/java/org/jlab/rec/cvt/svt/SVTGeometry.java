@@ -11,7 +11,7 @@ import org.jlab.geometry.prim.Line3d;
 
 public class SVTGeometry {
 
-    private final SVTStripFactory _svtStripFactory;
+    private SVTStripFactory _svtStripFactory;
     public static final int NREGIONS = 3;
     public static final int NLAYERS  = 6;
     public static final int NSTRIPS  = SVTConstants.NSTRIPS;

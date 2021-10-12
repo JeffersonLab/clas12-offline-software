@@ -5,18 +5,17 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Vector3D;
 
-public class Constants {
+public class BMTConstants {
 
-    private Constants() {
+    private BMTConstants() {
 
     }
     
-    public static boolean isMC = true;
     /*
- * The algorithm to describe the geometry of the Barrel Micromegas is provided by Franck Sabatie and implemented into the Java framework.
- * This version is for the last region of the BMT only.
-   CRC and CRZ characteristics localize strips in the cylindrical coordinate system. The target center is at the origin. The Z-axis is along the beam axis. 
-   The angles are defined with theZ-axis oriented from the accelerator to the beam dump.
+     * The algorithm to describe the geometry of the Barrel Micromegas is provided by Franck Sabatie and implemented into the Java framework.
+     * This version is for the last region of the BMT only.
+       CRC and CRZ characteristics localize strips in the cylindrical coordinate system. The target center is at the origin. The Z-axis is along the beam axis. 
+       The angles are defined with theZ-axis oriented from the accelerator to the beam dump.
      */
     //CUTS
     public static double MAXCLUSSIZE = 5;
@@ -113,35 +112,8 @@ public class Constants {
 
     public static final int STARTINGLAYR = 1;
 
-    public static synchronized void Load() {
-        if (areConstantsLoaded) {
-            return;
-        }
-
-        //if (org.jlab.rec.cvt.Constants.isCosmicsData() == false) {
-           //setThetaL(Math.toRadians(20. * Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale()))); // for 5-T field
-           //System.out.println("   LORENTZ ANGLE (radians) = "+getThetaL());
-        //}
-        areConstantsLoaded = true;
-
-    }
-
     public static double getThetaL() {
         return ThetaL;
-    }
-
-    public static synchronized void setThetaL(int layer, int sector) {
-        if(Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale())<0.001) {
-            ThetaL = 0;
-        }
-        else {
-            if(Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale())<0.8) {
-                ThetaL = Math.toRadians(org.jlab.rec.cvt.bmt.Lorentz.getLorentzAngle(E_DRIFT_MF[layer-1][sector-1],Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale()*50)));
-            } else {
-                ThetaL = Math.toRadians(org.jlab.rec.cvt.bmt.Lorentz.getLorentzAngle(E_DRIFT_FF[layer-1][sector-1],Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale()*50)));
-            }
-        }
-        if (org.jlab.rec.cvt.Constants.getSolenoidscale()<0) ThetaL=-ThetaL; 
     }
 
     public static double[] getCRZRADIUS() {
@@ -213,7 +185,7 @@ public class Constants {
     }
 
     public static void setCRZPHI(double[][] cRZPHI) {
-        Constants.CRZPHI = cRZPHI;
+        BMTConstants.CRZPHI = cRZPHI;
     }
 
     public static double[][] getCRZDPHI() {
@@ -221,7 +193,7 @@ public class Constants {
     }
 
     public static void setCRZDPHI(double[][] cRZDPHI) {
-        Constants.CRZDPHI = cRZDPHI;
+        BMTConstants.CRZDPHI = cRZDPHI;
     }
 
     public static double[][] getCRZEDGE1() {
@@ -357,7 +329,7 @@ public class Constants {
     }
 
     public static void setCRCPHI(double[][] cRCPHI) {
-        Constants.CRCPHI = cRCPHI;
+        BMTConstants.CRCPHI = cRCPHI;
     }
 
     public static double[][] getCRCDPHI() {
@@ -365,7 +337,7 @@ public class Constants {
     }
 
     public static void setCRCDPHI(double[][] cRCDPHI) {
-        Constants.CRCDPHI = cRCDPHI;
+        BMTConstants.CRCDPHI = cRCDPHI;
     }
 
     public static double[][] getCRCEDGE1() {

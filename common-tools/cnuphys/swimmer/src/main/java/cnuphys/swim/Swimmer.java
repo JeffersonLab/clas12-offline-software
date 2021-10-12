@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import cnuphys.adaptiveSwim.AdaptiveSwimResult;
 import cnuphys.adaptiveSwim.geometry.Cylinder;
+import cnuphys.adaptiveSwim.geometry.Point;
+import cnuphys.adaptiveSwim.geometry.Vector;
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
@@ -263,8 +265,8 @@ public final class Swimmer {
 		result.setFinalS(sFinal);
 
 	}
-	
-	/**
+	   
+        /**
 	 * Swims a particle with a built in stopper at the boundary of an
 	 * arbitrary cylinder. Uses a fixed stepsize algorithm.
 	 * 
@@ -669,7 +671,93 @@ public final class Swimmer {
 //		}
 	}
 
+	public void swimPlane(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+			double normX, double normY, double normZ, double pointX, double pointY, double pointZ,
+			double accuracy, double sMax, double stepSize, double relTolerance[], AdaptiveSwimResult result)
+			throws RungeKuttaException {
+		
+		cnuphys.adaptiveSwim.geometry.Plane targetPlane = new cnuphys.adaptiveSwim.geometry.Plane(new Vector(normX,normY,normZ), new Point(pointX,pointY,pointZ));
+//                System.out.println(targetPlane.toString());
+		result.setInitialValues(charge, xo, yo, zo, momentum, theta, phi);
 
+		// set u to the starting state vector
+		double thetaRad = Math.toRadians(theta);
+		double phiRad = Math.toRadians(phi);
+		double sinTheta = Math.sin(thetaRad);
+
+		double px = sinTheta*Math.cos(phiRad); //px/p
+		double py = sinTheta*Math.sin(phiRad); //py/p
+		double pz = Math.cos(thetaRad); //pz/p
+		
+		double uf[] = result.getUf();
+		uf[0] = xo;
+		uf[1] = yo;
+		uf[2] = zo;
+		uf[3] = px;
+		uf[4] = py;
+		uf[5] = pz;
+//		System.out.println(xo + " " +yo + " " + zo + " " + targetPlane.signedDistance(xo, yo, zo));
+		if (momentum < MINMOMENTUM) {
+			System.err.println("Skipping low momentum fixed rho swim (A)");
+			result.setNStep(0);
+			result.setFinalS(0);
+			result.setStatus(-2);
+			return;
+		}
+				
+		double del = Double.POSITIVE_INFINITY;
+		int maxtry = 25;
+		int count = 0;
+		double sFinal = 0;
+		int ns = 0;
+		
+		
+		while ((count < maxtry) && (del > accuracy)) {
+
+			
+			uf = result.getUf();
+			if (count > 0) {
+				px = uf[3];
+				py = uf[4];
+				pz = uf[5];
+				theta = FastMath.acos2Deg(pz);
+				phi = FastMath.atan2Deg(py, px);
+			}
+			
+			
+			NewPlaneStopper stopper = new NewPlaneStopper(uf, sFinal, sMax, targetPlane, accuracy);
+
+			ns += swim(charge, uf[0], uf[1], uf[2], momentum, theta, phi, stopper, null, sMax-sFinal, stepSize, relTolerance, null);
+			
+			System.arraycopy(stopper.getFinalU(), 0, result.getUf(), 0, result.getUf().length);
+			
+			sFinal = stopper.getFinalT();
+									
+			del = Math.abs(targetPlane.signedDistance(stopper.getFinalU()[0], stopper.getFinalU()[1], stopper.getFinalU()[2]));
+//			System.out.println(del + " " + stopper.getFinalU()[0] + " " + stopper.getFinalU()[1] + " " + stopper.getFinalU()[2]);
+			// succeed?
+			if (del < accuracy) {
+				break;
+			}
+
+			// passed max path length?
+			if (stopper.passedSmax()) {
+				break;
+			}
+			
+			count++;
+			
+			if (stopper.crossedBoundary()) {
+				stepSize = Math.max(stepSize / 2, del / 5);
+			}
+			
+		} // while
+
+		result.setNStep(ns);
+		result.setFinalS(sFinal);
+
+	}
+     
 	/**
 	 * Get the tolerance used by the CLAS_Toleance array
 	 * 

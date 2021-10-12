@@ -1,5 +1,6 @@
 package org.jlab.rec.cvt.track;
 
+import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.swimtools.Swimmer;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
@@ -22,7 +23,29 @@ import org.jlab.rec.cvt.trajectory.Trajectory;
  */
 public class Track extends Trajectory implements Comparable<Track> {
 
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = 1763744434903318419L;
+
+    private int _Q;			// track charge
+    private double _Pt;		// track pt
+    private double _Pz;		// track pz
+    private double _P;		// track p
+
+    private String _PID;	// track pid
+
     private int _TrackingStatus;
+    
+    private double _circleFitChi2PerNDF;	// the chi2 for the helical track circle fit
+    private double _lineFitChi2PerNDF;   	// the linear fit to get the track dip angle
+
+    private Point3D _TrackPointAtCTOFRadius;	// a point of reference at the CTOF radius [the track is extrapolated to the CTOF radius and matched to CTOF hits to get the TOF]	
+    private Vector3D _TrackDirAtCTOFRadious;	// the direction of the track at the reference point described above.
+    private double _pathLength;			// the pathlength from the doca of the track to the z axis to the reference point described above
+    public boolean passCand;			// a flag to pass the candidate.
+    private int _NDF;
+    private double _Chi2;
 
     
     public void set_TrackingStatus(int ts) {
@@ -42,17 +65,6 @@ public class Track extends Trajectory implements Comparable<Track> {
             set_HelicalTrack(helix);
         }
     }
-    /**
-     * serialVersionUID
-     */
-    private static final long serialVersionUID = 1763744434903318419L;
-
-    private int _Q;			// track charge
-    private double _Pt;		// track pt
-    private double _Pz;		// track pz
-    private double _P;		// track p
-
-    private String _PID;	// track pid
 
     /**
      *
@@ -115,7 +127,7 @@ public class Track extends Trajectory implements Comparable<Track> {
      */
     public void set_HelicalTrack(Helix Helix) {
         if (Helix != null) {
-            set_Q(((int) Math.signum(Constants.getSolenoidscale()) * Helix.get_charge()));
+            set_Q(((int) Math.signum(Constants.getSolenoidScale()) * Helix.get_charge()));
             double calcPt = 10;
             if(Math.abs(Helix.B)>0.0001) {
                 calcPt = Constants.LIGHTVEL * Helix.radius() * Helix.B;
@@ -132,6 +144,13 @@ public class Track extends Trajectory implements Comparable<Track> {
         }
     }
 
+    /**
+     * updates the crosses positions based on the track direction for a helical
+     * trajectory
+     *
+     * @param sgeo
+     * @param bgeo
+     */
     public void update_Crosses(SVTGeometry sgeo, BMTGeometry bgeo) {
         if (this.get_helix() != null && this.get_helix().get_curvature() != 0) {
 //            System.out.println("Updating crosses");
@@ -152,14 +171,10 @@ public class Track extends Trajectory implements Comparable<Track> {
 
         }
 
-    }
+    }    
 
-    /**
-     * updates the crosses positions based on the track direction for a helical
-     * trajectory
-     *
-     * @param geo the SVT geometry
-     */
+
+    @Deprecated
     public void update_Crosses(SVTGeometry geo) {
         if (this.get_helix() != null && this.get_helix().get_curvature() != 0) {
 
@@ -191,35 +206,6 @@ public class Track extends Trajectory implements Comparable<Track> {
 
     }
     
-    // not used
-    public void finalUpdate_Crosses(SVTGeometry geo) {
-        if (this.get_helix() != null && this.get_helix().get_curvature() != 0) {
-
-            Helix helix = this.get_helix();
-            for (int i = 0; i < this.size(); i++) {
-                if (this.get(i).get_Detector()!=DetectorType.BST) {
-                    continue;
-                }
-                double R = Math.sqrt(this.get(i).get_Point().x() * this.get(i).get_Point().x() + this.get(i).get_Point().y() * this.get(i).get_Point().y());
-                Vector3D helixTanVecAtLayer = helix.getTrackDirectionAtRadius(R);
-                Point3D helixPosAtLayer = helix.getPointAtRadius(R);
-                this.get(i).set_Point(helixPosAtLayer);
-                this.get(i).set_Dir(helixTanVecAtLayer);
-
-            }
-
-        }
-
-    }
-
-    private double _circleFitChi2PerNDF;		// the chi2 for the helical track circle fit
-    private double _lineFitChi2PerNDF;			// the linear fit to get the track dip angle
-
-    private Point3D _TrackPointAtCTOFRadius;	// a point of reference at the CTOF radius [the track is extrapolated to the CTOF radius and matched to CTOF hits to get the TOF]	
-    private Vector3D _TrackDirAtCTOFRadious;	// the direction of the track at the reference point described above.
-    private double _pathLength;				// the pathlength from the doca of the track to the z axis to the reference point described above
-    public boolean passCand;					// a flag to pass the candidate.
-
     /**
      *
      * @param cross the cross
@@ -319,9 +305,6 @@ public class Track extends Trajectory implements Comparable<Track> {
     public void set_lineFitChi2PerNDF(double _lineFitChi2PerNDF) {
         this._lineFitChi2PerNDF = _lineFitChi2PerNDF;
     }
-
-    private int _NDF;
-    private double _Chi2;
 
     public int getNDF() {
         return _NDF;

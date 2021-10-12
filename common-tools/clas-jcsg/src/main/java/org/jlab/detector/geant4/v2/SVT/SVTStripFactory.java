@@ -5,7 +5,6 @@ import org.jlab.geometry.prim.Line3d;
 
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
-import org.jlab.geom.prim.Vector3D;
 
 /**
  * <h1> Geometry for the SVT </h1>
@@ -31,6 +30,7 @@ public class SVTStripFactory
 {
 	private boolean bShift = false; // switch to select whether alignment shifts are applied
 	private double scaleT = 1.0, scaleR = 1.0;
+        private Vector3d labCenter = new Vector3d(0,0,0);
 	
 	/**
 	 * Constructs a new geometry factory for sensor strips.
@@ -276,10 +276,18 @@ public class SVTStripFactory
 	{
                 int aLayer = SVTConstants.convertRegionModule2Layer(aRegion, aModule);
 		Line3d stripLine = getIdealStrip( aRegion, aSector, aModule, aStrip );
+//                System.out.println(aLayer + " " + aSector + " " + stripLine.toString());
                 if(aRegion<SVTConstants.NREGIONS-1) {
-                    AlignmentFactory.applyShift( stripLine.origin(), SVTConstants.getLayerSectorAlignmentData()[aSector][aLayer], SVTAlignmentFactory.getIdealFiducialCenter( aRegion, aSector ), scaleT, scaleR );
-                    AlignmentFactory.applyShift( stripLine.end(),    SVTConstants.getLayerSectorAlignmentData()[aSector][aLayer], SVTAlignmentFactory.getIdealFiducialCenter( aRegion, aSector ), scaleT, scaleR );
+                    AlignmentFactory.applyShift( stripLine.origin(), 
+                                                 SVTConstants.getLayerSectorAlignmentData()[aSector][aLayer], 
+                                                 labCenter, 
+                                                 scaleT, scaleR );
+                    AlignmentFactory.applyShift( stripLine.end(),    
+                                                 SVTConstants.getLayerSectorAlignmentData()[aSector][aLayer], 
+                                                 labCenter, 
+                                                 scaleT, scaleR );
                 }
+//                System.out.println(stripLine.toString());
                 return stripLine;
 	}
 	
@@ -484,13 +492,14 @@ public class SVTStripFactory
 	public Vector3d[] getShiftedLayerCorners( int aRegion, int aSector, int aModule )
 	{
                 int aLayer = SVTConstants.convertRegionModule2Layer(aRegion, aModule);
-	       Vector3d[] cornerPos3Ds = getIdealLayerCorners( aRegion, aSector, aModule );
-                if(aRegion<SVTConstants.NREGIONS-1) {
-                    for( int i = 0; i < cornerPos3Ds.length; i++ )
-                        AlignmentFactory.applyShift( cornerPos3Ds[i], 
-                                                     SVTConstants.getLayerSectorAlignmentData()[aSector][aLayer], 
-                                                     SVTAlignmentFactory.getIdealFiducialCenter( aRegion, aSector ), 
-                                                     scaleT, scaleR );
+                Vector3d[] cornerPos3Ds = getIdealLayerCorners(aRegion, aSector, aModule);
+                if (aRegion < SVTConstants.NREGIONS - 1) {
+                    for (int i = 0; i < cornerPos3Ds.length; i++) {
+                        AlignmentFactory.applyShift(cornerPos3Ds[i],
+                                SVTConstants.getLayerSectorAlignmentData()[aSector][aLayer],
+                                labCenter,
+                                scaleT, scaleR);
+                    }
                 }
                 return cornerPos3Ds;
 	}
@@ -529,8 +538,8 @@ public class SVTStripFactory
 	*/
 	public Vector3d transformToLocal(int aLayer, int aSector, double x, double y, double z)
 	{
-             return this.transformToLocal(aLayer, aSector, new Vector3d(x,y,z));
-         }
+            return this.transformToLocal(aLayer, aSector, new Vector3d(x,y,z));
+        }
         
 	/**
 	 * Transform the pLab point from the lab to the local frame
@@ -543,15 +552,15 @@ public class SVTStripFactory
 	*/
 	public Vector3d transformToLocal(int aLayer, int aSector, Vector3d pLab)
 	{
-                   if( aLayer < 0 || aLayer > SVTConstants.NLAYERS-1 ){ 
-                       throw new IllegalArgumentException("layer out of bounds"); 
-                   }
-		int[] rm = SVTConstants.convertLayer2RegionModule(aLayer);
-                   if( aSector < 0 || aSector > SVTConstants.NSECTORS[rm[0]]-1){ 
-                       throw new IllegalArgumentException("sector out of bounds"); 
-                   }
-                   return this.transformToLocal(rm[0], aSector, rm[1], pLab);
-         }
+            if (aLayer < 0 || aLayer > SVTConstants.NLAYERS - 1) {
+                throw new IllegalArgumentException("layer out of bounds");
+            }
+            int[] rm = SVTConstants.convertLayer2RegionModule(aLayer);
+            if (aSector < 0 || aSector > SVTConstants.NSECTORS[rm[0]] - 1) {
+                throw new IllegalArgumentException("sector out of bounds");
+            }
+            return this.transformToLocal(rm[0], aSector, rm[1], pLab);
+        }
         
 	/**
 	 * Transform the pLab point from the lab to the local frame
@@ -565,29 +574,28 @@ public class SVTStripFactory
 	*/
 	public Vector3d transformToLocal(int aRegion, int aSector, int aModule, Vector3d pLab)
 	{
-                   if( aRegion < 0 || aRegion > SVTConstants.NREGIONS-1 ){ 
-                       throw new IllegalArgumentException("region out of bounds"); 
-                   }
-		int aLayer = SVTConstants.convertRegionModule2Layer(aRegion, aModule);
-		if( aSector < 0 || aSector > SVTConstants.NSECTORS[aRegion]-1){ 
-                    throw new IllegalArgumentException("sector out of bounds"); 
-                   }
-                   Vector3d pLoc = pLab.clone();
-		// transform to detector frame
-                   AlignmentFactory.applyInverseShift(pLoc, SVTConstants.getLayerSectorAlignmentData()[aSector][aLayer], 
-                                                            SVTAlignmentFactory.getIdealFiducialCenter(aRegion, aSector ), 
-                                                            scaleT, scaleR );
-                   // transform to local frame
-                   double r = SVTConstants.LAYERRADIUS[aRegion][aModule];
-		double z = SVTConstants.Z0ACTIVE[aRegion];
-		Transform labFrame = SVTConstants.getDetectorFrame( aRegion, aSector, r, z );
-		pLoc.transform(labFrame.invert());
-                
-                   // transform to strip frame
-                   Transform stripFrame = SVTConstants.getStripFrame(false);
-                   pLoc.transform(stripFrame.invert());
-                   
-                   return pLoc;
+            if (aRegion < 0 || aRegion > SVTConstants.NREGIONS - 1) {
+                throw new IllegalArgumentException("region out of bounds");
+            }
+            int aLayer = SVTConstants.convertRegionModule2Layer(aRegion, aModule);
+            if (aSector < 0 || aSector > SVTConstants.NSECTORS[aRegion] - 1) {
+                throw new IllegalArgumentException("sector out of bounds");
+            }
+            Vector3d pLoc = pLab.clone();
+            // transform to detector frame
+            AlignmentFactory.applyInverseShift(pLoc, SVTConstants.getLayerSectorAlignmentData()[aSector][aLayer],
+                                               labCenter, scaleT, scaleR);
+            // transform to local frame
+            double r = SVTConstants.LAYERRADIUS[aRegion][aModule];
+            double z = SVTConstants.Z0ACTIVE[aRegion];
+            Transform labFrame = SVTConstants.getDetectorFrame(aRegion, aSector, r, z);
+            pLoc.transform(labFrame.invert());
+
+            // transform to strip frame
+            Transform stripFrame = SVTConstants.getStripFrame(false);
+            pLoc.transform(stripFrame.invert());
+
+            return pLoc;
 	}
 	
 	
@@ -604,8 +612,8 @@ public class SVTStripFactory
 	*/
 	public Vector3d transformToLab(int aLayer, int aSector, double x, double y, double z)
 	{
-             return this.transformToLab(aLayer, aSector, new Vector3d(x,y,z));
-         }
+            return this.transformToLab(aLayer, aSector, new Vector3d(x,y,z));
+        }
         
 	/**
 	 * Transform the pLoc point from the strip to the lab frame
@@ -618,15 +626,15 @@ public class SVTStripFactory
 	*/
 	public Vector3d transformToLab(int aLayer, int aSector, Vector3d pLoc)
 	{
-                   if( aLayer < 0 || aLayer > SVTConstants.NLAYERS-1 ){ 
-                       throw new IllegalArgumentException("layer out of bounds"); 
-                   }
-		int[] rm = SVTConstants.convertLayer2RegionModule(aLayer);
-                   if( aSector < 0 || aSector > SVTConstants.NSECTORS[rm[0]]-1){ 
-                       throw new IllegalArgumentException("sector out of bounds"); 
-                   }
-                   return this.transformToLab(rm[0], aSector, rm[1], pLoc);
-         }
+            if (aLayer < 0 || aLayer > SVTConstants.NLAYERS - 1) {
+                throw new IllegalArgumentException("layer out of bounds");
+            }
+            int[] rm = SVTConstants.convertLayer2RegionModule(aLayer);
+            if (aSector < 0 || aSector > SVTConstants.NSECTORS[rm[0]] - 1) {
+                throw new IllegalArgumentException("sector out of bounds");
+            }
+            return this.transformToLab(rm[0], aSector, rm[1], pLoc);
+        }
         
 	/**
 	 * Transform the pLab point from the strip to the lab frame
@@ -638,34 +646,32 @@ public class SVTStripFactory
 	 * @return Vector3d of point coordinate in the module local frame
 	 * @throws IllegalArgumentException indices out of bounds
 	*/
-	public Vector3d transformToLab(int aRegion, int aSector, int aModule, Vector3d pLoc)
-	{
-                   if( aRegion < 0 || aRegion > SVTConstants.NREGIONS-1 ){ 
-                       throw new IllegalArgumentException("region out of bounds"); 
-                   }
-		int aLayer = SVTConstants.convertRegionModule2Layer(aRegion, aModule);
-		if( aSector < 0 || aSector > SVTConstants.NSECTORS[aRegion]-1){ 
-                    throw new IllegalArgumentException("sector out of bounds"); 
-                   }
-                   Vector3d pLab = pLoc.clone();
-		
-                   // transform to local frame
-                   Transform stripFrame = SVTConstants.getStripFrame(false);
-                   pLab.transform(stripFrame);
-                   
-                   // transform to detector frame
-                   double r = SVTConstants.LAYERRADIUS[aRegion][aModule];
-		double z = SVTConstants.Z0ACTIVE[aRegion];
-		Transform labFrame = SVTConstants.getDetectorFrame( aRegion, aSector, r, z );
-		pLab.transform(labFrame);
-                
-                  // transform to lab frame
-                   AlignmentFactory.applyShift(pLab, SVTConstants.getLayerSectorAlignmentData()[aSector][aLayer], 
-                                                     SVTAlignmentFactory.getIdealFiducialCenter(aRegion, aSector ), 
-                                                     scaleT, scaleR );
-                   
-                   return pLab;
-	}
+        public Vector3d transformToLab(int aRegion, int aSector, int aModule, Vector3d pLoc) {
+            if (aRegion < 0 || aRegion > SVTConstants.NREGIONS - 1) {
+                throw new IllegalArgumentException("region out of bounds");
+            }
+            int aLayer = SVTConstants.convertRegionModule2Layer(aRegion, aModule);
+            if (aSector < 0 || aSector > SVTConstants.NSECTORS[aRegion] - 1) {
+                throw new IllegalArgumentException("sector out of bounds");
+            }
+            Vector3d pLab = pLoc.clone();
+
+            // transform to local frame
+            Transform stripFrame = SVTConstants.getStripFrame(false);
+            pLab.transform(stripFrame);
+
+            // transform to detector frame
+            double r = SVTConstants.LAYERRADIUS[aRegion][aModule];
+            double z = SVTConstants.Z0ACTIVE[aRegion];
+            Transform labFrame = SVTConstants.getDetectorFrame(aRegion, aSector, r, z);
+            pLab.transform(labFrame);
+
+            // transform to lab frame
+            AlignmentFactory.applyShift(pLab, SVTConstants.getLayerSectorAlignmentData()[aSector][aLayer],
+                                        labCenter, scaleT, scaleR);
+
+            return pLab;
+        }
         
         
         /**

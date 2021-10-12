@@ -7,6 +7,7 @@ import java.util.*;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.rec.cvt.bmt.BMTConstants;
 
 /**
  * Base cell for the cellular automaton
@@ -84,7 +85,7 @@ public class Cell implements Comparable<Cell> {
 						      cross.get_Point().y()*cross.get_Point().y() );
 			}
 			else {
-				R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[cross.get_Region()-1];
+				R = BMTConstants.getCRCRADIUS()[cross.get_Region()-1];
 			}
 			point.set( cross.get_Point().z(), R );
 		}		

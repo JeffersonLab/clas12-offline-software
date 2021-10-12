@@ -1,7 +1,10 @@
 package org.jlab.rec.cvt;
 
+import cnuphys.magfield.MagneticFields;
 import java.util.HashMap;
 import java.util.Map;
+import org.jlab.clas.swimtools.Swim;
+import org.jlab.rec.cvt.bmt.BMTConstants;
 
 public class Constants {
 
@@ -9,13 +12,15 @@ public class Constants {
     
 
     /**
-     * Constants used in the reconstruction
+     * BMTConstants used in the reconstruction
      */
     Constants() {
     }
 
     // CONSTANTS USED IN RECONSTRUCTION
     //---------------------------------
+    public static boolean isMC = true;
+    
     public static final double LIGHTVEL = 0.000299792458;       // velocity of light (mm/ns) - conversion factor from radius in mm to momentum in GeV/c 
 
     // selection cuts for helical tracks
@@ -275,12 +280,9 @@ public class Constants {
         if (areConstantsLoaded) {
             return;
         }
-
         
         Constants.setCosmicsData(false);
         setSVTOnly(isSVTonly);
-
-        org.jlab.rec.cvt.bmt.Constants.Load();
 
         areConstantsLoaded = true;
         System.out.println("CVT constants loaded ? " + areConstantsLoaded);
@@ -302,24 +304,15 @@ public class Constants {
     public static final void setSVTOnly(boolean sVTOnly) {
         SVTOnly = sVTOnly;
     }
-
-    private static double SOLENOIDSCALE = 0;
-    private static double SOLENOIDVAL = 0;
-
-    public static final void setSolenoidscale(double scale) {
-        SOLENOIDSCALE = scale;
-    }
-
-    public static final double getSolenoidscale() {
-        return SOLENOIDSCALE;
-    }
     
-    public static final void setSolenoidVal(double val) {
-        SOLENOIDVAL = val;
+    public static double getSolenoidMagnitude() {
+        float[] b = new float[3];
+        Swim swimmer = new Swim();
+        swimmer.BfieldLab(0, 0, 0, b);
+        return Math.abs(b[2]);
     }
 
-    public static final double getSolenoidVal() {
-        return SOLENOIDVAL;
+    public static double getSolenoidScale() {
+        return MagneticFields.getInstance().getScaleFactor(MagneticFields.FieldType.SOLENOID);
     }
-
 }

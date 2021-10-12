@@ -9,7 +9,7 @@ import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
-import org.jlab.rec.cvt.bmt.Constants;
+import org.jlab.rec.cvt.bmt.BMTConstants;
 
 public class Strip {
 
@@ -241,7 +241,7 @@ public class Strip {
             int theLorentzCorrectedStrip = geo.getStrip(layer,  sector, line.midpoint());
             this.set_LCStrip(theLorentzCorrectedStrip);
             
-            double sigma = Constants.SigmaDrift / Math.cos(geo.getThetaLorentz(layer, sector)); // max sigma for drift distance  (hDrift) = total gap from top to mesh
+            double sigma = BMTConstants.SigmaDrift / Math.cos(geo.getThetaLorentz(layer, sector)); // max sigma for drift distance  (hDrift) = total gap from top to mesh
 
             //max phi err
             double phiErrL = sigma / geo.getRadius(layer);

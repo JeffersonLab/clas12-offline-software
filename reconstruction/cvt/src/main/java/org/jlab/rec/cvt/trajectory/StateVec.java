@@ -1,6 +1,7 @@
 package org.jlab.rec.cvt.trajectory;
 
 import Jama.*;
+import org.jlab.rec.cvt.Constants;
 
 /**
  * A StateVec describes a cross measurement in the BST. It is characterized by a
@@ -287,13 +288,13 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
     public int compareTo(StateVec arg) {
 
         int return_val = 0;
-        if (org.jlab.rec.cvt.Constants.isCosmicsData() == false) {
+        if (Constants.isCosmicsData() == false) {
             int RegComp = this.get_SurfaceLayer() < arg.get_SurfaceLayer() ? -1 : this.get_SurfaceLayer() == arg.get_SurfaceLayer() ? 0 : 1;
             int IDComp = this.get_ID() < arg.get_ID() ? -1 : this.get_ID() == arg.get_ID() ? 0 : 1;
 
             return_val = ((RegComp == 0) ? IDComp : RegComp);
         }
-        if (org.jlab.rec.cvt.Constants.isCosmicsData() == true) {
+        if (Constants.isCosmicsData() == true) {
             int RegComp = this.y() < arg.y() ? -1 : this.y() == arg.y() ? 0 : 1;
             int IDComp = this.get_ID() < arg.get_ID() ? -1 : this.get_ID() == arg.get_ID() ? 0 : 1;
 

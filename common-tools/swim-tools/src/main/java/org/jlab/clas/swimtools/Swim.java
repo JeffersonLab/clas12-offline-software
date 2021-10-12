@@ -556,6 +556,41 @@ public class Swim {
         return value;
 
     }
+
+    public double[] SwimPlane(Vector3D n, Point3D p, double accuracy)  {
+
+        double[] value = new double[8];
+        
+        
+        // using adaptive stepsize
+        if(this.SwimUnPhys)
+            return null;
+
+        try {
+        
+            AdaptiveSwimResult result = new AdaptiveSwimResult(false);
+            
+            PC.CF.swimPlane(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, 
+                            n.x(),n.y(),n.z(),p.x()/100,p.y()/100,p.z()/100, 
+                            accuracy/100, _rMax, stepSize, cnuphys.swim.Swimmer.CLAS_Tolerance, result);
+            
+
+            value[0] = result.getUf()[0] * 100; // convert back to cm
+            value[1] = result.getUf()[1] * 100; // convert back to cm
+            value[2] = result.getUf()[2] * 100; // convert back to cm
+            value[3] = result.getUf()[3] * _pTot; // normalized values
+            value[4] = result.getUf()[4] * _pTot;
+            value[5] = result.getUf()[5] * _pTot;
+            value[6] = result.getFinalS() * 100;
+            value[7] = 0; // Conversion from kG.m to T.cm
+            
+                    
+        } catch (RungeKuttaException e) {
+                e.printStackTrace();
+        }
+        return value;
+
+    }
     private class SphericalBoundarySwimStopper implements IStopper {
 
         private double _finalPathLength = Double.NaN;
@@ -722,7 +757,7 @@ public class Swim {
             st.computeBDL(PC.CP);
 
             double[] lastY = st.lastElement();
-
+            
             value[0] = lastY[0] * 100; // convert back to cm
             value[1] = lastY[1] * 100; // convert back to cm
             value[2] = lastY[2] * 100; // convert back to cm

@@ -257,7 +257,7 @@ public class RecUtilities {
 
         // initialize swimmer starting from the track vertex
         double maxPathLength = 1; 
-        swimmer.SetSwimParameters((helix.xdca()+org.jlab.rec.cvt.Constants.getXb()) / 10, (helix.ydca()+org.jlab.rec.cvt.Constants.getYb()) / 10, helix.get_Z0() / 10, 
+        swimmer.SetSwimParameters((helix.xdca()+Constants.getXb()) / 10, (helix.ydca()+Constants.getYb()) / 10, helix.get_Z0() / 10, 
                      Math.toDegrees(helix.get_phi_at_dca()), Math.toDegrees(Math.acos(helix.costheta())),
                      P, Q, maxPathLength) ;
         double[] inters = null;
@@ -299,8 +299,8 @@ public class RecUtilities {
                 // calculate trajectory
                 Point3D traj = null;
                 Point3D  p = sgeo.getModule(layer, sector).origin();
-                double d = n.dot(p.toVector3D());
-                inters = swimmer.SwimToPlaneBoundary(d/10.0, n, 1);
+                Point3D pm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
+                inters = swimmer.SwimPlane(n, pm, 1E-3);
                 if(inters!=null) {
                     traj = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
                 }
@@ -348,7 +348,7 @@ public class RecUtilities {
         }
         // initialize swimmer starting from the track vertex
         double maxPathLength = 1; 
-        swimmer.SetSwimParameters((helix.xdca()+org.jlab.rec.cvt.Constants.getXb()) / 10, (helix.ydca()+org.jlab.rec.cvt.Constants.getYb()) / 10, helix.get_Z0() / 10, 
+        swimmer.SetSwimParameters((helix.xdca()+Constants.getXb()) / 10, (helix.ydca()+Constants.getYb()) / 10, helix.get_Z0() / 10, 
                      Math.toDegrees(helix.get_phi_at_dca()), Math.toDegrees(Math.acos(helix.costheta())),
                      P, Q, maxPathLength) ;
         double[] inters = null;
@@ -369,8 +369,8 @@ public class RecUtilities {
             
             Vector3D n = sgeo.getNormal(layer, sector);
             Point3D  p = sgeo.getModule(layer, sector).origin();
-            double d = n.dot(p.toVector3D());
-            inters = swimmer.SwimToPlaneBoundary(d/10.0, n, 1);
+            Point3D pm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
+            inters = swimmer.SwimPlane(n, pm, 1E-3);
             if(inters!=null) {
                 Point3D trp = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
                 int nearstp = sgeo.calcNearestStrip(inters[0]*10, inters[1]*10, inters[2]*10, layer, sector);
@@ -423,15 +423,11 @@ public class RecUtilities {
         for (int i = 0; i < trkcand.get_Clusters().size(); i++) { //SVT
             if(trkcand.get_Clusters().get(i).get_Detector()==DetectorType.BST) {
                 Cluster cluster = trkcand.get_Clusters().get(i);
-                int layer = trkcand.get_Clusters().get(i).get_Layer();
+                int layer  = trkcand.get_Clusters().get(i).get_Layer();
                 int sector = trkcand.get_Clusters().get(i).get_Sector();
                 Point3D p = new Point3D(traj.get(layer).x, traj.get(layer).y, traj.get(layer).z);
-//                double doca2Cls = sgeo.getDOCAToStrip(sector, layer, cluster.get_Centroid(), p);
-//                double doca2Seed = sgeo.getDOCAToStrip(sector, layer, (double) cluster.get_SeedStrip().get_Strip(), p);
-//                cluster.set_SeedResidual(doca2Seed); 
                 cluster.set_CentroidResidual(traj.get(layer).resi);
-                cluster.set_SeedResidual(p); 
-            
+                cluster.set_SeedResidual(p);             
                 for (FittedHit hit : cluster) {
                     double doca1 = hit.residual(p);
                     double sigma1 = sgeo.getSingleStripResolution(layer, hit.get_Strip().get_Strip(), traj.get(layer).z);
@@ -446,73 +442,28 @@ public class RecUtilities {
         // adding the cross infos
         for (int c = 0; c < trkcand.get_Crosses().size(); c++) {
             if (trkcand.get_Crosses().get(c).get_Detector()==DetectorType.BST) {
-                int layer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer();
-                Point3D p = new Point3D(trkcand.get_Crosses().get(c).get_Point().x(), 
-                        trkcand.get_Crosses().get(c).get_Point().y(), 
-                        traj.get(layer).z);
+                int  layer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer();
                 Vector3D d = new Vector3D(traj.get(layer).px, traj.get(layer).py, traj.get(layer).pz).asUnit();
-                trkcand.get_Crosses().get(c).set_Point(p);
-                trkcand.get_Crosses().get(c).set_Dir(d);
+                trkcand.get_Crosses().get(c).setSVTCrossPosition(d, sgeo);
             }
             if (trkcand.get_Crosses().get(c).get_Detector()==DetectorType.BMT) {
-                
-                double ce = trkcand.get_Crosses().get(c).get_Cluster1().get_Centroid();
+                // update cross position
                 int layer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer()+6;
-                Cluster cluster = trkcand.get_Crosses().get(c).get_Cluster1();
-                Point3D p = new Point3D(traj.get(layer).x, traj.get(layer).y, traj.get(layer).z);
+                Point3D  p = new Point3D(traj.get(layer).x, traj.get(layer).y, traj.get(layer).z);
                 Vector3D v = new Vector3D(traj.get(layer).px, traj.get(layer).py, traj.get(layer).pz).asUnit();
+                trkcand.get_Crosses().get(c).setBMTCrossPosition(p);
                 trkcand.get_Crosses().get(c).set_Dir(v); 
+                Cluster cluster = trkcand.get_Crosses().get(c).get_Cluster1();
                 if (trkcand.get_Crosses().get(c).get_Type()==BMTType.Z) {
-                    trkcand.get_Crosses().get(c).set_Point(new Point3D(trkcand.get_Crosses().get(c).get_Point().x(),trkcand.get_Crosses().get(c).get_Point().y(),p.z()));
                     cluster.set_CentroidResidual(traj.get(layer).resi*cluster.getTile().baseArc().radius());
-                    //double xc = trkcand.get_Crosses().get(c).get_Point().x();
-                    //double yc = trkcand.get_Crosses().get(c).get_Point().y();
-                    int bsector = trkcand.get_Crosses().get(c).get_Sector();
-                    int blayer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer();
-//                    double cxh = Math.cos(cluster.get_Phi())*bgeo.getRadiusMidDrift(blayer);
-//                    double cyh = Math.sin(cluster.get_Phi())*bgeo.getRadiusMidDrift(blayer);
-//                    double phic = bgeo.getPhi(blayer, bsector, new Point3D(cxh,cyh,0));
-//                    double phit = bgeo.getPhi(blayer, bsector, p);
-//                    double doca2Cls = (phic-phit)*bgeo.getRadiusMidDrift(blayer);
-                    // RDV switch to use methogds from fitted hit
-                    for (FittedHit hit : cluster) {
-                        double xh = Math.cos(hit.get_Strip().get_Phi())*bgeo.getRadiusMidDrift(blayer);
-                        double yh = Math.sin(hit.get_Strip().get_Phi())*bgeo.getRadiusMidDrift(blayer);
-                        double hphic = bgeo.getPhi(blayer, bsector, new Point3D(xh,yh,0));
-                        double hphit = bgeo.getPhi(blayer, bsector, p);
-                        double doca1 = (hphic-hphit)*bgeo.getRadiusMidDrift(blayer);
-                        
-                        if(hit.get_Strip().get_Strip()==cluster.get_SeedStrip().get_Strip())
-                            cluster.set_SeedResidual(doca1); 
-                        if(traj.get(layer).isMeasUsed)
-                            hit.set_TrkgStatus(1);
-                        hit.set_docaToTrk(doca1);  
-
-                    }
                 }
-                if (trkcand.get_Crosses().get(c).get_Type()==BMTType.C) {
-                    double z = trkcand.get_Crosses().get(c).get_Point().z();
-                    double err = trkcand.get_Crosses().get(c).get_Cluster1().get_ZErr();
-                    //trkcand.get_Crosses().get(c).set_Point(new Point3D(p.x(),p.y(),
-                    //        trkcand.get_Crosses().get(c).get_Cluster1().center().z()));
-                    Point3D localArc = new Point3D(trkcand.get_Crosses().get(c).get_Cluster1().center());
-                    trkcand.get_Crosses().get(c).get_Cluster1().toLocal().apply(localArc);
-                    Point3D localTrj = new Point3D(p);
-                    trkcand.get_Crosses().get(c).get_Cluster1().toLocal().apply(localArc);
-                    trkcand.get_Crosses().get(c).get_Cluster1().toLocal().apply(localTrj);
-                    Point3D crs = new Point3D(localTrj.x(), localTrj.y(),localArc.z());
-                   
-                    Point3D newCrossPoint = new Point3D(localTrj.x(),localTrj.y(),localArc.z());
-                    trkcand.get_Crosses().get(c).get_Cluster1().toGlobal().apply(newCrossPoint);
-                    trkcand.get_Crosses().get(c).set_Point(p);
+                else if (trkcand.get_Crosses().get(c).get_Type()==BMTType.C) {
                     cluster.set_CentroidResidual(traj.get(layer).resi);
                     cluster.set_SeedResidual(p); 
-                    for (FittedHit hit : cluster) {
-                        if(traj.get(layer).isMeasUsed)
-                            hit.set_TrkgStatus(1);
-                        hit.set_docaToTrk(p);  
-
-                    }
+                }
+                for (FittedHit hit : cluster) {
+                    hit.set_docaToTrk(hit.residual(p));
+                    if(traj.get(layer).isMeasUsed) hit.set_TrkgStatus(1);
                 }
             }
         }
@@ -623,7 +574,7 @@ public class RecUtilities {
             int layr2 = 0;
             if(c.get_Detector()==DetectorType.BMT) {
                 layr = c.getOrderedRegion()+3;
-                if((int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)>0) {
+                if((int)Constants.getLayersUsed().get(layr)>0) {
                     c.isInSeed = false;
                     //System.out.println("refit "+c.printInfo());
                     refib.add(c);
@@ -631,8 +582,8 @@ public class RecUtilities {
             } else {
                 layr = c.get_Cluster1().get_Layer();
                 layr2 = c.get_Cluster2().get_Layer();
-                if((int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)>0 
-                        && (int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr2)>0) {
+                if((int)Constants.getLayersUsed().get(layr)>0 
+                        && (int)Constants.getLayersUsed().get(layr2)>0) {
                     c.setSVTCrossPosition(null, SVTGeom); 
                     c.isInSeed = false;
                     refi.add(c); 
@@ -676,15 +627,15 @@ public class RecUtilities {
             c.set_AssociatedTrackID(-1);
             if(c.get_Detector()==DetectorType.BMT) {
                 layr = c.getOrderedRegion()+3;
-                if((int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)>0) {
+                if((int)Constants.getLayersUsed().get(layr)>0) {
                     c.isInSeed = false;
                     refib.add(c);
                 }
             } else {
                 layr = c.get_Cluster1().get_Layer();
                 layr2 = c.get_Cluster2().get_Layer();
-                if((int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)>0 
-                        && (int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr2)>0) {
+                if((int)Constants.getLayersUsed().get(layr)>0 
+                        && (int)Constants.getLayersUsed().get(layr2)>0) {
                     c.setSVTCrossPosition(null, SVTGeom);
                     c.isInSeed = false;
                    // System.out.println("refit "+c.printInfo());
@@ -732,7 +683,7 @@ public class RecUtilities {
             int layr2 = 0;
             if(c.get_Detector()==DetectorType.BMT) {
                 layr = c.getOrderedRegion()+3;
-                if((int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)>0) {
+                if((int)Constants.getLayersUsed().get(layr)>0) {
                     c.isInSeed = false;
                 //    System.out.println("refit "+c.printInfo());
                     refib.add(c);
@@ -740,8 +691,8 @@ public class RecUtilities {
             } else {
                 layr = c.get_Cluster1().get_Layer();
                 layr2 = c.get_Cluster2().get_Layer();
-                if((int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)>0 
-                        && (int)org.jlab.rec.cvt.Constants.getLayersUsed().get(layr2)>0) {
+                if((int)Constants.getLayersUsed().get(layr)>0 
+                        && (int)Constants.getLayersUsed().get(layr2)>0) {
                     c.setSVTCrossPosition(null, SVTGeom);
                     c.isInSeed = false;
                    // System.out.println("refit "+c.printInfo());

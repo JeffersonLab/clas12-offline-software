@@ -578,8 +578,8 @@ public class TrackSeederCA {
                     ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_PointErr().z());
                 }
             }
-            X.add((double) org.jlab.rec.cvt.Constants.getXb());
-            Y.add((double) org.jlab.rec.cvt.Constants.getYb());
+            X.add((double) Constants.getXb());
+            Y.add((double) Constants.getYb());
 
             ErrRt.add((double) 0.1);
             

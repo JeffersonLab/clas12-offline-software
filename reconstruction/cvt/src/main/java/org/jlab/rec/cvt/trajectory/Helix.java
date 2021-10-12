@@ -4,6 +4,7 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
 import Jama.Matrix;
+import org.jlab.rec.cvt.Constants;
 
 /**
  * A class describing a helix; the helix parameters are field of the track
@@ -149,6 +150,21 @@ public class Helix {
         return this.get_dca() * Math.cos(this.get_phi_at_dca());
     }
 
+    public Point3D getVertex() {
+        return new Point3D(this.xdca(),this.ydca(),this.get_Z0());
+    }
+        
+    public Vector3D getPXYZ(double solenoidMag) { 
+        double pt = Constants.LIGHTVEL * this.radius() * solenoidMag;
+        if(solenoidMag<0.001)
+            pt = 100;
+        double pz = pt*this.get_tandip();
+        double px = pt*Math.cos(this.get_phi_at_dca());
+        double py = pt*Math.sin(this.get_phi_at_dca());
+        
+        return new Vector3D(px,py,pz);
+    }
+        
     public double getArcLength_dca(Point3D refpoint) {
         //insure that the refpoint is on the helix
         if (refpoint == null) {
@@ -223,13 +239,17 @@ public class Helix {
 
     public Vector3D getTrackDirectionAtRadius(double r) {
         // a method to return a point (as a vector) at a given radial position.
-        if (_curvature == 0) {
-            return null;
-        }
-
         double d0 = _dca;
         double omega = _curvature;
         double phi0 = _phi_at_dca;
+        double tandip = _tandip;
+        
+        if (_curvature <1E-5) { // R > 100 m, assume it's straight track
+            double ux =  Math.cos(phi0);
+            double uy =  Math.sin(phi0);
+            double uz =  tandip;
+            return new Vector3D(ux, uy, uz);
+        }
 
         double par = 1. - ((r * r - d0 * d0) * omega * omega) / (2. * (1. + d0 * Math.abs(omega)));
         double newPathLength = Math.abs(Math.acos(par) / omega);

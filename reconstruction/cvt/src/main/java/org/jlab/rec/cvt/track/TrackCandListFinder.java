@@ -12,6 +12,8 @@ import org.jlab.geom.base.Detector;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.bmt.BMTConstants;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
@@ -154,7 +156,7 @@ public class TrackCandListFinder {
         HelicalTrackFitter fitTrk = new HelicalTrackFitter();
         // sets the index according to assumption that the track comes from the origin or not
         int shift = 0;
-        //	if(org.jlab.rec.cvt.Constants.trk_comesfrmOrig)
+        //	if(org.jlab.rec.cvt.BMTConstants.trk_comesfrmOrig)
         //		shift =1;
 
         // interate the fit a number of times set in the constants file
@@ -242,7 +244,7 @@ public class TrackCandListFinder {
         HelicalTrackFitter fitTrk = new HelicalTrackFitter();
         // sets the index according to assumption that the track comes from the origin or not
         int shift = 0;
-        if (org.jlab.rec.cvt.Constants.trk_comesfrmOrig) {
+        if (Constants.trk_comesfrmOrig) {
             shift = 1;
         }
 
@@ -484,7 +486,7 @@ public class TrackCandListFinder {
             candMap.forEach((key,value) -> cands.add(value));
         }
 
-        //ArrayList<StraightTrack> passedcands = this.rmStraightTrkClones(org.jlab.rec.cvt.svt.Constants.removeClones, cands);
+        //ArrayList<StraightTrack> passedcands = this.rmStraightTrkClones(org.jlab.rec.cvt.svt.BMTConstants.removeClones, cands);
         ArrayList<StraightTrack> passedcands = this.rmStraightTrkClones(true, cands);
 
 //        for (int ic = 0; ic < passedcands.size(); ic++) {
@@ -596,19 +598,19 @@ public class TrackCandListFinder {
         if (shift == 1) {
             //X.add(0, (double) 0);
             //Y.add(0, (double) 0);
-            double xb = org.jlab.rec.cvt.Constants.getXb();
-            double yb = org.jlab.rec.cvt.Constants.getYb();
+            double xb = Constants.getXb();
+            double yb = Constants.getYb();
             double rb = Math.sqrt(xb*xb+yb*yb);
-            X.add(0, (double) org.jlab.rec.cvt.Constants.getXb());
-            Y.add(0, (double) org.jlab.rec.cvt.Constants.getYb());
+            X.add(0, (double) Constants.getXb());
+            Y.add(0, (double) Constants.getYb());
             //Z.add(0, (double) 0);
             //Rho.add(0, (double) 0);
             Rho.add(0, (double) rb);
-            //ErrRt.add(0, org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT);
-            ErrRt.add(0, org.jlab.rec.cvt.Constants.getRbErr());
-            //ErrZ.add(0, org.jlab.rec.cvt.svt.Constants.ZVTXCONSTRAINT);
-            //ErrRho.add(0, org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT);
-            ErrRho.add(0, org.jlab.rec.cvt.Constants.getRbErr());
+            //ErrRt.add(0, org.jlab.rec.cvt.svt.BMTConstants.RHOVTXCONSTRAINT);
+            ErrRt.add(0, Constants.getRbErr());
+            //ErrZ.add(0, org.jlab.rec.cvt.svt.BMTConstants.ZVTXCONSTRAINT);
+            //ErrRho.add(0, org.jlab.rec.cvt.svt.BMTConstants.RHOVTXCONSTRAINT);
+            ErrRho.add(0, Constants.getRbErr());
         }
 
         for (int j = shift; j < shift + SVTcrossesInTrk.size(); j++) {
@@ -651,8 +653,8 @@ public class TrackCandListFinder {
 
         for (int j = shift + j0; j < shift + j0 + BMTCdetcrossesInTrk.size(); j++) {
             Z.add(j, BMTCdetcrossesInTrk.get(j - shift - j0).get_Point().z());
-            Rho.add(j, org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTCdetcrossesInTrk.get(j - shift - j0).get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hDrift/2);
-            System.out.println(BMTCdetcrossesInTrk.get(j - shift - j0).get_Point().toString() + " " + org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTCdetcrossesInTrk.get(j - shift - j0).get_Region() - 1]);
+            Rho.add(j, BMTConstants.getCRCRADIUS()[BMTCdetcrossesInTrk.get(j - shift - j0).get_Region() - 1] + BMTConstants.hDrift/2);
+            System.out.println(BMTCdetcrossesInTrk.get(j - shift - j0).get_Point().toString() + " " + BMTConstants.getCRCRADIUS()[BMTCdetcrossesInTrk.get(j - shift - j0).get_Region() - 1]);
             ErrRho.add(j, 0.01); // check this error on thickness measurement					
             ErrZ.add(j, BMTCdetcrossesInTrk.get(j - shift - j0).get_PointErr().z());
 
@@ -668,7 +670,7 @@ public class TrackCandListFinder {
                 ErrZ.add(j, SVTcrossesInTrk.get(j - shift-1).get_PointErr0().z());
             }
         }
-        //	if(Constants.DEBUGMODE) {
+        //	if(BMTConstants.DEBUGMODE) {
         //		System.out.println(" FIT ARRAYS ");
         //		for(int i =0; i<X.length; i++)
         //			System.out.println("X["+i+"] = "+X[i]+ "  Y["+i+"] = "+Y[i]);
@@ -892,7 +894,7 @@ public class TrackCandListFinder {
                     continue;
                 }
                 double m_z = MMCrosses.get(i).get_Point().z();  
-                //int sector = geo.isInSector(MMCrosses.get(i).get_Region() * 2, phi, Math.toRadians(Constants.isInSectorJitter));
+                //int sector = geo.isInSector(MMCrosses.get(i).get_Region() * 2, phi, Math.toRadians(BMTConstants.isInSectorJitter));
                 int sector = geo.getSector(MMCrosses.get(i).get_Region() * 2, phi);
                 if (sector != MMCrosses.get(i).get_Sector()) {
                     continue;

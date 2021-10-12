@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorType;
 
 import org.jlab.geom.prim.Point3D;
@@ -95,8 +96,8 @@ public class StraightTrackSeeder {
         ((ArrayList<Double>) Xs).ensureCapacity(seedcrs.size()+1);
         ((ArrayList<Double>) Ys).ensureCapacity(seedcrs.size()+1);
         ((ArrayList<Double>) Ws).ensureCapacity(seedcrs.size()+1);
-        Xs.add(0, org.jlab.rec.cvt.Constants.getXb()); 
-        Ys.add(0, org.jlab.rec.cvt.Constants.getYb());
+        Xs.add(0, Constants.getXb()); 
+        Ys.add(0, Constants.getYb());
         Ws.add(0,0.1);
         for (Cross c : seedcrs ) { 
             if(c.get_Type()==BMTType.C ) System.err.println("WRONG CROSS TYPE");
@@ -263,8 +264,8 @@ public class StraightTrackSeeder {
             ((ArrayList<Double>) Xs).ensureCapacity(seedcrs.size()+1);
             ((ArrayList<Double>) Ys).ensureCapacity(seedcrs.size()+1);
             ((ArrayList<Double>) Ws).ensureCapacity(seedcrs.size()+1);
-            Xs.add(0, org.jlab.rec.cvt.Constants.getXb()); 
-            Ys.add(0, org.jlab.rec.cvt.Constants.getYb());
+            Xs.add(0, Constants.getXb()); 
+            Ys.add(0, Constants.getYb());
             Ws.add(0, 0.1);
             for (Cross c : seedcrs ) { 
                 if(c.get_Type()==BMTType.C ) continue;
@@ -477,8 +478,8 @@ public class StraightTrackSeeder {
                     ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_PointErr().z());
                 }
             }
-            //X.add((double) org.jlab.rec.cvt.Constants.getXb());
-            //Y.add((double) org.jlab.rec.cvt.Constants.getYb());
+            //X.add((double) Constants.getXb());
+            //Y.add((double) Constants.getYb());
             //ErrRt.add((double) 0.1);
             
             fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
