@@ -7,8 +7,8 @@ import java.util.Optional;
 import org.jlab.clas.reco.ReconstructionEngine;
 //import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.detector.calib.utils.DatabaseConstantProvider;
-import org.jlab.detector.geant4.v2.SVT.SVTConstants;
+//import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+//import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 //import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
 import org.jlab.geom.prim.Arc3D;
 import org.jlab.geom.prim.Line3D;
@@ -21,7 +21,7 @@ import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.banks.AlignmentBankWriter;
 import org.jlab.rec.cvt.banks.RecoBankReader;
 import org.jlab.rec.cvt.bmt.BMTType;
-import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
+//import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.svt.SVTGeometry;
@@ -57,7 +57,7 @@ public class CVTAlignment extends ReconstructionEngine {
 	int Run = -1;
 	public boolean isSVTonly = false;
 	private Boolean svtTopBottomSep;
-	public void setRunConditionsParameters(DataEvent event, String FieldsConfig, int iRun, boolean addMisAlignmts, String misAlgnFile) {
+	/*public void setRunConditionsParameters(DataEvent event, String FieldsConfig, int iRun, boolean addMisAlignmts, String misAlgnFile) {
 		if (event.hasBank("RUN::config") == false) {
 			System.err.println("RUN CONDITIONS NOT READ!");
 			return;
@@ -116,7 +116,7 @@ public class CVTAlignment extends ReconstructionEngine {
 
 		Run = newRun;
 		this.setRun(Run);
-	}
+	}*/
 
 	public int getRun() {
 		return Run;
@@ -243,7 +243,7 @@ public class CVTAlignment extends ReconstructionEngine {
 			// 	continue;
 			Ray ray = track.get_ray();
 			if(ray == null) {
-				ray = getRay(track.get_helix(),xb,yb);
+				ray = getRay(track.get_helix(),reader.getXbeam(),reader.getYbeam());
 				//System.out.println("curvature " +  track.get_helix().get_curvature());
 				//System.out.println("doca " +  track.get_helix().get_dca());
 				if(Math.abs(track.get_helix().get_curvature())>0.001) {
@@ -255,9 +255,9 @@ public class CVTAlignment extends ReconstructionEngine {
 			//System.out.println(ray.get_refPoint().toString());
 
 
-
-			int colsA = nAlignVars*((svtTopBottomSep ? 2*nCrossSVT : nCrossSVT) + nCrossBMT + (isCosmics ? 0:1));
-			int rows = 2*nCrossSVT+nCrossBMT + (isCosmics ? 0:1);
+			int paramsFromBeamspot = (isCosmics || ! includeBeamspot ? 0:1);
+			int colsA = nAlignVars*((svtTopBottomSep ? 2*nCrossSVT : nCrossSVT) + nCrossBMT + paramsFromBeamspot);
+			int rows = 2*nCrossSVT+nCrossBMT + paramsFromBeamspot;
 			Matrix A = new Matrix(rows, colsA);//not sure why there aren't 6 columns
 			Matrix B = new Matrix(rows, 4);
 			Matrix V = new Matrix(rows,rows);
@@ -354,8 +354,8 @@ public class CVTAlignment extends ReconstructionEngine {
 				}*/
 
 			}
-			if(!isCosmics) {
-				fillMatricesBeamspot(i, ray, A,B,V,m,c,I);
+			if(!isCosmics && includeBeamspot) {
+				fillMatricesBeamspot(i, ray, A,B,V,m,c,I, reader.getXbeam(), reader.getYbeam());
 			}
 			
 			As.add(A);
@@ -405,6 +405,9 @@ public class CVTAlignment extends ReconstructionEngine {
 
 
 		Point3D x = new Point3D(-d*Math.sin(phi)+xb,d*Math.cos(phi)+yb, z);
+		//Point3D x = new Point3D(-d*Math.sin(phi),d*Math.cos(phi), z);
+
+		//System.out.println("xb yb from db" + xb + yb);
 		//Point3D x = new Point3D(-d*Math.sin(phi),d*Math.cos(phi), z);
 		//if(u.y() <0)
 		//	u = u.multiply(-1);
@@ -467,8 +470,9 @@ public class CVTAlignment extends ReconstructionEngine {
 
 	boolean useDocaPhiZTandip=true;
 
+	boolean includeBeamspot = false;
 	private boolean fillMatricesBeamspot(int i, Ray ray, Matrix A, Matrix B, Matrix V, Matrix m, Matrix c,
-			Matrix I){
+			Matrix I, double xb, double yb){
 		// a point along the beam
 		Vector3D xref = ray.get_refPoint().toVector3D();
 		//System.out.println("xref:  " + xref.toStlString());
@@ -491,7 +495,7 @@ public class CVTAlignment extends ReconstructionEngine {
 
 
 		//this should be about equal to the beam width
-		double resolution = 0.2;
+		double resolution = 0.5;
 
 
 		V.set(i, i, Math.pow(resolution,2));
@@ -539,11 +543,11 @@ public class CVTAlignment extends ReconstructionEngine {
 		if(orderTz >= 0)
 			A.set(i, i*nAlignVars + orderTz, sp.z());
 		if(orderRx >= 0)
-			A.set(i, i*nAlignVars + orderRx, dmdr.x());
+			A.set(i, i*nAlignVars + orderRx, -dmdr.x());
 		if(orderRy >= 0)
-			A.set(i, i*nAlignVars + orderRy, dmdr.y());
+			A.set(i, i*nAlignVars + orderRy, -dmdr.y());
 		if(orderRz >= 0)
-			A.set(i, i*nAlignVars + orderRz, dmdr.z());
+			A.set(i, i*nAlignVars + orderRz, -dmdr.z());
 
 
 
@@ -1400,13 +1404,13 @@ public class CVTAlignment extends ReconstructionEngine {
 		System.out.println(" CVT YAML VARIATION NAME + "+variationName);
 
 		System.out.println("SVT LOADING WITH VARIATION "+variationName);
-		DatabaseConstantProvider cp = new DatabaseConstantProvider(11, variationName);
+		/*DatabaseConstantProvider cp = new DatabaseConstantProvider(11, variationName);
 		//cp = new HackConstantsProvider(cp);
 		cp = SVTConstants.connect( cp );
 		cp.disconnect();  
 		CCDBConstantsLoader.Load(new DatabaseConstantProvider(11, variationName));
 		xb = org.jlab.rec.cvt.Constants.getXb();
-		yb = org.jlab.rec.cvt.Constants.getYb();
+		yb = org.jlab.rec.cvt.Constants.getYb();*/
 		//System.out.println("Check SVT Geom lay1 sec1:  " + Arrays.toString(SVTConstants.getLayerSectorAlignmentData()[0][0]));
 		//System.out.println("Check SVT Geom lay1 sec1:  " + Arrays.toString(SVTConstants.getLayerSectorAlignmentData()[0][1]));
 		//SVTStripFactory svtFac = new SVTStripFactory(cp, true);
@@ -1532,7 +1536,17 @@ public class CVTAlignment extends ReconstructionEngine {
 					+ " (" + line.end().x + ", "+ line.end().y + ", "+ line.end().z+"), ");
 		}*/
 
-		this.nAlignables = ((this.svtTopBottomSep ? 2*42 : 42) + (this.isSVTonly ? 0: 18) + (isCosmics? 0 : 1));
+		String useBeamspotStr = this.getEngineConfigString("useBeamspot");
+
+		if (useBeamspotStr!=null) {
+			System.out.println("["+this.getName()+"] treat beamspot as an additional measurement "+useBeamspotStr+" config chosen based on yaml");
+			this.includeBeamspot =  Boolean.valueOf(useBeamspotStr);
+		} else{
+			System.out.println("["+this.getName()+"] treat beamspot as an additional measurement false [default]");
+			
+		}
+		
+		this.nAlignables = ((this.svtTopBottomSep ? 2*42 : 42) + (this.isSVTonly ? 0: 18) + (isCosmics || !includeBeamspot? 0 : 1));
 
 
 		String debug = this.getEngineConfigString("debug");
@@ -1549,7 +1563,7 @@ public class CVTAlignment extends ReconstructionEngine {
 		return true;
 	}
 
-	double xb, yb;
+	//double xb, yb;
 
 	double maxResidualCutSVT;
 	double maxResidualCutBMTC;
@@ -1560,14 +1574,37 @@ public class CVTAlignment extends ReconstructionEngine {
 
 
 	private void setAlignVars(String alignVars) {
-		String split[] = alignVars.split("[ \t]+");
-		int i = 0;
 		orderTx = -1;
 		orderTy = -1;
 		orderTz = -1;
 		orderRx = -1;
 		orderRy = -1;
 		orderRz = -1;
+		if(alignVars.length() >2 && !alignVars.contains(" ")) {
+			for(int i = 0;i<alignVars.length()/2; i++) {
+				String s = alignVars.substring(2*i,2*i+2);
+				if(s.equals("Tx")) {
+					orderTx = i; 
+				} else if(s.equals("Ty")) {
+					orderTy = i;
+				} else if(s.equals("Tz")) {
+					orderTz = i; 
+				} else if(s.equals("Rx")) {
+					orderRx = i; 
+				} else if(s.equals("Ry")) {
+					orderRy = i; 
+				} else if(s.equals("Rz")) {
+					orderRz = i; 
+				}
+				nAlignVars = i+1;
+			}
+			System.out.println(nAlignVars + " alignment variables requested");
+			//System.exit(0);
+			return;
+		}
+		//old version
+		String split[] = alignVars.split("[ \t]+");
+		int i = 0;
 		for(String s : split) {
 			if(s.equals("Tx")) {
 				orderTx = i; i++;

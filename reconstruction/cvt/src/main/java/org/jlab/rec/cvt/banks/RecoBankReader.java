@@ -317,7 +317,11 @@ public class RecoBankReader {
 		float d0s[] = bank.getFloat("d0");
 		float xbs[] = bank.getFloat("xb");
 		float ybs[] = bank.getFloat("yb");
-		
+		if(xbs.length > 0) {
+			xb = xbs[0]*10.f;
+			yb = ybs[0]*10.f;
+		}
+		//System.out.println("xb yb from file" + xbs[0] + ybs[0]);
 		
 		
 		float curvatures[];
@@ -368,7 +372,13 @@ public class RecoBankReader {
 
 		}
 	}
-	
+	private double xb, yb;
+	public double getXbeam() {
+		return xb;
+	}
+	public double getYbeam() {
+		return yb;
+	}
 	
 	
 
