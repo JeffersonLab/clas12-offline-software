@@ -39,7 +39,7 @@ services:
   - class: org.jlab.service.eb.EBHBEngine
     name: EBHB
 # DC regular TB tracking    
-  - class: org.jlab.service.dc.DCTBEngineConv
+  - class: org.jlab.service.dc.DCTBEngine
     name: DCTB
   - class: org.jlab.service.ftof.FTOFTBEngine
     name: FTOFTB

@@ -90,7 +90,7 @@ configuration:
       dcWireDistortion: "true" 
     DCTAI:
       dcT2DFunc: "Polynomial"
-      dcWireDistortion: "true" 
+      dcWireDistortion: "true"
     MLTD:
       run: "5038"
     EBTAI:

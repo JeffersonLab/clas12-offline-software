@@ -47,7 +47,7 @@ services:
   - class: org.jlab.service.eb.EBHBAIEngine
     name: EBHAI
 # DC regular TB tracking    
-  - class: org.jlab.service.dc.DCTBEngineConv
+  - class: org.jlab.service.dc.DCTBEngine
     name: DCTB
 # DC AI assisted TB tracking    
   - class: org.jlab.service.dc.DCTBEngineAI

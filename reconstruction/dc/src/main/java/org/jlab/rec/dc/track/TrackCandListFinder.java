@@ -15,7 +15,6 @@ import org.jlab.rec.dc.cross.Cross;
 import org.jlab.rec.dc.cross.CrossList;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
-//import org.jlab.rec.dc.track.fit.KFitter;
 import org.jlab.rec.dc.track.fit.KFitterDoca;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
@@ -800,7 +799,8 @@ public class TrackCandListFinder {
             for(FittedHit h : seg) {
                 // for hits with no timing information, check if there is a neighbor hit 
                 // in the same layer and copy time info from there
-                if(h.get_AssociatedHBTrackID()==-1 || h.getTFlight()==0) {
+                // currently disabled to avoid fake doublets
+                if((h.get_AssociatedHBTrackID()==-1 || h.getTFlight()==0) && false) {
                     for(FittedHit o :seg) {
                         if(h.get_Id()!=o.get_Id() && 
                            o.get_AssociatedHBTrackID()>0 && 
