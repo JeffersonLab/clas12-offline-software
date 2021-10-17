@@ -61,7 +61,7 @@ public class EngineProcessor {
             "org.jlab.service.ec.ECEngine",
             "org.jlab.service.htcc.HTCCReconstructionService",
             "org.jlab.service.eb.EBHBEngine",
-            "org.jlab.service.dc.DCTBEngineConv",
+            "org.jlab.service.dc.DCTBEngine",
             "org.jlab.service.ftof.FTOFTBEngine",
             "org.jlab.service.eb.EBTBEngine"
         };
@@ -98,7 +98,7 @@ public class EngineProcessor {
             "org.jlab.service.htcc.HTCCReconstructionService",
             "org.jlab.service.ltcc.LTCCEngine",
             "org.jlab.service.eb.EBHBEngine",
-            "org.jlab.service.dc.DCTBEngineConv",
+            "org.jlab.service.dc.DCTBEngine",
             "org.jlab.service.ftof.FTOFTBEngine",
             "org.jlab.service.eb.EBTBEngine",
             "org.jlab.rec.rich.RICHEBEngine",
