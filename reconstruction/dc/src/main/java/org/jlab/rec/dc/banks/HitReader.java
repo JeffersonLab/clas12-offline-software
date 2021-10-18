@@ -238,6 +238,62 @@ public class HitReader {
         this.set_DCHits(hits);
 
     }
+    
+    public Map<Integer, ArrayList<FittedHit>> read_Hits(DataEvent event, DCGeant4Factory dcDetector) {
+        Map<Integer, ArrayList<FittedHit>> grpHits = new HashMap<Integer, ArrayList<FittedHit>>();
+        
+        if (!event.hasBank(bankNames.getHitsInputBank())) {
+            return null;
+        }
+        
+        DataBank bank = event.getBank(bankNames.getHitsInputBank());
+        int rows = bank.rows();
+
+        List<FittedHit> hits = new ArrayList<>();
+        for (int i = 0; i < rows; i++) {
+            int id          = bank.getShort("id", i);
+            int sector      = bank.getByte("sector", i);
+            int slayer      = bank.getByte("superlayer", i);
+            int layer       = bank.getByte("layer", i);
+            int wire        = bank.getShort("wire", i);
+            int tdc         = bank.getInt("TDC", i);
+            int LR          = bank.getByte("LR", i);
+            int clusterID   = bank.getShort("clusterID", i);
+            
+        
+            //use only hits that have been fit to a track
+            if (clusterID == -1) {
+                continue;
+            }
+            
+            FittedHit hit = new FittedHit(sector, slayer, layer, wire, tdc, id);
+            hit.set_Id(id);
+            hit.set_AssociatedClusterID(clusterID);
+            hit.set_TrkgStatus(0);
+            hit.calc_CellSize(dcDetector);
+            hit.calc_GeomCorr(dcDetector, 0);
+            double posError = hit.get_CellSize() / Math.sqrt(12.);
+            hit.set_DocaErr(posError);
+            hits.add(hit);   
+        }
+        for (FittedHit hit : hits) {
+            
+            if (hit.get_AssociatedClusterID() == -1) {
+                continue;
+            }
+            if (hit.get_AssociatedClusterID() != -1 ) {
+                
+                int index = hit.get_AssociatedClusterID();
+                if(grpHits.get(index)==null) { // if the list not yet created make it
+                    grpHits.put(index, new ArrayList<FittedHit>()); 
+                    grpHits.get(index).add(hit); // append hit
+                } else {
+                    grpHits.get(index).add(hit); // append hit
+                }
+            }
+        }
+        return grpHits;
+    }
 
     private Map<Integer, Integer> id2tid = new HashMap<Integer, Integer>();
     private Map<Integer, Double> id2tidB = new HashMap<Integer, Double>();
@@ -262,10 +318,10 @@ public class HitReader {
         1: this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d")
         */
         String bankName    = bankNames.getHitsInputBank();
-        String pointName   = bankNames.getIdsBank();
+        String pointName   = bankNames.getIdsInputBank();
         String recBankName = bankNames.getRecEventBank();
         if(Constants.DEBUG) {
-                System.out.println("Reading hb banks for "+ bankNames.getHitsInputBank());
+                System.out.println("Reading hb banks for "+ bankName + ", " + pointName + " " + recBankName);
         }
         if (!event.hasBank(bankName) || !event.hasBank(pointName) || event.getBank(pointName).rows()==0) {
             //    System.err.println("there is no HB dc bankAI for "+_names[0]);

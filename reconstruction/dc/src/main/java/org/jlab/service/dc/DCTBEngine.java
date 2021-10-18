@@ -11,6 +11,7 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
+import org.jlab.rec.dc.banks.Banks.BankType;
 import org.jlab.rec.dc.banks.HitReader;
 import org.jlab.rec.dc.banks.RecoBankWriter;
 import org.jlab.rec.dc.cluster.ClusterCleanerUtilities;
@@ -42,33 +43,25 @@ public class DCTBEngine extends DCEngine {
     }
     public DCTBEngine() { // if not specified use conventional tracking
         super("DCTB");
+        this.setBankType("TB");
         tde = new TimeToDistanceEstimator();
     }
     
     @Override
     public void initBankNames() {
-        this.getBankNames().setHitsInputBank("HitBasedTrkg::HBHits");
-        this.getBankNames().setClustersInputBank("HitBasedTrkg::HBClusters");
-        this.getBankNames().setTracksInputBank("HitBasedTrkg::HBTracks");
-        this.getBankNames().setIdsBank("HitBasedTrkg::HBHitTrkId");
-        this.getBankNames().setHitsBank("TimeBasedTrkg::TBHits");
-        this.getBankNames().setClustersBank("TimeBasedTrkg::TBClusters");
-        this.getBankNames().setSegmentsBank("TimeBasedTrkg::TBSegments");
-        this.getBankNames().setCrossesBank("TimeBasedTrkg::TBCrosses");
-        this.getBankNames().setTracksBank("TimeBasedTrkg::TBTracks");
-        this.getBankNames().setTrajBank("TimeBasedTrkg::Trajectory");
-        this.getBankNames().setCovmatBank("TimeBasedTrkg::TBCovMat");
-        this.getBankNames().setRecEventBank("RECHB::Event");
-        this.getBankNames().setRecPartBank("RECHB::Particle");
-        this.getBankNames().setRecTrackBank("RECHB::Track");
+        BankType type = this.getBankType();
+
+        this.getBankNames().setInputBanks(type);       
+        this.getBankNames().setOutputBanks(type);
+        this.getBankNames().setRecBanks(type);
         
-        super.registerOutputBank("TimeBasedTrkg::TBHits");
-        super.registerOutputBank("TimeBasedTrkg::TBClusters");
-        super.registerOutputBank("TimeBasedTrkg::TBSegments");
-        super.registerOutputBank("TimeBasedTrkg::TBCrosses");
-        super.registerOutputBank("TimeBasedTrkg::TBTracks");
-        super.registerOutputBank("TimeBasedTrkg::TBCovMat");
-        super.registerOutputBank("TimeBasedTrkg::Trajectory");
+        super.registerOutputBank(this.getBankNames().getHitsBank());
+        super.registerOutputBank(this.getBankNames().getClustersBank());
+        super.registerOutputBank(this.getBankNames().getSegmentsBank());
+        super.registerOutputBank(this.getBankNames().getCrossesBank());
+        super.registerOutputBank(this.getBankNames().getTracksBank());
+        super.registerOutputBank(this.getBankNames().getCovmatBank());
+        super.registerOutputBank(this.getBankNames().getTrajBank());
     }
     
     @Override

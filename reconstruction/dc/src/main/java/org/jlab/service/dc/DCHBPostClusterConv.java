@@ -1,16 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.service.dc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.swimtools.Swimmer;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
+import org.jlab.rec.dc.banks.Banks.BankType;
 import org.jlab.rec.dc.banks.HitReader;
 import org.jlab.rec.dc.banks.RecoBankWriter;
 import org.jlab.rec.dc.cluster.ClusterFinder;
@@ -35,23 +32,22 @@ import org.jlab.rec.dc.trajectory.RoadFinder;
 public class DCHBPostClusterConv extends DCEngine {
     public DCHBPostClusterConv() {
         super("DCHB");
+        this.setBankType("HB");
     }
     
     @Override
     public void initBankNames() {
-        this.getBankNames().setHitsInputBank("HitBasedTrkg::HBHits");
-        this.getBankNames().setClustersInputBank("HitBasedTrkg::HBClusters");
-        this.getBankNames().setHitsBank("HitBasedTrkg::HBHits");
-        this.getBankNames().setClustersBank("HitBasedTrkg::HBClusters");
-        this.getBankNames().setSegmentsBank("HitBasedTrkg::HBSegments");
-        this.getBankNames().setCrossesBank("HitBasedTrkg::HBCrosses");
-        this.getBankNames().setTracksBank("HitBasedTrkg::HBTracks");
-        this.getBankNames().setIdsBank("HitBasedTrkg::HBHitTrkId");
+        BankType type = this.getBankType();
+
+        this.getBankNames().setInputBanks(type);
+        this.getBankNames().setOutputBanks(type);
         
-        super.registerOutputBank("HitBasedTrkg::HBSegments");
-        super.registerOutputBank("HitBasedTrkg::HBCrosses");
-        super.registerOutputBank("HitBasedTrkg::HBTracks");
-        super.registerOutputBank("HitBasedTrkg::HBHitTrkId");
+        super.registerOutputBank(this.getBankNames().getHitsBank());
+        super.registerOutputBank(this.getBankNames().getClustersBank());
+        super.registerOutputBank(this.getBankNames().getSegmentsBank());
+        super.registerOutputBank(this.getBankNames().getCrossesBank());
+        super.registerOutputBank(this.getBankNames().getTracksBank());
+        super.registerOutputBank(this.getBankNames().getIdsBank());
     }
         
     @Override
@@ -70,13 +66,13 @@ public class DCHBPostClusterConv extends DCEngine {
         List<Cross> crosses = null;
         List<FittedCluster> clusters = null;
         List<Segment> segments = null;
-        List<FittedHit> fhits = null;
+        List<FittedHit> fhits = new ArrayList<FittedHit>();
         
         //2) find the clusters from these hits
-        fhits = new ArrayList<FittedHit>();
+        Map<Integer, ArrayList<FittedHit>> hits = reader.read_Hits(event, Constants.getInstance().dcDetector);
         ClusterFinder clusFinder = new ClusterFinder();
         ClusterFitter cf = new ClusterFitter();
-        clusters = clusFinder.RecomposeClusters(event, Constants.getInstance().dcDetector, cf);
+        clusters = clusFinder.RecomposeClusters(hits, Constants.getInstance().dcDetector, cf);
         if (clusters ==null || clusters.isEmpty()) {
             return true;
         }
@@ -255,14 +251,18 @@ public class DCHBPostClusterConv extends DCEngine {
             }
         }
         
-                // no candidate found, stop here and save the hits,
+        // no candidate found, stop here and save the hits,
         // the clusters, the segments, the crosses
         if (trkcands.isEmpty()) {
              event.appendBanks(
+                    writer.fillHBHitsBank(event, fhits),
+                    writer.fillHBClustersBank(event, clusters),
                     writer.fillHBSegmentsBank(event, segments),
                     writer.fillHBCrossesBank(event, crosses));
         } else {
             event.appendBanks(
+                    writer.fillHBHitsBank(event, fhits),
+                    writer.fillHBClustersBank(event, clusters),
                     writer.fillHBSegmentsBank(event, segments),
                     writer.fillHBCrossesBank(event, crosses),
                     writer.fillHBTracksBank(event, trkcands),

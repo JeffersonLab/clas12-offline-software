@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.service.dc;
 
 import java.util.ArrayList;
@@ -12,6 +7,7 @@ import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.swimtools.Swimmer;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
+import org.jlab.rec.dc.banks.Banks.BankType;
 import org.jlab.rec.dc.banks.HitReader;
 import org.jlab.rec.dc.banks.RecoBankWriter;
 import org.jlab.rec.dc.cluster.FittedCluster;
@@ -33,26 +29,23 @@ public class DCHBPostClusterAI extends DCEngine {
 
     public DCHBPostClusterAI() {
         super("DCHAI");
+        this.setBankType("HBAI");
     }
     
     
     @Override
     public void initBankNames() {
-        this.getBankNames().setHitsInputBank("HitBasedTrkg::HBHits");
-        this.getBankNames().setClustersInputBank("HitBasedTrkg::HBClusters");
-        this.getBankNames().setHitsBank("HitBasedTrkg::AIHits");
-        this.getBankNames().setClustersBank("HitBasedTrkg::AIClusters");
-        this.getBankNames().setSegmentsBank("HitBasedTrkg::AISegments");
-        this.getBankNames().setCrossesBank("HitBasedTrkg::AICrosses");
-        this.getBankNames().setTracksBank("HitBasedTrkg::AITracks");
-        this.getBankNames().setIdsBank("HitBasedTrkg::AIHitTrkId");
-        
-        super.registerOutputBank("HitBasedTrkg::AIHits");
-        super.registerOutputBank("HitBasedTrkg::AIClusters");
-        super.registerOutputBank("HitBasedTrkg::AISegments");
-        super.registerOutputBank("HitBasedTrkg::AICrosses");
-        super.registerOutputBank("HitBasedTrkg::AITracks");
-        super.registerOutputBank("HitBasedTrkg::AIHitTrkId");
+        BankType type = this.getBankType();
+
+        this.getBankNames().setInputBanks(type);
+        this.getBankNames().setOutputBanks(type);
+
+        super.registerOutputBank(this.getBankNames().getHitsBank());
+        super.registerOutputBank(this.getBankNames().getClustersBank());
+        super.registerOutputBank(this.getBankNames().getSegmentsBank());
+        super.registerOutputBank(this.getBankNames().getCrossesBank());
+        super.registerOutputBank(this.getBankNames().getTracksBank());
+        super.registerOutputBank(this.getBankNames().getIdsBank());
     }
     
     @Override

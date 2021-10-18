@@ -7,6 +7,7 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.banks.Banks;
+import org.jlab.rec.dc.banks.Banks.BankType;
 import org.jlab.utils.groups.IndexedTable;
 
 public class DCEngine extends ReconstructionEngine {
@@ -15,14 +16,15 @@ public class DCEngine extends ReconstructionEngine {
     private Banks  bankNames = new Banks();
     
     // options configured from yaml
-    private int     selectedSector = 0;
-    private boolean wireDistortion = false;
-    private boolean useStartTime   = true;
-    private boolean useTimeBeta    = false;
-    private boolean useBetaCut     = false;
-    private int     t2d            = 0;
-    private int     nSuperLayer    = 5;
-    private String  geoVariation   = "default";
+    private int      selectedSector = 0;
+    private boolean  wireDistortion = false;
+    private boolean  useStartTime   = true;
+    private boolean  useTimeBeta    = false;
+    private boolean  useBetaCut     = false;
+    private int      t2d            = 0;
+    private int      nSuperLayer    = 5;
+    private String   geoVariation   = "default";
+    private BankType bankType       = BankType.HB;
         
     public DCEngine(String name) {
         super(name,"ziegler","5.0");
@@ -67,6 +69,12 @@ public class DCEngine extends ReconstructionEngine {
             if(!Boolean.valueOf(this.getEngineConfigString("dcFOOST"))) {
                 nSuperLayer =6;
             }    
+                
+        //Set output bank names
+        if(this.getEngineConfigString("bankType")!=null) {
+            bankType = BankType.getType(this.getEngineConfigString("bankType"));
+            if(bankType == BankType.UDF) bankType = BankType.HB;
+        }
         
     }
     
@@ -106,8 +114,13 @@ public class DCEngine extends ReconstructionEngine {
                                            nSuperLayer, 
                                            selectedSector);
         this.LoadTables();
-        this.initBankNames();
+        this.initBanks();
         return true;
+    }
+
+    private void initBanks() {
+        this.initBankNames();
+        System.out.println("["+this.getName()+"] bank names set for " + this.bankType.getName());        
     }
 
     public void initBankNames() {
@@ -117,11 +130,15 @@ public class DCEngine extends ReconstructionEngine {
     public Banks getBankNames() {
         return bankNames;
     }
-
-    public void setBankNames(Banks bankNames) {
-        this.bankNames = bankNames;
+    
+    public void setBankType(String type) {
+        this.bankType = BankType.getType(type);
     }
 
+    public BankType getBankType() {
+        return this.bankType;
+    }
+    
     public int getRun(DataEvent event) {
         if (!event.hasBank("RUN::config")) {
             return 0;
@@ -150,4 +167,5 @@ public class DCEngine extends ReconstructionEngine {
         }
         return triggerPhase;
     }
+
 }

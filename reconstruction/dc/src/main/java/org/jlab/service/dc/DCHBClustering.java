@@ -8,6 +8,7 @@ import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
+import org.jlab.rec.dc.banks.Banks.BankType;
 import org.jlab.rec.dc.banks.HitReader;
 import org.jlab.rec.dc.banks.RecoBankWriter;
 import org.jlab.rec.dc.cluster.ClusterCleanerUtilities;
@@ -26,18 +27,18 @@ public class DCHBClustering extends DCEngine {
 
     public DCHBClustering() {
         super("DCCR");
+        this.setBankType("CR");
     }
     
     @Override
     public void initBankNames() {
-        this.getBankNames().setHitsBank("HitBasedTrkg::HBHits");
-        this.getBankNames().setClustersBank("HitBasedTrkg::HBClusters");
+
+        this.getBankNames().setOutputBanks(BankType.CR);
         
-        super.registerOutputBank("HitBasedTrkg::HBHits");
-        super.registerOutputBank("HitBasedTrkg::HBClusters");
+        super.registerOutputBank(this.getBankNames().getHitsBank());
+        super.registerOutputBank(this.getBankNames().getClustersBank());
     }
-    
-    public static int sectorSelect;
+     
     
     @Override
     public boolean processDataEvent(DataEvent event) {
@@ -45,8 +46,9 @@ public class DCHBClustering extends DCEngine {
         int run = this.getRun(event);
         if(run==0) return true;
         
-        double triggerPhase = this.getTriggerPhase(event);
-        triggerPhase=0; 
+        double triggerPhase = 0;
+        this.getTriggerPhase(event);
+
         /* 1 */
         // get Field
         Swim dcSwim = new Swim();
@@ -81,7 +83,7 @@ public class DCHBClustering extends DCEngine {
                 triggerPhase);
         /* 10 */
         //I) get the hits
-        List<Hit> hits = hitRead.get_DCHits(sectorSelect);
+        List<Hit> hits = hitRead.get_DCHits(Constants.getInstance().SECTORSELECT);
         //II) process the hits
         //1) exit if hit list is empty
         if (hits.isEmpty()) {

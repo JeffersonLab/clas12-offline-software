@@ -25,6 +25,7 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.task.DataSourceProcessorPane;
 import org.jlab.io.task.IDataEventListener;
+import org.jlab.rec.dc.banks.Banks;
 import org.jlab.rec.dc.banks.HitReader;
 import org.jlab.rec.dc.cluster.ClusterCleanerUtilities;
 import org.jlab.rec.dc.cluster.ClusterFinder;
@@ -85,7 +86,8 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         Constants.getInstance().initialize("LayerEfficiency");
         Constants.getInstance().setT2D(1);
         this.LoadTables();
-        
+        this.setBankType("TB");
+        this.initBankNames();
         
         maxDoca[0]=0.8;maxDoca[1]=0.9;maxDoca[2]=1.3;maxDoca[3]=1.4;maxDoca[4]=1.9;maxDoca[5]=2.0;
         //plots
@@ -152,19 +154,13 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
 
     @Override
     public void initBankNames() {
-        this.getBankNames().setHitsInputBank("HitBasedTrkg::HBHits");
-        this.getBankNames().setClustersInputBank("HitBasedTrkg::HBClusters");
-        this.getBankNames().setHitsBank("HitBasedTrkg::HBHits");
-        this.getBankNames().setClustersBank("HitBasedTrkg::HBClusters");
-        this.getBankNames().setSegmentsBank("HitBasedTrkg::HBSegments");
-        this.getBankNames().setCrossesBank("HitBasedTrkg::HBCrosses");
-        this.getBankNames().setTracksBank("HitBasedTrkg::HBTracks");
-        this.getBankNames().setIdsBank("HitBasedTrkg::HBHitTrkId");
-        this.getBankNames().setRecEventBank("RECHB::Event");
-        this.getBankNames().setRecPartBank("RECHB::Particle");
-        this.getBankNames().setRecTrackBank("RECH::Track");
-    }
+        Banks.BankType type = this.getBankType();
 
+        this.getBankNames().setInputBanks(type);       
+        
+        super.registerOutputBank("TimeBasedTrkg::TBSegmentTrajectory");
+    }
+    
     @Override
     public void dataEventAction(DataEvent event) {
         ProcessLayerEffs(event);

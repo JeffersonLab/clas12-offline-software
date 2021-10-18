@@ -277,63 +277,10 @@ public class ClusterFinder {
 
     }
 
-    public List<FittedCluster> RecomposeClusters(DataEvent event, 
+    public List<FittedCluster> RecomposeClusters(Map<Integer, ArrayList<FittedHit>> grpHits, 
             DCGeant4Factory dcDetector, ClusterFitter cf) {
         cf.reset();
-        Map<Integer, ArrayList<FittedHit>> grpHits = new HashMap<Integer, ArrayList<FittedHit>>();
         List<FittedCluster> clusters = new ArrayList<FittedCluster>();
-        //List<FittedHit>fhits = new ArrayList<FittedHit>();
-        //
-        if (!event.hasBank("HitBasedTrkg::HBHits")) {
-            return null;
-        }
-        
-        DataBank bank = event.getBank("HitBasedTrkg::HBHits");
-        int rows = bank.rows();
-
-        List<FittedHit> hits = new ArrayList<>();
-        for (int i = 0; i < rows; i++) {
-            int id          = bank.getShort("id", i);
-            int sector      = bank.getByte("sector", i);
-            int slayer      = bank.getByte("superlayer", i);
-            int layer       = bank.getByte("layer", i);
-            int wire        = bank.getShort("wire", i);
-            int tdc         = bank.getInt("TDC", i);
-            int LR          = bank.getByte("LR", i);
-            int clusterID   = bank.getShort("clusterID", i);
-            
-        
-            //use only hits that have been fit to a track
-            if (clusterID == -1) {
-                continue;
-            }
-            
-            FittedHit hit = new FittedHit(sector, slayer, layer, wire, tdc, id);
-            hit.set_Id(id);
-            hit.set_AssociatedClusterID(clusterID);
-            hit.set_TrkgStatus(0);
-            hit.calc_CellSize(dcDetector);
-            hit.calc_GeomCorr(dcDetector, 0);
-            double posError = hit.get_CellSize() / Math.sqrt(12.);
-            hit.set_DocaErr(posError);
-            hits.add(hit);   
-        }
-        for (FittedHit hit : hits) {
-            
-            if (hit.get_AssociatedClusterID() == -1) {
-                continue;
-            }
-            if (hit.get_AssociatedClusterID() != -1 ) {
-                
-                int index = hit.get_AssociatedClusterID();
-                if(grpHits.get(index)==null) { // if the list not yet created make it
-                    grpHits.put(index, new ArrayList<FittedHit>()); 
-                    grpHits.get(index).add(hit); // append hit
-                } else {
-                    grpHits.get(index).add(hit); // append hit
-                }
-            }
-        }
         
         // using iterators 
         Iterator<Map.Entry<Integer, ArrayList<FittedHit>>> itr = grpHits.entrySet().iterator(); 

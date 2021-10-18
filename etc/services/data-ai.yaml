@@ -85,12 +85,14 @@ configuration:
     DCHAI:
       dcT2DFunc: "Polynomial"
       dcWireDistortion: "true" 
+      bankType: "HBAI"
     DCTB:
       dcT2DFunc: "Polynomial"
       dcWireDistortion: "true" 
     DCTAI:
       dcT2DFunc: "Polynomial"
       dcWireDistortion: "true"
+      bankType: "TBAI"
     MLTD:
       run: "5038"
     EBTAI:

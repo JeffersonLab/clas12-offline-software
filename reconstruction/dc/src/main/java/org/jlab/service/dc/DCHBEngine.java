@@ -11,6 +11,7 @@ import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.swimtools.Swimmer;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
+import org.jlab.rec.dc.banks.Banks.BankType;
 import org.jlab.rec.dc.banks.HitReader;
 import org.jlab.rec.dc.banks.RecoBankWriter;
 import org.jlab.rec.dc.cluster.ClusterCleanerUtilities;
@@ -40,24 +41,22 @@ public class DCHBEngine extends DCEngine {
 
     public DCHBEngine() {
         super("DCHB");
+        this.setBankType("HB");
     }
 
 
     @Override
     public void initBankNames() {
-        this.getBankNames().setHitsBank("HitBasedTrkg::HBHits");
-        this.getBankNames().setClustersBank("HitBasedTrkg::HBClusters");
-        this.getBankNames().setSegmentsBank("HitBasedTrkg::HBSegments");
-        this.getBankNames().setCrossesBank("HitBasedTrkg::HBCrosses");
-        this.getBankNames().setTracksBank("HitBasedTrkg::HBTracks");
-        this.getBankNames().setIdsBank("HitBasedTrkg::HBHitTrkId");
+        BankType type = this.getBankType();
         
-        super.registerOutputBank("HitBasedTrkg::HBHits");
-        super.registerOutputBank("HitBasedTrkg::HBClusters");
-        super.registerOutputBank("HitBasedTrkg::HBSegments");
-        super.registerOutputBank("HitBasedTrkg::HBCrosses");
-        super.registerOutputBank("HitBasedTrkg::HBTracks");
-        super.registerOutputBank("HitBasedTrkg::HBHitTrkId");
+        this.getBankNames().setOutputBanks(type);
+        
+        super.registerOutputBank(this.getBankNames().getHitsBank());
+        super.registerOutputBank(this.getBankNames().getClustersBank());
+        super.registerOutputBank(this.getBankNames().getSegmentsBank());
+        super.registerOutputBank(this.getBankNames().getCrossesBank());
+        super.registerOutputBank(this.getBankNames().getTracksBank());
+        super.registerOutputBank(this.getBankNames().getIdsBank());
     }
     
     @Override

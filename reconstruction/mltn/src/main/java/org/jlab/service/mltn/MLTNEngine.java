@@ -38,8 +38,8 @@ public class MLTNEngine extends ReconstructionEngine {
 
     @Override
     public boolean processDataEvent(DataEvent de) {
-        if(de.hasBank("HitBasedTrkg::HBClusters")==true){
-            DataBank bank = de.getBank("HitBasedTrkg::HBClusters");
+        if(de.hasBank("HitBasedTrkg::Clusters")==true){
+            DataBank bank = de.getBank("HitBasedTrkg::Clusters");
             
             
            HipoDataBank hipoBank = (HipoDataBank) bank;

@@ -19,8 +19,7 @@
        {"name":"LocY",        "type":"F", "info":"y in planar local coordinate system"},
        {"name":"X",           "type":"F", "info":"wire x-coordinate  in tilted-sector"},
        {"name":"Z",           "type":"F", "info":"wire z-coordinate  in tilted-sector"},
-       {"name":"clusterID",   "type":"S", "info":"ID of associated cluster"},
-       {"name":"trkID",       "type":"B", "info":"ID of associated track"}
+       {"name":"clusterID",   "type":"S", "info":"ID of associated cluster"}
     ]
   },
  {
