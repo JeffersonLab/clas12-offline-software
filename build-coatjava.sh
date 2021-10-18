@@ -29,27 +29,56 @@ do
     fi
 done
 
+top="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+
 wget='wget'
-mvn='mvn'
+mvn="mvn --settings $top/maven-settings.xml"
 if [ "$quiet" == "yes" ]
 then
     wget='wget --progress=dot:mega'
-    mvn='mvn -q -B'
+    mvn="mvn -q -B --settings $top/maven-settings.xml"
 fi
+
+command_exists () {
+    type "$1" &> /dev/null
+}
+download () {
+    ret=0
+    if command_exists wget ; then
+        # -N only redownloads if timestamp/filesize is newer/different
+        $wget -N --no-check-certificate $1
+        ret=$?
+    elif command_exists curl ; then
+        if ! [ -e ${1##*/} ]; then
+          curl $1 -o ${1##*/}
+          ret=$?
+        fi
+    else
+        ret=1
+        echo ERROR:::::::::::  Could not find wget nor curl.
+    fi
+    return $ret
+}
+
 
 # download the default field maps, as defined in bin/env.sh:
 # (and duplicated in etc/services/reconstruction.yaml):
 source `dirname $0`/bin/env.sh
 if [ $downloadMaps == "yes" ]; then
   echo 'Retrieving field maps ...'
-  webDir=http://clasweb.jlab.org/clas12offline/magfield
+  webDir=https://clasweb.jlab.org/clas12offline/magfield
   locDir=etc/data/magfield
   mkdir -p $locDir
   cd $locDir
   for map in $COAT_MAGFIELD_SOLENOIDMAP $COAT_MAGFIELD_TORUSMAP $COAT_MAGFIELD_TORUSSECONDARYMAP
   do
-    # -N only redownloads if timestamp/filesize is newer/different
-    $wget -N --no-check-certificate $webDir/$map
+    download $webDir/$map
+    if [ $? -ne 0 ]; then
+        echo ERROR:::::::::::  Could not download field map:
+        echo $webDir/$map
+        echo One option is to download manually into etc/data/magfield and then run this build script with --nomaps
+        exit
+    fi
   done
   cd -
 fi
@@ -65,14 +94,13 @@ cp external-dependencies/JEventViewer-1.1.jar coatjava/lib/clas/
 cp external-dependencies/vecmath-1.3.1-2.jar coatjava/lib/clas/
 mkdir -p coatjava/lib/utils
 cp external-dependencies/jclara-4.3-SNAPSHOT.jar coatjava/lib/utils
-cp external-dependencies/clas12mon-3.1.jar coatjava/lib/utils
-cp external-dependencies/KPP-Plots-3.2.jar coatjava/lib/utils
 #cp external-dependencies/jaw-1.0.jar coatjava/lib/utils
 mkdir -p coatjava/lib/services
 
 ### clean up any cache copies ###
 rm -rf ~/.m2/repository/org/hep/hipo
 rm -rf ~/.m2/repository/org/jlab
+cd common-tools/coat-lib; $mvn clean; cd -
 
 unset CLAS12DIR
 if [ $runUnitTests == "yes" ]; then
@@ -97,18 +125,7 @@ if [ $? != 0 ] ; then echo "mvn package failure" ; exit 1 ; fi
 cd -
 
 cp common-tools/coat-lib/target/coat-libs-*-SNAPSHOT.jar coatjava/lib/clas/
-cp reconstruction/dc/target/clas12detector-dc-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/tof/target/clas12detector-tof-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/cvt/target/clas12detector-cvt-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/ft/target/clas12detector-ft-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/ec/target/clas12detector-ec-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/ltcc/target/clas12detector-ltcc-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/htcc/target/clas12detector-htcc-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/cnd/target/clas12detector-cnd-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/rich/target/clas12detector-rich-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/fvt/target/clas12detector-fmt-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/eb/target/clas12detector-eb-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/band/target/clas12detector-band-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/rtpc/target/clas12detector-rtpc-*-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/*/target/clas12detector-*-SNAPSHOT.jar coatjava/lib/services/
+
 
 echo "COATJAVA SUCCESSFULLY BUILT !"

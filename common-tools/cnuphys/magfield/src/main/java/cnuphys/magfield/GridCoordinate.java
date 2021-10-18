@@ -13,16 +13,13 @@ import java.util.Arrays;
  */
 public class GridCoordinate {
 
-	private boolean _isUniform = true;
-	
-	
 	/**
 	 * The overall minimum value.
 	 */
 	private double _min;
 
 	/**
-	 * The overll maximum value.
+	 * The overall maximum value.
 	 */
 	private double _max;
 
@@ -42,30 +39,22 @@ public class GridCoordinate {
 	/**
 	 * Construct a grid coordinate.
 	 *
-	 * @param name
-	 *            the name of the coordinate
-	 * @param min
-	 *            the minimum value
-	 * @param max
-	 *            the maximum value
-	 * @param numPoints
-	 *            the number of points (including ends)
+	 * @param name      the name of the coordinate
+	 * @param min       the minimum value
+	 * @param max       the maximum value
+	 * @param numPoints the number of points (including ends)
 	 */
 	public GridCoordinate(String name, float min, float max, int numPoints) {
-		this(name, (double)min, (double)max, numPoints);
+		this(name, (double) min, (double) max, numPoints);
 	}
-	
+
 	/**
 	 * Construct a grid coordinate.
 	 *
-	 * @param name
-	 *            the name of the coordinate
-	 * @param min
-	 *            the minimum value
-	 * @param max
-	 *            the maximum value
-	 * @param numPoints
-	 *            the number of points (including ends)
+	 * @param name      the name of the coordinate
+	 * @param min       the minimum value
+	 * @param max       the maximum value
+	 * @param numPoints the number of points (including ends)
 	 */
 	public GridCoordinate(String name, double min, double max, int numPoints) {
 		super();
@@ -80,59 +69,54 @@ public class GridCoordinate {
 			_values[i] = _min + i * _delta;
 		}
 	}
-
-
+	
 	/**
-	 * Returns an index [0..numPoints-2] such that the grid values index and
-	 * index+1 enclose the value. A return of 0 means the value is between min
-	 * and min + delta; A return of numPoints-2 means the value is between max -
-	 * delta and max. A return value of -1 indicates out of range.
-	 * 
-	 * @param val
-	 *            the value to test
-	 * @return an index [0..numPoints-2] such that the grid values index and
-	 *         index+1 enclose the value.
+	 * Get the values of the grid points
+	 * @return the values of the grid points
 	 */
-	public int getIndex(double val) {
-		if ((val < _min) || (val > _max)) {
-			return -1;
-		}
+	public double[] getValues() {
+		return _values;
+	}
+	
+	/**
+	 * Gets the nearest index [0..numPoints-1] for nearest neighbor
+	 * @param val the value
+	 * @return the nearest index for nearest neighbor
+	 */
+	public int getRoundedIndex(double val) {
+		int uindex = (int) (((val - _min) / _delta) + 0.5);
+		uindex = Math.max(0, Math.min(uindex, (_numPoints - 1)));
+		return uindex;
 		
-		
-		if (_isUniform) {
-			int uindex = (int) ((val-_min)/_delta);
-			uindex = Math.max(0,  Math.min(uindex, (_numPoints - 1)));
-			return uindex;
-		}
-
-		int index = Arrays.binarySearch(_values, val);
-		// index of the search key, if it is contained in the array; otherwise,
-		// (-(insertion point) - 1).
-		// The insertion point is defined as the point at which the key would be
-		// inserted into the array:
-		// the index of the first element greater than the key, or a.length if
-		// all elements in the array are less than the specified key.
-		// Note that this guarantees that the return value will be >= 0 if and
-		// only if the key is found.
-
-		if (index < 0) {
-			index = -(index + 1); // now the insertion point.
-			index = index - 1;
-		}
-		// pathology if val == max, we'd get numPoints-1
-		if (index == _numPoints - 1) {
-			index--;
-		}
-
-		return index;
 	}
 
+	/**
+	 * Returns an index [0..numPoints-2] such that the grid values index and index+1
+	 * enclose the value. A return of 0 means the value is between min and min +
+	 * delta; A return of numPoints-2 means the value is between max - delta and
+	 * max. A return value of -1 indicates out of range.
+	 * 
+	 * @param val the value to test
+	 * @return an index [0..numPoints-2] such that the grid values index and index+1
+	 *         enclose the value.
+	 */
+	public int getIndex(double val) {
+		if ((val < _min) || (val >= _max)) {
+			return -1;
+		}
+
+		//truncates
+			int uindex = (int) ((val - _min) / _delta);
+		uindex = Math.max(0, Math.min(uindex, (_numPoints - 2)));
+		
+		
+			return uindex;
+		}
 
 	/**
 	 * Get the value at a given index.
 	 * 
-	 * @param index
-	 *            the index
+	 * @param index the index
 	 * @return the value at that index.
 	 */
 	public double getValue(int index) {
@@ -178,14 +162,10 @@ public class GridCoordinate {
 	/**
 	 * Get the fractional part for use in interpolation.
 	 *
-	 * @param val
-	 *            the value
+	 * @param val the value
 	 * @return the fraction of spacing.
 	 */
-	public double getFraction(double val, int index) {
-		
-//		double mv = _min + index*_delta;
-//		return (val - mv)/_delta;
+	public double getFraction(double val) {
 		double vv = (val - _min) / _delta;
 		return vv - Math.floor(vv);
 	}
@@ -220,46 +200,48 @@ public class GridCoordinate {
 	/**
 	 * Set the name of the grid coordinate.
 	 *
-	 * @param name
-	 *            the name of the grid coordinate
+	 * @param name the name of the grid coordinate
 	 */
 	public void setName(String name) {
 		_name = name;
 	}
-	
+
 	/**
 	 * Get the minimum for a given index
+	 * 
 	 * @param index the index
 	 * @return the min for the given index
 	 */
-    public double getMin(int index){
-        return _min + index*_delta;
-    }
+	public double getMin(int index) {
+		return _min + index * _delta;
+	}
 
 	/**
 	 * Get the maximum for a given index
+	 * 
 	 * @param index the index
 	 * @return the max for the given index
 	 */
-   public double getMax(int index){
-        return _min + (index+1)*_delta;
-    }
-   
-   /**
-    * Check whether a value is in range
-    * @param q the value
-    * @return <code>true</code> if the value is between min and max
-    */
-   public boolean inRange(double q) {
-	   return (q >= _min) && (q <= _max);
-   }
-   
-   /**
-    * Make a clone of this grid coordinate
-    */
-   @Override
-public GridCoordinate clone() {
-	   return new GridCoordinate(_name, _min, _max, _numPoints);
-   }
+	public double getMax(int index) {
+		return _min + (index + 1) * _delta;
+	}
+
+	/**
+	 * Check whether a value is in range
+	 * 
+	 * @param q the value
+	 * @return <code>true</code> if the value is between min and max
+	 */
+	public boolean inRange(double q) {
+		return (q >= _min) && (q <= _max);
+	}
+
+	/**
+	 * Make a clone of this grid coordinate
+	 */
+	@Override
+	public GridCoordinate clone() {
+		return new GridCoordinate(_name, _min, _max, _numPoints);
+	}
 
 }

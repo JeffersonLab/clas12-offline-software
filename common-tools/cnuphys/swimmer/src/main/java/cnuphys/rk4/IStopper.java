@@ -30,7 +30,7 @@ public interface IStopper {
 	 * 
 	 * @param finalT
 	 *            the final independent variable (typically path length in
-	 *            meters)
+	 *               meters)
 	 */
 	public void setFinalT(double finalT);
 	

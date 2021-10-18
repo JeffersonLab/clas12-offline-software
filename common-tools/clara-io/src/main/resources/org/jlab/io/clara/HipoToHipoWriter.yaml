@@ -1,0 +1,14 @@
+---
+name: HipoToHipoWriter
+engine: org.jlab.io.clara.HipoToHipoWriter
+type: java
+
+author: Sebastián Mancilla
+email: smancill@jlab.org
+
+version: 0.5
+description:
+  Writes HIPO events to a file.
+
+  Saves the received event to disk or report an error if there was some
+  problem.

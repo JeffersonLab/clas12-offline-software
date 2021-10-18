@@ -47,7 +47,7 @@ public class Plane {
 	 *            the y component of the normal vector
 	 * @param normZ
 	 *            the z component of the normal vector
-	 * @param d the d value of the plane ax + by + cz = d
+	 * @param d     the d value of the plane ax + by + cz = d
 	 * @return the plane that contains p and its normal is norm
 	 */
 	public static Plane createPlane(double normX, double normY, double normZ, double d) {
@@ -105,8 +105,8 @@ public class Plane {
 	/**
 	 * See if a point is contained (on) a plane
 	 * @param x x coordinate 
-	 * @param y y coordinate
-	 * @param z z coordinate
+	 * @param y         y coordinate
+	 * @param z         z coordinate
 	 * @param tolerance the maximum distance from the plane in the same units as the coordinates
 	 * @return
 	 */
@@ -132,8 +132,8 @@ public class Plane {
 	/**
 	 * Given a current position and velocity, compute the time to intersect the plane
 	 * @param x x coordinate 
-	 * @param y y coordinate
-	 * @param z z coordinate
+	 * @param y  y coordinate
+	 * @param z  z coordinate
 	 * @param vx x component of velocity (arbitrary units)
 	 * @param vy y component of velocity
 	 * @param vz z component of velocity
@@ -190,7 +190,7 @@ public class Plane {
 	
 		double denom = _a*(p1[0]-p2[0]) + _b*(p1[1]-p2[1]) + _c*(p1[2]-p2[2]);
 		if (Math.abs(denom) < 1.0e-20) {
-		   return Double.NaN;
+			return Double.NaN;
 		}
 		double numer = _a*p1[0] + _b*p1[1] + _c*p1[2] + _d;
 		return numer/denom;
