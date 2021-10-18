@@ -26,6 +26,7 @@ public class FTCALReconstruction {
         IndexedTable timeOffsets   = manager.getConstants(run, "/calibration/ft/ftcal/time_offsets");
         IndexedTable timeWalk      = manager.getConstants(run, "/calibration/ft/ftcal/time_walk");
         IndexedTable cluster       = manager.getConstants(run, "/calibration/ft/ftcal/cluster");
+        IndexedTable status        = manager.getConstants(run, "/calibration/ft/ftcal/status");
 
         if(this.debugMode>=1) System.out.println("\nAnalyzing new event");
         List<FTCALHit> allhits = null;
@@ -35,7 +36,7 @@ public class FTCALReconstruction {
         }
         
         if(event instanceof HipoDataEvent) {
-            allhits = this.readRawHitsHipo(event,charge2Energy,timeOffsets,timeWalk,cluster);
+            allhits = this.readRawHitsHipo(event,charge2Energy,timeOffsets,timeWalk,cluster,status);
         }
         if(debugMode>=1) {
             System.out.println("Found " + allhits.size() + " hits");
@@ -264,7 +265,7 @@ public class FTCALReconstruction {
         return hits;
     }
     
-    public List<FTCALHit> readRawHitsHipo(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable timeWalk, IndexedTable cluster) {
+    public List<FTCALHit> readRawHitsHipo(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable timeWalk, IndexedTable cluster, IndexedTable status) {
         // getting raw data bank
 	if(debugMode>=1) System.out.println("Getting raw hits from FTCAL:adc bank");
 
@@ -279,9 +280,9 @@ public class FTCALReconstruction {
                 int iorder      = bankDGTZ.getByte("order",row);
                 int adc         = bankDGTZ.getInt("ADC",row);
                 float time      = bankDGTZ.getFloat("time",row);
-                if(adc!=-1 && time!=-1){
+                if(adc!=-1 && time!=-1 && status.getIntValue("status", isector, ilayer, icomponent)==0){
                     FTCALHit hit = new FTCALHit(row,icomponent, adc, time, charge2Energy, timeOffsets, timeWalk, cluster);
-	             hits.add(hit); 
+	            hits.add(hit); 
 	        }	          
             }
         }

@@ -254,7 +254,8 @@ public class ECEngine extends ReconstructionEngine {
             "/calibration/ec/global_time_walk",
             "/calibration/ec/effective_velocity",
             "/calibration/ec/tmf_offset",
-            "/calibration/ec/tmf_window"
+            "/calibration/ec/tmf_window",
+	    "/calibration/ec/status"
         };
         
         
@@ -267,7 +268,13 @@ public class ECEngine extends ReconstructionEngine {
         setStripThresholds(10,9,8);
         setPeakThresholds(18,20,15);
         setClusterCuts(7,15,20);
-        
+
+        this.registerOutputBank("ECAL::hits");
+        this.registerOutputBank("ECAL::peaks");
+        this.registerOutputBank("ECAL::clusters");
+        this.registerOutputBank("ECAL::calib");
+        this.registerOutputBank("ECAL::moments");
+
         if (isSingleThreaded) ECCommon.initHistos();
         return true;
     }

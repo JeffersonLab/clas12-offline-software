@@ -38,8 +38,6 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
     private double _Energy; // the total energy of the cluster
 
     private double _t; // the cluster time
-    private double[] _tCorr; // corrected time using 3 algorithms to compute
-    // deltaR
 
     private double _y_locUnc; // uncertainty in y in the local cluster
     // coordinate system
@@ -155,14 +153,6 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
 
     public void set_t(double _t) {
         this._t = _t;
-    }
-
-    public double[] get_tCorr() {
-        return _tCorr;
-    }
-
-    public void set_tCorr(double[] _tCorr) {
-        this._tCorr = _tCorr;
     }
 
     public double get_y_locUnc() {
@@ -322,8 +312,6 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
 
         System.out.println(s);
     }
-
-    public int[] indexesClusHitsMatchedToTrk;
 
     public void matchToTrack() {
         double xTrk = 0;
