@@ -125,7 +125,7 @@ public class EBRadioFrequency {
             }
             event.appendBank(bankOut);
             int index = this.hasSignal(rfId);
-            if(index>=0) rfTime= this.rfSignals.get(index).getTime();
+            if(index>=0) rfTime= (float) this.rfSignals.get(index).getTime();
             if(debugMode>0) bankOut.show();
             
         }  
@@ -134,8 +134,8 @@ public class EBRadioFrequency {
             int rows = bank.rows();
             for(int i = 0; i < rows; i++){
                 if(bank.getShort("id", i)==rfId) rfTime=bank.getFloat("time", i);
+                }
             }
-        }
         
     }
     
