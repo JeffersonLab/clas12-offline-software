@@ -13,6 +13,7 @@ import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.helical.MeasVecs.MeasVec;
 import org.jlab.clas.tracking.trackrep.Helix;
 import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Plane3D;
 
 
 public class StateVecs {
@@ -172,7 +173,26 @@ public class StateVecs {
                         Point3D point = new Point3D(mv.surface.plane.point().x()/units,
                                                     mv.surface.plane.point().y()/units,
                                                     mv.surface.plane.point().z()/units);
-                        swimPars = swim.SwimPlane(norm,point,0.005/units);
+                        double accuracy = mv.surface.swimAccuracy/units;
+//                        swimPars = swim.SwimToPlaneBoundary(norm.dot(point.toVector3D()), norm, 1, 0.005/units);
+//                        swimPars = swim.SwimPlane(norm,point,0.005/units);
+//                        System.out.println(mv.surface.plane.point() + " " + current + " " + kVec.k);
+//                        double distance = Math.abs(current.vectorTo(mv.surface.plane.point()).dot(norm));
+//                        double stepsize = Math.min(distance/2, 0.5);// System.out.println(distance + " " + stepsize);
+                        swimPars = swim.AdaptiveSwimPlane(point.x(), point.y(), point.z(), norm.x(), norm.y(), norm.z(), accuracy);
+//                        Point3D  swimP = new Point3D(swimPars[0], swimPars[1], swimPars[2]);
+//                        Vector3D swimD = new Vector3D(swimPars[3], swimPars[4], swimPars[5]);
+//                        Line3D swimL = new Line3D(swimP, swimD);
+//                        Plane3D plane = new Plane3D(point, norm);
+//                        Point3D swimF = new Point3D();
+//                        plane.intersection(swimL, swimF);
+//                        Point3D p0 = new Point3D(swimPars0[0], swimPars0[1], swimPars0[2]);
+//                        Point3D p1 = new Point3D(swimPars1[0], swimPars1[1], swimPars1[2]);
+//                        Point3D p = new Point3D(swimPars[0], swimPars[1], swimPars[2]);
+//                        System.out.println();
+//                        System.out.println(swimPars0[0] + " " + swimPars0[1] + " " + swimPars0[2] + " " + point.vectorTo(p0).dot(norm));
+//                        System.out.println(swimPars1[0] + " " + swimPars1[1] + " " + swimPars1[2] + " " + point.vectorTo(p1).dot(norm));
+//                        System.out.println(swimPars[0] + " " + swimPars[1] + " " + swimPars[2] + " " + point.vectorTo(p).dot(norm));
                         if(swimPars==null)
                             return null;
                         for(int j =0; j < 3; j++) {
@@ -214,7 +234,11 @@ public class StateVecs {
                         Point3D p2 = new Point3D(mv.surface.cylinder.getAxis().end().x()/units,
                                                  mv.surface.cylinder.getAxis().end().y()/units,
                                                  mv.surface.cylinder.getAxis().end().z()/units) ;
-                        swimPars = swim.SwimGenCylinder(p1,p2,r/units);
+                        double accuracy = mv.surface.swimAccuracy/units;
+//                        swimPars = swim.SwimGenCylinder(p1,p2,r/units);
+                        swimPars = swim.AdaptiveSwimCylinder(p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), r/units, accuracy);
+//                        System.out.println(swimPars2[0] + " " + swimPars2[1] + " " + swimPars2[2]);
+//                        System.out.println(swimPars[0] + " " + swimPars[1] + " " + swimPars[2]);
                         if(swimPars==null)
                             return null;
                         for(int j =0; j < 3; j++) {
@@ -716,6 +740,7 @@ public class StateVecs {
         return new Helix(X.x(), X.y(), X.z(), P.x(), P.y(), P.z(), q, B, X0.get(0), Y0.get(0), util.units);
     }
     public StateVec initSV = new StateVec(0);
+    //RDV KF not used
     public void init(Helix trk, Matrix cov, KFitter kf,
             Swim swimmer) {
         this.units = trk.getUnitScale();

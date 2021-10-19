@@ -201,7 +201,7 @@ public class MeasVecs {
     }
 
     private double[] delta_d_a = new double[5];//{1, Math.toRadians(0.25),  0.05, 1, 0.01};
-    double sqrt_epsilon = Math.sqrt(2.2*1.e-16);
+    double sqrt_epsilon = Math.sqrt(2.2*1.e-16); //RDV, why so small?
     private double[] Hval = new double[5];
     public double[] H(StateVecs.StateVec stateVec, StateVecs sv, MeasVec mv, Swim swimmer, int dir) {
         StateVecs.StateVec SVplus = null;// = new StateVec(stateVec.k);

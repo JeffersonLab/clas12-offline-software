@@ -20,6 +20,7 @@ public class ProbeCollection {
     public final cnuphys.swimZ.SwimZ CF_z;   //  composite field - for swimming to fixed z 
     public final cnuphys.swim.Swimmer RCF;   //  rotated composite field 
     public final cnuphys.swim.Swimmer CF;    //  composite field 
+    public final cnuphys.adaptiveSwim.AdaptiveSwimmer AS; // adaptive swimmer
     //Probes:
     public final RotatedCompositeProbe RCP;
     public final CompositeProbe CP; 
@@ -34,5 +35,6 @@ public class ProbeCollection {
         CF_z    =   new SwimZ(MagneticFields.getInstance().getCompositeField());
         RCF     =   new cnuphys.swim.Swimmer(MagneticFields.getInstance().getRotatedCompositeField());
         CF      =   new cnuphys.swim.Swimmer(MagneticFields.getInstance().getCompositeField());
+        AS      =   new cnuphys.adaptiveSwim.AdaptiveSwimmer(MagneticFields.getInstance().getCompositeField());
     }
 }

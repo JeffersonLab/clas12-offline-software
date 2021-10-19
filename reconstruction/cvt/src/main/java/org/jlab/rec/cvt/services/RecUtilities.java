@@ -92,7 +92,7 @@ public class RecUtilities {
         Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()),
         new Vector3D(0,0,1));
         Surface meas0 = new Surface(pln0,new Point3D(Constants.getXb(),Constants.getYb(),0),
-        new Point3D(Constants.getXb()-300,Constants.getYb(),0), new Point3D(Constants.getXb()+300,Constants.getYb(),0));
+        new Point3D(Constants.getXb()-300,Constants.getYb(),0), new Point3D(Constants.getXb()+300,Constants.getYb(),0), Constants.DEFAULTSWIMACC);
         meas0.setSector(0);
         meas0.setLayer(0);
         meas0.setError(1);
@@ -141,7 +141,7 @@ public class RecUtilities {
         Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()),
                                     new Vector3D(0,0,1));
         Surface meas0 = new Surface(pln0,new Point3D(0,0,0),
-        new Point3D(-300,0,0), new Point3D(300,0,0));
+        new Point3D(-300,0,0), new Point3D(300,0,0),Constants.DEFAULTSWIMACC);
         meas0.setSector(0);
         meas0.setLayer(0);
         meas0.setError(1);
@@ -180,7 +180,7 @@ public class RecUtilities {
                     Plane3D pln = new Plane3D(endPt1,cls.get(j).getN());
 //                    Point3D Or = sgeo.getPlaneModuleOrigin(cluster.get(j).get_Sector(), cluster.get(j).get_Layer());
 //                    Point3D En = sgeo.getPlaneModuleEnd(cluster.get(j).get_Sector(), cluster.get(j).get_Layer());
-                    Surface meas = new Surface(pln, strp, cls.get(j).origin(), cls.get(j).end());
+                    Surface meas = new Surface(pln, strp, cls.get(j).origin(), cls.get(j).end(), Constants.SWIMACCURACYSVT);
                     meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());
                     meas.setSector(cls.get(j).get_Sector());
                     double err = cls.get(j).get_Resolution();
@@ -216,7 +216,7 @@ public class RecUtilities {
                     bgeo.toLocal(point, layer, sector);
                     Strip strp = new Strip(id, ce, point.x(), point.y(), phi);  
                     
-                    Surface meas = new Surface(bgeo.getTileSurface(layer, sector), strp);
+                    Surface meas = new Surface(bgeo.getTileSurface(layer, sector), strp, Constants.SWIMACCURACYBMT);
                     meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());
                     meas.setTransformation(bgeo.toGlobal(layer,sector));                     
                     meas.setSector(trkcand.get(i).get_Sector());
@@ -233,7 +233,7 @@ public class RecUtilities {
                     Arc3D arc  = trkcand.get(i).get_Cluster1().get_Arc();
                     Strip strp = new Strip(id, ce, arc);
          
-                    Surface meas = new Surface(bgeo.getTileSurface(layer, sector), strp);
+                    Surface meas = new Surface(bgeo.getTileSurface(layer, sector), strp, Constants.SWIMACCURACYBMT);
                     meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());
                     meas.setTransformation(bgeo.toGlobal(layer,sector)); 
                     
@@ -268,7 +268,7 @@ public class RecUtilities {
         for(Cluster cluster : seedCluster) {
             if(cluster.get_Detector() == DetectorType.BMT)
                 continue;
-            clusterMap.put(sgeo.getModuleId(cluster.get_Layer(), cluster.get_Sector()), cluster);
+            clusterMap.put(SVTGeometry.getModuleId(cluster.get_Layer(), cluster.get_Sector()), cluster);
         }   
         
         // for each layer
@@ -295,13 +295,13 @@ public class RecUtilities {
                 double deltaPhi = Math.acos(helixPoint.toVector3D().asUnit().dot(n));
                 if(Math.abs(deltaPhi)>2*Math.PI/SVTGeometry.NSECTORS[ilayer]) continue;
                 
-                int key = sgeo.getModuleId(layer, sector);
+                int key = SVTGeometry.getModuleId(layer, sector);
                 
                 // calculate trajectory
                 Point3D traj = null;
-                Point3D  p = sgeo.getModule(layer, sector).origin();
-                Point3D pm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
-                inters = swimmer.SwimPlane(n, pm, 1E-3);
+                Point3D   p = sgeo.getModule(layer, sector).origin();
+                Point3D pcm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
+                inters = swimmer.AdaptiveSwimPlane(pcm.x(), pcm.y(), pcm.z(), n.x(), n.y(), n.z(), Constants.DEFAULTSWIMACC/10);
                 if(inters!=null) {
                     traj = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
                 }
@@ -334,6 +334,7 @@ public class RecUtilities {
         return clustersOnTrack;
     }
     
+    @Deprecated
     public List<Cluster> FindClustersOnTrk (List<Cluster> allClusters, List<Cluster> seedCluster, Helix helix, double P, int Q,
             SVTGeometry sgeo, Swim swimmer) { 
         Map<Integer, Cluster> clusMap = new HashMap<Integer, Cluster>();
@@ -368,10 +369,10 @@ public class RecUtilities {
             if(sector == -1)
                 continue;
             
-            Vector3D n = sgeo.getNormal(layer, sector);
-            Point3D  p = sgeo.getModule(layer, sector).origin();
-            Point3D pm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
-            inters = swimmer.SwimPlane(n, pm, 1E-3);
+            Vector3D  n = sgeo.getNormal(layer, sector);
+            Point3D   p = sgeo.getModule(layer, sector).origin();
+            Point3D pcm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
+            inters = swimmer.AdaptiveSwimPlane(pcm.x(), pcm.y(), pcm.z(), n.x(), n.y(), n.z(), 2*Constants.SWIMACCURACYSVT/10);
             if(inters!=null) {
                 Point3D trp = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
                 int nearstp = sgeo.calcNearestStrip(inters[0]*10, inters[1]*10, inters[2]*10, layer, sector);

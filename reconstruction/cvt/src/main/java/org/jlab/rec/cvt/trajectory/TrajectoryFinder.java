@@ -138,10 +138,11 @@ public class TrajectoryFinder {
             if(sector == -1)
                 continue;
             
-            Vector3D n = svt_geo.getNormal(layer, sector);
-            Point3D  p = svt_geo.getModule(layer, sector).origin();
-            Point3D pm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
-            inters = swimmer.SwimPlane(n, pm, 5E-4);
+            Vector3D  n = svt_geo.getNormal(layer, sector);
+            Point3D   p = svt_geo.getModule(layer, sector).origin();
+            Point3D pcm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
+            double accuracy = 2*Constants.SWIMACCURACYSVT/10;
+            inters = swimmer.AdaptiveSwimPlane(pcm.x(), pcm.y(), pcm.z(), n.x(), n.y(), n.z(), accuracy);
             path  = path + inters[6];
             StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
             stVec.set_planeIdx(l);
@@ -202,13 +203,14 @@ public class TrajectoryFinder {
                 int sector = bmt_geo.getSector(0, Math.atan2(inters[1],inters[0]));
                 
                 Line3D axis    = bmt_geo.getAxis(layer, sector);
-                Point3D axisP1 = new Point3D(axis.origin().x()/10,axis.origin().y()/10, axis.origin().z()/10);
-                Point3D axisP2 = new Point3D(axis.end().x()/10,axis.end().y()/10, axis.end().z()/10);
+                Point3D a1 = new Point3D(axis.origin().x()/10,axis.origin().y()/10, axis.origin().z()/10);
+                Point3D a2 = new Point3D(axis.end().x()/10,axis.end().y()/10, axis.end().z()/10);
+                double accuracy = Constants.SWIMACCURACYBMT/10;
                     //            swimmer.SetSwimParameters((trk.get_helix().xdca()+org.jlab.rec.cvt.BMTConstants.getXb()) / 10, (trk.get_helix().ydca()+org.jlab.rec.cvt.BMTConstants.getYb()) / 10, trk.get_helix().get_Z0() / 10, 
     //                    Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
     //                    trk.get_P(), trk.get_Q(), 
     //                    5.0) ;
-                inters = swimmer.SwimGenCylinder(axisP1, axisP2, radius);
+                inters = swimmer.AdaptiveSwimCylinder(a1.x(), a1.y(), a1.z(), a2.x(), a2.y(), a2.z(), radius, accuracy);
                 double r = Math.sqrt(inters[0]*inters[0]+inters[1]*inters[1]);
                 path  = path + inters[6];
                 //if(r>(radius - BMTConstants.LYRTHICKN)/10) {
@@ -253,7 +255,7 @@ public class TrajectoryFinder {
             swimmer.SetSwimParameters(inters[0], inters[1], inters[2], Math.toDegrees(intersPhi), Math.toDegrees(intersTheta), trk.get_P(), trk.get_Q(), maxPathLength) ;
             // swim to CTOF
             double radius = ctof_geo.getRadius(1);
-            inters = swimmer.SwimGenCylinder(new Point3D(0,0,0), new Point3D(0,0,1), radius);
+            inters = swimmer.AdaptiveSwimRho(radius, Constants.SWIMACCURACYCD/10);
             // update parameters
             double r = Math.sqrt(inters[0]*inters[0]+inters[1]*inters[1]);
             intersPhi   = Math.atan2(inters[4], inters[3]);
@@ -287,8 +289,8 @@ public class TrajectoryFinder {
                 // swim to CTOF
                 Point3D center = cnd_geo.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getMidpoint();
                 double radius  = Math.sqrt(center.x()*center.x()+center.y()*center.y());
-                inters = swimmer.SwimGenCylinder(new Point3D(0,0,0), new Point3D(0,0,1), radius);
-            // update parameters
+                inters = swimmer.AdaptiveSwimRho(radius, Constants.SWIMACCURACYCD/10);
+                // update parameters
                 double r = Math.sqrt(inters[0]*inters[0]+inters[1]*inters[1]);
                 intersPhi   = Math.atan2(inters[4], inters[3]);
                 intersTheta = Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]));

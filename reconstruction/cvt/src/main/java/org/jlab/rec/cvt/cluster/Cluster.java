@@ -14,6 +14,7 @@ import org.jlab.geom.prim.Arc3D;
 import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Transformation3D;
+import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.bmt.BMTConstants;
 import org.jlab.rec.cvt.hit.Strip;
@@ -666,7 +667,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                                                                                                  endPt2.x(), endPt2.y(), endPt2.z());
             Plane3D plane = new Plane3D(endPt1, this.getN());
             Line3D module = this.get(0).get_Strip().get_Module();
-            surface = new Surface(plane, strp, module.origin(), module.end());
+            surface = new Surface(plane, strp, module.origin(), module.end(), Constants.SWIMACCURACYSVT);
             surface.hemisphere = Math.signum(this.center().y());
             surface.setLayer(mlayer);
             surface.setSector(this.get_Sector());
@@ -676,7 +677,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         else {
             if(this.get_Type()==BMTType.C) {
                 org.jlab.clas.tracking.objects.Strip strp = new org.jlab.clas.tracking.objects.Strip(this.get_Id(), this.get_Centroid(), this.get_CentroidValue());
-                surface = new Surface(this.get(0).get_Strip().get_Tile(), strp);
+                surface = new Surface(this.get(0).get_Strip().get_Tile(), strp, Constants.SWIMACCURACYBMT);
                 double error = this.get_CentroidError();
                 surface.setError(error*error);
             }
@@ -684,7 +685,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                 Point3D point = new Point3D(this.getLine().midpoint());
                 this.toLocal().apply(point);
                 org.jlab.clas.tracking.objects.Strip strp = new org.jlab.clas.tracking.objects.Strip(this.get_Id(), this.get_Centroid(), point.x(), point.y(), this.get_CentroidValue());  
-                surface = new Surface(this.getTile(), strp);
+                surface = new Surface(this.getTile(), strp, Constants.SWIMACCURACYBMT);
                 double error = this.get_CentroidError();///this.getTile().baseArc().radius();
                 surface.setError(error*error);
             

@@ -37,25 +37,29 @@ public class Surface implements Comparable<Surface> {
     private double _l_over_X0;
     //this is for energy loss
     private double _Z_over_A_times_l;
+    // this is for swimming
+    public double swimAccuracy;
     public boolean notUsedInFit = false;
     public double hemisphere = 1;
     
-    public Surface(Plane3D plane3d, Point3D refrPoint, Point3D c1, Point3D c2) {
+    public Surface(Plane3D plane3d, Point3D refrPoint, Point3D c1, Point3D c2, double accuracy) {
         type = Type.PLANEWITHPOINT;
         plane = plane3d;
         refPoint = refrPoint;
         finitePlaneCorner1 = c1;
         finitePlaneCorner2 = c2;
+        swimAccuracy = accuracy;
     }
-    public Surface(Plane3D plane3d, Point3D endPoint1, Point3D endPoint2, Point3D c1, Point3D c2) {
+    public Surface(Plane3D plane3d, Point3D endPoint1, Point3D endPoint2, Point3D c1, Point3D c2, double accuracy) {
         type = Type.PLANEWITHLINE;
         plane = plane3d;
         lineEndPoint1 = endPoint1;
         lineEndPoint2 = endPoint2;
         finitePlaneCorner1 = c1;
         finitePlaneCorner2 = c2;
+        swimAccuracy = accuracy;
     }
-    public Surface(Plane3D plane3d, Strip strp, Point3D c1, Point3D c2) {
+    public Surface(Plane3D plane3d, Strip strp, Point3D c1, Point3D c2, double accuracy) {
         type = Type.PLANEWITHSTRIP;
         plane = plane3d;
         strip = strp;
@@ -65,8 +69,9 @@ public class Surface implements Comparable<Surface> {
         lineEndPoint2 = new Point3D(strip.getX()+strip.getLength()*strip.getUx(), 
                 strip.getY()+strip.getLength()*strip.getUy(), 
                 strip.getZ()+strip.getLength()*strip.getUz());
+        swimAccuracy = accuracy;
     }
-    public Surface(Cylindrical3D cylinder3d, Strip strp) {
+    public Surface(Cylindrical3D cylinder3d, Strip strp, double accuracy) {
         type = Type.CYLINDERWITHSTRIP;
         cylinder = cylinder3d;
         strip = strp;
@@ -74,20 +79,23 @@ public class Surface implements Comparable<Surface> {
         lineEndPoint2 = new Point3D(strip.getX()+strip.getLength()*strip.getUx(), 
                 strip.getY()+strip.getLength()*strip.getUy(), 
                 strip.getZ()+strip.getLength()*strip.getUz());
+        swimAccuracy = accuracy;
     }
-    public Surface(Cylindrical3D cylinder3d, Point3D refrPoint) {
+    public Surface(Cylindrical3D cylinder3d, Point3D refrPoint, double accuracy) {
         type = Type.CYLINDERWITHPOINT;
         cylinder = cylinder3d;
         refPoint = refrPoint;
+        swimAccuracy = accuracy;
     }
-    public Surface(Cylindrical3D cylinder3d, Point3D endPoint1, Point3D endPoint2) {
+    public Surface(Cylindrical3D cylinder3d, Point3D endPoint1, Point3D endPoint2, double accuracy) {
         type = Type.CYLINDERWITHLINE;
         cylinder = cylinder3d;
         lineEndPoint1 = endPoint1;
         lineEndPoint2 = endPoint2;
+        swimAccuracy = accuracy;
     }
 
-    public Surface(Cylindrical3D cylinder3d, Arc3D refArc, Point3D endPoint1, Point3D endPoint2) {
+    public Surface(Cylindrical3D cylinder3d, Arc3D refArc, Point3D endPoint1, Point3D endPoint2, double accuracy) {
         type = Type.CYLINDERWITHARC;
         cylinder = cylinder3d;
         arc = refArc;
@@ -97,6 +105,7 @@ public class Surface implements Comparable<Surface> {
         if(endPoint2 == null) {
             lineEndPoint2 = arc.end();
         }
+        swimAccuracy = accuracy;
     }
 
     @Override
