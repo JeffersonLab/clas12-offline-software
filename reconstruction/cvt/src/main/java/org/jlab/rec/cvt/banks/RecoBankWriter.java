@@ -647,73 +647,28 @@ public class RecoBankWriter {
         List<DataBank> cvtbanks = new ArrayList<DataBank>();
 
         DataBank bank1 = this.fillSVTHitsBank(event, sVThits);
-        if (bank1 != null) {
-            svtbanks.add(bank1);
-        }
+        if (bank1 != null) event.appendBank(bank1);
 
         DataBank bank2 = this.fillBMTHitsBank(event, bMThits);
-        if (bank2 != null) {
-            bmtbanks.add(bank2);
-        }
+        if (bank2 != null) event.appendBank(bank2);
 
         DataBank bank3 = this.fillSVTClustersBank(event, sVTclusters);
-        if (bank3 != null) {
-            svtbanks.add(bank3);
-        }
+        if (bank3 != null) event.appendBank(bank3);
 
         DataBank bank4 = this.fillBMTClustersBank(event, bMTclusters);
-        if (bank4 != null) {
-            bmtbanks.add(bank4);
-        }
+        if (bank4 != null) event.appendBank(bank4);
 
         DataBank bank5 = this.fillSVTCrossesBank(event, crosses, zShift);
-        if (bank5 != null) {
-            svtbanks.add(bank5);
-        }
+        if (bank5 != null) event.appendBank(bank5);
 
         DataBank bank6 = this.fillBMTCrossesBank(event, crosses, zShift);
-        if (bank6 != null) {
-            bmtbanks.add(bank6);
-        }
+        if (bank6 != null) event.appendBank(bank6);
 
-        //found tracks
         DataBank bank7 = this.fillTracksBank(event, trks, zShift);
-        if (bank7 != null) {
-            cvtbanks.add(bank7);
-        }
+        if (bank7 != null) event.appendBank(bank7);
 
-        //found trajectories
         DataBank bank8 = this.fillHelicalTracksTrajectoryBank(event, trks, zShift);
-        if (bank8 != null) {
-            cvtbanks.add(bank8);
-        }
-
-        if (svtbanks.size() == 3) {
-            event.appendBanks(svtbanks.get(0), svtbanks.get(1), svtbanks.get(2));
-        }
-        if (svtbanks.size() == 2) {
-            event.appendBanks(svtbanks.get(0), svtbanks.get(1));
-        }
-        if (svtbanks.size() == 1) {
-            event.appendBanks(svtbanks.get(0));
-        }
-        if (bmtbanks.size() == 3) {
-            event.appendBanks(bmtbanks.get(0), bmtbanks.get(1), bmtbanks.get(2));
-        }
-        if (bmtbanks.size() == 2) {
-            event.appendBanks(bmtbanks.get(0), bmtbanks.get(1));
-        }
-        if (bmtbanks.size() == 1) {
-            event.appendBanks(bmtbanks.get(0));
-        }
-        if (cvtbanks.size() == 2) {
-            event.appendBanks(cvtbanks.get(0), cvtbanks.get(1));
-        }
-        if (cvtbanks.size() == 1) {
-            event.appendBanks(cvtbanks.get(0));
-        }
-
-        //event.show();
+        if (bank8 != null) event.appendBank(bank8);
     }
 
     public void appendCVTCosmicsBanks(DataEvent event,

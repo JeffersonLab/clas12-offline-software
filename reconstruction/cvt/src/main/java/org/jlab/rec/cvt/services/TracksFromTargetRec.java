@@ -1,7 +1,6 @@
 package org.jlab.rec.cvt.services;
 
 import Jama.Matrix;
-import cnuphys.magfield.MagneticFields;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
@@ -177,7 +176,7 @@ public class TracksFromTargetRec {
         List<Track> tracks = trkFinder.getTracks(trkcands, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, swimmer);
 
         for( int i=0;i<tracks.size();i++) { 
-            tracks.get(i).set_Id(i+1);         
+            tracks.get(i).set_Id(i+1);   
         }
 
         //System.out.println( " *** *** trkcands " + trkcands.size() + " * trks " + trks.size());
@@ -263,8 +262,8 @@ public class TracksFromTargetRec {
         // set index associations
         if (tracks.size() > 0) {
             recUtil.CleanupSpuriousCrosses(crosses, tracks, SVTGeom) ;
-            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, tracks, shift);
         }
+        rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, tracks, shift);
 
         return true;
 
