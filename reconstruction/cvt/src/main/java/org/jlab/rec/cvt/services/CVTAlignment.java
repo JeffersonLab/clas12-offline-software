@@ -271,7 +271,10 @@ public class CVTAlignment extends ReconstructionEngine {
 			q.set(2, 0, track.get_helix().get_Z0());
 			q.set(3, 0, track.get_helix().get_tandip());
 			
-			q.print(4, 4);
+			if(debug) {
+				System.out.println("track parameters");
+				q.print(4, 4);
+			}
 			
 			int i = 0;
 			boolean useNewFillMatrices = true;
