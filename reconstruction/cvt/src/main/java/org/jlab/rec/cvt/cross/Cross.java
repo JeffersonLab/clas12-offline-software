@@ -462,7 +462,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         return cross;
     }
 
-        /**
+    /**
      * Calculate the cross position error from the two strips and the track direction
      * @param trackDir track direction
      * @param geo      VT geometry
@@ -481,33 +481,77 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
             double sigma1 = geo.getSingleStripResolution(layer, this.get_Cluster1().get_SeedStrip().get_Strip(), local.z());
             double sigma2 = geo.getSingleStripResolution(layer, this.get_Cluster2().get_SeedStrip().get_Strip(), local.z());
             
-            double delta = 1e-3; // 1micron shift
-            Line3D strip1 = this.get_Cluster1().getLine();
-            Line3D strip2 = this.get_Cluster2().getLine();
-            
-            Vector3D t1 = strip1.direction().asUnit().cross(this.get_Cluster1().getN()).multiply(delta);
-            Line3D strip1Plus  = new Line3D(strip1); 
-            Line3D strip1Minus = new Line3D(strip1); 
-            strip1Plus.translateXYZ(t1.x(), t1.y(), t1.z());
-            strip1Minus.translateXYZ(-t1.x(),-t1.y(),-t1.z());
-            
-            Vector3D t2 = strip2.direction().asUnit().cross(this.get_Cluster2().getN()).multiply(delta);
-            Line3D strip2Plus  = new Line3D(strip2); 
-            Line3D strip2Minus = new Line3D(strip2); 
-            strip2Plus.translateXYZ(t2.x(), t2.y(), t2.z());
-            strip2Minus.translateXYZ(-t2.x(),-t2.y(),-t2.z());
-            
-            Point3D cross1Plus  = geo.getCross(sector, layer, strip1Plus, strip2, trackDir);
-            Point3D cross1Minus = geo.getCross(sector, layer, strip1Minus, strip2, trackDir);
-            Point3D cross2Plus  = geo.getCross(sector, layer, strip1, strip2Plus,  trackDir);
-            Point3D cross2Minus = geo.getCross(sector, layer, strip1, strip2Minus, trackDir);
-            Vector3D error1 = cross1Minus.vectorTo(cross1Plus).multiply(sigma1/delta);
-            Vector3D error2 = cross2Minus.vectorTo(cross2Plus).multiply(sigma2/delta);
-            error = new Vector3D(Math.sqrt(error1.x()*error1.x()+error2.x()*error2.x()),
-                                 Math.sqrt(error1.y()*error1.y()+error2.y()*error2.y()),
-                                 Math.sqrt(error1.z()*error1.z()+error2.z()*error2.z()));
-            if(error.x()==0 && error.y()==0) System.out.println(cross.toString() + "\n" + error.toString());
+            // get the error associated to each strip
+            Vector3D error1 = this.getSVTCrossDerivative(1, trackDir, geo).multiply(sigma1);
+            Vector3D error2 = this.getSVTCrossDerivative(2, trackDir, geo).multiply(sigma2);
+            if(error1!=null && error2!=null)
+                error = new Vector3D(Math.sqrt(error1.x()*error1.x()+error2.x()*error2.x()),
+                                     Math.sqrt(error1.y()*error1.y()+error2.y()*error2.y()),
+                                     Math.sqrt(error1.z()*error1.z()+error2.z()*error2.z()));
+//            if(error.x()==0 && error.y()==0) System.out.println(cross.toString() + "\n" + error.toString());
         }
+        return error;
+    }
+    /**
+     * Calculate the cross derivative for the translation of one strip
+     * useful for the error calculation
+     * @param trackDir track direction
+     * @param geo      VT geometry
+     * @return
+     */
+    public Vector3D getSVTCrossDerivative(int icluster, Vector3D trackDir, SVTGeometry geo) {
+        Vector3D error = null;
+       
+        // check the cluster to be used in the derivative calculation is either 1 or 2
+        if(icluster<1 || icluster>2) return null;
+
+        // if the croos position is not well defined, don't do anything
+        Point3D cross = this.getSVTCrossPoint(trackDir, geo);
+        if(cross==null) return null;
+         
+        int layer  = this.get_Cluster1().get_Layer();
+        int sector = this.get_Cluster1().get_Sector();
+        
+        double delta = 1e-3; // 1micron shift
+        
+        // get the clusters
+        Cluster clusA = this.get_Cluster1();
+        Cluster clusB = this.get_Cluster2();
+        if(icluster==2) {
+            clusA = this.get_Cluster2();
+            clusB = this.get_Cluster1();           
+        }
+        
+        // shift the selected cluster to the left and right of the line
+        Vector3D t = clusA.getLine().direction().asUnit().cross(clusA.getN()).multiply(delta);
+        Line3D stripAPlus  = new Line3D(clusA.getLine()); 
+        Line3D stripAMinus = new Line3D(clusA.getLine()); 
+        stripAPlus.translateXYZ(  t.x(), t.y(), t.z());
+        stripAMinus.translateXYZ(-t.x(),-t.y(),-t.z());
+            
+        // calculate the shifted cross positions
+        Point3D crossAPlus  = null;
+        Point3D crossAMinus = null;
+        if(clusA.get_Layer()%2 == 1) {
+            crossAPlus  = geo.getCross(sector, layer, stripAPlus,  clusB.getLine(), trackDir);
+            crossAMinus = geo.getCross(sector, layer, stripAMinus, clusB.getLine(), trackDir);
+        }
+        else {
+            crossAPlus  = geo.getCross(sector, layer, clusB.getLine(),  stripAPlus, trackDir);
+            crossAMinus = geo.getCross(sector, layer, clusB.getLine(), stripAMinus, trackDir);
+        }
+        
+        // if at least one is non-null, calculate the derivative
+        if(crossAPlus!=null && crossAMinus!=null) {
+            error = crossAMinus.vectorTo(crossAPlus).multiply(1/delta);            
+        }
+        else if(crossAPlus!=null) {
+            error = cross.vectorTo(crossAPlus).multiply(2/delta);
+        }
+        else if(crossAMinus!=null) {
+            error = crossAPlus.vectorTo(cross).multiply(2/delta);
+        }
+        
         return error;
     }
 
