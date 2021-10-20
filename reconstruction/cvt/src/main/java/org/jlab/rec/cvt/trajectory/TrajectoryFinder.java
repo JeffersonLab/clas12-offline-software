@@ -203,6 +203,7 @@ public class TrajectoryFinder {
                 double radius  = bmt_geo.getRadiusMidDrift(layer)/10;                
                 double accuracy = Constants.SWIMACCURACYBMT/10;
                 inters = swimmer.AdaptiveSwimRho(radius, accuracy);
+                if(inters==null) break; // give up on this track if swimming failed
                 int sector = bmt_geo.getSector(0, Math.atan2(inters[1],inters[0]));
                 
                 Line3D axis    = bmt_geo.getAxis(layer, sector);
