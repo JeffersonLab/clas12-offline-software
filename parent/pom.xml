@@ -40,6 +40,12 @@
       <artifactId>spotbugs</artifactId>
       <version>3.1.12</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.ejml</groupId>
+      <artifactId>ejml-all</artifactId>
+      <version>0.40</version>
+    </dependency>
   </dependencies>
 
   <build>
