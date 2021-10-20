@@ -42,8 +42,8 @@ public class KalmanFilter {
         finaltrackinfomap = params.get_finaltrackinfomap();
 
         for (int TID : finaltrackinfomap.keySet()) {
-            if (!passCuts(TID, event))
-                continue;
+            // if (!passCuts(TID, event))
+                // continue;
 
             MeasurementsList(TID);
             removeMultiHits();
@@ -69,7 +69,7 @@ public class KalmanFilter {
                 backwardPropagationFirstStep();
                 clearAndFillLists();
             }
-            writeData(TID, event);
+            // writeData(TID, event);
             SimpleMatrix a_plus = stateVectorUpdateList.get(0).a.copy();
             double phii = stateVectorUpdateList.get(0).phi;
             SimpleMatrix m = measVectorList.get(0);
