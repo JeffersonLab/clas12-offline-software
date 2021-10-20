@@ -279,22 +279,21 @@ public class TrajectoryFinder {
                 Point3D center = cnd_geo.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getMidpoint();
                 double radius  = Math.sqrt(center.x()*center.x()+center.y()*center.y());
                 inters = swimmer.AdaptiveSwimRho(radius, Constants.SWIMACCURACYCD/10);
+                if(inters==null) break; // give up on this track if swimming failed
                 // update parameters
-                if(inters!=null) {
-                    intersPhi   = Math.atan2(inters[4], inters[3]);
-                    intersTheta = Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]));
-                    path  = path + inters[6];
-                    StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
-                    stVec.set_SurfaceDetector(DetectorType.CND.getDetectorId());
-                    stVec.set_SurfaceSector(1);
-                    stVec.set_SurfaceLayer(ilayer+1); 
-                    stVec.set_ID(trk.get_Id());
-                    stVec.set_TrkPhiAtSurface(intersPhi);
-                    stVec.set_TrkThetaAtSurface(intersTheta);
-                    stVec.set_TrkToModuleAngle(0);
-                    stVec.set_Path(path*10);
-                    stateVecs.add(stVec);
-                }
+                intersPhi   = Math.atan2(inters[4], inters[3]);
+                intersTheta = Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]));
+                path  = path + inters[6];
+                StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
+                stVec.set_SurfaceDetector(DetectorType.CND.getDetectorId());
+                stVec.set_SurfaceSector(1);
+                stVec.set_SurfaceLayer(ilayer+1); 
+                stVec.set_ID(trk.get_Id());
+                stVec.set_TrkPhiAtSurface(intersPhi);
+                stVec.set_TrkThetaAtSurface(intersTheta);
+                stVec.set_TrkToModuleAngle(0);
+                stVec.set_Path(path*10);
+                stateVecs.add(stVec);
             }
         }
                
