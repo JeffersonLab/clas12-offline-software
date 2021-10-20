@@ -149,12 +149,16 @@ public class RTPCEngine extends ReconstructionEngine{
             RecoBankWriter writer = new RecoBankWriter();
             DataBank recoBank = writer.fillRTPCHitsBank(event,params);
             DataBank trackBank = writer.fillRTPCTrackBank(event,params);
-            DataBank kfBank = writer.fillRTPCKFBank(event, params);
 
             event.appendBank(recoBank);
             event.appendBank(trackBank);
-            event.appendBank(kfBank);
-
+            
+            if (params.get_kftrackinfomap() != null) {
+                if (!params.get_kftrackinfomap().isEmpty()){
+                    DataBank kfBank = writer.fillRTPCKFBank(event, params);
+                    event.appendBank(kfBank);
+                }
+            }
 
         }
         else{
