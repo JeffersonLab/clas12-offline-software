@@ -281,7 +281,6 @@ public class TrajectoryFinder {
                 inters = swimmer.AdaptiveSwimRho(radius, Constants.SWIMACCURACYCD/10);
                 // update parameters
                 if(inters!=null) {
-                    double r = Math.sqrt(inters[0]*inters[0]+inters[1]*inters[1]);
                     intersPhi   = Math.atan2(inters[4], inters[3]);
                     intersTheta = Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]));
                     path  = path + inters[6];
