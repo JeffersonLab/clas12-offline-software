@@ -211,8 +211,8 @@ public class TrajectoryFinder {
     //                    trk.get_P(), trk.get_Q(), 
     //                    5.0) ;
                 inters = swimmer.AdaptiveSwimCylinder(a1.x(), a1.y(), a1.z(), a2.x(), a2.y(), a2.z(), radius, accuracy);
-                double r = Math.sqrt(inters[0]*inters[0]+inters[1]*inters[1]);
-                path  = path + inters[6];
+                if(inters!=null) {
+                    path  = path + inters[6];
                 //if(r>(radius - BMTConstants.LYRTHICKN)/10) {
                     StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
                     stVec.set_planeIdx(l);  
@@ -241,10 +241,7 @@ public class TrajectoryFinder {
                         stVec.set_CalcCentroidStrip(cent); 
                     }
                     stateVecs.add(stVec);
-                //}
-                //else {
-                //    inters=null;
-                //}
+                }
             }
         }
         // CTOF
