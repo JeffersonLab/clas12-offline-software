@@ -76,7 +76,8 @@ public class RTPCEngine extends ReconstructionEngine{
             "/calibration/rtpc/time_offsets",
             "/calibration/rtpc/gain_balance",
             "/calibration/rtpc/time_parms",
-            "/calibration/rtpc/recon_parms"
+            "/calibration/rtpc/recon_parms",
+            "/calibration/rtpc/global_parms"
         };
 
         requireConstants(Arrays.asList(rtpcTables));
@@ -142,7 +143,7 @@ public class RTPCEngine extends ReconstructionEngine{
             try {
                 KalmanFilter KF = new KalmanFilter(params, event, 0);
             } catch (Exception e) {
-                e.printStackTrace();
+                // e.printStackTrace();
             }
 
             RecoBankWriter writer = new RecoBankWriter();
@@ -152,6 +153,7 @@ public class RTPCEngine extends ReconstructionEngine{
 
             event.appendBank(recoBank);
             event.appendBank(trackBank);
+            event.appendBank(kfBank);
 
 
         }
