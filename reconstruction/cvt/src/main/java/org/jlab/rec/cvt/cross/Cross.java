@@ -549,7 +549,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
             error = cross.vectorTo(crossAPlus).multiply(2/delta);
         }
         else if(crossAMinus!=null) {
-            error = crossAPlus.vectorTo(cross).multiply(2/delta);
+            error = crossAMinus.vectorTo(cross).multiply(2/delta);
         }
         
         return error;
