@@ -39,7 +39,7 @@ public class ECCommon {
     public static Boolean  isSingleThreaded = false;
     public static Boolean       singleEvent = false;
     public static Boolean     useNewTimeCal = true;
-    public static Boolean   useUnsharedTime = false;
+    public static Boolean   useUnsharedTime = true;
     public static Boolean      useLogWeight = true;
     public static Boolean       useCCDBGain = true;
     public static double           logParam = 4.0;

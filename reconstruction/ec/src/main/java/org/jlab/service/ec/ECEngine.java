@@ -122,7 +122,7 @@ public class ECEngine extends ReconstructionEngine {
                                 List<ECStrip>   strips, 
                                 List<ECPeak>    peaks, 
                                 List<ECCluster> clusters){
-/*	    
+	    
         DataBank bankS = de.createBank("ECAL::hits", strips.size());
         for(int h = 0; h < strips.size(); h++){
             bankS.setByte("sector",  h,  (byte) strips.get(h).getDescriptor().getSector());
@@ -134,7 +134,7 @@ public class ECEngine extends ReconstructionEngine {
             bankS.setFloat("energy", h, (float) strips.get(h).getEnergy());
             bankS.setFloat("time",   h, (float) strips.get(h).getTime());                
         }
- */      
+       
         DataBank  bankP =  de.createBank("ECAL::peaks", peaks.size());
         for(int p = 0; p < peaks.size(); p++){
             bankP.setByte("sector",  p,  (byte) peaks.get(p).getDescriptor().getSector());
@@ -171,7 +171,7 @@ public class ECEngine extends ReconstructionEngine {
             bankC.setInt("coordW",   c,         clusters.get(c).getPeak(2).getCoord());
   
         }
-/*     
+     
         DataBank bankM = de.createBank("ECAL::moments", clusters.size());
         for(int c = 0; c < clusters.size(); c++){
             bankM.setFloat("distU", c, (float) clusters.get(c).clusterPeaks.get(0).getDistanceEdge());
@@ -187,7 +187,7 @@ public class ECEngine extends ReconstructionEngine {
             bankM.setFloat("m3v", c,   (float) clusters.get(c).clusterPeaks.get(1).getMoment3());
             bankM.setFloat("m3w", c,   (float) clusters.get(c).clusterPeaks.get(2).getMoment3());
         }
- */               
+               
         DataBank  bankD =  de.createBank("ECAL::calib", clusters.size());
          for(int c = 0; c < clusters.size(); c++){
             bankD.setByte("sector",  c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getSector());
@@ -201,9 +201,7 @@ public class ECEngine extends ReconstructionEngine {
             bankD.setFloat("recEW",  c, (float) clusters.get(c).getEnergy(2));            
         }
          
-//         de.appendBanks(bankS,bankP,bankC,bankD,bankM);
-         de.appendBanks(bankP,bankC,bankD);
-//         de.appendBanks(bankS,bankP,bankC,bankD);
+         de.appendBanks(bankS,bankP,bankC,bankD,bankM);
 
     }
     
@@ -215,14 +213,14 @@ public class ECEngine extends ReconstructionEngine {
     	ECCommon.debugSplit = val;
     }
        
-    public void setCalRun(int runno) {
-        System.out.println("ECEngine: Calibration Run Number = "+runno);
-        this.calrun = runno;
+    public void setCalRun(int val) {
+        System.out.println("ECEngine: Calibration Run Number = "+val);
+        this.calrun = val;
     }
     
-    public void setVariation(String variation) {
-        System.out.println("ECEngine: Variation = "+variation);
-        ECCommon.variation = variation;
+    public void setVariation(String val) {
+        System.out.println("ECEngine: Calibration Variation = "+val);
+        ECCommon.variation = val;
     } 
     
     public void setGeomVariation(String val) {
@@ -230,9 +228,9 @@ public class ECEngine extends ReconstructionEngine {
         ECCommon.geomVariation = val;
     }  
     
-    public void setVeff(float veff) {
-        System.out.println("ECEngine: Veff = "+veff);
-    	    ECCommon.veff = veff;
+    public void setVeff(float val) {
+        System.out.println("ECEngine: Veff = "+val+" CM/NS");
+    	    ECCommon.veff = val;
     }
     
     public void setPCALTrackingPlane(int val) {
@@ -266,21 +264,21 @@ public class ECEngine extends ReconstructionEngine {
     }
         
     public void setStripThresholds(int thr0, int thr1, int thr2) {
-        System.out.println("ECEngine: Strip ADC thresholds = "+thr0+" "+thr1+" "+thr2);
+        System.out.println("ECEngine: Strip ADC thresholds = "+thr0+" "+thr1+" "+thr2+" MeV*10");
         ECCommon.stripThreshold[0] = thr0;
         ECCommon.stripThreshold[1] = thr1;
         ECCommon.stripThreshold[2] = thr2;
     }
     
     public void setPeakThresholds(int thr0, int thr1, int thr2) {
-        System.out.println("ECEngine: Peak ADC thresholds = "+thr0+" "+thr1+" "+thr2);
+        System.out.println("ECEngine: Peak ADC thresholds = "+thr0+" "+thr1+" "+thr2+" MeV*10");
         ECCommon.peakThreshold[0] = thr0;
         ECCommon.peakThreshold[1] = thr1;
         ECCommon.peakThreshold[2] = thr2;
     }   
     
     public void setClusterCuts(float err0, float err1, float err2) {
-        System.out.println("ECEngine: Cluster Dalitz Cuts = "+err0+" "+err1+" "+err2);
+        System.out.println("ECEngine: Cluster Dalitz Cuts = "+err0+" "+err1+" "+err2+" CM");
         ECCommon.clusterError[0] = err0;
         ECCommon.clusterError[1] = err1;
         ECCommon.clusterError[2] = err2;
