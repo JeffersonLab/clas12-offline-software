@@ -141,8 +141,10 @@ public class TrajectoryFinder {
             Vector3D  n = svt_geo.getNormal(layer, sector);
             Point3D   p = svt_geo.getModule(layer, sector).origin();
             Point3D pcm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
-            double accuracy = 2*Constants.SWIMACCURACYSVT/10;
+            double accuracy = Constants.DEFAULTSWIMACC/10;
             inters = swimmer.AdaptiveSwimPlane(pcm.x(), pcm.y(), pcm.z(), n.x(), n.y(), n.z(), accuracy);
+            if(inters==null) break; // give up on this track if swimming failed
+                
             path  = path + inters[6];
             StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
             stVec.set_planeIdx(l);
@@ -199,13 +201,13 @@ public class TrajectoryFinder {
                 // RDV: tried using this to determine the sector but t is giving bogus number
                 //Point3D helixTrj = trk.get_helix().getPointAtRadius(bmt_geo.getRadiusMidDrift(layer)); 
                 double radius  = bmt_geo.getRadiusMidDrift(layer)/10;                
-                inters = swimmer.SwimRho(radius);
+                double accuracy = Constants.SWIMACCURACYBMT/10;
+                inters = swimmer.AdaptiveSwimRho(radius, accuracy);
                 int sector = bmt_geo.getSector(0, Math.atan2(inters[1],inters[0]));
                 
                 Line3D axis    = bmt_geo.getAxis(layer, sector);
                 Point3D a1 = new Point3D(axis.origin().x()/10,axis.origin().y()/10, axis.origin().z()/10);
                 Point3D a2 = new Point3D(axis.end().x()/10,axis.end().y()/10, axis.end().z()/10);
-                double accuracy = Constants.SWIMACCURACYBMT/10;
                 inters = swimmer.AdaptiveSwimCylinder(a1.x(), a1.y(), a1.z(), a2.x(), a2.y(), a2.z(), radius, accuracy);
                 if(inters==null) break; // give up on this track if swimming failed
                 
