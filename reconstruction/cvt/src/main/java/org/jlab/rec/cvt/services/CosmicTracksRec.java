@@ -9,10 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.clas.tracking.kalmanfilter.straight.KFitter;
+import org.jlab.clas.tracking.trackrep.Helix;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.geom.base.Detector;
-import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -50,7 +51,8 @@ public class CosmicTracksRec {
             CTOFGeant4Factory CTOFGeom, Detector CNDGeom,
             RecoBankWriter rbc,
             double zShift, boolean exLayrs, Swim swimmer) {
-        // make list of crosses consistent with a track candidate
+        
+        // make list of crosses consistent with a track candidate using SVT only first
         StraightTrackCrossListFinder crossLister = new StraightTrackCrossListFinder();
         CrossList crosslist = crossLister.findCosmicsCandidateCrossLists(crosses, SVTGeom,
                 BMTGeom, 3);
@@ -60,6 +62,7 @@ public class CosmicTracksRec {
 
             return true;
         } 
+        // refit track based on SVT only and then add BMT and refit again
         TrackCandListFinder trkcandFinder = new TrackCandListFinder();
         List<StraightTrack> cosmics = trkcandFinder.getStraightTracks(crosslist, crosses.get(1), SVTGeom, BMTGeom);
         List<Track> trkcands = new ArrayList<Track>();
@@ -69,7 +72,6 @@ public class CosmicTracksRec {
         if (cosmics.size() == 0) {
             recUtil.CleanupSpuriousCrosses(crosses, null, SVTGeom) ;
             rbc.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null, zShift);
-
             return true;
         }
         
@@ -123,69 +125,47 @@ public class CosmicTracksRec {
             crosses.get(1).removeAll(bmtCrossesRm);
             crosses.get(1).addAll(bmtCrosses);
             
-            org.jlab.clas.tracking.trackrep.Helix hlx = null ;
-            org.jlab.clas.tracking.kalmanfilter.straight.KFitter kf = null;
+            Helix hlx  = null ;
+            KFitter kf = null;
             
+            // uncomment to initiali KF with MC track parameters
+//            double[] pars = recUtil.MCtrackPars(event);
+//            Point3D v  = new Point3D(pars[0],pars[1],pars[2]);
+//            Vector3D p = new Vector3D(pars[3],pars[4],pars[5]);
             for (int k1 = 0; k1 < cosmics.size(); k1++) {
                 Ray ray = cosmics.get(k1).get_ray();
-                
-                Point3D xp = new Point3D(ray.get_yxinterc(),0,ray.get_yzinterc() );
-                Vector3D u = new Vector3D(ray.get_yxslope(), 1, ray.get_yzslope()).asUnit();
-                Line3D trL = new Line3D(xp, u);
-                Point3D docVtx = trL.distance(new Point3D(0,0,0)).origin();
-                double xr = cosmics.get(k1).get_ray().get_refPoint().x();
-                double yr = cosmics.get(k1).get_ray().get_refPoint().y();
-                double zr = cosmics.get(k1).get_ray().get_refPoint().z();
-                
-                double pt = 10000;
-                double pz = pt*u.z();
-                double px = pt*u.x();
-                double py = pt*u.y();
-                int charge = 1;
+//                ray = new Ray(v,p);
+
                 
                 Matrix cov = new Matrix(5, 5);
-                cov.set(0, 0,ray.get_yxintercErr());
-                cov.set(1, 1,ray.get_yzintercErr());
-                cov.set(2, 2,ray.get_yxslopeErr());
-                cov.set(3, 3,ray.get_yzslopeErr());
-                cov.set(4, 4,1);
-                kf = new org.jlab.clas.tracking.kalmanfilter.straight.KFitter( ray.get_yxinterc(),ray.get_yzinterc(),
-                        ray.get_yxslope(),ray.get_yzslope(), 10.0, cov, kf,
-                    recUtil.setMeasVecs(cosmics.get(k1), SVTGeom, BMTGeom, swimmer )) ;
-                kf.filterOn=true;
+                cov.set(0, 0, ray.get_yxintercErr());
+                cov.set(1, 1, ray.get_yzintercErr());
+                cov.set(2, 2, ray.get_yxslopeErr());
+                cov.set(3, 3, ray.get_yzslopeErr());
+                cov.set(4, 4, 1);
+                kf = new KFitter( ray.get_yxinterc(),ray.get_yzinterc(),
+                                  ray.get_yxslope(), ray.get_yzslope(), 10.0, cov, kf,
+                                  recUtil.setMeasVecs(cosmics.get(k1), SVTGeom, BMTGeom, swimmer )) ;
+//                kf.filterOn=false;
                 kf.runFitter(swimmer);
-                Map<Integer, org.jlab.clas.tracking.kalmanfilter.straight.KFitter.HitOnTrack> traj 
-                        = kf.TrjPoints;
+                Map<Integer, KFitter.HitOnTrack> traj = kf.TrjPoints;
                 List<Integer> keys = new ArrayList<Integer>();
                 traj.forEach((key,value) -> keys.add(key));
-                List<org.jlab.clas.tracking.kalmanfilter.straight.KFitter.HitOnTrack> trkTraj = new ArrayList<org.jlab.clas.tracking.kalmanfilter.straight.KFitter.HitOnTrack>();
+                List<KFitter.HitOnTrack> trkTraj = new ArrayList<KFitter.HitOnTrack>();
                 traj.forEach((key,value) -> trkTraj.add(value));
-                
-                double y_ref = 0; // calc the ref point at the plane y =0
-                double x_ref = kf.yx_interc;
-                double z_ref = kf.yz_interc;
-                Point3D refPoint = new Point3D(x_ref, y_ref, z_ref);
-                Vector3D refDir = new Vector3D(kf.yx_slope, 1, kf.yz_slope).asUnit();
-                
-                Ray the_ray = new Ray(refPoint, refDir);
-                the_ray.set_yxslope(kf.yx_slope);
-                the_ray.set_yzslope(kf.yz_slope);
-                the_ray.set_yxinterc(kf.yx_interc);
-                the_ray.set_yzinterc(kf.yz_interc);
-                
+                                
+                Ray the_ray = new Ray(kf.yx_slope, kf.yx_interc, kf.yz_slope, kf.yz_interc);                
                 cosmics.get(k1).set_ray(the_ray);
-                
-                cosmics.get(k1).update_Crosses(cosmics.get(k1).get_ray().get_yxslope(), cosmics.get(k1).get_ray().get_yxinterc(), SVTGeom);
+                cosmics.get(k1).update_Crosses(cosmics.get(k1).get_ray(), SVTGeom);
                 double chi2 = cosmics.get(k1).calc_straightTrkChi2(); 
                 cosmics.get(k1).set_chi2(chi2);
                 
                 TrajectoryFinder trjFind = new TrajectoryFinder();
                 
-                ////Trajectory traj = trjFind.findTrajectory(passedcands.get(ic).get_Id(), trkRay, passedcands.get(ic), svt_geo, bmt_geo);
                 Trajectory ntraj = trjFind.findTrajectory(k1+1, cosmics.get(k1).get_ray(), cosmics.get(k1), SVTGeom, BMTGeom);
                 cosmics.get(k1).set_Trajectory(ntraj.get_Trajectory());
                 trkcandFinder.upDateCrossesFromTraj(cosmics.get(k1), ntraj, SVTGeom);
-                
+
                 
                 for(int i = 0; i< keys.size(); i++) {
                     double resi = trkTraj.get(i).resi;
@@ -203,7 +183,7 @@ public class CosmicTracksRec {
                             Line3D cln = BMTGeom.getAxis(layer, sector);
                             double r = BMTGeom.getRadiusMidDrift(layer);
                             cl.set_CentroidResidual(resi*r);
-                            cl.setN(cln.distance(refPoint).direction().asUnit());
+                            cl.setN(cln.distance(ray.get_refPoint()).direction().asUnit());
                             cl.setS(cl.getL().cross(cl.getN()).asUnit());    
 
                         }

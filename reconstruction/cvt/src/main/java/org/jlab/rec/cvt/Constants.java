@@ -33,7 +33,9 @@ public class Constants {
     public static final double SWIMACCURACYCD  = 0.500; // in mm
     
     private static boolean isCosmicsData = false;
-
+    public static final double COSMICSMINRESIDUALX = 120; // in mm
+    public static final double COSMICSMINRESIDUALZ =  12; // in mm
+    
     private static boolean SVTOnly = false;
 
     public static final boolean trk_comesfrmOrig = true;

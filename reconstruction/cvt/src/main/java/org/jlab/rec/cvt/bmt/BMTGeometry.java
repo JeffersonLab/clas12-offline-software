@@ -42,6 +42,10 @@ public class BMTGeometry {
         return BMTConstants.NLAYERS;
     }
     
+    public int getNSectors() {
+        return BMTConstants.NSECTORS;
+    }
+    
     /**
      * Return layer number for a given region and detector type
      * @param region (1-3)

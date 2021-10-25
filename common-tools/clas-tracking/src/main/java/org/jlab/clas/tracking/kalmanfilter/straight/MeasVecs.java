@@ -1,11 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.tracking.kalmanfilter.straight;
 
-import org.jlab.clas.tracking.kalmanfilter.straight.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -97,9 +91,11 @@ public class MeasVecs {
                 value = WL.length()*sideStrip; 
             }
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.Z) { 
-                value = stateVec.z-this.measurements.get(stateVec.k).surface.strip.getZ();
+                Transformation3D toLocal =this.measurements.get(stateVec.k).surface.toLocal();
+                Point3D stV = new Point3D(stateVec.x, stateVec.y, stateVec.z); 
+                toLocal.apply(stV);
+                value = stV.z()-this.measurements.get(stateVec.k).surface.strip.getZ();
             }
-            
              if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.ARC) {
                 Transformation3D toLocal =this.measurements.get(stateVec.k).surface.toLocal();
                 Arc3D arc = new Arc3D();
@@ -109,9 +105,12 @@ public class MeasVecs {
                 toLocal.apply(stV);
                 value = stV.z()-arc.center().z(); 
             }
-             
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.PHI) {
-               value = this.getPhi(stateVec)-this.measurements.get(stateVec.k).surface.strip.getPhi();
+                Transformation3D toLocal =this.measurements.get(stateVec.k).surface.toLocal();
+                Point3D sv = new Point3D(stateVec.x, stateVec.y, stateVec.z);
+                toLocal.apply(sv);
+                value = sv.toVector3D().phi()-this.measurements.get(stateVec.k).surface.strip.getPhi();
+                if(Math.abs(value)>2*Math.PI) value-=Math.signum(value)*2*Math.PI;
             }
         }
         return value;
@@ -129,15 +128,9 @@ public class MeasVecs {
     }
     
     public double getPhi(StateVec stateVec) {
-        Line3D cln = this.measurements.get(stateVec.k).surface.cylinder.getAxis();
-        
-        double v = (cln.origin().z()-stateVec.z)/cln.direction().z();
-        double xs = stateVec.x+v*cln.direction().x();
-        double ys = stateVec.y+v*cln.direction().y();
-        
-        Vector3D n = new Point3D(cln.origin().x(), cln.origin().y(), cln.origin().z()).
-                vectorTo(new Point3D(xs,ys,cln.origin().z())).asUnit();
-        return n.phi();
+        Point3D sv = new Point3D(stateVec.x, stateVec.y, stateVec.z);
+        this.measurements.get(stateVec.k).surface.toLocal().apply(sv);
+        return sv.toVector3D().phi();
     }
       
     public double h(int k, StateVec stateVec) {

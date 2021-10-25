@@ -574,9 +574,9 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             Point3D local = new Point3D(traj);
             this.toLocal().apply(local);
             if(this.get_Type()==BMTType.C)                
-                value = local.z()-this.get_Centroid();
+                value = local.z()-this.get_CentroidValue();
             else {
-                value = local.toVector3D().phi()-this.get_Centroid();
+                value = local.toVector3D().phi()-this.get_CentroidValue();
                 if(Math.abs(value)>2*Math.PI) value-=Math.signum(value)*2*Math.PI;
             }
         }     
@@ -657,7 +657,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         this._TrakInters = _TrakInters;
     }
 
-    public Surface measurement(int mlayer) {
+    public Surface measurement(int layerID) {
         Surface surface = null;
         if(this.get_Detector()==DetectorType.BST) {
             Point3D endPt1 = this.getLine().origin();
@@ -669,7 +669,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             Line3D module = this.get(0).get_Strip().get_Module();
             surface = new Surface(plane, strp, module.origin(), module.end(), Constants.SWIMACCURACYSVT);
             surface.hemisphere = Math.signum(this.center().y());
-            surface.setLayer(mlayer);
+            surface.setLayer(layerID);
             surface.setSector(this.get_Sector());
             surface.setError(this.get_Resolution()*this.get_Resolution()); 
             surface.setl_over_X0(this.get(0).get_Strip().getToverX0());
@@ -691,7 +691,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             
             }
             surface.setTransformation(this.toGlobal()); 
-            surface.setLayer(mlayer);
+            surface.setLayer(layerID);
             surface.setSector(this.get_Sector());
             surface.setl_over_X0(this.get(0).get_Strip().getToverX0());
         }
@@ -700,11 +700,10 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         
     /**
      *
-     * @return cluster info. about location and number of hits contained in it
      */
     public void printInfo() {
         String s = " cluster: Detector " + this.get_Detector().getName() +"  Detector Type " + this.get_Type().getName() + " ID " + this.get_Id() + " Sector " + this.get_Sector() 
-                + " Layer " + this.get_Layer() + " Radius " + this.getRadius()+ " Size " + this.size() +" centroid "+this.get_Centroid();
+                + " Layer " + this.get_Layer() + " Radius " + this.getRadius()+ " Size " + this.size() +" centroid "+this.get_Centroid() + this.size() +" centroidValue "+this.get_CentroidValue();
         System.out.println(s);
     }
 

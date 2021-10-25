@@ -1,6 +1,5 @@
 package org.jlab.clas.tracking.kalmanfilter.straight;
 
-import org.jlab.clas.tracking.kalmanfilter.straight.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +12,6 @@ import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.straight.MeasVecs.MeasVec;
 import org.jlab.clas.tracking.trackrep.Helix;
-import org.jlab.clas.tracking.trackrep.Helix.Units;
 import org.jlab.geom.prim.Line3D;
 
 
@@ -110,8 +108,8 @@ public class StateVecs {
                     double l = (-(ref.x()*u.x()+ref.y()*u.y())+delta)/(u.x()*u.x()+u.y()*u.y());
                     if(Math.signum(ref.y()+l*u.y())!=mv.hemisphere) {
                         l = (-(ref.x()*u.x()+ref.y()*u.y())-delta)/(u.x()*u.x()+u.y()*u.y()); 
-                    } 
-                    
+                        }
+              
                     Point3D cylInt = new Point3D(ref.x()+l*u.x(),ref.y()+l*u.y(),ref.z()+l*u.z());
                     mv.surface.toGlobal().apply(cylInt);
 //                    mv.surface.toGlobal().apply(ref);

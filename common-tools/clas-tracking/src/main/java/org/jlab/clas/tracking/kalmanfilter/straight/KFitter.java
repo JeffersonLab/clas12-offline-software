@@ -1,6 +1,5 @@
 package org.jlab.clas.tracking.kalmanfilter.straight;
 
-import org.jlab.clas.tracking.kalmanfilter.straight.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jlab.geom.prim.Point3D;
-import org.jlab.io.base.DataEvent;
 
 import Jama.Matrix;
 import org.jlab.clas.swimtools.Swim;

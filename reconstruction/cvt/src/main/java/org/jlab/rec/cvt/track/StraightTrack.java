@@ -1,7 +1,10 @@
 package org.jlab.rec.cvt.track;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
@@ -32,6 +35,7 @@ public class StraightTrack extends Trajectory{
      * @param fit_yzslope
      * @param geo
      */
+    @Deprecated
     public void update_Crosses(double fit_yxslope, double fit_yzslope, SVTGeometry geo) {
         for (Cross c : this) {
             if (c.get_Detector()==DetectorType.BST) //only update for the svt
@@ -41,6 +45,32 @@ public class StraightTrack extends Trajectory{
 
         }
     }
+    
+    public void update_Crosses(Ray ray, SVTGeometry geo) {
+        for (Cross c : this) {
+            if(c.get_Detector()==DetectorType.BST) 
+                c.setSVTCrossPosition(ray.get_dirVec(), geo);
+            else {
+                Cluster cluster = c.get_Cluster1();
+                List<Point3D> trajs = new ArrayList<>();
+                int nTraj = cluster.getTile().intersection(ray.toLine(), trajs);
+                if(nTraj>0) {
+                    Point3D traj = null;
+                    double  doca = Double.MAX_VALUE;
+                    for(Point3D t : trajs) {
+                        double d = Math.abs(cluster.residual(t));
+                        if(d<doca) {
+                            doca = d;
+                            traj = t;
+                        }
+                    }
+                    c.setBMTCrossPosition(traj);
+                }
+            }
+        }
+    }
+    
+    @Deprecated
     public void reset_Crosses() {
         for (Cross c : this) {
             if (c.get_Detector()==DetectorType.BST) //only update for the svt
@@ -60,6 +90,7 @@ public class StraightTrack extends Trajectory{
      * @param fit_yzslope
      * @param geo
      */
+    @Deprecated
     public void update_Cross(Cross cross, double fit_yxslope, double fit_yzslope, SVTGeometry geo) {
 
         double x = fit_yxslope / Math.sqrt(fit_yxslope * fit_yxslope + fit_yzslope * fit_yzslope + 1);
@@ -68,9 +99,9 @@ public class StraightTrack extends Trajectory{
 
         Vector3D trkDir = new Vector3D(x, y, z);
 
-        if (trkDir != null) {
-            cross.setSVTCrossPosition(trkDir, geo);
-        }
+//        if (trkDir != null) {
+//            cross.setSVTCrossPosition(trkDir, geo);
+//        }
 
     }
 

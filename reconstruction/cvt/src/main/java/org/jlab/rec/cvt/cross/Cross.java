@@ -355,6 +355,15 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     public void set_MatchedCCross(Cross _MatchedCCross) {
         this._MatchedCCross = _MatchedCCross;
     }
+    
+    public void resetCross(SVTGeometry geo) {
+        this.set_Dir(null);
+        this.set_DirErr(null);
+        if(this.get_Detector()==DetectorType.BST)
+            this.setSVTCrossPosition(null, geo);
+        else
+            this.setBMTCrossPosition(null);
+    }
 
     /**
      * Sets the cross parameters: the position and direction unit vector
@@ -382,10 +391,12 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         
         if(trackPos!=null) {
             Point3D local = new Point3D(trackPos);
+            Point3D orig  = new Point3D(cluster.origin());
             cluster.get_SeedStrip().toLocal().apply(local);
+            cluster.get_SeedStrip().toLocal().apply(orig);
             if(this.get_Type()==BMTType.C) {
                 double phi  = Math.atan2(local.y(), local.x());
-                double phi0 = Math.atan2(cluster.origin().y(), cluster.origin().x());
+                double phi0 = Math.atan2(orig.y(), orig.x());
                 double t = phi-phi0;
                 if(Math.abs(t)>Math.PI) t-=Math.signum(t)*2*Math.PI;
                 if(t<0) 
@@ -581,66 +592,37 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 
         int theRegion = 0;
         if (this.get_Detector()==DetectorType.BST) {
-            /*
-            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[6][0] + Constants.MODULERADIUS[7][0]) * 0.5 < 15) {
-                if (this.get_Point0().y() > 0) {
-                    theRegion = 8;
-                } else {
-                    theRegion = 1;
-                }
-            }
-
-            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[4][0] + Constants.MODULERADIUS[5][0]) * 0.5 < 15) {
-                if (this.get_Point0().y() > 0) {
-                    theRegion = 7;
-                } else {
-                    theRegion = 2;
-                }
-            }
-
-            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[2][0] + Constants.MODULERADIUS[3][0]) * 0.5 < 15) {
-                if (this.get_Point0().y() > 0) {
-                    theRegion = 6;
-                } else {
-                    theRegion = 3;
-                }
-            }
-
-            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[0][0] + Constants.MODULERADIUS[1][0]) * 0.5 < 15) {
-                if (this.get_Point0().y() > 0) {
-                    theRegion = 5;
-                } else {
-                    theRegion = 4;
-                }
-            }
-            */
-             
-
-            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(3) < 15) {
-                if (this.get_Point0().y() > 0) {
-                    theRegion = 6;
-                } else {
-                    theRegion = 1;
-                }
-            }
-
-            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(2) < 15) {
-                if (this.get_Point0().y() > 0) {
-                    theRegion = 5;
-                } else {
-                    theRegion = 2;
-                }
-            }
-
-            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(1) < 15) {
-                if (this.get_Point0().y() > 0) {
-                    theRegion = 4;
-                } else {
-                    theRegion = 3;
-                }
-            }
+            if(this.get_Point0().y()<0) 
+                theRegion = this.get_Region();
+            else 
+                theRegion = SVTGeometry.NREGIONS*2+1-this.get_Region();
         }
-
+                // RDV check with Veronique
+//            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(3) < 15) {
+//                if (this.get_Point0().y() > 0) {
+//                    theRegion = 6;
+//                } else {
+//                    theRegion = 1;
+//                }
+//            }
+//
+//            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(2) < 15) {
+//                if (this.get_Point0().y() > 0) {
+//                    theRegion = 5;
+//                } else {
+//                    theRegion = 2;
+//                }
+//            }
+//
+//            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(1) < 15) {
+//                if (this.get_Point0().y() > 0) {
+//                    theRegion = 4;
+//                } else {
+//                    theRegion = 3;
+//                }
+//            }
+//        }
+//
         return theRegion;
     }
 

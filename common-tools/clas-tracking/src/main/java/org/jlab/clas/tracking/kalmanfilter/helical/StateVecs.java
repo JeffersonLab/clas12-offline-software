@@ -134,65 +134,44 @@ public class StateVecs {
                 return value;
             } else { 
                 if(mv.surface.plane!=null) {
-                    //Update B
-//                    double r0 = mv.surface.finitePlaneCorner1.toVector3D().dot(mv.surface.plane.normal());
-//                    double stepSize = 5; //mm
-//                    int nSteps = (int) (r0/stepSize);
-//
-//                    double dist = 0;
-//
-//                    for(int i = 1; i<nSteps; i++) {
-//                        dist = (double) (i*stepSize);
-//                        this.setHelixPars(kVec, swim);
-//                        ps = util.getHelixPointAtR(dist);
-//                        kVec.x = ps.x();
-//                        kVec.y = ps.y();
-//                        kVec.z = ps.z();
-//                        this.tranState(k, kVec, swim);
-//                    }
-//                    this.setHelixPars(kVec, swim);
-//                    ps = util.getHelixPointAtPlane(mv.surface.finitePlaneCorner1.x(), mv.surface.finitePlaneCorner1.y(),
-//                            mv.surface.finitePlaneCorner2.x(), mv.surface.finitePlaneCorner2.y(), 10);
-//                    this.tranState(k, kVec, swim);
-//                    kVec.x = ps.x();
-//                    kVec.y = ps.y();
-//                    kVec.z = ps.z();
-//                    if(swimPars==null)
-//                        return null;
-//                    swimPars[0] = ps.x();
-//                    swimPars[1] = ps.y();
-//                    swimPars[2] = ps.z();
+                    if(useSwimmer=false) { // applicable only to planes parallel to the z -axis
+                        double r0 = mv.surface.finitePlaneCorner1.toVector3D().dot(mv.surface.plane.normal());
+                        double stepSize = 5; //mm
+                        int nSteps = (int) (r0/stepSize);
 
-    //                    x = X0.get(0) + kVec.d_rho * Math.cos(kVec.phi0);
-    //                    y = Y0.get(0) + kVec.d_rho * Math.sin(kVec.phi0);
-    //                    z = Z0.get(0) + kVec.dz;
-    //                    Bf = new B(kVec.k, x, y, z, swim);
-    //                    kVec.alpha = Bf.alpha;
+                        double dist = 0;
+
+                        for(int i = 1; i<nSteps; i++) {
+                            dist = (double) (i*stepSize);
+                            this.setHelixPars(kVec, swim);
+                            ps = util.getHelixPointAtR(dist);
+                            kVec.x = ps.x();
+                            kVec.y = ps.y();
+                            kVec.z = ps.z();
+                            this.tranState(k, kVec, swim);
+                        }
+                        this.setHelixPars(kVec, swim);
+                        ps = util.getHelixPointAtPlane(mv.surface.finitePlaneCorner1.x(), mv.surface.finitePlaneCorner1.y(),
+                                mv.surface.finitePlaneCorner2.x(), mv.surface.finitePlaneCorner2.y(), 10);
+                        this.tranState(k, kVec, swim);
+                        kVec.x = ps.x();
+                        kVec.y = ps.y();
+                        kVec.z = ps.z();
+                        if(swimPars==null)
+                            return null;
+                        swimPars[0] = ps.x();
+                        swimPars[1] = ps.y();
+                        swimPars[2] = ps.z();
+                    }
+                    else {
+
                         this.setTrackPars(kVec, swim);
                         Vector3D norm = mv.surface.plane.normal();
                         Point3D point = new Point3D(mv.surface.plane.point().x()/units,
                                                     mv.surface.plane.point().y()/units,
                                                     mv.surface.plane.point().z()/units);
                         double accuracy = mv.surface.swimAccuracy/units;
-//                        swimPars = swim.SwimToPlaneBoundary(norm.dot(point.toVector3D()), norm, 1, 0.005/units);
-//                        swimPars = swim.SwimPlane(norm,point,0.005/units);
-//                        System.out.println(mv.surface.plane.point() + " " + current + " " + kVec.k);
-//                        double distance = Math.abs(current.vectorTo(mv.surface.plane.point()).dot(norm));
-//                        double stepsize = Math.min(distance/2, 0.5);// System.out.println(distance + " " + stepsize);
                         swimPars = swim.AdaptiveSwimPlane(point.x(), point.y(), point.z(), norm.x(), norm.y(), norm.z(), accuracy);
-//                        Point3D  swimP = new Point3D(swimPars[0], swimPars[1], swimPars[2]);
-//                        Vector3D swimD = new Vector3D(swimPars[3], swimPars[4], swimPars[5]);
-//                        Line3D swimL = new Line3D(swimP, swimD);
-//                        Plane3D plane = new Plane3D(point, norm);
-//                        Point3D swimF = new Point3D();
-//                        plane.intersection(swimL, swimF);
-//                        Point3D p0 = new Point3D(swimPars0[0], swimPars0[1], swimPars0[2]);
-//                        Point3D p1 = new Point3D(swimPars1[0], swimPars1[1], swimPars1[2]);
-//                        Point3D p = new Point3D(swimPars[0], swimPars[1], swimPars[2]);
-//                        System.out.println();
-//                        System.out.println(swimPars0[0] + " " + swimPars0[1] + " " + swimPars0[2] + " " + point.vectorTo(p0).dot(norm));
-//                        System.out.println(swimPars1[0] + " " + swimPars1[1] + " " + swimPars1[2] + " " + point.vectorTo(p1).dot(norm));
-//                        System.out.println(swimPars[0] + " " + swimPars[1] + " " + swimPars[2] + " " + point.vectorTo(p).dot(norm));
                         if(swimPars==null)
                             return null;
                         for(int j =0; j < 3; j++) {
@@ -201,6 +180,7 @@ public class StateVecs {
                         kVec.x = swimPars[0];
                         kVec.y = swimPars[1];
                         kVec.z = swimPars[2];
+                    }
 
                 }
                 if(mv.surface.cylinder!=null) {
@@ -235,10 +215,7 @@ public class StateVecs {
                                                  mv.surface.cylinder.getAxis().end().y()/units,
                                                  mv.surface.cylinder.getAxis().end().z()/units) ;
                         double accuracy = mv.surface.swimAccuracy/units;
-//                        swimPars = swim.SwimGenCylinder(p1,p2,r/units);
                         swimPars = swim.AdaptiveSwimCylinder(p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), r/units, accuracy);
-//                        System.out.println(swimPars2[0] + " " + swimPars2[1] + " " + swimPars2[2]);
-//                        System.out.println(swimPars[0] + " " + swimPars[1] + " " + swimPars[2]);
                         if(swimPars==null)
                             return null;
                         for(int j =0; j < 3; j++) {
