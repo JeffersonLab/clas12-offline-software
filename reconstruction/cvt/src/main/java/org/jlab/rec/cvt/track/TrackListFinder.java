@@ -77,7 +77,7 @@ public class TrackListFinder {
                     trk.set_Trajectory(traj.get_Trajectory());
 
                     //if(trk.passCand == true)
-                    tracks.add(trk);
+                    tracks.add(trk); 
                 }
             }
 
@@ -116,7 +116,6 @@ public class TrackListFinder {
     public void removeOverlappingTracks(List<Track> trkcands) {
             if(trkcands==null)
                 return;
-            
             List<Track> selectedTracks =new ArrayList<Track>();
             List<Track> list = new  ArrayList<Track>();
             List<Track> rejected = new  ArrayList<Track>();
@@ -143,7 +142,7 @@ public class TrackListFinder {
                 }
 
             }
-            if( rejected != null )
+            if( rejected != null && selectedTracks!=null)
             	selectedTracks.removeAll(rejected);
             if(trkcands!=null)
                 trkcands.removeAll(trkcands);

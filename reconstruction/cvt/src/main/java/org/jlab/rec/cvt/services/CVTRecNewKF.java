@@ -331,7 +331,29 @@ public class CVTRecNewKF extends ReconstructionEngine {
 //        if (newClustering==null) {
 //             System.out.println("["+this.getName()+"] run with newclustering settings default = false");
 //        }
+
+        //
         
+         String MatLib = this.getEngineConfigString("matLib");
+        
+        if (MatLib!=null) {
+            System.out.println("["+this.getName()+"] run with matLib "+MatLib+" config chosen based on yaml");
+            String MatLibr = String.valueOf(MatLib);
+            Constants.setMatLib(MatLib);
+        }
+        else {
+            MatLib = System.getenv("COAT_CVT_MATLIB");
+            if (exLys!=null) {
+                System.out.println("["+this.getName()+"] run with matLib "+MatLib+" config chosen based on env");
+                String MatLibr = String.valueOf(MatLib);
+                Constants.setMatLib(MatLib);
+            }
+        }
+        if (MatLib==null) {
+             System.out.println("["+this.getName()+"] run with matLib (default = EJML) ");
+        }
+        
+
         // Load other geometries
         
         variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");

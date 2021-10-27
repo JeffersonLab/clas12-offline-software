@@ -6,6 +6,8 @@ import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.rec.cvt.bmt.BMTConstants;
 
+import org.jlab.clas.tracking.utilities.MatrixOps.*;
+
 public class Constants {
 
     public static double PTCUT = 0.075;
@@ -303,6 +305,32 @@ public class Constants {
 
     public static final void setSVTOnly(boolean sVTOnly) {
         SVTOnly = sVTOnly;
+    }
+
+    /**
+     * @return the matLib
+     */
+    private static Libr getMatLib(String matLib) {
+        String type = matLib;
+        switch (type) {
+            case "JAMA":
+                return Libr.JAMA;
+            case "JNP":
+                return Libr.JNP;
+            case "APA":
+                return Libr.APA;
+            case "EJML":
+                return Libr.EJML;    
+            default:
+                return Libr.EJML;
+        } 
+    }
+    public static Libr kfMatLib;
+    /**
+     * @param aMatLib the matLib to set
+     */
+    public static void setMatLib(String aMatLib) {
+        kfMatLib = getMatLib(aMatLib);
     }
     
     public static double getSolenoidMagnitude() {

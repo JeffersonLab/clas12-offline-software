@@ -3,7 +3,7 @@ package org.jlab.rec.cvt.trajectory;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
-import Jama.Matrix;
+//import Jama.Matrix;
 import org.jlab.rec.cvt.Constants;
 
 /**
@@ -26,7 +26,7 @@ public class Helix {
     private double _curvature;    // track curvature = 1/R, where R is the radius of the circle 
     private double _Z0;           // intersect of the helix axis with the z-axis
     private double _tandip;       // tangent of the dip angle
-    private Matrix _covmatrix = new Matrix(5, 5);
+    private double[][] _covmatrix = new double[5][5];
     //error matrix (assuming that the circle fit and line fit parameters are uncorrelated)
     // | d_dca*d_dca                   d_dca*d_phi_at_dca            d_dca*d_curvature        0            0             |
     // | d_phi_at_dca*d_dca     d_phi_at_dca*d_phi_at_dca     d_phi_at_dca*d_curvature        0            0             |
@@ -35,7 +35,7 @@ public class Helix {
     // | 0                              0                             0                       0        d_tandip*d_tandip |
     // 
 
-    public Helix(double dca, double phi_at_doca, double curvature, double Z0, double tandip, Matrix covmatrix) {
+    public Helix(double dca, double phi_at_doca, double curvature, double Z0, double tandip, double[][] covmatrix) {
         set_dca(dca);
         set_phi_at_dca(phi_at_doca);
         set_curvature(curvature);
@@ -94,11 +94,11 @@ public class Helix {
         this._tandip = tandip;
     }
 
-    public Matrix get_covmatrix() {
+    public double[][] get_covmatrix() {
         return _covmatrix;
     }
-
-    public void set_covmatrix(Matrix covmatrix) {
+    
+    public void set_covmatrix(double[][] covmatrix) {
         this._covmatrix = covmatrix;
     }
 

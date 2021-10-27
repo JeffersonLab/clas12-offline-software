@@ -1,7 +1,5 @@
 package org.jlab.rec.cvt.services;
 
-import Jama.Matrix;
-import cnuphys.magfield.MagneticFields;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
@@ -47,7 +45,6 @@ public class TracksFromTargetRec {
             double shift, 
             Swim swimmer,
             boolean isSVTonly, boolean exLayrs) {
-        
         
         // get field value and scale
         double solenoidScale = Constants.getSolenoidScale();
@@ -106,7 +103,7 @@ public class TracksFromTargetRec {
             Helix hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
                             solenoidValue, Constants.getXb(), Constants.getYb(), Helix.Units.MM);
             
-            Matrix cov = seed.get_Helix().get_covmatrix();
+            double[][] cov = seed.get_Helix().get_covmatrix();
             
             if(solenoidValue>0.001 &&
                     Constants.LIGHTVEL * seed.get_Helix().radius() *solenoidValue<Constants.PTCUT)
@@ -117,6 +114,7 @@ public class TracksFromTargetRec {
                     Constants.getYb(),
                     shift, 
                     recUtil.setMeasVecs(seed, swimmer)) ;
+                kf.matLib = Constants.kfMatLib;
                 //Uncomment to let track be fitted
                 //kf.filterOn=false;
                 kf.runFitter(swimmer);
@@ -129,40 +127,43 @@ public class TracksFromTargetRec {
                         }
                     }
                     //refit adding missing clusters
-                    List<Cluster> clsOnTrack = recUtil.FindClustersOnTrkNew(SVTclusters, seed.get_Clusters(), fittedTrack.get_helix(), 
+                    List<Cluster> clsOnTrack = recUtil.FindClustersOnTrk(SVTclusters, seed.get_Clusters(), fittedTrack.get_helix(), 
                             fittedTrack.get_P(), fittedTrack.get_Q(), SVTGeom, swimmer);
                     if(clsOnTrack.size()>0) {
                         seed.get_Clusters().addAll(clsOnTrack);
-                    }
+                    
                    
-                    //reset pars
-                    v = fittedTrack.get_helix().getVertex();
-                    p = fittedTrack.get_helix().getPXYZ(solenoidValue);
-                    charge = (int) (Math.signum(solenoidScale)*fittedTrack.get_helix().get_charge());
-                    if(solenoidValue<0.001)
-                        charge = 1;
-                    v.translateXYZ(Constants.getXb(),Constants.getYb(), 0);
-                    hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
-                                    solenoidValue, Constants.getXb(), Constants.getYb(), Helix.Units.MM);
+                        //reset pars
+                        v = fittedTrack.get_helix().getVertex();
+                        p = fittedTrack.get_helix().getPXYZ(solenoidValue);
+                        charge = (int) (Math.signum(solenoidScale)*fittedTrack.get_helix().get_charge());
+                        if(solenoidValue<0.001)
+                            charge = 1;
+                        v.translateXYZ(Constants.getXb(),Constants.getYb(), 0);
+                        hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
+                                        solenoidValue, Constants.getXb(), Constants.getYb(), Helix.Units.MM);
 
-                    kf = new KFitter( hlx, cov, event,  swimmer, 
-                    Constants.getXb(), 
-                    Constants.getYb(),
-                    shift, 
-                    recUtil.setMeasVecs(seed, swimmer)) ;
-                    //Uncomment to let track be fitted
-                    //kf.filterOn = false;
-                    kf.runFitter(swimmer);
+                        kf = new KFitter( hlx, cov, event,  swimmer, 
+                        Constants.getXb(), 
+                        Constants.getYb(),
+                        shift, 
+                        recUtil.setMeasVecs(seed, swimmer)) ;
+                        kf.matLib = Constants.kfMatLib;
+                        //Uncomment to let track be fitted
+                        //kf.filterOn = false;
+                        kf.runFitter(swimmer);
+                        
+                        if(kf.KFHelix!=null) {
+                            fittedTrack = recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom);
+                        }
+                    }    
                     
-                    Track trk = recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom);
-                    
-                    trkcands.add(trk);
+                    trkcands.add(fittedTrack);
                     trkcands.get(trkcands.size() - 1).set_TrackingStatus(seed.trkStatus);
-                }
-            //} else {
-                //trkcands.add(recUtil.OutputTrack(seed));
-                //trkcands.get(trkcands.size() - 1).set_TrackingStatus(1);
-            //}
+                } else {
+                    //trkcands.add(recUtil.OutputTrack(seed));
+                    //trkcands.get(trkcands.size() - 1).set_TrackingStatus(1);
+            }
         }
     
 
@@ -171,18 +172,19 @@ public class TracksFromTargetRec {
             rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null, shift);
             return true;
         }
-
+        
         //This last part does ELoss C
         TrackListFinder trkFinder = new TrackListFinder();
+        trkFinder.removeOverlappingTracks(trkcands); 
         List<Track> tracks = trkFinder.getTracks(trkcands, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, swimmer);
 
         for( int i=0;i<tracks.size();i++) { 
             tracks.get(i).set_Id(i+1);         
         }
 
-        //System.out.println( " *** *** trkcands " + trkcands.size() + " * trks " + trks.size());
+        //System.out.println( " *** *** trkcands " + trkcands.size() + " * trks " + tracks.size());
         // RDV: can it be done before doing trajectories??
-        trkFinder.removeOverlappingTracks(tracks); //turn off until debugged
+        //trkFinder.removeOverlappingTracks(tracks); //turn off until debugged
         // reset cross IDs
         for(int a = 0; a<2; a++) {
             for(Cross c : crosses.get(a))
@@ -262,7 +264,7 @@ public class TracksFromTargetRec {
         //------------------------
         // set index associations
         if (tracks.size() > 0) {
-            recUtil.CleanupSpuriousCrosses(crosses, tracks, SVTGeom) ;
+            recUtil.CleanupSpuriousCrosses(crosses, tracks, SVTGeom) ; 
             rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, tracks, shift);
         }
 

@@ -14,7 +14,7 @@ import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.rec.cvt.trajectory.StateVec;
 
-import Jama.Matrix;
+//import Jama.Matrix;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.rec.cvt.Constants;
@@ -419,16 +419,16 @@ public class RecoBankWriter {
             // | d_curvature*d_dca	    d_curvature*d_phi_at_dca      d_curvature*d_curvature         0            0             |
             // | 0                              0                             0                    d_Z0*d_Z0                     |
             // | 0                              0                             0                       0        d_tandip*d_tandip |X
-            Matrix covmatrix = helix.get_covmatrix();
+            double[][] covmatrix = helix.get_covmatrix();
             if (covmatrix != null) {
-                bank.setFloat("cov_d02", i, (float) covmatrix.get(0, 0));
-                bank.setFloat("cov_d0phi0", i, (float) covmatrix.get(0, 1));
-                bank.setFloat("cov_d0rho", i, (float) covmatrix.get(0, 2));
-                bank.setFloat("cov_phi02", i, (float) covmatrix.get(1, 1));
-                bank.setFloat("cov_phi0rho", i, (float) covmatrix.get(1, 2));
-                bank.setFloat("cov_rho2", i, (float) covmatrix.get(2, 2));
-                bank.setFloat("cov_z02", i, (float) covmatrix.get(3, 3));
-                bank.setFloat("cov_tandip2", i, (float) covmatrix.get(4, 4));
+                bank.setFloat("cov_d02", i, (float) covmatrix[0][0] );
+                bank.setFloat("cov_d0phi0", i, (float) covmatrix[0][1] );
+                bank.setFloat("cov_d0rho", i, (float) covmatrix[0][2] );
+                bank.setFloat("cov_phi02", i, (float) covmatrix[1][1] );
+                bank.setFloat("cov_phi0rho", i, (float) covmatrix[1][2] );
+                bank.setFloat("cov_rho2", i, (float) covmatrix[2][2] );
+                bank.setFloat("cov_z02", i, (float) covmatrix[3][3] );
+                bank.setFloat("cov_tandip2", i, (float) covmatrix[4][4] );
             } else {
                 bank.setFloat("cov_d02", i, -999);
                 bank.setFloat("cov_d0phi0", i, -999);
