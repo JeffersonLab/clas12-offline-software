@@ -250,7 +250,8 @@ public class TrajectoryFinder {
             swimmer.SetSwimParameters(inters[0], inters[1], inters[2], Math.toDegrees(intersPhi), Math.toDegrees(intersTheta), trk.get_P(), trk.get_Q(), maxPathLength) ;
             // swim to CTOF
             double radius = ctof_geo.getRadius(1);
-            inters = swimmer.AdaptiveSwimRho(radius, Constants.SWIMACCURACYCD/10);
+//            inters = swimmer.AdaptiveSwimRho(radius, Constants.SWIMACCURACYCD/10);
+            inters = swimmer.AdaptiveSwimCylinder(0, 0, 0, 0, 0, 1, radius, Constants.SWIMACCURACYCD/10);
             // update parameters
             if(inters!=null) {
                 intersPhi   = Math.atan2(inters[4], inters[3]);
@@ -281,7 +282,8 @@ public class TrajectoryFinder {
                 // swim to CTOF
                 Point3D center = cnd_geo.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getMidpoint();
                 double radius  = Math.sqrt(center.x()*center.x()+center.y()*center.y());
-                inters = swimmer.AdaptiveSwimRho(radius, Constants.SWIMACCURACYCD/10);
+//                inters = swimmer.AdaptiveSwimRho(radius, Constants.SWIMACCURACYCD/10);
+                inters = swimmer.AdaptiveSwimCylinder(0, 0, 0, 0, 0, 1, radius, Constants.SWIMACCURACYCD/10);
                 if(inters==null) break; // give up on this track if swimming failed
                 // update parameters
                 intersPhi   = Math.atan2(inters[4], inters[3]);
@@ -590,9 +592,13 @@ public class TrajectoryFinder {
     /**
      *
      * @param detector
-     * @param superlayer 0,1 (bottom, top)
-     * @param Cluster
+     * @param sector
+     * @param layer
+     * @param cluster
      * @param stVec stateVec
+     * @param svt_geo
+     * @param bmt_geo
+     * @param trajFinal
      */
     public void setHitResolParams(String detector, int sector, int layer, Cluster cluster,
             StateVec stVec, SVTGeometry svt_geo, BMTGeometry bmt_geo, boolean trajFinal) {

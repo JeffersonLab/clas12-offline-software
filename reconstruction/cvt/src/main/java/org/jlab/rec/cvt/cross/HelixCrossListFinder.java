@@ -6,7 +6,6 @@ import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.rec.cvt.bmt.BMTConstants;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
@@ -246,8 +245,8 @@ public class HelixCrossListFinder {
         }
         double dzdrsum = avg_tandip*countCrosses;
         double z_bmt = bmt_Ccross.get_Point().z();
-        double r_bmt = BMTConstants.getCRCRADIUS()[bmt_Ccross.get_Region() - 1];
-        System.out.println(bmt_Ccross.get_Point().toString() + " " + bmt_Ccross.getcCrossRadius());
+        double r_bmt = bmt_Ccross.getRadius();
+        System.out.println(bmt_Ccross.get_Point().toString() + " " + bmt_Ccross.getRadius());
         double dzdr_bmt = z_bmt / r_bmt;
         if (Math.abs(1 - (dzdrsum / (double) (countCrosses)) / ((dzdrsum + dzdr_bmt) / (double) (countCrosses + 1))) <= SVTParameters.dzdrcut) // add this to the track
             pass = true;

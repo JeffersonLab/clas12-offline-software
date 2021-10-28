@@ -277,7 +277,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                         stEP1  = thehit.get_Strip().get_Line().origin();
                         stEP2  = thehit.get_Strip().get_Line().end();
                         // RDV: should remove stuff that is not used or necessary from cluster strips and so on
-                        // for C detectors the phi of the centroid is calculated for the uncorrected and the Lorentz-angle-corrected centroid
+                        // for Z detectors the phi of the centroid is calculated for the uncorrected and the Lorentz-angle-corrected centroid
                         stCent  = new Point3D(Math.cos(thehit.get_Strip().get_Phi()),Math.sin(thehit.get_Strip().get_Phi()),0);
                         stCent0 = new Point3D(Math.cos(thehit.get_Strip().get_Phi0()),Math.sin(thehit.get_Strip().get_Phi0()),0);
                         weightedPhiErrSq  += (thehit.get_Strip().get_PhiErr())  * (thehit.get_Strip().get_PhiErr());

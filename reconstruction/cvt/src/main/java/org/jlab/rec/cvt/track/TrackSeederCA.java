@@ -169,8 +169,7 @@ public class TrackSeederCA {
 
     // create and run the cellular automaton
     public List<Cell> runCAMaker( String plane, int nepochs, ArrayList<Cross> crs, 
-            org.jlab.rec.cvt.bmt.BMTGeometry bgeom, 
-            Swim swimmer){
+            BMTGeometry bgeom, Swim swimmer){
         MakerCA camaker = new MakerCA(false);
         camaker.set_plane( plane );
         if( plane.equalsIgnoreCase("XY") ){
@@ -189,6 +188,7 @@ public class TrackSeederCA {
         camaker.evolve( nepochs );
         return camaker.getNodes();  
     }
+    
     TrackListFinder trkFinder = new TrackListFinder();
     public List<Seed> findSeed(List<Cross> svt_crosses, List<Cross> bmt_crosses, 
     			   SVTGeometry svt_geo, BMTGeometry bmt_geo, Swim swimmer) {

@@ -673,17 +673,10 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     }
 
     /**
-     * @return the cCrossRadius
+     * @return the Cross Radius
      */
-    public double getcCrossRadius() {
-        return cCrossRadius;
-    }
-
-    /**
-     * @param cCrossRadius the cCrossRadius to set
-     */
-    public void setcCrossRadius(double cCrossRadius) {
-        this.cCrossRadius = cCrossRadius;
+    public double getRadius() {
+        return Math.sqrt(this.get_Point().x()*this.get_Point().x()+this.get_Point().y()*this.get_Point().y());
     }
 
     public static void main(String arg[]) {

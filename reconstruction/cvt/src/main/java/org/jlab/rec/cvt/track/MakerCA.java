@@ -3,10 +3,8 @@ import java.util.*;
 
 import javax.vecmath.Vector2d;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.rec.cvt.bmt.BMTConstants;
 
 import org.jlab.rec.cvt.bmt.BMTGeometry;
-import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cross.Cross;
 
 /**
@@ -40,17 +38,7 @@ public class MakerCA {
 		this._debug = false;
 	}
 	
-	
-	private double getCrossRadius( Cross c ) {  // TODO: can this be moved inside the Cross class?
-		if( c.get_Detector()==DetectorType.BST) 
-			return Math.sqrt(c.get_Point().x()*c.get_Point().x()+c.get_Point().y()*c.get_Point().y());
 		
-		if( c.get_Type()==BMTType.Z )
-			return BMTConstants.getCRZRADIUS()[c.get_Region()-1 ];
-		
-		return BMTConstants.getCRCRADIUS()[c.get_Region()-1 ];
-	}
-	
 	private boolean checkAngles( Cell cell ) {
 		double xa = cell.get_Crs2D(1, this._plane).x;
 		double ya = cell.get_Crs2D(1, this._plane).y;
@@ -64,8 +52,8 @@ public class MakerCA {
 			// Angle( DR ) = 0.175 * DR + 0.551 
 			// where DR is the difference in radius of the crosses
 			// The angles are in degrees
-			double R1 = this.getCrossRadius( cell.get_c1() );
-			double R2 = this.getCrossRadius( cell.get_c2() );
+			double R1 = cell.get_c1().getRadius();
+			double R2 = cell.get_c2().getRadius();
 			double angle = 1.75 * (R2 - R1) + 0.551; // in cm; TODO: create setters and getters for the parameters
 //			if( Math.toDegrees(va.angle(vb)) > this._abCrs ) return false;
 			if( Math.toDegrees(va.angle(vb)) > angle ) return false;

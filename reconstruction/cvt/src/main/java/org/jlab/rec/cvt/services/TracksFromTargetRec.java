@@ -70,8 +70,8 @@ public class TracksFromTargetRec {
             } else {
                 TrackSeederCA trseed = new TrackSeederCA();  // cellular automaton seeder
                 seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
-                //second seeding algorithm to search for SVT only tracks, and/or tracks missed by the CA
                 
+                //second seeding algorithm to search for SVT only tracks, and/or tracks missed by the CA
                 TrackSeeder trseed2 = new TrackSeeder();
                 trseed2.unUsedHitsOnly = true;
                 seeds.addAll( trseed2.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer)); 
@@ -89,7 +89,7 @@ public class TracksFromTargetRec {
         KFitter kf = null;
         List<Track> trkcands = new ArrayList<Track>();
         
-        for (Seed seed : seeds) {             
+        for (Seed seed : seeds) { 
             Point3D  v = seed.get_Helix().getVertex();
             Vector3D p = seed.get_Helix().getPXYZ(solenoidValue);
             int charge = (int) (Math.signum(solenoidScale)*seed.get_Helix().get_charge());
