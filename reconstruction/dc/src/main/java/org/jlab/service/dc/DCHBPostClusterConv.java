@@ -68,8 +68,11 @@ public class DCHBPostClusterConv extends DCEngine {
         List<Segment> segments = null;
         List<FittedHit> fhits = new ArrayList<FittedHit>();
         
-        //2) find the clusters from these hits
+        //1) read the hits from the banks
         Map<Integer, ArrayList<FittedHit>> hits = reader.read_Hits(event, Constants.getInstance().dcDetector);
+        if(hits == null || hits.isEmpty())
+            return true;
+        //2) find the clusters from these hits
         ClusterFinder clusFinder = new ClusterFinder();
         ClusterFitter cf = new ClusterFitter();
         clusters = clusFinder.RecomposeClusters(hits, Constants.getInstance().dcDetector, cf);
