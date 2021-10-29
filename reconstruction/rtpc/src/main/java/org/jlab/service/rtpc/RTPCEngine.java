@@ -42,6 +42,7 @@ public class RTPCEngine extends ReconstructionEngine{
     private int fitToBeamline = 1;
     private boolean disentangle = true;
     private boolean chi2culling = true; 
+    private boolean kfStatus = true; 
 
     @Override
     public boolean init() {
@@ -49,7 +50,8 @@ public class RTPCEngine extends ReconstructionEngine{
         String cosm = this.getEngineConfigString("rtpcCosmic");
         String beamfit = this.getEngineConfigString("rtpcBeamlineFit");
         String disentangler = this.getEngineConfigString("rtpcDisentangler");
-	    String chi2cull = this.getEngineConfigString("rtpcChi2Cull");
+	String chi2cull = this.getEngineConfigString("rtpcChi2Cull");
+        String kfstatus = this.getEngineConfigString("rtpcKF");
         //System.out.println(sim + " " + cosm + " " + beamfit);
 
         if(sim != null){
@@ -70,6 +72,10 @@ public class RTPCEngine extends ReconstructionEngine{
 
         if(chi2cull != null){
             chi2culling = Boolean.valueOf(chi2cull);
+        }
+
+        if(kfstatus != null){
+            kfStatus = Boolean.valueOf(kfstatus);
         }
 
         String[] rtpcTables = new String[]{
@@ -140,10 +146,12 @@ public class RTPCEngine extends ReconstructionEngine{
             //Helix Fit Tracks to calculate Track Parameters
             HelixFitTest HF = new HelixFitTest(params,fitToBeamline,Math.abs(magfield),cosmic,chi2culling);
             // Kalman Filter
-            try {
-                KalmanFilter KF = new KalmanFilter(params, event, 0);
-            } catch (Exception e) {
-                // e.printStackTrace();
+            if(kfStatus) {
+                try {
+                    KalmanFilter KF = new KalmanFilter(params, event, 0);
+                } catch (Exception e) {
+                    // e.printStackTrace();
+                }
             }
 
             RecoBankWriter writer = new RecoBankWriter();
