@@ -265,6 +265,9 @@ public class CVTAlignment extends ReconstructionEngine {
 			Matrix c = new Matrix(rows,1);
 			Matrix I = new Matrix(rows,1);
 			Matrix q = new Matrix(4, 1); //track parameters, for plotting kinematic dependence.  Not used in KFA.  
+			if (track.get_helix() == null) {
+				track.set_helix(createHelixFromRay(track.get_ray()));
+			}
 			
 			q.set(0, 0, track.get_helix().get_dca());
 			q.set(1, 0, track.get_helix().get_phi_at_dca());
@@ -392,6 +395,20 @@ public class CVTAlignment extends ReconstructionEngine {
 		return true;
 
 	}
+	private Helix createHelixFromRay(Ray ray) {
+		Vector3D u = ray.get_dirVec();
+		Vector3D xref = ray.get_refPoint().toVector3D();
+		double phi = Math.atan2(u.y(),u.x());
+		Vector3D uT = new Vector3D(Math.cos(phi), Math.sin(phi),0);
+		Vector3D mscphi = new Vector3D(-Math.sin(phi), Math.cos(phi),0);
+		double cosdip = Math.hypot(u.x(), u.y());
+		double d = mscphi.dot(xref);
+		double curvature = 0;
+		double Z0 = xref.z()-u.z()*xref.dot(uT)/u.dot(uT);
+		double tandip = u.z()/Math.hypot(u.x(), u.y());
+		return new Helix(d, phi, curvature, Z0, tandip, null);
+	}
+
 	int nAlignables;
 
 	private Ray getRay(Helix h,double xb, double yb) {
