@@ -299,19 +299,19 @@ public class CCDBConstantsLoader {
         double zpos = dbprovider.getDouble("/geometry/cvt/mvt/position/z", 0 );
         // hardcode gemc rotation: set angles to 0 to null it
         Vector3D  gemcRot = new Vector3D(0,0,0);
-        Point3D bmtCenter = new Point3D(0,0,-94.7); // the original BMT Center
-        Point3D bmtShift  = new Point3D(bmtCenter);
-        bmtCenter.rotateZ(Math.toRadians(gemcRot.z()));
-        bmtCenter.rotateY(Math.toRadians(gemcRot.y()));
-        bmtCenter.rotateX(Math.toRadians(gemcRot.x()));
-        bmtShift.translateXYZ(-bmtCenter.x(), -bmtCenter.y(), -bmtCenter.z());
+        Point3D gemcCenter = new Point3D(0,0,-94.7); // the original BMT Center
+        Point3D gemcShift  = new Point3D(gemcCenter);
+        gemcCenter.rotateZ(Math.toRadians(gemcRot.z()));
+        gemcCenter.rotateY(Math.toRadians(gemcRot.y()));
+        gemcCenter.rotateX(Math.toRadians(gemcRot.x()));
+        gemcShift.translateXYZ(-gemcCenter.x(), -gemcCenter.y(), -gemcCenter.z());
         for (int row = 0; row<NLAYERS*NSECTORS; row++) {
             int sector = dbprovider.getInteger("/geometry/cvt/mvt/alignment/sector", row);
             int layer  = dbprovider.getInteger("/geometry/cvt/mvt/alignment/layer", row);
             Point3D shift = new Point3D(dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaX", row),
                                         dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaY", row),
                                         dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaZ", row)); 
-            shift.translateXYZ(xpos+bmtShift.x(), ypos+bmtShift.y(), zpos+bmtShift.z());
+            shift.translateXYZ(xpos+gemcShift.x(), ypos+gemcShift.y(), zpos+gemcShift.z());
             Vector3D rot = new Vector3D(dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotX", row)+Math.toRadians(gemcRot.x()),
                                         dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotY", row)+Math.toRadians(gemcRot.y()),
                                         dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotZ", row)+Math.toRadians(gemcRot.z())); 

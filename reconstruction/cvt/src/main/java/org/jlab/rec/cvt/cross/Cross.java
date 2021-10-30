@@ -355,6 +355,15 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     public void set_MatchedCCross(Cross _MatchedCCross) {
         this._MatchedCCross = _MatchedCCross;
     }
+    
+    public void resetCross(SVTGeometry geo) {
+        this.set_Dir(null);
+        this.set_DirErr(null);
+        if(this.get_Detector()==DetectorType.BST)
+            this.setSVTCrossPosition(null, geo);
+        else
+            this.setBMTCrossPosition(null);
+    }
 
     /**
      * Sets the cross parameters: the position and direction unit vector
@@ -382,10 +391,12 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         
         if(trackPos!=null) {
             Point3D local = new Point3D(trackPos);
+            Point3D orig  = new Point3D(cluster.origin());
             cluster.get_SeedStrip().toLocal().apply(local);
+            cluster.get_SeedStrip().toLocal().apply(orig);
             if(this.get_Type()==BMTType.C) {
                 double phi  = Math.atan2(local.y(), local.x());
-                double phi0 = Math.atan2(cluster.origin().y(), cluster.origin().x());
+                double phi0 = Math.atan2(orig.y(), orig.x());
                 double t = phi-phi0;
                 if(Math.abs(t)>Math.PI) t-=Math.signum(t)*2*Math.PI;
                 if(t<0) 
@@ -462,7 +473,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         return cross;
     }
 
-        /**
+    /**
      * Calculate the cross position error from the two strips and the track direction
      * @param trackDir track direction
      * @param geo      VT geometry
@@ -481,33 +492,77 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
             double sigma1 = geo.getSingleStripResolution(layer, this.get_Cluster1().get_SeedStrip().get_Strip(), local.z());
             double sigma2 = geo.getSingleStripResolution(layer, this.get_Cluster2().get_SeedStrip().get_Strip(), local.z());
             
-            double delta = 1e-3; // 1micron shift
-            Line3D strip1 = this.get_Cluster1().getLine();
-            Line3D strip2 = this.get_Cluster2().getLine();
-            
-            Vector3D t1 = strip1.direction().asUnit().cross(this.get_Cluster1().getN()).multiply(delta);
-            Line3D strip1Plus  = new Line3D(strip1); 
-            Line3D strip1Minus = new Line3D(strip1); 
-            strip1Plus.translateXYZ(t1.x(), t1.y(), t1.z());
-            strip1Minus.translateXYZ(-t1.x(),-t1.y(),-t1.z());
-            
-            Vector3D t2 = strip2.direction().asUnit().cross(this.get_Cluster2().getN()).multiply(delta);
-            Line3D strip2Plus  = new Line3D(strip2); 
-            Line3D strip2Minus = new Line3D(strip2); 
-            strip2Plus.translateXYZ(t2.x(), t2.y(), t2.z());
-            strip2Minus.translateXYZ(-t2.x(),-t2.y(),-t2.z());
-            
-            Point3D cross1Plus  = geo.getCross(sector, layer, strip1Plus, strip2, trackDir);
-            Point3D cross1Minus = geo.getCross(sector, layer, strip1Minus, strip2, trackDir);
-            Point3D cross2Plus  = geo.getCross(sector, layer, strip1, strip2Plus,  trackDir);
-            Point3D cross2Minus = geo.getCross(sector, layer, strip1, strip2Minus, trackDir);
-            Vector3D error1 = cross1Minus.vectorTo(cross1Plus).multiply(sigma1/delta);
-            Vector3D error2 = cross2Minus.vectorTo(cross2Plus).multiply(sigma2/delta);
-            error = new Vector3D(Math.sqrt(error1.x()*error1.x()+error2.x()*error2.x()),
-                                 Math.sqrt(error1.y()*error1.y()+error2.y()*error2.y()),
-                                 Math.sqrt(error1.z()*error1.z()+error2.z()*error2.z()));
-            if(error.x()==0 && error.y()==0) System.out.println(cross.toString() + "\n" + error.toString());
+            // get the error associated to each strip
+            Vector3D error1 = this.getSVTCrossDerivative(1, trackDir, geo).multiply(sigma1);
+            Vector3D error2 = this.getSVTCrossDerivative(2, trackDir, geo).multiply(sigma2);
+            if(error1!=null && error2!=null)
+                error = new Vector3D(Math.sqrt(error1.x()*error1.x()+error2.x()*error2.x()),
+                                     Math.sqrt(error1.y()*error1.y()+error2.y()*error2.y()),
+                                     Math.sqrt(error1.z()*error1.z()+error2.z()*error2.z()));
+//            if(error.x()==0 && error.y()==0) System.out.println(cross.toString() + "\n" + error.toString());
         }
+        return error;
+    }
+    /**
+     * Calculate the cross derivative for the translation of one strip
+     * useful for the error calculation
+     * @param trackDir track direction
+     * @param geo      VT geometry
+     * @return
+     */
+    public Vector3D getSVTCrossDerivative(int icluster, Vector3D trackDir, SVTGeometry geo) {
+        Vector3D error = null;
+       
+        // check the cluster to be used in the derivative calculation is either 1 or 2
+        if(icluster<1 || icluster>2) return null;
+
+        // if the croos position is not well defined, don't do anything
+        Point3D cross = this.getSVTCrossPoint(trackDir, geo);
+        if(cross==null) return null;
+         
+        int layer  = this.get_Cluster1().get_Layer();
+        int sector = this.get_Cluster1().get_Sector();
+        
+        double delta = 1e-3; // 1micron shift
+        
+        // get the clusters
+        Cluster clusA = this.get_Cluster1();
+        Cluster clusB = this.get_Cluster2();
+        if(icluster==2) {
+            clusA = this.get_Cluster2();
+            clusB = this.get_Cluster1();           
+        }
+        
+        // shift the selected cluster to the left and right of the line
+        Vector3D t = clusA.getLine().direction().asUnit().cross(clusA.getN()).multiply(delta);
+        Line3D stripAPlus  = new Line3D(clusA.getLine()); 
+        Line3D stripAMinus = new Line3D(clusA.getLine()); 
+        stripAPlus.translateXYZ(  t.x(), t.y(), t.z());
+        stripAMinus.translateXYZ(-t.x(),-t.y(),-t.z());
+            
+        // calculate the shifted cross positions
+        Point3D crossAPlus  = null;
+        Point3D crossAMinus = null;
+        if(clusA.get_Layer()%2 == 1) {
+            crossAPlus  = geo.getCross(sector, layer, stripAPlus,  clusB.getLine(), trackDir);
+            crossAMinus = geo.getCross(sector, layer, stripAMinus, clusB.getLine(), trackDir);
+        }
+        else {
+            crossAPlus  = geo.getCross(sector, layer, clusB.getLine(),  stripAPlus, trackDir);
+            crossAMinus = geo.getCross(sector, layer, clusB.getLine(), stripAMinus, trackDir);
+        }
+        
+        // if at least one is non-null, calculate the derivative
+        if(crossAPlus!=null && crossAMinus!=null) {
+            error = crossAMinus.vectorTo(crossAPlus).multiply(1/delta);            
+        }
+        else if(crossAPlus!=null) {
+            error = cross.vectorTo(crossAPlus).multiply(2/delta);
+        }
+        else if(crossAMinus!=null) {
+            error = crossAMinus.vectorTo(cross).multiply(2/delta);
+        }
+        
         return error;
     }
 
@@ -537,66 +592,37 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 
         int theRegion = 0;
         if (this.get_Detector()==DetectorType.BST) {
-            /*
-            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[6][0] + Constants.MODULERADIUS[7][0]) * 0.5 < 15) {
-                if (this.get_Point0().y() > 0) {
-                    theRegion = 8;
-                } else {
-                    theRegion = 1;
-                }
-            }
-
-            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[4][0] + Constants.MODULERADIUS[5][0]) * 0.5 < 15) {
-                if (this.get_Point0().y() > 0) {
-                    theRegion = 7;
-                } else {
-                    theRegion = 2;
-                }
-            }
-
-            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[2][0] + Constants.MODULERADIUS[3][0]) * 0.5 < 15) {
-                if (this.get_Point0().y() > 0) {
-                    theRegion = 6;
-                } else {
-                    theRegion = 3;
-                }
-            }
-
-            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[0][0] + Constants.MODULERADIUS[1][0]) * 0.5 < 15) {
-                if (this.get_Point0().y() > 0) {
-                    theRegion = 5;
-                } else {
-                    theRegion = 4;
-                }
-            }
-            */
-             
-
-            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(3) < 15) {
-                if (this.get_Point0().y() > 0) {
-                    theRegion = 6;
-                } else {
-                    theRegion = 1;
-                }
-            }
-
-            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(2) < 15) {
-                if (this.get_Point0().y() > 0) {
-                    theRegion = 5;
-                } else {
-                    theRegion = 2;
-                }
-            }
-
-            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(1) < 15) {
-                if (this.get_Point0().y() > 0) {
-                    theRegion = 4;
-                } else {
-                    theRegion = 3;
-                }
-            }
+            if(this.get_Point0().y()<0) 
+                theRegion = this.get_Region();
+            else 
+                theRegion = SVTGeometry.NREGIONS*2+1-this.get_Region();
         }
-
+                // RDV check with Veronique
+//            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(3) < 15) {
+//                if (this.get_Point0().y() > 0) {
+//                    theRegion = 6;
+//                } else {
+//                    theRegion = 1;
+//                }
+//            }
+//
+//            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(2) < 15) {
+//                if (this.get_Point0().y() > 0) {
+//                    theRegion = 5;
+//                } else {
+//                    theRegion = 2;
+//                }
+//            }
+//
+//            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(1) < 15) {
+//                if (this.get_Point0().y() > 0) {
+//                    theRegion = 4;
+//                } else {
+//                    theRegion = 3;
+//                }
+//            }
+//        }
+//
         return theRegion;
     }
 
@@ -647,17 +673,10 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     }
 
     /**
-     * @return the cCrossRadius
+     * @return the Cross Radius
      */
-    public double getcCrossRadius() {
-        return cCrossRadius;
-    }
-
-    /**
-     * @param cCrossRadius the cCrossRadius to set
-     */
-    public void setcCrossRadius(double cCrossRadius) {
-        this.cCrossRadius = cCrossRadius;
+    public double getRadius() {
+        return Math.sqrt(this.get_Point().x()*this.get_Point().x()+this.get_Point().y()*this.get_Point().y());
     }
 
     public static void main(String arg[]) {

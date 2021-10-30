@@ -70,10 +70,6 @@ public class SVTParameters {
 
     public static int EMAXREADOUT = 1;
 
-    // for cosmics
-    public static final double COSMICSMINRESIDUAL = 12;
-    public static final double COSMICSMINRESIDUALZ = 120;
-
     // track list cut-off
     public static int maxNcands = 200;
     public static boolean hasWidthResolution = false;

@@ -4,7 +4,6 @@ import cnuphys.magfield.MagneticFields;
 import java.util.HashMap;
 import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
-import org.jlab.rec.cvt.bmt.BMTConstants;
 
 public class Constants {
 
@@ -28,8 +27,15 @@ public class Constants {
 
     public static final double CIRCLEFIT_MAXCHI2 = 100;
 
+    public static final double DEFAULTSWIMACC  = 0.020; // in mm
+    public static final double SWIMACCURACYSVT = 0.010; // in mm
+    public static final double SWIMACCURACYBMT = 0.050; // in mm
+    public static final double SWIMACCURACYCD  = 0.500; // in mm
+    
     private static boolean isCosmicsData = false;
-
+    public static final double COSMICSMINRESIDUALX = 120; // in mm
+    public static final double COSMICSMINRESIDUALZ =  12; // in mm
+    
     private static boolean SVTOnly = false;
 
     public static final boolean trk_comesfrmOrig = true;

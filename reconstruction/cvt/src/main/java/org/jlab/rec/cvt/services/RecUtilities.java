@@ -53,13 +53,15 @@ public class RecUtilities {
         List<Cross> rmCrosses = new ArrayList<Cross>();
         
         for(Cross c : crosses.get(0)) {
-            double z = SVTGeom.toLocal(c.get_Region()*2,
-                                       c.get_Sector(),
-                                       c.get_Point()).z();
-        
-            if(z<-0.1 || z>SVTGeometry.getModuleLength()) {
+//            double z = SVTGeom.toLocal(c.get_Region()*2,
+//                                       c.get_Sector(),
+//                                       c.get_Point()).z();
+//        
+//            if(z<-0.1 || z>SVTGeometry.getModuleLength()) {
+//                rmCrosses.add(c);
+//            }
+            if(!SVTGeom.isInFiducial(c.get_Cluster1().get_Layer(), c.get_Sector(), c.get_Point()))
                 rmCrosses.add(c);
-            }
         }
        
         
@@ -92,7 +94,7 @@ public class RecUtilities {
         Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()),
         new Vector3D(0,0,1));
         Surface meas0 = new Surface(pln0,new Point3D(Constants.getXb(),Constants.getYb(),0),
-        new Point3D(Constants.getXb()-300,Constants.getYb(),0), new Point3D(Constants.getXb()+300,Constants.getYb(),0));
+        new Point3D(Constants.getXb()-300,Constants.getYb(),0), new Point3D(Constants.getXb()+300,Constants.getYb(),0), Constants.DEFAULTSWIMACC);
         meas0.setSector(0);
         meas0.setLayer(0);
         meas0.setError(1);
@@ -140,7 +142,7 @@ public class RecUtilities {
         Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()),
                                     new Vector3D(0,0,1));
         Surface meas0 = new Surface(pln0,new Point3D(0,0,0),
-        new Point3D(-300,0,0), new Point3D(300,0,0));
+        new Point3D(-300,0,0), new Point3D(300,0,0),Constants.DEFAULTSWIMACC);
         meas0.setSector(0);
         meas0.setLayer(0);
         meas0.setError(1);
@@ -151,16 +153,17 @@ public class RecUtilities {
         for (int i = 0; i < trkcand.size(); i++) { //SVT
             if(trkcand.get(i).get_Detector()==DetectorType.BST) {
                 List<Cluster> cls = new ArrayList<Cluster>();
-                int s = trkcand.get(i).get_Cluster1().get_Sector()-1;
-                int lt = trkcand.get(i).get_Cluster1().get_Layer()-1;
-                int lb = trkcand.get(i).get_Cluster2().get_Layer()-1;
+                
+                int sector   = trkcand.get(i).get_Cluster1().get_Sector();
+                int layertop = trkcand.get(i).get_Cluster1().get_Layer();
+                int layerbot = trkcand.get(i).get_Cluster2().get_Layer();
                 Ray ray = trkcand.get_ray();
-                double yt= tf.getIntersectionTrackWithSVTModule(s, lt, 
-                        ray.get_yxinterc(), ray.get_yxslope(), ray.get_yzinterc(), ray.get_yzslope(), sgeo)[1];
-                double yb= tf.getIntersectionTrackWithSVTModule(s, lb, 
-                        ray.get_yxinterc(), ray.get_yxslope(), ray.get_yzinterc(), ray.get_yzslope(), sgeo)[1];
-               
-                if(yt>yb) {
+                Point3D top    = new Point3D();
+                Point3D bottom = new Point3D();
+                sgeo.getPlane(layertop, sector).intersection(ray.toLine(), top);
+                sgeo.getPlane(layerbot, sector).intersection(ray.toLine(), bottom);
+                
+                if(top.y()>bottom.y()) {
                     cls.add(trkcand.get(i).get_Cluster1());
                     cls.add(trkcand.get(i).get_Cluster2());
                 } else {
@@ -168,82 +171,39 @@ public class RecUtilities {
                     cls.add(trkcand.get(i).get_Cluster1());
                 }
                 for (int j = 0; j < cls.size(); j++) { 
-                    int id = cls.get(j).get_Id();
-                    double ce = cls.get(j).get_Centroid();
-                    Point3D endPt1 = cls.get(j).getLine().origin();
-                    Point3D endPt2 = cls.get(j).getLine().end();
-                    Strip strp = new Strip(id, ce, endPt1.x(), endPt1.y(), endPt1.z(),
-                                            endPt2.x(), endPt2.y(), endPt2.z());
-//                    Plane3D pln = new Plane3D(endPt1,sgeo.findBSTPlaneNormal(cluster.get(j).get_Sector(), 
-//                            cluster.get(j).get_Layer()));
-                    Plane3D pln = new Plane3D(endPt1,cls.get(j).getN());
-//                    Point3D Or = sgeo.getPlaneModuleOrigin(cluster.get(j).get_Sector(), cluster.get(j).get_Layer());
-//                    Point3D En = sgeo.getPlaneModuleEnd(cluster.get(j).get_Sector(), cluster.get(j).get_Layer());
-                    Surface meas = new Surface(pln, strp, cls.get(j).origin(), cls.get(j).end());
-                    meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());
-                    meas.setSector(cls.get(j).get_Sector());
-                    double err = cls.get(j).get_Resolution();
-                    meas.setError(err*err); // CHECK THIS .... DOES KF take e or e^2?
-                    //the thickness for multiple scattering.  MS is outward the thickness is set for the 1st layer in the superlayer
-                    // air gap ignored
-                    double thickn_ov_X0 = 0;
-                    if(cls.get(j).get_Layer()%2==1)
-                        thickn_ov_X0 = cls.get(j).get(0).get_Strip().getToverX0();
-                    meas.setl_over_X0(thickn_ov_X0);
-                    //if((int)Constants.getLayersUsed().get(meas.getLayer())<1)
-                    //    meas.notUsedInFit=true;
-                    
+                    int mlayer = cls.get(j).get_Layer();
+                    Surface meas = cls.get(j).measurement(mlayer);
+                    // set SVT material budget according to track direction
+                    if(j==0) meas.setl_over_X0(SVTGeometry.getToverX0());
+                    else     meas.setl_over_X0(0);
+                    // RDV to be tested
+//                    if((int) Constants.getLayersUsed().get(meas.getLayer())<1)
+//                        meas.notUsedInFit=true;
+                    if(i>0 && KFSites.get(KFSites.size()-1).getLayer()==meas.getLayer())
+                        continue;
                     KFSites.add(meas);
+                    
                     clsMap.put(KFSites.size()-1, cls.get(j));
                     trkcand.clsMap = clsMap;
                 }
-        }
-       
-        // adding the BMT
-        
-        if (trkcand.get(i).get_Detector()==DetectorType.BMT) {
-            int layer  = trkcand.get(i).get_Cluster1().get_Layer();
-            int sector = trkcand.get(i).get_Cluster1().get_Sector();
+            }
 
-            int id = trkcand.get(i).get_Cluster1().get_Id();
-            double ce = trkcand.get(i).get_Cluster1().get_Centroid();
-            
-                if (trkcand.get(i).get_Type()==BMTType.Z) {
-                    Point3D point = trkcand.get(i).get_Cluster1().getLine().origin();
-                    double phi = bgeo.getPhi(layer, sector, point);
-                    double err = trkcand.get(i).get_Cluster1().get_PhiErr();
-                    bgeo.toLocal(point, layer, sector);
-                    Strip strp = new Strip(id, ce, point.x(), point.y(), phi);  
-                    
-                    Surface meas = new Surface(bgeo.getTileSurface(layer, sector), strp);
-                    meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());
-                    meas.setTransformation(bgeo.toGlobal(layer,sector));                     
-                    meas.setSector(trkcand.get(i).get_Sector());
-                    meas.setError(err*err); // CHECK THIS .... DOES KF take e or e^2?
-                    //for multiple scattering
-                    meas.setl_over_X0(bgeo.getToverX0(layer));
+            // adding the BMT
+            if (trkcand.get(i).get_Detector()==DetectorType.BMT) {
+                int layer  = trkcand.get(i).get_Cluster1().get_Layer();
+                int sector = trkcand.get(i).get_Cluster1().get_Sector();
 
-                    KFSites.add(meas);
-                    clsMap.put(KFSites.size()-1, trkcand.get(i).get_Cluster1());
+                int id = trkcand.get(i).get_Cluster1().get_Id();
+                double ce = trkcand.get(i).get_Cluster1().get_Centroid();
+                Surface meas = trkcand.get(i).get_Cluster1().measurement(layer);
+                meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());;
+                if((int)Constants.getLayersUsed().get(meas.getLayer())<1) {
+                    meas.notUsedInFit=true;
                 }
-                else if (trkcand.get(i).get_Type()==BMTType.C) {
-                    double z   = trkcand.get(i).get_Cluster1().get_Z();
-                    double err = trkcand.get(i).get_Cluster1().get_ZErr();
-                    Arc3D arc  = trkcand.get(i).get_Cluster1().get_Arc();
-                    Strip strp = new Strip(id, ce, arc);
-         
-                    Surface meas = new Surface(bgeo.getTileSurface(layer, sector), strp);
-                    meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());
-                    meas.setTransformation(bgeo.toGlobal(layer,sector)); 
-                    
-                    meas.setSector(sector);
-                    meas.setError(err*err); // CHECK THIS .... DOES KF take e or e^2?
-                    //for multiple scattering
-                    meas.setl_over_X0(bgeo.getToverX0(layer));
-
-                    KFSites.add(meas);
-                    clsMap.put(KFSites.size()-1, trkcand.get(i).get_Cluster1());
-                }
+                if(i>0 && KFSites.get(KFSites.size()-1).getLayer()==meas.getLayer())
+                    continue;
+                KFSites.add(meas);
+                clsMap.put(KFSites.size()-1, trkcand.get(i).get_Cluster1());
             }
         }
         for(int i = 0; i< KFSites.size(); i++) {
@@ -267,7 +227,7 @@ public class RecUtilities {
         for(Cluster cluster : seedCluster) {
             if(cluster.get_Detector() == DetectorType.BMT)
                 continue;
-            clusterMap.put(sgeo.getModuleId(cluster.get_Layer(), cluster.get_Sector()), cluster);
+            clusterMap.put(SVTGeometry.getModuleId(cluster.get_Layer(), cluster.get_Sector()), cluster);
         }   
         
         // for each layer
@@ -294,13 +254,13 @@ public class RecUtilities {
                 double deltaPhi = Math.acos(helixPoint.toVector3D().asUnit().dot(n));
                 if(Math.abs(deltaPhi)>2*Math.PI/SVTGeometry.NSECTORS[ilayer]) continue;
                 
-                int key = sgeo.getModuleId(layer, sector);
+                int key = SVTGeometry.getModuleId(layer, sector);
                 
                 // calculate trajectory
                 Point3D traj = null;
-                Point3D  p = sgeo.getModule(layer, sector).origin();
-                Point3D pm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
-                inters = swimmer.SwimPlane(n, pm, 1E-3);
+                Point3D   p = sgeo.getModule(layer, sector).origin();
+                Point3D pcm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
+                inters = swimmer.AdaptiveSwimPlane(pcm.x(), pcm.y(), pcm.z(), n.x(), n.y(), n.z(), Constants.DEFAULTSWIMACC/10);
                 if(inters!=null) {
                     traj = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
                 }
@@ -311,7 +271,7 @@ public class RecUtilities {
                         Cluster cluster = clusterMap.get(key);
                         doca = cluster.residual(traj);
                     }
-                    // loop over all clusters in the same sector and layer that are noy associated to s track
+                    // loop over all clusters in the same sector and layer that are noy associated to sector track
                     for(Cluster cls : allClusters) {
                         if(cls.get_AssociatedTrackID()==-1 && cls.get_Sector()==sector && cls.get_Layer()==layer) {
                             double clsDoca = cls.residual(traj);
@@ -333,6 +293,7 @@ public class RecUtilities {
         return clustersOnTrack;
     }
     
+    @Deprecated
     public List<Cluster> FindClustersOnTrk (List<Cluster> allClusters, List<Cluster> seedCluster, Helix helix, double P, int Q,
             SVTGeometry sgeo, Swim swimmer) { 
         Map<Integer, Cluster> clusMap = new HashMap<Integer, Cluster>();
@@ -367,10 +328,10 @@ public class RecUtilities {
             if(sector == -1)
                 continue;
             
-            Vector3D n = sgeo.getNormal(layer, sector);
-            Point3D  p = sgeo.getModule(layer, sector).origin();
-            Point3D pm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
-            inters = swimmer.SwimPlane(n, pm, 1E-3);
+            Vector3D  n = sgeo.getNormal(layer, sector);
+            Point3D   p = sgeo.getModule(layer, sector).origin();
+            Point3D pcm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
+            inters = swimmer.AdaptiveSwimPlane(pcm.x(), pcm.y(), pcm.z(), n.x(), n.y(), n.z(), 2*Constants.SWIMACCURACYSVT/10);
             if(inters!=null) {
                 Point3D trp = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
                 int nearstp = sgeo.calcNearestStrip(inters[0]*10, inters[1]*10, inters[2]*10, layer, sector);

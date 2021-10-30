@@ -87,7 +87,7 @@ public class SVTGeometry {
                           line.end().x,   line.end().y,   line.end().z);        
     }
     
-    public int getModuleId(int layer, int sector) {
+    public static int getModuleId(int layer, int sector) {
         return layer*100+sector;
     }
     

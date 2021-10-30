@@ -63,7 +63,7 @@ public class TrackListFinder {
                         trk.get_P(), charge, 
                         maxPathLength) ;
 
-                double[] pointAtCylRad = cvtSwim.SwimGenCylinder(new Point3D(0,0,0), new Point3D(0,0,0), Constants.CTOFINNERRADIUS/10);
+                double[] pointAtCylRad = cvtSwim.AdaptiveSwimRho(Constants.CTOFINNERRADIUS/10, Constants.SWIMACCURACYCD);
                 if(pointAtCylRad!=null) {
                     trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0]*10, pointAtCylRad[1]*10, pointAtCylRad[2]*10));
                     trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3]*10, pointAtCylRad[4]*10, pointAtCylRad[5]*10));

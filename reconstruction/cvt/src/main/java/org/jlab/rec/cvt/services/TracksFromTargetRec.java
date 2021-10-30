@@ -1,7 +1,6 @@
 package org.jlab.rec.cvt.services;
 
 import Jama.Matrix;
-import cnuphys.magfield.MagneticFields;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
@@ -71,8 +70,8 @@ public class TracksFromTargetRec {
             } else {
                 TrackSeederCA trseed = new TrackSeederCA();  // cellular automaton seeder
                 seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
-                //second seeding algorithm to search for SVT only tracks, and/or tracks missed by the CA
                 
+                //second seeding algorithm to search for SVT only tracks, and/or tracks missed by the CA
                 TrackSeeder trseed2 = new TrackSeeder();
                 trseed2.unUsedHitsOnly = true;
                 seeds.addAll( trseed2.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer)); 
@@ -90,7 +89,7 @@ public class TracksFromTargetRec {
         KFitter kf = null;
         List<Track> trkcands = new ArrayList<Track>();
         
-        for (Seed seed : seeds) {             
+        for (Seed seed : seeds) { 
             Point3D  v = seed.get_Helix().getVertex();
             Vector3D p = seed.get_Helix().getPXYZ(solenoidValue);
             int charge = (int) (Math.signum(solenoidScale)*seed.get_Helix().get_charge());
@@ -177,7 +176,7 @@ public class TracksFromTargetRec {
         List<Track> tracks = trkFinder.getTracks(trkcands, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, swimmer);
 
         for( int i=0;i<tracks.size();i++) { 
-            tracks.get(i).set_Id(i+1);         
+            tracks.get(i).set_Id(i+1);   
         }
 
         //System.out.println( " *** *** trkcands " + trkcands.size() + " * trks " + trks.size());
@@ -263,8 +262,8 @@ public class TracksFromTargetRec {
         // set index associations
         if (tracks.size() > 0) {
             recUtil.CleanupSpuriousCrosses(crosses, tracks, SVTGeom) ;
-            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, tracks, shift);
         }
+        rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, tracks, shift);
 
         return true;
 
