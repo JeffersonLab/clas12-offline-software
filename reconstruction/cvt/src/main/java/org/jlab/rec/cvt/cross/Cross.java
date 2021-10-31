@@ -597,32 +597,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
             else 
                 theRegion = SVTGeometry.NREGIONS*2+1-this.get_Region();
         }
-                // RDV check with Veronique
-//            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(3) < 15) {
-//                if (this.get_Point0().y() > 0) {
-//                    theRegion = 6;
-//                } else {
-//                    theRegion = 1;
-//                }
-//            }
-//
-//            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(2) < 15) {
-//                if (this.get_Point0().y() > 0) {
-//                    theRegion = 5;
-//                } else {
-//                    theRegion = 2;
-//                }
-//            }
-//
-//            if (this.get_Point0().toVector3D().rho() - SVTGeometry.getRegionRadius(1) < 15) {
-//                if (this.get_Point0().y() > 0) {
-//                    theRegion = 4;
-//                } else {
-//                    theRegion = 3;
-//                }
-//            }
-//        }
-//
+        
         return theRegion;
     }
 
