@@ -31,7 +31,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map.Entry;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.geom.prim.Arc3D;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -53,13 +52,6 @@ public class RecUtilities {
         List<Cross> rmCrosses = new ArrayList<Cross>();
         
         for(Cross c : crosses.get(0)) {
-//            double z = SVTGeom.toLocal(c.get_Region()*2,
-//                                       c.get_Sector(),
-//                                       c.get_Point()).z();
-//        
-//            if(z<-0.1 || z>SVTGeometry.getModuleLength()) {
-//                rmCrosses.add(c);
-//            }
             if(!SVTGeom.isInFiducial(c.get_Cluster1().get_Layer(), c.get_Sector(), c.get_Point()))
                 rmCrosses.add(c);
         }
@@ -84,6 +76,7 @@ public class RecUtilities {
                 if(rmFlag==true)
                     rmTrks.add(t);
             }
+            // RDV why removing the whole track?
             trks.removeAll(rmTrks);
         }
     }
@@ -134,7 +127,6 @@ public class RecUtilities {
     
     
     
-    // RDV: switch to cluster.mesurement()
     public List<Surface> setMeasVecs(StraightTrack trkcand, 
             SVTGeometry sgeo, BMTGeometry bgeo, Swim swim) {
         //Collections.sort(trkcand.get_Crosses());
@@ -258,9 +250,9 @@ public class RecUtilities {
                 
                 // calculate trajectory
                 Point3D traj = null;
-                Point3D   p = sgeo.getModule(layer, sector).origin();
-                Point3D pcm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
-                inters = swimmer.AdaptiveSwimPlane(pcm.x(), pcm.y(), pcm.z(), n.x(), n.y(), n.z(), Constants.DEFAULTSWIMACC/10);
+                Point3D  p = sgeo.getModule(layer, sector).origin();
+                Point3D pm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
+                inters = swimmer.SwimPlane(n, pm, Constants.DEFAULTSWIMACC/10);
                 if(inters!=null) {
                     traj = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
                 }
@@ -331,7 +323,7 @@ public class RecUtilities {
             Vector3D  n = sgeo.getNormal(layer, sector);
             Point3D   p = sgeo.getModule(layer, sector).origin();
             Point3D pcm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
-            inters = swimmer.AdaptiveSwimPlane(pcm.x(), pcm.y(), pcm.z(), n.x(), n.y(), n.z(), 2*Constants.SWIMACCURACYSVT/10);
+            inters = swimmer.SwimPlane(n, p, Constants.DEFAULTSWIMACC/10);
             if(inters!=null) {
                 Point3D trp = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
                 int nearstp = sgeo.calcNearestStrip(inters[0]*10, inters[1]*10, inters[2]*10, layer, sector);

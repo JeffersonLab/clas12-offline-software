@@ -1,7 +1,5 @@
 package org.jlab.rec.cvt.track;
 
-import org.jlab.clas.swimtools.Swim;
-import org.jlab.clas.swimtools.Swimmer;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
@@ -9,6 +7,7 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
+import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.rec.cvt.trajectory.Trajectory;
@@ -257,6 +256,40 @@ public class Track extends Trajectory implements Comparable<Track> {
 //    	return ( tr.size() >= this.size() ) ? 1 : -1;
         return (tr.get_P() > this.get_P()) ? 1 : -1;
     }
+    
+    /**
+     * Compare this track quality with the given track
+     * based on NDF and Chi2
+     * @param o the other track
+     * @return true if this track quality is better than the given track
+     */    
+    public boolean betterThan(Track o) {
+        if(this.getNDF()>o.getNDF()) 
+            return true;
+        else if(this.getNDF()>0 && this.getNDF()==o.getNDF()) {
+            if(this.getChi2()/this.getNDF() < o.getChi2()/o.getNDF())
+                return true;
+            else return false;
+        }
+        else
+            return false;
+    }
+    
+    /**
+     * Check track overlaps with the given track
+     * an overlaps is detected if the tracks share at least two crosses
+     * @param o the other track
+     * @return true if this track overlaps with the given track, false otherwise
+     */
+    public boolean overlapWith(Track o) {
+        int nc = 0;
+        for(Cross c : this) {
+            if(c.get_Type()==BMTType.C) continue; //skim BMTC
+            if(o.contains(c)) nc++;
+        }
+        if(nc >1) return true;
+        else      return false;
+    }
 
     public Point3D get_TrackPointAtCTOFRadius() {
         return _TrackPointAtCTOFRadius;
@@ -320,6 +353,14 @@ public class Track extends Trajectory implements Comparable<Track> {
 
     public void setChi2(double _Chi2) {
         this._Chi2 = _Chi2;
+    }
+    
+    public String toString() {
+        String str = String.format("Track id=%d, q=%d, p=%.3f GeV pt=%.3f GeV, phi=%.3f deg, NDF=%d, chi2=%.3f\n", 
+                     this.get_Id(), this.get_Q(), this.get_P(), this.get_Pt(), Math.toDegrees(this.get_helix().get_phi_at_dca()),
+                     this.getNDF(), this.getChi2());
+        for(Cross c: this) str = str + c.toString() + "\n";
+        return str;
     }
 
 }

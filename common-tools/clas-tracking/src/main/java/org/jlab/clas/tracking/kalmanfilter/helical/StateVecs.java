@@ -171,7 +171,8 @@ public class StateVecs {
                                                     mv.surface.plane.point().y()/units,
                                                     mv.surface.plane.point().z()/units);
                         double accuracy = mv.surface.swimAccuracy/units;
-                        swimPars = swim.AdaptiveSwimPlane(point.x(), point.y(), point.z(), norm.x(), norm.y(), norm.z(), accuracy);
+                        swimPars = swim.SwimPlane(norm,point,accuracy);
+     //                   swimPars = swim.AdaptiveSwimPlane(point.x(), point.y(), point.z(), norm.x(), norm.y(), norm.z(), accuracy);
                         if(swimPars==null)
                             return null;
                         for(int j =0; j < 3; j++) {
@@ -215,7 +216,7 @@ public class StateVecs {
                                                  mv.surface.cylinder.getAxis().end().y()/units,
                                                  mv.surface.cylinder.getAxis().end().z()/units) ;
                         double accuracy = mv.surface.swimAccuracy/units;
-                        swimPars = swim.AdaptiveSwimCylinder(p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), r/units, accuracy);
+                        swimPars = swim.SwimGenCylinder(p1, p2, r/units, accuracy);
                         if(swimPars==null)
                             return null;
                         for(int j =0; j < 3; j++) {

@@ -63,11 +63,10 @@ public class TrackListFinder {
                         trk.get_P(), charge, 
                         maxPathLength) ;
 
-                double[] pointAtCylRad = cvtSwim.AdaptiveSwimRho(Constants.CTOFINNERRADIUS/10, Constants.SWIMACCURACYCD);
+                double[] pointAtCylRad = cvtSwim.SwimGenCylinder(new Point3D(0,0,0), new Point3D(0,0,1), Constants.CTOFINNERRADIUS/10, Constants.SWIMACCURACYCD/10);
                 if(pointAtCylRad!=null) {
                     trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0]*10, pointAtCylRad[1]*10, pointAtCylRad[2]*10));
                     trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3]*10, pointAtCylRad[4]*10, pointAtCylRad[5]*10));
-
                     trk.set_pathLength(pointAtCylRad[6]*10);
 
                     TrajectoryFinder trjFind = new TrajectoryFinder();
@@ -113,7 +112,44 @@ public class TrackListFinder {
     }
     
      
-    public void removeOverlappingTracks(List<Track> trkcands) {
+    public void removeOverlappingTracks(List<Track> tracks) {
+            if(tracks==null)
+                return;
+            
+        List<Track> selectedTracks =  new ArrayList<>();
+        for (int i = 0; i < tracks.size(); i++) {
+            boolean overlap = false;
+            Track t1 = tracks.get(i);
+            for(int j=0; j<tracks.size(); j++ ) {
+                Track t2 = tracks.get(j);
+                if(i!=j && t1.overlapWith(t2) && !t1.betterThan(t2)) {
+                    overlap=true;
+                }
+            }
+            if(!overlap) selectedTracks.add(t1);
+        }
+//        if(selectedTracks.size()<tracks.size()) {
+//            for(Track t : tracks) System.out.println("Tracks " + t.toString());
+//            for(Track t : selectedTracks) System.out.println("Selected " + t.toString());
+//        }
+        tracks.removeAll(tracks);
+        tracks.addAll(selectedTracks);
+    }
+    
+    public static void checkForOverlaps(List<Track> tracks, String msg) {
+        for (int i = 0; i < tracks.size(); i++) {
+            Track t1 = tracks.get(i);
+            for(int j=0; j<tracks.size(); j++ ) {
+                Track t2 = tracks.get(j);
+                if(i!=j && t1.overlapWith(t2)) {
+                    System.out.println(msg + " " + "overlap");
+                }
+            }
+        }        
+    }
+    
+    @Deprecated
+    public void removeOverlappingTracksOld(List<Track> trkcands) {
             if(trkcands==null)
                 return;
             
@@ -151,6 +187,7 @@ public class TrackListFinder {
                 trkcands.addAll(selectedTracks);
     }
 
+    @Deprecated
     private boolean ListContainsTrack(List<Track> selectedTracks, Track selectedTrk) { 
             // not used. Now Track extends Comparables
             boolean isInList = false;
@@ -162,6 +199,7 @@ public class TrackListFinder {
     }
 
 
+    @Deprecated
     private void getOverlapLists(Track track, List<Track> trkcands, List<Track> list) {
     // --------------------------------------------------------------------
     //  two tracks are considered the same if they share at least 2 crosses

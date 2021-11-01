@@ -29,7 +29,7 @@ public class Constants {
 
     public static final double DEFAULTSWIMACC  = 0.020; // in mm
     public static final double SWIMACCURACYSVT = 0.010; // in mm
-    public static final double SWIMACCURACYBMT = 0.050; // in mm
+    public static final double SWIMACCURACYBMT = 0.020; // in mm
     public static final double SWIMACCURACYCD  = 0.500; // in mm
     
     private static boolean isCosmicsData = false;

@@ -74,7 +74,7 @@ public class TracksFromTargetRec {
                 //second seeding algorithm to search for SVT only tracks, and/or tracks missed by the CA
                 TrackSeeder trseed2 = new TrackSeeder();
                 trseed2.unUsedHitsOnly = true;
-                seeds.addAll( trseed2.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer)); 
+                seeds.addAll( trseed2.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer)); // RDV check for overlaps
                 if(exLayrs==true) {
                     seeds = recUtil.reFit(seeds, SVTGeom, BMTGeom, swimmer, trseed,trseed2);
                 }
@@ -132,36 +132,33 @@ public class TracksFromTargetRec {
                             fittedTrack.get_P(), fittedTrack.get_Q(), SVTGeom, swimmer);
                     if(clsOnTrack.size()>0) {
                         seed.get_Clusters().addAll(clsOnTrack);
-                    }
-                   
-                    //reset pars
-                    v = fittedTrack.get_helix().getVertex();
-                    p = fittedTrack.get_helix().getPXYZ(solenoidValue);
-                    charge = (int) (Math.signum(solenoidScale)*fittedTrack.get_helix().get_charge());
-                    if(solenoidValue<0.001)
-                        charge = 1;
-                    v.translateXYZ(Constants.getXb(),Constants.getYb(), 0);
-                    hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
-                                    solenoidValue, Constants.getXb(), Constants.getYb(), Helix.Units.MM);
+                    
+                        //reset pars
+                        v = fittedTrack.get_helix().getVertex();
+                        p = fittedTrack.get_helix().getPXYZ(solenoidValue);
+                        charge = (int) (Math.signum(solenoidScale)*fittedTrack.get_helix().get_charge());
+                        if(solenoidValue<0.001)
+                            charge = 1;
+                        v.translateXYZ(Constants.getXb(),Constants.getYb(), 0);
+                        hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
+                                        solenoidValue, Constants.getXb(), Constants.getYb(), Helix.Units.MM);
 
-                    kf = new KFitter( hlx, cov, event,  swimmer, 
-                    Constants.getXb(), 
-                    Constants.getYb(),
-                    shift, 
-                    recUtil.setMeasVecs(seed, swimmer)) ;
-                    //Uncomment to let track be fitted
-                    //kf.filterOn = false;
-                    kf.runFitter(swimmer);
-                    
-                    Track trk = recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom);
-                    
-                    trkcands.add(trk);
-                    trkcands.get(trkcands.size() - 1).set_TrackingStatus(seed.trkStatus);
+                        kf = new KFitter( hlx, cov, event,  swimmer, 
+                        Constants.getXb(), 
+                        Constants.getYb(),
+                        shift, 
+                        recUtil.setMeasVecs(seed, swimmer)) ;
+                        //Uncomment to let track be fitted
+                        //kf.filterOn = false;
+                        kf.runFitter(swimmer);
+                        
+                        // RDV get rid of added clusters if not true
+                        if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null)
+                            fittedTrack = recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom);
+                    }
+                    fittedTrack.set_TrackingStatus(seed.trkStatus);
+                    trkcands.add(fittedTrack);
                 }
-            //} else {
-                //trkcands.add(recUtil.OutputTrack(seed));
-                //trkcands.get(trkcands.size() - 1).set_TrackingStatus(1);
-            //}
         }
     
 
@@ -173,6 +170,9 @@ public class TracksFromTargetRec {
 
         //This last part does ELoss C
         TrackListFinder trkFinder = new TrackListFinder();
+        trkFinder.removeOverlappingTracks(trkcands); //turn off until debugged
+                    TrackListFinder.checkForOverlaps(trkcands, "KF");
+
         List<Track> tracks = trkFinder.getTracks(trkcands, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, swimmer);
 
         for( int i=0;i<tracks.size();i++) { 
@@ -180,8 +180,6 @@ public class TracksFromTargetRec {
         }
 
         //System.out.println( " *** *** trkcands " + trkcands.size() + " * trks " + trks.size());
-        // RDV: can it be done before doing trajectories??
-        trkFinder.removeOverlappingTracks(tracks); //turn off until debugged
         // reset cross IDs
         for(int a = 0; a<2; a++) {
             for(Cross c : crosses.get(a))
