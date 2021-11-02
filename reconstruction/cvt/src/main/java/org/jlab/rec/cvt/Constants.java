@@ -7,9 +7,11 @@ import org.jlab.clas.swimtools.Swim;
 
 public class Constants {
 
-    public static double PTCUT = 0.075;
-    
+    public static double PTCUT   = 0.075; // minimum pt in GeV
+    public static double NDFCUT  = 0;     // minimum number of degres of freedom
+    public static double CHI2CUT = 25;    // minimum chi2 per degrees of freedom
 
+    
     /**
      * BMTConstants used in the reconstruction
      */
@@ -23,7 +25,6 @@ public class Constants {
     public static final double LIGHTVEL = 0.000299792458;       // velocity of light (mm/ns) - conversion factor from radius in mm to momentum in GeV/c 
 
     // selection cuts for helical tracks
-    public static final double MINRADCURV = 200.00; //in cm
 
     public static final double CIRCLEFIT_MAXCHI2 = 100;
 

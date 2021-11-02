@@ -68,18 +68,16 @@ public class TrackListFinder {
                     trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0]*10, pointAtCylRad[1]*10, pointAtCylRad[2]*10));
                     trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3]*10, pointAtCylRad[4]*10, pointAtCylRad[5]*10));
                     trk.set_pathLength(pointAtCylRad[6]*10);
-
-                    TrajectoryFinder trjFind = new TrajectoryFinder();
-
-                    Trajectory traj = trjFind.findTrajectory(trk, svt_geo, bmt_geo, ctof_geo, cnd_geo, cvtSwim, "final");
-
-                    trk.set_Trajectory(traj.get_Trajectory());
-
-                    //if(trk.passCand == true)
-                    tracks.add(trk);
                 }
-            }
+                TrajectoryFinder trjFind = new TrajectoryFinder();
 
+                Trajectory traj = trjFind.findTrajectory(trk, svt_geo, bmt_geo, ctof_geo, cnd_geo, cvtSwim, "final");
+
+                trk.set_Trajectory(traj.get_Trajectory());
+
+                //if(trk.passCand == true)
+                tracks.add(trk);
+            }
         }
         return tracks;
     }
@@ -112,6 +110,32 @@ public class TrackListFinder {
     }
     
      
+    public void removeBadTracks(List<Track> trkcands) {
+        if (trkcands == null) {
+            return;
+        }
+
+        int initial_size = trkcands.size();
+
+        for (int i = 1; i < initial_size + 1; i++) {
+            if (Double.isNaN(trkcands.get(initial_size - i).getChi2())) {
+                trkcands.remove(initial_size - i);
+                continue;
+            }
+            if (trkcands.get(initial_size - i).getChi2() > Constants.CHI2CUT * (trkcands.get(initial_size - i).getNDF() + 5)) {
+                trkcands.remove(initial_size - i);
+                continue;
+            }
+            if (trkcands.get(initial_size - i).getNDF() < Constants.NDFCUT) {
+                trkcands.remove(initial_size - i);
+                continue;
+            }
+            if (trkcands.get(initial_size - i).get_Pt() < Constants.PTCUT) {
+                trkcands.remove(initial_size - i);
+            }
+        }
+    }
+
     public void removeOverlappingTracks(List<Track> tracks) {
             if(tracks==null)
                 return;
