@@ -550,8 +550,8 @@ public class RecUtilities {
     public List<Seed> reFit(List<Seed> seedlist,
             SVTGeometry SVTGeom, BMTGeometry BMTGeom,
             Swim swimmer,  TrackSeederCA trseed,  TrackSeeder trseed2) {
-        trseed = new TrackSeederCA();
-        trseed2 = new TrackSeeder();
+        trseed = new TrackSeederCA(SVTGeom, BMTGeom, swimmer);
+        trseed2 = new TrackSeeder(SVTGeom, BMTGeom, swimmer);
         List<Seed> filtlist = new ArrayList<Seed>();
         if(seedlist==null)
             return filtlist;
@@ -596,10 +596,10 @@ public class RecUtilities {
             }
         }
         Collections.sort(refi);
-        seedlist = trseed.findSeed(refi, refib, SVTGeom, BMTGeom, swimmer);
+        seedlist = trseed.findSeed(refi, refib);
         
         trseed2.unUsedHitsOnly = true;
-        seedlist.addAll( trseed2.findSeed(refi, refib, SVTGeom, BMTGeom, swimmer)); 
+        seedlist.addAll( trseed2.findSeed(refi, refib)); 
         
         return seedlist;
     }

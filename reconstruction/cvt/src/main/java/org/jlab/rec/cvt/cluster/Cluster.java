@@ -345,7 +345,9 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             weightedPhi0 = Math.atan2(weightedY0, weightedX0);
             this.set_Centroid(weightedStrp);
             this.set_TotalEnergy(totEn);
-            
+            this.set_Phi(weightedPhi);
+            this.set_Phi0(weightedPhi0);
+                    
             //setting final variables, including the ones used for alignment
             //-----------------------------------
             if (this.get_Detector()==DetectorType.BST) { //SVT
@@ -385,9 +387,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                 if (this.get_Type()==BMTType.Z) { // Z-detectors
             
                     this.set_Centroid0(weightedStrp0);
-                    this.set_Phi(weightedPhi);
                     this.set_PhiErr(Math.sqrt(weightedPhiErrSq));
-                    this.set_Phi0(weightedPhi0);
                     this.set_PhiErr0(Math.sqrt(weightedPhiErrSq0));
                     this.set_CentroidValue(weightedPhi);
                     this.set_CentroidError(Math.sqrt(weightedPhiErrSq));
@@ -747,8 +747,8 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     public int compareTo(Cluster arg) {
             
         //sort by phi of strip implant of first strip in the cluster, then by layer, then by seed strip number
-        double this_phi = PhiInRange(this.get(0).get_Strip().get_Line().origin().toVector3D().phi());
-        double arg_phi = PhiInRange(arg.get(0).get_Strip().get_Line().origin().toVector3D().phi());
+        double this_phi = this.get_Phi0(); 
+        double arg_phi  = arg.get_Phi0();
 
         int CompPhi = this_phi < arg_phi ? -1 : this_phi == arg_phi ? 0 : 1;
         int CompLay = this._Layer < arg._Layer ? -1 : this._Layer == arg._Layer ? 0 : 1;

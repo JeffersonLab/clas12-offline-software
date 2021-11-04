@@ -51,9 +51,9 @@ public class StraightTrackSeeder {
     private void MatchSeed(List<Cross> othercrs) {
         
         for (Seed seed : seedScan) {
-            double d = seed.doca;
-            double r = seed.rho;
-            double f = seed.phi;
+            double d = seed.get_Doca();
+            double r = seed.get_Rho();
+            double f = seed.get_Phi();
 
             Map<Integer, Cross> matchBMT = new HashMap<Integer, Cross>();
             for (Cross c : othercrs ) { 
@@ -128,11 +128,7 @@ public class StraightTrackSeeder {
                 return;
             }
         }
-        Seed seed = new Seed();
-        seed.set_Crosses(seedcrs);
-        seed.doca = d;
-        seed.rho = r;
-        seed.phi = f;
+        Seed seed = new Seed(seedcrs, d, r, f);
         
         seedScan.add(seed);
     }
@@ -314,17 +310,6 @@ public class StraightTrackSeeder {
                 Seed seed = new Seed();
                 seed.set_Crosses(seedcrs);
                 seed.set_Helix(cand.get_helix());
-                List<Cluster> clusters = new ArrayList<Cluster>();
-                for(Cross c : seed.get_Crosses()) { 
-                    c.set_AssociatedTrackID(1111);
-                    if(c.get_Detector()==DetectorType.BST) {
-                        clusters.add(c.get_Cluster1());
-                        clusters.add(c.get_Cluster2());
-                    } else {
-                        clusters.add(c.get_Cluster1());
-                    }
-                }
-                seed.set_Clusters(clusters);
                 
                 //match to BMT
                 if (seed != null ) {
@@ -341,7 +326,6 @@ public class StraightTrackSeeder {
                         if (bcand != null) {
                             seed = new Seed();
                             seed.set_Crosses(bseed.get_Crosses());
-                            seed.set_Clusters(bseed.get_Clusters());
                             seed.set_Helix(bcand.get_helix());
                         }
                     }
@@ -576,7 +560,6 @@ public class StraightTrackSeeder {
                         
                         BMTTrkSeed.set_Helix(trkCand.get_Helix());
                         BMTTrkSeed.set_Crosses(matches);
-                        BMTTrkSeed.set_Clusters(trkCand.get_Clusters());
                         AllSeeds.add(BMTTrkSeed);
                         
                         //if (AllSeeds.size() > 200) {

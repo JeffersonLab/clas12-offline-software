@@ -118,19 +118,7 @@ public class TrackListFinder {
         int initial_size = trkcands.size();
 
         for (int i = 1; i < initial_size + 1; i++) {
-            if (Double.isNaN(trkcands.get(initial_size - i).getChi2())) {
-                trkcands.remove(initial_size - i);
-                continue;
-            }
-            if (trkcands.get(initial_size - i).getChi2() > Constants.CHI2CUT * (trkcands.get(initial_size - i).getNDF() + 5)) {
-                trkcands.remove(initial_size - i);
-                continue;
-            }
-            if (trkcands.get(initial_size - i).getNDF() < Constants.NDFCUT) {
-                trkcands.remove(initial_size - i);
-                continue;
-            }
-            if (trkcands.get(initial_size - i).get_Pt() < Constants.PTCUT) {
+            if (!trkcands.get(initial_size - i).isGood()) {
                 trkcands.remove(initial_size - i);
             }
         }

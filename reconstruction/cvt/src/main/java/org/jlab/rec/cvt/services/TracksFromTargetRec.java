@@ -62,17 +62,17 @@ public class TracksFromTargetRec {
             //seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
         } else {
             if(isSVTonly) {
-                TrackSeeder trseed = new TrackSeeder();
+                TrackSeeder trseed = new TrackSeeder(SVTGeom, BMTGeom, swimmer);
                 trseed.unUsedHitsOnly = true;
-                seeds = trseed.findSeed(crosses.get(0), null, SVTGeom, BMTGeom, swimmer);
+                seeds = trseed.findSeed(crosses.get(0), null);
             } else {
-                TrackSeederCA trseed = new TrackSeederCA();  // cellular automaton seeder
-                seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
+                TrackSeederCA trseed = new TrackSeederCA(SVTGeom, BMTGeom, swimmer);  // cellular automaton seeder
+                seeds = trseed.findSeed(crosses.get(0), crosses.get(1));
                 
                 //second seeding algorithm to search for SVT only tracks, and/or tracks missed by the CA
-                TrackSeeder trseed2 = new TrackSeeder();
+                TrackSeeder trseed2 = new TrackSeeder(SVTGeom, BMTGeom, swimmer);
                 trseed2.unUsedHitsOnly = true;
-                seeds.addAll( trseed2.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer)); // RDV check for overlaps
+                seeds.addAll( trseed2.findSeed(crosses.get(0), crosses.get(1))); // RDV check for overlaps
                 if(exLayrs==true) {
                     seeds = recUtil.reFit(seeds, SVTGeom, BMTGeom, swimmer, trseed,trseed2);
                 }
@@ -155,7 +155,7 @@ public class TracksFromTargetRec {
                         if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null)
                             fittedTrack = recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom);
                     }
-                    fittedTrack.set_TrackingStatus(seed.trkStatus);
+                    fittedTrack.set_TrackingStatus(seed.get_Status());
                     trkcands.add(fittedTrack);
             }
         }

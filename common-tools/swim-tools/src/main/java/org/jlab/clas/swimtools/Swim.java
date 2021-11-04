@@ -519,6 +519,7 @@ public class Swim {
             }
                     
         } catch (RungeKuttaException e) {
+                System.out.println(_charge + " " + _x0 + " " + _y0 + " " + _z0 + " " + _pTot + " " + _theta + " " + _phi);
                 e.printStackTrace();
         }
         return value;
@@ -581,6 +582,7 @@ public class Swim {
             }
                     
         } catch (RungeKuttaException e) {
+                System.out.println(_charge + " " + _x0 + " " + _y0 + " " + _z0 + " " + _pTot + " " + _theta + " " + _phi);
                 e.printStackTrace();
         }
         return value;
@@ -618,6 +620,7 @@ public class Swim {
             }
                     
         } catch (RungeKuttaException e) {
+                System.out.println(_charge + " " + _x0 + " " + _y0 + " " + _z0 + " " + _pTot + " " + _theta + " " + _phi);
                 e.printStackTrace();
         }
         return value;
