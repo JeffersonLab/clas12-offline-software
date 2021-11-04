@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jlab.rec.cvt.trajectory.Helix;
-
-import Jama.Matrix;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 
 /**
@@ -168,7 +166,7 @@ public class HelicalTrackFitter {
         }
 
         // get the error matrix
-        Matrix fit_covmatrix = new Matrix(5, 5);
+       
         //error matrix (assuming that the circle fit and line fit parameters are uncorrelated)
         // | d_dca*d_dca                   d_dca*d_phi_at_dca            d_dca*d_curvature        0            0             |
         // | d_phi_at_dca*d_dca     d_phi_at_dca*d_phi_at_dca     d_phi_at_dca*d_curvature        0            0             |
@@ -176,7 +174,7 @@ public class HelicalTrackFitter {
         // | 0                              0                             0                    d_Z0*d_Z0                     |
         // | 0                              0                             0                       0        d_tandip*d_tandip |
         // 
-
+        double[][] fit_covmatrix = new double[5][5];
         // the circle covariance matrix
         //covr[0] =  delta_rho.delta_rho;
         //covr[1] =  delta_rho.delta_phi;
@@ -184,17 +182,17 @@ public class HelicalTrackFitter {
         //covr[3] =  delta_phi.delta_phi;
         //covr[4] =  delta_phi.delta_dca;
         //covr[5] =  delta_dca.delta_dca;
-        fit_covmatrix.set(0, 0, _circlefitpars.cov()[5]);
-        fit_covmatrix.set(1, 0, _circlefitpars.cov()[4]);
-        fit_covmatrix.set(2, 0, _circlefitpars.cov()[2]);
-        fit_covmatrix.set(0, 1, _circlefitpars.cov()[4]);
-        fit_covmatrix.set(1, 1, _circlefitpars.cov()[3]);
-        fit_covmatrix.set(2, 1, _circlefitpars.cov()[1]);
-        fit_covmatrix.set(0, 2, _circlefitpars.cov()[2]);
-        fit_covmatrix.set(1, 2, _circlefitpars.cov()[1]);
-        fit_covmatrix.set(2, 2, _circlefitpars.cov()[0]);
-        fit_covmatrix.set(3, 3, _linefitpars.interceptErr() * _linefitpars.interceptErr());
-        fit_covmatrix.set(4, 4, _linefitpars.slopeErr() * _linefitpars.slopeErr());
+        fit_covmatrix[0][0] = _circlefitpars.cov()[5];
+        fit_covmatrix[1][0] = _circlefitpars.cov()[4];
+        fit_covmatrix[2][0] = _circlefitpars.cov()[2];
+        fit_covmatrix[0][1] = _circlefitpars.cov()[4];
+        fit_covmatrix[1][1] = _circlefitpars.cov()[3];
+        fit_covmatrix[2][1] = _circlefitpars.cov()[1];
+        fit_covmatrix[0][2] = _circlefitpars.cov()[2];
+        fit_covmatrix[1][2] = _circlefitpars.cov()[1];
+        fit_covmatrix[2][2] = _circlefitpars.cov()[0];
+        fit_covmatrix[3][3] = _linefitpars.interceptErr() * _linefitpars.interceptErr();
+        fit_covmatrix[4][4] = _linefitpars.slopeErr() * _linefitpars.slopeErr();
 
         Helix helixresult = new Helix(fit_dca, fit_phi_at_dca, fit_curvature, fit_Z0, fit_tandip, fit_covmatrix);
 

@@ -1,10 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.rec.cvt.services;
-import Jama.Matrix;
+//import Jama.Matrix;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +11,6 @@ import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
@@ -134,15 +128,15 @@ public class CosmicTracksRec {
 //            Vector3D p = new Vector3D(pars[3],pars[4],pars[5]);
             for (int k1 = 0; k1 < cosmics.size(); k1++) {
                 Ray ray = cosmics.get(k1).get_ray();
-//                ray = new Ray(v,p);
-
+//                ray = new Ray(v,p);                
+               
+                double[][] cov = new double[5][5];
                 
-                Matrix cov = new Matrix(5, 5);
-                cov.set(0, 0, ray.get_yxintercErr());
-                cov.set(1, 1, ray.get_yzintercErr());
-                cov.set(2, 2, ray.get_yxslopeErr());
-                cov.set(3, 3, ray.get_yzslopeErr());
-                cov.set(4, 4, 1);
+                cov[0][0]=ray.get_yxintercErr();
+                cov[1][1]=ray.get_yzintercErr();
+                cov[2][2]=ray.get_yxslopeErr();
+                cov[3][3]=ray.get_yzslopeErr();
+                cov[4][4]=1;
                 kf = new KFitter( ray.get_yxinterc(),ray.get_yzinterc(),
                                   ray.get_yxslope(), ray.get_yzslope(), 10.0, cov, kf,
                                   recUtil.setMeasVecs(cosmics.get(k1), SVTGeom, BMTGeom, swimmer )) ;

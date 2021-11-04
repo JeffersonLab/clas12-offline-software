@@ -331,7 +331,18 @@ public class CVTRecNewKF extends ReconstructionEngine {
 //        if (newClustering==null) {
 //             System.out.println("["+this.getName()+"] run with newclustering settings default = false");
 //        }
+
+        //
         
+        
+        String matrixLibrary = "EJML";
+        if (this.getEngineConfigString("matLib")!=null) {
+            matrixLibrary = this.getEngineConfigString("matLib");
+        }
+        Constants.setMatLib(matrixLibrary);
+        System.out.println("["+this.getName()+"] run with matLib "+ Constants.kfMatLib.toString() + " library");
+        
+
         // Load other geometries
         
         variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");

@@ -176,7 +176,6 @@ public class TrackListFinder {
     public void removeOverlappingTracksOld(List<Track> trkcands) {
             if(trkcands==null)
                 return;
-            
             List<Track> selectedTracks =new ArrayList<Track>();
             List<Track> list = new  ArrayList<Track>();
             List<Track> rejected = new  ArrayList<Track>();

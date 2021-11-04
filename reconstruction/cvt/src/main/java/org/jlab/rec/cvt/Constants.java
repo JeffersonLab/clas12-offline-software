@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
 
+import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
+
 public class Constants {
 
     public static double PTCUT   = 0.075; // minimum pt in GeV
@@ -42,6 +44,8 @@ public class Constants {
     public static final boolean trk_comesfrmOrig = true;
 
     public static boolean areConstantsLoaded = false;
+
+    public static Libr kfMatLib;
 
     public static final double CTOFINNERRADIUS = 250;     // 250 mm
     public static final double CTOFOUTRRADIUS = 250 + 33;  // 283  mm
@@ -310,6 +314,25 @@ public class Constants {
 
     public static final void setSVTOnly(boolean sVTOnly) {
         SVTOnly = sVTOnly;
+    }
+
+    public static void setMatLib(String matLib) {
+        switch (matLib) {
+            case "JAMA":
+                kfMatLib = Libr.JAMA;
+                break;
+            case "JNP":
+                kfMatLib = Libr.JNP;
+                break;
+            case "APA":
+                kfMatLib = Libr.APA;
+                break;
+            case "EJML":
+                kfMatLib = Libr.EJML;    
+                break;
+            default:
+                kfMatLib = Libr.EJML;
+        } 
     }
     
     public static double getSolenoidMagnitude() {
