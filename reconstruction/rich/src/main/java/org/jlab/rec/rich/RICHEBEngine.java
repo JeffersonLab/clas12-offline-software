@@ -48,6 +48,10 @@ public class RICHEBEngine extends ReconstructionEngine {
 
         boolean ccdb = init_CCDB(1);
 
+        this.registerOutputBank("RICH::hits","RICH::clusters","RICH::response");
+        this.registerOutputBank("RICH::hadrons","RICH::photons","RICH::ringCher");
+        this.registerOutputBank("RICH::hadCher");
+
         return true;
 
     }

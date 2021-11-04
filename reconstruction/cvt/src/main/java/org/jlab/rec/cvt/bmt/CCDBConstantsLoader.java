@@ -119,8 +119,6 @@ public class CCDBConstantsLoader {
         // target position
         double ztarget = dbprovider.getDouble("/geometry/target/position", 0);
         
-//        System.out.println(" ................READ TARGET SHIFT "+ztarget+" cm......."); 
-      //  dbprovider.show();
         // Getting the BMTConstants
         // 1) pitch info 
         int[] C_Layers = {1, 4, 6};
@@ -345,7 +343,6 @@ public class CCDBConstantsLoader {
         Constants.setXb(xb*10);
         Constants.setYb(yb*10);
         Constants.setRbErr(err*10);
-        System.out.println(" ................READ BEAM OFFSET PARAMETERS "+xb+" & "+yb+" cm.......");
         
         // target position mm
         Constants.setZoffset(ztarget*10);
@@ -388,8 +385,6 @@ public class CCDBConstantsLoader {
         BMTConstants.setE_drift_MF(HV_DRIFT_MF);
         dbprovider.disconnect();
         CSTLOADED = true;
-        System.out
-                .println("SUCCESSFULLY LOADED BMT CONSTANTS....");
      //   setDB(dbprovider);
     }
 

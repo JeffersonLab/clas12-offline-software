@@ -68,7 +68,7 @@ public class HelixCrossListFinder {
             return null;
         }
         
-        List<org.jlab.rec.cvt.track.Seed> seedList = new ArrayList<org.jlab.rec.cvt.track.Seed>();
+        List<Seed> seedList = new ArrayList<>();
         
         //create arrays of crosses for each region
         ArrayList<ArrayList<Cross>> theListsByRegion = new ArrayList<ArrayList<Cross>>();

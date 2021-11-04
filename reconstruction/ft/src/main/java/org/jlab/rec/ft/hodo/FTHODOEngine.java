@@ -42,6 +42,8 @@ public class FTHODOEngine extends ReconstructionEngine {
                 requireConstants(Arrays.asList(tables));
                 this.getConstantsManager().setVariation("default");
 
+                this.registerOutputBank("FTHODO::hits","FTHODO::clusters");
+                
                 return true;
 	}
 

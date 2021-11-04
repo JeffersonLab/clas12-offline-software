@@ -371,40 +371,36 @@ public class SVTConstants
                         SUPPORTRADIUS[region] = cp.getDouble(ccdbPath+"region/CuSupportInnerRadius", region); // radius to inner side of heatSinkRidge
 
                         for( int m = 0; m < NMODULES; m++ )
-                        {
-                                switch( m ) 
-                                {
-                                case 0: // U = lower / inner
-                                        LAYERRADIUS[region][m] = REFRADIUS[region] - LAYERPOSFAC*SILICONTHK;
-                                        break;
-                                case 1: // V = upper / outer
-                                        LAYERRADIUS[region][m] = REFRADIUS[region] + LAYERGAPTHK + LAYERPOSFAC*SILICONTHK;
-                                        break;
-                                }
-                                //System.out.println("LAYERRADIUS "+ LAYERRADIUS[region][m]);
-                        }
-                }
-
-                NTOTALSECTORS = convertRegionSector2Index( NREGIONS-1, NSECTORS[NREGIONS-1]-1 )+1;
-                NTOTALFIDUCIALS = convertRegionSectorFiducial2Index(NREGIONS-1, NSECTORS[NREGIONS-1]-1, NFIDUCIALS-1  )+1;
-
-                RSI = new int[NREGIONS][NTOTALSECTORS];
-                for( int aRegion = 0; aRegion < NREGIONS; aRegion++ )
-                {
-                    for( int aSector = 0; aSector < NSECTORS[aRegion]; aSector++ )
-                    {
-                        RSI[aRegion][aSector] = convertRegionSector2Index( aRegion, aSector );
+		{			
+					switch( m ) 
+					{
+					case 0: // U = lower / inner
+						LAYERRADIUS[region][m] = REFRADIUS[region] - LAYERPOSFAC*SILICONTHK;
+						break;
+					case 1: // V = upper / outer
+						LAYERRADIUS[region][m] = REFRADIUS[region] + LAYERGAPTHK + LAYERPOSFAC*SILICONTHK;
+						break;
+					}
+					//System.out.println("LAYERRADIUS "+ LAYERRADIUS[region][m]);
+				}
+			}
+                        
+                        NTOTALSECTORS = convertRegionSector2Index( NREGIONS-1, NSECTORS[NREGIONS-1]-1 )+1;
+			NTOTALFIDUCIALS = convertRegionSectorFiducial2Index(NREGIONS-1, NSECTORS[NREGIONS-1]-1, NFIDUCIALS-1  )+1;
+			
+                        RSI = new int[NREGIONS][NTOTALSECTORS];
+                        for( int aRegion = 0; aRegion < NREGIONS; aRegion++ )
+			{
+                            for( int aSector = 0; aSector < NSECTORS[aRegion]; aSector++ )
+                            {
+                                RSI[aRegion][aSector] = convertRegionSector2Index( aRegion, aSector );
 //                                System.out.println(" a Region "+aRegion +" aSector "+aSector+" RSI "+RSI[aRegion][aSector] );
                     }
                 }
 
-                System.out.println("Reading detector global position from database");
                 double xpos = cp.getDouble(ccdbPath+"position/x", 0 );
                 double ypos = cp.getDouble(ccdbPath+"position/y", 0 );
                 double zpos = cp.getDouble(ccdbPath+"position/z", 0 );
-                System.out.println("SVT position set to (" + xpos + "," + ypos + "," + zpos + ") mm");
-
-                System.out.println("Reading alignment shifts from database");
 
                 double[] myShift = {0, 0, 0, -Math.toRadians(0), 0, 0, 0};
                 LAYERSHIFTDATA = new double[NSECTORS[3]][NLAYERS-2][];

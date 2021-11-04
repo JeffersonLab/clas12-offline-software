@@ -294,7 +294,6 @@ public class Constants {
         setSVTOnly(isSVTonly);
 
         areConstantsLoaded = true;
-        System.out.println("CVT constants loaded ? " + areConstantsLoaded);
         
     }
 

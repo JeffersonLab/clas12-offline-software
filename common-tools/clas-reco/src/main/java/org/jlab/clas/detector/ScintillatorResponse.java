@@ -57,7 +57,7 @@ public class ScintillatorResponse extends DetectorResponse {
                     float dx = bank.getFloat("pathLengthThruBar",row);
                     if (dx>0) response.setDedx(bank.getFloat("energy", row)/dx);
                 }
-		if (type == DetectorType.CTOF) {
+		if (type == DetectorType.CTOF || type == DetectorType.FTOF) {
                     response.clusterSize = bank.getShort("size",row);
                 }
 		if (type == DetectorType.CND) {
