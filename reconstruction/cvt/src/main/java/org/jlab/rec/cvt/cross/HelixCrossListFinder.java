@@ -11,6 +11,7 @@ import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.svt.SVTParameters;
+import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.track.TrackSeeder;
 
@@ -55,7 +56,10 @@ public class HelixCrossListFinder {
      * a track in the cvt
      */
     public List<org.jlab.rec.cvt.track.Seed> findCandidateCrossLists(List<ArrayList<Cross>> cvt_crosses, 
-            SVTGeometry svt_geo, BMTGeometry bmt_geo, Swim swimmer) {  
+            SVTGeometry svt_geo, BMTGeometry bmt_geo, Swim swimmer) { 
+        float[] bfield = new float[3];
+        swimmer.BfieldLab(0, 0, 0, bfield);
+        double bz = Math.abs(bfield[2]);
         // instantiate the crosslist
         //List<Seed> seedList = new ArrayList<Seed>();
         
@@ -64,7 +68,7 @@ public class HelixCrossListFinder {
             return null;
         }
         
-        List<org.jlab.rec.cvt.track.Seed> seedList = new ArrayList<org.jlab.rec.cvt.track.Seed>();
+        List<Seed> seedList = new ArrayList<>();
         
         //create arrays of crosses for each region
         ArrayList<ArrayList<Cross>> theListsByRegion = new ArrayList<ArrayList<Cross>>();
@@ -171,33 +175,33 @@ public class HelixCrossListFinder {
             //this.MatchBMTC(s, theListsByRegionBMTC.get(1), svt_geo); // match the seed to each BMT region
             //this.MatchBMTC(s, theListsByRegionBMTC.get(2), svt_geo); // match the seed to each BMT region
            
-            Track trk = s.seedFit.fitSeed(s, svt_geo, bmt_geo, 3, true, swimmer);
+            Track trk = s.fit(svt_geo, bmt_geo, 3, true, bz);
             if(trk==null)
                 continue;
             //match to r1
-            MatchToRegion1( s, theListsByRegion.get(0), svt_geo, bmt_geo, swimmer); 
-            org.jlab.rec.cvt.track.Seed trkSeed = new org.jlab.rec.cvt.track.Seed();
-            
-            trkSeed.set_Crosses(s);
-            List<Cluster> clusters = new ArrayList<Cluster>();
-            for(Cross c : s ) { 
-                if(c.get_Detector()==DetectorType.BST) {
-                    c.get_Cluster1().set_CentroidError(this.calcCentErr(c, c.get_Cluster1(), svt_geo));
-                    c.get_Cluster2().set_CentroidError(this.calcCentErr(c, c.get_Cluster2(), svt_geo));
-                    
-                    clusters.add(c.get_Cluster1());
-                    clusters.add(c.get_Cluster2());
-                }
-                if(c.get_Detector()==DetectorType.BMT) {
-                    clusters.add(c.get_Cluster1());
-                    
-                }
-            }
-            
-            trkSeed.set_Clusters(clusters);
+            MatchToRegion1( s, theListsByRegion.get(0), svt_geo, bmt_geo, bz); 
+//            org.jlab.rec.cvt.track.Seed trkSeed = new org.jlab.rec.cvt.track.Seed();
+//            
+//            trkSeed.set_Crosses(s);
+//            List<Cluster> clusters = new ArrayList<Cluster>();
+//            for(Cross c : s ) { 
+//                if(c.get_Detector()==DetectorType.BST) {
+//                    c.get_Cluster1().set_CentroidError(this.calcCentErr(c, c.get_Cluster1(), svt_geo));
+//                    c.get_Cluster2().set_CentroidError(this.calcCentErr(c, c.get_Cluster2(), svt_geo));
+//                    
+//                    clusters.add(c.get_Cluster1());
+//                    clusters.add(c.get_Cluster2());
+//                }
+//                if(c.get_Detector()==DetectorType.BMT) {
+//                    clusters.add(c.get_Cluster1());
+//                    
+//                }
+//            }
+//            
+//            trkSeed.set_Clusters(clusters);
            
-            trkSeed.set_Helix(trk.get_helix());
-            seedList.add(trkSeed);
+            s.set_Helix(trk.get_helix());
+            seedList.add(s);
         }
        
         return seedList;
@@ -235,7 +239,7 @@ public class HelixCrossListFinder {
             return false;
         double avg_tandip =0;
         int countCrosses =0;
-        for(Cross c : trkCand) {
+        for(Cross c : trkCand.get_Crosses()) {
             if(c.get_Detector()==DetectorType.BST) {
                 countCrosses++;
                 avg_tandip+=c.get_Point().z()/Math.sqrt(c.get_Point().x()*c.get_Point().x()+c.get_Point().y()*c.get_Point().y());
@@ -334,14 +338,14 @@ public class HelixCrossListFinder {
         if (Math.abs(rad245) < SVTParameters.radcut) {
             return null;
         }
-        double[] seed_delta_phi = {phi12, phi13, phi14, phi15};
-        double[] seed_radius = {rad123, rad124, rad134, rad234, rad135, rad235, rad245};
+//        double[] seed_delta_phi = {phi12, phi13, phi14, phi15};
+//        double[] seed_radius = {rad123, rad124, rad134, rad234, rad135, rad235, rad245};
         // create the seed
-        Seed seed = new Seed(seed_delta_phi, seed_radius);
-        seed.add(c1);
-        seed.add(c2);
-        seed.add(c3);
-        seed.add(c4);
+        Seed seed = new Seed();
+        seed.get_Crosses().add(c1);
+        seed.get_Crosses().add(c2);
+        seed.get_Crosses().add(c3);
+        seed.get_Crosses().add(c4);
         
         return seed;
     }
@@ -378,14 +382,14 @@ public class HelixCrossListFinder {
         if (Math.abs(rad234) < SVTParameters.radcut) {
             return null;
         }
-        double[] seed_delta_phi = {phi12, phi13, phi14};
-        double[] seed_radius = {rad123, rad124, rad134, rad234};
+//        double[] seed_delta_phi = {phi12, phi13, phi14};
+//        double[] seed_radius = {rad123, rad124, rad134, rad234};
         // create the seed
-        Seed seed = new Seed(seed_delta_phi, seed_radius);
-        seed.add(c1);
-        seed.add(c2);
-        seed.add(c3);
-        seed.add(c4);
+        Seed seed = new Seed();
+        seed.get_Crosses().add(c1);
+        seed.get_Crosses().add(c2);
+        seed.get_Crosses().add(c3);
+        seed.get_Crosses().add(c4);
         
         return seed;
     }
@@ -406,13 +410,13 @@ public class HelixCrossListFinder {
             return null;
         }
         
-        double[] seed_delta_phi = {phi12, phi13};
-        double[] seed_radius = {rad123};
+//        double[] seed_delta_phi = {phi12, phi13};
+//        double[] seed_radius = {rad123};
         // create the seed
-        Seed seed = new Seed(seed_delta_phi, seed_radius);
-        seed.add(c1);
-        seed.add(c2);
-        seed.add(c3);
+        Seed seed = new Seed();
+        seed.get_Crosses().add(c1);
+        seed.get_Crosses().add(c2);
+        seed.get_Crosses().add(c3);
         
         return seed;
     }
@@ -450,11 +454,11 @@ public class HelixCrossListFinder {
 
     }
 
-    private void MatchToRegion1(Seed s, ArrayList<Cross> R1Crosses, SVTGeometry svt_geo, BMTGeometry bmt_geo, Swim swimmer) {
+    private void MatchToRegion1(Seed s, ArrayList<Cross> R1Crosses, SVTGeometry svt_geo, BMTGeometry bmt_geo, double bz) {
         
         if(s==null)
             return;
-        Track cand = s.seedFit.fitSeed(s, svt_geo, bmt_geo, 3, true, swimmer);
+        Track cand = s.fit(svt_geo, bmt_geo, 3, true, bz);
         if(cand==null)
             return;
          
@@ -482,13 +486,13 @@ public class HelixCrossListFinder {
             }
         }
         if(cMatch != null) 
-            s.add(cMatch);
+            s.get_Crosses().add(cMatch);
   
     }
 
-    private void MatchBMTC(Seed s, ArrayList<Cross> BMTCrosses, SVTGeometry svt_geo, BMTGeometry bmt_geo, Swim swimmer) {
+    private void MatchBMTC(Seed s, ArrayList<Cross> BMTCrosses, SVTGeometry svt_geo, BMTGeometry bmt_geo, double bz) {
         
-        Track cand = s.seedFit.fitSeed(s, svt_geo, bmt_geo, 3, true, swimmer);
+        Track cand = s.fit(svt_geo, bmt_geo, 3, true, bz);
         if(s==null)
             return;
         double maxChi2 = Double.POSITIVE_INFINITY;
@@ -497,8 +501,8 @@ public class HelixCrossListFinder {
         if(passCcross(s, BMTCrosses.get(i)) == false) {
             continue; 
         } else {
-            s.add(BMTCrosses.get(i));
-            cand = s.seedFit.fitSeed(s, svt_geo, bmt_geo, 3, true, swimmer);
+            s.get_Crosses().add(BMTCrosses.get(i));
+            cand = s.fit(svt_geo, bmt_geo, 3, true, bz);
             if(cand==null)
                 continue;
             double linechi2perndf = cand.get_lineFitChi2PerNDF();
@@ -506,10 +510,10 @@ public class HelixCrossListFinder {
                 maxChi2 = linechi2perndf;
                 BestMatch = (Cross) BMTCrosses.get(i).clone();
             }
-            s.remove(s.size()-1);
+            s.get_Crosses().remove(BMTCrosses.get(i));
         }
         if(BestMatch!=null)
-            s.add(BestMatch);
+            s.get_Crosses().add(BestMatch);
            
         }
     }
@@ -519,14 +523,14 @@ public class HelixCrossListFinder {
        
         for(int i = 0; i<CirTrks.size(); i++) {
             int NbOverlaps =0;
-            for(Cross ci: CirTrks.get(i)) {
-                for(Cross c: cand)
+            for(Cross ci: CirTrks.get(i).get_Crosses()) {
+                for(Cross c: cand.get_Crosses())
                     if(c.get_Id()==ci.get_Id())
                         NbOverlaps++;
             }
-            if(CirTrks.get(i).size()==NbOverlaps)
+            if(CirTrks.get(i).get_Crosses().size()==NbOverlaps)
                 CirTrks.remove(i);
-            if(cand.size()==NbOverlaps)
+            if(cand.get_Crosses().size()==NbOverlaps)
                 inSeed=true;
         }
         return inSeed;
@@ -542,30 +546,30 @@ public class HelixCrossListFinder {
             Z=SVTGeometry.getActiveSensorLength();
         return Cluster1.get_ResolutionAlongZ(Z, svt_geo) / (SVTGeometry.getPitch() / Math.sqrt(12.));
     }
-    /**
-     * A class representing the seed object. The seed of a track is the initial
-     * guess of the track and contains the crosses that belong to it
-     *
-     * @author ziegler
-     *
-     */
-    private class Seed extends ArrayList<Cross> {
-
-        private static final long serialVersionUID = 1L;
-        final double[] delta_phi;		// opening angle between cross 1 and 2 positions wrt the origin
-        final double[] radius;          // the radius of the circle of the seed calculated using 3 crosses belonging to the seed
-        public TrackSeeder seedFit;
-        /**
-         * The constructor of the seed
-         *
-         * @param delta_phi
-         * @param radius
-         */
-        Seed(double[] delta_phi, double[] radius) {
-            seedFit = new TrackSeeder();
-            this.delta_phi = delta_phi;
-            this.radius = radius;
-        }
-    }
+//    /**
+//     * A class representing the seed object. The seed of a track is the initial
+//     * guess of the track and contains the crosses that belong to it
+//     *
+//     * @author ziegler
+//     *
+//     */
+//    private class Seed extends ArrayList<Cross> {
+//
+//        private static final long serialVersionUID = 1L;
+//        final double[] delta_phi;		// opening angle between cross 1 and 2 positions wrt the origin
+//        final double[] radius;          // the radius of the circle of the seed calculated using 3 crosses belonging to the seed
+//        public TrackSeeder seedFit;
+//        /**
+//         * The constructor of the seed
+//         *
+//         * @param delta_phi
+//         * @param radius
+//         */
+//        Seed(double[] delta_phi, double[] radius) {
+//            seedFit = new TrackSeeder();
+//            this.delta_phi = delta_phi;
+//            this.radius = radius;
+//        }
+//    }
 
 }

@@ -519,6 +519,7 @@ public class Swim {
             }
                     
         } catch (RungeKuttaException e) {
+                System.out.println(_charge + " " + _x0 + " " + _y0 + " " + _z0 + " " + _pTot + " " + _theta + " " + _phi);
                 e.printStackTrace();
         }
         return value;
@@ -581,6 +582,7 @@ public class Swim {
             }
                     
         } catch (RungeKuttaException e) {
+                System.out.println(_charge + " " + _x0 + " " + _y0 + " " + _z0 + " " + _pTot + " " + _theta + " " + _phi);
                 e.printStackTrace();
         }
         return value;
@@ -618,6 +620,7 @@ public class Swim {
             }
                     
         } catch (RungeKuttaException e) {
+                System.out.println(_charge + " " + _x0 + " " + _y0 + " " + _z0 + " " + _pTot + " " + _theta + " " + _phi);
                 e.printStackTrace();
         }
         return value;
@@ -943,7 +946,7 @@ public class Swim {
     
     
     public double[] AdaptiveSwimPlane(double px, double py, double pz, double nx, double ny, double nz, double accuracy)  {
-        System.out.println("Don't use yet");
+//        System.out.println("Don't use yet");
 
         double[] value = new double[8];
         
@@ -987,7 +990,7 @@ public class Swim {
     
     
     public double[] AdaptiveSwimCylinder(double a1x, double a1y, double a1z, double a2x, double a2y, double a2z, double radius, double accuracy)  {
-        System.out.println("Don't use yet");
+    //    System.out.println("Don't use yet");
         double[] value = new double[8];
         
         radius = radius/100;

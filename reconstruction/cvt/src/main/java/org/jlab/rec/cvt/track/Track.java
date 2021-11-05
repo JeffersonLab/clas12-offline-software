@@ -258,6 +258,23 @@ public class Track extends Trajectory implements Comparable<Track> {
     }
     
     /**
+     * Check if track passes basic quality cuts
+     * @return 
+     */    
+    public boolean isGood() {
+        if(Double.isNaN(this.getChi2())) 
+            return false;
+        else if(this.getChi2() > Constants.CHI2CUT * (this.getNDF() + 5)) 
+            return false;
+        else if(this.getNDF() < Constants.NDFCUT) 
+            return false;
+        else if(this.get_Pt() < Constants.PTCUT) 
+            return false;
+        else 
+            return true;
+    }
+    
+    /**
      * Compare this track quality with the given track
      * based on NDF and Chi2
      * @param o the other track

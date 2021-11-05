@@ -79,7 +79,7 @@ public class EBTBEngine extends EBEngine {
         this.setCovMatrixBank("REC::CovMat");
         this.setTrajectoryBank("REC::Traj");        
         this.setFTBank("REC::ForwardTagger");
-        this.setFTOFHitsType("FTOF::hits");
+        this.setFTOFHitsType("FTOF::clusters");
         this.setTrackType("TimeBasedTrkg::TBTracks");
         this.setTrajectoryType("TimeBasedTrkg::Trajectory");
         this.setCovMatrixType("TimeBasedTrkg::TBCovMat");

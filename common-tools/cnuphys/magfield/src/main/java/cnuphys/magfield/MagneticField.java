@@ -133,12 +133,12 @@ public abstract class MagneticField implements IMagField {
 	 * @param scale the scale factor
 	 */
 	public final void setScaleFactor(double scale) {
-		System.out.println("CHANGING SCALE from " + _scaleFactor + " to " + scale + "  for " + getBaseFileName());
+		//System.out.println("CHANGING SCALE from " + _scaleFactor + " to " + scale + "  for " + getBaseFileName());
 		if (Math.abs(scale - _scaleFactor) > TINY) {
 			_scaleFactor = scale;
 			MagneticFields.getInstance().changedScale(this);
 		} else {
-			System.out.println("Ignored inconsequential scale change for " + getBaseFileName());
+			//System.out.println("Ignored inconsequential scale change for " + getBaseFileName());
 		}
 	}
 

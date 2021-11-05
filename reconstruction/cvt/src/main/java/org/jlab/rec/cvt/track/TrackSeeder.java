@@ -6,21 +6,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
-import org.jlab.detector.base.DetectorType;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
-import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.fit.CircleFitter;
 import org.jlab.rec.cvt.fit.CircleFitPars;
-import org.jlab.rec.cvt.fit.HelicalTrackFitter;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.svt.SVTParameters;
 
 public class TrackSeeder {
+    SVTGeometry sgeo = null;
+    BMTGeometry bgeo = null;
+    double bfield;
+    
     int NBINS = 36;
     double[] phiShift = new double[]{0, 65, 90}; // move the bin edge to handle bin boundaries
     List<ArrayList<Cross>> scan ;
@@ -32,13 +33,19 @@ public class TrackSeeder {
     List<Double> Ws ;
     public boolean unUsedHitsOnly = false;
     
-    public TrackSeeder() {
+    public TrackSeeder(SVTGeometry sgeo, BMTGeometry bgeo, Swim swimmer) {
+        this.sgeo = sgeo;
+        this.bgeo = bgeo;
+        float[] b = new float[3];
+        swimmer.BfieldLab(0, 0, 0, b);
+        this.bfield = Math.abs(b[2]);
+
         //init lists for scan
         sortedCrosses = new ArrayList<ArrayList<ArrayList<Cross>>>();
-        for(int b =0; b<NBINS; b++) {
-            sortedCrosses.add(b, new ArrayList<ArrayList<Cross>>() );
+        for(int i =0; i<NBINS; i++) {
+            sortedCrosses.add(i, new ArrayList<ArrayList<Cross>>() );
             for(int l =0; l<3; l++) {
-                sortedCrosses.get(b).add(l,new ArrayList<Cross>() );
+                sortedCrosses.get(i).add(l,new ArrayList<Cross>() );
             }
         }
         scan = new ArrayList<ArrayList<Cross>>();
@@ -49,14 +56,15 @@ public class TrackSeeder {
         Ys = new ArrayList<Double>();
         Ws = new ArrayList<Double>();
     }
+    
     private void MatchSeed(List<Cross> othercrs) {
         if(othercrs==null || othercrs.size()==0)
             return;
         
         for (Seed seed : seedScan) {
-            double d = seed.doca;
-            double r = seed.rho;
-            double f = seed.phi;
+            double d = seed.get_Doca();
+            double r = seed.get_Rho();
+            double f = seed.get_Phi();
 
             for (Cross c : othercrs ) { 
                 c.set_AssociatedTrackID(22220);
@@ -116,12 +124,7 @@ public class TrackSeeder {
                 return;
             }
         }
-        Seed seed = new Seed();
-        seed.set_Crosses(seedcrs);
-        seed.doca = d;
-        seed.rho = r;
-        seed.phi = f;
-        
+        Seed seed = new Seed(seedcrs, d, r, f);
         seedScan.add(seed);
     }
     
@@ -213,10 +216,8 @@ public class TrackSeeder {
     
 
     List<Seed> BMTmatches = new ArrayList<Seed>();
-    public List<Seed> findSeed(List<Cross> bst_crosses, List<Cross> bmt_crosses, 
-            SVTGeometry svt_geo, BMTGeometry bmt_geo,
-            Swim swimmer) {
-       
+    public List<Seed> findSeed(List<Cross> bst_crosses, List<Cross> bmt_crosses) {
+        
         List<Seed> seedlist = new ArrayList<Seed>();
 
         List<Cross> crosses = new ArrayList<Cross>();
@@ -320,28 +321,16 @@ public class TrackSeeder {
             List<Cross> seedcrs = mseed.get_Crosses();
             Track cand = null;
             if(seedcrs.size()>=3)
-                cand = fitSeed(seedcrs, svt_geo, bmt_geo, 5, false, swimmer);
+                cand = mseed.fit(this.sgeo, this.bgeo, 5, false, this.bfield);
             if (cand != null) {
-                Seed seed = new Seed();
-                seed.set_Crosses(seedcrs);
-                seed.set_Helix(cand.get_helix());
-                List<Cluster> clusters = new ArrayList<Cluster>();
-                for(Cross c : seed.get_Crosses()) { 
-                    c.set_AssociatedTrackID(1111);
-                    if(c.get_Detector()==DetectorType.BST) {
-                        clusters.add(c.get_Cluster1());
-                        clusters.add(c.get_Cluster2());
-                    } else {
-                        clusters.add(c.get_Cluster1());
-                    }
-                }
-                seed.set_Clusters(clusters);
+                Seed seed = new Seed(seedcrs, cand.get_helix());
+
                 //match to BMT
                 if (seed != null ) {
-                    List<Cross> sameSectorCrosses = this.FindCrossesInSameSectorAsSVTTrk(seed, bmtC_crosses, bmt_geo);
+                    List<Cross> sameSectorCrosses = this.FindCrossesInSameSectorAsSVTTrk(seed, bmtC_crosses);
                     BMTmatches.clear();
                     if (sameSectorCrosses.size() >= 0) {
-                        BMTmatches = this.findCandUsingMicroMegas(seed, sameSectorCrosses, bmt_geo);
+                        BMTmatches = this.findCandUsingMicroMegas(seed, sameSectorCrosses);
                     } 
                     Seed bestSeed = null;
                     double chi2_Circ = Double.POSITIVE_INFINITY;
@@ -349,18 +338,17 @@ public class TrackSeeder {
                     
                     for (Seed bseed : BMTmatches) {
                         //refit using the BMT
-                        Track bcand = fitSeed(bseed.get_Crosses(), svt_geo, bmt_geo, 5, false, swimmer);
+                        Track bcand = bseed.fit(this.sgeo, this.bgeo, 5, false, this.bfield);
                         
                         if (bcand != null && bcand.get_circleFitChi2PerNDF()<chi2_Circ
-                                && bcand.get_lineFitChi2PerNDF()<chi2_Line) {
-                            seed = new Seed();
-                            seed.set_Crosses(bseed.get_Crosses());
-                            seed.set_Clusters(bseed.get_Clusters());
-                            seed.set_Helix(bcand.get_helix());
-                    
+                                          && bcand.get_lineFitChi2PerNDF()<chi2_Line
+                                          && bcand.isGood()) {
+                            bestSeed = new Seed(bseed.get_Crosses(), bcand.get_helix());
+                            chi2_Circ = bcand.get_circleFitChi2PerNDF();
+                            chi2_Line = bcand.get_lineFitChi2PerNDF();
                         }
                     }
-                    seedlist.add(seed);
+                    if(bestSeed!= null) seedlist.add(bestSeed);
                 } 
             }
         }
@@ -374,14 +362,14 @@ public class TrackSeeder {
     }
     
 
-    private List<Cross> FindCrossesInSameSectorAsSVTTrk(Seed seed, List<Cross> bmt_crosses, BMTGeometry bmt_geo) {
+    private List<Cross> FindCrossesInSameSectorAsSVTTrk(Seed seed, List<Cross> bmt_crosses) {
         List<Cross> bmt_crossesInSec = new ArrayList<Cross>();
         //double angle_i = 0; // first angular boundary init
         //double angle_f = 0; // second angular boundary for detector A, B, or C init
         
         double jitter = Math.toRadians(10); // 10 degrees jitter
         for (int i = 0; i < bmt_crosses.size(); i++) { 
-            Point3D pAtBMTSurf =seed.get_Helix().getPointAtRadius(bmt_geo.getRadius(bmt_crosses.get(i).get_Cluster1().get_Layer()));
+            Point3D pAtBMTSurf =seed.get_Helix().getPointAtRadius(bgeo.getRadius(bmt_crosses.get(i).get_Cluster1().get_Layer()));
             // the hit parameters
             double angle = Math.atan2(pAtBMTSurf.y(), pAtBMTSurf.x());
             if (angle < 0) {
@@ -390,7 +378,7 @@ public class TrackSeeder {
             //if (bmt_geo.isInDetector(bmt_crosses.get(i).get_Region()*2-1, angle, jitter) 
             //        == bmt_crosses.get(i).get_Sector() - 1) 
             //inDetector(int layer, int sector, Point3D traj) 
-            if (bmt_geo.inDetector(bmt_crosses.get(i).get_Region()*2-1, bmt_crosses.get(i).get_Sector(), pAtBMTSurf)==true){
+            if (bgeo.inDetector(bmt_crosses.get(i).get_Region()*2-1, bmt_crosses.get(i).get_Sector(), pAtBMTSurf)==true){
                 bmt_crossesInSec.add(bmt_crosses.get(i)); 
             }
             
@@ -399,158 +387,157 @@ public class TrackSeeder {
         return bmt_crossesInSec;
     }
 
-    private List<Double> X = new ArrayList<Double>();
-    private List<Double> Y = new ArrayList<Double>();
-    private List<Double> Z = new ArrayList<Double>();
-    private List<Double> Rho = new ArrayList<Double>();
-    private List<Double> ErrZ = new ArrayList<Double>();
-    private List<Double> ErrRho = new ArrayList<Double>();
-    private List<Double> ErrRt = new ArrayList<Double>();
-    List<Cross> BMTCrossesC = new ArrayList<Cross>();
-    List<Cross> BMTCrossesZ = new ArrayList<Cross>();
-    List<Cross> SVTCrosses = new ArrayList<Cross>();
-    float b[] = new float[3];
-    
-    public Track fitSeed(List<Cross> VTCrosses, SVTGeometry svt_geo, BMTGeometry bmt_geo, int fitIter, 
-            boolean originConstraint, Swim swimmer) {
-        double chisqMax = Double.POSITIVE_INFINITY;
-        
-        Track cand = null;
-        HelicalTrackFitter fitTrk = new HelicalTrackFitter();
-        for (int i = 0; i < fitIter; i++) {
-            //	if(originConstraint==true) {
-            //		X.add(0, (double) 0);
-            //		Y.add(0, (double) 0);
-            //		Z.add(0, (double) 0);
-            //		Rho.add(0, (double) 0);
-            //		ErrRt.add(0, (double) org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT);
-            //		ErrZ.add(0, (double) org.jlab.rec.cvt.svt.Constants.ZVTXCONSTRAINT);		
-            //		ErrRho.add(0, (double) org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT);										
-            //	}
-            X.clear();
-            Y.clear();
-            Z.clear();
-            Rho.clear();
-            ErrZ.clear();
-            ErrRho.clear();
-            ErrRt.clear();
+//    private List<Double> X = new ArrayList<Double>();
+//    private List<Double> Y = new ArrayList<Double>();
+//    private List<Double> Z = new ArrayList<Double>();
+//    private List<Double> Rho = new ArrayList<Double>();
+//    private List<Double> ErrZ = new ArrayList<Double>();
+//    private List<Double> ErrRho = new ArrayList<Double>();
+//    private List<Double> ErrRt = new ArrayList<Double>();
+//    List<Cross> BMTCrossesC = new ArrayList<Cross>();
+//    List<Cross> BMTCrossesZ = new ArrayList<Cross>();
+//    List<Cross> SVTCrosses = new ArrayList<Cross>();
+//    float b[] = new float[3];
+//    
+//    public Track fit(List<Cross> VTCrosses, SVTGeometry svt_geo, BMTGeometry bmt_geo, int fitIter, 
+//            boolean originConstraint, Swim swimmer) {
+//        double chisqMax = Double.POSITIVE_INFINITY;
+//        
+//        Track cand = null;
+//        HelicalTrackFitter fitTrk = new HelicalTrackFitter();
+//        for (int i = 0; i < fitIter; i++) {
+//            //	if(originConstraint==true) {
+//            //		X.add(0, (double) 0);
+//            //		Y.add(0, (double) 0);
+//            //		Z.add(0, (double) 0);
+//            //		Rho.add(0, (double) 0);
+//            //		ErrRt.add(0, (double) org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT);
+//            //		ErrZ.add(0, (double) org.jlab.rec.cvt.svt.Constants.ZVTXCONSTRAINT);		
+//            //		ErrRho.add(0, (double) org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT);										
+//            //	}
+//            X.clear();
+//            Y.clear();
+//            Z.clear();
+//            Rho.clear();
+//            ErrZ.clear();
+//            ErrRho.clear();
+//            ErrRt.clear();
+//
+//            int svtSz = 0;
+//            int bmtZSz = 0;
+//            int bmtCSz = 0;
+//
+//            BMTCrossesC.clear();
+//            BMTCrossesZ.clear();
+//            SVTCrosses.clear();
+//
+//            for (Cross c : VTCrosses) {
+//                if (c.get_Detector()==DetectorType.BST) {
+//                    SVTCrosses.add(c);
+//                }
+//                else if (c.get_Detector()==DetectorType.BMT && c.get_Type()==BMTType.C ) {
+//                    BMTCrossesC.add(c);
+//                }
+//                else if (c.get_Detector()==DetectorType.BMT && c.get_Type()==BMTType.Z ) {
+//                    BMTCrossesZ.add(c);
+//                }
+//            }
+//            svtSz = SVTCrosses.size();
+//            if (BMTCrossesZ != null) {
+//                bmtZSz = BMTCrossesZ.size();
+//            }
+//            if (BMTCrossesC != null) {
+//                bmtCSz = BMTCrossesC.size();
+//            }
+//
+//            int useSVTdipAngEst = 1;
+//            if (bmtCSz >= 2) {
+//                useSVTdipAngEst = 0;
+//            }
+//
+//            ((ArrayList<Double>) X).ensureCapacity(svtSz + bmtZSz);
+//            ((ArrayList<Double>) Y).ensureCapacity(svtSz + bmtZSz);
+//            ((ArrayList<Double>) Z).ensureCapacity(svtSz * useSVTdipAngEst + bmtCSz);
+//            ((ArrayList<Double>) Rho).ensureCapacity(svtSz * useSVTdipAngEst + bmtCSz);
+//            ((ArrayList<Double>) ErrZ).ensureCapacity(svtSz * useSVTdipAngEst + bmtCSz);
+//            ((ArrayList<Double>) ErrRho).ensureCapacity(svtSz * useSVTdipAngEst + bmtCSz); // Try: don't use svt in dipdangle fit determination
+//            ((ArrayList<Double>) ErrRt).ensureCapacity(svtSz + bmtZSz);
+//
+//            cand = new Track(null);
+//            cand.addAll(SVTCrosses);
+//            for (int j = 0; j < SVTCrosses.size(); j++) {
+//                X.add(j, SVTCrosses.get(j).get_Point().x());
+//                Y.add(j, SVTCrosses.get(j).get_Point().y());
+//                if (useSVTdipAngEst == 1) {
+//                    Z.add(j, SVTCrosses.get(j).get_Point().z());
+//                    Rho.add(j, Math.sqrt(SVTCrosses.get(j).get_Point().x() * SVTCrosses.get(j).get_Point().x()
+//                            + SVTCrosses.get(j).get_Point().y() * SVTCrosses.get(j).get_Point().y()));
+//                    ErrRho.add(j, Math.sqrt(SVTCrosses.get(j).get_PointErr().x() * SVTCrosses.get(j).get_PointErr().x()
+//                            + SVTCrosses.get(j).get_PointErr().y() * SVTCrosses.get(j).get_PointErr().y()));
+//                    ErrZ.add(j, SVTCrosses.get(j).get_PointErr().z());
+//                }
+//                ErrRt.add(j, Math.sqrt(SVTCrosses.get(j).get_PointErr().x() * SVTCrosses.get(j).get_PointErr().x()
+//                        + SVTCrosses.get(j).get_PointErr().y() * SVTCrosses.get(j).get_PointErr().y()));
+//            }
+//
+//            if (bmtZSz > 0) {
+//                for (int j = svtSz; j < svtSz + bmtZSz; j++) {
+//                    X.add(j, BMTCrossesZ.get(j - svtSz).get_Point().x());
+//                    Y.add(j, BMTCrossesZ.get(j - svtSz).get_Point().y());
+//                    ErrRt.add(j, Math.sqrt(BMTCrossesZ.get(j - svtSz).get_PointErr().x() * BMTCrossesZ.get(j - svtSz).get_PointErr().x()
+//                            + BMTCrossesZ.get(j - svtSz).get_PointErr().y() * BMTCrossesZ.get(j - svtSz).get_PointErr().y()));
+//                }
+//            }
+//            if (bmtCSz > 0) {
+//                for (int j = svtSz * useSVTdipAngEst; j < svtSz * useSVTdipAngEst + bmtCSz; j++) {
+//                    Z.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_Point().z());
+//                    Rho.add(j, bmt_geo.getRadiusMidDrift(BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_Cluster1().get_Layer()));
+//                    
+//                    ErrRho.add(j, bmt_geo.getThickness()/2 / Math.sqrt(12.));
+//                    ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_PointErr().z());
+//                }
+//            }
+//            X.add((double) Constants.getXb());
+//            Y.add((double) Constants.getYb());
+//            ErrRt.add((double) 0.1);
+//            
+//            fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
+//            
+//            if (fitTrk.get_helix() == null) { 
+//                return null;
+//            }
+//
+//            cand = new Track(fitTrk.get_helix());
+//            //cand.addAll(SVTCrosses);
+//            cand.addAll(SVTCrosses);
+//            cand.addAll(BMTCrossesC);
+//            cand.addAll(BMTCrossesZ);
+//            
+//            swimmer.BfieldLab(0, 0, 0, b);
+//            double Bz = Math.abs(b[2]);
+//            fitTrk.get_helix().B = Bz;
+//            cand.set_HelicalTrack(fitTrk.get_helix());
+//            //if(shift==0)
+//            if (fitTrk.get_chisq()[0] < chisqMax) {
+//                chisqMax = fitTrk.get_chisq()[0];
+//                if(chisqMax<Constants.CIRCLEFIT_MAXCHI2)
+//                    cand.update_Crosses(svt_geo, bmt_geo);
+//                //i=fitIter;
+//            }
+//        }
+//        //System.out.println(" Seed fitter "+fitTrk.get_chisq()[0]+" "+fitTrk.get_chisq()[1]); 
+//        if(chisqMax>Constants.CIRCLEFIT_MAXCHI2)
+//            return null;
+//        if(X.size() > 3)
+//            cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0] / (int) (X.size() - 3)); // 3 fit params	
+//        if(Z.size() > 2)
+//            cand.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1] / (int) (Z.size() - 2)); // 2 fit params
+//        return cand;
+//    }
 
-            int svtSz = 0;
-            int bmtZSz = 0;
-            int bmtCSz = 0;
-
-            BMTCrossesC.clear();
-            BMTCrossesZ.clear();
-            SVTCrosses.clear();
-
-            for (Cross c : VTCrosses) {
-                if (c.get_Detector()==DetectorType.BST) {
-                    SVTCrosses.add(c);
-                }
-                else if (c.get_Detector()==DetectorType.BMT && c.get_Type()==BMTType.C ) {
-                    BMTCrossesC.add(c);
-                }
-                else if (c.get_Detector()==DetectorType.BMT && c.get_Type()==BMTType.Z ) {
-                    BMTCrossesZ.add(c);
-                }
-            }
-            svtSz = SVTCrosses.size();
-            if (BMTCrossesZ != null) {
-                bmtZSz = BMTCrossesZ.size();
-            }
-            if (BMTCrossesC != null) {
-                bmtCSz = BMTCrossesC.size();
-            }
-
-            int useSVTdipAngEst = 1;
-            if (bmtCSz >= 2) {
-                useSVTdipAngEst = 0;
-            }
-
-            ((ArrayList<Double>) X).ensureCapacity(svtSz + bmtZSz);
-            ((ArrayList<Double>) Y).ensureCapacity(svtSz + bmtZSz);
-            ((ArrayList<Double>) Z).ensureCapacity(svtSz * useSVTdipAngEst + bmtCSz);
-            ((ArrayList<Double>) Rho).ensureCapacity(svtSz * useSVTdipAngEst + bmtCSz);
-            ((ArrayList<Double>) ErrZ).ensureCapacity(svtSz * useSVTdipAngEst + bmtCSz);
-            ((ArrayList<Double>) ErrRho).ensureCapacity(svtSz * useSVTdipAngEst + bmtCSz); // Try: don't use svt in dipdangle fit determination
-            ((ArrayList<Double>) ErrRt).ensureCapacity(svtSz + bmtZSz);
-
-            cand = new Track(null);
-            cand.addAll(SVTCrosses);
-            for (int j = 0; j < SVTCrosses.size(); j++) {
-                X.add(j, SVTCrosses.get(j).get_Point().x());
-                Y.add(j, SVTCrosses.get(j).get_Point().y());
-                if (useSVTdipAngEst == 1) {
-                    Z.add(j, SVTCrosses.get(j).get_Point().z());
-                    Rho.add(j, Math.sqrt(SVTCrosses.get(j).get_Point().x() * SVTCrosses.get(j).get_Point().x()
-                            + SVTCrosses.get(j).get_Point().y() * SVTCrosses.get(j).get_Point().y()));
-                    ErrRho.add(j, Math.sqrt(SVTCrosses.get(j).get_PointErr().x() * SVTCrosses.get(j).get_PointErr().x()
-                            + SVTCrosses.get(j).get_PointErr().y() * SVTCrosses.get(j).get_PointErr().y()));
-                    ErrZ.add(j, SVTCrosses.get(j).get_PointErr().z());
-                }
-                ErrRt.add(j, Math.sqrt(SVTCrosses.get(j).get_PointErr().x() * SVTCrosses.get(j).get_PointErr().x()
-                        + SVTCrosses.get(j).get_PointErr().y() * SVTCrosses.get(j).get_PointErr().y()));
-            }
-
-            if (bmtZSz > 0) {
-                for (int j = svtSz; j < svtSz + bmtZSz; j++) {
-                    X.add(j, BMTCrossesZ.get(j - svtSz).get_Point().x());
-                    Y.add(j, BMTCrossesZ.get(j - svtSz).get_Point().y());
-                    ErrRt.add(j, Math.sqrt(BMTCrossesZ.get(j - svtSz).get_PointErr().x() * BMTCrossesZ.get(j - svtSz).get_PointErr().x()
-                            + BMTCrossesZ.get(j - svtSz).get_PointErr().y() * BMTCrossesZ.get(j - svtSz).get_PointErr().y()));
-                }
-            }
-            if (bmtCSz > 0) {
-                for (int j = svtSz * useSVTdipAngEst; j < svtSz * useSVTdipAngEst + bmtCSz; j++) {
-                    Z.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_Point().z());
-                    Rho.add(j, bmt_geo.getRadiusMidDrift(BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_Cluster1().get_Layer()));
-                    
-                    ErrRho.add(j, bmt_geo.getThickness()/2 / Math.sqrt(12.));
-                    ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_PointErr().z());
-                }
-            }
-            X.add((double) Constants.getXb());
-            Y.add((double) Constants.getYb());
-            ErrRt.add((double) 0.1);
-            
-            fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
-            
-            if (fitTrk.get_helix() == null) { 
-                return null;
-            }
-
-            cand = new Track(fitTrk.get_helix());
-            //cand.addAll(SVTCrosses);
-            cand.addAll(SVTCrosses);
-            cand.addAll(BMTCrossesC);
-            cand.addAll(BMTCrossesZ);
-            
-            swimmer.BfieldLab(0, 0, 0, b);
-            double Bz = Math.abs(b[2]);
-            fitTrk.get_helix().B = Bz;
-            cand.set_HelicalTrack(fitTrk.get_helix());
-            //if(shift==0)
-            if (fitTrk.get_chisq()[0] < chisqMax) {
-                chisqMax = fitTrk.get_chisq()[0];
-                if(chisqMax<Constants.CIRCLEFIT_MAXCHI2)
-                    cand.update_Crosses(svt_geo, bmt_geo);
-                //i=fitIter;
-            }
-        }
-        //System.out.println(" Seed fitter "+fitTrk.get_chisq()[0]+" "+fitTrk.get_chisq()[1]); 
-        if(chisqMax>Constants.CIRCLEFIT_MAXCHI2)
-            return null;
-        if(X.size() > 3)
-            cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0] / (int) (X.size() - 3)); // 3 fit params	
-        if(Z.size() > 2)
-            cand.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1] / (int) (Z.size() - 2)); // 2 fit params
-        return cand;
-    }
 
 
-
-    public List<Seed> findCandUsingMicroMegas(Seed trkCand,
-        List<Cross> bmt_crosses, BMTGeometry bmt_geo) {
+    public List<Seed> findCandUsingMicroMegas(Seed trkCand, List<Cross> bmt_crosses) {
         List<ArrayList<Cross>> BMTCcrosses = new ArrayList<ArrayList<Cross>>();
         
         ArrayList<Cross> matches = new ArrayList<Cross>();
@@ -587,23 +574,22 @@ public class TrackSeeder {
                     matches.clear();
 
                     if (BMTCcrosses.get(0).size() > 0 && i1 < BMTCcrosses.get(0).size()) {
-                        if (this.passCcross(trkCand, BMTCcrosses.get(0).get(i1), bmt_geo)) {
+                        if (this.passCcross(trkCand, BMTCcrosses.get(0).get(i1), bgeo)) {
                             matches.add(BMTCcrosses.get(0).get(i1));
                         }
                     }
                     if (BMTCcrosses.get(1).size() > 0 && i2 < BMTCcrosses.get(1).size()) {
-                        if (this.passCcross(trkCand, BMTCcrosses.get(1).get(i2), bmt_geo)) {
+                        if (this.passCcross(trkCand, BMTCcrosses.get(1).get(i2), bgeo)) {
                             matches.add(BMTCcrosses.get(1).get(i2));
                         }
                     }
                     if (BMTCcrosses.get(2).size() > 0 && i3 < BMTCcrosses.get(2).size()) {
-                        if (this.passCcross(trkCand, BMTCcrosses.get(2).get(i3), bmt_geo)) {
+                        if (this.passCcross(trkCand, BMTCcrosses.get(2).get(i3), bgeo)) {
                             matches.add(BMTCcrosses.get(2).get(i3));
                         }
                     }
                     
                     matches.addAll(trkCand.get_Crosses());
-                    Collections.sort(matches);
                     if (matches.size() > 0) {
                         Seed BMTTrkSeed = new Seed();
                         String st = "";
@@ -611,7 +597,6 @@ public class TrackSeeder {
                             st+=c.get_Id();
                         BMTTrkSeed.set_Helix(trkCand.get_Helix());
                         BMTTrkSeed.set_Crosses(matches);
-                        BMTTrkSeed.set_Clusters(trkCand.get_Clusters());
                         AllSeeds.put(st,BMTTrkSeed);
                         
                         //if (AllSeeds.size() > 200) {

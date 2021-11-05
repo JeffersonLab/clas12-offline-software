@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.jlab.rec.cvt.trajectory.Helix;
 
-import Jama.Matrix;
+//import Jama.Matrix;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.svt.SVTGeometry;
@@ -120,7 +120,8 @@ public class StraightTrackFitter {
         }
 
         // get the error matrix
-        Matrix fit_covmatrix = new Matrix(5, 5);
+        double[][] fit_covmatrix = new double[5][5];
+        
         //error matrix (assuming that the circle fit and line fit parameters are uncorrelated)
         // | d_dca*d_dca                   d_dca*d_phi_at_dca            d_dca*d_curvature        0            0             |
         // | d_phi_at_dca*d_dca     d_phi_at_dca*d_phi_at_dca     d_phi_at_dca*d_curvature        0            0             |
@@ -137,11 +138,11 @@ public class StraightTrackFitter {
         //covr[4] =  delta_phi.delta_dca;
         //covr[5] =  delta_dca.delta_dca;
         
-        fit_covmatrix.set(0, 0, _xyfit.getFit().interceptErr() * _xyfit.getFit().interceptErr());
-        fit_covmatrix.set(1, 1, _xyfit.getFit().slopeErr() * _xyfit.getFit().slopeErr());
-        fit_covmatrix.set(2, 2, 1.e-08);
-        fit_covmatrix.set(3, 3, _linefitpars.interceptErr() * _linefitpars.interceptErr());
-        fit_covmatrix.set(4, 4, _linefitpars.slopeErr() * _linefitpars.slopeErr());
+        fit_covmatrix[0][0] = _xyfit.getFit().interceptErr() * _xyfit.getFit().interceptErr();
+        fit_covmatrix[1][1] = _xyfit.getFit().slopeErr() * _xyfit.getFit().slopeErr();
+        fit_covmatrix[2][2] = 1.e-08;
+        fit_covmatrix[3][3] = _linefitpars.interceptErr() * _linefitpars.interceptErr();
+        fit_covmatrix[4][4] = _linefitpars.slopeErr() * _linefitpars.slopeErr();
 
         Helix helixresult = new Helix(fit_dca, fit_phi_at_dca, fit_curvature, fit_Z0, fit_tandip, fit_covmatrix);
 

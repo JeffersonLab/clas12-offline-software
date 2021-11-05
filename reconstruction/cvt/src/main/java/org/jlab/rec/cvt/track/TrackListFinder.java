@@ -68,18 +68,16 @@ public class TrackListFinder {
                     trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0]*10, pointAtCylRad[1]*10, pointAtCylRad[2]*10));
                     trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3]*10, pointAtCylRad[4]*10, pointAtCylRad[5]*10));
                     trk.set_pathLength(pointAtCylRad[6]*10);
-
-                    TrajectoryFinder trjFind = new TrajectoryFinder();
-
-                    Trajectory traj = trjFind.findTrajectory(trk, svt_geo, bmt_geo, ctof_geo, cnd_geo, cvtSwim, "final");
-
-                    trk.set_Trajectory(traj.get_Trajectory());
-
-                    //if(trk.passCand == true)
-                    tracks.add(trk);
                 }
-            }
+                TrajectoryFinder trjFind = new TrajectoryFinder();
 
+                Trajectory traj = trjFind.findTrajectory(trk, svt_geo, bmt_geo, ctof_geo, cnd_geo, cvtSwim, "final");
+
+                trk.set_Trajectory(traj.get_Trajectory());
+
+                //if(trk.passCand == true)
+                tracks.add(trk);
+            }
         }
         return tracks;
     }
@@ -112,6 +110,20 @@ public class TrackListFinder {
     }
     
      
+    public void removeBadTracks(List<Track> trkcands) {
+        if (trkcands == null) {
+            return;
+        }
+
+        int initial_size = trkcands.size();
+
+        for (int i = 1; i < initial_size + 1; i++) {
+            if (!trkcands.get(initial_size - i).isGood()) {
+                trkcands.remove(initial_size - i);
+            }
+        }
+    }
+
     public void removeOverlappingTracks(List<Track> tracks) {
             if(tracks==null)
                 return;
@@ -152,7 +164,6 @@ public class TrackListFinder {
     public void removeOverlappingTracksOld(List<Track> trkcands) {
             if(trkcands==null)
                 return;
-            
             List<Track> selectedTracks =new ArrayList<Track>();
             List<Track> list = new  ArrayList<Track>();
             List<Track> rejected = new  ArrayList<Track>();

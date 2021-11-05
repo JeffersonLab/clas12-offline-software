@@ -1,6 +1,6 @@
 package org.jlab.rec.cvt.trajectory;
 
-import Jama.*;
+
 import org.jlab.rec.cvt.Constants;
 
 /**
@@ -11,7 +11,7 @@ import org.jlab.rec.cvt.Constants;
  * @author ziegler
  *
  */
-public class StateVec extends Matrix implements Comparable<StateVec> {
+public class StateVec implements Comparable<StateVec> {
 
     
     /**
@@ -29,7 +29,13 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
     private double _TrkToModuleAngle;
     private double _CalcCentroidStrip;
     private double _Path;
-
+    private double _x;
+    private double _y;
+    private double _z;
+    private double _ux;
+    private double _uy;
+    private double _uz;
+    
     public int get_ID() {
         return _ID;
     }
@@ -123,7 +129,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * Instantiates a new vec.
      */
     public StateVec() {
-        super(6, 1);
+        set(0,0,0,0,0,0);
     }
 
     /**
@@ -132,12 +138,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @param V the v
      */
     public void set(StateVec V) {
-        set(0, 0, V.x());
-        set(1, 0, V.y());
-        set(2, 0, V.z());
-        set(3, 0, V.ux());
-        set(4, 0, V.uy());
-        set(5, 0, V.uz());
+        set(V.x(), V.y(), V.z(), V.ux(), V.uy(), V.uz());
     }
 
     private int _planeIdx;
@@ -172,12 +173,12 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @param uz the z-component of the tangent to the helix at point (x,y,z)
      */
     public void set(double x, double y, double z, double ux, double uy, double uz) {
-        set(0, 0, x);
-        set(1, 0, y);
-        set(2, 0, z);
-        set(3, 0, ux);
-        set(4, 0, uy);
-        set(5, 0, uz);
+        _x=x;
+        _y=y;
+        _z=z;
+        _ux=ux;
+        _uy=uy;
+        _uz=uz;
     }
 
     /**
@@ -191,13 +192,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @param uz the z-component of the tangent to the helix at point (x,y,z)
      */
     public StateVec(double x, double y, double z, double ux, double uy, double uz) {
-        super(6, 1);
-        set(0, 0, x);
-        set(1, 0, y);
-        set(2, 0, z);
-        set(3, 0, ux);
-        set(4, 0, uy);
-        set(5, 0, uz);
+        set(x, y, z, ux, uy, uz);
     }
 
     /**
@@ -206,29 +201,10 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @param v the v
      */
     public StateVec(StateVec v) {
-        super(6, 1);
-        set(0, 0, v.x());
-        set(1, 0, v.y());
-        set(2, 0, v.z());
-        set(3, 0, v.ux());
-        set(4, 0, v.uy());
-        set(5, 0, v.uz());
+        set(v._x, v._y, v._z, v._ux, v._uy, v._uz); 
     }
 
-    /**
-     * Instantiates a new StateVec.
-     *
-     * @param m the m
-     */
-    private StateVec(Matrix m) { //needed since Jama.Matrix cannot be casted into StateVec		
-        super(4, 1);
-        set(0, 0, m.get(0, 0));
-        set(1, 0, m.get(1, 0));
-        set(2, 0, m.get(2, 0));
-        set(3, 0, m.get(3, 0));
-        set(4, 0, m.get(4, 0));
-        set(5, 0, m.get(5, 0));
-    }
+    
 
     /**
      * Description of x().
@@ -236,7 +212,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @return the x component
      */
     public double x() {
-        return (get(0, 0));
+        return _x;
     }
 
     /**
@@ -245,7 +221,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @return the y component
      */
     public double y() {
-        return (get(1, 0));
+        return _y;
     }
 
     /**
@@ -254,7 +230,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @return the z component
      */
     public double z() {
-        return (get(2, 0));
+        return _z;
     }
 
     /**
@@ -263,7 +239,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @return the ux component
      */
     public double ux() {
-        return (get(3, 0));
+        return _ux;
     }
 
     /**
@@ -272,7 +248,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @return the uy component
      */
     public double uy() {
-        return (get(4, 0));
+        return _uy;
     }
 
     /**
@@ -281,7 +257,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @return the uz component
      */
     public double uz() {
-        return (get(5, 0));
+        return _uz;
     }
 
     @Override

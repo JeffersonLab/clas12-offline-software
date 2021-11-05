@@ -1,48 +1,25 @@
 package org.jlab.clas.tracking.kalmanfilter.straight;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.jlab.geom.prim.Vector3D;
-import org.jlab.geom.prim.Point3D;
-import Jama.Matrix;
 import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
-import org.jlab.clas.tracking.kalmanfilter.straight.MeasVecs.MeasVec;
+import org.jlab.clas.tracking.kalmanfilter.AKFitter;
+import org.jlab.clas.tracking.kalmanfilter.AMeasVecs;
+import org.jlab.clas.tracking.kalmanfilter.AMeasVecs.MeasVec;
+import org.jlab.clas.tracking.kalmanfilter.AStateVecs;
 import org.jlab.clas.tracking.trackrep.Helix;
 import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 
+/**
+ *
+ * @author ziegler
+ */
+public class StateVecs extends AStateVecs {
 
-public class StateVecs {
-
-    private Helix util ;
-    public double units;
-    public double lightVel;
     
-    public List<B> bfieldPoints = new ArrayList<B>();
-    public Map<Integer, StateVec> trackTraj = new HashMap<Integer, StateVec>();
-    public Map<Integer, CovMat> trackCov = new HashMap<Integer, CovMat>();
-
-    public StateVec StateVec;
-    public CovMat CovMat;
-    public Matrix F;
-    MeasVecs mv = new MeasVecs();
-
-    //public List<Double> X0;
-    //public List<Double> Y0;
-    //public List<Double> Z0; // reference points
-    public double shift; // target shift
-    public List<Integer> Layer;
-    public List<Integer> Sector;
-
-    double[] value = new double[4]; // x,y,z,phi
-    double[] swimPars = new double[7];
-    B Bf = new B(0);
-
-    public double[] getStateVecPosAtMeasSite(int k, StateVec iVec, MeasVec mv, Swim swim, 
-            boolean useSwimmer) {
+    @Override
+    public double[] getStateVecPosAtMeasSite(int k, StateVec iVec, AMeasVecs.MeasVec mv, Swim swim, boolean useSwimmer) {
         if(swimPars!=null) {
             this.resetArrays(swimPars);
         } else {
@@ -132,7 +109,7 @@ public class StateVecs {
         }
         return value;
     }
-
+    @Override
     public void setStateVecPosAtMeasSite(int k, StateVec kVec, MeasVec mv, Swim swimmer) {
 
         double[] pars = this.getStateVecPosAtMeasSite(k, kVec, mv, swimmer, true);
@@ -145,6 +122,7 @@ public class StateVecs {
         kVec.dl = pars[3];
     }
 
+    @Override
     public StateVec newStateVecAtMeasSite(int k, StateVec kVec, MeasVec mv, Swim swimmer, boolean useSwimmer) {
 
         StateVec newVec = kVec;
@@ -160,13 +138,14 @@ public class StateVecs {
         // new state:
         return newVec;
     }
-    private void tranState(int f, StateVec iVec, Swim swimmer) {
 
+    @Override
+    public void tranState(int f, StateVec iVec, Swim swimmer) {
+        
     }
 
-    public StateVec transported(int i, int f, StateVec iVec, MeasVec mv,
-            Swim swimmer) {
-
+    @Override
+    public StateVec transported(int i, int f, StateVec iVec, AMeasVecs.MeasVec mv, Swim swimmer) {
         // transport stateVec...
         StateVec fVec = new StateVec(f);
 
@@ -184,10 +163,9 @@ public class StateVecs {
         return fVec;
     }
 
-    public void transport(int i, int f, StateVec iVec, CovMat icovMat, MeasVec mv,
-            Swim swimmer) {
-       
-        StateVec fVec = this.transported(i, f, iVec, mv, swimmer);
+    @Override
+    public void transport(int i, int f, StateVec iVec, CovMat icovMat, AMeasVecs.MeasVec mv, Swim swimmer) {
+        AStateVecs.StateVec fVec = this.transported(i, f, iVec, mv, swimmer);
         
         double[][] FMat = new double[][]{
             {1, 0, 0, 0, 0},
@@ -197,30 +175,26 @@ public class StateVecs {
             {0, 0, 0, 0, 1}
         };
 
-        //StateVec = fVec;
+        
         this.trackTraj.put(f, fVec);
-        F = new Matrix(FMat);
-        Matrix FT = F.transpose();
-        Matrix Cpropagated = FT.times(icovMat.covMat).times(F);
+        //F = new Matrix();
+        //F.set(FMat);
+        
+        double[][] Cpropagated = propagatedMatrix(FMat, icovMat.covMat, FMat);
+       
         if (Cpropagated != null) {
             CovMat fCov = new CovMat(f);
-            fCov.covMat = Cpropagated.plus(this.Q(iVec, mv, (int)Math.signum(fVec.y-iVec.y)));
+            double[][] CPN = addProcessNoise(Cpropagated, this.Q(iVec, mv, f - i));
+            
+            fCov.covMat = CPN;
             //CovMat = fCov;
             this.trackCov.put(f, fCov);
         }
     }
-    
-    private Matrix Q(StateVec iVec, MeasVec mVec, int dir) {
 
-        Matrix Q = new Matrix(new double[][]{
-            {0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0}
-        });
-
-        // if (iVec.k % 2 == 1 && dir > 0) {
+    @Override
+    public double[][] Q(StateVec iVec, AMeasVecs.MeasVec mVec, int dir) {
+        double[][] Q = new double[5][5];
         if (dir >0 ) {
             Vector3D trkDir = this.P(iVec.k).asUnit();
             Vector3D trkPos = this.X(iVec.k);
@@ -250,22 +224,20 @@ public class StateVecs {
             double cov_txtx = (1 + tx * tx) * (1 + tx * tx + tz * tz) * sctRMS * sctRMS;
             double cov_tztz = (1 + tz * tz) * (1 + tx * tx + tz * tz) * sctRMS * sctRMS;
             double cov_txtz = tx * tz * (1 + tx * tx + tz * tz) * sctRMS * sctRMS;
-
             
-            Q = new Matrix(new double[][]{
+            Q = new double[][]{
                 {0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0},
                 {0, 0, cov_txtx, cov_txtz, 0},
                 {0, 0, cov_txtz, cov_tztz, 0},
                 {0, 0, 0, 0, 0}
-            });
-            
+            };
         }
-
         return Q;
     }
 
-    private StateVec reset(StateVec SV, StateVec stateVec) {
+    @Override
+    public StateVec reset(StateVec SV, StateVec stateVec) {
         SV = new StateVec(stateVec.k);
         SV.x = stateVec.x;
         SV.y = stateVec.y;
@@ -279,102 +251,7 @@ public class StateVecs {
         return SV;
     }
 
-    private void resetArrays(double[] swimPars) {
-        for(int i = 0; i<swimPars.length; i++) {
-            swimPars[i] = 0;
-        }
-    }
-
-    
-    
-    public class StateVec {
-
-        final int k;
-
-        public double x0;
-        public double z0;
-        public double x;
-        public double y;
-        public double z;
-        public double tx; //=px/py
-        public double tz; //=pz/py
-        public double dl;
-        public double resi =0;
-    
-        StateVec(int k) {
-            this.k = k;
-        }
-        private double[] _ELoss = new double[3];
-
-        public double[] get_ELoss() {
-            return _ELoss;
-        }
-
-        public void set_ELoss(double[] _ELoss) {
-            this._ELoss = _ELoss;
-        }
-
-    }
-
-    public class CovMat {
-
-        final int k;
-        public Matrix covMat;
-
-        CovMat(int k) {
-            this.k = k;
-        }
-
-    }
-
-    public class B {
-
-        final int k;
-        public double x;
-        public double y;
-        public double z;
-        public Swim swimmer;
-
-        public double Bx;
-        public double By;
-        public double Bz;
-
-        public double alpha;
-
-        float b[] = new float[3];
-        B(int k) {
-            this.k = k;
-        }
-        B(int k, double x, double y, double z, Swim swimmer) {
-            this.k = k;
-            this.x = x;
-            this.y = y;
-            this.z = z;
-
-            swimmer.BfieldLab(x/units, y/units, z/units + shift/units, b);
-            this.Bx = b[0];
-            this.By = b[1];
-            this.Bz = b[2];
-            
-            this.alpha = 1. / (lightVel * Math.abs(b[2]));
-        }
-
-        public void set() {
-            swimmer.BfieldLab(x/units, y/units, z/units + shift/units, b);
-            this.Bx = b[0];
-            this.By = b[1];
-            this.Bz = b[2];
-
-            this.alpha = 1. / (lightVel * Math.abs(b[2]));
-        }
-    }
-    double piMass = 0.13957018;
-    double KMass = 0.493677;
-    double muMass = 0.105658369;
-    double eMass = 0.000510998;
-    double pMass = 0.938272029;
-    
-
+    @Override
     public Vector3D P(int kf) {
         if (this.trackTraj.get(kf) != null) {
             double tx = this.trackTraj.get(kf).tx;
@@ -388,8 +265,9 @@ public class StateVecs {
         } else {
             return new Vector3D(0, 0, 0);
         }
-
     }
+
+    @Override
     public Vector3D X(int kf) {
         if (this.trackTraj.get(kf) != null) {
             double tx = this.trackTraj.get(kf).tx;
@@ -407,12 +285,35 @@ public class StateVecs {
         } else {
             return new Vector3D(0, 0, 0);
         }
-
     }
-    
-    
+
+    @Override
+    public Vector3D X(StateVec kVec, double phi) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Vector3D P0(int kf) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Vector3D X0(int kf) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void printlnStateVec(StateVec S) {
+        System.out.println(S.k + ") x " + S.x + " y " + S.y + " z " + S.z + " tx " + S.tx + " tz " + S.tz + " dl " + S.dl );
+    }
+
+    @Override
+    public void init(Helix trk, double[][] cov, AKFitter kf, Swim swimmer) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     public StateVec initSV = new StateVec(0);
-    public void init(double x0, double z0, double tx, double tz, double units, Matrix cov, KFitter kf) {
+    @Override
+    public void init(double x0, double z0, double tx, double tz, double units, double[][] cov, AKFitter kf) {
         this.units = units;
         //this.lightVel = 0.0000299792458*units;
         //init stateVec
@@ -427,19 +328,29 @@ public class StateVecs {
         initSV.dl = 0;
         this.trackTraj.put(0, initSV);
         CovMat initCM = new CovMat(0);
-        Matrix covKF = cov.copy(); 
+        double[][] covKF = new double[5][5]; 
+    
+        for(int ic = 0; ic<5; ic++) {
+            for(int ir = 0; ir<5; ir++) {
+                covKF[ic][ir]=cov[ic][ir];
+            }
+        }
 
         initCM.covMat = covKF;
         this.trackCov.put(0, initCM);
     }
 
-    public void printMatrix(Matrix C) {
-        for (int k = 0; k < 5; k++) {
-            System.out.println(C.get(k, 0) + "	" + C.get(k, 1) + "	" + C.get(k, 2) + "	" + C.get(k, 3) + "	" + C.get(k, 4));
-        }
+    
+    @Override
+    public void setTrackPars(StateVec sv, Swim swim) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public void printlnStateVec(StateVec S) {
-        System.out.println(S.k + ") x " + S.x + " y " + S.y + " z " + S.z + " tx " + S.tx + " tz " + S.tz + " dl " + S.dl );
+    @Override
+    public Helix setTrackPars() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
+    
+    
 }

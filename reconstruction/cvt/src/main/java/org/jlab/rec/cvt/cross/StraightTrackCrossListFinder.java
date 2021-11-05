@@ -36,12 +36,12 @@ public class StraightTrackCrossListFinder {
         /// The principle of Hough Transform in pattern recognition is as follows.
         /// For every point (rho, z) on a line there exists an infinite number of
         /// lines that go through this point.  Each such line can be parametrized
-        /// with parameters (ir, theta) such that ir = rho * cos(theta) + z * sin(theta),
+        /// with parameters (r, theta) such that r = rho * cos(theta) + z * sin(theta),
         /// where theta is the polar angle of the line which is perpendicular to it
-        /// and intersects the origin, and ir is the distance between that line and
+        /// and intersects the origin, and r is the distance between that line and
         /// the origin, for a given theta.
         /// Hence a point in (rho, z) parameter space corresponds to a sinusoidal
-        /// curve in (ir, theta) parameter space, which is the so-called Hough-
+        /// curve in (r, theta) parameter space, which is the so-called Hough-
         /// transform space.
         /// Points that fall on a line in (rho, z) space correspond to sinusoidal
         /// curves that intersect at a common point in Hough-transform space.
@@ -53,15 +53,15 @@ public class StraightTrackCrossListFinder {
         /// the Hough transform algorithm makes use of an array, called an accumulator.
         /// The principle of the accumulator is a counting method.
         /// The dimensions of the array is equal to the number of parameters in
-        /// Hough transform space, which is 2 corresponding to the (ir, theta) pair
+        /// Hough transform space, which is 2 corresponding to the (r, theta) pair
         /// in our particular case.
-        /// The bin size in the array are finite intervals in ir and theta, which are
+        /// The bin size in the array are finite intervals in r and theta, which are
         /// called accumulator cells.
-        /// The bin content of cells along the curve of discretized (ir, theta) values
+        /// The bin content of cells along the curve of discretized (r, theta) values
         /// get incremented.  The cell with the highest count corresponds to the
         /// intersection of the curves.  This is a numerical method to find
         /// the intersection of any number of curves.
-        /// Once the accumulator array has been filled with all (ir, theta) points
+        /// Once the accumulator array has been filled with all (r, theta) points
         /// peaks and their associated (rho, z) points are determined.
         /// From these, sets of points belonging to common lines can be
         /// determined.
@@ -78,7 +78,7 @@ public class StraightTrackCrossListFinder {
         double ThetaMin = 0.;
         double ThetaMax = 360.;
 
-        // Define the dimension of the ir accumulator array
+        // Define the dimension of the r accumulator array
         //int N_t = 180;
         //int N_r = 180;
         int N_t = 180;
@@ -126,7 +126,7 @@ public class StraightTrackCrossListFinder {
                 //double theta_j   = ThetaMin + (0.5 + j_t)*SizeThetaBin;
                 // r_j corresponding to that theta_j:
                 double r_j = rho * cosTheta_Rz_array[j_t] + z * sinTheta_Rz_array[j_t];
-                // this value of r_j falls into the following bin in the ir array:
+                // this value of r_j falls into the following bin in the r array:
                 int j_r = (int) Math.floor(N_r * (r_j - RMin) / (float) (RMax - RMin));
                 //System.out.println("check range "+RMin+" [ "+r_j +" --> "+j_r+" ] "+RMax);
                 // increase this accumulator cell:
@@ -182,7 +182,7 @@ public class StraightTrackCrossListFinder {
                     //double theta_j   = ThetaMin + (0.5 + j_t)*SizeThetaBin;
                     // r_j corresponding to that theta_j:
                     double r_j = rho * cosTheta_Rz_array[j_t] + z * sinTheta_Rz_array[j_t];
-                    // this value of r_j falls into the following bin in the ir array:
+                    // this value of r_j falls into the following bin in the r array:
                     int j_r = (int) Math.floor(N_r * (r_j - RMin) / (float) (RMax - RMin));
 
                     // match bins:

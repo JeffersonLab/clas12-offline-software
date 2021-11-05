@@ -5,10 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
 
-public class Constants {
+import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
 
-    public static double PTCUT = 0.075;
-    
+public class Constants {
 
     /**
      * BMTConstants used in the reconstruction
@@ -23,7 +22,9 @@ public class Constants {
     public static final double LIGHTVEL = 0.000299792458;       // velocity of light (mm/ns) - conversion factor from radius in mm to momentum in GeV/c 
 
     // selection cuts for helical tracks
-    public static final double MINRADCURV = 200.00; //in cm
+    public static final double PTCUT   = 0.075; // minimum pt in GeV
+    public static final double NDFCUT  = 0;     // minimum number of degres of freedom
+    public static final double CHI2CUT = 50;    // minimum chi2 per degrees of freedom
 
     public static final double CIRCLEFIT_MAXCHI2 = 100;
 
@@ -41,6 +42,8 @@ public class Constants {
     public static final boolean trk_comesfrmOrig = true;
 
     public static boolean areConstantsLoaded = false;
+
+    public static Libr kfMatLib;
 
     public static final double CTOFINNERRADIUS = 250;     // 250 mm
     public static final double CTOFOUTRRADIUS = 250 + 33;  // 283  mm
@@ -291,7 +294,6 @@ public class Constants {
         setSVTOnly(isSVTonly);
 
         areConstantsLoaded = true;
-        System.out.println("CVT constants loaded ? " + areConstantsLoaded);
         
     }
 
@@ -309,6 +311,25 @@ public class Constants {
 
     public static final void setSVTOnly(boolean sVTOnly) {
         SVTOnly = sVTOnly;
+    }
+
+    public static void setMatLib(String matLib) {
+        switch (matLib) {
+            case "JAMA":
+                kfMatLib = Libr.JAMA;
+                break;
+            case "JNP":
+                kfMatLib = Libr.JNP;
+                break;
+            case "APA":
+                kfMatLib = Libr.APA;
+                break;
+            case "EJML":
+                kfMatLib = Libr.EJML;    
+                break;
+            default:
+                kfMatLib = Libr.EJML;
+        } 
     }
     
     public static double getSolenoidMagnitude() {

@@ -11,7 +11,8 @@ that is pulling it in.
             <id>new-freehep</id>
             <mirrorOf>freehep</mirrorOf>
             <name>freehep</name>
-            <url>https://java.freehep.org/maven2</url>
+            <!--<url>https://java.freehep.org/maven2</url>-->
+            <url>https://srs.slac.stanford.edu/nexus/content/groups/freehep-maven2-public/</url>
         </mirror>
     </mirrors>
 </settings>

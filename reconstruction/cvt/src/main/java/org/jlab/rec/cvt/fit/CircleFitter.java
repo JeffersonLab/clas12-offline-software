@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.jlab.rec.cvt.Constants;
 
-import Jama.Matrix;
+//import Jama.Matrix;
 
 /**
  * Circle fit using the Karimaki algorithm. The algorithm returns Gaussian
@@ -188,16 +188,19 @@ public class CircleFitter {
         double invV_dd = rhoFit * (rhoFit * S_alphalpha - 2. * u * S_alpha) + u * u * Sw;
 
         double[][] array = {{invV_rhorho, invV_rhophi, invV_rhod}, {invV_rhophi, invV_phiphi, invV_phid}, {invV_rhod, invV_phid, invV_dd}};
-        Matrix inv_V = new Matrix(array);
-        Matrix V = inv_V.inverse();
-        Matrix result = new Matrix(V.getArray());
-
-        double V_rhorho = result.get(0, 0);
-        double V_rhophi = result.get(0, 1);
-        double V_rhod = result.get(0, 2);
-        double V_phiphi = result.get(1, 1);
-        double V_phid = result.get(1, 2);
-        double V_dd = result.get(2, 2);
+        //Matrix inv_V = new Matrix(array);
+        //Matrix V = inv_V.inverse();
+        //Matrix result = new Matrix(V.getArray());
+        // using this class methods
+        
+        double[][] mat3x3= invert3x3Matrix(array);
+        
+        double V_rhorho = mat3x3[0][0];
+        double V_rhophi = mat3x3[0][1];
+        double V_rhod = mat3x3[0][2];
+        double V_phiphi = mat3x3[1][1];
+        double V_phid = mat3x3[1][2];
+        double V_dd = mat3x3[2][2];
 
         // Fill the covariance matrix
         _covr[0] = V_rhorho;
@@ -263,19 +266,23 @@ public class CircleFitter {
 
         double[][] Varray = {{_covr[0], _covr[1], _covr[2]}, {_covr[1], _covr[3], _covr[4]}, {_covr[2], _covr[4], _covr[5]}};
 
-        Matrix J = new Matrix(Jarray);
-        Matrix JT = J.transpose();
-        Matrix V = new Matrix(Varray);
-        Matrix Vp = J.times(V.times(JT));
+        //        Matrix J = new Matrix(Jarray);
+//        Matrix JT = J.transpose();
+//        Matrix V = new Matrix(Varray);
+//        Matrix Vp = J.times(V.times(JT));
+//
+//        Matrix result = new Matrix(Vp.getArray());
 
-        Matrix result = new Matrix(Vp.getArray());
-
-        double Vp_rhorho = result.get(0, 0);
-        double Vp_rhophi = result.get(0, 1);
-        double Vp_rhod = result.get(0, 2);
-        double Vp_phiphi = result.get(1, 1);
-        double Vp_phid = result.get(1, 2);
-        double Vp_dd = result.get(2, 2);
+        double[][] JarrayT = this.transpose3x3Matrix(Jarray);
+        double[][] VJT = this.multiply3x3Matrices(Varray, JarrayT);
+        double[][] JVJT = this.multiply3x3Matrices(Jarray, VJT);
+        
+        double Vp_rhorho = JVJT[0][0];
+        double Vp_rhophi = JVJT[0][1];
+        double Vp_rhod = JVJT[0][2];
+        double Vp_phiphi = JVJT[1][1];
+        double Vp_phid = JVJT[1][2];
+        double Vp_dd = JVJT[2][2];
 
         //3. Fill the covariance matrix
         /* 
@@ -366,4 +373,48 @@ public class CircleFitter {
         boolean circlefitstatusOK = _circlefit.fitStatus(xm, ym, wm, xm.size());
     }
 
+    
+    public double[][] transpose3x3Matrix(double[][] theMatrix){
+        int c1=3; int c2=3;
+        double[][] transpMatrix = new double[c2][c1];
+        for (int i = 0; i < c1; i++)
+            for (int j = 0; j < c2; j++)
+                transpMatrix[i][j] = theMatrix[j][i];
+
+        return transpMatrix;
+    }
+    
+    public double[][] multiply3x3Matrices(double[][] firstMatrix, double[][] secondMatrix) {
+        int r1 =3; int c1=3; int c2=3;
+        double[][] product = new double[r1][c2];
+        for(int i = 0; i < r1; i++) {
+            for (int j = 0; j < c2; j++) {
+                for (int k = 0; k < c1; k++) {
+                    product[i][j] += firstMatrix[i][k] * secondMatrix[k][j];
+                }
+            }
+        }
+
+        return product;
+    }
+    public double[][] invert3x3Matrix(double[][] m) {
+        double[][] minv = new double[3][3];
+        // computes the inverse of a matrix m
+        double det = m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2]) -
+                     m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
+                     m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+
+        double invdet = 1 / det;
+        minv[0][0] = (m[1][1] * m[2][2] - m[2][1] * m[1][2]) * invdet;
+        minv[0][1] = (m[0][2] * m[2][1] - m[0][1] * m[2][2]) * invdet;
+        minv[0][2] = (m[0][1] * m[1][2] - m[0][2] * m[1][1]) * invdet;
+        minv[1][0] = (m[1][2] * m[2][0] - m[1][0] * m[2][2]) * invdet;
+        minv[1][1] = (m[0][0] * m[2][2] - m[0][2] * m[2][0]) * invdet;
+        minv[1][2] = (m[1][0] * m[0][2] - m[0][0] * m[1][2]) * invdet;
+        minv[2][0] = (m[1][0] * m[2][1] - m[2][0] * m[1][1]) * invdet;
+        minv[2][1] = (m[2][0] * m[0][1] - m[0][0] * m[2][1]) * invdet;
+        minv[2][2] = (m[0][0] * m[1][1] - m[1][0] * m[0][1]) * invdet;
+        
+        return minv;
+    }
 }
