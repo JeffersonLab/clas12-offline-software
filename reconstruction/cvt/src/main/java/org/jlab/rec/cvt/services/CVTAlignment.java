@@ -226,7 +226,7 @@ public class CVTAlignment extends ReconstructionEngine {
 				}
 				if(nCrossBMT>12) {
 					System.out.println("Too many BMT crosses!");
-					System.exit(0);
+					return false;
 				}
 			}
 			
@@ -491,6 +491,8 @@ public class CVTAlignment extends ReconstructionEngine {
 	boolean useDocaPhiZTandip=true;
 
 	boolean includeBeamspot = false;
+	private double minCosIncident = Math.cos(75*Math.PI/180);
+	private double spMax = 10;
 	private boolean fillMatricesBeamspot(int i, Ray ray, Matrix A, Matrix B, Matrix V, Matrix m, Matrix c,
 			Matrix I, double xb, double yb){
 		// a point along the beam
@@ -508,7 +510,7 @@ public class CVTAlignment extends ReconstructionEngine {
 
 
 		double udotn = u.dot(n);
-		if(Math.abs(udotn)<0.01)
+		if(Math.abs(udotn)<minCosIncident )
 			return false;
 		double sdotu = s.dot(u);
 		Vector3D extrap = xref.clone().add(u.multiply(n.dot(e.clone().sub(xref))/udotn));
@@ -522,7 +524,7 @@ public class CVTAlignment extends ReconstructionEngine {
 
 
 		Vector3D sp = s.clone().sub(n.multiply(sdotu/udotn));
-		if(sp.mag() > 10) {  //this can only happen if the angle between the track and the normal is small
+		if(sp.mag() > spMax) {  //this can only happen if the angle between the track and the normal is small
 			//System.out.println("rejecting track");
 			return false;
 		}
@@ -636,6 +638,12 @@ public class CVTAlignment extends ReconstructionEngine {
 		Vector3D s;
 		Vector3D n;
 
+		/*if(detector == DetectorType.BMT && bmtType==BMTType.C) {
+			Vector3D u = ray.get_dirVec();
+			double phi = Math.atan2(u.y(),u.x());
+			System.out.println("prelim phi is " + phi + " sector= ="+cl.get_Sector());
+			
+		}*/
 
 		if(debug) {
 			System.out.println("\n\nNew method " + detector + " layer " + layer + " sector " + sector);
@@ -704,10 +712,24 @@ public class CVTAlignment extends ReconstructionEngine {
 			if(debug) {
 				System.out.println("extrap is on cylinder:  this should be zero: " + (perp(extrap_plus.clone().sub(cc),a).mag()-R));
 			}
-			//if(extrap_plus.clone().sub(midpoint).mag()<extrap_minus.clone().sub(midpoint).mag())
+			
+			double phi_mid = cl.get_Arc().origin().midpoint(cl.get_Arc().end()).toVector3D().phi();
+			double delta_phi_plus=extrap_plus.phi()-phi_mid;
+			while (delta_phi_plus >Math.PI)
+				delta_phi_plus-=2*Math.PI;
+			while (delta_phi_plus <-Math.PI)
+				delta_phi_plus+=2*Math.PI;
+			
+			double delta_phi_minus=extrap_minus.phi()-phi_mid;
+			while (delta_phi_minus >Math.PI)
+				delta_phi_minus-=2*Math.PI;
+			while (delta_phi_minus <-Math.PI)
+				delta_phi_minus+=2*Math.PI;
+			
+			if(Math.abs(delta_phi_plus)<Math.abs(delta_phi_minus))
 				extrap = extrap_plus;
-			//else
-			//	extrap = extrap_minus;
+			else
+				extrap = extrap_minus;
 			e = extrap.clone().add(endpoint.clone().sub(extrap).projection(a));
 			s = a;
 			n = perp(extrap.clone().sub(cc),a).asUnit();
@@ -755,9 +777,9 @@ public class CVTAlignment extends ReconstructionEngine {
 		
 		
 		double udotn = u.dot(n);
-		if(Math.abs(udotn)<0.01) {
+		if(Math.abs(udotn)<minCosIncident) {
 			if(debug) {
-				System.out.println("rejecting track:  abs(udotn)<0.01");
+				System.out.println("rejecting track:  abs(udotn)<" + minCosIncident);
 				System.out.println("u = " + u.toString());
 				System.out.println("n = " + n.toString());
 			}
@@ -793,8 +815,8 @@ public class CVTAlignment extends ReconstructionEngine {
 		}
 
 		Vector3D sp = s.clone().sub(n.multiply(sdotu/udotn));
-		if(sp.mag() > 10) {  //this can only happen if the angle between the track and the normal is small
-			if(debug) System.out.println("rejecting track:  sp.magnitude() > 10");
+		if(sp.mag() > spMax) {  //this can only happen if the angle between the track and the normal is small
+			if(debug) System.out.println("rejecting track:  sp.magnitude() > "+spMax);
 			return false;
 		}
 
@@ -838,6 +860,9 @@ public class CVTAlignment extends ReconstructionEngine {
 		} else {
 
 			double phi = Math.atan2(u.y(),u.x());
+			/*if(detector == DetectorType.BMT && bmtType==BMTType.C) {
+				System.out.println("phi is " + phi);
+			}*/
 			Vector3D csphi = new Vector3D(Math.cos(phi), Math.sin(phi),0);
 			Vector3D mscphi = new Vector3D(-Math.sin(phi), Math.cos(phi),0);
 			double cosdip = Math.hypot(u.x(), u.y());
