@@ -25,6 +25,7 @@ public class Constants {
     public static final double PTCUT   = 0.075; // minimum pt in GeV
     public static final double NDFCUT  = 0;     // minimum number of degres of freedom
     public static final double CHI2CUT = 50;    // minimum chi2 per degrees of freedom
+    public static final double ZRANGE  = 500;   // defines z range as -ZRANGE:+ZRANGE in mm
 
     public static final double CIRCLEFIT_MAXCHI2 = 100;
 

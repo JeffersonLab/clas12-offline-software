@@ -397,14 +397,14 @@ public class RecUtilities {
             if (trkcand.get_Crosses().get(c).get_Detector()==DetectorType.BST) {
                 int  layer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer();
                 Vector3D d = new Vector3D(traj.get(layer).px, traj.get(layer).py, traj.get(layer).pz).asUnit();
-                trkcand.get_Crosses().get(c).setSVTCrossPosition(d, sgeo);
+                trkcand.get_Crosses().get(c).updateSVTCross(d, sgeo);
             }
             if (trkcand.get_Crosses().get(c).get_Detector()==DetectorType.BMT) {
                 // update cross position
                 int layer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer()+6;
                 Point3D  p = new Point3D(traj.get(layer).x, traj.get(layer).y, traj.get(layer).z);
                 Vector3D v = new Vector3D(traj.get(layer).px, traj.get(layer).py, traj.get(layer).pz).asUnit();
-                trkcand.get_Crosses().get(c).setBMTCrossPosition(p);
+                trkcand.get_Crosses().get(c).updateBMTCross(p, v);
                 trkcand.get_Crosses().get(c).set_Dir(v); 
                 Cluster cluster = trkcand.get_Crosses().get(c).get_Cluster1();
                 if (trkcand.get_Crosses().get(c).get_Type()==BMTType.Z) {
@@ -484,18 +484,18 @@ public class RecUtilities {
         return cand;
         
     }
-    public Track OutputTrack(Seed seed) {
-        
-        Track cand = new Track(seed.get_Helix());
-        for (Cross c : seed.get_Crosses()) {
-            if (c.get_Detector()==DetectorType.BST) {
-                continue;
-            }
-        }
-        cand.addAll(seed.get_Crosses());
-        return cand;
-        
-    }
+//    public Track OutputTrack(Seed seed) {
+//        
+//        Track cand = new Track(seed.get_Helix());
+//        for (Cross c : seed.get_Crosses()) {
+//            if (c.get_Detector()==DetectorType.BST) {
+//                continue;
+//            }
+//        }
+//        cand.addAll(seed.get_Crosses());
+//        return cand;
+//        
+//    }
     
     public List<Seed> reFit(List<Seed> seedlist,
             SVTGeometry SVTGeom, BMTGeometry BMTGeom,
@@ -536,7 +536,7 @@ public class RecUtilities {
                 layr2 = c.get_Cluster2().get_Layer();
                 if((int)Constants.getLayersUsed().get(layr)>0 
                         && (int)Constants.getLayersUsed().get(layr2)>0) {
-                    c.setSVTCrossPosition(null, SVTGeom); 
+                    c.updateSVTCross(null, SVTGeom); 
                     c.isInSeed = false;
                     refi.add(c); 
                 }
@@ -588,7 +588,7 @@ public class RecUtilities {
                 layr2 = c.get_Cluster2().get_Layer();
                 if((int)Constants.getLayersUsed().get(layr)>0 
                         && (int)Constants.getLayersUsed().get(layr2)>0) {
-                    c.setSVTCrossPosition(null, SVTGeom);
+                    c.updateSVTCross(null, SVTGeom);
                     c.isInSeed = false;
                    // System.out.println("refit "+c.printInfo());
                     refi.add(c); 
@@ -645,7 +645,7 @@ public class RecUtilities {
                 layr2 = c.get_Cluster2().get_Layer();
                 if((int)Constants.getLayersUsed().get(layr)>0 
                         && (int)Constants.getLayersUsed().get(layr2)>0) {
-                    c.setSVTCrossPosition(null, SVTGeom);
+                    c.updateSVTCross(null, SVTGeom);
                     c.isInSeed = false;
                    // System.out.println("refit "+c.printInfo());
                     refi.add(c); 

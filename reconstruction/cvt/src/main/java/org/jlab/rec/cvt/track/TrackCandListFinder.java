@@ -300,7 +300,7 @@ public class TrackCandListFinder {
                 if (fitTrk.get_helix() != null && fitTrk.getFit() != null) {
                     Track cand = new Track(fitTrk.get_helix());
                     cand.addAll(crossList.get(i));
-                    //cand.set_HelicalTrack(fitTrk.get_helix());			done in Track constructor			
+                    //cand.setPXYZ(fitTrk.get_helix());			done in Track constructor			
                     //cand.update_Crosses(svt_geo);
 
                     cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0] / (int) (X.size() - 3)); // 3 fit params					
@@ -889,7 +889,7 @@ public class TrackCandListFinder {
                     }
                 }
                 if(doca<matchCut) {
-                    closestCross.setBMTCrossPosition(traj);
+                    closestCross.updateBMTCross(traj, ray.get_dirVec());
                     matched.add(closestCross);
                 }
             }
@@ -1132,13 +1132,13 @@ public class TrackCandListFinder {
             int ntraj = svt_geo.getPlane(layer, sector).intersection(track.get_ray().toLine(), traj);
             
             if(ntraj!=1) 
-                c.resetCross(svt_geo);
+                c.reset(svt_geo);
             else if(!svt_geo.isInFiducial(layer, sector, traj)) 
-                c.resetCross(svt_geo);
+                c.reset(svt_geo);
             else {
                 Vector3D distance = svt_geo.toLocal(layer, sector, c.get_Point().vectorTo(traj));
                 if(Math.abs(distance.x())>Constants.COSMICSMINRESIDUALX ||
-                   Math.abs(distance.z())>Constants.COSMICSMINRESIDUALZ) c.resetCross(svt_geo);
+                   Math.abs(distance.z())>Constants.COSMICSMINRESIDUALZ) c.reset(svt_geo);
                 else
                     toKeep.add(c);
             }

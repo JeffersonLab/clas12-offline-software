@@ -99,7 +99,7 @@ public class CrossMaker {
                     this_cross.set_Cluster2(outlayerclus);
                     this_cross.set_Id(rid);
                     // sets the cross parameters (point3D and associated error) from the SVT geometry
-                    this_cross.setSVTCrossPosition(null, svt_geo); 
+                    this_cross.updateSVTCross(null, svt_geo); 
                     // the uncorrected point obtained from default estimate that the track is at 90 deg wrt the module should not be null
                     if (this_cross.get_Point0() != null) {
                         //pass the cross to the arraylist of crosses
@@ -154,7 +154,7 @@ public class CrossMaker {
             Cross this_cross = new Cross(DetectorType.BMT, BMTType.Z, Zlayerclus.get_Sector(), Zlayerclus.get_Region(), pid++);
             this_cross.set_Id(pid);
             this_cross.set_Cluster1(Zlayerclus); 
-            this_cross.setBMTCrossPosition(null);
+            this_cross.updateBMTCross(null, null);
             if (this_cross.get_Point0() != null) {
                 //make arraylist
                 crosses.add(this_cross);
@@ -171,7 +171,7 @@ public class CrossMaker {
             Cross this_cross = new Cross(DetectorType.BMT, BMTType.C, Clayerclus.get_Sector(), Clayerclus.get_Region(), pid++);
             this_cross.set_Id(pid);
             this_cross.set_Cluster1(Clayerclus);
-            this_cross.setBMTCrossPosition(null);
+            this_cross.updateBMTCross(null, null);
             if (this_cross.get_Point0() != null) {
                 //make arraylist
                 crosses.add(this_cross);

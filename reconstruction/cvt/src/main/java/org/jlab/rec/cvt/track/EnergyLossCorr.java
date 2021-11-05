@@ -70,7 +70,7 @@ public class EnergyLossCorr {
             if (Math.abs(this.OrigTrack.get_curvature()) < Math.abs(curv)) {
                 double correctedCurv = (Constants.LIGHTVEL * Math.abs(B)) * Math.signum(this.OrigTrack.get_curvature()) / (pt + stepSize);
                 trkcand.get_helix().set_curvature(correctedCurv);
-                trkcand.set_HelicalTrack(trkcand.get_helix());
+                trkcand.setPXYZ();
                 return;
             }
             pt = pt0 - j * stepSize;

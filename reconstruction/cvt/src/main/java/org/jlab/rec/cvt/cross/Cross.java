@@ -356,19 +356,25 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         this._MatchedCCross = _MatchedCCross;
     }
     
-    public void resetCross(SVTGeometry geo) {
+    public void reset(SVTGeometry geo) {
         this.set_Dir(null);
         this.set_DirErr(null);
         if(this.get_Detector()==DetectorType.BST)
-            this.setSVTCrossPosition(null, geo);
+            this.updateSVTCross(null, geo);
         else
-            this.setBMTCrossPosition(null);
+            this.updateBMTCross(null, null);
     }
 
+    public void update(Point3D trackPos, Vector3D trackDir, SVTGeometry geo) {
+        if(this.get_Detector()==DetectorType.BST)
+            this.updateSVTCross(trackDir, geo);
+        else
+            this.updateBMTCross(trackPos, trackDir);
+    }
     /**
      * Sets the cross parameters: the position and direction unit vector
      */
-    public void setBMTCrossPosition(Point3D trackPos) {
+    public void updateBMTCross(Point3D trackPos, Vector3D trackDir) {
 
         Cluster cluster  = this.get_Cluster1();
         
@@ -382,6 +388,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         }
         this.set_Point(crossPoint);
         this.set_PointErr(crossError.toPoint3D());
+        this.set_Dir(trackDir);
     }
 
     private Point3D getBMTCrossPoint(Point3D trackPos) {
@@ -431,7 +438,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     /**
      * Sets the cross parameters: the position and direction unit vector
      */
-    public void setSVTCrossPosition(Vector3D trackDir, SVTGeometry geo) {
+    public void updateSVTCross(Vector3D trackDir, SVTGeometry geo) {
 
         Cluster inlayerclus  = this.get_Cluster1();
         Cluster outlayerclus = this.get_Cluster2();

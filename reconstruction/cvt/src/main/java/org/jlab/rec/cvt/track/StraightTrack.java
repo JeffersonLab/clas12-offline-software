@@ -49,7 +49,7 @@ public class StraightTrack extends Trajectory{
     public void update_Crosses(Ray ray, SVTGeometry geo) {
         for (Cross c : this) {
             if(c.get_Detector()==DetectorType.BST) 
-                c.setSVTCrossPosition(ray.get_dirVec(), geo);
+                c.updateSVTCross(ray.get_dirVec(), geo);
             else {
                 Cluster cluster = c.get_Cluster1();
                 List<Point3D> trajs = new ArrayList<>();
@@ -64,7 +64,7 @@ public class StraightTrack extends Trajectory{
                             traj = t;
                         }
                     }
-                    c.setBMTCrossPosition(traj);
+                    c.updateBMTCross(traj, ray.get_dirVec());
                 }
             }
         }
@@ -100,7 +100,7 @@ public class StraightTrack extends Trajectory{
         Vector3D trkDir = new Vector3D(x, y, z);
 
 //        if (trkDir != null) {
-//            cross.setSVTCrossPosition(trkDir, geo);
+//            cross.updateSVTCross(trkDir, geo);
 //        }
 
     }

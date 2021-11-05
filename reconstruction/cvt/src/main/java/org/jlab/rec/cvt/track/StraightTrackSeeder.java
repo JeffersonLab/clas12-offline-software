@@ -5,14 +5,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorType;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
-import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.fit.CircleFitter;
 import org.jlab.rec.cvt.fit.CircleFitPars;
@@ -472,14 +470,12 @@ public class StraightTrackSeeder {
                 return null;
             }
 
+            fitTrk.get_helix().B = 0;
             cand = new Track(fitTrk.get_helix());
-            //cand.addAll(SVTCrosses);
             cand.addAll(SVTCrosses);
             cand.addAll(BMTCrossesZ);
             cand.addAll(BMTCrossesC);
             
-            fitTrk.get_helix().B = 0;
-            cand.set_HelicalTrack(fitTrk.get_helix());
             //if(shift==0)
 //            if(i==0) System.out.println();
 //            System.out.println(fitTrk.get_chisq()[0] + " " + chisqMax + " " + Constants.CIRCLEFIT_MAXCHI2);

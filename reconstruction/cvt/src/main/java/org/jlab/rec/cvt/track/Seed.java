@@ -154,9 +154,10 @@ public class Seed implements Comparable<Seed>{
         int svtSz = 0;
         int bmtZSz = 0;
         int bmtCSz = 0;
-
+        
         for (Cross c : this.get_Crosses()) {
-            c.resetCross(svt_geo);
+            // reset cross to clear previous track settings on direction and Point
+            c.reset(svt_geo);
             if (c.get_Detector()==DetectorType.BST) {
                 SVTCrosses.add(c);
             }
@@ -251,13 +252,12 @@ public class Seed implements Comparable<Seed>{
                 return null;
             }
 
+            fitTrk.get_helix().B = bfield;
             cand = new Track(fitTrk.get_helix());
             cand.addAll(SVTCrosses);
             cand.addAll(BMTCrossesC);
             cand.addAll(BMTCrossesZ);
             
-            fitTrk.get_helix().B = bfield;
-            cand.set_HelicalTrack(fitTrk.get_helix());
             if( X.size()>3 ) {
             	cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0]/(X.size()-3));
             }
@@ -283,5 +283,15 @@ public class Seed implements Comparable<Seed>{
         return cand;
     }
 
+    public Track toTrack(int id) {
+        Track track = new Track(this.get_Helix());
+        track.set_Id(id);
+        track.set_TrackingStatus(this.get_Status());
+        track.addAll(this.get_Crosses());
+        for(Cross c : track) {
+            c.set_AssociatedTrackID(id);
+        }
+        return track;
+    }
 
 }
