@@ -67,9 +67,9 @@ public class TrackSeeder {
             double f = seed.get_Phi();
 
             for (Cross c : othercrs ) { 
-                c.set_AssociatedTrackID(22220);
+//                c.set_AssociatedTrackID(22220);
                 if(this.InSamePhiRange(seed, c)== true) {
-                    c.set_AssociatedTrackID(22221);
+//                    c.set_AssociatedTrackID(22221);
                     double xi = c.get_Point().x(); 
                     double yi = c.get_Point().y();
                     double ri = Math.sqrt(xi*xi+yi*yi);
@@ -77,7 +77,7 @@ public class TrackSeeder {
 
                     double res = this.calcResi(r, ri, d, f, fi);
                     if(Math.abs(res)<SVTParameters.RESIMAX) { 
-                        c.set_AssociatedTrackID(22222);
+//                        c.set_AssociatedTrackID(22222);
                         // add to seed    
                         seed.get_Crosses().add((Cross) c.clone());
                     }
@@ -262,10 +262,10 @@ public class TrackSeeder {
         
         for(Seed mseed : seedScan) { 
             List<Cross> seedcrs = mseed.get_Crosses();
-            for (Cross c : seedcrs ) { 
-                if(c.get_Type()==BMTType.C ) continue;
-                c.set_AssociatedTrackID(122220);
-            }
+//            for (Cross c : seedcrs ) { 
+//                if(c.get_Type()==BMTType.C ) continue;
+//                c.set_AssociatedTrackID(122220);
+//            }
           // loop until a good circular fit. removing far crosses each time
           boolean circlefitstatusOK = false;
           while( ! circlefitstatusOK && seedcrs.size()>=3 ){
@@ -280,8 +280,8 @@ public class TrackSeeder {
             Ys.add(0, Constants.getYb());
             Ws.add(0, 0.1);
             for (Cross c : seedcrs ) { 
-                if(c.get_Type()==BMTType.C ) continue;
-                c.set_AssociatedTrackID(122221);
+//                if(c.get_Type()==BMTType.C ) continue;
+//                c.set_AssociatedTrackID(122221);
                 Xs.add(c.get_Point().x()); 
                 Ys.add(c.get_Point().y());
                 Ws.add(1. / (c.get_PointErr().x()*c.get_PointErr().x()
@@ -299,8 +299,8 @@ public class TrackSeeder {
               double r = pars.rho();
               double f = pars.phi();
               for (Cross c : seedcrs ) { 
-                if(c.get_Type()==BMTType.C) continue;
-                c.set_AssociatedTrackID(122222);
+//                if(c.get_Type()==BMTType.C) continue;
+//                c.set_AssociatedTrackID(122222);
                     double xi = c.get_Point().x(); 
                     double yi = c.get_Point().y();
                     double ri = Math.sqrt(xi*xi+yi*yi);
@@ -357,6 +357,7 @@ public class TrackSeeder {
             for(Cross c : bseed.get_Crosses()) {
                 c.isInSeed = true;
             }
+            bseed.set_Status(2);
         }
         return seedlist;
     }
@@ -516,7 +517,7 @@ public class TrackSeeder {
 //            swimmer.BfieldLab(0, 0, 0, b);
 //            double Bz = Math.abs(b[2]);
 //            fitTrk.get_helix().B = Bz;
-//            cand.set_HelicalTrack(fitTrk.get_helix());
+//            cand.setPXYZ(fitTrk.get_helix());
 //            //if(shift==0)
 //            if (fitTrk.get_chisq()[0] < chisqMax) {
 //                chisqMax = fitTrk.get_chisq()[0];

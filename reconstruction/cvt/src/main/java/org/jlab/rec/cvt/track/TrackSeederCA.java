@@ -250,7 +250,7 @@ public class TrackSeederCA {
             
 	    for( Track cand : cands ) { 
 	        Seed seed = new Seed(cand, cand.get_helix());
-	        seed.set_Status(2);
+	        seed.set_Status(1);
 	        seedlist.add(seed);
 	    }
         for (Seed bseed : seedlist) {
@@ -587,7 +587,7 @@ public class TrackSeederCA {
 //            swimmer.BfieldLab(0, 0, 0, b);
 //            double Bz = Math.abs(b[2]);
 //            fitTrk.get_helix().B = Bz;
-//            cand.set_HelicalTrack(fitTrk.get_helix());
+//            cand.setPXYZ(fitTrk.get_helix());
 //            if( X.size()>3 ) {
 //            	cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0]/(X.size()-3));
 //            }

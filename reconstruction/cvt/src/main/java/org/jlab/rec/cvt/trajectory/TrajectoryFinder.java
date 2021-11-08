@@ -43,8 +43,6 @@ public class TrajectoryFinder {
     
     /**
      *
-     * @param candCrossList the input list of crosses used in determining a
-     * trajectory
      * @param isFinal
      * @return a trajectory object
      */

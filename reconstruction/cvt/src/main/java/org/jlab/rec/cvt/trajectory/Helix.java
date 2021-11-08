@@ -215,7 +215,7 @@ public class Helix {
         double tandip = _tandip;
         double z0 = _Z0;
 
-        if (_curvature <1E-5) { // R > 100 m, assume it's straight track
+        if (Math.abs(_curvature)<1E-5) { // R > 100 m, assume it's straight track
             double x =  r*Math.cos(phi0);
             double y =  r*Math.sin(phi0);
             double z =  r*tandip;
@@ -244,7 +244,7 @@ public class Helix {
         double phi0 = _phi_at_dca;
         double tandip = _tandip;
         
-        if (_curvature <1E-5) { // R > 100 m, assume it's straight track
+        if (Math.abs(_curvature) <1E-5) { // R > 100 m, assume it's straight track
             double ux =  Math.cos(phi0);
             double uy =  Math.sin(phi0);
             double uz =  tandip;

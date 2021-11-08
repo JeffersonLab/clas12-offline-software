@@ -8,6 +8,7 @@ import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import java.util.Collections;
+import org.jlab.clas.tracking.kalmanfilter.AKFitter.HitOnTrack;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Arc3D;
@@ -819,4 +820,31 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         this._n = _n;
     }
 
+    public void update(HitOnTrack traj, SVTGeometry sgeo) {
+        
+        Point3D  trackPos = new Point3D(traj.x, traj.y, traj.z);
+        Vector3D trackDir = new Vector3D(traj.px, traj.py, traj.pz).asUnit();
+                
+        this.set_CentroidResidual(traj.resi);
+        this.set_SeedResidual(trackPos); 
+        this.setTrakInters(trackPos);
+        
+        if(this.get_Detector()==DetectorType.BMT && this.get_Type()==BMTType.Z) {  
+            this.set_CentroidResidual(traj.resi*this.getTile().baseArc().radius());    
+            this.setN(this.getAxis().distance(trackPos).direction().asUnit());
+            this.setS(this.getL().cross(this.getN()).asUnit());
+        }
+        
+        for (FittedHit hit : this) {
+            double doca1 = hit.residual(trackPos);
+            hit.set_docaToTrk(doca1);  
+            if(this.get_Detector()==DetectorType.BST) {
+                Point3D local = sgeo.toLocal(this.get_Layer(), this.get_Sector(), trackPos);
+                double sigma1 = sgeo.getSingleStripResolution(this.get_Layer(), hit.get_Strip().get_Strip(), local.z());
+                hit.set_stripResolutionAtDoca(sigma1);
+            }
+            if(traj.isMeasUsed) hit.set_TrkgStatus(1);
+        }
+                
+    }
 }
