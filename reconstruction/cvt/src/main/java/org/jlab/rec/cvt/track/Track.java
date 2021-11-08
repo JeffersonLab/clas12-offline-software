@@ -3,7 +3,6 @@ package org.jlab.rec.cvt.track;
 import java.util.Map;
 import org.jlab.clas.tracking.kalmanfilter.AKFitter.HitOnTrack;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cross.Cross;
@@ -30,23 +29,18 @@ public class Track extends Trajectory implements Comparable<Track> {
      */
     private static final long serialVersionUID = 1763744434903318419L;
 
-    private int _Q;			// track charge
+    private int _Q;	        // track charge
     private double _Pt;		// track pt
     private double _Pz;		// track pz
     private double _P;		// track p
-
     private String _PID;	// track pid
-
-    private int _TrackingStatus;
     
-    private double _circleFitChi2PerNDF;	// the chi2 for the helical track circle fit
-    private double _lineFitChi2PerNDF;   	// the linear fit to get the track dip angle
+    private Seed    _seed;
 
-    private Point3D _TrackPointAtCTOFRadius;	// a point of reference at the CTOF radius [the track is extrapolated to the CTOF radius and matched to CTOF hits to get the TOF]	
-    private Vector3D _TrackDirAtCTOFRadious;	// the direction of the track at the reference point described above.
-    private double _pathLength;			// the pathlength from the doca of the track to the z axis to the reference point described above
-    public boolean passCand;			// a flag to pass the candidate.
-    private int _NDF;
+    private Point3D  _trackPosAtCTOF;	        // a point of reference at the CTOF radius [the track is extrapolated to the CTOF radius and matched to CTOF hits to get the TOF]	
+    private Vector3D _trackDirAtCTOF;	        // the direction of the track at the reference point described above.
+    private double   _pathToCTOF;       	// the pathlength from the doca of the track to the z axis to the reference point described above
+    private int    _NDF;
     private double _Chi2;
     private Map<Integer, HitOnTrack> trajs = null; // map of trajectories indexed by layer, to be filled based on the KF results
 
@@ -58,6 +52,15 @@ public class Track extends Trajectory implements Comparable<Track> {
             this.setPXYZ();
         }
     }
+    
+    public Track(Seed seed) {
+        super(seed.get_Helix());
+        this.set_Seed(seed);
+        this.setPXYZ();
+        this.setNDF(seed.getNDF());
+        this.setChi2(seed.getChi2());
+        this.addAll(seed.get_Crosses());       
+    }
 
     public Track(Seed seed, org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf) {
         super(new Helix(kf.KFHelix.getD0(), kf.KFHelix.getPhi0(), kf.KFHelix.getOmega(), 
@@ -66,18 +69,11 @@ public class Track extends Trajectory implements Comparable<Track> {
         this.setPXYZ();
         this.setNDF(kf.NDF);
         this.setChi2(kf.chi2);
+        this.set_Seed(seed);
         this.addAll(seed.get_Crosses());
         this.setTrajectories(kf.TrjPoints);
     }
     
-    public void set_TrackingStatus(int ts) {
-        _TrackingStatus = ts;
-    }
-
-    public int get_TrackingStatus() {
-        return _TrackingStatus;
-    }
-
     /**
      *
      * @return the charge
@@ -132,11 +128,19 @@ public class Track extends Trajectory implements Comparable<Track> {
         this._P = _P;
     }
 
+    public Seed get_Seed() {
+        return _seed;
+    }
+
+    public final void set_Seed(Seed seed) {
+        this._seed = seed;
+    }
+
     /**
      * Sets the track helical track parameters P, Pt, Pz
      *
      */
-    public void setPXYZ() {
+    public final void setPXYZ() {
         Helix helix = this.get_helix();
         if (helix != null) {
             set_Q(((int) Math.signum(Constants.getSolenoidScale()) * helix.get_charge()));
@@ -161,12 +165,13 @@ public class Track extends Trajectory implements Comparable<Track> {
      * @param sgeo
      * @param bgeo
      */
-    public void update_Crosses(SVTGeometry sgeo, BMTGeometry bgeo) {
+    public void update_Crosses(int trackId, SVTGeometry sgeo, BMTGeometry bgeo) {
         for (int i = 0; i < this.size(); i++) {
             Cross cross = this.get(i);
+            cross.set_AssociatedTrackID(trackId);
             Point3D  trackPos = null;
             Vector3D trackDir = null;
-            if(this.getTrajectories()!=null) {
+            if(this.getTrajectories()!=null && Math.abs(this.get_helix().B)>0.0001) {
                 int layer = cross.get_Cluster1().get_Layer();
                 if(cross.get_Detector()==DetectorType.BMT) layer += SVTGeometry.NLAYERS;
                 HitOnTrack traj = this.getTrajectories().get(layer);
@@ -185,54 +190,18 @@ public class Track extends Trajectory implements Comparable<Track> {
     }    
     
 
-    public void update_Clusters(SVTGeometry sgeo) {
+    public void update_Clusters(int trackId, SVTGeometry sgeo) {        
         if(this.getTrajectories()!=null) {
-            for (int i = 0; i < this.size(); i++) {
-                Cross cross = this.get(i);
-                int layer = cross.get_Cluster1().get_Layer();
-                if(cross.get_Detector()==DetectorType.BMT) layer += SVTGeometry.NLAYERS;
+            for (int i = 0; i < this.get_Seed().get_Clusters().size(); i++) {
+                Cluster cluster = this.get_Seed().get_Clusters().get(i);
                 
-                Cluster cluster = cross.get_Cluster1();                
-                cluster.update(this.getTrajectories().get(layer), sgeo);
+                int layer = cluster.get_Layer();
+                if(cluster.get_Detector()==DetectorType.BMT) layer += SVTGeometry.NLAYERS;
                 
-                if(cross.get_Detector()==DetectorType.BST) {
-                    Cluster cluster2 = cross.get_Cluster2();                
-                    cluster2.update(this.getTrajectories().get(layer+1), sgeo);                   
-                }
+                if(this.getTrajectories().get(layer)!=null) // RDV check why it is necessary
+                    cluster.update(trackId, this.getTrajectories().get(layer), sgeo);
             }
         }
-    }
-
-    @Deprecated
-    public void update_Crosses(SVTGeometry geo) {
-        if (this.get_helix() != null && this.get_helix().get_curvature() != 0) {
-
-            Helix helix = this.get_helix();
-            for (int i = 0; i < this.size(); i++) {
-                if (this.get(i).get_Detector()!=DetectorType.BST) {
-                    continue;
-                }
-                double R = Math.sqrt(this.get(i).get_Point().x() * this.get(i).get_Point().x() + this.get(i).get_Point().y() * this.get(i).get_Point().y());
-                Vector3D helixTanVecAtLayer = helix.getTrackDirectionAtRadius(R);
-                this.get(i).updateSVTCross(helixTanVecAtLayer, geo);
-                if (this.get(i).get_Cluster2().get_Centroid() <= 1) {
-                    //recalculate z using track pars:
-                    double z = helix.getPointAtRadius(R).z();
-                    double x = this.get(i).get_Point().x();
-                    double y = this.get(i).get_Point().y();
-                    Line3D module = this.get(i).get_Cluster2().get(0).get_Strip().get_Module();
-                    double z1 = module.origin().z();
-                    double z2 = module.end().z();
-                    if (z - z1 < z2 - z1) {
-                        this.get(i).set_Point(new Point3D(x, y, z));
-                    }
-
-                }
-
-            }
-
-        }
-
     }
     
     /**
@@ -340,28 +309,28 @@ public class Track extends Trajectory implements Comparable<Track> {
         else      return false;
     }
 
-    public Point3D get_TrackPointAtCTOFRadius() {
-        return _TrackPointAtCTOFRadius;
+    public Point3D get_TrackPosAtCTOF() {
+        return _trackPosAtCTOF;
     }
 
-    public void set_TrackPointAtCTOFRadius(Point3D _TrackPointAtCTOFRadius) {
-        this._TrackPointAtCTOFRadius = _TrackPointAtCTOFRadius;
+    public void se_TrackPosAtCTOF(Point3D _TrackPointAtCTOFRadius) {
+        this._trackPosAtCTOF = _TrackPointAtCTOFRadius;
     }
 
-    public Vector3D get_TrackDirAtCTOFRadius() {
-        return _TrackDirAtCTOFRadious;
+    public Vector3D get_TrackDirAtCTOF() {
+        return _trackDirAtCTOF;
     }
 
-    public void set_TrackDirAtCTOFRadius(Vector3D _TrackDirAtCTOFRadious) {
-        this._TrackDirAtCTOFRadious = _TrackDirAtCTOFRadious;
+    public void set_TrackDirAtCTOF(Vector3D _TrackDirAtCTOFRadious) {
+        this._trackDirAtCTOF = _TrackDirAtCTOFRadious;
     }
 
-    public double get_pathLength() {
-        return _pathLength;
+    public double get_PathToCTOF() {
+        return _pathToCTOF;
     }
 
-    public void set_pathLength(double _pathLength) {
-        this._pathLength = _pathLength;
+    public void set_PathToCTOF(double _pathLength) {
+        this._pathToCTOF = _pathLength;
     }
 
     public String get_PID() {
@@ -371,28 +340,12 @@ public class Track extends Trajectory implements Comparable<Track> {
     public void set_PID(String _PID) {
         this._PID = _PID;
     }
-
-    public double get_circleFitChi2PerNDF() {
-        return _circleFitChi2PerNDF;
-    }
-
-    public void set_circleFitChi2PerNDF(double _circleFitChi2PerNDF) {
-        this._circleFitChi2PerNDF = _circleFitChi2PerNDF;
-    }
-
-    public double get_lineFitChi2PerNDF() {
-        return _lineFitChi2PerNDF;
-    }
-
-    public void set_lineFitChi2PerNDF(double _lineFitChi2PerNDF) {
-        this._lineFitChi2PerNDF = _lineFitChi2PerNDF;
-    }
-
+    
     public int getNDF() {
         return _NDF;
     }
 
-    public void setNDF(int _NDF) {
+    public final void setNDF(int _NDF) {
         this._NDF = _NDF;
     }
 
@@ -400,7 +353,7 @@ public class Track extends Trajectory implements Comparable<Track> {
         return _Chi2;
     }
 
-    public void setChi2(double _Chi2) {
+    public final void setChi2(double _Chi2) {
         this._Chi2 = _Chi2;
     }
     
@@ -408,8 +361,31 @@ public class Track extends Trajectory implements Comparable<Track> {
         return trajs;
     }
     
-    public void setTrajectories(Map<Integer, HitOnTrack> trajectory) {
+    public final void setTrajectories(Map<Integer, HitOnTrack> trajectory) {
         this.trajs = trajectory;
+    }
+    
+    public int getStatus() {
+        //for status word:
+        int nSVT  = 0;
+        int nBMTZ = 0;
+        int nBMTC = 0;
+        // fills the list of cross ids for crosses belonging to that reconstructed track
+        for (int j = 0; j < this.size(); j++) {
+            // counter to get status word    
+            if (this.get(j).get_Detector() == DetectorType.BST) {
+                nSVT++;
+            }
+            if (this.get(j).get_Detector() == DetectorType.BMT
+                    && this.get(j).get_Type() == BMTType.Z) {
+                nBMTZ++;
+            }
+            if (this.get(j).get_Detector() == DetectorType.BMT
+                    && this.get(j).get_Type() == BMTType.C) {
+                nBMTC++;
+            }
+        }
+        return 1000+nSVT*100+nBMTZ*10+nBMTC;
     }
     
     public String toString() {

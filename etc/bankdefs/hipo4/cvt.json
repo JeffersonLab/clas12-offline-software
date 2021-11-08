@@ -1,9 +1,41 @@
  [
   {
+    "name": "CVTRec::Seeds",
+    "group": 20500,
+    "item" : 25,   
+    "info": "reconstructed CVT track seeds",
+    "entries": [
+        {"name":"ID",             "type":"S", "info":"ID"},
+        {"name":"fittingMethod",  "type":"B", "info":"fitting method (1 for global fit, 2 for Kalman Filter)"},
+        {"name":"q",              "type":"B", "info":"charge"},
+        {"name":"p",              "type":"F", "info":"total momentum"},
+        {"name":"pt",             "type":"F", "info":"transverse momentum"},
+        {"name":"phi0",           "type":"F", "info":"helical track fit parameter: phi at DOCA" },
+        {"name":"tandip",         "type":"F", "info":"helical track fit parameter: dip angle" },
+        {"name":"z0",             "type":"F", "info":"helical track fit parameter: value of z at the DOCA" },
+        {"name":"d0",             "type":"F", "info":"helical track fit parameter: Distance of Closest Approach" },
+	{"name":"circlefit_chi2_per_ndf",     "type":"F", "info":"Circle Fit chi^2/ndf "},
+        {"name":"linefit_chi2_per_ndf",       "type":"F", "info":" Line Fit chi^2/ndf "},
+        {"name":"chi2",           "type":"F", "info":"Fit chi^2 "},
+        {"name":"ndf",            "type":"S", "info":"Fit ndf "},
+        {"name":"Cross1_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"Cross2_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"Cross3_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"Cross4_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"Cross5_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"Cross6_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"Cross7_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"Cross8_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"Cross9_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"xb",             "type":"F", "info":"x offset  "},
+        {"name":"yb",             "type":"F", "info":"y offset  "}
+    ]
+  },
+  {
     "name": "CVTRec::Tracks",
     "group": 20500,
     "item" : 26,   
-    "info": "reconstructed SVT tracks",
+    "info": "reconstructed CVT tracks",
     "entries": [
         {"name":"ID",             "type":"S", "info":"ID"},
         {"name":"fittingMethod",  "type":"B", "info":"fitting method (1 for global fit, 2 for Kalman Filter)"},
@@ -42,6 +74,7 @@
         {"name":"Cross7_ID",      "type":"S", "info":"ID of cross in the track"},
         {"name":"Cross8_ID",      "type":"S", "info":"ID of cross in the track"},
         {"name":"Cross9_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"seedID",         "type":"S", "info":"ID of track seed"},
         {"name":"xb",             "type":"F", "info":"x offset  "},
         {"name":"yb",             "type":"F", "info":"y offset  "},
         {"name":"status",         "type":"S", "info":"track status : 1abc (a = nb SVT crosses, b = nb BMT Z clusters, c = nb BMT C clusters, used in fit)"}

@@ -14,7 +14,6 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
-import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
@@ -58,8 +57,6 @@ public class TracksFromTargetRec {
             if(exLayrs==true) {
                 seeds = recUtil.reFit(seeds, SVTGeom, BMTGeom, swimmer, trseed); // RDV can we juts refit?
             }
-            //TrackSeederCA trseed = new TrackSeederCA();  // cellular automaton seeder
-            //seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
         } else {
             if(isSVTonly) {
                 TrackSeeder trseed = new TrackSeeder(SVTGeom, BMTGeom, swimmer);
@@ -80,24 +77,26 @@ public class TracksFromTargetRec {
         }
         if(seeds ==null || seeds.size() == 0) {
             recUtil.CleanupSpuriousCrosses(crosses, null, SVTGeom) ;
-            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null, shift);
+            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null, null, shift);
             return true;
         }   
         
-        KFitter kf = null;
-        List<Track> trkcands = new ArrayList<Track>();
-        
-        if(false) {
-            for(Seed seed : seeds) {
-                int id = trkcands.size()+1;
-                Track track = seed.toTrack(id);
-                track.update_Crosses(SVTGeom, BMTGeom);
-                trkcands.add(track);                
-            }
-            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, trkcands, shift);
-            return true;
+        // create track candidate list, set seed IDs and do a final update to crosses
+        List<Track> trkcands = new ArrayList<>();        
+        for(Seed seed : seeds) {
+            int id = trkcands.size()+1;
+            seed.setId(id);
+            Track track = new Track(seed);
+            track.update_Crosses(id, SVTGeom, BMTGeom);
+            trkcands.add(track);                
         }
+//        if(true) {
+//            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, seeds, trkcands, shift);
+//            return true;
+//        }
         
+        trkcands.clear();
+        KFitter kf = null;
         for (Seed seed : seeds) { 
             Point3D  v = seed.get_Helix().getVertex();
             Vector3D p = seed.get_Helix().getPXYZ(solenoidValue);
@@ -129,7 +128,7 @@ public class TracksFromTargetRec {
                 //kf.filterOn=false;
                 kf.runFitter(swimmer);
                 if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null) { 
-                    Track fittedTrack = recUtil.OutputTrack(seed, kf, SVTGeom, BMTGeom);
+                    Track fittedTrack = new Track(seed, kf);
                     for(Cross c : fittedTrack) { 
                         if(c.get_Detector()==DetectorType.BST) {
                             c.get_Cluster1().set_AssociatedTrackID(0);
@@ -140,8 +139,8 @@ public class TracksFromTargetRec {
                     List<Cluster> clsOnTrack = recUtil.FindClustersOnTrk(SVTclusters, seed.get_Clusters(), fittedTrack.get_helix(), 
                             fittedTrack.get_P(), fittedTrack.get_Q(), SVTGeom, swimmer);
                     if(clsOnTrack.size()>0) {
-                        seed.get_Clusters().addAll(clsOnTrack);
-                    
+                        seed.add_Clusters(clsOnTrack);
+                                            
                         //reset pars
                         v = fittedTrack.get_helix().getVertex();
                         p = fittedTrack.get_helix().getPXYZ(solenoidValue);
@@ -166,113 +165,45 @@ public class TracksFromTargetRec {
                         if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null)
                             fittedTrack = new Track(seed, kf);
                     }
-                    fittedTrack.set_TrackingStatus(seed.get_Status());
                     trkcands.add(fittedTrack);
             }
         }
     
 
-        if (trkcands.size() == 0) {
-            recUtil.CleanupSpuriousCrosses(crosses, null, SVTGeom) ;
-            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null, shift);
-            return true;
-        }
-        
-        //This last part does ELoss C
-        TrackListFinder trkFinder = new TrackListFinder();
-        trkFinder.removeOverlappingTracks(trkcands); //turn off until debugged
-//        TrackListFinder.checkForOverlaps(trkcands, "KF");
-        List<Track> tracks = trkFinder.getTracks(trkcands, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, swimmer);
-
-
-        // reset cross IDs
+        // reset cross and cluster IDs
         for(int det = 0; det<2; det++) {
             for(Cross c : crosses.get(det)) {
                 c.set_AssociatedTrackID(-1);
             }
         }
-        // update crosses and clusters on track
-        for(int it = 0; it < tracks.size(); it++) {
-            int id = it + 1;
-            tracks.get(it).set_Id(id);
-            for(int ic = 0; ic < tracks.get(it).size(); ic++) {
-                tracks.get(it).get(ic).set_AssociatedTrackID(id);
+        for(Cluster c : SVTclusters) {
+            c.set_AssociatedTrackID(-1);
+        }
+//        if (trkcands.isEmpty()) {
+//            recUtil.CleanupSpuriousCrosses(crosses, null, SVTGeom) ;            
+//            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, seeds, null, shift);
+//            return true;
+//        }
+        
+        List<Track> tracks = null;
+        if(!trkcands.isEmpty()) {
+            // do a final cleanup
+            TrackListFinder.removeOverlappingTracks(trkcands); 
+    //        TrackListFinder.checkForOverlaps(trkcands, "KF");
+            tracks = TrackListFinder.getTracks(trkcands, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, swimmer);
+            // update crosses and clusters on track
+            for(int it = 0; it < tracks.size(); it++) {
+                int id = it + 1;
+                tracks.get(it).set_Id(id); 
+                tracks.get(it).update_Crosses(id, SVTGeom, BMTGeom);
+                tracks.get(it).update_Clusters(id, SVTGeom);
             }
-            tracks.get(it).update_Crosses(SVTGeom, BMTGeom);
-            tracks.get(it).update_Clusters(SVTGeom);
         }
         for(int det = 0; det<2; det++) {
             for(Cross c : crosses.get(det)) {
                 if(c.get_AssociatedTrackID()==-1) c.reset(SVTGeom);
             }
         }
-        // reset parameters for crosses that are not on track
-        
-//                if (crosses.get(0) != null && crosses.get(0).size() > 0) {
-//    //                    for (Cross crsSVT : crosses.get(0)) {
-//                        for (int jj=0 ; jj < crosses.get(0).size(); jj++) {
-//                                Cross crsSVT = crosses.get(0).get(jj);
-//                        if (crsSVT.get_Sector() == tracks.get(it).get(ic).get_Sector() && crsSVT.get_Cluster1()!=null && crsSVT.get_Cluster2()!=null 
-//                                && tracks.get(it).get(ic).get_Cluster1()!=null && tracks.get(it).get(ic).get_Cluster2()!=null
-//                                && crsSVT.get_Cluster1().get_Id() == tracks.get(it).get(ic).get_Cluster1().get_Id()
-//                                && crsSVT.get_Cluster2().get_Id() == tracks.get(it).get(ic).get_Cluster2().get_Id()) {  
-//                            crsSVT.set_Point(tracks.get(it).get(ic).get_Point());
-//                            tracks.get(it).get(ic).set_Id(crsSVT.get_Id());
-//                            crsSVT.set_PointErr(tracks.get(it).get(ic).get_PointErr());
-//                            crsSVT.set_Dir(tracks.get(it).get(ic).get_Dir());
-//                            crsSVT.set_DirErr(tracks.get(it).get(ic).get_DirErr());
-//                            crsSVT.set_AssociatedTrackID(it + 1);
-//                            crsSVT.get_Cluster1().set_AssociatedTrackID(it + 1);
-//                            for (FittedHit h : crsSVT.get_Cluster1()) {
-//                                h.set_AssociatedTrackID(it + 1);
-//                            }
-//                            for (FittedHit h : crsSVT.get_Cluster2()) {
-//                                h.set_AssociatedTrackID(it + 1);
-//                            }
-//                            crsSVT.get_Cluster2().set_AssociatedTrackID(it + 1);
-//
-//                        }
-//                    }
-//                }
-//                if (crosses.get(1) != null && crosses.get(1).size() > 0) {
-//    //                    for (Cross crsBMT : crosses.get(1)) {
-//                        for (int jj=0 ; jj < crosses.get(1).size(); jj++) {
-//                                Cross crsBMT = crosses.get(1).get(jj);
-//                        if (crsBMT.get_Id() == tracks.get(it).get(ic).get_Id()) {
-//                            crsBMT.set_Point(tracks.get(it).get(ic).get_Point());
-//                            crsBMT.set_PointErr(tracks.get(it).get(ic).get_PointErr());
-//                            crsBMT.set_Dir(tracks.get(it).get(ic).get_Dir());
-//                            crsBMT.set_DirErr(tracks.get(it).get(ic).get_DirErr());
-//                            crsBMT.set_AssociatedTrackID(it + 1);
-//                            crsBMT.get_Cluster1().set_AssociatedTrackID(it + 1);
-//                            for (FittedHit h : crsBMT.get_Cluster1()) {
-//                                h.set_AssociatedTrackID(it + 1);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
-//        /// remove direction information from crosses that were part of duplicates, now removed. TODO: Should I put it in the clone removal?  
-//        for( Cross c : crosses.get(1) ) {
-//                if( c.get_AssociatedTrackID() < 0 ) {
-//                        c.set_Dir( new Vector3D(0,0,0));
-//                        c.set_DirErr( new Vector3D(0,0,0));
-//                        if( c.get_Type()==BMTType.C) {
-//                            c.set_Point(new Point3D(Double.NaN,Double.NaN,c.get_Point().z()));
-//                        }
-//                        else {
-//                            c.set_Point(new Point3D(c.get_Point().x(),c.get_Point().y(),Double.NaN));
-//                        }
-//                }
-//        }
-//        for( Cross c : crosses.get(0) ) {
-//                if( c.get_AssociatedTrackID() < 0 ) {
-//                        c.set_Dir( new Vector3D(0,0,0));
-//                        c.set_DirErr( new Vector3D(0,0,0));
-//                }
-//        }
 
 
 //        //------------------------ RDV check with Veronique
@@ -280,7 +211,7 @@ public class TracksFromTargetRec {
 //        if (tracks.size() > 0) {
 //            recUtil.CleanupSpuriousCrosses(crosses, tracks, SVTGeom) ;
 //        }
-        rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, tracks, shift);
+        rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, seeds, tracks, shift);
 
         return true;
 

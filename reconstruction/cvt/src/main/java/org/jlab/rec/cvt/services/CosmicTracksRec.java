@@ -105,20 +105,6 @@ public class CosmicTracksRec {
             List<Cross> bmtCrossesRm = new ArrayList<Cross>();
             
             
-            
-            for (int k1 = 0; k1 < cosmics.size(); k1++) { 
-                cosmics.get(k1).set_Id(k1 + 1);
-                for (int k2 = 0; k2 < cosmics.get(k1).size(); k2++) {
-                    if(cosmics.get(k1).get(k2).get_Detector()==DetectorType.BST)
-                        continue;
-                    bmtCrossesRm.add(cosmics.get(k1).get(k2));
-                    cosmics.get(k1).get(k2).set_AssociatedTrackID(k1+1);
-                    bmtCrosses.add(cosmics.get(k1).get(k2));
-                }    
-            }
-            crosses.get(1).removeAll(bmtCrossesRm);
-            crosses.get(1).addAll(bmtCrosses);
-            
             Helix hlx  = null ;
             KFitter kf = null;
             

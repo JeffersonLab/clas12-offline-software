@@ -179,7 +179,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
             clusters.addAll(clusFinder.findClusters(bmt_hits)); 
         }
         if (clusters.size() == 0) {
-            rbc.appendCVTBanks(event, SVThits, BMThits, null, null, null, null, shift);
+            rbc.appendCVTBanks(event, SVThits, BMThits, null, null, null, null, null, shift);
             return true;
         }
         
@@ -201,7 +201,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
         CrossMaker crossMake = new CrossMaker();
         crosses = crossMake.findCrosses(clusters, SVTGeom, BMTGeom);
         if(crosses.get(0).size() > SVTParameters.MAXSVTCROSSES ) {
-            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, null, null, shift);
+            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, null, null, null, shift);
             return true; 
         }
         

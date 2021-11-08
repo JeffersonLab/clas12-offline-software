@@ -55,9 +55,9 @@ public class StraightTrackSeeder {
 
             Map<Integer, Cross> matchBMT = new HashMap<Integer, Cross>();
             for (Cross c : othercrs ) { 
-                c.set_AssociatedTrackID(22220);
+//                c.set_AssociatedTrackID(22220);
                 if(this.InSamePhiRange(seed, c)== true) {
-                    c.set_AssociatedTrackID(22221);
+//                    c.set_AssociatedTrackID(22221);
                     double xi = c.get_Point().x(); 
                     double yi = c.get_Point().y();
                     double ri = Math.sqrt(xi*xi+yi*yi);
@@ -65,7 +65,7 @@ public class StraightTrackSeeder {
 
                     double res = this.calcResi(r, ri, d, f, fi);
                     if(Math.abs(res)<20) { 
-                        c.set_AssociatedTrackID(22222);
+//                        c.set_AssociatedTrackID(22222);
                         // add to seed   
                         if(matchBMT.containsKey(c.getOrderedRegion())) {
                             Cross cs = (Cross) matchBMT.get(c.getOrderedRegion());
@@ -74,10 +74,10 @@ public class StraightTrackSeeder {
                             double ris = Math.sqrt(xis*xis+yis*yis);
                             double fis = Math.atan2(yis,xis) ;
                             if(Math.abs(this.calcResi(r, ris, d, f, fis))>Math.abs(res)) {
-                               matchBMT.put(c.getOrderedRegion(), (Cross) c.clone()); // add only if res better
+                               matchBMT.put(c.getOrderedRegion(), c); // add only if res better
                             } 
                         } else {
-                            matchBMT.put(c.getOrderedRegion(), (Cross) c.clone());
+                            matchBMT.put(c.getOrderedRegion(), c);
                         }
                     }
                 }
@@ -244,10 +244,10 @@ public class StraightTrackSeeder {
         for(Seed mseed : seedScan) { 
             List<Cross> seedcrs = mseed.get_Crosses();
             
-            for (Cross c : seedcrs ) { 
-                if(c.get_Type()==BMTType.C ) continue;
-                c.set_AssociatedTrackID(122220);
-            }
+//            for (Cross c : seedcrs ) { 
+//                if(c.get_Type()==BMTType.C ) continue;
+//                c.set_AssociatedTrackID(122220);
+//            }
           // loop until a good circular fit. removing far crosses each time
           boolean circlefitstatusOK = false;
           while( ! circlefitstatusOK && seedcrs.size()>=3 ){
@@ -263,7 +263,7 @@ public class StraightTrackSeeder {
             Ws.add(0, 0.1);
             for (Cross c : seedcrs ) { 
                 if(c.get_Type()==BMTType.C ) continue;
-                c.set_AssociatedTrackID(122221);
+//                c.set_AssociatedTrackID(122221);
                 Xs.add(c.get_Point().x()); 
                 Ys.add(c.get_Point().y());
                 Ws.add(1. / (c.get_PointErr().x()*c.get_PointErr().x()
@@ -282,7 +282,7 @@ public class StraightTrackSeeder {
               double f = pars.phi();
               for (Cross c : seedcrs ) { 
                 if(c.get_Type()==BMTType.C ) continue;
-                c.set_AssociatedTrackID(122222);
+//                c.set_AssociatedTrackID(122222);
                     double xi = c.get_Point().x(); 
                     double yi = c.get_Point().y();
                     double ri = Math.sqrt(xi*xi+yi*yi);
@@ -426,8 +426,6 @@ public class StraightTrackSeeder {
             ((ArrayList<Double>) ErrRho).ensureCapacity(svtSz * useSVTdipAngEst + bmtCSz); // Try: don't use svt in dipdangle fit determination
             ((ArrayList<Double>) ErrRt).ensureCapacity(svtSz + bmtZSz);
 
-            cand = new Track(null);
-            cand.addAll(SVTCrosses);
             for (int j = 0; j < SVTCrosses.size(); j++) {
                 X.add(j, SVTCrosses.get(j).get_Point().x());
                 Y.add(j, SVTCrosses.get(j).get_Point().y());
@@ -479,7 +477,7 @@ public class StraightTrackSeeder {
             //if(shift==0)
 //            if(i==0) System.out.println();
 //            System.out.println(fitTrk.get_chisq()[0] + " " + chisqMax + " " + Constants.CIRCLEFIT_MAXCHI2);
-            cand.update_Crosses(svt_geo, bmt_geo);
+            cand.update_Crosses(-1, svt_geo, bmt_geo);
             if (fitTrk.get_chisq()[0] < chisqMax) {
                 chisqMax = fitTrk.get_chisq()[0];
 //                if(chisqMax<Constants.CIRCLEFIT_MAXCHI2)
@@ -535,17 +533,17 @@ public class StraightTrackSeeder {
 
                     if (BMTCcrosses.get(0).size() > 0 && i1 < BMTCcrosses.get(0).size()) {
                         if (this.passCcross(trkCand, BMTCcrosses.get(0).get(i1), bmt_geo)) {
-                            matches.add((Cross) BMTCcrosses.get(0).get(i1).clone());
+                            matches.add(BMTCcrosses.get(0).get(i1));
                         }
                     }
                     if (BMTCcrosses.get(1).size() > 0 && i2 < BMTCcrosses.get(1).size()) {
                         if (this.passCcross(trkCand, BMTCcrosses.get(1).get(i2), bmt_geo)) {
-                            matches.add((Cross) BMTCcrosses.get(1).get(i2).clone());
+                            matches.add(BMTCcrosses.get(1).get(i2));
                         }
                     }
                     if (BMTCcrosses.get(2).size() > 0 && i3 < BMTCcrosses.get(2).size()) {
                         if (this.passCcross(trkCand, BMTCcrosses.get(2).get(i3), bmt_geo)) {
-                            matches.add((Cross) BMTCcrosses.get(2).get(i3).clone());
+                            matches.add(BMTCcrosses.get(2).get(i3));
                         }
                     }
                     
