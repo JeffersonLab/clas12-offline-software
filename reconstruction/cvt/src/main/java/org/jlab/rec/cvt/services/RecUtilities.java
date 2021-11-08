@@ -449,11 +449,11 @@ public class RecUtilities {
                 
                 layer = layer + 6;
                 
-               if(cl.get_Type() == BMTType.Z) {
+               if(cl.get_Type() == BMTType.C) {
                    
                 Line3D cln = cl.getAxis();
                 cl.setN(cln.distance(new Point3D(kf.TrjPoints.get(layer).x,kf.TrjPoints.get(layer).y,kf.TrjPoints.get(layer).z)).direction().asUnit());
-                cl.setS(cl.getL().cross(cl.getN()).asUnit());
+                cl.setL(cl.getS().cross(cl.getN()).asUnit());
                  
                }
                 

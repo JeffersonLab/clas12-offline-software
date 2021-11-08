@@ -897,6 +897,7 @@ public class TrackCandListFinder {
         return matched;
     }
 
+    @Deprecated
     private ArrayList<Cross> MatchMMCrossC(int Region, Ray ray, List<Cross> MMCrosses, double matchCutOff, BMTGeometry geo) {
 
         ArrayList<Cross> matchedMMCrosses = new ArrayList<Cross>();
@@ -968,6 +969,7 @@ public class TrackCandListFinder {
         return matchedMMCrosses;
     }
 
+    @Deprecated
     private ArrayList<Cross> MatchMMCrossZ(int Region, Ray ray, List<Cross> MMCrosses, double matchCutOff, BMTGeometry geo) {
 
         ArrayList<Cross> matchedMMCrosses = new ArrayList<Cross>();

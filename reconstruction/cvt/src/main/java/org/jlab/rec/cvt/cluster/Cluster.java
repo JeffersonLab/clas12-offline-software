@@ -820,22 +820,25 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         this._n = _n;
     }
 
-    public void update(HitOnTrack traj, SVTGeometry sgeo) {
+    public void update(int trackId, HitOnTrack traj, SVTGeometry sgeo) {
         
         Point3D  trackPos = new Point3D(traj.x, traj.y, traj.z);
         Vector3D trackDir = new Vector3D(traj.px, traj.py, traj.pz).asUnit();
                 
+        this.set_AssociatedTrackID(trackId);
         this.set_CentroidResidual(traj.resi);
         this.set_SeedResidual(trackPos); 
         this.setTrakInters(trackPos);
         
-        if(this.get_Detector()==DetectorType.BMT && this.get_Type()==BMTType.Z) {  
+        if(this.get_Detector()==DetectorType.BMT && this.get_Type()==BMTType.C) {  
             this.set_CentroidResidual(traj.resi*this.getTile().baseArc().radius());    
+            this.setS(this.getAxis().direction().asUnit());
             this.setN(this.getAxis().distance(trackPos).direction().asUnit());
-            this.setS(this.getL().cross(this.getN()).asUnit());
+            this.setL(this.getS().cross(this.getN()).asUnit());
         }
         
         for (FittedHit hit : this) {
+            hit.set_AssociatedTrackID(trackId);
             double doca1 = hit.residual(trackPos);
             hit.set_docaToTrk(doca1);  
             if(this.get_Detector()==DetectorType.BST) {

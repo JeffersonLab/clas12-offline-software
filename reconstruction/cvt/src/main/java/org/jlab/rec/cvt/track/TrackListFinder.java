@@ -34,7 +34,7 @@ public class TrackListFinder {
      * @param cvtSwim
      * @return the list of selected tracks
      */
-    public List<Track> getTracks(List<Track> cands, 
+    public static List<Track> getTracks(List<Track> cands, 
             SVTGeometry svt_geo, BMTGeometry bmt_geo,
             CTOFGeant4Factory ctof_geo, Detector cnd_geo,
             Swim cvtSwim) {
@@ -48,7 +48,7 @@ public class TrackListFinder {
         
         for (Track trk : cands) { 
             if(trk.get_helix()!=null) {
-                this.assignTrkPID(trk);
+                assignTrkPID(trk);
                 //KalFit kf = new KalFit(trk, svt_geo);
                 //kf.runKalFit(trk, svt_geo);
                 //EnergyLossCorr elc = new EnergyLossCorr(trk);
@@ -65,9 +65,9 @@ public class TrackListFinder {
 
                 double[] pointAtCylRad = cvtSwim.SwimGenCylinder(new Point3D(0,0,0), new Point3D(0,0,1), Constants.CTOFINNERRADIUS/10, Constants.SWIMACCURACYCD/10);
                 if(pointAtCylRad!=null) {
-                    trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0]*10, pointAtCylRad[1]*10, pointAtCylRad[2]*10));
-                    trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3]*10, pointAtCylRad[4]*10, pointAtCylRad[5]*10));
-                    trk.set_pathLength(pointAtCylRad[6]*10);
+                    trk.se_TrackPosAtCTOF(new Point3D(pointAtCylRad[0]*10, pointAtCylRad[1]*10, pointAtCylRad[2]*10));
+                    trk.set_TrackDirAtCTOF(new Vector3D(pointAtCylRad[3]*10, pointAtCylRad[4]*10, pointAtCylRad[5]*10));
+                    trk.set_PathToCTOF(pointAtCylRad[6]*10);
                 }
                 TrajectoryFinder trjFind = new TrajectoryFinder();
 
@@ -82,7 +82,7 @@ public class TrackListFinder {
         return tracks;
     }
 
-    private void assignTrkPID(Track trk) {
+    private static void assignTrkPID(Track trk) {
 
         int NbHits = 0;
         double TotE = 0;
@@ -110,7 +110,7 @@ public class TrackListFinder {
     }
     
      
-    public void removeBadTracks(List<Track> trkcands) {
+    public static void removeBadTracks(List<Track> trkcands) {
         if (trkcands == null) {
             return;
         }
@@ -124,7 +124,7 @@ public class TrackListFinder {
         }
     }
 
-    public void removeOverlappingTracks(List<Track> tracks) {
+    public static void removeOverlappingTracks(List<Track> tracks) {
             if(tracks==null)
                 return;
             
@@ -230,7 +230,7 @@ public class TrackListFinder {
     	
     }
 
-    private Track FindBestTrack(List<Track> trkList) {
+    private static Track FindBestTrack(List<Track> trkList) {
     // --------------------------------------------------------------------
     //  Select the candidate with the highest number of NDF
     //    if two have the same ndf, get the one with the better chi2/ndf

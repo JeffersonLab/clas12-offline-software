@@ -79,7 +79,7 @@ public class TrackSeeder {
                     if(Math.abs(res)<SVTParameters.RESIMAX) { 
 //                        c.set_AssociatedTrackID(22222);
                         // add to seed    
-                        seed.get_Crosses().add((Cross) c.clone());
+                        seed.get_Crosses().add(c);
                     }
                 }
             }
@@ -318,41 +318,38 @@ public class TrackSeeder {
 
 
         for(Seed mseed : seedScan) { 
-            List<Cross> seedcrs = mseed.get_Crosses();
-            Track cand = null;
-            if(seedcrs.size()>=3)
-                cand = mseed.fit(this.sgeo, this.bgeo, 5, false, this.bfield);
-            if (cand != null) {
-                Seed seed = new Seed(seedcrs, cand.get_helix());
-
-                //match to BMT
-                if (seed != null ) {
-                    List<Cross> sameSectorCrosses = this.FindCrossesInSameSectorAsSVTTrk(seed, bmtC_crosses);
-                    BMTmatches.clear();
-                    if (sameSectorCrosses.size() >= 0) {
-                        BMTmatches = this.findCandUsingMicroMegas(seed, sameSectorCrosses);
-                    } 
-                    Seed bestSeed = null;
-                    double chi2_Circ = Double.POSITIVE_INFINITY;
-                    double chi2_Line = Double.POSITIVE_INFINITY;
-                    
-                    for (Seed bseed : BMTmatches) {
-                        //refit using the BMT
-                        Track bcand = bseed.fit(this.sgeo, this.bgeo, 5, false, this.bfield);
-                        
-                        if (bcand != null && bcand.get_circleFitChi2PerNDF()<chi2_Circ
-                                          && bcand.get_lineFitChi2PerNDF()<chi2_Line
-                                          && bcand.isGood()) {
-                            bestSeed = new Seed(bseed.get_Crosses(), bcand.get_helix());
-                            chi2_Circ = bcand.get_circleFitChi2PerNDF();
-                            chi2_Line = bcand.get_lineFitChi2PerNDF();
-                        }
-                    }
-                    if(bestSeed!= null) seedlist.add(bestSeed);
+            boolean fitStatus = false;
+            if(mseed.get_Crosses().size()>=3)
+                fitStatus = mseed.fit(this.sgeo, this.bgeo, 5, false, this.bfield);
+            if (fitStatus) {
+                List<Cross> sameSectorCrosses = this.FindCrossesInSameSectorAsSVTTrk(mseed, bmtC_crosses);
+                BMTmatches.clear();
+                if (sameSectorCrosses.size() >= 0) {
+                    BMTmatches = this.findCandUsingMicroMegas(mseed, sameSectorCrosses);
                 } 
+                
+                Seed bestSeed = null;
+                double chi2_Circ = Double.POSITIVE_INFINITY;
+                double chi2_Line = Double.POSITIVE_INFINITY;
+                for (Seed bseed : BMTmatches) {
+                    //refit using the BMT
+                    fitStatus = bseed.fit(this.sgeo, this.bgeo, 5, false, this.bfield);
+
+                    if (fitStatus && bseed.get_circleFitChi2PerNDF()<chi2_Circ
+                                  && bseed.get_lineFitChi2PerNDF()<chi2_Line
+                                  && bseed.isGood()) {
+                        bestSeed  = bseed;
+                        chi2_Circ = bseed.get_circleFitChi2PerNDF();
+                        chi2_Line = bseed.get_lineFitChi2PerNDF();
+                    }
+                }
+                if(bestSeed!= null) seedlist.add(bestSeed);
             }
         }
        
+        // remove overlapping seeds
+        Seed.removeOverlappingSeeds(seedlist);
+        
         for (Seed bseed : seedlist) { 
             for(Cross c : bseed.get_Crosses()) {
                 c.isInSeed = true;

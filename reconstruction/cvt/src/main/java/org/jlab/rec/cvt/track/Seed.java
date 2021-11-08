@@ -3,7 +3,10 @@ package org.jlab.rec.cvt.track;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.clas.tracking.kalmanfilter.AKFitter;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
@@ -21,12 +24,17 @@ import org.jlab.rec.cvt.trajectory.Helix;
  */
 public class Seed implements Comparable<Seed>{
 
+    private int id;
     private int status;
     private double doca;
     private double rho;
     private double phi;
     private Helix _Helix;
     private List<Cross> _Crosses;
+    private double _circleFitChi2PerNDF;	// the chi2 for the helical track circle fit
+    private double _lineFitChi2PerNDF;   	// the linear fit to get the track dip angle
+    private int    _NDF;
+    private double _chi2;
     
     
     public Seed() {
@@ -59,6 +67,10 @@ public class Seed implements Comparable<Seed>{
         this.phi  = helix.get_phi_at_dca();
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public void set_Status(int trkStatus) {
         this.status = trkStatus;
     }
@@ -73,6 +85,10 @@ public class Seed implements Comparable<Seed>{
 
     public final void set_Phi(double phi) {
         this.phi = phi;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public int get_Status() {
@@ -114,7 +130,39 @@ public class Seed implements Comparable<Seed>{
         Collections.sort(_Crosses);
         this._Crosses = _Crosses;
     }
+
+    public double get_circleFitChi2PerNDF() {
+        return _circleFitChi2PerNDF;
+    }
+
+    public void set_circleFitChi2PerNDF(double _circleFitChi2PerNDF) {
+        this._circleFitChi2PerNDF = _circleFitChi2PerNDF;
+    }
+
+    public double get_lineFitChi2PerNDF() {
+        return _lineFitChi2PerNDF;
+    }
+
+    public void set_lineFitChi2PerNDF(double _lineFitChi2PerNDF) {
+        this._lineFitChi2PerNDF = _lineFitChi2PerNDF;
+    }
+
+    public int getNDF() {
+        return _NDF;
+    }
     
+    public void setNDF(int ndf) {
+        this._NDF= ndf;
+    }
+
+    public double getChi2() {
+        return _chi2;
+    }
+
+    public void setChi2(double _chi2) {
+        this._chi2 = _chi2;
+    }
+
     public String get_IntIdentifier() {
         
         String id = "";
@@ -135,7 +183,7 @@ public class Seed implements Comparable<Seed>{
     }
     
 
-    public Track fit(SVTGeometry svt_geo, BMTGeometry bmt_geo, int fitIter, boolean originConstraint,
+    public boolean fit(SVTGeometry svt_geo, BMTGeometry bmt_geo, int fitIter, boolean originConstraint,
             double bfield) {
         
         List<Double> X = new ArrayList<>();
@@ -187,8 +235,6 @@ public class Seed implements Comparable<Seed>{
         ((ArrayList<Double>) ErrZ).ensureCapacity(svtSz * useSVTdipAngEst + bmtCSz);
         ((ArrayList<Double>) ErrRho).ensureCapacity(svtSz * useSVTdipAngEst + bmtCSz); // Try: don't use svt in dipdangle fit determination
         ((ArrayList<Double>) ErrRt).ensureCapacity(svtSz + bmtZSz);
-
-        Track cand = null;
          
         HelicalTrackFitter fitTrk = new HelicalTrackFitter();
         for (int i = 0; i < fitIter; i++) {
@@ -249,49 +295,125 @@ public class Seed implements Comparable<Seed>{
             fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
             
             if (fitTrk.get_helix() == null) { 
-                return null;
+                return false;
             }
 
             fitTrk.get_helix().B = bfield;
-            cand = new Track(fitTrk.get_helix());
-            cand.addAll(SVTCrosses);
-            cand.addAll(BMTCrossesC);
-            cand.addAll(BMTCrossesZ);
             
+            this.set_Helix(fitTrk.get_helix());
             if( X.size()>3 ) {
-            	cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0]/(X.size()-3));
+            	this.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0]/(X.size()-3));
             }
             else { 
-            	cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0]*2); // penalize tracks with only 3 crosses 
+            	this.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0]*2); // penalize tracks with only 3 crosses 
             }
             
             if( Z.size() > 2 ) {
-            	cand.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1]/(Z.size()-2));
+            	this.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1]/(Z.size()-2));
             }
             else {
-            	cand.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1]*2);// penalize tracks with only 2 crosses
+            	this.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1]*2);// penalize tracks with only 2 crosses
             }
-            cand.setChi2(fitTrk.get_chisq()[0]+fitTrk.get_chisq()[1]);
-            cand.setNDF(X.size()+Z.size());
-
+            this.setChi2(fitTrk.get_chisq()[0]+fitTrk.get_chisq()[1]);
+            this.setNDF(X.size()+Z.size()-5);
+            
             if (fitTrk.get_chisq()[0] < chisqMax) {
                 chisqMax = fitTrk.get_chisq()[0];
-                if(chisqMax<Constants.CIRCLEFIT_MAXCHI2)
-                    cand.update_Crosses(svt_geo, bmt_geo);
+                if(chisqMax<Constants.CIRCLEFIT_MAXCHI2) {
+                    this.update_Crosses(svt_geo, bmt_geo);
+                }
             }
         }
-        return cand;
+        return true;
     }
 
-    public Track toTrack(int id) {
-        Track track = new Track(this.get_Helix());
-        track.set_Id(id);
-        track.set_TrackingStatus(this.get_Status());
-        track.addAll(this.get_Crosses());
-        for(Cross c : track) {
-            c.set_AssociatedTrackID(id);
+    /**
+     * Updates the crosses positions based on trajectories or helix
+     * @param sgeo
+     * @param bgeo
+     */
+    public void update_Crosses(SVTGeometry sgeo, BMTGeometry bgeo) {
+        if (this.get_Helix() != null && this.get_Helix().get_curvature() != 0) {
+            for (int i = 0; i < this.get_Crosses().size(); i++) {
+                Cross cross = this.get_Crosses().get(i);
+                double R = Math.sqrt(cross.get_Point().x() * cross.get_Point().x() + cross.get_Point().y() * cross.get_Point().y());
+                Point3D  trackPos = this.get_Helix().getPointAtRadius(R);
+                Vector3D trackDir = this.get_Helix().getTrackDirectionAtRadius(R);
+                cross.update(trackPos, trackDir, sgeo);
+            }
         }
-        return track;
     }
-
+    
+    /**
+     * Check if track passes basic quality cuts
+     * @return 
+     */    
+    public boolean isGood() {
+        if(Double.isNaN(this.getChi2())) 
+            return false;
+        else if(this.getChi2() > Constants.CHI2CUT * (this.getNDF() + 5)) 
+            return false;
+        else if(this.getNDF() < Constants.NDFCUT) 
+            return false;
+        else if(this.get_Helix().getPt(this.get_Helix().B) < Constants.PTCUT) 
+            return false;
+        else if(Math.abs(this.get_Helix().get_Z0()) > Constants.ZRANGE) 
+            return false;
+        else 
+            return true;
+    }
+    
+    /**
+     * Compare this track quality with the given track
+     * based on NDF and Chi2
+     * @param o the other track
+     * @return true if this track quality is better than the given track
+     */    
+    public boolean betterThan(Seed o) {
+        if(this.getNDF()>o.getNDF()) 
+            return true;
+        else if(this.getNDF()>0 && this.getNDF()==o.getNDF()) {
+            if(this.getChi2()/this.getNDF() < o.getChi2()/o.getNDF())
+                return true;
+            else return false;
+        }
+        else
+            return false;
+    }
+    
+    /**
+     * Check track overlaps with the given track
+     * an overlaps is detected if the tracks share at least two crosses
+     * @param o the other track
+     * @return true if this track overlaps with the given track, false otherwise
+     */
+    public boolean overlapWith(Seed o) {
+        int nc = 0;
+        for(Cross c : this.get_Crosses()) {
+            if(c.get_Type()==BMTType.C) continue; //skim BMTC
+            if(o.get_Crosses().contains(c)) nc++;
+        }
+        if(nc >1) return true;
+        else      return false;
+    }
+    
+    public static void removeOverlappingSeeds(List<Seed> seeds) {
+            if(seeds==null)
+                return;
+            
+        List<Seed> selectedSeeds =  new ArrayList<>();
+        for (int i = 0; i < seeds.size(); i++) {
+            boolean overlap = false;
+            Seed t1 = seeds.get(i);
+            for(int j=0; j<seeds.size(); j++ ) {
+                Seed t2 = seeds.get(j);
+                if(i!=j && t1.overlapWith(t2) && !t1.betterThan(t2)) {
+                    overlap=true;
+                }
+            }
+            if(!overlap) selectedSeeds.add(t1);
+        }
+        seeds.removeAll(seeds);
+        seeds.addAll(selectedSeeds);
+    }
 }

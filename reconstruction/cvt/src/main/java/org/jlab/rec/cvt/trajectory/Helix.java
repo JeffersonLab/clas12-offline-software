@@ -154,10 +154,15 @@ public class Helix {
         return new Point3D(this.xdca(),this.ydca(),this.get_Z0());
     }
         
-    public Vector3D getPXYZ(double solenoidMag) { 
+    public double getPt(double solenoidMag) { 
         double pt = Constants.LIGHTVEL * this.radius() * solenoidMag;
         if(solenoidMag<0.001)
             pt = 100;
+        return pt;
+    }
+        
+    public Vector3D getPXYZ(double solenoidMag) { 
+        double pt = this.getPt(solenoidMag);
         double pz = pt*this.get_tandip();
         double px = pt*Math.cos(this.get_phi_at_dca());
         double py = pt*Math.sin(this.get_phi_at_dca());
@@ -216,9 +221,9 @@ public class Helix {
         double z0 = _Z0;
 
         if (Math.abs(_curvature)<1E-5) { // R > 100 m, assume it's straight track
-            double x =  r*Math.cos(phi0);
-            double y =  r*Math.sin(phi0);
-            double z =  r*tandip;
+            double x = -d0 * Math.sin(phi0) + r*Math.cos(phi0);
+            double y =  d0 * Math.cos(phi0) + r*Math.sin(phi0);
+            double z =  z0 + r*tandip;
             return new Point3D(x, y, z);
         }
 

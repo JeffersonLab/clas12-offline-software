@@ -121,7 +121,7 @@ public class TrackSeederCA {
       		  if( cand.get(0).get_plane().equalsIgnoreCase("XY")) {
 	  			  if( candlen > 2 ){
                                       Seed seed = new Seed(getCrossFromCells(cand));
-	  				  if(seed.fit(sgeo, bgeo, 2, false, bfield) != null) {
+	  				  if(seed.fit(sgeo, bgeo, 2, false, bfield)) {
 	  					  cellCands.add(cand);
 	  					  
 	  					  for( Cell n : cand ) {
@@ -193,7 +193,6 @@ public class TrackSeederCA {
         return camaker.getNodes();  
     }
     
-    TrackListFinder trkFinder = new TrackListFinder();
     public List<Seed> findSeed(List<Cross> svt_crosses, List<Cross> bmt_crosses) {
         
         List<Seed> seedlist = new ArrayList<Seed>();
@@ -233,23 +232,22 @@ public class TrackSeederCA {
 
         List<ArrayList<Cross>> seedCrosses = CAonRZ( xytracks, bmtC_crosses);
         
-        List<Track> cands = new ArrayList<Track>();
+        List<Seed> cands = new ArrayList<Seed>();
 //        System.out.println(seedlist.size());
 	    for (int s = 0; s < seedCrosses.size(); s++) {
 //	    	Collections.sort(seedCrosses.get(s));      // TODO: check why sorting matters
 //                Track cand = fit(seedCrosses.get(s), svt_geo, bmt_geo, 5, false, swimmer);
                 Seed candSeed = new Seed(seedCrosses.get(s));
-                Track cand = candSeed.fit(sgeo, bgeo, 5, false, bfield);
-                if (cand != null && cand.isGood()) {
-                    cands.add(cand);
+                boolean fitStatus = candSeed.fit(sgeo, bgeo, 5, false, bfield);
+                if (fitStatus && candSeed.isGood()) {
+                    cands.add(candSeed);
                 }
 	    }
 //	    for( int i=0;i<cands.size();i++)cands.get(i).set_Id(i+1);
 //	    cands = rmDuplicate( cands ); // TODO
-	    trkFinder.removeOverlappingTracks(cands);
+	    Seed.removeOverlappingSeeds(cands);
             
-	    for( Track cand : cands ) { 
-	        Seed seed = new Seed(cand, cand.get_helix());
+	    for(Seed seed : cands ) { 
 	        seed.set_Status(1);
 	        seedlist.add(seed);
 	    }

@@ -19,6 +19,7 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTType;
+import org.jlab.rec.cvt.track.Seed;
 
 public class RecoBankWriter {
     boolean debug = false;
@@ -374,8 +375,55 @@ public class RecoBankWriter {
 
     }
 
+    public DataBank fillSeedsBank(DataEvent event, List<Seed> seeds) {
+        if (seeds == null) {
+            return null;
+        }
+        if (seeds.size() == 0) {
+            return null;
+        }
+
+        DataBank bank = event.createBank("CVTRec::Seeds", seeds.size());
+        // an array representing the ids of the crosses that belong to the track
+        List<Integer> crossIdxArray = new ArrayList<Integer>();
+
+        for (int i = 0; i < seeds.size(); i++) {
+            if(seeds.get(i)==null)
+                continue;
+            bank.setByte("fittingMethod", i, (byte) seeds.get(i).get_Status());
+            bank.setShort("ID", i, (short) seeds.get(i).getId());
+            Helix helix = seeds.get(i).get_Helix();
+            bank.setByte("q", i, (byte) helix.get_charge());
+            bank.setFloat("p", i, (float) helix.getPXYZ(seeds.get(i).get_Helix().B).mag());
+            bank.setFloat("pt", i, (float) helix.getPt(seeds.get(i).get_Helix().B));
+            bank.setFloat("phi0", i, (float) helix.get_phi_at_dca());
+            bank.setFloat("tandip", i, (float) helix.get_tandip());
+            bank.setFloat("z0", i, (float) (helix.get_Z0()/10.0));
+            bank.setFloat("d0", i, (float) (helix.get_dca()/10.0));
+            bank.setFloat("xb", i, (float) (Constants.getXb()/10.0));
+            bank.setFloat("yb", i, (float) (Constants.getYb()/10.0));
+            // fills the list of cross ids for crosses belonging to that reconstructed track
+            for (int j = 0; j < seeds.get(i).get_Crosses().size(); j++) {
+                if(j<9) {
+                    String hitStrg = "Cross";
+                    hitStrg += (j + 1);
+                    hitStrg += "_ID";  //System.out.println(" j "+j+" matched id "+trkcands.get(i).get(j).get_Id());
+                    bank.setShort(hitStrg, i, (short) seeds.get(i).get_Crosses().get(j).get_Id());
+                }
+            }
+            bank.setFloat("circlefit_chi2_per_ndf", i, (float) seeds.get(i).get_circleFitChi2PerNDF());
+            bank.setFloat("linefit_chi2_per_ndf", i, (float) seeds.get(i).get_lineFitChi2PerNDF());
+            bank.setFloat("chi2", i, (float) seeds.get(i).getChi2());
+            bank.setShort("ndf", i, (short) seeds.get(i).getNDF());
+
+        }
+        //bank.show();
+        return bank;
+
+    }
+
     /**
-     *
+     * 
      * @param event the event
      * @param trkcands the list of reconstructed helical tracks
      * @return track bank
@@ -439,40 +487,28 @@ public class RecoBankWriter {
                 bank.setFloat("cov_z02", i, -999);
                 bank.setFloat("cov_tandip2", i, -999);
             }
-            if(trkcands.get(i).get_TrackPointAtCTOFRadius()!=null) {
-                bank.setFloat("c_x", i, (float) (trkcands.get(i).get_TrackPointAtCTOFRadius().x() / 10.)); // convert to cm
-                bank.setFloat("c_y", i, (float) (trkcands.get(i).get_TrackPointAtCTOFRadius().y() / 10.)); // convert to cm
-                bank.setFloat("c_z", i, (float) (trkcands.get(i).get_TrackPointAtCTOFRadius().z() / 10. + zShift/10)); // convert to cm
-                bank.setFloat("c_ux", i, (float) trkcands.get(i).get_TrackDirAtCTOFRadius().x());
-                bank.setFloat("c_uy", i, (float) trkcands.get(i).get_TrackDirAtCTOFRadius().y());
-                bank.setFloat("c_uz", i, (float) trkcands.get(i).get_TrackDirAtCTOFRadius().z());
-                bank.setFloat("pathlength", i, (float) (trkcands.get(i).get_pathLength() / 10.)); // conversion to cm
+            if(trkcands.get(i).get_TrackPosAtCTOF()!=null) {
+                bank.setFloat("c_x", i, (float) (trkcands.get(i).get_TrackPosAtCTOF().x() / 10.)); // convert to cm
+                bank.setFloat("c_y", i, (float) (trkcands.get(i).get_TrackPosAtCTOF().y() / 10.)); // convert to cm
+                bank.setFloat("c_z", i, (float) (trkcands.get(i).get_TrackPosAtCTOF().z() / 10. + zShift/10)); // convert to cm
+                bank.setFloat("c_ux", i, (float) trkcands.get(i).get_TrackDirAtCTOF().x());
+                bank.setFloat("c_uy", i, (float) trkcands.get(i).get_TrackDirAtCTOF().y());
+                bank.setFloat("c_uz", i, (float) trkcands.get(i).get_TrackDirAtCTOF().z());
+                bank.setFloat("pathlength", i, (float) (trkcands.get(i).get_PathToCTOF() / 10.)); // conversion to cm
             }
-            //for status word:
-            int a = 0;
-            int b = 0;
-            int c = 0;
             // fills the list of cross ids for crosses belonging to that reconstructed track
             for (int j = 0; j < trkcands.get(i).size(); j++) {
                 if(j<9) {
-                String hitStrg = "Cross";
-                hitStrg += (j + 1);
-                hitStrg += "_ID";  //System.out.println(" j "+j+" matched id "+trkcands.get(i).get(j).get_Id());
-                bank.setShort(hitStrg, i, (short) trkcands.get(i).get(j).get_Id());
+                    String hitStrg = "Cross";
+                    hitStrg += (j + 1);
+                    hitStrg += "_ID";  //System.out.println(" j "+j+" matched id "+trkcands.get(i).get(j).get_Id());
+                    bank.setShort(hitStrg, i, (short) trkcands.get(i).get(j).get_Id());
                 }
-                // counter to get status word    
-                if(trkcands.get(i).get(j).get_Detector()==DetectorType.BST)
-                    a++;
-                if(trkcands.get(i).get(j).get_Detector()==DetectorType.BMT 
-                    && trkcands.get(i).get(j).get_Type()==BMTType.Z)
-                    b++;
-                if(trkcands.get(i).get(j).get_Detector()==DetectorType.BMT
-                    && trkcands.get(i).get(j).get_Type()==BMTType.C)
-                    c++;
             }
-            bank.setShort("status", i, (short) ((short) 1000+a*100+b*10+c));
-            bank.setFloat("circlefit_chi2_per_ndf", i, (float) trkcands.get(i).get_circleFitChi2PerNDF());
-            bank.setFloat("linefit_chi2_per_ndf", i, (float) trkcands.get(i).get_lineFitChi2PerNDF());
+            bank.setShort("status", i, (short) ((short) trkcands.get(i).getStatus()));
+//            bank.setFloat("circlefit_chi2_per_ndf", i, (float) trkcands.get(i).get_circleFitChi2PerNDF());
+//            bank.setFloat("linefit_chi2_per_ndf", i, (float) trkcands.get(i).get_lineFitChi2PerNDF());
+            bank.setShort("seedID", i, (short) trkcands.get(i).get_SeedId());
             bank.setFloat("chi2", i, (float) trkcands.get(i).getChi2());
             bank.setShort("ndf", i, (short) trkcands.get(i).getNDF());
 
@@ -641,10 +677,7 @@ public class RecoBankWriter {
     public void appendCVTBanks(DataEvent event,
             List<FittedHit> sVThits, List<FittedHit> bMThits,
             List<Cluster> sVTclusters, List<Cluster> bMTclusters,
-            List<ArrayList<Cross>> crosses, List<Track> trks, double zShift) {
-        List<DataBank> svtbanks = new ArrayList<DataBank>();
-        List<DataBank> bmtbanks = new ArrayList<DataBank>();
-        List<DataBank> cvtbanks = new ArrayList<DataBank>();
+            List<ArrayList<Cross>> crosses, List<Seed> seeds, List<Track> trks, double zShift) {
 
         DataBank bank1 = this.fillSVTHitsBank(event, sVThits);
         if (bank1 != null) event.appendBank(bank1);
@@ -664,11 +697,14 @@ public class RecoBankWriter {
         DataBank bank6 = this.fillBMTCrossesBank(event, crosses, zShift);
         if (bank6 != null) event.appendBank(bank6);
 
-        DataBank bank7 = this.fillTracksBank(event, trks, zShift);
+        DataBank bank7 = this.fillSeedsBank(event, seeds);
         if (bank7 != null) event.appendBank(bank7);
 
-        DataBank bank8 = this.fillHelicalTracksTrajectoryBank(event, trks, zShift);
+        DataBank bank8 = this.fillTracksBank(event, trks, zShift);
         if (bank8 != null) event.appendBank(bank8);
+
+        DataBank bank9 = this.fillHelicalTracksTrajectoryBank(event, trks, zShift);
+        if (bank9 != null) event.appendBank(bank9);
     }
 
     public void appendCVTCosmicsBanks(DataEvent event,

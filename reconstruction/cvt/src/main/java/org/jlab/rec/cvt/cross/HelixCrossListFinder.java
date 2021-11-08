@@ -175,8 +175,8 @@ public class HelixCrossListFinder {
             //this.MatchBMTC(s, theListsByRegionBMTC.get(1), svt_geo); // match the seed to each BMT region
             //this.MatchBMTC(s, theListsByRegionBMTC.get(2), svt_geo); // match the seed to each BMT region
            
-            Track trk = s.fit(svt_geo, bmt_geo, 3, true, bz);
-            if(trk==null)
+            boolean fitStatus = s.fit(svt_geo, bmt_geo, 3, true, bz);
+            if(!fitStatus)
                 continue;
             //match to r1
             MatchToRegion1( s, theListsByRegion.get(0), svt_geo, bmt_geo, bz); 
@@ -199,8 +199,6 @@ public class HelixCrossListFinder {
 //            }
 //            
 //            trkSeed.set_Clusters(clusters);
-           
-            s.set_Helix(trk.get_helix());
             seedList.add(s);
         }
        
@@ -458,11 +456,11 @@ public class HelixCrossListFinder {
         
         if(s==null)
             return;
-        Track cand = s.fit(svt_geo, bmt_geo, 3, true, bz);
-        if(cand==null)
+        boolean fitStatus = s.fit(svt_geo, bmt_geo, 3, true, bz);
+        if(!fitStatus)
             return;
          
-        Point3D trkAtR1 =cand.get_helix().getPointAtRadius(svt_geo.getRegionRadius(1));
+        Point3D trkAtR1 =s.get_Helix().getPointAtRadius(svt_geo.getRegionRadius(1));
         List<Cross> candMatches = new ArrayList<Cross>();
         for (int i = 0; i < R1Crosses.size(); i++) {
             if(R1Crosses.get(i)==null)
@@ -472,8 +470,8 @@ public class HelixCrossListFinder {
                     Math.sqrt(R1Crosses.get(i).get_Point().x()*R1Crosses.get(i).get_Point().x()+R1Crosses.get(i).get_Point().y()*R1Crosses.get(i).get_Point().y()))<2)
                 candMatches.add(R1Crosses.get(i));
         }
-        Point3D trkAtL1 =cand.get_helix().getPointAtRadius(svt_geo.getLayerRadius(1));
-        Point3D trkAtL2 =cand.get_helix().getPointAtRadius(svt_geo.getLayerRadius(2));
+        Point3D trkAtL1 =s.get_Helix().getPointAtRadius(svt_geo.getLayerRadius(1));
+        Point3D trkAtL2 =s.get_Helix().getPointAtRadius(svt_geo.getLayerRadius(2));
         
         double dMin = Double.POSITIVE_INFINITY;
         Cross cMatch = null;
@@ -492,8 +490,8 @@ public class HelixCrossListFinder {
 
     private void MatchBMTC(Seed s, ArrayList<Cross> BMTCrosses, SVTGeometry svt_geo, BMTGeometry bmt_geo, double bz) {
         
-        Track cand = s.fit(svt_geo, bmt_geo, 3, true, bz);
-        if(s==null)
+        boolean fitStatus = s.fit(svt_geo, bmt_geo, 3, true, bz);
+        if(!fitStatus)
             return;
         double maxChi2 = Double.POSITIVE_INFINITY;
         Cross BestMatch = null;
@@ -502,10 +500,10 @@ public class HelixCrossListFinder {
             continue; 
         } else {
             s.get_Crosses().add(BMTCrosses.get(i));
-            cand = s.fit(svt_geo, bmt_geo, 3, true, bz);
-            if(cand==null)
+            fitStatus = s.fit(svt_geo, bmt_geo, 3, true, bz);
+            if(!fitStatus)
                 continue;
-            double linechi2perndf = cand.get_lineFitChi2PerNDF();
+            double linechi2perndf = s.get_lineFitChi2PerNDF();
             if(linechi2perndf<maxChi2) {
                 maxChi2 = linechi2perndf;
                 BestMatch = (Cross) BMTCrosses.get(i).clone();
