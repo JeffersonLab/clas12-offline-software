@@ -3,7 +3,6 @@ package org.jlab.rec.cvt.track;
 import java.util.Map;
 import org.jlab.clas.tracking.kalmanfilter.AKFitter.HitOnTrack;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cross.Cross;
@@ -35,12 +34,8 @@ public class Track extends Trajectory implements Comparable<Track> {
     private double _Pz;		// track pz
     private double _P;		// track p
     private String _PID;	// track pid
-
-    private int _TrackingStatus;
     
-    private int    _seedId;
-    private double _circleFitChi2PerNDF;	// the chi2 for the helical track circle fit
-    private double _lineFitChi2PerNDF;   	// the linear fit to get the track dip angle
+    private Seed    _seed;
 
     private Point3D  _trackPosAtCTOF;	        // a point of reference at the CTOF radius [the track is extrapolated to the CTOF radius and matched to CTOF hits to get the TOF]	
     private Vector3D _trackDirAtCTOF;	        // the direction of the track at the reference point described above.
@@ -60,13 +55,10 @@ public class Track extends Trajectory implements Comparable<Track> {
     
     public Track(Seed seed) {
         super(seed.get_Helix());
-        this.set_SeedId(seed.getId());
+        this.set_Seed(seed);
         this.setPXYZ();
         this.setNDF(seed.getNDF());
         this.setChi2(seed.getChi2());
-        this.set_circleFitChi2PerNDF(seed.get_circleFitChi2PerNDF());
-        this.set_lineFitChi2PerNDF(seed.get_lineFitChi2PerNDF());
-        this.set_SeedingMethod(seed.get_Status());
         this.addAll(seed.get_Crosses());       
     }
 
@@ -77,22 +69,11 @@ public class Track extends Trajectory implements Comparable<Track> {
         this.setPXYZ();
         this.setNDF(kf.NDF);
         this.setChi2(kf.chi2);
-        this.set_SeedId(seed.getId());
-        this.set_SeedingMethod(seed.get_Status());
-        this.set_circleFitChi2PerNDF(seed.get_circleFitChi2PerNDF());
-        this.set_lineFitChi2PerNDF(seed.get_lineFitChi2PerNDF());
+        this.set_Seed(seed);
         this.addAll(seed.get_Crosses());
         this.setTrajectories(kf.TrjPoints);
     }
     
-    public final void set_SeedingMethod(int ts) {
-        _TrackingStatus = ts;
-    }
-
-    public int get_TrackingStatus() {
-        return _TrackingStatus;
-    }
-
     /**
      *
      * @return the charge
@@ -147,12 +128,12 @@ public class Track extends Trajectory implements Comparable<Track> {
         this._P = _P;
     }
 
-    public int get_SeedId() {
-        return _seedId;
+    public Seed get_Seed() {
+        return _seed;
     }
 
-    public final void set_SeedId(int _seedId) {
-        this._seedId = _seedId;
+    public final void set_Seed(Seed seed) {
+        this._seed = seed;
     }
 
     /**
@@ -211,19 +192,14 @@ public class Track extends Trajectory implements Comparable<Track> {
 
     public void update_Clusters(int trackId, SVTGeometry sgeo) {        
         if(this.getTrajectories()!=null) {
-            for (int i = 0; i < this.size(); i++) {
-                Cross cross = this.get(i);
+            for (int i = 0; i < this.get_Seed().get_Clusters().size(); i++) {
+                Cluster cluster = this.get_Seed().get_Clusters().get(i);
                 
-                int layer = cross.get_Cluster1().get_Layer();
-                if(cross.get_Detector()==DetectorType.BMT) layer += SVTGeometry.NLAYERS;
+                int layer = cluster.get_Layer();
+                if(cluster.get_Detector()==DetectorType.BMT) layer += SVTGeometry.NLAYERS;
                 
-                Cluster cluster = cross.get_Cluster1();                
-                cluster.update(trackId, this.getTrajectories().get(layer), sgeo);
-                
-                if(cross.get_Detector()==DetectorType.BST) {
-                    Cluster cluster2 = cross.get_Cluster2();                
-                    cluster2.update(trackId, this.getTrajectories().get(layer+1), sgeo);                   
-                }
+                if(this.getTrajectories().get(layer)!=null) // RDV check why it is necessary
+                    cluster.update(trackId, this.getTrajectories().get(layer), sgeo);
             }
         }
     }
@@ -364,23 +340,7 @@ public class Track extends Trajectory implements Comparable<Track> {
     public void set_PID(String _PID) {
         this._PID = _PID;
     }
-
-    public double get_circleFitChi2PerNDF() {
-        return _circleFitChi2PerNDF;
-    }
-
-    public final void set_circleFitChi2PerNDF(double _circleFitChi2PerNDF) {
-        this._circleFitChi2PerNDF = _circleFitChi2PerNDF;
-    }
-
-    public double get_lineFitChi2PerNDF() {
-        return _lineFitChi2PerNDF;
-    }
-
-    public final void set_lineFitChi2PerNDF(double _lineFitChi2PerNDF) {
-        this._lineFitChi2PerNDF = _lineFitChi2PerNDF;
-    }
-
+    
     public int getNDF() {
         return _NDF;
     }

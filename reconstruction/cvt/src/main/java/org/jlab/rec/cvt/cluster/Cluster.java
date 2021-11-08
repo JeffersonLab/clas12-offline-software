@@ -851,6 +851,14 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             }
             if(traj.isMeasUsed) hit.set_TrkgStatus(1);
         }
-                
+          
     }
+
+    public String toString() {
+        String s = "Cluster Id" + this.get_Id() + " " + this.get_Detector() + " " +this.get_Type();
+        s +=  " layer " + this.get_Layer() + " sector " + this.get_Sector() + " centroid " + this.get_Centroid() + " phi " + this.get_Phi();
+        return s;
+    }
+
+
 }

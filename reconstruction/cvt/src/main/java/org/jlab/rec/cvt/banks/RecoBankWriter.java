@@ -448,7 +448,7 @@ public class RecoBankWriter {
 //            } else {
 //                bank.setByte("fittingMethod", i, (byte) 0);
 //            }
-            bank.setByte("fittingMethod", i, (byte) trkcands.get(i).get_TrackingStatus());
+            bank.setByte("fittingMethod", i, (byte) trkcands.get(i).get_Seed().get_Status());
             bank.setShort("ID", i, (short) trkcands.get(i).get_Id());
             bank.setByte("q", i, (byte)trkcands.get(i).get_Q());
             bank.setFloat("p", i, (float) trkcands.get(i).get_P());
@@ -508,7 +508,7 @@ public class RecoBankWriter {
             bank.setShort("status", i, (short) ((short) trkcands.get(i).getStatus()));
 //            bank.setFloat("circlefit_chi2_per_ndf", i, (float) trkcands.get(i).get_circleFitChi2PerNDF());
 //            bank.setFloat("linefit_chi2_per_ndf", i, (float) trkcands.get(i).get_lineFitChi2PerNDF());
-            bank.setShort("seedID", i, (short) trkcands.get(i).get_SeedId());
+            bank.setShort("seedID", i, (short) trkcands.get(i).get_Seed().getId());
             bank.setFloat("chi2", i, (float) trkcands.get(i).getChi2());
             bank.setShort("ndf", i, (short) trkcands.get(i).getNDF());
 

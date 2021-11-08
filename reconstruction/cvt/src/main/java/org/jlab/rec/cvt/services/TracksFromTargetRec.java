@@ -139,8 +139,8 @@ public class TracksFromTargetRec {
                     List<Cluster> clsOnTrack = recUtil.FindClustersOnTrk(SVTclusters, seed.get_Clusters(), fittedTrack.get_helix(), 
                             fittedTrack.get_P(), fittedTrack.get_Q(), SVTGeom, swimmer);
                     if(clsOnTrack.size()>0) {
-                        seed.get_Clusters().addAll(clsOnTrack);
-                    
+                        seed.add_Clusters(clsOnTrack);
+                                            
                         //reset pars
                         v = fittedTrack.get_helix().getVertex();
                         p = fittedTrack.get_helix().getPXYZ(solenoidValue);
@@ -165,7 +165,6 @@ public class TracksFromTargetRec {
                         if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null)
                             fittedTrack = new Track(seed, kf);
                     }
-                    fittedTrack.set_SeedingMethod(seed.get_Status());
                     trkcands.add(fittedTrack);
             }
         }

@@ -3,7 +3,6 @@ package org.jlab.rec.cvt.track;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.jlab.clas.tracking.kalmanfilter.AKFitter;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -31,6 +30,7 @@ public class Seed implements Comparable<Seed>{
     private double phi;
     private Helix _Helix;
     private List<Cross> _Crosses;
+    private List<Cluster> _Clusters;
     private double _circleFitChi2PerNDF;	// the chi2 for the helical track circle fit
     private double _lineFitChi2PerNDF;   	// the linear fit to get the track dip angle
     private int    _NDF;
@@ -107,7 +107,7 @@ public class Seed implements Comparable<Seed>{
         return this.phi;
     }
         
-    public List<Cluster> get_Clusters() {
+    private void set_Clusters() {
         List<Cluster> clusters = new ArrayList<Cluster>(); 
         for(Cross c : this.get_Crosses()) { 
 	    if(c.get_Detector()==DetectorType.BST) {
@@ -118,7 +118,16 @@ public class Seed implements Comparable<Seed>{
             }
       	}
         Collections.sort(clusters);
-        return clusters;
+        _Clusters = clusters;
+    }
+
+    public List<Cluster> get_Clusters() {
+        return _Clusters;
+    }
+
+    public void add_Clusters(List<Cluster> clusters) {
+        this._Clusters.addAll(clusters);
+        Collections.sort(_Clusters);
     }
 
     public List<Cross> get_Crosses() {
@@ -129,6 +138,7 @@ public class Seed implements Comparable<Seed>{
     public final void set_Crosses(List<Cross> _Crosses) {
         Collections.sort(_Crosses);
         this._Crosses = _Crosses;
+        this.set_Clusters();
     }
 
     public double get_circleFitChi2PerNDF() {

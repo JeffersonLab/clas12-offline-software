@@ -232,10 +232,7 @@ public class RecUtilities {
             
             // reinitilize swimmer from last surface
             if(inters!=null) {
-                double intersPhi   = Math.atan2(inters[4], inters[3]);
-                double intersTheta = Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]));
-                swimmer.SetSwimParameters(inters[0], inters[1], inters[2], Math.toDegrees(intersPhi), Math.toDegrees(intersTheta), 
-                        P, Q, maxPathLength) ;
+                swimmer.SetSwimParameters(inters[0], inters[1], inters[2], inters[3], inters[4], inters[5], Q);
             }
             
             for(int isector=0; isector<SVTGeometry.NSECTORS[ilayer]; isector++) {
@@ -259,18 +256,22 @@ public class RecUtilities {
                 }
                 // if trajectory is valid, look for missing clusters
                 if(traj!=null && sgeo.isInFiducial(layer, sector, traj)) {
-                    double  doca    = Double.MAX_VALUE;
-                    if(clusterMap.containsKey(key)) {
-                        Cluster cluster = clusterMap.get(key);
-                        doca = cluster.residual(traj);
-                    }
-                    // loop over all clusters in the same sector and layer that are noy associated to sector track
+                    double  doca    = Double.POSITIVE_INFINITY;
+                    //if(clusterMap.containsKey(key)) {
+                    //    Cluster cluster = clusterMap.get(key);
+                    //    doca = cluster.residual(traj); 
+                    //}
+                    // loop over all clusters in the same sector and layer that are noy associated to s track
                     for(Cluster cls : allClusters) {
                         if(cls.get_AssociatedTrackID()==-1 && cls.get_Sector()==sector && cls.get_Layer()==layer) {
                             double clsDoca = cls.residual(traj);
                             // save the ones that have better doca
-                            if(Math.abs(clsDoca)<Math.abs(doca) && Math.abs(clsDoca)<cls.get_CentroidError()*5) {
-                                clusterMap.replace(key, cls);
+                            if(Math.abs(clsDoca)<Math.abs(doca) && Math.abs(clsDoca)<10*cls.size()*cls.get_SeedStrip().get_Pitch()/Math.sqrt(12)) {
+                                if(clusterMap.containsKey(key)) {
+                                    clusterMap.replace(key, cls);
+                                } else {
+                                    clusterMap.put(key, cls); 
+                                }
                                 doca = clsDoca;
                             }                           
                         }

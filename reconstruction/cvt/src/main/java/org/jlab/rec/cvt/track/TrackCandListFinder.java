@@ -298,13 +298,13 @@ public class TrackCandListFinder {
 
                 // if the fit is successful
                 if (fitTrk.get_helix() != null && fitTrk.getFit() != null) {
-                    Track cand = new Track(fitTrk.get_helix());
-                    cand.addAll(crossList.get(i));
+                    Seed seed = new Seed(crossList.get(i), fitTrk.get_helix());
+                    Track cand = new Track(seed);
                     //cand.setPXYZ(fitTrk.get_helix());			done in Track constructor			
                     //cand.update_Crosses(svt_geo);
 
-                    cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0] / (int) (X.size() - 3)); // 3 fit params					
-                    cand.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1] / (int) (Z.size() - 2)); // 2 fit params
+                    cand.get_Seed().set_circleFitChi2PerNDF(fitTrk.get_chisq()[0] / (int) (X.size() - 3)); // 3 fit params					
+                    cand.get_Seed().set_lineFitChi2PerNDF(fitTrk.get_chisq()[1] / (int) (Z.size() - 2)); // 2 fit params
 
                     if (Number_Of_Iterations == Max_Number_Of_Iterations) {
                         cands.add(cand); // dump the cand							
@@ -1060,8 +1060,8 @@ public class TrackCandListFinder {
                             }
                         }
                         if (overlaps > 1) {
-                            if ((cands.get(k2).get_circleFitChi2PerNDF() + cands.get(k2).get_lineFitChi2PerNDF()) > (cands.get(k).get_circleFitChi2PerNDF() + cands.get(k).get_lineFitChi2PerNDF())) {
-
+                            if ((cands.get(k2).get_Seed().get_circleFitChi2PerNDF() + cands.get(k2).get_Seed().get_lineFitChi2PerNDF()) > 
+                                (cands.get(k).get_Seed().get_circleFitChi2PerNDF() + cands.get(k).get_Seed().get_lineFitChi2PerNDF())) {
                                 cands.get(k2).set_Id(-999);
 
                             }
