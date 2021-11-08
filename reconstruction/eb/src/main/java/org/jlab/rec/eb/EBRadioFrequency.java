@@ -96,8 +96,8 @@ public class EBRadioFrequency {
             if(cycles>0 && timeStamp!=-1) triggerPhase=period*((timeStamp+phase)%cycles);
         
         }
-        // if RUN::rf bank does not exist but tdc bnk exist, reconstruct RF signals from TDC hits and save to bank
-        if(event.hasBank("RF::tdc") && !event.hasBank("RUN::rf")) {
+        // if RF::tdc exists (data), calculate rfTime from scratch
+        if(event.hasBank("RF::tdc")) {
             DataBank bank = event.getBank("RF::tdc");
             int rows = bank.rows();
             for(int i = 0; i < rows; i++){
@@ -117,16 +117,18 @@ public class EBRadioFrequency {
                 }
             }
             if(debugMode>0) bank.show();
-            DataBank bankOut = event.createBank("RUN::rf",this.rfSignals.size());
-            for(int i =0; i< this.rfSignals.size(); i++) {
-                bankOut.setShort("id",   i, (short) this.rfSignals.get(i).getId());
-                bankOut.setFloat("time", i, (float) this.rfSignals.get(i).getTime());
-                if(debugMode>0) this.rfSignals.get(i).print();
+            if(!event.hasBank("RUN::rf")) {
+                DataBank bankOut = event.createBank("RUN::rf",this.rfSignals.size());
+                for(int i =0; i< this.rfSignals.size(); i++) {
+                    bankOut.setShort("id",   i, (short) this.rfSignals.get(i).getId());
+                    bankOut.setFloat("time", i, (float) this.rfSignals.get(i).getTime());
+                    if(debugMode>0) this.rfSignals.get(i).print();
+                }
+                event.appendBank(bankOut);
+                if(debugMode>0) bankOut.show();
             }
-            event.appendBank(bankOut);
             int index = this.hasSignal(rfId);
             if(index>=0) rfTime= this.rfSignals.get(index).getTime();
-            if(debugMode>0) bankOut.show();
             
         }  
         else if(event.hasBank("RUN::rf")) {
