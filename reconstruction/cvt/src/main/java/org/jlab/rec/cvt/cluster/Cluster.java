@@ -829,12 +829,15 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         this.set_CentroidResidual(traj.resi);
         this.set_SeedResidual(trackPos); 
         this.setTrakInters(trackPos);
+
         
         if(this.get_Detector()==DetectorType.BMT && this.get_Type()==BMTType.C) {  
-            this.set_CentroidResidual(traj.resi*this.getTile().baseArc().radius());    
             this.setS(this.getAxis().direction().asUnit());
             this.setN(this.getAxis().distance(trackPos).direction().asUnit());
             this.setL(this.getS().cross(this.getN()).asUnit());
+        }
+        if(this.get_Detector()==DetectorType.BMT && this.get_Type()==BMTType.Z) {  
+            this.set_CentroidResidual(traj.resi*this.getTile().baseArc().radius());    
         }
         
         for (FittedHit hit : this) {
