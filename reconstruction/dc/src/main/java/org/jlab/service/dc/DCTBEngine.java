@@ -329,14 +329,16 @@ public class DCTBEngine extends DCEngine {
                 }
                 //trkId++;
             }
+            this.ensureTrackUnique(trkcands);
         }    
        
+        this.ensureUniqueness(fhits, clusters, segments, crosses);
         if(trkcands.isEmpty()) {
 
             rbc.fillAllTBBanks(event, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
             return true;
         }
-        this.ensureTrackUnique(trkcands);
+        
         rbc.fillAllTBBanks(event, thits, tclusters, segments, crosses, trkcands);
         //if(this.aiAssist) 
         //    event.getBank("TimeBasedTrkg::"+_name+"Tracks").show();
@@ -386,5 +388,73 @@ public class DCTBEngine extends DCEngine {
             }
         }
         trkcands.removeAll(rmFrmList);
+    }
+    private void ensureUniqueness(List<FittedHit> fhits, List<FittedCluster> clusters, List<Segment> segments, List<Cross> crosses) {
+        
+        Map<Integer, FittedHit> hitsMap = new HashMap<Integer, FittedHit>();
+        for(FittedHit h : fhits) {
+            if(hitsMap.get(h.get_Id())==null) {
+                hitsMap.put(h.get_Id(), h);
+            } else {
+                if(h.get_AssociatedHBTrackID()!=-1)
+                    hitsMap.replace(h.get_Id(), h);
+            }
+             
+        }
+        
+        fhits.removeAll(fhits);
+        for (Map.Entry<Integer, FittedHit> entry : hitsMap.entrySet()) {
+            fhits.add(entry.getValue());
+        }
+        
+        Map<Integer, FittedCluster> clsMap = new HashMap<Integer, FittedCluster>();
+        for(FittedCluster clus : clusters) {
+            if(clsMap.get(clus.get_Id())==null) {
+                clsMap.put(clus.get_Id(), clus);
+            } else {
+                if(clus.get(0).get_AssociatedHBTrackID()!=-1)
+                    clsMap.replace(clus.get_Id(), clus);
+            }
+             
+        }
+        
+        clusters.removeAll(clusters);
+        for (Map.Entry<Integer, FittedCluster> entry : clsMap.entrySet()) {
+            clusters.add(entry.getValue());
+        }
+        
+        Map<Integer, Segment> segMap = new HashMap<Integer, Segment>();
+        for(Segment seg : segments) {
+            if(segMap.get(seg.get_Id())==null) {
+                segMap.put(seg.get_Id(), seg);
+            } else {
+                if(seg.get(0).get_AssociatedHBTrackID()!=-1)
+                    segMap.replace(seg.get_Id(), seg);
+            }
+             
+        }
+        
+        segments.removeAll(segments);
+        for (Map.Entry<Integer, Segment> entry : segMap.entrySet()) {
+            segments.add(entry.getValue());
+        }
+        
+        Map<Integer, Cross> crsMap = new HashMap<Integer, Cross>();
+        for(Cross cr : crosses) {
+            if(crsMap.get(cr.get_Id())==null) {
+                crsMap.put(cr.get_Id(), cr);
+            } else {
+                if(cr.get_Segment1().get(0).get_AssociatedHBTrackID()!=-1 
+                        && cr.get_Segment1().get(0).get_AssociatedHBTrackID()==cr.get_Segment2().get(0).get_AssociatedHBTrackID())
+                    crsMap.replace(cr.get_Id(), cr);
+            }
+             
+        }
+        
+        crosses.removeAll(crosses);
+        for (Map.Entry<Integer, Cross> entry : crsMap.entrySet()) {
+            crosses.add(entry.getValue());
+        }
+        
     }
 }
