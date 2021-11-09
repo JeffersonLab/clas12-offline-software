@@ -122,12 +122,8 @@ public class ConnectionDialog extends BasicDialog {
                 }
             }
         };
-        for(int i=0; i<this.hostNames.length; i++) {
-            if(this.hostNames[i].equals(defaultHost)) {
-                    _comboHosts.setSelectedIndex(i);
-                    System.out.println(i);
-            }
-        }
+        _comboHosts.setSelectedItem(this.defaultHost);
+        
         _comboHosts.addItemListener(itemListener);
         subpanel.add(labelip);
         subpanel.add(_ipField);
