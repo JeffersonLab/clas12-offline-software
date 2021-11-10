@@ -117,7 +117,9 @@ public class EBRadioFrequency {
                 }
             }
             if(debugMode>0) bank.show();
-            if(!event.hasBank("RUN::rf")) {
+            // always rewrite RF bank
+            if(event.hasBank("RUN::rf")) {
+                event.removeBank("RUN::rf");
                 DataBank bankOut = event.createBank("RUN::rf",this.rfSignals.size());
                 for(int i =0; i< this.rfSignals.size(); i++) {
                     bankOut.setShort("id",   i, (short) this.rfSignals.get(i).getId());
