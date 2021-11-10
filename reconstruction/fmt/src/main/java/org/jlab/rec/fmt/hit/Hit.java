@@ -62,7 +62,7 @@ public class Hit implements Comparable<Hit> {
          *
          * @return the layer (1...6)
          */
-        public int get_Layer() {
+        public int getLayer() {
             return _Layer;
         }
 
@@ -71,7 +71,7 @@ public class Hit implements Comparable<Hit> {
          *
          * @param _Layer
          */
-        public void set_Layer(int _Layer) {
+        public void setLayer(int _Layer) {
             this._Layer = _Layer;
         }
 
@@ -79,7 +79,7 @@ public class Hit implements Comparable<Hit> {
          *
          * @return the strip number (1...256)
          */
-        public int get_Strip() {
+        public int getStrip() {
             return _Strip;
         }
 
@@ -88,7 +88,7 @@ public class Hit implements Comparable<Hit> {
          *
          * @param _Strip
          */
-        public void set_Strip(int _Strip) {
+        public void setStrip(int _Strip) {
             this._Strip = _Strip;
         }
 
@@ -96,7 +96,7 @@ public class Hit implements Comparable<Hit> {
          *
          * @return the Edep in MeV
          */
-        public double get_Energy() {
+        public double getEnergy() {
             return _Energy;
         }
 
@@ -105,15 +105,15 @@ public class Hit implements Comparable<Hit> {
          *
          * @param _Edep
          */
-        public void set_Energy(double _Edep) {
+        public void setEnergy(double _Edep) {
             this._Energy = _Edep;
         }
 
-        public double get_Time() {
+        public double getTime() {
             return _Time;
         }
 
-        public void set_Time(double _Time) {
+        public void setTime(double _Time) {
             this._Time = _Time;
         }
 
@@ -129,7 +129,7 @@ public class Hit implements Comparable<Hit> {
          *
          * @return the ID
          */
-        public int get_Index() {
+        public int getIndex() {
             return _Index;
         }
 
@@ -138,7 +138,7 @@ public class Hit implements Comparable<Hit> {
          *
          * @param _Id
          */
-        public void set_Index(int _Id) {
+        public void setIndex(int _Id) {
             this._Index = _Id;
         }
 
@@ -146,7 +146,7 @@ public class Hit implements Comparable<Hit> {
          *
          * @return region (1...4)
          */
-        public int get_Region() {
+        public int getRegion() {
             return (int) (this._Layer + 1) / 2;
         }
 
@@ -154,17 +154,17 @@ public class Hit implements Comparable<Hit> {
          *
          * @return superlayer 1 or 2 in region (1...4)
          */
-        public int get_RegionSlayer() {
+        public int getRegionSlayer() {
             return (this._Layer + 1) % 2 + 1;
         }
 
         
-        public Line3D get_StripGlobalSegment() {
+        public Line3D getStripGlobalSegment() {
             return _GlobalSegment;
         }
 
         
-        public Line3D get_StripLocalSegment() {
+        public Line3D getStripLocalSegment() {
             return _LocalSegment;
         }
 
@@ -184,8 +184,8 @@ public class Hit implements Comparable<Hit> {
         public int compareTo(Hit arg) {
             // Sort by layer and seed strip
             int return_val = 0;
-            int CompLay    = this.get_Layer() < arg.get_Layer() ? -1 : this.get_Layer() == arg.get_Layer() ? 0 : 1;
-            int CompStrip  = this.get_Strip() < arg.get_Strip() ? -1 : this.get_Strip() == arg.get_Strip() ? 0 : 1;
+            int CompLay    = this.getLayer() < arg.getLayer() ? -1 : this.getLayer() == arg.getLayer() ? 0 : 1;
+            int CompStrip  = this.getStrip() < arg.getStrip() ? -1 : this.getStrip() == arg.getStrip() ? 0 : 1;
 
             return_val = ((CompLay == 0) ? CompStrip : CompLay);
 
@@ -199,9 +199,9 @@ public class Hit implements Comparable<Hit> {
          * true if the hits are the same
          */
         public boolean equal(Hit otherHit) {
-            if (this.get_Energy() == otherHit.get_Energy()
-                    && this.get_Layer() == otherHit.get_Layer()
-                    && this.get_Strip() == otherHit.get_Strip()) {
+            if (this.getEnergy() == otherHit.getEnergy()
+                    && this.getLayer() == otherHit.getLayer()
+                    && this.getStrip() == otherHit.getStrip()) {
                 return true;
             }
             return false;
@@ -214,17 +214,17 @@ public class Hit implements Comparable<Hit> {
          * true if the hits are the same
          */
         public boolean isClose(Hit other) {
-            if (this.get_Layer() == other.get_Layer()) {
-                return Constants.areClose(this.get_Layer(),this.get_Strip(),other.get_Strip());
+            if (this.getLayer() == other.getLayer()) {
+                return Constants.areClose(this.getLayer(),this.getStrip(),other.getStrip());
             }
             return false;
         }
 
-        public int get_ClusterIndex() {
+        public int getClusterIndex() {
             return _ClusterIndex;
         }
 
-        public void set_ClusterIndex(int _AssociatedClusterIndex) {
+        public void setClusterIndex(int _AssociatedClusterIndex) {
             this._ClusterIndex = _AssociatedClusterIndex;
         }
 
@@ -260,10 +260,10 @@ public class Hit implements Comparable<Hit> {
          */
         @Override
         public String toString() {
-            String s = " Hit: Index " + this.get_Index()   
-                     + " Layer "      + this.get_Layer()   + " Strip "  + this.get_Strip()
-                     + " Energy "     + this.get_Energy()  + " Time "   + this.get_Time()
-                     + " LocalY "     + String.format("%.4f",this.get_StripLocalSegment().origin().y());
+            String s = " Hit: Index " + this.getIndex()   
+                     + " Layer "      + this.getLayer()   + " Strip "  + this.getStrip()
+                     + " Energy "     + this.getEnergy()  + " Time "   + this.getTime()
+                     + " LocalY "     + String.format("%.4f",this.getStripLocalSegment().origin().y());
             return s;
         }
 

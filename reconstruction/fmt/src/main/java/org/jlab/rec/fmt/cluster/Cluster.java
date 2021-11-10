@@ -58,7 +58,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
          *
          * @return the layer of the cluster (1...6)
          */
-        public int get_Layer() {
+        public int getLayer() {
             return _Layer;
         }
 
@@ -66,7 +66,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
          *
          * @param _Superlayer the layer of the cluster (1...6)
          */
-        public void set_Layer(int _Layer) {
+        public void setLayer(int _Layer) {
             this._Layer = _Layer;
         }
 
@@ -74,105 +74,105 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
          *
          * @return region (1...4)
          */
-        public int get_Region() {
+        public int getRegion() {
             return (int) (this._Layer + 1) / 2;
         }
 
-        public int get_Index() {
+        public int getIndex() {
             return _Index;
         }
 
-        public void set_Index(int _index) {
+        public void setIndex(int _index) {
             this._Index = _index;
         }
 
-        public double get_Doca() {
+        public double getDoca() {
             return this._Doca;
         }
 
-        public void set_Doca(double Doca) {
+        public void setDoca(double Doca) {
             this._Doca = Doca;
         }
 
 
-        public double get_Centroid() {
+        public double getCentroid() {
             return _Centroid;
         }
 
-        public void set_Centroid(double _Centroid) {
+        public void setCentroid(double _Centroid) {
             this._Centroid = _Centroid;
         }
 
-        public double get_CentroidError() {
+        public double getCentroidError() {
             return _CentroidError;
         }
 
-        public void set_CentroidError(double _CentroidError) {
+        public void setCentroidError(double _CentroidError) {
             this._CentroidError = _CentroidError;
         }
 
-        public double get_CentroidResidual() {
+        public double getCentroidResidual() {
             return _CentroidResidual;
         }
 
-        public void set_CentroidResidual(double trackLocalY) {
+        public void setCentroidResidual(double trackLocalY) {
             this._CentroidResidual = this._Centroid-trackLocalY;
-            for(FittedHit hit : this) hit.set_Residual(trackLocalY);
+            for(FittedHit hit : this) hit.setResidual(trackLocalY);
         }
 
-        public double get_TotalEnergy() {
+        public double getTotalEnergy() {
             return _TotalEnergy;
         }
 
-        public void set_TotalEnergy(double _TotalEnergy) {
+        public void setTotalEnergy(double _TotalEnergy) {
             this._TotalEnergy = _TotalEnergy;
         }
 
-        public double get_Time() {
+        public double getTime() {
             return _Time;
         }
 
-        public void set_Time(double _Time) {
+        public void setTime(double _Time) {
             this._Time = _Time;
         }
 
-        public int get_MinStrip() {
+        public int getMinStrip() {
             return _MinStrip;
         }
 
-        public void set_MinStrip(int _MinStrip) {
+        public void setMinStrip(int _MinStrip) {
             this._MinStrip = _MinStrip;
         }
 
-        public int get_MaxStrip() {
+        public int getMaxStrip() {
             return _MaxStrip;
         }
 
-        public void set_MaxStrip(int _MaxStrip) {
+        public void setMaxStrip(int _MaxStrip) {
             this._MaxStrip = _MaxStrip;
         }
 
-        public int get_SeedStrip() {
+        public int getSeedStrip() {
             return _SeedStrip;
         }
 
-        public void set_SeedStrip(int _SeedStrip) {
+        public void setSeedStrip(int _SeedStrip) {
             this._SeedStrip = _SeedStrip;
         }
 
-        public double get_SeedEnergy() {
+        public double getSeedEnergy() {
             return _SeedEnergy;
         }
 
-        public void set_SeedEnergy(double _SeedEnergy) {
+        public void setSeedEnergy(double _SeedEnergy) {
             this._SeedEnergy = _SeedEnergy;
         }
 
-        public double get_SeedTime() {
+        public double getSeedTime() {
             return _SeedTime;
         }
 
-        public void set_SeedTime(double _SeedTime) {
+        public void setSeedTime(double _SeedTime) {
             this._SeedTime = _SeedTime;
         }
 
@@ -184,42 +184,42 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             this._SeedIndex = _SeedIndex;
         }
 
-        public Line3D get_GlobalSegment() {
+        public Line3D getGlobalSegment() {
             return _GlobalSegment;
         }
 
-        public void set_GlobalSegment(Line3D segment) {
+        public void setGlobalSegment(Line3D segment) {
             this._GlobalSegment = segment;
         }
 
-        public Line3D get_LocalSegment() {
+        public Line3D getLocalSegment() {
             return _LocalSegment;
         }
 
-        public void set_LocalSegment(Line3D segment) {
+        public void setLocalSegment(Line3D segment) {
             this._LocalSegment = segment;
         }
 
-        public int get_CrossIndex() {
+        public int getCrossIndex() {
             return _AssociatedCrossIndex;
         }
 
-        public void set_CrossIndex(int _AssociatedCrossIndex) {
+        public void setCrossIndex(int _AssociatedCrossIndex) {
             this._AssociatedCrossIndex = _AssociatedCrossIndex;
         }
 
-        public int get_TrackIndex() {
+        public int getTrackIndex() {
             return _AssociatedTrackIndex;
         }
 
-        public void set_TrackIndex(int _AssociatedTrackIndex) {
+        public void setTrackIndex(int _AssociatedTrackIndex) {
             this._AssociatedTrackIndex = _AssociatedTrackIndex;
-            for(FittedHit hit: this) hit.set_TrackIndex(_AssociatedTrackIndex);
+            for(FittedHit hit: this) hit.setTrackIndex(_AssociatedTrackIndex);
         }
 
         private boolean containsHit(FittedHit hit) {
             boolean addFlag = false;
-            if(hit.get_Layer()==this.get_Layer()) {
+            if(hit.getLayer()==this.getLayer()) {
                 for(int j = 0; j< this.size(); j++) {
                     if(this.get(j).isClose(hit)) {
                         addFlag = true;
@@ -236,19 +236,19 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             
             for(int ihit=0; ihit<hits.size(); ihit++) {
                 FittedHit hit = new FittedHit(hits.get(ihit));
-                if(hit.get_ClusterIndex()==-1)  {                       // this hit is not yet associated with a cluster
+                if(hit.getClusterIndex()==-1)  {                       // this hit is not yet associated with a cluster
                     for(int jclus=0; jclus<clusters.size(); jclus++) {
                         Cluster cluster = clusters.get(jclus);
                         if(cluster.containsHit(hit)) {
-                            hit.set_ClusterIndex(cluster.get_Index());     // attaching hit to previous cluster 
+                            hit.setClusterIndex(cluster.getIndex());     // attaching hit to previous cluster 
                             cluster.add(hit);
                             break;
                         }
                     }
                 }
-                if(hit.get_ClusterIndex()==-1)  {                       // new cluster found
-                    Cluster cluster = new Cluster(hit.get_Layer(),clusters.size());
-                    hit.set_ClusterIndex(cluster.get_Index());
+                if(hit.getClusterIndex()==-1)  {                       // new cluster found
+                    Cluster cluster = new Cluster(hit.getLayer(),clusters.size());
+                    hit.setClusterIndex(cluster.getIndex());
                     cluster.add(hit);
                     clusters.add(cluster);
                 }
@@ -305,35 +305,35 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     FittedHit thehit = this.get(i);
 
                     // get the energy value of the strip
-                    double strpEn = thehit.get_Energy();
-                    double strpTm = thehit.get_Time();
+                    double strpEn = thehit.getEnergy();
+                    double strpTm = thehit.getTime();
                     
                     double weight = 1;
                     if(eweight) weight = strpEn;
 //                    // set the cluster's Tmin
-//                    if (this._Tmin > thehit.get_Time()) {
-//                            this._Tmin = thehit.get_Time();
+//                    if (this._Tmin > thehit.getTime()) {
+//                            this._Tmin = thehit.getTime();
 //                    }
 
                     // get strip informations
-                    int strpNb = thehit.get_Strip();
-                    double x1 = thehit.get_StripGlobalSegment().origin().x();
-                    double y1 = thehit.get_StripGlobalSegment().origin().y();
-                    double z1 = thehit.get_StripGlobalSegment().origin().z();
-                    double x2 = thehit.get_StripGlobalSegment().end().x();
-                    double y2 = thehit.get_StripGlobalSegment().end().y();
-                    double z2 = thehit.get_StripGlobalSegment().end().z();
+                    int strpNb = thehit.getStrip();
+                    double x1 = thehit.getStripGlobalSegment().origin().x();
+                    double y1 = thehit.getStripGlobalSegment().origin().y();
+                    double z1 = thehit.getStripGlobalSegment().origin().z();
+                    double x2 = thehit.getStripGlobalSegment().end().x();
+                    double y2 = thehit.getStripGlobalSegment().end().y();
+                    double z2 = thehit.getStripGlobalSegment().end().z();
 
-                    double lx1 = thehit.get_StripLocalSegment().origin().x();
-                    double ly1 = thehit.get_StripLocalSegment().origin().y();
-                    double lz1 = thehit.get_StripLocalSegment().origin().z();
-                    double lx2 = thehit.get_StripLocalSegment().end().x();
-                    double ly2 = thehit.get_StripLocalSegment().end().y();
-                    double lz2 = thehit.get_StripLocalSegment().end().z();
+                    double lx1 = thehit.getStripLocalSegment().origin().x();
+                    double ly1 = thehit.getStripLocalSegment().origin().y();
+                    double lz1 = thehit.getStripLocalSegment().origin().z();
+                    double lx2 = thehit.getStripLocalSegment().end().x();
+                    double ly2 = thehit.getStripLocalSegment().end().y();
+                    double lz2 = thehit.getStripLocalSegment().end().z();
 
                     totEn += strpEn;
                     totWeight += weight;
-                    weightedStrp += weight * thehit.get_StripLocalSegment().origin().y();
+                    weightedStrp += weight * thehit.getStripLocalSegment().origin().y();
                     weightedStripEndPoint1X += weight * x1;
                     weightedStripEndPoint1Y += weight * y1;
                     weightedStripEndPoint1Z += weight * z1;
@@ -383,11 +383,11 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                 double delta = Double.POSITIVE_INFINITY;
                 for (int i = 0; i < nbhits; i++) {
                     FittedHit thehit = this.get(i);
-                    if(Math.abs(thehit.get_Strip()-stripNumCent)<delta) {
-                        delta = Math.abs(thehit.get_Strip()-stripNumCent);
-                        seed  = thehit.get_Strip();
-                        Emax  = thehit.get_Energy();
-                        Time  = thehit.get_Time();
+                    if(Math.abs(thehit.getStrip()-stripNumCent)<delta) {
+                        delta = Math.abs(thehit.getStrip()-stripNumCent);
+                        seed  = thehit.getStrip();
+                        Emax  = thehit.getEnergy();
+                        Time  = thehit.getTime();
                         Error = thehit.getError();
                     }
                 }
@@ -432,8 +432,8 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         public int compareTo(Cluster arg) {
             // Sort by layer and seed strip
             int return_val = 0;
-            int CompLay  = this.get_Layer()    < arg.get_Layer()     ? -1 : this.get_Layer()     == arg.get_Layer()     ? 0 : 1;
-            int CompSeed = this.get_SeedStrip()< arg.get_SeedStrip() ? -1 : this.get_SeedStrip() == arg.get_SeedStrip() ? 0 : 1;
+            int CompLay  = this.getLayer()    < arg.getLayer()     ? -1 : this.getLayer()     == arg.getLayer()     ? 0 : 1;
+            int CompSeed = this.getSeedStrip()< arg.getSeedStrip() ? -1 : this.getSeedStrip() == arg.getSeedStrip() ? 0 : 1;
 
             return_val = ((CompLay == 0) ? CompSeed : CompLay);
 
@@ -445,12 +445,12 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
          * @return cluster info. about location and number of hits contained in it
          */
         public String toStringBrief() {
-            String str = "FMT cluster: Index " + this.get_Index() 
-                                  + ", Layer " + this.get_Layer()
-                                  + ", Seed "  + this.get_SeedStrip()
+            String str = "FMT cluster: Index " + this.getIndex() 
+                                  + ", Layer " + this.getLayer()
+                                  + ", Seed "  + this.getSeedStrip()
                                   + ", Size "  + this.size()
-                                  + ", LocX "  + String.format("%.4f", this.get_LocalSegment().midpoint().x())
-                                  + ", LocY "  + String.format("%.4f", this.get_LocalSegment().midpoint().y());
+                                  + ", LocX "  + String.format("%.4f", this.getLocalSegment().midpoint().x())
+                                  + ", LocY "  + String.format("%.4f", this.getLocalSegment().midpoint().y());
             return str;
         }
 

@@ -23,7 +23,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 	}
         
          public FittedHit(Hit hit) {
-             super(hit.get_Index(), hit.get_Layer(), hit.get_Strip(), hit.get_Energy(), hit.get_Time());
+             super(hit.getIndex(), hit.getLayer(), hit.getStrip(), hit.getEnergy(), hit.getTime());
          }
 
 	private double _residual;             // distance to track intersect
@@ -32,11 +32,11 @@ public class FittedHit extends Hit implements Comparable<Hit> {
          private int _AssociatedCrossIndex = -1;
          private int _AssociatedTrackIndex = -1;
 
-         public double get_docaToTrk() {
+         public double getdocaToTrk() {
 		return _residual;
 	}
 
-	public void set_docaToTrk(double _docaToTrk) {
+	public void setdocaToTrk(double _docaToTrk) {
 		this._residual = _docaToTrk;
 	}
 
@@ -45,7 +45,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 	 * @return an integer representative of the stage of the pattern recognition and subsequent KF
      * fit for that hit. -1: no fit; 0: global helical fit; 1: KF fit
 	 */
-	public int get_TrkgStatus() {
+	public int getTrkgStatus() {
 		return _TrkgStatus;
 	}
 
@@ -54,7 +54,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 	 * for that hit. -1: no fit; 0: global helical fit; 1: KF fit
      *
 	 */
-	public void set_TrkgStatus(int trkgStatus) {
+	public void setTrkgStatus(int trkgStatus) {
 		_TrkgStatus = trkgStatus;
 	}
 
@@ -64,31 +64,31 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 	 * @return an int used to sort a collection of hits by layer number
 	 */
 	public int compareTo(FittedHit arg0) {
-		if (this.get_Layer() > arg0.get_Layer()) return 1;
+		if (this.getLayer() > arg0.getLayer()) return 1;
 		else                                     return 0;
 	}
 
-	public double get_Residual() {
+	public double getResidual() {
             return this._residual;
 	}
 
-	public void set_Residual(double trackLocalY) {
-            this._residual = this.get_StripLocalSegment().origin().y()-trackLocalY;
+	public void setResidual(double trackLocalY) {
+            this._residual = this.getStripLocalSegment().origin().y()-trackLocalY;
 	}
 
-	public int get_CrossIndex() {
+	public int getCrossIndex() {
 		return _AssociatedCrossIndex;
 	}
 
-	public void set_CrossIndex(int _AssociatedCrossIndex) {
+	public void setCrossIndex(int _AssociatedCrossIndex) {
 		this._AssociatedCrossIndex = _AssociatedCrossIndex;
 	}
 
-	public int get_TrackIndex() {
+	public int getTrackIndex() {
 		return _AssociatedTrackIndex;
 	}
 
-	public void set_TrackIndex(int _AssociatedTrackIndex) {
+	public void setTrackIndex(int _AssociatedTrackIndex) {
 		this._AssociatedTrackIndex = _AssociatedTrackIndex;
 	}
 }

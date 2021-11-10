@@ -1,6 +1,7 @@
 package org.jlab.rec.fmt.cross;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -49,7 +50,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      *
      * @return the region of the cross
      */
-    public int get_Region() {
+    public int getRegion() {
         return _Region;
     }
 
@@ -58,7 +59,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      *
      * @param _Region the region of the cross
      */
-    public void set_Region(int _Region) {
+    public void setRegion(int _Region) {
         this._Region = _Region;
     }
 
@@ -66,7 +67,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      *
      * @return the id of the cross
      */
-    public int get_Index() {
+    public int getIndex() {
         return _Index;
     }
 
@@ -75,7 +76,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      *
      * @param _Id the id of the cross
      */
-    public void set_Index(int index) {
+    public void setIndex(int index) {
         this._Index = index;
     }
 
@@ -84,7 +85,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @return a 3-D point characterizing the position of the cross in the
      * tilted coordinate system.
      */
-    public Point3D get_Point() {
+    public Point3D getPoint() {
         return _Point;
     }
 
@@ -94,7 +95,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @param _Point a 3-D point characterizing the position of the cross in the
      * tilted coordinate system.
      */
-    public void set_Point(Point3D _Point) {
+    public void setPoint(Point3D _Point) {
         this._Point = _Point;
     }
 
@@ -103,7 +104,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @return a 3-dimensional error on the 3-D point characterizing the
      * position of the cross in the tilted coordinate system.
      */
-    public Point3D get_PointErr() {
+    public Point3D getPointErr() {
         return _PointErr;
     }
 
@@ -113,7 +114,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @param _PointErr a 3-dimensional error on the 3-D point characterizing
      * the position of the cross in the tilted coordinate system.
      */
-    public void set_PointErr(Point3D _PointErr) {
+    public void setPointErr(Point3D _PointErr) {
         this._PointErr = _PointErr;
     }
 
@@ -121,7 +122,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      *
      * @return the cross unit direction vector
      */
-    public Vector3D get_Dir() {
+    public Vector3D getDir() {
         return _Dir;
     }
 
@@ -130,7 +131,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      *
      * @param _Dir the cross unit direction vector
      */
-    public void set_Dir(Vector3D _Dir) {
+    public void setDir(Vector3D _Dir) {
         this._Dir = _Dir;
     }
 
@@ -138,7 +139,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      *
      * @return the cross unit direction vector
      */
-    public Vector3D get_DirErr() {
+    public Vector3D getDirErr() {
         return _DirErr;
     }
 
@@ -147,7 +148,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      *
      * @param _DirErr the cross unit direction vector
      */
-    public void set_DirErr(Vector3D _DirErr) {
+    public void setDirErr(Vector3D _DirErr) {
         this._DirErr = _DirErr;
     }
 
@@ -164,7 +165,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      */
     @Override
     public int compareTo(Cross arg) {
-        if (this.get_Point().toVector3D().phi() < arg.get_Point().toVector3D().phi()) {
+        if (this.getPoint().toVector3D().phi() < arg.getPoint().toVector3D().phi()) {
             return 1;
         } else {
             return -1;
@@ -177,7 +178,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @param seg1 the Cluster (in the first superlayer) which is used to make a
      * cross
      */
-    public void set_Cluster1(Cluster seg1) {
+    public void setCluster1(Cluster seg1) {
         this._clus1 = seg1;
     }
 
@@ -188,7 +189,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @param seg2 the Cluster (in the second superlayer) which is used to make
      * a cross
      */
-    public void set_Cluster2(Cluster seg2) {
+    public void setCluster2(Cluster seg2) {
         this._clus2 = seg2;
     }
 
@@ -197,7 +198,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @return he Cluster (in the first superlayer) which is used to make a
      * cross
      */
-    public Cluster get_Cluster1() {
+    public Cluster getCluster1() {
         return _clus1;
     }
 
@@ -206,53 +207,53 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @return the Cluster (in the second superlayer) which is used to make a
      * cross
      */
-    public Cluster get_Cluster2() {
+    public Cluster getCluster2() {
         return _clus2;
     }
 
     /**
      * Sets the cross parameters: the position and direction unit vector
      */
-    public void set_CrossParams() {
+    public void setCrossParams() {
 
-        Cluster inlayerclus = this.get_Cluster1();
-        Cluster outlayerclus = this.get_Cluster2();
+        Cluster inlayerclus = this.getCluster1();
+        Cluster outlayerclus = this.getCluster2();
 
         // Getting the cross position from the calculated centroid segment line positions
         //----------------------------------------------------
-//		double x0_inner = inlayerclus.get_GlobalSegment().origin().x();
-//		double x1_inner = inlayerclus.get_GlobalSegment().end().x();
-//		double x0_outer = outlayerclus.get_GlobalSegment().origin().x();
-//		double x1_outer = outlayerclus.get_GlobalSegment().end().x();
-//		double y0_inner = inlayerclus.get_GlobalSegment().origin().y();
-//		double y1_inner = inlayerclus.get_GlobalSegment().end().y();
-//		double y0_outer = outlayerclus.get_GlobalSegment().origin().y();
-//		double y1_outer = outlayerclus.get_GlobalSegment().end().y();
-//		double z0_inner = inlayerclus.get_GlobalSegment().origin().z();
-//		double z0_outer = outlayerclus.get_GlobalSegment().origin().z();
-        Point3D interPoint = inlayerclus.get_GlobalSegment().distanceSegments(outlayerclus.get_GlobalSegment()).midpoint();
+//		double x0_inner = inlayerclus.getGlobalSegment().origin().x();
+//		double x1_inner = inlayerclus.getGlobalSegment().end().x();
+//		double x0_outer = outlayerclus.getGlobalSegment().origin().x();
+//		double x1_outer = outlayerclus.getGlobalSegment().end().x();
+//		double y0_inner = inlayerclus.getGlobalSegment().origin().y();
+//		double y1_inner = inlayerclus.getGlobalSegment().end().y();
+//		double y0_outer = outlayerclus.getGlobalSegment().origin().y();
+//		double y1_outer = outlayerclus.getGlobalSegment().end().y();
+//		double z0_inner = inlayerclus.getGlobalSegment().origin().z();
+//		double z0_outer = outlayerclus.getGlobalSegment().origin().z();
+        Point3D interPoint = inlayerclus.getGlobalSegment().distanceSegments(outlayerclus.getGlobalSegment()).midpoint();
 
-        this.set_Point(interPoint);
-        this.set_PointErr(new Point3D(inlayerclus.get_CentroidError() / Math.sqrt(2.), outlayerclus.get_CentroidError() / Math.sqrt(2.), 0));
+        this.setPoint(interPoint);
+        this.setPointErr(new Point3D(inlayerclus.getCentroidError() / Math.sqrt(2.), outlayerclus.getCentroidError() / Math.sqrt(2.), 0));
     }
 
-    public int get_TrackIndex() {
+    public int getTrackIndex() {
         return _TrackIndex;
     }
 
-    public void set_TrackIndex(int _AssociatedTrackID) {
+    public void setTrackIndex(int _AssociatedTrackID) {
         this._TrackIndex = _AssociatedTrackID;
     }
 
-    public void set_AssociatedElementsIDs() {
+    public void setAssociatedElementsIDs() {
         for (Cluster cluster : this) {
-            cluster.set_CrossIndex(this._Index);
-            cluster.set_TrackIndex(this._TrackIndex);
+            cluster.setCrossIndex(this._Index);
+            cluster.setTrackIndex(this._TrackIndex);
 
             for (FittedHit hit : cluster) {
-                hit.set_ClusterIndex(cluster.get_Index());
-                hit.set_CrossIndex(this._Index);
-                hit.set_TrackIndex(this._TrackIndex);
+                hit.setClusterIndex(cluster.getIndex());
+                hit.setCrossIndex(this._Index);
+                hit.setTrackIndex(this._TrackIndex);
             }
         }
     }
@@ -262,9 +263,53 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @return the track info.
      */
     public String printInfo() {
-        String s = "fmt cross: Index " + this.get_Index() + " trackIndex " + this.get_TrackIndex()
-                + " Region " + this.get_Region()
-                + " Point "  + this.get_Point().toString();
+        String s = "fmt cross: Index " + this.getIndex() + " trackIndex " + this.getTrackIndex()
+                + " Region " + this.getRegion()
+                + " Point "  + this.getPoint().toString();
         return s;
     }
+    
+    @Deprecated
+    public static ArrayList<Cross> findCrosses(List<Cluster> clusters) {
+
+        // first separate the segments according to layers
+        ArrayList<Cluster> allinnerlayrclus = new ArrayList<Cluster>();
+        ArrayList<Cluster> allouterlayrclus = new ArrayList<Cluster>();
+
+        // Sorting by layer first:
+        for (Cluster theclus : clusters) {
+            if (theclus.getLayer() % 2 == 0) {
+                allouterlayrclus.add(theclus);
+            }
+            if (theclus.getLayer() % 2 == 1) {
+                allinnerlayrclus.add(theclus);
+            }
+        }
+
+        ArrayList<Cross> crosses = new ArrayList<Cross>();
+
+        int rid = 0;
+        for (Cluster inlayerclus : allinnerlayrclus) {
+            for (Cluster outlayerclus : allouterlayrclus) {
+                if (outlayerclus.getLayer() - inlayerclus.getLayer() != 1) {
+                    continue;
+                }
+//                // put correct numbers to make sure the intersection is valid
+//				if ((inlayerclus.get_MinStrip() + outlayerclus.get_MinStrip() > 1)
+//						&& (inlayerclus.get_MaxStrip() + outlayerclus.get_MaxStrip() < Geometry.nStrips*2) ) {
+
+                // define new cross
+                Cross this_cross = new Cross(inlayerclus.getRegion(), rid++);
+                this_cross.setCluster1(inlayerclus);
+                this_cross.setCluster2(outlayerclus);
+
+                this_cross.setCrossParams();
+                // make arraylist
+                crosses.add(this_cross);
+//				}
+            }
+        }
+        return crosses;
+    }
+
 }

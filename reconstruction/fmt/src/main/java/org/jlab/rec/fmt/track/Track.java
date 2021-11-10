@@ -115,9 +115,9 @@ public class Track {
     }
 
     public void addCluster(Cluster cluster) {
-        if(this._clusters[cluster.get_Layer()-1]==null)
-            this._clusters[cluster.get_Layer()-1] = new ArrayList<>();
-        this._clusters[cluster.get_Layer()-1].add(cluster);
+        if(this._clusters[cluster.getLayer()-1]==null)
+            this._clusters[cluster.getLayer()-1] = new ArrayList<>();
+        this._clusters[cluster.getLayer()-1].add(cluster);
     }
 
     public void clearClusters(int layer) {
@@ -301,9 +301,9 @@ public class Track {
     public double getSeedQuality() {
         double quality=99;
         if(this.getClusterLayer(1)>0 && this.getClusterLayer(2)>0 && this.getClusterLayer(3)>0) {
-            Line3D seg1 = this.getClusters(1).get(0).get_GlobalSegment();
-            Line3D seg2 = this.getClusters(2).get(0).get_GlobalSegment();
-            Line3D seg3 = this.getClusters(3).get(0).get_GlobalSegment();
+            Line3D seg1 = this.getClusters(1).get(0).getGlobalSegment();
+            Line3D seg2 = this.getClusters(2).get(0).getGlobalSegment();
+            Line3D seg3 = this.getClusters(3).get(0).getGlobalSegment();
             quality = seg1.distanceSegments(seg3).distanceSegments(seg2).length(); 
         }
         return quality;
@@ -320,11 +320,11 @@ public class Track {
         
         if(mode==1 && this.getClusterLayer(1)>0 && this.getClusterLayer(2)>0 && this.getClusterLayer(3)>0) {
             for(int i1=0; i1<this.getClusters(1).size(); i1++) {
-                Line3D seg1 = this.getClusters(1).get(i1).get_GlobalSegment();
+                Line3D seg1 = this.getClusters(1).get(i1).getGlobalSegment();
                 for(int i2=0; i2<this.getClusters(2).size(); i2++) {
-                    Line3D seg2 = this.getClusters(2).get(i2).get_GlobalSegment();
+                    Line3D seg2 = this.getClusters(2).get(i2).getGlobalSegment();
                     for(int i3=0; i3<this.getClusters(3).size(); i3++) {
-                        Line3D seg3 = this.getClusters(3).get(i3).get_GlobalSegment();
+                        Line3D seg3 = this.getClusters(3).get(i3).getGlobalSegment();
 
                         double d = seg1.distanceSegments(seg3).distanceSegments(seg2).length();
                         if(d<dref) {

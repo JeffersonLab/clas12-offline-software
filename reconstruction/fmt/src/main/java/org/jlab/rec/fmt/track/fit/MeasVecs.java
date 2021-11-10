@@ -37,11 +37,11 @@ public class MeasVecs {
         measurements = new ArrayList<MeasVec>();
 
         for (int i = 0; i < clusters.size(); i++) {
-            int l = clusters.get(i).get_Layer()-1;
-            double cent  = clusters.get(i).get_Centroid();
-            double error = clusters.get(i).get_CentroidError();
-            double z     = clusters.get(i).get_GlobalSegment().origin().z();
-            int seed = clusters.get(i).get_SeedStrip();
+            int l = clusters.get(i).getLayer()-1;
+            double cent  = clusters.get(i).getCentroid();
+            double error = clusters.get(i).getCentroidError();
+            double z     = clusters.get(i).getGlobalSegment().origin().z();
+            int seed = clusters.get(i).getSeedStrip();
             MeasVec meas = new MeasVec();
             meas = this.setMeasVec(l, cent, error, z, seed);
             measurements.add(meas);

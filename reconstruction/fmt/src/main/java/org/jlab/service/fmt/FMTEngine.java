@@ -113,8 +113,8 @@ public class FMTEngine extends ReconstructionEngine {
         // set cluster seed indices
         for(int i=0; i<fittedhits.size(); i++) {
             FittedHit hit = fittedhits.get(i);
-            if(hit.get_Strip()==clusters.get(hit.get_ClusterIndex()).get_SeedStrip())  
-                clusters.get(hit.get_ClusterIndex()).setSeedIndex(i); 
+            if(hit.getStrip()==clusters.get(hit.getClusterIndex()).getSeedStrip())  
+                clusters.get(hit.getClusterIndex()).setSeedIndex(i); 
         }
         
         // === DC TRACKS ===========================================================================
@@ -129,15 +129,15 @@ public class FMTEngine extends ReconstructionEngine {
                     
                 Cluster cluster = clusters.get(j);                    
                 
-                Trajectory trj = track.getDCTraj(cluster.get_Layer());
+                Trajectory trj = track.getDCTraj(cluster.getLayer());
                 if (trj==null) continue; 
 
                 // Match the layers from traj.
                 double d = cluster.distance(trj.getPosition());
                 if (d < Constants.CIRCLECONFUSION) {
                     track.addCluster(cluster);
-//                    track.getCluster(cluster.get_Layer()).set_Doca(d);
-//                    doca[cluster.get_Layer()-1] = d;
+//                    track.getCluster(cluster.getLayer()).setDoca(d);
+//                    doca[cluster.getLayer()-1] = d;
                 }
             }
             
@@ -158,20 +158,20 @@ public class FMTEngine extends ReconstructionEngine {
                 if(cluster!=null) {
                     double doca = cluster.distance(track.getDCTraj(layer).getPosition());
                     // cluster is not assigned
-                    if(cluster.get_TrackIndex()<0) {
-                        cluster.set_TrackIndex(track.getIndex());
-                        cluster.set_Doca(doca);
+                    if(cluster.getTrackIndex()<0) {
+                        cluster.setTrackIndex(track.getIndex());
+                        cluster.setDoca(doca);
                     }
                     // cluster is already assigned
                     else {
                         if(debug) System.out.println("WARNING: double cluster assignment for cluster "
-                                  + cluster.get_Index() + " tracks " + cluster.get_TrackIndex() + "/" + track.getIndex());
+                                  + cluster.getIndex() + " tracks " + cluster.getTrackIndex() + "/" + track.getIndex());
                         clusterDoubleAssignment = debug;
-                        Track other = tracks.get(cluster.get_TrackIndex());
+                        Track other = tracks.get(cluster.getTrackIndex());
                         if(track.getSeedQuality()>other.getSeedQuality()) {
                             other.clearClusters(layer);
-                            cluster.set_TrackIndex(track.getIndex());
-                            cluster.set_Doca(doca);                        
+                            cluster.setTrackIndex(track.getIndex());
+                            cluster.setDoca(doca);                        
                         }
                     }
                 }
@@ -188,10 +188,10 @@ public class FMTEngine extends ReconstructionEngine {
 //            List<Cross> crs = crossesMap.get(id);
 //            for(Cross c : crs) {
 //                // Filter clusters to use only the best cluster (minimum Tmin) per FMT layer.
-//                int lyr = c.get_Cluster1().get_Layer();
-////                System.out.println(c.get_Cluster1().get_Doca());
-//                if (cls.get(lyr) == null || c.get_Cluster1().get_Doca()< cls.get(lyr).get_Doca())
-//                    cls.put(lyr, c.get_Cluster1());
+//                int lyr = c.getCluster1().getLayer();
+////                System.out.println(c.getCluster1().getDoca());
+//                if (cls.get(lyr) == null || c.getCluster1().getDoca()< cls.get(lyr).getDoca())
+//                    cls.put(lyr, c.getCluster1());
 //            }
 
             // Set status and stop if there are no measurements to fit against.
@@ -235,15 +235,14 @@ public class FMTEngine extends ReconstructionEngine {
             for(int layer=1; layer<=Constants.NLAYERS; layer++) {
                 if(track.getFMTTraj(layer)!=null) {
                     double localY = track.getFMTTraj(layer).getLocalPosition().y();
-                    track.getCluster(layer).set_CentroidResidual(localY);
+                    track.getCluster(layer).setCentroidResidual(localY);
                 }
             }
             if(debug || clusterDoubleAssignment || track.getNDF()>3) System.out.println("Track " + track.toString());
         }
         if(clusterDoubleAssignment) for(int i=0; i<clusters.size(); i++) System.out.println(clusters.get(i).toStringBrief());
         
-        RecoBankWriter rbc = new RecoBankWriter();
-        rbc.appendFMTBanks(event, fittedhits, clusters, tracks);
+        RecoBankWriter.appendFMTBanks(event, fittedhits, clusters, tracks);
 
         return true;
    }
