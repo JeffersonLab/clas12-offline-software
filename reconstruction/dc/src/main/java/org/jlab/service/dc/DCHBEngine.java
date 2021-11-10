@@ -57,6 +57,12 @@ public class DCHBEngine extends DCEngine {
         Constants.Load();
         super.setOptions();
         super.LoadTables();
+        super.registerOutputBank("HitBasedTrkg::HBHits");
+        super.registerOutputBank("HitBasedTrkg::HBClusters");
+        super.registerOutputBank("HitBasedTrkg::HBSegments");
+        super.registerOutputBank("HitBasedTrkg::HBSegmentTrajectory");
+        super.registerOutputBank("HitBasedTrkg::HBCrosses");
+        super.registerOutputBank("HitBasedTrkg::HBTracks");
 //        newRun = 809;
 //        long timeStamp = 371468548086L;
 //        if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {

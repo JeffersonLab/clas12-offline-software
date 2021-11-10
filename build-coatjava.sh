@@ -98,8 +98,6 @@ cp external-dependencies/jclara-4.3-SNAPSHOT.jar coatjava/lib/utils
 mkdir -p coatjava/lib/services
 
 ### clean up any cache copies ###
-rm -rf ~/.m2/repository/org/hep/hipo
-rm -rf ~/.m2/repository/org/jlab
 cd common-tools/coat-lib; $mvn clean; cd -
 
 unset CLAS12DIR
@@ -126,6 +124,5 @@ cd -
 
 cp common-tools/coat-lib/target/coat-libs-*-SNAPSHOT.jar coatjava/lib/clas/
 cp reconstruction/*/target/clas12detector-*-SNAPSHOT.jar coatjava/lib/services/
-
 
 echo "COATJAVA SUCCESSFULLY BUILT !"

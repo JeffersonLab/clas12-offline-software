@@ -75,8 +75,8 @@ public class Swimmer {
         //remove overlap for composite field
         //MagneticFields.getInstance().removeMapOverlap();
         FieldsLoaded = true;
-        System.out.println(" TRACKING ***** ****** ****** THE TORUS IS BEING SCALED BY " + (TorusScale * 100) + "  %   *******  ****** **** ");
-        System.out.println(" TRACKING ***** ****** ****** THE SOLENOID IS BEING SCALED BY " + (SolenoidScale * 100) + "  %   *******  ****** **** ");   
+        //System.out.println(" TRACKING ***** ****** ****** THE TORUS IS BEING SCALED BY " + (TorusScale * 100) + "  %   *******  ****** **** ");
+        //System.out.println(" TRACKING ***** ****** ****** THE SOLENOID IS BEING SCALED BY " + (SolenoidScale * 100) + "  %   *******  ****** **** ");   
     }
     
     public static synchronized void setMagneticFieldsScales(double SolenoidScale, double TorusScale, 
@@ -104,8 +104,8 @@ public class Swimmer {
         //remove overlap for composite field
         //MagneticFields.getInstance().removeMapOverlap();
         FieldsLoaded = true;
-        System.out.println(" TRACKING ***** ****** ****** THE TORUS IS BEING SCALED BY " + (TorusScale * 100) + "  %   *******  ****** **** ");
-        System.out.println(" TRACKING ***** ****** ****** THE SOLENOID IS BEING SCALED BY " + (SolenoidScale * 100) + "  %   *******  ****** **** ");   
+        //System.out.println(" TRACKING ***** ****** ****** THE TORUS IS BEING SCALED BY " + (TorusScale * 100) + "  %   *******  ****** **** ");
+        //System.out.println(" TRACKING ***** ****** ****** THE SOLENOID IS BEING SCALED BY " + (SolenoidScale * 100) + "  %   *******  ****** **** ");   
     }
 
     private static double SOLSCALE = -1;

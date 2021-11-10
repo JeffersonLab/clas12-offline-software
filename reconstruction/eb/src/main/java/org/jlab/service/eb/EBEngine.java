@@ -21,8 +21,6 @@ import org.jlab.rec.eb.EBRadioFrequency;
  */
 public class EBEngine extends ReconstructionEngine {
 
-    boolean dropBanks = false;
-    boolean alreadyDroppedBanks = false;
     boolean usePOCA = false;
 
     // output banks:
@@ -65,8 +63,6 @@ public class EBEngine extends ReconstructionEngine {
     }
 
     public boolean processDataEvent(DataEvent de,EBScalers ebs) {
-
-        if (this.dropBanks==true) this.dropBanks(de);
 
         // check run number, get constants from CCDB:
         int run=-1;
@@ -276,36 +272,26 @@ public class EBEngine extends ReconstructionEngine {
         this.trajectoryType = trajectoryType;
     }
 
-    public void dropBanks(DataEvent de) {
-        if (this.alreadyDroppedBanks==false) {
-            System.out.println("["+this.getName()+"]  dropping REC banks!\n");
-            this.alreadyDroppedBanks=true;
-        }
-        de.removeBank(eventBank);
-        de.removeBank(particleBank);
-        de.removeBank(eventBankFT);
-        de.removeBank(particleBankFT);
-        de.removeBank(calorimeterBank);
-        de.removeBank(scintillatorBank);
-        de.removeBank(cherenkovBank);
-        de.removeBank(trackBank);
-        de.removeBank(crossBank);
-        de.removeBank(ftBank);
-        de.removeBank(trajectoryBank);
-        de.removeBank(covMatrixBank);
-    }
-
     @Override
     public boolean init() {
 
-        if (this.getEngineConfigString("dropBanks")!=null &&
-                this.getEngineConfigString("dropBanks").equals("true")) {
-            dropBanks=true;
-        }
+        this.registerOutputBank(eventBank);
+        this.registerOutputBank(particleBank);
+        this.registerOutputBank(eventBankFT);
+        this.registerOutputBank(particleBankFT);
+        this.registerOutputBank(calorimeterBank);
+        this.registerOutputBank(scintillatorBank);
+        this.registerOutputBank(cherenkovBank);
+        this.registerOutputBank(trackBank);
+        this.registerOutputBank(crossBank);
+        this.registerOutputBank(ftBank);
+        this.registerOutputBank(trajectoryBank);
+        this.registerOutputBank(covMatrixBank);
 
         requireConstants(EBCCDBConstants.getAllTableNames());
+
         this.getConstantsManager().setVariation("default");
-        System.out.println("["+this.getName()+"] --> event builder is ready....");
+
         return true;
     }
     

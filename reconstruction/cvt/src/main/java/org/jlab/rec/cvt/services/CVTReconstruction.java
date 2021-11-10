@@ -109,9 +109,7 @@ public class CVTReconstruction extends ReconstructionEngine {
             if(Math.abs(SolenoidScale)<0.001)
             Constants.setCosmicsData(true);
             
-            System.out.println(" LOADING CVT GEOMETRY...............................variation = "+variationName);
             CCDBConstantsLoader.Load(new DatabaseConstantProvider(newRun, variationName));
-            System.out.println("SVT LOADING WITH VARIATION "+variationName);
             DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, variationName);
             cp = SVTConstants.connect( cp );
             cp.disconnect();  

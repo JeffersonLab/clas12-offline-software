@@ -263,7 +263,6 @@ public class Constants {
         org.jlab.rec.cvt.bmt.Constants.Load();
 
         areConstantsLoaded = true;
-        System.out.println("CVT constants loaded ? " + areConstantsLoaded);
         
     }
 

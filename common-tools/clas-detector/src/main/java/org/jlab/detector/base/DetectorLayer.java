@@ -14,12 +14,12 @@ public class DetectorLayer {
     public static final byte EC_INNER_U=4; 
     public static final byte EC_INNER_V=5; 
     public static final byte EC_INNER_W=6; 
-    public static final byte EC_INNER_Z=0; // layer number used to define the longitudinal coordinate of the cluster 
+    public static final byte EC_INNER_Z=9; // layer number used to define the longitudinal coordinate of the cluster 
     
     public static final byte EC_OUTER_U=7; 
     public static final byte EC_OUTER_V=8; 
     public static final byte EC_OUTER_W=9;
-    public static final byte EC_OUTER_Z=0; // layer number used to define the longitudinal coordinate of the cluster
+    public static final byte EC_OUTER_Z=9; // layer number used to define the longitudinal coordinate of the cluster
 
     public static final byte PCAL=PCAL_U;
     public static final byte EC_INNER=EC_INNER_U;

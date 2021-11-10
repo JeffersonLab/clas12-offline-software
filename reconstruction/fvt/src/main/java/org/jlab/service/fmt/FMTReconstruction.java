@@ -136,6 +136,8 @@ public class FMTReconstruction extends ReconstructionEngine {
        clusFinder = new ClusterFinder();
        crossMake = new CrossMaker();
     
+       this.registerOutputBank("FMTRec::Hits","FMTRec::Clusters","FMTRec::Crosses");
+
        return true;
     }
 
