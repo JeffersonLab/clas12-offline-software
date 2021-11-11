@@ -30,7 +30,7 @@ public class StraightTrackCrossListFinder {
 
     public StraightTrackCrossListFinder() {
     }
-
+    
     public CrossList findTrackSeeds(List<Cross> crosses) {
 
         /// The principle of Hough Transform in pattern recognition is as follows.
@@ -68,12 +68,15 @@ public class StraightTrackCrossListFinder {
         /// This is a preliminary pattern recognition method used to identify
         /// reconstructed hits belonging to the same track-segment.
         CrossList crossListFinal = new CrossList();
-
-        if (crosses.size() < 3) {
+        if (crosses.size() == 2) {
             crossListFinal.add(0, (ArrayList<Cross>) crosses);
             return crossListFinal;
         }
-
+        if (crosses.size() < org.jlab.rec.cvt.Constants.MINSVTCRSFORCOSMIC) {
+            crossListFinal.add(0, (ArrayList<Cross>) crosses);
+            return crossListFinal;
+        }
+        
         // From this calculate the bin size in the theta accumulator array
         double ThetaMin = 0.;
         double ThetaMax = 360.;
@@ -273,7 +276,7 @@ public class StraightTrackCrossListFinder {
         
         
         // start finding SVT crosses
-        ArrayList<Cross> svt_crosses = crosses.get(0);
+        ArrayList<Cross> svt_crosses = crosses.get(0); 
         // if there are no svt crosses then return - there is no track
         if (svt_crosses.size() == 0) {
             return null;
@@ -316,7 +319,7 @@ public class StraightTrackCrossListFinder {
                     if(svtMap.containsKey(3)==true) {
                         ArrayList<Cross> list1 = (ArrayList<Cross>) svtMap.get(3);
                         list.add(list1.get(i3));
-                    }
+                    } 
                     crossLists.addAll(this.findTrackSeeds(list));
                 }
             }

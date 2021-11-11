@@ -137,10 +137,10 @@ public class TracksFromTargetRec {
                     }
                     //refit adding missing clusters
                     List<Cluster> clsOnTrack = recUtil.FindClustersOnTrk(SVTclusters, seed.get_Clusters(), fittedTrack.get_helix(), 
-                            fittedTrack.get_P(), fittedTrack.get_Q(), SVTGeom, swimmer);
+                            fittedTrack.get_P(), fittedTrack.get_Q(), SVTGeom, swimmer); //VZ: finds missing clusters
                     if(clsOnTrack.size()>0) {
-                        seed.add_Clusters(clsOnTrack);
-                                            
+                        //seed.add_Clusters(clsOnTrack);
+                        seed.get_Clusters().addAll(clsOnTrack); //VZ check for additional clusters, and only then re-run KF adding new clusters                    
                         //reset pars
                         v = fittedTrack.get_helix().getVertex();
                         p = fittedTrack.get_helix().getPXYZ(solenoidValue);

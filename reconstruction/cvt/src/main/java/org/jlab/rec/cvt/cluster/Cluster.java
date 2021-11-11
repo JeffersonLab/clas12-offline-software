@@ -704,7 +704,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
      */
     public void printInfo() {
         String s = " cluster: Detector " + this.get_Detector().getName() +"  Detector Type " + this.get_Type().getName() + " ID " + this.get_Id() + " Sector " + this.get_Sector() 
-                + " Layer " + this.get_Layer() + " Radius " + this.getRadius()+ " Size " + this.size() +" centroid "+this.get_Centroid() + this.size() +" centroidValue "+this.get_CentroidValue();
+                + " Layer " + this.get_Layer() + " tID " + this.get_AssociatedTrackID()+ " Size " + this.size() +" centroid "+this.get_Centroid() + this.size() +" centroidValue "+this.get_CentroidValue();
         System.out.println(s);
     }
 
