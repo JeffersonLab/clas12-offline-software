@@ -238,9 +238,9 @@ public class FMTEngine extends ReconstructionEngine {
                     track.getCluster(layer).setCentroidResidual(localY);
                 }
             }
-            if(debug || clusterDoubleAssignment || track.getNDF()>3) System.out.println("Track " + track.toString());
+            if(debug) System.out.println("Track " + track.toString());
         }
-        if(clusterDoubleAssignment) for(int i=0; i<clusters.size(); i++) System.out.println(clusters.get(i).toStringBrief());
+        if(debug && clusterDoubleAssignment) for(int i=0; i<clusters.size(); i++) System.out.println(clusters.get(i).toStringBrief());
         
         RecoBankWriter.appendFMTBanks(event, fittedhits, clusters, tracks);
 
