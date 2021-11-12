@@ -104,8 +104,6 @@ public class CosmicTracksRec {
             List<Cross> bmtCrosses = new ArrayList<Cross>();
             List<Cross> bmtCrossesRm = new ArrayList<Cross>();
             
-            
-            Helix hlx  = null ;
             KFitter kf = null;
             
             // uncomment to initiali KF with MC track parameters
@@ -128,7 +126,7 @@ public class CosmicTracksRec {
                                   recUtil.setMeasVecs(cosmics.get(k1), SVTGeom, BMTGeom, swimmer )) ;
 //                kf.filterOn=false;
                 kf.runFitter(swimmer);
-                Map<Integer, KFitter.HitOnTrack> traj = kf.TrjPoints;
+                Map<Integer, KFitter.HitOnTrack> traj = kf.TrjPoints; 
                 List<Integer> keys = new ArrayList<Integer>();
                 traj.forEach((key,value) -> keys.add(key));
                 List<KFitter.HitOnTrack> trkTraj = new ArrayList<KFitter.HitOnTrack>();
@@ -156,7 +154,9 @@ public class CosmicTracksRec {
                     
                     cosmics.get(k1).clsMap.get(keys.get(i)).setTrakInters(tj);
                     cl.set_CentroidResidual(resi);
-                    
+                    if (cl.get_Detector()==DetectorType.BST) {
+                        cl.update(k1 + 1, trkTraj.get(i), SVTGeom);
+                    }
                     if (cl.get_Detector()==DetectorType.BMT) {
                         
                         if (cl.get_Type()==BMTType.Z) { //Z-detector measuring phi
@@ -168,6 +168,77 @@ public class CosmicTracksRec {
 
                         }
                     }
+                }
+                //refit adding missing clusters
+                List<Cluster> clsOnTrack = recUtil.FindClustersOnTrack(SVTclusters, cosmics.get(k1), SVTGeom);
+                if(clsOnTrack.size()>0) {
+                    List<Cross> pseudoCrosses = new ArrayList<Cross>();
+                    for(Cluster cl : clsOnTrack) {
+                        cl.set_AssociatedTrackID(k1 + 1);
+                        //make pseudo-cross
+                        Cross this_cross = new Cross(DetectorType.BST, BMTType.UNDEFINED, cl.get_Sector(), cl.get_Region(), -1);
+                        // cluster1 is the inner layer cluster
+                        if(cl.get_Layer()%2==1) {
+                            this_cross.set_Cluster1(cl);
+                        } else {
+                        // cluster2 is the outer layer cluster
+                            this_cross.set_Cluster2(cl);
+                        }
+                        this_cross.set_Point0(cl.getTrakInters());
+                        this_cross.set_Point(cl.getTrakInters());
+                        pseudoCrosses.add(this_cross);
+                    }
+                    cosmics.get(k1).addAll(pseudoCrosses); //VZ check for additional clusters, and only then re-run KF adding new clusters                    
+                    //refit
+                    kf = new KFitter( the_ray.get_yxinterc(),the_ray.get_yzinterc(),
+                                  the_ray.get_yxslope(), the_ray.get_yzslope(), 10.0, cov, kf,
+                                  recUtil.setMeasVecs(cosmics.get(k1), SVTGeom, BMTGeom, swimmer )) ;
+ //                kf.filterOn=false;
+                    kf.runFitter(swimmer);
+                    
+                    Map<Integer, KFitter.HitOnTrack> traj2 = kf.TrjPoints; 
+                    List<Integer> keys2 = new ArrayList<Integer>();
+                    traj2.forEach((key,value) -> keys2.add(key));
+                    List<KFitter.HitOnTrack> trkTraj2 = new ArrayList<KFitter.HitOnTrack>();
+                    traj2.forEach((key,value) -> trkTraj2.add(value));
+
+                    the_ray = new Ray(kf.yx_slope, kf.yx_interc, kf.yz_slope, kf.yz_interc);                
+                    cosmics.get(k1).set_ray(the_ray);
+                    cosmics.get(k1).removeAll(pseudoCrosses);
+                    cosmics.get(k1).update_Crosses(cosmics.get(k1).get_ray(), SVTGeom);
+                    chi2 = cosmics.get(k1).calc_straightTrkChi2(); 
+                    cosmics.get(k1).set_chi2(chi2);
+                    
+                    ntraj = trjFind.findTrajectory(k1+1, cosmics.get(k1).get_ray(), cosmics.get(k1), SVTGeom, BMTGeom);
+                    cosmics.get(k1).set_Trajectory(ntraj.get_Trajectory());
+                    trkcandFinder.upDateCrossesFromTraj(cosmics.get(k1), ntraj, SVTGeom);
+
+                    for(int i = 0; i< keys2.size(); i++) {
+                        double resi = trkTraj2.get(i).resi;
+                        Point3D tj = new Point3D(trkTraj2.get(i).x,trkTraj2.get(i).y,trkTraj2.get(i).z);
+                        Cluster cl = cosmics.get(k1).clsMap.get(keys2.get(i));
+                        int layer = cl.get_Layer();
+                        int sector = cl.get_Sector();
+
+                        cosmics.get(k1).clsMap.get(keys2.get(i)).setTrakInters(tj);
+                        cl.set_CentroidResidual(resi);
+                        if (cl.get_Detector()==DetectorType.BST) {
+                            cl.update(k1 + 1, trkTraj2.get(i), SVTGeom);
+                            if(layer==2) {System.out.println("resi "+resi);cl.printInfo();}
+                        }
+                        if (cl.get_Detector()==DetectorType.BMT) {
+
+                            if (cl.get_Type()==BMTType.Z) { //Z-detector measuring phi
+                                Line3D cln = BMTGeom.getAxis(layer, sector);
+                                double r = BMTGeom.getRadiusMidDrift(layer);
+                                cl.set_CentroidResidual(resi*r);
+                                cl.setN(cln.distance(ray.get_refPoint()).direction().asUnit());
+                                cl.setS(cl.getL().cross(cl.getN()).asUnit());    
+
+                            }
+                        }
+                    }
+                    
                 }
                 
             }

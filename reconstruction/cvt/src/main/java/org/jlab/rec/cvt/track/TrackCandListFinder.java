@@ -164,7 +164,7 @@ public class TrackCandListFinder {
         int Max_Number_Of_Iterations = SVTParameters.BSTTRKINGNUMBERITERATIONS;
 
         // loop over the cross list and do the fits to the crosses
-        if (list.size() >= 3) {
+        if (list.size() >= org.jlab.rec.cvt.Constants.MINSVTCRSFORCOSMIC) {
             // for debugging purposes only sets all errors to 1
             boolean ignoreErr = SVTParameters.ignoreErr;
 
@@ -361,10 +361,10 @@ public class TrackCandListFinder {
                 }
             }
 
-            if (crossesToFit.size() < 3) {
+            if (crossesToFit.size() < org.jlab.rec.cvt.Constants.MINSVTCRSFORCOSMIC) {
                 continue;
             }
-
+            
             //fitTrk = new CosmicFitter();
             RayMeasurements MeasArrays = this.get_RayMeasurementsArrays(crossesToFit, false, false, false);
 
@@ -416,7 +416,7 @@ public class TrackCandListFinder {
 //                    + Math.toDegrees(cand.get_ray().toLine().direction().phi()) + " ");
             // eliminate bad residuals
             this.EliminateStraightTrackOutliers(crossesToFit, fitTrk, svt_geo);
-            if (crossesToFit.size() < 3) {
+            if (crossesToFit.size() < org.jlab.rec.cvt.Constants.MINSVTCRSFORCOSMIC) {
                 continue;
             }
 

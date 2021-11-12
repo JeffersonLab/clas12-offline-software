@@ -126,9 +126,9 @@ public class RecUtilities {
     private TrajectoryFinder tf = new TrajectoryFinder();
     
     
-    
     public List<Surface> setMeasVecs(StraightTrack trkcand, 
             SVTGeometry sgeo, BMTGeometry bgeo, Swim swim) {
+        if(trkcand.clsMap!=null) trkcand.clsMap.clear(); //VZ: reset cluster map for second pass tracking with isolated SVT clusters
         //Collections.sort(trkcand.get_Crosses());
         List<Surface> KFSites = new ArrayList<Surface>();
         Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()),
@@ -146,21 +146,27 @@ public class RecUtilities {
             if(trkcand.get(i).get_Detector()==DetectorType.BST) {
                 List<Cluster> cls = new ArrayList<Cluster>();
                 
-                int sector   = trkcand.get(i).get_Cluster1().get_Sector();
-                int layertop = trkcand.get(i).get_Cluster1().get_Layer();
-                int layerbot = trkcand.get(i).get_Cluster2().get_Layer();
-                Ray ray = trkcand.get_ray();
-                Point3D top    = new Point3D();
-                Point3D bottom = new Point3D();
-                sgeo.getPlane(layertop, sector).intersection(ray.toLine(), top);
-                sgeo.getPlane(layerbot, sector).intersection(ray.toLine(), bottom);
-                
-                if(top.y()>bottom.y()) {
-                    cls.add(trkcand.get(i).get_Cluster1());
-                    cls.add(trkcand.get(i).get_Cluster2());
+                if(trkcand.get(i).get_Cluster1()!=null && 
+                        trkcand.get(i).get_Cluster2()!=null) { //VZ: modification for pseudocrosses that contain only one cluster
+                    int sector   = trkcand.get(i).get_Cluster1().get_Sector();
+                    int layertop = trkcand.get(i).get_Cluster1().get_Layer();
+                    int layerbot = trkcand.get(i).get_Cluster2().get_Layer();
+                    Ray ray = trkcand.get_ray();
+                    Point3D top    = new Point3D();
+                    Point3D bottom = new Point3D();
+                    sgeo.getPlane(layertop, sector).intersection(ray.toLine(), top);
+                    sgeo.getPlane(layerbot, sector).intersection(ray.toLine(), bottom);
+
+                    if(top.y()>bottom.y()) {
+                        cls.add(trkcand.get(i).get_Cluster1());
+                        cls.add(trkcand.get(i).get_Cluster2());
+                    } else {
+                        cls.add(trkcand.get(i).get_Cluster2());
+                        cls.add(trkcand.get(i).get_Cluster1());
+                    }
                 } else {
-                    cls.add(trkcand.get(i).get_Cluster2());
-                    cls.add(trkcand.get(i).get_Cluster1());
+                    if(trkcand.get(i).get_Cluster1()!=null) cls.add(trkcand.get(i).get_Cluster1());
+                    if(trkcand.get(i).get_Cluster2()!=null) cls.add(trkcand.get(i).get_Cluster2());
                 }
                 for (int j = 0; j < cls.size(); j++) { 
                     int mlayer = cls.get(j).get_Layer();
@@ -170,7 +176,7 @@ public class RecUtilities {
                     else     meas.setl_over_X0(0);
                     // RDV to be tested
 //                    if((int) Constants.getLayersUsed().get(meas.getLayer())<1)
-//                        meas.notUsedInFit=true;
+//                        meas.notUsedInFit=true; //VZ: commenting this out prevents the layer exclusion to be employed in tracking
                     if(i>0 && KFSites.get(KFSites.size()-1).getLayer()==meas.getLayer())
                         continue;
                     KFSites.add(meas);
@@ -204,9 +210,87 @@ public class RecUtilities {
         return KFSites;
     }
     
+    public List<Cluster> FindClustersOnTrack(List<Cluster> allClusters, StraightTrack trkcand, 
+            SVTGeometry sgeo) {
+        List<Cluster> clustersOnTrack = new ArrayList<>();
+        Map<Integer, Cluster> clusterMap = new HashMap<Integer, Cluster>();
+        trkcand.sort(Comparator.comparing(Cross::getY).reversed());
+        List<Cluster> clsList = new ArrayList<Cluster>();
+        int crsCnt = 0;        
+        for (int i = 0; i < trkcand.size(); i++) { //SVT cluster sorting
+            if(trkcand.get(i).get_Detector()==DetectorType.BST) {
+                crsCnt++;
+                int sector   = trkcand.get(i).get_Cluster1().get_Sector();
+                int layertop = trkcand.get(i).get_Cluster1().get_Layer();
+                int layerbot = trkcand.get(i).get_Cluster2().get_Layer();
+                Ray ray = trkcand.get_ray();
+                Point3D top    = new Point3D();
+                Point3D bottom = new Point3D();
+                sgeo.getPlane(layertop, sector).intersection(ray.toLine(), top);
+                sgeo.getPlane(layerbot, sector).intersection(ray.toLine(), bottom);
+                
+                if(top.y()>bottom.y()) {
+                    clsList.add(trkcand.get(i).get_Cluster1());
+                    clsList.add(trkcand.get(i).get_Cluster2());
+                } else {
+                    clsList.add(trkcand.get(i).get_Cluster2());
+                    clsList.add(trkcand.get(i).get_Cluster1());
+                }
+            }
+        } 
+        
+        
+        for(Cluster cluster : clsList) {
+            clusterMap.put(SVTGeometry.getModuleId(cluster.get_Layer(), cluster.get_Sector()), cluster);
+        }  
+        
+        // for each layer
+        for (int ilayer = 0; ilayer < SVTGeometry.NLAYERS; ilayer++) {
+            int layer = ilayer + 1;
+            
+            for(int isector=0; isector<SVTGeometry.NSECTORS[ilayer]; isector++) {
+                int sector = isector+1;
+                
+                Ray ray = trkcand.get_ray();
+                Point3D traj = new Point3D();
+                sgeo.getPlane(layer, sector).intersection(ray.toLine(), traj);
+                
+                int key = SVTGeometry.getModuleId(layer, sector);
+                
+                if(traj!=null && sgeo.isInFiducial(layer, sector, traj)) {
+                    double  doca    = Double.POSITIVE_INFINITY;
+                    // loop over all clusters in the same sector and layer that are not associated to s track
+                    for(Cluster cls : allClusters) {
+                        if(cls.get_AssociatedTrackID()==-1 && cls.get_Sector()==sector && cls.get_Layer()==layer) {
+                            double clsDoca = cls.residual(traj);
+                            cls.setTrakInters(traj);
+                            // save the ones that have better doca
+                            if(Math.abs(clsDoca)<Math.abs(doca) && Math.abs(clsDoca)<10*cls.size()*cls.get_SeedStrip().get_Pitch()/Math.sqrt(12)) {
+                                if(clusterMap.containsKey(key) && clusterMap.get(key).get_AssociatedTrackID()==-1) {
+                                    clusterMap.replace(key, cls);
+                                } else {
+                                    if(!clusterMap.containsKey(key)) {
+                                        clusterMap.put(key, cls); 
+                                    }
+                                }
+                                doca = clsDoca;
+                            }                           
+                        }
+                    }
+                }
+            }
+        }
+        // if any lost cluster with doca better than the seed is found, save it
+        
+        for(Entry<Integer,Cluster> entry : clusterMap.entrySet()) {
+            if(entry.getValue().get_AssociatedTrackID()==-1) clustersOnTrack.add(entry.getValue());
+        }
+        return clustersOnTrack;
+        
+    }
+    
     public List<Cluster> FindClustersOnTrk(List<Cluster> allClusters, List<Cluster> seedCluster, Helix helix, double P, int Q,
             SVTGeometry sgeo, Swim swimmer) { 
-
         // initialize swimmer starting from the track vertex
         double maxPathLength = 1; 
         swimmer.SetSwimParameters((helix.xdca()+Constants.getXb()) / 10, (helix.ydca()+Constants.getYb()) / 10, helix.get_Z0() / 10, 
@@ -241,7 +325,8 @@ public class RecUtilities {
                 // and skip sectors that are too far (more than the sector angular coverage)
                 Vector3D n = sgeo.getNormal(layer, sector);
                 double deltaPhi = Math.acos(helixPoint.toVector3D().asUnit().dot(n));
-                if(Math.abs(deltaPhi)>2*Math.PI/SVTGeometry.NSECTORS[ilayer]) continue;
+                double buffer = Math.toRadians(1.);
+                if(Math.abs(deltaPhi)>2*Math.PI/SVTGeometry.NSECTORS[ilayer]+buffer) continue;
                 
                 int key = SVTGeometry.getModuleId(layer, sector);
                 
@@ -252,10 +337,10 @@ public class RecUtilities {
                 inters = swimmer.SwimPlane(n, pm, Constants.DEFAULTSWIMACC/10);
                 if(inters!=null) {
                     traj = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
-                }
+                } 
                 // if trajectory is valid, look for missing clusters
                 if(traj!=null && sgeo.isInFiducial(layer, sector, traj)) {
-                    double  doca    = Double.POSITIVE_INFINITY;
+                    double  doca    = Double.POSITIVE_INFINITY; 
                     //if(clusterMap.containsKey(key)) {
                     //    Cluster cluster = clusterMap.get(key);
                     //    doca = cluster.residual(traj); 
@@ -263,13 +348,15 @@ public class RecUtilities {
                     // loop over all clusters in the same sector and layer that are noy associated to s track
                     for(Cluster cls : allClusters) {
                         if(cls.get_AssociatedTrackID()==-1 && cls.get_Sector()==sector && cls.get_Layer()==layer) {
-                            double clsDoca = cls.residual(traj);
+                            double clsDoca = cls.residual(traj); 
                             // save the ones that have better doca
                             if(Math.abs(clsDoca)<Math.abs(doca) && Math.abs(clsDoca)<10*cls.size()*cls.get_SeedStrip().get_Pitch()/Math.sqrt(12)) {
-                                if(clusterMap.containsKey(key)) {
-                                    clusterMap.replace(key, cls);
+                                if(clusterMap.containsKey(key) && clusterMap.get(key).get_AssociatedTrackID()==-1) {
+                                    clusterMap.replace(key, cls); 
                                 } else {
-                                    clusterMap.put(key, cls); 
+                                    if(!clusterMap.containsKey(key)) {
+                                        clusterMap.put(key, cls); 
+                                    }
                                 }
                                 doca = clsDoca;
                             }                           
@@ -332,28 +419,28 @@ public class RecUtilities {
 //                trajMap.put((sector*1000+layer), trp); 
 //            }
 //        }
-//        for(Cluster cls : seedCluster) {
-//            if(cls.get_Detector() == DetectorType.BMT)
+//        for(Cluster clsList : seedCluster) {
+//            if(clsList.get_Detector() == DetectorType.BMT)
 //                continue;
-//            int clsKey = cls.get_Sector()*1000+cls.get_Layer();
-//            clusMap.put(clsKey, cls);
+//            int clsKey = clsList.get_Sector()*1000+clsList.get_Layer();
+//            clusMap.put(clsKey, clsList);
 //        }
-//        for(Cluster cls : allClusters) {
-//            if(cls.get_Detector() == DetectorType.BMT)
+//        for(Cluster clsList : allClusters) {
+//            if(clsList.get_Detector() == DetectorType.BMT)
 //                continue;
-//            int clsKey = cls.get_Sector()*1000+cls.get_Layer();
-//            if(cls.get_AssociatedTrackID()==-1 && trajMap!=null && trajMap.get(clsKey)!=null) {
+//            int clsKey = clsList.get_Sector()*1000+clsList.get_Layer();
+//            if(clsList.get_AssociatedTrackID()==-1 && trajMap!=null && trajMap.get(clsKey)!=null) {
 //                //double trjCent = stripMap.get(clsKey);
-//                double clsDoca = cls.residual(trajMap.get(clsKey));
+//                double clsDoca = clsList.residual(trajMap.get(clsKey));
 //                if(clusMap.containsKey(clsKey)) {
 //                    //double filldCent = clusMap.get(clsKey).get_Centroid();
 //                    double filldDoca = docaMap.get(clsKey);
 //                    if(Math.abs(clsDoca)<Math.abs(filldDoca)) {//closer doca
-//                        clusMap.put(clsKey, cls); //fill it
+//                        clusMap.put(clsKey, clsList); //fill it
 //                    }
 //                }
 //                if(Math.abs(clsDoca)<cls.get_CentroidError()*5){ //5sigma cut
-//                    clusMap.put(clsKey, cls);
+//                    clusMap.put(clsKey, clsList);
 //                }
 //            }
 //        }
@@ -362,9 +449,9 @@ public class RecUtilities {
 //            clustersOnTrack.add(cl);
 //        }
 //        // RDV can lead to duplicates
-//        for(Cluster cls : seedCluster) {
-//            if(cls.get_Detector() == DetectorType.BMT)
-//                clustersOnTrack.add(cls);
+//        for(Cluster clsList : seedCluster) {
+//            if(clsList.get_Detector() == DetectorType.BMT)
+//                clustersOnTrack.add(clsList);
 //        }
 //        return clustersOnTrack;
 //    }
