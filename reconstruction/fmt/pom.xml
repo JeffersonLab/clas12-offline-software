@@ -49,7 +49,7 @@
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../../parent/pom.xml</relativePath>
-    <version>7.0.0-SNAPSHOT</version>
+    <version>7.0.1-SNAPSHOT</version>
   </parent>
 
    <repositories>
@@ -63,14 +63,14 @@
      <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-jcsg</artifactId>
-      <version>7.0.0-SNAPSHOT</version>
+      <version>7.0.1-SNAPSHOT</version>
       <type>jar</type>
     </dependency>  
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>swim-tools</artifactId>
-      <version>7.0.0-SNAPSHOT</version>
+      <version>7.0.1-SNAPSHOT</version>
     </dependency>
    
   </dependencies>
