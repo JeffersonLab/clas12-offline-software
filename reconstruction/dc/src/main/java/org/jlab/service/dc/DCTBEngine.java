@@ -98,7 +98,6 @@ public class DCTBEngine extends DCEngine {
         List<Track> trkcands = new ArrayList<Track>();
         // final listed of hits and clusters from segments associated to tracks
         List<FittedHit> thits = new ArrayList<FittedHit>();	
-        List<FittedCluster> tclusters = new ArrayList<FittedCluster>();
         
         if(Constants.DEBUG)
             System.out.println("TB AI "+ this.getName());
@@ -299,8 +298,6 @@ public class DCTBEngine extends DCEngine {
                     c.set_CrossDirIntersSegWires();
                     c.get_Segment1().isOnTrack=true;
                     c.get_Segment2().isOnTrack=true;
-                    tclusters.add(c.get_Segment1().get_fittedCluster());
-                    tclusters.add(c.get_Segment2().get_fittedCluster());
                     for (FittedHit h1 : c.get_Segment1()) {
                         h1.set_AssociatedHBTrackID(trk.get_Id());
                         thits.add(h1);
@@ -339,7 +336,7 @@ public class DCTBEngine extends DCEngine {
             return true;
         }
         
-        rbc.fillAllTBBanks(event, thits, tclusters, segments, crosses, trkcands);
+        rbc.fillAllTBBanks(event, thits, clusters, segments, crosses, trkcands);
         //if(this.aiAssist) 
         //    event.getBank("TimeBasedTrkg::"+_name+"Tracks").show();
         return true;
