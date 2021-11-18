@@ -44,6 +44,9 @@ public class FTCALEngine extends ReconstructionEngine {
                 };
                 requireConstants(Arrays.asList(tables));
                 this.getConstantsManager().setVariation("default");
+
+                this.registerOutputBank("FTCAL::hits","FTCAL::clusters");
+                
                 return true;
 	}
 

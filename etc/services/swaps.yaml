@@ -2,10 +2,10 @@
 # Note, it must come before all other services.
 io-services:
   reader:
-    class: org.jlab.clas.std.services.convertors.HipoToHipoReader
+    class: org.jlab.io.clara.HipoToHipoReader
     name: HipoToHipoReader
   writer:
-    class: org.jlab.clas.std.services.convertors.HipoToHipoWriter
+    class: org.jlab.io.clara.HipoToHipoWriter
     name: HipoToHipoWriter
 services:
   - class: org.jlab.service.swaps.SwapEngine

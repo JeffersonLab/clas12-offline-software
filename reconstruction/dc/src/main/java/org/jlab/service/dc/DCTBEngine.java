@@ -52,6 +52,14 @@ public class DCTBEngine extends DCEngine {
     @Override
     public boolean init() {
         super.LoadTables();
+        super.registerOutputBank("TimeBasedTrkg::TBHits");
+        super.registerOutputBank("TimeBasedTrkg::TBClusters");
+        super.registerOutputBank("TimeBasedTrkg::TBSegments");
+        super.registerOutputBank("TimeBasedTrkg::TBSegmentTrajectory");
+        super.registerOutputBank("TimeBasedTrkg::TBCrosses");
+        super.registerOutputBank("TimeBasedTrkg::TBTracks");
+        super.registerOutputBank("TimeBasedTrkg::TBCovMat");
+        super.registerOutputBank("TimeBasedTrkg::Trajectory");
         return true;
     }
     @Override

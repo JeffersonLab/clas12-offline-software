@@ -2,6 +2,7 @@ package org.jlab.detector.calib.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -46,6 +47,14 @@ public class ConstantsManager {
     }
     
     public synchronized void init(List<String>  tables){
+        this.defaultDescriptor.addTables(tables);
+    }
+    
+    /**
+     * use a map just to avoid name clash
+     * @param tables map of table_name to #indices 
+     */
+    public synchronized void init(Map<String,Integer>  tables){
         this.defaultDescriptor.addTables(tables);
     }
     
@@ -109,7 +118,7 @@ public class ConstantsManager {
         for(int i = 0; i < desc.getTableNames().size(); i++){                
             String tableName = tn.get(i);
             try {
-                IndexedTable  table = provider.readTable(tableName);
+                IndexedTable  table = provider.readTable(tableName, desc.getTableIndices().get(i));
                 desc.getMap().put(tk.get(i), table);
                 System.out.println(String.format("***** >>> adding : %14s / table = %s", tk.get(i),tableName));
             } catch (Exception e) {
@@ -155,30 +164,32 @@ public class ConstantsManager {
         
         private String  descName   = "descriptor";
         private int     runNumber  = 10;
-        private int     nIndex     = 3;
-        
+        List<Integer>  tableIndices = new ArrayList<Integer>();
         Set<String>    tableNames  = new LinkedHashSet<String>();
-        
         Set<String>    mapKeys     = new LinkedHashSet<String>();
-        
         Map<String,IndexedTable>  hashTables = new LinkedHashMap<String,IndexedTable>();
         
         public DatabaseConstantsDescriptor(){
             
         }
-        
-        public void addTables(String[] tables){
-            tableNames.addAll(Arrays.asList(tables));
-            mapKeys.addAll(Arrays.asList(tables));
+       
+        public void addTable(String table, int indices) {
+            if (tableNames.add(table)) {
+                mapKeys.add(table);
+                tableIndices.add(indices);
+            }
         }
-        
+
         public void addTables(List<String> tables){
             for(String table : tables){
-                tableNames.add(table);
-                mapKeys.add(table);
+                addTable(table, DatabaseConstantProvider.DEFAULT_INDICES);
             }
         }
         
+        public void addTables(String[] tables){
+            addTables(Arrays.asList(tables));
+        }
+       
         public void addTables(Set<String> keys, Set<String> tables){
             if(keys.size()!=tables.size()){
                 System.out.println("[DatabaseConstantsDescriptor] error --> "
@@ -186,10 +197,35 @@ public class ConstantsManager {
                         + " tables ("+tables.size()+")");
             } else {
                 mapKeys.addAll(keys);
-                tableNames.addAll(tables);                
+                tableNames.addAll(tables);
+                for (int i=0; i<mapKeys.size(); i++) {
+                    tableIndices.add(DatabaseConstantProvider.DEFAULT_INDICES);
+                }
             }
         }
-        
+
+        public void addTables(Set<String> keys, Set<String> tables, List<Integer> indices){
+            if(keys.size()!=tables.size()){
+                System.out.println("[DatabaseConstantsDescriptor] error --> "
+                + " size of keys ("+keys.size()+") does not match size of"
+                        + " tables ("+tables.size()+")");
+            } else {
+                mapKeys.addAll(keys);
+                tableNames.addAll(tables);
+                tableIndices.addAll(indices);
+            }
+        }
+
+        /**
+         * 
+         * @param tables 
+         */
+        public void addTables(Map<String,Integer> tables) {
+            for (String table : tables.keySet()) {
+                addTable(table, tables.get(table));
+            } 
+        }
+
         public boolean hasTable(String name){
             return hashTables.containsKey(name);
         }
@@ -217,10 +253,14 @@ public class ConstantsManager {
         public Set<String>  getTableKeys(){
             return this.mapKeys;
         }
-        
+       
+        public List<Integer> getTableIndices(){
+            return this.tableIndices;
+        }
+
         public DatabaseConstantsDescriptor  getCopy(int run){
             DatabaseConstantsDescriptor desc = new DatabaseConstantsDescriptor();
-            desc.addTables(this.getTableKeys(),this.getTableNames());
+            desc.addTables(this.getTableKeys(),this.getTableNames(),this.getTableIndices());
             return desc;
         }
         
@@ -229,7 +269,6 @@ public class ConstantsManager {
             StringBuilder str = new StringBuilder();
             int i = 0;
             for(String name : tableNames){
-                //for(int i = 0; i < this.tableNames.size();i++){
                 str.append(String.format("%4d : %s\n", i , name));
                 i++;
             }
@@ -239,17 +278,30 @@ public class ConstantsManager {
     
     
     public static void main(String[] args){
+
         ConstantsManager  manager = new ConstantsManager("default");
         
         manager.init(Arrays.asList(new String[]{
             "/daq/fadc/ec",
             "/daq/fadc/ftof","/daq/fadc/htcc"}));
-        for(int i = 0; i < 5 ; i++){
+        for(int i = 0; i < 3 ; i++){
             IndexedTable  table1 = manager.getConstants(10, "/daq/fadc/htcc");
             IndexedTable  table2 = manager.getConstants(10, "/daq/fadc/ec");
-            IndexedTable  table3 = manager.getConstants(12, "/daq/fadc/htcc");
             manager.reset();
             System.out.println("\n\n STATUS = " + manager.getRequestStatus());
         }
+
+        ConstantsManager conman = new ConstantsManager("default");
+        Map<String,Integer> tables = new HashMap<>();
+        tables.put("/calibration/dc/time_corrections/T0Corrections",4);
+        tables.put("/calibration/dc/time_corrections/timingcuts",3);
+        conman.init(tables);
+        IndexedTable t4 = conman.getConstants(4013, "/calibration/dc/time_corrections/T0Corrections");
+        IndexedTable t3 = conman.getConstants(4013, "/calibration/dc/time_corrections/timingcuts");
+        System.out.println("4conman:  "+t4.getColumnCount());
+        System.out.println("4conman:  "+t4.toString());
+        System.out.println("4conman:  1/4/6/1:  "+t4.getDoubleValue("T0Correction", 1,4,6,1));
+        System.out.println("3conman:  0/2/56:   "+t3.getDoubleValue("LinearCoeff",0,2,56));
+        
     }
 }

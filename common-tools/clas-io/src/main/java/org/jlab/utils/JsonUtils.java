@@ -80,14 +80,11 @@ public class JsonUtils {
         JsonObject ret = new JsonObject();
         for (Map.Entry<String,Object> entry : map.entrySet()) {
             String topKey = entry.getKey();
-            if (entry.getValue() instanceof String) {
-                ret.add(topKey, (String)entry.getValue());
-            }
-            else if (entry.getValue() instanceof Map) {
+            if (entry.getValue() instanceof Map) {
                 ret.add(topKey,Map2Json((Map)entry.getValue()));
             }
             else {
-                throw new RuntimeException("non-String non-Supported.");
+                ret.add(topKey, entry.getValue().toString());
             }
         }
         return ret;
