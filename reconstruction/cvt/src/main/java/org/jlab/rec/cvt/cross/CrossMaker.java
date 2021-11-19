@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.cross;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTConstants;
 
 import org.jlab.rec.cvt.bmt.BMTGeometry;
@@ -40,8 +41,31 @@ public class CrossMaker {
         ArrayList<Cluster> svt_outerlayrclus = sortedClusters.get(1);
         ArrayList<Cluster> bmt_Clayrclus = sortedClusters.get(2);
         ArrayList<Cluster> bmt_Zlayrclus = sortedClusters.get(3);
+        ArrayList<Cluster> rbmt_Clayrclus = new ArrayList<Cluster>();
+        ArrayList<Cluster> rbmt_Zlayrclus = new ArrayList<Cluster>();
+        
+        for(Cluster cl : bmt_Zlayrclus) { 
+            if(cl.get_Layer()==Constants.getBMTLayerExcld()
+                    && cl.get_Phi0()>Constants.getBMTPhiZRangeExcld()[0][0]
+                    && cl.get_Phi0()<=Constants.getBMTPhiZRangeExcld()[0][1]) {
+                rbmt_Zlayrclus.add(cl); 
+            }
+        }
+        if(bmt_Zlayrclus.size()>0) {
+            bmt_Zlayrclus.removeAll(rbmt_Zlayrclus);
+        }
+        for(Cluster cl : bmt_Clayrclus) { 
+            if(cl.get_Layer()==Constants.getBMTLayerExcld()
+                    && cl.get_Z()>Constants.getBMTPhiZRangeExcld()[1][0]
+                    && cl.get_Z()<=Constants.getBMTPhiZRangeExcld()[1][1]) {
+                rbmt_Clayrclus.add(cl); 
+            }
+        }
+        if(bmt_Clayrclus.size()>0) {
+            bmt_Clayrclus.removeAll(rbmt_Clayrclus);
+        }
         // arrays of BMT and SVT crosses
-        ArrayList<Cross> BMTCrosses = this.findBMTCrosses(bmt_Clayrclus, bmt_Zlayrclus, bmt_geo);
+        ArrayList<Cross> BMTCrosses = this.findBMTCrosses(bmt_Clayrclus, bmt_Zlayrclus, bmt_geo,1000);
         ArrayList<Cross> SVTCrosses = this.findSVTCrosses(svt_innerlayrclus, svt_outerlayrclus, svt_geo);
         
         // instantiate the arraylists of sorted Crosses by detector type
@@ -136,15 +160,15 @@ public class CrossMaker {
      * @return list of reconstructed peudocrosses for the BMT which contain
      * measured x,y position for Z and measured z position for C detectors.
      */
-    private ArrayList<Cross> findBMTCrosses(
+    public ArrayList<Cross> findBMTCrosses(
             ArrayList<Cluster> Clayrclus,
             ArrayList<Cluster> Zlayrclus, 
-            BMTGeometry bmt_geo) {
+            BMTGeometry bmt_geo, int idx) {
         //instanciates the list of crosses
         ArrayList<Cross> crosses = new ArrayList<Cross>();
 
-        // For BMT start id at 1000
-        int pid = 1000;
+        // For BMT start id at last id from existing list
+        int pid = idx;
         for (Cluster Zlayerclus : Zlayrclus) {
             if (Zlayerclus.get_TotalEnergy() < BMTConstants.ETOTCUT) {
                 continue;

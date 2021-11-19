@@ -314,6 +314,13 @@ public class CVTRecNewKF extends ReconstructionEngine {
         if(exlyrsnb>0)
             exclLayrs = true;
         
+        //double[][]bmtx = new double[2][2];
+        //bmtx[0][0]= Math.toRadians(90);
+        //bmtx[0][1]= Math.toRadians(115);
+        //bmtx[1][0] =100;
+        //bmtx[1][1] =250;
+        //Constants.setBMTPhiZRangeExcld(bmtx);
+        //Constants.setBMTLayerExcld(1);
 //        //new clustering
 //        String newClustering = this.getEngineConfigString("newclustering");
 //        

@@ -35,6 +35,7 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
+import org.jlab.rec.cvt.cross.CrossMaker;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.trajectory.Ray;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
@@ -373,90 +374,94 @@ public class RecUtilities {
         }
         return clustersOnTrack;
     }
+    public List<Cluster> FindClustersOnTrk(List<Cluster> allClusters, List<Cross> seedCrosses, Helix helix, double P, int Q,
+            BMTGeometry bgeo, Swim swimmer) { 
+        // initialize swimmer starting from the track vertex
+        double maxPathLength = 1; 
+        swimmer.SetSwimParameters((helix.xdca()+Constants.getXb()) / 10, (helix.ydca()+Constants.getYb()) / 10, helix.get_Z0() / 10, 
+                     Math.toDegrees(helix.get_phi_at_dca()), Math.toDegrees(Math.acos(helix.costheta())),
+                     P, Q, maxPathLength) ;
+        double[] inters = null;
+        // load SVT clusters that are in the seed
+        Map<Integer,Cluster> clusterMap = new HashMap<>(); 
+        for(Cross cross : seedCrosses) {
+            if(cross.get_Detector() != DetectorType.BMT)
+                continue;
+            Cluster cluster = cross.get_Cluster1(); 
+            cluster.set_AssociatedTrackID(0);
+            clusterMap.put(BMTGeometry.getModuleId(cluster.get_Layer(), cluster.get_Sector()), cluster);
+        }   
+        
+        // for each layer
+        for (int ilayer = 0; ilayer < BMTGeometry.NLAYERS; ilayer++) {
+            int layer = ilayer + 1;
+            double radius  = bgeo.getRadiusMidDrift(layer);
+            // identify the sector the track may be going through (this doesn't account for misalignments
+            Point3D helixPoint = helix.getPointAtRadius(radius);
+            // reinitilize swimmer from last surface
+            if(inters!=null) {
+                swimmer.SetSwimParameters(inters[0], inters[1], inters[2], inters[3], inters[4], inters[5], Q);
+            }
+            
+            for(int isector=0; isector<BMTGeometry.NSECTORS; isector++) {
+                int sector = isector+1;
+                
+                // check the angle between the trajectory point and the sector 
+                // and skip sectors that are too far (more than the sector angular coverage)
+                if(bgeo.inDetector(layer, sector, helixPoint)==false)
+                    continue;
+                 
+                // calculate trajectory
+                Point3D traj = null;
+                inters = swimmer.SwimRho(radius/10, Constants.SWIMACCURACYBMT/10);
+                
+                if(inters!=null) {
+                    traj = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
+                } 
+                
+                int key = BMTGeometry.getModuleId(layer, sector);
+                
+               
+                // if trajectory is valid, look for missing clusters
+                if(traj!=null && bgeo.inDetector(layer, sector, traj)) {
+                    double  doca    = Double.POSITIVE_INFINITY; 
+                    // loop over all clusters in the same sector and layer that are noy associated to s track
+                    for(Cluster cls : allClusters) {
+                        if(cls.get_AssociatedTrackID()==-1 && cls.get_Sector()==sector && cls.get_Layer()==layer) {
+                            double clsDoca = cls.residual(traj); 
+                            // save the ones that have better doca
+                            if(Math.abs(clsDoca)<Math.abs(doca) && Math.abs(clsDoca)<10*cls.size()*cls.get_SeedStrip().get_Pitch()/Math.sqrt(12)) {
+                                if(clusterMap.containsKey(key) && clusterMap.get(key).get_AssociatedTrackID()==-1) {
+                                    clusterMap.replace(key, cls); 
+                                } else {
+                                    if(!clusterMap.containsKey(key)) {
+                                        clusterMap.put(key, cls); 
+                                    }
+                                }
+                                doca = clsDoca;
+                            }                           
+                        }
+                    }
+                }
+            }
+        }
+        // if any lost cluster with doca better than the seed is found, save it
+        List<Cluster> clustersOnTrack = new ArrayList<>();
+        for(Entry<Integer,Cluster> entry : clusterMap.entrySet()) {
+            if(entry.getValue().get_AssociatedTrackID()==-1) clustersOnTrack.add(entry.getValue());
+        }
+        return clustersOnTrack;
+    }
     
-//    public List<Cluster> FindClustersOnTrk (List<Cluster> allClusters, List<Cluster> seedCluster, Helix helix, double P, int Q,
-//            SVTGeometry sgeo, Swim swimmer) { 
-//        Map<Integer, Cluster> clusMap = new HashMap<Integer, Cluster>();
-//        //Map<Integer, Double> stripMap = new HashMap<Integer, Double>();
-//        Map<Integer, Double> docaMap = new HashMap<Integer, Double>();
-//        Map<Integer, Point3D> trajMap = new HashMap<Integer, Point3D>();
-//        int[] Sectors = new int[SVTGeometry.NLAYERS];
-//        // RDV it is not correct for tilte/shifted geometry
-//        for (int a = 0; a < Sectors.length; a++) {
-//            Point3D I = helix.getPointAtRadius(sgeo.getLayerRadius(a+1));
-//           int sec = sgeo.getSector(a+1, I);   
-//           Sectors[a] = sec;
-//        }
-//        // initialize swimmer starting from the track vertex
-//        double maxPathLength = 1; 
-//        swimmer.SetSwimParameters((helix.xdca()+Constants.getXb()) / 10, (helix.ydca()+Constants.getYb()) / 10, helix.get_Z0() / 10, 
-//                     Math.toDegrees(helix.get_phi_at_dca()), Math.toDegrees(Math.acos(helix.costheta())),
-//                     P, Q, maxPathLength) ;
-//        double[] inters = null;
-//        double     path = 0;
-//        // SVT
-//        for (int l = 0; l < SVTGeometry.NLAYERS; l++) {
-//            // reinitilize swimmer from last surface
-//            if(inters!=null) {
-//                double intersPhi   = Math.atan2(inters[4], inters[3]);
-//                double intersTheta = Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]));
-//                swimmer.SetSwimParameters(inters[0], inters[1], inters[2], Math.toDegrees(intersPhi), Math.toDegrees(intersTheta), 
-//                        P, Q, maxPathLength) ;
-//            }
-//            int layer = l + 1;
-//            int sector = Sectors[l];
-//            if(sector == -1)
-//                continue;
-//            
-//            Vector3D n = sgeo.getNormal(layer, sector);
-//            Point3D  p = sgeo.getModule(layer, sector).origin();
-//            Point3D pm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
-//            inters = swimmer.SwimPlane(n, pm, 1E-3);
-//            if(inters!=null) {
-//                Point3D trp = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
-//                int nearstp = sgeo.calcNearestStrip(inters[0]*10, inters[1]*10, inters[2]*10, layer, sector);
-//                //stripMap.put((sector*1000+layer), nearstp);
-//                docaMap.put((sector*1000+layer), sgeo.getDoca(layer, sector, nearstp, trp)); 
-//                trajMap.put((sector*1000+layer), trp); 
-//            }
-//        }
-//        for(Cluster clsList : seedCluster) {
-//            if(clsList.get_Detector() == DetectorType.BMT)
-//                continue;
-//            int clsKey = clsList.get_Sector()*1000+clsList.get_Layer();
-//            clusMap.put(clsKey, clsList);
-//        }
-//        for(Cluster clsList : allClusters) {
-//            if(clsList.get_Detector() == DetectorType.BMT)
-//                continue;
-//            int clsKey = clsList.get_Sector()*1000+clsList.get_Layer();
-//            if(clsList.get_AssociatedTrackID()==-1 && trajMap!=null && trajMap.get(clsKey)!=null) {
-//                //double trjCent = stripMap.get(clsKey);
-//                double clsDoca = clsList.residual(trajMap.get(clsKey));
-//                if(clusMap.containsKey(clsKey)) {
-//                    //double filldCent = clusMap.get(clsKey).get_Centroid();
-//                    double filldDoca = docaMap.get(clsKey);
-//                    if(Math.abs(clsDoca)<Math.abs(filldDoca)) {//closer doca
-//                        clusMap.put(clsKey, clsList); //fill it
-//                    }
-//                }
-//                if(Math.abs(clsDoca)<cls.get_CentroidError()*5){ //5sigma cut
-//                    clusMap.put(clsKey, clsList);
-//                }
-//            }
-//        }
-//        List<Cluster> clustersOnTrack = new ArrayList<Cluster>();
-//        for(Cluster cl : clusMap.values()) {
-//            clustersOnTrack.add(cl);
-//        }
-//        // RDV can lead to duplicates
-//        for(Cluster clsList : seedCluster) {
-//            if(clsList.get_Detector() == DetectorType.BMT)
-//                clustersOnTrack.add(clsList);
-//        }
-//        return clustersOnTrack;
-//    }
-    
+    List<Cross> findCrossesOnBMTTrack(List<Cluster> bmtclsOnTrack, BMTGeometry bmt_geo, CrossMaker cm, int idx) {
+         // fill the sorted list
+        ArrayList<ArrayList<Cluster>> sortedClusters = cm.sortClusterByDetectorAndIO(bmtclsOnTrack);
+        ArrayList<Cluster> bmt_Clayrclus = sortedClusters.get(2);
+        ArrayList<Cluster> bmt_Zlayrclus = sortedClusters.get(3);
+        ArrayList<Cross> BMTCrosses = cm.findBMTCrosses(bmt_Clayrclus, bmt_Zlayrclus, bmt_geo, idx);
+        
+        return BMTCrosses;
+    }
     public void MatchTrack2Traj(Seed trkcand, Map<Integer, 
             org.jlab.clas.tracking.kalmanfilter.helical.KFitter.HitOnTrack> traj, 
             SVTGeometry sgeo, BMTGeometry bgeo) {
@@ -781,5 +786,6 @@ public class RecUtilities {
         return value;
     }
 
+    
     
 }

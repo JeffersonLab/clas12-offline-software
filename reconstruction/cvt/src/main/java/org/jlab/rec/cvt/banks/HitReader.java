@@ -105,6 +105,12 @@ public class HitReader {
                 if (ADCtoEdep < 1) {
                     continue;
                 }
+                //timing cut in data
+                if(event.hasBank("MC::Particle") == false && 
+                        bankDGTZ.getFloat("time", i)<50.0) {
+                    continue;
+                    
+                }
                 // create the strip object for the BMT
                 //Strip BmtStrip = new Strip((int) bankDGTZ.getShort("component", i), ADCtoEdep);
                 Strip BmtStrip = new Strip((int) bankDGTZ.getShort("component", i), ADCtoEdep, (double) bankDGTZ.getFloat("time", i));

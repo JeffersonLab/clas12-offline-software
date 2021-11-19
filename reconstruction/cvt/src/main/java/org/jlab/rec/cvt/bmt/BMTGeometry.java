@@ -31,7 +31,8 @@ public class BMTGeometry {
     private final static int[] lC = { 1, 4, 6}; 
     private final static double accuracy =  1E-4; // mm
     private final static double udf      = -9999; // mm
-        
+    public final static int NLAYERS = 6;
+    public final static int NSECTORS = 3;
     /**
      * Handles BMT geometry
      */
@@ -79,6 +80,9 @@ public class BMTGeometry {
         return (int) Math.floor((layer+1)/2);
     }
 
+    public static int getModuleId(int layer, int sector) {
+        return layer*100+sector;
+    }
 
     /**
      * Return region number for a given layer
