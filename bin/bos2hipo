@@ -2,7 +2,7 @@
 
 . `dirname $0`/env.sh 
 
-java -Xms1024m \
+java -Xms1024m -XX:+UseSerialGC \
     -cp "$CLAS12DIR/lib/clas/*:$CLAS12DIR/lib/plugins/*" \
     org.jlab.io.utils.Bos2HipoEventBank \
     $*
