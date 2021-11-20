@@ -6,8 +6,12 @@
 package org.jlab.service.htcc;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
+import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.rec.htcc.HTCCReconstruction;
 import org.jlab.utils.groups.IndexedTable;
 import org.jlab.io.base.DataBank;
@@ -17,6 +21,7 @@ import org.jlab.io.base.DataEvent;
  * @author gavalian
  */
 public class HTCCReconstructionService extends ReconstructionEngine{
+    public static Logger LOGGER = Logger.getLogger(HTCCReconstructionService.class.getName());
 
     public HTCCReconstructionService(){
         super("HTCC","henkins","1.0");
@@ -41,7 +46,7 @@ public class HTCCReconstructionService extends ReconstructionEngine{
               reco.geometry   = this.getConstantsManager().getConstants(runNo, "/geometry/htcc/htcc");
               reco.processEvent(event);
         } catch (Exception e){
-            System.out.println("----> error with HTCC reconstruction..");
+            LOGGER.log(Level.WARNING,"----> error with HTCC reconstruction..");
             e.printStackTrace();
         }
 
