@@ -43,10 +43,8 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
         /**
          *
-         * @param sector the sector
          * @param layer the layer
-         * @param cid the cluster ID, an incremental integer corresponding to the
-         * cluster formed in the series of clusters
+         * @param index
          */
         public Cluster(int layer, int index) {
             this._Layer = layer;
@@ -64,7 +62,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
         /**
          *
-         * @param _Superlayer the layer of the cluster (1...6)
+         * @param _Layer
          */
         public void setLayer(int _Layer) {
             this._Layer = _Layer;
@@ -232,7 +230,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
 
         public static ArrayList<Cluster> findClusters(List<Hit> hits) {
-            ArrayList<Cluster> clusters = new ArrayList<Cluster>();
+            ArrayList<Cluster> clusters = new ArrayList<>();
             
             for(int ihit=0; ihit<hits.size(); ihit++) {
                 FittedHit hit = new FittedHit(hits.get(ihit));
@@ -261,8 +259,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
         /**
          * Sets energy-weighted parameters; these are the strip centroid
-         * (energy-weighted) value, the energy-weighted phi for Z detectors and the
-         * energy-weighted z for C detectorsting
+         * (energy-weighted) value
          * @param eweight set to true for energy weighting
          */
         public void calc_CentroidParams(boolean eweight) {

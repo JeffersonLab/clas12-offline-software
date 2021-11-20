@@ -37,6 +37,7 @@ public class RecoBankWriter {
     }
 
     /**
+     * @param event
      * @param cluslist the reconstructed list of fitted clusters in the event
      * @return clusters bank
      */
@@ -65,6 +66,7 @@ public class RecoBankWriter {
 
     /**
      *
+     * @param event
      * @param crosses the reconstructed list of crosses in the event
      * @return crosses bank
      */
@@ -127,10 +129,6 @@ public class RecoBankWriter {
                     bank.setFloat("dy",       row, (float) track.getDCTraj(layer).getLocalPosition().y());
                     bank.setFloat("dz",       row, (float) track.getDCTraj(layer).getLocalPosition().z());  
                 }
-//                else {
-//                    System.out.println(layer + " " + track.toString());
-//                    event.getBank("TimeBasedTrkg::Trajectory").show();
-//                }
                 if(track.getFMTTraj(layer)!=null) {
                     bank.setFloat("x",        row, (float) track.getFMTTraj(layer).getPosition().x());
                     bank.setFloat("y",        row, (float) track.getFMTTraj(layer).getPosition().y());

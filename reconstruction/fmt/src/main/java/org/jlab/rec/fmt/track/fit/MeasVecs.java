@@ -34,7 +34,7 @@ public class MeasVecs {
     }
 
     public void setMeasVecs(List<Cluster> clusters) {
-        measurements = new ArrayList<MeasVec>();
+        measurements = new ArrayList<>();
 
         for (int i = 0; i < clusters.size(); i++) {
             int l = clusters.get(i).getLayer()-1;

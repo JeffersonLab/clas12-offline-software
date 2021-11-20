@@ -22,16 +22,16 @@ import org.jlab.utils.groups.IndexedTable;
 // Class implements Comparable interface to allow for sorting a collection of hits by wire numbers
 public class Hit implements Comparable<Hit> {
 
-        private int _Layer;    	  // layer [1,...6]
-        private int _Strip;    	  // strip [1...1024]
+        private int _Layer;    	          // layer [1,...6]
+        private int _Strip;    	          // strip [1...1024]
 
-        private double _Energy;      	  // Reconstructed time, for now it is the gemc time
-        private double _Time;	  // Hit time
-        private double _Error;	  // Hit time
-        private Line3D _LocalSegment;  // The geometry segment representing the strip position in the local frame
-        private Line3D _GlobalSegment; // The geometry segment representing the strip position in the global frame
-        private int _Index;		  // Hit Id
-        private int _ClusterIndex = -1;
+        private double _Energy;      	  
+        private double _Time;	          
+        private double _Error;	          
+        private Line3D _LocalSegment  = null;  // The geometry segment representing the strip position in the local frame
+        private Line3D _GlobalSegment = null;  // The geometry segment representing the strip position in the global frame
+        private int _Index;		       // Hit index
+        private int _ClusterIndex = -1;        // Associated
 
         
         /**
@@ -48,12 +48,6 @@ public class Hit implements Comparable<Hit> {
             this._Energy = energy;
             this._Time  = time;
             this._Error = Constants.getPitch()/Math.sqrt(12);
-            
-//            double x0 = Constants.FVT_stripsX[layer - 1][strip - 1][0];
-//            double x1 = Constants.FVT_stripsX[layer - 1][strip - 1][1];
-//            double y0 = Constants.FVT_stripsY[layer - 1][strip - 1][0];
-//            double y1 = Constants.FVT_stripsY[layer - 1][strip - 1][1];
-//            double z  = Geometry.getLayerZ(layer - 1);
             this._GlobalSegment = Constants.getStrip(layer, strip);
             this._LocalSegment  = Constants.getLocalStrip(layer, strip);
         }
@@ -230,11 +224,11 @@ public class Hit implements Comparable<Hit> {
 
         public static List<Hit> fetchHits(DataEvent event, IndexedTable statuses) {
 
-            List<Hit> hits = new ArrayList<Hit>();
+            List<Hit> hits = new ArrayList<>();
 
             if (event.hasBank("FMT::adc")) {
                 DataBank bankDGTZ = event.getBank("FMT::adc");
-                int rows = bankDGTZ.rows();;
+                int rows = bankDGTZ.rows();
                 for (int i = 0; i < rows; i++) {
                     int sector  = bankDGTZ.getByte("sector", i);
                     int layer   = bankDGTZ.getByte("layer", i);
@@ -254,6 +248,7 @@ public class Hit implements Comparable<Hit> {
 
             return hits;
         }
+        
         /**
          *
          * @return print statement with hit information
