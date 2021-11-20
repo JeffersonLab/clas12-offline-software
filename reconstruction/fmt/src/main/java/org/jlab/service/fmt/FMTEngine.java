@@ -101,14 +101,14 @@ public class FMTEngine extends ReconstructionEngine {
 
         // === HITS ================================================================================
         List<Hit> hits = Hit.fetchHits(event, status);
-        if (hits.size() == 0) return true;
+        if (hits.isEmpty()) return true;
         
         // === CLUSTERS ============================================================================
         List<Cluster> clusters = Cluster.findClusters(hits);
         if(debug) for (int i = 0; i < clusters.size(); i++) System.out.println(clusters.get(i).toString());
 
         // === FITTED HITS =========================================================================
-        List<FittedHit> fittedhits =  new ArrayList<FittedHit>();
+        List<FittedHit> fittedhits =  new ArrayList<>();
         for (int i = 0; i < clusters.size(); i++) fittedhits.addAll(clusters.get(i)); 
         // set cluster seed indices
         for(int i=0; i<fittedhits.size(); i++) {
@@ -118,8 +118,8 @@ public class FMTEngine extends ReconstructionEngine {
         }
         
         // === DC TRACKS ===========================================================================
-        List<Track> tracks = Track.getDCTracks(event);
-        if(tracks.size()==0) return true;
+        List<Track> tracks = Track.getDCTracks(event, swimmer);
+        if(tracks.isEmpty()) return true;
         
         // === SEEDS =============================================================================
         for(int i=0; i<tracks.size(); i++) {
