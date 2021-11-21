@@ -6,30 +6,43 @@ package org.jlab.rec.dc.banks;
  */
 public class Banks {
     
-    private final String tdcBank  = "DC::tdc";
-    private final String docaBank = "DC::doca";
+    private final String tdcBank    = "DC::tdc";
+    private final String docaBank   = "DC::doca";
     
-    private String inHitsBank      = null;
-    private String inClustersBank  = null;
-    private String inTracksBank    = null;
-    private String inIdsBank       = null;
+    private final String aiBank     = "ai::tracks";
     
-    private String hitsBank        = null;
-    private String clustersBank    = null;
-    private String segmentsBank    = null;
-    private String crossesBank     = null;
-    private String tracksBank      = null;
-    private String idsBank         = null;
-    private String trajBank        = null;
-    private String covmatBank      = null;
-    
-    private final String aiBank    = "ai::tracks";
-    
-    private String recEventBank    = null;
-    private String recPartBank     = null;
-    private String recTrackBank    = null;
+    private final String inBankType = "HitBasedTrkg";
+    private String outBankType      = "HitBasedTrkg";
+    private String inPrefix         = "";
+    private String outPrefix        = "";
 
+    public Banks() {
+    }
 
+    public Banks(String bankType, String inputBankPrefix, String outputBankPrefix) {
+        this.init(bankType, inputBankPrefix, outputBankPrefix);
+    }
+    
+    public final void init(String outputBankType, String inputBankPrefix, String outputBankPrefix) {
+        this.outBankType = outputBankType;
+        this.inPrefix    = inputBankPrefix;
+        this.outPrefix   = outputBankPrefix;
+    }
+
+    public final void init(String outputBankPrefix) {
+        this.outPrefix   = outputBankPrefix;
+        if(!outBankType.equals("HitBasedTrkg")) {
+            if(outputBankPrefix.equals("TB")) 
+                this.inPrefix = "HB";
+            else 
+                this.inPrefix = outputBankPrefix;
+        }
+    }
+
+    public String getPrefix() {
+        return outPrefix;
+    }
+    
     public String getTdcBank() {
         return tdcBank;
     }
@@ -41,175 +54,88 @@ public class Banks {
     public String getAiBank() {
         return aiBank;
     }
-    private String setInputBank(BankType type, String item) {
-        String bank = type.getInputPrefix() + "::" + type.getInputSuffix() + item;
+    
+    private String getRecBank(String item) {
+        String bank = "RECHB";
+        if(!bank.endsWith(inPrefix)) bank = bank + this.inPrefix;
+        bank = bank + "::" + item;
         return bank;
     }
     
-    private String setOutputBank(BankType type, String item) {
-        String bank = type.getOutputPrefix() + "::" + type.getOutputSuffix() + item;
-        if(type == BankType.TB && item.equals("Trajectory"))
-            bank = type.getOutputPrefix() + "::" + item;
+    private String getInputBank(String item) {
+        String bank = this.inBankType + "::" + this.inPrefix + item;
         return bank;
     }
     
-    private String setRecBank(BankType type, String item) {
-        String bank = type.getRec()+ "::" + item;
+    private String getOutputBank(String item) {
+        String bank = this.outBankType + "::" + this.outPrefix + item;
+        if(outPrefix.equals("TB") && item.equals("Trajectory"))
+            bank = this.outBankType + "::" + item;
         return bank;
     }
     
-    public void setInputBanks(BankType type) {
-        this.inHitsBank     = this.setInputBank(type, "Hits");
-        this.inClustersBank = this.setInputBank(type, "Clusters");
-        this.inTracksBank   = this.setInputBank(type, "Tracks");
-        this.inIdsBank      = this.setInputBank(type, "HitTrkId");        
-    }
-    
-    public void setOutputBanks(BankType type) {
-        this.hitsBank     = this.setOutputBank(type, "Hits");
-        this.clustersBank = this.setOutputBank(type, "Clusters");
-        this.segmentsBank = this.setOutputBank(type, "Segments");
-        this.crossesBank  = this.setOutputBank(type, "Crosses");
-        this.tracksBank   = this.setOutputBank(type, "Tracks");
-        this.idsBank      = this.setOutputBank(type, "HitTrkId");
-        this.trajBank     = this.setOutputBank(type, "Trajectory");
-        this.covmatBank   = this.setOutputBank(type, "CovMat");
-    }
-    
-    public void setRecBanks(BankType type) {
-        this.recEventBank = this.setRecBank(type, "Event");
-        this.recPartBank  = this.setRecBank(type, "Particle");
-        this.recTrackBank = this.setRecBank(type, "Track");
-    }
-    
-    public String getHitsInputBank() {
-        return inHitsBank;
+    public String getInputHitsBank() {
+        return this.getInputBank("Hits");
     }
 
-    public String getClustersInputBank() {
-        return inClustersBank;
+    public String getInputClustersBank() {
+        return this.getInputBank("Clusters");
     }
 
-    public String getTracksInputBank() {
-        return inTracksBank;
+    public String getInputTracksBank() {
+        return this.getInputBank("Tracks");
     }
     
-    public String getIdsInputBank() {
-        return inIdsBank;
+    public String getInputIdsBank() {
+        return this.getInputBank("HitTrkId");
     }
     
     public String getHitsBank() {
-        return hitsBank;
+        return this.getOutputBank("Hits");
     }
 
     public String getClustersBank() {
-        return clustersBank;
+        return this.getOutputBank("Clusters");
     }
 
     public String getSegmentsBank() {
-        return segmentsBank;
+        return this.getOutputBank("Segments");
     }
 
     public String getCrossesBank() {
-        return crossesBank;
+        return this.getOutputBank("Crosses");
     }
 
     public String getTracksBank() {
-        return tracksBank;
+        return this.getOutputBank("Tracks");
     }
 
     public String getIdsBank() {
-        return idsBank;
+        return this.getOutputBank("HitTrkId");
     }
 
     public String getTrajBank() {
-        return trajBank;
+        return this.getOutputBank("Trajectory");
     }
 
     public String getCovmatBank() {
-        return covmatBank;
+        return this.getOutputBank("CovMat");
     }
     
     public String getRecEventBank() {
-        return recEventBank;
+        return this.getRecBank("Event");
     }
 
     public String getRecPartBank() {
-        return recPartBank;
+        return this.getRecBank("Particle");
     }
 
     public String getRecTrackBank() {
-        return recTrackBank;
+        return this.getRecBank("Track");
     }
 
-    
-    public enum BankType {
-        
-        UDF  ("UDF",  "",             "",   "",              "",   ""       ),
-        CR   ("CR",   "",             "",   "HitBasedTrkg",  "",   ""       ),
-        HB   ("HB",   "HitBasedTrkg", "",   "HitBasedTrkg",  "HB", ""       ),
-        HBAI ("HBAI", "HitBasedTrkg", "",   "HitBasedTrkg",  "AI", ""       ),
-        TB   ("TB",   "HitBasedTrkg", "HB", "TimeBasedTrkg", "TB", "RECHB"  ),
-        TBAI ("TBAI", "HitBasedTrkg", "AI", "TimeBasedTrkg", "AI", "RECHBAI");
-        
-        private String name;
-        private String inputBankPrefix;
-        private String inputBankSuffix;
-        private String outputBankPrefix;
-        private String outputBankSuffix;
-        private String recBankPrefix;
-                
-        BankType(){
-            name = "HB";
-            inputBankPrefix  = "HitBasedTrkg";
-            inputBankSuffix  = "";
-            outputBankPrefix = "HitBasedTrkg";
-            outputBankSuffix = "HB";
-            recBankPrefix    = "";
-        }
-
-        BankType(String typeName, 
-                 String inputPrefix,  String inputSuffix,
-                 String outputPrefix, String outputSuffix,
-                 String recPrefix){
-            name = typeName;
-            inputBankPrefix  = inputPrefix;
-            inputBankSuffix  = inputSuffix;
-            outputBankPrefix = outputPrefix;
-            outputBankSuffix = outputSuffix;
-            recBankPrefix    = recPrefix;
-        }
-        
-        public String getName() {
-            return name;
-        }
-        
-        public String getInputPrefix() {
-            return inputBankPrefix;
-        }
-        
-        public String getInputSuffix() {
-            return inputBankSuffix;
-        }
-        
-        public String getOutputPrefix() {
-            return outputBankPrefix;
-        }
-        
-        public String getOutputSuffix() {
-            return outputBankSuffix;
-        }
-        
-        public String getRec() {
-            return recBankPrefix;
-        }
-        
-        public static BankType getType(String name) {
-            name = name.trim();
-            for(BankType t: BankType.values())
-                if (t.getName().equalsIgnoreCase(name)) 
-                    return t;
-            return UDF;
-        }
+    @Override
+    public String toString() {
+        return this.inBankType + "::" + this.inPrefix + "/" + this.outBankType + "::" + this.outPrefix;
     }
 }

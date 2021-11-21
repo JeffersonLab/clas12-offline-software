@@ -53,6 +53,7 @@ public class Constants {
     private boolean USETIMETBETA = false;
     private boolean CHECKBETA = false;
     private int     T2D = 0;     
+    private boolean USEDOUBLETS = false;
     
     public static final String DOCARES      = "/calibration/dc/signal_generation/doca_resolution";
     public static final String TIME2DIST    = "/calibration/dc/time_to_distance/time2dist";
@@ -288,13 +289,23 @@ public class Constants {
         return T2D;
     }
 
+    public boolean USEDOUBLETS() {
+        return USEDOUBLETS;
+    }
+
+    public void setUSEDOUBLETS(boolean USEDOUBLETS) {
+        this.USEDOUBLETS = USEDOUBLETS;
+    }
+    
     public synchronized void initialize(String engine,
                                         String variation, 
                                         boolean wireDistortion,
                                         boolean useStartTime,
                                         boolean useTimeBeta,
                                         boolean useBetaCut,
-                                        int t2d, int nSuperLayer,
+                                        int t2d, 
+                                        boolean useDoublets,
+                                        int nSuperLayer,
                                         int selectedSector) {
         if (ConstantsLoaded) {
             printConfig(engine);
@@ -307,6 +318,7 @@ public class Constants {
             USETIMETBETA    = useTimeBeta;
             CHECKBETA       = useBetaCut;
             T2D             = t2d;
+            USEDOUBLETS     = useDoublets;
             NSUPERLAYERTRACKING = nSuperLayer;
             SECTORSELECT    = selectedSector;
 

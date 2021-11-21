@@ -11,7 +11,6 @@ import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.swimtools.Swimmer;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
-import org.jlab.rec.dc.banks.Banks.BankType;
 import org.jlab.rec.dc.banks.HitReader;
 import org.jlab.rec.dc.banks.RecoBankWriter;
 import org.jlab.rec.dc.cluster.ClusterCleanerUtilities;
@@ -32,7 +31,7 @@ import org.jlab.rec.dc.trajectory.RoadFinder;
 import org.jlab.rec.dc.trajectory.Road;
 
 /**
- * @author zigler
+ * @author ziegler
  * @since 08.09.2018 updated by gurjyan
  @deprecated 
  */
@@ -41,22 +40,18 @@ public class DCHBEngine extends DCEngine {
 
     public DCHBEngine() {
         super("DCHB");
-        this.setBankType("HB");
+        this.getBanks().init("HitBasedTrkg", "", "HB");
     }
 
 
     @Override
-    public void initBankNames() {
-        BankType type = this.getBankType();
-        
-        this.getBankNames().setOutputBanks(type);
-        
-        super.registerOutputBank(this.getBankNames().getHitsBank());
-        super.registerOutputBank(this.getBankNames().getClustersBank());
-        super.registerOutputBank(this.getBankNames().getSegmentsBank());
-        super.registerOutputBank(this.getBankNames().getCrossesBank());
-        super.registerOutputBank(this.getBankNames().getTracksBank());
-        super.registerOutputBank(this.getBankNames().getIdsBank());
+    public void setDropBanks() {
+        super.registerOutputBank(this.getBanks().getHitsBank());
+        super.registerOutputBank(this.getBanks().getClustersBank());
+        super.registerOutputBank(this.getBanks().getSegmentsBank());
+        super.registerOutputBank(this.getBanks().getCrossesBank());
+        super.registerOutputBank(this.getBanks().getTracksBank());
+        super.registerOutputBank(this.getBanks().getIdsBank());
     }
     
     @Override
@@ -91,9 +86,9 @@ public class DCHBEngine extends DCEngine {
         /* 6 */
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
         /* 7 */
-        RecoBankWriter rbc = new RecoBankWriter(this.getBankNames());
+        RecoBankWriter rbc = new RecoBankWriter(this.getBanks());
         /* 8 */
-        HitReader hitRead = new HitReader(this.getBankNames());
+        HitReader hitRead = new HitReader(this.getBanks());
         /* 9 */
         hitRead.fetch_DCHits(event,
                 noiseAnalysis,

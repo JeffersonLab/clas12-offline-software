@@ -8,7 +8,7 @@ public class DCTBEngineAI extends DCTBEngine {
     
     public DCTBEngineAI() {
         super("DCTAI");
-        this.setBankType("TBAI");
+        this.getBanks().init("TimeBasedTrkg", "AI", "AI");
     }
     
 }

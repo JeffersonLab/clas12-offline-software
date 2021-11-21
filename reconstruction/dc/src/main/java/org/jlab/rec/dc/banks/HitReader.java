@@ -242,11 +242,11 @@ public class HitReader {
     public Map<Integer, ArrayList<FittedHit>> read_Hits(DataEvent event, DCGeant4Factory dcDetector) {
         Map<Integer, ArrayList<FittedHit>> grpHits = new HashMap<Integer, ArrayList<FittedHit>>();
         
-        if (!event.hasBank(bankNames.getHitsInputBank())) {
+        if (!event.hasBank(bankNames.getInputHitsBank())) {
             return null;
         }
         
-        DataBank bank = event.getBank(bankNames.getHitsInputBank());
+        DataBank bank = event.getBank(bankNames.getInputHitsBank());
         int rows = bank.rows();
 
         List<FittedHit> hits = new ArrayList<>();
@@ -317,8 +317,8 @@ public class HitReader {
         0: this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
         1: this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d")
         */
-        String bankName    = bankNames.getHitsInputBank();
-        String pointName   = bankNames.getIdsInputBank();
+        String bankName    = bankNames.getInputHitsBank();
+        String pointName   = bankNames.getInputIdsBank();
         String recBankName = bankNames.getRecEventBank();
         if(Constants.DEBUG) {
                 System.out.println("Reading hb banks for "+ bankName + ", " + pointName + " " + recBankName);
@@ -345,6 +345,7 @@ public class HitReader {
         int rows = bank.rows();
 
         int[] id = new int[rows];
+        int[] status = new int[rows];
         int[] sector = new int[rows];
         int[] slayer = new int[rows];
         int[] layer = new int[rows];
@@ -360,6 +361,7 @@ public class HitReader {
 
         for (int i = 0; i < rows; i++) {
             id[i] = bank.getShort("id", i);
+            status[i] = bank.getByte("status", i);
             sector[i] = bank.getByte("sector", i);
             slayer[i] = bank.getByte("superlayer", i);
             layer[i] = bank.getByte("layer", i);
@@ -439,13 +441,13 @@ public class HitReader {
             hit.set_ClusFitDoca(trkDoca[i]);
             hit.set_TimeToDistance(event, 0.0, B[i], constants1, tde);
 
-            hit.set_QualityFac(0);
+            hit.set_QualityFac(status[i]);
             if (hit.get_Doca() > hit.get_CellSize()) {
                 hit.set_OutOfTimeFlag(true);
-                hit.set_QualityFac(2);
+                hit.set_QualityFac(3);
             }
             if (hit.get_Time() < 0)
-                hit.set_QualityFac(1);
+                hit.set_QualityFac(2);
             
             hit.set_DocaErr(hit.get_PosErr(event, B[i], constants0, constants1, tde));
             hit.set_AssociatedClusterID(clusterID[i]);
@@ -478,8 +480,8 @@ public class HitReader {
     //new way of fetching ai id'ed hits
     public void read_NNHits(DataEvent event, DCGeant4Factory DcDetector) {
         
-        if (!(event.hasBank(bankNames.getHitsInputBank()) 
-           && event.hasBank(bankNames.getClustersInputBank())
+        if (!(event.hasBank(bankNames.getInputHitsBank()) 
+           && event.hasBank(bankNames.getInputClustersBank())
            && event.hasBank(bankNames.getAiBank())  )) {
             _DCHits = new ArrayList<>();
             return;
@@ -487,7 +489,7 @@ public class HitReader {
         List<Hit> hits = new ArrayList<>();
         
         DataBank bankAI = event.getBank(bankNames.getAiBank());
-        DataBank bank = event.getBank(bankNames.getHitsInputBank());
+        DataBank bank = event.getBank(bankNames.getInputHitsBank());
 
         int[] Ids  ;     //  1-6 = cluster ids for slyrs 1 - 6
         double[] tPars ; // NN trk pars p, theta, phi ; last idx = track id;

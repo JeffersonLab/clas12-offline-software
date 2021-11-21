@@ -86,8 +86,8 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         Constants.getInstance().initialize("LayerEfficiency");
         Constants.getInstance().setT2D(1);
         this.LoadTables();
-        this.setBankType("TB");
-        this.initBankNames();
+        this.getBanks().init("TimBasedTrkg", "HB", "TB");
+        this.setDropBanks();
         
         maxDoca[0]=0.8;maxDoca[1]=0.9;maxDoca[2]=1.3;maxDoca[3]=1.4;maxDoca[4]=1.9;maxDoca[5]=2.0;
         //plots
@@ -153,11 +153,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
     }
 
     @Override
-    public void initBankNames() {
-        Banks.BankType type = this.getBankType();
-
-        this.getBankNames().setInputBanks(type);       
-        
+    public void setDropBanks() {
         super.registerOutputBank("TimeBasedTrkg::TBSegmentTrajectory");
     }
     
@@ -232,7 +228,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         List<Segment> segments = new ArrayList<Segment>();
         
         //instantiate bank writer
-        HitReader hitRead = new HitReader(this.getBankNames());
+        HitReader hitRead = new HitReader(this.getBanks());
 
             hitRead.read_HBHits(event, 
             super.getConstantsManager().getConstants(run, Constants.DOCARES),

@@ -7,7 +7,6 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.banks.Banks;
-import org.jlab.rec.dc.banks.Banks.BankType;
 import org.jlab.utils.groups.IndexedTable;
 
 public class DCEngine extends ReconstructionEngine {
@@ -21,10 +20,12 @@ public class DCEngine extends ReconstructionEngine {
     private boolean  useStartTime   = true;
     private boolean  useTimeBeta    = false;
     private boolean  useBetaCut     = false;
+    private boolean  useDoublets    = false;
     private int      t2d            = 0;
     private int      nSuperLayer    = 5;
     private String   geoVariation   = "default";
-    private BankType bankType       = BankType.HB;
+    private String   bankType       = "HitBasedTrkg";
+    private String   outBankPrefix  = null;
         
     public DCEngine(String name) {
         super(name,"ziegler","5.0");
@@ -64,6 +65,10 @@ public class DCEngine extends ReconstructionEngine {
                 t2d=1;
             }
         
+        //Recover hit doublets
+        if(this.getEngineConfigString("dcDoublets")!=null)       
+            useDoublets = Boolean.valueOf(this.getEngineConfigString("dcDoublets"));
+        
         //NSUPERLAYERTRACKING
         if(this.getEngineConfigString("dcFOOST")!=null)
             if(!Boolean.valueOf(this.getEngineConfigString("dcFOOST"))) {
@@ -71,9 +76,8 @@ public class DCEngine extends ReconstructionEngine {
             }    
                 
         //Set output bank names
-        if(this.getEngineConfigString("bankType")!=null) {
-            bankType = BankType.getType(this.getEngineConfigString("bankType"));
-            if(bankType == BankType.UDF) bankType = BankType.HB;
+        if(this.getEngineConfigString("outputBankPrefix")!=null) {
+            outBankPrefix = this.getEngineConfigString("outputBankPrefix");
         }
         
     }
@@ -110,33 +114,35 @@ public class DCEngine extends ReconstructionEngine {
                                            useStartTime, 
                                            useTimeBeta, 
                                            useBetaCut, 
-                                           t2d, 
+                                           t2d,
+                                           useDoublets,
                                            nSuperLayer, 
                                            selectedSector);
         this.LoadTables();
         this.initBanks();
+        this.setDropBanks();
         return true;
     }
 
     private void initBanks() {
-        this.initBankNames();
-        System.out.println("["+this.getName()+"] bank names set for " + this.bankType.getName());        
+        if(this.getBankPrefix()!=null) this.getBanks().init(outBankPrefix);
+        System.out.println("["+this.getName()+"] bank names set for " + this.getBanks().toString());        
     }
 
-    public void initBankNames() {
-        //Initialize bank names
-    }
-
-    public Banks getBankNames() {
+    public Banks getBanks() {
         return bankNames;
     }
     
-    public void setBankType(String type) {
-        this.bankType = BankType.getType(type);
+    public void setBankPrefix(String prefix) {
+        this.outBankPrefix = prefix;
     }
 
-    public BankType getBankType() {
-        return this.bankType;
+    public String getBankPrefix() {
+        return this.outBankPrefix;
+    }
+    
+    public void setDropBanks() {
+        
     }
     
     public int getRun(DataEvent event) {

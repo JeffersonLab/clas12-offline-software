@@ -7,7 +7,6 @@ import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.swimtools.Swimmer;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
-import org.jlab.rec.dc.banks.Banks.BankType;
 import org.jlab.rec.dc.banks.HitReader;
 import org.jlab.rec.dc.banks.RecoBankWriter;
 import org.jlab.rec.dc.cluster.FittedCluster;
@@ -29,23 +28,18 @@ public class DCHBPostClusterAI extends DCEngine {
 
     public DCHBPostClusterAI() {
         super("DCHAI");
-        this.setBankType("HBAI");
+        this.getBanks().init("HitBasedTrkg", "", "AI");
     }
     
     
     @Override
-    public void initBankNames() {
-        BankType type = this.getBankType();
-
-        this.getBankNames().setInputBanks(type);
-        this.getBankNames().setOutputBanks(type);
-
-        super.registerOutputBank(this.getBankNames().getHitsBank());
-        super.registerOutputBank(this.getBankNames().getClustersBank());
-        super.registerOutputBank(this.getBankNames().getSegmentsBank());
-        super.registerOutputBank(this.getBankNames().getCrossesBank());
-        super.registerOutputBank(this.getBankNames().getTracksBank());
-        super.registerOutputBank(this.getBankNames().getIdsBank());
+    public void setDropBanks() {
+        super.registerOutputBank(this.getBanks().getHitsBank());
+        super.registerOutputBank(this.getBanks().getClustersBank());
+        super.registerOutputBank(this.getBanks().getSegmentsBank());
+        super.registerOutputBank(this.getBanks().getCrossesBank());
+        super.registerOutputBank(this.getBanks().getTracksBank());
+        super.registerOutputBank(this.getBanks().getIdsBank());
     }
     
     @Override
@@ -58,8 +52,8 @@ public class DCHBPostClusterAI extends DCEngine {
         }
         
         /* IO */
-        HitReader reader      = new HitReader(this.getBankNames());
-        RecoBankWriter writer = new RecoBankWriter(this.getBankNames());
+        HitReader reader      = new HitReader(this.getBanks());
+        RecoBankWriter writer = new RecoBankWriter(this.getBanks());
         // get Field
         Swim dcSwim = new Swim();
         /* 2 */

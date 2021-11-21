@@ -800,7 +800,7 @@ public class TrackCandListFinder {
                 // for hits with no timing information, check if there is a neighbor hit 
                 // in the same layer and copy time info from there
                 // currently disabled to avoid fake doublets
-                if((h.get_AssociatedHBTrackID()==-1 || h.getTFlight()==0) && false) {
+                if((h.get_AssociatedHBTrackID()==-1 || h.getTFlight()==0) && Constants.getInstance().USEDOUBLETS()) {
                     for(FittedHit o :seg) {
                         if(h.get_Id()!=o.get_Id() && 
                            o.get_AssociatedHBTrackID()>0 && 
@@ -811,6 +811,7 @@ public class TrackCandListFinder {
                             h.setB(o.getB());
                             h.setTProp(o.getTProp());
                             h.setTFlight(o.getTFlight());
+                            h.set_QualityFac(1);
                         }
                     }
                 }

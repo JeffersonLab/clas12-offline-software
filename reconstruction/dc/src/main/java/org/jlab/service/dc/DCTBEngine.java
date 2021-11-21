@@ -11,7 +11,6 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
-import org.jlab.rec.dc.banks.Banks.BankType;
 import org.jlab.rec.dc.banks.HitReader;
 import org.jlab.rec.dc.banks.RecoBankWriter;
 import org.jlab.rec.dc.cluster.ClusterCleanerUtilities;
@@ -41,27 +40,21 @@ public class DCTBEngine extends DCEngine {
         super(trking);
         tde = new TimeToDistanceEstimator();
     }
-    public DCTBEngine() { // if not specified use conventional tracking
+    public DCTBEngine() {
         super("DCTB");
-        this.setBankType("TB");
+        this.getBanks().init("TimeBasedTrkg", "HB", "TB");
         tde = new TimeToDistanceEstimator();
     }
     
     @Override
-    public void initBankNames() {
-        BankType type = this.getBankType();
-
-        this.getBankNames().setInputBanks(type);       
-        this.getBankNames().setOutputBanks(type);
-        this.getBankNames().setRecBanks(type);
-        
-        super.registerOutputBank(this.getBankNames().getHitsBank());
-        super.registerOutputBank(this.getBankNames().getClustersBank());
-        super.registerOutputBank(this.getBankNames().getSegmentsBank());
-        super.registerOutputBank(this.getBankNames().getCrossesBank());
-        super.registerOutputBank(this.getBankNames().getTracksBank());
-        super.registerOutputBank(this.getBankNames().getCovmatBank());
-        super.registerOutputBank(this.getBankNames().getTrajBank());
+    public void setDropBanks() {
+        super.registerOutputBank(this.getBanks().getHitsBank());
+        super.registerOutputBank(this.getBanks().getClustersBank());
+        super.registerOutputBank(this.getBanks().getSegmentsBank());
+        super.registerOutputBank(this.getBanks().getCrossesBank());
+        super.registerOutputBank(this.getBanks().getTracksBank());
+        super.registerOutputBank(this.getBanks().getCovmatBank());
+        super.registerOutputBank(this.getBanks().getTrajBank());
     }
     
     @Override
@@ -72,7 +65,7 @@ public class DCTBEngine extends DCEngine {
         
         double T_Start = 0;
         if(Constants.getInstance().isUSETSTART() == true) {
-            String recBankName = this.getBankNames().getRecEventBank();
+            String recBankName = this.getBanks().getRecEventBank();
             if(event.hasBank(recBankName)==true) {
                 T_Start = event.getBank(recBankName).getFloat("startTime", 0);
                 if(T_Start<0) { 
@@ -102,9 +95,9 @@ public class DCTBEngine extends DCEngine {
         if(Constants.DEBUG)
             System.out.println("TB AI "+ this.getName());
         //instantiate bank writer
-        RecoBankWriter rbc = new RecoBankWriter(this.getBankNames());
+        RecoBankWriter rbc = new RecoBankWriter(this.getBanks());
 
-        HitReader hitRead = new HitReader(this.getBankNames()); //vz; modified reader to read regular or ai hits
+        HitReader hitRead = new HitReader(this.getBanks()); //vz; modified reader to read regular or ai hits
         hitRead.read_HBHits(event, 
             this.getConstantsManager().getConstants(run, Constants.DOCARES),
             this.getConstantsManager().getConstants(run, Constants.TIME2DIST),
@@ -167,11 +160,11 @@ public class DCTBEngine extends DCEngine {
         
         //
         // also need Track bank
-        if (event.hasBank(this.getBankNames().getTracksInputBank()) == false) { 
+        if (event.hasBank(this.getBanks().getInputTracksBank()) == false) { 
             return true;
         }
         
-        DataBank trkbank = event.getBank(this.getBankNames().getTracksInputBank());
+        DataBank trkbank = event.getBank(this.getBanks().getInputTracksBank());
         //DataBank trkcovbank = event.getBank("TimeBasedTrkg::TBCovMat");
         int trkrows = trkbank.rows();
         //if(trkbank.rows()!=trkcovbank.rows()) {

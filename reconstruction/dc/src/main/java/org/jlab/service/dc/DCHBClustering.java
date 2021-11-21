@@ -8,7 +8,6 @@ import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
-import org.jlab.rec.dc.banks.Banks.BankType;
 import org.jlab.rec.dc.banks.HitReader;
 import org.jlab.rec.dc.banks.RecoBankWriter;
 import org.jlab.rec.dc.cluster.ClusterCleanerUtilities;
@@ -27,16 +26,12 @@ public class DCHBClustering extends DCEngine {
 
     public DCHBClustering() {
         super("DCCR");
-        this.setBankType("CR");
     }
     
     @Override
-    public void initBankNames() {
-
-        this.getBankNames().setOutputBanks(BankType.CR);
-        
-        super.registerOutputBank(this.getBankNames().getHitsBank());
-        super.registerOutputBank(this.getBankNames().getClustersBank());
+    public void setDropBanks() {        
+        super.registerOutputBank(this.getBanks().getHitsBank());
+        super.registerOutputBank(this.getBanks().getClustersBank());
     }
      
     
@@ -68,9 +63,9 @@ public class DCHBClustering extends DCEngine {
         /* 6 */
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
         /* 7 */
-        RecoBankWriter rbc = new RecoBankWriter(this.getBankNames());
+        RecoBankWriter rbc = new RecoBankWriter(this.getBanks());
         /* 8 */
-        HitReader hitRead = new HitReader(this.getBankNames());
+        HitReader hitRead = new HitReader(this.getBanks());
         /* 9 */
         hitRead.fetch_DCHits(event,
                 noiseAnalysis,

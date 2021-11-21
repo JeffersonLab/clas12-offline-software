@@ -32,7 +32,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     private double _TimeResidual = 0;	// cluster line  to the wire position time-resid
     private int _LeftRightAmb;		// Left-Right Ambiguity value	-1 --> y-fit <0 --> to the left of the wire ==> y = y-_leftRight*TimeToDist
 
-    private double _QualityFac;
+    private int _QualityFac;
     private int _TrkgStatus = -1;	//  TrkgStatusFlag factor (-1: no fit; 0: hit-based trking fit; 1: time-based trking fit)
     private double _ClusFitDoca = -1;
     private double _TrkFitDoca = -1;
@@ -273,8 +273,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * @param _QualityFac is a quality factor representative of the quality of
      * the fit to the hit
      */
-    public void set_QualityFac(double _QualityFac) {
-        this._QualityFac = _QualityFac;
+    public void set_QualityFac(int _QualityFac) {
+        this._QualityFac |= 1 << (_QualityFac-1);
     }
 
     /**

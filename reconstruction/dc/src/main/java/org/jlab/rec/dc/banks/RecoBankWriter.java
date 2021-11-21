@@ -74,7 +74,7 @@ public class RecoBankWriter {
         }
 
         bank.setShort("id", i-rejCnt, (short) hitlist.get(i).get_Id());
-        bank.setShort("status", i-rejCnt, (short) 0);
+        bank.setShort("status", i-rejCnt, (short) hitlist.get(i).get_QualityFac());
         bank.setByte("superlayer", i-rejCnt, (byte) hitlist.get(i).get_Superlayer());
         bank.setByte("layer", i-rejCnt, (byte) hitlist.get(i).get_Layer());
         bank.setByte("sector", i-rejCnt, (byte) hitlist.get(i).get_Sector());
