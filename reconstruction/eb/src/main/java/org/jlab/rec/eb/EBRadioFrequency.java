@@ -117,16 +117,17 @@ public class EBRadioFrequency {
                 }
             }
             if(debugMode>0) bank.show();
-            if(!event.hasBank("RUN::rf")) {
-                DataBank bankOut = event.createBank("RUN::rf",this.rfSignals.size());
-                for(int i =0; i< this.rfSignals.size(); i++) {
-                    bankOut.setShort("id",   i, (short) this.rfSignals.get(i).getId());
-                    bankOut.setFloat("time", i, (float) this.rfSignals.get(i).getTime());
-                    if(debugMode>0) this.rfSignals.get(i).print();
-                }
-                event.appendBank(bankOut);
-                if(debugMode>0) bankOut.show();
+            // always rewrite RF bank
+            if(event.hasBank("RUN::rf")) event.removeBank("RUN::rf");
+            DataBank bankOut = event.createBank("RUN::rf",this.rfSignals.size());
+            for(int i =0; i< this.rfSignals.size(); i++) {
+                bankOut.setShort("id",   i, (short) this.rfSignals.get(i).getId());
+                bankOut.setFloat("time", i, (float) this.rfSignals.get(i).getTime());
+                if(debugMode>0) this.rfSignals.get(i).print();
             }
+            event.appendBank(bankOut);
+            if(debugMode>0) bankOut.show();
+            
             int index = this.hasSignal(rfId);
             if(index>=0) rfTime= this.rfSignals.get(index).getTime();
             
