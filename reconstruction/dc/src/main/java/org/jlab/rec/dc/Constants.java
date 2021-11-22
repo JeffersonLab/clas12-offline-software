@@ -354,6 +354,7 @@ public class Constants {
         System.out.println("["+engine+"] run with with new tBeta configuration = " + USETIMETBETA);
         System.out.println("["+engine+"] run with with Beta cut = " + CHECKBETA);
         System.out.println("["+engine+"] run with time to distance function set to exponential/polynomial (0/1) = " + T2D);
+        System.out.println("["+engine+"] run with with hit doublets recovery = " + USEDOUBLETS);
         System.out.println("["+engine+"] run with with Five-out-of-six-superlayer-trkg = " + NSUPERLAYERTRACKING);        
     }
     
