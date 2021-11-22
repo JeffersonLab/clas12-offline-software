@@ -674,6 +674,8 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             surface.setSector(this.get_Sector());
             surface.setError(this.get_Resolution()*this.get_Resolution()); 
             surface.setl_over_X0(this.get(0).get_Strip().getToverX0());
+            surface.setZ_over_A_times_l(this.get(0).get_Strip().getZoverA()*this.get(0).get_Strip().getMatT());
+            surface.setThickness(this.get(0).get_Strip().getMatT());
         }
         else {
             if(this.get_Type()==BMTType.C) {
@@ -695,6 +697,8 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             surface.setLayer(layerID);
             surface.setSector(this.get_Sector());
             surface.setl_over_X0(this.get(0).get_Strip().getToverX0());
+            surface.setZ_over_A_times_l(this.get(0).get_Strip().getZoverA()*this.get(0).get_Strip().getMatT());
+            surface.setThickness(this.get(0).get_Strip().getMatT());
         }
         return surface;
     }

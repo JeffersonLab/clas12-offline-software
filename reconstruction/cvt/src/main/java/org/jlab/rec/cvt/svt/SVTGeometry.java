@@ -75,6 +75,13 @@ public class SVTGeometry {
         return SVTConstants.SILICONTHK/SVTConstants.SILICONRADLEN;
     }
     
+    public static double getMaterialThickness() {
+        return SVTConstants.SILICONTHK;
+    }
+    
+    public static double getZoverA() {
+        return SVTConstants.ZOVERA;
+    }
     public Line3D getStrip(int layer, int sector, int strip) {
         Line3d line = this._svtStripFactory.getShiftedStrip(layer-1, sector-1, strip-1);
         return new Line3D(line.origin().x,line.origin().y,line.origin().z,

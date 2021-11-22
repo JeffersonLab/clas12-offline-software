@@ -214,6 +214,8 @@ public class HitReader {
                 SvtStrip.set_Normal(geo.getNormal(layer[i], sector[i])); 
                 if(layer[i]%2==1) {
                     SvtStrip.setToverX0(SVTGeometry.getToverX0());
+                    SvtStrip.setZoverA(SVTGeometry.getZoverA());
+                    SvtStrip.setMatT(SVTGeometry.getMaterialThickness());
                 }
                 else {
                     SvtStrip.setToverX0(0);

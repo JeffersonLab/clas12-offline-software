@@ -272,7 +272,7 @@ public class BMTGeometry {
     }
     
     /**
-     * Return thickness of the drift gap 
+     * Return material thickness in units of X0
      * @param layer
      * @return thickness in units of radiation lengths  
      */
@@ -283,7 +283,29 @@ public class BMTGeometry {
        return BMTConstants.get_T_OVER_X0()[layer-1];
      }
     
+    /**
+     * Return material thickness
+     * @param layer
+     * @return thickness in mm
+     */
+    public double getMaterialThickness(int layer) {
+       if(!(layer>=1 && layer<=BMTConstants.NLAYERS)) 
+            throw new IllegalArgumentException("Error: invalid layer="+layer);
+       
+       return BMTConstants.get_Material_T()[layer-1];
+     }
     
+    /**
+     * Return effective Z/A
+     * @param layer
+     * @return Z over A 
+     */
+    public double getZoverA(int layer) {
+       if(!(layer>=1 && layer<=BMTConstants.NLAYERS)) 
+            throw new IllegalArgumentException("Error: invalid layer="+layer);
+       
+       return BMTConstants.getEFF_Z_OVER_A()[layer-1];
+     }    
     
     /**
      * Return offset of the selected tile, identified by layer and sector

@@ -39,6 +39,8 @@ public class Strip {
     private Line3D _Module;
     private Vector3D _Normal;
     private double _ToverX0;
+    private double _ZoverA;
+    private double _Tmat;
     private Transformation3D toLocal;
     private Transformation3D toGlobal;
     
@@ -104,6 +106,22 @@ public class Strip {
 
     public void setToverX0(double _ToverX0) {
         this._ToverX0 = _ToverX0;
+    }
+
+    public double getMatT() {
+        return _Tmat;
+    }
+
+    public void setMatT(double t) {
+        this._Tmat = t;
+    }
+
+    public double getZoverA() {
+        return _ZoverA;
+    }
+
+    public void setZoverA(double value) {
+        this._ZoverA = value;
     }
 
     public Transformation3D toLocal() {
@@ -213,6 +231,8 @@ public class Strip {
         this.set_Tile(geo.getTileSurface(layer, sector));
         this.set_Pitch(geo.getPitch(layer, this.get_Strip()));
         this.setToverX0(geo.getToverX0(layer));
+        this.setZoverA(geo.getZoverA(layer));
+        this.setMatT(geo.getMaterialThickness(layer));
         
         if (BMTGeometry.getDetectorType(layer) == BMTType.C) { // C-detectors
             // set z
