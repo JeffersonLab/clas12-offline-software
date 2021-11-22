@@ -361,7 +361,7 @@ public class HitReader {
 
         for (int i = 0; i < rows; i++) {
             id[i] = bank.getShort("id", i);
-            status[i] = bank.getByte("status", i);
+            status[i] = bank.getShort("status", i);
             sector[i] = bank.getByte("sector", i);
             slayer[i] = bank.getByte("superlayer", i);
             layer[i] = bank.getByte("layer", i);

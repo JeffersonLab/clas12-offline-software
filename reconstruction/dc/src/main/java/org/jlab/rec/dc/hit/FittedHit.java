@@ -264,7 +264,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * @return a quality factor representative of the quality of the fit to the
      * hit
      */
-    public double get_QualityFac() {
+    public int get_QualityFac() {
         return _QualityFac;
     }
 
