@@ -20,6 +20,7 @@ import org.jlab.utils.CLASResources;
 import sun.rmi.runtime.Log;
 
 public class DCEngine extends ReconstructionEngine {
+
     Logger LOGGER = Logger.getLogger(ReconstructionEngine.class.getName());
 
     //String FieldsConfig="";

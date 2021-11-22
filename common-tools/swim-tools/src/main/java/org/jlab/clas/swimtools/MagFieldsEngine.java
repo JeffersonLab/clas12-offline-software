@@ -14,6 +14,7 @@ import org.jlab.utils.CLASResources;
 import org.jlab.utils.groups.IndexedTable;
 
 public class MagFieldsEngine extends ReconstructionEngine {
+
     public static Logger LOGGER = Logger.getLogger(MagFieldsEngine.class.getName());
 
     private String solShift = null;

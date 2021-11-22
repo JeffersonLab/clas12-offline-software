@@ -11,6 +11,7 @@ import org.jlab.geom.prim.Shape3D;
 import org.jlab.geom.prim.Triangle3D;
 
 public class Constants {
+
     public static Logger LOGGER = Logger.getLogger(Constants.class.getName());
     
     /**

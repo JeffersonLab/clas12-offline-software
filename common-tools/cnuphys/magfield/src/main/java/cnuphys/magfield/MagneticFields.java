@@ -870,19 +870,19 @@ public class MagneticFields {
 			}
 		}
 
-		LOGGER.log(Level.FINE, "===========================================");
-		LOGGER.log(Level.FINE, "  Initializing Magnetic Fields");
-		LOGGER.log(Level.FINE, "  Version " + VERSION);
-		LOGGER.log(Level.FINE, "  Contact: david.heddle@cnu.edu");
-		LOGGER.log(Level.FINE, "");
+		LOGGER.log(Level.INFO, "===========================================");
+		LOGGER.log(Level.INFO, "  Initializing Magnetic Fields");
+		LOGGER.log(Level.INFO, "  Version " + VERSION);
+		LOGGER.log(Level.INFO, "  Contact: david.heddle@cnu.edu");
+		LOGGER.log(Level.INFO, "");
 
 		if (torusFile != null) {
-			LOGGER.log(Level.FINE, "  TORUS: [" + torusPath + "]");
+			LOGGER.log(Level.INFO, "  TORUS: [" + torusPath + "]");
 			_torus = readTorus(torusPath);
 		}
 
 		if (solenoidFile != null) {
-			LOGGER.log(Level.FINE, "  SOLENOID: [" + solenoidPath + "]");
+			LOGGER.log(Level.INFO, "  SOLENOID: [" + solenoidPath + "]");
 			// load the solenoid
 			_solenoid = readSolenoid(solenoidPath, isTransverseSolenoidFile(solenoidFile));
 		}
@@ -954,7 +954,7 @@ public class MagneticFields {
 			}
 		}
 
-		LOGGER.log(Level.INFO,"WARNING Magnetic Field Package did not initialize.");
+		LOGGER.log(Level.SEVERE,"WARNING Magnetic Field Package did not initialize.");
 	}
 
 	private boolean initializeMagneticFields(File magdir) {

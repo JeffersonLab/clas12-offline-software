@@ -150,7 +150,7 @@ public class EngineProcessor {
                 }
                 this.processorEngines.put(name, engine);
             } else {
-                LOGGER.log(Level.WARNING,">>>> ERROR: class is not a reconstruction engine : " + clazz);
+                LOGGER.log(Level.SEVERE,">>>> ERROR: class is not a reconstruction engine : " + clazz);
             }
 
         } catch (ClassNotFoundException ex) {
@@ -177,7 +177,7 @@ public class EngineProcessor {
                 engine.init();
                 this.processorEngines.put(name, engine);
             } else {
-                LOGGER.log(Level.WARNING,">>>> ERROR: class is not a reconstruction engine : " + clazz);
+                LOGGER.log(Level.SEVERE,">>>> ERROR: class is not a reconstruction engine : " + clazz);
             }
 
         } catch (ClassNotFoundException ex) {
@@ -202,7 +202,7 @@ public class EngineProcessor {
                 engine.init();
                 this.processorEngines.put(engine.getName(), engine);
             } else {
-                LOGGER.log(Level.WARNING, ">>>> ERROR: class is not a reconstruction engine : " + clazz);
+                LOGGER.log(Level.SEVERE, ">>>> ERROR: class is not a reconstruction engine : " + clazz);
             }
 
         } catch (ClassNotFoundException ex) {
@@ -244,7 +244,7 @@ public class EngineProcessor {
                 }
                 engine.getValue().processDataEvent(event);
             } catch (Exception e){
-                LOGGER.log(Level.WARNING,"[Exception] >>>>> engine : " + engine.getKey() + "\n\n");
+                LOGGER.log(Level.SEVERE,"[Exception] >>>>> engine : " + engine.getKey() + "\n\n");
                 e.printStackTrace();
             }
         }

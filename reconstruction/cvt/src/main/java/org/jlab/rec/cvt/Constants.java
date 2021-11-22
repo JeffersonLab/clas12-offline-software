@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Constants {
+
     public static Logger LOGGER = Logger.getLogger(Constants.class.getName());
 
     /**

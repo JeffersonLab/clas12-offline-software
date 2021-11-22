@@ -68,13 +68,13 @@ public class RCDBProvider {
             provider.connect();
         }
         catch (Exception e) {
-            LOGGER.log(Level.WARNING,"",e);
+            LOGGER.log(Level.SEVERE,"",e);
         }
 
         if(provider.isConnected()==true){
             LOGGER.log(Level.INFO,"[RCDB] --->  database connection  : success");
         } else {
-            LOGGER.log(Level.WARNING,"[RCDB] --->  database connection  : failed");
+            LOGGER.log(Level.SEVERE,"[RCDB] --->  database connection  : failed");
         }
 
     }

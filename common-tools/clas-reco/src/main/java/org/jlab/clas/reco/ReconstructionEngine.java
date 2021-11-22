@@ -34,6 +34,7 @@ import org.json.JSONObject;
  * @author gavalian
  */
 public abstract class ReconstructionEngine implements Engine {
+
     Logger LOGGER = Logger.getLogger(ReconstructionEngine.class.getName());
 
     public static final String CONFIG_BANK_NAME = "COAT::config";
@@ -180,7 +181,7 @@ public abstract class ReconstructionEngine implements Engine {
                 LOGGER.log(Level.INFO,"[CONFIGURE]["+ this.getName() +"] ---->  Setting timestamp : " + timestamp);
                 if(timestamp.length()>2) this.setTimeStamp(timestamp);
             } else {
-                LOGGER.log(Level.INFO,"[CONFIGURE][" + this.getName() +"] *** WARNING *** ---> configuration string is too short ("
+                LOGGER.log(Level.WARNING,"[CONFIGURE][" + this.getName() +"] *** WARNING *** ---> configuration string is too short ("
                  + this.engineConfiguration + ")");
             }
         } catch (Exception e){

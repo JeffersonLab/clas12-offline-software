@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.io.hipo;
 
 import java.util.List;
@@ -26,6 +21,7 @@ import org.jlab.jnp.hipo4.io.HipoWriterSorted;
  * @author gavalian
  */
 public class HipoDataSync implements DataSync {
+
     public static Logger LOGGER = Logger.getLogger(HipoDataSync.class.getName());
     
     HipoWriterSorted writer = null;

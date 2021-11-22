@@ -11,8 +11,8 @@ import org.jlab.utils.groups.IndexedTable;
 
 
 public class TableLoader {
-    public static Logger LOGGER = Logger.getLogger(TableLoader.class.getName());
 
+    public static Logger LOGGER = Logger.getLogger(TableLoader.class.getName());
 
     public TableLoader() {
             // TODO Auto-generated constructor stub

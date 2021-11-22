@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package org.jlab.io.evio;
 
 import java.io.File;
@@ -25,6 +19,7 @@ import org.jlab.utils.TablePrintout;
  * @author gavalian
  */
 public class EvioDataDictionary implements DataDictionary {
+
 	Logger LOGGER = Logger.getLogger(EvioDataDictionary.class.getName());
 	private HashMap<String, EvioDataDescriptor> descriptors = new HashMap<String, EvioDataDescriptor>();
 
@@ -70,7 +65,7 @@ public class EvioDataDictionary implements DataDictionary {
 	public final void initWithEnv(String envname, String relative_path) {
 		String ENVDIR = System.getenv(envname);
 		if (ENVDIR == null) {
-			LOGGER.log(Level.INFO,"---> Warning the CLAS12DIR environment is not defined.");
+			LOGGER.log(Level.SEVERE,"---> Warning the CLAS12DIR environment is not defined.");
 			return;
 		}
 		String dict_path = ENVDIR + "/" + relative_path;
@@ -93,7 +88,7 @@ public class EvioDataDictionary implements DataDictionary {
 		File dict_dir = new File(dirname);
 
 		if (dict_dir.exists() == false) {
-			LOGGER.log(Level.WARNING,"[EvioDataDictionary]---> Directory does not exist.....");
+			LOGGER.log(Level.SEVERE,"[EvioDataDictionary]---> Directory does not exist.....");
 			return;
 		}
 
@@ -169,7 +164,7 @@ public class EvioDataDictionary implements DataDictionary {
 
 	public DataBank createBank(String name, int rows) {
 		if (descriptors.containsKey(name) == false) {
-			LOGGER.log(Level.WARNING,"[EvioDataDictionary]:: ERROR ---> no descriptor with name = " + name + " is found");
+			LOGGER.log(Level.SEVERE,"[EvioDataDictionary]:: ERROR ---> no descriptor with name = " + name + " is found");
 		}
 		EvioDataDescriptor desc = descriptors.get(name);
 		EvioDataBank bank = new EvioDataBank(desc);

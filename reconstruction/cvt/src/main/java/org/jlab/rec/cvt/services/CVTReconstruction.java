@@ -49,6 +49,7 @@ import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
  *
  */
 public class CVTReconstruction extends ReconstructionEngine {
+
     public static Logger LOGGER = Logger.getLogger(CVTReconstruction.class.getName());
     org.jlab.rec.cvt.svt.Geometry SVTGeom;
     org.jlab.rec.cvt.bmt.Geometry BMTGeom;

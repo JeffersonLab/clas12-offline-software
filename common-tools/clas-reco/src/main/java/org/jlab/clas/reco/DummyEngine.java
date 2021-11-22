@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.reco;
 
 import java.util.ArrayList;
@@ -20,6 +15,7 @@ import org.jlab.io.evio.EvioDataEvent;
  * @author gavalian
  */
 public class DummyEngine extends ReconstructionEngine {
+
     public static Logger LOGGER = Logger.getLogger(DummyEngine.class.getName());
 
     public DummyEngine(){

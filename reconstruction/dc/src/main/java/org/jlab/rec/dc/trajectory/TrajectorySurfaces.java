@@ -28,6 +28,7 @@ import java.util.logging.Logger;
  *
  */
 public class TrajectorySurfaces {
+
     public static Logger LOGGER = Logger.getLogger(TrajectorySurfaces.class.getName());
 
     private List<ArrayList<Surface>> _DetectorPlanes = new ArrayList<ArrayList<Surface>>();

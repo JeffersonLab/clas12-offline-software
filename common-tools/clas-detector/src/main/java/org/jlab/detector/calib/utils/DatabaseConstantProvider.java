@@ -27,6 +27,7 @@ import org.jlab.utils.groups.IndexedTableViewer;
  * @author gavalian
  */
 public class DatabaseConstantProvider implements ConstantProvider {
+
     Logger LOGGER = Logger.getLogger(DatabaseConstantProvider.class.getName());
     
     private final HashMap<String,String[]> constantContainer = new HashMap<String,String[]>();
@@ -166,7 +167,7 @@ public class DatabaseConstantProvider implements ConstantProvider {
         try {
             databaseDate = format.parse(timestamp);
         } catch (ParseException ex) {
-            LOGGER.log(Level.WARNING,"\n\n ***** TIMESTAMP ERROR ***** error parsing timestamp : " + timestamp);
+            LOGGER.log(Level.SEVERE,"\n\n ***** TIMESTAMP ERROR ***** error parsing timestamp : " + timestamp);
             databaseDate = new Date();
             LOGGER.log(Level.WARNING," ***** TIMESTAMP WARNING ***** setting date to : " + databaseDate);
 
@@ -289,7 +290,7 @@ public class DatabaseConstantProvider implements ConstantProvider {
                 constantContainer.put(str.toString(), values);
             }
         } catch (Exception e){
-            LOGGER.log(Level.WARNING,"[DB LOAD] --->  error loading table : " + table_name, e);
+            LOGGER.log(Level.SEVERE,"[DB LOAD] --->  error loading table : " + table_name, e);
             this.loadTimeErrors++;
         }
     }

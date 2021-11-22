@@ -10,6 +10,7 @@ import cnuphys.snr.NoiseReductionParameters;
  * Constants used in the reconstruction
  */
 public class Constants {
+
     public static Logger LOGGER = Logger.getLogger(Constants.class.getName());
 
     private static boolean ConstantsLoaded = false;

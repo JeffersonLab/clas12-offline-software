@@ -24,6 +24,7 @@ import org.jlab.service.ec.ECEngine;
  *@author baltzell
  */
 public class EBEngine extends ReconstructionEngine {
+
     public static Logger LOGGER = Logger.getLogger(EBEngine.class.getName());
 
     boolean usePOCA = false;

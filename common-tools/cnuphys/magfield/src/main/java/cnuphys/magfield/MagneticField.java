@@ -136,12 +136,12 @@ public abstract class MagneticField implements IMagField {
 	 * @param scale the scale factor
 	 */
 	public final void setScaleFactor(double scale) {
-		LOGGER.log(Level.FINE, "CHANGING SCALE from " + _scaleFactor + " to " + scale + "  for " + getBaseFileName());
+		LOGGER.log(Level.INFO, "CHANGING SCALE from " + _scaleFactor + " to " + scale + "  for " + getBaseFileName());
 		if (Math.abs(scale - _scaleFactor) > TINY) {
 			_scaleFactor = scale;
 			MagneticFields.getInstance().changedScale(this);
 		} else {
-			LOGGER.log(Level.WARNING, "Ignored inconsequential scale change for " + getBaseFileName());
+			LOGGER.log(Level.FINE, "Ignored inconsequential scale change for " + getBaseFileName());
 		}
 	}
 
@@ -437,7 +437,7 @@ public abstract class MagneticField implements IMagField {
 			// TODO handle swapping if necessary
 			swap = (magicnum != MAGICNUMBER);
 			if (swap) {
-				LOGGER.log(Level.WARNING, "byte swapping required but not yet implemented.");
+				LOGGER.log(Level.SEVERE, "byte swapping required but not yet implemented.");
 				dos.close();
 				return;
 			}
@@ -541,7 +541,7 @@ public abstract class MagneticField implements IMagField {
 			float val = field.get(i);
 			return val;
 		} catch (IndexOutOfBoundsException e) {
-			LOGGER.log(Level.WARNING, "error in mag field index1 = " + index);
+			LOGGER.log(Level.SEVERE, "error in mag field index1 = " + index);
 			e.printStackTrace();
 			return 0;
 		}

@@ -61,10 +61,10 @@ public final class Swimmer {
 
 	static {
 		setCLASTolerance(_eps);
-		LOGGER.log(Level.FINEST,"\n***********************************");
-		LOGGER.log(Level.FINEST,"* Swimmer package version: " + VERSION);
-		LOGGER.log(Level.FINEST,"* contact: david.heddle@cnu.edu");
-		LOGGER.log(Level.FINEST,"***********************************\n");
+		LOGGER.log(Level.FINE,"\n***********************************");
+		LOGGER.log(Level.FINE,"* Swimmer package version: " + VERSION);
+		LOGGER.log(Level.FINE,"* contact: david.heddle@cnu.edu");
+		LOGGER.log(Level.FINE,"***********************************\n");
 	}
 
 

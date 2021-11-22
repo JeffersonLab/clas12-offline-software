@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.service.htcc;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +16,7 @@ import org.jlab.io.base.DataEvent;
  * @author gavalian
  */
 public class HTCCReconstructionService extends ReconstructionEngine{
+
     public static Logger LOGGER = Logger.getLogger(HTCCReconstructionService.class.getName());
 
     public HTCCReconstructionService(){
@@ -46,7 +42,7 @@ public class HTCCReconstructionService extends ReconstructionEngine{
               reco.geometry   = this.getConstantsManager().getConstants(runNo, "/geometry/htcc/htcc");
               reco.processEvent(event);
         } catch (Exception e){
-            LOGGER.log(Level.WARNING,"----> error with HTCC reconstruction..");
+            LOGGER.log(Level.SEVERE,"----> error with HTCC reconstruction..");
             e.printStackTrace();
         }
 

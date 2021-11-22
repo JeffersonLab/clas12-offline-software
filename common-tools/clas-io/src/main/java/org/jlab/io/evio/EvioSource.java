@@ -15,6 +15,7 @@ import org.jlab.io.base.DataSource;
 import org.jlab.io.base.DataSourceType;
 
 public class EvioSource implements DataSource {
+
 	Logger LOGGER = Logger.getLogger(EvioSource.class.getName());
 	private ByteOrder storeByteOrder = ByteOrder.BIG_ENDIAN;
 	private EvioCompactReader evioReader = null;

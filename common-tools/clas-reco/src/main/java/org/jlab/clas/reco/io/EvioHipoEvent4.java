@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.reco.io;
 
 import java.util.ArrayList;
@@ -31,8 +26,8 @@ import org.jlab.utils.system.ClasUtilsFile;
  * @author gavalian
  */
 public class EvioHipoEvent4 {
+
     private static Logger LOGGER = Logger.getLogger(EvioHipoEvent4.class.getName());
-    
     
     private SchemaFactory        schemaFactory = new SchemaFactory();
 

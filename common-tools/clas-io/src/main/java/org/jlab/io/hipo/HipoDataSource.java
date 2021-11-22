@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.io.hipo;
 
 import java.io.File;
@@ -26,8 +21,8 @@ import org.jlab.jnp.hipo4.io.HipoReader;
  * @author gavalian
  */
 public class HipoDataSource implements DataSource {
-    public static Logger LOGGER = Logger.getLogger(HipoDataSource.class.getName());
 
+    public static Logger LOGGER = Logger.getLogger(HipoDataSource.class.getName());
 
     HipoReader  reader = null;
     EvioDataDictionary  dictionary = new EvioDataDictionary();

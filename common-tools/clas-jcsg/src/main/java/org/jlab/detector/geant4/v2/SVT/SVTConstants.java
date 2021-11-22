@@ -33,6 +33,7 @@ import eu.mihosoft.vrl.v3d.Transform;
  * @version 1.1.1
  */
 public class SVTConstants {
+
 	public static Logger LOGGER = Logger.getLogger(SVTConstants.class.getName());
 
 	private static String ccdbPath = "/geometry/cvt/svt/";

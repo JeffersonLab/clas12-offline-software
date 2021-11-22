@@ -13,6 +13,7 @@ import java.util.logging.Logger;
  * @author S. Joosten
  */
 public class LTCCEngine extends ReconstructionEngine {
+
     public static Logger LOGGER = Logger.getLogger(LTCCEngine.class.getName());
 
     private static final boolean DEBUG = false;

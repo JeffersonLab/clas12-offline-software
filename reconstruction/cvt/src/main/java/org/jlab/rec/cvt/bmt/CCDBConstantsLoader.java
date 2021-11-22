@@ -11,6 +11,7 @@ import java.util.logging.Logger;
  *
  */
 public class CCDBConstantsLoader {
+
     public static Logger LOGGER = Logger.getLogger(CCDBConstantsLoader.class.getName());
 
     public CCDBConstantsLoader() {
