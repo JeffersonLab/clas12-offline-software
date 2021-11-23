@@ -46,8 +46,8 @@ public class CrossMaker {
         
         for(Cluster cl : bmt_Zlayrclus) { 
             if(cl.get_Layer()==Constants.getBMTLayerExcld()
-                    && cl.get_Phi0()>Constants.getBMTPhiZRangeExcld()[0][0]
-                    && cl.get_Phi0()<=Constants.getBMTPhiZRangeExcld()[0][1]) {
+                    && cl.get_Phi0()>Math.toRadians(Constants.getBMTPhiZRangeExcld()[0][0])
+                    && cl.get_Phi0()<=Math.toRadians(Constants.getBMTPhiZRangeExcld()[0][1]) ) {
                 rbmt_Zlayrclus.add(cl); 
             }
         }
