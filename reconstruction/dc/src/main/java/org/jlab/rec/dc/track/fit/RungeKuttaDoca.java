@@ -6,7 +6,6 @@
 package org.jlab.rec.dc.track.fit;
 
 //import Jama.Matrix;
-import org.jlab.jnp.matrix.*;
 import java.util.ArrayList;
 import org.jlab.clas.swimtools.Swim;
 /**
@@ -27,14 +26,14 @@ public class RungeKuttaDoca {
     private final ArrayList<Double> jk4;
     
     public RungeKuttaDoca() {
-        this.k1 = new ArrayList<Double>(4);
-        this.k2 = new ArrayList<Double>(4);
-        this.k3 = new ArrayList<Double>(4);
-        this.k4 = new ArrayList<Double>(4);
-        this.jk1 = new ArrayList<Double>(12);
-        this.jk2 = new ArrayList<Double>(12);
-        this.jk3 = new ArrayList<Double>(12);
-        this.jk4 = new ArrayList<Double>(12);
+        this.k1 = new ArrayList<>(4);
+        this.k2 = new ArrayList<>(4);
+        this.k3 = new ArrayList<>(4);
+        this.k4 = new ArrayList<>(4);
+        this.jk1 = new ArrayList<>(12);
+        this.jk2 = new ArrayList<>(12);
+        this.jk3 = new ArrayList<>(12);
+        this.jk4 = new ArrayList<>(12);
         
     }
     

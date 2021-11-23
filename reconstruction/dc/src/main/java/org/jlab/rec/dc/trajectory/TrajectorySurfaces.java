@@ -7,7 +7,6 @@ import java.util.List;
 import org.jlab.detector.base.DetectorLayer;
 import org.jlab.detector.base.DetectorType;
 
-import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.geom.base.Detector;
@@ -98,7 +97,7 @@ public class TrajectorySurfaces {
             d = P.dot(n);
             this._DetectorPlanes.get(is).add(new Surface(DetectorType.FTOF, DetectorLayer.FTOF1A, -d, -n.x(), -n.y(), -n.z()));
             //LTCC
-            this._DetectorPlanes.get(is).add(new Surface(DetectorType.LTCC,1, Constants.ltccPlane, -n.x(), -n.y(), -n.z())); 
+            this._DetectorPlanes.get(is).add(new Surface(DetectorType.LTCC,1, Constants.LTCCPLANE, -n.x(), -n.y(), -n.z())); 
             //PCAL
             int superLayer = (int) ((DetectorLayer.PCAL_V-1)/3);
             int localLayer = DetectorLayer.PCAL_Z+1;

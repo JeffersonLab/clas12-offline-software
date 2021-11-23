@@ -23,10 +23,11 @@ public class CrossMaker {
     /**
      *
      * @param allSegments the list of segments in the event
+     * @param DcDetector
      * @return an list of crosses obtained from the input segments
      */
     public List<Cross> find_Crosses(List<Segment> allSegments, DCGeant4Factory DcDetector) {
-        List<Cross> crosses = new ArrayList<Cross>();
+        List<Cross> crosses = new ArrayList<>();
         
         int rid = 0;  // rsegment id
 

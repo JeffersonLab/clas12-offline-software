@@ -73,8 +73,8 @@ public class Constants {
     public Detector           fmtDetector  = null;
     public TrajectorySurfaces tSurf        = null;
     
-    public static final double htccRadius=175;
-    public static final double ltccPlane=653.09;
+    public static final double HTCCRADIUS=175;
+    public static final double LTCCPLANE=653.09;
     
     // other CLAS12 parameters
     public static final  int NSECT  = 6;
@@ -84,7 +84,7 @@ public class Constants {
     public static final  int NREG   = 3;
     public static final  int NWIRE  = 114; //1 guard + 112 sense + 1 guard
 
-    public static final double z_extrap_to_LowFieldReg = 592.; // z in cm in the region outside of DC-R3 [used for extrapolation of the track to the outer detectors]
+    public static final double LOWFIELDZ = 592.; // z in cm in the region outside of DC-R3 [used for extrapolation of the track to the outer detectors]
     public double[] wpdist = new double[6];//= {0.386160,0.404220,0.621906,0.658597,0.935140,0.977982};
 
     // CONSTANTS USED IN RECONSTRUCTION

@@ -32,7 +32,7 @@ public class CrossListFinder  {
      * @param dccrosslist the list of crosses in the event
      * @return the list of crosses determined to be consistent with belonging to a track in the DC
      */
-    private List<BaseCand> trkCnds = new ArrayList<BaseCand>();
+    private final List<BaseCand> trkCnds = new ArrayList<BaseCand>();
     ClusterFitter cf = new ClusterFitter();
     
     public CrossList candCrossLists(DataEvent event,
@@ -43,9 +43,9 @@ public class CrossListFinder  {
         trkCnds.clear();
 
         if(dccrosslist.size()>0) {
-            List<Cross> dccrosslistRg1 = new ArrayList<Cross>();
-            List<Cross> dccrosslistRg2 = new ArrayList<Cross>();
-            List<Cross> dccrosslistRg3 = new ArrayList<Cross>();
+            List<Cross> dccrosslistRg1 = new ArrayList<>();
+            List<Cross> dccrosslistRg2 = new ArrayList<>();
+            List<Cross> dccrosslistRg3 = new ArrayList<>();
 
             for(Cross dc : dccrosslist) {
                     if(dc.get_Region()==1) {
@@ -235,10 +235,10 @@ public class CrossListFinder  {
     }
 
     public List<List<Cross>> get_CrossesInSectors(List<Cross> crosses) {
-        List<List<Cross>> CrossesBySectors = new ArrayList<List<Cross>>();
+        List<List<Cross>> CrossesBySectors = new ArrayList<>();
 
         for (int s =0; s<6; s++) {
-            CrossesBySectors.add(s, new ArrayList<Cross>());
+            CrossesBySectors.add(s, new ArrayList<>());
         }
         for(Cross cross : crosses) { 
             //if(cross.isPseudoCross==false)
@@ -249,11 +249,13 @@ public class CrossListFinder  {
 
     /**
      * 
+     * @param event
      * @param c cross
      * @param tab table of constants
      * @param DcDetector detector geometry
      * @param tde  time-to-distance utility
      * Updates the B-field information of the hits in the cross segments
+     * @param swimmer
      */
     public void updateBFittedHits(DataEvent event, Cross c, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde, Swim swimmer) {
         for(int i =0; i<c.get_Segment1().size(); i++) {

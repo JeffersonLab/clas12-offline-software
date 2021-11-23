@@ -25,7 +25,6 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.task.DataSourceProcessorPane;
 import org.jlab.io.task.IDataEventListener;
-import org.jlab.rec.dc.banks.Banks;
 import org.jlab.rec.dc.banks.HitReader;
 import org.jlab.rec.dc.cluster.ClusterCleanerUtilities;
 import org.jlab.rec.dc.cluster.ClusterFinder;
@@ -117,8 +116,8 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         can12.divide(2, 3);
         // create histograms
         for(int si =0; si<6; si++) {
-            LayerEffs.add(new HashMap<Coordinate, H1F>());
-            LayerEffsTrkD.add(new HashMap<Coordinate, H1F>());
+            LayerEffs.add(new HashMap<>());
+            LayerEffsTrkD.add(new HashMap<>());
             for(int i =0; i<6; i++) {
                 LayerEffs.get(si).put(new Coordinate(i),
                                 new H1F("Sector-"+si+" layer efficiencies" + (i + 1), "superlayer" + (i + 1), 6, 0.5, 6.5));
@@ -205,14 +204,12 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
             if (getClass() != obj.getClass())
                     return false;
             Coordinate other = (Coordinate) obj;
-            if (!Arrays.equals(size, other.size))
-                    return false;
-            return true;
+            return Arrays.equals(size, other.size);
 	}
     }
 
-    private ArrayList<HashMap<Coordinate, H1F>> LayerEffs = new ArrayList<HashMap<Coordinate, H1F>>();
-    private ArrayList<HashMap<Coordinate, H1F>> LayerEffsTrkD = new ArrayList<HashMap<Coordinate, H1F>>();
+    private final ArrayList<HashMap<Coordinate, H1F>> LayerEffs = new ArrayList<HashMap<Coordinate, H1F>>();
+    private final ArrayList<HashMap<Coordinate, H1F>> LayerEffsTrkD = new ArrayList<HashMap<Coordinate, H1F>>();
     
     @Override
     public boolean processDataEvent(DataEvent event) {
@@ -224,8 +221,8 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         ClusterFitter cf = new ClusterFitter();
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
 
-        List<FittedCluster> clusters = new ArrayList<FittedCluster>();
-        List<Segment> segments = new ArrayList<Segment>();
+        List<FittedCluster> clusters = new ArrayList<>();
+        List<Segment> segments = new ArrayList<>();
         
         //instantiate bank writer
         HitReader hitRead = new HitReader(this.getBanks());
@@ -238,7 +235,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         //hitRead.read_TBHits(event, 
         //    super.getConstantsManager().getConstants(newRun, Constants.DOCARES),
         //    super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST), tde, Constants.getT0(), Constants.getT0Err());
-        List<FittedHit> hits = new ArrayList<FittedHit>();
+        List<FittedHit> hits = new ArrayList<>();
         //I) get the hits
         if(hitRead.get_HBHits()==null)
             return true;

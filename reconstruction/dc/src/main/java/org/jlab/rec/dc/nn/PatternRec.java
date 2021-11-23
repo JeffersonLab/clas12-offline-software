@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.rec.dc.nn;
 
 import java.util.ArrayList;
@@ -32,11 +27,11 @@ import org.jlab.rec.dc.trajectory.RoadFinder;
  */
 public class PatternRec {
     
-    private ClusterFinder clf = new ClusterFinder();
-    private ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
-    private ClusterFitter cf = new ClusterFitter();
-    private CrossMaker crf = new CrossMaker();
-    private RoadFinder rf = new RoadFinder();      
+    private final ClusterFinder clf = new ClusterFinder();
+    private final ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
+    private final ClusterFitter cf = new ClusterFitter();
+    private final CrossMaker crf = new CrossMaker();
+    private final RoadFinder rf = new RoadFinder();      
     
     public PatternRec() {
         rf.fitPassingCut = 1000;
@@ -45,13 +40,13 @@ public class PatternRec {
     public CrossList RecomposeCrossList(List<Segment> clusters,
             DCGeant4Factory DcDetector) {
         CrossList crossList = new CrossList();
-        Map<Integer, ArrayList<Cross>> grpCrs = new HashMap<Integer, ArrayList<Cross>>();
-        Map<Integer, ArrayList<Segment>> grpCls = new HashMap<Integer, ArrayList<Segment>>();
+        Map<Integer, ArrayList<Cross>> grpCrs = new HashMap<>();
+        Map<Integer, ArrayList<Segment>> grpCls = new HashMap<>();
         
         for(Segment cls : clusters) {
             int index = cls.get(0).get_AssociatedHBTrackID();
             if(grpCls.get(index)==null) { // if the list not yet created make it
-                    grpCls.put(index, new ArrayList<Segment>()); 
+                    grpCls.put(index, new ArrayList<>()); 
                     grpCls.get(index).add(cls); // append cluster
             } else {
                 grpCls.get(index).add(cls); // append 
@@ -111,9 +106,9 @@ public class PatternRec {
             Map.Entry<Integer, ArrayList<Cross>> entry = citr.next(); 
             if(entry.getValue().size()==3)
                 crossList.add(entry.getValue()); 
-                if(Constants.DEBUG==true)
-                    for(Cross c : entry.getValue()) System.out.println("AI"+c.printInfo()+
-                        c.get_Segment1().printInfo()+c.get_Segment2().printInfo());
+            if(Constants.DEBUG==true)
+                for(Cross c : entry.getValue()) 
+                    System.out.println("AI"+c.printInfo()+c.get_Segment1().printInfo()+c.get_Segment2().printInfo());
         }
         return crossList;
     }
@@ -121,14 +116,14 @@ public class PatternRec {
     public List<Segment> RecomposeSegments(List<Hit> fhits, 
             DCGeant4Factory DcDetector) {
             
-        List<Segment> fclusters = new ArrayList<Segment>();
-        Map<Integer, ArrayList<Hit>> grpHits = new HashMap<Integer, ArrayList<Hit>>();
+        List<Segment> fclusters = new ArrayList<>();
+        Map<Integer, ArrayList<Hit>> grpHits = new HashMap<>();
         
         for (Hit hit : fhits) {
             if (hit.NNTrkId > 0) {
                 int index = hit.NNTrkId;
                 if(grpHits.get(index)==null) { // if the list not yet created make it
-                    grpHits.put(index, new ArrayList<Hit>()); 
+                    grpHits.put(index, new ArrayList<>()); 
                     grpHits.get(index).add(hit); // append hit
                 } else {
                     grpHits.get(index).add(hit); // append hit

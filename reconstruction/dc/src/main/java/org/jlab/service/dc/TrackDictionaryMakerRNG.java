@@ -173,8 +173,8 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         Point3D rotatedP = this.rotateToTiltedCoordSys(sector, new Point3D(swimVal[3], swimVal[4], swimVal[5]));
         Point3D rotatedX = this.rotateToTiltedCoordSys(sector, new Point3D(swimVal[0], swimVal[1], swimVal[2]));
 //System.out.println(" sector in TrackDictionary "+sector);
-        List<Integer> Wi = new ArrayList<Integer>();
-        List<Integer> Di = new ArrayList<Integer>();
+        List<Integer> Wi = new ArrayList<>();
+        List<Integer> Di = new ArrayList<>();
         int index=0;
         DCTDC DCtdc = new DCTDC();
         for (int sl = 0; sl < 6; sl++) {
@@ -288,17 +288,17 @@ public class TrackDictionaryMakerRNG extends DCEngine{
             this.entry = "";
             for (int sl = 0; sl < 6; sl++) {
                 sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                this.swimtoLayer(sector, 0, sl, Wl1, dcDetector, sw);        
+                TrackDictionaryMakerRNG.swimtoLayer(sector, 0, sl, Wl1, dcDetector, sw);        
                 sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                this.swimtoLayer(sector, 1, sl, Wl2, dcDetector, sw);        
+                TrackDictionaryMakerRNG.swimtoLayer(sector, 1, sl, Wl2, dcDetector, sw);        
                 sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                this.swimtoLayer(sector, 2, sl, Wl3, dcDetector, sw);        
+                TrackDictionaryMakerRNG.swimtoLayer(sector, 2, sl, Wl3, dcDetector, sw);        
                 sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                this.swimtoLayer(sector, 3, sl, Wl4, dcDetector, sw);        
+                TrackDictionaryMakerRNG.swimtoLayer(sector, 3, sl, Wl4, dcDetector, sw);        
                 sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                this.swimtoLayer(sector, 4, sl, Wl5, dcDetector, sw);        
+                TrackDictionaryMakerRNG.swimtoLayer(sector, 4, sl, Wl5, dcDetector, sw);        
                 sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                this.swimtoLayer(sector, 5, sl, Wl6, dcDetector, sw);
+                TrackDictionaryMakerRNG.swimtoLayer(sector, 5, sl, Wl6, dcDetector, sw);
 
                             /*
                             double[] trk = sw.SwimToPlane(dcDetector.getSector(0).getSuperlayer(sl).getLayer(2).getComponent(0).getMidpoint().z());
@@ -363,7 +363,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                 wireArray[0+6*j]=Wl1.get(j); wireArray[1+6*j]=Wl2.get(j); wireArray[2+6*j]=Wl3.get(j); wireArray[3+6*j]=Wl4.get(j); wireArray[4+6*j]=Wl5.get(j); wireArray[5+6*j]=Wl6.get(j); 
             }
             if (count(Wl3) >=3) {
-                ArrayList<Integer> wires = new ArrayList<Integer>();
+                ArrayList<Integer> wires = new ArrayList<>();
                 for (int k = 0; k < 6; k++) {
                     for (int l=0; l<1; l++) {
                         if(wireArray[k*6 +l] > 0) {
@@ -479,7 +479,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
 
                         sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), 1);
 
-                        List<Integer> W = new ArrayList<Integer>();
+                        List<Integer> W = new ArrayList<>();
 
                         for (int sl = 0; sl < 6; sl++) {
 

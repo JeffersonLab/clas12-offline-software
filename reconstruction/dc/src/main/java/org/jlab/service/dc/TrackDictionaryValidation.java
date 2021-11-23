@@ -30,8 +30,8 @@ import org.jlab.utils.options.OptionParser;
 public class TrackDictionaryValidation {
 
     private Map<ArrayList<Byte>, Particle>   dictionary = null;
-    private IndexedList<DataGroup>           dataGroups = new IndexedList<DataGroup>(1);
-    private EmbeddedCanvasTabbed             canvas     = new EmbeddedCanvasTabbed("Dictionary", "Matched Roads", "Matched Tracks", "Efficiency");
+    private final IndexedList<DataGroup>     dataGroups = new IndexedList<DataGroup>(1);
+    private final EmbeddedCanvasTabbed       canvas     = new EmbeddedCanvasTabbed("Dictionary", "Matched Roads", "Matched Tracks", "Efficiency");
             
     public TrackDictionaryValidation(){
 
@@ -159,7 +159,7 @@ public class TrackDictionaryValidation {
                                 wireArray[(superlayer - 1) * 6 + layer - 1] = wire;
                             }
                         }
-                        ArrayList<Integer> wires = new ArrayList<Integer>();
+                        ArrayList<Integer> wires = new ArrayList<>();
                         for (int k = 0; k < 6; k++) {
                             for (int l=0; l<6; l++) {
                                 // use first non zero wire in superlayer
@@ -237,7 +237,7 @@ public class TrackDictionaryValidation {
                                             if(phiCC<0) phiCC +=360;
                                             double thetaCC = ((double) Math.round(thetaCheren*100))/100.;
                                             ArrayList<int[]> htccPMTs        = htccPMT(thetaCC, phiCC);
-                                            ArrayList<int[]> htccPMTsMatched = new ArrayList<int[]>();
+                                            ArrayList<int[]> htccPMTsMatched = new ArrayList<>();
 //                                            System.out.println(thetaCheren + " " + thetaCC + " " + phiCheren + " " + phiCC + " " + htccPMTs.size());
                                             //The special case of 4 hits, where we need to check if the hits were not in fact only 3
                                             for(int iPMT = 0; iPMT < htccPMTs.size(); iPMT++) {
@@ -526,7 +526,7 @@ public class TrackDictionaryValidation {
         double TableTheta3[] = {11.25, 18.75, 26.25};
         double TableTheta4[] = {13.75, 21.25, 28.75};
 
-        ArrayList<int[]> htccPMTS = new ArrayList<int[]>();
+        ArrayList<int[]> htccPMTS = new ArrayList<>();
 
         double p1, p2, ph_new;
 
@@ -903,7 +903,7 @@ public class TrackDictionaryValidation {
                         }
 
                         if(nSL3<3) continue; //ignore tracks with less than 3 hits in SL3 as in dictionary maker
-                        ArrayList<Byte> wires = new ArrayList<Byte>();
+                        ArrayList<Byte> wires = new ArrayList<>();
                         for (int k = 0; k < 6; k++) {
                             for (int l=0; l<1; l++) {
                                 // use first non zero wire in superlayer
@@ -1086,7 +1086,7 @@ public class TrackDictionaryValidation {
                 nLines++;
                 if(nLines % 1000000 == 0) System.out.println("Read " + nLines + " roads");
                 String[] lineValues = line.split("\t");
-                ArrayList<Byte> wires = new ArrayList<Byte>();
+                ArrayList<Byte> wires = new ArrayList<>();
                 if(lineValues.length < 51) {
                     System.out.println("WARNING: dictionary line " + nLines + " incomplete: skipping");
                 }
@@ -1255,7 +1255,7 @@ public class TrackDictionaryValidation {
         parser.addOption("-dupli"    , "1", "remove duplicates in dictionary creation, 0=false, 1=true");
         parser.parse(args);
         
-        List<String> arguments = new ArrayList<String>();
+        List<String> arguments = new ArrayList<>();
         for(String item : args){ arguments.add(item); }
         
         String dictionaryFileName = null;

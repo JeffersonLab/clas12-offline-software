@@ -56,7 +56,7 @@ public class TrackDictionaryMerger {
                 this.nlines++;
                 String[] lineValues;
                 lineValues  = line.split("\t");
-                ArrayList<Byte> wires = new ArrayList<Byte>();
+                ArrayList<Byte> wires = new ArrayList<>();
                 if(lineValues.length < 51) {
                     System.out.println("WARNING: dictionary line " + nLines + " incomplete: skipping");
                 }
@@ -121,7 +121,6 @@ public class TrackDictionaryMerger {
             e.printStackTrace();
         } 
         catch (IOException e) {
-            e.printStackTrace();
         } 
    }
     

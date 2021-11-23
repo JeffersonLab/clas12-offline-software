@@ -143,8 +143,8 @@ public class TrackDictionaryMaker extends DCEngine{
         Point3D rotatedX = this.rotateToTiltedCoordSys(new Point3D(swimVal[0], swimVal[1], swimVal[2]));
         int sector = this.getSector(swimVal[0], swimVal[1], swimVal[2]);
 //System.out.println(" sector in TrackDictionary "+sector);
-        List<Integer> Wi = new ArrayList<Integer>();
-        List<Integer> Di = new ArrayList<Integer>();
+        List<Integer> Wi = new ArrayList<>();
+        List<Integer> Di = new ArrayList<>();
         int index=0;
         DCTDC DCtdc = new DCTDC();
         for (int sl = 0; sl < 6; sl++) {
@@ -188,12 +188,12 @@ public class TrackDictionaryMaker extends DCEngine{
         public List<Integer> TDC = new ArrayList<Integer>();
         
     }
-    private List<Integer> Wl1 = new ArrayList<Integer>();
-    private List<Integer> Wl2 = new ArrayList<Integer>();
-    private List<Integer> Wl3 = new ArrayList<Integer>();
-    private List<Integer> Wl4 = new ArrayList<Integer>();
-    private List<Integer> Wl5 = new ArrayList<Integer>();
-    private List<Integer> Wl6 = new ArrayList<Integer>();
+    private List<Integer> Wl1 = new ArrayList<>();
+    private List<Integer> Wl2 = new ArrayList<>();
+    private List<Integer> Wl3 = new ArrayList<>();
+    private List<Integer> Wl4 = new ArrayList<>();
+    private List<Integer> Wl5 = new ArrayList<>();
+    private List<Integer> Wl6 = new ArrayList<>();
     private String entry;
     
     public void ProcessTracks(PrintWriter pw,DCGeant4Factory dcDetector, FTOFGeant4Factory ftofDetector, Detector ecalDetector, Swim sw, int q, float pBinSize, float PhiMin, float PhiMax, float Vz) {
@@ -261,17 +261,17 @@ public class TrackDictionaryMaker extends DCEngine{
                         this.entry = "";
                         for (int sl = 0; sl < 6; sl++) {
                             sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                            this.swimtoLayer(sector, 0, sl, Wl1, dcDetector, sw);        
+                            TrackDictionaryMaker.swimtoLayer(sector, 0, sl, Wl1, dcDetector, sw);        
                             sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                            this.swimtoLayer(sector, 1, sl, Wl2, dcDetector, sw);        
+                            TrackDictionaryMaker.swimtoLayer(sector, 1, sl, Wl2, dcDetector, sw);        
                             sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                            this.swimtoLayer(sector, 2, sl, Wl3, dcDetector, sw);        
+                            TrackDictionaryMaker.swimtoLayer(sector, 2, sl, Wl3, dcDetector, sw);        
                             sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                            this.swimtoLayer(sector, 3, sl, Wl4, dcDetector, sw);        
+                            TrackDictionaryMaker.swimtoLayer(sector, 3, sl, Wl4, dcDetector, sw);        
                             sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                            this.swimtoLayer(sector, 4, sl, Wl5, dcDetector, sw);        
+                            TrackDictionaryMaker.swimtoLayer(sector, 4, sl, Wl5, dcDetector, sw);        
                             sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                            this.swimtoLayer(sector, 5, sl, Wl6, dcDetector, sw);
+                            TrackDictionaryMaker.swimtoLayer(sector, 5, sl, Wl6, dcDetector, sw);
 
                             /*
                             double[] trk = sw.SwimToPlane(dcDetector.getSector(0).getSuperlayer(sl).getLayer(2).getComponent(0).getMidpoint().z());
@@ -431,7 +431,7 @@ public class TrackDictionaryMaker extends DCEngine{
 
                         sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), 1);
 
-                        List<Integer> W = new ArrayList<Integer>();
+                        List<Integer> W = new ArrayList<>();
 
                         for (int sl = 0; sl < 6; sl++) {
 

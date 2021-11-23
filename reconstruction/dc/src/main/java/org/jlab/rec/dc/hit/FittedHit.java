@@ -73,6 +73,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * @param layer (1...6)
      * @param wire (1...112)
      * @param TDC
+     * @param id
      */
     public FittedHit(int sector, int superlayer, int layer, int wire,
             int TDC, int id) {
@@ -101,6 +102,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      *
      * @return the ID
      */
+    @Override
     public int get_Id() {
         return _Id;
     }
@@ -110,6 +112,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      *
      * @param _Id
      */
+    @Override
     public void set_Id(int _Id) {
         this._Id = _Id;
     }										//		Hit Id
@@ -143,7 +146,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      *
      * @param layerValue layer number from 1 to 6
      */
-    public void set_lX(double layerValue) {
+    public final void set_lX(double layerValue) {
         this._lX = layerValue;
     }
 
@@ -162,13 +165,18 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * @param wire wire number from 1 to 112 sets the center of the cell as a
      * function of wire number in the local superlayer coordinate system.
      */
-    public void set_lY(int layer, int wire) {
+    public final void set_lY(int layer, int wire) {
         double y = this.calcLocY(layer, wire);
         this._lY = y;
     }
 
     /**
      *
+     * @param event
+     * @param B
+     * @param constants0
+     * @param constants1
+     * @param tde
      * @return The approximate uncertainty on the hit position using the inverse
      * of the gemc smearing function
      */
@@ -345,6 +353,11 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     }
     /**
      * sets the calculated distance (in cm) from the time (in ns)
+     * @param event
+     * @param trkAngle
+     * @param B
+     * @param tab
+     * @param tde
      */
     public void set_TimeToDistance(DataEvent event, double trkAngle, double B, IndexedTable tab,TimeToDistanceEstimator tde) {     
         
@@ -506,7 +519,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     
     /**
      * A method to update the hit position information after the fit to the
-     * local coord.sys. wire positions
+     * local coord.sys.wire positions
+     * @param DcDetector
      */
     public void updateHitPosition(DCGeant4Factory DcDetector) {
         if(this.get_Z()==0)
@@ -517,6 +531,12 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     /**
      * A method to update the hit position information after the fit to the wire
      * positions employing hit-based tracking algorithms has been performed.
+     * @param event
+     * @param trkAngle
+     * @param B
+     * @param tab
+     * @param DcDetector
+     * @param tde
      */
     public void updateHitPositionWithTime(DataEvent event, double trkAngle, double B, 
             IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
@@ -700,6 +720,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * 
      * @return string with hit output 
      */
+    @Override
     public String printInfo() {
         //double xr = this._X*FastMath.cos(Math.toRadians(25.))+this._Z*FastMath.sin(Math.toRadians(25.));		
         //double zr = this._Z*FastMath.cos(Math.toRadians(25.))-this._X*FastMath.sin(Math.toRadians(25.));
@@ -852,6 +873,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 
     /**
      * 
+     * @param X
+     * @param Y
      * @param DcDetector DC detector geometry
      */
     public void setSignalPropagTimeAlongWire(double X, double Y, DCGeant4Factory DcDetector) {
@@ -873,7 +896,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     public void setSignalTimeOfFlight() {
         if(this.get_Beta()>0 && this.getAssociatedStateVec()!=null)
             this._SignalTimeOfFlight = (this.getAssociatedStateVec().getPathLength())/(Constants.SPEEDLIGHT*this.get_Beta0to1());
-            this._tFlight = this._SignalTimeOfFlight;
+        this._tFlight = this._SignalTimeOfFlight;
     }
     
     

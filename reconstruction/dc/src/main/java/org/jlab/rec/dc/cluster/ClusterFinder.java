@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
-import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 
 import org.jlab.io.evio.EvioDataBank;
@@ -75,6 +74,7 @@ public class ClusterFinder {
      * Fills 3-dimentional array of hits from input hits
      *
      * @param hits the unfitted hit
+     * @param rejectLayer
      */
     public void fillHitArray(List<Hit> hits, int rejectLayer) {
 
@@ -100,12 +100,13 @@ public class ClusterFinder {
 
     /**
      * @param allhits the list of unfitted hits
+     * @param ct
      * @return List of clusters
      */
     public List<Cluster> findClumps(List<Hit> allhits, ClusterCleanerUtilities ct) { // a clump is a cluster that is not filtered for noise
         Collections.sort(allhits);
 
-        List<Cluster> clumps = new ArrayList<Cluster>();
+        List<Cluster> clumps = new ArrayList<>();
 
         // looping over each superlayer in each sector
         // each superlayer is treated independently
@@ -122,7 +123,7 @@ public class ClusterFinder {
             while (wi < nwire) {
                 // if there's a hit in at least one layer, it's a cluster candidate
                 if (ct.count_nlayers_hit(HitArray[ssl][wi]) != 0) {
-                    List<Hit> hits = new ArrayList<Hit>();
+                    List<Hit> hits = new ArrayList<>();
 
                     // adding all hits in this and all the subsequent
                     // wires until there's a wire with no layers hit
@@ -164,6 +165,9 @@ public class ClusterFinder {
 
     /**
      * @param allhits the list of unfitted hits
+     * @param ct
+     * @param cf
+     * @param DcDetector
      * @return clusters of hits. Hit-based tracking linear fits to the wires are
      * done to determine the clusters. The result is a fitted cluster
      */
@@ -213,8 +217,8 @@ public class ClusterFinder {
         //	for(FittedHit h : c)
         //		System.out.println(h.printInfo());
         // create list of fitted clusters
-        List<FittedCluster> fittedClusList = new ArrayList<FittedCluster>();
-        List<FittedCluster> refittedClusList = new ArrayList<FittedCluster>();
+        List<FittedCluster> fittedClusList = new ArrayList<>();
+        List<FittedCluster> refittedClusList = new ArrayList<>();
 
         for (FittedCluster clus : selectedClusList) {
 
@@ -280,7 +284,7 @@ public class ClusterFinder {
     public List<FittedCluster> RecomposeClusters(Map<Integer, ArrayList<FittedHit>> grpHits, 
             DCGeant4Factory dcDetector, ClusterFitter cf) {
         cf.reset();
-        List<FittedCluster> clusters = new ArrayList<FittedCluster>();
+        List<FittedCluster> clusters = new ArrayList<>();
         
         // using iterators 
         Iterator<Map.Entry<Integer, ArrayList<FittedHit>>> itr = grpHits.entrySet().iterator(); 
@@ -323,8 +327,8 @@ public class ClusterFinder {
     }
     
     private List<FittedCluster> RecomposeTrackClusters(DataEvent event, List<FittedHit> fhits, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
-        Map<Integer, ArrayList<FittedHit>> grpHits = new HashMap<Integer, ArrayList<FittedHit>>();
-        List<FittedCluster> clusters = new ArrayList<FittedCluster>();
+        Map<Integer, ArrayList<FittedHit>> grpHits = new HashMap<>();
+        List<FittedCluster> clusters = new ArrayList<>();
         
         for (FittedHit hit : fhits) {
             
@@ -335,7 +339,7 @@ public class ClusterFinder {
                     hit.get_AssociatedHBTrackID() != -1) {
                 int index = hit.get_AssociatedHBTrackID()*10000+hit.get_AssociatedClusterID();
                 if(grpHits.get(index)==null) { // if the list not yet created make it
-                    grpHits.put(index, new ArrayList<FittedHit>()); 
+                    grpHits.put(index, new ArrayList<>()); 
                     grpHits.get(index).add(hit); // append hit
                 } else {
                     grpHits.get(index).add(hit); // append hit
@@ -381,7 +385,7 @@ public class ClusterFinder {
             List<FittedHit> fhits, ClusterFitter cf, ClusterCleanerUtilities ct, 
             IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
 
-        List<FittedCluster> clusters = new ArrayList<FittedCluster>();
+        List<FittedCluster> clusters = new ArrayList<>();
 
         List<FittedCluster> rclusters = RecomposeTrackClusters(event, fhits, tab, DcDetector, tde);
         //System.out.println(" Clusters TimeBased Step 1");
@@ -529,7 +533,7 @@ public class ClusterFinder {
 
     public EvioDataBank getLayerEfficiencies(List<FittedCluster> fclusters, List<Hit> allhits, ClusterCleanerUtilities ct, ClusterFitter cf, EvioDataEvent event) {
 
-        ArrayList<Hit> clusteredHits = new ArrayList<Hit>();
+        ArrayList<Hit> clusteredHits = new ArrayList<>();
         for (FittedCluster fclus : fclusters) {
             for (int k = 0; k < fclus.size(); k++) {
                 clusteredHits.add(fclus.get(k));
@@ -551,7 +555,7 @@ public class ClusterFinder {
             //find clumps of hits
             List<Cluster> clusters = this.findClumps(clusteredHits, ct);
             // create cluster list to be fitted
-            List<FittedCluster> selectedClusList = new ArrayList<FittedCluster>();
+            List<FittedCluster> selectedClusList = new ArrayList<>();
 
             for (Cluster clus : clusters) {
                 //System.out.println(" I passed this cluster "+clus.printInfo());

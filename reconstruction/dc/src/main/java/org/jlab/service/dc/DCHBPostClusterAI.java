@@ -74,7 +74,7 @@ public class DCHBPostClusterAI extends DCEngine {
 
         //I) get the lists
         List<Hit> hits = reader.get_DCHits();
-        fhits = new ArrayList<FittedHit>();
+        fhits = new ArrayList<>();
         //II) process the hits
         //1) exit if hit list is empty
         if (hits.isEmpty()) {
@@ -89,7 +89,7 @@ public class DCHBPostClusterAI extends DCEngine {
         } 
         //crossList
         CrossList crosslist = pr.RecomposeCrossList(segments, Constants.getInstance().dcDetector);
-        crosses = new ArrayList<Cross>();
+        crosses = new ArrayList<>();
         if(Constants.DEBUG==true) 
             System.out.println("num cands = "+crosslist.size());
         for (List<Cross> clist : crosslist) {
@@ -100,7 +100,7 @@ public class DCHBPostClusterAI extends DCEngine {
             }
         }
         if (crosses.isEmpty()) {
-            clusters = new ArrayList<FittedCluster>();
+            clusters = new ArrayList<>();
             for(Segment seg : segments) {
                 clusters.add(seg.get_fittedCluster());
             }
@@ -123,7 +123,7 @@ public class DCHBPostClusterAI extends DCEngine {
             dcSwim, true);
 
         // track found
-        clusters = new ArrayList<FittedCluster>();
+        clusters = new ArrayList<>();
         int trkId = 1;
         if (trkcands.size() > 0) {
             // remove overlaps

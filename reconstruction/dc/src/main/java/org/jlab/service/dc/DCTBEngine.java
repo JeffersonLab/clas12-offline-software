@@ -79,18 +79,18 @@ public class DCTBEngine extends DCEngine {
         Swim dcSwim = new Swim();        
        
         // fill T2D table
-        TableLoader.getInstance().Fill(this.getConstantsManager().getConstants(run, Constants.TIME2DIST));
+        TableLoader.Fill(this.getConstantsManager().getConstants(run, Constants.TIME2DIST));
 
         ClusterFitter cf = new ClusterFitter();
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
 
-        List<FittedHit> fhits = new ArrayList<FittedHit>();	
-        List<FittedCluster> clusters = new ArrayList<FittedCluster>();
-        List<Segment> segments = new ArrayList<Segment>();
-        List<Cross> crosses = new ArrayList<Cross>();
-        List<Track> trkcands = new ArrayList<Track>();
+        List<FittedHit> fhits = new ArrayList<>();	
+        List<FittedCluster> clusters = new ArrayList<>();
+        List<Segment> segments = new ArrayList<>();
+        List<Cross> crosses = new ArrayList<>();
+        List<Track> trkcands = new ArrayList<>();
         // final listed of hits and clusters from segments associated to tracks
-        List<FittedHit> thits = new ArrayList<FittedHit>();	
+        List<FittedHit> thits = new ArrayList<>();	
         
         if(Constants.DEBUG)
             System.out.println("TB AI "+ this.getName());
@@ -103,9 +103,8 @@ public class DCTBEngine extends DCEngine {
             this.getConstantsManager().getConstants(run, Constants.TIME2DIST),
             this.getConstantsManager().getConstants(run, Constants.T0CORRECTION),
             Constants.getInstance().dcDetector, tde);
-        List<FittedHit> hits = new ArrayList<FittedHit>();
         //I) get the hits
-        hits = hitRead.get_HBHits();
+        List<FittedHit> hits = hitRead.get_HBHits();
         //II) process the hits
         //1) exit if hit list is empty
         if(hits.isEmpty() ) {
@@ -214,46 +213,48 @@ public class DCTBEngine extends DCEngine {
         double beamYoffset = beamOffset.getDoubleValue("y_offset", 0,0,0);
         TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
         TrajectoryFinder trjFind = new TrajectoryFinder();
-        for(int i = 0; i < TrackArray.length; i++) {
-            if(TrackArray[i]==null || TrackArray[i].get_ListOfHBSegments()==null || TrackArray[i].get_ListOfHBSegments().size()<4)
+        for (Track TrackArray1 : TrackArray) {
+            if (TrackArray1 == null || TrackArray1.get_ListOfHBSegments() == null || TrackArray1.get_ListOfHBSegments().size() < 4) {
                 continue;
-            TrackArray[i].set_MissingSuperlayer(get_Status(TrackArray[i]));
-            TrackArray[i].addAll(crossMake.find_Crosses(TrackArray[i].get_ListOfHBSegments(), Constants.getInstance().dcDetector));
-            if(TrackArray[i].size()<1)
+            }
+            TrackArray1.set_MissingSuperlayer(get_Status(TrackArray1));
+            TrackArray1.addAll(crossMake.find_Crosses(TrackArray1.get_ListOfHBSegments(), Constants.getInstance().dcDetector));
+            if (TrackArray1.size() < 1) {
                 continue;
-            crosses.addAll(TrackArray[i]);
+            }
+            crosses.addAll(TrackArray1);
             //if(TrackArray[i].get_FitChi2()>200) {
             //    resetTrackParams(TrackArray[i], new DCSwimmer());
-            //} 
-            KFitterDoca kFit = new KFitterDoca(TrackArray[i], Constants.getInstance().dcDetector, true, dcSwim, 0);
-             
+            //}
+            KFitterDoca kFit = new KFitterDoca(TrackArray1, Constants.getInstance().dcDetector, true, dcSwim, 0);
             StateVec fn = new StateVec();
-            kFit.runFitter(TrackArray[i].get(0).get_Sector());
-            
-            if(kFit.setFitFailed==false && kFit.finalStateVec!=null) { 
+            kFit.runFitter(TrackArray1.get(0).get_Sector());
+            if (kFit.setFitFailed==false && kFit.finalStateVec!=null) { 
                 // set the state vector at the last measurement site
                 fn.set(kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty); 
                 //set the track parameters if the filter does not fail
-                TrackArray[i].set_P(1./Math.abs(kFit.finalStateVec.Q));
-                TrackArray[i].set_Q((int)Math.signum(kFit.finalStateVec.Q));
-                trkcandFinder.setTrackPars(TrackArray[i], new Trajectory(), trjFind, fn, 
-                        kFit.finalStateVec.z, Constants.getInstance().dcDetector, dcSwim, beamXoffset, beamYoffset);
+                TrackArray1.set_P(1./Math.abs(kFit.finalStateVec.Q));
+                TrackArray1.set_Q((int)Math.signum(kFit.finalStateVec.Q));
+                trkcandFinder.setTrackPars(TrackArray1, new Trajectory(), trjFind, fn, kFit.finalStateVec.z, Constants.getInstance().dcDetector, dcSwim, beamXoffset, beamYoffset);
                 // candidate parameters are set from the state vector
-                if(TrackArray[i].fit_Successful==false)
+                if (TrackArray1.fit_Successful == false) {
                     continue;
-                TrackArray[i].set_FitChi2(kFit.chi2); 
-                TrackArray[i].set_FitNDF(kFit.NDF);
-                TrackArray[i].set_Trajectory(kFit.kfStateVecsAlongTrajectory);
-                TrackArray[i].set_FitConvergenceStatus(kFit.ConvStatus);
+                }
+                TrackArray1.set_FitChi2(kFit.chi2);
+                TrackArray1.set_FitNDF(kFit.NDF);
+                TrackArray1.set_Trajectory(kFit.kfStateVecsAlongTrajectory);
+                TrackArray1.set_FitConvergenceStatus(kFit.ConvStatus);
                 //TrackArray[i].set_Id(TrackArray[i].size()+1);
-                //TrackArray[i].set_CovMat(kFit.finalCovMat.covMat); 
-                if(TrackArray[i].get_Vtx0().toVector3D().mag()>500)
+                //TrackArray[i].set_CovMat(kFit.finalCovMat.covMat);
+                if (TrackArray1.get_Vtx0().toVector3D().mag() > 500) {
                     continue;
+                }
                 // get CovMat at vertex
-                Point3D VTCS = crosses.get(0).getCoordsInSector(
-                        TrackArray[i].get_Vtx0().x(), TrackArray[i].get_Vtx0().y(), TrackArray[i].get_Vtx0().z());
-                TrackArray[i].set_CovMat(kFit.propagateToVtx(crosses.get(0).get_Sector(), VTCS.z()));
-                if(TrackArray[i].isGood()) trkcands.add(TrackArray[i]);
+                Point3D VTCS = crosses.get(0).getCoordsInSector(TrackArray1.get_Vtx0().x(), TrackArray1.get_Vtx0().y(), TrackArray1.get_Vtx0().z());
+                TrackArray1.set_CovMat(kFit.propagateToVtx(crosses.get(0).get_Sector(), VTCS.z()));
+                if (TrackArray1.isGood()) {
+                    trkcands.add(TrackArray1);
+                }
             }
         }
         
@@ -341,7 +342,7 @@ public class DCTBEngine extends DCEngine {
         int miss = 0;    
         
         int L[] = new int[6];
-        Map<Integer, Segment> SegMap = new HashMap<Integer, Segment>();
+        Map<Integer, Segment> SegMap = new HashMap<>();
         for(int l = 0; l<track.get_ListOfHBSegments().size(); l++) {
             L[track.get_ListOfHBSegments().get(l).get_Superlayer()-1]++;
             SegMap.put(track.get_ListOfHBSegments().get(l).get_Superlayer(), track.get_ListOfHBSegments().get(l));
@@ -364,7 +365,7 @@ public class DCTBEngine extends DCEngine {
     }
 
     private void ensureTrackUnique(List<Track> trkcands) {
-        List<Track> rmFrmList = new ArrayList<Track>();
+        List<Track> rmFrmList = new ArrayList<>();
         trkcands.sort(Comparator.comparing(Track::get_Id).thenComparing(Track::get_FitChi2));
         for(int i = 0; i < trkcands.size()-1; i++) {
             if(trkcands.get(i).get_Id()==trkcands.get(i+1).get_Id()) {
@@ -381,7 +382,7 @@ public class DCTBEngine extends DCEngine {
     }
     private void ensureUniqueness(List<FittedHit> fhits, List<FittedCluster> clusters, List<Segment> segments, List<Cross> crosses) {
         
-        Map<Integer, FittedHit> hitsMap = new HashMap<Integer, FittedHit>();
+        Map<Integer, FittedHit> hitsMap = new HashMap<>();
         for(FittedHit h : fhits) {
             if(hitsMap.get(h.get_Id())==null) {
                 hitsMap.put(h.get_Id(), h);
@@ -397,7 +398,7 @@ public class DCTBEngine extends DCEngine {
             fhits.add(entry.getValue());
         }
         
-        Map<Integer, FittedCluster> clsMap = new HashMap<Integer, FittedCluster>();
+        Map<Integer, FittedCluster> clsMap = new HashMap<>();
         for(FittedCluster clus : clusters) {
             if(clsMap.get(clus.get_Id())==null) {
                 clsMap.put(clus.get_Id(), clus);
@@ -413,7 +414,7 @@ public class DCTBEngine extends DCEngine {
             clusters.add(entry.getValue());
         }
         
-        Map<Integer, Segment> segMap = new HashMap<Integer, Segment>();
+        Map<Integer, Segment> segMap = new HashMap<>();
         for(Segment seg : segments) {
             if(segMap.get(seg.get_Id())==null) {
                 segMap.put(seg.get_Id(), seg);
@@ -429,7 +430,7 @@ public class DCTBEngine extends DCEngine {
             segments.add(entry.getValue());
         }
         
-        Map<Integer, Cross> crsMap = new HashMap<Integer, Cross>();
+        Map<Integer, Cross> crsMap = new HashMap<>();
         for(Cross cr : crosses) {
             if(crsMap.get(cr.get_Id())==null) {
                 crsMap.put(cr.get_Id(), cr);

@@ -12,7 +12,7 @@ import org.jlab.utils.groups.IndexedTable;
 public class DCEngine extends ReconstructionEngine {
 
     // bank names
-    private Banks  bankNames = new Banks();
+    private final Banks  bankNames = new Banks();
     
     // options configured from yaml
     private int      selectedSector = 0;

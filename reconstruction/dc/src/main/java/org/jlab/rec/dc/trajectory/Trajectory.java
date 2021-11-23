@@ -257,7 +257,7 @@ public class Trajectory extends ArrayList<Cross> {
     public List<TrajectoryStateVec> trajectory;
     float b[] = new float[3];
     public void calcTrajectory(int id, Swim dcSwim, double x, double y,  double z, double px, double py, double pz, int q, TrajectorySurfaces ts) {
-        trajectory = new ArrayList<TrajectoryStateVec>();
+        trajectory = new ArrayList<>();
         dcSwim.SetSwimParameters(x, y, z, px, py, pz, q);
         dcSwim.BfieldLab(x, y, z, b);
         double pathLen =0;
@@ -266,7 +266,7 @@ public class Trajectory extends ArrayList<Cross> {
         
         //HTCC: swim to sphere and save end point
 //        System.out.println("New track " + x + " " + y + " " + z);
-        double[] trkParsCheren = dcSwim.SwimToSphere(Constants.htccRadius);
+        double[] trkParsCheren = dcSwim.SwimToSphere(Constants.HTCCRADIUS);
         if(trkParsCheren==null) return;
         this.FillTrajectory(id, trajectory, trkParsCheren, trkParsCheren[6], trkParsCheren[7], DetectorType.HTCC, 1); 
         pathLen = trkParsCheren[6];
@@ -374,7 +374,6 @@ public class Trajectory extends ArrayList<Cross> {
         sv.setPathLen(pathLen);
         sv.setiBdl(iBdl);
         trajectory.add(sv);
-        return;
     }
     
     

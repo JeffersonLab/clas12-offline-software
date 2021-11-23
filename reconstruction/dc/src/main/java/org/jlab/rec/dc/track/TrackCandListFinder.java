@@ -198,6 +198,10 @@ public class TrackCandListFinder {
 
     /**
      * @param crossList the input list of crosses
+     * @param DcDetector
+     * @param TORSCALE
+     * @param dcSwim
+     * @param donotapplyCuts
      * @return a list of track candidates in the DC
      */
     public List<Track> getTrackCands(CrossList crossList, DCGeant4Factory DcDetector, double TORSCALE, Swim dcSwim,
@@ -615,8 +619,8 @@ public class TrackCandListFinder {
                 System.out.println("------------------------------------------------------------------ ");
             }
         }
-        Map<Integer, Track> selectedTracksMap = new HashMap<Integer, Track>();
-        List<Track> list = new ArrayList<Track>();
+        Map<Integer, Track> selectedTracksMap = new HashMap<>();
+        List<Track> list = new ArrayList<>();
         int size = trkcands.size();
         for (int i = 0; i < size; i++) {
             list.clear();
@@ -630,9 +634,9 @@ public class TrackCandListFinder {
         }
 
         trkcands.removeAll(trkcands);
-        for (Map.Entry<Integer, Track> entry : selectedTracksMap.entrySet()) {
+        selectedTracksMap.entrySet().forEach(entry -> {
             trkcands.add(entry.getValue());
-        }
+        });
         if(Constants.DEBUG) {
             System.out.println("After Overlap Remvr "+trkcands.size()+" HB seeds ");
             for(int i = 0; i< trkcands.size(); i++) {
@@ -752,7 +756,7 @@ public class TrackCandListFinder {
             return;
         }
 
-        List<FittedHit> fhits = new ArrayList<FittedHit>();
+        List<FittedHit> fhits = new ArrayList<>();
 
         dcSwim.SetSwimParameters(trk.get_Vtx0().x(),
                 trk.get_Vtx0().y(), trk.get_Vtx0().z(), trk.get_pAtOrig().x(),
@@ -855,7 +859,7 @@ public class TrackCandListFinder {
         }
 
         List<Track> cands = new ArrayList<>();
-        if (crossList.size() == 0) {
+        if (crossList.isEmpty()) {
             return cands;
         }
 
@@ -946,7 +950,7 @@ public class TrackCandListFinder {
         }
 
         List<Track> cands = new ArrayList<>();
-        if (crossList.size() == 0) {
+        if (crossList.isEmpty()) {
             return cands;
         }
         for (List<Cross> aCrossList : crossList) {

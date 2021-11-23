@@ -1,7 +1,5 @@
 package org.jlab.rec.dc.track.fit;
 
-//import Jama.Matrix;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,7 +62,7 @@ public class KFitterDoca {
         TBT = true;
     }
 
-    public void init(Track trk, DCGeant4Factory DcDetector, int c) {
+    public final void init(Track trk, DCGeant4Factory DcDetector, int c) {
         mv.setMeasVecs(trk, DcDetector);
         int mSize = mv.measurements.size();
 

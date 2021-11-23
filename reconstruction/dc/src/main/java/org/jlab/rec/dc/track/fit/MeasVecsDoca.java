@@ -50,7 +50,7 @@ public class MeasVecsDoca {
 
     public void setMeasVecs(Track trkcand, DCGeant4Factory DcDetector) {
     	
-        List<HitOnTrack> hOTS = new ArrayList<HitOnTrack>(); // the list of hits on track		
+        List<HitOnTrack> hOTS = new ArrayList<>(); // the list of hits on track		
         FittedHit hitOnTrk;
         // loops over the regions (1 to 3) and the superlayers in a region (1 to 2) and obtains the hits on track
         for (int c = 0; c < 3; c++) {
@@ -119,7 +119,7 @@ public class MeasVecsDoca {
         }
         
 
-        measurements = new ArrayList<MeasVec>(hOTS.size());
+        measurements = new ArrayList<>(hOTS.size());
 
         for (int i = 0; i < hOTS.size(); i++) {
             MeasVec meas = new MeasVec(i);
@@ -137,7 +137,7 @@ public class MeasVecsDoca {
     }
 
     void setMeasVecsFromHB(Track trk, DCGeant4Factory DcDetector) { 
-        List<HitOnTrack> hOTS = new ArrayList<HitOnTrack>(); // the list of hits on track		
+        List<HitOnTrack> hOTS = new ArrayList<>(); // the list of hits on track		
         FittedHit hitOnTrk;
         for(int s = 0; s < trk.get_ListOfHBSegments().size(); s++) {
             for(int h = 0; h < trk.get_ListOfHBSegments().get(s).size(); h++) { 
@@ -180,7 +180,7 @@ public class MeasVecsDoca {
             }
         }
 
-        measurements = new ArrayList<MeasVec>(hOTS.size());
+        measurements = new ArrayList<>(hOTS.size());
 
         for (int i = 0; i < hOTS.size(); i++) {
             MeasVec meas = new MeasVec(i);

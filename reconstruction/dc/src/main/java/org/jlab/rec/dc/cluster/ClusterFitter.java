@@ -13,9 +13,6 @@ import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.track.fit.basefit.LineFitPars;
 import org.jlab.rec.dc.track.fit.basefit.LineFitter;
 
-//import trackfitter.fitter.LineFitPars;
-//import trackfitter.fitter.LineFitter;
-
 public class ClusterFitter {
 
 
@@ -24,12 +21,12 @@ public class ClusterFitter {
      *
      */
     private LineFitPars FitPars;
-    private List<ArrayList<Double>> FitArray = new ArrayList<ArrayList<Double>>(); 
-    private List<Double> x = new ArrayList<Double>();
-    private List<Double> y = new ArrayList<Double>();
-    private List<Double> ex = new ArrayList<Double>();
-    private List<Double> ey = new ArrayList<Double>();
-    private double stereo = FastMath.cos(Math.toRadians(6.));
+    private final List<ArrayList<Double>> FitArray = new ArrayList<ArrayList<Double>>(); 
+    private final List<Double> x = new ArrayList<Double>();
+    private final List<Double> y = new ArrayList<Double>();
+    private final List<Double> ex = new ArrayList<Double>();
+    private final List<Double> ey = new ArrayList<Double>();
+    private final double stereo = FastMath.cos(Math.toRadians(6.));
     
     private String CoordinateSystem; // LC= local, TSC = tilted Sector
     public ClusterFitter() {
@@ -38,11 +35,11 @@ public class ClusterFitter {
     public void reset() {
         for(int i =0; i<FitArray.size(); i++)
             FitArray.get(i).clear();
-            FitArray.clear();
-            x.clear();
-            y.clear();
-            ex.clear();
-            ey.clear();
+        FitArray.clear();
+        x.clear();
+        y.clear();
+        ex.clear();
+        ey.clear();
     }
     public void SetFitArray(FittedCluster clus, String system) {
 

@@ -75,8 +75,8 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
         int stat = 0;    
         
         int L[] = new int[6];
-        for(int l = 0; l<this.size(); l++) {
-            L[this.get(l).get_Layer()-1]++;
+        for (FittedHit aThi : this) {
+            L[aThi.get_Layer() - 1]++;
         }
         for(int l = 0; l<6; l++) {
             if(L[l]==0 || L[l]>2)
@@ -97,7 +97,7 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
      *
      * @param _fittedCluster the fitted cluster
      */
-    public void set_fittedCluster(FittedCluster _fittedCluster) {
+    public final void set_fittedCluster(FittedCluster _fittedCluster) {
         this._fittedCluster = _fittedCluster;
     }
 
@@ -279,6 +279,7 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
     /**
      * Sets the segment endpoints in the sector coordinate system for ced
      * display
+     * @param DcDetector
      */
     public void set_SegmentEndPointsSecCoordSys(DCGeant4Factory DcDetector) {
 
@@ -307,6 +308,7 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
 
     /**
      * Sets the plane containing the segment fitted-line representation
+     * @param DcDetector
      */
     public void set_fitPlane(DCGeant4Factory DcDetector) {
         if (this.get_fittedCluster().get_clusLine() == null) {
@@ -391,7 +393,7 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
      * 
      * @param _Status segment status word
      */
-    public void set_Status(int _Status) {
+    public final void set_Status(int _Status) {
         this._Status = _Status;
     }
 

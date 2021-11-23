@@ -1,6 +1,5 @@
 package org.jlab.rec.dc.track.fit;
 
-//import Jama.Matrix;
 import org.jlab.jnp.matrix.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +14,7 @@ import org.jlab.geom.prim.Point3D;
  * @author ziegler
  */
 public class StateVecsDoca {
-    private double Bmax = 2.366498; // averaged
+    private final double Bmax = 2.366498; // averaged
     
     final double speedLight = 0.002997924580;
     public double[] Z;
@@ -27,8 +26,8 @@ public class StateVecsDoca {
     public StateVec StateVec;
     public CovMat CovMat;
     public Matrix F = new Matrix();
-    private Matrix fMS = new Matrix();
-    private Matrix copyMatrix = new Matrix();
+    private final Matrix fMS = new Matrix();
+    private final Matrix copyMatrix = new Matrix();
     private final double[] A = new double[2];
     private final double[] dA = new double[4];
     private final float[] bf = new float[3];
@@ -38,6 +37,7 @@ public class StateVecsDoca {
     
     /**
      * State vector representing the track in the sector coordinate system at the measurement layer
+     * @param swimmer
      */
     public StateVecsDoca(Swim swimmer) {
         //Max Field Location: (phi, rho, z) = (29.50000, 44.00000, 436.00000)
@@ -48,10 +48,12 @@ public class StateVecsDoca {
     
     /**
      * 
+     * @param sector
      * @param i initial state vector index
-     * @param f final state vector index
+     * @param Zf
      * @param iVec state vector at the initial index
      * @param covMat state covariance matrix at the initial index
+     * @return 
      */
     public Matrix transport(int sector, int i, double Zf, StateVec iVec, CovMat covMat) { // s = signed step-size
 
@@ -139,6 +141,7 @@ public class StateVecsDoca {
     
     /**
      * 
+     * @param sector
      * @param i initial state vector index
      * @param f final state vector index
      * @param iVec state vector at the initial index
@@ -243,6 +246,7 @@ public class StateVecsDoca {
     }
     /**
      * 
+     * @param sector
      * @param i initial state vector index
      * @param f final state vector index
      * @param iVec state vector at the initial index
@@ -341,6 +345,7 @@ public class StateVecsDoca {
      * @param trkcand the track candidate
      * @param z0 the value in z to which the track is swam back to
      * @param kf the final state measurement index
+     * @param c
      */
     public void init(Track trkcand, double z0, KFitterDoca kf, int c) {
         
@@ -506,7 +511,6 @@ public class StateVecsDoca {
             this.trackCov.put(0, initCM); //this.printMatrix(initCM.covMat);
         } else {
             kf.setFitFailed = true;
-            return;
         }
         
     }

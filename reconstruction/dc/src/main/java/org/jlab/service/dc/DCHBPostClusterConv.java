@@ -60,7 +60,7 @@ public class DCHBPostClusterConv extends DCEngine {
         List<Cross> crosses = null;
         List<FittedCluster> clusters = null;
         List<Segment> segments = null;
-        List<FittedHit> fhits = new ArrayList<FittedHit>();
+        List<FittedHit> fhits = new ArrayList<>();
         
         //1) read the hits from the banks
         Map<Integer, ArrayList<FittedHit>> hits = reader.read_Hits(event, Constants.getInstance().dcDetector);

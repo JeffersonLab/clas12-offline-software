@@ -17,8 +17,8 @@ public class TrackListFinder {
     }
 
     public List<Track> getTracks(List<Track> cands) {
-        List<Track> tracks = new ArrayList<Track>();
-        if(cands.size()==0) {
+        List<Track> tracks = new ArrayList<>();
+        if(cands.isEmpty()) {
             System.err.print("Error no tracks found");
             return cands;
         }

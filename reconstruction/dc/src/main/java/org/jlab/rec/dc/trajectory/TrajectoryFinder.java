@@ -46,6 +46,8 @@ public class TrajectoryFinder {
     /**
      *
      * @param candCrossList the input list of crosses used in determining a trajectory
+     * @param DcDetector
+     * @param dcSwim
      * @return a trajectory object
      */
     public Trajectory findTrajectory(List<Cross> candCrossList, DCGeant4Factory DcDetector, Swim dcSwim) {
@@ -68,7 +70,9 @@ public class TrajectoryFinder {
     
     /**
      * 
+     * @param sector
      * @param DcDetector DC detector utility
+     * @param dcSwim
      * @return integral Bdl
      */
     public double integralBdl(int sector, DCGeant4Factory DcDetector, Swim dcSwim) {
@@ -176,10 +180,11 @@ public class TrajectoryFinder {
 //        
     /**
      *
+     * @param DcDetector
      * @return the list of state vectors along the trajectory
      */
     public List<StateVec> getStateVecsAlongTrajectory(DCGeant4Factory DcDetector) {
-        List<StateVec> stateVecAtPlanesList = new ArrayList<StateVec>(36);
+        List<StateVec> stateVecAtPlanesList = new ArrayList<>(36);
         for(int superlayerIdx =0; superlayerIdx<6; superlayerIdx++) {
             for(int layerIdx =0; layerIdx<6; layerIdx++) {
                 double z = DcDetector.getLayerMidpoint(superlayerIdx, layerIdx).z;

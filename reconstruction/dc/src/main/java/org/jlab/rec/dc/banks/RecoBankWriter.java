@@ -11,7 +11,6 @@ import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.hit.Hit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.track.Track;
-//import org.jlab.rec.dc.trajectory.SegmentTrajectory;
 
 import trackfitter.fitter.utilities.*;
 
@@ -153,6 +152,7 @@ public class RecoBankWriter {
 /**
  *
  * @param event the EvioEvent
+     * @param cluslist
  * @return clusters bank
  */
 public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist) {
@@ -215,6 +215,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
     /**
      *
      * @param event the EvioEvent
+     * @param seglist
      * @return segments bank
      */
     public DataBank fillHBSegmentsBank(DataEvent event, List<Segment> seglist) {
@@ -278,38 +279,11 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
         return bank;
 
     }
-//
-//    /**
-//     *
-//     * @param event the EvioEvent
-//     * @return segments bank
-//     */
-////    private DataBank fillHBSegmentsTrajectoryBank(DataEvent event, List<Segment> seglist) {
-//        DataBank bank = event.createBank("HitBasedTrkg::HBSegmentTrajectory", seglist.size() * 6);
-//
-//        int index = 0;
-//        for (Segment aSeglist : seglist) {
-//            if (aSeglist.get_Id() == -1) {
-//                continue;
-//            }
-//            SegmentTrajectory trj = aSeglist.get_Trajectory();
-//            for (int l = 0; l < 6; l++) {
-//                bank.setShort("segmentID", index, (short) trj.get_SegmentId());
-//                bank.setByte("sector", index, (byte) trj.get_Sector());
-//                bank.setByte("superlayer", index, (byte) trj.get_Superlayer());
-//                bank.setByte("layer", index, (byte) (l + 1));
-//                bank.setShort("matchedHitID", index, (short) trj.getMatchedHitId()[l]);
-//                bank.setFloat("trkDoca", index, (float) trj.getTrkDoca()[l]);
-//                index++;
-//            }
-//        }
-//        //bank.show();
-//        return bank;
-//    }
 
     /**
      *
      * @param event the EvioEvent
+     * @param crosslist
      * @return crosses bank
      */
     public DataBank fillHBCrossesBank(DataEvent event, List<Cross> crosslist) {
@@ -568,7 +542,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
 
             bank.setShort("id", i, (short) cluslist.get(i).get_Id());
 //            int status =0;
-            if(cluslist.get(i).size()<6)
+//            if(cluslist.get(i).size()<6)
 //                status = 1;
             bank.setShort("status", i, (short) 0);
             bank.setByte("superlayer", i, (byte) cluslist.get(i).get_Superlayer());
@@ -671,41 +645,6 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
 
     }
 
-//    /**
-//     *
-//     * @param event the EvioEvent
-//     * @return segments bank
-//     */
-//    private DataBank fillTBSegmentsTrajectoryBank(DataEvent event, List<Segment> seglist) {
-//        if(event.hasBank("TimeBasedTrkg::TBSegmentTrajectory")) { // for second pass tracking
-//                HipoDataEvent de = (HipoDataEvent) event;
-//                HipoEvent dde = de.getHipoEvent();
-////                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBSegmentTrajectory");
-//                ////event.show();
-//                //group.show();
-//                dde.removeGroup("TimeBasedTrkg::TBSegmentTrajectory");
-//        }
-//        DataBank bank = event.createBank("TimeBasedTrkg::TBSegmentTrajectory", seglist.size() * 6);
-//
-//        int index = 0;
-//        for (Segment aSeglist : seglist) {
-//            if (aSeglist.get_Id() == -1) {
-//                continue;
-//            }
-//            SegmentTrajectory trj = aSeglist.get_Trajectory();
-//            for (int l = 0; l < 6; l++) {
-//                bank.setShort("segmentID", index, (short) trj.get_SegmentId());
-//                bank.setByte("sector", index, (byte) trj.get_Sector());
-//                bank.setByte("superlayer", index, (byte) trj.get_Superlayer());
-//                bank.setByte("layer", index, (byte) (l + 1));
-//                bank.setShort("matchedHitID", index, (short) trj.getMatchedHitId()[l]);
-//                bank.setFloat("trkDoca", index, (float) trj.getTrkDoca()[l]);
-//                index++;
-//            }
-//        }
-//        //bank.show();
-//        return bank;
-//    }
 
     /**
      *

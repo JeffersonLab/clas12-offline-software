@@ -29,7 +29,7 @@ import org.jlab.utils.groups.IndexedTable;
  */
 public class HitReader {
 
-    private Banks bankNames;
+    private Banks bankNames = null;
     
     public HitReader(Banks names) {
         this.bankNames= names;
@@ -90,10 +90,18 @@ public class HitReader {
     private final double timeBuf = 25.0;
     /**
      * reads the hits using clas-io methods to get the EvioBank for the DC and
-     * fill the values to instantiate the DChit and MChit classes. This methods
-     * fills the DChit list of hits.
+     * fill the values to instantiate the DChit and MChit classes.This methods
+ fills the DChit list of hits.
      *
      * @param event DataEvent
+     * @param noiseAnalysis
+     * @param parameters
+     * @param results
+     * @param tab
+     * @param tab2
+     * @param tab3
+     * @param DcDetector
+     * @param triggerPhase
      */
     public void fetch_DCHits(DataEvent event, Clas12NoiseAnalysis noiseAnalysis,
                              NoiseReductionParameters parameters,
@@ -240,7 +248,7 @@ public class HitReader {
     }
     
     public Map<Integer, ArrayList<FittedHit>> read_Hits(DataEvent event, DCGeant4Factory dcDetector) {
-        Map<Integer, ArrayList<FittedHit>> grpHits = new HashMap<Integer, ArrayList<FittedHit>>();
+        Map<Integer, ArrayList<FittedHit>> grpHits = new HashMap<>();
         
         if (!event.hasBank(bankNames.getInputHitsBank())) {
             return null;
@@ -285,7 +293,7 @@ public class HitReader {
                 
                 int index = hit.get_AssociatedClusterID();
                 if(grpHits.get(index)==null) { // if the list not yet created make it
-                    grpHits.put(index, new ArrayList<FittedHit>()); 
+                    grpHits.put(index, new ArrayList<>()); 
                     grpHits.get(index).add(hit); // append hit
                 } else {
                     grpHits.get(index).add(hit); // append hit
@@ -295,12 +303,12 @@ public class HitReader {
         return grpHits;
     }
 
-    private Map<Integer, Integer> id2tid = new HashMap<Integer, Integer>();
-    private Map<Integer, Double> id2tidB = new HashMap<Integer, Double>();
-    private Map<Integer, Double> id2tidtProp = new HashMap<Integer, Double>();
-    private Map<Integer, Double> id2tidtFlight = new HashMap<Integer, Double>();
+    private final Map<Integer, Integer> id2tid = new HashMap<Integer, Integer>();
+    private final Map<Integer, Double> id2tidB = new HashMap<Integer, Double>();
+    private final Map<Integer, Double> id2tidtProp = new HashMap<Integer, Double>();
+    private final Map<Integer, Double> id2tidtFlight = new HashMap<Integer, Double>();
     
-    private Map<Integer, double[]> aimatch = new HashMap<Integer, double[]>();
+    private final Map<Integer, double[]> aimatch = new HashMap<Integer, double[]>();
     /**
      * Reads HB DC hits written to the DC bankAI
      *

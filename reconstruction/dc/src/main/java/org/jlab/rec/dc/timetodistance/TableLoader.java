@@ -12,37 +12,20 @@ public class TableLoader {
             
     }
     
-    // singleton
-    private static TableLoader instance = null;
-    
-    /**
-     * public access to the singleton
-     * 
-     * @return the dc constants singleton
-     */
-    public static TableLoader getInstance() {
-            if (instance == null) {
-                    instance = new TableLoader();
-            }
-            return instance;
-    }
-
-    private static final int nBinsT=2000;
-    //public static double[][][][][] DISTFROMTIME = new double[6][6][6][6][850]; // sector slyr alpha Bfield time bins
-    
     private static boolean T2DLOADED = false;
-//    static boolean T0LOADED = false;
+    
+    private static final int NBINST=2000;
     
     public static final double[] BfieldValues = new double[]{0.0000, 1.0000, 1.4142, 1.7321, 2.0000, 2.2361, 2.4495, 2.6458};
     public static int minBinIdxB = 0;
     public static int maxBinIdxB = BfieldValues.length-1;
     public static int minBinIdxAlpha = 0;
     public static int maxBinIdxAlpha = 5;
-    private static double[] AlphaMid = new double[6];
-    private static double[][] AlphaBounds = new double[6][2];
+    private static final double[] AlphaMid = new double[6];
+    private static final double[][] AlphaBounds = new double[6][2];
     public static int minBinIdxT  = 0;
-    public static int[][][][] maxBinIdxT  = new int[6][6][8][6];
-    public static double[][][][][] DISTFROMTIME = new double[6][6][maxBinIdxB+1][maxBinIdxAlpha+1][nBinsT]; // sector slyr alpha Bfield time bins [s][r][ibfield][icosalpha][tbin]    
+    public static final int[][][][] maxBinIdxT  = new int[6][6][8][6];
+    public static double[][][][][] DISTFROMTIME = new double[6][6][maxBinIdxB+1][maxBinIdxAlpha+1][NBINST]; // sector slyr alpha Bfield time bins [s][r][ibfield][icosalpha][tbin]    
     public static int maxTBin = -1;
         //public static double[] distbetaValues = new double[]{0.16, 0.16, 0.08, 0.08, 0.08, 0.08};
     
@@ -77,37 +60,6 @@ public class TableLoader {
             }
     }
     
-    
-    
-//    public static synchronized void FillT0Tables(int run, String variation) {
-//        if (T0LOADED) return;
-//        System.out.println(" T0 TABLE FILLED..... for Run "+run+" with VARIATION "+variation);
-//        DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(run, variation);
-//        dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
-//        //disconnect from database. Important to do this after loading tables.
-//        dbprovider.disconnect();
-//        // T0-subtraction
-//        double[][][][] T0 ;
-//        double[][][][] T0ERR ;
-//        //T0s
-//        T0 = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
-//        T0ERR = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
-//        for (int i = 0; i < dbprovider.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {
-//            int iSec = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Sector", i);
-//            int iSly = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Superlayer", i);
-//            int iSlot = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Slot", i);
-//            int iCab = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Cable", i);
-//            double t0 = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Correction", i);
-//            double t0Error = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
-//
-//            T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0; 
-//            T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
-//            Constants.setT0(T0);
-//            Constants.setT0Err(T0ERR);
-//            //System.out.println("T0 = "+t0);
-//        }
-//        T0LOADED = true;
-//    }
     private static int getAlphaBin(double Alpha) {
         int bin = 0;
         for(int b =0; b<6; b++) {
@@ -185,14 +137,14 @@ public class TableLoader {
                                     
                                     int tbin = Integer.parseInt(df.format(timebfield/2.) ) -1;
                                     
-                                    if(tbin<0 || tbin>nBinsT-1) {
+                                    if(tbin<0 || tbin>NBINST-1) {
                                         //System.err.println("Problem with tbin");
                                         continue;
                                     }
                                     if(tbin>maxTBin)
                                         maxTBin = tbin;
                                     //if(tbin>maxBinIdxT[s][r][ibfield][icosalpha]) {
-                                        //maxBinIdxT[s][r][ibfield][icosalpha] = nBinsT; 
+                                        //maxBinIdxT[s][r][ibfield][icosalpha] = NBINST; 
                                     //} //System.out.println("tbin "+tbin+" tmax "+tmax+ "s "+s+" sl "+r );
                                     if(DISTFROMTIME[s][r][ibfield][icosalpha][tbin]==0) {
                                         // firstbin = bi

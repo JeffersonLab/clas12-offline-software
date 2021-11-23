@@ -16,9 +16,9 @@ import org.jlab.detector.geant4.v2.DCGeant4Factory;
 
 public class RoadFinder  {
 
-    private SegmentTrajectory segTrj = new SegmentTrajectory();
+    private final SegmentTrajectory segTrj = new SegmentTrajectory();
     public double fitPassingCut = 150;
-    private ClusterFitter cf = new ClusterFitter();
+    private final ClusterFitter cf = new ClusterFitter();
     QuadraticFit qf = new QuadraticFit();
     public RoadFinder() {
     }
@@ -33,15 +33,15 @@ public class RoadFinder  {
         //QuadraticFit qf = new QuadraticFit();
         //initialize the lists
 
-        List<Road> Roads = new ArrayList<Road>();
+        List<Road> Roads = new ArrayList<>();
         
-        List<ArrayList<ArrayList<Segment>>> superLayerLists = new ArrayList<ArrayList<ArrayList<Segment>>>();
+        List<ArrayList<ArrayList<Segment>>> superLayerLists = new ArrayList<>();
         for(int sec=0; sec<6; sec++)  {
-            ArrayList<ArrayList<Segment>> sLyrs = new ArrayList<ArrayList<Segment>>();
-            ArrayList<ArrayList<ArrayList<Segment>>> rLyrs = new ArrayList<ArrayList<ArrayList<Segment>>>();
+            ArrayList<ArrayList<Segment>> sLyrs = new ArrayList<>();
+            ArrayList<ArrayList<ArrayList<Segment>>> rLyrs = new ArrayList<>();
             
             for(int sly=0; sly<6; sly++) {
-                sLyrs.add(new ArrayList<Segment>());
+                sLyrs.add(new ArrayList<>());
             }
             superLayerLists.add(sLyrs);
         }

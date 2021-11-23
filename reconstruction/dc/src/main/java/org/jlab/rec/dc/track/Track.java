@@ -1,6 +1,5 @@
 package org.jlab.rec.dc.track;
 
-//import Jama.Matrix;
 import org.jlab.jnp.matrix.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -408,17 +407,12 @@ public class Track extends Trajectory implements Comparable<Track>{
     }
     
     public boolean bestChi2(Track o) {
-        if(this.get_FitChi2()<o.get_FitChi2()) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return this.get_FitChi2()<o.get_FitChi2();
     }
     
     public boolean isGood() {
         boolean isGood=true;
-        if(this._trakOrig.distance(0, 0, 0)>Constants.getInstance().htccRadius) isGood=false;
+        if(this._trakOrig.distance(0, 0, 0)>Constants.HTCCRADIUS) isGood=false;
         return isGood;
     }
     /**
