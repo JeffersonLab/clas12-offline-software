@@ -37,6 +37,7 @@ public class Surface implements Comparable<Surface> {
     private double _l_over_X0;
     //this is for energy loss
     private double _Z_over_A_times_l;
+    private double _thickness;
     // this is for swimming
     public double swimAccuracy;
     public boolean notUsedInFit = false;
@@ -192,6 +193,14 @@ public class Surface implements Comparable<Surface> {
      */
     public void setZ_over_A_times_l(double _Z_over_A_times_l) {
         this._Z_over_A_times_l = _Z_over_A_times_l;
+    }
+
+    public double getThickness() {
+        return _thickness;
+    }
+
+    public void setThickness(double _thickness) {
+        this._thickness = _thickness;
     }
 
     public Transformation3D toGlobal() {

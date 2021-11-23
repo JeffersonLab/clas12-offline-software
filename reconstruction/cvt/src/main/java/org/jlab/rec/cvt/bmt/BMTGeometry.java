@@ -31,7 +31,8 @@ public class BMTGeometry {
     private final static int[] lC = { 1, 4, 6}; 
     private final static double accuracy =  1E-4; // mm
     private final static double udf      = -9999; // mm
-        
+    public final static int NLAYERS = 6;
+    public final static int NSECTORS = 3;
     /**
      * Handles BMT geometry
      */
@@ -79,6 +80,9 @@ public class BMTGeometry {
         return (int) Math.floor((layer+1)/2);
     }
 
+    public static int getModuleId(int layer, int sector) {
+        return layer*100+sector;
+    }
 
     /**
      * Return region number for a given layer
@@ -268,7 +272,7 @@ public class BMTGeometry {
     }
     
     /**
-     * Return thickness of the drift gap 
+     * Return material thickness in units of X0
      * @param layer
      * @return thickness in units of radiation lengths  
      */
@@ -279,7 +283,29 @@ public class BMTGeometry {
        return BMTConstants.get_T_OVER_X0()[layer-1];
      }
     
+    /**
+     * Return material thickness
+     * @param layer
+     * @return thickness in mm
+     */
+    public double getMaterialThickness(int layer) {
+       if(!(layer>=1 && layer<=BMTConstants.NLAYERS)) 
+            throw new IllegalArgumentException("Error: invalid layer="+layer);
+       
+       return BMTConstants.get_Material_T()[layer-1];
+     }
     
+    /**
+     * Return effective Z/A
+     * @param layer
+     * @return Z over A 
+     */
+    public double getZoverA(int layer) {
+       if(!(layer>=1 && layer<=BMTConstants.NLAYERS)) 
+            throw new IllegalArgumentException("Error: invalid layer="+layer);
+       
+       return BMTConstants.getEFF_Z_OVER_A()[layer-1];
+     }    
     
     /**
      * Return offset of the selected tile, identified by layer and sector

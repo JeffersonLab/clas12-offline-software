@@ -119,7 +119,7 @@ public class SVTConstants
          
          // material and radiation length information
          public static final double SILICONRADLEN = 9.36 * 10; //check this - converted to mm
-
+         public static final double ZOVERA = 0.49848;
 
          /**
 	 * Loads the the necessary tables for the SVT geometry for a given DatabaseConstantProvider.

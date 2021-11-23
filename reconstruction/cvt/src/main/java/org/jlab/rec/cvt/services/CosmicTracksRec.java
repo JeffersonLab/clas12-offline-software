@@ -224,7 +224,6 @@ public class CosmicTracksRec {
                         cl.set_CentroidResidual(resi);
                         if (cl.get_Detector()==DetectorType.BST) {
                             cl.update(k1 + 1, trkTraj2.get(i), SVTGeom);
-                            if(layer==2) {System.out.println("resi "+resi);cl.printInfo();}
                         }
                         if (cl.get_Detector()==DetectorType.BMT) {
 

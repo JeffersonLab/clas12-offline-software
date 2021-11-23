@@ -112,6 +112,37 @@ public class Constants {
     public static void setLayersUsed(Map aLayersUsed) {
         layersUsed = aLayersUsed;
     }
+
+    /**
+     * @return the BMTPhiZRangeExcld
+     */
+    public static double[][] getBMTPhiZRangeExcld() {
+        return BMTPhiZRangeExcld;
+    }
+
+    /**
+     * @param aBMTPhiZRangeExcld the BMTPhiZRangeExcld to set
+     */
+    public static void setBMTPhiZRangeExcld(double[][] aBMTPhiZRangeExcld) {
+        BMTPhiZRangeExcld = aBMTPhiZRangeExcld;
+    }
+
+    /**
+     * @return the BMTLayerExcld
+     */
+    public static int getBMTLayerExcld() {
+        return BMTLayerExcld;
+    }
+
+    /**
+     * @param aBMTLayerExcld the BMTLayerExcld to set
+     */
+    public static void setBMTLayerExcld(int aBMTLayerExcld) {
+        BMTLayerExcld = aBMTLayerExcld;
+    }
+    
+    private static double[][]BMTPhiZRangeExcld = new double[2][2];
+    private static int BMTLayerExcld = -1;
     
     //public static final boolean DEBUGMODE =false;
     // for landau inverse calculation

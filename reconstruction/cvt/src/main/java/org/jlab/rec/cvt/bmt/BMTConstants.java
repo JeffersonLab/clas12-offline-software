@@ -62,6 +62,7 @@ public class BMTConstants {
     private static double[] CRCXPOS = new double[NREGIONS]; 		// Distance on the PCB between the PCB first edge and the edge of the first strip in mm
     private static double[] EFF_Z_OVER_A = new double[NREGIONS*2];      // for ELOSS
     private static double[] T_OVER_X0 = new double[NREGIONS*2];         // for M.Scat.
+    private static double[] TMAT = new double[NREGIONS*2];              // for M.Scat.
 
   
     // THE RECONSTRUCTION CONSTANTS
@@ -376,6 +377,13 @@ public class BMTConstants {
     }
     public static synchronized void set_T_OVER_X0(double[] t_OVER_X0) {
         T_OVER_X0 = t_OVER_X0;
+    }
+    
+    public static double[] get_Material_T() {
+        return TMAT;
+    }
+    public static synchronized void set_Material_T(double[] t) {
+        TMAT = t;
     }
     
     public static synchronized void setTHETAL_grid(double[] cThetaL_grid) {

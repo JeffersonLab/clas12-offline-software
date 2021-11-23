@@ -66,6 +66,7 @@ public class CCDBConstantsLoader {
 
         double[] EFF_Z_OVER_A = new double[NLAYERS];
         double[] T_OVER_X0    = new double[NLAYERS];
+        double[] TMAT         = new double[NLAYERS];
         
          int GRID_SIZE=405;
          double[] THETA_L_grid = new double [GRID_SIZE];
@@ -224,53 +225,17 @@ public class CCDBConstantsLoader {
         
         //material budget
         //===============
-        for (int i = 0; i < dbprovider.length("/test/mvt/bmt_mat_l1/thickness"); i++) {
-            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l1/thickness", i)/10000.;
-            double Zeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l1/average_z", i);
-            double Aeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l1/average_a", i);
-            double X0 =  dbprovider.getDouble("/test/mvt/bmt_mat_l1/x0", i);
-            EFF_Z_OVER_A[0] += thickness*Zeff/Aeff;      
-            T_OVER_X0[0]+=thickness/X0;
-        }
-        for (int i = 0; i < dbprovider.length("/test/mvt/bmt_mat_l2/thickness"); i++) {
-            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l2/thickness", i)/10000.;
-            double Zeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l2/average_z", i);
-            double Aeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l2/average_a", i);
-            double X0 =  dbprovider.getDouble("/test/mvt/bmt_mat_l2/x0", i);
-            EFF_Z_OVER_A[1] += thickness*Zeff/Aeff;      
-            T_OVER_X0[1]+=thickness/X0;     
-        }  
-        for (int i = 0; i < dbprovider.length("/test/mvt/bmt_mat_l3/thickness"); i++) {
-            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l3/thickness", i)/10000.;
-            double Zeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l3/average_z", i);
-            double Aeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l3/average_a", i);
-            double X0 =  dbprovider.getDouble("/test/mvt/bmt_mat_l3/x0", i);
-            EFF_Z_OVER_A[2] += thickness*Zeff/Aeff;      
-            T_OVER_X0[2]+=thickness/X0;      
-        }
-        for (int i = 0; i < dbprovider.length("/test/mvt/bmt_mat_l4/thickness"); i++) {
-            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l4/thickness", i)/10000.;
-            double Zeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l4/average_z", i);
-            double Aeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l4/average_a", i);
-            double X0 =  dbprovider.getDouble("/test/mvt/bmt_mat_l4/x0", i);
-            EFF_Z_OVER_A[3] += thickness*Zeff/Aeff;      
-            T_OVER_X0[3]+=thickness/X0;   
-        }
-        for (int i = 0; i < dbprovider.length("/test/mvt/bmt_mat_l5/thickness"); i++) {
-            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l5/thickness", i)/10000.;
-            double Zeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l5/average_z", i);
-            double Aeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l5/average_a", i);
-            double X0 =  dbprovider.getDouble("/test/mvt/bmt_mat_l5/x0", i);
-            EFF_Z_OVER_A[4] += thickness*Zeff/Aeff;      
-            T_OVER_X0[4]+=thickness/X0;  
-        }
-        for (int i = 0; i < dbprovider.length("/test/mvt/bmt_mat_l6/thickness"); i++) {
-            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l6/thickness", i)/10000.;
-            double Zeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l6/average_z", i);
-            double Aeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l6/average_a", i);
-            double X0 =  dbprovider.getDouble("/test/mvt/bmt_mat_l6/x0", i);
-            EFF_Z_OVER_A[5] += thickness*Zeff/Aeff;      
-            T_OVER_X0[5]+=thickness/X0;      
+        for(int il=0; il<NLAYERS; il++) {
+            int layer = il+1;
+            for (int i = 0; i < dbprovider.length("/test/mvt/bmt_mat_l" + layer + "/thickness"); i++) {
+                double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l" + layer + "/thickness", i)/10000.;
+                double Zeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l" + layer + "/average_z", i);
+                double Aeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l" + layer + "/average_a", i);
+                double X0 =  dbprovider.getDouble("/test/mvt/bmt_mat_l" + layer + "/x0", i);
+                EFF_Z_OVER_A[il] += thickness*Zeff/Aeff;      
+                T_OVER_X0[il]+=thickness/X0;
+                TMAT[il] += thickness;
+            }
         }
         
         if (GRID_SIZE!=dbprovider.length("/calibration/mvt/lorentz/angle")) {

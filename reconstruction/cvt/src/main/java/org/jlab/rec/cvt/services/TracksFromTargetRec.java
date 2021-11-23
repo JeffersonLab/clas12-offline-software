@@ -17,6 +17,7 @@ import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
+import org.jlab.rec.cvt.cross.CrossMaker;
 import org.jlab.rec.cvt.cross.StraightTrackCrossListFinder;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.track.Seed;
@@ -138,9 +139,22 @@ public class TracksFromTargetRec {
                     //refit adding missing clusters
                     List<Cluster> clsOnTrack = recUtil.FindClustersOnTrk(SVTclusters, seed.get_Clusters(), fittedTrack.get_helix(), 
                             fittedTrack.get_P(), fittedTrack.get_Q(), SVTGeom, swimmer); //VZ: finds missing clusters
-                    if(clsOnTrack.size()>0) {
+                    List<Cluster> bmtclsOnTrack = recUtil.FindClustersOnTrk(BMTclusters, seed.get_Crosses(), fittedTrack.get_helix(), 
+                            fittedTrack.get_P(), fittedTrack.get_Q(), BMTGeom, swimmer); //VZ: finds missing clusters
+                    CrossMaker cm = new CrossMaker();
+                    List<Cross> bmtcrsOnTrack = recUtil.findCrossesOnBMTTrack(bmtclsOnTrack, BMTGeom, cm, crosses.get(1).size()+2000);
+                    
+                    if(clsOnTrack.size()>0 || bmtcrsOnTrack.size()>0) { 
                         //seed.add_Clusters(clsOnTrack);
-                        seed.get_Clusters().addAll(clsOnTrack); //VZ check for additional clusters, and only then re-run KF adding new clusters                    
+                        if(clsOnTrack.size()>0) 
+                            seed.get_Clusters().addAll(clsOnTrack); //VZ check for additional clusters, and only then re-run KF adding new clusters                    
+                        if(bmtcrsOnTrack.size()>0) {
+                            seed.get_Crosses().addAll(bmtcrsOnTrack); //VZ check for additional crosses, and only then re-run KF adding new clusters                    
+                            crosses.get(1).addAll(bmtcrsOnTrack);
+                            for(Cross c : bmtcrsOnTrack) {
+                                seed.get_Clusters().add(c.get_Cluster1());
+                            }
+                        }
                         //reset pars
                         v = fittedTrack.get_helix().getVertex();
                         p = fittedTrack.get_helix().getPXYZ(solenoidValue);
