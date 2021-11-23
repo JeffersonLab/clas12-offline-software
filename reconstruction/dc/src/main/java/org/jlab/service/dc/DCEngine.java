@@ -17,7 +17,6 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.trajectory.TrajectorySurfaces;
 import org.jlab.utils.CLASResources;
-import sun.rmi.runtime.Log;
 
 public class DCEngine extends ReconstructionEngine {
 
