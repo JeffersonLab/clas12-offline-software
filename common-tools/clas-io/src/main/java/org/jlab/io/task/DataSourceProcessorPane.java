@@ -52,10 +52,19 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
     private int                  eventDelay    = 0;
     private Color paneBackground               = Color.GRAY;
     public boolean               isHipo3Event  = false;          
-        
+    private String               defaultHost   = null;
+    private String               defaultIp     = null;    
+    
     public DataSourceProcessorPane(){
         super();
         initUI();
+    }
+    
+    public DataSourceProcessorPane(String host, String ip){
+        super();
+        initUI();
+        this.defaultHost = host;
+        this.defaultIp   = ip;
     }
     
     private void initUI(){
@@ -236,7 +245,7 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
             this.dataProcessor.processNextEvent();
         }
         if(e.getActionCommand().compareTo("OpenFileET")==0){
-            ConnectionDialog dialog = new ConnectionDialog();
+            ConnectionDialog dialog = new ConnectionDialog(this.defaultHost, this.defaultIp);
             dialog.setVisible(true);
             if(dialog.reason()==DialogUtilities.OK_RESPONSE){
                 String ip   = dialog.getIpAddress();

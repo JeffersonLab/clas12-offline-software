@@ -79,12 +79,12 @@ public class DCEngine extends ReconstructionEngine {
         if(this.getEngineConfigString("outputBankPrefix")!=null) {
             outBankPrefix = this.getEngineConfigString("outputBankPrefix");
         }
-        
-    }
-    
-    
+
+            }
+
+
     public void LoadTables() {
-        
+
         // Load tables
         Map<String,Integer> dcTables = new HashMap<>();
         dcTables.put(Constants.DOCARES,3);

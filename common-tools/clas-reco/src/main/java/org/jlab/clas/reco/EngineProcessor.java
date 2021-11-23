@@ -78,7 +78,8 @@ public class EngineProcessor {
             "DCCR","DCHB","FTOFHB","EC",
             "CVT","CTOF","CND","BAND",
             "HTCC","LTCC","EBHB",
-            "DCTB","FTOFTB","EBTB","RICHEB","RTPC", "MC"
+            "DCTB","FMT","FTOFTB","EBTB",
+            "RICHEB","RTPC", "MC"
         };
 
         String[] services = new String[]{
@@ -99,6 +100,7 @@ public class EngineProcessor {
             "org.jlab.service.ltcc.LTCCEngine",
             "org.jlab.service.eb.EBHBEngine",
             "org.jlab.service.dc.DCTBEngine",
+            "org.jlab.service.fmt.FMTEngine",
             "org.jlab.service.ftof.FTOFTBEngine",
             "org.jlab.service.eb.EBTBEngine",
             "org.jlab.rec.rich.RICHEBEngine",
@@ -220,6 +222,9 @@ public class EngineProcessor {
                     engine.getValue().wroteConfig = true;
                     JsonUtils.extend(event, ReconstructionEngine.CONFIG_BANK_NAME, "json",
                             engine.getValue().generateConfig());
+                }
+                if (engine.getValue().dropOutputBanks) {
+                    engine.getValue().dropBanks(event);
                 }
                 engine.getValue().processDataEvent(event);
             } catch (Exception e){

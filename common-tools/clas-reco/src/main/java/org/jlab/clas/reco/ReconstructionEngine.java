@@ -48,7 +48,7 @@ public abstract class ReconstructionEngine implements Engine {
     
     volatile boolean wroteConfig = false;
 
-    private boolean dropOutputBanks = false;
+    volatile boolean dropOutputBanks = false;
     private final Set<String> outputBanks = new HashSet<String>();
 
     String             engineName        = "UnknownEngine";
@@ -282,6 +282,15 @@ public abstract class ReconstructionEngine implements Engine {
         return ret;
     }
     
+    public void dropBanks(DataEvent event) {
+        for (String bankName : this.outputBanks) {
+            if (event.hasBank(bankName)) {
+                event.removeBank(bankName);
+            }
+        }
+    }
+    
+    
     @Override
     public EngineData execute(EngineData input) {
 
@@ -314,18 +323,14 @@ public abstract class ReconstructionEngine implements Engine {
                 output.setDescription(msg);
                 return output;
             }
-
+                    
             try {
                 if (!this.wroteConfig) {
                     this.wroteConfig = true;
                     JsonUtils.extend(dataEventHipo, CONFIG_BANK_NAME, "json", this.generateConfig());
                 }
                 if (this.dropOutputBanks) {
-                    for (String bankName : this.outputBanks) {
-                        if (dataEventHipo.hasBank(bankName)) {
-                            dataEventHipo.removeBank(bankName);
-                        }
-                    }
+                    this.dropBanks(dataEventHipo);
                 }
                 this.processDataEvent(dataEventHipo);
                 output.setData(mt, dataEventHipo.getHipoEvent());

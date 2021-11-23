@@ -70,6 +70,7 @@ public class Constants {
     public DCGeant4Factory    dcDetector   = null;
     public FTOFGeant4Factory  ftofDetector = null;
     public Detector           ecalDetector = null;
+    public Detector           fmtDetector  = null;
     public TrajectorySurfaces tSurf        = null;
     
     public static final double htccRadius=175;
@@ -440,11 +441,11 @@ public class Constants {
         // Load other geometries
         ConstantProvider providerFTOF = GeometryFactory.getConstants(DetectorType.FTOF, 11, geoVariation);
         ftofDetector = new FTOFGeant4Factory(providerFTOF);        
-        ConstantProvider providerEC = GeometryFactory.getConstants(DetectorType.ECAL, 11, geoVariation);
         ecalDetector =  GeometryFactory.getDetector(DetectorType.ECAL, 11, geoVariation);
+        fmtDetector =  GeometryFactory.getDetector(DetectorType.FMT, 11, geoVariation);
         // create the surfaces
         tSurf = new TrajectorySurfaces();
-        tSurf.LoadSurfaces(targetPosition, targetLength,dcDetector, ftofDetector, ecalDetector);        
+        tSurf.LoadSurfaces(targetPosition, targetLength,dcDetector, ftofDetector, ecalDetector, fmtDetector);        
     }
    
 
