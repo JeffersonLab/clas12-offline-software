@@ -45,7 +45,6 @@ public class ECCommon {
     public static double           logParam = 4.0;
     public static String          variation = "default";
     public static String      geomVariation = "default";
-    public static int       pcTrackingPlane = 9;
     
     private static double[] AtoE  = {15,10,10};   // SCALED ADC to Energy in MeV
     private static double[] AtoE5 = {15,5,5};     // For Sector 5 ECAL
@@ -139,8 +138,7 @@ public class ECCommon {
             int superlayer = (int) ((layer-1)/3);                  //0=PCAL 1=ECIN 2=ECOU
             int localLayer = (layer-1)%3;                          //0=U 1=V 2=W
 
-//            int off = (superlayer==0)?DetectorLayer.PCAL_Z:DetectorLayer.EC_INNER_Z;
-            int off = (superlayer==0)?pcTrackingPlane:0; //pcTrackingPlane = 9 (in the sequence 0-14 of 15 scintillator planes in PCAL)
+            int off = superlayer==0 ? DetectorLayer.PCAL_Z : (superlayer==1 ? DetectorLayer.EC_INNER_Z : DetectorLayer.EC_OUTER_Z);
             
             Layer detLayer = detector.getSector(sector-1).getSuperlayer(superlayer).getLayer(localLayer+off);
             ScintillatorPaddle      paddle = (ScintillatorPaddle) detLayer.getComponent(component-1);
@@ -238,7 +236,7 @@ public class ECCommon {
                 float t = bank.getFloat("time", i) + (float) tmf.getDoubleValue("offset",is,il,ip) // FADC-TDC offset (sector, layer, PMT)
                                                    + (float)  fo.getDoubleValue("offset",is,il,0); // FADC-TDC offset (sector, layer) 
                 
-		        if(status.getIntValue("status",is,il,ip)==3) continue;    
+		        if (status.getIntValue("status",is,il,ip)==3) continue;    
 		    
                 ECStrip  strip = new ECStrip(is, il, ip); 
                 
@@ -277,7 +275,7 @@ public class ECCommon {
             for(int loop = 1; loop < stripList.size(); loop++){ //Loop over all strips 
                 boolean stripAdded = false;                
                 for(ECPeak  peak : peakList) {
-                    if(peak.addStrip(stripList.get(loop))==true){ //Add adjacent strip to newly seeded peak
+                    if(peak.addStrip(stripList.get(loop))){ //Add adjacent strip to newly seeded peak
                         stripAdded = true;
                     }
                 }
@@ -312,7 +310,7 @@ public class ECCommon {
         return peakList;
     }
     
-    public static List<ECPeak>   getPeaks(int sector, int layer, List<ECPeak> peaks){
+    public static List<ECPeak>  getPeaks(int sector, int layer, List<ECPeak> peaks){
         List<ECPeak>  selected = new ArrayList<ECPeak>();
         for(ECPeak peak : peaks){
             if(peak.getDescriptor().getSector()==sector&&peak.getDescriptor().getLayer()==layer){
@@ -326,7 +324,7 @@ public class ECCommon {
         
         for(int i = 0; i < clusters.size() - 1; i++){
             for(int k = i+1 ; k < clusters.size(); k++){
-                byte sharedView = (byte) clusters.get(i).sharedView(clusters.get(k)); // 0,1,2 <=> U,V,W
+                byte sharedView = (byte) clusters.get(i).sharedView(clusters.get(k)); // 0,1,2,3,4,5 <=> U,V,W,UV,UW,VW
                 if(sharedView>=0&&sharedView<6){
                 	clusters.get(i).setSharedCluster(k); clusters.get(i).setSharedView(sharedView+1);
                 	clusters.get(k).setSharedCluster(i); clusters.get(k).setSharedView(sharedView+1);                  
