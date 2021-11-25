@@ -377,7 +377,7 @@ public class Track {
         DataBank trajBank  = null;
         if(event.hasBank("TimeBasedTrkg::TBTracks"))   trackBank = event.getBank("TimeBasedTrkg::TBTracks");
         if(event.hasBank("TimeBasedTrkg::Trajectory")) trajBank  = event.getBank("TimeBasedTrkg::Trajectory");
-        if (trackBank!=null && trajBank!=null) {
+        if (trackBank!=null) {
         
             for (int i = 0; i < trackBank.rows(); i++) {
                 Track trk = new Track();
