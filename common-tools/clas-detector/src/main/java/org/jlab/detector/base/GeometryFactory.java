@@ -11,6 +11,7 @@ import org.jlab.geom.base.Detector;
 import org.jlab.geom.detector.cnd.CNDFactory;
 import org.jlab.geom.detector.dc.DCFactory;
 import org.jlab.geom.detector.ec.ECFactory;
+import org.jlab.geom.detector.fmt.FMTFactory;
 import org.jlab.geom.detector.ftof.FTOFFactory;
 
 /**
@@ -108,6 +109,12 @@ public class GeometryFactory {
         if(type==DetectorType.TARGET){
             provider.loadTable("/geometry/target");
         }
+
+        if(type==DetectorType.FMT){
+            provider.loadTable("/geometry/fmt/fmt_global");
+            provider.loadTable("/geometry/fmt/fmt_layer_noshim");
+            provider.loadTable("/geometry/fmt/alignment");
+        }
         
         provider.disconnect();
         return provider;
@@ -160,6 +167,12 @@ public class GeometryFactory {
             CNDFactory factory = new CNDFactory();
             Detector ftof = factory.createDetectorCLAS(provider);
             return   ftof;
+        }
+        
+        if(type==DetectorType.FMT){
+            FMTFactory factory = new FMTFactory();
+            Detector fmt = factory.createDetectorCLAS(provider);
+            return   fmt;
         }
         
         System.out.println("[GeometryFactory] --->  detector construction for " 

@@ -17,7 +17,7 @@ import org.jlab.rec.tof.hit.AHit;
  * @author ziegler
  *
  */
-public class ClusterMatcher {
+public class ClusterMatcher extends ArrayList<Cluster> {
 
     /**
      * Matches the clusters in panel 1A and 1B
@@ -26,10 +26,9 @@ public class ClusterMatcher {
 
     }
 
-    private double[] _deltaPathLen = new double[3]; // pathlength of track between
-    // counters for 3 cases(taking
-    // earlier hit time, max energy
-    // or average hit times)
+    private double[] _deltaPathLen = new double[3]; // pathlength of track between counters for 3 cases
+    private double[] _tCorr = new double[3];        // corrected time using 3 algorithms
+    // (taking earlier hit time, max energy or average hit times)
     public double Beta = 0; // beta of the track to be obtained from the event
     // builder
     private double _xMatch = Double.NaN; // matched x coordinate between panel
@@ -73,6 +72,10 @@ public class ClusterMatcher {
         this._tMatch = _tMatch;
     }
 
+    public double[] get_tCorr() {
+        return _tCorr;
+    }
+
     public double getBeta() {
         return Beta;
     }
@@ -85,27 +88,23 @@ public class ClusterMatcher {
      *
      * @param C1a Cluster in panel 1a
      * @param C1b Cluster in panel 1b
-     * @return a 2-cluster system corresponding to a match between panel 1a and
-     * panel 1b
      */
-    public ArrayList<Cluster> ClusterDoublet(Cluster C1a, Cluster C1b, DataEvent event) { 
-        if (event.hasBank("RECHB::Particle")==false ||  event.hasBank("RECHB::Track")==false) 
-            return null; // do only if there's TB tracking
-        
+    public void init(Cluster C1a, Cluster C1b, DataEvent event) { 
+
         if (C1b.get_xTrk() == null || C1a.get_xTrk() == null) {
-            return null; // no tracking info
+            return; // no tracking info
         }
         if (C1a.get(0).get_TrkId() != C1b.get(0).get_TrkId()) {
-            return null; // not from the stame track
+            return; // not from the stame track
         }
         ArrayList<Cluster> ClsDoublet = new ArrayList<Cluster>(2);
         // computes an array of pathlengths for (cluster size=1) 1 or (cluster
         // size=2) 3 reference points along
         // the trajectory of the track with the counters in the cluster
         //
-        double[][] X1 = this.get_ClusterHitCoordinates(C1a);
-        double[][] X2 = this.get_ClusterHitCoordinates(C1b);
-        double[] deltaR = this.calc_deltaR(X1, X2);
+        double[][] X1 = ClusterMatcher.get_ClusterHitCoordinates(C1a);
+        double[][] X2 = ClusterMatcher.get_ClusterHitCoordinates(C1b);
+        double[] deltaR = ClusterMatcher.calc_deltaR(X1, X2);
         this._deltaPathLen = deltaR;
         //Read Beta:   
         DataBank bank = event.getBank("RECHB::Track");
@@ -113,8 +112,7 @@ public class ClusterMatcher {
         for (int i = 0; i < rows; i++) {
             if (bank.getByte("detector", i) == 6 &&
                     bank.getShort("index", i) == C1a.get(0).get_TrkId() - 1) {
-                this.Beta = event.getBank("RECHB::Particle").getFloat("beta",
-                        bank.getShort("pindex", i));
+                this.Beta = event.getBank("RECHB::Particle").getFloat("beta", bank.getShort("pindex", i));
             }
         }
         //double beta = C1b.get(0).get_TrkPathLen() / C1b.get_t();
@@ -131,12 +129,12 @@ public class ClusterMatcher {
         if (Math.abs(C1a.get_x() - C1a.get_xTrk()[0]) > Constants.CLS1ATRKMATCHXPAR
                 || Math.abs(C1a.get_y() - C1a.get_yTrk()[0]) > Constants.CLS1ATRKMATCHYPAR
                 || Math.abs(C1a.get_z() - C1a.get_zTrk()[0]) > Constants.CLS1ATRKMATCHZPAR) {
-            return null; // not matched
+            return; // not matched
         }
         if (Math.abs(C1b.get_x() - C1b.get_xTrk()[0]) > Constants.CLS1BTRKMATCHXPAR
                 || Math.abs(C1b.get_y() - C1b.get_yTrk()[0]) > Constants.CLS1BTRKMATCHYPAR
                 || Math.abs(C1b.get_z() - C1b.get_zTrk()[0]) > Constants.CLS1BTRKMATCHZPAR) {
-            return null; // not matched
+            return; // not matched
         }
         
         // Matching between 1A and 1B
@@ -155,15 +153,15 @@ public class ClusterMatcher {
 
         if (Double.isNaN(_xMatch) || Double.isNaN(_yMatch)
                 || Double.isNaN(_zMatch) || Double.isNaN(_tMatch)) {
-            return null; // not matched
+            return; // not matched
         }
-        ClsDoublet.add(C1a);
-        ClsDoublet.add(C1b);
-        return ClsDoublet;
+        this.add(C1a);
+        this.add(C1b);
+        return;
 
     }
 
-    private double[] calc_deltaR(double[][] X1, double[][] X2) {
+    private static double[] calc_deltaR(double[][] X1, double[][] X2) {
 
         double[] deltaR = new double[3];
 
@@ -187,7 +185,7 @@ public class ClusterMatcher {
         return deltaR;
     }
 
-    private double[][] get_ClusterHitCoordinates(Cluster c1a) {
+    private static double[][] get_ClusterHitCoordinates(Cluster c1a) {
         double[][] X1 = new double[3][3];
 
         double x1_min = c1a.get(0).get_Position().x();
@@ -228,8 +226,8 @@ public class ClusterMatcher {
      * @param clusters
      * @return list of matched cluster doublets
      */
-    public ArrayList<ArrayList<Cluster>> MatchedClusters(List<Cluster> clusters, DataEvent event) { 
-        ArrayList<ArrayList<Cluster>> ClsDoublets = new ArrayList<ArrayList<Cluster>>();
+    public static ArrayList<ClusterMatcher> matchClusters(List<Cluster> clusters, DataEvent event) { 
+        ArrayList<ClusterMatcher> ClsDoublets = new ArrayList<ClusterMatcher>();
         
         if (event.hasBank("RECHB::Particle")==true ||  event.hasBank("RECHB::Track")==true) { 
          // do only if there's TB tracking
@@ -247,14 +245,13 @@ public class ClusterMatcher {
                         continue;
                     }
 
-                    ArrayList<Cluster> ClsDoub = ClusterDoublet(C1, C2, event);
-                    if(ClsDoub==null)
-                        continue;
-                    C2.set_tCorr(this.get_CorrectedHitTime(C1, C2)); // set the
-                    // corrected
-                    // Time for
-                    // 1b
-                    ClsDoublets.add(ClsDoub);
+                    ClusterMatcher clsDoublet = new ClusterMatcher();
+                    clsDoublet.init(C1, C2, event);
+                    if(clsDoublet.size()==0) continue;
+                    
+                    clsDoublet.set_CorrectedHitTime(C1, C2);
+                    
+                    ClsDoublets.add(clsDoublet);
                 }
             }
         }
@@ -282,9 +279,8 @@ public class ClusterMatcher {
      * @param clus1B
      * @return corrected hit times for each of the 3 ways of computing deltaR
      */
-    private double[] get_CorrectedHitTime(Cluster clus1A, Cluster clus1B) {
+    private void set_CorrectedHitTime(Cluster clus1A, Cluster clus1B) {
 
-        double[] tCorr = {-1, -1, -1};
         double[] term2 = new double[3];
         int CntrInPan1aWithEmax = this.get_CounterWithMaxE(clus1A);
         int CntrInPan1bWithEmax = this.get_CounterWithMaxE(clus1B);
@@ -303,11 +299,11 @@ public class ClusterMatcher {
             for (int i = 0; i < 3; i++) {
                 if (this._deltaPathLen[i] > 0) {
                     term2[i] = (clus1A.get_t() - this._deltaPathLen[i] / Beta/ PhysicsConstants.speedOfLight()) / delta_t1a;
-                    tCorr[i] = (term1 + term2[i]) / term3;
+                    _tCorr[i] = (term1 + term2[i]) / term3;
                 }
             }
         }
-        return tCorr;
+        return;
 
     }
 

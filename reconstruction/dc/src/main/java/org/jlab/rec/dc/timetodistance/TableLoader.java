@@ -205,7 +205,6 @@ public class TableLoader {
         }	
         TableLoader.fillMissingTableBins();
         //TableLoader.test();
-        System.out.println(" T2D TABLE FILLED.....");
         T2DLOADED = true;
      }
 

@@ -13,7 +13,9 @@ import java.util.Arrays;
 public class LTCCEngine extends ReconstructionEngine {
     private static final boolean DEBUG = false;
     private static final List<String> CC_TABLES = 
-        Arrays.asList("/calibration/ltcc/spe");
+        Arrays.asList("/calibration/ltcc/spe",
+                      "/calibration/ltcc/status"
+                );
     
     public LTCCEngine() {
     	super("LTCC", "joosten", "1.0");
@@ -40,8 +42,8 @@ public class LTCCEngine extends ReconstructionEngine {
         
     @Override
         public boolean init() {
-            this.requireConstants(CC_TABLES);
-            System.out.println("[LTCC] --> initialization successful...");
+            this.requireConstants(CC_TABLES);            
+            this.registerOutputBank("LTCC::clusters");
             return true;
         }
        
