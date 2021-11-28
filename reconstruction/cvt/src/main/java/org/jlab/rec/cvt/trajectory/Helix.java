@@ -58,7 +58,7 @@ public class Helix {
         return _dca;
     }
 
-    public void set_dca(double dca) {
+    public final void set_dca(double dca) {
         this._dca = dca;
     }
 
@@ -66,7 +66,7 @@ public class Helix {
         return _phi_at_dca;
     }
 
-    public void set_phi_at_dca(double phi_at_dca) {
+    public final void set_phi_at_dca(double phi_at_dca) {
         this._phi_at_dca = phi_at_dca;
     }
 
@@ -74,7 +74,7 @@ public class Helix {
         return _curvature;
     }
 
-    public void set_curvature(double curvature) {
+    public final void set_curvature(double curvature) {
         this._curvature = curvature;
     }
 
@@ -82,7 +82,7 @@ public class Helix {
         return _Z0;
     }
 
-    public void set_Z0(double Z0) {
+    public final void set_Z0(double Z0) {
         this._Z0 = Z0;
     }
 
@@ -90,7 +90,7 @@ public class Helix {
         return _tandip;
     }
 
-    public void set_tandip(double tandip) {
+    public final void set_tandip(double tandip) {
         this._tandip = tandip;
     }
 
@@ -98,7 +98,7 @@ public class Helix {
         return _covmatrix;
     }
     
-    public void set_covmatrix(double[][] covmatrix) {
+    public final void set_covmatrix(double[][] covmatrix) {
         this._covmatrix = covmatrix;
     }
 
@@ -205,8 +205,7 @@ public class Helix {
     }
 
     public int get_charge() {
-        int charge = 0;
-        charge = (int) Math.signum(_curvature);
+        int charge = (int) Math.signum(_curvature);
 
         return charge;
     }
