@@ -314,6 +314,48 @@ public class CVTRecNewKF extends ReconstructionEngine {
         if(exlyrsnb>0)
             exclLayrs = true;
         
+        //Skip layers
+         String exBMTLys = this.getEngineConfigString("excludeBMTLayers");
+        
+        if (exBMTLys!=null) {
+            System.out.println("["+this.getName()+"] run with BMT layers "+exBMTLys+"excluded config chosen based on yaml");
+            String exbmtlys = String.valueOf(exBMTLys);
+            String[] values = exbmtlys.split(",");
+            int layer = Integer.valueOf(values[0]);
+            double phi_min = (double) Float.valueOf(values[1]);
+            double phi_max = (double) Float.valueOf(values[2]);
+            double z_min = (double) Float.valueOf(values[3]);
+            double z_max = (double) Float.valueOf(values[4]);
+            org.jlab.rec.cvt.Constants.setBMTLayerExcld(layer);
+            double[][]BMTPhiZRangeExcld= new double[2][2];
+            BMTPhiZRangeExcld[0][0] = phi_min;
+            BMTPhiZRangeExcld[0][1] = phi_max;
+            BMTPhiZRangeExcld[1][0] = z_min;
+            BMTPhiZRangeExcld[1][1] = z_max;
+            org.jlab.rec.cvt.Constants.setBMTPhiZRangeExcld(BMTPhiZRangeExcld);
+            
+        }
+        else {
+            exBMTLys = System.getenv("COAT_CVT_EXCLUDEBMTLAYERS");
+            if (exBMTLys!=null) {
+                System.out.println("["+this.getName()+"] run with region "+exBMTLys+"excluded in fit  config chosen based on env");
+                String exbmtlys = String.valueOf(exBMTLys);
+                String[] values = exbmtlys.split(",");
+                int layer = Integer.valueOf(values[0]);
+                double phi_min = (double) Float.valueOf(values[1]);
+                double phi_max = (double) Float.valueOf(values[2]);
+                double z_min = (double) Float.valueOf(values[3]);
+                double z_max = (double) Float.valueOf(values[4]);
+                org.jlab.rec.cvt.Constants.setBMTLayerExcld(layer);
+                double[][]BMTPhiZRangeExcld= new double[2][2];
+                BMTPhiZRangeExcld[0][0] = phi_min;
+                BMTPhiZRangeExcld[0][1] = phi_max;
+                BMTPhiZRangeExcld[1][0] = z_min;
+                BMTPhiZRangeExcld[1][1] = z_max;
+                org.jlab.rec.cvt.Constants.setBMTPhiZRangeExcld(BMTPhiZRangeExcld);
+            }
+        }
+       
         //double[][]bmtx = new double[2][2];
         //bmtx[0][0]= Math.toRadians(90);
         //bmtx[0][1]= Math.toRadians(115);
