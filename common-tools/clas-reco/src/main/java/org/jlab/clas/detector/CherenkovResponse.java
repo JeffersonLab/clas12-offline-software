@@ -53,6 +53,13 @@ public class CherenkovResponse extends DetectorResponse {
         hitDeltaPhi    = dphi;
     }
 
+    public void copy(CherenkovResponse r) {
+        super.copy(r);
+        hitDeltaPhi = r.hitDeltaPhi;
+        hitDeltaTheta = r.hitDeltaTheta;
+        hitPosition.copy(r.hitPosition);
+    }
+
     public double getNphe() {return this.getEnergy(); }
     public double getDeltaTheta(){ return this.hitDeltaTheta;}
     public double getDeltaPhi() {return this.hitDeltaPhi;}
