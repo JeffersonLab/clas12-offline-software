@@ -89,8 +89,6 @@ public class DCTBEngine extends DCEngine {
         List<Segment> segments = new ArrayList<>();
         List<Cross> crosses = new ArrayList<>();
         List<Track> trkcands = new ArrayList<>();
-        // final listed of hits and clusters from segments associated to tracks
-        List<FittedHit> thits = new ArrayList<>();	
         
         if(Constants.DEBUG)
             System.out.println("TB AI "+ this.getName());
@@ -293,22 +291,12 @@ public class DCTBEngine extends DCEngine {
                     c.get_Segment1().isOnTrack=true;
                     c.get_Segment2().isOnTrack=true;
                     for (FittedHit h1 : c.get_Segment1()) {
-                        h1.set_AssociatedHBTrackID(trk.get_Id());
-                        thits.add(h1);
+                        h1.set_AssociatedTBTrackID(trk.get_Id());
                     }
                     for (FittedHit h2 : c.get_Segment2()) {
-                        h2.set_AssociatedHBTrackID(trk.get_Id());
-                        thits.add(h2);
+                        h2.set_AssociatedTBTrackID(trk.get_Id());
                     }
-                    
-//                    for(FittedHit h1 : c.get_Segment1()) { 
-//                        h1.set_AssociatedTBTrackID(trk.get_Id());
-//
-//                    }
-//                    for(FittedHit h2 : c.get_Segment2()) {
-//                        h2.set_AssociatedTBTrackID(trk.get_Id());                              
-//                    }
-                    
+                                        
                     if (c.get_Segment1().get_Id() == -1) {
                         trk.set_MissingSuperlayer(c.get_Segment1().get_Superlayer());
                         trk.setSingleSuperlayer(c.get_Segment2());
@@ -318,7 +306,6 @@ public class DCTBEngine extends DCEngine {
                         trk.setSingleSuperlayer(c.get_Segment1());
                     }
                 }
-                //trkId++;
             }
             this.ensureTrackUnique(trkcands);
         }    
@@ -330,9 +317,8 @@ public class DCTBEngine extends DCEngine {
             return true;
         }
         
-        rbc.fillAllTBBanks(event, thits, clusters, segments, crosses, trkcands);
-        //if(this.aiAssist) 
-        //    event.getBank("TimeBasedTrkg::"+_name+"Tracks").show();
+        rbc.fillAllTBBanks(event, fhits, clusters, segments, crosses, trkcands);
+
         return true;
     }
 
