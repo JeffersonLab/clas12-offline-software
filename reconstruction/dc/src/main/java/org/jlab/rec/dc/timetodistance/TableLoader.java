@@ -2,12 +2,17 @@ package org.jlab.rec.dc.timetodistance;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.rec.dc.Constants;
 import org.jlab.utils.groups.IndexedTable;
 
 
 public class TableLoader {
+
+    public static Logger LOGGER = Logger.getLogger(TableLoader.class.getName());
 
     public TableLoader() {
             // TODO Auto-generated constructor stub
@@ -66,7 +71,7 @@ public class TableLoader {
     
     public static synchronized void FillT0Tables(int run, String variation) {
         if (T0LOADED) return;
-        System.out.println(" T0 TABLE FILLED..... for Run "+run+" with VARIATION "+variation);
+        LOGGER.log(Level.INFO," T0 TABLE FILLED..... for Run "+run+" with VARIATION "+variation);
         DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(run, variation);
         dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
         //disconnect from database. Important to do this after loading tables.
