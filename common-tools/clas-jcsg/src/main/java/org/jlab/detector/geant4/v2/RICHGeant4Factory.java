@@ -1,39 +1,29 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+//*
+To change this license header, choose License Headers in Project Properties.
+* To change this template file, choose Tools | Templates
+* and open the template in the editor.
+*/
 package org.jlab.detector.geant4.v2;
 
-import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.Vector3d;
-import eu.mihosoft.vrl.v3d.Vertex;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.jlab.detector.units.SystemOfUnits.Length;
 import org.jlab.detector.volume.G4Stl;
 import org.jlab.detector.volume.G4World;
+import org.jlab.geom.prim.Point3D;
+
+
 import org.jlab.detector.volume.G4Box;
 
 /**
  * Building the RICH PMTs
- * @author gangel, Goodwill, kenjo
+ * @author Goodwill, kenjo
  */
 public final class RICHGeant4Factory extends Geant4Factory {
-    // list containing the volumes that can be obtained with a getter method
-    private List<G4Box> pmts = new ArrayList<G4Box>();
-    private List<G4Box> photocatodes = new ArrayList<G4Box>();
-    private List<G4Box> windows = new ArrayList<G4Box>();
-    private List<G4Stl> aerogel_201=new ArrayList<G4Stl>();
-    private List<G4Stl> aerogel_202=new ArrayList<G4Stl>();
-    private List<G4Stl> aerogel_203=new ArrayList<G4Stl>();
-    private List<G4Stl> aerogel_204=new ArrayList<G4Stl>();
-    private List<G4Stl> mirror_301 = new ArrayList<G4Stl>();
-    private List<G4Stl> mirror_302 = new ArrayList<G4Stl>();
-    private List<G4Stl> stlvolumes = new ArrayList<G4Stl>();
     
-    private int StlNr = 0;
     //to be  stored in database, from hashmap of perl script for gemc, all dimensions in mm
     private final int PMT_rows = 23, sector = 4;
     
@@ -59,50 +49,33 @@ public final class RICHGeant4Factory extends Geant4Factory {
     
     private final double offset = 0.5 * Length.mm;
     
+    // list containing the pmts
+    private List<G4Box> pmts = new ArrayList<G4Box>();
+    private List<G4Box> photocatodes = new ArrayList<G4Box>();
+    private List<G4Stl> stlvolumes = new ArrayList<G4Stl>();
     
+    // Optical properties
+    private double n_w=1.3;
+    private double n_aerogel=1.5;
     
-    // Optical properties (as a test), they will be implemented for database purposes
-    //   private double n_w=1.3;
-    //  private double n_aerogel=1.05;
     
     public RICHGeant4Factory() {
-
-        int debugMode = 0;
-        
         motherVolume = new G4World("fc");
-        //import the 5 mesh files
-        int stlN=0;
-        
-        if(debugMode>=1)System.out.format("#####RICHFactory Geant4 v2 \n");
         ClassLoader cloader = getClass().getClassLoader();
-        if(debugMode>=1)System.out.format("   --> Rich Sector 4 Mother volume\n");
         G4Stl gasVolume = new G4Stl("RICH_s4", cloader.getResourceAsStream("rich/cad/RICH_s4.stl"), Length.mm / Length.cm);
         gasVolume.setMother(motherVolume);
         stlvolumes.add(gasVolume);
-        for (String name : new String[]{"Aluminum", "CFRP", "TedlarWrapping","MirrorSupport"}) {
-            if(debugMode>=1)System.out.format("   --> %s\n",name);
+        
+        ArrayList<String> stl_names = StlNames();
+        for( int i =0; i <stl_names.size(); i++ ) {
+            String name = stl_names.get(i);
             G4Stl component = new G4Stl(String.format("%s", name),
                                         cloader.getResourceAsStream(String.format("rich/cad/%s.stl", name)),
                                         Length.mm / Length.cm);
-            if(debugMode>=1)System.out.println("Resource read correctly");
             component.setMother(gasVolume);
             stlvolumes.add(component);
-            stlN++;
+            
         }
-        this.StlNr=stlN;
-        
-        // STL READER:
-        // Read an Stl from folder Layer, with component from 1 up to component max.
-        // Give 0 if the Layer is not optical
-        // Give 1 if it is otpical but not reflective (ex. aerogel)
-        // Give 2 if it is mirror
-        Read_Stl(gasVolume,201,16);
-        Read_Stl(gasVolume,202,22);
-        Read_Stl(gasVolume,203,32);
-        Read_Stl(gasVolume,204,31); //component 32 has been left empty in sector 4 rich
-        // Mirrors
-        Read_Stl(gasVolume,301,7); //Planar Mirrors
-        Read_Stl(gasVolume,302,10); //Spherical Mirrors
         
         //place the PMTs in the trapezoidal box
         for (int irow = 0; irow < PMT_rows; irow++) {
@@ -127,15 +100,218 @@ public final class RICHGeant4Factory extends Geant4Factory {
                 PMT.translate(position.rotateZ(-Math.toRadians(90.0 - (sector - 1) * 60.0)));
                 pmts.add(PMT);
                 
+                
+                
             }
         }
         
     }
     
     
+    // Function to import as stl volumes all stl files:
+    
+    private ArrayList StlNames()
+    {
+        ArrayList<String> names = new ArrayList<String>();
+        // CFRP
+        names.add("CFRP");
+        names.add("MirrorSupport");
+        // Aluminium
+        names.add("Al_Base");
+        names.add("Al_BottomFrame");
+        names.add("Al_TopFrame");
+        names.add("Al_TopLeft");
+        names.add("Al_TopRight");
+        // Tedlar Wrapping : Horizontal components
+        names.add("Tedlar_H1");
+        names.add("Tedlar_H2");
+        names.add("Tedlar_H3");
+        names.add("Tedlar_H4");
+        names.add("Tedlar_H5");
+        names.add("Tedlar_H6");
+        names.add("Tedlar_H7");
+        names.add("Tedlar_H8");
+        names.add("Tedlar_H9");
+        names.add("Tedlar_H10");
+        names.add("Tedlar_H11");
+        names.add("Tedlar_H12");
+        names.add("Tedlar_H13");
+        names.add("Tedlar_H14");
+        names.add("Tedlar_H15");
+        names.add("Tedlar_H16");
+        names.add("Tedlar_H17");
+        names.add("Tedlar_H18");
+        names.add("Tedlar_H19");
+        names.add("Tedlar_H20");
+        names.add("Tedlar_H21");
+        names.add("Tedlar_H22");
+        names.add("Tedlar_H23");
+        names.add("Tedlar_H24");
+        names.add("Tedlar_H25");
+        names.add("Tedlar_H26");
+        names.add("Tedlar_H27");
+        names.add("Tedlar_H28");
+        names.add("Tedlar_H29");
+        names.add("Tedlar_H30");
+        names.add("Tedlar_H31");
+        names.add("Tedlar_H32");
+        names.add("Tedlar_H33");
+        names.add("Tedlar_H34");
+        names.add("Tedlar_H35");
+        names.add("Tedlar_H36");
+        names.add("Tedlar_H37");
+        names.add("Tedlar_H38");
+        names.add("Tedlar_H39");
+        names.add("Tedlar_H40");
+        names.add("Tedlar_H41");
+        names.add("Tedlar_H42");
+        names.add("Tedlar_H43");
+        names.add("Tedlar_H44");
+        names.add("Tedlar_H45");
+        names.add("Tedlar_H46");
+        names.add("Tedlar_H47");
+        // Tedlar Wrapping : Vertical components
+        names.add("Tedlar_V1");
+        names.add("Tedlar_V2");
+        names.add("Tedlar_V3");
+        names.add("Tedlar_V4");
+        names.add("Tedlar_V5");
+        names.add("Tedlar_V6");
+        names.add("Tedlar_V7");
+        names.add("Tedlar_V8");
+        names.add("Tedlar_V9");
+        names.add("Tedlar_V10");
+        names.add("Tedlar_V11");
+        names.add("Tedlar_V12");
+        names.add("Tedlar_V13");
+        names.add("Tedlar_V14");
+        names.add("Tedlar_V15");
+        names.add("Tedlar_V16");
+        names.add("Tedlar_V17");
+        names.add("Tedlar_V18");
+        names.add("Tedlar_V19");
+        names.add("Tedlar_V20");
+        names.add("Tedlar_V21");
+        names.add("Tedlar_V22");
+        names.add("Tedlar_V23");
+        // Aerogel Tiles
+        names.add("Layer_201_component_1");
+        names.add("Layer_201_component_2");
+        names.add("Layer_201_component_3");
+        names.add("Layer_201_component_4");
+        names.add("Layer_201_component_5");
+        names.add("Layer_201_component_6");
+        names.add("Layer_201_component_7");
+        names.add("Layer_201_component_8");
+        names.add("Layer_201_component_9");
+        names.add("Layer_201_component_10");
+        names.add("Layer_201_component_11");
+        names.add("Layer_201_component_12");
+        names.add("Layer_201_component_13");
+        names.add("Layer_201_component_14");
+        names.add("Layer_201_component_15");
+        names.add("Layer_201_component_16");
+        names.add("Layer_202_component_1");
+        names.add("Layer_202_component_2");
+        names.add("Layer_202_component_3");
+        names.add("Layer_202_component_4");
+        names.add("Layer_202_component_5");
+        names.add("Layer_202_component_6");
+        names.add("Layer_202_component_7");
+        names.add("Layer_202_component_8");
+        names.add("Layer_202_component_9");
+        names.add("Layer_202_component_10");
+        names.add("Layer_202_component_11");
+        names.add("Layer_202_component_12");
+        names.add("Layer_202_component_13");
+        names.add("Layer_202_component_14");
+        names.add("Layer_202_component_15");
+        names.add("Layer_202_component_16");
+        names.add("Layer_202_component_17");
+        names.add("Layer_202_component_18");
+        names.add("Layer_202_component_19");
+        names.add("Layer_202_component_20");
+        names.add("Layer_202_component_21");
+        names.add("Layer_202_component_22");
+        names.add("Layer_203_component_1");
+        names.add("Layer_203_component_2");
+        names.add("Layer_203_component_3");
+        names.add("Layer_203_component_4");
+        names.add("Layer_203_component_5");
+        names.add("Layer_203_component_6");
+        names.add("Layer_203_component_7");
+        names.add("Layer_203_component_8");
+        names.add("Layer_203_component_9");
+        names.add("Layer_203_component_10");
+        names.add("Layer_203_component_11");
+        names.add("Layer_203_component_12");
+        names.add("Layer_203_component_13");
+        names.add("Layer_203_component_14");
+        names.add("Layer_203_component_15");
+        names.add("Layer_203_component_16");
+        names.add("Layer_203_component_17");
+        names.add("Layer_203_component_18");
+        names.add("Layer_203_component_19");
+        names.add("Layer_203_component_20");
+        names.add("Layer_203_component_21");
+        names.add("Layer_203_component_22");
+        names.add("Layer_203_component_23");
+        names.add("Layer_203_component_24");
+        names.add("Layer_203_component_25");
+        names.add("Layer_203_component_26");
+        names.add("Layer_203_component_27");
+        names.add("Layer_203_component_28");
+        names.add("Layer_203_component_29");
+        names.add("Layer_203_component_30");
+        names.add("Layer_203_component_31");
+        names.add("Layer_203_component_32");
+        names.add("Layer_204_component_1");
+        names.add("Layer_204_component_2");
+        names.add("Layer_204_component_3");
+        names.add("Layer_204_component_4");
+        names.add("Layer_204_component_5");
+        names.add("Layer_204_component_6");
+        names.add("Layer_204_component_7");
+        names.add("Layer_204_component_8");
+        names.add("Layer_204_component_9");
+        names.add("Layer_204_component_10");
+        names.add("Layer_204_component_11");
+        names.add("Layer_204_component_12");
+        names.add("Layer_204_component_13");
+        names.add("Layer_204_component_14");
+        names.add("Layer_204_component_15");
+        names.add("Layer_204_component_16");
+        names.add("Layer_204_component_17");
+        names.add("Layer_204_component_18");
+        names.add("Layer_204_component_19");
+        names.add("Layer_204_component_20");
+        names.add("Layer_204_component_21");
+        names.add("Layer_204_component_22");
+        names.add("Layer_204_component_23");
+        names.add("Layer_204_component_24");
+        names.add("Layer_204_component_25");
+        names.add("Layer_204_component_26");
+        names.add("Layer_204_component_27");
+        names.add("Layer_204_component_28");
+        names.add("Layer_204_component_29");
+        names.add("Layer_204_component_30");
+        names.add("Layer_204_component_31");
+        names.add("Layer_204_component_32");
+        // Planar Mirrors
+        names.add("Layer_301_component_1");
+        names.add("Layer_301_component_2");
+        names.add("Layer_301_component_3");
+        names.add("Layer_301_component_4");
+        names.add("Layer_301_component_5");
+        names.add("Layer_301_component_6");
+        names.add("Layer_301_component_7");
+        return names;
+    }
+    
     //function that generates the PMT with all the volumes in it
     
     private G4Box buildMAPMT(String mapmtName) {
+        
         
         G4Box MAPMTVolume = new G4Box(mapmtName, MAPMT_dx, MAPMT_dy, MAPMT_dz);
         
@@ -160,15 +336,15 @@ public final class RICHGeant4Factory extends Geant4Factory {
         G4Box Window = new G4Box("Window_" + mapmtName, MAPMT_dx - MAPMTWall_thickness, MAPMT_dy - MAPMTWall_thickness, MAPMTWindow_thickness / 2);
         Window.translate(0, 0, -MAPMT_dz + MAPMTWindow_thickness / 2);
         Window.setMother(MAPMTVolume);
-        windows.add(Window);
+        //Test indexof refraction
+        Window.setIndexRefraction(n_w);
         
         //photocathode
         G4Box Photocathode = new G4Box("Photocathode_" + mapmtName, MAPMTPhotocathode_side / 2, MAPMTPhotocathode_side / 2, MAPMTPhotocathode_thickness / 2);
         Photocathode.translate(0, 0, -MAPMT_dz + MAPMTWindow_thickness + MAPMTPhotocathode_thickness / 2);
         Photocathode.setMother(MAPMTVolume);
-        Photocathode.makeSensitive();
-        
         // add the photocatodes to the list
+        Photocathode.setIndexRefraction(n_w);//test to remove
         photocatodes.add(Photocathode);
         
         //socket
@@ -195,137 +371,25 @@ public final class RICHGeant4Factory extends Geant4Factory {
     
     /**
      * @author: gangel
-     * @param i the nr of the PMT (starting from 1)
+     * @param i the nr of the PMT
      * @return: the Photocatodes volumes inside the PMT
      */
     public G4Box GetPhotocatode(int i)
     {
+        
         return    photocatodes.get(i-1);
-    }
-    
-    
-    /**
-     * @author: gangel
-     * @param i the nr of the PMT (starting from 1 )
-     * @return: the Windows volumes inside the PMT
-     */
-    public G4Box GetWindow(int i)
-    {
-        return windows.get(i-1);
+        
+        
     }
     
     /**
      * @author: gangel
-     * @param i the STL volume nr (as follows):
-     * 0: OpticalGasVolume -1: Aluminum -2: CFRP -3: TedlarWrapping -4: MirrorSupport
-     * @return: the Stl volume
+     * @param i the STL volume
+     * 0 OpticalGasVolume - 1 AerogelTiles,2 Aluminum,3 CFRP,4 Glass,5 TedlarWrapping
+     * @return: the Photocatodes volumes inside the PMT
      */
     public G4Stl GetStl(int i)
     {
-        System.out.println(" GETSTL IS OBSOLETE. DO NOT USE IT, the volumes are incorrect");
-        return  stlvolumes.get(i);
-    }
-    
-    public int GetStlNR()
-    {
-        return this.StlNr;
-    }
-    
-    //i is the number of the stl
-    //
-    public Vector3d GetNormal_Stl(int i, Vector3d hitV )
-    {
-        
-        Vector3d[] Vector = new Vector3d[3];
-        int k=0;
-        //to modify
-        for ( Polygon comp:    this.GetStl(i).toCSG().getPolygons() )
-        {
-            if(comp.contains(hitV))  // search between all the components of the mesh the one containing the vector
-            {
-                for (Vertex vert: comp.vertices ) //creating a list of vertices of components of the hitten track
-                {
-                    Vector[k] = vert.pos;
-                    k++;
-                }
-            }
-        }
-        // using k=0,1,2, I am sure I am going to take the entrance vertexes
-        Vector3d Surf1= new Vector3d(Vector[1].minus(Vector[0]));
-        Vector3d Surf2= new Vector3d(Vector[2].minus(Vector[0]));
-        Vector3d SurfN = new Vector3d(Surf1.cross(Surf2));
-        return SurfN;
-    }
-    
-    // read from file an Stl using the RICH layer, component convention
-    private void Read_Stl(G4Stl Mother, int Layernr , int componentnr ){
-
-        int debugMode = 0;
-        
-        ClassLoader cloader = getClass().getClassLoader();
-        for ( int _ii = 1 ; _ii<= componentnr; _ii++)
-        {
-            String Layers = String.format("Layer_%d",Layernr);
-            String name = String.format("%s_component_%d",Layers,_ii);
-            String Path = String.format("%d",Layernr);
-            // String Path = String.format("%s/%d",Layers,Layernr);
-            if(debugMode>=1 && _ii==componentnr)System.out.format(" Loaded up to %s \n",String.format("rich/cad/%s_%d.stl",Path,_ii));
-            G4Stl component = new G4Stl(String.format("%s", name),
-                                        cloader.getResourceAsStream(String.format("rich/cad/%s_%d.stl",Path,_ii)),
-                                        Length.mm / Length.cm);
-            component.setMother(Mother);
-            if(Layernr == 201){
-                //component.makeOptical();
-                aerogel_201.add(component);
-            }
-            else  if(Layernr == 202){
-                //component.makeOptical();
-                aerogel_202.add(component);
-            }
-            else if(Layernr == 203){
-                //  component.makeOptical();
-                aerogel_203.add(component);
-            }
-            else  if(Layernr == 204){
-                // component.makeOptical();
-                aerogel_204.add(component);
-            }
-            else  if(Layernr == 301){
-                // component.makeReflective();
-                mirror_301.add(component);
-            }
-            else  if(Layernr == 302){
-                // component.makeReflective();
-                mirror_302.add(component);
-            }
-        }
-        return;
-    }
-    /**
-     * @author: gangel
-     * @param   layer nr, component nr
-     * Layer can be (Aerogel) 201,202,203,204,  (Planar Mirror) 301, (Spherical Mirror)302
-     * @return: the G4Stl file
-     */
-    public G4Stl getStlComponent(int Layer_nr , int Component_nr){
-        if (Layer_nr == 201) return aerogel_201.get(Component_nr);
-        else if (Layer_nr == 202) return aerogel_202.get(Component_nr);
-        else if (Layer_nr == 203) return aerogel_203.get(Component_nr);
-        else if (Layer_nr == 204) return aerogel_204.get(Component_nr);
-        else if (Layer_nr == 301) return mirror_301.get(Component_nr);
-        else if (Layer_nr == 302) return mirror_302.get(Component_nr);
-        return null;
-    }
-    
-    public int getStlNumber(int Layer_nr){
-        //System.out.format("getStlNumber Chiesto layer %d\n",Layer_nr);
-        if (Layer_nr == 201) return 16;
-        else if (Layer_nr == 202) return 22;
-        else if (Layer_nr == 203) return 31;
-        else if (Layer_nr == 204) return 31;
-        else if (Layer_nr == 301) return 7;
-        else if (Layer_nr == 302) return 10;
-        return 0;
+        return  stlvolumes.get(i-1);
     }
 }
-
