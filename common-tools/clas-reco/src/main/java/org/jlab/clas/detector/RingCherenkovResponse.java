@@ -24,6 +24,12 @@ public class RingCherenkovResponse extends DetectorResponse {
         this.getDescriptor().setSectorLayerComponent(sector, layer, pmt);
     }
 
+    public void copy(RingCherenkovResponse r) {
+        super.copy(r);
+        cluster = r.cluster;
+        xtalk = r.xtalk;
+    }
+
     public int getCluster(){ return this.cluster;}
     public int getXtalk(){ return this.xtalk;}
 

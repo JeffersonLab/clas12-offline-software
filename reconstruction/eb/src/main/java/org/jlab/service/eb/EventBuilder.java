@@ -208,15 +208,23 @@ public class EventBuilder {
     public boolean findMatchingHit(
             final int pindex, DetectorParticle particle, List<DetectorResponse> responses,
             DetectorType type, final int layer, final double distance) {
-        final int index = particle.getDetectorHit(responses,type,layer,distance);
+        int index = particle.getDetectorHit(responses,type,layer,distance);
         if (index>=0) {
+            // if sharing hits between tracks, duplicate it:
+            if (responses.get(index).getAssociation() >= 0) {
+                DetectorResponse copy = new DetectorResponse();
+                copy.copy(responses.get(index));
+                copy.clearAssociations();
+                responses.add(copy);
+                index = responses.size()-1;
+            }
             particle.addResponse(responses.get(index),true);
             responses.get(index).addAssociation(pindex);
             return true;
         }
         return false;
     }
-    
+
     public void forwardTaggerIDMatching() {
         int np = this.detectorEvent.getParticles().size();
         if(this.ftIndices.size()>0 && this.detectorEvent.getParticles().size()>0) {

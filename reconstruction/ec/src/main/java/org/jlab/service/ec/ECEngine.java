@@ -125,14 +125,14 @@ public class ECEngine extends ReconstructionEngine {
 	    
         DataBank bankS = de.createBank("ECAL::hits", strips.size());
         for(int h = 0; h < strips.size(); h++){
-            bankS.setByte("sector",  h,  (byte) strips.get(h).getDescriptor().getSector());
-            bankS.setByte("layer",   h,  (byte) strips.get(h).getDescriptor().getLayer());
-            bankS.setByte("strip",   h,  (byte) strips.get(h).getDescriptor().getComponent());
-            bankS.setByte("peakid",  h,  (byte) strips.get(h).getPeakId());
-            bankS.setShort("id",     h, (short) strips.get(h).getID());
+            bankS.setByte("sector",     h,  (byte) strips.get(h).getDescriptor().getSector());
+            bankS.setByte("layer",      h,  (byte) strips.get(h).getDescriptor().getLayer());
+            bankS.setByte("strip",      h,  (byte) strips.get(h).getDescriptor().getComponent());
+            bankS.setByte("peakid",     h,  (byte) strips.get(h).getPeakId());
+            bankS.setShort("id",        h, (short) strips.get(h).getID());
             bankS.setShort("clusterId", h, (short) strips.get(h).getClusterId());
-            bankS.setFloat("energy", h, (float) strips.get(h).getEnergy());
-            bankS.setFloat("time",   h, (float) strips.get(h).getTime());                
+            bankS.setFloat("energy",    h, (float) strips.get(h).getEnergy());
+            bankS.setFloat("time",      h, (float) strips.get(h).getTime());                
         }
        
         DataBank  bankP =  de.createBank("ECAL::peaks", peaks.size());
@@ -177,15 +177,15 @@ public class ECEngine extends ReconstructionEngine {
             bankM.setFloat("distU", c, (float) clusters.get(c).clusterPeaks.get(0).getDistanceEdge());
             bankM.setFloat("distV", c, (float) clusters.get(c).clusterPeaks.get(1).getDistanceEdge());
             bankM.setFloat("distW", c, (float) clusters.get(c).clusterPeaks.get(2).getDistanceEdge());
-            bankM.setFloat("m1u", c,   (float) clusters.get(c).clusterPeaks.get(0).getMoment());
-            bankM.setFloat("m1v", c,   (float) clusters.get(c).clusterPeaks.get(1).getMoment());
-            bankM.setFloat("m1w", c,   (float) clusters.get(c).clusterPeaks.get(2).getMoment());
-            bankM.setFloat("m2u", c,   (float) clusters.get(c).clusterPeaks.get(0).getMoment2());
-            bankM.setFloat("m2v", c,   (float) clusters.get(c).clusterPeaks.get(1).getMoment2());
-            bankM.setFloat("m2w", c,   (float) clusters.get(c).clusterPeaks.get(2).getMoment2());
-            bankM.setFloat("m3u", c,   (float) clusters.get(c).clusterPeaks.get(0).getMoment3());
-            bankM.setFloat("m3v", c,   (float) clusters.get(c).clusterPeaks.get(1).getMoment3());
-            bankM.setFloat("m3w", c,   (float) clusters.get(c).clusterPeaks.get(2).getMoment3());
+            bankM.setFloat("m1u",   c, (float) clusters.get(c).clusterPeaks.get(0).getMoment());
+            bankM.setFloat("m1v",   c, (float) clusters.get(c).clusterPeaks.get(1).getMoment());
+            bankM.setFloat("m1w",   c, (float) clusters.get(c).clusterPeaks.get(2).getMoment());
+            bankM.setFloat("m2u",   c, (float) clusters.get(c).clusterPeaks.get(0).getMoment2());
+            bankM.setFloat("m2v",   c, (float) clusters.get(c).clusterPeaks.get(1).getMoment2());
+            bankM.setFloat("m2w",   c, (float) clusters.get(c).clusterPeaks.get(2).getMoment2());
+            bankM.setFloat("m3u",   c, (float) clusters.get(c).clusterPeaks.get(0).getMoment3());
+            bankM.setFloat("m3v",   c, (float) clusters.get(c).clusterPeaks.get(1).getMoment3());
+            bankM.setFloat("m3w",   c, (float) clusters.get(c).clusterPeaks.get(2).getMoment3());
         }
                
         DataBank  bankD =  de.createBank("ECAL::calib", clusters.size());
@@ -231,11 +231,6 @@ public class ECEngine extends ReconstructionEngine {
     public void setVeff(float val) {
         System.out.println("ECEngine: Veff = "+val+" CM/NS");
     	    ECCommon.veff = val;
-    }
-    
-    public void setPCALTrackingPlane(int val) {
-        System.out.println("ECEngine: PCAL tracking plane = "+val);
-    	ECCommon.pcTrackingPlane = val;
     }
     
     public void setNewTimeCal(boolean val) {
@@ -329,6 +324,7 @@ public class ECEngine extends ReconstructionEngine {
         setCalRun(2);
         setStripThresholds(10,9,8);
         setPeakThresholds(18,20,15);
+        setClusterThresholds(0,0,0);
         setClusterCuts(7,15,20);
 
         this.registerOutputBank("ECAL::hits");
