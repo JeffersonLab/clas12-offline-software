@@ -1,6 +1,8 @@
 package org.jlab.detector.calib.utils;
 
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.rcdb.RCDB;
 import org.rcdb.Condition;
@@ -11,6 +13,7 @@ import org.rcdb.ConditionType;
  * @author baltzell
  */
 public class RCDBProvider {
+    public static Logger LOGGER = Logger.getLogger(RCDBProvider.class.getName());
 
     public static final String DEFAULTADDRESS = "mysql://rcdb@clasdb.jlab.org/rcdb";
 
@@ -61,27 +64,24 @@ public class RCDBProvider {
     private void initialize(String address){
         provider = RCDB.createProvider(address);
         try {
-            if (debugMode>1) {
-                System.out.println("[RCDB] --->  open connection with : " + address);
-            }
+            LOGGER.log(Level.INFO,"[RCDB] --->  open connection with : " + address);
             provider.connect();
         }
         catch (Exception e) {
+            LOGGER.log(Level.SEVERE,"",e);
         }
-        if (debugMode>1) {
-            if(provider.isConnected()==true){
-                System.out.println("[RCDB] --->  database connection  : success");
-            } else {
-                System.out.println("[RCDB] --->  database connection  : failed");
-            }
+
+        if(provider.isConnected()==true){
+            LOGGER.log(Level.INFO,"[RCDB] --->  database connection  : success");
+        } else {
+            LOGGER.log(Level.SEVERE,"[RCDB] --->  database connection  : failed");
         }
+
     }
 
     public void disconnect(){
         if (provider.isConnected()) {
-            if (debugMode>1) {
-                System.out.println("[RCDB] --->  database disconnect  : success");
-            }
+            LOGGER.log(Level.INFO,"[RCDB] --->  database disconnect  : success");
             provider.close();
         }
     }
