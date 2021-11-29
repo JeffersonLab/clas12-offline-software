@@ -57,13 +57,12 @@ public class CVTRecNewKF extends ReconstructionEngine {
         trksFromTargetRec = new TracksFromTargetRec();
     }
 
-    String FieldsConfig = "";
-    int Run = -1;
+    private int Run = -1;
     public boolean isSVTonly = false;
     public boolean isCosmic = false;
     public boolean exclLayrs = false;
     
-    public void setRunConditionsParameters(DataEvent event, String FieldsConfig, int iRun, boolean addMisAlignmts, String misAlgnFile) {
+    public void setRunConditionsParameters(DataEvent event, int iRun, boolean addMisAlignmts, String misAlgnFile) {
         if (event.hasBank("RUN::config") == false) {
             System.err.println("RUN CONDITIONS NOT READ!");
             return;
@@ -79,18 +78,6 @@ public class CVTRecNewKF extends ReconstructionEngine {
             isCosmics = true;
         }
 
-
-
-        // Load the fields
-        //-----------------
-        String newConfig = "SOLENOID" + bank.getFloat("solenoid", 0);
-
-        if (FieldsConfig.equals(newConfig) == false) {
-            // Load the BMTConstants
-            
-            this.setFieldsConfig(newConfig);
-        }
-        FieldsConfig = newConfig;
         // Load the constants
         //-------------------
         int newRun = bank.getInt("run", 0); 
@@ -99,11 +86,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
             Constants.Load(isCosmics, isSVTonly);
             this.setRun(newRun); 
            
-            if(newRun<100) { 
-                Constants.isMC = true;
-            } else {
-                Constants.isMC = false;
-            }
+            Constants.isMC = newRun<100;
         }
       
         Run = newRun;
@@ -118,20 +101,10 @@ public class CVTRecNewKF extends ReconstructionEngine {
         Run = run;
     }
 
-    public String getFieldsConfig() {
-        return FieldsConfig;
-    }
-
-    public void setFieldsConfig(String fieldsConfig) {
-        FieldsConfig = fieldsConfig;
-    }
    
     @Override
     public boolean processDataEvent(DataEvent event) {
-        this.setRunConditionsParameters(event, FieldsConfig, Run, false, "");
-        double shift = 0;//org.jlab.rec.cvt.BMTConstants.getZoffset();
-
-        this.FieldsConfig = this.getFieldsConfig();
+        this.setRunConditionsParameters(event, Run, false, "");
         
         Swim swimmer = new Swim();
         ADCConvertor adcConv = new ADCConvertor();
@@ -143,12 +116,12 @@ public class CVTRecNewKF extends ReconstructionEngine {
         if(isSVTonly==false)
           hitRead.fetch_BMTHits(event, adcConv, BMTGeom, swimmer);
 
-        List<Hit> hits = new ArrayList<Hit>();
+        List<Hit> hits = new ArrayList<>();
         //I) get the hits
         List<Hit> svt_hits = hitRead.get_SVTHits();
         if(svt_hits.size()>SVTParameters.MAXSVTHITS)
             return true;
-        if (svt_hits != null && svt_hits.size() > 0) {
+        if (svt_hits != null && !svt_hits.isEmpty()) {
             hits.addAll(svt_hits);
         }
 
@@ -161,16 +134,16 @@ public class CVTRecNewKF extends ReconstructionEngine {
         }
 
         //II) process the hits		
-        List<FittedHit> SVThits = new ArrayList<FittedHit>();
-        List<FittedHit> BMThits = new ArrayList<FittedHit>();
+        List<FittedHit> SVThits = new ArrayList<>();
+        List<FittedHit> BMThits = new ArrayList<>();
         //1) exit if hit list is empty
-        if (hits.size() == 0) {
+        if (hits.isEmpty()) {
             return true;
         }
        
-        List<Cluster> clusters = new ArrayList<Cluster>();
-        List<Cluster> SVTclusters = new ArrayList<Cluster>();
-        List<Cluster> BMTclusters = new ArrayList<Cluster>();
+        List<Cluster> clusters = new ArrayList<>();
+        List<Cluster> SVTclusters = new ArrayList<>();
+        List<Cluster> BMTclusters = new ArrayList<>();
 
         //2) find the clusters from these hits
         ClusterFinder clusFinder = new ClusterFinder();
@@ -178,13 +151,13 @@ public class CVTRecNewKF extends ReconstructionEngine {
         if(bmt_hits != null && bmt_hits.size() > 0) {
             clusters.addAll(clusFinder.findClusters(bmt_hits)); 
         }
-        if (clusters.size() == 0) {
-            rbc.appendCVTBanks(event, SVThits, BMThits, null, null, null, null, null, shift);
+        if (clusters.isEmpty()) {
+            rbc.appendCVTBanks(event, SVThits, BMThits, null, null, null, null, null);
             return true;
         }
         
         // fill the fitted hits list.
-        if (clusters.size() != 0) {
+        if (!clusters.isEmpty()) {
             for (int i = 0; i < clusters.size(); i++) {
                 if (clusters.get(i).get_Detector() == DetectorType.BST) {
                     SVTclusters.add(clusters.get(i));
@@ -197,25 +170,24 @@ public class CVTRecNewKF extends ReconstructionEngine {
             }
         }
 
-        List<ArrayList<Cross>> crosses = new ArrayList<ArrayList<Cross>>();
         CrossMaker crossMake = new CrossMaker();
-        crosses = crossMake.findCrosses(clusters, SVTGeom, BMTGeom);
+        List<ArrayList<Cross>> crosses = crossMake.findCrosses(clusters, SVTGeom, BMTGeom);
         if(crosses.get(0).size() > SVTParameters.MAXSVTCROSSES ) {
-            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, null, null, null, shift);
+            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, null, null, null);
             return true; 
         }
         
         if(this.isCosmic) {
-            if(this.isSVTonly) {
-                List<ArrayList<Cross>> crosses_svtOnly = new ArrayList<ArrayList<Cross>>();
-                crosses_svtOnly.add(0, crosses.get(0));
-                crosses_svtOnly.add(1, new ArrayList<Cross>());
-            } 
+//            if(this.isSVTonly) {
+//                List<ArrayList<Cross>> crosses_svtOnly = new ArrayList<>();
+//                crosses_svtOnly.add(0, crosses.get(0));
+//                crosses_svtOnly.add(1, new ArrayList<>());
+//            } 
             strgtTrksRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
-                    crosses, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, rbc, shift, this.exclLayrs, swimmer);
+                    crosses, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, rbc, this.exclLayrs, swimmer);
         } else {
             trksFromTargetRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
-                crosses, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, rbc, shift, swimmer, 
+                crosses, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, rbc, swimmer, 
                 this.isSVTonly, this.exclLayrs);
         }
         return true;
@@ -287,8 +259,9 @@ public class CVTRecNewKF extends ReconstructionEngine {
             System.out.println("["+this.getName()+"] run with layers "+exLys+"excluded in fit config chosen based on yaml");
             String exlys = String.valueOf(exLys);
             String[] values = exlys.split(",");
-            for(int k = 0; k < values.length; k++)
-                Constants.getLayersUsed().put(Integer.valueOf(values[k]), 0);
+            for (String value : values) {
+                Constants.getLayersUsed().put(Integer.valueOf(value), 0);
+            }
         }
         else {
             exLys = System.getenv("COAT_CVT_EXCLUDELAYERS");
@@ -296,8 +269,9 @@ public class CVTRecNewKF extends ReconstructionEngine {
                 System.out.println("["+this.getName()+"] run with region "+rmReg+"excluded in fit  config chosen based on env");
                 String exlys = String.valueOf(exLys);
                 String[] values = exlys.split(",");
-                for(int k = 0; k < values.length; k++)
-                    Constants.getLayersUsed().put(Integer.valueOf(values[k]), 0);// layer excluded --->0
+                for (String value : values) {
+                    Constants.getLayersUsed().put(Integer.valueOf(value), 0); // layer excluded --->0
+                }
             }
         }
         if (exLys==null) {

@@ -284,10 +284,8 @@ public class Track extends Trajectory implements Comparable<Track> {
     public boolean betterThan(Track o) {
         if(this.getNDF()>o.getNDF()) 
             return true;
-        else if(this.getNDF()>0 && this.getNDF()==o.getNDF()) {
-            if(this.getChi2()/this.getNDF() < o.getChi2()/o.getNDF())
-                return true;
-            else return false;
+        else if(this.getNDF()==o.getNDF()) {
+            return this.getChi2()/this.getNDF() < o.getChi2()/o.getNDF();
         }
         else
             return false;

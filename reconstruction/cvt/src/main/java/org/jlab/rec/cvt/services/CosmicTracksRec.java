@@ -1,11 +1,9 @@
 package org.jlab.rec.cvt.services;
-//import Jama.Matrix;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.straight.KFitter;
-import org.jlab.clas.tracking.trackrep.Helix;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.geom.base.Detector;
@@ -35,7 +33,7 @@ import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 
 public class CosmicTracksRec {
     
-    private RecUtilities recUtil = new RecUtilities();
+    private final RecUtilities recUtil = new RecUtilities();
     
     public boolean processEvent(DataEvent event,  
             List<FittedHit> SVThits, List<FittedHit> BMThits, 
@@ -44,28 +42,28 @@ public class CosmicTracksRec {
             SVTGeometry SVTGeom, BMTGeometry BMTGeom,
             CTOFGeant4Factory CTOFGeom, Detector CNDGeom,
             RecoBankWriter rbc,
-            double zShift, boolean exLayrs, Swim swimmer) {
+            boolean exLayrs, Swim swimmer) {
         
         // make list of crosses consistent with a track candidate using SVT only first
         StraightTrackCrossListFinder crossLister = new StraightTrackCrossListFinder();
         CrossList crosslist = crossLister.findCosmicsCandidateCrossLists(crosses, SVTGeom,
                 BMTGeom, 3);
-        if (crosslist == null || crosslist.size() == 0) {
+        if (crosslist == null || crosslist.isEmpty()) {
             // create the clusters and fitted hits banks
-            rbc.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null, zShift);
+            rbc.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null);
 
             return true;
         } 
         // refit track based on SVT only and then add BMT and refit again
         TrackCandListFinder trkcandFinder = new TrackCandListFinder();
         List<StraightTrack> cosmics = trkcandFinder.getStraightTracks(crosslist, crosses.get(1), SVTGeom, BMTGeom);
-        List<Track> trkcands = new ArrayList<Track>();
+        List<Track> trkcands = new ArrayList<>();
         //REMOVE THIS
         //crosses.get(0).addAll(crosses.get(1));
         //------------------------
-        if (cosmics.size() == 0) {
+        if (cosmics.isEmpty()) {
             recUtil.CleanupSpuriousCrosses(crosses, null, SVTGeom) ;
-            rbc.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null, zShift);
+            rbc.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null);
             return true;
         }
         
@@ -101,8 +99,8 @@ public class CosmicTracksRec {
             }
             recUtil.CleanupSpuriousCrosses(crosses, null, SVTGeom) ;
             //4)  ---  write out the banks
-            List<Cross> bmtCrosses = new ArrayList<Cross>();
-            List<Cross> bmtCrossesRm = new ArrayList<Cross>();
+            List<Cross> bmtCrosses = new ArrayList<>();
+            List<Cross> bmtCrossesRm = new ArrayList<>();
             
             KFitter kf = null;
             
@@ -127,9 +125,9 @@ public class CosmicTracksRec {
 //                kf.filterOn=false;
                 kf.runFitter(swimmer);
                 Map<Integer, KFitter.HitOnTrack> traj = kf.TrjPoints; 
-                List<Integer> keys = new ArrayList<Integer>();
+                List<Integer> keys = new ArrayList<>();
                 traj.forEach((key,value) -> keys.add(key));
-                List<KFitter.HitOnTrack> trkTraj = new ArrayList<KFitter.HitOnTrack>();
+                List<KFitter.HitOnTrack> trkTraj = new ArrayList<>();
                 traj.forEach((key,value) -> trkTraj.add(value));
                                 
                 Ray the_ray = new Ray(kf.yx_slope, kf.yx_interc, kf.yz_slope, kf.yz_interc);                
@@ -172,7 +170,7 @@ public class CosmicTracksRec {
                 //refit adding missing clusters
                 List<Cluster> clsOnTrack = recUtil.FindClustersOnTrack(SVTclusters, cosmics.get(k1), SVTGeom);
                 if(clsOnTrack.size()>0) {
-                    List<Cross> pseudoCrosses = new ArrayList<Cross>();
+                    List<Cross> pseudoCrosses = new ArrayList<>();
                     for(Cluster cl : clsOnTrack) {
                         cl.set_AssociatedTrackID(k1 + 1);
                         //make pseudo-cross
@@ -197,9 +195,9 @@ public class CosmicTracksRec {
                     kf.runFitter(swimmer);
                     
                     Map<Integer, KFitter.HitOnTrack> traj2 = kf.TrjPoints; 
-                    List<Integer> keys2 = new ArrayList<Integer>();
+                    List<Integer> keys2 = new ArrayList<>();
                     traj2.forEach((key,value) -> keys2.add(key));
-                    List<KFitter.HitOnTrack> trkTraj2 = new ArrayList<KFitter.HitOnTrack>();
+                    List<KFitter.HitOnTrack> trkTraj2 = new ArrayList<>();
                     traj2.forEach((key,value) -> trkTraj2.add(value));
 
                     the_ray = new Ray(kf.yx_slope, kf.yx_interc, kf.yz_slope, kf.yz_interc);                
@@ -242,7 +240,7 @@ public class CosmicTracksRec {
                 
             }
     
-            rbc.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, cosmics, 0);
+            rbc.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, cosmics);
         }
         return true;
         }

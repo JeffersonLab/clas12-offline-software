@@ -32,8 +32,8 @@ import org.jlab.rec.cvt.track.TrackSeederCA;
  * @author ziegler
  */
 public class TracksFromTargetRec {
-    private StraightTrackCrossListFinder crossLister = new StraightTrackCrossListFinder();
-    private RecUtilities recUtil = new RecUtilities();
+    private final StraightTrackCrossListFinder crossLister = new StraightTrackCrossListFinder();
+    private final RecUtilities recUtil = new RecUtilities();
     
     public boolean processEvent(DataEvent event,  
             List<FittedHit> SVThits, List<FittedHit> BMThits, 
@@ -42,7 +42,6 @@ public class TracksFromTargetRec {
             SVTGeometry SVTGeom, BMTGeometry BMTGeom,
             CTOFGeant4Factory CTOFGeom, Detector CNDGeom,
             RecoBankWriter rbc,
-            double shift, 
             Swim swimmer,
             boolean isSVTonly, boolean exLayrs) {
         
@@ -78,7 +77,7 @@ public class TracksFromTargetRec {
         }
         if(seeds ==null || seeds.size() == 0) {
             recUtil.CleanupSpuriousCrosses(crosses, null, SVTGeom) ;
-            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null, null, shift);
+            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null, null);
             return true;
         }   
         
@@ -122,7 +121,7 @@ public class TracksFromTargetRec {
                 kf = new KFitter( hlx, cov, event,  swimmer, 
                     Constants.getXb(), 
                     Constants.getYb(),
-                    shift, 
+                    0,
                     recUtil.setMeasVecs(seed, swimmer)) ;
                 kf.setMatrixLibrary(Constants.kfMatLib);
                 //Uncomment to let track be fitted
@@ -166,10 +165,10 @@ public class TracksFromTargetRec {
                                         solenoidValue, Constants.getXb(), Constants.getYb(), Helix.Units.MM);
 
                         kf = new KFitter( hlx, cov, event,  swimmer, 
-                        Constants.getXb(), 
-                        Constants.getYb(),
-                        shift, 
-                        recUtil.setMeasVecs(seed, swimmer)) ;
+                            Constants.getXb(), 
+                            Constants.getYb(),
+                            0,
+                            recUtil.setMeasVecs(seed, swimmer)) ;
                         kf.setMatrixLibrary(Constants.kfMatLib);
                         //Uncomment to let track be fitted
                         //kf.filterOn = false;
@@ -206,7 +205,8 @@ public class TracksFromTargetRec {
         if(!trkcands.isEmpty()) {
             // do a final cleanup
             TrackListFinder.removeOverlappingTracks(trkcands); 
-    //        TrackListFinder.checkForOverlaps(trkcands, "KF");
+            if(trkcands.isEmpty()) System.out.println("Error: no tracks left after overlap remover");
+            
             tracks = TrackListFinder.getTracks(trkcands, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, swimmer);
             // update crosses and clusters on track
             for(int it = 0; it < tracks.size(); it++) {
@@ -228,7 +228,7 @@ public class TracksFromTargetRec {
 //        if (tracks.size() > 0) {
 //            recUtil.CleanupSpuriousCrosses(crosses, tracks, SVTGeom) ;
 //        }
-        rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, seeds, tracks, shift);
+        rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, seeds, tracks);
 
         return true;
 
