@@ -192,6 +192,9 @@ public class TracksFromTargetRec {
         for(Cluster c : SVTclusters) {
             c.set_AssociatedTrackID(-1);
         }
+        for(Cluster c : BMTclusters) {
+            c.set_AssociatedTrackID(-1);
+        }
 //        if (trkcands.isEmpty()) {
 //            recUtil.CleanupSpuriousCrosses(crosses, null, SVTGeom) ;            
 //            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, seeds, null, shift);
