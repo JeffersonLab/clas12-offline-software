@@ -125,7 +125,7 @@ public class TrajectoryFinder {
         double px = trk.get_Pt()*Math.cos(trk.get_helix().get_phi_at_dca());
         double py = trk.get_Pt()*Math.sin(trk.get_helix().get_phi_at_dca());
         double x = (trk.get_helix().xdca()+Constants.getXb()) / 10;
-        double y = (trk.get_helix().xdca()+Constants.getXb()) / 10;
+        double y = (trk.get_helix().ydca()+Constants.getYb()) / 10;
         double z = trk.get_helix().get_Z0() / 10;
         swimmer.SetSwimParameters(x,y,z,px,py,pz, trk.get_Q()) ;
         
