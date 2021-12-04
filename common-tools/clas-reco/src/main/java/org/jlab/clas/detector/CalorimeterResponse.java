@@ -19,6 +19,14 @@ public class CalorimeterResponse extends DetectorResponse {
     private final Vector3 secondMomentUVW = new Vector3(0,0,0);
     private final Vector3 thirdMomentUVW = new Vector3(0,0,0);
 
+    public void copy(CalorimeterResponse r) {
+        super.copy(r);
+        widthUVW.copy(r.widthUVW);
+        coordUVW.copy(r.coordUVW);
+        secondMomentUVW.copy(r.secondMomentUVW);
+        thirdMomentUVW.copy(r.thirdMomentUVW);
+    }
+
     public void setWidthUVW(float u,float v,float w) {
         widthUVW.setXYZ(u,v,w);
     }

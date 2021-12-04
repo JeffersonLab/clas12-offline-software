@@ -2,12 +2,17 @@ package org.jlab.rec.cvt.bmt;
 
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author ziegler
  *
  */
 public class CCDBConstantsLoader {
+
+    public static Logger LOGGER = Logger.getLogger(CCDBConstantsLoader.class.getName());
 
     public CCDBConstantsLoader() {
         // TODO Auto-generated constructor stub
@@ -230,7 +235,7 @@ public class CCDBConstantsLoader {
         }
         
         if (GRID_SIZE!=dbprovider.length("/calibration/mvt/lorentz/angle")) {
-         System.out.println("WARNING... Lorentz angle grid is not the same size as the table in CCDBConstant");}
+         LOGGER.log(Level.WARNING,"WARNING... Lorentz angle grid is not the same size as the table in CCDBConstant");}
          for (int i = 0; i < dbprovider.length("/calibration/mvt/lorentz/angle"); i++) {
          	THETA_L_grid[i]=dbprovider.getDouble("/calibration/mvt/lorentz/angle",i);
          	ELEC_grid[i]=dbprovider.getDouble("/calibration/mvt/lorentz/Edrift",i);

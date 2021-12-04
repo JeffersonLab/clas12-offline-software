@@ -436,12 +436,15 @@ public class DetectorParticle implements Comparable {
             if(response.getDescriptor().getType()==type &&
                (detectorLayer<=0 || response.getDescriptor().getLayer()==detectorLayer) &&
                (hitSharing || response.getAssociation()<0)) {
+                
                 hitPoint.set(
                         response.getPosition().x(),
                         response.getPosition().y(),
                         response.getPosition().z()
                         );
+
                 double hitdistance = trajectory.distance(hitPoint).length();
+
                 if (hitdistance<distanceThreshold && hitdistance<minimumDistance) {
                     minimumDistance = hitdistance;
                     bestIndex       = loop;
