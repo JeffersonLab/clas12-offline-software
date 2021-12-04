@@ -7,7 +7,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.rec.fmt.Constants;
 import org.jlab.rec.fmt.cluster.Cluster;
 import org.jlab.rec.fmt.cross.Cross;
-import org.jlab.rec.fmt.hit.FittedHit;
+import org.jlab.rec.fmt.hit.Hit;
 import org.jlab.rec.fmt.track.Track;
 
 /**
@@ -18,7 +18,7 @@ import org.jlab.rec.fmt.track.Track;
  */
 public class RecoBankWriter {
 
-        public static DataBank fillFMTHitsBank(DataEvent event, List<FittedHit> hitlist) {
+        public static DataBank fillFMTHitsBank(DataEvent event, List<Hit> hitlist) {
         DataBank bank = event.createBank("FMT::Hits", hitlist.size());
 
         for (int i = 0; i < hitlist.size(); i++) {
@@ -31,6 +31,7 @@ public class RecoBankWriter {
             bank.setShort("adcIndex",     i, (short) hitlist.get(i).getIndex());
             bank.setShort("clusterIndex", i, (short) hitlist.get(i).getClusterIndex());
             bank.setShort("trackIndex",   i, (short) hitlist.get(i).getTrackIndex());
+            bank.setByte( "status",       i, (byte)  hitlist.get(i).getStatus());
         }
 
         return bank;
@@ -147,7 +148,7 @@ public class RecoBankWriter {
         return bank;
     }
 
-    public static void appendFMTBanks(DataEvent event, List<FittedHit> fhits, List<Cluster> clusters,
+    public static void appendFMTBanks(DataEvent event, List<Hit> fhits, List<Cluster> clusters,
                                List<Track> tracks) {
 
         if (event == null) return;

@@ -25,15 +25,19 @@ public class Hit implements Comparable<Hit> {
         private int _Layer;    	          // layer [1,...6]
         private int _Strip;    	          // strip [1...1024]
 
+        private int    _Status;                // 0 good, 1 bad energy, 2, bad time, 3 dead
         private double _Energy;      	  
         private double _Time;	          
         private double _Error;	          
         private Line3D _LocalSegment  = null;  // The geometry segment representing the strip position in the local frame
         private Line3D _GlobalSegment = null;  // The geometry segment representing the strip position in the global frame
         private int _Index;		       // Hit index
-        private int _ClusterIndex = -1;        // Associated
+        private int _ClusterIndex = -1;        // Cluster index
+        private int _CrossIndex = -1;          // Cross index 
+        private int _TrackIndex = -1;          // Track index        
+        private double _residual;              // distance to track intersect
 
-        
+
         /**
          * @param index
          * @param layer
@@ -168,6 +172,37 @@ public class Hit implements Comparable<Hit> {
             return _GlobalSegment.distance(trkPoint).length();
         }
 
+        public int getStatus() {
+            return _Status;
+        }
+
+        public void setStatus(int _Status) {
+            this._Status = _Status;
+        }
+
+	public double getResidual() {
+            return this._residual;
+	}
+
+        public void setResidual(double trackLocalY) {
+            this._residual = this.getStripLocalSegment().origin().y()-trackLocalY;
+	}
+
+	public int getCrossIndex() {
+		return _CrossIndex;
+	}
+
+	public void setCrossIndex(int crossIndex) {
+		this._CrossIndex = crossIndex;
+	}
+        
+        public int getTrackIndex() {
+		return _TrackIndex;
+	}
+
+	public void setTrackIndex(int _AssociatedTrackIndex) {
+		this._TrackIndex = _AssociatedTrackIndex;
+	}
         /**
          *
          * @param arg the other hit
@@ -222,9 +257,12 @@ public class Hit implements Comparable<Hit> {
             this._ClusterIndex = _AssociatedClusterIndex;
         }
 
-        public static List<Hit> fetchHits(DataEvent event, IndexedTable statuses) {
+        public static List<Hit> fetchHits(DataEvent event, IndexedTable timecuts, IndexedTable statuses) {
 
             List<Hit> hits = new ArrayList<>();
+
+            double tmean = timecuts.getDoubleValue("mean", 0, 0, 0);
+            double tcut  = timecuts.getDoubleValue("cut", 0, 0, 0);
 
             if (event.hasBank("FMT::adc")) {
                 DataBank bankDGTZ = event.getBank("FMT::adc");
@@ -240,8 +278,11 @@ public class Hit implements Comparable<Hit> {
                     
                     Hit hit = new Hit(i, layer, strip, (double) ADC, time);
                     
-                    int status = statuses.getIntValue("status", sector, layer, strip);
-                    if(status==0) hits.add(hit);
+                    hit.setStatus(statuses.getIntValue("status", sector, layer, strip));
+                    
+                    if(Math.abs(time-tmean)>tcut) hit.setStatus(2);
+                    
+                    hits.add(hit);
                 }
             }
             Collections.sort(hits);

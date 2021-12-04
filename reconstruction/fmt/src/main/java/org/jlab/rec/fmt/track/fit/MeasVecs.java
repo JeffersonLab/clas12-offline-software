@@ -42,8 +42,7 @@ public class MeasVecs {
             double error = clusters.get(i).getCentroidError();
             double z     = clusters.get(i).getGlobalSegment().origin().z();
             int seed = clusters.get(i).getSeedStrip();
-            MeasVec meas = new MeasVec();
-            meas = this.setMeasVec(l, cent, error, z, seed);
+            MeasVec meas = this.setMeasVec(l, cent, error, z, seed);
             measurements.add(meas);
         }
     }

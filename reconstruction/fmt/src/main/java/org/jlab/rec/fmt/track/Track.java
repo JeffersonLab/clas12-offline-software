@@ -392,6 +392,7 @@ public class Track {
                 trk.setPx(trackBank.getFloat("p0_x", i));
                 trk.setPy(trackBank.getFloat("p0_y", i));
                 trk.setPz(trackBank.getFloat("p0_z", i));
+                trk.setStatus(1);
                 trackmap.put(id,trk);
             
                 for(int j=0; j<Constants.NLAYERS; j++) {
