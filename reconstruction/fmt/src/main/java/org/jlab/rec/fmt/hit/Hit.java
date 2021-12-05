@@ -280,7 +280,7 @@ public class Hit implements Comparable<Hit> {
                     
                     hit.setStatus(statuses.getIntValue("status", sector, layer, strip));
                     
-                    if(Math.abs(time-tmean)>tcut) hit.setStatus(2);
+                    if(time!=0 && Math.abs(time-tmean)>tcut) hit.setStatus(2); // exclude time==0 hits for MC
                     
                     hits.add(hit);
                 }
