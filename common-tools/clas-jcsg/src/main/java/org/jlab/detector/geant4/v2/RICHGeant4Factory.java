@@ -79,7 +79,7 @@ public final class RICHGeant4Factory extends Geant4Factory {
         G4Stl gasVolume = new G4Stl("RICH_s4", cloader.getResourceAsStream("rich/cad/RICH_s4.stl"), Length.mm / Length.cm);
         gasVolume.setMother(motherVolume);
         stlvolumes.add(gasVolume);
-        for (String name : new String[]{"Aluminum", "CFRP", "TedlarWrapping","MirrorSupport"}) {
+        for (String name : new String[]{"Al_Base","Al_TopLeft","Al_TopRight","AluminumLeft","AluminumMirrors","AluminumRight", "CFRP", "TedlarWrapping","MirrorSupport"}) {
             if(debugMode>=1)System.out.format("   --> %s\n",name);
             G4Stl component = new G4Stl(String.format("%s", name),
                                         cloader.getResourceAsStream(String.format("rich/cad/%s.stl", name)),
@@ -99,7 +99,7 @@ public final class RICHGeant4Factory extends Geant4Factory {
         Read_Stl(gasVolume,201,16);
         Read_Stl(gasVolume,202,22);
         Read_Stl(gasVolume,203,32);
-        Read_Stl(gasVolume,204,33); 
+        Read_Stl(gasVolume,204,32); 
         // Mirrors
         Read_Stl(gasVolume,301,7); //Planar Mirrors
         Read_Stl(gasVolume,302,10); //Spherical Mirrors
