@@ -99,8 +99,7 @@ public final class RICHGeant4Factory extends Geant4Factory {
         Read_Stl(gasVolume,201,16);
         Read_Stl(gasVolume,202,22);
         Read_Stl(gasVolume,203,32);
-        Read_Stl(gasVolume,204,31); //component 32 has been left empty in sector 4 rich
-        // Mirrors
+        Read_Stl(gasVolume,204,32); 
         Read_Stl(gasVolume,301,7); //Planar Mirrors
         Read_Stl(gasVolume,302,10); //Spherical Mirrors
         
