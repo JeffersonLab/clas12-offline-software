@@ -26,6 +26,8 @@ import org.jlab.rec.cvt.track.TrackCandListFinder;
 import org.jlab.rec.cvt.trajectory.Ray;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
+
+import cnuphys.magfield.MagneticFields;
 /**
  *
  * @author ziegler
@@ -43,7 +45,8 @@ public class CosmicTracksRec {
             CTOFGeant4Factory CTOFGeom, Detector CNDGeom,
             RecoBankWriter rbc,
             boolean exLayrs, Swim swimmer) {
-        
+    	MagneticFields.getInstance().getSolenoid().setScaleFactor(1e-7); 
+    	MagneticFields.getInstance().getTorus().setScaleFactor(1e-7); 
         // make list of crosses consistent with a track candidate using SVT only first
         StraightTrackCrossListFinder crossLister = new StraightTrackCrossListFinder();
         CrossList crosslist = crossLister.findCosmicsCandidateCrossLists(crosses, SVTGeom,
