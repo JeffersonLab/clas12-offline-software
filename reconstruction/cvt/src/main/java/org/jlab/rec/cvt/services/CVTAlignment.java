@@ -32,6 +32,7 @@ import org.jlab.rec.cvt.trajectory.Trajectory;
 
 import Jama.Matrix;
 //import eu.mihosoft.vrl.v3d.Vector3d;
+import cnuphys.magfield.MagneticFields;
 
 /**
  * Service to return reconstructed TRACKS
@@ -144,6 +145,9 @@ public class CVTAlignment extends ReconstructionEngine {
 	int gCountBMTZ =0;
 	int debugPrintEventCount = 0;
 	
+	//check if there are multiple hits in the same BMTC tile (can happen sometimes in cosmic tracks)
+	//boolean checkClusterAmbiguityBMTC = true;
+	
 	@Override
 	public boolean processDataEvent(DataEvent event) {
 		int runNum = event.getBank("RUN::config").getInt("run", 0);
@@ -238,6 +242,10 @@ public class CVTAlignment extends ReconstructionEngine {
 			if(countBMTC<minClustersBMTC)
 				continue;
 			
+			if(nCrossSVT+countBMTZ< 3) //no transverse degrees of freedom
+				continue;
+			if(nCrossSVT+countBMTC< 3) //no transverse degrees of freedom
+				continue;
 			//int nCross = nCrossSVT + nCrossBMT;
 			//if(nCross <= 2)
 			// 	continue;
@@ -713,7 +721,7 @@ public class CVTAlignment extends ReconstructionEngine {
 				System.out.println("extrap is on cylinder:  this should be zero: " + (perp(extrap_plus.clone().sub(cc),a).mag()-R));
 			}
 			
-			double phi_mid = cl.get_Arc().origin().midpoint(cl.get_Arc().end()).toVector3D().phi();
+			/*double phi_mid = cl.get_Arc().origin().midpoint(cl.get_Arc().end()).toVector3D().phi();
 			double delta_phi_plus=extrap_plus.phi()-phi_mid;
 			while (delta_phi_plus >Math.PI)
 				delta_phi_plus-=2*Math.PI;
@@ -724,9 +732,31 @@ public class CVTAlignment extends ReconstructionEngine {
 			while (delta_phi_minus >Math.PI)
 				delta_phi_minus-=2*Math.PI;
 			while (delta_phi_minus <-Math.PI)
+				delta_phi_minus+=2*Math.PI;*/
+			/*double phi_n = cl.getN().phi();
+			System.out.println("phi_recon="+ phi_n);
+			System.out.println("phi_+="+ extrap_plus.phi());
+			System.out.println("phi_-="+ extrap_minus.phi());
+			double delta_phi_plus=extrap_plus.phi()-phi_n;
+			while (delta_phi_plus >Math.PI)
+				delta_phi_plus-=2*Math.PI;
+			while (delta_phi_plus <-Math.PI)
+				delta_phi_plus+=2*Math.PI;
+			
+			double delta_phi_minus=extrap_minus.phi()-phi_n;
+			while (delta_phi_minus >Math.PI)
+				delta_phi_minus-=2*Math.PI;
+			while (delta_phi_minus <-Math.PI)
 				delta_phi_minus+=2*Math.PI;
 			
 			if(Math.abs(delta_phi_plus)<Math.abs(delta_phi_minus))
+				extrap = extrap_plus;
+			else
+				extrap = extrap_minus;*/
+			
+			
+			//choose the extrapolated point that is closer in z to the measured cluster.  
+			if(Math.abs(extrap_plus.clone().sub(cc).z())<Math.abs(extrap_minus.clone().sub(cc).z()))
 				extrap = extrap_plus;
 			else
 				extrap = extrap_minus;
@@ -1494,19 +1524,7 @@ public class CVTAlignment extends ReconstructionEngine {
 			System.out.println("["+this.getName()+"] obtain alignment derivatives for all 6 variables (default) ");
 			this.setAlignVars("Tx Ty Tz Rx Ry Rz");
 		}
-
-
-		String maxDocaCut = this.getEngineConfigString("maxDocaCut");
-
-		if(maxDocaCut != null) {
-			System.out.println("["+this.getName()+"] max doca cut "+ maxDocaCut + " mm");
-			this.maxDocaCut = Double.parseDouble(maxDocaCut);
-		}
-		else {
-			System.out.println("["+this.getName()+"] no max doca cut set (default)");
-			this.maxDocaCut = Double.MAX_VALUE;
-		}
-
+		
 		String cosmics = this.getEngineConfigString("cosmics");
 
 		if(cosmics != null) {
@@ -1518,6 +1536,24 @@ public class CVTAlignment extends ReconstructionEngine {
 			this.isCosmics = false;
 		}
 
+
+		String maxDocaCut = this.getEngineConfigString("maxDocaCut");
+
+		if(maxDocaCut != null) {
+			System.out.println("["+this.getName()+"] max doca cut "+ maxDocaCut + " mm");
+			this.maxDocaCut = Double.parseDouble(maxDocaCut);
+		}
+		else {
+			if (isCosmics) {
+				System.out.println("["+this.getName()+"] no max doca cut set (default for cosmics)");
+				this.maxDocaCut = Double.MAX_VALUE;
+			} else {
+				System.out.println("["+this.getName()+"]  doca cut set to 10 mm (default for field-off tracks)");
+				this.maxDocaCut = 10;
+			}
+		}
+
+		
 		String maxResidual = this.getEngineConfigString("maxResidual");
 
 		if (maxResidual!=null) {
@@ -1591,7 +1627,7 @@ public class CVTAlignment extends ReconstructionEngine {
 			
 		}
 		
-		this.nAlignables = ((this.svtTopBottomSep ? 2*42 : 42) + (this.isSVTonly ? 0: 18) + (isCosmics || !includeBeamspot? 0 : 1));
+		this.nAlignables = ((this.svtTopBottomSep ? 2*42 : 42) + (this.isSVTonly ? 0: 18) + (includeBeamspot? 0 : 1));
 
 
 		String debug = this.getEngineConfigString("debug");
@@ -1603,7 +1639,7 @@ public class CVTAlignment extends ReconstructionEngine {
 			System.out.println("["+this.getName()+"] debug false; config chosen based on yaml");
 			this.debug =  false;
 		}
-
+		//MagneticFields.getInstance().getSolenoid().setScaleFactor(1e-7);
 
 		return true;
 	}
