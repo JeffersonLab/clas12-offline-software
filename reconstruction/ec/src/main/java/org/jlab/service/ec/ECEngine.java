@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.base.DetectorCollection;
@@ -20,6 +22,8 @@ import org.jlab.io.base.DataEvent;
  * @author gavalian
  */
 public class ECEngine extends ReconstructionEngine {
+
+    public static Logger LOGGER = Logger.getLogger(ECEngine.class.getName());
     
     Detector              ecDetector = null;
     public Boolean             debug = false;
@@ -45,7 +49,7 @@ public class ECEngine extends ReconstructionEngine {
             DataBank bank = de.getBank("RUN::config");
             runNo = bank.getInt("run", 0);
             if (runNo<=0) {
-                System.err.println("ECEngine:  got run <= 0 in RUN::config, skipping event.");
+                LOGGER.log(Level.WARNING,"ECEngine:  got run <= 0 in RUN::config, skipping event.");
                 return false;
             }
         }
@@ -79,18 +83,17 @@ public class ECEngine extends ReconstructionEngine {
         
         if (debug) {
         	if (ecClusters.size()<5) {
-        	for(ECCluster c : ecClusters) {
-        		if (c.getStatus()>0) {
-        			System.out.println("\nSTRIPS SIZE = " + ecStrips.size());
-        			for(ECStrip strip : ecStrips) System.out.println(strip);
-        			System.out.println("\nPEAKS  SIZE = " + ecPeaks.size());
-        			for(ECPeak p : ecPeaks) System.out.println(p);
-        			System.out.println("\nEC CLUSTERS SIZE = " + ecClusters.size());
-        			System.out.println(c);	
-        		}
-        	
-        	}
-            System.out.println("\nEND\n");
+                for(ECCluster c : ecClusters) {
+                    if (c.getStatus()>0) {
+                        System.out.println("\nSTRIPS SIZE = " + ecStrips.size());
+                        for(ECStrip strip : ecStrips) System.out.println(strip);
+                        System.out.println("\nPEAKS  SIZE = " + ecPeaks.size());
+                        for(ECPeak p : ecPeaks) System.out.println(p);
+                        System.out.println("\nEC CLUSTERS SIZE = " + ecClusters.size());
+                        System.out.println(c);	
+                    }
+                }
+                System.out.println("\nEND\n");
         	}
         }
 	    
@@ -214,73 +217,73 @@ public class ECEngine extends ReconstructionEngine {
     }
        
     public void setCalRun(int val) {
-        System.out.println("ECEngine: Calibration Run Number = "+val);
+        LOGGER.log(Level.INFO,"ECEngine: Calibration Run Number = "+val);
         this.calrun = val;
     }
     
     public void setVariation(String val) {
-        System.out.println("ECEngine: Calibration Variation = "+val);
+        LOGGER.log(Level.INFO,"ECEngine: Calibration Variation = "+val);
         ECCommon.variation = val;
     } 
     
     public void setGeomVariation(String val) {
-        System.out.println("ECEngine: Geometry Variation = "+val);
+        LOGGER.log(Level.INFO,"ECEngine: Geometry Variation = "+val);
         ECCommon.geomVariation = val;
     }  
     
     public void setVeff(float val) {
-        System.out.println("ECEngine: Veff = "+val+" CM/NS");
-    	    ECCommon.veff = val;
+        LOGGER.log(Level.INFO,"ECEngine: Veff = "+val+" CM/NS");
+        ECCommon.veff = val;
     }
-    
+
     public void setNewTimeCal(boolean val) {
-        System.out.println("ECEngine: useNewTimeCal = "+val);
+        LOGGER.log(Level.INFO,"ECEngine: useNewTimeCal = "+val);
     	ECCommon.useNewTimeCal = val;
     }
     
     public void setUseUnsharedTime(boolean val) {
-    	System.out.println("ECengine: useUnsharedTime = "+val);
+    	LOGGER.log(Level.INFO,"ECengine: useUnsharedTime = "+val);
     	ECCommon.useUnsharedTime = val;
     }  
     
     public void setCCDBGain(boolean val) {
-        System.out.println("ECEngine: useCCDBGain = "+val);
+        LOGGER.log(Level.INFO,"ECEngine: useCCDBGain = "+val);
         ECCommon.useCCDBGain = val;    	
     }  
     
     public void setLogWeight(boolean val) {
-        System.out.println("ECEngine: useLogWeight = "+val);
+        LOGGER.log(Level.INFO,"ECEngine: useLogWeight = "+val);
     	ECCommon.useLogWeight = val;
     }
     
     public void setLogParam(double val) {
-        System.out.println("ECEngine: logParam = "+val);
+        LOGGER.log(Level.INFO,"ECEngine: logParam = "+val);
     	ECCommon.logParam = val;
     }
         
     public void setStripThresholds(int thr0, int thr1, int thr2) {
-        System.out.println("ECEngine: Strip ADC thresholds = "+thr0+" "+thr1+" "+thr2+" MeV*10");
+        LOGGER.log(Level.INFO,"ECEngine: Strip ADC thresholds = "+thr0+" "+thr1+" "+thr2+" MeV*10");
         ECCommon.stripThreshold[0] = thr0;
         ECCommon.stripThreshold[1] = thr1;
         ECCommon.stripThreshold[2] = thr2;
     }
     
     public void setPeakThresholds(int thr0, int thr1, int thr2) {
-        System.out.println("ECEngine: Peak ADC thresholds = "+thr0+" "+thr1+" "+thr2+" MeV*10");
+        LOGGER.log(Level.INFO,"ECEngine: Peak ADC thresholds = "+thr0+" "+thr1+" "+thr2+" MeV*10");
         ECCommon.peakThreshold[0] = thr0;
         ECCommon.peakThreshold[1] = thr1;
         ECCommon.peakThreshold[2] = thr2;
     }   
     
     public void setClusterCuts(float err0, float err1, float err2) {
-        System.out.println("ECEngine: Cluster Dalitz Cuts = "+err0+" "+err1+" "+err2+" CM");
+        LOGGER.log(Level.INFO,"ECEngine: Cluster Dalitz Cuts = "+err0+" "+err1+" "+err2+" CM");
         ECCommon.clusterError[0] = err0;
         ECCommon.clusterError[1] = err1;
         ECCommon.clusterError[2] = err2;
     }
     
     public void setClusterThresholds(int thr0, int thr1, int thr2) {
-        System.out.println("ECEngine: Cluster peak energy threshold scale factors = "+thr0+" "+thr1+" "+thr2);  
+        LOGGER.log(Level.INFO,"ECEngine: Cluster peak energy threshold scale factors = "+thr0+" "+thr1+" "+thr2);  
         ECCommon.clusterThreshold[0] = thr0;
         ECCommon.clusterThreshold[1] = thr1;
         ECCommon.clusterThreshold[2] = thr2;    	
@@ -318,7 +321,7 @@ public class ECEngine extends ReconstructionEngine {
         getConstantsManager().setVariation(ECCommon.variation);
         String variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
         if(!(ECCommon.geomVariation.equals("default"))) variationName = ECCommon.geomVariation;
-        System.out.println("GEOMETRY VARIATION IS "+variationName);
+        LOGGER.log(Level.INFO,"GEOMETRY VARIATION IS "+variationName);
         ecDetector =  GeometryFactory.getDetector(DetectorType.ECAL,11,variationName);
 
         setCalRun(2);

@@ -102,6 +102,12 @@
       <artifactId>clas-utils</artifactId>
       <version>7.0.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+        <groupId>org.jlab.clas</groupId>
+        <artifactId>clas-logging</artifactId>
+        <version>7.0.1-SNAPSHOT</version>
+        <scope>compile</scope>
+    </dependency>
   </dependencies>
 
   <properties>
