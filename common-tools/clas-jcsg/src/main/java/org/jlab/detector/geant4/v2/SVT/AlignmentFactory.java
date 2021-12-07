@@ -416,7 +416,7 @@ public class AlignmentFactory
 		if(Math.abs(ra) >1E-5)
 		{			
 		    Vector3d vecAxis = new Vector3d( rx, ry, rz ).normalized();			
-                    vecAxis.rotate( aPoint, ra );
+                    vecAxis.rotate( aPoint, -ra );
                 }
                 // if ra==0, assume rx,ry,rz are the rotation angles around the 3 axis
                 else if(ra==0)
