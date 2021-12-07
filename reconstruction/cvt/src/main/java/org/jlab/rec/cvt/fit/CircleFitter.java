@@ -283,16 +283,15 @@ public class CircleFitter {
         double Vp_phiphi = JVJT[1][1];
         double Vp_phid = JVJT[1][2];
         double Vp_dd = JVJT[2][2];
-
         //3. Fill the covariance matrix
-        /* 
-        _covr[0] =  Vp_rhorho;
-        _covr[1] =  Vp_rhophi;
-        _covr[2] =  Vp_rhod;
-        _covr[3] =  Vp_phiphi;
-        _covr[4] =  Vp_phid;
-        _covr[5] =  Vp_dd; 
-         */
+        if(Constants.beamSpotConstraint) {
+            _covr[0] =  Vp_rhorho;
+            _covr[1] =  Vp_rhophi;
+            _covr[2] =  Vp_rhod;
+            _covr[3] =  Vp_phiphi;
+            _covr[4] =  Vp_phid;
+            _covr[5] =  Vp_dd; 
+        }
         //  new params
         _phi = Math.atan2(B, C);
         _dca = A / (1. + U);

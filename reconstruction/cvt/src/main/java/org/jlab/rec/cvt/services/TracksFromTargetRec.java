@@ -73,6 +73,11 @@ public class TracksFromTargetRec {
                 if(exLayrs==true) {
                     seeds = recUtil.reFit(seeds, SVTGeom, BMTGeom, swimmer, trseed,trseed2);
                 }
+                if(Constants.beamSpotConstraint) {
+                    for(Seed s : seeds) {
+                        recUtil.reFitCircle(s);
+                    }
+                }
             }
         }
         if(seeds ==null || seeds.size() == 0) {
@@ -155,6 +160,7 @@ public class TracksFromTargetRec {
                             }
                         }
                         //reset pars
+                        fittedTrack.get_helix().set_dca(-fittedTrack.get_helix().get_dca());
                         v = fittedTrack.get_helix().getVertex();
                         p = fittedTrack.get_helix().getPXYZ(solenoidValue);
                         charge = (int) (Math.signum(solenoidScale)*fittedTrack.get_helix().get_charge());

@@ -36,6 +36,8 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.cross.CrossMaker;
+import org.jlab.rec.cvt.fit.CircleFitPars;
+import org.jlab.rec.cvt.fit.CircleFitter;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.trajectory.Ray;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
@@ -638,6 +640,30 @@ public class RecUtilities {
         Collections.sort(refi);
         seedlist.addAll(trseed.findSeed(refi, refib, SVTGeom, BMTGeom, false));
         return seedlist;
+    }
+    public void reFitCircle(Seed mseed) {
+        List<Double> Xs = new ArrayList<Double>() ;
+        List<Double> Ys = new ArrayList<Double>() ;
+        List<Double> Ws = new ArrayList<Double>() ;
+        List<Cross> seedcrs = mseed.get_Crosses();
+        for (int j = 0; j < seedcrs.size(); j++) {
+            if (seedcrs.get(j).get_Type() == BMTType.C)
+                continue;
+        
+            Xs.add(seedcrs.get(j).get_Point().x());
+            Ys.add(seedcrs.get(j).get_Point().y());
+            Ws.add(1. / (seedcrs.get(j).get_PointErr().x()*seedcrs.get(j).get_PointErr().x()
+                        +seedcrs.get(j).get_PointErr().y()*seedcrs.get(j).get_PointErr().y()));
+ 
+        }
+        CircleFitter circlefit = new CircleFitter();
+        boolean circlefitstatusOK = circlefit.fitStatus(Xs, Ys, Ws, Xs.size());
+        CircleFitPars pars = circlefit.getFit();
+        if(pars.rho()!=0) {
+            mseed.get_Helix().set_curvature(pars.rho());
+        }
+        mseed.get_Helix().set_dca(pars.doca());
+        mseed.get_Helix().set_phi_at_dca(pars.phi());
     }
     
     public List<Seed> reFit(List<Seed> seedlist,

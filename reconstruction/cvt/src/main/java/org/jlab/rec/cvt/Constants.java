@@ -41,6 +41,8 @@ public class Constants {
     private static boolean SVTOnly = false;
 
     public static final boolean trk_comesfrmOrig = true;
+    
+    public static boolean beamSpotConstraint = false;
 
     public static boolean areConstantsLoaded = false;
 
