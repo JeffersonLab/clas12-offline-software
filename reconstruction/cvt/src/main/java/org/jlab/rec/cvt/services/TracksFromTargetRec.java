@@ -73,7 +73,7 @@ public class TracksFromTargetRec {
                 if(exLayrs==true) {
                     seeds = recUtil.reFit(seeds, SVTGeom, BMTGeom, swimmer, trseed,trseed2);
                 }
-                if(Constants.beamSpotConstraint) {
+                if(Constants.beamSpotConstraint==false) {
                     for(Seed s : seeds) {
                         recUtil.reFitCircle(s);
                     }

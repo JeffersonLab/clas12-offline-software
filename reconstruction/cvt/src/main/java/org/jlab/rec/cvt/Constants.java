@@ -42,7 +42,7 @@ public class Constants {
 
     public static final boolean trk_comesfrmOrig = true;
     
-    public static boolean beamSpotConstraint = false;
+    public static boolean beamSpotConstraint = true;
 
     public static boolean areConstantsLoaded = false;
 
