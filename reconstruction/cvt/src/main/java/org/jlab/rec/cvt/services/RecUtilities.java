@@ -87,13 +87,14 @@ public class RecUtilities {
     public List<Surface> setMeasVecs(Seed trkcand, Swim swim) {
         //Collections.sort(trkcand.get_Crosses());
         List<Surface> KFSites = new ArrayList<Surface>();
-        Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()),
-        new Vector3D(0,0,1));
+        Vector3D u = trkcand.get_Helix().getTrackDirectionAtRadius(Math.sqrt(Constants.getXb()*Constants.getXb()+Constants.getYb()*Constants.getYb()));
+        Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()), u);
         Surface meas0 = new Surface(pln0,new Point3D(Constants.getXb(),Constants.getYb(),0),
-        new Point3D(Constants.getXb()-300,Constants.getYb(),0), new Point3D(Constants.getXb()+300,Constants.getYb(),0), Constants.DEFAULTSWIMACC);
+        new Point3D(Constants.getXb()-300,Constants.getYb(),0), new Point3D(Constants.getXb()+300,Constants.getYb(),0), 
+                Constants.DEFAULTSWIMACC);
         meas0.setSector(0);
         meas0.setLayer(0);
-        meas0.setError(1);
+        meas0.setError(trkcand.get_Helix().get_covmatrix()[0][0]);
         KFSites.add(meas0); 
         
         // SVT measurements
@@ -135,8 +136,8 @@ public class RecUtilities {
         if(trkcand.clsMap!=null) trkcand.clsMap.clear(); //VZ: reset cluster map for second pass tracking with isolated SVT clusters
         //Collections.sort(trkcand.get_Crosses());
         List<Surface> KFSites = new ArrayList<Surface>();
-        Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()),
-                                    new Vector3D(0,0,1));
+        Vector3D u = trkcand.get_ray().get_dirVec();
+        Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()), u);
         Surface meas0 = new Surface(pln0,new Point3D(0,0,0),
         new Point3D(-300,0,0), new Point3D(300,0,0),Constants.DEFAULTSWIMACC);
         meas0.setSector(0);
