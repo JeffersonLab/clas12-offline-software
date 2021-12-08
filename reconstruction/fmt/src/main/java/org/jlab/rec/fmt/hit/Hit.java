@@ -261,8 +261,8 @@ public class Hit implements Comparable<Hit> {
 
             List<Hit> hits = new ArrayList<>();
 
-            double tmean = timecuts.getDoubleValue("mean", 0, 0, 0);
-            double tcut  = timecuts.getDoubleValue("cut", 0, 0, 0);
+            double tmin = timecuts.getDoubleValue("hit_min", 0, 0, 0);
+            double tmax = timecuts.getDoubleValue("hit_max", 0, 0, 0);
 
             if (event.hasBank("FMT::adc")) {
                 DataBank bankDGTZ = event.getBank("FMT::adc");
@@ -280,7 +280,7 @@ public class Hit implements Comparable<Hit> {
                     
                     hit.setStatus(statuses.getIntValue("status", sector, layer, strip));
                     
-                    if(time!=0 && Math.abs(time-tmean)>tcut) hit.setStatus(2); // exclude time==0 hits for MC
+                    if(time!=0 && (time<tmin || time>tmax)) hit.setStatus(2); // exclude time==0 hits for MC
                     
                     hits.add(hit);
                 }
