@@ -54,11 +54,7 @@ public class StateVecs extends AStateVecs {
             Bf.set();
             kVec.alpha = Bf.alpha;
             
-            if(k==0) {
-                //value[0] = x;
-                //value[1] = y;
-                //value[2] = z;
-                //value[3] = 0.0;
+            if(k==0 && this.straight==false) {
                 double invKappa = 1. / Math.abs(kVec.kappa);
                 double px = -invKappa * Math.sin(kVec.phi0 );
                 double py = invKappa * Math.cos(kVec.phi0 );
