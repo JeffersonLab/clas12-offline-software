@@ -381,7 +381,7 @@ public class CVTAlignment extends ReconstructionEngine {
 				cl1.setN(n);
 				cl1.setL(l);
 				cl1.setS(n.cross(l));
-				cl1.set_Resolution(0.1);
+				cl1.set_Resolution(0.6);
 				
 				fillMatricesNew(i, ray, cl1, A,B,V,m,c,I, this.debug, true);
 				
