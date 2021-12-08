@@ -230,6 +230,23 @@ public class CVTRecNewKF extends ReconstructionEngine {
              System.out.println("["+this.getName()+"] run with both CVT systems (default) ");
         }
         //svt stand-alone
+        String beamSpotConst = this.getEngineConfigString("BeamSpotConst");
+        
+        if (beamSpotConst!=null) {
+            System.out.println("["+this.getName()+"] run with beamSpotConst settings "+beamSpotConst+" config chosen based on yaml");
+            Constants.beamSpotConstraint = Boolean.valueOf(beamSpotConst);
+        }
+        else {
+            beamSpotConst = System.getenv("COAT_CVT_BEAMSPOTCONST");
+            if (beamSpotConst!=null) {
+                System.out.println("["+this.getName()+"] run with beamSpotConst settings "+beamSpotConst+" config chosen based on env");
+                this.isCosmic= Boolean.valueOf(beamSpotConst);
+                Constants.beamSpotConstraint = Boolean.valueOf(beamSpotConst);
+            }
+        }
+        if (beamSpotConst==null) {
+             System.out.println("["+this.getName()+"] run with beamSpotConst settings default = false");
+        }
         String svtCosmics = this.getEngineConfigString("cosmics");
         
         if (svtCosmics!=null) {
