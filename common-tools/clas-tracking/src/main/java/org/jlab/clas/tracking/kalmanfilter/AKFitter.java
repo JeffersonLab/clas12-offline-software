@@ -66,7 +66,7 @@ public abstract class AKFitter {
             }
             sv.transport(k, k - 1, sv.trackTraj.get(k), sv.trackCov.get(k), mv.measurements.get(k-1), 
                     swimmer);
-            if(k>1)
+            //if(k>1)
                this.filter(k - 1, swimmer, -1, sv, mv);
         }
     }

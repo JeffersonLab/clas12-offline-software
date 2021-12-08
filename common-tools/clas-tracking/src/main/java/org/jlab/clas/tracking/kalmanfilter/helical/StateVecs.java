@@ -55,11 +55,34 @@ public class StateVecs extends AStateVecs {
             kVec.alpha = Bf.alpha;
             
             if(k==0) {
-                value[0] = x;
-                value[1] = y;
-                value[2] = z;
-                value[3] = 0.0;
-                return value;
+                //value[0] = x;
+                //value[1] = y;
+                //value[2] = z;
+                //value[3] = 0.0;
+                double invKappa = 1. / Math.abs(kVec.kappa);
+                double px = -invKappa * Math.sin(kVec.phi0 );
+                double py = invKappa * Math.cos(kVec.phi0 );
+                double pz = invKappa * kVec.tanL;
+                int ch = (int) KFitter.polarity*(int) Math.signum(kVec.kappa);
+                double accuracy = mv.surface.swimAccuracy/units;
+                swim.SetSwimParameters(x/units, y/units, z/units, px, py, pz, ch);
+                swimPars = swim.SwimRho(50./units, accuracy);
+                if(swimPars==null)
+                    return null;
+                swim.SetSwimParameters(swimPars[0], swimPars[1], swimPars[2], -swimPars[3], -swimPars[4], -swimPars[5], -ch);
+                Vector3D norm = new Vector3D(px,py,pz).asUnit();
+                Point3D point = new Point3D(mv.surface.plane.point().x()/units,
+                                            mv.surface.plane.point().y()/units,
+                                            mv.surface.plane.point().z()/units);
+                swimPars = swim.SwimPlane(norm,point,accuracy);
+                if(swimPars==null)
+                    return null;
+                for(int j =0; j < 3; j++) {
+                    swimPars[j]*=units;
+                }
+                kVec.x = swimPars[0];
+                kVec.y = swimPars[1];
+                kVec.z = swimPars[2]; 
             }
             
             if(this.straight) {
@@ -73,7 +96,7 @@ public class StateVecs extends AStateVecs {
                     int ints = mv.surface.plane.intersection(toPln, inters);
                     kVec.x = inters.x()  ;
                     kVec.y = inters.y()  ;
-                    kVec.z = inters.z()  ;                    
+                    kVec.z = inters.z()  ;  
                     
                 }
                 else if(mv.surface.cylinder!=null) {
@@ -148,7 +171,7 @@ public class StateVecs extends AStateVecs {
                         }
                         kVec.x = swimPars[0];
                         kVec.y = swimPars[1];
-                        kVec.z = swimPars[2];
+                        kVec.z = swimPars[2]; 
                     }
 
                 }
