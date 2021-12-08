@@ -293,14 +293,14 @@ public class CVTAlignment extends ReconstructionEngine {
 				if(useNewFillMatrices) {
 					if(cross.get_Detector() == DetectorType.BST){
 						Cluster cl1 = cross.get_Cluster1();
-						boolean ok = fillMatricesNew(i,ray,cl1,A,B,V,m,c,I,DetectorType.BST,null,debug);
+						boolean ok = fillMatricesNew(i,ray,cl1,A,B,V,m,c,I,debug,false);
 						i++;
 						if(!ok) { //reject track if there's a cluster with really bad values.
 							if(debug) System.out.println("rejecting track due to problem in an SVT layer");
 							continue tracksLoop;
 						}
 						Cluster cl2 = cross.get_Cluster2();
-						ok = fillMatricesNew(i,ray,cl2,A,B,V,m,c,I,DetectorType.BST,null,debug);
+						ok = fillMatricesNew(i,ray,cl2,A,B,V,m,c,I,debug,false);
 						i++;
 						if(!ok) { //reject track if there's a cluster with really bad values.
 							if(debug) System.out.println("rejecting track due to problem in an SVT layer");
@@ -310,7 +310,7 @@ public class CVTAlignment extends ReconstructionEngine {
 						Cluster cl1 = cross.get_Cluster1();
 						boolean ok = true;
 						if(cl1.get_Type() == BMTType.Z || !skipBMTC){
-						     ok = fillMatricesNew(i,ray,cl1,A,B,V,m,c,I, cl1.get_Detector(), cl1.get_Type(), this.debug);
+						     ok = fillMatricesNew(i,ray,cl1,A,B,V,m,c,I, this.debug, false);
 						}
 						i++;
 						if(!ok) { //reject track if there's a cluster with really bad values.
@@ -369,7 +369,23 @@ public class CVTAlignment extends ReconstructionEngine {
 
 			}
 			if(!isCosmics && includeBeamspot) {
-				fillMatricesBeamspot(i, ray, A,B,V,m,c,I, reader.getXbeam(), reader.getYbeam());
+				//fillMatricesBeamspot(i, ray, A,B,V,m,c,I, reader.getXbeam(), reader.getYbeam());
+				
+				
+				//pseudo cluster for the beamspot
+				Cluster cl1 = new Cluster(null, null, 0, 0, 0);
+				cl1.setLine(new Line3D(reader.getXbeam(),reader.getYbeam(),-100, reader.getXbeam(),reader.getYbeam(),100));
+				
+				Vector3D n = ray.get_dirVec();
+				Vector3D l = new Vector3D(0,0,1);
+				cl1.setN(n);
+				cl1.setL(l);
+				cl1.setS(n.cross(l));
+				cl1.set_Resolution(0.1);
+				
+				fillMatricesNew(i, ray, cl1, A,B,V,m,c,I, this.debug, true);
+				
+				
 			}
 			
 			As.add(A);
@@ -501,6 +517,7 @@ public class CVTAlignment extends ReconstructionEngine {
 	boolean includeBeamspot = false;
 	private double minCosIncident = Math.cos(75*Math.PI/180);
 	private double spMax = 10;
+	private final static double indexBeamspot = 102;
 	private boolean fillMatricesBeamspot(int i, Ray ray, Matrix A, Matrix B, Matrix V, Matrix m, Matrix c,
 			Matrix I, double xb, double yb){
 		// a point along the beam
@@ -637,7 +654,7 @@ public class CVTAlignment extends ReconstructionEngine {
 	 * @return
 	 */
 	private boolean fillMatricesNew(int i, Ray ray, Cluster cl, Matrix A, Matrix B, Matrix V, Matrix m, 
-			Matrix c, Matrix I, DetectorType detector, BMTType bmtType, boolean debug) {
+			Matrix c, Matrix I, boolean debug, boolean isBeamspot) {
 		int layer = cl.get_Layer();
 		int sector = cl.get_Sector();
 		//System.out.println("RLS " + region + " " + layer + " " + sector);
@@ -652,6 +669,9 @@ public class CVTAlignment extends ReconstructionEngine {
 			System.out.println("prelim phi is " + phi + " sector= ="+cl.get_Sector());
 			
 		}*/
+		
+		DetectorType detector = cl.get_Detector(); 
+		BMTType bmtType = cl.get_Type();
 
 		if(debug) {
 			System.out.println("\n\nNew method " + detector + " layer " + layer + " sector " + sector);
@@ -675,7 +695,7 @@ public class CVTAlignment extends ReconstructionEngine {
 		//Vector3d e1 = cl.getX
 		Vector3D e = null;
 		Vector3D extrap = null;
-		if(detector == DetectorType.BST || detector == DetectorType.BMT && bmtType==BMTType.Z) {
+		if(detector == DetectorType.BST || (detector == DetectorType.BMT && bmtType==BMTType.Z) || isBeamspot) {
 			l = cl.getL();
 			s = cl.getS();
 			n = cl.getN();
@@ -878,9 +898,10 @@ public class CVTAlignment extends ReconstructionEngine {
 
 		if(detector == DetectorType.BST)
 			I.set(i, 0, getIndexSVT(layer-1,sector-1));
-		if(detector == DetectorType.BMT)
+		else if(detector == DetectorType.BMT)
 			I.set(i, 0, getIndexBMT(layer-1,sector-1));
-
+		else
+			I.set(i, 0, indexBeamspot );
 		Vector3D dmdu = sp.multiply(e.clone().sub(xref).dot(n)/udotn);
 		if(!this.useDocaPhiZTandip) {
 			B.set(i,0, -sp.x());
@@ -1627,7 +1648,7 @@ public class CVTAlignment extends ReconstructionEngine {
 			
 		}
 		
-		this.nAlignables = ((this.svtTopBottomSep ? 2*42 : 42) + (this.isSVTonly ? 0: 18) + (includeBeamspot? 0 : 1));
+		this.nAlignables = ((this.svtTopBottomSep ? 2*42 : 42) + (this.isSVTonly ? 0: 18) + (includeBeamspot? 1 : 0));
 
 
 		String debug = this.getEngineConfigString("debug");
