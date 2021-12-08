@@ -402,7 +402,7 @@ public class SVTConstants
                 double ypos = cp.getDouble(ccdbPath+"position/y", 0 );
                 double zpos = cp.getDouble(ccdbPath+"position/z", 0 );
 
-                double[] myShift = {0, 0, 0, -Math.toRadians(0), 0, 0, 0};
+//                double[] myShift = {0, 0, 0, -Math.toRadians(0), 0, 0, 0};
                 LAYERSHIFTDATA = new double[NSECTORS[3]][NLAYERS-2][];
                 for( int i = 0; i < (NTOTALSECTORS-NSECTORS[3])*2; i++ )    // layeralignment tables doesn't cover region 4
                 {
@@ -420,11 +420,11 @@ public class SVTConstants
                         ty += ypos;
                         tz += zpos;
                         LAYERSHIFTDATA[sector-1][layer-1] = new double[]{ tx, ty, tz, rx, ry, rz, ra };
-                        if (layer == 1 || layer == 2 || true) {
-                            for(int j=0; j<LAYERSHIFTDATA[sector-1][layer-1].length; j++) {
-                                LAYERSHIFTDATA[sector-1][layer-1][j] += myShift[j];
-                            }
-                        }                        
+//                        if (layer == 1 || layer == 2 || true) {
+//                            for(int j=0; j<LAYERSHIFTDATA[sector-1][layer-1].length; j++) {
+//                                LAYERSHIFTDATA[sector-1][layer-1][j] += myShift[j];
+//                            }
+//                        }                        
                 }
                 if( VERBOSE ) showLayerShiftData();
 
