@@ -20,6 +20,9 @@ services:
 # This is where the AI plugin would go.  THe AI code reads the HB clusters.  
   - class: org.jlab.service.mltn.MLTDEngine
     name: MLTD
+# DC using clustering: regular HB tracking
+  - class: org.jlab.service.dc.DCHBPostClusterConv
+    name: DCHB
 # DC using clustering on AI hits: NN assisted HB tracking
   - class: org.jlab.service.dc.DCHBPostClusterAI
     name: DCHAI
@@ -41,12 +44,20 @@ services:
     name: LTCC
   - class: org.jlab.service.eb.EBHBEngine
     name: EBHB
+  - class: org.jlab.service.eb.EBHBAIEngine
+    name: EBHAI
+# DC regular TB tracking    
   - class: org.jlab.service.dc.DCTBEngine
     name: DCTB
+# DC AI assisted TB tracking    
+  - class: org.jlab.service.dc.DCTBEngineAI
+    name: DCTAI  
   - class: org.jlab.service.ftof.FTOFTBEngine
     name: FTOFTB
   - class: org.jlab.service.eb.EBTBEngine
     name: EBTB
+  - class: org.jlab.service.eb.EBTBAIEngine
+    name: EBTAI
   - class: org.jlab.rec.rich.RICHEBEngine
     name: RICH
   - class: org.jlab.service.rtpc.RTPCEngine
@@ -67,16 +78,25 @@ configuration:
       magfieldTorusMap: Full_torus_r251_phi181_z251_08May2018.dat
     DCCR:
       dcT2DFunc: "Polynomial"
-      dcWireDistortion: "true"  
+      dcWireDistortion: "true" 
+    DCHB:
+      dcT2DFunc: "Polynomial"
+      dcWireDistortion: "true" 
     DCHAI:
       dcT2DFunc: "Polynomial"
       dcWireDistortion: "true" 
-      outputBankPrefix: "HB"
+      outputBankPrefix: "HBAI"
     DCTB:
       dcT2DFunc: "Polynomial"
       dcWireDistortion: "true" 
+    DCTAI:
+      dcT2DFunc: "Polynomial"
+      dcWireDistortion: "true"
+      outputBankPrefix: "TBAI"
     MLTD:
       run: "5038"
+    EBTAI:
+      outputBankPrefix: "RECAI"
       
 mime-types:
   - binary/data-hipo
