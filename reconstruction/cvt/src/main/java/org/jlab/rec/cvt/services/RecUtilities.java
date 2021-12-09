@@ -642,29 +642,41 @@ public class RecUtilities {
         seedlist.addAll(trseed.findSeed(refi, refib, SVTGeom, BMTGeom, false));
         return seedlist;
     }
-    public void reFitCircle(Seed mseed) {
+    public void reFitCircle(Seed mseed,SVTGeometry SVTGeom, BMTGeometry BMTGeom, int iter) {
         List<Double> Xs = new ArrayList<Double>() ;
         List<Double> Ys = new ArrayList<Double>() ;
         List<Double> Ws = new ArrayList<Double>() ;
-        List<Cross> seedcrs = mseed.get_Crosses();
-        for (int j = 0; j < seedcrs.size(); j++) {
-            if (seedcrs.get(j).get_Type() == BMTType.C)
-                continue;
+        List<Cross> seedcrs = new ArrayList<Cross>();
         
-            Xs.add(seedcrs.get(j).get_Point().x());
-            Ys.add(seedcrs.get(j).get_Point().y());
-            Ws.add(1. / (seedcrs.get(j).get_PointErr().x()*seedcrs.get(j).get_PointErr().x()
-                        +seedcrs.get(j).get_PointErr().y()*seedcrs.get(j).get_PointErr().y()));
- 
-        }
         CircleFitter circlefit = new CircleFitter();
-        boolean circlefitstatusOK = circlefit.fitStatus(Xs, Ys, Ws, Xs.size());
-        CircleFitPars pars = circlefit.getFit();
-        if(pars.rho()!=0) {
-            mseed.get_Helix().set_curvature(pars.rho());
+        CircleFitPars pars = null;
+        for(int i = 0; i< iter; i++) {
+            Xs.clear();
+            Ys.clear();
+            Ws.clear();
+            seedcrs = mseed.get_Crosses();
+            
+            for (int j = 0; j < seedcrs.size(); j++) {
+                if (seedcrs.get(j).get_Type() == BMTType.C)
+                    continue;
+                
+                Xs.add(seedcrs.get(j).get_Point().x());
+                Ys.add(seedcrs.get(j).get_Point().y());
+                Ws.add(1. / (seedcrs.get(j).get_PointErr().x()*seedcrs.get(j).get_PointErr().x()
+                            +seedcrs.get(j).get_PointErr().y()*seedcrs.get(j).get_PointErr().y()));
+
+            }
+
+            boolean circlefitstatusOK = circlefit.fitStatus(Xs, Ys, Ws, Xs.size());
+            pars = circlefit.getFit();
+            if(pars.rho()!=0) {
+                mseed.get_Helix().set_curvature(pars.rho());
+            }
+            mseed.get_Helix().set_dca(-pars.doca());
+            mseed.get_Helix().set_phi_at_dca(pars.phi());
+
+            mseed.update_Crosses(SVTGeom, BMTGeom);
         }
-        mseed.get_Helix().set_dca(pars.doca());
-        mseed.get_Helix().set_phi_at_dca(pars.phi());
     }
     
     public List<Seed> reFit(List<Seed> seedlist,
