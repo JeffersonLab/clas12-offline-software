@@ -69,6 +69,7 @@ public class T2DFunctions {
      * @param Bb2 Bfield dependence parametrization coefficient
      * @param Bb3 Bfield dependence parametrization coefficient
      * @param Bb4 Bfield dependence parametrization coefficient
+     * @param superlayer
      * @return  time
      */
     public static double polyFcnP5(double x, double alpha, double bfield, double v_0, double vm, double R, 
@@ -177,6 +178,7 @@ public class T2DFunctions {
      * @param Bb2 Bfield dependence parametrization coefficient
      * @param Bb3 Bfield dependence parametrization coefficient
      * @param Bb4 Bfield dependence parametrization coefficient
+     * @param superlayer
      * @return  time
      */
     public static double polyFcnDmaxV0Constraint(double x, double alpha, double bfield, double v_0, double vm, double R, 
@@ -260,6 +262,7 @@ public class T2DFunctions {
      * @param Bb2 Bfield dependence parametrization coefficient
      * @param Bb3 Bfield dependence parametrization coefficient
      * @param Bb4 Bfield dependence parametrization coefficient
+     * @param superlayer
      * @return  time
      */
     public static double polyFcnNoDmaxV0Constraint(double x, double alpha, double bfield, double v_0, double vm, double R, 

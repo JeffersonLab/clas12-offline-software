@@ -44,8 +44,8 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
     private Segment _seg2;
     public boolean isPseudoCross = false;
     
-    private double cos_tilt = FastMath.cos(Math.toRadians(25.));
-    private double sin_tilt = FastMath.sin(Math.toRadians(25.));
+    private final double cos_tilt = FastMath.cos(Math.toRadians(25.));
+    private final double sin_tilt = FastMath.sin(Math.toRadians(25.));
     
     public int recalc;
     /**
@@ -187,6 +187,7 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
 
     /**
      * Sorts crosses by azimuth angle values
+     * @param arg
      */
     @Override
     public int compareTo(Cross arg) {
@@ -250,6 +251,7 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
 
     /**
      * Sets the cross parameters: the position and direction unit vector
+     * @param DcDetector
      */
     public void set_CrossParams(DCGeant4Factory DcDetector) {
 

@@ -1,7 +1,6 @@
 package org.jlab.rec.dc.cross;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -17,14 +16,13 @@ public class CrossList extends ArrayList<List<Cross>> {
     private static final long serialVersionUID = 8509791607282273163L;
 
     public void removeDuplicates(CrossList crosslist) {
-        Map<String, ArrayList<Cross>> crosslistUniq = new HashMap<String, ArrayList<Cross>>();
-        for(int i = 0; i< this.size(); i++) {
-            List<Cross> thisList = this.get(i);
+        Map<String, ArrayList<Cross>> crosslistUniq = new HashMap<>();
+        for (List<Cross> thisList : this) {
             for(int j = 0; j< crosslist.size(); j++) {
                 List<Cross> otherList = crosslist.get(j);
                 if(!(thisList.get(0).get_Id()==otherList.get(0).get_Id() &&
                         thisList.get(1).get_Id()==otherList.get(1).get_Id() &&
-                            thisList.get(2).get_Id()==otherList.get(2).get_Id())) {
+                        thisList.get(2).get_Id()==otherList.get(2).get_Id())) {
                     String s = "";
                     s+=thisList.get(0).get_Id()+thisList.get(1).get_Id()+thisList.get(2).get_Id();
                     crosslistUniq.put(s, (ArrayList<Cross>) thisList);

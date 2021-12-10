@@ -310,7 +310,6 @@ public class Constants {
                                         int selectedSector) {
         if (ConstantsLoaded) {
             printConfig(engine);
-            return;
         }
         else {
             GEOVARIATION    = variation;
@@ -335,7 +334,6 @@ public class Constants {
     public synchronized void initialize(String engine) {
         if (ConstantsLoaded) {
             printConfig(engine);
-            return;
         }
         else {
             LoadConstants();

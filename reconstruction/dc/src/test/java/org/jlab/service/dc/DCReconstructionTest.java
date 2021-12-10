@@ -1,13 +1,10 @@
 package org.jlab.service.dc;
 
 import cnuphys.magfield.MagneticFields;
-import java.util.Map;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 import org.jlab.io.base.DataEvent;
-import org.jlab.service.dc.DCHBEngine;
-import org.jlab.service.dc.DCTBEngine;
 
 import org.jlab.analysis.physics.TestEvent;
 import org.jlab.analysis.math.ClasMath;

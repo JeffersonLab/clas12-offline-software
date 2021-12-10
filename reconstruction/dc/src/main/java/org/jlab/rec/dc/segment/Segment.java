@@ -71,7 +71,7 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
         this.set_Status(Status());
     }
     
-    public int Status() {
+    public final int Status() {
         int stat = 0;    
         
         int L[] = new int[6];

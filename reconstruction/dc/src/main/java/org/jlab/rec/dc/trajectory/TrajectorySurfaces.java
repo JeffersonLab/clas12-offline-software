@@ -55,7 +55,7 @@ public class TrajectorySurfaces {
         Vector3D n,P;
         for(int is =0; is<6; is++) {
 
-            this._DetectorPlanes.add(new ArrayList<Surface>());
+            this._DetectorPlanes.add(new ArrayList<>());
 
             // Add target center and downstream wall
             this._DetectorPlanes.get(is).add(new Surface(DetectorType.TARGET, DetectorLayer.TARGET_DOWNSTREAM, targetPosition+targetLength/2, 0., 0., 1.));

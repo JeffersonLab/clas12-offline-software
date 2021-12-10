@@ -35,6 +35,7 @@ public class ClusterCleanerUtilities {
      * // tracks.
      * @param nextClsStartIndex the index of the next cluster in the splitted
      * cluster.
+     * @param cf
      * @return a list of fitted clusters
      */
     public List<FittedCluster> ClusterSplitter(FittedCluster clus, int nextClsStartIndex, ClusterFitter cf) {
@@ -277,7 +278,7 @@ public class ClusterCleanerUtilities {
         int nlayr = 6;
         Hit[] allhits_inlayer = new Hit[nlayr];
         allhits_inlayer = hits_inlayer;
-
+        
         int nlayers_hit = 0;
         for (int la = 0; la < nlayr; la++) {
             if (allhits_inlayer[la] != null) {
@@ -578,7 +579,7 @@ public class ClusterCleanerUtilities {
         //System.out.println(" secondaries Remover :"+clus.printInfo());
         Collections.sort(clus);
 
-        ArrayList<ArrayList<FittedHit>> sortedHits = new ArrayList<ArrayList<FittedHit>>(6);
+        ArrayList<ArrayList<FittedHit>> sortedHits = new ArrayList<>(6);
         //initialize
         for (int i = 0; i < 6; i++) {
             sortedHits.add(new ArrayList<>());
