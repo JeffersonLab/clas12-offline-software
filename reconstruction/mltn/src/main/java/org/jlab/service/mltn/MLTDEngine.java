@@ -1,14 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.service.mltn;
 
 import j4ml.clas12.ejml.ArchiveProvider;
 import j4ml.clas12.ejml.EJMLTrackNeuralNetwork;
 import j4ml.clas12.network.Clas12TrackFinder;
 import j4ml.clas12.tracking.ClusterCombinations;
+import java.io.File;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -16,6 +13,7 @@ import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataBank;
+import org.jlab.utils.CLASResources;
 
 /**
  *
@@ -32,13 +30,6 @@ public class MLTDEngine extends ReconstructionEngine {
         super("MLTD","gavalian","1.0");
     }
     
-    private String getPathWithEnvironment(String envDirectory,String relative){
-       if(envDirectory==null) return relative;
-       if(System.getenv(envDirectory)!=null) return System.getenv(envDirectory)+"/"+relative;
-       if(System.getProperty(envDirectory)!=null) return System.getProperty(envDirectory)+"/"+relative;
-       return relative;
-    }
-    
     @Override
     public boolean init() {
         
@@ -46,11 +37,15 @@ public class MLTDEngine extends ReconstructionEngine {
         String runNumber = Optional.ofNullable(this.getEngineConfigString("run")).orElse("5038");
         networkRun = Integer.parseInt(runNumber);
         
+        String path = CLASResources.getResourcePath("etc/ejml/ejmlclas12.network"); 
+        if(this.getEngineConfigString("network")!=null) 
+            path = this.getEngineConfigString("network");
+        System.out.println("[neural-network] info : Loading neural network from " + path);
+        
         network = new EJMLTrackNeuralNetwork();        
         Map<String,String>  files = new HashMap<String,String>();
         files.put("classifier", "trackClassifier.network");
         files.put("fixer", "trackFixer.network");        
-        String path = getPathWithEnvironment("CLAS12DIR","etc/ejml/ejmlclas12.network");        
         
         ArchiveProvider provider = new ArchiveProvider(path);
         
