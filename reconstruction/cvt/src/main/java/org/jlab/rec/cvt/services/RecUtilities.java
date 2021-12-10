@@ -36,6 +36,8 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.cross.CrossMaker;
+import org.jlab.rec.cvt.fit.CircleFitPars;
+import org.jlab.rec.cvt.fit.CircleFitter;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.trajectory.Ray;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
@@ -85,13 +87,14 @@ public class RecUtilities {
     public List<Surface> setMeasVecs(Seed trkcand, Swim swim) {
         //Collections.sort(trkcand.get_Crosses());
         List<Surface> KFSites = new ArrayList<Surface>();
-        Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()),
-        new Vector3D(0,0,1));
+        Vector3D u = trkcand.get_Helix().getTrackDirectionAtRadius(Math.sqrt(Constants.getXb()*Constants.getXb()+Constants.getYb()*Constants.getYb()));
+        Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()), u);
         Surface meas0 = new Surface(pln0,new Point3D(Constants.getXb(),Constants.getYb(),0),
-        new Point3D(Constants.getXb()-300,Constants.getYb(),0), new Point3D(Constants.getXb()+300,Constants.getYb(),0), Constants.DEFAULTSWIMACC);
+        new Point3D(Constants.getXb()-300,Constants.getYb(),0), new Point3D(Constants.getXb()+300,Constants.getYb(),0), 
+                Constants.DEFAULTSWIMACC);
         meas0.setSector(0);
         meas0.setLayer(0);
-        meas0.setError(1);
+        meas0.setError(trkcand.get_Helix().get_covmatrix()[0][0]);
         KFSites.add(meas0); 
         
         // SVT measurements
@@ -133,8 +136,8 @@ public class RecUtilities {
         if(trkcand.clsMap!=null) trkcand.clsMap.clear(); //VZ: reset cluster map for second pass tracking with isolated SVT clusters
         //Collections.sort(trkcand.get_Crosses());
         List<Surface> KFSites = new ArrayList<Surface>();
-        Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()),
-                                    new Vector3D(0,0,1));
+        Vector3D u = trkcand.get_ray().get_dirVec();
+        Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()), u);
         Surface meas0 = new Surface(pln0,new Point3D(0,0,0),
         new Point3D(-300,0,0), new Point3D(300,0,0),Constants.DEFAULTSWIMACC);
         meas0.setSector(0);
@@ -638,6 +641,42 @@ public class RecUtilities {
         Collections.sort(refi);
         seedlist.addAll(trseed.findSeed(refi, refib, SVTGeom, BMTGeom, false));
         return seedlist;
+    }
+    public void reFitCircle(Seed mseed,SVTGeometry SVTGeom, BMTGeometry BMTGeom, int iter) {
+        List<Double> Xs = new ArrayList<Double>() ;
+        List<Double> Ys = new ArrayList<Double>() ;
+        List<Double> Ws = new ArrayList<Double>() ;
+        List<Cross> seedcrs = new ArrayList<Cross>();
+        
+        CircleFitter circlefit = new CircleFitter();
+        CircleFitPars pars = null;
+        for(int i = 0; i< iter; i++) {
+            Xs.clear();
+            Ys.clear();
+            Ws.clear();
+            seedcrs = mseed.get_Crosses();
+            
+            for (int j = 0; j < seedcrs.size(); j++) {
+                if (seedcrs.get(j).get_Type() == BMTType.C)
+                    continue;
+                
+                Xs.add(seedcrs.get(j).get_Point().x());
+                Ys.add(seedcrs.get(j).get_Point().y());
+                Ws.add(1. / (seedcrs.get(j).get_PointErr().x()*seedcrs.get(j).get_PointErr().x()
+                            +seedcrs.get(j).get_PointErr().y()*seedcrs.get(j).get_PointErr().y()));
+
+            }
+
+            boolean circlefitstatusOK = circlefit.fitStatus(Xs, Ys, Ws, Xs.size());
+            pars = circlefit.getFit();
+            if(pars.rho()!=0) {
+                mseed.get_Helix().set_curvature(pars.rho());
+            }
+            mseed.get_Helix().set_dca(-pars.doca());
+            mseed.get_Helix().set_phi_at_dca(pars.phi());
+
+            mseed.update_Crosses(SVTGeom, BMTGeom);
+        }
     }
     
     public List<Seed> reFit(List<Seed> seedlist,

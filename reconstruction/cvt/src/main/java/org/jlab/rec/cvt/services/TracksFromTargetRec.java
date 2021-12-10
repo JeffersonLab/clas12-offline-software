@@ -74,6 +74,11 @@ public class TracksFromTargetRec {
                         seeds = recUtil.reFit(seeds, SVTGeom, BMTGeom, swimmer, trseed, trseed2);
                     }
                 }
+                if(Constants.beamSpotConstraint==false) {
+                    for(Seed s : seeds) {
+                        recUtil.reFitCircle(s,SVTGeom, BMTGeom, 5);
+                    }
+                }
             }
         }
         if(seeds ==null || seeds.size() == 0) {
@@ -156,6 +161,7 @@ public class TracksFromTargetRec {
                             }
                         }
                         //reset pars
+                        fittedTrack.get_helix().set_dca(-fittedTrack.get_helix().get_dca());
                         v = fittedTrack.get_helix().getVertex();
                         p = fittedTrack.get_helix().getPXYZ(solenoidValue);
                         charge = (int) (Math.signum(solenoidScale)*fittedTrack.get_helix().get_charge());
@@ -191,6 +197,9 @@ public class TracksFromTargetRec {
             }
         }
         for(Cluster c : SVTclusters) {
+            c.set_AssociatedTrackID(-1);
+        }
+        for(Cluster c : BMTclusters) {
             c.set_AssociatedTrackID(-1);
         }
 //        if (trkcands.isEmpty()) {

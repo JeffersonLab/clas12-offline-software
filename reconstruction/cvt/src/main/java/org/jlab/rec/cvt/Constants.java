@@ -47,7 +47,7 @@ public class Constants {
 
     public static final boolean TRACKSFROMORIGIN = true;
 
-    public static boolean areConstantsLoaded = false;
+    public static boolean beamSpotConstraint = true;
 
     public static Libr kfMatLib;
 

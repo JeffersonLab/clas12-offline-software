@@ -117,18 +117,26 @@ public class TrajectoryFinder {
         
         // initialize swimmer starting from the track vertex
         double maxPathLength = 1;  
-        swimmer.SetSwimParameters((trk.get_helix().xdca()+Constants.getXb()) / 10, (trk.get_helix().ydca()+Constants.getYb()) / 10, trk.get_helix().get_Z0() / 10, 
-                     Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
-                     trk.get_P(), trk.get_Q(), maxPathLength) ;
+        //swimmer.SetSwimParameters((trk.get_helix().xdca()+Constants.getXb()) / 10, (trk.get_helix().xdca()+Constants.getXb()) / 10, trk.get_helix().get_Z0() / 10, 
+        //             Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
+        //             trk.get_P(), trk.get_Q(), maxPathLength) ;
+        double pz = trk.get_Pt()*trk.get_helix().get_tandip();
+        double px = trk.get_Pt()*Math.cos(trk.get_helix().get_phi_at_dca());
+        double py = trk.get_Pt()*Math.sin(trk.get_helix().get_phi_at_dca());
+        double x = (trk.get_helix().xdca()+Constants.getXb()) / 10;
+        double y = (trk.get_helix().ydca()+Constants.getYb()) / 10;
+        double z = trk.get_helix().get_Z0() / 10;
+        swimmer.SetSwimParameters(x,y,z,px,py,pz, trk.get_Q()) ;
+        
         double[] inters = null;
         double     path = 0;
         // SVT
         for (int l = 0; l < SVTGeometry.NLAYERS; l++) {
             // reinitilize swimmer from last surface
             if(inters!=null) {
-                double intersPhi   = Math.atan2(inters[4], inters[3]);
-                double intersTheta = Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]));
-                swimmer.SetSwimParameters(inters[0], inters[1], inters[2], Math.toDegrees(intersPhi), Math.toDegrees(intersTheta), trk.get_P(), trk.get_Q(), maxPathLength) ;
+                //double intersPhi   = Math.atan2(inters[4], inters[3]);
+                //double intersTheta = Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]));
+                swimmer.SetSwimParameters(inters[0], inters[1], inters[2], inters[3], inters[4], inters[5], trk.get_Q()) ;
             }
             int layer = l + 1;
             int sector = Sectors[l];
@@ -138,7 +146,7 @@ public class TrajectoryFinder {
             Vector3D n = svt_geo.getNormal(layer, sector);
             Point3D  p = svt_geo.getModule(layer, sector).origin();
             Point3D pm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
-            inters = swimmer.SwimPlane(n, pm, Constants.SWIMACCURACYSVT/10);
+            inters = swimmer.SwimPlane(n, pm, Constants.SWIMACCURACYSVT/10); 
             if(inters==null) break;
             path  = path + inters[6];
             StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
