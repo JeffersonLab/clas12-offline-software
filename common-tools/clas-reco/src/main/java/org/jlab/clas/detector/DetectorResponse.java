@@ -33,6 +33,10 @@ public class DetectorResponse {
         descriptor.setSectorLayerComponent(sector, layer, component);
     }
     
+    public DetectorResponse(DetectorResponse r) {
+        this.copy(r);
+    }
+    
     public void copy(DetectorResponse r) {
         descriptor.copy(r.getDescriptor());
         hitPosition.copy(r.hitPosition);
