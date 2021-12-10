@@ -23,7 +23,6 @@ import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
-import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.track.Track;
@@ -627,7 +626,7 @@ public class TrajectoryFinder {
 //            Plane3D pl = new Plane3D(endPt1, svt_geo.findBSTPlaneNormal(sector, layer));
 //            double d = new Vector3D(stVec.x(), stVec.y(), stVec.z()).dot(pl.normal())-pl.point().toVector3D().dot(pl.normal());
 //            System.out.println(d+" calc "+l.distance(new Point3D(stVec.x(), stVec.y(), stVec.z())).length()+" d "+doca2Cls);
-            for (FittedHit hit : cluster) {
+            for (Hit hit : cluster) {
                 double doca1 = hit.residual(new Point3D(stVec.x(), stVec.y(), stVec.z()));
                 double sigma1 = svt_geo.getSingleStripResolution(layer, hit.get_Strip().get_Strip(), stVec.z());
                 hit.set_stripResolutionAtDoca(sigma1);
@@ -647,7 +646,7 @@ public class TrajectoryFinder {
             if (BMTGeometry.getDetectorType(layer) == BMTType.C) { //C-detector measuring z
                 cluster.set_CentroidResidual(p);
                 cluster.set_SeedResidual(p);
-                for (FittedHit h1 : cluster) {
+                for (Hit h1 : cluster) {
                     // calculate the hit residuals
                     h1.set_TrkgStatus(1);
                     h1.set_docaToTrk(p);
@@ -668,7 +667,7 @@ public class TrajectoryFinder {
                 double doca2Cls = (phic-phit)*bmt_geo.getRadiusMidDrift(blayer);
                 cluster.set_CentroidResidual(doca2Cls);
 
-                for (FittedHit h1 : cluster) {
+                for (Hit h1 : cluster) {
                     double xh = Math.cos(h1.get_Strip().get_Phi())*bmt_geo.getRadiusMidDrift(blayer);
                     double yh = Math.sin(h1.get_Strip().get_Phi())*bmt_geo.getRadiusMidDrift(blayer);
                     double hphic = bmt_geo.getPhi(blayer, bsector, new Point3D(xh,yh,0));

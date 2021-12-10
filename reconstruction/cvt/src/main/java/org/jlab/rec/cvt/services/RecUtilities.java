@@ -14,7 +14,7 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
-import org.jlab.rec.cvt.hit.FittedHit;
+import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.clas.swimtools.Swim;
@@ -477,7 +477,7 @@ public class RecUtilities {
                 Point3D p = new Point3D(traj.get(layer).x, traj.get(layer).y, traj.get(layer).z);
                 cluster.set_CentroidResidual(traj.get(layer).resi);
                 cluster.set_SeedResidual(p);             
-                for (FittedHit hit : cluster) {
+                for (Hit hit : cluster) {
                     double doca1 = hit.residual(p);
                     double sigma1 = sgeo.getSingleStripResolution(layer, hit.get_Strip().get_Strip(), traj.get(layer).z);
                     hit.set_stripResolutionAtDoca(sigma1);
@@ -510,7 +510,7 @@ public class RecUtilities {
                     cluster.set_CentroidResidual(traj.get(layer).resi);
                     cluster.set_SeedResidual(p); 
                 }
-                for (FittedHit hit : cluster) {
+                for (Hit hit : cluster) {
                     hit.set_docaToTrk(hit.residual(p));
                     if(traj.get(layer).isMeasUsed) hit.set_TrkgStatus(1);
                 }

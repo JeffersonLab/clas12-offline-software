@@ -23,7 +23,7 @@ import org.jlab.rec.cvt.fit.HelicalTrackFitter;
 import org.jlab.rec.cvt.fit.LineFitter;
 import org.jlab.rec.cvt.fit.CosmicFitter;
 import org.jlab.rec.cvt.fit.LineFitPars;
-import org.jlab.rec.cvt.hit.FittedHit;
+import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.svt.SVTParameters;
 import org.jlab.rec.cvt.trajectory.Ray;
@@ -157,7 +157,7 @@ public class TrackCandListFinder {
         HelicalTrackFitter fitTrk = new HelicalTrackFitter();
         // sets the index according to assumption that the track comes from the origin or not
         int shift = 0;
-        //	if(org.jlab.rec.cvt.BMTConstants.trk_comesfrmOrig)
+        //	if(org.jlab.rec.cvt.BMTConstants.TRACKSFROMORIGIN)
         //		shift =1;
 
         // interate the fit a number of times set in the constants file
@@ -245,7 +245,7 @@ public class TrackCandListFinder {
         HelicalTrackFitter fitTrk = new HelicalTrackFitter();
         // sets the index according to assumption that the track comes from the origin or not
         int shift = 0;
-        if (Constants.trk_comesfrmOrig) {
+        if (Constants.TRACKSFROMORIGIN) {
             shift = 1;
         }
 
@@ -1169,7 +1169,7 @@ public class TrackCandListFinder {
                             st, svt_geo, bmt_geo, trajFinal);
                     //System.out.println("trying to associate a cluster ");cls.printInfo(); System.out.println(" to "+st.get_CalcCentroidStrip()+" dStp = "+(st.get_CalcCentroidStrip()-cls.get_Centroid()));
                     cls.set_AssociatedTrackID(k);
-                    for (FittedHit h : cls) {
+                    for (Hit h : cls) {
                         h.set_AssociatedTrackID(k);
                     }
                 }

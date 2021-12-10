@@ -367,6 +367,8 @@ public class Seed implements Comparable<Seed>{
             return false;
         else if(this.get_Helix().getPt(this.get_Helix().B) < Constants.PTCUT) 
             return false;
+//        else if(Math.abs(this.get_Helix().get_tandip()) > Constants.TANDIP) 
+//            return false;
         else if(Math.abs(this.get_Helix().get_Z0()) > Constants.ZRANGE) 
             return false;
         else 
@@ -382,7 +384,7 @@ public class Seed implements Comparable<Seed>{
     public boolean betterThan(Seed o) {
         if(this.getNDF()>o.getNDF()) 
             return true;
-        else if(this.getNDF()>0 && this.getNDF()==o.getNDF()) {
+        else if(this.getNDF()==o.getNDF()) {
             if(this.getChi2()/this.getNDF() < o.getChi2()/o.getNDF())
                 return true;
             else return false;

@@ -20,14 +20,15 @@ public class Strip {
     }
     
 
-    private int _Strip;    	 							//     strip read from daq 
-    private double _Edep;      							//     for simulation this corresponds to the energy deposited on the strip, in data it should be an ADC converted value
+    private int _Strip;    	//     strip read from daq 
+    private double _Edep;      	//     for simulation this corresponds to the energy deposited on the strip, in data it should be an ADC converted value
     private double _Time;
+    private int _Status;        //     0=good, 1=bad edep, 2=bad tim, 3=dead                
     
-    private int _LCStrip;								//     strip number taking into account Lorentz angle correction (for MM Z detectors)
-    private double _Phi;  								//     for MM Z-detectors, the azimuth angle at the strip midwidth after LC
+    private int _LCStrip;	//     strip number taking into account Lorentz angle correction (for MM Z detectors)
+    private double _Phi;  	//     for MM Z-detectors, the azimuth angle at the strip midwidth after LC
     private double _PhiErr;
-    private double _Phi0;  								//     for MM Z-detectors, the azimuth angle at the strip midwidth before LC
+    private double _Phi0;  	//     for MM Z-detectors, the azimuth angle at the strip midwidth before LC
     private double _PhiErr0;
     private double _Z;
     private double _ZErr;
@@ -218,10 +219,23 @@ public class Strip {
         this._Time = _Time;
     }
 
+    public int getStatus() {
+        return _Status;
+    }
+
+    public void setStatus(int _Status) {
+        this._Status = _Status;
+    }
+
+    
     /**
+     * 
      *
      * @param geo the BMT geometry class Sets the Lorentz corrected phi and
      * strip number for Z detectors, the z position for C detectors
+     * @param sector
+     * @param layer
+     * @param swim
      */
     public void calc_BMTStripParams(BMTGeometry geo, int sector, int layer, Swim swim) {
 

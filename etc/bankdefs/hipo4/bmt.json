@@ -9,10 +9,13 @@
         {"name":"sector",         "type":"B", "info":"hit sector"},
         {"name":"layer",          "type":"B", "info":"hit layer"},
         {"name":"strip",          "type":"I", "info":"hit strip"},
+        {"name":"energy",         "type":"F", "info":"energy"},
+        {"name":"time",           "type":"F", "info":"time (ns)"},
         {"name":"fitResidual",    "type":"F", "info":"fitted hit residual"},
         {"name":"trkingStat",     "type":"I", "info":"tracking status"},
         {"name":"clusterID",      "type":"S", "info":"associated cluster ID"},
-        {"name":"trkID",          "type":"S", "info":"associated track ID"}
+        {"name":"trkID",          "type":"S", "info":"associated track ID"},
+        {"name":"status",         "type":"B", "info":"status (0=good)"}
         ]
   },
   {
@@ -26,6 +29,7 @@
             {"name":"layer",           "type":"B", "info":"layer"},
             {"name":"size",            "type":"S", "info":"cluster size"},
             {"name":"ETot",            "type":"F", "info":"cluster total energy"},
+            {"name":"time",            "type":"F", "info":"cluster average time"},
             {"name":"seedE",           "type":"F", "info":"energy of the seed "},
             {"name":"seedStrip",       "type":"I", "info":"seed strip"},
             {"name":"centroid",        "type":"F", "info":"centroid strip number"},

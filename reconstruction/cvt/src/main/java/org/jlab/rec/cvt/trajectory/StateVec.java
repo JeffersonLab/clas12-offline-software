@@ -264,13 +264,13 @@ public class StateVec implements Comparable<StateVec> {
     public int compareTo(StateVec arg) {
 
         int return_val = 0;
-        if (Constants.isCosmicsData() == false) {
+        if (Constants.isCosmicsData == false) {
             int RegComp = this.get_SurfaceLayer() < arg.get_SurfaceLayer() ? -1 : this.get_SurfaceLayer() == arg.get_SurfaceLayer() ? 0 : 1;
             int IDComp = this.get_ID() < arg.get_ID() ? -1 : this.get_ID() == arg.get_ID() ? 0 : 1;
 
             return_val = ((RegComp == 0) ? IDComp : RegComp);
         }
-        if (Constants.isCosmicsData() == true) {
+        if (Constants.isCosmicsData == true) {
             int RegComp = this.y() < arg.y() ? -1 : this.y() == arg.y() ? 0 : 1;
             int IDComp = this.get_ID() < arg.get_ID() ? -1 : this.get_ID() == arg.get_ID() ? 0 : 1;
 
