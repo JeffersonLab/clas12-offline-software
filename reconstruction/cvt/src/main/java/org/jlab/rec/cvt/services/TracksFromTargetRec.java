@@ -75,7 +75,7 @@ public class TracksFromTargetRec {
                 }
                 if(Constants.beamSpotConstraint==false) {
                     for(Seed s : seeds) {
-                        recUtil.reFitCircle(s);
+                        recUtil.reFitCircle(s,SVTGeom, BMTGeom, 5);
                     }
                 }
             }
