@@ -19,7 +19,7 @@ import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.CrossMaker;
 import org.jlab.rec.cvt.cross.StraightTrackCrossListFinder;
-import org.jlab.rec.cvt.hit.FittedHit;
+import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.StraightTrackSeeder;
 import org.jlab.rec.cvt.track.Track;
@@ -36,14 +36,13 @@ public class TracksFromTargetRec {
     private final RecUtilities recUtil = new RecUtilities();
     
     public boolean processEvent(DataEvent event,  
-            List<FittedHit> SVThits, List<FittedHit> BMThits, 
+            List<Hit> SVThits, List<Hit> BMThits, 
             List<Cluster> SVTclusters, List<Cluster> BMTclusters, 
             List<ArrayList<Cross>> crosses,
             SVTGeometry SVTGeom, BMTGeometry BMTGeom,
             CTOFGeant4Factory CTOFGeom, Detector CNDGeom,
             RecoBankWriter rbc,
-            Swim swimmer,
-            boolean isSVTonly, boolean exLayrs) {
+            Swim swimmer) {
         
         // get field intensity and scale
         double solenoidScale = Constants.getSolenoidScale();
@@ -53,12 +52,12 @@ public class TracksFromTargetRec {
         List<Seed> seeds = null;
         if(solenoidValue<0.001) {
             StraightTrackSeeder trseed = new StraightTrackSeeder();
-            seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, isSVTonly);
-            if(exLayrs==true) {
+            seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, Constants.SVTOnly);
+            if(Constants.excludeLayers==true) {
                 seeds = recUtil.reFit(seeds, SVTGeom, BMTGeom, swimmer, trseed); // RDV can we juts refit?
             }
         } else {
-            if(isSVTonly) {
+            if(Constants.SVTOnly) {
                 TrackSeeder trseed = new TrackSeeder(SVTGeom, BMTGeom, swimmer);
                 trseed.unUsedHitsOnly = true;
                 seeds = trseed.findSeed(crosses.get(0), null);
@@ -67,11 +66,13 @@ public class TracksFromTargetRec {
                 seeds = trseed.findSeed(crosses.get(0), crosses.get(1));
                 
                 //second seeding algorithm to search for SVT only tracks, and/or tracks missed by the CA
-                TrackSeeder trseed2 = new TrackSeeder(SVTGeom, BMTGeom, swimmer);
-                trseed2.unUsedHitsOnly = true;
-                seeds.addAll( trseed2.findSeed(crosses.get(0), crosses.get(1))); // RDV check for overlaps
-                if(exLayrs==true) {
-                    seeds = recUtil.reFit(seeds, SVTGeom, BMTGeom, swimmer, trseed,trseed2);
+                if(Constants.svtSeeding || Constants.excludeLayers) {
+                    TrackSeeder trseed2 = new TrackSeeder(SVTGeom, BMTGeom, swimmer);
+                    trseed2.unUsedHitsOnly = true;
+                    seeds.addAll( trseed2.findSeed(crosses.get(0), crosses.get(1))); // RDV check for overlaps
+                    if(Constants.excludeLayers==true) {
+                        seeds = recUtil.reFit(seeds, SVTGeom, BMTGeom, swimmer, trseed, trseed2);
+                    }
                 }
             }
         }

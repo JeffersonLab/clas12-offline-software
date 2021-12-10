@@ -8,7 +8,6 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
-import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.track.StraightTrack;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.trajectory.Helix;
@@ -16,6 +15,7 @@ import org.jlab.rec.cvt.trajectory.StateVec;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTType;
+import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.track.Seed;
 
 public class RecoBankWriter {
@@ -29,7 +29,7 @@ public class RecoBankWriter {
      * @return hits bank
      *
      */
-    public DataBank fillSVTHitsBank(DataEvent event, List<FittedHit> hitlist) {
+    public DataBank fillSVTHitsBank(DataEvent event, List<Hit> hitlist) {
         if (hitlist == null) {
             return null;
         }
@@ -48,12 +48,15 @@ public class RecoBankWriter {
             bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
             bank.setInt("strip", i, hitlist.get(i).get_Strip().get_Strip());
 
+            bank.setFloat("energy", i, (float) hitlist.get(i).get_Strip().get_Edep());
+            bank.setFloat("time", i, (float) hitlist.get(i).get_Strip().get_Time());
             bank.setFloat("fitResidual", i, (float) hitlist.get(i).get_Residual());
             bank.setInt("trkingStat", i, hitlist.get(i).get_TrkgStatus());
 
             bank.setShort("clusterID", i, (short) hitlist.get(i).get_AssociatedClusterID());
             bank.setShort("trkID", i, (short) hitlist.get(i).get_AssociatedTrackID());
 
+            bank.setByte("status", i, (byte) hitlist.get(i).get_Strip().getStatus());            
         }
         //bank.show();
         return bank;
@@ -86,6 +89,7 @@ public class RecoBankWriter {
             bank.setByte("layer", i, (byte) cluslist.get(i).get_Layer());
             bank.setShort("size", i, (short) cluslist.get(i).size());
             bank.setFloat("ETot", i, (float) cluslist.get(i).get_TotalEnergy());
+            bank.setFloat("time", i, (float) cluslist.get(i).get_Time());
             bank.setInt("seedStrip", i, cluslist.get(i).get_SeedStrip().get_Strip());
             bank.setFloat("centroid", i, (float) cluslist.get(i).get_Centroid());
             bank.setFloat("seedE", i, (float) cluslist.get(i).get_SeedStrip().get_Edep());
@@ -195,7 +199,7 @@ public class RecoBankWriter {
 
     }
 
-    public DataBank fillBMTHitsBank(DataEvent event, List<FittedHit> hitlist) {
+    public DataBank fillBMTHitsBank(DataEvent event, List<Hit> hitlist) {
         if (hitlist == null) {
             return null;
         }
@@ -214,12 +218,15 @@ public class RecoBankWriter {
             bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
             bank.setInt("strip", i, hitlist.get(i).get_Strip().get_Strip());
 
+            bank.setFloat("energy", i, (float) hitlist.get(i).get_Strip().get_Edep());
+            bank.setFloat("time", i, (float) hitlist.get(i).get_Strip().get_Time());
             bank.setFloat("fitResidual", i, (float) hitlist.get(i).get_Residual());
             bank.setInt("trkingStat", i, hitlist.get(i).get_TrkgStatus());
 
             bank.setShort("clusterID", i, (short) hitlist.get(i).get_AssociatedClusterID());
             bank.setShort("trkID", i, (short) hitlist.get(i).get_AssociatedTrackID());
 
+            bank.setByte("status", i, (byte) hitlist.get(i).get_Strip().getStatus());  
         }
 
         return bank;
@@ -252,6 +259,7 @@ public class RecoBankWriter {
             bank.setByte("layer", i, (byte) cluslist.get(i).get_Layer());
             bank.setShort("size", i, (short) cluslist.get(i).size());
             bank.setFloat("ETot", i, (float) cluslist.get(i).get_TotalEnergy());
+            bank.setFloat("time", i, (float) cluslist.get(i).get_Time());
             bank.setInt("seedStrip", i, cluslist.get(i).get_SeedStrip().get_Strip());
             bank.setFloat("centroid", i, (float) cluslist.get(i).get_Centroid());
             bank.setFloat("centroidValue", i, (float) cluslist.get(i).get_CentroidValue());
@@ -674,7 +682,7 @@ public class RecoBankWriter {
     }
 
     public void appendCVTBanks(DataEvent event,
-            List<FittedHit> sVThits, List<FittedHit> bMThits,
+            List<Hit> sVThits, List<Hit> bMThits,
             List<Cluster> sVTclusters, List<Cluster> bMTclusters,
             List<ArrayList<Cross>> crosses, List<Seed> seeds, List<Track> trks) {
 
@@ -707,7 +715,7 @@ public class RecoBankWriter {
     }
 
     public void appendCVTCosmicsBanks(DataEvent event,
-            List<FittedHit> sVThits, List<FittedHit> bMThits,
+            List<Hit> sVThits, List<Hit> bMThits,
             List<Cluster> sVTclusters, List<Cluster> bMTclusters,
             List<ArrayList<Cross>> crosses, List<StraightTrack> trks) {
         List<DataBank> svtbanks = new ArrayList<>();

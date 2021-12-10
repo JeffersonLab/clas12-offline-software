@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import java.util.Collections;
@@ -26,7 +25,7 @@ import org.jlab.rec.cvt.hit.Strip;
  * @author ziegler
  *
  */
-public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster> {
+public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
 
     private static final long serialVersionUID = 9153980362683755204L;
 
@@ -41,6 +40,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     private double _CentroidError;            // for BMT error or Z or phi
     private double _Resolution;               // cluster spatial resolution    
     private double _TotalEnergy;
+    private double _Time;
     private double _Phi;  			// local LC phi and error for BMT-Z
     private double _PhiErr;
     private double _Phi0;  			// local uncorrected phi and error for BMT-Z 
@@ -55,7 +55,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
     private int _MinStrip;			// the min strip number in the cluster
     private int _MaxStrip;			// the max strip number in the cluster
-    private FittedHit _Seed;		// the seed: the strip with largest deposited energy
+    private Hit _Seed;		                // the seed: the strip with largest deposited energy
 
     private double _SeedResidual;               // residual is doca to seed strip from trk intersection with module plane
     private double _CentroidResidual;           // residual is doca to centroid of cluster to trk inters with module plane
@@ -199,6 +199,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     public void calc_CentroidParams() {
         // instantiation of variables
         double totEn = 0.;			// cluster total energy
+        double aveTime = 0.;			// cluster average time
         double weightedStrp = 0;		// Lorentz-angle-corrected energy-weighted strip 
         double weightedStrp0 = 0;		// uncorrected energy-weighted strip 
         double weightedPhi = 0;			// Lorentz-angle-corrected energy-weighted phi of the strip 
@@ -228,11 +229,12 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         if (nbhits != 0) {
             int min = 1000000;
             int max = -1;
-            FittedHit seed = null;
-           
+            Hit seed = null;
+            int totHits = 0;
+            
             // looping over the number of hits in the cluster
             for (int i = 0; i < nbhits; i++) {
-                FittedHit thehit = this.get(i); 
+                Hit thehit = this.get(i); 
                 
                 int strpNb = -1;
                 int strpNb0 = -1; //before LC
@@ -246,6 +248,9 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                 // strip energy
                 double strpEn = thehit.get_Strip().get_Edep();
 
+                // strip time
+                double strpTime = thehit.get_Strip().get_Time();
+                
                 if (this.get_Detector()==DetectorType.BST) {
                    // for the SVT the analysis only uses the centroid
                     strpNb  = thehit.get_Strip().get_Strip();
@@ -287,8 +292,10 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     }
                     
                 }
-
+                
+                totHits++;
                 totEn += strpEn;
+                aveTime += strpTime;
                 weightedX1 += strpEn * stEP1.x();
                 weightedY1 += strpEn * stEP1.y();
                 weightedZ1 += strpEn * stEP1.z();
@@ -327,6 +334,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             this.set_MaxStrip(max);
             this.set_Seed(seed);
             // calculates the centroid values and associated errors
+            aveTime /= totHits;
             weightedStrp  /= totEn;
             weightedStrp0 /= totEn;
             weightedX1 /= totEn;
@@ -346,6 +354,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             weightedPhi0 = Math.atan2(weightedY0, weightedX0);
             this.set_Centroid(weightedStrp);
             this.set_TotalEnergy(totEn);
+            this.set_Time(aveTime);
             this.set_Phi(weightedPhi);
             this.set_Phi0(weightedPhi0);
                     
@@ -599,6 +608,14 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     public void set_TotalEnergy(double _TotalEnergy) {
         this._TotalEnergy = _TotalEnergy;
     }
+
+    public double get_Time() {
+        return _Time;
+    }
+
+    public void set_Time(double _Time) {
+        this._Time = _Time;
+    }
     
     public int get_MinStrip() {
         return _MinStrip;
@@ -620,11 +637,11 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         return _Seed.get_Strip();
     }
 
-    public FittedHit get_Seed() {
+    public Hit get_Seed() {
         return _Seed;
     }
 
-    public void set_Seed(FittedHit _Seed) {
+    public void set_Seed(Hit _Seed) {
         this._Seed = _Seed;
     }
 
@@ -716,6 +733,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
      *
      * @param Z z-coordinate of a point in the local coordinate system of a
      * module
+     * @param geo
      * @return the average resolution for a group of strips in a cluster in the
      * SVT
      *
@@ -844,7 +862,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             this.set_CentroidResidual(traj.resi*this.getTile().baseArc().radius());    
         }
         
-        for (FittedHit hit : this) {
+        for (Hit hit : this) {
             hit.set_AssociatedTrackID(trackId);
             double doca1 = hit.residual(trackPos);
             hit.set_docaToTrk(doca1);  
@@ -858,6 +876,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
           
     }
 
+    @Override
     public String toString() {
         String s = "Cluster Id" + this.get_Id() + " " + this.get_Detector() + " " +this.get_Type();
         s +=  " layer " + this.get_Layer() + " sector " + this.get_Sector() + " centroid " + this.get_Centroid() + " phi " + this.get_Phi();

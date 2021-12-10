@@ -10,6 +10,7 @@ import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.io.base.DataEvent;
+import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
@@ -18,7 +19,7 @@ import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.CrossList;
 import org.jlab.rec.cvt.cross.StraightTrackCrossListFinder;
 import org.jlab.rec.cvt.fit.CosmicFitter;
-import org.jlab.rec.cvt.hit.FittedHit;
+import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.track.StraightTrack;
 import org.jlab.rec.cvt.track.Track;
@@ -36,13 +37,12 @@ public class CosmicTracksRec {
     private final RecUtilities recUtil = new RecUtilities();
     
     public boolean processEvent(DataEvent event,  
-            List<FittedHit> SVThits, List<FittedHit> BMThits, 
+            List<Hit> SVThits, List<Hit> BMThits, 
             List<Cluster> SVTclusters, List<Cluster> BMTclusters, 
             List<ArrayList<Cross>> crosses,
             SVTGeometry SVTGeom, BMTGeometry BMTGeom,
             CTOFGeant4Factory CTOFGeom, Detector CNDGeom,
-            RecoBankWriter rbc,
-            boolean exLayrs, Swim swimmer) {
+            RecoBankWriter rbc, Swim swimmer) {
         
         // make list of crosses consistent with a track candidate using SVT only first
         StraightTrackCrossListFinder crossLister = new StraightTrackCrossListFinder();
@@ -67,7 +67,7 @@ public class CosmicTracksRec {
             return true;
         }
         
-        if(exLayrs==true) {
+        if(Constants.excludeLayers==true) {
             CosmicFitter fitTrk = new CosmicFitter();
             cosmics = recUtil.reFit(cosmics, SVTGeom, fitTrk,  trkcandFinder);
         }

@@ -1,6 +1,7 @@
 package org.jlab.rec.cvt.services;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,10 +28,10 @@ import org.jlab.rec.cvt.cluster.ClusterFinder;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.CrossMaker;
 import org.jlab.rec.cvt.hit.ADCConvertor;
-import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.svt.SVTParameters;
+import org.jlab.utils.groups.IndexedTable;
 
 /**
  * Service to return reconstructed TRACKS
@@ -41,13 +42,14 @@ import org.jlab.rec.cvt.svt.SVTParameters;
  */
 public class CVTRecNewKF extends ReconstructionEngine {
 
-    SVTGeometry       SVTGeom;
-    BMTGeometry       BMTGeom;
-    CTOFGeant4Factory CTOFGeom;
-    Detector          CNDGeom ;
-    SVTStripFactory svtIdealStripFactory;
-    CosmicTracksRec strgtTrksRec;
-    TracksFromTargetRec trksFromTargetRec;
+    private SVTGeometry       SVTGeom = null;
+    private BMTGeometry       BMTGeom = null;
+    private CTOFGeant4Factory CTOFGeom = null;
+    private Detector          CNDGeom = null;
+    private SVTStripFactory   svtIdealStripFactory = null;
+    private CosmicTracksRec   strgtTrksRec = null;
+    private TracksFromTargetRec trksFromTargetRec = null;
+    private int Run = -1;
     
     public CVTRecNewKF() {
         super("CVTTracks", "ziegler", "4.0");
@@ -57,10 +59,16 @@ public class CVTRecNewKF extends ReconstructionEngine {
         trksFromTargetRec = new TracksFromTargetRec();
     }
 
-    private int Run = -1;
-    public boolean isSVTonly = false;
-    public boolean isCosmic = false;
-    public boolean exclLayrs = false;
+    
+    @Override
+    public boolean init() {
+        
+        this.loadConfiguration();
+        this.initConstantsTables();
+        this.loadGeometries();
+        this.registerBanks();
+        return true;
+    }
     
     public void setRunConditionsParameters(DataEvent event, int iRun, boolean addMisAlignmts, String misAlgnFile) {
         if (event.hasBank("RUN::config") == false) {
@@ -83,7 +91,6 @@ public class CVTRecNewKF extends ReconstructionEngine {
         int newRun = bank.getInt("run", 0); 
         if (Run != newRun) {
 
-            Constants.Load(isCosmics, isSVTonly);
             this.setRun(newRun); 
            
             Constants.isMC = newRun<100;
@@ -111,31 +118,33 @@ public class CVTRecNewKF extends ReconstructionEngine {
 
         RecoBankWriter rbc = new RecoBankWriter();
 
+        IndexedTable svtStatus = this.getConstantsManager().getConstants(this.getRun(), "/calibration/svt/status");
+        IndexedTable bmtStatus = this.getConstantsManager().getConstants(this.getRun(), "/calibration/mvt/bmt_status");
+        IndexedTable bmtTime   = this.getConstantsManager().getConstants(this.getRun(), "/calibration/mvt/bmt_time");
+
         HitReader hitRead = new HitReader();
-        hitRead.fetch_SVTHits(event, adcConv, -1, -1, SVTGeom);
-        if(isSVTonly==false)
-          hitRead.fetch_BMTHits(event, adcConv, BMTGeom, swimmer);
+        hitRead.fetch_SVTHits(event, adcConv, -1, -1, SVTGeom, svtStatus);
+        if(Constants.SVTOnly==false)
+          hitRead.fetch_BMTHits(event, adcConv, BMTGeom, swimmer, bmtStatus, bmtTime);
 
         List<Hit> hits = new ArrayList<>();
         //I) get the hits
-        List<Hit> svt_hits = hitRead.get_SVTHits();
-        if(svt_hits.size()>SVTParameters.MAXSVTHITS)
+        List<Hit> SVThits = hitRead.get_SVTHits();
+        if(SVThits.size()>SVTParameters.MAXSVTHITS)
             return true;
-        if (svt_hits != null && !svt_hits.isEmpty()) {
-            hits.addAll(svt_hits);
+        if (SVThits != null && !SVThits.isEmpty()) {
+            hits.addAll(SVThits);
         }
 
-        List<Hit> bmt_hits = hitRead.get_BMTHits();
-        if (bmt_hits != null && bmt_hits.size() > 0) {
-            hits.addAll(bmt_hits);
+        List<Hit> BMThits = hitRead.get_BMTHits();
+        if (BMThits != null && BMThits.size() > 0) {
+            hits.addAll(BMThits);
 
-            if(bmt_hits.size()>BMTConstants.MAXBMTHITS)
+            if(BMThits.size()>BMTConstants.MAXBMTHITS)
                  return true;
         }
 
         //II) process the hits		
-        List<FittedHit> SVThits = new ArrayList<>();
-        List<FittedHit> BMThits = new ArrayList<>();
         //1) exit if hit list is empty
         if (hits.isEmpty()) {
             return true;
@@ -147,25 +156,22 @@ public class CVTRecNewKF extends ReconstructionEngine {
 
         //2) find the clusters from these hits
         ClusterFinder clusFinder = new ClusterFinder();
-        clusters.addAll(clusFinder.findClusters(svt_hits));     
-        if(bmt_hits != null && bmt_hits.size() > 0) {
-            clusters.addAll(clusFinder.findClusters(bmt_hits)); 
+        clusters.addAll(clusFinder.findClusters(SVThits));     
+        if(BMThits != null && BMThits.size() > 0) {
+            clusters.addAll(clusFinder.findClusters(BMThits)); 
         }
         if (clusters.isEmpty()) {
             rbc.appendCVTBanks(event, SVThits, BMThits, null, null, null, null, null);
             return true;
         }
         
-        // fill the fitted hits list.
         if (!clusters.isEmpty()) {
             for (int i = 0; i < clusters.size(); i++) {
                 if (clusters.get(i).get_Detector() == DetectorType.BST) {
                     SVTclusters.add(clusters.get(i));
-                    SVThits.addAll(clusters.get(i));
                 }
                 if (clusters.get(i).get_Detector() == DetectorType.BMT) {
                     BMTclusters.add(clusters.get(i));
-                    BMThits.addAll(clusters.get(i));
                 }
             }
         }
@@ -177,157 +183,66 @@ public class CVTRecNewKF extends ReconstructionEngine {
             return true; 
         }
         
-        if(this.isCosmic) {
+        if(Constants.isCosmicsData) {
 //            if(this.isSVTonly) {
 //                List<ArrayList<Cross>> crosses_svtOnly = new ArrayList<>();
 //                crosses_svtOnly.add(0, crosses.get(0));
 //                crosses_svtOnly.add(1, new ArrayList<>());
 //            } 
             strgtTrksRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
-                    crosses, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, rbc, this.exclLayrs, swimmer);
+                    crosses, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, rbc, swimmer);
         } else {
-            trksFromTargetRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
-                crosses, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, rbc, swimmer, 
-                this.isSVTonly, this.exclLayrs);
+            trksFromTargetRec.processEvent(event,SVThits, BMThits, SVTclusters, BMTclusters, 
+                crosses, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, rbc, swimmer);
         }
         return true;
     }
      
-    @Override
-    public boolean init() {
+    
+    private void loadConfiguration() {            
         // Load config
-        String rmReg = this.getEngineConfigString("removeRegion");
         
+        String rmReg = this.getEngineConfigString("removeRegion");        
         if (rmReg!=null) {
             System.out.println("["+this.getName()+"] run with region "+rmReg+"removed config chosen based on yaml");
             Constants.setRmReg(Integer.valueOf(rmReg));
         }
         else {
-            rmReg = System.getenv("COAT_CVT_REMOVEREGION");
-            if (rmReg!=null) {
-                System.out.println("["+this.getName()+"] run with region "+rmReg+"removed config chosen based on env");
-                Constants.setRmReg(Integer.valueOf(rmReg));
-            }
-        }
-        if (rmReg==null) {
              System.out.println("["+this.getName()+"] run with all region (default) ");
         }
-        //svt stand-alone
-        String svtStAl = this.getEngineConfigString("svtOnly");
         
+        //svt stand-alone
+        String svtStAl = this.getEngineConfigString("svtOnly");        
         if (svtStAl!=null) {
-            System.out.println("["+this.getName()+"] run with SVT only "+svtStAl+" config chosen based on yaml");
-            this.isSVTonly= Boolean.valueOf(svtStAl);
+            Constants.SVTOnly = Boolean.valueOf(svtStAl);
+            System.out.println("["+this.getName()+"] run with SVT only "+Constants.SVTOnly+" config chosen based on yaml");
         }
         else {
-            svtStAl = System.getenv("COAT_SVT_ONLY");
-            if (svtStAl!=null) {
-                System.out.println("["+this.getName()+"] run with SVT only "+svtStAl+" config chosen based on env");
-                this.isSVTonly= Boolean.valueOf(svtStAl);
-            }
-        }
-        if (svtStAl==null) {
              System.out.println("["+this.getName()+"] run with both CVT systems (default) ");
         }
-        //svt stand-alone
-        String svtCosmics = this.getEngineConfigString("cosmics");
         
+        String svtCosmics = this.getEngineConfigString("cosmics");        
         if (svtCosmics!=null) {
-            System.out.println("["+this.getName()+"] run with cosmics settings "+svtCosmics+" config chosen based on yaml");
-            this.isCosmic= Boolean.valueOf(svtCosmics);
-            Constants.setCosmicsData(isCosmic);
+            Constants.isCosmicsData = Boolean.valueOf(svtCosmics);
+            System.out.println("["+this.getName()+"] run with cosmics settings "+Constants.isCosmicsData+" config chosen based on yaml");
         }
         else {
-            svtCosmics = System.getenv("COAT_CVT_COSMICS");
-            if (svtCosmics!=null) {
-                System.out.println("["+this.getName()+"] run with cosmics settings "+svtCosmics+" config chosen based on env");
-                this.isCosmic= Boolean.valueOf(svtCosmics);
-                Constants.setCosmicsData(isCosmic);
-            }
+            System.out.println("["+this.getName()+"] run with cosmics settings default = false");
         }
-        if (svtCosmics==null) {
-             System.out.println("["+this.getName()+"] run with cosmics settings default = false");
-        }
-        //all layers used --> 1
-        for(int i = 0; i < 12; i++)
-            Constants.getLayersUsed().put(i+1, 1);
         
         //Skip layers
-         String exLys = this.getEngineConfigString("excludeLayers");
-        
-        if (exLys!=null) {
+        String exLys = this.getEngineConfigString("excludeLayers");        
+        if (exLys!=null)
             System.out.println("["+this.getName()+"] run with layers "+exLys+"excluded in fit config chosen based on yaml");
-            String exlys = String.valueOf(exLys);
-            String[] values = exlys.split(",");
-            for (String value : values) {
-                Constants.getLayersUsed().put(Integer.valueOf(value), 0);
-            }
-        }
-        else {
-            exLys = System.getenv("COAT_CVT_EXCLUDELAYERS");
-            if (exLys!=null) {
-                System.out.println("["+this.getName()+"] run with region "+rmReg+"excluded in fit  config chosen based on env");
-                String exlys = String.valueOf(exLys);
-                String[] values = exlys.split(",");
-                for (String value : values) {
-                    Constants.getLayersUsed().put(Integer.valueOf(value), 0); // layer excluded --->0
-                }
-            }
-        }
-        if (exLys==null) {
-             System.out.println("["+this.getName()+"] run with all layer in fit (default) ");
-        }
-        
-        int exlyrsnb = 0;
-        for(int ilayrs = 0; ilayrs<12; ilayrs++) {
-            if((int)Constants.getLayersUsed().get(ilayrs+1)<1) {
-                System.out.println("EXCLUDE CVT LAYER "+(ilayrs+1));
-                exlyrsnb++;
-            }
-        }
-        if(exlyrsnb>0)
-            exclLayrs = true;
+        else
+            System.out.println("["+this.getName()+"] run with all layer in fit (default) ");
+        Constants.setLayersUsed(exLys);
         
         //Skip layers
-         String exBMTLys = this.getEngineConfigString("excludeBMTLayers");
-        
+        String exBMTLys = this.getEngineConfigString("excludeBMTLayers");        
         if (exBMTLys!=null) {
             System.out.println("["+this.getName()+"] run with BMT layers "+exBMTLys+"excluded config chosen based on yaml");
-            String exbmtlys = String.valueOf(exBMTLys);
-            String[] values = exbmtlys.split(",");
-            int layer = Integer.valueOf(values[0]);
-            double phi_min = (double) Float.valueOf(values[1]);
-            double phi_max = (double) Float.valueOf(values[2]);
-            double z_min = (double) Float.valueOf(values[3]);
-            double z_max = (double) Float.valueOf(values[4]);
-            org.jlab.rec.cvt.Constants.setBMTLayerExcld(layer);
-            double[][]BMTPhiZRangeExcld= new double[2][2];
-            BMTPhiZRangeExcld[0][0] = phi_min;
-            BMTPhiZRangeExcld[0][1] = phi_max;
-            BMTPhiZRangeExcld[1][0] = z_min;
-            BMTPhiZRangeExcld[1][1] = z_max;
-            org.jlab.rec.cvt.Constants.setBMTPhiZRangeExcld(BMTPhiZRangeExcld);
-            
-        }
-        else {
-            exBMTLys = System.getenv("COAT_CVT_EXCLUDEBMTLAYERS");
-            if (exBMTLys!=null) {
-                System.out.println("["+this.getName()+"] run with region "+exBMTLys+"excluded in fit  config chosen based on env");
-                String exbmtlys = String.valueOf(exBMTLys);
-                String[] values = exbmtlys.split(",");
-                int layer = Integer.valueOf(values[0]);
-                double phi_min = (double) Float.valueOf(values[1]);
-                double phi_max = (double) Float.valueOf(values[2]);
-                double z_min = (double) Float.valueOf(values[3]);
-                double z_max = (double) Float.valueOf(values[4]);
-                org.jlab.rec.cvt.Constants.setBMTLayerExcld(layer);
-                double[][]BMTPhiZRangeExcld= new double[2][2];
-                BMTPhiZRangeExcld[0][0] = phi_min;
-                BMTPhiZRangeExcld[0][1] = phi_max;
-                BMTPhiZRangeExcld[1][0] = z_min;
-                BMTPhiZRangeExcld[1][1] = z_max;
-                org.jlab.rec.cvt.Constants.setBMTPhiZRangeExcld(BMTPhiZRangeExcld);
-            }
+            Constants.setBMTExclude(exBMTLys);        
         }
        
         //double[][]bmtx = new double[2][2];
@@ -365,30 +280,58 @@ public class CVTRecNewKF extends ReconstructionEngine {
         Constants.setMatLib(matrixLibrary);
         System.out.println("["+this.getName()+"] run with matLib "+ Constants.kfMatLib.toString() + " library");
         
+        if(this.getEngineConfigString("svtSeeding")!=null) {
+            Constants.svtSeeding = Boolean.parseBoolean(this.getEngineConfigString("svtSeeding"));
+            System.out.println("["+this.getName()+"] run SVT-based seeding set to "+ Constants.svtSeeding);
+        }
 
+        if(this.getEngineConfigString("BMTTimeCuts")!=null) {
+            Constants.BMTTimeCuts = Boolean.parseBoolean(this.getEngineConfigString("BMTTimeCuts"));
+            System.out.println("["+this.getName()+"] run BMT timing cuts set to "+ Constants.BMTTimeCuts);
+        }
+    }
+
+
+    private void initConstantsTables() {
+        String[] tables = new String[]{
+            "/calibration/svt/status",
+            "/calibration/mvt/bmt_time",
+            "/calibration/mvt/bmt_status"
+        };
+        requireConstants(Arrays.asList(tables));
+        this.getConstantsManager().setVariation("default");
+    }
+    
+    private void loadGeometries() {
         // Load other geometries
         
-        variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
-        System.out.println(" CVT YAML VARIATION NAME + "+variationName);
-        ConstantProvider providerCTOF = GeometryFactory.getConstants(DetectorType.CTOF, 11, variationName);
+        String variation = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
+        System.out.println(" CVT YAML VARIATION NAME + "+variation);
+        ConstantProvider providerCTOF = GeometryFactory.getConstants(DetectorType.CTOF, 11, variation);
         CTOFGeom = new CTOFGeant4Factory(providerCTOF);        
-        CNDGeom =  GeometryFactory.getDetector(DetectorType.CND, 11, variationName);
-        //
-          
+        CNDGeom =  GeometryFactory.getDetector(DetectorType.CND, 11, variation);
         
-        System.out.println(" LOADING CVT GEOMETRY...............................variation = "+variationName);
-        CCDBConstantsLoader.Load(new DatabaseConstantProvider(11, variationName));
-        System.out.println("SVT LOADING WITH VARIATION "+variationName);
-        DatabaseConstantProvider cp = new DatabaseConstantProvider(11, variationName);
+        System.out.println(" LOADING CVT GEOMETRY...............................variation = "+variation);
+        CCDBConstantsLoader.Load(new DatabaseConstantProvider(11, variation));
+        System.out.println("SVT LOADING WITH VARIATION "+variation);
+        DatabaseConstantProvider cp = new DatabaseConstantProvider(11, variation);
         cp = SVTConstants.connect( cp );
         cp.disconnect();  
         SVTStripFactory svtFac = new SVTStripFactory(cp, true);
-        SVTGeom = new SVTGeometry(svtFac);
-
-        return true;
+        SVTGeom = new SVTGeometry(svtFac);        
     }
-  
-    private String variationName;
+    
+    private void registerBanks() {
+        super.registerOutputBank("BMTRec::Hits");
+        super.registerOutputBank("BMTRec::Clusters");
+        super.registerOutputBank("BSTRec::Crosses");
+        super.registerOutputBank("BSTRec::Hits");
+        super.registerOutputBank("BSTRec::Clusters");
+        super.registerOutputBank("BSTRec::Crosses");
+        super.registerOutputBank("CVTRec::Seeds");
+        super.registerOutputBank("CVTRec::Tracks");
+        super.registerOutputBank("CVTRec::Trajectory");        
+    }
     
 
 }
