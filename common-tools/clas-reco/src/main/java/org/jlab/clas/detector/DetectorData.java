@@ -210,18 +210,11 @@ public class DetectorData {
      * @return 
      */
    public static DataBank getCalorimeterResponseBank(List<DetectorResponse> responses, DataEvent event, String bank_name){
-       int nrows=0;
-       for(int iresp=0; iresp<responses.size(); iresp++) {
-           nrows += responses.get(iresp).getNAssociations();
-       }
-       int row=0;
-
-       DataBank bank = event.createBank(bank_name, nrows);
-       for(int iresp = 0; iresp < responses.size(); iresp++){
-           CalorimeterResponse r = (CalorimeterResponse)responses.get(iresp);
-           for(int iass = 0; iass < r.getNAssociations(); iass++) {
+       DataBank bank = event.createBank(bank_name, responses.size()); 
+       for(int row = 0; row < responses.size(); row++){
+           CalorimeterResponse r = (CalorimeterResponse)responses.get(row);
                bank.setShort("index", row, (short) r.getHitIndex());
-               bank.setShort("pindex", row, (short) r.getAssociation(iass));
+               bank.setShort("pindex", row, (short) r.getAssociation());
                bank.setByte("detector", row, (byte) r.getDescriptor().getType().getDetectorId());
                bank.setByte("sector", row, (byte) r.getDescriptor().getSector());
                bank.setByte("layer", row, (byte) r.getDescriptor().getLayer());
@@ -248,24 +241,16 @@ public class DetectorData {
                bank.setFloat("energy", row, (float) r.getEnergy());
                bank.setFloat("chi2", row, (float) 0.0);
                bank.setShort("status",row,(short) r.getStatus());
-               row++;
-           }
        }
        return bank;
    }
    
    public static DataBank getScintillatorResponseBank(List<DetectorResponse> responses, DataEvent event, String bank_name){
-       int nrows=0;
-       for(int iresp=0; iresp<responses.size(); iresp++) {
-           nrows += responses.get(iresp).getNAssociations();
-       }
-       int row=0;
-       DataBank bank = event.createBank(bank_name, nrows);
-       for(int iresp = 0; iresp < responses.size(); iresp++){
-           DetectorResponse r = responses.get(iresp);
-           for(int iass = 0; iass < r.getNAssociations(); iass++) {
+       DataBank bank = event.createBank(bank_name, responses.size()); 
+       for(int row = 0; row < responses.size(); row++){
+           DetectorResponse r = responses.get(row);
                bank.setShort("index",row,(short) r.getHitIndex());
-               bank.setShort("pindex", row, (short) r.getAssociation(iass));
+               bank.setShort("pindex", row, (short) r.getAssociation());
                bank.setByte("detector", row, (byte) r.getDescriptor().getType().getDetectorId());
                bank.setByte("sector", row, (byte) r.getDescriptor().getSector());
                bank.setByte("layer", row, (byte) r.getDescriptor().getLayer());
@@ -281,43 +266,27 @@ public class DetectorData {
                bank.setFloat("energy", row, (float) r.getEnergy());
                bank.setFloat("chi2", row, (float) 0.0);
                bank.setShort("status",row,(short) r.getStatus());
-               row++;
-           }
        }
        return bank;
    }
    
    public static DataBank getScintExtrasResponseBank(List<DetectorResponse> responses, DataEvent event, String bank_name){
-       int nrows=0;
-       for(int iresp=0; iresp<responses.size(); iresp++) {
-           nrows += responses.get(iresp).getNAssociations();
-       }
-       int row=0;
-       DataBank     bank = event.createBank(bank_name, nrows);
-       for(int iresp = 0; iresp < responses.size(); iresp++){
-           DetectorResponse r = responses.get(iresp);
-           for(int iass = 0; iass < r.getNAssociations(); iass++) {
-               bank.setFloat("dedx",row,(float) ((ScintillatorResponse)r).getDedx());
-               bank.setShort("size",row, ((ScintillatorResponse)r).getClusterSize());
-               bank.setByte("layermult",row, ((ScintillatorResponse)r).getLayerMultiplicity());
-               row++;
-           }
+       DataBank bank = event.createBank(bank_name, responses.size()); 
+       for(int row = 0; row < responses.size(); row++){
+           ScintillatorResponse r = (ScintillatorResponse)responses.get(row);
+               bank.setFloat("dedx",row,(float) r.getDedx());
+               bank.setShort("size",row, r.getClusterSize());
+               bank.setByte("layermult",row, r.getLayerMultiplicity());
        }
        return bank;
    }
    
    public static DataBank getCherenkovResponseBank(List<DetectorResponse> responses, DataEvent event, String bank_name){
-       int nrows=0;
-       for(int iresp=0; iresp<responses.size(); iresp++) {
-           nrows += responses.get(iresp).getNAssociations();
-       }
-       int row=0;
-       DataBank bank = event.createBank(bank_name, nrows);
-       for(int iresp = 0; iresp < responses.size(); iresp++){
-           CherenkovResponse c = (CherenkovResponse)responses.get(iresp);
-           for(int iass = 0; iass<c.getNAssociations(); iass++) {
+       DataBank bank = event.createBank(bank_name, responses.size());
+       for(int row = 0; row < responses.size(); row++){
+           CherenkovResponse c = (CherenkovResponse)responses.get(row);
                bank.setShort("index", row, (short) c.getHitIndex());
-               bank.setShort("pindex", row, (short) c.getAssociation(iass));
+               bank.setShort("pindex", row, (short) c.getAssociation());
                bank.setByte("detector", row, (byte) c.getDescriptor().getType().getDetectorId());
                bank.setByte("sector", row, (byte) c.getDescriptor().getSector());
                bank.setFloat("x", row, (float) c.getHitPosition().x());
@@ -330,17 +299,14 @@ public class DetectorData {
                bank.setFloat("nphe", row, (float) c.getEnergy());
                bank.setFloat("chi2", row, (float) 0.0);
                bank.setShort("status",row,(short) c.getStatus());
-               row++;
-           }
        }
        return bank;
    }
       
       public static DataBank getForwardTaggerBank(List<DetectorResponse> responses, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, responses.size());
-       int row = 0;
-       for(int i = 0; i < responses.size(); i++){
-           TaggerResponse t  = (TaggerResponse)responses.get(i);
+       for(int row = 0; row < responses.size(); row++){
+           TaggerResponse t  = (TaggerResponse)responses.get(row);
            bank.setShort("index", row, (short) t.getHitIndex());
            bank.setShort("pindex", row, (short) t.getAssociation());
            bank.setByte("detector", row, (byte) t.getDescriptor().getType().getDetectorId());
@@ -356,7 +322,6 @@ public class DetectorData {
            bank.setShort("size", row, (short) t.getSize());                                                                                   
            bank.setFloat("chi2", row, (float) 0.0);
            bank.setByte("layer", row, (byte) t.getDescriptor().getLayer());
-           row = row + 1;
        }
        return bank;
       } 
