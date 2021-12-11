@@ -1,6 +1,6 @@
 #!/bin/bash
 
-usage='build-coatjava.sh [--quiet] [--spotbugs] [--nomaps] [--unittests]'
+usage='build-coatjava.sh [-h] [--quiet] [--spotbugs] [--nomaps] [--unittests]'
 
 quiet="no"
 runSpotBugs="no"
@@ -24,7 +24,7 @@ do
     then
         quiet="yes"
     else
-        echo $usage
+        echo "$usage"
         exit
     fi
 done
