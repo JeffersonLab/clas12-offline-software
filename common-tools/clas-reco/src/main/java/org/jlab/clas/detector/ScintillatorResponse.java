@@ -26,6 +26,11 @@ public class ScintillatorResponse extends DetectorResponse {
     public ScintillatorResponse(){
         super();
     }
+    
+    public ScintillatorResponse(ScintillatorResponse r) {
+        super();
+        this.copy(r);
+    }
 
     public void copy(ScintillatorResponse r) {
         super.copy(r);

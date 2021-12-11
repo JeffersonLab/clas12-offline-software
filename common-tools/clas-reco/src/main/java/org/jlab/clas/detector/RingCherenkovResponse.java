@@ -16,10 +16,15 @@ public class RingCherenkovResponse extends DetectorResponse {
     private int cluster=0;
     private int xtalk=0;
     
-    //public RingCherenkovResponse(){
-    //    super();
-    //}
+    public RingCherenkovResponse(){
+        super();
+    }
     
+    public RingCherenkovResponse(RingCherenkovResponse r) {
+        super();
+        this.copy(r);
+    }
+
     public RingCherenkovResponse(int sector, int layer, int pmt){
         this.getDescriptor().setSectorLayerComponent(sector, layer, pmt);
     }
