@@ -303,7 +303,6 @@ public class RoadFinder  {
                 X = Ainv.times(V);
                 for (int i = 0; i < 3; ++i) {
                         ret[i] = X.get(i, 0);
-                        //System.out.println(X.get(i, 0));
                 }
                 double _chi2 =0;
                 for (int i = 0; i<x.length; i++) {				

@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -90,8 +91,7 @@ public class DCTBEngine extends DCEngine {
         List<Cross> crosses = new ArrayList<>();
         List<Track> trkcands = new ArrayList<>();
         
-        if(Constants.DEBUG)
-            System.out.println("TB AI "+ this.getName());
+        LOGGER.log(Level.FINE, "TB AI "+ this.getName());
         //instantiate bank writer
         RecoBankWriter rbc = new RecoBankWriter(this.getBanks());
 
@@ -274,7 +274,7 @@ public class DCTBEngine extends DCEngine {
                         trk.get_pAtOrig().x(), trk.get_pAtOrig().y(), trk.get_pAtOrig().z(), trk.get_Q(), 
                         Constants.getInstance().tSurf);
 //                for(int j = 0; j< trk.trajectory.size(); j++) {
-//                System.out.println(trk.get_Id()+" "+trk.trajectory.size()+" ("+trk.trajectory.get(j).getDetId()+") ["+
+//                LOGGER.log(Level.FINE, trk.get_Id()+" "+trk.trajectory.size()+" ("+trk.trajectory.get(j).getDetId()+") ["+
 //                            trk.trajectory.get(j).getDetName()+"] "+
 //                            (float)trk.trajectory.get(j).getX()/trk.get_P()+", "+
 //                            (float)trk.trajectory.get(j).getY()/trk.get_P()+", "+
@@ -338,12 +338,10 @@ public class DCTBEngine extends DCEngine {
                 miss=l+1;
                 if(miss%2==0) {//missing sl in 2,4,6
                     track.setSingleSuperlayer(SegMap.get(l)); //isolated sl in 1,3,5
-                    if(Constants.DEBUG)
-                        System.out.println("Missing superlayer "+miss+" seg "+SegMap.get(l).printInfo());
+                    LOGGER.log(Level.FINE, "Missing superlayer "+miss+" seg "+SegMap.get(l).printInfo());
                 } else {//missing sl in 1,3,5
                     track.setSingleSuperlayer(SegMap.get(l+2)); //isolated sl in 2,4,6
-                    if(Constants.DEBUG)
-                        System.out.println("Missing superlayer "+miss+" seg "+track.getSingleSuperlayer().printInfo());
+                    LOGGER.log(Level.FINE, "Missing superlayer "+miss+" seg "+track.getSingleSuperlayer().printInfo());
                 }
             }
         } 

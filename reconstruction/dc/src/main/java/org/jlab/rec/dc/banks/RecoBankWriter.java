@@ -126,8 +126,6 @@ public class RecoBankWriter {
 //                     hitlist.get(i).get_Layer()==hitlist.get(i-1).get_Layer() && 
 //                     Math.abs(hitlist.get(i).get_Wire()-hitlist.get(i-1).get_Wire())==1 &&
 //                     hitlist.get(i-1).getTFlight()>0) {// fix for double hits
-//                System.out.println("i-1 " + hitlist.get(i-1).printInfo());
-//                System.out.println("i   " + hitlist.get(i).printInfo());
 //                bank.setFloat("B", i-rejCnt, (float) hitlist.get(i-1).getB());
 //                bank.setFloat("TProp", i-rejCnt, (float) hitlist.get(i-1).getTProp());
 //                bank.setFloat("TFlight", i-rejCnt, (float) hitlist.get(i-1).getTFlight());
@@ -467,11 +465,6 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
             bank.setFloat("Z", i, (float) hitlist.get(i).get_Z());
             bank.setByte("LR", i, (byte) hitlist.get(i).get_LeftRightAmb());
 
-            // checks the existing schema to fill the time
-            //System.out.println(" has entry "+bank.getDescriptor().hasEntry("time"));
-            /*
-            correctedTime = (this.get_Time() - this.get_DeltaTimeBeta());
-            */
             if(bank.getDescriptor().hasEntry("time")){
                bank.setFloat("time", i, (float) (hitlist.get(i).get_Time() - hitlist.get(i).get_DeltaTimeBeta()));
             }
@@ -515,7 +508,6 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
             }
 
         }
-        //System.out.println(" Created Bank "); bank.show();
         return bank;
 
     }

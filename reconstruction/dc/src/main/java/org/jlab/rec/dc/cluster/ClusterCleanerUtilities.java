@@ -3,6 +3,7 @@ package org.jlab.rec.dc.cluster;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.io.base.DataEvent;
 
@@ -13,6 +14,8 @@ import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.utils.groups.IndexedTable;
 
 public class ClusterCleanerUtilities {
+
+    private static final Logger LOGGER = Logger.getLogger(ClusterCleanerUtilities.class.getName());
 
     public ClusterCleanerUtilities() {
         List<ArrayList<Hit>> sortdHits = new ArrayList<>();
@@ -576,7 +579,7 @@ public class ClusterCleanerUtilities {
     }
 
     public FittedCluster SecondariesRemover(DataEvent event, FittedCluster clus, ClusterFitter cf, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
-        //System.out.println(" secondaries Remover :"+clus.printInfo());
+        //LOGGER.log(Level.INFO, " secondaries Remover :"+clus.printInfo());
         Collections.sort(clus);
 
         ArrayList<ArrayList<FittedHit>> sortedHits = new ArrayList<>(6);
@@ -599,7 +602,7 @@ public class ClusterCleanerUtilities {
         for (int i = 0; i < 6; i++) {
             ArrayList<FittedHit> hitsInLayer = sortedHits.get(i);
             //for(int j =0; j<hitsInLayer.size(); j++) {
-            //	System.out.println("*  Hits in layer  :: "+(i+1)+" "+hitsInLayer.get(j).printInfo());
+            //	LOGGER.log(Level.INFO, "*  Hits in layer  :: "+(i+1)+" "+hitsInLayer.get(j).printInfo());
             //}
             if (hitsInLayer.isEmpty()) {
                 continue;
@@ -676,16 +679,16 @@ public class ClusterCleanerUtilities {
         }
 
         // get the best cluster
-        //System.out.println(" clusters for selection ");
+        //LOGGER.log(Level.INFO, " clusters for selection ");
         //for(FittedCluster c : clusters) {
-        //	System.out.println(c.printInfo());
+        //	LOGGER.log(Level.INFO, c.printInfo());
         //	for(FittedHit h : c)
-        //		System.out.println(h.printInfo());
+        //		LOGGER.log(Level.INFO, h.printInfo());
         //}
         FittedCluster BestCluster = cf.BestClusterSelector(clusters, "LC");
-        //System.out.println("  ---> selected cluster  : ");
+        //LOGGER.log(Level.INFO, "  ---> selected cluster  : ");
         //for(FittedHit h : BestCluster)
-        //	System.out.println(h.printInfo());
+        //	LOGGER.log(Level.INFO, h.printInfo());
         return BestCluster;
     }
 
@@ -863,7 +866,7 @@ public class ClusterCleanerUtilities {
             if (fClus.get(i).get_OutOfTimeFlag() == true) {
 
                 //if(Constants.DEBUGPRINTMODE == true)
-                //	System.out.println("flag out of timer ? "+fClus.get(i).printInfo()+" correcting this hit ...");
+                //	LOGGER.log(Level.INFO, "flag out of timer ? "+fClus.get(i).printInfo()+" correcting this hit ...");
                 if (removeHit == true) {
                     fClus.remove(i);
                 } else {
@@ -875,7 +878,7 @@ public class ClusterCleanerUtilities {
     }
 
     public FittedCluster ClusterCleaner(FittedCluster clus, ClusterFitter cf, DCGeant4Factory DcDetector) {
-        //System.out.println(" cleaner :"+clus.printInfo());
+        //LOGGER.log(Level.INFO, " cleaner :"+clus.printInfo());
         Collections.sort(clus);
 
         ArrayList<ArrayList<FittedHit>> sortedHitList = new ArrayList<>(6);
@@ -898,7 +901,7 @@ public class ClusterCleanerUtilities {
         for (int i = 0; i < 6; i++) {
             ArrayList<FittedHit> hitsInLayer = sortedHitList.get(i);
             //for(int j =0; j<hitsInLayer.size(); j++) {
-            //	System.out.println("*  Hits in layer  :: "+(i+1)+" "+hitsInLayer.get(j).printInfo());
+            //	LOGGER.log(Level.INFO, "*  Hits in layer  :: "+(i+1)+" "+hitsInLayer.get(j).printInfo());
             //}
             if (hitsInLayer.isEmpty()) {
                 continue;
@@ -961,16 +964,16 @@ public class ClusterCleanerUtilities {
         }
 
         // get the best cluster
-        //System.out.println(" clusters for selection ");
+        //LOGGER.log(Level.INFO, " clusters for selection ");
         //for(FittedCluster c : clusters) {
-        //	System.out.println(c.printInfo());
+        //	LOGGER.log(Level.INFO, c.printInfo());
         //	for(FittedHit h : c)
-        //		System.out.println(h.printInfo());
+        //		LOGGER.log(Level.INFO, h.printInfo());
         //}
         FittedCluster BestCluster = cf.BestClusterSelector(clusters, "LC");
-        //System.out.println("  ---> selected cluster  : ");
+        //LOGGER.log(Level.INFO, "  ---> selected cluster  : ");
         //for(FittedHit h : BestCluster)
-        //	System.out.println(h.printInfo());
+        //	LOGGER.log(Level.INFO, h.printInfo());
         return BestCluster;
     }
 

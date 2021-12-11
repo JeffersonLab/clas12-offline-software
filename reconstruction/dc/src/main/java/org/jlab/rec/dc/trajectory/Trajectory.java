@@ -2,6 +2,7 @@ package org.jlab.rec.dc.trajectory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorLayer;
 import org.jlab.detector.base.DetectorType;
@@ -22,6 +23,8 @@ public class Trajectory extends ArrayList<Cross> {
     public Trajectory() {
     }
 
+    private static final Logger LOGGER = Logger.getLogger(Trajectory.class.getName());
+    
     private int _Sector;     
     private List<StateVec> _Trajectory;
     private double _IntegralBdl;
@@ -265,13 +268,13 @@ public class Trajectory extends ArrayList<Cross> {
         int dir  = 1;
         
         //HTCC: swim to sphere and save end point
-//        System.out.println("New track " + x + " " + y + " " + z);
+//        LOGGER.log(Level.FINE, "New track " + x + " " + y + " " + z);
         double[] trkParsCheren = dcSwim.SwimToSphere(Constants.HTCCRADIUS);
         if(trkParsCheren==null) return;
         this.FillTrajectory(id, trajectory, trkParsCheren, trkParsCheren[6], trkParsCheren[7], DetectorType.HTCC, 1); 
         pathLen = trkParsCheren[6];
         iBdl    = trkParsCheren[7]; 
-//        System.out.println( "HTCC" + " " + trkParsCheren[0] + " " + trkParsCheren[1] + " " + trkParsCheren[2] + " " + trkParsCheren[6] + " " + trkParsCheren[7]);
+//        LOGGER.log(Level.FINE,  "HTCC" + " " + trkParsCheren[0] + " " + trkParsCheren[1] + " " + trkParsCheren[2] + " " + trkParsCheren[6] + " " + trkParsCheren[7]);
        
 
         int is = _Sector-1;
@@ -335,11 +338,11 @@ public class Trajectory extends ArrayList<Cross> {
 //            }
   
             if(trkPars==null) {
-                //System.out.println(" Failed swim");
+                //LOGGER.log(Level.FINE, " Failed swim");
                 return;
             }
                 
-//            System.out.println(surface.getDetectorType().getName() + " " + surface.getDetectorLayer() + " " + trkPars[0] + " " + trkPars[1] + " " + trkPars[2] + " " + trkPars[6] + " " + trkPars[7]);
+//            LOGGER.log(Level.FINE, surface.getDetectorType().getName() + " " + surface.getDetectorLayer() + " " + trkPars[0] + " " + trkPars[1] + " " + trkPars[2] + " " + trkPars[6] + " " + trkPars[7]);
 
             // if surface correspond to target, invert unit vector before is saved and calculate manually the pathlength
             if(surface.getDetectorType()==DetectorType.TARGET) {
@@ -352,7 +355,7 @@ public class Trajectory extends ArrayList<Cross> {
                 this.FillTrajectory(id, trajectory, trkPars, trkPars[6], trkPars[7], surface.getDetectorType(), surface.getDetectorLayer());
             }
             else {
-//                System.out.println(surface.getDetectorType() + " " + surface.getDetectorLayer() + " " + trkPars[2] + " " + pathLen + " " + trkPars[6]);
+//                LOGGER.log(Level.FINE, surface.getDetectorType() + " " + surface.getDetectorLayer() + " " + trkPars[2] + " " + pathLen + " " + trkPars[6]);
                 this.FillTrajectory(id, trajectory, trkPars, pathLen+trkPars[6], iBdl+trkPars[7], surface.getDetectorType(), surface.getDetectorLayer());               
             }
             

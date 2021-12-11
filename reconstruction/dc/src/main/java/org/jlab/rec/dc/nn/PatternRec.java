@@ -6,8 +6,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
-import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.cluster.Cluster;
 import org.jlab.rec.dc.cluster.ClusterCleanerUtilities;
 import org.jlab.rec.dc.cluster.ClusterFinder;
@@ -27,6 +28,8 @@ import org.jlab.rec.dc.trajectory.RoadFinder;
  */
 public class PatternRec {
     
+    private static final Logger LOGGER = Logger.getLogger(PatternRec.class.getName());
+
     private final ClusterFinder clf = new ClusterFinder();
     private final ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
     private final ClusterFitter cf = new ClusterFitter();
@@ -106,9 +109,8 @@ public class PatternRec {
             Map.Entry<Integer, ArrayList<Cross>> entry = citr.next(); 
             if(entry.getValue().size()==3)
                 crossList.add(entry.getValue()); 
-            if(Constants.DEBUG==true)
-                for(Cross c : entry.getValue()) 
-                    System.out.println("AI"+c.printInfo()+c.get_Segment1().printInfo()+c.get_Segment2().printInfo());
+            for(Cross c : entry.getValue()) 
+                LOGGER.log(Level.FINE, "AI"+c.printInfo()+c.get_Segment1().printInfo()+c.get_Segment2().printInfo());
         }
         return crossList;
     }

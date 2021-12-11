@@ -29,6 +29,7 @@
     <module>clas-utils</module>
     <module>clas-physics</module>
     <module>clas-io</module>
+    <module>clas-logging</module>
     <module>clas-geometry</module>
     <module>clas-jcsg</module>
     <module>clas-detector</module>

@@ -26,8 +26,15 @@ public class ScintillatorResponse extends DetectorResponse {
     public ScintillatorResponse(){
         super();
     }
-    
-   public ScintillatorResponse(int sector, int layer, int component){
+
+    public void copy(ScintillatorResponse r) {
+        super.copy(r);
+        dedx = r.dedx;
+        clusterSize = r.clusterSize;
+        layerMultiplicity = r.layerMultiplicity;
+    }
+
+    public ScintillatorResponse(int sector, int layer, int component){
         this.getDescriptor().setSectorLayerComponent(sector, layer, component);
     }
     

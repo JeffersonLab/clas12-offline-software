@@ -1,6 +1,9 @@
 package org.jlab.rec.cvt.svt;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 
 import org.jlab.geom.prim.Point3D;
@@ -9,6 +12,7 @@ import org.jlab.geom.prim.Triangle3D;
 
 public class Constants {
 
+    public static Logger LOGGER = Logger.getLogger(Constants.class.getName());
     
     /**
      * Constants used in the reconstruction

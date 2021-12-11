@@ -2,6 +2,7 @@ package org.jlab.rec.dc.segment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
@@ -22,9 +23,8 @@ import org.jlab.rec.dc.trajectory.SegmentTrajectory;
 public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>,
         Cloneable {
 
-    /**
-     *
-     */
+    private static final Logger LOGGER = Logger.getLogger(Segment.class.getName());
+
     private static final long serialVersionUID = -997960312423538455L;
     private FittedCluster _fittedCluster;
     public boolean isOnTrack = false;
@@ -212,7 +212,7 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
         /// <center><b>|Xwires<sub>2</sub>-Xwires<sub>1</sub>| = a*Xwires<sub>1</sub> + b</b></center>\n
         /// where a and b are DC parameters set by DC_RSEG_a and DC_RSEG_B .\n\n
         boolean value = false;
-        //System.out.println("in Segment DeltaW "+Math.abs(this.getAvgwire()-otherseg.getAvgwire() )+
+        //LOGGER.log(Level.FINE, "in Segment DeltaW "+Math.abs(this.getAvgwire()-otherseg.getAvgwire() )+
         //	" < ? "+(Constants.DC_RSEG_A * this.getAvgwire() + Constants.DC_RSEG_B));
         if (Math.abs(this.getAvgwire() - otherseg.getAvgwire()) < Constants.DC_RSEG_A * this.getAvgwire() + Constants.DC_RSEG_B) {
             value = true;
@@ -229,7 +229,7 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
         /// <center><b>|Xwires<sub>2</sub>-Xwires<sub>1</sub>| = a*Xwires<sub>1</sub> + b</b></center>\n
         /// where a and b are DC parameters set by DC_RSEG_a and DC_RSEG_B .\n\n
         boolean value = true;
-        //System.out.println("in Segment DeltaW "+Math.abs(this.getAvgwire()-otherseg.getAvgwire() )+
+        //LOGGER.log(Level.FINE, "in Segment DeltaW "+Math.abs(this.getAvgwire()-otherseg.getAvgwire() )+
         //	" < ? "+(Constants.DC_RSEG_A * this.getAvgwire() + Constants.DC_RSEG_B));
         for(Segment otherseg : othersegs) {
             if (Math.abs(this.getAvgwire() - otherseg.getAvgwire()) < Constants.DC_RSEG_A * this.getAvgwire() + Constants.DC_RSEG_B) {

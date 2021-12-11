@@ -3,6 +3,7 @@ package org.jlab.service.dc;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.swimtools.Swimmer;
 import org.jlab.io.base.DataEvent;
@@ -219,16 +220,16 @@ public class DCHBPostClusterConv extends DCEngine {
         }
 
         trkcands.addAll(mistrkcands);
-        if(Constants.DEBUG) {
-        System.out.println("Found after 5STg "+mistrkcands.size()+" HB seeds ");
-            for(int i = 0; i< trkcands.size(); i++) {
-                System.out.println("cand "+i);
-                for(Cross c : trkcands.get(i)) {
-                    System.out.println(c.printInfo());
-                }
-                System.out.println("------------------------------------------------------------------ ");
+
+        LOGGER.log(Level.FINE, "Found after 5STg "+mistrkcands.size()+" HB seeds ");
+        for(int i = 0; i< trkcands.size(); i++) {
+            LOGGER.log(Level.FINE, "cand "+i);
+            for(Cross c : trkcands.get(i)) {
+                LOGGER.log(Level.FINE, c.printInfo());
             }
+            LOGGER.log(Level.FINE, "------------------------------------------------------------------ ");
         }
+        
         //gather all the hits for pointer bank creation
         for (Track trk : trkcands) {
             for (Cross c : trk) {

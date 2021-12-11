@@ -2,16 +2,19 @@ package org.jlab.rec.dc.timetodistance;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jlab.rec.dc.Constants;
 import org.jlab.utils.groups.IndexedTable;
 
 
 public class TableLoader {
 
-    private TableLoader() {
-            
+    public TableLoader() {
     }
     
+    public static final Logger LOGGER = Logger.getLogger(TableLoader.class.getName());
+
     private static boolean T2DLOADED = false;
     
     private static final int NBINST=2000;
@@ -38,7 +41,7 @@ public class TableLoader {
                     for(int r = 4; r<5; r++ ){ //loop over slys
                             for(int ibfield =0; ibfield<1; ibfield++) {
                                 for (int tb = 250; tb< 300; tb++) {
-                                    System.out.println(" NEW TIME BIN ");
+                                    LOGGER.log(Level.FINE, " NEW TIME BIN ");
                                     for(int icosalpha =0; icosalpha<maxBinIdxAlpha+1; icosalpha++) {
                                             //for (int tb = 0; tb< maxBinIdxT[s][r][ibfield][icosalpha]; tb++) {
                                             double Xalpha = -(Math.toDegrees(Math.acos(Math.cos(Math.toRadians(30.)) + (icosalpha)*(1. - Math.cos(Math.toRadians(30.)))/5.)) - 30.);
@@ -48,7 +51,7 @@ public class TableLoader {
                                             double Bf = (ibfield)*0.5;
                                             int bbin = tde.getBIdx(Bf);
                                             double Xdoca=tde.interpolateOnGrid((double) Bf, Xalpha, Xtime, s, r);
-                                                System.out.println("Bbin "+ibfield+" B "+ (float)Bf+" sl "+(r+1)+" time "+Xtime+" tb "+tb+" timeBin "+tde.getTimeIdx(Xtime, s, r, ibfield, icosalpha)
+                                                LOGGER.log(Level.FINE, "Bbin "+ibfield+" B "+ (float)Bf+" sl "+(r+1)+" time "+Xtime+" tb "+tb+" timeBin "+tde.getTimeIdx(Xtime, s, r, ibfield, icosalpha)
                                                         +" icosalpha "+icosalpha+" Xalpha "+(float) Xalpha + " dis "+ (float)DISTFROMTIME[s][r][bbin][icosalpha][tde.getTimeIdx(Xtime, s, r, ibfield, icosalpha)] +" time' "+
                                                       (float)  calc_Time( Xdoca,  Xalpha, Bf, s+1, r+1) +" tdix "+tde.getTimeIdx(calc_Time( Xdoca,  Xalpha, Bf, s+1, r+1), s, r, ibfield, icosalpha));
                                             //}
@@ -118,7 +121,7 @@ public class TableLoader {
                     b4[s][r] = tab.getDoubleValue("b4", s+1,r+1,0);
                     Tmax[s][r] = tab.getDoubleValue("tmax", s+1,r+1,0);
                     // end fill constants
-                    //System.out.println(v0[s][r]+" "+vmid[s][r]+" "+FracDmaxAtMinVel[s][r]);
+                    //LOGGER.log(Level.FINE, v0[s][r]+" "+vmid[s][r]+" "+FracDmaxAtMinVel[s][r]);
                     double dmax = 2.*Constants.getInstance().wpdist[r]; 
                     //double tmax = CCDBConstants.getTMAXSUPERLAYER()[s][r];
                     for(int ibfield =0; ibfield<maxBinIdxB+1; ibfield++) {
@@ -145,7 +148,7 @@ public class TableLoader {
                                         maxTBin = tbin;
                                     //if(tbin>maxBinIdxT[s][r][ibfield][icosalpha]) {
                                         //maxBinIdxT[s][r][ibfield][icosalpha] = NBINST; 
-                                    //} //System.out.println("tbin "+tbin+" tmax "+tmax+ "s "+s+" sl "+r );
+                                    //} //LOGGER.log(Level.FINE, "tbin "+tbin+" tmax "+tmax+ "s "+s+" sl "+r );
                                     if(DISTFROMTIME[s][r][ibfield][icosalpha][tbin]==0) {
                                         // firstbin = bi
                                         // bincount = 0;				    	 

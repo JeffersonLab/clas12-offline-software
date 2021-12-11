@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -217,7 +218,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         int run = this.getRun(event);
         if(run==0) return true;
         
-        //System.out.println(" RUNNING TIME BASED....................................");
+        //LOGGER.log(Level.FINE, " RUNNING TIME BASED....................................");
         ClusterFitter cf = new ClusterFitter();
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
 
@@ -304,15 +305,15 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
                     return;
 		DataBank Bank = event.getBank("TimeBasedTrkg::TBSegmentTrajectory") ;
 		int nrows =  Bank.rows();
-		//Bank.show(); System.out.println(" NUMBER OF ENTRIES IN BANK = "+nrows);
+		//Bank.show(); LOGGER.log(Level.FINE, " NUMBER OF ENTRIES IN BANK = "+nrows);
 		for (int i = 0; i < nrows; i++) {
 			totLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1]++;
 			
-			//System.out.println(" Layer eff denom for ["+Bank.getByte("sector", i)+"]["+ Bank.getByte("superlayer", i)+"]["+Bank.getByte("layer", i)+"] = "+totLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1]);
+			//LOGGER.log(Level.FINE, " Layer eff denom for ["+Bank.getByte("sector", i)+"]["+ Bank.getByte("superlayer", i)+"]["+Bank.getByte("layer", i)+"] = "+totLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1]);
 			if(Bank.getShort("matchedHitID", i)!=-1) {
 				effLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1]++;
 			}
-			//System.out.println(" Layer eff num for ["+Bank.getByte("sector", i)+"]["+ Bank.getByte("superlayer", i)+"]["+Bank.getByte("layer", i)+"] = "+effLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1]);
+			//LOGGER.log(Level.FINE, " Layer eff num for ["+Bank.getByte("sector", i)+"]["+ Bank.getByte("superlayer", i)+"]["+Bank.getByte("layer", i)+"] = "+effLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1]);
 			
 			if(Math.abs(Bank.getFloat("trkDoca", i))<4.0) {
 				totLayA[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][(int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning)))]++;
@@ -415,7 +416,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
                 dir.addDataSet(LayerEffsTrkD.get(si).get(new Coordinate(i)));
             }
         }
-        System.out.println("Saving histograms to file " + fileName);
+        LOGGER.log(Level.INFO, "Saving histograms to file " + fileName);
         dir.writeFile(fileName);
     }
    
@@ -452,7 +453,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
                 tm.ProcessLayerEffs(event);
                 //event.show();
                 if(counter%1000==0) {
-                    System.out.println(counter);
+                    LOGGER.log(Level.INFO, "processed " + counter + " events");
                     tm.drawPlots();
                 }
             }

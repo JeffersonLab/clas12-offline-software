@@ -14,6 +14,8 @@ import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jlab.clas.swimtools.Swimmer;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.Constants;
@@ -35,6 +37,9 @@ public class HitReader {
         this.bankNames= names;
             
     }
+    
+    private static final Logger LOGGER = Logger.getLogger(HitReader.class.getName());
+    
     private List<Hit> _DCHits;
 
     private List<FittedHit> _HBHits; //hit-based tracking hit information
@@ -328,9 +333,9 @@ public class HitReader {
         String bankName    = bankNames.getInputHitsBank();
         String pointName   = bankNames.getInputIdsBank();
         String recBankName = bankNames.getRecEventBank();
-        if(Constants.DEBUG) {
-                System.out.println("Reading hb banks for "+ bankName + ", " + pointName + " " + recBankName);
-        }
+        
+        LOGGER.log(Level.FINE,"Reading hb banks for "+ bankName + ", " + pointName + " " + recBankName);
+        
         if (!event.hasBank(bankName) || !event.hasBank(pointName) || event.getBank(pointName).rows()==0) {
             //    System.err.println("there is no HB dc bankAI for "+_names[0]);
             _HBHits = new ArrayList<>();
@@ -464,9 +469,7 @@ public class HitReader {
             //if(hit.betaFlag == 0)
             if(passHit(hit.betaFlag)) {
                 hits.add(hit);        
-                if(Constants.DEBUG) {
-                    System.out.println("Passing "+hit.printInfo()+" for "+ bankNames.getHitsBank());
-                }
+                LOGGER.log(Level.FINE, "Passing "+hit.printInfo()+" for "+ bankNames.getHitsBank());            
             }
         }
 
@@ -536,8 +539,7 @@ public class HitReader {
                         hit.NNTrkP      = this.aimatch.get(clusterID)[0];
                         hit.NNTrkTheta  = this.aimatch.get(clusterID)[1];
                         hit.NNTrkPhi    = this.aimatch.get(clusterID)[2];
-                        if(Constants.DEBUG==true)
-                            System.out.println("NN"+hit.printInfo());
+                        LOGGER.log(Level.FINE, "NN"+hit.printInfo());
                         hits.add(hit);
                     }
                 }
@@ -764,11 +766,11 @@ public class HitReader {
         } else {
             for(int i = 0; i<CableSwaps.length; i++) {
                 if(CableSwaps[i][0]==sector && CableSwaps[i][1]==layer && CableSwaps[i][2]==wire) {
-                   // System.out.println(" swapped "+sector+", "+layer+", "+wire);
+                   // LOGGER.log(Level.FINE, " swapped "+sector+", "+layer+", "+wire);
                     _sector = CableSwaps[i][3];
                     _layer  = CableSwaps[i][4];
                     _wire   = CableSwaps[i][5];
-                  //  System.out.println("    to  "+_sector+", "+_layer+", "+_wire);
+                  //  LOGGER.log(Level.FINE, "    to  "+_sector+", "+_layer+", "+_wire);
                 }
             }
         }
@@ -788,9 +790,9 @@ public class HitReader {
 
         for (int s=1; s<7; s++) {
            if (trigger_bits[s]) {
-               System.out.println("Trigger bit set for electron in sector "+s);
+               LOGGER.log(Level.FINE, "Trigger bit set for electron in sector "+s);
            }
-          if (trigger_bits[31])System.out.println("Trigger bit set from random pulser");
+          if (trigger_bits[31])LOGGER.log(Level.FINE, "Trigger bit set from random pulser");
         }
 }
     }

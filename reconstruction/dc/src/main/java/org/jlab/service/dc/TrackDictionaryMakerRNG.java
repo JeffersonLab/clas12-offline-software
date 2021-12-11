@@ -68,7 +68,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         Swim sw = new Swim();
         PrintWriter pw = null;
         try {
-            System.out.println(" MAKING ROADS for: "
+            LOGGER.log(Level.INFO, " MAKING ROADS for: "
                     +"\n Torus:\t\t"   +String.valueOf(torScale)
                     +"\n Solenoid:\t"  +String.valueOf(solScale)
                     +"\n Charge:\t"    +String.valueOf(charge)
@@ -92,8 +92,8 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     +"Duplicates" +String.valueOf(duplicates)+".txt";
             pw = new PrintWriter(fileName);
             this.r.setSeed(seed);
-            System.out.println("\n Random generator seed set to: " + seed);
-            System.out.println("\n Dictionary file name: " + fileName + "\n");
+            LOGGER.log(Level.INFO, "\n Random generator seed set to: " + seed);
+            LOGGER.log(Level.INFO, "\n Dictionary file name: " + fileName + "\n");
             this.ProcessTracks(pw, Constants.getInstance().dcDetector, Constants.getInstance().ftofDetector, 
                                    Constants.getInstance().ecalDetector, sw, charge, n, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax,duplicates);
             pw.close();
@@ -172,7 +172,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         
         Point3D rotatedP = this.rotateToTiltedCoordSys(sector, new Point3D(swimVal[3], swimVal[4], swimVal[5]));
         Point3D rotatedX = this.rotateToTiltedCoordSys(sector, new Point3D(swimVal[0], swimVal[1], swimVal[2]));
-//System.out.println(" sector in TrackDictionary "+sector);
+//LOGGER.log(Level.INFO, " sector in TrackDictionary "+sector);
         List<Integer> Wi = new ArrayList<>();
         List<Integer> Di = new ArrayList<>();
         int index=0;
@@ -204,7 +204,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         Line3D wl = new Line3D(new Point3D(p3dl.x, p3dl.y, p3dl.z), new Point3D(p3dr.x, p3dr.y, p3dr.z));
         double min = wl.distance(new Point3D(tx, ty, tz)).length();
         if(min<wMax*1.05) {
-            Wi.add(i + 1); //System.out.println("min "+min); ? one strip off
+            Wi.add(i + 1); //LOGGER.log(Level.INFO, "min "+min); ? one strip off
             Di.add((int)min);
         }
     }
@@ -258,7 +258,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
 
             
         for (int i = 0; i < numRandoms; i++) {
-            if(i%10000 == 0) System.out.println("\t" + i + " tracks generated, " + newDictionary.size() + " roads found");
+            if(i%10000 == 0) LOGGER.log(Level.INFO, "\t" + i + " tracks generated, " + newDictionary.size() + " roads found");
             Clear(wireArray);
             invP     =this.randomDouble((double)(1./PMax), (double) (1./PMin));
             phiDeg   =this.randomDouble((double) PhiMin, (double) PhiMax);
@@ -383,7 +383,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                 if(newDictionary.containsKey(wires) && duplicates!=0)  {
                         int nRoad = newDictionary.get(wires) + 1;
                         newDictionary.replace(wires, nRoad);
-                       // System.out.println(" Number of duplicate roads "+nRoad+" p "+p+" theta "+thetaDeg+" phi "+phiDeg+" vz "+vzCm);
+                       // LOGGER.log(Level.INFO, " Number of duplicate roads "+nRoad+" p "+p+" theta "+thetaDeg+" phi "+phiDeg+" vz "+vzCm);
                 }
                 else {
                     newDictionary.put(wires, 1);
@@ -423,7 +423,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                 }   
             }
         }
-        System.out.println("\t" + numRandoms + " tracks generated, " + newDictionary.size() + " roads found");
+        LOGGER.log(Level.INFO, "\t" + numRandoms + " tracks generated, " + newDictionary.size() + " roads found");
     }
 
     public void ProcessCosmics(PrintWriter pw, DCGeant4Factory dcDetector, TrackDictionaryMakerRNG tw, Swim sw) {
@@ -534,12 +534,12 @@ public class TrackDictionaryMakerRNG extends DCEngine{
            
             if (wl.distance(new Point3D(trk[0], trk[1], trk[2])).length() < min) { 
                 min = wl.distance(new Point3D(trk[0], trk[1], trk[2])).length();
-                w = i; //System.out.println(" min "+min+" wire "+(i+1)+" sl "+sl+" l "+l+" trk "+trk[0]+", "+trk[1]+", "+trk[2]+" mp "+dcDetector.getWireMidpoint(sl, l, i)+" : "+dcDetector.getWireMidpoint(sl, l, 0).z);
+                w = i; //LOGGER.log(Level.INFO, " min "+min+" wire "+(i+1)+" sl "+sl+" l "+l+" trk "+trk[0]+", "+trk[1]+", "+trk[2]+" mp "+dcDetector.getWireMidpoint(sl, l, i)+" : "+dcDetector.getWireMidpoint(sl, l, 0).z);
             } 
         }
 
         if (min < wMax*1.01) {
-            Wi.add(w + 1); //System.out.println("min "+min);
+            Wi.add(w + 1); //LOGGER.log(Level.INFO, "min "+min);
             Di.add((int)min);
             addAdjacentHits(sector-1, sl, l, w+1, Wi, Di, dcDetector, wMax, trk[0], trk[1], trk[2]);
             addAdjacentHits(sector-1, sl, l, w-1, Wi, Di, dcDetector, wMax, trk[0], trk[1], trk[2]);
@@ -571,13 +571,13 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                 min = wl.distance(new Point3D(trk[0], trk[1], trk[2])).length();
                 wLeft = p3dl.y;
                 wRight= p3dr.y;
-                w = i; //System.out.println(" min "+min+" wire "+(i+1)+" sl "+sl+" l "+l+" trk "+trk[0]+", "+trk[1]+", "+trk[2]+" mp "+dcDetector.getWireMidpoint(sl, l, i)+" : "+dcDetector.getWireMidpoint(sl, l, 0).z);
+                w = i; //LOGGER.log(Level.INFO, " min "+min+" wire "+(i+1)+" sl "+sl+" l "+l+" trk "+trk[0]+", "+trk[1]+", "+trk[2]+" mp "+dcDetector.getWireMidpoint(sl, l, i)+" : "+dcDetector.getWireMidpoint(sl, l, 0).z);
             }  
         }
 
         if (min < wMax*1.01 && trk[1]>(wLeft-wMax) && trk[1]<(wRight+wMax)) {
-            Wi.add(w + 1); //System.out.println("min "+min);
- //           System.out.println(w + " " + sl + " " + l + " " + wLeft + " " + wRight);
+            Wi.add(w + 1); //LOGGER.log(Level.INFO, "min "+min);
+ //           LOGGER.log(Level.INFO, w + " " + sl + " " + l + " " + wLeft + " " + wRight);
         } else {
             Wi.add(0);
         }
@@ -674,7 +674,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         
         for(int l=0; l<6; l++) {
             Constants.getInstance().wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
-            System.out.println("****************** WPDIST READ *********FROM RELOADED "+geomDBVar+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
+            LOGGER.log(Level.INFO, "****************** WPDIST READ *********FROM RELOADED "+geomDBVar+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
         }
         
     }
@@ -723,7 +723,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
             tm.resetGeom(dcVar);
             tm.processFile(duplicates,torus, solenoid, charge, n, seed, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax);
         } else {
-            System.out.println(" FIELDS NOT SET");
+            LOGGER.log(Level.INFO, " FIELDS NOT SET");
         }
     }
     

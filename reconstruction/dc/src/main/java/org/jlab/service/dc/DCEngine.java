@@ -2,6 +2,8 @@ package org.jlab.service.dc;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -27,6 +29,9 @@ public class DCEngine extends ReconstructionEngine {
     private String   bankType       = "HitBasedTrkg";
     private String   outBankPrefix  = null;
         
+    public static final Logger LOGGER = Logger.getLogger(ReconstructionEngine.class.getName());
+
+
     public DCEngine(String name) {
         super(name,"ziegler","5.0");
     }
@@ -63,7 +68,7 @@ public class DCEngine extends ReconstructionEngine {
         if(this.getEngineConfigString("dcT2DFunc")!=null)       
             if(this.getEngineConfigString("dcT2DFunc").equalsIgnoreCase("Polynomial")) {
                 t2d=1;
-            }
+        }
         
         //Recover hit doublets
         if(this.getEngineConfigString("dcDoublets")!=null)       
@@ -79,8 +84,7 @@ public class DCEngine extends ReconstructionEngine {
         if(this.getEngineConfigString("outputBankPrefix")!=null) {
             outBankPrefix = this.getEngineConfigString("outputBankPrefix");
         }
-
-            }
+    }
 
 
     public void LoadTables() {
@@ -126,7 +130,7 @@ public class DCEngine extends ReconstructionEngine {
 
     private void initBanks() {
         if(this.getBankPrefix()!=null) this.getBanks().init(outBankPrefix);
-        System.out.println("["+this.getName()+"] bank names set for " + this.getBanks().toString());        
+        LOGGER.log(Level.INFO,"["+this.getName()+"] bank names set for " + this.getBanks().toString());       
     }
 
     public Banks getBanks() {
@@ -150,8 +154,7 @@ public class DCEngine extends ReconstructionEngine {
             return 0;
         }
         DataBank bank = event.getBank("RUN::config");
-        if(Constants.DEBUG)
-            System.out.println("EVENT "+bank.getInt("event", 0));
+        LOGGER.log(Level.FINE,"["+this.getName()+"] EVENT "+bank.getInt("event", 0));       
         
         int run = bank.getInt("run", 0);
         return run;

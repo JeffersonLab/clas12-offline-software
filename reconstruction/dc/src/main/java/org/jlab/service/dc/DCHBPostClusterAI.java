@@ -3,6 +3,7 @@ package org.jlab.service.dc;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.swimtools.Swimmer;
 import org.jlab.io.base.DataEvent;
@@ -47,7 +48,7 @@ public class DCHBPostClusterAI extends DCEngine {
         
         int run = this.getRun(event);
         if(run==0) {
-            System.out.println("RUN=0: Skipping event");
+            LOGGER.log(Level.INFO, "RUN=0: Skipping event");
             return true;
         }
         
@@ -59,8 +60,7 @@ public class DCHBPostClusterAI extends DCEngine {
         /* 2 */
         
         /* 5 */
-        if(Constants.DEBUG)
-            System.out.println("HB AI process event");
+        LOGGER.log(Level.FINE, "HB AI process event");
         /* 7 */
         /* 8 */
         //AI
@@ -90,14 +90,12 @@ public class DCHBPostClusterAI extends DCEngine {
         //crossList
         CrossList crosslist = pr.RecomposeCrossList(segments, Constants.getInstance().dcDetector);
         crosses = new ArrayList<>();
-        if(Constants.DEBUG==true) 
-            System.out.println("num cands = "+crosslist.size());
+        
+        LOGGER.log(Level.FINE, "num cands = "+crosslist.size());
         for (List<Cross> clist : crosslist) {
             crosses.addAll(clist); 
-            if(Constants.DEBUG==true) {
-                for(Cross c : clist)
-                    System.out.println("Pass Cross"+c.printInfo());
-            }
+            for(Cross c : clist)
+                LOGGER.log(Level.FINE, "Pass Cross"+c.printInfo());
         }
         if (crosses.isEmpty()) {
             clusters = new ArrayList<>();

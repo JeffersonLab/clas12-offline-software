@@ -3,6 +3,8 @@ package org.jlab.rec.cvt.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.clas.swimtools.Swim;
@@ -48,6 +50,7 @@ import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
  */
 public class CVTReconstruction extends ReconstructionEngine {
 
+    public static Logger LOGGER = Logger.getLogger(CVTReconstruction.class.getName());
     org.jlab.rec.cvt.svt.Geometry SVTGeom;
     org.jlab.rec.cvt.bmt.Geometry BMTGeom;
     CTOFGeant4Factory CTOFGeom;
@@ -67,7 +70,7 @@ public class CVTReconstruction extends ReconstructionEngine {
   
     public void setRunConditionsParameters(DataEvent event, String FieldsConfig, int iRun, boolean addMisAlignmts, String misAlgnFile) {
         if (event.hasBank("RUN::config") == false) {
-            System.err.println("RUN CONDITIONS NOT READ!");
+            LOGGER.log(Level.WARNING,"RUN CONDITIONS NOT READ!");
             return;
         }
 
@@ -397,18 +400,18 @@ public class CVTReconstruction extends ReconstructionEngine {
         String rmReg = this.getEngineConfigString("removeRegion");
         
         if (rmReg!=null) {
-            System.out.println("["+this.getName()+"] run with region "+rmReg+"removed config chosen based on yaml");
+            LOGGER.log(Level.INFO,"["+this.getName()+"] run with region "+rmReg+"removed config chosen based on yaml");
             Constants.setRmReg(Integer.valueOf(rmReg));
         }
         else {
             rmReg = System.getenv("COAT_CVT_REMOVEREGION");
             if (rmReg!=null) {
-                System.out.println("["+this.getName()+"] run with region "+rmReg+"removed config chosen based on env");
+                LOGGER.log(Level.INFO,"["+this.getName()+"] run with region "+rmReg+"removed config chosen based on env");
                 Constants.setRmReg(Integer.valueOf(rmReg));
             }
         }
         if (rmReg==null) {
-             System.out.println("["+this.getName()+"] run with all region (default) ");
+             LOGGER.log(Level.INFO,"["+this.getName()+"] run with all region (default) ");
         }
         
         // Load other geometries

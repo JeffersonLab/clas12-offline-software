@@ -1,6 +1,8 @@
 package org.jlab.rec.dc;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import cnuphys.snr.NoiseReductionParameters;
 import org.jlab.detector.base.DetectorType;
@@ -34,6 +36,9 @@ public class Constants {
             }
             return instance;
     }
+
+    
+    public static Logger LOGGER = Logger.getLogger(Constants.class.getName());
 
     private static boolean ConstantsLoaded = false;
     
@@ -346,15 +351,15 @@ public class Constants {
     }
     
     public void printConfig(String engine) {
-        System.out.println("["+engine+"] run with variation = " + GEOVARIATION);
-        System.out.println("["+engine+"] run with sector selection = " + SECTORSELECT);
-        System.out.println("["+engine+"] run with start time option = " + USETSTART);
-        System.out.println("["+engine+"] run with wire distortions = " + ENDPLATESBOWING);
-        System.out.println("["+engine+"] run with with new tBeta configuration = " + USETIMETBETA);
-        System.out.println("["+engine+"] run with with Beta cut = " + CHECKBETA);
-        System.out.println("["+engine+"] run with time to distance function set to exponential/polynomial (0/1) = " + T2D);
-        System.out.println("["+engine+"] run with with hit doublets recovery = " + USEDOUBLETS);
-        System.out.println("["+engine+"] run with with Five-out-of-six-superlayer-trkg = " + NSUPERLAYERTRACKING);        
+        LOGGER.log(Level.INFO, "["+engine+"] run with variation = " + GEOVARIATION);
+        LOGGER.log(Level.INFO, "["+engine+"] run with sector selection = " + SECTORSELECT);
+        LOGGER.log(Level.INFO, "["+engine+"] run with start time option = " + USETSTART);
+        LOGGER.log(Level.INFO, "["+engine+"] run with wire distortions = " + ENDPLATESBOWING);
+        LOGGER.log(Level.INFO, "["+engine+"] run with with new tBeta configuration = " + USETIMETBETA);
+        LOGGER.log(Level.INFO, "["+engine+"] run with with Beta cut = " + CHECKBETA);
+        LOGGER.log(Level.INFO, "["+engine+"] run with time to distance function set to exponential/polynomial (0/1) = " + T2D);
+        LOGGER.log(Level.INFO, "["+engine+"] run with with hit doublets recovery = " + USEDOUBLETS);
+        LOGGER.log(Level.INFO, "["+engine+"] run with with Five-out-of-six-superlayer-trkg = " + NSUPERLAYERTRACKING);        
     }
     
     private synchronized void LoadConstants() {

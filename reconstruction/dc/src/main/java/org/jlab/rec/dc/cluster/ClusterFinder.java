@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.io.base.DataEvent;
 
@@ -38,6 +39,7 @@ public class ClusterFinder {
     public ClusterFinder() {
 
     }
+    private static final Logger LOGGER = Logger.getLogger(ClusterFinder.class.getName());
 
     // cluster finding algorithm
     // the loop is done over sector and superlayers
@@ -135,7 +137,7 @@ public class ClusterFinder {
                             if (HitArray[ssl][wi][la] != null) {
 
                                 hits.add(HitArray[ssl][wi][la]);
-                                //System.out.println(" adding hit "+HitArray[ssl][wi][la].printInfo()+" to cid "+cid);
+                                //LOGGER.log(Level.FINER, " adding hit "+HitArray[ssl][wi][la].printInfo()+" to cid "+cid);
                             }
                         }
                         wi++;
@@ -147,7 +149,7 @@ public class ClusterFinder {
 
                         // cluster constructor DCCluster(hit.sector,hit.superlayer, cid)
                         Cluster this_cluster = new Cluster((int) (ssl / nsect) + 1, (int) (ssl % nsect) + 1, cid++);
-                        //System.out.println(" created cluster "+this_cluster.printInfo());
+                        //LOGGER.log(Level.FINER, " created cluster "+this_cluster.printInfo());
                         this_cluster.addAll(hits);
 
                         clumps.add(this_cluster);
@@ -197,7 +199,7 @@ public class ClusterFinder {
         for (Cluster clus : clusters) {
             if(clus.size()<Constants.DC_MIN_NLAYERS)
                 continue;
-            //System.out.println(" I passed this cluster "+clus.printInfo());
+            //LOGGER.log(Level.FINER, " I passed this cluster "+clus.printInfo());
             FittedCluster fClus = new FittedCluster(clus);
             //FittedCluster fClus = ct.IsolatedHitsPruner(fclus);
             // Flag out-of-timers
@@ -212,10 +214,10 @@ public class ClusterFinder {
             selectedClusList.add(fClus); 
         }
         
-        //System.out.println(" Clusters Step 2");
+        //LOGGER.log(Level.FINER, " Clusters Step 2");
         // for(FittedCluster c : selectedClusList)
         //	for(FittedHit h : c)
-        //		System.out.println(h.printInfo());
+        //		LOGGER.log(Level.FINER, h.printInfo());
         // create list of fitted clusters
         List<FittedCluster> fittedClusList = new ArrayList<>();
         List<FittedCluster> refittedClusList = new ArrayList<>();
@@ -273,10 +275,10 @@ public class ClusterFinder {
 
         }
 
-        //System.out.println(" Clusters Step 4");
+        //LOGGER.log(Level.FINER, " Clusters Step 4");
         //for(FittedCluster c : refittedClusList)
         //	for(FittedHit h : c)
-        //		System.out.println(h.printInfo());
+        //		LOGGER.log(Level.FINER, h.printInfo());
         return refittedClusList;
 
     }
@@ -388,10 +390,10 @@ public class ClusterFinder {
         List<FittedCluster> clusters = new ArrayList<>();
 
         List<FittedCluster> rclusters = RecomposeTrackClusters(event, fhits, tab, DcDetector, tde);
-        //System.out.println(" Clusters TimeBased Step 1");
+        //LOGGER.log(Level.FINER, " Clusters TimeBased Step 1");
         //     for(FittedCluster c : rclusters)
         //    	for(FittedHit h : c)
-        //    		System.out.println(h.printInfo());
+        //    		LOGGER.log(Level.FINER, h.printInfo());
 
         for (FittedCluster clus : rclusters) {
             // clean them up
@@ -404,18 +406,18 @@ public class ClusterFinder {
                 continue;
             }
 
-           // 	System.out.println(" Clusters TimeBased Step 2ndaries rem");
+           // 	LOGGER.log(Level.FINER, " Clusters TimeBased Step 2ndaries rem");
            // 	for(FittedHit h : clus)
-           // 		System.out.println(h.printInfo());
+           // 		LOGGER.log(Level.FINER, h.printInfo());
             FittedCluster LRresolvClus = ct.LRAmbiguityResolver(event, clus, cf, tab, DcDetector, tde);
             clus = LRresolvClus;
             if (clus == null) {
                 continue;
             }
 
-            //	System.out.println(" Clusters TimeBased Step LR res");
+            //	LOGGER.log(Level.FINER, " Clusters TimeBased Step LR res");
            // 	for(FittedHit h : clus)
-             //   	System.out.println(h.printInfo());
+             //   	LOGGER.log(Level.FINER, h.printInfo());
             // resolves segments where there are only single hits in layers thereby resulting in a two-fold LR ambiguity
             // hence there are 2 solutions to the segments
             int[] SumLn = new int[6];
@@ -558,7 +560,7 @@ public class ClusterFinder {
             List<FittedCluster> selectedClusList = new ArrayList<>();
 
             for (Cluster clus : clusters) {
-                //System.out.println(" I passed this cluster "+clus.printInfo());
+                //LOGGER.log(Level.FINER, " I passed this cluster "+clus.printInfo());
                 FittedCluster fclus = new FittedCluster(clus);
                 selectedClusList.add(fclus);
 
