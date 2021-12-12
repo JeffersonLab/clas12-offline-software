@@ -15,7 +15,6 @@ import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
-import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.hit.Strip;
 import org.jlab.rec.cvt.track.StraightTrack;
@@ -27,10 +26,10 @@ public class RecoBankReader {
 	private List<StraightTrack> _cosmics;
 	private List<Cross> _SVTcrosses;
 	private List<Cluster> _SVTclusters;
-	private List<FittedHit> _SVTHits;
+	private List<Hit> _SVTHits;
 	private List<Cross> _BMTcrosses;
 	private List<Cluster> _BMTclusters;
-	private List<FittedHit> _BMThits;
+	private List<Hit> _BMThits;
 
 
 
@@ -204,7 +203,7 @@ public class RecoBankReader {
 				if(!hasColumn(bank,hitStrg))
 					continue;
 				int hitId = bank.getShort(hitStrg, i);
-				for(FittedHit hit : _BMThits) {
+				for(Hit hit : _BMThits) {
 					if (hit.get_Id() == hitId) {
 						cluster.add(hit);
 					}
@@ -443,7 +442,7 @@ public class RecoBankReader {
 				if(!hasColumn(bank,hitStrg))
 					continue;
 				int hitId = bank.getShort(hitStrg, i);
-				for(FittedHit hit : _SVTHits) {
+				for(Hit hit : _SVTHits) {
 					if (hit.get_Id() == hitId) {
 						cluster.add(hit);
 					}
@@ -459,13 +458,13 @@ public class RecoBankReader {
 	private void fetch_SVTHits(DataEvent event) {
 		DataBank bank = event.getBank("BSTRec::Hits");
 
-		_SVTHits = new ArrayList<FittedHit>();
+		_SVTHits = new ArrayList<Hit>();
 		for (int i = 0; i < bank.rows(); i++) {
 			int layer = bank.getByte("layer", i);
 			int sector = bank.getByte("sector", i);
 			int strip = bank.getInt("strip", i);
 			int id = bank.getShort("ID", i);
-			FittedHit hit = new FittedHit(DetectorType.BST, null, sector, layer, new Strip(strip, 0, 0));
+			Hit hit = new Hit(DetectorType.BST, null, sector, layer, new Strip(strip, 0, 0));
 
 			hit.set_Id(id);
 			hit.set_docaToTrk(bank.getFloat("fitResidual", i));
@@ -481,13 +480,13 @@ public class RecoBankReader {
 	public void fetch_BMTHits(DataEvent event) {
 		DataBank bank = event.getBank("BSTRec::Hits");
 
-		_BMThits = new ArrayList<FittedHit>();
+		_BMThits = new ArrayList<Hit>();
 		for (int i = 0; i < bank.rows(); i++) {
 			int layer = bank.getByte("layer", i);
 			int sector = bank.getByte("sector", i);
 			int strip = bank.getInt("strip", i);
 			int id = bank.getShort("ID", i);
-			FittedHit hit = new FittedHit(DetectorType.BMT, BMTGeometry.getDetectorType(layer), sector, layer, new Strip(strip, 0, 0));
+			Hit hit = new Hit(DetectorType.BMT, BMTGeometry.getDetectorType(layer), sector, layer, new Strip(strip, 0, 0));
 
 			
 			
