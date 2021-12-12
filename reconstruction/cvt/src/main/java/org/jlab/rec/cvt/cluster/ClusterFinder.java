@@ -3,7 +3,8 @@ package org.jlab.rec.cvt.cluster;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.jlab.rec.cvt.hit.FittedHit;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.hit.Hit;
 
 /**
@@ -25,7 +26,7 @@ public class ClusterFinder {
     int nsec = 18;
     public ArrayList<Cluster> findClusters(List<Hit> hits2) // the number of strips depends on the layer 
     {
-        ArrayList<Cluster> clusters = new ArrayList<Cluster>();
+        ArrayList<Cluster> clusters = new ArrayList<>();
 
         // a Hit Array is used to identify clusters		
         HitArray = new Hit[nstrip][nlayr][nsec];
@@ -35,6 +36,10 @@ public class ClusterFinder {
         for (Hit hit : hits2) {
 
             if (hit.get_Strip().get_Strip() == -1) {
+                continue;
+            }
+
+            if (hit.get_Strip().getStatus()!=0) {
                 continue;
             }
 
@@ -61,16 +66,13 @@ public class ClusterFinder {
                     // if there's a hit, it's a cluster candidate
                     if (HitArray[si][l][s] != null || (si < nstrip - 1 && HitArray[si + 1][l][s] != null)) { 
                         // vector of hits in the cluster candidate
-                        ArrayList<FittedHit> hits = new ArrayList<FittedHit>();
+                        ArrayList<Hit> hits = new ArrayList<>();
 
                         // adding all hits in this and all the subsequent
                         // strip until there's a strip with no hit
                         while ((si < nstrip - 1 && HitArray[si + 1][l][s] != null) || (HitArray[si][l][s] != null && si < nstrip)) {
                             if (HitArray[si][l][s] != null) { // continue clustering skipping over bad hit
-                                FittedHit hitInCls = new FittedHit(HitArray[si][l][s].get_Detector(), HitArray[si][l][s].get_Type(), HitArray[si][l][s].get_Sector(), HitArray[si][l][s].get_Layer(), HitArray[si][l][s].get_Strip());
-                                hitInCls.set_Id(HitArray[si][l][s].get_Id());
-
-                                hits.add(hitInCls);
+                                hits.add(HitArray[si][l][s]);
                             }
                             si++;
                         }
@@ -88,14 +90,14 @@ public class ClusterFinder {
                                 }
                             }
                         }
-                        for (FittedHit h : hits) {
+                        for (Hit h : hits) {
                             h.set_AssociatedClusterID(this_cluster.get_Id());
-                            h.newClustering = true; 
+                            h.newClustering = true; //RDV fix me!
                         }
                         
                         this_cluster.calc_CentroidParams();
                        
-                        for (FittedHit h : this_cluster) {
+                        for (Hit h : this_cluster) {
                             h.newClustering = false;
                         }
                         Collections.sort(this_cluster);

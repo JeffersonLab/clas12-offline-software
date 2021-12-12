@@ -615,7 +615,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     public int compareTo(Cross arg) {
 
         int return_val = 0;
-        if (Constants.isCosmicsData() == true) {
+        if(Constants.isCosmicsData) {
             int RegComp = this.get_SVTCosmicsRegion() < arg.get_SVTCosmicsRegion() ? -1 : this.get_SVTCosmicsRegion() == arg.get_SVTCosmicsRegion() ? 0 : 1;
             int IDComp = this.get_Id() < arg.get_Id() ? -1 : this.get_Id() == arg.get_Id() ? 0 : 1;
 
