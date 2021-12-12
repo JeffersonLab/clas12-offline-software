@@ -19,6 +19,7 @@ import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorTrack;
 import org.jlab.clas.detector.TaggerResponse;
 import org.jlab.clas.detector.CherenkovResponse;
+import org.jlab.clas.detector.DetectorResponseFactory;
 import org.jlab.clas.physics.Vector3;
 
 import org.jlab.rec.eb.EBCCDBConstants;
@@ -212,8 +213,10 @@ public class EventBuilder {
         if (index>=0) {
             // if sharing hits between tracks, duplicate it:
             if (responses.get(index).getAssociation() >= 0) {
-                DetectorResponse copy = new DetectorResponse();
-                copy.copy(responses.get(index));
+                //System.out.println(responses.get(index).getClass());
+                //DetectorResponse copy = new DetectorResponse();
+                //copy.copy(responses.get(index));
+                DetectorResponse copy = DetectorResponseFactory.create(responses.get(index));
                 copy.clearAssociations();
                 responses.add(copy);
                 index = responses.size()-1;
