@@ -66,7 +66,20 @@ public class Track extends Trajectory implements Comparable<Track> {
         super(new Helix(kf.KFHelix.getD0(), kf.KFHelix.getPhi0(), kf.KFHelix.getOmega(), 
                         kf.KFHelix.getZ0(), kf.KFHelix.getTanL()));
         this.get_helix().B = kf.KFHelix.getB();
-        this.get_helix().set_covmatrix(kf.finalCovMat);
+        double c = Constants.LIGHTVEL;
+        //convert from kf representation to helix repr
+        double alpha = 1. / (c * Math.abs(kf.KFHelix.getB()));
+        double[][] kfCov = kf.finalCovMat;
+        for(int i = 0; i<5; i++) {
+            for(int j = 0; j<5; j++) {
+                if(i==2)
+                    kfCov[i][j]/=alpha;
+                if(j==2)
+                    kfCov[i][j]/=alpha;
+                
+            }
+        }
+        this.get_helix().set_covmatrix(kfCov);
         this.setPXYZ();
         this.setNDF(kf.NDF);
         this.setChi2(kf.chi2);
