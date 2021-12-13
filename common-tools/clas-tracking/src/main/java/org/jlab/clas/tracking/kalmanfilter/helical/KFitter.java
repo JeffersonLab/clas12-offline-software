@@ -23,6 +23,7 @@ public class KFitter extends AKFitter {
     StateVecs sv = new StateVecs();
     MeasVecs mv = new MeasVecs();
     public StateVecs.StateVec finalStateVec;
+    public double[][] finalCovMat;
     
     public Helix KFHelix;
     public KFitter(Helix helix, double[][] cov, DataEvent event, Swim swimmer, double Xb, double Yb, 
@@ -49,6 +50,7 @@ public class KFitter extends AKFitter {
             if(this.chi2<newchisq) { 
                 KFHelix = sv.setTrackPars();
                 finalStateVec = sv.trackTraj.get(0);
+                finalCovMat   = sv.trackCov.get(0).covMat;
                 this.setTrajectory(sv, mv);
                 setFitFailed = false;
                 if(newchisq-this.chi2<0.1)

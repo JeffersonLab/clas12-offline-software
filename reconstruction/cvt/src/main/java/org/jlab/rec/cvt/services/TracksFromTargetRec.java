@@ -119,7 +119,7 @@ public class TracksFromTargetRec {
             Helix hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
                             solenoidValue, Constants.getXb(), Constants.getYb(), Helix.Units.MM);
             double[][] cov = seed.get_Helix().get_covmatrix();
-            
+
             if(solenoidValue>0.001 &&
                     Constants.LIGHTVEL * seed.get_Helix().radius() *solenoidValue<Constants.PTCUT)
                 continue;
@@ -131,7 +131,7 @@ public class TracksFromTargetRec {
                     recUtil.setMeasVecs(seed, swimmer)) ;
                 kf.setMatrixLibrary(Constants.kfMatLib);
                 //Uncomment to let track be fitted
-                //kf.filterOn=false;
+                kf.filterOn=Constants.KFFILTERON;
                 kf.runFitter(swimmer);
                 if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null) { 
                     Track fittedTrack = new Track(seed, kf);

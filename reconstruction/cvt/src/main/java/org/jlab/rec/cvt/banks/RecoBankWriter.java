@@ -410,6 +410,26 @@ public class RecoBankWriter {
             bank.setFloat("tandip", i, (float) helix.get_tandip());
             bank.setFloat("z0", i, (float) (helix.get_Z0()/10.0));
             bank.setFloat("d0", i, (float) (helix.get_dca()/10.0));
+            double[][] covmatrix = helix.get_covmatrix();
+            if (covmatrix != null) {
+                bank.setFloat("cov_d02", i, (float) covmatrix[0][0] );
+                bank.setFloat("cov_d0phi0", i, (float) covmatrix[0][1] );
+                bank.setFloat("cov_d0rho", i, (float) covmatrix[0][2] );
+                bank.setFloat("cov_phi02", i, (float) covmatrix[1][1] );
+                bank.setFloat("cov_phi0rho", i, (float) covmatrix[1][2] );
+                bank.setFloat("cov_rho2", i, (float) covmatrix[2][2] );
+                bank.setFloat("cov_z02", i, (float) covmatrix[3][3] );
+                bank.setFloat("cov_tandip2", i, (float) covmatrix[4][4] );
+            } else {
+                bank.setFloat("cov_d02", i, -999);
+                bank.setFloat("cov_d0phi0", i, -999);
+                bank.setFloat("cov_d0rho", i, -999);
+                bank.setFloat("cov_phi02", i, -999);
+                bank.setFloat("cov_phi0rho", i, -999);
+                bank.setFloat("cov_rho2", i, -999);
+                bank.setFloat("cov_z02", i, -999);
+                bank.setFloat("cov_tandip2", i, -999);
+            }
             bank.setFloat("xb", i, (float) (Constants.getXb()/10.0));
             bank.setFloat("yb", i, (float) (Constants.getYb()/10.0));
             // fills the list of cross ids for crosses belonging to that reconstructed track

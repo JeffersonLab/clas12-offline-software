@@ -1,7 +1,6 @@
 package org.jlab.rec.cvt.hit;
 
 import java.util.Random;
-import org.jlab.io.base.DataEvent;
 
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.svt.SVTParameters;
@@ -20,11 +19,11 @@ public class ADCConvertor {
 
     /**
      *
-     * @param hit Hit object
      * @param adc ADC value Converts ADC values to DAQ units -- used for BST
      * test stand analysis
+     * @return 
      */
-    public double SVTADCtoDAQ(int adc, DataEvent event) {
+    public double SVTADCtoDAQ(int adc) {
         if (adc == -5) {
             return 1; // this is for running with Geantinos.  Geantinos have adc -5
         }
@@ -44,7 +43,7 @@ public class ADCConvertor {
         random.setSeed(42);
 
         int daq = returnRandomInteger(START[adc], END[adc], random);
-
+        
         double value = (double) daq;
         /* 
         if(event.hasBank("MC::Particle")==true) {

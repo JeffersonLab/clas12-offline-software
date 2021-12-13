@@ -221,15 +221,10 @@ public class CVTRecNewKF extends ReconstructionEngine {
              System.out.println("["+this.getName()+"] run with both CVT systems (default) ");
         }
 
-        //svt stand-alone
-        String beamSpotConst = this.getEngineConfigString("BeamSpotConst");        
-        if (beamSpotConst!=null) {
-            System.out.println("["+this.getName()+"] run with beamSpotConst settings "+beamSpotConst+" config chosen based on yaml");
-            Constants.beamSpotConstraint = Boolean.valueOf(beamSpotConst);
+        if (this.getEngineConfigString("kfFilterOn")!=null) {
+            Constants.KFFILTERON = Boolean.valueOf(this.getEngineConfigString("kfFilterOn"));
         }
-        if (beamSpotConst==null) {
-             System.out.println("["+this.getName()+"] run with beamSpotConst settings default = false");
-        }
+        System.out.println("["+this.getName()+"] run with Kalman-Filter status set to "+Constants.KFFILTERON);
         
         String svtCosmics = this.getEngineConfigString("cosmics");        
         if (svtCosmics!=null) {
@@ -254,14 +249,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
             System.out.println("["+this.getName()+"] run with BMT layers "+exBMTLys+"excluded config chosen based on yaml");
             Constants.setBMTExclude(exBMTLys);        
         }
-       
-        //double[][]bmtx = new double[2][2];
-        //bmtx[0][0]= Math.toRadians(90);
-        //bmtx[0][1]= Math.toRadians(115);
-        //bmtx[1][0] =100;
-        //bmtx[1][1] =250;
-        //Constants.setBMTPhiZRangeExcld(bmtx);
-        //Constants.setBMTLayerExcld(1);
+      
 //        //new clustering
 //        String newClustering = this.getEngineConfigString("newclustering");
 //        
@@ -296,8 +284,8 @@ public class CVTRecNewKF extends ReconstructionEngine {
         }
 
         if(this.getEngineConfigString("BMTTimeCuts")!=null) {
-            Constants.BMTTimeCuts = Boolean.parseBoolean(this.getEngineConfigString("BMTTimeCuts"));
-            System.out.println("["+this.getName()+"] run BMT timing cuts set to "+ Constants.BMTTimeCuts);
+            Constants.TIMECUTS = Boolean.parseBoolean(this.getEngineConfigString("BMTTimeCuts"));
+            System.out.println("["+this.getName()+"] run BMT timing cuts set to "+ Constants.TIMECUTS);
         }
     }
 
