@@ -19,7 +19,7 @@ import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.CrossMaker;
 import org.jlab.rec.cvt.cross.StraightTrackCrossListFinder;
-import org.jlab.rec.cvt.hit.FittedHit;
+import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.StraightTrackSeeder;
 import org.jlab.rec.cvt.track.Track;
@@ -36,14 +36,13 @@ public class TracksFromTargetRec {
     private final RecUtilities recUtil = new RecUtilities();
     
     public boolean processEvent(DataEvent event,  
-            List<FittedHit> SVThits, List<FittedHit> BMThits, 
+            List<Hit> SVThits, List<Hit> BMThits, 
             List<Cluster> SVTclusters, List<Cluster> BMTclusters, 
             List<ArrayList<Cross>> crosses,
             SVTGeometry SVTGeom, BMTGeometry BMTGeom,
             CTOFGeant4Factory CTOFGeom, Detector CNDGeom,
             RecoBankWriter rbc,
-            Swim swimmer,
-            boolean isSVTonly, boolean exLayrs) {
+            Swim swimmer) {
         
         // get field intensity and scale
         double solenoidScale = Constants.getSolenoidScale();
@@ -53,12 +52,12 @@ public class TracksFromTargetRec {
         List<Seed> seeds = null;
         if(solenoidValue<0.001) {
             StraightTrackSeeder trseed = new StraightTrackSeeder();
-            seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, isSVTonly);
-            if(exLayrs==true) {
+            seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, Constants.SVTOnly);
+            if(Constants.excludeLayers==true) {
                 seeds = recUtil.reFit(seeds, SVTGeom, BMTGeom, swimmer, trseed); // RDV can we juts refit?
             }
         } else {
-            if(isSVTonly) {
+            if(Constants.SVTOnly) {
                 TrackSeeder trseed = new TrackSeeder(SVTGeom, BMTGeom, swimmer);
                 trseed.unUsedHitsOnly = true;
                 seeds = trseed.findSeed(crosses.get(0), null);
@@ -67,15 +66,17 @@ public class TracksFromTargetRec {
                 seeds = trseed.findSeed(crosses.get(0), crosses.get(1));
                 
                 //second seeding algorithm to search for SVT only tracks, and/or tracks missed by the CA
-                TrackSeeder trseed2 = new TrackSeeder(SVTGeom, BMTGeom, swimmer);
-                trseed2.unUsedHitsOnly = true;
-                seeds.addAll( trseed2.findSeed(crosses.get(0), crosses.get(1))); // RDV check for overlaps
-                if(exLayrs==true) {
-                    seeds = recUtil.reFit(seeds, SVTGeom, BMTGeom, swimmer, trseed,trseed2);
+                if(Constants.svtSeeding || Constants.excludeLayers) {
+                    TrackSeeder trseed2 = new TrackSeeder(SVTGeom, BMTGeom, swimmer);
+                    trseed2.unUsedHitsOnly = true;
+                    seeds.addAll( trseed2.findSeed(crosses.get(0), crosses.get(1))); // RDV check for overlaps
+                    if(Constants.excludeLayers==true) {
+                        seeds = recUtil.reFit(seeds, SVTGeom, BMTGeom, swimmer, trseed, trseed2);
+                    }
                 }
                 if(Constants.beamSpotConstraint==false) {
                     for(Seed s : seeds) {
-                        recUtil.reFitCircle(s);
+                        recUtil.reFitCircle(s,SVTGeom, BMTGeom, 5);
                     }
                 }
             }
@@ -118,7 +119,7 @@ public class TracksFromTargetRec {
             Helix hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
                             solenoidValue, Constants.getXb(), Constants.getYb(), Helix.Units.MM);
             double[][] cov = seed.get_Helix().get_covmatrix();
-            
+
             if(solenoidValue>0.001 &&
                     Constants.LIGHTVEL * seed.get_Helix().radius() *solenoidValue<Constants.PTCUT)
                 continue;
@@ -130,7 +131,7 @@ public class TracksFromTargetRec {
                     recUtil.setMeasVecs(seed, swimmer)) ;
                 kf.setMatrixLibrary(Constants.kfMatLib);
                 //Uncomment to let track be fitted
-                //kf.filterOn=false;
+                kf.filterOn=Constants.KFFILTERON;
                 kf.runFitter(swimmer);
                 if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null) { 
                     Track fittedTrack = new Track(seed, kf);
@@ -220,6 +221,7 @@ public class TracksFromTargetRec {
                 tracks.get(it).set_Id(id); 
                 tracks.get(it).update_Crosses(id, SVTGeom, BMTGeom);
                 tracks.get(it).update_Clusters(id, SVTGeom);
+                tracks.get(it).setTrackCovMat(recUtil.getCovMatInTrackRep(tracks.get(it)));
             }
         }
         for(int det = 0; det<2; det++) {

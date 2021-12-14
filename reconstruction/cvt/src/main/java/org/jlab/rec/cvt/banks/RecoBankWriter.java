@@ -8,7 +8,6 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
-import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.track.StraightTrack;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.trajectory.Helix;
@@ -16,6 +15,7 @@ import org.jlab.rec.cvt.trajectory.StateVec;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTType;
+import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.track.Seed;
 
 public class RecoBankWriter {
@@ -29,7 +29,7 @@ public class RecoBankWriter {
      * @return hits bank
      *
      */
-    public DataBank fillSVTHitsBank(DataEvent event, List<FittedHit> hitlist) {
+    public DataBank fillSVTHitsBank(DataEvent event, List<Hit> hitlist) {
         if (hitlist == null) {
             return null;
         }
@@ -48,12 +48,15 @@ public class RecoBankWriter {
             bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
             bank.setInt("strip", i, hitlist.get(i).get_Strip().get_Strip());
 
+            bank.setFloat("energy", i, (float) hitlist.get(i).get_Strip().get_Edep());
+            bank.setFloat("time", i, (float) hitlist.get(i).get_Strip().get_Time());
             bank.setFloat("fitResidual", i, (float) hitlist.get(i).get_Residual());
             bank.setInt("trkingStat", i, hitlist.get(i).get_TrkgStatus());
 
             bank.setShort("clusterID", i, (short) hitlist.get(i).get_AssociatedClusterID());
             bank.setShort("trkID", i, (short) hitlist.get(i).get_AssociatedTrackID());
 
+            bank.setByte("status", i, (byte) hitlist.get(i).get_Strip().getStatus());            
         }
         //bank.show();
         return bank;
@@ -86,9 +89,11 @@ public class RecoBankWriter {
             bank.setByte("layer", i, (byte) cluslist.get(i).get_Layer());
             bank.setShort("size", i, (short) cluslist.get(i).size());
             bank.setFloat("ETot", i, (float) cluslist.get(i).get_TotalEnergy());
+            bank.setFloat("time", i, (float) cluslist.get(i).get_Time());
             bank.setInt("seedStrip", i, cluslist.get(i).get_SeedStrip().get_Strip());
             bank.setFloat("centroid", i, (float) cluslist.get(i).get_Centroid());
             bank.setFloat("seedE", i, (float) cluslist.get(i).get_SeedStrip().get_Edep());
+            bank.setFloat("centroidError", i, (float) cluslist.get(i).get_Resolution());
             bank.setFloat("centroidResidual", i, (float) cluslist.get(i).get_CentroidResidual());
             bank.setFloat("seedResidual", i, (float) cluslist.get(i).get_SeedResidual()); 
             bank.setShort("trkID", i, (short) cluslist.get(i).get_AssociatedTrackID());
@@ -195,7 +200,7 @@ public class RecoBankWriter {
 
     }
 
-    public DataBank fillBMTHitsBank(DataEvent event, List<FittedHit> hitlist) {
+    public DataBank fillBMTHitsBank(DataEvent event, List<Hit> hitlist) {
         if (hitlist == null) {
             return null;
         }
@@ -214,12 +219,15 @@ public class RecoBankWriter {
             bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
             bank.setInt("strip", i, hitlist.get(i).get_Strip().get_Strip());
 
+            bank.setFloat("energy", i, (float) hitlist.get(i).get_Strip().get_Edep());
+            bank.setFloat("time", i, (float) hitlist.get(i).get_Strip().get_Time());
             bank.setFloat("fitResidual", i, (float) hitlist.get(i).get_Residual());
             bank.setInt("trkingStat", i, hitlist.get(i).get_TrkgStatus());
 
             bank.setShort("clusterID", i, (short) hitlist.get(i).get_AssociatedClusterID());
             bank.setShort("trkID", i, (short) hitlist.get(i).get_AssociatedTrackID());
 
+            bank.setByte("status", i, (byte) hitlist.get(i).get_Strip().getStatus());  
         }
 
         return bank;
@@ -252,6 +260,7 @@ public class RecoBankWriter {
             bank.setByte("layer", i, (byte) cluslist.get(i).get_Layer());
             bank.setShort("size", i, (short) cluslist.get(i).size());
             bank.setFloat("ETot", i, (float) cluslist.get(i).get_TotalEnergy());
+            bank.setFloat("time", i, (float) cluslist.get(i).get_Time());
             bank.setInt("seedStrip", i, cluslist.get(i).get_SeedStrip().get_Strip());
             bank.setFloat("centroid", i, (float) cluslist.get(i).get_Centroid());
             bank.setFloat("centroidValue", i, (float) cluslist.get(i).get_CentroidValue());
@@ -402,6 +411,26 @@ public class RecoBankWriter {
             bank.setFloat("tandip", i, (float) helix.get_tandip());
             bank.setFloat("z0", i, (float) (helix.get_Z0()/10.0));
             bank.setFloat("d0", i, (float) (helix.get_dca()/10.0));
+            double[][] covmatrix = helix.get_covmatrix();
+            if (covmatrix != null) {
+                bank.setFloat("cov_d02", i, (float) covmatrix[0][0] );
+                bank.setFloat("cov_d0phi0", i, (float) covmatrix[0][1] );
+                bank.setFloat("cov_d0rho", i, (float) covmatrix[0][2] );
+                bank.setFloat("cov_phi02", i, (float) covmatrix[1][1] );
+                bank.setFloat("cov_phi0rho", i, (float) covmatrix[1][2] );
+                bank.setFloat("cov_rho2", i, (float) covmatrix[2][2] );
+                bank.setFloat("cov_z02", i, (float) covmatrix[3][3] );
+                bank.setFloat("cov_tandip2", i, (float) covmatrix[4][4] );
+            } else {
+                bank.setFloat("cov_d02", i, -999);
+                bank.setFloat("cov_d0phi0", i, -999);
+                bank.setFloat("cov_d0rho", i, -999);
+                bank.setFloat("cov_phi02", i, -999);
+                bank.setFloat("cov_phi0rho", i, -999);
+                bank.setFloat("cov_rho2", i, -999);
+                bank.setFloat("cov_z02", i, -999);
+                bank.setFloat("cov_tandip2", i, -999);
+            }
             bank.setFloat("xb", i, (float) (Constants.getXb()/10.0));
             bank.setFloat("yb", i, (float) (Constants.getYb()/10.0));
             // fills the list of cross ids for crosses belonging to that reconstructed track
@@ -515,6 +544,46 @@ public class RecoBankWriter {
             bank.setShort("ndf", i, (short) trkcands.get(i).getNDF());
 
         }
+        //bank.show();
+        return bank;
+
+    }
+    
+    public DataBank fillTracksCovMatBank(DataEvent event, List<Track> trkcands) {
+        if (trkcands == null) {
+            return null;
+        }
+        if (trkcands.isEmpty()) {
+            return null;
+        }
+
+        DataBank bank = event.createBank("CVTRec::TrackCovMats", trkcands.size());
+        // an array representing the ids of the crosses that belong to the track
+        List<Integer> crossIdxArray = new ArrayList<>();
+
+        for (int i = 0; i < trkcands.size(); i++) {
+            if(trkcands.get(i)==null || trkcands.get(i).getTrackCovMat()==null)
+                continue;
+            bank.setShort("ID", i, (short) trkcands.get(i).get_Id());
+            double[][] covmatrix = trkcands.get(i).getTrackCovMat();
+            if (covmatrix != null) {
+                String[][] names = new String[][]{
+                    {"cov_xx", "cov_xy", "cov_xz", "cov_xpx", "cov_xpy", "cov_xpz"},
+                    {"cov_yx", "cov_yy", "cov_yz", "cov_ypx", "cov_ypy", "cov_ypz"},
+                    {"cov_zx", "cov_zy", "cov_zz", "cov_zpx", "cov_zpy", "cov_zpz"},
+                    {"cov_pxx", "cov_pxy", "cov_pxz", "cov_pxpx", "cov_pxpy", "cov_pxpz"},
+                    {"cov_pyx", "cov_pyy", "cov_pyz", "cov_pypx", "cov_pypy", "cov_pypz"},
+                    {"cov_pzx", "cov_pzy", "cov_pzz", "cov_pzpx", "cov_pzpy", "cov_pzpz"}
+                };
+              
+                for(int r = 0; r<6; r++) {
+                    for(int c = 0; c<6; c++) {
+                        bank.setFloat(names[r][c], i, (float) covmatrix[r][c] );
+                    }
+                }
+            }
+        }
+        
         //bank.show();
         return bank;
 
@@ -674,7 +743,7 @@ public class RecoBankWriter {
     }
 
     public void appendCVTBanks(DataEvent event,
-            List<FittedHit> sVThits, List<FittedHit> bMThits,
+            List<Hit> sVThits, List<Hit> bMThits,
             List<Cluster> sVTclusters, List<Cluster> bMTclusters,
             List<ArrayList<Cross>> crosses, List<Seed> seeds, List<Track> trks) {
 
@@ -704,10 +773,14 @@ public class RecoBankWriter {
 
         DataBank bank9 = this.fillHelicalTracksTrajectoryBank(event, trks);
         if (bank9 != null) event.appendBank(bank9);
+        
+        DataBank bank10 = this.fillTracksCovMatBank(event, trks);
+        if (bank10 != null) event.appendBank(bank10);
+        
     }
 
     public void appendCVTCosmicsBanks(DataEvent event,
-            List<FittedHit> sVThits, List<FittedHit> bMThits,
+            List<Hit> sVThits, List<Hit> bMThits,
             List<Cluster> sVTclusters, List<Cluster> bMTclusters,
             List<ArrayList<Cross>> crosses, List<StraightTrack> trks) {
         List<DataBank> svtbanks = new ArrayList<>();

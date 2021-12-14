@@ -22,10 +22,11 @@ public class Constants {
     public static final double LIGHTVEL = 0.000299792458;       // velocity of light (mm/ns) - conversion factor from radius in mm to momentum in GeV/c 
 
     // selection cuts for helical tracks
-    public static final double PTCUT   = 0.075; // minimum pt in GeV
+    public static final double PTCUT   = 0.125; // minimum pt in GeV
+    public static final double TANDIP  = 2;     // max value on dip angle
     public static final double NDFCUT  = 0;     // minimum number of degres of freedom
     public static final double CHI2CUT = 50;    // minimum chi2 per degrees of freedom
-    public static final double ZRANGE  = 500;   // defines z range as -ZRANGE:+ZRANGE in mm
+    public static final double ZRANGE  = 300;   // defines z range as -ZRANGE:+ZRANGE in mm
     public static final int MINSVTCRSFORCOSMIC = 2; 
     public static final double CIRCLEFIT_MAXCHI2 = 100;
 
@@ -34,17 +35,21 @@ public class Constants {
     public static final double SWIMACCURACYBMT = 0.020; // in mm
     public static final double SWIMACCURACYCD  = 0.500; // in mm
     
-    private static boolean isCosmicsData = false;
+    public static boolean isCosmicsData = false;
     public static final double COSMICSMINRESIDUALX = 120; // in mm
     public static final double COSMICSMINRESIDUALZ =  12; // in mm
     
-    private static boolean SVTOnly = false;
+    public static boolean SVTOnly = false;
 
-    public static final boolean trk_comesfrmOrig = true;
-    
+    public static boolean svtSeeding = true;
+
+    public static boolean TIMECUTS = true;
+
+    public static boolean KFFILTERON = true;
+
+    public static final boolean TRACKSFROMORIGIN = true;
+
     public static boolean beamSpotConstraint = true;
-
-    public static boolean areConstantsLoaded = false;
 
     public static Libr kfMatLib;
 
@@ -59,7 +64,10 @@ public class Constants {
     
     private static int _rmReg = 0;
 
-    private static Map<Integer,Integer> layersUsed = new HashMap<Integer,Integer>();
+    public static boolean excludeLayers = false;
+    private static final Map<Integer,Integer> layersUsed = new HashMap<Integer,Integer>();
+    private static final double[][]BMTPhiZRangeExcld = new double[2][2];
+    private static int BMTLayerExcld = -1;
     
     public static double getXb() {
         return _Xb;
@@ -109,12 +117,40 @@ public class Constants {
     }
 
     /**
-     * @param aLayersUsed the layersUsed to set
+     * @param layers
      */
-    public static void setLayersUsed(Map aLayersUsed) {
-        layersUsed = aLayersUsed;
+    public static void setLayersUsed(String layers) {
+        //all layers used --> 1
+        for(int i = 0; i < 12; i++)
+            layersUsed.put(i+1, 1);        
+        //Skip layers
+        if(layers!=null) {
+            String[] values = layers.split(",");
+            if(values.length==0) return;            
+            for(String value : values) {
+                int layer = Integer.valueOf(value);
+                layersUsed.put(layer, 0);
+                System.out.println("EXCLUDE CVT LAYER " + layer);
+            }
+            excludeLayers=true;
+        }
     }
 
+    public static void setBMTExclude(String exbmtlys) {
+        String[] values = exbmtlys.split(",");
+        int layer = Integer.valueOf(values[0]);
+        double phi_min = (double) Float.valueOf(values[1]);
+        double phi_max = (double) Float.valueOf(values[2]);
+        double z_min = (double) Float.valueOf(values[3]);
+        double z_max = (double) Float.valueOf(values[4]);
+        BMTLayerExcld = layer;
+        BMTPhiZRangeExcld[0][0] = phi_min;
+        BMTPhiZRangeExcld[0][1] = phi_max;
+        BMTPhiZRangeExcld[1][0] = z_min;
+        BMTPhiZRangeExcld[1][1] = z_max;
+    }
+            
+            
     /**
      * @return the BMTPhiZRangeExcld
      */
@@ -123,28 +159,11 @@ public class Constants {
     }
 
     /**
-     * @param aBMTPhiZRangeExcld the BMTPhiZRangeExcld to set
-     */
-    public static void setBMTPhiZRangeExcld(double[][] aBMTPhiZRangeExcld) {
-        BMTPhiZRangeExcld = aBMTPhiZRangeExcld;
-    }
-
-    /**
      * @return the BMTLayerExcld
      */
     public static int getBMTLayerExcld() {
         return BMTLayerExcld;
     }
-
-    /**
-     * @param aBMTLayerExcld the BMTLayerExcld to set
-     */
-    public static void setBMTLayerExcld(int aBMTLayerExcld) {
-        BMTLayerExcld = aBMTLayerExcld;
-    }
-    
-    private static double[][]BMTPhiZRangeExcld = new double[2][2];
-    private static int BMTLayerExcld = -1;
     
     //public static final boolean DEBUGMODE =false;
     // for landau inverse calculation
@@ -318,34 +337,6 @@ public class Constants {
         51.005773, 53.437996, 56.123356, 59.103894};
 
     //public static final int CVTCONFIGSTARTREG = 2; // for 3SVT+3BMT
-
-    public static synchronized void Load(boolean isCosmics, boolean isSVTonly) {
-        if (areConstantsLoaded) {
-            return;
-        }
-        
-        Constants.setCosmicsData(false);
-        setSVTOnly(isSVTonly);
-
-        areConstantsLoaded = true;
-        
-    }
-
-    public static final boolean isCosmicsData() {
-        return isCosmicsData;
-    }
-
-    public static final void setCosmicsData(boolean isCosmicsData) {
-        Constants.isCosmicsData = isCosmicsData;
-    }
-
-    public static final boolean isSVTOnly() {
-        return SVTOnly;
-    }
-
-    public static final void setSVTOnly(boolean sVTOnly) {
-        SVTOnly = sVTOnly;
-    }
 
     public static void setMatLib(String matLib) {
         switch (matLib) {

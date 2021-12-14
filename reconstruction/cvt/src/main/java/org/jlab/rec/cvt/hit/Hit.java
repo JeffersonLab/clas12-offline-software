@@ -1,6 +1,8 @@
 package org.jlab.rec.cvt.hit;
 
 import org.jlab.detector.base.DetectorType;
+import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.bmt.BMTType;
 
 /**
@@ -13,19 +15,27 @@ import org.jlab.rec.cvt.bmt.BMTType;
 public class Hit implements Comparable<Hit> {
     // class implements Comparable interface to allow for sorting a collection of hits by wire number values
 
-    private DetectorType _Detector;	       //   the detector SVT or BMT
-    private BMTType      _Type;             //   for the BMT, either C or Z
-
-    private int _Sector;      	       //	   sector[1...24] for SVT, [1..3] for BMT
-    private int _Layer;    	 	       //	   layer [1,...]
-    private Strip _Strip;    	       //	   Strip object
-
     private int _Id;		       //    Hit Id
-    private int _Status; 		       //    Status -1 dead, 0 noisy, 1 good
+
+    private DetectorType _Detector;    //   the detector SVT or BMT
+    private BMTType      _Type;        //   for the BMT, either C or Z
+
+    private int _Sector;      	       //   sector[1...24] for SVT, [1..3] for BMT
+    private int _Layer;    	       //   layer [1,...]
+    private Strip _Strip;    	       //   Strip object
+    
+    private double _docaToTrk;              // 3-D distance of closest approach of the helix to the wire 
+    private double _stripResolutionAtDoca;    
+    private int _TrkgStatus = -1;           // TrkgStatusFlag factor (-1: no fit; 0: global helical fit; 1: KF fit)
+    public double _QualityFac;	            // a quality factor depending on the hit status and goodness of fit
+    private int _AssociatedClusterID = -1;  // the cluster ID associated with that hit
+    private int AssociatedTrackID = -1;     // the track ID associated with that hit
+
+    public boolean newClustering = false;
 
     // constructor
     public Hit(DetectorType detector, BMTType type, int sector, int layer, Strip strip) {
-        this._Detector = detector;                   // 0 = SVT, 1 = BMT
+        this._Detector = detector;     // 0 = SVT, 1 = BMT
         this._Type     = type;               // set according to BMTType
         this._Sector   = sector;
         this._Layer    = layer;
@@ -123,10 +133,10 @@ public class Hit implements Comparable<Hit> {
     public int get_RegionSlayer() {
         return (this._Layer + 1) % 2 + 1;
     }
-    public boolean newClustering = false;
+
     /**
      *
-     * @param arg0 the other hit
+     * @param arg
      * @return an int used to sort a collection of hits by wire number. Sorting
      * by wire is used in clustering.
      */
@@ -148,10 +158,8 @@ public class Hit implements Comparable<Hit> {
             return ((CompLyr == 0) ? return_val1 : CompLyr);
         }
     }
-    /**
-     *
-     * @return print statement with hit information
-     */
+    
+    
     public void printInfo() {
         String s = " Hit: Detector " + this.get_Detector() + "ID " + this.get_Id() + " Sector " + this.get_Sector() + " Layer " + this.get_Layer() + " Strip " + this.get_Strip().get_Strip() 
                 + " Edep " + this.get_Strip().get_Edep()+ " Time " + this.get_Strip().get_Time();
@@ -164,8 +172,8 @@ public class Hit implements Comparable<Hit> {
      * @return a boolean comparing 2 hits based on basic descriptors; returns
      * true if the hits are the same
      */
-    public boolean isSameAs(FittedHit otherHit) {
-        FittedHit thisHit = (FittedHit) this;
+    public boolean isSameAs(Hit otherHit) {
+        Hit thisHit = (Hit) this;
         boolean cmp = false;
         if ((thisHit.get_Detector()==otherHit.get_Detector())
                 && thisHit.get_Sector() == otherHit.get_Sector()
@@ -177,12 +185,100 @@ public class Hit implements Comparable<Hit> {
         return cmp;
     }
 
-    public int get_Status() {
-        return _Status;
+    public double get_docaToTrk() {
+        return _docaToTrk;
     }
 
-    public void set_Status(int _Status) {
-        this._Status = _Status;
+    public void set_docaToTrk(double _docaToTrk) {
+        this._docaToTrk = _docaToTrk;
+    }
+
+    public void set_docaToTrk(Point3D traj) {
+        this.set_docaToTrk(this.residual(traj));
+    }
+    
+    public double residual(Point3D traj) {
+        double value = 0;
+        if(this.get_Detector()==DetectorType.BST) {
+            Line3D dist = this.get_Strip().get_Line().distance(traj);
+            double side = -Math.signum(this.get_Strip().get_Line().direction().cross(dist.direction()).dot(this.get_Strip().get_Normal()));
+            value = dist.length()*side;
+        }
+        else {
+            Point3D local = new Point3D(traj);
+            this.get_Strip().toLocal().apply(local);
+            if(this.get_Type()==BMTType.C)                
+                value = local.z()-this.get_Strip().get_Z();
+            else {
+                value = Math.atan2(local.y(),local.x())-this.get_Strip().get_Phi();
+                if(Math.abs(value)>2*Math.PI) value-=Math.signum(value)*2*Math.PI;
+                value = value*this.get_Strip().get_Tile().baseArc().radius();
+            }
+        }     
+        return value;
+    }   
+    
+    
+    public double get_stripResolutionAtDoca() {
+        return _stripResolutionAtDoca;
+    }
+
+    public void set_stripResolutionAtDoca(double _stripResolutionAtDoca) {
+        this._stripResolutionAtDoca = _stripResolutionAtDoca;
+    }
+
+    /**
+     *
+     * @return an integer representative of the stage of the pattern recognition
+     * and subsequent KF fit for that hit. -1: no fit; 0: global helical fit; 1:
+     * KF fit
+     */
+    public int get_TrkgStatus() {
+        return _TrkgStatus;
+    }
+
+    /**
+     *
+     * @param trkgStatus is an integer representative of the stage of the
+     * pattern recognition and subsequent KF fit for that hit. -1: no fit; 0:
+     * global helical fit; 1: KF fit
+     */
+    public void set_TrkgStatus(int trkgStatus) {
+        _TrkgStatus = trkgStatus;
+    }
+
+    public double get_QualityFac() {
+        return _QualityFac;
+    }
+
+    public void set_QualityFac(double QF) {
+        _QualityFac = QF;
+    }
+
+    /**
+     *
+     * @return the hit residual = doca to track
+     */
+    public double get_Residual() {
+        return get_docaToTrk();
+    }
+
+
+    public int get_AssociatedClusterID() {
+        return _AssociatedClusterID;
+    }
+
+    public void set_AssociatedClusterID(int _AssociatedClusterID) {
+        this._AssociatedClusterID = _AssociatedClusterID;
+    }
+
+
+    public int get_AssociatedTrackID() {
+        return AssociatedTrackID;
+    }
+
+    public void set_AssociatedTrackID(int associatedTrackID) {
+        AssociatedTrackID = associatedTrackID;
     }
 
 }

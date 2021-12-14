@@ -304,7 +304,7 @@ public class CCDBConstantsLoader {
         double eyb = dbprovider.getDouble("/geometry/beam/position/y_error", 0); 
         double err = 0;
         if(Math.sqrt(xb*xb+yb*yb)!=0) err = Math.sqrt((Math.pow(xb*exb,2)+Math.pow(yb*eyb,2))/(xb*xb+yb*yb));
-        //xb= 0.1947;  yb= -0.1943;
+        
         Constants.setXb(xb*10);
         Constants.setYb(yb*10);
         Constants.setRbErr(err*10);

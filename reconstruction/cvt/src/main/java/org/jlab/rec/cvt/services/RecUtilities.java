@@ -14,7 +14,7 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
-import org.jlab.rec.cvt.hit.FittedHit;
+import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.clas.swimtools.Swim;
@@ -87,13 +87,14 @@ public class RecUtilities {
     public List<Surface> setMeasVecs(Seed trkcand, Swim swim) {
         //Collections.sort(trkcand.get_Crosses());
         List<Surface> KFSites = new ArrayList<Surface>();
-        Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()),
-        new Vector3D(0,0,1));
+        Vector3D u = trkcand.get_Helix().getTrackDirectionAtRadius(Math.sqrt(Constants.getXb()*Constants.getXb()+Constants.getYb()*Constants.getYb()));
+        Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()), u);
         Surface meas0 = new Surface(pln0,new Point3D(Constants.getXb(),Constants.getYb(),0),
-        new Point3D(Constants.getXb()-300,Constants.getYb(),0), new Point3D(Constants.getXb()+300,Constants.getYb(),0), Constants.DEFAULTSWIMACC);
+        new Point3D(Constants.getXb()-300,Constants.getYb(),0), new Point3D(Constants.getXb()+300,Constants.getYb(),0), 
+                Constants.DEFAULTSWIMACC);
         meas0.setSector(0);
         meas0.setLayer(0);
-        meas0.setError(1);
+        meas0.setError(trkcand.get_Helix().get_covmatrix()[0][0]);
         KFSites.add(meas0); 
         // SVT measurements
         for (int i = 0; i < trkcand.get_Clusters().size(); i++) { 
@@ -134,8 +135,8 @@ public class RecUtilities {
         if(trkcand.clsMap!=null) trkcand.clsMap.clear(); //VZ: reset cluster map for second pass tracking with isolated SVT clusters
         //Collections.sort(trkcand.get_Crosses());
         List<Surface> KFSites = new ArrayList<Surface>();
-        Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()),
-                                    new Vector3D(0,0,1));
+        Vector3D u = trkcand.get_ray().get_dirVec();
+        Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()), u);
         Surface meas0 = new Surface(pln0,new Point3D(0,0,0),
         new Point3D(-300,0,0), new Point3D(300,0,0),Constants.DEFAULTSWIMACC);
         meas0.setSector(0);
@@ -475,7 +476,7 @@ public class RecUtilities {
                 Point3D p = new Point3D(traj.get(layer).x, traj.get(layer).y, traj.get(layer).z);
                 cluster.set_CentroidResidual(traj.get(layer).resi);
                 cluster.set_SeedResidual(p);             
-                for (FittedHit hit : cluster) {
+                for (Hit hit : cluster) {
                     double doca1 = hit.residual(p);
                     double sigma1 = sgeo.getSingleStripResolution(layer, hit.get_Strip().get_Strip(), traj.get(layer).z);
                     hit.set_stripResolutionAtDoca(sigma1);
@@ -508,7 +509,7 @@ public class RecUtilities {
                     cluster.set_CentroidResidual(traj.get(layer).resi);
                     cluster.set_SeedResidual(p); 
                 }
-                for (FittedHit hit : cluster) {
+                for (Hit hit : cluster) {
                     hit.set_docaToTrk(hit.residual(p));
                     if(traj.get(layer).isMeasUsed) hit.set_TrkgStatus(1);
                 }
@@ -640,29 +641,41 @@ public class RecUtilities {
         seedlist.addAll(trseed.findSeed(refi, refib, SVTGeom, BMTGeom, false));
         return seedlist;
     }
-    public void reFitCircle(Seed mseed) {
+    public void reFitCircle(Seed mseed,SVTGeometry SVTGeom, BMTGeometry BMTGeom, int iter) {
         List<Double> Xs = new ArrayList<Double>() ;
         List<Double> Ys = new ArrayList<Double>() ;
         List<Double> Ws = new ArrayList<Double>() ;
-        List<Cross> seedcrs = mseed.get_Crosses();
-        for (int j = 0; j < seedcrs.size(); j++) {
-            if (seedcrs.get(j).get_Type() == BMTType.C)
-                continue;
+        List<Cross> seedcrs = new ArrayList<Cross>();
         
-            Xs.add(seedcrs.get(j).get_Point().x());
-            Ys.add(seedcrs.get(j).get_Point().y());
-            Ws.add(1. / (seedcrs.get(j).get_PointErr().x()*seedcrs.get(j).get_PointErr().x()
-                        +seedcrs.get(j).get_PointErr().y()*seedcrs.get(j).get_PointErr().y()));
- 
-        }
         CircleFitter circlefit = new CircleFitter();
-        boolean circlefitstatusOK = circlefit.fitStatus(Xs, Ys, Ws, Xs.size());
-        CircleFitPars pars = circlefit.getFit();
-        if(pars.rho()!=0) {
-            mseed.get_Helix().set_curvature(pars.rho());
+        CircleFitPars pars = null;
+        for(int i = 0; i< iter; i++) {
+            Xs.clear();
+            Ys.clear();
+            Ws.clear();
+            seedcrs = mseed.get_Crosses();
+            
+            for (int j = 0; j < seedcrs.size(); j++) {
+                if (seedcrs.get(j).get_Type() == BMTType.C)
+                    continue;
+                
+                Xs.add(seedcrs.get(j).get_Point().x());
+                Ys.add(seedcrs.get(j).get_Point().y());
+                Ws.add(1. / (seedcrs.get(j).get_PointErr().x()*seedcrs.get(j).get_PointErr().x()
+                            +seedcrs.get(j).get_PointErr().y()*seedcrs.get(j).get_PointErr().y()));
+
+            }
+
+            boolean circlefitstatusOK = circlefit.fitStatus(Xs, Ys, Ws, Xs.size());
+            pars = circlefit.getFit();
+            if(pars.rho()!=0) {
+                mseed.get_Helix().set_curvature(pars.rho());
+            }
+            mseed.get_Helix().set_dca(-pars.doca());
+            mseed.get_Helix().set_phi_at_dca(pars.phi());
+
+            mseed.update_Crosses(SVTGeom, BMTGeom);
         }
-        mseed.get_Helix().set_dca(pars.doca());
-        mseed.get_Helix().set_phi_at_dca(pars.phi());
     }
     
     public List<Seed> reFit(List<Seed> seedlist,
@@ -811,6 +824,119 @@ public class RecUtilities {
         return value;
     }
 
+    public double[][] getCovMatInTrackRep(Track trk) {
+        double[][] tCov = new double[6][6];
+        double [][] hCov = trk.get_helix().get_covmatrix();
+        
+    //error matrix (assuming that the circle fit and line fit parameters are uncorrelated)
+    // | d_dca*d_dca                   d_dca*d_phi_at_dca            d_dca*d_curvature        0            0             |
+    // | d_phi_at_dca*d_dca     d_phi_at_dca*d_phi_at_dca     d_phi_at_dca*d_curvature        0            0             |
+    // | d_curvature*d_dca	    d_curvature*d_phi_at_dca      d_curvature*d_curvature     0            0             |
+    // | 0                              0                             0                    d_Z0*d_Z0                     |
+    // | 0                              0                             0                       0        d_tandip*d_tandip |
+    // 
+    
+    
+        double pt = trk.get_Pt();
+        double rho = trk.get_helix().get_curvature();
+        double c = Constants.LIGHTVEL;
+        double Bz = pt/(c*trk.get_helix().radius());
+        double d0 = trk.get_helix().get_dca();
+        double phi0 = trk.get_helix().get_phi_at_dca();
+        double tandip = trk.get_helix().get_tandip();
+
+        double delxdeld0 = -Math.sin(phi0);
+        double delxdelphi0 = -d0*Math.cos(phi0);
+        double delydeld0 = Math.cos(phi0);
+        double delydelphi0 = -d0*Math.sin(phi0);
+        
+        double delzdelz0 = 1;
+        
+        double delpxdelphi0 = -pt*Math.sin(phi0);   
+        double delpxdelrho = -pt*Math.cos(phi0)/rho;    
+        double delpydelphi0 = pt*Math.cos(phi0);
+        double delpydelrho = -pt*Math.sin(phi0)/rho;    
+        
+        double delpzdelrho = -pt*tandip/rho;    
+        
+        double delpzdeltandip = pt;
+        
+        tCov[0][0] = (hCov[0][0]*delxdeld0+hCov[1][0]*delxdelphi0)*delxdeld0
+                    +(hCov[0][1]*delxdeld0+hCov[1][1]*delxdelphi0)*delxdelphi0;
+        tCov[0][1] = (hCov[0][0]*delxdeld0+hCov[1][0]*delxdelphi0)*delydeld0
+                    +(hCov[0][1]*delxdeld0+hCov[1][1]*delxdelphi0)*delydelphi0;
+        tCov[0][2] = (hCov[0][3]*delxdeld0+hCov[1][3]*delxdelphi0);
+        tCov[0][3] = (hCov[0][1]*delxdeld0+hCov[1][1]*delxdelphi0)*delpxdelphi0
+                    +(hCov[0][2]*delxdeld0+hCov[1][2]*delxdelphi0)*delpxdelrho;
+        tCov[0][4] = (hCov[0][1]*delxdeld0+hCov[1][1]*delxdelphi0)*delpydelphi0
+                    +(hCov[0][2]*delxdeld0+hCov[1][2]*delxdelphi0)*delpydelrho;
+        tCov[0][5] = (hCov[0][2]*delxdeld0+hCov[1][2]*delxdelphi0)*delpzdelrho
+                    +(hCov[0][4]*delxdeld0+hCov[1][4]*delxdelphi0)*delpzdeltandip;
+        
+        
+        tCov[1][0] = (hCov[0][0]*delydeld0+hCov[1][0]*delydelphi0)*delxdeld0
+                    +(hCov[0][1]*delydeld0+hCov[1][1]*delydelphi0)*delxdelphi0;
+        tCov[1][1] = (hCov[0][0]*delydeld0+hCov[1][0]*delydelphi0)*delydeld0
+                    +(hCov[0][1]*delydeld0+hCov[1][1]*delydelphi0)*delydelphi0;
+        tCov[1][2] = (hCov[0][3]*delydeld0+hCov[1][3]*delydelphi0);
+        tCov[1][3] = (hCov[0][1]*delydeld0+hCov[1][1]*delydelphi0)*delpxdelphi0
+                    +(hCov[0][2]*delydeld0+hCov[1][2]*delydelphi0)*delpxdelrho;
+        tCov[1][4] = (hCov[0][1]*delydeld0+hCov[1][1]*delydelphi0)*delpydelphi0
+                    +(hCov[0][2]*delydeld0+hCov[1][2]*delydelphi0)*delpydelrho;
+        tCov[1][5] = (hCov[0][2]*delydeld0+hCov[1][2]*delydelphi0)*delpzdelrho
+                    +(hCov[0][4]*delydeld0+hCov[1][4]*delydelphi0)*delpzdeltandip;
+        
+        tCov[2][0] = hCov[2][0]*delxdeld0+hCov[2][1]*delxdelphi0;
+        tCov[2][1] = hCov[2][0]*delydeld0+hCov[2][1]*delydelphi0;
+        tCov[2][2] = hCov[2][3];
+        tCov[2][3] = hCov[2][1]*delpxdelphi0+hCov[2][2]*delpxdelrho;
+        tCov[2][4] = hCov[2][1]*delpydelphi0+hCov[2][2]*delpydelrho;
+        tCov[2][5] = hCov[2][2]*delpzdelrho+hCov[2][4]*delpzdeltandip;
+        
+        tCov[3][0] = (hCov[1][0]*delpxdelphi0+hCov[2][0]*delpxdelrho)*delxdeld0
+                    +(hCov[1][1]*delpxdelphi0+hCov[2][1]*delpxdelrho)*delxdelphi0;
+        tCov[3][1] = (hCov[1][0]*delpxdelphi0+hCov[2][0]*delpxdelrho)*delydeld0
+                    +(hCov[1][1]*delpxdelphi0+hCov[2][1]*delpxdelrho)*delydelphi0;
+        tCov[3][2] = (hCov[1][3]*delpxdelphi0+hCov[2][3]*delpxdelrho);
+        tCov[3][3] = (hCov[1][1]*delpxdelphi0+hCov[2][1]*delpxdelrho)*delpxdelphi0
+                    +(hCov[1][2]*delpxdelphi0+hCov[2][2]*delpxdelrho)*delpxdelrho;
+        tCov[3][4] = (hCov[1][1]*delpxdelphi0+hCov[2][1]*delpxdelrho)*delpydelphi0
+                    +(hCov[1][2]*delpxdelphi0+hCov[2][2]*delpxdelrho)*delpydelrho;
+        tCov[3][5] = (hCov[1][2]*delpxdelphi0+hCov[2][2]*delpxdelrho)*delpzdelrho
+                    +(hCov[1][4]*delpxdelphi0+hCov[2][4]*delpxdelrho)*delpzdeltandip;
+        
+        tCov[4][0] = (hCov[1][0]*delpydelphi0+hCov[2][0]*delpydelrho)*delxdeld0
+                    +(hCov[1][1]*delpydelphi0+hCov[2][1]*delpydelrho)*delxdelphi0;
+        tCov[4][1] = (hCov[1][0]*delpydelphi0+hCov[2][0]*delpydelrho)*delydeld0
+                    +(hCov[1][1]*delpydelphi0+hCov[2][1]*delpydelrho)*delydelphi0;
+        tCov[4][2] = (hCov[1][3]*delpydelphi0+hCov[2][3]*delpydelrho);
+        tCov[4][3] = (hCov[1][1]*delpydelphi0+hCov[2][1]*delpydelrho)*delpxdelphi0
+                    +(hCov[1][2]*delpydelphi0+hCov[2][2]*delpydelrho)*delpxdelrho;
+        tCov[4][4] = (hCov[1][1]*delpydelphi0+hCov[2][1]*delpydelrho)*delpydelphi0
+                    +(hCov[1][2]*delpydelphi0+hCov[2][2]*delpydelrho)*delpydelrho;
+        tCov[4][5] = (hCov[1][2]*delpydelphi0+hCov[2][2]*delpydelrho)*delpzdelrho
+                    +(hCov[1][4]*delpydelphi0+hCov[2][4]*delpydelrho)*delpzdeltandip;
+      
+        tCov[5][0] = (hCov[2][0]*delpzdelrho+hCov[4][0]*delpzdeltandip)*delxdeld0
+                    +(hCov[2][1]*delpzdelrho+hCov[4][1]*delpzdeltandip)*delxdelphi0;
+        tCov[5][1] = (hCov[2][0]*delpzdelrho+hCov[4][0]*delpzdeltandip)*delydeld0
+                    +(hCov[2][1]*delpzdelrho+hCov[4][1]*delpzdeltandip)*delydelphi0;
+        tCov[5][2] = (hCov[2][3]*delpzdelrho+hCov[4][3]*delpzdeltandip);
+        tCov[5][3] = (hCov[2][1]*delpzdelrho+hCov[4][1]*delpzdeltandip)*delpxdelphi0
+                    +(hCov[2][2]*delpzdelrho+hCov[4][2]*delpzdeltandip)*delpxdelrho;
+        tCov[5][4] = (hCov[2][1]*delpzdelrho+hCov[4][1]*delpzdeltandip)*delpydelphi0
+                    +(hCov[2][2]*delpzdelrho+hCov[4][2]*delpzdeltandip)*delpydelrho;
+        tCov[5][5] = (hCov[2][2]*delpzdelrho+hCov[4][2]*delpzdeltandip)*delpzdelrho
+                    +(hCov[2][4]*delpzdelrho+hCov[4][4]*delpzdeltandip)*delpzdeltandip;
+        
+        //for (int k = 0; k < 6; k++) {
+        //    System.out.println(tCov[k][0]+"	"+tCov[k][1]+"	"+tCov[k][2]+"	"+tCov[k][3]+"	"+tCov[k][4]+"	"+tCov[k][5]);
+        //}
+        //System.out.println("    ");
+        
+        return tCov;
+    }
+    
     
     
 }
