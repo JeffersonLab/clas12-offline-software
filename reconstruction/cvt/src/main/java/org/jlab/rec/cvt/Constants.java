@@ -43,7 +43,9 @@ public class Constants {
 
     public static boolean svtSeeding = true;
 
-    public static boolean BMTTimeCuts = true;
+    public static boolean TIMECUTS = true;
+
+    public static boolean KFFILTERON = true;
 
     public static final boolean TRACKSFROMORIGIN = true;
 

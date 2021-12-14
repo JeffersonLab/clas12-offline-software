@@ -33,6 +33,7 @@
             {"name":"seedE",           "type":"F", "info":"energy of the seed "},
             {"name":"seedStrip",       "type":"I", "info":"seed strip"},
             {"name":"centroid",        "type":"F", "info":"centroid strip number"},
+            {"name":"centroidError",   "type":"F", "info":"centroid spatial error"},
             {"name":"centroidResidual","type":"F", "info":"centroid residual"},
             {"name":"seedResidual",    "type":"F", "info":"seed residual"},
             {"name":"Hit1_ID",         "type":"S", "info":"Index of hit 1 in cluster"},

@@ -1,8 +1,11 @@
 package org.jlab.rec.cvt.banks;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -117,7 +120,7 @@ public class HitReader {
                 // create the strip object for the BMT
                 Strip BmtStrip = new Strip(strip, ADCtoEdep, time);
                 BmtStrip.setStatus(status.getIntValue("status", sector, layer, strip));
-                if(Constants.BMTTimeCuts) {
+                if(Constants.TIMECUTS) {
                     if(time!=0 && (time<tmin || time>tmax))
                         BmtStrip.setStatus(2);// calculate the strip parameters for the BMT hit
                 }
@@ -158,20 +161,52 @@ public class HitReader {
         
         if (event.hasBank("BST::adc") == true) {
             //bankDGTZ.show();
+            // first get tdcs
+            Map<Integer, Double> tdcs = new HashMap<>();
+            for (int i = 0; i < rows; i++) {                
+                if(bankDGTZ.getInt("ADC", i) < 0) {
+                    byte sector = bankDGTZ.getByte("sector", i);
+                    byte layer  = bankDGTZ.getByte("layer", i);
+                    short strip = bankDGTZ.getShort("component", i);
+                    double time = bankDGTZ.getFloat("time", i);
+                    int key = DetectorDescriptor.generateHashCode(sector, layer, strip);
+                    if(tdcs.containsKey(key)) {
+                        if(time<tdcs.get(key))
+                            tdcs.replace(key, time);
+                    }
+                    else 
+                        tdcs.put(key, time);
+                }
+            }
+                
+            // then get real hits
             for (int i = 0; i < rows; i++) {
-
                 if (bankDGTZ.getInt("ADC", i) < 0) {
                     continue; // ignore hits TDC hits with ADC==-1 
                 }
                 
                 int id      = i + 1;
-                int sector  = bankDGTZ.getByte("sector", i);
-                int layer   = bankDGTZ.getByte("layer", i);
-                int strip   = bankDGTZ.getShort("component", i);
+                byte sector = bankDGTZ.getByte("sector", i);
+                byte layer  = bankDGTZ.getByte("layer", i);
+                short strip = bankDGTZ.getShort("component", i);
                 int ADC     = bankDGTZ.getInt("ADC", i);
-                double time = bankDGTZ.getFloat("time", i);
+                double time = 0;//bankDGTZ.getFloat("time", i);
+                int key = DetectorDescriptor.generateHashCode(sector, layer,(short) (strip/128)+1);
+                if(tdcs.containsKey(key)) {
+                    time = tdcs.get(key);
+                }
+//                else {
+//                    System.out.println("missing time for " + sector + " " + layer + " " + strip);
+//                    for(int ii : tdcs.keySet()) {
+//                        int s = (ii&0xFF000000)>>24;
+//                        int l = (ii&0x00FF0000)>>16;
+//                        int c = (ii&0x0000FFFF);
+//                        System.out.println("\t"+s+"/"+l+"/"+c);
+//                    }
+//                    bankDGTZ.show();
+//                }
                 
-                double angle = geo.getSectorPhi(layer, sector);
+                double angle = SVTGeometry.getSectorPhi(layer, sector);
                 int hemisphere = (int) Math.signum(Math.sin(angle));
                 if (sector == 7 && layer > 6) {
                     hemisphere = 1;
@@ -200,7 +235,7 @@ public class HitReader {
                 //if(adcConv.SVTADCtoDAQ(ADC[i], event)<50)
                 //    continue;
                 // create the strip object with the adc value converted to daq value used for cluster-centroid estimate
-                Strip SvtStrip = new Strip(strip, adcConv.SVTADCtoDAQ(ADC, event), time); 
+                Strip SvtStrip = new Strip(strip, adcConv.SVTADCtoDAQ(ADC), time); 
                 SvtStrip.set_Pitch(SVTGeometry.getPitch());
                 // get the strip line
                 SvtStrip.set_Line(geo.getStrip(layer, sector, strip));
@@ -218,6 +253,11 @@ public class HitReader {
                 if (SvtStrip.get_Edep() == 0) {
                     SvtStrip.setStatus(1);
                 }
+//                if (Constants.TIMECUTS) {
+//                    if(time > 0 && (time < 150 || time > 350)) {
+//                        SvtStrip.setStatus(2);// calculate the strip parameters for the BMT hit
+//                    }
+//                }
 //                SvtStrip.setStatus(status.getIntValue("status", sector, layer, strip));
                 
                 // BMTGeometry implementation using the geometry package:  Charles Platt

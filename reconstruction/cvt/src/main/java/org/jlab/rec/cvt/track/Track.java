@@ -66,6 +66,20 @@ public class Track extends Trajectory implements Comparable<Track> {
         super(new Helix(kf.KFHelix.getD0(), kf.KFHelix.getPhi0(), kf.KFHelix.getOmega(), 
                         kf.KFHelix.getZ0(), kf.KFHelix.getTanL()));
         this.get_helix().B = kf.KFHelix.getB();
+        double c = Constants.LIGHTVEL;
+        //convert from kf representation to helix repr
+        double alpha = 1. / (c * Math.abs(kf.KFHelix.getB()));
+        double[][] kfCov = kf.finalCovMat;
+        for(int i = 0; i<5; i++) {
+            for(int j = 0; j<5; j++) {
+                if(i==2)
+                    kfCov[i][j]/=alpha;
+                if(j==2)
+                    kfCov[i][j]/=alpha;
+                
+            }
+        }
+        this.get_helix().set_covmatrix(kfCov);
         this.setPXYZ();
         this.setNDF(kf.NDF);
         this.setChi2(kf.chi2);
@@ -386,6 +400,21 @@ public class Track extends Trajectory implements Comparable<Track> {
         return 1000+nSVT*100+nBMTZ*10+nBMTC;
     }
     
+    private double[][] trackCovMat;
+    /**
+     * @return the trackCovMat
+     */
+    public double[][] getTrackCovMat() {
+        return trackCovMat;
+    }
+
+    /**
+     * @param trackCovMat the trackCovMat to set
+     */
+    public void setTrackCovMat(double[][] trackCovMat) {
+        this.trackCovMat = trackCovMat;
+    }
+    
     public String toString() {
         String str = String.format("Track id=%d, q=%d, p=%.3f GeV pt=%.3f GeV, phi=%.3f deg, NDF=%d, chi2=%.3f\n", 
                      this.get_Id(), this.get_Q(), this.get_P(), this.get_Pt(), Math.toDegrees(this.get_helix().get_phi_at_dca()),
@@ -393,5 +422,7 @@ public class Track extends Trajectory implements Comparable<Track> {
         for(Cross c: this) str = str + c.toString() + "\n";
         return str;
     }
+
+    
 
 }
