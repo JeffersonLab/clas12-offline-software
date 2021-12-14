@@ -221,6 +221,11 @@ public class CVTRecNewKF extends ReconstructionEngine {
              System.out.println("["+this.getName()+"] run with both CVT systems (default) ");
         }
 
+        if (this.getEngineConfigString("BeamSpotConst")!=null) {
+            Constants.beamSpotConstraint = Boolean.valueOf(this.getEngineConfigString("BeamSpotConst"));
+        }
+        System.out.println("["+this.getName()+"] run with beamSpotConst set to "+Constants.beamSpotConstraint);        
+         
         if (this.getEngineConfigString("kfFilterOn")!=null) {
             Constants.KFFILTERON = Boolean.valueOf(this.getEngineConfigString("kfFilterOn"));
         }
