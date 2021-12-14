@@ -548,6 +548,46 @@ public class RecoBankWriter {
         return bank;
 
     }
+    
+    public DataBank fillTracksCovMatBank(DataEvent event, List<Track> trkcands) {
+        if (trkcands == null) {
+            return null;
+        }
+        if (trkcands.isEmpty()) {
+            return null;
+        }
+
+        DataBank bank = event.createBank("CVTRec::TrackCovMats", trkcands.size());
+        // an array representing the ids of the crosses that belong to the track
+        List<Integer> crossIdxArray = new ArrayList<>();
+
+        for (int i = 0; i < trkcands.size(); i++) {
+            if(trkcands.get(i)==null || trkcands.get(i).getTrackCovMat()==null)
+                continue;
+            bank.setShort("ID", i, (short) trkcands.get(i).get_Id());
+            double[][] covmatrix = trkcands.get(i).getTrackCovMat();
+            if (covmatrix != null) {
+                String[][] names = new String[][]{
+                    {"cov_xx", "cov_xy", "cov_xz", "cov_xpx", "cov_xpy", "cov_xpz"},
+                    {"cov_yx", "cov_yy", "cov_yz", "cov_ypx", "cov_ypy", "cov_ypz"},
+                    {"cov_zx", "cov_zy", "cov_zz", "cov_zpx", "cov_zpy", "cov_zpz"},
+                    {"cov_pxx", "cov_pxy", "cov_pxz", "cov_pxpx", "cov_pxpy", "cov_pxpz"},
+                    {"cov_pyx", "cov_pyy", "cov_pyz", "cov_pypx", "cov_pypy", "cov_pypz"},
+                    {"cov_pzx", "cov_pzy", "cov_pzz", "cov_pzpx", "cov_pzpy", "cov_pzpz"}
+                };
+              
+                for(int r = 0; r<6; r++) {
+                    for(int c = 0; c<6; c++) {
+                        bank.setFloat(names[r][c], i, (float) covmatrix[r][c] );
+                    }
+                }
+            }
+        }
+        
+        //bank.show();
+        return bank;
+
+    }
 
     /**
      *
@@ -733,6 +773,10 @@ public class RecoBankWriter {
 
         DataBank bank9 = this.fillHelicalTracksTrajectoryBank(event, trks);
         if (bank9 != null) event.appendBank(bank9);
+        
+        DataBank bank10 = this.fillTracksCovMatBank(event, trks);
+        if (bank10 != null) event.appendBank(bank10);
+        
     }
 
     public void appendCVTCosmicsBanks(DataEvent event,

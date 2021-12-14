@@ -221,6 +221,7 @@ public class TracksFromTargetRec {
                 tracks.get(it).set_Id(id); 
                 tracks.get(it).update_Crosses(id, SVTGeom, BMTGeom);
                 tracks.get(it).update_Clusters(id, SVTGeom);
+                tracks.get(it).setTrackCovMat(recUtil.getCovMatInTrackRep(tracks.get(it)));
             }
         }
         for(int det = 0; det<2; det++) {
