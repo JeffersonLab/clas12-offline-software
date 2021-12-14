@@ -89,7 +89,7 @@
     ]
   },
   {
-    "name": "CVTRec::Tracks",
+    "name": "CVTRec::TrackCovMats",
     "group": 20500,
     "item" : 27,   
     "info": "reconstructed CVT tracks covariance matrix in track representation",
