@@ -28,7 +28,7 @@ case $OS in
      *) ;;
 esac
 chmod +x install-claracre-clas.sh
-echo Y | ./install-claracre-clas.sh -f 5.0.2 -j 11 -l local
+echo Y | ./install-claracre-clas.sh -f 4.3.12 -l local
 [ $? != 0 ] && echo "clara installation error" && exit 1
 rm install-claracre-clas.sh
 
