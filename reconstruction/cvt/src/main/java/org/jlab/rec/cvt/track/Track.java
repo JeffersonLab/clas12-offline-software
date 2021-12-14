@@ -400,6 +400,21 @@ public class Track extends Trajectory implements Comparable<Track> {
         return 1000+nSVT*100+nBMTZ*10+nBMTC;
     }
     
+    private double[][] trackCovMat;
+    /**
+     * @return the trackCovMat
+     */
+    public double[][] getTrackCovMat() {
+        return trackCovMat;
+    }
+
+    /**
+     * @param trackCovMat the trackCovMat to set
+     */
+    public void setTrackCovMat(double[][] trackCovMat) {
+        this.trackCovMat = trackCovMat;
+    }
+    
     public String toString() {
         String str = String.format("Track id=%d, q=%d, p=%.3f GeV pt=%.3f GeV, phi=%.3f deg, NDF=%d, chi2=%.3f\n", 
                      this.get_Id(), this.get_Q(), this.get_P(), this.get_Pt(), Math.toDegrees(this.get_helix().get_phi_at_dca()),
@@ -407,5 +422,7 @@ public class Track extends Trajectory implements Comparable<Track> {
         for(Cross c: this) str = str + c.toString() + "\n";
         return str;
     }
+
+    
 
 }
