@@ -93,6 +93,7 @@ public class RecoBankWriter {
             bank.setInt("seedStrip", i, cluslist.get(i).get_SeedStrip().get_Strip());
             bank.setFloat("centroid", i, (float) cluslist.get(i).get_Centroid());
             bank.setFloat("seedE", i, (float) cluslist.get(i).get_SeedStrip().get_Edep());
+            bank.setFloat("centroidError", i, (float) cluslist.get(i).get_Resolution());
             bank.setFloat("centroidResidual", i, (float) cluslist.get(i).get_CentroidResidual());
             bank.setFloat("seedResidual", i, (float) cluslist.get(i).get_SeedResidual()); 
             bank.setShort("trkID", i, (short) cluslist.get(i).get_AssociatedTrackID());
