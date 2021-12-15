@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.rec.fmt.hit.FittedHit;
 import org.jlab.rec.fmt.hit.Hit;
 
 /**
@@ -15,7 +14,7 @@ import org.jlab.rec.fmt.hit.Hit;
  * @author benkel
  * @author devita
 */
-public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster> {
+public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
 
         private static final long serialVersionUID = 9153980362683755204L;
 
@@ -43,10 +42,8 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
         /**
          *
-         * @param sector the sector
          * @param layer the layer
-         * @param cid the cluster ID, an incremental integer corresponding to the
-         * cluster formed in the series of clusters
+         * @param index
          */
         public Cluster(int layer, int index) {
             this._Layer = layer;
@@ -64,7 +61,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
         /**
          *
-         * @param _Superlayer the layer of the cluster (1...6)
+         * @param _Layer
          */
         public void setLayer(int _Layer) {
             this._Layer = _Layer;
@@ -117,7 +114,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
         public void setCentroidResidual(double trackLocalY) {
             this._CentroidResidual = this._Centroid-trackLocalY;
-            for(FittedHit hit : this) hit.setResidual(trackLocalY);
+            for(Hit hit : this) hit.setResidual(trackLocalY);
         }
 
         public double getTotalEnergy() {
@@ -214,14 +211,14 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
         public void setTrackIndex(int _AssociatedTrackIndex) {
             this._AssociatedTrackIndex = _AssociatedTrackIndex;
-            for(FittedHit hit: this) hit.setTrackIndex(_AssociatedTrackIndex);
+            for(Hit hit: this) hit.setTrackIndex(_AssociatedTrackIndex);
         }
 
-        private boolean containsHit(FittedHit hit) {
+        private boolean containsHit(Hit hit) {
             boolean addFlag = false;
             if(hit.getLayer()==this.getLayer()) {
-                for(int j = 0; j< this.size(); j++) {
-                    if(this.get(j).isClose(hit)) {
+                for (Hit aThi : this) {
+                    if (aThi.isClose(hit)) {
                         addFlag = true;
                         break;
                     }
@@ -232,10 +229,10 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
 
         public static ArrayList<Cluster> findClusters(List<Hit> hits) {
-            ArrayList<Cluster> clusters = new ArrayList<Cluster>();
+            ArrayList<Cluster> clusters = new ArrayList<>();
             
-            for(int ihit=0; ihit<hits.size(); ihit++) {
-                FittedHit hit = new FittedHit(hits.get(ihit));
+            for(Hit hit: hits) {
+                if(hit.getStatus()!=0) continue;
                 if(hit.getClusterIndex()==-1)  {                       // this hit is not yet associated with a cluster
                     for(int jclus=0; jclus<clusters.size(); jclus++) {
                         Cluster cluster = clusters.get(jclus);
@@ -261,8 +258,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
         /**
          * Sets energy-weighted parameters; these are the strip centroid
-         * (energy-weighted) value, the energy-weighted phi for Z detectors and the
-         * energy-weighted z for C detectorsting
+         * (energy-weighted) value
          * @param eweight set to true for energy weighting
          */
         public void calc_CentroidParams(boolean eweight) {
@@ -295,14 +291,11 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             if (nbhits != 0) {
                 int min = Integer.MAX_VALUE;
                 int max = Integer.MIN_VALUE;
-                int seed = -1;
-                double Emax = -1;
-                double Time = -1;
-                double Error = 0;
+                Hit seed = null;
 
                 // looping over the number of hits in the cluster
                 for (int i = 0; i < nbhits; i++) {
-                    FittedHit thehit = this.get(i);
+                    Hit thehit = this.get(i);
 
                     // get the energy value of the strip
                     double strpEn = thehit.getEnergy();
@@ -382,27 +375,25 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
                 double delta = Double.POSITIVE_INFINITY;
                 for (int i = 0; i < nbhits; i++) {
-                    FittedHit thehit = this.get(i);
+                    Hit thehit = this.get(i);
                     if(Math.abs(thehit.getStrip()-stripNumCent)<delta) {
                         delta = Math.abs(thehit.getStrip()-stripNumCent);
-                        seed  = thehit.getStrip();
-                        Emax  = thehit.getEnergy();
-                        Time  = thehit.getTime();
-                        Error = thehit.getError();
+                        seed  = thehit;
                     }
                 }
 
                 _TotalEnergy   = totEn;
                 _Centroid      = stripNumCent;
-                _CentroidError = Math.sqrt(this.size()) * Error;
+                _CentroidError = seed.getError();// / Math.sqrt(this.size());
                 _GlobalSegment = new Line3D(weightedStripEndPoint1X,weightedStripEndPoint1Y,weightedStripEndPoint1Z,
                                            weightedStripEndPoint2X,weightedStripEndPoint2Y,weightedStripEndPoint2Z);
                 _LocalSegment  = new Line3D(weightedLocStripEndPoint1X,weightedLocStripEndPoint1Y,weightedLocStripEndPoint1Z,
                                            weightedLocStripEndPoint2X,weightedLocStripEndPoint2Y,weightedLocStripEndPoint2Z);
                 _Time          = averageTime;
-                _SeedStrip     = seed;
-                _SeedEnergy    = Emax;
-                _SeedTime      = Time;
+                _SeedIndex     = seed.getIndex();
+                _SeedStrip     = seed.getStrip();
+                _SeedEnergy    = seed.getEnergy();
+                _SeedTime      = seed.getTime();
                 _MinStrip      = min;
                 _MaxStrip      = max;
             }
@@ -457,7 +448,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         @Override
         public String toString() {
             String str = this.toStringBrief();
-            for (FittedHit aThi : this) {
+            for(Hit aThi : this) {
                 str = str.concat("\n" + aThi.toString());
             }
             return str;

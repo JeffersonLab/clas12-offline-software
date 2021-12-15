@@ -11,7 +11,7 @@ import org.jlab.clas.swimtools.Swim;
  * @author ziegler
  */
 public class StateVecs {
-    private double Bmax = 2.366498; // averaged
+    private final double Bmax = 2.366498; // averaged
 
     final double speedLight = 0.002997924580;
     public double[] Z;
@@ -21,17 +21,18 @@ public class StateVecs {
     public StateVec StateVec;
     public CovMat CovMat;
     public Matrix F = new Matrix();
-    private Matrix fMS = new Matrix();
-    private Matrix copyMatrix = new Matrix();
+    private final Matrix fMS = new Matrix();
+    private final Matrix copyMatrix = new Matrix();
     private final double[] A = new double[2];
     private final double[] dA = new double[4];
     private final float[] bf = new float[3];
     private final float[] lbf = new float[3];
-    private Swim dcSwim;
-    private RungeKutta rk;
+    private final Swim dcSwim;
+    private final RungeKutta rk;
 
     /**
      * State vector representing the track in the sector coordinate system at the measurement layer
+     * @param swimmer
      */
     public StateVecs(Swim swimmer) {
         dcSwim = swimmer;
@@ -40,10 +41,12 @@ public class StateVecs {
 
     /**
      *
+     * @param sector
      * @param i initial state vector index
-     * @param f final state vector index
+     * @param Zf
      * @param iVec state vector at the initial index
      * @param covMat state covariance matrix at the initial index
+     * @return 
      */
     public Matrix transport(int sector, int i, double Zf, StateVec iVec, CovMat covMat) { // s = signed step-size
         double stepSize = 1.0;
@@ -122,6 +125,7 @@ public class StateVecs {
 
     /**
      *
+     * @param sector
      * @param i initial state vector index
      * @param f final state vector index
      * @param iVec state vector at the initial index
@@ -313,9 +317,17 @@ public class StateVecs {
 
     /**
      *
-     * @param trkcand the track candidate
+     * @param sector
+     * @param xVtx
+     * @param yVtx
+     * @param zVtx
      * @param z0 the value in z to which the track is swam back to
+     * @param pyVtx
+     * @param pzVtx
+     * @param q
      * @param kf the final state measurement index
+     * @param pxVtx
+     * @param c
      */
     public void init(int sector, double xVtx, double yVtx, double zVtx,
             double pxVtx, double pyVtx, double pzVtx,

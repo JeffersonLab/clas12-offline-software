@@ -21,6 +21,9 @@ import org.jlab.geom.component.TrackerStrip;
  */
 public class FMTLayer extends AbstractLayer<TrackerStrip> {
     
+    private double rmin;
+    private double rmax;
+    
     protected FMTLayer(int sectorId, int superlayerId, int layerId) {
         super(DetectorId.FMT, sectorId, superlayerId, layerId, false);
     }
@@ -34,4 +37,37 @@ public class FMTLayer extends AbstractLayer<TrackerStrip> {
         return "FMT Layer";
     }
 
+    /**
+     * Returns the minimum radius
+     * @return
+     */
+    public double getRmin() {
+        return rmin;
+    }
+
+    /**
+     * Set the minimum radius
+     * @param rmin
+     */
+    public void setRmin(double rmin) {
+        this.rmin = rmin;
+    }
+
+    /**
+     * Returns the maximum radius
+     * @return
+     */
+    public double getRmax() {
+        return rmax;
+    }
+
+    /**
+     * Set the maximum radius
+     * @param rmax
+     */
+    public void setRmax(double rmax) {
+        this.rmax = rmax;
+    }
+
+    
 }

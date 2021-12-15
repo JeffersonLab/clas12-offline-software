@@ -169,6 +169,8 @@ public class FMTFactory implements Factory <FMTDetector, FMTSector, FMTSuperlaye
         layer.getBoundary().addFace(new Triangle3D(pUR, pUL, pLR));
                 
         layer.getPlane().set(0, 0, 0, 0, 0, -1);
+        layer.setRmin(beamHole);
+        layer.setRmax(rMax);
         
         Transformation3D transform = new Transformation3D();
         transform.rotateY(Math.toRadians(180));

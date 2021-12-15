@@ -1,6 +1,5 @@
 package org.jlab.service.fmt;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,7 +13,6 @@ import org.jlab.rec.fmt.Constants;
 
 import org.jlab.rec.fmt.banks.RecoBankWriter;
 import org.jlab.rec.fmt.cluster.Cluster;
-import org.jlab.rec.fmt.hit.FittedHit;
 import org.jlab.rec.fmt.hit.Hit;
 import org.jlab.rec.fmt.track.Track;
 import org.jlab.rec.fmt.track.Trajectory;
@@ -29,7 +27,6 @@ import org.jlab.rec.fmt.track.fit.StateVecs.StateVec;
 public class FMTEngine extends ReconstructionEngine {
 
     boolean debug = false;
-    boolean alreadyDroppedBanks = false;
 
     public FMTEngine() {
         super("FMT", "ziegler", "5.0");
@@ -52,6 +49,7 @@ public class FMTEngine extends ReconstructionEngine {
 
         String[] tables = new String[]{
             "/geometry/beam/position",
+            "/calibration/mvt/fmt_time",
             "/calibration/mvt/fmt_status"
         };
         requireConstants(Arrays.asList(tables));
@@ -99,27 +97,20 @@ public class FMTEngine extends ReconstructionEngine {
         // get status table
         IndexedTable status = this.getConstantsManager().getConstants(run, "/calibration/mvt/fmt_status");
 
+        // get time table
+        IndexedTable timecuts = this.getConstantsManager().getConstants(run, "/calibration/mvt/fmt_time");
+
         // === HITS ================================================================================
-        List<Hit> hits = Hit.fetchHits(event, status);
-        if (hits.size() == 0) return true;
+        List<Hit> hits = Hit.fetchHits(event, timecuts, status);
+        if (hits.isEmpty()) return true;
         
         // === CLUSTERS ============================================================================
         List<Cluster> clusters = Cluster.findClusters(hits);
         if(debug) for (int i = 0; i < clusters.size(); i++) System.out.println(clusters.get(i).toString());
-
-        // === FITTED HITS =========================================================================
-        List<FittedHit> fittedhits =  new ArrayList<FittedHit>();
-        for (int i = 0; i < clusters.size(); i++) fittedhits.addAll(clusters.get(i)); 
-        // set cluster seed indices
-        for(int i=0; i<fittedhits.size(); i++) {
-            FittedHit hit = fittedhits.get(i);
-            if(hit.getStrip()==clusters.get(hit.getClusterIndex()).getSeedStrip())  
-                clusters.get(hit.getClusterIndex()).setSeedIndex(i); 
-        }
         
         // === DC TRACKS ===========================================================================
-        List<Track> tracks = Track.getDCTracks(event);
-        if(tracks.size()==0) return true;
+        List<Track> tracks = Track.getDCTracks(event, swimmer);
+        if(tracks.isEmpty()) return true;
         
         // === SEEDS =============================================================================
         for(int i=0; i<tracks.size(); i++) {
@@ -194,9 +185,10 @@ public class FMTEngine extends ReconstructionEngine {
 //                    cls.put(lyr, c.getCluster1());
 //            }
 
-            // Set status and stop if there are no measurements to fit against.
+            // Set status and stop if there are not at least two measurements to fit against.
             List<Cluster> trackClusters = track.getClusters();
-            if (trackClusters.isEmpty()) continue;
+            
+            if (trackClusters.size()<2) continue;
 
             kf = new KFitter(track, swimmer, 0);
             kf.runFitter(track.getSector());
@@ -216,7 +208,7 @@ public class FMTEngine extends ReconstructionEngine {
                 
                 // if successful, save track parameters
                 if(Vt == null || Vt[6]<Constants.MIN_SWIM_PATH) continue;
-                track.setStatus(1);
+                track.setStatus(0);
                 track.setNDF(trackClusters.size());
                 track.setQ(charge);
                 track.setChi2(kf.chi2);
@@ -242,7 +234,7 @@ public class FMTEngine extends ReconstructionEngine {
         }
         if(debug && clusterDoubleAssignment) for(int i=0; i<clusters.size(); i++) System.out.println(clusters.get(i).toStringBrief());
         
-        RecoBankWriter.appendFMTBanks(event, fittedhits, clusters, tracks);
+        RecoBankWriter.appendFMTBanks(event, hits, clusters, tracks);
 
         return true;
    }

@@ -21,14 +21,14 @@ public class RungeKutta {
     private final ArrayList<Double> jk4;
 
     public RungeKutta() {
-        this.k1 = new ArrayList<Double>(4);
-        this.k2 = new ArrayList<Double>(4);
-        this.k3 = new ArrayList<Double>(4);
-        this.k4 = new ArrayList<Double>(4);
-        this.jk1 = new ArrayList<Double>(12);
-        this.jk2 = new ArrayList<Double>(12);
-        this.jk3 = new ArrayList<Double>(12);
-        this.jk4 = new ArrayList<Double>(12);
+        this.k1 = new ArrayList<>(4);
+        this.k2 = new ArrayList<>(4);
+        this.k3 = new ArrayList<>(4);
+        this.k4 = new ArrayList<>(4);
+        this.jk1 = new ArrayList<>(12);
+        this.jk2 = new ArrayList<>(12);
+        this.jk3 = new ArrayList<>(12);
+        this.jk4 = new ArrayList<>(12);
     }
 
     public void SwimToZ(int sector, StateVecs.StateVec fVec, Swim dcSwim, double z0, float[] bf){

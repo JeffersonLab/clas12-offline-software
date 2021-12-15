@@ -79,7 +79,9 @@ public class Constants {
 
     /**
      *
-     * @param other
+     * @param layer
+     * @param strip1
+     * @param strip2
      * @return a boolean comparing 2 hits based on basic descriptors; returns
      * true if the hits are the same
      */

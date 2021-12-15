@@ -6,7 +6,7 @@ import java.util.List;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.fmt.cluster.Cluster;
-import org.jlab.rec.fmt.hit.FittedHit;
+import org.jlab.rec.fmt.hit.Hit;
 
 /**
  * The crosses are objects used to find tracks and are characterized by a 3-D
@@ -36,10 +36,8 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 
     /**
      *
-     * @param sector the sector (1)
      * @param region the region (1...3)
-     * @param rid the cross ID (if there are only 3 crosses in the event, the ID
-     * corresponds to the region index
+     * @param index
      */
     public Cross(int region, int index) {
         this._Region = region;
@@ -74,7 +72,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     /**
      * Sets the cross ID
      *
-     * @param _Id the id of the cross
+     * @param index
      */
     public void setIndex(int index) {
         this._Index = index;
@@ -250,7 +248,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
             cluster.setCrossIndex(this._Index);
             cluster.setTrackIndex(this._TrackIndex);
 
-            for (FittedHit hit : cluster) {
+            for (Hit hit : cluster) {
                 hit.setClusterIndex(cluster.getIndex());
                 hit.setCrossIndex(this._Index);
                 hit.setTrackIndex(this._TrackIndex);

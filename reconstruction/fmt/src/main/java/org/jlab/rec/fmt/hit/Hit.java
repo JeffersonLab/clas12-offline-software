@@ -22,18 +22,22 @@ import org.jlab.utils.groups.IndexedTable;
 // Class implements Comparable interface to allow for sorting a collection of hits by wire numbers
 public class Hit implements Comparable<Hit> {
 
-        private int _Layer;    	  // layer [1,...6]
-        private int _Strip;    	  // strip [1...1024]
+        private int _Layer;    	          // layer [1,...6]
+        private int _Strip;    	          // strip [1...1024]
 
-        private double _Energy;      	  // Reconstructed time, for now it is the gemc time
-        private double _Time;	  // Hit time
-        private double _Error;	  // Hit time
-        private Line3D _LocalSegment;  // The geometry segment representing the strip position in the local frame
-        private Line3D _GlobalSegment; // The geometry segment representing the strip position in the global frame
-        private int _Index;		  // Hit Id
-        private int _ClusterIndex = -1;
+        private int    _Status;                // 0 good, 1 bad energy, 2, bad time, 3 dead
+        private double _Energy;      	  
+        private double _Time;	          
+        private double _Error;	          
+        private Line3D _LocalSegment  = null;  // The geometry segment representing the strip position in the local frame
+        private Line3D _GlobalSegment = null;  // The geometry segment representing the strip position in the global frame
+        private int _Index;		       // Hit index
+        private int _ClusterIndex = -1;        // Cluster index
+        private int _CrossIndex = -1;          // Cross index 
+        private int _TrackIndex = -1;          // Track index        
+        private double _residual;              // distance to track intersect
 
-        
+
         /**
          * @param index
          * @param layer
@@ -48,12 +52,6 @@ public class Hit implements Comparable<Hit> {
             this._Energy = energy;
             this._Time  = time;
             this._Error = Constants.getPitch()/Math.sqrt(12);
-            
-//            double x0 = Constants.FVT_stripsX[layer - 1][strip - 1][0];
-//            double x1 = Constants.FVT_stripsX[layer - 1][strip - 1][1];
-//            double y0 = Constants.FVT_stripsY[layer - 1][strip - 1][0];
-//            double y1 = Constants.FVT_stripsY[layer - 1][strip - 1][1];
-//            double z  = Geometry.getLayerZ(layer - 1);
             this._GlobalSegment = Constants.getStrip(layer, strip);
             this._LocalSegment  = Constants.getLocalStrip(layer, strip);
         }
@@ -174,6 +172,37 @@ public class Hit implements Comparable<Hit> {
             return _GlobalSegment.distance(trkPoint).length();
         }
 
+        public int getStatus() {
+            return _Status;
+        }
+
+        public void setStatus(int _Status) {
+            this._Status = _Status;
+        }
+
+	public double getResidual() {
+            return this._residual;
+	}
+
+        public void setResidual(double trackLocalY) {
+            this._residual = this.getStripLocalSegment().origin().y()-trackLocalY;
+	}
+
+	public int getCrossIndex() {
+		return _CrossIndex;
+	}
+
+	public void setCrossIndex(int crossIndex) {
+		this._CrossIndex = crossIndex;
+	}
+        
+        public int getTrackIndex() {
+		return _TrackIndex;
+	}
+
+	public void setTrackIndex(int _AssociatedTrackIndex) {
+		this._TrackIndex = _AssociatedTrackIndex;
+	}
         /**
          *
          * @param arg the other hit
@@ -228,13 +257,16 @@ public class Hit implements Comparable<Hit> {
             this._ClusterIndex = _AssociatedClusterIndex;
         }
 
-        public static List<Hit> fetchHits(DataEvent event, IndexedTable statuses) {
+        public static List<Hit> fetchHits(DataEvent event, IndexedTable timecuts, IndexedTable statuses) {
 
-            List<Hit> hits = new ArrayList<Hit>();
+            List<Hit> hits = new ArrayList<>();
+
+            double tmin = timecuts.getDoubleValue("hit_min", 0, 0, 0);
+            double tmax = timecuts.getDoubleValue("hit_max", 0, 0, 0);
 
             if (event.hasBank("FMT::adc")) {
                 DataBank bankDGTZ = event.getBank("FMT::adc");
-                int rows = bankDGTZ.rows();;
+                int rows = bankDGTZ.rows();
                 for (int i = 0; i < rows; i++) {
                     int sector  = bankDGTZ.getByte("sector", i);
                     int layer   = bankDGTZ.getByte("layer", i);
@@ -246,14 +278,18 @@ public class Hit implements Comparable<Hit> {
                     
                     Hit hit = new Hit(i, layer, strip, (double) ADC, time);
                     
-                    int status = statuses.getIntValue("status", sector, layer, strip);
-                    if(status==0) hits.add(hit);
+                    hit.setStatus(statuses.getIntValue("status", sector, layer, strip));
+                    
+                    if(time!=0 && (time<tmin || time>tmax)) hit.setStatus(2); // exclude time==0 hits for MC
+                    
+                    hits.add(hit);
                 }
             }
             Collections.sort(hits);
 
             return hits;
         }
+        
         /**
          *
          * @return print statement with hit information

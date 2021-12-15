@@ -43,6 +43,8 @@ services:
     name: EBHB
   - class: org.jlab.service.dc.DCTBEngine
     name: DCTB
+  - class: org.jlab.service.fmt.FMTEngine
+    name: FMT
   - class: org.jlab.service.ftof.FTOFTBEngine
     name: FTOFTB
   - class: org.jlab.service.eb.EBTBEngine
