@@ -29,7 +29,7 @@ esac
 
 
 chmod +x install-claracre-clas.sh
-echo Y | ./install-claracre-clas.sh -f 4.3.9 -l local
+echo Y | ./install-claracre-clas.sh -f 5.0.2 -j 11 -l local
 if [ $? != 0 ] ; then echo "clara installation error" ; exit 1 ; fi
 rm install-claracre-clas.sh
 
@@ -63,7 +63,6 @@ echo "set description d_cook" >> cook.clara
 ls twoTrackEvents_809.hipo > files.list
 echo "set fileList $PWD/files.list" >> cook.clara
 echo "set servicesFile $CLARA_HOME/plugins/clas12/config/kpp.yaml" >> cook.clara
-echo "run local" >> cook.clara
 echo "run local" >> cook.clara
 echo "exit" >> cook.clara
 $CLARA_HOME/bin/clara-shell cook.clara
