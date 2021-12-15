@@ -16,9 +16,9 @@ import org.jlab.detector.geant4.v2.DCGeant4Factory;
 
 public class RoadFinder  {
 
-    private SegmentTrajectory segTrj = new SegmentTrajectory();
-
-    private ClusterFitter cf = new ClusterFitter();
+    private final SegmentTrajectory segTrj = new SegmentTrajectory();
+    public double fitPassingCut = 150;
+    private final ClusterFitter cf = new ClusterFitter();
     QuadraticFit qf = new QuadraticFit();
     public RoadFinder() {
     }
@@ -33,20 +33,20 @@ public class RoadFinder  {
         //QuadraticFit qf = new QuadraticFit();
         //initialize the lists
 
-        List<Road> Roads = new ArrayList<Road>();
+        List<Road> Roads = new ArrayList<>();
         
-        List<ArrayList<ArrayList<Segment>>> superLayerLists = new ArrayList<ArrayList<ArrayList<Segment>>>();
+        List<ArrayList<ArrayList<Segment>>> superLayerLists = new ArrayList<>();
         for(int sec=0; sec<6; sec++)  {
-            ArrayList<ArrayList<Segment>> sLyrs = new ArrayList<ArrayList<Segment>>();
-            ArrayList<ArrayList<ArrayList<Segment>>> rLyrs = new ArrayList<ArrayList<ArrayList<Segment>>>();
+            ArrayList<ArrayList<Segment>> sLyrs = new ArrayList<>();
+            ArrayList<ArrayList<ArrayList<Segment>>> rLyrs = new ArrayList<>();
             
             for(int sly=0; sly<6; sly++) {
-                sLyrs.add(new ArrayList<Segment>());
+                sLyrs.add(new ArrayList<>());
             }
             superLayerLists.add(sLyrs);
         }
         //make an array sorted by sector, superlayers
-        for (Segment seg : segs) {
+        for (Segment seg : segs) { 
             if (seg.isOnTrack==false) {
                 superLayerLists.get(seg.get_Sector()-1).get(seg.get_Superlayer()-1).add((Segment) seg.clone());
             }
@@ -82,7 +82,7 @@ public class RoadFinder  {
                             if(sLyr.size()<3) 
                                 continue;
                             if (this.fitRoad(sLyr, DcDetector)==true) { 
-                                if(qf.chi2<150 && qf.chi2!=0 ) { // road is good --> pass w.out looking for missing segment
+                                if(qf.chi2<fitPassingCut && qf.chi2!=0 ) { // road is good --> pass w.out looking for missing segment
                                     sLyr.id=roadId;
                                     sLyr.a=qf.a;
                                     Roads.add(sLyr);
@@ -303,7 +303,6 @@ public class RoadFinder  {
                 X = Ainv.times(V);
                 for (int i = 0; i < 3; ++i) {
                         ret[i] = X.get(i, 0);
-                        //System.out.println(X.get(i, 0));
                 }
                 double _chi2 =0;
                 for (int i = 0; i<x.length; i++) {				

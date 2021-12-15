@@ -30,8 +30,9 @@ import org.jlab.utils.options.OptionParser;
 public class TrackDictionaryValidation {
 
     private Map<ArrayList<Byte>, Particle>   dictionary = null;
-    private IndexedList<DataGroup>           dataGroups = new IndexedList<DataGroup>(1);
-    private EmbeddedCanvasTabbed             canvas     = new EmbeddedCanvasTabbed("Dictionary", "Matched Roads", "Matched Tracks", "Efficiency");
+    private final IndexedList<DataGroup>     dataGroups = new IndexedList<DataGroup>(1);
+    private final EmbeddedCanvasTabbed       canvas     = new EmbeddedCanvasTabbed("Dictionary", "Matched Roads", "Matched Tracks", "Efficiency");
+    public static Logger LOGGER = Logger.getLogger(TrackDictionaryValidation.class.getName());
             
     public TrackDictionaryValidation(){
 
@@ -51,9 +52,9 @@ public class TrackDictionaryValidation {
         this.effHisto(this.dataGroups.getItem(2).getH2F("hi_phitheta_neg_found"), 
                       this.dataGroups.getItem(2).getH2F("hi_phitheta_neg_missing"), 
                       this.dataGroups.getItem(3).getH2F("hi_phitheta_neg_eff"));
-        System.out.println("Positive particles found/missed: " + this.dataGroups.getItem(2).getH2F("hi_ptheta_pos_found").integral() + "/" +
+        LOGGER.log(Level.INFO, "Positive particles found/missed: " + this.dataGroups.getItem(2).getH2F("hi_ptheta_pos_found").integral() + "/" +
                                                                + this.dataGroups.getItem(2).getH2F("hi_ptheta_pos_missing").integral());
-        System.out.println("Negative particles found/missed: " + this.dataGroups.getItem(2).getH2F("hi_ptheta_neg_found").integral() + "/" +
+        LOGGER.log(Level.INFO, "Negative particles found/missed: " + this.dataGroups.getItem(2).getH2F("hi_ptheta_neg_found").integral() + "/" +
                                                                + this.dataGroups.getItem(2).getH2F("hi_ptheta_neg_missing").integral());
     }
     
@@ -68,17 +69,17 @@ public class TrackDictionaryValidation {
      */
     public void createDictionary(String inputFileName, String dictName , int pidSelect, int chargeSelect, double thrs, int duplicates) {
         // create dictionary from event file
-        System.out.println("\nCreating dictionary from file: " + inputFileName);
+        LOGGER.log(Level.INFO, "\nCreating dictionary from file: " + inputFileName);
         Map<ArrayList<Integer>, Particle> newDictionary = new HashMap<>();
         HipoDataSource reader = new HipoDataSource();
         reader.open(inputFileName);
         String[] tokens = inputFileName.split("/");
-        System.out.println("\nDictionary will be saved to: " + dictName); 
+        LOGGER.log(Level.INFO, "\nDictionary will be saved to: " + dictName); 
         int nevent = -1;
         while(reader.hasEvent() == true) {
             DataEvent event = reader.getNextEvent();
             nevent++;
-            if(nevent%10000 == 0) System.out.println("Analyzed " + nevent + " events, found " + newDictionary.size() + " roads");
+            if(nevent%10000 == 0) LOGGER.log(Level.INFO, "Analyzed " + nevent + " events, found " + newDictionary.size() + " roads");
             DataBank runConfig       = null;
             DataBank recParticle     = null;
             DataBank recCalorimeter  = null;
@@ -159,7 +160,7 @@ public class TrackDictionaryValidation {
                                 wireArray[(superlayer - 1) * 6 + layer - 1] = wire;
                             }
                         }
-                        ArrayList<Integer> wires = new ArrayList<Integer>();
+                        ArrayList<Integer> wires = new ArrayList<>();
                         for (int k = 0; k < 6; k++) {
                             for (int l=0; l<6; l++) {
                                 // use first non zero wire in superlayer
@@ -206,7 +207,7 @@ public class TrackDictionaryValidation {
                                             pcalV = (ecalCluster.getInt("coordV",indexClus)-4)/8+1;
                                             pcalW = (ecalCluster.getInt("coordW",indexClus)-4)/8+1;
                                             pcalE =  energy;
-//                                            System.out.println(pcalU + " " + pcalV + " " + pcalW);
+//                                            LOGGER.log(Level.INFO, pcalU + " " + pcalV + " " + pcalW);
                                         }
                                         else if(detectorClus==DetectorType.ECAL.getDetectorId() && layerClus==4) {
                                             ecinE = energy;
@@ -237,48 +238,48 @@ public class TrackDictionaryValidation {
                                             if(phiCC<0) phiCC +=360;
                                             double thetaCC = ((double) Math.round(thetaCheren*100))/100.;
                                             ArrayList<int[]> htccPMTs        = htccPMT(thetaCC, phiCC);
-                                            ArrayList<int[]> htccPMTsMatched = new ArrayList<int[]>();
-//                                            System.out.println(thetaCheren + " " + thetaCC + " " + phiCheren + " " + phiCC + " " + htccPMTs.size());
+                                            ArrayList<int[]> htccPMTsMatched = new ArrayList<>();
+//                                            LOGGER.log(Level.INFO, thetaCheren + " " + thetaCC + " " + phiCheren + " " + phiCC + " " + htccPMTs.size());
                                             //The special case of 4 hits, where we need to check if the hits were not in fact only 3
                                             for(int iPMT = 0; iPMT < htccPMTs.size(); iPMT++) {
                                                 int htccSector    = htccPMTs.get(iPMT)[0];
                                                 int htccLayer     = htccPMTs.get(iPMT)[1];
                                                 int htccComponent = htccPMTs.get(iPMT)[2];
                                                 boolean found = false;
-//                                                System.out.println(iPMT + " " + htccSector + " " + htccLayer + " " + htccComponent);
+//                                                LOGGER.log(Level.INFO, iPMT + " " + htccSector + " " + htccLayer + " " + htccComponent);
                                                 for (int k = 0; k < htccADC.rows(); k++) {
                                                     int sector    = htccADC.getByte("sector", k);
                                                     int layer     = htccADC.getByte("layer", k);
                                                     int component = htccADC.getShort("component", k);
-//                                                    System.out.println(k + " " + sector + " " + layer + " " + component);
+//                                                    LOGGER.log(Level.INFO, k + " " + sector + " " + layer + " " + component);
                                                     if( htccSector    == sector && 
                                                         htccLayer     == layer && 
                                                         htccComponent == component) {
                                                         found = true;
-//                                                        System.out.println("Found match in adc bank");
+//                                                        LOGGER.log(Level.INFO, "Found match in adc bank");
                                                     }                                                  
                                                 }
                                                 if(found) {
                                                     htccPMTsMatched.add(htccPMTs.get(iPMT));
                                                 }
 //                                                else {
-//                                                    System.out.println("Removing hit " + iPMT + " among " + htccPMTs.size() + " " + thetaCC + " " +  phiCC + " " + htccSector + "/" + htccLayer+ "/"+htccComponent);
+//                                                    LOGGER.log(Level.INFO, "Removing hit " + iPMT + " among " + htccPMTs.size() + " " + thetaCC + " " +  phiCC + " " + htccSector + "/" + htccLayer+ "/"+htccComponent);
 //                                                    runConfig.show();recCherenkov.show(); htccRec.show();htccADC.show();
 //                                                }
                                                 }
                                             if(htccPMTsMatched.size() != nhits) {
-                                                System.out.println("Mismatch in HTCC cluster size " +  runConfig.getInt("event",0) + " " + nhits +"/"+htccPMTsMatched.size()+"/"+htccPMTs.size() + " " + thetaCC + " " +  phiCC + " " +((phiCC+30)%60-30));
+                                                LOGGER.log(Level.INFO, "Mismatch in HTCC cluster size " +  runConfig.getInt("event",0) + " " + nhits +"/"+htccPMTsMatched.size()+"/"+htccPMTs.size() + " " + thetaCC + " " +  phiCC + " " +((phiCC+30)%60-30));
 //                                                for(int iPMT = 0; iPMT < htccPMTs.size(); iPMT++) {
 //                                                    int htccSector    = htccPMTs.get(iPMT)[0];
 //                                                    int htccLayer     = htccPMTs.get(iPMT)[1];
 //                                                    int htccComponent = htccPMTs.get(iPMT)[2];
-//                                                    System.out.println(iPMT + " " + htccSector + " " + htccLayer + " " + htccComponent);
+//                                                    LOGGER.log(Level.INFO, iPMT + " " + htccSector + " " + htccLayer + " " + htccComponent);
 //                                                }
 //                                                for (int k = 0; k < htccADC.rows(); k++) {
 //                                                    int sector    = htccADC.getByte("sector", k);
 //                                                    int layer     = htccADC.getByte("layer", k);
 //                                                    int component = htccADC.getShort("component", k);
-//                                                    System.out.println(k + " " + sector + " " + layer + " " + component);
+//                                                    LOGGER.log(Level.INFO, k + " " + sector + " " + layer + " " + component);
 //                                                }
                                             }
                                             htcc = this.htccMask(htccPMTsMatched);
@@ -306,7 +307,7 @@ public class TrackDictionaryValidation {
                 }
             }
         }
-        System.out.println("Analyzed " + nevent + " events, found " + newDictionary.size() + " roads");
+        LOGGER.log(Level.INFO, "Analyzed " + nevent + " events, found " + newDictionary.size() + " roads");
         this.writeDictionary(newDictionary, dictName);
     }
     
@@ -508,12 +509,12 @@ public class TrackDictionaryValidation {
             htccMaskArray[ibit]=1;
         }
         int htccMask=0;
-//        System.out.println("Mask " + htccPMTS.size());
+//        LOGGER.log(Level.INFO, "Mask " + htccPMTS.size());
         for(int ibit=0; ibit<8; ibit++) {
             if(htccMaskArray[ibit]>0) {
                 int imask = 1 << ibit;
                 htccMask += imask;
-//                System.out.println(ibit + " " + imask + " " + htccMask);
+//                LOGGER.log(Level.INFO, ibit + " " + imask + " " + htccMask);
             }
         }
         return htccMask;
@@ -526,7 +527,7 @@ public class TrackDictionaryValidation {
         double TableTheta3[] = {11.25, 18.75, 26.25};
         double TableTheta4[] = {13.75, 21.25, 28.75};
 
-        ArrayList<int[]> htccPMTS = new ArrayList<int[]>();
+        ArrayList<int[]> htccPMTS = new ArrayList<>();
 
         double p1, p2, ph_new;
 
@@ -775,7 +776,7 @@ public class TrackDictionaryValidation {
     public void processFile(String fileName, int wireSmear, int pcalSmear, int sectorDependence, int mode, int maxEvents, int pidSelect, int chargeSelect, double thrs) {
         // testing dictionary on event file
         
-        System.out.println("\nTesting dictionary on file " + fileName);
+        LOGGER.log(Level.INFO, "\nTesting dictionary on file " + fileName);
         
         int pcalUSmear  = pcalSmear;
         int pcalVWSmear = 0;
@@ -790,7 +791,7 @@ public class TrackDictionaryValidation {
             }
             DataEvent event = reader.getNextEvent();
             nevent++;
-            if(nevent%10000 == 0) System.out.println("Analyzed " + nevent + " events");
+            if(nevent%10000 == 0) LOGGER.log(Level.INFO, "Analyzed " + nevent + " events");
             DataBank runConfig       = null;
             DataBank recParticle     = null;
             DataBank recCalorimeter  = null;
@@ -903,7 +904,7 @@ public class TrackDictionaryValidation {
                         }
 
                         if(nSL3<3) continue; //ignore tracks with less than 3 hits in SL3 as in dictionary maker
-                        ArrayList<Byte> wires = new ArrayList<Byte>();
+                        ArrayList<Byte> wires = new ArrayList<>();
                         for (int k = 0; k < 6; k++) {
                             for (int l=0; l<1; l++) {
                                 // use first non zero wire in superlayer
@@ -974,35 +975,35 @@ public class TrackDictionaryValidation {
                                             double thetaCC = ((double) Math.round(thetaCheren*100))/100.;
                                             ArrayList<int[]> htccPMTs        = htccPMT(thetaCC, phiCC);
                                             ArrayList<int[]> htccPMTsMatched = new ArrayList<int[]>();
-//                                            System.out.println(thetaCheren + " " + thetaCC + " " + phiCheren + " " + phiCC + " " + htccPMTs.size());
+//                                            LOGGER.log(Level.INFO, thetaCheren + " " + thetaCC + " " + phiCheren + " " + phiCC + " " + htccPMTs.size());
                                             //The special case of 4 hits, where we need to check if the hits were not in fact only 3
                                             for(int iPMT = 0; iPMT < htccPMTs.size(); iPMT++) {
                                                 int htccSector    = htccPMTs.get(iPMT)[0];
                                                 int htccLayer     = htccPMTs.get(iPMT)[1];
                                                 int htccComponent = htccPMTs.get(iPMT)[2];
                                                 boolean found = false;
-//                                                System.out.println(iPMT + " " + htccSector + " " + htccLayer + " " + htccComponent);
+//                                                LOGGER.log(Level.INFO, iPMT + " " + htccSector + " " + htccLayer + " " + htccComponent);
                                                 for (int k = 0; k < htccADC.rows(); k++) {
                                                     int sector    = htccADC.getByte("sector", k);
                                                     int layer     = htccADC.getByte("layer", k);
                                                     int component = htccADC.getShort("component", k);
-//                                                    System.out.println(k + " " + sector + " " + layer + " " + component);
+//                                                    LOGGER.log(Level.INFO, k + " " + sector + " " + layer + " " + component);
                                                     if( htccSector    == sector && 
                                                         htccLayer     == layer && 
                                                         htccComponent == component) {
                                                         found = true;
-//                                                        System.out.println("Found match in adc bank");
+//                                                        LOGGER.log(Level.INFO, "Found match in adc bank");
                                                     }                                                  
                                                 }
                                                 if(found) {
                                                     htccPMTsMatched.add(htccPMTs.get(iPMT));
                                                 }
 //                                                else {
-//                                                    System.out.println("Removing hit " + iPMT + " among " + htccPMTs.size() + " " + thetaCC + " " +  phiCC + " " + htccSector + "/" + htccLayer+ "/"+htccComponent);
+//                                                    LOGGER.log(Level.INFO, "Removing hit " + iPMT + " among " + htccPMTs.size() + " " + thetaCC + " " +  phiCC + " " + htccSector + "/" + htccLayer+ "/"+htccComponent);
 //                                                    runConfig.show();recCherenkov.show(); htccRec.show();htccADC.show();
 //                                                }
                                             }
-                                            if(htccPMTsMatched.size() != nhits) System.out.println("Mismatch in HTCC cluster size " + runConfig.getInt("event",0) + " " + nhits +"/"+htccPMTsMatched.size()+"/"+htccPMTs.size() + " " + thetaCC + " " +  phiCC);
+                                            if(htccPMTsMatched.size() != nhits) LOGGER.log(Level.INFO, "Mismatch in HTCC cluster size " + runConfig.getInt("event",0) + " " + nhits +"/"+htccPMTsMatched.size()+"/"+htccPMTs.size() + " " + thetaCC + " " +  phiCC);
                                             htcc = this.htccMask(htccPMTsMatched);
                                         }
                                     }
@@ -1071,7 +1072,7 @@ public class TrackDictionaryValidation {
         
         this.dictionary = new HashMap<>();
         
-        System.out.println("\nReading dictionary from file " + fileName);
+        LOGGER.log(Level.INFO, "\nReading dictionary from file " + fileName);
         int nLines = 0;
         int nFull  = 0;
         int nDupli = 0;
@@ -1084,14 +1085,14 @@ public class TrackDictionaryValidation {
             String line = null;
             while ((line = txtreader.readLine()) != null) {
                 nLines++;
-                if(nLines % 1000000 == 0) System.out.println("Read " + nLines + " roads");
+                if(nLines % 1000000 == 0) LOGGER.log(Level.INFO, "Read " + nLines + " roads");
                 String[] lineValues = line.split("\t");
-                ArrayList<Byte> wires = new ArrayList<Byte>();
+                ArrayList<Byte> wires = new ArrayList<>();
                 if(lineValues.length < 51) {
-                    System.out.println("WARNING: dictionary line " + nLines + " incomplete: skipping");
+                    LOGGER.log(Level.INFO, "WARNING: dictionary line " + nLines + " incomplete: skipping");
                 }
                 else {
-//                    System.out.println(line);
+//                    LOGGER.log(Level.INFO, line);
                     int charge   = Integer.parseInt(lineValues[0]);
                     double p     = Double.parseDouble(lineValues[1]);
                     double theta = Double.parseDouble(lineValues[2]);
@@ -1148,8 +1149,8 @@ public class TrackDictionaryValidation {
                     nFull++;
                     if(this.dictionary.containsKey(wires)) {
                         nDupli++;
-                        if(nDupli<10) System.out.println("WARNING: found duplicate road");
-                        else if(nDupli==10) System.out.println("WARNING: reached maximum number of warnings, switching to silent mode");
+                        if(nDupli<10) LOGGER.log(Level.INFO, "WARNING: found duplicate road");
+                        else if(nDupli==10) LOGGER.log(Level.INFO, "WARNING: reached maximum number of warnings, switching to silent mode");
                     }
                     else {
                         this.dictionary.put(wires, road);
@@ -1170,7 +1171,7 @@ public class TrackDictionaryValidation {
                     }
                 }
             }
-            System.out.println("Found " + nLines + " roads with " + nFull + " full ones, " + nDupli + " duplicates and " + this.dictionary.keySet().size() + " good ones");
+            LOGGER.log(Level.INFO, "Found " + nLines + " roads with " + nFull + " full ones, " + nDupli + " duplicates and " + this.dictionary.keySet().size() + " good ones");
         } 
         catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -1255,7 +1256,7 @@ public class TrackDictionaryValidation {
         parser.addOption("-dupli"    , "1", "remove duplicates in dictionary creation, 0=false, 1=true");
         parser.parse(args);
         
-        List<String> arguments = new ArrayList<String>();
+        List<String> arguments = new ArrayList<>();
         for(String item : args){ arguments.add(item); }
         
         String dictionaryFileName = null;
@@ -1271,49 +1272,49 @@ public class TrackDictionaryValidation {
         int pid        = parser.getOption("-pid").intValue();
         int charge     = parser.getOption("-charge").intValue();
         if(Math.abs(charge)>1) {
-            System.out.println("\terror: invalid charge selection");
+            LOGGER.log(Level.INFO, "\terror: invalid charge selection");
             System.exit(1);
         }
         int wireSmear  = parser.getOption("-wire").intValue();
         if(wireSmear<0) {
-            System.out.println("\terror: invalid dc wire smearing, value should be >0");
+            LOGGER.log(Level.INFO, "\terror: invalid dc wire smearing, value should be >0");
             System.exit(1);
         }
         int pcalSmear  = parser.getOption("-strip").intValue();
         if(pcalSmear<0) {
-            System.out.println("\terror: invalid pcal strip smearing, value should be >0");
+            LOGGER.log(Level.INFO, "\terror: invalid pcal strip smearing, value should be >0");
             System.exit(1);
         }
         int sector     = parser.getOption("-sector").intValue();
         if(sector<0 || sector>1) {
-            System.out.println("\terror: invalid sector-dependence option, allowed values are 0=false or 1=true");
+            LOGGER.log(Level.INFO, "\terror: invalid sector-dependence option, allowed values are 0=false or 1=true");
             System.exit(1);
         }
         int mode       = parser.getOption("-mode").intValue();
         if(mode<0 || mode>3) {
-            System.out.println("\terror: invalid test mode, allowed options are 0-DC only, 1-DC-FTOF-pcalU, 2-DC-FTOF-pcalUVW, 3-DC-FTOF-pcalUVW-HTCC");
+            LOGGER.log(Level.INFO, "\terror: invalid test mode, allowed options are 0-DC only, 1-DC-FTOF-pcalU, 2-DC-FTOF-pcalUVW, 3-DC-FTOF-pcalUVW-HTCC");
             System.exit(1);
         }
         int maxEvents  = parser.getOption("-n").intValue();
         int duplicates = parser.getOption("-dupli").intValue();
         if(duplicates<0 || duplicates>1) {
-            System.out.println("\terror: invalid duplicate-removal option, allowed values are 0=false or 1=true");
+            LOGGER.log(Level.INFO, "\terror: invalid duplicate-removal option, allowed values are 0=false or 1=true");
             System.exit(1);
         }
         double thrs    = parser.getOption("-threshold").doubleValue();
         
-        System.out.println("Dictionary file name set to: " + dictionaryFileName);
-        if(parser.containsOptions(arguments, "-c"))   System.out.println("Event file for dictionary creation set to:    " + inputFileName);
-        if(parser.containsOptions(arguments, "-i"))   System.out.println("Event file for dictionary validation set to:  " + testFileName);
-        System.out.println("PID selection for dictionary creation/validation set to:    " + pid);
-        System.out.println("Charge selection for dictionary creation/validation set to: " + charge);
-        System.out.println("Momentum threshold set to:                                  " + thrs);
-        System.out.println("Wire smearing for dictionary validation set to:             " + wireSmear);
-        System.out.println("Pcal smearing for dictionary validation set to:             " + pcalSmear);
-        System.out.println("Sector dependence for dictionary validation set to:         " + sector);
-        System.out.println("Test mode set to:                                           " + mode);
-        System.out.println("Maximum number of events to process set to:                 " + maxEvents);
-        System.out.println("Duplicates remove flag set to:                              " + duplicates);
+        LOGGER.log(Level.INFO, "Dictionary file name set to: " + dictionaryFileName);
+        if(parser.containsOptions(arguments, "-c"))   LOGGER.log(Level.INFO, "Event file for dictionary creation set to:    " + inputFileName);
+        if(parser.containsOptions(arguments, "-i"))   LOGGER.log(Level.INFO, "Event file for dictionary validation set to:  " + testFileName);
+        LOGGER.log(Level.INFO, "PID selection for dictionary creation/validation set to:    " + pid);
+        LOGGER.log(Level.INFO, "Charge selection for dictionary creation/validation set to: " + charge);
+        LOGGER.log(Level.INFO, "Momentum threshold set to:                                  " + thrs);
+        LOGGER.log(Level.INFO, "Wire smearing for dictionary validation set to:             " + wireSmear);
+        LOGGER.log(Level.INFO, "Pcal smearing for dictionary validation set to:             " + pcalSmear);
+        LOGGER.log(Level.INFO, "Sector dependence for dictionary validation set to:         " + sector);
+        LOGGER.log(Level.INFO, "Test mode set to:                                           " + mode);
+        LOGGER.log(Level.INFO, "Maximum number of events to process set to:                 " + maxEvents);
+        LOGGER.log(Level.INFO, "Duplicates remove flag set to:                              " + duplicates);
 //        dictionaryFileName="/Users/devita/tracks_silvia.txt";
 //        inputFileName = "/Users/devita/out_clas_003355.evio.440.hipo";
 //        testFileName  = "/Users/devita/out_clas_003355.evio.440.hipo";
@@ -1345,7 +1346,7 @@ public class TrackDictionaryValidation {
         }
         else {
             parser.printUsage();
-            System.out.println("\n >>>> error : no dictionary specified: specify the road dictionary or choose to create it from file\n");
+            LOGGER.log(Level.INFO, "\n >>>> error : no dictionary specified: specify the road dictionary or choose to create it from file\n");
             System.exit(0);       
         }
 
