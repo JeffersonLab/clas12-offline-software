@@ -56,7 +56,7 @@ $CLARA_HOME/lib/clara/run-clara \
     -o . \
     -z out_ \
     -x . \
-    -t 1 \
+    -t 2 \
     -s kpp \
     $CLARA_HOME/plugins/clas12/config/kpp.yaml \
     ./files.list
