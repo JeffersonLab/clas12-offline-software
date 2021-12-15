@@ -68,6 +68,25 @@ public class EBEngine extends ReconstructionEngine {
         throw new RuntimeException("EBEngine cannot be used directly.  Use EBTBEngine/EBHBEngine instead.");
     }
 
+    public void setOutputBankPrefix(String prefix) {
+        this.setEventBank(prefix+"::Event");
+        this.setParticleBank(prefix+"::Particle");
+        this.setCalorimeterBank(prefix+"::Calorimeter");
+        this.setCherenkovBank(prefix+"::Cherenkov");
+        this.setScintillatorBank(prefix+"::Scintillator");
+        this.setScintClusterBank(prefix+"::ScintExtras");
+        this.setTrackBank(prefix+"::Track");
+        this.setCrossBank(prefix+"::TrackCross");
+        if (!this.getClass().isAssignableFrom(EBHBEngine.class) &&
+            !this.getClass().isAssignableFrom(EBHBAIEngine.class)) {
+            this.setEventBankFT(prefix+"FT::Event");
+            this.setParticleBankFT(prefix+"FT::Particle");
+            this.setCovMatrixBank(prefix+"::CovMat");
+            this.setTrajectoryBank(prefix+"::Traj");        
+        }
+        this.setFTBank(prefix+"::ForwardTagger");
+    }
+
     public boolean processDataEvent(DataEvent de,EBScalers ebs) {
 
         // check run number, get constants from CCDB:
@@ -293,6 +312,10 @@ public class EBEngine extends ReconstructionEngine {
         this.registerOutputBank(ftBank);
         this.registerOutputBank(trajectoryBank);
         this.registerOutputBank(covMatrixBank);
+
+	if (this.getEngineConfigString("outputBankPrefix")!=null) {
+	    this.setOutputBankPrefix(this.getEngineConfigString("outputBankPrefix"));
+        }
 
         requireConstants(EBCCDBConstants.getAllTableNames());
 

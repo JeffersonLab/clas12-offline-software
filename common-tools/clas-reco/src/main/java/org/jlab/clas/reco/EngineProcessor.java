@@ -52,13 +52,14 @@ public class EngineProcessor {
 
         String[] names = new String[]{
             "MAGFIELDS",
-            "DCHB","FTOFHB","EC","HTCC","EBHB",
+            "DCCR","DCHB","FTOFHB","EC","HTCC","EBHB",
             "DCTB","FTOFTB","EBTB"
         };
 
         String[] services = new String[]{
             "org.jlab.clas.swimtools.MagFieldsEngine",
-            "org.jlab.service.dc.DCHBEngine",
+            "org.jlab.service.dc.DCHBClustering",
+            "org.jlab.service.dc.DCHBPostClusterConv",
             "org.jlab.service.ftof.FTOFHBEngine",
             "org.jlab.service.ec.ECEngine",
             "org.jlab.service.htcc.HTCCReconstructionService",
@@ -77,7 +78,7 @@ public class EngineProcessor {
         String[] names = new String[]{
             "MAGFIELDS",
             "FTCAL", "FTHODO", "FTEB",
-            "DCHB","FTOFHB","EC",
+            "DCCR","DCHB","FTOFHB","EC",
             "CVT","CTOF","CND","BAND",
             "HTCC","LTCC","EBHB",
             "DCTB","FMT","FTOFTB","EBTB",
@@ -89,7 +90,8 @@ public class EngineProcessor {
             "org.jlab.rec.ft.cal.FTCALEngine",
             "org.jlab.rec.ft.hodo.FTHODOEngine",
             "org.jlab.rec.ft.FTEBEngine",
-            "org.jlab.service.dc.DCHBEngine",
+            "org.jlab.service.dc.DCHBClustering",
+            "org.jlab.service.dc.DCHBPostClusterConv",
             "org.jlab.service.ftof.FTOFHBEngine",
             "org.jlab.service.ec.ECEngine",
             "org.jlab.rec.cvt.services.CVTReconstruction",

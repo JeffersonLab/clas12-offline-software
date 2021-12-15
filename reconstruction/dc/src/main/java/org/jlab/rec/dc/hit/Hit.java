@@ -22,6 +22,10 @@ public class Hit implements Comparable<Hit> {
     private double _DocaErr;
     // class implements Comparable interface to allow for sorting a collection of hits by wire number values
     public int NNTrkId;
+    public int NNClusId;
+    public double NNTrkP;
+    public double NNTrkTheta;
+    public double NNTrkPhi;
     
     // constructors
     /**
@@ -31,6 +35,7 @@ public class Hit implements Comparable<Hit> {
      * @param layer (1...6)
      * @param wire (1...112)
      * @param TDC TDC
+     * @param Id
      */
     public Hit(int sector, int superlayer, int layer, int wire, int TDC, int Id) {
         this._Sector = sector;
@@ -163,7 +168,7 @@ public class Hit implements Comparable<Hit> {
 
     /**
      *
-     * @param arg0 the other hit
+     * @param arg
      * @return an int used to sort a collection of hits by wire number. Sorting
      * by wire is used in clustering.
      */
@@ -188,6 +193,7 @@ public class Hit implements Comparable<Hit> {
      * @param layer layer number from 1 to 6
      * @param wire wire number from 1 to 112 calculates the center of the cell
      * as a function of wire number in the local superlayer coordinate system.
+     * @return y
      */
     public double calcLocY(int layer, int wire) {
 

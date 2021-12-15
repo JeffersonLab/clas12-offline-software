@@ -126,19 +126,16 @@ public class EBRadioFrequency {
                 if(debugMode>0) this.rfSignals.get(i).print();
             }
             event.appendBank(bankOut);
-            if(debugMode>0) bankOut.show();
-            
             int index = this.hasSignal(rfId);
-            if(index>=0) rfTime= this.rfSignals.get(index).getTime();
-            
+            if(index>=0) rfTime=this.rfSignals.get(index).getTime();           
         }  
         else if(event.hasBank("RUN::rf")) {
             DataBank bank = event.getBank("RUN::rf");
             int rows = bank.rows();
             for(int i = 0; i < rows; i++){
                 if(bank.getShort("id", i)==rfId) rfTime=bank.getFloat("time", i);
+                }
             }
-        }
         
     }
     

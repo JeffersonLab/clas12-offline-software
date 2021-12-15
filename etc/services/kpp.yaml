@@ -14,7 +14,14 @@ services:
     name: FTHODO
   - class: org.jlab.rec.ft.FTEBEngine
     name: FTEB
-  - class: org.jlab.service.dc.DCHBEngine
+# DC clustering: nominal algoritm, filled the cluster bank for ai and conventional tracking
+  - class: org.jlab.service.dc.DCHBClustering
+    name: DCCR
+# This is where the AI plugin would go.  THe AI code reads the HB clusters.  
+  - class: org.jlab.service.mltn.MLTDEngine
+    name: MLTD
+# DC using clustering: regular HB tracking
+  - class: org.jlab.service.dc.DCHBPostClusterConv
     name: DCHB
   - class: org.jlab.service.ftof.FTOFHBEngine
     name: FTOFHB
@@ -34,6 +41,7 @@ services:
     name: LTCC
   - class: org.jlab.service.eb.EBHBEngine
     name: EBHB
+# DC regular TB tracking    
   - class: org.jlab.service.dc.DCTBEngine
     name: DCTB
   - class: org.jlab.service.ftof.FTOFTBEngine
@@ -48,7 +56,6 @@ configuration:
   io-services:
     writer:
       compression: 2
-# settings below are for GEMC, compatible with 4.3.0
   services:
     MAGFIELDS:
       magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
@@ -59,12 +66,12 @@ configuration:
 #      magfieldTorusYShift: "0.0"
 #      magfieldTorusZShift: "0.0"
 # examples of yaml settings for DC services 
-#    DCHB:
+#    DCI:
 #      variation: default
 #      dcGeometryVariation: rga_spring2018
-#      dcUseSTT: "true"
+#      dcT2DFunc: "Polynomial"
 #      dcWireDistortion: "true"
-#    DCTB:
+#    DCRC:
 #      variation: default
 #      dcGeometryVariation: rga_spring2018
 # example of how to set variation and timestamp for a service, uncomment to use

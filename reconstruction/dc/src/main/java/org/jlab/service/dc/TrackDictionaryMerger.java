@@ -21,6 +21,7 @@ public class TrackDictionaryMerger {
     private int nlines;
     private int nfull;
     private int ndupli;            
+    public static Logger LOGGER = Logger.getLogger(TrackDictionaryMerger.class.getName());
     
     public TrackDictionaryMerger(){
 
@@ -41,7 +42,7 @@ public class TrackDictionaryMerger {
     
     public void readDictionary(String fileName) {
         
-        System.out.println("\nReading dictionary from file " + fileName);
+        LOGGER.log(Level.INFO, "\nReading dictionary from file " + fileName);
         int nLines = 0;
         int nFull  = 0;
         int nDupli = 0;
@@ -56,12 +57,12 @@ public class TrackDictionaryMerger {
                 this.nlines++;
                 String[] lineValues;
                 lineValues  = line.split("\t");
-                ArrayList<Byte> wires = new ArrayList<Byte>();
+                ArrayList<Byte> wires = new ArrayList<>();
                 if(lineValues.length < 51) {
-                    System.out.println("WARNING: dictionary line " + nLines + " incomplete: skipping");
+                    LOGGER.log(Level.INFO, "WARNING: dictionary line " + nLines + " incomplete: skipping");
                 }
                 else {
-//                    System.out.println(line);
+//                    LOGGER.log(Level.INFO, line);
                     int charge   = Integer.parseInt(lineValues[0]);
                     double p     = Double.parseDouble(lineValues[1]);
                     double theta = Double.parseDouble(lineValues[2]);
@@ -104,24 +105,23 @@ public class TrackDictionaryMerger {
                     if(this.dictionary.containsKey(wires)) {
                         nDupli++;
                         this.ndupli++;
-                        if(nDupli<10) System.out.println("WARNING: found duplicate road");
-                        else if(nDupli==10) System.out.println("WARNING: reached maximum number of warnings, switching to silent mode");
+                        if(nDupli<10) LOGGER.log(Level.INFO, "WARNING: found duplicate road");
+                        else if(nDupli==10) LOGGER.log(Level.INFO, "WARNING: reached maximum number of warnings, switching to silent mode");
                     }
                     else {
                         this.dictionary.put(wires, road);
                     }
                 }
-                if(nLines % 1000000 == 0) System.out.println("Number of processed/full/duplicates in current file " + nLines + "/" + nFull + "/" + nDupli + " and in merged dictionary " 
+                if(nLines % 1000000 == 0) LOGGER.log(Level.INFO, "Number of processed/full/duplicates in current file " + nLines + "/" + nFull + "/" + nDupli + " and in merged dictionary " 
                                + this.nlines + "/" + this.nfull + "/" + this.ndupli + ", current dictionary size: " + this.dictionary.keySet().size());
             }
-            System.out.println("Number of processed/full/duplicates in current file " + nLines + "/" + nFull + "/" + nDupli + " and in merged dictionary " 
+            LOGGER.log(Level.INFO, "Number of processed/full/duplicates in current file " + nLines + "/" + nFull + "/" + nDupli + " and in merged dictionary " 
                                + this.nlines + "/" + this.nfull + "/" + this.ndupli + ", current dictionary size: " + this.dictionary.keySet().size());
         } 
         catch (FileNotFoundException e) {
             e.printStackTrace();
         } 
         catch (IOException e) {
-            e.printStackTrace();
         } 
    }
     
@@ -195,7 +195,7 @@ public class TrackDictionaryMerger {
             
             if(inputList.isEmpty()==true){
                 parser.printUsage();
-                System.out.println("\n >>>> error : no input file is specified....\n");
+                LOGGER.log(Level.INFO, "\n >>>> error : no input file is specified....\n");
                 System.exit(0);
             }
 
@@ -212,7 +212,7 @@ public class TrackDictionaryMerger {
         }
         else {
             parser.printUsage();
-            System.out.println("\n >>>> error : no dictionary specified: specify the road dictionary or choose to create it from file\n");
+            LOGGER.log(Level.INFO, "\n >>>> error : no dictionary specified: specify the road dictionary or choose to create it from file\n");
             System.exit(0);       
         }
 
