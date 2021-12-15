@@ -7,7 +7,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.rec.fmt.Constants;
 import org.jlab.rec.fmt.cluster.Cluster;
 import org.jlab.rec.fmt.cross.Cross;
-import org.jlab.rec.fmt.hit.FittedHit;
+import org.jlab.rec.fmt.hit.Hit;
 import org.jlab.rec.fmt.track.Track;
 
 /**
@@ -18,7 +18,7 @@ import org.jlab.rec.fmt.track.Track;
  */
 public class RecoBankWriter {
 
-        public static DataBank fillFMTHitsBank(DataEvent event, List<FittedHit> hitlist) {
+        public static DataBank fillFMTHitsBank(DataEvent event, List<Hit> hitlist) {
         DataBank bank = event.createBank("FMT::Hits", hitlist.size());
 
         for (int i = 0; i < hitlist.size(); i++) {
@@ -31,12 +31,14 @@ public class RecoBankWriter {
             bank.setShort("adcIndex",     i, (short) hitlist.get(i).getIndex());
             bank.setShort("clusterIndex", i, (short) hitlist.get(i).getClusterIndex());
             bank.setShort("trackIndex",   i, (short) hitlist.get(i).getTrackIndex());
+            bank.setByte( "status",       i, (byte)  hitlist.get(i).getStatus());
         }
 
         return bank;
     }
 
     /**
+     * @param event
      * @param cluslist the reconstructed list of fitted clusters in the event
      * @return clusters bank
      */
@@ -65,6 +67,7 @@ public class RecoBankWriter {
 
     /**
      *
+     * @param event
      * @param crosses the reconstructed list of crosses in the event
      * @return crosses bank
      */
@@ -127,10 +130,6 @@ public class RecoBankWriter {
                     bank.setFloat("dy",       row, (float) track.getDCTraj(layer).getLocalPosition().y());
                     bank.setFloat("dz",       row, (float) track.getDCTraj(layer).getLocalPosition().z());  
                 }
-//                else {
-//                    System.out.println(layer + " " + track.toString());
-//                    event.getBank("TimeBasedTrkg::Trajectory").show();
-//                }
                 if(track.getFMTTraj(layer)!=null) {
                     bank.setFloat("x",        row, (float) track.getFMTTraj(layer).getPosition().x());
                     bank.setFloat("y",        row, (float) track.getFMTTraj(layer).getPosition().y());
@@ -149,7 +148,7 @@ public class RecoBankWriter {
         return bank;
     }
 
-    public static void appendFMTBanks(DataEvent event, List<FittedHit> fhits, List<Cluster> clusters,
+    public static void appendFMTBanks(DataEvent event, List<Hit> fhits, List<Cluster> clusters,
                                List<Track> tracks) {
 
         if (event == null) return;
