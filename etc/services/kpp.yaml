@@ -23,6 +23,9 @@ services:
 # DC using clustering: regular HB tracking
   - class: org.jlab.service.dc.DCHBPostClusterConv
     name: DCHB
+# DC using clustering on AI hits: NN assisted HB tracking
+  - class: org.jlab.service.dc.DCHBPostClusterAI
+    name: DCHAI
   - class: org.jlab.service.ftof.FTOFHBEngine
     name: FTOFHB
   - class: org.jlab.service.ec.ECEngine
@@ -41,13 +44,22 @@ services:
     name: LTCC
   - class: org.jlab.service.eb.EBHBEngine
     name: EBHB
+  - class: org.jlab.service.eb.EBHBAIEngine
+    name: EBHAI
 # DC regular TB tracking    
   - class: org.jlab.service.dc.DCTBEngine
     name: DCTB
+# DC AI assisted TB tracking    
+  - class: org.jlab.service.dc.DCTBEngineAI
+    name: DCTAI  
+  - class: org.jlab.service.fmt.FMTEngine
+    name: FMT
   - class: org.jlab.service.ftof.FTOFTBEngine
     name: FTOFTB
   - class: org.jlab.service.eb.EBTBEngine
     name: EBTB
+  - class: org.jlab.service.eb.EBTBAIEngine
+    name: EBTAI
   - class: org.jlab.rec.rich.RICHEBEngine
     name: RICH
   - class: org.jlab.service.rtpc.RTPCEngine
@@ -66,14 +78,10 @@ configuration:
 #      magfieldTorusYShift: "0.0"
 #      magfieldTorusZShift: "0.0"
 # examples of yaml settings for DC services 
-#    DCI:
-#      variation: default
+#    DCRC:
 #      dcGeometryVariation: rga_spring2018
 #      dcT2DFunc: "Polynomial"
 #      dcWireDistortion: "true"
-#    DCRC:
-#      variation: default
-#      dcGeometryVariation: rga_spring2018
 # example of how to set variation and timestamp for a service, uncomment to use
 #    EBTB:
 #      variation: default

@@ -52,6 +52,8 @@ services:
 # DC AI assisted TB tracking    
   - class: org.jlab.service.dc.DCTBEngineAI
     name: DCTAI  
+  - class: org.jlab.service.fmt.FMTEngine
+    name: FMT
   - class: org.jlab.service.ftof.FTOFTBEngine
     name: FTOFTB
   - class: org.jlab.service.eb.EBTBEngine
