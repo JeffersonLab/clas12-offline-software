@@ -63,6 +63,7 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
     private Vector3D _l; //svt vector along cluster pseudo-strip direction or bmt vector along cluster pseudo-strip direction in the middle of the arc
     private Vector3D _s; //svt vector perpendicular to cluster pseudo-strip direction in the module plane or bmt vector perpendicular to cluster pseudo-strip in direction tangential to the cluster surface in the middle of the arc
     private Vector3D _n; //svt vector normal to the cluster module plane or bmt vector normal to the cluster surface in the middle of the arc
+    public boolean flagForExclusion = false;
     
 
     public Cluster(DetectorType detector, BMTType type, int sector, int layer, int cid) {
