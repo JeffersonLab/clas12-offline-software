@@ -427,7 +427,7 @@ public class RecUtilities {
                 // if trajectory is valid, look for missing clusters
                 if(traj!=null && bgeo.inDetector(layer, sector, traj)) {
                     double  doca    = Double.POSITIVE_INFINITY; 
-                    // loop over all clusters in the same sector and layer that are noy associated to s track
+                    // loop over all clusters in the same sector and layer that are not associated to s track
                     for(Cluster cls : allClusters) {
                         if(cls.get_AssociatedTrackID()==-1 && cls.get_Sector()==sector && cls.get_Layer()==layer) {
                             double clsDoca = cls.residual(traj); 
@@ -450,7 +450,7 @@ public class RecUtilities {
         // if any lost cluster with doca better than the seed is found, save it
         List<Cluster> clustersOnTrack = new ArrayList<>();
         for(Entry<Integer,Cluster> entry : clusterMap.entrySet()) {
-            if(entry.getValue().get_AssociatedTrackID()==-1) clustersOnTrack.add(entry.getValue());
+            if(entry.getValue().get_AssociatedTrackID()==-1 && entry.getValue().flagForExclusion) clustersOnTrack.add(entry.getValue());
         }
         return clustersOnTrack;
     }

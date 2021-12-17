@@ -49,6 +49,10 @@ public class KFitter extends AKFitter {
             this.chi2=this.calc_chi2(swimmer, sv, mv); 
             if(this.chi2<newchisq) { 
                 KFHelix = sv.setTrackPars();
+                if(KFHelix.getOmega()==0) {
+                    this.setFitFailed=true;
+                    break;
+                }
                 finalStateVec = sv.trackTraj.get(0);
                 finalCovMat   = sv.trackCov.get(0).covMat;
                 this.setTrajectory(sv, mv);

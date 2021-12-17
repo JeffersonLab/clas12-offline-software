@@ -48,6 +48,7 @@ public class CrossMaker {
             if(cl.get_Layer()==Constants.getBMTLayerExcld()
                     && cl.get_Phi0()>Math.toRadians(Constants.getBMTPhiZRangeExcld()[0][0])
                     && cl.get_Phi0()<=Math.toRadians(Constants.getBMTPhiZRangeExcld()[0][1]) ) {
+                cl.flagForExclusion = true;
                 rbmt_Zlayrclus.add(cl); 
             }
         }
@@ -58,6 +59,7 @@ public class CrossMaker {
             if(cl.get_Layer()==Constants.getBMTLayerExcld()
                     && cl.get_Z()>Constants.getBMTPhiZRangeExcld()[1][0]
                     && cl.get_Z()<=Constants.getBMTPhiZRangeExcld()[1][1]) {
+                cl.flagForExclusion = true;
                 rbmt_Clayrclus.add(cl); 
             }
         }
