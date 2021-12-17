@@ -212,7 +212,7 @@ public class DCTBEngine extends DCEngine {
         TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
         TrajectoryFinder trjFind = new TrajectoryFinder();
         for (Track TrackArray1 : TrackArray) {
-            if (TrackArray1 == null || TrackArray1.get_ListOfHBSegments() == null || TrackArray1.get_ListOfHBSegments().size() < 4) {
+            if (TrackArray1 == null || TrackArray1.get_ListOfHBSegments() == null || TrackArray1.get_ListOfHBSegments().size() < 5) {
                 continue;
             }
             TrackArray1.set_MissingSuperlayer(get_Status(TrackArray1));
