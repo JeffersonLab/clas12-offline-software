@@ -336,10 +336,11 @@ public class DCTBEngine extends DCEngine {
         for(int l = 0; l<6; l++) {
             if(L[l]==0){
                 miss=l+1;
-                if(miss%2==0) {//missing sl in 2,4,6
-                    track.setSingleSuperlayer(SegMap.get(l)); //isolated sl in 1,3,5
+                if(miss%2==0 && SegMap.containsKey(l)) {       //missing sl in 2,4,6
+                    track.setSingleSuperlayer(SegMap.get(l));  //isolated sl in 1,3,5
                     LOGGER.log(Level.FINE, "Missing superlayer "+miss+" seg "+SegMap.get(l).printInfo());
-                } else {//missing sl in 1,3,5
+                } 
+                else if(miss%2==1 && SegMap.containsKey(l+2)) { //missing sl in 1,3,5
                     track.setSingleSuperlayer(SegMap.get(l+2)); //isolated sl in 2,4,6
                     LOGGER.log(Level.FINE, "Missing superlayer "+miss+" seg "+track.getSingleSuperlayer().printInfo());
                 }
