@@ -196,7 +196,7 @@ public class KFitter {
             // Update Chi^2 and filtered state vector.
             double h = mv.h(sv.trackTraj.get(k));
             double m = mv.measurements.get(k).centroid;
-            this.chi2 += ((m-h)*(m-h)/mv.measurements.get(k).error);
+            this.chi2 += ((m-h)*(m-h)/mv.measurements.get(k).error/mv.measurements.get(k).error);
 
             double x_filt = sv.trackTraj.get(k).x + K[0] * (m-h);
             double y_filt = sv.trackTraj.get(k).y + K[1] * (m-h);

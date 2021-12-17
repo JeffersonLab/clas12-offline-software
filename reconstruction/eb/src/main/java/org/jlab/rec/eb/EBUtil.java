@@ -18,6 +18,7 @@ public class EBUtil {
      *
      * FIXME:  move float parameters to CCDB
      */
+    @Deprecated
     public static boolean centralNeutralVeto(DetectorParticle p) {
 
         ScintillatorResponse cnd=(ScintillatorResponse)p.getHit(DetectorType.CND);
