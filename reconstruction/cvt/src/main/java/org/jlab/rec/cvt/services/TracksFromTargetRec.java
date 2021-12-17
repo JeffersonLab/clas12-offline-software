@@ -226,7 +226,13 @@ public class TracksFromTargetRec {
         }
         for(int det = 0; det<2; det++) {
             for(Cross c : crosses.get(det)) {
-                if(c.get_AssociatedTrackID()==-1) c.reset(SVTGeom);
+                if(c.get_AssociatedTrackID()==-1) {
+                    c.reset(SVTGeom);
+                    if(det==1 && c.get_Id()>2000) { //if matched cross failed tracking resol requirements, reset its id
+                        c.set_Id(c.get_Id()-1000);
+                    } 
+                }
+                
             }
         }
 

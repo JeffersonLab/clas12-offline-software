@@ -434,12 +434,19 @@ public class RecoBankWriter {
             bank.setFloat("xb", i, (float) (Constants.getXb()/10.0));
             bank.setFloat("yb", i, (float) (Constants.getYb()/10.0));
             // fills the list of cross ids for crosses belonging to that reconstructed track
+             for (int j = 0; j < 9; j++) {
+                String hitStrg = "Cross";
+                hitStrg += (j + 1);
+                hitStrg += "_ID";  
+                bank.setShort(hitStrg, i, (short) -1);
+            }
             for (int j = 0; j < seeds.get(i).get_Crosses().size(); j++) {
                 if(j<9) {
                     String hitStrg = "Cross";
                     hitStrg += (j + 1);
                     hitStrg += "_ID";  //System.out.println(" j "+j+" matched id "+trkcands.get(i).get(j).get_Id());
-                    bank.setShort(hitStrg, i, (short) seeds.get(i).get_Crosses().get(j).get_Id());
+                    if(seeds.get(i).get_Crosses().get(j).get_Id()!=0)
+                        bank.setShort(hitStrg, i, (short) seeds.get(i).get_Crosses().get(j).get_Id());
                 }
             }
             bank.setFloat("circlefit_chi2_per_ndf", i, (float) seeds.get(i).get_circleFitChi2PerNDF());
@@ -528,12 +535,20 @@ public class RecoBankWriter {
                 bank.setFloat("pathlength", i, (float) (trkcands.get(i).get_PathToCTOF() / 10.)); // conversion to cm
             }
             // fills the list of cross ids for crosses belonging to that reconstructed track
+            for (int j = 0; j < 9; j++) {
+                String hitStrg = "Cross";
+                hitStrg += (j + 1);
+                hitStrg += "_ID";  
+                bank.setShort(hitStrg, i, (short) -1);
+                
+            }
             for (int j = 0; j < trkcands.get(i).size(); j++) {
                 if(j<9) {
                     String hitStrg = "Cross";
                     hitStrg += (j + 1);
                     hitStrg += "_ID";  //System.out.println(" j "+j+" matched id "+trkcands.get(i).get(j).get_Id());
-                    bank.setShort(hitStrg, i, (short) trkcands.get(i).get(j).get_Id());
+                    if(trkcands.get(i).get(j).get_Id()!=0)
+                        bank.setShort(hitStrg, i, (short) trkcands.get(i).get(j).get_Id());
                 }
             }
             bank.setShort("status", i, (short) ((short) trkcands.get(i).getStatus()));
@@ -628,7 +643,12 @@ public class RecoBankWriter {
             for (int j = 0; j < cosmics.get(i).size(); j++) {
                 crossIdxArray.add(cosmics.get(i).get(j).get_Id());
             }
-            
+             for (int j = 0; j < 18; j++) {
+                String hitStrg = "Cross";
+                hitStrg += (j + 1);
+                hitStrg += "_ID";  
+                bank.setShort(hitStrg, i, (short) -1);
+            }
 
             for (int j = 0; j < crossIdxArray.size(); j++) { 
                 if(j<18) {

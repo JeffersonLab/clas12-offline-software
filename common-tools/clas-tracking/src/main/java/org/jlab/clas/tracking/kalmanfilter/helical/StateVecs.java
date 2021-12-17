@@ -322,7 +322,8 @@ public class StateVecs extends AStateVecs {
     @Override
     public void transport(int i, int f, StateVec iVec, CovMat icovMat, AMeasVecs.MeasVec mv, Swim swimmer) {
         StateVec fVec = this.transported(i, f, iVec, mv, swimmer);
-
+        //StateVec = fVec;
+        this.trackTraj.put(f, fVec);
         // now transport covMat...
         double dphi0_prm_del_drho = -1. / (fVec.d_rho + iVec.alpha / iVec.kappa) * Math.sin(fVec.phi0 - iVec.phi0);
         double dphi0_prm_del_phi0 = (iVec.d_rho + iVec.alpha / iVec.kappa) / (fVec.d_rho + iVec.alpha / iVec.kappa) * Math.cos(fVec.phi0 - iVec.phi0);
@@ -368,8 +369,7 @@ public class StateVecs extends AStateVecs {
             {drho_prm_del_dz,   dphi0_prm_del_dz,   dkappa_prm_del_dz,    dz_prm_del_dz,   dtanL_prm_del_dz},
             {drho_prm_del_tanL, dphi0_prm_del_tanL, dkappa_prm_del_tanL,  dz_prm_del_tanL, dtanL_prm_del_tanL}
         };
-        //StateVec = fVec;
-        this.trackTraj.put(f, fVec);
+        
         //F = new Matrix();
         //F.set(FMat);
         
@@ -663,9 +663,17 @@ public class StateVecs extends AStateVecs {
                 covKF[ic][ir]=cov[ic][ir];
             }
         }
-    
-        covKF[2][2] = cov[2][2]*600 ;
-
+       //convert from helix to KF representation
+        for(int i = 0; i<5; i++) {
+            for(int j = 0; j<5; j++) {
+                if(i==2)
+                    covKF[i][j]*=Bf.alpha;
+                if(j==2)
+                    covKF[i][j]*=Bf.alpha;
+                
+            }
+        }
+        //covKF[2][2] = cov[2][2]*600 ;
         initCM.covMat = covKF;
         this.trackCov.put(0, initCM);
     }

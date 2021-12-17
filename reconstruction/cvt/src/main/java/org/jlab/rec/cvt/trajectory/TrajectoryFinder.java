@@ -218,9 +218,10 @@ public class TrajectoryFinder {
                 inters = swimmer.SwimGenCylinder(axisP1, axisP2, radius, Constants.SWIMACCURACYBMT/10);
                 if(inters==null) break;
                 double r = Math.sqrt(inters[0]*inters[0]+inters[1]*inters[1]);
+                double Ra = Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]); 
                 path  = path + inters[6];
                 //if(r>(radius - BMTConstants.LYRTHICKN)/10) {
-                StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
+                StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3]/Ra, inters[4]/Ra, inters[5]/Ra);
                 stVec.set_planeIdx(l);  
 //                    double phiPos = Math.atan2(stVec.y(),stVec.x());
 //                    //int sector = bmt_geo.isInSector(BMTRegIdx+1,phiPos, 0);
@@ -265,10 +266,11 @@ public class TrajectoryFinder {
             if(inters!=null) {
                 // update parameters
                 double r = Math.sqrt(inters[0]*inters[0]+inters[1]*inters[1]);
-                    intersPhi   = Math.atan2(inters[4], inters[3]);
-                intersTheta = Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]));
+                intersPhi   = Math.atan2(inters[4], inters[3]);
+                double Ra = Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]);    
+                intersTheta = Math.acos(inters[5]/Ra);
                 path  = path + inters[6];
-                StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
+                StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3]/Ra, inters[4]/Ra, inters[5]/Ra);
                 stVec.set_SurfaceDetector(DetectorType.CTOF.getDetectorId());
                 stVec.set_SurfaceSector(1);
                 stVec.set_SurfaceLayer(1); 
@@ -283,9 +285,10 @@ public class TrajectoryFinder {
         // CND
         if(cnd_geo!=null && inters!=null) {     //  don't swim to CND if swimming to CTOF failed
             for(int ilayer=0; ilayer<cnd_geo.getSector(0).getSuperlayer(0).getNumLayers(); ilayer++) {
+                double Ra = Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]); 
                 // reinitialize swimmer based on last BMT layer
                 double intersPhi   = Math.atan2(inters[4], inters[3]);
-                double intersTheta = Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]));
+                double intersTheta = Math.acos(inters[5]/Ra);
                 swimmer.SetSwimParameters(inters[0], inters[1], inters[2], 
                         Math.toDegrees(intersPhi), Math.toDegrees(intersTheta),
                         trk.get_P(), trk.get_Q(), 
@@ -298,9 +301,10 @@ public class TrajectoryFinder {
                 // update parameters
                 double r = Math.sqrt(inters[0]*inters[0]+inters[1]*inters[1]);
                 intersPhi   = Math.atan2(inters[4], inters[3]);
-                intersTheta = Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]));
+                Ra = Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]); 
+                intersTheta = Math.acos(inters[5]/Ra);
                 path  = path + inters[6];
-                StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
+                StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3]/Ra, inters[4]/Ra, inters[5]/Ra);
                 stVec.set_SurfaceDetector(DetectorType.CND.getDetectorId());
                 stVec.set_SurfaceSector(1);
                 stVec.set_SurfaceLayer(ilayer+1); 
