@@ -5,8 +5,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.jlab.detector.base.DetectorType;
+import org.jlab.clas.swimtools.Swim;
 import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.fmt.Constants;
@@ -43,9 +44,9 @@ public class Track {
     private double _pz;
     private int _NDF;
 
-    private Trajectory[]    _DCtrajs  = new Trajectory[Constants.NLAYERS];
-    private List<Cluster>[] _clusters = new ArrayList[Constants.NLAYERS];
-    private Trajectory[]    _FMTtrajs = new Trajectory[Constants.NLAYERS];
+    private final Trajectory[]    _DCtrajs  = new Trajectory[Constants.NLAYERS];
+    private final List<Cluster>[] _clusters = new ArrayList[Constants.NLAYERS];
+    private final Trajectory[]    _FMTtrajs = new Trajectory[Constants.NLAYERS];
             
     public Track() {
     }
@@ -68,6 +69,7 @@ public class Track {
     
     
     /**
+     * @param layer
      * @return the _traj
      */
     public Trajectory getDCTraj(int layer) {
@@ -76,7 +78,7 @@ public class Track {
     }
 
     /**
-     * @param _traj the _traj to set
+     * @param trj
      */
     public void setDCTraj(Trajectory trj) {
         this._DCtrajs[trj.getLayer()-1] = trj;
@@ -114,7 +116,7 @@ public class Track {
         else return 0;
     }
 
-    public void addCluster(Cluster cluster) {
+    public final void addCluster(Cluster cluster) {
         if(this._clusters[cluster.getLayer()-1]==null)
             this._clusters[cluster.getLayer()-1] = new ArrayList<>();
         this._clusters[cluster.getLayer()-1].add(cluster);
@@ -256,6 +258,13 @@ public class Track {
     }
 
     /**
+     * @return the the tracke momentum
+     */
+    public double getP() {
+        return Math.sqrt(_px*_px+_py*_py+_pz*_pz);
+    }
+
+    /**
      * @return the _px
      */
     public double getPx() {
@@ -360,7 +369,7 @@ public class Track {
         }
     }
     
-    public static List<Track> getDCTracks(DataEvent event) {
+    public static List<Track> getDCTracks(DataEvent event, Swim swimmer) {
         
         Map<Integer, Track> trackmap = new LinkedHashMap<Integer, Track>();        
         
@@ -368,7 +377,7 @@ public class Track {
         DataBank trajBank  = null;
         if(event.hasBank("TimeBasedTrkg::TBTracks"))   trackBank = event.getBank("TimeBasedTrkg::TBTracks");
         if(event.hasBank("TimeBasedTrkg::Trajectory")) trajBank  = event.getBank("TimeBasedTrkg::Trajectory");
-        if (trackBank!=null && trajBank!=null) {
+        if (trackBank!=null) {
         
             for (int i = 0; i < trackBank.rows(); i++) {
                 Track trk = new Track();
@@ -383,23 +392,42 @@ public class Track {
                 trk.setPx(trackBank.getFloat("p0_x", i));
                 trk.setPy(trackBank.getFloat("p0_y", i));
                 trk.setPz(trackBank.getFloat("p0_z", i));
+                trk.setStatus(1);
                 trackmap.put(id,trk);
-            }
-            for (int i = 0; i < trajBank.rows(); i++) {
-                if (trajBank.getByte("detector", i) == DetectorType.FMT.getDetectorId()) { 
-                    int id    = trajBank.getShort("id", i);
-                    int layer = trajBank.getByte("layer", i);
-                    Trajectory trj = new Trajectory(layer,
-                                                    trajBank.getFloat("x", i),
-                                                    trajBank.getFloat("y", i),
-                                                    trajBank.getFloat("z", i),
-                                                    trajBank.getFloat("tx", i),
-                                                    trajBank.getFloat("ty", i),
-                                                    trajBank.getFloat("tz", i),
-                                                    trajBank.getFloat("path", i));
-                    trackmap.get(id).setDCTraj(trj);                
+            
+                for(int j=0; j<Constants.NLAYERS; j++) {
+                    int layer = j+1;
+                    double[] result = getTrajectory(trk.getX(),  trk.getY(),  trk.getZ(),
+                                                    trk.getPx(), trk.getPy(), trk.getPz(),
+                                                    trk.getQ(), layer, swimmer);
+                    if(result!=null) {
+                        Trajectory trj = new Trajectory(layer,
+                                                        result[0],
+                                                        result[1],
+                                                        result[2],
+                                                        result[3]/trk.getP(),
+                                                        result[4]/trk.getP(),
+                                                        result[5]/trk.getP(),
+                                                        result[6]);
+                        trackmap.get(id).setDCTraj(trj); 
+                    }
                 }
             }
+//            for (int i = 0; i < trajBank.rows(); i++) {
+//                if (trajBank.getByte("detector", i) == DetectorType.FMT.getDetectorId()) { 
+//                    int id    = trajBank.getShort("id", i);
+//                    int layer = trajBank.getByte("layer", i);
+//                    Trajectory trj = new Trajectory(layer,
+//                                                    trajBank.getFloat("x", i),
+//                                                    trajBank.getFloat("y", i),
+//                                                    trajBank.getFloat("z", i),
+//                                                    trajBank.getFloat("tx", i),
+//                                                    trajBank.getFloat("ty", i),
+//                                                    trajBank.getFloat("tz", i),
+//                                                    trajBank.getFloat("path", i));
+//                    trackmap.get(id).setDCTraj(trj);                
+//                }
+//            }
         }
         List<Track> tracks = new ArrayList<>();
         for(Entry<Integer,Track> entry: trackmap.entrySet()) {
@@ -408,6 +436,21 @@ public class Track {
         return tracks;
     }
     
+    private static double[] getTrajectory(double x, double y, double z, double px, double py, double pz,
+            int q, int layer, Swim swim) {
+        Vector3D p = Constants.getLayer(layer).getPlane().point().toVector3D();
+        Vector3D n = Constants.getLayer(layer).getPlane().normal();
+        Vector3D v = new Vector3D(x, y, z);
+        double d = p.dot(n);
+        if(v.dot(n)<d) {
+        swim.SetSwimParameters(x, y, z, px, py, pz, q);
+            return swim.SwimToPlaneBoundary(p.dot(n), n, 1);
+        }
+        else {
+            return null;
+        }
+    }
+
     @Override
     public String toString() {
         String str = "FMT track :" + " Index "  + this._index

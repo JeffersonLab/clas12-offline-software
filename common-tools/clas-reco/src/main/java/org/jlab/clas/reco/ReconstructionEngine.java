@@ -35,6 +35,8 @@ import org.json.JSONObject;
  */
 public abstract class ReconstructionEngine implements Engine {
 
+    Logger LOGGER = Logger.getLogger(ReconstructionEngine.class.getName());
+
     public static final String CONFIG_BANK_NAME = "COAT::config";
     
     volatile ConstantsManager                       constantsManager;
@@ -101,7 +103,7 @@ public abstract class ReconstructionEngine implements Engine {
 
     public void requireConstants(List<String> tables){
         if(constManagerMap.containsKey(this.getClass().getName())==false){
-            System.out.println("[ConstantsManager] ---> create a new one for module : " + this.getClass().getName());
+            LOGGER.log(Level.INFO,"[ConstantsManager] ---> create a new one for module : " + this.getClass().getName());
             ConstantsManager manager = new ConstantsManager();
             manager.init(tables);
             constManagerMap.put(this.getClass().getName(), manager);
@@ -134,10 +136,10 @@ public abstract class ReconstructionEngine implements Engine {
         
         if (ed.getMimeType().equals(EngineDataType.JSON.toString())) {
             this.engineConfiguration = (String) ed.getData();
-            System.out.println("[CONFIGURE][" + this.getName() + "] ---> JSON Data : " + this.engineConfiguration);
+            LOGGER.log(Level.INFO,"[CONFIGURE][" + this.getName() + "] ---> JSON Data : " + this.engineConfiguration);
         } else {
             this.engineConfiguration = "";
-            System.out.println("[CONFIGURE][" + this.getName() + "] *** WARNING *** ---> NO JSON Data provided");
+            LOGGER.log(Level.INFO,"[CONFIGURE][" + this.getName() + "] *** WARNING *** ---> NO JSON Data provided");
         }
        
         // store yaml contents for easy access by engines:
@@ -156,7 +158,7 @@ public abstract class ReconstructionEngine implements Engine {
           constManagerMap = new ConcurrentHashMap<>();
       if(engineDictionary == null)
           engineDictionary = new SchemaFactory();
-      System.out.println("--- engine configuration is called " + this.getDescription());
+      LOGGER.log(Level.INFO,"--- engine configuration is called " + this.getDescription());
       try {
           if (this.getEngineConfigString("dropBanks")!=null &&
                   this.getEngineConfigString("dropBanks").equals("true")) {
@@ -164,26 +166,26 @@ public abstract class ReconstructionEngine implements Engine {
           }
           this.init();
       } catch (Exception e){
-          System.out.println("[Wooops] ---> something went wrong with " + this.getDescription());
+          LOGGER.log(Level.SEVERE,"[Wooops] ---> something went wrong with " + this.getDescription());
           e.printStackTrace();
       }
       System.out.println("----> I am doing nothing");
         
-      try {
-          if(engineConfiguration.length()>2){
-              String variation = this.getStringConfigParameter(engineConfiguration, "variation");
-              System.out.println("[CONFIGURE]["+ this.getName() +"] ---->  Setting variation : " + variation);
-              if(variation.length()>2)
-                  this.setVariation(variation);
-              String timestamp = this.getStringConfigParameter(engineConfiguration, "timestamp");
-              System.out.println("[CONFIGURE]["+ this.getName() +"] ---->  Setting timestamp : " + timestamp);
-              if(timestamp.length()>2)
-                  this.setTimeStamp(timestamp);
-          } else {
-              System.out.println("[CONFIGURE][" + this.getName() + "] *** WARNING *** ---> configuration string is too short (" + this.engineConfiguration + ")");
-          }
+        try {
+            if(engineConfiguration.length()>2){
+//                String variation = this.getStringConfigParameter(engineConfiguration, "services", "variation");
+                String variation = this.getStringConfigParameter(engineConfiguration, "variation");
+                LOGGER.log(Level.INFO,"[CONFIGURE]["+ this.getName() +"] ---->  Setting variation : " + variation);
+                if(variation.length()>2) this.setVariation(variation);
+                String timestamp = this.getStringConfigParameter(engineConfiguration, "timestamp");
+                LOGGER.log(Level.INFO,"[CONFIGURE]["+ this.getName() +"] ---->  Setting timestamp : " + timestamp);
+                if(timestamp.length()>2) this.setTimeStamp(timestamp);
+            } else {
+                LOGGER.log(Level.WARNING,"[CONFIGURE][" + this.getName() +"] *** WARNING *** ---> configuration string is too short ("
+                 + this.engineConfiguration + ")");
+            }
         } catch (Exception e){
-            System.out.println("[Engine] " + getName() + " failet to set variation");
+            LOGGER.log(Level.SEVERE,"[Engine] " + getName() + " failed to set variation", e);
         }
         return ed;
     }
@@ -198,7 +200,7 @@ public abstract class ReconstructionEngine implements Engine {
             if(base.has(key)==true){
                 variation = base.getString(key);
             } else {
-                System.out.println("[JSON]" + this.getName() + " **** warning **** does not contain key = " + key);
+                LOGGER.log(Level.WARNING,"[JSON]" + this.getName() + " **** warning **** does not contain key = " + key);
             }
             /*
             js = base.get(key);
@@ -241,7 +243,7 @@ public abstract class ReconstructionEngine implements Engine {
     
     public void setVariation(String variation){
        for(Map.Entry<String,ConstantsManager> entry : constManagerMap.entrySet()){
-           System.out.println("[MAP MANAGER][" + this.getName() + "] ---> Setting " + entry.getKey() + " : variation = "
+           LOGGER.log(Level.INFO,"[MAP MANAGER][" + this.getName() + "] ---> Setting " + entry.getKey() + " : variation = "
                    + variation );
            entry.getValue().setVariation(variation);
        }
@@ -249,7 +251,7 @@ public abstract class ReconstructionEngine implements Engine {
     
     public void setTimeStamp(String timestamp){
         for(Map.Entry<String,ConstantsManager> entry : constManagerMap.entrySet()){
-           System.out.println("[MAP MANAGER][" + this.getName() + "] ---> Setting " + entry.getKey() + " : variation = "
+            LOGGER.log(Level.INFO,"[MAP MANAGER][" + this.getName() + "] ---> Setting " + entry.getKey() + " : variation = "
                    + timestamp );
            entry.getValue().setTimeStamp(timestamp);
        }

@@ -27,6 +27,8 @@ import org.jlab.utils.groups.IndexedTableViewer;
  * @author gavalian
  */
 public class DatabaseConstantProvider implements ConstantProvider {
+
+    Logger LOGGER = Logger.getLogger(DatabaseConstantProvider.class.getName());
     
     private final HashMap<String,String[]> constantContainer = new HashMap<String,String[]>();
     private final boolean PRINT_ALL = true;
@@ -104,6 +106,8 @@ public class DatabaseConstantProvider implements ConstantProvider {
         
         String propCLAS12 = System.getProperty("CLAS12DIR");
         String propCCDB   = System.getProperty("CCDB_DATABASE");
+
+        LOGGER.log(Level.FINE,"ENVIRONMENT : " + envCLAS12 + " " + envCCDB + " " + propCLAS12 + " " + propCCDB);
         
         if(envCCDB!=null&&envCLAS12!=null){
             StringBuilder str = new StringBuilder();
@@ -134,19 +138,19 @@ public class DatabaseConstantProvider implements ConstantProvider {
     
     private void initialize(String address){
         provider = CcdbPackage.createProvider(address);
-        if(debugMode>0){
-            System.out.println("[DB] --->  open connection with : " + address);
-            System.out.println("[DB] --->  database variation   : " + this.variation);
-            System.out.println("[DB] --->  database run number  : " + this.runNumber);
-            System.out.println("[DB] --->  database time stamp  : " + databaseDate);
-        }
+
+        LOGGER.log(Level.INFO, "[DB] --->  open connection with : " + address);
+        LOGGER.log(Level.INFO, "[DB] --->  database variation   : " + this.variation);
+        LOGGER.log(Level.INFO, "[DB] --->  database run number  : " + this.runNumber);
+        LOGGER.log(Level.INFO, "[DB] --->  database time stamp  : " + databaseDate);
+
         
         provider.connect();
         
-        if(provider.isConnected()==true){
-            if(debugMode>0) System.out.println("[DB] --->  database connection  : success");
+        if(provider.isConnected()){
+            LOGGER.log(Level.INFO,"[DB] --->  database connection  : success");
         } else {
-            System.out.println("[DB] --->  database connection  : failed");
+            LOGGER.log(Level.SEVERE,"[DB] --->  database connection  : failed");
         }
         
         provider.setDefaultVariation(variation);
@@ -163,9 +167,9 @@ public class DatabaseConstantProvider implements ConstantProvider {
         try {
             databaseDate = format.parse(timestamp);
         } catch (ParseException ex) {
-            System.out.println("\n\n ***** TIMESTAMP ERROR ***** error parsing timestamp : " + timestamp);
+            LOGGER.log(Level.SEVERE,"\n\n ***** TIMESTAMP ERROR ***** error parsing timestamp : " + timestamp);
             databaseDate = new Date();
-            System.out.println(" ***** TIMESTAMP WARNING ***** setting date to : " + databaseDate);
+            LOGGER.log(Level.WARNING," ***** TIMESTAMP WARNING ***** setting date to : " + databaseDate);
 
         }
     }
@@ -270,8 +274,8 @@ public class DatabaseConstantProvider implements ConstantProvider {
             
             int ncolumns = asgmt.getColumnCount();
             Vector<TypeTableColumn> typecolumn = asgmt.getTypeTable().getColumns();
-            System.out.println("[DB LOAD] ---> loading data table : " + table_name);
-            System.out.println("[DB LOAD] ---> number of columns  : " + typecolumn.size());
+            LOGGER.log(Level.INFO,"[DB LOAD] ---> loading data table : " + table_name);
+            LOGGER.log(Level.INFO,"[DB LOAD] ---> number of columns  : " + typecolumn.size());
             for(int loop = 0; loop < ncolumns; loop++){
                 String name = typecolumn.get(loop).getName();
                 Vector<String> row = asgmt.getColumnValuesString(name);
@@ -286,7 +290,7 @@ public class DatabaseConstantProvider implements ConstantProvider {
                 constantContainer.put(str.toString(), values);
             }
         } catch (Exception e){
-            System.out.println("[DB LOAD] --->  error loading table : " + table_name);
+            LOGGER.log(Level.SEVERE,"[DB LOAD] --->  error loading table : " + table_name, e);
             this.loadTimeErrors++;
         }
     }
@@ -338,7 +342,7 @@ public class DatabaseConstantProvider implements ConstantProvider {
     }
     
     public void disconnect(){
-        System.out.println("[DB] --->  database disconnect  : success");
+        LOGGER.log(Level.INFO,"[DB] --->  database disconnect  : success");
         this.provider.close();
     }
 
