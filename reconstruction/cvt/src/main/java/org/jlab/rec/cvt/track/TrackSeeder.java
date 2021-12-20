@@ -320,7 +320,7 @@ public class TrackSeeder {
         for(Seed mseed : seedScan) { 
             boolean fitStatus = false;
             if(mseed.get_Crosses().size()>=3)
-                fitStatus = mseed.fit(this.sgeo, this.bgeo, 5, false, this.bfield);
+                fitStatus = mseed.fit(this.sgeo, this.bgeo, Constants.SEEDFITITERATIONS, false, this.bfield);
             if (fitStatus) {
                 List<Cross> sameSectorCrosses = this.FindCrossesInSameSectorAsSVTTrk(mseed, bmtC_crosses);
                 BMTmatches.clear();
@@ -333,7 +333,7 @@ public class TrackSeeder {
                 double chi2_Line = Double.POSITIVE_INFINITY;
                 for (Seed bseed : BMTmatches) {
                     //refit using the BMT
-                    fitStatus = bseed.fit(this.sgeo, this.bgeo, 5, false, this.bfield);
+                    fitStatus = bseed.fit(this.sgeo, this.bgeo, Constants.SEEDFITITERATIONS, false, this.bfield);
 
                     if (fitStatus && bseed.get_circleFitChi2PerNDF()<chi2_Circ
                                   && bseed.get_lineFitChi2PerNDF()<chi2_Line

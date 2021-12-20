@@ -69,15 +69,18 @@ public class TracksFromTargetRec {
                 if(Constants.svtSeeding || Constants.excludeLayers) {
                     TrackSeeder trseed2 = new TrackSeeder(SVTGeom, BMTGeom, swimmer);
                     trseed2.unUsedHitsOnly = true;
-                    seeds.addAll( trseed2.findSeed(crosses.get(0), crosses.get(1))); // RDV check for overlaps
+                    seeds.addAll( trseed2.findSeed(crosses.get(0), crosses.get(1)));
                     if(Constants.excludeLayers==true) {
                         seeds = recUtil.reFit(seeds, SVTGeom, BMTGeom, swimmer, trseed, trseed2);
                     }
                 }
                 if(Constants.beamSpotConstraint==false) {
+                    List<Seed> failed = new ArrayList<>();
                     for(Seed s : seeds) {
-                        recUtil.reFitCircle(s,SVTGeom, BMTGeom, 5);
+                        if(!recUtil.reFitCircle(s,SVTGeom, BMTGeom, Constants.SEEDFITITERATIONS))
+                            failed.add(s);
                     }
+                    seeds.removeAll(failed);
                 }
             }
         }

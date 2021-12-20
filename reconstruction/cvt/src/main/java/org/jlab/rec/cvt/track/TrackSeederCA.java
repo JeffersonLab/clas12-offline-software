@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 
 import org.jlab.rec.cvt.bmt.BMTType;
@@ -224,7 +225,7 @@ public class TrackSeederCA {
         //// TODO: TEST TEST TEST
         // test if a first fit to move the SVT crosses helps
 //        for( ArrayList<Cross> acr : xytracks ) {
-//		    Track xycand = fit(acr, svt_geo, 5, false);
+//		    Track xycand = fit(acr, svt_geo, Constants.SEEDFITITERATIONS, false);
 //		    // update
 //        }
         
@@ -236,9 +237,9 @@ public class TrackSeederCA {
 //        System.out.println(seedlist.size());
 	    for (int s = 0; s < seedCrosses.size(); s++) {
 //	    	Collections.sort(seedCrosses.get(s));      // TODO: check why sorting matters
-//                Track cand = fit(seedCrosses.get(s), svt_geo, bmt_geo, 5, false, swimmer);
+//                Track cand = fit(seedCrosses.get(s), svt_geo, bmt_geo, Constants.SEEDFITITERATIONS, false, swimmer);
                 Seed candSeed = new Seed(seedCrosses.get(s));
-                boolean fitStatus = candSeed.fit(sgeo, bgeo, 5, false, bfield);
+                boolean fitStatus = candSeed.fit(sgeo, bgeo, Constants.SEEDFITITERATIONS, false, bfield);
                 if (fitStatus && candSeed.isGood()) {
                     cands.add(candSeed);
                 }

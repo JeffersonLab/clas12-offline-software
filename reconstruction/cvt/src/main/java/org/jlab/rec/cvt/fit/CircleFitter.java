@@ -226,7 +226,9 @@ public class CircleFitter {
         _dca = docaFit + Delta_doca;
         _xpca = _xx0 + _dca * Math.sin(phiFit);
         _ypca = _yy0 - _dca * Math.cos(phiFit);
-
+        if(_rho==0 || Double.isNaN(_rho))
+            return false;
+        
         // corrected chi2
         _chi2 = (1. + _rho * _dca) * (1. + _rho * _dca) * (1. - kappa * delta) * _chi2;
 
