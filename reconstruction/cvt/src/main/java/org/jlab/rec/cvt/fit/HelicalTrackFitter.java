@@ -199,7 +199,7 @@ public class HelicalTrackFitter {
         if(Constants.beamSpotConstraint==true) {    //tune cov mat for beam constraint only; does not work for no-beam-constraint fitting
             for(int i = 0; i<5; i++) {
                 for(int j = 0; j<5; j++) {
-                    fit_covmatrix[0][0]*=Constants.seedCovMatScaleFac[i][j];
+                    fit_covmatrix[0][0]*=Constants.seedCovMatScaleFac[i][j]; // RDV check rescaling of [0][0]
                 }
             }
         } 

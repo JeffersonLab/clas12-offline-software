@@ -55,6 +55,8 @@ public class Constants {
     public static final double COSMICSMINRESIDUALX = 120; // in mm
     public static final double COSMICSMINRESIDUALZ =  12; // in mm
     
+    public static final int SEEDFITITERATIONS = 5;
+    
     public static boolean SVTOnly = false;
 
     public static boolean svtSeeding = true;

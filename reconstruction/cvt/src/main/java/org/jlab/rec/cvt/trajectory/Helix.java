@@ -27,7 +27,6 @@ public class Helix {
     private double _Z0;           // intersect of the helix axis with the z-axis
     private double _tandip;       // tangent of the dip angle
     private double[][] _covmatrix = new double[5][5];
-    public boolean failed = false;
     //error matrix (assuming that the circle fit and line fit parameters are uncorrelated)
     // | d_dca*d_dca                   d_dca*d_phi_at_dca            d_dca*d_curvature        0            0             |
     // | d_phi_at_dca*d_dca     d_phi_at_dca*d_phi_at_dca     d_phi_at_dca*d_curvature        0            0             |
@@ -43,10 +42,6 @@ public class Helix {
         set_Z0(Z0);
         set_tandip(tandip);
         set_covmatrix(covmatrix);
-        if(curvature==0) { 
-            failed = true;
-        }
-
     }
     
     public Helix(double dca, double phi_at_doca, double curvature, double Z0, double tandip ) {
@@ -55,10 +50,6 @@ public class Helix {
         set_curvature(curvature);
         set_Z0(Z0);
         set_tandip(tandip);
-        if(curvature==0) {
-            failed = true;
-        }
-
     }
 
     public double get_dca() {

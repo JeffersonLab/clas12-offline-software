@@ -13,6 +13,7 @@ import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.fit.HelicalTrackFitter;
+import org.jlab.rec.cvt.fit.HelicalTrackFitter.FitStatus;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.trajectory.Helix;
 
@@ -302,9 +303,9 @@ public class Seed implements Comparable<Seed>{
 
             ErrRt.add((double) 0.1);
             
-            fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
+            FitStatus fitStatus = fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
             
-            if (fitTrk.get_helix() == null) { 
+            if (fitStatus!=FitStatus.Successful || fitTrk.get_helix() == null) { 
                 return false;
             }
 
