@@ -445,8 +445,7 @@ public class RecoBankWriter {
                     String hitStrg = "Cross";
                     hitStrg += (j + 1);
                     hitStrg += "_ID";  //System.out.println(" j "+j+" matched id "+trkcands.get(i).get(j).get_Id());
-                    if(seeds.get(i).get_Crosses().get(j).get_Id()!=0)
-                        bank.setShort(hitStrg, i, (short) seeds.get(i).get_Crosses().get(j).get_Id());
+                    bank.setShort(hitStrg, i, (short) seeds.get(i).get_Crosses().get(j).get_Id());
                 }
             }
             bank.setFloat("circlefit_chi2_per_ndf", i, (float) seeds.get(i).get_circleFitChi2PerNDF());
@@ -547,8 +546,7 @@ public class RecoBankWriter {
                     String hitStrg = "Cross";
                     hitStrg += (j + 1);
                     hitStrg += "_ID";  //System.out.println(" j "+j+" matched id "+trkcands.get(i).get(j).get_Id());
-                    if(trkcands.get(i).get(j).get_Id()!=0)
-                        bank.setShort(hitStrg, i, (short) trkcands.get(i).get(j).get_Id());
+                    bank.setShort(hitStrg, i, (short) trkcands.get(i).get(j).get_Id());
                 }
             }
             bank.setShort("status", i, (short) ((short) trkcands.get(i).getStatus()));

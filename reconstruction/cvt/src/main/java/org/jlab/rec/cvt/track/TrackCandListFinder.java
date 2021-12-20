@@ -218,7 +218,7 @@ public class TrackCandListFinder {
     }
 
     /**
-     *
+     * Not used
      * @param crossList the input list of crosses
      * @return an array list of track candidates in the SVT
      */
