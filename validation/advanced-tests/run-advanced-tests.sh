@@ -50,7 +50,7 @@ esac
 if [ $? != 0 ] ; then echo "wget validation files failure" ; exit 1 ; fi
 tar -zxvf twoTrackEvents_809_raw.evio.tar.gz
 
-export JAVA_OPTS=-Djava.util.logging.config.file=../../common-tools/clas-logging/src/main/resources/org/jlab/logging/debug.properties
+export JAVA_OPTS="-Djava.util.logging.config.file=$PWD/../../etc/logging/debug.properties"
 
 # run decoder
 $COAT/bin/decoder -t -0.5 -s 0.0 -i ./twoTrackEvents_809_raw.evio -o ./twoTrackEvents_809.hipo -c 2
@@ -59,7 +59,7 @@ $COAT/bin/decoder -t -0.5 -s 0.0 -i ./twoTrackEvents_809_raw.evio -o ./twoTrackE
 echo "set inputDir $PWD/" > cook.clara
 echo "set outputDir $PWD/" >> cook.clara
 echo "set threads 1" >> cook.clara
-echo "set javaMemory 2" >> cook.clara
+echo "set javaOptions \"-Xmx2g -Djava.util.logging.config.file=$PWD/../../etc/logging/debug.properties\"" >> cook.clara
 echo "set session s_cook" >> cook.clara
 echo "set description d_cook" >> cook.clara
 ls twoTrackEvents_809.hipo > files.list
