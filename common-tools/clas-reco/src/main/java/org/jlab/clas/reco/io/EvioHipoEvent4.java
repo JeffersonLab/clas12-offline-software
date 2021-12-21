@@ -34,7 +34,7 @@ public class EvioHipoEvent4 {
     public EvioHipoEvent4() {
         String dir = ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4");
         schemaFactory.initFromDirectory(dir);
-
+        DefaultLogger.debug();
     }
     
     
