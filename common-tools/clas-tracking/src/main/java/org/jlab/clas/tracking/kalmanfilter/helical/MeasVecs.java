@@ -19,6 +19,11 @@ public class MeasVecs extends AMeasVecs {
         delta_d_a[2]=2*sqrt_epsilon*(stateVec.kappa+1);
         delta_d_a[3]=2*sqrt_epsilon*(stateVec.dz+1);
         delta_d_a[4]=2*sqrt_epsilon*(stateVec.tanL+1);
+//        delta_d_a[0]=2*0.2;
+//        delta_d_a[1]=2*Math.toRadians(0.1);
+//        delta_d_a[2]=2*0.02*(stateVec.kappa);
+//        delta_d_a[3]=2*0.2;
+//        delta_d_a[4]=2*0.01*(stateVec.tanL+1);
         
         for(int i = 0; i < getHval().length; i++)
             getHval()[i] = 0;
@@ -48,6 +53,7 @@ public class MeasVecs extends AMeasVecs {
             SVplus = sv.newStateVecAtMeasSite(stateVec.k, SVplus, mv, swimmer, false);
             SVminus = sv.newStateVecAtMeasSite(stateVec.k, SVminus, mv, swimmer, false);
             Hval[i] = (this.h(stateVec.k, SVplus) - this.h(stateVec.k, SVminus)) / getDelta_d_a()[i] ;
+//            System.out.println(i + " " + getDelta_d_a()[i] + " " + this.h(stateVec.k, SVplus) + " " + this.h(stateVec.k, SVminus) + " " + Hval[i]);
         }
        
         return getHval();

@@ -413,13 +413,13 @@ public class RecoBankWriter {
             bank.setFloat("d0", i, (float) (helix.get_dca()/10.0));
             double[][] covmatrix = helix.get_covmatrix();
             if (covmatrix != null) {
-                bank.setFloat("cov_d02", i, (float) covmatrix[0][0] );
-                bank.setFloat("cov_d0phi0", i, (float) covmatrix[0][1] );
+                bank.setFloat("cov_d02", i, (float) covmatrix[0][0]/10/10 );
+                bank.setFloat("cov_d0phi0", i, (float) covmatrix[0][1]/10 );
                 bank.setFloat("cov_d0rho", i, (float) covmatrix[0][2] );
                 bank.setFloat("cov_phi02", i, (float) covmatrix[1][1] );
-                bank.setFloat("cov_phi0rho", i, (float) covmatrix[1][2] );
-                bank.setFloat("cov_rho2", i, (float) covmatrix[2][2] );
-                bank.setFloat("cov_z02", i, (float) covmatrix[3][3] );
+                bank.setFloat("cov_phi0rho", i, (float) covmatrix[1][2]*10 );
+                bank.setFloat("cov_rho2", i, (float) covmatrix[2][2]*10*10 );
+                bank.setFloat("cov_z02", i, (float) covmatrix[3][3]/10/10 );
                 bank.setFloat("cov_tandip2", i, (float) covmatrix[4][4] );
             } else {
                 bank.setFloat("cov_d02", i, -999);
@@ -506,13 +506,13 @@ public class RecoBankWriter {
             // | 0                              0                             0                       0        d_tandip*d_tandip |X
             double[][] covmatrix = helix.get_covmatrix();
             if (covmatrix != null) {
-                bank.setFloat("cov_d02", i, (float) covmatrix[0][0] );
-                bank.setFloat("cov_d0phi0", i, (float) covmatrix[0][1] );
+                bank.setFloat("cov_d02", i, (float) covmatrix[0][0]/10/10 );
+                bank.setFloat("cov_d0phi0", i, (float) covmatrix[0][1]/10 );
                 bank.setFloat("cov_d0rho", i, (float) covmatrix[0][2] );
                 bank.setFloat("cov_phi02", i, (float) covmatrix[1][1] );
-                bank.setFloat("cov_phi0rho", i, (float) covmatrix[1][2] );
-                bank.setFloat("cov_rho2", i, (float) covmatrix[2][2] );
-                bank.setFloat("cov_z02", i, (float) covmatrix[3][3] );
+                bank.setFloat("cov_phi0rho", i, (float) covmatrix[1][2]*10 );
+                bank.setFloat("cov_rho2", i, (float) covmatrix[2][2]*10*10 );
+                bank.setFloat("cov_z02", i, (float) covmatrix[3][3]/10/10 );
                 bank.setFloat("cov_tandip2", i, (float) covmatrix[4][4] );
             } else {
                 bank.setFloat("cov_d02", i, -999);

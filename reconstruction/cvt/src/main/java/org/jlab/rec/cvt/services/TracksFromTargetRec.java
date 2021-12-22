@@ -74,7 +74,7 @@ public class TracksFromTargetRec {
                         seeds = recUtil.reFit(seeds, SVTGeom, BMTGeom, swimmer, trseed, trseed2);
                     }
                 }
-                if(Constants.beamSpotConstraint==false) {
+                if(Constants.BEAMSPOTCONST==false) {
                     List<Seed> failed = new ArrayList<>();
                     for(Seed s : seeds) {
                         if(!recUtil.reFitCircle(s,SVTGeom, BMTGeom, Constants.SEEDFITITERATIONS))
@@ -115,10 +115,12 @@ public class TracksFromTargetRec {
             v.translateXYZ(Constants.getXb(),
                            Constants.getYb(),
                            0);
-            //Uncomment to force to MC truth:
-            //double[] pars = recUtil.MCtrackPars(event);
-            //v = new Point3D(pars[0],pars[1],pars[2]);
-            //p = new Vector3D(pars[3],pars[4],pars[5]);
+
+            double[] pars = recUtil.MCtrackPars(event);
+            if(Constants.INITFROMMC) {
+                v = new Point3D(pars[0],pars[1],pars[2]);
+                p = new Vector3D(pars[3],pars[4],pars[5]);
+            }
             Helix hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
                             solenoidValue, Constants.getXb(), Constants.getYb(), Helix.Units.MM);
             double[][] cov = seed.get_Helix().get_covmatrix();
@@ -164,7 +166,7 @@ public class TracksFromTargetRec {
                             }
                         }
                         //reset pars
-                        fittedTrack.get_helix().set_dca(-fittedTrack.get_helix().get_dca());
+//                        fittedTrack.get_helix().set_dca(-fittedTrack.get_helix().get_dca()); // RDV check
                         v = fittedTrack.get_helix().getVertex();
                         p = fittedTrack.get_helix().getPXYZ(solenoidValue);
                         charge = (int) (Math.signum(solenoidScale)*fittedTrack.get_helix().get_charge());

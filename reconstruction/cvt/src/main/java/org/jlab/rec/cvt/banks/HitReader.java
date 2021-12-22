@@ -241,8 +241,8 @@ public class HitReader {
                 SvtStrip.set_Line(geo.getStrip(layer, sector, strip));
                 SvtStrip.set_Module(geo.getModule(layer, sector));
                 SvtStrip.set_Normal(geo.getNormal(layer, sector)); 
-                if(layer%2==1) {
-                    SvtStrip.setToverX0(SVTGeometry.getToverX0());
+                if(layer%2==0) {
+                    SvtStrip.setToverX0(2*SVTGeometry.getToverX0());
                     SvtStrip.setZoverA(SVTGeometry.getZoverA());
                     SvtStrip.setMatT(SVTGeometry.getMaterialThickness());
                 }
