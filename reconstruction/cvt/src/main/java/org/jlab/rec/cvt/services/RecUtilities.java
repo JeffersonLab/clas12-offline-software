@@ -86,15 +86,18 @@ public class RecUtilities {
     
     public List<Surface> setMeasVecs(Seed trkcand, Swim swim) {
         //Collections.sort(trkcand.get_Crosses());
-        List<Surface> KFSites = new ArrayList<Surface>();
-        Vector3D u = trkcand.get_Helix().getTrackDirectionAtRadius(Math.sqrt(Constants.getXb()*Constants.getXb()+Constants.getYb()*Constants.getYb()));
-        Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()), u);
-        Surface meas0 = new Surface(pln0,new Point3D(Constants.getXb(),Constants.getYb(),0),
-        new Point3D(Constants.getXb()-300,Constants.getYb(),0), new Point3D(Constants.getXb()+300,Constants.getYb(),0), 
-                Constants.DEFAULTSWIMACC);
+        List<Surface> KFSites = new ArrayList<>();
+        Vector3D u = new Vector3D(0,0,1);
+        Point3D  p = new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset());
+        Plane3D pln0 = new Plane3D(p, u);
+        Surface meas0 = new Surface(pln0,
+                                    new Point3D(p),
+                                    new Point3D(p.x()-300,p.y(),p.z()), 
+                                    new Point3D(p.x()+300,p.y(),p.z()), 
+                                    Constants.DEFAULTSWIMACC);
         meas0.setSector(0);
         meas0.setLayer(0);
-        meas0.setError(trkcand.get_Helix().get_covmatrix()[0][0]);
+        meas0.setError(1);
         KFSites.add(meas0); 
         // SVT measurements
         for (int i = 0; i < trkcand.get_Clusters().size(); i++) { 
@@ -134,7 +137,7 @@ public class RecUtilities {
             SVTGeometry sgeo, BMTGeometry bgeo, Swim swim) {
         if(trkcand.clsMap!=null) trkcand.clsMap.clear(); //VZ: reset cluster map for second pass tracking with isolated SVT clusters
         //Collections.sort(trkcand.get_Crosses());
-        List<Surface> KFSites = new ArrayList<Surface>();
+        List<Surface> KFSites = new ArrayList<>();
         Vector3D u = trkcand.get_ray().get_dirVec();
         Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()), u);
         Surface meas0 = new Surface(pln0,new Point3D(0,0,0),
@@ -144,11 +147,11 @@ public class RecUtilities {
         meas0.setError(1);
         meas0.hemisphere = 1;
         KFSites.add(meas0); 
-        Map<Integer, Cluster> clsMap = new HashMap<Integer, Cluster>();
+        Map<Integer, Cluster> clsMap = new HashMap<>();
         trkcand.sort(Comparator.comparing(Cross::getY).reversed());
         for (int i = 0; i < trkcand.size(); i++) { //SVT
             if(trkcand.get(i).get_Detector()==DetectorType.BST) {
-                List<Cluster> cls = new ArrayList<Cluster>();
+                List<Cluster> cls = new ArrayList<>();
                 
                 if(trkcand.get(i).get_Cluster1()!=null && 
                         trkcand.get(i).get_Cluster2()!=null) { //VZ: modification for pseudocrosses that contain only one cluster

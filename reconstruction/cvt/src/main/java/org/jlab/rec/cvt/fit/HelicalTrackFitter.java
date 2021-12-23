@@ -56,10 +56,10 @@ public class HelicalTrackFitter {
     public HelicalTrackFitter() {
     }
 
-    private List<Double> W = new ArrayList<Double>();
-    private List<Double> P0 = new ArrayList<Double>(2);
-    private List<Double> P1 = new ArrayList<Double>(2);
-    private List<Double> P2 = new ArrayList<Double>(2);
+    private final List<Double> W = new ArrayList<>();
+    private final List<Double> P0 = new ArrayList<>(2);
+    private final List<Double> P1 = new ArrayList<>(2);
+    private final List<Double> P2 = new ArrayList<>(2);
 
     public FitStatus fit(List<Double> X, List<Double> Y, List<Double> Z, List<Double> Rho, List<Double> errRt, List<Double> errRho, List<Double> ErrZ) {
         //  Initialize the various fitter outputs
@@ -183,26 +183,25 @@ public class HelicalTrackFitter {
         //covr[4] =  delta_phi.delta_dca;
         //covr[5] =  delta_dca.delta_dca;
         
-            fit_covmatrix[0][0] = _circlefitpars.cov()[5];
-            fit_covmatrix[1][0] = _circlefitpars.cov()[4];
-            fit_covmatrix[2][0] = _circlefitpars.cov()[2];
-            fit_covmatrix[0][1] = _circlefitpars.cov()[4];
-            fit_covmatrix[1][1] = _circlefitpars.cov()[3];
-            fit_covmatrix[2][1] = _circlefitpars.cov()[1];
-            fit_covmatrix[0][2] = _circlefitpars.cov()[2];
-            fit_covmatrix[1][2] = _circlefitpars.cov()[1];
-            fit_covmatrix[2][2] = _circlefitpars.cov()[0];
-            fit_covmatrix[3][3] = _linefitpars.interceptErr() * _linefitpars.interceptErr();
-            fit_covmatrix[4][4] = _linefitpars.slopeErr() * _linefitpars.slopeErr();
-            fit_covmatrix[3][4] = _linefitpars.SlopeIntercCov();
-            fit_covmatrix[4][3] = _linefitpars.SlopeIntercCov();
-        if(Constants.beamSpotConstraint==true) {    //tune cov mat for beam constraint only; does not work for no-beam-constraint fitting
-            for(int i = 0; i<5; i++) {
-                for(int j = 0; j<5; j++) {
-                    fit_covmatrix[0][0]*=Constants.seedCovMatScaleFac[i][j]; // RDV check rescaling of [0][0]
-                }
+        fit_covmatrix[0][0] = _circlefitpars.cov()[5];
+        fit_covmatrix[1][0] = _circlefitpars.cov()[4];
+        fit_covmatrix[2][0] = _circlefitpars.cov()[2];
+        fit_covmatrix[0][1] = _circlefitpars.cov()[4];
+        fit_covmatrix[1][1] = _circlefitpars.cov()[3];
+        fit_covmatrix[2][1] = _circlefitpars.cov()[1];
+        fit_covmatrix[0][2] = _circlefitpars.cov()[2];
+        fit_covmatrix[1][2] = _circlefitpars.cov()[1];
+        fit_covmatrix[2][2] = _circlefitpars.cov()[0];
+        fit_covmatrix[3][3] = _linefitpars.interceptErr() * _linefitpars.interceptErr();
+        fit_covmatrix[4][4] = _linefitpars.slopeErr() * _linefitpars.slopeErr();
+        fit_covmatrix[3][4] = _linefitpars.SlopeIntercCov();
+        fit_covmatrix[4][3] = _linefitpars.SlopeIntercCov();
+        for(int i = 0; i<5; i++) {
+            for(int j = 0; j<5; j++) {
+                fit_covmatrix[i][j]*=Constants.COVMATSCALEFACT[i][j];
             }
-        } 
+        }
+        
         if(fit_curvature==0) {
             return FitStatus.CircleFitFailed;
         }
