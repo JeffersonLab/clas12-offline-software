@@ -87,7 +87,6 @@ public class Track extends Trajectory implements Comparable<Track> {
         //kfCov[4][4]*=10;
         
         this.get_helix().set_covmatrix(kfCov);
-        //this.get_helix().set_covmatrix(seed.get_Helix().get_covmatrix());
         this.setPXYZ();
         this.setNDF(kf.NDF);
         this.setChi2(kf.chi2);

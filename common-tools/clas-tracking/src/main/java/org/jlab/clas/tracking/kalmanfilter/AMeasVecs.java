@@ -51,9 +51,7 @@ public abstract class AMeasVecs {
         if( this.measurements.get(stateVec.k).surface.type == Type.PLANEWITHPOINT || 
                 this.measurements.get(stateVec.k).surface.type == Type.CYLINDERWITHPOINT) {
             Point3D p = new Point3D(this.measurements.get(stateVec.k).surface.refPoint);
-            p.setZ(0);
-            value = p.distance(stateVec.x, stateVec.y, 0);
-            
+            value = p.distance(stateVec.x, stateVec.y, stateVec.z);
         }
         if( this.measurements.get(stateVec.k).surface.type == Type.CYLINDERWITHARC) {
             double phia = this.measurements.get(stateVec.k).surface.arc.theta();

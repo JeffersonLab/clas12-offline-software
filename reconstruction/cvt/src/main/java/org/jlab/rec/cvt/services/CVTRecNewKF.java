@@ -221,15 +221,20 @@ public class CVTRecNewKF extends ReconstructionEngine {
              System.out.println("["+this.getName()+"] run with both CVT systems (default) ");
         }
 
-        if (this.getEngineConfigString("BeamSpotConst")!=null) {
-            Constants.beamSpotConstraint = Boolean.valueOf(this.getEngineConfigString("BeamSpotConst"));
+        if (this.getEngineConfigString("beamSpotConst")!=null) {
+            Constants.BEAMSPOTCONST = Boolean.valueOf(this.getEngineConfigString("beamSpotConst"));
         }
-        System.out.println("["+this.getName()+"] run with beamSpotConst set to "+Constants.beamSpotConstraint);        
+        System.out.println("["+this.getName()+"] run with beamSpotConst set to "+Constants.BEAMSPOTCONST);        
          
         if (this.getEngineConfigString("kfFilterOn")!=null) {
             Constants.KFFILTERON = Boolean.valueOf(this.getEngineConfigString("kfFilterOn"));
         }
         System.out.println("["+this.getName()+"] run with Kalman-Filter status set to "+Constants.KFFILTERON);
+        
+        if (this.getEngineConfigString("initFromMC")!=null) {
+            Constants.INITFROMMC = Boolean.valueOf(this.getEngineConfigString("initFromMC"));
+        }
+        System.out.println("["+this.getName()+"] initialize KF from true MC information "+Constants.INITFROMMC);
         
         String svtCosmics = this.getEngineConfigString("cosmics");        
         if (svtCosmics!=null) {
@@ -288,8 +293,8 @@ public class CVTRecNewKF extends ReconstructionEngine {
             System.out.println("["+this.getName()+"] run SVT-based seeding set to "+ Constants.svtSeeding);
         }
 
-        if(this.getEngineConfigString("BMTTimeCuts")!=null) {
-            Constants.TIMECUTS = Boolean.parseBoolean(this.getEngineConfigString("BMTTimeCuts"));
+        if(this.getEngineConfigString("timeCuts")!=null) {
+            Constants.TIMECUTS = Boolean.parseBoolean(this.getEngineConfigString("timeCuts"));
             System.out.println("["+this.getName()+"] run BMT timing cuts set to "+ Constants.TIMECUTS);
         }
     }

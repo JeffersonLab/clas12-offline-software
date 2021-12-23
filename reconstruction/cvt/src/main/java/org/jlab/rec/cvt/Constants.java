@@ -8,22 +8,6 @@ import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
 
 public class Constants {
-    static double covd0d0S      = 1./1000.;
-    static double covd0phi0S    = 1./10.;
-    static double covd0rhoS     = 1./10.;
-    static double covphi0phi0S  = 1./100.;
-    static double covphi0rhoS   = 1./10.;
-    static double covrho0rhoS   = 1./100.;
-    static double covz0z0S      = 1./100.;
-    static double covtanLtanLS  = 1.;
-    
-    public static double[][] seedCovMatScaleFac = new double[][]{
-                                                                    {covd0d0S, covd0phi0S, covd0rhoS,1.0,1.0},
-                                                                    {covd0phi0S,covphi0phi0S, covphi0rhoS,1.0,1.0},
-                                                                    {covd0rhoS, covphi0rhoS, covrho0rhoS,1.0,1.0},
-                                                                    {1.0,1.0,1.0, covz0z0S,1.0},
-                                                                    {1.0,1.0,1.0,1.0, covtanLtanLS}
-                                                                };
    
     /**
      * BMTConstants used in the reconstruction
@@ -31,6 +15,22 @@ public class Constants {
     Constants() {
     }
 
+    private static final double COVD0D0      = 1./50.;
+    private static final double COVD0PHI0    = 1./50.;
+    private static final double COVD0RHO     = 1./50.;
+    private static final double COVPHI0PHI0  = 1./50.;
+    private static final double COVPHI0RHO   = 1./50.;
+    private static final double COVRHORHO    = 1./50.;
+    private static final double COVZ0Z0      = 1.;
+    private static final double CONVTANLTANL = 1.;
+    
+    public static double[][] COVMATSCALEFACT = new double[][]{
+                                                                    {COVD0D0, COVD0PHI0, COVD0RHO,1.0,1.0},
+                                                                    {COVD0PHI0,COVPHI0PHI0, COVPHI0RHO,1.0,1.0},
+                                                                    {COVD0RHO, COVPHI0RHO, COVRHORHO,1.0,1.0},
+                                                                    {1.0,1.0,1.0, COVZ0Z0,1.0},
+                                                                    {1.0,1.0,1.0,1.0, CONVTANLTANL}
+                                                                };
     // CONSTANTS USED IN RECONSTRUCTION
     //---------------------------------
     public static boolean isMC = true;
@@ -61,13 +61,14 @@ public class Constants {
 
     public static boolean svtSeeding = true;
 
-    public static boolean TIMECUTS = true;
+    public static boolean TIMECUTS = false;
 
     public static boolean KFFILTERON = true;
+    public static boolean INITFROMMC = false;
 
     public static final boolean TRACKSFROMORIGIN = true;
 
-    public static boolean beamSpotConstraint = true;
+    public static boolean BEAMSPOTCONST = false;
 
     public static Libr kfMatLib;
 

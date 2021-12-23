@@ -216,7 +216,7 @@ public class StateVecs extends AStateVecs {
             t_ov_X0 = t_ov_X0 / cosEntranceAngle;
             if(t_ov_X0!=0) {
             // Highland-Lynch-Dahl formula
-                sctRMS = (0.136/(beta*PhysicsConstants.speedOfLight()*p))*Math.sqrt(t_ov_X0)*
+                sctRMS = (0.0136/(beta*p))*Math.sqrt(t_ov_X0)*
                     (1 + 0.038 * Math.log(t_ov_X0));
              //sctRMS = ((0.141)/(beta*PhysicsConstants.speedOfLight()*p))*Math.sqrt(t_ov_X0)*
              //       (1 + Math.log(t_ov_X0)/9.);
