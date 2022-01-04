@@ -80,6 +80,25 @@ public class MatrixOps {
                 
         return result;
     }
+    public double[][] MatrixSubtraction(Object obj1, Object obj2) {
+        double[][] arr1 = this.ConversionToArray(obj1);
+        double[][] arr2 = this.ConversionToArray(obj2);
+        double[][] result = null;
+        if(arr1==null || arr2==null)
+            return null;
+        if(arr1.length!=arr2.length || arr1[0].length!=arr2[0].length)
+            return null;
+        result = new double[arr1.length][arr1[0].length];
+        for(int r = 0; r< arr1.length; r++) {
+            for(int c = 0; c< arr1[0].length; c++) {
+                result[r][c] = arr1[r][c]-arr2[r][c];
+            }
+        }
+        arr1 = null;
+        arr2 = null;
+                
+        return result;
+    }
     public double[][] MatrixMultiplication(Object obj1, Object obj2) {
         double[][] arr1 = this.ConversionToArray(obj1);
         double[][] arr2 = this.ConversionToArray(obj2);
@@ -102,11 +121,11 @@ public class MatrixOps {
     }
     public double[][] MatrixTranspose(Object obj1) {
         double[][] arr1 = this.ConversionToArray(obj1);
-        double[][] result = null;
         if(arr1==null)
             return null;
         int r =arr1.length; int c=arr1[0].length; 
-        
+        double[][] result = new double[c][r];
+
         for(int i = 0; i < r; i++) {
             for (int j = 0; j < c; j++) {
                 result[i][j] = arr1[j][j];
@@ -192,5 +211,26 @@ public class MatrixOps {
         public byte value() {
             return (byte) this.value;
         }
+    }
+    
+    
+    /**
+     * prints the matrix -- used for debugging
+     *
+     * @param mat matrix
+     * @param message
+     */
+    public static void printMatrix(double[][] mat, String message) {
+        int nrow = mat.length; 
+        int ncol = mat[0].length; 
+
+        System.out.println("\t" + message);
+        for (int ir = 0; ir < nrow; ir++) {
+            for (int ic = 0; ic < ncol; ic++) {
+                System.out.print("\t" + mat[ir][ic]);
+            }
+            System.out.print("\n");
+        }
+        System.out.println();
     }
 }

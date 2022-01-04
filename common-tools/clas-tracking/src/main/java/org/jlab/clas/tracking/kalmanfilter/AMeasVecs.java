@@ -7,11 +7,9 @@ import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec;
 import org.jlab.clas.tracking.objects.Strip;
 import org.jlab.geom.prim.Arc3D;
-import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
-import org.jlab.geom.prim.Vector3D;
 
 /**
  *
@@ -20,9 +18,10 @@ import org.jlab.geom.prim.Vector3D;
 
 public abstract class AMeasVecs {
    
-    public List<MeasVec> measurements = new ArrayList<MeasVec>();
+    public List<MeasVec> measurements = new ArrayList<>();
 
     public void setMeasVecs(List<Surface> measSurfaces) {
+        measurements = new ArrayList<>();
         Collections.sort(measSurfaces);
         for(int i = 0; i < measSurfaces.size(); i++) {
             MeasVec mvec = new MeasVec();
@@ -43,11 +42,17 @@ public abstract class AMeasVecs {
     public double dh(int k, StateVec stateVec) {
         
         double value = Double.NaN;
-        
+
         if (stateVec == null|| this.measurements.get(stateVec.k) == null) {
             return value;
         }
         
+        if (this.measurements.get(stateVec.k).surface.type == Type.LINE) {
+            Point3D sv = new Point3D(stateVec.x, stateVec.y, stateVec.z);
+            Line3D l = new Line3D(this.measurements.get(stateVec.k).surface.lineEndPoint1,
+                                  this.measurements.get(stateVec.k).surface.lineEndPoint2);
+            value = l.distance(sv).length();
+        }
         if( this.measurements.get(stateVec.k).surface.type == Type.PLANEWITHPOINT || 
                 this.measurements.get(stateVec.k).surface.type == Type.CYLINDERWITHPOINT) {
             Point3D p = new Point3D(this.measurements.get(stateVec.k).surface.refPoint);
@@ -108,28 +113,10 @@ public abstract class AMeasVecs {
                 Point3D sv = new Point3D(stateVec.x, stateVec.y, stateVec.z);
                 toLocal.apply(sv);
                 value = sv.toVector3D().phi()-this.measurements.get(stateVec.k).surface.strip.getPhi();
-                if(Math.abs(value)>2*Math.PI) value-=Math.signum(value)*2*Math.PI;
+                if(Math.abs(value)>Math.PI) value-=Math.signum(value)*2*Math.PI;
             }
         }
         return value;
-    }
-    
-    
-    public double getPhiATZ(StateVec stateVec) {
-        Cylindrical3D cyl = this.measurements.get(stateVec.k).surface.cylinder;
-        Line3D cln = this.measurements.get(stateVec.k).surface.cylinder.getAxis();
-        double v = (stateVec.z-cyl.baseArc().center().z())/cln.direction().z();
-        double x = cyl.baseArc().center().x()+v*cln.direction().x();
-        double y = cyl.baseArc().center().y()+v*cln.direction().y();
-        Vector3D n = new Point3D(x, y, stateVec.z).
-                vectorTo(new Point3D(stateVec.x,stateVec.y,stateVec.z)).asUnit();
-        return n.phi();
-    }
-    
-    public double getPhi(StateVec stateVec) {
-        Point3D sv = new Point3D(stateVec.x, stateVec.y, stateVec.z);
-        this.measurements.get(stateVec.k).surface.toLocal().apply(sv);
-        return sv.toVector3D().phi();
     }
       
     public double h(int k, StateVec stateVec) {
@@ -140,6 +127,12 @@ public abstract class AMeasVecs {
             return value;
         }
         
+        if (this.measurements.get(stateVec.k).surface.type == Type.LINE) {
+            Point3D sv = new Point3D(stateVec.x, stateVec.y, stateVec.z);
+            Line3D l = new Line3D(this.measurements.get(stateVec.k).surface.lineEndPoint1,
+                                  this.measurements.get(stateVec.k).surface.lineEndPoint2);
+            value = l.distance(sv).length();
+        }
         if( this.measurements.get(stateVec.k).surface.type == Type.PLANEWITHPOINT || 
                 this.measurements.get(stateVec.k).surface.type == Type.CYLINDERWITHPOINT) {
             Point3D p = new Point3D(this.measurements.get(stateVec.k).surface.refPoint);
@@ -187,18 +180,27 @@ public abstract class AMeasVecs {
                 value = stV.z(); 
             }
             if(this.measurements.get(stateVec.k).surface.strip.type == Strip.Type.PHI) {
-               //value = Math.atan2(stateVec.y, stateVec.x);
-               value = this.getPhi(stateVec);
+                Transformation3D toLocal =this.measurements.get(stateVec.k).surface.toLocal();
+                Point3D sv = new Point3D(stateVec.x, stateVec.y, stateVec.z);
+                toLocal.apply(sv);
+                value = sv.toVector3D().phi()-this.measurements.get(stateVec.k).surface.strip.getPhi();
+                if(Math.abs(value)>Math.PI) value-=Math.signum(value)*2*Math.PI;
             }
+            if(this.measurements.get(stateVec.k).surface.type == Type.LINE) {
+                Point3D sv = new Point3D(stateVec.x, stateVec.y, stateVec.z);
+                Line3D l   = new Line3D(this.measurements.get(stateVec.k).surface.lineEndPoint1, 
+                                        this.measurements.get(stateVec.k).surface.lineEndPoint2);
+                value = l.distance(sv).length();
+            }        
         }
         return value;
     }
 
     public double[] delta_d_a = new double[5];//{1, Math.toRadians(0.25),  0.05, 1, 0.01};
     public double sqrt_epsilon = Math.sqrt(2.2*1.e-16);
+    public double rollBackAngle = Math.toRadians(0.5); // angular shift applied to the stateVec to move it "before" the surface when swimming
     public double[] Hval = new double[5];
-    public abstract double[] H(AStateVecs.StateVec stateVec, AStateVecs sv, MeasVec mv, Swim swimmer, int dir) ;
-    public abstract AStateVecs.StateVec reset(AStateVecs.StateVec SVplus, AStateVecs.StateVec stateVec, AStateVecs sv) ;
+    public abstract double[] H(AStateVecs.StateVec stateVec, AStateVecs sv, MeasVec mv, Swim swimmer) ;
      
     public class MeasVec implements Comparable<MeasVec> {
         public Surface surface;

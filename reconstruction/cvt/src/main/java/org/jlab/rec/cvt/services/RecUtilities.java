@@ -88,16 +88,12 @@ public class RecUtilities {
         //Collections.sort(trkcand.get_Crosses());
         List<Surface> KFSites = new ArrayList<>();
         Vector3D u = new Vector3D(0,0,1);
-        Point3D  p = new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset());
-        Plane3D pln0 = new Plane3D(p, u);
-        Surface meas0 = new Surface(pln0,
-                                    new Point3D(p),
-                                    new Point3D(p.x()-300,p.y(),p.z()), 
-                                    new Point3D(p.x()+300,p.y(),p.z()), 
-                                    Constants.DEFAULTSWIMACC);
+        Point3D  p = new Point3D(Constants.getXb(),Constants.getYb(),0);
+        Line3D   l = new Line3D(p, u);
+        Surface meas0 = new Surface(l.origin(), l.end(), Constants.DEFAULTSWIMACC);
         meas0.setSector(0);
         meas0.setLayer(0);
-        meas0.setError(1);
+        meas0.setError(Constants.getRbErr());
         KFSites.add(meas0); 
         
         // SVT measurements
@@ -145,7 +141,7 @@ public class RecUtilities {
         new Point3D(-300,0,0), new Point3D(300,0,0),Constants.DEFAULTSWIMACC);
         meas0.setSector(0);
         meas0.setLayer(0);
-        meas0.setError(1);
+        meas0.setError(Constants.getRbErr());
         meas0.hemisphere = 1;
         KFSites.add(meas0); 
         Map<Integer, Cluster> clsMap = new HashMap<>();

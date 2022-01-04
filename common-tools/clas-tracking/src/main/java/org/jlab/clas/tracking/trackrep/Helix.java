@@ -39,6 +39,10 @@ public class Helix {
     
     public Units units = Units.CM; //default
     
+    public Helix() {
+        
+    }
+    
     public Helix(double d0, double phi0, double omega, double z0, double tanL,
             int turningSign, double B, double xb, double yb, Units unit) {
         _d0             = d0;
@@ -631,4 +635,11 @@ public class Helix {
     
     private static double LightVel = 0.00299792458;       // velocity of light (um/ns) - conversion factor from radius in cm to momentum in GeV/c 
     private static double unitScale = 1;
+    
+    @Override
+    public String toString() {
+        String s = String.format("    drho=%.4f phi0=%.4f radius=%.4f z0=%.4f tanL=%.4f B=%.4f\n", this._d0, this._phi0, this._R, this._z0, this._tanL, this._B);
+        s       += String.format("    phi=%.4f x=%.4f y=%.4f z=%.4f px=%.4f py=%.4f pz=%.4f", this.tFlightLen, this._x, this._y, this._z, this._px, this._py, this._pz);
+        return s;
+    }
 }

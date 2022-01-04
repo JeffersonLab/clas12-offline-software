@@ -72,7 +72,7 @@ public class SVTGeometry {
     }
     
     public static double getToverX0() {
-        return SVTConstants.SILICONTHK/SVTConstants.SILICONRADLEN;
+        return 2*SVTConstants.SILICONTHK/SVTConstants.SILICONRADLEN;
     }
     
     public static double getMaterialThickness() {

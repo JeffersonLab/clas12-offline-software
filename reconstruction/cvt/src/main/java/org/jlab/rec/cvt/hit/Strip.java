@@ -274,7 +274,7 @@ public class Strip {
             // get the strip number after correcting for Lorentz angle
             int theLorentzCorrectedStrip = geo.getStrip(layer,  sector, line.midpoint());
             this.set_LCStrip(theLorentzCorrectedStrip);
-            
+            // RDV use xyz dependent ThetaLorentz
             double sigma = BMTConstants.SigmaDrift / Math.cos(geo.getThetaLorentz(layer, sector)); // max sigma for drift distance  (hDrift) = total gap from top to mesh
 
             //max phi err

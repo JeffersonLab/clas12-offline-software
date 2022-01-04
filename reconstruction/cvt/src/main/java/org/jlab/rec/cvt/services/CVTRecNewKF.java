@@ -222,9 +222,14 @@ public class CVTRecNewKF extends ReconstructionEngine {
         }
 
         if (this.getEngineConfigString("beamSpotConst")!=null) {
-            Constants.BEAMSPOTCONST = Boolean.valueOf(this.getEngineConfigString("beamSpotConst"));
+            Constants.setBEAMSPOTCONST(Integer.valueOf(this.getEngineConfigString("beamSpotConst")));
         }
-        System.out.println("["+this.getName()+"] run with beamSpotConst set to "+Constants.BEAMSPOTCONST);        
+        System.out.println("["+this.getName()+"] run with beamSpotConst set to "+Constants.getBEAMSPOTCONST()+ " (0=no-constraint, 1=seed only, 2=sed aand KF");        
+         
+        if (this.getEngineConfigString("beamSpotRadius")!=null) {
+            Constants.setRbErr(Double.valueOf(this.getEngineConfigString("beamSpotRadius")));
+        }
+        System.out.println("["+this.getName()+"] run with beam spot size set to "+Constants.getRbErr());        
          
         if (this.getEngineConfigString("kfFilterOn")!=null) {
             Constants.KFFILTERON = Boolean.valueOf(this.getEngineConfigString("kfFilterOn"));
@@ -235,6 +240,11 @@ public class CVTRecNewKF extends ReconstructionEngine {
             Constants.INITFROMMC = Boolean.valueOf(this.getEngineConfigString("initFromMC"));
         }
         System.out.println("["+this.getName()+"] initialize KF from true MC information "+Constants.INITFROMMC);
+        
+        if (this.getEngineConfigString("kfIterations")!=null) {
+            Constants.KFITERATIONS = Integer.valueOf(this.getEngineConfigString("kfIterations"));
+        }
+        System.out.println("["+this.getName()+"] number of KF iterations set to "+Constants.KFITERATIONS);
         
         String svtCosmics = this.getEngineConfigString("cosmics");        
         if (svtCosmics!=null) {

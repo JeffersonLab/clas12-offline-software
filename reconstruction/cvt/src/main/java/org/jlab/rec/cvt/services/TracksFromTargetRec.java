@@ -74,7 +74,7 @@ public class TracksFromTargetRec {
                         seeds = recUtil.reFit(seeds, SVTGeom, BMTGeom, swimmer, trseed, trseed2);
                     }
                 }
-                if(Constants.BEAMSPOTCONST==false) {
+                if(!Constants.seedBeamSpotConstraint()) {
                     List<Seed> failed = new ArrayList<>();
                     for(Seed s : seeds) {
                         if(!recUtil.reFitCircle(s,SVTGeom, BMTGeom, Constants.SEEDFITITERATIONS))
@@ -105,7 +105,7 @@ public class TracksFromTargetRec {
 //        }
         
         trkcands.clear();
-        KFitter kf = null;
+        KFitter kf = new KFitter(Constants.KFFILTERON, Constants.KFITERATIONS, Constants.kfBeamSpotConstraint(), swimmer, Constants.kfMatLib);
         for (Seed seed : seeds) { 
             Point3D  v = seed.get_Helix().getVertex();
             Vector3D p = seed.get_Helix().getPXYZ(solenoidValue);
@@ -120,6 +120,7 @@ public class TracksFromTargetRec {
             if(Constants.INITFROMMC) {
                 v = new Point3D(pars[0],pars[1],pars[2]);
                 p = new Vector3D(pars[3],pars[4],pars[5]);
+                if(solenoidValue<0.001) p.scale(100/p.mag());
             }
             Helix hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
                             solenoidValue, Constants.getXb(), Constants.getYb(), Helix.Units.MM);
@@ -128,16 +129,8 @@ public class TracksFromTargetRec {
             if(solenoidValue>0.001 &&
                     Constants.LIGHTVEL * seed.get_Helix().radius() *solenoidValue<Constants.PTCUT)
                 continue;
-                
-                kf = new KFitter( hlx, cov, event,  swimmer, 
-                    Constants.getXb(), 
-                    Constants.getYb(),
-                    0,
-                    recUtil.setMeasVecs(seed, swimmer)) ;
-                kf.setMatrixLibrary(Constants.kfMatLib);
-                //Uncomment to let track be fitted
-                kf.filterOn=Constants.KFFILTERON;
-                kf.runFitter(swimmer);
+                kf.init(hlx, cov, Constants.getXb(), Constants.getYb(), 0, recUtil.setMeasVecs(seed, swimmer)) ;
+                kf.runFitter();
                 if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null) { 
                     Track fittedTrack = new Track(seed, kf);
                     for(Cross c : fittedTrack) { 
@@ -176,15 +169,8 @@ public class TracksFromTargetRec {
                         hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
                                         solenoidValue, Constants.getXb(), Constants.getYb(), Helix.Units.MM);
 
-                        kf = new KFitter( hlx, cov, event,  swimmer, 
-                            Constants.getXb(), 
-                            Constants.getYb(),
-                            0,
-                            recUtil.setMeasVecs(seed, swimmer)) ;
-                        kf.setMatrixLibrary(Constants.kfMatLib);
-                        //Uncomment to let track be fitted
-                        //kf.filterOn = false;
-                        kf.runFitter(swimmer);
+                        kf.init(hlx, cov, Constants.getXb(), Constants.getYb(), 0, recUtil.setMeasVecs(seed, swimmer)) ;
+                        kf.runFitter();
                         
                         // RDV get rid of added clusters if not true
                         if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null)

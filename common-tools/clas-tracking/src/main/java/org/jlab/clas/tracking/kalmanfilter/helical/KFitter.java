@@ -1,6 +1,5 @@
 package org.jlab.clas.tracking.kalmanfilter.helical;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,78 +10,93 @@ import org.jlab.clas.tracking.kalmanfilter.AStateVecs;
 import org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.clas.tracking.trackrep.Helix;
-import org.jlab.geom.prim.Point3D;
-import org.jlab.io.base.DataEvent;
+import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
 
 /**
  *
  * @author ziegler
  */
 public class KFitter extends AKFitter {
-    public Map<Integer, HitOnTrack> TrjPoints = new HashMap<Integer, HitOnTrack>();
-    StateVecs sv = new StateVecs();
-    MeasVecs mv = new MeasVecs();
-    public StateVecs.StateVec finalStateVec;
-    public double[][] finalCovMat;
-    
+    public Map<Integer, HitOnTrack> TrjPoints = new HashMap<>();
+    private StateVecs sv = new StateVecs();
+    private MeasVecs  mv = new MeasVecs();
+    public StateVecs.StateVec finalStateVec = null;    
     public Helix KFHelix;
-    public KFitter(Helix helix, double[][] cov, DataEvent event, Swim swimmer, double Xb, double Yb, 
-            double Zref, List<Surface> measSurfaces) {
+
+    
+    public KFitter(boolean filter, int iterations, boolean beamspot, Swim swim, Libr mo) {
+        super(filter, iterations, beamspot, swim, mo);
+    }
+        
+    public final void init(Helix helix, double[][] cov, 
+                           double Xb, double Yb, double Zref, 
+                           List<Surface> measSurfaces) {
+        finalStateVec = null;
+        KFHelix = null;
+        this.NDF0 = -5;
+        this.NDF  = -5;
+        this.chi2 = Double.POSITIVE_INFINITY;
+        this.numIter = 0;
+        this.setFitFailed = false;
+        mv.setMeasVecs(measSurfaces);
+        for (int i = 1; i < mv.measurements.size(); i++) {
+            if(mv.measurements.get(i).skip==false) {
+                this.NDF++;
+            }
+        } 
         this.setXb(Xb);
         this.setYb(Yb);
-        this.setTarShift(Zref);
-        this.init(helix, cov, event, swimmer, Xb, Yb, 
-             Zref, sv, mv, measSurfaces);
+        sv.init( helix, cov, Xb, Yb, Zref, this.getSwimmer());
     }
-    public void runFitter(Swim swimmer) {
-        this.runFitter(swimmer, sv, mv);
+        
+    public void runFitter() {
+        this.runFitter(sv, mv);
     }
+    
     @Override
-    public void runFitter(Swim swimmer, AStateVecs sv, AMeasVecs mv) {
-     double newchisq = Double.POSITIVE_INFINITY;
-     
+    public void runFitter(AStateVecs sv, AMeasVecs mv) {
+        
+        StateVecs.StateVec finalSVonPivot = null;
+        double newchisq = Double.POSITIVE_INFINITY;
         for (int it = 0; it < totNumIter; it++) {
-            this.chi2 = 0;
-            this.runFitterIter(swimmer, it, sv, mv);
+            this.runFitterIter(sv, mv);
 
             // chi2
-            this.chi2=this.calc_chi2(swimmer, sv, mv); 
-            if(this.chi2<newchisq) { 
-                KFHelix = sv.setTrackPars();
-                if(KFHelix.getOmega()==0) {
-                    this.setFitFailed=true;
-                    break;
-                }
-                finalStateVec = sv.trackTraj.get(0);
-                finalCovMat   = sv.trackCov.get(0).covMat;
-                this.setTrajectory(sv, mv);
-                setFitFailed = false;
-                if(newchisq-this.chi2<0.1)
-                    break;
-                    
-                newchisq=this.chi2;
-            } else {
-                this.chi2 =newchisq ; 
+            newchisq = this.calc_chi2(sv, mv); 
+            // if curvature is 0, fit failed
+            if(Double.isNaN(newchisq) ||
+               sv.trackTraj.get(0)==null ||
+               sv.trackTraj.get(0).kappa==0 || 
+               Double.isNaN(sv.trackTraj.get(0).kappa)) {
+                this.setFitFailed = true;
                 break;
             }
+            // if chi2 improved and curvature is non-zero, save fit results but continue iterating
+            else if(newchisq < this.chi2) {
+                this.chi2 = newchisq;
+                finalSVonPivot = sv.new StateVec(sv.trackTraj.get(0));
+                this.setTrajectory(sv, mv);
+            }
+            // stop if chi2 got worse
+            else {
+                break;
+            }
+        }
+        if(!this.setFitFailed) {
+            finalStateVec = sv.new StateVec(finalSVonPivot);
+            finalStateVec.setPivot(this.getXb(), this.getYb(), 0);
+            finalStateVec.covMat = this.sv.propagateCovMat(finalSVonPivot, finalStateVec);
+            KFHelix = finalStateVec.getOldHelix();
         }
     }
 
     @Override
-    public void setTrajectory(AStateVecs sv, AMeasVecs mv) {
-        TrjPoints.clear();
-        for (int k = 1; k < sv.trackTraj.size(); k++) {
-            int layer = mv.measurements.get(k).layer;
-            double x = sv.trackTraj.get(k).x;
-            double y = sv.trackTraj.get(k).y;
-            double z = sv.trackTraj.get(k).z;
-            double azi = sv.trackTraj.get(k).phi0 + sv.trackTraj.get(k).phi;
-            double invKappa = 1. / Math.abs(sv.trackTraj.get(k).kappa);
-            double px = -invKappa * Math.sin(azi);
-            double py = invKappa * Math.cos(azi);
-            double pz = invKappa * sv.trackTraj.get(k).tanL;
-            double resi = mv.dh(k, sv.trackTraj.get(k));
-            TrjPoints.put(layer, new HitOnTrack(layer, x, y, z, px, py, pz, resi));
+    public void setTrajectory(AStateVecs s, AMeasVecs mv) {
+        TrjPoints = new HashMap<>();
+        for (int k = 1; k < s.trackTraj.size(); k++) {
+            int layer   = mv.measurements.get(k).layer;
+            double resi = mv.dh(k, s.trackTraj.get(k));
+            TrjPoints.put(layer, new HitOnTrack(layer, s.trackTraj.get(k), resi));
             if(mv.measurements.get(k).skip)
                 TrjPoints.get(layer).isMeasUsed = false;
             //System.out.println(" Traj layer "+layer+" x "+TrjPoints.get(layer).x+" y "+TrjPoints.get(layer).y+" z "+TrjPoints.get(layer).z);
@@ -90,22 +104,25 @@ public class KFitter extends AKFitter {
     }
 
     @Override
-    public void filter(int k, Swim swimmer, int dir, AStateVecs sv, AMeasVecs mv) {
-        if (sv.trackTraj.get(k) != null && sv.trackCov.get(k).covMat != null 
+    public void filter(int k, AStateVecs sv, AMeasVecs mv) {
+        if (sv.trackTraj.get(k) != null && sv.trackTraj.get(k).covMat != null 
                 && mv.measurements.get(k).skip == false && filterOn) {
 
             double[] K = new double[5];
-            double V = mv.measurements.get(k).error;
+            double V = mv.measurements.get(k).error*mv.measurements.get(k).error;
 
             double dh = mv.dh(k, sv.trackTraj.get(k));
-            
+//            System.out.println(dh);
             //get the projector Matrix
-            double[] H = new double[5];
-            H = mv.H(sv.trackTraj.get(k), sv,  mv.measurements.get(k), swimmer, dir);
+            double[] H = mv.H(sv.trackTraj.get(k), sv,  mv.measurements.get(k), this.getSwimmer());
+//            System.out.println(k + " " + mv.measurements.get(k).layer + " " + H[0] + " " + H[1] + " " + H[2] + " " + H[3] + " " + H[4] + " " +dh );
             
-            double[][] CaInv =  mo.filterCovMat(H, sv.trackCov.get(k).covMat, V);
+            if(sv.straight) {
+                sv.trackTraj.get(k).covMat[2][2]=0;
+            }
+            double[][] CaInv =  this.getMatrixOps().filterCovMat(H, sv.trackTraj.get(k).covMat, V);
             if (CaInv != null) {
-                    sv.trackCov.get(k).covMat = CaInv;
+                    sv.trackTraj.get(k).covMat = CaInv;
                 } else {
                     return;
             }
@@ -114,107 +131,46 @@ public class KFitter extends AKFitter {
                 // the gain matrix
                 K[j] = 0;
                 for (int i = 0; i < 5; i++) {
-                    K[j] += H[i] * sv.trackCov.get(k).covMat[j][i] / V;
+                    K[j] += H[i] * sv.trackTraj.get(k).covMat[j][i] / V;
                 } 
             }
-            if(sv.straight == true) {
-                //for (int i = 0; i < 5; i++) {
-                    K[2] = 0;
-                //}
-            }
-            double drho_filt = sv.trackTraj.get(k).d_rho;
-            double phi0_filt = sv.trackTraj.get(k).phi0;
-            double kappa_filt = sv.trackTraj.get(k).kappa;
-            double dz_filt = sv.trackTraj.get(k).dz;
-            double tanL_filt = sv.trackTraj.get(k).tanL;
+
+            StateVec fVec = sv.new StateVec(sv.trackTraj.get(k));
             
             if (!Double.isNaN(dh)) {
-                drho_filt -= K[0] * dh;
-                phi0_filt -= K[1] * dh;
-                kappa_filt -= K[2] * dh;
-                dz_filt -= K[3] * dh;
-                tanL_filt -= K[4] * dh;
+//                for (int j = 0; j < 5; j++) {
+//                    for (int i = 0; i < 5; i++) {
+//                        System.out.print(CaInv[j][i] + " ");
+//                    }
+//                    System.out.println();
+//                }
+//                System.out.println(k + " " + CaInv[0][0] + " " + CaInv[1][1] + " " + CaInv[2][2] + " " + CaInv[3][3] + " " + CaInv[4][4] + " " + V );
+//                System.out.println(k + " " + H[0] + " " + H[1] + " " + H[2] + " " + H[3] + " " + H[4] + " " +dh );
+//                System.out.println(k + " " + K[0] + " " + K[1] + " " + K[2] + " " + K[3] + " " + K[4] + " " +dh );
+                fVec.d_rho -= K[0] * dh;
+                fVec.phi0  -= K[1] * dh;
+                fVec.kappa -= K[2] * dh;
+                fVec.dz    -= K[3] * dh;
+                fVec.tanL  -= K[4] * dh;
             }
-            
-            StateVec fVec = sv.new StateVec(sv.trackTraj.get(k).k);
-            fVec.d_rho = drho_filt;
-            fVec.phi0 = phi0_filt;
-            fVec.kappa = kappa_filt;
-            fVec.dz = dz_filt;
-            fVec.tanL = tanL_filt;
-            fVec.alpha = sv.trackTraj.get(k).alpha;
-            sv.setStateVecPosAtMeasSite(k, fVec, mv.measurements.get(k), swimmer); 
 
-            double dh_filt = mv.dh(k, fVec);  
-            if (Math.abs(dh_filt) < Math.abs(dh) 
-                    && Math.abs(dh_filt)/Math.sqrt(V)<this.getResiCut()) { 
-                sv.trackTraj.get(k).d_rho = drho_filt;
-                sv.trackTraj.get(k).phi0 = phi0_filt;
-                sv.trackTraj.get(k).kappa = kappa_filt;
-                sv.trackTraj.get(k).dz = dz_filt;
-                sv.trackTraj.get(k).tanL = tanL_filt;
-                sv.trackTraj.get(k).phi = fVec.phi;
-                sv.trackTraj.get(k).x = fVec.x;
-                sv.trackTraj.get(k).y = fVec.y;
-                sv.trackTraj.get(k).z = fVec.z;  
+            if(this.getSwimmer()!=null && !sv.straight) fVec.rollBack(mv.rollBackAngle);
+            fVec.updateFromHelix();
+//            sv.printlnStateVec(fVec);
+            sv.setStateVecPosAtMeasSite(fVec, mv.measurements.get(k), this.getSwimmer()); 
+//            sv.printlnStateVec(fVec);
+
+            double dh_filt = mv.dh(k, fVec); 
+//            System.out.println(dh_filt + " " + dh);
+            if (!Double.isNaN(dh_filt) 
+             && Math.abs(dh_filt) < 10*Math.abs(dh) 
+             && Math.abs(dh_filt)/Math.sqrt(V)<this.getResiCut()) { 
+                sv.trackTraj.get(k).copy(fVec);
             } else {
                 this.NDF--;
                 mv.measurements.get(k).skip = true;
             }
         }
     }
-    
-    public void init(Helix helix, double[][] cov, DataEvent event, Swim swimmer, double Xb, double Yb, 
-            double Zref, StateVecs sv, MeasVecs mv, List<Surface> measSurfaces) {
-        sv.shift = Zref;
-        //iCov = cov;
-        mv.setMeasVecs(measSurfaces);
-        if (sv.Layer != null) {
-            sv.Layer.clear();
-        } else {
-            sv.Layer = new ArrayList<Integer>();
-        }
-        if (sv.Sector != null) {
-            sv.Sector.clear();
-        } else {
-            sv.Sector = new ArrayList<Integer>();
-        }
-        if (sv.X0 != null) {
-            sv.X0.clear();
-        } else {
-            sv.X0 = new ArrayList<Double>();
-        }
-        if (sv.Y0 != null) {
-            sv.Y0.clear();
-        } else {
-            sv.Y0 = new ArrayList<Double>();
-        }
-        if (sv.Z0 != null) {
-            sv.Z0.clear();
-        } else {
-            sv.Z0 = new ArrayList<Double>();
-        }
-        //take first plane along beam line with n = y-dir;
-        sv.Layer.add(0);
-        sv.Sector.add(0);
-        sv.X0.add(Xb);
-        sv.Y0.add(Yb);
-        sv.Z0.add(0.0); 
-        this.NDF = -5;
-        for (int i = 1; i < mv.measurements.size(); i++) {
-            sv.Layer.add(mv.measurements.get(i).layer);
-            sv.Sector.add(mv.measurements.get(i).sector);
-            if(mv.measurements.get(i).skip==false) {
-                this.NDF++;
-            }
-            Point3D ref = new Point3D(Xb, Yb, 0.0);
-            sv.X0.add(ref.x());
-            sv.Y0.add(ref.y());
-            sv.Z0.add(ref.z());
-        } 
-        sv.init( helix, cov, this, swimmer);
-
-    }
-
 
 }

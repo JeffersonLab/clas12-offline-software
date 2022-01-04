@@ -16,7 +16,6 @@ import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Transformation3D;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTType;
-import org.jlab.rec.cvt.bmt.BMTConstants;
 import org.jlab.rec.cvt.hit.Strip;
 /**
  * A cluster in the BST consists of an array of hits that are grouped together
@@ -262,8 +261,8 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
                }
                 else if (this.get_Detector()==DetectorType.BMT) { 
                     
-                    if(thehit.newClustering && nbhits>BMTConstants.MAXCLUSSIZE && i>BMTConstants.MAXCLUSSIZE-1) 
-                        continue;
+//                    if(thehit.newClustering && nbhits>BMTConstants.MAXCLUSSIZE && i>BMTConstants.MAXCLUSSIZE-1) 
+//                        continue;
 
                     // for the BMT the analysis distinguishes between C and Z type detectors
                     if (this.get_Type()==BMTType.C) { // C-detectors
@@ -588,7 +587,7 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
                 value = local.z()-this.get_CentroidValue();
             else {
                 value = local.toVector3D().phi()-this.get_CentroidValue();
-                if(Math.abs(value)>2*Math.PI) value-=Math.signum(value)*2*Math.PI;
+                if(Math.abs(value)>Math.PI) value-=Math.signum(value)*2*Math.PI;
             }
         }     
         return value;
@@ -690,7 +689,7 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
             surface.hemisphere = Math.signum(this.center().y());
             surface.setLayer(layerID);
             surface.setSector(this.get_Sector());
-            surface.setError(this.get_Resolution()*this.get_Resolution()); 
+            surface.setError(this.get_Resolution()); 
             surface.setl_over_X0(this.get(0).get_Strip().getToverX0());
             surface.setZ_over_A_times_l(this.get(0).get_Strip().getZoverA()*this.get(0).get_Strip().getMatT());
             surface.setThickness(this.get(0).get_Strip().getMatT());
@@ -700,7 +699,7 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
                 org.jlab.clas.tracking.objects.Strip strp = new org.jlab.clas.tracking.objects.Strip(this.get_Id(), this.get_Centroid(), this.get_CentroidValue());
                 surface = new Surface(this.get(0).get_Strip().get_Tile(), strp, Constants.SWIMACCURACYBMT);
                 double error = this.get_CentroidError();
-                surface.setError(error*error);
+                surface.setError(error);
             }
             else {
                 Point3D point = new Point3D(this.getLine().midpoint());
@@ -708,7 +707,7 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
                 org.jlab.clas.tracking.objects.Strip strp = new org.jlab.clas.tracking.objects.Strip(this.get_Id(), this.get_Centroid(), point.x(), point.y(), this.get_CentroidValue());  
                 surface = new Surface(this.getTile(), strp, Constants.SWIMACCURACYBMT);
                 double error = this.get_CentroidError();///this.getTile().baseArc().radius();
-                surface.setError(error*error);
+                surface.setError(error);
             
             }
             surface.setTransformation(this.toGlobal()); 

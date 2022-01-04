@@ -265,7 +265,7 @@ public class CrossMaker {
     }
 
     /**
-     *
+     * not used
      * @param crosses the crosses in the list
      * @return the crosses that have been flagged as being part of a looper
      * candidate in the SVT

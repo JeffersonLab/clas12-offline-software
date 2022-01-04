@@ -42,6 +42,7 @@ public class Track extends Trajectory implements Comparable<Track> {
     private double   _pathToCTOF;       	// the pathlength from the doca of the track to the z axis to the reference point described above
     private int    _NDF;
     private double _Chi2;
+    private int kfIterations;
     private Map<Integer, HitOnTrack> trajs = null; // map of trajectories indexed by layer, to be filled based on the KF results
 
     
@@ -66,10 +67,11 @@ public class Track extends Trajectory implements Comparable<Track> {
         super(new Helix(kf.KFHelix.getD0(), kf.KFHelix.getPhi0(), kf.KFHelix.getOmega(), 
                         kf.KFHelix.getZ0(), kf.KFHelix.getTanL()));
         this.get_helix().B = kf.KFHelix.getB();
+        this.kfIterations = kf.numIter;
         double c = Constants.LIGHTVEL;
         //convert from kf representation to helix repr
         double alpha = 1. / (c * Math.abs(kf.KFHelix.getB()));
-        double[][] kfCov = kf.finalCovMat;
+        double[][] kfCov = kf.finalStateVec.covMat;
         for(int i = 0; i<5; i++) {
             for(int j = 0; j<5; j++) {
                 if(i==2)
@@ -375,6 +377,10 @@ public class Track extends Trajectory implements Comparable<Track> {
     public final void setChi2(double _Chi2) {
         this._Chi2 = _Chi2;
     }
+
+    public int getKfIterations() {
+        return kfIterations;
+    }
     
     public Map<Integer, HitOnTrack> getTrajectories() {
         return trajs;
@@ -404,7 +410,7 @@ public class Track extends Trajectory implements Comparable<Track> {
                 nBMTC++;
             }
         }
-        return 1000+nSVT*100+nBMTZ*10+nBMTC;
+        return 1000*this.kfIterations+nSVT*100+nBMTZ*10+nBMTC;
     }
     
     private double[][] trackCovMat;

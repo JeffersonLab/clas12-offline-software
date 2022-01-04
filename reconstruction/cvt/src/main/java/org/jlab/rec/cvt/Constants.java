@@ -15,14 +15,14 @@ public class Constants {
     Constants() {
     }
 
-    private static final double COVD0D0      = 1./50.;
-    private static final double COVD0PHI0    = 1./50.;
-    private static final double COVD0RHO     = 1./50.;
-    private static final double COVPHI0PHI0  = 1./50.;
-    private static final double COVPHI0RHO   = 1./50.;
-    private static final double COVRHORHO    = 1./50.;
-    private static final double COVZ0Z0      = 1.;
-    private static final double CONVTANLTANL = 1.;
+    private static final double COVD0D0      = 1.;///50.;
+    private static final double COVD0PHI0    = 1;//./50.;
+    private static final double COVD0RHO     = 1.;///50.;
+    private static final double COVPHI0PHI0  = 1.;///50.;
+    private static final double COVPHI0RHO   = 1.;///50.;
+    private static final double COVRHORHO    = 1.;//50.;
+    private static final double COVZ0Z0      = 10.;
+    private static final double CONVTANLTANL = 10.;
     
     public static double[][] COVMATSCALEFACT = new double[][]{
                                                                     {COVD0D0, COVD0PHI0, COVD0RHO,1.0,1.0},
@@ -65,10 +65,11 @@ public class Constants {
 
     public static boolean KFFILTERON = true;
     public static boolean INITFROMMC = false;
-
+    public static int     KFITERATIONS = 1;
+    
     public static final boolean TRACKSFROMORIGIN = true;
 
-    public static boolean BEAMSPOTCONST = false;
+    private static int BEAMSPOTCONST = 0;
 
     public static Libr kfMatLib;
 
@@ -77,7 +78,7 @@ public class Constants {
     
     private static double _Xb =0;
     private static double _Yb =0;
-    private static double _RbErr = 1./Math.sqrt(12.);
+    private static double _RbErr = 0.3; // mm
     
     private static double _Zoffset = 0;
     
@@ -108,10 +109,26 @@ public class Constants {
         return _RbErr;
     }
 
-    public static synchronized void setRbErr(double RbErr) {
-        _RbErr = RbErr;
+    public static void setRbErr(double value) {
+        _RbErr = value;
     }
 
+    public static int getBEAMSPOTCONST() {
+        return BEAMSPOTCONST;
+    }
+
+    public static void setBEAMSPOTCONST(int BEAMSPOTCONST) {
+        Constants.BEAMSPOTCONST = BEAMSPOTCONST;
+    }
+
+    public static boolean seedBeamSpotConstraint() {
+        return Constants.BEAMSPOTCONST>0;
+    }
+    
+    public static boolean kfBeamSpotConstraint() {
+        return Constants.BEAMSPOTCONST==2;
+    }
+    
     public static double getZoffset() {
         return _Zoffset;
     }

@@ -2,6 +2,7 @@ package org.jlab.rec.cvt.bmt;
 
 import javax.swing.JFrame;
 import java.util.ArrayList;
+import java.util.List;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.geom.prim.Arc3D;
 import org.jlab.geom.prim.Cylindrical3D;
@@ -14,6 +15,7 @@ import static org.jlab.rec.cvt.bmt.BMTConstants.E_DRIFT_FF;
 import static org.jlab.rec.cvt.bmt.BMTConstants.E_DRIFT_MF;
 import static org.jlab.rec.cvt.bmt.Lorentz.getLorentzAngle;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.geom.prim.Transformation3D;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.graphics.EmbeddedCanvasTabbed;
@@ -911,10 +913,15 @@ public class BMTGeometry {
      * @param sector
      * @return 
      */
+    @Deprecated
     public double LorentzAngleCorr(int layer, int sector) {
         return (this.getThickness()/2 * Math.tan(this.getThetaLorentz(layer, sector))) / this.getRadius(layer);
     }
 
+    public List<Surface> getSurfaces() {
+        List<Surface> surfaces = new ArrayList<>();
+        return surfaces;
+    }
 
     /**
      * Executable method: implements checks
@@ -1047,7 +1054,7 @@ public class BMTGeometry {
                     if(BMTGeometry.getDetectorType(layer) == BMTType.Z) {
 //                        measure=newGeo.getZstripPhi(region, sector, seed);
                         double residual=Math.atan2(trajs.get(0).y(),trajs.get(0).x())-measure;
-                        if(Math.abs(residual)>2*Math.PI) residual-=Math.signum(residual)*2*Math.PI;
+                        if(Math.abs(residual)>Math.PI) residual-=Math.signum(residual)*2*Math.PI;
                         dgBMT.getH1F("hiz_res" + region).fill(residual);
 //                              System.out.println(newGeo.getCylinder(layer, sector).getAxis().distance(hit).length() + " " + newGeo.getRadius(layer));
                         dgBMT.getH2F("hiz_res_z" + region).fill(trajs.get(0).z(), residual);

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.tracking.kalmanfilter;
 
 import org.jlab.clas.tracking.objects.Strip;
@@ -109,10 +104,17 @@ public class Surface implements Comparable<Surface> {
         swimAccuracy = accuracy;
     }
 
+    public Surface(Point3D endPoint1, Point3D endPoint2, double accuracy) {
+        type = Type.LINE;
+        lineEndPoint1 = endPoint1;
+        lineEndPoint2 = endPoint2;
+        swimAccuracy = accuracy;
+    }
+
     @Override
     public String toString() {
         String s = "Surface: ";
-        s = s + String.format("Layer=%d  Sector=%d  Emisphere=%.1f X0=%.4f  Z/AL=%.4f  Error=%.4f",this.getLayer(),this.getSector(),this.hemisphere,this.getl_over_X0(),this.getZ_over_A_times_l(),this.getError());
+        s = s + String.format("Type=%s Layer=%d  Sector=%d  Emisphere=%.1f X0=%.4f  Z/AL=%.4f  Error=%.4f",this.type.name(),this.getLayer(),this.getSector(),this.hemisphere,this.getl_over_X0(),this.getZ_over_A_times_l(),this.getError());
         if(type==Type.PLANEWITHSTRIP) {
             s = s + "\n\t" + this.plane.toString();
             s = s + "\n\t" + this.finitePlaneCorner1.toString();
@@ -122,6 +124,10 @@ public class Surface implements Comparable<Surface> {
         else if(type==Type.CYLINDERWITHSTRIP) {
             s = s + "\n\t" + this.cylinder.toString();
             s = s + "\n\t" + this.strip.toString();
+        }
+        else if(type==Type.LINE) {
+            s = s + "\n\t" + this.lineEndPoint1.toString();
+            s = s + "\n\t" + this.lineEndPoint2.toString();
         }
         return s;
     }

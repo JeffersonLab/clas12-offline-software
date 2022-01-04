@@ -102,7 +102,7 @@ public class CosmicTracksRec {
             List<Cross> bmtCrosses = new ArrayList<>();
             List<Cross> bmtCrossesRm = new ArrayList<>();
             
-            KFitter kf = null;
+            KFitter kf = new KFitter(Constants.KFFILTERON, Constants.KFITERATIONS, Constants.kfBeamSpotConstraint(), Constants.kfMatLib);
             
             // uncomment to initiali KF with MC track parameters
 //            double[] pars = recUtil.MCtrackPars(event);
@@ -119,11 +119,10 @@ public class CosmicTracksRec {
                 cov[2][2]=ray.get_yxslopeErr();
                 cov[3][3]=ray.get_yzslopeErr();
                 cov[4][4]=1;
-                kf = new KFitter( ray.get_yxinterc(),ray.get_yzinterc(),
-                                  ray.get_yxslope(), ray.get_yzslope(), 10.0, cov, kf,
-                                  recUtil.setMeasVecs(cosmics.get(k1), SVTGeom, BMTGeom, swimmer )) ;
-//                kf.filterOn=false;
-                kf.runFitter(swimmer);
+                kf.init(ray.get_yxinterc(),ray.get_yzinterc(),
+                        ray.get_yxslope(), ray.get_yzslope(), 10.0, cov,
+                        recUtil.setMeasVecs(cosmics.get(k1), SVTGeom, BMTGeom, swimmer )) ;
+                kf.runFitter();
                 Map<Integer, KFitter.HitOnTrack> traj = kf.TrjPoints; 
                 List<Integer> keys = new ArrayList<>();
                 traj.forEach((key,value) -> keys.add(key));
@@ -133,8 +132,8 @@ public class CosmicTracksRec {
                 Ray the_ray = new Ray(kf.yx_slope, kf.yx_interc, kf.yz_slope, kf.yz_interc);                
                 cosmics.get(k1).set_ray(the_ray);
                 cosmics.get(k1).update_Crosses(cosmics.get(k1).get_ray(), SVTGeom);
-                double chi2 = cosmics.get(k1).calc_straightTrkChi2(); 
-                cosmics.get(k1).set_chi2(chi2);
+//                double chi2 = cosmics.get(k1).calc_straightTrkChi2(); 
+                cosmics.get(k1).set_chi2(kf.chi2); // RDV why recalculating chi2 and not just used what given by the last KF iteration?
                 
                 TrajectoryFinder trjFind = new TrajectoryFinder();
                 
@@ -188,11 +187,10 @@ public class CosmicTracksRec {
                     }
                     cosmics.get(k1).addAll(pseudoCrosses); //VZ check for additional clusters, and only then re-run KF adding new clusters                    
                     //refit
-                    kf = new KFitter( the_ray.get_yxinterc(),the_ray.get_yzinterc(),
-                                  the_ray.get_yxslope(), the_ray.get_yzslope(), 10.0, cov, kf,
-                                  recUtil.setMeasVecs(cosmics.get(k1), SVTGeom, BMTGeom, swimmer )) ;
- //                kf.filterOn=false;
-                    kf.runFitter(swimmer);
+                    kf.init(the_ray.get_yxinterc(),the_ray.get_yzinterc(),
+                            the_ray.get_yxslope(), the_ray.get_yzslope(), 10.0, cov,
+                            recUtil.setMeasVecs(cosmics.get(k1), SVTGeom, BMTGeom, swimmer )) ;
+                    kf.runFitter();
                     
                     Map<Integer, KFitter.HitOnTrack> traj2 = kf.TrjPoints; 
                     List<Integer> keys2 = new ArrayList<>();
@@ -204,8 +202,8 @@ public class CosmicTracksRec {
                     cosmics.get(k1).set_ray(the_ray);
                     cosmics.get(k1).removeAll(pseudoCrosses);
                     cosmics.get(k1).update_Crosses(cosmics.get(k1).get_ray(), SVTGeom);
-                    chi2 = cosmics.get(k1).calc_straightTrkChi2(); 
-                    cosmics.get(k1).set_chi2(chi2);
+//                    chi2 = cosmics.get(k1).calc_straightTrkChi2(); // RDV why recalculating chi2 and not just used what given by the last KF iteration?
+                    cosmics.get(k1).set_chi2(kf.chi2);
                     
                     ntraj = trjFind.findTrajectory(k1+1, cosmics.get(k1).get_ray(), cosmics.get(k1), SVTGeom, BMTGeom);
                     cosmics.get(k1).set_Trajectory(ntraj.get_Trajectory());
