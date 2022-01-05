@@ -117,9 +117,6 @@ public class KFitter extends AKFitter {
             double[] H = mv.H(sv.trackTraj.get(k), sv,  mv.measurements.get(k), this.getSwimmer());
 //            System.out.println(k + " " + mv.measurements.get(k).layer + " " + H[0] + " " + H[1] + " " + H[2] + " " + H[3] + " " + H[4] + " " +dh );
             
-            if(sv.straight) {
-                sv.trackTraj.get(k).covMat[2][2]=0;
-            }
             double[][] CaInv =  this.getMatrixOps().filterCovMat(H, sv.trackTraj.get(k).covMat, V);
             if (CaInv != null) {
                     sv.trackTraj.get(k).covMat = CaInv;
@@ -133,6 +130,9 @@ public class KFitter extends AKFitter {
                 for (int i = 0; i < 5; i++) {
                     K[j] += H[i] * sv.trackTraj.get(k).covMat[j][i] / V;
                 } 
+            }
+            if(sv.straight) {
+                    K[2] = 0;
             }
 
             StateVec fVec = sv.new StateVec(sv.trackTraj.get(k));

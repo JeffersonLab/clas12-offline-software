@@ -67,6 +67,10 @@ public class MeasVecs extends AMeasVecs {
                 SVplus.rollBack(rollBackAngle);
                 SVminus.rollBack(rollBackAngle);
             }
+            else {
+                SVplus.toDoca();
+                SVminus.toDoca();
+            }
             sv.setStateVecPosAtMeasSite(SVplus,  mv, null);
             sv.setStateVecPosAtMeasSite(SVminus, mv, null);
 //            sv.printlnStateVec(SVplus);

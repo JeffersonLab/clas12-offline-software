@@ -149,7 +149,7 @@ public class StateVecs extends AStateVecs {
         }
         sv.k = mv.k;
         if(swimmer!=null && !this.straight) sv.alpha = new B(sv.k, sv.x, sv.y, sv.z, swimmer).alpha;
-        sv.pivotTransform();
+        if(!this.straight) sv.pivotTransform(); //for straight tracks, keep the same pivot since F matrix is fixed anyway
         return true;
     }
           
@@ -159,7 +159,7 @@ public class StateVecs extends AStateVecs {
         double[][] FMat = new double[][]{
                                         {1, 0, 0, 0, 0},
                                         {0, 1, 0, 0, 0},
-                                        {0, 0, 0, 0, 0},
+                                        {0, 0, 1, 0, 0},
                                         {0, 0, 0, 1, 0},
                                         {0, 0, 0, 0, 1}
                                         };
@@ -429,11 +429,22 @@ public class StateVecs extends AStateVecs {
         this.yref = yref;
         this.zref = zref;
         
-        //init stateVec, pivot set to current vertex
+        if(Math.abs(helix.getB())<0.001)
+           this.straight = true;
+        //        System.out.println(this.straight);
+
+        //init stateVec, pivot set to current vertex for field-on and to the reference for straight tracks
         initSV = new StateVec(0);
-        initSV.x0 = helix.getX();
-        initSV.y0 = helix.getY();
-        initSV.z0 = helix.getZ();
+        if(this.straight) {
+            initSV.x0 = xref;
+            initSV.y0 = yref;
+            initSV.z0 = zref;
+        }
+        else {
+            initSV.x0 = helix.getX();
+            initSV.y0 = helix.getY();
+            initSV.z0 = helix.getZ();           
+        }
         initSV.x  = helix.getX();
         initSV.y  = helix.getY();
         initSV.z  = helix.getZ();
@@ -442,9 +453,6 @@ public class StateVecs extends AStateVecs {
         initSV.pz = helix.getPz();
 //        this.printlnStateVec(initSV);
 
-        if(Math.abs(helix.getB())<0.001)
-           this.straight = true;
-//        System.out.println(this.straight);
         // set bfield according to input helix for consistency
         initSV.alpha = 1/(helix.getB()*helix.getLIGHTVEL());
         // set kappa to define the charge

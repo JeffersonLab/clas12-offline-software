@@ -225,8 +225,8 @@ public abstract class AStateVecs {
         }
         
         public void updateFromHelix() {
-            this.x = x0 + (this.d_rho + this.alpha / this.kappa) * Math.cos(this.phi0) - this.alpha / this.kappa * Math.cos(this.phi0 + this.phi);
-            this.y = y0 + (this.d_rho + this.alpha / this.kappa) * Math.sin(this.phi0) - this.alpha / this.kappa * Math.sin(this.phi0 + this.phi);
+            this.x = x0 + this.d_rho * Math.cos(this.phi0) + this.alpha / this.kappa * (Math.cos(this.phi0) - Math.cos(this.phi0 + this.phi));
+            this.y = y0 + this.d_rho * Math.sin(this.phi0) + this.alpha / this.kappa * (Math.sin(this.phi0) - Math.sin(this.phi0 + this.phi));
             this.z = z0 + this.dz - this.alpha / this.kappa * this.tanL * this.phi;
             this.px = -Math.sin(this.phi0 + this.phi) / Math.abs(this.kappa);
             this.py = Math.cos(this.phi0 + this.phi) / Math.abs(this.kappa);
