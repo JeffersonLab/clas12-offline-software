@@ -224,7 +224,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
         if (this.getEngineConfigString("beamSpotConst")!=null) {
             Constants.setBEAMSPOTCONST(Integer.valueOf(this.getEngineConfigString("beamSpotConst")));
         }
-        System.out.println("["+this.getName()+"] run with beamSpotConst set to "+Constants.getBEAMSPOTCONST()+ " (0=no-constraint, 1=seed only, 2=sed aand KF");        
+        System.out.println("["+this.getName()+"] run with beamSpotConst set to "+Constants.getBEAMSPOTCONST()+ " (0=no-constraint, 1=seed only, 2=seed and KF");        
          
         if (this.getEngineConfigString("beamSpotRadius")!=null) {
             Constants.setRbErr(Double.valueOf(this.getEngineConfigString("beamSpotRadius")));

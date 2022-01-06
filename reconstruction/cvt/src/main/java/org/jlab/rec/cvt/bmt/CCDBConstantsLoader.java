@@ -301,7 +301,6 @@ public class CCDBConstantsLoader {
         
         Constants.setXb(xb*10);
         Constants.setYb(yb*10);
-        Constants.setRbErr(err*10);
         
         // target position mm
         Constants.setZoffset(ztarget*10);

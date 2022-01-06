@@ -361,7 +361,20 @@ public class TrajectoryFinder {
         stVec.set_TrkPhiAtSurface(PhiTrackIntersPlane);
         stVec.set_TrkThetaAtSurface(ThetaTrackIntersPlane);
         stVec.set_TrkToModuleAngle(trkToMPlnAngl);
-
+        
+        if(layer<=2 && (sector==6 || sector==1)) {
+            Vector3D vv = svt_geo.toLocal(layer, sector, u);
+            System.out.println("\nTrack " + u.toString());
+            System.out.println(vv.toString());
+            vv.rotateX(-Math.PI/2);
+            vv.rotateY(Math.PI);
+            System.out.println(vv.toString());
+            System.out.println(layer + " " + sector + " " + trkToMPlnAngl + " " + vv.phi() + " " + vv.theta());
+            System.out.println(layer + " " + sector + " " + trkToMPlnAngl + " " + PhiTrackIntersPlane + " " + ThetaTrackIntersPlane);
+            System.out.println(n.toString());
+            System.out.println(ui.toString());
+            System.out.println(uj.toString());
+        }
     }
 
     public Trajectory findTrajectory(int id, Ray ray, ArrayList<Cross> candCrossList, 
