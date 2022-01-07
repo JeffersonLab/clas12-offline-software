@@ -918,6 +918,58 @@ public class BMTGeometry {
         return (this.getThickness()/2 * Math.tan(this.getThetaLorentz(layer, sector))) / this.getRadius(layer);
     }
 
+    /**
+     * Return track vector for local angle calculations
+     * 
+     * 1) transform to the geometry service local frame first,
+     * 2) rotates to bring the track intersection at phi=0.
+     * 
+     * The y and x components determine the local angle for Z strips
+     * The x and z components determine the local angle for C strips
+     * @param layer
+     * @param sector
+     * @param trackPos
+     * @param trackDir
+     * @return track direction unit vector
+    **/
+    private Vector3D getLocalTrack(int layer, int sector, Point3D trackPos, Vector3D trackDir) {               
+        Vector3D dir = new Vector3D(trackDir).asUnit();
+        Point3D  pos = new Point3D(trackPos);
+        this.toLocal(layer, sector).apply(dir);
+        this.toLocal(layer, sector).apply(pos);
+        Vector3D n = pos.toVector3D().asUnit();
+        dir.rotateZ(-n.phi());
+        return dir;
+    }
+    
+    /**
+     * Returns the local angle of the track for Z detectors
+     * the angle is positive for tracks going toward positive phi
+     * @param layer
+     * @param sector
+     * @param trakPos
+     * @param trackDir
+     * @return local angle
+     */
+    public double getThetaZ(int layer, int sector, Point3D trakPos, Vector3D trackDir) { 
+        Vector3D dir = this.getLocalTrack(layer, sector, trakPos, trackDir);
+        return Math.atan(dir.y()/dir.x());
+    }
+    
+    /**
+     * Returns the local angle of the track for C detectors
+     * the angle is positive for tracks going at positive z
+     * @param layer
+     * @param sector
+     * @param trakPos
+     * @param trackDir
+     * @return local angle
+     */
+    public double getThetaC(int layer, int sector, Point3D trakPos, Vector3D trackDir) { 
+        Vector3D dir = this.getLocalTrack(layer, sector, trakPos, trackDir);
+        return Math.atan(dir.z()/dir.x());
+    }
+    
     public List<Surface> getSurfaces() {
         List<Surface> surfaces = new ArrayList<>();
         return surfaces;

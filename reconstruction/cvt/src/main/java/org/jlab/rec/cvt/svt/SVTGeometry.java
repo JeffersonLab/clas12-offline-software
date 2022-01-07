@@ -166,6 +166,48 @@ public class SVTGeometry {
         return dist.length()*side;
     }
     
+    /**
+     * Return track vector for local angle calculations
+     * 
+     * 1) transform to the geometry service local frame first:
+     * y axis pointing toward the center, 
+     * z axis pointing downstream along the module
+     * x axis given by y.cross(z)
+     * 
+     * 2) for even layers, it rotates by 180 deg to have the y axis
+     * pointing outward
+     * 
+     * 3) rotates by 90 deg around X to have:
+     * z axis normal to the module pointing inward for odd layers and outward for even ones
+     * y axis pointing upstream along the module
+     * x axis given by y.cross(z) along the short side of the module
+     *
+     * @param layer
+     * @param sector
+     * @param trackDir
+     * @return 
+    **/
+    public Vector3D getLocalTrack(int layer, int sector, Vector3D trackDir) {
+        Vector3D dir = this.toLocal(layer, sector, trackDir);
+        if(layer%2==0) dir.rotateZ(Math.PI); // to get the Y axis to point
+        dir.rotateX(Math.PI/2); 
+        return dir;
+    }
+
+    /**
+     * Returns angle of the track with respect to the normal to the module
+     * in the x-z plane defined above
+     * 
+     * @param layer
+     * @param sector
+     * @param trackDir
+     * @return
+     */
+    public double getLocalAngle(int layer, int sector, Vector3D trackDir) {
+        Vector3D dir = this.getLocalTrack(layer, sector, trackDir);
+        return Math.atan(dir.x()/dir.z());
+    }
+    
     @Deprecated
     public int getSector(int layer, Point3D traj) {
         

@@ -155,7 +155,11 @@ public class TrajectoryFinder {
             stVec.set_SurfaceLayer(layer);
             stVec.set_SurfaceSector(sector);
             Vector3D dir = new Vector3D(inters[3], inters[4], inters[5]).asUnit();
-            this.fill_HelicalTrkAngleWRTSVTPlane(sector, layer, dir, svt_geo, stVec);
+//            this.fill_HelicalTrkAngleWRTSVTPlane(sector, layer, dir, svt_geo, stVec);
+            Vector3D localDir = svt_geo.getLocalTrack(layer, sector, dir);
+            stVec.set_TrkPhiAtSurface(dir.phi());
+            stVec.set_TrkThetaAtSurface(dir.theta());
+            stVec.set_TrkToModuleAngle(svt_geo.getLocalAngle(layer, sector, dir));
             stVec.set_CalcCentroidStrip(svt_geo.calcNearestStrip(inters[0]*10, inters[1]*10, inters[2]*10, layer, sector));
             stVec.set_Path(path*10);
             stVec.set_ID(trk.get_Id());
@@ -232,7 +236,9 @@ public class TrajectoryFinder {
                 stVec.set_ID(trk.get_Id());
                 stVec.set_Path(path*10);
                 Vector3D dir = new Vector3D(inters[3], inters[4], inters[5]).asUnit();
-                this.fill_HelicalTrkAngleWRTBMTTangentPlane(dir, stVec);
+                Point3D  pos = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
+                stVec.set_TrkPhiAtSurface(bmt_geo.getThetaZ(layer, sector, pos, dir));
+                stVec.set_TrkThetaAtSurface(bmt_geo.getThetaC(layer, sector, pos, dir));
                 //stVec.set_CalcCentroidStrip(bmt_geo.getCStrip(BMTRegIdx+1, stVec.z()));
                 stVec.set_CalcCentroidStrip(bmt_geo.getCstrip(region, 
                        new Point3D(stVec.x(),stVec.y(),stVec.z())));
@@ -336,7 +342,7 @@ public class TrajectoryFinder {
         if (stVec.z()<0){
             thetaC=-thetaC;  //Negative thetaC if track is going to negative z
         }
-        
+    
         //Fill State Vector
         stVec.set_TrkPhiAtSurface(thetaZ); //Call "phi" the normal angle for Z detectors
         stVec.set_TrkThetaAtSurface(thetaC); //Call "theta" the normal angle for C detectors
@@ -344,16 +350,17 @@ public class TrajectoryFinder {
     
     private void fill_HelicalTrkAngleWRTSVTPlane(int sector, int layer,
         Vector3D trkDir, SVTGeometry svt_geo, StateVec stVec) {
-        Vector3D n  = svt_geo.getNormal(layer,sector);
-        Vector3D ui = new Vector3D(n.y(), -n.x(), 0); //longitudinal vector along the local x direction of the module			
-        Vector3D uj = ui.cross(n); //longitudinal vector along the local z direction of the module		    
+        Vector3D uz  = svt_geo.getNormal(layer,sector);
+        if(layer%2==1) uz.negative();
+        Vector3D ux = new Vector3D(uz.y(), -uz.x(), 0); // longitudinal vector along the local x direction of the module
+        Vector3D uy = uz.cross(ux); //longitudinal vector along the local z direction of the module        
         Vector3D u = new Vector3D(trkDir.x(), trkDir.y(), trkDir.z());
 
-        double trkToMPlnAngl = Math.acos(u.dot(ui));
+        double trkToMPlnAngl = Math.acos(trkDir.dot(ux));
 
-        double zl = u.dot(n);
-        double xl = u.dot(ui);
-        double yl = u.dot(uj);
+        double zl = u.dot(uz);
+        double xl = u.dot(ux);
+        double yl = u.dot(uy);
 
         double PhiTrackIntersPlane = Math.atan2(yl, xl);
         double ThetaTrackIntersPlane = Math.acos(zl);
@@ -361,7 +368,17 @@ public class TrajectoryFinder {
         stVec.set_TrkPhiAtSurface(PhiTrackIntersPlane);
         stVec.set_TrkThetaAtSurface(ThetaTrackIntersPlane);
         stVec.set_TrkToModuleAngle(trkToMPlnAngl);
-        
+////        if(layer<=2 && (sector==1 || sector ==6)) {
+//            System.out.println("\n" + layer + " " + sector);
+//            System.out.println(ux.toString());
+//            System.out.println(uy.toString());
+//            System.out.println(uz.toString());
+//            System.out.println(trkToMPlnAngl + " " + PhiTrackIntersPlane + " " + ThetaTrackIntersPlane);
+//            Vector3D dir = svt_geo.getLocalTrack(layer, sector, trkDir);
+//            System.out.println(trkDir.toString());
+//            System.out.println(dir.toString());
+//            System.out.println(svt_geo.getLocalAngle(layer, sector, trkDir) + " " + dir.phi() + " " + dir.theta());
+////        }
     }
 
     public Trajectory findTrajectory(int id, Ray ray, ArrayList<Cross> candCrossList, 
