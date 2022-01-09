@@ -141,9 +141,10 @@ public class RecUtilities {
         new Point3D(-300,0,0), new Point3D(300,0,0),Constants.DEFAULTSWIMACC);
         meas0.setSector(0);
         meas0.setLayer(0);
-        meas0.setError(Constants.getRbErr());
+        meas0.setError(1);
         meas0.hemisphere = 1;
         KFSites.add(meas0); 
+        
         Map<Integer, Cluster> clsMap = new HashMap<>();
         trkcand.sort(Comparator.comparing(Cross::getY).reversed());
         for (int i = 0; i < trkcand.size(); i++) { //SVT
@@ -175,13 +176,15 @@ public class RecUtilities {
                 for (int j = 0; j < cls.size(); j++) { 
                     int mlayer = cls.get(j).get_Layer();
                     Surface meas = cls.get(j).measurement(mlayer);
+                    meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());;
                     // set SVT material budget according to track direction
                     if(j==0) meas.setl_over_X0(SVTGeometry.getToverX0());
                     else     meas.setl_over_X0(0);
                     // RDV to be tested
 //                    if((int) Constants.getLayersUsed().get(meas.getLayer())<1)
 //                        meas.notUsedInFit=true; //VZ: commenting this out prevents the layer exclusion to be employed in tracking
-                    if(i>0 && KFSites.get(KFSites.size()-1).getLayer()==meas.getLayer())
+                    if(i>0 && KFSites.get(KFSites.size()-1).getLayer()==meas.getLayer()
+                           && KFSites.get(KFSites.size()-1).hemisphere==meas.hemisphere)
                         continue;
                     KFSites.add(meas);
                     
@@ -202,7 +205,8 @@ public class RecUtilities {
                 if((int)Constants.getLayersUsed().get(meas.getLayer())<1) {
                     meas.notUsedInFit=true;
                 }
-                if(i>0 && KFSites.get(KFSites.size()-1).getLayer()==meas.getLayer())
+                if(i>0 && KFSites.get(KFSites.size()-1).getLayer()==meas.getLayer()
+                       && KFSites.get(KFSites.size()-1).hemisphere==meas.hemisphere)
                     continue;
                 KFSites.add(meas);
                 clsMap.put(KFSites.size()-1, trkcand.get(i).get_Cluster1());

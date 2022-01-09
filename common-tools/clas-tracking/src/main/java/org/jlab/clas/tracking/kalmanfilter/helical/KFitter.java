@@ -57,12 +57,11 @@ public class KFitter extends AKFitter {
     public void runFitter(AStateVecs sv, AMeasVecs mv) {
         
         StateVecs.StateVec finalSVonPivot = null;
-        double newchisq = Double.POSITIVE_INFINITY;
         for (int it = 0; it < totNumIter; it++) {
             this.runFitterIter(sv, mv);
 
             // chi2
-            newchisq = this.calc_chi2(sv, mv); 
+            double newchisq = this.calc_chi2(sv, mv); 
             // if curvature is 0, fit failed
             if(Double.isNaN(newchisq) ||
                sv.trackTraj.get(0)==null ||

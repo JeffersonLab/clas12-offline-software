@@ -301,7 +301,7 @@ public class TrackCandListFinder {
                     Seed seed = new Seed(crossList.get(i), fitTrk.get_helix());
                     Track cand = new Track(seed);
                     //cand.setPXYZ(fitTrk.get_helix());			done in Track constructor			
-                    //cand.update_Crosses(svt_geo);
+                    //cand.updateCrosses(svt_geo);
 
                     cand.get_Seed().set_circleFitChi2PerNDF(fitTrk.get_chisq()[0] / (int) (X.size() - 3)); // 3 fit params					
                     cand.get_Seed().set_lineFitChi2PerNDF(fitTrk.get_chisq()[1] / (int) (Z.size() - 2)); // 2 fit params
@@ -376,7 +376,7 @@ public class TrackCandListFinder {
             StraightTrack cand = new StraightTrack(null);
             cand.addAll(crossesToFit);
             if (linefitresultYX && linefitparsYX != null) {
-                cand.update_Crosses(linefitparsYX.getYXRay(), svt_geo); 
+                cand.updateCrosses(linefitparsYX.getYXRay(), svt_geo); 
             }
             // update measurements
             MeasArrays = this.get_RayMeasurementsArrays(crossesToFit, false, false, false);
@@ -410,7 +410,7 @@ public class TrackCandListFinder {
                 }
                 //System.err.println("Error in  Track fitting -- track not found -- refit FAILED");
             }
-            cand.update_Crosses(cand.get_ray(), svt_geo);
+            cand.updateCrosses(svt_geo);
 //            System.out.println(cand.get_ray().toLine().origin().toString() + " " 
 //                    + Math.toDegrees(cand.get_ray().toLine().direction().theta()) + " " 
 //                    + Math.toDegrees(cand.get_ray().toLine().direction().phi()) + " ");
@@ -425,7 +425,7 @@ public class TrackCandListFinder {
             if (fitTrk.get_ray() != null) { 
                 cand = new StraightTrack(fitTrk.get_ray());
                 cand.addAll(crossesToFit);
-                cand.update_Crosses(cand.get_ray(), svt_geo);
+                cand.updateCrosses(svt_geo);
            
             }
 
@@ -459,7 +459,7 @@ public class TrackCandListFinder {
                 fitTrk.fit(NewMeasArrays._X, NewMeasArrays._Y, NewMeasArrays._Z, NewMeasArrays._Y_prime, NewMeasArrays._ErrRt, NewMeasArrays._ErrY_prime, NewMeasArrays._ErrZ);
                 cand.addAll(crossesToFitWithBMT);
 //                cand.reset_Crosses();
-                cand.update_Crosses(cand.get_ray(), svt_geo);
+                cand.updateCrosses(svt_geo);
                 NewMeasArrays = this.get_RayMeasurementsArrays(cand, false, false, true);
                 fitTrk.fit(NewMeasArrays._X, NewMeasArrays._Y, NewMeasArrays._Z, NewMeasArrays._Y_prime, NewMeasArrays._ErrRt, NewMeasArrays._ErrY_prime, NewMeasArrays._ErrZ);
                 crossesToFitWithBMT.clear();
@@ -472,13 +472,13 @@ public class TrackCandListFinder {
 //                        + Math.toDegrees(fitTrk.get_ray().toLine().direction().phi()) + " ");
                     cand = new StraightTrack(fitTrk.get_ray()); 
                     cand.addAll(crossesToFitWithBMT); 
-                    cand.update_Crosses(cand.get_ray(), svt_geo);
+                    cand.updateCrosses(svt_geo);
                     //refit not using only BMT to fit the z profile
                     NewMeasArrays = this.get_RayMeasurementsArrays(crossesToFitWithBMT, false, false, false);
                     fitTrk.fit(NewMeasArrays._X, NewMeasArrays._Y, NewMeasArrays._Z, NewMeasArrays._Y_prime, NewMeasArrays._ErrRt, NewMeasArrays._ErrY_prime, NewMeasArrays._ErrZ);
                     cand = new StraightTrack(fitTrk.get_ray()); 
                     cand.addAll(crossesToFitWithBMT);
-                    cand.update_Crosses(cand.get_ray(), svt_geo);
+                    cand.updateCrosses(svt_geo);
                     cand.set_ndf(NewMeasArrays._Y.size() + NewMeasArrays._Y_prime.size() - 4);
                     double chi2 = cand.calc_straightTrkChi2(); 
                     cand.set_chi2(chi2);

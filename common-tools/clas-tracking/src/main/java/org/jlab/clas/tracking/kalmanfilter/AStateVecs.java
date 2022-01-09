@@ -315,6 +315,24 @@ public abstract class AStateVecs {
             helix.setD0(-vec.d_rho);
             helix.Update();
         }
+        
+        public void updateRay() {
+            this.dl = this.y/this.py;
+            this.x0 = this.x -this.dl*this.px;
+            this.y0 = this.y -this.dl*this.py;
+            this.z0 = this.z -this.dl*this.pz;
+            this.tx = this.px/this.py;
+            this.tz = this.pz/this.py;
+        }
+        
+        public void updateFromRay() {
+            this.py = 1/Math.sqrt(1+tx*tx+tz*tz);
+            this.px = tx*py;
+            this.pz = tz*py;
+            this.x = this.x0 + this.dl*this.px;
+            this.y = this.y0 + this.dl*this.py;
+            this.z = this.z0 + this.dl*this.pz;
+        }
 
         public double[] get_ELoss() {
             return _ELoss;

@@ -230,6 +230,10 @@ public abstract class AMeasVecs {
         return delta_d_a;
     }
 
+    public void setDelta_d_a(double[] values) {
+        delta_d_a = values;
+    }
+
     /**
      * @return the Hval
      */

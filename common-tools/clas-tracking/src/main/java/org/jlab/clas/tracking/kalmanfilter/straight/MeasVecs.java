@@ -18,6 +18,8 @@ public class MeasVecs extends AMeasVecs {
         for(int i = 0; i < getHval().length; i++)
             getHval()[i] = 0;
         for(int i = 0; i < getDelta_d_a().length-1; i++) {
+            SVplus.copy(stateVec);
+            SVminus.copy(stateVec);
             if(i ==0) {
                 SVplus.x0  = stateVec.x0 + getDelta_d_a()[i] / 2.;
                 SVminus.x0 = stateVec.x0 - getDelta_d_a()[i] / 2.;
@@ -28,13 +30,14 @@ public class MeasVecs extends AMeasVecs {
             }
             if(i ==2) {
                 SVplus.tx  = stateVec.tx + getDelta_d_a()[i] / 2.;
-                SVminus.tz = stateVec.tz - getDelta_d_a()[i] / 2.;
+                SVminus.tx = stateVec.tx - getDelta_d_a()[i] / 2.;
             }
             if(i ==3) {
                 SVplus.tz  = stateVec.tz + getDelta_d_a()[i] / 2.;
                 SVminus.tz = stateVec.tz - getDelta_d_a()[i] / 2.;
             }
-            
+            SVplus.updateFromRay();
+            SVminus.updateFromRay();
             sv.setStateVecPosAtMeasSite(SVplus, mv, swimmer);
             sv.setStateVecPosAtMeasSite(SVminus, mv, swimmer);
             Hval[i] = (this.h(stateVec.k, SVplus) - this.h(stateVec.k, SVminus)) / getDelta_d_a()[i] ;

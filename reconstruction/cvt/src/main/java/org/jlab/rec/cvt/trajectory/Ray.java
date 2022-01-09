@@ -133,6 +133,16 @@ public class Ray {
     public void set_yzintercErr(double _yzintercErr) {
         this._yzintercErr = _yzintercErr;
     }
+    
+    public double[][] getCovMat() {
+        double[][] cov = new double[5][5];
+        cov[0][0] = this.get_yxintercErr()*this.get_yxintercErr();
+        cov[1][1] = this.get_yzintercErr()*this.get_yzintercErr();
+        cov[2][2] = this.get_yxslopeErr()*this.get_yxslopeErr();
+        cov[3][3] = this.get_yzslopeErr()*this.get_yzslopeErr();
+        cov[4][4] = 1;
+        return cov;
+    }
 
     public Line3D toLine() {
         return new Line3D(this.get_refPoint(), this.get_dirVec());

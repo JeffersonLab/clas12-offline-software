@@ -21,30 +21,15 @@ public class StateVecs extends AStateVecs {
     public boolean getStateVecPosAtMeasSite(StateVec vec, AMeasVecs.MeasVec mv, Swim swim) {
         double[] value = new double[4];
         
-        Point3D ps = new Point3D(0,0,0) ;
-
         if(mv.surface==null) return false;
         
-        double x = vec.x0 ;
-        double y = 0 ;
-        double z = vec.z0;
-
-        Point3D ref = new Point3D(x,y,z);
-
-        double tx = vec.tx;
-        double tz = vec.tz;
-
-        double py = (double) mv.hemisphere/Math.sqrt(1+tx*tx+tz*tz);
-        double px = tx*py;
-        double pz = tz*py;
-
-        Vector3D u = new Vector3D(px, py, pz).asUnit(); 
+        Point3D ref = new Point3D(vec.x0,vec.y0,vec.z0);
+        Vector3D u = new Vector3D(vec.px, vec.py, vec.pz).asUnit(); 
 
         if(mv.k==0) {
-            vec.x = x;
-            vec.y = y;
-            vec.z = z;
-            vec.dl = 0.0;
+            vec.x = vec.x0;
+            vec.y = vec.y0;
+            vec.z = vec.z0;
             return true;
         }            
         else if(mv.hemisphere!=0) {
@@ -55,8 +40,6 @@ public class StateVecs extends AStateVecs {
                 vec.x = inters.x()  ;
                 vec.y = inters.y()  ;
                 vec.z = inters.z()  ;
-                vec.dl = ref.distance(inters);
-
             }
             if(mv.surface.cylinder!=null) {
                 mv.surface.toLocal().apply(ref);
@@ -71,14 +54,9 @@ public class StateVecs extends AStateVecs {
 
                 Point3D cylInt = new Point3D(ref.x()+l*u.x(),ref.y()+l*u.y(),ref.z()+l*u.z());
                 mv.surface.toGlobal().apply(cylInt);
-//                    mv.surface.toGlobal().apply(ref);
-//                    mv.surface.toGlobal().apply(u);
-
-                vec.dl = l;
                 vec.x = cylInt.x();
                 vec.y = cylInt.y();
                 vec.z = cylInt.z();
-
             } 
             return true;
         }
@@ -95,6 +73,7 @@ public class StateVecs extends AStateVecs {
             return false;
         }
         sv.k = mv.k;
+        sv.updateRay();
         return true;
     }
 
@@ -207,9 +186,11 @@ public class StateVecs extends AStateVecs {
     }
 
     @Override
-    public void printlnStateVec(StateVec S) {
-        System.out.println(S.k + ") x " + S.x + " y " + S.y + " z " + S.z + " tx " + S.tx + " tz " + S.tz + " dl " + S.dl );
-    }
+public void printlnStateVec(StateVec S) {
+        String s = String.format("%d) x0=%.4f y0=%.4f z0=%.4f tx=%.4f tz=%.4f dl=%.4f", S.k, S.x0, S.y0, S.z0, S.tx, S.tz, S.dl);
+        s       += String.format("    x=%.4f y=%.4f z=%.4f px=%.4f py=%.4f pz=%.4f", S.x, S.y, S.z, S.px, S.py, S.pz);
+        System.out.println(s);
+    }   
 
     @Override
     public void init(Helix trk, double[][] cov, double xref, double yref, double zref, Swim swimmer) {
@@ -225,13 +206,12 @@ public class StateVecs extends AStateVecs {
         //StateVec initSV = new StateVec(0);
         initSV = new StateVec(0);
         initSV.x0 = x0;
+        initSV.y0 = 0;
         initSV.z0 = z0;
-        initSV.x = x0;
-        initSV.y = 0;
-        initSV.z = z0;
         initSV.tx = tx;
         initSV.tz = tz;
         initSV.dl = 0;
+        initSV.updateFromRay();
         double[][] covKF = new double[5][5];    
         for(int ic = 0; ic<5; ic++) {
             for(int ir = 0; ir<5; ir++) {

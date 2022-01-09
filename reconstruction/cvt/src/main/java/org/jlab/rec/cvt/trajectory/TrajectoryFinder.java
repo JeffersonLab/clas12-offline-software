@@ -707,7 +707,7 @@ public class TrajectoryFinder {
         }
     }
 
-    private double[][][] calc_trackIntersBMT(Ray ray, BMTGeometry bmt_geo, int start_layer) {
+    public static double[][][] calc_trackIntersBMT(Ray ray, BMTGeometry bmt_geo, int start_layer) {
 
         //[l][hemisphere], [0,1,2,3,4]=x,y,z,phi,theta,estimated centroid strip; hemisphere = [1]top or [0]bottom
         double[][][] result = new double[6][2][7];
@@ -812,7 +812,7 @@ public class TrajectoryFinder {
         return result;
     }
 
-    private double[][][] calc_trackIntersSVT(Ray ray, SVTGeometry svt_geo) {
+    public static double[][][] calc_trackIntersSVT(Ray ray, SVTGeometry svt_geo) {
         //[l][s], [0,1,2,3,4]=x,y,z,phi,theta,estimated centroid strip
         double[][][] result = new double[SVTGeometry.NLAYERS][SVTGeometry.NSECTORS[SVTGeometry.NLAYERS-1]][7];
         for (int l = 0; l < SVTGeometry.NLAYERS; l++) {
