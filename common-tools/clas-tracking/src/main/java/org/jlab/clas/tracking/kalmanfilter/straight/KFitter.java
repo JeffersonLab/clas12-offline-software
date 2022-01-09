@@ -56,7 +56,7 @@ public class KFitter extends AKFitter {
             // chi2
             double newchisq = this.calc_chi2(sv, mv); 
             // if curvature is 0, fit failed
-            if(sv.trackTraj.get(0)==null) {
+            if(Double.isNaN(newchisq) || sv.trackTraj.get(0)==null) {
                 this.setFitFailed = true;
                 break;
             }

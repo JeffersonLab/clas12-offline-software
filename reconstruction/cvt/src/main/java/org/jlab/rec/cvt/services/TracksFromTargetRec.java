@@ -39,8 +39,6 @@ public class TracksFromTargetRec {
             List<Hit> SVThits, List<Hit> BMThits, 
             List<Cluster> SVTclusters, List<Cluster> BMTclusters, 
             List<ArrayList<Cross>> crosses,
-            SVTGeometry SVTGeom, BMTGeometry BMTGeom,
-            CTOFGeant4Factory CTOFGeom, Detector CNDGeom,
             RecoBankWriter rbc,
             Swim swimmer) {
         
@@ -52,32 +50,32 @@ public class TracksFromTargetRec {
         List<Seed> seeds = null;
         if(solenoidValue<0.001) {
             StraightTrackSeeder trseed = new StraightTrackSeeder();
-            seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, Constants.SVTOnly);
+            seeds = trseed.findSeed(crosses.get(0), crosses.get(1), Constants.SVTOnly);
             if(Constants.excludeLayers==true) {
-                seeds = recUtil.reFit(seeds, SVTGeom, BMTGeom, swimmer, trseed); // RDV can we juts refit?
+                seeds = recUtil.reFit(seeds, swimmer, trseed); // RDV can we juts refit?
             }
         } else {
             if(Constants.SVTOnly) {
-                TrackSeeder trseed = new TrackSeeder(SVTGeom, BMTGeom, swimmer);
+                TrackSeeder trseed = new TrackSeeder(swimmer);
                 trseed.unUsedHitsOnly = true;
                 seeds = trseed.findSeed(crosses.get(0), null);
             } else {
-                TrackSeederCA trseed = new TrackSeederCA(SVTGeom, BMTGeom, swimmer);  // cellular automaton seeder
+                TrackSeederCA trseed = new TrackSeederCA(swimmer);  // cellular automaton seeder
                 seeds = trseed.findSeed(crosses.get(0), crosses.get(1));
                 
                 //second seeding algorithm to search for SVT only tracks, and/or tracks missed by the CA
                 if(Constants.svtSeeding || Constants.excludeLayers) {
-                    TrackSeeder trseed2 = new TrackSeeder(SVTGeom, BMTGeom, swimmer);
+                    TrackSeeder trseed2 = new TrackSeeder(swimmer);
                     trseed2.unUsedHitsOnly = true;
                     seeds.addAll( trseed2.findSeed(crosses.get(0), crosses.get(1)));
                     if(Constants.excludeLayers==true) {
-                        seeds = recUtil.reFit(seeds, SVTGeom, BMTGeom, swimmer, trseed, trseed2);
+                        seeds = recUtil.reFit(seeds, swimmer, trseed, trseed2);
                     }
                 }
                 if(!Constants.seedBeamSpotConstraint()) {
                     List<Seed> failed = new ArrayList<>();
                     for(Seed s : seeds) {
-                        if(!recUtil.reFitCircle(s,SVTGeom, BMTGeom, Constants.SEEDFITITERATIONS))
+                        if(!recUtil.reFitCircle(s, Constants.SEEDFITITERATIONS))
                             failed.add(s);
                     }
                     seeds.removeAll(failed);
@@ -85,7 +83,7 @@ public class TracksFromTargetRec {
             }
         }
         if(seeds ==null || seeds.size() == 0) {
-            recUtil.CleanupSpuriousCrosses(crosses, null, SVTGeom) ;
+            recUtil.CleanupSpuriousCrosses(crosses, null) ;
             rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null, null);
             return true;
         }   
@@ -96,7 +94,7 @@ public class TracksFromTargetRec {
             int id = trkcands.size()+1;
             seed.setId(id);
             Track track = new Track(seed);
-            track.update_Crosses(id, SVTGeom, BMTGeom);
+            track.update_Crosses(id);
             trkcands.add(track);                
         }
 //        if(true) {
@@ -141,11 +139,11 @@ public class TracksFromTargetRec {
                     }
                     //refit adding missing clusters
                     List<Cluster> clsOnTrack = recUtil.FindClustersOnTrk(SVTclusters, seed.get_Clusters(), fittedTrack.get_helix(), 
-                            fittedTrack.get_P(), fittedTrack.get_Q(), SVTGeom, swimmer); //VZ: finds missing clusters
-                    List<Cluster> bmtclsOnTrack = recUtil.FindClustersOnTrk(BMTclusters, seed.get_Crosses(), fittedTrack.get_helix(), 
-                            fittedTrack.get_P(), fittedTrack.get_Q(), BMTGeom, swimmer); //VZ: finds missing clusters
+                            fittedTrack.get_P(), fittedTrack.get_Q(), swimmer); //VZ: finds missing clusters
+                    List<Cluster> bmtclsOnTrack = recUtil.findBMTClustersOnTrk(BMTclusters, seed.get_Crosses(), fittedTrack.get_helix(), 
+                            fittedTrack.get_P(), fittedTrack.get_Q(), swimmer); //VZ: finds missing clusters
                     CrossMaker cm = new CrossMaker();
-                    List<Cross> bmtcrsOnTrack = recUtil.findCrossesOnBMTTrack(bmtclsOnTrack, BMTGeom, cm, crosses.get(1).size()+2000);
+                    List<Cross> bmtcrsOnTrack = recUtil.findCrossesOnBMTTrack(bmtclsOnTrack, cm, crosses.get(1).size()+2000);
                     
                     if(clsOnTrack.size()>0 || bmtcrsOnTrack.size()>0) { 
                         //seed.add_Clusters(clsOnTrack);
@@ -205,20 +203,20 @@ public class TracksFromTargetRec {
             TrackListFinder.removeOverlappingTracks(trkcands); 
             if(trkcands.isEmpty()) System.out.println("Error: no tracks left after overlap remover");
             
-            tracks = TrackListFinder.getTracks(trkcands, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, swimmer);
+            tracks = TrackListFinder.getTracks(trkcands, swimmer);
             // update crosses and clusters on track
             for(int it = 0; it < tracks.size(); it++) {
                 int id = it + 1;
                 tracks.get(it).set_Id(id); 
-                tracks.get(it).update_Crosses(id, SVTGeom, BMTGeom);
-                tracks.get(it).update_Clusters(id, SVTGeom);
+                tracks.get(it).update_Crosses(id);
+                tracks.get(it).update_Clusters(id);
                 tracks.get(it).setTrackCovMat(recUtil.getCovMatInTrackRep(tracks.get(it)));
             }
         }
         for(int det = 0; det<2; det++) {
             for(Cross c : crosses.get(det)) {
                 if(c.get_AssociatedTrackID()==-1) {
-                    c.reset(SVTGeom);
+                    c.reset();
                     if(det==1 && c.get_Id()>2000) { //if matched cross failed tracking resol requirements, reset its id
                         c.set_Id(c.get_Id()-1000);
                     } 

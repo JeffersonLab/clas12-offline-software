@@ -50,12 +50,11 @@ import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
  */
 public class RecUtilities {
 
-    public void CleanupSpuriousCrosses(List<ArrayList<Cross>> crosses, List<Track> trks,
-            SVTGeometry SVTGeom) {
+    public void CleanupSpuriousCrosses(List<ArrayList<Cross>> crosses, List<Track> trks) {
         List<Cross> rmCrosses = new ArrayList<Cross>();
         
         for(Cross c : crosses.get(0)) {
-            if(!SVTGeom.isInFiducial(c.get_Cluster1().get_Layer(), c.get_Sector(), c.get_Point()))
+            if(!Constants.SVTGEOMETRY.isInFiducial(c.get_Cluster1().get_Layer(), c.get_Sector(), c.get_Point()))
                 rmCrosses.add(c);
         }
        
@@ -130,8 +129,7 @@ public class RecUtilities {
     private TrajectoryFinder tf = new TrajectoryFinder();
     
     
-    public List<Surface> setMeasVecs(StraightTrack trkcand, 
-            SVTGeometry sgeo, BMTGeometry bgeo, Swim swim) {
+    public List<Surface> setMeasVecs(StraightTrack trkcand, Swim swim) {
         if(trkcand.clsMap!=null) trkcand.clsMap.clear(); //VZ: reset cluster map for second pass tracking with isolated SVT clusters
         //Collections.sort(trkcand.get_Crosses());
         List<Surface> KFSites = new ArrayList<>();
@@ -159,8 +157,8 @@ public class RecUtilities {
                     Ray ray = trkcand.get_ray();
                     Point3D top    = new Point3D();
                     Point3D bottom = new Point3D();
-                    sgeo.getPlane(layertop, sector).intersection(ray.toLine(), top);
-                    sgeo.getPlane(layerbot, sector).intersection(ray.toLine(), bottom);
+                    Constants.SVTGEOMETRY.getPlane(layertop, sector).intersection(ray.toLine(), top);
+                    Constants.SVTGEOMETRY.getPlane(layerbot, sector).intersection(ray.toLine(), bottom);
 
                     if(top.y()>bottom.y()) {
                         cls.add(trkcand.get(i).get_Cluster1());
@@ -218,8 +216,7 @@ public class RecUtilities {
         return KFSites;
     }
     
-    public List<Cluster> FindClustersOnTrack(List<Cluster> allClusters, StraightTrack trkcand, 
-            SVTGeometry sgeo) {
+    public List<Cluster> FindClustersOnTrack(List<Cluster> allClusters, StraightTrack trkcand) {
         List<Cluster> clustersOnTrack = new ArrayList<>();
         Map<Integer, Cluster> clusterMap = new HashMap<Integer, Cluster>();
         trkcand.sort(Comparator.comparing(Cross::getY).reversed());
@@ -234,8 +231,8 @@ public class RecUtilities {
                 Ray ray = trkcand.get_ray();
                 Point3D top    = new Point3D();
                 Point3D bottom = new Point3D();
-                sgeo.getPlane(layertop, sector).intersection(ray.toLine(), top);
-                sgeo.getPlane(layerbot, sector).intersection(ray.toLine(), bottom);
+                Constants.SVTGEOMETRY.getPlane(layertop, sector).intersection(ray.toLine(), top);
+                Constants.SVTGEOMETRY.getPlane(layerbot, sector).intersection(ray.toLine(), bottom);
                 
                 if(top.y()>bottom.y()) {
                     clsList.add(trkcand.get(i).get_Cluster1());
@@ -261,11 +258,11 @@ public class RecUtilities {
                 
                 Ray ray = trkcand.get_ray();
                 Point3D traj = new Point3D();
-                sgeo.getPlane(layer, sector).intersection(ray.toLine(), traj);
+                Constants.SVTGEOMETRY.getPlane(layer, sector).intersection(ray.toLine(), traj);
                 
                 int key = SVTGeometry.getModuleId(layer, sector);
                 
-                if(traj!=null && sgeo.isInFiducial(layer, sector, traj)) {
+                if(traj!=null && Constants.SVTGEOMETRY.isInFiducial(layer, sector, traj)) {
                     double  doca    = Double.POSITIVE_INFINITY;
                     // loop over all clusters in the same sector and layer that are not associated to s track
                     for(Cluster cls : allClusters) {
@@ -297,8 +294,7 @@ public class RecUtilities {
         
     }
     
-    public List<Cluster> FindClustersOnTrk(List<Cluster> allClusters, List<Cluster> seedCluster, Helix helix, double P, int Q,
-            SVTGeometry sgeo, Swim swimmer) { 
+    public List<Cluster> FindClustersOnTrk(List<Cluster> allClusters, List<Cluster> seedCluster, Helix helix, double P, int Q, Swim swimmer) { 
         // initialize swimmer starting from the track vertex
         double maxPathLength = 1; 
         swimmer.SetSwimParameters((helix.xdca()+Constants.getXb()) / 10, (helix.ydca()+Constants.getYb()) / 10, helix.get_Z0() / 10, 
@@ -319,7 +315,7 @@ public class RecUtilities {
             int layer = ilayer + 1;
 
             // identify the sector the track may be going through (this doesn't account for misalignments
-            Point3D helixPoint = helix.getPointAtRadius(sgeo.getLayerRadius(layer));
+            Point3D helixPoint = helix.getPointAtRadius(Constants.SVTGEOMETRY.getLayerRadius(layer));
             
             // reinitilize swimmer from last surface
             if(inters!=null) {
@@ -331,7 +327,7 @@ public class RecUtilities {
                 
                 // check the angle between the trajectory point and the sector 
                 // and skip sectors that are too far (more than the sector angular coverage)
-                Vector3D n = sgeo.getNormal(layer, sector);
+                Vector3D n = Constants.SVTGEOMETRY.getNormal(layer, sector);
                 double deltaPhi = Math.acos(helixPoint.toVector3D().asUnit().dot(n));
                 double buffer = Math.toRadians(1.);
                 if(Math.abs(deltaPhi)>2*Math.PI/SVTGeometry.NSECTORS[ilayer]+buffer) continue;
@@ -340,14 +336,14 @@ public class RecUtilities {
                 
                 // calculate trajectory
                 Point3D traj = null;
-                Point3D  p = sgeo.getModule(layer, sector).origin();
+                Point3D  p = Constants.SVTGEOMETRY.getModule(layer, sector).origin();
                 Point3D pm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
                 inters = swimmer.SwimPlane(n, pm, Constants.DEFAULTSWIMACC/10);
                 if(inters!=null) {
                     traj = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
                 } 
                 // if trajectory is valid, look for missing clusters
-                if(traj!=null && sgeo.isInFiducial(layer, sector, traj)) {
+                if(traj!=null && Constants.SVTGEOMETRY.isInFiducial(layer, sector, traj)) {
                     double  doca    = Double.POSITIVE_INFINITY; 
                     //if(clusterMap.containsKey(key)) {
                     //    Cluster cluster = clusterMap.get(key);
@@ -380,8 +376,7 @@ public class RecUtilities {
         }
         return clustersOnTrack;
     }
-    public List<Cluster> FindClustersOnTrk(List<Cluster> allClusters, List<Cross> seedCrosses, Helix helix, double P, int Q,
-            BMTGeometry bgeo, Swim swimmer) { 
+    public List<Cluster> findBMTClustersOnTrk(List<Cluster> allClusters, List<Cross> seedCrosses, Helix helix, double P, int Q, Swim swimmer) { 
         // initialize swimmer starting from the track vertex
         double maxPathLength = 1; 
         swimmer.SetSwimParameters((helix.xdca()+Constants.getXb()) / 10, (helix.ydca()+Constants.getYb()) / 10, helix.get_Z0() / 10, 
@@ -395,13 +390,13 @@ public class RecUtilities {
                 continue;
             Cluster cluster = cross.get_Cluster1(); 
             cluster.set_AssociatedTrackID(0);
-            clusterMap.put(BMTGeometry.getModuleId(cluster.get_Layer(), cluster.get_Sector()), cluster);
+            clusterMap.put(Constants.BMTGEOMETRY.getModuleId(cluster.get_Layer(), cluster.get_Sector()), cluster);
         }   
         
         // for each layer
         for (int ilayer = 0; ilayer < BMTGeometry.NLAYERS; ilayer++) {
             int layer = ilayer + 1;
-            double radius  = bgeo.getRadiusMidDrift(layer);
+            double radius  = Constants.BMTGEOMETRY.getRadiusMidDrift(layer);
             // identify the sector the track may be going through (this doesn't account for misalignments
             Point3D helixPoint = helix.getPointAtRadius(radius);
             // reinitilize swimmer from last surface
@@ -414,7 +409,7 @@ public class RecUtilities {
                 
                 // check the angle between the trajectory point and the sector 
                 // and skip sectors that are too far (more than the sector angular coverage)
-                if(bgeo.inDetector(layer, sector, helixPoint)==false)
+                if(Constants.BMTGEOMETRY.inDetector(layer, sector, helixPoint)==false)
                     continue;
                  
                 // calculate trajectory
@@ -429,7 +424,7 @@ public class RecUtilities {
                 
                
                 // if trajectory is valid, look for missing clusters
-                if(traj!=null && bgeo.inDetector(layer, sector, traj)) {
+                if(traj!=null && Constants.BMTGEOMETRY.inDetector(layer, sector, traj)) {
                     double  doca    = Double.POSITIVE_INFINITY; 
                     // loop over all clusters in the same sector and layer that are not associated to s track
                     for(Cluster cls : allClusters) {
@@ -459,18 +454,17 @@ public class RecUtilities {
         return clustersOnTrack;
     }
     
-    List<Cross> findCrossesOnBMTTrack(List<Cluster> bmtclsOnTrack, BMTGeometry bmt_geo, CrossMaker cm, int idx) {
+    List<Cross> findCrossesOnBMTTrack(List<Cluster> bmtclsOnTrack, CrossMaker cm, int idx) {
          // fill the sorted list
         ArrayList<ArrayList<Cluster>> sortedClusters = cm.sortClusterByDetectorAndIO(bmtclsOnTrack);
         ArrayList<Cluster> bmt_Clayrclus = sortedClusters.get(2);
         ArrayList<Cluster> bmt_Zlayrclus = sortedClusters.get(3);
-        ArrayList<Cross> BMTCrosses = cm.findBMTCrosses(bmt_Clayrclus, bmt_Zlayrclus, bmt_geo, idx);
+        ArrayList<Cross> BMTCrosses = cm.findBMTCrosses(bmt_Clayrclus, bmt_Zlayrclus, idx);
         
         return BMTCrosses;
     }
     public void MatchTrack2Traj(Seed trkcand, Map<Integer, 
-            org.jlab.clas.tracking.kalmanfilter.helical.KFitter.HitOnTrack> traj, 
-            SVTGeometry sgeo, BMTGeometry bgeo) {
+            org.jlab.clas.tracking.kalmanfilter.helical.KFitter.HitOnTrack> traj) {
         
         for (int i = 0; i < trkcand.get_Clusters().size(); i++) { //SVT
             if(trkcand.get_Clusters().get(i).get_Detector()==DetectorType.BST) {
@@ -482,7 +476,7 @@ public class RecUtilities {
                 cluster.set_SeedResidual(p);             
                 for (Hit hit : cluster) {
                     double doca1 = hit.residual(p);
-                    double sigma1 = sgeo.getSingleStripResolution(layer, hit.get_Strip().get_Strip(), traj.get(layer).z);
+                    double sigma1 = Constants.SVTGEOMETRY.getSingleStripResolution(layer, hit.get_Strip().get_Strip(), traj.get(layer).z);
                     hit.set_stripResolutionAtDoca(sigma1);
                     hit.set_docaToTrk(doca1);  
                     if(traj.get(layer).isMeasUsed)
@@ -496,7 +490,7 @@ public class RecUtilities {
             if (trkcand.get_Crosses().get(c).get_Detector()==DetectorType.BST) {
                 int  layer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer();
                 Vector3D d = new Vector3D(traj.get(layer).px, traj.get(layer).py, traj.get(layer).pz).asUnit();
-                trkcand.get_Crosses().get(c).updateSVTCross(d, sgeo);
+                trkcand.get_Crosses().get(c).updateSVTCross(d);
             }
             if (trkcand.get_Crosses().get(c).get_Detector()==DetectorType.BMT) {
                 // update cross position
@@ -521,8 +515,7 @@ public class RecUtilities {
         }
     }
     
-    public Track OutputTrack(Seed seed, org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf,
-            SVTGeometry SVTGeom, BMTGeometry BMTGeom) {
+    public Track OutputTrack(Seed seed, org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf) {
         org.jlab.rec.cvt.trajectory.Helix helix = new org.jlab.rec.cvt.trajectory.Helix(kf.KFHelix.getD0(), 
                 kf.KFHelix.getPhi0(), kf.KFHelix.getOmega(), 
                 kf.KFHelix.getZ0(), kf.KFHelix.getTanL());
@@ -537,7 +530,7 @@ public class RecUtilities {
             }
         }
         
-        this.MatchTrack2Traj(seed, kf.TrjPoints, SVTGeom, BMTGeom);
+        this.MatchTrack2Traj(seed, kf.TrjPoints);
         cand.addAll(seed.get_Crosses());
         for(Cluster cl : seed.get_Clusters()) {
             
@@ -569,8 +562,7 @@ public class RecUtilities {
         return cand;
         
     }
-    public Track OutputTrack(StraightTrack seed, org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf,
-            SVTGeometry SVTGeom, BMTGeometry BMTGeom) {
+    public Track OutputTrack(StraightTrack seed, org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf) {
         org.jlab.rec.cvt.trajectory.Helix helix = new org.jlab.rec.cvt.trajectory.Helix(kf.KFHelix.getD0(), 
                 kf.KFHelix.getPhi0(), kf.KFHelix.getOmega(), 
                 kf.KFHelix.getZ0(), kf.KFHelix.getTanL());
@@ -596,16 +588,14 @@ public class RecUtilities {
 //        
 //    }
     
-    public List<Seed> reFit(List<Seed> seedlist,
-            SVTGeometry SVTGeom, BMTGeometry BMTGeom,
-            Swim swimmer,  StraightTrackSeeder trseed) {
+    public List<Seed> reFit(List<Seed> seedlist, Swim swimmer,  StraightTrackSeeder trseed) {
         List<Seed> filtlist = new ArrayList<Seed>();
         if(seedlist==null)
             return filtlist;
         for (Seed bseed : seedlist) {
             if(bseed == null)
                 continue;
-            List<Seed>  fseeds = this.reFitSeed(bseed, SVTGeom, BMTGeom, trseed);
+            List<Seed>  fseeds = this.reFitSeed(bseed, trseed);
             if(fseeds!=null) {
                 filtlist.addAll(fseeds);
             }
@@ -613,9 +603,7 @@ public class RecUtilities {
         return filtlist;
     }        
     
-    public List<Seed> reFitSeed(Seed bseed, 
-            SVTGeometry SVTGeom, BMTGeometry BMTGeom,
-            StraightTrackSeeder trseed) {
+    public List<Seed> reFitSeed(Seed bseed, StraightTrackSeeder trseed) {
         
         List<Seed> seedlist = new ArrayList<Seed>();
         List<Cross> refib = new ArrayList<Cross>();
@@ -635,17 +623,17 @@ public class RecUtilities {
                 layr2 = c.get_Cluster2().get_Layer();
                 if((int)Constants.getLayersUsed().get(layr)>0 
                         && (int)Constants.getLayersUsed().get(layr2)>0) {
-                    c.updateSVTCross(null, SVTGeom); 
+                    c.updateSVTCross(null); 
                     c.isInSeed = false;
                     refi.add(c); 
                 }
             }
         }
         Collections.sort(refi);
-        seedlist.addAll(trseed.findSeed(refi, refib, SVTGeom, BMTGeom, false));
+        seedlist.addAll(trseed.findSeed(refi, refib, false));
         return seedlist;
     }
-    public boolean reFitCircle(Seed seed,SVTGeometry SVTGeom, BMTGeometry BMTGeom, int iter) {
+    public boolean reFitCircle(Seed seed, int iter) {
         boolean fitStatus = false;
         
         List<Double> Xs = new ArrayList<>() ;
@@ -677,33 +665,29 @@ public class RecUtilities {
                 seed.get_Helix().set_curvature(pars.rho());           
                 seed.get_Helix().set_dca(-pars.doca());
                 seed.get_Helix().set_phi_at_dca(pars.phi());
-                seed.update_Crosses(SVTGeom, BMTGeom);
+                seed.update_Crosses();
             }
         }
         return fitStatus;
     }
     
-    public List<Seed> reFit(List<Seed> seedlist,
-            SVTGeometry SVTGeom, BMTGeometry BMTGeom,
-            Swim swimmer,  TrackSeederCA trseed,  TrackSeeder trseed2) {
-        trseed = new TrackSeederCA(SVTGeom, BMTGeom, swimmer);
-        trseed2 = new TrackSeeder(SVTGeom, BMTGeom, swimmer);
+    public List<Seed> reFit(List<Seed> seedlist, Swim swimmer,  TrackSeederCA trseed,  TrackSeeder trseed2) {
+        trseed = new TrackSeederCA(swimmer);
+        trseed2 = new TrackSeeder(swimmer);
         List<Seed> filtlist = new ArrayList<Seed>();
         if(seedlist==null)
             return filtlist;
         for (Seed bseed : seedlist) {
             if(bseed == null)
                 continue;
-            List<Seed>  fseeds = this.reFitSeed(bseed, SVTGeom, BMTGeom, swimmer, trseed, trseed2);
+            List<Seed>  fseeds = this.reFitSeed(bseed, swimmer, trseed, trseed2);
             if(fseeds!=null) {
                 filtlist.addAll(fseeds);
             }
         }
         return filtlist;
     }
-    public List<Seed> reFitSeed(Seed bseed, 
-            SVTGeometry SVTGeom, BMTGeometry BMTGeom,
-            Swim swimmer,  TrackSeederCA trseed,  TrackSeeder trseed2) {
+    public List<Seed> reFitSeed(Seed bseed, Swim swimmer,  TrackSeederCA trseed,  TrackSeeder trseed2) {
         boolean pass = true;
 
         List<Seed> seedlist = new ArrayList<Seed>();
@@ -724,7 +708,7 @@ public class RecUtilities {
                 layr2 = c.get_Cluster2().get_Layer();
                 if((int)Constants.getLayersUsed().get(layr)>0 
                         && (int)Constants.getLayersUsed().get(layr2)>0) {
-                    c.updateSVTCross(null, SVTGeom);
+                    c.updateSVTCross(null);
                     c.isInSeed = false;
                    // System.out.println("refit "+c.printInfo());
                     refi.add(c); 
@@ -740,8 +724,7 @@ public class RecUtilities {
         return seedlist;
     }
     
-    public List<StraightTrack> reFit(List<StraightTrack> seedlist, 
-            SVTGeometry SVTGeom, CosmicFitter fitTrk,  TrackCandListFinder trkfindr) {
+    public List<StraightTrack> reFit(List<StraightTrack> seedlist, CosmicFitter fitTrk,  TrackCandListFinder trkfindr) {
         fitTrk = new CosmicFitter();
         trkfindr = new TrackCandListFinder();
         List<StraightTrack> filtlist = new ArrayList<StraightTrack>();
@@ -750,7 +733,7 @@ public class RecUtilities {
         for (StraightTrack bseed : seedlist) {
             if(bseed == null)
                 continue;
-            List<StraightTrack> fseeds = this.reFitSeed(bseed, SVTGeom, fitTrk, trkfindr);
+            List<StraightTrack> fseeds = this.reFitSeed(bseed, fitTrk, trkfindr);
             if(fseeds!=null) {
                 filtlist.addAll(fseeds);
             }
@@ -759,8 +742,7 @@ public class RecUtilities {
     }
     
     
-    public List<StraightTrack> reFitSeed(StraightTrack cand, 
-            SVTGeometry SVTGeom, CosmicFitter fitTrk,TrackCandListFinder trkfindr) {
+    public List<StraightTrack> reFitSeed(StraightTrack cand, CosmicFitter fitTrk,TrackCandListFinder trkfindr) {
         boolean pass = true;
 
         List<StraightTrack> seedlist = new ArrayList<StraightTrack>();
@@ -781,7 +763,7 @@ public class RecUtilities {
                 layr2 = c.get_Cluster2().get_Layer();
                 if((int)Constants.getLayersUsed().get(layr)>0 
                         && (int)Constants.getLayersUsed().get(layr2)>0) {
-                    c.updateSVTCross(null, SVTGeom);
+                    c.updateSVTCross(null);
                     c.isInSeed = false;
                    // System.out.println("refit "+c.printInfo());
                     refi.add(c); 

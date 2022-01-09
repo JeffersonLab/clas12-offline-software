@@ -5,7 +5,6 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.hit.Hit;
-import org.jlab.rec.cvt.svt.SVTGeometry;
 import java.util.Collections;
 import org.jlab.clas.tracking.kalmanfilter.AKFitter.HitOnTrack;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
@@ -733,12 +732,11 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
      *
      * @param Z z-coordinate of a point in the local coordinate system of a
      * module
-     * @param geo
      * @return the average resolution for a group of strips in a cluster in the
      * SVT
      *
      */
-    public double get_ResolutionAlongZ(double Z, SVTGeometry geo) {
+    public double get_ResolutionAlongZ(double Z) {
 
         // returns the total resolution for a group of strips in a cluster
         // the single strip resolution varies at each point along the strip as a function of Z (due to the graded angle of the strips) and 
@@ -752,7 +750,7 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
         double res = 0;
 
         for (int i = 0; i < nbhits; i++) {
-            double rstrp = geo.getSingleStripResolution(this.get(i).get_Layer(), this.get(i).get_Strip().get_Strip(), Z);
+            double rstrp = Constants.SVTGEOMETRY.getSingleStripResolution(this.get(i).get_Layer(), this.get(i).get_Strip().get_Strip(), Z);
             res += rstrp * rstrp;
         }
         return Math.sqrt(res);
@@ -842,7 +840,7 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
         this._n = _n;
     }
 
-    public void update(int trackId, HitOnTrack traj, SVTGeometry sgeo) {
+    public void update(int trackId, HitOnTrack traj) {
         
         Point3D  trackPos = new Point3D(traj.x, traj.y, traj.z);
         Vector3D trackDir = new Vector3D(traj.px, traj.py, traj.pz).asUnit();
@@ -867,8 +865,8 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
             double doca1 = hit.residual(trackPos);
             hit.set_docaToTrk(doca1);  
             if(this.get_Detector()==DetectorType.BST) {
-                Point3D local = sgeo.toLocal(this.get_Layer(), this.get_Sector(), trackPos);
-                double sigma1 = sgeo.getSingleStripResolution(this.get_Layer(), hit.get_Strip().get_Strip(), local.z());
+                Point3D local = Constants.SVTGEOMETRY.toLocal(this.get_Layer(), this.get_Sector(), trackPos);
+                double sigma1 = Constants.SVTGEOMETRY.getSingleStripResolution(this.get_Layer(), hit.get_Strip().get_Strip(), local.z());
                 hit.set_stripResolutionAtDoca(sigma1);
             }
             if(traj.isMeasUsed) hit.set_TrkgStatus(1);

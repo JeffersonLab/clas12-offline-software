@@ -8,8 +8,8 @@ import org.jlab.clas.tracking.kalmanfilter.AKFitter.HitOnTrack;
 import org.jlab.clas.tracking.kalmanfilter.straight.KFitter;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTConstants;
-import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.svt.SVTGeometry;
@@ -30,27 +30,27 @@ public class StraightTrack extends Trajectory{
 
     }
 
-    public void update(KFitter kf, SVTGeometry svt, BMTGeometry bmt) {
+    public void update(KFitter kf) {
         Ray the_ray = new Ray(kf.finalStateVec.tx, kf.finalStateVec.x0, kf.finalStateVec.tz, kf.finalStateVec.z0);                
         this.set_ray(the_ray);
         this.set_chi2(kf.chi2);
         this.trajs = kf.TrjPoints;
-        this.updateCrosses(svt);
-        this.updateClusters(svt);
-        this.findTrajectory(svt, bmt);
+        this.updateCrosses();
+        this.updateClusters();
+        this.findTrajectory();
     }
     
     
-    public void updateCrosses(Ray ray, SVTGeometry geo) {
+    public void updateCrosses(Ray ray) {
         this.set_ray(ray);
-        this.updateCrosses(geo);
+        this.updateCrosses();
     }
     
-    public void updateCrosses(SVTGeometry geo) {
+    public void updateCrosses() {
         for (Cross c : this) {
             c.set_AssociatedTrackID(this.get_Id());
             if(c.get_Detector()==DetectorType.BST) 
-                c.updateSVTCross(this.get_ray().get_dirVec(), geo);
+                c.updateSVTCross(this.get_ray().get_dirVec());
             else {
                 Cluster cluster = c.get_Cluster1();
                 List<Point3D> trajs = new ArrayList<>();
@@ -71,9 +71,9 @@ public class StraightTrack extends Trajectory{
         }
     }
     
-    public void updateClusters(SVTGeometry svt) {
+    public void updateClusters() {
         for(int key : this.trajs.keySet()) {
-            this.clsMap.get(key).update(this.get_Id(), this.trajs.get(key), svt);
+            this.clsMap.get(key).update(this.get_Id(), this.trajs.get(key));
         }        
     }
 
@@ -108,11 +108,11 @@ public class StraightTrack extends Trajectory{
     }
 
     
-    public void findTrajectory(SVTGeometry svt_geo, BMTGeometry bmt_geo) {
+    public void findTrajectory() {
         Ray ray = this.get_ray();
         ArrayList<StateVec> stateVecs = new ArrayList<>();
 
-        double[][][] SVTIntersections = TrajectoryFinder.calc_trackIntersSVT(ray, svt_geo);
+        double[][][] SVTIntersections = TrajectoryFinder.calc_trackIntersSVT(ray);
 
         for (int l = 0; l < SVTGeometry.NLAYERS; l++) {
             for (int s = 0; s < SVTGeometry.NSECTORS[l]; s++) {
@@ -148,7 +148,7 @@ public class StraightTrack extends Trajectory{
             }
         }
         
-        double[][][] BMTIntersections = TrajectoryFinder.calc_trackIntersBMT(ray, bmt_geo, BMTConstants.STARTINGLAYR);
+        double[][][] BMTIntersections = TrajectoryFinder.calc_trackIntersBMT(ray, BMTConstants.STARTINGLAYR);
 
         for (int l = BMTConstants.STARTINGLAYR - 1; l < 6; l++) {
             //hemisphere 1-2
@@ -161,7 +161,7 @@ public class StraightTrack extends Trajectory{
                     double YtrackIntersSurf = BMTIntersections[l][h][1];
                     double ZtrackIntersSurf = BMTIntersections[l][h][2];
                     //int SectorTrackIntersSurf = bmt_geo.isInSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf), Math.toRadians(BMTConstants.isInSectorJitter));
-                    int SectorTrackIntersSurf = bmt_geo.getSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf));
+                    int SectorTrackIntersSurf = Constants.BMTGEOMETRY.getSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf));
                     double PhiTrackIntersSurf = BMTIntersections[l][h][3];
                     double ThetaTrackIntersSurf = BMTIntersections[l][h][4];
                     double trkToMPlnAngl = BMTIntersections[l][h][5];

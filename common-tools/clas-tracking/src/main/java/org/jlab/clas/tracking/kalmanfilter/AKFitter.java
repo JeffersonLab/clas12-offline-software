@@ -120,7 +120,7 @@ public abstract class AKFitter {
                 ndf++;
             }
         }  
-        if(chisq==0) chisq=Double.POSITIVE_INFINITY;
+        if(chisq==0) chisq=Double.NaN;
         return chisq;
     }
     

@@ -16,6 +16,7 @@ import static org.jlab.rec.cvt.bmt.BMTConstants.E_DRIFT_MF;
 import static org.jlab.rec.cvt.bmt.Lorentz.getLorentzAngle;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.clas.tracking.objects.Strip;
 import org.jlab.geom.prim.Transformation3D;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.graphics.EmbeddedCanvasTabbed;
@@ -23,6 +24,7 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.rec.cvt.Constants;
+
 /**
  *
  * @author devita
@@ -972,8 +974,40 @@ public class BMTGeometry {
     
     public List<Surface> getSurfaces() {
         List<Surface> surfaces = new ArrayList<>();
+        for(int i=1; i<=NLAYERS; i++)
+            surfaces.add(this.getSurface(i, 1));
         return surfaces;
     }
+    
+    public Surface getSurfaceC(int layer, int sector, int stripId, double centroid, double centroidValue, int hemisphere) {
+        Surface surface = this.getSurface(layer, sector);
+        surface.hemisphere = hemisphere;
+        surface.strip = new Strip(stripId, centroid, centroidValue);
+        return surface;
+    }
+    
+    public Surface getSurfaceZ(int layer, int sector, int stripId, double centroid, double x, double y, double centroidValue, int hemisphere) {
+        Surface surface = this.getSurface(layer, sector);
+        surface.hemisphere = hemisphere;
+        surface.strip = new Strip(stripId, centroid, x, y, centroidValue);
+        return surface;
+    }
+    
+    public Surface getSurface(int layer, int sector) {
+        Surface surface = new Surface(this.getTileSurface(layer, sector), 
+                                      new Strip(0,0,0), 
+                                      Constants.SWIMACCURACYBMT);
+        surface.hemisphere = 0;
+        surface.setLayer(layer);
+        surface.setSector(sector);
+        surface.setError(0); 
+        surface.setl_over_X0(this.getToverX0(layer));
+        surface.setZ_over_A_times_l(this.getZoverA(layer));
+        surface.setThickness(this.getMaterialThickness(layer));
+        surface.notUsedInFit=true;
+        return surface;
+    }
+    
 
     /**
      * Executable method: implements checks

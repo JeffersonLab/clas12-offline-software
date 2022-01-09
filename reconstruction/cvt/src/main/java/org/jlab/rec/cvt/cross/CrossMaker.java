@@ -27,11 +27,9 @@ public class CrossMaker {
     /**
      *
      * @param clusters clusters
-     * @param svt_geo svt geometry
      * @return list of crosses for the SVT and BMT
      */
-    public ArrayList<ArrayList<Cross>> findCrosses(List<Cluster> clusters, SVTGeometry svt_geo,
-            BMTGeometry bmt_geo) {
+    public ArrayList<ArrayList<Cross>> findCrosses(List<Cluster> clusters) {
         // instantiate array of clusters that are sorted by detector (SVT, BMT [C, Z]) and inner/outer layers
         ArrayList<ArrayList<Cluster>> sortedClusters = new ArrayList<ArrayList<Cluster>>();
         // fill the sorted list
@@ -67,8 +65,8 @@ public class CrossMaker {
             bmt_Clayrclus.removeAll(rbmt_Clayrclus);
         }
         // arrays of BMT and SVT crosses
-        ArrayList<Cross> BMTCrosses = this.findBMTCrosses(bmt_Clayrclus, bmt_Zlayrclus, bmt_geo,1000);
-        ArrayList<Cross> SVTCrosses = this.findSVTCrosses(svt_innerlayrclus, svt_outerlayrclus, svt_geo);
+        ArrayList<Cross> BMTCrosses = this.findBMTCrosses(bmt_Clayrclus, bmt_Zlayrclus,1000);
+        ArrayList<Cross> SVTCrosses = this.findSVTCrosses(svt_innerlayrclus, svt_outerlayrclus);
         
         // instantiate the arraylists of sorted Crosses by detector type
         ArrayList<ArrayList<Cross>> sortedCrosses = new ArrayList<ArrayList<Cross>>();
@@ -83,14 +81,12 @@ public class CrossMaker {
      *
      * @param svt_innerlayrclus svt inner layer clusters
      * @param svt_outerlayrclus svt outer layer clusters
-     * @param svt_geo svt geometry
      * @return the list of SVT crosses reconstructed from clusters in the inner
      * and outer layers in a module
      */
     public ArrayList<Cross> findSVTCrosses(
             List<Cluster> svt_innerlayrclus,
-            List<Cluster> svt_outerlayrclus,
-            SVTGeometry svt_geo) {
+            List<Cluster> svt_outerlayrclus) {
         // instantiate the list of crosses
         ArrayList<Cross> crosses = new ArrayList<Cross>();
         int rid = 0; // cross id
@@ -125,14 +121,14 @@ public class CrossMaker {
                     this_cross.set_Cluster2(outlayerclus);
                     this_cross.set_Id(rid);
                     // sets the cross parameters (point3D and associated error) from the SVT geometry
-                    this_cross.updateSVTCross(null, svt_geo); 
+                    this_cross.updateSVTCross(null); 
                     // the uncorrected point obtained from default estimate that the track is at 90 deg wrt the module should not be null
                     if (this_cross.get_Point0() != null) {
                         //pass the cross to the arraylist of crosses
                         this_cross.set_Id(crosses.size() + 1);
                         this_cross.set_Detector(DetectorType.BST);
-                        calcCentErr(this_cross, this_cross.get_Cluster1(), svt_geo);
-                        calcCentErr(this_cross, this_cross.get_Cluster2(), svt_geo);
+                        calcCentErr(this_cross, this_cross.get_Cluster1());
+                        calcCentErr(this_cross, this_cross.get_Cluster2());
                         crosses.add(this_cross);
                     }
 
@@ -146,14 +142,14 @@ public class CrossMaker {
         return crosses;
     }
 
-    private void calcCentErr(Cross c, Cluster Cluster1, SVTGeometry svt_geo) {
-        double Z = svt_geo.toLocal(Cluster1.get_Layer(),
-                                   Cluster1.get_Sector(),
-                                   c.get_Point()).z();        
+    private void calcCentErr(Cross c, Cluster Cluster1) {
+        double Z = Constants.SVTGEOMETRY.toLocal(Cluster1.get_Layer(),
+                                                 Cluster1.get_Sector(),
+                                                 c.get_Point()).z();        
         if(Z>SVTGeometry.getModuleLength()) Z=SVTGeometry.getModuleLength();
         else if(Z<0) Z=0;
-        Cluster1.set_CentroidError(Cluster1.get_ResolutionAlongZ(Z, svt_geo) /(SVTGeometry.getPitch() / Math.sqrt(12.)));
-        Cluster1.set_Resolution(Cluster1.get_ResolutionAlongZ(Z, svt_geo) );
+        Cluster1.set_CentroidError(Cluster1.get_ResolutionAlongZ(Z) /(SVTGeometry.getPitch() / Math.sqrt(12.)));
+        Cluster1.set_Resolution(Cluster1.get_ResolutionAlongZ(Z) );
     }
     /**
      *
@@ -165,7 +161,7 @@ public class CrossMaker {
     public ArrayList<Cross> findBMTCrosses(
             ArrayList<Cluster> Clayrclus,
             ArrayList<Cluster> Zlayrclus, 
-            BMTGeometry bmt_geo, int idx) {
+            int idx) {
         //instanciates the list of crosses
         ArrayList<Cross> crosses = new ArrayList<Cross>();
 
@@ -206,7 +202,7 @@ public class CrossMaker {
 
         for (Cross c : crosses) {
             int rg  =  3 + 
-                    bmt_geo.getLayer( c.get_Region(), c.get_Type()) ;
+                    Constants.BMTGEOMETRY.getLayer( c.get_Region(), c.get_Type()) ;
             c.setOrderedRegion(rg);
         }
         return crosses;

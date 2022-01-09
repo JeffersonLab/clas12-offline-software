@@ -5,10 +5,10 @@ import java.util.List;
 
 import org.jlab.rec.cvt.trajectory.Helix;
 
-//import Jama.Matrix;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.svt.SVTGeometry;
+
 
 /**
  * A fitter which does sequential fit (for r, phi coordinates) to a circle using

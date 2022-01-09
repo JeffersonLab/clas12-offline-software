@@ -4,16 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
-import org.jlab.geom.base.Detector;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.Constants;
-import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cross.Cross;
-import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.svt.SVTParameters;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
@@ -27,17 +23,10 @@ public class TrackListFinder {
     /**
      *
      * @param cands the list of track candidates
-     * @param svt_geo the svt geometry
-     * @param bmt_geo
-     * @param ctof_geo
-     * @param cnd_geo
      * @param cvtSwim
      * @return the list of selected tracks
      */
-    public static List<Track> getTracks(List<Track> cands, 
-            SVTGeometry svt_geo, BMTGeometry bmt_geo,
-            CTOFGeant4Factory ctof_geo, Detector cnd_geo,
-            Swim cvtSwim) {
+    public static List<Track> getTracks(List<Track> cands, Swim cvtSwim) {
         List<Track> tracks = new ArrayList<>();
         if (cands.isEmpty()) {
             System.err.print("Error no tracks found");
@@ -71,7 +60,7 @@ public class TrackListFinder {
                 }
                 TrajectoryFinder trjFind = new TrajectoryFinder();
 
-                Trajectory traj = trjFind.findTrajectory(trk, svt_geo, bmt_geo, ctof_geo, cnd_geo, cvtSwim, "final");
+                Trajectory traj = trjFind.findTrajectory(trk, cvtSwim, "final");
 
                 trk.set_Trajectory(traj.get_Trajectory());
 

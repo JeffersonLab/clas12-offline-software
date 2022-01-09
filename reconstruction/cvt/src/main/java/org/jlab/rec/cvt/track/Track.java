@@ -7,7 +7,6 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.Constants;
-import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.svt.SVTGeometry;
@@ -185,10 +184,8 @@ public class Track extends Trajectory implements Comparable<Track> {
 
     /**
      * Updates the crosses positions based on trajectories or helix
-     * @param sgeo
-     * @param bgeo
      */
-    public void update_Crosses(int trackId, SVTGeometry sgeo, BMTGeometry bgeo) {
+    public void update_Crosses(int trackId) {
         for (int i = 0; i < this.size(); i++) {
             Cross cross = this.get(i);
             cross.set_AssociatedTrackID(trackId);
@@ -208,12 +205,12 @@ public class Track extends Trajectory implements Comparable<Track> {
 //                System.out.println("Traj  " + cross.get_Cluster1().get_Layer() + " " + helixPos.toString());
 //                System.out.println("Cross " + cross.get_Detector().getName() + " " + cross.get_Point().toString());
             }
-            cross.update(trackPos, trackDir, sgeo);
+            cross.update(trackPos, trackDir);
         }
     }    
     
 
-    public void update_Clusters(int trackId, SVTGeometry sgeo) {        
+    public void update_Clusters(int trackId) {        
         if(this.getTrajectories()!=null) {
             for (int i = 0; i < this.get_Seed().get_Clusters().size(); i++) {
                 Cluster cluster = this.get_Seed().get_Clusters().get(i);
@@ -222,7 +219,7 @@ public class Track extends Trajectory implements Comparable<Track> {
                 if(cluster.get_Detector()==DetectorType.BMT) layer += SVTGeometry.NLAYERS;
                 
                 if(this.getTrajectories().get(layer)!=null) // RDV check why it is necessary
-                    cluster.update(trackId, this.getTrajectories().get(layer), sgeo);
+                    cluster.update(trackId, this.getTrajectories().get(layer));
             }
         }
     }

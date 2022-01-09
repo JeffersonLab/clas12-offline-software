@@ -2,10 +2,16 @@ package org.jlab.rec.cvt;
 
 import cnuphys.magfield.MagneticFields;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.clas.tracking.kalmanfilter.Surface;
 
 import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
+import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
+import org.jlab.geom.base.Detector;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
+import org.jlab.rec.cvt.svt.SVTGeometry;
 
 public class Constants {
    
@@ -88,6 +94,12 @@ public class Constants {
     private static final Map<Integer,Integer> layersUsed = new HashMap<Integer,Integer>();
     private static final double[][]BMTPhiZRangeExcld = new double[2][2];
     private static int BMTLayerExcld = -1;
+    
+    public static SVTGeometry       SVTGEOMETRY  = null;
+    public static BMTGeometry       BMTGEOMETRY  = null;
+    public static CTOFGeant4Factory CTOFGEOMETRY = null;
+    public static Detector          CNDGEOMETRY  = null;
+    public static List<Surface>     CVTSURFACES  = null;
     
     public static double getXb() {
         return _Xb;

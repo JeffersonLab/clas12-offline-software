@@ -7,6 +7,7 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.bmt.BMTConstants;
@@ -231,14 +232,13 @@ public class Strip {
     /**
      * 
      *
-     * @param geo the BMT geometry class Sets the Lorentz corrected phi and
-     * strip number for Z detectors, the z position for C detectors
      * @param sector
      * @param layer
      * @param swim
      */
-    public void calc_BMTStripParams(BMTGeometry geo, int sector, int layer, Swim swim) {
-
+    public void calc_BMTStripParams(int sector, int layer, Swim swim) {
+        BMTGeometry geo = Constants.BMTGEOMETRY;
+        
         int region = geo.getRegion(layer); // region index (1...3) 1=layers 1&2, 2=layers 3&4, 3=layers 5&6
         this.setToGlobal(geo.toGlobal(layer, sector));
         this.setToLocal(geo.toLocal(layer, sector));

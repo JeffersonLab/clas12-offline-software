@@ -1,13 +1,20 @@
 package org.jlab.rec.cvt.svt;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
+import java.util.ArrayList;
+import java.util.List;
+import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.clas.tracking.objects.Strip;
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
+import org.jlab.geom.prim.Arc3D;
+import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Line3d;
+import org.jlab.rec.cvt.Constants;
 
 public class SVTGeometry {
 
@@ -206,6 +213,71 @@ public class SVTGeometry {
     public double getLocalAngle(int layer, int sector, Vector3D trackDir) {
         Vector3D dir = this.getLocalTrack(layer, sector, trackDir);
         return Math.atan(dir.x()/dir.z());
+    }
+    
+    public List<Surface> getSurfaces() {
+        List<Surface> surfaces = new ArrayList<>();
+        surfaces.add(this.getShieldSurface());
+        surfaces.add(this.getFaradayCageSurfaces(0));
+        for(int i=1; i<=NLAYERS; i++) {
+            surfaces.add(this.getSurface(i, 1));
+        }
+        surfaces.add(this.getFaradayCageSurfaces(1));
+        return surfaces;
+    }
+        
+    public Surface getSurface(int layer, int sector, int stripId, double centroid, Line3D stripLine, int hemisphere) {
+        Surface surface = this.getSurface(layer, sector);
+        surface.hemisphere = hemisphere;
+        surface.strip = new Strip(stripId, centroid, stripLine);
+        return surface;
+    }
+
+    public Surface getSurface(int layer, int sector) {
+        Line3D module = this.getModule(layer, sector);
+        Surface surface = new Surface(this.getPlane(layer, sector), 
+                                      new Strip(0,0,0), 
+                                      module.origin(), module.end(), 
+                                      Constants.SWIMACCURACYSVT);
+        surface.hemisphere = 0;
+        surface.setLayer(layer);
+        surface.setSector(sector);
+        surface.setError(0); 
+        if(layer%2==0) {
+            surface.setl_over_X0(SVTGeometry.getToverX0());
+            surface.setZ_over_A_times_l(SVTGeometry.getZoverA());
+            surface.setThickness(SVTGeometry.getMaterialThickness());
+        }
+        surface.notUsedInFit=true;
+        return surface;
+    }
+    
+    private Surface getShieldSurface() {
+        Point3D  center = new Point3D(0, 0, Constants.getZoffset()+SVTConstants.TSHIELDZPOS-SVTConstants.TSHIELDLENGTH/2);
+        Point3D  origin = new Point3D(SVTConstants.TSHIELDRMAX, 0, SVTConstants.TSHIELDZPOS-SVTConstants.TSHIELDLENGTH/2);
+        Vector3D axis   = new Vector3D(0,0,1);
+        Arc3D base = new Arc3D(origin, center, axis, 2*Math.PI);
+        Cylindrical3D shieldCylinder = new Cylindrical3D(base, SVTConstants.TSHIELDLENGTH);
+        Surface shieldSurface = new Surface(shieldCylinder, new Strip(0, 0, 0), Constants.DEFAULTSWIMACC);
+        shieldSurface.setl_over_X0(SVTConstants.TSHIELDRADLEN);
+        shieldSurface.setZ_over_A_times_l(SVTConstants.TSHILEDZOVERA);
+        shieldSurface.setThickness(SVTConstants.TSHIELDRMAX-SVTConstants.TSHIELDRMIN);
+        shieldSurface.notUsedInFit=true;
+        return shieldSurface;
+    }
+
+    private Surface getFaradayCageSurfaces(int i) {
+        Point3D  center = new Point3D(0, 0, SVTConstants.FARADAYCAGEZPOS[i]-SVTConstants.FARADAYCAGELENGTH[i]/2);
+        Point3D  origin = new Point3D(SVTConstants.FARADAYCAGERMAX[i], 0, SVTConstants.FARADAYCAGEZPOS[i]-SVTConstants.FARADAYCAGELENGTH[i]/2);
+        Vector3D axis   = new Vector3D(0,0,1);
+        Arc3D base = new Arc3D(origin, center, axis, 2*Math.PI);
+        Cylindrical3D fcCylinder = new Cylindrical3D(base, SVTConstants.FARADAYCAGELENGTH[i]);
+        Surface fcSurface = new Surface(fcCylinder, new Strip(0, 0, 0), Constants.DEFAULTSWIMACC);
+        fcSurface.setl_over_X0(SVTConstants.FARADAYCAGERADLEN[i]);
+        fcSurface.setZ_over_A_times_l(SVTConstants.FARADAYCAGEZOVERA[i]);
+        fcSurface.setThickness(SVTConstants.FARADAYCAGERMAX[i]-SVTConstants.FARADAYCAGERMIN[i]);
+        fcSurface.notUsedInFit=true;
+        return fcSurface;
     }
     
     @Deprecated
