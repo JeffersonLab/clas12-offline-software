@@ -18,6 +18,7 @@ import org.jlab.rec.cvt.cross.CrossList;
 import org.jlab.rec.cvt.cross.StraightTrackCrossListFinder;
 import org.jlab.rec.cvt.fit.CosmicFitter;
 import org.jlab.rec.cvt.hit.Hit;
+import org.jlab.rec.cvt.track.Measurements;
 import org.jlab.rec.cvt.track.StraightTrack;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.track.TrackCandListFinder;
@@ -83,7 +84,7 @@ public class CosmicTracksRec {
             recUtil.CleanupSpuriousCrosses(crosses, null) ;
             
             KFitter kf = new KFitter(Constants.KFFILTERON, Constants.KFITERATIONS, Constants.kfBeamSpotConstraint(), Constants.kfMatLib);
-            
+            Measurements measures = new Measurements(true, null);
             List<StraightTrack> cosmics = new ArrayList<>();
             for (int k1 = 0; k1 < cosmicCands.size(); k1++) {
                 Ray ray = cosmicCands.get(k1).get_ray();
@@ -103,7 +104,7 @@ public class CosmicTracksRec {
                 cov[4][4]=1;
                 kf.init(ray.get_yxinterc(),ray.get_yzinterc(),
                         ray.get_yxslope(), ray.get_yzslope(), 10.0, cov,
-                        recUtil.setMeasVecs(cosmicCands.get(k1), swimmer));
+                        measures.getMeasurements(cosmicCands.get(k1)));
                 kf.mv.setDelta_d_a(new double[]{0.1, 0.1, 0.0001, 0.0001, 1});
                 kf.runFitter();
                 if (kf.setFitFailed == false && kf.NDF>0 && kf.finalStateVec!=null) { 
@@ -133,7 +134,7 @@ public class CosmicTracksRec {
                         //refit
                         kf.init(cosmic.get_ray().get_yxinterc(),cosmic.get_ray().get_yzinterc(),
                                 cosmic.get_ray().get_yxslope(), cosmic.get_ray().get_yzslope(), 10.0, cov,
-                                recUtil.setMeasVecs(cosmic, swimmer)) ;
+                                measures.getMeasurements(cosmicCands.get(k1))) ;
                         kf.runFitter();
                         if (kf.setFitFailed == false && kf.NDF>0 && kf.finalStateVec!=null) { 
                             cosmic.update(kf);

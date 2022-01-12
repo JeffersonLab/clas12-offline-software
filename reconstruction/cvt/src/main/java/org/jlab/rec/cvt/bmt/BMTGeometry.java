@@ -975,36 +975,35 @@ public class BMTGeometry {
     public List<Surface> getSurfaces() {
         List<Surface> surfaces = new ArrayList<>();
         for(int i=1; i<=NLAYERS; i++)
-            surfaces.add(this.getSurface(i, 1));
+            surfaces.add(this.getSurface(i, 1, new Strip(0, 0, 0)));
         return surfaces;
     }
     
-    public Surface getSurfaceC(int layer, int sector, int stripId, double centroid, double centroidValue, int hemisphere) {
-        Surface surface = this.getSurface(layer, sector);
-        surface.hemisphere = hemisphere;
-        surface.strip = new Strip(stripId, centroid, centroidValue);
+    public Surface getSurfaceC(int layer, int sector, int stripId, double centroid, double centroidValue) {
+        Strip strip = new Strip(stripId, centroid, centroidValue);
+        Surface surface = this.getSurface(layer, sector, strip);
         return surface;
     }
     
-    public Surface getSurfaceZ(int layer, int sector, int stripId, double centroid, double x, double y, double centroidValue, int hemisphere) {
-        Surface surface = this.getSurface(layer, sector);
-        surface.hemisphere = hemisphere;
-        surface.strip = new Strip(stripId, centroid, x, y, centroidValue);
+    public Surface getSurfaceZ(int layer, int sector, int stripId, double centroid, double x, double y, double centroidValue) {
+        Strip strip = new Strip(stripId, centroid, x, y, centroidValue);
+        Surface surface = this.getSurface(layer, sector, strip);
         return surface;
     }
     
-    public Surface getSurface(int layer, int sector) {
+    public Surface getSurface(int layer, int sector, Strip strip) {
         Surface surface = new Surface(this.getTileSurface(layer, sector), 
-                                      new Strip(0,0,0), 
+                                      strip, 
                                       Constants.SWIMACCURACYBMT);
         surface.hemisphere = 0;
         surface.setLayer(layer);
         surface.setSector(sector);
+        surface.setTransformation(this.toGlobal(layer, sector));
         surface.setError(0); 
         surface.setl_over_X0(this.getToverX0(layer));
         surface.setZ_over_A_times_l(this.getZoverA(layer));
         surface.setThickness(this.getMaterialThickness(layer));
-        surface.notUsedInFit=true;
+        surface.notUsedInFit=false;
         return surface;
     }
     

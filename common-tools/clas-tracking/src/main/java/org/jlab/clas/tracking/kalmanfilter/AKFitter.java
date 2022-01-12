@@ -112,8 +112,12 @@ public abstract class AKFitter {
         int ndf = this.NDF0;
 
         for(int k = 0; k< mv.measurements.size()-1; k++) {
-            if(mv.measurements.get(k+1).skip==false && sv.trackTraj.get(k)!=null) {
-                sv.transport(k, k+1, mv, swimmer);
+            if(sv.trackTraj.get(k)==null) {
+                chisq=Double.NaN;
+                break;
+            }
+            sv.transport(k, k+1, mv, swimmer);
+            if(!mv.measurements.get(k+1).skip) {
                 double dh    = mv.dh(k+1, sv.trackTraj.get(k+1));
                 double error = mv.measurements.get(k+1).error;
                 chisq += dh*dh / error/error;

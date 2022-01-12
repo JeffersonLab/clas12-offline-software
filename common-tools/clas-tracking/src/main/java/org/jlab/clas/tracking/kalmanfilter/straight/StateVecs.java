@@ -92,43 +92,35 @@ public class StateVecs extends AStateVecs {
     @Override
     public double[][] Q(int i, int f, StateVec iVec, AMeasVecs mv) {
         double[][] Q = new double[5][5];
-        int dir = f-i;
-        if (dir >0 ) {
-            Vector3D trkDir = this.P(iVec.k).asUnit();
-            Vector3D trkPos = this.X(iVec.k);
-            double x = trkPos.x();
-            double y = trkPos.y();
-            double z = trkPos.z();
-            double ux = trkDir.x();
-            double uy = trkDir.y();
-            double uz = trkDir.z();
-            double tx = ux/uy;
-            double tz = uz/uy;
-            double cosEntranceAngle = Math.abs((x * ux + y * uy + z * uz) / Math.sqrt(x * x + y * y + z * z));
 
-            double p = 1;
-             double sctRMS = 0;
-            double t_ov_X0 = mv.measurements.get(i).l_over_X0;
+        int dir = (int) Math.signum(f-i);
+        if(dir<0) return Q;
+        
+        double t_ov_X0 = 0;
+        // depending on dir, k increases or decreases
+        for (int k = i; (k-f)*dir <= 0; k += dir) {
+            int hemisphere = (int) mv.measurements.get(k).surface.hemisphere;
+            if(dir*hemisphere>0 && k==f) continue;
+            if(dir*hemisphere<0 && k==i) continue;
+            double cosEntranceAngle = 1;//this.getLocalDirAtMeasSite(iVec, mv.measurements.get(k));
+            t_ov_X0 += mv.measurements.get(k).l_over_X0 / cosEntranceAngle;
+        }
+
+        if (t_ov_X0>0) {
+            double p    = 1;
             double mass = piMass;   // assume given mass hypothesis 
-            double beta = 1; // use particle momentum
-            t_ov_X0 = t_ov_X0 / cosEntranceAngle;
-            if(t_ov_X0!=0) {
+            double beta = p / Math.sqrt(p * p + mass * mass);
             // Highland-Lynch-Dahl formula
-                sctRMS = (0.0136/(beta*p))*Math.sqrt(t_ov_X0)*
-                    (1 + 0.038 * Math.log(t_ov_X0));
-             //sctRMS = ((0.141)/(beta*PhysicsConstants.speedOfLight()*p))*Math.sqrt(t_ov_X0)*
-             //       (1 + Math.log(t_ov_X0)/9.);
-            }
-            double cov_txtx = (1 + tx * tx) * (1 + tx * tx + tz * tz) * sctRMS * sctRMS;
-            double cov_tztz = (1 + tz * tz) * (1 + tx * tx + tz * tz) * sctRMS * sctRMS;
-            double cov_txtz = tx * tz * (1 + tx * tx + tz * tz) * sctRMS * sctRMS;
-            
+            double sctRMS = (0.0136/(beta*p))*Math.sqrt(t_ov_X0)*(1 + 0.038 * Math.log(t_ov_X0));        
+            double cov_txtx = (1 + iVec.tx * iVec.tx) * (1 + iVec.tx * iVec.tx + iVec.tz * iVec.tz) * sctRMS * sctRMS;
+            double cov_tztz = (1 + iVec.tz * iVec.tz) * (1 + iVec.tx * iVec.tx + iVec.tz * iVec.tz) * sctRMS * sctRMS;
+            double cov_txtz = iVec.tx * iVec.tz * (1 + iVec.tx * iVec.tx + iVec.tz * iVec.tz) * sctRMS * sctRMS;
             Q = new double[][]{
-                {0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0},
+                {0, 0, 0,        0,        0},
+                {0, 0, 0,        0,        0},
                 {0, 0, cov_txtx, cov_txtz, 0},
                 {0, 0, cov_txtz, cov_tztz, 0},
-                {0, 0, 0, 0, 0}
+                {0, 0, 0,        0,        0}
             };
         }
         return Q;

@@ -95,9 +95,11 @@ public class KFitter extends AKFitter {
         for (int k = 1; k < s.trackTraj.size(); k++) {
             int layer   = mv.measurements.get(k).layer;
             double resi = mv.dh(k, s.trackTraj.get(k));
-            TrjPoints.put(layer, new HitOnTrack(layer, s.trackTraj.get(k), resi));
-            if(mv.measurements.get(k).skip)
-                TrjPoints.get(layer).isMeasUsed = false;
+            if(!mv.measurements.get(k).surface.passive) {
+                TrjPoints.put(layer, new HitOnTrack(layer, s.trackTraj.get(k), resi));
+                if(mv.measurements.get(k).skip)
+                    TrjPoints.get(layer).isMeasUsed = false;
+            }
             //System.out.println(" Traj layer "+layer+" x "+TrjPoints.get(layer).x+" y "+TrjPoints.get(layer).y+" z "+TrjPoints.get(layer).z);
         }
     }

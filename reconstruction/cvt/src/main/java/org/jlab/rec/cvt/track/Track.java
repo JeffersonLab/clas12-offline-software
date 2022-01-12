@@ -9,7 +9,7 @@ import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
-import org.jlab.rec.cvt.svt.SVTGeometry;
+import org.jlab.rec.cvt.track.Measurements.CVTLayer;
 import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 
@@ -193,8 +193,9 @@ public class Track extends Trajectory implements Comparable<Track> {
             Vector3D trackDir = null;
             if(this.getTrajectories()!=null && Math.abs(this.get_helix().B)>0.0001) {
                 int layer = cross.get_Cluster1().get_Layer();
-                if(cross.get_Detector()==DetectorType.BMT) layer += SVTGeometry.NLAYERS;
-                HitOnTrack traj = this.getTrajectories().get(layer);
+                int index = CVTLayer.getType(cross.get_Detector(), layer).getIndex();
+                HitOnTrack traj = this.getTrajectories().get(index);
+                if(traj==null) return; //RDV check why
                 trackPos = new Point3D(traj.x, traj.y, traj.z);
                 trackDir = new Vector3D(traj.px, traj.py, traj.pz).asUnit();
             }
@@ -216,10 +217,10 @@ public class Track extends Trajectory implements Comparable<Track> {
                 Cluster cluster = this.get_Seed().get_Clusters().get(i);
                 
                 int layer = cluster.get_Layer();
-                if(cluster.get_Detector()==DetectorType.BMT) layer += SVTGeometry.NLAYERS;
+                int index = CVTLayer.getType(cluster.get_Detector(), layer).getIndex();
                 
-                if(this.getTrajectories().get(layer)!=null) // RDV check why it is necessary
-                    cluster.update(trackId, this.getTrajectories().get(layer));
+                if(this.getTrajectories().get(index)!=null) // RDV check why it is necessary
+                    cluster.update(trackId, this.getTrajectories().get(index));
             }
         }
     }

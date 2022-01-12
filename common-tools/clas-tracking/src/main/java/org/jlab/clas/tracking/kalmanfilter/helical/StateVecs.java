@@ -210,39 +210,34 @@ public class StateVecs extends AStateVecs {
     @Override
     public double[][] Q(int i, int f, StateVec iVec, AMeasVecs mv) {
         double[][] Q = new double[5][5];
-        // if (iVec.k % 2 == 1 && dir > 0) {
+
         int dir = f-i;
+
         double t_ov_X0 = 0;
         if(dir>0) {
-            for(int k=i+1; k<=f; k++) t_ov_X0 += mv.measurements.get(k).l_over_X0;
+            for(int k=i; k<f; k++) {
+                double cosEntranceAngle = this.getLocalDirAtMeasSite(iVec, mv.measurements.get(k+1));
+                t_ov_X0 += mv.measurements.get(k+1).l_over_X0/cosEntranceAngle;
+//                System.out.println("From " + i + " to " + f + " including material from surface " + (k+1) + " with X0 = " +  mv.measurements.get(k+1).l_over_X0 + " / " + cosEntranceAngle);
+//                System.out.println(mv.measurements.get(k+1).surface.toString());
+            }
         }
         else {
-            for(int k=i; k>f; k--)    t_ov_X0 += mv.measurements.get(k).l_over_X0;
+            for(int k=i; k>f; k--) {
+                double cosEntranceAngle = this.getLocalDirAtMeasSite(iVec, mv.measurements.get(k));
+                t_ov_X0 += mv.measurements.get(k).l_over_X0/cosEntranceAngle;
+//                System.out.println("From " + i + " to " + f + " including material from surface " + k + " with X0 = " +  mv.measurements.get(k).l_over_X0 + " / " + cosEntranceAngle);
+//                System.out.println(mv.measurements.get(k).surface.toString());
+            }
         }
 
         if (t_ov_X0>0) {
-            Vector3D trkDir = this.P(iVec.k).asUnit();
-            Vector3D trkPos = this.X(iVec.k);
-            double x = trkPos.x();
-            double y = trkPos.y();
-            double z = trkPos.z();
-            double ux = trkDir.x();
-            double uy = trkDir.y();
-            double uz = trkDir.z();
-
-            double cosEntranceAngle = Math.abs((x * ux + y * uy + z * uz) / Math.sqrt(x * x + y * y + z * z));
-
-            double pt = Math.abs(1. / iVec.kappa);
-            double pz = pt * iVec.tanL;
-            double p  = Math.sqrt(pt * pt + pz * pz);
+            double p    = Math.sqrt(iVec.px*iVec.px + iVec.py*iVec.py + iVec.pz*iVec.pz);
+            if(this.straight) p = 1;
             double mass = piMass;   // assume given mass hypothesis 
-            double beta = p / Math.sqrt(p * p + mass * mass); // use particle momentum
-            t_ov_X0 = t_ov_X0 / cosEntranceAngle;
+            double beta = p / Math.sqrt(p * p + mass * mass);
             // Highland-Lynch-Dahl formula
-            double sctRMS = (0.0136/(beta*p))*Math.sqrt(t_ov_X0)*
-                            (1 + 0.038 * Math.log(t_ov_X0));
-             //sctRMS = ((0.141)/(beta*PhysicsConstants.speedOfLight()*p))*Math.sqrt(t_ov_X0)*
-             //       (1 + Math.log(t_ov_X0)/9.);
+            double sctRMS = (0.0136/(beta*p))*Math.sqrt(t_ov_X0)*(1 + 0.038 * Math.log(t_ov_X0));
             Q = new double[][]{
                 {0, 0, 0, 0, 0},
                 {0, sctRMS*sctRMS * (1 + iVec.tanL * iVec.tanL), 0, 0, 0},

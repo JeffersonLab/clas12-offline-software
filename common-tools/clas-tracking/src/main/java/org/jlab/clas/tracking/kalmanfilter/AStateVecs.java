@@ -9,6 +9,7 @@ import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs.MeasVec;
 import org.jlab.clas.tracking.kalmanfilter.helical.KFitter;
 import org.jlab.clas.tracking.trackrep.Helix;
+import org.jlab.geom.prim.Point3D;
 
 public abstract class AStateVecs {
 
@@ -118,6 +119,29 @@ public abstract class AStateVecs {
         return result;
     }
 
+    public double getLocalDirAtMeasSite(StateVec vec, MeasVec mv) {
+        if(mv.surface==null) 
+            return 0;
+        else if(mv.surface.plane==null && mv.surface.cylinder==null) 
+            return 0;
+        else {
+            Point3D  pos = new Point3D(vec.x, vec.y, vec.z);
+            Vector3D dir = new Vector3D(vec.px, vec.py, vec.pz).asUnit();
+            if(mv.surface.plane!=null) {
+                Vector3D norm = mv.surface.plane.normal();
+                return Math.abs(norm.dot(dir));
+            }
+            else if(mv.surface.cylinder!=null) {
+                mv.surface.toLocal().apply(pos);
+                mv.surface.toLocal().apply(dir);
+                Vector3D norm = pos.toVector3D().asUnit();
+                return Math.abs(norm.dot(dir));
+            }
+            return 0;
+        }
+    }
+    
+    
     public abstract double[][] Q(int i, int f, StateVec iVec, AMeasVecs mv);
 
     public abstract double[][] F(StateVec ivec, StateVec fvec);

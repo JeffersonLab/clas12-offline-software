@@ -204,7 +204,7 @@ public class TrajectoryFinder {
                 //Point3D helixTrj = trk.get_helix().getPointAtRadius(bmt_geo.getRadiusMidDrift(layer)); 
                 double radius  = Constants.BMTGEOMETRY.getRadiusMidDrift(layer)/10;                
                 inters = swimmer.SwimRho(radius, Constants.SWIMACCURACYBMT/10);
-                if(inters==null) break;
+                if(inters==null || Double.isNaN(inters[0]) || Double.isNaN(inters[1]) || Double.isNaN(inters[2])) break;
                 int sector = Constants.BMTGEOMETRY.getSector(0, Math.atan2(inters[1],inters[0]));
                 
                 Line3D axis    = Constants.BMTGEOMETRY.getAxis(layer, sector);

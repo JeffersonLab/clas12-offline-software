@@ -26,8 +26,7 @@ public abstract class AMeasVecs {
         for(int i = 0; i < measSurfaces.size(); i++) {
             MeasVec mvec = new MeasVec();
             mvec.k = i ;
-            mvec.layer = measSurfaces.get(i).getLayer();
-            mvec.sector = measSurfaces.get(i).getSector();
+            mvec.layer = measSurfaces.get(i).getIndex();
             mvec.surface = measSurfaces.get(i);
             if(mvec.surface.getError()!=0)
                 mvec.error = mvec.surface.getError();
@@ -205,10 +204,10 @@ public abstract class AMeasVecs {
     public class MeasVec implements Comparable<MeasVec> {
         public Surface surface;
         public int layer    = -1;
-        public int sector   = -1;
         public double error = 1;
         public int k        = -1;
-        public boolean skip = false;
+        public boolean passive = false;
+        public boolean skip  = false;
         // this is for multiple scattering estimates in track 
         public double l_over_X0;
         //this is for energy loss

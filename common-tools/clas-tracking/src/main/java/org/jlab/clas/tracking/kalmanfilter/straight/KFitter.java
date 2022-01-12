@@ -78,14 +78,14 @@ public class KFitter extends AKFitter {
     @Override
     public void setTrajectory(AStateVecs sv, AMeasVecs mv) {
         TrjPoints = new HashMap<>();
-        for (int k = 0; k < sv.trackTraj.size()-1; k++) {
-            StateVec stv = sv.trackTraj.get(k+1);
-            stv.resi = mv.dh(k+1, stv);
+        for (int k = 1; k < sv.trackTraj.size(); k++) {
+            StateVec stv = sv.trackTraj.get(k);
+            stv.resi = mv.dh(k, stv);
             if(Double.isNaN(stv.resi)) {
-                mv.measurements.get(k+1).skip = true;
+                mv.measurements.get(k).skip = true;
             }
-            else {
-                int layer = mv.measurements.get(k+1).layer;
+            else if(!mv.measurements.get(k).surface.passive) {
+                int layer = mv.measurements.get(k).layer;
                 TrjPoints.put(layer, new HitOnTrack(layer, stv.x, stv.y, stv.z, stv.px, stv.py, stv.pz, stv.resi));
                 if(mv.measurements.get(k).skip)
                     TrjPoints.get(layer).isMeasUsed = false;

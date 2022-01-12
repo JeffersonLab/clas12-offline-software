@@ -1,6 +1,7 @@
 package org.jlab.rec.cvt.track;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.jlab.rec.cvt.bmt.BMTConstants;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.svt.SVTGeometry;
+import org.jlab.rec.cvt.track.Measurements.CVTLayer;
 import org.jlab.rec.cvt.trajectory.Ray;
 import org.jlab.rec.cvt.trajectory.StateVec;
 import org.jlab.rec.cvt.trajectory.Trajectory;
@@ -29,7 +31,22 @@ public class StraightTrack extends Trajectory{
         super(ray);
 
     }
-
+    
+    public List<Cluster> getClusters() {
+        List<Cluster> clusters = new ArrayList<>(); 
+        for(Cross c : this) { 
+	    if(c.get_Detector()==DetectorType.BST) {
+                if(c.get_Cluster1()!=null) clusters.add(c.get_Cluster1());
+                if(c.get_Cluster2()!=null) clusters.add(c.get_Cluster2());
+            } else {
+                clusters.add(c.get_Cluster1());
+            }
+      	}
+        Collections.sort(clusters);
+        return clusters;
+    }
+    
+    
     public void update(KFitter kf) {
         Ray the_ray = new Ray(kf.finalStateVec.tx, kf.finalStateVec.x0, kf.finalStateVec.tz, kf.finalStateVec.z0);                
         this.set_ray(the_ray);
@@ -72,9 +89,13 @@ public class StraightTrack extends Trajectory{
     }
     
     public void updateClusters() {
-        for(int key : this.trajs.keySet()) {
-            this.clsMap.get(key).update(this.get_Id(), this.trajs.get(key));
-        }        
+        for(Cluster cluster: this.getClusters()) {
+            int hemisphere = (int) Math.signum(cluster.center().y());
+            int layer = cluster.get_Layer();
+            DetectorType type = cluster.get_Detector();
+            int index = CVTLayer.getType(type, layer).getIndex(hemisphere);
+            cluster.update(this.get_Id(), this.trajs.get(index));
+        }
     }
 
     public double get_ndf() {

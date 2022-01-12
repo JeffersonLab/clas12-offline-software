@@ -26,6 +26,7 @@ public class Surface implements Comparable<Surface> {
     public Arc3D arc;
     public Strip strip;
     private double error;
+    private int index;
     private int layer;
     private int sector;
     // this is for multiple scattering estimates in track 
@@ -36,6 +37,7 @@ public class Surface implements Comparable<Surface> {
     // this is for swimming
     public double swimAccuracy;
     public boolean notUsedInFit = false;
+    public boolean passive = false;
     public double hemisphere = 1;
     
     public Surface(Plane3D plane3d, Point3D refrPoint, Point3D c1, Point3D c2, double accuracy) {
@@ -114,7 +116,9 @@ public class Surface implements Comparable<Surface> {
     @Override
     public String toString() {
         String s = "Surface: ";
-        s = s + String.format("Type=%s Layer=%d  Sector=%d  Emisphere=%.1f X0=%.4f  Z/AL=%.4f  Error=%.4f",this.type.name(),this.getLayer(),this.getSector(),this.hemisphere,this.getl_over_X0(),this.getZ_over_A_times_l(),this.getError());
+        s = s + String.format("Type=%s Index=%d  Layer=%d  Sector=%d  Emisphere=%.1f X0=%.4f  Z/AL=%.4f  Error=%.4f Skip=%b Passive=%b",
+                               this.type.name(), this.getIndex(),this.getLayer(),this.getSector(),this.hemisphere,this.getl_over_X0(),
+                               this.getZ_over_A_times_l(),this.getError(),this.notUsedInFit, this.passive);
         if(type==Type.PLANEWITHSTRIP) {
             s = s + "\n\t" + this.plane.toString();
             s = s + "\n\t" + this.finitePlaneCorner1.toString();
@@ -143,6 +147,14 @@ public class Surface implements Comparable<Surface> {
      */
     public void setError(double error) {
         this.error = error;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 
     /**
@@ -224,7 +236,7 @@ public class Surface implements Comparable<Surface> {
 
     @Override
     public int compareTo(Surface o) {
-       if (this.layer > o.layer) {
+       if (this.index > o.index) {
             return 1;
         } else {
             return -1;

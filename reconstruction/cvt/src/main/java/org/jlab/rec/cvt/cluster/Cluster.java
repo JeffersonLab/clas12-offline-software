@@ -674,47 +674,33 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
         this._TrakInters = _TrakInters;
     }
 
-    public Surface measurement(int layerID) {
+    public Surface measurement() {
         Surface surface = null;
+        
         if(this.get_Detector()==DetectorType.BST) {
             Point3D endPt1 = this.getLine().origin();
             Point3D endPt2 = this.getLine().end();
-            org.jlab.clas.tracking.objects.Strip strp = new org.jlab.clas.tracking.objects.Strip(this.get_Id(), this.get_Centroid(), 
-                                                                                                 endPt1.x(), endPt1.y(), endPt1.z(),
-                                                                                                 endPt2.x(), endPt2.y(), endPt2.z());
+//            org.jlab.clas.tracking.objects.Strip strp = new org.jlab.clas.tracking.objects.Strip(this.get_Id(), this.get_Centroid(), 
+//                                                                                                 endPt1.x(), endPt1.y(), endPt1.z(),
+//                                                                                                 endPt2.x(), endPt2.y(), endPt2.z());
             Plane3D plane = new Plane3D(endPt1, this.getN());
-            Line3D module = this.get(0).get_Strip().get_Module();
-            surface = new Surface(plane, strp, module.origin(), module.end(), Constants.SWIMACCURACYSVT);
+            surface = Constants.SVTGEOMETRY.getSurface(this.get_Layer(), this.get_Sector(), this.get_Id(), 
+                                                       this.get_Centroid(), this.getLine());
             surface.hemisphere = Math.signum(this.center().y());
-            surface.setLayer(layerID);
-            surface.setSector(this.get_Sector());
             surface.setError(this.get_Resolution()); 
-            surface.setl_over_X0(this.get(0).get_Strip().getToverX0());
-            surface.setZ_over_A_times_l(this.get(0).get_Strip().getZoverA()*this.get(0).get_Strip().getMatT());
-            surface.setThickness(this.get(0).get_Strip().getMatT());
         }
         else {
             if(this.get_Type()==BMTType.C) {
-                org.jlab.clas.tracking.objects.Strip strp = new org.jlab.clas.tracking.objects.Strip(this.get_Id(), this.get_Centroid(), this.get_CentroidValue());
-                surface = new Surface(this.get(0).get_Strip().get_Tile(), strp, Constants.SWIMACCURACYBMT);
-                double error = this.get_CentroidError();
-                surface.setError(error);
+                surface = Constants.BMTGEOMETRY.getSurfaceC(this.get_Layer(), this.get_Sector(), this.get_Id(), 
+                                                            this.get_Centroid(), this.get_CentroidValue());
             }
             else {
                 Point3D point = new Point3D(this.getLine().midpoint());
                 this.toLocal().apply(point);
-                org.jlab.clas.tracking.objects.Strip strp = new org.jlab.clas.tracking.objects.Strip(this.get_Id(), this.get_Centroid(), point.x(), point.y(), this.get_CentroidValue());  
-                surface = new Surface(this.getTile(), strp, Constants.SWIMACCURACYBMT);
-                double error = this.get_CentroidError();///this.getTile().baseArc().radius();
-                surface.setError(error);
-            
+                surface = Constants.BMTGEOMETRY.getSurfaceZ(this.get_Layer(), this.get_Sector(), this.get_Id(), 
+                                                            this.get_Centroid(), point.x(), point.y(), this.get_CentroidValue());           
             }
-            surface.setTransformation(this.toGlobal()); 
-            surface.setLayer(layerID);
-            surface.setSector(this.get_Sector());
-            surface.setl_over_X0(this.get(0).get_Strip().getToverX0());
-            surface.setZ_over_A_times_l(this.get(0).get_Strip().getZoverA()*this.get(0).get_Strip().getMatT());
-            surface.setThickness(this.get(0).get_Strip().getMatT());
+            surface.setError(this.get_CentroidError());
         }
         return surface;
     }

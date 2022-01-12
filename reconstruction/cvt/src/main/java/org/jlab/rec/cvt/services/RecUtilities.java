@@ -98,37 +98,41 @@ public class RecUtilities {
         // SVT measurements
         for (int i = 0; i < trkcand.get_Clusters().size(); i++) { 
             if(trkcand.get_Clusters().get(i).get_Detector()==DetectorType.BST) {
-                int mlayer = trkcand.get_Clusters().get(i).get_Layer();
-                Surface meas = trkcand.get_Clusters().get(i).measurement(mlayer);
+                int layer = trkcand.get_Clusters().get(i).get_Layer();
+                Surface meas = trkcand.get_Clusters().get(i).measurement();
+                meas.setIndex(layer);
                 if((int)Constants.getLayersUsed().get(meas.getLayer())<1)
                     meas.notUsedInFit=true;
-                if(i>0 && KFSites.get(KFSites.size()-1).getLayer()==meas.getLayer())
+                if(i>0 && KFSites.get(KFSites.size()-1).getIndex()==meas.getIndex())
                     continue;
                 KFSites.add(meas);
             }
         }
-       
+        
         // adding the BMT
         double hemisp = Math.signum(trkcand.get_Helix().getPointAtRadius(300).y());
         for (int c = 0; c < trkcand.get_Crosses().size(); c++) {
-            if (trkcand.get_Crosses().get(c).get_Detector()==DetectorType.BMT) {                
-                int mlayer=trkcand.get_Crosses().get(c).get_Cluster1().get_Layer()+6;
-                Surface meas = trkcand.get_Crosses().get(c).get_Cluster1().measurement(mlayer);
+            if (trkcand.get_Crosses().get(c).get_Detector()==DetectorType.BMT) { 
+                int layer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer();
+                Surface meas = trkcand.get_Crosses().get(c).get_Cluster1().measurement();
+                meas.setIndex(layer+SVTGeometry.NLAYERS);
+                meas.setLayer(layer+SVTGeometry.NLAYERS);
                 meas.hemisphere = hemisp;
-                if((int)Constants.getLayersUsed().get(meas.getLayer())<1) {
+                if((int)Constants.getLayersUsed().get(layer+SVTGeometry.NLAYERS)<1) {
                     //System.out.println("Exluding layer "+meas.getLayer()+trkcand.get_Crosses().get(c).printInfo());
                     meas.notUsedInFit=true;
                 }
-                if(c>0 && KFSites.get(KFSites.size()-1).getLayer()==meas.getLayer())
+                if(c>0 && KFSites.get(KFSites.size()-1).getIndex()==meas.getIndex())
                     continue;
                 KFSites.add(meas);
             }
         }
+        for(Surface s : KFSites) System.out.println(s.toString());
         return KFSites;
     }
     private TrajectoryFinder tf = new TrajectoryFinder();
     
-    
+    // Not used, replaced by Measurements class
     public List<Surface> setMeasVecs(StraightTrack trkcand, Swim swim) {
         if(trkcand.clsMap!=null) trkcand.clsMap.clear(); //VZ: reset cluster map for second pass tracking with isolated SVT clusters
         //Collections.sort(trkcand.get_Crosses());
@@ -173,7 +177,8 @@ public class RecUtilities {
                 }
                 for (int j = 0; j < cls.size(); j++) { 
                     int mlayer = cls.get(j).get_Layer();
-                    Surface meas = cls.get(j).measurement(mlayer);
+                    Surface meas = cls.get(j).measurement();
+                    meas.setLayer(mlayer);
                     meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());;
                     // set SVT material budget according to track direction
                     if(j==0) meas.setl_over_X0(SVTGeometry.getToverX0());
@@ -181,7 +186,7 @@ public class RecUtilities {
                     // RDV to be tested
 //                    if((int) Constants.getLayersUsed().get(meas.getLayer())<1)
 //                        meas.notUsedInFit=true; //VZ: commenting this out prevents the layer exclusion to be employed in tracking
-                    if(i>0 && KFSites.get(KFSites.size()-1).getLayer()==meas.getLayer()
+                    if(i>0 && KFSites.get(KFSites.size()-1).getLayer()==mlayer
                            && KFSites.get(KFSites.size()-1).hemisphere==meas.hemisphere)
                         continue;
                     KFSites.add(meas);
@@ -198,7 +203,8 @@ public class RecUtilities {
 
                 int id = trkcand.get(i).get_Cluster1().get_Id();
                 double ce = trkcand.get(i).get_Cluster1().get_Centroid();
-                Surface meas = trkcand.get(i).get_Cluster1().measurement(layer);
+                Surface meas = trkcand.get(i).get_Cluster1().measurement();
+                meas.setLayer(layer);
                 meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());;
                 if((int)Constants.getLayersUsed().get(meas.getLayer())<1) {
                     meas.notUsedInFit=true;

@@ -6,20 +6,17 @@ import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.helical.KFitter;
 import org.jlab.clas.tracking.trackrep.Helix;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
-import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
-import org.jlab.rec.cvt.bmt.BMTGeometry;
-import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.CrossMaker;
 import org.jlab.rec.cvt.cross.StraightTrackCrossListFinder;
 import org.jlab.rec.cvt.hit.Hit;
+import org.jlab.rec.cvt.track.Measurements;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.StraightTrackSeeder;
 import org.jlab.rec.cvt.track.Track;
@@ -104,6 +101,7 @@ public class TracksFromTargetRec {
         
         trkcands.clear();
         KFitter kf = new KFitter(Constants.KFFILTERON, Constants.KFITERATIONS, Constants.kfBeamSpotConstraint(), swimmer, Constants.kfMatLib);
+        Measurements surfaces = new Measurements(false, swimmer);
         for (Seed seed : seeds) { 
             Point3D  v = seed.get_Helix().getVertex();
             Vector3D p = seed.get_Helix().getPXYZ(solenoidValue);
@@ -127,7 +125,7 @@ public class TracksFromTargetRec {
             if(solenoidValue>0.001 &&
                     Constants.LIGHTVEL * seed.get_Helix().radius() *solenoidValue<Constants.PTCUT)
                 continue;
-                kf.init(hlx, cov, Constants.getXb(), Constants.getYb(), 0, recUtil.setMeasVecs(seed, swimmer)) ;
+                kf.init(hlx, cov, Constants.getXb(), Constants.getYb(), 0, surfaces.getMeasurements(seed)) ;
                 kf.runFitter();
                 if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null) { 
                     Track fittedTrack = new Track(seed, kf);
@@ -167,7 +165,7 @@ public class TracksFromTargetRec {
                         hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
                                         solenoidValue, Constants.getXb(), Constants.getYb(), Helix.Units.MM);
 
-                        kf.init(hlx, cov, Constants.getXb(), Constants.getYb(), 0, recUtil.setMeasVecs(seed, swimmer)) ;
+                        kf.init(hlx, cov, Constants.getXb(), Constants.getYb(), 0, surfaces.getMeasurements(seed)) ;
                         kf.runFitter();
                         
                         // RDV get rid of added clusters if not true
