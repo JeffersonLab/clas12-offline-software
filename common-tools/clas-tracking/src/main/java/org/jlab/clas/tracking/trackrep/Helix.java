@@ -39,6 +39,10 @@ public class Helix {
     
     public Units units = Units.CM; //default
     
+    public Helix() {
+        
+    }
+    
     public Helix(double d0, double phi0, double omega, double z0, double tanL,
             int turningSign, double B, double xb, double yb, Units unit) {
         _d0             = d0;
@@ -54,7 +58,7 @@ public class Helix {
         _yb = yb;
         this.units = unit;
         this.setUnitScale(unit.unit);
-        setLIGHTVEL(LIGHTVEL/unit.unit);
+        setLIGHTVEL(LIGHTVEL*unit.unit);
         this.Update();
     }
     
@@ -65,8 +69,8 @@ public class Helix {
         double pt = Math.sqrt(px0*px0 + py0*py0);
         this.units = unit;
         setUnitScale(unit.unit);
-        setLIGHTVEL(LIGHTVEL/unit.unit);
-        _R = pt/(B*LIGHTVEL/unit.unit);
+        setLIGHTVEL(LIGHTVEL*unit.unit);
+        _R = pt/(B*LIGHTVEL*unit.unit);
         _cosphi0 = px0/pt;
         _sinphi0 = py0/pt;
         _phi0 = Math.atan2(py0, px0);
@@ -627,8 +631,15 @@ public class Helix {
         LightVel = aLIGHTVEL;
     }
 
-    public static final double LIGHTVEL = 0.00299792458;       // velocity of light (um/ns) - conversion factor from radius in cm to momentum in GeV/c 
+    public static final double LIGHTVEL = 0.0000299792458;       // velocity of light (um/ns) - conversion factor from radius in cm to momentum in GeV/c 
     
-    private static double LightVel = 0.00299792458;       // velocity of light (um/ns) - conversion factor from radius in cm to momentum in GeV/c 
+    private static double LightVel = 0.0000299792458;       // velocity of light (um/ns) - conversion factor from radius in cm to momentum in GeV/c 
     private static double unitScale = 1;
+    
+    @Override
+    public String toString() {
+        String s = String.format("    drho=%.4f phi0=%.4f radius=%.4f z0=%.4f tanL=%.4f B=%.4f\n", this._d0, this._phi0, this._R, this._z0, this._tanL, this._B);
+        s       += String.format("    phi=%.4f x=%.4f y=%.4f z=%.4f px=%.4f py=%.4f pz=%.4f", this.tFlightLen, this._x, this._y, this._z, this._px, this._py, this._pz);
+        return s;
+    }
 }

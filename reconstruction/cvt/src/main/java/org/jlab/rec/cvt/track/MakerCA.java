@@ -3,8 +3,8 @@ import java.util.*;
 
 import javax.vecmath.Vector2d;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.rec.cvt.Constants;
 
-import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.cross.Cross;
 
 /**
@@ -82,7 +82,7 @@ public class MakerCA {
 		return true;
 	}
 	
-	public void createCells( List<Cross> crs, BMTGeometry bgeom ){
+	public void createCells( List<Cross> crs){
 		// this function loops over the crosses and looks for pairs that pass the cuts
 		//
 		Collections.sort(crs);
@@ -91,13 +91,13 @@ public class MakerCA {
       	  Cross a = crs.get(ic);
       	  int aReg = a.get_Region();
       	  if( a.get_Detector()==DetectorType.BMT) {
-      		  aReg = 3 + bgeom.getLayer( aReg , a.get_Type() );
+      		  aReg = 3 + Constants.BMTGEOMETRY.getLayer( aReg , a.get_Type() );
       	  }
       	  
       	  if( this._debug ) {
       		  System.out.println( "\n cross a " + a.get_Id() + " " + a.get_Detector().getName() +a.get_Type().getName() + " sect:" + a.get_Sector() + " reg:" 
       				  + aReg + " phi:" + a.get_Point().toVector3D().phi() + " in BMT sector:" + 
-      				  bgeom.getSector(1, a.get_Point().toVector3D().phi()));
+      				  Constants.BMTGEOMETRY.getSector(1, a.get_Point().toVector3D().phi()));
       	  }
       	  
       	  
@@ -108,13 +108,13 @@ public class MakerCA {
           	  // we skip same region crosses
           	  int bReg = b.get_Region();
           	  if( b.get_Detector()==DetectorType.BMT) {
-          		  bReg = 3 + bgeom.getLayer( bReg , b.get_Type() );
+          		  bReg = 3 + Constants.BMTGEOMETRY.getLayer( bReg , b.get_Type() );
           	  }
           	  
           	  if( this._debug ) {
           		  System.out.println( " cross b " + b.get_Id() + " " + b.get_Detector().getName() +b.get_Type().getName() + " sect:" + b.get_Sector() + " reg:" 
           				  + bReg + " phi:" + b.get_Point().toVector3D().phi() + " in BMT sector:" + 
-          				  bgeom.getSector(1, b.get_Point().toVector3D().phi() ));
+          				  Constants.BMTGEOMETRY.getSector(1, b.get_Point().toVector3D().phi() ));
           	  }
           	  
           	  if( bReg <= aReg  ) continue; // crosses should be ordered. skip in case they are not
@@ -141,7 +141,7 @@ public class MakerCA {
           		  else{
           			  double aphi = a.get_Point().toVector3D().phi() ;
           			  //if( ! bgeom.checkIsInSector( aphi, b.get_Sector(), 1, Math.toRadians(10) )  ) {
-                                  if(bgeom.getSector(b.get_Region()*2, aphi)==0) {
+                                  if(Constants.BMTGEOMETRY.getSector(b.get_Region()*2, aphi)==0) {
           				  if( this._debug) System.out.println("cross b and a are not in the same sector"); 
           				  continue;
       				  }

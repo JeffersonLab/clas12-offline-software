@@ -48,4 +48,24 @@ public class KFCovMatOps{
         return Cinv;
     }
     
+ 
+    /**
+     * prints the matrix -- used for debugging
+     *
+     * @param mat matrix
+     * @param message
+     */
+    public static void printMatrix(double[][] mat, String message) {
+        int nrow = mat.length; 
+        int ncol = mat[0].length; 
+
+        System.out.println("\t" + message);
+        for (int ir = 0; ir < nrow; ir++) {
+            for (int ic = 0; ic < ncol; ic++) {
+                System.out.print("\t" + mat[ir][ic]);
+            }
+            System.out.print("\n");
+        }
+        System.out.println();
+    }
 }

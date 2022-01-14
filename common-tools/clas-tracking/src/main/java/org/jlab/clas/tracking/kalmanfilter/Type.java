@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.tracking.kalmanfilter;
 
 /**
@@ -11,7 +6,8 @@ package org.jlab.clas.tracking.kalmanfilter;
  */
 public enum Type {
     UDF(-1), PLANEWITHPOINT(0), PLANEWITHLINE(1), PLANEWITHSTRIP(2),
-    CYLINDERWITHPOINT(3), CYLINDERWITHLINE(4), CYLINDERWITHARC(5), CYLINDERWITHSTRIP(6);
+    CYLINDERWITHPOINT(3), CYLINDERWITHLINE(4), CYLINDERWITHARC(5), 
+    CYLINDERWITHSTRIP(6), LINE(7);
     private final int value;
 
     Type(int value) {

@@ -1,7 +1,6 @@
 package org.jlab.rec.cvt.track;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.geom.prim.Vector3D;
-//import org.jlab.geom.prim.Point3D;
 import java.util.*;
 
 import javax.vecmath.Point2d;

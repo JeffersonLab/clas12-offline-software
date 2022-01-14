@@ -9,29 +9,54 @@ import org.jlab.clas.tracking.utilities.MatrixOps.*;
 
 public abstract class AKFitter {
     
-    public static int polarity = -1;
-    public boolean setFitFailed = true;
-
-    // AStateVecs sv 
-    // AMeasVecs mv 
-    public boolean filterOn = true;
-    private double _tarShift; //targetshift
+    // control variables
+    public static int polarity = -1; //RDV should check that everything works reversing this value    
+    public boolean    filterOn = true;
+    public int        totNumIter = 1;
+    public boolean    beamSpotConstraint = false;
+    
+    // parameters
     private double _Xb; //beam axis pars
     private double _Yb;
     private double resiCut = 100;//residual cut for the measurements
 
-    public KFCovMatOps mo = new KFCovMatOps(Libr.EJML);
+    // return variables
+    public boolean setFitFailed = false;
+    public double  chi2;
+    public int     NDF;
+    public int     NDF0;
+    public int     numIter;
     
-    public void setMatrixLibrary(Libr ml) {
+    private Swim swimmer;
+    private KFCovMatOps mo = new KFCovMatOps(Libr.EJML);
+    
+    
+    public AKFitter(boolean filter, int iterations, boolean beamspot, Swim swim, Libr m) {
+        this.filterOn           = filter;
+        this.totNumIter         = iterations;
+        this.beamSpotConstraint = beamspot;
+        this.swimmer            = swim;
+        this.setMatrixLibrary(m);
+    }
+    
+    public final void setMatrixLibrary(Libr ml) {
         mo = new KFCovMatOps(ml);
     }
     
-    public Libr getMatrixLibrary() {
-        return mo.getMatrixLibrary();
+    public KFCovMatOps getMatrixOps() {
+        return mo;
     }
     
     public void setMeasurements(List<Surface> measSurfaces, AMeasVecs mv) {
         mv.setMeasVecs(measSurfaces);
+    }
+
+    public Swim getSwimmer() {
+        return swimmer;
+    }
+
+    public void setSwimmer(Swim swimmer) {
+        this.swimmer = swimmer;
     }
      
     /**
@@ -47,64 +72,63 @@ public abstract class AKFitter {
     public void setResiCut(double resiCut) {
         this.resiCut = resiCut;
     }
-
-    public int totNumIter = 5;
-                    
-    public void runFitterIter(Swim swimmer, int it, AStateVecs sv, AMeasVecs mv) {
+    
+    public void runFitterIter(AStateVecs sv, AMeasVecs mv) {
+        this.numIter++;
         for (int k = 0; k < mv.measurements.size() - 1; k++) {
-                if (sv.trackCov.get(k) == null || mv.measurements.get(k + 1) == null) {
-                    return;
-                } 
-                sv.transport(k, k + 1, sv.trackTraj.get(k), sv.trackCov.get(k), mv.measurements.get(k+1), 
-                        swimmer); 
-                this.filter(k + 1, swimmer, 1, sv, mv); 
-            }
-            
-        for (int k =  mv.measurements.size() - 1; k>0 ;k--) {
-            if (sv.trackCov.get(k) == null || mv.measurements.get(k - 1) == null) {
+//            System.out.println(k);
+            if (sv.trackTraj.get(k)==null || mv.measurements.get(k + 1) == null) {
                 return;
             }
-            sv.transport(k, k - 1, sv.trackTraj.get(k), sv.trackCov.get(k), mv.measurements.get(k-1), 
-                    swimmer);
-            if(k>1)
-               this.filter(k - 1, swimmer, -1, sv, mv);
+            if(k==0) sv.trackTraj.get(0).copyCovMat(sv.initSV.covMat);
+            
+//            System.out.println("before transport");sv.printlnStateVec(sv.trackTraj.get(k));
+            sv.transport(k, k + 1, mv, swimmer);
+//            System.out.println("after transport:" + mv.dh(k+1, sv.trackTraj.get(k+1)));sv.printlnStateVec(sv.trackTraj.get(k+1));            
+            this.filter(k + 1, sv, mv);
+//            System.out.println("after filtering:" + mv.dh(k+1, sv.trackTraj.get(k+1)));sv.printlnStateVec(sv.trackTraj.get(k+1));            
         }
+                                
+        for (int k =  mv.measurements.size() - 1; k>0 ;k--) {
+            if (sv.trackTraj.get(k)==null || mv.measurements.get(k - 1) == null) {
+                return;
+            }
+//            System.out.println("before transport");sv.printlnStateVec(sv.trackTraj.get(k));
+            sv.transport(k, k - 1, mv, swimmer);
+//            System.out.println("after transport:" + mv.dh(k-1, sv.trackTraj.get(k-1)));sv.printlnStateVec(sv.trackTraj.get(k-1));            
+            if(k>1 || this.beamSpotConstraint)
+               this.filter(k - 1, sv, mv);
+//            System.out.println("after filtering:" + mv.dh(k-1, sv.trackTraj.get(k-1)));sv.printlnStateVec(sv.trackTraj.get(k-1));            
+        }        
     }
-    public abstract void runFitter(Swim swimmer, AStateVecs sv, AMeasVecs mv) ;
+    
+    public abstract void runFitter(AStateVecs sv, AMeasVecs mv) ;
     
     public abstract void setTrajectory(AStateVecs sv, AMeasVecs mv) ;
     
     
-    public double chi2 = 0;
-    public int NDF = 0;
+    public double calc_chi2(AStateVecs sv, AMeasVecs mv) {
+        double chisq = 0;
+        int ndf = this.NDF0;
 
-    public double calc_chi2(Swim swimmer, AStateVecs sv, AMeasVecs mv) {
-        //get the measurement
-        double m = 0;
-        //get the projector state
-        double h = 0;
-        double chi2 =0;
-        m=0;
-        h=0;
-        int ndf = -5;
-        StateVec stv = sv.transported(0, 1, sv.trackTraj.get(0), mv.measurements.get(1), swimmer);
-        double dh = mv.dh(1, stv);
-        if(mv.measurements.get(1).skip==false) { 
-            chi2 = dh*dh / mv.measurements.get(1).error;
-            ndf++;
-        }
-        for(int k = 1; k< sv.Layer.size()-1; k++) {
-            if(mv.measurements.get(k+1).skip==false) {
-                stv = sv.transported(k, k+1, stv, mv.measurements.get(k+1), swimmer);
-                dh = mv.dh(k+1, stv);
-                chi2 += dh*dh / mv.measurements.get(k+1).error;
+        for(int k = 0; k< mv.measurements.size()-1; k++) {
+            if(sv.trackTraj.get(k)==null) {
+                chisq=Double.NaN;
+                break;
+            }
+            sv.transport(k, k+1, mv, swimmer);
+            if(!mv.measurements.get(k+1).skip) {
+                double dh    = mv.dh(k+1, sv.trackTraj.get(k+1));
+                double error = mv.measurements.get(k+1).error;
+                chisq += dh*dh / error/error;
                 ndf++;
             }
         }  
-        return chi2;
+        if(chisq==0) chisq=Double.NaN;
+        return chisq;
     }
     
-    public abstract void filter(int k, Swim swimmer, int dir, AStateVecs sv, AMeasVecs mv) ;
+    public abstract void filter(int k, AStateVecs sv, AMeasVecs mv) ;
 
     /**
      * @return the _Xb
@@ -133,34 +157,8 @@ public abstract class AKFitter {
     public void setYb(double _Yb) {
         this._Yb = _Yb;
     }
-
-    /**
-     * @return the _tarShift
-     */
-    public double getTarShift() {
-        return _tarShift;
-    }
-
-    /**
-     * @param _TarShift the _tarShift to set
-     */
-    public void setTarShift(double _TarShift) {
-        this._tarShift = _TarShift;
-    }
-
-    /**
-     * prints the matrix -- used for debugging
-     *
-     * @param C matrix
-     */
-    public void printMatrix(double[][] C, String s) {
-        System.out.println("    "+s);
-        for (int k = 0; k < 5; k++) {
-            System.out.println(C[k][0]+"	"+C[k][1]+"	"+C[k][2]+"	"+C[k][3]+"	"+C[k][4]);
-        }
-        System.out.println("    ");
-    }
-
+    
+    // RDV why not just using state vectors?
     public class HitOnTrack {
 
         public int layer;
@@ -183,6 +181,24 @@ public abstract class AKFitter {
             this.pz = pz;
             this.resi = resi;
         }
+        
+        public HitOnTrack(int layer, StateVec sv, double resi) {
+            this.layer = layer;
+            this.x = sv.x;
+            this.y = sv.y;
+            this.z = sv.z;
+            this.px = sv.px;
+            this.py = sv.py;
+            this.pz = sv.pz;
+            this.resi = resi;
+        }
     }
-
+    
+    public void printConfig() {
+        System.out.println("Kalman Filter configuration:");
+        System.out.println("- filter status " + this.filterOn);
+        System.out.println("- beam spot constraint " + this.beamSpotConstraint);
+        System.out.println("- number of iterations " + this.totNumIter);
+        System.out.println("- matrix library " + this.mo.getMatrixLibrary().name());  
+    }
 }

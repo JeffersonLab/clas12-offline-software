@@ -6,14 +6,12 @@ import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.rec.cvt.bmt.BMTGeometry;
+import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.svt.SVTParameters;
 import org.jlab.rec.cvt.track.Seed;
-import org.jlab.rec.cvt.track.Track;
-import org.jlab.rec.cvt.track.TrackSeeder;
 
 /**
  * A class with methods used to find lists of crosses. This is the Pattern
@@ -55,8 +53,7 @@ public class HelixCrossListFinder {
      * @return the list of crosses determined to be consistent with belonging to
      * a track in the cvt
      */
-    public List<org.jlab.rec.cvt.track.Seed> findCandidateCrossLists(List<ArrayList<Cross>> cvt_crosses, 
-            SVTGeometry svt_geo, BMTGeometry bmt_geo, Swim swimmer) { 
+    public List<org.jlab.rec.cvt.track.Seed> findCandidateCrossLists(List<ArrayList<Cross>> cvt_crosses, Swim swimmer) { 
         float[] bfield = new float[3];
         swimmer.BfieldLab(0, 0, 0, bfield);
         double bz = Math.abs(bfield[2]);
@@ -175,11 +172,11 @@ public class HelixCrossListFinder {
             //this.MatchBMTC(s, theListsByRegionBMTC.get(1), svt_geo); // match the seed to each BMT region
             //this.MatchBMTC(s, theListsByRegionBMTC.get(2), svt_geo); // match the seed to each BMT region
            
-            boolean fitStatus = s.fit(svt_geo, bmt_geo, 3, true, bz);
+            boolean fitStatus = s.fit(3, true, bz);
             if(!fitStatus)
                 continue;
             //match to r1
-            MatchToRegion1( s, theListsByRegion.get(0), svt_geo, bmt_geo, bz); 
+            MatchToRegion1( s, theListsByRegion.get(0), bz); 
 //            org.jlab.rec.cvt.track.Seed trkSeed = new org.jlab.rec.cvt.track.Seed();
 //            
 //            trkSeed.set_Crosses(s);
@@ -452,15 +449,15 @@ public class HelixCrossListFinder {
 
     }
 
-    private void MatchToRegion1(Seed s, ArrayList<Cross> R1Crosses, SVTGeometry svt_geo, BMTGeometry bmt_geo, double bz) {
+    private void MatchToRegion1(Seed s, ArrayList<Cross> R1Crosses, double bz) {
         
         if(s==null)
             return;
-        boolean fitStatus = s.fit(svt_geo, bmt_geo, 3, true, bz);
+        boolean fitStatus = s.fit(3, true, bz);
         if(!fitStatus)
             return;
          
-        Point3D trkAtR1 =s.get_Helix().getPointAtRadius(svt_geo.getRegionRadius(1));
+        Point3D trkAtR1 =s.get_Helix().getPointAtRadius(Constants.SVTGEOMETRY.getRegionRadius(1));
         List<Cross> candMatches = new ArrayList<Cross>();
         for (int i = 0; i < R1Crosses.size(); i++) {
             if(R1Crosses.get(i)==null)
@@ -470,8 +467,8 @@ public class HelixCrossListFinder {
                     Math.sqrt(R1Crosses.get(i).get_Point().x()*R1Crosses.get(i).get_Point().x()+R1Crosses.get(i).get_Point().y()*R1Crosses.get(i).get_Point().y()))<2)
                 candMatches.add(R1Crosses.get(i));
         }
-        Point3D trkAtL1 =s.get_Helix().getPointAtRadius(svt_geo.getLayerRadius(1));
-        Point3D trkAtL2 =s.get_Helix().getPointAtRadius(svt_geo.getLayerRadius(2));
+        Point3D trkAtL1 =s.get_Helix().getPointAtRadius(Constants.SVTGEOMETRY.getLayerRadius(1));
+        Point3D trkAtL2 =s.get_Helix().getPointAtRadius(Constants.SVTGEOMETRY.getLayerRadius(2));
         
         double dMin = Double.POSITIVE_INFINITY;
         Cross cMatch = null;
@@ -488,9 +485,9 @@ public class HelixCrossListFinder {
   
     }
 
-    private void MatchBMTC(Seed s, ArrayList<Cross> BMTCrosses, SVTGeometry svt_geo, BMTGeometry bmt_geo, double bz) {
+    private void MatchBMTC(Seed s, ArrayList<Cross> BMTCrosses, double bz) {
         
-        boolean fitStatus = s.fit(svt_geo, bmt_geo, 3, true, bz);
+        boolean fitStatus = s.fit(3, true, bz);
         if(!fitStatus)
             return;
         double maxChi2 = Double.POSITIVE_INFINITY;
@@ -500,7 +497,7 @@ public class HelixCrossListFinder {
             continue; 
         } else {
             s.get_Crosses().add(BMTCrosses.get(i));
-            fitStatus = s.fit(svt_geo, bmt_geo, 3, true, bz);
+            fitStatus = s.fit(3, true, bz);
             if(!fitStatus)
                 continue;
             double linechi2perndf = s.get_lineFitChi2PerNDF();
@@ -534,15 +531,15 @@ public class HelixCrossListFinder {
         return inSeed;
     }
 
-    private double calcCentErr(Cross c, Cluster Cluster1, SVTGeometry svt_geo) {
-        double Z = svt_geo.toLocal(Cluster1.get_Layer(),
+    private double calcCentErr(Cross c, Cluster Cluster1) {
+        double Z = Constants.SVTGEOMETRY.toLocal(Cluster1.get_Layer(),
                                    Cluster1.get_Sector(),
                                    c.get_Point()).z();
         if(Z<0)
             Z=0;
         if(Z>SVTGeometry.getActiveSensorLength())
             Z=SVTGeometry.getActiveSensorLength();
-        return Cluster1.get_ResolutionAlongZ(Z, svt_geo) / (SVTGeometry.getPitch() / Math.sqrt(12.));
+        return Cluster1.get_ResolutionAlongZ(Z) / (SVTGeometry.getPitch() / Math.sqrt(12.));
     }
 //    /**
 //     * A class representing the seed object. The seed of a track is the initial

@@ -211,7 +211,7 @@ public class Hit implements Comparable<Hit> {
                 value = local.z()-this.get_Strip().get_Z();
             else {
                 value = Math.atan2(local.y(),local.x())-this.get_Strip().get_Phi();
-                if(Math.abs(value)>2*Math.PI) value-=Math.signum(value)*2*Math.PI;
+                if(Math.abs(value)>Math.PI) value-=Math.signum(value)*2*Math.PI;
                 value = value*this.get_Strip().get_Tile().baseArc().radius();
             }
         }     

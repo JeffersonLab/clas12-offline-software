@@ -1,8 +1,7 @@
 package org.jlab.clas.tracking.kalmanfilter.straight;
 
-import org.jlab.clas.pdg.PhysicsConstants;
+import java.util.HashMap;
 import org.jlab.clas.swimtools.Swim;
-import org.jlab.clas.tracking.kalmanfilter.AKFitter;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs.MeasVec;
 import org.jlab.clas.tracking.kalmanfilter.AStateVecs;
@@ -19,154 +18,67 @@ public class StateVecs extends AStateVecs {
 
     
     @Override
-    public double[] getStateVecPosAtMeasSite(int k, StateVec iVec, AMeasVecs.MeasVec mv, Swim swim, boolean useSwimmer) {
-        if(swimPars!=null) {
-            this.resetArrays(swimPars);
-        } else {
-            swimPars = new double[7];
-        }
-        if(value!=null) {
-            this.resetArrays(value);
-        } else {
-            value = new double[4];
-        }
+    public boolean getStateVecPosAtMeasSite(StateVec vec, AMeasVecs.MeasVec mv, Swim swim) {
+        double[] value = new double[4];
         
-        Point3D ps = new Point3D(0,0,0) ;
-
-        StateVec kVec = new StateVec(k);
+        if(mv.surface==null) return false;
         
-        kVec.x0 = iVec.x0;
-        kVec.z0 = iVec.z0;
-        kVec.tx = iVec.tx;
-        kVec.tz = iVec.tz;
-        kVec.dl = 0;
+        Point3D ref = new Point3D(vec.x0,vec.y0,vec.z0);
+        Vector3D u = new Vector3D(vec.px, vec.py, vec.pz).asUnit(); 
 
-        if(mv.surface!=null) {
-            double x = kVec.x0 ;
-            double y = 0 ;
-            double z = kVec.z0;
-            
-            Point3D ref = new Point3D(x,y,z);
-            
-            double tx = kVec.tx;
-            double tz = kVec.tz;
-            
-            double py = (double) mv.hemisphere/Math.sqrt(1+tx*tx+tz*tz);
-            double px = tx*py;
-            double pz = tz*py;
-            
-            Vector3D u = new Vector3D(px, py, pz).asUnit(); 
-            
-            if(k==0) {
-                value[0] = x;
-                value[1] = y;
-                value[2] = z;
-                value[3] = 0.0;
-                return value;
+        if(mv.k==0) {
+            vec.x = vec.x0;
+            vec.y = vec.y0;
+            vec.z = vec.z0;
+            return true;
+        }            
+        else if(mv.hemisphere!=0) {
+            if(mv.surface.plane!=null) {
+                Line3D toPln = new Line3D(ref,u);
+                Point3D inters = new Point3D();
+                int ints = mv.surface.plane.intersection(toPln, inters);
+                vec.x = inters.x()  ;
+                vec.y = inters.y()  ;
+                vec.z = inters.z()  ;
             }
-            
-            if(mv.hemisphere!=0) {
-                if(mv.surface.plane!=null) {
-                    Line3D toPln = new Line3D(ref,u);
-                    Point3D inters = new Point3D();
-                    int ints = mv.surface.plane.intersection(toPln, inters);
-                    kVec.x = inters.x()  ;
-                    kVec.y = inters.y()  ;
-                    kVec.z = inters.z()  ;
-                    kVec.dl = ref.distance(inters);
-                    
-                }
-                if(mv.surface.cylinder!=null) {
-                    mv.surface.toLocal().apply(ref);
-                    mv.surface.toLocal().apply(u);
-                    double r = 0.5*(mv.surface.cylinder.baseArc().radius()+mv.surface.cylinder.highArc().radius());
-                    double delta = Math.sqrt((ref.x()*u.x()+ref.y()*u.y())*(ref.x()*u.x()+ref.y()*u.y())
-                            -(-r*r+ref.x()*ref.x()+ref.y()*ref.y())*(u.x()*u.x()+u.y()*u.y()));
-                    double l = (-(ref.x()*u.x()+ref.y()*u.y())+delta)/(u.x()*u.x()+u.y()*u.y());
-                    if(Math.signum(ref.y()+l*u.y())!=mv.hemisphere) {
-                        l = (-(ref.x()*u.x()+ref.y()*u.y())-delta)/(u.x()*u.x()+u.y()*u.y()); 
-                        }
-              
-                    Point3D cylInt = new Point3D(ref.x()+l*u.x(),ref.y()+l*u.y(),ref.z()+l*u.z());
-                    mv.surface.toGlobal().apply(cylInt);
-//                    mv.surface.toGlobal().apply(ref);
-//                    mv.surface.toGlobal().apply(u);
+            if(mv.surface.cylinder!=null) {
+                mv.surface.toLocal().apply(ref);
+                mv.surface.toLocal().apply(u);
+                double r = 0.5*(mv.surface.cylinder.baseArc().radius()+mv.surface.cylinder.highArc().radius());
+                double delta = Math.sqrt((ref.x()*u.x()+ref.y()*u.y())*(ref.x()*u.x()+ref.y()*u.y())
+                        -(-r*r+ref.x()*ref.x()+ref.y()*ref.y())*(u.x()*u.x()+u.y()*u.y()));
+                double l = (-(ref.x()*u.x()+ref.y()*u.y())+delta)/(u.x()*u.x()+u.y()*u.y());
+                if(Math.signum(ref.y()+l*u.y())!=mv.hemisphere) {
+                    l = (-(ref.x()*u.x()+ref.y()*u.y())-delta)/(u.x()*u.x()+u.y()*u.y()); 
+                    }
 
-                    kVec.dl = l;
-                    kVec.x = cylInt.x();
-                    kVec.y = cylInt.y();
-                    kVec.z = cylInt.z();
-                    
-                }
-                
-                value[0] = kVec.x;
-                value[1] = kVec.y;
-                value[2] = kVec.z;
-                value[3] = kVec.dl ;
-                
-                return value;
+                Point3D cylInt = new Point3D(ref.x()+l*u.x(),ref.y()+l*u.y(),ref.z()+l*u.z());
+                mv.surface.toGlobal().apply(cylInt);
+                vec.x = cylInt.x();
+                vec.y = cylInt.y();
+                vec.z = cylInt.z();
             } 
+            return true;
         }
-        return value;
-    }
-    @Override
-    public void setStateVecPosAtMeasSite(int k, StateVec kVec, MeasVec mv, Swim swimmer) {
-
-        double[] pars = this.getStateVecPosAtMeasSite(k, kVec, mv, swimmer, true);
-        if (pars == null) {
-            return;
+        else {
+            return false;
         }
-        kVec.x = pars[0];
-        kVec.y = pars[1];
-        kVec.z = pars[2];
-        kVec.dl = pars[3];
     }
-
+    
     @Override
-    public StateVec newStateVecAtMeasSite(int k, StateVec kVec, MeasVec mv, Swim swimmer, boolean useSwimmer) {
+    public boolean setStateVecPosAtMeasSite(StateVec sv, MeasVec mv, Swim swimmer) {
 
-        StateVec newVec = kVec;
-        double[] pars = this.getStateVecPosAtMeasSite(k, kVec, mv, swimmer, useSwimmer);
-        if (pars == null) {
-            return null;
+        boolean status = this.getStateVecPosAtMeasSite(sv, mv, swimmer);
+        if (!status) {
+            return false;
         }
-
-        newVec.x = pars[0];
-        newVec.y = pars[1];
-        newVec.z = pars[2];
-        newVec.dl = pars[3];
-        // new state:
-        return newVec;
+        sv.k = mv.k;
+        sv.updateRay();
+        return true;
     }
 
     @Override
-    public void tranState(int f, StateVec iVec, Swim swimmer) {
-        
-    }
-
-    @Override
-    public StateVec transported(int i, int f, StateVec iVec, AMeasVecs.MeasVec mv, Swim swimmer) {
-        // transport stateVec...
-        StateVec fVec = new StateVec(f);
-
-        fVec.x0 = iVec.x0;
-        fVec.z0 = iVec.z0;
-        fVec.x = iVec.x0;
-        fVec.y = 0;
-        fVec.z = iVec.z0;
-        fVec.tx = iVec.tx;
-        fVec.tz = iVec.tz;
-        fVec.dl = 0;
-        if(f>0)
-            this.newStateVecAtMeasSite(f, fVec, mv, swimmer, true);
-
-        return fVec;
-    }
-
-    @Override
-    public void transport(int i, int f, StateVec iVec, CovMat icovMat, AMeasVecs.MeasVec mv, Swim swimmer) {
-        AStateVecs.StateVec fVec = this.transported(i, f, iVec, mv, swimmer);
-        
+    public double[][] F(StateVec iVec, StateVec fVec) {
         double[][] FMat = new double[][]{
             {1, 0, 0, 0, 0},
             {0, 1, 0, 0, 0},
@@ -174,81 +86,44 @@ public class StateVecs extends AStateVecs {
             {0, 0, 0, 1, 0},
             {0, 0, 0, 0, 1}
         };
-
-        
-        this.trackTraj.put(f, fVec);
-        //F = new Matrix();
-        //F.set(FMat);
-        
-        double[][] Cpropagated = propagatedMatrix(FMat, icovMat.covMat, FMat);
-       
-        if (Cpropagated != null) {
-            CovMat fCov = new CovMat(f);
-            double[][] CPN = addProcessNoise(Cpropagated, this.Q(iVec, mv, f - i));
-            
-            fCov.covMat = CPN;
-            //CovMat = fCov;
-            this.trackCov.put(f, fCov);
-        }
+        return FMat;
     }
 
     @Override
-    public double[][] Q(StateVec iVec, AMeasVecs.MeasVec mVec, int dir) {
+    public double[][] Q(int i, int f, StateVec iVec, AMeasVecs mv) {
         double[][] Q = new double[5][5];
-        if (dir >0 ) {
-            Vector3D trkDir = this.P(iVec.k).asUnit();
-            Vector3D trkPos = this.X(iVec.k);
-            double x = trkPos.x();
-            double y = trkPos.y();
-            double z = trkPos.z();
-            double ux = trkDir.x();
-            double uy = trkDir.y();
-            double uz = trkDir.z();
-            double tx = ux/uy;
-            double tz = uz/uy;
-            double cosEntranceAngle = Math.abs((x * ux + y * uy + z * uz) / Math.sqrt(x * x + y * y + z * z));
 
-            double p = 1;
-             double sctRMS = 0;
-            double t_ov_X0 = mVec.l_over_X0;
+        int dir = (int) Math.signum(f-i);
+        if(dir<0) return Q;
+        
+        double t_ov_X0 = 0;
+        // depending on dir, k increases or decreases
+        for (int k = i; (k-f)*dir <= 0; k += dir) {
+            int hemisphere = (int) mv.measurements.get(k).surface.hemisphere;
+            if(dir*hemisphere>0 && k==f) continue;
+            if(dir*hemisphere<0 && k==i) continue;
+            double cosEntranceAngle = 1;//this.getLocalDirAtMeasSite(iVec, mv.measurements.get(k));
+            t_ov_X0 += mv.measurements.get(k).l_over_X0 / cosEntranceAngle;
+        }
+
+        if (t_ov_X0>0) {
+            double p    = 1;
             double mass = piMass;   // assume given mass hypothesis 
-            double beta = 1; // use particle momentum
-            t_ov_X0 = t_ov_X0 / cosEntranceAngle;
-            if(t_ov_X0!=0) {
+            double beta = p / Math.sqrt(p * p + mass * mass);
             // Highland-Lynch-Dahl formula
-                sctRMS = (0.0136/(beta*p))*Math.sqrt(t_ov_X0)*
-                    (1 + 0.038 * Math.log(t_ov_X0));
-             //sctRMS = ((0.141)/(beta*PhysicsConstants.speedOfLight()*p))*Math.sqrt(t_ov_X0)*
-             //       (1 + Math.log(t_ov_X0)/9.);
-            }
-            double cov_txtx = (1 + tx * tx) * (1 + tx * tx + tz * tz) * sctRMS * sctRMS;
-            double cov_tztz = (1 + tz * tz) * (1 + tx * tx + tz * tz) * sctRMS * sctRMS;
-            double cov_txtz = tx * tz * (1 + tx * tx + tz * tz) * sctRMS * sctRMS;
-            
+            double sctRMS = (0.0136/(beta*p))*Math.sqrt(t_ov_X0)*(1 + 0.038 * Math.log(t_ov_X0));        
+            double cov_txtx = (1 + iVec.tx * iVec.tx) * (1 + iVec.tx * iVec.tx + iVec.tz * iVec.tz) * sctRMS * sctRMS;
+            double cov_tztz = (1 + iVec.tz * iVec.tz) * (1 + iVec.tx * iVec.tx + iVec.tz * iVec.tz) * sctRMS * sctRMS;
+            double cov_txtz = iVec.tx * iVec.tz * (1 + iVec.tx * iVec.tx + iVec.tz * iVec.tz) * sctRMS * sctRMS;
             Q = new double[][]{
-                {0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0},
+                {0, 0, 0,        0,        0},
+                {0, 0, 0,        0,        0},
                 {0, 0, cov_txtx, cov_txtz, 0},
                 {0, 0, cov_txtz, cov_tztz, 0},
-                {0, 0, 0, 0, 0}
+                {0, 0, 0,        0,        0}
             };
         }
         return Q;
-    }
-
-    @Override
-    public StateVec reset(StateVec SV, StateVec stateVec) {
-        SV = new StateVec(stateVec.k);
-        SV.x = stateVec.x;
-        SV.y = stateVec.y;
-        SV.z = stateVec.z;
-        SV.x0 = stateVec.x0;
-        SV.z0 = stateVec.z0;
-        SV.tx = stateVec.tx;
-        SV.tz = stateVec.tz;
-        SV.dl = stateVec.dl;
-
-        return SV;
     }
 
     @Override
@@ -303,54 +178,45 @@ public class StateVecs extends AStateVecs {
     }
 
     @Override
-    public void printlnStateVec(StateVec S) {
-        System.out.println(S.k + ") x " + S.x + " y " + S.y + " z " + S.z + " tx " + S.tx + " tz " + S.tz + " dl " + S.dl );
-    }
+public void printlnStateVec(StateVec S) {
+        String s = String.format("%d) x0=%.4f y0=%.4f z0=%.4f tx=%.4f tz=%.4f dl=%.4f", S.k, S.x0, S.y0, S.z0, S.tx, S.tz, S.dl);
+        s       += String.format("    x=%.4f y=%.4f z=%.4f px=%.4f py=%.4f pz=%.4f", S.x, S.y, S.z, S.px, S.py, S.pz);
+        System.out.println(s);
+    }   
 
     @Override
-    public void init(Helix trk, double[][] cov, AKFitter kf, Swim swimmer) {
+    public void init(Helix trk, double[][] cov, double xref, double yref, double zref, Swim swimmer) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    public StateVec initSV = new StateVec(0);
+    
     @Override
-    public void init(double x0, double z0, double tx, double tz, double units, double[][] cov, AKFitter kf) {
+    public void init(double x0, double z0, double tx, double tz, double units, double[][] cov) {
+        this.trackTraj = new HashMap<>();
         this.units = units;
         //this.lightVel = 0.0000299792458*units;
         //init stateVec
         //StateVec initSV = new StateVec(0);
+        initSV = new StateVec(0);
         initSV.x0 = x0;
+        initSV.y0 = 0;
         initSV.z0 = z0;
-        initSV.x = x0;
-        initSV.y = 0;
-        initSV.z = z0;
         initSV.tx = tx;
         initSV.tz = tz;
         initSV.dl = 0;
-        this.trackTraj.put(0, initSV);
-        CovMat initCM = new CovMat(0);
-        double[][] covKF = new double[5][5]; 
-    
+        initSV.updateFromRay();
+        double[][] covKF = new double[5][5];    
         for(int ic = 0; ic<5; ic++) {
             for(int ir = 0; ir<5; ir++) {
                 covKF[ic][ir]=cov[ic][ir];
             }
         }
-
-        initCM.covMat = covKF;
-        this.trackCov.put(0, initCM);
-    }
-
-    
-    @Override
-    public void setTrackPars(StateVec sv, Swim swim) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        initSV.covMat = covKF;
+        this.trackTraj.put(0, new StateVec(initSV));
     }
 
     @Override
     public Helix setTrackPars() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
-    
-    
+
 }

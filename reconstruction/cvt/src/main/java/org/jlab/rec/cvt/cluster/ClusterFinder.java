@@ -3,8 +3,6 @@ package org.jlab.rec.cvt.cluster;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.jlab.detector.base.DetectorType;
-import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.hit.Hit;
 
 /**

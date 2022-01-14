@@ -1,77 +1,82 @@
 package org.jlab.clas.tracking.kalmanfilter;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.jlab.geom.prim.Vector3D;
 
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs.MeasVec;
+import org.jlab.clas.tracking.kalmanfilter.helical.KFitter;
 import org.jlab.clas.tracking.trackrep.Helix;
+import org.jlab.geom.prim.Point3D;
 
 public abstract class AStateVecs {
 
-    public List<Double> X0;
-    public List<Double> Y0;
-    public List<Double> Z0; // reference points
-   
-    public Helix util ;
+    public Helix util;
     public double units;
     public double lightVel;
+
+    public double xref;
+    public double yref;
+    public double zref;
+
+    public StateVec initSV;
     
-    public List<B> bfieldPoints = new ArrayList<B>();
-    public Map<Integer, StateVec> trackTraj = new HashMap<Integer, StateVec>();
-    public Map<Integer, CovMat> trackCov = new HashMap<Integer, CovMat>();
+    public Map<Integer, StateVec> trackTraj  = new HashMap<>();
 
     public boolean straight;
-    public StateVec StateVec;
-    public CovMat CovMat;
-    
-    AMeasVecs mv = new AMeasVecs() {
-        @Override
-        public double[] H(StateVec stateVec, AStateVecs sv, MeasVec mv, Swim swimmer, int dir) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
+    public abstract void init(Helix trk, double[][] cov, double xref, double yref, double zref, Swim swimmer);
+
+    public abstract void init(double x0, double z0, double tx, double tz, double units, double[][] cov);
+
+    public abstract boolean setStateVecPosAtMeasSite(StateVec vec, MeasVec mv, Swim swimmer);
+
+    public StateVec newStateVecAtMeasSite(StateVec vec, MeasVec mv, Swim swimmer) {
+        StateVec newVec = new StateVec(vec);
+        if(!this.setStateVecPosAtMeasSite(newVec, mv, swimmer))
+            return null;
+        else
+            return newVec;
+    }
+
+    public abstract boolean getStateVecPosAtMeasSite(StateVec iVec, MeasVec mv, Swim swim);
+
+    public final void transport(int i, int f, AMeasVecs mv, Swim swimmer) {
+    // transport state vector
+        StateVec iVec = this.trackTraj.get(i);
+        StateVec fVec = this.newStateVecAtMeasSite(iVec, mv.measurements.get(f), swimmer);
+        if(fVec==null) return;
+        //transport covariance matrix
+        double[][] fCov = this.propagateCovMat(iVec, fVec);
+        double[][] iQ   = this.Q(i, f, iVec, mv);
+        double[][] fQ   = this.propagateMatrix(iVec, fVec, iQ);
+        if (fCov != null) {
+            fVec.covMat = addProcessNoise(fCov, fQ);            
         }
+        this.trackTraj.put(f, fVec);
+    }
 
-        @Override
-        public StateVec reset(StateVec SVplus, StateVec stateVec, AStateVecs sv) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-    } ;
-
-    public double shift; // target shift
-    public List<Integer> Layer;
-    public List<Integer> Sector;
-
-    public double[] value = new double[4]; // x,y,z,phi
-    public double[] swimPars = new double[7];
-    public B Bf = new B(0);
-
-    public abstract void init(Helix trk, double[][] cov, AKFitter kf, Swim swimmer);
-    public abstract void init(double x0, double z0, double tx, double tz, double units, double[][] cov, AKFitter kf) ;
-    public abstract void setStateVecPosAtMeasSite(int k, StateVec kVec, MeasVec mv, Swim swimmer) ;
-    public abstract StateVec newStateVecAtMeasSite(int k, StateVec kVec, MeasVec mv, Swim swimmer, 
-            boolean useSwimmer);
-    public abstract double[] getStateVecPosAtMeasSite(int k, StateVec iVec, MeasVec mv, Swim swim, 
-            boolean useSwimmer) ;
-    public abstract void tranState(int f, StateVec iVec, Swim swimmer) ;
-
-    public abstract StateVec transported(int i, int f, StateVec iVec, MeasVec mv,
-            Swim swimmer) ;
+    public final double[][] propagateCovMat(StateVec ivec, StateVec fvec) {
+        return this.propagateMatrix(ivec, fvec, ivec.covMat);
+    }
     
-    public abstract void transport(int i, int f, StateVec iVec, CovMat icovMat, MeasVec mv,
-            Swim swimmer) ;
+    private double[][] propagateMatrix(StateVec ivec, StateVec fvec, double[][] matrix) {
+        double[][] FMat  = this.F(ivec, fvec);
+        double[][] FMatT = this.transposeMatrix(FMat);
 
-    public abstract void setTrackPars(StateVec kVec, Swim swim);
+        return multiplyMatrices(FMat, matrix, FMatT);
+    }
     
     public abstract Helix setTrackPars();
-    
+
     private double[][] multiplyMatrices(double[][] firstMatrix, double[][] secondMatrix) {
-        int r1 =firstMatrix.length; int c1=firstMatrix[0].length; int c2=secondMatrix[0].length;
+        int r1 = firstMatrix.length;
+        int c1 = firstMatrix[0].length;
+        int c2 = secondMatrix[0].length;
         double[][] product = new double[r1][c2];
-        for(int i = 0; i < r1; i++) {
+        for (int i = 0; i < r1; i++) {
             for (int j = 0; j < c2; j++) {
                 for (int k = 0; k < c1; k++) {
                     product[i][j] += firstMatrix[i][k] * secondMatrix[k][j];
@@ -81,47 +86,79 @@ public abstract class AStateVecs {
 
         return product;
     }
-    
-    public double[][] propagatedMatrix(double[][] firstMatrix, double[][] sMatrix, double[][] secondMatrix){
-        double[][] m1 = multiplyMatrices(sMatrix, secondMatrix);
-        double[][] m2 = multiplyMatrices(firstMatrix,m1);
-        
+
+    public double[][] transposeMatrix(double[][] matrix) {
+        double[][] result = new double[5][5];
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 5; j++) {
+                result[j][i] = matrix[i][j];
+            }
+        }
+        return result;
+
+    }
+
+    public double[][] multiplyMatrices(double[][] firstMatrix, double[][] sMatrix, double[][] secondMatrix) {
+        double[][] m1 = this.multiplyMatrices(sMatrix, secondMatrix);
+        double[][] m2 = this.multiplyMatrices(firstMatrix, m1);
+
         return m2;
     }
-    
-    public double[][] addProcessNoise(double[][] C, double[][] Q){
+
+    public double[][] addProcessNoise(double[][] C, double[][] Q) {
         double[][] result = new double[5][5];
-        for(int i = 0; i<5; i++) {
-            for(int j = 0; j<5; j++) {
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 5; j++) {
                 result[i][j] = C[i][j];
-                if(Q[i][j]!=0) {
-                    result[i][j] +=Q[i][j];
+                if (Q[i][j] != 0) {
+                    result[i][j] += Q[i][j];
                 }
             }
         }
-          
+
         return result;
     }
-    public abstract double[][] Q(StateVec iVec, MeasVec mVec, int dir) ;
-    
-    public abstract StateVec reset(StateVec SV, StateVec stateVec) ;
 
-    public void resetArrays(double[] swimPars) {
-        for(int i = 0; i<swimPars.length; i++) {
-            swimPars[i] = 0;
+    public double getLocalDirAtMeasSite(StateVec vec, MeasVec mv) {
+        if(mv.surface==null) 
+            return 0;
+        else if(mv.surface.plane==null && mv.surface.cylinder==null) 
+            return 0;
+        else {
+            Point3D  pos = new Point3D(vec.x, vec.y, vec.z);
+            Vector3D dir = new Vector3D(vec.px, vec.py, vec.pz).asUnit();
+            if(mv.surface.plane!=null) {
+                Vector3D norm = mv.surface.plane.normal();
+                return Math.abs(norm.dot(dir));
+            }
+            else if(mv.surface.cylinder!=null) {
+                mv.surface.toLocal().apply(pos);
+                mv.surface.toLocal().apply(dir);
+                Vector3D norm = pos.toVector3D().asUnit();
+                return Math.abs(norm.dot(dir));
+            }
+            return 0;
         }
     }
+    
+    
+    public abstract double[][] Q(int i, int f, StateVec iVec, AMeasVecs mv);
 
-    
-    
+    public abstract double[][] F(StateVec ivec, StateVec fvec);
+
     public class StateVec {
 
-        public final int k;
+        public int k;
 
+        // regular coordinates
         public double x;
         public double y;
         public double z;
-        
+        public double px;
+        public double py;
+        public double pz;
+
+        // helix variables
         public double kappa;
         public double d_rho;
         public double phi0;
@@ -129,22 +166,197 @@ public abstract class AStateVecs {
         public double tanL;
         public double dz;
         public double alpha;
-        
-        //Cosmics
+
+        // helix pivot or cosmic rays intercept (y0=0) 
         public double x0;
+        public double y0;
         public double z0;
-        //public double x;
-        //public double y;
-        //public double z;
+
+        // cosmics rays
         public double tx; //=px/py
         public double tz; //=pz/py
         public double dl;
-        public double resi =0;
-        
+
+        public double resi = 0;
+
+        public double[][] covMat;
+
+        private double[] _ELoss = new double[3];
+
         public StateVec(int k) {
             this.k = k;
         }
-        private double[] _ELoss = new double[3];
+
+        public StateVec(StateVec s) {
+            this(s.k);
+            this.copy(s);
+        }
+
+        public StateVec(int k, StateVec s) {
+            this(k);
+            this.copy(s);
+        }
+
+        public StateVec(int k, double xpivot, double ypivot, double zpivot, StateVec s) {
+            this(k);
+            this.copy(s);
+            this.setPivot(xpivot, ypivot, zpivot);
+        }
+
+        public final void copy(StateVec s) {
+            this.d_rho = s.d_rho;
+            this.phi0 = s.phi0;
+            this.kappa = s.kappa;
+            this.tanL = s.tanL;
+            this.dz = s.dz;
+            this.phi = s.phi;
+            this.alpha = s.alpha;
+            this.x0 = s.x0;
+            this.y0 = s.y0;
+            this.z0 = s.z0;
+            this.tx = s.tx;
+            this.tz = s.tz;
+            this.dl = s.dl;
+            this.x = s.x;
+            this.y = s.y;
+            this.z = s.z;
+            this.px = s.px;
+            this.py = s.py;
+            this.pz = s.pz;
+            this.resi = s.resi;
+            this.copyCovMat(s.covMat);
+        }
+
+        public void copyCovMat(double[][] c) {
+            int rows = c.length;
+            int cols = c[0].length;
+            this.covMat = new double[rows][cols];
+            for (int ir = 0; ir < rows; ir++) {
+                for (int ic = 0; ic < cols; ic++) {
+                    this.covMat[ir][ic] = c[ir][ic];
+                }
+            }
+        }
+        
+        public void scaleCovMat(double scale) {
+            int rows = this.covMat.length;
+            int cols = this.covMat[0].length;
+            for (int ir = 0; ir < rows; ir++) {
+                for (int ic = 0; ic < cols; ic++) {
+                    this.covMat[ir][ic] *= scale;
+                }
+            }        
+        }
+        
+        public void updateFromHelix() {
+            this.x = x0 + this.d_rho * Math.cos(this.phi0) + this.alpha / this.kappa * (Math.cos(this.phi0) - Math.cos(this.phi0 + this.phi));
+            this.y = y0 + this.d_rho * Math.sin(this.phi0) + this.alpha / this.kappa * (Math.sin(this.phi0) - Math.sin(this.phi0 + this.phi));
+            this.z = z0 + this.dz - this.alpha / this.kappa * this.tanL * this.phi;
+            this.px = -Math.sin(this.phi0 + this.phi) / Math.abs(this.kappa);
+            this.py = Math.cos(this.phi0 + this.phi) / Math.abs(this.kappa);
+            this.pz = this.tanL / Math.abs(this.kappa);
+        }
+
+        public final void updateHelix() {
+            double kappa = Math.signum(this.kappa) / Math.sqrt(this.px * this.px + this.py * this.py);
+            double tanL = Math.abs(kappa) * this.pz;
+            double phit = Math.atan2(-this.px, this.py);
+            double xcen = this.x + Math.signum(kappa) * this.alpha * this.py;
+            double ycen = this.y - Math.signum(kappa) * this.alpha * this.px;
+            double phi0 = Math.atan2(ycen - y0, xcen - x0);
+            if (Math.signum(kappa) < 0) {
+                phi0 = Math.atan2(-(ycen - y0), -(xcen - x0));
+            }
+            double phi = phit - phi0;
+            if (Math.abs(phi) > Math.PI) {
+                phi -= 2 * Math.signum(phi) * Math.PI;
+            }
+            double drho = (xcen - x0) * Math.cos(phi0) + (ycen - y0) * Math.sin(phi0) - this.alpha / kappa;
+            double dz = this.z - z0 + this.alpha / kappa * tanL * phi;
+            this.d_rho = drho;
+            this.phi0 = phi0;
+            this.kappa = kappa;
+            this.dz = dz;
+            this.tanL = tanL;
+            this.phi = phi;
+        }
+
+        public void rollBack(double angle) {
+            this.phi += Math.signum(this.kappa) * angle;
+            this.updateFromHelix();
+        }
+
+        public void toDoca() {
+            this.phi = 0;
+            this.updateFromHelix();
+        }
+
+        public void pivotTransform() {
+            this.setPivot(this.x, this.y, this.z);
+        }
+
+        public final void setPivot(double xPivot, double yPivot, double zPivot) {
+            x0 = xPivot;
+            y0 = yPivot;
+            z0 = zPivot;
+            this.updateHelix();
+        }
+
+        public void updateHelix(double x, double y, double z, double px, double py, double pz, double alpha) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.px = px;
+            this.py = py;
+            this.pz = pz;
+            this.alpha = alpha;
+            this.updateHelix();
+        }
+
+        public Helix getOldHelix() {
+            Helix helix = new Helix();
+            this.toOldHelix(helix);
+            return helix;
+        }
+
+        public void toOldHelix(Helix helix) {
+            StateVec vec = new StateVec(0, helix.getXb(), helix.getYb(), 0, this);
+            vec.updateHelix();
+
+            helix.setTurningSign((int) Math.signum(vec.kappa) * KFitter.polarity);
+            helix.setB(1 / vec.alpha / helix.getLIGHTVEL());
+            helix.setR(vec.alpha / Math.abs(vec.kappa));
+            double hphi0 = vec.phi0 + Math.PI / 2;
+            if (Math.abs(hphi0) > Math.PI) {
+                hphi0 -= Math.signum(hphi0) * 2 * Math.PI;
+            }
+            helix.setPhi0(hphi0);
+            helix.setTanL(vec.tanL);
+            helix.setZ0(z0 + vec.dz);
+            helix.setOmega(-helix.getTurningSign() / helix.getR());
+            helix.setCosphi0(Math.cos(helix.getPhi0()));
+            helix.setSinphi0(Math.sin(helix.getPhi0()));
+            helix.setD0(-vec.d_rho);
+            helix.Update();
+        }
+        
+        public void updateRay() {
+            this.dl = this.y/this.py;
+            this.x0 = this.x -this.dl*this.px;
+            this.y0 = this.y -this.dl*this.py;
+            this.z0 = this.z -this.dl*this.pz;
+            this.tx = this.px/this.py;
+            this.tz = this.pz/this.py;
+        }
+        
+        public void updateFromRay() {
+            this.py = 1/Math.sqrt(1+tx*tx+tz*tz);
+            this.px = tx*py;
+            this.pz = tz*py;
+            this.x = this.x0 + this.dl*this.px;
+            this.y = this.y0 + this.dl*this.py;
+            this.z = this.z0 + this.dl*this.pz;
+        }
 
         public double[] get_ELoss() {
             return _ELoss;
@@ -154,15 +366,43 @@ public abstract class AStateVecs {
             this._ELoss = _ELoss;
         }
 
-    }
+        public double getHelixComponent(int i) {
+            switch (i) {
+                case 0:
+                    return d_rho;
+                case 1:
+                    return phi0;
+                case 2:
+                    return kappa;
+                case 3:
+                    return dz;
+                case 4:
+                    return tanL;
+                default:
+                    return 0;
+            }
+        }
 
-    public class CovMat {
+        public double getRayComponent(int i) {
+            switch (i) {
+                case 0:
+                    return x0;
+                case 1:
+                    return z0;
+                case 2:
+                    return tx;
+                case 3:
+                    return tz;
+                default:
+                    return 0;
+            }
+        }
 
-        public final int k;
-        public double[][] covMat;
-
-        public CovMat(int k) {
-            this.k = k;
+        @Override
+        public String toString() {
+            String s = String.format("%d) drho=%.4f phi0=%.4f kappa=%.4f dz=%.4f tanL=%.4f alpha=%.4f\n", this.k, this.d_rho, this.phi0, this.kappa, this.dz, this.tanL, this.alpha);
+            s += String.format("    phi=%.4f x=%.4f y=%.4f z=%.4f px=%.4f py=%.4f pz=%.4f", this.phi, this.x, this.y, this.z, this.px, this.py, this.pz);
+            return s;
         }
 
     }
@@ -182,27 +422,27 @@ public abstract class AStateVecs {
         public double alpha;
 
         float b[] = new float[3];
+
         public B(int k) {
             this.k = k;
         }
+
         public B(int k, double x, double y, double z, Swim swimmer) {
             this.k = k;
             this.x = x;
             this.y = y;
             this.z = z;
 
-            swimmer.BfieldLab(x/units, y/units, z/units + shift/units, b);
+            swimmer.BfieldLab(x / units, y / units, z / units, b);
             this.Bx = b[0];
             this.By = b[1];
             this.Bz = b[2];
-            
+
             this.alpha = 1. / (lightVel * Math.abs(b[2]));
         }
 
-        
-
         public void set() {
-            swimmer.BfieldLab(x/units, y/units, z/units + shift/units, b);
+            swimmer.BfieldLab(x / units, y / units, z / units, b);
             this.Bx = b[0];
             this.By = b[1];
             this.Bz = b[2];
@@ -215,14 +455,16 @@ public abstract class AStateVecs {
     public double muMass = 0.105658369;
     public double eMass = 0.000510998;
     public double pMass = 0.938272029;
-    
 
-    public abstract Vector3D P(int kf) ;
-    public abstract Vector3D X(int kf) ;
-    public abstract Vector3D X(StateVec kVec, double phi) ;
-    public abstract Vector3D P0(int kf) ;
-    public abstract Vector3D X0(int kf) ;
+    public abstract Vector3D P(int kf);
 
-    
-    public abstract void printlnStateVec(StateVec S) ;
+    public abstract Vector3D X(int kf);
+
+    public abstract Vector3D X(StateVec kVec, double phi);
+
+    public abstract Vector3D P0(int kf);
+
+    public abstract Vector3D X0(int kf);
+
+    public abstract void printlnStateVec(StateVec S);
 }
