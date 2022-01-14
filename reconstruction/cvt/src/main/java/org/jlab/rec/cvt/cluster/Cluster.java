@@ -5,7 +5,6 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.hit.Hit;
-import org.jlab.rec.cvt.svt.SVTGeometry;
 import java.util.Collections;
 import org.jlab.clas.tracking.kalmanfilter.AKFitter.HitOnTrack;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
@@ -16,7 +15,6 @@ import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Transformation3D;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTType;
-import org.jlab.rec.cvt.bmt.BMTConstants;
 import org.jlab.rec.cvt.hit.Strip;
 /**
  * A cluster in the BST consists of an array of hits that are grouped together
@@ -262,8 +260,8 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
                }
                 else if (this.get_Detector()==DetectorType.BMT) { 
                     
-                    if(thehit.newClustering && nbhits>BMTConstants.MAXCLUSSIZE && i>BMTConstants.MAXCLUSSIZE-1) 
-                        continue;
+//                    if(thehit.newClustering && nbhits>BMTConstants.MAXCLUSSIZE && i>BMTConstants.MAXCLUSSIZE-1) 
+//                        continue;
 
                     // for the BMT the analysis distinguishes between C and Z type detectors
                     if (this.get_Type()==BMTType.C) { // C-detectors
@@ -588,7 +586,7 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
                 value = local.z()-this.get_CentroidValue();
             else {
                 value = local.toVector3D().phi()-this.get_CentroidValue();
-                if(Math.abs(value)>2*Math.PI) value-=Math.signum(value)*2*Math.PI;
+                if(Math.abs(value)>Math.PI) value-=Math.signum(value)*2*Math.PI;
             }
         }     
         return value;
@@ -676,47 +674,33 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
         this._TrakInters = _TrakInters;
     }
 
-    public Surface measurement(int layerID) {
+    public Surface measurement() {
         Surface surface = null;
+        
         if(this.get_Detector()==DetectorType.BST) {
             Point3D endPt1 = this.getLine().origin();
             Point3D endPt2 = this.getLine().end();
-            org.jlab.clas.tracking.objects.Strip strp = new org.jlab.clas.tracking.objects.Strip(this.get_Id(), this.get_Centroid(), 
-                                                                                                 endPt1.x(), endPt1.y(), endPt1.z(),
-                                                                                                 endPt2.x(), endPt2.y(), endPt2.z());
+//            org.jlab.clas.tracking.objects.Strip strp = new org.jlab.clas.tracking.objects.Strip(this.get_Id(), this.get_Centroid(), 
+//                                                                                                 endPt1.x(), endPt1.y(), endPt1.z(),
+//                                                                                                 endPt2.x(), endPt2.y(), endPt2.z());
             Plane3D plane = new Plane3D(endPt1, this.getN());
-            Line3D module = this.get(0).get_Strip().get_Module();
-            surface = new Surface(plane, strp, module.origin(), module.end(), Constants.SWIMACCURACYSVT);
+            surface = Constants.SVTGEOMETRY.getSurface(this.get_Layer(), this.get_Sector(), this.get_Id(), 
+                                                       this.get_Centroid(), this.getLine());
             surface.hemisphere = Math.signum(this.center().y());
-            surface.setLayer(layerID);
-            surface.setSector(this.get_Sector());
-            surface.setError(this.get_Resolution()*this.get_Resolution()); 
-            surface.setl_over_X0(this.get(0).get_Strip().getToverX0());
-            surface.setZ_over_A_times_l(this.get(0).get_Strip().getZoverA()*this.get(0).get_Strip().getMatT());
-            surface.setThickness(this.get(0).get_Strip().getMatT());
+            surface.setError(this.get_Resolution()); 
         }
         else {
             if(this.get_Type()==BMTType.C) {
-                org.jlab.clas.tracking.objects.Strip strp = new org.jlab.clas.tracking.objects.Strip(this.get_Id(), this.get_Centroid(), this.get_CentroidValue());
-                surface = new Surface(this.get(0).get_Strip().get_Tile(), strp, Constants.SWIMACCURACYBMT);
-                double error = this.get_CentroidError();
-                surface.setError(error*error);
+                surface = Constants.BMTGEOMETRY.getSurfaceC(this.get_Layer(), this.get_Sector(), this.get_Id(), 
+                                                            this.get_Centroid(), this.get_CentroidValue());
             }
             else {
                 Point3D point = new Point3D(this.getLine().midpoint());
                 this.toLocal().apply(point);
-                org.jlab.clas.tracking.objects.Strip strp = new org.jlab.clas.tracking.objects.Strip(this.get_Id(), this.get_Centroid(), point.x(), point.y(), this.get_CentroidValue());  
-                surface = new Surface(this.getTile(), strp, Constants.SWIMACCURACYBMT);
-                double error = this.get_CentroidError();///this.getTile().baseArc().radius();
-                surface.setError(error*error);
-            
+                surface = Constants.BMTGEOMETRY.getSurfaceZ(this.get_Layer(), this.get_Sector(), this.get_Id(), 
+                                                            this.get_Centroid(), point.x(), point.y(), this.get_CentroidValue());           
             }
-            surface.setTransformation(this.toGlobal()); 
-            surface.setLayer(layerID);
-            surface.setSector(this.get_Sector());
-            surface.setl_over_X0(this.get(0).get_Strip().getToverX0());
-            surface.setZ_over_A_times_l(this.get(0).get_Strip().getZoverA()*this.get(0).get_Strip().getMatT());
-            surface.setThickness(this.get(0).get_Strip().getMatT());
+            surface.setError(this.get_CentroidError());
         }
         return surface;
     }
@@ -734,12 +718,11 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
      *
      * @param Z z-coordinate of a point in the local coordinate system of a
      * module
-     * @param geo
      * @return the average resolution for a group of strips in a cluster in the
      * SVT
      *
      */
-    public double get_ResolutionAlongZ(double Z, SVTGeometry geo) {
+    public double get_ResolutionAlongZ(double Z) {
 
         // returns the total resolution for a group of strips in a cluster
         // the single strip resolution varies at each point along the strip as a function of Z (due to the graded angle of the strips) and 
@@ -753,7 +736,7 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
         double res = 0;
 
         for (int i = 0; i < nbhits; i++) {
-            double rstrp = geo.getSingleStripResolution(this.get(i).get_Layer(), this.get(i).get_Strip().get_Strip(), Z);
+            double rstrp = Constants.SVTGEOMETRY.getSingleStripResolution(this.get(i).get_Layer(), this.get(i).get_Strip().get_Strip(), Z);
             res += rstrp * rstrp;
         }
         return Math.sqrt(res);
@@ -843,7 +826,7 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
         this._n = _n;
     }
 
-    public void update(int trackId, HitOnTrack traj, SVTGeometry sgeo) {
+    public void update(int trackId, HitOnTrack traj) {
         
         Point3D  trackPos = new Point3D(traj.x, traj.y, traj.z);
         Vector3D trackDir = new Vector3D(traj.px, traj.py, traj.pz).asUnit();
@@ -868,8 +851,8 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
             double doca1 = hit.residual(trackPos);
             hit.set_docaToTrk(doca1);  
             if(this.get_Detector()==DetectorType.BST) {
-                Point3D local = sgeo.toLocal(this.get_Layer(), this.get_Sector(), trackPos);
-                double sigma1 = sgeo.getSingleStripResolution(this.get_Layer(), hit.get_Strip().get_Strip(), local.z());
+                Point3D local = Constants.SVTGEOMETRY.toLocal(this.get_Layer(), this.get_Sector(), trackPos);
+                double sigma1 = Constants.SVTGEOMETRY.getSingleStripResolution(this.get_Layer(), hit.get_Strip().get_Strip(), local.z());
                 hit.set_stripResolutionAtDoca(sigma1);
             }
             if(traj.isMeasUsed) hit.set_TrkgStatus(1);

@@ -18,8 +18,8 @@ import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.svt.SVTParameters;
 
 public class TrackSeeder {
-    SVTGeometry sgeo = null;
-    BMTGeometry bgeo = null;
+    SVTGeometry sgeo = Constants.SVTGEOMETRY;
+    BMTGeometry bgeo = Constants.BMTGEOMETRY;
     double bfield;
     
     int NBINS = 36;
@@ -33,9 +33,7 @@ public class TrackSeeder {
     List<Double> Ws ;
     public boolean unUsedHitsOnly = false;
     
-    public TrackSeeder(SVTGeometry sgeo, BMTGeometry bgeo, Swim swimmer) {
-        this.sgeo = sgeo;
-        this.bgeo = bgeo;
+    public TrackSeeder(Swim swimmer) {
         float[] b = new float[3];
         swimmer.BfieldLab(0, 0, 0, b);
         this.bfield = Math.abs(b[2]);
@@ -320,7 +318,7 @@ public class TrackSeeder {
         for(Seed mseed : seedScan) { 
             boolean fitStatus = false;
             if(mseed.get_Crosses().size()>=3)
-                fitStatus = mseed.fit(this.sgeo, this.bgeo, Constants.SEEDFITITERATIONS, false, this.bfield);
+                fitStatus = mseed.fit(Constants.SEEDFITITERATIONS, false, this.bfield);
             if (fitStatus) {
                 List<Cross> sameSectorCrosses = this.FindCrossesInSameSectorAsSVTTrk(mseed, bmtC_crosses);
                 BMTmatches.clear();
@@ -333,7 +331,7 @@ public class TrackSeeder {
                 double chi2_Line = Double.POSITIVE_INFINITY;
                 for (Seed bseed : BMTmatches) {
                     //refit using the BMT
-                    fitStatus = bseed.fit(this.sgeo, this.bgeo, Constants.SEEDFITITERATIONS, false, this.bfield);
+                    fitStatus = bseed.fit(Constants.SEEDFITITERATIONS, false, this.bfield);
 
                     if (fitStatus && bseed.get_circleFitChi2PerNDF()<chi2_Circ
                                   && bseed.get_lineFitChi2PerNDF()<chi2_Line
@@ -572,17 +570,17 @@ public class TrackSeeder {
                     matches.clear();
 
                     if (BMTCcrosses.get(0).size() > 0 && i1 < BMTCcrosses.get(0).size()) {
-                        if (this.passCcross(trkCand, BMTCcrosses.get(0).get(i1), bgeo)) {
+                        if (this.passCcross(trkCand, BMTCcrosses.get(0).get(i1))) {
                             matches.add(BMTCcrosses.get(0).get(i1));
                         }
                     }
                     if (BMTCcrosses.get(1).size() > 0 && i2 < BMTCcrosses.get(1).size()) {
-                        if (this.passCcross(trkCand, BMTCcrosses.get(1).get(i2), bgeo)) {
+                        if (this.passCcross(trkCand, BMTCcrosses.get(1).get(i2))) {
                             matches.add(BMTCcrosses.get(1).get(i2));
                         }
                     }
                     if (BMTCcrosses.get(2).size() > 0 && i3 < BMTCcrosses.get(2).size()) {
-                        if (this.passCcross(trkCand, BMTCcrosses.get(2).get(i3), bgeo)) {
+                        if (this.passCcross(trkCand, BMTCcrosses.get(2).get(i3))) {
                             matches.add(BMTCcrosses.get(2).get(i3));
                         }
                     }
@@ -615,17 +613,17 @@ public class TrackSeeder {
         return outputSeeds;
     }
 
-    private boolean passCcross(Seed trkCand, Cross bmt_Ccross, BMTGeometry bmt_geo) {
+    private boolean passCcross(Seed trkCand, Cross bmt_Ccross) {
         boolean pass = false;
 
         double dzdrsum = trkCand.get_Helix().get_tandip();
 
         double z_bmt = bmt_Ccross.get_Point().z();
-        double r_bmt = bmt_geo.getRadius(bmt_Ccross.get_Cluster1().get_Layer());
+        double r_bmt = bgeo.getRadius(bmt_Ccross.get_Cluster1().get_Layer());
         Point3D phiHelixAtSurf = trkCand.get_Helix().getPointAtRadius(r_bmt); 
         //if (bmt_geo.isInSector(bmt_Ccross.get_Cluster1().get_Layer(), Math.atan2(phiHelixAtSurf.y(), phiHelixAtSurf.x()), Math.toRadians(10)) 
         //        != bmt_Ccross.get_Sector()) 
-        int sector = bmt_geo.getSector(bmt_Ccross.get_Cluster1().get_Layer(), Math.atan2(phiHelixAtSurf.y(), phiHelixAtSurf.x()));
+        int sector = bgeo.getSector(bmt_Ccross.get_Cluster1().get_Layer(), Math.atan2(phiHelixAtSurf.y(), phiHelixAtSurf.x()));
         if(sector!= bmt_Ccross.get_Sector() || sector ==0){
             return false;
         }

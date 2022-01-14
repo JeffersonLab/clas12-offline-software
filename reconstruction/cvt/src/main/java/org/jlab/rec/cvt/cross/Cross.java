@@ -356,18 +356,18 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         this._MatchedCCross = _MatchedCCross;
     }
     
-    public void reset(SVTGeometry geo) {
+    public void reset() {
         this.set_Dir(null);
         this.set_DirErr(null);
         if(this.get_Detector()==DetectorType.BST)
-            this.updateSVTCross(null, geo);
+            this.updateSVTCross(null);
         else
             this.updateBMTCross(null, null);
     }
 
-    public void update(Point3D trackPos, Vector3D trackDir, SVTGeometry geo) {
+    public void update(Point3D trackPos, Vector3D trackDir) {
         if(this.get_Detector()==DetectorType.BST)
-            this.updateSVTCross(trackDir, geo);
+            this.updateSVTCross(trackDir);
         else
             this.updateBMTCross(trackPos, trackDir);
     }
@@ -438,7 +438,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     /**
      * Sets the cross parameters: the position and direction unit vector
      */
-    public void updateSVTCross(Vector3D trackDir, SVTGeometry geo) {
+    public void updateSVTCross(Vector3D trackDir) {
 
         Cluster inlayerclus  = this.get_Cluster1();
         Cluster outlayerclus = this.get_Cluster2();
@@ -446,8 +446,8 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
             return;
         }
         // RDV: z error is now smaller because resulting from strip resolution instead of +/- 1 strip
-        Point3D  crossPoint = this.getSVTCrossPoint(trackDir, geo);
-        Vector3D crossError = this.getSVTCrossError(trackDir, geo);
+        Point3D  crossPoint = this.getSVTCrossPoint(trackDir);
+        Vector3D crossError = this.getSVTCrossError(trackDir);
         
         if(crossPoint==null || crossError==null) {
             return;
@@ -467,15 +467,14 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     /**
      * Calculate the cross point from the two strips and the track direction
      * @param trackDir track direction
-     * @param geo      SVT geometry class
      * @return
      */
-    public Point3D getSVTCrossPoint(Vector3D trackDir, SVTGeometry geo) {
+    public Point3D getSVTCrossPoint(Vector3D trackDir) {
         
         int layer  = this.get_Cluster1().get_Layer();
         int sector = this.get_Cluster1().get_Sector();
         
-        Point3D cross = geo.getCross(sector, layer, this.get_Cluster1().getLine(), this.get_Cluster2().getLine(), trackDir);
+        Point3D cross = Constants.SVTGEOMETRY.getCross(sector, layer, this.get_Cluster1().getLine(), this.get_Cluster2().getLine(), trackDir);
   
         return cross;
     }
@@ -483,25 +482,24 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     /**
      * Calculate the cross position error from the two strips and the track direction
      * @param trackDir track direction
-     * @param geo      VT geometry
      * @return
      */
-    public Vector3D getSVTCrossError(Vector3D trackDir, SVTGeometry geo) {
+    public Vector3D getSVTCrossError(Vector3D trackDir) {
         Vector3D error = null;
        
         int layer  = this.get_Cluster1().get_Layer();
         int sector = this.get_Cluster1().get_Sector();
 
-        Point3D cross = this.getSVTCrossPoint(trackDir, geo);
+        Point3D cross = this.getSVTCrossPoint(trackDir);
         if(cross!=null) {
             // get the strip resolution
-            Point3D local = geo.toLocal(layer, sector, cross);
-            double sigma1 = geo.getSingleStripResolution(layer, this.get_Cluster1().get_SeedStrip().get_Strip(), local.z());
-            double sigma2 = geo.getSingleStripResolution(layer, this.get_Cluster2().get_SeedStrip().get_Strip(), local.z());
+            Point3D local = Constants.SVTGEOMETRY.toLocal(layer, sector, cross);
+            double sigma1 = Constants.SVTGEOMETRY.getSingleStripResolution(layer, this.get_Cluster1().get_SeedStrip().get_Strip(), local.z());
+            double sigma2 = Constants.SVTGEOMETRY.getSingleStripResolution(layer, this.get_Cluster2().get_SeedStrip().get_Strip(), local.z());
             
             // get the error associated to each strip
-            Vector3D error1 = this.getSVTCrossDerivative(1, trackDir, geo).multiply(sigma1);
-            Vector3D error2 = this.getSVTCrossDerivative(2, trackDir, geo).multiply(sigma2);
+            Vector3D error1 = this.getSVTCrossDerivative(1, trackDir).multiply(sigma1);
+            Vector3D error2 = this.getSVTCrossDerivative(2, trackDir).multiply(sigma2);
             if(error1!=null && error2!=null)
                 error = new Vector3D(Math.sqrt(error1.x()*error1.x()+error2.x()*error2.x()),
                                      Math.sqrt(error1.y()*error1.y()+error2.y()*error2.y()),
@@ -514,17 +512,16 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * Calculate the cross derivative for the translation of one strip
      * useful for the error calculation
      * @param trackDir track direction
-     * @param geo      VT geometry
      * @return
      */
-    public Vector3D getSVTCrossDerivative(int icluster, Vector3D trackDir, SVTGeometry geo) {
+    public Vector3D getSVTCrossDerivative(int icluster, Vector3D trackDir) {
         Vector3D error = null;
        
         // check the cluster to be used in the derivative calculation is either 1 or 2
         if(icluster<1 || icluster>2) return null;
 
         // if the croos position is not well defined, don't do anything
-        Point3D cross = this.getSVTCrossPoint(trackDir, geo);
+        Point3D cross = this.getSVTCrossPoint(trackDir);
         if(cross==null) return null;
          
         int layer  = this.get_Cluster1().get_Layer();
@@ -551,12 +548,12 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         Point3D crossAPlus  = null;
         Point3D crossAMinus = null;
         if(clusA.get_Layer()%2 == 1) {
-            crossAPlus  = geo.getCross(sector, layer, stripAPlus,  clusB.getLine(), trackDir);
-            crossAMinus = geo.getCross(sector, layer, stripAMinus, clusB.getLine(), trackDir);
+            crossAPlus  = Constants.SVTGEOMETRY.getCross(sector, layer, stripAPlus,  clusB.getLine(), trackDir);
+            crossAMinus = Constants.SVTGEOMETRY.getCross(sector, layer, stripAMinus, clusB.getLine(), trackDir);
         }
         else {
-            crossAPlus  = geo.getCross(sector, layer, clusB.getLine(),  stripAPlus, trackDir);
-            crossAMinus = geo.getCross(sector, layer, clusB.getLine(), stripAMinus, trackDir);
+            crossAPlus  = Constants.SVTGEOMETRY.getCross(sector, layer, clusB.getLine(),  stripAPlus, trackDir);
+            crossAMinus = Constants.SVTGEOMETRY.getCross(sector, layer, clusB.getLine(), stripAMinus, trackDir);
         }
         
         // if at least one is non-null, calculate the derivative

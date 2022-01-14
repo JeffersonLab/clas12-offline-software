@@ -7,14 +7,12 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.Constants;
-import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.fit.HelicalTrackFitter;
 import org.jlab.rec.cvt.fit.HelicalTrackFitter.FitStatus;
-import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.trajectory.Helix;
 
 /**
@@ -194,7 +192,7 @@ public class Seed implements Comparable<Seed>{
     }
     
 
-    public boolean fit(SVTGeometry svt_geo, BMTGeometry bmt_geo, int fitIter, boolean originConstraint,
+    public boolean fit(int fitIter, boolean originConstraint,
             double bfield) {
         
         List<Double> X = new ArrayList<>();
@@ -216,7 +214,7 @@ public class Seed implements Comparable<Seed>{
         
         for (Cross c : this.get_Crosses()) {
             // reset cross to clear previous track settings on direction and Point
-            c.reset(svt_geo);
+            c.reset();
             if (c.get_Detector()==DetectorType.BST) {
                 SVTCrosses.add(c);
             }
@@ -292,9 +290,9 @@ public class Seed implements Comparable<Seed>{
             if (bmtCSz > 0) {
                 for (int j = svtSz * useSVTdipAngEst; j < svtSz * useSVTdipAngEst + bmtCSz; j++) {
                     Z.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_Point().z());
-                    Rho.add(j, bmt_geo.getRadiusMidDrift(BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_Cluster1().get_Layer()));
+                    Rho.add(j, Constants.BMTGEOMETRY.getRadiusMidDrift(BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_Cluster1().get_Layer()));
                     
-                    ErrRho.add(j, bmt_geo.getThickness()/2 / Math.sqrt(12.));
+                    ErrRho.add(j, Constants.BMTGEOMETRY.getThickness()/2 / Math.sqrt(12.));
                     ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_PointErr().z());
                 }
             }
@@ -331,7 +329,7 @@ public class Seed implements Comparable<Seed>{
             if (fitTrk.get_chisq()[0] < chisqMax) {
                 chisqMax = fitTrk.get_chisq()[0];
                 if(chisqMax<Constants.CIRCLEFIT_MAXCHI2) {
-                    this.update_Crosses(svt_geo, bmt_geo);
+                    this.update_Crosses();
                 }
             }
         }
@@ -343,14 +341,14 @@ public class Seed implements Comparable<Seed>{
      * @param sgeo
      * @param bgeo
      */
-    public void update_Crosses(SVTGeometry sgeo, BMTGeometry bgeo) {
+    public void update_Crosses() {
         if (this.get_Helix() != null && this.get_Helix().get_curvature() != 0) {
             for (int i = 0; i < this.get_Crosses().size(); i++) {
                 Cross cross = this.get_Crosses().get(i);
                 double R = Math.sqrt(cross.get_Point().x() * cross.get_Point().x() + cross.get_Point().y() * cross.get_Point().y());
                 Point3D  trackPos = this.get_Helix().getPointAtRadius(R);
                 Vector3D trackDir = this.get_Helix().getTrackDirectionAtRadius(R);
-                cross.update(trackPos, trackDir, sgeo);
+                cross.update(trackPos, trackDir);
             }
         }
     }

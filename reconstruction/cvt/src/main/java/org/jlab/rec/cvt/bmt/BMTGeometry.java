@@ -2,6 +2,7 @@ package org.jlab.rec.cvt.bmt;
 
 import javax.swing.JFrame;
 import java.util.ArrayList;
+import java.util.List;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.geom.prim.Arc3D;
 import org.jlab.geom.prim.Cylindrical3D;
@@ -14,6 +15,8 @@ import static org.jlab.rec.cvt.bmt.BMTConstants.E_DRIFT_FF;
 import static org.jlab.rec.cvt.bmt.BMTConstants.E_DRIFT_MF;
 import static org.jlab.rec.cvt.bmt.Lorentz.getLorentzAngle;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.clas.tracking.objects.Strip;
 import org.jlab.geom.prim.Transformation3D;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.graphics.EmbeddedCanvasTabbed;
@@ -21,6 +24,7 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.rec.cvt.Constants;
+
 /**
  *
  * @author devita
@@ -911,10 +915,98 @@ public class BMTGeometry {
      * @param sector
      * @return 
      */
+    @Deprecated
     public double LorentzAngleCorr(int layer, int sector) {
         return (this.getThickness()/2 * Math.tan(this.getThetaLorentz(layer, sector))) / this.getRadius(layer);
     }
 
+    /**
+     * Return track vector for local angle calculations
+     * 
+     * 1) transform to the geometry service local frame first,
+     * 2) rotates to bring the track intersection at phi=0.
+     * 
+     * The y and x components determine the local angle for Z strips
+     * The x and z components determine the local angle for C strips
+     * @param layer
+     * @param sector
+     * @param trackPos
+     * @param trackDir
+     * @return track direction unit vector
+    **/
+    private Vector3D getLocalTrack(int layer, int sector, Point3D trackPos, Vector3D trackDir) {               
+        Vector3D dir = new Vector3D(trackDir).asUnit();
+        Point3D  pos = new Point3D(trackPos);
+        this.toLocal(layer, sector).apply(dir);
+        this.toLocal(layer, sector).apply(pos);
+        Vector3D n = pos.toVector3D().asUnit();
+        dir.rotateZ(-n.phi());
+        return dir;
+    }
+    
+    /**
+     * Returns the local angle of the track for Z detectors
+     * the angle is positive for tracks going toward positive phi
+     * @param layer
+     * @param sector
+     * @param trakPos
+     * @param trackDir
+     * @return local angle
+     */
+    public double getThetaZ(int layer, int sector, Point3D trakPos, Vector3D trackDir) { 
+        Vector3D dir = this.getLocalTrack(layer, sector, trakPos, trackDir);
+        return Math.atan(dir.y()/dir.x());
+    }
+    
+    /**
+     * Returns the local angle of the track for C detectors
+     * the angle is positive for tracks going at positive z
+     * @param layer
+     * @param sector
+     * @param trakPos
+     * @param trackDir
+     * @return local angle
+     */
+    public double getThetaC(int layer, int sector, Point3D trakPos, Vector3D trackDir) { 
+        Vector3D dir = this.getLocalTrack(layer, sector, trakPos, trackDir);
+        return Math.atan(dir.z()/dir.x());
+    }
+    
+    public List<Surface> getSurfaces() {
+        List<Surface> surfaces = new ArrayList<>();
+        for(int i=1; i<=NLAYERS; i++)
+            surfaces.add(this.getSurface(i, 1, new Strip(0, 0, 0)));
+        return surfaces;
+    }
+    
+    public Surface getSurfaceC(int layer, int sector, int stripId, double centroid, double centroidValue) {
+        Strip strip = new Strip(stripId, centroid, centroidValue);
+        Surface surface = this.getSurface(layer, sector, strip);
+        return surface;
+    }
+    
+    public Surface getSurfaceZ(int layer, int sector, int stripId, double centroid, double x, double y, double centroidValue) {
+        Strip strip = new Strip(stripId, centroid, x, y, centroidValue);
+        Surface surface = this.getSurface(layer, sector, strip);
+        return surface;
+    }
+    
+    public Surface getSurface(int layer, int sector, Strip strip) {
+        Surface surface = new Surface(this.getTileSurface(layer, sector), 
+                                      strip, 
+                                      Constants.SWIMACCURACYBMT);
+        surface.hemisphere = 0;
+        surface.setLayer(layer);
+        surface.setSector(sector);
+        surface.setTransformation(this.toGlobal(layer, sector));
+        surface.setError(0); 
+        surface.setl_over_X0(this.getToverX0(layer));
+        surface.setZ_over_A_times_l(this.getZoverA(layer));
+        surface.setThickness(this.getMaterialThickness(layer));
+        surface.notUsedInFit=false;
+        return surface;
+    }
+    
 
     /**
      * Executable method: implements checks
@@ -1047,7 +1139,7 @@ public class BMTGeometry {
                     if(BMTGeometry.getDetectorType(layer) == BMTType.Z) {
 //                        measure=newGeo.getZstripPhi(region, sector, seed);
                         double residual=Math.atan2(trajs.get(0).y(),trajs.get(0).x())-measure;
-                        if(Math.abs(residual)>2*Math.PI) residual-=Math.signum(residual)*2*Math.PI;
+                        if(Math.abs(residual)>Math.PI) residual-=Math.signum(residual)*2*Math.PI;
                         dgBMT.getH1F("hiz_res" + region).fill(residual);
 //                              System.out.println(newGeo.getCylinder(layer, sector).getAxis().distance(hit).length() + " " + newGeo.getRadius(layer));
                         dgBMT.getH2F("hiz_res_z" + region).fill(trajs.get(0).z(), residual);

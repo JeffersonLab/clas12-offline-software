@@ -77,9 +77,8 @@ public class HitReader {
      * @param event the data event
      * @param adcConv converter from adc to values used in the analysis (i.e.
      * Edep for gemc, adc for cosmics)
-     * @param geo the BMT geometry
      */
-    public void fetch_BMTHits(DataEvent event, ADCConvertor adcConv, BMTGeometry geo, Swim swim, IndexedTable status, IndexedTable timeCuts) {
+    public void fetch_BMTHits(DataEvent event, ADCConvertor adcConv, Swim swim, IndexedTable status, IndexedTable timeCuts) {
 
         // return if there is no BMT bank
         if (event.hasBank("BMT::adc") == false) {
@@ -124,7 +123,7 @@ public class HitReader {
                     if(time!=0 && (time<tmin || time>tmax))
                         BmtStrip.setStatus(2);// calculate the strip parameters for the BMT hit
                 }
-                BmtStrip.calc_BMTStripParams(geo, sector, layer, swim); // for Z detectors the Lorentz angle shifts the strip measurement; calc_Strip corrects for this effect
+                BmtStrip.calc_BMTStripParams(sector, layer, swim); // for Z detectors the Lorentz angle shifts the strip measurement; calc_Strip corrects for this effect
                 // create the hit object for detector type BMT
                 
                 Hit hit = new Hit(DetectorType.BMT, BMTGeometry.getDetectorType(layer), sector, layer, BmtStrip);                
@@ -143,9 +142,8 @@ public class HitReader {
      *
      * @param event the data event
      * @param adcConv converter from adc to daq values
-     * @param geo the SVT geometry
      */
-    public void fetch_SVTHits(DataEvent event, ADCConvertor adcConv, int omitLayer, int omitHemisphere, SVTGeometry geo, IndexedTable status) {
+    public void fetch_SVTHits(DataEvent event, ADCConvertor adcConv, int omitLayer, int omitHemisphere, IndexedTable status) {
 
         if (event.hasBank("BST::adc") == false) {
             //System.err.println("there is no BST bank ");
@@ -238,9 +236,9 @@ public class HitReader {
                 Strip SvtStrip = new Strip(strip, adcConv.SVTADCtoDAQ(ADC), time); 
                 SvtStrip.set_Pitch(SVTGeometry.getPitch());
                 // get the strip line
-                SvtStrip.set_Line(geo.getStrip(layer, sector, strip));
-                SvtStrip.set_Module(geo.getModule(layer, sector));
-                SvtStrip.set_Normal(geo.getNormal(layer, sector)); 
+                SvtStrip.set_Line(Constants.SVTGEOMETRY.getStrip(layer, sector, strip));
+                SvtStrip.set_Module(Constants.SVTGEOMETRY.getModule(layer, sector));
+                SvtStrip.set_Normal(Constants.SVTGEOMETRY.getNormal(layer, sector)); 
                 if(layer%2==0) {
                     SvtStrip.setToverX0(2*SVTGeometry.getToverX0());
                     SvtStrip.setZoverA(SVTGeometry.getZoverA());

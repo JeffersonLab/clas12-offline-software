@@ -105,12 +105,23 @@ public class SVTConstants
          public static final double SIDETOL   = 1.0;  // extra width used in defining the module corners
 	public static final double LENGTHTOL = 10.0; // extra length for track intersection
     
+        // tungsten shield
+        public static double TSHIELDRMIN    = 51;
+        public static double TSHIELDRMAX    = 51.051;
+        public static double TSHIELDLENGTH  = 360;
+        public static double TSHIELDZPOS    = -50;
+        public static double TSHIELDRADLEN  = 6.76/19.3 *10; // X0(g/cm2) / density(g/cm3) * 10; 
+        public static double TSHILEDZOVERA  = 0.40252;
+        
          // faraday cup cage
          public static double[] FARADAYCAGERMIN    = new double[4];
          public static double[] FARADAYCAGERMAX    = new double[4];
          public static double[] FARADAYCAGELENGTH  = new double[4];
          public static double[] FARADAYCAGEZPOS    = new double[4];
          public static String[] FARADAYCAGENAME    = new String[4];
+         public static double[] FARADAYCAGERADLEN  = new double[4];
+         public static double[] FARADAYCAGEZOVERA  = new double[4];
+         
          
          // region peek supports
          public static double[] REGIONPEEKRMIN;
@@ -118,7 +129,7 @@ public class SVTConstants
          public static double[] REGIONPEEKLENGTH;
          
          // material and radiation length information
-         public static final double SILICONRADLEN = 9.36 * 10; //check this - converted to mm
+         public static final double SILICONRADLEN = 9.36 * 10; //converted to mm
          public static final double ZOVERA = 0.49848;
 
          /**
@@ -297,6 +308,8 @@ public class SVTConstants
                     FARADAYCAGEZPOS[i]   = cp.getDouble( ccdbPath+"material/faradaycage/zpos",   i);
                     FARADAYCAGENAME[i]   = cp.getString( ccdbPath+"material/faradaycage/name",   i);
                 }
+                FARADAYCAGERADLEN = new double[]{503, 237, 5440, 1000};   // RDV do be checked
+                FARADAYCAGEZOVERA = new double[]{0.52037, 0.5, 0.5, 0.5};
                                                      
                 // calculate derived constants
                 NLAYERS = NMODULES*NREGIONS;

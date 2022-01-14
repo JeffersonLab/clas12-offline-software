@@ -93,12 +93,7 @@ public class CCDBConstantsLoader {
         dbprovider.loadTable("/geometry/cvt/mvt/bmt_strip_L6");
         
         //load material budget:
-        dbprovider.loadTable("/test/mvt/bmt_mat_l1");
-        dbprovider.loadTable("/test/mvt/bmt_mat_l2");
-        dbprovider.loadTable("/test/mvt/bmt_mat_l3");
-        dbprovider.loadTable("/test/mvt/bmt_mat_l4");
-        dbprovider.loadTable("/test/mvt/bmt_mat_l5");
-        dbprovider.loadTable("/test/mvt/bmt_mat_l6");
+        dbprovider.loadTable("/geometry/cvt/mvt/bmt_material");
         
          //load Lorentz angle table
         dbprovider.loadTable("/calibration/mvt/lorentz");
@@ -225,18 +220,17 @@ public class CCDBConstantsLoader {
         
         //material budget
         //===============
-        for(int il=0; il<NLAYERS; il++) {
-            int layer = il+1;
-            for (int i = 0; i < dbprovider.length("/test/mvt/bmt_mat_l" + layer + "/thickness"); i++) {
-                double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l" + layer + "/thickness", i)/10000.;
-                double Zeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l" + layer + "/average_z", i);
-                double Aeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l" + layer + "/average_a", i);
-                double X0 =  dbprovider.getDouble("/test/mvt/bmt_mat_l" + layer + "/x0", i);
-                EFF_Z_OVER_A[il] += thickness*Zeff/Aeff;      
-                T_OVER_X0[il]+=thickness/X0;
-                TMAT[il] += thickness;
-            }
+        for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_material" + "/sector"); i++) {
+            int layer = dbprovider.getInteger("/geometry/cvt/mvt/bmt_material" + "/layer", i);
+            double thickness = dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/thickness", i)/10000.;
+            double Zeff =  dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/average_z", i);
+            double Aeff =  dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/average_a", i);
+            double X0 =  dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/x0", i);
+            EFF_Z_OVER_A[layer-1] += thickness*Zeff/Aeff;      
+            T_OVER_X0[layer-1]+=thickness/X0;
+            TMAT[layer-1] += thickness;
         }
+        
         
         if (GRID_SIZE!=dbprovider.length("/calibration/mvt/lorentz/angle")) {
          System.out.println("WARNING... Lorentz angle grid is not the same size as the table in CCDBConstant");}
@@ -307,7 +301,6 @@ public class CCDBConstantsLoader {
         
         Constants.setXb(xb*10);
         Constants.setYb(yb*10);
-        Constants.setRbErr(err*10);
         
         // target position mm
         Constants.setZoffset(ztarget*10);

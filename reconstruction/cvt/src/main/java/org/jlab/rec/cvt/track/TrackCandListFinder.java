@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
-import org.jlab.geom.base.Detector;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -138,7 +136,7 @@ public class TrackCandListFinder {
      * @param list the input list of crosses
      * @return an array list of track candidates in the SVT
      */
-    public void getHelicalTrack(Seed cand, SVTGeometry svt_geo, BMTGeometry bmt_geo) {
+    public void getHelicalTrack(Seed cand) {
         X.clear();
         Y.clear();
         Z.clear();
@@ -222,10 +220,7 @@ public class TrackCandListFinder {
      * @param crossList the input list of crosses
      * @return an array list of track candidates in the SVT
      */
-    public ArrayList<Track> getHelicalTracks(CrossList crossList, 
-            SVTGeometry svt_geo, BMTGeometry bmt_geo,
-            CTOFGeant4Factory ctof_geo, Detector cnd_geo,
-            Swim swimmer) {
+    public ArrayList<Track> getHelicalTracks(CrossList crossList, Swim swimmer) {
 
         X.clear();
         Y.clear();
@@ -301,7 +296,7 @@ public class TrackCandListFinder {
                     Seed seed = new Seed(crossList.get(i), fitTrk.get_helix());
                     Track cand = new Track(seed);
                     //cand.setPXYZ(fitTrk.get_helix());			done in Track constructor			
-                    //cand.update_Crosses(svt_geo);
+                    //cand.updateCrosses(svt_geo);
 
                     cand.get_Seed().set_circleFitChi2PerNDF(fitTrk.get_chisq()[0] / (int) (X.size() - 3)); // 3 fit params					
                     cand.get_Seed().set_lineFitChi2PerNDF(fitTrk.get_chisq()[1] / (int) (Z.size() - 2)); // 2 fit params
@@ -340,7 +335,7 @@ public class TrackCandListFinder {
      * @param SVTCrossList the input list of crosses
      * @return an array list of track candidates in the SVT
      */
-    public ArrayList<StraightTrack> getStraightTracks(CrossList SVTCrosses, List<Cross> BMTCrosses, SVTGeometry svt_geo, BMTGeometry bmt_geo) {
+    public ArrayList<StraightTrack> getStraightTracks(CrossList SVTCrosses, List<Cross> BMTCrosses) {
 
         ArrayList<StraightTrack> cands = new ArrayList<StraightTrack>();
         Map<String, StraightTrack> candMap= new HashMap<String, StraightTrack>();
@@ -376,7 +371,7 @@ public class TrackCandListFinder {
             StraightTrack cand = new StraightTrack(null);
             cand.addAll(crossesToFit);
             if (linefitresultYX && linefitparsYX != null) {
-                cand.update_Crosses(linefitparsYX.getYXRay(), svt_geo); 
+                cand.updateCrosses(linefitparsYX.getYXRay()); 
             }
             // update measurements
             MeasArrays = this.get_RayMeasurementsArrays(crossesToFit, false, false, false);
@@ -410,12 +405,12 @@ public class TrackCandListFinder {
                 }
                 //System.err.println("Error in  Track fitting -- track not found -- refit FAILED");
             }
-            cand.update_Crosses(cand.get_ray(), svt_geo);
+            cand.updateCrosses();
 //            System.out.println(cand.get_ray().toLine().origin().toString() + " " 
 //                    + Math.toDegrees(cand.get_ray().toLine().direction().theta()) + " " 
 //                    + Math.toDegrees(cand.get_ray().toLine().direction().phi()) + " ");
             // eliminate bad residuals
-            this.EliminateStraightTrackOutliers(crossesToFit, fitTrk, svt_geo);
+            this.EliminateStraightTrackOutliers(crossesToFit, fitTrk);
             if (crossesToFit.size() < org.jlab.rec.cvt.Constants.MINSVTCRSFORCOSMIC) {
                 continue;
             }
@@ -425,7 +420,7 @@ public class TrackCandListFinder {
             if (fitTrk.get_ray() != null) { 
                 cand = new StraightTrack(fitTrk.get_ray());
                 cand.addAll(crossesToFit);
-                cand.update_Crosses(cand.get_ray(), svt_geo);
+                cand.updateCrosses();
            
             }
 
@@ -445,12 +440,12 @@ public class TrackCandListFinder {
                 crossesToFitWithBMT.clear();
                 SVTmatches.clear();
                 for (Cross c : cand) { 
-                    if (c.get_Detector()==DetectorType.BST && svt_geo.isInFiducial(c.get_Region()*2-1, c.get_Sector(), c.get_Point())) {
+                    if (c.get_Detector()==DetectorType.BST && Constants.SVTGEOMETRY.isInFiducial(c.get_Region()*2-1, c.get_Sector(), c.get_Point())) {
                         SVTmatches.add(c);
                     }
                 }
                 BMTmatches.clear();
-                BMTmatches = this.matchTrackToBMT(cand, BMTCrosses, bmt_geo);
+                BMTmatches = this.matchTrackToBMT(cand, BMTCrosses);
                 
                 //crossesToFitWithBMT.addAll(SVTmatches);
                 crossesToFitWithBMT.addAll(BMTmatches);
@@ -459,7 +454,7 @@ public class TrackCandListFinder {
                 fitTrk.fit(NewMeasArrays._X, NewMeasArrays._Y, NewMeasArrays._Z, NewMeasArrays._Y_prime, NewMeasArrays._ErrRt, NewMeasArrays._ErrY_prime, NewMeasArrays._ErrZ);
                 cand.addAll(crossesToFitWithBMT);
 //                cand.reset_Crosses();
-                cand.update_Crosses(cand.get_ray(), svt_geo);
+                cand.updateCrosses();
                 NewMeasArrays = this.get_RayMeasurementsArrays(cand, false, false, true);
                 fitTrk.fit(NewMeasArrays._X, NewMeasArrays._Y, NewMeasArrays._Z, NewMeasArrays._Y_prime, NewMeasArrays._ErrRt, NewMeasArrays._ErrY_prime, NewMeasArrays._ErrZ);
                 crossesToFitWithBMT.clear();
@@ -472,13 +467,13 @@ public class TrackCandListFinder {
 //                        + Math.toDegrees(fitTrk.get_ray().toLine().direction().phi()) + " ");
                     cand = new StraightTrack(fitTrk.get_ray()); 
                     cand.addAll(crossesToFitWithBMT); 
-                    cand.update_Crosses(cand.get_ray(), svt_geo);
+                    cand.updateCrosses();
                     //refit not using only BMT to fit the z profile
                     NewMeasArrays = this.get_RayMeasurementsArrays(crossesToFitWithBMT, false, false, false);
                     fitTrk.fit(NewMeasArrays._X, NewMeasArrays._Y, NewMeasArrays._Z, NewMeasArrays._Y_prime, NewMeasArrays._ErrRt, NewMeasArrays._ErrY_prime, NewMeasArrays._ErrZ);
                     cand = new StraightTrack(fitTrk.get_ray()); 
                     cand.addAll(crossesToFitWithBMT);
-                    cand.update_Crosses(cand.get_ray(), svt_geo);
+                    cand.updateCrosses();
                     cand.set_ndf(NewMeasArrays._Y.size() + NewMeasArrays._Y_prime.size() - 4);
                     double chi2 = cand.calc_straightTrkChi2(); 
                     cand.set_chi2(chi2);
@@ -516,7 +511,7 @@ public class TrackCandListFinder {
         return passedcands;
     }
 
-    public void upDateCrossesFromTraj(StraightTrack cand, Trajectory trj, SVTGeometry geo) {
+    public void upDateCrossesFromTraj(StraightTrack cand, Trajectory trj) {
 
         double[][][] trajPlaneInters = trj.get_SVTIntersections();
         ArrayList<Cross> hitsOnTrack = new ArrayList<Cross>();
@@ -807,10 +802,9 @@ public class TrackCandListFinder {
      *
      * @param bmtCrosses the BMT crosses
      * @param thecand the straight track candidate
-     * @param geo the BMT geometry
      * @return an arraylist of BMT crosses matched to the track
      */
-    public ArrayList<Cross> matchTrackToBMT(StraightTrack thecand, List<Cross> bmtCrosses, BMTGeometry geo) {
+    public ArrayList<Cross> matchTrackToBMT(StraightTrack thecand, List<Cross> bmtCrosses) {
 
         ArrayList<Cross> BMTCrossList = new ArrayList<Cross>();
         if (thecand == null) {
@@ -827,13 +821,13 @@ public class TrackCandListFinder {
             int region = iregion + 1;
             
             // match Z crosses
-            List<Cross> zCross = this.matchTrackToBMT(geo.getLayer(region, BMTType.Z), thecand.get_ray(), bmtCrosses, 
-                                                Constants.COSMICSMINRESIDUALX/geo.getRadiusMidDrift(geo.getLayer(region, BMTType.Z)), geo);
+            List<Cross> zCross = this.matchTrackToBMT(Constants.BMTGEOMETRY.getLayer(region, BMTType.Z), thecand.get_ray(), bmtCrosses, 
+                                                Constants.COSMICSMINRESIDUALX/Constants.BMTGEOMETRY.getRadiusMidDrift(Constants.BMTGEOMETRY.getLayer(region, BMTType.Z)));
             if(zCross!=null) 
                 BMTCrossList.addAll(zCross);
             
             // match Z crosses
-            List<Cross> cCross = this.matchTrackToBMT(geo.getLayer(region, BMTType.C), thecand.get_ray(), bmtCrosses, Constants.COSMICSMINRESIDUALZ, geo);
+            List<Cross> cCross = this.matchTrackToBMT(Constants.BMTGEOMETRY.getLayer(region, BMTType.C), thecand.get_ray(), bmtCrosses, Constants.COSMICSMINRESIDUALZ);
             if(cCross!=null) 
                 BMTCrossList.addAll(cCross);
         
@@ -860,15 +854,15 @@ public class TrackCandListFinder {
         return BMTCrossList;
     }
 
-    private List<Cross> matchTrackToBMT(int layer, Ray ray, List<Cross> crosses, double matchCut, BMTGeometry geo) {
+    private List<Cross> matchTrackToBMT(int layer, Ray ray, List<Cross> crosses, double matchCut) {
         
         List<Cross> matched = new ArrayList<>();
         
-        for(int is=0; is<geo.getNSectors(); is++) {
+        for(int is=0; is<Constants.BMTGEOMETRY.getNSectors(); is++) {
             // get ray intersection with cross tile
             int sector = is+1;
             List<Point3D> trajs = new ArrayList<>();
-            int ntrajs = geo.getTileSurface(layer, sector).intersection(ray.toLine(), trajs);
+            int ntrajs = Constants.BMTGEOMETRY.getTileSurface(layer, sector).intersection(ray.toLine(), trajs);
             if(ntrajs==0) continue;
             
             // find the closests cross-trajectory match
@@ -898,11 +892,11 @@ public class TrackCandListFinder {
     }
 
     @Deprecated
-    private ArrayList<Cross> MatchMMCrossC(int Region, Ray ray, List<Cross> MMCrosses, double matchCutOff, BMTGeometry geo) {
+    private ArrayList<Cross> MatchMMCrossC(int Region, Ray ray, List<Cross> MMCrosses, double matchCutOff) {
 
         ArrayList<Cross> matchedMMCrosses = new ArrayList<Cross>();
 
-        double R = geo.getRadiusMidDrift(geo.getLayer(Region,BMTType.C));		     // R for C detector
+        double R = Constants.BMTGEOMETRY.getRadiusMidDrift(Constants.BMTGEOMETRY.getLayer(Region,BMTType.C));		     // R for C detector
 
         double sx = ray.get_yxslope();
         double ix = ray.get_yxinterc();
@@ -943,7 +937,7 @@ public class TrackCandListFinder {
                 }
                 double m_z = MMCrosses.get(i).get_Point().z();  
                 //int sector = geo.isInSector(MMCrosses.get(i).get_Region() * 2, phi, Math.toRadians(BMTConstants.isInSectorJitter));
-                int sector = geo.getSector(MMCrosses.get(i).get_Region() * 2, phi);
+                int sector = Constants.BMTGEOMETRY.getSector(MMCrosses.get(i).get_Region() * 2, phi);
                 if (sector != MMCrosses.get(i).get_Sector()) {
                     continue;
                 }
@@ -970,11 +964,11 @@ public class TrackCandListFinder {
     }
 
     @Deprecated
-    private ArrayList<Cross> MatchMMCrossZ(int Region, Ray ray, List<Cross> MMCrosses, double matchCutOff, BMTGeometry geo) {
+    private ArrayList<Cross> MatchMMCrossZ(int Region, Ray ray, List<Cross> MMCrosses, double matchCutOff) {
 
         ArrayList<Cross> matchedMMCrosses = new ArrayList<Cross>();
 
-        double R = geo.getRadiusMidDrift(geo.getLayer(Region,BMTType.Z));		     // R for Z detector
+        double R = Constants.BMTGEOMETRY.getRadiusMidDrift(Constants.BMTGEOMETRY.getLayer(Region,BMTType.Z));		     // R for Z detector
         double sx = ray.get_yxslope();
         double ix = ray.get_yxinterc();
         double sz = ray.get_yzslope();
@@ -1122,7 +1116,7 @@ public class TrackCandListFinder {
         return passedcands;
     }
 
-    private void EliminateStraightTrackOutliers(ArrayList<Cross> crosses, CosmicFitter track, SVTGeometry svt_geo) {
+    private void EliminateStraightTrackOutliers(ArrayList<Cross> crosses, CosmicFitter track) {
         ArrayList<Cross> toKeep = new ArrayList<>();
         
         for(int j = 0; j < crosses.size(); j++) {
@@ -1131,16 +1125,16 @@ public class TrackCandListFinder {
             int sector = c.get_Sector();
             
             Point3D traj = new Point3D();
-            int ntraj = svt_geo.getPlane(layer, sector).intersection(track.get_ray().toLine(), traj);
+            int ntraj = Constants.SVTGEOMETRY.getPlane(layer, sector).intersection(track.get_ray().toLine(), traj);
             
             if(ntraj!=1) 
-                c.reset(svt_geo);
-            else if(!svt_geo.isInFiducial(layer, sector, traj)) 
-                c.reset(svt_geo);
+                c.reset();
+            else if(!Constants.SVTGEOMETRY.isInFiducial(layer, sector, traj)) 
+                c.reset();
             else {
-                Vector3D distance = svt_geo.toLocal(layer, sector, c.get_Point().vectorTo(traj));
+                Vector3D distance = Constants.SVTGEOMETRY.toLocal(layer, sector, c.get_Point().vectorTo(traj));
                 if(Math.abs(distance.x())>Constants.COSMICSMINRESIDUALX ||
-                   Math.abs(distance.z())>Constants.COSMICSMINRESIDUALZ) c.reset(svt_geo);
+                   Math.abs(distance.z())>Constants.COSMICSMINRESIDUALZ) c.reset();
                 else
                     toKeep.add(c);
             }
@@ -1148,7 +1142,7 @@ public class TrackCandListFinder {
         crosses = toKeep;
     }
 
-    public void matchClusters(List<Cluster> sVTclusters, TrajectoryFinder tf, SVTGeometry svt_geo, BMTGeometry bmt_geo, boolean trajFinal,
+    public void matchClusters(List<Cluster> sVTclusters, TrajectoryFinder tf, boolean trajFinal,
             ArrayList<StateVec> trajectory, int k) {
         if(trajectory == null)
             return;
@@ -1165,8 +1159,7 @@ public class TrackCandListFinder {
                     continue;
                 }
                 if (Math.abs(st.get_CalcCentroidStrip() - cls.get_Centroid()) < 4) {
-                    tf.setHitResolParams("SVT", cls.get_Sector(), cls.get_Layer(), cls,
-                            st, svt_geo, bmt_geo, trajFinal);
+                    tf.setHitResolParams("SVT", cls.get_Sector(), cls.get_Layer(), cls, st, trajFinal);
                     //System.out.println("trying to associate a cluster ");cls.printInfo(); System.out.println(" to "+st.get_CalcCentroidStrip()+" dStp = "+(st.get_CalcCentroidStrip()-cls.get_Centroid()));
                     cls.set_AssociatedTrackID(k);
                     for (Hit h : cls) {

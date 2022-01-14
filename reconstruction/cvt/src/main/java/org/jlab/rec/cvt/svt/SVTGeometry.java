@@ -1,13 +1,20 @@
 package org.jlab.rec.cvt.svt;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
+import java.util.ArrayList;
+import java.util.List;
+import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.clas.tracking.objects.Strip;
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
+import org.jlab.geom.prim.Arc3D;
+import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Line3d;
+import org.jlab.rec.cvt.Constants;
 
 public class SVTGeometry {
 
@@ -16,6 +23,7 @@ public class SVTGeometry {
     public static final int NLAYERS  = 6;
     public static final int NSTRIPS  = SVTConstants.NSTRIPS;
     public static final int[] NSECTORS = new int[NLAYERS];
+    public static final int NPASSIVE = 3;
     
     
     
@@ -31,6 +39,11 @@ public class SVTGeometry {
         }
     }
     
+    public int getTwinLayer(int layer) {
+        int[] rm = SVTConstants.convertLayer2RegionModule(layer-1);
+        rm[1] = 1 - rm[1];
+        return 1+SVTConstants.convertRegionModule2Layer(rm[0], rm[1]);
+    }
 
     public static double getLayerRadius(int layer) {
         int[] rm = SVTConstants.convertLayer2RegionModule(layer-1);
@@ -72,7 +85,7 @@ public class SVTGeometry {
     }
     
     public static double getToverX0() {
-        return SVTConstants.SILICONTHK/SVTConstants.SILICONRADLEN;
+        return 2*SVTConstants.SILICONTHK/SVTConstants.SILICONRADLEN;
     }
     
     public static double getMaterialThickness() {
@@ -166,26 +179,126 @@ public class SVTGeometry {
         return dist.length()*side;
     }
     
+    /**
+     * Return track vector for local angle calculations
+     * 
+     * 1) transform to the geometry service local frame first:
+     * y axis pointing toward the center, 
+     * z axis pointing downstream along the module
+     * x axis given by y.cross(z)
+     * 
+     * 2) for even layers, it rotates by 180 deg to have the y axis
+     * pointing outward
+     * 
+     * 3) rotates by 90 deg around X to have:
+     * z axis normal to the module pointing inward for odd layers and outward for even ones
+     * y axis pointing upstream along the module
+     * x axis given by y.cross(z) along the short side of the module
+     *
+     * @param layer
+     * @param sector
+     * @param trackDir
+     * @return 
+    **/
+    public Vector3D getLocalTrack(int layer, int sector, Vector3D trackDir) {
+        Vector3D dir = this.toLocal(layer, sector, trackDir);
+        if(layer%2==0) dir.rotateZ(Math.PI); // to get the Y axis to point
+        dir.rotateX(Math.PI/2); 
+        return dir;
+    }
+
+    /**
+     * Returns angle of the track with respect to the normal to the module
+     * in the x-z plane defined above
+     * 
+     * @param layer
+     * @param sector
+     * @param trackDir
+     * @return
+     */
+    public double getLocalAngle(int layer, int sector, Vector3D trackDir) {
+        Vector3D dir = this.getLocalTrack(layer, sector, trackDir);
+        return Math.atan(dir.x()/dir.z());
+    }
+    
+    public List<Surface> getSurfaces() {
+        List<Surface> surfaces = new ArrayList<>();
+        surfaces.add(this.getShieldSurface());
+        surfaces.add(this.getFaradayCageSurfaces(0));
+        for(int i=1; i<=NLAYERS; i++) {
+            surfaces.add(this.getSurface(i, 1, new Strip(0,0,0)));
+        }
+        surfaces.add(this.getFaradayCageSurfaces(1));
+        return surfaces;
+    }
+        
+    public Surface getSurface(int layer, int sector, int stripId, double centroid, Line3D stripLine) {
+        Strip strip = new Strip(stripId, centroid, stripLine);
+        Surface surface = this.getSurface(layer, sector, strip);
+        return surface;
+    }
+
+    public Surface getSurface(int layer, int sector, Strip strip) {
+        Line3D module = this.getModule(layer, sector);
+        Surface surface = new Surface(this.getPlane(layer, sector), 
+                                      strip, 
+                                      module.origin(), module.end(), 
+                                      Constants.SWIMACCURACYSVT);
+        surface.hemisphere = 0;
+        surface.setLayer(layer);
+        surface.setSector(sector);
+        surface.setError(0); 
+        if(layer%2==0) {
+            surface.setl_over_X0(SVTGeometry.getToverX0());
+            surface.setZ_over_A_times_l(SVTGeometry.getZoverA());
+            surface.setThickness(SVTGeometry.getMaterialThickness());
+        }
+        surface.notUsedInFit=false;
+        return surface;
+    }
+    
+    public Surface getShieldSurface() {
+        Point3D  center = new Point3D(0,                        0, Constants.getZoffset()+SVTConstants.TSHIELDZPOS-SVTConstants.TSHIELDLENGTH/2);
+        Point3D  origin = new Point3D(SVTConstants.TSHIELDRMAX, 0, Constants.getZoffset()+SVTConstants.TSHIELDZPOS-SVTConstants.TSHIELDLENGTH/2);
+        Vector3D axis   = new Vector3D(0,0,1);
+        Arc3D base = new Arc3D(origin, center, axis, 2*Math.PI);
+        Cylindrical3D shieldCylinder = new Cylindrical3D(base, SVTConstants.TSHIELDLENGTH);
+        Surface shieldSurface = new Surface(shieldCylinder, new Strip(0, 0, 0), Constants.DEFAULTSWIMACC);
+        shieldSurface.setZ_over_A_times_l(SVTConstants.TSHILEDZOVERA);
+        shieldSurface.setThickness(SVTConstants.TSHIELDRMAX-SVTConstants.TSHIELDRMIN);
+        shieldSurface.setl_over_X0(shieldSurface.getThickness()/SVTConstants.TSHIELDRADLEN);
+        shieldSurface.passive=true;
+        shieldSurface.notUsedInFit=true;
+        return shieldSurface;
+    }
+
+    public Surface getFaradayCageSurfaces(int i) {
+        Point3D  center = new Point3D(0, 0, SVTConstants.FARADAYCAGEZPOS[i]-SVTConstants.FARADAYCAGELENGTH[i]/2);
+        Point3D  origin = new Point3D(SVTConstants.FARADAYCAGERMAX[i], 0, SVTConstants.FARADAYCAGEZPOS[i]-SVTConstants.FARADAYCAGELENGTH[i]/2);
+        Vector3D axis   = new Vector3D(0,0,1);
+        Arc3D base = new Arc3D(origin, center, axis, 2*Math.PI);
+        Cylindrical3D fcCylinder = new Cylindrical3D(base, SVTConstants.FARADAYCAGELENGTH[i]);
+        Surface fcSurface = new Surface(fcCylinder, new Strip(0, 0, 0), Constants.DEFAULTSWIMACC);
+        fcSurface.setZ_over_A_times_l(SVTConstants.FARADAYCAGEZOVERA[i]);
+        fcSurface.setThickness(SVTConstants.FARADAYCAGERMAX[i]-SVTConstants.FARADAYCAGERMIN[i]);
+        fcSurface.setl_over_X0(fcSurface.getThickness()/SVTConstants.FARADAYCAGERADLEN[i]);
+        fcSurface.passive=true;
+        fcSurface.notUsedInFit=true;
+        return fcSurface;
+    }
+    
     @Deprecated
     public int getSector(int layer, Point3D traj) {
         
         int[] rm = SVTConstants.convertLayer2RegionModule(layer-1);
         int Sect = -1;
+        double delta = Double.POSITIVE_INFINITY;
         for (int s = 0; s < SVTConstants.NSECTORS[rm[0]]; s++) {
             int sector = s + 1;
-            Line3D module = this.getModule(layer, sector);
-            Vector3D orig = module.origin().toVector3D().asUnit();
-            Vector3D end  = module.end().toVector3D().asUnit();
-            Vector3D trk  = new Vector3D(traj.x(), traj.y(), 0);
-            orig.unit();
-            end.unit();
-            trk.unit();
-
-            double phi1 = Math.acos(orig.dot(trk));
-            double phi2 = Math.acos(trk.dot(end));
-            double phiRange = Math.acos(orig.dot(end));
-
-            if (phi1<phiRange && phi2<phiRange) {
+            Vector3D n = this.getNormal(layer, sector);
+            double deltaPhi = Math.acos(traj.toVector3D().asUnit().dot(n));
+            if(Math.abs(deltaPhi)<delta) {
+                delta = deltaPhi;
                 Sect = sector;
             }
         }

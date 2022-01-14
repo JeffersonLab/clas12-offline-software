@@ -625,7 +625,7 @@ public class RecoBankWriter {
 
 
             bank.setShort("ID", i, (short) cosmics.get(i).get_Id());
-            bank.setFloat("chi2", i, (float) cosmics.get(i).get_ray().chi2);
+            bank.setFloat("chi2", i, (float) cosmics.get(i).get_chi2());
             bank.setShort("ndf", i, (short) (cosmics.get(i).size()-2));
             bank.setFloat("trkline_yx_slope", i, (float) cosmics.get(i).get_ray().get_yxslope());
             bank.setFloat("trkline_yx_interc", i, (float) (cosmics.get(i).get_ray().get_yxinterc()/10.));
