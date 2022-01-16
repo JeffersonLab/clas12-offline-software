@@ -90,7 +90,7 @@ public class Constants {
     
     private static int _rmReg = 0;
 
-    public static boolean excludeLayers = false;
+    public static boolean EXCLUDELAYERS = false;
     private static final Map<Integer,Integer> layersUsed = new HashMap<Integer,Integer>();
     private static final double[][]BMTPhiZRangeExcld = new double[2][2];
     private static int BMTLayerExcld = -1;
@@ -160,14 +160,14 @@ public class Constants {
     /**
      * @return the layersUsed
      */
-    public static Map getLayersUsed() {
+    public static Map getUsedLayers() {
         return layersUsed;
     }
 
     /**
      * @param layers
      */
-    public static void setLayersUsed(String layers) {
+    public static void setUsedLayers(String layers) {
         //all layers used --> 1
         for(int i = 0; i < 12; i++)
             layersUsed.put(i+1, 1);        
@@ -178,9 +178,8 @@ public class Constants {
             for(String value : values) {
                 int layer = Integer.valueOf(value);
                 layersUsed.put(layer, 0);
-                System.out.println("EXCLUDE CVT LAYER " + layer);
             }
-            excludeLayers=true;
+            EXCLUDELAYERS=true;
         }
     }
 

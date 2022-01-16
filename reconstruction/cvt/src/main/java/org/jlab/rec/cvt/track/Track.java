@@ -426,10 +426,11 @@ public class Track extends Trajectory implements Comparable<Track> {
         this.trackCovMat = trackCovMat;
     }
     
+    @Override
     public String toString() {
-        String str = String.format("Track id=%d, q=%d, p=%.3f GeV pt=%.3f GeV, phi=%.3f deg, NDF=%d, chi2=%.3f\n", 
+        String str = String.format("Track id=%d, q=%d, p=%.3f GeV pt=%.3f GeV, phi=%.3f deg, NDF=%d, chi2=%.3f, seed method=%d\n", 
                      this.get_Id(), this.get_Q(), this.get_P(), this.get_Pt(), Math.toDegrees(this.get_helix().get_phi_at_dca()),
-                     this.getNDF(), this.getChi2());
+                     this.getNDF(), this.getChi2(), this.get_Seed().get_Status());
         for(Cross c: this) str = str + c.toString() + "\n";
         return str;
     }

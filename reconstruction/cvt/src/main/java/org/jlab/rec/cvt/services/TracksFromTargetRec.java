@@ -48,9 +48,10 @@ public class TracksFromTargetRec {
         if(solenoidValue<0.001) {
             StraightTrackSeeder trseed = new StraightTrackSeeder();
             seeds = trseed.findSeed(crosses.get(0), crosses.get(1), Constants.SVTOnly);
-            if(Constants.excludeLayers==true) {
-                seeds = recUtil.reFit(seeds, swimmer, trseed); // RDV can we juts refit?
-            }
+            // RDV, disabled because it seems to create fake tracks, skipping measurement in KF
+//            if(Constants.EXCLUDELAYERS==true) {
+//                seeds = recUtil.reFit(seeds, swimmer, trseed); // RDV can we juts refit?
+//            }
         } else {
             if(Constants.SVTOnly) {
                 TrackSeeder trseed = new TrackSeeder(swimmer);
@@ -61,13 +62,14 @@ public class TracksFromTargetRec {
                 seeds = trseed.findSeed(crosses.get(0), crosses.get(1));
                 
                 //second seeding algorithm to search for SVT only tracks, and/or tracks missed by the CA
-                if(Constants.svtSeeding || Constants.excludeLayers) {
+                if(Constants.svtSeeding) {
                     TrackSeeder trseed2 = new TrackSeeder(swimmer);
                     trseed2.unUsedHitsOnly = true;
                     seeds.addAll( trseed2.findSeed(crosses.get(0), crosses.get(1)));
-                    if(Constants.excludeLayers==true) {
-                        seeds = recUtil.reFit(seeds, swimmer, trseed, trseed2);
-                    }
+                    // RDV, disabled because it seems to create fake tracks, skipping measurement in KF
+//                    if(Constants.EXCLUDELAYERS==true) {
+//                        seeds = recUtil.reFit(seeds, swimmer, trseed, trseed2);
+//                    }
                 }
                 if(!Constants.seedBeamSpotConstraint()) {
                     List<Seed> failed = new ArrayList<>();
@@ -92,12 +94,8 @@ public class TracksFromTargetRec {
             seed.setId(id);
             Track track = new Track(seed);
             track.update_Crosses(id);
-            trkcands.add(track);                
+            trkcands.add(track);   
         }
-//        if(true) {
-//            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, seeds, trkcands, shift);
-//            return true;
-//        }
         
         trkcands.clear();
         KFitter kf = new KFitter(Constants.KFFILTERON, Constants.KFITERATIONS, Constants.kfBeamSpotConstraint(), swimmer, Constants.kfMatLib);
@@ -189,11 +187,6 @@ public class TracksFromTargetRec {
         for(Cluster c : BMTclusters) {
             c.set_AssociatedTrackID(-1);
         }
-//        if (trkcands.isEmpty()) {
-//            recUtil.CleanupSpuriousCrosses(crosses, null, SVTGeom) ;            
-//            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, seeds, null, shift);
-//            return true;
-//        }
         
         List<Track> tracks = null;
         if(!trkcands.isEmpty()) {

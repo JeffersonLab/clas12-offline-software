@@ -101,7 +101,7 @@ public class RecUtilities {
                 int layer = trkcand.get_Clusters().get(i).get_Layer();
                 Surface meas = trkcand.get_Clusters().get(i).measurement();
                 meas.setIndex(layer);
-                if((int)Constants.getLayersUsed().get(meas.getLayer())<1)
+                if((int)Constants.getUsedLayers().get(meas.getLayer())<1)
                     meas.notUsedInFit=true;
                 if(i>0 && KFSites.get(KFSites.size()-1).getIndex()==meas.getIndex())
                     continue;
@@ -118,7 +118,7 @@ public class RecUtilities {
                 meas.setIndex(layer+SVTGeometry.NLAYERS);
                 meas.setLayer(layer+SVTGeometry.NLAYERS);
                 meas.hemisphere = hemisp;
-                if((int)Constants.getLayersUsed().get(layer+SVTGeometry.NLAYERS)<1) {
+                if((int)Constants.getUsedLayers().get(layer+SVTGeometry.NLAYERS)<1) {
                     //System.out.println("Exluding layer "+meas.getLayer()+trkcand.get_Crosses().get(c).printInfo());
                     meas.notUsedInFit=true;
                 }
@@ -184,7 +184,7 @@ public class RecUtilities {
                     if(j==0) meas.setl_over_X0(SVTGeometry.getToverX0());
                     else     meas.setl_over_X0(0);
                     // RDV to be tested
-//                    if((int) Constants.getLayersUsed().get(meas.getLayer())<1)
+//                    if((int) Constants.getUsedLayers().get(meas.getLayer())<1)
 //                        meas.notUsedInFit=true; //VZ: commenting this out prevents the layer exclusion to be employed in tracking
                     if(i>0 && KFSites.get(KFSites.size()-1).getLayer()==mlayer
                            && KFSites.get(KFSites.size()-1).hemisphere==meas.hemisphere)
@@ -206,7 +206,7 @@ public class RecUtilities {
                 Surface meas = trkcand.get(i).get_Cluster1().measurement();
                 meas.setLayer(layer);
                 meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());;
-                if((int)Constants.getLayersUsed().get(meas.getLayer())<1) {
+                if((int)Constants.getUsedLayers().get(meas.getLayer())<1) {
                     meas.notUsedInFit=true;
                 }
                 if(i>0 && KFSites.get(KFSites.size()-1).getLayer()==meas.getLayer()
@@ -619,7 +619,7 @@ public class RecUtilities {
             int layr2 = 0;
             if(c.get_Detector()==DetectorType.BMT) {
                 layr = c.getOrderedRegion()+3;
-                if((int)Constants.getLayersUsed().get(layr)>0) {
+                if((int)Constants.getUsedLayers().get(layr)>0) {
                     c.isInSeed = false;
                     //System.out.println("refit "+c.printInfo());
                     refib.add(c);
@@ -627,8 +627,8 @@ public class RecUtilities {
             } else {
                 layr = c.get_Cluster1().get_Layer();
                 layr2 = c.get_Cluster2().get_Layer();
-                if((int)Constants.getLayersUsed().get(layr)>0 
-                        && (int)Constants.getLayersUsed().get(layr2)>0) {
+                if((int)Constants.getUsedLayers().get(layr)>0 
+                        && (int)Constants.getUsedLayers().get(layr2)>0) {
                     c.updateSVTCross(null); 
                     c.isInSeed = false;
                     refi.add(c); 
@@ -705,15 +705,15 @@ public class RecUtilities {
             c.set_AssociatedTrackID(-1);
             if(c.get_Detector()==DetectorType.BMT) {
                 layr = c.getOrderedRegion()+3;
-                if((int)Constants.getLayersUsed().get(layr)>0) {
+                if((int)Constants.getUsedLayers().get(layr)>0) {
                     c.isInSeed = false;
                     refib.add(c);
                 }
             } else {
                 layr = c.get_Cluster1().get_Layer();
                 layr2 = c.get_Cluster2().get_Layer();
-                if((int)Constants.getLayersUsed().get(layr)>0 
-                        && (int)Constants.getLayersUsed().get(layr2)>0) {
+                if((int)Constants.getUsedLayers().get(layr)>0 
+                        && (int)Constants.getUsedLayers().get(layr2)>0) {
                     c.updateSVTCross(null);
                     c.isInSeed = false;
                    // System.out.println("refit "+c.printInfo());
@@ -759,7 +759,7 @@ public class RecUtilities {
             int layr2 = 0;
             if(c.get_Detector()==DetectorType.BMT) {
                 layr = c.getOrderedRegion()+3;
-                if((int)Constants.getLayersUsed().get(layr)>0) {
+                if((int)Constants.getUsedLayers().get(layr)>0) {
                     c.isInSeed = false;
                 //    System.out.println("refit "+c.printInfo());
                     refib.add(c);
@@ -767,8 +767,8 @@ public class RecUtilities {
             } else {
                 layr = c.get_Cluster1().get_Layer();
                 layr2 = c.get_Cluster2().get_Layer();
-                if((int)Constants.getLayersUsed().get(layr)>0 
-                        && (int)Constants.getLayersUsed().get(layr2)>0) {
+                if((int)Constants.getUsedLayers().get(layr)>0 
+                        && (int)Constants.getUsedLayers().get(layr2)>0) {
                     c.updateSVTCross(null);
                     c.isInSeed = false;
                    // System.out.println("refit "+c.printInfo());

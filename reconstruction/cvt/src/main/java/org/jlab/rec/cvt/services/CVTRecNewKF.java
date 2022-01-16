@@ -251,10 +251,10 @@ public class CVTRecNewKF extends ReconstructionEngine {
         //Skip layers
         String exLys = this.getEngineConfigString("excludeLayers");        
         if (exLys!=null)
-            System.out.println("["+this.getName()+"] run with layers "+exLys+"excluded in fit config chosen based on yaml");
+            System.out.println("["+this.getName()+"] run with layers "+exLys+" excluded in fit config chosen based on yaml");
         else
             System.out.println("["+this.getName()+"] run with all layer in fit (default) ");
-        Constants.setLayersUsed(exLys);
+        Constants.setUsedLayers(exLys);
         
         //Skip layers
         String exBMTLys = this.getEngineConfigString("excludeBMTLayers");        

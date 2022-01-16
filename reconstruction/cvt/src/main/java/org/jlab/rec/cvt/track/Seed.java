@@ -427,4 +427,14 @@ public class Seed implements Comparable<Seed>{
         seeds.removeAll(seeds);
         seeds.addAll(selectedSeeds);
     }
+    
+    @Override
+    public String toString() {
+        String str = String.format("Track id=%d, q=%d, omega=%.3f mm-1, d0=%.3f mm, phi=%.3f deg, dz=%.3f mm, tanL=%.3f, NDF=%d, chi2=%.3f, seed method=%d\n", 
+                     this.getId(), this.get_Helix().get_charge(), this.get_Helix().get_curvature(), this.get_Helix().get_dca(),
+                     Math.toDegrees(this.get_Helix().get_phi_at_dca()), this.get_Helix().get_Z0(), this.get_Helix().get_tandip(),
+                     this.getNDF(), this.getChi2(), this.get_Status());
+        for(Cross c: this.get_Crosses()) str = str + c.toString() + "\n";
+        return str;
+    }
 }

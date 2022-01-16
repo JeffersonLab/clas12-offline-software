@@ -61,7 +61,7 @@ public class CosmicTracksRec {
             return true;
         }
         
-        if(Constants.excludeLayers==true) {
+        if(Constants.EXCLUDELAYERS==true) {
             CosmicFitter fitTrk = new CosmicFitter();
             cosmicCands = recUtil.reFit(cosmicCands, fitTrk,  trkcandFinder);
         }

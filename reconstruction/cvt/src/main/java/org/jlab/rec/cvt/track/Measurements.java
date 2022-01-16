@@ -199,9 +199,10 @@ public class Measurements {
         for(Cluster cluster : clusters) {
             if(cluster.get_Detector()!=type) continue;
             int layer = cluster.get_Layer();
+            if(type==DetectorType.BMT) layer += SVTGeometry.NLAYERS;
             Surface measure = cluster.measurement();
             measure.hemisphere = Math.signum(cluster.center().y());
-            if((int)Constants.getLayersUsed().get(measure.getLayer())<1)
+            if((int)Constants.getUsedLayers().get(layer)<1)
                 measure.notUsedInFit=true;
             surfaces.add(measure);
         }
