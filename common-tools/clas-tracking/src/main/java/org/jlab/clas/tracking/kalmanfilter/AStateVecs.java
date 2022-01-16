@@ -302,6 +302,17 @@ public abstract class AStateVecs {
             this.updateHelix();
         }
 
+        public double[] subtractHelix(StateVec vec) {
+            double[] result = new double[5];
+            vec.setPivot(this.x0, this.y0, this.z0);
+            result[0] = this.d_rho-vec.d_rho;
+            result[1] = this.phi0-vec.phi0;
+            result[2] = this.kappa-vec.kappa;
+            result[3] = this.dz-vec.dz;
+            result[4] = this.tanL-vec.tanL;
+            return result;
+        }
+        
         public void updateHelix(double x, double y, double z, double px, double py, double pz, double alpha) {
             this.x = x;
             this.y = y;
