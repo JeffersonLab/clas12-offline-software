@@ -18,8 +18,8 @@ public class HelicalTrackFitter {
     private Helix _helix;  // fit helix
     private double[] _chisq = new double[2];  // fit chi-squared [0]: circle [1] line
 
-    private CircleCalculator _circlecalc = new CircleCalculator();
-    private CircleFitter _circlefit = new CircleFitter();
+    private CircleCalculator _circlecalc;
+    private CircleFitter _circlefit;
     private LineFitter _linefit = new LineFitter();
     private CircleCalcPars _circlecalcpars;
     private CircleFitPars _circlefitpars;
@@ -61,7 +61,7 @@ public class HelicalTrackFitter {
     private final List<Double> P1 = new ArrayList<>(2);
     private final List<Double> P2 = new ArrayList<>(2);
 
-    public FitStatus fit(List<Double> X, List<Double> Y, List<Double> Z, List<Double> Rho, List<Double> errRt, List<Double> errRho, List<Double> ErrZ) {
+    public FitStatus fit(List<Double> X, List<Double> Y, List<Double> Z, List<Double> Rho, List<Double> errRt, List<Double> errRho, List<Double> ErrZ, double xb, double yb) {
         //  Initialize the various fitter outputs
         _circlefitpars = null;
         _linefitpars = null;
@@ -83,7 +83,7 @@ public class HelicalTrackFitter {
 
         // fit the points 
         // check the status
-        _circlefit = new CircleFitter();
+        _circlefit = new CircleFitter(xb, yb);
         boolean circlefitstatusOK = _circlefit.fitStatus(X, Y, W, X.size());
 
         if (!circlefitstatusOK) { 
@@ -205,8 +205,8 @@ public class HelicalTrackFitter {
         if(fit_curvature==0) {
             return FitStatus.CircleFitFailed;
         }
-        Helix helixresult = new Helix(fit_dca, fit_phi_at_dca, fit_curvature, fit_Z0, fit_tandip, fit_covmatrix);
-
+        Helix helixresult = new Helix(fit_dca, fit_phi_at_dca, fit_curvature, fit_Z0, fit_tandip, xb, yb, fit_covmatrix);
+        
         set_helix(helixresult);
         _chisq[0] = _circlefitpars.chisq();
         _chisq[1] = _linefitpars.chisq();

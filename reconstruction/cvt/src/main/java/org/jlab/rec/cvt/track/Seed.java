@@ -192,8 +192,7 @@ public class Seed implements Comparable<Seed>{
     }
     
 
-    public boolean fit(int fitIter, boolean originConstraint,
-            double bfield) {
+    public boolean fit(int fitIter, double xb, double yb, double bfield) {
         
         List<Double> X = new ArrayList<>();
         List<Double> Y = new ArrayList<>();
@@ -247,15 +246,6 @@ public class Seed implements Comparable<Seed>{
          
         HelicalTrackFitter fitTrk = new HelicalTrackFitter();
         for (int i = 0; i < fitIter; i++) {
-            //	if(originConstraint==true) {
-            //		X.add(0, (double) 0);
-            //		Y.add(0, (double) 0);
-            //		Z.add(0, (double) 0);
-            //		Rho.add(0, (double) 0);
-            //		ErrRt.add(0, (double) org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT);
-            //		ErrZ.add(0, (double) org.jlab.rec.cvt.svt.Constants.ZVTXCONSTRAINT);		
-            //		ErrRho.add(0, (double) org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT);										
-            //	}
             X.clear();
             Y.clear();
             Z.clear();
@@ -296,12 +286,11 @@ public class Seed implements Comparable<Seed>{
                     ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_PointErr().z());
                 }
             }
-            X.add((double) Constants.getXb());
-            Y.add((double) Constants.getYb());
-
+            X.add(xb);
+            Y.add(yb);
             ErrRt.add((double) 0.1);
             
-            FitStatus fitStatus = fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
+            FitStatus fitStatus = fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ, xb, yb);
             
             if (fitStatus!=FitStatus.Successful || fitTrk.get_helix() == null) { 
                 return false;

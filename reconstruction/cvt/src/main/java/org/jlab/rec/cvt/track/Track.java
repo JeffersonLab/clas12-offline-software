@@ -64,7 +64,8 @@ public class Track extends Trajectory implements Comparable<Track> {
 
     public Track(Seed seed, org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf) {
         super(new Helix(kf.KFHelix.getD0(), kf.KFHelix.getPhi0(), kf.KFHelix.getOmega(), 
-                        kf.KFHelix.getZ0(), kf.KFHelix.getTanL()));
+                        kf.KFHelix.getZ0(), kf.KFHelix.getTanL(), 
+                        kf.KFHelix.getXb(), kf.KFHelix.getYb()));
         this.get_helix().B = kf.KFHelix.getB();
         this.kfIterations = kf.numIter;
         double c = Constants.LIGHTVEL;

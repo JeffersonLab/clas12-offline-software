@@ -114,6 +114,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
         IndexedTable svtStatus = this.getConstantsManager().getConstants(this.getRun(), "/calibration/svt/status");
         IndexedTable bmtStatus = this.getConstantsManager().getConstants(this.getRun(), "/calibration/mvt/bmt_status");
         IndexedTable bmtTime   = this.getConstantsManager().getConstants(this.getRun(), "/calibration/mvt/bmt_time");
+        IndexedTable beamPos   = this.getConstantsManager().getConstants(this.getRun(), "/geometry/beam/position");
 
         HitReader hitRead = new HitReader();
         hitRead.fetch_SVTHits(event, adcConv, -1, -1, svtStatus);
@@ -185,8 +186,10 @@ public class CVTRecNewKF extends ReconstructionEngine {
             strgtTrksRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
                     crosses, rbc, swimmer);
         } else {
-            trksFromTargetRec.processEvent(event,SVThits, BMThits, SVTclusters, BMTclusters, 
-                crosses, rbc, swimmer);
+            double xb = beamPos.getDoubleValue("x_offset", 0, 0, 0);
+            double yb = beamPos.getDoubleValue("y_offset", 0, 0, 0);
+            trksFromTargetRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
+                crosses, xb , yb, rbc, swimmer);
         }
         return true;
     }
@@ -307,7 +310,8 @@ public class CVTRecNewKF extends ReconstructionEngine {
         String[] tables = new String[]{
             "/calibration/svt/status",
             "/calibration/mvt/bmt_time",
-            "/calibration/mvt/bmt_status"
+            "/calibration/mvt/bmt_status",
+            "/geometry/beam/position"
         };
         requireConstants(Arrays.asList(tables));
         this.getConstantsManager().setVariation("default");

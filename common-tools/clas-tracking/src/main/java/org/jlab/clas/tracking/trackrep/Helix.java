@@ -19,11 +19,9 @@ public class Helix {
     private double _omega;
     private double _z0;
     private double _tanL;
-    private int _turningSign;
-    
-    private double tFlightLen = 0;
+    private int    _turningSign;
     private double _R;
-    
+        
     private double _xd; 
     private double _yd;
     private double _xc;
@@ -37,7 +35,9 @@ public class Helix {
     private double _py;
     private double _pz;
     
-    public Units units = Units.CM; //default
+    private Units units = Units.CM; //default
+    
+    public final static double LIGHTVEL = 0.0000299792458;       // velocity of light - conversion factor from radius in cm to momentum in GeV/c 
     
     public Helix() {
         
@@ -45,38 +45,34 @@ public class Helix {
     
     public Helix(double d0, double phi0, double omega, double z0, double tanL,
             int turningSign, double B, double xb, double yb, Units unit) {
-        _d0             = d0;
-        _phi0           = phi0;
-        _cosphi0 = Math.cos(phi0);
-        _sinphi0 = Math.sin(phi0);
-        _omega          = omega;
-        _z0             = z0;
-        _tanL           = tanL;
-        _turningSign    = turningSign;
-        _B              = B;
-        _xb = xb;
-        _yb = yb;
-        this.units = unit;
-        this.setUnitScale(unit.unit);
-        setLIGHTVEL(LIGHTVEL*unit.unit);
-        this.Update();
+        _d0          = d0;
+        _phi0        = phi0;
+        _cosphi0     = Math.cos(phi0);
+        _sinphi0     = Math.sin(phi0);
+        _omega       = omega;
+        _z0          = z0;
+        _tanL        = tanL;
+        _turningSign = turningSign;
+        _B           = B;
+        _xb          = xb;
+        _yb          = yb;
+        units        = unit;
+        this.update();
     }
     
     public Helix(double x0, double y0, double z0, double px0, double py0, double pz0,
             int q, double B, double xb, double yb, Units unit) {
         _turningSign = q;
-        _B = B;
-        double pt = Math.sqrt(px0*px0 + py0*py0);
-        this.units = unit;
-        setUnitScale(unit.unit);
-        setLIGHTVEL(LIGHTVEL*unit.unit);
-        _R = pt/(B*LIGHTVEL*unit.unit);
-        _cosphi0 = px0/pt;
-        _sinphi0 = py0/pt;
-        _phi0 = Math.atan2(py0, px0);
-        _tanL = pz0/pt;
-        _z0 = z0;
-        _omega = (double) -_turningSign/_R;
+        _B           = B;
+        units        = unit;
+        double pt    = Math.sqrt(px0*px0 + py0*py0);
+        _R           = pt/(B*this.getLightVelocity());
+        _cosphi0     = px0/pt;
+        _sinphi0     = py0/pt;
+        _phi0        = Math.atan2(py0, px0);
+        _tanL        = pz0/pt;
+        _z0          = z0;
+        _omega       = (double) -_turningSign/_R;
         double S = Math.sin(_phi0);
         double C = Math.cos(_phi0);
         if(Math.abs(S)>=Math.abs(C)) {
@@ -86,202 +82,161 @@ public class Helix {
         }
         _xb = xb;
         _yb = yb;
-        this.Update();
+        this.update();
     }
     
+    
+    public Units getUnits() {
+        return this.units;
+    }
+
+    public final double getLightVelocity() {
+        return LIGHTVEL*units.unit;
+    }    
+        
+    public void reset(double d0, double phi0, double omega, double z0, double tanL, double B){
+        _d0          = d0;
+        _phi0        = phi0;
+        _cosphi0     = Math.cos(phi0);
+        _sinphi0     = Math.sin(phi0);
+        _omega       = omega;
+        _z0          = z0;
+        _tanL        = tanL;
+        _B           = B;
+        this.update();
+    }
+    
+    public final void update() {
+        setR(1./Math.abs(getOmega()));
+        _xd = -getD0()*getSinphi0()+_xb;
+        _yd =  getD0()*getCosphi0()+_yb;
+        _xc = -(_turningSign*_R + _d0)*getSinphi0()+_xb;
+        _yc =  (_turningSign*_R + _d0)*getCosphi0()+_yb;
+        _x  = getX(0);
+        _y  = getY(0);
+        _z  = getZ(0);
+        _px = getPx(getB(), 0);
+        _py = getPy(getB(), 0);
+        _pz = getPz(getB()); 
+    }
+    
+    public double getB() {
+        return _B;
+    }
+
+    public double getD0() {
+        return _d0;
+    }
+
+    public double getPhi0() {
+        return _phi0;
+    }
+
+    public double getCosphi0() {
+        return _cosphi0;
+    }
+
+    public double getSinphi0() {
+        return _sinphi0;
+    }
+
+    public double getOmega() {
+        return _omega;
+    }
+
+    public double getZ0() {
+        return _z0;
+    }
+
+    public double getTanL() {
+        return _tanL;
+    }
+
+    public int getTurningSign() {
+        return _turningSign;
+    }
+
+    public double getR() {
+        return _R;
+    }
+
+    public void setR(double _R) {
+        this._R = _R;
+    }
+
+
+    public double getXc() {
+        return _xc;
+    }
+
+    public double getYc() {
+        return _yc;
+    }
+
+    public double getXb() {
+        return _xb;
+    }
+
+    public double getYb() {
+        return _yb;
+    }
+
     public double getPhi(double l) {
         return getPhi0() + getOmega()*l;
     }
     
     public double getPt(double B) {
-        return getLIGHTVEL() * getR() * B;
+        return getLightVelocity() * getR() * B;
     }
+    
     public double getX(double l){
         return getXc() + getTurningSign()*getR()*Math.sin(getPhi(l));
     }
+    
     public double getY(double l){
         return getYc() - getTurningSign()*getR()*Math.cos(getPhi(l));
     }
+    
     public double getZ(double l){
         return getZ0() -l*getTanL();
     }
+    
     public double getPx(double B, double l) {
         return getPt(B) * Math.cos(getPhi(l));
     }
+    
     public double getPy(double B, double l) {
         return getPt(B) * Math.sin(getPhi(l));
     }
+    
     public double getPz(double B) {
         return getPt(B)*getTanL();
     }
-    
-    /**
-     * @return the _B
-     */
-    public double getB() {
-        return _B;
+
+    public double getX() {
+        return this.getX(0);
     }
 
-    /**
-     * @param _B the _B to set
-     */
-    public void setB(double _B) {
-        this._B = _B;
+    public double getY() {
+        return this.getY(0);
     }
 
-    /**
-     * @return the _d0
-     */
-    public double getD0() {
-        return _d0;
+    public double getZ() {
+        return this.getZ(0);
     }
 
-    /**
-     * @param _d0 the _d0 to set
-     */
-    public void setD0(double _d0) {
-        this._d0 = _d0;
+    public double getPx() {
+        return this.getPx(this.getB(), 0);
     }
 
-    /**
-     * @return the _phi0
-     */
-    public double getPhi0() {
-        return _phi0;
+    public double getPy() {
+        return this.getPy(this.getB(), 0);
     }
 
-    /**
-     * @param _phi0 the _phi0 to set
-     */
-    public void setPhi0(double _phi0) {
-        this._phi0 = _phi0;
+    public double getPz() {
+        return this.getPz(this.getB());
     }
 
-    /**
-     * @return the _cosphi0
-     */
-    public double getCosphi0() {
-        return _cosphi0;
-    }
-
-    /**
-     * @param _cosphi0 the _cosphi0 to set
-     */
-    public void setCosphi0(double _cosphi0) {
-        this._cosphi0 = _cosphi0;
-    }
-
-    /**
-     * @return the _sinphi0
-     */
-    public double getSinphi0() {
-        return _sinphi0;
-    }
-
-    /**
-     * @param _sinphi0 the _sinphi0 to set
-     */
-    public void setSinphi0(double _sinphi0) {
-        this._sinphi0 = _sinphi0;
-    }
-
-    /**
-     * @return the _omega
-     */
-    public double getOmega() {
-        return _omega;
-    }
-
-    /**
-     * @param _omega the _omega to set
-     */
-    public void setOmega(double _omega) {
-        this._omega = _omega;
-    }
-
-    /**
-     * @return the _z0
-     */
-    public double getZ0() {
-        return _z0;
-    }
-
-    /**
-     * @param _z0 the _z0 to set
-     */
-    public void setZ0(double _z0) {
-        this._z0 = _z0;
-    }
-
-    /**
-     * @return the _tanL
-     */
-    public double getTanL() {
-        return _tanL;
-    }
-
-    /**
-     * @param _tanL the _tanL to set
-     */
-    public void setTanL(double _tanL) {
-        this._tanL = _tanL;
-    }
-
-    /**
-     * @return the _turningSign
-     */
-    public int getTurningSign() {
-        return _turningSign;
-    }
-
-    /**
-     * @param _turningSign the _turningSign to set
-     */
-    public void setTurningSign(int _turningSign) {
-        this._turningSign = _turningSign;
-    }
-
-    /**
-     * @return the _R
-     */
-    public double getR() {
-        return _R;
-    }
-
-    /**
-     * @param _R the _R to set
-     */
-    public void setR(double _R) {
-        this._R = _R;
-    }
-
-    public void Reset(double d0, double phi0, double omega, double z0, double tanL,
-            double B){
-        setD0(d0);
-        setPhi0(phi0);
-        setCosphi0(Math.cos(phi0));
-        setSinphi0(Math.sin(phi0));
-        setOmega(omega);
-        setZ0(z0);
-        setTanL(tanL);
-        setB(B);
-        
-        this.Update();
-    }
-    public void Update() {
-        setR(1./Math.abs(getOmega()));
-        _xd = -getD0()*getSinphi0()+_xb;
-        _yd =  getD0()*getCosphi0()+_yb;
-        setXc(-(_turningSign*_R + _d0)*getSinphi0()+_xb);
-        setYc((_turningSign*_R + _d0)*getCosphi0()+_yb);
-        setX(getX(tFlightLen));
-        setY(getY(tFlightLen));
-        setZ(getZ(tFlightLen));
-        setPx(getPx(getB(), tFlightLen));
-        setPy(getPy(getB(), tFlightLen));
-        setPz(getPz(getB())); 
-    }
-    
     public double getLAtPlane(double X1, double Y1, double X2, double Y2, 
             double tolerance) {
         // Find the intersection of the helix circle with the module plane projection in XY which is a line
@@ -369,17 +324,13 @@ public class Helix {
         double l = getLAtPlane(X1, Y1, X2, Y2, tolerance);
         return new Point3D(getX(l),getY(l),getZ(l));
     }
+    
     public Vector3D getMomentumAtPlane(double X1, double Y1, double X2, double Y2, 
             double tolerance) {
         double l = getLAtPlane(X1, Y1, X2, Y2, tolerance);
         return new Vector3D(getPx(getB(),l),getPy(getB(),l),getPz(getB()));
     }
     
-    /**
-     * 
-     * @param r radius
-     * @return Computes intersection of helix with circle centered at 0 and of radius R
-     */
     public double getLAtR(double r) {
         
         double x;
@@ -432,214 +383,59 @@ public class Helix {
         
         return dphi/getOmega();
     }
+    
     public Point3D getHelixPointAtR(double r) {
         double l = getLAtR( r);
         return new Point3D(getX(l),getY(l),getZ(l));
     }
+    
     public Vector3D getMomentumAtR(double r) {
         double l = getLAtR( r);
         return new Vector3D(getPx(getB(),l),getPy(getB(),l),getPz(getB()));
     }
+    
     public double getLAtZ(double z) {
         return (z - getZ0())/getTanL();
     }
+    
     public Point3D getHelixPointAtZ(double z) {
         double l = getLAtZ( z);
         return new Point3D(getX(l),getY(l),z);
     }
+    
     public Vector3D getMomentumAtZ(double z) {
         double l = getLAtZ( z);
         return new Vector3D(getPx(getB(),l),getPy(getB(),l),getPz(getB()));
     }
-    /**
-     * @return the _x
-     */
-    public double getX() {
-        return _x;
-    }
-
-    /**
-     * @param _x the _x to set
-     */
-    public void setX(double _x) {
-        this._x = _x;
-    }
-
-    /**
-     * @return the _y
-     */
-    public double getY() {
-        return _y;
-    }
-
-    /**
-     * @param _y the _y to set
-     */
-    public void setY(double _y) {
-        this._y = _y;
-    }
-
-    /**
-     * @return the _z
-     */
-    public double getZ() {
-        return _z;
-    }
-
-    /**
-     * @param _z the _z to set
-     */
-    public void setZ(double _z) {
-        this._z = _z;
-    }
-
-    /**
-     * @return the _px
-     */
-    public double getPx() {
-        return _px;
-    }
-
-    /**
-     * @param _px the _px to set
-     */
-    public void setPx(double _px) {
-        this._px = _px;
-    }
-
-    /**
-     * @return the _py
-     */
-    public double getPy() {
-        return _py;
-    }
-
-    /**
-     * @param _py the _py to set
-     */
-    public void setPy(double _py) {
-        this._py = _py;
-    }
-
-    /**
-     * @return the _pz
-     */
-    public double getPz() {
-        return _pz;
-    }
-
-    /**
-     * @param _pz the _pz to set
-     */
-    public void setPz(double _pz) {
-        this._pz = _pz;
-    }
-
-    /**
-     * @return the _xc
-     */
-    public double getXc() {
-        return _xc;
-    }
-
-    /**
-     * @param _xc the _xc to set
-     */
-    public void setXc(double _xc) {
-        this._xc = _xc;
-    }
-
-    /**
-     * @return the _yc
-     */
-    public double getYc() {
-        return _yc;
-    }
-
-    /**
-     * @param _yc the _yc to set
-     */
-    public void setYc(double _yc) {
-        this._yc = _yc;
-    }
-
-    /**
-     * @return the _xb
-     */
-    public double getXb() {
-        return _xb;
-    }
-
-    /**
-     * @param _xb the _xb to set
-     */
-    public void setXb(double _xb) {
-        this._xb = _xb;
-    }
-
-    /**
-     * @return the _yb
-     */
-    public double getYb() {
-        return _yb;
-    }
-
-    /**
-     * @param _yb the _yb to set
-     */
-    public void setYb(double _yb) {
-        this._yb = _yb;
-    }
-    
     
     public enum Units {
         MM (10.0),
-        CM   (1.0);
+        CM  (1.0);
 
         private final double unit;  
+        
         Units(double unit) {
             this.unit = unit;
         }
-        private double unit() { return unit; }
-    }
-    
-    /**
-     * @return the unitScale
-     */
-    public double getUnitScale() {
-        return unitScale;
-    }
-
-    /**
-     * @param aUnitScale the unitScale to set
-     */
-    public void setUnitScale(double aUnitScale) {
-        unitScale = aUnitScale;
+        
+        public double unit() { 
+            return unit; 
+        }
+        
+        public static Units getUnit(double value) {
+            for (Units unit : Units.values()) {
+                if (unit.unit == value) {
+                    return unit;
+                }
+            }
+            return Units.CM;
+        }
     }
 
-    /**
-     * @return the LightVel
-     */
-    public double getLIGHTVEL() {
-        return LightVel;
-    }
-
-    /**
-     * @param aLIGHTVEL the LightVel to set
-     */
-    public void setLIGHTVEL(double aLIGHTVEL) {
-        LightVel = aLIGHTVEL;
-    }
-
-    public static final double LIGHTVEL = 0.0000299792458;       // velocity of light (um/ns) - conversion factor from radius in cm to momentum in GeV/c 
-    
-    private static double LightVel = 0.0000299792458;       // velocity of light (um/ns) - conversion factor from radius in cm to momentum in GeV/c 
-    private static double unitScale = 1;
-    
     @Override
     public String toString() {
         String s = String.format("    drho=%.4f phi0=%.4f radius=%.4f z0=%.4f tanL=%.4f B=%.4f\n", this._d0, this._phi0, this._R, this._z0, this._tanL, this._B);
-        s       += String.format("    phi=%.4f x=%.4f y=%.4f z=%.4f px=%.4f py=%.4f pz=%.4f", this.tFlightLen, this._x, this._y, this._z, this._px, this._py, this._pz);
+        s       += String.format("    x0=%.4f y0=%.4f x=%.4f y=%.4f z=%.4f px=%.4f py=%.4f pz=%.4f", this._xb, this._yb, this._x, this._y, this._z, this._px, this._py, this._pz);
         return s;
     }
 }

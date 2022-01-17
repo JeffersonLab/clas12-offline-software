@@ -17,13 +17,17 @@ import org.jlab.rec.cvt.svt.SVTGeometry;
 public class TrackSeederCA {
     SVTGeometry sgeo = Constants.SVTGEOMETRY;
     BMTGeometry bgeo = Constants.BMTGEOMETRY;
+    double xbeam;
+    double ybeam;
     double bfield;
     
     
-    public TrackSeederCA(Swim swimmer) {
+    public TrackSeederCA(Swim swimmer, double xb, double yb) {
         float[] b = new float[3];
         swimmer.BfieldLab(0, 0, 0, b);
-        this.bfield = Math.abs(b[2]);        
+        this.bfield = Math.abs(b[2]);  
+        this.xbeam  = xb;
+        this.ybeam  = yb;
     }
 
 
@@ -120,7 +124,7 @@ public class TrackSeederCA {
       		  if( cand.get(0).get_plane().equalsIgnoreCase("XY")) {
 	  			  if( candlen > 2 ){
                                       Seed seed = new Seed(getCrossFromCells(cand));
-	  				  if(seed.fit(2, false, bfield)) {
+	  				  if(seed.fit(2, xbeam, ybeam, bfield)) {
 	  					  cellCands.add(cand);
 	  					  
 	  					  for( Cell n : cand ) {
@@ -237,7 +241,7 @@ public class TrackSeederCA {
 //	    	Collections.sort(seedCrosses.get(s));      // TODO: check why sorting matters
 //                Track cand = fit(seedCrosses.get(s), svt_geo, bmt_geo, Constants.SEEDFITITERATIONS, false, swimmer);
                 Seed candSeed = new Seed(seedCrosses.get(s));
-                boolean fitStatus = candSeed.fit(Constants.SEEDFITITERATIONS, false, bfield);
+                boolean fitStatus = candSeed.fit(Constants.SEEDFITITERATIONS, xbeam, ybeam, bfield);
                 if (fitStatus && candSeed.isGood()) {
                     cands.add(candSeed);
                 }

@@ -27,6 +27,8 @@ public class Helix {
     private double _Z0;           // intersect of the helix axis with the z-axis
     private double _tandip;       // tangent of the dip angle
     private double[][] _covmatrix = new double[5][5];
+    private double xb;
+    private double yb;
     //error matrix (assuming that the circle fit and line fit parameters are uncorrelated)
     // | d_dca*d_dca                   d_dca*d_phi_at_dca            d_dca*d_curvature        0            0             |
     // | d_phi_at_dca*d_dca     d_phi_at_dca*d_phi_at_dca     d_phi_at_dca*d_curvature        0            0             |
@@ -35,23 +37,38 @@ public class Helix {
     // | 0                              0                             0                       0        d_tandip*d_tandip |
     // 
 
-    public Helix(double dca, double phi_at_doca, double curvature, double Z0, double tandip, double[][] covmatrix) {
-        set_dca(dca);
-        set_phi_at_dca(phi_at_doca);
-        set_curvature(curvature);
-        set_Z0(Z0);
-        set_tandip(tandip);
+    public Helix(double dca, double phi_at_doca, double curvature, double Z0, double tandip, double xb, double yb, double[][] covmatrix) {
+        this(dca, phi_at_doca, curvature, Z0, tandip, xb, yb);
         set_covmatrix(covmatrix);
     }
     
-    public Helix(double dca, double phi_at_doca, double curvature, double Z0, double tandip ) {
+    public Helix(double dca, double phi_at_doca, double curvature, double Z0, double tandip, double xb, double yb) {
         set_dca(dca);
         set_phi_at_dca(phi_at_doca);
         set_curvature(curvature);
         set_Z0(Z0);
         set_tandip(tandip);
+        setXb(xb);
+        setYb(yb);
     }
 
+    public double getXb() {
+        return xb;
+    }
+
+    public final void setXb(double xb) {
+        this.xb = xb;
+    }
+
+    public double getYb() {
+        return yb;
+    }
+
+    public final void setYb(double yb) {
+        this.yb = yb;
+    }
+
+    
     public double get_dca() {
         return _dca;
     }
@@ -149,7 +166,7 @@ public class Helix {
     }
 
     public Point3D getVertex() {
-        return new Point3D(this.xdca(),this.ydca(),this.get_Z0());
+        return new Point3D(this.xdca()+this.getXb(),this.ydca()+this.getYb(),this.get_Z0());
     }
         
     public double getPt(double solenoidMag) { 

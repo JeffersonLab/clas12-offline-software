@@ -8,6 +8,7 @@ import org.jlab.clas.tracking.kalmanfilter.AMeasVecs;
 import org.jlab.clas.tracking.kalmanfilter.AStateVecs;
 import org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.clas.tracking.trackrep.Helix.Units;
 import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
 
 /**
@@ -29,7 +30,7 @@ public class KFitter extends AKFitter {
         this.runFitter(sv, mv);
     }
     
-    public void init(double x0, double z0,double tx,double tz, double units, double[][] cov, List<Surface> measSurfaces) {
+    public void init(double x0, double z0,double tx,double tz, Units units, double[][] cov, List<Surface> measSurfaces) {
         finalStateVec = null;
         this.NDF0 = -4;
         this.NDF  = -4;

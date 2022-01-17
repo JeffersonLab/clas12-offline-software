@@ -29,25 +29,23 @@ public class Measurements {
                                          BMTGeometry.NLAYERS;
     private boolean cosmic = false;
     private Surface[] cvtSurfaces;
-    private Swim swimmer = null;
     private boolean debug = false;
     
-    public Measurements(boolean cosmic, Swim swimmer) {
+    public Measurements(boolean cosmic, double xbeam, double ybeam) {
         this.cosmic  = cosmic;
-        this.swimmer = swimmer;
-        this.init();
+        this.init(xbeam, ybeam);
     }
     
-    private void init() {
+    private void init(double xbeam, double ybeam) {
         if(this.cosmic)
             this.initCosmicSurfaces();
         else
-            this.initTargetSurfaces();
+            this.initTargetSurfaces(xbeam, ybeam);
     }
     
-    private void initTargetSurfaces() {
+    private void initTargetSurfaces(double xbeam, double ybeam) {
         cvtSurfaces = new Surface[NSURFACES+1];
-        this.add(CVTLayer.TARGET.getIndex(),       this.getTarget());
+        this.add(CVTLayer.TARGET.getIndex(),       this.getTarget(xbeam, ybeam));
         this.add(CVTLayer.SHIELD.getIndex(),       Constants.SVTGEOMETRY.getShieldSurface());
         this.add(CVTLayer.INNERSVTCAGE.getIndex(), Constants.SVTGEOMETRY.getFaradayCageSurfaces(0));
         this.add(CVTLayer.OUTERSVTCAGE.getIndex(), Constants.SVTGEOMETRY.getFaradayCageSurfaces(1)); 
@@ -85,9 +83,9 @@ public class Measurements {
             return id.getIndex(hemisphere);
     }
 
-    private Surface getTarget() {
+    private Surface getTarget(double xbeam, double ybeam) {
         Vector3D u = new Vector3D(0,0,1);
-        Point3D  p = new Point3D(Constants.getXb(),Constants.getYb(),0);
+        Point3D  p = new Point3D(xbeam, ybeam, 0);
         Line3D   l = new Line3D(p, u);
         Surface target = new Surface(l.origin(), l.end(), Constants.DEFAULTSWIMACC);
         target.setError(Constants.getRbErr());

@@ -82,8 +82,6 @@ public class Constants {
     public static final double CTOFINNERRADIUS = 250;     // 250 mm
     public static final double CTOFOUTRRADIUS = 250 + 33;  // 283  mm
     
-    private static double _Xb =0;
-    private static double _Yb =0;
     private static double _RbErr = 0.3; // mm
     
     private static double _Zoffset = 0;
@@ -100,22 +98,6 @@ public class Constants {
     public static CTOFGeant4Factory CTOFGEOMETRY = null;
     public static Detector          CNDGEOMETRY  = null;
     public static List<Surface>     CVTSURFACES  = null;
-    
-    public static double getXb() {
-        return _Xb;
-    }
-
-    public static synchronized void setXb(double Xb) {
-        _Xb = Xb;
-    }
-
-    public static double getYb() {
-        return _Yb;
-    }
-
-    public static synchronized void setYb(double Yb) {
-        _Yb = Yb;
-    }
 
     public static double getRbErr() {
         return _RbErr;

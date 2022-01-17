@@ -3,9 +3,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.straight.KFitter;
+import org.jlab.clas.tracking.trackrep.Helix.Units;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
-import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataEvent;
@@ -84,7 +83,7 @@ public class CosmicTracksRec {
             recUtil.CleanupSpuriousCrosses(crosses, null) ;
             
             KFitter kf = new KFitter(Constants.KFFILTERON, Constants.KFITERATIONS, Constants.kfBeamSpotConstraint(), Constants.kfMatLib);
-            Measurements measures = new Measurements(true, null);
+            Measurements measures = new Measurements(true, 0, 0);
             List<StraightTrack> cosmics = new ArrayList<>();
             for (int k1 = 0; k1 < cosmicCands.size(); k1++) {
                 Ray ray = cosmicCands.get(k1).get_ray();
@@ -103,7 +102,7 @@ public class CosmicTracksRec {
                 cov[3][3]=0.001;
                 cov[4][4]=1;
                 kf.init(ray.get_yxinterc(),ray.get_yzinterc(),
-                        ray.get_yxslope(), ray.get_yzslope(), 10.0, cov,
+                        ray.get_yxslope(), ray.get_yzslope(), Units.MM, cov,
                         measures.getMeasurements(cosmicCands.get(k1)));
                 kf.mv.setDelta_d_a(new double[]{0.1, 0.1, 0.0001, 0.0001, 1});
                 kf.runFitter();
@@ -133,7 +132,7 @@ public class CosmicTracksRec {
                         cosmic.addAll(pseudoCrosses); //VZ check for additional clusters, and only then re-run KF adding new clusters                    
                         //refit
                         kf.init(cosmic.get_ray().get_yxinterc(),cosmic.get_ray().get_yzinterc(),
-                                cosmic.get_ray().get_yxslope(), cosmic.get_ray().get_yzslope(), 10.0, cov,
+                                cosmic.get_ray().get_yxslope(), cosmic.get_ray().get_yzslope(), Units.CM, cov,
                                 measures.getMeasurements(cosmicCands.get(k1))) ;
                         kf.runFitter();
                         if (kf.setFitFailed == false && kf.NDF>0 && kf.finalStateVec!=null) { 

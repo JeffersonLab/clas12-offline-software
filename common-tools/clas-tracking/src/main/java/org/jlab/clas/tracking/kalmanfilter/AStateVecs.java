@@ -9,12 +9,12 @@ import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs.MeasVec;
 import org.jlab.clas.tracking.kalmanfilter.helical.KFitter;
 import org.jlab.clas.tracking.trackrep.Helix;
+import org.jlab.clas.tracking.trackrep.Helix.Units;
 import org.jlab.geom.prim.Point3D;
 
 public abstract class AStateVecs {
 
-    public Helix util;
-    public double units;
+    public Units units;
     public double lightVel;
 
     public double xref;
@@ -29,7 +29,7 @@ public abstract class AStateVecs {
 
     public abstract void init(Helix trk, double[][] cov, double xref, double yref, double zref, Swim swimmer);
 
-    public abstract void init(double x0, double z0, double tx, double tz, double units, double[][] cov);
+    public abstract void init(double x0, double z0, double tx, double tz, Units units, double[][] cov);
 
     public abstract boolean setStateVecPosAtMeasSite(StateVec vec, MeasVec mv, Swim swimmer);
 
@@ -324,31 +324,22 @@ public abstract class AStateVecs {
             this.updateHelix();
         }
 
-        public Helix getOldHelix() {
-            Helix helix = new Helix();
-            this.toOldHelix(helix);
+        public Helix getHelix(double xref, double yref) {
+            StateVec vec = new StateVec(0, xref, yref, 0, this);
+
+            int turningSign = (int) Math.signum(vec.kappa) * KFitter.polarity;
+            double bfield   = 1 / vec.alpha / lightVel;
+            double R        = vec.alpha / Math.abs(vec.kappa);
+            double phi0     = vec.phi0 + Math.PI / 2;
+            if (Math.abs(phi0) > Math.PI) phi0 -= Math.signum(phi0) * 2 * Math.PI;
+            double tanDip   = vec.tanL;
+            double z0       = vec.z0 + vec.dz;
+            double omega    = -turningSign / R;
+            double d0       = -vec.d_rho;
+            
+            Helix helix = new Helix(d0, phi0, omega, z0, tanDip, turningSign, bfield, xref, yref, units);
+            
             return helix;
-        }
-
-        public void toOldHelix(Helix helix) {
-            StateVec vec = new StateVec(0, helix.getXb(), helix.getYb(), 0, this);
-            vec.updateHelix();
-
-            helix.setTurningSign((int) Math.signum(vec.kappa) * KFitter.polarity);
-            helix.setB(1 / vec.alpha / helix.getLIGHTVEL());
-            helix.setR(vec.alpha / Math.abs(vec.kappa));
-            double hphi0 = vec.phi0 + Math.PI / 2;
-            if (Math.abs(hphi0) > Math.PI) {
-                hphi0 -= Math.signum(hphi0) * 2 * Math.PI;
-            }
-            helix.setPhi0(hphi0);
-            helix.setTanL(vec.tanL);
-            helix.setZ0(z0 + vec.dz);
-            helix.setOmega(-helix.getTurningSign() / helix.getR());
-            helix.setCosphi0(Math.cos(helix.getPhi0()));
-            helix.setSinphi0(Math.sin(helix.getPhi0()));
-            helix.setD0(-vec.d_rho);
-            helix.Update();
         }
         
         public void updateRay() {
@@ -444,7 +435,7 @@ public abstract class AStateVecs {
             this.y = y;
             this.z = z;
 
-            swimmer.BfieldLab(x / units, y / units, z / units, b);
+            swimmer.BfieldLab(x / units.unit(), y / units.unit(), z / units.unit(), b);
             this.Bx = b[0];
             this.By = b[1];
             this.Bz = b[2];
@@ -453,7 +444,7 @@ public abstract class AStateVecs {
         }
 
         public void set() {
-            swimmer.BfieldLab(x / units, y / units, z / units, b);
+            swimmer.BfieldLab(x / units.unit(), y / units.unit(), z / units.unit(), b);
             this.Bx = b[0];
             this.By = b[1];
             this.Bz = b[2];

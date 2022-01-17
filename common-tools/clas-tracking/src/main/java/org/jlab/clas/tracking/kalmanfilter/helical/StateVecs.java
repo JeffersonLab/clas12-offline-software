@@ -6,6 +6,7 @@ import org.jlab.clas.tracking.kalmanfilter.AMeasVecs;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs.MeasVec;
 import org.jlab.clas.tracking.kalmanfilter.AStateVecs;
 import org.jlab.clas.tracking.trackrep.Helix;
+import org.jlab.clas.tracking.trackrep.Helix.Units;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -69,11 +70,11 @@ public class StateVecs extends AStateVecs {
             }
         } else { 
             if(swim==null) { // applicable only to planes parallel to the z -axis
-                sv.toOldHelix(util);
+                Helix helix = sv.getHelix(xref, yref);
                 if(mv.surface.plane!=null) {
-                    pos = util.getHelixPointAtPlane(mv.surface.finitePlaneCorner1.x(), mv.surface.finitePlaneCorner1.y(),
+                    pos = helix.getHelixPointAtPlane(mv.surface.finitePlaneCorner1.x(), mv.surface.finitePlaneCorner1.y(),
                             mv.surface.finitePlaneCorner2.x(), mv.surface.finitePlaneCorner2.y(), 10);
-                    mom = util.getMomentumAtPlane(mv.surface.finitePlaneCorner1.x(), mv.surface.finitePlaneCorner1.y(),
+                    mom = helix.getMomentumAtPlane(mv.surface.finitePlaneCorner1.x(), mv.surface.finitePlaneCorner1.y(),
                             mv.surface.finitePlaneCorner2.x(), mv.surface.finitePlaneCorner2.y(), 10);
                     sv.x = pos.x();
                     sv.y = pos.y();
@@ -84,8 +85,8 @@ public class StateVecs extends AStateVecs {
                 }
                 else {
                     double r = mv.surface.cylinder.baseArc().radius();
-                    pos = util.getHelixPointAtR(r);
-                    mom = util.getMomentumAtR(r);
+                    pos = helix.getHelixPointAtR(r);
+                    mom = helix.getMomentumAtR(r);
                     sv.x = pos.x();
                     sv.y = pos.y();
                     sv.z = pos.z();
@@ -95,42 +96,42 @@ public class StateVecs extends AStateVecs {
                 }
             }
             else {
-                swim.SetSwimParameters(sv.x/units, sv.y/units, sv.z/units, 
+                swim.SetSwimParameters(sv.x/units.unit(), sv.y/units.unit(), sv.z/units.unit(), 
                                    dir*sv.px, dir*sv.py, dir*sv.pz, 
                                    KFitter.polarity*(int) Math.signum(sv.kappa)*dir);
                 if(mv.surface.plane!=null) {
                     Vector3D norm = mv.surface.plane.normal();
-                    Point3D point = new Point3D(mv.surface.plane.point().x()/units,
-                                                mv.surface.plane.point().y()/units,
-                                                mv.surface.plane.point().z()/units);
-                    double accuracy = mv.surface.swimAccuracy/units;
+                    Point3D point = new Point3D(mv.surface.plane.point().x()/units.unit(),
+                                                mv.surface.plane.point().y()/units.unit(),
+                                                mv.surface.plane.point().z()/units.unit());
+                    double accuracy = mv.surface.swimAccuracy/units.unit();
                     swimPars = swim.SwimPlane(norm,point,accuracy);
  //                   swimPars = swim.AdaptiveSwimPlane(point.x(), point.y(), point.z(), norm.x(), norm.y(), norm.z(), accuracy);
                     if(swimPars==null)
                         return false;
 
-                    sv.x = swimPars[0]*units;
-                    sv.y = swimPars[1]*units;
-                    sv.z = swimPars[2]*units;
+                    sv.x = swimPars[0]*units.unit();
+                    sv.y = swimPars[1]*units.unit();
+                    sv.z = swimPars[2]*units.unit();
                     sv.px = swimPars[3]*dir;
                     sv.py = swimPars[4]*dir;
                     sv.pz = swimPars[5]*dir;
                 }
                 else   {
                     double r = mv.surface.cylinder.baseArc().radius();
-                    Point3D p1 = new Point3D(mv.surface.cylinder.getAxis().origin().x()/units,
-                                             mv.surface.cylinder.getAxis().origin().y()/units,
-                                             mv.surface.cylinder.getAxis().origin().z()/units) ;
-                    Point3D p2 = new Point3D(mv.surface.cylinder.getAxis().end().x()/units,
-                                             mv.surface.cylinder.getAxis().end().y()/units,
-                                             mv.surface.cylinder.getAxis().end().z()/units) ;
-                    double accuracy = mv.surface.swimAccuracy/units;
-                    swimPars = swim.SwimGenCylinder(p1, p2, r/units, accuracy);
+                    Point3D p1 = new Point3D(mv.surface.cylinder.getAxis().origin().x()/units.unit(),
+                                             mv.surface.cylinder.getAxis().origin().y()/units.unit(),
+                                             mv.surface.cylinder.getAxis().origin().z()/units.unit()) ;
+                    Point3D p2 = new Point3D(mv.surface.cylinder.getAxis().end().x()/units.unit(),
+                                             mv.surface.cylinder.getAxis().end().y()/units.unit(),
+                                             mv.surface.cylinder.getAxis().end().z()/units.unit()) ;
+                    double accuracy = mv.surface.swimAccuracy/units.unit();
+                    swimPars = swim.SwimGenCylinder(p1, p2, r/units.unit(), accuracy);
                     if(swimPars==null)
                         return false;
-                    sv.x = swimPars[0]*units;
-                    sv.y = swimPars[1]*units;
-                    sv.z = swimPars[2]*units;
+                    sv.x = swimPars[0]*units.unit();
+                    sv.y = swimPars[1]*units.unit();
+                    sv.z = swimPars[2]*units.unit();
                     sv.px = swimPars[3]*dir;
                     sv.py = swimPars[4]*dir;
                     sv.pz = swimPars[5]*dir;
@@ -254,7 +255,7 @@ public class StateVecs extends AStateVecs {
 //        util.setTurningSign(q);
 //        util.setB(B);
 //        double pt = Math.sqrt(px0*px0 + py0*py0);
-//        util.setR(pt/(B*util.getLIGHTVEL())) ;
+//        util.setR(pt/(B*util.getLightVelocity())) ;
 //        util.setPhi0(Math.atan2(py0, px0));
 //        util.setTanL(pz0/pt);
 //        util.setZ0(z0);
@@ -272,7 +273,7 @@ public class StateVecs extends AStateVecs {
 //            util.setD0((y0-Y0.get(0))/C) ;
 //        }
 //
-//        util.Update();
+//        util.update();
 //    }
 //    private void setHelixPars(StateVec kVec, Swim swim) {
 //        StateVec vec = new StateVec(0, kVec);
@@ -409,16 +410,15 @@ public class StateVecs extends AStateVecs {
         int q = KFitter.polarity*(int) Math.signum(this.trackTraj.get(0).kappa);
         double B = 1./Math.abs(this.trackTraj.get(0).alpha)/lightVel ;
 
-        return new Helix(X.x(), X.y(), X.z(), P.x(), P.y(), P.z(), q, B, this.xref, this.yref, util.units);
+        return new Helix(X.x(), X.y(), X.z(), P.x(), P.y(), P.z(), q, B, this.xref, this.yref, this.units);
     }
 
     
     @Override
     public void init(Helix helix, double[][] cov, double xref, double yref, double zref, Swim swimmer) {
         this.trackTraj = new HashMap<>();
-        this.units = helix.getUnitScale();
-        this.lightVel = helix.getLIGHTVEL();
-        this.util = helix;
+        this.units     = helix.getUnits();
+        this.lightVel  = helix.getLightVelocity();
 
         this.xref = xref;
         this.yref = yref;
@@ -438,7 +438,7 @@ public class StateVecs extends AStateVecs {
         else {
             initSV.x0 = helix.getX();
             initSV.y0 = helix.getY();
-            initSV.z0 = helix.getZ();           
+            initSV.z0 = helix.getZ();  
         }
         initSV.x  = helix.getX();
         initSV.y  = helix.getY();
@@ -446,10 +446,9 @@ public class StateVecs extends AStateVecs {
         initSV.px = helix.getPx();
         initSV.py = helix.getPy();
         initSV.pz = helix.getPz();
-//        this.printlnStateVec(initSV);
 
         // set bfield according to input helix for consistency
-        initSV.alpha = 1/(helix.getB()*helix.getLIGHTVEL());
+        initSV.alpha = 1/(helix.getB()*helix.getLightVelocity());
         // set kappa to define the charge
         initSV.kappa = initSV.alpha * helix.getOmega();
         // convert from the helix class representation to KF
@@ -491,7 +490,7 @@ public class StateVecs extends AStateVecs {
 
 
     @Override
-    public void init(double x0, double z0, double tx, double tz, double units, double[][] cov) {
+    public void init(double x0, double z0, double tx, double tz, Units units, double[][] cov) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
