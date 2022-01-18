@@ -26,8 +26,12 @@ public class StraightTrackSeeder {
     List<Double> Xs ;
     List<Double> Ys ;
     List<Double> Ws ;
+    double xbeam;
+    double ybeam;
     
-    public StraightTrackSeeder() {
+    public StraightTrackSeeder(double xb, double yb) {
+        xbeam = xb;
+        ybeam = yb;
         //init lists for scan
         sortedCrosses = new ArrayList<ArrayList<ArrayList<Cross>>>();
         for(int b =0; b<NBINS; b++) {
@@ -92,8 +96,8 @@ public class StraightTrackSeeder {
         ((ArrayList<Double>) Xs).ensureCapacity(seedcrs.size()+1);
         ((ArrayList<Double>) Ys).ensureCapacity(seedcrs.size()+1);
         ((ArrayList<Double>) Ws).ensureCapacity(seedcrs.size()+1);
-        Xs.add(0, Constants.getXb()); 
-        Ys.add(0, Constants.getYb());
+        Xs.add(0, this.xbeam); 
+        Ys.add(0, this.ybeam);
         Ws.add(0,0.1);
         for (Cross c : seedcrs ) { 
             if(c.get_Type()==BMTType.C ) System.err.println("WRONG CROSS TYPE");
@@ -102,7 +106,7 @@ public class StraightTrackSeeder {
             Ws.add(1. / (c.get_PointErr().x()*c.get_PointErr().x()+c.get_PointErr().y()*c.get_PointErr().y()));
             
         }
-        CircleFitter circlefit = new CircleFitter();
+        CircleFitter circlefit = new CircleFitter(xbeam, ybeam);
         boolean circlefitstatusOK = circlefit.fitStatus(Xs, Ys, Ws, Xs.size());
         CircleFitPars pars = circlefit.getFit(); 
         if(circlefitstatusOK==false )
@@ -255,8 +259,8 @@ public class StraightTrackSeeder {
             ((ArrayList<Double>) Xs).ensureCapacity(seedcrs.size()+1);
             ((ArrayList<Double>) Ys).ensureCapacity(seedcrs.size()+1);
             ((ArrayList<Double>) Ws).ensureCapacity(seedcrs.size()+1);
-            Xs.add(0, Constants.getXb()); 
-            Ys.add(0, Constants.getYb());
+            Xs.add(0, this.xbeam); 
+            Ys.add(0, this.ybeam);
             Ws.add(0, 0.1);
             for (Cross c : seedcrs ) { 
                 if(c.get_Type()==BMTType.C ) continue;
@@ -267,7 +271,7 @@ public class StraightTrackSeeder {
                         +c.get_PointErr().y()*c.get_PointErr().y()));
             }
 
-            CircleFitter circlefit = new CircleFitter();
+            CircleFitter circlefit = new CircleFitter(xbeam, ybeam);
             circlefitstatusOK = circlefit.fitStatus(Xs, Ys, Ws, Xs.size());
             CircleFitPars pars = circlefit.getFit();
 

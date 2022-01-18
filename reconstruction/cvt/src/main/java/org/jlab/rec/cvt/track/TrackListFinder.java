@@ -47,7 +47,7 @@ public class TrackListFinder {
 
                 int charge = trk.get_Q();
                 double maxPathLength = 5.0;//very loose cut 
-                cvtSwim.SetSwimParameters((trk.get_helix().xdca()+Constants.getXb()) / 10, (trk.get_helix().ydca()+Constants.getYb()) / 10, trk.get_helix().get_Z0() / 10 , 
+                cvtSwim.SetSwimParameters((trk.get_helix().xdca()+trk.get_helix().getXb()) / 10, (trk.get_helix().ydca()+trk.get_helix().getYb()) / 10, trk.get_helix().get_Z0() / 10 , 
                         Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
                         trk.get_P(), charge, 
                         maxPathLength) ;

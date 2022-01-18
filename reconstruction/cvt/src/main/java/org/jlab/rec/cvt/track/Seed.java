@@ -192,8 +192,7 @@ public class Seed implements Comparable<Seed>{
     }
     
 
-    public boolean fit(int fitIter, boolean originConstraint,
-            double bfield) {
+    public boolean fit(int fitIter, double xb, double yb, double bfield) {
         
         List<Double> X = new ArrayList<>();
         List<Double> Y = new ArrayList<>();
@@ -247,15 +246,6 @@ public class Seed implements Comparable<Seed>{
          
         HelicalTrackFitter fitTrk = new HelicalTrackFitter();
         for (int i = 0; i < fitIter; i++) {
-            //	if(originConstraint==true) {
-            //		X.add(0, (double) 0);
-            //		Y.add(0, (double) 0);
-            //		Z.add(0, (double) 0);
-            //		Rho.add(0, (double) 0);
-            //		ErrRt.add(0, (double) org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT);
-            //		ErrZ.add(0, (double) org.jlab.rec.cvt.svt.Constants.ZVTXCONSTRAINT);		
-            //		ErrRho.add(0, (double) org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT);										
-            //	}
             X.clear();
             Y.clear();
             Z.clear();
@@ -296,12 +286,11 @@ public class Seed implements Comparable<Seed>{
                     ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_PointErr().z());
                 }
             }
-            X.add((double) Constants.getXb());
-            Y.add((double) Constants.getYb());
-
+            X.add(xb);
+            Y.add(yb);
             ErrRt.add((double) 0.1);
             
-            FitStatus fitStatus = fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
+            FitStatus fitStatus = fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ, xb, yb);
             
             if (fitStatus!=FitStatus.Successful || fitTrk.get_helix() == null) { 
                 return false;
@@ -426,5 +415,15 @@ public class Seed implements Comparable<Seed>{
         }
         seeds.removeAll(seeds);
         seeds.addAll(selectedSeeds);
+    }
+    
+    @Override
+    public String toString() {
+        String str = String.format("Track id=%d, q=%d, omega=%.3f mm-1, d0=%.3f mm, phi=%.3f deg, dz=%.3f mm, tanL=%.3f, NDF=%d, chi2=%.3f, seed method=%d\n", 
+                     this.getId(), this.get_Helix().get_charge(), this.get_Helix().get_curvature(), this.get_Helix().get_dca(),
+                     Math.toDegrees(this.get_Helix().get_phi_at_dca()), this.get_Helix().get_Z0(), this.get_Helix().get_tandip(),
+                     this.getNDF(), this.getChi2(), this.get_Status());
+        for(Cross c: this.get_Crosses()) str = str + c.toString() + "\n";
+        return str;
     }
 }

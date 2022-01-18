@@ -53,7 +53,7 @@ public class HelixCrossListFinder {
      * @return the list of crosses determined to be consistent with belonging to
      * a track in the cvt
      */
-    public List<org.jlab.rec.cvt.track.Seed> findCandidateCrossLists(List<ArrayList<Cross>> cvt_crosses, Swim swimmer) { 
+    public List<org.jlab.rec.cvt.track.Seed> findCandidateCrossLists(List<ArrayList<Cross>> cvt_crosses, double xb, double yb, Swim swimmer) { 
         float[] bfield = new float[3];
         swimmer.BfieldLab(0, 0, 0, bfield);
         double bz = Math.abs(bfield[2]);
@@ -172,11 +172,11 @@ public class HelixCrossListFinder {
             //this.MatchBMTC(s, theListsByRegionBMTC.get(1), svt_geo); // match the seed to each BMT region
             //this.MatchBMTC(s, theListsByRegionBMTC.get(2), svt_geo); // match the seed to each BMT region
            
-            boolean fitStatus = s.fit(3, true, bz);
+            boolean fitStatus = s.fit(3, xb, yb, bz);
             if(!fitStatus)
                 continue;
             //match to r1
-            MatchToRegion1( s, theListsByRegion.get(0), bz); 
+            MatchToRegion1( s, theListsByRegion.get(0), xb, yb, bz); 
 //            org.jlab.rec.cvt.track.Seed trkSeed = new org.jlab.rec.cvt.track.Seed();
 //            
 //            trkSeed.set_Crosses(s);
@@ -449,11 +449,11 @@ public class HelixCrossListFinder {
 
     }
 
-    private void MatchToRegion1(Seed s, ArrayList<Cross> R1Crosses, double bz) {
+    private void MatchToRegion1(Seed s, ArrayList<Cross> R1Crosses, double xb, double yb, double bz) {
         
         if(s==null)
             return;
-        boolean fitStatus = s.fit(3, true, bz);
+        boolean fitStatus = s.fit(3, xb, yb, bz);
         if(!fitStatus)
             return;
          
@@ -485,9 +485,9 @@ public class HelixCrossListFinder {
   
     }
 
-    private void MatchBMTC(Seed s, ArrayList<Cross> BMTCrosses, double bz) {
+    private void MatchBMTC(Seed s, ArrayList<Cross> BMTCrosses, double xb, double yb, double bz) {
         
-        boolean fitStatus = s.fit(3, true, bz);
+        boolean fitStatus = s.fit(3, xb, yb, bz);
         if(!fitStatus)
             return;
         double maxChi2 = Double.POSITIVE_INFINITY;
@@ -497,7 +497,7 @@ public class HelixCrossListFinder {
             continue; 
         } else {
             s.get_Crosses().add(BMTCrosses.get(i));
-            fitStatus = s.fit(3, true, bz);
+            fitStatus = s.fit(3, xb, yb, bz);
             if(!fitStatus)
                 continue;
             double linechi2perndf = s.get_lineFitChi2PerNDF();

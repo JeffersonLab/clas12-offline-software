@@ -42,9 +42,9 @@ public class CircleFitter {
     /**
      * Constructor Sets the reference point to (0,0)
      */
-    public CircleFitter() {
-        _xref = Constants.getXb();
-        _yref = Constants.getYb();
+    public CircleFitter(double xb, double yb) {
+        _xref = xb;
+        _yref = yb;
         _covr = new double[6];
     }
     // Now set the reference point for the fit
@@ -370,7 +370,7 @@ public class CircleFitter {
 
         System.out.println("calculated radius " + CircRad + "  --> pt=" + (Constants.LIGHTVEL * 5.14 * CircRad));
 
-        CircleFitter _circlefit = new CircleFitter();
+        CircleFitter _circlefit = new CircleFitter(0, 0);
         boolean circlefitstatusOK = _circlefit.fitStatus(xm, ym, wm, xm.size());
     }
 

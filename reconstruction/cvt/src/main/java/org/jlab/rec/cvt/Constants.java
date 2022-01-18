@@ -82,15 +82,13 @@ public class Constants {
     public static final double CTOFINNERRADIUS = 250;     // 250 mm
     public static final double CTOFOUTRRADIUS = 250 + 33;  // 283  mm
     
-    private static double _Xb =0;
-    private static double _Yb =0;
     private static double _RbErr = 0.3; // mm
     
     private static double _Zoffset = 0;
     
     private static int _rmReg = 0;
 
-    public static boolean excludeLayers = false;
+    public static boolean EXCLUDELAYERS = false;
     private static final Map<Integer,Integer> layersUsed = new HashMap<Integer,Integer>();
     private static final double[][]BMTPhiZRangeExcld = new double[2][2];
     private static int BMTLayerExcld = -1;
@@ -100,22 +98,6 @@ public class Constants {
     public static CTOFGeant4Factory CTOFGEOMETRY = null;
     public static Detector          CNDGEOMETRY  = null;
     public static List<Surface>     CVTSURFACES  = null;
-    
-    public static double getXb() {
-        return _Xb;
-    }
-
-    public static synchronized void setXb(double Xb) {
-        _Xb = Xb;
-    }
-
-    public static double getYb() {
-        return _Yb;
-    }
-
-    public static synchronized void setYb(double Yb) {
-        _Yb = Yb;
-    }
 
     public static double getRbErr() {
         return _RbErr;
@@ -160,14 +142,14 @@ public class Constants {
     /**
      * @return the layersUsed
      */
-    public static Map getLayersUsed() {
+    public static Map getUsedLayers() {
         return layersUsed;
     }
 
     /**
      * @param layers
      */
-    public static void setLayersUsed(String layers) {
+    public static void setUsedLayers(String layers) {
         //all layers used --> 1
         for(int i = 0; i < 12; i++)
             layersUsed.put(i+1, 1);        
@@ -178,9 +160,8 @@ public class Constants {
             for(String value : values) {
                 int layer = Integer.valueOf(value);
                 layersUsed.put(layer, 0);
-                System.out.println("EXCLUDE CVT LAYER " + layer);
             }
-            excludeLayers=true;
+            EXCLUDELAYERS=true;
         }
     }
 

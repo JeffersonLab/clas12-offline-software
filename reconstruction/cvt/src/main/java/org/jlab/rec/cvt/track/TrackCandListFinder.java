@@ -136,7 +136,7 @@ public class TrackCandListFinder {
      * @param list the input list of crosses
      * @return an array list of track candidates in the SVT
      */
-    public void getHelicalTrack(Seed cand) {
+    public void getHelicalTrack(Seed cand, double xb, double yb) {
         X.clear();
         Y.clear();
         Z.clear();
@@ -172,7 +172,7 @@ public class TrackCandListFinder {
                 Number_Of_Iterations++;
                 fitTrk = new HelicalTrackFitter();
                 // get the measuerement arrays for the helical track fit
-                HelixMeasurements MeasArrays = this.get_HelixMeasurementsArrays(list, shift, ignoreErr, false);
+                HelixMeasurements MeasArrays = this.get_HelixMeasurementsArrays(list, xb, yb, shift, ignoreErr, false);
 
                 X = MeasArrays._X;
                 Y = MeasArrays._Y;
@@ -184,12 +184,12 @@ public class TrackCandListFinder {
 
                 // do the fit to X, Y taking ErrRt uncertainties into account to get the circle fit params, 
                 // and do the fit to Rho, Z taking into account the uncertainties in Rho and Z into account to get the linefit params
-                fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
+                fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ, xb, yb);
 
                 // if the fit failed then use the uncorrected SVT points since the z-correction in resetting the SVT cross points sometimes fails 
                 if (fitTrk.get_helix() == null) {
                     //System.err.println("Error in Helical Track fitting -- helix not found -- trying to refit using the uncorrected crosses...");
-                    MeasArrays = this.get_HelixMeasurementsArrays(list, shift, ignoreErr, true);
+                    MeasArrays = this.get_HelixMeasurementsArrays(list, xb, yb, shift, ignoreErr, true);
 
                     X = MeasArrays._X;
                     Y = MeasArrays._Y;
@@ -199,7 +199,7 @@ public class TrackCandListFinder {
                     ErrRho = MeasArrays._ErrRho;
                     ErrRt = MeasArrays._ErrRt;
 
-                    fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
+                    fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ, xb, yb);
                     Number_Of_Iterations = Max_Number_Of_Iterations + 1;
                     //if(fitTrk.get_helix()==null) 
                     //System.err.println("Error in Helical Track fitting -- helix not found -- refit FAILED");
@@ -220,7 +220,7 @@ public class TrackCandListFinder {
      * @param crossList the input list of crosses
      * @return an array list of track candidates in the SVT
      */
-    public ArrayList<Track> getHelicalTracks(CrossList crossList, Swim swimmer) {
+    public ArrayList<Track> getHelicalTracks(CrossList crossList, double xb, double yb, Swim swimmer) {
 
         X.clear();
         Y.clear();
@@ -258,7 +258,7 @@ public class TrackCandListFinder {
                 Number_Of_Iterations++;
                 fitTrk = new HelicalTrackFitter();
                 // get the measuerement arrays for the helical track fit
-                HelixMeasurements MeasArrays = this.get_HelixMeasurementsArrays(crossList.get(i), shift, ignoreErr, false);
+                HelixMeasurements MeasArrays = this.get_HelixMeasurementsArrays(crossList.get(i), xb, yb, shift, ignoreErr, false);
 
                 X = MeasArrays._X;
                 Y = MeasArrays._Y;
@@ -270,12 +270,12 @@ public class TrackCandListFinder {
 
                 // do the fit to X, Y taking ErrRt uncertainties into account to get the circle fit params, 
                 // and do the fit to Rho, Z taking into account the uncertainties in Rho and Z into account to get the linefit params
-                fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
+                fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ, xb, yb);
 
                 // if the fit failed then use the uncorrected SVT points since the z-correction in resetting the SVT cross points sometimes fails 
                 if (fitTrk.get_helix() == null) {
                     //System.err.println("Error in Helical Track fitting -- helix not found -- trying to refit using the uncorrected crosses...");
-                    MeasArrays = this.get_HelixMeasurementsArrays(crossList.get(i), shift, ignoreErr, true);
+                    MeasArrays = this.get_HelixMeasurementsArrays(crossList.get(i), xb, yb, shift, ignoreErr, true);
 
                     X = MeasArrays._X;
                     Y = MeasArrays._Y;
@@ -285,7 +285,7 @@ public class TrackCandListFinder {
                     ErrRho = MeasArrays._ErrRho;
                     ErrRt = MeasArrays._ErrRt;
 
-                    fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
+                    fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ, xb, yb);
                     Number_Of_Iterations = Max_Number_Of_Iterations + 1;
                     //if(fitTrk.get_helix()==null) 
                     //System.err.println("Error in Helical Track fitting -- helix not found -- refit FAILED");
@@ -552,7 +552,7 @@ public class TrackCandListFinder {
     }
 
     private HelixMeasurements get_HelixMeasurementsArrays(List<Cross> list,
-            int shift, boolean ignoreErr, boolean resetSVTMeas) {
+            double xb, double yb, int shift, boolean ignoreErr, boolean resetSVTMeas) {
         X.clear();
         Y.clear();
         Z.clear();
@@ -599,11 +599,9 @@ public class TrackCandListFinder {
         if (shift == 1) {
             //X.add(0, (double) 0);
             //Y.add(0, (double) 0);
-            double xb = Constants.getXb();
-            double yb = Constants.getYb();
             double rb = Math.sqrt(xb*xb+yb*yb);
-            X.add(0, (double) Constants.getXb());
-            Y.add(0, (double) Constants.getYb());
+            X.add(0, xb);
+            Y.add(0, yb);
             //Z.add(0, (double) 0);
             //Rho.add(0, (double) 0);
             Rho.add(0, (double) rb);

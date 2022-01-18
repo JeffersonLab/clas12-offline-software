@@ -291,17 +291,6 @@ public class CCDBConstantsLoader {
         }
         
          
-        // beam offset
-        double xb = dbprovider.getDouble("/geometry/beam/position/x_offset", 0);     
-        double yb = dbprovider.getDouble("/geometry/beam/position/y_offset", 0); 
-        double exb = dbprovider.getDouble("/geometry/beam/position/x_error", 0);     
-        double eyb = dbprovider.getDouble("/geometry/beam/position/y_error", 0); 
-        double err = 0;
-        if(Math.sqrt(xb*xb+yb*yb)!=0) err = Math.sqrt((Math.pow(xb*exb,2)+Math.pow(yb*eyb,2))/(xb*xb+yb*yb));
-        
-        Constants.setXb(xb*10);
-        Constants.setYb(yb*10);
-        
         // target position mm
         Constants.setZoffset(ztarget*10);
         
