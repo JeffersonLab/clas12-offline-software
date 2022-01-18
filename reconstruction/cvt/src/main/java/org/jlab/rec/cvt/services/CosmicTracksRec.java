@@ -60,10 +60,10 @@ public class CosmicTracksRec {
             return true;
         }
         
-        if(Constants.EXCLUDELAYERS==true) {
-            CosmicFitter fitTrk = new CosmicFitter();
-            cosmicCands = recUtil.reFit(cosmicCands, fitTrk,  trkcandFinder);
-        }
+//        if(Constants.EXCLUDELAYERS==true) {
+//            CosmicFitter fitTrk = new CosmicFitter();
+//            cosmicCands = recUtil.reFit(cosmicCands, fitTrk,  trkcandFinder);
+//        }
         
         if (cosmicCands.size() > 0) {
             for (int k1 = 0; k1 < cosmicCands.size(); k1++) {
