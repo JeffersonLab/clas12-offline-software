@@ -430,7 +430,7 @@ public class CVTAlignment extends ReconstructionEngine {
 		double curvature = 0;
 		double Z0 = xref.z()-u.z()*xref.dot(uT)/u.dot(uT);
 		double tandip = u.z()/Math.hypot(u.x(), u.y());
-		return new Helix(d, phi, curvature, Z0, tandip, null);
+		return new Helix(d, phi, curvature, Z0, tandip, 0,0);
 	}
 
 	int nAlignables;
