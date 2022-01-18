@@ -50,7 +50,7 @@ public class EnergyLossCorr {
         massHypo = trkcand.get_PID();
 
         OrigTrack = new Helix(trkcand.get_helix().get_dca(), trkcand.get_helix().get_phi_at_dca(), trkcand.get_helix().get_curvature(),
-                trkcand.get_helix().get_Z0(), trkcand.get_helix().get_tandip(), null);
+                trkcand.get_helix().get_Z0(), trkcand.get_helix().get_tandip(), trkcand.get_helix().getXb(), trkcand.get_helix().getYb(), null);
 
         init(trkcand, bstSwim);
     }

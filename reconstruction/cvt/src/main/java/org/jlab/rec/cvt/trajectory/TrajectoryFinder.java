@@ -118,9 +118,10 @@ public class TrajectoryFinder {
         double pz = trk.get_Pt()*trk.get_helix().get_tandip();
         double px = trk.get_Pt()*Math.cos(trk.get_helix().get_phi_at_dca());
         double py = trk.get_Pt()*Math.sin(trk.get_helix().get_phi_at_dca());
-        double x = (trk.get_helix().xdca()+Constants.getXb()) / 10;
-        double y = (trk.get_helix().ydca()+Constants.getYb()) / 10;
-        double z = trk.get_helix().get_Z0() / 10;
+        Point3D vertex = trk.get_helix().getVertex();
+        double x = vertex.x()/10;
+        double y = vertex.y()/10;
+        double z = vertex.z()/10;
         swimmer.SetSwimParameters(x,y,z,px,py,pz, trk.get_Q()) ;
         
         double[] inters = null;
@@ -183,7 +184,7 @@ public class TrajectoryFinder {
         }
         // reinitialize from vertex
         maxPathLength = 1.5;  
-        swimmer.SetSwimParameters((trk.get_helix().xdca()+Constants.getXb()) / 10, (trk.get_helix().ydca()+Constants.getYb()) / 10, trk.get_helix().get_Z0() / 10, 
+        swimmer.SetSwimParameters(vertex.x()/10, vertex.y()/10, vertex.z()/10, 
                      Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
                      trk.get_P(), trk.get_Q(), maxPathLength) ;
         inters = null;

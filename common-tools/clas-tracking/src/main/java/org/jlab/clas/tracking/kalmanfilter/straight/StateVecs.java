@@ -6,6 +6,7 @@ import org.jlab.clas.tracking.kalmanfilter.AMeasVecs;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs.MeasVec;
 import org.jlab.clas.tracking.kalmanfilter.AStateVecs;
 import org.jlab.clas.tracking.trackrep.Helix;
+import org.jlab.clas.tracking.trackrep.Helix.Units;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -190,7 +191,7 @@ public void printlnStateVec(StateVec S) {
     }
     
     @Override
-    public void init(double x0, double z0, double tx, double tz, double units, double[][] cov) {
+    public void init(double x0, double z0, double tx, double tz, Units units, double[][] cov) {
         this.trackTraj = new HashMap<>();
         this.units = units;
         //this.lightVel = 0.0000299792458*units;

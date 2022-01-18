@@ -31,9 +31,11 @@ public class TrackSeeder {
     List<Double> Xs ;
     List<Double> Ys ;
     List<Double> Ws ;
+    double xbeam;
+    double ybeam;
     public boolean unUsedHitsOnly = false;
     
-    public TrackSeeder(Swim swimmer) {
+    public TrackSeeder(Swim swimmer, double xb, double yb) {
         float[] b = new float[3];
         swimmer.BfieldLab(0, 0, 0, b);
         this.bfield = Math.abs(b[2]);
@@ -53,6 +55,8 @@ public class TrackSeeder {
         Xs = new ArrayList<Double>();
         Ys = new ArrayList<Double>();
         Ws = new ArrayList<Double>();
+        xbeam = xb;
+        ybeam = yb;
     }
     
     private void MatchSeed(List<Cross> othercrs) {
@@ -90,8 +94,8 @@ public class TrackSeeder {
         ((ArrayList<Double>) Xs).ensureCapacity(seedcrs.size()+1);
         ((ArrayList<Double>) Ys).ensureCapacity(seedcrs.size()+1);
         ((ArrayList<Double>) Ws).ensureCapacity(seedcrs.size()+1);
-        Xs.add(0, Constants.getXb()); 
-        Ys.add(0, Constants.getYb());
+        Xs.add(0, xbeam); 
+        Ys.add(0, ybeam);
         Ws.add(0,0.1);
         for (Cross c : seedcrs ) { 
             if(c.get_Type()==BMTType.C ) System.err.println("WRONG CROSS TYPE");
@@ -100,7 +104,7 @@ public class TrackSeeder {
             Ws.add(1. / (c.get_PointErr().x()*c.get_PointErr().x()+c.get_PointErr().y()*c.get_PointErr().y()));
             
         }
-        CircleFitter circlefit = new CircleFitter();
+        CircleFitter circlefit = new CircleFitter(xbeam, ybeam);
         boolean circlefitstatusOK = circlefit.fitStatus(Xs, Ys, Ws, Xs.size());
         CircleFitPars pars = circlefit.getFit(); 
         if(circlefitstatusOK==false )
@@ -274,8 +278,8 @@ public class TrackSeeder {
             ((ArrayList<Double>) Xs).ensureCapacity(seedcrs.size()+1);
             ((ArrayList<Double>) Ys).ensureCapacity(seedcrs.size()+1);
             ((ArrayList<Double>) Ws).ensureCapacity(seedcrs.size()+1);
-            Xs.add(0, Constants.getXb()); 
-            Ys.add(0, Constants.getYb());
+            Xs.add(0, xbeam); 
+            Ys.add(0, ybeam);
             Ws.add(0, 0.1);
             for (Cross c : seedcrs ) { 
 //                if(c.get_Type()==BMTType.C ) continue;
@@ -286,7 +290,7 @@ public class TrackSeeder {
                         +c.get_PointErr().y()*c.get_PointErr().y()));
             }
 
-            CircleFitter circlefit = new CircleFitter();
+            CircleFitter circlefit = new CircleFitter(xbeam, ybeam);
             circlefitstatusOK = circlefit.fitStatus(Xs, Ys, Ws, Xs.size());
             CircleFitPars pars = circlefit.getFit();
 
@@ -318,7 +322,7 @@ public class TrackSeeder {
         for(Seed mseed : seedScan) { 
             boolean fitStatus = false;
             if(mseed.get_Crosses().size()>=3)
-                fitStatus = mseed.fit(Constants.SEEDFITITERATIONS, false, this.bfield);
+                fitStatus = mseed.fit(Constants.SEEDFITITERATIONS, xbeam, ybeam, bfield);
             if (fitStatus) {
                 List<Cross> sameSectorCrosses = this.FindCrossesInSameSectorAsSVTTrk(mseed, bmtC_crosses);
                 BMTmatches.clear();
@@ -331,7 +335,7 @@ public class TrackSeeder {
                 double chi2_Line = Double.POSITIVE_INFINITY;
                 for (Seed bseed : BMTmatches) {
                     //refit using the BMT
-                    fitStatus = bseed.fit(Constants.SEEDFITITERATIONS, false, this.bfield);
+                    fitStatus = bseed.fit(Constants.SEEDFITITERATIONS, xbeam, ybeam, bfield);
 
                     if (fitStatus && bseed.get_circleFitChi2PerNDF()<chi2_Circ
                                   && bseed.get_lineFitChi2PerNDF()<chi2_Line

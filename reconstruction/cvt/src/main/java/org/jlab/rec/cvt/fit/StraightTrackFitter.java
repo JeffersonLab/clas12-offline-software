@@ -144,7 +144,7 @@ public class StraightTrackFitter {
         fit_covmatrix[3][3] = _linefitpars.interceptErr() * _linefitpars.interceptErr();
         fit_covmatrix[4][4] = _linefitpars.slopeErr() * _linefitpars.slopeErr();
 
-        Helix helixresult = new Helix(fit_dca, fit_phi_at_dca, fit_curvature, fit_Z0, fit_tandip, fit_covmatrix);
+        Helix helixresult = new Helix(fit_dca, fit_phi_at_dca, fit_curvature, fit_Z0, fit_tandip, 0, 0, fit_covmatrix);
 
         set_helix(helixresult);
         _chisq[0] = _linefitpars.chisq();

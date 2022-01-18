@@ -83,11 +83,11 @@ public class RecUtilities {
         }
     }
     
-    public List<Surface> setMeasVecs(Seed trkcand, Swim swim) {
+    public List<Surface> setMeasVecs(Seed trkcand, double xb, double yb, Swim swim) {
         //Collections.sort(trkcand.get_Crosses());
         List<Surface> KFSites = new ArrayList<>();
         Vector3D u = new Vector3D(0,0,1);
-        Point3D  p = new Point3D(Constants.getXb(),Constants.getYb(),0);
+        Point3D  p = new Point3D(xb, yb, 0);
         Line3D   l = new Line3D(p, u);
         Surface meas0 = new Surface(l.origin(), l.end(), Constants.DEFAULTSWIMACC);
         meas0.setSector(0);
@@ -100,7 +100,7 @@ public class RecUtilities {
                 int layer = trkcand.get_Clusters().get(i).get_Layer();
                 Surface meas = trkcand.get_Clusters().get(i).measurement();
                 meas.setIndex(layer);
-                if((int)Constants.getLayersUsed().get(meas.getLayer())<1)
+                if((int)Constants.getUsedLayers().get(meas.getLayer())<1)
                     meas.notUsedInFit=true;
                 if(i>0 && KFSites.get(KFSites.size()-1).getIndex()==meas.getIndex())
                     continue;
@@ -117,7 +117,7 @@ public class RecUtilities {
                 meas.setIndex(layer+SVTGeometry.NLAYERS);
                 meas.setLayer(layer+SVTGeometry.NLAYERS);
                 meas.hemisphere = hemisp;
-                if((int)Constants.getLayersUsed().get(layer+SVTGeometry.NLAYERS)<1) {
+                if((int)Constants.getUsedLayers().get(layer+SVTGeometry.NLAYERS)<1) {
                     //System.out.println("Exluding layer "+meas.getLayer()+trkcand.get_Crosses().get(c).printInfo());
                     meas.notUsedInFit=true;
                 }
@@ -137,7 +137,7 @@ public class RecUtilities {
         //Collections.sort(trkcand.get_Crosses());
         List<Surface> KFSites = new ArrayList<>();
         Vector3D u = trkcand.get_ray().get_dirVec();
-        Plane3D pln0 = new Plane3D(new Point3D(Constants.getXb(),Constants.getYb(),Constants.getZoffset()), u);
+        Plane3D pln0 = new Plane3D(new Point3D(0, 0, 0), u);
         Surface meas0 = new Surface(pln0,new Point3D(0,0,0),
         new Point3D(-300,0,0), new Point3D(300,0,0),Constants.DEFAULTSWIMACC);
         meas0.setSector(0);
@@ -183,7 +183,7 @@ public class RecUtilities {
                     if(j==0) meas.setl_over_X0(SVTGeometry.getToverX0());
                     else     meas.setl_over_X0(0);
                     // RDV to be tested
-//                    if((int) Constants.getLayersUsed().get(meas.getLayer())<1)
+//                    if((int) Constants.getUsedLayers().get(meas.getLayer())<1)
 //                        meas.notUsedInFit=true; //VZ: commenting this out prevents the layer exclusion to be employed in tracking
                     if(i>0 && KFSites.get(KFSites.size()-1).getLayer()==mlayer
                            && KFSites.get(KFSites.size()-1).hemisphere==meas.hemisphere)
@@ -205,7 +205,7 @@ public class RecUtilities {
                 Surface meas = trkcand.get(i).get_Cluster1().measurement();
                 meas.setLayer(layer);
                 meas.hemisphere = Math.signum(trkcand.get(i).get_Point().y());;
-                if((int)Constants.getLayersUsed().get(meas.getLayer())<1) {
+                if((int)Constants.getUsedLayers().get(meas.getLayer())<1) {
                     meas.notUsedInFit=true;
                 }
                 if(i>0 && KFSites.get(KFSites.size()-1).getLayer()==meas.getLayer()
@@ -302,7 +302,8 @@ public class RecUtilities {
     public List<Cluster> FindClustersOnTrk(List<Cluster> allClusters, List<Cluster> seedCluster, Helix helix, double P, int Q, Swim swimmer) { 
         // initialize swimmer starting from the track vertex
         double maxPathLength = 1; 
-        swimmer.SetSwimParameters((helix.xdca()+Constants.getXb()) / 10, (helix.ydca()+Constants.getYb()) / 10, helix.get_Z0() / 10, 
+        Point3D vertex = helix.getVertex();
+        swimmer.SetSwimParameters(vertex.x()/10, vertex.y()/10, vertex.z()/10, 
                      Math.toDegrees(helix.get_phi_at_dca()), Math.toDegrees(Math.acos(helix.costheta())),
                      P, Q, maxPathLength) ;
         double[] inters = null;
@@ -384,7 +385,8 @@ public class RecUtilities {
     public List<Cluster> findBMTClustersOnTrk(List<Cluster> allClusters, List<Cross> seedCrosses, Helix helix, double P, int Q, Swim swimmer) { 
         // initialize swimmer starting from the track vertex
         double maxPathLength = 1; 
-        swimmer.SetSwimParameters((helix.xdca()+Constants.getXb()) / 10, (helix.ydca()+Constants.getYb()) / 10, helix.get_Z0() / 10, 
+        Point3D vertex = helix.getVertex();
+        swimmer.SetSwimParameters(vertex.x()/10, vertex.y()/10, vertex.z()/10, 
                      Math.toDegrees(helix.get_phi_at_dca()), Math.toDegrees(Math.acos(helix.costheta())),
                      P, Q, maxPathLength) ;
         double[] inters = null;
@@ -520,66 +522,66 @@ public class RecUtilities {
         }
     }
     
-    public Track OutputTrack(Seed seed, org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf) {
-        org.jlab.rec.cvt.trajectory.Helix helix = new org.jlab.rec.cvt.trajectory.Helix(kf.KFHelix.getD0(), 
-                kf.KFHelix.getPhi0(), kf.KFHelix.getOmega(), 
-                kf.KFHelix.getZ0(), kf.KFHelix.getTanL());
-        helix.B = kf.KFHelix.getB();
-        Track cand = new Track(helix);
-        cand.setNDF(kf.NDF);
-        cand.setChi2(kf.chi2);
-        
-        for (Cross c : seed.get_Crosses()) {
-            if (c.get_Detector()==DetectorType.BST) {
-                continue;
-            }
-        }
-        
-        this.MatchTrack2Traj(seed, kf.TrjPoints);
-        cand.addAll(seed.get_Crosses());
-        for(Cluster cl : seed.get_Clusters()) {
-            
-            int layer = cl.get_Layer();
-            int sector = cl.get_Sector();
-            
-            if(cl.get_Detector()==DetectorType.BMT) {
-                
-                layer = layer + 6;
-                
-               if(cl.get_Type() == BMTType.C) {
-                   
-                Line3D cln = cl.getAxis();
-                cl.setN(cln.distance(new Point3D(kf.TrjPoints.get(layer).x,kf.TrjPoints.get(layer).y,kf.TrjPoints.get(layer).z)).direction().asUnit());
-                cl.setL(cl.getS().cross(cl.getN()).asUnit());
-                 
-               }
-                
-            }
-            //double x = kf.TrjPoints.get(layer).x;
-            //double y = kf.TrjPoints.get(layer).y;
-            //double z = kf.TrjPoints.get(layer).z;
-            //double px = kf.TrjPoints.get(layer).px;
-            //double py = kf.TrjPoints.get(layer).py;
-            //double pz = kf.TrjPoints.get(layer).pz;
-            cl.setTrakInters(new Point3D(kf.TrjPoints.get(layer).x,kf.TrjPoints.get(layer).y,kf.TrjPoints.get(layer).z));
-        }
-        
-        return cand;
-        
-    }
-    public Track OutputTrack(StraightTrack seed, org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf) {
-        org.jlab.rec.cvt.trajectory.Helix helix = new org.jlab.rec.cvt.trajectory.Helix(kf.KFHelix.getD0(), 
-                kf.KFHelix.getPhi0(), kf.KFHelix.getOmega(), 
-                kf.KFHelix.getZ0(), kf.KFHelix.getTanL());
-        helix.B = kf.KFHelix.getB();
-        Track cand = new Track(helix);
-        cand.setNDF(kf.NDF);
-        cand.setChi2(kf.chi2); 
-        cand.addAll(seed); 
-        
-        return cand;
-        
-    }
+//    public Track OutputTrack(Seed seed, org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf) {
+//        org.jlab.rec.cvt.trajectory.Helix helix = new org.jlab.rec.cvt.trajectory.Helix(kf.KFHelix.getD0(), 
+//                                                  kf.KFHelix.getPhi0(), kf.KFHelix.getOmega(), kf.KFHelix.getZ0(), 
+//                                                  kf.KFHelix.getTanL(), kf.KFHelix.getXb(), kf.KFHelix.getYb());
+//        helix.B = kf.KFHelix.getB();
+//        Track cand = new Track(helix);
+//        cand.setNDF(kf.NDF);
+//        cand.setChi2(kf.chi2);
+//        
+//        for (Cross c : seed.get_Crosses()) {
+//            if (c.get_Detector()==DetectorType.BST) {
+//                continue;
+//            }
+//        }
+//        
+//        this.MatchTrack2Traj(seed, kf.TrjPoints);
+//        cand.addAll(seed.get_Crosses());
+//        for(Cluster cl : seed.get_Clusters()) {
+//            
+//            int layer = cl.get_Layer();
+//            int sector = cl.get_Sector();
+//            
+//            if(cl.get_Detector()==DetectorType.BMT) {
+//                
+//                layer = layer + 6;
+//                
+//               if(cl.get_Type() == BMTType.C) {
+//                   
+//                Line3D cln = cl.getAxis();
+//                cl.setN(cln.distance(new Point3D(kf.TrjPoints.get(layer).x,kf.TrjPoints.get(layer).y,kf.TrjPoints.get(layer).z)).direction().asUnit());
+//                cl.setL(cl.getS().cross(cl.getN()).asUnit());
+//                 
+//               }
+//                
+//            }
+//            //double x = kf.TrjPoints.get(layer).x;
+//            //double y = kf.TrjPoints.get(layer).y;
+//            //double z = kf.TrjPoints.get(layer).z;
+//            //double px = kf.TrjPoints.get(layer).px;
+//            //double py = kf.TrjPoints.get(layer).py;
+//            //double pz = kf.TrjPoints.get(layer).pz;
+//            cl.setTrakInters(new Point3D(kf.TrjPoints.get(layer).x,kf.TrjPoints.get(layer).y,kf.TrjPoints.get(layer).z));
+//        }
+//        
+//        return cand;
+//        
+//    }
+//    public Track OutputTrack(StraightTrack seed, org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf) {
+//        org.jlab.rec.cvt.trajectory.Helix helix = new org.jlab.rec.cvt.trajectory.Helix(kf.KFHelix.getD0(), 
+//                kf.KFHelix.getPhi0(), kf.KFHelix.getOmega(), 
+//                kf.KFHelix.getZ0(), kf.KFHelix.getTanL());
+//        helix.B = kf.KFHelix.getB();
+//        Track cand = new Track(helix);
+//        cand.setNDF(kf.NDF);
+//        cand.setChi2(kf.chi2); 
+//        cand.addAll(seed); 
+//        
+//        return cand;
+//        
+//    }
 //    public Track OutputTrack(Seed seed) {
 //        
 //        Track cand = new Track(seed.get_Helix());
@@ -618,7 +620,7 @@ public class RecUtilities {
             int layr2 = 0;
             if(c.get_Detector()==DetectorType.BMT) {
                 layr = c.getOrderedRegion()+3;
-                if((int)Constants.getLayersUsed().get(layr)>0) {
+                if((int)Constants.getUsedLayers().get(layr)>0) {
                     c.isInSeed = false;
                     //System.out.println("refit "+c.printInfo());
                     refib.add(c);
@@ -626,8 +628,8 @@ public class RecUtilities {
             } else {
                 layr = c.get_Cluster1().get_Layer();
                 layr2 = c.get_Cluster2().get_Layer();
-                if((int)Constants.getLayersUsed().get(layr)>0 
-                        && (int)Constants.getLayersUsed().get(layr2)>0) {
+                if((int)Constants.getUsedLayers().get(layr)>0 
+                        && (int)Constants.getUsedLayers().get(layr2)>0) {
                     c.updateSVTCross(null); 
                     c.isInSeed = false;
                     refi.add(c); 
@@ -638,14 +640,14 @@ public class RecUtilities {
         seedlist.addAll(trseed.findSeed(refi, refib, false));
         return seedlist;
     }
-    public boolean reFitCircle(Seed seed, int iter) {
+    public boolean reFitCircle(Seed seed, int iter, double xb, double yb) {
         boolean fitStatus = false;
         
         List<Double> Xs = new ArrayList<>() ;
         List<Double> Ys = new ArrayList<>() ;
         List<Double> Ws = new ArrayList<>() ;
         
-        CircleFitter circlefit = new CircleFitter();
+        CircleFitter circlefit = new CircleFitter(xb, yb);
         for(int i = 0; i< iter; i++) {
             Xs.clear();
             Ys.clear();
@@ -676,9 +678,9 @@ public class RecUtilities {
         return fitStatus;
     }
     
-    public List<Seed> reFit(List<Seed> seedlist, Swim swimmer,  TrackSeederCA trseed,  TrackSeeder trseed2) {
-        trseed = new TrackSeederCA(swimmer);
-        trseed2 = new TrackSeeder(swimmer);
+    public List<Seed> reFit(List<Seed> seedlist, Swim swimmer,  TrackSeederCA trseed,  TrackSeeder trseed2, double xb, double yb) {
+        trseed = new TrackSeederCA(swimmer, xb, yb);
+        trseed2 = new TrackSeeder(swimmer, xb, yb);
         List<Seed> filtlist = new ArrayList<Seed>();
         if(seedlist==null)
             return filtlist;
@@ -704,15 +706,15 @@ public class RecUtilities {
             c.set_AssociatedTrackID(-1);
             if(c.get_Detector()==DetectorType.BMT) {
                 layr = c.getOrderedRegion()+3;
-                if((int)Constants.getLayersUsed().get(layr)>0) {
+                if((int)Constants.getUsedLayers().get(layr)>0) {
                     c.isInSeed = false;
                     refib.add(c);
                 }
             } else {
                 layr = c.get_Cluster1().get_Layer();
                 layr2 = c.get_Cluster2().get_Layer();
-                if((int)Constants.getLayersUsed().get(layr)>0 
-                        && (int)Constants.getLayersUsed().get(layr2)>0) {
+                if((int)Constants.getUsedLayers().get(layr)>0 
+                        && (int)Constants.getUsedLayers().get(layr2)>0) {
                     c.updateSVTCross(null);
                     c.isInSeed = false;
                    // System.out.println("refit "+c.printInfo());
@@ -758,7 +760,7 @@ public class RecUtilities {
             int layr2 = 0;
             if(c.get_Detector()==DetectorType.BMT) {
                 layr = c.getOrderedRegion()+3;
-                if((int)Constants.getLayersUsed().get(layr)>0) {
+                if((int)Constants.getUsedLayers().get(layr)>0) {
                     c.isInSeed = false;
                 //    System.out.println("refit "+c.printInfo());
                     refib.add(c);
@@ -766,8 +768,8 @@ public class RecUtilities {
             } else {
                 layr = c.get_Cluster1().get_Layer();
                 layr2 = c.get_Cluster2().get_Layer();
-                if((int)Constants.getLayersUsed().get(layr)>0 
-                        && (int)Constants.getLayersUsed().get(layr2)>0) {
+                if((int)Constants.getUsedLayers().get(layr)>0 
+                        && (int)Constants.getUsedLayers().get(layr2)>0) {
                     c.updateSVTCross(null);
                     c.isInSeed = false;
                    // System.out.println("refit "+c.printInfo());

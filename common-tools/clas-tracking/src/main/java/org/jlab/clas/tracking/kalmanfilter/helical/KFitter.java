@@ -85,7 +85,7 @@ public class KFitter extends AKFitter {
             finalStateVec = sv.new StateVec(finalSVonPivot);
             finalStateVec.setPivot(this.getXb(), this.getYb(), 0);
             finalStateVec.covMat = this.sv.propagateCovMat(finalSVonPivot, finalStateVec);
-            KFHelix = finalStateVec.getOldHelix();
+            KFHelix = finalStateVec.getHelix(this.getXb(), this.getYb());
         }
     }
 

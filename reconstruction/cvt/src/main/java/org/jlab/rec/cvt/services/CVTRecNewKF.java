@@ -114,6 +114,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
         IndexedTable svtStatus = this.getConstantsManager().getConstants(this.getRun(), "/calibration/svt/status");
         IndexedTable bmtStatus = this.getConstantsManager().getConstants(this.getRun(), "/calibration/mvt/bmt_status");
         IndexedTable bmtTime   = this.getConstantsManager().getConstants(this.getRun(), "/calibration/mvt/bmt_time");
+        IndexedTable beamPos   = this.getConstantsManager().getConstants(this.getRun(), "/geometry/beam/position");
 
         HitReader hitRead = new HitReader();
         hitRead.fetch_SVTHits(event, adcConv, -1, -1, svtStatus);
@@ -185,8 +186,10 @@ public class CVTRecNewKF extends ReconstructionEngine {
             strgtTrksRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
                     crosses, rbc, swimmer);
         } else {
-            trksFromTargetRec.processEvent(event,SVThits, BMThits, SVTclusters, BMTclusters, 
-                crosses, rbc, swimmer);
+            double xb = beamPos.getDoubleValue("x_offset", 0, 0, 0);
+            double yb = beamPos.getDoubleValue("y_offset", 0, 0, 0);
+            trksFromTargetRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
+                crosses, xb , yb, rbc, swimmer);
         }
         return true;
     }
@@ -251,10 +254,10 @@ public class CVTRecNewKF extends ReconstructionEngine {
         //Skip layers
         String exLys = this.getEngineConfigString("excludeLayers");        
         if (exLys!=null)
-            System.out.println("["+this.getName()+"] run with layers "+exLys+"excluded in fit config chosen based on yaml");
+            System.out.println("["+this.getName()+"] run with layers "+exLys+" excluded in fit config chosen based on yaml");
         else
             System.out.println("["+this.getName()+"] run with all layer in fit (default) ");
-        Constants.setLayersUsed(exLys);
+        Constants.setUsedLayers(exLys);
         
         //Skip layers
         String exBMTLys = this.getEngineConfigString("excludeBMTLayers");        
@@ -307,7 +310,8 @@ public class CVTRecNewKF extends ReconstructionEngine {
         String[] tables = new String[]{
             "/calibration/svt/status",
             "/calibration/mvt/bmt_time",
-            "/calibration/mvt/bmt_status"
+            "/calibration/mvt/bmt_status",
+            "/geometry/beam/position"
         };
         requireConstants(Arrays.asList(tables));
         this.getConstantsManager().setVariation("default");
