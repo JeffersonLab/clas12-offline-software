@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.tracking.utilities;
 
 import java.io.BufferedReader;
@@ -26,7 +21,7 @@ public class SelectEventsToFile {
     public static void main(String[] args) throws FileNotFoundException {
     String[] splited ;
     BufferedReader reader;
-    Map<Integer, Integer> evts = new HashMap<Integer, Integer>();
+    Map<Integer, Integer> evts = new HashMap<>();
         try {
             reader = new BufferedReader(new FileReader("/Users/ziegler/Desktop/Base/CodeDevel/Validation/hipo4Validation/selEvts.txt"));
             try {
@@ -65,7 +60,7 @@ public class SelectEventsToFile {
             
             int run = bank.getInt("run", 0);
             int evt = bank.getInt("event", 0);
-            if(evts.get(evt)!=null && evts.get(evt).intValue()==run) {
+            if(evts.get(evt)!=null && evts.get(evt)==run) {
                 writer.writeEvent(event);
                 System.out.println("PROCESSED  EVENT " + event.getBank("RUN::config").getInt("event", 0));
             }

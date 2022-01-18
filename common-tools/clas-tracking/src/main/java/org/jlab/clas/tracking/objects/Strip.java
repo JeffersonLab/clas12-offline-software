@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.tracking.objects;
 
 import org.jlab.geom.prim.Arc3D;
@@ -17,6 +12,7 @@ public class Strip extends TObject {
     /**
      * @return the _id
      */
+    @Override
     public int getId() {
         return _id;
     }
@@ -24,6 +20,7 @@ public class Strip extends TObject {
     /**
      * @param _id the _id to set
      */
+    @Override
     public void setId(int _id) {
         this._id = _id;
     }
@@ -31,6 +28,7 @@ public class Strip extends TObject {
     /**
      * @return the _x
      */
+    @Override
     public double getX() {
         return _x;
     }
@@ -38,6 +36,7 @@ public class Strip extends TObject {
     /**
      * @param _x the _x to set
      */
+    @Override
     public void setX(double _x) {
         this._x = _x;
     }
@@ -45,6 +44,7 @@ public class Strip extends TObject {
     /**
      * @return the _y
      */
+    @Override
     public double getY() {
         return _y;
     }
@@ -52,6 +52,7 @@ public class Strip extends TObject {
     /**
      * @param _y the _y to set
      */
+    @Override
     public void setY(double _y) {
         this._y = _y;
     }
@@ -59,6 +60,7 @@ public class Strip extends TObject {
     /**
      * @return the _z
      */
+    @Override
     public double getZ() {
         return _z;
     }
@@ -66,6 +68,7 @@ public class Strip extends TObject {
     /**
      * @param _z the _z to set
      */
+    @Override
     public void setZ(double _z) {
         this._z = _z;
     }
@@ -303,6 +306,7 @@ public class Strip extends TObject {
         type = Type.ARC;
     }
     
+    @Override
     public String toString() {
         String s = String.format("Strip id: %d",super.getId());
         if(this.type==Type.XYZ) {

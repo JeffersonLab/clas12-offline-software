@@ -179,7 +179,7 @@ public class StateVecs extends AStateVecs {
     }
 
     @Override
-public void printlnStateVec(StateVec S) {
+    public void printlnStateVec(StateVec S) {
         String s = String.format("%d) x0=%.4f y0=%.4f z0=%.4f tx=%.4f tz=%.4f dl=%.4f", S.k, S.x0, S.y0, S.z0, S.tx, S.tz, S.dl);
         s       += String.format("    x=%.4f y=%.4f z=%.4f px=%.4f py=%.4f pz=%.4f", S.x, S.y, S.z, S.px, S.py, S.pz);
         System.out.println(s);
@@ -194,9 +194,7 @@ public void printlnStateVec(StateVec S) {
     public void init(double x0, double z0, double tx, double tz, Units units, double[][] cov) {
         this.trackTraj = new HashMap<>();
         this.units = units;
-        //this.lightVel = 0.0000299792458*units;
-        //init stateVec
-        //StateVec initSV = new StateVec(0);
+
         initSV = new StateVec(0);
         initSV.x0 = x0;
         initSV.y0 = 0;
@@ -214,10 +212,5 @@ public void printlnStateVec(StateVec S) {
         initSV.covMat = covKF;
         this.trackTraj.put(0, new StateVec(initSV));
     }
-
-    @Override
-    public Helix setTrackPars() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
+    
 }
