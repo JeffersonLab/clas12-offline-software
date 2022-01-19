@@ -341,7 +341,7 @@ public class RecoBankReader {
 		
 		for(int i = 0; i<rows; i++) {
 			// get the cosmics ray unit direction vector
-			Track track = new Track(new Helix(d0s[i]*10.f, phi0s[i], curvatures[i]/10.f, (z0s[i]-zShift)*10.f, tandips[i], xbs[i], ybs[i]));
+			Track track = new Track(new Helix(d0s[i]*10.f, phi0s[i], curvatures[i]/10.f, (z0s[i]-zShift)*10.f, tandips[i], xbs[i]*10.f, ybs[i]*10.f));
 			track.setId(ids[i]);
 			track.setChi2(chi2s[i]);
 			track.setNDF(ndfs[i]);
