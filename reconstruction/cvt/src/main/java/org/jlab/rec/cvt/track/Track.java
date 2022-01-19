@@ -9,7 +9,7 @@ import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
-import org.jlab.rec.cvt.track.Measurements.CVTLayer;
+import org.jlab.rec.cvt.measurement.MLayer;
 import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 
@@ -54,19 +54,19 @@ public class Track extends Trajectory implements Comparable<Track> {
     }
     
     public Track(Seed seed) {
-        super(seed.get_Helix());
-        this.set_Seed(seed);
+        super(seed.getHelix());
+        this.setSeed(seed);
         this.setPXYZ();
         this.setNDF(seed.getNDF());
         this.setChi2(seed.getChi2());
-        this.addAll(seed.get_Crosses());       
+        this.addAll(seed.getCrosses());       
     }
 
     public Track(Seed seed, org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf) {
         super(new Helix(kf.KFHelix.getD0(), kf.KFHelix.getPhi0(), kf.KFHelix.getOmega(), 
                         kf.KFHelix.getZ0(), kf.KFHelix.getTanL(), 
                         kf.KFHelix.getXb(), kf.KFHelix.getYb()));
-        this.get_helix().B = kf.KFHelix.getB();
+        this.getHelix().B = kf.KFHelix.getB();
         this.kfIterations = kf.numIter;
         double c = Constants.LIGHTVEL;
         //convert from kf representation to helix repr
@@ -88,12 +88,12 @@ public class Track extends Trajectory implements Comparable<Track> {
         //kfCov[2][2]*=10;
         //kfCov[4][4]*=10;
         
-        this.get_helix().set_covmatrix(kfCov);
+        this.getHelix().setCovMatrix(kfCov);
         this.setPXYZ();
         this.setNDF(kf.NDF);
         this.setChi2(kf.chi2);
-        this.set_Seed(seed);
-        this.addAll(seed.get_Crosses());
+        this.setSeed(seed);
+        this.addAll(seed.getCrosses());
         this.setTrajectories(kf.TrjPoints);
     }
     
@@ -101,7 +101,7 @@ public class Track extends Trajectory implements Comparable<Track> {
      *
      * @return the charge
      */
-    public int get_Q() {
+    public int getQ() {
         return _Q;
     }
 
@@ -110,23 +110,23 @@ public class Track extends Trajectory implements Comparable<Track> {
      *
      * @param _Q the charge
      */
-    public void set_Q(int _Q) {
+    public void setQ(int _Q) {
         this._Q = _Q;
     }
 
-    public double get_Pt() {
+    public double getPt() {
         return _Pt;
     }
 
-    public void set_Pt(double _Pt) {
+    public void setPt(double _Pt) {
         this._Pt = _Pt;
     }
 
-    public double get_Pz() {
+    public double getPz() {
         return _Pz;
     }
 
-    public void set_Pz(double _Pz) {
+    public void setPz(double _Pz) {
         this._Pz = _Pz;
     }
 
@@ -138,7 +138,7 @@ public class Track extends Trajectory implements Comparable<Track> {
      *
      * @return the total momentum value
      */
-    public double get_P() {
+    public double getP() {
         return _P;
     }
 
@@ -147,15 +147,15 @@ public class Track extends Trajectory implements Comparable<Track> {
      *
      * @param _P the total momentum value
      */
-    public void set_P(double _P) {
+    public void setP(double _P) {
         this._P = _P;
     }
 
-    public Seed get_Seed() {
+    public Seed getSeed() {
         return _seed;
     }
 
-    public final void set_Seed(Seed seed) {
+    public final void setSeed(Seed seed) {
         this._seed = seed;
     }
 
@@ -164,48 +164,49 @@ public class Track extends Trajectory implements Comparable<Track> {
      *
      */
     public final void setPXYZ() {
-        Helix helix = this.get_helix();
+        Helix helix = this.getHelix();
         if (helix != null) {
-            set_Q(((int) Math.signum(Constants.getSolenoidScale()) * helix.get_charge()));
+            setQ(((int) Math.signum(Constants.getSolenoidScale()) * helix.getCharge()));
             double calcPt = 10;
             if(Math.abs(helix.B)>0.0001) {
                 calcPt = Constants.LIGHTVEL * helix.radius() * helix.B;
             } else {
                 calcPt = 100;
-                set_Q(1);
+                setQ(1);
             }
             double calcPz = 0;
-            calcPz = calcPt * helix.get_tandip();
+            calcPz = calcPt * helix.getTanDip();
             double calcP = Math.sqrt(calcPt * calcPt + calcPz * calcPz);
-            set_Pt(calcPt);
-            set_Pz(calcPz);
-            set_P(calcP);
+            setPt(calcPt);
+            setPz(calcPz);
+            setP(calcP);
         }
     }
 
     /**
      * Updates the crosses positions based on trajectories or helix
+     * @param trackId
      */
     public void update_Crosses(int trackId) {
         for (int i = 0; i < this.size(); i++) {
             Cross cross = this.get(i);
-            cross.set_AssociatedTrackID(trackId);
+            cross.setAssociatedTrackID(trackId);
             Point3D  trackPos = null;
             Vector3D trackDir = null;
-            if(this.getTrajectories()!=null && Math.abs(this.get_helix().B)>0.0001) {
-                int layer = cross.get_Cluster1().get_Layer();
-                int index = CVTLayer.getType(cross.get_Detector(), layer).getIndex();
+            if(this.getTrajectories()!=null && Math.abs(this.getHelix().B)>0.0001) {
+                int layer = cross.getCluster1().getLayer();
+                int index = MLayer.getType(cross.getDetector(), layer).getIndex();
                 HitOnTrack traj = this.getTrajectories().get(index);
                 if(traj==null) return; //RDV check why
                 trackPos = new Point3D(traj.x, traj.y, traj.z);
                 trackDir = new Vector3D(traj.px, traj.py, traj.pz).asUnit();
             }
-            else if (this.get_helix() != null && this.get_helix().get_curvature() != 0) {
-                double R = Math.sqrt(cross.get_Point().x() * cross.get_Point().x() + cross.get_Point().y() * cross.get_Point().y());
-                trackPos = this.get_helix().getPointAtRadius(R);
-                trackDir = this.get_helix().getTrackDirectionAtRadius(R);
-//                System.out.println("Traj  " + cross.get_Cluster1().get_Layer() + " " + helixPos.toString());
-//                System.out.println("Cross " + cross.get_Detector().getName() + " " + cross.get_Point().toString());
+            else if (this.getHelix() != null && this.getHelix().getCurvature() != 0) {
+                double R = Math.sqrt(cross.getPoint().x() * cross.getPoint().x() + cross.getPoint().y() * cross.getPoint().y());
+                trackPos = this.getHelix().getPointAtRadius(R);
+                trackDir = this.getHelix().getTrackDirectionAtRadius(R);
+//                System.out.println("Traj  " + cross.getCluster1().getLayer() + " " + helixPos.toString());
+//                System.out.println("Cross " + cross.getDetector().getName() + " " + cross.getPoint().toString());
             }
             cross.update(trackPos, trackDir);
         }
@@ -214,11 +215,11 @@ public class Track extends Trajectory implements Comparable<Track> {
 
     public void update_Clusters(int trackId) {        
         if(this.getTrajectories()!=null) {
-            for (int i = 0; i < this.get_Seed().get_Clusters().size(); i++) {
-                Cluster cluster = this.get_Seed().get_Clusters().get(i);
+            for (int i = 0; i < this.getSeed().getClusters().size(); i++) {
+                Cluster cluster = this.getSeed().getClusters().get(i);
                 
-                int layer = cluster.get_Layer();
-                int index = CVTLayer.getType(cluster.get_Detector(), layer).getIndex();
+                int layer = cluster.getLayer();
+                int index = MLayer.getType(cluster.getDetector(), layer).getIndex();
                 
                 if(this.getTrajectories().get(index)!=null) // RDV check why it is necessary
                     cluster.update(trackId, this.getTrajectories().get(index));
@@ -236,7 +237,7 @@ public class Track extends Trajectory implements Comparable<Track> {
         boolean isInTrack = false;
 
         for (int i = 0; i < cand.size(); i++) {
-            if (cand.get(i).get_Id() == cross.get_Id()) {
+            if (cand.get(i).getId() == cross.getId()) {
                 isInTrack = true;
             }
 
@@ -257,7 +258,7 @@ public class Track extends Trajectory implements Comparable<Track> {
             return false;
         }
         Track other = (Track) obj;
-        if (this.get_Id() != other.get_Id()) {
+        if (this.getId() != other.getId()) {
             return false;
         }
 
@@ -274,8 +275,7 @@ public class Track extends Trajectory implements Comparable<Track> {
 
     @Override
     public int compareTo(Track tr) {
-//    	return ( tr.size() >= this.size() ) ? 1 : -1;
-        return (tr.get_P() > this.get_P()) ? 1 : -1;
+        return (tr.getP() > this.getP()) ? 1 : -1;
     }
     
     /**
@@ -289,9 +289,9 @@ public class Track extends Trajectory implements Comparable<Track> {
             return false;
         else if(this.getNDF() < Constants.NDFCUT) 
             return false;
-        else if(this.get_Pt() < Constants.PTCUT) 
+        else if(this.getPt() < Constants.PTCUT) 
             return false;
-        else if(Math.abs(this.get_helix().get_Z0()) > Constants.ZRANGE) 
+        else if(Math.abs(this.getHelix().getZ0()) > Constants.ZRANGE) 
             return false;
         else 
             return true;
@@ -322,42 +322,42 @@ public class Track extends Trajectory implements Comparable<Track> {
     public boolean overlapWith(Track o) {
         int nc = 0;
         for(Cross c : this) {
-            if(c.get_Type()==BMTType.C) continue; //skim BMTC
+            if(c.getType()==BMTType.C) continue; //skim BMTC
             if(o.contains(c)) nc++;
         }
         if(nc >1) return true;
         else      return false;
     }
 
-    public Point3D get_TrackPosAtCTOF() {
+    public Point3D getTrackPosAtCTOF() {
         return _trackPosAtCTOF;
     }
 
-    public void se_TrackPosAtCTOF(Point3D _TrackPointAtCTOFRadius) {
+    public void setTrackPosAtCTOF(Point3D _TrackPointAtCTOFRadius) {
         this._trackPosAtCTOF = _TrackPointAtCTOFRadius;
     }
 
-    public Vector3D get_TrackDirAtCTOF() {
+    public Vector3D getTrackDirAtCTOF() {
         return _trackDirAtCTOF;
     }
 
-    public void set_TrackDirAtCTOF(Vector3D _TrackDirAtCTOFRadious) {
+    public void setTrackDirAtCTOF(Vector3D _TrackDirAtCTOFRadious) {
         this._trackDirAtCTOF = _TrackDirAtCTOFRadious;
     }
 
-    public double get_PathToCTOF() {
+    public double getPathToCTOF() {
         return _pathToCTOF;
     }
 
-    public void set_PathToCTOF(double _pathLength) {
+    public void setPathToCTOF(double _pathLength) {
         this._pathToCTOF = _pathLength;
     }
 
-    public String get_PID() {
+    public String getPID() {
         return _PID;
     }
 
-    public void set_PID(String _PID) {
+    public void setPID(String _PID) {
         this._PID = _PID;
     }
     
@@ -397,15 +397,15 @@ public class Track extends Trajectory implements Comparable<Track> {
         // fills the list of cross ids for crosses belonging to that reconstructed track
         for (int j = 0; j < this.size(); j++) {
             // counter to get status word    
-            if (this.get(j).get_Detector() == DetectorType.BST) {
+            if (this.get(j).getDetector() == DetectorType.BST) {
                 nSVT++;
             }
-            if (this.get(j).get_Detector() == DetectorType.BMT
-                    && this.get(j).get_Type() == BMTType.Z) {
+            if (this.get(j).getDetector() == DetectorType.BMT
+                    && this.get(j).getType() == BMTType.Z) {
                 nBMTZ++;
             }
-            if (this.get(j).get_Detector() == DetectorType.BMT
-                    && this.get(j).get_Type() == BMTType.C) {
+            if (this.get(j).getDetector() == DetectorType.BMT
+                    && this.get(j).getType() == BMTType.C) {
                 nBMTC++;
             }
         }
@@ -430,8 +430,8 @@ public class Track extends Trajectory implements Comparable<Track> {
     @Override
     public String toString() {
         String str = String.format("Track id=%d, q=%d, p=%.3f GeV pt=%.3f GeV, phi=%.3f deg, NDF=%d, chi2=%.3f, seed method=%d\n", 
-                     this.get_Id(), this.get_Q(), this.get_P(), this.get_Pt(), Math.toDegrees(this.get_helix().get_phi_at_dca()),
-                     this.getNDF(), this.getChi2(), this.get_Seed().get_Status());
+                     this.getId(), this.getQ(), this.getP(), this.getPt(), Math.toDegrees(this.getHelix().getPhiAtDCA()),
+                     this.getNDF(), this.getChi2(), this.getSeed().getStatus());
         for(Cross c: this) str = str + c.toString() + "\n";
         return str;
     }

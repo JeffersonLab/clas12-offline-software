@@ -46,7 +46,7 @@ public class LineFitPars {
         return _intercErr;
     }
 
-    public double SlopeIntercCov() {
+    public double slopeIntercCov() {
         return _SlIntCov;
     }
 
@@ -58,7 +58,7 @@ public class LineFitPars {
         return _ndf;
     }
 
-    public double[] get_pointchi2() {
+    public double[] getPointChi2() {
         return _pointchi2;
     }
 

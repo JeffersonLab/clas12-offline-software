@@ -194,8 +194,8 @@ public class HelicalTrackFitter {
         fit_covmatrix[2][2] = _circlefitpars.cov()[0];
         fit_covmatrix[3][3] = _linefitpars.interceptErr() * _linefitpars.interceptErr();
         fit_covmatrix[4][4] = _linefitpars.slopeErr() * _linefitpars.slopeErr();
-        fit_covmatrix[3][4] = _linefitpars.SlopeIntercCov();
-        fit_covmatrix[4][3] = _linefitpars.SlopeIntercCov();
+        fit_covmatrix[3][4] = _linefitpars.slopeIntercCov();
+        fit_covmatrix[4][3] = _linefitpars.slopeIntercCov();
         for(int i = 0; i<5; i++) {
             for(int j = 0; j<5; j++) {
                 fit_covmatrix[i][j]*=Constants.COVMATSCALEFACT[i][j];
@@ -207,7 +207,7 @@ public class HelicalTrackFitter {
         }
         Helix helixresult = new Helix(fit_dca, fit_phi_at_dca, fit_curvature, fit_Z0, fit_tandip, xb, yb, fit_covmatrix);
         
-        set_helix(helixresult);
+        sethelix(helixresult);
         _chisq[0] = _circlefitpars.chisq();
         _chisq[1] = _linefitpars.chisq();
 
@@ -238,11 +238,11 @@ public class HelicalTrackFitter {
         return _circlefitpars;
     }
 
-    public CircleCalcPars get_circlecalcpars() {
+    public CircleCalcPars getcirclecalcpars() {
         return _circlecalcpars;
     }
 
-    public void set_circlecalcpars(CircleCalcPars _circlecalcpars) {
+    public void setcirclecalcpars(CircleCalcPars _circlecalcpars) {
         this._circlecalcpars = _circlecalcpars;
     }
 
@@ -259,22 +259,21 @@ public class HelicalTrackFitter {
 
     public void setReferencePoint(double x, double y) {
         _circlefit.setrefcoords(x, y);
-        return;
     }
 
-    public Helix get_helix() {
+    public Helix gethelix() {
         return _helix;
     }
 
-    public void set_helix(Helix helix) {
+    public void sethelix(Helix helix) {
         this._helix = helix;
     }
 
-    public double[] get_chisq() {
+    public double[] getchisq() {
         return _chisq;
     }
 
-    public void set_covmat(double[] chisq) {
+    public void setcovmat(double[] chisq) {
         this._chisq = chisq;
     }
 

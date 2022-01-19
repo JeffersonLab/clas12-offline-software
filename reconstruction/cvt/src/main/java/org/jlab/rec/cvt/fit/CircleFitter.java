@@ -41,6 +41,8 @@ public class CircleFitter {
 
     /**
      * Constructor Sets the reference point to (0,0)
+     * @param xb
+     * @param yb
      */
     public CircleFitter(double xb, double yb) {
         _xref = xb;
@@ -56,9 +58,14 @@ public class CircleFitter {
 
     /**
      * Fits the set of data points given by arrays xm[], ym[], with
-     * corresponding weights wm[]. The number of points that are fitted is given
-     * by NP. The fit returns a boolean flag of true if the fit was successful.
+     * corresponding weights wm[].The number of points that are fitted is given
+     * by NP.The fit returns a boolean flag of true if the fit was successful.
      *
+     * @param xm
+     * @param ym
+     * @param wm
+     * @param NP
+     * @return 
      */
     public boolean fitStatus(List<Double> xm, List<Double> ym, List<Double> wm, int NP) {
         double xl, yl, r2l, wt, wx, wy, wr2;  // The local point positions and weight parameters
@@ -238,7 +245,7 @@ public class CircleFitter {
         return true;
     }
 
-    void propagatePars(double xr, double yr, double x, double y, double cosphi, double sinphi) {
+    private void propagatePars(double xr, double yr, double x, double y, double cosphi, double sinphi) {
         setrefcoords(xr, yr);
         // evaluate the fit parameters at the reference point
         //double X = _xpca -_xref;
@@ -333,9 +340,9 @@ public class CircleFitter {
 
     public static void main(String[] args) {
         //List<Double> xm, List<Double> ym, List<Double> wm;
-        List<Double> xm = new ArrayList<Double>();
-        List<Double> ym = new ArrayList<Double>();
-        List<Double> wm = new ArrayList<Double>();
+        List<Double> xm = new ArrayList<>();
+        List<Double> ym = new ArrayList<>();
+        List<Double> wm = new ArrayList<>();
         //	xm.add((double) 5.);
         //	ym.add((double) 5.);
         //	wm.add((double) 1.);
@@ -349,9 +356,9 @@ public class CircleFitter {
         ym.add((double) 46.82);
         wm.add((double) 1.);
 
-        List<Double> P0 = new ArrayList<Double>(2);
-        List<Double> P1 = new ArrayList<Double>(2);
-        List<Double> P2 = new ArrayList<Double>(2);
+        List<Double> P0 = new ArrayList<>(2);
+        List<Double> P1 = new ArrayList<>(2);
+        List<Double> P2 = new ArrayList<>(2);
         // Find the intersection of the lines joining the innermost to middle and middle to outermost point
         P0.add(xm.get(0));
         P1.add(xm.get(1));

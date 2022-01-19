@@ -21,22 +21,6 @@ public class Constants {
     Constants() {
     }
 
-    private static final double COVD0D0      = 1.;///50.;
-    private static final double COVD0PHI0    = 1;//./50.;
-    private static final double COVD0RHO     = 1.;///50.;
-    private static final double COVPHI0PHI0  = 1.;///50.;
-    private static final double COVPHI0RHO   = 1.;///50.;
-    private static final double COVRHORHO    = 1.;//50.;
-    private static final double COVZ0Z0      = 10.;
-    private static final double CONVTANLTANL = 10.;
-    
-    public static double[][] COVMATSCALEFACT = new double[][]{
-                                                                    {COVD0D0, COVD0PHI0, COVD0RHO,1.0,1.0},
-                                                                    {COVD0PHI0,COVPHI0PHI0, COVPHI0RHO,1.0,1.0},
-                                                                    {COVD0RHO, COVPHI0RHO, COVRHORHO,1.0,1.0},
-                                                                    {1.0,1.0,1.0, COVZ0Z0,1.0},
-                                                                    {1.0,1.0,1.0,1.0, CONVTANLTANL}
-                                                                };
     // CONSTANTS USED IN RECONSTRUCTION
     //---------------------------------
     public static boolean isMC = true;
@@ -57,15 +41,15 @@ public class Constants {
     public static final double SWIMACCURACYBMT = 0.020; // in mm
     public static final double SWIMACCURACYCD  = 0.500; // in mm
     
-    public static boolean isCosmicsData = false;
+    public static boolean ISCOSMICDATA = false;
     public static final double COSMICSMINRESIDUALX = 120; // in mm
     public static final double COSMICSMINRESIDUALZ =  12; // in mm
     
     public static final int SEEDFITITERATIONS = 5;
     
-    public static boolean SVTOnly = false;
+    public static boolean SVTONLY = false;
 
-    public static boolean svtSeeding = true;
+    public static boolean SVTSEEDING = true;
 
     public static boolean TIMECUTS = false;
 
@@ -77,7 +61,7 @@ public class Constants {
 
     private static int BEAMSPOTCONST = 0;
 
-    public static Libr kfMatLib;
+    public static Libr KFMATLIB;
 
     public static final double CTOFINNERRADIUS = 250;     // 250 mm
     public static final double CTOFOUTRRADIUS = 250 + 33;  // 283  mm
@@ -194,6 +178,23 @@ public class Constants {
         return BMTLayerExcld;
     }
     
+    private static final double COVD0D0      = 1.;///50.;
+    private static final double COVD0PHI0    = 1;//./50.;
+    private static final double COVD0RHO     = 1.;///50.;
+    private static final double COVPHI0PHI0  = 1.;///50.;
+    private static final double COVPHI0RHO   = 1.;///50.;
+    private static final double COVRHORHO    = 1.;//50.;
+    private static final double COVZ0Z0      = 10.;
+    private static final double CONVTANLTANL = 10.;
+    
+    public static double[][] COVMATSCALEFACT = new double[][]{
+                                                                    {COVD0D0, COVD0PHI0, COVD0RHO,1.0,1.0},
+                                                                    {COVD0PHI0,COVPHI0PHI0, COVPHI0RHO,1.0,1.0},
+                                                                    {COVD0RHO, COVPHI0RHO, COVRHORHO,1.0,1.0},
+                                                                    {1.0,1.0,1.0, COVZ0Z0,1.0},
+                                                                    {1.0,1.0,1.0,1.0, CONVTANLTANL}
+                                                                };
+
     //public static final boolean DEBUGMODE =false;
     // for landau inverse calculation
     public static final double f[] = {
@@ -365,24 +366,23 @@ public class Constants {
         40.157721, 41.622399, 43.202525, 44.912465, 46.769077, 48.792279,
         51.005773, 53.437996, 56.123356, 59.103894};
 
-    //public static final int CVTCONFIGSTARTREG = 2; // for 3SVT+3BMT
-
+    
     public static void setMatLib(String matLib) {
         switch (matLib) {
             case "JAMA":
-                kfMatLib = Libr.JAMA;
+                KFMATLIB = Libr.JAMA;
                 break;
             case "JNP":
-                kfMatLib = Libr.JNP;
+                KFMATLIB = Libr.JNP;
                 break;
             case "APA":
-                kfMatLib = Libr.APA;
+                KFMATLIB = Libr.APA;
                 break;
             case "EJML":
-                kfMatLib = Libr.EJML;    
+                KFMATLIB = Libr.EJML;    
                 break;
             default:
-                kfMatLib = Libr.EJML;
+                KFMATLIB = Libr.EJML;
         } 
     }
     

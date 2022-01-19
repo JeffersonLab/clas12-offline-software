@@ -69,8 +69,6 @@ public abstract class AStateVecs {
         return multiplyMatrices(FMat, matrix, FMatT);
     }
     
-    public abstract Helix setTrackPars();
-
     private double[][] multiplyMatrices(double[][] firstMatrix, double[][] secondMatrix) {
         int r1 = firstMatrix.length;
         int c1 = firstMatrix[0].length;

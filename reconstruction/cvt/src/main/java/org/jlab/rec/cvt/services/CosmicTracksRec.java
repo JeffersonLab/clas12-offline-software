@@ -15,12 +15,10 @@ import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.CrossList;
 import org.jlab.rec.cvt.cross.StraightTrackCrossListFinder;
-import org.jlab.rec.cvt.fit.CosmicFitter;
 import org.jlab.rec.cvt.hit.Hit;
-import org.jlab.rec.cvt.track.Measurements;
+import org.jlab.rec.cvt.measurement.Measurements;
 import org.jlab.rec.cvt.track.StraightTrack;
-import org.jlab.rec.cvt.track.Track;
-import org.jlab.rec.cvt.track.TrackCandListFinder;
+import org.jlab.rec.cvt.track.StraightTrackCandListFinder;
 import org.jlab.rec.cvt.trajectory.Ray;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 
@@ -52,48 +50,45 @@ public class CosmicTracksRec {
             return true;
         } 
         // refit track based on SVT only and then add BMT and refit again
-        TrackCandListFinder trkcandFinder = new TrackCandListFinder();
+        StraightTrackCandListFinder trkcandFinder = new StraightTrackCandListFinder();
         List<StraightTrack> cosmicCands = trkcandFinder.getStraightTracks(crosslist, crosses.get(1));
-        List<Track> trkcands = new ArrayList<>();
-        //REMOVE THIS
-        //crosses.get(0).addAll(crosses.get(1));
-        //------------------------
+
         if (cosmicCands.isEmpty()) {
             recUtil.CleanupSpuriousCrosses(crosses, null) ;
             rbc.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null);
             return true;
         }
         
-        if(Constants.EXCLUDELAYERS==true) {
-            CosmicFitter fitTrk = new CosmicFitter();
-            cosmicCands = recUtil.reFit(cosmicCands, fitTrk,  trkcandFinder);
-        }
+//        if(Constants.EXCLUDELAYERS==true) {
+//            CosmicFitter fitTrk = new CosmicFitter();
+//            cosmicCands = recUtil.reFit(cosmicCands, fitTrk,  trkcandFinder);
+//        }
         
         if (cosmicCands.size() > 0) {
             for (int k1 = 0; k1 < cosmicCands.size(); k1++) {
-                cosmicCands.get(k1).set_Id(k1 + 1);
+                cosmicCands.get(k1).setId(k1 + 1);
                 for (int k2 = 0; k2 < cosmicCands.get(k1).size(); k2++) { 
-                    cosmicCands.get(k1).get(k2).set_AssociatedTrackID(cosmicCands.get(k1).get_Id()); // associate crosses
-                    if (cosmicCands.get(k1).get(k2).get_Cluster1() != null) {
-                        cosmicCands.get(k1).get(k2).get_Cluster1().set_AssociatedTrackID(cosmicCands.get(k1).get_Id()); // associate cluster1 in cross
+                    cosmicCands.get(k1).get(k2).setAssociatedTrackID(cosmicCands.get(k1).getId()); // associate crosses
+                    if (cosmicCands.get(k1).get(k2).getCluster1() != null) {
+                        cosmicCands.get(k1).get(k2).getCluster1().setAssociatedTrackID(cosmicCands.get(k1).getId()); // associate cluster1 in cross
                     }
-                    if (cosmicCands.get(k1).get(k2).get_Cluster2() != null) {
-                        cosmicCands.get(k1).get(k2).get_Cluster2().set_AssociatedTrackID(cosmicCands.get(k1).get_Id()); // associate cluster2 in cross	
+                    if (cosmicCands.get(k1).get(k2).getCluster2() != null) {
+                        cosmicCands.get(k1).get(k2).getCluster2().setAssociatedTrackID(cosmicCands.get(k1).getId()); // associate cluster2 in cross	
                     }
                 }
                 trkcandFinder.matchClusters(SVTclusters, new TrajectoryFinder(), true,
-                        cosmicCands.get(k1).get_Trajectory(), k1 + 1);
+                        cosmicCands.get(k1).getTrajectory(), k1 + 1);
             }
             recUtil.CleanupSpuriousCrosses(crosses, null) ;
             
-            KFitter kf = new KFitter(Constants.KFFILTERON, Constants.KFITERATIONS, Constants.kfBeamSpotConstraint(), Constants.kfMatLib);
+            KFitter kf = new KFitter(Constants.KFFILTERON, Constants.KFITERATIONS, Constants.kfBeamSpotConstraint(), Constants.KFMATLIB);
             Measurements measures = new Measurements(true, 0, 0);
             List<StraightTrack> cosmics = new ArrayList<>();
             for (int k1 = 0; k1 < cosmicCands.size(); k1++) {
-                Ray ray = cosmicCands.get(k1).get_ray();
+                Ray ray = cosmicCands.get(k1).getRay();
                 
                 if(Constants.INITFROMMC) {
-                    double[] pars = recUtil.MCtrackPars(event);
+                    double[] pars = recUtil.mcTrackPars(event);
                     Point3D  v = new Point3D(pars[0],pars[1],pars[2]);
                     Vector3D p = new Vector3D(pars[3],pars[4],pars[5]);
                     ray = new Ray(v,p);
@@ -105,8 +100,8 @@ public class CosmicTracksRec {
                 cov[2][2]=0.001; // ~2deg
                 cov[3][3]=0.001;
                 cov[4][4]=1;
-                kf.init(ray.get_yxinterc(),ray.get_yzinterc(),
-                        ray.get_yxslope(), ray.get_yzslope(), Units.MM, cov,
+                kf.init(ray.getYXInterc(),ray.getYZInterc(),
+                        ray.getYXSlope(), ray.getYZSlope(), Units.MM, cov,
                         measures.getMeasurements(cosmicCands.get(k1)));
                 kf.mv.setDelta_d_a(new double[]{0.1, 0.1, 0.0001, 0.0001, 1});
                 kf.runFitter();
@@ -115,28 +110,28 @@ public class CosmicTracksRec {
                     cosmic.update(kf);
                     
                     //refit adding missing clusters
-                    List<Cluster> clsOnTrack = recUtil.FindClustersOnTrack(SVTclusters, cosmic);
+                    List<Cluster> clsOnTrack = recUtil.findClustersOnTrack(SVTclusters, cosmic);
                     if(clsOnTrack.size()>0) {
                         List<Cross> pseudoCrosses = new ArrayList<>();
                         for(Cluster cl : clsOnTrack) {
-                            cl.set_AssociatedTrackID(k1 + 1);
+                            cl.setAssociatedTrackID(k1 + 1);
                             //make pseudo-cross
-                            Cross this_cross = new Cross(DetectorType.BST, BMTType.UNDEFINED, cl.get_Sector(), cl.get_Region(), -1);
+                            Cross this_cross = new Cross(DetectorType.BST, BMTType.UNDEFINED, cl.getSector(), cl.getRegion(), -1);
                             // cluster1 is the inner layer cluster
-                            if(cl.get_Layer()%2==1) {
-                                this_cross.set_Cluster1(cl);
+                            if(cl.getLayer()%2==1) {
+                                this_cross.setCluster1(cl);
                             } else {
                             // cluster2 is the outer layer cluster
-                                this_cross.set_Cluster2(cl);
+                                this_cross.setCluster2(cl);
                             }
-                            this_cross.set_Point0(cl.getTrakInters());
-                            this_cross.set_Point(cl.getTrakInters());
+                            this_cross.setPoint0(cl.getTrakInters());
+                            this_cross.setPoint(cl.getTrakInters());
                             pseudoCrosses.add(this_cross);
                         }
                         cosmic.addAll(pseudoCrosses); //VZ check for additional clusters, and only then re-run KF adding new clusters                    
                         //refit
-                        kf.init(cosmic.get_ray().get_yxinterc(),cosmic.get_ray().get_yzinterc(),
-                                cosmic.get_ray().get_yxslope(), cosmic.get_ray().get_yzslope(), Units.CM, cov,
+                        kf.init(cosmic.getRay().getYXInterc(),cosmic.getRay().getYZInterc(),
+                                cosmic.getRay().getYXSlope(), cosmic.getRay().getYZSlope(), Units.CM, cov,
                                 measures.getMeasurements(cosmicCands.get(k1))) ;
                         kf.runFitter();
                         if (kf.setFitFailed == false && kf.NDF>0 && kf.finalStateVec!=null) { 
@@ -150,25 +145,25 @@ public class CosmicTracksRec {
             // reset cross and cluster IDs
             for(int det = 0; det<2; det++) {
                 for(Cross c : crosses.get(det)) {
-                    c.set_AssociatedTrackID(-1);
+                    c.setAssociatedTrackID(-1);
                 }
             }
             for(Cluster c : SVTclusters) {
-                c.set_AssociatedTrackID(-1);
+                c.setAssociatedTrackID(-1);
             }
             for(Cluster c : BMTclusters) {
-                c.set_AssociatedTrackID(-1);
+                c.setAssociatedTrackID(-1);
             }
             if(!cosmics.isEmpty()) {
                 for(int k = 0; k < cosmics.size(); k++) {
-                    cosmics.get(k).set_Id(k + 1);
+                    cosmics.get(k).setId(k + 1);
                     cosmics.get(k).updateCrosses();
                     cosmics.get(k).updateClusters();
                 }
             }
             for(int det = 0; det<2; det++) {
                 for(Cross c : crosses.get(det)) {
-                    if(c.get_AssociatedTrackID()==-1) {
+                    if(c.getAssociatedTrackID()==-1) {
                         c.reset();
                     }
                 }

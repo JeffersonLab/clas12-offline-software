@@ -62,7 +62,7 @@ public class CosmicFitter {
         //  Initialize the various fitter outputs
         _linefitYX = null;
         _linefitY_primeZ = null;
-        set_rayfitoutput(null);
+        setrayfitoutput(null);
 
         for (int j = 0; j < errRt.size(); j++) {
             if (errRt.get(j) == 0) {
@@ -81,7 +81,7 @@ public class CosmicFitter {
         // fit the points 
         // check the status
         _linefitYX = new LineFitter();
-        boolean linefitstatusXYOK = _linefitYX.fitStatus(Y, X, errRt, new ArrayList<Double>(X.size()), X.size());
+        boolean linefitstatusXYOK = _linefitYX.fitStatus(Y, X, errRt, new ArrayList<>(X.size()), X.size());
 
         //Line fit
         _linefitY_primeZ = new LineFitter();
@@ -109,22 +109,22 @@ public class CosmicFitter {
         
         Ray the_ray = new Ray(refPoint, refDir);
 
-        the_ray.set_yxslope(yx_slope);
-        the_ray.set_yxslopeErr(yx_slope_err);
-        the_ray.set_yzslope(yz_slope);
-        the_ray.set_yzslopeErr(yz_slope_err);
-        the_ray.set_yxinterc(yx_interc);
-        the_ray.set_yxintercErr(yx_interc_err);
-        the_ray.set_yzinterc(yz_interc);
-        the_ray.set_yzintercErr(yz_interc_err);
+        the_ray.setYXSlope(yx_slope);
+        the_ray.setYXSlopeErr(yx_slope_err);
+        the_ray.setYZSlope(yz_slope);
+        the_ray.setYZSlopeErr(yz_slope_err);
+        the_ray.setYXInterc(yx_interc);
+        the_ray.setYXInterErr(yx_interc_err);
+        the_ray.setYZInterc(yz_interc);
+        the_ray.setYZIntercErr(yz_interc_err);
         
         double[] chisq = new double[]{_linefitYX.getFit().chisq(), _linefitY_primeZ.getFit().chisq()};
         if (the_ray != null) {
             CosmicFitPars the_rayfitoutput = new CosmicFitPars(the_ray, chisq);
             _ray = the_ray;
-            the_rayfitoutput.set_ray(the_ray);
-            the_rayfitoutput.set_chisq(chisq);
-            set_rayfitoutput(the_rayfitoutput);
+            the_rayfitoutput.setRay(the_ray);
+            the_rayfitoutput.setChi2(chisq);
+            setrayfitoutput(the_rayfitoutput);
             _ray.chi2 = ProbChi2perNDF.prob(chisq[0]+chisq[1],errRt.size()+errZ.size());
         }
         return FitStatus.Successful;
@@ -136,7 +136,7 @@ public class CosmicFitter {
         _linefitRhoZ = null;
         _linefitYX = null;
         _linefitY_primeZ = null;
-        set_rayfitoutput(null);
+        setrayfitoutput(null);
 
         for (int j = 0; j < errRt.size(); j++) {
             if (errRt.get(j) == 0) {
@@ -164,7 +164,7 @@ public class CosmicFitter {
 
         //Line fits
         _linefitYX = new LineFitter();
-        boolean linefitstatusXYOK = _linefitYX.fitStatus(Y, X, errRt, new ArrayList<Double>(X.size()), X.size());
+        boolean linefitstatusXYOK = _linefitYX.fitStatus(Y, X, errRt, new ArrayList<>(X.size()), X.size());
 
         _linefitRhoZ = new LineFitter();
         boolean linefitstatusOK = _linefitRhoZ.fitStatus(Rho, Z, errRho, ErrZ, Z.size());
@@ -192,37 +192,37 @@ public class CosmicFitter {
         Vector3D refDir = new Vector3D(yx_slope, 1, yz_slope).asUnit();
         Ray the_ray = new Ray(refPoint, refDir);
 
-        the_ray.set_yxslope(yx_slope);
-        the_ray.set_yzslope(yz_slope);
-        the_ray.set_yxinterc(yx_interc);
-        the_ray.set_yzinterc(yz_interc);
+        the_ray.setYXSlope(yx_slope);
+        the_ray.setYZSlope(yz_slope);
+        the_ray.setYXInterc(yx_interc);
+        the_ray.setYZInterc(yz_interc);
 
         double[] chisq = new double[]{_linefitYX.getFit().chisq(), _linefitRhoZ.getFit().chisq()};
         if (the_ray != null) {
             CosmicFitPars the_rayfitoutput = new CosmicFitPars(the_ray, chisq);
             _ray = the_ray;
-            the_rayfitoutput.set_ray(the_ray);
-            the_rayfitoutput.set_chisq(chisq);
-            set_rayfitoutput(the_rayfitoutput);
+            the_rayfitoutput.setRay(the_ray);
+            the_rayfitoutput.setChi2(chisq);
+            setrayfitoutput(the_rayfitoutput);
             _ray.chi2 = ProbChi2perNDF.prob(chisq[0]+chisq[1],errRt.size()+ErrZ.size());
         }
         System.out.println(refPoint.toString()+"yzslope "+yz_slope+" yz_interc "+yz_interc+" c2 "+_linefitRhoZ.getFit().chisq());
         return FitStatus.Successful;
     }
 
-    public Ray get_ray() {
+    public Ray getray() {
         return _ray;
     }
 
-    public void set_ray(Ray _ray) {
+    public void setray(Ray _ray) {
         this._ray = _ray;
     }
 
-    public CosmicFitPars get_rayfitoutput() {
+    public CosmicFitPars getrayfitoutput() {
         return _rayfitoutput;
     }
 
-    public void set_rayfitoutput(CosmicFitPars _rayfitoutput) {
+    public void setrayfitoutput(CosmicFitPars _rayfitoutput) {
         this._rayfitoutput = _rayfitoutput;
     }
 

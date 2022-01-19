@@ -33,17 +33,17 @@ public class ClusterFinder {
         // with valid hits
         for (Hit hit : hits2) {
 
-            if (hit.get_Strip().get_Strip() == -1) {
+            if (hit.getStrip().getStrip() == -1) {
                 continue;
             }
 
-            if (hit.get_Strip().getStatus()!=0) {
+            if (hit.getStrip().getStatus()!=0) {
                 continue;
             }
 
-            int w = hit.get_Strip().get_Strip();
-            int l = hit.get_Layer();
-            int s = hit.get_Sector();
+            int w = hit.getStrip().getStrip();
+            int l = hit.getLayer();
+            int s = hit.getSector();
             
             if (w > 0 && w < nstrip) {
                 HitArray[w - 1][l - 1][s - 1] = hit; 
@@ -76,20 +76,20 @@ public class ClusterFinder {
                         }
                     
                         // define new cluster 
-                        Cluster this_cluster = new Cluster(hits.get(0).get_Detector(), hits.get(0).get_Type(), hits.get(0).get_Sector(), l + 1, cid++);
-                        this_cluster.set_Id(clusters.size() + 1);
+                        Cluster this_cluster = new Cluster(hits.get(0).getDetector(), hits.get(0).getType(), hits.get(0).getSector(), l + 1, cid++);
+                        this_cluster.setId(clusters.size() + 1);
                         // add hits to the cluster
                         this_cluster.addAll(hits); 
                         if(hits.size()>2) {
                             for(int hi = 1; hi<hits.size()-1; hi++) { //interpolate between neighboring strips
-                                if(hits.get(hi).get_Strip().get_Edep()<hits.get(hi-1).get_Strip().get_Edep()
-                                        && hits.get(hi).get_Strip().get_Edep()<hits.get(hi+1).get_Strip().get_Edep()) {
-                                    hits.get(hi).get_Strip().set_Edep(0.5*(hits.get(hi-1).get_Strip().get_Edep()+hits.get(hi+1).get_Strip().get_Edep()));
+                                if(hits.get(hi).getStrip().getEdep()<hits.get(hi-1).getStrip().getEdep()
+                                        && hits.get(hi).getStrip().getEdep()<hits.get(hi+1).getStrip().getEdep()) {
+                                    hits.get(hi).getStrip().setEdep(0.5*(hits.get(hi-1).getStrip().getEdep()+hits.get(hi+1).getStrip().getEdep()));
                                 }
                             }
                         }
                         for (Hit h : hits) {
-                            h.set_AssociatedClusterID(this_cluster.get_Id());
+                            h.setAssociatedClusterID(this_cluster.getId());
                             h.newClustering = true; //RDV fix me!
                         }
                         

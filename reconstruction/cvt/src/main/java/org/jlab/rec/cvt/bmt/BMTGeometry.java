@@ -122,7 +122,7 @@ public class BMTGeometry {
      * @return radius (=0 if layer is out of range)
      */
     public double getRadiusMidDrift(int layer) {        
-        return this.getRadius(layer) + BMTConstants.hDrift/2;
+        return this.getRadius(layer) + BMTConstants.HDRIFT/2;
     }
     
     /**
@@ -272,7 +272,7 @@ public class BMTGeometry {
      */
     public double getThickness() {
         
-        return BMTConstants.hDrift;
+        return BMTConstants.HDRIFT;
     }
     
     /**
@@ -284,7 +284,7 @@ public class BMTGeometry {
        if(!(layer>=1 && layer<=BMTConstants.NLAYERS)) 
             throw new IllegalArgumentException("Error: invalid layer="+layer);
        
-       return BMTConstants.get_T_OVER_X0()[layer-1];
+       return BMTConstants.getT_OVER_X0()[layer-1];
      }
     
     /**
@@ -296,7 +296,7 @@ public class BMTGeometry {
        if(!(layer>=1 && layer<=BMTConstants.NLAYERS)) 
             throw new IllegalArgumentException("Error: invalid layer="+layer);
        
-       return BMTConstants.get_Material_T()[layer-1];
+       return BMTConstants.getMaterial_T()[layer-1];
      }
     
     /**
@@ -320,7 +320,7 @@ public class BMTGeometry {
     public Point3D getOffset(int layer, int sector) {
         Point3D offset = new Point3D();
         if(layer>0 && layer<BMTConstants.NLAYERS+1 && sector > 0 && sector<BMTConstants.NSECTORS+1) {    
-            offset.copy(BMTConstants.shifts[layer-1][sector-1]); 
+            offset.copy(BMTConstants.SHIFTS[layer-1][sector-1]); 
         }
        else {
             System.out.println("ERROR: out of layer number in getOffset(int layer, region)");
@@ -329,7 +329,7 @@ public class BMTGeometry {
     }
     
     /**
-     * Return rotations for the selected tile, identified by layer and sector
+     * Return ROTATIONS for the selected tile, identified by layer and sector
      * @param layer (1-6)
      * @param sector (1-3)
      * @return Point3D offset: 3D offset
@@ -337,7 +337,7 @@ public class BMTGeometry {
     public Vector3D getRotation(int layer, int sector) {
         Vector3D rot = new Vector3D();
         if(layer>0 && layer<BMTConstants.NLAYERS+1 && sector > 0 && sector<BMTConstants.NSECTORS+1) {    
-            rot.copy(BMTConstants.rotations[layer-1][sector-1]);
+            rot.copy(BMTConstants.ROTATIONS[layer-1][sector-1]);
             return rot;
         } else {
             System.out.println("ERROR: out of layer sector number in getRotation(int layer, region)");
@@ -351,7 +351,7 @@ public class BMTGeometry {
         if(!(0<sector && sector<=BMTConstants.NSECTORS))
             throw new IllegalArgumentException("Error: invalid sector="+sector);
         
-        return BMTConstants.toGlobal[layer-1][sector-1];
+        return BMTConstants.TOGLOBAL[layer-1][sector-1];
     }
     
     public Transformation3D toLocal(int layer, int sector) {
@@ -360,7 +360,7 @@ public class BMTGeometry {
         if(!(0<sector && sector<=BMTConstants.NSECTORS))
             throw new IllegalArgumentException("Error: invalid sector="+sector);
         
-        return BMTConstants.toLocal[layer-1][sector-1];
+        return BMTConstants.TOLOCAL[layer-1][sector-1];
     }
     
     /**
@@ -375,7 +375,7 @@ public class BMTGeometry {
             throw new IllegalArgumentException("Error: invalid layer="+layer);
         if(!(0<sector && sector<=BMTConstants.NSECTORS))
             throw new IllegalArgumentException("Error: invalid sector="+sector);
-        axis.copy(BMTConstants.axes[layer-1][sector-1]);
+        axis.copy(BMTConstants.AXES[layer-1][sector-1]);
         return axis;
     }
     
@@ -390,38 +390,7 @@ public class BMTGeometry {
         this.toGlobal(layer, sector).apply(global);
         return global;
     }
-      
-//    public double getResidual(Point3D traj, int layer, int sector, int strip) {
-//        BMTType type  = BMTGeometry.getDetectorType(layer);
-//        switch (type) {
-//            case C:
-//                return this.getCResidual(traj, layer, sector, strip);
-//            case Z:
-//                return this.getZResidual(traj, layer, sector, strip);
-//            default:
-//                return 0;
-//        } 
-//    }
-//    
-//    private double getCResidual(Point3D traj, int layer, int sector, int strip) {
-//        int region    = this.getRegion(layer);
-//        Point3D local = this.toLocal(traj, layer, sector);
-//        return local.z()-this.getCstripZ(region, strip);
-//    }
-//    
-//    
-//    private double getZResidual(Point3D traj, int layer, int sector, int strip) {
-//        int region     = this.getRegion(layer);
-//        Point3D local  = this.toLocal(traj, layer, sector);
-//        
-//        double  phi    = Math.atan2(local.y(),local.x());
-//        double  radius = this.getRadius(layer)+this.getThickness()/2;
-//        double  dphi   = phi-this.getZstripPhi(region, sector, strip);
-//        if(dphi>2*Math.PI)       dphi -= 2*Math.PI;
-//        else if(dphi<-2*Math.PI) dphi += 2*Math.PI;
-//        return radius*dphi;
-//    }
-    
+          
     /**
      * Returns Line3D for Z detector strip identified from region, sector, strip numbers, for ideal geometry
      * @param region
@@ -659,7 +628,7 @@ public class BMTGeometry {
     /**
      * Return the sector number
      * @param layer [0-6]
-     * @param localangle localangle in the local frame in radians
+     * @param localAngle track angle in the local frame in radians
      * @return sector [1-3] (not) accounting for dead areas if layer (0) [1-6] or 0 if layer is undefined
      */
     public int getSector(int layer, double localAngle) {
@@ -713,7 +682,7 @@ public class BMTGeometry {
         int sector = this.getSector(0, Math.atan2(localtraj.y(), localtraj.x()));
         if(sector ==0) return 0;
         for(int i=1; i<=BMTConstants.NLAYERS; i++) {
-            double radius = BMTConstants.axes[i-1][sector-1].distance(localtraj).length();
+            double radius = BMTConstants.AXES[i-1][sector-1].distance(localtraj).length();
             if(Math.abs(radius-this.getRadiusMidDrift(i)-strip2Det)<accuracy) {
                 layer = i;
                 break;
@@ -832,7 +801,6 @@ public class BMTGeometry {
             double dphi = angle - edge; 
             if(dphi<0) dphi += 2*Math.PI;
             strip = (int) Math.floor(dphi*radius/pitch) + 1;
-//            System.out.println(Math.toDegrees(angle) + " " + Math.toDegrees(dphi) + " " + sector + " " + strip_calc);
             if (strip < 1 || strip > this.getNStrips(layer)) {
                 strip = -1;
             }
@@ -880,6 +848,10 @@ public class BMTGeometry {
      * Calculate Theta Lorentz based on solenoid scale and drift settings
      * @param layer
      * @param sector
+     * @param x
+     * @param y
+     * @param z
+     * @param swim
      * @return thetaL in radians
      */
     public double getThetaLorentz(int layer, int sector, double x, double y, double z, Swim swim) {
@@ -906,18 +878,6 @@ public class BMTGeometry {
         }
         if (Constants.getSolenoidScale()<0) thetaL=-thetaL; 
         return thetaL;
-    }
-    
-    
-    /**
-     * Calculate Lorentz angle correction
-     * @param layer
-     * @param sector
-     * @return 
-     */
-    @Deprecated
-    public double LorentzAngleCorr(int layer, int sector) {
-        return (this.getThickness()/2 * Math.tan(this.getThetaLorentz(layer, sector))) / this.getRadius(layer);
     }
 
     /**
@@ -1185,394 +1145,5 @@ public class BMTGeometry {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
-       
     
-    
-    //added methods:
-//    public int isInDetector(int layer, double angle, double jitter) {
-//        int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
-//        if (angle < 0) {
-//            angle += 2 * Math.PI; // from 0 to 2Pi
-//        }
-//        double angle_i = 0; // first angular boundary init
-//        double angle_f = 0; // second angular boundary for detector A, B, or C init
-//        int num_detector = 2;
-//        //double jitter = Math.toRadians(BMTConstants.isInSectorJitter);
-//        for (int i = 0; i < 3; i++) {
-//
-//            //angle_i=BMTConstants.getCRCEDGE1()[num_region][i]+BMTConstants.getCRCXPOS()[num_region]/Constants.getCRCRADIUS()[num_region];
-//            //angle_f=BMTConstants.getCRCEDGE1()[num_region][i]+(BMTConstants.getCRCXPOS()[num_region]+BMTConstants.getCRCLENGTH()[num_region])/Constants.getCRCRADIUS()[num_region];
-//            angle_i = BMTConstants.getCRCEDGE1()[num_region][i];
-//            angle_f = BMTConstants.getCRCEDGE2()[num_region][i];
-//            if ((angle >= angle_i - jitter && angle <= angle_f + jitter)) {
-//                num_detector = i;
-//            }
-//        }
-//       
-//        return num_detector;
-//    }
-//    public int isInSector(int layer, double angle, double jitter) {
-//        //double jitter = Math.toRadians(BMTConstants.isInSectorJitter);
-//        int value = -1;
-//        int num_det = this.isInDetector(layer, angle, jitter);
-//        /*	if(num_det == 0)
-//			value = 2;
-//		if(num_det ==2)
-//			value = 3;
-//		if(num_det == 1)
-//			value = 1; */
-//        value = num_det + 1;
-//
-//        return value;
-//    }
-    
-//    /**
-//     *
-//     * @param layer the hit layer
-//     * @param strip the hit strip
-//     * @return the z position in mm for the C-detectors
-//     */
-//    public double CRCStrip_GetZ(int layer, int strip) {
-//
-//        int num_strip = strip - 1;     			// index of the strip (starts at 0)
-//        int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
-//
-//        //For CR6C, this function returns the Z position of the strip center
-//        int group = 0;
-//        int limit = BMTConstants.getCRCGROUP()[num_region][group];
-//        double zc = BMTConstants.getCRCZMIN()[num_region];
-//
-//        if (num_strip > 0) {
-//            for (int j = 1; j < num_strip + 1; j++) {
-//                zc += BMTConstants.getCRCWIDTH()[num_region][group];
-//                if (j >= limit) { //test if we change the width
-//                    group++;
-//                    limit += BMTConstants.getCRCGROUP()[num_region][group];
-//                }
-//              }
-//        }
-//        zc += BMTConstants.getCRCWIDTH()[num_region][group]/2.;
-//        return zc; //in mm
-//    }
-
-//    public double CRCStrip_GetPitch(int layer, int strip) {
-//
-//        int num_strip = strip - 1;     			// index of the strip (starts at 0)
-//        int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
-//
-//        //For CR6C, this function returns the Z position of the strip center
-//        int group = 0;
-//        int limit = BMTConstants.getCRCGROUP()[num_region][group];
-//
-//        if (num_strip > 0) {
-//            for (int j = 1; j < num_strip + 1; j++) {
-//
-//                if (j >= limit) { //test if we change the width
-//                    group++;
-//                    limit += BMTConstants.getCRCGROUP()[num_region][group];
-//                }
-//            }
-//        }
-//
-//        return BMTConstants.getCRCWIDTH()[num_region][group]; //
-//    }
-
-//    /**
-//     *
-//     * @param layer the layer 1...6
-//     * @param angle the position angle of the hit in the Z detector
-//     * @return the Z strip as a function of azimuthal angle
-//     */
-//    public int getZStrip(int layer, double angle) { // the angle is the Lorentz uncorrected angle
-//        double jitter = Math.toRadians(BMTConstants.isInSectorJitter);
-//        int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
-//        int num_detector = isInDetector(layer, angle, jitter);
-//        if (num_detector == -1) {
-//            return -1;
-//        }
-//
-//        if (angle < 0) {
-//            angle += 2 * Math.PI; // from 0 to 2Pi
-//        }
-//        if (num_detector == 1) {
-//            double angle_f = BMTConstants.getCRCEDGE1()[num_region][1] + (BMTConstants.getCRCXPOS()[num_region] + BMTConstants.getCRCLENGTH()[num_region]) / BMTConstants.getCRCRADIUS()[num_region] - 2 * Math.PI;
-//            if (angle >= 0 && angle <= angle_f) {
-//                angle += 2 * Math.PI;
-//            }
-//        }
-//        //double strip_calc = ( (angle-BMTConstants.getCRZEDGE1()[num_region][num_detector])*BMTConstants.getCRZRADIUS()[num_region]-BMTConstants.getCRZXPOS()[num_region]-BMTConstants.getCRZWIDTH()[num_region]/2.)/(BMTConstants.getCRZWIDTH()[num_region]+BMTConstants.getCRZSPACING()[num_region]);
-//        //double strip_calc = ((angle - BMTConstants.getCRZEDGE1()[num_region][num_detector]) * BMTConstants.getCRZRADIUS()[num_region]) / (BMTConstants.getCRZWIDTH()[num_region]);
-//        double strip_calc = ((angle - BMTConstants.getCRZEDGE1()[num_region][num_detector]) * BMTConstants.getCRZRADIUS()[num_region]) / (BMTConstants.getCRZWIDTH()[num_region])-0.5;
-//        strip_calc = (int) (Math.round(strip_calc * 1d) / 1d);
-//        int strip_num = (int) Math.floor(strip_calc);
-//
-//        int value = strip_num + 1;
-//        //int value = strip_num;
-//
-//        if (value < 1 || value > BMTConstants.getCRZNSTRIPS()[num_region]) {
-//            value = -1;
-//        }
-//
-//        return value;
-//    }
-
-//    public void setLorentzAngle(int layer, int sector) {
-//     	BMTConstants.setThetaL(layer, sector); 
-//    }
-////    // Correct strip position before clustering
-////    public int getLorentzCorrectedZStrip(int sector, int layer, int theMeasuredZStrip) {
-////
-////        double theMeasuredPhi = this.CRZStrip_GetPhi(sector, layer, theMeasuredZStrip);
-////        double theLorentzCorrectedAngle = this.LorentzAngleCorr(theMeasuredPhi, layer);
-////        
-////        return this.getZStrip(layer, theLorentzCorrectedAngle);
-////    }   
-//    public double LorentzAngleCorr(double phi, int layer) {
-//
-//        int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
-//        //return phi +( BMTConstants.hDrift/2*Math.tan(BMTConstants.getThetaL()) )/Constants.getCRZRADIUS()[num_region];
-//        //return phi + (BMTConstants.hDrift * Math.tan(BMTConstants.getThetaL())) / (BMTConstants.getCRZRADIUS()[num_region]);
-//        return phi + (BMTConstants.hStrip2Det * Math.tan(BMTConstants.getThetaL())) / (BMTConstants.getCRZRADIUS()[num_region]);
-//    }
-//    
-//    /**
-//     *
-//     * @param sector
-//     * @param layer
-//     * @param x
-//     * @return a boolean indicating is the track hit is in the fiducial detector
-//     */
-//    public boolean isInFiducial(int sector, int layer, int axis,double[] x) {
-//
-//        boolean isInFid = false;
-//
-//        int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6;
-//
-//        double z_i = CRZ_GetZStrip(layer) - BMTConstants.getCRZLENGTH()[num_region] / 2.; // fiducial z-profile lower limit
-//        double z_f = CRZ_GetZStrip(layer) + BMTConstants.getCRZLENGTH()[num_region] / 2.; // fiducial z-profile upper limit
-//
-//        double R_i = 0; // inner radius init
-//        double R_f = 0; // outer radius init for a C or Z detector
-//        if (org.jlab.rec.cvt.bmt.OldGeometry.getZorC(layer) == 1) {
-//            R_i = BMTConstants.getCRZRADIUS()[num_region]; // Z layer
-//        }
-//        if (org.jlab.rec.cvt.bmt.OldGeometry.getZorC(layer) == 0) {
-//            R_i = BMTConstants.getCRCRADIUS()[num_region]; // // C-dtectors 
-//        }
-//        R_f = R_i + BMTConstants.hDrift;
-//
-//        double angle_i = 0; // first angular boundary init
-//        double angle_f = 0; // second angular boundary for detector A, B, or C init
-//        double A_i = CRC_GetBeginStrip(sector, layer);
-//        double A_f = CRC_GetEndStrip(sector, layer);
-//        angle_i = A_i;
-//        angle_f = A_f;
-//        if (A_i > A_f) { // for B-detector
-//            angle_f = A_i;
-//            angle_i = A_f;
-//        }
-//        // the hit parameters
-//        double angle = Math.atan2(x[1], x[0]);
-//        if (angle > 2 * Math.PI) {
-//            angle -= 2 * Math.PI;
-//        }
-//        double R = Math.sqrt(x[0] * x[0] + x[1] * x[1]);
-//        double z = x[2];
-//
-//        if ((angle_i - angle) < (angle_f - angle_i) && (R - R_i) < (R_f - R_i) && (z - z_i) < (z_f - z_i)) {
-//            isInFid = true;
-//        }
-//
-//        return isInFid;
-//    }
-//    /**
-//     *
-//     * @param sector the sector in CLAS12 1...3
-//     * @param layer the layer 1...6
-//     * @return the angle to localize the beginning of the strips
-//     */
-//    public double CRC_GetBeginStrip(int sector, int layer) {
-//        // Sector = num_detector + 1;	
-//        // num_detector = 0 (region A), 1 (region B), 2, (region C)
-//
-//        int num_detector = sector -1; 			// index of the detector (0...2)
-//        int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
-//
-//        //For CRC, this function returns the angle to localize the beginning of the strips
-//        double angle = BMTConstants.getCRCEDGE1()[num_region][num_detector] + BMTConstants.getCRCXPOS()[num_region] / BMTConstants.getCRCRADIUS()[num_region];
-//        if (angle > 2 * Math.PI) {
-//            angle -= 2 * Math.PI;
-//        }
-//        return angle; //in rad
-//    }
-//
-//    /**
-//     *
-//     * @param sector the sector in CLAS12 1...3
-//     * @param layer the layer 1...6
-//     * @return the angle to localize the end of the strips
-//     */
-//    public double CRC_GetEndStrip(int sector, int layer) {
-//        // Sector = num_detector + 1;	
-//        // num_detector = 0 (region A), 1 (region B), 2, (region C)
-//
-//        int num_detector = sector -1; 			// index of the detector (0...2)
-//        int num_region = (int) (layer + 1) / 2 - 1; 					// region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
-//
-//        //For CRC, this function returns the angle to localize the end of the strips
-//        double angle = BMTConstants.getCRCEDGE2()[num_region][num_detector] + BMTConstants.getCRCXPOS()[num_region] / BMTConstants.getCRCRADIUS()[num_region];
-//        if (angle > 2 * Math.PI) {
-//            angle -= 2 * Math.PI;
-//        }
-//        return angle; //in rad
-//    }
-//    /**
-//    *
-//    * @param angle
-//    * @param sector
-//    * @param layer
-//    * @param x
-//    * @return a boolean indicating if the given angle is the sector 
-//    */
-//    public boolean checkIsInSector( double angle, int sector, int layer, double jitter ) {
-//    	if( layer < 1 || layer > 6 ) {
-//    		System.err.println(" BMT layer has to be 1 <= layer <= 6");
-//    		return false;
-//    	}
-//    	if( sector < 1 || sector > 3 ) {
-//    		System.err.println(" BMT sector has to be 1 <= layer <= 3");
-//    		return false;
-//    	}
-//    	
-//    	int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
-//        double angle_i = 0; // first angular boundary init
-//        double angle_f = 0; // second angular boundary for detector A, B, or C init
-//        angle_i = BMTConstants.getCRCEDGE1()[num_region][sector-1];
-//        angle_f = BMTConstants.getCRCEDGE2()[num_region][sector-1];
-//        
-//
-//        if (angle < 0) {
-//            angle += 2 * Math.PI; // from 0 to 2Pi
-//        }
-//        
-//        if( sector == 3 ) {
-//        	if( angle < Math.PI ) {
-//        		if( angle < angle_f + jitter ) return true;
-//        		else return false;
-//        	}
-//        	else {
-//        		if( angle > angle_i - jitter ) return true;
-//        		else return false;
-//        	}
-//        }
-//        else {
-//            if ( (angle >= angle_i - jitter && angle <= angle_f + jitter))
-//            	return true;
-//            else
-//            	return false;
-//            
-//        }
-//    }
-    
-//    /**
-//     *
-//     * @param layer
-//     * @param trk_z the track z position of intersection with the C-detector
-//     * @return the C-strip
-//     */
-//    public int getCStrip(int layer, double trk_z) {
-//
-//        int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
-//        int strip_group = 0;
-//        int ClosestStrip = -1;
-//        // get group
-//        int len = BMTConstants.getCRCGROUP()[num_region].length;
-//        double[] Z_lowBound = new double[len];
-//        double[] Z_uppBound = new double[len];
-//        int[] NStrips = new int[len];
-//
-//        double zi = BMTConstants.getCRCZMIN()[num_region] + BMTConstants.getCRCOFFSET()[num_region];
-//        double z = trk_z - zi;
-//
-//        for (int i = 0; i < len; i++) {
-//            if(i==0) {
-//                Z_lowBound[i] = 0; 
-//                NStrips[i] = BMTConstants.getCRCGROUP()[num_region][i];
-//            }
-//            else {
-//                Z_lowBound[i] = Z_uppBound[i - 1];
-//                NStrips[i] = NStrips[i - 1] + BMTConstants.getCRCGROUP()[num_region][i];
-//            }
-//            Z_uppBound[i] = Z_lowBound[i] + BMTConstants.getCRCGROUP()[num_region][i] * BMTConstants.getCRCWIDTH()[num_region][i];
-//            
-//            if (z >= Z_lowBound[i] && z <= Z_uppBound[i]) {
-//                strip_group = i;
-//                ClosestStrip = 1 + (int) Math.floor((z - Z_lowBound[strip_group]) / BMTConstants.getCRCWIDTH()[num_region][strip_group]);
-//                if(i>0)  ClosestStrip += NStrips[i - 1];
-//                //ClosestStrip = (int) (Math.round(((z-Z_lowBound[strip_group])/(BMTConstants.getCRCWIDTH()[num_region][strip_group] + BMTConstants.getCRCSPACING()[num_region]))))+NStrips[i-1];
-//
-//                len = i;
-//            }
-//        }
-//        return ClosestStrip;
-//    }
-//    
-//    public boolean isInFiducial(double x, double y, double z, int layer) {
-//
-//        boolean isOK = false;
-//
-//        int num_region = (int) (layer + 1) / 2 - 1;
-//
-//        int axis = OldGeometry.getZorC(layer);
-//
-//        double R = 0;
-//        if (axis == 0) {
-//            R = BMTConstants.getCRCRADIUS()[num_region];
-//        }
-//        if (axis == 1) {
-//            R = BMTConstants.getCRZRADIUS()[num_region];
-//        }
-//
-//        double CRZLENGTH = BMTConstants.getCRCLENGTH()[num_region];
-//        double CRZZMIN = BMTConstants.getCRZZMIN()[num_region];
-//        double CRZOFFSET = BMTConstants.getCRZOFFSET()[num_region];
-//
-//        double z_min = CRZZMIN + CRZOFFSET;
-//        double z_max = z_min + CRZLENGTH;
-//
-//        double epsilon = 1e-1;
-//
-//        if (Math.abs(x) < R + epsilon && Math.abs(y) < R + epsilon && z > z_min - epsilon && z < z_max + epsilon) {
-//            isOK = true;
-//        }
-//        return isOK;
-//    }
-//    
-//    /**
-//     *
-//     * @param layer the layer 1...6
-//     * @return the Z position of the strip center
-//     */
-//    private double CRZ_GetZStrip(int layer) {
-//        int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
-//        //For CRZ, this function returns the Z position of the strip center
-//        double zc = BMTConstants.getCRZZMIN()[num_region] + BMTConstants.getCRZOFFSET()[num_region] + BMTConstants.getCRZLENGTH()[num_region] / 2.;
-//        return zc; //in mm
-//    }
-
-
-    public void putInFrame(Point3D cent, Point3D offset, Vector3D rotation, boolean inverse) {
-        if(inverse==false) {
-            cent.rotateX(rotation.x());
-            cent.rotateY(rotation.y());
-            cent.rotateZ(rotation.z());
-            cent.translateXYZ(offset.x(),offset.y(),offset.z());
-        } else {
-            cent.translateXYZ(offset.x(),offset.y(),offset.z());
-            cent.rotateZ(rotation.z());
-            cent.rotateY(rotation.y());
-            cent.rotateX(rotation.x());
-        }
-    }
-
 }

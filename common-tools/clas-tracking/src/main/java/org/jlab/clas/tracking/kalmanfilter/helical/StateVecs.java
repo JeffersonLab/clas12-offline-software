@@ -250,91 +250,6 @@ public class StateVecs extends AStateVecs {
 
         return Q;
     }
-//    private void setHelix(Helix util, double x0, double y0, double z0, double px0, double py0, double pz0,
-//            int q, double B) {
-//        util.setTurningSign(q);
-//        util.setB(B);
-//        double pt = Math.sqrt(px0*px0 + py0*py0);
-//        util.setR(pt/(B*util.getLightVelocity())) ;
-//        util.setPhi0(Math.atan2(py0, px0));
-//        util.setTanL(pz0/pt);
-//        util.setZ0(z0);
-//        util.setOmega((double) -q/util.getR());
-//
-//        double S = Math.sin(util.getPhi0());
-//        double C = Math.cos(util.getPhi0());
-//        
-//        util.setCosphi0(C);
-//        util.setSinphi0(S);
-//        
-//        if(Math.abs(S)>=Math.abs(C)) {
-//            util.setD0(-(x0-X0.get(0))/S) ;
-//        } else {
-//            util.setD0((y0-Y0.get(0))/C) ;
-//        }
-//
-//        util.update();
-//    }
-//    private void setHelixPars(StateVec kVec, Swim swim) {
-//        StateVec vec = new StateVec(0, kVec);
-//        vec.updateHelix();
-//        vec.phi = 0;
-//        vec.updateFromHelix();
-//
-//        double x0 = X0.get(vec.k) + vec.d_rho * Math.cos(vec.phi0) ;
-//        double y0 = Y0.get(vec.k) + vec.d_rho * Math.sin(vec.phi0) ;
-//        double z0 = Z0.get(vec.k) + vec.dz ;
-//        double invKappa = 1. / Math.abs(vec.kappa);
-//        double px0 = -invKappa * Math.sin(vec.phi0 );
-//        double py0 = invKappa * Math.cos(vec.phi0 );
-//        double pz0 = invKappa * vec.tanL;
-//
-//        int ch = (int) KFitter.polarity*(int) Math.signum(vec.kappa);
-//
-//        double B = 1. / (lightVel * vec.alpha);
-////        System.out.println(x0 + " " + y0 + " " + z0 + " " + px0  + " " + py0 + " " + pz0);
-//        this.setHelix(util, x0,y0,z0,px0,py0,pz0,ch, B);
-//    }
-    
-//    @Override
-//    public void setTrackPars(StateVec kVec, Swim swim) {
-//
-//        double x0 = kVec.x0 + kVec.d_rho * Math.cos(kVec.phi0) ;
-//        double y0 = kVec.y0 + kVec.d_rho * Math.sin(kVec.phi0) ;
-//        double z0 = kVec.z0 + kVec.dz ;
-//        double invKappa = 1. / Math.abs(kVec.kappa);
-//        double px0 = -invKappa * Math.sin(kVec.phi0 );
-//        double py0 = invKappa * Math.cos(kVec.phi0 );
-//        double pz0 = invKappa * kVec.tanL;
-//        int ch = (int) KFitter.polarity*(int) Math.signum(kVec.kappa);
-////        System.out.println("old pivot " + new Point3D(x0,y0,z0).toString() + new Vector3D(px0,py0,pz0).toString());
-//        swim.SetSwimParameters(
-//                        x0/units,
-//                        y0/units,
-//                        z0/units,
-//                        px0, py0, pz0, ch);
-//    }
-
-
-//    private void iterateHelixAtR(int it, int k, StateVec kVec, Swim swim,
-//            double r, B Bf, Point3D ps) {
-//        for(int i = 0; i < it; i++) {
-//            this.setHelixPars(kVec, swim);
-//            ps = util.getHelixPointAtR(r);
-//            kVec.x = ps.x();
-//            kVec.y = ps.y();
-//            kVec.z = ps.z();
-//            this.tranState(k, kVec, swim);
-//            Bf = new B(kVec.k, kVec.x, kVec.y, kVec.z, swim);
-//            kVec.alpha = Bf.alpha;
-//            this.tranState(k, kVec, swim);
-//            this.setHelixPars(kVec, swim);
-//            kVec.x = ps.x();
-//            kVec.y = ps.y();
-//            kVec.z = ps.z();
-//            this.tranState(k, kVec, swim);
-//        }
-//    }
 
     @Override
     public Vector3D P(int kf) {
@@ -400,17 +315,6 @@ public class StateVecs extends AStateVecs {
         } else {
             return new Vector3D(0, 0, 0);
         }
-    }
-
-    @Override
-    public Helix setTrackPars() {
-        Vector3D X = this.X0(0);
-        Vector3D P = this.P0(0);
-
-        int q = KFitter.polarity*(int) Math.signum(this.trackTraj.get(0).kappa);
-        double B = 1./Math.abs(this.trackTraj.get(0).alpha)/lightVel ;
-
-        return new Helix(X.x(), X.y(), X.z(), P.x(), P.y(), P.z(), q, B, this.xref, this.yref, this.units);
     }
 
     

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.tracking.patternrec;
 
 import java.util.ArrayList;
@@ -43,7 +38,7 @@ public class LineHoughTrans {
         acc     = new int[n][nTh];
         results = new int[n * nTh *3];
     }
-    private Map<Integer, Integer> peaks = new HashMap<Integer, Integer>();
+    private Map<Integer, Integer> peaks = new HashMap<>();
     public int minAccVal = 4;
     
     public void fillAccumulator(List<Double>X, List<Double>Y) {
@@ -63,14 +58,14 @@ public class LineHoughTrans {
     }
     List<Point2D> xy; // xy of seed points
     
-    private List<ArrayList<Point2D>> set = new ArrayList<ArrayList<Point2D>>();
-    public List<ArrayList<Point2D>> LHTSeeds = new ArrayList<ArrayList<Point2D>>();
+    private List<ArrayList<Point2D>> set = new ArrayList<>();
+    public List<ArrayList<Point2D>> LHTSeeds = new ArrayList<>();
         
     public void findLines(List<Double>X, List<Double>Y, List<Integer>L) {
-        for(int j = 0; j < set.size(); j++) {
+        for (ArrayList<Point2D> set1 : set) {
             set.clear();
         }
-        for(int j = 0; j < LHTSeeds.size(); j++) {
+        for (ArrayList<Point2D> LHTSeed : LHTSeeds) {
             LHTSeeds.clear();
         }
         fillAccumulator(X, Y);
@@ -84,7 +79,7 @@ public class LineHoughTrans {
         
         for(Map.Entry entry:sorted.entrySet()){
             
-            xy = new ArrayList<Point2D>((int)entry.getValue());
+            xy = new ArrayList<>((int)entry.getValue());
             
             double t;
             int l;
@@ -126,22 +121,22 @@ public class LineHoughTrans {
     
     private List<ArrayList<Point2D>> split() {
         hxy.clear();
-        List<ArrayList<Point2D>> newset = new ArrayList<ArrayList<Point2D>>();
+        List<ArrayList<Point2D>> newset = new ArrayList<>();
         //get list with single hit per layer
-        List<Point2D> base = new ArrayList<Point2D>(); // xy of seed points
+        List<Point2D> base = new ArrayList<>(); // xy of seed points
         base.add(xy.get(0));
         for(int i = 1; i < xy.size(); i++) {
             if(xy.get(i-1).getLayer() != xy.get(i).getLayer()) {
                 base.add(xy.get(i));
             } 
         }
-        List<Point2D> offbase = new ArrayList<Point2D>(); 
+        List<Point2D> offbase = new ArrayList<>(); 
         offbase.addAll(xy);
         offbase.removeAll(base);
         
         //get same layer hits
         for(Point2D p : offbase) {
-            hxy.put(p.getLayer(),new ArrayList<Point2D>());
+            hxy.put(p.getLayer(),new ArrayList<>());
         }
         for(Point2D p : offbase) {
             hxy.get(p.getLayer()).add(p);
@@ -150,7 +145,7 @@ public class LineHoughTrans {
         
         for (Map.Entry<Integer, List<Point2D>> entry : hxy.entrySet()) {
             for(Point2D p : entry.getValue()) {
-                List<Point2D> base2 = new ArrayList<Point2D>();
+                List<Point2D> base2 = new ArrayList<>();
                 base2.addAll(base);
                 for(int k = 0; k < base2.size(); k++) {
                     Point2D bp = base2.get(k);

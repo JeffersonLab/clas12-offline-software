@@ -12,23 +12,23 @@ public class CosmicFitPars {
 
     // The constructor
     public CosmicFitPars(Ray ray, double[] chi2) {
-        set_ray(ray);
-        set_chisq(chi2);
+        setRay(ray);
+        setChi2(chi2);
     }
 
-    public double[] get_chisq() {
+    public double[] getChi2() {
         return _chisq;
     }
 
-    public void set_chisq(double[] chisq) {
+    public final void setChi2(double[] chisq) {
         this._chisq = chisq;
     }
 
-    public Ray get_ray() {
+    public Ray getRay() {
         return _ray;
     }
 
-    public void set_ray(Ray _ray) {
+    public final void setRay(Ray _ray) {
         this._ray = _ray;
     }
 

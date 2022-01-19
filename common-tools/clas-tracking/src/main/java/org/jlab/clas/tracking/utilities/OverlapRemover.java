@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.tracking.utilities;
 
 import java.util.ArrayList;
@@ -59,7 +54,7 @@ public class OverlapRemover {
     }
     
     private List<TObject> findOverlapObjects(List<TObject> c0, List<TObject> c1) {
-        List<TObject> covrl = new ArrayList<TObject>();
+        List<TObject> covrl = new ArrayList<>();
         c0.sort(Comparator.comparing(TObject::getLayer).thenComparing(TObject::getR).thenComparing(TObject::getZ));
         c1.sort(Comparator.comparing(TObject::getLayer).thenComparing(TObject::getR).thenComparing(TObject::getZ));
         
@@ -109,7 +104,7 @@ public class OverlapRemover {
     }
     
     public void removeDuplicates(List<Seed> seeds) {
-        List<Seed> dupl = new ArrayList<Seed>();
+        List<Seed> dupl = new ArrayList<>();
         for(int i = 0; i < seeds.size(); i++) {
             Seed ci = seeds.get(i);
             seeds.remove(i); //exlude it from list

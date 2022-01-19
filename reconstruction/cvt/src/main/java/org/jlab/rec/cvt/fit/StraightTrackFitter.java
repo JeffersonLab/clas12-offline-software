@@ -55,7 +55,7 @@ public class StraightTrackFitter {
     public StraightTrackFitter() {
     }
 
-    private List<Double> W = new ArrayList<Double>();
+    private final List<Double> W = new ArrayList<>();
 
     public FitStatus fit(List<Double> X, List<Double> Y, List<Double> Z, List<Double> Rho, List<Double> errRt, List<Double> errRho, List<Double> ErrZ) {
         //  Initialize the various fitter outputs
@@ -75,7 +75,7 @@ public class StraightTrackFitter {
         // fit the points 
         // check the status
         _xyfit = new LineFitter();
-        boolean xyfitstatusOK = _xyfit.fitStatus(X, Y, W, new ArrayList<Double>(X.size()), X.size());
+        boolean xyfitstatusOK = _xyfit.fitStatus(X, Y, W, new ArrayList<>(X.size()), X.size());
         double slope = _xyfit.getFit().slope();
         double intercept = _xyfit.getFit().intercept();
         Line3D line = new Line3D(new Point3D(X.get(0),slope*X.get(0)+intercept,0), new Point3D(X.get(1),slope*X.get(1)+intercept,0));
@@ -146,7 +146,7 @@ public class StraightTrackFitter {
 
         Helix helixresult = new Helix(fit_dca, fit_phi_at_dca, fit_curvature, fit_Z0, fit_tandip, 0, 0, fit_covmatrix);
 
-        set_helix(helixresult);
+        setHelix(helixresult);
         _chisq[0] = _linefitpars.chisq();
         _chisq[1] = _linefitpars.chisq();
 
@@ -182,19 +182,19 @@ public class StraightTrackFitter {
     }
 
     
-    public Helix get_helix() {
+    public Helix getHelix() {
         return _helix;
     }
 
-    public void set_helix(Helix helix) {
+    public void setHelix(Helix helix) {
         this._helix = helix;
     }
 
-    public double[] get_chisq() {
+    public double[] getChi2() {
         return _chisq;
     }
 
-    public void set_covmat(double[] chisq) {
+    public void setCovMat(double[] chisq) {
         this._chisq = chisq;
     }
 

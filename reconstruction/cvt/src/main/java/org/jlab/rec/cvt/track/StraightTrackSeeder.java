@@ -33,46 +33,43 @@ public class StraightTrackSeeder {
         xbeam = xb;
         ybeam = yb;
         //init lists for scan
-        sortedCrosses = new ArrayList<ArrayList<ArrayList<Cross>>>();
+        sortedCrosses = new ArrayList<>();
         for(int b =0; b<NBINS; b++) {
-            sortedCrosses.add(b, new ArrayList<ArrayList<Cross>>() );
+            sortedCrosses.add(b, new ArrayList<>() );
             for(int l =0; l<3; l++) {
-                sortedCrosses.get(b).add(l,new ArrayList<Cross>() );
+                sortedCrosses.get(b).add(l,new ArrayList<>() );
             }
         }
-        scan = new ArrayList<ArrayList<Cross>>();
-        seedMap = new HashMap<Double, ArrayList<Cross>>(); // init seeds;
-        seedScan = new ArrayList<Seed>();
+        scan = new ArrayList<>();
+        seedMap = new HashMap<>(); // init seeds;
+        seedScan = new ArrayList<>();
         //for fitting
-        Xs = new ArrayList<Double>();
-        Ys = new ArrayList<Double>();
-        Ws = new ArrayList<Double>();
+        Xs = new ArrayList<>();
+        Ys = new ArrayList<>();
+        Ws = new ArrayList<>();
     }
     private void MatchSeed(List<Cross> othercrs) {
         
         for (Seed seed : seedScan) {
-            double d = seed.get_Doca();
-            double r = seed.get_Rho();
-            double f = seed.get_Phi();
+            double d = seed.getDoca();
+            double r = seed.getRho();
+            double f = seed.getPhi();
 
-            Map<Integer, Cross> matchBMT = new HashMap<Integer, Cross>();
+            Map<Integer, Cross> matchBMT = new HashMap<>();
             for (Cross c : othercrs ) { 
-//                c.set_AssociatedTrackID(22220);
                 if(this.InSamePhiRange(seed, c)== true) {
-//                    c.set_AssociatedTrackID(22221);
-                    double xi = c.get_Point().x(); 
-                    double yi = c.get_Point().y();
+                    double xi = c.getPoint().x(); 
+                    double yi = c.getPoint().y();
                     double ri = Math.sqrt(xi*xi+yi*yi);
                     double fi = Math.atan2(yi,xi) ;
 
                     double res = this.calcResi(r, ri, d, f, fi);
                     if(Math.abs(res)<20) { 
-//                        c.set_AssociatedTrackID(22222);
                         // add to seed   
                         if(matchBMT.containsKey(c.getOrderedRegion())) {
                             Cross cs = (Cross) matchBMT.get(c.getOrderedRegion());
-                            double xis = cs.get_Point().x(); 
-                            double yis = cs.get_Point().y();
+                            double xis = cs.getPoint().x(); 
+                            double yis = cs.getPoint().y();
                             double ris = Math.sqrt(xis*xis+yis*yis);
                             double fis = Math.atan2(yis,xis) ;
                             if(Math.abs(this.calcResi(r, ris, d, f, fis))>Math.abs(res)) {
@@ -86,7 +83,7 @@ public class StraightTrackSeeder {
             }
             // add hashmap items to list 
             for (Cross crs : matchBMT.values())  
-                seed.get_Crosses().add((Cross) crs);
+                seed.getCrosses().add((Cross) crs);
         }
     }
     private void FitSeed(List<Cross> seedcrs) {
@@ -100,10 +97,10 @@ public class StraightTrackSeeder {
         Ys.add(0, this.ybeam);
         Ws.add(0,0.1);
         for (Cross c : seedcrs ) { 
-            if(c.get_Type()==BMTType.C ) System.err.println("WRONG CROSS TYPE");
-            Xs.add(c.get_Point().x()); 
-            Ys.add(c.get_Point().y());
-            Ws.add(1. / (c.get_PointErr().x()*c.get_PointErr().x()+c.get_PointErr().y()*c.get_PointErr().y()));
+            if(c.getType()==BMTType.C ) System.err.println("WRONG CROSS TYPE");
+            Xs.add(c.getPoint().x()); 
+            Ys.add(c.getPoint().y());
+            Ws.add(1. / (c.getPointErr().x()*c.getPointErr().x()+c.getPointErr().y()*c.getPointErr().y()));
             
         }
         CircleFitter circlefit = new CircleFitter(xbeam, ybeam);
@@ -117,8 +114,8 @@ public class StraightTrackSeeder {
         
         boolean failed = false;
         for (Cross c : seedcrs ) { 
-            double xi = c.get_Point().x(); 
-            double yi = c.get_Point().y();
+            double xi = c.getPoint().x(); 
+            double yi = c.getPoint().y();
             double ri = Math.sqrt(xi*xi+yi*yi);
             double fi = Math.atan2(yi,xi) ;
             
@@ -136,7 +133,7 @@ public class StraightTrackSeeder {
     /*
     Finds BMT seeds
     */
-    public void FindSeedCrossList(List<Cross> crosses) {
+    public void findSeedCrossList(List<Cross> crosses) {
         
         seedMap.clear();
         
@@ -144,7 +141,7 @@ public class StraightTrackSeeder {
             scan.get(si1).clear();
         
         for(int i = 0; i< phiShift.length; i++) {
-            FindSeedCrossesFixedBin(crosses, phiShift[i]); 
+            findSeedCrossesFixedBin(crosses, phiShift[i]); 
         }
         
         seedMap.forEach((key,value) -> this.FitSeed(value));
@@ -154,7 +151,7 @@ public class StraightTrackSeeder {
     /*
     Scans overphase space to find groups of BMT crosses 
     */
-    private void FindSeedCrossesFixedBin(List<Cross> crosses, double phiShift) {
+    private void findSeedCrossesFixedBin(List<Cross> crosses, double phiShift) {
         for(int b =0; b<NBINS; b++) {
             for(int l =0; l<3; l++) {
                 sortedCrosses.get(b).get(l).clear();
@@ -162,7 +159,7 @@ public class StraightTrackSeeder {
         }
         int[][] LPhi = new int[NBINS][3];
         for (int i = 0; i < crosses.size(); i++) {
-            double phi = Math.toDegrees(crosses.get(i).get_Point().toVector3D().phi());
+            double phi = Math.toDegrees(crosses.get(i).getPoint().toVector3D().phi());
 
             phi += phiShift;
             if (phi < 0) {
@@ -172,8 +169,8 @@ public class StraightTrackSeeder {
             int binIdx = (int) (phi / (360./NBINS) );
             if(binIdx>35)
                 binIdx = 35;
-            sortedCrosses.get(binIdx).get(crosses.get(i).get_Region() - 1).add(crosses.get(i));
-            LPhi[binIdx][crosses.get(i).get_Region() - 1]++; 
+            sortedCrosses.get(binIdx).get(crosses.get(i).getRegion() - 1).add(crosses.get(i));
+            LPhi[binIdx][crosses.get(i).getRegion() - 1]++; 
         }
         
         for (int b = 0; b < NBINS; b++) {
@@ -208,7 +205,7 @@ public class StraightTrackSeeder {
                         int s = hits.size();
                         int index = (int) Math.pow(2,s);
                         for(Cross c : hits) {
-                            seedIdx +=c.get_Id()*Math.pow(10, index);
+                            seedIdx +=c.getId()*Math.pow(10, index);
                             index-=4;
                         }
                         seedMap.put(seedIdx, hits);
@@ -220,34 +217,34 @@ public class StraightTrackSeeder {
 
     
 
-    List<Seed> BMTmatches = new ArrayList<Seed>();
+    List<Seed> BMTmatches = new ArrayList<>();
     public List<Seed> findSeed(List<Cross> svt_crosses, List<Cross> bmt_crosses, boolean isSVTOnly) {
         BMTmatches.clear();
         seedScan.clear() ;
-        List<Seed> seedlist = new ArrayList<Seed>();
+        List<Seed> seedlist = new ArrayList<>();
 
-        List<Cross> crosses = new ArrayList<Cross>();
-        List<Cross> bmtC_crosses = new ArrayList<Cross>();
+        List<Cross> crosses = new ArrayList<>();
+        List<Cross> bmtC_crosses = new ArrayList<>();
         
         if(isSVTOnly == false ) {
             for(Cross c : bmt_crosses) { 
-                if(c.get_Type()== BMTType.Z)
+                if(c.getType()== BMTType.Z)
                     crosses.add(c);
-                if(c.get_Type()==BMTType.C)
+                if(c.getType()==BMTType.C)
                     bmtC_crosses.add(c);
             }
         }
-        //this.FindSeedCrossList(crosses);
+        //this.findSeedCrossList(crosses);
         //this.MatchSeed(svt_crosses);
-        this.FindSeedCrossList(svt_crosses);
+        this.findSeedCrossList(svt_crosses);
         this.MatchSeed(crosses);
         
         for(Seed mseed : seedScan) { 
-            List<Cross> seedcrs = mseed.get_Crosses();
+            List<Cross> seedcrs = mseed.getCrosses();
             
 //            for (Cross c : seedcrs ) { 
-//                if(c.get_Type()==BMTType.C ) continue;
-//                c.set_AssociatedTrackID(122220);
+//                if(c.getType()==BMTType.C ) continue;
+//                c.setAssociatedTrackID(122220);
 //            }
           // loop until a good circular fit. removing far crosses each time
           boolean circlefitstatusOK = false;
@@ -263,12 +260,12 @@ public class StraightTrackSeeder {
             Ys.add(0, this.ybeam);
             Ws.add(0, 0.1);
             for (Cross c : seedcrs ) { 
-                if(c.get_Type()==BMTType.C ) continue;
-//                c.set_AssociatedTrackID(122221);
-                Xs.add(c.get_Point().x()); 
-                Ys.add(c.get_Point().y());
-                Ws.add(1. / (c.get_PointErr().x()*c.get_PointErr().x()
-                        +c.get_PointErr().y()*c.get_PointErr().y()));
+                if(c.getType()==BMTType.C ) continue;
+//                c.setAssociatedTrackID(122221);
+                Xs.add(c.getPoint().x()); 
+                Ys.add(c.getPoint().y());
+                Ws.add(1. / (c.getPointErr().x()*c.getPointErr().x()
+                        +c.getPointErr().y()*c.getPointErr().y()));
             }
 
             CircleFitter circlefit = new CircleFitter(xbeam, ybeam);
@@ -282,15 +279,15 @@ public class StraightTrackSeeder {
               double r = pars.rho();
               double f = pars.phi();
               for (Cross c : seedcrs ) { 
-                if(c.get_Type()==BMTType.C ) continue;
-//                c.set_AssociatedTrackID(122222);
-                    double xi = c.get_Point().x(); 
-                    double yi = c.get_Point().y();
+                if(c.getType()==BMTType.C ) continue;
+//                c.setAssociatedTrackID(122222);
+                    double xi = c.getPoint().x(); 
+                    double yi = c.getPoint().y();
                     double ri = Math.sqrt(xi*xi+yi*yi);
                     double fi = Math.atan2(yi,xi) ;
                     double res = this.calcResi(r, ri, d, f, fi);
                     if(Math.abs(res)>SVTParameters.RESIMAX) {
-                        //System.out.println(" remove detector " + c .get_Detector() + " region " + c.get_Region() + " sector " + c.get_Sector()  );
+                        //System.out.println(" remove detector " + c .getDetector() + " region " + c.getRegion() + " sector " + c.getSector()  );
                         seedcrs.remove(c);
                         break;
                     }
@@ -301,37 +298,37 @@ public class StraightTrackSeeder {
 
 
         for(Seed mseed : seedScan) { 
-            List<Cross> seedcrs = mseed.get_Crosses();
+            List<Cross> seedcrs = mseed.getCrosses();
             Track cand = null;
             if(seedcrs.size()>=3)
                 cand = fitSeed(seedcrs, 5, false);
             if (cand != null) {
                 Seed seed = new Seed();
-                seed.set_Crosses(seedcrs);
-                seed.set_Helix(cand.get_helix());
+                seed.setCrosses(seedcrs);
+                seed.setHelix(cand.getHelix());
                 
                 //match to BMT
                 if (seed != null ) {
-                    List<Cross> sameSectorCrosses = this.FindCrossesInSameSectorAsSVTTrk(seed, bmtC_crosses);
+                    List<Cross> sameSectorCrosses = this.findCrossesInSameSectorAsSVTTrk(seed, bmtC_crosses);
                     BMTmatches.clear();
                     if (sameSectorCrosses.size() >= 0) {
                         BMTmatches = this.findCandUsingMicroMegas(seed, sameSectorCrosses);
                     } 
                     
                     for (Seed bseed : BMTmatches) {
-                        Collections.sort(bseed.get_Crosses());
+                        Collections.sort(bseed.getCrosses());
                         //refit using the BMT
-                        Track bcand = fitSeed(bseed.get_Crosses(), 5, false);
+                        Track bcand = fitSeed(bseed.getCrosses(), 5, false);
                         if (bcand != null) {
                             seed = new Seed();
-                            seed.set_Crosses(bseed.get_Crosses());
-                            seed.set_Helix(bcand.get_helix());
+                            seed.setCrosses(bseed.getCrosses());
+                            seed.setHelix(bcand.getHelix());
                         }
                     }
 
                     seedlist.add(seed); 
                 } else { 
-                //    seedlist.add(seed); System.out.println("no BMT matched"+seed.get_Helix().get_Z0());
+                //    seedlist.add(seed); System.out.println("no BMT matched"+seed.getHelix().getZ0());
                 }
             }
         }
@@ -339,22 +336,22 @@ public class StraightTrackSeeder {
     }
     
 
-    private List<Cross> FindCrossesInSameSectorAsSVTTrk(Seed seed, List<Cross> bmt_crosses) {
-        List<Cross> bmt_crossesInSec = new ArrayList<Cross>();
+    private List<Cross> findCrossesInSameSectorAsSVTTrk(Seed seed, List<Cross> bmt_crosses) {
+        List<Cross> bmt_crossesInSec = new ArrayList<>();
         //double angle_i = 0; // first angular boundary init
         //double angle_f = 0; // second angular boundary for detector A, B, or C init
         
         double jitter = Math.toRadians(10); // 10 degrees jitter
         for (int i = 0; i < bmt_crosses.size(); i++) { 
-            Point3D ref =seed.get_Crosses().get(0).get_Point();
+            Point3D ref =seed.getCrosses().get(0).getPoint();
             // the hit parameters
             double angle = Math.atan2(ref.y(), ref.x());
             if (angle < 0) {
                 angle += 2 * Math.PI;
             }
-            //if (bmt_geo.isInDetector(bmt_crosses.get(i).get_Region()*2-1, angle, jitter) 
-            //        == bmt_crosses.get(i).get_Sector() - 1) 
-            if (Constants.BMTGEOMETRY.inDetector(bmt_crosses.get(i).get_Region()*2-1, bmt_crosses.get(i).get_Sector(), ref)==true){
+            //if (bmt_geo.isInDetector(bmt_crosses.get(i).getRegion()*2-1, angle, jitter) 
+            //        == bmt_crosses.get(i).getSector() - 1) 
+            if (Constants.BMTGEOMETRY.inDetector(bmt_crosses.get(i).getRegion()*2-1, bmt_crosses.get(i).getSector(), ref)==true){
                 bmt_crossesInSec.add(bmt_crosses.get(i)); 
             }
             
@@ -363,16 +360,16 @@ public class StraightTrackSeeder {
         return bmt_crossesInSec;
     }
 
-    private List<Double> X = new ArrayList<Double>();
-    private List<Double> Y = new ArrayList<Double>();
-    private List<Double> Z = new ArrayList<Double>();
-    private List<Double> Rho = new ArrayList<Double>();
-    private List<Double> ErrZ = new ArrayList<Double>();
-    private List<Double> ErrRho = new ArrayList<Double>();
-    private List<Double> ErrRt = new ArrayList<Double>();
-    List<Cross> BMTCrossesC = new ArrayList<Cross>();
-    List<Cross> BMTCrossesZ = new ArrayList<Cross>();
-    List<Cross> SVTCrosses = new ArrayList<Cross>();
+    private final List<Double> X = new ArrayList<>();
+    private final List<Double> Y = new ArrayList<>();
+    private final List<Double> Z = new ArrayList<>();
+    private final List<Double> Rho = new ArrayList<>();
+    private final List<Double> ErrZ = new ArrayList<>();
+    private final List<Double> ErrRho = new ArrayList<>();
+    private final List<Double> ErrRt = new ArrayList<>();
+    private final List<Cross> BMTCrossesC = new ArrayList<>();
+    private final List<Cross> BMTCrossesZ = new ArrayList<>();
+    private final List<Cross> SVTCrosses = new ArrayList<>();
     
     public Track fitSeed(List<Cross> VTCrosses, int fitIter, 
             boolean originConstraint) {
@@ -398,11 +395,11 @@ public class StraightTrackSeeder {
             SVTCrosses.clear();
 
             for (Cross c : VTCrosses) {
-                if (c.get_Detector() == DetectorType.BST) {
+                if (c.getDetector() == DetectorType.BST) {
                     SVTCrosses.add(c);
-                } else if (c.get_Detector() == DetectorType.BMT && c.get_Type() == BMTType.C) {
+                } else if (c.getDetector() == DetectorType.BMT && c.getType() == BMTType.C) {
                     BMTCrossesC.add(c);
-                } else if (c.get_Detector() == DetectorType.BMT && c.get_Type() == BMTType.Z) {
+                } else if (c.getDetector() == DetectorType.BMT && c.getType() == BMTType.Z) {
                     BMTCrossesZ.add(c);
                 }
             }
@@ -428,35 +425,35 @@ public class StraightTrackSeeder {
             ((ArrayList<Double>) ErrRt).ensureCapacity(svtSz + bmtZSz);
 
             for (int j = 0; j < SVTCrosses.size(); j++) {
-                X.add(j, SVTCrosses.get(j).get_Point().x());
-                Y.add(j, SVTCrosses.get(j).get_Point().y());
+                X.add(j, SVTCrosses.get(j).getPoint().x());
+                Y.add(j, SVTCrosses.get(j).getPoint().y());
                 if (useSVTdipAngEst == 1) {
-                    Z.add(j, SVTCrosses.get(j).get_Point().z());
-                    Rho.add(j, Math.sqrt(SVTCrosses.get(j).get_Point().x() * SVTCrosses.get(j).get_Point().x()
-                            + SVTCrosses.get(j).get_Point().y() * SVTCrosses.get(j).get_Point().y()));
-                    ErrRho.add(j, Math.sqrt(SVTCrosses.get(j).get_PointErr().x() * SVTCrosses.get(j).get_PointErr().x()
-                            + SVTCrosses.get(j).get_PointErr().y() * SVTCrosses.get(j).get_PointErr().y()));
-                    ErrZ.add(j, SVTCrosses.get(j).get_PointErr().z());
+                    Z.add(j, SVTCrosses.get(j).getPoint().z());
+                    Rho.add(j, Math.sqrt(SVTCrosses.get(j).getPoint().x() * SVTCrosses.get(j).getPoint().x()
+                            + SVTCrosses.get(j).getPoint().y() * SVTCrosses.get(j).getPoint().y()));
+                    ErrRho.add(j, Math.sqrt(SVTCrosses.get(j).getPointErr().x() * SVTCrosses.get(j).getPointErr().x()
+                            + SVTCrosses.get(j).getPointErr().y() * SVTCrosses.get(j).getPointErr().y()));
+                    ErrZ.add(j, SVTCrosses.get(j).getPointErr().z());
                 }
-                ErrRt.add(j, Math.sqrt(SVTCrosses.get(j).get_PointErr().x() * SVTCrosses.get(j).get_PointErr().x()
-                        + SVTCrosses.get(j).get_PointErr().y() * SVTCrosses.get(j).get_PointErr().y()));
+                ErrRt.add(j, Math.sqrt(SVTCrosses.get(j).getPointErr().x() * SVTCrosses.get(j).getPointErr().x()
+                        + SVTCrosses.get(j).getPointErr().y() * SVTCrosses.get(j).getPointErr().y()));
             }
 
             if (bmtZSz > 0) {
                 for (int j = svtSz; j < svtSz + bmtZSz; j++) {
-                    X.add(j, BMTCrossesZ.get(j - svtSz).get_Point().x());
-                    Y.add(j, BMTCrossesZ.get(j - svtSz).get_Point().y());
-                    ErrRt.add(j, Math.sqrt(BMTCrossesZ.get(j - svtSz).get_PointErr().x() * BMTCrossesZ.get(j - svtSz).get_PointErr().x()
-                            + BMTCrossesZ.get(j - svtSz).get_PointErr().y() * BMTCrossesZ.get(j - svtSz).get_PointErr().y()));
+                    X.add(j, BMTCrossesZ.get(j - svtSz).getPoint().x());
+                    Y.add(j, BMTCrossesZ.get(j - svtSz).getPoint().y());
+                    ErrRt.add(j, Math.sqrt(BMTCrossesZ.get(j - svtSz).getPointErr().x() * BMTCrossesZ.get(j - svtSz).getPointErr().x()
+                            + BMTCrossesZ.get(j - svtSz).getPointErr().y() * BMTCrossesZ.get(j - svtSz).getPointErr().y()));
                 }
             }
             if (bmtCSz > 0) {
                 for (int j = svtSz * useSVTdipAngEst; j < svtSz * useSVTdipAngEst + bmtCSz; j++) {
-                    Z.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_Point().z());
-                    Rho.add(j, Constants.BMTGEOMETRY.getRadiusMidDrift(BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_Cluster1().get_Layer()));
+                    Z.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).getPoint().z());
+                    Rho.add(j, Constants.BMTGEOMETRY.getRadiusMidDrift(BMTCrossesC.get(j - svtSz * useSVTdipAngEst).getCluster1().getLayer()));
                     
                     ErrRho.add(j, Constants.BMTGEOMETRY.getThickness()/2 / Math.sqrt(12.));
-                    ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_PointErr().z());
+                    ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).getPointErr().z());
                 }
             }
             //X.add((double) Constants.getXb());
@@ -465,28 +462,28 @@ public class StraightTrackSeeder {
             
             fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
             
-            if (fitTrk.get_helix() == null) { 
+            if (fitTrk.getHelix() == null) { 
                 return null;
             }
 
-            fitTrk.get_helix().B = 0;
-            cand = new Track(fitTrk.get_helix());
+            fitTrk.getHelix().B = 0;
+            cand = new Track(fitTrk.getHelix());
             cand.addAll(SVTCrosses);
             cand.addAll(BMTCrossesZ);
             cand.addAll(BMTCrossesC);
             
             //if(shift==0)
 //            if(i==0) System.out.println();
-//            System.out.println(fitTrk.get_chisq()[0] + " " + chisqMax + " " + Constants.CIRCLEFIT_MAXCHI2);
+//            System.out.println(fitTrk.getChi2()[0] + " " + chisqMax + " " + Constants.CIRCLEFIT_MAXCHI2);
             cand.update_Crosses(-1);
-            if (fitTrk.get_chisq()[0] < chisqMax) {
-                chisqMax = fitTrk.get_chisq()[0];
+            if (fitTrk.getChi2()[0] < chisqMax) {
+                chisqMax = fitTrk.getChi2()[0];
 //                if(chisqMax<Constants.CIRCLEFIT_MAXCHI2)
 //                    cand.update_Crosses(svt_geo, bmt_geo);
                 //i=fitIter;
             }
         }
-        //System.out.println(" Seed fitter "+fitTrk.get_chisq()[0]+" "+fitTrk.get_chisq()[1]); 
+        //System.out.println(" Seed fitter "+fitTrk.getChi2()[0]+" "+fitTrk.getChi2()[1]); 
         if(chisqMax>Constants.CIRCLEFIT_MAXCHI2)
             cand=null;
         return cand;
@@ -495,14 +492,14 @@ public class StraightTrackSeeder {
 
 
     public List<Seed> findCandUsingMicroMegas(Seed trkCand, List<Cross> bmt_crosses) {
-        List<ArrayList<Cross>> BMTCcrosses = new ArrayList<ArrayList<Cross>>();
+        List<ArrayList<Cross>> BMTCcrosses = new ArrayList<>();
         
-        ArrayList<Cross> matches = new ArrayList<Cross>();
-        List<Seed> AllSeeds = new ArrayList<Seed>();
+        ArrayList<Cross> matches = new ArrayList<>();
+        List<Seed> AllSeeds = new ArrayList<>();
         int[] S = new int[3];
        
         for (int r = 0; r < 3; r++) {
-            BMTCcrosses.add(new ArrayList<Cross>());
+            BMTCcrosses.add(new ArrayList<>());
         }
         //for (int r = 0; r < 3; r++) {
         //    BMTCcrosses.get(r).clear();
@@ -510,8 +507,8 @@ public class StraightTrackSeeder {
         //}
 
         for (Cross bmt_cross : bmt_crosses) { 
-            if (bmt_cross.get_Type()==BMTType.C) {// C-detector
-                BMTCcrosses.get(bmt_cross.get_Region() - 1).add(bmt_cross); 
+            if (bmt_cross.getType()==BMTType.C) {// C-detector
+                BMTCcrosses.get(bmt_cross.getRegion() - 1).add(bmt_cross); 
             }
         }
 
@@ -547,13 +544,13 @@ public class StraightTrackSeeder {
                         }
                     }
                     
-                    matches.addAll(trkCand.get_Crosses());
+                    matches.addAll(trkCand.getCrosses());
                     
                     if (matches.size() > 0) {
                         Seed BMTTrkSeed = new Seed();
                         
-                        BMTTrkSeed.set_Helix(trkCand.get_Helix());
-                        BMTTrkSeed.set_Crosses(matches);
+                        BMTTrkSeed.setHelix(trkCand.getHelix());
+                        BMTTrkSeed.setCrosses(matches);
                         AllSeeds.add(BMTTrkSeed);
                         
                         //if (AllSeeds.size() > 200) {
@@ -573,36 +570,23 @@ public class StraightTrackSeeder {
 
     private boolean passCcross(Seed trkCand, Cross bmt_Ccross) {
         boolean pass = false;
-        double dzdrsum = trkCand.get_Helix().get_tandip();
+        double dzdrsum = trkCand.getHelix().getTanDip();
 
-        double z_bmt = bmt_Ccross.get_Point().z();
-        double r_bmt = Constants.BMTGEOMETRY.getRadius(bmt_Ccross.get_Cluster1().get_Layer());
+        double z_bmt = bmt_Ccross.getPoint().z();
+        double r_bmt = Constants.BMTGEOMETRY.getRadius(bmt_Ccross.getCluster1().getLayer());
         
-        Point3D refPoint = trkCand.get_Crosses().get(0).get_Point(); 
-        //if (bmt_geo.isInSector(bmt_Ccross.get_Cluster1().get_Layer(), Math.atan2(refPoint.y(), refPoint.x()), Math.toRadians(10)) != bmt_Ccross.get_Sector()) {
-        if (Constants.BMTGEOMETRY.getSector(bmt_Ccross.get_Cluster1().get_Layer(), Math.atan2(refPoint.y(), refPoint.x())) != bmt_Ccross.get_Sector()) {
+        Point3D refPoint = trkCand.getCrosses().get(0).getPoint(); 
+        //if (bmt_geo.isInSector(bmt_Ccross.getCluster1().getLayer(), Math.atan2(refPoint.y(), refPoint.x()), Math.toRadians(10)) != bmt_Ccross.getSector()) {
+        if (Constants.BMTGEOMETRY.getSector(bmt_Ccross.getCluster1().getLayer(), Math.atan2(refPoint.y(), refPoint.x())) != bmt_Ccross.getSector()) {
             return false;
         }
         double dzdr_bmt = z_bmt / r_bmt;
-        if (Math.abs(1 - (dzdrsum / (double) (trkCand.get_Crosses().size())) / ((dzdrsum + dzdr_bmt) / (double) (trkCand.get_Crosses().size() + 1))) <= SVTParameters.dzdrcut) // add this to the track
+        if (Math.abs(1 - (dzdrsum / (double) (trkCand.getCrosses().size())) / ((dzdrsum + dzdr_bmt) / (double) (trkCand.getCrosses().size() + 1))) <= SVTParameters.DZDRCUT) // add this to the track
         { 
             pass = true;
         } 
         
         return pass;
-    }
-
-    private void removeDuplicates(List<Seed> AllSeeds) {
-        
-        Collections.sort(AllSeeds);
-        List<Seed> Dupl = new ArrayList<Seed>();
-        for(int i = 1; i < AllSeeds.size(); i++) { 
-            if(AllSeeds.get(i-1).get_IntIdentifier().equalsIgnoreCase(AllSeeds.get(i).get_IntIdentifier())) { 
-                Dupl.add(AllSeeds.get(i));
-            }
-        }
-        AllSeeds.removeAll(Dupl);
-        
     }
 
     private double calcResi(double r, double ri, double d, double f, double fi) {
@@ -612,9 +596,9 @@ public class StraightTrackSeeder {
 
     private boolean InSamePhiRange(Seed seed, Cross c) {
         boolean pass = false;
-        Cross s = seed.get_Crosses().get(0);
-        double seedPhi = Math.atan2(s.get_Point().y(), s.get_Point().x());
-        double crossPhi = Math.atan2(c.get_Point().y(), c.get_Point().x());
+        Cross s = seed.getCrosses().get(0);
+        double seedPhi = Math.atan2(s.getPoint().y(), s.getPoint().x());
+        double crossPhi = Math.atan2(c.getPoint().y(), c.getPoint().x());
         if(Math.abs(Math.toDegrees(seedPhi-crossPhi))<8)
             pass = true;
         return pass;
