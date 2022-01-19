@@ -301,6 +301,10 @@ public class CLASDecoder4 {
             tdcBANK.putShort("component", i, (short) tdcDGTZ.get(i).getDescriptor().getComponent());
             tdcBANK.putByte("order", i, (byte) tdcDGTZ.get(i).getDescriptor().getOrder());
             tdcBANK.putInt("TDC", i, tdcDGTZ.get(i).getTDCData(0).getTime());
+            if(tdcBANK.getSchema().getSchemaString().contains("edge"))
+                tdcBANK.putByte("edge", i, (byte) tdcDGTZ.get(i).getTDCData(0).getEdge());
+            if(tdcBANK.getSchema().getSchemaString().contains("timestamp"))
+                tdcBANK.putLong("timestamp", i, tdcDGTZ.get(i).getTDCData(0).getTimeStamp());                
         }
         return tdcBANK;
     }
@@ -387,9 +391,9 @@ public class CLASDecoder4 {
                                                           DetectorType.HTCC,DetectorType.BST,DetectorType.CTOF,DetectorType.CND,DetectorType.LTCC,DetectorType.BMT,
                                                           DetectorType.FMT,DetectorType.HEL,DetectorType.RF,DetectorType.BAND};
 
-        String[]        tdcBankNames = new String[]{"FTOF::tdc","ECAL::tdc","DC::tdc","HTCC::tdc","LTCC::tdc","CTOF::tdc","CND::tdc","RF::tdc","RICH::tdc","BAND::tdc"};
+        String[]        tdcBankNames = new String[]{"FTOF::tdc","ECAL::tdc","DC::tdc","HTCC::tdc","LTCC::tdc","CTOF::tdc","CND::tdc","RF::tdc","RICH::tdc","BAND::tdc","FTOF::vftdc"};
         DetectorType[]  tdcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.ECAL,
-            DetectorType.DC,DetectorType.HTCC,DetectorType.LTCC,DetectorType.CTOF,DetectorType.CND,DetectorType.RF,DetectorType.RICH,DetectorType.BAND};
+            DetectorType.DC,DetectorType.HTCC,DetectorType.LTCC,DetectorType.CTOF,DetectorType.CND,DetectorType.RF,DetectorType.RICH,DetectorType.BAND,DetectorType.FTOFVF};
 
         for(int i = 0; i < adcBankTypes.length; i++){
             Bank adcBank = getDataBankADC(adcBankNames[i],adcBankTypes[i]);

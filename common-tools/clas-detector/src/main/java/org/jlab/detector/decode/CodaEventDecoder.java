@@ -321,6 +321,10 @@ public class CodaEventDecoder {
                 //  RTPC  data decoding
                 return this.getDataEntries_57641(crate, node, event);
                 //return this.getDataEntriesMode_7(crate,node, event);
+            } else if(node.getTag()==57650){
+                //  RTPC  data decoding
+                return this.getDataEntries_57650(crate, node, event);
+                //return this.getDataEntriesMode_7(crate,node, event);
             }
         }
         return bankEntries;
@@ -1366,6 +1370,66 @@ public class CodaEventDecoder {
         return tdcEntries;
     }
 
+    /**
+     * reads the TDC values from the bank with tag = 57650, decodes
+     * them and returns a list of digitized detector object.
+     * @param event
+     * @return
+     */
+    public List<DetectorDataDgtz>  getDataEntries_57650(Integer crate, EvioNode node, EvioDataEvent event){
+
+        List<DetectorDataDgtz> tdcEntries = new ArrayList<>();
+
+        if(node.getTag()==57650){
+            try {
+
+                ByteBuffer     compBuffer = node.getByteData(true);
+                CompositeData  compData = new CompositeData(compBuffer.array(),event.getByteOrder());
+
+                List<DataType> cdatatypes = compData.getTypes();
+                List<Object>   cdataitems = compData.getItems();
+
+                if(cdatatypes.get(3) != DataType.NVALUE){
+//                    System.err.println("[EvioRawDataSource] ** error ** corrupted "
+//                    + " bank. tag = " + node.getTag() + " num = " + node.getNum());
+                    return null;
+                }
+
+                int position = 0;
+                while(position<cdatatypes.size()-4){
+//                    Byte    slot = (Byte)     cdataitems.get(position+0);
+                    Integer trig = (Integer)  cdataitems.get(position+1);
+                    Long    time = (Long)     cdataitems.get(position+2);
+
+                    Integer nchannels = (Integer) cdataitems.get(position+3);
+//                    System.out.println("Retrieving the data size = " + cdataitems.size()
+//                    + "  " + cdatatypes.get(3) + " number of channels = " + nchannels);
+                    position += 4;
+                    int counter  = 0;
+
+                    while(counter<nchannels){
+//                        System.out.println("Position = " + position + " type =  "
+//                        + cdatatypes.get(position));
+                        Integer rawtdc = (Integer) cdataitems.get(position);
+                        int  slot      = DataUtils.getInteger(rawtdc, 27, 31 );
+                        int  chan      = DataUtils.getInteger(rawtdc, 19, 25);
+                        int  edge      = DataUtils.getInteger(rawtdc, 18, 18);
+                        int  value     = DataUtils.getInteger(rawtdc,  0, 17);
+//                        System.out.println("crate=" + crate + " slot=" + slot + " chan=" + chan + " edge=" + edge + " value=" + value);
+                        DetectorDataDgtz entry = new DetectorDataDgtz(crate,slot,chan);
+                        entry.addTDC(new TDCData(value, (byte) edge, time));
+
+                        tdcEntries.add(entry);
+                        position += 1;
+                        counter++;
+                    }
+                }
+            } catch (EvioException ex) {
+                Logger.getLogger(CodaEventDecoder.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return tdcEntries;
+    }
 
     /**
      * decoding bank that contains TI time stamp.

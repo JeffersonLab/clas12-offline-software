@@ -218,6 +218,21 @@
     ]
   },
   {
+    "name" : "FTOF::vftdc",
+    "group": 21200,
+    "item" : 13,
+    "info": "vfTDC bank for the Forward Time of Flight",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (1-6)"},
+      { "name":"layer"     , "type":"B", "info":"panel (1-1A, 2-1B, 3-2B"},
+      { "name":"component" , "type":"S", "info":"paddle"},
+      { "name":"order"     , "type":"B", "info":"order: 2 - TDCL , 3 - TDCR"},
+      { "name":"TDC"       , "type":"I", "info":"TDC value"},
+      { "name":"edge"      , "type":"B", "info":"pulse edge (0-1)"},
+      { "name":"timestamp" , "type":"L", "info":"timestamp"}
+    ]
+  },
+  {
     "name" : "FTTRK::adc",
     "group": 21300,
     "item" : 11,

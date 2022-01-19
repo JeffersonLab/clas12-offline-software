@@ -340,13 +340,22 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
     
     public static class TDCData implements Comparable<TDCData>{
         
-        private int   tdcOrder = 0;
-        private int tdcTime = 0;
+        private int      tdcOrder = 0;
+        private int       tdcTime = 0;
+        private byte      tdcEdge = 0;
+        private long tdcTimeStamp = 0;
         
         public TDCData() {}
         public TDCData(int time) { this.tdcTime = time;}
+        public TDCData(int time, byte edge, long timestamp) { 
+            this.tdcTime = time;
+            this.tdcEdge = edge;
+            this.tdcTimeStamp = timestamp;
+        }
         public int getTime() { return this.tdcTime;}
-        public int   getOrder() { return tdcOrder;}
+        public int getOrder() { return tdcOrder;}
+        public byte getEdge() { return tdcEdge;}
+        public long getTimeStamp() { return tdcTimeStamp;}
         public TDCData  setOrder(int order) { tdcOrder = order;return this;}
         public TDCData  setTime(short time) { tdcTime = time;return this;}
         
