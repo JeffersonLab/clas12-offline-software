@@ -55,20 +55,20 @@ public class RecoBankReader {
 			int sector = bank.getByte("sector", j);
 			int id = bank.getShort("ID",j);
 			Cross cross = new Cross(DetectorType.BST, BMTType.UNDEFINED, sector, region, j);
-			cross.set_Id(id);
-			cross.set_Point(new Point3D(10.*bank.getFloat("x", j), 10.*bank.getFloat("y", j),10.*(bank.getFloat("z", j)-zShift)));
-			cross.set_PointErr(new Point3D(10.*bank.getFloat("err_x", j), 10.*bank.getFloat("err_y", j),10.*bank.getFloat("err_z", j)));
-			cross.set_AssociatedTrackID(bank.getShort("trkID",j));
-			cross.set_Dir(new Vector3D(bank.getFloat("ux", j),bank.getFloat("uy", j),bank.getFloat("uz", j)));
+			cross.setId(id);
+			cross.setPoint(new Point3D(10.*bank.getFloat("x", j), 10.*bank.getFloat("y", j),10.*(bank.getFloat("z", j)-zShift)));
+			cross.setPointErr(new Point3D(10.*bank.getFloat("err_x", j), 10.*bank.getFloat("err_y", j),10.*bank.getFloat("err_z", j)));
+			cross.setAssociatedTrackID(bank.getShort("trkID",j));
+			cross.setDir(new Vector3D(bank.getFloat("ux", j),bank.getFloat("uy", j),bank.getFloat("uz", j)));
 
 			int cluster1id = bank.getShort("Cluster1_ID", j);
 			for (Cluster cluster: _SVTclusters)
-				if (cluster.get_Id() == cluster1id)
-					cross.set_Cluster1(cluster);
+				if (cluster.getId() == cluster1id)
+					cross.setCluster1(cluster);
 			int cluster2id = bank.getShort("Cluster2_ID", j);
 			for (Cluster cluster: _SVTclusters)
-				if (cluster.get_Id() == cluster2id)
-					cross.set_Cluster2(cluster);
+				if (cluster.getId() == cluster2id)
+					cross.setCluster2(cluster);
 
 			_SVTcrosses.add(cross);
 		}
@@ -95,22 +95,22 @@ public class RecoBankReader {
 			int sector = bank.getByte("sector", j);
 			int id = bank.getShort("ID",j);
 			Cross cross = new Cross(DetectorType.BMT, BMTType.UNDEFINED, sector, region, id);
-			cross.set_Point(new Point3D(10.*bank.getFloat("x", j), 10.*bank.getFloat("y", j),10.*(bank.getFloat("z", j)-zShift)));
-			cross.set_PointErr(new Point3D(10.*bank.getFloat("err_x", j), 10.*bank.getFloat("err_y", j),10.*bank.getFloat("err_z", j)));
-			cross.set_AssociatedTrackID(bank.getShort("trkID",j));
-			cross.set_Dir(new Vector3D(bank.getFloat("ux", j),bank.getFloat("uy", j),bank.getFloat("uz", j)));
+			cross.setPoint(new Point3D(10.*bank.getFloat("x", j), 10.*bank.getFloat("y", j),10.*(bank.getFloat("z", j)-zShift)));
+			cross.setPointErr(new Point3D(10.*bank.getFloat("err_x", j), 10.*bank.getFloat("err_y", j),10.*bank.getFloat("err_z", j)));
+			cross.setAssociatedTrackID(bank.getShort("trkID",j));
+			cross.setDir(new Vector3D(bank.getFloat("ux", j),bank.getFloat("uy", j),bank.getFloat("uz", j)));
 
 			int cluster1id = bank.getShort("Cluster1_ID", j);
 			for (Cluster cluster: _BMTclusters) {
-				if (cluster.get_Id() == cluster1id) {
-					cross.set_Cluster1(cluster);
-					cross.set_Type(BMTGeometry.getDetectorType(cluster.get_Layer()));
+				if (cluster.getId() == cluster1id) {
+					cross.setCluster1(cluster);
+					cross.setType(BMTGeometry.getDetectorType(cluster.getLayer()));
 				}
 			}
 			//int cluster2id = bank.getShort("Cluster2_ID", j);
 			//for (Cluster cluster: _clusters)
-			//	if (cluster.get_Id() == cluster2id)
-			//		cross.set_Cluster2(cluster);
+			//	if (cluster.getId() == cluster2id)
+			//		cross.setCluster2(cluster);
 
 			_BMTcrosses.add(cross);
 		}
@@ -132,15 +132,15 @@ public class RecoBankReader {
 			Cluster cluster = new Cluster(DetectorType.BMT, BMTGeometry.getDetectorType(layer), sector, layer, id);
 
 			int size = bank.getInt("size", i);
-			cluster.set_TotalEnergy(bank.getFloat("ETot", i));
+			cluster.setTotalEnergy(bank.getFloat("ETot", i));
 			
-			//cluster.set_Seed(bank.getInt("seedStrip", i));
-			cluster.set_Centroid(bank.getFloat("centroid",i));
-			//cluster.set_SeedEnergy(bank.getFloat("seedE",i));
-			//cluster.set_SeedEnergy(bank.getFloat("seedE",i));
-			cluster.set_CentroidResidual(bank.getFloat("centroidResidual",i));
-			cluster.set_SeedResidual(bank.getFloat("seedResidual",i));
-			cluster.set_AssociatedTrackID(bank.getShort("trkID",i));
+			//cluster.setSeed(bank.getInt("seedStrip", i));
+			cluster.setCentroid(bank.getFloat("centroid",i));
+			//cluster.setSeedEnergy(bank.getFloat("seedE",i));
+			//cluster.setSeedEnergy(bank.getFloat("seedE",i));
+			cluster.setCentroidResidual(bank.getFloat("centroidResidual",i));
+			cluster.setSeedResidual(bank.getFloat("seedResidual",i));
+			cluster.setAssociatedTrackID(bank.getShort("trkID",i));
 			cluster.setLine(new Line3D(
 					bank.getFloat("x1", i),
 					bank.getFloat("y1", i),
@@ -161,7 +161,7 @@ public class RecoBankReader {
 					bank.getFloat("lx", i),
 					bank.getFloat("ly", i),
 					bank.getFloat("lz", i)));
-			cluster.set_Resolution(bank.getFloat("e", i));
+			cluster.setResolution(bank.getFloat("e", i));
 			
 			
 			Point3D x1 = new Point3D(
@@ -188,12 +188,12 @@ public class RecoBankReader {
 			Vector3D a = a1.vectorTo(a2).asUnit();
 			Point3D arccenter = a1.toVector3D().add(a.multiply(a.dot(a1.vectorTo(x1)))).toPoint3D();
 			
-			cluster.set_Arc(new Arc3D(
+			cluster.setArc(new Arc3D(
 					x1,
 					arccenter, a,
 					bank.getFloat("theta", i)
 					));
-			cluster.set_Type(BMTGeometry.getDetectorType(layer));
+			cluster.setType(BMTGeometry.getDetectorType(layer));
 			
 			//Since only up to 5 hits per track are written...
 			for (int j = 0; j < 5; j++) {
@@ -204,7 +204,7 @@ public class RecoBankReader {
 					continue;
 				int hitId = bank.getShort(hitStrg, i);
 				for(Hit hit : _BMThits) {
-					if (hit.get_Id() == hitId) {
+					if (hit.getId() == hitId) {
 						cluster.add(hit);
 					}
 				}
@@ -251,9 +251,9 @@ public class RecoBankReader {
 			Point3D point = new Point3D(10.*yx_intercs[i], 0, 10.*(yz_intercs[i]-zShift));
 			Ray ray = new Ray(point, u);
 			StraightTrack track = new StraightTrack(ray);
-			track.set_Id(ids[i]);
-			track.set_chi2(chi2s[i]);
-			track.set_ndf(ndfs[i]);
+			track.setId(ids[i]);
+			track.setchi2(chi2s[i]);
+			track.setndf(ndfs[i]);
 
 
 			loopCrossId: for (int j = 0; j < 18; j++) { 
@@ -265,14 +265,14 @@ public class RecoBankReader {
 					continue;
 				int crossid = bank.getShort(hitStrg, i);
 				for(Cross cross : _SVTcrosses) {
-					if(cross.get_Id() == crossid) {
+					if(cross.getId() == crossid) {
 						track.add(cross);
 						continue loopCrossId;
 					}
 					
 				}
 				for(Cross cross : _BMTcrosses) {
-					if(cross.get_Id() == crossid) {
+					if(cross.getId() == crossid) {
 						track.add(cross);
 						continue loopCrossId;
 					}
@@ -342,7 +342,7 @@ public class RecoBankReader {
 		for(int i = 0; i<rows; i++) {
 			// get the cosmics ray unit direction vector
 			Track track = new Track(new Helix(d0s[i]*10.f, phi0s[i], curvatures[i]/10.f, (z0s[i]-zShift)*10.f, tandips[i], xbs[i], ybs[i]));
-			track.set_Id(ids[i]);
+			track.setId(ids[i]);
 			track.setChi2(chi2s[i]);
 			track.setNDF(ndfs[i]);
 			//there are other entries that should be read.  add these later.  
@@ -357,11 +357,11 @@ public class RecoBankReader {
 					continue;
 				int crossid = bank.getShort(hitStrg, i);
 				for(Cross cross : _SVTcrosses) {
-					if(cross.get_Id() == crossid)
+					if(cross.getId() == crossid)
 						track.add(cross);
 				}
 				for(Cross cross : _BMTcrosses) {
-					if(cross.get_Id() == crossid) {
+					if(cross.getId() == crossid) {
 						track.add(cross);
 						continue loopCrossId;
 					}
@@ -404,14 +404,14 @@ public class RecoBankReader {
 			Cluster cluster = new Cluster(DetectorType.BST, null, sector, layer, id);
 
 			int size = bank.getInt("size", i);
-			cluster.set_TotalEnergy(bank.getFloat("ETot", i));
-			//cluster.set_Seed(bank.getInt("seedStrip", i));
-			cluster.set_Centroid(bank.getFloat("centroid",i));
-			//cluster.set_SeedEnergy(bank.getFloat("seedE",i));
-			//cluster.set_SeedEnergy(bank.getFloat("seedE",i));
-			cluster.set_CentroidResidual(bank.getFloat("centroidResidual",i));
-			cluster.set_SeedResidual(bank.getFloat("seedResidual",i));
-			cluster.set_AssociatedTrackID(bank.getShort("trkID",i));
+			cluster.setTotalEnergy(bank.getFloat("ETot", i));
+			//cluster.setSeed(bank.getInt("seedStrip", i));
+			cluster.setCentroid(bank.getFloat("centroid",i));
+			//cluster.setSeedEnergy(bank.getFloat("seedE",i));
+			//cluster.setSeedEnergy(bank.getFloat("seedE",i));
+			cluster.setCentroidResidual(bank.getFloat("centroidResidual",i));
+			cluster.setSeedResidual(bank.getFloat("seedResidual",i));
+			cluster.setAssociatedTrackID(bank.getShort("trkID",i));
 			cluster.setLine(new Line3D(
 					bank.getFloat("x1", i),
 					bank.getFloat("y1", i),
@@ -432,7 +432,7 @@ public class RecoBankReader {
 					bank.getFloat("lx", i),
 					bank.getFloat("ly", i),
 					bank.getFloat("lz", i)));
-			cluster.set_Resolution(bank.getFloat("e", i));
+			cluster.setResolution(bank.getFloat("e", i));
 			
 			//Since only up to 5 hits per track are written...
 			for (int j = 0; j < 5; j++) {
@@ -443,7 +443,7 @@ public class RecoBankReader {
 					continue;
 				int hitId = bank.getShort(hitStrg, i);
 				for(Hit hit : _SVTHits) {
-					if (hit.get_Id() == hitId) {
+					if (hit.getId() == hitId) {
 						cluster.add(hit);
 					}
 				}
@@ -466,12 +466,12 @@ public class RecoBankReader {
 			int id = bank.getShort("ID", i);
 			Hit hit = new Hit(DetectorType.BST, null, sector, layer, new Strip(strip, 0, 0));
 
-			hit.set_Id(id);
-			hit.set_docaToTrk(bank.getFloat("fitResidual", i));
-			hit.set_TrkgStatus(bank.getInt("trkingStat", i));
+			hit.setId(id);
+			hit.setdocaToTrk(bank.getFloat("fitResidual", i));
+			hit.setTrkgStatus(bank.getInt("trkingStat", i));
 
-			hit.set_AssociatedClusterID(bank.getShort("clusterID", i));
-			hit.set_AssociatedTrackID(bank.getShort("trkID", i));
+			hit.setAssociatedClusterID(bank.getShort("clusterID", i));
+			hit.setAssociatedTrackID(bank.getShort("trkID", i));
 			_SVTHits.add(hit);
 		}
 		//bank.show();
@@ -491,12 +491,12 @@ public class RecoBankReader {
 			
 			
 			
-			hit.set_Id(id);
-			hit.set_docaToTrk(bank.getFloat("fitResidual", i));
-			hit.set_TrkgStatus(bank.getInt("trkingStat", i));
+			hit.setId(id);
+			hit.setdocaToTrk(bank.getFloat("fitResidual", i));
+			hit.setTrkgStatus(bank.getInt("trkingStat", i));
 
-			hit.set_AssociatedClusterID(bank.getShort("clusterID", i));
-			hit.set_AssociatedTrackID(bank.getShort("trkID", i));
+			hit.setAssociatedClusterID(bank.getShort("clusterID", i));
+			hit.setAssociatedTrackID(bank.getShort("trkID", i));
 			_BMThits.add(hit);
 		}
 		//bank.show();
