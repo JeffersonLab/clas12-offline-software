@@ -40,49 +40,49 @@ public class Seed implements Comparable<Seed>{
     }
 
     public Seed(List<Cross> crosses) {
-        this.set_Crosses(crosses);
+        this.setCrosses(crosses);
     }
 
     public Seed(List<Cross> crosses, double doca, double rho, double phi) {
-        this.set_Crosses(crosses);
-        this.set_Doca(doca);
-        this.set_Rho(rho);
-        this.set_Phi(phi);
+        this.setCrosses(crosses);
+        this.setDoca(doca);
+        this.setRho(rho);
+        this.setPhi(phi);
     }
 
     public Seed(List<Cross> crosses, Helix helix) {
-        this.set_Crosses(crosses);
-        this.set_Helix(helix);
+        this.setCrosses(crosses);
+        this.setHelix(helix);
     }
 
-    public Helix get_Helix() {
+    public Helix getHelix() {
         return _Helix;
     }
 
-    public final void set_Helix(Helix helix) {
+    public final void setHelix(Helix helix) {
         this._Helix = helix;
-        this.doca = helix.get_dca();
-        this.rho  = helix.get_curvature();
-        this.phi  = helix.get_phi_at_dca();
+        this.doca = helix.getDCA();
+        this.rho  = helix.getCurvature();
+        this.phi  = helix.getPhiAtDCA();
     }
 
     public void setId(int id) {
         this.id = id;
     }
 
-    public void set_Status(int trkStatus) {
+    public void setStatus(int trkStatus) {
         this.status = trkStatus;
     }
 
-    public final void set_Doca(double doca) {
+    public final void setDoca(double doca) {
         this.doca = doca;
     }
 
-    public final void set_Rho(double rho) {
+    public final void setRho(double rho) {
         this.rho = rho;
     }
 
-    public final void set_Phi(double phi) {
+    public final void setPhi(double phi) {
         this.phi = phi;
     }
 
@@ -90,37 +90,37 @@ public class Seed implements Comparable<Seed>{
         return id;
     }
 
-    public int get_Status() {
+    public int getStatus() {
         return status;
     }
 
-    public double get_Doca() {
+    public double getDoca() {
         return this.doca;
     }
     
-    public double get_Rho() {
+    public double getRho() {
         return this.rho;
     }
     
-    public double get_Phi() {
+    public double getPhi() {
         return this.phi;
     }
         
-    private void set_Clusters() {
-        List<Cluster> clusters = new ArrayList<Cluster>(); 
-        for(Cross c : this.get_Crosses()) { 
-	    if(c.get_Detector()==DetectorType.BST) {
-                clusters.add(c.get_Cluster1());
-                clusters.add(c.get_Cluster2());
+    private void setClusters() {
+        List<Cluster> clusters = new ArrayList<>(); 
+        for(Cross c : this.getCrosses()) { 
+	    if(c.getDetector()==DetectorType.BST) {
+                clusters.add(c.getCluster1());
+                clusters.add(c.getCluster2());
             } else {
-                clusters.add(c.get_Cluster1());
+                clusters.add(c.getCluster1());
             }
       	}
         Collections.sort(clusters);
         _Clusters = clusters;
     }
 
-    public List<Cluster> get_Clusters() {
+    public List<Cluster> getClusters() {
         return _Clusters;
     }
 
@@ -129,30 +129,30 @@ public class Seed implements Comparable<Seed>{
         Collections.sort(_Clusters);
     }
 
-    public List<Cross> get_Crosses() {
+    public List<Cross> getCrosses() {
         Collections.sort(_Crosses);
         return _Crosses;
     }
 
-    public final void set_Crosses(List<Cross> _Crosses) {
+    public final void setCrosses(List<Cross> _Crosses) {
         Collections.sort(_Crosses);
         this._Crosses = _Crosses;
-        this.set_Clusters();
+        this.setClusters();
     }
 
-    public double get_circleFitChi2PerNDF() {
+    public double getCircleFitChi2PerNDF() {
         return _circleFitChi2PerNDF;
     }
 
-    public void set_circleFitChi2PerNDF(double _circleFitChi2PerNDF) {
+    public void setCircleFitChi2PerNDF(double _circleFitChi2PerNDF) {
         this._circleFitChi2PerNDF = _circleFitChi2PerNDF;
     }
 
-    public double get_lineFitChi2PerNDF() {
+    public double getLineFitChi2PerNDF() {
         return _lineFitChi2PerNDF;
     }
 
-    public void set_lineFitChi2PerNDF(double _lineFitChi2PerNDF) {
+    public void setLineFitChi2PerNDF(double _lineFitChi2PerNDF) {
         this._lineFitChi2PerNDF = _lineFitChi2PerNDF;
     }
 
@@ -172,23 +172,20 @@ public class Seed implements Comparable<Seed>{
         this._chi2 = _chi2;
     }
 
-    public String get_IntIdentifier() {
+    public String getIntIdentifier() {
         
         String id = "";
-        for(Cluster c: this.get_Clusters())
-            id+=c.get_Id();
-        for(Cross c: this.get_Crosses())
-            id+=c.get_Id();
+        for(Cluster c: this.getClusters())
+            id+=c.getId();
+        for(Cross c: this.getCrosses())
+            id+=c.getId();
        
         return id;
     }
 
     @Override
     public int compareTo(Seed arg) {
-
-    	return ( this._Crosses.size() > arg.get_Crosses().size() ) ? -1 : ( this._Crosses.size() == arg.get_Crosses().size() ) ? 0 : 1;
-//        return Double.parseDouble(this.get_IntIdentifier()) < Double.parseDouble(arg.get_IntIdentifier()) ? -1 : Double.parseDouble(this.get_IntIdentifier()) == Double.parseDouble(arg.get_IntIdentifier()) ? 0 : 1;
-        
+    	return ( this._Crosses.size() > arg.getCrosses().size() ) ? -1 : ( this._Crosses.size() == arg.getCrosses().size() ) ? 0 : 1;        
     }
     
 
@@ -211,16 +208,16 @@ public class Seed implements Comparable<Seed>{
         int bmtZSz = 0;
         int bmtCSz = 0;
         
-        for (Cross c : this.get_Crosses()) {
+        for (Cross c : this.getCrosses()) {
             // reset cross to clear previous track settings on direction and Point
             c.reset();
-            if (c.get_Detector()==DetectorType.BST) {
+            if (c.getDetector()==DetectorType.BST) {
                 SVTCrosses.add(c);
             }
-            else if (c.get_Detector()==DetectorType.BMT && c.get_Type()==BMTType.C ) {
+            else if (c.getDetector()==DetectorType.BMT && c.getType()==BMTType.C ) {
                 BMTCrossesC.add(c);
             }
-            else if (c.get_Detector()==DetectorType.BMT && c.get_Type()==BMTType.Z ) {
+            else if (c.getDetector()==DetectorType.BMT && c.getType()==BMTType.Z ) {
                 BMTCrossesZ.add(c);
             }
         }
@@ -255,35 +252,35 @@ public class Seed implements Comparable<Seed>{
             ErrRt.clear();
             
             for (int j = 0; j < SVTCrosses.size(); j++) {
-                X.add(j, SVTCrosses.get(j).get_Point().x());
-                Y.add(j, SVTCrosses.get(j).get_Point().y());
+                X.add(j, SVTCrosses.get(j).getPoint().x());
+                Y.add(j, SVTCrosses.get(j).getPoint().y());
                 if (useSVTdipAngEst == 1) {
-                    Z.add(j, SVTCrosses.get(j).get_Point().z());
-                    Rho.add(j, Math.sqrt(SVTCrosses.get(j).get_Point().x() * SVTCrosses.get(j).get_Point().x()
-                            + SVTCrosses.get(j).get_Point().y() * SVTCrosses.get(j).get_Point().y()));
-                    ErrRho.add(j, Math.sqrt(SVTCrosses.get(j).get_PointErr().x() * SVTCrosses.get(j).get_PointErr().x()
-                            + SVTCrosses.get(j).get_PointErr().y() * SVTCrosses.get(j).get_PointErr().y()));
-                    ErrZ.add(j, SVTCrosses.get(j).get_PointErr().z());
+                    Z.add(j, SVTCrosses.get(j).getPoint().z());
+                    Rho.add(j, Math.sqrt(SVTCrosses.get(j).getPoint().x() * SVTCrosses.get(j).getPoint().x()
+                            + SVTCrosses.get(j).getPoint().y() * SVTCrosses.get(j).getPoint().y()));
+                    ErrRho.add(j, Math.sqrt(SVTCrosses.get(j).getPointErr().x() * SVTCrosses.get(j).getPointErr().x()
+                            + SVTCrosses.get(j).getPointErr().y() * SVTCrosses.get(j).getPointErr().y()));
+                    ErrZ.add(j, SVTCrosses.get(j).getPointErr().z());
                 }
-                ErrRt.add(j, Math.sqrt(SVTCrosses.get(j).get_PointErr().x() * SVTCrosses.get(j).get_PointErr().x()
-                        + SVTCrosses.get(j).get_PointErr().y() * SVTCrosses.get(j).get_PointErr().y()));
+                ErrRt.add(j, Math.sqrt(SVTCrosses.get(j).getPointErr().x() * SVTCrosses.get(j).getPointErr().x()
+                        + SVTCrosses.get(j).getPointErr().y() * SVTCrosses.get(j).getPointErr().y()));
             }
 
             if (bmtZSz > 0) {
                 for (int j = svtSz; j < svtSz + bmtZSz; j++) {
-                    X.add(j, BMTCrossesZ.get(j - svtSz).get_Point().x());
-                    Y.add(j, BMTCrossesZ.get(j - svtSz).get_Point().y());
-                    ErrRt.add(j, Math.sqrt(BMTCrossesZ.get(j - svtSz).get_PointErr().x() * BMTCrossesZ.get(j - svtSz).get_PointErr().x()
-                            + BMTCrossesZ.get(j - svtSz).get_PointErr().y() * BMTCrossesZ.get(j - svtSz).get_PointErr().y()));
+                    X.add(j, BMTCrossesZ.get(j - svtSz).getPoint().x());
+                    Y.add(j, BMTCrossesZ.get(j - svtSz).getPoint().y());
+                    ErrRt.add(j, Math.sqrt(BMTCrossesZ.get(j - svtSz).getPointErr().x() * BMTCrossesZ.get(j - svtSz).getPointErr().x()
+                            + BMTCrossesZ.get(j - svtSz).getPointErr().y() * BMTCrossesZ.get(j - svtSz).getPointErr().y()));
                 }
             }
             if (bmtCSz > 0) {
                 for (int j = svtSz * useSVTdipAngEst; j < svtSz * useSVTdipAngEst + bmtCSz; j++) {
-                    Z.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_Point().z());
-                    Rho.add(j, Constants.BMTGEOMETRY.getRadiusMidDrift(BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_Cluster1().get_Layer()));
+                    Z.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).getPoint().z());
+                    Rho.add(j, Constants.BMTGEOMETRY.getRadiusMidDrift(BMTCrossesC.get(j - svtSz * useSVTdipAngEst).getCluster1().getLayer()));
                     
                     ErrRho.add(j, Constants.BMTGEOMETRY.getThickness()/2 / Math.sqrt(12.));
-                    ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_PointErr().z());
+                    ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).getPointErr().z());
                 }
             }
             X.add(xb);
@@ -292,31 +289,31 @@ public class Seed implements Comparable<Seed>{
             
             FitStatus fitStatus = fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ, xb, yb);
             
-            if (fitStatus!=FitStatus.Successful || fitTrk.get_helix() == null) { 
+            if (fitStatus!=FitStatus.Successful || fitTrk.gethelix() == null) { 
                 return false;
             }
 
-            fitTrk.get_helix().B = bfield;
+            fitTrk.gethelix().B = bfield;
             
-            this.set_Helix(fitTrk.get_helix());
+            this.setHelix(fitTrk.gethelix());
             if( X.size()>3 ) {
-            	this.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0]/(X.size()-3));
+            	this.setCircleFitChi2PerNDF(fitTrk.getchisq()[0]/(X.size()-3));
             }
             else { 
-            	this.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0]*2); // penalize tracks with only 3 crosses 
+            	this.setCircleFitChi2PerNDF(fitTrk.getchisq()[0]*2); // penalize tracks with only 3 crosses 
             }
             
             if( Z.size() > 2 ) {
-            	this.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1]/(Z.size()-2));
+            	this.setLineFitChi2PerNDF(fitTrk.getchisq()[1]/(Z.size()-2));
             }
             else {
-            	this.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1]*2);// penalize tracks with only 2 crosses
+            	this.setLineFitChi2PerNDF(fitTrk.getchisq()[1]*2);// penalize tracks with only 2 crosses
             }
-            this.setChi2(fitTrk.get_chisq()[0]+fitTrk.get_chisq()[1]);
+            this.setChi2(fitTrk.getchisq()[0]+fitTrk.getchisq()[1]);
             this.setNDF(X.size()+Z.size()-5);
             
-            if (fitTrk.get_chisq()[0] < chisqMax) {
-                chisqMax = fitTrk.get_chisq()[0];
+            if (fitTrk.getchisq()[0] < chisqMax) {
+                chisqMax = fitTrk.getchisq()[0];
                 if(chisqMax<Constants.CIRCLEFIT_MAXCHI2) {
                     this.update_Crosses();
                 }
@@ -327,16 +324,14 @@ public class Seed implements Comparable<Seed>{
 
     /**
      * Updates the crosses positions based on trajectories or helix
-     * @param sgeo
-     * @param bgeo
      */
     public void update_Crosses() {
-        if (this.get_Helix() != null && this.get_Helix().get_curvature() != 0) {
-            for (int i = 0; i < this.get_Crosses().size(); i++) {
-                Cross cross = this.get_Crosses().get(i);
-                double R = Math.sqrt(cross.get_Point().x() * cross.get_Point().x() + cross.get_Point().y() * cross.get_Point().y());
-                Point3D  trackPos = this.get_Helix().getPointAtRadius(R);
-                Vector3D trackDir = this.get_Helix().getTrackDirectionAtRadius(R);
+        if (this.getHelix() != null && this.getHelix().getCurvature() != 0) {
+            for (int i = 0; i < this.getCrosses().size(); i++) {
+                Cross cross = this.getCrosses().get(i);
+                double R = Math.sqrt(cross.getPoint().x() * cross.getPoint().x() + cross.getPoint().y() * cross.getPoint().y());
+                Point3D  trackPos = this.getHelix().getPointAtRadius(R);
+                Vector3D trackDir = this.getHelix().getTrackDirectionAtRadius(R);
                 cross.update(trackPos, trackDir);
             }
         }
@@ -353,11 +348,11 @@ public class Seed implements Comparable<Seed>{
             return false;
         else if(this.getNDF() < Constants.NDFCUT) 
             return false;
-        else if(this.get_Helix().getPt(this.get_Helix().B) < Constants.PTCUT) 
+        else if(this.getHelix().getPt(this.getHelix().B) < Constants.PTCUT) 
             return false;
-//        else if(Math.abs(this.get_Helix().get_tandip()) > Constants.TANDIP) 
+//        else if(Math.abs(this.getHelix().getTanDip()) > Constants.TANDIP) 
 //            return false;
-        else if(Math.abs(this.get_Helix().get_Z0()) > Constants.ZRANGE) 
+        else if(Math.abs(this.getHelix().getZ0()) > Constants.ZRANGE) 
             return false;
         else 
             return true;
@@ -389,9 +384,9 @@ public class Seed implements Comparable<Seed>{
      */
     public boolean overlapWith(Seed o) {
         int nc = 0;
-        for(Cross c : this.get_Crosses()) {
-            if(c.get_Type()==BMTType.C) continue; //skim BMTC
-            if(o.get_Crosses().contains(c)) nc++;
+        for(Cross c : this.getCrosses()) {
+            if(c.getType()==BMTType.C) continue; //skim BMTC
+            if(o.getCrosses().contains(c)) nc++;
         }
         if(nc >1) return true;
         else      return false;
@@ -420,10 +415,10 @@ public class Seed implements Comparable<Seed>{
     @Override
     public String toString() {
         String str = String.format("Track id=%d, q=%d, omega=%.3f mm-1, d0=%.3f mm, phi=%.3f deg, dz=%.3f mm, tanL=%.3f, NDF=%d, chi2=%.3f, seed method=%d\n", 
-                     this.getId(), this.get_Helix().get_charge(), this.get_Helix().get_curvature(), this.get_Helix().get_dca(),
-                     Math.toDegrees(this.get_Helix().get_phi_at_dca()), this.get_Helix().get_Z0(), this.get_Helix().get_tandip(),
-                     this.getNDF(), this.getChi2(), this.get_Status());
-        for(Cross c: this.get_Crosses()) str = str + c.toString() + "\n";
+                     this.getId(), this.getHelix().getCharge(), this.getHelix().getCurvature(), this.getHelix().getDCA(),
+                     Math.toDegrees(this.getHelix().getPhiAtDCA()), this.getHelix().getZ0(), this.getHelix().getTanDip(),
+                     this.getNDF(), this.getChi2(), this.getStatus());
+        for(Cross c: this.getCrosses()) str = str + c.toString() + "\n";
         return str;
     }
 }

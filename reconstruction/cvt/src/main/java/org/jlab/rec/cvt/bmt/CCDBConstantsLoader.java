@@ -32,7 +32,7 @@ public class CCDBConstantsLoader {
         int NLAYERS  = BMTConstants.NLAYERS;
         double[] CRZRADIUS = new double[NREGIONS]; 		// the radius of the Z detector in mm
         int[] CRZNSTRIPS = new int[NREGIONS]; 			// the number of strips
-        double[] CRZSPACING = new double[NREGIONS]; 	// the strip spacing in mm
+        double[] CRZSPACING = new double[NREGIONS]; 	        // the strip spacing in mm
         double[] CRZWIDTH = new double[NREGIONS]; 		// the strip width in mm
         double[] CRZLENGTH = new double[NREGIONS]; 		// the strip length in mm
         double[] CRZZMIN = new double[NREGIONS]; 		// PCB upstream extremity mm
@@ -136,14 +136,6 @@ public class CCDBConstantsLoader {
                 }
             }
         }
-//        for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_strip_L4/Group_size"); i++) {
-//            CRCGROUP[1][i] = dbprovider.getInteger("/geometry/cvt/mvt/bmt_strip_L4/Group_size", i);
-//            CRCWIDTH[1][i] = dbprovider.getDouble("/geometry/cvt/mvt/bmt_strip_L4/Pitch", i);
-//        }
-//        for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_strip_L6/Group_size"); i++) {
-//            CRCGROUP[2][i] = dbprovider.getInteger("/geometry/cvt/mvt/bmt_strip_L6/Group_size", i);
-//            CRCWIDTH[2][i] = dbprovider.getDouble("/geometry/cvt/mvt/bmt_strip_L6/Pitch", i);
-//        }
 
         CRZWIDTH[0] = dbprovider.getDouble("/geometry/cvt/mvt/bmt_strip_L2/Pitch", 0);
         CRZWIDTH[1] = dbprovider.getDouble("/geometry/cvt/mvt/bmt_strip_L3/Pitch", 0);
@@ -283,11 +275,11 @@ public class CCDBConstantsLoader {
             transform.translateXYZ(shift.x(), shift.y(), shift.z());
             Line3D axis = new Line3D(new Point3D(0,0,Zmin), new Vector3D(0,0,Zmax));
             transform.apply(axis);
-            BMTConstants.shifts[layer-1][sector-1]    = shift;
-            BMTConstants.rotations[layer-1][sector-1] = rot;
-            BMTConstants.axes[layer-1][sector-1]      = axis;
-            BMTConstants.toGlobal[layer-1][sector-1]  = transform;
-            BMTConstants.toLocal[layer-1][sector-1]   = transform.inverse();
+            BMTConstants.SHIFTS[layer-1][sector-1]    = shift;
+            BMTConstants.ROTATIONS[layer-1][sector-1] = rot;
+            BMTConstants.AXES[layer-1][sector-1]      = axis;
+            BMTConstants.TOGLOBAL[layer-1][sector-1]  = transform;
+            BMTConstants.TOLOCAL[layer-1][sector-1]   = transform.inverse();
         }
         
          
@@ -323,7 +315,7 @@ public class CCDBConstantsLoader {
         BMTConstants.setCRCGRPNMAX(CRCGRPNMAX);
         BMTConstants.setCRZWIDTH(CRZWIDTH);
         BMTConstants.setEFF_Z_OVER_A(EFF_Z_OVER_A);
-        BMTConstants.set_T_OVER_X0(T_OVER_X0);
+        BMTConstants.setT_OVER_X0(T_OVER_X0);
         BMTConstants.setTHETAL_grid(THETA_L_grid);
         BMTConstants.setE_grid(ELEC_grid);
         BMTConstants.setB_grid(MAG_grid);
@@ -332,14 +324,6 @@ public class CCDBConstantsLoader {
         BMTConstants.setE_drift_MF(HV_DRIFT_MF);
         dbprovider.disconnect();
         CSTLOADED = true;
-     //   setDB(dbprovider);
     }
 
-    //public static final synchronized DatabaseConstantProvider getDB() {
-    //    return DB;
-    //}
-
-    //public static final synchronized void setDB(DatabaseConstantProvider dB) {
-    //    DB = dB;
-    //}
 }

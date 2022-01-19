@@ -39,7 +39,7 @@ public class HitReader {
      *
      * @return a list of BMT hits
      */
-    public List<Hit> get_BMTHits() {
+    public List<Hit> getBMTHits() {
         return _BMTHits;
     }
 
@@ -48,7 +48,7 @@ public class HitReader {
      *
      * @param _BMTHits list of BMT hits
      */
-    public void set_BMTHits(List<Hit> _BMTHits) {
+    public void setBMTHits(List<Hit> _BMTHits) {
         this._BMTHits = _BMTHits;
     }
     // the list of SVT hits
@@ -58,7 +58,7 @@ public class HitReader {
      *
      * @return a list of SVT hits
      */
-    public List<Hit> get_SVTHits() {
+    public List<Hit> getSVTHits() {
         return _SVTHits;
     }
 
@@ -67,7 +67,7 @@ public class HitReader {
      *
      * @param _SVTHits list of SVT hits
      */
-    public void set_SVTHits(List<Hit> _SVTHits) {
+    public void setSVTHits(List<Hit> _SVTHits) {
         this._SVTHits = _SVTHits;
     }
 
@@ -77,19 +77,22 @@ public class HitReader {
      * @param event the data event
      * @param adcConv converter from adc to values used in the analysis (i.e.
      * Edep for gemc, adc for cosmics)
+     * @param swim
+     * @param status
+     * @param timeCuts
      */
     public void fetch_BMTHits(DataEvent event, ADCConvertor adcConv, Swim swim, IndexedTable status, IndexedTable timeCuts) {
 
         // return if there is no BMT bank
         if (event.hasBank("BMT::adc") == false) {
             //System.err.println("there is no BMT bank ");
-            _BMTHits = new ArrayList<Hit>();
+            _BMTHits = new ArrayList<>();
 
             return;
         }
 
         // instanciates the list of hits
-        List<Hit> hits = new ArrayList<Hit>();
+        List<Hit> hits = new ArrayList<>();
         // gets the BMT dgtz bank
         DataBank bankDGTZ = event.getBank("BMT::adc");
         // fills the arrays corresponding to the hit variables
@@ -123,17 +126,17 @@ public class HitReader {
                     if(time!=0 && (time<tmin || time>tmax))
                         BmtStrip.setStatus(2);// calculate the strip parameters for the BMT hit
                 }
-                BmtStrip.calc_BMTStripParams(sector, layer, swim); // for Z detectors the Lorentz angle shifts the strip measurement; calc_Strip corrects for this effect
+                BmtStrip.calcBMTStripParams(sector, layer, swim); // for Z detectors the Lorentz angle shifts the strip measurement; calc_Strip corrects for this effect
                 // create the hit object for detector type BMT
                 
                 Hit hit = new Hit(DetectorType.BMT, BMTGeometry.getDetectorType(layer), sector, layer, BmtStrip);                
-                hit.set_Id(i+1);
+                hit.setId(i+1);
                 // add this hit
-                if(hit.get_Layer()+3!=Constants.getRmReg())
+                if(hit.getLayer()+3!=Constants.getRmReg())
                     hits.add(hit);
             }
             // fills the list of BMT hits
-            this.set_BMTHits(hits);
+            this.setBMTHits(hits);
         }
     }
 
@@ -142,6 +145,9 @@ public class HitReader {
      *
      * @param event the data event
      * @param adcConv converter from adc to daq values
+     * @param omitLayer
+     * @param omitHemisphere
+     * @param status
      */
     public void fetch_SVTHits(DataEvent event, ADCConvertor adcConv, int omitLayer, int omitHemisphere, IndexedTable status) {
 
@@ -234,21 +240,13 @@ public class HitReader {
                 //    continue;
                 // create the strip object with the adc value converted to daq value used for cluster-centroid estimate
                 Strip SvtStrip = new Strip(strip, adcConv.SVTADCtoDAQ(ADC), time); 
-                SvtStrip.set_Pitch(SVTGeometry.getPitch());
+                SvtStrip.setPitch(SVTGeometry.getPitch());
                 // get the strip line
-                SvtStrip.set_Line(Constants.SVTGEOMETRY.getStrip(layer, sector, strip));
-                SvtStrip.set_Module(Constants.SVTGEOMETRY.getModule(layer, sector));
-                SvtStrip.set_Normal(Constants.SVTGEOMETRY.getNormal(layer, sector)); 
-                if(layer%2==0) {
-                    SvtStrip.setToverX0(2*SVTGeometry.getToverX0());
-                    SvtStrip.setZoverA(SVTGeometry.getZoverA());
-                    SvtStrip.setMatT(SVTGeometry.getMaterialThickness());
-                }
-                else {
-                    SvtStrip.setToverX0(0);
-                }
+                SvtStrip.setLine(Constants.SVTGEOMETRY.getStrip(layer, sector, strip));
+                SvtStrip.setModule(Constants.SVTGEOMETRY.getModule(layer, sector));
+                SvtStrip.setNormal(Constants.SVTGEOMETRY.getNormal(layer, sector)); 
                 // if the hit is useable in the analysis its status is =0
-                if (SvtStrip.get_Edep() == 0) {
+                if (SvtStrip.getEdep() == 0) {
                     SvtStrip.setStatus(1);
                 }
 //                if (Constants.TIMECUTS) {
@@ -272,19 +270,19 @@ public class HitReader {
  //                                           (-o1.z + e1.z )     );
 
 //                Point3D passVals = new Point3D(o1.x, o1.y, o1.z); //switch from Vector3d to Point3D
-//                SvtStrip.set_ImplantPoint(passVals);
+//                SvtStrip.setImplantPoint(passVals);
 
 
                 // create the hit object
                 Hit hit = new Hit(DetectorType.BST, BMTType.UNDEFINED, sector, layer, SvtStrip);
-                hit.set_Id(id);
+                hit.setId(id);
                 // add this hit
-                if(hit.get_Region()!=Constants.getRmReg())      
+                if(hit.getRegion()!=Constants.getRmReg())      
                     hits.add(hit);
             }
         }
         // fill the list of SVT hits
-        this.set_SVTHits(hits);
+        this.setSVTHits(hits);
 
     }
 

@@ -43,19 +43,19 @@ public class Hit implements Comparable<Hit> {
 
     }
 
-    public DetectorType get_Detector() {
+    public DetectorType getDetector() {
         return _Detector;
     }
 
-    public void set_Detector(DetectorType _detector) {
+    public void setDetector(DetectorType _detector) {
         this._Detector = _detector;
     }
 
-    public BMTType get_Type() {
+    public BMTType getType() {
         return _Type;
     }
 
-    public void set_Type(BMTType type) {
+    public void setType(BMTType type) {
         this._Type = type;
     }
 
@@ -63,7 +63,7 @@ public class Hit implements Comparable<Hit> {
      *
      * @return the sector (1...24)
      */
-    public int get_Sector() {
+    public int getSector() {
         return _Sector;
     }
 
@@ -72,7 +72,7 @@ public class Hit implements Comparable<Hit> {
      *
      * @param _Sector
      */
-    public void set_Sector(int _Sector) {
+    public void setSector(int _Sector) {
         this._Sector = _Sector;
     }
 
@@ -80,7 +80,7 @@ public class Hit implements Comparable<Hit> {
      *
      * @return the layer (1...8)
      */
-    public int get_Layer() {
+    public int getLayer() {
         return _Layer;
     }
 
@@ -89,15 +89,15 @@ public class Hit implements Comparable<Hit> {
      *
      * @param _Layer
      */
-    public void set_Layer(int _Layer) {
+    public void setLayer(int _Layer) {
         this._Layer = _Layer;
     }
 
-    public Strip get_Strip() {
+    public Strip getStrip() {
         return _Strip;
     }
 
-    public void set_Strip(Strip _Strip) {
+    public void setStrip(Strip _Strip) {
         this._Strip = _Strip;
     }
 
@@ -105,7 +105,7 @@ public class Hit implements Comparable<Hit> {
      *
      * @return the ID
      */
-    public int get_Id() {
+    public int getId() {
         return _Id;
     }
 
@@ -114,7 +114,7 @@ public class Hit implements Comparable<Hit> {
      *
      * @param _Id
      */
-    public void set_Id(int _Id) {
+    public void setId(int _Id) {
         this._Id = _Id;
     }
 
@@ -122,7 +122,7 @@ public class Hit implements Comparable<Hit> {
      *
      * @return region (1...4)
      */
-    public int get_Region() {
+    public int getRegion() {
         return (int) (this._Layer + 1) / 2;
     }
 
@@ -130,7 +130,7 @@ public class Hit implements Comparable<Hit> {
      *
      * @return superlayer 1 or 2 in region (1...4)
      */
-    public int get_RegionSlayer() {
+    public int getRegionSlayer() {
         return (this._Layer + 1) % 2 + 1;
     }
 
@@ -144,25 +144,25 @@ public class Hit implements Comparable<Hit> {
     public int compareTo(Hit arg) {
         if(this.newClustering) {
             //sort by layer, then time, then edep
-            int CompLyr = this.get_Layer() < arg.get_Layer() ? -1 : this.get_Layer() == arg.get_Layer() ? 0 : 1;
-            int CompEdep = this.get_Strip().get_Edep() > arg.get_Strip().get_Edep() ? -1 : this.get_Strip().get_Edep() == arg.get_Strip().get_Edep() ? 0 : 1;
-            int CompTime = this.get_Strip().get_Time() < arg.get_Strip().get_Time() ? -1 : this.get_Strip().get_Time() == arg.get_Strip().get_Time() ? 0 : 1;
+            int CompLyr = this.getLayer() < arg.getLayer() ? -1 : this.getLayer() == arg.getLayer() ? 0 : 1;
+            int CompEdep = this.getStrip().getEdep() > arg.getStrip().getEdep() ? -1 : this.getStrip().getEdep() == arg.getStrip().getEdep() ? 0 : 1;
+            int CompTime = this.getStrip().getTime() < arg.getStrip().getTime() ? -1 : this.getStrip().getTime() == arg.getStrip().getTime() ? 0 : 1;
 
             int return_val1 = ((CompTime == 0) ? CompEdep : CompTime);
             int return_val = ((CompLyr == 0) ? return_val1 : CompLyr);
 
             return return_val;
         } else {
-            int CompLyr = this.get_Layer() < arg.get_Layer() ? -1 : this.get_Layer() == arg.get_Layer() ? 0 : 1;         
-            int return_val1 = this.get_Strip().get_Strip() < arg.get_Strip().get_Strip() ? -1 : this.get_Strip().get_Strip() == arg.get_Strip().get_Strip() ? 0 : 1;
+            int CompLyr = this.getLayer() < arg.getLayer() ? -1 : this.getLayer() == arg.getLayer() ? 0 : 1;         
+            int return_val1 = this.getStrip().getStrip() < arg.getStrip().getStrip() ? -1 : this.getStrip().getStrip() == arg.getStrip().getStrip() ? 0 : 1;
             return ((CompLyr == 0) ? return_val1 : CompLyr);
         }
     }
     
     
     public void printInfo() {
-        String s = " Hit: Detector " + this.get_Detector() + "ID " + this.get_Id() + " Sector " + this.get_Sector() + " Layer " + this.get_Layer() + " Strip " + this.get_Strip().get_Strip() 
-                + " Edep " + this.get_Strip().get_Edep()+ " Time " + this.get_Strip().get_Time();
+        String s = " Hit: Detector " + this.getDetector() + "ID " + this.getId() + " Sector " + this.getSector() + " Layer " + this.getLayer() + " Strip " + this.getStrip().getStrip() 
+                + " Edep " + this.getStrip().getEdep()+ " Time " + this.getStrip().getTime();
         System.out.println(s);
     }
 
@@ -175,55 +175,55 @@ public class Hit implements Comparable<Hit> {
     public boolean isSameAs(Hit otherHit) {
         Hit thisHit = (Hit) this;
         boolean cmp = false;
-        if ((thisHit.get_Detector()==otherHit.get_Detector())
-                && thisHit.get_Sector() == otherHit.get_Sector()
-                && thisHit.get_Layer() == otherHit.get_Layer()
-                && thisHit.get_Strip().get_Strip() == otherHit.get_Strip().get_Strip()
-                && thisHit.get_Strip().get_Edep() == otherHit.get_Strip().get_Edep()) {
+        if ((thisHit.getDetector()==otherHit.getDetector())
+                && thisHit.getSector() == otherHit.getSector()
+                && thisHit.getLayer() == otherHit.getLayer()
+                && thisHit.getStrip().getStrip() == otherHit.getStrip().getStrip()
+                && thisHit.getStrip().getEdep() == otherHit.getStrip().getEdep()) {
             cmp = true;
         }
         return cmp;
     }
 
-    public double get_docaToTrk() {
+    public double getdocaToTrk() {
         return _docaToTrk;
     }
 
-    public void set_docaToTrk(double _docaToTrk) {
+    public void setdocaToTrk(double _docaToTrk) {
         this._docaToTrk = _docaToTrk;
     }
 
-    public void set_docaToTrk(Point3D traj) {
-        this.set_docaToTrk(this.residual(traj));
+    public void setdocaToTrk(Point3D traj) {
+        this.setdocaToTrk(this.residual(traj));
     }
     
     public double residual(Point3D traj) {
         double value = 0;
-        if(this.get_Detector()==DetectorType.BST) {
-            Line3D dist = this.get_Strip().get_Line().distance(traj);
-            double side = -Math.signum(this.get_Strip().get_Line().direction().cross(dist.direction()).dot(this.get_Strip().get_Normal()));
+        if(this.getDetector()==DetectorType.BST) {
+            Line3D dist = this.getStrip().getLine().distance(traj);
+            double side = -Math.signum(this.getStrip().getLine().direction().cross(dist.direction()).dot(this.getStrip().getNormal()));
             value = dist.length()*side;
         }
         else {
             Point3D local = new Point3D(traj);
-            this.get_Strip().toLocal().apply(local);
-            if(this.get_Type()==BMTType.C)                
-                value = local.z()-this.get_Strip().get_Z();
+            this.getStrip().toLocal().apply(local);
+            if(this.getType()==BMTType.C)                
+                value = local.z()-this.getStrip().getZ();
             else {
-                value = Math.atan2(local.y(),local.x())-this.get_Strip().get_Phi();
+                value = Math.atan2(local.y(),local.x())-this.getStrip().getPhi();
                 if(Math.abs(value)>Math.PI) value-=Math.signum(value)*2*Math.PI;
-                value = value*this.get_Strip().get_Tile().baseArc().radius();
+                value = value*this.getStrip().getTile().baseArc().radius();
             }
         }     
         return value;
     }   
     
     
-    public double get_stripResolutionAtDoca() {
+    public double getstripResolutionAtDoca() {
         return _stripResolutionAtDoca;
     }
 
-    public void set_stripResolutionAtDoca(double _stripResolutionAtDoca) {
+    public void setstripResolutionAtDoca(double _stripResolutionAtDoca) {
         this._stripResolutionAtDoca = _stripResolutionAtDoca;
     }
 
@@ -233,7 +233,7 @@ public class Hit implements Comparable<Hit> {
      * and subsequent KF fit for that hit. -1: no fit; 0: global helical fit; 1:
      * KF fit
      */
-    public int get_TrkgStatus() {
+    public int getTrkgStatus() {
         return _TrkgStatus;
     }
 
@@ -243,15 +243,15 @@ public class Hit implements Comparable<Hit> {
      * pattern recognition and subsequent KF fit for that hit. -1: no fit; 0:
      * global helical fit; 1: KF fit
      */
-    public void set_TrkgStatus(int trkgStatus) {
+    public void setTrkgStatus(int trkgStatus) {
         _TrkgStatus = trkgStatus;
     }
 
-    public double get_QualityFac() {
+    public double getQualityFac() {
         return _QualityFac;
     }
 
-    public void set_QualityFac(double QF) {
+    public void setQualityFac(double QF) {
         _QualityFac = QF;
     }
 
@@ -259,25 +259,25 @@ public class Hit implements Comparable<Hit> {
      *
      * @return the hit residual = doca to track
      */
-    public double get_Residual() {
-        return get_docaToTrk();
+    public double getResidual() {
+        return getdocaToTrk();
     }
 
 
-    public int get_AssociatedClusterID() {
+    public int getAssociatedClusterID() {
         return _AssociatedClusterID;
     }
 
-    public void set_AssociatedClusterID(int _AssociatedClusterID) {
+    public void setAssociatedClusterID(int _AssociatedClusterID) {
         this._AssociatedClusterID = _AssociatedClusterID;
     }
 
 
-    public int get_AssociatedTrackID() {
+    public int getAssociatedTrackID() {
         return AssociatedTrackID;
     }
 
-    public void set_AssociatedTrackID(int associatedTrackID) {
+    public void setAssociatedTrackID(int associatedTrackID) {
         AssociatedTrackID = associatedTrackID;
     }
 

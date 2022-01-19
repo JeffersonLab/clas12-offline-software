@@ -14,7 +14,7 @@ import org.jlab.rec.cvt.bmt.BMTConstants;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.svt.SVTGeometry;
-import org.jlab.rec.cvt.track.Measurements.CVTLayer;
+import org.jlab.rec.cvt.measurement.MLayer;
 import org.jlab.rec.cvt.trajectory.Ray;
 import org.jlab.rec.cvt.trajectory.StateVec;
 import org.jlab.rec.cvt.trajectory.Trajectory;
@@ -35,11 +35,11 @@ public class StraightTrack extends Trajectory{
     public List<Cluster> getClusters() {
         List<Cluster> clusters = new ArrayList<>(); 
         for(Cross c : this) { 
-	    if(c.get_Detector()==DetectorType.BST) {
-                if(c.get_Cluster1()!=null) clusters.add(c.get_Cluster1());
-                if(c.get_Cluster2()!=null) clusters.add(c.get_Cluster2());
+	    if(c.getDetector()==DetectorType.BST) {
+                if(c.getCluster1()!=null) clusters.add(c.getCluster1());
+                if(c.getCluster2()!=null) clusters.add(c.getCluster2());
             } else {
-                clusters.add(c.get_Cluster1());
+                clusters.add(c.getCluster1());
             }
       	}
         Collections.sort(clusters);
@@ -49,8 +49,8 @@ public class StraightTrack extends Trajectory{
     
     public void update(KFitter kf) {
         Ray the_ray = new Ray(kf.finalStateVec.tx, kf.finalStateVec.x0, kf.finalStateVec.tz, kf.finalStateVec.z0);                
-        this.set_ray(the_ray);
-        this.set_chi2(kf.chi2);
+        this.setRay(the_ray);
+        this.setchi2(kf.chi2);
         this.trajs = kf.TrjPoints;
         this.updateCrosses();
         this.updateClusters();
@@ -59,19 +59,19 @@ public class StraightTrack extends Trajectory{
     
     
     public void updateCrosses(Ray ray) {
-        this.set_ray(ray);
+        this.setRay(ray);
         this.updateCrosses();
     }
     
     public void updateCrosses() {
         for (Cross c : this) {
-            c.set_AssociatedTrackID(this.get_Id());
-            if(c.get_Detector()==DetectorType.BST) 
-                c.updateSVTCross(this.get_ray().get_dirVec());
+            c.setAssociatedTrackID(this.getId());
+            if(c.getDetector()==DetectorType.BST) 
+                c.updateSVTCross(this.getRay().getDirVec());
             else {
-                Cluster cluster = c.get_Cluster1();
+                Cluster cluster = c.getCluster1();
                 List<Point3D> trajs = new ArrayList<>();
-                int nTraj = cluster.getTile().intersection(this.get_ray().toLine(), trajs);
+                int nTraj = cluster.getTile().intersection(this.getRay().toLine(), trajs);
                 if(nTraj>0) {
                     Point3D traj = null;
                     double  doca = Double.MAX_VALUE;
@@ -82,7 +82,7 @@ public class StraightTrack extends Trajectory{
                             traj = t;
                         }
                     }
-                    c.updateBMTCross(traj, this.get_ray().get_dirVec());
+                    c.updateBMTCross(traj, this.getRay().getDirVec());
                 }
             }
         }
@@ -91,26 +91,26 @@ public class StraightTrack extends Trajectory{
     public void updateClusters() {
         for(Cluster cluster: this.getClusters()) {
             int hemisphere = (int) Math.signum(cluster.center().y());
-            int layer = cluster.get_Layer();
-            DetectorType type = cluster.get_Detector();
-            int index = CVTLayer.getType(type, layer).getIndex(hemisphere);
-            cluster.update(this.get_Id(), this.trajs.get(index));
+            int layer = cluster.getLayer();
+            DetectorType type = cluster.getDetector();
+            int index = MLayer.getType(type, layer).getIndex(hemisphere);
+            cluster.update(this.getId(), this.trajs.get(index));
         }
     }
 
-    public double get_ndf() {
+    public double getndf() {
         return _ndf;
     }
 
-    public void set_ndf(double _ndf) {
+    public void setndf(double _ndf) {
         this._ndf = _ndf;
     }
 
-    public double get_chi2() {
+    public double getchi2() {
         return _chi2;
     }
 
-    public void set_chi2(double _chi2) {
+    public void setchi2(double _chi2) {
         this._chi2 = _chi2;
     }
 
@@ -119,7 +119,7 @@ public class StraightTrack extends Trajectory{
         boolean isInTrack = false;
 
         for (int i = 0; i < cand.size(); i++) {
-            if (cand.get(i).get_Id() == cross.get_Id()) {
+            if (cand.get(i).getId() == cross.getId()) {
                 isInTrack = true;
             }
 
@@ -130,10 +130,10 @@ public class StraightTrack extends Trajectory{
 
     
     public void findTrajectory() {
-        Ray ray = this.get_ray();
+        Ray ray = this.getRay();
         ArrayList<StateVec> stateVecs = new ArrayList<>();
 
-        double[][][] SVTIntersections = TrajectoryFinder.calc_trackIntersSVT(ray);
+        double[][][] SVTIntersections = TrajectoryFinder.calcTrackIntersSVT(ray);
 
         for (int l = 0; l < SVTGeometry.NLAYERS; l++) {
             for (int s = 0; s < SVTGeometry.NSECTORS[l]; s++) {
@@ -150,14 +150,14 @@ public class StraightTrack extends Trajectory{
                     double trkToMPlnAngl = SVTIntersections[l][s][5];
                     double CalcCentroidStrip = SVTIntersections[l][s][6];
 
-                    StateVec stVec = new StateVec(XtrackIntersPlane, YtrackIntersPlane, ZtrackIntersPlane, ray.get_dirVec().x(), ray.get_dirVec().y(), ray.get_dirVec().z());
-                    stVec.set_ID(this.get_Id());
-                    stVec.set_SurfaceLayer(LayerTrackIntersPlane);
-                    stVec.set_SurfaceSector(SectorTrackIntersPlane);
-                    stVec.set_TrkPhiAtSurface(PhiTrackIntersPlane);
-                    stVec.set_TrkThetaAtSurface(ThetaTrackIntersPlane);
-                    stVec.set_TrkToModuleAngle(trkToMPlnAngl);
-                    stVec.set_CalcCentroidStrip(CalcCentroidStrip);
+                    StateVec stVec = new StateVec(XtrackIntersPlane, YtrackIntersPlane, ZtrackIntersPlane, ray.getDirVec().x(), ray.getDirVec().y(), ray.getDirVec().z());
+                    stVec.setID(this.getId());
+                    stVec.setSurfaceLayer(LayerTrackIntersPlane);
+                    stVec.setSurfaceSector(SectorTrackIntersPlane);
+                    stVec.setTrkPhiAtSurface(PhiTrackIntersPlane);
+                    stVec.setTrkThetaAtSurface(ThetaTrackIntersPlane);
+                    stVec.setTrkToModuleAngle(trkToMPlnAngl);
+                    stVec.setCalcCentroidStrip(CalcCentroidStrip);
                     if(stateVecs.size()>0 
                             && stateVecs.get(stateVecs.size()-1).x()==stVec.x()
                             && stateVecs.get(stateVecs.size()-1).y()==stVec.y()
@@ -169,7 +169,7 @@ public class StraightTrack extends Trajectory{
             }
         }
         
-        double[][][] BMTIntersections = TrajectoryFinder.calc_trackIntersBMT(ray, BMTConstants.STARTINGLAYR);
+        double[][][] BMTIntersections = TrajectoryFinder.calcTrackIntersBMT(ray, BMTConstants.STARTINGLAYR);
 
         for (int l = BMTConstants.STARTINGLAYR - 1; l < 6; l++) {
             //hemisphere 1-2
@@ -181,22 +181,22 @@ public class StraightTrack extends Trajectory{
                     double XtrackIntersSurf = BMTIntersections[l][h][0];
                     double YtrackIntersSurf = BMTIntersections[l][h][1];
                     double ZtrackIntersSurf = BMTIntersections[l][h][2];
-                    //int SectorTrackIntersSurf = bmt_geo.isInSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf), Math.toRadians(BMTConstants.isInSectorJitter));
+                    //int SectorTrackIntersSurf = bmt_geo.isInSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf), Math.toRadians(BMTConstants.ISINSECTORJITTER));
                     int SectorTrackIntersSurf = Constants.BMTGEOMETRY.getSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf));
                     double PhiTrackIntersSurf = BMTIntersections[l][h][3];
                     double ThetaTrackIntersSurf = BMTIntersections[l][h][4];
                     double trkToMPlnAngl = BMTIntersections[l][h][5];
                     double CalcCentroidStrip = BMTIntersections[l][h][6];
 
-                    StateVec stVec = new StateVec(XtrackIntersSurf, YtrackIntersSurf, ZtrackIntersSurf, ray.get_dirVec().x(), ray.get_dirVec().y(), ray.get_dirVec().z());
+                    StateVec stVec = new StateVec(XtrackIntersSurf, YtrackIntersSurf, ZtrackIntersSurf, ray.getDirVec().x(), ray.getDirVec().y(), ray.getDirVec().z());
 
-                    stVec.set_ID(this.get_Id());
-                    stVec.set_SurfaceLayer(LayerTrackIntersSurf);
-                    stVec.set_SurfaceSector(SectorTrackIntersSurf);
-                    stVec.set_TrkPhiAtSurface(PhiTrackIntersSurf);
-                    stVec.set_TrkThetaAtSurface(ThetaTrackIntersSurf);
-                    stVec.set_TrkToModuleAngle(trkToMPlnAngl);
-                    stVec.set_CalcCentroidStrip(CalcCentroidStrip); 
+                    stVec.setID(this.getId());
+                    stVec.setSurfaceLayer(LayerTrackIntersSurf);
+                    stVec.setSurfaceSector(SectorTrackIntersSurf);
+                    stVec.setTrkPhiAtSurface(PhiTrackIntersSurf);
+                    stVec.setTrkThetaAtSurface(ThetaTrackIntersSurf);
+                    stVec.setTrkToModuleAngle(trkToMPlnAngl);
+                    stVec.setCalcCentroidStrip(CalcCentroidStrip); 
                      if(stateVecs.size()>0 
                             && stateVecs.get(stateVecs.size()-1).x()==stVec.x()
                             && stateVecs.get(stateVecs.size()-1).y()==stVec.y()
@@ -212,11 +212,11 @@ public class StraightTrack extends Trajectory{
         
         stateVecs.sort(Comparator.comparing(StateVec::y));
         for (int l = 0; l < stateVecs.size(); l++) {
-            stateVecs.get(l).set_planeIdx(l);
+            stateVecs.get(l).setPlaneIdx(l);
         }
-        this.set_Trajectory(stateVecs);
-        this.set_SVTIntersections(SVTIntersections);
-        this.set_BMTIntersections(BMTIntersections);
+        this.setTrajectory(stateVecs);
+        this.setSVTIntersections(SVTIntersections);
+        this.setBMTIntersections(BMTIntersections);
     }
 
     
@@ -224,20 +224,20 @@ public class StraightTrack extends Trajectory{
      *
      * @return the chi^2 for the straight track fit
      */
-    public double calc_straightTrkChi2() {
+    public double calcStraightTrkChi2() {
 
         double chi2 = 0;
 
-        double yxSl = this.get_ray().get_yxslope();
-        double yzSl = this.get_ray().get_yzslope();
-        double yxIt = this.get_ray().get_yxinterc();
-        double yzIt = this.get_ray().get_yzinterc(); 
+        double yxSl = this.getRay().getYXSlope();
+        double yzSl = this.getRay().getYZSlope();
+        double yxIt = this.getRay().getYXInterc();
+        double yzIt = this.getRay().getYZInterc(); 
         
         for (Cross c : this) {
-            double errSq = c.get_PointErr().x() * c.get_PointErr().x() + c.get_PointErr().z() * c.get_PointErr().z();
-            double y = c.get_Point().y();
-            double x = c.get_Point().x();
-            double z = c.get_Point().z();
+            double errSq = c.getPointErr().x() * c.getPointErr().x() + c.getPointErr().z() * c.getPointErr().z();
+            double y = c.getPoint().y();
+            double x = c.getPoint().x();
+            double z = c.getPoint().z();
 
             double x_fit = yxSl * y + yxIt;
             double z_fit = yzSl * y + yzIt;

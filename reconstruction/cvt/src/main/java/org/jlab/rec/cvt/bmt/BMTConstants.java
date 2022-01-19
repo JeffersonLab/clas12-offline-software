@@ -66,22 +66,15 @@ public class BMTConstants {
 
   
     // THE RECONSTRUCTION CONSTANTS
-    //public static final double SigmaDrift = 0.4; 				// Max transverse diffusion value (GEMC value)
-    public static final double SigmaDrift = 0.036; 				// Max transverse diffusion value (GEMC value)
+    public static final double SIGMADRIFT = 0.036; 				// Max transverse diffusion value (GEMC value)
     
-    public static final double hDrift = 3.0; 					// Size of the drift gap
+    public static final double HDRIFT = 3.0; 					// Size of the drift gap
     
-    public static Point3D[][]  shifts    = new Point3D[NLAYERS][NSECTORS];  // detector alignment shifts
-    public static Vector3D[][] rotations = new Vector3D[NLAYERS][NSECTORS]; // detector alignment rotations
-    public static Line3D[][]   axes = new Line3D[NLAYERS][NSECTORS];        // detector axes
-    public static Transformation3D[][] toLocal  = new Transformation3D[NLAYERS][NSECTORS];
-    public static Transformation3D[][] toGlobal = new Transformation3D[NLAYERS][NSECTORS];
-    public static double[][] Rx= new double[NREGIONS*2][3];   //Angle to rotate the det around x-axis
-    public static double[][] Ry= new double[NREGIONS*2][3];   //Angle to rotate the det around y-axis
-    public static double[][] Rz= new double[NREGIONS*2][3];   //Angle to rotate the det around z-axis
-    public static double[][] Cx= new double[NREGIONS*2][3];   //x-position of Center of detector frame
-    public static double[][] Cy= new double[NREGIONS*2][3];   //y-position of Center of detector frame
-    public static double[][] Cz= new double[NREGIONS*2][3];   //z-position of Center of detector frame
+    public static Point3D[][]  SHIFTS    = new Point3D[NLAYERS][NSECTORS];  // detector alignment SHIFTS
+    public static Vector3D[][] ROTATIONS = new Vector3D[NLAYERS][NSECTORS]; // detector alignment ROTATIONS
+    public static Line3D[][]   AXES = new Line3D[NLAYERS][NSECTORS];        // detector AXES
+    public static Transformation3D[][] TOLOCAL  = new Transformation3D[NLAYERS][NSECTORS];
+    public static Transformation3D[][] TOGLOBAL = new Transformation3D[NLAYERS][NSECTORS];
     public static double[] ThetaL_grid = new double[405];    //Lorentz angle grid
     public static double[] E_grid = new double[405];         //Electric field value of the grid
     public static double[] B_grid = new double[405];        //Magnetic field value of the grid
@@ -97,19 +90,6 @@ public class BMTConstants {
 // THE HV CONSTANT
     public static double[][] E_DRIFT_FF = new double[2*NREGIONS][3]; 
     public static double[][] E_DRIFT_MF = new double[2*NREGIONS][3]; 
-    //private static double ThetaL = 0; 						// the Lorentz angle for 5-T B-field
-
-    //private static double w_i =25.0; 
-    public static boolean areConstantsLoaded = false;
-
-    // ----- cut based cand select
-    public static final double phi12cut = 35.;
-    public static final double phi13cut = 35.;
-    public static final double phi14cut = 35.;
-    public static final double radcut = 100.;
-    public static final double drdzcut = 150.;
-//    public static final double LYRTHICKN = 0.0; // old LYRTHICKN = 4.;
-    public static final double isInSectorJitter = 2.0; // 2 deg
 
     public static final int STARTINGLAYR = 1;
 
@@ -372,17 +352,17 @@ public class BMTConstants {
         EFF_Z_OVER_A = eFF_Z_OVER_A;
     }
     
-    public static double[] get_T_OVER_X0() {
+    public static double[] getT_OVER_X0() {
         return T_OVER_X0;
     }
-    public static synchronized void set_T_OVER_X0(double[] t_OVER_X0) {
+    public static synchronized void setT_OVER_X0(double[] t_OVER_X0) {
         T_OVER_X0 = t_OVER_X0;
     }
     
-    public static double[] get_Material_T() {
+    public static double[] getMaterial_T() {
         return TMAT;
     }
-    public static synchronized void set_Material_T(double[] t) {
+    public static synchronized void setMaterial_T(double[] t) {
         TMAT = t;
     }
     
@@ -429,34 +409,16 @@ public class BMTConstants {
    public static synchronized void setE_drift_FF(double[][] cHV_drift) {
    	for (int i=0; i<2*NREGIONS;i++) {
             for (int j=0; j<3;j++) {	
-                    E_DRIFT_FF[i][j] = 10*cHV_drift[i][j]/hDrift;
+                    E_DRIFT_FF[i][j] = 10*cHV_drift[i][j]/HDRIFT;
             }	
    	}
   }
    public static synchronized void setE_drift_MF(double[][] cHV_drift) {
    	for (int i=0; i<2*NREGIONS;i++) {
             for (int j=0; j<3;j++) {	
-                    E_DRIFT_MF[i][j]  = 10*cHV_drift[i][j]/hDrift;
+                    E_DRIFT_MF[i][j]  = 10*cHV_drift[i][j]/HDRIFT;
             }	
    	}
   }
    
-  public static synchronized void setRx(int layer, int sector, double cRx) {
-   	Rx[layer-1][sector-1]  = cRx;
-  }
-  public static synchronized void setRy(int layer, int sector, double cRy) {
-  		Ry[layer-1][sector-1]  = cRy;
-  }
-  public static synchronized void setRz(int layer, int sector, double cRz) {
- 	   	Rz[layer-1][sector-1]  = cRz;
-  }
-  public static synchronized void setCx(int layer, int sector, double cCx) {
-  		Cx[layer-1][sector-1]  = cCx;
-  }
-  public static synchronized void setCy(int layer, int sector, double cCy) {
- 		Cy[layer-1][sector-1]  = cCy;
- }
- public static synchronized void setCz(int layer, int sector, double cCz) {
- 	   	Cz[layer-1][sector-1]  = cCz;
- }
 }

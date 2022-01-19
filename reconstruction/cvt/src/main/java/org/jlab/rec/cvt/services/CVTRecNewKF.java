@@ -118,19 +118,19 @@ public class CVTRecNewKF extends ReconstructionEngine {
 
         HitReader hitRead = new HitReader();
         hitRead.fetch_SVTHits(event, adcConv, -1, -1, svtStatus);
-        if(Constants.SVTOnly==false)
+        if(Constants.SVTONLY==false)
           hitRead.fetch_BMTHits(event, adcConv, swimmer, bmtStatus, bmtTime);
 
         List<Hit> hits = new ArrayList<>();
         //I) get the hits
-        List<Hit> SVThits = hitRead.get_SVTHits();
+        List<Hit> SVThits = hitRead.getSVTHits();
         if(SVThits.size()>SVTParameters.MAXSVTHITS)
             return true;
         if (SVThits != null && !SVThits.isEmpty()) {
             hits.addAll(SVThits);
         }
 
-        List<Hit> BMThits = hitRead.get_BMTHits();
+        List<Hit> BMThits = hitRead.getBMTHits();
         if (BMThits != null && BMThits.size() > 0) {
             hits.addAll(BMThits);
 
@@ -161,10 +161,10 @@ public class CVTRecNewKF extends ReconstructionEngine {
         
         if (!clusters.isEmpty()) {
             for (int i = 0; i < clusters.size(); i++) {
-                if (clusters.get(i).get_Detector() == DetectorType.BST) {
+                if (clusters.get(i).getDetector() == DetectorType.BST) {
                     SVTclusters.add(clusters.get(i));
                 }
-                if (clusters.get(i).get_Detector() == DetectorType.BMT) {
+                if (clusters.get(i).getDetector() == DetectorType.BMT) {
                     BMTclusters.add(clusters.get(i));
                 }
             }
@@ -177,12 +177,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
             return true; 
         }
         
-        if(Constants.isCosmicsData) {
-//            if(this.isSVTonly) {
-//                List<ArrayList<Cross>> crosses_svtOnly = new ArrayList<>();
-//                crosses_svtOnly.add(0, crosses.get(0));
-//                crosses_svtOnly.add(1, new ArrayList<>());
-//            } 
+        if(Constants.ISCOSMICDATA) {
             strgtTrksRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
                     crosses, rbc, swimmer);
         } else {
@@ -210,8 +205,8 @@ public class CVTRecNewKF extends ReconstructionEngine {
         //svt stand-alone
         String svtStAl = this.getEngineConfigString("svtOnly");        
         if (svtStAl!=null) {
-            Constants.SVTOnly = Boolean.valueOf(svtStAl);
-            System.out.println("["+this.getName()+"] run with SVT only "+Constants.SVTOnly+" config chosen based on yaml");
+            Constants.SVTONLY = Boolean.valueOf(svtStAl);
+            System.out.println("["+this.getName()+"] run with SVT only "+Constants.SVTONLY+" config chosen based on yaml");
         }
         else {
              System.out.println("["+this.getName()+"] run with both CVT systems (default) ");
@@ -244,8 +239,8 @@ public class CVTRecNewKF extends ReconstructionEngine {
         
         String svtCosmics = this.getEngineConfigString("cosmics");        
         if (svtCosmics!=null) {
-            Constants.isCosmicsData = Boolean.valueOf(svtCosmics);
-            System.out.println("["+this.getName()+"] run with cosmics settings "+Constants.isCosmicsData+" config chosen based on yaml");
+            Constants.ISCOSMICDATA = Boolean.valueOf(svtCosmics);
+            System.out.println("["+this.getName()+"] run with cosmics settings "+Constants.ISCOSMICDATA+" config chosen based on yaml");
         }
         else {
             System.out.println("["+this.getName()+"] run with cosmics settings default = false");
@@ -292,11 +287,11 @@ public class CVTRecNewKF extends ReconstructionEngine {
             matrixLibrary = this.getEngineConfigString("matLib");
         }
         Constants.setMatLib(matrixLibrary);
-        System.out.println("["+this.getName()+"] run with matLib "+ Constants.kfMatLib.toString() + " library");
+        System.out.println("["+this.getName()+"] run with matLib "+ Constants.KFMATLIB.toString() + " library");
         
         if(this.getEngineConfigString("svtSeeding")!=null) {
-            Constants.svtSeeding = Boolean.parseBoolean(this.getEngineConfigString("svtSeeding"));
-            System.out.println("["+this.getName()+"] run SVT-based seeding set to "+ Constants.svtSeeding);
+            Constants.SVTSEEDING = Boolean.parseBoolean(this.getEngineConfigString("svtSeeding"));
+            System.out.println("["+this.getName()+"] run SVT-based seeding set to "+ Constants.SVTSEEDING);
         }
 
         if(this.getEngineConfigString("timeCuts")!=null) {

@@ -40,90 +40,63 @@ public class Strip {
     private Cylindrical3D _Tile;
     private Line3D _Module;
     private Vector3D _Normal;
-    private double _ToverX0;
-    private double _ZoverA;
-    private double _Tmat;
     private Transformation3D toLocal;
     private Transformation3D toGlobal;
     
-    public int get_Strip() {
+    public int getStrip() {
         return _Strip;
     }
 
-    public void set_Strip(int _Strip) {
+    public void setStrip(int _Strip) {
         this._Strip = _Strip;
     }
 
-    public double get_Pitch() {
+    public double getPitch() {
         return _Pitch;
     }
 
-    public void set_Pitch(double _Pitch) {
+    public void setPitch(double _Pitch) {
         this._Pitch = _Pitch;
     }
 
-    public Arc3D get_Arc() {
+    public Arc3D getArc() {
         return _Arc;
     }
 
-    public void set_Arc(Arc3D _Arc) {
+    public void setArc(Arc3D _Arc) {
         this._Arc = _Arc;
     }
 
-    public Line3D get_Line() {
+    public Line3D getLine() {
         return _Line;
     }
 
-    public void set_Line(Line3D _Line) {
+    public void setLine(Line3D _Line) {
         this._Line = _Line;
     }
 
-    public Cylindrical3D get_Tile() {
+    public Cylindrical3D getTile() {
         return _Tile;
     }
 
-    public void set_Tile(Cylindrical3D _Tile) {
+    public void setTile(Cylindrical3D _Tile) {
         this._Tile = _Tile;
     }
 
-    public Line3D get_Module() {
+    public Line3D getModule() {
         return _Module;
     }
 
-    public void set_Module(Line3D _Module) {
+    public void setModule(Line3D _Module) {
         this._Module = _Module;
     }
 
-    public Vector3D get_Normal() {
+    public Vector3D getNormal() {
         return _Normal;
     }
 
-    public void set_Normal(Vector3D _Normal) {
+    public void setNormal(Vector3D _Normal) {
         this._Normal = _Normal;
-    }
-
-    public double getToverX0() {
-        return _ToverX0;
-    }
-
-    public void setToverX0(double _ToverX0) {
-        this._ToverX0 = _ToverX0;
-    }
-
-    public double getMatT() {
-        return _Tmat;
-    }
-
-    public void setMatT(double t) {
-        this._Tmat = t;
-    }
-
-    public double getZoverA() {
-        return _ZoverA;
-    }
-
-    public void setZoverA(double value) {
-        this._ZoverA = value;
     }
 
     public Transformation3D toLocal() {
@@ -142,81 +115,81 @@ public class Strip {
         this.toGlobal = toGlobal;
     }
 
-    public int get_LCStrip() {
+    public int getLCStrip() {
         return _LCStrip;
     }
 
-    public void set_LCStrip(int _LCStrip) {
+    public void setLCStrip(int _LCStrip) {
         this._LCStrip = _LCStrip;
     }
 
-    public double get_Phi() {
+    public double getPhi() {
         return _Phi;
     }
 
-    public void set_Phi(double _Phi) {
+    public void setPhi(double _Phi) {
         this._Phi = _Phi;
     }
 
-    public double get_PhiErr() {
+    public double getPhiErr() {
         return _PhiErr;
     }
 
-    public void set_PhiErr(double _PhiErr) {
+    public void setPhiErr(double _PhiErr) {
         this._PhiErr = _PhiErr;
     }
 
-    public double get_Phi0() {
+    public double getPhi0() {
         return _Phi0;
     }
 
-    public void set_Phi0(double _Phi0) {
+    public void setPhi0(double _Phi0) {
         this._Phi0 = _Phi0;
     }
 
-    public double get_PhiErr0() {
+    public double getPhiErr0() {
         return _PhiErr0;
     }
 
-    public void set_PhiErr0(double _PhiErr0) {
+    public void setPhiErr0(double _PhiErr0) {
         this._PhiErr0 = _PhiErr0;
     }
 
-    public double get_Z() {
+    public double getZ() {
         return _Z;
     }
 
-    public void set_Z(double _Z) {
+    public void setZ(double _Z) {
         this._Z = _Z;
     }
 
-    public double get_ZErr() {
+    public double getZErr() {
         return _ZErr;
     }
 
-    public void set_ZErr(double _ZErr) {
+    public void setZErr(double _ZErr) {
         this._ZErr = _ZErr;
     }
 
-    public double get_Edep() {
+    public double getEdep() {
         return _Edep;
     }
 
-    public void set_Edep(double _Edep) {
+    public void setEdep(double _Edep) {
         this._Edep = _Edep;
     }
 
     /**
      * @return the _Time
      */
-    public double get_Time() {
+    public double getTime() {
         return _Time;
     }
 
     /**
      * @param _Time the _Time to set
      */
-    public void set_Time(double _Time) {
+    public void setTime(double _Time) {
         this._Time = _Time;
     }
 
@@ -236,53 +209,50 @@ public class Strip {
      * @param layer
      * @param swim
      */
-    public void calc_BMTStripParams(int sector, int layer, Swim swim) {
+    public void calcBMTStripParams(int sector, int layer, Swim swim) {
         BMTGeometry geo = Constants.BMTGEOMETRY;
         
         int region = geo.getRegion(layer); // region index (1...3) 1=layers 1&2, 2=layers 3&4, 3=layers 5&6
         this.setToGlobal(geo.toGlobal(layer, sector));
         this.setToLocal(geo.toLocal(layer, sector));
-        this.set_Tile(geo.getTileSurface(layer, sector));
-        this.set_Pitch(geo.getPitch(layer, this.get_Strip()));
-        this.setToverX0(geo.getToverX0(layer));
-        this.setZoverA(geo.getZoverA(layer));
-        this.setMatT(geo.getMaterialThickness(layer));
+        this.setTile(geo.getTileSurface(layer, sector));
+        this.setPitch(geo.getPitch(layer, this.getStrip()));
         
         if (BMTGeometry.getDetectorType(layer) == BMTType.C) { // C-detectors
             // set z
-            //double z = geo.CRCStrip_GetZ(layer, this.get_Strip());
-            Arc3D arcLine = geo.getCstrip(region, sector, this.get_Strip());
-            this.set_Arc(arcLine);
-            this.set_Normal(arcLine.bisect());
+            //double z = geo.CRCStrip_GetZ(layer, this.getStrip());
+            Arc3D arcLine = geo.getCstrip(region, sector, this.getStrip());
+            this.setArc(arcLine);
+            this.setNormal(arcLine.bisect());
             // max z err
-            this.set_Z(geo.getCstripZ(geo.getRegion(layer),this.get_Strip()));
-            this.set_ZErr(geo.getPitch(layer, this.get_Strip()) / Math.sqrt(12.));
+            this.setZ(geo.getCstripZ(geo.getRegion(layer),this.getStrip()));
+            this.setZErr(geo.getPitch(layer, this.getStrip()) / Math.sqrt(12.));
 
         }
 
         if (BMTGeometry.getDetectorType(layer) == BMTType.Z) { // Z-detectors
-            Line3D line = geo.getLCZstrip(geo.getRegion(layer), sector, this.get_Strip(), swim);
-            this.set_Line(line);
-            this.set_Normal(this.get_Tile().getAxis().distance(line.midpoint()).direction().asUnit());            
+            Line3D line = geo.getLCZstrip(geo.getRegion(layer), sector, this.getStrip(), swim);
+            this.setLine(line);
+            this.setNormal(this.getTile().getAxis().distance(line.midpoint()).direction().asUnit());            
             // set the phi 
-            Point3D local = geo.getIdealLCZstrip(region, sector, this.get_Strip(), swim).midpoint();
-            double theMeasuredPhi = geo.getZstripPhi(geo.getRegion(layer), sector, this.get_Strip());
+            Point3D local = geo.getIdealLCZstrip(region, sector, this.getStrip(), swim).midpoint();
+            double theMeasuredPhi = geo.getZstripPhi(geo.getRegion(layer), sector, this.getStrip());
             double theLorentzCorrectedAngle = local.toVector3D().phi();
-            this.set_Phi(theLorentzCorrectedAngle);
-            this.set_Phi0(theMeasuredPhi); // uncorrected, can be outside of -pi,pi
+            this.setPhi(theLorentzCorrectedAngle);
+            this.setPhi0(theMeasuredPhi); // uncorrected, can be outside of -pi,pi
 
             // get the strip number after correcting for Lorentz angle
             int theLorentzCorrectedStrip = geo.getStrip(layer,  sector, line.midpoint());
-            this.set_LCStrip(theLorentzCorrectedStrip);
+            this.setLCStrip(theLorentzCorrectedStrip);
             // RDV use xyz dependent ThetaLorentz
-            double sigma = BMTConstants.SigmaDrift / Math.cos(geo.getThetaLorentz(layer, sector)); // max sigma for drift distance  (hDrift) = total gap from top to mesh
+            double sigma = BMTConstants.SIGMADRIFT / Math.cos(geo.getThetaLorentz(layer, sector)); // max sigma for drift distance  (HDRIFT) = total gap from top to mesh
 
             //max phi err
             double phiErrL = sigma / geo.getRadius(layer);
 
-            double phiErr = geo.getPitch(layer, this.get_Strip()) / geo.getRadius(layer) / Math.sqrt(12.);
-            this.set_PhiErr(Math.sqrt(phiErr * phiErr + phiErrL * phiErrL));
-            this.set_PhiErr0(phiErr);
+            double phiErr = geo.getPitch(layer, this.getStrip()) / geo.getRadius(layer) / Math.sqrt(12.);
+            this.setPhiErr(Math.sqrt(phiErr * phiErr + phiErrL * phiErrL));
+            this.setPhiErr0(phiErr);
             
             
         }

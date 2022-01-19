@@ -34,8 +34,8 @@ public class ADCConvertor {
         int START[] = new int[8];
         int END[] = new int[8];
         for (int i = 0; i < 8; i++) {
-            START[i] = SVTParameters.initThresholds + SVTParameters.deltaThresholds * i;
-            END[i] = SVTParameters.initThresholds + SVTParameters.deltaThresholds * (i + 1);
+            START[i] = SVTParameters.INITTHRESHOLD + SVTParameters.DELTATHRESHOLD * i;
+            END[i] = SVTParameters.INITTHRESHOLD + SVTParameters.DELTATHRESHOLD * (i + 1);
         }
         END[7] = 1000; //overflow
 
@@ -104,11 +104,11 @@ public class ADCConvertor {
             return 0;
         }
 
-        double res = mu + landau_quantile(aRandom.nextDouble(), sigma);
+        double res = mu + landauQuantile(aRandom.nextDouble(), sigma);
         return res;
     }
 
-    private double landau_quantile(double z, double xi) {
+    private double landauQuantile(double z, double xi) {
         // LANDAU quantile : algorithm from CERNLIB G110 ranlan
         // with scale parameter xi
 

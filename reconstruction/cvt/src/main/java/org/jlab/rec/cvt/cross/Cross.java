@@ -59,7 +59,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 		return _usedInXYcand;
 	}
 
-	public void set_usedInXYcand(boolean _usedInXYcand) {
+	public void setusedInXYcand(boolean _usedInXYcand) {
 		this._usedInXYcand = _usedInXYcand;
 	}
 
@@ -67,7 +67,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 		return _usedInZRcand;
 	}
 
-	public void set_usedInZRcand(boolean _usedInZRcand) {
+	public void setusedInZRcand(boolean _usedInZRcand) {
 		this._usedInZRcand = _usedInZRcand;
 	}
 
@@ -88,24 +88,22 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 		if (getClass() != obj.getClass())
 			return false;
 		Cross other = (Cross) obj;
-		if (_Id != other._Id)
-			return false;
-		return true;
+		return _Id == other._Id;
 	}
     
-    public DetectorType get_Detector() {
+    public DetectorType getDetector() {
         return _Detector;
     }
 
-    public void set_Detector(DetectorType _Detector) {
+    public void setDetector(DetectorType _Detector) {
         this._Detector = _Detector;
     }
 
-    public BMTType get_Type() {
+    public BMTType getType() {
         return _Type;
     }
 
-    public void set_Type(BMTType type) {
+    public void setType(BMTType type) {
         this._Type = type;
     }
 
@@ -113,7 +111,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      *
      * @return the sector of the cross
      */
-    public int get_Sector() {
+    public int getSector() {
         return _Sector;
     }
 
@@ -122,7 +120,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      *
      * @param _Sector the sector of the cross
      */
-    public void set_Sector(int _Sector) {
+    public void setSector(int _Sector) {
         this._Sector = _Sector;
     }
 
@@ -130,7 +128,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      *
      * @return the region of the cross
      */
-    public int get_Region() {
+    public int getRegion() {
         return _Region;
     }
 
@@ -139,7 +137,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      *
      * @param _Region the region of the cross
      */
-    public void set_Region(int _Region) {
+    public void setRegion(int _Region) {
         this._Region = _Region;
     }
 
@@ -161,7 +159,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      *
      * @return the id of the cross
      */
-    public int get_Id() {
+    public int getId() {
         return _Id;
     }
 
@@ -170,7 +168,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      *
      * @param _Id the id of the cross
      */
-    public void set_Id(int _Id) {
+    public void setId(int _Id) {
         this._Id = _Id;
     }
 
@@ -179,7 +177,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @return a 3-D point characterizing the position of the cross in the
      * tilted coordinate system.
      */
-    public Point3D get_Point0() {
+    public Point3D getPoint0() {
         return _Point0;
     }
 
@@ -189,7 +187,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @param _Point a 3-D point characterizing the position of the cross in the
      * tilted coordinate system.
      */
-    public void set_Point0(Point3D _Point) {
+    public void setPoint0(Point3D _Point) {
         this._Point0 = _Point;
     }
 
@@ -198,7 +196,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @return a 3-dimensional error on the 3-D point characterizing the
      * position of the cross in the tilted coordinate system.
      */
-    public Point3D get_PointErr0() {
+    public Point3D getPointErr0() {
         return _PointErr0;
     }
 
@@ -208,7 +206,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @param _PointErr a 3-dimensional error on the 3-D point characterizing
      * the position of the cross in the tilted coordinate system.
      */
-    public void set_PointErr0(Point3D _PointErr) {
+    public void setPointErr0(Point3D _PointErr) {
         this._PointErr0 = _PointErr;
     }
 
@@ -217,7 +215,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @return a 3-D point characterizing the position of the cross in the
      * tilted coordinate system.
      */
-    public Point3D get_Point() {
+    public Point3D getPoint() {
         return _Point;
     }
 
@@ -227,7 +225,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @param _Point a 3-D point characterizing the position of the cross in the
      * tilted coordinate system.
      */
-    public void set_Point(Point3D _Point) {
+    public void setPoint(Point3D _Point) {
         this._Point = _Point;
     }
     
@@ -239,7 +237,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @return a 3-dimensional error on the 3-D point characterizing the
      * position of the cross in the tilted coordinate system.
      */
-    public Point3D get_PointErr() {
+    public Point3D getPointErr() {
         return _PointErr;
     }
 
@@ -249,7 +247,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @param _PointErr a 3-dimensional error on the 3-D point characterizing
      * the position of the cross in the tilted coordinate system.
      */
-    public void set_PointErr(Point3D _PointErr) {
+    public void setPointErr(Point3D _PointErr) {
         this._PointErr = _PointErr;
     }
 
@@ -257,7 +255,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      *
      * @return the cross unit direction vector
      */
-    public Vector3D get_Dir() {
+    public Vector3D getDir() {
         return _Dir;
     }
 
@@ -266,7 +264,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      *
      * @param trkDir the cross unit direction vector
      */
-    public void set_Dir(Vector3D trkDir) {
+    public void setDir(Vector3D trkDir) {
         this._Dir = trkDir;
     }
 
@@ -274,7 +272,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      *
      * @return the cross unit direction vector
      */
-    public Vector3D get_DirErr() {
+    public Vector3D getDirErr() {
         return _DirErr;
     }
 
@@ -283,7 +281,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      *
      * @param _DirErr the cross unit direction vector
      */
-    public void set_DirErr(Vector3D _DirErr) {
+    public void setDirErr(Vector3D _DirErr) {
         this._DirErr = _DirErr;
     }
 
@@ -307,7 +305,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @param seg1 the Cluster (in the first superlayer) which is used to make a
      * cross
      */
-    public void set_Cluster1(Cluster seg1) {
+    public void setCluster1(Cluster seg1) {
         this._clus1 = seg1;
     }
 
@@ -318,7 +316,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @param seg2 the Cluster (in the second superlayer) which is used to make
      * a cross
      */
-    public void set_Cluster2(Cluster seg2) {
+    public void setCluster2(Cluster seg2) {
         this._clus2 = seg2;
     }
 
@@ -327,7 +325,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @return he Cluster (in the first superlayer) which is used to make a
      * cross
      */
-    public Cluster get_Cluster1() {
+    public Cluster getCluster1() {
         return _clus1;
     }
 
@@ -336,37 +334,37 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @return the Cluster (in the second superlayer) which is used to make a
      * cross
      */
-    public Cluster get_Cluster2() {
+    public Cluster getCluster2() {
         return _clus2;
     }
 
-    public Cross get_MatchedZCross() {
+    public Cross getMatchedZCross() {
         return _MatchedZCross;
     }
 
-    public void set_MatchedZCross(Cross _MatchedZCross) {
+    public void setMatchedZCross(Cross _MatchedZCross) {
         this._MatchedZCross = _MatchedZCross;
     }
 
-    public Cross get_MatchedCCross() {
+    public Cross getMatchedCCross() {
         return _MatchedCCross;
     }
 
-    public void set_MatchedCCross(Cross _MatchedCCross) {
+    public void setMatchedCCross(Cross _MatchedCCross) {
         this._MatchedCCross = _MatchedCCross;
     }
     
     public void reset() {
-        this.set_Dir(null);
-        this.set_DirErr(null);
-        if(this.get_Detector()==DetectorType.BST)
+        this.setDir(null);
+        this.setDirErr(null);
+        if(this.getDetector()==DetectorType.BST)
             this.updateSVTCross(null);
         else
             this.updateBMTCross(null, null);
     }
 
     public void update(Point3D trackPos, Vector3D trackDir) {
-        if(this.get_Detector()==DetectorType.BST)
+        if(this.getDetector()==DetectorType.BST)
             this.updateSVTCross(trackDir);
         else
             this.updateBMTCross(trackPos, trackDir);
@@ -376,42 +374,42 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      */
     public void updateBMTCross(Point3D trackPos, Vector3D trackDir) {
 
-        Cluster cluster  = this.get_Cluster1();
+        Cluster cluster  = this.getCluster1();
         
-        if(this.get_Detector()!=DetectorType.BMT) return;
+        if(this.getDetector()!=DetectorType.BMT) return;
 
         Point3D  crossPoint = this.getBMTCrossPoint(trackPos);
         Vector3D crossError = this.getBMTCrossError(trackPos);
         if (trackPos == null) {
-            this.set_Point0(crossPoint);
-            this.set_PointErr0(crossError.toPoint3D());
+            this.setPoint0(crossPoint);
+            this.setPointErr0(crossError.toPoint3D());
         }
-        this.set_Point(crossPoint);
-        this.set_PointErr(crossError.toPoint3D());
-        this.set_Dir(trackDir);
+        this.setPoint(crossPoint);
+        this.setPointErr(crossError.toPoint3D());
+        this.setDir(trackDir);
     }
 
     private Point3D getBMTCrossPoint(Point3D trackPos) {
-        Cluster cluster = this.get_Cluster1();
+        Cluster cluster = this.getCluster1();
         
         Point3D cross = cluster.center();
         
         if(trackPos!=null) {
             Point3D local = new Point3D(trackPos);
             Point3D orig  = new Point3D(cluster.origin());
-            cluster.get_SeedStrip().toLocal().apply(local);
-            cluster.get_SeedStrip().toLocal().apply(orig);
-            if(this.get_Type()==BMTType.C) {
+            cluster.getSeedStrip().toLocal().apply(local);
+            cluster.getSeedStrip().toLocal().apply(orig);
+            if(this.getType()==BMTType.C) {
                 double phi  = Math.atan2(local.y(), local.x());
                 double phi0 = Math.atan2(orig.y(), orig.x());
                 double t = phi-phi0;
                 if(Math.abs(t)>Math.PI) t-=Math.signum(t)*2*Math.PI;
                 if(t<0) 
                     cross = cluster.origin();
-                else if(t>cluster.get_Arc().theta())
+                else if(t>cluster.getArc().theta())
                     cross = cluster.end();
                 else {
-                    cross = cluster.get_Arc().point(t);
+                    cross = cluster.getArc().point(t);
                 }
             }
             else {
@@ -423,25 +421,26 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     
 
     private Vector3D getBMTCrossError(Point3D trackPos) {
-        Cluster cluster = this.get_Cluster1();
+        Cluster cluster = this.getCluster1();
         Point3D cross   = this.getBMTCrossPoint(trackPos);
         
         Point3D local = new Point3D(cross);
-        cluster.get_SeedStrip().toLocal().apply(local);
+        cluster.getSeedStrip().toLocal().apply(local);
         
         Vector3D error = new Vector3D(cluster.getS());
-        error.scale(cluster.get_Resolution());
+        error.scale(cluster.getResolution());
         error.setXYZ(Math.abs(error.x()), Math.abs(error.y()), Math.abs(error.z()));
         return error;
     }   
     
     /**
      * Sets the cross parameters: the position and direction unit vector
+     * @param trackDir
      */
     public void updateSVTCross(Vector3D trackDir) {
 
-        Cluster inlayerclus  = this.get_Cluster1();
-        Cluster outlayerclus = this.get_Cluster2();
+        Cluster inlayerclus  = this.getCluster1();
+        Cluster outlayerclus = this.getCluster2();
         if (inlayerclus == null || outlayerclus == null) { 
             return;
         }
@@ -454,13 +453,13 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         }
         
         if (trackDir == null) {
-            this.set_Point0(crossPoint);
-            this.set_PointErr0(crossError.toPoint3D());
+            this.setPoint0(crossPoint);
+            this.setPointErr0(crossError.toPoint3D());
         }
 
-        this.set_Point(crossPoint);
-        this.set_Dir(trackDir);
-        this.set_PointErr(crossError.toPoint3D());
+        this.setPoint(crossPoint);
+        this.setDir(trackDir);
+        this.setPointErr(crossError.toPoint3D());
 
     }
 
@@ -471,10 +470,10 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      */
     public Point3D getSVTCrossPoint(Vector3D trackDir) {
         
-        int layer  = this.get_Cluster1().get_Layer();
-        int sector = this.get_Cluster1().get_Sector();
+        int layer  = this.getCluster1().getLayer();
+        int sector = this.getCluster1().getSector();
         
-        Point3D cross = Constants.SVTGEOMETRY.getCross(sector, layer, this.get_Cluster1().getLine(), this.get_Cluster2().getLine(), trackDir);
+        Point3D cross = Constants.SVTGEOMETRY.getCross(sector, layer, this.getCluster1().getLine(), this.getCluster2().getLine(), trackDir);
   
         return cross;
     }
@@ -487,15 +486,15 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     public Vector3D getSVTCrossError(Vector3D trackDir) {
         Vector3D error = null;
        
-        int layer  = this.get_Cluster1().get_Layer();
-        int sector = this.get_Cluster1().get_Sector();
+        int layer  = this.getCluster1().getLayer();
+        int sector = this.getCluster1().getSector();
 
         Point3D cross = this.getSVTCrossPoint(trackDir);
         if(cross!=null) {
             // get the strip resolution
             Point3D local = Constants.SVTGEOMETRY.toLocal(layer, sector, cross);
-            double sigma1 = Constants.SVTGEOMETRY.getSingleStripResolution(layer, this.get_Cluster1().get_SeedStrip().get_Strip(), local.z());
-            double sigma2 = Constants.SVTGEOMETRY.getSingleStripResolution(layer, this.get_Cluster2().get_SeedStrip().get_Strip(), local.z());
+            double sigma1 = Constants.SVTGEOMETRY.getSingleStripResolution(layer, this.getCluster1().getSeedStrip().getStrip(), local.z());
+            double sigma2 = Constants.SVTGEOMETRY.getSingleStripResolution(layer, this.getCluster2().getSeedStrip().getStrip(), local.z());
             
             // get the error associated to each strip
             Vector3D error1 = this.getSVTCrossDerivative(1, trackDir).multiply(sigma1);
@@ -524,17 +523,17 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         Point3D cross = this.getSVTCrossPoint(trackDir);
         if(cross==null) return null;
          
-        int layer  = this.get_Cluster1().get_Layer();
-        int sector = this.get_Cluster1().get_Sector();
+        int layer  = this.getCluster1().getLayer();
+        int sector = this.getCluster1().getSector();
         
         double delta = 1e-3; // 1micron shift
         
         // get the clusters
-        Cluster clusA = this.get_Cluster1();
-        Cluster clusB = this.get_Cluster2();
+        Cluster clusA = this.getCluster1();
+        Cluster clusB = this.getCluster2();
         if(icluster==2) {
-            clusA = this.get_Cluster2();
-            clusB = this.get_Cluster1();           
+            clusA = this.getCluster2();
+            clusB = this.getCluster1();           
         }
         
         // shift the selected cluster to the left and right of the line
@@ -547,7 +546,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         // calculate the shifted cross positions
         Point3D crossAPlus  = null;
         Point3D crossAMinus = null;
-        if(clusA.get_Layer()%2 == 1) {
+        if(clusA.getLayer()%2 == 1) {
             crossAPlus  = Constants.SVTGEOMETRY.getCross(sector, layer, stripAPlus,  clusB.getLine(), trackDir);
             crossAMinus = Constants.SVTGEOMETRY.getCross(sector, layer, stripAMinus, clusB.getLine(), trackDir);
         }
@@ -584,22 +583,22 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     }
     
     public String printInfo() {
-        String s = " cross:  " + this.get_Detector() + " ID " + this.get_Id() + " Sector " + this.get_Sector() + " Region " + this.get_Region()
-                + " Point " + this.get_Point().toString()+ " Point0 " + this.get_Point0().toString()
-                + " sort "+this.getOrderedRegion()+" cosmic region "+this.get_SVTCosmicsRegion();
+        String s = " cross:  " + this.getDetector() + " ID " + this.getId() + " Sector " + this.getSector() + " Region " + this.getRegion()
+                + " Point " + this.getPoint().toString()+ " Point0 " + this.getPoint0().toString()
+                + " sort "+this.getOrderedRegion()+" cosmic region "+this.getSVTCosmicsRegion();
         
         
         return s;
     }
 
-    public int get_SVTCosmicsRegion() {
+    public int getSVTCosmicsRegion() {
 
         int theRegion = 0;
-        if (this.get_Detector()==DetectorType.BST) {
-            if(this.get_Point0().y()<0) 
-                theRegion = this.get_Region();
+        if (this.getDetector()==DetectorType.BST) {
+            if(this.getPoint0().y()<0) 
+                theRegion = this.getRegion();
             else 
-                theRegion = SVTGeometry.NREGIONS*2+1-this.get_Region();
+                theRegion = SVTGeometry.NREGIONS*2+1-this.getRegion();
         }
         
         return theRegion;
@@ -607,33 +606,34 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 
     /**
      * Sorts crosses
+     * @param arg
      */
     @Override
     public int compareTo(Cross arg) {
 
         int return_val = 0;
-        if(Constants.isCosmicsData) {
-            int RegComp = this.get_SVTCosmicsRegion() < arg.get_SVTCosmicsRegion() ? -1 : this.get_SVTCosmicsRegion() == arg.get_SVTCosmicsRegion() ? 0 : 1;
-            int IDComp = this.get_Id() < arg.get_Id() ? -1 : this.get_Id() == arg.get_Id() ? 0 : 1;
+        if(Constants.ISCOSMICDATA) {
+            int RegComp = this.getSVTCosmicsRegion() < arg.getSVTCosmicsRegion() ? -1 : this.getSVTCosmicsRegion() == arg.getSVTCosmicsRegion() ? 0 : 1;
+            int IDComp = this.getId() < arg.getId() ? -1 : this.getId() == arg.getId() ? 0 : 1;
 
             return_val = ((RegComp == 0) ? IDComp : RegComp);
         } else {
             
-            //int thisreg = (this.get_Detector().equalsIgnoreCase("BMT")) ? 3 + bgeom.getLayer( this.get_Region(), this.get_DetectorType()) : this.get_Region();
-            //int argreg  = (arg.get_Detector().equalsIgnoreCase("BMT"))  ? 3 + bgeom.getLayer( arg.get_Region(), arg.get_DetectorType()) : arg.get_Region();
+            //int thisreg = (this.getDetector().equalsIgnoreCase("BMT")) ? 3 + bgeom.getLayer( this.getRegion(), this.getDetectorType()) : this.getRegion();
+            //int argreg  = (arg.getDetector().equalsIgnoreCase("BMT"))  ? 3 + bgeom.getLayer( arg.getRegion(), arg.getDetectorType()) : arg.getRegion();
             int thisreg = this.getOrderedRegion();
             int argreg  = arg.getOrderedRegion();
             int RegComp = thisreg < argreg ? -1 : thisreg == argreg ? 0 : 1;
-//            int RegComp = this.get_Region() < arg.get_Region() ? -1 : this.get_Region() == arg.get_Region() ? 0 : 1;
+//            int RegComp = this.getRegion() < arg.getRegion() ? -1 : this.getRegion() == arg.getRegion() ? 0 : 1;
             
             // check that is not BMTC for phi comparison
-            if( Double.isNaN(arg.get_Point().x())==false &&  Double.isNaN(this.get_Point().x())==false ) {
-            	int PhiComp = this.get_Point0().toVector3D().phi() < arg.get_Point0().toVector3D().phi() ? -1 : this.get_Point0().toVector3D().phi() == arg.get_Point0().toVector3D().phi() ? 0 : 1;
+            if( Double.isNaN(arg.getPoint().x())==false &&  Double.isNaN(this.getPoint().x())==false ) {
+            	int PhiComp = this.getPoint0().toVector3D().phi() < arg.getPoint0().toVector3D().phi() ? -1 : this.getPoint0().toVector3D().phi() == arg.getPoint0().toVector3D().phi() ? 0 : 1;
             
             	return_val = ((RegComp == 0) ? PhiComp : RegComp);
             }
             else {
-            	int ZComp = this.get_Point0().z() < arg.get_Point0().z() ? -1 : this.get_Point0().z() == arg.get_Point0().z() ? 0 : 1;
+            	int ZComp = this.getPoint0().z() < arg.getPoint0().z() ? -1 : this.getPoint0().z() == arg.getPoint0().z() ? 0 : 1;
             	return_val = ((RegComp == 0) ? ZComp : RegComp);
             }
         }
@@ -643,11 +643,11 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 
     private int AssociatedTrackID = -1; // the track ID associated with that hit 
 
-    public int get_AssociatedTrackID() {
+    public int getAssociatedTrackID() {
         return AssociatedTrackID;
     }
 
-    public void set_AssociatedTrackID(int associatedTrackID) {
+    public void setAssociatedTrackID(int associatedTrackID) {
         AssociatedTrackID = associatedTrackID;
     }
 
@@ -655,45 +655,45 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * @return the Cross Radius
      */
     public double getRadius() {
-        return Math.sqrt(this.get_Point().x()*this.get_Point().x()+this.get_Point().y()*this.get_Point().y());
+        return Math.sqrt(this.getPoint().x()*this.getPoint().x()+this.getPoint().y()*this.getPoint().y());
     }
 
     public static void main(String arg[]) {
 
         // Geometry geo = new Geometry();
 
-        ArrayList<Cross> testList = new ArrayList<Cross>();
+        ArrayList<Cross> testList = new ArrayList<>();
 
         for (int i = 0; i < 5; i++) {
             Cross c1 = new Cross(DetectorType.BST, BMTType.UNDEFINED, 1, 1, 1 + i);
-            c1.set_Point0(new Point3D(-1.2 - i, 66.87, 0));
+            c1.setPoint0(new Point3D(-1.2 - i, 66.87, 0));
             testList.add(c1);
         }
         for (int i = 0; i < 5; i++) {
             Cross c1 = new Cross(DetectorType.BST, BMTType.UNDEFINED, 1, 3, 1 + i);
-            c1.set_Point0(new Point3D(-1.2 + i, 123, 0));
+            c1.setPoint0(new Point3D(-1.2 + i, 123, 0));
             testList.add(c1);
         }
 
         for (int i = 0; i < 5; i++) {
             Cross c1 = new Cross(DetectorType.BST, BMTType.UNDEFINED, 1, 2, 1 + i);
-            c1.set_Point0(new Point3D(-1.2 - i, 95, 0));
+            c1.setPoint0(new Point3D(-1.2 - i, 95, 0));
             testList.add(c1);
         }
 
         Collections.sort(testList);
 
-        ArrayList<ArrayList<Cross>> theListsByRegion = new ArrayList<ArrayList<Cross>>();
+        ArrayList<ArrayList<Cross>> theListsByRegion = new ArrayList<>();
 
-        ArrayList<Cross> theRegionList = new ArrayList<Cross>();
+        ArrayList<Cross> theRegionList = new ArrayList<>();
         if (testList.size() > 0) {
             theRegionList.add(testList.get(0)); // init
         }
         for (int i = 1; i < testList.size(); i++) {
             Cross c = testList.get(i);
-            if (testList.get(i - 1).get_Region() != c.get_Region()) {
+            if (testList.get(i - 1).getRegion() != c.getRegion()) {
                 theListsByRegion.add(theRegionList);    // end previous list by region
-                theRegionList = new ArrayList<Cross>(); // new region list
+                theRegionList = new ArrayList<>(); // new region list
             }
             theRegionList.add(c);
         }

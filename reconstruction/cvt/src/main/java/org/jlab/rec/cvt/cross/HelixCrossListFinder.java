@@ -6,9 +6,7 @@ import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTType;
-import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.svt.SVTParameters;
 import org.jlab.rec.cvt.track.Seed;
@@ -49,7 +47,10 @@ public class HelixCrossListFinder {
     
     /**
      *
-     * @param crosses the list of crosses in the event
+     * @param cvt_crosses
+     * @param xb
+     * @param yb
+     * @param swimmer
      * @return the list of crosses determined to be consistent with belonging to
      * a track in the cvt
      */
@@ -61,22 +62,22 @@ public class HelixCrossListFinder {
         //List<Seed> seedList = new ArrayList<Seed>();
         
         // require crosses to be found in the svt
-        if (cvt_crosses.size() == 0) {
+        if (cvt_crosses.isEmpty()) {
             return null;
         }
         
         List<Seed> seedList = new ArrayList<>();
         
         //create arrays of crosses for each region
-        ArrayList<ArrayList<Cross>> theListsByRegion = new ArrayList<ArrayList<Cross>>();
-        ArrayList<ArrayList<Cross>> theListsByRegionBMTC = new ArrayList<ArrayList<Cross>>();
+        ArrayList<ArrayList<Cross>> theListsByRegion = new ArrayList<>();
+        ArrayList<ArrayList<Cross>> theListsByRegionBMTC = new ArrayList<>();
         /////
         for(int r = 0; r<6; r++) {
-            theListsByRegion.add(new ArrayList<Cross>());
+            theListsByRegion.add(new ArrayList<>());
             if(r<3)
-                theListsByRegionBMTC.add(new ArrayList<Cross>());
+                theListsByRegionBMTC.add(new ArrayList<>());
         }
-        ArrayList<Cross> allCrossList = new ArrayList<Cross>();
+        ArrayList<Cross> allCrossList = new ArrayList<>();
         if (cvt_crosses.size() > 0) {
             // sort the crosses by region and phi
             if(cvt_crosses.get(0).size() > 0 ) {
@@ -90,23 +91,23 @@ public class HelixCrossListFinder {
         }
         for(Cross c : allCrossList){
             //System.out.println(" CROSSLISTER "+c.printInfo());
-            if(c.get_Detector()==DetectorType.BST)
-                theListsByRegion.get(c.get_Region()-1).add(c);
-            if(c.get_Detector()==DetectorType.BMT && c.get_Type()==BMTType.Z)
-                theListsByRegion.get(c.get_Region()+2).add(c);
-            if(c.get_Detector()==DetectorType.BMT && c.get_Type()==BMTType.C)
-                theListsByRegionBMTC.get(c.get_Region()-1).add(c);
+            if(c.getDetector()==DetectorType.BST)
+                theListsByRegion.get(c.getRegion()-1).add(c);
+            if(c.getDetector()==DetectorType.BMT && c.getType()==BMTType.Z)
+                theListsByRegion.get(c.getRegion()+2).add(c);
+            if(c.getDetector()==DetectorType.BMT && c.getType()==BMTType.C)
+                theListsByRegionBMTC.get(c.getRegion()-1).add(c);
         }
         // 
         for(int r =0; r<6; r++) {
-            if(theListsByRegion.get(r).size()==0)
+            if(theListsByRegion.get(r).isEmpty())
                 theListsByRegion.get(r).add(null);
         }
         for(int r =0; r<3; r++) {
-            if(theListsByRegionBMTC.get(r).size()==0)
+            if(theListsByRegionBMTC.get(r).isEmpty())
                 theListsByRegionBMTC.get(r).add(null);
         }
-        List<Seed> CirTrks = new ArrayList<Seed>();
+        List<Seed> CirTrks = new ArrayList<>();
         for (int i2 = 0; i2 < theListsByRegion.get(1).size(); i2++) {
             for (int i3 = 0; i3 < theListsByRegion.get(2).size(); i3++) {
                 for (int i4 = 0; i4 < theListsByRegion.get(3).size(); i4++) {
@@ -127,7 +128,6 @@ public class HelixCrossListFinder {
                                     theListsByRegion.get(5).get(i6));
                             if(cand!=null && this.ContainsSeed(CirTrks, cand)==false) {
                                 CirTrks.add(cand);
-                                continue;
                             } else {
                                 for (int l = 0; l < C4.length; l++) { 
                               //      System.out.println("0) TRAC 4 regions "+C4[l][0]+" cnt "+this.match(C4[l][0], i2, i3, i4, i5, i6));
@@ -142,7 +142,6 @@ public class HelixCrossListFinder {
 
                                     if(cand!=null && this.ContainsSeed(CirTrks, cand)==false) {
                                         CirTrks.add(cand); 
-                                        continue;
                                     } else {
                                         for(int ll = l*4; ll<((l+1)*4-1); ll++) {
                                             cand = this.isTrack3(
@@ -151,7 +150,6 @@ public class HelixCrossListFinder {
                                                 theListsByRegion.get(C3[ll][2] - 1).get(this.match(C3[ll][2], i2, i3, i4, i5, i6)));
                                             if(cand!=null && this.ContainsSeed(CirTrks, cand)==false) {
                                                 CirTrks.add(cand); 
-                                                continue;
                                             }
                                         }
                                     }
@@ -177,25 +175,7 @@ public class HelixCrossListFinder {
                 continue;
             //match to r1
             MatchToRegion1( s, theListsByRegion.get(0), xb, yb, bz); 
-//            org.jlab.rec.cvt.track.Seed trkSeed = new org.jlab.rec.cvt.track.Seed();
-//            
-//            trkSeed.set_Crosses(s);
-//            List<Cluster> clusters = new ArrayList<Cluster>();
-//            for(Cross c : s ) { 
-//                if(c.get_Detector()==DetectorType.BST) {
-//                    c.get_Cluster1().set_CentroidError(this.calcCentErr(c, c.get_Cluster1(), svt_geo));
-//                    c.get_Cluster2().set_CentroidError(this.calcCentErr(c, c.get_Cluster2(), svt_geo));
-//                    
-//                    clusters.add(c.get_Cluster1());
-//                    clusters.add(c.get_Cluster2());
-//                }
-//                if(c.get_Detector()==DetectorType.BMT) {
-//                    clusters.add(c.get_Cluster1());
-//                    
-//                }
-//            }
-//            
-//            trkSeed.set_Clusters(clusters);
+
             seedList.add(s);
         }
        
@@ -234,20 +214,20 @@ public class HelixCrossListFinder {
             return false;
         double avg_tandip =0;
         int countCrosses =0;
-        for(Cross c : trkCand.get_Crosses()) {
-            if(c.get_Detector()==DetectorType.BST) {
+        for(Cross c : trkCand.getCrosses()) {
+            if(c.getDetector()==DetectorType.BST) {
                 countCrosses++;
-                avg_tandip+=c.get_Point().z()/Math.sqrt(c.get_Point().x()*c.get_Point().x()+c.get_Point().y()*c.get_Point().y());
+                avg_tandip+=c.getPoint().z()/Math.sqrt(c.getPoint().x()*c.getPoint().x()+c.getPoint().y()*c.getPoint().y());
             }
             if(countCrosses>0)
                 avg_tandip/=countCrosses;
         }
         double dzdrsum = avg_tandip*countCrosses;
-        double z_bmt = bmt_Ccross.get_Point().z();
+        double z_bmt = bmt_Ccross.getPoint().z();
         double r_bmt = bmt_Ccross.getRadius();
-        System.out.println(bmt_Ccross.get_Point().toString() + " " + bmt_Ccross.getRadius());
+        System.out.println(bmt_Ccross.getPoint().toString() + " " + bmt_Ccross.getRadius());
         double dzdr_bmt = z_bmt / r_bmt;
-        if (Math.abs(1 - (dzdrsum / (double) (countCrosses)) / ((dzdrsum + dzdr_bmt) / (double) (countCrosses + 1))) <= SVTParameters.dzdrcut) // add this to the track
+        if (Math.abs(1 - (dzdrsum / (double) (countCrosses)) / ((dzdrsum + dzdr_bmt) / (double) (countCrosses + 1))) <= SVTParameters.DZDRCUT) // add this to the track
             pass = true;
         
         return pass;
@@ -290,57 +270,57 @@ public class HelixCrossListFinder {
         if(c1==null || c2==null || c3==null || c4==null || c5==null)
             return null;
         double phi12 = Math.abs(relPhi(c1, c2));
-        if (phi12 > SVTParameters.phi12cut) {
+        if (phi12 > SVTParameters.PHI12CUT) {
             return null;
         }
         double phi13 = Math.abs(relPhi(c1, c3));
-        if (phi13 > SVTParameters.phi13cut) {
+        if (phi13 > SVTParameters.PHI13CUT) {
             return null;
         }
         double phi14 = Math.abs(relPhi(c1, c4));
-        if (phi14 > SVTParameters.phi14cut) {
+        if (phi14 > SVTParameters.PHI14CUT) {
             return null;
         }
         double phi15 = Math.abs(relPhi(c1, c5));
-        if (phi15 > SVTParameters.phi14cut) {
+        if (phi15 > SVTParameters.PHI14CUT) {
             return null;
         }
         double rad123 = radCurvature(c1, c2, c3);
-        if (Math.abs(rad123) < SVTParameters.radcut) {
+        if (Math.abs(rad123) < SVTParameters.RADCUT) {
             return null;
         }
         double rad124 = radCurvature(c1, c2, c4);
-        if (Math.abs(rad124) < SVTParameters.radcut) {
+        if (Math.abs(rad124) < SVTParameters.RADCUT) {
             return null;
         }
         double rad134 = radCurvature(c1, c3, c4);
-        if (Math.abs(rad134) < SVTParameters.radcut) {
+        if (Math.abs(rad134) < SVTParameters.RADCUT) {
             return null;
         }
         double rad234 = radCurvature(c2, c3, c4);
-        if (Math.abs(rad234) < SVTParameters.radcut) {
+        if (Math.abs(rad234) < SVTParameters.RADCUT) {
             return null;
         }
         double rad135 = radCurvature(c1, c3, c5);
-        if (Math.abs(rad135) < SVTParameters.radcut) {
+        if (Math.abs(rad135) < SVTParameters.RADCUT) {
             return null;
         }
         double rad235 = radCurvature(c2, c3, c5);
-        if (Math.abs(rad235) < SVTParameters.radcut) {
+        if (Math.abs(rad235) < SVTParameters.RADCUT) {
             return null;
         }
         double rad245 = radCurvature(c2, c4, c5);
-        if (Math.abs(rad245) < SVTParameters.radcut) {
+        if (Math.abs(rad245) < SVTParameters.RADCUT) {
             return null;
         }
 //        double[] seed_delta_phi = {phi12, phi13, phi14, phi15};
 //        double[] seed_radius = {rad123, rad124, rad134, rad234, rad135, rad235, rad245};
         // create the seed
         Seed seed = new Seed();
-        seed.get_Crosses().add(c1);
-        seed.get_Crosses().add(c2);
-        seed.get_Crosses().add(c3);
-        seed.get_Crosses().add(c4);
+        seed.getCrosses().add(c1);
+        seed.getCrosses().add(c2);
+        seed.getCrosses().add(c3);
+        seed.getCrosses().add(c4);
         
         return seed;
     }
@@ -350,41 +330,41 @@ public class HelixCrossListFinder {
             return null;
         
         double phi12 = Math.abs(relPhi(c1, c2));
-        if (phi12 > SVTParameters.phi12cut) {
+        if (phi12 > SVTParameters.PHI12CUT) {
             return null;
         }
         double phi13 = Math.abs(relPhi(c1, c3));
-        if (phi13 > SVTParameters.phi13cut) {
+        if (phi13 > SVTParameters.PHI13CUT) {
             return null;
         }
         double phi14 = Math.abs(relPhi(c1, c4));
-        if (phi14 > SVTParameters.phi14cut) {
+        if (phi14 > SVTParameters.PHI14CUT) {
             return null;
         }
         double rad123 = radCurvature(c1, c2, c3);
-        if (Math.abs(rad123) < SVTParameters.radcut) {
+        if (Math.abs(rad123) < SVTParameters.RADCUT) {
             return null;
         }
         double rad124 = radCurvature(c1, c2, c4);
-        if (Math.abs(rad124) < SVTParameters.radcut) {
+        if (Math.abs(rad124) < SVTParameters.RADCUT) {
             return null;
         }
         double rad134 = radCurvature(c1, c3, c4);
-        if (Math.abs(rad134) < SVTParameters.radcut) {
+        if (Math.abs(rad134) < SVTParameters.RADCUT) {
             return null;
         }
         double rad234 = radCurvature(c2, c3, c4);
-        if (Math.abs(rad234) < SVTParameters.radcut) {
+        if (Math.abs(rad234) < SVTParameters.RADCUT) {
             return null;
         }
 //        double[] seed_delta_phi = {phi12, phi13, phi14};
 //        double[] seed_radius = {rad123, rad124, rad134, rad234};
         // create the seed
         Seed seed = new Seed();
-        seed.get_Crosses().add(c1);
-        seed.get_Crosses().add(c2);
-        seed.get_Crosses().add(c3);
-        seed.get_Crosses().add(c4);
+        seed.getCrosses().add(c1);
+        seed.getCrosses().add(c2);
+        seed.getCrosses().add(c3);
+        seed.getCrosses().add(c4);
         
         return seed;
     }
@@ -393,15 +373,15 @@ public class HelixCrossListFinder {
         if(c1==null || c2==null || c3==null)
             return null;
         double phi12 = Math.abs(relPhi(c1,c2));
-        if (phi12 > SVTParameters.phi12cut) {
+        if (phi12 > SVTParameters.PHI12CUT) {
             return null;
         }
         double phi13 = Math.abs(relPhi(c1, c3));
-        if (phi13 > SVTParameters.phi13cut) {
+        if (phi13 > SVTParameters.PHI13CUT) {
             return null;
         }
         double rad123 = radCurvature(c1, c2, c3);
-        if (Math.abs(rad123) < SVTParameters.radcut) {
+        if (Math.abs(rad123) < SVTParameters.RADCUT) {
             return null;
         }
         
@@ -409,39 +389,39 @@ public class HelixCrossListFinder {
 //        double[] seed_radius = {rad123};
         // create the seed
         Seed seed = new Seed();
-        seed.get_Crosses().add(c1);
-        seed.get_Crosses().add(c2);
-        seed.get_Crosses().add(c3);
+        seed.getCrosses().add(c1);
+        seed.getCrosses().add(c2);
+        seed.getCrosses().add(c3);
         
         return seed;
     }
 
     private double relPhi(Cross c1, Cross c2) {
         //double cos_ZDiff = -1;
-        double x1 = c1.get_Point().x();
-        double y1 = c1.get_Point().y();
-        double x2 = c2.get_Point().x();
-        double y2 = c2.get_Point().y();
+        double x1 = c1.getPoint().x();
+        double y1 = c1.getPoint().y();
+        double x2 = c2.getPoint().x();
+        double y2 = c2.getPoint().y();
         double n1 = Math.sqrt(x1*x1+y1*y1);
         double n2 = Math.sqrt(x2*x2+y2*y2);
-        //Vector3D bt1 = new Vector3D(c1.get_Point().x(), c1.get_Point().y(),0);
-        //Vector3D bt2 = new Vector3D(c2.get_Point().x(), c2.get_Point().y(),0);
+        //Vector3D bt1 = new Vector3D(c1.getPoint().x(), c1.getPoint().y(),0);
+        //Vector3D bt2 = new Vector3D(c2.getPoint().x(), c2.getPoint().y(),0);
         //cos_ZDiff = bt1.asUnit().dot(bt2.asUnit());
         return Math.toDegrees(Math.acos((x1*x2+y1*y2)/(n1*n2)));
     }
     
     private double radCurvature(Cross c1, Cross c2, Cross c3) {
         double radiusOfCurv = 0;
-        if (Math.abs(c2.get_Point().x() - c1.get_Point().x()) > 1.0e-9 && Math.abs(c3.get_Point().x() - c2.get_Point().x()) > 1.0e-9) {
+        if (Math.abs(c2.getPoint().x() - c1.getPoint().x()) > 1.0e-9 && Math.abs(c3.getPoint().x() - c2.getPoint().x()) > 1.0e-9) {
             // Find the intersection of the lines joining the innermost to middle and middle to outermost point
-            double ma = (c2.get_Point().y() - c1.get_Point().y()) / (c2.get_Point().x() - c1.get_Point().x());
-            double mb = (c3.get_Point().y() - c2.get_Point().y()) / (c3.get_Point().x() - c2.get_Point().x());
+            double ma = (c2.getPoint().y() - c1.getPoint().y()) / (c2.getPoint().x() - c1.getPoint().x());
+            double mb = (c3.getPoint().y() - c2.getPoint().y()) / (c3.getPoint().x() - c2.getPoint().x());
 
             if (Math.abs(mb - ma) > 1.0e-9) {
-                double xcen = 0.5 * (ma * mb * (c1.get_Point().y() - c3.get_Point().y()) + mb * (c1.get_Point().x() + c2.get_Point().x()) - ma * (c2.get_Point().x() + c3.get_Point().x())) / (mb - ma);
-                double ycen = (-1. / mb) * (xcen - 0.5 * (c2.get_Point().x() + c3.get_Point().x())) + 0.5 * (c2.get_Point().y() + c3.get_Point().y());
+                double xcen = 0.5 * (ma * mb * (c1.getPoint().y() - c3.getPoint().y()) + mb * (c1.getPoint().x() + c2.getPoint().x()) - ma * (c2.getPoint().x() + c3.getPoint().x())) / (mb - ma);
+                double ycen = (-1. / mb) * (xcen - 0.5 * (c2.getPoint().x() + c3.getPoint().x())) + 0.5 * (c2.getPoint().y() + c3.getPoint().y());
 
-                radiusOfCurv = Math.sqrt(Math.pow((c1.get_Point().x() - xcen), 2) + Math.pow((c1.get_Point().y() - ycen), 2));
+                radiusOfCurv = Math.sqrt(Math.pow((c1.getPoint().x() - xcen), 2) + Math.pow((c1.getPoint().y() - ycen), 2));
             }
         
         }
@@ -457,31 +437,31 @@ public class HelixCrossListFinder {
         if(!fitStatus)
             return;
          
-        Point3D trkAtR1 =s.get_Helix().getPointAtRadius(Constants.SVTGEOMETRY.getRegionRadius(1));
-        List<Cross> candMatches = new ArrayList<Cross>();
+        Point3D trkAtR1 =s.getHelix().getPointAtRadius(SVTGeometry.getRegionRadius(1));
+        List<Cross> candMatches = new ArrayList<>();
         for (int i = 0; i < R1Crosses.size(); i++) {
             if(R1Crosses.get(i)==null)
                 continue;
             
             if(Math.abs(Math.sqrt(trkAtR1.x()*trkAtR1.x()+trkAtR1.y()*trkAtR1.y()) - 
-                    Math.sqrt(R1Crosses.get(i).get_Point().x()*R1Crosses.get(i).get_Point().x()+R1Crosses.get(i).get_Point().y()*R1Crosses.get(i).get_Point().y()))<2)
+                    Math.sqrt(R1Crosses.get(i).getPoint().x()*R1Crosses.get(i).getPoint().x()+R1Crosses.get(i).getPoint().y()*R1Crosses.get(i).getPoint().y()))<2)
                 candMatches.add(R1Crosses.get(i));
         }
-        Point3D trkAtL1 =s.get_Helix().getPointAtRadius(Constants.SVTGEOMETRY.getLayerRadius(1));
-        Point3D trkAtL2 =s.get_Helix().getPointAtRadius(Constants.SVTGEOMETRY.getLayerRadius(2));
+        Point3D trkAtL1 =s.getHelix().getPointAtRadius(SVTGeometry.getLayerRadius(1));
+        Point3D trkAtL2 =s.getHelix().getPointAtRadius(SVTGeometry.getLayerRadius(2));
         
         double dMin = Double.POSITIVE_INFINITY;
         Cross cMatch = null;
         for (int i = 0; i < candMatches.size(); i++) {//find cross for which the distance of the track to the 2 clusters in the double layers is minimal
-            double d = candMatches.get(i).get_Cluster1().residual(trkAtL1)
-                     + candMatches.get(i).get_Cluster1().residual(trkAtL2);
+            double d = candMatches.get(i).getCluster1().residual(trkAtL1)
+                     + candMatches.get(i).getCluster1().residual(trkAtL2);
             if(d<dMin) {
                 dMin =d;
                 cMatch = (Cross) candMatches.get(i).clone();
             }
         }
         if(cMatch != null) 
-            s.get_Crosses().add(cMatch);
+            s.getCrosses().add(cMatch);
   
     }
 
@@ -496,19 +476,19 @@ public class HelixCrossListFinder {
         if(passCcross(s, BMTCrosses.get(i)) == false) {
             continue; 
         } else {
-            s.get_Crosses().add(BMTCrosses.get(i));
+            s.getCrosses().add(BMTCrosses.get(i));
             fitStatus = s.fit(3, xb, yb, bz);
             if(!fitStatus)
                 continue;
-            double linechi2perndf = s.get_lineFitChi2PerNDF();
+            double linechi2perndf = s.getLineFitChi2PerNDF();
             if(linechi2perndf<maxChi2) {
                 maxChi2 = linechi2perndf;
                 BestMatch = (Cross) BMTCrosses.get(i).clone();
             }
-            s.get_Crosses().remove(BMTCrosses.get(i));
+            s.getCrosses().remove(BMTCrosses.get(i));
         }
         if(BestMatch!=null)
-            s.get_Crosses().add(BestMatch);
+            s.getCrosses().add(BestMatch);
            
         }
     }
@@ -518,53 +498,16 @@ public class HelixCrossListFinder {
        
         for(int i = 0; i<CirTrks.size(); i++) {
             int NbOverlaps =0;
-            for(Cross ci: CirTrks.get(i).get_Crosses()) {
-                for(Cross c: cand.get_Crosses())
-                    if(c.get_Id()==ci.get_Id())
+            for(Cross ci: CirTrks.get(i).getCrosses()) {
+                for(Cross c: cand.getCrosses())
+                    if(c.getId()==ci.getId())
                         NbOverlaps++;
             }
-            if(CirTrks.get(i).get_Crosses().size()==NbOverlaps)
+            if(CirTrks.get(i).getCrosses().size()==NbOverlaps)
                 CirTrks.remove(i);
-            if(cand.get_Crosses().size()==NbOverlaps)
+            if(cand.getCrosses().size()==NbOverlaps)
                 inSeed=true;
         }
         return inSeed;
     }
-
-    private double calcCentErr(Cross c, Cluster Cluster1) {
-        double Z = Constants.SVTGEOMETRY.toLocal(Cluster1.get_Layer(),
-                                   Cluster1.get_Sector(),
-                                   c.get_Point()).z();
-        if(Z<0)
-            Z=0;
-        if(Z>SVTGeometry.getActiveSensorLength())
-            Z=SVTGeometry.getActiveSensorLength();
-        return Cluster1.get_ResolutionAlongZ(Z) / (SVTGeometry.getPitch() / Math.sqrt(12.));
-    }
-//    /**
-//     * A class representing the seed object. The seed of a track is the initial
-//     * guess of the track and contains the crosses that belong to it
-//     *
-//     * @author ziegler
-//     *
-//     */
-//    private class Seed extends ArrayList<Cross> {
-//
-//        private static final long serialVersionUID = 1L;
-//        final double[] delta_phi;		// opening angle between cross 1 and 2 positions wrt the origin
-//        final double[] radius;          // the radius of the circle of the seed calculated using 3 crosses belonging to the seed
-//        public TrackSeeder seedFit;
-//        /**
-//         * The constructor of the seed
-//         *
-//         * @param delta_phi
-//         * @param radius
-//         */
-//        Seed(double[] delta_phi, double[] radius) {
-//            seedFit = new TrackSeeder();
-//            this.delta_phi = delta_phi;
-//            this.radius = radius;
-//        }
-//    }
-
 }
