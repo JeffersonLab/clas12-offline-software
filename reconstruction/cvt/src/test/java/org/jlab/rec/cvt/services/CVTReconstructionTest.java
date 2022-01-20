@@ -48,7 +48,7 @@ public class CVTReconstructionTest {
         enf.init();
         enf.processDataEvent(testEvent);
         
-        CVTRecNewKF CVTengine = new CVTRecNewKF();
+        CVTEngine CVTengine = new CVTEngine();
         CVTengine.init();
         
         testEvent.show();

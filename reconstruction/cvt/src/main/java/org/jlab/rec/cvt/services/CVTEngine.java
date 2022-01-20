@@ -39,13 +39,13 @@ import org.jlab.utils.groups.IndexedTable;
  * @author ziegler
  *
  */
-public class CVTRecNewKF extends ReconstructionEngine {
+public class CVTEngine extends ReconstructionEngine {
 
     private CosmicTracksRec   strgtTrksRec = null;
     private TracksFromTargetRec trksFromTargetRec = null;
     private int Run = -1;
     
-    public CVTRecNewKF() {
+    public CVTEngine() {
         super("CVTTracks", "ziegler", "4.0");
         
         strgtTrksRec      = new CosmicTracksRec();
