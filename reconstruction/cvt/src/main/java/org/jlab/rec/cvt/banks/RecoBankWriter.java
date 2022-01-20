@@ -50,7 +50,7 @@ public class RecoBankWriter {
 
             bank.setFloat("energy", i, (float) hitlist.get(i).getStrip().getEdep());
             bank.setFloat("time", i, (float) hitlist.get(i).getStrip().getTime());
-            bank.setFloat("fitResidual", i, (float) hitlist.get(i).getResidual());
+            bank.setFloat("fitResidual", i, (float) hitlist.get(i).getResidual()/10);
             bank.setInt("trkingStat", i, hitlist.get(i).getTrkgStatus());
 
             bank.setShort("clusterID", i, (short) hitlist.get(i).getAssociatedClusterID());
@@ -93,9 +93,9 @@ public class RecoBankWriter {
             bank.setInt("seedStrip", i, cluslist.get(i).getSeedStrip().getStrip());
             bank.setFloat("centroid", i, (float) cluslist.get(i).getCentroid());
             bank.setFloat("seedE", i, (float) cluslist.get(i).getSeedStrip().getEdep());
-            bank.setFloat("centroidError", i, (float) cluslist.get(i).getResolution());
-            bank.setFloat("centroidResidual", i, (float) cluslist.get(i).getCentroidResidual());
-            bank.setFloat("seedResidual", i, (float) cluslist.get(i).getSeedResidual()); 
+            bank.setFloat("centroidError", i, (float) cluslist.get(i).getResolution()/10);
+            bank.setFloat("centroidResidual", i, (float) cluslist.get(i).getCentroidResidual()/10);
+            bank.setFloat("seedResidual", i, (float) cluslist.get(i).getSeedResidual()/10); 
             bank.setShort("trkID", i, (short) cluslist.get(i).getAssociatedTrackID());
 
             for (int j = 0; j < cluslist.get(i).size(); j++) {
@@ -111,12 +111,12 @@ public class RecoBankWriter {
                 bank.setShort(hitStrg, i, (short) hitIdxArray[j]);
             }
             
-            bank.setFloat("x1",   i, (float)cluslist.get(i).origin().x());
-            bank.setFloat("y1",   i, (float)cluslist.get(i).origin().y());
-            bank.setFloat("z1",   i, (float)cluslist.get(i).origin().z());
-            bank.setFloat("x2",   i, (float)cluslist.get(i).end().x());
-            bank.setFloat("y2",   i, (float)cluslist.get(i).end().y());
-            bank.setFloat("z2",   i, (float)cluslist.get(i).end().z()); 
+            bank.setFloat("x1",   i, (float)cluslist.get(i).origin().x()/10);
+            bank.setFloat("y1",   i, (float)cluslist.get(i).origin().y()/10);
+            bank.setFloat("z1",   i, (float)cluslist.get(i).origin().z()/10);
+            bank.setFloat("x2",   i, (float)cluslist.get(i).end().x()/10);
+            bank.setFloat("y2",   i, (float)cluslist.get(i).end().y()/10);
+            bank.setFloat("z2",   i, (float)cluslist.get(i).end().z()/10); 
             bank.setFloat("lx",   i, (float)cluslist.get(i).getL().x());
             bank.setFloat("ly",   i, (float)cluslist.get(i).getL().y());
             bank.setFloat("lz",   i, (float)cluslist.get(i).getL().z());
@@ -126,7 +126,7 @@ public class RecoBankWriter {
             bank.setFloat("nx",   i, (float)cluslist.get(i).getN().x());
             bank.setFloat("ny",   i, (float)cluslist.get(i).getN().y());
             bank.setFloat("nz",   i, (float)cluslist.get(i).getN().z());
-            bank.setFloat("e",    i, (float)cluslist.get(i).getResolution());
+            bank.setFloat("e",    i, (float)cluslist.get(i).getResolution()/10);
 //            cluslist.get(i).printInfo();
 //            System.out.println("N "+cluslist.get(i).getNFromTraj().toString()+" \n"+
 //                    " L "+cluslist.get(i).getL().toString()+" \n"+
@@ -221,7 +221,7 @@ public class RecoBankWriter {
 
             bank.setFloat("energy", i, (float) hitlist.get(i).getStrip().getEdep());
             bank.setFloat("time", i, (float) hitlist.get(i).getStrip().getTime());
-            bank.setFloat("fitResidual", i, (float) hitlist.get(i).getResidual());
+            bank.setFloat("fitResidual", i, (float) hitlist.get(i).getResidual()/10);
             bank.setInt("trkingStat", i, hitlist.get(i).getTrkgStatus());
 
             bank.setShort("clusterID", i, (short) hitlist.get(i).getAssociatedClusterID());
@@ -263,10 +263,16 @@ public class RecoBankWriter {
             bank.setFloat("time", i, (float) cluslist.get(i).getTime());
             bank.setInt("seedStrip", i, cluslist.get(i).getSeedStrip().getStrip());
             bank.setFloat("centroid", i, (float) cluslist.get(i).getCentroid());
-            bank.setFloat("centroidValue", i, (float) cluslist.get(i).getCentroidValue());
-            bank.setFloat("centroidError", i, (float) cluslist.get(i).getCentroidError());
-            bank.setFloat("centroidResidual", i, (float) cluslist.get(i).getCentroidResidual());
-            bank.setFloat("seedResidual", i, (float) cluslist.get(i).getSeedResidual()); 
+            if(cluslist.get(i).getType()==BMTType.C) {
+                bank.setFloat("centroidValue", i, (float) cluslist.get(i).getCentroidValue()/10);
+                bank.setFloat("centroidError", i, (float) cluslist.get(i).getCentroidError()/10);
+            }
+            else {
+                bank.setFloat("centroidValue", i, (float) cluslist.get(i).getCentroidValue());
+                bank.setFloat("centroidError", i, (float) cluslist.get(i).getCentroidError());                
+            }
+            bank.setFloat("centroidResidual", i, (float) cluslist.get(i).getCentroidResidual()/10);
+            bank.setFloat("seedResidual", i, (float) cluslist.get(i).getSeedResidual()/10); 
             bank.setFloat("seedE", i, (float) cluslist.get(i).getSeedStrip().getEdep());
             bank.setShort("trkID", i, (short) cluslist.get(i).getAssociatedTrackID());
             for (int j = 0; j < cluslist.get(i).size(); j++) {
@@ -281,22 +287,22 @@ public class RecoBankWriter {
                 hitStrg += "_ID";
                 bank.setShort(hitStrg, i, (short) hitIdxArray[j]);
             }
-            bank.setFloat("x1",   i, (float)cluslist.get(i).origin().x());
-            bank.setFloat("y1",   i, (float)cluslist.get(i).origin().y());
-            bank.setFloat("z1",   i, (float)cluslist.get(i).origin().z());
-            bank.setFloat("x2",   i, (float)cluslist.get(i).end().x());
-            bank.setFloat("y2",   i, (float)cluslist.get(i).end().y());
-            bank.setFloat("z2",   i, (float)cluslist.get(i).end().z());
-            bank.setFloat("cx",   i, (float)cluslist.get(i).center().x());
-            bank.setFloat("cy",   i, (float)cluslist.get(i).center().y());
-            bank.setFloat("cz",   i, (float)cluslist.get(i).center().z());
+            bank.setFloat("x1",   i, (float)cluslist.get(i).origin().x()/10);
+            bank.setFloat("y1",   i, (float)cluslist.get(i).origin().y()/10);
+            bank.setFloat("z1",   i, (float)cluslist.get(i).origin().z()/10);
+            bank.setFloat("x2",   i, (float)cluslist.get(i).end().x()/10);
+            bank.setFloat("y2",   i, (float)cluslist.get(i).end().y()/10);
+            bank.setFloat("z2",   i, (float)cluslist.get(i).end().z()/10);
+            bank.setFloat("cx",   i, (float)cluslist.get(i).center().x()/10);
+            bank.setFloat("cy",   i, (float)cluslist.get(i).center().y()/10);
+            bank.setFloat("cz",   i, (float)cluslist.get(i).center().z()/10);
             bank.setFloat("theta",i, (float)cluslist.get(i).theta());
-            bank.setFloat("ax1",  i, (float)cluslist.get(i).getAxis().origin().x());
-            bank.setFloat("ay1",  i, (float)cluslist.get(i).getAxis().origin().y());
-            bank.setFloat("az1",  i, (float)cluslist.get(i).getAxis().origin().z());
-            bank.setFloat("ax2",  i, (float)cluslist.get(i).getAxis().end().x());
-            bank.setFloat("ay2",  i, (float)cluslist.get(i).getAxis().end().y());
-            bank.setFloat("az2",  i, (float)cluslist.get(i).getAxis().end().z());
+            bank.setFloat("ax1",  i, (float)cluslist.get(i).getAxis().origin().x()/10);
+            bank.setFloat("ay1",  i, (float)cluslist.get(i).getAxis().origin().y()/10);
+            bank.setFloat("az1",  i, (float)cluslist.get(i).getAxis().origin().z()/10);
+            bank.setFloat("ax2",  i, (float)cluslist.get(i).getAxis().end().x()/10);
+            bank.setFloat("ay2",  i, (float)cluslist.get(i).getAxis().end().y()/10);
+            bank.setFloat("az2",  i, (float)cluslist.get(i).getAxis().end().z()/10);
             bank.setFloat("lx",   i, (float)cluslist.get(i).getL().x());
             bank.setFloat("ly",   i, (float)cluslist.get(i).getL().y());
             bank.setFloat("lz",   i, (float)cluslist.get(i).getL().z());
@@ -306,7 +312,7 @@ public class RecoBankWriter {
             bank.setFloat("nx",   i, (float)cluslist.get(i).getN().x());
             bank.setFloat("ny",   i, (float)cluslist.get(i).getN().y());
             bank.setFloat("nz",   i, (float)cluslist.get(i).getN().z());
-            bank.setFloat("e",    i, (float)cluslist.get(i).getResolution());
+            bank.setFloat("e",    i, (float)cluslist.get(i).getResolution()/10);
             if(debug && cluslist.get(i).getAssociatedTrackID()>0 && cluslist.get(i).getType()==BMTType.Z) {
                 Line3D cln = new Line3D(cluslist.get(i).origin(), cluslist.get(i).end());
                 System.out.println("Check: N "+cluslist.get(i).getN().toString()+" \n"+
