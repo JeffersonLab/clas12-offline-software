@@ -4,4 +4,7 @@
 
 export MALLOC_ARENA_MAX=1
 
-java -Xmx2048m -Xms1024m -cp "$CLAS12DIR/lib/clas/*:$CLAS12DIR/lib/plugins/*" org.jlab.jnp.hipo4.utils.HipoUtilities $*
+java -Xmx2048m -Xms1024m -XX:+UseSerialGC \
+    -cp "$CLAS12DIR/lib/clas/*:$CLAS12DIR/lib/plugins/*" \
+    org.jlab.jnp.hipo4.utils.HipoUtilities \
+    $*

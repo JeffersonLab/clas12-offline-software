@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jlab.detector.calib.utils.DatabaseConstantProvider; // coatjava-3.0
 
@@ -29,8 +31,10 @@ import eu.mihosoft.vrl.v3d.Transform;
  * @author pdavies
  * @version 1.1.1
  */
-public class SVTConstants
-{
+public class SVTConstants {
+
+	public static Logger LOGGER = Logger.getLogger(SVTConstants.class.getName());
+
 	private static String ccdbPath = "/geometry/cvt/svt/";
 	private static boolean bLoadedConstants = false; // only load constants once
 	
@@ -384,7 +388,7 @@ public class SVTConstants
                         SUPPORTRADIUS[region] = cp.getDouble(ccdbPath+"region/CuSupportInnerRadius", region); // radius to inner side of heatSinkRidge
 
                         for( int m = 0; m < NMODULES; m++ )
-		{			
+                        {			
 					switch( m ) 
 					{
 					case 0: // U = lower / inner

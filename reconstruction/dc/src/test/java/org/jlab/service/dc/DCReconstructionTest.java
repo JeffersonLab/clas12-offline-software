@@ -1,19 +1,17 @@
 package org.jlab.service.dc;
 
 import cnuphys.magfield.MagneticFields;
-import java.util.Map;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 import org.jlab.io.base.DataEvent;
-import org.jlab.service.dc.DCHBEngine;
-import org.jlab.service.dc.DCTBEngine;
 
 import org.jlab.analysis.physics.TestEvent;
 import org.jlab.analysis.math.ClasMath;
 
 import org.jlab.clas.swimtools.MagFieldsEngine;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
+import org.jlab.logging.DefaultLogger;
 import org.jlab.utils.CLASResources;
 import org.jlab.utils.system.ClasUtilsFile;
 
@@ -25,6 +23,9 @@ public class DCReconstructionTest {
 
   @Test
   public void testDCReconstruction() {
+
+    DefaultLogger.debug();
+
     System.setProperty("CLAS12DIR", "../../");
 
     String mapDir = CLASResources.getResourcePath("etc")+"/data/magfield";

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.geom.prim.Line3D;
-import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -35,6 +33,22 @@ public class DetectorResponse {
         descriptor.setSectorLayerComponent(sector, layer, component);
     }
     
+    public DetectorResponse(DetectorResponse r) {
+        this.copy(r);
+    }
+    
+    public void copy(DetectorResponse r) {
+        descriptor.copy(r.getDescriptor());
+        hitPosition.copy(r.hitPosition);
+        hitPositionMatched.copy(r.hitPositionMatched);
+        detectorTime = r.detectorTime;
+        detectorEnergy = r.detectorEnergy;
+        particlePath = r.particlePath;
+        hitIndex = r.hitIndex;
+        status = r.status;
+        associations = new ArrayList<>(r.associations);
+    }
+
     public void   setTime(double time){ this.detectorTime = time;}
     public void   setPosition(double x, double y, double z){this.hitPosition.setXYZ(x, y, z);}
     public void   setMatchPosition(double x, double y, double z){this.hitPositionMatched.setXYZ(x, y, z);}

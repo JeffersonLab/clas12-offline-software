@@ -40,8 +40,10 @@ public class ConnectionDialog extends BasicDialog {
     private JRadioButton _directConnect;
     private JRadioButton _connectToDAQ;
     
-    private static String[] hostNames = new String[]{"clondaq2","clondaq3","clondaq4","clondaq5","clondaq6"};
-    private static String[]    hostIP = new String[]{"129.57.167.109","129.57.167.226","129.57.167.227","129.57.167.41","129.57.167.60"};
+    private static String[] hostNames = new String[]{"clondaq2","clondaq3","clondaq4","clondaq5","clondaq6","clondaq7"};
+    private static String[]    hostIP = new String[]{"129.57.167.109","129.57.167.226","129.57.167.227","129.57.167.41","129.57.167.60","129.57.167.20"};
+    private static String defaultHost = "clondaq6";
+    private static String defaultIP = "129.57.167.60";
     
     Map<String,String>  connectionHosts = new LinkedHashMap<String,String>();
     
@@ -76,6 +78,25 @@ public class ConnectionDialog extends BasicDialog {
         }        
     }
     
+    public ConnectionDialog(String defaultHost, String defaultIP) {
+        super("Connection.....", true, closeoutButtons);
+        int nhosts = hostNames.length;
+        for(int i = 0; i < hostNames.length; i++){
+            this.connectionHosts.put(hostNames[i],hostIP[i]);
+        }
+        if(defaultHost!=null && defaultIP!=null) {
+            if(!this.connectionHosts.containsKey(defaultHost)) {
+                this.connectionHosts.put(defaultHost, defaultIP);
+                this._comboHosts.addItem(defaultHost);
+            }
+            else
+                this.connectionHosts.replace(defaultHost, defaultIP);
+            _ipField.setText(defaultIP);
+            _comboHosts.setSelectedItem(defaultHost);
+            _comboHosts.updateUI();
+        }
+    }
+    
     @Override
     protected Component createCenterComponent() {
         
@@ -84,7 +105,7 @@ public class ConnectionDialog extends BasicDialog {
                 BoxLayout.Y_AXIS));
         
         _ipField = new JTextField(25);
-        _ipField.setText("129.57.167.227");
+        _ipField.setText(this.defaultIP);
         
         JPanel subpanel = new JPanel();
         subpanel.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 2));
@@ -101,7 +122,8 @@ public class ConnectionDialog extends BasicDialog {
                 }
             }
         };
-        _comboHosts.setSelectedIndex(2);
+        _comboHosts.setSelectedItem(this.defaultHost);
+        
         _comboHosts.addItemListener(itemListener);
         subpanel.add(labelip);
         subpanel.add(_ipField);

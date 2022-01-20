@@ -48,9 +48,25 @@ public class CherenkovResponse extends DetectorResponse {
     // FIXME:  remove this, use DetectorResponse's hitPosition instead:
     private final Point3D hitPosition = new Point3D();
 
+    public CherenkovResponse() {
+        super();
+    }
+
+    public CherenkovResponse(CherenkovResponse r) {
+        super();
+        this.copy(r);
+    }
+
     public CherenkovResponse(double dtheta, double dphi){
         hitDeltaTheta  = dtheta;
         hitDeltaPhi    = dphi;
+    }
+
+    public void copy(CherenkovResponse r) {
+        super.copy(r);
+        hitDeltaPhi = r.hitDeltaPhi;
+        hitDeltaTheta = r.hitDeltaTheta;
+        hitPosition.copy(r.hitPosition);
     }
 
     public double getNphe() {return this.getEnergy(); }

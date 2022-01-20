@@ -4,6 +4,7 @@ import cnuphys.magfield.MagneticFields;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
 
@@ -15,8 +16,11 @@ import org.jlab.rec.cvt.svt.SVTGeometry;
 
 public class Constants {
    
+
+    public static Logger LOGGER = Logger.getLogger(Constants.class.getName());
+
     /**
-     * BMTConstants used in the reconstruction
+     * Constants used in the reconstruction
      */
     Constants() {
     }

@@ -1,0 +1,477 @@
+[
+    {
+        "name": "RECHBAI::Event",
+        "group": 400,
+        "item": 10,
+        "info": "Event Header Bank",
+        "entries": [
+                {"name":"category",   "type":"L", "info":"Undefined"},
+                {"name":"topology",   "type":"L", "info":"Undefined"},
+                {"name":"beamCharge", "type":"F", "info":"Beam charge, gated (nano-Coulomb)"},
+                {"name":"liveTime",   "type":"D", "info":"Lifetime"},
+                {"name":"startTime",  "type":"F", "info":"Event Start Time (ns)"},
+                {"name":"RFTime",     "type":"F", "info":"RF Time (ns)"},
+                {"name":"helicity",   "type":"B", "info":"Helicity of Event (+/-1, else undefined), with HWP-correction"},
+                {"name":"helicityRaw","type":"B", "info":"Helicity of Event (+/-1, else undefined)"},
+                {"name":"procTime",   "type":"F", "info":"Event Processing Time (UNIX Time = seconds)"}
+            ]
+    },
+    {
+        "name": "RECHBAI::Particle",
+        "group": 400,
+        "item" : 11,
+        "info": "Reconstructed Particle Information",
+        "entries": [
+            {"name":"pid",      "type":"I", "info":"particle id in LUND conventions"},
+            {"name":"px",       "type":"F", "info":"x component of the momentum (GeV)"},
+            {"name":"py",       "type":"F", "info":"y component of the momentum (GeV)"},
+            {"name":"pz",       "type":"F", "info":"z component of the momentum (GeV)"},
+            {"name":"vx",       "type":"F", "info":"x component of the vertex (cm)"},
+            {"name":"vy",       "type":"F", "info":"y component of the vertex (cm)"},
+            {"name":"vz",       "type":"F", "info":"z component of the vertex (cm)"},
+            {"name":"vt",       "type":"F", "info":"RF and z corrected vertex time (ns)"},
+            {"name":"charge",   "type":"B", "info":"particle charge"},
+            {"name":"beta",     "type":"F", "info":"particle beta measured by TOF"},
+            {"name":"chi2pid",  "type":"F", "info":"Chi2 of assigned PID"},
+            {"name":"status",   "type":"S", "info":"particle status (represents detector collection it passed)"}
+        ]
+    },
+    {
+        "name": "RECHBAI::Calorimeter",
+        "group": 400,
+        "item" : 12,
+        "info": "Calorimeter Responses for Particles bank",
+        "entries": [
+            {"name":"index",    "type":"S", "info":"index of the hit in the specific detector bank"},
+            {"name":"pindex",   "type":"S", "info":"row number in the particle bank hit is associated with"},
+            {"name":"detector", "type":"B", "info":"Detector ID, as defined in org.jlab.detector.base.DetectorType"},
+            {"name":"sector",   "type":"B", "info":"Sector of the Detector hit"},
+            {"name":"layer",    "type":"B", "info":"Layer ID, as defined in org.jlab.detector.base.DetectorLayer"},
+            {"name":"energy",   "type":"F", "info":"Energy associated with the hit (GeV)"},
+            {"name":"time",     "type":"F", "info":"Time associated with the hit (ns)"},
+            {"name":"path",     "type":"F", "info":"Path from vertex to the hit position (cm)"},
+            {"name":"chi2",     "type":"F", "info":"Chi2 (or quality) of hit-track matching"},
+            {"name":"x",        "type":"F", "info":"X coordinate of the hit (cm)"},
+            {"name":"y",        "type":"F", "info":"Y coordinate of the hit (cm)"},
+            {"name":"z",        "type":"F", "info":"Z coordinate of the hit (cm)"},
+            {"name":"hx",       "type":"F", "info":"X coordinate of the matched hit (cm)"},
+            {"name":"hy",       "type":"F", "info":"Y coordinate of the mathced hit (cm)"},
+            {"name":"hz",       "type":"F", "info":"Z coordinate of the matched hit (cm)"},
+            {"name":"lu",       "type":"F", "info":"distance on U-side"},
+            {"name":"lv",       "type":"F", "info":"distance on V-side"},
+            {"name":"lw",       "type":"F", "info":"distance on W-side"},
+            {"name":"du",       "type":"F", "info":"shower width on U-side"},
+            {"name":"dv",       "type":"F", "info":"shower width on V-side"},
+            {"name":"dw",       "type":"F", "info":"shower width on w-side"},
+            {"name":"m2u",      "type":"F", "info":"2nd moment of the shower on U-side"},
+            {"name":"m2v",      "type":"F", "info":"2nd moment of the shower on V-side"},
+            {"name":"m2w",      "type":"F", "info":"2nd moment of the shower on W-side"},
+            {"name":"m3u",      "type":"F", "info":"3rd moment of the shower on U-side"},
+            {"name":"m3v",      "type":"F", "info":"3rd moment of the shower on V-side"},
+            {"name":"m3w",      "type":"F", "info":"3rd moment of the shower on W-side"},
+            {"name":"status",   "type":"S", "info":"hit status"}
+        ]
+    },
+    {
+        "name": "RECHBAI::Cherenkov",
+        "group": 400,
+        "item" : 13,
+        "info": "Cherenkov Responses for Particles bank",
+        "entries": [
+            {"name":"index",    "type":"S", "info":"index of the hit in the specific detector bank"},
+            {"name":"pindex",   "type":"S", "info":"row number in the particle bank hit is associated with"},
+            {"name":"detector", "type":"B", "info":"Detector ID, as defined in org.jlab.detector.base.DetectorType"},
+            {"name":"sector",   "type":"B", "info":"Sector of the Detector hit"},
+            {"name":"nphe",     "type":"F", "info":"Number of photoelectrons from Cherenkov radiation"},
+            {"name":"time",     "type":"F", "info":"Time associated with the hit (ns)"},
+            {"name":"path",     "type":"F", "info":"Path from vertex to the hit position (cm)"},
+            {"name":"chi2",     "type":"F", "info":"Chi2 (or quality) of hit-track matching"},
+            {"name":"x",        "type":"F", "info":"X coordinate of the hit (cm)"},
+            {"name":"y",        "type":"F", "info":"Y coordinate of the hit (cm)"},
+            {"name":"z",        "type":"F", "info":"Z coordinate of the hit (cm)"},
+            {"name":"dtheta",   "type":"F", "info":"Expected Theta Resolution (deg)"},
+            {"name":"dphi",     "type":"F", "info":"Expected Phi Resolution (deg)"},
+            {"name":"status",   "type":"S", "info":"hit status"}
+        ]
+    },
+    {
+        "name": "RECHBAI::ForwardTagger",
+        "group": 400,
+        "item" : 14,
+        "info": "Forward Tagger information for Particles bank",
+        "entries": [
+            {"name":"index",    "type":"S", "info":"index of the cluster in the specific detector bank"},
+            {"name":"pindex",   "type":"S", "info":"row number in the particle bank hit is associated with"},
+            {"name":"detector", "type":"B", "info":"Detector ID, as defined in org.jlab.detector.base.DetectorType"},
+            {"name":"layer",    "type":"B", "info":"layer"},
+            {"name":"energy",   "type":"F", "info":"Energy associated with the cluster (GeV)"},
+            {"name":"time",     "type":"F", "info":"Time associated with the cluster (cm)"},
+            {"name":"path",     "type":"F", "info":"Path from vertex to the cluster position (cm)"},
+            {"name":"chi2",     "type":"F", "info":"Chi2 (or quality) of cluster-particle matching"},
+            {"name":"x",        "type":"F", "info":"X coordinate of the cluster"},
+            {"name":"y",        "type":"F", "info":"Y coordinate of the cluster"},
+            {"name":"z",        "type":"F", "info":"Z coordinate of the cluster"},
+            {"name":"dx",       "type":"F", "info":"Cluster width in x" },
+            {"name":"dy",       "type":"F", "info":"Cluster width in y" },
+            {"name":"radius",   "type":"F", "info":"Cluster radius" },
+            {"name":"size",     "type":"S", "info":"size of the cluster"},
+            {"name":"status",   "type":"S", "info":"hit status"}
+        ]
+    },
+    {
+        "name": "RECHBAI::Scintillator",
+        "group": 400,
+        "item" : 15,
+        "info": "Scintillator Responses for Particles bank",
+        "entries": [
+            {"name":"index",    "type":"S", "info":"index of the hit in the specific detector bank"},
+            {"name":"pindex",   "type":"S", "info":"row number in the particle bank hit is associated with"},
+            {"name":"detector", "type":"B", "info":"Detector ID, as defined in org.jlab.detector.base.DetectorType"},
+            {"name":"sector",   "type":"B", "info":"Sector of the Detector hit"},
+            {"name":"layer",    "type":"B", "info":"Layer ID, as defined in org.jlab.detector.base.DetectorLayer"},
+            {"name":"component","type":"S", "info":"Component of the Detector hit"},
+            {"name":"energy",   "type":"F", "info":"Energy associated with the hit (MeV)"},
+            {"name":"time",     "type":"F", "info":"Time associated with the hit (ns)"},
+            {"name":"path",     "type":"F", "info":"Path from vertex to the hit position (cm)"},
+            {"name":"chi2",     "type":"F", "info":"Chi2 (or quality) of hit-track matching"},
+            {"name":"x",        "type":"F", "info":"X coordinate of the hit (cm)"},
+            {"name":"y",        "type":"F", "info":"Y coordinate of the hit (cm)"},
+            {"name":"z",        "type":"F", "info":"Z coordinate of the hit (cm)"},
+            {"name":"hx",       "type":"F", "info":"X coordinate of the matched hit (cm)"},
+            {"name":"hy",       "type":"F", "info":"Y coordinate of the mathced hit (cm)"},
+            {"name":"hz",       "type":"F", "info":"Z coordinate of the matched hit (cm)"},
+            {"name":"status",   "type":"S", "info":"hit status"}
+        ]
+    },
+    {
+        "name": "RECHBAI::ScintExtras",
+        "group": 400,
+        "item" : 23,
+        "info": "Scintillator Cluster Parameters",
+        "entries": [
+            {"name":"dedx",     "type":"F", "info":"Energy deposition per distance travelled (MeV/cm)"},
+            {"name":"size",     "type":"S", "info":"cluster size"},
+            {"name":"layermult","type":"B", "info":"cluster layer multiplicity"}
+        ]
+    },
+    {
+        "name": "RECHBAI::Track",
+        "group": 400,
+        "item" : 16,
+        "info": "Track information for Particles bank",
+        "entries": [
+            {"name":"index",    "type":"S", "info":"index of the track in the specific detector bank"},
+            {"name":"pindex",   "type":"S", "info":"row number in the particle bank hit is associated with"},
+            {"name":"detector", "type":"B", "info":"Detector ID, as defined in org.jlab.detector.base.DetectorType"},
+            {"name":"sector",   "type":"B", "info":"Sector of the track"},
+            {"name":"status",   "type":"S", "info":"status of the track"},
+            {"name":"q",        "type":"B", "info":"charge of the track"},
+            {"name":"chi2",     "type":"F", "info":"Chi2 (or quality) track fitting"},
+            {"name":"NDF",      "type":"S", "info":"number of degrees of freedom in track fitting"}
+        ]
+    },
+    {
+        "name": "RECHBAI::TrackCross",
+        "group": 400,
+        "item" : 17,
+        "info": "Track Cross information for Particles bank (deprecated by RECHBAI::Traj)",
+        "entries": [
+            {"name":"index",    "type":"S", "info":"index of the cross in the specific detector bank"},
+            {"name":"pindex",   "type":"S", "info":"row number in the track bank hit is associated with"},
+            {"name":"detector", "type":"B", "info":"Detector ID, as defined in org.jlab.detector.base.DetectorType"},
+            {"name":"sector",   "type":"B", "info":"sector of the track"},
+            {"name":"layer",    "type":"B", "info":"layer of the track"},
+            {"name":"c_x",      "type":"F", "info":"Cross x-position in the lab (in cm)"},
+            {"name":"c_y",      "type":"F", "info":"Cross y-position in the lab (in cm)"},
+            {"name":"c_z",      "type":"F", "info":"Cross z-position in the lab (in cm)"},
+            {"name":"c_ux",     "type":"F", "info":"Cross unit x-direction vector in the lab"},
+            {"name":"c_uy",     "type":"F", "info":"Cross unit y-direction vector in the lab"},
+            {"name":"c_uz",     "type":"F", "info":"Cross unit z-direction vector in the lab"},
+            {"name":"status",   "type":"S", "info":"hit status"}
+        ]
+    },
+    {
+        "name": "RECAI::Event",
+        "group": 400,
+        "item" : 30,
+        "info": "Event Header Bank",
+        "entries": [
+                {"name":"category",   "type":"L", "info":"Undefined"},
+                {"name":"topology",   "type":"L", "info":"Undefined"},
+                {"name":"beamCharge", "type":"F", "info":"Beam charge, gated (nano-Coulomb)"},
+                {"name":"liveTime",   "type":"D", "info":"Lifetime"},
+                {"name":"startTime",  "type":"F", "info":"Event Start Time (ns)"},
+                {"name":"RFTime",     "type":"F", "info":"RF Time (ns)"},
+                {"name":"helicity",   "type":"B", "info":"Helicity of Event (+/-1, else undefined), with HWP-correction"},
+                {"name":"helicityRaw","type":"B", "info":"Helicity of Event (+/-1, else undefined)"},
+                {"name":"procTime",   "type":"F", "info":"Event Processing Time (UNIX Time = seconds)"}
+            ]
+    },
+    {
+        "name": "RECAI::Particle",
+        "group": 400,
+        "item" : 31,
+        "info": "Reconstructed Particle Information",
+        "entries": [
+            {"name":"pid",      "type":"I", "info":"particle id in LUND conventions"},
+            {"name":"px",       "type":"F", "info":"x component of the momentum (GeV)"},
+            {"name":"py",       "type":"F", "info":"y component of the momentum (GeV)"},
+            {"name":"pz",       "type":"F", "info":"z component of the momentum (GeV)"},
+            {"name":"vx",       "type":"F", "info":"x component of the vertex (cm)"},
+            {"name":"vy",       "type":"F", "info":"y component of the vertex (cm)"},
+            {"name":"vz",       "type":"F", "info":"z component of the vertex (cm)"},
+            {"name":"vt",       "type":"F", "info":"RF and z corrected vertex time (ns)"},
+            {"name":"charge",   "type":"B", "info":"particle charge"},
+            {"name":"beta",     "type":"F", "info":"particle beta measured by TOF"},
+            {"name":"chi2pid",  "type":"F", "info":"Chi2 of assigned PID"},
+            {"name":"status",   "type":"S", "info":"particle status (represents detector collection it passed)"}
+        ]
+    },
+    {
+        "name": "RECAI::Calorimeter",
+        "group": 400,
+        "item" : 32,
+        "info": "Calorimeter Responses for Particles bank",
+        "entries": [
+            {"name":"index",    "type":"S", "info":"index of the hit in the specific detector bank"},
+            {"name":"pindex",   "type":"S", "info":"row number in the particle bank hit is associated with"},
+            {"name":"detector", "type":"B", "info":"Detector ID, as defined in org.jlab.detector.base.DetectorType"},
+            {"name":"sector",   "type":"B", "info":"Sector of the Detector hit"},
+            {"name":"layer",    "type":"B", "info":"Layer ID, as defined in org.jlab.detector.base.DetectorLayer"},
+            {"name":"energy",   "type":"F", "info":"Energy associated with the hit (GeV)"},
+            {"name":"time",     "type":"F", "info":"Time associated with the hit (ns)"},
+            {"name":"path",     "type":"F", "info":"Path from vertex to the hit position (cm)"},
+            {"name":"chi2",     "type":"F", "info":"Chi2 (or quality) of hit-track matching"},
+            {"name":"x",        "type":"F", "info":"X coordinate of the hit (cm)"},
+            {"name":"y",        "type":"F", "info":"Y coordinate of the hit (cm)"},
+            {"name":"z",        "type":"F", "info":"Z coordinate of the hit (cm)"},
+            {"name":"hx",       "type":"F", "info":"X coordinate of the matched hit (cm)"},
+            {"name":"hy",       "type":"F", "info":"Y coordinate of the mathced hit (cm)"},
+            {"name":"hz",       "type":"F", "info":"Z coordinate of the matched hit (cm)"},
+            {"name":"lu",       "type":"F", "info":"distance on U-side"},
+            {"name":"lv",       "type":"F", "info":"distance on V-side"},
+            {"name":"lw",       "type":"F", "info":"distance on W-side"},
+            {"name":"du",       "type":"F", "info":"shower width on U-side"},
+            {"name":"dv",       "type":"F", "info":"shower width on V-side"},
+            {"name":"dw",       "type":"F", "info":"shower width on w-side"},
+            {"name":"m2u",      "type":"F", "info":"2nd moment of the shower on U-side"},
+            {"name":"m2v",      "type":"F", "info":"2nd moment of the shower on V-side"},
+            {"name":"m2w",      "type":"F", "info":"2nd moment of the shower on W-side"},
+            {"name":"m3u",      "type":"F", "info":"3rd moment of the shower on U-side"},
+            {"name":"m3v",      "type":"F", "info":"3rd moment of the shower on V-side"},
+            {"name":"m3w",      "type":"F", "info":"3rd moment of the shower on W-side"},
+            {"name":"status",   "type":"S", "info":"hit status"}
+        ]
+    },
+    {
+        "name": "RECAI::Cherenkov",
+        "group": 400,
+        "item" : 33,
+        "info": "Cherenkov Responses for Particles bank",
+        "entries": [
+            {"name":"index",    "type":"S", "info":"index of the hit in the specific detector bank"},
+            {"name":"pindex",   "type":"S", "info":"row number in the particle bank hit is associated with"},
+            {"name":"detector", "type":"B", "info":"Detector ID, as defined in org.jlab.detector.base.DetectorType"},
+            {"name":"sector",   "type":"B", "info":"Sector of the Detector hit"},
+            {"name":"nphe",     "type":"F", "info":"Number of photoelectrons from Cherenkov radiation"},
+            {"name":"time",     "type":"F", "info":"Time associated with the hit (ns)"},
+            {"name":"path",     "type":"F", "info":"Path from vertex to the hit position (cm)"},
+            {"name":"chi2",     "type":"F", "info":"Chi2 (or quality) of hit-track matching"},
+            {"name":"x",        "type":"F", "info":"X coordinate of the hit (cm)"},
+            {"name":"y",        "type":"F", "info":"Y coordinate of the hit (cm)"},
+            {"name":"z",        "type":"F", "info":"Z coordinate of the hit (cm)"},
+            {"name":"dtheta",   "type":"F", "info":"Expected Theta Resolution (deg)"},
+            {"name":"dphi",     "type":"F", "info":"Expected Phi Resolution (deg)"},
+            {"name":"status",   "type":"S", "info":"hit status"}
+        ]
+    },
+    {
+        "name": "RECAI::ForwardTagger",
+        "group": 400,
+        "item" : 34,
+        "info": "Forward Tagger information for Particles bank",
+        "entries": [
+            {"name":"index",    "type":"S", "info":"index of the cluster in the specific detector bank"},
+            {"name":"pindex",   "type":"S", "info":"row number in the particle bank hit is associated with"},
+            {"name":"detector", "type":"B", "info":"Detector ID, as defined in org.jlab.detector.base.DetectorType"},
+            {"name":"layer",    "type":"B", "info":"layer"},
+            {"name":"energy",   "type":"F", "info":"Energy associated with the cluster (GeV)"},
+            {"name":"time",     "type":"F", "info":"Time associated with the cluster (ns)"},
+            {"name":"path",     "type":"F", "info":"Path from vertex to the cluster position (cm)"},
+            {"name":"chi2",     "type":"F", "info":"Chi2 (or quality) of cluster-particle matching"},
+            {"name":"x",        "type":"F", "info":"X coordinate of the cluster"},
+            {"name":"y",        "type":"F", "info":"Y coordinate of the cluster"},
+            {"name":"z",        "type":"F", "info":"Z coordinate of the cluster"},
+            {"name":"dx",       "type":"F", "info":"Cluster width in x" },
+            {"name":"dy",       "type":"F", "info":"Cluster width in y" },
+            {"name":"radius",   "type":"F", "info":"Cluster radius" },
+            {"name":"size",     "type":"S", "info":"size of the cluster"},
+            {"name":"status",   "type":"S", "info":"hit status"}
+        ]
+    },
+    {
+        "name": "RECAI::Scintillator",
+        "group": 400,
+        "item" : 35,
+        "info": "Scintillator Responses for Particles bank",
+        "entries": [
+            {"name":"index",    "type":"S", "info":"index of the hit in the specific detector bank"},
+            {"name":"pindex",   "type":"S", "info":"row number in the particle bank hit is associated with"},
+            {"name":"detector", "type":"B", "info":"Detector ID, as defined in org.jlab.detector.base.DetectorType"},
+            {"name":"sector",   "type":"B", "info":"Sector of the Detector hit"},
+            {"name":"layer",    "type":"B", "info":"Layer ID, as defined in org.jlab.detector.base.DetectorLayer"},
+            {"name":"component","type":"S", "info":"Component of the Detector hit"},
+            {"name":"energy",   "type":"F", "info":"Energy associated with the hit (MeV)"},
+            {"name":"time",     "type":"F", "info":"Time associated with the hit (ns)"},
+            {"name":"path",     "type":"F", "info":"Path from vertex to the hit position (cm)"},
+            {"name":"chi2",     "type":"F", "info":"Chi2 (or quality) of hit-track matching"},
+            {"name":"x",        "type":"F", "info":"X coordinate of the hit (cm)"},
+            {"name":"y",        "type":"F", "info":"Y coordinate of the hit (cm)"},
+            {"name":"z",        "type":"F", "info":"Z coordinate of the hit (cm)"},
+            {"name":"hx",       "type":"F", "info":"X coordinate of the matched hit (cm)"},
+            {"name":"hy",       "type":"F", "info":"Y coordinate of the mathced hit (cm)"},
+            {"name":"hz",       "type":"F", "info":"Z coordinate of the matched hit (cm)"},
+            {"name":"status",   "type":"S", "info":"hit status"}
+        ]
+    },
+    {
+        "name": "RECAI::ScintExtras",
+        "group": 400,
+        "item" : 43,
+        "info": "Scintillator Cluster Parameters",
+        "entries": [
+            {"name":"dedx",     "type":"F", "info":"Energy deposition per distance travelled (MeV/cm)"},
+            {"name":"size",     "type":"S", "info":"cluster size"},
+            {"name":"layermult","type":"B", "info":"cluster layer multiplicity"}
+        ]
+    },
+    {
+        "name": "RECAI::Track",
+        "group": 400,
+        "item" : 36,
+        "info": "Track information for Particles bank",
+        "entries": [
+            {"name":"index",    "type":"S", "info":"index of the track in the specific detector bank"},
+            {"name":"pindex",   "type":"S", "info":"row number in the particle bank hit is associated with"},
+            {"name":"detector", "type":"B", "info":"Detector ID, as defined in org.jlab.detector.base.DetectorType"},
+            {"name":"sector",   "type":"B", "info":"Sector of the track"},
+            {"name":"status",   "type":"S", "info":"status of the track"},
+            {"name":"q",        "type":"B", "info":"charge of the track"},
+            {"name":"chi2",     "type":"F", "info":"Chi2 (or quality) track fitting"},
+            {"name":"NDF",      "type":"S", "info":"number of degrees of freedom in track fitting"}
+        ]
+    },
+    {
+        "name": "RECAI::TrackCross",
+        "group": 400,
+        "item" : 37,
+        "info": "Track Cross information for Particles bank (deprecated by RECAI::Traj)",
+        "entries": [
+            {"name":"index",    "type":"S", "info":"index of the cross in the specific detector bank"},
+            {"name":"pindex",   "type":"S", "info":"row number in the track bank hit is associated with"},
+            {"name":"detector", "type":"B", "info":"Detector ID, as defined in org.jlab.detector.base.DetectorType"},
+            {"name":"sector",   "type":"B", "info":"sector of the track"},
+            {"name":"layer",    "type":"B", "info":"layer of the track"},
+            {"name":"c_x",      "type":"F", "info":"Cross x-position in the lab (in cm)"},
+            {"name":"c_y",      "type":"F", "info":"Cross y-position in the lab (in cm)"},
+            {"name":"c_z",      "type":"F", "info":"Cross z-position in the lab (in cm)"},
+            {"name":"c_ux",     "type":"F", "info":"Cross unit x-direction vector in the lab"},
+            {"name":"c_uy",     "type":"F", "info":"Cross unit y-direction vector in the lab"},
+            {"name":"c_uz",     "type":"F", "info":"Cross unit z-direction vector in the lab"},
+            {"name":"status",   "type":"S", "info":"hit status"}
+        ]
+    },
+    {
+        "name": "RECAI::CovMat",
+        "group": 400,
+        "item" : 38,
+        "info": "reconstructed track covariance matrix",
+        "entries": [
+            {"name":"index",    "type":"S", "info":"index of the track in Tracks bank"},
+            {"name":"pindex",   "type":"S", "info":"row number in the particle bank hit is associated with"},
+            {"name":"C11",      "type":"F", "info":"C11 covariance matrix element at last superlayer used in the fit"},
+            {"name":"C12",      "type":"F", "info":"C12 covariance matrix element at last superlayer used in the fit"},
+            {"name":"C13",      "type":"F", "info":"C13 covariance matrix element at last superlayer used in the fit"},
+            {"name":"C14",      "type":"F", "info":"C14 covariance matrix element at last superlayer used in the fit"},
+            {"name":"C15",      "type":"F", "info":"C15 covariance matrix element at last superlayer used in the fit"},
+            {"name":"C22",      "type":"F", "info":"C22 covariance matrix element at last superlayer used in the fit"},
+            {"name":"C23",      "type":"F", "info":"C23 covariance matrix element at last superlayer used in the fit"},
+            {"name":"C24",      "type":"F", "info":"C24 covariance matrix element at last superlayer used in the fit"},
+            {"name":"C25",      "type":"F", "info":"C25 covariance matrix element at last superlayer used in the fit"},
+            {"name":"C33",      "type":"F", "info":"C33 covariance matrix element at last superlayer used in the fit"},
+            {"name":"C34",      "type":"F", "info":"C34 covariance matrix element at last superlayer used in the fit"},
+            {"name":"C35",      "type":"F", "info":"C35 covariance matrix element at last superlayer used in the fit"},
+            {"name":"C44",      "type":"F", "info":"C44 covariance matrix element at last superlayer used in the fit"},
+            {"name":"C45",      "type":"F", "info":"C45 covariance matrix element at last superlayer used in the fit"},
+            {"name":"C55",      "type":"F", "info":"C55 covariance matrix element at last superlayer used in the fit"}
+        ]
+    },
+    {
+        "name": "RECAI::VertDoca",
+        "group": 400,
+        "item" : 39,
+        "info": "Track Cross information for Particles bank",
+        "entries": [
+           {"name":"index1",   "type":"S", "info":"index of the first track in Tracks bank"},
+           {"name":"index2",   "type":"S", "info":"index of the second track in Tracks bank"},
+           {"name":"x",        "type":"F", "info":"x-position of the common vertex (cm)"},
+           {"name":"y",        "type":"F", "info":"y-position of the common vertex (cm)"},
+           {"name":"z",        "type":"F", "info":"z-position of the common vertex (cm)"},
+           {"name":"x1",       "type":"F", "info":"x-position of the first track at the DOCA point (cm)"},
+           {"name":"y1",       "type":"F", "info":"y-position of the first track at the DOCA point (cm)"},
+           {"name":"z1",       "type":"F", "info":"z-position of the first track at the DOCA point (cm)"},
+           {"name":"cx1",      "type":"F", "info":"x-direction vector of the first track at the DOCA point (cm)"},
+           {"name":"cy1",      "type":"F", "info":"y-direction vector of the first track at the DOCA point (cm)"},
+           {"name":"cz1",      "type":"F", "info":"z-direction vector of the first track at the DOCA point (cm)"},
+           {"name":"x2",       "type":"F", "info":"x-position of the second track at the DOCA point (cm)"},
+           {"name":"y2",       "type":"F", "info":"y-position of the second track at the DOCA point (cm)"},
+           {"name":"z2",       "type":"F", "info":"z-position of the second track at the DOCA point (cm)"},
+           {"name":"cx2",      "type":"F", "info":"x-direction vector of the second track at the DOCA point (cm)"},
+           {"name":"cy2",      "type":"F", "info":"y-direction vector of the second track at the DOCA point (cm)"},
+           {"name":"cz2",      "type":"F", "info":"z-direction vector of the second track at the DOCA point (cm)"},
+           {"name":"r",        "type":"F", "info":"The distance between two tracks (cm)"}
+        ]
+    },
+    {
+        "name": "RECAI::Traj",
+        "group": 400,
+        "item" : 40,
+        "info": "Trajectory information for Particles bank",
+        "entries": [
+            {"name":"pindex",  "type":"S", "info":"index of the particle in RECAI::Particle"},
+            {"name":"index",   "type":"S", "info":"index of the track in its tracking bank"},
+            {"name":"detector","type":"B", "info":"DetectorID as defined in org.jlab.detector.DetectorType"},
+            {"name":"layer",   "type":"B", "info":"Layer ID as defined in org.jlab.detector.DetectorLayer"},
+            {"name":"x",       "type":"F", "info":"x-position of the track at the detector surface (cm)"},
+            {"name":"y",       "type":"F", "info":"y-position of the track at the detector surface (cm)"},
+            {"name":"z",       "type":"F", "info":"z-position of the track at the detector surface (cm)"},
+            {"name":"cx",      "type":"F", "info":"direction cosline of the track at the detector surface"},
+            {"name":"cy",      "type":"F", "info":"direction cosline of the track at the detector surface"},
+            {"name":"cz",      "type":"F", "info":"direction cosline of the track at the detector surface"},
+            {"name":"path",    "type":"F", "info":"pathlength of the track to the detector surface from the DOCA point (cm)"}
+        ]
+    },
+    {
+        "name": "RECAIFT::Event",
+        "group": 400,
+        "item": 41,
+        "info": "Event Header Bank, shadowing RECAI::Event with FT-based start time",
+        "entries": [
+            {"name":"category",   "type":"L", "info":"Undefined"},
+            {"name":"startTime", "type":"F", "info":"Event Start Time (ns)"}
+        ]
+    },
+    {
+        "name": "RECAIFT::Particle",
+        "group": 400,
+        "item" : 42,
+        "info": "Reconstructed Particle Information, shadowing RECAI::Particle with FT-based start time",
+        "entries": [
+            {"name":"pid",     "type":"I", "info":"particle id in LUND conventions"},
+            {"name":"vt",      "type":"F", "info":"RF and z corrected vertex time (ns)"},
+            {"name":"beta",    "type":"F", "info":"particle beta measured by TOF"},
+            {"name":"chi2pid", "type":"F", "info":"Chi2 of assigned PID"},
+            {"name":"status",  "type":"S", "info":"particle status (represents detector collection it passed)"}
+        ]
+    }
+]

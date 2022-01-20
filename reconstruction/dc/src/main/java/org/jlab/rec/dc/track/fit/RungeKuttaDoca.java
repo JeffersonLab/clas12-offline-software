@@ -6,8 +6,8 @@
 package org.jlab.rec.dc.track.fit;
 
 //import Jama.Matrix;
-import org.jlab.jnp.matrix.*;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 import org.jlab.clas.swimtools.Swim;
 /**
  *
@@ -15,6 +15,8 @@ import org.jlab.clas.swimtools.Swim;
  */
 public class RungeKuttaDoca {
     
+    private static final Logger LOGGER = Logger.getLogger(RungeKuttaDoca.class.getName());
+
     private final float[] _b = new float[3];
     final double v = 0.0029979245;
     private final ArrayList<Double> k1;
@@ -27,14 +29,14 @@ public class RungeKuttaDoca {
     private final ArrayList<Double> jk4;
     
     public RungeKuttaDoca() {
-        this.k1 = new ArrayList<Double>(4);
-        this.k2 = new ArrayList<Double>(4);
-        this.k3 = new ArrayList<Double>(4);
-        this.k4 = new ArrayList<Double>(4);
-        this.jk1 = new ArrayList<Double>(12);
-        this.jk2 = new ArrayList<Double>(12);
-        this.jk3 = new ArrayList<Double>(12);
-        this.jk4 = new ArrayList<Double>(12);
+        this.k1 = new ArrayList<>(4);
+        this.k2 = new ArrayList<>(4);
+        this.k3 = new ArrayList<>(4);
+        this.k4 = new ArrayList<>(4);
+        this.jk1 = new ArrayList<>(12);
+        this.jk2 = new ArrayList<>(12);
+        this.jk3 = new ArrayList<>(12);
+        this.jk4 = new ArrayList<>(12);
         
     }
     
@@ -50,7 +52,7 @@ public class RungeKuttaDoca {
         double BatMeas = 0;
         
         while(Math.signum(z0 - Zi) *z<Math.signum(z0 - Zi) *z0) {
-            //System.out.println(" RK step num "+(j+1)+" = "+(float)s+" nSteps = "+nSteps);
+            //LOGGER.log(Level.FINE, " RK step num "+(j+1)+" = "+(float)s+" nSteps = "+nSteps);
             double x =  fVec.x;
             double y =  fVec.y;
             z = fVec.z;
@@ -133,7 +135,7 @@ public class RungeKuttaDoca {
         double delty_delty0_0 =1;
         double deltx_delq0_0 =0;
         double delty_delq0_0 =0;
-        //System.out.println("RK0 "+x0+","+y0+","+z0+";"+tx0+","+ty0+","+" z0 "+z0+" h "+h);
+        //LOGGER.log(Level.FINE, "RK0 "+x0+","+y0+","+z0+";"+tx0+","+ty0+","+" z0 "+z0+" h "+h);
         //State
         swimmer.Bfield(sector, x0, y0, z0, _b);
         double x1 = tx0;
@@ -259,7 +261,7 @@ public class RungeKuttaDoca {
         double tx = tx0 + this.RK4(tx1, tx2, tx3, tx4, h);
         double ty = ty0 + this.RK4(ty1, ty2, ty3, ty4, h);
         double z = z0+h;
-        //System.out.println("RK "+x+","+y+","+z+";"+tx+","+ty+","+" z0 "+z0);
+        //LOGGER.log(Level.FINE, "RK "+x+","+y+","+z+";"+tx+","+ty+","+" z0 "+z0);
         // Jacobian:
         double delx_deltx0  = this.RK4(delx_deltx0_1, delx_deltx0_2, delx_deltx0_3, delx_deltx0_4, h);
         double deltx_deltx0 = 1 + this.RK4(deltx_deltx0_1, deltx_deltx0_2, deltx_deltx0_3, deltx_deltx0_4, h);
@@ -325,7 +327,7 @@ public class RungeKuttaDoca {
         fVec.B = Math.sqrt(_b[0]*_b[0]+_b[1]*_b[1]+_b[2]*_b[2]);
         fVec.deltaPath = Math.sqrt((x0-x)*(x0-x)+(y0-y)*(y0-y)+h*h)+dPath;
         fCov.covMat.set(C);
-        //System.out.println("Transported matrix");
+        //LOGGER.log(Level.FINE, "Transported matrix");
         //Matrix5x5.show(fCov.covMat);
     }
     
