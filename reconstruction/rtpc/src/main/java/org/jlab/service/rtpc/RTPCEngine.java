@@ -17,7 +17,7 @@ import org.jlab.rec.rtpc.banks.HitReader;
 import org.jlab.rec.rtpc.banks.RecoBankWriter;
 import org.jlab.rec.rtpc.hit.Hit;
 import org.jlab.rec.rtpc.hit.HitParameters;
-import org.jlab.rec.rtpc.hit.KalmanFilter;
+import org.jlab.rec.rtpc.hit.KF.KalmanFilter;
 import org.jlab.rec.rtpc.hit.SignalSimulation;
 import org.jlab.rec.rtpc.hit.TimeAverage;
 import org.jlab.rec.rtpc.hit.TrackDisentangler;
@@ -141,7 +141,7 @@ public class RTPCEngine extends ReconstructionEngine{
             HelixFitTest HF = new HelixFitTest(params,fitToBeamline,Math.abs(magfield),cosmic,chi2culling);
             // Kalman Filter
             try {
-                KalmanFilter KF = new KalmanFilter(params, event, 0);
+                KalmanFilter KF = new KalmanFilter(params, event);
             } catch (Exception e) {
                 // e.printStackTrace();
             }

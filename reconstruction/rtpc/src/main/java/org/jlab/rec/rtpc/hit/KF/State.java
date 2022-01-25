@@ -1,4 +1,4 @@
-package org.jlab.rec.rtpc.KF;
+package org.jlab.rec.rtpc.hit.KF;
 
 import org.ejml.simple.SimpleMatrix;
 import org.jlab.clas.swimtools.Swim;
