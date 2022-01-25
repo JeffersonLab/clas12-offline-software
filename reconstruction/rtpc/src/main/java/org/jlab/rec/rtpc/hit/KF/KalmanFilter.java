@@ -65,13 +65,12 @@ public class KalmanFilter {
 
                 } catch (Exception ignored) {}
 
-            try {
-                sitemap.clear();
-                statemap.clear();
-                matrixmap.clear();
-                bstatemap.clear();
-                bmatrixmap.clear();
-            } catch (Exception ignored) {}
+                if (!(sitemap == null)) if (!sitemap.isEmpty()) sitemap.clear();
+                if (!(statemap == null)) if (!statemap.isEmpty()) statemap.clear();
+                if (!(matrixmap == null)) if (!matrixmap.isEmpty()) matrixmap.clear();
+                if (!(bstatemap == null)) if (!bstatemap.isEmpty()) bstatemap.clear();
+                if (!(bmatrixmap == null)) if (!bmatrixmap.isEmpty()) bmatrixmap.clear();
+
         }
 
         params.set_kftrackinfomap(kftrackinfomap);
