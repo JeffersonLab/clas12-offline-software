@@ -22,7 +22,7 @@ public class KalmanFilter {
     HashMap<Integer, State> bstatemap;
     HashMap<Integer, SimpleMatrix> bmatrixmap;
 
-    public KalmanFilter(HitParameters params, DataEvent event) throws Exception {
+    public KalmanFilter(HitParameters params, DataEvent event) {
         recotrackmap = params.get_recotrackmap();
         finaltrackinfomap = params.get_finaltrackinfomap();
 
@@ -65,13 +65,13 @@ public class KalmanFilter {
 
                 } catch (Exception ignored) {}
 
-
+            try {
                 sitemap.clear();
                 statemap.clear();
                 matrixmap.clear();
                 bstatemap.clear();
                 bmatrixmap.clear();
-
+            } catch (Exception ignored) {}
         }
 
         params.set_kftrackinfomap(kftrackinfomap);

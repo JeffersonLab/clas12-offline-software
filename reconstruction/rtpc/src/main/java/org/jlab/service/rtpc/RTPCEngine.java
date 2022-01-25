@@ -90,6 +90,8 @@ public class RTPCEngine extends ReconstructionEngine{
     @Override
     public boolean processDataEvent(DataEvent event) {
 
+        simulation = true;
+
         HitParameters params = new HitParameters();
 
         HitReader hitRead = new HitReader();
@@ -125,6 +127,7 @@ public class RTPCEngine extends ReconstructionEngine{
         if(hits.size() > hitsbound) return true; 
 
         if(event.hasBank("RTPC::adc")){
+
             params.init(this.getConstantsManager(), runNo);
 
             SignalSimulation SS = new SignalSimulation(hits,params,simulation); //boolean is for simulation
@@ -140,11 +143,8 @@ public class RTPCEngine extends ReconstructionEngine{
             //Helix Fit Tracks to calculate Track Parameters
             HelixFitTest HF = new HelixFitTest(params,fitToBeamline,Math.abs(magfield),cosmic,chi2culling);
             // Kalman Filter
-            try {
-                KalmanFilter KF = new KalmanFilter(params, event);
-            } catch (Exception e) {
-                // e.printStackTrace();
-            }
+            KalmanFilter KF = new KalmanFilter(params, event);
+
 
             RecoBankWriter writer = new RecoBankWriter();
             DataBank recoBank = writer.fillRTPCHitsBank(event,params);
