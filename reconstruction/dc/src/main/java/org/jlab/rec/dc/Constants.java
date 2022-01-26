@@ -282,9 +282,6 @@ public class Constants {
             MAXENDPLTDEFLEC[2][4][1] = 0.;
             MAXENDPLTDEFLEC[2][5][0] = 0.;
             MAXENDPLTDEFLEC[2][5][1] = 0.;
-            
-            System.out.println("CONSTANTS LOADED!!!");
-
     }
 
     private static double[][][][] _T0 = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables --- with TStart calibration 

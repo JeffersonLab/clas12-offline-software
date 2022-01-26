@@ -41,6 +41,7 @@ public class RTPCEngine extends ReconstructionEngine{
     private int fitToBeamline = 1;
     private boolean disentangle = true;
     private boolean chi2culling = true; 
+    private boolean kfStatus = true; 
 
     @Override
     public boolean init() {
@@ -48,7 +49,8 @@ public class RTPCEngine extends ReconstructionEngine{
         String cosm = this.getEngineConfigString("rtpcCosmic");
         String beamfit = this.getEngineConfigString("rtpcBeamlineFit");
         String disentangler = this.getEngineConfigString("rtpcDisentangler");
-	    String chi2cull = this.getEngineConfigString("rtpcChi2Cull");
+	String chi2cull = this.getEngineConfigString("rtpcChi2Cull");
+        String kfstatus = this.getEngineConfigString("rtpcKF");
         //System.out.println(sim + " " + cosm + " " + beamfit);
 
         if(sim != null){
@@ -71,6 +73,10 @@ public class RTPCEngine extends ReconstructionEngine{
             chi2culling = Boolean.valueOf(chi2cull);
         }
 
+        if(kfstatus != null){
+            kfStatus = Boolean.valueOf(kfstatus);
+        }
+
         String[] rtpcTables = new String[]{
             "/calibration/rtpc/time_offsets",
             "/calibration/rtpc/gain_balance",
@@ -80,6 +86,8 @@ public class RTPCEngine extends ReconstructionEngine{
         };
 
         requireConstants(Arrays.asList(rtpcTables));
+
+        this.registerOutputBank("RTPC::hits","RTPC::tracks");
 
         return true;
     }

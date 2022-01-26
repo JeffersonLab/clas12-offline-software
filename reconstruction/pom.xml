@@ -23,7 +23,7 @@
     <module>htcc</module>
     <module>cnd</module>
     <module>rich</module>
-    <module>fvt</module>
+    <module>fmt</module>
     <module>eb</module>
     <module>band</module>
     <module>mc</module>
