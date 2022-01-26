@@ -1,8 +1,6 @@
 package org.jlab.rec.rtpc.hit.KF;
 
 import org.ejml.simple.SimpleMatrix;
-import org.jlab.io.base.DataBank;
-import org.jlab.io.base.DataEvent;
 import org.jlab.rec.rtpc.hit.*;
 
 import java.util.*;
@@ -22,7 +20,7 @@ public class KalmanFilter {
     HashMap<Integer, State> bstatemap;
     HashMap<Integer, SimpleMatrix> bmatrixmap;
 
-    public KalmanFilter(HitParameters params, DataEvent event) {
+    public KalmanFilter(HitParameters params) {
         recotrackmap = params.get_recotrackmap();
         finaltrackinfomap = params.get_finaltrackinfomap();
 
@@ -30,18 +28,17 @@ public class KalmanFilter {
 
                 try {
                     fillHitMap(TID);
-                    initializationStateMap(TID, event);
+                    initializationStateMap(TID);
                     generateSites();
 
 
                     for (int i = 0; i < 3; i++) {
-                        test3();
+                        kalmanFilter();
                     }
 
                     // Save data :
                     State state = statemap.get(0);
                     Site from = sitemap.get(0);
-                    double drho = state.drho();
                     double phi0 = state.phi0();
                     double kappa = state.kappa();
                     double dz = state.dz();
@@ -76,20 +73,20 @@ public class KalmanFilter {
         params.set_kftrackinfomap(kftrackinfomap);
     }
 
-    private void test3() throws Exception{
+    private void kalmanFilter() throws Exception{
         boolean debug = false;
 
         State state = statemap.get(0);
         SimpleMatrix P = matrixmap.get(0);
         if (print) state.debug("start", sitemap.get(0));
 
-        Group target = truc(state, sitemap.get(0), sitemap.get(1), new Material("Deuterium"), true, debug);
-        Group wall = truc(target.state, sitemap.get(1), sitemap.get(2), new Material("Kapton"), true, debug);
-        Group buffer = truc(wall.state, sitemap.get(2), sitemap.get(3), new Material("HeCO2"), true, debug);
-        Group foil = truc(buffer.state, sitemap.get(3), sitemap.get(4), new Material("Mylar"), true, debug);
-        Group flow = truc(foil.state, sitemap.get(4), sitemap.get(5), new Material("HeCO2"), true, debug);
-        Group cath = truc(flow.state, sitemap.get(5), sitemap.get(6), new Material("Mylar"), true, debug);
-        Group meas = truc(cath.state, sitemap.get(6), sitemap.get(7), new Material("HeCO2"), true, debug);
+        Group target = propagation(state, sitemap.get(0), sitemap.get(1), new Material("Deuterium"), true, debug);
+        Group wall = propagation(target.state, sitemap.get(1), sitemap.get(2), new Material("Kapton"), true, debug);
+        Group buffer = propagation(wall.state, sitemap.get(2), sitemap.get(3), new Material("HeCO2"), true, debug);
+        Group foil = propagation(buffer.state, sitemap.get(3), sitemap.get(4), new Material("Mylar"), true, debug);
+        Group flow = propagation(foil.state, sitemap.get(4), sitemap.get(5), new Material("HeCO2"), true, debug);
+        Group cath = propagation(flow.state, sitemap.get(5), sitemap.get(6), new Material("Mylar"), true, debug);
+        Group meas = propagation(cath.state, sitemap.get(6), sitemap.get(7), new Material("HeCO2"), true, debug);
 
         State state_minus = meas.state;
         SimpleMatrix F = target.F.mult(wall.F).mult(buffer.F).mult(foil.F).mult(flow.F).mult(cath.F).mult(meas.F);
@@ -122,21 +119,21 @@ public class KalmanFilter {
         matrixmap.put(7, P_plus);
 
         for (int k = 7; k < sitemap.size() - 1; k++) {
-            truc2(k, debug);
+            propagationUpdateForward(k, debug);
         }
 
         fillbMap();
 
         // Back Propagation !!!!
         for (int k = sitemap.size() - 1; k > 7; k--) {
-            truc3(k, debug);
+            propagationUpdateBackward(k, debug);
         }
-        lasttruc(debug);
+        lastPropagation(debug);
 
 
     }
 
-    private void truc2(int k, boolean debug) throws Exception {
+    private void propagationUpdateForward(int k, boolean debug) throws Exception {
         State state1 = statemap.get(k);
         SimpleMatrix P = matrixmap.get(k);
         Site from = sitemap.get(k);
@@ -179,7 +176,7 @@ public class KalmanFilter {
         matrixmap.put(k+1, P_plus);
     }
 
-    private void truc3(int k, boolean debug) throws Exception {
+    private void propagationUpdateBackward(int k, boolean debug) throws Exception {
         State state1 = statemap.get(k);
         SimpleMatrix P = matrixmap.get(k);
         Site from = sitemap.get(k);
@@ -226,19 +223,19 @@ public class KalmanFilter {
         bmatrixmap.put(k-1, P_plus);
     }
 
-    private void lasttruc(boolean debug) throws Exception {
+    private void lastPropagation(boolean debug) throws Exception {
         State state = statemap.get(7);
         SimpleMatrix P = matrixmap.get(7);
         if (print) state.debug("start", sitemap.get(7));
 
-        Group meas = truc(state, sitemap.get(7), sitemap.get(6), new Material("HeCO2"), false, debug);
+        Group meas = propagation(state, sitemap.get(7), sitemap.get(6), new Material("HeCO2"), false, debug);
 
-        Group cath = truc(meas.state, sitemap.get(6), sitemap.get(5), new Material("Mylar"), false, debug);
-        Group flow = truc(cath.state, sitemap.get(5), sitemap.get(4), new Material("HeCO2"), false, debug);
-        Group foil = truc(flow.state, sitemap.get(4), sitemap.get(3), new Material("Mylar"), false, debug);
-        Group buffer = truc(foil.state, sitemap.get(3), sitemap.get(2), new Material("HeCO2"), false, debug);
-        Group wall = truc(buffer.state, sitemap.get(2), sitemap.get(1), new Material("Kapton"), false, debug);
-        Group start = truc(wall.state, sitemap.get(1), sitemap.get(0), new Material("Deuterium"), false, debug);
+        Group cath = propagation(meas.state, sitemap.get(6), sitemap.get(5), new Material("Mylar"), false, debug);
+        Group flow = propagation(cath.state, sitemap.get(5), sitemap.get(4), new Material("HeCO2"), false, debug);
+        Group foil = propagation(flow.state, sitemap.get(4), sitemap.get(3), new Material("Mylar"), false, debug);
+        Group buffer = propagation(foil.state, sitemap.get(3), sitemap.get(2), new Material("HeCO2"), false, debug);
+        Group wall = propagation(buffer.state, sitemap.get(2), sitemap.get(1), new Material("Kapton"), false, debug);
+        Group start = propagation(wall.state, sitemap.get(1), sitemap.get(0), new Material("Deuterium"), false, debug);
 
 
         // Update :
@@ -272,7 +269,7 @@ public class KalmanFilter {
 
     }
 
-    private Group truc(State state, Site from, Site to, Material material, boolean dir, boolean debug) throws Exception {
+    private Group propagation(State state, Site from, Site to, Material material, boolean dir, boolean debug) throws Exception {
         State state_to = state.moveToBeam4(from, to, material, dir, debug);
         SimpleMatrix F = state.FBeam4(from, to, material, dir);
         SimpleMatrix Q = F.mult(state_to.Qms(state_to, material)).mult(F.transpose());
@@ -369,9 +366,8 @@ public class KalmanFilter {
      * Create the first state vector base on the global fit and the first covariance matrix.
      *
      * @param TID   Track ID
-     * @param event event (for mc only)
      */
-    private void initializationStateMap(int TID, DataEvent event) {
+    private void initializationStateMap(int TID) {
         statemap = new HashMap<>();
         matrixmap = new HashMap<>();
 
@@ -383,26 +379,8 @@ public class KalmanFilter {
         double alpha = -895.6040867490954;
         double kappa = alpha / R;
 
-        DataBank mc = event.getBank("MC::Particle");
-        double mc_px = mc.getFloat("px", 0);
-        double mc_py = mc.getFloat("py", 0);
-        double mc_pz = mc.getFloat("pz", 0);
-        double mc_vz = mc.getFloat("vz", 0);
-        double mc_vx = 0;
-        double mc_vy = 0;
-
-        double mc_pt = Math.hypot(mc_px, mc_py);
-        double mc_kappa = 1. / mc_pt;
-        double mc_drho = 0.001;
-        double mc_phi0 = mod2PI(Math.atan2(mc_py, mc_px) - Math.PI / 2); // - Math.PI / 2
-        double mc_dz = 0.001;
-        double mc_tanL = mc_pz * mc_kappa;
-
-        // SimpleMatrix P = new SimpleMatrix(new double[][]{{0.1, 0, 0, 0, 0}, {0, 0.02, 0, 0, 0},
-        //        {0, 0, 0.1, 0, 0}, {0, 0, 0, 0.1, 0}, {0, 0, 0, 0, 0.005}});
-
         SimpleMatrix P = new SimpleMatrix(new double[][]{{0.1, 0, 0, 0, 0}, {0, 0.02, 0, 0, 0},
-                {0, 0, 0.1, 0, 0}, {0, 0, 0, 0.1, 0}, {0, 0, 0, 0, 0.005}}).scale(1);
+                {0, 0, 0.1, 0, 0}, {0, 0, 0, 0.1, 0}, {0, 0, 0, 0, 0.005}});
 
         // statemap.put(0, new State(mc_drho, mc_phi0, mc_kappa, mc_dz, mc_tanL, 0, 0));
         statemap.put(0, new State(drho, phi0, kappa, dz, tanL, 0, 0));

@@ -24,7 +24,6 @@ import org.jlab.rec.rtpc.hit.TrackDisentangler;
 import org.jlab.rec.rtpc.hit.TrackFinder;
 import org.jlab.rec.rtpc.hit.TrackHitReco;
 import org.jlab.rec.rtpc.hit.HelixFitTest;
-import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.utils.groups.IndexedTable;
 
 
@@ -143,7 +142,7 @@ public class RTPCEngine extends ReconstructionEngine{
             //Helix Fit Tracks to calculate Track Parameters
             HelixFitTest HF = new HelixFitTest(params,fitToBeamline,Math.abs(magfield),cosmic,chi2culling);
             // Kalman Filter
-            KalmanFilter KF = new KalmanFilter(params, event);
+            KalmanFilter KF = new KalmanFilter(params);
 
 
             RecoBankWriter writer = new RecoBankWriter();
