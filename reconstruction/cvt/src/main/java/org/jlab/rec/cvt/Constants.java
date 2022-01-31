@@ -55,11 +55,11 @@ public class Constants {
 
     public static boolean KFFILTERON = true;
     public static boolean INITFROMMC = false;
-    public static int     KFITERATIONS = 1;
+    public static int     KFITERATIONS = 5;
     
     public static final boolean TRACKSFROMORIGIN = true;
 
-    private static int BEAMSPOTCONST = 0;
+    private static int BEAMSPOTCONST = 1;
 
     public static Libr KFMATLIB;
 
