@@ -136,6 +136,7 @@ public class RecoBankWriter {
             bank.setFloat("px", row, (float) kf.get_px());
             bank.setFloat("py", row, (float) kf.get_py());
             bank.setFloat("pz", row, (float) kf.get_pz());
+            bank.setFloat("vz", row, (float) kf.get_vz());
             bank.setFloat("theta", row, (float) kf.get_theta());
             bank.setFloat("phi", row, (float) kf.get_phi());
             row++;
