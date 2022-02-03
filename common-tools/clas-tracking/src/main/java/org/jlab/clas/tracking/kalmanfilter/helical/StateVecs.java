@@ -234,7 +234,7 @@ public class StateVecs extends AStateVecs {
 
         if (t_ov_X0>0) {
             double p    = Math.sqrt(iVec.px*iVec.px + iVec.py*iVec.py + iVec.pz*iVec.pz);
-            if(this.straight) p = 1;
+            //if(this.straight) p = 1;
             double mass = piMass;   // assume given mass hypothesis 
             double beta = p / Math.sqrt(p * p + mass * mass);
             // Highland-Lynch-Dahl formula
