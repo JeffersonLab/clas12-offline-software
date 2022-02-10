@@ -18,12 +18,14 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.data.H2F;
 import org.jlab.groot.data.DataLine;
+import org.jlab.groot.ui.LatexText;
 import org.jlab.groot.math.F1D;
 import org.jlab.groot.fitter.DataFitter;
 import org.jlab.groot.graphics.EmbeddedCanvas;
 import org.jlab.groot.base.DatasetAttributes;
 import org.jlab.groot.base.GStyle;
 import org.jlab.groot.base.TColorPalette;
+import org.jlab.groot.data.GraphErrors;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
@@ -72,7 +74,8 @@ public class FTEBEngine extends ReconstructionEngine {
             FTresponses = reco.addResponses(event, this.getConstantsManager(), run);
             FTparticles = reco.initFTparticles(FTresponses);
             if(FTparticles.size()>0){
-                reco.matchToTRK(FTresponses, FTparticles);
+////                reco.matchToTRK(FTresponses, FTparticles);
+                reco.matchToTRKTwoDetectors(FTresponses, FTparticles);
                 reco.matchToHODO(FTresponses, FTparticles);
 //                reco.correctDirection(FTparticles, this.getConstantsManager(), run);  // correction to be applied only to FTcal and FThodo
                 reco.writeBanks(event, FTparticles);
@@ -161,6 +164,11 @@ public class FTEBEngine extends ReconstructionEngine {
     public static H1F h602 = new H1F("cross0 time", 100, 0.0001, 500.);
     public static H1F h603 = new H1F("cross1 time", 100, 0.0001, 500.);
     
+    public static H2F hSecDet0 = new H2F("lay 2 vs lay1 sectors fo form a cross", 20, -0.5, 19.5, 20, -0.5, 19.5);
+    public static H2F hSecDet1 = new H2F("lay 4 vs lay3 sectors fo form a cross", 20, -0.5, 19.5, 20, -0.5, 19.5);
+    public static H2F hSeedDet0 = new H2F("lay 2 vs lay1 cluster seeds fo form a cross", 768/4, -0.5, 767.5, 768/4, -0.5, 767.5);
+    public static H2F hSeedDet1 = new H2F("lay 4 vs lay3 cluster seeds fo form a cross", 768/4, -0.5, 767.5, 768/4, -0.5, 767.5);
+    
 
     public static void main(String arg[]){
        
@@ -176,12 +184,22 @@ public class FTEBEngine extends ReconstructionEngine {
 //		String input = "/Users/devita/Work/clas12/simulations/tests/detectors/clas12/ft/elec_nofield_header.evio";
 ///        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_singleEle_nofields_big_-30.60.120.30.hipo";
 ///        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_singleEle_nofields_big_-30.60.120.30_fullAcceptance.hipo";
-///       String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_singleEle_withFields_big_-30.60.120.30.hipo";
+///        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/gemc_singleEle_withFields_big_-30.60.120.30_newbanks.hipo";
+//        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/gemc_test_1000.hipo";
 ///       String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_singleEle_withFields_big_-30.60.120.30_fullAcceptance.hipo";
 ///        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_dis.hipo";
 //////        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/ft_005038.evio.01231.hipo";
-        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/filter_005418.0.hipo";
-///        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_test.hipo";
+//////        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/filter_005418.0.hipo";  // dontuse
+        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/filter_005418_newbanks.hipo";
+///        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/ft_005038_01231_newbanks.hipo";
+//        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/data_merge.hipo";
+//        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_154824_det0.hipo";
+//        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_153947_det1.hipo";
+//        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_160427_det1.hipo";
+//        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/twoHits_10239.hipo";
+//       String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_10730.hipo";
+//        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_test.hipo";
+///        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/gemc_singleEle_withFields_big_-30.60.120.30_fullAcceptance_newbanks.hipo";
         HipoDataSource reader = new HipoDataSource();
         reader.open(input);
 
@@ -418,13 +436,22 @@ public class FTEBEngine extends ReconstructionEngine {
 
         
         int nev = 0;
-        int nevWithCrosses = 0;
+        int nevWithCrosses = 0, ncrosses2 = 0;
         while (reader.hasEvent()) {  // run over all events
 //        int nev1 = 0; int nev2 = 10000; for(nev=nev1; nev<nev2; nev++){   // run on one event only
-            System.out.println("////////////// event read " + nev);
             DataEvent event = (DataEvent) reader.getNextEvent();
-//            nev++; 
-//            if(nev != 4251) continue;
+            DataBank bk;
+            int bankEvt = -1;
+            if(event.hasBank("RUN::config")) {
+                nev++;
+                bk = event.getBank("RUN::config");
+                bankEvt = bk.getInt("event", 0);
+            }else{
+                continue;
+            } 
+            // bankEvt is used to extract the event with groovy
+            if(debugMode>=1) System.out.println("////////////// event read " + bankEvt + " - sequential number " + nev);
+            //if(nev > 10239) System.exit(0); if(nev != 10239) continue;
             cal.processDataEvent(event);
             hodo.processDataEvent(event);
 	    trk.processDataEventAndGetClusters(event);
@@ -452,7 +479,7 @@ public class FTEBEngine extends ReconstructionEngine {
             } else {
                 DetectorEvent detectorEvent = DetectorData.readDetectorEvent(event);
                 PhysicsEvent gen = detectorEvent.getGeneratedEvent();
-                nev++;
+//                nev++;
                 if (event.hasBank("FT::particles")) {
                     DataBank bank = event.getBank("FT::particles");
                     int nrows = bank.rows();
@@ -475,16 +502,44 @@ public class FTEBEngine extends ReconstructionEngine {
                             }
                             
                             // check match with trk bank (entry trkID)
-                            int trkID = bank.getShort("trkID", i);
-                            if(trkID > 0){ // accept all fired strips if trkID >-1, only hits connected with a track if >0
+//                            int trkID = bank.getShort("trkID", i); 
+                            int trk0ID = bank.getShort("trk0ID", i);   // it should correspond to the number of the cross in the banks
+                            int trk1ID = bank.getShort("trk1ID", i);
+                            if(trk0ID >= 0 || trk1ID >= 0){ // at least one cross is present on one TRK det
+ 
                                 // loop on crosses bank
                                 DataBank banktrk = event.getBank("FTTRK::crosses");
                                 int ncrosses = banktrk.rows();
-                                for(int nc = 0; nc < ncrosses; nc++){
-                                    int det =  banktrk.getInt("detector", nc);
+                                // how many matched crosses are associated to a given track?
+                                int matchedCrosses = 0;
+                                for(int nc=0; nc<ncrosses; nc++){
                                     int crossID = banktrk.getInt("id", nc);
-                                    if(crossID != trkID) continue;
-                                    
+                                    int det = banktrk.getInt("detector", nc);
+                                    if(trk0ID == crossID && det==0) matchedCrosses++;
+                                    if(trk1ID == crossID && det==1) matchedCrosses++;
+                                }
+
+                                
+//                                if(matchedCrosses != 1){
+                                if(matchedCrosses != 2){
+//                                  if(matchedCrosses == 0){  // accept all crosses
+                                    continue;
+                                }else{
+                                    ncrosses2++;
+                                    if(ncrosses< 100) System.out.println("++++++++++++++++++++++++++ Sequential number " + nev);
+                                }
+                                
+                                for(int nc = 0; nc < ncrosses; nc++){
+                                    int crossID = banktrk.getInt("id", nc);
+                                    if(crossID != trk0ID && crossID != trk1ID) continue;
+                                    int det =  banktrk.getInt("detector", nc);
+//                                    if(det != 0) continue;
+                                    //int crossID = banktrk.getInt("id", nc);
+                                    System.out.println("trk0ID " + trk0ID + " trk1ID " + trk1ID + 
+                                        " crossID " + crossID);
+//                                    if(ncrosses<2) continue;
+//                                    if(crossID != trk0ID || crossID != trk1ID) continue; // keep only 2nd detector 
+                                         
                                     if(det>=0){
                                         float xt = banktrk.getFloat("x", nc);
                                         float yt = banktrk.getFloat("y", nc);
@@ -492,25 +547,54 @@ public class FTEBEngine extends ReconstructionEngine {
                                         Vector3D hitOnTrk = new Vector3D(xt, yt, zt);
                                         // extract information on the crossed strips 
                                         
-                                        float icl1 = banktrk.getFloat("energy", nc);   // Cluster1ID provisional to be changed
-                                        float icl2 = banktrk.getFloat("time", nc);     // cluster2ID provisional to be changes
+//                                      float icl1 = banktrk.getFloat("energy", nc);   // Cluster1ID provisional to be changed
+//                                      float icl2 = banktrk.getFloat("time", nc);     // cluster2ID provisional to be changes
+                                        float icl1 = banktrk.getShort("Cluster1ID", nc);   
+                                        float icl2 = banktrk.getShort("Cluster2ID", nc);   
                                         DataBank bankcl = event.getBank("FTTRK::clusters");
+                                        // which is the correct location in the cluster bank for the cluster with the given id?
+                                        int icl1ok = -1;
+                                        int icl2ok = -1;
+                                        for(int k=0; k<bankcl.rows(); k++){
+                                            int cid = bankcl.getInt("id", (int) k);
+                                            if((int)icl1 == cid) icl1ok = k;
+                                            if((int)icl2 == cid) icl2ok = k;
+                                        }  
                                         DataLine segment1 = new DataLine();
                                         DataLine segment2 = new DataLine();
+                                        int seed1 = -1;
+                                        int seed2 = -1;
                                         if(bankcl.rows()>0){
-                                           segment1.setOrigin(0.,0.); segment1.setEnd(0.,0.);
-                                           segment2.setOrigin(0.,0.); segment2.setEnd(0.,0.);
-                                           int seed1 = bankcl.getInt("seed", (int)icl1);
-                                           int seed2 = bankcl.getInt("seed", (int)icl2);
-                                           int lay1 = bankcl.getInt("layer", (int)icl1);
-                                           int lay2 = bankcl.getInt("layer", (int)icl2);
-                                           System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ seed1, seed2 " + seed1 + " " + seed2 + " layer1 layer2 " + lay1 + " " + lay2);
-                                           System.out.println("~~~~~~~~~~ hit strip 1: " + seed1 + " layer " + lay1 + " sector " + 
+                                            segment1.setOrigin(0.,0.); segment1.setEnd(0.,0.);
+                                            segment2.setOrigin(0.,0.); segment2.setEnd(0.,0.);
+                                            seed1 = bankcl.getInt("seed", (int)icl1ok);
+                                            seed2 = bankcl.getInt("seed", (int)icl2ok);
+                                            int cent1 = (int)bankcl.getFloat("centroid", icl1ok);
+                                            int cent2 = (int)bankcl.getFloat("centroid", icl2ok);
+                                            // if the cluster is formed by > 3 strips take the centroid
+                                            int clustsize1 =  bankcl.getShort("size", icl1ok);
+                                            int clustsize2 =  bankcl.getShort("size", icl2ok);
+                                            if(clustsize1>=3){
+                                                int sector = FTTRKReconstruction.findSector(seed1);
+                                                if(!(sector == 0 || sector == 1 || sector == 18 || sector == 19))  seed1 = cent1;
+                                            } 
+                                            if(clustsize2>=3){
+                                                int sector = FTTRKReconstruction.findSector(seed2);
+                                                if(!(sector == 0 || sector == 1 || sector == 18 || sector == 19))  seed2 = cent2;
+                                            }
+                                            // if seed and centroid dont coincide, take the geometric centroid as seed
+                                            //if(cent1 != seed1) seed1 = cent1;
+                                            //if(cent2 != seed2) seed2 = cent2;
+                                            int lay1 = bankcl.getInt("layer", (int)icl1ok);
+                                            int lay2 = bankcl.getInt("layer", (int)icl2ok);
+                                            System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ seed1, seed2 " + seed1 + " " + seed2 + " layer1 layer2 " + lay1 + " " + lay2);
+                                            System.out.println("~~~~~~~~~~ hit strip 1: " + seed1 + " layer " + lay1 + " sector " + 
                                                         FTTRKReconstruction.findSector(seed1));
-                                           System.out.println("~~~~~~~~~~ hit strip 2: " + seed2 + " layer " + lay2 + " sector " + 
+                                            System.out.println("~~~~~~~~~~ hit strip 2: " + seed2 + " layer " + lay2 + " sector " + 
                                                         FTTRKReconstruction.findSector(seed2));
                                           
-                                           if(seed1!=0 && seed2!=0){
+                                            if(seed1!=0 && seed2!=0){
+                                                System.out.println("seed2" + seed2);
                                                 Line3D seg1 = (Line3D) FTTRKConstantsLoader.getStripSegmentLab(lay1, seed1);
                                                 Line3D seg2 = (Line3D) FTTRKConstantsLoader.getStripSegmentLab(lay2, seed2);
                                                 segment1.setOrigin(seg1.origin().x(), seg1.origin().y());
@@ -521,47 +605,48 @@ public class FTEBEngine extends ReconstructionEngine {
                                             // extract the mumber of strips forming the cross and store them in an occupancy plot for matched signals
                                             // which strips are forming the id cross?
                                                                                        
-                                            if(lay1==1){
-                                                h71.fill(seed1);
-                                            }else if(lay1==2){
-                                                h72.fill(seed1);
-                                            }else if(lay1==3){
-                                                h73.fill(seed1);
-;                                           }else if(lay1==4){
-                                                h74.fill(seed1);    
-                                            }
-                                            if(lay2==1){
-                                                h71.fill(seed2);
-                                            }else if(lay2==2){
-                                                h72.fill(seed2);
-                                            }else if(lay2==3){
-                                                h73.fill(seed2);
-;                                           }else if(lay2==4){
-                                                h74.fill(seed2);    
-                                            }
+                                                if(lay1==1){
+                                                    h71.fill(seed1);
+                                                }else if(lay1==2){
+                                                    h72.fill(seed1);
+                                                }else if(lay1==3){
+                                                    h73.fill(seed1);
+;                                               }else if(lay1==4){
+                                                    h74.fill(seed1);    
+                                                }
                                             
-                                            DataBank bankhit = event.getBank("FTTRK::hits");
-                                            if(bankhit.rows()>0){
-                                                for(int k=0; k<bankhit.rows(); k++){
-                                                    int clusterNum = bankhit.getInt("clusterID", k);
-                                                    if(clusterNum != icl1 && clusterNum != icl2) continue;
-                                                    int stripInCluster = bankhit.getInt("component", k);
-                                                    int clusterLay = bankhit.getInt("layer", k);
-                                                    if(clusterLay==1){
-                                                        h81.fill(stripInCluster);
-                                                    }else if(clusterLay==2){
-                                                        h82.fill(stripInCluster);
-                                                    }else if(clusterLay==3){
-                                                        h83.fill(stripInCluster);
-;                                                   }else if(clusterLay==4){
-                                                        h84.fill(stripInCluster);    
-                                                    }
-                                                }   
-                                           }    
-                                           }    
+                                                if(lay2==1){
+                                                    h71.fill(seed2);
+                                                }else if(lay2==2){
+                                                    h72.fill(seed2);
+                                                }else if(lay2==3){
+                                                    h73.fill(seed2);
+;                                               }else if(lay2==4){
+                                                    h74.fill(seed2);    
+                                                }
+                                            
+                                                DataBank bankhit = event.getBank("FTTRK::hits");
+                                                if(bankhit.rows()>0){
+                                                    for(int k=0; k<bankhit.rows(); k++){
+                                                        int clusterNum = bankhit.getInt("clusterID", k);
+                                                        if(clusterNum != icl1 && clusterNum != icl2) continue;
+                                                        int stripInCluster = bankhit.getInt("component", k);
+                                                        int clusterLay = bankhit.getInt("layer", k);
+                                                        if(clusterLay==1){
+                                                            h81.fill(stripInCluster);
+                                                        }else if(clusterLay==2){
+                                                            h82.fill(stripInCluster);
+                                                        }else if(clusterLay==3){
+                                                            h83.fill(stripInCluster);
+;                                                       }else if(clusterLay==4){
+                                                            h84.fill(stripInCluster);    
+                                                        }
+                                                    }   
+                                                }    
+                                            }    
                                         }
                                         
-                                        if(det==0){
+                                        if(det==0 && trk0ID==crossID){
                                             h100.fill(xt, yt);
                                             if(debugMode>0){ 
 //                                                System.out.println("coordinates on calorimeter " + bank.getDouble("x", i) + " " + bank.getFloat("y", i) + " " + bank.getFloat("z", i));
@@ -574,20 +659,68 @@ public class FTEBEngine extends ReconstructionEngine {
                                             h104.fill(bank.getFloat("cy", i) *zt - yt);
                                             h106.fill((part.theta() - hitOnTrk.theta()));
                                             h108.fill((part.phi() - hitOnTrk.phi()));
-                                            
+                                            int sec1 = FTTRKReconstruction.findSector(seed1);
+                                            int sec2 = FTTRKReconstruction.findSector(seed2);
+                                            hSecDet0.fill(sec1, sec2);
+                                            hSeedDet0.fill(seed1, seed2);
+                                            /*
+                                            if(sec1 == 1 && sec2 == 10){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 1-10 bad seeds d0, event " + nev);
+                                            }else if(sec1 == 10 && sec2 == 10){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 10-10 bad seeds d0, event " + nev);
+                                            }else if(sec1 == 10 && sec2 == 11){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 10-11 bad seeds d0, event " + nev);
+                                            }else if(sec1 == 16 && sec2 == 8){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 16-8 bad seeds d0, event " + nev);
+                                            }else if(sec1 == 16 && sec2 == 8){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 16-8 bad seeds d0, event " + nev);
+                                            }else if(sec1 == 1 && sec2 == 11){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 1-11 bad seeds d0, event " + nev);
+                                            }else if(sec1 == 11 && sec2 == 15){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 11-15 bad seeds d0, event " + nev);
+                                            }else if(sec1 == 12 && sec2 == 16){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 12-16 bad seeds d0, event " + nev);
+                                            }else if(sec1 == 13 && sec2 == 11){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 13-11 bad seeds d0, event " + nev);
+                                            }
+                                            */
+                                            /*
+                                            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " +  sec1 + "-" + sec2 + 
+                                                    " bad seeds d0, event " + nev);
+                                            */
                                             canvasCALTRK.cd(0);
                                             segment1.setLineColor(1);
                                             segment2.setLineColor(2);
                                             canvasCALTRK.draw(segment1);
                                             canvasCALTRK.draw(segment2);
                                             
-                                        }else if(det==1){
+                                        }else if(det==1 && trk1ID==crossID){
                                             h101.fill(xt, yt);
                                             h103.fill(bank.getFloat("cx", i) *zt - xt);
                                             h105.fill(bank.getFloat("cy", i) *zt - yt);
                                             h107.fill((part.theta() - hitOnTrk.theta()));
                                             h109.fill((part.phi() - hitOnTrk.phi()));
-                                            
+                                            int sec1 = FTTRKReconstruction.findSector(seed1);
+                                            int sec2 = FTTRKReconstruction.findSector(seed2);
+                                            hSecDet1.fill(sec1, sec2);
+                                            hSeedDet1.fill(seed1, seed2);
+                                            /*
+                                            if(sec1 == 0 && sec2 == 8){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 0-8 bad seeds d1, event " + nev);
+                                            }else if(sec1 == 12 && sec2 == 10){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 12-10 bad seeds d1, event " + nev);
+                                            }else if(sec1 == 3 && sec2 == 18){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 3-18 bad seeds d1, event " + nev);
+                                            }else if(sec1 == 12 && sec2 == 9){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 12-9 bad seeds d1, event " + nev);
+                                            }else if(sec1 == 2 && sec2 == 18){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 2-18 bad seeds d1, event " + nev);
+                                            }
+                                            */
+                                            /*
+                                            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " +  sec1 + "-" + sec2 + 
+                                                    " bad seeds d1, event " + nev);
+                                            */
                                             canvasCALTRK.cd(1);
                                             segment1.setLineColor(3);
                                             segment2.setLineColor(4);
@@ -810,7 +943,7 @@ public class FTEBEngine extends ReconstructionEngine {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
-        double narrowFactor = 4.5;
+        double narrowFactor = 6.5;  // was 4.5
         JFrame frametrk = new JFrame("FTTRK Reconstruction with respect to FTCAL tracking");
         frametrk.setSize(1600, 800);
         EmbeddedCanvas canvastrk = new EmbeddedCanvas();
@@ -1125,6 +1258,7 @@ public class FTEBEngine extends ReconstructionEngine {
         frametrkrel.setLocationRelativeTo(null);
         frametrkrel.setVisible(true);
         
+        /*
         JFrame frameMCradio = new JFrame("Montecarlo radiography of vertex");
         frameMCradio.setSize(1000,500);
         EmbeddedCanvas canvasMCradio = new EmbeddedCanvas();
@@ -1136,7 +1270,230 @@ public class FTEBEngine extends ReconstructionEngine {
         frameMCradio.add(canvasMCradio);
         frameMCradio.setLocationRelativeTo(null);
         frameMCradio.setVisible(true);
-       
+        */
+        
+        JFrame frameSecradio = new JFrame("20 sectors occupancy");
+        frameSecradio.setSize(1000,500);
+        EmbeddedCanvas canvasSecradio = new EmbeddedCanvas();
+        canvasSecradio.divide(2,1);
+        canvasSecradio.cd(0);
+        canvasSecradio.draw(hSecDet0);
+        // excluded cells
+        double excx0h1[] = {0., 1., 2., 3., 4., 5., 10., 11., 12., 13.};
+        double excy0h1[] = {10., 11., 12., 13., 14., 15., 16., 17.};
+        GraphErrors excludedDet0half1 = new GraphErrors();
+        for(int i=0; i<excx0h1.length; i++){
+            for(int j=0; j<excy0h1.length; j++){
+                excludedDet0half1.addPoint(excx0h1[i], excy0h1[j], 0., 0.);
+            }   
+        }
+        double excx0h2[] = {6., 7., 8., 9., 14., 15., 16., 17., 18., 19.};
+        double excy0h2[] = {2., 3., 4., 5., 6., 7., 8., 9.};  
+        GraphErrors excludedDet0half2 = new GraphErrors();
+        for(int i=0; i<excx0h2.length; i++){
+            for(int j=0; j<excy0h2.length; j++){
+                excludedDet0half2.addPoint(excx0h2[i], excy0h2[j], 0., 0.);
+            }   
+        }
+        double excx0h3[] = {2., 3., 4., 5., 6., 7., 8., 9.};
+        double excy0h3[] = {0., 1.};  // 10 not sure
+        GraphErrors excludedDet0half3 = new GraphErrors();
+        for(int i=0; i<excx0h3.length; i++){
+            for(int j=0; j<excy0h3.length; j++){
+                excludedDet0half3.addPoint(excx0h3[i], excy0h3[j], 0., 0.);
+            }   
+        }
+        double excx0h4[] = {10., 11., 12., 13., 14., 15., 16., 17.};
+        double excy0h4[] = {18., 19.};  
+        GraphErrors excludedDet0half4 = new GraphErrors();
+        for(int i=0; i<excx0h4.length; i++){
+            for(int j=0; j<excy0h4.length; j++){
+                excludedDet0half4.addPoint(excx0h4[i], excy0h4[j], 0., 0.);
+            }   
+        }
+        excludedDet0half1.setMarkerSize(4); excludedDet0half1.setMarkerColor(55);
+        excludedDet0half2.setMarkerSize(4); excludedDet0half2.setMarkerColor(55);
+        excludedDet0half3.setMarkerSize(4); excludedDet0half3.setMarkerColor(55);
+        excludedDet0half4.setMarkerSize(4); excludedDet0half4.setMarkerColor(55);
+        
+        double excx1h1[] = {0., 1., 2., 3., 4., 5., 10., 11., 12., 13.};
+        double excy1h1[] = {2., 3., 4., 5., 6., 7., 8., 9.};
+        GraphErrors excludedDet1half1 = new GraphErrors();
+        for(int i=0; i<excx1h1.length; i++){
+            for(int j=0; j<excy1h1.length; j++){
+                excludedDet1half1.addPoint(excx1h1[i], excy1h1[j], 0., 0.);
+            }   
+        }
+        double excx1h2[] = {6., 7., 8., 9., 14., 15., 16., 17., 18., 19.};
+        double excy1h2[] = {10., 11., 12., 13., 14., 15., 16., 17.};
+        GraphErrors excludedDet1half2 = new GraphErrors();
+        for(int i=0; i<excx1h2.length; i++){
+            for(int j=0; j<excy1h2.length; j++){
+                excludedDet1half2.addPoint(excx1h2[i], excy1h2[j], 0., 0.);
+            }   
+        }
+        double excx1h3[] = {10., 11., 12., 13., 14., 15., 16., 17.};
+        double excy1h3[] = {0., 1.};  // 10 not sure
+        GraphErrors excludedDet1half3 = new GraphErrors();
+        for(int i=0; i<excx1h3.length; i++){
+            for(int j=0; j<excy1h3.length; j++){
+                excludedDet1half3.addPoint(excx1h3[i], excy1h3[j], 0., 0.);
+            }   
+        }
+        double excx1h4[] = {2., 3., 4., 5., 6., 7., 8., 9.};
+        double excy1h4[] = {18., 19.};  
+        GraphErrors excludedDet1half4 = new GraphErrors();
+        for(int i=0; i<excx1h4.length; i++){
+            for(int j=0; j<excy1h4.length; j++){
+                excludedDet1half4.addPoint(excx1h4[i], excy1h4[j], 0., 0.);
+            }   
+        }
+        excludedDet1half1.setMarkerSize(4); excludedDet1half1.setMarkerColor(55);
+        excludedDet1half2.setMarkerSize(4); excludedDet1half2.setMarkerColor(55);
+        excludedDet1half3.setMarkerSize(4); excludedDet1half3.setMarkerColor(55);
+        excludedDet1half4.setMarkerSize(4); excludedDet1half4.setMarkerColor(55);
+        
+        canvasSecradio.draw(excludedDet0half1,"same");
+        canvasSecradio.draw(excludedDet0half2,"same");
+        canvasSecradio.draw(excludedDet0half3,"same");
+        canvasSecradio.draw(excludedDet0half4,"same");
+        canvasSecradio.cd(1);
+        canvasSecradio.draw(hSecDet1);
+        canvasSecradio.draw(excludedDet1half1,"same");
+        canvasSecradio.draw(excludedDet1half2,"same");
+        canvasSecradio.draw(excludedDet1half3,"same");
+        canvasSecradio.draw(excludedDet1half4,"same");
+        frameSecradio.add(canvasSecradio);
+        frameSecradio.setLocationRelativeTo(null);
+        frameSecradio.setVisible(true);
+        
+        
+        JFrame frameSeedradio = new JFrame("Cluster seeds occupancy");
+        double limSec[] = 
+              {64., 128., 160., 192., 224., 256., 288., 320., 352., 384., 416., 448., 480., 512., 544., 576., 608., 640., 704., 768.};
+        double limLab[] =
+              {50., 110., 150., 180., 205., 230., 260., 290., 320., 350., 370., 400., 425., 450., 480., 510., 530., 560., 605., 660.};
+        double limLab2[] =
+              {50., 110., 150., 180., 205., 230., 260., 290., 320., 350., 390., 420., 450., 480., 510., 540., 570., 600., 650., 710.};
+        int limLen = limSec.length;
+        DataLine[] limitX = new DataLine[limLen];
+        DataLine[] limitY = new DataLine[limLen];
+        LatexText[] labSecX = new LatexText[limLen];
+        LatexText[] labSecY = new LatexText[limLen];
+        
+        double[] limSecCenter = new double[limLen];
+        for(int l=0; l<limLen; l++){
+            if(l==0){
+                limSecCenter[0] = 32.;
+            }else{
+                limSecCenter[l] = (limSec[l]+limSec[l-1])/2.;
+            }
+        }
+        GraphErrors excludedDet01 = new GraphErrors();
+        for(int i=0; i<excx0h1.length; i++){
+            for(int j=0; j<excy0h1.length; j++){
+                //System.out.println(limSecCenter[(int)excx0h1[i]] + " - " + limSecCenter[(int)excy0h1[j]]);
+                excludedDet01.addPoint(limSecCenter[(int)excx0h1[i]], limSecCenter[(int)excy0h1[j]], 0., 0.);
+            }   
+        }
+        GraphErrors excludedDet02 = new GraphErrors();
+        for(int i=0; i<excx0h2.length; i++){
+            for(int j=0; j<excy0h2.length; j++){
+                excludedDet02.addPoint(limSecCenter[(int)excx0h2[i]], limSecCenter[(int)excy0h2[j]], 0., 0.);
+            }   
+        }
+        GraphErrors excludedDet03 = new GraphErrors();
+        for(int i=0; i<excx0h3.length; i++){
+            for(int j=0; j<excy0h3.length; j++){
+                excludedDet03.addPoint(limSecCenter[(int)excx0h3[i]], limSecCenter[(int)excy0h3[j]], 0., 0.);
+            }   
+        }
+        GraphErrors excludedDet04 = new GraphErrors();
+        for(int i=0; i<excx0h4.length; i++){
+            for(int j=0; j<excy0h4.length; j++){
+                excludedDet04.addPoint(limSecCenter[(int)excx0h4[i]], limSecCenter[(int)excy0h4[j]], 0., 0.);
+            }   
+        }
+        
+        GraphErrors excludedDet11 = new GraphErrors();
+        for(int i=0; i<excx1h1.length; i++){
+            for(int j=0; j<excy1h1.length; j++){
+                //System.out.println(limSecCenter[(int)excx0h1[i]] + " - " + limSecCenter[(int)excy0h1[j]]);
+                excludedDet11.addPoint(limSecCenter[(int)excx1h1[i]], limSecCenter[(int)excy1h1[j]], 0., 0.);
+            }   
+        }
+        GraphErrors excludedDet12 = new GraphErrors();
+        for(int i=0; i<excx1h2.length; i++){
+            for(int j=0; j<excy1h2.length; j++){
+                excludedDet12.addPoint(limSecCenter[(int)excx1h2[i]], limSecCenter[(int)excy1h2[j]], 0., 0.);
+            }   
+        }
+        GraphErrors excludedDet13 = new GraphErrors();
+        for(int i=0; i<excx1h3.length; i++){
+            for(int j=0; j<excy1h3.length; j++){
+                excludedDet13.addPoint(limSecCenter[(int)excx1h3[i]], limSecCenter[(int)excy1h3[j]], 0., 0.);
+            }   
+        }
+        GraphErrors excludedDet14 = new GraphErrors();
+        for(int i=0; i<excx1h4.length; i++){
+            for(int j=0; j<excy1h4.length; j++){
+                excludedDet14.addPoint(limSecCenter[(int)excx1h4[i]], limSecCenter[(int)excy1h4[j]], 0., 0.);
+            }   
+        }
+        excludedDet01.setMarkerSize(6); excludedDet01.setMarkerColor(0);
+        excludedDet02.setMarkerSize(6); excludedDet02.setMarkerColor(0);
+        excludedDet03.setMarkerSize(6); excludedDet03.setMarkerColor(0);
+        excludedDet04.setMarkerSize(6); excludedDet04.setMarkerColor(0);
+        excludedDet11.setMarkerSize(6); excludedDet11.setMarkerColor(0);
+        excludedDet12.setMarkerSize(6); excludedDet12.setMarkerColor(0);
+        excludedDet13.setMarkerSize(6); excludedDet13.setMarkerColor(0);
+        excludedDet14.setMarkerSize(6); excludedDet14.setMarkerColor(0);
+        
+        for(int l=0; l<limLen; l++){
+            limitX[l] = new DataLine();
+            limitY[l] = new DataLine();
+            limitX[l].setOrigin(limSec[l], -0.5); limitX[l].setEnd(limSec[l], 767.5);
+            limitY[l].setOrigin(-0.5, limSec[l]); limitY[l].setEnd(767.5, limSec[l]);
+            limitX[l].setLineColor(6); //limitX[l].setLineStyle(3);
+            limitY[l].setLineColor(6); //limitY[l].setLineStyle(3);
+            labSecX[l] = new LatexText(Integer.toString(l), limLab[l], 15.);
+            labSecY[l] = new LatexText(Integer.toString(l), 720., limLab2[limLen-1-l]);   // 670
+            labSecX[l].setColor(6);
+            labSecY[l].setColor(6);
+        }
+        frameSeedradio.setSize(1500, 800);
+        EmbeddedCanvas canvasSeedradio = new EmbeddedCanvas();
+        canvasSeedradio.divide(2,1);
+        canvasSeedradio.cd(0);
+        canvasSeedradio.draw(hSeedDet0);
+        for(int l=0; l<limLen; l++){
+            canvasSeedradio.draw(limitX[l]);
+            canvasSeedradio.draw(limitY[l]);
+            canvasSeedradio.draw(labSecX[l]);
+            canvasSeedradio.draw(labSecY[l]);
+        }
+        canvasSeedradio.draw(excludedDet01, "same");
+        canvasSeedradio.draw(excludedDet02, "same");
+        canvasSeedradio.draw(excludedDet03, "same");
+        canvasSeedradio.draw(excludedDet04, "same");
+        
+        canvasSeedradio.cd(1);
+        canvasSeedradio.draw(hSeedDet1);
+        for(int l=0; l<limLen; l++){
+            canvasSeedradio.draw(limitX[l]);
+            canvasSeedradio.draw(limitY[l]);
+            canvasSeedradio.draw(labSecX[l]);
+            canvasSeedradio.draw(labSecY[l]);
+        }
+        canvasSeedradio.draw(excludedDet11, "same");
+        canvasSeedradio.draw(excludedDet12, "same");
+        canvasSeedradio.draw(excludedDet13, "same");
+        canvasSeedradio.draw(excludedDet14, "same");
+        
+        frameSeedradio.add(canvasSeedradio);
+        frameSeedradio.setLocationRelativeTo(null);
+        frameSeedradio.setVisible(true);
+           
         canvasCALTRK.cd(0); canvasCALTRK.draw(h100, "same"); canvasCALTRK.draw(h7, "same");
         canvasCALTRK.cd(1); canvasCALTRK.draw(h101, "same"); canvasCALTRK.draw(h7, "same");
         canvasCALTRK.cd(2); canvasCALTRK.draw(h7, "same");
