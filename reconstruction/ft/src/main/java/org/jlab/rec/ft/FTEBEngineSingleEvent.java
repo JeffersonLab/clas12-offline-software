@@ -18,13 +18,14 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.data.H2F;
 import org.jlab.groot.data.DataLine;
-import org.jlab.groot.data.GraphErrors;
+import org.jlab.groot.ui.LatexText;
 import org.jlab.groot.math.F1D;
 import org.jlab.groot.fitter.DataFitter;
 import org.jlab.groot.graphics.EmbeddedCanvas;
 import org.jlab.groot.base.DatasetAttributes;
 import org.jlab.groot.base.GStyle;
 import org.jlab.groot.base.TColorPalette;
+import org.jlab.groot.data.GraphErrors;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
@@ -74,7 +75,8 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
             FTparticles = reco.initFTparticles(FTresponses);
             if(FTparticles.size()>0){
 ////                reco.matchToTRK(FTresponses, FTparticles);
-                reco.matchToTRKTwoDetectors(FTresponses, FTparticles);
+////                reco.matchToTRKTwoDetectors(FTresponses, FTparticles);
+                reco.matchToTRKTwoDetectorsMultiHits(FTresponses, FTparticles);
                 reco.matchToHODO(FTresponses, FTparticles);
 //                reco.correctDirection(FTparticles, this.getConstantsManager(), run);  // correction to be applied only to FTcal and FThodo
                 reco.writeBanks(event, FTparticles);
@@ -157,7 +159,6 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
     public static H1F h522 = new H1F("time of strips in cluster1 TRK1", 100, 0., 500.);
     public static H1F h523 = new H1F("Time of strips in cluster2 TRK1", 100, 0., 500.);
     
-
     public static H1F h600 = new H1F("TRK response position", 100, 5.93, 6.03);
     public static H2F h601 = new H2F("TRK tof vs time", 100, 0., 500., 100, 5.93, 6.03);
     public static H1F h602 = new H1F("cross0 time", 100, 0.0001, 500.);
@@ -165,8 +166,12 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
     
     public static H2F hSecDet0 = new H2F("lay 2 vs lay1 sectors fo form a cross", 20, -0.5, 19.5, 20, -0.5, 19.5);
     public static H2F hSecDet1 = new H2F("lay 4 vs lay3 sectors fo form a cross", 20, -0.5, 19.5, 20, -0.5, 19.5);
+    public static H2F hSeedDet0 = new H2F("lay 2 vs lay1 cluster seeds fo form a cross", 768/4, -0.5, 767.5, 768/4, -0.5, 767.5);
+    public static H2F hSeedDet1 = new H2F("lay 4 vs lay3 cluster seeds fo form a cross", 768/4, -0.5, 767.5, 768/4, -0.5, 767.5);
     
-
+    public static Point3D ORIGIN = new Point3D(0., 0., 0.);
+    
+    
     public static void main(String arg[]){
        
         FTCALEngine cal = new FTCALEngine();
@@ -181,18 +186,22 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
 //		String input = "/Users/devita/Work/clas12/simulations/tests/detectors/clas12/ft/elec_nofield_header.evio";
 ///        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_singleEle_nofields_big_-30.60.120.30.hipo";
 ///        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_singleEle_nofields_big_-30.60.120.30_fullAcceptance.hipo";
-///       String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_singleEle_withFields_big_-30.60.120.30.hipo";
+///        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/gemc_singleEle_withFields_big_-30.60.120.30_newbanks.hipo";
+//        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/gemc_test_1000.hipo";
 ///       String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_singleEle_withFields_big_-30.60.120.30_fullAcceptance.hipo";
 ///        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_dis.hipo";
 //////        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/ft_005038.evio.01231.hipo";
 //////        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/filter_005418.0.hipo";  // dontuse
 //////        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/filter_005418_newbanks.hipo";
+///        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/ft_005038_01231_newbanks.hipo";
+//        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/data_merge.hipo";
 //        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_154824_det0.hipo";
 //        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_153947_det1.hipo";
 //        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_160427_det1.hipo";
-//        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/twoHits_10298.hipo";
-        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_92897.hipo";
-///        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_test.hipo";
+//        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/twoHits_10239.hipo";
+        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_94976.hipo";
+//        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_test.hipo";
+///        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/gemc_singleEle_withFields_big_-30.60.120.30_fullAcceptance_newbanks.hipo";
         HipoDataSource reader = new HipoDataSource();
         reader.open(input);
 
@@ -278,7 +287,41 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
         h109.setOptStat(10);
         h109.setTitleX("trk2 phi residual (rad)");
         h109.setFillColor(51);
-        
+ 
+        H1F resTrkXdet0 = new H1F("trk1 x residual wrt line thru trk0", 63, -0.5, 0.5);
+        resTrkXdet0.setOptStat(10);
+        resTrkXdet0.setTitleX("trk1 x residual (mm) wrt line thru trk0");
+        resTrkXdet0.setFillColor(9);
+        H1F resTrkYdet0 = new H1F("trk1 y residual wrt line thru trk0", 63, -0.5, 0.5);
+        resTrkYdet0.setOptStat(10);
+        resTrkYdet0.setFillColor(9);
+        resTrkYdet0.setTitleX("trk1 y residual (mm) wrt line thru trk0");
+        H1F resTrkXdet1 = new H1F("trk0 x residual wrt line thru trk1", 63, -1., 1.);
+        resTrkXdet1.setOptStat(10);
+        resTrkXdet1.setFillColor(49);
+        resTrkXdet1.setTitleX("trk0 y residual (mm) wrt line thru trk1");
+        H1F resTrkYdet1 = new H1F("trk0 y residual wrt line thru trk1", 63, -1., 1.);
+        resTrkYdet1.setOptStat(10);
+        resTrkYdet1.setTitleX("trk0 y residual (mm) wrt line thru trk1");
+        resTrkYdet1.setFillColor(49);
+
+        H1F resTrkThetadet0 = new H1F("trk1 theta residual (rad) wrt line thru trk0", 100, -0.01, 0.01);
+        resTrkThetadet0.setOptStat(10);
+        resTrkThetadet0.setTitleX("trk1 theta residual (rad) wrt line thru trk0");
+        resTrkThetadet0.setFillColor(9);
+        H1F resTrkThetadet1 = new H1F("trk0 theta residual (rad) wrt line thru trk1", 100, -0.01, 0.01);
+        resTrkThetadet1.setOptStat(10);
+        resTrkThetadet1.setTitleX("trk0 theta residual (rad) wrt line thru trk1");
+        resTrkThetadet1.setFillColor(49);
+        H1F resTrkPhidet0 = new H1F("trk1 phi residual (rad) wrt line thru  trk0", 100, -0.2, 0.2);
+        resTrkPhidet0.setOptStat(10);
+        resTrkPhidet0.setTitleX("trk1 phi residual wrt line thru trk0");
+        resTrkPhidet0.setFillColor(9);
+        H1F resTrkPhidet1 = new H1F("trk0 phi residual (rad) wrt line thru trk1", 100, -0.2, 0.2);
+        resTrkPhidet1.setOptStat(10);
+        resTrkPhidet1.setTitleX("trk0 phi residual (rad) wrt line thru trk1");
+        resTrkPhidet1.setFillColor(49);
+         
 //        H1F h202 = new H1F("trk1 x", 25, 9., 9.4);
 //        H1F h1202 = new H1F("trk1 x MC", 25, 9., 9.4);    
         H1F h202 = new H1F("trk1 x", 25, 8.2, 9.0);
@@ -425,11 +468,9 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
         h83.setLineColor(1); h83.setFillColor(33);
         H1F h84 = new H1F("hOccupancyMatched4", 768, 0., 769.); h84.setTitleX("Component layer 4"); 
         h84.setLineColor(1); h84.setFillColor(34);
-
-
-        
+    
         int nev = 0;
-        int nevWithCrosses = 0, ncrosses2 = 0;
+        int nevWithCrosses = 0, ncrosses2 = 0, nOfFTParticles = 0;
         while (reader.hasEvent()) {  // run over all events
 //        int nev1 = 0; int nev2 = 10000; for(nev=nev1; nev<nev2; nev++){   // run on one event only
             DataEvent event = (DataEvent) reader.getNextEvent();
@@ -476,6 +517,7 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
                 if (event.hasBank("FT::particles")) {
                     DataBank bank = event.getBank("FT::particles");
                     int nrows = bank.rows();
+                    if(nrows>0) nOfFTParticles++;
                     for (int i = 0; i < nrows; i++) {
                         int calId = bank.getShort("calID",i);
                         if(bank.getByte("charge", i)==-1 && bank.getShort("calID",i)>0) { 
@@ -513,18 +555,15 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
                                 }
 
                                 
-                                if(matchedCrosses == 0){
+//                                if(matchedCrosses != 1){
 //                                if(matchedCrosses != 2){
+                                  if(matchedCrosses == 0){  // accept all crosses
                                     continue;
                                 }else{
                                     ncrosses2++;
                                     if(ncrosses< 100) System.out.println("++++++++++++++++++++++++++ Sequential number " + nev);
                                 }
                                 
-                                
-//                                if(matchedCrosses != 1) continue;
-//                                if(matchedCrosses == 0) continue;
-
                                 for(int nc = 0; nc < ncrosses; nc++){
                                     int crossID = banktrk.getInt("id", nc);
                                     if(crossID != trk0ID && crossID != trk1ID) continue;
@@ -556,7 +595,6 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
                                             if((int)icl1 == cid) icl1ok = k;
                                             if((int)icl2 == cid) icl2ok = k;
                                         }  
-                                        
                                         DataLine segment1 = new DataLine();
                                         DataLine segment2 = new DataLine();
                                         int seed1 = -1;
@@ -564,11 +602,11 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
                                         if(bankcl.rows()>0){
                                             segment1.setOrigin(0.,0.); segment1.setEnd(0.,0.);
                                             segment2.setOrigin(0.,0.); segment2.setEnd(0.,0.);
-                                            seed1 = bankcl.getInt("seed", icl1ok);
-                                            seed2 = bankcl.getInt("seed", icl2ok);
+                                            seed1 = bankcl.getInt("seed", (int)icl1ok);
+                                            seed2 = bankcl.getInt("seed", (int)icl2ok);
                                             int cent1 = (int)bankcl.getFloat("centroid", icl1ok);
                                             int cent2 = (int)bankcl.getFloat("centroid", icl2ok);
-                                            // the cluster is formed by > 3 strips take the centroid
+                                            // if the cluster is formed by > 3 strips take the centroid
                                             int clustsize1 =  bankcl.getShort("size", icl1ok);
                                             int clustsize2 =  bankcl.getShort("size", icl2ok);
                                             if(clustsize1>=3){
@@ -579,12 +617,11 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
                                                 int sector = FTTRKReconstruction.findSector(seed2);
                                                 if(!(sector == 0 || sector == 1 || sector == 18 || sector == 19))  seed2 = cent2;
                                             }
-                                           
-                                            // if seed and centroid dont coincide, take the centroid as seed
+                                            // if seed and centroid dont coincide, take the geometric centroid as seed
                                             //if(cent1 != seed1) seed1 = cent1;
                                             //if(cent2 != seed2) seed2 = cent2;
-                                            int lay1 = bankcl.getInt("layer", icl1ok);
-                                            int lay2 = bankcl.getInt("layer", icl2ok);
+                                            int lay1 = bankcl.getInt("layer", (int)icl1ok);
+                                            int lay2 = bankcl.getInt("layer", (int)icl2ok);
                                             System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ seed1, seed2 " + seed1 + " " + seed2 + " layer1 layer2 " + lay1 + " " + lay2);
                                             System.out.println("~~~~~~~~~~ hit strip 1: " + seed1 + " layer " + lay1 + " sector " + 
                                                         FTTRKReconstruction.findSector(seed1));
@@ -592,6 +629,7 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
                                                         FTTRKReconstruction.findSector(seed2));
                                           
                                             if(seed1!=0 && seed2!=0){
+                                                System.out.println("seed2" + seed2);
                                                 Line3D seg1 = (Line3D) FTTRKConstantsLoader.getStripSegmentLab(lay1, seed1);
                                                 Line3D seg2 = (Line3D) FTTRKConstantsLoader.getStripSegmentLab(lay2, seed2);
                                                 segment1.setOrigin(seg1.origin().x(), seg1.origin().y());
@@ -618,13 +656,13 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
                                                     h72.fill(seed2);
                                                 }else if(lay2==3){
                                                     h73.fill(seed2);
-;                                               }else if(lay2==4){
+                                                }else if(lay2==4){
                                                     h74.fill(seed2);    
                                                 }
                                             
                                                 DataBank bankhit = event.getBank("FTTRK::hits");
                                                 if(bankhit.rows()>0){
-                                                   for(int k=0; k<bankhit.rows(); k++){
+                                                    for(int k=0; k<bankhit.rows(); k++){
                                                         int clusterNum = bankhit.getInt("clusterID", k);
                                                         if(clusterNum != icl1 && clusterNum != icl2) continue;
                                                         int stripInCluster = bankhit.getInt("component", k);
@@ -640,7 +678,7 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
                                                         }
                                                     }   
                                                 }    
-                                           }    
+                                            }    
                                         }
                                         
                                         if(det==0 && trk0ID==crossID){
@@ -656,11 +694,41 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
                                             h104.fill(bank.getFloat("cy", i) *zt - yt);
                                             h106.fill((part.theta() - hitOnTrk.theta()));
                                             h108.fill((part.phi() - hitOnTrk.phi()));
-                                            hSecDet0.fill(FTTRKReconstruction.findSector(seed1), FTTRKReconstruction.findSector(seed2));
-                                            
+                                            int sec1 = FTTRKReconstruction.findSector(seed1);
+                                            int sec2 = FTTRKReconstruction.findSector(seed2);
+                                            hSecDet0.fill(sec1, sec2);
+                                            hSeedDet0.fill(seed1, seed2);
+                                            /*
+                                            if(sec1 == 1 && sec2 == 10){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 1-10 bad seeds d0, event " + nev);
+                                            }else if(sec1 == 10 && sec2 == 10){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 10-10 bad seeds d0, event " + nev);
+                                            }else if(sec1 == 10 && sec2 == 11){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 10-11 bad seeds d0, event " + nev);
+                                            }else if(sec1 == 16 && sec2 == 8){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 16-8 bad seeds d0, event " + nev);
+                                            }else if(sec1 == 16 && sec2 == 8){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 16-8 bad seeds d0, event " + nev);
+                                            }else if(sec1 == 1 && sec2 == 11){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 1-11 bad seeds d0, event " + nev);
+                                            }else if(sec1 == 11 && sec2 == 15){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 11-15 bad seeds d0, event " + nev);
+                                            }else if(sec1 == 12 && sec2 == 16){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 12-16 bad seeds d0, event " + nev);
+                                            }else if(sec1 == 13 && sec2 == 11){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 13-11 bad seeds d0, event " + nev);
+                                            }
+                                            */
+                                            /*
+                                            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " +  sec1 + "-" + sec2 + 
+                                                    " bad seeds d0, event " + nev);
+                                            */
                                             canvasCALTRK.cd(0);
                                             segment1.setLineColor(1);
                                             segment2.setLineColor(2);
+                                            canvasCALTRK.draw(segment1);
+                                            canvasCALTRK.draw(segment2);
+                                            canvasCALTRK.cd(2);
                                             canvasCALTRK.draw(segment1);
                                             canvasCALTRK.draw(segment2);
                                             
@@ -670,46 +738,128 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
                                             h105.fill(bank.getFloat("cy", i) *zt - yt);
                                             h107.fill((part.theta() - hitOnTrk.theta()));
                                             h109.fill((part.phi() - hitOnTrk.phi()));
-                                            hSecDet1.fill(FTTRKReconstruction.findSector(seed1), FTTRKReconstruction.findSector(seed2));
-                                            
+                                            int sec1 = FTTRKReconstruction.findSector(seed1);
+                                            int sec2 = FTTRKReconstruction.findSector(seed2);
+                                            hSecDet1.fill(sec1, sec2);
+                                            hSeedDet1.fill(seed1, seed2);
+                                            /*
+                                            if(sec1 == 0 && sec2 == 8){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 0-8 bad seeds d1, event " + nev);
+                                            }else if(sec1 == 12 && sec2 == 10){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 12-10 bad seeds d1, event " + nev);
+                                            }else if(sec1 == 3 && sec2 == 18){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 3-18 bad seeds d1, event " + nev);
+                                            }else if(sec1 == 12 && sec2 == 9){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 12-9 bad seeds d1, event " + nev);
+                                            }else if(sec1 == 2 && sec2 == 18){ 
+                                                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 2-18 bad seeds d1, event " + nev);
+                                            }
+                                            */
+                                            /*
+                                            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " +  sec1 + "-" + sec2 + 
+                                                    " bad seeds d1, event " + nev);
+                                            */
                                             canvasCALTRK.cd(1);
                                             segment1.setLineColor(3);
                                             segment2.setLineColor(4);
                                             canvasCALTRK.draw(segment1);
-                                            canvasCALTRK.draw(segment2);    
+                                            canvasCALTRK.draw(segment2);
+                                            canvasCALTRK.cd(2);
+                                            canvasCALTRK.draw(segment1);
+                                            canvasCALTRK.draw(segment2);
                                         }
-                                        
+                                                                            
+                                        // extract residuals of TRK1 wrt TRK0 and viceversa    
+                                        // loop on crosses in det0, find track connecting with origin, evaluate residuals of TRK1 hits wrt to this track
+                                        /*
+                                        double x0 = banktrk.getFloat("x", i);
+                                        double y0 = banktrk.getFloat("y", i);
+                                        double z0 = banktrk.getFloat("z", i);
+                                        for(int j = 0; j < nrows; j++) {
+                                            int det1 =  banktrk.getInt("detector", j);
+                                            if(det1 >=0 && i != j && det != det1){
+                                                double x1 = banktrk.getFloat("x", j);
+                                                double y1 = banktrk.getFloat("y", j);
+                                                double z1 = banktrk.getFloat("z", j);
+                                                //int cross1ID = banktrk.getInt("id", j);
+                                                Vector3D pointOnTrack = new Vector3D(x0*z1/z0, y0*z1/z0, z1);
+                                                Vector3D cross = new Vector3D(x1, y1, z1);
+                                                //if(det == 0 && trk0ID == crossID){
+                                                if(det == 0){
+                                                    resTrkXdet0.fill(pointOnTrack.x() - cross.x());
+                                                    resTrkYdet0.fill(pointOnTrack.y() - cross.y());
+                                                    resTrkThetadet0.fill(pointOnTrack.theta() - cross.theta());
+                                                    resTrkPhidet0.fill(pointOnTrack.phi() - cross.phi());  
+                                                //}else if(det == 1 && trk1ID == crossID){
+                                                }else if(det == 1){
+                                                    resTrkXdet1.fill(pointOnTrack.x() - cross.x());
+                                                    resTrkYdet1.fill(pointOnTrack.y() - cross.y());
+                                                    resTrkThetadet1.fill(pointOnTrack.theta() - cross.theta());
+                                                    resTrkPhidet1.fill(pointOnTrack.phi() - cross.phi());
+                                                }
+                                            }
+                                        }
+                                        */
+                                                
+                                        double cx = hitOnTrk.x() - ORIGIN.x();
+                                        double cy = hitOnTrk.y() - ORIGIN.y();
+                                        double cz = hitOnTrk.z() - ORIGIN.z();
+                                        for(int ncj = 0; ncj < ncrosses; ncj++) {
+                                            int det1 =  banktrk.getInt("detector", ncj);
+                                            if(det1 >=0 && nc != ncj && det != det1){
+                                                double x1 = banktrk.getFloat("x", ncj);
+                                                double y1 = banktrk.getFloat("y", ncj);
+                                                double z1 = banktrk.getFloat("z", ncj);
+                                                int secondCrossID = banktrk.getInt("id", ncj);
+                                                Vector3D cross = new Vector3D(x1, y1, z1);
+                                                double t = cross.z()/hitOnTrk.z();
+                                                Vector3D pointOnTrackAtZ = new Vector3D(cx*t + ORIGIN.x(), cy*t + ORIGIN.y(), z1);
+                                                //if(det == 0 && trk0ID == crossID){
+                                                if(det1 == 1 && trk1ID == secondCrossID){
+                                                    resTrkXdet0.fill(pointOnTrackAtZ.x() - cross.x());
+                                                    resTrkYdet0.fill(pointOnTrackAtZ.y() - cross.y());
+                                                    resTrkThetadet0.fill(pointOnTrackAtZ.theta() - cross.theta());
+                                                    resTrkPhidet0.fill(pointOnTrackAtZ.phi() - cross.phi());  
+                                                //}else if(det == 1 && trk1ID == crossID){
+                                                }else if(det1 == 0 && trk0ID == secondCrossID){
+                                                    resTrkXdet1.fill(pointOnTrackAtZ.x() - cross.x());
+                                                    resTrkYdet1.fill(pointOnTrackAtZ.y() - cross.y());
+                                                    resTrkThetadet1.fill(pointOnTrackAtZ.theta() - cross.theta());
+                                                    resTrkPhidet1.fill(pointOnTrackAtZ.phi() - cross.phi());
+                                                }
+                                            }
+                                        }      
                                     }
                                 } 
-                                
+                                       
                                 if(ncrosses==2){
-                                    float x0 = banktrk.getFloat("x", 0);
-                                    float y0 = banktrk.getFloat("y", 0);
-                                    float x1 = banktrk.getFloat("x", 1);
-                                    float y1 = banktrk.getFloat("y", 1);
+                                   float x0 = banktrk.getFloat("x", 0);
+                                   float y0 = banktrk.getFloat("y", 0);
+                                   float x1 = banktrk.getFloat("x", 1);
+                                   float y1 = banktrk.getFloat("y", 1);
                                    
-                                    Point3D c0 = new Point3D(x0, y0, banktrk.getFloat("z",0));
-                                    Point3D c1 = new Point3D(x1, y1, banktrk.getFloat("z",1));
-                                    Line3D lineBwCrosses = new Line3D(c1, c0);
-                                    if(debugMode>0){
+                                   Point3D c0 = new Point3D(x0, y0, banktrk.getFloat("z",0));
+                                   Point3D c1 = new Point3D(x1, y1, banktrk.getFloat("z",1));
+                                   Line3D lineBwCrosses = new Line3D(c1, c0);
+                                   if(debugMode>0){
                                         System.out.println("x coordinates on 2 layers " + x0 + " " + x1);
                                         System.out.println("director cosines straight line bw crosses, cx " + lineBwCrosses.originDir().x() + " cy " + 
                                             lineBwCrosses.originDir().y() + " cz " + lineBwCrosses.originDir().z());
-                                    }
+                                    }   
                                 }
                             }
                         }
                     }
                 }
 
-                
                 if(event.hasBank("FTTRK::crosses")){
                     nevWithCrosses++;
                     DataBank banktrk = event.getBank("FTTRK::crosses");
                     int nrows = banktrk.rows();
-                    // how many particles have been generated?
-                    int ipart = gen.countGenerated();
                     
+                     // comparison with MC data
+                    // how many particles have been generated?
+                    int ipart = gen.countGenerated();                    
                     for(int ip=0; ip<ipart; ip++){
                     // no magnetic field: the track is a straight line
                         double mass = gen.getGeneratedParticle(ip).mass();
@@ -837,12 +987,46 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
                                 System.out.println("trk hit coordinates " + hitOnTrk.x() + " " + hitOnTrk.y() + " " + hitOnTrk.z());
                             }
                         }   
-                    }
-                }
+                    } // end MC comparison
+                    
+                    /*
+                // extract residuals of TRK1 wrt TRK0 and viceversa    
+                // loop on crosses in det0, find track connecting with origin, evaluate residuals of TRK1 hits wrt to this track
+                    for(int i = 0; i < nrows; i++) {
+                        int det0 =  banktrk.getInt("detector", i);
+                        double x0 = banktrk.getFloat("x", i);
+                        double y0 = banktrk.getFloat("y", i);
+                        double z0 = banktrk.getFloat("z", i);
+                        Vector3D hitOnTrk = new Vector3D(x0, y0, z0);
+                        for(int j = 0; j < nrows; j++) {
+                            int det1 =  banktrk.getInt("detector", j);
+                            if(i != j && det0 != det1){
+                                double x1 = banktrk.getFloat("x", j);
+                                double y1 = banktrk.getFloat("y", j);
+                                double z1 = banktrk.getFloat("z", j);
+                                Vector3D cross = new Vector3D(x1, y1*x1/x0, z1*x1/x0);
+                                if(det0 == 0){
+                                    resTrkXdet0.fill(hitOnTrk.x() - cross.x());
+                                    resTrkYdet0.fill (hitOnTrk.y() - cross.y());
+                                    resTrkThetadet0.fill(hitOnTrk.theta() - cross.theta());
+                                    resTrkPhidet0.fill(hitOnTrk.phi() - cross.phi());  
+                                }else if(det0 == 1){
+                                    resTrkXdet1.fill(hitOnTrk.x() - cross.x());
+                                    resTrkYdet1.fill (hitOnTrk.y() - cross.y());
+                                    resTrkThetadet1.fill(hitOnTrk.theta() - cross.theta());
+                                    resTrkPhidet1.fill(hitOnTrk.phi() - cross.phi());
+                                }
+                            }
+                        }
+                    } 
+                    */
+                } // end loop on crosses
             }
         }
         
-        if(debugMode>=0) System.out.println("@@@@@@@@@@@@@ total number of events read " + nev + " @@@@@ total number of events with rec cross in FTTRK " + nevWithCrosses);
+        if(debugMode>=0) 
+            System.out.println("@@@@@@@@@@@@@ total number of events read " + nev + " @@@@@ total number of events with rec cross in FTTRK " 
+                    + nevWithCrosses + " @@@@ number of reconstructed FTParticles " + nOfFTParticles);
         
         JFrame frame = new JFrame("FT Reconstruction");
         frame.setSize(1200, 800);
@@ -895,7 +1079,7 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
-        double narrowFactor = 4.5;
+        double narrowFactor = 7.;  // was 4.5
         JFrame frametrk = new JFrame("FTTRK Reconstruction with respect to FTCAL tracking");
         frametrk.setSize(1600, 800);
         EmbeddedCanvas canvastrk = new EmbeddedCanvas();
@@ -919,7 +1103,7 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
         canvastrk.draw(f02,"same");
         canvastrk.cd(2);
         canvastrk.draw(h104);
-        F1D f04 = new F1D("f04","[amp]*gaus(x,[mean],[sigma])", -limTC/narrowFactor, limTC/(narrowFactor+0.2));
+        F1D f04 = new F1D("f04","[amp]*gaus(x,[mean],[sigma])", -limTC/narrowFactor, limTC/(narrowFactor));
         f04.setParameter(0, 10.0);
         f04.setParameter(1, 0.0);
         f04.setParameter(2, 1.0);
@@ -1224,7 +1408,6 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
         frameMCradio.setVisible(true);
         */
         
-        
         JFrame frameSecradio = new JFrame("20 sectors occupancy");
         frameSecradio.setSize(1000,500);
         EmbeddedCanvas canvasSecradio = new EmbeddedCanvas();
@@ -1305,95 +1488,7 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
         excludedDet1half2.setMarkerSize(4); excludedDet1half2.setMarkerColor(55);
         excludedDet1half3.setMarkerSize(4); excludedDet1half3.setMarkerColor(55);
         excludedDet1half4.setMarkerSize(4); excludedDet1half4.setMarkerColor(55);
-
         
-        
-        /*
-        
-        JFrame frameSecradio = new JFrame("20 sectors occupancy");
-        frameSecradio.setSize(1000,500);
-        EmbeddedCanvas canvasSecradio = new EmbeddedCanvas();
-        canvasSecradio.divide(2,1);
-        canvasSecradio.cd(0);
-        canvasSecradio.draw(hSecDet0);
-        // excluded cells
-        double excx0h1[] = {0., 1., 2., 3., 4., 5., 10., 11., 12., 13.};
-        double excy0h1[] = {10., 11., 12., 13., 14., 15., 16., 17.};
-        GraphErrors excludedDet0half1 = new GraphErrors();
-        for(int i=0; i<excx0h1.length; i++){
-            for(int j=0; j<excy0h1.length; j++){
-                excludedDet0half1.addPoint(excx0h1[i], excy0h1[j], 0., 0.);
-            }   
-        }
-        double excx0h2[] = {5., 6., 7., 8., 9., 15., 16., 17., 18., 19.};
-        double excy0h2[] = {2., 3., 4., 5., 6., 7., 8., 9.};  // 10 not sure
-        GraphErrors excludedDet0half2 = new GraphErrors();
-        for(int i=0; i<excx0h2.length; i++){
-            for(int j=0; j<excy0h2.length; j++){
-                excludedDet0half2.addPoint(excx0h2[i], excy0h2[j], 0., 0.);
-            }   
-        }
-        double excx0h3[] = {2., 3., 4., 5., 6., 7., 8., 9.};
-        double excy0h3[] = {0., 1.};  // 10 not sure
-        GraphErrors excludedDet0half3 = new GraphErrors();
-        for(int i=0; i<excx0h3.length; i++){
-            for(int j=0; j<excy0h3.length; j++){
-                excludedDet0half3.addPoint(excx0h3[i], excy0h3[j], 0., 0.);
-            }   
-        }
-        double excx0h4[] = {10., 11., 12., 13., 14., 15., 16., 17.};
-        double excy0h4[] = {18., 19.};  
-        GraphErrors excludedDet0half4 = new GraphErrors();
-        for(int i=0; i<excx0h4.length; i++){
-            for(int j=0; j<excy0h4.length; j++){
-                excludedDet0half4.addPoint(excx0h4[i], excy0h4[j], 0., 0.);
-            }   
-        }
-        excludedDet0half1.setMarkerSize(4); excludedDet0half1.setMarkerColor(55);
-        excludedDet0half2.setMarkerSize(4); excludedDet0half2.setMarkerColor(55);
-        excludedDet0half3.setMarkerSize(4); excludedDet0half3.setMarkerColor(55);
-        excludedDet0half4.setMarkerSize(4); excludedDet0half4.setMarkerColor(55);
-        
-        double excx1h1[] = {0., 1., 2., 3., 4., 10., 11., 12., 13., 14.};
-        double excy1h1[] = {2., 3., 4., 5., 6., 7., 8., 9.};
-        GraphErrors excludedDet1half1 = new GraphErrors();
-        for(int i=0; i<excx1h1.length; i++){
-            for(int j=0; j<excy1h1.length; j++){
-                excludedDet1half1.addPoint(excx1h1[i], excy1h1[j], 0., 0.);
-            }   
-        }
-        double excx1h2[] = {5., 6., 7., 8., 9., 15., 16., 17., 18., 19.};
-        double excy1h2[] = {10., 11., 12., 13., 14., 15., 16., 17.};
-        GraphErrors excludedDet1half2 = new GraphErrors();
-        for(int i=0; i<excx1h2.length; i++){
-            for(int j=0; j<excy1h2.length; j++){
-                excludedDet1half2.addPoint(excx1h2[i], excy1h2[j], 0., 0.);
-            }   
-        }
-        double excx1h3[] = {10., 11., 12., 13., 14., 15., 16., 17.};
-        double excy1h3[] = {0., 1.};  // 10 not sure
-        GraphErrors excludedDet1half3 = new GraphErrors();
-        for(int i=0; i<excx1h3.length; i++){
-            for(int j=0; j<excy1h3.length; j++){
-                excludedDet1half3.addPoint(excx1h3[i], excy1h3[j], 0., 0.);
-            }   
-        }
-        double excx1h4[] = {2., 3., 4., 5., 6., 7., 8., 9.};
-        double excy1h4[] = {18., 19.};  
-        GraphErrors excludedDet1half4 = new GraphErrors();
-        for(int i=0; i<excx1h4.length; i++){
-            for(int j=0; j<excy1h4.length; j++){
-                excludedDet1half4.addPoint(excx1h4[i], excy1h4[j], 0., 0.);
-            }   
-        }
-        excludedDet1half1.setMarkerSize(4); excludedDet1half1.setMarkerColor(55);
-        excludedDet1half2.setMarkerSize(4); excludedDet1half2.setMarkerColor(55);
-        excludedDet1half3.setMarkerSize(4); excludedDet1half3.setMarkerColor(55);
-        excludedDet1half4.setMarkerSize(4); excludedDet1half4.setMarkerColor(55);
-        
-*/
-
-
         canvasSecradio.draw(excludedDet0half1,"same");
         canvasSecradio.draw(excludedDet0half2,"same");
         canvasSecradio.draw(excludedDet0half3,"same");
@@ -1407,7 +1502,134 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
         frameSecradio.add(canvasSecradio);
         frameSecradio.setLocationRelativeTo(null);
         frameSecradio.setVisible(true);
-               
+        
+        
+        JFrame frameSeedradio = new JFrame("Cluster seeds occupancy");
+        double limSec[] = 
+              {64., 128., 160., 192., 224., 256., 288., 320., 352., 384., 416., 448., 480., 512., 544., 576., 608., 640., 704., 768.};
+        double limLab[] =
+              {50., 110., 150., 180., 205., 230., 260., 290., 320., 350., 370., 400., 425., 450., 480., 510., 530., 560., 605., 660.};
+        double limLab2[] =
+              {50., 110., 150., 180., 205., 230., 260., 290., 320., 350., 390., 420., 450., 480., 510., 540., 570., 600., 650., 710.};
+        int limLen = limSec.length;
+        DataLine[] limitX = new DataLine[limLen];
+        DataLine[] limitY = new DataLine[limLen];
+        LatexText[] labSecX = new LatexText[limLen];
+        LatexText[] labSecY = new LatexText[limLen];
+        
+        double[] limSecCenter = new double[limLen];
+        for(int l=0; l<limLen; l++){
+            if(l==0){
+                limSecCenter[0] = 32.;
+            }else{
+                limSecCenter[l] = (limSec[l]+limSec[l-1])/2.;
+            }
+        }
+        GraphErrors excludedDet01 = new GraphErrors();
+        for(int i=0; i<excx0h1.length; i++){
+            for(int j=0; j<excy0h1.length; j++){
+                //System.out.println(limSecCenter[(int)excx0h1[i]] + " - " + limSecCenter[(int)excy0h1[j]]);
+                excludedDet01.addPoint(limSecCenter[(int)excx0h1[i]], limSecCenter[(int)excy0h1[j]], 0., 0.);
+            }   
+        }
+        GraphErrors excludedDet02 = new GraphErrors();
+        for(int i=0; i<excx0h2.length; i++){
+            for(int j=0; j<excy0h2.length; j++){
+                excludedDet02.addPoint(limSecCenter[(int)excx0h2[i]], limSecCenter[(int)excy0h2[j]], 0., 0.);
+            }   
+        }
+        GraphErrors excludedDet03 = new GraphErrors();
+        for(int i=0; i<excx0h3.length; i++){
+            for(int j=0; j<excy0h3.length; j++){
+                excludedDet03.addPoint(limSecCenter[(int)excx0h3[i]], limSecCenter[(int)excy0h3[j]], 0., 0.);
+            }   
+        }
+        GraphErrors excludedDet04 = new GraphErrors();
+        for(int i=0; i<excx0h4.length; i++){
+            for(int j=0; j<excy0h4.length; j++){
+                excludedDet04.addPoint(limSecCenter[(int)excx0h4[i]], limSecCenter[(int)excy0h4[j]], 0., 0.);
+            }   
+        }
+        
+        GraphErrors excludedDet11 = new GraphErrors();
+        for(int i=0; i<excx1h1.length; i++){
+            for(int j=0; j<excy1h1.length; j++){
+                //System.out.println(limSecCenter[(int)excx0h1[i]] + " - " + limSecCenter[(int)excy0h1[j]]);
+                excludedDet11.addPoint(limSecCenter[(int)excx1h1[i]], limSecCenter[(int)excy1h1[j]], 0., 0.);
+            }   
+        }
+        GraphErrors excludedDet12 = new GraphErrors();
+        for(int i=0; i<excx1h2.length; i++){
+            for(int j=0; j<excy1h2.length; j++){
+                excludedDet12.addPoint(limSecCenter[(int)excx1h2[i]], limSecCenter[(int)excy1h2[j]], 0., 0.);
+            }   
+        }
+        GraphErrors excludedDet13 = new GraphErrors();
+        for(int i=0; i<excx1h3.length; i++){
+            for(int j=0; j<excy1h3.length; j++){
+                excludedDet13.addPoint(limSecCenter[(int)excx1h3[i]], limSecCenter[(int)excy1h3[j]], 0., 0.);
+            }   
+        }
+        GraphErrors excludedDet14 = new GraphErrors();
+        for(int i=0; i<excx1h4.length; i++){
+            for(int j=0; j<excy1h4.length; j++){
+                excludedDet14.addPoint(limSecCenter[(int)excx1h4[i]], limSecCenter[(int)excy1h4[j]], 0., 0.);
+            }   
+        }
+        excludedDet01.setMarkerSize(6); excludedDet01.setMarkerColor(0);
+        excludedDet02.setMarkerSize(6); excludedDet02.setMarkerColor(0);
+        excludedDet03.setMarkerSize(6); excludedDet03.setMarkerColor(0);
+        excludedDet04.setMarkerSize(6); excludedDet04.setMarkerColor(0);
+        excludedDet11.setMarkerSize(6); excludedDet11.setMarkerColor(0);
+        excludedDet12.setMarkerSize(6); excludedDet12.setMarkerColor(0);
+        excludedDet13.setMarkerSize(6); excludedDet13.setMarkerColor(0);
+        excludedDet14.setMarkerSize(6); excludedDet14.setMarkerColor(0);
+        
+        for(int l=0; l<limLen; l++){
+            limitX[l] = new DataLine();
+            limitY[l] = new DataLine();
+            limitX[l].setOrigin(limSec[l], -0.5); limitX[l].setEnd(limSec[l], 767.5);
+            limitY[l].setOrigin(-0.5, limSec[l]); limitY[l].setEnd(767.5, limSec[l]);
+            limitX[l].setLineColor(6); //limitX[l].setLineStyle(3);
+            limitY[l].setLineColor(6); //limitY[l].setLineStyle(3);
+            labSecX[l] = new LatexText(Integer.toString(l), limLab[l], 15.);
+            labSecY[l] = new LatexText(Integer.toString(l), 720., limLab2[limLen-1-l]);   // 670
+            labSecX[l].setColor(6);
+            labSecY[l].setColor(6);
+        }
+        frameSeedradio.setSize(1500, 800);
+        EmbeddedCanvas canvasSeedradio = new EmbeddedCanvas();
+        canvasSeedradio.divide(2,1);
+        canvasSeedradio.cd(0);
+        canvasSeedradio.draw(hSeedDet0);
+        for(int l=0; l<limLen; l++){
+            canvasSeedradio.draw(limitX[l]);
+            canvasSeedradio.draw(limitY[l]);
+            canvasSeedradio.draw(labSecX[l]);
+            canvasSeedradio.draw(labSecY[l]);
+        }
+        canvasSeedradio.draw(excludedDet01, "same");
+        canvasSeedradio.draw(excludedDet02, "same");
+        canvasSeedradio.draw(excludedDet03, "same");
+        canvasSeedradio.draw(excludedDet04, "same");
+        
+        canvasSeedradio.cd(1);
+        canvasSeedradio.draw(hSeedDet1);
+        for(int l=0; l<limLen; l++){
+            canvasSeedradio.draw(limitX[l]);
+            canvasSeedradio.draw(limitY[l]);
+            canvasSeedradio.draw(labSecX[l]);
+            canvasSeedradio.draw(labSecY[l]);
+        }
+        canvasSeedradio.draw(excludedDet11, "same");
+        canvasSeedradio.draw(excludedDet12, "same");
+        canvasSeedradio.draw(excludedDet13, "same");
+        canvasSeedradio.draw(excludedDet14, "same");
+        
+        frameSeedradio.add(canvasSeedradio);
+        frameSeedradio.setLocationRelativeTo(null);
+        frameSeedradio.setVisible(true);
+           
         canvasCALTRK.cd(0); canvasCALTRK.draw(h100, "same"); canvasCALTRK.draw(h7, "same");
         canvasCALTRK.cd(1); canvasCALTRK.draw(h101, "same"); canvasCALTRK.draw(h7, "same");
         canvasCALTRK.cd(2); canvasCALTRK.draw(h7, "same");
@@ -1483,6 +1705,97 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
         frameOccMatch.setLocationRelativeTo(null);
         frameOccMatch.setVisible(true);
         
+        /*
+        JFrame frametrkonlyres = new JFrame("FTTRK residuals with respect to the second detector");
+        frametrkonlyres.setSize(1600, 800);
+        EmbeddedCanvas canvastrkonlyres = new EmbeddedCanvas();
+        canvastrkonlyres.divide(4, 2);
+        int nc=-1;
+        canvastrkonlyres.cd(++nc);
+        canvastrkonlyres.draw(resTrkXdet0);
+        double lowLim = resTrkXdet0.getMean() - resTrkXdet0.getRMS()/1.5;
+        double upLim = resTrkXdet0.getMean() + resTrkXdet0.getRMS()/1.5;
+        F1D f10x = new F1D("f10x","[amp]*gaus(x,[mean],[sigma])", lowLim, upLim);
+        f10x.setParameter(0, resTrkXdet0.getMax());
+        f10x.setParameter(1, resTrkXdet0.getMean());
+        f10x.setParameter(2, resTrkXdet0.getRMS());
+        f10x.setLineColor(6);
+        f10x.setLineWidth(3);
+        DataFitter.fit(f10x, resTrkXdet0, " "); //No options uses error for sigma
+        f10x.setParameter(0, f10x.parameter(0).value());
+        f10x.setParameter(1, f10x.parameter(1).value());
+        f10x.setParameter(2, f10x.parameter(2).value());
+        DataFitter.fit(f10x, resTrkXdet0, " "); //No options uses error for sigma
+        f10x.setOptStat(11111);
+        canvastrkonlyres.draw(f10x,"same");
+        
+        canvastrkonlyres.cd(++nc);
+        canvastrkonlyres.draw(resTrkYdet0);
+        lowLim = resTrkYdet0.getMean() - resTrkYdet0.getRMS()/1.5;
+        upLim = resTrkYdet0.getMean() + resTrkYdet0.getRMS()/1.5;
+        F1D f10y = new F1D("f10y","[amp]*gaus(x,[mean],[sigma])", lowLim, upLim);
+        f10y.setParameter(0, resTrkYdet0.getMax());
+        f10y.setParameter(1, resTrkYdet0.getMean());
+        f10y.setParameter(2, resTrkYdet0.getRMS());
+        f10y.setLineColor(6);
+        f10y.setLineWidth(3);
+        DataFitter.fit(f10y, resTrkYdet0, "Q"); //No options uses error for sigma
+        f10y.setParameter(0, f10y.parameter(0).value());
+        f10y.setParameter(1, f10y.parameter(1).value());
+        f10y.setParameter(2, f10y.parameter(2).value());
+        DataFitter.fit(f10y, resTrkYdet0, "Q"); //No options uses error for sigma
+        f10y.setOptStat(11111);
+        canvastrkonlyres.draw(f10y,"same");
+        
+        canvastrkonlyres.cd(++nc);
+        canvastrkonlyres.draw(resTrkThetadet0);
+        canvastrkonlyres.cd(++nc);
+        canvastrkonlyres.draw(resTrkPhidet0);
+        
+        canvastrkonlyres.cd(++nc);
+        canvastrkonlyres.draw(resTrkXdet1);
+        lowLim = resTrkXdet1.getMean() - resTrkXdet1.getRMS()/1.5;
+        upLim = resTrkXdet1.getMean() + resTrkXdet1.getRMS()/1.5;
+        F1D f11x = new F1D("f11x","[amp]*gaus(x,[mean],[sigma])", lowLim, upLim);
+        f11x.setParameter(0, resTrkXdet1.getMax());
+        f11x.setParameter(1, resTrkXdet1.getMean());
+        f11x.setParameter(2, resTrkXdet1.getRMS());
+        f11x.setLineColor(6);
+        f11x.setLineWidth(3);
+        DataFitter.fit(f11x, resTrkXdet1, "Q"); //No options uses error for sigma
+        f11x.setParameter(0, f11x.parameter(0).value());
+        f11x.setParameter(1, f11x.parameter(1).value());
+        f11x.setParameter(2, f11x.parameter(2).value());
+        DataFitter.fit(f11x, resTrkXdet1, "Q"); //No options uses error for sigma
+        f11x.setOptStat(11111);
+        canvastrkonlyres.draw(f11x,"same");
+        
+        canvastrkonlyres.cd(++nc);
+        canvastrkonlyres.draw(resTrkYdet1);
+        lowLim = resTrkYdet1.getMean() - resTrkYdet1.getRMS()/1.5;
+        upLim = resTrkYdet1.getMean() + resTrkYdet1.getRMS()/1.5;
+        F1D f11y = new F1D("f11y","[amp]*gaus(x,[mean],[sigma])", lowLim, upLim);
+        f11y.setParameter(0, resTrkYdet1.getMax());
+        f11y.setParameter(1, resTrkYdet1.getMean());
+        f11y.setParameter(2, resTrkYdet1.getRMS());
+        f11y.setLineColor(6);
+        f11y.setLineWidth(3);
+        DataFitter.fit(f11y, resTrkYdet1, "Q"); //No options uses error for sigma
+        f11y.setParameter(0, f11y.parameter(0).value());
+        f11y.setParameter(1, f11y.parameter(1).value());
+        f11y.setParameter(2, f11y.parameter(2).value());
+        DataFitter.fit(f11y, resTrkYdet1, "Q"); //No options uses error for sigma
+        f11y.setOptStat(11111);
+        canvastrkonlyres.draw(f11y,"same");
+        canvastrkonlyres.cd(++nc);
+        canvastrkonlyres.draw(resTrkThetadet1);
+        canvastrkonlyres.cd(++nc);
+        canvastrkonlyres.draw(resTrkPhidet1);
+        frametrkonlyres.add(canvastrkonlyres);
+        frametrkonlyres.setLocationRelativeTo(null);
+        frametrkonlyres.setVisible(true);
+        */
     }
+    
     
 }
