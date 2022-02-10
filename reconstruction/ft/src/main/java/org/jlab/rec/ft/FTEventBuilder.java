@@ -14,6 +14,7 @@ import org.jlab.utils.groups.IndexedTable;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.rec.ft.trk.FTTRKConstantsLoader;
 import org.jlab.rec.ft.trk.FTTRKReconstruction;
 
 public class FTEventBuilder {
@@ -153,6 +154,17 @@ public class FTEventBuilder {
                     resp.setCrTime(FTTRKReconstruction.crTime[i]);
                     //////////////////////////////
                     resp.setPosition(bank.getFloat("x", i), bank.getFloat("y", i), bank.getFloat("z", i));
+                    /// detector id (it is not the cross id)
+                    double zCoord = bank.getFloat("z", i);
+                    
+                    if(zCoord >= FTTRKConstantsLoader.Zlayer[0] && zCoord <= FTTRKConstantsLoader.Zlayer[1]){
+                        resp.setTrkDet(0);
+                    }else{
+                        resp.setTrkDet(1);
+                    }
+                    
+                    
+                    
                     //debugMode = 2;
                     if(debugMode>=1) System.out.println(" --------- id, cross x, y, z " + bank.getInt("id", i) + " " + bank.getFloat("x", i) + " " + bank.getFloat("y", i) + " " + bank.getFloat("z", i));
                     responses.add(resp);
@@ -192,7 +204,9 @@ public class FTEventBuilder {
                 track.setTime(responses.get(i).getTime() - responses.get(i).getPosition().mag() / PhysicsConstants.speedOfLight());
                 track.setCalorimeterIndex(responses.get(i).getId());
                 track.setHodoscopeIndex(-1);
-                track.setTrackerIndex(-1);
+                //track.setTrackerIndex(-1);
+                track.setTrackerIndex(-1, 0);
+                track.setTrackerIndex(-1, 1);
                 particles.add(track);
                 responses.get(i).setAssociation(particles.size()-1);
             }
@@ -238,8 +252,10 @@ public class FTEventBuilder {
                     System.out.println("found signal in FTTRK" + iTrk);
                 }
                 track.setCharge(-999); // provisional, for no field tracking
-                track.setTrackerIndex(responses.get(iTrk).getId());
+                track.setTrackerIndex(responses.get(iTrk).getId(), responses.get(iTrk).getTrkDet()); // here trkID is set to the index of the matched track
                 responses.get(iTrk).setAssociation(i);
+                // if the cross is matched to the track set the cross id as negative
+                if(responses.get(iTrk).getAssociation()==0) responses.get(iTrk).setId(-responses.get(iTrk).getId());
                 responses.get(iTrk).setMatchPosition(track.getPosition().x(), track.getPosition().y(), track.getPosition().z());
                 System.out.println("matched cross coordinates " + responses.get(iTrk).getPosition().x() + " " + responses.get(iTrk).getPosition().y());
             }else{
@@ -249,6 +265,39 @@ public class FTEventBuilder {
         }
     }
   
+     public void matchToTRKTwoDetectors(List<FTResponse> responses, List<FTParticle> particles) {
+        for (int i = 0; i < particles.size(); i++) {
+            FTParticle track = particles.get(i);
+            if (debugMode >= 1) {
+                System.out.println("Searching for matching signal in the tracker:");
+            }
+            //int[] iTrk = track.getTRKBestHits(responses, FTConstants.CAL_TRK_DISTANCE_MATCHING, FTConstants.CAL_TRK_TIME_MATCHING);
+            int[] iTrk = {-1, -1};
+            iTrk = track.getTRKBestHits(responses, i, FTConstants.CAL_TRK_DISTANCE_MATCHING, FTConstants.CAL_TRK_TIME_MATCHING);
+            for(int j=0; j<2; j++){ // loop on two detectors
+                if (iTrk[j] > 0) {
+                    if (debugMode >= 1) {
+                        System.out.println("found signal in FTTRK" + iTrk[j]);
+                    }
+                
+                    track.setCharge(-999); // provisional, for no field tracking
+                    track.setTrackerIndex(responses.get(iTrk[j]).getId(), j); // here trkIS is set to the index of the matched track
+////                    track.setTrackerIndex(iTrk[j], j);
+//                    responses.get(iTrk[j]).setId(iTrk[j]);
+                    responses.get(iTrk[j]).setHitIndex(iTrk[j]);
+                    responses.get(iTrk[j]).setAssociation(i);
+                    //responses.get(iTrk[j]).getCross and change the index of the cross
+                    responses.get(iTrk[j]).setMatchPosition(track.getPosition().x(), track.getPosition().y(), track.getPosition().z());
+                    System.out.println("matched cross coordinates " + responses.get(iTrk[j]).getPosition().x() + " " + 
+                            responses.get(iTrk[j]).getPosition().y());
+                }else{  
+                    // wrong cross coordinates need to be deleted
+                }
+            }
+            if (debugMode >= 1) track.show();
+        }
+    }
+   
    
     public void matchToFTCal(List<FTResponse> responses, List<FTParticle> particles) {
         for (int i = 0; i < particles.size(); i++) {
@@ -270,7 +319,7 @@ public class FTEventBuilder {
                     System.out.println("found signal in FTTRK" + iTrk);
                 }
                 track.setCharge(-999); // provisional, for no field tracking
-                track.setTrackerIndex(responses.get(iTrk).getId());
+                track.setTrackerIndex(responses.get(iTrk).getId(), responses.get(iTrk).getTrkDet());
                 responses.get(iTrk).setAssociation(i);
             }
             
@@ -332,7 +381,9 @@ public class FTEventBuilder {
                     banktrack.setDouble("Time", i, particles.get(i).getTime());
                     banktrack.setInt("CalID", i, particles.get(i).getCalorimeterIndex());
                     banktrack.setInt("HodoID", i, particles.get(i).getHodoscopeIndex());
-                    banktrack.setInt("TrkID", i, particles.get(i).getTrackerIndex());
+                    banktrack.setInt("Trk0ID", i, particles.get(i).getTrackerIndex(0));
+//                    banktrack.setInt("trkID", i, particles.get(i).getTrackerIndex(0));
+                    banktrack.setInt("Trk1ID", i, particles.get(i).getTrackerIndex(1));
                     if (debugMode >= 1) {
                         particles.get(i).show();
                     }
@@ -355,7 +406,10 @@ public class FTEventBuilder {
                     banktrack.setFloat("time", i, (float) particles.get(i).getTime());
                     banktrack.setShort("calID", i, (short) particles.get(i).getCalorimeterIndex());
                     banktrack.setShort("hodoID", i, (short) particles.get(i).getHodoscopeIndex());
-                    banktrack.setShort("trkID", i, (short) particles.get(i).getTrackerIndex());
+//                    banktrack.setShort("trkID", i, (short) particles.get(i).getTrackerIndex());
+                    banktrack.setShort("trk0ID", i, (short) particles.get(i).getTrackerIndex(0));
+                    banktrack.setShort("trk1ID", i, (short) particles.get(i).getTrackerIndex(1));
+                    
                     if (debugMode >= 1) {
                         particles.get(i).show();
                         System.out.println(particles.get(i).getDirection().x() + " " + particles.get(i).getDirection().y() + " " + particles.get(i).getDirection().z());
