@@ -16,6 +16,7 @@ public class FTResponse extends DetectorResponse {
     private String _type;            // FTCAL, FTHODO, FTTRK
     private int    _size;            // cluster multiplicity
     private int    _id;              // response ID
+    private int    _trkDet;
 
     private float  _crTime;            // provisional: detector time (for crosses only: the location in the bank is overwritten)
     private float  _crEnergy;          // provisional: detector energy (for crosses only same reason)
@@ -51,6 +52,15 @@ public class FTResponse extends DetectorResponse {
     public void setId(int id) {
         this._id = id;
     }
+    
+    public int getTrkDet() {
+        return _trkDet;
+    }
+
+    public void setTrkDet(int ndet) {
+        this._trkDet = ndet;
+    }
+    
         
     /////////////////////////// provisional (info must be present in banks)
     public void setCrTime(float crTime){
