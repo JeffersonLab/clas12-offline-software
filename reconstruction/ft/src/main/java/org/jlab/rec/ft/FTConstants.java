@@ -25,15 +25,9 @@ public class FTConstants {
     public static final double  TRK_MIN_CROSS_NUMBER = 1;           // minimum number of crosses to find a line in the tracker
 //    public static final double  TRK0_TRK1_DISTANCE_MATCHING = 0.25;  // matching distance between FTTRK points in cms
 //    public static final double  TOLERANCE_ON_CROSSES_TWO_DETECTORS = 0.; // 1. cm radius tolerance, tune it up
-    public static final double  TRK0_TRK1_RADTOL = 1.;              // max tolerance for TRK0/TRK1 distance (3D)
-///    public static final double  TRK0_TRK1_RADTOL = 0.5;             // max tolerance for TRK0/TRK1 radial distance (2D)
-///    public static final double  TRK0_TRK1_PHITOL = 0.07;             // max tolerance for TRK0/TRK1 phi angular deviation
-///    public static final double  TRK0_TRK1_THETATOL = 0.07;           // max tolerance for TRK0/TRK1 theta angulare deviation
-//    public static final double  TRK0_TRK1_RADTOL = 10.;             // max tolerance for TRK0/TRK1 radial distance (2D)
-//    public static final double  TRK0_TRK1_PHITOL = 1.;             // max tolerance for TRK0/TRK1 phi angular deviation
-//    public static final double  TRK0_TRK1_THETATOL = 1.;           // max tolerance for TRK0/TRK1 theta angulare deviation
-      public static final double  TRK0_TRK1_PHITOL = 0.7;             // max tolerance for TRK0/TRK1 phi angular deviation
-      public static final double  TRK0_TRK1_THETATOL = 0.7;
+    public static final double  TRK0_TRK1_RADTOL = 0.1;              // max tolerance for TRK0/TRK1 distance (3D) (was 1.-0.5)
+    public static final double  TRK0_TRK1_PHITOL = 0.07;             // max tolerance for TRK0/TRK1 phi angular deviation (was 1.-0.7)
+    public static final double  TRK0_TRK1_THETATOL = 0.07;           // max tolerance for TRK0/TRK1 theta angulare deviation (was 1.-0.7=
     
     public static final double  FTTRKMinAdcThreshold = 18.;             // check min threshold for FTTTRK ADCs (18)
     public static final double  FTTRKMaxAdcThreshold = 2000.;           // check max threshold for FTTTRK ADCs (18) was 1000 170122
