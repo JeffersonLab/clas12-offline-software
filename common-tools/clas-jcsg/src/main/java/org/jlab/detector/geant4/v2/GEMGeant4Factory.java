@@ -20,11 +20,13 @@ import org.jlab.geometry.prim.Line3d;
  *
  * @author kenjo
  */
+/*
 final class GEMdatabase {
 
     private final int nSectors = 6;
     private final int nRegions = 3;
     private final int nSupers = 6;
+
 
     private final double dist2tgt[] = new double[nRegions];
     private final double xdist[] = new double[nRegions];
@@ -53,6 +55,8 @@ final class GEMdatabase {
     
     private int nsensewires;
     private int nguardwires;
+    
+  
 
     
     private final String dcdbpath = "/geometry/dc/";
@@ -206,7 +210,8 @@ final class GEMdatabase {
         return new Vector3d(align_dx[isec][ireg], align_dy[isec][ireg], align_dz[isec][ireg]);
     }
 }
-
+*/
+/*
 final class Strip extends Line3d {
 
     public Strip(Vector3d origin, Vector3d end) {
@@ -243,171 +248,154 @@ final class Strip extends Line3d {
         return center;
     }
 }
-
+*/
 ///////////////////////////////////////////////////
 public final class GEMGeant4Factory extends Geant4Factory {
 
     GEMdatabase dbref = GEMdatabase.getInstance();
 
-    private final HashMap<String, String> properties = new HashMap<>();
-    private int nsgwires;
-
-    private final double y_enlargement = 3.65;
-    private final double z_enlargement = -2.96;
+  //  private final HashMap<String, String> properties = new HashMap<>();
+    private final double x_enlargement = 0.5;
+    private final double y_enlargement = 1.;
+    private final double z_enlargement = 0.1;
     private final double microgap = 0.01;
 
+    private final double th_open = 54.; // opening angle between endplate planes
+    private final double th_tilt = 25; // theta tilt
+    private final double th_min = 4.694; // polar angle to the base of first chamber
+    private final double distance_urwell2dc0 = 4;
+    private final double dist_2_tgt = (228.078-distance_urwell2dc0); //206.93 distance from the target to the first chamber - 228.078 is DC-region1
+    private final double sector_height = 146.21;  //height of each sector 
+    private final double dx0_chamber0 = 5.197;    // halfbase of chamber 1 
+    private final int nChambers = 3;              //number of chamber
+    private final double  w2tgt = dist_2_tgt/Math.cos(Math.toRadians(th_tilt-th_min));
+    private final double  y_min = w2tgt*Math.sin(Math.toRadians(th_min)); // distance from the base chamber1 and beamline
+    private final double  z_min = w2tgt*Math.cos(Math.toRadians(th_min));    
+
+    private final double[] chamber_volumes_thickness = {0.0025, 0.0005, 0.3,        // window
+        0.0025, 0.0005,0.4,                                                        // cathode
+        0.0005, 0.005, 0.0005,                                                      //uRWell + DlC
+        0.0005, 0.005, 0.0005,                                                      // Capacitive sharing layer1
+        0.0005, 0.005, 0.0005,                                                      // Capacitive sharing layer2
+        0.005,  0.0005,0.005, 0.005,  0.0005,0.005, 0.005,                           // Readout
+        0.0127, 0.3, 0.0125};                                                       // support
+    private final String[] chamber_volumes_string = {"window_kapton", "window_Al", "window_gas",
+           "cathode_kapton", "cathode_Al", "cathode_gas",
+           "muRwell_Cu", "muRwell_kapton", "muRwell_dlc", 
+           "capa_sharing_layer1_glue","capa_sharing_layer1_Cr","capa_sharing_layer1_kapton",
+           "capa_sharing_layer2_glue","capa_sharing_layer2_Cr","capa_sharing_layer2_kapton",
+           "readout1_glue", "readout1_Cu", "readout1_kapton", "readout2_glue", "readout2_Cu", "readout2_kapton", "readout3_glue",
+           "support_skin1_g10", "support_honeycomb_nomex", "support_skin2_g10"};
+  
+    
     ///////////////////////////////////////////////////
     public GEMGeant4Factory(ConstantProvider provider) {
         motherVolume = new G4World("fc");
 
-        dbref.connect(provider);
-        nsgwires = dbref.nsensewires() + dbref.nguardwires();
-
-        for (int iregion = 0; iregion < 3; iregion++) {
+        for (int iregion = 0; iregion < 1; iregion++) {
             for (int isector = 0; isector < 6; isector++) {
                 Geant4Basic regionVolume = createRegion(isector, iregion);
                 regionVolume.setMother(motherVolume);
             }
         }
-    }
-
-
-    /**
-     * 
-     * @param sector sector 1...6
-     * @param super  superlayer index 0...5
-     * @param layer  layer 1...6
-     * @param wire   wire 1...112
-     */
-    private Strip getStrip(int sector, int isuper, int layer, int wire) {
-        int ireg    = isuper / 2;
-
-        // calculate first-wire distance from target
-        double w2tgt = dbref.dist2tgt(ireg);
-        if (isuper % 2 > 0) {
-            w2tgt += dbref.superwidth(isuper - 1) + dbref.midgap(ireg);
         }
-        w2tgt /= Math.cos(dbref.thtilt(ireg) - dbref.thmin(isuper));
 
-        // y0 and z0 in the lab for the first wire of the layer
-        double y0mid = w2tgt * Math.sin(dbref.thmin(isuper));
-        double z0mid = w2tgt * Math.cos(dbref.thmin(isuper));
+    public double chamber_thickness(){
+        double chamber_t =0;
+         for (int i=0; i< chamber_volumes_thickness.length; i++ )chamber_t+=chamber_volumes_thickness[i];
+         return chamber_t;
+}
 
-        double cster = Math.cos(dbref.thster(isuper));
-        double ctilt = Math.cos(dbref.thtilt(ireg));
-        double stilt = Math.sin(dbref.thtilt(ireg));
-
-        double dw = 4 * Math.cos(Math.toRadians(30)) * dbref.wpdist(isuper);
-        double dw2 = dw / cster;
-
-        // hh: wire distance in the wire plane
-        double hh = (wire-1 + ((double)(layer % 2)) / 2.0) * dw2;
- 
-        // ll: layer distance
-        double tt = dbref.cellthickness(isuper) * dbref.wpdist(isuper);
-        double ll = layer * tt;
-
-        // wire x=0 coordinates in the lab
-        double ym = y0mid + ll * stilt + hh * ctilt;
-        double zm = z0mid + ll * ctilt - hh * stilt;
-
-        // wire midpoint in the lab
-        Vector3d midpoint = new Vector3d(0, ym, zm);
-        Vector3d direction = new Vector3d(1, 0, 0);
-        direction.rotateZ(dbref.thster(isuper));
-        direction.rotateX(-dbref.thtilt(ireg));
-
-        Vector3d vnum = new Vector3d(0, dbref.xdist(ireg), 0);
-        vnum.sub(midpoint);
-
-        double copen = Math.cos(dbref.thopen(ireg) / 2.0);
-        double sopen = Math.sin(dbref.thopen(ireg) / 2.0);
-
-        // define unit vector normal to the sides of the chamber and pointing inside
-        Vector3d rnorm = new Vector3d(copen, sopen, 0);
-        Vector3d lnorm = new Vector3d(-copen, sopen, 0);
-
-        double wlenl = vnum.dot(lnorm) / direction.dot(lnorm);
-        Vector3d leftend = direction.times(wlenl).add(midpoint);
-
-        double wlenr = vnum.dot(rnorm) / direction.dot(rnorm);
-        Vector3d rightend = direction.times(wlenr).add(midpoint);
-        
-        return new Strip(leftend,rightend);
-    }
-    
-    
     ///////////////////////////////////////////////////
     public Geant4Basic createRegion(int isector, int iregion) {
-        Strip regw0 = this.getStrip(isector+1, iregion * 2, 0, 0);
-        Strip regw1 = this.getStrip(isector+1, iregion * 2 + 1, 7, nsgwires - 1);
 
-        double dx_shift = y_enlargement * Math.tan(Math.toRadians(29.5));
+       
+       double reg_dz = (this.chamber_thickness())/2. + z_enlargement ;
+       double reg_dy = sector_height/2 + y_enlargement ;
+       double reg_dx0 = dx0_chamber0 + x_enlargement ;
+       double reg_dx1 = (reg_dy*2)*Math.tan(Math.toRadians(th_open/2))+reg_dx0 ;  
+       double reg_thtilt = Math.toRadians(th_tilt);
 
-        double reg_dz = (dbref.frontgap(iregion) + dbref.backgap(iregion) + dbref.midgap(iregion) + dbref.superwidth(iregion * 2) + dbref.superwidth(iregion * 2 + 1)) / 2.0 + z_enlargement;
-        double reg_dx0 = Math.abs(regw0.bottom().x) - dx_shift + 1.0;
-        double reg_dx1 = Math.abs(regw1.top().x) + dx_shift + 1.0;
-        double reg_dy = regw1.top().minus(regw0.bottom()).y / Math.cos(dbref.thtilt(iregion)) / 2.0 + y_enlargement + 1.0;
-        double reg_skew = 0.0;
-        double reg_thtilt = dbref.thtilt(iregion);
+        // baricenter coordinate in CLAS12 frame 
 
-        Vector3d vcenter = regw1.top().plus(regw0.bottom()).dividedBy(2.0);
-        vcenter.x = 0;
-        Vector3d reg_position0 = new Vector3d(vcenter.x, vcenter.y, vcenter.z);
+        Vector3d vcenter = new Vector3d(0, 0, 0);
+        vcenter.x = 0 ;
+        vcenter.y =sector_height/2*Math.cos(Math.toRadians(th_tilt))+y_min;
+        vcenter.z =-sector_height/2*Math.sin(Math.toRadians(th_tilt))+z_min;
         vcenter.rotateZ(-Math.toRadians(90 - isector * 60));
 
-        Geant4Basic regionVolume = new G4Trap("region" + (iregion + 1) + "_s" + (isector + 1),
+                // Sector construction
+        Geant4Basic sectorVolume = new G4Trap("region_uRwell_" + (iregion + 1) + "_s" + (isector + 1),
                 reg_dz, -reg_thtilt, Math.toRadians(90.0),
                 reg_dy, reg_dx0, reg_dx1, 0.0,
                 reg_dy, reg_dx0, reg_dx1, 0.0);
-        regionVolume.rotate("yxz", 0.0, reg_thtilt, Math.toRadians(90.0 - isector * 60.0));
-        regionVolume.translate(vcenter.x, vcenter.y, vcenter.z);
-        regionVolume.setId(isector + 1, iregion + 1, 0, 0);
 
-        for (int isup = 0; isup < 2; isup++) {
-            int isuper = iregion * 2 + isup;
-            int nsglayers = dbref.nsenselayers(isuper) + dbref.nguardlayers(isuper);
-            for (int ilayer = 1; ilayer < nsglayers - 1; ilayer++) {
-                Geant4Basic layerVolume = this.createLayer(isuper, ilayer);
-                layerVolume.setName("sl" + (isuper + 1) + "_layer" + ilayer + "_s" + (isector + 1));
+        sectorVolume.rotate("yxz", 0.0, reg_thtilt, Math.toRadians(90.0 - isector * 60.0));
+        sectorVolume.translate(vcenter.x, vcenter.y, vcenter.z);
+        sectorVolume.setId(isector + 1, iregion + 1, 0, 0);
+        
+               // Chambers construction
+         for (int ich = 0; ich < nChambers; ich++) {
+             double y_chamber = (2*ich+1)*(sector_height/nChambers/2+0.05);
+             //double y_chamber = (2*ich+1)*(sector_height/nChambers/2);
+             Geant4Basic chamberVolume = this.createChamber(ich, iregion, isector);
+             chamberVolume.setName("rg" + (iregion + 1) + "_s" + (isector + 1) + "_c" + (ich +1));
+             chamberVolume.setMother(sectorVolume);
+             chamberVolume.translate(0.0, y_chamber-sector_height/2,0. );
+             chamberVolume.setId(isector + 1, iregion + 1, ich +1, 0);
+         }
+       
 
-                Vector3d lcenter = layerVolume.getLocalPosition();
-                Vector3d lshift = lcenter.minus(reg_position0);
-                lshift.rotateX(reg_thtilt);
-
-                layerVolume.rotate("zxy", -dbref.thster(isuper), 0.0, 0.0);
-
-                layerVolume.setPosition(lshift.x, lshift.y, lshift.z);
-                layerVolume.setMother(regionVolume);
-                layerVolume.setId(isector + 1, iregion + 1, isuper + 1, ilayer);
-            }
-        }
-
-        return regionVolume;
+        
+        return sectorVolume;
     }
 
     ///////////////////////////////////////////////////
-    public Geant4Basic createLayer(int isuper, int ilayer) {
-        Strip lw0 = this.getStrip(1, isuper, ilayer, 0);
-        Strip lw1 = this.getStrip(1, isuper, ilayer, nsgwires - 1);
-
-        Vector3d midline = lw1.center().minus(lw0.center());
-        double lay_dy = Math.sqrt(Math.pow(midline.magnitude(), 2.0) - Math.pow(midline.dot(lw0.dir()), 2.0)) / 2.0;
-        double lay_dx0 = lw0.length() / 2.0;
-        double lay_dx1 = lw1.length() / 2.0;
-        double lay_dz = dbref.cellthickness(isuper) * dbref.wpdist(isuper) / 2.0 - microgap;
-        double lay_skew = lw0.center().minus(lw1.center()).angle(lw1.dir()) - Math.toRadians(90.0);
+    
+    public Geant4Basic createChamber(int iChamber, int iRegion, int iSector) {
         
-        Vector3d lcent = lw0.center().plus(lw1.center()).dividedBy(2.0);
-        G4Trap layerVolume = new G4Trap("sl" + (isuper + 1) + "_layer" + ilayer,
-                lay_dz, -dbref.thtilt(isuper / 2), Math.toRadians(90.0),
-                lay_dy, lay_dx0, lay_dx1, lay_skew,
-                lay_dy, lay_dx0, lay_dx1, lay_skew);
+  
+        double ch_dz = (this.chamber_thickness())/2. + z_enlargement/2;
+        double ch_dx0 = (iChamber*sector_height/nChambers)*Math.tan(Math.toRadians(th_open/2.))+ dx0_chamber0 +0.1; 
+ 
+        double ch_dx1 = (sector_height/nChambers)*Math.tan(Math.toRadians(th_open/2.))+ch_dx0;  
+        double ch_dy = sector_height/nChambers/2+0.05;
+        double ch_thtilt = Math.toRadians(th_tilt);
+        Geant4Basic chamberVolume = new G4Trap("r" + (iRegion + 1) + "_s" + (iSector + 1) + "_c" + (iChamber+1),
+                ch_dz, -ch_thtilt, Math.toRadians(90.0),
+                ch_dy, ch_dx0, ch_dx1, 0.0,
+                ch_dy, ch_dx0, ch_dx1, 0.0);
 
-        layerVolume.setPosition(lcent.x, lcent.y, lcent.z);
+       double  daughter_volume_z_pos =0;
+       double  daughter_volume_y_pos =0;
 
-        return layerVolume;
+       double ch_dx0_daughter = (iChamber*sector_height/nChambers)*Math.tan(Math.toRadians(th_open/2.))+ dx0_chamber0 ;
+       double ch_dx1_daughter = (sector_height/nChambers)*Math.tan(Math.toRadians(th_open/2.))+ch_dx0_daughter;
+       double ch_dy_daughter = sector_height/nChambers/2 ;
+
+       for (int i=0; i< chamber_volumes_thickness.length; i++ ){
+ 
+        if(i==0) {daughter_volume_z_pos = chamber_volumes_thickness[i]/2 - (this.chamber_thickness())/2.;
+         } else daughter_volume_z_pos += chamber_volumes_thickness[i-1]/2 + chamber_volumes_thickness[i]/2;
+            
+            daughter_volume_y_pos = -daughter_volume_z_pos *Math.tan(Math.toRadians(th_tilt));
+          
+         Geant4Basic daughter_volume = new G4Trap("daughter_volume",
+                chamber_volumes_thickness[i]/2, -ch_thtilt, Math.toRadians(90.0),
+                ch_dy_daughter, ch_dx0_daughter, ch_dx1_daughter, 0.0,
+                ch_dy_daughter, ch_dx0_daughter, ch_dx1_daughter, 0.0);
+        
+        daughter_volume.setName("rg" + (iRegion + 1) + "_s" + (iSector + 1) + "_c" + (iChamber +1) +"_"+chamber_volumes_string[i] );
+        daughter_volume.setMother(chamberVolume);
+        daughter_volume.setPosition(0.0, daughter_volume_y_pos,daughter_volume_z_pos);
+
+          
+        }
+
+
+        return  chamberVolume;
     }
+
 
     public static void main(String[] args) {
         ConstantProvider cp = GeometryFactory.getConstants(DetectorType.DC, 11, "default");
