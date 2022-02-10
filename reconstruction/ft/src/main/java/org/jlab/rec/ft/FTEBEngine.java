@@ -179,7 +179,8 @@ public class FTEBEngine extends ReconstructionEngine {
 ///       String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_singleEle_withFields_big_-30.60.120.30.hipo";
 ///       String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_singleEle_withFields_big_-30.60.120.30_fullAcceptance.hipo";
 ///        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_dis.hipo";
-        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/ft_005038.evio.01231.hipo";
+//////        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/ft_005038.evio.01231.hipo";
+        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/filter_005418.0.hipo";
 ///        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_test.hipo";
         HipoDataSource reader = new HipoDataSource();
         reader.open(input);
@@ -390,11 +391,31 @@ public class FTEBEngine extends ReconstructionEngine {
         H2F h2001 = new H2F("Montecarlo radiography at second FTTRK det", 100, -15., 15., 100, -15, 15.);
         h2001.setTitleX("x (mm)");
         h2001.setTitleY("y (mm)");
-   
+        
         JFrame frameCALTRK = new JFrame("radiography FTCAL hits and FTTRK Crosses");
         frameCALTRK.setSize(1500,500);
         EmbeddedCanvas canvasCALTRK = new EmbeddedCanvas();
         canvasCALTRK.divide(3,1);
+        
+        H1F h71 = new H1F("hOccupancyMatchedSeed1", 768, 0., 769.); h71.setTitleX("Component layer 1"); 
+        h71.setLineColor(1); h71.setFillColor(51);
+        H1F h72 = new H1F("hOccupancyMatchedSeed2", 768, 0., 769.); h72.setTitleX("Component layer 2"); 
+        h72.setLineColor(1); h72.setFillColor(52);
+        H1F h73 = new H1F("hOccupancyMatchedSeed3", 768, 0., 769.); h73.setTitleX("Component layer 3"); 
+        h73.setLineColor(1); h73.setFillColor(53);
+        H1F h74 = new H1F("hOccupancyMatchedSeed4", 768, 0., 769.); h74.setTitleX("Component layer 4"); 
+        h74.setLineColor(1); h74.setFillColor(54);
+
+        H1F h81 = new H1F("hOccupancyMatched1", 768, 0., 769.); h81.setTitleX("Component layer 1"); 
+        h81.setLineColor(1); h81.setFillColor(31);
+        H1F h82 = new H1F("hOccupancyMatched2", 768, 0., 769.); h82.setTitleX("Component layer 2"); 
+        h82.setLineColor(1); h82.setFillColor(32);
+        H1F h83 = new H1F("hOccupancyMatched3", 768, 0., 769.); h83.setTitleX("Component layer 3"); 
+        h83.setLineColor(1); h83.setFillColor(33);
+        H1F h84 = new H1F("hOccupancyMatched4", 768, 0., 769.); h84.setTitleX("Component layer 4"); 
+        h84.setLineColor(1); h84.setFillColor(34);
+
+
         
         int nev = 0;
         int nevWithCrosses = 0;
@@ -402,7 +423,8 @@ public class FTEBEngine extends ReconstructionEngine {
 //        int nev1 = 0; int nev2 = 10000; for(nev=nev1; nev<nev2; nev++){   // run on one event only
             System.out.println("////////////// event read " + nev);
             DataEvent event = (DataEvent) reader.getNextEvent();
-//            nev++; if(nev != 39731) continue;
+//            nev++; 
+//            if(nev != 4251) continue;
             cal.processDataEvent(event);
             hodo.processDataEvent(event);
 	    trk.processDataEventAndGetClusters(event);
@@ -460,6 +482,9 @@ public class FTEBEngine extends ReconstructionEngine {
                                 int ncrosses = banktrk.rows();
                                 for(int nc = 0; nc < ncrosses; nc++){
                                     int det =  banktrk.getInt("detector", nc);
+                                    int crossID = banktrk.getInt("id", nc);
+                                    if(crossID != trkID) continue;
+                                    
                                     if(det>=0){
                                         float xt = banktrk.getFloat("x", nc);
                                         float yt = banktrk.getFloat("y", nc);
@@ -493,7 +518,47 @@ public class FTEBEngine extends ReconstructionEngine {
                                                 segment1.setEnd(seg1.end().x(), seg1.end().y());
                                                 segment2.setEnd(seg2.end().x(), seg2.end().y());
                                                 
-                                           }
+                                            // extract the mumber of strips forming the cross and store them in an occupancy plot for matched signals
+                                            // which strips are forming the id cross?
+                                                                                       
+                                            if(lay1==1){
+                                                h71.fill(seed1);
+                                            }else if(lay1==2){
+                                                h72.fill(seed1);
+                                            }else if(lay1==3){
+                                                h73.fill(seed1);
+;                                           }else if(lay1==4){
+                                                h74.fill(seed1);    
+                                            }
+                                            if(lay2==1){
+                                                h71.fill(seed2);
+                                            }else if(lay2==2){
+                                                h72.fill(seed2);
+                                            }else if(lay2==3){
+                                                h73.fill(seed2);
+;                                           }else if(lay2==4){
+                                                h74.fill(seed2);    
+                                            }
+                                            
+                                            DataBank bankhit = event.getBank("FTTRK::hits");
+                                            if(bankhit.rows()>0){
+                                                for(int k=0; k<bankhit.rows(); k++){
+                                                    int clusterNum = bankhit.getInt("clusterID", k);
+                                                    if(clusterNum != icl1 && clusterNum != icl2) continue;
+                                                    int stripInCluster = bankhit.getInt("component", k);
+                                                    int clusterLay = bankhit.getInt("layer", k);
+                                                    if(clusterLay==1){
+                                                        h81.fill(stripInCluster);
+                                                    }else if(clusterLay==2){
+                                                        h82.fill(stripInCluster);
+                                                    }else if(clusterLay==3){
+                                                        h83.fill(stripInCluster);
+;                                                   }else if(clusterLay==4){
+                                                        h84.fill(stripInCluster);    
+                                                    }
+                                                }   
+                                           }    
+                                           }    
                                         }
                                         
                                         if(det==0){
@@ -1113,6 +1178,39 @@ public class FTEBEngine extends ReconstructionEngine {
         frameStripET.setVisible(true);
         
         
+        JFrame frameOccMatchSeed = new JFrame("strip occupancy clutsre seed for matched crosses");
+        frameOccMatchSeed.setSize(1200,800);
+        h71.setOptStat(11); h72.setOptStat(11); h73.setOptStat(11); h74.setOptStat(11);
+        EmbeddedCanvas canvasOccMatchSeed = new EmbeddedCanvas();
+        canvasOccMatchSeed.divide(2,2);
+        canvasOccMatchSeed.cd(0);
+        canvasOccMatchSeed.draw(h71);
+        canvasOccMatchSeed.cd(1);
+        canvasOccMatchSeed.draw(h72);
+        canvasOccMatchSeed.cd(2);
+        canvasOccMatchSeed.draw(h73);
+        canvasOccMatchSeed.cd(3);
+        canvasOccMatchSeed.draw(h74);
+        frameOccMatchSeed.add(canvasOccMatchSeed);
+        frameOccMatchSeed.setLocationRelativeTo(null);
+        frameOccMatchSeed.setVisible(true);
+        
+        JFrame frameOccMatch = new JFrame("strip occupancy for matched crosses");
+        frameOccMatch.setSize(1200,800);
+        h81.setOptStat(11); h82.setOptStat(11); h83.setOptStat(11); h84.setOptStat(11);
+        EmbeddedCanvas canvasOccMatch = new EmbeddedCanvas();
+        canvasOccMatch.divide(2,2);
+        canvasOccMatch.cd(0);
+        canvasOccMatch.draw(h81);
+        canvasOccMatch.cd(1);
+        canvasOccMatch.draw(h82);
+        canvasOccMatch.cd(2);
+        canvasOccMatch.draw(h83);
+        canvasOccMatch.cd(3);
+        canvasOccMatch.draw(h84);
+        frameOccMatch.add(canvasOccMatch);
+        frameOccMatch.setLocationRelativeTo(null);
+        frameOccMatch.setVisible(true);
         
     }
     

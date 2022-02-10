@@ -23,7 +23,7 @@ public class FTConstants {
 
 
     
-    public static final double  TRK_MIN_CROSS_NUMBER = 2;           // minimum number of crosses to find a line in the tracker
+    public static final double  TRK_MIN_CROSS_NUMBER = 1;           // minimum number of crosses to find a line in the tracker
 //    public static final double  TRK0_TRK1_DISTANCE_MATCHING = 0.25;  // matching distance between FTTRK points in cms
 //    public static final double  TOLERANCE_ON_CROSSES_TWO_DETECTORS = 0.; // 1. cm radius tolerance, tune it up
 //    public static final double  TRK0_TRK1_RADTOL = 2.5;              // max tolerance for TRK0/TRK1 distance (3D)
@@ -37,7 +37,7 @@ public class FTConstants {
     public static final double  FTTRKMinAdcThreshold = 18.;             // check min threshold for FTTTRK ADCs (18)
     public static final double  FTTRKMaxAdcThreshold = 1000.;            // check max threshold for FTTTRK ADCs (18)
     public static final double  TRK_MIN_CLUS_ENERGY = 20.;              // minimum cluster energy to accept a signal cluster (20)
-    public static final int     TRK_MIN_CLUS_SIZE = 1;                  // minimum cluster size to form crosses (0: no limit on cluster size) // 2 is very strict
+    public static final int     TRK_MIN_CLUS_SIZE = 0;                  // minimum cluster size to form crosses (0: no limit on cluster size) // 2 is very strict
 
 
 }

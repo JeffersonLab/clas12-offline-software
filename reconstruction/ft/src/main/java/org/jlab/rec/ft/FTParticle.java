@@ -179,6 +179,8 @@ public class FTParticle {
                            minimumDistance = hitdistance;
                            bestIndex = loop;
                            System.out.println("best hit distance and time " + minimumDistance + " " + timedistance);
+                           System.out.println("cross center coordinates x, y " + response.getPosition().toPoint3D().x() + " , " +
+                                   response.getPosition().toPoint3D().y());
                         }else if(detectorType=="FTHODO" && timedistance<timeThreshold){
                            minimumDistance = hitdistance; 
                            bestIndex = loop;
@@ -190,10 +192,17 @@ public class FTParticle {
                 // if bestHit is on hodo require at least two hits overall on HODO
                 if(detectorType=="HODO"){if(hitList.get(bestIndex).getSize()<FTConstants.HODO_MIN_CLUSTER_SIZE) bestIndex=-1;}
                 // if bestHit is on trk require at least two crosses overall in FTTRK
-                if(detectorType=="FTTRK"){if(hitList.get(bestIndex).getSize()<FTConstants.TRK_MIN_CROSS_NUMBER) bestIndex=-1;}
+                if(detectorType=="FTTRK"){
+                    if(hitList.get(bestIndex).getSize() >= FTConstants.TRK_MIN_CROSS_NUMBER){
+                         ;
+                    }else{
+                        bestIndex=-1;
+                    } 
+                }
             }
             return bestIndex;
         }
+        
         
         public void show() {            
             System.out.println( "FT Particle info " +
