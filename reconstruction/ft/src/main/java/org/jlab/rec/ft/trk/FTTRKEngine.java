@@ -141,7 +141,8 @@ public class FTTRKEngine extends ReconstructionEngine {
 //        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_singleEle_nofields_big_-30.60.120.30.hipo";
 ///        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_dis.hipo";
 ///        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_test.hipo";
-        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/ft_005038.evio.01231.hipo";
+//////        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/ft_005038.evio.01231.hipo";
+        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/filter_005418.0.hipo";
 //        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_fullAcceptance_singleTrack.hipo";
         System.out.println("input file " + input);
 	HipoDataSource  reader = new HipoDataSource();
@@ -170,13 +171,13 @@ public class FTTRKEngine extends ReconstructionEngine {
         H1F h1clEn = new H1F("Cluster energy", 100, 0., 1000.);
         h1clEn.setOptStat(Integer.parseInt("1111")); h1clEn.setTitleX("centroid energy of clusters"); 
         H1F hOccupancy1 = new H1F("hOccupancy1", 768, 0., 769.); hOccupancy1.setTitleX("Component layer 1"); 
-        hOccupancy1.setLineColor(1); hOccupancy1.setFillColor(1);
+        hOccupancy1.setLineColor(1); hOccupancy1.setFillColor(1); hOccupancy1.setOptStat(11);
         H1F hOccupancy2 = new H1F("hOccupancy2", 768, 0., 769.); hOccupancy2.setTitleX("Component layer 2"); 
-        hOccupancy2.setLineColor(1); hOccupancy2.setFillColor(2);
+        hOccupancy2.setLineColor(1); hOccupancy2.setFillColor(2); hOccupancy2.setOptStat(11);
         H1F hOccupancy3 = new H1F("hOccupancy3", 768, 0., 769.); hOccupancy3.setTitleX("Component layer 3"); 
-        hOccupancy3.setLineColor(1); hOccupancy3.setFillColor(3);
+        hOccupancy3.setLineColor(1); hOccupancy3.setFillColor(3); hOccupancy3.setOptStat(11);
         H1F hOccupancy4 = new H1F("hOccupancy4", 768, 0., 769.); hOccupancy4.setTitleX("Component layer 4"); 
-        hOccupancy4.setLineColor(1); hOccupancy4.setFillColor(4);
+        hOccupancy4.setLineColor(1); hOccupancy4.setFillColor(4); hOccupancy4.setOptStat(11);
         
         H1F hStripDiff1 = new H1F("hStripDiff1", 10, -5.5, 4.5); hStripDiff1.setTitleX("Strip difference layer 1"); 
         hStripDiff1.setOptStat(Integer.parseInt("1111")); hStripDiff1.setLineColor(1); hStripDiff1.setFillColor(1);
@@ -219,8 +220,8 @@ public class FTTRKEngine extends ReconstructionEngine {
         
         int nc1 = 0, nc2 = 0, ncmatch = 0;
         int nev=0;
-//        while(reader.hasEvent()){
-        int nev1 = 0; int nev2 = 10000; for(nev=nev1; nev<nev2; nev++){   // debug only a set of events (uncomment while loop in case)
+        while(reader.hasEvent()){
+//        int nev1 = 0; int nev2 = 40000; for(nev=nev1; nev<nev2; nev++){   // debug only a set of events (uncomment while loop in case)
             DataEvent event = (DataEvent) reader.getNextEvent();
             if(debug>=1) System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~ processing event ~~~~~~~~~~~ " + nev); 
 //            if(nev != 8) continue;    // select one event only for debugging purposes
@@ -294,7 +295,7 @@ public class FTTRKEngine extends ReconstructionEngine {
                 maxcomp4 = bank.getShort("component", imax4);
             }            
           
-            
+            /*
             // iterate along the cluster list for every event
             if(debug>=1) System.out.println("clusters size --- " + clusters.size());
             if(clusters.size()!=0){
@@ -416,7 +417,8 @@ public class FTTRKEngine extends ReconstructionEngine {
                         }   
                     }
                 }
-             }    
+            }
+*/
         }
     
         

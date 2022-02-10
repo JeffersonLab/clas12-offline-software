@@ -153,6 +153,7 @@ public class FTEventBuilder {
                     resp.setCrTime(FTTRKReconstruction.crTime[i]);
                     //////////////////////////////
                     resp.setPosition(bank.getFloat("x", i), bank.getFloat("y", i), bank.getFloat("z", i));
+                    //debugMode = 2;
                     if(debugMode>=1) System.out.println(" --------- id, cross x, y, z " + bank.getInt("id", i) + " " + bank.getFloat("x", i) + " " + bank.getFloat("y", i) + " " + bank.getFloat("z", i));
                     responses.add(resp);
                 }
@@ -239,6 +240,10 @@ public class FTEventBuilder {
                 track.setCharge(-999); // provisional, for no field tracking
                 track.setTrackerIndex(responses.get(iTrk).getId());
                 responses.get(iTrk).setAssociation(i);
+                responses.get(iTrk).setMatchPosition(track.getPosition().x(), track.getPosition().y(), track.getPosition().z());
+                System.out.println("matched cross coordinates " + responses.get(iTrk).getPosition().x() + " " + responses.get(iTrk).getPosition().y());
+            }else{
+                // wrong cross coordinates need to be deleted
             }
             if (debugMode >= 1) track.show();
         }

@@ -269,8 +269,42 @@ public class FTCALReconstruction {
                 if(adc!=-1 && time!=-1){
                     FTCALHit hit = new FTCALHit(row,icomponent, adc, time, charge2Energy, timeOffsets, timeWalk, cluster);
 //	            if(icomponent>=90 && icomponent<=98) hits.add(hit); // select only crystals in a given region
-//                    if(icomponent>= 90 && icomponent<=107)
-//                  if(icomponent == 92)
+//                    if(icomponent>= 69 && icomponent<=84)
+// vertical strip of crystals, right side
+/*
+                     if(icomponent == 61 || icomponent == 83 || icomponent == 105 || icomponent == 127 || 
+                        icomponent == 149 || icomponent == 193 || icomponent == 215 || icomponent == 237 || 
+                        icomponent == 259 || icomponent == 281 || icomponent == 303 || icomponent == 325 || 
+                        icomponent == 347 || icomponent == 369 || icomponent == 391 || icomponent == 413 || icomponent == 435)  
+*/
+// vertical strip of crystals, left side
+/*
+                    if(icomponent == 27 || icomponent == 49 || icomponent == 71 || icomponent == 93 || 
+                        icomponent == 115 || icomponent == 137 || icomponent == 159 || icomponent == 181 || 
+                        icomponent == 203 || icomponent == 225 || icomponent == 247 || icomponent == 269 || 
+                        icomponent == 291 || icomponent == 313 || icomponent == 335 || icomponent == 357 || 
+                        icomponent == 379 || icomponent == 401 || icomponent == 423 || icomponent == 445 )  
+*/
+// vertical strip of crystals, left side central
+/*
+                    if(icomponent == 10 || icomponent == 32 || icomponent == 54 || icomponent == 76 || 
+                        icomponent == 98 || icomponent == 120 || icomponent == 142 || icomponent == 340 || 
+                        icomponent == 362 || icomponent == 384 || icomponent == 406 || icomponent == 428 || 
+                        icomponent == 450 || icomponent == 472 )  
+ */                       
+// vertical strip of crystals, right side central
+/*
+                    if(icomponent == 11 || icomponent == 33 || icomponent == 55 || icomponent == 77 || 
+                        icomponent == 99 || icomponent == 121 || icomponent == 143 || icomponent == 341 || 
+                        icomponent == 363 || icomponent == 385 || icomponent == 407 || icomponent == 429 || 
+                        icomponent == 451 || icomponent == 473 )  
+*/
+// top half 
+//                    if(icomponent >= 242)
+// bottom half
+ //                   if(icomponent <= 241)
+
+//                   if(icomponent == 92)
 //                   if(icomponent == 105)
 //                   if(icomponent == 400)
 //                   if(icomponent == 412)

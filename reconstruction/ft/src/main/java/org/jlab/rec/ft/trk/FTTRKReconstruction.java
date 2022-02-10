@@ -431,6 +431,7 @@ public class FTTRKReconstruction {
             DataBank bankDGTZ = event.getBank("FTTRK::adc");
             int nrows = bankDGTZ.rows();
             int hitId = -1;
+            int nsec1 = -1, nsec2 = -1;
             for(int row = 0; row < nrows; row++){
                 int isector     = bankDGTZ.getInt("sector",row);
                 int ilayer      = bankDGTZ.getInt("layer",row);
@@ -476,10 +477,10 @@ public class FTTRKReconstruction {
                 
                 // read just layer sectors only for real data (no montecarlo)
               //icomponent = adjustStripNumberingTest11(run, ilayer, icomponent);
-              //icomponent = renumberStrip(ilayer, icomponent);
-              icomponent = renumberFEE2RECRotatedAndAdjust(run, ilayer, icomponent);
-                
-              
+//                icomponent = renumberStrip(ilayer, icomponent);
+//                icomponent = renumberFEE2RECRotatedAndAdjustVanilla(run, ilayer, icomponent);
+                icomponent = renumberFEE2RECRotatedAndAdjustHazel(run, ilayer, icomponent);
+
 /*                
 // layer 3: swap 6-7 e inversione                
                 if(ilayer==3){
@@ -591,8 +592,17 @@ public class FTTRKReconstruction {
                       }
 */
 
+                    boolean isHitAccepted = true;      
+
 // select strips belonging to a crate (1-2-3)
-///                      if(isStripInCrate(1, ilayer, icomponent)) hits.add(hit);
+//                      if(isStripInCrate(1, ilayer, icomponent)) hits.add(hit);
+
+                    if(isStripInCrate(1, ilayer, icomponent)){
+                       isHitAccepted = true;    
+                    }else{   
+                       isHitAccepted = false;       
+                    }
+
 // select strips belonging to a given physical connector in a layer
 //                      int iconn = findPhysicalConnector(icomponent);  
 //                      if(ilayer==2 && iconn==6) hits.add(hit);           // bad connector
@@ -606,13 +616,31 @@ public class FTTRKReconstruction {
                       if(ilayer==4 && icomponent>=119 && icomponent<=384) hits.add(hit);
                       */
                       
-                      boolean isHitAccepted = true;
 //                      if(ilayer == 2 || ilayer ==3) isHitAccepted = false;
 //                      if((ilayer==2) && icomponent<=641) isHitAccepted = false; 
-//                      if((ilayer==4) && icomponent>=1 && icomponent>64) isHitAccepted = false; 
+//                      if((ilayer==4) && icomponent>=1 && icomponent>64) isHitAccepted = false;
+
+// strip sector selection in layer 1-2
+/*
+                      if(ilayer==1){
+                          nsec1 = findIn12Sectors(icomponent);
+                          if(nsec1!=10 && nsec1!=11) isHitAccepted = false;
+                      }
+                      if(ilayer==2){
+                          nsec2 = findIn12Sectors(icomponent);
+                          if(nsec2 ==6){
+                              System.out.println("layer 2 sector 6 "  + icomponent);
+//                              if(icomponent-64*6 > 32.){icomponent = -1;}else{icomponent = 200;}
+                          }else{
+                              icomponent = -1;
+                          }
+                      }                  
+//                      if(nsec1 !=5) isHitAccepted = false;
+*/                     
                       
 //  selection on strip time
                       if(time < 50 || time > 350) isHitAccepted = false;
+                      if(icomponent<0) isHitAccepted = false;
                       
                       if(isHitAccepted) hits.add(hit);                  
 ////////////////////////////////////////////////////////////////////////////////////////                      
@@ -1132,9 +1160,20 @@ public int reverseStripsInSector(int icomponent){
     int offset = sectorLimit[nsector+1] - icomponent;
     icomponent = sectorLimit[nsector] + offset;
       
-    return icomponent;
+    return icomponent; 
  } 
- 
+
+public int reverseStripsIn12Sectors(int icomponent){
+    // flip the layer horizontally with respect to the x axis (top/bottom flip)
+    int[] sectorLimit = {0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768};
+    int nsector = findIn12Sectors(icomponent);
+    int offset = sectorLimit[nsector+1] - icomponent;
+    icomponent = sectorLimit[nsector] + offset;
+      
+    return icomponent; 
+}
+
+
 public int swapSectors(int icomponent, int nsector2){
     // get the new strip number of the icomponent strip in nsector1 once the sector is swapped to nsector2
     int[] sectorLimit = {0, 64, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480, 512, 544, 576, 608, 640, 704, 768};
@@ -1144,6 +1183,31 @@ public int swapSectors(int icomponent, int nsector2){
            
     return newicomp;
 }
+
+public int swap12Sectors(int icomponent, int nsector2){
+    // get the new strip number of the icomponent strip in nsector1 once the sector is swapped to nsector2
+    //int[] sectorLimits = {0, 64, 128, 192, 256, 320, 384, 498, 512, 576, 640, 704, 768};
+    int[] sectorNumber =   {0,  1,   2,   3,   8,   9,   4,   5,   6,   7,   10,   11 };
+    int[] sectorLimits = {0, 64, 128, 192, 256, 448, 512, 576, 640, 320, 384, 704, 768};
+    int[] sectorLimitsSequential = {0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768};
+    int[] sectorNumberSequential =   {0,  1,   2,   3,   4,   5,   6,   7,   8,   9,   10,   11 };    
+    int nsector1 = findIn12Sectors(icomponent);
+    int secidx1 = -1; 
+    int secidx2 = -1;
+    /*
+    for(int i=0; i<11; i++){
+        if(sectorNumberSequential[i] == nsector1) secidx1 = i;
+        if(sectorNumberSequential[i] == nsector2) secidx2 = i;
+    }
+    */
+    int offset = -sectorLimitsSequential[nsector1] + icomponent;
+    int newicomp = sectorLimitsSequential[nsector2] + offset;
+           
+    return newicomp;
+}
+
+
+
 
 public static int findSector(int icomponent){
     // returns the sector number, corresponding to the component of the lower extreme of the interval
@@ -1158,6 +1222,24 @@ public static int findSector(int icomponent){
     }
     return nsector;
 }
+
+public static int findIn12Sectors(int icomponent){
+    // returns the sector number, corresponding to the component of the lower extreme of the interval
+    // sectors are numbered 0-11
+    //int[] sectorLimits = {0, 64, 128, 192, 256, 320, 384, 498, 512, 576, 640, 704, 768};
+    int[] sectorLimits = {0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768};
+    int[] sectorNumber =   {0,  1,   2,   3,   8,   9,   4,   5,   6,   7,   10,   11 };
+    int nsector = -1;
+    for(int i=0; i<12; i++){
+        if(icomponent>sectorLimits[i] && icomponent<=sectorLimits[i+1]){
+//            nsector = sectorNumber[i];
+            nsector = i;
+            break;
+        } 
+    }
+    return nsector;
+}
+
 
 public static int findIn16Sectors(int icomponent){
     // returns the sector number, corresponding to the component of the lower extreme of the interval
@@ -1341,7 +1423,7 @@ public boolean isStripInCrate(int nCrate, int ilayer, int icomponent){
     boolean isInCrate = false;
     // check if the strip belongs to a given connector - connectors are numbered 1-12
     // icomponent is numberered 0-767
-    int iConnector = findPhysicalConnector(icomponent);
+    int iConnector = findOrderedConnector(icomponent);
     // check if the connector belongs to the chosen crate
     if(nCrate==1){
        if(ilayer==1){
@@ -1379,6 +1461,38 @@ public boolean isStripInCrate(int nCrate, int ilayer, int icomponent){
    return isInCrate;
 }    
     
+public int findOrderedConnector(int icomponent){
+    // returns the number of the physical connector one strip belongs to
+    // physical connectors are numbered 1-12
+    int iConnector = -1;
+    if(icomponent>=0 && icomponent <64){
+        iConnector = 1;
+    }else if(icomponent>=64 && icomponent <128){
+        iConnector = 2;
+    }else if(icomponent>=128 && icomponent <192){
+        iConnector = 3;
+    }else if(icomponent>=192 && icomponent <256){
+        iConnector = 4;
+    }else if(icomponent>=384 && icomponent <448){
+        iConnector = 7;
+    }else if(icomponent>=448 && icomponent <512){
+        iConnector = 8;
+    }else if(icomponent>=512 && icomponent <576){
+        iConnector = 9;
+    }else if(icomponent>=576 && icomponent <640){
+        iConnector = 10;
+    }else if(icomponent>=256 && icomponent <320){
+        iConnector = 5;
+    }else if(icomponent>=320 && icomponent <384){
+        iConnector = 6;
+    }else if(icomponent>=640 && icomponent <704){
+        iConnector = 11;
+    }else if(icomponent>=704 && icomponent <768){
+        iConnector = 12;
+    }   
+    return iConnector;
+} 
+
 public int findPhysicalConnector(int icomponent){
     // returns the number of the physical connector one strip belongs to
     // physical connectors are numbered 1-12
@@ -1409,7 +1523,8 @@ public int findPhysicalConnector(int icomponent){
         iConnector = 12;
     }   
     return iConnector;
-}   
+} 
+
 
 public int renumberStrip(int ilayer, int icomponent){
     // renumber strips from FEE number (to RECO numbering
@@ -1466,8 +1581,11 @@ public int renumberFEE2RECRotatedAndAdjust(int run, int ilayer, int icomponent){
         //System.out.println("icomponent in bank " + icomponent + " ilayer " + ilayer);    
         icomponent = renumberStrip(ilayer, icomponent);
         
-        //if(ilayer==2) icomponent = flipStripVertical(ilayer, icomponent);
+//        if(ilayer==2) icomponent = flipStripHorizontal(ilayer, icomponent);
+//        if(ilayer==1) icomponent = overturnModule(ilayer, icomponent);
         if(ilayer==1 || ilayer==4) icomponent = overturnModule(ilayer, icomponent);
+//        if(ilayer==2) icomponent = overturnModule(ilayer, icomponent);
+
         if(ilayer==3){
             int isec1 = findSector(icomponent);
             if(isec1==11){
@@ -1480,13 +1598,97 @@ public int renumberFEE2RECRotatedAndAdjust(int run, int ilayer, int icomponent){
             if(newsec==11 || newsec==10) icomponent = reverseStripsInSector(icomponent);
             icomponent = flipStripHorizontal(ilayer, icomponent);
         }
+ 
+        
+        if(ilayer==2){
+            int isec1 = findIn12Sectors(icomponent);
+//            if(isec1 == 1 || isec1==6 || isec1 == 10){
+//                 icomponent = -1;
+//            }
+        }
+        
+
+/*
+            if(isec1 == 6) icomponent = -1;
+            if(isec1 == 0){
+                icomponent = swap12Sectors(icomponent, 11);
+            }else if(isec1 == 1){
+                icomponent = swap12Sectors(icomponent, 10);
+            }else if(isec1 == 11){
+                icomponent = swap12Sectors(icomponent, 0);
+            }else if(isec1 == 10){
+                icomponent = swap12Sectors(icomponent, 1);
+            }
+            int newsec = findIn12Sectors(icomponent);
+            if( newsec==0 || newsec==1 || newsec ==10 || newsec==11) icomponent = reverseStripsIn12Sectors(icomponent);
+            if(newsec==1 || newsec==10) icomponent = -1;
+*/            
+        //}
+        
+        
         if(ilayer==1){
-            int isec1 = findSector(icomponent);
+            
+            int isec1 = findIn12Sectors(icomponent);
+            /* 
+            if(isec1==2){
+               icomponent = swap12Sectors(icomponent, 9);
+//                 icomponent = -1;
+            }else if(isec1==9){
+               icomponent = swap12Sectors(icomponent, 2);
+            }else if(isec1==3){
+                icomponent = swap12Sectors(icomponent, 6);
+                //icomponent = -1;
+            }else if(isec1==6){
+                icomponent = swap12Sectors(icomponent, 3);
+            }
+            int newsec = findIn12Sectors(icomponent);
+            if(newsec == 2 || newsec == 9) icomponent = reverseStripsIn12Sectors(icomponent);
+            if(newsec==3){
+               icomponent = swap12Sectors(icomponent, 2);
+//                 icomponent = -1;
+            }else if(newsec==2){
+               icomponent = swap12Sectors(icomponent, 3);
+            }else if(newsec==9){
+                icomponent = swap12Sectors(icomponent, 6);
+            }
+            */
+            
+            // good
+            
+            if(isec1==3){
+//                icomponent = reverseStripsInSector(icomponent);
+//                icomponent = swap12Sectors(icomponent, 2); 
+//                 icomponent = -1;
+            }else if(isec1==6){
+               icomponent = swap12Sectors(icomponent, 10);
+            }else if(isec1==8){
+               icomponent = swap12Sectors(icomponent, 11);
+//                 icomponent = -1;
+            }else if(isec1==4){
+//                 icomponent = -1;
+//               icomponent = swap12Sectors(icomponent, 6); 
+            }else if(isec1==2){
+//               icomponent = reverseStripsIn12Sectors(icomponent); 
+               //icomponent = swap12Sectors(icomponent, 3);  
+            }
+            
+            /*
+            int isec2 = findIn12Sectors(icomponent);
+            if(isec2==3){
+               icomponent = swap12Sectors(icomponent, 6);
+               icomponent = reverseStripsIn12Sectors(icomponent);
+            }
+            */
+            
+//            int newsec1 = findIn12Sectors(icomponent);   
+//            if(newsec1!=2) icomponent = -1;
+            
+            
             /*
             if(isec1==4){
                 icomponent = swapSectors(icomponent, 2);
             }else if(isec1==5){
-                icomponent = swapSectors(icomponent, 3);
+               icomponent = swapSectors(icomponent, 3);
             }else if(isec1==3){
                 icomponent = swapSectors(icomponent, 4);
             }else if(isec1==9){
@@ -1497,7 +1699,7 @@ public int renumberFEE2RECRotatedAndAdjust(int run, int ilayer, int icomponent){
             
             int newsec = findSector(icomponent);
             if(newsec == 2) icomponent = reverseStripsInSector(icomponent);
-*/
+            */
             /*
             if(isec1==10){
                 icomponent = swapSectors(icomponent, 2);
@@ -1609,8 +1811,106 @@ public int renumberFEE2RECRotatedAndAdjust(int run, int ilayer, int icomponent){
 }
 
 
+public int renumberFEE2RECRotatedAndAdjustVanilla(int run, int ilayer, int icomponent){
+//  apply the renumbering schema - method 2 
+    if(run>0){
+        //System.out.println("icomponent in bank " + icomponent + " ilayer " + ilayer);    
+        icomponent = renumberStrip(ilayer, icomponent);
+        
+        /*
+        if(ilayer==1 || ilayer==4) icomponent = overturnModule(ilayer, icomponent);
+        if(ilayer==3){
+            int isec1 = findSector(icomponent);
+            if(isec1==11){
+                icomponent = swapSectors(icomponent, 10);
+            }else if(isec1==10){
+                icomponent = swapSectors(icomponent, 11);
+            }
+            // reverse sectors 10-11 + flip horizontal
+            int newsec = findSector(icomponent);
+            if(newsec==11 || newsec==10) icomponent = reverseStripsInSector(icomponent);
+            icomponent = flipStripHorizontal(ilayer, icomponent);
+        }
+        */
+    } 
+    
+    return icomponent;     
+}
 
-}    
+
+public int renumberFEE2RECRotatedAndAdjustHazel(int run, int ilayer, int icomponent){
+//  apply the renumbering schema - method 2 
+    if(run>0){
+        //System.out.println("icomponent in bank " + icomponent + " ilayer " + ilayer);    
+        icomponent = renumberStrip(ilayer, icomponent);
+        
+        if(ilayer==1 || ilayer==4) icomponent = overturnModule(ilayer, icomponent);
+        if(ilayer==3){
+            // consider 16 sectors division
+            int isec1 = findSector(icomponent);
+            if(isec1==11){
+                icomponent = swapSectors(icomponent, 10);
+            }else if(isec1==10){
+                icomponent = swapSectors(icomponent, 11);
+            }
+            // reverse sectors 10-11 + flip horizontal
+            int newsec = findSector(icomponent);
+            if(newsec==11 || newsec==10) icomponent = reverseStripsInSector(icomponent);
+            icomponent = flipStripHorizontal(ilayer, icomponent);
+        }
+ 
+        if(ilayer==2){
+            int isec1 = findIn12Sectors(icomponent);
+//            if(isec1 == 1 || isec1==6 || isec1 == 10) icomponent = -1;
+//            if(isec1 != 10){icomponent = -1;} 
+        }
+        
+        
+        if(ilayer==1){            
+            int isec1 = findIn12Sectors(icomponent);
+
+            // good
+            /*
+            if(isec1==3){
+//                icomponent = reverseStripsInSector(icomponent);
+//                icomponent = swap12Sectors(icomponent, 2); 
+//                 icomponent = -1;
+            }else if(isec1==6){
+               icomponent = swap12Sectors(icomponent, 10);
+            }else if(isec1==8){
+               icomponent = swap12Sectors(icomponent, 11);
+//                 icomponent = -1;
+            }else if(isec1==4){
+//                 icomponent = -1;
+//               icomponent = swap12Sectors(icomponent, 6); 
+            }else if(isec1==2){
+//               icomponent = reverseStripsIn12Sectors(icomponent); 
+               //icomponent = swap12Sectors(icomponent, 3);  
+            }
+            */
+            
+//            if(isec1 != 10 && isec1 != 11) icomponent = -1; 
+            
+            //if(isec1 != 4) icomponent = -1;
+            if(isec1 == 4){
+//                icomponent = swap12Sectors(icomponent, 10);
+//                icomponent = -1;
+            }
+            
+            
+        }
+        if(ilayer==3){
+            int isec1 = findIn12Sectors(icomponent);
+            //if(isec1 != 8) icomponent = -1;
+        }
+        
+    } 
+    
+    return icomponent;     
+}
+
+}
+  
 
 
 
