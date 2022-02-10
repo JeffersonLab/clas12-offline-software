@@ -1,5 +1,8 @@
 package org.jlab.rec.ft;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.geom.prim.Line3D;
@@ -252,6 +255,114 @@ public class FTParticle {
                     }   
                 }
                 return bestIndex;
+        }
+        
+        public int [][] getTRKOrderedListOfHits(List<FTResponse>  hitList, int it, double distanceThreshold, double timeThreshold){
+            Line3D cross = this.getLastCross();
+            double   minimumDistance = 500.0;
+            // how many FTTRK events?
+            int hitsTRK = 0;
+            for(int l=0; l<hitList.size(); l++){
+                if(hitList.get(l).getType() == "FTTRK") hitsTRK++;
+            }
+            int[][] bestIndices; 
+            if(hitsTRK != 0){
+                bestIndices = new int[hitsTRK][2];
+                ArrayList<Double> hitDistancesDet0 = new ArrayList<Double>(hitsTRK);
+                ArrayList<Integer> hitOrderDet0 = new ArrayList<Integer>(hitsTRK);
+                ArrayList<Double> hitDistancesDet1 = new ArrayList<Double>(hitsTRK);
+                ArrayList<Integer> hitOrderDet1 = new ArrayList<Integer>(hitsTRK);
+                int lTRK = -1;
+                //init
+                for(int l=0; l<hitsTRK; l++){
+                    bestIndices[l][0] = bestIndices[l][1] = -1;
+                    hitDistancesDet0.add(l, -1.);
+                    hitOrderDet0.add(l, 1);
+                    hitDistancesDet1.add(l, -1.);
+                    hitOrderDet1.add(l, 1);
+                }
+                for(int loop = 0; loop < hitList.size(); loop++){
+                    int bestidx = -1;
+                    FTResponse response = hitList.get(loop);
+                    if(response.getAssociation()<0 && response.getType() == "FTTRK"){
+                        lTRK++;
+                        hitDistancesDet0.add(lTRK, -1.);
+                        hitDistancesDet1.add(lTRK, -1.);
+                        hitOrderDet0.add(lTRK, -1);
+                        hitOrderDet1.add(lTRK, -1);
+                        Line3D  dist = cross.distance(response.getPosition().toPoint3D());
+                        double hitdistance  = dist.length();
+                        double timedistance = Math.abs(this.getTime() - (response.getTime()-response.getPosition().mag()/PhysicsConstants.speedOfLight()));       
+
+                        double t=response.getTime();
+                        int det = response.getTrkDet();
+                        if(it==0){
+                            // fill energy and time histograms only once per set or hits on FTTRK
+                            FTEBEngine.h600.fill(response.getPosition().mag()/PhysicsConstants.speedOfLight());
+                            FTEBEngine.h601.fill(response.getCrTime(), response.getPosition().mag()/PhysicsConstants.speedOfLight());
+                            if(det==0){ // non e' Id ma trkDet
+                                FTEBEngine.h602.fill(response.getCrTime());
+                            }else if(det==1){
+                                FTEBEngine.h603.fill(response.getCrTime());
+                            }
+                        }
+                                        
+                        if(timedistance<timeThreshold && hitdistance<distanceThreshold){
+                            bestidx = loop;
+                            if(det==0) {
+                                hitDistancesDet0.set(lTRK, hitdistance);
+                                hitOrderDet0.set(lTRK, loop);
+                            }
+                            if(det==1){
+                                hitDistancesDet1.set(lTRK, hitdistance);
+                                hitOrderDet1.set(lTRK, loop);
+                            }
+                        }                    
+                    
+                        if(bestidx>-1){
+                            if(hitList.get(bestidx).getSize() < FTConstants.TRK_MIN_CROSS_NUMBER){
+                                bestidx=-1;
+                                if(det==0){
+                                    hitDistancesDet0.set(lTRK, -1.);
+                                    hitOrderDet0.set(lTRK, -1);
+                                }
+                                if(det==1){
+                                    hitDistancesDet1.set(lTRK, -1.);
+                                    hitOrderDet1.set(lTRK, -1);
+                                }    
+                            }
+                        }
+                    }   
+                }
+                // sort the two arrays as a function of the distance
+                //int hitLen = hitDistancesDet0.size();
+                ArrayList<Double> iniHitDis0 = new ArrayList<Double>();
+                ArrayList<Double> iniHitDis1 = new ArrayList<Double>(); 
+                for(int l=0; l<hitsTRK; l++){
+                    iniHitDis0.add(l, hitDistancesDet0.get(l));
+                    iniHitDis1.add(l, hitDistancesDet1.get(l));
+                }
+                int[] orderedIndices0 = new int[hitsTRK];
+                int[] orderedIndices1 = new int[hitsTRK];
+                Collections.sort(hitDistancesDet0, Collections.reverseOrder());
+                Collections.sort(hitDistancesDet1, Collections.reverseOrder());
+                for(int l=0; l<hitsTRK; l++){
+                    orderedIndices0[l] = orderedIndices1[l] = -1;
+                    for(int k=0; k<hitsTRK; k++){
+                        if(hitDistancesDet0.get(l) == iniHitDis0.get(k) && hitDistancesDet0.get(l)>0) orderedIndices0[l] = hitOrderDet0.get(k);
+                        if(hitDistancesDet1.get(l) == iniHitDis1.get(k) && hitDistancesDet1.get(l)>0) orderedIndices1[l] = hitOrderDet1.get(k);
+                    }
+                }
+                // compose the double arrays of indices ordered by distance
+                for(int l=0; l < hitsTRK; l++){
+                    bestIndices[l][0] = orderedIndices0[l];
+                    bestIndices[l][1] = orderedIndices1[l];
+                }
+            }else{ 
+                bestIndices = new int[1][2];
+                bestIndices[0][0] = bestIndices[0][1] = -1;
+            }
+            return bestIndices;
         }
         
         
