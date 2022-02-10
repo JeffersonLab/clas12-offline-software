@@ -265,7 +265,7 @@ public class FTEventBuilder {
         }
     }
   
-     public void matchToTRKTwoDetectors(List<FTResponse> responses, List<FTParticle> particles) {
+    public void matchToTRKTwoDetectors(List<FTResponse> responses, List<FTParticle> particles) {
         for (int i = 0; i < particles.size(); i++) {
             FTParticle track = particles.get(i);
             if (debugMode >= 1) {
@@ -298,6 +298,37 @@ public class FTEventBuilder {
         }
     }
    
+    public void matchToTRKTwoDetectorsMultiHits(List<FTResponse> responses, List<FTParticle> particles) {
+        for (int i = 0; i < particles.size(); i++) {
+            FTParticle track = particles.get(i);
+            if (debugMode >= 1) {
+                System.out.println("Searching for matching signal in the tracker:");
+            }
+            int[][] iTrk;
+            iTrk = track.getTRKOrderedListOfHits(responses, i, FTConstants.CAL_TRK_DISTANCE_MATCHING, FTConstants.CAL_TRK_TIME_MATCHING);
+            int nHitsOnTRK = iTrk.length;
+            for(int j=0; j<2; j++){ // j: loop on two detectors
+                for(int k=0; k<nHitsOnTRK; k++){ // k: loop on hits on TRK
+                    if (iTrk[k][j] > 0) {
+                        if (debugMode >= 1) {
+                            System.out.println("found signal in FTTRK" + iTrk[k][j]);
+                        }
+                        track.setCharge(-999); // provisional, for no field tracking
+                        track.setTrackerIndex(responses.get(iTrk[k][j]).getId(), j); 
+                        responses.get(iTrk[k][j]).setHitIndex(iTrk[k][j]);
+                        responses.get(iTrk[k][j]).setAssociation(i);
+                        responses.get(iTrk[k][j]).setMatchPosition(track.getPosition().x(), track.getPosition().y(), track.getPosition().z());
+                        System.out.println("matched cross coordinates " + responses.get(iTrk[k][j]).getPosition().x() + " " + 
+                            responses.get(iTrk[k][j]).getPosition().y());
+                    }else{  
+                        // wrong cross coordinates need to be deleted
+                    }
+                }
+            }
+            if (debugMode >= 1) track.show();
+        }
+    }
+    
    
     public void matchToFTCal(List<FTResponse> responses, List<FTParticle> particles) {
         for (int i = 0; i < particles.size(); i++) {
