@@ -8,6 +8,7 @@ package org.jlab.rec.ft.trk;
 import java.util.ArrayList;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.ft.FTConstants;
 
 /**
  *
@@ -18,11 +19,14 @@ import org.jlab.geom.prim.Vector3D;
 
 	private static final long serialVersionUID = 9153980362683755204L;
 
-	private int _Sector;      							
-	private int _Layer;    	 							
-	private int _CId;									
-
-  private Line3D _StripSegment ;
+	private int _Sector;
+        private int _Layer;
+        private int _CId;
+        private double _TotalEnergy;
+        private double _Centroid;
+	private double _CentroidError;
+        
+        private Line3D _StripSegment ;
 	
 	/**
 	 * 
@@ -117,13 +121,6 @@ import org.jlab.geom.prim.Vector3D;
 		String s = "FTTRK cluster: ID "+this.get_CId()+" Seed "+this.get_SeedStrip()+" Layer "+this.get_Layer()+" Size "+this.size();
 		return s;
 	}
-	
-	
-	
-	private double _TotalEnergy;
-        private double _Centroid;
-	private double _CentroidError;
-
 	public double get_Centroid() {
 		return _Centroid;
 	}
@@ -183,7 +180,7 @@ import org.jlab.geom.prim.Vector3D;
                         double maxEn2 = -1;
                         int maxI = -1;
                         int maxI2nd = -1;
-                        int maxStripsForTM = 20; // truncated mean: minimum energy
+                        int maxStripsForTM = FTConstants.TRK_MAX_StripsForTruncatedMean; // truncated mean: minimum energy  HARDCODED 
                         if(nbhits>maxStripsForTM){
                             // max energy strip
                             for(int i=0; i< nbhits; i++){
@@ -204,74 +201,135 @@ import org.jlab.geom.prim.Vector3D;
                                 }
                             }
                         }
-                        
+                        // are all the strips int he cluster consecutive? if they are limiting pick as seed the strip with larger energy release
+                        /*
+                        boolean isCutInside = false;
+                        for(int i=0; i< nbhits-1; i++){
+                            FTTRKHit oneHit = this.get(i);   
+                            FTTRKHit theNext = this.get(i+1);
+                            if(oneHit.get_Strip() != theNext.get_Strip()) isCutInside = true; 
+                            double stripEn = oneHit.get_Edep();
+                            if(stripEn> maxEn1){
+                               maxEn1 = stripEn;
+                               maxI = i;
+                            }
+                            if(i==nbhits-1){
+                               stripEn = theNext.get_Edep();
+                                if(stripEn> maxEn1){
+                                    maxEn1 = stripEn;
+                                    maxI = i+1;
+                                } 
+                            }
+                        }
                         
 			// looping over the number of hits in the cluster
-			for(int i=0;i<nbhits;i++) {
-                            FTTRKHit thehit = this.get(i);
-                            // gets the energy value of the strip
-                            double strpEn = thehit.get_Edep();
-                            totEnergy += strpEn;
-                            strpEn = 1.; // fix to 1 if no energy weighted mean is required - seems to have better efficiency
-                            // if truncated mean on the maximun energy
-                            if(i==maxI || i==maxI2nd && Math.random()>0.5) {continue;}
-                            // get strip informations
-                            int strpNb = thehit.get_Strip();
-                            double x1 = thehit.get_StripSegment().origin().x();
-                            double y1 = thehit.get_StripSegment().origin().y();
-                            double z1 = thehit.get_StripSegment().origin().z();
-                            double x2 = thehit.get_StripSegment().end().x();
-                            double y2 = thehit.get_StripSegment().end().y();
-                            double z2 = thehit.get_StripSegment().end().z();
-				
-			    totEn += strpEn;
-                            totEnSq += strpEn*strpEn;
-                            int layer = thehit.get_Layer();
-                            int Slayer = thehit.get_HalfLayer(layer);
-                            double y = (double)FTTRKConstantsLoader.stripsYloc[Slayer][strpNb-1][0];
-//                            double y = (double)FTTRKConstantsLoader.stripsY[Slayer][strpNb-1][0];  
-
-			    weightedStrp+= strpEn*y;	
-			    weightedStripEndPoint1X+= strpEn*x1;
-			    weightedStripEndPoint1Y+= strpEn*y1;
-			    weightedStripEndPoint1Z+= strpEn*z1;
-			    weightedStripEndPoint2X+= strpEn*x2;
-			    weightedStripEndPoint2Y+= strpEn*y2;
-			    weightedStripEndPoint2Z+= strpEn*z2;
-			    // getting the max and min strip number in the cluster
-			    if(strpNb<=min) 
-					min = strpNb;
-			    if(strpNb>=max) 
-					max = strpNb;	
-			    // getting the seed strip which is defined as the strip with the largest deposited energy
-			    if(strpEn>=Emax) {
-					Emax = strpEn;
-					seed = strpNb; // seed: hit with largest energy release
-				}
-			    Slay = 2*Slayer;
-			}
-			if(totEn==0) {
+                        isCutInside = false;
+                        if(isCutInside){
+                            // if there is a limiting strip choose as centroid (seed) the strip with max energy release
+                            int maxStripNumber = -1;
+                            int minStripNumber = 1000;
+                            for(int i=0;i<nbhits;i++) {
+                                FTTRKHit thehit = this.get(i);
+                                // gets the energy value of the strip
+                                double strpEn = thehit.get_Edep();
+                                totEnergy += strpEn;
+                                totEn += strpEn;
+                                totEnSq += strpEn*strpEn;
+                                int numStrip = thehit.get_Strip();
+                                if(numStrip >= maxStripNumber) maxStripNumber = numStrip;
+                                if(numStrip <= minStripNumber) minStripNumber = numStrip;
+                            }
+                            FTTRKHit centHit = this.get(maxI);
+                            int layer = centHit.get_Layer();
+                            int Slayer = centHit.get_HalfLayer(layer);
+                            int strpNb = seed = centHit.get_Strip(); 
+                            Slay = 2*Slayer;
+                            double y = (double)FTTRKConstantsLoader.stripsYloc[Slayer][strpNb-1][0];  
+                            
+                            if(totEn==0) {
 				System.err.println(" Cluster energy is null .... exit");
 				return;
-			}
+                            }
 
-			this.set_MinStrip(min);
-			this.set_MaxStrip(max);
-			this.set_SeedStrip(seed);
-			this.set_SeedEnergy(Emax);
-			// calculates the centroid values and associated positions (in local RF)
-			stripYCent = weightedStrp/totEn;   //     
-                        //System.out.println("  --> centroid "+stripNumCent);
-                        // extreme points of the strip in global RF
-			xCentEndPoint1 = weightedStripEndPoint1X/totEn;
-			yCentEndPoint1 = weightedStripEndPoint1Y/totEn;
-			zCentEndPoint1 = weightedStripEndPoint1Z/totEn;
-			xCentEndPoint2 = weightedStripEndPoint2X/totEn;
-			yCentEndPoint2 = weightedStripEndPoint2Y/totEn;
-			zCentEndPoint2 = weightedStripEndPoint2Z/totEn;
-     
+                            this.set_MinStrip(minStripNumber);
+                            this.set_MaxStrip(maxStripNumber);
+                            this.set_SeedStrip(seed);
+                            this.set_SeedEnergy(maxEn1);
+                            // calculates the centroid values and associated positions (in local RF)
+                            stripYCent = seed;      
+                            //System.out.println("  --> centroid "+stripNumCent);
+                            // extreme points of the strip in global RF
+                            xCentEndPoint2 = centHit.get_StripSegment().end().x();
+                            yCentEndPoint2 = centHit.get_StripSegment().end().y();
+                            zCentEndPoint2 = centHit.get_StripSegment().end().z();
+                            xCentEndPoint1 = centHit.get_StripSegment().origin().x();
+                            yCentEndPoint1 = centHit.get_StripSegment().origin().y();
+                            zCentEndPoint1 = centHit.get_StripSegment().origin().z();
+                            
+                        }else{
+                        */
+                            for(int i=0;i<nbhits;i++) {
+                                FTTRKHit thehit = this.get(i);
+                                // gets the energy value of the strip
+                                double strpEn = thehit.get_Edep();
+                                totEnergy += strpEn;
+                                strpEn = 1.; // fix to 1 if no energy weighted mean is required - seems to have better efficiency
+                                // if truncated mean on the maximun energy
+                                if(i==maxI || i==maxI2nd && Math.random()>0.5) {continue;}
+                                // get strip informations
+                                int strpNb = thehit.get_Strip();
+                                double x1 = thehit.get_StripSegment().origin().x();
+                                double y1 = thehit.get_StripSegment().origin().y();
+                                double z1 = thehit.get_StripSegment().origin().z();
+                                double x2 = thehit.get_StripSegment().end().x();
+                                double y2 = thehit.get_StripSegment().end().y();
+                                double z2 = thehit.get_StripSegment().end().z();
+				
+                                totEn += strpEn;
+                                totEnSq += strpEn*strpEn;
+                                int layer = thehit.get_Layer();
+                                int Slayer = thehit.get_HalfLayer(layer);
+                                double y = (double)FTTRKConstantsLoader.stripsYloc[Slayer][strpNb-1][0];
+//                              double y = (double)FTTRKConstantsLoader.stripsY[Slayer][strpNb-1][0];  
+
+                                weightedStrp+= strpEn*y;	
+                                weightedStripEndPoint1X+= strpEn*x1;
+                                weightedStripEndPoint1Y+= strpEn*y1;
+                                weightedStripEndPoint1Z+= strpEn*z1;
+                                weightedStripEndPoint2X+= strpEn*x2;
+                                weightedStripEndPoint2Y+= strpEn*y2;
+                                weightedStripEndPoint2Z+= strpEn*z2;
+                                // getting the max and min strip number in the cluster
+                                if(strpNb<=min) min = strpNb;
+                                if(strpNb>=max) max = strpNb;	
+                                // getting the seed strip which is defined as the strip with the largest deposited energy
+                                if(strpEn>=Emax) {
+			            Emax = strpEn;
+				    seed = strpNb; // seed: hit with largest energy release
+                                }
+                                Slay = 2*Slayer;
+                            }
+                            if(totEn==0) {
+                                System.err.println(" Cluster energy is null .... exit");
+                                return;
+                            }
+                            
+                            this.set_MinStrip(min);
+                            this.set_MaxStrip(max);
+                            this.set_SeedStrip(seed);
+                            this.set_SeedEnergy(Emax);
+                            // calculates the centroid values and associated positions (in local RF)
+                            stripYCent = weightedStrp/totEn;   //     
+                            //System.out.println("  --> centroid "+stripNumCent);
+                            // extreme points of the strip in global RF
+                            xCentEndPoint1 = weightedStripEndPoint1X/totEn;
+                            yCentEndPoint1 = weightedStripEndPoint1Y/totEn;
+                            zCentEndPoint1 = weightedStripEndPoint1Z/totEn;
+                            xCentEndPoint2 = weightedStripEndPoint2X/totEn;
+                            yCentEndPoint2 = weightedStripEndPoint2Y/totEn;
+                            zCentEndPoint2 = weightedStripEndPoint2Z/totEn;
+                    //}
                 }
-                
                 // use the discrete coordinate of the seed strip x-y (for debug purposes only)
                 /*
                 int seed = this.get_SeedStrip();
