@@ -179,6 +179,7 @@ public class EvioHipoEvent4 {
         }
     }
     
+    @SuppressWarnings("empty-statement")
     public void fillHipoEventBMT(Event hipoEvent, EvioDataEvent evioEvent){
         if(evioEvent.hasBank("BMT::dgtz")==true){
             EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("BMT::dgtz");
@@ -188,7 +189,12 @@ public class EvioHipoEvent4 {
                 hipoADC.putByte("layer",  i, (byte) evioBank.getInt("layer",i));
                 hipoADC.putShort("component",  i, (short) evioBank.getInt("strip",i));
                 hipoADC.putInt("ADC",  i, (int) evioBank.getInt("ADC",i));
-                hipoADC.putFloat("time",  i, (float) 0);
+                try {
+                    hipoADC.putFloat("time",  i, (float) evioBank.getDouble("time",i));
+                }
+                catch(Exception e) {
+                    hipoADC.putFloat("time",  i, 0);
+                }
                 hipoADC.putShort("ped", i, (short) 0);            
             }
             hipoEvent.write(hipoADC);
@@ -204,7 +210,12 @@ public class EvioHipoEvent4 {
                 hipoADC.putByte("layer",  i, (byte) evioBank.getInt("layer",i));
                 hipoADC.putShort("component",  i, (short) evioBank.getInt("strip",i));
                 hipoADC.putInt("ADC",  i, (int) evioBank.getInt("ADC",i));
-                hipoADC.putFloat("time",  i, (float) 0);
+                try {
+                    hipoADC.putFloat("time",  i, (float) evioBank.getDouble("time",i));
+                }
+                catch(Exception e) {
+                    hipoADC.putFloat("time",  i, 0);
+                }
                 hipoADC.putShort("ped", i, (short) 0);            
             }
             hipoEvent.write(hipoADC);

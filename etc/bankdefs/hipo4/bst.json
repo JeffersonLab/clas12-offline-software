@@ -9,10 +9,13 @@
         {"name":"sector",         "type":"B", "info":"hit sector"},
         {"name":"layer",          "type":"B", "info":"hit layer"},
         {"name":"strip",          "type":"I", "info":"hit strip"},
+        {"name":"energy",         "type":"F", "info":"energy"},
+        {"name":"time",           "type":"F", "info":"time (ns)"},
         {"name":"fitResidual",    "type":"F", "info":"fitted hit residual"},
         {"name":"trkingStat",     "type":"I", "info":"tracking status"},
         {"name":"clusterID",      "type":"S", "info":"associated cluster ID"},
-        {"name":"trkID",          "type":"S", "info":"associated track ID"}
+        {"name":"trkID",          "type":"S", "info":"associated track ID"},
+        {"name":"status",         "type":"B", "info":"status (0=good)"}
         ]
   },
   {
@@ -26,9 +29,11 @@
             {"name":"layer",           "type":"B", "info":"layer"},
             {"name":"size",            "type":"S", "info":"cluster size"},
             {"name":"ETot",            "type":"F", "info":"cluster total energy"},
+            {"name":"time",            "type":"F", "info":"cluster time"},
             {"name":"seedE",           "type":"F", "info":"energy of the seed "},
             {"name":"seedStrip",       "type":"I", "info":"seed strip"},
             {"name":"centroid",        "type":"F", "info":"centroid strip number"},
+            {"name":"centroidError",   "type":"F", "info":"centroid spatial error"},
             {"name":"centroidResidual","type":"F", "info":"centroid residual"},
             {"name":"seedResidual",    "type":"F", "info":"seed residual"},
             {"name":"Hit1_ID",         "type":"S", "info":"Index of hit 1 in cluster"},
@@ -36,7 +41,23 @@
             {"name":"Hit3_ID",         "type":"S", "info":"Index of hit 3 in cluster"},
             {"name":"Hit4_ID",         "type":"S", "info":"Index of hit 4 in cluster"},
             {"name":"Hit5_ID",         "type":"S", "info":"Index of hit 5 in cluster"},
-            {"name":"trkID",           "type":"S", "info":"associated track ID"}
+            {"name":"trkID",           "type":"S", "info":"associated track ID"},
+            {"name":"x1",              "type":"F", "info":"cluster first end point x"},
+            {"name":"y1",              "type":"F", "info":"cluster first end point y"},
+            {"name":"z1",              "type":"F", "info":"cluster first end point z"},
+            {"name":"x2",              "type":"F", "info":"cluster second end point x"},
+            {"name":"y2",              "type":"F", "info":"cluster second end point y"},
+            {"name":"z2",              "type":"F", "info":"cluster second end point z"},
+            {"name":"lx",              "type":"F", "info":"vector x comp  along cluster pseudo-strip direction"},
+            {"name":"ly",              "type":"F", "info":"vector y comp  along cluster pseudo-strip direction"},
+            {"name":"lz",              "type":"F", "info":"vector z comp  along cluster pseudo-strip direction"},
+            {"name":"sx",              "type":"F", "info":"vector x comp perpendicular to cluster pseudo-strip direction in the module plane"},
+            {"name":"sy",              "type":"F", "info":"vector y comp perpendicular to cluster pseudo-strip direction in the module plane"},
+            {"name":"sz",              "type":"F", "info":"vector z comp perpendicular to cluster pseudo-strip direction in the module plane"},
+            {"name":"nx",              "type":"F", "info":"vector x comp normal to the cluster module plane"},
+            {"name":"ny",              "type":"F", "info":"vector y comp normal to the cluster module plane"},
+            {"name":"nz",              "type":"F", "info":"vector z comp normal to the cluster module plane"},
+            {"name":"e",              "type":"F", "info":"cluster spacial uncertainty"}
             ]
   },
   {
