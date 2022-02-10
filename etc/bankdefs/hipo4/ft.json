@@ -87,7 +87,8 @@
               {"name":"time",   "type":"F", "info":"track Time" },
               {"name":"calID",  "type":"S", "info":"pointer to cluster bank"},
               {"name":"hodoID", "type":"S", "info":"pointer to signal bank"},
-              {"name":"trkID",  "type":"S", "info":"pointer to cross banks"}
+              {"name":"trk0ID", "type":"S", "info":"pointer to first cross bank"},
+              {"name":"trk1ID", "type":"S", "info":"pointer to second cross bank"}
  
     ]
   },
@@ -119,7 +120,7 @@
               {"name":"id",               "type":"S",  "info":"Cluster ID"},
               {"name":"sector",           "type":"B",  "info":"Cluster sector"},
               {"name":"layer",            "type":"B",  "info":"Cluster layer"},
-              {"name":"energy",           "type":"F",  "info":"Cluster total energy"},
+              {"name":"energy",    "type":"F", "info":"Hit Energy" },
               {"name":"maxEnergy",        "type":"F",  "info":"Seed energy"},
               {"name":"seed",             "type":"S",  "info":"Seed strip"},
               {"name":"centroid",         "type":"F",  "info":"Centroid strip number"}
@@ -138,8 +139,8 @@
              {"name":"x",           "type":"F", "info":"Cross X position (cm)"},
              {"name":"y",           "type":"F", "info":"Cross Y position (cm)"},
              {"name":"z",           "type":"F", "info":"Cross Z position (cm)"},
-             {"name":"energy",      "type":"F", "info":"Energy assigned to the Cross"},
-             {"name":"time",        "type":"F", "info":"Time assigned to the Cross"},
+             {"name":"energy",      "type":"F", "info":"Cross Energy" },
+             {"name":"time",        "type":"F", "info":"Cross Time" },
              {"name":"Cluster1ID",  "type":"S", "info":"ID of the bottom layer cluster in the Cross"},
              {"name":"Cluster2ID",  "type":"S", "info":"ID of the top layer cluster in the Cross"}
     ]
