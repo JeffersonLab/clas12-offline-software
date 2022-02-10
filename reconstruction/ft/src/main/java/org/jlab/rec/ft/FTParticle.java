@@ -18,7 +18,9 @@ public class FTParticle {
 	private Vector3D _Direction = new Vector3D();             // direction 
         private int _Cluster;					  // track pointer to cluster information in FTCALRec::cluster bank
 	private int _Signal;					  // track pointer to signal information in FTHODORec::cluster bank
-	private int _Cross;					  // track pointer to cross information in FTTRKRec::cross bank
+//	private int _Cross;					  // track pointer to cross information in FTTRKRec::cross bank
+        private int _Cross0;                                      // track pointer to cross information in FTTRKRec::cross bank (TRK0)
+        private int _Cross1;                                      // track pointer to cross information in FTTRKRec::cross bank (TRK1)
         private double _field;
         	
 	// constructor
@@ -135,18 +137,27 @@ public class FTParticle {
 		this._Signal = _Signal;
 	}
 
-
+/*
 	public int getTrackerIndex() {
 		return _Cross;
 	}
+*/
+        
+        public int getTrackerIndex(int ndet) {
+		if(ndet==0){return _Cross0;}else{return _Cross1;}
+	}
 
-
+/*        
 	public void setTrackerIndex(int _Cross) {
 		this._Cross = _Cross;
 	}
+*/        
+        public void setTrackerIndex(int _Cross, int ndet) {
+		if(ndet==0){this._Cross0 = _Cross;}else{this._Cross1 = _Cross;}
+	}
+        
 
         public int getDetectorHit(List<FTResponse>  hitList, String detectorType, double distanceThreshold, double timeThreshold){
-        
             Line3D cross = this.getLastCross();
             double   minimumDistance = 500.0;
             int      bestIndex       = -1;
@@ -159,9 +170,10 @@ public class FTParticle {
 //                    FTEBEngine.h600.fill(timedistance);
 //                    FTEBEngine.h601.fill(response.getTime());
 
+/*
                     if(detectorType=="FTTRK") {
                         double t=response.getTime();
-                        System.out.println(this.getTime() + " to be compard to " + response.getPosition().mag()/PhysicsConstants.speedOfLight());
+                        System.out.println(this.getTime() + " to be compared to " + response.getPosition().mag()/PhysicsConstants.speedOfLight());
                         FTEBEngine.h600.fill(response.getPosition().mag()/PhysicsConstants.speedOfLight());
                         FTEBEngine.h601.fill(response.getCrTime(), response.getPosition().mag()/PhysicsConstants.speedOfLight());
                         if(response.getId()==0){
@@ -171,7 +183,8 @@ public class FTParticle {
                             FTEBEngine.h603.fill(response.getCrTime());
                         }
                     }
-                    
+*/
+
 //                    if(detectorType=="FTHODO") FTEBEngine.h502.fill(timedistance);
 //                    if((timedistanceTRK || timedistance<2.*timeThreshold) && hitdistance<distanceThreshold && hitdistance<minimumDistance){
                     if(hitdistance<distanceThreshold && hitdistance<minimumDistance){                    
@@ -193,14 +206,52 @@ public class FTParticle {
                 if(detectorType=="HODO"){if(hitList.get(bestIndex).getSize()<FTConstants.HODO_MIN_CLUSTER_SIZE) bestIndex=-1;}
                 // if bestHit is on trk require at least two crosses overall in FTTRK
                 if(detectorType=="FTTRK"){
-                    if(hitList.get(bestIndex).getSize() >= FTConstants.TRK_MIN_CROSS_NUMBER){
-                         ;
-                    }else{
-                        bestIndex=-1;
-                    } 
+                    if(hitList.get(bestIndex).getSize() >= FTConstants.TRK_MIN_CROSS_NUMBER){;}else{bestIndex=-1;}
                 }
             }
             return bestIndex;
+        }
+        
+        
+        public int[] getTRKBestHits(List<FTResponse>  hitList, int it, double distanceThreshold, double timeThreshold){
+            Line3D cross = this.getLastCross();
+            double   minimumDistance = 500.0;
+            int[] bestIndex = {-1, -1};
+            for(int loop = 0; loop < hitList.size(); loop++){
+                int bestidx = -1;
+                FTResponse response = hitList.get(loop);
+                if(response.getAssociation()<0 && response.getType() == "FTTRK"){
+                    Line3D  dist = cross.distance(response.getPosition().toPoint3D());
+                    double hitdistance  = dist.length();
+                    double timedistance = Math.abs(this.getTime() - (response.getTime()-response.getPosition().mag()/PhysicsConstants.speedOfLight()));       
+
+                    double t=response.getTime();
+                    int det = response.getTrkDet();
+                    if(it==0){
+                        // fill energy and time histograms only once per set or hits on FTTRK
+                        FTEBEngine.h600.fill(response.getPosition().mag()/PhysicsConstants.speedOfLight());
+                        FTEBEngine.h601.fill(response.getCrTime(), response.getPosition().mag()/PhysicsConstants.speedOfLight());
+                        if(det==0){ // non e' Id ma trkDet
+                            FTEBEngine.h602.fill(response.getCrTime());
+                        }else if(det==1){
+                            FTEBEngine.h603.fill(response.getCrTime());
+                        }
+                    }
+                                        
+//                    if(timedistance<timeThreshold || hitdistance<distanceThreshold){
+                    if(timedistance<timeThreshold && hitdistance<distanceThreshold){
+                        minimumDistance = hitdistance;
+                        bestidx = loop;
+                    }
+                    // select index of the detector                    
+                    
+                    if(bestidx>-1){
+                        if(hitList.get(bestidx).getSize() < FTConstants.TRK_MIN_CROSS_NUMBER) bestidx=-1;
+                        bestIndex[det] = bestidx;
+                        }
+                    }   
+                }
+                return bestIndex;
         }
         
         
