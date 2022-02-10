@@ -372,31 +372,6 @@ public class FTTRKReconstruction {
                 }
             }
         }
-        /*
-        // validate crosses in two detectors: their distance must be within a reasonable tolerance 
-        ArrayList<FTTRKCross> validatedCrosses = new ArrayList<FTTRKCross>();
-        for(int ic=0; ic<crosses.size(); ic++){
-            for(int jc=crosses.size()-1; jc>ic; jc--){
-                FTTRKCross cross1 = crosses.get(ic);
-                FTTRKCross cross2 = crosses.get(jc);
-                if(cross1.get_Id()!=cross2.get_Id() && cross1.get_Region()!=cross2.get_Region()){
-                    double rad1 = Math.sqrt(cross1.get_Point().x()*cross1.get_Point().x() + 
-                            cross1.get_Point().y()*cross1.get_Point().y());
-                    double rad2 = Math.sqrt(cross2.get_Point().x()*cross2.get_Point().x() + 
-                            cross2.get_Point().y()*cross2.get_Point().y());
-                    double diffPhi = Math.abs(Math.atan2(cross1.get_Point().y(),cross1.get_Point().x()) - 
-                            Math.atan2(cross2.get_Point().y(),cross2.get_Point().x()));
-                    double diffTheta = Math.abs(Math.atan2(rad1,cross1.get_Point().z())- Math.atan2(rad2,cross2.get_Point().z()));
-                    double phiTolerance = 0.01;
-                    double thetaTolerance = 0.01;
-                    if(Math.abs(rad2-rad1)< FTConstants.TOLERANCE_ON_CROSSES_TWO_DETECTORS && diffPhi<phiTolerance && diffTheta<thetaTolerance){
-                        validatedCrosses.add(cross1);
-                        validatedCrosses.add(cross2);
-                    } 
-                }
-            }
-        }
-        */
         
         // validate crosses: for every detector choose the cross with larger deposited energy: only two crosses are saved
         ArrayList<FTTRKCross> validatedCrosses = new ArrayList<FTTRKCross>();
@@ -421,11 +396,12 @@ public class FTTRKReconstruction {
         if(idMax1>=0) validatedCrosses.add(crosses.get(idMax1));
         if(idMax2>=0) validatedCrosses.add(crosses.get(idMax2)); 
         
-        // make a geometric match of the two crosses 
-        if(validatedCrosses.size()== FTTRKConstantsLoader.NSupLayers){
-            double diffRadTolerance = FTConstants.TRK0_TRK1_RADTOL;
-            double diffPhiTolerance = FTConstants.TRK0_TRK1_PHITOL;
-            double diffThetaTolerance = FTConstants.TRK0_TRK1_THETATOL;
+        double diffRadTolerance = FTConstants.TRK0_TRK1_RADTOL;
+        double diffPhiTolerance = FTConstants.TRK0_TRK1_PHITOL;
+        double diffThetaTolerance = FTConstants.TRK0_TRK1_THETATOL;
+        
+// make a geometric match of the two crosses 
+        if(validatedCrosses.size()== FTTRKConstantsLoader.NSupLayers){            
             Point3D cross0 = validatedCrosses.get(0).get_Point();
             Point3D cross1 = validatedCrosses.get(1).get_Point();
             double r02d = Math.sqrt(cross0.x()*cross0.x() + cross0.y()*cross0.y());
@@ -438,8 +414,8 @@ public class FTTRKReconstruction {
             if(!(Math.abs(diffPhi) < diffPhiTolerance && Math.abs(diffRadii)< diffRadTolerance && Math.abs(diffTheta) < diffThetaTolerance)) validatedCrosses.clear();
         }
         
-        return validatedCrosses;
-        //return crosses;
+        //return validatedCrosses;
+        return crosses;
     }
 
         public List<FTTRKHit> readRawHits(DataEvent event, int run) {
@@ -2205,6 +2181,8 @@ public int renumberFEE2RECRotatedAndAdjustWalnut(int run, int ilayer, int icompo
                 //if(icomponent > 48 && icomponent <= 64) icomponent += 16;
                 //if(icomponent > 32) icomponent = -1;
                 //icomponent = reverseStripInSecondHalf(icomponent);
+            }else if(isec1==12){ // strip 476 only is fired
+                //icomponent += 16;
             }
         }
         
