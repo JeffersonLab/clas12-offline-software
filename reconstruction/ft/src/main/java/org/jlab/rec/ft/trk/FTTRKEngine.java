@@ -145,12 +145,12 @@ public class FTTRKEngine extends ReconstructionEngine {
 ///////        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/filter_005418.0.hipo";
 //        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/filter_005418_newbanks.hipo";
 //        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_fullAcceptance_singleTrack.hipo";
-//        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/filter_005418_newbanks.hipo";
+        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/filter_005418_newbanks.hipo";
 //        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_154824_det0.hipo";
 //        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_153947_det1.hipo";
 //        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_160427_det1.hipo";
-//        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_42486.hipo";  // multihit evt
-        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_10323.hipo";  
+//        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_126798.hipo";  // multihit evt
+///        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_68733.hipo";  
 //        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_92897.hipo";
 ///        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/gemc_test_1000.hipo";
 ///        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/gemc_singleEle_withFields_big_-30.60.120.30_fullAcceptance_newbanks.hipo";
