@@ -27,7 +27,8 @@ public class FTTRKCross implements Comparable<FTTRKCross> {
 	private int _Sector;      							//	    sector[1]
 	private int _Region;    		 					//	    region [1,2]
 	private int _Id;							        //	    cross Id [0,1]
-
+        private int _trkId;                                                             // cross index for tracking
+        
 	// point parameters:
 	private Point3D _Point;
 	private Point3D _PointErr;
@@ -41,6 +42,8 @@ public class FTTRKCross implements Comparable<FTTRKCross> {
         private float _Energy;
         private float _Time;
         
+        
+        
         /**
 	 * 
 	 * @param sector the sector (1)
@@ -50,7 +53,8 @@ public class FTTRKCross implements Comparable<FTTRKCross> {
 	public FTTRKCross(int sector, int region, int rid) {
 		this._Sector = sector;
 		this._Region = region;
-		this._Id = rid;
+		this._Id = rid;      // sequential number
+                this._trkId = rid; 
 	}
 	
 	/**
@@ -103,8 +107,15 @@ public class FTTRKCross implements Comparable<FTTRKCross> {
 		this._Id = id;
 	}
 
-	
-	
+	public int get_trkId() {
+		return _trkId;
+	}
+        
+	public void set_trkId(int trkid) {
+		this._trkId = trkid;
+	}
+        
+        
 
 	/**
 	 * 
@@ -239,6 +250,11 @@ public class FTTRKCross implements Comparable<FTTRKCross> {
 		return _clus2;
 	}
 
+        public int getDetector() {
+		return (_Region-1);
+	}
+        
+        
 	/**
 	 * Sets the cross parameters: the position and direction unit vector
 	 */
@@ -333,7 +349,7 @@ public class FTTRKCross implements Comparable<FTTRKCross> {
                    }
                    Point3D error = new Point3D(err1, err2, thickness);
                    this.set_PointErr(error); 
-                   this.set_AssociatedElementsIDs();
+                   this.set_AssociatedElementsIDs();  // associates cross number to the clusters
                 }else{
                    Point3D error = new Point3D(-999., -999., -999); 
                    this.set_Point(error);
@@ -341,6 +357,7 @@ public class FTTRKCross implements Comparable<FTTRKCross> {
                 }
                 
                 this.evaluate_EnergyAndTime();
+                 
 	}
 
 	public void evaluate_EnergyAndTime(){
