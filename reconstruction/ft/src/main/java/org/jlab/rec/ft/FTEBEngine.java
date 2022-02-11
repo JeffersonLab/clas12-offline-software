@@ -461,7 +461,8 @@ public class FTEBEngine extends ReconstructionEngine {
                 continue;
             } 
             // bankEvt is the number used to extract the event with groovy
-            if(debugMode>0) System.out.println("////////////// event read " + bankEvt + " - sequential number " + nev);
+            // always print to keep track of running
+            if(debugMode>-1) System.out.println("////////////// event read " + bankEvt + " - sequential number " + nev);
             //if(nev > 10239) System.exit(0); if(nev != 10239) continue; // stop at a given evt number
             cal.processDataEvent(event);
             hodo.processDataEvent(event);
@@ -855,7 +856,7 @@ public class FTEBEngine extends ReconstructionEngine {
             }
         }
         
-        if(debugMode>=0) 
+        if(debugMode>=-1) // print always
             System.out.println("@@@@@@@@@@@@@ total number of events read " + nev + " @@@@@ total number of events with rec cross in FTTRK " 
                     + nevWithCrosses + " @@@@ number of reconstructed FTParticles " + nOfFTParticles);
         
