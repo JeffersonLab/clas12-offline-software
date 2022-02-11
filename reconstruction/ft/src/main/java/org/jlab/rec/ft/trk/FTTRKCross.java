@@ -79,7 +79,6 @@ public class FTTRKCross implements Comparable<FTTRKCross> {
 	 */
 	public int get_Region() {
             // return the number of supermodule (top or bottom)
-//               if(_Region==0 || _Region==1){return 0;}else{return 1;}
 	    return _Region;
 	}
 
@@ -275,8 +274,7 @@ public class FTTRKCross implements Comparable<FTTRKCross> {
 		double y1_outer = outlayerclus.get_StripSegment().end().y();
 		double z0_inner = inlayerclus.get_StripSegment().origin().z();		
 		double z0_outer = outlayerclus.get_StripSegment().origin().z();
-
-                
+ 
 		Line3D l_in  = new Line3D(x0_inner, y0_inner, z0_inner, x1_inner, y1_inner, z0_inner);
                 Line3D l_out = new Line3D(x0_outer, y0_outer, z0_outer, x1_outer, y1_outer, z0_outer);
                 
@@ -285,7 +283,6 @@ public class FTTRKCross implements Comparable<FTTRKCross> {
                 int region = inlayerclus.get_Region(); // 1-2
                 double distanceBwLayers = FTTRKConstantsLoader.Zlayer[2*region-1] - FTTRKConstantsLoader.Zlayer[2*region-2];
                 // check if the point belongs to the crossed segments 
-//                double tolerance = FTTRKConstantsLoader.Pitch/Math.sqrt(2.);
                 // set as tolerance the maximum uncertainty of the two centroids
                 double maxTolerance = 0;
                 double tol1 = inlayerclus.get_CentroidError(); 
@@ -378,7 +375,7 @@ public class FTTRKCross implements Comparable<FTTRKCross> {
             meanEnergy = Math.sqrt(cl1.get_TotalEnergy() * cl2.get_TotalEnergy());
             this.set_Energy((float)meanEnergy);
             
-// to determine the time associated with the cross, the times of each hit forming each cluster must be retrieved
+            // to determine the time associated with the cross, the times of each hit forming each cluster must be retrieved
             // loop on strips of each cluster
             int nHits1 = cl1.size();
             for(int i=0; i<nHits1; i++){
@@ -388,6 +385,7 @@ public class FTTRKCross implements Comparable<FTTRKCross> {
             for(int i=0; i<nHits2; i++){
                 timeCross2 += cl2.get(i).get_Time();
             }
+            // meantime value over all the strips
             if(nHits1 != 0){timeCross1 /= nHits1;}else{timeCross1 = 9999.;};
             if(nHits2 != 0){timeCross2 /= nHits2;}else{timeCross2 = 9999.;};
             meanTime = (timeCross1+timeCross2)/2.; 
