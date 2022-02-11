@@ -9,10 +9,11 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.utils.groups.IndexedTable;
 import org.jlab.rec.ft.FTEBEngine;
+import org.jlab.rec.ft.FTEventBuilder;
+import org.jlab.rec.ft.trk.FTTRKConstantsLoader;
 
 public class FTParticle {
 
-	
 	private int _ID;                                          // track ID
 	private int _Charge;		         	          // 0/1 for photon/electron
 	private double _Time;      			          // time of the particle at the vertex
@@ -21,7 +22,6 @@ public class FTParticle {
 	private Vector3D _Direction = new Vector3D();             // direction 
         private int _Cluster;					  // track pointer to cluster information in FTCALRec::cluster bank
 	private int _Signal;					  // track pointer to signal information in FTHODORec::cluster bank
-//	private int _Cross;					  // track pointer to cross information in FTTRKRec::cross bank
         private int _Cross0;                                      // track pointer to cross information in FTTRKRec::cross bank (TRK0)
         private int _Cross1;                                      // track pointer to cross information in FTTRKRec::cross bank (TRK1)
         private double _field;
@@ -139,22 +139,11 @@ public class FTParticle {
 	public void setHodoscopeIndex(int _Signal) {
 		this._Signal = _Signal;
 	}
-
-/*
-	public int getTrackerIndex() {
-		return _Cross;
-	}
-*/
         
         public int getTrackerIndex(int ndet) {
 		if(ndet==0){return _Cross0;}else{return _Cross1;}
 	}
-
-/*        
-	public void setTrackerIndex(int _Cross) {
-		this._Cross = _Cross;
-	}
-*/        
+      
         public void setTrackerIndex(int _Cross, int ndet) {
 		if(ndet==0){this._Cross0 = _Cross;}else{this._Cross1 = _Cross;}
 	}
@@ -170,36 +159,18 @@ public class FTParticle {
                     Line3D  dist = cross.distance(response.getPosition().toPoint3D());
                     double hitdistance  = dist.length();
                     double timedistance = Math.abs(this.getTime() - (response.getTime()-response.getPosition().mag()/PhysicsConstants.speedOfLight()));       
-//                    FTEBEngine.h600.fill(timedistance);
-//                    FTEBEngine.h601.fill(response.getTime());
-
-/*
-                    if(detectorType=="FTTRK") {
-                        double t=response.getTime();
-                        System.out.println(this.getTime() + " to be compared to " + response.getPosition().mag()/PhysicsConstants.speedOfLight());
-                        FTEBEngine.h600.fill(response.getPosition().mag()/PhysicsConstants.speedOfLight());
-                        FTEBEngine.h601.fill(response.getCrTime(), response.getPosition().mag()/PhysicsConstants.speedOfLight());
-                        if(response.getId()==0){
-                            FTEBEngine.h602.fill(response.getCrTime());
-                        }
-                        if(response.getId()==1){
-                            FTEBEngine.h603.fill(response.getCrTime());
-                        }
-                    }
-*/
-
-//                    if(detectorType=="FTHODO") FTEBEngine.h502.fill(timedistance);
-//                    if((timedistanceTRK || timedistance<2.*timeThreshold) && hitdistance<distanceThreshold && hitdistance<minimumDistance){
                     if(hitdistance<distanceThreshold && hitdistance<minimumDistance){                    
                         if(detectorType=="FTTRK" && timedistance<timeThreshold){
-                           minimumDistance = hitdistance;
-                           bestIndex = loop;
-                           System.out.println("best hit distance and time " + minimumDistance + " " + timedistance);
-                           System.out.println("cross center coordinates x, y " + response.getPosition().toPoint3D().x() + " , " +
+                            minimumDistance = hitdistance;
+                            bestIndex = loop;
+                            if(FTEventBuilder.debugMode >=1){
+                                System.out.println("best hit distance and time " + minimumDistance + " " + timedistance);
+                                System.out.println("cross center coordinates x, y " + response.getPosition().toPoint3D().x() + " , " +
                                    response.getPosition().toPoint3D().y());
+                            }
                         }else if(detectorType=="FTHODO" && timedistance<timeThreshold){
-                           minimumDistance = hitdistance; 
-                           bestIndex = loop;
+                            minimumDistance = hitdistance; 
+                            bestIndex = loop;
                         } 
                     }
                 }
@@ -241,7 +212,6 @@ public class FTParticle {
                         }
                     }
                                         
-//                    if(timedistance<timeThreshold || hitdistance<distanceThreshold){
                     if(timedistance<timeThreshold && hitdistance<distanceThreshold){
                         minimumDistance = hitdistance;
                         bestidx = loop;
@@ -257,17 +227,19 @@ public class FTParticle {
                 return bestIndex;
         }
         
+        
         public int [][] getTRKOrderedListOfHits(List<FTResponse>  hitList, int it, double distanceThreshold, double timeThreshold){
             Line3D cross = this.getLastCross();
-            double   minimumDistance = 500.0;
+            //double   minimumDistance = 500.0;
             // how many FTTRK events?
+            int ndetectors = FTTRKConstantsLoader.NSupLayers;
             int hitsTRK = 0;
             for(int l=0; l<hitList.size(); l++){
                 if(hitList.get(l).getType() == "FTTRK") hitsTRK++;
             }
             int[][] bestIndices; 
             if(hitsTRK != 0){
-                bestIndices = new int[hitsTRK][2];
+                bestIndices = new int[hitsTRK][ndetectors];
                 ArrayList<Double> hitDistancesDet0 = new ArrayList<Double>(hitsTRK);
                 ArrayList<Integer> hitOrderDet0 = new ArrayList<Integer>(hitsTRK);
                 ArrayList<Double> hitDistancesDet1 = new ArrayList<Double>(hitsTRK);
@@ -300,7 +272,7 @@ public class FTParticle {
                             // fill energy and time histograms only once per set or hits on FTTRK
                             FTEBEngine.h600.fill(response.getPosition().mag()/PhysicsConstants.speedOfLight());
                             FTEBEngine.h601.fill(response.getCrTime(), response.getPosition().mag()/PhysicsConstants.speedOfLight());
-                            if(det==0){ // non e' Id ma trkDet
+                            if(det==0){ 
                                 FTEBEngine.h602.fill(response.getCrTime());
                             }else if(det==1){
                                 FTEBEngine.h603.fill(response.getCrTime());
@@ -335,7 +307,6 @@ public class FTParticle {
                     }   
                 }
                 // sort the two arrays as a function of the distance
-                //int hitLen = hitDistancesDet0.size();
                 ArrayList<Double> iniHitDis0 = new ArrayList<Double>();
                 ArrayList<Double> iniHitDis1 = new ArrayList<Double>(); 
                 for(int l=0; l<hitsTRK; l++){
