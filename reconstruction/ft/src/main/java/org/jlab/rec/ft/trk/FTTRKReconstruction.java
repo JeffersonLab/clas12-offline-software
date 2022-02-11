@@ -742,7 +742,6 @@ public int reverseStripsInSector(int icomponent){
     // reverse the number of strips inside a sector (strips are numbered 1-768, the [i] component of sectorLimit vector is
     // excluded in the sector, [i+1]is included
     // 20 sectors of 32 strips each, except long strips sectors (0, 1, 18, 19) which have 64 strips
-    //int[] sectorLimit = {0, 64, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480, 512, 544, 576, 608, 640, 704, 768};
     int nsector = findSector(icomponent);
     if(nsector>20) System.out.println("wrong sector number, check code");
     int offset = sectorLimits[nsector+1] - icomponent;
@@ -755,7 +754,6 @@ public int reverseStripInFirstHalf(int icomponent){
     // reverse the number of strips inside a sector (strips are numbered 1-768, the [i] component of sectorLimit vector is
     // excluded in the sector, [i+1]is included
     // 20 sectors of 32 strips each, except long strips sectors (0, 1, 18, 19) which have 64 strips
-    //int[] sectorLimit = {0, 64, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480, 512, 544, 576, 608, 640, 704, 768};
     int nsector = findSector(icomponent);
     if(nsector>20) System.out.println("wrong sector number, check code");
     int halfStrip = (sectorLimits[nsector+1]-sectorLimits[nsector])/2 + sectorLimits[nsector];
@@ -771,7 +769,6 @@ public int reverseStripInSecondHalf(int icomponent){
     // reverse the number of strips inside a sector (strips are numbered 1-768, the [i] component of sectorLimit vector is
     // excluded in the sector, [i+1]is included
     // 20 sectors of 32 strips each, except long strips sectors (0, 1, 18, 19) which have 64 strips
-    //int[] sectorLimit = {0, 64, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480, 512, 544, 576, 608, 640, 704, 768};
     int nsector = findSector(icomponent);
     if(nsector>20) System.err.println("wrong FTTRK strip sector number, check code");
     int halfStrip = (sectorLimits[nsector+1]-sectorLimits[nsector])/2 + sectorLimits[nsector];
@@ -787,7 +784,6 @@ public int swapHalves(int icomponent){
     // the strips are numbered 1-768, the [i] component of sectorLimit vector is
     // excluded in the sector, [i+1]is included
     // 20 sectors of 32 strips each, except long strips sectors (0, 1, 18, 19) which have 64 strips
-    //int[] sectorLimit = {0, 64, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480, 512, 544, 576, 608, 640, 704, 768};
     int nsector = findSector(icomponent);
     if(nsector>20) System.err.println("wrong FTTRK strip sector number, check code");
     int halfWid = (sectorLimits[nsector+1]-sectorLimits[nsector])/2;
@@ -808,7 +804,6 @@ public int swapSectors(int icomponent, int nsector2){
     // icomponent strips are numbered 1-768 so the vector sectorLimits contains the number of the starting 
     // strip of a sector: [i] is excluded from sector i, [i+1] is included
     // 20 sectors of 32 strips each, except long strips sectors (0, 1, 18, 19) which have 64 strips
-    //int[] sectorLimit = {0, 64, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480, 512, 544, 576, 608, 640, 704, 768};
     int nsector1 = findSector(icomponent);
     int offset = -sectorLimits[nsector1] + icomponent;
     int newicomp = sectorLimits[nsector2] + offset;
@@ -822,7 +817,6 @@ public static int findSector(int icomponent){
     // sectors are numbered 0-20; icomponent strips are numbered 1-768 so the vector sectorLimits contains
     // the number of the starting strip of a sector: [i] is excluded from sector i, [i+1] is included
     // 20 sectors of 32 strips each, except long strips sectors (0, 1, 18, 19) which have 64 strips
-    //int[] sectorLimits = {0, 64, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480, 512, 544, 576, 608, 640, 704, 768};
     int nsector = -1;
     for(int i=0; i<20; i++){
         if(icomponent>sectorLimits[i] && icomponent<=sectorLimits[i+1]){
@@ -837,7 +831,6 @@ public static int findSector(int icomponent){
 public boolean isInSector(int iSector, int icomponent){
     // returns ture is the strip icomponent is in the iSector sector
     // 20 sectors of 32 strips each, except long strips sectors (0, 1, 18, 19) which have 64 strips
-    //int[] sectorLimits = {0, 64, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480, 512, 544, 576, 608, 640, 704, 768};
     if(icomponent>sectorLimits[iSector] && icomponent<=sectorLimits[iSector+1]){
         return true;
     }else{

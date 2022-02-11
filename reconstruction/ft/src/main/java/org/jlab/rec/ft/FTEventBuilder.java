@@ -221,62 +221,6 @@ public class FTEventBuilder {
             }
         }
     }
-
-    /*
-    // obsolete version, including just one hit from the tracker
-    public void matchToTRK(List<FTResponse> responses, List<FTParticle> particles) {
-        for (int i = 0; i < particles.size(); i++) {
-            FTParticle track = particles.get(i);
-            if (debugMode >= 1) {
-                System.out.println("Searching for matching signal in the tracker:");
-            }
-            int iTrk = track.getDetectorHit(responses, "FTTRK", FTConstants.CAL_TRK_DISTANCE_MATCHING, FTConstants.CAL_TRK_TIME_MATCHING);
-            if (iTrk > 0) {
-                if (debugMode >= 1) {
-                    System.out.println("found signal in FTTRK" + iTrk);
-                }
-                track.setCharge(-999); // provisional, assuming no field tracking
-                track.setTrackerIndex(responses.get(iTrk).getId(), responses.get(iTrk).getTrkDet()); // here trkID is set to the index of the matched track
-                responses.get(iTrk).setAssociation(i);
-                // if the cross is matched to the track set the cross id as negative
-                if(responses.get(iTrk).getAssociation()==0) responses.get(iTrk).setId(-responses.get(iTrk).getId());
-                responses.get(iTrk).setMatchPosition(track.getPosition().x(), track.getPosition().y(), track.getPosition().z());
-                System.out.println("matched cross coordinates " + responses.get(iTrk).getPosition().x() + " " + responses.get(iTrk).getPosition().y());
-            }
-            if (debugMode >= 1) track.show();
-        }
-    }
-    */
-    
-    // 2nd version including both detectors
-    /*
-    public void matchToTRKTwoDetectors(List<FTResponse> responses, List<FTParticle> particles) {
-        for (int i = 0; i < particles.size(); i++) {
-            FTParticle track = particles.get(i);
-            if (debugMode >= 1) {
-                System.out.println("Searching for matching signal in the tracker:");
-            }
-            int[] iTrk = {-1, -1};
-            iTrk = track.getTRKBestHits(responses, i, FTConstants.CAL_TRK_DISTANCE_MATCHING, FTConstants.CAL_TRK_TIME_MATCHING);
-            for(int j=0; j<FTTRKConstantsLoader.NSupLayers; j++){ // loop on two detectors
-                if (iTrk[j] > 0) {
-                    if (debugMode >= 1) {
-                        System.out.println("found signal in FTTRK" + iTrk[j]);
-                    }
-                
-                    track.setCharge(-999); // provisional, for no field tracking
-                    track.setTrackerIndex(responses.get(iTrk[j]).getId(), j); // here trkID is set to the index of the matched track
-                    responses.get(iTrk[j]).setHitIndex(iTrk[j]);
-                    responses.get(iTrk[j]).setAssociation(i);
-                    responses.get(iTrk[j]).setMatchPosition(track.getPosition().x(), track.getPosition().y(), track.getPosition().z());
-                    if(debugMode>=1) System.out.println("matched cross coordinates " + responses.get(iTrk[j]).getPosition().x() + " " + 
-                            responses.get(iTrk[j]).getPosition().y());
-                }
-            }
-            if (debugMode >= 1) track.show();
-        }
-    }
-    */
    
     public void matchToTRKTwoDetectorsMultiHits(List<FTResponse> responses, List<FTParticle> particles) {
         for (int i = 0; i < particles.size(); i++) {
