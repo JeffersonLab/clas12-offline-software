@@ -206,8 +206,7 @@ public class FTTRKConstantsLoader {
         public static Line3D getStripSegmentLab(int layer, int seed){
             Line3D stripSegment = new Line3D(stripsX[layer-1][seed-1][0], stripsY[layer-1][seed-1][0], Zlayer[layer-1], 
                                              stripsX[layer-1][seed-1][1], stripsY[layer-1][seed-1][1], Zlayer[layer-1]);
-            stripSegment.show();
-            
+            //stripSegment.show();
             return stripSegment;
         }
 }

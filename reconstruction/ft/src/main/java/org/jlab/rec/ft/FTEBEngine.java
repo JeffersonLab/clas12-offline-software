@@ -22,9 +22,6 @@ import org.jlab.groot.ui.LatexText;
 import org.jlab.groot.math.F1D;
 import org.jlab.groot.fitter.DataFitter;
 import org.jlab.groot.graphics.EmbeddedCanvas;
-import org.jlab.groot.base.DatasetAttributes;
-import org.jlab.groot.base.GStyle;
-import org.jlab.groot.base.TColorPalette;
 import org.jlab.groot.data.GraphErrors;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -107,8 +104,6 @@ public class FTEBEngine extends ReconstructionEngine {
             FTresponses = reco.addResponses(event, this.getConstantsManager(), run);
             FTparticles = reco.initFTparticles(FTresponses);
             if(FTparticles.size()>0){
-////                reco.matchToTRK(FTresponses, FTparticles);
-////                reco.matchToTRKTwoDetectors(FTresponses, FTparticles);
                 reco.matchToTRKTwoDetectorsMultiHits(FTresponses, FTparticles);
                 reco.matchToHODO(FTresponses, FTparticles);
 //                reco.correctDirection(FTparticles, this.getConstantsManager(), run);  // correction to be applied only to FTcal and FThodo
@@ -812,7 +807,7 @@ public class FTEBEngine extends ReconstructionEngine {
                                     double t1 = (zt - hitOnPlane.z())/vz1;
                                     hitMCOnTrk.setXYZ(hitOnPlane.x()+vx1*t1, hitOnPlane.y()+vy1*t1, zt);
                                 }else{
-                                    System.out.println("check particle/curvature signs");
+                                    if(debugMode>0) System.out.println("check particle/curvature signs");
                                 }                                   
                             }
                             if(debugMode>0) System.out.println("MC after swimming in mag field x = " + hitMCOnTrk.x() + " y = " + hitMCOnTrk.y() + 
