@@ -554,30 +554,32 @@ public class FTTRKReconstruction {
                 bankCross.setFloat("z",          j, (float) crosses.get(j).get_Point().z());
                 if(debugMode>=1) System.out.println("energy and time to be stored in banks " + crosses.get(j).get_Energy() + " " + crosses.get(j).get_Time());
                 // control histograms should be provisional and filled only if existing
-                FTEBEngine.h507.fill(crosses.get(j).get_Time(), crosses.get(j).get_Energy());   
-                if(crosses.get(j).get_Id()==0){
-                    FTEBEngine.h503.fill(crosses.get(j).get_Time());
-                    FTEBEngine.h501.fill(crosses.get(j).get_Energy());
-                    FTEBEngine.h505.fill(crosses.get(j).get_Time(), crosses.get(j).get_Energy());
-                    FTTRKCluster cl1 = crosses.get(j).get_Cluster1();
-                    FTTRKCluster cl2 = crosses.get(j).get_Cluster2();
-                    FTEBEngine.h510.fill(cl1.get_TotalEnergy(), cl2.get_TotalEnergy());
-                    FTEBEngine.h512.fill(cl1.get_TotalEnergy());
-                    FTEBEngine.h512.fill(cl2.get_TotalEnergy());
-                    for(int k=0; k<cl1.size(); k++) FTEBEngine.h520.fill(cl1.get(k).get_Time());
-                    for(int k=0; k<cl2.size(); k++) FTEBEngine.h521.fill(cl2.get(k).get_Time());         
-                }
-                if(crosses.get(j).get_Id()==1){
-                    FTEBEngine.h504.fill(crosses.get(j).get_Time());
-                    FTEBEngine.h502.fill(crosses.get(j).get_Energy());
-                    FTEBEngine.h506.fill(crosses.get(j).get_Time(), crosses.get(j).get_Energy());
-                    FTTRKCluster cl1 = crosses.get(j).get_Cluster1();
-                    FTTRKCluster cl2 = crosses.get(j).get_Cluster2();
-                    FTEBEngine.h511.fill(crosses.get(j).get_Cluster1().get_TotalEnergy(), crosses.get(j).get_Cluster2().get_TotalEnergy());
-                    FTEBEngine.h513.fill(crosses.get(j).get_Cluster1().get_TotalEnergy());
-                    FTEBEngine.h513.fill(crosses.get(j).get_Cluster2().get_TotalEnergy());
-                    for(int k=0; k<cl1.size(); k++) FTEBEngine.h522.fill(cl1.get(k).get_Time());
-                    for(int k=0; k<cl2.size(); k++) FTEBEngine.h523.fill(cl2.get(k).get_Time());    
+                if(FTEBEngine.timeEnergyDiagnosticHistograms){
+                    FTEBEngine.h507.fill(crosses.get(j).get_Time(), crosses.get(j).get_Energy());   
+                    if(crosses.get(j).get_Id()==0){
+                        FTEBEngine.h503.fill(crosses.get(j).get_Time());
+                        FTEBEngine.h501.fill(crosses.get(j).get_Energy());
+                        FTEBEngine.h505.fill(crosses.get(j).get_Time(), crosses.get(j).get_Energy());
+                        FTTRKCluster cl1 = crosses.get(j).get_Cluster1();
+                        FTTRKCluster cl2 = crosses.get(j).get_Cluster2();
+                        FTEBEngine.h510.fill(cl1.get_TotalEnergy(), cl2.get_TotalEnergy());
+                        FTEBEngine.h512.fill(cl1.get_TotalEnergy());
+                        FTEBEngine.h512.fill(cl2.get_TotalEnergy());
+                        for(int k=0; k<cl1.size(); k++) FTEBEngine.h520.fill(cl1.get(k).get_Time());
+                        for(int k=0; k<cl2.size(); k++) FTEBEngine.h521.fill(cl2.get(k).get_Time());         
+                    }
+                    if(crosses.get(j).get_Id()==1){
+                        FTEBEngine.h504.fill(crosses.get(j).get_Time());
+                        FTEBEngine.h502.fill(crosses.get(j).get_Energy());
+                        FTEBEngine.h506.fill(crosses.get(j).get_Time(), crosses.get(j).get_Energy());
+                        FTTRKCluster cl1 = crosses.get(j).get_Cluster1();
+                        FTTRKCluster cl2 = crosses.get(j).get_Cluster2();
+                        FTEBEngine.h511.fill(crosses.get(j).get_Cluster1().get_TotalEnergy(), crosses.get(j).get_Cluster2().get_TotalEnergy());
+                        FTEBEngine.h513.fill(crosses.get(j).get_Cluster1().get_TotalEnergy());
+                        FTEBEngine.h513.fill(crosses.get(j).get_Cluster2().get_TotalEnergy());
+                        for(int k=0; k<cl1.size(); k++) FTEBEngine.h522.fill(cl1.get(k).get_Time());
+                        for(int k=0; k<cl2.size(); k++) FTEBEngine.h523.fill(cl2.get(k).get_Time());    
+                    }
                 }
                 FTTRKReconstruction.crEnergy[j] = crosses.get(j).get_Energy();
                 FTTRKReconstruction.crTime[j] = crosses.get(j).get_Time();
