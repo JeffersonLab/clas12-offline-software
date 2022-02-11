@@ -268,72 +268,38 @@ public class FTCALReconstruction {
                 float time      = bankDGTZ.getFloat("time",row);
                 if(adc!=-1 && time!=-1){
                     FTCALHit hit = new FTCALHit(row,icomponent, adc, time, charge2Energy, timeOffsets, timeWalk, cluster);
-//	            if(icomponent>=90 && icomponent<=98) hits.add(hit); // select only crystals in a given region
-//                    if(icomponent>= 69 && icomponent<=84)
-// vertical strip of crystals, right side
-/*
-                     if(icomponent == 61 || icomponent == 83 || icomponent == 105 || icomponent == 127 || 
-                        icomponent == 149 || icomponent == 193 || icomponent == 215 || icomponent == 237 || 
-                        icomponent == 259 || icomponent == 281 || icomponent == 303 || icomponent == 325 || 
-                        icomponent == 347 || icomponent == 369 || icomponent == 391 || icomponent == 413 || icomponent == 435)  
-*/
-// vertical strip of crystals, left side
-/*
-                    if(icomponent == 27 || icomponent == 49 || icomponent == 71 || icomponent == 93 || 
-                        icomponent == 115 || icomponent == 137 || icomponent == 159 || icomponent == 181 || 
-                        icomponent == 203 || icomponent == 225 || icomponent == 247 || icomponent == 269 || 
-                        icomponent == 291 || icomponent == 313 || icomponent == 335 || icomponent == 357 || 
-                        icomponent == 379 || icomponent == 401 || icomponent == 423 || icomponent == 445 )  
-*/
-// vertical strip of crystals, left side central
-/*
-                    if(icomponent == 10 || icomponent == 32 || icomponent == 54 || icomponent == 76 || 
-                        icomponent == 98 || icomponent == 120 || icomponent == 142 || icomponent == 340 || 
-                        icomponent == 362 || icomponent == 384 || icomponent == 406 || icomponent == 428 || 
-                        icomponent == 450 || icomponent == 472 )  
- */                       
-// vertical strip of crystals, right side central
-/*
-                    if(icomponent == 11 || icomponent == 33 || icomponent == 55 || icomponent == 77 || 
-                        icomponent == 99 || icomponent == 121 || icomponent == 143 || icomponent == 341 || 
-                        icomponent == 363 || icomponent == 385 || icomponent == 407 || icomponent == 429 || 
-                        icomponent == 451 || icomponent == 473 )  
-*/
-// top half 
-//                    if(icomponent >= 242)
-// bottom half
- //                   if(icomponent <= 241)
-
-//                   if(icomponent == 92)
-//                   if(icomponent == 105)
-//                   if(icomponent == 400)
-//                   if(icomponent == 412)
-// select one vertical stip of crystals left of the hole
-//                     if(icomponent == 472 || icomponent == 450 || icomponent == 428 || icomponent == 406 || icomponent == 384 ||
-//                        icomponent == 362 || icomponent == 340)
-// select one vertical strip of crystals right of the hole
-//                    if(icomponent == 473 || icomponent == 451 || icomponent == 429 || icomponent == 407 || icomponent == 385 ||
-//                        icomponent == 363 || icomponent == 341)
-//                     if(icomponent == 454 || icomponent == 432 || icomponent == 410 || icomponent == 388 || icomponent == 366 ||
-//                        icomponent == 344 || icomponent == 322 || icomponent == 300)
-//                    if(icomponent == 402 || icomponent == 401 || icomponent == 400 || icomponent == 380 || icomponent == 379 ||
-//                        icomponent == 378 || icomponent == 358 || icomponent == 357 || icomponent == 356)
-//                   if(icomponent == 381 || icomponent == 380 || icomponent == 379 || icomponent == 359 || icomponent == 358 ||
-//                        icomponent == 357 || icomponent == 337 || icomponent == 336 || icomponent == 335)  
-//                    if(icomponent == 340 || icomponent == 339 || icomponent == 316 || icomponent == 293 || icomponent == 270 ||
-//                        icomponent == 248)  
-//                    if(icomponent == 341 || icomponent == 342 || icomponent == 321 || icomponent == 300 || icomponent == 279 ||
-//                        icomponent == 257)  
-//                    if(icomponent == 226 || icomponent == 204 || icomponent == 183 || icomponent == 162 || icomponent == 141  ||
-//                        icomponent == 142) 
-//                    if(icomponent == 235 || icomponent == 213 || icomponent == 190 || icomponent == 167 || icomponent == 144  ||
-//                        icomponent == 143) 
-//                      if(icomponent == 241 || icomponent == 218 || icomponent == 195 || icomponent == 172 || icomponent == 149  ||
-//                        icomponent == 126 || icomponent == 103 || icomponent == 80 || icomponent == 57 || icomponent == 34 || 
-//                        icomponent == 11)
-//                     if(icomponent >=341 && icomponent<=350)
- //                     if(icomponent==347) 
-                   hits.add(hit);
+                    
+                    ////////////////////////////////////////////////////////////////////////////////////////////////////
+                    // select here single/groups of crystals for debugging purposes
+                    // examples:
+	            /// if(icomponent>=90 && icomponent<=98) hits.add(hit); // select only crystals in a given region
+                    // vertical strip of crystals, right side
+                    /// if(icomponent == 61 || icomponent == 83 || icomponent == 105 || icomponent == 127 || 
+                    ///    icomponent == 149 || icomponent == 193 || icomponent == 215 || icomponent == 237 || 
+                    ///    icomponent == 259 || icomponent == 281 || icomponent == 303 || icomponent == 325 || 
+                    ///    icomponent == 347 || icomponent == 369 || icomponent == 391 || icomponent == 413 || icomponent == 435)  
+                    // vertical strip of crystals, left side
+                    ///if(icomponent == 27 || icomponent == 49 || icomponent == 71 || icomponent == 93 || 
+                    ///    icomponent == 115 || icomponent == 137 || icomponent == 159 || icomponent == 181 || 
+                    ///    icomponent == 203 || icomponent == 225 || icomponent == 247 || icomponent == 269 || 
+                    ///    icomponent == 291 || icomponent == 313 || icomponent == 335 || icomponent == 357 || 
+                    ///    icomponent == 379 || icomponent == 401 || icomponent == 423 || icomponent == 445 )  
+                    // vertical strip of crystals, left side central
+                    ///if(icomponent == 10 || icomponent == 32 || icomponent == 54 || icomponent == 76 || 
+                    ///    icomponent == 98 || icomponent == 120 || icomponent == 142 || icomponent == 340 || 
+                    ///    icomponent == 362 || icomponent == 384 || icomponent == 406 || icomponent == 428 || 
+                    ///    icomponent == 450 || icomponent == 472 )  
+                    // vertical strip of crystals, right side central
+                    ///if(icomponent == 11 || icomponent == 33 || icomponent == 55 || icomponent == 77 || 
+                    ///    icomponent == 99 || icomponent == 121 || icomponent == 143 || icomponent == 341 || 
+                    ///    icomponent == 363 || icomponent == 385 || icomponent == 407 || icomponent == 429 || 
+                    ///    icomponent == 451 || icomponent == 473 )  
+                    // top half 
+                    /// if(icomponent >= 242)
+                    // bottom half
+                    ///  if(icomponent <= 241)
+                    
+                    hits.add(hit);
 	        }	          
             }
         }
