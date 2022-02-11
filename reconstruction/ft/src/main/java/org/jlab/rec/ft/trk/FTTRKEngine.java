@@ -55,21 +55,8 @@ public class FTTRKEngine extends ReconstructionEngine {
             // use 11 provisionally as run number to download the basic FTTK geometry constants
             FTTRKConstantsLoader.Load(11, this.getConstantsManager().getVariation());
             reco = new FTTRKReconstruction();
-	    reco.debugMode=0;
-
-/*
-            String[]  tables = new String[]{ 
-                "/calibration/ft/fthodo/charge_to_energy",
-                "/calibration/ft/fthodo/time_offsets",
-                "/calibration/ft/fthodo/status",
-                "/geometry/ft/fthodo",
-                "/geometry/ft/fttrk"
-            };
-            requireConstants(Arrays.asList(tables));
-            this.getConstantsManager().setVariation("default");
-*/            
+	    reco.debugMode=0;       
             
-
             return true;
 	}
 
@@ -107,7 +94,7 @@ public class FTTRKEngine extends ReconstructionEngine {
                 // get hits from banks
                 allHits = reco.initFTTRK(event,this.getConstantsManager(), run);
                 if(allHits.size()>0){
-                // create clusters
+                    // create clusters
                     clusters = reco.findClusters(allHits);
                     // create crosses
                     crosses = reco.findCrosses(clusters);
@@ -138,22 +125,8 @@ public class FTTRKEngine extends ReconstructionEngine {
 	FTTRKEngine trk = new FTTRKEngine();
 	trk.init();
         // insert input filename here
-//        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_singleEle_nofields_big_-30.60.120.30.hipo";
-///        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_dis.hipo";
-///        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_test.hipo";
-//////        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/ft_005038.evio.01231.hipo";
-///////        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/filter_005418.0.hipo";
 //        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/filter_005418_newbanks.hipo";
-//        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/gemc_fullAcceptance_singleTrack.hipo";
-        String input = "/home/filippi/clas12/fttrkDev/clas12-offline-software-6.5.13-fttrkDev/filter_005418_newbanks.hipo";
-//        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_154824_det0.hipo";
-//        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_153947_det1.hipo";
-//        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_160427_det1.hipo";
-//        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_126798.hipo";  // multihit evt
-///        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_68733.hipo";  
-//        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_92897.hipo";
-///        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/gemc_test_1000.hipo";
-///        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/gemc_singleEle_withFields_big_-30.60.120.30_fullAcceptance_newbanks.hipo";
+        String input = "/home/filippi/clas12/coatjava-devel/clas12-offline-software_v7.0.0/oneHit_126798.hipo";  // multihit evt
         System.out.println("input file " + input);
 	HipoDataSource  reader = new HipoDataSource();
 	reader.open(input);
@@ -237,7 +210,6 @@ public class FTTRKEngine extends ReconstructionEngine {
 //            if(nev != 8) continue;    // select one event only for debugging purposes
             
             ArrayList<FTTRKCluster> clusters = new ArrayList();
-            
             clusters = trk.processDataEventAndGetClusters(event);
             int nStripsInClusters = 0;
 
@@ -254,8 +226,10 @@ public class FTTRKEngine extends ReconstructionEngine {
                     float energy = bank.getFloat("energy",i);
                     float time   = bank.getFloat("time",i);
                     
-                    if(debug>=1) System.out.println("layer " + layer + " strip " + comp);
-                    System.out.println("%%%%%%%%% layer " + layer + " strip " + comp + " sector " + FTTRKReconstruction.findSector(comp));
+                    if(debug>=1) {
+                        System.out.println("layer " + layer + " strip " + comp);
+                        System.out.println("%%%%%%%%% layer " + layer + " strip " + comp + " sector " + FTTRKReconstruction.findSector(comp));
+                    }
                     h1.fill(comp,layer);
                     h2.fill(energy);
                     h3.fill(time);
@@ -312,7 +286,7 @@ public class FTTRKEngine extends ReconstructionEngine {
             if(clusters.size()!=0){
                 // get one cluster and iterate over all the strips contained in it
                 canvasCl.cd(1); canvasCl.draw(hHitL1);
-                for(int l=0; l<4; l++){
+                for(int l=0; l<FTTRKConstantsLoader.Nlayers; l++){
                     canvasClSingleLay.cd(l); 
                     if(l==2 || l==3){canvasClSingleLay.draw(hHitL2);}else{canvasClSingleLay.draw(hHitL1);}
                 }
@@ -386,17 +360,14 @@ public class FTTRKEngine extends ReconstructionEngine {
                 double minDiffPhi = 1000.;
                 int iBest = -1, jBest = -1;
                 if(debug>=1) System.out.println("number of rows " + nrows);
-                if(nrows>1){
+                if(nrows>=1){
                     double diffPhi = 1000;
                     for(int i=0; i<nrows; i++){
                         for(int j=nrows-1; j>i; j--){
                             if(det[i]!=det[j]){
                                 double distance = Math.sqrt((x[i]-x[j])*(x[i]-x[j]) + (y[i]-y[j])*(y[i]-y[j]));
-//                                if(distance < minDistance){
-//                                    minDistance = distance;
-//                                    iBest = i; jBest = j;
-//                  check det1 and det2 correspondence by comparing phi angles
-//                  the radius is larger for the second detector (as it is more distant)
+                                // check det1 and det2 correspondence by comparing phi angles
+                                // the radius is larger for the second detector (as it is more distant)
                                 double phiCross1 = Math.atan2(y[i],x[i]);
                                 double phiCross2 = Math.atan2(y[j],x[j]);
                                 diffPhi = Math.abs(phiCross1-phiCross2);
@@ -408,7 +379,7 @@ public class FTTRKEngine extends ReconstructionEngine {
                         }
                     }
                     if(debug>=1) System.out.println("minimum distance " + minDistance);
-                    // adjust tolerances if needed
+                    // adjust tolerances if needed (some reference values are hardcoded in FTConstants.java
                     double diffRadTolerance = 0.5;
                     double diffPhiTolerance = 1.;
                     double thetaTolerance = 0.05;
@@ -417,21 +388,19 @@ public class FTTRKEngine extends ReconstructionEngine {
                     double r2 = Math.sqrt(x[jBest]*x[jBest]+y[jBest]*y[jBest]);
                     double diffRadii = r1-r2;    
                     double diffTheta = Math.atan2(r1,z[iBest])- Math.atan2(r2,z[jBest]);
- //                   if(minDiffPhi < diffPhiTolerance && diffRadii<0 && Math.abs(diffRadii)<diffRadTolerance && 
- //                           diffTheta<thetaTolerance){
-                        if(minDiffPhi < diffPhiTolerance &&
-                            Math.abs(diffRadii)<diffRadTolerance && diffTheta<thetaTolerance){
-                                if(debug>=1) System.out.println("phi differences on two detectors " + diffPhi + " number of cross " + ncmatch + 
-                                        " diffTheta " + diffTheta + " diffRadii " + diffRadii + " " + det[iBest] + " " + det[jBest]);
-                                hHitMatch.fill((x[iBest]+x[jBest])/2., (y[iBest]+y[jBest])/2.);
-                                ncmatch++;
+                    if(minDiffPhi < diffPhiTolerance &&
+                        Math.abs(diffRadii)<diffRadTolerance && diffTheta<thetaTolerance){
+                            if(debug>=1) System.out.println("phi differences on two detectors " + diffPhi + " number of cross " + ncmatch + 
+                                " diffTheta " + diffTheta + " diffRadii " + diffRadii + " " + det[iBest] + " " + det[jBest]);
+                            hHitMatch.fill((x[iBest]+x[jBest])/2., (y[iBest]+y[jBest])/2.);
+                            ncmatch++;
                         }   
                     }
                 }
-             }    
+            }    
         }
     
-        
+        // output
         if(debug>=1) System.out.println("number of found crosses: module 1: " + nc1 + " module 2: " + nc2 + " matching crosses " + ncmatch);
         
         JFrame frame = new JFrame("FT Reconstruction");
@@ -540,43 +509,43 @@ public class FTTRKEngine extends ReconstructionEngine {
         
         canvas3.cd(++ic); canvas3.draw(hOccupancy1);
         canvas3.draw(l1); canvas3.draw(l2); canvas3.draw(l3); 
-        canvas3.draw(l4); //canvas3.draw(l5); 
-        canvas3.draw(l6); //canvas3.draw(l7); 
+        canvas3.draw(l4); 
+        canvas3.draw(l6); 
         canvas3.draw(l8); canvas3.draw(l9); 
         canvas3.draw(l10); canvas3.draw(l11); 
-        canvas3.draw(l12); //canvas3.draw(l13); 
-        canvas3.draw(l14); //canvas3.draw(l15); 
+        canvas3.draw(l12); 
+        canvas3.draw(l14); 
         canvas3.draw(l16); canvas3.draw(l17); 
         canvas3.draw(l18); canvas3.draw(l19); canvas3.draw(l20);
         canvas3.cd(++ic); canvas3.draw(hOccupancy2);
         canvas3.draw(l1); canvas3.draw(l2); canvas3.draw(l3); 
-        canvas3.draw(l4); //canvas3.draw(l5); 
-        canvas3.draw(l6); //canvas3.draw(l7); 
+        canvas3.draw(l4); 
+        canvas3.draw(l6);  
         canvas3.draw(l8); canvas3.draw(l9); 
         canvas3.draw(l10); canvas3.draw(l11); 
-        canvas3.draw(l12); //canvas3.draw(l13); 
-        canvas3.draw(l14); //canvas3.draw(l15); 
+        canvas3.draw(l12); 
+        canvas3.draw(l14);  
         canvas3.draw(l16); canvas3.draw(l17); 
         canvas3.draw(l18); canvas3.draw(l19); canvas3.draw(l20);
         canvas3.cd(++ic); canvas3.draw(hOccupancy3);
         canvas3.draw(l1); canvas3.draw(l2); canvas3.draw(l3); 
-        canvas3.draw(l4); //canvas3.draw(l5); 
-        canvas3.draw(l6); //canvas3.draw(l7); 
+        canvas3.draw(l4);  
+        canvas3.draw(l6); 
         canvas3.draw(l8); canvas3.draw(l9); 
         canvas3.draw(l10); canvas3.draw(l11); 
-        canvas3.draw(l12); //canvas3.draw(l13); 
-        canvas3.draw(l14); //canvas3.draw(l15); 
-        canvas3.draw(l16); //canvas3.draw(l17); 
+        canvas3.draw(l12); 
+        canvas3.draw(l14); 
+        canvas3.draw(l16);  
         canvas3.draw(l18); canvas3.draw(l19); canvas3.draw(l20);
         canvas3.cd(++ic); canvas3.draw(hOccupancy4);
         canvas3.draw(l1); canvas3.draw(l2); canvas3.draw(l3); 
-        canvas3.draw(l4); //canvas3.draw(l5); 
-        canvas3.draw(l6); //canvas3.draw(l7); 
+        canvas3.draw(l4); 
+        canvas3.draw(l6); 
         canvas3.draw(l8); canvas3.draw(l9); 
         canvas3.draw(l10); canvas3.draw(l11); 
-        canvas3.draw(l12); //canvas3.draw(l13); 
-        canvas3.draw(l14); //canvas3.draw(l15); 
-        canvas3.draw(l16); //canvas3.draw(l17); 
+        canvas3.draw(l12); 
+        canvas3.draw(l14); 
+        canvas3.draw(l16); 
         canvas3.draw(l18); canvas3.draw(l19); canvas3.draw(l20);
         frame3.add(canvas3);
         frame3.setLocationRelativeTo(null);
