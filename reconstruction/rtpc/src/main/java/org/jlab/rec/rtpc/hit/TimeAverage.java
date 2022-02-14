@@ -85,6 +85,7 @@ public class TimeAverage {
                 
                 gain = gains.getDoubleValue("gain", 1,(int)p.row(),(int)p.col());
                 //System.out.println("gain" + (int)p.col() + " " + (int)p.row() + " " + gain);
+                gain *= params.get_globalgain();
                 if(gain == 0) gain = 1;
                 HitVector v = new HitVector(pad,p.z(),p.phi(),averagetime,sumden/gain);
                 rtrack.addHit(v);
