@@ -46,6 +46,8 @@ public class TrajectoryFinder {
     /**
      *
      * @param candCrossList the input list of crosses used in determining a trajectory
+     * @param DcDetector
+     * @param dcSwim
      * @return a trajectory object
      */
     public Trajectory findTrajectory(List<Cross> candCrossList, DCGeant4Factory DcDetector, Swim dcSwim) {
@@ -68,7 +70,9 @@ public class TrajectoryFinder {
     
     /**
      * 
+     * @param sector
      * @param DcDetector DC detector utility
+     * @param dcSwim
      * @return integral Bdl
      */
     public double integralBdl(int sector, DCGeant4Factory DcDetector, Swim dcSwim) {
@@ -92,7 +96,6 @@ public class TrajectoryFinder {
  
             float[] result = new float[3];
             dcSwim.Bfield(sector, (x + x0) * 0.5, (y + y0) * 0.5, (z + z0) * 0.5, result);
-            //System.out.println("bf "+bf.toString());
             Vector3D dl = new Vector3D(x-x0,0,z-z0);
             Vector3D Bf = new Vector3D(result[0], result[1], result[2]);
             intBdl+= dl.cross(Bf).mag();
@@ -159,7 +162,7 @@ public class TrajectoryFinder {
 //                    X[planeIdx] = swamPars[0];
 //                    Y[planeIdx] = swamPars[1];
 //                    thX[planeIdx] = swamPars[3]/swamPars[5];
-//                    thY[planeIdx] = swamPars[4]/swamPars[5]; //System.out.println("traj swim to z "+Z[planeIdx]+" = "+swamPars[2]+" x "+ X[planeIdx]+" y "+ Y[planeIdx]);
+//                    thY[planeIdx] = swamPars[4]/swamPars[5];
 //                    pathLen+=swamPars[6];
 //                    StateVec stVec = new StateVec(X[planeIdx],Y[planeIdx],thX[planeIdx], thY[planeIdx]);
 //                    stVec.set_planeIdx(planeIdx);
@@ -176,10 +179,11 @@ public class TrajectoryFinder {
 //        
     /**
      *
+     * @param DcDetector
      * @return the list of state vectors along the trajectory
      */
     public List<StateVec> getStateVecsAlongTrajectory(DCGeant4Factory DcDetector) {
-        List<StateVec> stateVecAtPlanesList = new ArrayList<StateVec>(36);
+        List<StateVec> stateVecAtPlanesList = new ArrayList<>(36);
         for(int superlayerIdx =0; superlayerIdx<6; superlayerIdx++) {
             for(int layerIdx =0; layerIdx<6; layerIdx++) {
                 double z = DcDetector.getLayerMidpoint(superlayerIdx, layerIdx).z;

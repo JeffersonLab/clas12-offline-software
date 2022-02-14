@@ -1,5 +1,7 @@
 package cnuphys.magfield;
 
+import java.io.PrintStream;
+
 /**
  *
  * @author gavalian
@@ -36,7 +38,7 @@ public class TorusProbe extends FieldProbe {
 		q3Coordinate = _torus.q3Coordinate.clone();
 
 	}
-
+	
 	/**
 	 * Create a probe for use with the torus Used only for the weird DoubleTorus
 	 * 

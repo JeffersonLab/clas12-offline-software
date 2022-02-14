@@ -5,6 +5,7 @@
  */
 package org.jlab.clas.swimtools;
 
+import cnuphys.adaptiveSwim.AdaptiveSwimException;
 import cnuphys.rk4.IStopper;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.SwimTrajectory;
@@ -14,7 +15,13 @@ import cnuphys.swimZ.SwimZResult;
 import cnuphys.swimZ.SwimZStateVector;
 import org.apache.commons.math3.util.FastMath;
 import org.jlab.geom.prim.Vector3D;
-
+import org.jlab.geom.prim.Point3D;
+import cnuphys.adaptiveSwim.AdaptiveSwimResult;
+import cnuphys.adaptiveSwim.AdaptiveSwimmer;
+import cnuphys.adaptiveSwim.geometry.Cylinder;
+import cnuphys.adaptiveSwim.geometry.Line;
+import cnuphys.adaptiveSwim.geometry.Point;
+import cnuphys.adaptiveSwim.geometry.Vector;
 /**
  *
  * @author ziegler
@@ -36,8 +43,8 @@ public class Swim {
 
     final double SWIMZMINMOM = 0.75; // GeV/c
     final double MINTRKMOM = 0.05; // GeV/c
-    final double accuracy = 20e-6; // 20 microns
-    final double stepSize = 5.00 * 1.e-4; // 500 microns
+    double accuracy = 20e-6; // 20 microns
+    double stepSize = 5.00 * 1.e-4; // 500 microns
 
     private ProbeCollection PC;
     
@@ -153,6 +160,35 @@ public class Swim {
                     int charge, double maxPathLength) {
 
         _maxPathLength = maxPathLength;
+        _charge = charge;
+        _phi = phiDeg;
+        _theta = thetaDeg;
+        _pTot = p;
+        _x0 = xcm / 100;
+        _y0 = ycm / 100;
+        _z0 = zcm / 100;
+
+    }
+
+    /**
+     * 
+     * @param xcm
+     * @param ycm
+     * @param zcm
+     * @param phiDeg
+     * @param thetaDeg
+     * @param p
+     * @param charge
+     * @param maxPathLength
+     * @param Accuracy
+     * @param StepSize
+     */
+    public void SetSwimParameters(double xcm, double ycm, double zcm, double phiDeg, double thetaDeg, double p,
+                    int charge, double maxPathLength, double Accuracy, double StepSize) {
+
+        _maxPathLength = maxPathLength;
+         accuracy = Accuracy/100;
+         stepSize = StepSize/100;
         _charge = charge;
         _phi = phiDeg;
         _theta = thetaDeg;
@@ -441,6 +477,157 @@ public class Swim {
 
     }
 
+    /**
+     * 
+     * @param radius in cm
+     * @return state  x,y,z,px,py,pz, pathlength, iBdl at the surface 
+     */
+    public double[] SwimRho(double radius)  {
+        return SwimRho(radius, accuracy*100);
+    }
+    
+    /**
+     * 
+     * @param radius   in cm
+     * @param accuracy in cm 
+     * @return state  x,y,z,px,py,pz, pathlength, iBdl at the surface 
+     */
+    public double[] SwimRho(double radius, double accuracy)  {
+
+        double[] value = null;
+
+        // using adaptive stepsize
+        if(this.SwimUnPhys)
+            return null;
+
+        try {
+        
+            AdaptiveSwimResult result = new AdaptiveSwimResult(false);
+            
+            PC.CF.swimRho(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, radius/100, accuracy/100, _rMax, stepSize, cnuphys.swim.Swimmer.CLAS_Tolerance, result);
+
+            if(result.getStatus()==0) {
+                value = new double[8];   
+                value[0] = result.getUf()[0] * 100; // convert back to cm
+                value[1] = result.getUf()[1] * 100; // convert back to cm
+                value[2] = result.getUf()[2] * 100; // convert back to cm
+                value[3] = result.getUf()[3] * _pTot; // normalized values
+                value[4] = result.getUf()[4] * _pTot;
+                value[5] = result.getUf()[5] * _pTot;
+                value[6] = result.getFinalS() * 100;
+                value[7] = 0; // Conversion from kG.m to T.cm
+            }
+                    
+        } catch (RungeKuttaException e) {
+                System.out.println(_charge + " " + _x0 + " " + _y0 + " " + _z0 + " " + _pTot + " " + _theta + " " + _phi);
+                e.printStackTrace();
+        }
+        return value;
+
+    }
+    
+    /**
+     * 
+     * @param axisPoint1 in cm
+     * @param axisPoint2 in cm 
+     * @param radius in cm 
+     * @return swam trajectory to the cylinder
+     */
+    public double[] SwimGenCylinder(Point3D axisPoint1, Point3D axisPoint2, double radius)  {
+        return SwimGenCylinder(axisPoint1, axisPoint2, radius, accuracy*100);
+    }
+    
+    /**
+     * 
+     * @param axisPoint1 in cm
+     * @param axisPoint2 in cm 
+     * @param radius in cm 
+     * @param accuracy in cm
+     * @return swam trajectory to the cylinder
+     */
+    public double[] SwimGenCylinder(Point3D axisPoint1, Point3D axisPoint2, double radius, double accuracy)  {
+
+        double[] value = null;
+        double[] p1 = new double[3];
+        double[] p2 = new double[3];
+        p1[0] = axisPoint1.x()/100;
+        p1[1] = axisPoint1.y()/100;
+        p1[2] = axisPoint1.z()/100;
+        p2[0] = axisPoint2.x()/100;
+        p2[1] = axisPoint2.y()/100;
+        p2[2] = axisPoint2.z()/100;
+        
+        Cylinder targCyl = new Cylinder(p1, p2, radius/100);
+        // using adaptive stepsize
+        if(this.SwimUnPhys)
+            return null;
+
+        try {
+        
+            AdaptiveSwimResult result = new AdaptiveSwimResult(false);
+            
+            PC.CF.swimCylinder(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, 
+                    p1, p2, radius/100, accuracy/100, _rMax, stepSize, cnuphys.swim.Swimmer.CLAS_Tolerance, result);
+            
+            if(result.getStatus()==0) {
+                value = new double[8];            
+                value[0] = result.getUf()[0] * 100; // convert back to cm
+                value[1] = result.getUf()[1] * 100; // convert back to cm
+                value[2] = result.getUf()[2] * 100; // convert back to cm
+                value[3] = result.getUf()[3] * _pTot; // normalized values
+                value[4] = result.getUf()[4] * _pTot;
+                value[5] = result.getUf()[5] * _pTot;
+                value[6] = result.getFinalS() * 100;
+                value[7] = 0; // Conversion from kG.m to T.cm
+            }
+                    
+        } catch (RungeKuttaException e) {
+                System.out.println(_charge + " " + _x0 + " " + _y0 + " " + _z0 + " " + _pTot + " " + _theta + " " + _phi);
+                e.printStackTrace();
+        }
+        return value;
+
+    }
+
+    public double[] SwimPlane(Vector3D n, Point3D p, double accuracy)  {
+
+        double[] value = null;
+        
+        
+        // using adaptive stepsize
+        if(this.SwimUnPhys)
+            return null;
+
+        try {
+        
+            AdaptiveSwimResult result = new AdaptiveSwimResult(false);
+            
+            PC.CF.swimPlane(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, 
+                            n.x(),n.y(),n.z(),p.x()/100,p.y()/100,p.z()/100, 
+                            accuracy/100, _rMax, stepSize, cnuphys.swim.Swimmer.CLAS_Tolerance, result);
+            
+
+            if(result.getStatus()==0) {
+                value = new double[8];   
+                value[0] = result.getUf()[0] * 100; // convert back to cm
+                value[1] = result.getUf()[1] * 100; // convert back to cm
+                value[2] = result.getUf()[2] * 100; // convert back to cm
+                value[3] = result.getUf()[3] * _pTot; // normalized values
+                value[4] = result.getUf()[4] * _pTot;
+                value[5] = result.getUf()[5] * _pTot;
+                value[6] = result.getFinalS() * 100;
+                value[7] = 0; // Conversion from kG.m to T.cm
+            }
+                    
+        } catch (RungeKuttaException e) {
+                System.out.println(_charge + " " + _x0 + " " + _y0 + " " + _z0 + " " + _pTot + " " + _theta + " " + _phi);
+                e.printStackTrace();
+        }
+        return value;
+
+    }
+    
+    
     private class SphericalBoundarySwimStopper implements IStopper {
 
         private double _finalPathLength = Double.NaN;
@@ -592,7 +779,7 @@ public class Swim {
         if(this.SwimUnPhys)
             return null;
         double d = d_cm / 100;
-
+        
         double hdata[] = new double[3];
         // using adaptive stepsize
 
@@ -607,7 +794,7 @@ public class Swim {
             st.computeBDL(PC.CP);
 
             double[] lastY = st.lastElement();
-
+            
             value[0] = lastY[0] * 100; // convert back to cm
             value[1] = lastY[1] * 100; // convert back to cm
             value[2] = lastY[2] * 100; // convert back to cm
@@ -753,6 +940,134 @@ public class Swim {
         result[0] = result[0] / 10;
         result[1] = result[1] / 10;
         result[2] = result[2] / 10;
+
+    }
+
+    
+    
+    public double[] AdaptiveSwimPlane(double px, double py, double pz, double nx, double ny, double nz, double accuracy)  {
+//        System.out.println("Don't use yet");
+
+        double[] value = new double[8];
+        
+        Vector norm = new Vector(nx,ny,nz);
+        Point point = new Point(px/100,py/100,pz/100);
+        
+        cnuphys.adaptiveSwim.geometry.Plane targetPlane = new cnuphys.adaptiveSwim.geometry.Plane(norm, point);
+
+        
+        // using adaptive stepsize
+        if(this.SwimUnPhys)
+            return null;
+
+        try {
+        
+            AdaptiveSwimResult result = new AdaptiveSwimResult(false);
+            
+            PC.AS.swimPlane(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, targetPlane,
+                            accuracy/100, _rMax, stepSize, cnuphys.swim.Swimmer.getEps(), result);
+            
+            if(result.getStatus() == AdaptiveSwimmer.SWIM_SUCCESS) {
+                value[0] = result.getUf()[0] * 100; // convert back to cm
+                value[1] = result.getUf()[1] * 100; // convert back to cm
+                value[2] = result.getUf()[2] * 100; // convert back to cm
+                value[3] = result.getUf()[3] * _pTot; // normalized values
+                value[4] = result.getUf()[4] * _pTot;
+                value[5] = result.getUf()[5] * _pTot;
+                value[6] = result.getFinalS() * 100;
+                value[7] = 0; // Conversion from kG.m to T.cm
+            }
+            else {
+                return null;
+            }
+                    
+        } catch (AdaptiveSwimException e) {
+                e.printStackTrace();
+        }        
+        return value;
+
+    }
+    
+    
+    public double[] AdaptiveSwimCylinder(double a1x, double a1y, double a1z, double a2x, double a2y, double a2z, double radius, double accuracy)  {
+    //    System.out.println("Don't use yet");
+        double[] value = new double[8];
+        
+        radius = radius/100;
+        Point a1 = new Point(a1x/100, a1y/100, a1z/100);
+        Point a2 = new Point(a2x/100, a2y/100, a2z/100);
+        Line centerLine = new Line(a1, a2);
+        
+        cnuphys.adaptiveSwim.geometry.Cylinder targetCylinder = new cnuphys.adaptiveSwim.geometry.Cylinder(centerLine, radius);
+
+        
+        // using adaptive stepsize
+        if(this.SwimUnPhys)
+            return null;
+
+        try {
+        
+            AdaptiveSwimResult result = new AdaptiveSwimResult(false);
+            
+            PC.AS.swimCylinder(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, targetCylinder,
+                            accuracy/100, _rMax, stepSize, cnuphys.swim.Swimmer.getEps(), result);
+
+            if(result.getStatus() == AdaptiveSwimmer.SWIM_SUCCESS) {
+                value[0] = result.getUf()[0] * 100; // convert back to cm
+                value[1] = result.getUf()[1] * 100; // convert back to cm
+                value[2] = result.getUf()[2] * 100; // convert back to cm
+                value[3] = result.getUf()[3] * _pTot; // normalized values
+                value[4] = result.getUf()[4] * _pTot;
+                value[5] = result.getUf()[5] * _pTot;
+                value[6] = result.getFinalS() * 100;
+                value[7] = 0; // Conversion from kG.m to T.cm
+            }
+            else {
+                return null;
+            }
+                    
+        } catch (AdaptiveSwimException e) {
+                e.printStackTrace();
+        }        
+        return value;
+
+    }
+
+    public double[] AdaptiveSwimRho(double radius, double accuracy)  {
+        System.out.println("Don't use yet");
+
+        double[] value = new double[8];
+
+        radius = radius/100;
+        // using adaptive stepsize
+        if(this.SwimUnPhys)
+            return null;
+
+        try {
+        
+            AdaptiveSwimResult result = new AdaptiveSwimResult(false);
+            
+            PC.AS.swimRho(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, radius, 
+                          accuracy/100, _rMax, stepSize, cnuphys.swim.Swimmer.getEps(), result);
+
+            if(result.getStatus() == AdaptiveSwimmer.SWIM_SUCCESS) {
+                value[0] = result.getUf()[0] * 100; // convert back to cm
+                value[1] = result.getUf()[1] * 100; // convert back to cm
+                value[2] = result.getUf()[2] * 100; // convert back to cm
+                value[3] = result.getUf()[3] * _pTot; // normalized values
+                value[4] = result.getUf()[4] * _pTot;
+                value[5] = result.getUf()[5] * _pTot;
+                value[6] = result.getFinalS() * 100;
+                value[7] = 0; // Conversion from kG.m to T.cm
+            }
+            else {
+                return null;
+            }
+                    
+        } catch (AdaptiveSwimException e) {
+                e.printStackTrace();
+        }
+        return value;
 
     }
 

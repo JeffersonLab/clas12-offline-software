@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.reco.io;
 
 import java.util.ArrayList;
@@ -21,6 +16,7 @@ import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.Event;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.jnp.hipo4.io.HipoWriter;
+import org.jlab.logging.DefaultLogger;
 import org.jlab.utils.benchmark.ProgressPrintout;
 import org.jlab.utils.options.OptionParser;
 import org.jlab.utils.system.ClasUtilsFile;
@@ -30,14 +26,15 @@ import org.jlab.utils.system.ClasUtilsFile;
  * @author gavalian
  */
 public class EvioHipoEvent4 {
-    
+
+    private static Logger LOGGER = Logger.getLogger(EvioHipoEvent4.class.getName());
     
     private SchemaFactory        schemaFactory = new SchemaFactory();
 
     public EvioHipoEvent4() {
         String dir = ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4");
         schemaFactory.initFromDirectory(dir);
-
+        DefaultLogger.debug();
     }
     
     
@@ -112,7 +109,7 @@ public class EvioHipoEvent4 {
                 hipoEvent.write(hipoBankADC);
                 hipoEvent.write(hipoBankTDC);
             } catch (Exception e) {
-                System.out.println("[hipo-decoder]  >>>> error writing RICH bank");
+                LOGGER.log(Level.SEVERE,"[hipo-decoder]  >>>> error writing RICH bank", e);
             }
         }
     }
@@ -136,7 +133,7 @@ public class EvioHipoEvent4 {
                 }
                 hipoEvent.write(hipoBank);
             } catch (Exception e) {
-                System.out.println("[hipo-decoder]  >>>> error writing LTCC bank");
+                LOGGER.log(Level.SEVERE,"[hipo-decoder]  >>>> error writing LTCC bank", e);
             }
         }
     }
@@ -161,7 +158,7 @@ public class EvioHipoEvent4 {
                 hipoEvent.write(hipoBank);
             } catch (Exception e) {
                 e.printStackTrace();
-                System.out.println("[hipo-decoder]  >>>> error writing LTCC bank");
+                LOGGER.log(Level.SEVERE,"[hipo-decoder]  >>>> error writing LTCC bank", e);
             }
         }
     }
@@ -182,6 +179,7 @@ public class EvioHipoEvent4 {
         }
     }
     
+    @SuppressWarnings("empty-statement")
     public void fillHipoEventBMT(Event hipoEvent, EvioDataEvent evioEvent){
         if(evioEvent.hasBank("BMT::dgtz")==true){
             EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("BMT::dgtz");
@@ -191,7 +189,12 @@ public class EvioHipoEvent4 {
                 hipoADC.putByte("layer",  i, (byte) evioBank.getInt("layer",i));
                 hipoADC.putShort("component",  i, (short) evioBank.getInt("strip",i));
                 hipoADC.putInt("ADC",  i, (int) evioBank.getInt("ADC",i));
-                hipoADC.putFloat("time",  i, (float) 0);
+                try {
+                    hipoADC.putFloat("time",  i, (float) evioBank.getDouble("time",i));
+                }
+                catch(Exception e) {
+                    hipoADC.putFloat("time",  i, 0);
+                }
                 hipoADC.putShort("ped", i, (short) 0);            
             }
             hipoEvent.write(hipoADC);
@@ -207,7 +210,12 @@ public class EvioHipoEvent4 {
                 hipoADC.putByte("layer",  i, (byte) evioBank.getInt("layer",i));
                 hipoADC.putShort("component",  i, (short) evioBank.getInt("strip",i));
                 hipoADC.putInt("ADC",  i, (int) evioBank.getInt("ADC",i));
-                hipoADC.putFloat("time",  i, (float) 0);
+                try {
+                    hipoADC.putFloat("time",  i, (float) evioBank.getDouble("time",i));
+                }
+                catch(Exception e) {
+                    hipoADC.putFloat("time",  i, 0);
+                }
                 hipoADC.putShort("ped", i, (short) 0);            
             }
             hipoEvent.write(hipoADC);
@@ -638,7 +646,7 @@ public class EvioHipoEvent4 {
             }
 
         } catch (EvioException ex) {
-            Logger.getLogger(EvioHipoEvent4.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, null, ex);
         }
         for(EvioTreeBranch branch : branches){
             int  crate = branch.getTag();
@@ -689,9 +697,16 @@ public class EvioHipoEvent4 {
         parser.addOption("-t","-1.0");
         parser.addOption("-s","1.0");
         parser.addOption("-n", "-1");
+        parser.addOption("-d","1","Debug level [0 - OFF, 1 - ON/default]");
         
         parser.parse(args);
-        
+
+        if(parser.getOption("-d").intValue() == 0)
+            DefaultLogger.initialize();
+        else
+            DefaultLogger.debug();
+
+
         if(parser.hasOption("-o")==true){
         
             String outputFile = parser.getOption("-o").stringValue();
@@ -712,6 +727,7 @@ public class EvioHipoEvent4 {
             int nrun = parser.getOption("-r").intValue();
             double torus = parser.getOption("-t").doubleValue();
             double solenoid = parser.getOption("-s").doubleValue();
+
             
             
             writer.open(outputFile);
@@ -720,10 +736,10 @@ public class EvioHipoEvent4 {
             int maximumEvents = parser.getOption("-n").intValue();
             int nevent = 0;
                         
-            System.out.println(">>>>>  SIZE OF THE INPUT FILES = " + inputFiles.size());
+            LOGGER.log(Level.INFO,">>>>>  SIZE OF THE INPUT FILES = " + inputFiles.size());
             
             for(String input : inputFiles){
-                System.out.println(">>>>>  appending file : " + input);
+                LOGGER.log(Level.INFO,">>>>>  appending file : " + input);
                 try {
                     EvioSource reader = new EvioSource();
                     reader.open(input);
@@ -741,17 +757,16 @@ public class EvioHipoEvent4 {
                         if(maximumEvents>0&&nevent>=maximumEvents) {
                             reader.close();
                             writer.close();
-                            System.out.println("\n\n\n Finished output file at event count = " + nevent);
+                            LOGGER.log(Level.INFO,"Finished output file at event count = " + nevent);
                             System.exit(0);
                         }
                 }
             } catch (Exception e){
                 e.printStackTrace();
-                System.out.println(">>>>>  processing file :  failed ");
+                LOGGER.log(Level.SEVERE,">>>>>  processing file :  failed ");
             }
-            System.out.println(">>>>>  processing file  :  success ");
-            System.out.println(">>>>>  number of events :  " + nevent);
-            System.out.println();            
+            LOGGER.log(Level.INFO,">>>>>  processing file  :  success ");
+            LOGGER.log(Level.INFO,">>>>>  number of events :  " + nevent);
         }
         writer.close();
         }

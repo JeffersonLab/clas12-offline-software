@@ -20,27 +20,28 @@ public class StyleEditorPanel extends JPanel {
 	public static final String SYMBOLSIZEPROP = "Symbol Size";
 	public static final String LINEWIDTHPROP = "Line Width";
 
-	private static final Font _font = Environment.getInstance()
-			.getCommonFont(10);
+	private static final Font _font = Environment.getInstance().getCommonFont(10);
 
 	// change symbol type
-	EnumComboBox _symbolSelector;
+	private EnumComboBox _symbolSelector;
 
-	// change line style
-	EnumComboBox _lineSelector;
+	// change symbol border style
+	private EnumComboBox _fitLineStyleSelector;
 
-	// line color
-	protected ColorLabel _lineColor;
+	// symbol border color
+	protected ColorLabel _borderColor;
+
+	// fit line color
+	protected ColorLabel _fitLineColor;
 
 	// symbol color
 	protected ColorLabel _symbolColor;
 
 	// symbol size
 	protected TextFieldSlider _symbolSizeSelector;
-	
-	// line size
-	protected TextFieldSlider _lineSizeSelector;
 
+	// curve line size
+	protected TextFieldSlider _lineSizeSelector;
 
 	/**
 	 * Create the stye editing panel.
@@ -56,6 +57,7 @@ public class StyleEditorPanel extends JPanel {
 	private void addContent(DataSetType type) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
+		// symbol panel
 		JPanel symPan = null;
 		if (type != DataSetType.H1D) {
 			symPan = flowPanel(FlowLayout.LEFT);
@@ -64,29 +66,41 @@ public class StyleEditorPanel extends JPanel {
 			symPan.add(_symbolSelector);
 			symPan.add(_symbolColor);
 
+			_borderColor = new ColorLabel(null, Color.black, _font, "Symbol Border");
+			symPan.add(_borderColor);
+
+		}
+		else {
+			symPan = flowPanel(FlowLayout.LEFT);
+			_symbolColor = new ColorLabel(null, Color.black, _font, "Histogram Fill");
+			symPan.add(_symbolColor);
+
+			_borderColor = new ColorLabel(null, Color.black, _font, "Histogram Border");
+			symPan.add(_borderColor);
 		}
 
-		JPanel linePanel = flowPanel(FlowLayout.LEFT);
-		_lineSelector = LineStyle.getComboBox(LineStyle.SOLID);
+		// symbol border panel
+		JPanel borderPanel = flowPanel(FlowLayout.LEFT);
+		_fitLineStyleSelector = LineStyle.getComboBox(LineStyle.SOLID);
+
+		_fitLineColor = new ColorLabel(null, Color.black, _font, "Curve Line");
 
 		// make same size
 		if (_symbolSelector != null) {
 			Dimension dim1 = _symbolSelector.getPreferredSize();
-			Dimension dim2 = _lineSelector.getPreferredSize();
+			Dimension dim2 = _fitLineStyleSelector.getPreferredSize();
 			int mw = Math.max(dim1.width, dim2.width);
 			dim1.width = mw;
 			_symbolSelector.setPreferredSize(dim1);
-			_lineSelector.setPreferredSize(dim1);
+			_fitLineStyleSelector.setPreferredSize(dim1);
 		}
 
-		_lineColor = new ColorLabel(null, Color.black, _font, "Line");
-		linePanel.add(_lineSelector);
-		linePanel.add(_lineColor);
+		borderPanel.add(_fitLineStyleSelector);
+		borderPanel.add(_fitLineColor);
 
 		if (type != DataSetType.H1D) {
 			String labels[] = { "4", "8", "12", "16", "20", "24", "28" };
-			_symbolSizeSelector = new TextFieldSlider(4, 28, 8, _font, 1,
-					labels, 180, 40, "Symbol Size") {
+			_symbolSizeSelector = new TextFieldSlider(4, 28, 8, _font, 1, labels, 180, 40, "Symbol Size") {
 
 				@Override
 				public double sliderValueToRealValue() {
@@ -105,27 +119,24 @@ public class StyleEditorPanel extends JPanel {
 
 				@Override
 				public void valueChanged() {
-					firePropertyChange(SYMBOLSIZEPROP, -1,
-							_symbolSizeSelector.getValue());
+					firePropertyChange(SYMBOLSIZEPROP, -1, _symbolSizeSelector.getValue());
 				}
 
 			};
 		}
-		
-		//line size 
+
+		// line size
 		String szLabels[] = { "0", "2", "4", "6", "8", "10", "12" };
-		_lineSizeSelector = new TextFieldSlider(0, 24, 1, _font, 1,
-				szLabels, 180, 40, "Line Width") {
-		
+		_lineSizeSelector = new TextFieldSlider(0, 24, 1, _font, 1, szLabels, 180, 40, "Curve Line Width") {
 
 			@Override
 			public double sliderValueToRealValue() {
-				return getValue()/2.;
+				return getValue() / 2.;
 			}
 
 			@Override
 			public int realValueToSliderValue(double val) {
-				return (int) (2*val);
+				return (int) (2 * val);
 			}
 
 			@Override
@@ -136,8 +147,7 @@ public class StyleEditorPanel extends JPanel {
 
 			@Override
 			public void valueChanged() {
-				firePropertyChange(LINEWIDTHPROP, -1,
-						_lineSizeSelector.getValue());
+				firePropertyChange(LINEWIDTHPROP, -1, _lineSizeSelector.getValue());
 			}
 
 		};
@@ -145,7 +155,7 @@ public class StyleEditorPanel extends JPanel {
 		if (symPan != null) {
 			add(symPan);
 		}
-		add(linePanel);
+		add(borderPanel);
 		if (type != DataSetType.H1D) {
 			add(_symbolSizeSelector);
 		}
@@ -168,14 +178,14 @@ public class StyleEditorPanel extends JPanel {
 		if (_symbolSelector != null) {
 			_symbolSelector.setEnabled(enabled);
 		}
-		if (_lineSelector != null) {
-			_lineSelector.setEnabled(enabled);
+		if (_fitLineStyleSelector != null) {
+			_fitLineStyleSelector.setEnabled(enabled);
 		}
 		if (_symbolColor != null) {
 			_symbolColor.setEnabled(enabled);
 		}
-		if (_lineColor != null) {
-			_lineColor.setEnabled(enabled);
+		if (_borderColor != null) {
+			_borderColor.setEnabled(enabled);
 		}
 		if (_symbolSizeSelector != null) {
 			_symbolSizeSelector.setEnabled(enabled);
@@ -183,6 +193,10 @@ public class StyleEditorPanel extends JPanel {
 		if (_lineSizeSelector != null) {
 			_lineSizeSelector.setEnabled(enabled);
 		}
+		if (_fitLineColor != null) {
+			_fitLineColor.setEnabled(enabled);
+		}
+
 	}
 
 	/**
@@ -193,17 +207,19 @@ public class StyleEditorPanel extends JPanel {
 	public void setStyle(IStyled style) {
 		if (style != null) {
 			if (_symbolSelector != null) {
-				_symbolSelector
-						.setSelectedItem(style.getSymbolType().getName());
+				_symbolSelector.setSelectedItem(style.getSymbolType().getName());
 			}
-			if (_lineSelector != null) {
-				_lineSelector.setSelectedItem(style.getLineStyle().getName());
+			if (_fitLineStyleSelector != null) {
+				_fitLineStyleSelector.setSelectedItem(style.getFitLineStyle().getName());
 			}
 			if (_symbolColor != null) {
 				_symbolColor.setColor(style.getFillColor());
 			}
-			if (_lineColor != null) {
-				_lineColor.setColor(style.getLineColor());
+			if (_borderColor != null) {
+				_borderColor.setColor(style.getBorderColor());
+			}
+			if (_fitLineColor != null) {
+				_fitLineColor.setColor(style.getFitLineColor());
 			}
 			if (_symbolSizeSelector != null) {
 				_symbolSizeSelector.setValue(style.getSymbolSize());
@@ -219,7 +235,7 @@ public class StyleEditorPanel extends JPanel {
 	public TextFieldSlider getSymbolSizeSelector() {
 		return _symbolSizeSelector;
 	}
-	
+
 	/**
 	 * Get the line width slider
 	 * 
@@ -228,7 +244,6 @@ public class StyleEditorPanel extends JPanel {
 	public TextFieldSlider getLineWidthSelector() {
 		return _lineSizeSelector;
 	}
-
 
 	/**
 	 * Get the symbol selector
@@ -240,12 +255,12 @@ public class StyleEditorPanel extends JPanel {
 	}
 
 	/**
-	 * Get the line selector
+	 * Get the border selector
 	 * 
-	 * @return the line selector
+	 * @return the border selector
 	 */
-	public EnumComboBox getLineSelector() {
-		return _lineSelector;
+	public EnumComboBox getBorderSelector() {
+		return _fitLineStyleSelector;
 	}
 
 	/**
@@ -262,7 +277,16 @@ public class StyleEditorPanel extends JPanel {
 	 * 
 	 * @return the line color selector
 	 */
-	public ColorLabel getLineColor() {
-		return _lineColor;
+	public ColorLabel getBorderColor() {
+		return _borderColor;
+	}
+
+	/**
+	 * Get the fit line color selector
+	 * 
+	 * @return the fit line color selector
+	 */
+	public ColorLabel getFitLineColor() {
+		return _fitLineColor;
 	}
 }

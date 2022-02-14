@@ -13,7 +13,7 @@
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../../parent/pom.xml</relativePath>
-    <version>6.6.0-SNAPSHOT</version>
+    <version>7.1.0-SNAPSHOT</version>
   </parent>
 
   <build>
@@ -69,19 +69,19 @@
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-jcsg</artifactId>
-      <version>6.6.0-SNAPSHOT</version>
+      <version>7.1.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-reco</artifactId>
-      <version>6.6.0-SNAPSHOT</version>
+      <version>7.1.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-analysis</artifactId>
-      <version>6.6.0-SNAPSHOT</version>
+      <version>7.1.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -115,21 +115,19 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jlab.coda</groupId>
-      <artifactId>jclara</artifactId>
-      <version>4.3-SNAPSHOT</version>
-    </dependency>
-    
-    <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>swim-tools</artifactId>
-      <version>6.6.0-SNAPSHOT</version>
+      <version>7.1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.jlab</groupId>
       <artifactId>groot</artifactId>
       <version>3.0.0-SNAPSHOT</version>
     </dependency>
-    
-  </dependencies>
+        <dependency>
+            <groupId>org.jlab.clas</groupId>
+            <artifactId>clas-tracking</artifactId>
+            <version>7.1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
  </project>

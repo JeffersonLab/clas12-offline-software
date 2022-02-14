@@ -1,5 +1,6 @@
 package cnuphys.lund;
 
+import java.io.Serializable;
 import java.util.StringTokenizer;
 
 /**
@@ -9,9 +10,13 @@ import java.util.StringTokenizer;
  * @author heddle
  *
  */
-public class GeneratedParticleRecord {
-	
-	//for use in hask keys
+public class GeneratedParticleRecord implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2460631848401695481L;
+	// for use in hask keys
 	private static final String HASH_DELIM = "$";
 	private static final int HASHRADIX = 36;
 	private static final double HASHFACT = 100.;
@@ -168,7 +173,7 @@ public class GeneratedParticleRecord {
 	 * @param rpr the GeneratedParticleRecord
 	 * @return a reduced precision String version
 	 */
-	public static String hashKey(GeneratedParticleRecord  rpr) {
+	public static String hashKey(GeneratedParticleRecord rpr) {
 		
 		StringBuilder sb = new StringBuilder(128);
 		sb.append(rpr._charge);

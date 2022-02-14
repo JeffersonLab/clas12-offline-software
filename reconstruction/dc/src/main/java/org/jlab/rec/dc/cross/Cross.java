@@ -1,6 +1,8 @@
 package org.jlab.rec.dc.cross;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jlab.clas.clas.math.FastMath;
 
 //import org.apache.commons.math3.util.FastMath;
@@ -17,6 +19,8 @@ import org.jlab.rec.dc.segment.Segment;
  *
  */
 public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
+    
+    private static final Logger LOGGER = Logger.getLogger(Cross.class.getName());
 
     /**
      * serial id
@@ -43,8 +47,8 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
     private Segment _seg2;
     public boolean isPseudoCross = false;
     
-    private double cos_tilt = FastMath.cos(Math.toRadians(25.));
-    private double sin_tilt = FastMath.sin(Math.toRadians(25.));
+    private final double cos_tilt = FastMath.cos(Math.toRadians(25.));
+    private final double sin_tilt = FastMath.sin(Math.toRadians(25.));
     
     public int recalc;
     /**
@@ -186,6 +190,7 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
 
     /**
      * Sorts crosses by azimuth angle values
+     * @param arg
      */
     @Override
     public int compareTo(Cross arg) {
@@ -193,12 +198,18 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
         double theta_deg1 = (theta_rad1 / Math.PI * 180.) + (theta_rad1 > 0 ? 0 : 360.);
         double theta_rad2 = FastMath.atan2(arg.get_Point().y(), arg.get_Point().x());
         double theta_deg2 = (theta_rad2 / Math.PI * 180.) + (theta_rad2 > 0 ? 0 : 360.);
+        
 
-        if (theta_deg1 < theta_deg2) {
-            return 1;
-        } else {
-            return -1;
-        }
+        int RegComp = this.get_Region() < arg.get_Region() ? -1 : this.get_Region() == arg.get_Region() ? 0 : 1;
+        int AngComp = theta_deg1 < theta_deg2 ? -1 : theta_deg1 == theta_deg2 ? 0 : 1;
+
+        return ((RegComp == 0) ? AngComp : RegComp);
+        
+//        if (theta_deg1 < theta_deg2) {
+//            return 1;
+//        } else {
+//            return -1;
+//        }
     }
 
 
@@ -243,6 +254,7 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
 
     /**
      * Sets the cross parameters: the position and direction unit vector
+     * @param DcDetector
      */
     public void set_CrossParams(DCGeant4Factory DcDetector) {
 
@@ -381,24 +393,27 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
 		
 		if(this.recalc==0) {
 			
-			System.out.println(this.recalc+"] "+this.printInfo()+" alpha "+Math.toDegrees(alpha)+" X "+X+" Y "+Y+c2.printInfo()+" "+c3.printInfo());
+			LOGGER.log(Level.FINE, this.recalc+"] "+this.printInfo()+" alpha "+Math.toDegrees(alpha)+" X "+X+" Y "+Y+c2.printInfo()+" "+c3.printInfo());
 			this.set_Point(new Point3D(X, Y, this.get_Point().z()));
 		}
 		XY[0] = X;
 		XY[1] = Y;
 		
 		return XY;
-		//System.out.println(this.recalc+"] "+this.printInfo()+" alpha "+Math.toDegrees(alpha)+" X "+X+" Y "+Y+c2.printInfo()+" "+c3.printInfo());
+		//LOGGER.log(Level.FINE, this.recalc+"] "+this.printInfo()+" alpha "+Math.toDegrees(alpha)+" X "+X+" Y "+Y+c2.printInfo()+" "+c3.printInfo());
 	}
      */
 
-    void set_CrossDirIntersSegWires() {
+    public void set_CrossDirIntersSegWires() {
         double wy_over_wx = (FastMath.cos(Math.toRadians(6.)) / FastMath.sin(Math.toRadians(6.)));
         double val_sl1 = this._seg1.get_fittedCluster().get_clusterLineFitSlope();
         double val_sl2 = this._seg2.get_fittedCluster().get_clusterLineFitSlope();
         double val_it1 = this._seg1.get_fittedCluster().get_clusterLineFitIntercept();
         double val_it2 = this._seg2.get_fittedCluster().get_clusterLineFitIntercept();
-
+        
+        LOGGER.log(Level.FINE, this._seg1.printInfo()+this._seg2.printInfo()+" insterWire: seg1 "+new Point3D(val_sl1, val_it1,999).toString()+
+                    " seg2 "+new Point3D(val_sl2, val_it2,999).toString()
+                   );
         for(int i =0; i<this.get_Segment1().size(); i++) {
             this.calc_IntersectPlaneAtZ(this.get_Segment1().get(i).get_Z(), wy_over_wx, val_sl1, val_sl2, val_it1, val_it2, this.get_Segment1().get(i));
         }
@@ -410,8 +425,15 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
    
     private void calc_IntersectPlaneAtZ(double z, double wy_over_wx, double val_sl1, double val_sl2, double val_it1, double val_it2, FittedHit hit) {
        
+        LOGGER.log(Level.FINE, " .....insterWire: seg1 "+new Point3D(val_sl1, val_it1,z).toString()+
+                    " seg2 "+new Point3D(val_sl2, val_it2,z).toString()
+                   );
         double x = 0.5 * (val_it1 + val_it2) + 0.5 * z * (val_sl1 + val_sl2);
         double y = 0.5 * wy_over_wx * (val_it2 - val_it1) + 0.5 * wy_over_wx * z * (val_sl2 - val_sl1);
+        
+        if(hit.getCrossDirIntersWire()!=null && hit.getCrossDirIntersWire().x()!=x)
+                LOGGER.log(Level.FINE, "Already exists "+hit.getCrossDirIntersWire().toString()+" for "
+                +hit.printInfo() +"new "+new Point3D(x,y,z).toString());
         
         hit.setCrossDirIntersWire(new Point3D(x,y,z));
     } 

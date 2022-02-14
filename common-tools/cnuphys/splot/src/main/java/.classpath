@@ -6,7 +6,6 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/bCNU/lib/bcnuimages.jar"/>
 	<classpathentry kind="lib" path="/numericalRec/lib/f2jutil.jar"/>
 	<classpathentry kind="lib" path="/numericalRec/lib/numRec.jar"/>
 	<classpathentry kind="output" path="cnuphys/bin"/>

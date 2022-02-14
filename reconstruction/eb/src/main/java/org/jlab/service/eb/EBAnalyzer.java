@@ -479,9 +479,7 @@ public class EBAnalyzer {
                     bestPid = p.getBeta()<ccdb.getDouble(EBCCDBEnum.NEUTRON_maxBeta) ? 2112 : 22;
                 }
                 else if (p.hasHit(DetectorType.CND) || p.hasHit(DetectorType.CTOF)) {
-                    if (!EBUtil.centralNeutralVeto(p)) {
-                        bestPid = p.getBeta()<ccdb.getDouble(EBCCDBEnum.CND_NEUTRON_maxBeta) ? 2112 : 22;
-                    }
+                    bestPid = p.getBeta()<ccdb.getDouble(EBCCDBEnum.CND_NEUTRON_maxBeta) ? 2112 : 22;                  
                 }
                 else if (p.hasHit(DetectorType.BAND)) {
                     bestPid = p.getBeta() < 0.9 ? 2112 : 0;

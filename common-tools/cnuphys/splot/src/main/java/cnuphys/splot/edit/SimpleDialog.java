@@ -50,15 +50,11 @@ public class SimpleDialog extends JDialog implements ActionListener {
 	/**
 	 * Create a SimpleDialog
 	 * 
-	 * @param title
-	 *            the title of the dialog
-	 * @param modal
-	 *            if <code>true</code> the dialog is modal
-	 * @param closeout
-	 *            a set of closeout labels
+	 * @param title    the title of the dialog
+	 * @param modal    if <code>true</code> the dialog is modal
+	 * @param closeout a set of closeout labels
 	 */
-	public SimpleDialog(String title, Object userObject, boolean modal,
-			String... closeout) {
+	public SimpleDialog(String title, Object userObject, boolean modal, String... closeout) {
 		super();
 		setTitle(title);
 		setModal(modal);
@@ -128,10 +124,8 @@ public class SimpleDialog extends JDialog implements ActionListener {
 	 * Add a component if the given borderlayout direction as long as it is not
 	 * <code>null</code>.
 	 * 
-	 * @param component
-	 *            the component to add (oftent a panel with other components)
-	 * @param direction
-	 *            the BorderLayout direction.
+	 * @param component the component to add (oftent a panel with other components)
+	 * @param direction the BorderLayout direction.
 	 */
 	private void conditionalAdd(Component component, String direction) {
 		if (component != null) {
@@ -151,16 +145,14 @@ public class SimpleDialog extends JDialog implements ActionListener {
 	/**
 	 * Override to create the component that goes in the south.
 	 * 
-	 * @return the component that is placed in the south. The default
-	 *         implementation creates a row of closeout buttons.
+	 * @return the component that is placed in the south. The default implementation
+	 *         creates a row of closeout buttons.
 	 */
 	protected Component createSouthComponent() {
 		if (_closeout != null) {
 			buttonPanel = new JPanel();
-			buttonPanel.setLayout(new BoxLayout(buttonPanel,
-					BoxLayout.LINE_AXIS));
-			buttonPanel.setBorder(BorderFactory
-					.createEmptyBorder(0, 10, 10, 10));
+			buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
+			buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
 			buttonPanel.add(Box.createHorizontalGlue());
 
 			int lenm1 = _closeout.length - 1;
@@ -178,14 +170,13 @@ public class SimpleDialog extends JDialog implements ActionListener {
 	}
 
 	/**
-	 * Get the first button on this dialog with the given label. This will
-	 * search all buttons, not just the closout buttons, so it is safe only if
-	 * no more than one button has the given label.
+	 * Get the first button on this dialog with the given label. This will search
+	 * all buttons, not just the closout buttons, so it is safe only if no more than
+	 * one button has the given label.
 	 * 
-	 * @param label
-	 *            the label to search for.
-	 * @return the first button among its components that has the given label,
-	 *         or <code>null</code>.
+	 * @param label the label to search for.
+	 * @return the first button among its components that has the given label, or
+	 *         <code>null</code>.
 	 */
 	public AbstractButton getButton(String label) {
 		return getButton(this, label);
@@ -207,7 +198,8 @@ public class SimpleDialog extends JDialog implements ActionListener {
 				if (label.equals(blabel)) {
 					return button;
 				}
-			} else if (c instanceof Container) {
+			}
+			else if (c instanceof Container) {
 				AbstractButton button = getButton((Container) c, label);
 				if (button != null) {
 					return button;
@@ -222,10 +214,8 @@ public class SimpleDialog extends JDialog implements ActionListener {
 	 * Enable or disable a button with a given label. Assumes no more than one
 	 * button has the given label.
 	 * 
-	 * @param label
-	 *            the label to match
-	 * @param enabled
-	 *            the enable flag
+	 * @param label   the label to match
+	 * @param enabled the enable flag
 	 */
 	public void setButtonEnabled(String label, boolean enabled) {
 		AbstractButton button = getButton(this, label);
@@ -260,8 +250,8 @@ public class SimpleDialog extends JDialog implements ActionListener {
 	}
 
 	/**
-	 * Override to create the component that goes in the center. Usually this is
-	 * the "main" component.
+	 * Override to create the component that goes in the center. Usually this is the
+	 * "main" component.
 	 * 
 	 * @return the component that is placed in the center
 	 */
@@ -293,11 +283,9 @@ public class SimpleDialog extends JDialog implements ActionListener {
 	}
 
 	/**
-	 * A closeout button was hit. The default behavior is to shutdown the
-	 * dialog.
+	 * A closeout button was hit. The default behavior is to shutdown the dialog.
 	 * 
-	 * @param command
-	 *            the label on the button that was hit.
+	 * @param command the label on the button that was hit.
 	 */
 	protected void handleCommand(String command) {
 		setVisible(false);
@@ -319,8 +307,7 @@ public class SimpleDialog extends JDialog implements ActionListener {
 
 	public static void main(String arg[]) {
 		String closeout[] = { "OK", "Apply", "Cancel" };
-		SimpleDialog sd = new SimpleDialog("Sample Dialog", null, true,
-				closeout) {
+		SimpleDialog sd = new SimpleDialog("Sample Dialog", null, true, closeout) {
 
 			@Override
 			public void handleCommand(String command) {

@@ -1,6 +1,7 @@
 package org.jlab.rec.cvt.trajectory;
 
-import Jama.*;
+
+import org.jlab.rec.cvt.Constants;
 
 /**
  * A StateVec describes a cross measurement in the BST. It is characterized by a
@@ -10,7 +11,7 @@ import Jama.*;
  * @author ziegler
  *
  */
-public class StateVec extends Matrix implements Comparable<StateVec> {
+public class StateVec implements Comparable<StateVec> {
 
     
     /**
@@ -28,89 +29,95 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
     private double _TrkToModuleAngle;
     private double _CalcCentroidStrip;
     private double _Path;
-
-    public int get_ID() {
+    private double _x;
+    private double _y;
+    private double _z;
+    private double _ux;
+    private double _uy;
+    private double _uz;
+    
+    public int getID() {
         return _ID;
     }
 
-    public void set_ID(int _ID) {
+    public void setID(int _ID) {
         this._ID = _ID;
     }
 
-    public double get_Path() {
+    public double getPath() {
         return _Path;
     }
 
-    public void set_Path(double _Path) {
+    public void setPath(double _Path) {
         this._Path = _Path;
     }
 
-    public int get_SurfaceDetector() {
+    public int getSurfaceDetector() {
         return _SurfaceDetector;
     }
 
-    public void set_SurfaceDetector(int _SurfaceDetector) {
+    public void setSurfaceDetector(int _SurfaceDetector) {
         this._SurfaceDetector = _SurfaceDetector;
     }
 
-    public int get_SurfaceLayer() {
+    public int getSurfaceLayer() {
         return _SurfaceLayer;
     }
 
-    public void set_SurfaceLayer(int _SurfaceLayer) {
+    public void setSurfaceLayer(int _SurfaceLayer) {
         this._SurfaceLayer = _SurfaceLayer;
     }
 
-    public int get_SurfaceSector() {
+    public int getSurfaceSector() {
         return _SurfaceSector;
     }
 
-    public void set_SurfaceSector(int _SurfaceSector) {
+    public void setSurfaceSector(int _SurfaceSector) {
         this._SurfaceSector = _SurfaceSector;
     }
 
-    public double get_TrkPhiAtSurface() {
+    public double getTrkPhiAtSurface() {
         return _TrkPhiAtSurface;
     }
     /**
      * @return the _SurfaceComponent
      */
-    public int get_SurfaceComponent() {
+    public int getSurfaceComponent() {
         return _SurfaceComponent;
     }
 
     /**
      * @param _SurfaceComponent the _SurfaceComponent to set
      */
-    public void set_SurfaceComponent(int _SurfaceComponent) {
+    public void setSurfaceComponent(int _SurfaceComponent) {
         this._SurfaceComponent = _SurfaceComponent;
     }
     
-    public void set_TrkPhiAtSurface(double _TrkPhiAtSurface) {
+    public void setTrkPhiAtSurface(double _TrkPhiAtSurface) {
         this._TrkPhiAtSurface = _TrkPhiAtSurface;
     }
 
-    public double get_TrkThetaAtSurface() {
+    public double getTrkThetaAtSurface() {
         return _TrkThetaAtSurface;
     }
 
-    public void set_TrkThetaAtSurface(double _TrkThetaAtSurface) {
+    public void setTrkThetaAtSurface(double _TrkThetaAtSurface) {
         this._TrkThetaAtSurface = _TrkThetaAtSurface;
     }
 
-    public double get_TrkToModuleAngle() {
+    public double getTrkToModuleAngle() {
         return _TrkToModuleAngle;
     }
 
-    public void set_TrkToModuleAngle(double _TrkToModuleAngle) {
+    public void setTrkToModuleAngle(double _TrkToModuleAngle) {
         this._TrkToModuleAngle = _TrkToModuleAngle;
     }
 
-    public double get_CalcCentroidStrip() {
+    public double getCalcCentroidStrip() {
         return _CalcCentroidStrip;
     }
 
-    public void set_CalcCentroidStrip(double _CalcCentroidStrip) {
+    public void setCalcCentroidStrip(double _CalcCentroidStrip) {
         this._CalcCentroidStrip = _CalcCentroidStrip;
     }
 
@@ -122,7 +129,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * Instantiates a new vec.
      */
     public StateVec() {
-        super(6, 1);
+        set(0,0,0,0,0,0);
     }
 
     /**
@@ -131,12 +138,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @param V the v
      */
     public void set(StateVec V) {
-        set(0, 0, V.x());
-        set(1, 0, V.y());
-        set(2, 0, V.z());
-        set(3, 0, V.ux());
-        set(4, 0, V.uy());
-        set(5, 0, V.uz());
+        set(V.x(), V.y(), V.z(), V.ux(), V.uy(), V.uz());
     }
 
     private int _planeIdx;
@@ -146,7 +148,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @return the wire plane index in the series of planes used in the
      * trajectory
      */
-    public int get_planeIdx() {
+    public int getPlaneIdx() {
         return _planeIdx;
     }
 
@@ -156,7 +158,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @param _planeIdx wire plane index in the series of planes used in the
      * trajectory
      */
-    public void set_planeIdx(int _planeIdx) {
+    public void setPlaneIdx(int _planeIdx) {
         this._planeIdx = _planeIdx;
     }
 
@@ -171,12 +173,12 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @param uz the z-component of the tangent to the helix at point (x,y,z)
      */
     public void set(double x, double y, double z, double ux, double uy, double uz) {
-        set(0, 0, x);
-        set(1, 0, y);
-        set(2, 0, z);
-        set(3, 0, ux);
-        set(4, 0, uy);
-        set(5, 0, uz);
+        _x=x;
+        _y=y;
+        _z=z;
+        _ux=ux;
+        _uy=uy;
+        _uz=uz;
     }
 
     /**
@@ -190,13 +192,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @param uz the z-component of the tangent to the helix at point (x,y,z)
      */
     public StateVec(double x, double y, double z, double ux, double uy, double uz) {
-        super(6, 1);
-        set(0, 0, x);
-        set(1, 0, y);
-        set(2, 0, z);
-        set(3, 0, ux);
-        set(4, 0, uy);
-        set(5, 0, uz);
+        set(x, y, z, ux, uy, uz);
     }
 
     /**
@@ -205,29 +201,10 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @param v the v
      */
     public StateVec(StateVec v) {
-        super(6, 1);
-        set(0, 0, v.x());
-        set(1, 0, v.y());
-        set(2, 0, v.z());
-        set(3, 0, v.ux());
-        set(4, 0, v.uy());
-        set(5, 0, v.uz());
+        set(v._x, v._y, v._z, v._ux, v._uy, v._uz); 
     }
 
-    /**
-     * Instantiates a new StateVec.
-     *
-     * @param m the m
-     */
-    private StateVec(Matrix m) { //needed since Jama.Matrix cannot be casted into StateVec		
-        super(4, 1);
-        set(0, 0, m.get(0, 0));
-        set(1, 0, m.get(1, 0));
-        set(2, 0, m.get(2, 0));
-        set(3, 0, m.get(3, 0));
-        set(4, 0, m.get(4, 0));
-        set(5, 0, m.get(5, 0));
-    }
+    
 
     /**
      * Description of x().
@@ -235,7 +212,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @return the x component
      */
     public double x() {
-        return (get(0, 0));
+        return _x;
     }
 
     /**
@@ -244,7 +221,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @return the y component
      */
     public double y() {
-        return (get(1, 0));
+        return _y;
     }
 
     /**
@@ -253,7 +230,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @return the z component
      */
     public double z() {
-        return (get(2, 0));
+        return _z;
     }
 
     /**
@@ -262,7 +239,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @return the ux component
      */
     public double ux() {
-        return (get(3, 0));
+        return _ux;
     }
 
     /**
@@ -271,7 +248,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @return the uy component
      */
     public double uy() {
-        return (get(4, 0));
+        return _uy;
     }
 
     /**
@@ -280,24 +257,24 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @return the uz component
      */
     public double uz() {
-        return (get(5, 0));
+        return _uz;
     }
 
     @Override
     public int compareTo(StateVec arg) {
 
         int return_val = 0;
-        if (org.jlab.rec.cvt.Constants.isCosmicsData() == false) {
-            int RegComp = this.get_SurfaceLayer() < arg.get_SurfaceLayer() ? -1 : this.get_SurfaceLayer() == arg.get_SurfaceLayer() ? 0 : 1;
-            int IDComp = this.get_ID() < arg.get_ID() ? -1 : this.get_ID() == arg.get_ID() ? 0 : 1;
+        if (Constants.ISCOSMICDATA == false) {
+            int RegComp = this.getSurfaceLayer() < arg.getSurfaceLayer() ? -1 : this.getSurfaceLayer() == arg.getSurfaceLayer() ? 0 : 1;
+            int IDComp = this.getID() < arg.getID() ? -1 : this.getID() == arg.getID() ? 0 : 1;
 
             return_val = ((RegComp == 0) ? IDComp : RegComp);
         }
-        if (org.jlab.rec.cvt.Constants.isCosmicsData() == true) {
+        if (Constants.ISCOSMICDATA == true) {
             int RegComp = this.y() < arg.y() ? -1 : this.y() == arg.y() ? 0 : 1;
-            int IDComp = this.get_ID() < arg.get_ID() ? -1 : this.get_ID() == arg.get_ID() ? 0 : 1;
+            int IDComp = this.getID() < arg.getID() ? -1 : this.getID() == arg.getID() ? 0 : 1;
 
-            return_val = ((RegComp == 0) ? IDComp : RegComp);
+            return_val = RegComp;//((RegComp == 0) ? IDComp : RegComp);
         }
 
         return return_val;

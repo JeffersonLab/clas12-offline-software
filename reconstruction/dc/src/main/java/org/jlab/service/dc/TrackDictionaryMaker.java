@@ -20,7 +20,6 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
-import org.jlab.detector.geant4.v2.PCALGeant4Factory;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.FTOFDetHit;
 import org.jlab.geom.DetectorHit;
@@ -29,7 +28,6 @@ import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Path3D;
 import org.jlab.geometry.prim.Line3d;
 import org.jlab.rec.dc.Constants;
-import static org.jlab.service.dc.TrackDictionaryMakerRNG.rotateToSectorCoordSys;
 
 import org.jlab.utils.options.OptionParser;
 
@@ -51,7 +49,7 @@ public class TrackDictionaryMaker extends DCEngine{
     public boolean init() {
         MagFieldsEngine mf = new MagFieldsEngine();
         mf.initializeMagneticFields();
-        super.LoadTables();
+        super.init();
         return true;
     }
     public void processFile(float torScale, float solScale, int charge, float pBinSize, float phiMin, float phiMax, float vz) {
@@ -59,7 +57,7 @@ public class TrackDictionaryMaker extends DCEngine{
         Swim sw = new Swim();
         PrintWriter pw = null;
         try {
-            System.out.println(" MAKING ROADS for "+"TracksDicTorus"+String.valueOf(torScale)+"Solenoid"+String.valueOf(solScale)
+            LOGGER.log(Level.INFO, " MAKING ROADS for "+"TracksDicTorus"+String.valueOf(torScale)+"Solenoid"+String.valueOf(solScale)
                     +"Charge"+String.valueOf(charge)+"InvPBinSizeiGeV"+String.valueOf(pBinSize)
                     +"PhiMinDeg" +String.valueOf(phiMin)+"PhiMaxDeg" +String.valueOf(phiMax)
                     +"VzCm" +String.valueOf(vz));
@@ -67,7 +65,8 @@ public class TrackDictionaryMaker extends DCEngine{
                     +"Charge"+String.valueOf(charge)+"InvPBinSizeiGeV"+String.valueOf(pBinSize)
                     +"PhiMinDeg" +String.valueOf(phiMin)+"PhiMaxDeg" +String.valueOf(phiMax)
                     +"VzCm" +String.valueOf(vz)+".txt");
-            this.ProcessTracks(pw, dcDetector, ftofDetector, ecalDetector, sw, charge, pBinSize, phiMin, phiMax, vz);
+            this.ProcessTracks(pw, Constants.getInstance().dcDetector, Constants.getInstance().ftofDetector, 
+                                   Constants.getInstance().ecalDetector, sw, charge, pBinSize, phiMin, phiMax, vz);
             pw.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(TrackDictionaryMaker.class.getName()).log(Level.SEVERE, null, ex);
@@ -143,9 +142,9 @@ public class TrackDictionaryMaker extends DCEngine{
         Point3D rotatedP = this.rotateToTiltedCoordSys(new Point3D(swimVal[3], swimVal[4], swimVal[5]));
         Point3D rotatedX = this.rotateToTiltedCoordSys(new Point3D(swimVal[0], swimVal[1], swimVal[2]));
         int sector = this.getSector(swimVal[0], swimVal[1], swimVal[2]);
-//System.out.println(" sector in TrackDictionary "+sector);
-        List<Integer> Wi = new ArrayList<Integer>();
-        List<Integer> Di = new ArrayList<Integer>();
+//LOGGER.log(Level.FINE, " sector in TrackDictionary "+sector);
+        List<Integer> Wi = new ArrayList<>();
+        List<Integer> Di = new ArrayList<>();
         int index=0;
         DCTDC DCtdc = new DCTDC();
         for (int sl = 0; sl < 6; sl++) {
@@ -175,7 +174,7 @@ public class TrackDictionaryMaker extends DCEngine{
         Line3D wl = new Line3D(new Point3D(p3dl.x, p3dl.y, p3dl.z), new Point3D(p3dr.x, p3dr.y, p3dr.z));
         double min = wl.distance(new Point3D(tx, ty, tz)).length();
         if(min<wMax*1.05) {
-            Wi.add(i + 1); //System.out.println("min "+min); ? one strip off
+            Wi.add(i + 1); //LOGGER.log(Level.FINE, "min "+min); ? one strip off
             Di.add((int)min);
         }
     }
@@ -189,12 +188,12 @@ public class TrackDictionaryMaker extends DCEngine{
         public List<Integer> TDC = new ArrayList<Integer>();
         
     }
-    private List<Integer> Wl1 = new ArrayList<Integer>();
-    private List<Integer> Wl2 = new ArrayList<Integer>();
-    private List<Integer> Wl3 = new ArrayList<Integer>();
-    private List<Integer> Wl4 = new ArrayList<Integer>();
-    private List<Integer> Wl5 = new ArrayList<Integer>();
-    private List<Integer> Wl6 = new ArrayList<Integer>();
+    private List<Integer> Wl1 = new ArrayList<>();
+    private List<Integer> Wl2 = new ArrayList<>();
+    private List<Integer> Wl3 = new ArrayList<>();
+    private List<Integer> Wl4 = new ArrayList<>();
+    private List<Integer> Wl5 = new ArrayList<>();
+    private List<Integer> Wl6 = new ArrayList<>();
     private String entry;
     
     public void ProcessTracks(PrintWriter pw,DCGeant4Factory dcDetector, FTOFGeant4Factory ftofDetector, Detector ecalDetector, Swim sw, int q, float pBinSize, float PhiMin, float PhiMax, float Vz) {
@@ -262,17 +261,17 @@ public class TrackDictionaryMaker extends DCEngine{
                         this.entry = "";
                         for (int sl = 0; sl < 6; sl++) {
                             sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                            this.swimtoLayer(sector, 0, sl, Wl1, dcDetector, sw);        
+                            TrackDictionaryMaker.swimtoLayer(sector, 0, sl, Wl1, dcDetector, sw);        
                             sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                            this.swimtoLayer(sector, 1, sl, Wl2, dcDetector, sw);        
+                            TrackDictionaryMaker.swimtoLayer(sector, 1, sl, Wl2, dcDetector, sw);        
                             sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                            this.swimtoLayer(sector, 2, sl, Wl3, dcDetector, sw);        
+                            TrackDictionaryMaker.swimtoLayer(sector, 2, sl, Wl3, dcDetector, sw);        
                             sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                            this.swimtoLayer(sector, 3, sl, Wl4, dcDetector, sw);        
+                            TrackDictionaryMaker.swimtoLayer(sector, 3, sl, Wl4, dcDetector, sw);        
                             sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                            this.swimtoLayer(sector, 4, sl, Wl5, dcDetector, sw);        
+                            TrackDictionaryMaker.swimtoLayer(sector, 4, sl, Wl5, dcDetector, sw);        
                             sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                            this.swimtoLayer(sector, 5, sl, Wl6, dcDetector, sw);
+                            TrackDictionaryMaker.swimtoLayer(sector, 5, sl, Wl6, dcDetector, sw);
 
                             /*
                             double[] trk = sw.SwimToPlane(dcDetector.getSector(0).getSuperlayer(sl).getLayer(2).getComponent(0).getMidpoint().z());
@@ -432,7 +431,7 @@ public class TrackDictionaryMaker extends DCEngine{
 
                         sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), 1);
 
-                        List<Integer> W = new ArrayList<Integer>();
+                        List<Integer> W = new ArrayList<>();
 
                         for (int sl = 0; sl < 6; sl++) {
 
@@ -487,12 +486,12 @@ public class TrackDictionaryMaker extends DCEngine{
            
             if (wl.distance(new Point3D(trk[0], trk[1], trk[2])).length() < min) { 
                 min = wl.distance(new Point3D(trk[0], trk[1], trk[2])).length();
-                w = i; //System.out.println(" min "+min+" wire "+(i+1)+" sl "+sl+" l "+l+" trk "+trk[0]+", "+trk[1]+", "+trk[2]+" mp "+dcDetector.getWireMidpoint(sl, l, i)+" : "+dcDetector.getWireMidpoint(sl, l, 0).z);
+                w = i; //LOGGER.log(Level.FINE, " min "+min+" wire "+(i+1)+" sl "+sl+" l "+l+" trk "+trk[0]+", "+trk[1]+", "+trk[2]+" mp "+dcDetector.getWireMidpoint(sl, l, i)+" : "+dcDetector.getWireMidpoint(sl, l, 0).z);
             } 
         }
 
         if (min < wMax*1.01) {
-            Wi.add(w + 1); //System.out.println("min "+min);
+            Wi.add(w + 1); //LOGGER.log(Level.FINE, "min "+min);
             Di.add((int)min);
             addAdjacentHits(sector-1, sl, l, w+1, Wi, Di, dcDetector, wMax, trk[0], trk[1], trk[2]);
             addAdjacentHits(sector-1, sl, l, w-1, Wi, Di, dcDetector, wMax, trk[0], trk[1], trk[2]);
@@ -520,12 +519,12 @@ public class TrackDictionaryMaker extends DCEngine{
            
             if (wl.distance(new Point3D(trk[0], trk[1], trk[2])).length() < min) { 
                 min = wl.distance(new Point3D(trk[0], trk[1], trk[2])).length();
-                w = i; //System.out.println(" min "+min+" wire "+(i+1)+" sl "+sl+" l "+l+" trk "+trk[0]+", "+trk[1]+", "+trk[2]+" mp "+dcDetector.getWireMidpoint(sl, l, i)+" : "+dcDetector.getWireMidpoint(sl, l, 0).z);
+                w = i; //LOGGER.log(Level.FINE, " min "+min+" wire "+(i+1)+" sl "+sl+" l "+l+" trk "+trk[0]+", "+trk[1]+", "+trk[2]+" mp "+dcDetector.getWireMidpoint(sl, l, i)+" : "+dcDetector.getWireMidpoint(sl, l, 0).z);
             } 
         }
 
         if (min < wMax*1.01) {
-            Wi.add(w + 1); //System.out.println("min "+min);
+            Wi.add(w + 1); //LOGGER.log(Level.FINE, "min "+min);
         } else {
             Wi.add(0);
         }
@@ -618,11 +617,11 @@ public class TrackDictionaryMaker extends DCEngine{
 
     private void resetGeom(String geomDBVar) {
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, Optional.ofNullable(geomDBVar).orElse("default"));
-        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, DCGeant4Factory.ENDPLATESBOWON);
+        Constants.getInstance().dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, DCGeant4Factory.ENDPLATESBOWON);
         
         for(int l=0; l<6; l++) {
-            Constants.wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
-            System.out.println("****************** WPDIST READ *********FROM RELOADED "+geomDBVar+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
+            Constants.getInstance().wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
+            LOGGER.log(Level.INFO, "****************** WPDIST READ *********FROM RELOADED "+geomDBVar+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
         }
         
     }
@@ -654,7 +653,7 @@ public class TrackDictionaryMaker extends DCEngine{
             tm.resetGeom(dcVar);
             tm.processFile(torus, solenoid, charge, pBinSize, phiMin, phiMax, vz);
         } else {
-            System.out.println(" FIELDS NOT SET");
+            LOGGER.log(Level.INFO, " FIELDS NOT SET");
         }
     }
     

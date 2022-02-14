@@ -34,7 +34,8 @@
             {"name":"Hit3_ID",         "id":13, "type":"int16" ,  "info":"Index of hit 3 in cluster"},
             {"name":"Hit4_ID",         "id":14, "type":"int16" ,  "info":"Index of hit 4 in cluster"},
             {"name":"Hit5_ID",         "id":15, "type":"int16" ,  "info":"Index of hit 5 in cluster"},
-            {"name":"trkID",           "id":16, "type":"int16"   ,  "info":"associated track ID"}
+            {"name":"trkID",           "id":16, "type":"int16",  "info":"associated track ID"},
+            {"name":"Tmin",            "id":17, "type":"float",  "info":"min T between strips"}
             ]
   },
   {

@@ -48,6 +48,8 @@ public class FTEBEngine extends ReconstructionEngine {
         requireConstants(Arrays.asList(tables));
         this.getConstantsManager().setVariation("default");
 
+        this.registerOutputBank("FT::particles");
+
         return true;
     }
 

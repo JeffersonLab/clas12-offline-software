@@ -1,9 +1,9 @@
 package org.jlab.rec.cvt.hit;
 
 import java.util.Random;
-import org.jlab.io.base.DataEvent;
 
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.svt.SVTParameters;
 
 public class ADCConvertor {
 
@@ -19,11 +19,11 @@ public class ADCConvertor {
 
     /**
      *
-     * @param hit Hit object
      * @param adc ADC value Converts ADC values to DAQ units -- used for BST
      * test stand analysis
+     * @return 
      */
-    public double SVTADCtoDAQ(int adc, DataEvent event) {
+    public double SVTADCtoDAQ(int adc) {
         if (adc == -5) {
             return 1; // this is for running with Geantinos.  Geantinos have adc -5
         }
@@ -34,8 +34,8 @@ public class ADCConvertor {
         int START[] = new int[8];
         int END[] = new int[8];
         for (int i = 0; i < 8; i++) {
-            START[i] = org.jlab.rec.cvt.svt.Constants.initThresholds + org.jlab.rec.cvt.svt.Constants.deltaThresholds * i;
-            END[i] = org.jlab.rec.cvt.svt.Constants.initThresholds + org.jlab.rec.cvt.svt.Constants.deltaThresholds * (i + 1);
+            START[i] = SVTParameters.INITTHRESHOLD + SVTParameters.DELTATHRESHOLD * i;
+            END[i] = SVTParameters.INITTHRESHOLD + SVTParameters.DELTATHRESHOLD * (i + 1);
         }
         END[7] = 1000; //overflow
 
@@ -43,7 +43,7 @@ public class ADCConvertor {
         random.setSeed(42);
 
         int daq = returnRandomInteger(START[adc], END[adc], random);
-
+        
         double value = (double) daq;
         /* 
         if(event.hasBank("MC::Particle")==true) {
@@ -104,11 +104,11 @@ public class ADCConvertor {
             return 0;
         }
 
-        double res = mu + landau_quantile(aRandom.nextDouble(), sigma);
+        double res = mu + landauQuantile(aRandom.nextDouble(), sigma);
         return res;
     }
 
-    private double landau_quantile(double z, double xi) {
+    private double landauQuantile(double z, double xi) {
         // LANDAU quantile : algorithm from CERNLIB G110 ranlan
         // with scale parameter xi
 

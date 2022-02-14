@@ -1,5 +1,7 @@
 package org.jlab.detector.geant4.v2.SVT;
 
+import org.jlab.detector.volume.G4Operation;
+import org.jlab.detector.volume.G4Pgon;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -46,6 +48,10 @@ public class SVTVolumeFactory
 	
 	private boolean bShift = false; // switch to select whether alignment shifts are applied
 	private double scaleT = 1.0, scaleR = 1.0;
+        
+         private double motherVolumeLength;
+         private double motherVolumeRmin;
+         private double motherVolumeRmax;
 	
 	
 	/**
@@ -107,7 +113,7 @@ public class SVTVolumeFactory
 	{
 		SVTConstants.load( cp );
 		setApplyAlignmentShifts( applyAlignmentShifts );
-		if( bShift == true && SVTConstants.getDataAlignmentSectorShift() == null ){
+		if( bShift == true && SVTConstants.getLayerSectorAlignmentData() == null ){
 			System.err.println("error: SVTVolumeFactory: no shifts loaded");
 			System.exit(-1);
 		}
@@ -118,11 +124,11 @@ public class SVTVolumeFactory
 		// default behaviour
 		setRange( 1, SVTConstants.NREGIONS, new int[]{ 1, 1, 1, 1 }, SVTConstants.NSECTORS, 1, SVTConstants.NMODULES ); // all regions, sectors, and modules
 		
-		double rmin = SVTConstants.LAYERRADIUS[0][0]*0.9;
-		double rmax = SVTConstants.LAYERRADIUS[regionMax-1][1]*1.13;
-		double zlen = SVTConstants.SECTORLEN*1.404;
+		motherVolumeRmin   = SVTConstants.LAYERRADIUS[0][0]*0.87;
+		motherVolumeRmax   = SVTConstants.LAYERRADIUS[regionMax-1][1]*1.13;
+		motherVolumeLength = SVTConstants.SECTORLEN*1.404;
 		
-		motherVol = new G4Tubs("svt", rmin*0.1, rmax*0.1, zlen/2.0*0.1, 0, 360 );
+		motherVol = new G4Tubs("svt", motherVolumeRmin*0.1, motherVolumeRmax*0.1, motherVolumeLength/2.0*0.1, 0, 360 );
 		
 		Geant4Basic top = new G4World("none");
 		motherVol.setMother( top );
@@ -217,6 +223,8 @@ public class SVTVolumeFactory
 		if( BUILDSENSORS ) System.out.println("  include sensor active and dead zones ? "+ BUILDSENSORZONES );
 		//System.out.println("  halve dimensions of boxes ? "+ HALFBOXES );
 		
+                  this.makeCage();
+                  
 		for( int region = regionMin-1; region < regionMax; region++ ) // NREGIONS
 		{
 			//if( VERBOSE ) System.out.println("r "+region);			
@@ -269,7 +277,8 @@ public class SVTVolumeFactory
 							//System.out.println( stepVol.getChildren().get(j).gemcString() );
 					}*/
 					
-					AlignmentFactory.applyShift( sectorVol, SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( region, sector )], fidTri3D.center(), scaleT, scaleR );
+                                        // FIXME currently using shifts from bottom module of each region
+					AlignmentFactory.applyShift( sectorVol, SVTConstants.getLayerSectorAlignmentData()[sector][region*2], fidTri3D.center(), scaleT, scaleR );
 					//System.out.println("S "+sectorVol.gemcString() );
 				}
 			}
@@ -293,7 +302,7 @@ public class SVTVolumeFactory
 		double rfit = 4.0; // scale factor to encompass the entire volume of the sectors
 		double rcen = 0.5*(SVTConstants.LAYERRADIUS[aRegion][1] + SVTConstants.LAYERRADIUS[aRegion][0]);
 		double rthk = rfit*0.5*(SVTConstants.LAYERRADIUS[aRegion][1] - SVTConstants.LAYERRADIUS[aRegion][0]);
-		double rmin = rcen - rthk;
+		double rmin = SVTConstants.REGIONPEEKRMIN[aRegion]-1.0;
 		double rmax = rcen + rthk;
 		double zlen = SVTConstants.SECTORLEN; // same length as dummy sector volume
 		
@@ -309,9 +318,10 @@ public class SVTVolumeFactory
 		}
 		
 		Geant4Basic regionVol = new G4Tubs("region", rmin*0.1, rmax*0.1, zlen/2.0*0.1, 0, 360 );
-		
-		// create faraday cage here?
-		
+
+                   // add the peek support
+		this.createDownstreamSupport(aRegion, regionVol);
+                
 		for( int sector = sectorMin[aRegion]-1; sector < sectorMax[aRegion]; sector++ ) // NSECTORS[region]
 		{
 			//if( VERBOSE ) System.out.println(" s "+sector);
@@ -338,7 +348,22 @@ public class SVTVolumeFactory
 		return regionVol;
 	}
 	
-	
+	public void makeCage() {
+            
+              for(int i=0; i<SVTConstants.FARADAYCAGERMIN.length; i++) {
+                   double zmin = Math.max(-SVTConstants.FARADAYCAGELENGTH[i]/2+SVTConstants.FARADAYCAGEZPOS[i], -this.motherVolumeLength/2);
+                   double zmax = SVTConstants.FARADAYCAGELENGTH[i]/2+SVTConstants.FARADAYCAGEZPOS[i];                   
+                   Geant4Basic cage = new G4Tubs("faradayCage" + SVTConstants.FARADAYCAGENAME[i], SVTConstants.FARADAYCAGERMIN[i]*0.1
+                                                                                                , SVTConstants.FARADAYCAGERMAX[i]*0.1
+                                                                                                , (zmax-zmin)/2*0.1
+                                                                                                , 0, 360 );
+                   cage.setMother( motherVol );
+		cage.setPosition(0, 0, (zmax+zmin)/2*0.1); 
+			
+              }
+         }
+        
+        
 	/**
 	 * Returns one sector module, containing a pair of sensor modules and backing structure.
 	 * 
@@ -799,7 +824,7 @@ public class SVTVolumeFactory
 	}
 	
 	
-	public Geant4Basic createDownstreamSupport()
+	public void createDownstreamSupport(int aRegion, Geant4Basic regionVol)
 	{
 		/*
 		 * GDML file needs to look like this
@@ -817,15 +842,20 @@ public class SVTVolumeFactory
 	    
 	    */
 		
-		String pgonName = "peekSupport_polyhedra",
-				tubeName = "peekSupport_tube";
-		
-		Geant4Basic polyhedra = new G4Pgon(pgonName, 10, 0, 360 );
-		Geant4Basic tube = new G4Tubs(tubeName, 0, 62.390, 28.000/2.0, 0, 360 );
-		Geant4Basic op = new G4Operation("subtract", pgonName, tubeName );
-		tube.setMother(op);
-		polyhedra.setMother(op);
-		return op;
+		String pgonName = "peek_polyhedra" ;
+		String tubeName = "peek_tube";
+                   double[] zPlane = {-SVTConstants.REGIONPEEKLENGTH[aRegion]*0.1/2,SVTConstants.REGIONPEEKLENGTH[aRegion]*0.1/2};
+		double[] rInner = {0.0, 0.0};
+		double[] rOuter = {SVTConstants.REGIONPEEKRMAX[aRegion]*0.1,SVTConstants.REGIONPEEKRMAX[aRegion]*0.1};
+		Geant4Basic polyhedra = new G4Pgon(pgonName, 0, Math.toRadians(360), SVTConstants.NSECTORS[aRegion], 2, zPlane, rInner, rOuter);
+		Geant4Basic tube = new G4Tubs(tubeName, 0, SVTConstants.REGIONPEEKRMIN[aRegion]*0.1, SVTConstants.REGIONPEEKLENGTH[aRegion]/2*1.1*0.1, 0, 360 ); //add 10% more thickness for correct subtraction
+		Geant4Basic op = new G4Operation("peek", "subtract", pgonName+"_r"+(aRegion+1), tubeName+"_r"+(aRegion+1));
+//		tube.setMother(op);
+//		polyhedra.setMother(op);
+                   polyhedra.setMother(regionVol);
+                   tube.setMother(regionVol);
+                   op.setMother(regionVol);
+                   op.setPosition(0, 0, (SVTConstants.SECTORLEN-SVTConstants.REGIONPEEKLENGTH[aRegion])/2.0*0.1);
 	}
 	
 	
@@ -1168,4 +1198,19 @@ public class SVTVolumeFactory
 	{
 		return layerMax;
 	}
+        
+         
+         public static void main(String[] args) {
+              DatabaseConstantProvider cp = new DatabaseConstantProvider(11, "default");
+
+              SVTConstants.connect(cp);
+
+              SVTVolumeFactory factory = new SVTVolumeFactory( cp, false ); // ideal geometry
+              factory.BUILDSENSORS = false; // include physical sensors (aka cards)
+              factory.makeVolumes();
+
+              System.out.println(factory.toString());
+              
+         }
+    
 }

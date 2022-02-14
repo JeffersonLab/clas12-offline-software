@@ -31,6 +31,8 @@ import org.jlab.utils.options.OptionParser;
  * 
  * FIXME:  DaqScalersSequence doesn't manage run numbers.  Until then, we
  * cannot mix run numbers here.
+ * 
+ * FIXME:  delay=8 is hardcoded below, should come from CCDB.  
  *
  * @author wphelps
  * @author baltzell
@@ -63,12 +65,12 @@ public class Tag1ToEvent {
         String fileout = parser.getOption("-o").stringValue();
 
         // helicity / beamcharge options:
-        final boolean doHelicity = parser.getOption("-d").intValue() != 0;
+        final boolean doHelicityDelay = parser.getOption("-d").intValue() != 0;
         final boolean doBeamCharge = parser.getOption("-q").intValue() != 0;
         final boolean doHelicityFlip = parser.getOption("-f").intValue() != 0;
-        if (!doHelicity && !doBeamCharge) {
+        if (!doHelicityDelay && !doBeamCharge && !doHelicityFlip) {
             parser.printUsage();
-            System.err.println("\n >>>>> error : at least one of -q/-d must be specified\n");
+            System.err.println("\n >>>>> error : at least one of -q/-d/-f must be specified\n");
             System.exit(1);
         }
 
@@ -77,7 +79,7 @@ public class Tag1ToEvent {
 
         HipoWriterSorted writer = new HipoWriterSorted();
         writer.getSchemaFactory().initFromDirectory(ClasUtilsFile.getResourceDir("COATJAVA", "etc/bankdefs/hipo4"));
-        writer.setCompressionType(1);
+        writer.setCompressionType(2);
         writer.open(fileout);
 			
         Event event = new Event();
@@ -129,9 +131,14 @@ public class Tag1ToEvent {
                 if (Math.abs(hb.value())==1) goodHelicity++;
                 else badHelicity++;
 
-                // write heliicty to REC::Event:
-                if (doHelicity) {
+                // write delay-corrected helicty to REC::Event:
+                if (doHelicityDelay) {
                     recEventBank.putByte("helicity",0,hb.value());
+                }
+                // flip the non-delay-corrected helicity in place in REC::Event:
+                else if (doHelicityFlip) {
+                    recEventBank.putByte("helicity",0,(byte)-recEventBank.getByte("helicity",0));
+                    recEventBank.putByte("helicityRaw",0,(byte)-recEventBank.getByte("helicityRaw",0));
                 }
 
                 // write beam charge to REC::Event:
@@ -151,6 +158,8 @@ public class Tag1ToEvent {
                     if (bank.getRows()>0) {
                         configEvent.write(bank);
                     }
+                }
+                if (!configEvent.isEmpty()) {
                     writer.addEvent(configEvent,1);
                 }
 
