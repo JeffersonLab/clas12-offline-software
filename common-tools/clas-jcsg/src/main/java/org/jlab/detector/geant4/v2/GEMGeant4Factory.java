@@ -252,7 +252,7 @@ final class Strip extends Line3d {
 ///////////////////////////////////////////////////
 public final class GEMGeant4Factory extends Geant4Factory {
 
-    GEMdatabase dbref = GEMdatabase.getInstance();
+//    GEMdatabase dbref = GEMdatabase.getInstance();
 
   //  private final HashMap<String, String> properties = new HashMap<>();
     private final double x_enlargement = 0.5;
