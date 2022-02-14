@@ -44,30 +44,87 @@ public class HelixFitTest {
     }
     private double phichi2(double phi0, double r, double R){
         double rterm = r/(2*R);
-	if(Math.abs(r) > (2 * Math.abs(R))) rterm = 1; 
-	return Math.toRadians(phi0) - Math.asin(rterm);
+	    if(Math.abs(r) > (2 * Math.abs(R))) rterm = 1; 
+	    return Math.toRadians(phi0) - Math.asin(rterm);
     }
     private double zchi2(double z0, double theta0, double r, double R){
         R = Math.abs(R);
-	double rterm = r/(2*R);
-	if(Math.abs(r) > (2 * Math.abs(R))) rterm = 1; 
+	    double rterm = r/(2*R);
+	    if(Math.abs(r) > (2 * Math.abs(R))) rterm = 1; 
         return z0 + 2*R*Math.asin(rterm)/Math.tan(Math.toRadians(theta0));
     }
 
     private void findtrackparams(int TID, List<RecoHitVector> track, int iter){
+        List<RecoHitVector> trackhitsA = new ArrayList<>();
+        List<RecoHitVector> trackhitsB = new ArrayList<>();
+        List<RecoHitVector> originaltrack = new ArrayList<>(track);
+        if(track.get(0).flag() > 0){
+            for(RecoHitVector hit : track){
+                if(hit.flag() == 1) trackhitsA.add(hit);
+                else if(hit.flag() == 2) trackhitsB.add(hit);
+            }
+        }
+
+        HelixFitJava h = new HelixFitJava();
+        HelixFitObject ho = new HelixFitObject();
         int numhits = track.size();
-        szpos = new double[numhits][3];
+        int numhitstrack = numhits;
+        int hit = 0; 
+        boolean trackaused = false;
+        boolean trackbused = false; 
+        int numhitsA = 0;
+        int numhitsB = 0; 
+        if(trackhitsA.size() > 0 && trackhitsB.size() > 0){
+            numhitsA = trackhitsA.size();
+            numhitsB = trackhitsB.size();
+            szpos = new double[numhitsA][3];
+            hit = 0; 
+            for(hit = 0; hit < numhitsA; hit++){
+                szpos[hit][0] = trackhitsA.get(hit).x();
+                szpos[hit][1] = trackhitsA.get(hit).y();
+                szpos[hit][2] = trackhitsA.get(hit).z();
+            }
+            ho = h.HelixFit(hit,szpos,fittobeamline);   
+            ho.set_magfield(magfield);         
+            if(ho.get_Rho() > 0){ 
+                ho = new HelixFitObject();
+                szpos = new double[numhitsB][3];
+                hit = 0; 
+                for(hit = 0; hit < numhitsB; hit++){
+                    szpos[hit][0] = trackhitsB.get(hit).x();
+                    szpos[hit][1] = trackhitsB.get(hit).y();
+                    szpos[hit][2] = trackhitsB.get(hit).z();
+                }
+                ho = h.HelixFit(hit,szpos,fittobeamline);
+                ho.set_magfield(magfield); 
+                trackbused = true; 
+                numhits = numhitsB;
+                track = trackhitsB;
+            }else{
+                trackaused = true; 
+                numhits = numhitsA;
+                track = trackhitsA;
+            }
+        }else{
+            szpos = new double[numhits][3];
+            hit = 0; 
+            for(hit = 0; hit < numhits; hit++){
+                szpos[hit][0] = track.get(hit).x();
+                szpos[hit][1] = track.get(hit).y();
+                szpos[hit][2] = track.get(hit).z();
+            }
+            ho = h.HelixFit(hit,szpos,fittobeamline); 
+            ho.set_magfield(magfield);
+        }
+
         double ADCsum = 0;
-        int hit = 0;
+        hit = 0;
         for(hit = 0; hit < numhits; hit++){
-            szpos[hit][0] = track.get(hit).x();
-            szpos[hit][1] = track.get(hit).y();
-            szpos[hit][2] = track.get(hit).z();
             ADCsum += track.get(hit).adc();
         }
-        HelixFitJava h = new HelixFitJava();
-        HelixFitObject ho = h.HelixFit(hit,szpos,fittobeamline);
-        ho.set_magfield(magfield);
+
+        //Do I use the full track for these calculations, or only the fitted part? 
+
         double dz = 0;
 
         dz = track.get(numhits-1).z() - track.get(0).z();
@@ -131,9 +188,8 @@ public class HelixFitTest {
         if(Double.isNaN(tl)) tl = 0;
         if(tl != 0 && !Double.isNaN(tl)) dEdx = ADCsum/tl;
         if(TID != 0 && numhits > minhitcount){
-            newrecotrackmap.put(TID, track);
+            newrecotrackmap.put(TID, originaltrack);
             finaltrackinfomap.put(TID, new FinalTrackInfo(px,py,pz,vz,theta,phi,numhits,tl,ADCsum,dEdx,ho.get_Rho(),A,B,chi2));
         }
-
     }
 }
