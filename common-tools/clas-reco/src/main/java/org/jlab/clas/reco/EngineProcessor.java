@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.FileInputStream;
 import org.jlab.utils.JsonUtils;
 import org.json.JSONObject;
+import org.jlab.logging.DefaultLogger;
 
 
 /**
@@ -30,6 +31,8 @@ public class EngineProcessor {
 
     private final Map<String,ReconstructionEngine>  processorEngines = new LinkedHashMap<String,ReconstructionEngine>();
     ReconstructionEngine  engineDummy = null;
+    private static Logger LOGGER = Logger.getLogger(EngineProcessor.class.getPackage().getName());
+
 
     public EngineProcessor(){
         this.engineDummy = new DummyEngine();
@@ -49,13 +52,14 @@ public class EngineProcessor {
 
         String[] names = new String[]{
             "MAGFIELDS",
-            "DCHB","FTOFHB","EC","HTCC","EBHB",
+            "DCCR","DCHB","FTOFHB","EC","HTCC","EBHB",
             "DCTB","FTOFTB","EBTB"
         };
 
         String[] services = new String[]{
             "org.jlab.clas.swimtools.MagFieldsEngine",
-            "org.jlab.service.dc.DCHBEngine",
+            "org.jlab.service.dc.DCHBClustering",
+            "org.jlab.service.dc.DCHBPostClusterConv",
             "org.jlab.service.ftof.FTOFHBEngine",
             "org.jlab.service.ec.ECEngine",
             "org.jlab.service.htcc.HTCCReconstructionService",
@@ -74,10 +78,11 @@ public class EngineProcessor {
         String[] names = new String[]{
             "MAGFIELDS",
             "FTCAL", "FTHODO", "FTEB",
-            "DCHB","FTOFHB","EC",
+            "DCCR","DCHB","FTOFHB","EC",
             "CVT","CTOF","CND","BAND",
             "HTCC","LTCC","EBHB",
-            "DCTB","FTOFTB","EBTB","RICHEB","RTPC"
+            "DCTB","FMT","FTOFTB","EBTB",
+            "RICHEB","RTPC", "MC"
         };
 
         String[] services = new String[]{
@@ -85,10 +90,11 @@ public class EngineProcessor {
             "org.jlab.rec.ft.cal.FTCALEngine",
             "org.jlab.rec.ft.hodo.FTHODOEngine",
             "org.jlab.rec.ft.FTEBEngine",
-            "org.jlab.service.dc.DCHBEngine",
+            "org.jlab.service.dc.DCHBClustering",
+            "org.jlab.service.dc.DCHBPostClusterConv",
             "org.jlab.service.ftof.FTOFHBEngine",
             "org.jlab.service.ec.ECEngine",
-            "org.jlab.rec.cvt.services.CVTReconstruction",
+            "org.jlab.rec.cvt.services.CVTEngine",
             "org.jlab.service.ctof.CTOFEngine",
             //"org.jlab.service.cnd.CNDEngine",
             "org.jlab.service.cnd.CNDCalibrationEngine",
@@ -97,10 +103,12 @@ public class EngineProcessor {
             "org.jlab.service.ltcc.LTCCEngine",
             "org.jlab.service.eb.EBHBEngine",
             "org.jlab.service.dc.DCTBEngine",
+            "org.jlab.service.fmt.FMTEngine",
             "org.jlab.service.ftof.FTOFTBEngine",
             "org.jlab.service.eb.EBTBEngine",
             "org.jlab.rec.rich.RICHEBEngine",
-            "org.jlab.service.rtpc.RTPCEngine"
+            "org.jlab.service.rtpc.RTPCEngine",
+	    "org.jlab.service.mc.TruthMatch"
         };
 
         for(int i = 0; i < names.length; i++){
@@ -137,7 +145,6 @@ public class EngineProcessor {
             c = Class.forName(clazz);
             if( ReconstructionEngine.class.isAssignableFrom(c)==true){
                 ReconstructionEngine engine = (ReconstructionEngine) c.newInstance();
-                engine.init();
                 if(!jsonConf.equals("null")) {
                     EngineData input = new EngineData();
                     input.setData(EngineDataType.JSON.mimeType(), jsonConf);
@@ -145,10 +152,15 @@ public class EngineProcessor {
                 }
                 this.processorEngines.put(name, engine);
             } else {
-                System.out.println(">>>> ERROR: class is not a reconstruction engine : " + clazz);
+                LOGGER.log(Level.SEVERE,">>>> ERROR: class is not a reconstruction engine : " + clazz);
             }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-            Logger.getLogger(EngineProcessor.class.getName()).log(Level.SEVERE, null, ex);
+
+        } catch (ClassNotFoundException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -167,10 +179,15 @@ public class EngineProcessor {
                 engine.init();
                 this.processorEngines.put(name, engine);
             } else {
-                System.out.println(">>>> ERROR: class is not a reconstruction engine : " + clazz);
+                LOGGER.log(Level.SEVERE,">>>> ERROR: class is not a reconstruction engine : " + clazz);
             }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-            Logger.getLogger(EngineProcessor.class.getName()).log(Level.SEVERE, null, ex);
+
+        } catch (ClassNotFoundException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -187,10 +204,15 @@ public class EngineProcessor {
                 engine.init();
                 this.processorEngines.put(engine.getName(), engine);
             } else {
-                System.out.println(">>>> ERROR: class is not a reconstruction engine : " + clazz);
+                LOGGER.log(Level.SEVERE, ">>>> ERROR: class is not a reconstruction engine : " + clazz);
             }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-            Logger.getLogger(EngineProcessor.class.getName()).log(Level.SEVERE, null, ex);
+
+        } catch (ClassNotFoundException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -219,11 +241,12 @@ public class EngineProcessor {
                     JsonUtils.extend(event, ReconstructionEngine.CONFIG_BANK_NAME, "json",
                             engine.getValue().generateConfig());
                 }
+                if (engine.getValue().dropOutputBanks) {
+                    engine.getValue().dropBanks(event);
+                }
                 engine.getValue().processDataEvent(event);
             } catch (Exception e){
-
-                System.out.println("[Exception] >>>>> engine : " + engine.getKey());
-                System.out.println();
+                LOGGER.log(Level.SEVERE,"[Exception] >>>>> engine : " + engine.getKey() + "\n\n");
                 e.printStackTrace();
             }
         }
@@ -284,9 +307,16 @@ public class EngineProcessor {
         parser.addOption("-c","0","use default configuration [0 - no, 1 - yes/default, 2 - all services] ");
         parser.addOption("-n","-1","number of events to process");
         parser.addOption("-y","0","yaml file");
+        parser.addOption("-d","1","Debug level [0 - OFF, 1 - ON/default]");
         parser.setDescription("previously known as notsouseful-util");
 
         parser.parse(args);
+
+        if(parser.getOption("-d").intValue() == 0)
+            DefaultLogger.initialize();
+        else
+            DefaultLogger.debug();
+
 
         if(parser.hasOption("-i")==true&&parser.hasOption("-o")==true){
 
@@ -320,11 +350,11 @@ public class EngineProcessor {
                         }
                     }
                 } catch (FileNotFoundException ex) {
-                    Logger.getLogger(EngineProcessor.class.getName()).log(Level.SEVERE, null, ex);
+                    LOGGER.log(Level.SEVERE, null, ex);
                 } catch (IOException ex) {
-                    Logger.getLogger(EngineProcessor.class.getName()).log(Level.SEVERE, null, ex);
+                    LOGGER.log(Level.SEVERE, null, ex);
                 } catch (ClassCastException | YAMLException ex) {
-                    Logger.getLogger(EngineProcessor.class.getName()).log(Level.SEVERE, null, ex);
+                    LOGGER.log(Level.SEVERE, null, ex);
                 }
             }
             else if (config>0){

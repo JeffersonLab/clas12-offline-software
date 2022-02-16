@@ -32,7 +32,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     private double _TimeResidual = 0;	// cluster line  to the wire position time-resid
     private int _LeftRightAmb;		// Left-Right Ambiguity value	-1 --> y-fit <0 --> to the left of the wire ==> y = y-_leftRight*TimeToDist
 
-    private double _QualityFac;
+    private int _QualityFac;
     private int _TrkgStatus = -1;	//  TrkgStatusFlag factor (-1: no fit; 0: hit-based trking fit; 1: time-based trking fit)
     private double _ClusFitDoca = -1;
     private double _TrkFitDoca = -1;
@@ -73,6 +73,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * @param layer (1...6)
      * @param wire (1...112)
      * @param TDC
+     * @param id
      */
     public FittedHit(int sector, int superlayer, int layer, int wire,
             int TDC, int id) {
@@ -101,6 +102,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      *
      * @return the ID
      */
+    @Override
     public int get_Id() {
         return _Id;
     }
@@ -110,6 +112,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      *
      * @param _Id
      */
+    @Override
     public void set_Id(int _Id) {
         this._Id = _Id;
     }										//		Hit Id
@@ -143,7 +146,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      *
      * @param layerValue layer number from 1 to 6
      */
-    public void set_lX(double layerValue) {
+    public final void set_lX(double layerValue) {
         this._lX = layerValue;
     }
 
@@ -162,13 +165,18 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * @param wire wire number from 1 to 112 sets the center of the cell as a
      * function of wire number in the local superlayer coordinate system.
      */
-    public void set_lY(int layer, int wire) {
+    public final void set_lY(int layer, int wire) {
         double y = this.calcLocY(layer, wire);
         this._lY = y;
     }
 
     /**
      *
+     * @param event
+     * @param B
+     * @param constants0
+     * @param constants1
+     * @param tde
      * @return The approximate uncertainty on the hit position using the inverse
      * of the gemc smearing function
      */
@@ -264,7 +272,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * @return a quality factor representative of the quality of the fit to the
      * hit
      */
-    public double get_QualityFac() {
+    public int get_QualityFac() {
         return _QualityFac;
     }
 
@@ -273,8 +281,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * @param _QualityFac is a quality factor representative of the quality of
      * the fit to the hit
      */
-    public void set_QualityFac(double _QualityFac) {
-        this._QualityFac = _QualityFac;
+    public void set_QualityFac(int _QualityFac) {
+        this._QualityFac |= 1 << (_QualityFac-1);
     }
 
     /**
@@ -345,6 +353,11 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     }
     /**
      * sets the calculated distance (in cm) from the time (in ns)
+     * @param event
+     * @param trkAngle
+     * @param B
+     * @param tab
+     * @param tde
      */
     public void set_TimeToDistance(DataEvent event, double trkAngle, double B, IndexedTable tab,TimeToDistanceEstimator tde) {     
         
@@ -371,7 +384,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             double deltatime_beta2 = 0;
             
             if (x != -1) {
-                if(Constants.useUSETIMETBETA()==true) {
+                if(Constants.getInstance().useUSETIMETBETA()==true) {
                     deltatime_beta = calcDeltaTimeBetaTFCN(this.get_Time(), tab, beta);
                     deltatime_beta2 = calcDeltaTimeBeta(this.get_Time(), tab, beta);
                 } else {
@@ -393,7 +406,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             //distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.getCorrectedTime(this.get_Time(), deltatime_beta), secIdx, slIdx) ;
             
         }
-        
+     
         this.set_Doca(distance);
         this._TimeToDistance = distance;
     }
@@ -506,7 +519,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     
     /**
      * A method to update the hit position information after the fit to the
-     * local coord.sys. wire positions
+     * local coord.sys.wire positions
+     * @param DcDetector
      */
     public void updateHitPosition(DCGeant4Factory DcDetector) {
         if(this.get_Z()==0)
@@ -517,6 +531,12 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     /**
      * A method to update the hit position information after the fit to the wire
      * positions employing hit-based tracking algorithms has been performed.
+     * @param event
+     * @param trkAngle
+     * @param B
+     * @param tab
+     * @param DcDetector
+     * @param tde
      */
     public void updateHitPositionWithTime(DataEvent event, double trkAngle, double B, 
             IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
@@ -646,7 +666,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                 throw new RuntimeException("invalid region");
         }    
         
-        double MaxSag = Constants.getWIREDIST()*A*C*wire*wire*FastMath.cos(Math.toRadians(25.))*FastMath.cos(Math.toRadians(30.));
+        double MaxSag = Constants.getInstance().getWIREDIST()*A*C*wire*wire*FastMath.cos(Math.toRadians(25.))*FastMath.cos(Math.toRadians(30.));
         
         double delta_x = MaxSag*(1.-Math.abs(y)/(0.5*wireLen))*(1.-Math.abs(y)/(0.5*wireLen));
         
@@ -700,12 +720,17 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * 
      * @return string with hit output 
      */
+    @Override
     public String printInfo() {
         //double xr = this._X*FastMath.cos(Math.toRadians(25.))+this._Z*FastMath.sin(Math.toRadians(25.));		
         //double zr = this._Z*FastMath.cos(Math.toRadians(25.))-this._X*FastMath.sin(Math.toRadians(25.));
-        String s = "DC Fitted Hit: ID " + this.get_Id() + " Sector " + this.get_Sector() + " Superlayer " + this.get_Superlayer() + " Layer " + this.get_Layer() + " Wire " + this.get_Wire() + " TDC " + this.get_TDC()+ " Time " + this.get_Time()
-                + "  LR " + this.get_LeftRightAmb() + " doca " + (float)this.get_TimeToDistance()+ " +/- " +(float)this.get_DocaErr() + " updated pos  " + (float)this._X + " clus "
-                + this._AssociatedClusterID;
+        String s = String.format("DC Fitted Hit: ID %d  Sector %d  Superlayer %d  Layer %d  Wire %d  TDC %d  Time %.4f  LR %d  Doca %.4f +/- %.4f\n",
+                   this.get_Id(),this.get_Sector(),this.get_Superlayer(),this.get_Layer(),this.get_Wire(),this.get_TDC(),
+                   this.get_Time(),this.get_LeftRightAmb(),this.get_TimeToDistance(),this.get_DocaErr());
+        s = s +    String.format("               clusID %d  trkID %d  Tflight %.4f  Tprop %.4f  T0 %.4f  TStart %.4f  Beta %.4f  B %.4f\n",
+                   this.get_AssociatedClusterID(), this.get_AssociatedHBTrackID(), this.getTFlight(), this.getTProp(), this.getT0(), this.getTStart(), this.get_Beta(), this.getB());
+        s = s +    String.format("               clusFitDoca %.4f  X %.4f  Z %.4f", this.get_ClusFitDoca(), this.get_X(), this.get_Z());
+        if(this.getCrossDirIntersWire()!=null) s = s + " " +  this.getCrossDirIntersWire().toString();
         return s;
     }
 
@@ -785,7 +810,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     public double calc_SignalPropagAlongWire(DCGeant4Factory DcDetector) {
         
         Vector3d WireEnd;
-        int end = Constants.STBLOC[this.get_Sector()-1][this.get_Superlayer()-1];
+        int end = Constants.getInstance().STBLOC[this.get_Sector()-1][this.get_Superlayer()-1];
         if(end>0) {
             WireEnd = DcDetector.getWireRightend(this.get_Sector()-1, this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1);
         } else {
@@ -803,7 +828,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     public double calc_SignalPropagAlongWire(double X, double Y, DCGeant4Factory DcDetector) {
         
         Vector3d WireEnd;
-        int end = Constants.STBLOC[this.get_Sector()-1][this.get_Superlayer()-1];
+        int end = Constants.getInstance().STBLOC[this.get_Sector()-1][this.get_Superlayer()-1];
         if(end>0) {
             WireEnd = DcDetector.getWireRightend(this.get_Sector()-1, this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1);
         } else {
@@ -848,6 +873,18 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 
     /**
      * 
+     * @param X
+     * @param Y
+     * @param DcDetector DC detector geometry
+     */
+    public void setSignalPropagTimeAlongWire(double X, double Y, DCGeant4Factory DcDetector) {
+        this._SignalPropagAlongWire = this.calc_SignalPropagAlongWire(X,Y, DcDetector);
+        this._SignalPropagTimeAlongWire = this._SignalPropagAlongWire/(Constants.SPEEDLIGHT*0.7);
+        this._tProp= this._SignalPropagTimeAlongWire;
+    }
+
+    /**
+     * 
      * @return signal time of flight to the track doca to the hit wire in ns
      */
     public double getSignalTimeOfFlight() {
@@ -859,7 +896,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     public void setSignalTimeOfFlight() {
         if(this.get_Beta()>0 && this.getAssociatedStateVec()!=null)
             this._SignalTimeOfFlight = (this.getAssociatedStateVec().getPathLength())/(Constants.SPEEDLIGHT*this.get_Beta0to1());
-            this._tFlight = this._SignalTimeOfFlight;
+        this._tFlight = this._SignalTimeOfFlight;
     }
     
     
@@ -959,6 +996,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     public void set_DeltaTimeBeta(double deltatime_beta) {
         _deltatime_beta = deltatime_beta;
     }
+
     public double get_DeltaTimeBeta() {
         return _deltatime_beta ;
     }
@@ -991,7 +1029,35 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         return beta;
     }
     
+    public void updateHitfromSV(StateVec st, DCGeant4Factory DcDetector) {
+//        this.set_Id(this.get_Id());
+//        this.set_TDC(this.get_TDC());
+//        this.set_AssociatedHBTrackID(trk.get_Id());
+//        this.set_AssociatedClusterID(this.get_AssociatedClusterID());
+        this.setAssociatedStateVec(st);
+        this.set_TrkResid(this.get_Doca() * Math.signum(st.getProjectorDoca()) - st.getProjectorDoca());
+        this.setB(st.getB());
+        this.setSignalPropagTimeAlongWire(st.x(), st.y(), DcDetector);
+        this.setSignalTimeOfFlight();
+        this.set_Doca(this.get_Doca());
+        this.set_ClusFitDoca(this.get_ClusFitDoca());
+//        this.set_DocaErr(this.get_DocaErr());
+//        this.setT0(this.getT0());
+//        this.set_Beta(this.get_Beta());
+//        this.set_DeltaTimeBeta(this.get_DeltaTimeBeta());
+//        this.setTStart(this.getTStart());
+        this.set_Time(this.get_Time()
+                + this.getSignalPropagTimeAlongWire() - this.getSignalPropagTimeAlongWire()
+                + this.getTProp() - this.getTProp());
+//        this.set_Id(this.get_Id());
+//        this.set_TrkgStatus(this.get_TrkgStatus());
+//        this.calc_CellSize(DcDetector);
+//        this.set_LeftRightAmb(this.get_LeftRightAmb());
+
+    }
+    
     //make a  copy
+    @Override
     public FittedHit clone() throws CloneNotSupportedException {
         FittedHit hitClone = new FittedHit(this.get_Sector(), this.get_Superlayer(), this.get_Layer(), this.get_Wire(),
                     this.get_TDC(), this.get_Id());
@@ -1004,6 +1070,9 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             hitClone.setTStart(this.getTStart());
             hitClone.setTProp(this.getTProp());
             hitClone.setTFlight(this.getTFlight());
+            hitClone._SignalPropagAlongWire = this._SignalPropagAlongWire;
+            hitClone._SignalPropagTimeAlongWire = this._SignalPropagTimeAlongWire;
+            hitClone._SignalTimeOfFlight = this._SignalTimeOfFlight;
             hitClone.set_Time(this.get_Time());
             hitClone.set_Id(this.get_Id());
             hitClone.set_ClusFitDoca(this.get_ClusFitDoca());
@@ -1018,6 +1087,6 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             
         return hitClone;
     }
+
     
-  
 }

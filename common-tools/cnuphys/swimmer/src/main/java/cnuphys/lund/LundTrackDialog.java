@@ -25,19 +25,20 @@ import javax.swing.JTextField;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
+import cnuphys.adaptiveSwim.AdaptiveSwimException;
+import cnuphys.adaptiveSwim.AdaptiveSwimResult;
+import cnuphys.adaptiveSwim.AdaptiveSwimmer;
 import cnuphys.magfield.FastMath;
-import cnuphys.rk4.RungeKuttaException;
-import cnuphys.swim.DefaultSwimStopper;
 import cnuphys.swim.SwimTrajectory;
-import cnuphys.swim.Swimmer;
 import cnuphys.swim.Swimming;
-import cnuphys.swimZ.SwimZ;
-import cnuphys.swimZ.SwimZException;
 import cnuphys.swimZ.SwimZResult;
-import cnuphys.swimZ.SwimZStateVector;
 
 @SuppressWarnings("serial")
 public class LundTrackDialog extends JDialog {
+	
+	public enum SWIM_ALGORITHM {STANDARD, FIXEDZ, FIXEDS, FIXEDRHO}
+	
+	private SWIM_ALGORITHM _algorithm = SWIM_ALGORITHM.STANDARD;
 
 	private static final int CANCEL_RESPONSE = 1;
 
@@ -80,23 +81,29 @@ public class LundTrackDialog extends JDialog {
 	// text field for initial phi
 	private JTextField _phi;
 
-	// text field for cutoff
-	private JTextField _maxR;
-
 	// use standard cutoff
-	private JRadioButton _standardCutoff;
+	private JRadioButton _standardRB;
 
 	// fixed z cutoff
-	private JRadioButton _fixedZCutoff;
+	private JRadioButton _fixedZRB;
+	
+	// fixed s (pathlength) cutoff
+    private JRadioButton _fixedSRB;
+	
+	// fixed z cutoff
+	private JRadioButton _fixedRhoRB;
 
-	// use traditional swimmer
-	private JRadioButton _traditionalSwimmer;
+	// fixed Rho value
+	private JTextField _fixedRho;
 
-	// swimZ swimmer
-	private JRadioButton _swimZ;
 
 	// fixed Z value
 	private JTextField _fixedZ;
+	
+	
+	// fixed S (pathlength) value
+	private JTextField _fixedS;
+	
 
 	// accuracy in fixed z
 	private JTextField _accuracy;
@@ -112,6 +119,7 @@ public class LundTrackDialog extends JDialog {
 	public static final String SMALL_THETA = "\u03B8";
 	public static final String SMALL_PHI = "\u03C6";
 	public static final String SUPER2 = "\u00B2";
+	public static final String SMALL_RHO = "\u03C1";
 
 	// usual relativistic quantities
 	private double _gamma;
@@ -130,13 +138,9 @@ public class LundTrackDialog extends JDialog {
 
 	/**
 	 * Create a dialog used to swim a particle
-	 * 
-	 * @param swimmer
-	 *            Object that will swim (integrate) the particle through B
-	 *            field.
 	 */
 	private LundTrackDialog() {
-		setTitle("Swim a Lund Particle");
+		setTitle("Swim a Particle");
 		setModal(false);
 
 		// close is like a cancel
@@ -151,6 +155,65 @@ public class LundTrackDialog extends JDialog {
 		addComponents();
 		pack();
 		centerComponent(this);
+	}
+	
+	//create the algorithm buttons
+	private void createAlgorithmButtons(ButtonGroup bg) {
+		
+		ActionListener al = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (_standardRB.isSelected()) {
+					_algorithm = SWIM_ALGORITHM.STANDARD;
+				}
+				else if (_fixedZRB.isSelected()) {
+					_algorithm = SWIM_ALGORITHM.FIXEDZ;
+				}
+				else if (_fixedRhoRB.isSelected()) {
+					_algorithm = SWIM_ALGORITHM.FIXEDRHO;
+				}
+				else if (_fixedSRB.isSelected()) {
+					_algorithm = SWIM_ALGORITHM.FIXEDS;
+				}
+
+
+				fixState();
+			}
+			
+		};
+		
+		_standardRB = new JRadioButton("Standard");
+		_fixedZRB = new JRadioButton("Fixed Z");
+		_fixedSRB = new JRadioButton("Fixed S");
+
+		_fixedRhoRB = new JRadioButton("Fixed " + SMALL_RHO);
+		
+		
+		_standardRB.setSelected((_algorithm == SWIM_ALGORITHM.STANDARD));
+		_fixedZRB.setSelected((_algorithm == SWIM_ALGORITHM.FIXEDZ));
+		_fixedSRB.setSelected((_algorithm == SWIM_ALGORITHM.FIXEDS));
+		_fixedRhoRB.setSelected((_algorithm == SWIM_ALGORITHM.FIXEDRHO));
+		
+		_standardRB.addActionListener(al);
+		_fixedZRB.addActionListener(al);
+		_fixedSRB.addActionListener(al);
+		_fixedRhoRB.addActionListener(al);
+		
+		bg.add(_standardRB);
+		bg.add(_fixedZRB);
+		bg.add(_fixedSRB);
+		bg.add(_fixedRhoRB);
+		
+		fixState();
+	}
+	
+	
+	//fix the state of the dialog
+	private void fixState() {
+		_fixedZ.setEnabled(_fixedZRB.isSelected());
+		_fixedRho.setEnabled(_fixedRhoRB.isSelected());
+		_fixedS.setEnabled(_fixedSRB.isSelected());
 	}
 
 	/**
@@ -228,10 +291,9 @@ public class LundTrackDialog extends JDialog {
 	 */
 	private void doCommonSwim() {
 		
-		Swimmer swimmer = new Swimmer();
+		//use the AdaptiveSwimmer exclusively
+		AdaptiveSwimmer swimmer = new AdaptiveSwimmer();
 		
-		swimmer.getProbe().getField().printConfiguration(System.out);
-
 		try {
 			LundId lid = _lundComboBox.getSelectedId();
 
@@ -239,136 +301,78 @@ public class LundTrackDialog extends JDialog {
 			double xo = Double.parseDouble(_vertexX.getText()) / 100.;
 			double yo = Double.parseDouble(_vertexY.getText()) / 100.;
 			double zo = Double.parseDouble(_vertexZ.getText()) / 100.;
+			double momentum = Double.parseDouble(_momentumTextField.getText());
 			double theta = Double.parseDouble(_theta.getText());
 			double phi = Double.parseDouble(_phi.getText());
-			double rMax = Double.parseDouble(_maxR.getText());
-			double momentum = Double.parseDouble(_momentumTextField.getText());
 
-			// create a stopper
-			DefaultSwimStopper stopper = new DefaultSwimStopper(rMax);
-
-			double stepSize = 5e-3; // m
+			double stepSize = 1e-5; // m
 			double maxPathLen = 8.0; // m
-			double hdata[] = new double[3];
 
-			try {
-				if (_standardCutoff.isSelected()) {
-					SwimTrajectory traj = swimmer.swim(lid.getCharge(), xo, yo, zo, momentum, theta, phi, stopper, 0,
-							maxPathLen, stepSize, Swimmer.CLAS_Tolerance, hdata);
-					traj.setLundId(lid);
+			double eps = 1.0e-6;
 
-					double lastY[] = traj.lastElement();
-					printSummary("\nRESULT from adaptive stepsize method with storage and err vector", traj.size(),
-							momentum, lastY, hdata);
+			AdaptiveSwimResult result = new AdaptiveSwimResult(true);
+			SwimTrajectory traj = null;
+			
+			String prompt = "";
 
-					Swimming.addMCTrajectory(traj);
-				} else {
+			switch (_algorithm) {
 
-					System.err.println("Fixed Z cutoff");
+			case STANDARD:
+				swimmer.swim(lid.getCharge(), xo, yo, zo, momentum, theta, phi, maxPathLen, stepSize, eps, result);
+				prompt = "RESULT from standard swim:\n";
+				break;
 
-					// which algorithm
+			case FIXEDZ:
+				// convert accuracy from microns to meters
+				double accuracy = Double.parseDouble(_accuracy.getText()) / 1.0e6;
+				double ztarget = Double.parseDouble(_fixedZ.getText()) / 100; // meters
+				swimmer.swimZ(lid.getCharge(), xo, yo, zo, momentum, theta, phi, ztarget, accuracy, maxPathLen,
+						stepSize, eps, result);
+				prompt = "RESULT from fixed Z swim:\n";
+				break;
+				
+			case FIXEDS:
+				// convert accuracy from microns to meters
+				accuracy = Double.parseDouble(_accuracy.getText()) / 1.0e6;
+				double targetS = Double.parseDouble(_fixedS.getText()) / 100; // meters
+				swimmer.swimS(lid.getCharge(), xo, yo, zo, momentum, theta, phi, accuracy, targetS,
+						stepSize, eps, result);
+				prompt = "RESULT from fixed S swim:\n";
+				break;
 
-					double ztarget = Double.parseDouble(_fixedZ.getText()); // meters
 
-					SwimTrajectory traj = null;
-					if (_swimZ.isSelected()) {
-						System.err.println("SwimZ swimmer");
-						SwimZStateVector start = new SwimZStateVector(xo * 100, yo * 100, zo * 100, momentum, theta,
-								phi);
-						SwimZ sz = new SwimZ();
+			case FIXEDRHO:
+				// convert accuracy from microns to meters
+				accuracy = Double.parseDouble(_accuracy.getText()) / 1.0e6;
+				double rhotarget = Double.parseDouble(_fixedRho.getText()) / 100; // meters
+				
+				
+			//	.swimRho(charge[i], xo[i], yo[i], zo[i], p, theta[i], phi[i], rho, accuracy, sMax, stepSize, eps, result);			
+				
+				swimmer.swimRho(lid.getCharge(), xo, yo, zo, momentum, theta, phi, rhotarget, accuracy, maxPathLen, stepSize, eps, result);
+				prompt = "RESULT from fixed Rho swim:\n";
+				break;
+			} //switch
+			
+			traj = result.getTrajectory();
+			if (traj != null) {
+				traj = result.getTrajectory();
+				traj.setLundId(lid);
+				traj.computeBDL(swimmer.getProbe());
 
-						double adaptiveInitStepSize = 0.5;
-
-						SwimZResult result = sz.adaptiveRK(lid.getCharge(), momentum, start, ztarget,
-								adaptiveInitStepSize, hdata);
-						partialReport(result, "Z ADAPTIVE");
-						traj = result.toSwimTrajectory();
-
-					} else {
-						System.err.println("Traditional swimmer");
-						ztarget /= 100; // meters
-						// convert accuracy from microns to meters
-						double accuracy = Double.parseDouble(_accuracy.getText()) / 1.0e6;
-						traj = swimmer.swim(lid.getCharge(), xo, yo, zo, momentum, theta, phi, ztarget, accuracy,
-								maxPathLen, stepSize, Swimmer.CLAS_Tolerance, hdata);
-						traj.setLundId(lid);
-						double lastY[] = traj.lastElement();
-						printSummary("\nresult from adaptive stepsize method with storage and Z cutoff at " + ztarget,
-								traj.size(), momentum, lastY, hdata);
-					}
-					if (traj != null) {
-						Swimming.addMCTrajectory(traj);
-					}
-				}
-
-			} catch (RungeKuttaException e) {
-				e.printStackTrace();
+				result.printOut(System.out, prompt + result);
+				Swimming.addMCTrajectory(traj);
 			}
-		} catch (SwimZException e) {
-			System.err.println("Swimming failed. See the log for more details.");
+
 		}
-	}
-
-	private static void partialReport(SwimZResult result, String name) {
-		double p3v[] = result.getFinalThreeMomentum();
-		// check
-		double pf = Math.sqrt(p3v[0] * p3v[0] + p3v[1] * p3v[1] + p3v[2] * p3v[2]);
-
-		printVect(result.getInitialThreeMomentum(), "po");
-		printVect(result.getFinalThreeMomentum(), "pf");
-		System.out.println(name + " [" + result.size() + "]");
-		System.out.println("Initial state vector: " + result.first());
-		System.out.println("Final state vector: " + result.last());
-
-		double thetaPhi[] = result.getInitialThetaAndPhi();
-		System.out.println(String.format("Initial theta = %-8.2f phi = %-8.2f deg", thetaPhi[0], thetaPhi[1]));
-		thetaPhi = result.getFinalThetaAndPhi();
-		System.out.println(String.format("Final theta = %-8.2f phi = %-8.2f deg", thetaPhi[0], thetaPhi[1]));
-
-		System.out.println("p: " + pf + " GeV/c");
-	}
-
-	private static void printVect(double v[], String s) {
-		String out = String.format("%s [%-12.5f, %-12.5f, %-12.5f]", s, v[0], v[1], v[2]);
-		System.out.println(out);
-	}
-
-	// print a summary
-	private static void printSummary(String message, int nstep, double momentum, double Q[], double hdata[]) {
-		System.out.println(message);
-		double R = FastMath.sqrt(Q[0] * Q[0] + Q[1] * Q[1] + Q[2] * Q[2]);
-		double norm = FastMath.sqrt(Q[3] * Q[3] + Q[4] * Q[4] + Q[5] * Q[5]);
-		double P = momentum * norm;
-		double px = P * Q[3];
-		double py = P * Q[4];
-		double pz = P * Q[5];
-		double theta = FastMath.acos2Deg(pz / P);
-		double phi = FastMath.atan2Deg(py, px);
-
-		System.out.println("Number of steps: " + nstep);
-
-		if (hdata != null) {
-			System.out.println("min stepsize: " + hdata[0]);
-			System.out.println("avg stepsize: " + hdata[1]);
-			System.out.println("max stepsize: " + hdata[2]);
+		catch (AdaptiveSwimException e) {
+			e.printStackTrace();
 		}
-		System.out.println(
-				String.format("R = [%9.6f, %9.6f, %9.6f] |R| = %9.6f m\nP = [%9.6e, %9.6e, %9.6e] |P| =  %9.6e GeV/c",
-						Q[0], Q[1], Q[2], R, px, py, pz, P));
-		System.out.println("norm (should be 1): " + norm);
+		
 
-		System.out.println(String.format("Final angles theta: %9.6f  phi: %9.6f", theta, phi));
-
-		// for swimming backwards
-		px = -px;
-		py = -py;
-		pz = -pz;
-		theta = FastMath.acos2Deg(pz / P);
-		phi = FastMath.atan2Deg(py, px);
-		System.out.println(String.format("Swim backwards use theta: %9.6f  phi: %9.6f", theta, phi));
-
-		System.out.println("--------------------------------------\n");
 	}
+
+
 
 	/**
 	 * Create a Box that has a prompt, text field, and unit string
@@ -477,25 +481,30 @@ public class LundTrackDialog extends JDialog {
 
 	// create the cutoff panel
 	private JPanel cutoffPanel() {
+		
+		_fixedZ = new JTextField(8);
+		_fixedS = new JTextField(8);
+		_fixedRho = new JTextField(8);
+
+		_accuracy = new JTextField(8);
+
+		_fixedRho.setText("100.0");
+		_fixedS.setText("29.990");
+		_fixedZ.setText("575.0");
+
+		_accuracy.setText("10");
+
+		
 		JPanel panel = new JPanel();
 		Box box = Box.createVerticalBox();
 		box.add(cutoffType());
 
-		_maxR = new JTextField(8);
-		_fixedZ = new JTextField(8);
-		_accuracy = new JTextField(8);
-
-		_maxR.setText("7.0");
-		_fixedZ.setText("575.0");
-		_accuracy.setText("10");
-
-		_fixedZ.setEnabled(false);
-		_accuracy.setEnabled(false);
-
-		box.add(labeledTextField("Max Radial Coordinate", _maxR, "m", -1));
-		box.add(Box.createVerticalStrut(5));
 		box.add(Box.createVerticalStrut(5));
 		box.add(labeledTextField("      Stopping Z", _fixedZ, "cm", -1));
+		box.add(Box.createVerticalStrut(5));
+		box.add(labeledTextField("      Stopping S", _fixedS, "cm", -1));
+		box.add(Box.createVerticalStrut(5));
+		box.add(labeledTextField("      Stopping " + SMALL_RHO, _fixedRho, "cm", -1));
 		box.add(Box.createVerticalStrut(5));
 		box.add(labeledTextField("        Accuracy", _accuracy, "microns", -1));
 		box.add(Box.createVerticalStrut(5));
@@ -505,62 +514,20 @@ public class LundTrackDialog extends JDialog {
 		return panel;
 	}
 
-	public void setFixedZSelected(boolean selected) {
-		_standardCutoff.setSelected(!selected);
-		_fixedZCutoff.setSelected(selected);
-		_swimZ.setEnabled(_fixedZCutoff.isSelected());
-		_accuracy.setEnabled(_fixedZCutoff.isSelected());
-	}
-
 	private JPanel cutoffType() {
-		_traditionalSwimmer = new JRadioButton("Old Swimmer");
-		_swimZ = new JRadioButton("SwimZ");
-		_traditionalSwimmer.setSelected(true);
-
-		_standardCutoff = new JRadioButton("Standard");
-		_fixedZCutoff = new JRadioButton("Fixed Z");
-		_standardCutoff.setSelected(true);
-		_swimZ.setEnabled(_fixedZCutoff.isSelected());
-
-		ButtonGroup bga = new ButtonGroup();
-		bga.add(_traditionalSwimmer);
-		bga.add(_swimZ);
 
 		ButtonGroup bg = new ButtonGroup();
-		bg.add(_standardCutoff);
-		bg.add(_fixedZCutoff);
-
-		ActionListener al = new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				_maxR.setEnabled(_standardCutoff.isSelected());
-				_accuracy.setEnabled(_fixedZCutoff.isSelected());
-				_fixedZ.setEnabled(_fixedZCutoff.isSelected());
-				_swimZ.setEnabled(_fixedZCutoff.isSelected());
-
-				if (!_fixedZCutoff.isSelected()) {
-					_traditionalSwimmer.setSelected(true);
-				}
-			}
-
-		};
-
-		_standardCutoff.addActionListener(al);
-		_fixedZCutoff.addActionListener(al);
+		
+		createAlgorithmButtons(bg);
 		JPanel spanel = new JPanel();
-		spanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
-		spanel.add(_standardCutoff);
-		spanel.add(_fixedZCutoff);
-
-		JPanel spanel2 = new JPanel();
-		spanel2.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
-		spanel2.add(_traditionalSwimmer);
-		spanel2.add(_swimZ);
+		spanel.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 0));
+		spanel.add(_standardRB);
+		spanel.add(_fixedZRB);
+		spanel.add(_fixedSRB);
+		spanel.add(_fixedRhoRB);
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		panel.add(spanel2);
 		panel.add(spanel);
 		return panel;
 	}
@@ -643,12 +610,9 @@ public class LundTrackDialog extends JDialog {
 	/**
 	 * Create a nice padded panel.
 	 * 
-	 * @param hpad
-	 *            the pixel pad on the left and right
-	 * @param vpad
-	 *            the pixel pad on the top and bottom
-	 * @param component
-	 *            the main component placed in the center.
+	 * @param hpad      the pixel pad on the left and right
+	 * @param vpad      the pixel pad on the top and bottom
+	 * @param component the main component placed in the center.
 	 * @return the padded panel
 	 */
 	public static JPanel paddedPanel(int hpad, int vpad, Component component) {
@@ -671,12 +635,9 @@ public class LundTrackDialog extends JDialog {
 	/**
 	 * Center a component.
 	 * 
-	 * @param component
-	 *            The Component to center.
-	 * @param dh
-	 *            offset from horizontal center.
-	 * @param dv
-	 *            offset from vertical center.
+	 * @param component The Component to center.
+	 * @param dh        offset from horizontal center.
+	 * @param dv        offset from vertical center.
 	 */
 	public static void centerComponent(Component component) {
 

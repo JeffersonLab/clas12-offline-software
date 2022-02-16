@@ -36,6 +36,8 @@ public class ECStrip implements Comparable {
 	private int        triggerPhase = 0;
 	private double             veff = 18.1; // Effective velocity of scintillator light (cm/ns)
 	private int              peakID = -1;
+    private int                  id = -1;       // ID of the hit. this shows the row number of the corresponding hit in the ADC bank
+    private int           clusterId = -1;       // Id (row number) of the cluster that this hit belongs to
 	
 	private double              tdist=0;
 	private double              edist=0;
@@ -167,6 +169,23 @@ public class ECStrip implements Comparable {
       	return this.peakID;
     	}
     
+    public void setID(int id){
+            this.id = id;
+    }
+    
+    public int getID(){
+            return this.id;
+    }
+    
+    public void setClusterId(int id){
+            this.clusterId = id;
+    }
+    
+    public int getClusterId(){
+            return this.clusterId;
+    }
+        
+    
     public void setAttenuation(double a, double b, double c){
         this.iAttenLengthA = a;
         this.iAttenLengthB = b;
@@ -213,8 +232,11 @@ public class ECStrip implements Comparable {
 	
     public double getEnergy(Point3D point){
         edist = point.distance(this.stripLine.end());
-        double  ecorr = this.iAttenLengthA*Math.exp(-edist/this.iAttenLengthB) + this.iAttenLengthC;
-        return this.iADC*this.iGain*this.iADC_to_MEV/ecorr;
+        return this.iADC*this.iGain*this.iADC_to_MEV/getEcorr(-edist);
+    }
+    
+    public double getEcorr(double dist) {
+        return this.iAttenLengthA*Math.exp(dist/this.iAttenLengthB) + this.iAttenLengthC;    	
     }
     
 	public double getTime(Point3D point) {		

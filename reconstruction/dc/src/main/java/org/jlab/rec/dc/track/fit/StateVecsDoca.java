@@ -1,9 +1,9 @@
 package org.jlab.rec.dc.track.fit;
 
-//import Jama.Matrix;
 import org.jlab.jnp.matrix.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 import org.jlab.clas.clas.math.FastMath;
 import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
@@ -15,7 +15,10 @@ import org.jlab.geom.prim.Point3D;
  * @author ziegler
  */
 public class StateVecsDoca {
-    private double Bmax = 2.366498; // averaged
+    
+    private static final Logger LOGGER = Logger.getLogger(StateVecsDoca.class.getName());
+    
+    private final double Bmax = 2.366498; // averaged
     
     final double speedLight = 0.002997924580;
     public double[] Z;
@@ -27,8 +30,8 @@ public class StateVecsDoca {
     public StateVec StateVec;
     public CovMat CovMat;
     public Matrix F = new Matrix();
-    private Matrix fMS = new Matrix();
-    private Matrix copyMatrix = new Matrix();
+    private final Matrix fMS = new Matrix();
+    private final Matrix copyMatrix = new Matrix();
     private final double[] A = new double[2];
     private final double[] dA = new double[4];
     private final float[] bf = new float[3];
@@ -38,6 +41,7 @@ public class StateVecsDoca {
     
     /**
      * State vector representing the track in the sector coordinate system at the measurement layer
+     * @param swimmer
      */
     public StateVecsDoca(Swim swimmer) {
         //Max Field Location: (phi, rho, z) = (29.50000, 44.00000, 436.00000)
@@ -48,10 +52,12 @@ public class StateVecsDoca {
     
     /**
      * 
+     * @param sector
      * @param i initial state vector index
-     * @param f final state vector index
+     * @param Zf
      * @param iVec state vector at the initial index
      * @param covMat state covariance matrix at the initial index
+     * @return 
      */
     public Matrix transport(int sector, int i, double Zf, StateVec iVec, CovMat covMat) { // s = signed step-size
 
@@ -72,7 +78,7 @@ public class StateVecsDoca {
         double BatMeas = iVec.B;
         
         while(Math.signum(Zf - Z[i]) *z<Math.signum(Zf - Z[i]) *Zf) {
-            //System.out.println(" RK step num "+(j+1)+" = "+(float)s+" nSteps = "+nSteps);
+            //LOGGER.log(Level.FINE, " RK step num "+(j+1)+" = "+(float)s+" nSteps = "+nSteps);
             double x =  fVec.x;
             double y =  fVec.y;
             z = fVec.z;
@@ -83,7 +89,7 @@ public class StateVecsDoca {
             //covMat.covMat = fCov.covMat; 
             Matrix5x5.copy(fCov.covMat, covMat.covMat);
             s= Math.signum(Zf - Z[i]) * stepSize;
-           // System.out.println(" from "+(float)Z[i]+" to "+(float)Z[f]+" at "+(float)z+" By is "+bf[1]+" B is "+Math.sqrt(bf[0]*bf[0]+bf[1]*bf[1]+bf[2]*bf[2])/Bmax+" stepSize is "+s);
+           // LOGGER.log(Level.FINE, " from "+(float)Z[i]+" to "+(float)Z[f]+" at "+(float)z+" By is "+bf[1]+" B is "+Math.sqrt(bf[0]*bf[0]+bf[1]*bf[1]+bf[2]*bf[2])/Bmax+" stepSize is "+s);
             if(Math.signum(Zf - Z[i]) *(z+s)>Math.signum(Zf - Z[i]) *Zf)
                 s=Math.signum(Zf - Z[i]) *Math.abs(Zf-z);
             
@@ -139,6 +145,7 @@ public class StateVecsDoca {
     
     /**
      * 
+     * @param sector
      * @param i initial state vector index
      * @param f final state vector index
      * @param iVec state vector at the initial index
@@ -164,7 +171,7 @@ public class StateVecsDoca {
         double BatMeas = iVec.B;
         
         while(Math.signum(Z[f] - Z[i]) *z<Math.signum(Z[f] - Z[i]) *Z[f]) {
-            //System.out.println(" RK step num "+(j+1)+" = "+(float)s+" nSteps = "+nSteps);
+            //LOGGER.log(Level.FINE, " RK step num "+(j+1)+" = "+(float)s+" nSteps = "+nSteps);
             double x =  fVec.x;
             double y =  fVec.y;
             z = fVec.z;
@@ -175,7 +182,7 @@ public class StateVecsDoca {
             //covMat.covMat = fCov.covMat; 
             Matrix5x5.copy(fCov.covMat, covMat.covMat);
             s= Math.signum(Z[f] - Z[i]) * stepSize;
-           // System.out.println(" from "+(float)Z[i]+" to "+(float)Z[f]+" at "+(float)z+" By is "+bf[1]+" B is "+Math.sqrt(bf[0]*bf[0]+bf[1]*bf[1]+bf[2]*bf[2])/Bmax+" stepSize is "+s);
+           // LOGGER.log(Level.FINE, " from "+(float)Z[i]+" to "+(float)Z[f]+" at "+(float)z+" By is "+bf[1]+" B is "+Math.sqrt(bf[0]*bf[0]+bf[1]*bf[1]+bf[2]*bf[2])/Bmax+" stepSize is "+s);
             if(Math.signum(Z[f] - Z[i]) *(z+s)>Math.signum(Z[f] - Z[i]) *Z[f])
                 s=Math.signum(Z[f] - Z[i]) *Math.abs(Z[f]-z);
             
@@ -231,10 +238,10 @@ public class StateVecsDoca {
     public double getX0(double z) {
         double X0 = Constants.AIRRADLEN;
         double tolerance = 0.01;
-        for(int i = 1; i <Constants.Z.length; i++) {
+        for(int i = 1; i <Constants.getInstance().Z.length; i++) {
             if(i%2==0)
                 continue;
-            if(z>=Constants.Z[i]-tolerance && z<=Constants.Z[i+1]+tolerance) { 
+            if(z>=Constants.getInstance().Z[i]-tolerance && z<=Constants.getInstance().Z[i+1]+tolerance) { 
                 return Constants.ARGONRADLEN; 
             }
         }
@@ -243,6 +250,7 @@ public class StateVecsDoca {
     }
     /**
      * 
+     * @param sector
      * @param i initial state vector index
      * @param f final state vector index
      * @param iVec state vector at the initial index
@@ -272,7 +280,7 @@ public class StateVecsDoca {
             if (j == nSteps - 1) {
                 s = Math.signum(Z[f] - Z[i]) * Math.abs(z - Z[f]);
             }
-            //System.out.println(" RK step num "+(j+1)+" = "+(float)s+" nSteps = "+nSteps);
+            //LOGGER.log(Level.FINE, " RK step num "+(j+1)+" = "+(float)s+" nSteps = "+nSteps);
             double x =  fVec.x;
             double y =  fVec.y;
             z = fVec.z;
@@ -341,6 +349,7 @@ public class StateVecsDoca {
      * @param trkcand the track candidate
      * @param z0 the value in z to which the track is swam back to
      * @param kf the final state measurement index
+     * @param c
      */
     public void init(Track trkcand, double z0, KFitterDoca kf, int c) {
         
@@ -363,7 +372,7 @@ public class StateVecsDoca {
             kf.setFitFailed = true;
             return;
         }
-        //System.out.println((0)+"] init "+this.trackTraj.get(0).x+","+this.trackTraj.get(0).y+","+
+        //LOGGER.log(Level.FINE, (0)+"] init "+this.trackTraj.get(0).x+","+this.trackTraj.get(0).y+","+
         //		this.trackTraj.get(0).z+","+this.trackTraj.get(0).tx+","+this.trackTraj.get(0).ty+" "+1/this.trackTraj.get(0).Q); 
         double err_sl1 = trkcand.get(0).get_Segment1().get_fittedCluster().get_clusterLineFitSlopeErr();
         double err_sl2 = trkcand.get(0).get_Segment2().get_fittedCluster().get_clusterLineFitSlopeErr();
@@ -468,8 +477,7 @@ public class StateVecsDoca {
     }
     
     void initFromHB(Track trkcand, double z0, KFitterDoca kf) { 
-        if (trkcand != null && trkcand.getFinalStateVec()!=null 
-                && trkcand.get_CovMat()!=null) {
+        if (trkcand != null && trkcand.getFinalStateVec()!=null ) {
             beta = trkcand.get(0).get(0).get(0).get_Beta();
             StateVec initSV = new StateVec(0);
             initSV.x = trkcand.getFinalStateVec().x();
@@ -507,7 +515,6 @@ public class StateVecsDoca {
             this.trackCov.put(0, initCM); //this.printMatrix(initCM.covMat);
         } else {
             kf.setFitFailed = true;
-            return;
         }
         
     }

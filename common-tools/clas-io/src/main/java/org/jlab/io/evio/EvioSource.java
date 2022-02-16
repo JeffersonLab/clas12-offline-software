@@ -16,6 +16,7 @@ import org.jlab.io.base.DataSourceType;
 
 public class EvioSource implements DataSource {
 
+	Logger LOGGER = Logger.getLogger(EvioSource.class.getName());
 	private ByteOrder storeByteOrder = ByteOrder.BIG_ENDIAN;
 	private EvioCompactReader evioReader = null;
 	private EvioDataEvent evioEvent = null;
@@ -30,14 +31,14 @@ public class EvioSource implements DataSource {
 		String CLAS12DIRPROP = System.getProperty("CLAS12DIR");
 
 		if (CLAS12DIR == null) {
-			System.out.println("---> Warning the CLAS12DIR environment is not defined.");
+			LOGGER.log(Level.WARNING,"---> Warning the CLAS12DIR environment is not defined.");
 			// return;
 		} else {
 			dictionaryPath = CLAS12DIR + "/etc/bankdefs/clas12";
 		}
 
 		if (CLAS12DIRPROP == null) {
-			System.out.println("---> Warning the CLAS12DIR property is not defined.");
+			LOGGER.log(Level.WARNING,"---> Warning the CLAS12DIR property is not defined.");
 		} else {
 			dictionaryPath = CLAS12DIRPROP + "/etc/bankdefs/clas12";
 		}
@@ -53,7 +54,7 @@ public class EvioSource implements DataSource {
 
 		EvioFactory.loadDictionary(dictionaryPath);
 		dictionary = EvioFactory.getDictionary();
-		System.out.println("[EvioSource] ---> Factory loaded descriptor count : " + dictionary.getDescriptorList().length);
+		LOGGER.log(Level.INFO,"[EvioSource] ---> Factory loaded descriptor count : " + dictionary.getDescriptorList().length);
 		// dictionary.show();
 	}
 
@@ -62,14 +63,14 @@ public class EvioSource implements DataSource {
 		String CLAS12DIRPROP = System.getProperty("CLAS12DIR");
 
 		if (CLAS12DIR == null) {
-			System.out.println("---> Warning the CLAS12DIR environment is not defined.");
+			LOGGER.log(Level.WARNING,"---> Warning the CLAS12DIR environment is not defined.");
 			// return;
 		} else {
 			dictionaryPath = CLAS12DIR + "/etc/bankdefs/clas12";
 		}
 
 		if (CLAS12DIRPROP == null) {
-			System.out.println("---> Warning the CLAS12DIR property is not defined.");
+			LOGGER.log(Level.WARNING,"---> Warning the CLAS12DIR property is not defined.");
 		} else {
 			dictionaryPath = CLAS12DIRPROP + "/etc/bankdefs/clas12";
 		}
@@ -85,7 +86,7 @@ public class EvioSource implements DataSource {
 
 		EvioFactory.loadDictionary(dictionaryPath);
 		dictionary = EvioFactory.getDictionary();
-		System.out.println("[EvioSource] ---> Factory loaded descriptor count : " + dictionary.getDescriptorList().length);
+		LOGGER.log(Level.INFO,"[EvioSource] ---> Factory loaded descriptor count : " + dictionary.getDescriptorList().length);
 		dictionary.show();
 		this.open(filename);
 	}
@@ -100,7 +101,7 @@ public class EvioSource implements DataSource {
 			currentEvent = 1;
 			currentFileEntries = evioReader.getEventCount();
 			storeByteOrder = evioReader.getFileByteOrder();
-			System.out.println("****** opened FILE [] ** NEVENTS = " + currentFileEntries + " *******");
+			LOGGER.log(Level.INFO,"****** opened FILE [] ** NEVENTS = " + currentFileEntries + " *******");
 			// TODO Auto-generated method stub
 		} catch (EvioException ex) {
 			Logger.getLogger(EvioSource.class.getName()).log(Level.SEVERE, null, ex);
@@ -115,7 +116,7 @@ public class EvioSource implements DataSource {
 			currentEvent = 1;
 			currentFileEntries = evioReader.getEventCount()+1;
 			storeByteOrder = evioReader.getFileByteOrder();
-			// System.out.println("****** opened BUFFER [] ** NEVENTS = " + currentFileEntries + " *******");
+			// LOGGER.log(Level.INFO,"****** opened BUFFER [] ** NEVENTS = " + currentFileEntries + " *******");
 		} catch (EvioException ex) {
 			Logger.getLogger(EvioSource.class.getName()).log(Level.SEVERE, null, ex);
 		}

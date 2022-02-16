@@ -1,0 +1,20 @@
+io-services:
+  reader:
+    class: org.jlab.io.clara.HipoToHipoReader
+    name: HipoToHipoReader
+  writer:
+    class: org.jlab.io.clara.HipoToHipoWriter
+    name: HipoToHipoWriter
+services:
+  - class: org.jlab.service.eb.EBTBEngine
+    name: EBTB
+configuration:
+  io-services:
+    writer:
+      compression: 2
+  services:
+    EBTB:
+      dropBanks: 'true'
+
+mime-types:
+  - binary/data-hipo

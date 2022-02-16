@@ -95,5 +95,19 @@
             {"name":"procID",   "id":26, "type":"int32", "info":"Process that created the FP. see gemc.jlab.org"},
             {"name":"hitn",     "id":27, "type":"int32", "info":"Hit number"}
         ]
+    },
+        {
+        "name": "MC::IsParticleMatched",
+        "group": 45,
+        "info": "MC Particle - Rec Track matching.",
+        "items": [
+            {"name":"mcTindex",      "type":"S",  "info":"MC Particle index, as in tid"},
+            {"name":"pindex",        "type":"S",  "info":"REC particle index"},
+            {"name":"MCLayersTrk",   "type":"L",  "info":"layers of tracker (mostly)  detectors that a given MCParticle hit. Each layer corresponds to a specific bit in this variable"},
+            {"name":"MCLayersNeut",  "type":"L",  "info":"layers of detectors (non tracker) that a givem MCParticle hit. Each layer corresponds to a specific bit in this variable"},
+            {"name":"RecLayersTrk",  "type":"L",  "info":"layers of tracker detectors (mostly) that, the matched RecParticle picked hits from"},
+            {"name":"RecLayersNeut", "type":"L",  "info":"layers of detectors (mostly) that, the matched RecParticle picked hits from"}
+        ]
     }
+
 ]

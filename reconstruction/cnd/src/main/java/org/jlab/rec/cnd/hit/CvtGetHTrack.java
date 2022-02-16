@@ -65,7 +65,7 @@ public class CvtGetHTrack { // this class is used to extract helical tracks from
 						indexTrack = id;
 					}
 					
-					int layer	  = bank.getByte("layer", i);
+					int layer    = bank.getByte("layer", i);
 					double x     = bank.getFloat("x", i);
 					double y     = bank.getFloat("y", i);
 					double z     = bank.getFloat("z", i);
@@ -95,14 +95,14 @@ public class CvtGetHTrack { // this class is used to extract helical tracks from
 					if((Double.isNaN(uo1)) ||  (Double.isNaN(ui1)) )continue; //check if the track crosses the paddle. If not then go to the next swimmer intersection
 						
 					Point3D entryPoint = new Point3D((x+ui1*ux)*10,(y+ui1*uy)*10,(z+ui1*uz)*10);
-					Point3D midPoint = new Point3D(x*10,y*10,z*10);
-					Point3D exitPoint = new Point3D((x+uo1*ux)*10,(y+uo1*uy)*10,(z+uo1*uz)*10);
+					Point3D midPoint   = new Point3D(x*10,y*10,z*10);
+					Point3D exitPoint  = new Point3D((x+uo1*ux)*10,(y+uo1*uy)*10,(z+uo1*uz)*10);
 
-					trk._TrkInters.get(layer - 1).add(entryPoint);
-					trk._TrkInters.get(layer - 1).add(midPoint);
-					trk._TrkInters.get(layer - 1).add(exitPoint);
+					trk._TrkInters.get(layer - 1).set(0, entryPoint);
+					trk._TrkInters.get(layer - 1).set(1, midPoint);
+					trk._TrkInters.get(layer - 1).set(2, exitPoint);
 
-					trk._TrkLengths.add(path*10);
+					trk._TrkLengths.set(layer-1, path*10);
 
 					helices.add(trk);
 					//System.out.println("layer from swimmer "+layer+ " x "+trk._TrkInters.get(layer-1).get(0).x()+ " "+y+" "+z);
@@ -233,9 +233,11 @@ public class CvtGetHTrack { // this class is used to extract helical tracks from
 		private List<Double>             _TrkLengths = new ArrayList<Double>();  //the pathlength of the track from the doca to the beam line to the middle of the CND counter
 
 		public CVTTrack() {
-			for (int i = 0; i < 3; i++) {
-				_TrkInters.add(new ArrayList<Point3D>());
-			}
+                    for (int i = 0; i < 3; i++) {
+                        _TrkInters.add(new ArrayList<Point3D>());
+                        for(int j=0; j<3; j++) _TrkInters.get(i).add(new Point3D(Double.NaN,Double.NaN,Double.NaN));
+                        _TrkLengths.add(Double.NaN);
+                    }
 		}
 
 		public Helix get_Helix() {

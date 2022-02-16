@@ -26,26 +26,47 @@ public class EBRadioFrequency {
     }
 
     /**
-     * new-style start time, based on one particle's vertex time (the trigger
-     * particle) and another's z-vertex (e.g. the hadron) 
-     * @param p the particle with which to determine the vertex time (e.g. the trigger particle)
-     * @param type type of detector to use for p's timing info
-     * @param layer layer of detector to use for p's timing info
-     * @param vz the z-vertex to use for the correction
-     * @return RF/vz-corrected start time 
+     * New-style start time, based on one particle's vertex time and position to
+     * determine the beam bunch and RF correction (the trigger particle), and
+     * another particle's z-vertex's (to correct for systematic z-vertex difference
+     * with the trigger particle).  All times/distances are in units of ns/cm.
+     * @param trigger the trigger particle
+     * @param type type of timing detector to use for trigger particle
+     * @param layer layer of timing detector to use for trigger particle
+     * @param vz the z-vertex of the non-trigger particle 
+     * @return start time corrected for RF and z-vertex
      */
-    public double  getStartTime(DetectorParticle p,final DetectorType type,final int layer,final double vz) {
-        final double tgpos = this.ccdb.getDouble(EBCCDBEnum.TARGET_POSITION);
-        final double rfBucketLength = this.ccdb.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH);
-        final double vertexTime = p.getVertexTime(type,layer,p.getPid());
-        final double vzCorr = (tgpos - vz) / PhysicsConstants.speedOfLight();
-        final double deltatr = - vertexTime - vzCorr
+    public double  getStartTime(DetectorParticle trigger,final DetectorType type,final int layer,final double vz) {
+
+        final double rfPeriod = this.ccdb.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH);
+
+        // The RF calibration is relative to target center:
+        final double zTarget = this.ccdb.getDouble(EBCCDBEnum.TARGET_POSITION);
+
+        // The trigger particles' vertex info:
+        final double tVertex = trigger.getVertexTime(type,layer,trigger.getPid());
+        final double dzTargetVertex = zTarget - trigger.vertex().z();
+
+        // The RF time at the trigger particle's vertex:
+        // (Note, this is shifted forward by a large integer number of RF periods,
+        // to accommadate the modulus in the next step, as it was done in CLAS6.
+        // Probably this should be "simplified" with Math.IEEERemainder.)
+        final double tVertexRF = - tVertex - dzTargetVertex / PhysicsConstants.speedOfLight()
                 + this.rfTime + this.ccdb.getDouble(EBCCDBEnum.RF_OFFSET)
-                + (EBConstants.RF_LARGE_INTEGER+0.5)*rfBucketLength;
-        final double rfCorr = deltatr % rfBucketLength - rfBucketLength/2;
-        return vertexTime + rfCorr;
+                + (EBConstants.RF_LARGE_INTEGER+0.5)*rfPeriod;
+
+        // The relative, RF-beam-bucket-centering correction, based only on the
+        // trigger particle:
+        final double dtRF = tVertexRF % rfPeriod - rfPeriod/2;
+
+        // The RF-corrected event start time, based only on the trigger particle:
+        final double startTime = tVertex + dtRF;
+
+        // The RF-corrected event start time, now corrected for beam flight time
+        // between the trigger and non-trigger particles' z-vertices:
+        return startTime + (vz - trigger.vertex().z()) / PhysicsConstants.speedOfLight();
     }
-  
+
     /**
      * "traditional" start time, based only on one particle
      * @param p the particle with which to determine the start time
@@ -75,8 +96,8 @@ public class EBRadioFrequency {
             if(cycles>0 && timeStamp!=-1) triggerPhase=period*((timeStamp+phase)%cycles);
         
         }
-        // if RUN::rf bank does not exist but tdc bnk exist, reconstruct RF signals from TDC hits and save to bank
-        if(event.hasBank("RF::tdc") && !event.hasBank("RUN::rf")) {
+        // if RF::tdc exists (data), calculate rfTime from scratch
+        if(event.hasBank("RF::tdc")) {
             DataBank bank = event.getBank("RF::tdc");
             int rows = bank.rows();
             for(int i = 0; i < rows; i++){
@@ -96,6 +117,8 @@ public class EBRadioFrequency {
                 }
             }
             if(debugMode>0) bank.show();
+            // always rewrite RF bank
+            if(event.hasBank("RUN::rf")) event.removeBank("RUN::rf");
             DataBank bankOut = event.createBank("RUN::rf",this.rfSignals.size());
             for(int i =0; i< this.rfSignals.size(); i++) {
                 bankOut.setShort("id",   i, (short) this.rfSignals.get(i).getId());
@@ -104,17 +127,15 @@ public class EBRadioFrequency {
             }
             event.appendBank(bankOut);
             int index = this.hasSignal(rfId);
-            if(index>=0) rfTime= this.rfSignals.get(index).getTime();
-            if(debugMode>0) bankOut.show();
-            
+            if(index>=0) rfTime=this.rfSignals.get(index).getTime();           
         }  
         else if(event.hasBank("RUN::rf")) {
             DataBank bank = event.getBank("RUN::rf");
             int rows = bank.rows();
             for(int i = 0; i < rows; i++){
                 if(bank.getShort("id", i)==rfId) rfTime=bank.getFloat("time", i);
+                }
             }
-        }
         
     }
     

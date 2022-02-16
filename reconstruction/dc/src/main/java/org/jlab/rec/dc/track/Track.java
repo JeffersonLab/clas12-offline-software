@@ -1,6 +1,5 @@
 package org.jlab.rec.dc.track;
 
-//import Jama.Matrix;
 import org.jlab.jnp.matrix.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +61,7 @@ public class Track extends Trajectory implements Comparable<Track>{
     private double _fitChisq;
     public boolean fit_Successful;
     private int _missingSuperlayer;
+    private Segment _singleSuperlayer ;
     private int _fitConvergenceStatus;
     private StateVec finalStateVec ;
     
@@ -81,6 +81,20 @@ public class Track extends Trajectory implements Comparable<Track>{
      */
     public void set_MissingSuperlayer(int missingSuperlayer) {
         this._missingSuperlayer = missingSuperlayer;
+    }
+
+    /**
+     * @return the _singleSuperlayer
+     */
+    public Segment getSingleSuperlayer() {
+        return _singleSuperlayer;
+    }
+
+    /**
+     * @param _singleSuperlayer the _singleSuperlayer to set
+     */
+    public void setSingleSuperlayer(Segment _singleSuperlayer) {
+        this._singleSuperlayer = _singleSuperlayer;
     }
     
     private int _Status=0;
@@ -382,17 +396,32 @@ public class Track extends Trajectory implements Comparable<Track>{
         return _hitsOnTrack;
     }
     
+    public boolean overlaps(Track o) {
+        boolean value = false;
+        for(int i=0; i<this.size(); i++) {
+            int ct = this.get(i).get_Id();
+            int co = o.get(i).get_Id();
+            if(ct!=-1 && ct==co) value = true;
+        }
+        return value;
+    }
+    
+    public boolean bestChi2(Track o) {
+        return this.get_FitChi2()<o.get_FitChi2();
+    }
     
     public boolean isGood() {
         boolean isGood=true;
-        if(this._trakOrig.distance(0, 0, 0)>Constants.htccRadius) isGood=false;
+        if(this._trakOrig.distance(0, 0, 0)>Constants.HTCCRADIUS) isGood=false;
         return isGood;
     }
     /**
      * Basic track info
      */
     public void printInfo() {
-        System.out.println("Track "+this._Id+" Q= "+this._Q+" P= "+this._P);
+        String str = "Track "+this._Id+" Sector= "+this.get_Sector()+" Q= "+this._Q+" P= "+this._P+" chi2="+this.get_FitChi2();
+        for(int i=0; i<this.size(); i++) str += " cross" + (i+1) + "= " + this.get(i).get_Id();
+        System.out.println(str);
     }
     @Override
     public int compareTo(Track arg) {

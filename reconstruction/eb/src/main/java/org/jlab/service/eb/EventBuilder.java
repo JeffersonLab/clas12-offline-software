@@ -19,6 +19,7 @@ import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorTrack;
 import org.jlab.clas.detector.TaggerResponse;
 import org.jlab.clas.detector.CherenkovResponse;
+import org.jlab.clas.detector.DetectorResponseFactory;
 import org.jlab.clas.physics.Vector3;
 
 import org.jlab.rec.eb.EBCCDBConstants;
@@ -208,15 +209,25 @@ public class EventBuilder {
     public boolean findMatchingHit(
             final int pindex, DetectorParticle particle, List<DetectorResponse> responses,
             DetectorType type, final int layer, final double distance) {
-        final int index = particle.getDetectorHit(responses,type,layer,distance);
+        int index = particle.getDetectorHit(responses,type,layer,distance);
         if (index>=0) {
+            // if sharing hits between tracks, duplicate it:
+            if (responses.get(index).getAssociation() >= 0) {
+                //System.out.println(responses.get(index).getClass());
+                //DetectorResponse copy = new DetectorResponse();
+                //copy.copy(responses.get(index));
+                DetectorResponse copy = DetectorResponseFactory.create(responses.get(index));
+                copy.clearAssociations();
+                responses.add(copy);
+                index = responses.size()-1;
+            }
             particle.addResponse(responses.get(index),true);
             responses.get(index).addAssociation(pindex);
             return true;
         }
         return false;
     }
-    
+
     public void forwardTaggerIDMatching() {
         int np = this.detectorEvent.getParticles().size();
         if(this.ftIndices.size()>0 && this.detectorEvent.getParticles().size()>0) {

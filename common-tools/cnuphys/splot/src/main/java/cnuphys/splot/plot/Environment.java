@@ -2,13 +2,10 @@ package cnuphys.splot.plot;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Iterator;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
-import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.UIManager;
 
@@ -35,17 +32,11 @@ public final class Environment {
 	// the java class path
 	private String _classPath;
 
-	// the host name
-	private String _hostName;
-
 	// png image writer, if there is one
 	private ImageWriter _pngWriter;
 
 	// default panel background color
 	private Color _defaultPanelBackgroundColor;
-
-	// cnu logo
-	private ImageIcon _cnuIcon;
 
 	// common fonts
 	private Font _commonFonts[] = new Font[50];
@@ -63,38 +54,14 @@ public final class Environment {
 		_tempDirectory = getProperty("java.io.tmpdir");
 		_classPath = getProperty("java.class.path");
 
-		try {
-			InetAddress addr = InetAddress.getLocalHost();
-
-			// Get hostname
-			_hostName = addr.getHostName();
-		} catch (UnknownHostException e) {
-			_hostName = "???";
-		}
-
 		// any png image writers?
-		Iterator<ImageWriter> iterator = ImageIO
-				.getImageWritersByFormatName("png");
+		Iterator<ImageWriter> iterator = ImageIO.getImageWritersByFormatName("png");
 		if ((iterator == null) || !iterator.hasNext()) {
 			System.err.println("no png writer");
 		}
 		else {
 			_pngWriter = iterator.next(); // take the first
 		}
-
-		// icon for about ced dialog
-		_cnuIcon = ImageManager.getInstance()
-				.loadImageIcon("images/cnuicon.png");
-
-	}
-
-	/**
-	 * Get the CNU icon
-	 * 
-	 * @return the CNU Icon
-	 */
-	public ImageIcon getCNUIcon() {
-		return _cnuIcon;
 	}
 
 	/**
@@ -144,7 +111,8 @@ public final class Environment {
 	private String getProperty(String keyName) {
 		try {
 			return System.getProperty(keyName);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			return null;
 		}
 	}
@@ -204,15 +172,6 @@ public final class Environment {
 	}
 
 	/**
-	 * Gets the host name.
-	 * 
-	 * @return the host name.
-	 */
-	public String getHostName() {
-		return _hostName;
-	}
-
-	/**
 	 * Convert to a string representation.
 	 * 
 	 * @return a string representation of the <code>Environment</code> object.
@@ -223,16 +182,13 @@ public final class Environment {
 		StringBuffer sb = new StringBuffer(1024);
 		sb.append("Environment: \n");
 
-		sb.append("Host Name: " + getHostName() + "\n");
 		sb.append("User Name: " + getUserName() + "\n");
 		sb.append("Temp Directory: " + getTempDirectory() + "\n");
 		sb.append("OS Name: " + getOsName() + "\n");
 		sb.append("Home Directory: " + getHomeDirectory() + "\n");
-		sb.append("Current Working Directory: " + getCurrentWorkingDirectory()
-				+ "\n");
+		sb.append("Current Working Directory: " + getCurrentWorkingDirectory() + "\n");
 		sb.append("Class Path: " + getClassPath() + "\n");
-		sb.append("PNG Writer: " + ((_pngWriter == null) ? "none" : _pngWriter)
-				+ "\n");
+		sb.append("PNG Writer: " + ((_pngWriter == null) ? "none" : _pngWriter) + "\n");
 		return sb.toString();
 	}
 
@@ -286,8 +242,7 @@ public final class Environment {
 	 */
 	public Color getDefaultPanelBackgroundColor() {
 		if (_defaultPanelBackgroundColor == null) {
-			_defaultPanelBackgroundColor = UIManager
-					.getColor("Panel.background");
+			_defaultPanelBackgroundColor = UIManager.getColor("Panel.background");
 			if (_defaultPanelBackgroundColor == null) {
 				_defaultPanelBackgroundColor = new Color(238, 238, 238);
 			}
@@ -300,7 +255,7 @@ public final class Environment {
 	 * Useful for making common look components
 	 * 
 	 * @param component the component
-	 * @param color the background color--if <code>null</code> use default.
+	 * @param color     the background color--if <code>null</code> use default.
 	 */
 	public void commonize(JComponent component, Color color) {
 		component.setOpaque(true);
@@ -323,12 +278,9 @@ public final class Environment {
 		if (message != null) {
 			System.err.println(message);
 		}
-		System.err.println("Total memory in JVM: "
-				+ DoubleFormat.doubleFormat(total, 1) + "MB");
-		System.err.println(" Free memory in JVM: "
-				+ DoubleFormat.doubleFormat(free, 1) + "MB");
-		System.err.println(" Used memory in JVM: "
-				+ DoubleFormat.doubleFormat(used, 1) + "MB");
+		System.err.println("Total memory in JVM: " + DoubleFormat.doubleFormat(total, 1) + "MB");
+		System.err.println(" Free memory in JVM: " + DoubleFormat.doubleFormat(free, 1) + "MB");
+		System.err.println(" Used memory in JVM: " + DoubleFormat.doubleFormat(used, 1) + "MB");
 		System.err.println();
 	}
 

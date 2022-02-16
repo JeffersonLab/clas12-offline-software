@@ -22,6 +22,8 @@ import org.jlab.rec.rtpc.hit.TrackDisentangler;
 import org.jlab.rec.rtpc.hit.TrackFinder;
 import org.jlab.rec.rtpc.hit.TrackHitReco;
 import org.jlab.rec.rtpc.hit.HelixFitTest;
+import org.jlab.detector.calib.utils.ConstantsManager;
+import org.jlab.utils.groups.IndexedTable;
 
 
 
@@ -37,6 +39,7 @@ public class RTPCEngine extends ReconstructionEngine{
     private boolean cosmic = false;
     private int fitToBeamline = 1;
     private boolean disentangle = true;
+    private boolean chi2culling = true; 
 
     @Override
     public boolean init() {
@@ -44,6 +47,7 @@ public class RTPCEngine extends ReconstructionEngine{
         String cosm = this.getEngineConfigString("rtpcCosmic");
         String beamfit = this.getEngineConfigString("rtpcBeamlineFit");
         String disentangler = this.getEngineConfigString("rtpcDisentangler");
+	String chi2cull = this.getEngineConfigString("rtpcChi2Cull");
         //System.out.println(sim + " " + cosm + " " + beamfit);
 
         if(sim != null){
@@ -62,6 +66,10 @@ public class RTPCEngine extends ReconstructionEngine{
             disentangle = Boolean.valueOf(disentangler);
         }
 
+	if(chi2cull != null){
+	    chi2culling = Boolean.valueOf(chi2cull);
+	}
+
         String[] rtpcTables = new String[]{
             "/calibration/rtpc/time_offsets",
             "/calibration/rtpc/gain_balance",
@@ -70,6 +78,8 @@ public class RTPCEngine extends ReconstructionEngine{
         };
 
         requireConstants(Arrays.asList(rtpcTables));
+
+        this.registerOutputBank("RTPC::hits","RTPC::tracks");
 
         return true;
     }
@@ -88,11 +98,11 @@ public class RTPCEngine extends ReconstructionEngine{
 
         hits = hitRead.get_RTPCHits();
 
-        if(hits==null || hits.size()==0) {
+        if(hits==null || hits.size()==0){
             return true;
         }
 
-        int runNo = 10;
+         int runNo = 10;
         double magfield = 50.0;
         double magfieldfactor = 1;
 
@@ -105,9 +115,13 @@ public class RTPCEngine extends ReconstructionEngine{
                 return false;
             }
         }
-
+	
         magfield = 50 * magfieldfactor;
-
+	IndexedTable time_offsets = this.getConstantsManager().getConstants(runNo, "/calibration/rtpc/time_offsets");
+	int hitsbound = 15000;
+	hitsbound = (int) time_offsets.getDoubleValue("tl",1,1,4);
+	if(hitsbound < 1) hitsbound = 15000; 
+	if(hits.size() > hitsbound) return true; 
 
         if(event.hasBank("RTPC::adc")){
             params.init(this.getConstantsManager(), runNo);
@@ -123,7 +137,7 @@ public class RTPCEngine extends ReconstructionEngine{
             //Reconstruct Hits in Drift Region
             TrackHitReco TR = new TrackHitReco(params,hits,cosmic,magfield);
             //Helix Fit Tracks to calculate Track Parameters
-            HelixFitTest HF = new HelixFitTest(params,fitToBeamline,Math.abs(magfield),cosmic);
+            HelixFitTest HF = new HelixFitTest(params,fitToBeamline,Math.abs(magfield),cosmic,chi2culling);
 
             RecoBankWriter writer = new RecoBankWriter();
             DataBank recoBank = writer.fillRTPCHitsBank(event,params);

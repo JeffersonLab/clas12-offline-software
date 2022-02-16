@@ -30,11 +30,14 @@ public class EvioDataEventHandler {
     public EvioDataEventHandler(byte[] buffer, ByteOrder b_order){
         evioBuffer = ByteBuffer.wrap(buffer);
         evioBuffer.order(b_order);
-        if(buffer.length>500*1024){
-            System.out.println("error >>> evio event hadler : buffer size ecceeds 500 kB");
-            structure = null;
-            eventNodes = null;
-        } else {
+
+        // This had been inserted to accommodate large EVIO events that
+        // were unreadable in JEVIO versions prior to 6.2:
+        //if(buffer.length>500*1024){
+        //    System.out.println("error >>> evio event hadler : buffer size ecceeds 500 kB");
+        //    structure = null;
+        //    eventNodes = null;
+        //} else {
             try {
                 structure = new EvioCompactStructureHandler(evioBuffer,DataType.BANK);
                 //eventNodes = structure.getChildNodes();
@@ -42,7 +45,7 @@ public class EvioDataEventHandler {
             } catch (EvioException ex) {
                 Logger.getLogger(EvioDataEvent.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
+        //}
          //this.list();
     }
     

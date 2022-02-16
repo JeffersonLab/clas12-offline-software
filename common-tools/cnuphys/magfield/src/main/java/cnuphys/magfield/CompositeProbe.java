@@ -144,14 +144,4 @@ public class CompositeProbe extends FieldProbe {
 		return false;
 	}
 
-//	@Override
-//	public boolean containsCylindrical(double phi, double rho, double z) {
-//		for (IField probe : probes) {
-//			if (probe.containsCylindrical(phi, rho, z)) {
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
-
 }

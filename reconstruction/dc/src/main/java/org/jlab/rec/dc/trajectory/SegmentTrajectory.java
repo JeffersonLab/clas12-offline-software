@@ -60,6 +60,7 @@ public class SegmentTrajectory {
      * @param superlayer
      * @param layer
      * @param trkX trk x in local tilted coordinate system
+     * @param DcDetector
      * @return the wire that should fire for a trajectory with x value trkX at the given superlayer and layer
      */
     public int getWireOnTrajectory(int sector, int superlayer, int layer, double trkX, DCGeant4Factory DcDetector) {
