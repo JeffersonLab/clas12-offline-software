@@ -43,6 +43,7 @@ public class EBCCDBConstants {
         "/runcontrol/hwp",
         "/runcontrol/helicity",
         "/geometry/target",
+        "/calibration/cnd/cluster",
         "/calibration/ftof/tres",
         //"/calibration/ctof/tres"
     };
@@ -266,6 +267,9 @@ public class EBCCDBConstants {
         loadDouble(EBCCDBEnum.CTOF_DR,"ctof_matching","dr",0,0,0);
         loadDouble(EBCCDBEnum.CTOF_DPHI,"ctof_matching","dphi",0,0,0);
         loadDouble(EBCCDBEnum.CTOF_DZ,"ctof_matching","dz",0,0,0);
+        // FIXME:  CND's new independent x/y matching doesn't make sense
+        loadVector3D(EBCCDBEnum.CND_MATCHING_dr,"/calibration/cnd/cluster","deltax","deltay","deltaz",0,0,0);
+        loadDouble(EBCCDBEnum.CND_MATCHING_dt,"/calibration/cnd/cluster","deltat",0,0,0);
         
         loadDouble(EBCCDBEnum.CND_DR,"cnd_matching","dr",0,0,0);
         loadDouble(EBCCDBEnum.CND_DPHI,"cnd_matching","dphi",0,0,0);

@@ -50,6 +50,8 @@ public enum EBCCDBEnum {
     CND_DPHI,
     CND_DZ,
     CND_NEUTRON_maxBeta,
+    CND_MATCHING_dr,
+    CND_MATCHING_dt,
     HTCC_DTHETA,
     HTCC_DPHI,
     HTCC_TimingRes,
