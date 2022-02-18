@@ -70,7 +70,7 @@ public class FTEBEngine extends ReconstructionEngine {
     public static H2F hSeedDet0 = new H2F("lay 2 vs lay1 cluster seeds fo form a cross", 768/4, -0.5, 767.5, 768/4, -0.5, 767.5);
     public static H2F hSeedDet1 = new H2F("lay 4 vs lay3 cluster seeds fo form a cross", 768/4, -0.5, 767.5, 768/4, -0.5, 767.5);
     
-    public static Point3D ORIGIN = new Point3D(0., 0., 0.);
+    public static Point3D centerOfTarget = new Point3D(0., 0., -3.);
     
    
 
@@ -303,6 +303,19 @@ public class FTEBEngine extends ReconstructionEngine {
         resTrkPhidet1.setTitleX("trk0 phi residual (rad) wrt line thru trk1");
         resTrkPhidet1.setFillColor(49);
            
+        H2F resTrkXVsXdet0 = new H2F("trk1 x residual wrt line thru trk0 vs X", 50, -15., 15., 63, -0.5, 0.5);
+        resTrkXVsXdet0.setTitleX("trk1 x (mm)");
+        resTrkXVsXdet0.setTitleY("trk1 x residual (mm) wrt line thru trk0");
+        H2F resTrkYVsYdet0 = new H2F("trk1 y residual wrt line thru trk0 vs Y", 50, -15., 15., 63, -0.5, 0.5);
+        resTrkYVsYdet0.setTitleX("trk1 y (mm)");
+        resTrkYVsYdet0.setTitleY("trk1 y residual (mm) wrt line thru trk0");
+        H2F resTrkXVsXdet1 = new H2F("trk0 x residual wrt line thru trk1 vs X", 50, -15., 15., 63, -0.5, 0.5);
+        resTrkXVsXdet1.setTitleX("trk0 x (mm)");
+        resTrkXVsXdet1.setTitleY("trk0 x residual (mm) wrt line thru trk1");
+        H2F resTrkYVsYdet1 = new H2F("trk0 y residual wrt line thru trk1 vs Y", 50, -15., 15., 63, -0.5, 0.5);
+        resTrkYVsYdet1.setTitleX("trk0 y (mm)");
+        resTrkYVsYdet1.setTitleY("trk0 y residual (mm) wrt line thru trk1");
+        
         H1F h202 = new H1F("trk1 x", 25, 8.2, 9.0);
         H1F h1202 = new H1F("trk1 x MC", 25, 8.2, 9.0);      
         h202.setOptStat(0);
@@ -604,15 +617,17 @@ public class FTEBEngine extends ReconstructionEngine {
                                                 
                                                 // extract the mumber of strips forming the cross and store them in an occupancy plot for matched signals
                                                 // which strips are forming the id cross?                                       
-                                                if(lay1==1){h71.fill(seed1);}
-                                                else if(lay1==2){h72.fill(seed1);}
-                                                else if(lay1==3){h73.fill(seed1);}
-                                                else if(lay1==4){h74.fill(seed1);}
+                                                if(lay1==1){h71.fill(seed1);
+                                                }else if(lay1==2){h72.fill(seed1);
+                                                }else if(lay1==3){h73.fill(seed1);
+                                                }else if(lay1==4){h74.fill(seed1);
+                                                }
                                             
-                                                if(lay2==1){h71.fill(seed2);}
-                                                else if(lay2==2){h72.fill(seed2);}
-                                                else if(lay2==3){h73.fill(seed2);}
-                                                else if(lay2==4){h74.fill(seed2);}    
+                                                if(lay2==1){h71.fill(seed2);
+                                                }else if(lay2==2){h72.fill(seed2);
+                                                }else if(lay2==3){h73.fill(seed2);
+                                                }else if(lay2==4){h74.fill(seed2);
+                                                }    
                                                 
                                                 DataBank bankhit = event.getBank("FTTRK::hits");
                                                 if(bankhit.rows()>0){
@@ -621,10 +636,11 @@ public class FTEBEngine extends ReconstructionEngine {
                                                         if(clusterNum != icl1 && clusterNum != icl2) continue;
                                                         int stripInCluster = bankhit.getInt("component", k);
                                                         int clusterLay = bankhit.getInt("layer", k);
-                                                        if(clusterLay==1){h81.fill(stripInCluster);}
-                                                        else if(clusterLay==2){h82.fill(stripInCluster);}
-                                                        else if(clusterLay==3){h83.fill(stripInCluster);}
-                                                        else if(clusterLay==4){h84.fill(stripInCluster);}
+                                                        if(clusterLay==1){h81.fill(stripInCluster);
+                                                        }else if(clusterLay==2){h82.fill(stripInCluster);
+                                                        }else if(clusterLay==3){h83.fill(stripInCluster);
+                                                        }else if(clusterLay==4){h84.fill(stripInCluster);
+                                                        }
                                                     }   
                                                 }    
                                             }    
@@ -679,9 +695,9 @@ public class FTEBEngine extends ReconstructionEngine {
                                                                             
                                         // extract residuals of TRK1 wrt TRK0 and viceversa    
                                         // loop on crosses in det0, find track connecting with origin, evaluate residuals of TRK1 hits wrt to this track   
-                                        double cx = hitOnTrk.x() - ORIGIN.x();
-                                        double cy = hitOnTrk.y() - ORIGIN.y();
-                                        double cz = hitOnTrk.z() - ORIGIN.z();
+                                        double cx = hitOnTrk.x() - centerOfTarget.x();
+                                        double cy = hitOnTrk.y() - centerOfTarget.y();
+                                        double cz = hitOnTrk.z() - centerOfTarget.z();
                                         for(int ncj = 0; ncj < ncrosses; ncj++) {
                                             int det1 =  banktrk.getInt("detector", ncj);
                                             if(det1 >=0 && nc != ncj && det != det1){
@@ -700,18 +716,22 @@ public class FTEBEngine extends ReconstructionEngine {
                                                 double diffPhi = Math.atan2(hitOnTrk.y(), hitOnTrk.x()) - Math.atan2(cross.y(), cross.x());
                                                 if(Math.abs(diffPhi) < diffPhiTolerance && Math.abs(diffRadii)< diffRadTolerance && 
                                                         Math.abs(diffTheta) < diffThetaTolerance){
-                                                    double t = cross.z()/hitOnTrk.z();
-                                                    Vector3D pointOnTrackAtZ = new Vector3D(cx*t + ORIGIN.x(), cy*t + ORIGIN.y(), z1);
+                                                    double t = (cross.z()-centerOfTarget.z())/hitOnTrk.z();
+                                                    Vector3D pointOnTrackAtZ = new Vector3D(cx*t + centerOfTarget.x(), cy*t + centerOfTarget.y(), z1);
                                                     if(det1 == 1 && trk1ID == secondCrossID){
                                                         resTrkXdet0.fill(pointOnTrackAtZ.x() - cross.x());
                                                         resTrkYdet0.fill(pointOnTrackAtZ.y() - cross.y());
                                                         resTrkThetadet0.fill(pointOnTrackAtZ.theta() - cross.theta());
                                                         resTrkPhidet0.fill(pointOnTrackAtZ.phi() - cross.phi());  
+                                                        resTrkXVsXdet0.fill(cross.x(), pointOnTrackAtZ.x() - cross.x());
+                                                        resTrkYVsYdet0.fill(cross.y(), pointOnTrackAtZ.y() - cross.y());
                                                     }else if(det1 == 0 && trk0ID == secondCrossID){
                                                         resTrkXdet1.fill(pointOnTrackAtZ.x() - cross.x());
                                                         resTrkYdet1.fill(pointOnTrackAtZ.y() - cross.y());
                                                         resTrkThetadet1.fill(pointOnTrackAtZ.theta() - cross.theta());
                                                         resTrkPhidet1.fill(pointOnTrackAtZ.phi() - cross.phi());
+                                                        resTrkXVsXdet1.fill(cross.x(), pointOnTrackAtZ.x() - cross.x());
+                                                        resTrkYVsYdet1.fill(cross.y(), pointOnTrackAtZ.y() - cross.y());
                                                     }
                                                 }
                                             }
@@ -907,7 +927,7 @@ public class FTEBEngine extends ReconstructionEngine {
             frame.setVisible(true);
         }
 
-        double narrowFactor = 7.;  // was 4.5
+        double narrowFactor = 7.5;  // was 4.5
         JFrame frametrk = new JFrame("FTTRK Reconstruction with respect to FTCAL tracking");
         frametrk.setSize(1600, 800);
         EmbeddedCanvas canvastrk = new EmbeddedCanvas();
@@ -932,9 +952,9 @@ public class FTEBEngine extends ReconstructionEngine {
         canvastrk.cd(2);
         canvastrk.draw(h104);
         F1D f04 = new F1D("f04","[amp]*gaus(x,[mean],[sigma])", -limTC/narrowFactor, limTC/(narrowFactor));
-        f04.setParameter(0, 10.0);
-        f04.setParameter(1, 0.0);
-        f04.setParameter(2, 1.0);
+        f04.setParameter(0, h104.getMax());
+        f04.setParameter(1, h104.getMean());
+        f04.setParameter(2, h104.getRMS()/2.);
         f04.setLineColor(6);
         f04.setLineWidth(3);
         DataFitter.fit(f04, h104, "Q"); //No options uses error for sigma
@@ -1607,6 +1627,23 @@ public class FTEBEngine extends ReconstructionEngine {
         canvastrkonlyres.draw(resTrkPhidet1);
         frametrkonlyres.add(canvastrkonlyres);
         frametrkonlyres.setLocationRelativeTo(null);
-        frametrkonlyres.setVisible(true);      
+        frametrkonlyres.setVisible(true); 
+        
+        JFrame frametrkonlyresVsCoord = new JFrame("FTTRK residuals wrt 2nd detector vs 2nd det coordinate");
+        frametrkonlyresVsCoord.setSize(1000, 800);
+        EmbeddedCanvas canvastrkonlyresVsCoord = new EmbeddedCanvas();
+        canvastrkonlyresVsCoord.divide(2, 2);
+        nc=-1;
+        canvastrkonlyresVsCoord.cd(++nc);
+        canvastrkonlyresVsCoord.draw(resTrkXVsXdet0);
+        canvastrkonlyresVsCoord.cd(++nc);
+        canvastrkonlyresVsCoord.draw(resTrkYVsYdet0);
+        canvastrkonlyresVsCoord.cd(++nc);
+        canvastrkonlyresVsCoord.draw(resTrkXVsXdet1);
+        canvastrkonlyresVsCoord.cd(++nc);
+        canvastrkonlyresVsCoord.draw(resTrkYVsYdet1);
+        frametrkonlyresVsCoord.add(canvastrkonlyresVsCoord);
+        frametrkonlyresVsCoord.setLocationRelativeTo(null);
+        frametrkonlyresVsCoord.setVisible(true);
     }
 }
