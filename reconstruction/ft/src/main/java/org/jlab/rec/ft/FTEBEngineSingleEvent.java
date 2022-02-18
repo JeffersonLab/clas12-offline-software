@@ -168,7 +168,7 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
     public static H2F hSeedDet0 = new H2F("lay 2 vs lay1 cluster seeds fo form a cross", 768/4, -0.5, 767.5, 768/4, -0.5, 767.5);
     public static H2F hSeedDet1 = new H2F("lay 4 vs lay3 cluster seeds fo form a cross", 768/4, -0.5, 767.5, 768/4, -0.5, 767.5);
     
-    public static Point3D ORIGIN = new Point3D(0., 0., 0.);
+    public static Point3D centerOfTarget = new Point3D(0., 0., -3.);
     
     
     public static void main(String arg[]){
@@ -695,9 +695,9 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
                                             canvasCALTRK.draw(segment2);
                                         }
                                                                                     
-                                        double cx = hitOnTrk.x() - ORIGIN.x();
-                                        double cy = hitOnTrk.y() - ORIGIN.y();
-                                        double cz = hitOnTrk.z() - ORIGIN.z();
+                                        double cx = hitOnTrk.x() - centerOfTarget.x();
+                                        double cy = hitOnTrk.y() - centerOfTarget.y();
+                                        double cz = hitOnTrk.z() - centerOfTarget.z();
                                         for(int ncj = 0; ncj < ncrosses; ncj++) {
                                             int det1 =  banktrk.getInt("detector", ncj);
                                             if(det1 >=0 && nc != ncj && det != det1){
@@ -706,8 +706,8 @@ public class FTEBEngineSingleEvent extends ReconstructionEngine {
                                                 double z1 = banktrk.getFloat("z", ncj);
                                                 int secondCrossID = banktrk.getInt("id", ncj);
                                                 Vector3D cross = new Vector3D(x1, y1, z1);
-                                                double t = cross.z()/hitOnTrk.z();
-                                                Vector3D pointOnTrackAtZ = new Vector3D(cx*t + ORIGIN.x(), cy*t + ORIGIN.y(), z1);
+                                                double t = (cross.z()-centerOfTarget.z())/hitOnTrk.z();
+                                                Vector3D pointOnTrackAtZ = new Vector3D(cx*t + centerOfTarget.x(), cy*t + centerOfTarget.y(), z1);
                                                 if(det1 == 1 && trk1ID == secondCrossID){
                                                     resTrkXdet0.fill(pointOnTrackAtZ.x() - cross.x());
                                                     resTrkYdet0.fill(pointOnTrackAtZ.y() - cross.y());
