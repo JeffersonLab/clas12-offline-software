@@ -120,7 +120,7 @@
               {"name":"id",               "type":"S",  "info":"Cluster ID"},
               {"name":"sector",           "type":"B",  "info":"Cluster sector"},
               {"name":"layer",            "type":"B",  "info":"Cluster layer"},
-              {"name":"energy",    "type":"F", "info":"Hit Energy" },
+              {"name":"energy",           "type":"F",  "info":"Cluster total energy" },
               {"name":"maxEnergy",        "type":"F",  "info":"Seed energy"},
               {"name":"seed",             "type":"S",  "info":"Seed strip"},
               {"name":"centroid",         "type":"F",  "info":"Centroid strip number"}
@@ -141,8 +141,8 @@
              {"name":"z",           "type":"F", "info":"Cross Z position (cm)"},
              {"name":"energy",      "type":"F", "info":"Cross Energy" },
              {"name":"time",        "type":"F", "info":"Cross Time" },
-             {"name":"Cluster1ID",  "type":"S", "info":"ID of the bottom layer cluster in the Cross"},
-             {"name":"Cluster2ID",  "type":"S", "info":"ID of the top layer cluster in the Cross"}
+             {"name":"Cluster1ID",  "type":"S", "info":"ID of the upstream layer cluster in the Cross"},
+             {"name":"Cluster2ID",  "type":"S", "info":"ID of the downstream layer cluster in the Cross"}
     ]
   }
 
