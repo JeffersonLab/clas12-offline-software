@@ -30,8 +30,7 @@ do
 done
 
 wget='wget'
-#mvn='mvn'
-mvn='/usr/local/apache-maven-3.6.3/bin/mvn'
+mvn='mvn'
 if [ "$quiet" == "yes" ]
 then
     wget='wget --progress=dot:mega'
