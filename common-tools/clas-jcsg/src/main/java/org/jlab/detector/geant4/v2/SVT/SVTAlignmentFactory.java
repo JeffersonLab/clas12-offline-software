@@ -237,7 +237,7 @@ public class SVTAlignmentFactory
 				Vector3d fidPos3Ds[] = getShiftedFiducials( region, sector );
 				for( int fid = 0; fid < SVTConstants.NFIDUCIALS; fid++ )
 					data[SVTConstants.convertRegionSectorFiducial2Index( region, sector, fid )] = new double[]{ fidPos3Ds[fid].x, fidPos3Ds[fid].y, fidPos3Ds[fid].z };
-			}
+                            }
 		return data;
 	}
 	
@@ -257,9 +257,9 @@ public class SVTAlignmentFactory
 				for( int fid = 0; fid < SVTConstants.NFIDUCIALS; fid++ )
 				{
 					data[SVTConstants.convertRegionSectorFiducial2Index( region, sector, fid )] 
-							= new double[]{ fidPos3Ds[fid].x, fidPos3Ds[fid].y, fidPos3Ds[fid].z };
+							= new double[]{ fidPos3Ds[fid].x, fidPos3Ds[fid].y, fidPos3Ds[fid].z };                                    
+                                    }
 				}
-			}
 		return data;
 	}
 	
@@ -282,7 +282,7 @@ public class SVTAlignmentFactory
 		Triangle3d fidTri3D = new Triangle3d( fidPos3Ds[0], fidPos3Ds[1], fidPos3Ds[2] );
 		
 		for( int f = 0; f < SVTConstants.NFIDUCIALS; f++ )
-			applyShift( fidPos3Ds[f], SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( aRegion, aSector )], fidTri3D.center() );
+			applyShift( fidPos3Ds[f], SVTConstants.getLayerSectorAlignmentData()[aSector][SVTConstants.convertRegionModule2Layer(aRegion, 0)], fidTri3D.center() );
 		
 		return fidPos3Ds;
 	}
@@ -307,10 +307,10 @@ public class SVTAlignmentFactory
 		double heatSinkTotalThk = SVTConstants.MATERIALDIMENSIONS.get("heatSink")[1];
 		double radius = SVTConstants.SUPPORTRADIUS[aRegion] + heatSinkTotalThk;
 		
-		Transform labFrame = SVTConstants.getLabFrame( aRegion, aSector, radius, fidOriginZ );
+		Transform detFrame = SVTConstants.getDetectorFrame( aRegion, aSector, radius, fidOriginZ );
 		
 		for( int f = 0; f < SVTConstants.NFIDUCIALS; f++ )
-			fidPos3Ds[f].transform(labFrame);
+			fidPos3Ds[f].transform(detFrame);
 		
 		return fidPos3Ds;
 	}

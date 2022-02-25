@@ -332,23 +332,31 @@ public class AlignmentFactory
 		}
 				
 		// do the rotation here.
-		if( !(ra < 1E-3) )
-		{			
-			aCenter.times( -1 ); // reverse translation
-			aPoint.set( aPoint.add( aCenter ) ); // move origin to center of rotation axis
+		aCenter.times( -1 ); // reverse translation
+                aPoint.set( aPoint.add( aCenter ) ); // move origin to center of rotation axis
 			
 			//System.out.printf("PC: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
-			
-			Vector3d vecAxis = new Vector3d( rx, ry, rz ).normalized();			
-			vecAxis.rotate( aPoint, ra );
-			
+                // if ra!=0, assume rx,ry,rz defines the rotation axis and ra the angle
+                // if angle is non-zero but it is too small, don't do anything
+		if(Math.abs(ra) >1E-5)
+		{			
+		    Vector3d vecAxis = new Vector3d( rx, ry, rz ).normalized();			
+                    vecAxis.rotate( aPoint, ra );
+                }
+                // if ra==0, assume rx,ry,rz are the rotation angles around the 3 axis
+                else if(ra==0)
+		{		
+                	aPoint.rotateZ(rz);
+                        aPoint.rotateY(ry);
+                        aPoint.rotateX(rx);
+                }
 			//System.out.printf("PR: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
 			
-			aCenter.times( -1 ); // reverse translation
-			aPoint.set( aPoint.add( aCenter ) );
-			
+                aCenter.times( -1 ); // reverse translation
+                aPoint.set( aPoint.add( aCenter ) );
+
 			//System.out.printf("PC: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
-		}
+		
 		
 		// do the translation here.
 		Vector3d translationVec = new Vector3d( tx, ty, tz );
@@ -399,23 +407,31 @@ public class AlignmentFactory
 		aPoint.set( aPoint.add( translationVec ) );
 
 		// test size of rotation - too small creates errors.
-		if( !(ra < 1E-3) )
+		aCenter.times( -1 ); // reverse translation
+		aPoint.set( aPoint.add( aCenter ) ); // move origin to center of rotation axis
+			
+			//System.out.printf("PC: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
+		// if ra!=0, assume rx,ry,rz defines the rotation axis and ra the angle
+                // if angle is non-zero but it is too small, don't do anything
+		if(Math.abs(ra) >1E-5)
 		{			
-			aCenter.times( -1 ); // reverse translation
-			aPoint.set( aPoint.add( aCenter ) ); // move origin to center of rotation axis
+		    Vector3d vecAxis = new Vector3d( rx, ry, rz ).normalized();			
+                    vecAxis.rotate( aPoint, -ra );
+                }
+                // if ra==0, assume rx,ry,rz are the rotation angles around the 3 axis
+                else if(ra==0)
+		{
+                        aPoint.rotateX(-rx);
+                        aPoint.rotateY(-ry);
+			aPoint.rotateZ(-rz);
+                }
 			
-			//System.out.printf("PC: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
-			
-			Vector3d vecAxis = new Vector3d( rx, ry, rz ).normalized();			
-			vecAxis.rotate( aPoint, -ra );
-			
-			//System.out.printf("PR: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
-			
-			aCenter.times( -1 ); // reverse translation
-			aPoint.set( aPoint.add( aCenter ) );
-			
-			//System.out.printf("PC: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
-		}
+                //System.out.printf("PR: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
+
+                aCenter.times( -1 ); // reverse translation
+                aPoint.set( aPoint.add( aCenter ) );
+
+                //System.out.printf("PC: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
 		
 		
 		if( VERBOSE ) System.out.printf("PS: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );

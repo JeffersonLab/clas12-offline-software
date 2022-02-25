@@ -276,6 +276,21 @@ public class AdaptiveSwimResult {
 		return initialValuesString() + sb.toString();
 	}
 	
+	/**
+	 * A final location string
+	 * @return a location string
+	 */
+	public String finalLocationString() {
+		double x = _uf[0];
+		double y = _uf[1];
+		double z = _uf[2];
+		double rho = Math.hypot(x, y);
+		double phi = Math.toDegrees(Math.atan2(y, x));
+		return String.format("[x,y,z] = [%8.5f, %8.5f, %8.5f] cm  [phi,rho] = [%8.5f deg, %8.5f cm] S = %8.5f cm", 
+				100*x, 100*y, 100*z, phi, 100*rho, 100*getFinalS());
+		
+	}
+	
 	//the location
 	private String locationString() {
 		double x = _uf[0];

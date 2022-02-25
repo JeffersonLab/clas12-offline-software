@@ -39,7 +39,7 @@ public class CrossList extends ArrayList<ArrayList<Cross>> {
             for (int j = 0; j < array2size; j++) {
                 Cross c2 = arrayList2.get(j);
 
-                if ((c1.get_Detector()).equals(c2.get_Detector()) && c1.get_Id() == c2.get_Id()) {
+                if ((c1.getDetector()).equals(c2.getDetector()) && c1.getId() == c2.getId()) {
                     arrayList2.remove(j);
 
                     if (array2size > 0) {
@@ -49,11 +49,7 @@ public class CrossList extends ArrayList<ArrayList<Cross>> {
             }
 
         }
-        if (array2size == 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return array2size == 0;
     }
 
 }

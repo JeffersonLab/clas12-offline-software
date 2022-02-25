@@ -65,6 +65,8 @@ public class Swimmer {
         }
         if(TorusScale==0)
             TorusScale=0.000001;
+        if(SolenoidScale==0)
+            SolenoidScale=0.000001;
         if(MagneticFields.getInstance().getTorus()!=null) MagneticFields.getInstance().getTorus().setScaleFactor(TorusScale);
         if(MagneticFields.getInstance().getSolenoid()!=null) {
             MagneticFields.getInstance().getSolenoid().setScaleFactor(SolenoidScale);
@@ -85,6 +87,8 @@ public class Swimmer {
         }
         if(TorusScale==0)
             TorusScale=0.000001;
+        if(SolenoidScale==0)
+            SolenoidScale=0.000001;
         if(MagneticFields.getInstance().getTorus()!=null) {
             MagneticFields.getInstance().getTorus().setScaleFactor(TorusScale);
             MagneticFields.getInstance().getTorus().setShiftX(Tx);
