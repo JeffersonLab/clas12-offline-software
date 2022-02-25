@@ -19,7 +19,7 @@ import org.jlab.utils.groups.IndexedTable;
  * converts the ADC values recorded for the raster signals 
  * into XY beam positions
  * 
- * @author devita, pillaux
+ * @author devita, pilleux
  */
 
 public class RasterEngine extends ReconstructionEngine {
@@ -40,8 +40,11 @@ public class RasterEngine extends ReconstructionEngine {
         // register list of CCDB tables the engine will access
         List<String> tableNames = new ArrayList<>();
         tableNames.add("/calibration/raster/adc_to_position");
-        this.requireConstants(tableNames);        
-       
+        this.requireConstants(tableNames);
+        
+        //remove raster bank in case it existed previously
+        this.registerOutputBank("RASTER::position");
+        
         System.out.println("["+this.getName()+"] --> raster is ready....");
         return true;
     }
@@ -108,7 +111,7 @@ public class RasterEngine extends ReconstructionEngine {
         engine.init();
         
         // open hipo file
-        String input = "/Users/devita/Work/clas12/simulations/dcalign/test.hipo";
+        String input = "/vol0/pilleux-l/Bureau/dev_COATJAVA/out_NH3_updated.hipo";
         HipoDataSource  reader = new HipoDataSource();
         reader.open(input);
 		

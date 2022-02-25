@@ -438,8 +438,8 @@
     "item" : 11,
     "info": "ADC bank for the Raster signals",
     "entries":[
-      { "name":"sector"    , "type":"B", "info":"sector (=1)"},
-      { "name":"layer"     , "type":"B", "info":"layer (=1)"},
+      { "name":"sector"    , "type":"B", "info":"sector (=0)"},
+      { "name":"layer"     , "type":"B", "info":"layer (=0)"},
       { "name":"component" , "type":"S", "info":"signal (1-2)"},
       { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
       { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
