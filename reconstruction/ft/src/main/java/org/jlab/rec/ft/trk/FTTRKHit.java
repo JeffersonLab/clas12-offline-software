@@ -7,7 +7,6 @@ package org.jlab.rec.ft.trk;
 
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.rec.ft.trk.FTTRKConstantsLoader;
 
 /**
  *
@@ -228,12 +227,12 @@ public class FTTRKHit implements Comparable<FTTRKHit>{
         double x = xGlobal*Math.cos(alpha)+yg*Math.sin(alpha);
         
         double r=Math.sqrt(x*x+y*y);
-        if(r<=FTTRKConstantsLoader.Rmax && r>=FTTRKConstantsLoader.InnerHole && Math.abs(y)<=FTTRKConstantsLoader.Pitch*FTTRKConstantsLoader.Nstrips*2/6) {
-            int strip = (int) Math.floor(y/FTTRKConstantsLoader.Pitch) + 1 + FTTRKConstantsLoader.Nstrips*2/6;
-            if(strip>FTTRKConstantsLoader.Nstrips*3/6) { // strip in the top sector
-                strip += FTTRKConstantsLoader.Nstrips*2/6;
+        if(r<=FTTRKConstantsLoader.Rmax && r>=FTTRKConstantsLoader.InnerHole && Math.abs(y)<=FTTRKConstantsLoader.Pitch*FTTRKConstantsLoader.Nstrips/3) {
+            int strip = (int) Math.floor(y/FTTRKConstantsLoader.Pitch) + 1 + FTTRKConstantsLoader.Nstrips/3;
+            if(strip>FTTRKConstantsLoader.Nstrips/2) { // strip in the top sector
+                strip += FTTRKConstantsLoader.Nstrips/3;
             }else if(strip>FTTRKConstantsLoader.Nstrips/6 && x>0){
-                strip += FTTRKConstantsLoader.Nstrips*2/6;
+                strip += FTTRKConstantsLoader.Nstrips/3;
             }   
                 return strip;
             }else{
@@ -248,12 +247,12 @@ public class FTTRKHit implements Comparable<FTTRKHit>{
         double y = yGlobal*Math.cos(alpha)-xGlobal*Math.sin(alpha);
         
         double r=Math.sqrt(x*x+y*y);
-        if(r<=FTTRKConstantsLoader.Rmax && r>=FTTRKConstantsLoader.InnerHole && Math.abs(y)<=FTTRKConstantsLoader.Pitch*FTTRKConstantsLoader.Nstrips*2/6) {
-            int strip = (int) Math.floor(y/FTTRKConstantsLoader.Pitch) + 1 + FTTRKConstantsLoader.Nstrips*2/6;
-            if(strip>FTTRKConstantsLoader.Nstrips*3/6) { // strip in the top sector
-                strip += FTTRKConstantsLoader.Nstrips*2/6;
+        if(r<=FTTRKConstantsLoader.Rmax && r>=FTTRKConstantsLoader.InnerHole && Math.abs(y)<=FTTRKConstantsLoader.Pitch*FTTRKConstantsLoader.Nstrips/3) {
+            int strip = (int) Math.floor(y/FTTRKConstantsLoader.Pitch) + 1 + FTTRKConstantsLoader.Nstrips/3;
+            if(strip>FTTRKConstantsLoader.Nstrips/2) { // strip in the top sector
+                strip += FTTRKConstantsLoader.Nstrips/3;
             }else if(strip>FTTRKConstantsLoader.Nstrips/6 && x>0){
-                strip += FTTRKConstantsLoader.Nstrips*2/6;
+                strip += FTTRKConstantsLoader.Nstrips/3;
             }   
                 return strip;
             }else{
