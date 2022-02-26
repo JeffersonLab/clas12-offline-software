@@ -3,6 +3,7 @@ package org.jlab.rec.ft;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.pdg.PhysicsConstants;
+import org.jlab.detector.base.DetectorLayer;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -11,11 +12,7 @@ import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.rec.ft.cal.FTCALConstantsLoader;
 import org.jlab.utils.groups.IndexedTable;
-import org.jlab.geom.prim.Line3D;
-import org.jlab.geom.prim.Vector3D;
-import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.ft.trk.FTTRKConstantsLoader;
-import org.jlab.rec.ft.trk.FTTRKReconstruction;
 
 public class FTEventBuilder {
 
@@ -51,7 +48,7 @@ public class FTEventBuilder {
         List<FTResponse> responses = new ArrayList<FTResponse>();
         
         IndexedTable cluster = manager.getConstants(run, "/calibration/ft/ftcal/cluster");
-                
+        
         if (event instanceof EvioDataEvent) {
             if (event.hasBank("FTCALRec::clusters") == true) {
                 EvioDataBank bank = (EvioDataBank) event.getBank("FTCALRec::clusters");
@@ -128,6 +125,8 @@ public class FTEventBuilder {
                 }
             }
             if (event.hasBank("FTTRK::crosses") == true) {
+                int TRK1 = DetectorLayer.FTTRK_MODULE1 - 1;   // tracker id=0
+                int TRK2 = DetectorLayer.FTTRK_MODULE2 - 1;   // tracker id=1
                 DataBank bank = event.getBank("FTTRK::crosses");
                 int nrows = bank.rows();
                 for (int i = 0; i < nrows; i++) {
@@ -137,16 +136,13 @@ public class FTEventBuilder {
                     resp.setId(bank.getInt("id", i));
                     resp.setEnergy(bank.getFloat("energy", i));
                     resp.setTime(bank.getFloat("time", i));
-                    resp.setCrEnergy(FTTRKReconstruction.crEnergy[i]);
-                    resp.setCrTime(FTTRKReconstruction.crTime[i]);
                     resp.setPosition(bank.getFloat("x", i), bank.getFloat("y", i), bank.getFloat("z", i));
-                    /// detector id (different from cross id!)
                     double zCoord = bank.getFloat("z", i);
                     
-                    if(zCoord >= FTTRKConstantsLoader.Zlayer[0] && zCoord <= FTTRKConstantsLoader.Zlayer[1]){
-                        resp.setTrkDet(0);
+                    if(zCoord >= FTTRKConstantsLoader.Zlayer[TRK1] && zCoord <= FTTRKConstantsLoader.Zlayer[TRK2]){
+                        resp.setTrkDet(TRK1);
                     }else{
-                        resp.setTrkDet(1);
+                        resp.setTrkDet(TRK2);
                     }
                     
                     if(debugMode>=1) System.out.println(" --------- id, cross x, y, z " + bank.getInt("id", i) + " " + bank.getFloat("x", i) + " " + bank.getFloat("y", i) + " " + bank.getFloat("z", i));
@@ -291,12 +287,15 @@ public class FTEventBuilder {
         if (debugMode >= 1) {
             System.out.println("Preparing to output track bank with " + particles.size() + " FTparticles");
         }
+        int TRK1 = DetectorLayer.FTTRK_MODULE1 - 1;
+        int TRK2 = DetectorLayer.FTTRK_MODULE2 - 1;  
         if (particles.size() != 0) {
             if (event instanceof EvioDataEvent) {
                 EvioDataBank banktrack = (EvioDataBank) event.getDictionary().createBank("FTRec::tracks", particles.size());
                 if (debugMode >= 1) {
                     System.out.println("Creating output track bank with " + particles.size() + " FTparticles");
                 }
+                
                 for (int i = 0; i < particles.size(); i++) {
                     banktrack.setInt("ID", i, particles.get(i).get_ID());
                     banktrack.setInt("Charge", i, particles.get(i).getCharge());
@@ -307,8 +306,8 @@ public class FTEventBuilder {
                     banktrack.setDouble("Time", i, particles.get(i).getTime());
                     banktrack.setInt("CalID", i, particles.get(i).getCalorimeterIndex());
                     banktrack.setInt("HodoID", i, particles.get(i).getHodoscopeIndex());
-                    banktrack.setInt("Trk0ID", i, particles.get(i).getTrackerIndex(0));
-                    banktrack.setInt("Trk1ID", i, particles.get(i).getTrackerIndex(1));
+                    banktrack.setInt("Trk0ID", i, particles.get(i).getTrackerIndex(TRK1));
+                    banktrack.setInt("Trk1ID", i, particles.get(i).getTrackerIndex(TRK2));
                     if (debugMode >= 1) {
                         particles.get(i).show();
                     }
@@ -331,8 +330,8 @@ public class FTEventBuilder {
                     banktrack.setFloat("time", i, (float) particles.get(i).getTime());
                     banktrack.setShort("calID", i, (short) particles.get(i).getCalorimeterIndex());
                     banktrack.setShort("hodoID", i, (short) particles.get(i).getHodoscopeIndex());
-                    banktrack.setShort("trk0ID", i, (short) particles.get(i).getTrackerIndex(0));
-                    banktrack.setShort("trk1ID", i, (short) particles.get(i).getTrackerIndex(1));
+                    banktrack.setShort("trk0ID", i, (short) particles.get(i).getTrackerIndex(TRK1));
+                    banktrack.setShort("trk1ID", i, (short) particles.get(i).getTrackerIndex(TRK2));
                     
                     if (debugMode >= 1) {
                         particles.get(i).show();
