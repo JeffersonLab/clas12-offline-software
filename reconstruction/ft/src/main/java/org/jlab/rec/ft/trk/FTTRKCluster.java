@@ -7,7 +7,6 @@ package org.jlab.rec.ft.trk;
 
 import java.util.ArrayList;
 import org.jlab.geom.prim.Line3D;
-import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.ft.FTConstants;
 
 /**
@@ -94,7 +93,6 @@ import org.jlab.rec.ft.FTConstants;
 	 */
 	public void set_CId(int _Id) {
 		this._CId = _Id;
-                // update hits collection with the proper cluster index
                 for(int i=0; i<this.size(); i++){
                     FTTRKHit thehit = this.get(i);
                     thehit.set_ClusterIndex(_Id);
