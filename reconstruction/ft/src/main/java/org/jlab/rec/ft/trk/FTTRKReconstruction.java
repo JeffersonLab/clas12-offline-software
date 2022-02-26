@@ -7,7 +7,7 @@ package org.jlab.rec.ft.trk;
 
 import java.util.ArrayList;
 import java.util.List;
-//import java.util.Collections;
+import org.jlab.detector.base.DetectorLayer;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -15,9 +15,7 @@ import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.rec.ft.FTConstants;
-//import org.jlab.utils.groups.IndexedTable;
-import org.jlab.geom.prim.Point3D;
-import org.jlab.rec.ft.FTEBEngine;
+
 
 /**
  *
@@ -29,11 +27,17 @@ import org.jlab.rec.ft.FTEBEngine;
 public class FTTRKReconstruction {
 
     public static int debugMode = 0;  // 1 for verbose, set it here (better be set in the steering Engine) PROVISIONAL
-    public static float[] crEnergy;
-    public static float[] crTime;
     public static int[] sectorLimits = 
         {0, 64, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480, 512, 544, 576, 608, 640, 704, 768};
-
+    public static int NStripsSectors = 20;
+    public static int stripsInLongSector = 64;
+    public static int stripsInShortSector = 32;
+    public static int sideShortStrips = 2*FTTRKConstantsLoader.SideHalfstrips;   // 256
+    public static int sequentialStrips = FTTRKConstantsLoader.Longstrips + FTTRKConstantsLoader.SideHalfstrips + sideShortStrips; // 512
+    public static int stripDiscontinuity1 = FTTRKConstantsLoader.Longstrips; // 128   CHECK DISCONTINUITIES +- 1 strip
+    public static int stripDiscontinuity2 = FTTRKConstantsLoader.Longstrips + sideShortStrips + 1;  // 385
+    public static int stripDiscontinuity3 = sequentialStrips + FTTRKConstantsLoader.SideHalfstrips; // 640
+    public static int stripDiscontinuity4 = stripDiscontinuity3+1;     
     
     
     public FTTRKReconstruction() {
@@ -105,19 +109,18 @@ public class FTTRKReconstruction {
         // for each layer and sector, loop over the strips:
         // once one is selected for the first time, loop over the remainder
         // clusters are delimited by strips with no hits
-        
-        int[] indR = new int[512]; 
-        int[] indL = new int[512];
+        int[] indR = new int[sequentialStrips]; 
+        int[] indL = new int[sequentialStrips];
         // strip index: from 0 to 512 (full right hand side, left hand side fired only in the interval 384-639)
         // strip number: from 1 to 768
-        for(int i=0; i<512; i++){
-            if(i<128){
+        for(int i=0; i<sequentialStrips; i++){
+            if(i<FTTRKConstantsLoader.Longstrips){
                 indR[i] = indL[i] = i;
-            }else if(i >= 128 && i < 384){
+            }else if(i >=  FTTRKConstantsLoader.Longstrips && i < (FTTRKConstantsLoader.Longstrips + sideShortStrips)){ //384
                 indR[i] = i;
-                indL[i] = i+256;
-            }else if(i >= 384){
-                indR[i] = indL[i] = i+256;    
+                indL[i] = i + sideShortStrips; //256
+            }else if(i >= (FTTRKConstantsLoader.Longstrips + sideShortStrips)){ // 384
+                indR[i] = indL[i] = i + sideShortStrips; // 256    
             }
         }
             
@@ -126,7 +129,7 @@ public class FTTRKReconstruction {
         for(int il=0; il<Nlayers; il++) {
             int is = 0;
             // first loop on RHS strips (complete, including top and bottom long strips)
-            while(is < 512){
+            while(is < sequentialStrips){
                 int nst = 0;
                 int ris = indR[is];
                 if(HitArray[ris][il] != null && !checked[ris][il]){
@@ -137,7 +140,7 @@ public class FTTRKReconstruction {
                             HitArray[ris][il].get_Edep(), HitArray[ris][il].get_Time(), HitArray[ris][il].get_Id()));
                     // look for a consecutive strip in the stack and stick it to the cluster
                     int isnext = is+1; 
-                    while(isnext < 512 && HitArray[indR[isnext]][il] != null && !checked[indR[isnext]][il]){
+                    while(isnext < sequentialStrips && HitArray[indR[isnext]][il] != null && !checked[indR[isnext]][il]){
                         int nris = indR[isnext];
                         checked[nris][il] = true;
                         clusterHits.add(new FTTRKHit(HitArray[nris][il].get_Sector(), HitArray[nris][il].get_Layer(), HitArray[nris][il].get_Strip(), 
@@ -168,8 +171,8 @@ public class FTTRKReconstruction {
                 is++;
             }
             // second loop on LHS strips (only lateral strips)
-            is = 128; 
-            while(is < 384){  
+            is = FTTRKConstantsLoader.Longstrips; 
+            while(is < (FTTRKConstantsLoader.Longstrips + sideShortStrips)){  //384
                 int nst = 0;
                 int lis = indL[is];
                 if(HitArray[lis][il] != null && !checked[lis][il]){
@@ -180,7 +183,8 @@ public class FTTRKReconstruction {
                             HitArray[lis][il].get_Edep(), HitArray[lis][il].get_Time(), HitArray[lis][il].get_Id()));
                     // look for a consecutive strip in the stack and stick it to the cluster
                     int isnext = is+1; 
-                    while(isnext < 640 && HitArray[indL[isnext]][il] != null && !checked[indL[isnext]][il]){
+                    while(isnext < (sequentialStrips + FTTRKConstantsLoader.SideHalfstrips) &&   // 640 
+                            HitArray[indL[isnext]][il] != null && !checked[indL[isnext]][il]){  
                         int nlis = indL[isnext];
                         checked[nlis][il] = true;
                         clusterHits.add(new FTTRKHit(HitArray[nlis][il].get_Sector(), HitArray[nlis][il].get_Layer(), HitArray[nlis][il].get_Strip(), 
@@ -215,12 +219,13 @@ public class FTTRKReconstruction {
                     for(int i=0; i < nbhits; i++){
                         FTTRKHit hit = clust.get(i);
                         int nstrip = hit.get_Strip();
-                        if(nstrip==128 || nstrip==385 || nstrip==640 || nstrip==641){
+                                                     // 641
+                        if(nstrip==stripDiscontinuity1 || nstrip==stripDiscontinuity2 || nstrip==stripDiscontinuity3 || nstrip==stripDiscontinuity4){
                             needsReordering = true;
-                            if(nstrip==128) clusterId11 = clust.get_CId();  //cut 127-384
-                            if(nstrip==385) clusterId12 = clust.get_CId();
-                            if(nstrip==640) clusterId21 = clust.get_CId(); // cut 640-641
-                            if(nstrip==641) clusterId22 = clust.get_CId();
+                            if(nstrip==stripDiscontinuity1) clusterId11 = clust.get_CId();  //cut 127-384
+                            if(nstrip==stripDiscontinuity2) clusterId12 = clust.get_CId();
+                            if(nstrip==stripDiscontinuity3) clusterId21 = clust.get_CId();  // cut 640-641
+                            if(nstrip==stripDiscontinuity4) clusterId22 = clust.get_CId();
                         }   
                     }
                 }
@@ -359,51 +364,6 @@ public class FTTRKReconstruction {
             }
         }
         
-        // best validated crosses: for every detector choose the cross with larger deposited energy: only two crosses are saved with the largest energy
-        // not used if all crosses are used for multihit matching
-        /*
-        ArrayList<FTTRKCross> validatedCrosses = new ArrayList<FTTRKCross>();
-        double maxEn1 =-100.;
-        double maxEn2 =-100.;
-        int idMax1=-1, idMax2=-1;
-        for(int ic=0; ic<crosses.size(); ic++){
-            FTTRKCross aCross = crosses.get((ic));
-            double crossEnergy = Math.sqrt(aCross.get_Cluster1().get_TotalEnergy() * aCross.get_Cluster2().get_TotalEnergy());
-            if(aCross.get_Region()==1){   
-                if(crossEnergy>maxEn1){
-                    maxEn1 = crossEnergy;
-                    idMax1 = ic;
-                }
-            }else if(aCross.get_Region()==2){
-                if(crossEnergy>maxEn2){
-                    maxEn2 = crossEnergy;
-                    idMax2 = ic;
-                }
-            }
-        }
-        if(idMax1>=0) validatedCrosses.add(crosses.get(idMax1));
-        if(idMax2>=0) validatedCrosses.add(crosses.get(idMax2)); 
-        
-        double diffRadTolerance = FTConstants.TRK0_TRK1_RADTOL;
-        double diffPhiTolerance = FTConstants.TRK0_TRK1_PHITOL;
-        double diffThetaTolerance = FTConstants.TRK0_TRK1_THETATOL;
-        
-// make a geometric match of the two validate crosses 
-        if(validatedCrosses.size()== FTTRKConstantsLoader.NSupLayers){            
-            Point3D cross0 = validatedCrosses.get(0).get_Point();
-            Point3D cross1 = validatedCrosses.get(1).get_Point();
-            double r02d = Math.sqrt(cross0.x()*cross0.x() + cross0.y()*cross0.y());
-            double r12d = Math.sqrt(cross1.x()*cross1.x() + cross1.y()*cross1.y());
-            double r0 = Math.sqrt(r02d*r02d + cross0.z()*cross0.z());
-            double r1 = Math.sqrt(r12d*r12d + cross1.z()*cross1.z());
-            double diffRadii =  r02d-r12d;
-            double diffTheta = Math.acos(cross0.z()/r0) - Math.acos(cross1.z()/r1);
-            double diffPhi = Math.atan2(cross0.y(), cross0.x()) - Math.atan2(cross1.y(), cross1.x());
-            if(!(Math.abs(diffPhi) < diffPhiTolerance && Math.abs(diffRadii)< diffRadTolerance && Math.abs(diffTheta) < diffThetaTolerance)) validatedCrosses.clear();
-        }
-        */
-        
-        //return validatedCrosses;  // return this if just the best two crosses per event are required
         return crosses;
     }
 
@@ -542,8 +502,6 @@ public class FTTRKReconstruction {
                 System.err.println("ERROR CREATING BANK : FTTRK::crosses");
                 return;
             }        
-            crEnergy = new float[crosses.size()];
-            crTime = new float[crosses.size()];
             for (int j = 0; j < crosses.size(); j++){     
                 bankCross.setShort("size",       j, (short) crosses.size());
                 bankCross.setShort("id",         j, (short) crosses.get(j).get_trkId());
@@ -552,42 +510,9 @@ public class FTTRKReconstruction {
                 bankCross.setFloat("x",          j, (float) crosses.get(j).get_Point().x());
                 bankCross.setFloat("y",          j, (float) crosses.get(j).get_Point().y());
                 bankCross.setFloat("z",          j, (float) crosses.get(j).get_Point().z());
-                if(debugMode>=1) System.out.println("energy and time to be stored in banks " + crosses.get(j).get_Energy() + " " + crosses.get(j).get_Time());
-                // control histograms should be provisional and filled only if existing
-                if(FTEBEngine.timeEnergyDiagnosticHistograms){
-                    FTEBEngine.h507.fill(crosses.get(j).get_Time(), crosses.get(j).get_Energy());   
-                    if(crosses.get(j).get_Id()==0){
-                        FTEBEngine.h503.fill(crosses.get(j).get_Time());
-                        FTEBEngine.h501.fill(crosses.get(j).get_Energy());
-                        FTEBEngine.h505.fill(crosses.get(j).get_Time(), crosses.get(j).get_Energy());
-                        FTTRKCluster cl1 = crosses.get(j).get_Cluster1();
-                        FTTRKCluster cl2 = crosses.get(j).get_Cluster2();
-                        FTEBEngine.h510.fill(cl1.get_TotalEnergy(), cl2.get_TotalEnergy());
-                        FTEBEngine.h512.fill(cl1.get_TotalEnergy());
-                        FTEBEngine.h512.fill(cl2.get_TotalEnergy());
-                        for(int k=0; k<cl1.size(); k++) FTEBEngine.h520.fill(cl1.get(k).get_Time());
-                        for(int k=0; k<cl2.size(); k++) FTEBEngine.h521.fill(cl2.get(k).get_Time());         
-                    }
-                    if(crosses.get(j).get_Id()==1){
-                        FTEBEngine.h504.fill(crosses.get(j).get_Time());
-                        FTEBEngine.h502.fill(crosses.get(j).get_Energy());
-                        FTEBEngine.h506.fill(crosses.get(j).get_Time(), crosses.get(j).get_Energy());
-                        FTTRKCluster cl1 = crosses.get(j).get_Cluster1();
-                        FTTRKCluster cl2 = crosses.get(j).get_Cluster2();
-                        FTEBEngine.h511.fill(crosses.get(j).get_Cluster1().get_TotalEnergy(), crosses.get(j).get_Cluster2().get_TotalEnergy());
-                        FTEBEngine.h513.fill(crosses.get(j).get_Cluster1().get_TotalEnergy());
-                        FTEBEngine.h513.fill(crosses.get(j).get_Cluster2().get_TotalEnergy());
-                        for(int k=0; k<cl1.size(); k++) FTEBEngine.h522.fill(cl1.get(k).get_Time());
-                        for(int k=0; k<cl2.size(); k++) FTEBEngine.h523.fill(cl2.get(k).get_Time());    
-                    }
-                }
-                FTTRKReconstruction.crEnergy[j] = crosses.get(j).get_Energy();
-                FTTRKReconstruction.crTime[j] = crosses.get(j).get_Time();
-               
+                if(debugMode>=1) System.out.println("energy and time to be stored in banks " + crosses.get(j).get_Energy() + " " + crosses.get(j).get_Time());              
                 bankCross.setFloat("energy", j, (float) crosses.get(j).get_Energy());
                 bankCross.setFloat("time", j, (float) crosses.get(j).get_Time());
-                int dummy = crosses.get(j).get_Cluster1().get_CId();
-                int dummy2 = crosses.get(j).get_Cluster2().get_CId();
                 bankCross.setShort("Cluster1ID", j, (short) crosses.get(j).get_Cluster1().get_CId());
                 bankCross.setShort("Cluster2ID", j, (short) crosses.get(j).get_Cluster2().get_CId());
             }
@@ -674,7 +599,6 @@ public class FTTRKReconstruction {
  public void updateAllHitsWithAssociatedIDs(List<FTTRKHit> hits, List<FTTRKCluster> clusters){
     // update clusterIndex and crossIndex for hits belonging to a cross
     for(FTTRKCluster aCluster: clusters){
-        int i=-1;
         for(FTTRKHit ahitInCluster: aCluster){
             for(FTTRKHit aHit: hits){     
                if(aHit.get_Id()==ahitInCluster.get_Id()){
@@ -691,19 +615,19 @@ public class FTTRKReconstruction {
  public int flipStripVertical(int ilayer, int icomponent){
     // flip the layer vertically with respect to y axis (left/right flip)
     // strips numbered 1-768
-    if(ilayer==2 || ilayer==3){  // RECO vertical strips        
-        if(icomponent>=129 && icomponent<=384){
-            icomponent += 256;
-        }else if(icomponent>=385 && icomponent<=640){
-            icomponent -= 256;
+    if(ilayer==DetectorLayer.FTTRK_LAYER2 || ilayer==DetectorLayer.FTTRK_LAYER3){  // RECO vertical strips        
+        if(icomponent>=(stripDiscontinuity1+1) && icomponent<=(stripDiscontinuity2-1)){   // [129,384]
+            icomponent += sideShortStrips;  // 256
+        }else if(icomponent>=stripDiscontinuity2 && icomponent<=stripDiscontinuity3){ // [385,640]
+            icomponent -= sideShortStrips;  // 256
         }
-    }else if(ilayer==1 || ilayer==4){  // RECO horizontal strips
-        if(icomponent>=129 && icomponent<=384){
-            icomponent = 513 - icomponent;   
-        }else if(icomponent>=385 && icomponent<=640){
-            icomponent = 1025 - icomponent;
+    }else if(ilayer==DetectorLayer.FTTRK_LAYER1 || ilayer==DetectorLayer.FTTRK_LAYER4){  // RECO horizontal strips
+        if(icomponent>=129 && icomponent<=384){ // [129,384]
+            icomponent = 513 - icomponent;   // 513
+        }else if(icomponent>=stripDiscontinuity2 && icomponent<=stripDiscontinuity3){ // [385,640]
+            icomponent = 2*sequentialStrips+1 - icomponent;     // 1025
         }else{ // for horizontal strips flip also long strips
-            icomponent = 769 - icomponent;
+            icomponent = FTTRKConstantsLoader.Nstrips+1 - icomponent;      // 769
         }
     }
     return icomponent;
@@ -712,19 +636,19 @@ public class FTTRKReconstruction {
  public int flipStripHorizontal(int ilayer, int icomponent){
     // flip the layer horizontally with respect to the x axis (top/bottom flip)
     // strips 1-128
-    if(ilayer==1 || ilayer==4){  // RECO vertical strips        
-        if(icomponent>=129 && icomponent<=384){
-            icomponent += 256;
-        }else if(icomponent>=385 && icomponent<=640){
-            icomponent -= 256;
+    if(ilayer==DetectorLayer.FTTRK_LAYER1 || ilayer==DetectorLayer.FTTRK_LAYER4){  // RECO vertical strips        
+        if(icomponent>=(stripDiscontinuity1+1) && icomponent<=(stripDiscontinuity2-1)){   // [129, 384]
+            icomponent += sideShortStrips;                    // 256
+        }else if(icomponent>=stripDiscontinuity2 && icomponent<=stripDiscontinuity3){   // [385,640]
+            icomponent -= sideShortStrips;                    // 256
         }
-    }else if(ilayer==2 || ilayer==3){ // RECO horizontal strips
-        if(icomponent>=129 && icomponent<=384){
-            icomponent = 513 - icomponent;   
-        }else if(icomponent>=385 && icomponent<=640){
-            icomponent = 1025 - icomponent;
+    }else if(ilayer==DetectorLayer.FTTRK_LAYER2 || ilayer==DetectorLayer.FTTRK_LAYER3){ // RECO horizontal strips
+        if(icomponent>=(stripDiscontinuity1+1) && icomponent<=(stripDiscontinuity2-1)){   // [129,384]
+            icomponent = sequentialStrips+1 - icomponent;        // 513
+        }else if(icomponent>=stripDiscontinuity2 && icomponent<=stripDiscontinuity3){   // [385,640]
+            icomponent = 2*sequentialStrips+1 - icomponent;     // 1025
         }else{
-            icomponent = 769 - icomponent;
+            icomponent = FTTRKConstantsLoader.Nstrips+1 - icomponent;      // 769
         }
     }
     
@@ -743,7 +667,7 @@ public int reverseStripsInSector(int icomponent){
     // excluded in the sector, [i+1]is included
     // 20 sectors of 32 strips each, except long strips sectors (0, 1, 18, 19) which have 64 strips
     int nsector = findSector(icomponent);
-    if(nsector>20) System.out.println("wrong sector number, check code");
+    if(nsector>NStripsSectors) System.out.println("wrong sector number, check code");
     int offset = sectorLimits[nsector+1] - icomponent;
     icomponent = sectorLimits[nsector]+1 + offset;
       
@@ -755,7 +679,7 @@ public int reverseStripInFirstHalf(int icomponent){
     // excluded in the sector, [i+1]is included
     // 20 sectors of 32 strips each, except long strips sectors (0, 1, 18, 19) which have 64 strips
     int nsector = findSector(icomponent);
-    if(nsector>20) System.out.println("wrong sector number, check code");
+    if(nsector>NStripsSectors) System.out.println("wrong sector number, check code");
     int halfStrip = (sectorLimits[nsector+1]-sectorLimits[nsector])/2 + sectorLimits[nsector];
     if(icomponent <= halfStrip){
         int offset = halfStrip - icomponent;
@@ -770,7 +694,7 @@ public int reverseStripInSecondHalf(int icomponent){
     // excluded in the sector, [i+1]is included
     // 20 sectors of 32 strips each, except long strips sectors (0, 1, 18, 19) which have 64 strips
     int nsector = findSector(icomponent);
-    if(nsector>20) System.err.println("wrong FTTRK strip sector number, check code");
+    if(nsector>NStripsSectors) System.err.println("wrong FTTRK strip sector number, check code");
     int halfStrip = (sectorLimits[nsector+1]-sectorLimits[nsector])/2 + sectorLimits[nsector];
     if(icomponent > halfStrip){
         int offset = sectorLimits[nsector+1] - icomponent;
@@ -785,7 +709,7 @@ public int swapHalves(int icomponent){
     // excluded in the sector, [i+1]is included
     // 20 sectors of 32 strips each, except long strips sectors (0, 1, 18, 19) which have 64 strips
     int nsector = findSector(icomponent);
-    if(nsector>20) System.err.println("wrong FTTRK strip sector number, check code");
+    if(nsector>NStripsSectors) System.err.println("wrong FTTRK strip sector number, check code");
     int halfWid = (sectorLimits[nsector+1]-sectorLimits[nsector])/2;
     int halfStrip =  halfWid + sectorLimits[nsector];
     if(icomponent >= halfStrip+1){
@@ -818,13 +742,13 @@ public static int findSector(int icomponent){
     // the number of the starting strip of a sector: [i] is excluded from sector i, [i+1] is included
     // 20 sectors of 32 strips each, except long strips sectors (0, 1, 18, 19) which have 64 strips
     int nsector = -1;
-    for(int i=0; i<20; i++){
+    for(int i=0; i<NStripsSectors; i++){
         if(icomponent>sectorLimits[i] && icomponent<=sectorLimits[i+1]){
             nsector = i;
             break;
         } 
     }
-    if(nsector>20) System.err.println("wrong FTTRK strip sector number, check code");
+    if(nsector>NStripsSectors) System.err.println("wrong FTTRK strip sector number, check code");
     return nsector;
 }
 
@@ -843,21 +767,21 @@ public int renumberStrip(int ilayer, int icomponent){
     // renumber strips from FEE number (to RECO numbering
     // strips numbering 1-768
     int newStripNumber = -1;
-    if(ilayer==1){
-        if((icomponent>=1 && icomponent <=128) || (icomponent>=641 && icomponent<=768)){
+    if(ilayer==DetectorLayer.FTTRK_LAYER1){
+        if((icomponent>=1 && icomponent <=stripDiscontinuity1) || (icomponent>=641 && icomponent<=768)){    //[1,128], [641,768]
             newStripNumber = icomponent;
-        }else if(icomponent>=129 && icomponent<=256){
-            newStripNumber = icomponent+256;
-        }else if(icomponent>=257 && icomponent<=512){
-            newStripNumber = icomponent-128;
-        }else if(icomponent>=513 && icomponent<=640){
+        }else if(icomponent>=(stripDiscontinuity1+1) && icomponent<=sideShortStrips){   // [129, 256]
+            newStripNumber = icomponent+sideShortStrips;            // 256
+        }else if(icomponent>=(sideShortStrips+1) && icomponent<=sequentialStrips){   // [257, 512] 
+            newStripNumber = icomponent-FTTRKConstantsLoader.Longstrips;            // 128
+        }else if(icomponent>=(sequentialStrips+1) && icomponent<=stripDiscontinuity3){   // [513, 640]
             newStripNumber = icomponent;
         }
-    }else if(ilayer==2 || ilayer==4 || ilayer==3){
-        if(icomponent>=257 && icomponent <=512){
-            newStripNumber = icomponent+128;
-        }else if(icomponent>=513 && icomponent <=640){
-            newStripNumber = icomponent-256;
+    }else if(ilayer==DetectorLayer.FTTRK_LAYER2 || ilayer==DetectorLayer.FTTRK_LAYER4 || ilayer==DetectorLayer.FTTRK_LAYER3){
+        if(icomponent>=(sideShortStrips+1) && icomponent <=sequentialStrips){        // [257, 512]
+            newStripNumber = icomponent+FTTRKConstantsLoader.Longstrips;            // 128
+        }else if(icomponent>=(sequentialStrips+1) && icomponent <=stripDiscontinuity3){  // [513, 640]
+            newStripNumber = icomponent-sideShortStrips;            // 256
         }else{  
             newStripNumber = icomponent;
         }
@@ -865,7 +789,7 @@ public int renumberStrip(int ilayer, int icomponent){
     return (newStripNumber);
 }
 
-public int renumberFEE2RECRotatedAndAdjustVanilla(int run, int ilayer, int icomponent){
+public int renumberFEE2REC(int run, int ilayer, int icomponent){
 //  apply strip renumbering  only
     if(run>10) icomponent = renumberStrip(ilayer, icomponent); 
     return icomponent;     
@@ -877,10 +801,10 @@ public int renumberFEE2RECRotatedAndAdjust_Fall18RGA(int run, int ilayer, int ic
     if(run>0){   
         icomponent = renumberStrip(ilayer, icomponent);
         // overturn layer 1+4
-        if(ilayer==1 || ilayer==4) icomponent = overturnModule(ilayer, icomponent);
+        if(ilayer==DetectorLayer.FTTRK_LAYER1 || ilayer==DetectorLayer.FTTRK_LAYER4) icomponent = overturnModule(ilayer, icomponent);
         
         int isec1 = -1;
-        if(ilayer==1){
+        if(ilayer==DetectorLayer.FTTRK_LAYER1){
             isec1 = findSector(icomponent);
             if(isec1 == 1){
                 icomponent = reverseStripInSecondHalf(icomponent);
@@ -898,16 +822,16 @@ public int renumberFEE2RECRotatedAndAdjust_Fall18RGA(int run, int ilayer, int ic
                 icomponent = reverseStripInFirstHalf(icomponent); 
             }   
             
-        }else if(ilayer==2){
+        }else if(ilayer==DetectorLayer.FTTRK_LAYER2){
             isec1 = findSector(icomponent);
             if(isec1==1){
                 icomponent = reverseStripsInSector(icomponent);
-                if(icomponent>96) icomponent -= 8;
+                if(icomponent>(stripsInLongSector+stripsInShortSector)/2) icomponent -= 8;        // 96
             }else if(isec1==3){
                 icomponent = reverseStripsInSector(icomponent);
             }
         
-        }else if(ilayer==3){     
+        }else if(ilayer==DetectorLayer.FTTRK_LAYER3){     
             isec1 = findSector(icomponent);
             if(isec1==11){
                 icomponent = swapSectors(icomponent, 10);
@@ -931,7 +855,7 @@ public int renumberFEE2RECRotatedAndAdjust_Fall18RGA(int run, int ilayer, int ic
                 icomponent = reverseStripsInSector(icomponent);
             }
         
-        }else if(ilayer==4){            
+        }else if(ilayer==DetectorLayer.FTTRK_LAYER4){            
             isec1 = findSector(icomponent);
             if(isec1 == 1){
                 icomponent = reverseStripInSecondHalf(icomponent);
@@ -944,8 +868,6 @@ public int renumberFEE2RECRotatedAndAdjust_Fall18RGA(int run, int ilayer, int ic
                 icomponent = reverseStripInSecondHalf(icomponent);
             }
         }
- 
-        isec1 = findSector(icomponent);  // rehash  
     }
 
     return icomponent;     
