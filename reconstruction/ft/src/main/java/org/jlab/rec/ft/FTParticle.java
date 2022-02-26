@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.detector.base.DetectorLayer;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.utils.groups.IndexedTable;
@@ -147,7 +148,7 @@ public class FTParticle {
 	}
         
 
-        public int getDetectorHit(List<FTResponse>  hitList, String detectorType, double distanceThreshold, double timeThreshold){
+        public int getDetectorHit(List<FTResponse>  hitList, DetectorType detectorType, double distanceThreshold, double timeThreshold){
             Line3D cross = this.getLastCross();
             double   minimumDistance = 500.0;
             int      bestIndex       = -1;
@@ -158,7 +159,7 @@ public class FTParticle {
                     double hitdistance  = dist.length();
                     double timedistance = Math.abs(this.getTime() - (response.getTime()-response.getPosition().mag()/PhysicsConstants.speedOfLight()));       
                     if(hitdistance<distanceThreshold && hitdistance<minimumDistance){                    
-                        if(detectorType=="FTTRK" && timedistance<timeThreshold){
+                        if(detectorType.getName()=="FTTRK" && timedistance<timeThreshold){
                             minimumDistance = hitdistance;
                             bestIndex = loop;
                             if(FTEventBuilder.debugMode >=1){
@@ -166,7 +167,7 @@ public class FTParticle {
                                 System.out.println("cross center coordinates x, y " + response.getPosition().toPoint3D().x() + " , " +
                                    response.getPosition().toPoint3D().y());
                             }
-                        }else if(detectorType=="FTHODO" && timedistance<timeThreshold){
+                        }else if(detectorType.getName()=="FTHODO" && timedistance<timeThreshold){
                             minimumDistance = hitdistance; 
                             bestIndex = loop;
                         } 
@@ -175,9 +176,9 @@ public class FTParticle {
             }
             if(bestIndex>-1) {
                 // if bestHit is on hodo require at least two hits overall on HODO
-                if(detectorType=="HODO"){if(hitList.get(bestIndex).getSize()<FTConstants.HODO_MIN_CLUSTER_SIZE) bestIndex=-1;}
+                if(detectorType.getName()=="HODO"){if(hitList.get(bestIndex).getSize()<FTConstants.HODO_MIN_CLUSTER_SIZE) bestIndex=-1;}
                 // if bestHit is on trk require at least two crosses overall in FTTRK
-                if(detectorType=="FTTRK"){
+                if(detectorType.getName()=="FTTRK"){
                     if(hitList.get(bestIndex).getSize() >= FTConstants.TRK_MIN_CROSS_NUMBER){;}else{bestIndex=-1;}
                 }
             }
@@ -192,7 +193,7 @@ public class FTParticle {
             for(int loop = 0; loop < hitList.size(); loop++){
                 int bestidx = -1;
                 FTResponse response = hitList.get(loop);
-                if(response.getAssociation()<0 && response.getType() == "FTTRK"){
+                if(response.getAssociation()<0 && response.getType().getName() == "FTTRK"){
                     Line3D  dist = cross.distance(response.getPosition().toPoint3D());
                     double hitdistance  = dist.length();
                     double timedistance = Math.abs(this.getTime() - (response.getTime()-response.getPosition().mag()/PhysicsConstants.speedOfLight()));       
@@ -225,7 +226,7 @@ public class FTParticle {
             int ndetectors = FTTRKConstantsLoader.NSupLayers;
             int hitsTRK = 0;
             for(int l=0; l<hitList.size(); l++){
-                if(hitList.get(l).getType() == "FTTRK") hitsTRK++;
+                if(hitList.get(l).getType().getName() == "FTTRK") hitsTRK++;
             }
             int[][] bestIndices; 
             if(hitsTRK != 0){
@@ -246,7 +247,7 @@ public class FTParticle {
                 for(int loop = 0; loop < hitList.size(); loop++){
                     int bestidx = -1;
                     FTResponse response = hitList.get(loop);
-                    if(response.getAssociation()<0 && response.getType() == "FTTRK"){
+                    if(response.getAssociation()<0 && response.getType().getName() == "FTTRK"){
                         lTRK++;
                         hitDistancesDet0.add(lTRK, -1.);
                         hitDistancesDet1.add(lTRK, -1.);
