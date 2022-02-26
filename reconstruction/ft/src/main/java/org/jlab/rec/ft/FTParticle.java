@@ -1,15 +1,13 @@
 package org.jlab.rec.ft;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.pdg.PhysicsConstants;
+import org.jlab.detector.base.DetectorLayer;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.utils.groups.IndexedTable;
-import org.jlab.rec.ft.FTEBEngine;
-import org.jlab.rec.ft.FTEventBuilder;
 import org.jlab.rec.ft.trk.FTTRKConstantsLoader;
 
 public class FTParticle {
@@ -201,17 +199,7 @@ public class FTParticle {
 
                     double t=response.getTime();
                     int det = response.getTrkDet();
-                    if(it==0){
-                        // fill energy and time histograms only once per set or hits on FTTRK
-                        FTEBEngine.h600.fill(response.getPosition().mag()/PhysicsConstants.speedOfLight());
-                        FTEBEngine.h601.fill(response.getCrTime(), response.getPosition().mag()/PhysicsConstants.speedOfLight());
-                        if(det==0){ // non e' Id ma trkDet
-                            FTEBEngine.h602.fill(response.getCrTime());
-                        }else if(det==1){
-                            FTEBEngine.h603.fill(response.getCrTime());
-                        }
-                    }
-                                        
+                    
                     if(timedistance<timeThreshold && hitdistance<distanceThreshold){
                         minimumDistance = hitdistance;
                         bestidx = loop;
@@ -229,9 +217,11 @@ public class FTParticle {
         
         
         public int [][] getTRKOrderedListOfHits(List<FTResponse>  hitList, int it, double distanceThreshold, double timeThreshold){
+            
+            int TRK1 = DetectorLayer.FTTRK_MODULE1 - 1;  // tracker id=0
+            int TRK2 = DetectorLayer.FTTRK_MODULE2 -1;   // tracker id=1
+            
             Line3D cross = this.getLastCross();
-            //double   minimumDistance = 500.0;
-            // how many FTTRK events?
             int ndetectors = FTTRKConstantsLoader.NSupLayers;
             int hitsTRK = 0;
             for(int l=0; l<hitList.size(); l++){
@@ -247,7 +237,7 @@ public class FTParticle {
                 int lTRK = -1;
                 //init
                 for(int l=0; l<hitsTRK; l++){
-                    bestIndices[l][0] = bestIndices[l][1] = -1;
+                    bestIndices[l][TRK1] = bestIndices[l][TRK2] = -1;
                     hitDistancesDet0.add(l, -1.);
                     hitOrderDet0.add(l, 1);
                     hitDistancesDet1.add(l, -1.);
@@ -268,24 +258,14 @@ public class FTParticle {
 
                         double t=response.getTime();
                         int det = response.getTrkDet();
-                        if(it==0){
-                            // fill energy and time histograms only once per set or hits on FTTRK
-                            FTEBEngine.h600.fill(response.getPosition().mag()/PhysicsConstants.speedOfLight());
-                            FTEBEngine.h601.fill(response.getCrTime(), response.getPosition().mag()/PhysicsConstants.speedOfLight());
-                            if(det==0){ 
-                                FTEBEngine.h602.fill(response.getCrTime());
-                            }else if(det==1){
-                                FTEBEngine.h603.fill(response.getCrTime());
-                            }
-                        }
-                                        
+                        
                         if(timedistance<timeThreshold && hitdistance<distanceThreshold){
                             bestidx = loop;
-                            if(det==0) {
+                            if(det==TRK1) {
                                 hitDistancesDet0.set(lTRK, hitdistance);
                                 hitOrderDet0.set(lTRK, loop);
                             }
-                            if(det==1){
+                            if(det==TRK2){
                                 hitDistancesDet1.set(lTRK, hitdistance);
                                 hitOrderDet1.set(lTRK, loop);
                             }
@@ -294,11 +274,10 @@ public class FTParticle {
                         if(bestidx>-1){
                             if(hitList.get(bestidx).getSize() < FTConstants.TRK_MIN_CROSS_NUMBER){
                                 bestidx=-1;
-                                if(det==0){
+                                if(det==TRK1){
                                     hitDistancesDet0.set(lTRK, -1.);
                                     hitOrderDet0.set(lTRK, -1);
-                                }
-                                if(det==1){
+                                }else if(det==TRK2){
                                     hitDistancesDet1.set(lTRK, -1.);
                                     hitOrderDet1.set(lTRK, -1);
                                 }    
@@ -326,12 +305,12 @@ public class FTParticle {
                 }
                 // compose the double arrays of indices ordered by distance
                 for(int l=0; l < hitsTRK; l++){
-                    bestIndices[l][0] = orderedIndices0[l];
-                    bestIndices[l][1] = orderedIndices1[l];
+                    bestIndices[l][TRK1] = orderedIndices0[l];
+                    bestIndices[l][TRK2] = orderedIndices1[l];
                 }
             }else{ 
                 bestIndices = new int[1][2];
-                bestIndices[0][0] = bestIndices[0][1] = -1;
+                bestIndices[0][TRK1] = bestIndices[0][TRK2] = -1;
             }
             return bestIndices;
         }
