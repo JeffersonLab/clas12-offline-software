@@ -7,6 +7,7 @@ package org.jlab.rec.ft;
 
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.detector.base.DetectorLayer;
+import org.jlab.detector.base.DetectorType;
 
 /**
  *
@@ -14,7 +15,8 @@ import org.jlab.detector.base.DetectorLayer;
  */
 public class FTResponse extends DetectorResponse {
     
-    private String _type;            // FTCAL, FTHODO, FTTRK
+    //private String _type;            // FTCAL, FTHODO, FTTRK
+    private DetectorType _type;
     private int    _size;            // cluster multiplicity
     private int    _id;              // response ID
     private int    _trkDet;          // number of TRK detector (0,1)
@@ -24,6 +26,7 @@ public class FTResponse extends DetectorResponse {
     public FTResponse() {
     }
     
+    /*
     public FTResponse(String type) {
         this._type = type;
     }
@@ -33,6 +36,23 @@ public class FTResponse extends DetectorResponse {
     }
 
     public void setType(String type) {
+        this._type = type;
+    }
+    */
+    
+    public FTResponse(DetectorType type) {
+        this._type = type;
+    }
+    
+    public DetectorType getType() {
+        return _type;
+    }
+
+    public void setType(String type) {
+        this._type.getType(type);
+    }
+    
+    public void setType(DetectorType type) {
         this._type = type;
     }
 
