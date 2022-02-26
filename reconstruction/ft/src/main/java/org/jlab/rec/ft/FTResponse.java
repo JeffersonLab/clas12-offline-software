@@ -6,6 +6,7 @@
 package org.jlab.rec.ft;
 
 import org.jlab.clas.detector.DetectorResponse;
+import org.jlab.detector.base.DetectorLayer;
 
 /**
  *
@@ -17,9 +18,7 @@ public class FTResponse extends DetectorResponse {
     private int    _size;            // cluster multiplicity
     private int    _id;              // response ID
     private int    _trkDet;          // number of TRK detector (0,1)
-
-    private float  _crTime;            // provisional: detector time (for crosses only: the location in the bank is overwritten)
-    private float  _crEnergy;          // provisional: detector energy (for crosses only same reason)
+    //private DetectorLayer _trkLayer;     // number of TRK detector+1
 
     
     public FTResponse() {
@@ -53,6 +52,7 @@ public class FTResponse extends DetectorResponse {
         this._id = id;
     }
     
+    
     public int getTrkDet() {
         return _trkDet;
     }
@@ -61,22 +61,24 @@ public class FTResponse extends DetectorResponse {
         this._trkDet = ndet;
     }
     
-        
-    /////////////////////////// provisional (info must be present in banks)
-    public void setCrTime(float crTime){
-        this._crTime = crTime;
+    
+    /*
+    public DetectorLayer getTrkDet() {
+        if(this._id == 0){
+            this._trkDet = DetectorLayer.FTTRK_MODULE1;
+        }else if(this._id == 1){
+            this._trkDet = DetectorLayer.FTTRK_MODULE1;
+        }
+        return _trkDet;
     }
-    public float getCrTime(){
-            return _crTime;
+   
+    
+    public void setTrkDet(int ndet) {
+        this._trkDet = ndet;
     }
-    public void setCrEnergy(float crEnergy){
-        this._crEnergy = crEnergy;
-    }
-    public float getCrEnergy(){
-            return _crEnergy;
-    }
-    //////////////////////////        
-            
+    */ 
+    
+    
     public void show() {
         System.out.println("ID = "+ this.getId()
                     + " Type = "  + this.getType()
