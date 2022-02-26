@@ -13,6 +13,7 @@ import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.rec.ft.cal.FTCALConstantsLoader;
 import org.jlab.utils.groups.IndexedTable;
 import org.jlab.rec.ft.trk.FTTRKConstantsLoader;
+import org.jlab.detector.base.DetectorType;
 
 public class FTEventBuilder {
 
@@ -54,7 +55,7 @@ public class FTEventBuilder {
                 EvioDataBank bank = (EvioDataBank) event.getBank("FTCALRec::clusters");
                 int nrows = bank.rows();
                 for (int i = 0; i < nrows; i++) {
-                    FTResponse resp = new FTResponse("FTCAL");
+                    FTResponse resp = new FTResponse(DetectorType.FTCAL);
                     resp.setAssociation(-1);
                     resp.setSize(bank.getInt("clusSize", i));
                     resp.setId(bank.getInt("clusID", i));
@@ -69,7 +70,7 @@ public class FTEventBuilder {
                 DataBank bank = event.getBank("FTTRK::crosses");
                 int nrows = bank.rows();
                 for (int i = 0; i < nrows; i++) {
-                    FTResponse resp = new FTResponse("FTTRK");
+                    FTResponse resp = new FTResponse(DetectorType.FTTRK);
                     resp.setAssociation(-1);
                     resp.setSize(bank.getInt("size", i));
                     resp.setId(bank.getInt("id", i));
@@ -86,7 +87,7 @@ public class FTEventBuilder {
                 EvioDataBank bank = (EvioDataBank) event.getBank("FTHODORec::clusters");
                 int nrows = bank.rows();
                 for (int i = 0; i < nrows; i++) {
-                    FTResponse resp = new FTResponse("FTHODO");
+                    FTResponse resp = new FTResponse(DetectorType.FTHODO);
                     resp.setSize(bank.getInt("clusterSize", i));
                     resp.setId(bank.getInt("clusterID", i));
                     resp.setEnergy(bank.getDouble("clusterEnergy", i));
@@ -100,7 +101,7 @@ public class FTEventBuilder {
                 DataBank bank = event.getBank("FTCAL::clusters");
                 int nrows = bank.rows();
                 for (int i = 0; i < nrows; i++) {
-                    FTResponse resp = new FTResponse("FTCAL");
+                    FTResponse resp = new FTResponse(DetectorType.FTCAL);
                     resp.setAssociation(-1);
                     resp.setSize(bank.getInt("size", i));
                     resp.setId(bank.getInt("id", i));
@@ -114,7 +115,7 @@ public class FTEventBuilder {
                 DataBank bank = event.getBank("FTHODO::clusters");
                 int nrows = bank.rows();
                 for (int i = 0; i < nrows; i++) {
-                    FTResponse resp = new FTResponse("FTHODO");
+                    FTResponse resp = new FTResponse(DetectorType.FTHODO);
                     resp.setAssociation(-1);
                     resp.setSize(bank.getInt("size", i));
                     resp.setId(bank.getInt("id", i));
@@ -130,7 +131,7 @@ public class FTEventBuilder {
                 DataBank bank = event.getBank("FTTRK::crosses");
                 int nrows = bank.rows();
                 for (int i = 0; i < nrows; i++) {
-                    FTResponse resp = new FTResponse("FTTRK");
+                    FTResponse resp = new FTResponse(DetectorType.FTTRK);
                     resp.setAssociation(-1);                    
                     resp.setSize(bank.getInt("size", i));
                     resp.setId(bank.getInt("id", i));
@@ -172,7 +173,7 @@ public class FTEventBuilder {
         List<FTParticle> particles = new ArrayList<FTParticle>();
 //        this.FTparticles.clear();
         for (int i = 0; i < responses.size(); i++) {
-            if (responses.get(i).getType() == "FTCAL") {
+            if (responses.get(i).getType().getName() == "FTCAL") {
                 FTParticle track = new FTParticle(i);
                 // start assuming the cluster to be associated to a photon    PROVISIONAL to be updated with correct charge (if possible)
                 track.setCharge(0);
@@ -203,7 +204,7 @@ public class FTEventBuilder {
             if (debugMode >= 1) {
                 System.out.println("Searching for matching signal in the hodoscope:");
             }
-            int iHodo = track.getDetectorHit(responses, "FTHODO", FTConstants.CAL_HODO_DISTANCE_MATCHING, FTConstants.CAL_HODO_TIME_MATCHING);
+            int iHodo = track.getDetectorHit(responses, DetectorType.FTHODO, FTConstants.CAL_HODO_DISTANCE_MATCHING, FTConstants.CAL_HODO_TIME_MATCHING);
             if (iHodo > 0) {
                 if (debugMode >= 1) {
                     System.out.println("found signal in the hodoscope " + iHodo);
@@ -252,7 +253,7 @@ public class FTEventBuilder {
         for (int i = 0; i < particles.size(); i++) {
             FTParticle track = particles.get(i);
             
-            int iHodo = track.getDetectorHit(responses, "FTHODO", FTConstants.CAL_HODO_DISTANCE_MATCHING, FTConstants.CAL_HODO_TIME_MATCHING);
+            int iHodo = track.getDetectorHit(responses, DetectorType.FTHODO, FTConstants.CAL_HODO_DISTANCE_MATCHING, FTConstants.CAL_HODO_TIME_MATCHING);
             if (iHodo > 0) {
                 if (debugMode >= 1) {
                     System.out.println("found signal in the hodoscope " + iHodo);
@@ -262,7 +263,7 @@ public class FTEventBuilder {
                 responses.get(iHodo).setAssociation(i);
             }
             
-            int iTrk = track.getDetectorHit(responses, "FTTRK", FTConstants.CAL_TRK_DISTANCE_MATCHING, FTConstants.CAL_TRK_TIME_MATCHING);
+            int iTrk = track.getDetectorHit(responses, DetectorType.FTTRK, FTConstants.CAL_TRK_DISTANCE_MATCHING, FTConstants.CAL_TRK_TIME_MATCHING);
             if (iTrk > 0) {
                 if (debugMode >= 1) {
                     System.out.println("found signal in FTTRK" + iTrk);
