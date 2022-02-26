@@ -5,7 +5,7 @@
  */
 package org.jlab.rec.ft.trk;
 
-import java.util.ArrayList;
+import org.jlab.detector.base.DetectorLayer;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -336,13 +336,14 @@ public class FTTRKCross implements Comparable<FTTRKCross> {
                 
                 boolean isCluster1EnergyAboveTHR = (inlayerclus.get_TotalEnergy() > FTConstants.TRK_MIN_CLUS_ENERGY);
                 boolean isCluster2EnergyAboveTHR = (outlayerclus.get_TotalEnergy() > FTConstants.TRK_MIN_CLUS_ENERGY);
+                int regionDet1 = DetectorLayer.FTTRK_MODULE1;  // region of detector1: 1 
                 if(d<distanceBwLayers && isPointInSegments && isCluster1EnergyAboveTHR && isCluster2EnergyAboveTHR){
                    this.set_Point(mid);
                    double thickness = 0; 
-                   if(region==1){
-                       thickness = (FTTRKConstantsLoader.Zlayer[1]-FTTRKConstantsLoader.Zlayer[0])/2.;
+                   if(region==regionDet1){
+                       thickness = (FTTRKConstantsLoader.Zlayer[DetectorLayer.FTTRK_LAYER2-1]-FTTRKConstantsLoader.Zlayer[DetectorLayer.FTTRK_LAYER1-1])/2.;
                    }else{
-                       thickness = (FTTRKConstantsLoader.Zlayer[3]-FTTRKConstantsLoader.Zlayer[2])/2.;
+                       thickness = (FTTRKConstantsLoader.Zlayer[DetectorLayer.FTTRK_LAYER4-1]-FTTRKConstantsLoader.Zlayer[DetectorLayer.FTTRK_LAYER3-1])/2.;
                    }
                    Point3D error = new Point3D(err1, err2, thickness);
                    this.set_PointErr(error); 
@@ -360,18 +361,9 @@ public class FTTRKCross implements Comparable<FTTRKCross> {
 	public void evaluate_EnergyAndTime(){
             FTTRKCluster cl1 = this._clus1; 
             FTTRKCluster cl2 = this._clus2;
-            int idCl1 = cl1.get_CId();
-            int idCl2 = cl2.get_CId();
             double meanEnergy = -9999.;
             double meanTime = -9999.;
             double timeCross1 = 0., timeCross2 = 0.;
-            int det;
-            int layer = cl1.get_Layer();
-            if(layer==1 || layer==2){
-                det = 0;
-            }else if(layer==3 || layer ==4){
-                det = 1;
-            }
             meanEnergy = Math.sqrt(cl1.get_TotalEnergy() * cl2.get_TotalEnergy());
             this.set_Energy((float)meanEnergy);
             
