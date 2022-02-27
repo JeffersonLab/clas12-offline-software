@@ -32,13 +32,12 @@ public class FTTRKReconstruction {
     public static int NStripsSectors = 20;
     public static int stripsInLongSector = 64;
     public static int stripsInShortSector = 32;
-    public static int sideShortStrips = 2*FTTRKConstantsLoader.SideHalfstrips;   // 256
-    public static int sequentialStrips = FTTRKConstantsLoader.Longstrips + FTTRKConstantsLoader.SideHalfstrips + sideShortStrips; // 512
-    public static int stripDiscontinuity1 = FTTRKConstantsLoader.Longstrips; // 128   CHECK DISCONTINUITIES +- 1 strip
-    public static int stripDiscontinuity2 = FTTRKConstantsLoader.Longstrips + sideShortStrips + 1;  // 385
-    public static int stripDiscontinuity3 = sequentialStrips + FTTRKConstantsLoader.SideHalfstrips; // 640
-    public static int stripDiscontinuity4 = stripDiscontinuity3+1;     
-    
+    public static int sideShortStrips;      // 256
+    public static int sequentialStrips;     // 512
+    public static int stripDiscontinuity1;  // 128   CHECK DISCONTINUITIES +- 1 strip
+    public static int stripDiscontinuity2;  // 385
+    public static int stripDiscontinuity3;  // 640
+    public static int stripDiscontinuity4;  // 641
     
     public FTTRKReconstruction() {
     }
@@ -50,6 +49,13 @@ public class FTTRKReconstruction {
         IndexedTable geometry      = manager.getConstants(run, "/geometry/ft/fthodo");
         IndexedTable trkGeo        = manager.getConstants(run, "/geometry/ft/fttrk");
         */
+        
+        sideShortStrips = 2*FTTRKConstantsLoader.SideHalfstrips;   // 256
+        sequentialStrips = FTTRKConstantsLoader.Longstrips + FTTRKConstantsLoader.SideHalfstrips + sideShortStrips; // 512
+        stripDiscontinuity1 = FTTRKConstantsLoader.Longstrips; // 128   CHECK DISCONTINUITIES +- 1 strip
+        stripDiscontinuity2 = FTTRKConstantsLoader.Longstrips + sideShortStrips + 1;  // 385
+        stripDiscontinuity3 = sequentialStrips + FTTRKConstantsLoader.SideHalfstrips; // 640
+        stripDiscontinuity4 = stripDiscontinuity3+1;    
         
         if(debugMode>=1) System.out.println("\nAnalyzing new event");
         List<FTTRKHit> allhits = null;
