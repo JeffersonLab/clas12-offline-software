@@ -40,6 +40,5 @@ public class DetectorLayer {
     public static final byte FTTRK_LAYER3=3;
     public static final byte FTTRK_LAYER4=4;
     
-    
 }
 
