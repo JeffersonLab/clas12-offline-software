@@ -177,15 +177,11 @@ public class FTTRKEngine extends ReconstructionEngine {
         JFrame frameClusters = new JFrame("FT strips in clusters");
         frameClusters.setSize(800,800);
         EmbeddedCanvas canvasCl = new EmbeddedCanvas();
-        JFrame frameClustersSingleLay = new JFrame("FT strips in clusters single layers");
-        frameClustersSingleLay.setSize(800,800);
-        EmbeddedCanvas canvasClSingleLay = new EmbeddedCanvas();
-        canvasClSingleLay.divide(2,2);
         
         int nc1 = 0, nc2 = 0, ncmatch = 0;
         int nev=0;
-//        while(reader.hasEvent()){
-        int nev1 = 0; int nev2 = 20000; for(nev=nev1; nev<nev2; nev++){   // debug only a set of events (uncomment while loop in case)
+        while(reader.hasEvent()){
+//        int nev1 = 0; int nev2 = 20000; for(nev=nev1; nev<nev2; nev++){   // debug only a set of events (uncomment while loop in case)
             DataEvent event = (DataEvent) reader.getNextEvent();
             if(debug>=1) System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~ processing event ~~~~~~~~~~~ " + nev); 
             
@@ -244,24 +240,13 @@ public class FTTRKEngine extends ReconstructionEngine {
                         default:    
                     }
             	}
-                // strip number correposponding to the max energy release
-                maxcomp1 = bank.getShort("component", imax1);
-                maxcomp2 = bank.getShort("component", imax2);
-                maxcomp3 = bank.getShort("component", imax3);
-                maxcomp4 = bank.getShort("component", imax4);
             }            
           
-            
+            canvasCl.draw(hHitL1);  // dummy histogram
             // iterate along the cluster list for every event
             if(debug>=1) System.out.println("clusters size --- " + clusters.size());
             if(clusters.size()!=0){
                 // get one cluster and iterate over all the strips contained in it
-                canvasCl.cd(1); canvasCl.draw(hHitL1);
-                for(int l=0; l<FTTRKConstantsLoader.Nlayers; l++){
-                    canvasClSingleLay.cd(l); 
-                    if(l==(DetectorLayer.FTTRK_LAYER3 - 1) || l==(DetectorLayer.FTTRK_LAYER4 -1)){
-                        canvasClSingleLay.draw(hHitL2);}else{canvasClSingleLay.draw(hHitL1);}
-                }
                 for(int i = 0; i < clusters.size(); i++){
                     // get a single cluster and count its strip, extract the information on extremal points of the segment
                     FTTRKCluster singleCluster = clusters.get(i);
@@ -368,10 +353,6 @@ public class FTTRKEngine extends ReconstructionEngine {
         frameClusters.add(canvasCl);    
         frameClusters.setLocationRelativeTo(null);
         frameClusters.setVisible(true);
-
-        frameClustersSingleLay.add(canvasClSingleLay);    
-        frameClustersSingleLay.setLocationRelativeTo(null);
-        frameClustersSingleLay.setVisible(true);
         
         JFrame frame3 = new JFrame("FT Occupancy single layers");
         frame3.setSize(1200,800);
