@@ -209,9 +209,9 @@ public class FTTRKEngineTest extends ReconstructionEngine {
         int nc1 = 0, nc2 = 0, ncmatch = 0;
         int nev=0;
         int TRK1 = DetectorLayer.FTTRK_MODULE1 - 1; 
-        int TRK2 = DetectorLayer.FTTRK_MODULE1 - 2;
+        int TRK2 = DetectorLayer.FTTRK_MODULE2 - 1;
         while(reader.hasEvent()){
-//       int nev1 = 0; int nev2 = 10000; for(nev=nev1; nev<nev2; nev++){   // debug only a set of events (uncomment while loop in case)
+//        int nev1 = 0; int nev2 = 30000; for(nev=nev1; nev<nev2; nev++){   // debug only a set of events (uncomment while loop in case)
             DataEvent event = (DataEvent) reader.getNextEvent();
             if(debug>=1) System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~ processing event ~~~~~~~~~~~ " + nev); 
 //            if(nev != 8) continue;    // select one event only for debugging purposes
@@ -292,11 +292,13 @@ public class FTTRKEngineTest extends ReconstructionEngine {
             if(debug>=1) System.out.println("clusters size --- " + clusters.size());
             if(clusters.size()!=0){
                 // get one cluster and iterate over all the strips contained in it
-                canvasCl.cd(1); canvasCl.draw(hHitL1);
+                // draw dummy histograms to be superimposed with strips
+                canvasCl.cd(1); canvasCl.draw(hHitMatch);
                 for(int l=0; l<FTTRKConstantsLoader.Nlayers; l++){
                     canvasClSingleLay.cd(l); 
                     if(l==DetectorLayer.FTTRK_LAYER2 || l==DetectorLayer.FTTRK_LAYER3){canvasClSingleLay.draw(hHitL2);}else{canvasClSingleLay.draw(hHitL1);}
                 }
+                
                 for(int i = 0; i < clusters.size(); i++){
                     // get a single cluster and count its strip, extract the information on extremal points of the segment
                     FTTRKCluster singleCluster = clusters.get(i);
