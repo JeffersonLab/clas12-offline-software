@@ -14,31 +14,15 @@ import org.jlab.detector.base.DetectorType;
  * @author devita
  */
 public class FTResponse extends DetectorResponse {
-    
-    //private String _type;            // FTCAL, FTHODO, FTTRK
-    private DetectorType _type;
+      
+    private DetectorType _type;      // FTCAL, FTHODO, FTTRK
     private int    _size;            // cluster multiplicity
-    private int    _id;              // response ID
+    private int    _id;              // response ID (ordinal number of hit)
     private int    _trkDet;          // number of TRK detector (0,1)
-    //private DetectorLayer _trkLayer;     // number of TRK detector+1
-
+    
     
     public FTResponse() {
     }
-    
-    /*
-    public FTResponse(String type) {
-        this._type = type;
-    }
-
-    public String getType() {
-        return _type;
-    }
-
-    public void setType(String type) {
-        this._type = type;
-    }
-    */
     
     public FTResponse(DetectorType type) {
         this._type = type;
@@ -72,32 +56,22 @@ public class FTResponse extends DetectorResponse {
         this._id = id;
     }
     
-    
     public int getTrkDet() {
         return _trkDet;
     }
-
-    public void setTrkDet(int ndet) {
-        this._trkDet = ndet;
-    }
     
-    
-    /*
-    public DetectorLayer getTrkDet() {
-        if(this._id == 0){
-            this._trkDet = DetectorLayer.FTTRK_MODULE1;
-        }else if(this._id == 1){
-            this._trkDet = DetectorLayer.FTTRK_MODULE1;
+    public void setTrkDet(byte layer) { 
+    // if the name of the module is passed it is a byte variable        
+        if(layer == DetectorLayer.FTTRK_MODULE1){         
+            this._trkDet = 0;
+        }else if(layer == DetectorLayer.FTTRK_MODULE2){
+            this._trkDet = 1;
         }
-        return _trkDet;
     }
    
-    
     public void setTrkDet(int ndet) {
         this._trkDet = ndet;
     }
-    */ 
-    
     
     public void show() {
         System.out.println("ID = "+ this.getId()
