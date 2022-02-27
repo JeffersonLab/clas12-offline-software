@@ -126,8 +126,10 @@ public class FTEventBuilder {
                 }
             }
             if (event.hasBank("FTTRK::crosses") == true) {
-                int TRK1 = DetectorLayer.FTTRK_MODULE1 - 1;   // tracker id=0
-                int TRK2 = DetectorLayer.FTTRK_MODULE2 - 1;   // tracker id=1
+                int TRK1 = DetectorLayer.FTTRK_MODULE1 - 1;   // module1, tracker id=0 (int index for loops)
+                int TRK2 = DetectorLayer.FTTRK_MODULE2 - 1;   // module2, tracker id=1
+                byte bytTRK1 = DetectorLayer.FTTRK_MODULE1;   // module1, trkid=0
+                byte bytTRK2 = DetectorLayer.FTTRK_MODULE2;   // module2, trkid=1
                 DataBank bank = event.getBank("FTTRK::crosses");
                 int nrows = bank.rows();
                 for (int i = 0; i < nrows; i++) {
@@ -141,9 +143,9 @@ public class FTEventBuilder {
                     double zCoord = bank.getFloat("z", i);
                     
                     if(zCoord >= FTTRKConstantsLoader.Zlayer[TRK1] && zCoord <= FTTRKConstantsLoader.Zlayer[TRK2]){
-                        resp.setTrkDet(TRK1);
+                        resp.setTrkDet(bytTRK1);
                     }else{
-                        resp.setTrkDet(TRK2);
+                        resp.setTrkDet(bytTRK2);
                     }
                     
                     if(debugMode>=1) System.out.println(" --------- id, cross x, y, z " + bank.getInt("id", i) + " " + bank.getFloat("x", i) + " " + bank.getFloat("y", i) + " " + bank.getFloat("z", i));
