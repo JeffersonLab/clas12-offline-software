@@ -19,7 +19,7 @@ public class StateVecs extends AStateVecs {
 
     
     @Override
-    public boolean getStateVecPosAtMeasSite(StateVec vec, AMeasVecs.MeasVec mv, Swim swim) {
+    public boolean getStateVecPosAtMeasSite(AStateVecs.StateVec vec, AMeasVecs.MeasVec mv, Swim swim) {
         double[] value = new double[4];
         
         if(mv.surface==null) return false;
@@ -67,7 +67,7 @@ public class StateVecs extends AStateVecs {
     }
     
     @Override
-    public boolean setStateVecPosAtMeasSite(StateVec sv, MeasVec mv, Swim swimmer) {
+    public boolean setStateVecPosAtMeasSite(AStateVecs.StateVec sv, MeasVec mv, Swim swimmer) {
 
         boolean status = this.getStateVecPosAtMeasSite(sv, mv, swimmer);
         if (!status) {
@@ -79,7 +79,7 @@ public class StateVecs extends AStateVecs {
     }
 
     @Override
-    public double[][] F(StateVec iVec, StateVec fVec) {
+    public double[][] F(AStateVecs.StateVec iVec, AStateVecs.StateVec fVec) {
         double[][] FMat = new double[][]{
             {1, 0, 0, 0, 0},
             {0, 1, 0, 0, 0},
@@ -91,7 +91,7 @@ public class StateVecs extends AStateVecs {
     }
 
     @Override
-    public double[][] Q(int i, int f, StateVec iVec, AMeasVecs mv) {
+    public double[][] Q(int i, int f, AStateVecs.StateVec iVec, AMeasVecs mv) {
         double[][] Q = new double[5][5];
 
         int dir = (int) Math.signum(f-i);
@@ -164,7 +164,7 @@ public class StateVecs extends AStateVecs {
     }
 
     @Override
-    public Vector3D X(StateVec kVec, double phi) {
+    public Vector3D X(AStateVecs.StateVec kVec, double phi) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -179,7 +179,7 @@ public class StateVecs extends AStateVecs {
     }
 
     @Override
-    public void printlnStateVec(StateVec S) {
+    public void printlnStateVec(AStateVecs.StateVec S) {
         String s = String.format("%d) x0=%.4f y0=%.4f z0=%.4f tx=%.4f tz=%.4f dl=%.4f", S.k, S.x0, S.y0, S.z0, S.tx, S.tz, S.dl);
         s       += String.format("    x=%.4f y=%.4f z=%.4f px=%.4f py=%.4f pz=%.4f", S.x, S.y, S.z, S.px, S.py, S.pz);
         System.out.println(s);
@@ -195,7 +195,7 @@ public class StateVecs extends AStateVecs {
         this.trackTraj = new HashMap<>();
         this.units = units;
 
-        initSV = new StateVec(0);
+        initSV = new AStateVecs.StateVec(0);
         initSV.x0 = x0;
         initSV.y0 = 0;
         initSV.z0 = z0;
@@ -210,7 +210,10 @@ public class StateVecs extends AStateVecs {
             }
         }
         initSV.covMat = covKF;
-        this.trackTraj.put(0, new StateVec(initSV));
+        this.trackTraj.put(0, new AStateVecs.StateVec(initSV));
+        this.trackTraj0.put(0, new AStateVecs.StateVec(initSV));
+        
     }
-    
+
+     public double piMass = 0.13957018;
 }

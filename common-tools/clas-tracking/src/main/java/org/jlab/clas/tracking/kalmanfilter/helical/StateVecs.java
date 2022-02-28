@@ -17,9 +17,9 @@ import org.jlab.geom.prim.Vector3D;
  */
 public class StateVecs extends AStateVecs {
 
-     
+    
     @Override
-    public boolean getStateVecPosAtMeasSite(StateVec sv, AMeasVecs.MeasVec mv, Swim swim) {
+    public boolean getStateVecPosAtMeasSite(AStateVecs.StateVec sv, AMeasVecs.MeasVec mv, Swim swim) {
         double[] swimPars = new double[7];
         Point3D  pos = new Point3D(0,0,0);
         Vector3D mom = new Vector3D(0,0,0);
@@ -142,21 +142,21 @@ public class StateVecs extends AStateVecs {
     }
     
     @Override
-    public boolean setStateVecPosAtMeasSite(StateVec sv, MeasVec mv, Swim swimmer) {
+    public boolean setStateVecPosAtMeasSite(AStateVecs.StateVec sv, MeasVec mv, Swim swimmer) {
 
         boolean status = this.getStateVecPosAtMeasSite(sv, mv, swimmer);
         if (!status) {
             return false;
         }
         sv.k = mv.k;
-        if(swimmer!=null && !this.straight) sv.alpha = new B(sv.k, sv.x, sv.y, sv.z, swimmer).alpha;
+        if(swimmer!=null && !this.straight) sv.alpha = new AStateVecs.B(sv.k, sv.x, sv.y, sv.z, swimmer).alpha;
         if(!this.straight) sv.pivotTransform(); //for straight tracks, keep the same pivot since F matrix is fixed anyway
         return true;
     }
           
     
     @Override
-    public double[][] F(StateVec iVec, StateVec fVec) {
+    public double[][] F(AStateVecs.StateVec iVec, AStateVecs.StateVec fVec) {
         double[][] FMat = new double[][]{
                                         {1, 0, 0, 0, 0},
                                         {0, 1, 0, 0, 0},
@@ -209,7 +209,7 @@ public class StateVecs extends AStateVecs {
     }
 
     @Override
-    public double[][] Q(int i, int f, StateVec iVec, AMeasVecs mv) {
+    public double[][] Q(int i, int f, AStateVecs.StateVec iVec, AMeasVecs mv) {
         double[][] Q = new double[5][5];
 
         int dir = f-i;
@@ -246,7 +246,7 @@ public class StateVecs extends AStateVecs {
                 {0, 0, 0, 0, 0},
                 {0, 0, sctRMS*sctRMS * (iVec.kappa * iVec.tanL * (1 + iVec.tanL * iVec.tanL)), 0, sctRMS*sctRMS * (1 + iVec.tanL * iVec.tanL) * (1 + iVec.tanL * iVec.tanL)}
             };
-        }
+        } 
 
         return Q;
     }
@@ -278,7 +278,7 @@ public class StateVecs extends AStateVecs {
     }
 
     @Override
-    public Vector3D X(StateVec kVec, double phi) {
+    public Vector3D X(AStateVecs.StateVec kVec, double phi) {
     if (kVec != null) {
             double x = kVec.x0 + kVec.d_rho * Math.cos(kVec.phi0) + kVec.alpha / kVec.kappa * (Math.cos(kVec.phi0) - Math.cos(kVec.phi0 + phi));
             double y = kVec.y0 + kVec.d_rho * Math.sin(kVec.phi0) + kVec.alpha / kVec.kappa * (Math.sin(kVec.phi0) - Math.sin(kVec.phi0 + phi));
@@ -289,7 +289,7 @@ public class StateVecs extends AStateVecs {
             return new Vector3D(0, 0, 0);
         }
     }
-
+    
     @Override
     public Vector3D P0(int kf) {
         if (this.trackTraj.get(kf) != null) {
@@ -333,7 +333,7 @@ public class StateVecs extends AStateVecs {
         //        System.out.println(this.straight);
 
         //init stateVec, pivot set to current vertex for field-on and to the reference for straight tracks
-        initSV = new StateVec(0);
+        initSV = new AStateVecs.StateVec(0);
         if(this.straight) {
             initSV.x0 = xref;
             initSV.y0 = yref;
@@ -381,11 +381,20 @@ public class StateVecs extends AStateVecs {
             }
         }
         initSV.covMat = covKF;
-        this.trackTraj.put(0, new StateVec(initSV));
+        double[][] FMat = new double[][]{
+                                        {1, 0, 0, 0, 0},
+                                        {0, 1, 0, 0, 0},
+                                        {0, 0, 1, 0, 0},
+                                        {0, 0, 0, 1, 0},
+                                        {0, 0, 0, 0, 1}
+                                        };
+        initSV.F = FMat;
+        this.trackTraj.put(0, new AStateVecs.StateVec(initSV));
+        
     }
 
     @Override
-    public void printlnStateVec(StateVec S) {
+    public void printlnStateVec(AStateVecs.StateVec S) {
         String s = String.format("%d) drho=%.4f phi0=%.4f kappa=%.4f dz=%.4f tanL=%.4f alpha=%.4f\n", S.k, S.d_rho, S.phi0, S.kappa, S.dz, S.tanL, S.alpha);
         s       += String.format("    x0=%.4f y0=%.4f z0=%.4f", S.x0, S.y0, S.z0);
         s       += String.format("    phi=%.4f x=%.4f y=%.4f z=%.4f px=%.4f py=%.4f pz=%.4f", S.phi, S.x, S.y, S.z, S.px, S.py, S.pz);
@@ -398,5 +407,5 @@ public class StateVecs extends AStateVecs {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-    
+     public double piMass = 0.13957018;
 }

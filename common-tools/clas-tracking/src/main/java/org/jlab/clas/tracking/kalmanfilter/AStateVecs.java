@@ -21,12 +21,17 @@ public abstract class AStateVecs {
     public double yref;
     public double zref;
 
-    public StateVec initSV;
+    public StateVec initSV; //init sv at target
     
-    public Map<Integer, StateVec> trackTraj  = new HashMap<>();
+    public StateVec initSVLastMeas; //init sv at last layer
+    
+    public Map<Integer, StateVec> trackTraj  = new HashMap<>(); //filtered
+    
+    public Map<Integer, StateVec> trackTraj0  = new HashMap<>();// transported
 
     public boolean straight;
 
+    
     public abstract void init(Helix trk, double[][] cov, double xref, double yref, double zref, Swim swimmer);
 
     public abstract void init(double x0, double z0, double tx, double tz, Units units, double[][] cov);
@@ -43,19 +48,30 @@ public abstract class AStateVecs {
 
     public abstract boolean getStateVecPosAtMeasSite(StateVec iVec, MeasVec mv, Swim swim);
 
-    public final void transport(int i, int f, AMeasVecs mv, Swim swimmer) {
+    public StateVec transported(int i, int f, AMeasVecs mv, Swim swimmer) {
     // transport state vector
         StateVec iVec = this.trackTraj.get(i);
         StateVec fVec = this.newStateVecAtMeasSite(iVec, mv.measurements.get(f), swimmer);
-        if(fVec==null) return;
+        if(fVec==null) return null;
         //transport covariance matrix
         double[][] fCov = this.propagateCovMat(iVec, fVec);
         double[][] iQ   = this.Q(i, f, iVec, mv);
-        double[][] fQ   = this.propagateMatrix(iVec, fVec, iQ);
+        //double[][] fQ   = this.propagateMatrix(iVec, fVec, iQ);
         if (fCov != null) {
-            fVec.covMat = addProcessNoise(fCov, fQ);            
+            fVec.covMat = addProcessNoise(fCov, iQ);            
         }
+        
+        fVec.F = this.F(iVec, fVec);
+        
+        return fVec;
+    }
+    
+    public final void transport(int i, int f, AMeasVecs mv, Swim swimmer) {
+    // transport state vector
+        StateVec fVec = this.transported(i, f, mv, swimmer);
+        if(fVec==null) return;
         this.trackTraj.put(f, fVec);
+        this.trackTraj0.put(f, fVec);
     }
 
     public final double[][] propagateCovMat(StateVec ivec, StateVec fvec) {
@@ -178,6 +194,8 @@ public abstract class AStateVecs {
         public double resi = 0;
 
         public double[][] covMat;
+        
+        public double[][] F;
 
         private double[] _ELoss = new double[3];
 
@@ -450,12 +468,8 @@ public abstract class AStateVecs {
             this.alpha = 1. / (lightVel * Math.abs(b[2]));
         }
     }
-    public double piMass = 0.13957018;
-    public double KMass = 0.493677;
-    public double muMass = 0.105658369;
-    public double eMass = 0.000510998;
-    public double pMass = 0.938272029;
-
+    
+   
     public abstract Vector3D P(int kf);
 
     public abstract Vector3D X(int kf);

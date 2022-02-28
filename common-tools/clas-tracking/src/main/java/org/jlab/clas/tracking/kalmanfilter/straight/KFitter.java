@@ -17,7 +17,7 @@ import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
  */
 public class KFitter extends AKFitter {
 
-    public Map<Integer, HitOnTrack> TrjPoints = new HashMap<>();
+    public Map<Integer, AKFitter.HitOnTrack> TrjPoints = new HashMap<>();
     public final StateVecs sv = new StateVecs();
     public final MeasVecs  mv = new MeasVecs();
     public StateVecs.StateVec finalStateVec;
@@ -52,8 +52,7 @@ public class KFitter extends AKFitter {
     @Override
     public void runFitter(AStateVecs sv, AMeasVecs mv) {
         for (int it = 0; it < totNumIter; it++) {
-            this.runFitterIter(sv, mv);
-            
+            this.runFitterIter(sv, mv,-1);
             // chi2
             double newchisq = this.calc_chi2(sv, mv); 
             // if curvature is 0, fit failed
@@ -87,7 +86,7 @@ public class KFitter extends AKFitter {
             }
             else if(!mv.measurements.get(k).surface.passive) {
                 int layer = mv.measurements.get(k).layer;
-                TrjPoints.put(layer, new HitOnTrack(layer, stv.x, stv.y, stv.z, stv.px, stv.py, stv.pz, stv.resi));
+                TrjPoints.put(layer, new AKFitter.HitOnTrack(layer, stv.x, stv.y, stv.z, stv.px, stv.py, stv.pz, stv.resi));
                 if(mv.measurements.get(k).skip)
                     TrjPoints.get(layer).isMeasUsed = false;
             }
@@ -148,6 +147,11 @@ public class KFitter extends AKFitter {
                 mv.measurements.get(k).skip = true;
             }
         }
+    }
+
+    @Override
+    public void smooth(int k, AStateVecs sv, AMeasVecs mv) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }
