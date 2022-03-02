@@ -85,16 +85,21 @@ public class SVTGeometry {
     }
     
     public static double getToverX0() {
-        return 2*SVTConstants.SILICONTHK/SVTConstants.SILICONRADLEN;
+        return SVTConstants.MODULETHICKNESS/2/SVTConstants.MODULERADLEN;
     }
     
     public static double getMaterialThickness() {
-        return SVTConstants.SILICONTHK;
+        return SVTConstants.MODULETHICKNESS/2;
     }
     
     public static double getZoverA() {
-        return SVTConstants.ZOVERA;
+        return SVTConstants.MODULEZOVERA;
     }
+    
+    public static double getDensity() {
+        return SVTConstants.MODULERHO;
+    }
+        
     public Line3D getStrip(int layer, int sector, int strip) {
         Line3d line = this._svtStripFactory.getShiftedStrip(layer-1, sector-1, strip-1);
         return new Line3D(line.origin().x,line.origin().y,line.origin().z,
@@ -248,11 +253,11 @@ public class SVTGeometry {
         surface.setLayer(layer);
         surface.setSector(sector);
         surface.setError(0); 
-        if(layer%2==0) {
-            surface.setl_over_X0(SVTGeometry.getToverX0());
-            surface.setZ_over_A_times_l(SVTGeometry.getZoverA());
-            surface.setThickness(SVTGeometry.getMaterialThickness());
-        }
+        surface.setl_over_X0(SVTGeometry.getToverX0());
+        surface.setZ_over_A_times_l(SVTGeometry.getZoverA());
+        surface.setThickness(SVTGeometry.getMaterialThickness()); 
+        surface.setDensity(SVTGeometry.getDensity());
+       
         surface.notUsedInFit=false;
         return surface;
     }
@@ -264,7 +269,8 @@ public class SVTGeometry {
         Arc3D base = new Arc3D(origin, center, axis, 2*Math.PI);
         Cylindrical3D shieldCylinder = new Cylindrical3D(base, SVTConstants.TSHIELDLENGTH);
         Surface shieldSurface = new Surface(shieldCylinder, new Strip(0, 0, 0), Constants.DEFAULTSWIMACC);
-        shieldSurface.setZ_over_A_times_l(SVTConstants.TSHILEDZOVERA);
+        shieldSurface.setDensity(SVTConstants.TSHIELDRHO);
+        shieldSurface.setZ_over_A_times_l(SVTConstants.TSHIELDZOVERA);
         shieldSurface.setThickness(SVTConstants.TSHIELDRMAX-SVTConstants.TSHIELDRMIN);
         shieldSurface.setl_over_X0(shieldSurface.getThickness()/SVTConstants.TSHIELDRADLEN);
         shieldSurface.passive=true;
@@ -279,6 +285,7 @@ public class SVTGeometry {
         Arc3D base = new Arc3D(origin, center, axis, 2*Math.PI);
         Cylindrical3D fcCylinder = new Cylindrical3D(base, SVTConstants.FARADAYCAGELENGTH[i]);
         Surface fcSurface = new Surface(fcCylinder, new Strip(0, 0, 0), Constants.DEFAULTSWIMACC);
+        fcSurface.setDensity(SVTConstants.FARADAYCAGERHO[i]);
         fcSurface.setZ_over_A_times_l(SVTConstants.FARADAYCAGEZOVERA[i]);
         fcSurface.setThickness(SVTConstants.FARADAYCAGERMAX[i]-SVTConstants.FARADAYCAGERMIN[i]);
         fcSurface.setl_over_X0(fcSurface.getThickness()/SVTConstants.FARADAYCAGERADLEN[i]);

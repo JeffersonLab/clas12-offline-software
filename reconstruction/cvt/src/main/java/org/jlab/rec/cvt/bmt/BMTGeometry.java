@@ -296,7 +296,19 @@ public class BMTGeometry {
        if(!(layer>=1 && layer<=BMTConstants.NLAYERS)) 
             throw new IllegalArgumentException("Error: invalid layer="+layer);
        
-       return BMTConstants.getMaterial_T()[layer-1];
+       return BMTConstants.getMaterialThickness()[layer-1];
+     }
+    
+    /**
+     * Return material thickness
+     * @param layer
+     * @return density in g/mm3
+     */
+    public double getMaterialDensity(int layer) {
+       if(!(layer>=1 && layer<=BMTConstants.NLAYERS)) 
+            throw new IllegalArgumentException("Error: invalid layer="+layer);
+       
+       return BMTConstants.getMaterialDensity()[layer-1];
      }
     
     /**
@@ -963,6 +975,7 @@ public class BMTGeometry {
         surface.setl_over_X0(this.getToverX0(layer));
         surface.setZ_over_A_times_l(this.getZoverA(layer));
         surface.setThickness(this.getMaterialThickness(layer));
+        surface.setDensity(this.getMaterialDensity(layer));
         surface.notUsedInFit=false;
         return surface;
     }

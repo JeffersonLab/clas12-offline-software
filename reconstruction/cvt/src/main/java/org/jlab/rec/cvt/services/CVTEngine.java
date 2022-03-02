@@ -325,8 +325,6 @@ public class CVTEngine extends ReconstructionEngine {
         CCDBConstantsLoader.Load(new DatabaseConstantProvider(11, variation));
         System.out.println("SVT LOADING WITH VARIATION "+variation);
         DatabaseConstantProvider cp = new DatabaseConstantProvider(11, variation);
-        cp = SVTConstants.connect( cp );
-        cp.disconnect();  
         SVTStripFactory svtFac = new SVTStripFactory(cp, true);
         Constants.SVTGEOMETRY  = new SVTGeometry(svtFac);
         Constants.BMTGEOMETRY  = new BMTGeometry();

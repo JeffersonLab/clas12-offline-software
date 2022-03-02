@@ -115,7 +115,8 @@ public class SVTConstants {
         public static double TSHIELDLENGTH  = 360;
         public static double TSHIELDZPOS    = -50;
         public static double TSHIELDRADLEN  = 6.76/19.3 *10; // X0(g/cm2) / density(g/cm3) * 10; 
-        public static double TSHILEDZOVERA  = 0.40252;
+        public static double TSHIELDZOVERA  = 0.40252;
+        public static double TSHIELDRHO     = 19.3E-3; // g/mm3
         
          // faraday cup cage
          public static double[] FARADAYCAGERMIN    = new double[4];
@@ -125,6 +126,7 @@ public class SVTConstants {
          public static String[] FARADAYCAGENAME    = new String[4];
          public static double[] FARADAYCAGERADLEN  = new double[4];
          public static double[] FARADAYCAGEZOVERA  = new double[4];
+         public static double[] FARADAYCAGERHO     = new double[4];
          
          
          // region peek supports
@@ -132,10 +134,15 @@ public class SVTConstants {
          public static double[] REGIONPEEKRMAX;
          public static double[] REGIONPEEKLENGTH;
          
-         // material and radiation length information
-         public static final double SILICONRADLEN = 9.36 * 10; //converted to mm
-         public static final double ZOVERA = 0.49848;
-
+         // map of material properties for dE/dx and mult. scat
+         // the array contains thickness density in g/mm3, Z/A, X0
+         public static final Map<String, double[]> MATERIALPROPERTIES = new LinkedHashMap<>();
+         public static double MODULERADLEN;
+         public static double MODULEZOVERA;
+         public static double MODULERHO;
+         public static double MODULETHICKNESS;
+         public static double MODULERHOX;
+         
          /**
 	 * Loads the the necessary tables for the SVT geometry for a given DatabaseConstantProvider.
 	 * 
@@ -160,6 +167,8 @@ public class SVTConstants {
 		//if( loadAlignmentTables ) cp.loadTable( ccdbPath +"alignment/layer");
 		
 		load( cp );
+                cp.disconnect();
+                
 		return cp;
 	}
 	
@@ -312,9 +321,41 @@ public class SVTConstants {
                     FARADAYCAGEZPOS[i]   = cp.getDouble( ccdbPath+"material/faradaycage/zpos",   i);
                     FARADAYCAGENAME[i]   = cp.getString( ccdbPath+"material/faradaycage/name",   i);
                 }
-                FARADAYCAGERADLEN = new double[]{503, 237, 5440, 1000};   // RDV do be checked
-                FARADAYCAGEZOVERA = new double[]{0.52037, 0.5, 0.5, 0.5};
+                FARADAYCAGERADLEN = new double[]{500, 250, 5440, 1000};   
+                FARADAYCAGEZOVERA = new double[]{0.52098, 0.51342, 0.52005, 0.5392};
+                FARADAYCAGERHO    = new double[]{1.4E-3, 1.75E-3, 0.1E-3, 0.1E-3};
                                                      
+                // fill material property map
+                //material      thickness   density            Z/A         Composition
+                //sensor    	2x320 um    2.328E-3 g/mm3     0.49848     Si
+                //epoxy 	2x63 um     1.16E-3 g/mm3      0.55263     H 32 N 2 O 4 C 15 
+                //busCable 	2x78 um     2.692E-3 g/mm3     0.54538     G4_Cu 0.219 G4_POLYETHYLENE 0.781
+                //carbonFiber 	2x190 um    1.75E-3 g/mm3      0.51342     G4_C 0.745 epoxy(tdr1100) 0.255
+                //rohacell 	2.5 mm      0.1E-3 g/mm3       0.5392      G4_C 0.6465 G4_H 0.0784 G4_N 0.0839 G4_O 0.1912 
+                // radiation lengths (mm)  from SVT TDR
+                MATERIALPROPERTIES.put("silicon",     new double[]{2*SILICONTHK,                                      2.328E-3, 0.49848,  93.7});
+                MATERIALPROPERTIES.put("epoxy",       new double[]{2*MATERIALDIMENSIONS.get("epoxyAndRailAndPads")[1], 1.16E-3, 0.55263, 443.7});
+                MATERIALPROPERTIES.put("busCable",    new double[]{2*MATERIALDIMENSIONS.get("busCable")[1],           2.692E-3, 0.54538,  14.3});
+                MATERIALPROPERTIES.put("carbonFiber", new double[]{2*MATERIALDIMENSIONS.get("carbonFiber")[1],         1.75E-3, 0.51342, 250.0});
+                MATERIALPROPERTIES.put("rohacell",    new double[]{MATERIALDIMENSIONS.get("rohacell")[1],               0.1E-3, 0.5392, 4500.0});
+                for(String key : MATERIALPROPERTIES.keySet()) {
+                    double[] value = MATERIALPROPERTIES.get(key);
+                    MODULETHICKNESS += value[0];
+                    MODULERADLEN    += value[0]/value[3];
+                    MODULEZOVERA    += value[2]*value[1]*value[0];
+                    MODULERHOX      += value[1]*value[0];
+                }
+                MODULERADLEN = MODULETHICKNESS/MODULERADLEN;
+                MODULERHO    = MODULERHOX/MODULETHICKNESS;
+                MODULEZOVERA = MODULEZOVERA/MODULERHOX;
+                if( VERBOSE )
+                {
+                    System.out.printf("Module thickness          %9.4f mm\n",   MODULETHICKNESS);
+                    System.out.printf("Module average density    %.4e g/mm3\n", MODULERHO);
+                    System.out.printf("Module average Z/A        %9.4f \n",     MODULEZOVERA);
+                    System.out.printf("Module total X0           %9.4f mm\n",   MODULERADLEN);
+                }
+                
                 // calculate derived constants
                 NLAYERS = NMODULES*NREGIONS;
                 MODULELEN = NSENSORS*(ACTIVESENLEN + 2*DEADZNLEN) + (NSENSORS - 1)*MICROGAPLEN;

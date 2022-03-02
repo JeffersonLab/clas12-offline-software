@@ -212,25 +212,15 @@ public class StateVecs extends AStateVecs {
     public double[][] Q(int i, int f, StateVec iVec, AMeasVecs mv) {
         double[][] Q = new double[5][5];
 
-        int dir = f-i;
+        int dir = (int) Math.signum(f-i);
 
         double t_ov_X0 = 0;
-        if(dir>0) {
-            for(int k=i; k<f; k++) {
-                double cosEntranceAngle = this.getLocalDirAtMeasSite(iVec, mv.measurements.get(k+1));
-                t_ov_X0 += mv.measurements.get(k+1).l_over_X0/cosEntranceAngle;
-//                System.out.println("From " + i + " to " + f + " including material from surface " + (k+1) + " with X0 = " +  mv.measurements.get(k+1).l_over_X0 + " / " + cosEntranceAngle);
-//                System.out.println(mv.measurements.get(k+1).surface.toString());
-            }
-        }
-        else {
-            for(int k=i; k>f; k--) {
-                double cosEntranceAngle = this.getLocalDirAtMeasSite(iVec, mv.measurements.get(k));
-                t_ov_X0 += mv.measurements.get(k).l_over_X0/cosEntranceAngle;
-//                System.out.println("From " + i + " to " + f + " including material from surface " + k + " with X0 = " +  mv.measurements.get(k).l_over_X0 + " / " + cosEntranceAngle);
-//                System.out.println(mv.measurements.get(k).surface.toString());
-            }
-        }
+        for (int k = i; (k-f)*dir < 0; k += dir) {
+            double cosEntranceAngle = this.getLocalDirAtMeasSite(iVec, mv.measurements.get(k));
+            t_ov_X0 += mv.measurements.get(k).l_over_X0/cosEntranceAngle;
+//            System.out.println("From " + i + " to " + f + " including material from surface " + k + " with X0 = " +  mv.measurements.get(k).l_over_X0 + " / " + cosEntranceAngle);
+//            System.out.println(mv.measurements.get(k).surface.toString());
+        }        
 
         if (t_ov_X0>0) {
             double p    = Math.sqrt(iVec.px*iVec.px + iVec.py*iVec.py + iVec.pz*iVec.pz);

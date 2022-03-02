@@ -72,6 +72,7 @@ public class CCDBConstantsLoader {
         double[] EFF_Z_OVER_A = new double[NLAYERS];
         double[] T_OVER_X0    = new double[NLAYERS];
         double[] TMAT         = new double[NLAYERS];
+        double[] RHO          = new double[NLAYERS];
         
          int GRID_SIZE=405;
          double[] THETA_L_grid = new double [GRID_SIZE];
@@ -219,13 +220,19 @@ public class CCDBConstantsLoader {
         //===============
         for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_material" + "/sector"); i++) {
             int layer = dbprovider.getInteger("/geometry/cvt/mvt/bmt_material" + "/layer", i);
-            double thickness = dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/thickness", i)/10000.;
+            double density = dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/density", i)*1E-3;       // g/mm3
+            double thickness = dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/thickness", i)/1000.;  // mm
             double Zeff =  dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/average_z", i);
             double Aeff =  dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/average_a", i);
-            double X0 =  dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/x0", i);
-            EFF_Z_OVER_A[layer-1] += thickness*Zeff/Aeff;      
-            T_OVER_X0[layer-1]+=thickness/X0;
+            double X0 =  dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/x0", i)*10;                  // mm
+            EFF_Z_OVER_A[layer-1] += density*thickness*Zeff/Aeff;      
+            T_OVER_X0[layer-1]+= thickness/X0;
             TMAT[layer-1] += thickness;
+            RHO[layer-1] += thickness*density;
+        }
+        for(int i=0; i<TMAT.length; i++) {
+            EFF_Z_OVER_A[i] /= RHO[i];
+            RHO[i] /= TMAT[i];
         }
         
         
@@ -321,6 +328,8 @@ public class CCDBConstantsLoader {
         BMTConstants.setCRZWIDTH(CRZWIDTH);
         BMTConstants.setEFF_Z_OVER_A(EFF_Z_OVER_A);
         BMTConstants.setT_OVER_X0(T_OVER_X0);
+        BMTConstants.setMaterialThickness(TMAT);
+        BMTConstants.setMaterialDensity(RHO);
         BMTConstants.setTHETAL_grid(THETA_L_grid);
         BMTConstants.setE_grid(ELEC_grid);
         BMTConstants.setB_grid(MAG_grid);

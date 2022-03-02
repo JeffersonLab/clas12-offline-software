@@ -63,6 +63,7 @@ public class BMTConstants {
     private static double[] EFF_Z_OVER_A = new double[NREGIONS*2];      // for ELOSS
     private static double[] T_OVER_X0 = new double[NREGIONS*2];         // for M.Scat.
     private static double[] TMAT = new double[NREGIONS*2];              // for M.Scat.
+    private static double[] TRHO = new double[NREGIONS*2];              // for ELOSS
 
   
     // THE RECONSTRUCTION CONSTANTS
@@ -359,11 +360,18 @@ public class BMTConstants {
         T_OVER_X0 = t_OVER_X0;
     }
     
-    public static double[] getMaterial_T() {
+    public static double[] getMaterialThickness() {
         return TMAT;
     }
-    public static synchronized void setMaterial_T(double[] t) {
+    public static synchronized void setMaterialThickness(double[] t) {
         TMAT = t;
+    }
+    
+    public static double[] getMaterialDensity() {
+        return TRHO;
+    }
+    public static synchronized void setMaterialDensity(double[] t) {
+        TRHO = t;
     }
     
     public static synchronized void setTHETAL_grid(double[] cThetaL_grid) {

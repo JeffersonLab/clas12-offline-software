@@ -99,12 +99,14 @@ public class StateVecs extends AStateVecs {
         
         double t_ov_X0 = 0;
         // depending on dir, k increases or decreases
-        for (int k = i; (k-f)*dir <= 0; k += dir) {
-            int hemisphere = (int) mv.measurements.get(k).surface.hemisphere;
-            if(dir*hemisphere>0 && k==f) continue;
-            if(dir*hemisphere<0 && k==i) continue;
-            double cosEntranceAngle = 1;//this.getLocalDirAtMeasSite(iVec, mv.measurements.get(k));
+        for (int k = i; (k-f)*dir < 0; k += dir) {
+//            int hemisphere = (int) mv.measurements.get(k).surface.hemisphere;
+//            if(dir*hemisphere>0 && k==f) continue;
+//            if(dir*hemisphere<0 && k==i) continue;
+            double cosEntranceAngle = this.getLocalDirAtMeasSite(iVec, mv.measurements.get(k));
             t_ov_X0 += mv.measurements.get(k).l_over_X0 / cosEntranceAngle;
+//            System.out.println("From " + i + " to " + f + " including material from surface " + k + " with X0 = " +  mv.measurements.get(k).l_over_X0 + " / " + cosEntranceAngle);
+//            System.out.println(mv.measurements.get(k).surface.toString()); 
         }
 
         if (t_ov_X0>0) {
