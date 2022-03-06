@@ -16,6 +16,7 @@ import static org.jlab.rec.cvt.bmt.BMTConstants.E_DRIFT_MF;
 import static org.jlab.rec.cvt.bmt.Lorentz.getLorentzAngle;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.clas.tracking.kalmanfilter.Surface.Material;
 import org.jlab.clas.tracking.objects.Strip;
 import org.jlab.geom.prim.Transformation3D;
 import org.jlab.groot.data.H1F;
@@ -273,55 +274,7 @@ public class BMTGeometry {
     public double getThickness() {
         
         return BMTConstants.HDRIFT;
-    }
-    
-    /**
-     * Return material thickness in units of X0
-     * @param layer
-     * @return thickness in units of radiation lengths  
-     */
-    public double getToverX0(int layer) {
-       if(!(layer>=1 && layer<=BMTConstants.NLAYERS)) 
-            throw new IllegalArgumentException("Error: invalid layer="+layer);
-       
-       return BMTConstants.getT_OVER_X0()[layer-1];
-     }
-    
-    /**
-     * Return material thickness
-     * @param layer
-     * @return thickness in mm
-     */
-    public double getMaterialThickness(int layer) {
-       if(!(layer>=1 && layer<=BMTConstants.NLAYERS)) 
-            throw new IllegalArgumentException("Error: invalid layer="+layer);
-       
-       return BMTConstants.getMaterialThickness()[layer-1];
-     }
-    
-    /**
-     * Return material thickness
-     * @param layer
-     * @return density in g/mm3
-     */
-    public double getMaterialDensity(int layer) {
-       if(!(layer>=1 && layer<=BMTConstants.NLAYERS)) 
-            throw new IllegalArgumentException("Error: invalid layer="+layer);
-       
-       return BMTConstants.getMaterialDensity()[layer-1];
-     }
-    
-    /**
-     * Return effective Z/A
-     * @param layer
-     * @return Z over A 
-     */
-    public double getZoverA(int layer) {
-       if(!(layer>=1 && layer<=BMTConstants.NLAYERS)) 
-            throw new IllegalArgumentException("Error: invalid layer="+layer);
-       
-       return BMTConstants.getEFF_Z_OVER_A()[layer-1];
-     }    
+    }    
     
     /**
      * Return offset of the selected tile, identified by layer and sector
@@ -972,10 +925,10 @@ public class BMTGeometry {
         surface.setSector(sector);
         surface.setTransformation(this.toGlobal(layer, sector));
         surface.setError(0); 
-        surface.setl_over_X0(this.getToverX0(layer));
-        surface.setZ_over_A_times_l(this.getZoverA(layer));
-        surface.setThickness(this.getMaterialThickness(layer));
-        surface.setDensity(this.getMaterialDensity(layer));
+        for(String key : BMTConstants.getMaterials().keySet()) {
+            double[] p = BMTConstants.getMaterials().get(key);
+            surface.addMaterial(key, p[0], p[1], p[2], p[3], p[4]);
+        }
         surface.notUsedInFit=false;
         return surface;
     }

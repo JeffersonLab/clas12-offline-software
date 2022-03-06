@@ -68,11 +68,6 @@ public class CCDBConstantsLoader {
         double[][] CRCEDGE1 = new double[NREGIONS][NSECTORS];   // the angle of the first edge of each PCB detector A, B, C
         double[][] CRCEDGE2 = new double[NREGIONS][NSECTORS];   // the angle of the second edge of each PCB detector A, B, C
         double[] CRCXPOS = new double[NREGIONS]; 		// Distance on the PCB between the PCB first edge and the edge of the first strip in mm
-
-        double[] EFF_Z_OVER_A = new double[NLAYERS];
-        double[] T_OVER_X0    = new double[NLAYERS];
-        double[] TMAT         = new double[NLAYERS];
-        double[] RHO          = new double[NLAYERS];
         
          int GRID_SIZE=405;
          double[] THETA_L_grid = new double [GRID_SIZE];
@@ -99,7 +94,7 @@ public class CCDBConstantsLoader {
         dbprovider.loadTable("/geometry/cvt/mvt/bmt_strip_L6");
         
         //load material budget:
-        dbprovider.loadTable("/geometry/cvt/mvt/bmt_material");
+        dbprovider.loadTable("/geometry/cvt/mvt/material");
         
          //load Lorentz angle table
         dbprovider.loadTable("/calibration/mvt/lorentz");
@@ -218,21 +213,18 @@ public class CCDBConstantsLoader {
         
         //material budget
         //===============
-        for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_material" + "/sector"); i++) {
-            int layer = dbprovider.getInteger("/geometry/cvt/mvt/bmt_material" + "/layer", i);
-            double density = dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/density", i)*1E-3;       // g/mm3
-            double thickness = dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/thickness", i)/1000.;  // mm
-            double Zeff =  dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/average_z", i);
-            double Aeff =  dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/average_a", i);
-            double X0 =  dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/x0", i)*10;                  // mm
-            EFF_Z_OVER_A[layer-1] += density*thickness*Zeff/Aeff;      
-            T_OVER_X0[layer-1]+= thickness/X0;
-            TMAT[layer-1] += thickness;
-            RHO[layer-1] += thickness*density;
-        }
-        for(int i=0; i<TMAT.length; i++) {
-            EFF_Z_OVER_A[i] /= RHO[i];
-            RHO[i] /= TMAT[i];
+        for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/material" + "/sector"); i++) {
+            int layer    = dbprovider.getInteger("/geometry/cvt/mvt/material" + "/layer", i);
+            int comp     = dbprovider.getInteger("/geometry/cvt/mvt/material" + "/component", i);
+            double[] properties = new double[5];
+            String name   = dbprovider.getString("/geometry/cvt/mvt/material" + "/name", i);
+            properties[0] = dbprovider.getDouble("/geometry/cvt/mvt/material" + "/thickness", i)/1000.;  // mm
+            properties[1] = dbprovider.getDouble("/geometry/cvt/mvt/material" + "/density", i)*1E-3;     // g/mm3
+            properties[2] = dbprovider.getDouble("/geometry/cvt/mvt/material" + "/average_Z", i)/
+                            dbprovider.getDouble("/geometry/cvt/mvt/material" + "/average_A", i);
+            properties[3] =  dbprovider.getDouble("/geometry/cvt/mvt/material" + "/X0", i)*10;           // mm
+            properties[4] =  dbprovider.getDouble("/geometry/cvt/mvt/material" + "/I", i);               // eV
+            BMTConstants.addMaterial(name, properties);
         }
         
         
@@ -326,10 +318,6 @@ public class CCDBConstantsLoader {
         BMTConstants.setCRCGRPNMIN(CRCGRPNMIN);
         BMTConstants.setCRCGRPNMAX(CRCGRPNMAX);
         BMTConstants.setCRZWIDTH(CRZWIDTH);
-        BMTConstants.setEFF_Z_OVER_A(EFF_Z_OVER_A);
-        BMTConstants.setT_OVER_X0(T_OVER_X0);
-        BMTConstants.setMaterialThickness(TMAT);
-        BMTConstants.setMaterialDensity(RHO);
         BMTConstants.setTHETAL_grid(THETA_L_grid);
         BMTConstants.setE_grid(ELEC_grid);
         BMTConstants.setB_grid(MAG_grid);
