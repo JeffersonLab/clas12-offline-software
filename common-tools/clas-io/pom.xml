@@ -13,19 +13,6 @@
     <version>7.1.0-SNAPSHOT</version>
   </parent>
 
-  <build>
-      <plugins>
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <configuration>
-                  <source>1.8</source>
-                  <target>1.8</target>
-              </configuration>
-          </plugin>
-      </plugins>
-  </build>
-
   <dependencies>
 
     <dependency>
@@ -89,30 +76,19 @@
       <version>2.3-SNAPSHOT</version>
     </dependency>
 
-<!--
-    <dependency>
-      <groupId>org.jlab.clas</groupId>
-      <artifactId>clas-tools</artifactId>
-      <version>2.4-SNAPSHOT</version>
-    </dependency>
--->
-
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-utils</artifactId>
       <version>7.1.0-SNAPSHOT</version>
     </dependency>
+
     <dependency>
         <groupId>org.jlab.clas</groupId>
         <artifactId>clas-logging</artifactId>
         <version>7.1.0-SNAPSHOT</version>
         <scope>compile</scope>
     </dependency>
-  </dependencies>
 
-  <properties>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-  </properties>
+  </dependencies>
 
 </project>
