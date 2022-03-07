@@ -114,8 +114,7 @@ public class CVTEngine extends ReconstructionEngine {
         IndexedTable svtStatus = this.getConstantsManager().getConstants(this.getRun(), "/calibration/svt/status");
         IndexedTable bmtStatus = this.getConstantsManager().getConstants(this.getRun(), "/calibration/mvt/bmt_status");
         IndexedTable bmtTime   = this.getConstantsManager().getConstants(this.getRun(), "/calibration/mvt/bmt_time");
-        IndexedTable beamPos   = this.getConstantsManager().getConstants(this.getRun(), "/geometry/beam/position");
-
+        
         HitReader hitRead = new HitReader();
         hitRead.fetch_SVTHits(event, adcConv, -1, -1, svtStatus);
         if(Constants.SVTONLY==false)
@@ -181,8 +180,17 @@ public class CVTEngine extends ReconstructionEngine {
             strgtTrksRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
                     crosses, rbc, swimmer);
         } else {
-            double xb = beamPos.getDoubleValue("x_offset", 0, 0, 0);
-            double yb = beamPos.getDoubleValue("y_offset", 0, 0, 0);
+                double xb, yb;
+                if(event.hasBank("RASTER::position")){
+                DataBank raster_bank = event.getBank("RASTER::position");
+                xb = raster_bank.getFloat("x", 0);
+                yb = raster_bank.getFloat("y", 0);
+                }   
+                else {
+                IndexedTable beamPos   = this.getConstantsManager().getConstants(this.getRun(), "/geometry/beam/position");
+                xb = beamPos.getDoubleValue("x_offset", 0, 0, 0);
+                yb = beamPos.getDoubleValue("y_offset", 0, 0, 0);
+                }
             trksFromTargetRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
                 crosses, xb , yb, rbc, swimmer);
         }
