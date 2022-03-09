@@ -237,12 +237,12 @@ public class Surface implements Comparable<Surface> {
     
     public class Material {
         
-        private String name;
-        private double thickness;
-        private double density;
-        private double ZoverA;
-        private double X0;
-        private double IeV;
+        public String name;
+        public double thickness;
+        public double density;
+        public double ZoverA;
+        public double X0;
+        public double IeV;
 
         public Material(String name, double thickness, double density, double ZoverA, double X0, double IeV) {
             this.name = name;

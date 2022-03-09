@@ -55,9 +55,37 @@ public abstract class AStateVecs {
         if (fCov != null) {
             fVec.covMat = addProcessNoise(fCov, fQ);            
         }
+        this.corrForEloss(iVec, fVec, mv, f-i);
         this.trackTraj.put(f, fVec);
     }
+    
+    private double _mass ;
+    
+    /**
+     * @return the _mass
+     */
+    public double getMass() {
+        return _mass;
+    }
 
+    /**
+     * @param _mass the _mass to set
+     */
+    public void setMass(Mass mass) {
+        this._mass = mass.value();
+    }
+    
+    public abstract double ELoss(int i, int f, StateVec iVec, AMeasVecs mv);
+    
+    public void corrForEloss(StateVec iVec, StateVec fVec, AMeasVecs mv, int dir) {
+        double dE = this.ELoss(iVec.k, fVec.k, iVec, mv);
+        double pObs = Math.sqrt(1 + fVec.tanL*fVec.tanL)/ Math.abs(fVec.kappa);
+        double E = Math.sqrt(pObs*pObs + this.getMass()*this.getMass());
+        //update Kappa
+        double kappaUpd = fVec.kappa*( 1 +(double)dir* dE/E);
+        
+        fVec.kappa = kappaUpd;
+    }
     public final double[][] propagateCovMat(StateVec ivec, StateVec fvec) {
         return this.propagateMatrix(ivec, fvec, ivec.covMat);
     }

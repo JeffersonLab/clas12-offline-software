@@ -5,6 +5,7 @@ import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs.MeasVec;
 import org.jlab.clas.tracking.kalmanfilter.AStateVecs;
+import org.jlab.clas.tracking.kalmanfilter.Mass;
 import org.jlab.clas.tracking.trackrep.Helix;
 import org.jlab.clas.tracking.trackrep.Helix.Units;
 import org.jlab.geom.prim.Line3D;
@@ -213,6 +214,13 @@ public class StateVecs extends AStateVecs {
         }
         initSV.covMat = covKF;
         this.trackTraj.put(0, new StateVec(initSV));
+        
+        this.setMass(Mass.mu);
+    }
+
+    @Override
+    public double ELoss(int i, int f, StateVec iVec, AMeasVecs mv) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }
