@@ -209,14 +209,14 @@ public class RICHTool{
     private double pixel_mtime[][] = new double [NPMT][NPIX];            // 0 = dead, 1 = ok, 2= hot
     private double pixel_stime[][] = new double [NPMT][NPIX];            // 0 = dead, 1 = ok, 2= hot
 
-    private double aero_refi[][] = new double[4][31];
-    private double aero_plan[][] = new double[4][31];
-    private double aero_chele_dir[][][] = new double[4][31][225];
-    private double aero_chele_lat[][][] = new double[4][31][225];
-    private double aero_chele_spe[][][] = new double[4][31][225];
-    private double aero_schele_dir[][][] = new double[4][31][225];
-    private double aero_schele_lat[][][] = new double[4][31][225];
-    private double aero_schele_spe[][][] = new double[4][31][225];
+    private double aero_refi[][] = new double[4][32];
+    private double aero_plan[][] = new double[4][32];
+    private double aero_chele_dir[][][] = new double[4][32][225];
+    private double aero_chele_lat[][][] = new double[4][32][225];
+    private double aero_chele_spe[][][] = new double[4][32][225];
+    private double aero_schele_dir[][][] = new double[4][32][225];
+    private double aero_schele_lat[][][] = new double[4][32][225];
+    private double aero_schele_spe[][][] = new double[4][32][225];
 
     private Vector3D rich_survey_angle  = new Vector3D();
     private Vector3D rich_survey_shift  = new Vector3D();
@@ -402,7 +402,7 @@ public class RICHTool{
         * AEROGEL CALIBRATED OPTCIS (USING ELECTRON CONTROL SAMPLE)
         */
 
-        int ndo[] = {16,22,31,31};
+        int ndo[] = {16,22,32,32};
         double mrad = reco_constants.MRAD;
         for (int ila=0; ila<4; ila++){
             for (int ico=0; ico<ndo[ila]*225; ico++){
@@ -618,7 +618,7 @@ public class RICHTool{
         * AEROGEL NOMINAL OPTCIS
         */
 
-        int nco[] = {16,22,31,31};
+        int nco[] = {16,22,32,32};
         for (int ila=0; ila<4; ila++){
             for (int ico=0; ico<nco[ila]; ico++){
                 aero_refi[ila][ico] = (float) aeroConstants.getDoubleValue("n400", 4,201+ila,ico+1);
