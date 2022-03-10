@@ -411,7 +411,7 @@ public class StateVecs extends AStateVecs {
         double beta = p / Math.sqrt(p * p + mass * mass);
         double s = Mass.e.value() / mass;
         double gamma = 1. / Math.sqrt(1 - beta * beta);
-        double Wmax = 2. * mass * beta * beta * gamma * gamma / (1. + 2. * s * gamma + s * s);
+        double Wmax = 2. * Mass.e.value() * beta * beta * gamma * gamma / (1. + 2. * s * gamma + s * s);
         double K = 0.000307075*this.units.unit()*this.units.unit(); //  GeV mol-1 cm2
         //double E = Math.sqrt(p*p + this.getMass()*this.getMass());
         
@@ -427,9 +427,9 @@ public class StateVecs extends AStateVecs {
                     double ZovA = surf.getMaterials().get(matidx).ZoverA;
                     double density = surf.getMaterials().get(matidx).density;
                     double I = surf.getMaterials().get(matidx).IeV* 1e-9; //GeV
-                    double logterm = 2. * mass * beta * beta * gamma * gamma * Wmax / (I * I); 
+                    double logterm = 2. * Mass.e.value() * beta * beta * gamma * gamma * Wmax / (I * I); 
                     dE += K*((ZovA/(beta*beta))  * 
-                            (0.5*Math.log(logterm) -  beta * beta ) / (beta * beta))
+                            (0.5*Math.log(logterm) -  beta * beta ))
                             *density*thickn/cosEntranceAngle; //in GeV
                 }
             }
