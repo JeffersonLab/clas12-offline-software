@@ -6,15 +6,6 @@
   <version>7.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <!--
-  <parent>
-    <groupId>org.jlab.coat</groupId>
-    <artifactId>coat-clas-parent</artifactId>
-    <relativePath>../parent/pom.xml</relativePath>
-    <version>1.0-SNAPSHOT</version>
-  </parent>
-  -->
-
   <repositories>
     <repository>
       <id>local-build</id>
@@ -29,8 +20,6 @@
      <url>https://srs.slac.stanford.edu/nexus/content/groups/freehep-maven2-public/</url>
     </repository>
   </repositories>
-
-  <!-- project Dependencies -->
 
   <dependencies>
     <dependency>
