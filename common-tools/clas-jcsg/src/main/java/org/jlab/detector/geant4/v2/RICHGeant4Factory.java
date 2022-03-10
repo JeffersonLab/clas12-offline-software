@@ -99,7 +99,7 @@ public final class RICHGeant4Factory extends Geant4Factory {
         Read_Stl(gasVolume,201,16);
         Read_Stl(gasVolume,202,22);
         Read_Stl(gasVolume,203,32);
-        Read_Stl(gasVolume,204,31); //component 32 has been left empty in sector 4 rich
+        Read_Stl(gasVolume,204,32); 
         // Mirrors
         Read_Stl(gasVolume,301,7); //Planar Mirrors
         Read_Stl(gasVolume,302,10); //Spherical Mirrors
@@ -321,8 +321,8 @@ public final class RICHGeant4Factory extends Geant4Factory {
         //System.out.format("getStlNumber Chiesto layer %d\n",Layer_nr);
         if (Layer_nr == 201) return 16;
         else if (Layer_nr == 202) return 22;
-        else if (Layer_nr == 203) return 31;
-        else if (Layer_nr == 204) return 31;
+        else if (Layer_nr == 203) return 32;
+        else if (Layer_nr == 204) return 32;
         else if (Layer_nr == 301) return 7;
         else if (Layer_nr == 302) return 10;
         return 0;
