@@ -30,5 +30,6 @@
     <module>rtpc</module>
     <module>mltn</module>
     <module>swaps</module>
+    <module>urwell</module>
   </modules>
 </project>
