@@ -446,7 +446,7 @@ public class StateVecs extends AStateVecs {
                     double ZovA = surf.getMaterials().get(matidx).ZoverA;
                     double density = surf.getMaterials().get(matidx).density;
                     double I = surf.getMaterials().get(matidx).IeV* 1e-9; //GeV
-                    double logterm = 2. * mass * beta * beta * gamma * gamma * Wmax / (I * I); 
+                    double logterm = 2. * Mass.e.value() * beta * beta * gamma * gamma * Wmax / (I * I); 
                     dE += K*((ZovA/(beta*beta))  * 
                             (0.5*Math.log(logterm) -  beta * beta ))
                             *density*thickn/cosEntranceAngle; //in GeV
