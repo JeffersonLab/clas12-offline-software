@@ -291,13 +291,18 @@ public class CVTEngine extends ReconstructionEngine {
         
         if(this.getEngineConfigString("svtSeeding")!=null) {
             Constants.SVTSEEDING = Boolean.parseBoolean(this.getEngineConfigString("svtSeeding"));
-            System.out.println("["+this.getName()+"] run SVT-based seeding set to "+ Constants.SVTSEEDING);
+            System.out.println("["+this.getName()+"] SVT-based seeding set to "+ Constants.SVTSEEDING);
         }
 
         if(this.getEngineConfigString("timeCuts")!=null) {
             Constants.TIMECUTS = Boolean.parseBoolean(this.getEngineConfigString("timeCuts"));
-            System.out.println("["+this.getName()+"] run BMT timing cuts set to "+ Constants.TIMECUTS);
+            System.out.println("["+this.getName()+"] BMT timing cuts set to "+ Constants.TIMECUTS);
         }
+
+        if(this.getEngineConfigString("elossMass")!=null) {
+            Constants.ELOSSMASS = Double.parseDouble(this.getEngineConfigString("elossMass"));
+        }
+        System.out.println("["+this.getName()+"] ELoss mass set to "+ Constants.ELOSSMASS + " GeV");
     }
 
 

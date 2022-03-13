@@ -222,6 +222,13 @@ public class Surface implements Comparable<Surface> {
         return dE;
     }
     
+    public double getThetaMS(double p, double mass, double cosEntranceAngle) {
+        double ToverX0 = this.ToverX0()/cosEntranceAngle;
+        double beta = p / Math.sqrt(p * p + mass * mass);
+        double thetaMS = (0.0136/(beta*p))*Math.sqrt(ToverX0)*(1 + 0.038 * Math.log(ToverX0));
+        return thetaMS;
+    }
+        
     public Transformation3D toGlobal() {
         return toGlobal;
     }

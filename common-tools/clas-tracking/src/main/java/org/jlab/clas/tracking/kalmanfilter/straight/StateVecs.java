@@ -6,6 +6,7 @@ import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs.MeasVec;
 import org.jlab.clas.tracking.kalmanfilter.AStateVecs;
+import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.clas.tracking.trackrep.Helix;
 import org.jlab.clas.tracking.trackrep.Helix.Units;
 import org.jlab.geom.prim.Line3D;
@@ -92,40 +93,30 @@ public class StateVecs extends AStateVecs {
     }
 
     @Override
-    public double[][] Q(int i, int f, StateVec iVec, AMeasVecs mv) {
+    public double[][] Q(StateVec vec, AMeasVecs mv) {
         double[][] Q = new double[5][5];
 
-        int dir = (int) Math.signum(f-i);
-        if(dir<0) return Q;
-        
-        double t_ov_X0 = 0;
-        // depending on dir, k increases or decreases
-        for (int k = i; (k-f)*dir < 0; k += dir) {
-//            int hemisphere = (int) mv.measurements.get(k).surface.hemisphere;
-//            if(dir*hemisphere>0 && k==f) continue;
-//            if(dir*hemisphere<0 && k==i) continue;
-            double cosEntranceAngle = this.getLocalDirAtMeasSite(iVec, mv.measurements.get(k));
-            t_ov_X0 += mv.measurements.get(k).l_over_X0 / cosEntranceAngle;
-//            System.out.println("From " + i + " to " + f + " including material from surface " + k + " with X0 = " +  mv.measurements.get(k).l_over_X0 + " / " + cosEntranceAngle);
-//            System.out.println(mv.measurements.get(k).surface.toString()); 
-        }
+//        int dir = (int) Math.signum(f-i);
+//        if(dir<0) return Q;
+                
+        Surface surf = mv.measurements.get(vec.k).surface;
+        double cosEntranceAngle = this.getLocalDirAtMeasSite(vec, mv.measurements.get(vec.k));
 
-        if (t_ov_X0>0) {
-            double p    = 1;
-            double beta = p / Math.sqrt(p * p + mass * mass);
-            // Highland-Lynch-Dahl formula
-            double sctRMS = (0.0136/(beta*p))*Math.sqrt(t_ov_X0)*(1 + 0.038 * Math.log(t_ov_X0));        
-            double cov_txtx = (1 + iVec.tx * iVec.tx) * (1 + iVec.tx * iVec.tx + iVec.tz * iVec.tz) * sctRMS * sctRMS;
-            double cov_tztz = (1 + iVec.tz * iVec.tz) * (1 + iVec.tx * iVec.tx + iVec.tz * iVec.tz) * sctRMS * sctRMS;
-            double cov_txtz = iVec.tx * iVec.tz * (1 + iVec.tx * iVec.tx + iVec.tz * iVec.tz) * sctRMS * sctRMS;
-            Q = new double[][]{
-                {0, 0, 0,        0,        0},
-                {0, 0, 0,        0,        0},
-                {0, 0, cov_txtx, cov_txtz, 0},
-                {0, 0, cov_txtz, cov_tztz, 0},
-                {0, 0, 0,        0,        0}
-            };
-        }
+        double p = 1;
+        
+        // Highland-Lynch-Dahl formula
+        double sctRMS = surf.getThetaMS(p, mass, cosEntranceAngle);      
+        double cov_txtx = (1 + vec.tx * vec.tx) * (1 + vec.tx * vec.tx + vec.tz * vec.tz) * sctRMS * sctRMS;
+        double cov_tztz = (1 + vec.tz * vec.tz) * (1 + vec.tx * vec.tx + vec.tz * vec.tz) * sctRMS * sctRMS;
+        double cov_txtz = vec.tx * vec.tz * (1 + vec.tx * vec.tx + vec.tz * vec.tz) * sctRMS * sctRMS;
+        Q = new double[][]{
+            {0, 0, 0,        0,        0},
+            {0, 0, 0,        0,        0},
+            {0, 0, cov_txtx, cov_txtz, 0},
+            {0, 0, cov_txtz, cov_tztz, 0},
+            {0, 0, 0,        0,        0}
+        };
+        
         return Q;
     }
 
@@ -216,7 +207,7 @@ public class StateVecs extends AStateVecs {
     }
 
     @Override
-    public void corrForEloss(int i, int f, StateVec iVec, AMeasVecs mv) {
+    public void corrForEloss(int dir, StateVec iVec, AMeasVecs mv) {
 
     }
 

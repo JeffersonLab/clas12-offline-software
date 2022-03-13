@@ -44,22 +44,40 @@ public abstract class AStateVecs {
     public abstract boolean getStateVecPosAtMeasSite(StateVec iVec, MeasVec mv, Swim swim);
 
     public final void transport(int i, int f, AMeasVecs mv, Swim swimmer) {
-    // transport state vector
+        int dir = (int) Math.signum(f-i);
+ 
+        // transport state vector
         StateVec iVec = this.trackTraj.get(i);
-        this.corrForEloss(i, f, iVec, mv);
+
+        if(dir>0) this.corrForEloss(dir, iVec, mv);
+
         StateVec fVec = this.newStateVecAtMeasSite(iVec, mv.measurements.get(f), swimmer);
         if(fVec==null) return;
+
+        if(dir<0) this.corrForEloss(dir, fVec, mv);
+
         //transport covariance matrix
         double[][] fCov = this.propagateCovMat(iVec, fVec);
-        double[][] iQ   = this.Q(i, f, iVec, mv);
-        double[][] fQ   = this.propagateMatrix(iVec, fVec, iQ);
+        double[][] fQ = null;
+        
+        if(dir>0) {
+            double[][] iQ = this.Q(iVec, mv);
+            fQ = this.propagateMatrix(iVec, fVec, iQ);
+//            System.out.println("From " + i + " to " + f + " including material from surface " + i + " with X0 = " +  mv.measurements.get(i).surface.ToverX0());
+//            System.out.println(mv.measurements.get(i).surface.toString());
+                        }
+        else {
+            fQ =this.Q(fVec, mv);
+//            System.out.println("From " + i + " to " + f + " including material from surface " + f + " with X0 = " +  mv.measurements.get(f).surface.ToverX0());
+//            System.out.println(mv.measurements.get(f).surface.toString());
+        }
         if (fCov != null) {
             fVec.covMat = addProcessNoise(fCov, fQ);            
         }
         this.trackTraj.put(f, fVec);
     }
     
-    public abstract void corrForEloss(int i, int f, StateVec iVec, AMeasVecs mv);
+    public abstract void corrForEloss(int dir, StateVec iVec, AMeasVecs mv);
     
     public final double[][] propagateCovMat(StateVec ivec, StateVec fvec) {
         return this.propagateMatrix(ivec, fvec, ivec.covMat);
@@ -150,7 +168,7 @@ public abstract class AStateVecs {
     }
     
     
-    public abstract double[][] Q(int i, int f, StateVec iVec, AMeasVecs mv);
+    public abstract double[][] Q(StateVec vec, AMeasVecs mv);
 
     public abstract double[][] F(StateVec ivec, StateVec fvec);
 

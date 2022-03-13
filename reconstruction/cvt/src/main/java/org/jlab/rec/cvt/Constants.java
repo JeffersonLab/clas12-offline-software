@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
 
@@ -57,6 +58,8 @@ public class Constants {
 
     public static boolean TIMECUTS = false;
 
+    public static double  ELOSSMASS = PhysicsConstants.massPionCharged();
+    
     public static boolean KFFILTERON = true;
     public static boolean INITFROMMC = false;
     public static int     KFITERATIONS = 5;

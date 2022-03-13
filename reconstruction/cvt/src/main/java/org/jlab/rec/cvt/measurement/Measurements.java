@@ -89,7 +89,7 @@ public class Measurements {
         Point3D  p = new Point3D(xbeam, ybeam, 0);
         Line3D   l = new Line3D(p, u);
         Surface target = new Surface(l.origin(), l.end(), Constants.DEFAULTSWIMACC);
-        target.addMaterial("LH2", 5, 0.0708E-3, 1, 630.4, 21.8);
+        target.addMaterial("LH2", 5, 0.0708E-3, 1, 8904.0, 21.8);
         target.setError(Constants.getRbErr());
         if(Constants.kfBeamSpotConstraint())
             target.notUsedInFit = false;

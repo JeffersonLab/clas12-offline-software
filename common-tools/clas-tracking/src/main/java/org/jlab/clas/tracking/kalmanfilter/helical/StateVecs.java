@@ -156,27 +156,25 @@ public class StateVecs extends AStateVecs {
     }
           
     @Override
-    public void corrForEloss(int i, int f, StateVec iVec, AMeasVecs mv) {
+    public void corrForEloss(int dir, StateVec vec, AMeasVecs mv) {
         
-        if(this.straight) return;
-        
-        int dir = (int) Math.signum(f-i);
-        
-        double dE = 0;
-        double p    = Math.sqrt(iVec.px*iVec.px + iVec.py*iVec.py + iVec.pz*iVec.pz);
-//        if(p<0.35) p = 0.35;
-        
-        for (int k = i; (k-f)*dir < 0; k += dir) {
-            Surface surf = mv.measurements.get(k).surface;
-            double cosEntranceAngle = this.getLocalDirAtMeasSite(iVec, mv.measurements.get(k));
-            dE -= dir*surf.getEloss(p, mass, this.units.unit())/cosEntranceAngle;
-        }        
+        if(this.straight || mass<0) return;
+                       
+        Surface surf = mv.measurements.get(vec.k).surface;
+        double cosEntranceAngle = this.getLocalDirAtMeasSite(vec, mv.measurements.get(vec.k));
+
+        double p = Math.sqrt(vec.px*vec.px + vec.py*vec.py + vec.pz*vec.pz);
         double E = Math.sqrt(p*p + mass*mass);
+
+        double dE = -dir*surf.getEloss(p, mass, this.units.unit())/cosEntranceAngle;
+
         double ECorr = E + dE;
         double pCorr = Math.sqrt(ECorr*ECorr-mass*mass);
+//        System.out.println("From " + i + " to " + f + " including material from surface " + 1 + " with X0 = " +  mv.measurements.get(i).l_over_X0);
 //        System.out.println(p + " " + E + " " + dE + " " + pCorr);
-        iVec.kappa = iVec.kappa*pCorr/p;
-        iVec.updateFromHelix();
+//        System.out.println(mv.measurements.get(i).surface.toString());
+        vec.kappa = vec.kappa*p/pCorr;
+        vec.updateFromHelix();
     }
     
     @Override
@@ -233,34 +231,25 @@ public class StateVecs extends AStateVecs {
     }
 
     @Override
-    public double[][] Q(int i, int f, StateVec iVec, AMeasVecs mv) {
+    public double[][] Q(StateVec vec, AMeasVecs mv) {
         double[][] Q = new double[5][5];
+        
+        Surface surf = mv.measurements.get(vec.k).surface;
+        double cosEntranceAngle = this.getLocalDirAtMeasSite(vec, mv.measurements.get(vec.k));
 
-        int dir = (int) Math.signum(f-i);
-
-        double t_ov_X0 = 0;
-        for (int k = i; (k-f)*dir < 0; k += dir) {
-            double cosEntranceAngle = this.getLocalDirAtMeasSite(iVec, mv.measurements.get(k));
-            t_ov_X0 += mv.measurements.get(k).l_over_X0/cosEntranceAngle;
-//            System.out.println("From " + i + " to " + f + " including material from surface " + k + " with X0 = " +  mv.measurements.get(k).l_over_X0 + " / " + cosEntranceAngle);
-//            System.out.println(mv.measurements.get(k).surface.toString());
-        }        
-
-        if (t_ov_X0>0) {
-            double p    = Math.sqrt(iVec.px*iVec.px + iVec.py*iVec.py + iVec.pz*iVec.pz);
-            if(this.straight) p = 1;
-            double beta = p / Math.sqrt(p * p + mass * mass);
-            // Highland-Lynch-Dahl formula
-            double sctRMS = (0.0136/(beta*p))*Math.sqrt(t_ov_X0)*(1 + 0.038 * Math.log(t_ov_X0));
-            Q = new double[][]{
-                {0, 0, 0, 0, 0},
-                {0, sctRMS*sctRMS * (1 + iVec.tanL * iVec.tanL), 0, 0, 0},
-                {0, 0, sctRMS*sctRMS * (iVec.kappa * iVec.kappa * iVec.tanL * iVec.tanL), 0, sctRMS*sctRMS * (iVec.kappa * iVec.tanL * (1 + iVec.tanL * iVec.tanL))},
-                {0, 0, 0, 0, 0},
-                {0, 0, sctRMS*sctRMS * (iVec.kappa * iVec.tanL * (1 + iVec.tanL * iVec.tanL)), 0, sctRMS*sctRMS * (1 + iVec.tanL * iVec.tanL) * (1 + iVec.tanL * iVec.tanL)}
-            };
-        }
-
+        double p = Math.sqrt(vec.px*vec.px + vec.py*vec.py + vec.pz*vec.pz);
+        if(this.straight) p = 1;
+        
+        // Highland-Lynch-Dahl formula
+        double sctRMS = surf.getThetaMS(p, mass, cosEntranceAngle);
+        Q = new double[][]{
+            {0, 0, 0, 0, 0},
+            {0, sctRMS*sctRMS * (1 + vec.tanL * vec.tanL), 0, 0, 0},
+            {0, 0, sctRMS*sctRMS * (vec.kappa * vec.kappa * vec.tanL * vec.tanL), 0, sctRMS*sctRMS * (vec.kappa * vec.tanL * (1 + vec.tanL * vec.tanL))},
+            {0, 0, 0, 0, 0},
+            {0, 0, sctRMS*sctRMS * (vec.kappa * vec.tanL * (1 + vec.tanL * vec.tanL)), 0, sctRMS*sctRMS * (1 + vec.tanL * vec.tanL) * (1 + vec.tanL * vec.tanL)}
+        };
+        
         return Q;
     }
 
