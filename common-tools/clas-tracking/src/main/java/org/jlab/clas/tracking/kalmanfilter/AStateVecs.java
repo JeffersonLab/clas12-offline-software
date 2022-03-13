@@ -20,14 +20,14 @@ public abstract class AStateVecs {
     public double xref;
     public double yref;
     public double zref;
-
+    public double mass;
     public StateVec initSV;
     
     public Map<Integer, StateVec> trackTraj  = new HashMap<>();
 
     public boolean straight;
 
-    public abstract void init(Helix trk, double[][] cov, double xref, double yref, double zref, Swim swimmer);
+    public abstract void init(Helix trk, double[][] cov, double xref, double yref, double zref, double mass, Swim swimmer);
 
     public abstract void init(double x0, double z0, double tx, double tz, Units units, double[][] cov);
 
@@ -46,6 +46,7 @@ public abstract class AStateVecs {
     public final void transport(int i, int f, AMeasVecs mv, Swim swimmer) {
     // transport state vector
         StateVec iVec = this.trackTraj.get(i);
+        this.corrForEloss(i, f, iVec, mv);
         StateVec fVec = this.newStateVecAtMeasSite(iVec, mv.measurements.get(f), swimmer);
         if(fVec==null) return;
         //transport covariance matrix
@@ -55,37 +56,11 @@ public abstract class AStateVecs {
         if (fCov != null) {
             fVec.covMat = addProcessNoise(fCov, fQ);            
         }
-        this.corrForEloss(iVec, fVec, mv, f-i);
         this.trackTraj.put(f, fVec);
     }
     
-    private double _mass ;
+    public abstract void corrForEloss(int i, int f, StateVec iVec, AMeasVecs mv);
     
-    /**
-     * @return the _mass
-     */
-    public double getMass() {
-        return _mass;
-    }
-
-    /**
-     * @param _mass the _mass to set
-     */
-    public void setMass(Mass mass) {
-        this._mass = mass.value();
-    }
-    
-    public abstract double ELoss(int i, int f, StateVec iVec, AMeasVecs mv);
-    
-    public void corrForEloss(StateVec iVec, StateVec fVec, AMeasVecs mv, int dir) {
-        double dE = this.ELoss(iVec.k, fVec.k, iVec, mv);
-        double pObs = Math.sqrt(1 + fVec.tanL*fVec.tanL)/ Math.abs(fVec.kappa);
-        double E = Math.sqrt(pObs*pObs + this.getMass()*this.getMass());
-        //update Kappa
-        double kappaUpd = fVec.kappa*( 1 +(double)dir* dE/E);
-        
-        fVec.kappa = kappaUpd;
-    }
     public final double[][] propagateCovMat(StateVec ivec, StateVec fvec) {
         return this.propagateMatrix(ivec, fvec, ivec.covMat);
     }
@@ -147,21 +122,28 @@ public abstract class AStateVecs {
 
     public double getLocalDirAtMeasSite(StateVec vec, MeasVec mv) {
         if(mv.surface==null) 
-            return 0;
-        else if(mv.surface.plane==null && mv.surface.cylinder==null) 
-            return 0;
+            return 1;
+        else if(mv.surface.type!=Type.PLANEWITHSTRIP && 
+                mv.surface.type!=Type.CYLINDERWITHSTRIP && 
+                mv.surface.type!=Type.LINE) 
+            return 1;
         else {
             Point3D  pos = new Point3D(vec.x, vec.y, vec.z);
             Vector3D dir = new Vector3D(vec.px, vec.py, vec.pz).asUnit();
-            if(mv.surface.plane!=null) {
+            if(mv.surface.type==Type.PLANEWITHSTRIP) {
                 Vector3D norm = mv.surface.plane.normal();
                 return Math.abs(norm.dot(dir));
             }
-            else if(mv.surface.cylinder!=null) {
+            else if(mv.surface.type==Type.CYLINDERWITHSTRIP) {
                 mv.surface.toLocal().apply(pos);
                 mv.surface.toLocal().apply(dir);
                 Vector3D norm = pos.toVector3D().asUnit();
                 return Math.abs(norm.dot(dir));
+            }
+            else if(mv.surface.type==Type.LINE) {
+                Vector3D norm = mv.surface.lineEndPoint1.vectorTo(mv.surface.lineEndPoint2).asUnit();
+                double cosdir = Math.abs(norm.dot(dir));
+                return Math.sqrt(1-cosdir*cosdir);
             }
             return 0;
         }
@@ -478,11 +460,6 @@ public abstract class AStateVecs {
             this.alpha = 1. / (lightVel * Math.abs(b[2]));
         }
     }
-    public double piMass = 0.13957018;
-    public double KMass = 0.493677;
-    public double muMass = 0.105658369;
-    public double eMass = 0.000510998;
-    public double pMass = 0.938272029;
 
     public abstract Vector3D P(int kf);
 

@@ -1,11 +1,11 @@
 package org.jlab.clas.tracking.kalmanfilter.straight;
 
 import java.util.HashMap;
+import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs.MeasVec;
 import org.jlab.clas.tracking.kalmanfilter.AStateVecs;
-import org.jlab.clas.tracking.kalmanfilter.Mass;
 import org.jlab.clas.tracking.trackrep.Helix;
 import org.jlab.clas.tracking.trackrep.Helix.Units;
 import org.jlab.geom.prim.Line3D;
@@ -112,7 +112,6 @@ public class StateVecs extends AStateVecs {
 
         if (t_ov_X0>0) {
             double p    = 1;
-            double mass = piMass;   // assume given mass hypothesis 
             double beta = p / Math.sqrt(p * p + mass * mass);
             // Highland-Lynch-Dahl formula
             double sctRMS = (0.0136/(beta*p))*Math.sqrt(t_ov_X0)*(1 + 0.038 * Math.log(t_ov_X0));        
@@ -189,7 +188,7 @@ public class StateVecs extends AStateVecs {
     }   
 
     @Override
-    public void init(Helix trk, double[][] cov, double xref, double yref, double zref, Swim swimmer) {
+    public void init(Helix trk, double[][] cov, double xref, double yref, double zref, double mass, Swim swimmer) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
@@ -213,14 +212,14 @@ public class StateVecs extends AStateVecs {
             }
         }
         initSV.covMat = covKF;
-        this.trackTraj.put(0, new StateVec(initSV));
-        
-        this.setMass(Mass.mu);
+        this.trackTraj.put(0, new StateVec(initSV));        
     }
 
     @Override
-    public double ELoss(int i, int f, StateVec iVec, AMeasVecs mv) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void corrForEloss(int i, int f, StateVec iVec, AMeasVecs mv) {
+
     }
+
+    
     
 }

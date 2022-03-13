@@ -2,6 +2,7 @@ package org.jlab.rec.cvt.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.helical.KFitter;
 import org.jlab.clas.tracking.trackrep.Helix;
@@ -119,7 +120,7 @@ public class TracksFromTargetRec {
 
             if(solenoidValue>0.001 && Constants.LIGHTVEL * seed.getHelix().radius() *solenoidValue<Constants.PTCUT)
                 continue;
-            kf.init(hlx, cov, xb, yb, 0, surfaces.getMeasurements(seed)) ;
+            kf.init(hlx, cov, xb, yb, 0, surfaces.getMeasurements(seed), PhysicsConstants.massProton()) ;
             kf.runFitter();
             if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null) { 
                 Track fittedTrack = new Track(seed, kf);
@@ -156,7 +157,7 @@ public class TracksFromTargetRec {
                     hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
                                     solenoidValue, xb, yb, Helix.Units.MM);
 
-                    kf.init(hlx, cov, xb, yb, 0, surfaces.getMeasurements(seed)) ;
+                    kf.init(hlx, cov, xb, yb, 0, surfaces.getMeasurements(seed), PhysicsConstants.massProton()) ;
                     kf.runFitter();
 
                     // RDV get rid of added clusters if not true

@@ -5,7 +5,6 @@ import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs.MeasVec;
 import org.jlab.clas.tracking.kalmanfilter.AStateVecs;
-import org.jlab.clas.tracking.kalmanfilter.Mass;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.clas.tracking.trackrep.Helix;
 import org.jlab.clas.tracking.trackrep.Helix.Units;
@@ -156,6 +155,29 @@ public class StateVecs extends AStateVecs {
         return true;
     }
           
+    @Override
+    public void corrForEloss(int i, int f, StateVec iVec, AMeasVecs mv) {
+        
+        if(this.straight) return;
+        
+        int dir = (int) Math.signum(f-i);
+        
+        double dE = 0;
+        double p    = Math.sqrt(iVec.px*iVec.px + iVec.py*iVec.py + iVec.pz*iVec.pz);
+//        if(p<0.35) p = 0.35;
+        
+        for (int k = i; (k-f)*dir < 0; k += dir) {
+            Surface surf = mv.measurements.get(k).surface;
+            double cosEntranceAngle = this.getLocalDirAtMeasSite(iVec, mv.measurements.get(k));
+            dE -= dir*surf.getEloss(p, mass, this.units.unit())/cosEntranceAngle;
+        }        
+        double E = Math.sqrt(p*p + mass*mass);
+        double ECorr = E + dE;
+        double pCorr = Math.sqrt(ECorr*ECorr-mass*mass);
+//        System.out.println(p + " " + E + " " + dE + " " + pCorr);
+        iVec.kappa = iVec.kappa*pCorr/p;
+        iVec.updateFromHelix();
+    }
     
     @Override
     public double[][] F(StateVec iVec, StateVec fVec) {
@@ -227,7 +249,6 @@ public class StateVecs extends AStateVecs {
         if (t_ov_X0>0) {
             double p    = Math.sqrt(iVec.px*iVec.px + iVec.py*iVec.py + iVec.pz*iVec.pz);
             if(this.straight) p = 1;
-            double mass = piMass;   // assume given mass hypothesis 
             double beta = p / Math.sqrt(p * p + mass * mass);
             // Highland-Lynch-Dahl formula
             double sctRMS = (0.0136/(beta*p))*Math.sqrt(t_ov_X0)*(1 + 0.038 * Math.log(t_ov_X0));
@@ -311,7 +332,7 @@ public class StateVecs extends AStateVecs {
 
     
     @Override
-    public void init(Helix helix, double[][] cov, double xref, double yref, double zref, Swim swimmer) {
+    public void init(Helix helix, double[][] cov, double xref, double yref, double zref, double mass, Swim swimmer) {
         this.trackTraj = new HashMap<>();
         this.units     = helix.getUnits();
         this.lightVel  = helix.getLightVelocity();
@@ -319,6 +340,8 @@ public class StateVecs extends AStateVecs {
         this.xref = xref;
         this.yref = yref;
         this.zref = zref;
+        
+        this.mass = mass;
         
         if(Math.abs(helix.getB())<0.001)
            this.straight = true;
@@ -374,13 +397,6 @@ public class StateVecs extends AStateVecs {
         }
         initSV.covMat = covKF;
         this.trackTraj.put(0, new StateVec(initSV));
-        
-        this.setMass(Mass.p);
-    }
-
-    public void init(Helix helix, double[][] cov, double xref, double yref, double zref, Swim swimmer, Mass mass ) {
-        this.init(helix, cov, xref, yref, zref, swimmer);
-        this.setMass(mass);
     }
     
     @Override
@@ -395,65 +411,6 @@ public class StateVecs extends AStateVecs {
     @Override
     public void init(double x0, double z0, double tx, double tz, Units units, double[][] cov) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
-    @Override
-    public double ELoss(int i, int f, StateVec iVec, AMeasVecs mv) {
-        
-        int dir = f-i;
-
-        double dE = 0;
-        double p    = Math.sqrt(iVec.px*iVec.px + iVec.py*iVec.py + iVec.pz*iVec.pz);
-        if(this.straight) 
-            p = 1;
-        if(p<0.35) p = 0.35;
-        double mass = this.getMass();   // assume given mass hypothesis 
-        double beta = p / Math.sqrt(p * p + mass * mass);
-        double s = Mass.e.value() / mass;
-        double gamma = 1. / Math.sqrt(1 - beta * beta);
-        double Wmax = 2. * Mass.e.value() * beta * beta * gamma * gamma / (1. + 2. * s * gamma + s * s);
-        double K = 0.000307075*this.units.unit()*this.units.unit(); //  GeV mol-1 cm2
-        //double E = Math.sqrt(p*p + this.getMass()*this.getMass());
-        
-        if(dir>0) {
-            for(int k=i; k<f; k++) {
-                double cosEntranceAngle = this.getLocalDirAtMeasSite(iVec, mv.measurements.get(k+1));
-               
-                Surface surf = mv.measurements.get(k+1).surface;
-                 
-                int numberMaterials = surf.getMaterials().size();
-                for(int matidx = 0; matidx<numberMaterials; matidx++) {
-                    double thickn = surf.getMaterials().get(matidx).thickness;
-                    double ZovA = surf.getMaterials().get(matidx).ZoverA;
-                    double density = surf.getMaterials().get(matidx).density;
-                    double I = surf.getMaterials().get(matidx).IeV* 1e-9; //GeV
-                    double logterm = 2. * Mass.e.value() * beta * beta * gamma * gamma * Wmax / (I * I); 
-                    dE += K*((ZovA/(beta*beta))  * 
-                            (0.5*Math.log(logterm) -  beta * beta ))
-                            *density*thickn/cosEntranceAngle; //in GeV
-                }
-            }
-        }
-        else {
-            for(int k=i; k>f; k--) { 
-                double cosEntranceAngle = this.getLocalDirAtMeasSite(iVec, mv.measurements.get(k));
-               
-                Surface surf = mv.measurements.get(k).surface;
-                
-                int numberMaterials = surf.getMaterials().size();
-                for(int matidx = 0; matidx<numberMaterials; matidx++) {
-                    double thickn = surf.getMaterials().get(matidx).thickness;
-                    double ZovA = surf.getMaterials().get(matidx).ZoverA;
-                    double density = surf.getMaterials().get(matidx).density;
-                    double I = surf.getMaterials().get(matidx).IeV* 1e-9; //GeV
-                    double logterm = 2. * Mass.e.value() * beta * beta * gamma * gamma * Wmax / (I * I); 
-                    dE += K*((ZovA/(beta*beta))  * 
-                            (0.5*Math.log(logterm) -  beta * beta ))
-                            *density*thickn/cosEntranceAngle; //in GeV
-                }
-            }
-        }
-        return dE;
     }
     
 }

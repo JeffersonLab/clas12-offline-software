@@ -2,6 +2,7 @@ package org.jlab.clas.tracking.kalmanfilter;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.tracking.objects.Strip;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
@@ -213,6 +214,14 @@ public class Surface implements Comparable<Surface> {
         return ZA/RhoX;
     }
     
+    public double getEloss(double p, double mass, double units) {
+        double dE=0;
+        for(Material m : this.materials) {
+            dE += m.getEloss(p, mass, units);
+        }
+        return dE;
+    }
+    
     public Transformation3D toGlobal() {
         return toGlobal;
     }
@@ -237,12 +246,12 @@ public class Surface implements Comparable<Surface> {
     
     public class Material {
         
-        public String name;
-        public double thickness;
-        public double density;
-        public double ZoverA;
-        public double X0;
-        public double IeV;
+        private String name;
+        private double thickness;
+        private double density;
+        private double ZoverA;
+        private double X0;
+        private double IeV;
 
         public Material(String name, double thickness, double density, double ZoverA, double X0, double IeV) {
             this.name = name;
@@ -253,6 +262,19 @@ public class Surface implements Comparable<Surface> {
             this.IeV = IeV;
         }
         
+        public double getEloss(double p, double mass, double units) {
+            double beta = p / Math.sqrt(p * p + mass * mass);
+            double s = PhysicsConstants.massElectron() / mass;
+            double gamma = 1. / Math.sqrt(1 - beta * beta);
+            double Wmax = 2. * PhysicsConstants.massElectron() * beta * beta * gamma * gamma
+                    / (1. + 2. * s * gamma + s * s);
+            double K = 0.000307075 * units * units; //  GeV mol-1 cm2
+            double I = this.IeV * 1E-9;
+            double logterm = 2. * PhysicsConstants.massElectron() * beta * beta * gamma * gamma * Wmax / (I * I);
+            double dE = this.thickness * this.density * K * this.ZoverA
+                    * (0.5 * Math.log(logterm) - beta * beta) / beta / beta; //in GeV
+            return dE;
+        }
         
     }
 

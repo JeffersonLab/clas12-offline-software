@@ -30,7 +30,7 @@ public class KFitter extends AKFitter {
         
     public final void init(Helix helix, double[][] cov, 
                            double Xb, double Yb, double Zref, 
-                           List<Surface> measSurfaces) {
+                           List<Surface> measSurfaces, double mass) {
         finalStateVec = null;
         KFHelix = null;
         this.NDF0 = -5;
@@ -46,7 +46,7 @@ public class KFitter extends AKFitter {
         } 
         this.setXb(Xb);
         this.setYb(Yb);
-        sv.init( helix, cov, Xb, Yb, Zref, this.getSwimmer());
+        sv.init( helix, cov, Xb, Yb, Zref, mass, this.getSwimmer());
     }
         
     public void runFitter() {
