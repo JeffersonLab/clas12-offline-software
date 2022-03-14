@@ -110,7 +110,7 @@ public class TracksFromTargetRec {
             double[] pars = recUtil.mcTrackPars(event);
             if(Constants.INITFROMMC) {
                 v = new Point3D(pars[0],pars[1],pars[2]);
-                p = new Vector3D(pars[3],pars[4],pars[5]);
+                p = new Vector3D(pars[3]/10,pars[4]/10,pars[5]/10);
                 if(solenoidValue<0.001) p.scale(100/p.mag());
             }
             Helix hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,

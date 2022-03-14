@@ -233,7 +233,9 @@ public class StateVecs extends AStateVecs {
     @Override
     public double[][] Q(StateVec vec, AMeasVecs mv) {
         double[][] Q = new double[5][5];
-        
+              
+        if(this.mass<0) return Q;
+                
         Surface surf = mv.measurements.get(vec.k).surface;
         double cosEntranceAngle = this.getLocalDirAtMeasSite(vec, mv.measurements.get(vec.k));
 
