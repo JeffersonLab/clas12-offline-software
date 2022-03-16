@@ -187,6 +187,22 @@
         {"name":"centroid", "type":"F", "info":"estimated strip centroid"},
         {"name":"path",     "type":"F", "info":"pathlength of the track from the track vertex to the detector surface (cm)"}
     ]
+  },
+  {
+    "name": "CVTRec::KFTraj",
+    "group": 20500,
+    "item" : 30,   
+    "info": "Trajectory bank output from KF",
+    "entries": [
+        {"name":"id",       "type":"S", "info":"id of the track"},
+        {"name":"layer",    "type":"S", "info":"id of the detector layer"},
+        {"name":"x",        "type":"F", "info":"track x position at detector surface (cm)"},
+        {"name":"y",        "type":"F", "info":"track y position at detector surface (cm)"},
+        {"name":"z",        "type":"F", "info":"track z position at detector surface (cm)"},
+        {"name":"px",       "type":"F", "info":"track x momentum at detector surface (GeV)"},
+        {"name":"py",       "type":"F", "info":"track y momentum at detector surface (GeV)"},
+        {"name":"pz",       "type":"F", "info":"track z momentum at detector surface (GeV)"}
+    ]
   }
 
 ]
