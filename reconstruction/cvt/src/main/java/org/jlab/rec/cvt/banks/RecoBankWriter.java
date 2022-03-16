@@ -2,6 +2,7 @@ package org.jlab.rec.cvt.banks;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.tracking.kalmanfilter.AKFitter;
 
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
@@ -478,7 +479,7 @@ public class RecoBankWriter {
         if (trkcands.isEmpty()) {
             return null;
         }
-
+        
         DataBank bank = event.createBank("CVTRec::Tracks", trkcands.size());
         // an array representing the ids of the crosses that belong to the track
         List<Integer> crossIdxArray = new ArrayList<>();
@@ -565,6 +566,47 @@ public class RecoBankWriter {
         }
         //bank.show();
         return bank;
+
+    }
+    public DataBank fillElossTrajBank(DataEvent event, List<Track> trkcands) {
+        if (trkcands == null) {
+            return null;
+        }
+        if (trkcands.isEmpty()) {
+            return null;
+        }
+        //new trajectory
+        int k = 0;
+        for (int i = 0; i < trkcands.size(); i++) {
+            if (trkcands.get(i).getTrajectories() == null) {
+                continue;
+            }
+            if (trkcands.get(i).getTrajectories() != null) {
+                k += trkcands.get(i).getTrajectories().keySet().size();
+            }
+        }
+        DataBank tbank = event.createBank("CVTRec::KFTraj", k);
+        for (int i = 0; i < trkcands.size(); i++) {
+            if(trkcands.get(i)==null)
+                continue;
+            //Fill trajectory for Eloss debugging
+            k = 0;
+            for (AKFitter.HitOnTrack t : trkcands.get(i).getTrajectories().values()) {
+                tbank.setShort("id",       k, (short) trkcands.get(i).getId()); //trackid
+                tbank.setShort("layer",    k, (short) t.layer);
+                tbank.setFloat("x",        k, (float) (t.x/10.));
+                tbank.setFloat("y",        k, (float) (t.y/10.));
+                tbank.setFloat("z",        k, (float) (t.z/10.));
+                tbank.setFloat("px",       k, (float) (t.px));
+                tbank.setFloat("py",       k, (float) (t.py));
+                tbank.setFloat("pz",       k, (float) (t.pz));
+                k++;
+            }
+            //end fill
+        }
+
+        //tbank.show();
+        return tbank;
 
     }
     
@@ -801,6 +843,8 @@ public class RecoBankWriter {
         DataBank bank10 = this.fillTracksCovMatBank(event, trks);
         if (bank10 != null) event.appendBank(bank10);
         
+        DataBank bank11 = this.fillElossTrajBank(event, trks);
+        if (bank11 != null) event.appendBank(bank11);
     }
 
     public void appendCVTCosmicsBanks(DataEvent event,
@@ -836,6 +880,7 @@ public class RecoBankWriter {
         //found trajectories
         DataBank bank8 = this.fillStraightTracksTrajectoryBank(event, trks);
         if (bank8 != null) event.appendBank(bank8);
+        
 
     }
 
