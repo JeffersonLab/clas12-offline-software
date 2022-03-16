@@ -7,24 +7,26 @@ import org.jlab.detector.base.DetectorType;
  * @author devita
  */
 public enum MLayer {
-    UNDEFINED(99,   "Undefined",              0),
-    TARGET(0,       "Target",                 0),
-    SHIELD(1,       "Tungsten Shield",        0),
-    INNERSVTCAGE(2, "Inner SVT Faraday Cage", 0),
-    SVTLAYER1(3,    "SVT Layer 1",            1),
-    SVTLAYER2(4,    "SVT Layer 2",            2),
-    SVTLAYER3(5,    "SVT Layer 3",            3),
-    SVTLAYER4(6,    "SVT Layer 4",            4),
-    SVTLAYER5(7,    "SVT Layer 5",            5),
-    SVTLAYER6(8,    "SVT Layer 6",            6),
-    OUTERSVTCAGE(9, "Outer SVT Faraday Cage", 0),
-    BMTLAYER1(10,   "BMT Layer 1",            1),
-    BMTLAYER2(11,   "BMT Layer 2",            2),
-    BMTLAYER3(12,   "BMT Layer 3",            3),
-    BMTLAYER4(13,   "BMT Layer 4",            4),
-    BMTLAYER5(14,   "BMT Layer 5",            5),
-    BMTLAYER6(15,   "BMT Layer 6",            6),
-    COSMICPLANE(16, "Cosmic reference plane", 0);
+    UNDEFINED(99,    "Undefined",              0),
+    TARGET(0,        "Target",                 0),
+    SCHAMBER(1,      "Scattering Chamber",     0),
+    SHIELD(2,        "Tungsten Shield",        0),
+    INNERSVTCAGE(3,  "Inner SVT Faraday Cage", 0),
+    SVTLAYER1(4,     "SVT Layer 1",            1),
+    SVTLAYER2(5,     "SVT Layer 2",            2),
+    SVTLAYER3(6,     "SVT Layer 3",            3),
+    SVTLAYER4(7,     "SVT Layer 4",            4),
+    SVTLAYER5(8,     "SVT Layer 5",            5),
+    SVTLAYER6(9,     "SVT Layer 6",            6),
+    OUTERSVTCAGE(10, "Outer SVT Faraday Cage", 0),
+    BMTINNERTUBE(11, "BMT Inner Tube",         0),
+    BMTLAYER1(12,    "BMT Layer 1",            1),
+    BMTLAYER2(13,    "BMT Layer 2",            2),
+    BMTLAYER3(14,    "BMT Layer 3",            3),
+    BMTLAYER4(15,    "BMT Layer 4",            4),
+    BMTLAYER5(16,    "BMT Layer 5",            5),
+    BMTLAYER6(17,    "BMT Layer 6",            6),
+    COSMICPLANE(18,  "Cosmic reference plane", 0);
 
     private final int id;
     private final String name;

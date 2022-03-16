@@ -165,14 +165,14 @@ public class StateVecs extends AStateVecs {
 
         double p = Math.sqrt(vec.px*vec.px + vec.py*vec.py + vec.pz*vec.pz);
         double E = Math.sqrt(p*p + mass*mass);
-
+        
         double dE = -dir*surf.getEloss(p, mass, this.units.unit())/cosEntranceAngle;
 
         double ECorr = E + dE;
         double pCorr = Math.sqrt(ECorr*ECorr-mass*mass);
-//        System.out.println("From " + i + " to " + f + " including material from surface " + 1 + " with X0 = " +  mv.measurements.get(i).l_over_X0);
+//        System.out.println("Moving in direction " + dir + " including material from surface " + vec.k + " with X0 = " +  mv.measurements.get(vec.k).surface.ToverX0());
 //        System.out.println(p + " " + E + " " + dE + " " + pCorr);
-//        System.out.println(mv.measurements.get(i).surface.toString());
+//        System.out.println(mv.measurements.get(vec.k).surface.toString());
         vec.kappa = vec.kappa*p/pCorr;
         vec.updateFromHelix();
     }
