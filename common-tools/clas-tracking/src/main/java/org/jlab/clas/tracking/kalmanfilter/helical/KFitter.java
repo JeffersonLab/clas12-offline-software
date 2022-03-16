@@ -99,8 +99,10 @@ public class KFitter extends AKFitter {
                 TrjPoints.put(layer, new HitOnTrack(layer, s.trackTraj.get(k), resi));
                 if(mv.measurements.get(k).skip)
                     TrjPoints.get(layer).isMeasUsed = false;
+            } else {
+                TrjPoints.put(layer, new HitOnTrack(layer, s.trackTraj.get(k), -999));
+                TrjPoints.get(layer).isMeasUsed = false;
             }
-            //System.out.println(" Traj layer "+layer+" x "+TrjPoints.get(layer).x+" y "+TrjPoints.get(layer).y+" z "+TrjPoints.get(layer).z);
         }
     }
 
