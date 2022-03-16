@@ -12,23 +12,23 @@ public class HelicalTrackFitPars {
 
     // The constructor
     public HelicalTrackFitPars(Helix helix, double[] chi2) {
-        set_helix(helix);
-        set_chisq(chi2);
+        setHelix(helix);
+        setChi2(chi2);
     }
 
-    public Helix get_helix() {
+    public Helix getHelix() {
         return _helix;
     }
 
-    public void set_helix(Helix helix) {
+    public final void setHelix(Helix helix) {
         this._helix = helix;
     }
 
-    public double[] get_chisq() {
+    public double[] getChi2() {
         return _chisq;
     }
 
-    public void set_chisq(double[] chisq) {
+    public final void setChi2(double[] chisq) {
         this._chisq = chisq;
     }
 

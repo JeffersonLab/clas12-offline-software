@@ -22,7 +22,12 @@ public class RandomData {
 	public RandomData(int n, long seed) {
 		
 		this(n, seed, -0.01, 0.02, -0.01, 0.02, -0.01, 0.02,
-				0.9, 0.0, 25, 20, 0, 360);
+				0.9, 5.0, 25, 20, 0, 360);
+	}
+	
+	public String toStringRaw(int index) {
+		return String.format("%2d %7.4f  %7.4f  %7.4f   %6.3f   %6.3f  %7.3f", 
+				charge[index], xo[index], yo[index], zo[index], p[index], theta[index], phi[index]);		
 	}
 	
 	/**

@@ -354,8 +354,12 @@ public class CndHitFinder {
 
 			//	if(Math.abs(xi-xj)<(3.*incx)  && Math.abs(yi-yj)<(3.*incy)  && Math.abs(zi-zj)<(3.*incz)) { // CUT are set to x,y,z incertainty
 			double zjAv = zj - ((-1.*ccdb.ZOFFSET[lay-1]) + (ccdb.LENGTH[lay-1]/2.))-(ccdb.ZTARGET[0]*10);
-			if((flag==0 && Math.abs(xi-xj)<(5.*incx)  && Math.abs(yi-yj)<(5.*incy)  && zjAv>(ccdb.LENGTH[lay-1]/-2.)-10*Parameters.Zres[0] && zjAv<(ccdb.LENGTH[lay-1]/2.)+10*Parameters.Zres[0]) || 
-					(flag==1 && Math.abs(xi-xj)<(5.*incx)  && Math.abs(yi-yj)<(5.*incy)  && Math.abs(zi-zj)<(5.*incz))){ // CUT are set to x,y incertainty and zj in the paddle length
+			if((flag==0 && Math.abs(xi-xj)<(5.*incx)  && 
+                                       Math.abs(yi-yj)<(5.*incy)  && 
+                                       zjAv>(ccdb.LENGTH[lay-1]/-2.)-10*Parameters.Zres[0] && 
+                                       zjAv<(ccdb.LENGTH[lay-1]/2.)+10*Parameters.Zres[0]) || 
+			   (flag==1 && Math.abs(xi-xj)<(5.*incx)  && Math.abs(yi-yj)<(5.*incy)  && 
+                                       Math.abs(zi-zj)<(5.*incz))){ // CUT are set to x,y incertainty and zj in the paddle length
 
 				hit.set_AssociatedTrkId(helices.get(i).get_Id());
 				hit.set_pathlength(helices.get(i).get_TrkLengths().get(lay-1));

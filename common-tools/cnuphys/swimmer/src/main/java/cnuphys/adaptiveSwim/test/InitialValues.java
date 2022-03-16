@@ -38,6 +38,11 @@ public class InitialValues {
 		
 	}
 	
+	
+	public String toStringRaw() {
+		return String.format("%-7.4f  %-7.4f  %-7.4f %-6.3f %-6.3f %-6.3f", xo, yo, zo, p, theta, phi);
+	}
+	
 	/**
 	 * Store the initial conditions of a swim
 	 * @param charge The integer charge
@@ -70,9 +75,9 @@ public class InitialValues {
 	public String toString() {
 		return 
 		String.format("Q: %d\n", charge) +
-		String.format("xo: %10.7e cm\n", xo) +
-		String.format("yo: %10.7e cm\n", yo) +
-		String.format("zo: %10.7e cm\n", zo) +
+		String.format("xo: %10.7e m\n", xo) +
+		String.format("yo: %10.7e m\n", yo) +
+		String.format("zo: %10.7e m\n", zo) +
 		String.format("p: %10.7e GeV/c\n", p) +
 		String.format("theta: %10.7f deg\n", theta) +
 		String.format("phi: %10.7f deg", phi);

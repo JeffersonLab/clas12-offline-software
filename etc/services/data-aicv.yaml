@@ -30,7 +30,7 @@ services:
     name: FTOFHB
   - class: org.jlab.service.ec.ECEngine
     name: EC
-  - class: org.jlab.rec.cvt.services.CVTReconstruction
+  - class: org.jlab.rec.cvt.services.CVTEngine
     name: CVT
   - class: org.jlab.service.ctof.CTOFEngine
     name: CTOF
