@@ -179,20 +179,21 @@ public class CVTEngine extends ReconstructionEngine {
         if(Constants.ISCOSMICDATA) {
             strgtTrksRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
                     crosses, rbc, swimmer);
-        } else {
-                double xb, yb;
-                if(event.hasBank("RASTER::position")){
+        } 
+        else {  
+            double xb, yb;
+            if(event.hasBank("RASTER::position")){
                 DataBank raster_bank = event.getBank("RASTER::position");
                 xb = raster_bank.getFloat("x", 0);
                 yb = raster_bank.getFloat("y", 0);
-                }   
-                else {
+            }   
+            else {
                 IndexedTable beamPos   = this.getConstantsManager().getConstants(this.getRun(), "/geometry/beam/position");
                 xb = beamPos.getDoubleValue("x_offset", 0, 0, 0);
                 yb = beamPos.getDoubleValue("y_offset", 0, 0, 0);
-                }
-            trksFromTargetRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
-                crosses, xb , yb, rbc, swimmer);
+            }
+            trksFromTargetRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters,
+                    crosses, xb , yb, rbc, swimmer);
         }
         return true;
     }

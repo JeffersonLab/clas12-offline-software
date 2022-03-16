@@ -78,7 +78,7 @@ public class EngineProcessor {
         String[] names = new String[]{
             "MAGFIELDS",
             "FTCAL", "FTHODO", "FTEB",
-            "DCCR","DCHB","FTOFHB","EC","raster",
+            "DCCR","DCHB","FTOFHB","EC","RASTER",
             "CVT","CTOF","CND","BAND",
             "HTCC","LTCC","EBHB", 
             "DCTB","FMT","FTOFTB","EBTB",
