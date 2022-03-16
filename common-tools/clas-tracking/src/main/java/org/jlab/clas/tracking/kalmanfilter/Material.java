@@ -50,6 +50,7 @@ public class Material {
 
     
     public double getEloss(double p, double mass, double units) {
+        if(mass==0) return 0;
         double beta = p / Math.sqrt(p * p + mass * mass);
         double s = PhysicsConstants.massElectron() / mass;
         double gamma = 1. / Math.sqrt(1 - beta * beta);
