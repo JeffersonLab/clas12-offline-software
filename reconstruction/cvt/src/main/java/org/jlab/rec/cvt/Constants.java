@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.clas.tracking.kalmanfilter.Material;
 
 import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
@@ -59,6 +60,11 @@ public class Constants {
     public static boolean TIMECUTS = false;
 
     public static double  ELOSSMASS = PhysicsConstants.massPionCharged();
+    private static final Material LH2 = new Material("LH2", 8.85, 0.0708E-3, 0.99212, 8904.0, 21.8);
+    private static final Material LD2 = new Material("LD2", 8.85, 0.1638E-3, 0.49650, 7691.0, 21.8);
+    public static final Material TARGETKAPTON = new Material("Kapton", 50E-3, 1.42E-3, 0.501, 28.57, 79.6);
+    public static final Material TARGETRHOACELL = new Material("Rhoacell", 10.4, 0.1E-3, 0.5392, 1000, 93.0);
+    private static Material TARGETMAT = LH2;
     
     public static boolean KFFILTERON = true;
     public static boolean INITFROMMC = false;
@@ -122,6 +128,19 @@ public class Constants {
         Constants._Zoffset = _Zoffset;
     }
 
+    public static void setTargetMaterial(String material) {
+        if(material.equalsIgnoreCase("LH2"))
+            TARGETMAT = LH2;
+        else if(material.equalsIgnoreCase("LD2") )
+            TARGETMAT = LD2;
+        else
+            System.out.println("Unknown target material " + material + ", keeping current setting " + TARGETMAT.getName());
+    }
+
+    public static Material getTargetMaterial() {
+        return TARGETMAT;
+    }
+    
     public static int getRmReg() {
         return _rmReg;
     }

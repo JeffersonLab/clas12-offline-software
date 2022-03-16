@@ -49,10 +49,11 @@ public abstract class AStateVecs {
         // transport state vector
         StateVec iVec = this.trackTraj.get(i);
 
-        if(dir>0) this.corrForEloss(dir, iVec, mv);
+        StateVec fVec = new StateVec(iVec);
+        
+        if(dir>0) this.corrForEloss(dir, fVec, mv);
 
-        StateVec fVec = this.newStateVecAtMeasSite(iVec, mv.measurements.get(f), swimmer);
-        if(fVec==null) return;
+        if(!this.setStateVecPosAtMeasSite(fVec, mv.measurements.get(f), swimmer)) return;
 
         if(dir<0) this.corrForEloss(dir, fVec, mv);
 

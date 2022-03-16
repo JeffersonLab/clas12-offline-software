@@ -303,6 +303,11 @@ public class CVTEngine extends ReconstructionEngine {
             Constants.ELOSSMASS = Double.parseDouble(this.getEngineConfigString("elossMass"));
         }
         System.out.println("["+this.getName()+"] ELoss mass set to "+ Constants.ELOSSMASS + " GeV");
+
+        if(this.getEngineConfigString("targetMat")!=null) {
+            Constants.setTargetMaterial(this.getEngineConfigString("targetMat"));
+        }
+        System.out.println("["+this.getName()+"] Target material set to "+ Constants.getTargetMaterial());
     }
 
 

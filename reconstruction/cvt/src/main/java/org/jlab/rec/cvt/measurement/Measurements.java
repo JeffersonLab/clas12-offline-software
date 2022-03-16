@@ -5,6 +5,9 @@ import java.util.List;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.clas.tracking.objects.Strip;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.geant4.v2.SVT.SVTConstants;
+import org.jlab.geom.prim.Arc3D;
+import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
@@ -27,6 +30,7 @@ public class Measurements {
     
     private static final int NSURFACES = SVTGeometry.NPASSIVE + 
                                          SVTGeometry.NLAYERS  +
+                                         BMTGeometry.NPASSIVE +
                                          BMTGeometry.NLAYERS;
     private boolean cosmic = false;
     private Surface[] cvtSurfaces;
@@ -45,23 +49,28 @@ public class Measurements {
     }
     
     private void initTargetSurfaces(double xbeam, double ybeam) {
-        cvtSurfaces = new Surface[NSURFACES+1];
+        cvtSurfaces = new Surface[NSURFACES+2];
         this.add(MLayer.TARGET.getIndex(),       this.getTarget(xbeam, ybeam));
+        this.add(MLayer.SCHAMBER.getIndex(),     this.getScatteringChamber());
         this.add(MLayer.SHIELD.getIndex(),       Constants.SVTGEOMETRY.getShieldSurface());
         this.add(MLayer.INNERSVTCAGE.getIndex(), Constants.SVTGEOMETRY.getFaradayCageSurfaces(0));
         this.add(MLayer.OUTERSVTCAGE.getIndex(), Constants.SVTGEOMETRY.getFaradayCageSurfaces(1)); 
+        this.add(MLayer.BMTINNERTUBE.getIndex(), Constants.BMTGEOMETRY.getInnerTube()); 
     }
     
     private void initCosmicSurfaces() {
-        cvtSurfaces = new Surface[NSURFACES*2+1];
+        cvtSurfaces = new Surface[NSURFACES*2+3];
         this.add(MLayer.COSMICPLANE.getIndex(1),   this.getCosmicPlane());
+        this.add(MLayer.SCHAMBER.getIndex(1),      this.getScatteringChamber());
         this.add(MLayer.SHIELD.getIndex(1),        Constants.SVTGEOMETRY.getShieldSurface());
         this.add(MLayer.INNERSVTCAGE.getIndex(1),  Constants.SVTGEOMETRY.getFaradayCageSurfaces(0));
         this.add(MLayer.OUTERSVTCAGE.getIndex(1),  Constants.SVTGEOMETRY.getFaradayCageSurfaces(1));       
+        this.add(MLayer.BMTINNERTUBE.getIndex(1),  Constants.BMTGEOMETRY.getInnerTube()); 
+        this.add(MLayer.SCHAMBER.getIndex(-1),     this.getScatteringChamber());
         this.add(MLayer.SHIELD.getIndex(-1),       Constants.SVTGEOMETRY.getShieldSurface(), -1);
         this.add(MLayer.INNERSVTCAGE.getIndex(-1), Constants.SVTGEOMETRY.getFaradayCageSurfaces(0), -1);
         this.add(MLayer.OUTERSVTCAGE.getIndex(-1), Constants.SVTGEOMETRY.getFaradayCageSurfaces(1), -1);       
-       
+        this.add(MLayer.BMTINNERTUBE.getIndex(-1), Constants.BMTGEOMETRY.getInnerTube());        
     }
     
     private void add(int index, Surface surface) {
@@ -89,13 +98,27 @@ public class Measurements {
         Point3D  p = new Point3D(xbeam, ybeam, 0);
         Line3D   l = new Line3D(p, u);
         Surface target = new Surface(l.origin(), l.end(), Constants.DEFAULTSWIMACC);
-        target.addMaterial("LH2", 5, 0.0708E-3, 1, 8904.0, 21.8);
+        target.addMaterial(Constants.getTargetMaterial());
+        target.addMaterial(Constants.TARGETKAPTON);
         target.setError(Constants.getRbErr());
         if(Constants.kfBeamSpotConstraint())
             target.notUsedInFit = false;
         else
             target.notUsedInFit = true;
         return target;
+    }
+    
+    private Surface getScatteringChamber() {
+        Point3D  center = new Point3D(0, 0, Constants.getZoffset()-100);
+        Point3D  origin = new Point3D(39.5, 0, Constants.getZoffset()-100);
+        Vector3D axis   = new Vector3D(0,0,1);
+        Arc3D base = new Arc3D(origin, center, axis, 2*Math.PI);
+        Cylindrical3D chamber = new Cylindrical3D(base, 200);
+        Surface scatteringChamber = new Surface(chamber, new Strip(0, 0, 0), Constants.DEFAULTSWIMACC);
+        scatteringChamber.addMaterial(Constants.TARGETRHOACELL);
+        scatteringChamber.passive=true;
+        scatteringChamber.notUsedInFit=true;
+        return scatteringChamber;
     }
     
     private Surface getCosmicPlane() {
