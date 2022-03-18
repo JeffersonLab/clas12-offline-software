@@ -15,7 +15,8 @@ import org.jlab.rec.vtx.Vertex;
  * @author ziegler
  */
 public class Writer {
-    public DataBank VtxBank(DataEvent event, List<Vertex> vtx) { 
+    
+    public static DataBank VtxBank(DataEvent event, List<Vertex> vtx) { 
         DataBank bank = event.createBank("REC::VertDoca", vtx.size());
         if(vtx!=null) {
             for (int i = 0; i < vtx.size(); i++) {
@@ -39,6 +40,7 @@ public class Writer {
                 bank.setFloat("r", i, (float) vtx.get(i).getDoca()); 
             }
         }
+        //bank.show();
         return bank;
     }
 }
