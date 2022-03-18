@@ -5,7 +5,7 @@
 
 <!--## Quick Start-->
 
-This README fell too far out of date and is undergoing resurrection.
+This README fell too far out of date and is undergoing resurrection.  Meanwhile, these bits are still relevant ...
 
 If you just want to use the software without modifying/building it, you can download a pre-built package from the [github releases](https://github.com/JeffersonLab/clas12-offline-software/releases) page or the corresponding repo at [JLab](https://clasweb.jlab.org/clas12offline/distribution/coatjava/).  Builds on JLab machines are also available, see the [general software wiki](https://clasweb.jlab.org/wiki/index.php/CLAS12_Software_Center) for setting up your environment to use them.
 
