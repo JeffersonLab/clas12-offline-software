@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.clas.tracking.trackrep.Helix;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.vtx.TrackParsHelix;
@@ -15,8 +16,8 @@ public class Reader {
 		// TODO Auto-generated constructor stub
 	}
 
-        float[] b = new float[3];
-	public List<TrackParsHelix> get_Trks(DataEvent event, Swim swimmer) {
+        static float[] b = new float[3];
+	public static List<TrackParsHelix> get_Trks(DataEvent event, Swim swimmer, double xb, double yb) {
             if(event.hasBank("REC::Particle")==false ) {
                 //System.err.println(" NO Tracks bank! ");						
                 return new ArrayList<TrackParsHelix>();
@@ -27,26 +28,27 @@ public class Reader {
             for (int i = 0; i < rows; i++) {
                 if (bank.getFloat("chi2pid", i) !=(float)9999 && bank.getByte("charge", i)!=0) {
                     swimmer.BfieldLab(
-                        (double)event.getBank("REC::Particle").getFloat("vx",i),
-                        (double)event.getBank("REC::Particle").getFloat("vy",i),
-                        (double)event.getBank("REC::Particle").getFloat("vz",i), b);
+                        (double)bank.getFloat("vx",i),
+                        (double)bank.getFloat("vy",i),
+                        (double)bank.getFloat("vz",i), b);
+                    double Bf = Math.sqrt(b[0]*b[0]+b[1]*b[1]+b[2]*b[2]);
+            
+                    TrackParsHelix trkPars = new TrackParsHelix((int)i, (double)bank.getFloat("vx",i),
+                            (double)bank.getFloat("vy",i),
+                            (double)bank.getFloat("vz",i),
+                            (double)bank.getFloat("px",i),
+                            (double)bank.getFloat("py",i),
+                            (double)bank.getFloat("pz",i),
+                            (int) bank.getByte("charge", i), Bf,
+                            xb,yb);
                     
-                    TrackParsHelix dcpars = new TrackParsHelix((int)i);
-                    dcpars.setHelixParams(
-                            (double)event.getBank("REC::Particle").getFloat("vx",i),
-                            (double)event.getBank("REC::Particle").getFloat("vy",i),
-                            (double)event.getBank("REC::Particle").getFloat("vz",i),
-                            (double)event.getBank("REC::Particle").getFloat("px",i),
-                            (double)event.getBank("REC::Particle").getFloat("py",i),
-                            (double)event.getBank("REC::Particle").getFloat("pz",i),
-                            (double) bank.getByte("charge", i), b[2]); 
-                    helices.add(dcpars);
+                    helices.add(trkPars);
                 }
             }
 		
             return helices;
 	}
-        public List<TrackParsHelix> get_MCTrks(DataEvent event, Swim swimmer) {
+        public static List<TrackParsHelix> get_MCTrks(DataEvent event, Swim swimmer, double xb, double yb) {
     	
 		
 		if(event.hasBank("MC::Particle")==false ) {
@@ -55,26 +57,31 @@ public class Reader {
 		}
  
 		List<TrackParsHelix> helices = new ArrayList<TrackParsHelix>();		
-		DataBank bankMC = event.getBank("MC::Particle");
-		
-                for(int i = 0; i<bankMC.rows(); i++){
-			TrackParsHelix dcpars = new TrackParsHelix(i);
-                        swimmer.BfieldLab(bankMC.getFloat("vx",i), bankMC.getFloat("vy",i), bankMC.getFloat("vz",i), b);
-			dcpars.setHelixParams(bankMC.getFloat("vx",i), bankMC.getFloat("vy",i), bankMC.getFloat("vz",i),
-                                bankMC.getFloat("px",i), bankMC.getFloat("py",i), bankMC.getFloat("pz",i), 
-					             this.getQ(bankMC.getInt("pid",i)), b[2]);
-			helices.add(dcpars);
+		DataBank bank = event.getBank("MC::Particle");
+		double Bf = Math.sqrt(b[0]*b[0]+b[1]*b[1]+b[2]*b[2]);
+                    
+                for(int i = 0; i<bank.rows(); i++){
+                    TrackParsHelix trkPars = new TrackParsHelix((int)i, (double)bank.getFloat("vx",i),
+                            (double)bank.getFloat("vy",i),
+                            (double)bank.getFloat("vz",i),
+                            (double)bank.getFloat("px",i),
+                            (double)bank.getFloat("py",i),
+                            (double)bank.getFloat("pz",i),
+                            getQ(bank.getInt("pid",i)), Bf,
+                            xb,yb);
+                    
+			helices.add(trkPars);
 		}
 		
 		return helices;
 	}
 	
-    private double getQ(int pid) {
-        double q = 1;
+    private static int getQ(int pid) {
+        int q = 1;
         if(Math.abs(pid/100)>0) {
-            q = (double)-Math.abs(pid); // leptons 11,12,13
+            q = -Math.abs(pid); // leptons 11,12,13
         } else {
-            q = (double)Math.abs(pid);
+            q = Math.abs(pid);
         }
         return q;
     }
