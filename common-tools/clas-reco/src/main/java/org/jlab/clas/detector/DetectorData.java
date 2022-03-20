@@ -578,6 +578,8 @@ public class DetectorData {
                 double pt = bank.getFloat("pt", row);
                 double phi0 = bank.getFloat("phi0", row);
                 double tandip = bank.getFloat("tandip", row);
+                double xb = bank.getFloat("xb", row);
+                double yb = bank.getFloat("yb", row);
                 double z0 = bank.getFloat("z0", row);
                 double d0 = bank.getFloat("d0", row);
 
@@ -585,8 +587,8 @@ public class DetectorData {
                 double py = pt * Math.sin(phi0);
                 double px = pt * Math.cos(phi0);
 
-                double vx = -d0 * Math.sin(phi0);
-                double vy = d0 * Math.cos(phi0);
+                double vx = -d0 * Math.sin(phi0) + xb;
+                double vy =  d0 * Math.cos(phi0) + yb;
 
                 DetectorTrack track = new DetectorTrack(charge, p, row);
                 track.setVector(px, py, pz);
