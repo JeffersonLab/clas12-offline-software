@@ -181,8 +181,8 @@ public class CVTEngine extends ReconstructionEngine {
             strgtTrksRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
                     crosses, rbc, swimmer);
         } else {
-            double xb = beamPos.getDoubleValue("x_offset", 0, 0, 0);
-            double yb = beamPos.getDoubleValue("y_offset", 0, 0, 0);
+            double xb = beamPos.getDoubleValue("x_offset", 0, 0, 0)*10.0;
+            double yb = beamPos.getDoubleValue("y_offset", 0, 0, 0)*10.0;
             trksFromTargetRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
                 crosses, xb , yb, rbc, swimmer);
         }

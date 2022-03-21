@@ -98,7 +98,7 @@ public class CCDBConstantsLoader {
         dbprovider.loadTable("/geometry/cvt/mvt/bmt_strip_L6");
         
         //load material budget:
-        dbprovider.loadTable("/geometry/cvt/mvt/bmt_material");
+        dbprovider.loadTable("/geometry/cvt/mvt/material");
         
          //load Lorentz angle table
         dbprovider.loadTable("/calibration/mvt/lorentz");
@@ -217,12 +217,12 @@ public class CCDBConstantsLoader {
         
         //material budget
         //===============
-        for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_material" + "/sector"); i++) {
-            int layer = dbprovider.getInteger("/geometry/cvt/mvt/bmt_material" + "/layer", i);
-            double thickness = dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/thickness", i)/10000.;
-            double Zeff =  dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/average_z", i);
-            double Aeff =  dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/average_a", i);
-            double X0 =  dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/x0", i);
+        for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/material" + "/sector"); i++) {
+            int layer = dbprovider.getInteger("/geometry/cvt/mvt/material" + "/layer", i);
+            double thickness = dbprovider.getDouble("/geometry/cvt/mvt/material" + "/thickness", i)/10000.;
+            double Zeff =  dbprovider.getDouble("/geometry/cvt/mvt/material" + "/average_Z", i);
+            double Aeff =  dbprovider.getDouble("/geometry/cvt/mvt/material" + "/average_A", i);
+            double X0 =  dbprovider.getDouble("/geometry/cvt/mvt/material" + "/X0", i);
             EFF_Z_OVER_A[layer-1] += thickness*Zeff/Aeff;      
             T_OVER_X0[layer-1]+=thickness/X0;
             TMAT[layer-1] += thickness;

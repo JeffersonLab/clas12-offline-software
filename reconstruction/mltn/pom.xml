@@ -14,20 +14,8 @@
         <groupId>org.jlab.clas</groupId>
         <artifactId>clas12rec</artifactId>
         <relativePath>../../parent/pom.xml</relativePath>
-        <version>7.1.0-SNAPSHOT</version>
+        <version>8.0.0-SNAPSHOT</version>
     </parent>
-
-    <repositories>
-        <repository>
-            <id>clas12maven</id>
-            <url>https://clasweb.jlab.org/clas12maven</url>
-        </repository>
-
-        <repository>
-            <id>jnp-maven</id>
-            <url>https://clasweb.jlab.org/jhep/maven</url>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>
@@ -51,37 +39,37 @@
         <dependency>
             <groupId>org.jlab.clas</groupId>
             <artifactId>clas-io</artifactId>
-            <version>7.1.0-SNAPSHOT</version>
+            <version>8.0.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.jlab.clas</groupId>
             <artifactId>clas-detector</artifactId>
-            <version>7.1.0-SNAPSHOT</version>
+            <version>8.0.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.jlab.clas</groupId>
             <artifactId>clas-geometry</artifactId>
-            <version>7.1.0-SNAPSHOT</version>
+            <version>8.0.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.jlab.clas</groupId>
             <artifactId>clas-reco</artifactId>
-            <version>7.1.0-SNAPSHOT</version>
+            <version>8.0.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.jlab.clas</groupId>
             <artifactId>clas-physics</artifactId>
-            <version>7.1.0-SNAPSHOT</version>
+            <version>8.0.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.jlab.clas</groupId>
             <artifactId>clas-analysis</artifactId>
-            <version>7.1.0-SNAPSHOT</version>
+            <version>8.0.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -90,9 +78,7 @@
             <version>2.0-SNAPSHOT</version>
         </dependency>
 
-
     </dependencies>
-
 
     <build>
         <extensions>
