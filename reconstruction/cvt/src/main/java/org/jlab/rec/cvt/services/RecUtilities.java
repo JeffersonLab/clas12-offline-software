@@ -317,7 +317,7 @@ public class RecUtilities {
         return clustersOnTrack;
     }
     
-    List<Cross> findCrossesOnBMTTrack(List<Cluster> bmtclsOnTrack, CrossMaker cm, int idx) {
+    public List<Cross> findCrossesOnBMTTrack(List<Cluster> bmtclsOnTrack, CrossMaker cm, int idx) {
          // fill the sorted list
         ArrayList<ArrayList<Cluster>> sortedClusters = cm.sortClusterByDetectorAndIO(bmtclsOnTrack);
         ArrayList<Cluster> bmt_Clayrclus = sortedClusters.get(2);

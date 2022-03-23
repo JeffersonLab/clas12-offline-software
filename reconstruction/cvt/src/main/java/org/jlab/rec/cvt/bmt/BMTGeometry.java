@@ -77,6 +77,20 @@ public class BMTGeometry {
     }
 
     /**
+     * @return the lZ
+     */
+    public static int[] getlZ() {
+        return lZ;
+    }
+
+    /**
+     * @return the lC
+     */
+    public static int[] getlC() {
+        return lC;
+    }
+
+    /**
      * Return region number for a given layer
      * @param layer (1-6)
      * @return region (1-3) 
@@ -902,7 +916,6 @@ public class BMTGeometry {
     
     public List<Surface> getSurfaces() {
         List<Surface> surfaces = new ArrayList<>();
-        surfaces.add(this.getInnerTube());
         for(int i=1; i<=NLAYERS; i++)
             surfaces.add(this.getSurface(i, 1, new Strip(0, 0, 0)));
         return surfaces;

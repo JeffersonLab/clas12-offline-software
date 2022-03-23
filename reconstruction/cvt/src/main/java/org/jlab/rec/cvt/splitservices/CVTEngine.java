@@ -1,36 +1,22 @@
-package org.jlab.rec.cvt.services;
+package org.jlab.rec.cvt.splitservices;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import org.jlab.clas.reco.ReconstructionEngine;
-import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
-import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
-import org.jlab.rec.cvt.banks.HitReader;
-import org.jlab.rec.cvt.banks.RecoBankWriter;
-import org.jlab.rec.cvt.bmt.BMTConstants;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
-import org.jlab.rec.cvt.cluster.Cluster;
-import org.jlab.rec.cvt.cluster.ClusterFinder;
-import org.jlab.rec.cvt.cross.Cross;
-import org.jlab.rec.cvt.cross.CrossMaker;
-import org.jlab.rec.cvt.hit.ADCConvertor;
-import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.svt.SVTGeometry;
-import org.jlab.rec.cvt.svt.SVTParameters;
-import org.jlab.utils.groups.IndexedTable;
 
 /**
  * Service to return reconstructed TRACKS
@@ -41,25 +27,16 @@ import org.jlab.utils.groups.IndexedTable;
  */
 public class CVTEngine extends ReconstructionEngine {
 
-    private CosmicTracksRec   strgtTrksRec = null;
-    private TracksFromTargetRec trksFromTargetRec = null;
     private int Run = -1;
     
-    public CVTEngine() {
-        super("CVTTracks", "ziegler", "4.0");
+    public CVTEngine(String name) {
+        super(name, "ziegler", "5.0");
         
-        strgtTrksRec      = new CosmicTracksRec();
-        trksFromTargetRec = new TracksFromTargetRec();
     }
 
     
     @Override
     public boolean init() {
-        
-        this.loadConfiguration();
-        this.initConstantsTables();
-        this.loadGeometries();
-        this.registerBanks();
         return true;
     }
     
@@ -104,93 +81,11 @@ public class CVTEngine extends ReconstructionEngine {
    
     @Override
     public boolean processDataEvent(DataEvent event) {
-        this.setRunConditionsParameters(event, Run, false, "");
-        
-        Swim swimmer = new Swim();
-        ADCConvertor adcConv = new ADCConvertor();
-
-        RecoBankWriter rbc = new RecoBankWriter();
-
-        IndexedTable svtStatus = this.getConstantsManager().getConstants(this.getRun(), "/calibration/svt/status");
-        IndexedTable bmtStatus = this.getConstantsManager().getConstants(this.getRun(), "/calibration/mvt/bmt_status");
-        IndexedTable bmtTime   = this.getConstantsManager().getConstants(this.getRun(), "/calibration/mvt/bmt_time");
-        IndexedTable beamPos   = this.getConstantsManager().getConstants(this.getRun(), "/geometry/beam/position");
-
-        HitReader hitRead = new HitReader();
-        hitRead.fetch_SVTHits(event, adcConv, -1, -1, svtStatus);
-        if(Constants.SVTONLY==false)
-          hitRead.fetch_BMTHits(event, adcConv, swimmer, bmtStatus, bmtTime);
-
-        List<Hit> hits = new ArrayList<>();
-        //I) get the hits
-        List<Hit> SVThits = hitRead.getSVTHits();
-        if(SVThits.size()>SVTParameters.MAXSVTHITS)
-            return true;
-        if (SVThits != null && !SVThits.isEmpty()) {
-            hits.addAll(SVThits);
-        }
-
-        List<Hit> BMThits = hitRead.getBMTHits();
-        if (BMThits != null && BMThits.size() > 0) {
-            hits.addAll(BMThits);
-
-            if(BMThits.size()>BMTConstants.MAXBMTHITS)
-                 return true;
-        }
-
-        //II) process the hits		
-        //1) exit if hit list is empty
-        if (hits.isEmpty()) {
-            return true;
-        }
-       
-        List<Cluster> clusters = new ArrayList<>();
-        List<Cluster> SVTclusters = new ArrayList<>();
-        List<Cluster> BMTclusters = new ArrayList<>();
-
-        //2) find the clusters from these hits
-        ClusterFinder clusFinder = new ClusterFinder();
-        clusters.addAll(clusFinder.findClusters(SVThits));     
-        if(BMThits != null && BMThits.size() > 0) {
-            clusters.addAll(clusFinder.findClusters(BMThits)); 
-        }
-        if (clusters.isEmpty()) {
-            rbc.appendCVTBanks(event, SVThits, BMThits, null, null, null, null, null);
-            return true;
-        }
-        
-        if (!clusters.isEmpty()) {
-            for (int i = 0; i < clusters.size(); i++) {
-                if (clusters.get(i).getDetector() == DetectorType.BST) {
-                    SVTclusters.add(clusters.get(i));
-                }
-                if (clusters.get(i).getDetector() == DetectorType.BMT) {
-                    BMTclusters.add(clusters.get(i));
-                }
-            }
-        }
-
-        CrossMaker crossMake = new CrossMaker();
-        List<ArrayList<Cross>> crosses = crossMake.findCrosses(clusters);
-        if(crosses.get(0).size() > SVTParameters.MAXSVTCROSSES ) {
-            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, null, null, null);
-            return true; 
-        }
-        
-        if(Constants.ISCOSMICDATA) {
-            strgtTrksRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
-                    crosses, rbc, swimmer);
-        } else {
-            double xb = beamPos.getDoubleValue("x_offset", 0, 0, 0)*10;
-            double yb = beamPos.getDoubleValue("y_offset", 0, 0, 0)*10;
-            trksFromTargetRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
-                crosses, xb , yb, rbc, swimmer);
-        }
         return true;
     }
      
     
-    private void loadConfiguration() {            
+    public void loadConfiguration() {            
         // Load config
         
         String rmReg = this.getEngineConfigString("removeRegion");        
@@ -291,27 +186,17 @@ public class CVTEngine extends ReconstructionEngine {
         
         if(this.getEngineConfigString("svtSeeding")!=null) {
             Constants.SVTSEEDING = Boolean.parseBoolean(this.getEngineConfigString("svtSeeding"));
-            System.out.println("["+this.getName()+"] SVT-based seeding set to "+ Constants.SVTSEEDING);
+            System.out.println("["+this.getName()+"] run SVT-based seeding set to "+ Constants.SVTSEEDING);
         }
 
         if(this.getEngineConfigString("timeCuts")!=null) {
             Constants.TIMECUTS = Boolean.parseBoolean(this.getEngineConfigString("timeCuts"));
-            System.out.println("["+this.getName()+"] BMT timing cuts set to "+ Constants.TIMECUTS);
+            System.out.println("["+this.getName()+"] run BMT timing cuts set to "+ Constants.TIMECUTS);
         }
-
-        if(this.getEngineConfigString("elossMass")!=null) {
-            Constants.ELOSSMASS = Double.parseDouble(this.getEngineConfigString("elossMass"));
-        }
-        System.out.println("["+this.getName()+"] ELoss mass set to "+ Constants.ELOSSMASS + " GeV");
-
-        if(this.getEngineConfigString("targetMat")!=null) {
-            Constants.setTargetMaterial(this.getEngineConfigString("targetMat"));
-        }
-        System.out.println("["+this.getName()+"] Target material set to "+ Constants.getTargetMaterial());
     }
 
 
-    private void initConstantsTables() {
+    public void initConstantsTables() {
         String[] tables = new String[]{
             "/calibration/svt/status",
             "/calibration/mvt/bmt_time",
@@ -322,7 +207,7 @@ public class CVTEngine extends ReconstructionEngine {
         this.getConstantsManager().setVariation("default");
     }
     
-    private void loadGeometries() {
+    public void loadGeometries() {
         // Load other geometries
         
         String variation = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
@@ -342,18 +227,6 @@ public class CVTEngine extends ReconstructionEngine {
         Constants.CVTSURFACES = new ArrayList<>();
         Constants.CVTSURFACES.addAll(Constants.SVTGEOMETRY.getSurfaces());
         Constants.CVTSURFACES.addAll(Constants.BMTGEOMETRY.getSurfaces());
-    }
-    
-    private void registerBanks() {
-        super.registerOutputBank("BMTRec::Hits");
-        super.registerOutputBank("BMTRec::Clusters");
-        super.registerOutputBank("BSTRec::Crosses");
-        super.registerOutputBank("BSTRec::Hits");
-        super.registerOutputBank("BSTRec::Clusters");
-        super.registerOutputBank("BSTRec::Crosses");
-        super.registerOutputBank("CVTRec::Seeds");
-        super.registerOutputBank("CVTRec::Tracks");
-        super.registerOutputBank("CVTRec::Trajectory");        
     }
     
 

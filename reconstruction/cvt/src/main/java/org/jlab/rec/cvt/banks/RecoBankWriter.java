@@ -2,7 +2,6 @@ package org.jlab.rec.cvt.banks;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.clas.tracking.kalmanfilter.AKFitter;
 
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
@@ -56,7 +55,6 @@ public class RecoBankWriter {
 
             bank.setShort("clusterID", i, (short) hitlist.get(i).getAssociatedClusterID());
             bank.setShort("trkID", i, (short) hitlist.get(i).getAssociatedTrackID());
-
             bank.setByte("status", i, (byte) hitlist.get(i).getStrip().getStatus());            
         }
         //bank.show();
@@ -227,7 +225,6 @@ public class RecoBankWriter {
 
             bank.setShort("clusterID", i, (short) hitlist.get(i).getAssociatedClusterID());
             bank.setShort("trkID", i, (short) hitlist.get(i).getAssociatedTrackID());
-
             bank.setByte("status", i, (byte) hitlist.get(i).getStrip().getStatus());  
         }
 
@@ -472,15 +469,20 @@ public class RecoBankWriter {
      * @param trkcands the list of reconstructed helical tracks
      * @return track bank
      */
-    public DataBank fillTracksBank(DataEvent event, List<Track> trkcands) {
+    public DataBank fillTracksBank(DataEvent event, List<Track> trkcands, int pass) {
         if (trkcands == null) {
             return null;
         }
         if (trkcands.isEmpty()) {
             return null;
         }
-        
-        DataBank bank = event.createBank("CVTRec::Tracks", trkcands.size());
+
+        DataBank bank ;
+        if(pass==2) {
+            bank= event.createBank("CVTRec::ELCTracks", trkcands.size());
+        } else {
+            bank= event.createBank("CVTRec::Tracks", trkcands.size());
+        }
         // an array representing the ids of the crosses that belong to the track
         List<Integer> crossIdxArray = new ArrayList<>();
 
@@ -566,47 +568,6 @@ public class RecoBankWriter {
         }
         //bank.show();
         return bank;
-
-    }
-    public DataBank fillElossTrajBank(DataEvent event, List<Track> trkcands) {
-        if (trkcands == null) {
-            return null;
-        }
-        if (trkcands.isEmpty()) {
-            return null;
-        }
-        //new trajectory
-        int k = 0;
-        for (int i = 0; i < trkcands.size(); i++) {
-            if (trkcands.get(i).getTrajectories() == null) {
-                continue;
-            }
-            if (trkcands.get(i).getTrajectories() != null) {
-                k += trkcands.get(i).getTrajectories().keySet().size();
-            }
-        }
-        DataBank tbank = event.createBank("CVTRec::KFTraj", k);
-        for (int i = 0; i < trkcands.size(); i++) {
-            if(trkcands.get(i)==null)
-                continue;
-            //Fill trajectory for Eloss debugging
-            k = 0;
-            for (AKFitter.HitOnTrack t : trkcands.get(i).getTrajectories().values()) {
-                tbank.setShort("id",       k, (short) trkcands.get(i).getId()); //trackid
-                tbank.setShort("layer",    k, (short) t.layer);
-                tbank.setFloat("x",        k, (float) (t.x/10.));
-                tbank.setFloat("y",        k, (float) (t.y/10.));
-                tbank.setFloat("z",        k, (float) (t.z/10.));
-                tbank.setFloat("px",       k, (float) (t.px));
-                tbank.setFloat("py",       k, (float) (t.py));
-                tbank.setFloat("pz",       k, (float) (t.pz));
-                k++;
-            }
-            //end fill
-        }
-
-        //tbank.show();
-        return tbank;
 
     }
     
@@ -834,7 +795,7 @@ public class RecoBankWriter {
         DataBank bank7 = this.fillSeedsBank(event, seeds);
         if (bank7 != null) event.appendBank(bank7);
 
-        DataBank bank8 = this.fillTracksBank(event, trks);
+        DataBank bank8 = this.fillTracksBank(event, trks, 1);
         if (bank8 != null) event.appendBank(bank8);
 
         DataBank bank9 = this.fillHelicalTracksTrajectoryBank(event, trks);
@@ -843,8 +804,43 @@ public class RecoBankWriter {
         DataBank bank10 = this.fillTracksCovMatBank(event, trks);
         if (bank10 != null) event.appendBank(bank10);
         
-        DataBank bank11 = this.fillElossTrajBank(event, trks);
-        if (bank11 != null) event.appendBank(bank11);
+    }
+    
+    public void appendCVTBanks(DataEvent event,
+            List<Hit> sVThits, List<Hit> bMThits,
+            List<Cluster> sVTclusters, List<Cluster> bMTclusters,
+            List<ArrayList<Cross>> crosses, List<Seed> seeds, List<Track> trks, int pass) {
+
+        DataBank bank1 = this.fillSVTHitsBank(event, sVThits);
+        if (bank1 != null) event.appendBank(bank1);
+
+        DataBank bank2 = this.fillBMTHitsBank(event, bMThits);
+        if (bank2 != null) event.appendBank(bank2);
+
+        DataBank bank3 = this.fillSVTClustersBank(event, sVTclusters);
+        if (bank3 != null) event.appendBank(bank3);
+
+        DataBank bank4 = this.fillBMTClustersBank(event, bMTclusters);
+        if (bank4 != null) event.appendBank(bank4);
+
+        DataBank bank5 = this.fillSVTCrossesBank(event, crosses);
+        if (bank5 != null) event.appendBank(bank5);
+
+        DataBank bank6 = this.fillBMTCrossesBank(event, crosses);
+        if (bank6 != null) event.appendBank(bank6);
+
+        DataBank bank7 = this.fillSeedsBank(event, seeds);
+        if (bank7 != null) event.appendBank(bank7);
+
+        DataBank bank8 = this.fillTracksBank(event, trks, pass);
+        if (bank8 != null) event.appendBank(bank8);
+
+        DataBank bank9 = this.fillHelicalTracksTrajectoryBank(event, trks);
+        if (bank9 != null) event.appendBank(bank9);
+        
+        DataBank bank10 = this.fillTracksCovMatBank(event, trks);
+        if (bank10 != null) event.appendBank(bank10);
+        
     }
 
     public void appendCVTCosmicsBanks(DataEvent event,
@@ -880,7 +876,6 @@ public class RecoBankWriter {
         //found trajectories
         DataBank bank8 = this.fillStraightTracksTrajectoryBank(event, trks);
         if (bank8 != null) event.appendBank(bank8);
-        
 
     }
 
