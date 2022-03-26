@@ -46,12 +46,9 @@ public class MagTests {
 	private static String _homeDir = System.getProperty("user.home");
 	private static String _currentWorkingDirectory = System.getProperty("user.dir");
 
-
-
 	// test the test data file.
 	public static void testTestData(String path) {
-		
-		
+
 		File file = new File(path);
 
 		if (!file.exists()) {
@@ -94,7 +91,6 @@ public class MagTests {
 				solenoidFile, sameSolenoid));
 
 		td.testResult = new float[td.count()][3];
-		
 
 		int nLoop = 10;
 
@@ -176,11 +172,11 @@ public class MagTests {
 		System.err.println("TORUS: [" + td.torusFile + "]");
 		System.err.println("SOLENOID: [" + td.solenoidFile + "]");
 
-	//	Random rand = new Random(seed);
+		// Random rand = new Random(seed);
 
 		double phi = Math.toRadians(15.);
-		double delRho = 300./(n-1);
-		double delZ = 600./(n-1);
+		double delRho = 300. / (n - 1);
+		double delZ = 600. / (n - 1);
 
 		for (int i = 0; i < n; i++) {
 //			double rho = 300 * rand.nextFloat();
@@ -188,13 +184,13 @@ public class MagTests {
 //			td.x[i] = (float) (rho * Math.cos(phi));
 //			td.y[i] = (float) (rho * Math.sin(phi));
 //			td.z[i] = 600 * rand.nextFloat();
-			
-			double rho = (float)(i*delRho);
+
+			double rho = (float) (i * delRho);
 			td.x[i] = (float) (rho * Math.cos(phi));
 			td.y[i] = (float) (rho * Math.sin(phi));
-			td.z[i] = (float)(i*delZ);
+			td.z[i] = (float) (i * delZ);
 			ifield.field(td.x[i], td.y[i], td.z[i], td.result[i]);
-			
+
 //			System.err.println(String.format("(%7.3f, %7.3f, %7.3f), (%7.3f, %7.3f, %7.3f)", td.x[i], td.y[i], td.z[i],
 //					td.result[i][0], td.result[i][1], td.result[i][2]));
 		}
@@ -306,8 +302,6 @@ public class MagTests {
 				result[1][iMax][1], result[1][iMax][2], FastMath.vectorLength(result[1][iMax])));
 
 	}
-
-
 
 	// check active field
 	private static void checkSectors() {
@@ -433,6 +427,42 @@ public class MagTests {
 
 	}
 
+	// test speeding up tited system calls
+	private static void tiltSpeedupTest(int n, long seed) {
+		System.err.println("\nTilted Sector Speedup Test");
+		Random rand = new Random(seed);
+		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITEROTATED);
+
+		//hold the results
+		Comparison results[] = new Comparison[n];
+
+		
+		//get the test data
+		for (int i = 0; i < n; i++) {
+			results[i] = new Comparison();
+			results[i].x = 100 + 20 * rand.nextFloat();
+			results[i].y = -40 + 20 * rand.nextFloat();
+			results[i].z = 290 + 30 * rand.nextFloat();
+		}
+
+		// lets start with just sector 1 of [1..6]
+		int sect = 1;
+		
+		//traditional
+		
+		
+		RotatedCompositeProbe probe = (RotatedCompositeProbe) FieldProbe.factory();
+		for (int i = 0; i < n; i++) {
+			probe.field(sect, results[i].x, results[i].y, results[i].z, results[i].tradResult);
+			double r = 8;
+		}
+		
+		
+		for (int i = 0; i < n; i++) {
+			System.err.println(results[i]);
+		}
+	}
+
 	// timing tests
 	private static void timingTest(int option) {
 		System.out.println("Timing tests: [" + options[option] + "]");
@@ -497,19 +527,17 @@ public class MagTests {
 		ToAscii.readAsciiTorus("/Users/heddle/magfield/FullTorus.txt");
 	}
 
-	
 	private static void parseMauriFiles(FieldProbe probe, final ArrayList<GEMCCompare> compares) {
 		File mfdir = new File(System.getProperty("user.home"), "magfield");
 //		File file = new File(mfdir, "gemctorusNone.txt");
 		File file = new File(mfdir, "gemctorusLinear.txt");
-		
+
 		String lines[] = new String[6];
-		
+
 		try {
 			AsciiReader ar = new AsciiReader(file) {
-				
-				int index = 0;
 
+				int index = 0;
 
 				@Override
 				protected void processLine(String line) {
@@ -519,81 +547,73 @@ public class MagTests {
 					line = line.replaceAll("    ", " ");
 					line = line.replaceAll("   ", " ");
 					line = line.replaceAll("  ", " ");
-	//				System.err.println(line);
-					
+					// System.err.println(line);
+
 					lines[index] = new String(line);
-					
+
 					if (index == 5) {
 						parse();
 					}
-					
+
 					index = (index + 1) % 6;
-					
+
 				}
 
 				@Override
 				public void done() {
 				}
-				
+
 				private void parse() {
 					String tokens[] = MagneticFields.tokens(lines[0], " ");
 					float x = Float.parseFloat(tokens[0]);
 					float y = Float.parseFloat(tokens[1]);
 					float z = Float.parseFloat(tokens[2]);
-					
+
 					tokens = MagneticFields.tokens(lines[3], " ");
-					
+
 					int n1 = Integer.parseInt(tokens[0]);
 					int n2 = Integer.parseInt(tokens[1]);
 					int n3 = Integer.parseInt(tokens[2]);
-							
+
 //					tokens = MagneticFields.tokens(lines[4], " ");
 //					float bx = Float.parseFloat(tokens[0]);
 //					float by = Float.parseFloat(tokens[1]);
 //					float bz = Float.parseFloat(tokens[2]);
-					
+
 					tokens = MagneticFields.tokens(lines[5], " ");
 					float globalbx = Float.parseFloat(tokens[0]);
 					float globalby = Float.parseFloat(tokens[1]);
 					float globalbz = Float.parseFloat(tokens[2]);
 
-					
 					compares.add(new GEMCCompare(probe, x, y, z, n1, n2, n3, globalbx, globalby, globalbz));
-					
+
 				}
-				
+
 			};
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
-	
-	
+
 	private static void compareGEMCTorus() {
 		System.out.println("Setting field to torus only.");
-
 
 		MagneticFields.getInstance().setActiveField(FieldType.TORUS);
 
 		IField ifield = FieldProbe.factory();
-		TorusProbe torusProbe = (TorusProbe)ifield;
-		
+		TorusProbe torusProbe = (TorusProbe) ifield;
+
 		Torus torus = MagneticFields.getInstance().getTorus();
 		torus.setScaleFactor(1.0);
 		MagneticField.setInterpolate(true);
-		
+
 		ArrayList<GEMCCompare> compares = new ArrayList<>();
 		parseMauriFiles(torusProbe, compares);
-		
-		
-		
+
 		for (GEMCCompare compare : compares) {
-	//		ifield.field(compare.x, compare.y, compare.z, compare.bced);
+			// ifield.field(compare.x, compare.y, compare.z, compare.bced);
 			System.err.println(compare);
 		}
-
-		
-
 
 	}
 
@@ -715,8 +735,6 @@ public class MagTests {
 
 	}
 
-
-
 	// convert the torus to ASCII
 	private static void convertTorusToAscii() {
 //		ToAscii.torusToAscii(MagneticFields.getInstance().getTorus(), 
@@ -734,6 +752,7 @@ public class MagTests {
 
 		JMenu testMenu = new JMenu("Tests");
 
+		final JMenuItem tiltItem = new JMenuItem("Tilted System Speedup Test");
 		final JMenuItem test0Item = new JMenuItem("Timing Test Random Points");
 		final JMenuItem test1Item = new JMenuItem("Timing Test Along a Line");
 		final JMenuItem test4Item = new JMenuItem("Overlap/No overlap Sameness Test");
@@ -750,7 +769,9 @@ public class MagTests {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (e.getSource() == test0Item) {
+				if (e.getSource() == tiltItem) {
+					tiltSpeedupTest(10, 34646261);
+				} else if (e.getSource() == test0Item) {
 					timingTest(0);
 				} else if (e.getSource() == test1Item) {
 					timingTest(1);
@@ -776,6 +797,7 @@ public class MagTests {
 
 		};
 
+		tiltItem.addActionListener(al1);
 		test0Item.addActionListener(al1);
 		test1Item.addActionListener(al1);
 		test4Item.addActionListener(al1);
@@ -787,6 +809,8 @@ public class MagTests {
 		solenoidConvertItem.addActionListener(al1);
 		torusConvertItem.addActionListener(al1);
 
+		testMenu.add(tiltItem);
+		testMenu.addSeparator();
 		testMenu.add(test0Item);
 		testMenu.add(test1Item);
 		testMenu.add(test4Item);
@@ -879,8 +903,10 @@ public class MagTests {
 //					"Symm_solenoid_r601_phi1_z1201_2008.dat");
 //			mf.initializeMagneticFields(mfdir.getPath(), "Symm_torus_r2501_phi16_z251_24Apr2018.dat",
 //					"SolenoidMarch2019_BIN.dat");
+//			mf.initializeMagneticFields(mfdir.getPath(), "Symm_torus_r2501_phi16_z251_24Apr2018.dat",
+//					"Symm_solenoid_r601_phi1_z1201_13June2018.dat", "Full_transsolenoid_x161_y161_z321_March2021.dat");
 			mf.initializeMagneticFields(mfdir.getPath(), "Symm_torus_r2501_phi16_z251_24Apr2018.dat",
-					"Symm_solenoid_r601_phi1_z1201_13June2018.dat", "Full_transsolenoid_x161_y161_z321_March2021.dat");
+					"Symm_solenoid_r601_phi1_z1201_13June2018.dat");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -1011,11 +1037,9 @@ public class MagTests {
 //		String path = (new File(_homeDir, "magTestData")).getPath();
 //		serializeTestData(path, 1000000, 19923456L);
 //		serializeTestData(path, 100, 19923456L);
-		
-		
-		//look for the file
-		
-		
+
+		// look for the file
+
 		File file = new File(_currentWorkingDirectory, "magTestData");
 		if (!file.exists()) {
 			file = new File(_homeDir, "magTestData");
@@ -1023,7 +1047,7 @@ public class MagTests {
 				System.err.println("FATAL ERROR Could not find test data file.");
 			}
 		}
-		
+
 		System.err.println("Will test on data file: [" + file.getPath() + "]");
 
 		testTestData(file.getPath());
@@ -1032,6 +1056,5 @@ public class MagTests {
 
 	}
 	
-
 
 }

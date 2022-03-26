@@ -6,9 +6,14 @@ public class RotatedCompositeProbe extends CompositeProbe {
 	private final double _angle = -25.0;
 	private final double _sin25 = Math.sin(Math.toRadians(_angle));
 	private final double _cos25 = Math.cos(Math.toRadians(_angle));
+	
+	// for the use of maps rotated to the tiled system. These are used to speed up by using
+	// maps rotated to each sector tilted system, rather than rotating on each query
+	private TiltedMapManager _tiltedManager;
 
 	public RotatedCompositeProbe(RotatedCompositeField field) {
 		super(field);
+		_tiltedManager = TiltedMapManager.getInstance();
 	}
 
 	/**
