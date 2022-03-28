@@ -31,6 +31,9 @@ import cnuphys.magfield.converter.Converter;
  *
  */
 public class MagTests {
+	
+	public static boolean TestMode;
+	
 	private static final JMenuItem reconfigItem = new JMenuItem("Remove Solenoid and Torus Overlap");
 	private static int _sector = 1;
 	final static MagneticFieldCanvas canvas1 = new MagneticFieldCanvas(_sector, -50, 0, 650, 350.,
@@ -175,12 +178,12 @@ public class MagTests {
 			probe.field(results[i].sect, results[i].x, results[i].y, results[i].z, results[i].oldResult);
 		}
 		
-		RotatedCompositeProbe.TestMode = true;
+		TestMode = true;
 		for (int i = 0; i < 100; i++) {
 			probe.field(results[i].sect, results[i].x, results[i].y, results[i].z, results[i].newResult);
 		}
 		
-		RotatedCompositeProbe.TestMode = false;
+		TestMode = false;
 		
 		
 		Instant start = Instant.now();
@@ -191,7 +194,7 @@ public class MagTests {
 		long oldmillis = Duration.between(start, end).toMillis();
 		System.err.println("Old time: " + oldmillis + "ms");
 		
-		RotatedCompositeProbe.TestMode = true;
+		TestMode = true;
 		
 		start = Instant.now();
 		for (int i = 0; i < n; i++) {
@@ -211,7 +214,7 @@ public class MagTests {
 		System.err.println("Max Component Diff: " + maxDiff);
 
 		System.err.println("Using same point over and over to test probe effect");
-		RotatedCompositeProbe.TestMode = false;
+		TestMode = false;
 		
 		start = Instant.now();
 		for (int i = 0; i < n; i++) {
@@ -221,7 +224,7 @@ public class MagTests {
 		oldmillis = Duration.between(start, end).toMillis();
 		System.err.println("Old time: " + oldmillis + "ms");
 		
-		RotatedCompositeProbe.TestMode = true;
+		TestMode = true;
 		
 		start = Instant.now();
 		for (int i = 0; i < n; i++) {
@@ -310,7 +313,7 @@ public class MagTests {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource() == tiltItem) {
-					tiltSpeedupTest(5000000, 94646291);
+					tiltSpeedupTest(5000000, 97746291);
 				} else if (e.getSource() == test0Item) {
 					timingTest(0);
 				} else if (e.getSource() == test1Item) {
