@@ -3,6 +3,23 @@ package cnuphys.magfield;
 public class RotatedCompositeProbe extends CompositeProbe {
 	
 	//Constants used in the tilted <--> lab translations
+	//The mij below are the numerical values that result from taking
+	//the two sequential matrices that convert from the tilted sector 
+	//system to the CLAS sector system to the CLAS lab system and
+	//back. The angles are fixed: -25° in the first case and nπ/3
+	//in the second. With t being -25° and s being nπ/3 the combined
+	//matrix is
+	//      _                                       _
+	//      | cos(s)cos(t)  -sin(s)   -cos(s)sin(t) |
+	//      |                                       |
+	//      | sin(s)cos(t)   cos(s)   -sin(s)sin(t) |
+	//      |                                       |
+	//      | sin(t)           0           cos(t)   |
+	//      _                                       _
+	//
+	
+	//for example, cos(25°)sin(60°) = m31 = 0.784885567
+	
 	private static final float m11 = 0.906307787f;
 	private static final float m12 = 0.422618262f;
 	private static final float m21 = 0.453153894f;
@@ -43,6 +60,7 @@ public class RotatedCompositeProbe extends CompositeProbe {
 		float bxl = 0, byl = 0, bzl = 0;
 
 		//covert tilted coordinates to lab
+		//see the comments at the top of this file for more details
 		z = -m12 * xtilt + m11 * ztilt;
 
 		switch (sector) {
