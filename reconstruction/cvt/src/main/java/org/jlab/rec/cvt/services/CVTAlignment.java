@@ -254,7 +254,7 @@ public class CVTAlignment extends ReconstructionEngine {
 				ray = getRay(track.getHelix());
 				//System.out.println("curvature " +  track.getHelix().get_curvature());
 				//System.out.println("doca " +  track.getHelix().get_dca());
-				if(Math.abs(track.getHelix().getCurvature())>0.001) {
+				if(Math.abs(track.getHelix().getCurvature())>0.001 && !curvedTracks) {
 					continue;
 				}
 			}
