@@ -289,105 +289,119 @@ public class CVTAlignment extends ReconstructionEngine {
 			
 			int i = 0;
 			boolean useNewFillMatrices = true;
-			for(Cross cross : track) {
-				if(useNewFillMatrices) {
-					if(cross.getDetector() == DetectorType.BST){
-						Cluster cl1 = cross.getCluster1();
-						boolean ok = fillMatricesNew(i,ray,cl1,A,B,V,m,c,I,debug,false);
-						i++;
-						if(!ok) { //reject track if there's a cluster with really bad values.
-							if(debug) System.out.println("rejecting track due to problem in an SVT layer");
-							continue tracksLoop;
+			if(!curvedTracks) { 
+				for(Cross cross : track) {
+					if(useNewFillMatrices) {
+						if(cross.getDetector() == DetectorType.BST){
+							Cluster cl1 = cross.getCluster1();
+							boolean ok = fillMatricesNew(i,ray,cl1,A,B,V,m,c,I,debug,false);
+							i++;
+							if(!ok) { //reject track if there's a cluster with really bad values.
+								if(debug) System.out.println("rejecting track due to problem in an SVT layer");
+								continue tracksLoop;
+							}
+							Cluster cl2 = cross.getCluster2();
+							ok = fillMatricesNew(i,ray,cl2,A,B,V,m,c,I,debug,false);
+							i++;
+							if(!ok) { //reject track if there's a cluster with really bad values.
+								if(debug) System.out.println("rejecting track due to problem in an SVT layer");
+								continue tracksLoop;
+							}
+						} else {
+							Cluster cl1 = cross.getCluster1();
+							boolean ok = true;
+							if(cl1.getType() == BMTType.Z || !skipBMTC){
+							     ok = fillMatricesNew(i,ray,cl1,A,B,V,m,c,I, this.debug, false);
+							}
+							i++;
+							if(!ok) { //reject track if there's a cluster with really bad values.
+								if(debug) System.out.println("rejecting track due to problem in a BMT"+ cl1.getType().name() + " layer");
+								continue tracksLoop;
+							}
+							//}
 						}
-						Cluster cl2 = cross.getCluster2();
-						ok = fillMatricesNew(i,ray,cl2,A,B,V,m,c,I,debug,false);
-						i++;
-						if(!ok) { //reject track if there's a cluster with really bad values.
-							if(debug) System.out.println("rejecting track due to problem in an SVT layer");
-							continue tracksLoop;
-						}
-					} else {
-						Cluster cl1 = cross.getCluster1();
-						boolean ok = true;
-						if(cl1.getType() == BMTType.Z || !skipBMTC){
-						     ok = fillMatricesNew(i,ray,cl1,A,B,V,m,c,I, this.debug, false);
-						}
-						i++;
-						if(!ok) { //reject track if there's a cluster with really bad values.
-							if(debug) System.out.println("rejecting track due to problem in a BMT"+ cl1.getType().name() + " layer");
-							continue tracksLoop;
-						}
-						//}
+						continue;
 					}
-					continue;
+					
+	
 				}
-				/*else {
-					//System.out.println("cross " +cross.get_Point());
-					if(cross.get_Detector()== DetectorType.BST)
-					{
-						if(isBMTonly)
-							continue;
-						Cluster cl1 = cross.get_Cluster1();
-						boolean ok = fillMatricesSVT(i,ray,cl1,A,B,V,m,c,I);
-						i++;
-						if(!ok) { //reject track if there's a cluster with really bad values.
-							if(debug) System.out.println("rejecting track due to problem in an SVT layer");
-							continue tracksLoop;
-						}
-						Cluster cl2 = cross.get_Cluster2();
-						ok = fillMatricesSVT(i,ray,cl2,A,B,V,m,c,I);
-						i++;
-						if(!ok) { //reject track if there's a cluster with really bad values.
-							if(debug) System.out.println("rejecting track due to problem in an SVT layer");
-							continue tracksLoop;
-						}
-					} else {
-						if(isSVTonly)
-							continue;
-						Cluster cl = cross.get_Cluster1();
-
-
-						if(cross.get_DetectorType() == BMTType.Z) {
-							boolean ok = fillMatricesBMTZ(i,ray,cl,A,B,V,m,c,I);
+				if(!isCosmics && includeBeamspot) {
+					//fillMatricesBeamspot(i, ray, A,B,V,m,c,I, reader.getXbeam(), reader.getYbeam());
+					
+					
+					//pseudo cluster for the beamspot
+					Cluster cl1 = new Cluster(null, null, 0, 0, 0);
+					cl1.setLine(new Line3D(reader.getXbeam(),reader.getYbeam(),-100, reader.getXbeam(),reader.getYbeam(),100));
+					
+					Vector3D n = ray.getDirVec();
+					Vector3D l = new Vector3D(0,0,1);
+					cl1.setN(n);
+					cl1.setL(l);
+					cl1.setS(n.cross(l));
+					cl1.setResolution(0.6);
+					
+					fillMatricesNew(i, ray, cl1, A,B,V,m,c,I, this.debug, true);
+					
+					
+				}
+			} else { 
+				Helix helix = track.getHelix();
+				//curved tracks
+				for(Cross cross : track) {
+					if(useNewFillMatrices) {
+						if(cross.getDetector() == DetectorType.BST){
+							Cluster cl1 = cross.getCluster1();
+							boolean ok = fillMatricesNew(i,helix,cl1,A,B,V,m,c,I,debug,false);
 							i++;
 							if(!ok) { //reject track if there's a cluster with really bad values.
-								if(debug) System.out.println("rejecting track due to problem in a BMT Z layer");
+								if(debug) System.out.println("rejecting track due to problem in an SVT layer");
 								continue tracksLoop;
 							}
-						}
-						else if(cross.get_DetectorType() == BMTType.C) {
-							boolean ok = fillMatricesBMTC(i,ray,cl,A,B,V,m,c,I);
+							Cluster cl2 = cross.getCluster2();
+							ok = fillMatricesNew(i,helix,cl2,A,B,V,m,c,I,debug,false);
 							i++;
 							if(!ok) { //reject track if there's a cluster with really bad values.
-								if(debug) System.out.println("rejecting track due to problem in a BMT C layer");
+								if(debug) System.out.println("rejecting track due to problem in an SVT layer");
 								continue tracksLoop;
 							}
+						} else {
+							Cluster cl1 = cross.getCluster1();
+							boolean ok = true;
+							if(cl1.getType() == BMTType.Z || !skipBMTC){
+							     ok = fillMatricesNew(i,helix,cl1,A,B,V,m,c,I, this.debug, false);
+							}
+							i++;
+							if(!ok) { //reject track if there's a cluster with really bad values.
+								if(debug) System.out.println("rejecting track due to problem in a BMT"+ cl1.getType().name() + " layer");
+								continue tracksLoop;
+							}
+							//}
 						}
-
+						continue;
 					}
-				}*/
-
+					
+	
+				}
+				if(!isCosmics && includeBeamspot) {
+					//fillMatricesBeamspot(i, ray, A,B,V,m,c,I, reader.getXbeam(), reader.getYbeam());
+					
+					
+					//pseudo cluster for the beamspot
+					Cluster cl1 = new Cluster(null, null, 0, 0, 0);
+					cl1.setLine(new Line3D(reader.getXbeam(),reader.getYbeam(),-100, reader.getXbeam(),reader.getYbeam(),100));
+					
+					Vector3D n = ray.getDirVec();
+					Vector3D l = new Vector3D(0,0,1);
+					cl1.setN(n);
+					cl1.setL(l);
+					cl1.setS(n.cross(l));
+					cl1.setResolution(0.6);
+					
+					fillMatricesNew(i, helix, cl1, A,B,V,m,c,I, this.debug, true);
+					
+					
+				}
 			}
-			if(!isCosmics && includeBeamspot) {
-				//fillMatricesBeamspot(i, ray, A,B,V,m,c,I, reader.getXbeam(), reader.getYbeam());
-				
-				
-				//pseudo cluster for the beamspot
-				Cluster cl1 = new Cluster(null, null, 0, 0, 0);
-				cl1.setLine(new Line3D(reader.getXbeam(),reader.getYbeam(),-100, reader.getXbeam(),reader.getYbeam(),100));
-				
-				Vector3D n = ray.getDirVec();
-				Vector3D l = new Vector3D(0,0,1);
-				cl1.setN(n);
-				cl1.setL(l);
-				cl1.setS(n.cross(l));
-				cl1.setResolution(0.6);
-				
-				fillMatricesNew(i, ray, cl1, A,B,V,m,c,I, this.debug, true);
-				
-				
-			}
-			
 			As.add(A);
 			Bs.add(B);
 			Vs.add(V);
@@ -641,6 +655,16 @@ public class CVTAlignment extends ReconstructionEngine {
 		return true;
 	}
 
+	
+	private boolean fillMatricesNew(int i, Helix helix, Cluster cl, Matrix A, Matrix B, Matrix V, Matrix m, 
+			Matrix c, Matrix I, boolean debug, boolean isBeamspot) {
+		Vector3D u= helix.getTrackDirectionAtRadius(cl.getRadius());
+		Point3D xref = helix.getPointAtRadius(cl.getRadius());
+		Ray ray = new Ray(xref, u);
+		return fillMatricesNew(i, ray, cl, A, B, V, m, 
+				c, I, debug, isBeamspot);
+	}
+	
 	/**
 	 * generic method that uses any type of cluster.  
 	 * @param i
@@ -1662,6 +1686,15 @@ public class CVTAlignment extends ReconstructionEngine {
 			System.out.println("["+this.getName()+"] debug false; config chosen based on yaml");
 			this.debug =  false;
 		}
+		
+		String curvedTracks=this.getEngineConfigString("curvedTracks");
+		if (curvedTracks!=null) {
+			System.out.println("["+this.getName()+"] curvedTracks "+curvedTracks+" config chosen based on yaml");
+			this.curvedTracks =  Boolean.parseBoolean(curvedTracks);
+		} else {
+			System.out.println("["+this.getName()+"] curvedTracks false; config chosen based on yaml");
+			this.curvedTracks =  false;
+		}
 		//MagneticFields.getInstance().getSolenoid().setScaleFactor(1e-7);
 
 		return true;
@@ -1736,6 +1769,6 @@ public class CVTAlignment extends ReconstructionEngine {
 	private int orderRz; 
 
 	private String variationName;
-
+	private boolean curvedTracks = false;
 
 }
