@@ -34,14 +34,14 @@ public class CosmicTracksRec {
             List<Hit> SVThits, List<Hit> BMThits, 
             List<Cluster> SVTclusters, List<Cluster> BMTclusters, 
             List<ArrayList<Cross>> crosses,
-            RecoBankWriter rbc, Swim swimmer) {
+            Swim swimmer) {
         
         // make list of crosses consistent with a track candidate using SVT only first
         StraightTrackCrossListFinder crossLister = new StraightTrackCrossListFinder();
         CrossList crosslist = crossLister.findCosmicsCandidateCrossLists(crosses, 3);
         if (crosslist == null || crosslist.isEmpty()) {
             // create the clusters and fitted hits banks
-            rbc.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null);
+            RecoBankWriter.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null);
 
             return true;
         } 
@@ -51,7 +51,7 @@ public class CosmicTracksRec {
 
         if (cosmicCands.isEmpty()) {
             recUtil.CleanupSpuriousCrosses(crosses, null) ;
-            rbc.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null);
+            RecoBankWriter.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null);
             return true;
         }
         
@@ -164,7 +164,7 @@ public class CosmicTracksRec {
                     }
                 }
             }
-            rbc.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, cosmics);
+            RecoBankWriter.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, cosmics);
         }
         return true;
         }

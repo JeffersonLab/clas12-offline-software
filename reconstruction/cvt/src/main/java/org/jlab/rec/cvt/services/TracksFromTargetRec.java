@@ -14,7 +14,6 @@ import org.jlab.rec.cvt.banks.RecoBankWriter;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.CrossMaker;
-import org.jlab.rec.cvt.cross.StraightTrackCrossListFinder;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.measurement.Measurements;
 import org.jlab.rec.cvt.track.Seed;
@@ -29,7 +28,7 @@ import org.jlab.rec.cvt.track.TrackSeederCA;
  * @author ziegler
  */
 public class TracksFromTargetRec {
-    private final StraightTrackCrossListFinder crossLister = new StraightTrackCrossListFinder();
+
     private final RecUtilities recUtil = new RecUtilities();
     
     public boolean processEvent(DataEvent event,  
@@ -37,7 +36,6 @@ public class TracksFromTargetRec {
             List<Cluster> SVTclusters, List<Cluster> BMTclusters, 
             List<ArrayList<Cross>> crosses,
             double xb, double yb,
-            RecoBankWriter rbc,
             Swim swimmer) {
         
         // get field intensity and scale
@@ -84,7 +82,7 @@ public class TracksFromTargetRec {
         }
         if(seeds ==null || seeds.size() == 0) {
             recUtil.CleanupSpuriousCrosses(crosses, null) ;
-            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null, null);
+            RecoBankWriter.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null, null);
             return true;
         }   
         
@@ -215,7 +213,7 @@ public class TracksFromTargetRec {
 //        if (tracks.size() > 0) {
 //            recUtil.CleanupSpuriousCrosses(crosses, tracks, SVTGeom) ;
 //        }
-        rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, seeds, tracks);
+        RecoBankWriter.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, seeds, tracks);
 
         return true;
 

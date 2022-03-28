@@ -17,6 +17,7 @@ import org.jlab.rec.cvt.hit.ADCConvertor;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.services.CosmicTracksRec;
 import org.jlab.rec.cvt.svt.SVTParameters;
+import org.jlab.rec.cvt.track.Seed;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -30,7 +31,6 @@ public class CVTFirstPass extends CVTEngine {
 
     private CosmicTracksRec   strgtTrksRec = null;
     private TracksFromTargetRec trksFromTargetRec = null;
-    private int Run = -1;
     
     public CVTFirstPass() {
         super("CVTFirstPass");
@@ -40,15 +40,7 @@ public class CVTFirstPass extends CVTEngine {
 
     
     @Override
-    public boolean init() {
-        
-        this.loadConfiguration();
-        this.initConstantsTables();
-        this.loadGeometries();
-        this.registerBanks();
-        return true;
-    }
-    private void registerBanks() {
+    public void registerBanks() {
         super.registerOutputBank("BMTRec::Hits");
         super.registerOutputBank("BMTRec::Clusters");
         super.registerOutputBank("BSTRec::Crosses");
@@ -62,17 +54,16 @@ public class CVTFirstPass extends CVTEngine {
    
     @Override
     public boolean processDataEvent(DataEvent event) {
-        this.setRunConditionsParameters(event, Run, false, "");
+        
+        int run = this.getRun(event);
         
         Swim swimmer = new Swim();
         ADCConvertor adcConv = new ADCConvertor();
-
-        RecoBankWriter rbc = new RecoBankWriter();
-
-        IndexedTable svtStatus = this.getConstantsManager().getConstants(this.getRun(), "/calibration/svt/status");
-        IndexedTable bmtStatus = this.getConstantsManager().getConstants(this.getRun(), "/calibration/mvt/bmt_status");
-        IndexedTable bmtTime   = this.getConstantsManager().getConstants(this.getRun(), "/calibration/mvt/bmt_time");
-        IndexedTable beamPos   = this.getConstantsManager().getConstants(this.getRun(), "/geometry/beam/position");
+ 
+        IndexedTable svtStatus = this.getConstantsManager().getConstants(run, "/calibration/svt/status");
+        IndexedTable bmtStatus = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_status");
+        IndexedTable bmtTime   = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_time");
+        IndexedTable beamPos   = this.getConstantsManager().getConstants(run, "/geometry/beam/position");
 
         HitReader hitRead = new HitReader();
         hitRead.fetch_SVTHits(event, adcConv, -1, -1, svtStatus);
@@ -113,7 +104,7 @@ public class CVTFirstPass extends CVTEngine {
             clusters.addAll(clusFinder.findClusters(BMThits)); 
         }
         if (clusters.isEmpty()) {
-            rbc.appendCVTBanks(event, SVThits, BMThits, null, null, null, null, null,0);
+            RecoBankWriter.appendCVTBanks(event, SVThits, BMThits, null, null, null, null, null,0);
             return true;
         }
         
@@ -131,19 +122,19 @@ public class CVTFirstPass extends CVTEngine {
         CrossMaker crossMake = new CrossMaker();
         List<ArrayList<Cross>> crosses = crossMake.findCrosses(clusters);
         if(crosses.get(0).size() > SVTParameters.MAXSVTCROSSES ) {
-            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, null, null, null,0);
+            RecoBankWriter.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, null, null, null,0);
             return true; 
         }
         
         if(Constants.ISCOSMICDATA) {
             strgtTrksRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
-                    crosses, rbc, swimmer);
+                    crosses, swimmer);
         } else {
             double xb = beamPos.getDoubleValue("x_offset", 0, 0, 0)*10;
             double yb = beamPos.getDoubleValue("y_offset", 0, 0, 0)*10;
-            trksFromTargetRec.getSeeds(event, SVThits, BMThits, SVTclusters, BMTclusters, 
-                crosses, xb , yb, rbc, swimmer);
-            trksFromTargetRec.getTracks(event, true, 1);
+            List<Seed> seeds = trksFromTargetRec.getSeeds(event, SVThits, BMThits, SVTclusters, BMTclusters, 
+                crosses, xb , yb, swimmer);
+            if(seeds!=null) trksFromTargetRec.getTracks(event, seeds, false, 1);
         }
         return true;
     }

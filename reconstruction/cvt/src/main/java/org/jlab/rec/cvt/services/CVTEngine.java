@@ -86,7 +86,6 @@ public class CVTEngine extends ReconstructionEngine {
 
             this.setRun(newRun); 
            
-            Constants.isMC = newRun<100;
         }
       
         Run = newRun;
@@ -155,7 +154,7 @@ public class CVTEngine extends ReconstructionEngine {
             clusters.addAll(clusFinder.findClusters(BMThits)); 
         }
         if (clusters.isEmpty()) {
-            rbc.appendCVTBanks(event, SVThits, BMThits, null, null, null, null, null);
+            RecoBankWriter.appendCVTBanks(event, SVThits, BMThits, null, null, null, null, null);
             return true;
         }
         
@@ -173,18 +172,18 @@ public class CVTEngine extends ReconstructionEngine {
         CrossMaker crossMake = new CrossMaker();
         List<ArrayList<Cross>> crosses = crossMake.findCrosses(clusters);
         if(crosses.get(0).size() > SVTParameters.MAXSVTCROSSES ) {
-            rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, null, null, null);
+            RecoBankWriter.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, null, null, null);
             return true; 
         }
         
         if(Constants.ISCOSMICDATA) {
             strgtTrksRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
-                    crosses, rbc, swimmer);
+                    crosses, swimmer);
         } else {
             double xb = beamPos.getDoubleValue("x_offset", 0, 0, 0)*10;
             double yb = beamPos.getDoubleValue("y_offset", 0, 0, 0)*10;
             trksFromTargetRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
-                crosses, xb , yb, rbc, swimmer);
+                crosses, xb , yb, swimmer);
         }
         return true;
     }

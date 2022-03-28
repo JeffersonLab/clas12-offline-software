@@ -28,9 +28,7 @@ public class Constants {
     }
 
     // CONSTANTS USED IN RECONSTRUCTION
-    //---------------------------------
-    public static boolean isMC = true;
-    
+    //---------------------------------    
     public static final double LIGHTVEL = 0.000299792458;       // velocity of light (mm/ns) - conversion factor from radius in mm to momentum in GeV/c 
 
     // selection cuts for helical tracks

@@ -36,46 +36,29 @@ public class CVTEngine extends ReconstructionEngine {
 
     
     @Override
-    public boolean init() {
-        return true;
+    public boolean init() {        
+        this.loadConfiguration();
+        this.initConstantsTables();
+        this.loadGeometries();
+        this.registerBanks();
+        return true;    
     }
     
-    public void setRunConditionsParameters(DataEvent event, int iRun, boolean addMisAlignmts, String misAlgnFile) {
+    public void registerBanks() {
+        
+    }
+    
+    public int getRun(DataEvent event) {
+                
         if (event.hasBank("RUN::config") == false) {
             System.err.println("RUN CONDITIONS NOT READ!");
-            return;
+            return 0;
         }
 
-        boolean isMC = false;
-        boolean isCosmics = false;
         DataBank bank = event.getBank("RUN::config");
-        if (bank.getByte("type", 0) == 0) {
-            isMC = true;
-        }
-        if (bank.getByte("mode", 0) == 1) {
-            isCosmics = true;
-        }
-
-        // Load the constants
-        //-------------------
-        int newRun = bank.getInt("run", 0); 
-        if (Run != newRun) {
-
-            this.setRun(newRun); 
-           
-            Constants.isMC = newRun<100;
-        }
-      
-        Run = newRun;
-        this.setRun(Run);
-    }
-
-    public int getRun() {
-        return Run;
-    }
-
-    public void setRun(int run) {
-        Run = run;
+        int run = bank.getInt("run", 0); 
+                
+        return run;
     }
 
    
