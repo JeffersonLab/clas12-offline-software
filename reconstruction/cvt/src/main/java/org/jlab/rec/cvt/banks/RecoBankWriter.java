@@ -31,7 +31,7 @@ public class RecoBankWriter {
      * @return hits bank
      *
      */
-    public static DataBank fillSVTHitsBank(DataEvent event, List<Hit> hitlist) {
+    public static DataBank fillSVTHitsBank(DataEvent event, List<Hit> hitlist, int pass) {
         if (hitlist == null) {
             return null;
         }
@@ -39,9 +39,11 @@ public class RecoBankWriter {
             return null;
         }
 
-        DataBank bank
-                = event.createBank("BSTRec::Hits", hitlist.size());
-
+        DataBank bank = null;
+        if(pass == 1)
+                bank = event.createBank("BSTRecFP::Hits", hitlist.size());
+        if(pass == 2)
+                bank = event.createBank("BSTRec::Hits", hitlist.size());
         for (int i = 0; i < hitlist.size(); i++) {
 
             bank.setShort("ID", i, (short) hitlist.get(i).getId());
@@ -70,7 +72,7 @@ public class RecoBankWriter {
      * @param cluslist the reconstructed list of fitted clusters in the event
      * @return clusters bank
      */
-    public static DataBank fillSVTClustersBank(DataEvent event, List<Cluster> cluslist) {
+    public static DataBank fillSVTClustersBank(DataEvent event, List<Cluster> cluslist, int pass) {
         if (cluslist == null) {
             return null;
         }
@@ -78,7 +80,12 @@ public class RecoBankWriter {
             return null;
         }
 
-        DataBank bank = event.createBank("BSTRec::Clusters", cluslist.size());
+        DataBank bank = null;
+        if(pass == 1) 
+            bank = event.createBank("BSTRecFP::Clusters", cluslist.size());
+        if(pass == 2) 
+            bank = event.createBank("BSTRec::Clusters", cluslist.size());
+        
         int[] hitIdxArray = new int[5];
 
         for (int i = 0; i < cluslist.size(); i++) {
@@ -151,7 +158,7 @@ public class RecoBankWriter {
      * @param crosses the reconstructed list of crosses in the event
      * @return crosses bank
      */
-    public static DataBank fillSVTCrossesBank(DataEvent event, List<ArrayList<Cross>> crosses) {
+    public static DataBank fillSVTCrossesBank(DataEvent event, List<ArrayList<Cross>> crosses, int pass) {
         if (crosses == null) {
             return null;
         }
@@ -159,7 +166,11 @@ public class RecoBankWriter {
             return null;
         }
 
-        DataBank bank = event.createBank("BSTRec::Crosses", crosses.get(0).size());
+        DataBank bank = null;
+        if(pass==1)
+           bank = event.createBank("BSTRecFP::Crosses", crosses.get(0).size());
+        if(pass==2)
+            bank = event.createBank("BSTRec::Crosses", crosses.get(0).size());
 
         int index = 0;
         int i = 0;
@@ -207,7 +218,7 @@ public class RecoBankWriter {
 
     }
 
-    public static DataBank fillBMTHitsBank(DataEvent event, List<Hit> hitlist) {
+    public static DataBank fillBMTHitsBank(DataEvent event, List<Hit> hitlist, int pass) {
         if (hitlist == null) {
             return null;
         }
@@ -215,8 +226,11 @@ public class RecoBankWriter {
             return null;
         }
 
-        DataBank bank
-                = event.createBank("BMTRec::Hits", hitlist.size());
+        DataBank bank = null;
+        if(pass == 1)
+            bank = event.createBank("BMTRecFP::Hits", hitlist.size());
+        if(pass == 2)
+            bank = event.createBank("BMTRec::Hits", hitlist.size());
 
         for (int i = 0; i < hitlist.size(); i++) {
 
@@ -246,7 +260,7 @@ public class RecoBankWriter {
      * @param cluslist the reconstructed list of fitted clusters in the event
      * @return clusters bank
      */
-    public static DataBank fillBMTClustersBank(DataEvent event, List<Cluster> cluslist) {
+    public static DataBank fillBMTClustersBank(DataEvent event, List<Cluster> cluslist, int pass) {
         if (cluslist == null) {
             return null;
         }
@@ -254,7 +268,12 @@ public class RecoBankWriter {
             return null;
         }
 
-        DataBank bank = event.createBank("BMTRec::Clusters", cluslist.size());
+        DataBank bank = null;
+        if(pass==1) 
+            bank = event.createBank("BMTRecFP::Clusters", cluslist.size());
+        if(pass==2) 
+            bank = event.createBank("BMTRec::Clusters", cluslist.size());
+        
         int[] hitIdxArray = new int[5];
 
         for (int i = 0; i < cluslist.size(); i++) {
@@ -349,7 +368,7 @@ public class RecoBankWriter {
      * @param crosses the reconstructed list of crosses in the event
      * @return crosses bank
      */
-    public static DataBank fillBMTCrossesBank(DataEvent event, List<ArrayList<Cross>> crosses) {
+    public static DataBank fillBMTCrossesBank(DataEvent event, List<ArrayList<Cross>> crosses, int pass) {
         if (crosses == null) {
             return null;
         }
@@ -357,7 +376,11 @@ public class RecoBankWriter {
             return null;
         }
 
-        DataBank bank = event.createBank("BMTRec::Crosses", crosses.get(1).size());
+        DataBank bank = null;
+        if(pass==1) 
+            bank = event.createBank("BMTRecFP::Crosses", crosses.get(1).size());
+        if(pass==2) 
+            bank = event.createBank("BMTRec::Crosses", crosses.get(1).size());
 
         int index = 0;
         int i = 1;
@@ -404,7 +427,7 @@ public class RecoBankWriter {
 
     }
 
-    public static DataBank fillSeedsBank(DataEvent event, List<Seed> seeds) {
+    public static DataBank fillSeedsBank(DataEvent event, List<Seed> seeds, int pass) {
         if (seeds == null) {
             return null;
         }
@@ -412,7 +435,12 @@ public class RecoBankWriter {
             return null;
         }
 
-        DataBank bank = event.createBank("CVTRec::Seeds", seeds.size());
+        DataBank bank = null;
+        if(pass == 1) 
+            bank = event.createBank("CVTRecFP::Seeds", seeds.size());
+        if(pass == 2) 
+            bank = event.createBank("CVTRec::Seeds", seeds.size());
+        
         for (int i = 0; i < seeds.size(); i++) {
             if(seeds.get(i)==null)
                 continue;
@@ -490,9 +518,9 @@ public class RecoBankWriter {
 
         DataBank bank ;
         if(pass==2) {
-            bank= event.createBank("CVTRec::ELCTracks", trkcands.size());
+            bank = event.createBank("CVTRec::ELCTracks", trkcands.size());
         } else {
-            bank= event.createBank("CVTRec::Tracks", trkcands.size());
+            bank = event.createBank("CVTRec::Tracks", trkcands.size());
         }
         // an array representing the ids of the crosses that belong to the track
         List<Integer> crossIdxArray = new ArrayList<>();
@@ -785,25 +813,25 @@ public class RecoBankWriter {
             List<Cluster> sVTclusters, List<Cluster> bMTclusters,
             List<ArrayList<Cross>> crosses, List<Seed> seeds, List<Track> trks) {
 
-        DataBank bank1 = fillSVTHitsBank(event, sVThits);
+        DataBank bank1 = fillSVTHitsBank(event, sVThits, 1);
         if (bank1 != null) event.appendBank(bank1);
 
-        DataBank bank2 = fillBMTHitsBank(event, bMThits);
+        DataBank bank2 = fillBMTHitsBank(event, bMThits, 1);
         if (bank2 != null) event.appendBank(bank2);
 
-        DataBank bank3 = fillSVTClustersBank(event, sVTclusters);
+        DataBank bank3 = fillSVTClustersBank(event, sVTclusters, 1);
         if (bank3 != null) event.appendBank(bank3);
 
-        DataBank bank4 = fillBMTClustersBank(event, bMTclusters);
+        DataBank bank4 = fillBMTClustersBank(event, bMTclusters, 1);
         if (bank4 != null) event.appendBank(bank4);
 
-        DataBank bank5 = fillSVTCrossesBank(event, crosses);
+        DataBank bank5 = fillSVTCrossesBank(event, crosses, 1);
         if (bank5 != null) event.appendBank(bank5);
 
-        DataBank bank6 = fillBMTCrossesBank(event, crosses);
+        DataBank bank6 = fillBMTCrossesBank(event, crosses, 1);
         if (bank6 != null) event.appendBank(bank6);
 
-        DataBank bank7 = fillSeedsBank(event, seeds);
+        DataBank bank7 = fillSeedsBank(event, seeds, 1);
         if (bank7 != null) event.appendBank(bank7);
 
         DataBank bank8 = fillTracksBank(event, trks, 1);
@@ -822,25 +850,25 @@ public class RecoBankWriter {
             List<Cluster> sVTclusters, List<Cluster> bMTclusters,
             List<ArrayList<Cross>> crosses, List<Seed> seeds, List<Track> trks, int pass) {
 
-        DataBank bank1 = fillSVTHitsBank(event, sVThits);
+        DataBank bank1 = fillSVTHitsBank(event, sVThits, pass);
         if (bank1 != null) event.appendBank(bank1);
 
-        DataBank bank2 = fillBMTHitsBank(event, bMThits);
+        DataBank bank2 = fillBMTHitsBank(event, bMThits, pass);
         if (bank2 != null) event.appendBank(bank2);
 
-        DataBank bank3 = fillSVTClustersBank(event, sVTclusters);
+        DataBank bank3 = fillSVTClustersBank(event, sVTclusters, pass);
         if (bank3 != null) event.appendBank(bank3);
 
-        DataBank bank4 = fillBMTClustersBank(event, bMTclusters);
+        DataBank bank4 = fillBMTClustersBank(event, bMTclusters, pass);
         if (bank4 != null) event.appendBank(bank4);
 
-        DataBank bank5 = fillSVTCrossesBank(event, crosses);
+        DataBank bank5 = fillSVTCrossesBank(event, crosses, pass);
         if (bank5 != null) event.appendBank(bank5);
 
-        DataBank bank6 = fillBMTCrossesBank(event, crosses);
+        DataBank bank6 = fillBMTCrossesBank(event, crosses, pass);
         if (bank6 != null) event.appendBank(bank6);
 
-        DataBank bank7 = fillSeedsBank(event, seeds);
+        DataBank bank7 = fillSeedsBank(event, seeds, pass);
         if (bank7 != null) event.appendBank(bank7);
 
         DataBank bank8 = fillTracksBank(event, trks, pass);
@@ -862,22 +890,22 @@ public class RecoBankWriter {
         List<DataBank> bmtbanks = new ArrayList<>();
         List<DataBank> cvtbanks = new ArrayList<>();
 
-        DataBank bank1 = fillSVTHitsBank(event, sVThits);
+        DataBank bank1 = fillSVTHitsBank(event, sVThits, 2);
         if (bank1 != null) event.appendBank(bank1);
 
-        DataBank bank2 = fillBMTHitsBank(event, bMThits);
+        DataBank bank2 = fillBMTHitsBank(event, bMThits, 2);
         if (bank2 != null) event.appendBank(bank2);
         
-        DataBank bank3 = fillSVTClustersBank(event, sVTclusters);
+        DataBank bank3 = fillSVTClustersBank(event, sVTclusters, 2);
         if (bank3 != null) event.appendBank(bank3);
 
-        DataBank bank4 = fillBMTClustersBank(event, bMTclusters);
+        DataBank bank4 = fillBMTClustersBank(event, bMTclusters, 2);
         if (bank4 != null) event.appendBank(bank4);
 
-        DataBank bank5 = fillSVTCrossesBank(event, crosses);
+        DataBank bank5 = fillSVTCrossesBank(event, crosses, 2);
         if (bank5 != null) event.appendBank(bank5);
 
-        DataBank bank6 = fillBMTCrossesBank(event, crosses);
+        DataBank bank6 = fillBMTCrossesBank(event, crosses, 2);
         if (bank6 != null) event.appendBank(bank6);
 
         //found tracks

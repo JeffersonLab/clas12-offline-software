@@ -35,6 +35,7 @@ import org.jlab.rec.cvt.cross.CrossMaker;
 import org.jlab.rec.cvt.fit.CircleFitPars;
 import org.jlab.rec.cvt.fit.CircleFitter;
 import org.jlab.rec.cvt.svt.SVTGeometry;
+import org.jlab.rec.cvt.svt.SVTParameters;
 import org.jlab.rec.cvt.trajectory.Ray;
 /**
  * Service to return reconstructed TRACKS
@@ -154,7 +155,8 @@ public class RecUtilities {
         
     }
     
-    public List<Cluster> findClustersOnTrk(List<Cluster> allClusters, List<Cluster> seedCluster, Helix helix, double P, int Q, Swim swimmer) { 
+    public List<Cluster> findClustersOnTrk(List<Cluster> allClusters, 
+            List<Cluster> seedCluster, Helix helix, double P, int Q, Swim swimmer) { 
         // initialize swimmer starting from the track vertex
         double maxPathLength = 1; 
         Point3D vertex = helix.getVertex();
@@ -716,6 +718,61 @@ public class RecUtilities {
         //System.out.println("    ");
         
         return tCov;
+    }
+
+    public List<Cross> findCrossesFromClustersOnTrk(List<Cluster> clsOnTrack, Seed seed, Helix helix, Swim swimmer) {
+        List<Cross> crosses = new ArrayList<>();
+        int rid = seed.getClusters().size() / 2;
+        for (Cluster cl : clsOnTrack) {//inner layer
+            if(cl.getLayer()%2==0) 
+                continue;
+            //mke crosses using these clusters
+            for (Cluster cl2 : clsOnTrack) { //outer layer
+                if(cl2.getLayer()%2==1) 
+                    continue;
+                
+                if (cl.getRegion() == cl2.getRegion() && cl.getSector() == cl2.getSector()
+                        && cl.getMinStrip() + cl2.getMinStrip() > SVTParameters.MINSTRIPSUM
+                        && cl.getMaxStrip() + cl2.getMaxStrip() < SVTParameters.MAXSTRIPSUM) {
+                    // define new cross 
+                    Cross this_cross = new Cross(DetectorType.BST, BMTType.UNDEFINED, cl.getSector(), cl.getRegion(), 999);
+                    // cluster1 is the inner layer cluster
+                    //Cluster inlayerclus = cl.getLayer() < cl2.getLayer() ? cl : cl2;
+                    //Cluster outlayerclus = cl.getLayer() > cl2.getLayer() ? cl : cl2;
+                    this_cross.setCluster1(cl);
+                    // cluster2 is the outer layer cluster
+                    this_cross.setCluster2(cl2);
+                    this_cross.setId(rid++);
+                    // sets the cross parameters (point3D and associated error) from the SVT geometry
+                    this_cross.updateSVTCross(null);
+                    // the uncorrected point obtained from default estimate that the track is at 90 deg wrt the module should not be null
+                    if (this_cross.getPoint0() != null) {
+                        //pass the cross to the arraylist of crosses
+                        this_cross.setDetector(DetectorType.BST);
+                        double Z = Constants.SVTGEOMETRY.toLocal(cl.getLayer(),
+                                cl.getSector(),
+                                this_cross.getPoint()).z();
+                        if (Z > SVTGeometry.getModuleLength()) {
+                            Z = SVTGeometry.getModuleLength();
+                        } else if (Z < 0) {
+                            Z = 0;
+                        }
+                        cl.setCentroidError(cl.getResolutionAlongZ(Z) / (SVTGeometry.getPitch() / Math.sqrt(12.)));
+                        cl.setResolution(cl.getResolutionAlongZ(Z));
+                        cl2.setCentroidError(cl2.getResolutionAlongZ(Z) / (SVTGeometry.getPitch() / Math.sqrt(12.)));
+                        cl2.setResolution(cl2.getResolutionAlongZ(Z));
+                        if (seed.getHelix() != null && seed.getHelix().getCurvature() != 0) {
+                            double R = this_cross.getPoint().toVector3D().rho();
+                            this_cross.update(seed.getHelix().getPointAtRadius(R), seed.getHelix().getTrackDirectionAtRadius(R));
+                            this_cross.setAssociatedTrackID(seed.getClusters().get(0).getAssociatedTrackID());
+                        }
+                        this_cross.setAssociatedTrackID(seed.getClusters().get(0).getAssociatedTrackID());
+                        crosses.add(this_cross);
+                    }
+                }
+            }
+        }
+        return crosses;
     }
     
     

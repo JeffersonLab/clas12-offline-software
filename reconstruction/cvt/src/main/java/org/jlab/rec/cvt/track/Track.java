@@ -205,8 +205,6 @@ public class Track extends Trajectory implements Comparable<Track> {
                 double R = Math.sqrt(cross.getPoint().x() * cross.getPoint().x() + cross.getPoint().y() * cross.getPoint().y());
                 trackPos = this.getHelix().getPointAtRadius(R);
                 trackDir = this.getHelix().getTrackDirectionAtRadius(R);
-//                System.out.println("Traj  " + cross.getCluster1().getLayer() + " " + helixPos.toString());
-//                System.out.println("Cross " + cross.getDetector().getName() + " " + cross.getPoint().toString());
             }
             cross.update(trackPos, trackDir);
         }

@@ -50,6 +50,8 @@ public class CVTSecondPass extends CVTEngine {
             double xb = beamPos.getDoubleValue("x_offset", 0, 0, 0)*10;
             double yb = beamPos.getDoubleValue("y_offset", 0, 0, 0)*10;
             List<Seed> seeds = trksFromTargetRec.getSeedsFromBanks(event, swimmer, xb , yb); //write another method to start from recomp seeds
+            if(seeds == null)
+                return false;
             trksFromTargetRec.getTracks(event, seeds, false, 2);
         }
         return true;
@@ -60,6 +62,13 @@ public class CVTSecondPass extends CVTEngine {
     
     @Override
     public void registerBanks() {
+        super.registerOutputBank("BMTRec::Hits");
+        super.registerOutputBank("BMTRec::Clusters");
+        super.registerOutputBank("BSTRec::Crosses");
+        super.registerOutputBank("BSTRec::Hits");
+        super.registerOutputBank("BSTRec::Clusters");
+        super.registerOutputBank("BSTRec::Crosses");
+        super.registerOutputBank("CVTRec::Seeds");
         super.registerOutputBank("CVTRec::ELCTracks");     //eloss corrected tracks
     }
     

@@ -41,13 +41,13 @@ public class CVTFirstPass extends CVTEngine {
     
     @Override
     public void registerBanks() {
-        super.registerOutputBank("BMTRec::Hits");
-        super.registerOutputBank("BMTRec::Clusters");
-        super.registerOutputBank("BSTRec::Crosses");
-        super.registerOutputBank("BSTRec::Hits");
-        super.registerOutputBank("BSTRec::Clusters");
-        super.registerOutputBank("BSTRec::Crosses");
-        super.registerOutputBank("CVTRec::Seeds");
+        super.registerOutputBank("BMTRecFP::Hits");
+        super.registerOutputBank("BMTRecFP::Clusters");
+        super.registerOutputBank("BSTRecFP::Crosses");
+        super.registerOutputBank("BSTRecFP::Hits");
+        super.registerOutputBank("BSTRecFP::Clusters");
+        super.registerOutputBank("BSTRecFP::Crosses");
+        super.registerOutputBank("CVTRecFP::Seeds");
         super.registerOutputBank("CVTRec::Tracks");
         super.registerOutputBank("CVTRec::Trajectory");        
     }
@@ -104,7 +104,7 @@ public class CVTFirstPass extends CVTEngine {
             clusters.addAll(clusFinder.findClusters(BMThits)); 
         }
         if (clusters.isEmpty()) {
-            RecoBankWriter.appendCVTBanks(event, SVThits, BMThits, null, null, null, null, null,0);
+            RecoBankWriter.appendCVTBanks(event, SVThits, BMThits, null, null, null, null, null,1);
             return true;
         }
         
@@ -122,7 +122,7 @@ public class CVTFirstPass extends CVTEngine {
         CrossMaker crossMake = new CrossMaker();
         List<ArrayList<Cross>> crosses = crossMake.findCrosses(clusters);
         if(crosses.get(0).size() > SVTParameters.MAXSVTCROSSES ) {
-            RecoBankWriter.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, null, null, null,0);
+            RecoBankWriter.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, null, null, null,1);
             return true; 
         }
         
@@ -134,7 +134,7 @@ public class CVTFirstPass extends CVTEngine {
             double yb = beamPos.getDoubleValue("y_offset", 0, 0, 0)*10;
             List<Seed> seeds = trksFromTargetRec.getSeeds(event, SVThits, BMThits, SVTclusters, BMTclusters, 
                 crosses, xb , yb, swimmer);
-            if(seeds!=null) trksFromTargetRec.getTracks(event, seeds, false, 1);
+            if(seeds!=null) trksFromTargetRec.getTracks(event, seeds, true, 1);
         }
         return true;
     }
