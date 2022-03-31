@@ -1,8 +1,48 @@
  [
   {
-    "name": "CVTRec::Seeds",
+    "name": "CVTRecFP::Seeds",
     "group": 20500,
     "item" : 25,   
+    "info": "first pass reconstructed CVT track seeds",
+    "entries": [
+        {"name":"ID",             "type":"S", "info":"ID"},
+        {"name":"fittingMethod",  "type":"B", "info":"fitting method (1 for global fit, 2 for Kalman Filter)"},
+        {"name":"q",              "type":"B", "info":"charge"},
+        {"name":"p",              "type":"F", "info":"total momentum"},
+        {"name":"pt",             "type":"F", "info":"transverse momentum"},
+        {"name":"phi0",           "type":"F", "info":"helical track fit parameter: phi at DOCA" },
+        {"name":"tandip",         "type":"F", "info":"helical track fit parameter: dip angle" },
+        {"name":"z0",             "type":"F", "info":"helical track fit parameter: value of z at the DOCA" },
+        {"name":"d0",             "type":"F", "info":"helical track fit parameter: Distance of Closest Approach" },
+        {"name":"cov_d02",        "type":"F", "info":"helical track fit covariance matrix element : delta_d0^2" },
+        {"name":"cov_d0phi0",     "type":"F", "info":"helical track fit covariance matrix element : delta_d0.delta_phi0" },
+        {"name":"cov_d0rho",      "type":"F", "info":"helical track fit covariance matrix element : delta_d0.delta_rho" },
+        {"name":"cov_phi02",      "type":"F", "info":"helical track fit covariance matrix element : delta_phi0^2" },
+        {"name":"cov_phi0rho",    "type":"F", "info":"helical track fit covariance matrix element : delta_phi0.delta_rho" },
+        {"name":"cov_rho2",       "type":"F", "info":"helical track fit covariance matrix element : delta_rho.delta_rho" },
+        {"name":"cov_z02",        "type":"F", "info":"helical track fit covariance matrix element : delta_z0^2" },
+        {"name":"cov_tandip2",    "type":"F", "info":"helical track fit covariance matrix element : delta_tandip^2" },
+	{"name":"circlefit_chi2_per_ndf",     "type":"F", "info":"Circle Fit chi^2/ndf "},
+        {"name":"linefit_chi2_per_ndf",       "type":"F", "info":" Line Fit chi^2/ndf "},
+        {"name":"chi2",           "type":"F", "info":"Fit chi^2 "},
+        {"name":"ndf",            "type":"S", "info":"Fit ndf "},
+        {"name":"Cross1_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"Cross2_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"Cross3_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"Cross4_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"Cross5_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"Cross6_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"Cross7_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"Cross8_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"Cross9_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"xb",             "type":"F", "info":"x offset  "},
+        {"name":"yb",             "type":"F", "info":"y offset  "}
+    ]
+  },
+  {
+    "name": "CVTRec::Seeds",
+    "group": 20500,
+    "item" : 31,   
     "info": "reconstructed CVT track seeds",
     "entries": [
         {"name":"ID",             "type":"S", "info":"ID"},
@@ -91,7 +131,7 @@
   {
     "name": "CVTRec::ELCTracks",
     "group": 20500,
-    "item" : 31,   
+    "item" : 32,   
     "info": "reconstructed CVT tracks",
     "entries": [
         {"name":"ID",             "type":"S", "info":"ID"},
