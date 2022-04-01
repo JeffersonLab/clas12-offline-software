@@ -144,7 +144,7 @@ public class StraightTrackFitter {
         Helix helixresult = new Helix(fit_dca, fit_phi_at_dca, fit_curvature, fit_Z0, fit_tandip, this.getXb(), this.getYb(), fit_covmatrix);
 
         setHelix(helixresult);
-        _chisq[0] = _xyfitpars.chisq();
+        _chisq[0] = _linefitpars.chisq();
         _chisq[1] = _linefitpars.chisq();
 
         //System.out.println("chi2 "+_chisq[0]+" " + _chisq[1]);
