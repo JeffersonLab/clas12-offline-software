@@ -142,7 +142,7 @@ public class CrossMaker {
         return crosses;
     }
 
-    private void calcCentErr(Cross c, Cluster Cluster1) {
+    public void calcCentErr(Cross c, Cluster Cluster1) {
         double Z = Constants.SVTGEOMETRY.toLocal(Cluster1.getLayer(),
                                                  Cluster1.getSector(),
                                                  c.getPoint()).z();        

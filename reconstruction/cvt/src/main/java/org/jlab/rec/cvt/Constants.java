@@ -29,7 +29,7 @@ public class Constants {
 
     // CONSTANTS USED IN RECONSTRUCTION
     //---------------------------------    
-    public static final double LIGHTVEL = 0.000299792458;       // velocity of light (mm/ns) - conversion factor from radius in mm to momentum in GeV/c 
+    public static final double LIGHTVEL = PhysicsConstants.speedOfLight()*1e-5;  // velocity of light (mm/ns) - conversion factor from radius in mm to momentum in GeV/c 
 
     // selection cuts for helical tracks
     public static final double PTCUT   = 0.125; // minimum pt in GeV
@@ -57,7 +57,6 @@ public class Constants {
 
     public static boolean TIMECUTS = false;
 
-    public static double  ELOSSMASS = PhysicsConstants.massPionCharged();
     private static final Material LH2 = new Material("LH2", 8.85, 0.0708E-3, 0.99212, 8904.0, 21.8);
     private static final Material LD2 = new Material("LD2", 8.85, 0.1638E-3, 0.49650, 7691.0, 21.8);
     public static final Material TARGETKAPTON = new Material("Kapton", 50E-3, 1.42E-3, 0.501, 28.57, 79.6);
@@ -218,7 +217,31 @@ public class Constants {
                                                                     {1.0,1.0,1.0, COVZ0Z0,1.0},
                                                                     {1.0,1.0,1.0,1.0, CONVTANLTANL}
                                                                 };
+    public static final double COVMATSCALE = 10;
 
+    public static double[][] scaleCovMat(double[][] matrix, double scale) {
+        int nrow = matrix.length; 
+        int ncol = matrix[0].length; 
+        if(nrow!=5 || ncol!=5) {
+            throw new IllegalArgumentException("Error: wrong matrix dimension " + nrow + "x" + ncol);
+        }
+        double[][] scaledMatrix = new double[5][5];
+        if(scale==0) {
+            for(int i = 0; i<5; i++) {
+                for(int j = 0; j<5; j++) {
+                    scaledMatrix[i][j] = Constants.COVMATSCALEFACT[i][j]*matrix[i][j];
+                }
+            }
+        }
+        else {
+            for(int i = 0; i<5; i++) {
+                scaledMatrix[i][i] = scale*matrix[i][i];
+            }
+        }
+        return scaledMatrix;
+    }
+    
+    
     //public static final boolean DEBUGMODE =false;
     // for landau inverse calculation
     public static final double f[] = {

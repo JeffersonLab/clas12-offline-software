@@ -166,7 +166,7 @@ public class KFitter extends AKFitter {
             double dh_filt = mv.dh(k, fVec); 
 //            System.out.println(dh_filt + " " + dh);
             if (!Double.isNaN(dh_filt) 
-             && Math.abs(dh_filt) < 10*Math.abs(dh) 
+             && Math.abs(dh_filt) < 10*Math.abs(dh) // RDV change to drop measurements onlt if dh_filt increase exceed errors
              && Math.abs(dh_filt)/Math.sqrt(V)<this.getResiCut()) { 
                 sv.trackTraj.get(k).copy(fVec);
             } else {

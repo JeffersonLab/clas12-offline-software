@@ -122,6 +122,7 @@ public abstract class AKFitter {
                 double error = mv.measurements.get(k+1).error;
                 chisq += dh*dh / error/error;
                 ndf++;
+//                System.out.println((k+1) + " " + dh + " " + error+ " " + chisq + " " + ndf);
             }
         }  
         if(chisq==0) chisq=Double.NaN;

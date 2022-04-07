@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import org.jlab.clas.pdg.PhysicsConstants;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.clas.swimtools.Swim;
@@ -11,7 +12,6 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
-import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.io.base.DataBank;
@@ -43,13 +43,25 @@ public class CVTEngine extends ReconstructionEngine {
 
     private CosmicTracksRec   strgtTrksRec = null;
     private TracksFromTargetRec trksFromTargetRec = null;
+    private String svtHitBank        = "BSTRec::Hits";
+    private String svtClusterBank    = "BSTRec::Clusters";
+    private String svtCrossBank      = "BSTRec::Crosses";
+    private String bmtHitBank        = "BMTRec::Hits";
+    private String bmtClusterBank    = "BMTRec::Clusters";
+    private String bmtCrossBank      = "BMTRec::Crosses";
+    private String cvtSeedBank       = "CVTRec::Seeds";
+    private String cvtTrackBank      = "CVTRec::Tracks";
+    private String cvtTrajectoryBank = "CVTRec::Trajectory";
+    private String cvtTrackCovMat    = "CVTRec::TrackCovMats";  
     private int Run = -1;
+    private double mass = PhysicsConstants.massPionCharged();
     
     public CVTEngine() {
         super("CVTTracks", "ziegler", "4.0");
         
         strgtTrksRec      = new CosmicTracksRec();
         trksFromTargetRec = new TracksFromTargetRec();
+        
     }
 
     
@@ -154,7 +166,9 @@ public class CVTEngine extends ReconstructionEngine {
             clusters.addAll(clusFinder.findClusters(BMThits)); 
         }
         if (clusters.isEmpty()) {
-            RecoBankWriter.appendCVTBanks(event, SVThits, BMThits, null, null, null, null, null);
+            DataBank svtHitBank = RecoBankWriter.fillSVTHitBank(event, SVThits, this.svtHitBank);
+            DataBank bmtHitBank = RecoBankWriter.fillBMTHitBank(event, SVThits, this.bmtHitBank);
+            event.appendBanks(svtHitBank, bmtHitBank);
             return true;
         }
         
@@ -172,7 +186,11 @@ public class CVTEngine extends ReconstructionEngine {
         CrossMaker crossMake = new CrossMaker();
         List<ArrayList<Cross>> crosses = crossMake.findCrosses(clusters);
         if(crosses.get(0).size() > SVTParameters.MAXSVTCROSSES ) {
-            RecoBankWriter.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, null, null, null);
+            DataBank svtHitBank = RecoBankWriter.fillSVTHitBank(event, SVThits, this.svtHitBank);
+            DataBank bmtHitBank = RecoBankWriter.fillBMTHitBank(event, SVThits, this.bmtHitBank);
+            DataBank svtClusterBank = RecoBankWriter.fillSVTClusterBank(event, SVTclusters, this.svtClusterBank);
+            DataBank bmtClusterBank = RecoBankWriter.fillBMTClusterBank(event, BMTclusters, this.bmtClusterBank);
+            event.appendBanks(svtHitBank, bmtHitBank, svtClusterBank, bmtClusterBank);
             return true; 
         }
         
@@ -183,7 +201,7 @@ public class CVTEngine extends ReconstructionEngine {
             double xb = beamPos.getDoubleValue("x_offset", 0, 0, 0)*10;
             double yb = beamPos.getDoubleValue("y_offset", 0, 0, 0)*10;
             trksFromTargetRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
-                crosses, xb , yb, swimmer);
+                crosses, xb , yb, mass, swimmer);
         }
         return true;
     }
@@ -299,9 +317,9 @@ public class CVTEngine extends ReconstructionEngine {
         }
 
         if(this.getEngineConfigString("elossMass")!=null) {
-            Constants.ELOSSMASS = Double.parseDouble(this.getEngineConfigString("elossMass"));
+            this.mass = Double.parseDouble(this.getEngineConfigString("elossMass"));
         }
-        System.out.println("["+this.getName()+"] ELoss mass set to "+ Constants.ELOSSMASS + " GeV");
+        System.out.println("["+this.getName()+"] ELoss mass set to "+ mass + " GeV");
 
         if(this.getEngineConfigString("targetMat")!=null) {
             Constants.setTargetMaterial(this.getEngineConfigString("targetMat"));

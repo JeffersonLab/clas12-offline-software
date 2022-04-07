@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.splitservices;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
+import org.jlab.clas.pdg.PhysicsConstants;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.base.DetectorType;
@@ -28,6 +29,18 @@ import org.jlab.rec.cvt.svt.SVTGeometry;
 public class CVTEngine extends ReconstructionEngine {
 
     private int Run = -1;
+
+    private String svtHitBank;
+    private String svtClusterBank;
+    private String svtCrossBank;
+    private String bmtHitBank;
+    private String bmtClusterBank;
+    private String bmtCrossBank;
+    private String cvtSeedBank;
+    private String cvtTrackBank;
+    private String cvtTrajectoryBank;
+    private String cvtCovMat;    
+    private double mass = PhysicsConstants.massPionCharged();
     
     public CVTEngine(String name) {
         super(name, "ziegler", "5.0");
@@ -44,8 +57,30 @@ public class CVTEngine extends ReconstructionEngine {
         return true;    
     }
     
+    public final void setOutputBankPrefix(String prefix) {
+        this.setBmtHitBank("BMTRec" + prefix + "::Hits");
+        this.setBmtClusterBank("BMTRec" + prefix + "::Clusters");
+        this.setBmtCrossBank("BMTRec" + prefix + "::Crosses");
+        this.setSvtHitBank("BSTRec" + prefix + "::Hits");
+        this.setSvtClusterBank("BSTRec" + prefix + "::Clusters");
+        this.setSvtCrossBank("BSTRec" + prefix + "::Crosses");
+        this.setSeedBank("CVTRec" + prefix + "::Seeds");
+        this.setTrackBank("CVTRec" + prefix + "::Tracks");
+        this.setCovMatBank("CVTRec" + prefix + "::TrackCovMat");
+        this.setTrajectoryBank("CVTRec" + prefix + "::Trajectory");
+    }
+
     public void registerBanks() {
-        
+        super.registerOutputBank(this.bmtHitBank);
+        super.registerOutputBank(this.bmtClusterBank);
+        super.registerOutputBank(this.bmtCrossBank);
+        super.registerOutputBank(this.svtHitBank);
+        super.registerOutputBank(this.svtClusterBank);
+        super.registerOutputBank(this.svtCrossBank);
+        super.registerOutputBank(this.cvtSeedBank);
+        super.registerOutputBank(this.cvtTrackBank);
+        super.registerOutputBank(this.cvtCovMat);                
+        super.registerOutputBank(this.cvtTrajectoryBank);                
     }
     
     public int getRun(DataEvent event) {
@@ -61,13 +96,16 @@ public class CVTEngine extends ReconstructionEngine {
         return run;
     }
 
+    public double getMass() {
+        return mass;
+    }
    
     @Override
     public boolean processDataEvent(DataEvent event) {
         return true;
     }
-     
-    
+
+         
     public void loadConfiguration() {            
         // Load config
         
@@ -176,6 +214,16 @@ public class CVTEngine extends ReconstructionEngine {
             Constants.TIMECUTS = Boolean.parseBoolean(this.getEngineConfigString("timeCuts"));
             System.out.println("["+this.getName()+"] run BMT timing cuts set to "+ Constants.TIMECUTS);
         }
+
+        if(this.getEngineConfigString("elossMass")!=null) {
+            this.mass = Double.parseDouble(this.getEngineConfigString("elossMass"));
+        }
+        System.out.println("["+this.getName()+"] ELoss mass set to "+ mass + " GeV");
+
+        if(this.getEngineConfigString("targetMat")!=null) {
+            Constants.setTargetMaterial(this.getEngineConfigString("targetMat"));
+        }
+        System.out.println("["+this.getName()+"] Target material set to "+ Constants.getTargetMaterial());
     }
 
 
@@ -211,6 +259,87 @@ public class CVTEngine extends ReconstructionEngine {
         Constants.CVTSURFACES.addAll(Constants.SVTGEOMETRY.getSurfaces());
         Constants.CVTSURFACES.addAll(Constants.BMTGEOMETRY.getSurfaces());
     }
+
+    public void setSvtHitBank(String bstHitBank) {
+        this.svtHitBank = bstHitBank;
+    }
+
+    public void setSvtClusterBank(String bstClusterBank) {
+        this.svtClusterBank = bstClusterBank;
+    }
+
+    public void setSvtCrossBank(String bstCrossBank) {
+        this.svtCrossBank = bstCrossBank;
+    }
+
+    public void setBmtHitBank(String bmtHitBank) {
+        this.bmtHitBank = bmtHitBank;
+    }
+
+    public void setBmtClusterBank(String bmtClusterBank) {
+        this.bmtClusterBank = bmtClusterBank;
+    }
+
+    public void setBmtCrossBank(String bmtCrossBank) {
+        this.bmtCrossBank = bmtCrossBank;
+    }
+
+    public void setSeedBank(String cvtSeedBank) {
+        this.cvtSeedBank = cvtSeedBank;
+    }
+
+    public void setTrackBank(String cvtTrackBank) {
+        this.cvtTrackBank = cvtTrackBank;
+    }
+
+    public void setTrajectoryBank(String cvtTrajectoryBank) {
+        this.cvtTrajectoryBank = cvtTrajectoryBank;
+    }
+
+    public void setCovMatBank(String cvtTrackCovMat) {
+        this.cvtCovMat = cvtTrackCovMat;
+    }
+
+    public String getSvtHitBank() {
+        return svtHitBank;
+    }
+
+    public String getSvtClusterBank() {
+        return svtClusterBank;
+    }
+
+    public String getSvtCrossBank() {
+        return svtCrossBank;
+    }
+
+    public String getBmtHitBank() {
+        return bmtHitBank;
+    }
+
+    public String getBmtClusterBank() {
+        return bmtClusterBank;
+    }
+
+    public String getBmtCrossBank() {
+        return bmtCrossBank;
+    }
+
+    public String getSeedBank() {
+        return cvtSeedBank;
+    }
+
+    public String getTrackBank() {
+        return cvtTrackBank;
+    }
+
+    public String getTrajectoryBank() {
+        return cvtTrajectoryBank;
+    }
+
+    public String getCovMat() {
+        return cvtCovMat;
+    }
+    
     
 
 }

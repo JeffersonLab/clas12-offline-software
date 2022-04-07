@@ -419,6 +419,7 @@ public class Seed implements Comparable<Seed>{
                      Math.toDegrees(this.getHelix().getPhiAtDCA()), this.getHelix().getZ0(), this.getHelix().getTanDip(),
                      this.getNDF(), this.getChi2(), this.getStatus());
         for(Cross c: this.getCrosses()) str = str + c.toString() + "\n";
+        for(Cluster c: this.getClusters()) str = str + c.toString() + "\n";
         return str;
     }
 }

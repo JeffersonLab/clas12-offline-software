@@ -378,6 +378,10 @@ public class Track extends Trajectory implements Comparable<Track> {
     public int getKfIterations() {
         return kfIterations;
     }
+
+    public void setKFIterations(int iter) {
+        kfIterations = iter;
+    }
     
     public Map<Integer, HitOnTrack> getTrajectories() {
         return trajs;
@@ -427,10 +431,12 @@ public class Track extends Trajectory implements Comparable<Track> {
     
     @Override
     public String toString() {
-        String str = String.format("Track id=%d, q=%d, p=%.3f GeV pt=%.3f GeV, phi=%.3f deg, NDF=%d, chi2=%.3f, seed method=%d\n", 
-                     this.getId(), this.getQ(), this.getP(), this.getPt(), Math.toDegrees(this.getHelix().getPhiAtDCA()),
+        String str = String.format("Track id=%d, q=%d, p=%.3f GeV pt=%.3f GeV, d0=%.3f deg, phi=%.3f deg, z0=%.3f deg, tandip=%.3f deg, NDF=%d, chi2=%.3f, seed method=%d\n", 
+                     this.getId(), this.getQ(), this.getP(), this.getPt(), this.getHelix().getDCA(),
+                     Math.toDegrees(this.getHelix().getPhiAtDCA()), this.getHelix().getZ0(), this.getHelix().getTanDip(),
                      this.getNDF(), this.getChi2(), this.getSeed().getStatus());
         for(Cross c: this) str = str + c.toString() + "\n";
+        for(Cluster c: this.getSeed().getClusters()) str = str + c.toString() + "\n";
         return str;
     }
 

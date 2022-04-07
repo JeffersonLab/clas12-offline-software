@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.banks.HitReader;
@@ -18,6 +19,7 @@ import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.services.CosmicTracksRec;
 import org.jlab.rec.cvt.svt.SVTParameters;
 import org.jlab.rec.cvt.track.Seed;
+import org.jlab.rec.cvt.track.Track;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -28,29 +30,12 @@ import org.jlab.utils.groups.IndexedTable;
  *
  */
 public class CVTFirstPass extends CVTEngine {
-
-    private CosmicTracksRec   strgtTrksRec = null;
-    private TracksFromTargetRec trksFromTargetRec = null;
     
     public CVTFirstPass() {
         super("CVTFirstPass");
-        strgtTrksRec      = new CosmicTracksRec();
-        trksFromTargetRec = new TracksFromTargetRec();
+        this.setOutputBankPrefix("FP");
     }
 
-    
-    @Override
-    public void registerBanks() {
-        super.registerOutputBank("BMTRecFP::Hits");
-        super.registerOutputBank("BMTRecFP::Clusters");
-        super.registerOutputBank("BSTRecFP::Crosses");
-        super.registerOutputBank("BSTRecFP::Hits");
-        super.registerOutputBank("BSTRecFP::Clusters");
-        super.registerOutputBank("BSTRecFP::Crosses");
-        super.registerOutputBank("CVTRecFP::Seeds");
-        super.registerOutputBank("CVTRec::Tracks");
-        super.registerOutputBank("CVTRec::Trajectory");        
-    }
    
     @Override
     public boolean processDataEvent(DataEvent event) {
@@ -58,7 +43,7 @@ public class CVTFirstPass extends CVTEngine {
         int run = this.getRun(event);
         
         Swim swimmer = new Swim();
-        ADCConvertor adcConv = new ADCConvertor();
+        ADCConvertor  adcConv = new ADCConvertor();
  
         IndexedTable svtStatus = this.getConstantsManager().getConstants(run, "/calibration/svt/status");
         IndexedTable bmtStatus = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_status");
@@ -70,26 +55,18 @@ public class CVTFirstPass extends CVTEngine {
         if(Constants.SVTONLY==false)
           hitRead.fetch_BMTHits(event, adcConv, swimmer, bmtStatus, bmtTime);
 
-        List<Hit> hits = new ArrayList<>();
         //I) get the hits
         List<Hit> SVThits = hitRead.getSVTHits();
         if(SVThits.size()>SVTParameters.MAXSVTHITS)
             return true;
-        if (SVThits != null && !SVThits.isEmpty()) {
-            hits.addAll(SVThits);
-        }
 
         List<Hit> BMThits = hitRead.getBMTHits();
-        if (BMThits != null && BMThits.size() > 0) {
-            hits.addAll(BMThits);
-
-            if(BMThits.size()>BMTConstants.MAXBMTHITS)
-                 return true;
-        }
-
+        if(BMThits.size()>BMTConstants.MAXBMTHITS)
+             return true;
+        
         //II) process the hits		
         //1) exit if hit list is empty
-        if (hits.isEmpty()) {
+        if (SVThits.isEmpty() && BMThits.isEmpty()) {
             return true;
         }
        
@@ -104,37 +81,61 @@ public class CVTFirstPass extends CVTEngine {
             clusters.addAll(clusFinder.findClusters(BMThits)); 
         }
         if (clusters.isEmpty()) {
-            RecoBankWriter.appendCVTBanks(event, SVThits, BMThits, null, null, null, null, null,1);
+            DataBank svtHitsBank = RecoBankWriter.fillSVTHitBank(event, SVThits, this.getSvtHitBank());
+            DataBank bmtHitsBank = RecoBankWriter.fillBMTHitBank(event, BMThits, this.getBmtHitBank());
+            event.appendBanks(svtHitsBank, bmtHitsBank);
             return true;
         }
         
-        if (!clusters.isEmpty()) {
-            for (int i = 0; i < clusters.size(); i++) {
-                if (clusters.get(i).getDetector() == DetectorType.BST) {
-                    SVTclusters.add(clusters.get(i));
-                }
-                if (clusters.get(i).getDetector() == DetectorType.BMT) {
-                    BMTclusters.add(clusters.get(i));
-                }
+        for (int i = 0; i < clusters.size(); i++) {
+            if (clusters.get(i).getDetector() == DetectorType.BST) {
+                SVTclusters.add(clusters.get(i));
+            }
+            if (clusters.get(i).getDetector() == DetectorType.BMT) {
+                BMTclusters.add(clusters.get(i));
             }
         }
+        
 
+        //3) make crosses
         CrossMaker crossMake = new CrossMaker();
         List<ArrayList<Cross>> crosses = crossMake.findCrosses(clusters);
         if(crosses.get(0).size() > SVTParameters.MAXSVTCROSSES ) {
-            RecoBankWriter.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, null, null, null,1);
+            DataBank svtHitsBank = RecoBankWriter.fillSVTHitBank(event, SVThits, this.getSvtHitBank());
+            DataBank bmtHitsBank = RecoBankWriter.fillBMTHitBank(event, BMThits, this.getBmtHitBank());
+            DataBank svtClustersBank = RecoBankWriter.fillSVTClusterBank(event, SVTclusters, this.getSvtClusterBank());
+            DataBank bmtClustersBank = RecoBankWriter.fillBMTClusterBank(event, BMTclusters, this.getBmtClusterBank());
+            event.appendBanks(svtHitsBank, bmtHitsBank, svtClustersBank, bmtClustersBank);
             return true; 
         }
         
         if(Constants.ISCOSMICDATA) {
+            CosmicTracksRec strgtTrksRec = new CosmicTracksRec();
             strgtTrksRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
                     crosses, swimmer);
         } else {
             double xb = beamPos.getDoubleValue("x_offset", 0, 0, 0)*10;
             double yb = beamPos.getDoubleValue("y_offset", 0, 0, 0)*10;
-            List<Seed> seeds = trksFromTargetRec.getSeeds(event, SVThits, BMThits, SVTclusters, BMTclusters, 
-                crosses, xb , yb, swimmer);
-            if(seeds!=null) trksFromTargetRec.getTracks(event, seeds, true, 1);
+//            if(crosses.get(1)!=null) for(Cross c :crosses.get(1)) System.out.println(c.toString() + "\n" + c.getCluster1().toString());
+            TracksFromTargetRec  trackFinder = new TracksFromTargetRec(xb, yb, swimmer, true, 0, this.getMass());
+            List<Seed>   seeds = trackFinder.getSeeds(SVTclusters, BMTclusters, crosses);
+            List<Track> tracks = trackFinder.getTracks(event);
+            
+            List<DataBank> banks = new ArrayList<>();
+            banks.add(RecoBankWriter.fillSVTHitBank(event, SVThits, this.getSvtHitBank()));
+            banks.add(RecoBankWriter.fillBMTHitBank(event, BMThits, this.getBmtHitBank()));
+            banks.add(RecoBankWriter.fillSVTClusterBank(event, SVTclusters, this.getSvtClusterBank()));
+            banks.add(RecoBankWriter.fillBMTClusterBank(event, BMTclusters, this.getBmtClusterBank()));
+            banks.add(RecoBankWriter.fillSVTCrossBank(event, crosses.get(0), this.getSvtCrossBank()));
+            banks.add(RecoBankWriter.fillBMTCrossBank(event, crosses.get(1), this.getBmtCrossBank()));
+            if(seeds!=null) banks.add(RecoBankWriter.fillSeedBank(event, seeds, this.getSeedBank()));
+            if(tracks!=null) {
+                banks.add(RecoBankWriter.fillTrackBank(event, tracks, this.getTrackBank()));
+//                banks.add(RecoBankWriter.fillTrackCovMatBank(event, tracks, this.getCovMat()));
+                banks.add(RecoBankWriter.fillTrajectoryBank(event, tracks, this.getTrajectoryBank()));
+            }
+            event.appendBanks(banks.toArray(new DataBank[0]));
+            
         }
         return true;
     }

@@ -1,6 +1,7 @@
 package org.jlab.rec.cvt.banks;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,6 +137,7 @@ public class HitReader {
                     hits.add(hit);
             }
             // fills the list of BMT hits
+            Collections.sort(hits);
             this.setBMTHits(hits);
         }
     }
@@ -282,6 +284,7 @@ public class HitReader {
             }
         }
         // fill the list of SVT hits
+        Collections.sort(hits);
         this.setSVTHits(hits);
 
     }

@@ -49,6 +49,8 @@ public class EBEngine extends ReconstructionEngine {
     String ftofHitsType     = null;
     String trajectoryType   = null;
     String covMatrixType    = null;
+    String cvtTrackType     = null;
+    String cvtTrajType      = null;
     
     public EBEngine(String name){
         super(name,"gavalian","1.0");
@@ -133,7 +135,7 @@ public class EBEngine extends ReconstructionEngine {
         List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType, trajectoryType, covMatrixType);
         eb.addTracks(tracks);      
         
-        List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks", "CVTRec::Trajectory");
+        List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, cvtTrackType, cvtTrajType);
         eb.addTracks(ctracks);
        
         // FIXME:  remove need for these indexing bookkeepers:
@@ -297,6 +299,14 @@ public class EBEngine extends ReconstructionEngine {
         this.trajectoryType = trajectoryType;
     }
 
+    public void setCvtTrackType(String trackType) {
+        this.cvtTrackType = trackType;
+    }
+    
+    public void setCvtTrajType(String trajectoryType) {
+        this.cvtTrajType = trajectoryType;
+    }
+    
     @Override
     public boolean init() {
 

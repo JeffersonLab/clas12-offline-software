@@ -42,7 +42,7 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
     private double _Phi;  			// local LC phi and error for BMT-Z
     private double _PhiErr;
     private double _Phi0;  			// local uncorrected phi and error for BMT-Z 
-    private double _PhiErr0;                                                        
+    private double _PhiErr0;                    // RDV could be removed                                    
     private double _Z;    			// local Z and correspondng error for BMT-C
     private double _ZErr;                       
     private Line3D _Line;                     // 3D line for SVT and BMT-Z
@@ -317,8 +317,8 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
                 if (strpNb >= max) {
                     max = strpNb;
                 }
-                // getting the seed strip which is defined as the strip with the largest deposited energy
-                if (seed==null || strpEn >= seed.getStrip().getEdep()) {
+                // getting the seed strip which is defined as the first in the cluster according to the chosen ordering
+                if (seed==null) {
                     seed = thehit;
                 }
 
@@ -704,15 +704,6 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
         }
         return surface;
     }
-        
-    /**
-     *
-     */
-    public void printInfo() {
-        String s = " cluster: Detector " + this.getDetector().getName() +"  Detector Type " + this.getType().getName() + " ID " + this.getId() + " Sector " + this.getSector() 
-                + " Layer " + this.getLayer() + " tID " + this.getAssociatedTrackID()+ " Size " + this.size() +" centroid "+this.getCentroid() + this.size() +" centroidValue "+this.getCentroidValue();
-        System.out.println(s);
-    }
 
     /**
      *
@@ -862,9 +853,10 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
 
     @Override
     public String toString() {
-        String s = "Cluster Id" + this.getId() + " " + this.getDetector() + " " +this.getType();
-        s +=  " layer " + this.getLayer() + " sector " + this.getSector() + " centroid " + this.getCentroid() + " phi " + this.getPhi();
-        return s;
+        String str = String.format("Cluster id=%d %s %s layer=%d sector=%d centroid=%.3f value=%.3f error=%.3f resolution=%.3f phi=%.3f phi0=%.3f size=%d", 
+                                    this.getId(), this.getDetector(), this.getType(), this.getLayer(), this.getSector(), this.getCentroid(),
+                                    this.getCentroidValue(), this.getCentroidError(), this.getResolution(), this.getPhi(), this.getPhi0(), this.size());
+        return str;
     }
 
 

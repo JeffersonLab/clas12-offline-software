@@ -2,6 +2,7 @@ package org.jlab.rec.cvt.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.helical.KFitter;
 import org.jlab.clas.tracking.trackrep.Helix;
@@ -35,7 +36,7 @@ public class TracksFromTargetRec {
             List<Hit> SVThits, List<Hit> BMThits, 
             List<Cluster> SVTclusters, List<Cluster> BMTclusters, 
             List<ArrayList<Cross>> crosses,
-            double xb, double yb,
+            double xb, double yb, double mass,
             Swim swimmer) {
         
         // get field intensity and scale
@@ -113,11 +114,11 @@ public class TracksFromTargetRec {
             }
             Helix hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
                             solenoidValue, xb , yb, Helix.Units.MM);
-            double[][] cov = seed.getHelix().getCovMatrix();
+            double[][] cov = Constants.scaleCovMat(seed.getHelix().getCovMatrix(), 0);
 
             if(solenoidValue>0.001 && Constants.LIGHTVEL * seed.getHelix().radius() *solenoidValue<Constants.PTCUT)
                 continue;
-            kf.init(hlx, cov, xb, yb, 0, surfaces.getMeasurements(seed), Constants.ELOSSMASS) ;
+            kf.init(hlx, cov, xb, yb, 0, surfaces.getMeasurements(seed), mass) ;
             kf.runFitter();
             if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null) { 
                 Track fittedTrack = new Track(seed, kf);
@@ -132,8 +133,7 @@ public class TracksFromTargetRec {
                         fittedTrack.getP(), fittedTrack.getQ(), swimmer); //VZ: finds missing clusters
                 List<Cluster> bmtclsOnTrack = recUtil.findBMTClustersOnTrk(BMTclusters, seed.getCrosses(), fittedTrack.getHelix(), 
                         fittedTrack.getP(), fittedTrack.getQ(), swimmer); //VZ: finds missing clusters
-                CrossMaker cm = new CrossMaker();
-                List<Cross> bmtcrsOnTrack = recUtil.findCrossesOnBMTTrack(bmtclsOnTrack, cm, crosses.get(1).size()+2000);
+                List<Cross> bmtcrsOnTrack = recUtil.findCrossesOnBMTTrack(crosses.get(1), bmtclsOnTrack);
 
                 if(clsOnTrack.size()>0 || bmtcrsOnTrack.size()>0) { 
                     if(clsOnTrack.size()>0) 
@@ -154,7 +154,7 @@ public class TracksFromTargetRec {
                     hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
                                     solenoidValue, xb, yb, Helix.Units.MM);
 
-                    kf.init(hlx, cov, xb, yb, 0, surfaces.getMeasurements(seed), Constants.ELOSSMASS) ;
+                    kf.init(hlx, cov, xb, yb, 0, surfaces.getMeasurements(seed), mass) ;
                     kf.runFitter();
 
                     // RDV get rid of added clusters if not true
