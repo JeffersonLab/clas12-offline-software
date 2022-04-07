@@ -7,6 +7,7 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
+import static org.jlab.rec.cvt.banks.RecoBankWriter.fillKFTrajBank;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.utils.groups.IndexedTable;
@@ -70,6 +71,7 @@ public class CVTSecondPass extends CVTEngine {
                 banks.add(RecoBankWriter.fillTrackBank(event, tracks, this.getTrackBank()));
                 banks.add(RecoBankWriter.fillTrackCovMatBank(event, tracks, this.getCovMat()));
                 banks.add(RecoBankWriter.fillTrajectoryBank(event, tracks, this.getTrajectoryBank()));
+                banks.add(RecoBankWriter.fillKFTrajBank(event, tracks, this.getKFTrajectoryBank()));
             }
             if(!banks.isEmpty()) event.appendBanks(banks.toArray(new DataBank[0]));
         }

@@ -39,6 +39,7 @@ public class CVTEngine extends ReconstructionEngine {
     private String cvtSeedBank;
     private String cvtTrackBank;
     private String cvtTrajectoryBank;
+    private String cvtKFTrajectoryBank;
     private String cvtCovMat;    
     private double mass = PhysicsConstants.massPionCharged();
     
@@ -68,6 +69,7 @@ public class CVTEngine extends ReconstructionEngine {
         this.setTrackBank("CVTRec" + prefix + "::Tracks");
         this.setCovMatBank("CVTRec" + prefix + "::TrackCovMat");
         this.setTrajectoryBank("CVTRec" + prefix + "::Trajectory");
+        this.setKFTrajectoryBank("CVTRec" + prefix + "::KFTraj");
     }
 
     public void registerBanks() {
@@ -80,7 +82,8 @@ public class CVTEngine extends ReconstructionEngine {
         super.registerOutputBank(this.cvtSeedBank);
         super.registerOutputBank(this.cvtTrackBank);
         super.registerOutputBank(this.cvtCovMat);                
-        super.registerOutputBank(this.cvtTrajectoryBank);                
+        super.registerOutputBank(this.cvtTrajectoryBank); 
+        super.registerOutputBank(this.cvtKFTrajectoryBank); 
     }
     
     public int getRun(DataEvent event) {
@@ -299,7 +302,13 @@ public class CVTEngine extends ReconstructionEngine {
     public void setCovMatBank(String cvtTrackCovMat) {
         this.cvtCovMat = cvtTrackCovMat;
     }
-
+    /**
+     * @param cvtKFTrajectoryBank the cvtKFTrajectoryBank to set
+     */
+    public void setKFTrajectoryBank(String cvtKFTrajectoryBank) {
+        this.cvtKFTrajectoryBank = cvtKFTrajectoryBank;
+    }
+    
     public String getSvtHitBank() {
         return svtHitBank;
     }
@@ -334,6 +343,13 @@ public class CVTEngine extends ReconstructionEngine {
 
     public String getTrajectoryBank() {
         return cvtTrajectoryBank;
+    }
+
+    /**
+     * @return the cvtKFTrajectoryBank
+     */
+    public String getKFTrajectoryBank() {
+        return cvtKFTrajectoryBank;
     }
 
     public String getCovMat() {

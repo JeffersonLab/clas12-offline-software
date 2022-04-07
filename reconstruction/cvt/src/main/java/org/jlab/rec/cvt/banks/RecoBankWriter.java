@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.banks;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.jlab.clas.tracking.kalmanfilter.AKFitter;
 
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
@@ -574,7 +575,46 @@ public class RecoBankWriter {
         return bank;
 
     }
-
+     public static DataBank fillKFTrajBank(DataEvent event, List<Track> trkcands,String bankName) {
+        if (trkcands == null) {
+            return null;
+        }
+        if (trkcands.isEmpty()) {
+            return null;
+        }
+        //new trajectory
+        int k = 0;
+        for (int i = 0; i < trkcands.size(); i++) {
+            if (trkcands.get(i).getTrajectories() == null) {
+                continue;
+            }
+            if (trkcands.get(i).getTrajectories() != null) {
+                k += trkcands.get(i).getTrajectories().keySet().size();
+            }
+        }
+        DataBank bank = event.createBank(bankName, k);
+        for (int i = 0; i < trkcands.size(); i++) {
+            if(trkcands.get(i)==null)
+                continue;
+            //Fill trajectory for Eloss debugging
+            k = 0;
+            for (AKFitter.HitOnTrack t : trkcands.get(i).getTrajectories().values()) {
+                bank.setShort("id",       k, (short) trkcands.get(i).getId()); //trackid
+                bank.setShort("layer",    k, (short) t.layer);
+                bank.setFloat("x",        k, (float) (t.x/10.));
+                bank.setFloat("y",        k, (float) (t.y/10.));
+                bank.setFloat("z",        k, (float) (t.z/10.));
+                bank.setFloat("px",       k, (float) (t.px));
+                bank.setFloat("py",       k, (float) (t.py));
+                bank.setFloat("pz",       k, (float) (t.pz));
+                bank.setFloat("resi",     k, (float) (t.resi));
+                k++;
+            }
+            //end fill
+        }
+        //bank.show();
+        return bank;
+    }
     /**
      *
      * @param event the event
@@ -764,6 +804,9 @@ public class RecoBankWriter {
         
         DataBank bank10 = fillTrajectoryBank(event, tracks, "CVTRec::Trajectory");
         if (bank10 != null) banks.add(bank10);
+        
+        DataBank bank11 = fillKFTrajBank(event, tracks, "CVTRec::KFTraj");
+        if (bank11 != null) event.appendBank(bank11);
         
         event.appendBanks(banks.toArray(new DataBank[0]));
     }
