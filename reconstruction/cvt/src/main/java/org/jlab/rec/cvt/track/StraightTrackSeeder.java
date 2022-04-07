@@ -460,7 +460,7 @@ public class StraightTrackSeeder {
             //Y.add((double) Constants.getYb());
             //ErrRt.add((double) 0.1);
             
-            fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
+            fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ, xbeam, ybeam);
             
             if (fitTrk.getHelix() == null) { 
                 return null;
