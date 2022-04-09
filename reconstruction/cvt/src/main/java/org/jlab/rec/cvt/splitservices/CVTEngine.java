@@ -41,7 +41,7 @@ public class CVTEngine extends ReconstructionEngine {
     private String cvtTrajectoryBank;
     private String cvtKFTrajectoryBank;
     private String cvtCovMat;    
-    private double mass = PhysicsConstants.massPionCharged();
+    private int pid = 0;
     
     public CVTEngine(String name) {
         super(name, "ziegler", "5.0");
@@ -69,7 +69,7 @@ public class CVTEngine extends ReconstructionEngine {
         this.setTrackBank("CVTRec" + prefix + "::Tracks");
         this.setCovMatBank("CVTRec" + prefix + "::TrackCovMat");
         this.setTrajectoryBank("CVTRec" + prefix + "::Trajectory");
-        this.setKFTrajectoryBank("CVTRec" + prefix + "::KFTraj");
+        this.setKFTrajectoryBank("CVTRec" + prefix + "::KFTrajectory");
     }
 
     public void registerBanks() {
@@ -99,8 +99,8 @@ public class CVTEngine extends ReconstructionEngine {
         return run;
     }
 
-    public double getMass() {
-        return mass;
+    public int getPid() {
+        return pid;
     }
    
     @Override
@@ -218,10 +218,16 @@ public class CVTEngine extends ReconstructionEngine {
             System.out.println("["+this.getName()+"] run BMT timing cuts set to "+ Constants.TIMECUTS);
         }
 
-        if(this.getEngineConfigString("elossMass")!=null) {
-            this.mass = Double.parseDouble(this.getEngineConfigString("elossMass"));
+        if(this.getEngineConfigString("elossPid")!=null) {
+            this.pid = Integer.parseInt(this.getEngineConfigString("elossPid"));
         }
-        System.out.println("["+this.getName()+"] ELoss mass set to "+ mass + " GeV");
+        System.out.println("["+this.getName()+"] ELoss mass set for particle "+ pid);
+
+
+        if(this.getEngineConfigString("elossPreCorrection")!=null) {
+            Constants.PREELOSS = Boolean.parseBoolean(this.getEngineConfigString("elossPreCorrection"));
+        }
+        System.out.println("["+this.getName()+"] Pre-Eloss correction set to " + Constants.PREELOSS);
 
         if(this.getEngineConfigString("targetMat")!=null) {
             Constants.setTargetMaterial(this.getEngineConfigString("targetMat"));
@@ -302,9 +308,7 @@ public class CVTEngine extends ReconstructionEngine {
     public void setCovMatBank(String cvtTrackCovMat) {
         this.cvtCovMat = cvtTrackCovMat;
     }
-    /**
-     * @param cvtKFTrajectoryBank the cvtKFTrajectoryBank to set
-     */
+    
     public void setKFTrajectoryBank(String cvtKFTrajectoryBank) {
         this.cvtKFTrajectoryBank = cvtKFTrajectoryBank;
     }
@@ -345,9 +349,6 @@ public class CVTEngine extends ReconstructionEngine {
         return cvtTrajectoryBank;
     }
 
-    /**
-     * @return the cvtKFTrajectoryBank
-     */
     public String getKFTrajectoryBank() {
         return cvtKFTrajectoryBank;
     }

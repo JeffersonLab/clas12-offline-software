@@ -57,6 +57,9 @@ public class Constants {
 
     public static boolean TIMECUTS = false;
 
+    public static int DEFAULTPID = 211;
+    public static boolean PREELOSS = true;
+    
     private static final Material LH2 = new Material("LH2", 8.85, 0.0708E-3, 0.99212, 8904.0, 21.8);
     private static final Material LD2 = new Material("LD2", 8.85, 0.1638E-3, 0.49650, 7691.0, 21.8);
     public static final Material TARGETKAPTON = new Material("Kapton", 50E-3, 1.42E-3, 0.501, 28.57, 79.6);

@@ -7,7 +7,6 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
-import static org.jlab.rec.cvt.banks.RecoBankWriter.fillKFTrajBank;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.utils.groups.IndexedTable;
@@ -52,7 +51,7 @@ public class CVTSecondPass extends CVTEngine {
             double xb = beamPos.getDoubleValue("x_offset", 0, 0, 0)*10;
             double yb = beamPos.getDoubleValue("y_offset", 0, 0, 0)*10;
             
-            TracksFromTargetRec trackFinder = new TracksFromTargetRec(xb , yb, swimmer, false, 0, this.getMass());
+            TracksFromTargetRec trackFinder = new TracksFromTargetRec(xb , yb, swimmer, false, 0, this.getPid());
             List<Seed>  seeds  = trackFinder.getSeedsFromBanks(event);
             List<Track> tracks = null;
             if(seeds!=null) {
@@ -71,7 +70,7 @@ public class CVTSecondPass extends CVTEngine {
                 banks.add(RecoBankWriter.fillTrackBank(event, tracks, this.getTrackBank()));
                 banks.add(RecoBankWriter.fillTrackCovMatBank(event, tracks, this.getCovMat()));
                 banks.add(RecoBankWriter.fillTrajectoryBank(event, tracks, this.getTrajectoryBank()));
-                banks.add(RecoBankWriter.fillKFTrajBank(event, tracks, this.getKFTrajectoryBank()));
+                banks.add(RecoBankWriter.fillKFTrajectoryBank(event, tracks, this.getKFTrajectoryBank()));
             }
             if(!banks.isEmpty()) event.appendBanks(banks.toArray(new DataBank[0]));
         }

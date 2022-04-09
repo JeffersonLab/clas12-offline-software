@@ -846,7 +846,7 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
                 double sigma1 = Constants.SVTGEOMETRY.getSingleStripResolution(this.getLayer(), hit.getStrip().getStrip(), local.z());
                 hit.setstripResolutionAtDoca(sigma1);
             }
-            if(traj.isMeasUsed) hit.setTrkgStatus(1);
+            if(traj.isUsed) hit.setTrkgStatus(1);
         }
           
     }

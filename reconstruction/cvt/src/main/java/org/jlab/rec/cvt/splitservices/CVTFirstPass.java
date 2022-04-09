@@ -117,7 +117,7 @@ public class CVTFirstPass extends CVTEngine {
             double xb = beamPos.getDoubleValue("x_offset", 0, 0, 0)*10;
             double yb = beamPos.getDoubleValue("y_offset", 0, 0, 0)*10;
 //            if(crosses.get(1)!=null) for(Cross c :crosses.get(1)) System.out.println(c.toString() + "\n" + c.getCluster1().toString());
-            TracksFromTargetRec  trackFinder = new TracksFromTargetRec(xb, yb, swimmer, true, 0, this.getMass());
+            TracksFromTargetRec  trackFinder = new TracksFromTargetRec(xb, yb, swimmer, true, 0, this.getPid());
             List<Seed>   seeds = trackFinder.getSeeds(SVTclusters, BMTclusters, crosses);
             List<Track> tracks = trackFinder.getTracks(event);
             
@@ -133,7 +133,7 @@ public class CVTFirstPass extends CVTEngine {
                 banks.add(RecoBankWriter.fillTrackBank(event, tracks, this.getTrackBank()));
 //                banks.add(RecoBankWriter.fillTrackCovMatBank(event, tracks, this.getCovMat()));
                 banks.add(RecoBankWriter.fillTrajectoryBank(event, tracks, this.getTrajectoryBank()));
-                banks.add(RecoBankWriter.fillKFTrajBank(event, tracks, this.getKFTrajectoryBank()));
+                banks.add(RecoBankWriter.fillKFTrajectoryBank(event, tracks, this.getKFTrajectoryBank()));
             }
             event.appendBanks(banks.toArray(new DataBank[0]));
             

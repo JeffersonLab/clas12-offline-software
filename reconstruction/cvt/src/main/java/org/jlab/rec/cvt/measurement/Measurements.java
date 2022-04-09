@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.clas.tracking.objects.Strip;
+import org.jlab.clas.tracking.trackrep.Helix.Units;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Arc3D;
 import org.jlab.geom.prim.Cylindrical3D;
@@ -155,6 +156,21 @@ public class Measurements {
             if(debug) System.out.println(surf.toString());
         }
         return active;
+    }
+
+    
+    public double getELoss(double p, double mass, Units units) {
+        double pcorr = p;
+        for(int i=0; i<cvtSurfaces.length; i++) {
+            Surface surf = cvtSurfaces[i];
+            if(surf==null) break;
+            double E  = Math.sqrt(pcorr*pcorr + mass*mass);
+            double dE = surf.getEloss(pcorr, mass, units.unit());
+            double Ecorr = E + dE;
+            pcorr = Math.sqrt(Ecorr*Ecorr-mass*mass); 
+            if(debug) System.out.println(p + " " + pcorr + "\n" + surf.toString());
+        }
+        return pcorr;
     }
 
     public List<Surface> getMeasurements(StraightTrack cosmic) {

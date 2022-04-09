@@ -170,7 +170,7 @@ public abstract class AKFitter {
         public double py;
         public double pz;
         public double resi;
-        public boolean isMeasUsed = true;
+        public boolean isUsed = true;
         
         public HitOnTrack(int layer, double x, double y, double z, double px, double py, double pz, double resi) {
             this.layer = layer;

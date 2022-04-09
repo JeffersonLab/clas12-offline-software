@@ -89,7 +89,7 @@ public class KFitter extends AKFitter {
                 int layer = mv.measurements.get(k).layer;
                 TrjPoints.put(layer, new HitOnTrack(layer, stv.x, stv.y, stv.z, stv.px, stv.py, stv.pz, stv.resi));
                 if(mv.measurements.get(k).skip)
-                    TrjPoints.get(layer).isMeasUsed = false;
+                    TrjPoints.get(layer).isUsed = false;
             }
         } 
     }

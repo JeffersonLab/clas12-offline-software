@@ -2,6 +2,7 @@ package org.jlab.rec.cvt.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.pdg.PDGDatabase;
 import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.helical.KFitter;
@@ -36,7 +37,7 @@ public class TracksFromTargetRec {
             List<Hit> SVThits, List<Hit> BMThits, 
             List<Cluster> SVTclusters, List<Cluster> BMTclusters, 
             List<ArrayList<Cross>> crosses,
-            double xb, double yb, double mass,
+            double xb, double yb, int pid,
             Swim swimmer) {
         
         // get field intensity and scale
@@ -118,7 +119,7 @@ public class TracksFromTargetRec {
 
             if(solenoidValue>0.001 && Constants.LIGHTVEL * seed.getHelix().radius() *solenoidValue<Constants.PTCUT)
                 continue;
-            kf.init(hlx, cov, xb, yb, 0, surfaces.getMeasurements(seed), mass) ;
+            kf.init(hlx, cov, xb, yb, 0, surfaces.getMeasurements(seed), PDGDatabase.getParticleMass(pid)) ;
             kf.runFitter();
             if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null) { 
                 Track fittedTrack = new Track(seed, kf);
@@ -154,7 +155,7 @@ public class TracksFromTargetRec {
                     hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
                                     solenoidValue, xb, yb, Helix.Units.MM);
 
-                    kf.init(hlx, cov, xb, yb, 0, surfaces.getMeasurements(seed), mass) ;
+                    kf.init(hlx, cov, xb, yb, 0, surfaces.getMeasurements(seed), PDGDatabase.getParticleMass(pid)) ;
                     kf.runFitter();
 
                     // RDV get rid of added clusters if not true

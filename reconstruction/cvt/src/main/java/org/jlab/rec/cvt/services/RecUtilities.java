@@ -321,18 +321,13 @@ public class RecUtilities {
     
     public List<Cross> findCrossesOnBMTTrack(List<Cross> allCrosses, List<Cluster> bmtclsOnTrack) {
          // fill the sorted list
-        CrossMaker cm = new CrossMaker(); 
-        ArrayList<ArrayList<Cluster>> sortedClusters = cm.sortClusterByDetectorAndIO(bmtclsOnTrack);
-        ArrayList<Cluster> bmt_Clayrclus = sortedClusters.get(2);
-        ArrayList<Cluster> bmt_Zlayrclus = sortedClusters.get(3);
-        ArrayList<Cross> BMTCrosses = cm.findBMTCrosses(bmt_Clayrclus, bmt_Zlayrclus, allCrosses.size()+2000);
-        BMTCrosses.clear();
+        List<Cross> BMTCrosses = new ArrayList<>();
         for(Cluster cluster : bmtclsOnTrack) {
             for(Cross cross : allCrosses) {
                 if(cluster.getId()==cross.getCluster1().getId()) BMTCrosses.add(cross);
             }
         }
-        if(BMTCrosses.size()!=bmtclsOnTrack.size()) System.out.println("Error: MMMMMMMMMMMMMMISING CROSS");
+        if(BMTCrosses.size()!=bmtclsOnTrack.size()) System.out.println("Error: cross missing from list");
         return BMTCrosses;
     }
     
@@ -352,7 +347,7 @@ public class RecUtilities {
                     double sigma1 = Constants.SVTGEOMETRY.getSingleStripResolution(layer, hit.getStrip().getStrip(), traj.get(layer).z);
                     hit.setstripResolutionAtDoca(sigma1);
                     hit.setdocaToTrk(doca1);  
-                    if(traj.get(layer).isMeasUsed)
+                    if(traj.get(layer).isUsed)
                         hit.setTrkgStatus(1);
                 }
             }
@@ -382,7 +377,7 @@ public class RecUtilities {
                 }
                 for (Hit hit : cluster) {
                     hit.setdocaToTrk(hit.residual(p));
-                    if(traj.get(layer).isMeasUsed) hit.setTrkgStatus(1);
+                    if(traj.get(layer).isUsed) hit.setTrkgStatus(1);
                 }
             }
         }

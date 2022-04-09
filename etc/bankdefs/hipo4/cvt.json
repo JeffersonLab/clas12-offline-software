@@ -191,13 +191,15 @@
     ]
   },
   {
-    "name": "CVTRec::KFTraj",
+    "name": "CVTRec::KFTrajectory",
     "group": 20500,
     "item" : 30,   
     "info": "Trajectory bank output from KF",
     "entries": [
         {"name":"id",       "type":"S", "info":"id of the track"},
-        {"name":"layer",    "type":"S", "info":"id of the detector layer"},
+        {"name":"detector", "type":"B", "info":"detector type id"},
+        {"name":"layer",    "type":"B", "info":"id of the detector layer"},
+        {"name":"index",    "type":"B", "info":"id of the measureents surface"},
         {"name":"x",        "type":"F", "info":"track x position at detector surface (cm)"},
         {"name":"y",        "type":"F", "info":"track y position at detector surface (cm)"},
         {"name":"z",        "type":"F", "info":"track z position at detector surface (cm)"},
@@ -319,13 +321,15 @@
     ]
   },
   {
-    "name": "CVTRecFP::KFTraj",
+    "name": "CVTRecFP::KFTrajectory",
     "group": 20500,
     "item" : 34,   
     "info": "Trajectory bank output from KF",
     "entries": [
         {"name":"id",       "type":"S", "info":"id of the track"},
-        {"name":"layer",    "type":"S", "info":"id of the detector layer"},
+        {"name":"detector", "type":"B", "info":"detector type id"},
+        {"name":"layer",    "type":"B", "info":"id of the detector layer"},
+        {"name":"index",    "type":"B", "info":"id of the measureents surface"},
         {"name":"x",        "type":"F", "info":"track x position at detector surface (cm)"},
         {"name":"y",        "type":"F", "info":"track y position at detector surface (cm)"},
         {"name":"z",        "type":"F", "info":"track z position at detector surface (cm)"},
