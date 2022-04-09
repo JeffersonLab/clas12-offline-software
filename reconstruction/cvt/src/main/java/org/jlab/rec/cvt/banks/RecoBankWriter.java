@@ -801,7 +801,7 @@ public class RecoBankWriter {
         DataBank bank10 = fillTrajectoryBank(event, tracks, "CVTRec::Trajectory");
         if (bank10 != null) banks.add(bank10);
         
-        DataBank bank11 = fillKFTrajectoryBank(event, tracks, "CVTRec::KFTraj");
+        DataBank bank11 = fillKFTrajectoryBank(event, tracks, "CVTRec::KFTrajectory");
         if (bank11 != null) banks.add(bank11);
         
         event.appendBanks(banks.toArray(new DataBank[0]));
