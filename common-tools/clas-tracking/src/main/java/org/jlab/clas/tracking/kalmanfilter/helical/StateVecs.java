@@ -1,6 +1,7 @@
 package org.jlab.clas.tracking.kalmanfilter.helical;
 
 import java.util.HashMap;
+import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs.MeasVec;
@@ -19,7 +20,7 @@ public class StateVecs extends AStateVecs {
 
     
     @Override
-    public boolean getStateVecPosAtMeasSite(AStateVecs.StateVec sv, AMeasVecs.MeasVec mv, Swim swim) {
+    public boolean getStateVecPosAtMeasSite(StateVec sv, AMeasVecs.MeasVec mv, Swim swim) {
         double[] swimPars = new double[7];
         Point3D  pos = new Point3D(0,0,0);
         Vector3D mom = new Vector3D(0,0,0);
@@ -142,21 +143,21 @@ public class StateVecs extends AStateVecs {
     }
     
     @Override
-    public boolean setStateVecPosAtMeasSite(AStateVecs.StateVec sv, MeasVec mv, Swim swimmer) {
+    public boolean setStateVecPosAtMeasSite(StateVec sv, MeasVec mv, Swim swimmer) {
 
         boolean status = this.getStateVecPosAtMeasSite(sv, mv, swimmer);
         if (!status) {
             return false;
         }
         sv.k = mv.k;
-        if(swimmer!=null && !this.straight) sv.alpha = new AStateVecs.B(sv.k, sv.x, sv.y, sv.z, swimmer).alpha;
+        if(swimmer!=null && !this.straight) sv.alpha = new B(sv.k, sv.x, sv.y, sv.z, swimmer).alpha;
         if(!this.straight) sv.pivotTransform(); //for straight tracks, keep the same pivot since F matrix is fixed anyway
         return true;
     }
           
     
     @Override
-    public double[][] F(AStateVecs.StateVec iVec, AStateVecs.StateVec fVec) {
+    public double[][] F(StateVec iVec, StateVec fVec) {
         double[][] FMat = new double[][]{
                                         {1, 0, 0, 0, 0},
                                         {0, 1, 0, 0, 0},
@@ -209,7 +210,7 @@ public class StateVecs extends AStateVecs {
     }
 
     @Override
-    public double[][] Q(int i, int f, AStateVecs.StateVec iVec, AMeasVecs mv) {
+    public double[][] Q(int i, int f, StateVec iVec, AMeasVecs mv) {
         double[][] Q = new double[5][5];
 
         int dir = f-i;
@@ -218,7 +219,7 @@ public class StateVecs extends AStateVecs {
         if(dir>0) {
             for(int k=i; k<f; k++) {
                 double cosEntranceAngle = this.getLocalDirAtMeasSite(iVec, mv.measurements.get(k+1));
-                t_ov_X0 += mv.measurements.get(k+1).l_over_X0/cosEntranceAngle;
+                t_ov_X0 += mv.measurements.get(k+1).l_over_X0/1;//cosEntranceAngle;
 //                System.out.println("From " + i + " to " + f + " including material from surface " + (k+1) + " with X0 = " +  mv.measurements.get(k+1).l_over_X0 + " / " + cosEntranceAngle);
 //                System.out.println(mv.measurements.get(k+1).surface.toString());
             }
@@ -226,7 +227,7 @@ public class StateVecs extends AStateVecs {
         else {
             for(int k=i; k>f; k--) {
                 double cosEntranceAngle = this.getLocalDirAtMeasSite(iVec, mv.measurements.get(k));
-                t_ov_X0 += mv.measurements.get(k).l_over_X0/cosEntranceAngle;
+                t_ov_X0 += mv.measurements.get(k).l_over_X0/1;//cosEntranceAngle;
 //                System.out.println("From " + i + " to " + f + " including material from surface " + k + " with X0 = " +  mv.measurements.get(k).l_over_X0 + " / " + cosEntranceAngle);
 //                System.out.println(mv.measurements.get(k).surface.toString());
             }
@@ -235,7 +236,7 @@ public class StateVecs extends AStateVecs {
         if (t_ov_X0>0) {
             double p    = Math.sqrt(iVec.px*iVec.px + iVec.py*iVec.py + iVec.pz*iVec.pz);
             if(this.straight) p = 1;
-            double mass = piMass;   // assume given mass hypothesis 
+            double mass = PhysicsConstants.massPionCharged();   // assume given mass hypothesis 
             double beta = p / Math.sqrt(p * p + mass * mass);
             // Highland-Lynch-Dahl formula
             double sctRMS = (0.0136/(beta*p))*Math.sqrt(t_ov_X0)*(1 + 0.038 * Math.log(t_ov_X0));
@@ -253,10 +254,10 @@ public class StateVecs extends AStateVecs {
 
     @Override
     public Vector3D P(int kf) {
-    if (this.trackTraj.get(kf) != null) {
-            double px = -(Math.signum(this.trackTraj.get(kf).kappa) / this.trackTraj.get(kf).kappa) * Math.sin(this.trackTraj.get(kf).phi0 + this.trackTraj.get(kf).phi);
-            double py = (Math.signum(this.trackTraj.get(kf).kappa) / this.trackTraj.get(kf).kappa) * Math.cos(this.trackTraj.get(kf).phi0 + this.trackTraj.get(kf).phi);
-            double pz = (Math.signum(this.trackTraj.get(kf).kappa) / this.trackTraj.get(kf).kappa) * this.trackTraj.get(kf).tanL;
+    if (this.trackTrajF.get(kf) != null) {
+            double px = -(Math.signum(this.trackTrajF.get(kf).kappa) / this.trackTrajF.get(kf).kappa) * Math.sin(this.trackTrajF.get(kf).phi0 + this.trackTrajF.get(kf).phi);
+            double py = (Math.signum(this.trackTrajF.get(kf).kappa) / this.trackTrajF.get(kf).kappa) * Math.cos(this.trackTrajF.get(kf).phi0 + this.trackTrajF.get(kf).phi);
+            double pz = (Math.signum(this.trackTrajF.get(kf).kappa) / this.trackTrajF.get(kf).kappa) * this.trackTrajF.get(kf).tanL;
 
             return new Vector3D(px, py, pz);
         } else {
@@ -266,10 +267,10 @@ public class StateVecs extends AStateVecs {
 
     @Override
     public Vector3D X(int kf) {
-    if (this.trackTraj.get(kf) != null) {
-            double x = this.trackTraj.get(kf).x0 + this.trackTraj.get(kf).d_rho * Math.cos(this.trackTraj.get(kf).phi0) + this.trackTraj.get(kf).alpha / this.trackTraj.get(kf).kappa * (Math.cos(this.trackTraj.get(kf).phi0) - Math.cos(this.trackTraj.get(kf).phi0 + this.trackTraj.get(kf).phi));
-            double y = this.trackTraj.get(kf).y0 + this.trackTraj.get(kf).d_rho * Math.sin(this.trackTraj.get(kf).phi0) + this.trackTraj.get(kf).alpha / this.trackTraj.get(kf).kappa * (Math.sin(this.trackTraj.get(kf).phi0) - Math.sin(this.trackTraj.get(kf).phi0 + this.trackTraj.get(kf).phi));
-            double z = this.trackTraj.get(kf).z0 + this.trackTraj.get(kf).dz - this.trackTraj.get(kf).alpha / this.trackTraj.get(kf).kappa * this.trackTraj.get(kf).tanL * this.trackTraj.get(kf).phi;
+    if (this.trackTrajF.get(kf) != null) {
+            double x = this.trackTrajF.get(kf).x0 + this.trackTrajF.get(kf).d_rho * Math.cos(this.trackTrajF.get(kf).phi0) + this.trackTrajF.get(kf).alpha / this.trackTrajF.get(kf).kappa * (Math.cos(this.trackTrajF.get(kf).phi0) - Math.cos(this.trackTrajF.get(kf).phi0 + this.trackTrajF.get(kf).phi));
+            double y = this.trackTrajF.get(kf).y0 + this.trackTrajF.get(kf).d_rho * Math.sin(this.trackTrajF.get(kf).phi0) + this.trackTrajF.get(kf).alpha / this.trackTrajF.get(kf).kappa * (Math.sin(this.trackTrajF.get(kf).phi0) - Math.sin(this.trackTrajF.get(kf).phi0 + this.trackTrajF.get(kf).phi));
+            double z = this.trackTrajF.get(kf).z0 + this.trackTrajF.get(kf).dz - this.trackTrajF.get(kf).alpha / this.trackTrajF.get(kf).kappa * this.trackTrajF.get(kf).tanL * this.trackTrajF.get(kf).phi;
 
             return new Vector3D(x, y, z);
         } else {
@@ -278,7 +279,7 @@ public class StateVecs extends AStateVecs {
     }
 
     @Override
-    public Vector3D X(AStateVecs.StateVec kVec, double phi) {
+    public Vector3D X(StateVec kVec, double phi) {
     if (kVec != null) {
             double x = kVec.x0 + kVec.d_rho * Math.cos(kVec.phi0) + kVec.alpha / kVec.kappa * (Math.cos(kVec.phi0) - Math.cos(kVec.phi0 + phi));
             double y = kVec.y0 + kVec.d_rho * Math.sin(kVec.phi0) + kVec.alpha / kVec.kappa * (Math.sin(kVec.phi0) - Math.sin(kVec.phi0 + phi));
@@ -292,10 +293,10 @@ public class StateVecs extends AStateVecs {
     
     @Override
     public Vector3D P0(int kf) {
-        if (this.trackTraj.get(kf) != null) {
-            double px = -(Math.signum(this.trackTraj.get(kf).kappa) / this.trackTraj.get(kf).kappa) * Math.sin(this.trackTraj.get(kf).phi0);
-            double py = (Math.signum(this.trackTraj.get(kf).kappa) / this.trackTraj.get(kf).kappa) * Math.cos(this.trackTraj.get(kf).phi0);
-            double pz = (Math.signum(this.trackTraj.get(kf).kappa) / this.trackTraj.get(kf).kappa) * this.trackTraj.get(kf).tanL;
+        if (this.trackTrajF.get(kf) != null) {
+            double px = -(Math.signum(this.trackTrajF.get(kf).kappa) / this.trackTrajF.get(kf).kappa) * Math.sin(this.trackTrajF.get(kf).phi0);
+            double py = (Math.signum(this.trackTrajF.get(kf).kappa) / this.trackTrajF.get(kf).kappa) * Math.cos(this.trackTrajF.get(kf).phi0);
+            double pz = (Math.signum(this.trackTrajF.get(kf).kappa) / this.trackTrajF.get(kf).kappa) * this.trackTrajF.get(kf).tanL;
 
             return new Vector3D(px, py, pz);
         } else {
@@ -306,10 +307,10 @@ public class StateVecs extends AStateVecs {
 
     @Override
     public Vector3D X0(int kf) {
-        if (this.trackTraj.get(kf) != null) {
-            double x = this.trackTraj.get(kf).x0 + this.trackTraj.get(kf).d_rho * Math.cos(this.trackTraj.get(kf).phi0);
-            double y = this.trackTraj.get(kf).y0 + this.trackTraj.get(kf).d_rho * Math.sin(this.trackTraj.get(kf).phi0);
-            double z = this.trackTraj.get(kf).z0 + this.trackTraj.get(kf).dz;
+        if (this.trackTrajF.get(kf) != null) {
+            double x = this.trackTrajF.get(kf).x0 + this.trackTrajF.get(kf).d_rho * Math.cos(this.trackTrajF.get(kf).phi0);
+            double y = this.trackTrajF.get(kf).y0 + this.trackTrajF.get(kf).d_rho * Math.sin(this.trackTrajF.get(kf).phi0);
+            double z = this.trackTrajF.get(kf).z0 + this.trackTrajF.get(kf).dz;
 
             return new Vector3D(x, y, z);
         } else {
@@ -320,7 +321,6 @@ public class StateVecs extends AStateVecs {
     
     @Override
     public void init(Helix helix, double[][] cov, double xref, double yref, double zref, Swim swimmer) {
-        this.trackTraj = new HashMap<>();
         this.units     = helix.getUnits();
         this.lightVel  = helix.getLightVelocity();
 
@@ -333,7 +333,7 @@ public class StateVecs extends AStateVecs {
         //        System.out.println(this.straight);
 
         //init stateVec, pivot set to current vertex for field-on and to the reference for straight tracks
-        initSV = new AStateVecs.StateVec(0);
+        initSV = new StateVec(0);
         if(this.straight) {
             initSV.x0 = xref;
             initSV.y0 = yref;
@@ -389,12 +389,11 @@ public class StateVecs extends AStateVecs {
                                         {0, 0, 0, 0, 1}
                                         };
         initSV.F = FMat;
-        this.trackTraj.put(0, new AStateVecs.StateVec(initSV));
-        
+        this.trackTrajT.put(0, new StateVec(initSV));        
     }
 
     @Override
-    public void printlnStateVec(AStateVecs.StateVec S) {
+    public void printlnStateVec(StateVec S) {
         String s = String.format("%d) drho=%.4f phi0=%.4f kappa=%.4f dz=%.4f tanL=%.4f alpha=%.4f\n", S.k, S.d_rho, S.phi0, S.kappa, S.dz, S.tanL, S.alpha);
         s       += String.format("    x0=%.4f y0=%.4f z0=%.4f", S.x0, S.y0, S.z0);
         s       += String.format("    phi=%.4f x=%.4f y=%.4f z=%.4f px=%.4f py=%.4f pz=%.4f", S.phi, S.x, S.y, S.z, S.px, S.py, S.pz);
@@ -407,5 +406,5 @@ public class StateVecs extends AStateVecs {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-     public double piMass = 0.13957018;
+    
 }

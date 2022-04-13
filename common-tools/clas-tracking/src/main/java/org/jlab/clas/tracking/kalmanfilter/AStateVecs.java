@@ -21,13 +21,11 @@ public abstract class AStateVecs {
     public double yref;
     public double zref;
 
-    public StateVec initSV; //init sv at target
-    
-    public StateVec initSVLastMeas; //init sv at last layer
-    
-    public Map<Integer, StateVec> trackTraj  = new HashMap<>(); //filtered
-    
-    public Map<Integer, StateVec> trackTraj0  = new HashMap<>();// transported
+    public StateVec initSV; //init sv
+         
+    public Map<Integer, StateVec> trackTrajS  = new HashMap<>(); // smoothed    
+    public Map<Integer, StateVec> trackTrajF  = new HashMap<>(); // filtered    
+    public Map<Integer, StateVec> trackTrajT  = new HashMap<>(); // transported
 
     public boolean straight;
 
@@ -48,30 +46,40 @@ public abstract class AStateVecs {
 
     public abstract boolean getStateVecPosAtMeasSite(StateVec iVec, MeasVec mv, Swim swim);
 
-    public StateVec transported(int i, int f, AMeasVecs mv, Swim swimmer) {
+    public StateVec transported(StateVec iVec, int f, AMeasVecs mv, Swim swimmer) {
     // transport state vector
-        StateVec iVec = this.trackTraj.get(i);
         StateVec fVec = this.newStateVecAtMeasSite(iVec, mv.measurements.get(f), swimmer);
         if(fVec==null) return null;
         //transport covariance matrix
         double[][] fCov = this.propagateCovMat(iVec, fVec);
-        double[][] iQ   = this.Q(i, f, iVec, mv);
-        //double[][] fQ   = this.propagateMatrix(iVec, fVec, iQ);
+        double[][] iQ   = this.Q(iVec.k, fVec.k, iVec, mv);
+        double[][] fQ   = this.propagateMatrix(iVec, fVec, iQ);
         if (fCov != null) {
-            fVec.covMat = addProcessNoise(fCov, iQ);            
+            fVec.covMat = addProcessNoise(fCov, fQ);            
         }
-        
-        fVec.F = this.F(iVec, fVec);
         
         return fVec;
     }
     
     public final void transport(int i, int f, AMeasVecs mv, Swim swimmer) {
-    // transport state vector
-        StateVec fVec = this.transported(i, f, mv, swimmer);
-        if(fVec==null) return;
-        this.trackTraj.put(f, fVec);
-        this.trackTraj0.put(f, fVec);
+        // transport state vector
+        StateVec iVec = this.trackTrajT.get(i);
+        StateVec fVec = this.transported(iVec, f, mv, swimmer);
+        this.trackTrajT.put(f, fVec);
+    }
+
+    public final void transportFiltered(int i, int f, AMeasVecs mv, Swim swimmer) {
+        // transport state vector
+        StateVec iVec = this.trackTrajF.get(i);
+        StateVec fVec = this.transported(iVec, f, mv, swimmer);
+        this.trackTrajT.put(f, fVec);
+    }
+
+    public final void transportSmoothed(int i, int f, AMeasVecs mv, Swim swimmer) {
+        // transport state vector
+        StateVec iVec = this.trackTrajS.get(i);
+        StateVec fVec = this.transported(iVec, f, mv, swimmer);
+        this.trackTrajS.put(f, fVec);
     }
 
     public final double[][] propagateCovMat(StateVec ivec, StateVec fvec) {
@@ -81,7 +89,7 @@ public abstract class AStateVecs {
     private double[][] propagateMatrix(StateVec ivec, StateVec fvec, double[][] matrix) {
         double[][] FMat  = this.F(ivec, fvec);
         double[][] FMatT = this.transposeMatrix(FMat);
-
+        ivec.F = FMat;
         return multiplyMatrices(FMat, matrix, FMatT);
     }
     
@@ -155,7 +163,7 @@ public abstract class AStateVecs {
         }
     }
     
-    
+
     public abstract double[][] Q(int i, int f, StateVec iVec, AMeasVecs mv);
 
     public abstract double[][] F(StateVec ivec, StateVec fvec);
@@ -240,18 +248,28 @@ public abstract class AStateVecs {
             this.py = s.py;
             this.pz = s.pz;
             this.resi = s.resi;
-            this.copyCovMat(s.covMat);
+            this.covMat = this.copyMatrix(s.covMat);
+            this.F = this.copyMatrix(s.F);
         }
 
         public void copyCovMat(double[][] c) {
+            this.covMat = this.copyMatrix(c);
+        }
+        
+        public void copyFMat(double[][] c) {
+            this.F = this.copyMatrix(c);
+        }
+        
+        private double[][] copyMatrix(double[][] c) {
             int rows = c.length;
             int cols = c[0].length;
-            this.covMat = new double[rows][cols];
+            double[][] cCopy = new double[rows][cols];
             for (int ir = 0; ir < rows; ir++) {
                 for (int ic = 0; ic < cols; ic++) {
-                    this.covMat[ir][ic] = c[ir][ic];
+                    cCopy[ir][ic] = c[ir][ic];
                 }
             }
+            return cCopy;
         }
         
         public void scaleCovMat(double scale) {

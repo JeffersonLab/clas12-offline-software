@@ -48,13 +48,7 @@ public class KFCovMatOps{
         return Cinv;
     }
         
-    public double[][] smoothCovMat(double[][] C_n_kp1, double[][] C_k, double[][] FMatT , double[][] C_k_kp1) {
-        double[][] A = null;
-        try {
-            A = this.smoothingCorr(C_k, FMatT, C_k_kp1);
-        } catch (Exception e) {
-            return null;
-        }
+    public double[][] smoothCovMat(double[][] C_n_kp1, double[][] C_k, double[][] A , double[][] C_k_kp1) {
         double[][] At = null;
         try {
             At = mo.MatrixTranspose(A);

@@ -129,9 +129,9 @@ public class StateVecs extends AStateVecs {
 
     @Override
     public Vector3D P(int kf) {
-        if (this.trackTraj.get(kf) != null) {
-            double tx = this.trackTraj.get(kf).tx;
-            double tz = this.trackTraj.get(kf).tz;
+        if (this.trackTrajF.get(kf) != null) {
+            double tx = this.trackTrajF.get(kf).tx;
+            double tz = this.trackTrajF.get(kf).tz;
             
             double py = 1/Math.sqrt(1+tx*tx+tz*tz);
             double px = tx*py;
@@ -145,17 +145,17 @@ public class StateVecs extends AStateVecs {
 
     @Override
     public Vector3D X(int kf) {
-        if (this.trackTraj.get(kf) != null) {
-            double tx = this.trackTraj.get(kf).tx;
-            double tz = this.trackTraj.get(kf).tz;
+        if (this.trackTrajF.get(kf) != null) {
+            double tx = this.trackTrajF.get(kf).tx;
+            double tz = this.trackTrajF.get(kf).tz;
             
             double py = 1/Math.sqrt(1+tx*tx+tz*tz);
             double px = tx*py;
             double pz = tz*py;
             
-            double x = this.trackTraj.get(kf).x0 + px ;
-            double y = this.trackTraj.get(kf).dl*py ;
-            double z = this.trackTraj.get(kf).z0 + this.trackTraj.get(kf).dl*pz ;
+            double x = this.trackTrajF.get(kf).x0 + px ;
+            double y = this.trackTrajF.get(kf).dl*py ;
+            double z = this.trackTrajF.get(kf).z0 + this.trackTrajF.get(kf).dl*pz ;
 
             return new Vector3D(x, y, z);
         } else {
@@ -192,7 +192,7 @@ public class StateVecs extends AStateVecs {
     
     @Override
     public void init(double x0, double z0, double tx, double tz, Units units, double[][] cov) {
-        this.trackTraj = new HashMap<>();
+        this.trackTrajF = new HashMap<>();
         this.units = units;
 
         initSV = new AStateVecs.StateVec(0);
@@ -210,8 +210,8 @@ public class StateVecs extends AStateVecs {
             }
         }
         initSV.covMat = covKF;
-        this.trackTraj.put(0, new AStateVecs.StateVec(initSV));
-        this.trackTraj0.put(0, new AStateVecs.StateVec(initSV));
+        this.trackTrajF.put(0, new AStateVecs.StateVec(initSV));
+        this.trackTrajT.put(0, new AStateVecs.StateVec(initSV));
         
     }
 

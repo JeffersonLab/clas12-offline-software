@@ -26,14 +26,16 @@ public abstract class AKFitter {
     public int     NDF;
     public int     NDF0;
     public int     numIter;
-    
+    public int     dir = 1; 
+
     private Swim swimmer;
     private KFCovMatOps mo = new KFCovMatOps(Libr.EJML);
     
     
-    public AKFitter(boolean filter, int iterations, boolean beamspot, Swim swim, Libr m) {
+    public AKFitter(boolean filter, int iterations, int dir, boolean beamspot, Swim swim, Libr m) {
         this.filterOn           = filter;
         this.totNumIter         = iterations;
+        this.dir                = dir;
         this.beamSpotConstraint = beamspot;
         this.swimmer            = swim;
         this.setMatrixLibrary(m);
@@ -75,56 +77,54 @@ public abstract class AKFitter {
     
     public void runFitterIter(AStateVecs sv, AMeasVecs mv, int dir) {
         this.numIter++;
-        //re-init cov mat
-        if(dir>0)
-            sv.trackTraj.get(0).copyCovMat(sv.initSV.covMat);
-        //init for out to in fitting
-        if(sv.trackTraj.get(mv.measurements.size() - 1)==null) {// transport to last site for out to in propagation with mat budget
-            for (int k = 0; k < mv.measurements.size() - 1; k++) {
-                if (sv.trackTraj.get(k)==null || mv.measurements.get(k + 1) == null) {
-                    return;
-                }
-                sv.transport(k, k + 1, mv, swimmer);
-                this.filter(k + 1, sv, mv);
-            } 
-            sv.initSVLastMeas = sv.new StateVec(mv.measurements.size() - 1);
-            sv.initSVLastMeas.copy(sv.trackTraj0.get(mv.measurements.size() - 1));
-        }
-        if(dir<0)
-            sv.trackTraj.get(mv.measurements.size() - 1).copyCovMat(sv.initSVLastMeas.covMat);
         
-        if(dir >0) {//inside out
-            for (int k = 0; k < mv.measurements.size() - 1; k++) {
-                if (sv.trackTraj.get(k)==null || mv.measurements.get(k + 1) == null) {
-                    return;
-                }
-                sv.transport(k, k + 1, mv, swimmer);
-                this.filter(k + 1, sv, mv);
+        int k0 = 0;
+        int kf = mv.measurements.size() - 1;
+        if(dir<0) {
+            k0 = mv.measurements.size() - 1;
+            kf = 0;
+        }
+        
+        //init for out to in fitting
+        if(sv.trackTrajT.get(k0)==null && sv.trackTrajT.get(kf)!=null) {
+            if (mv.measurements.get(k0) == null) 
+                return;               
+            sv.transport(kf, k0, mv, swimmer);
+            sv.initSV.copy(sv.trackTrajT.get(k0));
+        }
+               
+        //re-init cov mat
+        if(this.numIter>1) {
+            sv.trackTrajT.get(k0).copy(sv.trackTrajS.get(k0));
+        }
+        sv.trackTrajT.get(k0).copyCovMat(sv.initSV.covMat);                
+
+        // filter & transport
+        for (int k = k0; (k-kf)*dir <= 0; k += dir) {
+            if (sv.trackTrajT.get(k)==null || mv.measurements.get(k) == null) {
+                return;
             }
-            
-            for (int k =  mv.measurements.size() - 1; k>0 ;k--) {
-                this.smooth(k - 1, sv, mv);
+//            System.out.println(k);
+//            System.out.println("before filter:" + mv.dh(k+1, sv.trackTrajT.get(k)));sv.printlnStateVec(sv.trackTrajT.get(k));// sv.printMatrix(sv.trackTrajF.get(k).covMat);
+            if(k>1 || this.beamSpotConstraint)
+                this.filter(k, sv, mv);
+            else
+                sv.trackTrajF.put(k, sv.new StateVec(sv.trackTrajT.get(k)));
+//            System.out.println("after filtering:" + mv.dh(k+dir, sv.trackTrajF.get(k)));sv.printlnStateVec(sv.trackTrajF.get(k)); //sv.printMatrix(sv.trackTrajF.get(k+1).covMat); 
+            if(k != kf) {
+                sv.transportFiltered(k, k + dir, mv, swimmer);
+//                System.out.println("after transport:" + mv.dh(k+dir, sv.trackTrajT.get(k+dir)));sv.printlnStateVec(sv.trackTrajT.get(k+dir)); //sv.printMatrix(sv.trackTrajT.get(k+1).covMat);  
             }
-        }   else { //outside in
-            //transport in
-            for (int k =  mv.measurements.size() - 1; k>0 ;k--) {
-                if (sv.trackTraj.get(k)==null || mv.measurements.get(k - 1) == null) {
-                    return;
-                }
-                sv.transport(k, k - 1, mv, swimmer);
-                if(k>1 || this.beamSpotConstraint) {
-                    this.filter(k - 1, sv, mv);
-                    //this.smooth(k, sv, mv); 
-                    //sv.transport(k, k - 1, mv, swimmer);
-                }
+        }
+        
+        for (int k = kf; (k-k0)*dir > 0; k -= dir) {
+            if (k == kf && sv.trackTrajF.get(k) != null) {
+                sv.trackTrajS.put(k, sv.new StateVec(sv.trackTrajF.get(k)));
             }
-            //smooth
-            for (int k = 0; k < mv.measurements.size() - 1; k++) {
-                if (sv.trackTraj.get(k)==null || mv.measurements.get(k + 1) == null) {
-                    return;
-                }
-                this.smooth(k + 1, sv, mv);
+            if (sv.trackTrajS.get(k) == null || sv.trackTrajF.get(k-dir) == null) {
+                return;
             }
+            this.smooth(k - dir, sv, mv);
         }
     }
     
@@ -137,22 +137,35 @@ public abstract class AKFitter {
         double chisq = 0;
         int ndf = this.NDF0;
 
-        for(int k = 0; k< mv.measurements.size()-1; k++) {
-            if(sv.trackTraj.get(k)==null) {
-                chisq=Double.NaN;
-                break;
-            }
-            //don't modify the state vecs list - clone them
-            StateVec iVec = sv.new StateVec(sv.trackTraj.get(k));
-            StateVec fVec = sv.newStateVecAtMeasSite(iVec, mv.measurements.get(k+1), swimmer);
-            //sv.transport(k, k+1, mv, swimmer);
-            if(!mv.measurements.get(k+1).skip) {
-                double dh    = mv.dh(k+1, fVec);
-                double error = mv.measurements.get(k+1).error;
-                chisq += dh*dh / error/error;
-                ndf++;
-            }
-        }  
+        int k0 = 0;
+        int kf = mv.measurements.size()-1;
+        if(dir<0) {
+            k0 = mv.measurements.size()-1;
+            kf = 0;
+        }
+        
+        if(sv.trackTrajS.get(k0)!=null) {
+            // store trajectory in transported state-vector map
+            sv.trackTrajT.put(k0, sv.new StateVec(sv.trackTrajS.get(k0)));
+
+            for(int k = k0; (k-kf)*dir<=0; k+=dir) {
+                StateVec iVec = sv.trackTrajT.get(k);
+                if(!mv.measurements.get(k).skip) {
+                    double dh    = mv.dh(k, iVec);
+                    double error = mv.measurements.get(k).error;
+                    chisq += dh*dh / error/error;
+                    ndf++;
+//                    System.out.println(k + " " + mv.measurements.get(k).surface.getLayer() + " " + dh + " " + error + " " + chisq + " " + ndf);
+                }
+                if((k-kf)*dir<0) {
+                    sv.transport(k, k+dir, mv, swimmer);
+                    if(sv.trackTrajT.get(k+dir)==null) {
+                        chisq=Double.NaN;
+                        break;
+                    }
+                }
+            }  
+        }
         if(chisq==0) chisq=Double.NaN;
         return chisq;
     }

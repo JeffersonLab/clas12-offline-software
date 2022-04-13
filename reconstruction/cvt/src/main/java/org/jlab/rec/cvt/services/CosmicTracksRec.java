@@ -77,7 +77,7 @@ public class CosmicTracksRec {
             }
             recUtil.CleanupSpuriousCrosses(crosses, null) ;
             
-            KFitter kf = new KFitter(Constants.KFFILTERON, Constants.KFITERATIONS, Constants.kfBeamSpotConstraint(), Constants.KFMATLIB);
+            KFitter kf = new KFitter(Constants.KFFILTERON, Constants.KFITERATIONS, Constants.KFDIR, Constants.kfBeamSpotConstraint(), Constants.KFMATLIB);
             Measurements measures = new Measurements(true, 0, 0);
             List<StraightTrack> cosmics = new ArrayList<>();
             for (int k1 = 0; k1 < cosmicCands.size(); k1++) {

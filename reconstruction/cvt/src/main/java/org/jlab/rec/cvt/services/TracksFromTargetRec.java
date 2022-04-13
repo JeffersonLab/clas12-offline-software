@@ -99,7 +99,7 @@ public class TracksFromTargetRec {
         }
         
         trkcands.clear();
-        KFitter kf = new KFitter(Constants.KFFILTERON, Constants.KFITERATIONS, Constants.kfBeamSpotConstraint(), swimmer, Constants.KFMATLIB);
+        KFitter kf = new KFitter(Constants.KFFILTERON, Constants.KFITERATIONS, Constants.KFDIR, Constants.kfBeamSpotConstraint(), swimmer, Constants.KFMATLIB);
         Measurements surfaces = new Measurements(false, xb, yb);
         for (Seed seed : seeds) { 
             Point3D  v = seed.getHelix().getVertex();

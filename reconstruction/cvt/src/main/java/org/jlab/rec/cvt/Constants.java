@@ -60,6 +60,7 @@ public class Constants {
     public static boolean KFFILTERON = true;
     public static boolean INITFROMMC = false;
     public static int     KFITERATIONS = 5;
+    public static int     KFDIR = -1;
     
     public static final boolean TRACKSFROMORIGIN = true;
 
