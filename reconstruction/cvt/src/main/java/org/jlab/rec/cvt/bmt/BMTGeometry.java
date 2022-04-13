@@ -876,7 +876,7 @@ public class BMTGeometry {
      * @param trackDir
      * @return track direction unit vector
     **/
-    private Vector3D getLocalTrack(int layer, int sector, Point3D trackPos, Vector3D trackDir) {               
+    public Vector3D getLocalTrack(int layer, int sector, Point3D trackPos, Vector3D trackDir) {               
         Vector3D dir = new Vector3D(trackDir).asUnit();
         Point3D  pos = new Point3D(trackPos);
         this.toLocal(layer, sector).apply(dir);
@@ -891,12 +891,12 @@ public class BMTGeometry {
      * the angle is positive for tracks going toward positive phi
      * @param layer
      * @param sector
-     * @param trakPos
+     * @param trackPos
      * @param trackDir
      * @return local angle
      */
-    public double getThetaZ(int layer, int sector, Point3D trakPos, Vector3D trackDir) { 
-        Vector3D dir = this.getLocalTrack(layer, sector, trakPos, trackDir);
+    public double getThetaZ(int layer, int sector, Point3D trackPos, Vector3D trackDir) { 
+        Vector3D dir = this.getLocalTrack(layer, sector, trackPos, trackDir);
         return Math.atan(dir.y()/dir.x());
     }
     
@@ -905,13 +905,20 @@ public class BMTGeometry {
      * the angle is positive for tracks going at positive z
      * @param layer
      * @param sector
-     * @param trakPos
+     * @param trackPos
      * @param trackDir
      * @return local angle
      */
-    public double getThetaC(int layer, int sector, Point3D trakPos, Vector3D trackDir) { 
-        Vector3D dir = this.getLocalTrack(layer, sector, trakPos, trackDir);
+    public double getThetaC(int layer, int sector, Point3D trackPos, Vector3D trackDir) { 
+        Vector3D dir = this.getLocalTrack(layer, sector, trackPos, trackDir);
         return Math.atan(dir.z()/dir.x());
+    }
+    
+    public double getLocalAngle(int layer, int sector,  Point3D trackPos, Vector3D trackDir) {
+        if(getDetectorType(layer) == BMTType.C)
+            return this.getThetaC(layer, sector, trackPos, trackDir);
+        else 
+            return this.getThetaZ(layer, sector, trackPos, trackDir);
     }
     
     public List<Surface> getSurfaces() {

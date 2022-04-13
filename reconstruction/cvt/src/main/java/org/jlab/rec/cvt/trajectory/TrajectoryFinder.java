@@ -151,8 +151,8 @@ public class TrajectoryFinder {
             Vector3D dir = new Vector3D(inters[3], inters[4], inters[5]).asUnit();
 //            this.fill_HelicalTrkAngleWRTSVTPlane(sector, layer, dir, svt_geo, stVec);
             Vector3D localDir = Constants.SVTGEOMETRY.getLocalTrack(layer, sector, dir);
-            stVec.setTrkPhiAtSurface(dir.phi());
-            stVec.setTrkThetaAtSurface(dir.theta());
+            stVec.setTrkPhiAtSurface(localDir.phi());
+            stVec.setTrkThetaAtSurface(localDir.theta());
             stVec.setTrkToModuleAngle(Constants.SVTGEOMETRY.getLocalAngle(layer, sector, dir));
             stVec.setCalcCentroidStrip(Constants.SVTGEOMETRY.calcNearestStrip(inters[0]*10, inters[1]*10, inters[2]*10, layer, sector));
             stVec.setPath(path*10);
@@ -218,9 +218,10 @@ public class TrajectoryFinder {
                 stVec.setPath(path*10);
                 Vector3D dir = new Vector3D(inters[3], inters[4], inters[5]).asUnit();
                 Point3D  pos = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
-                stVec.setTrkPhiAtSurface(Constants.BMTGEOMETRY.getThetaZ(layer, sector, pos, dir));
-                stVec.setTrkThetaAtSurface(Constants.BMTGEOMETRY.getThetaC(layer, sector, pos, dir));
-                //stVec.setCalcCentroidStrip(bmt_geo.getCStrip(BMTRegIdx+1, stVec.z()));
+                Vector3D localDir = Constants.BMTGEOMETRY.getLocalTrack(layer, sector, pos, dir);
+                stVec.setTrkPhiAtSurface(localDir.phi());
+                stVec.setTrkThetaAtSurface(localDir.theta());
+                stVec.setTrkToModuleAngle(Constants.BMTGEOMETRY.getLocalAngle(layer, sector, pos, localDir));
                 stVec.setCalcCentroidStrip(Constants.BMTGEOMETRY.getCstrip(region, 
                        new Point3D(stVec.x(),stVec.y(),stVec.z())));
                 stVec.setPath(path*10);
