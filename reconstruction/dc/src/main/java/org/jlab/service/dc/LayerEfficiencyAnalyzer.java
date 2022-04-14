@@ -7,8 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -28,7 +27,6 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.task.DataSourceProcessorPane;
 import org.jlab.io.task.IDataEventListener;
 import org.jlab.rec.dc.banks.HitReader;
-import org.jlab.rec.dc.banks.RecoBankWriter;
 import org.jlab.rec.dc.cluster.ClusterCleanerUtilities;
 import org.jlab.rec.dc.cluster.ClusterFinder;
 import org.jlab.rec.dc.cluster.ClusterFitter;
@@ -36,10 +34,8 @@ import org.jlab.rec.dc.cluster.FittedCluster;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.segment.SegmentFinder;
-import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.trajectory.SegmentTrajectory;
-import org.jlab.utils.groups.IndexedTable;
 
 public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListener{
     
@@ -83,16 +79,15 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
     
     public double[] maxDoca = new double[6];
     
-    private AtomicInteger Run = new AtomicInteger(0);
-    
-    private int newRun = 0;
     @Override
     public boolean init() {
         
-        Constants.Load();
-        super.setOptions();
-        super.LoadTables();
-        Constants.setT2D(1);
+        this.setOptions();
+        Constants.getInstance().initialize("LayerEfficiency");
+        Constants.getInstance().setT2D(1);
+        this.LoadTables();
+        this.getBanks().init("TimBasedTrkg", "HB", "TB");
+        this.setDropBanks();
         
         maxDoca[0]=0.8;maxDoca[1]=0.9;maxDoca[2]=1.3;maxDoca[3]=1.4;maxDoca[4]=1.9;maxDoca[5]=2.0;
         //plots
@@ -122,8 +117,8 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         can12.divide(2, 3);
         // create histograms
         for(int si =0; si<6; si++) {
-            LayerEffs.add(new HashMap<Coordinate, H1F>());
-            LayerEffsTrkD.add(new HashMap<Coordinate, H1F>());
+            LayerEffs.add(new HashMap<>());
+            LayerEffsTrkD.add(new HashMap<>());
             for(int i =0; i<6; i++) {
                 LayerEffs.get(si).put(new Coordinate(i),
                                 new H1F("Sector-"+si+" layer efficiencies" + (i + 1), "superlayer" + (i + 1), 6, 0.5, 6.5));
@@ -157,6 +152,11 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         return true;
     }
 
+    @Override
+    public void setDropBanks() {
+        super.registerOutputBank("TimeBasedTrkg::TBSegmentTrajectory");
+    }
+    
     @Override
     public void dataEventAction(DataEvent event) {
         ProcessLayerEffs(event);
@@ -205,69 +205,38 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
             if (getClass() != obj.getClass())
                     return false;
             Coordinate other = (Coordinate) obj;
-            if (!Arrays.equals(size, other.size))
-                    return false;
-            return true;
+            return Arrays.equals(size, other.size);
 	}
     }
 
-    private ArrayList<HashMap<Coordinate, H1F>> LayerEffs = new ArrayList<HashMap<Coordinate, H1F>>();
-    private ArrayList<HashMap<Coordinate, H1F>> LayerEffsTrkD = new ArrayList<HashMap<Coordinate, H1F>>();
+    private final ArrayList<HashMap<Coordinate, H1F>> LayerEffs = new ArrayList<HashMap<Coordinate, H1F>>();
+    private final ArrayList<HashMap<Coordinate, H1F>> LayerEffsTrkD = new ArrayList<HashMap<Coordinate, H1F>>();
     
-    //instantiate bank writer
-    RecoBankWriter rbc = new RecoBankWriter();
-    HitReader hitRead = new HitReader();
-
     @Override
     public boolean processDataEvent(DataEvent event) {
-        if (!event.hasBank("RUN::config")) {
-            return true;
-        }
-
-       DataBank bank = event.getBank("RUN::config");
-       long timeStamp = bank.getLong("timestamp", 0);
-       double triggerPhase = 0;
-
-        // Load the constants
-        //-------------------
-        int newRun = bank.getInt("run", 0);
-        if (newRun == 0)
-           return true;
-
-       if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {
-           if (timeStamp == -1)
-               return true;
- //          if (debug.get()) startTime = System.currentTimeMillis();
-           IndexedTable tabJ = super.getConstantsManager().getConstants(newRun, Constants.TIMEJITTER);
-           double period = tabJ.getDoubleValue("period", 0, 0, 0);
-           int phase = tabJ.getIntValue("phase", 0, 0, 0);
-           int cycles = tabJ.getIntValue("cycles", 0, 0, 0);
-
-           if (cycles > 0) triggerPhase = period * ((timeStamp + phase) % cycles);
-
-           TableLoader.FillT0Tables(newRun, super.variationName);
-           TableLoader.Fill(super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST));
-
-           Run.set(newRun);
-           if (event.hasBank("MC::Particle") && this.getEngineConfigString("wireDistort")==null) {
-               Constants.setWIREDIST(0);
-           }
-       }
-        //System.out.println(" RUNNING TIME BASED....................................");
+        
+        int run = this.getRun(event);
+        if(run==0) return true;
+        
+        //LOGGER.log(Level.FINE, " RUNNING TIME BASED....................................");
         ClusterFitter cf = new ClusterFitter();
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
 
-        List<FittedCluster> clusters = new ArrayList<FittedCluster>();
-        List<Segment> segments = new ArrayList<Segment>();
+        List<FittedCluster> clusters = new ArrayList<>();
+        List<Segment> segments = new ArrayList<>();
         
-        hitRead.read_HBHits(event, 
-            super.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
-            super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"),
-            Constants.getT0(), Constants.getT0Err(), dcDetector, tde);
+        //instantiate bank writer
+        HitReader hitRead = new HitReader(this.getBanks());
+
+            hitRead.read_HBHits(event, 
+            super.getConstantsManager().getConstants(run, Constants.DOCARES),
+            super.getConstantsManager().getConstants(run, Constants.TIME2DIST),
+            super.getConstantsManager().getConstants(run, Constants.T0CORRECTION),
+            Constants.getInstance().dcDetector, tde);
         //hitRead.read_TBHits(event, 
-        //    super.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
-        //    super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), tde, Constants.getT0(), Constants.getT0Err());
-        List<FittedHit> hits = new ArrayList<FittedHit>();
+        //    super.getConstantsManager().getConstants(newRun, Constants.DOCARES),
+        //    super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST), tde, Constants.getT0(), Constants.getT0Err());
+        List<FittedHit> hits = new ArrayList<>();
         //I) get the hits
         if(hitRead.get_HBHits()==null)
             return true;
@@ -287,7 +256,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         ClusterFinder clusFinder = new ClusterFinder();
 
         clusters = clusFinder.FindTimeBasedClusters(event, hits, cf, ct, 
-                super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, tde);
+                super.getConstantsManager().getConstants(run, Constants.TIME2DIST), Constants.getInstance().dcDetector, tde);
 
         if(clusters.isEmpty()) {
             return true;
@@ -298,7 +267,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
 
         List<FittedCluster> pclusters = segFinder.selectTimeBasedSegments(clusters);
 
-        segments =  segFinder.get_Segments(pclusters, event, dcDetector, true);
+        segments =  segFinder.get_Segments(pclusters, event, Constants.getInstance().dcDetector, true);
         
         if(segments!=null && segments.size()>0) {
             DataBank bankE = event.createBank("TimeBasedTrkg::TBSegmentTrajectory", segments.size() * 6);
@@ -336,15 +305,15 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
                     return;
 		DataBank Bank = event.getBank("TimeBasedTrkg::TBSegmentTrajectory") ;
 		int nrows =  Bank.rows();
-		//Bank.show(); System.out.println(" NUMBER OF ENTRIES IN BANK = "+nrows);
+		//Bank.show(); LOGGER.log(Level.FINE, " NUMBER OF ENTRIES IN BANK = "+nrows);
 		for (int i = 0; i < nrows; i++) {
 			totLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1]++;
 			
-			//System.out.println(" Layer eff denom for ["+Bank.getByte("sector", i)+"]["+ Bank.getByte("superlayer", i)+"]["+Bank.getByte("layer", i)+"] = "+totLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1]);
+			//LOGGER.log(Level.FINE, " Layer eff denom for ["+Bank.getByte("sector", i)+"]["+ Bank.getByte("superlayer", i)+"]["+Bank.getByte("layer", i)+"] = "+totLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1]);
 			if(Bank.getShort("matchedHitID", i)!=-1) {
 				effLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1]++;
 			}
-			//System.out.println(" Layer eff num for ["+Bank.getByte("sector", i)+"]["+ Bank.getByte("superlayer", i)+"]["+Bank.getByte("layer", i)+"] = "+effLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1]);
+			//LOGGER.log(Level.FINE, " Layer eff num for ["+Bank.getByte("sector", i)+"]["+ Bank.getByte("superlayer", i)+"]["+Bank.getByte("layer", i)+"] = "+effLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1]);
 			
 			if(Math.abs(Bank.getFloat("trkDoca", i))<4.0) {
 				totLayA[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][(int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning)))]++;
@@ -447,7 +416,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
                 dir.addDataSet(LayerEffsTrkD.get(si).get(new Coordinate(i)));
             }
         }
-        System.out.println("Saving histograms to file " + fileName);
+        LOGGER.log(Level.INFO, "Saving histograms to file " + fileName);
         dir.writeFile(fileName);
     }
    
@@ -484,7 +453,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
                 tm.ProcessLayerEffs(event);
                 //event.show();
                 if(counter%1000==0) {
-                    System.out.println(counter);
+                    LOGGER.log(Level.INFO, "processed " + counter + " events");
                     tm.drawPlots();
                 }
             }

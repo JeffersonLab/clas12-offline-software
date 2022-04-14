@@ -1,6 +1,23 @@
 package org.jlab.rec.cvt;
 
+import cnuphys.magfield.MagneticFields;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+import org.jlab.clas.swimtools.Swim;
+import org.jlab.clas.tracking.kalmanfilter.Surface;
+
+import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
+import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
+import org.jlab.geom.base.Detector;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
+import org.jlab.rec.cvt.svt.SVTGeometry;
+
 public class Constants {
+   
+
+    public static Logger LOGGER = Logger.getLogger(Constants.class.getName());
 
     /**
      * Constants used in the reconstruction
@@ -8,59 +25,92 @@ public class Constants {
     Constants() {
     }
 
-    // SIMULATION FLAG
-    public static boolean isSimulation = true;
-
     // CONSTANTS USED IN RECONSTRUCTION
     //---------------------------------
+    public static boolean isMC = true;
+    
     public static final double LIGHTVEL = 0.000299792458;       // velocity of light (mm/ns) - conversion factor from radius in mm to momentum in GeV/c 
 
     // selection cuts for helical tracks
-    public static final double MINRADCURV = 200.00; //in cm
+    public static final double PTCUT   = 0.125; // minimum pt in GeV
+    public static final double TANDIP  = 2;     // max value on dip angle
+    public static final double NDFCUT  = 0;     // minimum number of degres of freedom
+    public static final double CHI2CUT = 50;    // minimum chi2 per degrees of freedom
+    public static final double ZRANGE  = 300;   // defines z range as -ZRANGE:+ZRANGE in mm
+    public static final int MINSVTCRSFORCOSMIC = 2; 
+    public static final double CIRCLEFIT_MAXCHI2 = 100;
 
-    private static boolean isCosmicsData = true;
+    public static final double DEFAULTSWIMACC  = 0.020; // in mm
+    public static final double SWIMACCURACYSVT = 0.010; // in mm
+    public static final double SWIMACCURACYBMT = 0.020; // in mm
+    public static final double SWIMACCURACYCD  = 0.500; // in mm
+    
+    public static boolean ISCOSMICDATA = false;
+    public static final double COSMICSMINRESIDUALX = 120; // in mm
+    public static final double COSMICSMINRESIDUALZ =  12; // in mm
+    
+    public static final int SEEDFITITERATIONS = 5;
+    
+    public static boolean SVTONLY = false;
 
-    private static boolean SVTOnly = false;
+    public static boolean SVTSEEDING = true;
 
-    public static final boolean trk_comesfrmOrig = true;
+    public static boolean TIMECUTS = false;
 
-    public static boolean areConstantsLoaded = false;
+    public static boolean KFFILTERON = true;
+    public static boolean INITFROMMC = false;
+    public static int     KFITERATIONS = 5;
+    
+    public static final boolean TRACKSFROMORIGIN = true;
+
+    private static int BEAMSPOTCONST = 1;
+
+    public static Libr KFMATLIB;
 
     public static final double CTOFINNERRADIUS = 250;     // 250 mm
     public static final double CTOFOUTRRADIUS = 250 + 33;  // 283  mm
     
-    private static double _Xb =0;
-    private static double _Yb =0;
-    private static double _RbErr = 1./Math.sqrt(12.);
+    private static double _RbErr = 0.3; // mm
     
     private static double _Zoffset = 0;
     
     private static int _rmReg = 0;
 
-    public static double getXb() {
-        return _Xb;
-    }
-
-    public static synchronized void setXb(double Xb) {
-        _Xb = Xb;
-    }
-
-    public static double getYb() {
-        return _Yb;
-    }
-
-    public static synchronized void setYb(double Yb) {
-        _Yb = Yb;
-    }
+    public static boolean EXCLUDELAYERS = false;
+    private static final Map<Integer,Integer> layersUsed = new HashMap<Integer,Integer>();
+    private static final double[][]BMTPhiZRangeExcld = new double[2][2];
+    private static int BMTLayerExcld = -1;
+    
+    public static SVTGeometry       SVTGEOMETRY  = null;
+    public static BMTGeometry       BMTGEOMETRY  = null;
+    public static CTOFGeant4Factory CTOFGEOMETRY = null;
+    public static Detector          CNDGEOMETRY  = null;
+    public static List<Surface>     CVTSURFACES  = null;
 
     public static double getRbErr() {
         return _RbErr;
     }
 
-    public static synchronized void setRbErr(double RbErr) {
-        _RbErr = RbErr;
+    public static void setRbErr(double value) {
+        _RbErr = value;
     }
 
+    public static int getBEAMSPOTCONST() {
+        return BEAMSPOTCONST;
+    }
+
+    public static void setBEAMSPOTCONST(int BEAMSPOTCONST) {
+        Constants.BEAMSPOTCONST = BEAMSPOTCONST;
+    }
+
+    public static boolean seedBeamSpotConstraint() {
+        return Constants.BEAMSPOTCONST>0;
+    }
+    
+    public static boolean kfBeamSpotConstraint() {
+        return Constants.BEAMSPOTCONST==2;
+    }
+    
     public static double getZoffset() {
         return _Zoffset;
     }
@@ -76,7 +126,79 @@ public class Constants {
     public static void setRmReg(int _reg) {
         Constants._rmReg = _reg;
     }
+
+    /**
+     * @return the layersUsed
+     */
+    public static Map getUsedLayers() {
+        return layersUsed;
+    }
+
+    /**
+     * @param layers
+     */
+    public static void setUsedLayers(String layers) {
+        //all layers used --> 1
+        for(int i = 0; i < 12; i++)
+            layersUsed.put(i+1, 1);        
+        //Skip layers
+        if(layers!=null) {
+            String[] values = layers.split(",");
+            if(values.length==0) return;            
+            for(String value : values) {
+                int layer = Integer.valueOf(value);
+                layersUsed.put(layer, 0);
+            }
+            EXCLUDELAYERS=true;
+        }
+    }
+
+    public static void setBMTExclude(String exbmtlys) {
+        String[] values = exbmtlys.split(",");
+        int layer = Integer.valueOf(values[0]);
+        double phi_min = (double) Float.valueOf(values[1]);
+        double phi_max = (double) Float.valueOf(values[2]);
+        double z_min = (double) Float.valueOf(values[3]);
+        double z_max = (double) Float.valueOf(values[4]);
+        BMTLayerExcld = layer;
+        BMTPhiZRangeExcld[0][0] = phi_min;
+        BMTPhiZRangeExcld[0][1] = phi_max;
+        BMTPhiZRangeExcld[1][0] = z_min;
+        BMTPhiZRangeExcld[1][1] = z_max;
+    }
+            
+            
+    /**
+     * @return the BMTPhiZRangeExcld
+     */
+    public static double[][] getBMTPhiZRangeExcld() {
+        return BMTPhiZRangeExcld;
+    }
+
+    /**
+     * @return the BMTLayerExcld
+     */
+    public static int getBMTLayerExcld() {
+        return BMTLayerExcld;
+    }
     
+    private static final double COVD0D0      = 1.;///50.;
+    private static final double COVD0PHI0    = 1;//./50.;
+    private static final double COVD0RHO     = 1.;///50.;
+    private static final double COVPHI0PHI0  = 1.;///50.;
+    private static final double COVPHI0RHO   = 1.;///50.;
+    private static final double COVRHORHO    = 1.;//50.;
+    private static final double COVZ0Z0      = 10.;
+    private static final double CONVTANLTANL = 10.;
+    
+    public static double[][] COVMATSCALEFACT = new double[][]{
+                                                                    {COVD0D0, COVD0PHI0, COVD0RHO,1.0,1.0},
+                                                                    {COVD0PHI0,COVPHI0PHI0, COVPHI0RHO,1.0,1.0},
+                                                                    {COVD0RHO, COVPHI0RHO, COVRHORHO,1.0,1.0},
+                                                                    {1.0,1.0,1.0, COVZ0Z0,1.0},
+                                                                    {1.0,1.0,1.0,1.0, CONVTANLTANL}
+                                                                };
+
     //public static final boolean DEBUGMODE =false;
     // for landau inverse calculation
     public static final double f[] = {
@@ -248,49 +370,34 @@ public class Constants {
         40.157721, 41.622399, 43.202525, 44.912465, 46.769077, 48.792279,
         51.005773, 53.437996, 56.123356, 59.103894};
 
-    //public static final int CVTCONFIGSTARTREG = 2; // for 3SVT+3BMT
-
-    public static synchronized void Load(boolean isCosmics, boolean isSVTonly) {
-        if (areConstantsLoaded) {
-            return;
-        }
-
-        
-        Constants.setCosmicsData(false);
-        setSVTOnly(isSVTonly);
-
-        org.jlab.rec.cvt.svt.Constants.Load();
-        org.jlab.rec.cvt.bmt.Constants.Load();
-
-        areConstantsLoaded = true;
-        System.out.println("CVT constants loaded ? " + areConstantsLoaded);
-        
+    
+    public static void setMatLib(String matLib) {
+        switch (matLib) {
+            case "JAMA":
+                KFMATLIB = Libr.JAMA;
+                break;
+            case "JNP":
+                KFMATLIB = Libr.JNP;
+                break;
+            case "APA":
+                KFMATLIB = Libr.APA;
+                break;
+            case "EJML":
+                KFMATLIB = Libr.EJML;    
+                break;
+            default:
+                KFMATLIB = Libr.EJML;
+        } 
+    }
+    
+    public static double getSolenoidMagnitude() {
+        float[] b = new float[3];
+        Swim swimmer = new Swim();
+        swimmer.BfieldLab(0, 0, 0, b);
+        return Math.abs(b[2]);
     }
 
-    public static final boolean isCosmicsData() {
-        return isCosmicsData;
+    public static double getSolenoidScale() {
+        return MagneticFields.getInstance().getScaleFactor(MagneticFields.FieldType.SOLENOID);
     }
-
-    public static final void setCosmicsData(boolean isCosmicsData) {
-        Constants.isCosmicsData = isCosmicsData;
-    }
-
-    public static final boolean isSVTOnly() {
-        return SVTOnly;
-    }
-
-    public static final void setSVTOnly(boolean sVTOnly) {
-        SVTOnly = sVTOnly;
-    }
-
-    private static double SOLENOIDSCALE = 0;
-
-    public static final void setSolenoidscale(double scale) {
-        SOLENOIDSCALE = scale;
-    }
-
-    public static final double getSolenoidscale() {
-        return SOLENOIDSCALE;
-    }
-
 }

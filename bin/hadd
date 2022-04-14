@@ -2,4 +2,7 @@
 
 . `dirname $0`/env.sh 
 
-java -Xms1024m -cp "$CLAS12DIR/lib/clas/*:$CLAS12DIR/lib/plugins/*" org.jlab.groot.data.TDirectory $*
+java -Xms1024m \
+    -cp "$CLAS12DIR/lib/clas/*:$CLAS12DIR/lib/plugins/*" \
+    org.jlab.groot.data.TDirectory \
+    $*

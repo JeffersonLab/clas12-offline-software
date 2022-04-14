@@ -21,7 +21,16 @@ public class TaggerResponse extends DetectorResponse {
     
     private Vector3D hitMomentum = new Vector3D();
     private Point3D  hitWidth = new Point3D();
-    
+   
+    public TaggerResponse() {
+        super();
+    }
+
+    public TaggerResponse(TaggerResponse r) {
+        super();
+        this.copy(r);
+    }
+
     public void setID(int id){ hitID = id;}
     public void setSize(int q){hitSize = q;}
     public void setRadius(double r) {hitRadius = r;}
@@ -29,7 +38,16 @@ public class TaggerResponse extends DetectorResponse {
     public int getSize(){return hitSize;}
     public int getID(){return hitID;}
     public double getRadius() {return this.hitRadius;}
-    
+   
+    public void copy(TaggerResponse r) {
+        super.copy(r);
+        hitID = r.hitID;
+        hitSize = r.hitSize;
+        hitRadius = r.hitRadius;
+        hitMomentum.copy(r.hitMomentum);
+        hitWidth.copy(r.hitWidth);
+    }
+
     public Vector3D getMomentum(){
         return this.hitMomentum;
     }

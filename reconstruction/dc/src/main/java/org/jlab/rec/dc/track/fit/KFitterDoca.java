@@ -1,9 +1,8 @@
 package org.jlab.rec.dc.track.fit;
 
-//import Jama.Matrix;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
@@ -17,6 +16,8 @@ import org.jlab.jnp.matrix.*;
  */
 public class KFitterDoca {
 
+    private static final Logger LOGGER = Logger.getLogger(KFitterDoca.class.getName());
+    
     public boolean setFitFailed = false;
 
     private StateVecsDoca sv;
@@ -64,7 +65,7 @@ public class KFitterDoca {
         TBT = true;
     }
 
-    public void init(Track trk, DCGeant4Factory DcDetector, int c) {
+    public final void init(Track trk, DCGeant4Factory DcDetector, int c) {
         mv.setMeasVecs(trk, DcDetector);
         int mSize = mv.measurements.size();
 
@@ -116,7 +117,7 @@ public class KFitterDoca {
                         sv.trackCov.get(svzLength- 1)); */
                 for (int k = svzLength - 1; k >0; k--) {
                     //if(i==2 && this.totNumIter==30)
-                    //System.out.println("sector " +sector+"stateVec "+sv.trackTraj.get(k).printInfo());
+                    //LOGGER.log(Level.FINE, "sector " +sector+"stateVec "+sv.trackTraj.get(k).printInfo());
                     if(k>=2) {
                         sv.transport(sector, k, k - 2,
                             sv.trackTraj.get(k),
@@ -136,7 +137,7 @@ public class KFitterDoca {
             }
             for (int k = 0; k < svzLength - 1; k++) {
                 //if(i==2 && this.totNumIter==30)
-                //System.out.println("stateVec "+sv.trackTraj.get(k).printInfo());
+                //LOGGER.log(Level.FINE, "stateVec "+sv.trackTraj.get(k).printInfo());
                 sv.transport(sector, k, k + 1,
                         sv.trackTraj.get(k),
                         sv.trackCov.get(k));
@@ -171,7 +172,7 @@ public class KFitterDoca {
             this.finalStateVec = sv.trackTraj.get(svzLength - 1);
             this.finalCovMat = sv.trackCov.get(svzLength - 1);
         }
-        this.calcFinalChisq(sector);
+        this.calcFinalChisq(sector); 
         if(Double.isNaN(chi2))
             this.setFitFailed = true;
         if(TBT==true) {
@@ -197,18 +198,18 @@ public class KFitterDoca {
                     0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0);
-        //System.out.println("Ci ");
+        //LOGGER.log(Level.FINE, "Ci ");
         //Matrix5x5.show(Ci);
-        //System.out.println("Cinv ");
+        //LOGGER.log(Level.FINE, "Cinv ");
         //Matrix5x5.show(first_inverse);
-        //System.out.println("addition ");
+        //LOGGER.log(Level.FINE, "addition ");
         //Matrix5x5.show(addition);
         
         Matrix5x5.add(first_inverse, addition, result);
         double det2 = Matrix5x5.inverse(result, result_inv, adj);
-        //System.out.println("addition result");
+        //LOGGER.log(Level.FINE, "addition result");
         //Matrix5x5.show(result);
-        //System.out.println("inv result");
+        //LOGGER.log(Level.FINE, "inv result");
         //Matrix5x5.show(result_inv);
         if(Math.abs(det2)<1.e-30)
             return null;
@@ -265,7 +266,7 @@ public class KFitterDoca {
             //    signMeas = Math.signum(h);
             double c2 = ((signMeas*Math.abs(mv.measurements.get(k).doca[0]) - sign*Math.abs(h)) 
                     * (signMeas*Math.abs(mv.measurements.get(k).doca[0]) - sign*Math.abs(h)) / V);
-            //if(signMeas!=Math.signum(h) && this.interNum>1) System.out.println(sv.trackTraj.get(k).printInfo()+" h "+(float)h);
+            //if(signMeas!=Math.signum(h) && this.interNum>1) LOGGER.log(Level.FINE, sv.trackTraj.get(k).printInfo()+" h "+(float)h);
             double x_filt = sv.trackTraj.get(k).x + K[0] * (signMeas*Math.abs(mv.measurements.get(k).doca[0]) - sign*Math.abs(h));
             double y_filt = sv.trackTraj.get(k).y + K[1] * (signMeas*Math.abs(mv.measurements.get(k).doca[0]) - sign*Math.abs(h));
             double tx_filt = sv.trackTraj.get(k).tx + K[2] * (signMeas*Math.abs(mv.measurements.get(k).doca[0]) - sign*Math.abs(h));

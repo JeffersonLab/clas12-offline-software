@@ -1,13 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.service.htcc;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
+import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.rec.htcc.HTCCReconstruction;
 import org.jlab.utils.groups.IndexedTable;
 import org.jlab.io.base.DataBank;
@@ -17,6 +16,8 @@ import org.jlab.io.base.DataEvent;
  * @author gavalian
  */
 public class HTCCReconstructionService extends ReconstructionEngine{
+
+    public static Logger LOGGER = Logger.getLogger(HTCCReconstructionService.class.getName());
 
     public HTCCReconstructionService(){
         super("HTCC","henkins","1.0");
@@ -36,11 +37,12 @@ public class HTCCReconstructionService extends ReconstructionEngine{
               reco.gain       = this.getConstantsManager().getConstants(runNo, "/calibration/htcc/gain");
               reco.time       = this.getConstantsManager().getConstants(runNo, "/calibration/htcc/time");
               reco.ring_time  = this.getConstantsManager().getConstants(runNo, "/calibration/htcc/ring_time");
-              reco.cluster_par    = this.getConstantsManager().getConstants(runNo, "/calibration/htcc/cluster");
+              reco.cluster_par= this.getConstantsManager().getConstants(runNo, "/calibration/htcc/cluster");
+              reco.status     = this.getConstantsManager().getConstants(runNo, "/calibration/htcc/status");
               reco.geometry   = this.getConstantsManager().getConstants(runNo, "/geometry/htcc/htcc");
               reco.processEvent(event);
         } catch (Exception e){
-            System.out.println("----> error with HTCC reconstruction..");
+            LOGGER.log(Level.SEVERE,"----> error with HTCC reconstruction..");
             e.printStackTrace();
         }
 
@@ -57,12 +59,14 @@ public class HTCCReconstructionService extends ReconstructionEngine{
             "/calibration/htcc/time", 
             "/calibration/htcc/ring_time", 
             "/calibration/htcc/cluster", 
+            "/calibration/htcc/status", 
             "/geometry/htcc/htcc", 
     
         };
+            
+        this.registerOutputBank("HTCC::rec");
         
         requireConstants(Arrays.asList(htccTables));
-        System.out.println("-----> INITIALIZING HTCC as a SERVICE...");
         return true;
     }
 

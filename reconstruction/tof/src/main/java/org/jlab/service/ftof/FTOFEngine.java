@@ -9,7 +9,6 @@ import java.util.Optional;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
-import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.io.base.DataBank;
@@ -25,7 +24,6 @@ import org.jlab.rec.tof.cluster.ClusterFinder;
 import org.jlab.rec.tof.cluster.ftof.ClusterMatcher;
 import org.jlab.rec.tof.hit.AHit;
 import org.jlab.rec.tof.hit.ftof.Hit;
-import org.jlab.geometry.prim.Line3d;
 import org.jlab.rec.tof.track.Track;
 
 /**
@@ -65,7 +63,8 @@ public class FTOFEngine extends ReconstructionEngine {
                     "/calibration/ftof/time_walk_pos",
                     "/calibration/ftof/time_walk_exp",
                     "/calibration/ftof/fadc_offset",
-                    "/calibration/ftof/cluster"
+                    "/calibration/ftof/cluster",
+                    "/calibration/ftof/tres"
                  };
         
         requireConstants(Arrays.asList(ftofTables));
@@ -77,6 +76,9 @@ public class FTOFEngine extends ReconstructionEngine {
         String engineVariation = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
         ConstantProvider db = GeometryFactory.getConstants(DetectorType.FTOF, 11, engineVariation);
         geometry = new FTOFGeant4Factory(db);
+
+        this.registerOutputBank("FTOF::rawhits","FTOF::hbhits","FTOF::hbclusters");
+        this.registerOutputBank("FTOF::hits","FTIF::clusters","FTOF::matchedClusters");
 
         return true;
     }
@@ -164,7 +166,9 @@ public class FTOFEngine extends ReconstructionEngine {
         }
 
         // 3) find the clusters from these hits
-        ClusterFinder clusFinder = new ClusterFinder(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/cluster"));
+        ClusterFinder clusFinder = new ClusterFinder(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/cluster"),
+                                                     this.getConstantsManager().getConstants(newRun, "/calibration/ftof/tres"),
+                                                     this.getConstantsManager().getConstants(newRun, "/calibration/ftof/effective_velocity"));
         int[] npaddles = Constants.NPAD;
         int npanels = 3;
         int nsectors = 6;
@@ -205,9 +209,7 @@ public class FTOFEngine extends ReconstructionEngine {
         }
 
         // 4) matching clusters ... not used at this stage...
-        ClusterMatcher clsMatch = new ClusterMatcher();
-        ArrayList<ArrayList<Cluster>> matchedClusters = clsMatch
-                .MatchedClusters(clusters, event);
+        ArrayList<ClusterMatcher> matchedClusters = ClusterMatcher.matchClusters(clusters, event);
         if (matchedClusters.size() == 0) {
             rbc.appendFTOFBanks(event, hits, clusters, null, TrkType);
             return true;

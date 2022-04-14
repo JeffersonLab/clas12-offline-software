@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.reco.io;
 
 import java.util.ArrayList;
@@ -21,6 +16,7 @@ import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.Event;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.jnp.hipo4.io.HipoWriter;
+import org.jlab.logging.DefaultLogger;
 import org.jlab.utils.benchmark.ProgressPrintout;
 import org.jlab.utils.options.OptionParser;
 import org.jlab.utils.system.ClasUtilsFile;
@@ -30,14 +26,15 @@ import org.jlab.utils.system.ClasUtilsFile;
  * @author gavalian
  */
 public class EvioHipoEvent4 {
-    
+
+    private static Logger LOGGER = Logger.getLogger(EvioHipoEvent4.class.getName());
     
     private SchemaFactory        schemaFactory = new SchemaFactory();
 
     public EvioHipoEvent4() {
         String dir = ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4");
         schemaFactory.initFromDirectory(dir);
-
+        DefaultLogger.debug();
     }
     
     
@@ -60,6 +57,7 @@ public class EvioHipoEvent4 {
         this.fillHipoEventLTCC(hipoEvent, event);
         this.fillHipoEventHTCC(hipoEvent, event);
         this.fillHipoEventRICH(hipoEvent, event);
+        this.fillHipoEventBAND(hipoEvent, event);
         this.fillHipoEventGenPart(hipoEvent, event);
         this.fillHipoEventTrueInfo(hipoEvent, event);
         this.fillHipoEventTrigger(hipoEvent, event);
@@ -112,7 +110,7 @@ public class EvioHipoEvent4 {
                 hipoEvent.write(hipoBankADC);
                 hipoEvent.write(hipoBankTDC);
             } catch (Exception e) {
-                System.out.println("[hipo-decoder]  >>>> error writing RICH bank");
+                LOGGER.log(Level.SEVERE,"[hipo-decoder]  >>>> error writing RICH bank", e);
             }
         }
     }
@@ -136,7 +134,7 @@ public class EvioHipoEvent4 {
                 }
                 hipoEvent.write(hipoBank);
             } catch (Exception e) {
-                System.out.println("[hipo-decoder]  >>>> error writing LTCC bank");
+                LOGGER.log(Level.SEVERE,"[hipo-decoder]  >>>> error writing LTCC bank", e);
             }
         }
     }
@@ -161,7 +159,7 @@ public class EvioHipoEvent4 {
                 hipoEvent.write(hipoBank);
             } catch (Exception e) {
                 e.printStackTrace();
-                System.out.println("[hipo-decoder]  >>>> error writing LTCC bank");
+                LOGGER.log(Level.SEVERE,"[hipo-decoder]  >>>> error writing LTCC bank", e);
             }
         }
     }
@@ -182,6 +180,7 @@ public class EvioHipoEvent4 {
         }
     }
     
+    @SuppressWarnings("empty-statement")
     public void fillHipoEventBMT(Event hipoEvent, EvioDataEvent evioEvent){
         if(evioEvent.hasBank("BMT::dgtz")==true){
             EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("BMT::dgtz");
@@ -191,7 +190,12 @@ public class EvioHipoEvent4 {
                 hipoADC.putByte("layer",  i, (byte) evioBank.getInt("layer",i));
                 hipoADC.putShort("component",  i, (short) evioBank.getInt("strip",i));
                 hipoADC.putInt("ADC",  i, (int) evioBank.getInt("ADC",i));
-                hipoADC.putFloat("time",  i, (float) 0);
+                try {
+                    hipoADC.putFloat("time",  i, (float) evioBank.getDouble("time",i));
+                }
+                catch(Exception e) {
+                    hipoADC.putFloat("time",  i, 0);
+                }
                 hipoADC.putShort("ped", i, (short) 0);            
             }
             hipoEvent.write(hipoADC);
@@ -207,7 +211,12 @@ public class EvioHipoEvent4 {
                 hipoADC.putByte("layer",  i, (byte) evioBank.getInt("layer",i));
                 hipoADC.putShort("component",  i, (short) evioBank.getInt("strip",i));
                 hipoADC.putInt("ADC",  i, (int) evioBank.getInt("ADC",i));
-                hipoADC.putFloat("time",  i, (float) 0);
+                try {
+                    hipoADC.putFloat("time",  i, (float) evioBank.getDouble("time",i));
+                }
+                catch(Exception e) {
+                    hipoADC.putFloat("time",  i, 0);
+                }
                 hipoADC.putShort("ped", i, (short) 0);            
             }
             hipoEvent.write(hipoADC);
@@ -475,6 +484,67 @@ public class EvioHipoEvent4 {
         }
     }
     
+    
+    public void fillHipoEventBAND(Event hipoEvent, EvioDataEvent evioEvent){
+        if(evioEvent.hasBank("BAND::dgtz")==true){
+            EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("BAND::dgtz");
+            int rows = evioBank.rows();
+            Bank hipoADC = new Bank(schemaFactory.getSchema("BAND::adc"), rows*2);
+            Bank hipoTDC = new Bank(schemaFactory.getSchema("BAND::tdc"), rows*2);            
+	    //System.out.println("**************************");
+	    //System.out.println("In band DGTZ\n");
+	    //evioBank.show();
+            for(int index = 0; index < evioBank.rows(); index++){
+		int i = index*2;
+
+		// For L PMT:
+                hipoADC .putByte("sector", 	i,      (byte)  evioBank.getInt("sector",index));
+                hipoADC .putByte("layer",  	i,      (byte)  evioBank.getInt("layer",index));
+                hipoADC .putShort("component",  i, 	(short) evioBank.getInt("component",index));
+                hipoADC .putByte("order", 	i,	(byte) 	0);
+                hipoADC .putInt("ADC", 		i, 	evioBank.getInt("ADCL", index));
+                hipoADC .putInt("amplitude", 	i, 	evioBank.getInt("amplitudeL", index));
+                hipoADC .putFloat("time", 	i, 	(float) evioBank.getDouble("ADCtimeL", index));
+                hipoADC .putShort("ped",  	i, 	(short) 0);
+
+                hipoTDC .putByte("sector", 	i,      (byte)  evioBank.getInt("sector",index));
+                hipoTDC .putByte("layer",  	i,      (byte)  evioBank.getInt("layer",index));
+                hipoTDC .putShort("component",  i, 	(short) evioBank.getInt("component",index));
+                hipoTDC .putByte("order", 	i,	(byte)  2);
+                hipoTDC .putInt("TDC", 		i, 	evioBank.getInt("TDCL", index));
+
+		// For R PMT:
+                hipoADC .putByte("sector", 	i+1,      (byte)  evioBank.getInt("sector",index));
+                hipoADC .putByte("layer",  	i+1,      (byte)  evioBank.getInt("layer",index));
+                hipoADC .putShort("component",  i+1, 	(short) evioBank.getInt("component",index));
+                hipoADC .putByte("order", 	i+1,	(byte) 	1);
+                hipoADC .putInt("ADC", 		i+1, 	evioBank.getInt("ADCR", index));
+                hipoADC .putInt("amplitude", 	i+1, 	evioBank.getInt("amplitudeR", index));
+                hipoADC .putFloat("time", 	i+1, 	(float) evioBank.getDouble("ADCtimeR", index));
+                hipoADC .putShort("ped",  	i+1, 	(short) 0);
+
+                hipoTDC .putByte("sector", 	i+1,      (byte)  evioBank.getInt("sector",index));
+                hipoTDC .putByte("layer",  	i+1,      (byte)  evioBank.getInt("layer",index));
+                hipoTDC .putShort("component",  i+1, 	(short) evioBank.getInt("component",index));
+                hipoTDC .putByte("order", 	i+1,	(byte)  3);
+                hipoTDC .putInt("TDC", 		i+1, 	evioBank.getInt("TDCR", index));
+
+
+            }
+            hipoEvent.write(hipoADC);
+            hipoEvent.write(hipoTDC);
+
+
+
+	    //System.out.println("ADC");
+	    //hipoADC.show();
+	    //System.out.println("TDC");
+	    //hipoTDC.show();
+	    //System.out.println("**************************");
+	    
+        }
+    }
+    
     public void fillHipoEventGenPart(Event hipoEvent, EvioDataEvent evioEvent){
         if(evioEvent.hasBank("GenPart::header")==true){
             EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("GenPart::header");
@@ -544,7 +614,7 @@ public class EvioHipoEvent4 {
     
    public void fillHipoEventTrueInfo(Event hipoEvent, EvioDataEvent evioEvent){
         
-        String[]        bankNames = new String[]{"BMT","BST","CND","CTOF","DC","EC","FMT","FTCAL","FTHODO","FTOF","FTTRK","HTCC","LTCC","PCAL","RICH","RTPC"};
+        String[]        bankNames = new String[]{"BMT","BST","CND","CTOF","DC","EC","FMT","FTCAL","FTHODO","FTOF","FTTRK","HTCC","LTCC","PCAL","RICH","RTPC","BAND"};
         DetectorType[]  bankTypes = new DetectorType[]{DetectorType.BMT,
                                                        DetectorType.BST,
                                                        DetectorType.CND,
@@ -560,7 +630,8 @@ public class EvioHipoEvent4 {
                                                        DetectorType.LTCC,
                                                        DetectorType.ECAL,
                                                        DetectorType.RICH,
-                                                       DetectorType.RTPC};
+                                                       DetectorType.RTPC,
+                                                       DetectorType.BAND};
         int rows = 0;
         for(int k = 0; k < bankNames.length; k++){
             if(evioEvent.hasBank(bankNames[k]+"::true")==true){
@@ -638,7 +709,7 @@ public class EvioHipoEvent4 {
             }
 
         } catch (EvioException ex) {
-            Logger.getLogger(EvioHipoEvent4.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, null, ex);
         }
         for(EvioTreeBranch branch : branches){
             int  crate = branch.getTag();
@@ -689,9 +760,16 @@ public class EvioHipoEvent4 {
         parser.addOption("-t","-1.0");
         parser.addOption("-s","1.0");
         parser.addOption("-n", "-1");
+        parser.addOption("-d","1","Debug level [0 - OFF, 1 - ON/default]");
         
         parser.parse(args);
-        
+
+        if(parser.getOption("-d").intValue() == 0)
+            DefaultLogger.initialize();
+        else
+            DefaultLogger.debug();
+
+
         if(parser.hasOption("-o")==true){
         
             String outputFile = parser.getOption("-o").stringValue();
@@ -712,6 +790,7 @@ public class EvioHipoEvent4 {
             int nrun = parser.getOption("-r").intValue();
             double torus = parser.getOption("-t").doubleValue();
             double solenoid = parser.getOption("-s").doubleValue();
+
             
             
             writer.open(outputFile);
@@ -720,10 +799,10 @@ public class EvioHipoEvent4 {
             int maximumEvents = parser.getOption("-n").intValue();
             int nevent = 0;
                         
-            System.out.println(">>>>>  SIZE OF THE INPUT FILES = " + inputFiles.size());
+            LOGGER.log(Level.INFO,">>>>>  SIZE OF THE INPUT FILES = " + inputFiles.size());
             
             for(String input : inputFiles){
-                System.out.println(">>>>>  appending file : " + input);
+                LOGGER.log(Level.INFO,">>>>>  appending file : " + input);
                 try {
                     EvioSource reader = new EvioSource();
                     reader.open(input);
@@ -741,17 +820,16 @@ public class EvioHipoEvent4 {
                         if(maximumEvents>0&&nevent>=maximumEvents) {
                             reader.close();
                             writer.close();
-                            System.out.println("\n\n\n Finished output file at event count = " + nevent);
+                            LOGGER.log(Level.INFO,"Finished output file at event count = " + nevent);
                             System.exit(0);
                         }
                 }
             } catch (Exception e){
                 e.printStackTrace();
-                System.out.println(">>>>>  processing file :  failed ");
+                LOGGER.log(Level.SEVERE,">>>>>  processing file :  failed ");
             }
-            System.out.println(">>>>>  processing file  :  success ");
-            System.out.println(">>>>>  number of events :  " + nevent);
-            System.out.println();            
+            LOGGER.log(Level.INFO,">>>>>  processing file  :  success ");
+            LOGGER.log(Level.INFO,">>>>>  number of events :  " + nevent);
         }
         writer.close();
         }

@@ -84,6 +84,21 @@
     </section>
   </bank>
 
+  <bank name="MC" tag="25000" info="Monte Carlo Banks">
+    <section name="particle" tag="25001" info="Monte Carlo Particles">
+      <column name="status"  type="int8"   num="1"   info="status of the particle"/>
+      <column name="charge"  type="int8"   num="2"   info="charge of the particle"/>
+      <column name="pid"     type="int32"   num="3"   info="particle ID"/>
+      <column name="mass"    type="float32" num="4"   info="particle mass calculated from beta"/>
+      <column name="px"      type="float32" num="5"   info="x component of momentum"/>
+      <column name="py"      type="float32" num="6"   info="y component of momentum"/>
+      <column name="pz"      type="float32" num="7"   info="z component of momentum"/>
+      <column name="vx"      type="float32" num="8"   info="x component of vertex"/>
+      <column name="vy"      type="float32" num="9"   info="y component of vertex"/>
+      <column name="vz"      type="float32" num="10"  info="z component of vertex"/>
+    </section>
+  </bank>
+  
   <bank name="TAGGER" tag="24000" info="Tagger banks">
     <section name="tgpb" tag="24001" info="Tagger bank">
       <column name="status"   type="int8"     num="1"   info="hit status"/>

@@ -54,6 +54,29 @@
        {"name":"pathLengthThruBar",  "type":"F", "info":"pathlength of the track from the entrance point to the exit point through the hit bar "}
     ]
   },
+ {
+    "name": "FTOF::hbclusters",
+    "group": 21200,
+    "item": 22,
+    "info": "reconstructed clusters from FTOF",
+    "entries": [
+        {"name":"id",          "type":"S",  "info":"id of the hit"},
+        {"name":"status",      "type":"S",  "info":"status of the cluster"},
+        {"name":"trackid",     "type":"S",  "info":"matched DC track id"},
+        {"name":"size",        "type":"S",  "info":"cluster size"},
+        {"name":"sector",      "type":"B",  "info":"sector of FTOF"},
+        {"name":"layer",       "type":"B",  "info":"panel id of FTOF (1-1A, 2-1B, 3-2"},
+        {"name":"component",   "type":"S", "info":"paddle id of FTOF cluster seed"},
+        {"name":"energy",      "type":"F", "info":"E dep (MeV) of the cluster"},
+        {"name":"time",        "type":"F", "info":"Cluster hit time (ns)"},
+        {"name":"energy_unc",  "type":"F", "info":"E dep unc (MeV) of the cluster"},
+        {"name":"time_unc",    "type":"F", "info":"Cluster hit time unc (ns)"},
+        {"name":"x",           "type":"F", "info":"Global X coor (cm) of cluster hit"},
+        {"name":"y",           "type":"F", "info":"Global Y coor (cm) of cluster hit"},
+        {"name":"z",           "type":"F", "info":"Global Z coor (cm) of cluster hit"},
+        {"name":"pathLengthThruBar",  "type":"F", "info":"pathlength of the track from the entrance point to the exit point through the cluster bars "}
+    ]
+ },
    {
     "name": "FTOF::hits",
     "group": 21200,

@@ -70,7 +70,11 @@ public class IndexedList<T> {
         
         public static long hashCode(int... indecies){
             long result = (long) 0;
-            
+           
+            if (indecies.length > byteShits.length) {
+                throw new IllegalArgumentException("# indices is larger than "+byteShits.length);
+            }
+
             for(int loop = 0; loop < indecies.length; loop++){
                 long patern = (((long) indecies[loop])&0x000000000000FFFF)<<IndexGenerator.byteShits[loop]; 
                 result = (result | patern);

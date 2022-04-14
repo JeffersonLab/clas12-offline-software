@@ -52,8 +52,10 @@ mc = ["MC::Event", "MC::Header", "MC::Lund", "MC::Particle", "MC::True"]
 tag1 = ["RUN::config", "RAW::epics", "RAW::scaler", "RUN::scaler", "COAT::config", "HEL::flip", "HEL::online"]
 
 # these are the output of the event builder:
-rectb = ["REC::Event","REC::Particle","REC::Calorimeter","REC::Cherenkov","REC::CovMat","REC::ForwardTagger","REC::Scintillator","REC::ScintExtras","REC::Track","REC::Traj","RECFT::Event","RECFT::Particle"]
-rechb = ["RECHB::Event","RECHB::Particle","RECHB::Calorimeter","RECHB::Cherenkov","RECHB::ForwardTagger","RECHB::Scintillator","RECHB::ScintExtras","RECHB::Track"]
+rectb   = ["REC::Event","REC::Particle","REC::Calorimeter","REC::Cherenkov","REC::CovMat","REC::ForwardTagger","REC::Scintillator","REC::ScintExtras","REC::Track","REC::Traj","RECFT::Event","RECFT::Particle"]
+rechb   = ["RECHB::Event","RECHB::Particle","RECHB::Calorimeter","RECHB::Cherenkov","RECHB::ForwardTagger","RECHB::Scintillator","RECHB::ScintExtras","RECHB::Track"]
+rectbai = ["RECAI::Event","RECAI::Particle","RECAI::Calorimeter","RECAI::Cherenkov","RECAI::CovMat","RECAI::ForwardTagger","RECAI::Scintillator","RECAI::ScintExtras","RECAI::Track","RECAI::Traj","RECAIFT::Event","RECAIFT::Particle"]
+rechbai = ["RECHBAI::Event","RECHBAI::Particle","RECHBAI::Calorimeter","RECHBAI::Cherenkov","RECHBAI::ForwardTagger","RECHBAI::Scintillator","RECHBAI::ScintExtras","RECHBAI::Track"]
 
 # special, detector-specific raw banks that are kept in DSTs (for now):
 band = ["BAND::laser"]
@@ -62,16 +64,16 @@ rtpc = ["RTPC::hits","RTPC::tracks"]
 dets = band + rich + rtpc
 
 # additions for the calibration schema: 
-calib = ["BAND::adc","BAND::laser","BAND::tdc","BAND::hits","BAND::rawhits","CND::adc","CND::hits","CND::tdc","CTOF::adc","CTOF::hits","CTOF::tdc","CVTRec::Tracks","ECAL::adc","ECAL::calib","ECAL::clusters","ECAL::peaks","ECAL::tdc","FT::particles","FTCAL::adc","FTCAL::clusters","FTCAL::hits","FTHODO::adc","FTHODO::clusters","FTHODO::hits","FTOF::adc","FTOF::hits","FTOF::tdc","HTCC::adc","HTCC::rec","LTCC::adc","LTCC::clusters","RF::adc","RF::tdc","RICH::tdc","RICH::hits","RICH::hadCher","RICH::hadrons","RICH::photons","RICH::ringCher","RTPC::adc","RTPC::hits","RTPC::tracks","RUN::rf","RUN::trigger","TimeBasedTrkg::TBCrosses","TimeBasedTrkg::TBHits","TimeBasedTrkg::TBSegments","TimeBasedTrkg::TBSegmentTrajectory","TimeBasedTrkg::TBTracks","TimeBasedTrkg::Trajectory"]
+calib = ["BAND::adc","BAND::laser","BAND::tdc","BAND::hits","BAND::rawhits","CND::adc","CND::hits","CND::tdc","CTOF::adc","CTOF::hits","CTOF::tdc","CVTRec::Tracks","ECAL::adc","ECAL::calib","ECAL::clusters","ECAL::peaks","ECAL::tdc","FMT::Hits","FMT::Clusters","FMT::Tracks","FMT::Trajectory","FT::particles","FTCAL::adc","FTCAL::clusters","FTCAL::hits","FTHODO::adc","FTHODO::clusters","FTHODO::hits","FTOF::adc","FTOF::hits","FTOF::tdc","HTCC::adc","HTCC::rec","LTCC::adc","LTCC::clusters","RF::adc","RF::tdc","RICH::tdc","RICH::hits","RICH::hadCher","RICH::hadrons","RICH::photons","RICH::ringCher","RTPC::adc","RTPC::hits","RTPC::tracks","RUN::rf","RUN::trigger","TimeBasedTrkg::TBCrosses","TimeBasedTrkg::TBHits","TimeBasedTrkg::TBSegments","TimeBasedTrkg::TBSegmentTrajectory","TimeBasedTrkg::TBTracks","TimeBasedTrkg::Trajectory"]
 
 # additions for the monitoring schema:
-mon = ["BMT::adc","BMTRec::Clusters","BMTRec::Crosses","BMTRec::Hits","BMTRec::LayerEffs","BST::adc","BSTRec::Clusters","BSTRec::Crosses","BSTRec::Hits","BSTRec::LayerEffs","CND::clusters","CVTRec::Trajectory","ECAL::hits","HEL::adc","HitBasedTrkg::HBTracks","RAW::vtp"]
+mon = ["BMT::adc","BMTRec::Clusters","BMTRec::Crosses","BMTRec::Hits","BMTRec::LayerEffs","BST::adc","BSTRec::Clusters","BSTRec::Crosses","BSTRec::Hits","BSTRec::LayerEffs","CND::clusters","CVTRec::Trajectory","ECAL::hits","FMT::adc","HEL::adc","HitBasedTrkg::HBTracks","RAW::vtp"]
 
 #ebrerun = list(dst)
 #ebrerun.extend(["FTOF::hits","TimeBasedTrkg::TBTracks","TimeBasedTrkg::Trajectory","TimeBasedTrkg::TBCovMat","HitBasedTrkg::HBTracks","FTOF::hbhits","ECAL::clusters","CTOF::hits","CND::clusters","HTCC::rec","LTCC::clusters","ECAL::moments","CVTRec::Tracks","CVTRec::Trajectory","FT::particles","FTCAL::clusters","FTHODO::clusters","RUN:rf"])
 
-dst = rectb + mc + tag1 + dets
-dsthb = dst + rechb
+dst = rectbai + rectb + mc + tag1 + dets
+dsthb = dst + rechbai + rechb
 
 calib.extend(dsthb)
 mon.extend(calib)
