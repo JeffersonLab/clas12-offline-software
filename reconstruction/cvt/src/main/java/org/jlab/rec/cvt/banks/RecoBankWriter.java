@@ -366,6 +366,7 @@ public class RecoBankWriter {
             }
             if (crosses.get(j).getCluster1() != null) {
                 bank.setShort("Cluster1_ID", j, (short) crosses.get(j).getCluster1().getId());
+                bank.setByte("layer",  j, (byte) crosses.get(j).getCluster1().getLayer());
             }
             if (crosses.get(j).getCluster2() != null) {
                 bank.setShort("Cluster2_ID", j, (short) crosses.get(j).getCluster2().getId());

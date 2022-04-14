@@ -581,9 +581,9 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     }
     
     public String printInfo() {
-        String s = " cross:  " + this.getDetector() + " ID " + this.getId() + " Sector " + this.getSector() + " Region " + this.getRegion()
-                + " sort "+this.getOrderedRegion()+" cosmic region "+this.getSVTCosmicsRegion()
-                + " Point " + this.getPoint().toString();
+        String s = " cross:  " + this.getDetector() + " " + this.getType() + " ID " + this.getId() + " Sector " + this.getSector() 
+                + " Region " + this.getRegion() + " sort "+this.getOrderedRegion()+" cosmic region "+this.getSVTCosmicsRegion();
+        if(this.getPoint0()!=null) s += " Point " + this.getPoint().toString();
         if(this.getPoint0()!=null) s += " Point0 " + this.getPoint0().toString();
         if(this.getDir()!=null)    s += " Direction "+ this.getDir().toString();
         return s;

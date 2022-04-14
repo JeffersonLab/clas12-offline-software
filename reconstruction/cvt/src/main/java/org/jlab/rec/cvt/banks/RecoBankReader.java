@@ -293,6 +293,7 @@ public class RecoBankReader {
                 int tid    = bank.getShort("trkID", i);
                 int sector = bank.getByte("sector", i);
                 int region = bank.getByte("region", i);
+                int layer  = bank.getByte("layer", i);
                 double x   = bank.getFloat("x", i)*10;
                 double y   = bank.getFloat("y", i)*10;
                 double z   = bank.getFloat("z", i)*10;
@@ -309,12 +310,8 @@ public class RecoBankReader {
                 double uy = bank.getFloat("uy", i);
                 double uz = bank.getFloat("uz", i);
                 int clid1 = bank.getShort("Cluster1_ID", i);
-                Cross cr = null;
-                if(err_z==0 && err_x!=0) {
-                    cr = new Cross(DetectorType.BMT, BMTType.Z, sector, region, id);
-                } else {
-                    cr = new Cross(DetectorType.BMT, BMTType.C, sector, region, id);
-                }
+                if(layer==0) continue;
+                Cross cr = new Cross(DetectorType.BMT, BMTGeometry.getDetectorType(layer), sector, region, id);
                 cr.setAssociatedTrackID(tid); 
                 cr.isInSeed=true;
                 cr.setDir(new Vector3D(ux,uy,uz));
