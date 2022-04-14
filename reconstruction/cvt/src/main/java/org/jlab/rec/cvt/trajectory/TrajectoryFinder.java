@@ -221,7 +221,7 @@ public class TrajectoryFinder {
                 Vector3D localDir = Constants.BMTGEOMETRY.getLocalTrack(layer, sector, pos, dir);
                 stVec.setTrkPhiAtSurface(localDir.phi());
                 stVec.setTrkThetaAtSurface(localDir.theta());
-                stVec.setTrkToModuleAngle(Constants.BMTGEOMETRY.getLocalAngle(layer, sector, pos, localDir));
+                stVec.setTrkToModuleAngle(Constants.BMTGEOMETRY.getLocalAngle(layer, sector, pos, dir));
                 stVec.setCalcCentroidStrip(Constants.BMTGEOMETRY.getCstrip(region, 
                        new Point3D(stVec.x(),stVec.y(),stVec.z())));
                 stVec.setPath(path*10);

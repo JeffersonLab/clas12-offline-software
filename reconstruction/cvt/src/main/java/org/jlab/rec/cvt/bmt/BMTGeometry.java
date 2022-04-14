@@ -866,7 +866,11 @@ public class BMTGeometry {
      * Return track vector for local angle calculations
      * 
      * 1) transform to the geometry service local frame first,
-     * 2) rotates to bring the track intersection at phi=0.
+     * 2) rotates to bring the track intersection at phi=90.
+     * 
+     * The final frame has:
+     * - z along the axis of the tile cylinder
+     * - y perpendicular to the surface
      * 
      * The y and x components determine the local angle for Z strips
      * The x and z components determine the local angle for C strips
@@ -882,7 +886,7 @@ public class BMTGeometry {
         this.toLocal(layer, sector).apply(dir);
         this.toLocal(layer, sector).apply(pos);
         Vector3D n = pos.toVector3D().asUnit();
-        dir.rotateZ(-n.phi());
+        dir.rotateZ(-n.phi()+Math.PI/2);
         return dir;
     }
     
@@ -897,7 +901,7 @@ public class BMTGeometry {
      */
     public double getThetaZ(int layer, int sector, Point3D trackPos, Vector3D trackDir) { 
         Vector3D dir = this.getLocalTrack(layer, sector, trackPos, trackDir);
-        return Math.atan(dir.y()/dir.x());
+        return Math.atan(dir.x()/dir.y());
     }
     
     /**
@@ -911,7 +915,7 @@ public class BMTGeometry {
      */
     public double getThetaC(int layer, int sector, Point3D trackPos, Vector3D trackDir) { 
         Vector3D dir = this.getLocalTrack(layer, sector, trackPos, trackDir);
-        return Math.atan(dir.z()/dir.x());
+        return Math.atan(dir.z()/dir.y());
     }
     
     public double getLocalAngle(int layer, int sector,  Point3D trackPos, Vector3D trackDir) {

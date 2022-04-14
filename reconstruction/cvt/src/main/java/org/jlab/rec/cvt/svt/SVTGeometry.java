@@ -178,12 +178,7 @@ public class SVTGeometry {
      * 
      * 2) for even layers, it rotates by 180 deg to have the y axis
      * pointing outward
-     * 
-     * 3) rotates by 90 deg around X to have:
-     * z axis normal to the module pointing inward for odd layers and outward for even ones
-     * y axis pointing upstream along the module
-     * x axis given by y.cross(z) along the short side of the module
-     *
+     *      *
      * @param layer
      * @param sector
      * @param trackDir
@@ -191,8 +186,7 @@ public class SVTGeometry {
     **/
     public Vector3D getLocalTrack(int layer, int sector, Vector3D trackDir) {
         Vector3D dir = this.toLocal(layer, sector, trackDir);
-        if(layer%2==0) dir.rotateZ(Math.PI); // to get the Y axis to point
-        dir.rotateX(Math.PI/2); 
+        if(layer%2==0) dir.rotateZ(Math.PI);
         return dir;
     }
 
@@ -207,7 +201,7 @@ public class SVTGeometry {
      */
     public double getLocalAngle(int layer, int sector, Vector3D trackDir) {
         Vector3D dir = this.getLocalTrack(layer, sector, trackDir);
-        return Math.atan(dir.x()/dir.z());
+        return Math.atan(dir.x()/dir.y());
     }
     
     public List<Surface> getSurfaces() {
