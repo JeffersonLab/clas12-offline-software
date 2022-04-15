@@ -381,29 +381,24 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             double x = this.get_ClusFitDoca();
            
             double deltatime_beta = 0;
-            double deltatime_beta2 = 0;
-            
+            double deltadoca_beta = 0;
             if (x != -1) {
                 if(Constants.getInstance().useUSETIMETBETA()==true) {
                     deltatime_beta = calcDeltaTimeBetaTFCN(this.get_Time(), tab, beta);
-                    deltatime_beta2 = calcDeltaTimeBeta(this.get_Time(), tab, beta);
                 } else {
-                    deltatime_beta = calcDeltaTimeBeta(x, tab, beta);
+                    deltadoca_beta = calcDeltaDocaBeta(x, tab, beta);
                 }
             }
             if(event.hasBank("MC::Particle")==false) {
                 distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), 
-                        this.getCorrectedTime(this.get_Time(), deltatime_beta+deltatime_beta2), 
-                        secIdx, slIdx) ;
+                        this.getCorrectedTime(this.get_Time(), deltatime_beta), 
+                        secIdx, slIdx) -deltadoca_beta;
             } else {
                 distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), 
                         this.getCorrectedTime(this.get_Time(), 0), 
                         secIdx, slIdx) ;
             }
-            //deltatime_beta = calcDeltaTimeBeta(distance, tab, beta);
-            //deltatime_beta = calcDeltaTimeBeta(distance, this.get_Superlayer(), beta);
             this.set_DeltaTimeBeta(deltatime_beta);
-            //distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.getCorrectedTime(this.get_Time(), deltatime_beta), secIdx, slIdx) ;
             
         }
      
@@ -417,11 +412,12 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         return correctedTime;
     }
     
-    public double calcDeltaTimeBeta(double x, IndexedTable tab, double beta){
-        return (Math.sqrt(x * x + (tab.getDoubleValue("distbeta", this.get_Sector(), 
-                this.get_Superlayer(),0) * beta * beta) * 
-                (tab.getDoubleValue("distbeta", this.get_Sector(), 
-                        this.get_Superlayer(),0) * beta * beta)) - x) / Constants.V0AVERAGED;
+    public double calcDeltaDocaBeta(double doca, IndexedTable tab, double beta){
+        double distbeta = tab.getDoubleValue("distbeta", this.get_Sector());
+        double delta_doca = 0.5 * (distbeta *beta*beta) *(distbeta *beta*beta) *(distbeta *beta*beta) * doca / 
+                ( (distbeta *beta*beta) *(distbeta *beta*beta)*(distbeta *beta*beta) + doca *doca *doca );
+        
+        return delta_doca;
     }
     
     public double calcDeltaTimeBetaTFCN(double t,IndexedTable tab, double beta){
