@@ -49,9 +49,9 @@ public class RecoBankReader {
                 int trkStatus  = bank.getByte("trkingStat", i);
                 int status     = bank.getByte("status", i);
                 Hit hit = new Hit(DetectorType.BST, BMTType.UNDEFINED, sector, layer, new Strip(strip, energy, time));
-                hit.getStrip().setLine(Constants.SVTGEOMETRY.getStrip(layer, sector, strip));
-                hit.getStrip().setModule(Constants.SVTGEOMETRY.getModule(layer, sector));
-                hit.getStrip().setNormal(Constants.SVTGEOMETRY.getNormal(layer, sector));
+                hit.getStrip().setLine(Constants.getInstance().SVTGEOMETRY.getStrip(layer, sector, strip));
+                hit.getStrip().setModule(Constants.getInstance().SVTGEOMETRY.getModule(layer, sector));
+                hit.getStrip().setNormal(Constants.getInstance().SVTGEOMETRY.getNormal(layer, sector));
                 hit.getStrip().setPitch(SVTGeometry.getPitch());
                 hit.getStrip().setStatus(status);
                 hit.setId(id);
@@ -319,8 +319,8 @@ public class RecoBankReader {
                 cr.setPointErr(new Point3D(err_x,err_y,err_z));
                 cr.setPoint0(new Point3D(x0,y0,z0));
                 cr.setPointErr0(new Point3D(err_x0,err_y0,err_z0));
-                cr.setOrderedRegion(Constants.BMTGEOMETRY.getLayer(region, cr.getType())+SVTGeometry.NREGIONS); // RDV check if is used and fix definition here and in CrossMaker
-                cr.setCluster1(new Cluster(DetectorType.BMT, cr.getType(), sector, Constants.BMTGEOMETRY.getLayer(region, cr.getType()), clid1));
+                cr.setOrderedRegion(Constants.getInstance().BMTGEOMETRY.getLayer(region, cr.getType())+SVTGeometry.NREGIONS); // RDV check if is used and fix definition here and in CrossMaker
+                cr.setCluster1(new Cluster(DetectorType.BMT, cr.getType(), sector, Constants.getInstance().BMTGEOMETRY.getLayer(region, cr.getType()), clid1));
                 crosses.add(cr);
             }
             return crosses;
@@ -416,6 +416,7 @@ public class RecoBankReader {
                 int    status   = bank.getShort("status", i);
                 double chi2     = bank.getFloat("chi2", i);
                 int    ndf      = bank.getShort("ndf", i);
+                int    pid      = bank.getInt("pid", i);
                 int    seedId   = bank.getShort("seedID", i);
                 int    type   = bank.getByte("fittingMethod", i);
                 Seed seed = new Seed();
@@ -426,6 +427,7 @@ public class RecoBankReader {
                 track.getHelix().setCovMatrix(covmatrix);
                 track.setChi2(chi2);
                 track.setNDF(ndf);
+                track.setPID(pid);
                 track.setKFIterations((int) status/1000);
                 track.setSeed(seed);
                 tracks.add(track);

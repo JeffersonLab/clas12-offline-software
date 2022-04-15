@@ -105,16 +105,7 @@ public class CCDBConstantsLoader {
         dbprovider.loadTable("/geometry/cvt/mvt/alignment");
         dbprovider.loadTable("/geometry/cvt/mvt/position");
         
-        //beam offset table
-        dbprovider.loadTable("/geometry/beam/position");
-        
-        //target position table
-        dbprovider.loadTable("/geometry/target");
-        
         dbprovider.disconnect();
-        
-        // target position
-        double ztarget = dbprovider.getDouble("/geometry/target/position", 0);
         
         // Getting the BMTConstants
         // 1) pitch info 
@@ -286,10 +277,7 @@ public class CCDBConstantsLoader {
             BMTConstants.TOLOCAL[layer-1][sector-1]   = transform.inverse();
         }
         
-         
-        // target position mm
-        Constants.setZoffset(ztarget*10);
-        
+       
         BMTConstants.setCRCRADIUS(CRCRADIUS);
         BMTConstants.setCRZRADIUS(CRZRADIUS);
         BMTConstants.setCRZNSTRIPS(CRZNSTRIPS);

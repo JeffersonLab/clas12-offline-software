@@ -16,7 +16,6 @@ import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.hit.Hit;
-import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.rec.cvt.banks.RecoBankReader;
 import org.jlab.rec.cvt.measurement.Measurements;
@@ -42,20 +41,15 @@ public class TracksFromTargetRec {
     private List<Cluster> BMTclusters;
     private List<ArrayList<Cross>> CVTcrosses = new ArrayList<>();
     private List<Seed>    CVTseeds = new ArrayList<>();
-    private boolean searchMissingCls = false;
-    private int pid = 0; 
+    private Swim swimmer;
     private double xb; 
     private double yb;
-    private double covmatScale = 0;
-    private Swim swimmer;
-
-    public TracksFromTargetRec(double xb, double yb, Swim swimmer, boolean searchMissingCls, double scale, int pid) {
+    
+    
+    public TracksFromTargetRec(double xb, double yb, Swim swimmer) {
         this.xb = xb;
         this.yb = yb;
         this.swimmer = swimmer;
-        this.searchMissingCls = searchMissingCls;
-        this.covmatScale = scale;
-        this.pid = pid;
     }
     
        
@@ -65,19 +59,18 @@ public class TracksFromTargetRec {
         this.BMTclusters = BMTclusters;
         this.CVTcrosses = crosses;   
         
-        double solenoidScale = Constants.getSolenoidScale();
         double solenoidValue = Constants.getSolenoidMagnitude(); // already the absolute value
         
         // make list of crosses consistent with a track candidate
         if(solenoidValue<0.001) {
             StraightTrackSeeder trseed = new StraightTrackSeeder(xb, yb);
-            CVTseeds = trseed.findSeed(this.CVTcrosses.get(0), this.CVTcrosses.get(1), Constants.SVTONLY);
+            CVTseeds = trseed.findSeed(this.CVTcrosses.get(0), this.CVTcrosses.get(1), Constants.getInstance().svtOnly);
             // RDV, disabled because it seems to create fake tracks, skipping measurement in KF
-//            if(Constants.EXCLUDELAYERS==true) {
+//            if(Constants.getInstance().EXCLUDELAYERS==true) {
 //                seeds = recUtil.reFit(seeds, swimmer, trseed); // RDV can we juts refit?
 //            }
         } else {
-            if(Constants.SVTONLY) {
+            if(Constants.getInstance().svtOnly) {
                 TrackSeeder trseed = new TrackSeeder(swimmer, xb, yb);
                 trseed.unUsedHitsOnly = true;
                 CVTseeds = trseed.findSeed(this.CVTcrosses.get(0), null);
@@ -86,19 +79,19 @@ public class TracksFromTargetRec {
                 CVTseeds = trseed.findSeed(this.CVTcrosses.get(0), this.CVTcrosses.get(1));
                 
                 //second seeding algorithm to search for SVT only tracks, and/or tracks missed by the CA
-                if(Constants.SVTSEEDING) {
+                if(Constants.getInstance().svtSeeding) {
                     TrackSeeder trseed2 = new TrackSeeder(swimmer, xb, yb);
                     trseed2.unUsedHitsOnly = true;
                     CVTseeds.addAll( trseed2.findSeed(this.CVTcrosses.get(0), this.CVTcrosses.get(1)));
                     // RDV, disabled because it seems to create fake tracks, skipping measurement in KF
-//                    if(Constants.EXCLUDELAYERS==true) {
+//                    if(Constants.getInstance().EXCLUDELAYERS==true) {
 //                        seeds = recUtil.reFit(seeds, swimmer, trseed, trseed2);
 //                    }
                 }
-                if(!Constants.seedBeamSpotConstraint()) {
+                if(!Constants.getInstance().seedBeamSpotConstraint()) {
                     List<Seed> failed = new ArrayList<>();
                     for(Seed s : CVTseeds) {
-                        if(!recUtil.reFitCircle(s, Constants.SEEDFITITERATIONS, xb, yb))
+                        if(!recUtil.reFitCircle(s, Constants.getInstance().SEEDFITITERATIONS, xb, yb))
                             failed.add(s);
                     }
                     CVTseeds.removeAll(failed);
@@ -122,14 +115,15 @@ public class TracksFromTargetRec {
         return CVTseeds;
     }
     
-    public List<Track> getTracks(DataEvent event) {
+    public List<Track> getTracks(DataEvent event, boolean initFromMc, boolean kfFilterOn, int kfIterations, 
+                       boolean searchMissingCls, double covmatScale, int pid) {
         if(this.CVTseeds.isEmpty()) return null;
         
-        double solenoidScale = Constants.getSolenoidScale();
-        double solenoidValue = Constants.getSolenoidMagnitude(); // already the absolute value
+        double solenoidScale = Constants.getInstance().getSolenoidScale();
+        double solenoidValue = Constants.getInstance().getSolenoidMagnitude(); // already the absolute value
         
         List<Track> trkcands = new ArrayList<>();
-        KFitter kf = new KFitter(Constants.KFFILTERON, Constants.KFITERATIONS, Constants.kfBeamSpotConstraint(), swimmer, Constants.KFMATLIB);
+        KFitter kf = new KFitter(kfFilterOn, kfIterations, Constants.getInstance().kfBeamSpotConstraint(), swimmer, Constants.getInstance().KFMatrixLibrary);
         Measurements measure = new Measurements(false, xb, yb);
         for (Seed seed : CVTseeds) { 
 //            seed.update_Crosses();
@@ -140,7 +134,7 @@ public class TracksFromTargetRec {
             Point3D  v = seed.getHelix().getVertex();
             Vector3D p = seed.getHelix().getPXYZ(solenoidValue);
             
-            if(Constants.PREELOSS && pid!=Constants.DEFAULTPID) {
+            if(Constants.getInstance().preElossCorrection && pid!=Constants.DEFAULTPID) {
                 double pcorr = measure.getELoss(p.mag(), PDGDatabase.getParticleMass(pid), Helix.Units.MM);
                 p.scale(pcorr/p.mag());
             }
@@ -150,21 +144,21 @@ public class TracksFromTargetRec {
                 charge = 1;
 
             double[] pars = recUtil.mcTrackPars(event);
-            if(Constants.INITFROMMC) {
+            if(initFromMc) {
                 v = new Point3D(pars[0],pars[1],pars[2]);
                 p = new Vector3D(pars[3],pars[4],pars[5]);
                 if(solenoidValue<0.001) p.scale(100/p.mag());
             }
             Helix hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
                             solenoidValue, xb , yb, Helix.Units.MM);
-            double[][] cov = Constants.scaleCovMat(seed.getHelix().getCovMatrix(), this.covmatScale);
+            double[][] cov = Constants.scaleCovMat(seed.getHelix().getCovMatrix(), covmatScale);
 
             if(solenoidValue>0.001 && Constants.LIGHTVEL * seed.getHelix().radius() *solenoidValue<Constants.PTCUT)
                 continue;
             kf.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid));
             kf.runFitter();
             if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null) { 
-                Track fittedTrack = new Track(seed, kf);
+                Track fittedTrack = new Track(seed, kf, pid);
                 for(Cross c : fittedTrack) { 
                     if(c.getDetector()==DetectorType.BST) {
                         c.getCluster1().setAssociatedTrackID(0);
@@ -210,7 +204,7 @@ public class TracksFromTargetRec {
                         kf.runFitter();
 
                         if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null) { 
-                            fittedTrack = new Track(seed, kf);
+                            fittedTrack = new Track(seed, kf, pid);
                             for(Cross c : fittedTrack) { 
                                 if(c.getDetector()==DetectorType.BST) {
                                     c.getCluster1().setAssociatedTrackID(0);

@@ -32,7 +32,7 @@ public class Track extends Trajectory implements Comparable<Track> {
     private double _Pt;		// track pt
     private double _Pz;		// track pz
     private double _P;		// track p
-    private String _PID;	// track pid
+    private int    _PID;	// track pid
     
     private Seed    _seed;
 
@@ -81,13 +81,6 @@ public class Track extends Trajectory implements Comparable<Track> {
                 
             }
         }
-        
-        //kfCov[0][0]/=10;
-        //kfCov[3][3]/=10;
-        //kfCov[1][1]*=10;
-        //kfCov[2][2]*=10;
-        //kfCov[4][4]*=10;
-        
         this.getHelix().setCovMatrix(kfCov);
         this.setPXYZ();
         this.setNDF(kf.NDF);
@@ -97,6 +90,12 @@ public class Track extends Trajectory implements Comparable<Track> {
         this.setTrajectories(kf.TrjPoints);
     }
     
+        
+    public Track(Seed seed, org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf, int pid) {
+        this(seed, kf);
+        this.setPID(pid);
+    }
+
     /**
      *
      * @return the charge
@@ -351,11 +350,11 @@ public class Track extends Trajectory implements Comparable<Track> {
         this._pathToCTOF = _pathLength;
     }
 
-    public String getPID() {
+    public int getPID() {
         return _PID;
     }
 
-    public void setPID(String _PID) {
+    public void setPID(int _PID) {
         this._PID = _PID;
     }
     

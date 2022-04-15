@@ -123,7 +123,7 @@ public class HitReader {
                 // create the strip object for the BMT
                 Strip BmtStrip = new Strip(strip, ADCtoEdep, time);
                 BmtStrip.setStatus(status.getIntValue("status", sector, layer, strip));
-                if(Constants.TIMECUTS) {
+                if(Constants.getInstance().timeCuts) {
                     if(time!=0 && (time<tmin || time>tmax))
                         BmtStrip.setStatus(2);// calculate the strip parameters for the BMT hit
                 }
@@ -133,7 +133,7 @@ public class HitReader {
                 Hit hit = new Hit(DetectorType.BMT, BMTGeometry.getDetectorType(layer), sector, layer, BmtStrip);                
                 hit.setId(i+1);
                 // add this hit
-                if(hit.getLayer()+3!=Constants.getRmReg())
+                if(hit.getLayer()+3!=Constants.getInstance().getRmReg())
                     hits.add(hit);
             }
             // fills the list of BMT hits
@@ -244,14 +244,14 @@ public class HitReader {
                 Strip SvtStrip = new Strip(strip, adcConv.SVTADCtoDAQ(ADC), time); 
                 SvtStrip.setPitch(SVTGeometry.getPitch());
                 // get the strip line
-                SvtStrip.setLine(Constants.SVTGEOMETRY.getStrip(layer, sector, strip));
-                SvtStrip.setModule(Constants.SVTGEOMETRY.getModule(layer, sector));
-                SvtStrip.setNormal(Constants.SVTGEOMETRY.getNormal(layer, sector)); 
+                SvtStrip.setLine(Constants.getInstance().SVTGEOMETRY.getStrip(layer, sector, strip));
+                SvtStrip.setModule(Constants.getInstance().SVTGEOMETRY.getModule(layer, sector));
+                SvtStrip.setNormal(Constants.getInstance().SVTGEOMETRY.getNormal(layer, sector)); 
                 // if the hit is useable in the analysis its status is =0
                 if (SvtStrip.getEdep() == 0) {
                     SvtStrip.setStatus(1);
                 }
-//                if (Constants.TIMECUTS) {
+//                if (Constants.getInstance().timeCuts) {
 //                    if(time > 0 && (time < 150 || time > 350)) {
 //                        SvtStrip.setStatus(2);// calculate the strip parameters for the BMT hit
 //                    }
@@ -279,7 +279,7 @@ public class HitReader {
                 Hit hit = new Hit(DetectorType.BST, BMTType.UNDEFINED, sector, layer, SvtStrip);
                 hit.setId(id);
                 // add this hit
-                if(hit.getRegion()!=Constants.getRmReg())      
+                if(hit.getRegion()!=Constants.getInstance().getRmReg())      
                     hits.add(hit);
             }
         }

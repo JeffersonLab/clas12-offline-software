@@ -277,9 +277,9 @@ public class Seed implements Comparable<Seed>{
             if (bmtCSz > 0) {
                 for (int j = svtSz * useSVTdipAngEst; j < svtSz * useSVTdipAngEst + bmtCSz; j++) {
                     Z.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).getPoint().z());
-                    Rho.add(j, Constants.BMTGEOMETRY.getRadiusMidDrift(BMTCrossesC.get(j - svtSz * useSVTdipAngEst).getCluster1().getLayer()));
+                    Rho.add(j, Constants.getInstance().BMTGEOMETRY.getRadiusMidDrift(BMTCrossesC.get(j - svtSz * useSVTdipAngEst).getCluster1().getLayer()));
                     
-                    ErrRho.add(j, Constants.BMTGEOMETRY.getThickness()/2 / Math.sqrt(12.));
+                    ErrRho.add(j, Constants.getInstance().BMTGEOMETRY.getThickness()/2 / Math.sqrt(12.));
                     ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).getPointErr().z());
                 }
             }

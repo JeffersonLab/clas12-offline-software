@@ -27,17 +27,6 @@ public class CVTSecondPass extends CVTEngine {
 
     
     @Override
-    public boolean init() {
-        
-        this.loadConfiguration();
-        this.initConstantsTables();
-        this.loadGeometries();
-        this.registerBanks();
-        return true;
-    }
-    
-    
-    @Override
     public boolean processDataEvent(DataEvent event) {
 
         int run = this.getRun(event);
@@ -45,17 +34,18 @@ public class CVTSecondPass extends CVTEngine {
 
         IndexedTable beamPos   = this.getConstantsManager().getConstants(run, "/geometry/beam/position");
         
-        if(Constants.ISCOSMICDATA) {
+        if(Constants.getInstance().isCosmics) {
             return true;
         } else {
             double xb = beamPos.getDoubleValue("x_offset", 0, 0, 0)*10;
             double yb = beamPos.getDoubleValue("y_offset", 0, 0, 0)*10;
             
-            TracksFromTargetRec trackFinder = new TracksFromTargetRec(xb , yb, swimmer, false, 0, this.getPid());
+            TracksFromTargetRec trackFinder = new TracksFromTargetRec(xb , yb, swimmer);
             List<Seed>  seeds  = trackFinder.getSeedsFromBanks(event);
             List<Track> tracks = null;
             if(seeds!=null) {
-                tracks = trackFinder.getTracks(event);
+                tracks = trackFinder.getTracks(event, this.isInitFromMc(), this.isKfFilterOn(), 
+                                               this.getKfIterations(), false, 0, this.getPid());
             }
             
             List<DataBank> banks = new ArrayList<>();

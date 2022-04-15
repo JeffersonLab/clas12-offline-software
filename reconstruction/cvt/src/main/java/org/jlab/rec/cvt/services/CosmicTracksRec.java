@@ -28,13 +28,20 @@ import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 
 public class CosmicTracksRec {
     
+    private boolean initFromMc = false;    
+    
     private final RecUtilities recUtil = new RecUtilities();
+    private KFitter kf = null;
+    
+    public void initKF(boolean initFromMc, boolean kfFilterOn, int kfIterations) {
+        this.initFromMc = initFromMc;
+        kf = new KFitter(kfFilterOn, kfIterations, Constants.getInstance().kfBeamSpotConstraint(), Constants.getInstance().KFMatrixLibrary);
+    }
     
     public boolean processEvent(DataEvent event,  
             List<Hit> SVThits, List<Hit> BMThits, 
             List<Cluster> SVTclusters, List<Cluster> BMTclusters, 
-            List<ArrayList<Cross>> crosses,
-            Swim swimmer) {
+            List<ArrayList<Cross>> crosses) {
         
         // make list of crosses consistent with a track candidate using SVT only first
         StraightTrackCrossListFinder crossLister = new StraightTrackCrossListFinder();
@@ -55,7 +62,7 @@ public class CosmicTracksRec {
             return true;
         }
         
-//        if(Constants.EXCLUDELAYERS==true) {
+//        if(Constants.getInstance().EXCLUDELAYERS==true) {
 //            CosmicFitter fitTrk = new CosmicFitter();
 //            cosmicCands = recUtil.reFit(cosmicCands, fitTrk,  trkcandFinder);
 //        }
@@ -77,13 +84,12 @@ public class CosmicTracksRec {
             }
             recUtil.CleanupSpuriousCrosses(crosses, null) ;
             
-            KFitter kf = new KFitter(Constants.KFFILTERON, Constants.KFITERATIONS, Constants.kfBeamSpotConstraint(), Constants.KFMATLIB);
             Measurements measures = new Measurements(true, 0, 0);
             List<StraightTrack> cosmics = new ArrayList<>();
             for (int k1 = 0; k1 < cosmicCands.size(); k1++) {
                 Ray ray = cosmicCands.get(k1).getRay();
                 
-                if(Constants.INITFROMMC) {
+                if(this.initFromMc) {
                     double[] pars = recUtil.mcTrackPars(event);
                     Point3D  v = new Point3D(pars[0],pars[1],pars[2]);
                     Vector3D p = new Vector3D(pars[3],pars[4],pars[5]);

@@ -19,8 +19,8 @@ import org.jlab.rec.cvt.svt.SVTParameters;
 
 public class TrackSeeder {
     
-    private final SVTGeometry sgeo = Constants.SVTGEOMETRY;
-    private final BMTGeometry bgeo = Constants.BMTGEOMETRY;
+    private final SVTGeometry sgeo = Constants.getInstance().SVTGEOMETRY;
+    private final BMTGeometry bgeo = Constants.getInstance().BMTGEOMETRY;
     private  double bfield;
     
     private final int NBINS = 36;

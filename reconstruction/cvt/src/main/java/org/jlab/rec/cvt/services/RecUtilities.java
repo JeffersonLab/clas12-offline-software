@@ -50,7 +50,7 @@ public class RecUtilities {
         List<Cross> rmCrosses = new ArrayList<>();
         
         for(Cross c : crosses.get(0)) {
-            if(!Constants.SVTGEOMETRY.isInFiducial(c.getCluster1().getLayer(), c.getSector(), c.getPoint()))
+            if(!Constants.getInstance().SVTGEOMETRY.isInFiducial(c.getCluster1().getLayer(), c.getSector(), c.getPoint()))
                 rmCrosses.add(c);
         }
        
@@ -92,8 +92,8 @@ public class RecUtilities {
                 Ray ray = trkcand.getRay();
                 Point3D top    = new Point3D();
                 Point3D bottom = new Point3D();
-                Constants.SVTGEOMETRY.getPlane(layertop, sector).intersection(ray.toLine(), top);
-                Constants.SVTGEOMETRY.getPlane(layerbot, sector).intersection(ray.toLine(), bottom);
+                Constants.getInstance().SVTGEOMETRY.getPlane(layertop, sector).intersection(ray.toLine(), top);
+                Constants.getInstance().SVTGEOMETRY.getPlane(layerbot, sector).intersection(ray.toLine(), bottom);
                 
                 if(top.y()>bottom.y()) {
                     clsList.add(trkcand.get(i).getCluster1());
@@ -119,11 +119,11 @@ public class RecUtilities {
                 
                 Ray ray = trkcand.getRay();
                 Point3D traj = new Point3D();
-                Constants.SVTGEOMETRY.getPlane(layer, sector).intersection(ray.toLine(), traj);
+                Constants.getInstance().SVTGEOMETRY.getPlane(layer, sector).intersection(ray.toLine(), traj);
                 
                 int key = SVTGeometry.getModuleId(layer, sector);
                 
-                if(traj!=null && Constants.SVTGEOMETRY.isInFiducial(layer, sector, traj)) {
+                if(traj!=null && Constants.getInstance().SVTGEOMETRY.isInFiducial(layer, sector, traj)) {
                     double  doca    = Double.POSITIVE_INFINITY;
                     // loop over all clusters in the same sector and layer that are not associated to s track
                     for(Cluster cls : allClusters) {
@@ -190,7 +190,7 @@ public class RecUtilities {
                 
                 // check the angle between the trajectory point and the sector 
                 // and skip sectors that are too far (more than the sector angular coverage)
-                Vector3D n = Constants.SVTGEOMETRY.getNormal(layer, sector);
+                Vector3D n = Constants.getInstance().SVTGEOMETRY.getNormal(layer, sector);
                 double deltaPhi = Math.acos(helixPoint.toVector3D().asUnit().dot(n));
                 double buffer = Math.toRadians(1.);
                 if(Math.abs(deltaPhi)>2*Math.PI/SVTGeometry.NSECTORS[ilayer]+buffer) continue;
@@ -199,14 +199,14 @@ public class RecUtilities {
                 
                 // calculate trajectory
                 Point3D traj = null;
-                Point3D  p = Constants.SVTGEOMETRY.getModule(layer, sector).origin();
+                Point3D  p = Constants.getInstance().SVTGEOMETRY.getModule(layer, sector).origin();
                 Point3D pm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
                 inters = swimmer.SwimPlane(n, pm, Constants.DEFAULTSWIMACC/10);
                 if(inters!=null) {
                     traj = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
                 } 
                 // if trajectory is valid, look for missing clusters
-                if(traj!=null && Constants.SVTGEOMETRY.isInFiducial(layer, sector, traj)) {
+                if(traj!=null && Constants.getInstance().SVTGEOMETRY.isInFiducial(layer, sector, traj)) {
                     double  doca    = Double.POSITIVE_INFINITY; 
                     //if(clusterMap.containsKey(key)) {
                     //    Cluster cluster = clusterMap.get(key);
@@ -261,7 +261,7 @@ public class RecUtilities {
         // for each layer
         for (int ilayer = 0; ilayer < BMTGeometry.NLAYERS; ilayer++) {
             int layer = ilayer + 1;
-            double radius  = Constants.BMTGEOMETRY.getRadiusMidDrift(layer);
+            double radius  = Constants.getInstance().BMTGEOMETRY.getRadiusMidDrift(layer);
             // identify the sector the track may be going through (this doesn't account for misalignments
             Point3D helixPoint = helix.getPointAtRadius(radius);
             // reinitilize swimmer from last surface
@@ -274,7 +274,7 @@ public class RecUtilities {
                 
                 // check the angle between the trajectory point and the sector 
                 // and skip sectors that are too far (more than the sector angular coverage)
-                if(Constants.BMTGEOMETRY.inDetector(layer, sector, helixPoint)==false)
+                if(Constants.getInstance().BMTGEOMETRY.inDetector(layer, sector, helixPoint)==false)
                     continue;
                  
                 // calculate trajectory
@@ -289,7 +289,7 @@ public class RecUtilities {
                 
                
                 // if trajectory is valid, look for missing clusters
-                if(traj!=null && Constants.BMTGEOMETRY.inDetector(layer, sector, traj)) {
+                if(traj!=null && Constants.getInstance().BMTGEOMETRY.inDetector(layer, sector, traj)) {
                     double  doca    = Double.POSITIVE_INFINITY; 
                     // loop over all clusters in the same sector and layer that are not associated to s track
                     for(Cluster cls : allClusters) {
@@ -344,7 +344,7 @@ public class RecUtilities {
                 cluster.setSeedResidual(p);             
                 for (Hit hit : cluster) {
                     double doca1 = hit.residual(p);
-                    double sigma1 = Constants.SVTGEOMETRY.getSingleStripResolution(layer, hit.getStrip().getStrip(), traj.get(layer).z);
+                    double sigma1 = Constants.getInstance().SVTGEOMETRY.getSingleStripResolution(layer, hit.getStrip().getStrip(), traj.get(layer).z);
                     hit.setstripResolutionAtDoca(sigma1);
                     hit.setdocaToTrk(doca1);  
                     if(traj.get(layer).isUsed)
@@ -408,7 +408,7 @@ public class RecUtilities {
             int layr2 = 0;
             if(c.getDetector()==DetectorType.BMT) {
                 layr = c.getOrderedRegion()+3;
-                if((int)Constants.getUsedLayers().get(layr)>0) {
+                if((int)Constants.getInstance().getUsedLayers().get(layr)>0) {
                     c.isInSeed = false;
                     //System.out.println("refit "+c.printInfo());
                     refib.add(c);
@@ -416,8 +416,8 @@ public class RecUtilities {
             } else {
                 layr = c.getCluster1().getLayer();
                 layr2 = c.getCluster2().getLayer();
-                if((int)Constants.getUsedLayers().get(layr)>0 
-                        && (int)Constants.getUsedLayers().get(layr2)>0) {
+                if((int)Constants.getInstance().getUsedLayers().get(layr)>0 
+                        && (int)Constants.getInstance().getUsedLayers().get(layr2)>0) {
                     c.updateSVTCross(null); 
                     c.isInSeed = false;
                     refi.add(c); 
@@ -497,15 +497,15 @@ public class RecUtilities {
             c.setAssociatedTrackID(-1);
             if(c.getDetector()==DetectorType.BMT) {
                 layr = c.getOrderedRegion()+3;
-                if((int)Constants.getUsedLayers().get(layr)>0) {
+                if((int)Constants.getInstance().getUsedLayers().get(layr)>0) {
                     c.isInSeed = false;
                     refib.add(c);
                 }
             } else {
                 layr = c.getCluster1().getLayer();
                 layr2 = c.getCluster2().getLayer();
-                if((int)Constants.getUsedLayers().get(layr)>0 
-                        && (int)Constants.getUsedLayers().get(layr2)>0) {
+                if((int)Constants.getInstance().getUsedLayers().get(layr)>0 
+                        && (int)Constants.getInstance().getUsedLayers().get(layr2)>0) {
                     c.updateSVTCross(null);
                     c.isInSeed = false;
                    // System.out.println("refit "+c.printInfo());
@@ -551,7 +551,7 @@ public class RecUtilities {
             int layr2 = 0;
             if(c.getDetector()==DetectorType.BMT) {
                 layr = c.getOrderedRegion()+3;
-                if((int)Constants.getUsedLayers().get(layr)>0) {
+                if((int)Constants.getInstance().getUsedLayers().get(layr)>0) {
                     c.isInSeed = false;
                 //    System.out.println("refit "+c.printInfo());
                     refib.add(c);
@@ -559,8 +559,8 @@ public class RecUtilities {
             } else {
                 layr = c.getCluster1().getLayer();
                 layr2 = c.getCluster2().getLayer();
-                if((int)Constants.getUsedLayers().get(layr)>0 
-                        && (int)Constants.getUsedLayers().get(layr2)>0) {
+                if((int)Constants.getInstance().getUsedLayers().get(layr)>0 
+                        && (int)Constants.getInstance().getUsedLayers().get(layr2)>0) {
                     c.updateSVTCross(null);
                     c.isInSeed = false;
                    // System.out.println("refit "+c.printInfo());

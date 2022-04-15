@@ -52,7 +52,7 @@ public class CVTFirstPass extends CVTEngine {
 
         HitReader hitRead = new HitReader();
         hitRead.fetch_SVTHits(event, adcConv, -1, -1, svtStatus);
-        if(Constants.SVTONLY==false)
+        if(Constants.getInstance().svtOnly==false)
           hitRead.fetch_BMTHits(event, adcConv, swimmer, bmtStatus, bmtTime);
 
         //I) get the hits
@@ -109,17 +109,18 @@ public class CVTFirstPass extends CVTEngine {
             return true; 
         }
         
-        if(Constants.ISCOSMICDATA) {
+        if(Constants.getInstance().isCosmics) {
             CosmicTracksRec strgtTrksRec = new CosmicTracksRec();
-            strgtTrksRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
-                    crosses, swimmer);
+            strgtTrksRec.initKF(this.isInitFromMc(), this.isKfFilterOn(), this.getKfIterations());
+            strgtTrksRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses);
         } else {
             double xb = beamPos.getDoubleValue("x_offset", 0, 0, 0)*10;
             double yb = beamPos.getDoubleValue("y_offset", 0, 0, 0)*10;
-//            if(crosses.get(1)!=null) for(Cross c :crosses.get(1)) System.out.println(c.toString() + "\n" + c.getCluster1().toString());
-            TracksFromTargetRec  trackFinder = new TracksFromTargetRec(xb, yb, swimmer, true, 0, this.getPid());
+
+            TracksFromTargetRec  trackFinder = new TracksFromTargetRec(xb, yb, swimmer);
             List<Seed>   seeds = trackFinder.getSeeds(SVTclusters, BMTclusters, crosses);
-            List<Track> tracks = trackFinder.getTracks(event);
+            List<Track> tracks = trackFinder.getTracks(event, this.isInitFromMc(), this.isKfFilterOn(), 
+                                                       this.getKfIterations(), true, 0, this.getPid());
             
             List<DataBank> banks = new ArrayList<>();
             banks.add(RecoBankWriter.fillSVTHitBank(event, SVThits, this.getSvtHitBank()));

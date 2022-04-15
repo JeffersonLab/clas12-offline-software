@@ -35,13 +35,6 @@ public class TrackListFinder {
         
         for (Track trk : cands) { 
             if(trk.getHelix()!=null) {
-                assignTrkPID(trk);
-                //KalFit kf = new KalFit(trk, svt_geo);
-                //kf.runKalFit(trk, svt_geo);
-                //EnergyLossCorr elc = new EnergyLossCorr(trk);
-                //System.out.println("******* before EL "+trk.getP());
-                //elc.doCorrection(trk, svt_geo);
-                //System.out.println("*******  after EL "+trk.getP());
 
                 int charge = trk.getQ();
                 double maxPathLength = 5.0;//very loose cut 
@@ -89,10 +82,10 @@ public class TrackListFinder {
         TotE /= (double) NbHits;
 
         if (TotE <= SVTParameters.PIDCUTOFF) {
-            trk.setPID("pion");
+            trk.setPID(211);
         }
         if (TotE > SVTParameters.PIDCUTOFF) {
-            trk.setPID("proton");
+            trk.setPID(2212);
         }
     }
     

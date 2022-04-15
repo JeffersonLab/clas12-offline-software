@@ -240,8 +240,8 @@ public class SVTGeometry {
     }
     
     public Surface getShieldSurface() {
-        Point3D  center = new Point3D(0,                        0, Constants.getZoffset()+SVTConstants.TSHIELDZPOS-SVTConstants.TSHIELDLENGTH/2);
-        Point3D  origin = new Point3D(SVTConstants.TSHIELDRMAX, 0, Constants.getZoffset()+SVTConstants.TSHIELDZPOS-SVTConstants.TSHIELDLENGTH/2);
+        Point3D  center = new Point3D(0,                        0, Constants.getInstance().getZoffset()+SVTConstants.TSHIELDZPOS-SVTConstants.TSHIELDLENGTH/2);
+        Point3D  origin = new Point3D(SVTConstants.TSHIELDRMAX, 0, Constants.getInstance().getZoffset()+SVTConstants.TSHIELDZPOS-SVTConstants.TSHIELDLENGTH/2);
         Vector3D axis   = new Vector3D(0,0,1);
         Arc3D base = new Arc3D(origin, center, axis, 2*Math.PI);
         Cylindrical3D shieldCylinder = new Cylindrical3D(base, SVTConstants.TSHIELDLENGTH);

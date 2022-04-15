@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import org.jlab.clas.pdg.PhysicsConstants;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.clas.swimtools.Swim;
@@ -43,19 +42,35 @@ public class CVTEngine extends ReconstructionEngine {
 
     private CosmicTracksRec   strgtTrksRec = null;
     private TracksFromTargetRec trksFromTargetRec = null;
-    private String svtHitBankName        = "BSTRec::Hits";
-    private String svtClusterBankName    = "BSTRec::Clusters";
-    private String svtCrossBankName      = "BSTRec::Crosses";
-    private String bmtHitBankName        = "BMTRec::Hits";
-    private String bmtClusterBankName    = "BMTRec::Clusters";
-    private String bmtCrossBankName      = "BMTRec::Crosses";
-    private String cvtSeedBankName       = "CVTRec::Seeds";
-    private String cvtTrackBankName      = "CVTRec::Tracks";
-    private String cvtTrajectoryBankName = "CVTRec::Trajectory";
-    private String cvtTrackCovMatName    = "CVTRec::TrackCovMats";  
+    private final String svtHitBankName        = "BSTRec::Hits";
+    private final String svtClusterBankName    = "BSTRec::Clusters";
+    private final String svtCrossBankName      = "BSTRec::Crosses";
+    private final String bmtHitBankName        = "BMTRec::Hits";
+    private final String bmtClusterBankName    = "BMTRec::Clusters";
+    private final String bmtCrossBankName      = "BMTRec::Crosses";
+    private final String cvtSeedBankName       = "CVTRec::Seeds";
+    private final String cvtTrackBankName      = "CVTRec::Tracks";
+    private final String cvtTrajectoryBankName = "CVTRec::Trajectory";
+    private final String cvtTrackCovMatName    = "CVTRec::TrackCovMats";  
     private int Run = -1;
-    private int pid = Constants.DEFAULTPID;
+    // run-time options
+    private int     pid = Constants.DEFAULTPID;   
     
+    // yaml setting passed to Constants class
+    private String  variation           = "default";
+    private boolean isCosmics           = false;
+    private boolean svtOnly             = false;
+    private String  excludeLayers       = null;
+    private String  excludeBMTLayers    = null;
+    private int     removeRegion        = 0;
+    private int     beamSpotConstraint  = 1;
+    private double  beamSpotRadius      = 0.3;
+    private String  targetMaterial      = "LH2";
+    private boolean elossPrecorrection  = true;
+    private boolean svtSeeding          = true;
+    private boolean timeCuts            = false;
+    private String  matrixLibrary       = "EJML";
+     
     public CVTEngine() {
         super("CVTTracks", "ziegler", "4.0");
         
@@ -69,8 +84,22 @@ public class CVTEngine extends ReconstructionEngine {
     public boolean init() {
         
         this.loadConfiguration();
+        Constants.getInstance().initialize(this.getName(),
+                                           this.variation, 
+                                           isCosmics,
+                                           svtOnly,
+                                           excludeLayers,
+                                           excludeBMTLayers,
+                                           removeRegion,
+                                           beamSpotConstraint,
+                                           beamSpotRadius,
+                                           targetMaterial,
+                                           elossPrecorrection,
+                                           svtSeeding,
+                                           timeCuts,
+                                           matrixLibrary);
+
         this.initConstantsTables();
-        this.loadGeometries();
         this.registerBanks();
         return true;
     }
@@ -129,7 +158,7 @@ public class CVTEngine extends ReconstructionEngine {
 
         HitReader hitRead = new HitReader();
         hitRead.fetch_SVTHits(event, adcConv, -1, -1, svtStatus);
-        if(Constants.SVTONLY==false)
+        if(Constants.getInstance().svtOnly==false)
           hitRead.fetch_BMTHits(event, adcConv, swimmer, bmtStatus, bmtTime);
 
         List<Hit> hits = new ArrayList<>();
@@ -194,9 +223,9 @@ public class CVTEngine extends ReconstructionEngine {
             return true; 
         }
         
-        if(Constants.ISCOSMICDATA) {
-            strgtTrksRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, 
-                    crosses, swimmer);
+        if(Constants.getInstance().isCosmics) {
+            strgtTrksRec.initKF(Constants.INITFROMMC, Constants.KFFILTERON, Constants.KFITERATIONS);
+            strgtTrksRec.processEvent(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses);
         } else {
             double xb = beamPos.getDoubleValue("x_offset", 0, 0, 0)*10;
             double yb = beamPos.getDoubleValue("y_offset", 0, 0, 0)*10;
@@ -207,126 +236,48 @@ public class CVTEngine extends ReconstructionEngine {
     }
      
     
-    private void loadConfiguration() {            
-        // Load config
+    public void loadConfiguration() {            
         
-        String rmReg = this.getEngineConfigString("removeRegion");        
-        if (rmReg!=null) {
-            System.out.println("["+this.getName()+"] run with region "+rmReg+"removed config chosen based on yaml");
-            Constants.setRmReg(Integer.valueOf(rmReg));
-        }
-        else {
-             System.out.println("["+this.getName()+"] run with all region (default) ");
-        }
+        // general (pass-independent) settings
+        if (this.getEngineConfigString("variation")!=null) 
+            this.variation = this.getEngineConfigString("variation");
+               
+        if (this.getEngineConfigString("cosmics")!=null) 
+            this.isCosmics = Boolean.valueOf(this.getEngineConfigString("cosmics"));
+               
+        if (this.getEngineConfigString("svtOnly")!=null)
+            this.svtOnly = Boolean.valueOf(this.getEngineConfigString("svtOnly"));
         
-        //svt stand-alone
-        String svtStAl = this.getEngineConfigString("svtOnly");        
-        if (svtStAl!=null) {
-            Constants.SVTONLY = Boolean.valueOf(svtStAl);
-            System.out.println("["+this.getName()+"] run with SVT only "+Constants.SVTONLY+" config chosen based on yaml");
-        }
-        else {
-             System.out.println("["+this.getName()+"] run with both CVT systems (default) ");
-        }
+        if (this.getEngineConfigString("excludeLayers")!=null) 
+            this.excludeLayers = this.getEngineConfigString("excludeLayers");
+        
+        if (this.getEngineConfigString("excludeBMTLayers")!=null) 
+            this.excludeBMTLayers = this.getEngineConfigString("excludeBMTLayers");                
 
-        if (this.getEngineConfigString("beamSpotConst")!=null) {
-            Constants.setBEAMSPOTCONST(Integer.valueOf(this.getEngineConfigString("beamSpotConst")));
-        }
-        System.out.println("["+this.getName()+"] run with beamSpotConst set to "+Constants.getBEAMSPOTCONST()+ " (0=no-constraint, 1=seed only, 2=seed and KF)");        
-         
-        if (this.getEngineConfigString("beamSpotRadius")!=null) {
-            Constants.setRbErr(Double.valueOf(this.getEngineConfigString("beamSpotRadius")));
-        }
-        System.out.println("["+this.getName()+"] run with beam spot size set to "+Constants.getRbErr());        
-         
-        if (this.getEngineConfigString("kfFilterOn")!=null) {
-            Constants.KFFILTERON = Boolean.valueOf(this.getEngineConfigString("kfFilterOn"));
-        }
-        System.out.println("["+this.getName()+"] run with Kalman-Filter status set to "+Constants.KFFILTERON);
+        if (this.getEngineConfigString("removeRegion")!=null) 
+            this.removeRegion = Integer.valueOf(this.getEngineConfigString("removeRegion"));
         
-        if (this.getEngineConfigString("initFromMC")!=null) {
-            Constants.INITFROMMC = Boolean.valueOf(this.getEngineConfigString("initFromMC"));
-        }
-        System.out.println("["+this.getName()+"] initialize KF from true MC information "+Constants.INITFROMMC);
+        if (this.getEngineConfigString("beamSpotConst")!=null)
+            this.beamSpotConstraint = Integer.valueOf(this.getEngineConfigString("beamSpotConst"));
         
-        if (this.getEngineConfigString("kfIterations")!=null) {
-            Constants.KFITERATIONS = Integer.valueOf(this.getEngineConfigString("kfIterations"));
-        }
-        System.out.println("["+this.getName()+"] number of KF iterations set to "+Constants.KFITERATIONS);
-        
-        String svtCosmics = this.getEngineConfigString("cosmics");        
-        if (svtCosmics!=null) {
-            Constants.ISCOSMICDATA = Boolean.valueOf(svtCosmics);
-            System.out.println("["+this.getName()+"] run with cosmics settings "+Constants.ISCOSMICDATA+" config chosen based on yaml");
-        }
-        else {
-            System.out.println("["+this.getName()+"] run with cosmics settings default = false");
-        }
-        
-        //Skip layers
-        String exLys = this.getEngineConfigString("excludeLayers");        
-        if (exLys!=null)
-            System.out.println("["+this.getName()+"] run with layers "+exLys+" excluded in fit config chosen based on yaml");
-        else
-            System.out.println("["+this.getName()+"] run with all layer in fit (default) ");
-        Constants.setUsedLayers(exLys);
-        
-        //Skip layers
-        String exBMTLys = this.getEngineConfigString("excludeBMTLayers");        
-        if (exBMTLys!=null) {
-            System.out.println("["+this.getName()+"] run with BMT layers "+exBMTLys+"excluded config chosen based on yaml");
-            Constants.setBMTExclude(exBMTLys);        
-        }
-      
-//        //new clustering
-//        String newClustering = this.getEngineConfigString("newclustering");
-//        
-//        if (newClustering!=null) {
-//            System.out.println("["+this.getName()+"] run with new clustering settings "+newClustering+" config chosen based on yaml");
-//            BMTConstants.newClustering= Boolean.valueOf(newClustering);
-//        }
-//        else {
-//            newClustering = System.getenv("COAT_CVT_NEWCLUSTERING");
-//            if (newClustering!=null) {
-//                System.out.println("["+this.getName()+"] run with new clustering settings "+newClustering+" config chosen based on env");
-//                BMTConstants.newClustering= Boolean.valueOf(newClustering);
-//            }
-//        }
-//        if (newClustering==null) {
-//             System.out.println("["+this.getName()+"] run with newclustering settings default = false");
-//        }
+        if (this.getEngineConfigString("beamSpotRadius")!=null)
+            this.beamSpotRadius = Double.valueOf(this.getEngineConfigString("beamSpotRadius"));
+            
+        if(this.getEngineConfigString("targetMat")!=null)
+            this.targetMaterial = this.getEngineConfigString("targetMat");
 
-        //
+        if(this.getEngineConfigString("elossPreCorrection")!=null)
+            this.elossPrecorrection = Boolean.parseBoolean(this.getEngineConfigString("elossPreCorrection"));
         
+        if(this.getEngineConfigString("svtSeeding")!=null)
+            this.svtSeeding = Boolean.parseBoolean(this.getEngineConfigString("svtSeeding"));
         
-        String matrixLibrary = "EJML";
-        if (this.getEngineConfigString("matLib")!=null) {
-            matrixLibrary = this.getEngineConfigString("matLib");
-        }
-        Constants.setMatLib(matrixLibrary);
-        System.out.println("["+this.getName()+"] run with matLib "+ Constants.KFMATLIB.toString() + " library");
+        if(this.getEngineConfigString("timeCuts")!=null) 
+            this.timeCuts = Boolean.parseBoolean(this.getEngineConfigString("timeCuts"));
         
-        if(this.getEngineConfigString("svtSeeding")!=null) {
-            Constants.SVTSEEDING = Boolean.parseBoolean(this.getEngineConfigString("svtSeeding"));
-            System.out.println("["+this.getName()+"] SVT-based seeding set to "+ Constants.SVTSEEDING);
-        }
-
-        if(this.getEngineConfigString("timeCuts")!=null) {
-            Constants.TIMECUTS = Boolean.parseBoolean(this.getEngineConfigString("timeCuts"));
-            System.out.println("["+this.getName()+"] BMT timing cuts set to "+ Constants.TIMECUTS);
-        }
-
-        if(this.getEngineConfigString("elossPid")!=null) {
-            this.pid = Integer.parseInt(this.getEngineConfigString("elossPid"));
-        }
-        System.out.println("["+this.getName()+"] ELoss mass set for particle " + pid);
-
-        if(this.getEngineConfigString("targetMat")!=null) {
-            Constants.setTargetMaterial(this.getEngineConfigString("targetMat"));
-        }
-        System.out.println("["+this.getName()+"] Target material set to "+ Constants.getTargetMaterial());
+        if (this.getEngineConfigString("matLib")!=null)
+            this. matrixLibrary = this.getEngineConfigString("matLib");
     }
-
 
     private void initConstantsTables() {
         String[] tables = new String[]{
@@ -338,29 +289,7 @@ public class CVTEngine extends ReconstructionEngine {
         requireConstants(Arrays.asList(tables));
         this.getConstantsManager().setVariation("default");
     }
-    
-    private void loadGeometries() {
-        // Load other geometries
-        
-        String variation = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
-        System.out.println(" CVT YAML VARIATION NAME + "+variation);
-        ConstantProvider providerCTOF = GeometryFactory.getConstants(DetectorType.CTOF, 11, variation);
-        Constants.CTOFGEOMETRY = new CTOFGeant4Factory(providerCTOF);        
-        Constants.CNDGEOMETRY  =  GeometryFactory.getDetector(DetectorType.CND, 11, variation);
-        
-        System.out.println(" LOADING CVT GEOMETRY...............................variation = "+variation);
-        CCDBConstantsLoader.Load(new DatabaseConstantProvider(11, variation));
-        System.out.println("SVT LOADING WITH VARIATION "+variation);
-        DatabaseConstantProvider cp = new DatabaseConstantProvider(11, variation);
-        SVTStripFactory svtFac = new SVTStripFactory(cp, true);
-        Constants.SVTGEOMETRY  = new SVTGeometry(svtFac);
-        Constants.BMTGEOMETRY  = new BMTGeometry();
-        
-        Constants.CVTSURFACES = new ArrayList<>();
-        Constants.CVTSURFACES.addAll(Constants.SVTGEOMETRY.getSurfaces());
-        Constants.CVTSURFACES.addAll(Constants.BMTGEOMETRY.getSurfaces());
-    }
-    
+       
     private void registerBanks() {
         super.registerOutputBank("BMTRec::Hits");
         super.registerOutputBank("BMTRec::Clusters");
@@ -373,5 +302,26 @@ public class CVTEngine extends ReconstructionEngine {
         super.registerOutputBank("CVTRec::Trajectory");        
     }
     
-
+    public void printConfiguration() {            
+        
+        System.out.println("["+this.getName()+"] run with cosmics setting set to "+Constants.getInstance().isCosmics);        
+        System.out.println("["+this.getName()+"] run with SVT only set to "+Constants.getInstance().svtOnly);
+        if(this.excludeLayers!=null)
+            System.out.println("["+this.getName()+"] run with layers "+this.excludeLayers+" excluded in fit, based on yaml");
+        if(this.excludeBMTLayers!=null)
+            System.out.println("["+this.getName()+"] run with BMT layers "+this.excludeBMTLayers+" excluded");
+        if(this.removeRegion>0)
+            System.out.println("["+this.getName()+"] run with region "+this.getEngineConfigString("removeRegion")+" removed");
+        System.out.println("["+this.getName()+"] run with beamSpotConst set to "+Constants.getInstance().beamSpotConstraint+ " (0=no-constraint, 1=seed only, 2=seed and KF)");        
+        System.out.println("["+this.getName()+"] run with beam spot size set to "+Constants.getInstance().getBeamRadius());                
+        System.out.println("["+this.getName()+"] Target material set to "+ Constants.getInstance().getTargetMaterial().getName());
+        System.out.println("["+this.getName()+"] Pre-Eloss correction set to " + Constants.getInstance().preElossCorrection);
+        System.out.println("["+this.getName()+"] run SVT-based seeding set to "+ Constants.getInstance().svtSeeding);
+        System.out.println("["+this.getName()+"] run BMT timing cuts set to "+ Constants.getInstance().timeCuts);
+        System.out.println("["+this.getName()+"] run with matLib "+ Constants.getInstance().KFMatrixLibrary.toString() + " library");
+        System.out.println("["+this.getName()+"] ELoss mass set for particle "+ Constants.DEFAULTPID);
+        System.out.println("["+this.getName()+"] run with Kalman-Filter status set to "+Constants.KFFILTERON);
+        System.out.println("["+this.getName()+"] initialize KF from true MC information "+Constants.INITFROMMC);
+        System.out.println("["+this.getName()+"] number of KF iterations set to "+Constants.KFITERATIONS);
+    }
 }

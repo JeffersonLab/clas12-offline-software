@@ -48,13 +48,13 @@ public class TracksFromTargetRec {
         List<Seed> seeds = null;
         if(solenoidValue<0.001) {
             StraightTrackSeeder trseed = new StraightTrackSeeder(xb, yb);
-            seeds = trseed.findSeed(crosses.get(0), crosses.get(1), Constants.SVTONLY);
+            seeds = trseed.findSeed(crosses.get(0), crosses.get(1), Constants.getInstance().svtOnly);
             // RDV, disabled because it seems to create fake tracks, skipping measurement in KF
-//            if(Constants.EXCLUDELAYERS==true) {
+//            if(Constants.getInstance().EXCLUDELAYERS==true) {
 //                seeds = recUtil.reFit(seeds, swimmer, trseed); // RDV can we juts refit?
 //            }
         } else {
-            if(Constants.SVTONLY) {
+            if(Constants.getInstance().svtOnly) {
                 TrackSeeder trseed = new TrackSeeder(swimmer, xb, yb);
                 trseed.unUsedHitsOnly = true;
                 seeds = trseed.findSeed(crosses.get(0), null);
@@ -63,16 +63,16 @@ public class TracksFromTargetRec {
                 seeds = trseed.findSeed(crosses.get(0), crosses.get(1));
                 
                 //second seeding algorithm to search for SVT only tracks, and/or tracks missed by the CA
-                if(Constants.SVTSEEDING) {
+                if(Constants.getInstance().svtSeeding) {
                     TrackSeeder trseed2 = new TrackSeeder(swimmer, xb, yb);
                     trseed2.unUsedHitsOnly = true;
                     seeds.addAll( trseed2.findSeed(crosses.get(0), crosses.get(1)));
                     // RDV, disabled because it seems to create fake tracks, skipping measurement in KF
-//                    if(Constants.EXCLUDELAYERS==true) {
+//                    if(Constants.getInstance().EXCLUDELAYERS==true) {
 //                        seeds = recUtil.reFit(seeds, swimmer, trseed, trseed2);
 //                    }
                 }
-                if(!Constants.seedBeamSpotConstraint()) {
+                if(!Constants.getInstance().seedBeamSpotConstraint()) {
                     List<Seed> failed = new ArrayList<>();
                     for(Seed s : seeds) {
                         if(!recUtil.reFitCircle(s, Constants.SEEDFITITERATIONS, xb, yb))
@@ -99,7 +99,7 @@ public class TracksFromTargetRec {
         }
         
         trkcands.clear();
-        KFitter kf = new KFitter(Constants.KFFILTERON, Constants.KFITERATIONS, Constants.kfBeamSpotConstraint(), swimmer, Constants.KFMATLIB);
+        KFitter kf = new KFitter(Constants.getInstance().KFFILTERON, Constants.getInstance().KFITERATIONS, Constants.getInstance().kfBeamSpotConstraint(), swimmer, Constants.getInstance().KFMatrixLibrary);
         Measurements surfaces = new Measurements(false, xb, yb);
         for (Seed seed : seeds) { 
             Point3D  v = seed.getHelix().getVertex();
