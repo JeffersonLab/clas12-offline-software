@@ -114,7 +114,7 @@ public class RTPCEngine extends ReconstructionEngine {
 
             count++;
 
-            if (count != 11) return true;
+            if (count != 15) return true;
             // if (count < 4 || count > 100) return true;
             System.out.println("count = " + count);
 

@@ -14,7 +14,7 @@ public class DormandPrinceRK78 extends Integrator {
     }
 
     @Override
-    public void ForwardStepper(double[] yInput, double h, double[] Field, Material material) {
+    public void ForwardStepper(double[] yInput, double h, double[] Field, Material material, double[] EnergyLoss) {
 
         double b21 = 1.0 / 18,
                 b31 = 1.0 / 48.0,
@@ -234,11 +234,11 @@ public class DormandPrinceRK78 extends Integrator {
 
         }
 
-        ForwardEnergyLoss(yInput, h, material);
+        ForwardEnergyLoss(yInput, h, material, EnergyLoss);
     }
 
     @Override
-    public void BackwardStepper(double[] yInput, double h, double[] Field, Material material) {
+    public void BackwardStepper(double[] yInput, double h, double[] Field, Material material, double[] EnergyLoss) {
 
         double b21 = 1.0 / 18,
                 b31 = 1.0 / 48.0,
@@ -458,7 +458,7 @@ public class DormandPrinceRK78 extends Integrator {
 
         }
 
-        BackwardEnergyLoss(yInput, h, material);
+        BackwardEnergyLoss(yInput, h, material, EnergyLoss);
 
     }
 

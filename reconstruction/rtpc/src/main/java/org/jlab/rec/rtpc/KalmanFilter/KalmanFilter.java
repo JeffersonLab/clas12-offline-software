@@ -77,12 +77,7 @@ public class KalmanFilter {
         // ----------------------------------------------------------------
         // ----------------------------------------------------------------
 
-        double vz = 0;
-        HashMap<Integer, FinalTrackInfo> finaltrackinfomap = params.get_finaltrackinfomap();
-        for (int TID : finaltrackinfomap.keySet()) {
-            FinalTrackInfo track = finaltrackinfomap.get(TID);
-            vz = track.get_vz();
-        }
+
 
 
         NistManager manager = NistManager.Instance();
@@ -115,7 +110,31 @@ public class KalmanFilter {
 
         int NumberOfVariables = 6;
 
-        double x0 = 0 * mm, y0 = 0 * mm, z0 = vz * mm, px0 = 100 * MeV, py0 = 10 * MeV, pz0 = -5 * MeV;
+
+        double vz = 0;
+        double p_hf = 0;
+        double phi_hf = 0;
+        double theta_hf = 0;
+        HashMap<Integer, FinalTrackInfo> finaltrackinfomap = params.get_finaltrackinfomap();
+        for (int TID : finaltrackinfomap.keySet()) {
+            FinalTrackInfo track = finaltrackinfomap.get(TID);
+            vz = track.get_vz();
+            p_hf = Math.sqrt(track.get_px()* track.get_px() + track.get_py()* track.get_py() + track.get_pz()* track.get_pz());
+            phi_hf = Math.toRadians(track.get_phi());
+            theta_hf = Math.toRadians(track.get_theta());
+
+        }
+
+        if (p_hf < 100) p_hf = 100;
+
+        double px_hf = p_hf * Math.cos(phi_hf) * Math.sin(theta_hf);
+        double py_hf = p_hf * Math.sin(phi_hf) * Math.sin(theta_hf);
+        double pz_hf = p_hf * Math.cos(theta_hf);
+
+
+
+
+        double x0 = 2 * mm, y0 = 0 * mm, z0 = vz * mm, px0 = px_hf * MeV, py0 = py_hf * MeV, pz0 = pz_hf * MeV;
         double Bz = -0.745 * 5 * tesla;
         double[] B = {0.0, 0.0, Bz};
 
@@ -155,55 +174,50 @@ public class KalmanFilter {
 
         // plotForwardBackwardPropagation(yIn, rArrayList, hArrayList, MaterialList, hitArrayList, integrator, B);
 
-        RealMatrix processNoiseTarget = MatrixUtils.createRealMatrix(new double[][]{
-                {10.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-                {0.0, 10.0, 0.0, 0.0, 0.0, 0.0},
-                {0.0, 0.0, 10.0, 0.0, 0.0, 0.0},
-                {0.0, 0.0, 0.0, 100.0, 0.0, 0.0},
-                {0.0, 0.0, 0.0, 0.0, 100.0, 0.0},
-                {0.0, 0.0, 0.0, 0.0, 0.0, 100.0}
-        }).scalarMultiply(1);
-
+        double sigma_p = 155.0;
         RealMatrix processNoise = MatrixUtils.createRealMatrix(new double[][]{
-                {0.1, 0.0, 0.0, 0.0, 0.0, 0.0},
-                {0.0, 0.1, 0.0, 0.0, 0.0, 0.0},
-                {0.0, 0.0, 0.1, 0.0, 0.0, 0.0},
-                {0.0, 0.0, 0.0, 4.0, 0.0, 0.0},
-                {0.0, 0.0, 0.0, 0.0, 4.0, 0.0},
-                {0.0, 0.0, 0.0, 0.0, 0.0, 4.0}
-        }).scalarMultiply(0.2);
+                {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+                {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+                {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+                {0.0, 0.0, 0.0, sigma_p, 0.0, 0.0},
+                {0.0, 0.0, 0.0, 0.0, sigma_p, 0.0},
+                {0.0, 0.0, 0.0, 0.0, 0.0, sigma_p}
+        });
 
 
         RealVector stateEstimation = MatrixUtils.createRealVector(new double[]
                 {x0, y0, z0, px0, py0, pz0}
         );
 
+
         RealMatrix errorCovariance = MatrixUtils.createRealMatrix(new double[][]{
-                {4.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-                {0.0, 4.0, 0.0, 0.0, 0.0, 0.0},
-                {0.0, 0.0, 100.0, 0.0, 0.0, 0.0},
-                {0.0, 0.0, 0.0, 400.0, 0.0, 0.0},
-                {0.0, 0.0, 0.0, 0.0, 400.0, 0.0},
-                {0.0, 0.0, 0.0, 0.0, 0.0, 400.0}
+                {40.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+                {0.0, 40.0, 0.0, 0.0, 0.0, 0.0},
+                {0.0, 0.0, 1000.0, 0.0, 0.0, 0.0},
+                {0.0, 0.0, 0.0, 4000.0, 0.0, 0.0},
+                {0.0, 0.0, 0.0, 0.0, 4000.0, 0.0},
+                {0.0, 0.0, 0.0, 0.0, 0.0, 4000.0}
         });
 
 
-        // System.out.println("hitMap = " + hitMap);
-
         saveForwardPropagation(stateEstimation, rArrayList, hArrayList, MaterialList, integrator, B, "first.dat");
 
+        System.out.println("stateEstimation = " + stateEstimation + " r = " + Math.hypot(
+                stateEstimation.getEntry(0), stateEstimation.getEntry(1)) + " p = " +
+                Math.sqrt(stateEstimation.getEntry(3)*stateEstimation.getEntry(3) +
+                        stateEstimation.getEntry(4)*stateEstimation.getEntry(4) +
+                        stateEstimation.getEntry(5)*stateEstimation.getEntry(5)));
 
-        Kalman kalman = new Kalman(new ProcessModel(processNoise, processNoiseTarget, B), integrator, stateEstimation, errorCovariance);
 
-        for (k = 0; k < 10; k++) {
+        Kalman kalman = new Kalman(new ProcessModel(processNoise, B), integrator, stateEstimation, errorCovariance);
 
-            boolean targetNoise = true;
+
+
+        for (k = 0; k < 20; k++) {
 
             for (int i = 0; i < rArrayList.size(); i++) {
 
-                if (i > 1) targetNoise = false;
-
-                kalman.newpredict(rArrayList.get(i), hArrayList.get(i), MaterialList.get(i), true, targetNoise);
+                kalman.predict(rArrayList.get(i), hArrayList.get(i), MaterialList.get(i), true);
                 print(kalman.getStateEstimationVector(), "Predict");
 
 
@@ -223,7 +237,7 @@ public class KalmanFilter {
 
                 if (hitArrayList.get(i) != null) {
 
-                    kalman.newpredict(rArrayList.get(i - 1), hArrayList.get(i), MaterialList.get(i), false, targetNoise);
+                    kalman.predict(rArrayList.get(i - 1), hArrayList.get(i), MaterialList.get(i), false);
                     print(kalman.getStateEstimationVector(), "Predict");
 
                     kalman.correct(hitArrayList.get(i).get_Vector(), hitArrayList.get(i).get_MeasurementNoise());
@@ -231,19 +245,17 @@ public class KalmanFilter {
 
                 } else {
 
-                    if (i < 2) targetNoise = true;
-
-                    kalman.newpredict(rArrayList.get(i - 1), hArrayList.get(i), MaterialList.get(i), false, targetNoise);
+                    kalman.predict(rArrayList.get(i - 1), hArrayList.get(i), MaterialList.get(i), false);
                     print(kalman.getStateEstimationVector(), "Predict");
 
                     if (i == 1) {
 
 
-                        kalman.newpredict(0, hArrayList.get(0), deuteriumGas, false, targetNoise);
+                        kalman.predict(0, hArrayList.get(0), deuteriumGas, false);
                         print(kalman.getStateEstimationVector(), "Predict");
 
                         RealVector z = new ArrayRealVector(new double[]{0, 0, vz});
-                        RealMatrix measurementNoise = new Array2DRowRealMatrix(new double[][]{{4, 0, 0}, {0, 400, 0}, {0, 0, 400}});
+                        RealMatrix measurementNoise = new Array2DRowRealMatrix(new double[][]{{9, 0, 0}, {0, 1e5, 0}, {0, 0, 1e5}});
 
                         kalman.correct(z, measurementNoise);
                         print(kalman.getStateEstimationVector(), "Correct");
@@ -254,7 +266,12 @@ public class KalmanFilter {
 
             }
 
-            System.out.println("stateEstimation = " + kalman.getStateEstimationVector());
+            stateEstimation = kalman.getStateEstimationVector();
+            System.out.println("stateEstimation = " + stateEstimation + " r = " + Math.hypot(
+                            stateEstimation.getEntry(0), stateEstimation.getEntry(1)) + " p = " +
+                            Math.sqrt(stateEstimation.getEntry(3)*stateEstimation.getEntry(3) +
+                                    stateEstimation.getEntry(4)*stateEstimation.getEntry(4) +
+                                    stateEstimation.getEntry(5)*stateEstimation.getEntry(5)));
 
         }
 
@@ -265,6 +282,41 @@ public class KalmanFilter {
 
 
         // saveForwardBackward(stateEstimation,rArrayList,hArrayList,MaterialList,hitArrayList,deuteriumGas,integrator,B,"forward.dat", "backward.dat");
+
+
+
+
+
+
+
+
+        /*
+        for (int i = 0; i < rArrayList.size(); i++) {
+
+
+            kalman.newpredict(rArrayList.get(i), hArrayList.get(i), MaterialList.get(i), true);
+
+            if (hitArrayList.get(i) != null) {
+                kalman.correct(hitArrayList.get(i).get_Vector(), hitArrayList.get(i).get_MeasurementNoise());
+            }
+        }
+
+         */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -293,7 +345,7 @@ public class KalmanFilter {
      |_|   \__,_|_| |_|\___|\__|_|\___/|_| |_|
      **********************************************************/
 
-    RealVector f(RealVector x, double rMax, double h, double[] B, Integrator dormandPrinceRK78, Material material, boolean dir, FileWriter writer) throws IOException {
+    RealVector f(RealVector x, double rMax, double h, double[] B, Integrator integrator, Material material, boolean dir, FileWriter writer) throws IOException {
         double TotNbOfStep = 1e8;
         double s = 0, sEnd = 40;
         double[] yIn = x.toArray();
@@ -303,12 +355,15 @@ public class KalmanFilter {
 
         for (int nStep = 0; nStep < TotNbOfStep; ++nStep) {
 
+
+            double[] energyLoss = {0};
+
             double previous_r = Math.hypot(yIn[0], yIn[1]);
 
             if (dir) {
-                dormandPrinceRK78.ForwardStepper(yIn, h, B, material);
+                integrator.ForwardStepper(yIn, h, B, material, energyLoss);
             } else {
-                dormandPrinceRK78.BackwardStepper(yIn, h, B, material);
+                integrator.BackwardStepper(yIn, h, B, material, energyLoss);
             }
 
 
@@ -356,14 +411,14 @@ public class KalmanFilter {
         writer.write("" + yIn[0] + ' ' + yIn[1] + ' ' + yIn[2] + '\n');
 
         for (int nStep = 0; nStep < TotNbOfStep; ++nStep) {
-
+            double[] energyLoss = {0};
             double previous_r = Math.hypot(yIn[0], yIn[1]);
             double[] previous_yIn = Arrays.copyOf(yIn, 6);
 
             if (dir) {
-                dormandPrinceRK78.ForwardStepper(yIn, h, B, material);
+                dormandPrinceRK78.ForwardStepper(yIn, h, B, material, energyLoss);
             } else {
-                dormandPrinceRK78.BackwardStepper(yIn, h, B, material);
+                dormandPrinceRK78.BackwardStepper(yIn, h, B, material, energyLoss);
             }
 
 

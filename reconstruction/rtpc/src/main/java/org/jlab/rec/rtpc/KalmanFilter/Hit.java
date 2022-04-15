@@ -26,9 +26,9 @@ public class Hit implements Comparable<Hit> {
     }
 
     public RealMatrix get_MeasurementNoise() {
-        double deltaR = 70. / this._r;
-        double deltaPhi = Math.toRadians(1);
-        double deltaZ = 2;
+        double deltaR = 70. / this._r * 2;
+        double deltaPhi = Math.toRadians(2) * 2;
+        double deltaZ = 4;
 
         return new Array2DRowRealMatrix(new double[][]{
                 {deltaR * deltaR, 0, 0},

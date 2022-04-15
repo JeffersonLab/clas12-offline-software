@@ -13,7 +13,7 @@ public class EulerMethod extends Integrator {
     }
 
     @Override
-    public void ForwardStepper(double[] yIn, double h, double[] Field, Material material) {
+    public void ForwardStepper(double[] yIn, double h, double[] Field, Material material, double[] EnergyLoss) {
         double[] dydt = new double[numberOfVariables];
         double[] yInTemp = new double[numberOfVariables];
         System.arraycopy(yIn, 0, yInTemp, 0, numberOfVariables);
@@ -24,12 +24,12 @@ public class EulerMethod extends Integrator {
             yIn[i] = yInTemp[i] + h * dydt[i];
         }
 
-        ForwardEnergyLoss(yIn, h, material);
+        ForwardEnergyLoss(yIn, h, material, EnergyLoss);
 
     }
 
     @Override
-    public void BackwardStepper(double[] yIn, double h, double[] Field, Material material) {
+    public void BackwardStepper(double[] yIn, double h, double[] Field, Material material, double[] EnergyLoss) {
         double[] dydt = new double[numberOfVariables];
         double[] yInTemp = new double[numberOfVariables];
         System.arraycopy(yIn, 0, yInTemp, 0, numberOfVariables);
@@ -40,7 +40,7 @@ public class EulerMethod extends Integrator {
             yIn[i] = yInTemp[i] + h * dydt[i];
         }
 
-        BackwardEnergyLoss(yIn, h, material);
+        BackwardEnergyLoss(yIn, h, material, EnergyLoss);
 
     }
 

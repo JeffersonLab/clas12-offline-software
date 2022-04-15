@@ -11,11 +11,11 @@ public abstract class Integrator {
     protected Particle particle;
     protected BetheBlochModel model;
 
-    public abstract void ForwardStepper(double[] yIn, double h, double[] Field, Material material);
+    public abstract void ForwardStepper(double[] yIn, double h, double[] Field, Material material, double[] EnergyLoss);
 
-    public abstract void BackwardStepper(double[] yIn, double h, double[] Field, Material material);
+    public abstract void BackwardStepper(double[] yIn, double h, double[] Field, Material material, double[] EnergyLoss);
 
-    protected void ForwardEnergyLoss(double[] yIn, double h, Material material) {
+    protected void ForwardEnergyLoss(double[] yIn, double h, Material material, double[] energyLoss) {
         double mass = particle.GetMass();
 
         h /= 10; // cm
@@ -26,6 +26,8 @@ public abstract class Integrator {
         double dedx = model.ComputeDEDXPerVolume(particle, material, kineticEnergy, true) * 1000; // MeV/cm
         double DeltaE = dedx * h;
 
+        energyLoss[0] = DeltaE;
+
         double mom_prim = Math.sqrt((E - DeltaE) * (E - DeltaE) - mass * mass);
 
         yIn[3] *= mom_prim / mom;
@@ -35,7 +37,7 @@ public abstract class Integrator {
 
     }
 
-    protected void BackwardEnergyLoss(double[] yIn, double h, Material material) {
+    protected void BackwardEnergyLoss(double[] yIn, double h, Material material, double[] energyLoss) {
         double mass = particle.GetMass();
 
         h /= 10; // cm
@@ -47,6 +49,8 @@ public abstract class Integrator {
         double DeltaE = dedx * h;
 
         double mom_prim = Math.sqrt((E + DeltaE) * (E + DeltaE) - mass * mass);
+
+        energyLoss[0] = DeltaE;
 
         // double kineticEnergy_prim = Math.sqrt(mass * mass + mom_prim * mom_prim) - mass;
         // double E_prim = Math.sqrt(mom_prim * mom_prim + mass * mass);

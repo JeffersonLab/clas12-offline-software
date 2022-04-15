@@ -2,13 +2,66 @@ package org.jlab.rec.rtpc.KalmanFilter;
 
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.NullArgumentException;
-import org.apache.commons.math3.linear.MatrixUtils;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
-import org.apache.commons.math3.linear.SingularMatrixException;
+import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.util.MathUtils;
 import org.jlab.rec.rtpc.KalmanFilter.EnergyLoss.Material;
 import org.jlab.rec.rtpc.KalmanFilter.Integrator.Integrator;
+
+/*************************************************************************************************************
+ *  Class for Discrete Extended Kalman Filter
+ *  The system to be estimated is defined as a discrete nonlinear dynamic dystem:
+ *              x(k) = f[x(k-1), u(k-1)] + v(k)     ; x = Nx1,    u = Mx1
+ *              y(k) = h[x(k)] + n(k)               ; y = Zx1
+ *
+ *        Where:
+ *          x(k) : State Variable at time-k                          : Nx1
+ *          y(k) : Measured output at time-k                         : Zx1
+ *          u(k) : System input at time-k                            : Mx1
+ *          v(k) : Process noise, AWGN assumed, w/ covariance Qn     : Nx1
+ *          n(k) : Measurement noise, AWGN assumed, w/ covariance Rn : Nx1
+ *
+ *          f(..), h(..) is a nonlinear transformation of the system to be estimated.
+ *
+ ***************************************************************************************************
+ *      Extended Kalman Filter algorithm:
+ *          Initialization:
+ *              x(k=0|k=0) = Expected value of x at time-0 (i.e. x(k=0)), typically set to zero.
+ *              P(k=0|k=0) = Identity matrix * covariant(P(k=0)), typically initialized with some
+ *                            big number.
+ *              Q, R       = Covariance matrices of process & measurement. As this implementation
+ *                            the noise as AWGN (and same value for every variable), this is set
+ *                            to Q=diag(QInit,...,QInit) and R=diag(RInit,...,RInit).
+ *
+ *
+ *          EKF Calculation (every sampling time):
+ *              Calculate the Jacobian matrix of f (i.e. F):
+ *                  F = d(f(..))/dx |x(k-1|k-1),u(k-1)                               ...{EKF_1}
+ *
+ *              Predict x(k) through nonlinear function f:
+ *                  x(k|k-1) = f[x(k-1|k-1), u(k-1)]                                 ...{EKF_2}
+ *
+ *              Predict P(k) using linearized f (i.e. F):
+ *                  P(k|k-1)  = F*P(k-1|k-1)*F' + Q                                  ...{EKF_3}
+ *
+ *              Calculate the Jacobian matrix of h (i.e. C):
+ *                  C = d(h(..))/dx |x(k|k-1)                                        ...{EKF_4}
+ *
+ *              Predict residual covariance S using linearized h (i.e. H):
+ *                  S       = C*P(k|k-1)*C' + R                                      ...{EKF_5}
+ *
+ *              Calculate the kalman gain:
+ *                  K       = P(k|k-1)*C'*(S^-1)                                     ...{EKF_6}
+ *
+ *              Correct x(k) using kalman gain:
+ *                  x(k|k) = x(k|k-1) + K*[y(k) - h(x(k|k-1))]                       ...{EKF_7}
+ *
+ *              Correct P(k) using kalman gain:
+ *                  P(k|k)  = (I - K*C)*P(k|k-1)                                     ...{EKF_8}
+ *
+ *
+ *
+ *
+ ************************************************************************************************************/
 
 public class Kalman {
 
@@ -34,7 +87,10 @@ public class Kalman {
     /**
      * Creates a new Kalman filter with the given process and measurement models.
      *
-     * @param process the model defining the underlying process dynamics
+     * @param process                the model defining the underlying process dynamics.
+     * @param integrator             integrator use for the prediction
+     * @param initialStateEstimate   Expected value of x at time-0 (i.e. x(k=0))
+     * @param initialErrorCovariance covariant(P(k=0))
      */
     public Kalman(final ProcessModel process, final Integrator integrator, final RealVector initialStateEstimate, final RealMatrix initialErrorCovariance) {
 
@@ -42,8 +98,8 @@ public class Kalman {
 
         this.processModel = process;
         this.integrator = integrator;
-        stateEstimation = initialStateEstimate;
-        errorCovariance = initialErrorCovariance;
+        this.stateEstimation = initialStateEstimate;
+        this.errorCovariance = initialErrorCovariance;
 
 
     }
@@ -54,30 +110,13 @@ public class Kalman {
      */
     public void predict(double rMax, double h, Material material, boolean dir) {
 
-        RealMatrix transitionMatrix = processModel.F(stateEstimation, rMax, h, integrator, material, dir);
-        RealMatrix transitionMatrixT = transitionMatrix.transpose();
-
-        // project the state estimation ahead (a priori state)
-        // xHat(k)- = f(xHat(k-1))
-        stateEstimation = processModel.f(stateEstimation, rMax, h, integrator, material, dir);
-
-        // project the error covariance ahead
-        // P(k)- = F * P(k-1) * F' + Q
-        errorCovariance = transitionMatrix.multiply(errorCovariance)
-                .multiply(transitionMatrixT)
-                .add(processModel.getProcessNoise());
-    }
-
-    /**
-     * Predict the internal state estimation one time step ahead.
-     */
-    public void newpredict(double rMax, double h, Material material, boolean dir, boolean targetNoise) {
-
 
         double[] s = {0};
+        double[] totalEnergyLoss = {0};
+
         // project the state estimation ahead (a priori state)
         // xHat(k)- = f(xHat(k-1))
-        stateEstimation = processModel.newf(stateEstimation, rMax, h, s, integrator, material, dir);
+        stateEstimation = processModel.f(stateEstimation, rMax, h, s, integrator, material, dir, totalEnergyLoss);
 
 
         RealMatrix transitionMatrix;
@@ -86,9 +125,8 @@ public class Kalman {
 
         RealMatrix transitionMatrixT = transitionMatrix.transpose();
 
-        RealMatrix processNoise;
-        if (targetNoise) processNoise = processModel.getProcessNoiseTarget();
-        else processNoise = processModel.getProcessNoise();
+
+        RealMatrix processNoise = processModel.getProcessNoise().scalarMultiply(totalEnergyLoss[0]);
 
         // project the error covariance ahead
         // P(k)- = F * P(k-1) * F' + Q
@@ -137,12 +175,20 @@ public class Kalman {
         // update covariance of prediction error
         // P(k) = (I - K * H) * P(k)-
         RealMatrix identity = MatrixUtils.createRealIdentityMatrix(kalmanGain.getRowDimension());
-        errorCovariance = identity.subtract(kalmanGain.multiply(measurementMatrix)).multiply(errorCovariance);
+        // errorCovariance = identity.subtract(kalmanGain.multiply(measurementMatrix))
+        //         .multiply(errorCovariance);
 
+        // Numerically more stable !!
+        RealMatrix temp1 = identity.subtract(kalmanGain.multiply(measurementMatrix));
+        errorCovariance = temp1.multiply(errorCovariance.multiply(temp1.transpose()))
+                .add(kalmanGain.multiply(measurementNoise.multiply(kalmanGain.transpose())));
 
 
         // System.out.println("stateEstimation correct = " + stateEstimation + " r = " + Math.hypot(
-        //         stateEstimation.getEntry(0),stateEstimation.getEntry(1)));
+        //         stateEstimation.getEntry(0), stateEstimation.getEntry(1)) + " p = " +
+        //         Math.sqrt(stateEstimation.getEntry(3)*stateEstimation.getEntry(3) +
+        //                 stateEstimation.getEntry(4)*stateEstimation.getEntry(4) +
+        //                 stateEstimation.getEntry(5)*stateEstimation.getEntry(5)));
 
     }
 

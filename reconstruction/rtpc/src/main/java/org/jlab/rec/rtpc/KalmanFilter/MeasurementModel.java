@@ -1,6 +1,5 @@
 package org.jlab.rec.rtpc.KalmanFilter;
 
-import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
@@ -16,7 +15,7 @@ public class MeasurementModel {
         double r = Math.hypot(xx, yy);
         double phi = Math.atan2(yy, xx);
 
-        return new ArrayRealVector(new double[]{r, phi, zz});
+        return MatrixUtils.createRealVector(new double[]{r, phi, zz});
     }
 
     static RealMatrix H(RealVector x) {
