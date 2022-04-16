@@ -494,7 +494,7 @@ public class Constants {
         // Load other geometries
         System.out.println(" CVT YAML VARIATION NAME + "+variation);
         
-// Load target
+        // Load target
         ConstantProvider providerTG = GeometryFactory.getConstants(DetectorType.TARGET, 11, variation);
         this.zTarget = providerTG.getDouble("/geometry/target/position",0)*10;
                          
