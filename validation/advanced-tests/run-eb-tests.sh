@@ -1,7 +1,7 @@
 #!/bin/bash
 
 webDir=http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/eb
-webVersion=4.4.0-fid-r11
+webVersion=5.0-fid-r11
 webDir=$webDir/$webVersion
 
 # coatjava must already be built at ../../coatjava/
@@ -124,23 +124,20 @@ then
     fi
 
     # download test files, if necessary:
-    rm -f ${webFileStub}.evio
-    wget -N --no-check-certificate $webDir/${webFileStub}.evio.gz
+    wget -N --no-check-certificate $webDir/${webFileStub}.hipo
     if [ $? != 0 ] ; then echo "wget validation files failure" ; exit 1 ; fi
-    gunzip -f ${webFileStub}.evio.gz
 
-    rm -f ${webFileStub}.hipo
-    rm -f out_${webFileStub}.hipo
-
-    # convert to hipo:
-    $COAT/bin/evio2hipo -s $gemcSolenoidDefault -o ${webFileStub}.hipo ${webFileStub}.evio
+    # update the schema dictionary:
+    rm -f up_${webFileStub}.hipo
+    ../../coatjava/bin/hipo-utils -update -d ../../coatjava/etc/bankdefs/hipo4/ -o up_${webFileStub}.hipo ${webFileStub}.hipo
 
     # run reconstruction:
+    rm -f out_${webFileStub}.hipo
     if [ $useClara -eq 0 ]
     then
         GEOMDBVAR=$geoDbVariation
         export GEOMDBVAR
-        ../../coatjava/bin/recon-util -i ${webFileStub}.hipo -o out_${webFileStub}.hipo -c 2
+        ../../coatjava/bin/recon-util -i up_${webFileStub}.hipo -o out_${webFileStub}.hipo -c 2
     else
         echo "set inputDir $PWD/" > cook.clara
         echo "set outputDir $PWD/" >> cook.clara
@@ -148,7 +145,7 @@ then
         echo "set javaMemory 2" >> cook.clara
         echo "set session s_cook" >> cook.clara
         echo "set description d_cook" >> cook.clara
-        ls ${webFileStub}.hipo > files.list
+        ls up_${webFileStub}.hipo > files.list
         echo "set fileList $PWD/files.list" >> cook.clara
         echo "run local" >> cook.clara
         echo "exit" >> cook.clara
