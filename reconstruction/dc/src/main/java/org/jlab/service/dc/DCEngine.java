@@ -59,7 +59,7 @@ public class DCEngine extends ReconstructionEngine {
         //Use time in tBeta function (true: use time; false: use track doca)
         if(this.getEngineConfigString("dcTimeTBeta")!=null)
             useTimeBeta = (Boolean.valueOf(this.getEngineConfigString("dcTimeTBeta")));
-        
+            useTimeBeta =false; //always force to false
         //Use beta cut(true: use time; false: use track doca)
         if(this.getEngineConfigString("dcBetaCut")!=null)
             useBetaCut =Boolean.valueOf(this.getEngineConfigString("dcBetaCut"));

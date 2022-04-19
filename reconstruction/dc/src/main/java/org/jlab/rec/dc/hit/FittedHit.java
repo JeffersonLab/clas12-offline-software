@@ -399,6 +399,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                         secIdx, slIdx) ;
             }
             this.set_DeltaTimeBeta(deltatime_beta);
+            this.set_DeltaDocaBeta(deltadoca_beta);
             
         }
      
@@ -996,6 +997,14 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     public double get_DeltaTimeBeta() {
         return _deltatime_beta ;
     }
+    private double _deltadoca_beta;
+    public void set_DeltaDocaBeta(double deltadoca_beta) {
+        _deltadoca_beta = deltadoca_beta;
+    }
+
+    public double get_DeltaDocaBeta() {
+        return _deltadoca_beta ;
+    }
     
     // local angle 
     private double _alpha;
@@ -1063,6 +1072,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             hitClone.set_Beta(this.get_Beta());  
             hitClone.setB(this.getB());  
             hitClone.set_DeltaTimeBeta(this.get_DeltaTimeBeta());
+            hitClone.set_DeltaDocaBeta(this.get_DeltaDocaBeta());
             hitClone.setTStart(this.getTStart());
             hitClone.setTProp(this.getTProp());
             hitClone.setTFlight(this.getTFlight());
