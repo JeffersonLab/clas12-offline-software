@@ -276,6 +276,7 @@
         {"name":"TFlight",      "type":"F", "info":"time of flight correction (ns)"},      
         {"name":"T0",           "type":"F", "info":"T0 (ns)"},
         {"name":"TStart",       "type":"F", "info":"event start time used (ns)"},
+        {"name":"dDoca",        "type":"F", "info":"delta Doca correction (cm)"},
         {"name":"clusterID",    "type":"S", "info":"ID of associated cluster"},
         {"name":"trkID",        "type":"B", "info":"ID of associated track"},
         {"name":"time",         "type":"F", "info":"time used in tracking (ns)"},
