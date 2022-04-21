@@ -412,9 +412,9 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             correctedTime=0.01; // fixes edge effects ... to be improved
         return correctedTime;
     }
-    
+   
     public double calcDeltaDocaBeta(double doca, IndexedTable tab, double beta){
-        double distbeta = tab.getDoubleValue("distbeta", this.get_Sector());
+        double distbeta = tab.getDoubleValue("distbeta", this.get_Sector(), this.get_Superlayer(), 0);
         double delta_doca = 0.5 * (distbeta *beta*beta) *(distbeta *beta*beta) *(distbeta *beta*beta) * doca / 
                 ( (distbeta *beta*beta) *(distbeta *beta*beta)*(distbeta *beta*beta) + doca *doca *doca );
         
