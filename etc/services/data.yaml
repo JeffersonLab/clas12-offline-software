@@ -24,8 +24,8 @@ services:
     name: FTOFHB
   - class: org.jlab.service.ec.ECEngine
     name: EC
-  - class: org.jlab.rec.cvt.services.CVTEngine
-    name: CVT
+  - class: org.jlab.rec.cvt.splitservices.CVTFirstPass
+    name: CVTFP
   - class: org.jlab.service.ctof.CTOFEngine
     name: CTOF
   - class: org.jlab.service.cnd.CNDCalibrationEngine
@@ -43,6 +43,8 @@ services:
     name: DCTB
   - class: org.jlab.service.fmt.FMTEngine
     name: FMT
+  - class: org.jlab.rec.cvt.splitservices.CVTSecondPass
+    name: CVTSP
   - class: org.jlab.service.ftof.FTOFTBEngine
     name: FTOFTB
   - class: org.jlab.service.eb.EBTBEngine

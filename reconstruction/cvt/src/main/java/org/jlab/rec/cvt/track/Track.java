@@ -32,7 +32,7 @@ public class Track extends Trajectory implements Comparable<Track> {
     private double _Pt;		// track pt
     private double _Pz;		// track pz
     private double _P;		// track p
-    private String _PID;	// track pid
+    private int    _PID;	// track pid
     
     private Seed    _seed;
 
@@ -81,22 +81,21 @@ public class Track extends Trajectory implements Comparable<Track> {
                 
             }
         }
-        
-        //kfCov[0][0]/=10;
-        //kfCov[3][3]/=10;
-        //kfCov[1][1]*=10;
-        //kfCov[2][2]*=10;
-        //kfCov[4][4]*=10;
-        
         this.getHelix().setCovMatrix(kfCov);
         this.setPXYZ();
         this.setNDF(kf.NDF);
         this.setChi2(kf.chi2);
         this.setSeed(seed);
         this.addAll(seed.getCrosses());
-        this.setTrajectories(kf.TrjPoints);
+        this.setTrajectories(kf.trajPoints);
     }
     
+        
+    public Track(Seed seed, org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf, int pid) {
+        this(seed, kf);
+        this.setPID(pid);
+    }
+
     /**
      *
      * @return the charge
@@ -205,8 +204,6 @@ public class Track extends Trajectory implements Comparable<Track> {
                 double R = Math.sqrt(cross.getPoint().x() * cross.getPoint().x() + cross.getPoint().y() * cross.getPoint().y());
                 trackPos = this.getHelix().getPointAtRadius(R);
                 trackDir = this.getHelix().getTrackDirectionAtRadius(R);
-//                System.out.println("Traj  " + cross.getCluster1().getLayer() + " " + helixPos.toString());
-//                System.out.println("Cross " + cross.getDetector().getName() + " " + cross.getPoint().toString());
             }
             cross.update(trackPos, trackDir);
         }
@@ -353,11 +350,11 @@ public class Track extends Trajectory implements Comparable<Track> {
         this._pathToCTOF = _pathLength;
     }
 
-    public String getPID() {
+    public int getPID() {
         return _PID;
     }
 
-    public void setPID(String _PID) {
+    public void setPID(int _PID) {
         this._PID = _PID;
     }
     
@@ -379,6 +376,10 @@ public class Track extends Trajectory implements Comparable<Track> {
 
     public int getKfIterations() {
         return kfIterations;
+    }
+
+    public void setKFIterations(int iter) {
+        kfIterations = iter;
     }
     
     public Map<Integer, HitOnTrack> getTrajectories() {
@@ -429,10 +430,12 @@ public class Track extends Trajectory implements Comparable<Track> {
     
     @Override
     public String toString() {
-        String str = String.format("Track id=%d, q=%d, p=%.3f GeV pt=%.3f GeV, phi=%.3f deg, NDF=%d, chi2=%.3f, seed method=%d\n", 
-                     this.getId(), this.getQ(), this.getP(), this.getPt(), Math.toDegrees(this.getHelix().getPhiAtDCA()),
+        String str = String.format("Track id=%d, q=%d, p=%.3f GeV pt=%.3f GeV, d0=%.3f deg, phi=%.3f deg, z0=%.3f deg, tandip=%.3f deg, NDF=%d, chi2=%.3f, seed method=%d\n", 
+                     this.getId(), this.getQ(), this.getP(), this.getPt(), this.getHelix().getDCA(),
+                     Math.toDegrees(this.getHelix().getPhiAtDCA()), this.getHelix().getZ0(), this.getHelix().getTanDip(),
                      this.getNDF(), this.getChi2(), this.getSeed().getStatus());
         for(Cross c: this) str = str + c.toString() + "\n";
+        for(Cluster c: this.getSeed().getClusters()) str = str + c.toString() + "\n";
         return str;
     }
 

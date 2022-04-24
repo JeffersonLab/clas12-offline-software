@@ -451,9 +451,9 @@ public class StraightTrackCrossListFinder {
             for (int is = 0; is < SVTGeometry.NSECTORS[ir*2]; is++) {
                 int sector = is+1;
                 
-                Plane3D  plane = Constants.SVTGEOMETRY.getPlane(layer, sector);
+                Plane3D  plane = Constants.getInstance().SVTGEOMETRY.getPlane(layer, sector);
                 Point3D traj = new Point3D();
-                if(plane.intersection(xyTrack.toLine(), traj)==1 && Constants.SVTGEOMETRY.isInFiducial(layer, sector, traj)) {
+                if(plane.intersection(xyTrack.toLine(), traj)==1 && Constants.getInstance().SVTGEOMETRY.isInFiducial(layer, sector, traj)) {
                     Cross cross2D = new Cross(DetectorType.BST, BMTType.UNDEFINED, sector, region, -1); // 2-dimentional cross object corresponding to a point on the trajectory line in the xy plane
                     cross2D.setPoint0(new Point3D(traj.x(), traj.y(), 0));
                     projectedCrosses.add(cross2D);
@@ -461,17 +461,17 @@ public class StraightTrackCrossListFinder {
             }
         }
         //BMTs
-        for (int il = 0; il < Constants.BMTGEOMETRY.getNLayers(); il++) {
+        for (int il = 0; il < Constants.getInstance().BMTGEOMETRY.getNLayers(); il++) {
             int layer = il+1;
-            for(int is=0; is<Constants.BMTGEOMETRY.getNSectors(); is++) {
+            for(int is=0; is<Constants.getInstance().BMTGEOMETRY.getNSectors(); is++) {
                 int sector = is+1;
                 
                 List<Point3D> trajs = new ArrayList<>();
-                int nTraj = Constants.BMTGEOMETRY.getTileSurface(layer, sector).intersection(xyTrack.toLine(), trajs);
+                int nTraj = Constants.getInstance().BMTGEOMETRY.getTileSurface(layer, sector).intersection(xyTrack.toLine(), trajs);
                 if(nTraj==0) continue;
                 
                 for(Point3D traj : trajs) {
-                    Cross cross2D = new Cross(DetectorType.BMT, BMTGeometry.getDetectorType(layer), sector, Constants.BMTGEOMETRY.getRegion(layer), -1);
+                    Cross cross2D = new Cross(DetectorType.BMT, BMTGeometry.getDetectorType(layer), sector, Constants.getInstance().BMTGEOMETRY.getRegion(layer), -1);
                     cross2D.setPoint0(new Point3D(traj.x(), traj.y(), 0)); 
                     projectedCrosses.add(cross2D); 
                 }

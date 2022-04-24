@@ -1,10 +1,12 @@
 package org.jlab.clas.tracking.kalmanfilter.straight;
 
 import java.util.HashMap;
+import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs.MeasVec;
 import org.jlab.clas.tracking.kalmanfilter.AStateVecs;
+import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.clas.tracking.trackrep.Helix;
 import org.jlab.clas.tracking.trackrep.Helix.Units;
 import org.jlab.geom.prim.Line3D;
@@ -19,18 +21,17 @@ public class StateVecs extends AStateVecs {
 
     
     @Override
-    public boolean getStateVecPosAtMeasSite(AStateVecs.StateVec vec, AMeasVecs.MeasVec mv, Swim swim) {
-        double[] value = new double[4];
+    public boolean getStateVecPosAtMeasSite(StateVec vec, MeasVec mv, Swim swim) {
         
         if(mv.surface==null) return false;
         
         Point3D ref = new Point3D(vec.x0,vec.y0,vec.z0);
-        Vector3D u = new Vector3D(vec.px, vec.py, vec.pz).asUnit(); 
+        Vector3D u = new Vector3D(vec.tx, 1, vec.tz).asUnit(); 
 
         if(mv.k==0) {
-            vec.x = vec.x0;
-            vec.y = vec.y0;
-            vec.z = vec.z0;
+            vec.x = vec.x0-vec.y0*vec.tx;
+            vec.y = 0;
+            vec.z = vec.z0-vec.y0*vec.tz;
             return true;
         }            
         else if(mv.hemisphere!=0) {
@@ -67,7 +68,7 @@ public class StateVecs extends AStateVecs {
     }
     
     @Override
-    public boolean setStateVecPosAtMeasSite(AStateVecs.StateVec sv, MeasVec mv, Swim swimmer) {
+    public boolean setStateVecPosAtMeasSite(StateVec sv, MeasVec mv, Swim swimmer) {
 
         boolean status = this.getStateVecPosAtMeasSite(sv, mv, swimmer);
         if (!status) {
@@ -79,123 +80,70 @@ public class StateVecs extends AStateVecs {
     }
 
     @Override
-    public double[][] F(AStateVecs.StateVec iVec, AStateVecs.StateVec fVec) {
+    public double[][] F(StateVec iVec, StateVec fVec) {
+        /* Assumes the state vector is (x, z, tx, ty)
+         * with (x0, 0, z0) being the track intercept with the y=0 plane;
+         * x = x0 + dl*tx;      xi = x0 + yi*tx;                                  xf = xi + (yf-yi)*tx;
+         * y = y0 + dl;     =>  yi = dl;            for iVec->fVec, i.e. yi->yf   zf = zi + (yf-yi)*tz;
+         * z = z0 + dl*tz;      zi = z0 + yi*tz;                                  txf = tx; tzf = tz;           
+        */                                                                      
         double[][] FMat = new double[][]{
-            {1, 0, 0, 0, 0},
-            {0, 1, 0, 0, 0},
-            {0, 0, 1, 0, 0},
-            {0, 0, 0, 1, 0},
-            {0, 0, 0, 0, 1}
+            { 1, 0, (fVec.y-iVec.y),               0,   0},
+            { 0, 1,               0, (fVec.y-iVec.y),   0},
+            { 0, 0,               1,               0,   0},
+            { 0, 0,               0,               1,   0},
+            { 0, 0,               0,               0,   1}
         };
         return FMat;
     }
 
     @Override
-    public double[][] Q(int i, int f, AStateVecs.StateVec iVec, AMeasVecs mv) {
+    public double[][] Q(StateVec vec, AMeasVecs mv) {
+
         double[][] Q = new double[5][5];
 
-        int dir = (int) Math.signum(f-i);
-        if(dir<0) return Q;
-        
-        double t_ov_X0 = 0;
-        // depending on dir, k increases or decreases
-        for (int k = i; (k-f)*dir <= 0; k += dir) {
-            int hemisphere = (int) mv.measurements.get(k).surface.hemisphere;
-            if(dir*hemisphere>0 && k==f) continue;
-            if(dir*hemisphere<0 && k==i) continue;
-            double cosEntranceAngle = 1;//this.getLocalDirAtMeasSite(iVec, mv.measurements.get(k));
-            t_ov_X0 += mv.measurements.get(k).l_over_X0 / cosEntranceAngle;
-        }
+//        int dir = (int) Math.signum(f-i);
+//        if(dir<0) return Q;
+                
+        Surface surf = mv.measurements.get(vec.k).surface;
+        double cosEntranceAngle = this.getLocalDirAtMeasSite(vec, mv.measurements.get(vec.k));
 
-        if (t_ov_X0>0) {
-            double p    = 1;
-            double mass = piMass;   // assume given mass hypothesis 
-            double beta = p / Math.sqrt(p * p + mass * mass);
-            // Highland-Lynch-Dahl formula
-            double sctRMS = (0.0136/(beta*p))*Math.sqrt(t_ov_X0)*(1 + 0.038 * Math.log(t_ov_X0));        
-            double cov_txtx = (1 + iVec.tx * iVec.tx) * (1 + iVec.tx * iVec.tx + iVec.tz * iVec.tz) * sctRMS * sctRMS;
-            double cov_tztz = (1 + iVec.tz * iVec.tz) * (1 + iVec.tx * iVec.tx + iVec.tz * iVec.tz) * sctRMS * sctRMS;
-            double cov_txtz = iVec.tx * iVec.tz * (1 + iVec.tx * iVec.tx + iVec.tz * iVec.tz) * sctRMS * sctRMS;
-            Q = new double[][]{
-                {0, 0, 0,        0,        0},
-                {0, 0, 0,        0,        0},
-                {0, 0, cov_txtx, cov_txtz, 0},
-                {0, 0, cov_txtz, cov_tztz, 0},
-                {0, 0, 0,        0,        0}
-            };
-        }
+        double p = 1;
+        
+        // Highland-Lynch-Dahl formula
+        double sctRMS = surf.getThetaMS(p, mass, cosEntranceAngle);
+        double cov_txtx = (1 + vec.tx * vec.tx) * (1 + vec.tx * vec.tx + vec.tz * vec.tz) * sctRMS * sctRMS;
+        double cov_tztz = (1 + vec.tz * vec.tz) * (1 + vec.tx * vec.tx + vec.tz * vec.tz) * sctRMS * sctRMS;
+        double cov_txtz = vec.tx * vec.tz * (1 + vec.tx * vec.tx + vec.tz * vec.tz) * sctRMS * sctRMS;
+        Q = new double[][]{
+            {0, 0, 0,        0,        0},
+            {0, 0, 0,        0,        0},
+            {0, 0, cov_txtx, cov_txtz, 0},
+            {0, 0, cov_txtz, cov_tztz, 0},
+            {0, 0, 0,        0,        0}
+        };
+        
         return Q;
     }
-
+    
     @Override
-    public Vector3D P(int kf) {
-        if (this.trackTrajF.get(kf) != null) {
-            double tx = this.trackTrajF.get(kf).tx;
-            double tz = this.trackTrajF.get(kf).tz;
-            
-            double py = 1/Math.sqrt(1+tx*tx+tz*tz);
-            double px = tx*py;
-            double pz = tz*py;
-
-            return new Vector3D(px, py, pz);
-        } else {
-            return new Vector3D(0, 0, 0);
-        }
-    }
-
-    @Override
-    public Vector3D X(int kf) {
-        if (this.trackTrajF.get(kf) != null) {
-            double tx = this.trackTrajF.get(kf).tx;
-            double tz = this.trackTrajF.get(kf).tz;
-            
-            double py = 1/Math.sqrt(1+tx*tx+tz*tz);
-            double px = tx*py;
-            double pz = tz*py;
-            
-            double x = this.trackTrajF.get(kf).x0 + px ;
-            double y = this.trackTrajF.get(kf).dl*py ;
-            double z = this.trackTrajF.get(kf).z0 + this.trackTrajF.get(kf).dl*pz ;
-
-            return new Vector3D(x, y, z);
-        } else {
-            return new Vector3D(0, 0, 0);
-        }
-    }
-
-    @Override
-    public Vector3D X(AStateVecs.StateVec kVec, double phi) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Vector3D P0(int kf) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Vector3D X0(int kf) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void printlnStateVec(AStateVecs.StateVec S) {
+    public void printlnStateVec(StateVec S) {
         String s = String.format("%d) x0=%.4f y0=%.4f z0=%.4f tx=%.4f tz=%.4f dl=%.4f", S.k, S.x0, S.y0, S.z0, S.tx, S.tz, S.dl);
         s       += String.format("    x=%.4f y=%.4f z=%.4f px=%.4f py=%.4f pz=%.4f", S.x, S.y, S.z, S.px, S.py, S.pz);
         System.out.println(s);
     }   
 
     @Override
-    public void init(Helix trk, double[][] cov, double xref, double yref, double zref, Swim swimmer) {
+    public void init(Helix trk, double[][] cov, double xref, double yref, double zref, double mass, Swim swimmer) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     @Override
     public void init(double x0, double z0, double tx, double tz, Units units, double[][] cov) {
-        this.trackTrajF = new HashMap<>();
+
         this.units = units;
 
-        initSV = new AStateVecs.StateVec(0);
+        initSV = new StateVec(0);
         initSV.x0 = x0;
         initSV.y0 = 0;
         initSV.z0 = z0;
@@ -210,10 +158,26 @@ public class StateVecs extends AStateVecs {
             }
         }
         initSV.covMat = covKF;
-        this.trackTrajF.put(0, new AStateVecs.StateVec(initSV));
-        this.trackTrajT.put(0, new AStateVecs.StateVec(initSV));
+        double[][] FMat = new double[][]{
+            {1, 0, 0, 0, 0},
+            {0, 1, 0, 0, 0},
+            {0, 0, 1, 0, 0},
+            {0, 0, 0, 1, 0},
+            {0, 0, 0, 0, 1}
+        };
+        initSV.F = FMat;
+        this.trackTrajT.clear();
+        this.trackTrajF.clear();
+        this.trackTrajP.clear();
+        this.trackTrajB.clear();
+        this.trackTrajS.clear();
+        this.trackTrajT.put(0, new StateVec(initSV));
         
     }
 
-     public double piMass = 0.13957018;
+    @Override
+    public void corrForEloss(int dir, StateVec iVec, AMeasVecs mv) {
+
+    }
+
 }

@@ -21,19 +21,41 @@ public abstract class AStateVecs {
     public double yref;
     public double zref;
 
-    public StateVec initSV; //init sv
+    public double mass;
+
+    public StateVec initSV; 
+    public StateVec lastSV; 
          
     public Map<Integer, StateVec> trackTrajS  = new HashMap<>(); // smoothed    
+    public Map<Integer, StateVec> trackTrajB  = new HashMap<>(); // backward filtered    
+    public Map<Integer, StateVec> trackTrajP  = new HashMap<>(); // backward transport    
     public Map<Integer, StateVec> trackTrajF  = new HashMap<>(); // filtered    
-    public Map<Integer, StateVec> trackTrajT  = new HashMap<>(); // transported
+    public Map<Integer, StateVec> trackTrajT  = new HashMap<>(); // transport
 
     public boolean straight;
 
-    
-    public abstract void init(Helix trk, double[][] cov, double xref, double yref, double zref, Swim swimmer);
+    public abstract void init(Helix trk, double[][] cov, double xref, double yref, double zref, double mass, Swim swimmer);
 
     public abstract void init(double x0, double z0, double tx, double tz, Units units, double[][] cov);
 
+    public Map<Integer, StateVec> smoothed() {
+        return this.trackTrajS;
+    }
+    
+    public Map<Integer, StateVec> transported() {
+        return this.transported(true);
+    }
+    
+    public Map<Integer, StateVec> transported(boolean forward) {
+        if(forward) return this.trackTrajT;
+        else        return this.trackTrajP;
+    }
+    
+    public Map<Integer, StateVec> filtered(boolean forward) {
+        if(forward) return this.trackTrajF;
+        else        return this.trackTrajB;
+    }
+        
     public abstract boolean setStateVecPosAtMeasSite(StateVec vec, MeasVec mv, Swim swimmer);
 
     public StateVec newStateVecAtMeasSite(StateVec vec, MeasVec mv, Swim swimmer) {
@@ -46,14 +68,33 @@ public abstract class AStateVecs {
 
     public abstract boolean getStateVecPosAtMeasSite(StateVec iVec, MeasVec mv, Swim swim);
 
-    public StateVec transported(StateVec iVec, int f, AMeasVecs mv, Swim swimmer) {
-    // transport state vector
-        StateVec fVec = this.newStateVecAtMeasSite(iVec, mv.measurements.get(f), swimmer);
-        if(fVec==null) return null;
+    public StateVec transport(StateVec iVec, int f, AMeasVecs mv, Swim swimmer) {
+        // transport state vector
+        int dir = (int) Math.signum(f-iVec.k);
+ 
+        StateVec fVec = new StateVec(iVec);
+        
+        if(dir>0) this.corrForEloss(dir, fVec, mv);
+
+        if(!this.setStateVecPosAtMeasSite(fVec, mv.measurements.get(f), swimmer)) return null;
+
+        if(dir<0) this.corrForEloss(dir, fVec, mv);
+
         //transport covariance matrix
         double[][] fCov = this.propagateCovMat(iVec, fVec);
-        double[][] iQ   = this.Q(iVec.k, fVec.k, iVec, mv);
-        double[][] fQ   = this.propagateMatrix(iVec, fVec, iQ);
+        double[][] fQ = null;
+        
+        if(dir>0) {
+            double[][] iQ = this.Q(iVec, mv);
+            fQ = this.propagateMatrix(iVec, fVec, iQ);
+//            System.out.println("From " + i + " to " + f + " including material from surface " + i + " with X0 = " +  mv.measurements.get(i).surface.getToverX0());
+//            System.out.println(mv.measurements.get(i).surface.toString());
+                        }
+        else {
+            fQ =this.Q(fVec, mv);
+//            System.out.println("From " + i + " to " + f + " including material from surface " + f + " with X0 = " +  mv.measurements.get(f).surface.getToverX0());
+//            System.out.println(mv.measurements.get(f).surface.toString());
+        }
         if (fCov != null) {
             fVec.covMat = addProcessNoise(fCov, fQ);            
         }
@@ -64,24 +105,12 @@ public abstract class AStateVecs {
     public final void transport(int i, int f, AMeasVecs mv, Swim swimmer) {
         // transport state vector
         StateVec iVec = this.trackTrajT.get(i);
-        StateVec fVec = this.transported(iVec, f, mv, swimmer);
+        StateVec fVec = this.transport(iVec, f, mv, swimmer);
         this.trackTrajT.put(f, fVec);
     }
 
-    public final void transportFiltered(int i, int f, AMeasVecs mv, Swim swimmer) {
-        // transport state vector
-        StateVec iVec = this.trackTrajF.get(i);
-        StateVec fVec = this.transported(iVec, f, mv, swimmer);
-        this.trackTrajT.put(f, fVec);
-    }
-
-    public final void transportSmoothed(int i, int f, AMeasVecs mv, Swim swimmer) {
-        // transport state vector
-        StateVec iVec = this.trackTrajS.get(i);
-        StateVec fVec = this.transported(iVec, f, mv, swimmer);
-        this.trackTrajS.put(f, fVec);
-    }
-
+    public abstract void corrForEloss(int dir, StateVec iVec, AMeasVecs mv);
+    
     public final double[][] propagateCovMat(StateVec ivec, StateVec fvec) {
         return this.propagateMatrix(ivec, fvec, ivec.covMat);
     }
@@ -143,28 +172,34 @@ public abstract class AStateVecs {
 
     public double getLocalDirAtMeasSite(StateVec vec, MeasVec mv) {
         if(mv.surface==null) 
-            return 0;
-        else if(mv.surface.plane==null && mv.surface.cylinder==null) 
-            return 0;
+            return 1;
+        else if(mv.surface.type!=Type.PLANEWITHSTRIP && 
+                mv.surface.type!=Type.CYLINDERWITHSTRIP && 
+                mv.surface.type!=Type.LINE) 
+            return 1;
         else {
             Point3D  pos = new Point3D(vec.x, vec.y, vec.z);
             Vector3D dir = new Vector3D(vec.px, vec.py, vec.pz).asUnit();
-            if(mv.surface.plane!=null) {
+            if(mv.surface.type==Type.PLANEWITHSTRIP) {
                 Vector3D norm = mv.surface.plane.normal();
                 return Math.abs(norm.dot(dir));
             }
-            else if(mv.surface.cylinder!=null) {
+            else if(mv.surface.type==Type.CYLINDERWITHSTRIP) {
                 mv.surface.toLocal().apply(pos);
                 mv.surface.toLocal().apply(dir);
                 Vector3D norm = pos.toVector3D().asUnit();
                 return Math.abs(norm.dot(dir));
             }
+            else if(mv.surface.type==Type.LINE) {
+                Vector3D norm = mv.surface.lineEndPoint1.vectorTo(mv.surface.lineEndPoint2).asUnit();
+                double cosdir = Math.abs(norm.dot(dir));
+                return Math.sqrt(1-cosdir*cosdir);
+            }
             return 0;
         }
     }
-    
-
-    public abstract double[][] Q(int i, int f, StateVec iVec, AMeasVecs mv);
+        
+    public abstract double[][] Q(StateVec vec, AMeasVecs mv);
 
     public abstract double[][] F(StateVec ivec, StateVec fvec);
 
@@ -227,6 +262,10 @@ public abstract class AStateVecs {
             this.setPivot(xpivot, ypivot, zpivot);
         }
 
+        public StateVec clone() {
+            return new StateVec(this);
+        }
+        
         public final void copy(StateVec s) {
             this.d_rho = s.d_rho;
             this.phi0 = s.phi0;
@@ -377,21 +416,21 @@ public abstract class AStateVecs {
         }
         
         public void updateRay() {
-            this.dl = this.y/this.py;
-            this.x0 = this.x -this.dl*this.px;
-            this.y0 = this.y -this.dl*this.py;
-            this.z0 = this.z -this.dl*this.pz;
+            this.dl = 0;
             this.tx = this.px/this.py;
             this.tz = this.pz/this.py;
+            this.x0 = this.x -this.dl*this.tx;
+            this.y0 = this.y -this.dl;
+            this.z0 = this.z -this.dl*this.tz;
         }
         
         public void updateFromRay() {
             this.py = 1/Math.sqrt(1+tx*tx+tz*tz);
             this.px = tx*py;
             this.pz = tz*py;
-            this.x = this.x0 + this.dl*this.px;
-            this.y = this.y0 + this.dl*this.py;
-            this.z = this.z0 + this.dl*this.pz;
+            this.x = this.x0 + this.dl*this.tx;
+            this.y = this.y0 + this.dl;
+            this.z = this.z0 + this.dl*this.tz;
         }
 
         public double[] get_ELoss() {
@@ -402,6 +441,20 @@ public abstract class AStateVecs {
             this._ELoss = _ELoss;
         }
 
+        public double[] getHelixArray() {
+            double[] a = new double[5];
+            for(int i=0; i<5; i++)
+                a[i] = this.getHelixComponent(i);
+            return a;
+        }
+        
+        public double[] getRayArray() {
+            double[] a = new double[5];
+            for(int i=0; i<5; i++)
+                a[i] = this.getRayComponent(i);
+            return a;
+        }
+        
         public double getHelixComponent(int i) {
             switch (i) {
                 case 0:
@@ -486,17 +539,6 @@ public abstract class AStateVecs {
             this.alpha = 1. / (lightVel * Math.abs(b[2]));
         }
     }
-    
-   
-    public abstract Vector3D P(int kf);
-
-    public abstract Vector3D X(int kf);
-
-    public abstract Vector3D X(StateVec kVec, double phi);
-
-    public abstract Vector3D P0(int kf);
-
-    public abstract Vector3D X0(int kf);
 
     public abstract void printlnStateVec(StateVec S);
 }

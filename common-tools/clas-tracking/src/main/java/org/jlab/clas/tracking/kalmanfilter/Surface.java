@@ -1,5 +1,7 @@
 package org.jlab.clas.tracking.kalmanfilter;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.jlab.clas.tracking.objects.Strip;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
@@ -29,15 +31,11 @@ public class Surface implements Comparable<Surface> {
     private int index;
     private int layer;
     private int sector;
-    // this is for multiple scattering estimates in track 
-    private double _l_over_X0;
-    //this is for energy loss
-    private double _Z_over_A_times_l;
-    private double _thickness;
+    private List<Material> materials = new ArrayList<>();
     // this is for swimming
     public double swimAccuracy;
     public boolean notUsedInFit = false;
-    public boolean passive = false;
+    public boolean passive = false; // RDV chek if passive and notUsedinFit could be mergeds
     public double hemisphere = 1;
     
     public Surface(Plane3D plane3d, Point3D refrPoint, Point3D c1, Point3D c2, double accuracy) {
@@ -116,9 +114,9 @@ public class Surface implements Comparable<Surface> {
     @Override
     public String toString() {
         String s = "Surface: ";
-        s = s + String.format("Type=%s Index=%d  Layer=%d  Sector=%d  Emisphere=%.1f X0=%.4f  Z/AL=%.4f  Error=%.4f Skip=%b Passive=%b",
-                               this.type.name(), this.getIndex(),this.getLayer(),this.getSector(),this.hemisphere,this.getl_over_X0(),
-                               this.getZ_over_A_times_l(),this.getError(),this.notUsedInFit, this.passive);
+        s = s + String.format("Type=%s Index=%d  Layer=%d  Sector=%d  Emisphere=%.1f X0=%.4f  Z/A=%.4f  Error=%.4f Skip=%b Passive=%b",
+                               this.type.name(), this.getIndex(),this.getLayer(),this.getSector(),this.hemisphere,this.getToverX0(),
+                               this.getZoverA(),this.getError(),this.notUsedInFit, this.passive);
         if(type==Type.PLANEWITHSTRIP) {
             s = s + "\n\t" + this.plane.toString();
             s = s + "\n\t" + this.finitePlaneCorner1.toString();
@@ -185,42 +183,52 @@ public class Surface implements Comparable<Surface> {
         this.sector = sector;
     }
 
-    /**
-     * @return  _l_over_X0
-     */
-    public double getl_over_X0() {
-        return _l_over_X0;
+    public List<Material> getMaterials() {
+        return materials;
     }
 
-    /**
-     * @param l_over_X0 the l_over_X0 to set
-     */
-    public void setl_over_X0(double l_over_X0) {
-        this._l_over_X0 = l_over_X0;
+    public void addMaterial(Material m) {
+        this.materials.add(m);
+    }
+    
+    public void addMaterial(String name, double thickness, double density, double ZoverA, double X0, double IeV) {
+        this.materials.add(new Material(name, thickness, density, ZoverA, X0, IeV));
+    }
+    
+    public double getToverX0() {
+        double lX0 = 0;
+        for(Material m : this.materials) {
+            lX0 += m.getThickness()/m.getX0();
+        }
+        return lX0;
     }
 
-    /**
-     * @return the _Z_over_A_times_l
-     */
-    public double getZ_over_A_times_l() {
-        return _Z_over_A_times_l;
+    public double getZoverA() {
+        double ZA   = 0;
+        double RhoX = 0;
+        for(Material m : this.materials) {
+            ZA += m.getThickness()*m.getDensity()*m.getZoverA();
+            RhoX += m.getThickness()*m.getDensity();
+        }
+        return ZA/RhoX;
     }
-
-    /**
-     * @param _Z_over_A_times_l the _Z_over_A_times_l to set
-     */
-    public void setZ_over_A_times_l(double _Z_over_A_times_l) {
-        this._Z_over_A_times_l = _Z_over_A_times_l;
+    
+    public double getEloss(double p, double mass, double units) {
+        double dE=0;
+        for(Material m : this.materials) {
+            dE += m.getEloss(p, mass, units);
+        }
+        return dE;
     }
-
-    public double getThickness() {
-        return _thickness;
+    
+    public double getThetaMS(double p, double mass, double cosEntranceAngle) {
+        double ToverX0 = this.getToverX0()/cosEntranceAngle;
+        double beta = p / Math.sqrt(p * p + mass * mass);
+        double thetaMS = 0;
+        if(ToverX0>0) thetaMS = (0.0136/(beta*p))*Math.sqrt(ToverX0)*(1 + 0.038 * Math.log(ToverX0));
+        return thetaMS;
     }
-
-    public void setThickness(double _thickness) {
-        this._thickness = _thickness;
-    }
-
+        
     public Transformation3D toGlobal() {
         return toGlobal;
     }

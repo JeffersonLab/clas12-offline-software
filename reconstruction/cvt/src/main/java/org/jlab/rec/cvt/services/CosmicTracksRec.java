@@ -1,7 +1,6 @@
 package org.jlab.rec.cvt.services;
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.straight.KFitter;
 import org.jlab.clas.tracking.trackrep.Helix.Units;
 import org.jlab.detector.base.DetectorType;
@@ -28,20 +27,27 @@ import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 
 public class CosmicTracksRec {
     
+    private boolean initFromMc = false;    
+    
     private final RecUtilities recUtil = new RecUtilities();
+    private KFitter kf = null;
+    
+    public void initKF(boolean initFromMc, boolean kfFilterOn, int kfIterations) {
+        this.initFromMc = initFromMc;
+        kf = new KFitter(kfFilterOn, kfIterations, Constants.KFDIR, Constants.getInstance().KFMatrixLibrary);
+    }
     
     public boolean processEvent(DataEvent event,  
             List<Hit> SVThits, List<Hit> BMThits, 
             List<Cluster> SVTclusters, List<Cluster> BMTclusters, 
-            List<ArrayList<Cross>> crosses,
-            RecoBankWriter rbc, Swim swimmer) {
+            List<ArrayList<Cross>> crosses) {
         
         // make list of crosses consistent with a track candidate using SVT only first
         StraightTrackCrossListFinder crossLister = new StraightTrackCrossListFinder();
         CrossList crosslist = crossLister.findCosmicsCandidateCrossLists(crosses, 3);
         if (crosslist == null || crosslist.isEmpty()) {
             // create the clusters and fitted hits banks
-            rbc.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null);
+            RecoBankWriter.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null, null);
 
             return true;
         } 
@@ -51,11 +57,11 @@ public class CosmicTracksRec {
 
         if (cosmicCands.isEmpty()) {
             recUtil.CleanupSpuriousCrosses(crosses, null) ;
-            rbc.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null);
+            RecoBankWriter.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null, null);
             return true;
         }
         
-//        if(Constants.EXCLUDELAYERS==true) {
+//        if(Constants.getInstance().EXCLUDELAYERS==true) {
 //            CosmicFitter fitTrk = new CosmicFitter();
 //            cosmicCands = recUtil.reFit(cosmicCands, fitTrk,  trkcandFinder);
 //        }
@@ -77,13 +83,12 @@ public class CosmicTracksRec {
             }
             recUtil.CleanupSpuriousCrosses(crosses, null) ;
             
-            KFitter kf = new KFitter(Constants.KFFILTERON, Constants.KFITERATIONS, Constants.KFDIR, Constants.kfBeamSpotConstraint(), Constants.KFMATLIB);
-            Measurements measures = new Measurements(true, 0, 0);
+            Measurements measures = new Measurements(true);
             List<StraightTrack> cosmics = new ArrayList<>();
             for (int k1 = 0; k1 < cosmicCands.size(); k1++) {
                 Ray ray = cosmicCands.get(k1).getRay();
                 
-                if(Constants.INITFROMMC) {
+                if(this.initFromMc) {
                     double[] pars = recUtil.mcTrackPars(event);
                     Point3D  v = new Point3D(pars[0],pars[1],pars[2]);
                     Vector3D p = new Vector3D(pars[3],pars[4],pars[5]);
@@ -91,10 +96,10 @@ public class CosmicTracksRec {
                 }                
                
                 double[][] cov = new double[5][5];                
-                cov[0][0]=1;
-                cov[1][1]=1;
-                cov[2][2]=0.001; // ~2deg
-                cov[3][3]=0.001;
+                cov[0][0]=20;
+                cov[1][1]=20;
+                cov[2][2]=0.01; // ~8deg
+                cov[3][3]=0.01;
                 cov[4][4]=1;
                 kf.init(ray.getYXInterc(),ray.getYZInterc(),
                         ray.getYXSlope(), ray.getYZSlope(), Units.MM, cov,
@@ -102,8 +107,7 @@ public class CosmicTracksRec {
                 kf.mv.setDelta_d_a(new double[]{0.1, 0.1, 0.0001, 0.0001, 1});
                 kf.runFitter();
                 if (kf.setFitFailed == false && kf.NDF>0 && kf.finalStateVec!=null) { 
-                    StraightTrack cosmic = cosmicCands.get(k1);
-                    cosmic.update(kf);
+                    StraightTrack cosmic = new StraightTrack(cosmicCands.get(k1), kf);
                     
                     //refit adding missing clusters
                     List<Cluster> clsOnTrack = recUtil.findClustersOnTrack(SVTclusters, cosmic);
@@ -128,7 +132,7 @@ public class CosmicTracksRec {
                         //refit
                         kf.init(cosmic.getRay().getYXInterc(),cosmic.getRay().getYZInterc(),
                                 cosmic.getRay().getYXSlope(), cosmic.getRay().getYZSlope(), Units.CM, cov,
-                                measures.getMeasurements(cosmicCands.get(k1))) ;
+                                measures.getMeasurements(cosmic)) ;
                         kf.runFitter();
                         if (kf.setFitFailed == false && kf.NDF>0 && kf.finalStateVec!=null) { 
                             cosmic.update(kf);
@@ -164,7 +168,7 @@ public class CosmicTracksRec {
                     }
                 }
             }
-            rbc.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, cosmics);
+            RecoBankWriter.appendCVTCosmicsBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, cosmicCands, cosmics);
         }
         return true;
         }

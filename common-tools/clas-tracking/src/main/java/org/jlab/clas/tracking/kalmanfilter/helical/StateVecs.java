@@ -1,11 +1,10 @@
 package org.jlab.clas.tracking.kalmanfilter.helical;
 
-import java.util.HashMap;
-import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs.MeasVec;
 import org.jlab.clas.tracking.kalmanfilter.AStateVecs;
+import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.clas.tracking.trackrep.Helix;
 import org.jlab.clas.tracking.trackrep.Helix.Units;
 import org.jlab.geom.prim.Line3D;
@@ -155,6 +154,27 @@ public class StateVecs extends AStateVecs {
         return true;
     }
           
+    @Override
+    public void corrForEloss(int dir, StateVec vec, AMeasVecs mv) {
+        
+        if(this.straight || mass<0) return;
+                       
+        Surface surf = mv.measurements.get(vec.k).surface;
+        double cosEntranceAngle = this.getLocalDirAtMeasSite(vec, mv.measurements.get(vec.k));
+
+        double p = Math.sqrt(vec.px*vec.px + vec.py*vec.py + vec.pz*vec.pz);
+        double E = Math.sqrt(p*p + mass*mass);
+        
+        double dE = -dir*surf.getEloss(p, mass, this.units.unit())/cosEntranceAngle;
+
+        double ECorr = E + dE;
+        double pCorr = Math.sqrt(ECorr*ECorr-mass*mass);
+//        System.out.println("Moving in direction " + dir + " including material from surface " + vec.k + " with X0 = " +  mv.measurements.get(vec.k).surface.getToverX0());
+//        System.out.println(p + " " + E + " " + dE + " " + pCorr);
+//        System.out.println(mv.measurements.get(vec.k).surface.toString());
+        vec.kappa = vec.kappa*p/pCorr;
+        vec.updateFromHelix();
+    }
     
     @Override
     public double[][] F(StateVec iVec, StateVec fVec) {
@@ -170,25 +190,25 @@ public class StateVecs extends AStateVecs {
             if(Math.abs(deltaPhi0)>Math.PI) deltaPhi0 -= Math.signum(deltaPhi0)*2*Math.PI;
             double dphi0_prm_del_drho = -1. / (fVec.d_rho + iVec.alpha / iVec.kappa) * Math.sin(deltaPhi0);
             double dphi0_prm_del_phi0 = (iVec.d_rho + iVec.alpha / iVec.kappa) / (fVec.d_rho + iVec.alpha / iVec.kappa) * Math.cos(deltaPhi0);
-            double dphi0_prm_del_kappa = (iVec.alpha / (iVec.kappa * iVec.kappa)) / (fVec.d_rho + iVec.alpha / iVec.kappa) * Math.sin(deltaPhi0);
+            double dphi0_prm_del_kappa = (fVec.kappa/iVec.kappa)*(iVec.alpha / (iVec.kappa * iVec.kappa)) / (fVec.d_rho + iVec.alpha / iVec.kappa) * Math.sin(deltaPhi0);
             double dphi0_prm_del_dz = 0;
             double dphi0_prm_del_tanL = 0;
 
             double drho_prm_del_drho = Math.cos(deltaPhi0);
             double drho_prm_del_phi0 = (iVec.d_rho + iVec.alpha / iVec.kappa) * Math.sin(deltaPhi0);
-            double drho_prm_del_kappa = (iVec.alpha / (iVec.kappa * iVec.kappa)) * (1 - Math.cos(deltaPhi0));
+            double drho_prm_del_kappa = (fVec.kappa/iVec.kappa)*(iVec.alpha / (iVec.kappa * iVec.kappa)) * (1 - Math.cos(deltaPhi0));
             double drho_prm_del_dz = 0;
             double drho_prm_del_tanL = 0;
 
             double dkappa_prm_del_drho = 0;
             double dkappa_prm_del_phi0 = 0;
-            double dkappa_prm_del_dkappa = 1;
+            double dkappa_prm_del_dkappa = fVec.kappa/iVec.kappa;
             double dkappa_prm_del_dz = 0;
             double dkappa_prm_del_tanL = 0;
 
             double dz_prm_del_drho = ((iVec.alpha / iVec.kappa) / (fVec.d_rho + iVec.alpha / iVec.kappa)) * iVec.tanL * Math.sin(deltaPhi0);
             double dz_prm_del_phi0 = (iVec.alpha / iVec.kappa) * iVec.tanL * (1 - Math.cos(deltaPhi0) * (iVec.d_rho + iVec.alpha / iVec.kappa) / (fVec.d_rho + iVec.alpha / iVec.kappa));
-            double dz_prm_del_kappa = (iVec.alpha / (iVec.kappa * iVec.kappa)) * iVec.tanL * (deltaPhi0 - Math.sin(deltaPhi0) * (iVec.alpha / iVec.kappa) / (fVec.d_rho + iVec.alpha / iVec.kappa));
+            double dz_prm_del_kappa = (fVec.kappa/iVec.kappa)*(iVec.alpha / (iVec.kappa * iVec.kappa)) * iVec.tanL * (deltaPhi0 - Math.sin(deltaPhi0) * (iVec.alpha / iVec.kappa) / (fVec.d_rho + iVec.alpha / iVec.kappa));
             double dz_prm_del_dz = 1;
             double dz_prm_del_tanL = -iVec.alpha * (deltaPhi0) / iVec.kappa;
 
@@ -210,123 +230,41 @@ public class StateVecs extends AStateVecs {
     }
 
     @Override
-    public double[][] Q(int i, int f, StateVec iVec, AMeasVecs mv) {
+    public double[][] Q(StateVec vec, AMeasVecs mv) {
         double[][] Q = new double[5][5];
+              
+        if(this.mass<0) return Q;
+                
+        Surface surf = mv.measurements.get(vec.k).surface;
+        double cosEntranceAngle = this.getLocalDirAtMeasSite(vec, mv.measurements.get(vec.k));
 
-        int dir = f-i;
-
-        double t_ov_X0 = 0;
-        if(dir>0) {
-            for(int k=i; k<f; k++) {
-                double cosEntranceAngle = this.getLocalDirAtMeasSite(iVec, mv.measurements.get(k+1));
-                t_ov_X0 += mv.measurements.get(k+1).l_over_X0/1;//cosEntranceAngle;
-//                System.out.println("From " + i + " to " + f + " including material from surface " + (k+1) + " with X0 = " +  mv.measurements.get(k+1).l_over_X0 + " / " + cosEntranceAngle);
-//                System.out.println(mv.measurements.get(k+1).surface.toString());
-            }
-        }
-        else {
-            for(int k=i; k>f; k--) {
-                double cosEntranceAngle = this.getLocalDirAtMeasSite(iVec, mv.measurements.get(k));
-                t_ov_X0 += mv.measurements.get(k).l_over_X0/1;//cosEntranceAngle;
-//                System.out.println("From " + i + " to " + f + " including material from surface " + k + " with X0 = " +  mv.measurements.get(k).l_over_X0 + " / " + cosEntranceAngle);
-//                System.out.println(mv.measurements.get(k).surface.toString());
-            }
-        }
-
-        if (t_ov_X0>0) {
-            double p    = Math.sqrt(iVec.px*iVec.px + iVec.py*iVec.py + iVec.pz*iVec.pz);
-            if(this.straight) p = 1;
-            double mass = PhysicsConstants.massPionCharged();   // assume given mass hypothesis 
-            double beta = p / Math.sqrt(p * p + mass * mass);
-            // Highland-Lynch-Dahl formula
-            double sctRMS = (0.0136/(beta*p))*Math.sqrt(t_ov_X0)*(1 + 0.038 * Math.log(t_ov_X0));
-            Q = new double[][]{
-                {0, 0, 0, 0, 0},
-                {0, sctRMS*sctRMS * (1 + iVec.tanL * iVec.tanL), 0, 0, 0},
-                {0, 0, sctRMS*sctRMS * (iVec.kappa * iVec.kappa * iVec.tanL * iVec.tanL), 0, sctRMS*sctRMS * (iVec.kappa * iVec.tanL * (1 + iVec.tanL * iVec.tanL))},
-                {0, 0, 0, 0, 0},
-                {0, 0, sctRMS*sctRMS * (iVec.kappa * iVec.tanL * (1 + iVec.tanL * iVec.tanL)), 0, sctRMS*sctRMS * (1 + iVec.tanL * iVec.tanL) * (1 + iVec.tanL * iVec.tanL)}
-            };
-        } 
-
+        double p = Math.sqrt(vec.px*vec.px + vec.py*vec.py + vec.pz*vec.pz);
+        if(this.straight) p = 1;
+        
+        // Highland-Lynch-Dahl formula
+        double sctRMS = surf.getThetaMS(p, mass, cosEntranceAngle);
+        Q = new double[][]{
+            {0, 0, 0, 0, 0},
+            {0, sctRMS*sctRMS * (1 + vec.tanL * vec.tanL), 0, 0, 0},
+            {0, 0, sctRMS*sctRMS * (vec.kappa * vec.kappa * vec.tanL * vec.tanL), 0, sctRMS*sctRMS * (vec.kappa * vec.tanL * (1 + vec.tanL * vec.tanL))},
+            {0, 0, 0, 0, 0},
+            {0, 0, sctRMS*sctRMS * (vec.kappa * vec.tanL * (1 + vec.tanL * vec.tanL)), 0, sctRMS*sctRMS * (1 + vec.tanL * vec.tanL) * (1 + vec.tanL * vec.tanL)}
+        };
+        
         return Q;
     }
-
-    @Override
-    public Vector3D P(int kf) {
-    if (this.trackTrajF.get(kf) != null) {
-            double px = -(Math.signum(this.trackTrajF.get(kf).kappa) / this.trackTrajF.get(kf).kappa) * Math.sin(this.trackTrajF.get(kf).phi0 + this.trackTrajF.get(kf).phi);
-            double py = (Math.signum(this.trackTrajF.get(kf).kappa) / this.trackTrajF.get(kf).kappa) * Math.cos(this.trackTrajF.get(kf).phi0 + this.trackTrajF.get(kf).phi);
-            double pz = (Math.signum(this.trackTrajF.get(kf).kappa) / this.trackTrajF.get(kf).kappa) * this.trackTrajF.get(kf).tanL;
-
-            return new Vector3D(px, py, pz);
-        } else {
-            return new Vector3D(0, 0, 0);
-        }
-    }
-
-    @Override
-    public Vector3D X(int kf) {
-    if (this.trackTrajF.get(kf) != null) {
-            double x = this.trackTrajF.get(kf).x0 + this.trackTrajF.get(kf).d_rho * Math.cos(this.trackTrajF.get(kf).phi0) + this.trackTrajF.get(kf).alpha / this.trackTrajF.get(kf).kappa * (Math.cos(this.trackTrajF.get(kf).phi0) - Math.cos(this.trackTrajF.get(kf).phi0 + this.trackTrajF.get(kf).phi));
-            double y = this.trackTrajF.get(kf).y0 + this.trackTrajF.get(kf).d_rho * Math.sin(this.trackTrajF.get(kf).phi0) + this.trackTrajF.get(kf).alpha / this.trackTrajF.get(kf).kappa * (Math.sin(this.trackTrajF.get(kf).phi0) - Math.sin(this.trackTrajF.get(kf).phi0 + this.trackTrajF.get(kf).phi));
-            double z = this.trackTrajF.get(kf).z0 + this.trackTrajF.get(kf).dz - this.trackTrajF.get(kf).alpha / this.trackTrajF.get(kf).kappa * this.trackTrajF.get(kf).tanL * this.trackTrajF.get(kf).phi;
-
-            return new Vector3D(x, y, z);
-        } else {
-            return new Vector3D(0, 0, 0);
-        }
-    }
-
-    @Override
-    public Vector3D X(StateVec kVec, double phi) {
-    if (kVec != null) {
-            double x = kVec.x0 + kVec.d_rho * Math.cos(kVec.phi0) + kVec.alpha / kVec.kappa * (Math.cos(kVec.phi0) - Math.cos(kVec.phi0 + phi));
-            double y = kVec.y0 + kVec.d_rho * Math.sin(kVec.phi0) + kVec.alpha / kVec.kappa * (Math.sin(kVec.phi0) - Math.sin(kVec.phi0 + phi));
-            double z = kVec.z0 + kVec.dz - kVec.alpha / kVec.kappa * kVec.tanL * phi;
-
-            return new Vector3D(x, y, z);
-        } else {
-            return new Vector3D(0, 0, 0);
-        }
-    }
     
     @Override
-    public Vector3D P0(int kf) {
-        if (this.trackTrajF.get(kf) != null) {
-            double px = -(Math.signum(this.trackTrajF.get(kf).kappa) / this.trackTrajF.get(kf).kappa) * Math.sin(this.trackTrajF.get(kf).phi0);
-            double py = (Math.signum(this.trackTrajF.get(kf).kappa) / this.trackTrajF.get(kf).kappa) * Math.cos(this.trackTrajF.get(kf).phi0);
-            double pz = (Math.signum(this.trackTrajF.get(kf).kappa) / this.trackTrajF.get(kf).kappa) * this.trackTrajF.get(kf).tanL;
+    public void init(Helix helix, double[][] cov, double xref, double yref, double zref, double mass, Swim swimmer) {
 
-            return new Vector3D(px, py, pz);
-        } else {
-            return new Vector3D(0, 0, 0);
-        }
-
-    }
-
-    @Override
-    public Vector3D X0(int kf) {
-        if (this.trackTrajF.get(kf) != null) {
-            double x = this.trackTrajF.get(kf).x0 + this.trackTrajF.get(kf).d_rho * Math.cos(this.trackTrajF.get(kf).phi0);
-            double y = this.trackTrajF.get(kf).y0 + this.trackTrajF.get(kf).d_rho * Math.sin(this.trackTrajF.get(kf).phi0);
-            double z = this.trackTrajF.get(kf).z0 + this.trackTrajF.get(kf).dz;
-
-            return new Vector3D(x, y, z);
-        } else {
-            return new Vector3D(0, 0, 0);
-        }
-    }
-
-    
-    @Override
-    public void init(Helix helix, double[][] cov, double xref, double yref, double zref, Swim swimmer) {
         this.units     = helix.getUnits();
         this.lightVel  = helix.getLightVelocity();
 
         this.xref = xref;
         this.yref = yref;
         this.zref = zref;
+        
+        this.mass = mass;
         
         if(Math.abs(helix.getB())<0.001)
            this.straight = true;
@@ -389,9 +327,14 @@ public class StateVecs extends AStateVecs {
                                         {0, 0, 0, 0, 1}
                                         };
         initSV.F = FMat;
+        this.trackTrajT.clear();
+        this.trackTrajF.clear();
+        this.trackTrajP.clear();
+        this.trackTrajB.clear();
+        this.trackTrajS.clear();
         this.trackTrajT.put(0, new StateVec(initSV));        
     }
-
+    
     @Override
     public void printlnStateVec(StateVec S) {
         String s = String.format("%d) drho=%.4f phi0=%.4f kappa=%.4f dz=%.4f tanL=%.4f alpha=%.4f\n", S.k, S.d_rho, S.phi0, S.kappa, S.dz, S.tanL, S.alpha);
@@ -405,6 +348,5 @@ public class StateVecs extends AStateVecs {
     public void init(double x0, double z0, double tx, double tz, Units units, double[][] cov) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
     
 }

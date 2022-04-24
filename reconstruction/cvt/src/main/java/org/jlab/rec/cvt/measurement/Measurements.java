@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.clas.tracking.objects.Strip;
+import org.jlab.clas.tracking.trackrep.Helix.Units;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.geom.prim.Arc3D;
+import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
@@ -27,41 +30,44 @@ public class Measurements {
     
     private static final int NSURFACES = SVTGeometry.NPASSIVE + 
                                          SVTGeometry.NLAYERS  +
+                                         BMTGeometry.NPASSIVE +
                                          BMTGeometry.NLAYERS;
-    private boolean cosmic = false;
+    private boolean cosmic   = false;
     private Surface[] cvtSurfaces;
     private boolean debug = false;
     
-    public Measurements(boolean cosmic, double xbeam, double ybeam) {
+    public Measurements(double xbeam, double ybeam, boolean beamSpot) {
+        this.initTargetSurfaces(xbeam, ybeam, beamSpot);
+    }
+    
+    public Measurements(boolean cosmic) {
         this.cosmic  = cosmic;
-        this.init(xbeam, ybeam);
+        this.initCosmicSurfaces();
     }
     
-    private void init(double xbeam, double ybeam) {
-        if(this.cosmic)
-            this.initCosmicSurfaces();
-        else
-            this.initTargetSurfaces(xbeam, ybeam);
-    }
-    
-    private void initTargetSurfaces(double xbeam, double ybeam) {
-        cvtSurfaces = new Surface[NSURFACES+1];
-        this.add(MLayer.TARGET.getIndex(),       this.getTarget(xbeam, ybeam));
-        this.add(MLayer.SHIELD.getIndex(),       Constants.SVTGEOMETRY.getShieldSurface());
-        this.add(MLayer.INNERSVTCAGE.getIndex(), Constants.SVTGEOMETRY.getFaradayCageSurfaces(0));
-        this.add(MLayer.OUTERSVTCAGE.getIndex(), Constants.SVTGEOMETRY.getFaradayCageSurfaces(1)); 
+    private void initTargetSurfaces(double xbeam, double ybeam, boolean beamSpot) {
+        cvtSurfaces = new Surface[NSURFACES+2];
+        this.add(MLayer.TARGET.getIndex(),       this.getTarget(xbeam, ybeam, beamSpot));
+        this.add(MLayer.SCHAMBER.getIndex(),     this.getScatteringChamber());
+        this.add(MLayer.SHIELD.getIndex(),       Constants.getInstance().SVTGEOMETRY.getShieldSurface());
+        this.add(MLayer.INNERSVTCAGE.getIndex(), Constants.getInstance().SVTGEOMETRY.getFaradayCageSurfaces(0));
+        this.add(MLayer.OUTERSVTCAGE.getIndex(), Constants.getInstance().SVTGEOMETRY.getFaradayCageSurfaces(1)); 
+        this.add(MLayer.BMTINNERTUBE.getIndex(), Constants.getInstance().BMTGEOMETRY.getInnerTube()); 
     }
     
     private void initCosmicSurfaces() {
-        cvtSurfaces = new Surface[NSURFACES*2+1];
+        cvtSurfaces = new Surface[NSURFACES*2+3];
         this.add(MLayer.COSMICPLANE.getIndex(1),   this.getCosmicPlane());
-        this.add(MLayer.SHIELD.getIndex(1),        Constants.SVTGEOMETRY.getShieldSurface());
-        this.add(MLayer.INNERSVTCAGE.getIndex(1),  Constants.SVTGEOMETRY.getFaradayCageSurfaces(0));
-        this.add(MLayer.OUTERSVTCAGE.getIndex(1),  Constants.SVTGEOMETRY.getFaradayCageSurfaces(1));       
-        this.add(MLayer.SHIELD.getIndex(-1),       Constants.SVTGEOMETRY.getShieldSurface(), -1);
-        this.add(MLayer.INNERSVTCAGE.getIndex(-1), Constants.SVTGEOMETRY.getFaradayCageSurfaces(0), -1);
-        this.add(MLayer.OUTERSVTCAGE.getIndex(-1), Constants.SVTGEOMETRY.getFaradayCageSurfaces(1), -1);       
-       
+        this.add(MLayer.SCHAMBER.getIndex(1),      this.getScatteringChamber());
+        this.add(MLayer.SHIELD.getIndex(1),        Constants.getInstance().SVTGEOMETRY.getShieldSurface());
+        this.add(MLayer.INNERSVTCAGE.getIndex(1),  Constants.getInstance().SVTGEOMETRY.getFaradayCageSurfaces(0));
+        this.add(MLayer.OUTERSVTCAGE.getIndex(1),  Constants.getInstance().SVTGEOMETRY.getFaradayCageSurfaces(1));       
+        this.add(MLayer.BMTINNERTUBE.getIndex(1),  Constants.getInstance().BMTGEOMETRY.getInnerTube()); 
+        this.add(MLayer.SCHAMBER.getIndex(-1),     this.getScatteringChamber());
+        this.add(MLayer.SHIELD.getIndex(-1),       Constants.getInstance().SVTGEOMETRY.getShieldSurface(), -1);
+        this.add(MLayer.INNERSVTCAGE.getIndex(-1), Constants.getInstance().SVTGEOMETRY.getFaradayCageSurfaces(0), -1);
+        this.add(MLayer.OUTERSVTCAGE.getIndex(-1), Constants.getInstance().SVTGEOMETRY.getFaradayCageSurfaces(1), -1);       
+        this.add(MLayer.BMTINNERTUBE.getIndex(-1), Constants.getInstance().BMTGEOMETRY.getInnerTube());        
     }
     
     private void add(int index, Surface surface) {
@@ -84,17 +90,32 @@ public class Measurements {
             return id.getIndex(hemisphere);
     }
 
-    private Surface getTarget(double xbeam, double ybeam) {
+    private Surface getTarget(double xbeam, double ybeam, boolean beamSpot) {
         Vector3D u = new Vector3D(0,0,1);
         Point3D  p = new Point3D(xbeam, ybeam, 0);
         Line3D   l = new Line3D(p, u);
-        Surface target = new Surface(l.origin(), l.end(), Constants.DEFAULTSWIMACC);
-        target.setError(Constants.getRbErr());
-        if(Constants.kfBeamSpotConstraint())
+        Surface target = new Surface(l.origin(), l.end(), Constants.getInstance().DEFAULTSWIMACC);
+        target.addMaterial(Constants.getInstance().getTargetMaterial());
+        target.addMaterial(Constants.TARGETKAPTON);
+        target.setError(Constants.getInstance().getBeamRadius());
+        if(beamSpot)
             target.notUsedInFit = false;
         else
             target.notUsedInFit = true;
         return target;
+    }
+    
+    private Surface getScatteringChamber() {
+        Point3D  center = new Point3D(0, 0, Constants.getInstance().getZoffset()-100);
+        Point3D  origin = new Point3D(39.5, 0, Constants.getInstance().getZoffset()-100);
+        Vector3D axis   = new Vector3D(0,0,1);
+        Arc3D base = new Arc3D(origin, center, axis, 2*Math.PI);
+        Cylindrical3D chamber = new Cylindrical3D(base, 200);
+        Surface scatteringChamber = new Surface(chamber, new Strip(0, 0, 0), Constants.DEFAULTSWIMACC);
+        scatteringChamber.addMaterial(Constants.TARGETRHOACELL);
+        scatteringChamber.passive=true;
+        scatteringChamber.notUsedInFit=true;
+        return scatteringChamber;
     }
     
     private Surface getCosmicPlane() {
@@ -104,8 +125,10 @@ public class Measurements {
         Vector3D  dir = new Vector3D(0,1,0); 
         Plane3D plane = new Plane3D(point, dir);
         Surface cosmic = new Surface(plane, point,ep1, ep2,Constants.DEFAULTSWIMACC);
+        cosmic.addMaterial(Constants.VACUUM);
         cosmic.setError(1);
         cosmic.hemisphere = 1;
+        cosmic.notUsedInFit = true;
         return cosmic;
     }
     
@@ -132,6 +155,21 @@ public class Measurements {
             if(debug) System.out.println(surf.toString());
         }
         return active;
+    }
+
+    
+    public double getELoss(double p, double mass, Units units) {
+        double pcorr = p;
+        for(int i=0; i<cvtSurfaces.length; i++) {
+            Surface surf = cvtSurfaces[i];
+            if(surf==null) break;
+            double E  = Math.sqrt(pcorr*pcorr + mass*mass);
+            double dE = surf.getEloss(pcorr, mass, units.unit());
+            double Ecorr = E + dE;
+            pcorr = Math.sqrt(Ecorr*Ecorr-mass*mass); 
+            if(debug) System.out.println(p + " " + pcorr + "\n" + surf.toString());
+        }
+        return pcorr;
     }
 
     public List<Surface> getMeasurements(StraightTrack cosmic) {
@@ -164,14 +202,13 @@ public class Measurements {
     }
 
     private void addClusters(Seed seed) {
-        int hemisp = (int) Math.signum(seed.getHelix().getPointAtRadius(300).y());    
         this.addClusters(DetectorType.BST, this.getClusterSurfaces(DetectorType.BST, seed.getClusters()));
-        this.addClusters(DetectorType.BMT, this.getClusterSurfaces(DetectorType.BMT, seed.getClusters(), hemisp));
+        this.addClusters(DetectorType.BMT, this.getClusterSurfaces(DetectorType.BMT, seed.getClusters()));
     }
     
     private void addClusters(StraightTrack cosmic) {
         this.addClusters(DetectorType.BST, this.getClusterSurfaces(DetectorType.BST, cosmic.getClusters()));
-        this.addClusters(DetectorType.BMT, this.getClusterSurfaces(DetectorType.BMT, cosmic.getClusters()));
+        this.addClusters(DetectorType.BMT, this.getClusterSurfaces(DetectorType.BMT, cosmic.getClusters(), cosmic.getRay()));
     }
 
     private void addClusters(DetectorType type, List<Surface> clusters) {
@@ -183,11 +220,20 @@ public class Measurements {
         }
     }
         
-    private List<Surface> getClusterSurfaces(DetectorType type, List<Cluster> clusters, int hemisphere) {
+//    private List<Surface> getClusterSurfaces(DetectorType type, List<Cluster> clusters, int hemisphere) {
+//        
+//        List<Surface> surfaces = this.getClusterSurfaces(type, clusters);        
+//        for(Surface surf : surfaces) {
+//            surf.hemisphere = hemisphere;
+//        }
+//        return surfaces;
+//    }
+        
+    private List<Surface> getClusterSurfaces(DetectorType type, List<Cluster> clusters, Ray ray) {
         
         List<Surface> surfaces = this.getClusterSurfaces(type, clusters);        
         for(Surface surf : surfaces) {
-            surf.hemisphere = hemisphere;
+            surf.hemisphere = this.getHemisphere(ray, surf);
         }
         return surfaces;
     }
@@ -201,7 +247,7 @@ public class Measurements {
             if(type==DetectorType.BMT) layer += SVTGeometry.NLAYERS;
             Surface measure = cluster.measurement();
             measure.hemisphere = Math.signum(cluster.center().y());
-            if((int)Constants.getUsedLayers().get(layer)<1)
+            if((int)Constants.getInstance().getUsedLayers().get(layer)<1)
                 measure.notUsedInFit=true;
             surfaces.add(measure);
         }
@@ -264,9 +310,9 @@ public class Measurements {
     private Surface getDetectorSurface(DetectorType type, int layer, int sector) {
         Surface surface = null;
         if(type==DetectorType.BST)
-            surface = Constants.SVTGEOMETRY.getSurface(layer, sector, new Strip(0, 0, 0));
+            surface = Constants.getInstance().SVTGEOMETRY.getSurface(layer, sector, new Strip(0, 0, 0));
         else if(type==DetectorType.BMT)
-            surface = Constants.BMTGEOMETRY.getSurface(layer, sector, new Strip(0, 0, 0));
+            surface = Constants.getInstance().BMTGEOMETRY.getSurface(layer, sector, new Strip(0, 0, 0));
         return surface;
     }
 
@@ -274,18 +320,18 @@ public class Measurements {
     private int getSector(Seed seed, DetectorType type, int layer, int hemisphere) {
         Helix helix = seed.getHelix();
         if(type==DetectorType.BST) { 
-            int twinLayer = Constants.SVTGEOMETRY.getTwinLayer(layer);
+            int twinLayer = Constants.getInstance().SVTGEOMETRY.getTwinLayer(layer);
             int twinIndex = MLayer.getType(DetectorType.BST, twinLayer).getIndex(hemisphere);
             if(cvtSurfaces[twinIndex]!=null) 
                 return cvtSurfaces[twinIndex].getSector();
-            Point3D traj = helix.getPointAtRadius(Constants.SVTGEOMETRY.getLayerRadius(layer));
+            Point3D traj = helix.getPointAtRadius(Constants.getInstance().SVTGEOMETRY.getLayerRadius(layer));
             if(traj!=null && !Double.isNaN(traj.z())) 
-                return Constants.SVTGEOMETRY.getSector(layer, traj);
+                return Constants.getInstance().SVTGEOMETRY.getSector(layer, traj);
         }
         else if(type==DetectorType.BMT) {
-            Point3D traj = seed.getHelix().getPointAtRadius(Constants.BMTGEOMETRY.getRadius(layer));
+            Point3D traj = seed.getHelix().getPointAtRadius(Constants.getInstance().BMTGEOMETRY.getRadius(layer));
             if(traj!=null && !Double.isNaN(traj.z())) 
-                return Constants.BMTGEOMETRY.getSector(0, traj);
+                return Constants.getInstance().BMTGEOMETRY.getSector(0, traj);
         }
         return 0;
     }
@@ -293,7 +339,7 @@ public class Measurements {
     private int getSector(StraightTrack cosmic, DetectorType type, int layer, int hemisphere) {
 
         if(type==DetectorType.BST) {   
-            int twinLayer = Constants.SVTGEOMETRY.getTwinLayer(layer);
+            int twinLayer = Constants.getInstance().SVTGEOMETRY.getTwinLayer(layer);
             int twinIndex = MLayer.getType(DetectorType.BST, twinLayer).getIndex(hemisphere);
             if(cvtSurfaces[twinIndex]!=null)
                 return cvtSurfaces[twinIndex].getSector();
@@ -310,7 +356,7 @@ public class Measurements {
             double x = trajs[layer-1][(hemisphere+1)/2][0];
             double y = trajs[layer-1][(hemisphere+1)/2][1];
             double z = trajs[layer-1][(hemisphere+1)/2][2];
-            return Constants.BMTGEOMETRY.getSector(layer, Math.atan2(y, x));
+            return Constants.getInstance().BMTGEOMETRY.getSector(layer, Math.atan2(y, x));
         }
         return 0;
         
@@ -322,6 +368,18 @@ public class Measurements {
         List<Point3D> trajs = new ArrayList<>();
         Line3D line = ray.toLine();
         return surface.cylinder.intersection(line, trajs) > 1;
+    }
+    
+    private int getHemisphere(Ray ray, Surface surface){
+        if(surface.cylinder==null)
+            return 0;
+        List<Point3D> trajs = new ArrayList<>();
+        Line3D line = ray.toLine();
+        if(surface.cylinder.intersection(line, trajs)>= 1) {
+            return (int) Math.signum(trajs.get(0).y());
+        }
+        else 
+            return 0;
     }
     
     private void reset() {

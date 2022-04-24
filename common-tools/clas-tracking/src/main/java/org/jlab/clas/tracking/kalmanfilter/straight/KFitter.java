@@ -1,8 +1,6 @@
 package org.jlab.clas.tracking.kalmanfilter.straight;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.jlab.clas.tracking.kalmanfilter.AKFitter;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs;
 import org.jlab.clas.tracking.kalmanfilter.AStateVecs;
@@ -17,13 +15,12 @@ import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
  */
 public class KFitter extends AKFitter {
 
-    public Map<Integer, AKFitter.HitOnTrack> TrjPoints = new HashMap<>();
     public final StateVecs sv = new StateVecs();
     public final MeasVecs  mv = new MeasVecs();
     public StateVecs.StateVec finalStateVec;
 
-    public KFitter(boolean filter, int iterations, int dir, boolean beamspot, Libr m) {
-        super(filter, iterations, dir, beamspot, null, m);
+    public KFitter(boolean filter, int iterations, int dir, Libr m) {
+        super(filter, iterations, dir, null, m);
     }
     
     public void runFitter() {
@@ -52,11 +49,11 @@ public class KFitter extends AKFitter {
     @Override
     public void runFitter(AStateVecs sv, AMeasVecs mv) {
         for (int it = 0; it < totNumIter; it++) {
-            this.runFitterIter(sv, mv, dir);
+            this.runFitterIter(sv, mv);
             // chi2
             double newchisq = this.calc_chi2(sv, mv); 
             // if curvature is 0, fit failed
-            if(Double.isNaN(newchisq) || sv.trackTrajF.get(0)==null) {
+            if(Double.isNaN(newchisq) || sv.smoothed().get(0)==null) {
                 this.setFitFailed = true;
                 break;
             }
@@ -71,87 +68,120 @@ public class KFitter extends AKFitter {
             }
         }
         if(!this.setFitFailed) {
-            finalStateVec = sv.new StateVec(sv.trackTrajF.get(0));
+            finalStateVec = sv.new StateVec(sv.smoothed().get(0));
         }
     }
 
     @Override
-    public void setTrajectory(AStateVecs sv, AMeasVecs mv) {
-        TrjPoints = new HashMap<>();
-        for (int k = 1; k < sv.trackTrajF.size(); k++) {
-            StateVec stv = sv.trackTrajF.get(k);
-            stv.resi = mv.dh(k, stv);
-            if(Double.isNaN(stv.resi)) {
-                mv.measurements.get(k).skip = true;
-            }
-            else if(!mv.measurements.get(k).surface.passive) {
-                int layer = mv.measurements.get(k).layer;
-                TrjPoints.put(layer, new HitOnTrack(layer, stv.x, stv.y, stv.z, stv.px, stv.py, stv.pz, stv.resi));
-                if(mv.measurements.get(k).skip)
-                    TrjPoints.get(layer).isMeasUsed = false;
-            }
-        } 
-    }
+    public StateVec filter(int k, StateVec vec, AMeasVecs mv) {
+        if (vec != null && vec.covMat != null) {
+        
+            StateVec fVec = sv.new StateVec(vec);
+            
+            if(mv.measurements.get(k).skip == false && filterOn) {
+    
+                double[] K = new double[5];
+                double V = mv.measurements.get(k).error*mv.measurements.get(k).error;
 
-    @Override
-    public void filter(int k, AStateVecs sv, AMeasVecs mv) {
-        if (sv.trackTrajF.get(k) != null && sv.trackTrajF.get(k).covMat != null 
-                && mv.measurements.get(k).skip == false && this.filterOn) {
-            double[] K = new double[5];
-            double V = mv.measurements.get(k).error*mv.measurements.get(k).error;
+                //get the projector Matrix
+                double[] H = new double[5];
+                H = mv.H(fVec, sv,  mv.measurements.get(k), null);
+//                System.out.println(k + " " + mv.measurements.get(k).layer  + " " + mv.measurements.get(k).surface.type.name() + " " + H[0] + " " + H[1] + " " + H[2] + " " + H[3]);
 
-            //get the projector Matrix
-            double[] H = new double[5];
-            H = mv.H(sv.trackTrajF.get(k), sv,  mv.measurements.get(k), null);
-//            System.out.println(k + " " + mv.measurements.get(k).layer  + " " + mv.measurements.get(k).surface.type.name() + " " + H[0] + " " + H[1] + " " + H[2] + " " + H[3]);
+                double[][] CaInv =  this.getMatrixOps().filterCovMat(H, fVec.covMat, V);
+                if (CaInv != null) {
+                        fVec.covMat = CaInv;
+                    } else {
+                        return null;
+                }
+                // the gain matrix
+                for (int j = 0; j < 4; j++) {
+                    K[j] = 0;
+                    for (int i = 0; i < 4; i++) {
+                        K[j] += H[i] * fVec.covMat[j][i] / V;
+                    } 
+                }
+    //            for (int j = 0; j < 5; j++) {
+    //                for (int i = 0; i < 5; i++) {
+    //                    System.out.print(CaInv[j][i] + " ");
+    //                }
+    //                System.out.println();
+    //            }
+//                System.out.println(k + " " + mv.measurements.get(k).layer  + " " + mv.measurements.get(k).surface.type.name() + " " + V);
+//                System.out.println("\t" + H[0] + " " + H[1] + " " + H[2] + " " + H[3]);
+//                System.out.println("\t" + fVec.covMat[0][0] + " " + fVec.covMat[1][1] + " " + fVec.covMat[2][2] + " " + fVec.covMat[3][3]);
+//                System.out.println("\t" + K[0] + " " + K[1] + " " + K[2] + " " + K[3]);
 
-            double[][] CaInv =  this.getMatrixOps().filterCovMat(H, sv.trackTrajF.get(k).covMat, V);
-            if (CaInv != null) {
-                    sv.trackTrajF.get(k).covMat = CaInv;
-                } else {
-                    return;
-            }
-            // the gain matrix
-            for (int j = 0; j < 4; j++) {
-                K[j] = 0;
-                for (int i = 0; i < 4; i++) {
-                    K[j] += H[i] * sv.trackTrajF.get(k).covMat[j][i] / V;
-                } 
-            }
-//            for (int j = 0; j < 5; j++) {
-//                for (int i = 0; i < 5; i++) {
-//                    System.out.print(CaInv[j][i] + " ");
-//                }
-//                System.out.println();
-//            }
-//            System.out.println(k + " " + mv.measurements.get(k).layer  + " " + mv.measurements.get(k).surface.type.name() + " " + V);
-//            System.out.println("\t" + H[0] + " " + H[1] + " " + H[2] + " " + H[3]);
-//            System.out.println("\t" + sv.trackTrajF.get(k).covMat[0][0] + " " + sv.trackTrajF.get(k).covMat[1][1] + " " + sv.trackTrajF.get(k).covMat[2][2] + " " + sv.trackTrajF.get(k).covMat[3][3]);
-//            System.out.println("\t" + K[0] + " " + K[1] + " " + K[2] + " " + K[3]);
+                double dh = mv.dh(k, fVec);
 
-            double dh = mv.dh(k, sv.trackTrajF.get(k));
-
-            if (!Double.isNaN(dh)) {
-                StateVec fVec = sv.new StateVec(sv.trackTrajF.get(k));
-                fVec.x0 -= K[0] * dh;
-                fVec.z0 -= K[1] * dh;
-                fVec.tx -= K[2] * dh;
-                fVec.tz -= K[3] * dh;
-                fVec.updateFromRay();
-                sv.setStateVecPosAtMeasSite(fVec, mv.measurements.get(k), null); 
-                sv.trackTrajF.replace(k, fVec);
-                sv.trackTrajF.get(k).resi = mv.dh(k, fVec);  
+                if (!Double.isNaN(dh)) {
+                    fVec.x0 -= K[0] * dh;
+                    fVec.z0 -= K[1] * dh;
+                    fVec.tx -= K[2] * dh;
+                    fVec.tz -= K[3] * dh;
+                    fVec.updateFromRay();
+                    sv.setStateVecPosAtMeasSite(fVec, mv.measurements.get(k), null); 
+                    fVec.resi = mv.dh(k, fVec);
+                }
+                double dh_filt = mv.dh(k, fVec); 
+    //            System.out.println(dh_filt + " " + dh);
+                if (Double.isNaN(dh_filt) 
+                 || Math.abs(dh_filt) > Math.max(V, 10*Math.abs(dh))
+                 || Math.abs(dh_filt)/Math.sqrt(V)>this.getResidualsCut()) { 
+                    this.NDF--;
+                    mv.measurements.get(k).skip = true;
+                }
             }
-            else {
-                this.NDF--;
-                mv.measurements.get(k).skip = true;
-            }
+            return fVec;
         }
+        return null;
     }
 
     @Override
-    public void smooth(int k, AStateVecs sv, AMeasVecs mv) {
+    public StateVec smooth(int k, AStateVecs sv, AMeasVecs mv) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public StateVec smooth(StateVec v1, StateVec v2) {
+        
+        if(v1==null || v2==null) return null;
+//        // move pivot of first state vector to match second
+//        v1.setPivot(v2.x0, v2.y0, v2.z0);
+        // get covariance matrices and arrays
+        double[][] c1 = v1.covMat;
+        double[][] c2 = v2.covMat;
+        double[]   a1 = v1.getRayArray();
+        double[]   a2 = v2.getRayArray();
+        // smooth covariance matrices
+        double[][] c1i = this.getMatrixOps().inverse(c1);
+        double[][] c2i = this.getMatrixOps().inverse(c2);
+        if(c1i == null || c2i == null) return null;
+        double[][]  ci = this.getMatrixOps().mo.MatrixAddition(c1i, c2i);
+        double[][]   c = this.getMatrixOps().inverse(ci);
+        if(c == null) return null;
+        // smooth state vectors
+        double[] a = new double[a1.length];
+        for(int i=0; i<a1.length; i++) {
+            for(int j=0; j<a1.length; j++) {
+                for(int k=0; k<a1.length; k++) {
+                    a[i] += c[i][j]*(c1i[j][k]*a1[k]+c2i[j][k]*a2[k]);
+    }
+            }
+        }
+        // create averaged state vector
+        StateVec vave = sv.new StateVec(v2);
+        vave.x0 = a[0];
+        vave.z0 = a[1];
+        vave.tx = a[2];
+        vave.tz = a[3];
+        vave.covMat = c;
+        vave.updateFromRay();
+        sv.setStateVecPosAtMeasSite(vave, mv.measurements.get(vave.k), null); 
+        
+        return vave;
+    }
+
+
 
 }

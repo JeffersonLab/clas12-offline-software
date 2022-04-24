@@ -28,6 +28,8 @@ public class EBHBAIEngine extends EBEngine {
 
 	this.setTrackType("HitBasedTrkg::AITracks");
          this.setFTOFHitsType("FTOF::hbclusters");
+        this.setCvtTrackType("CVTRecFP::Tracks");
+        this.setCvtTrajType("CVTRecFP::Trajectory");
     }
     
 }

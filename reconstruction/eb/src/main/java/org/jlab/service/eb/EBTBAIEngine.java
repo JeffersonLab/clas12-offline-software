@@ -30,6 +30,8 @@ public class EBTBAIEngine extends EBEngine {
         this.setTrackType("TimeBasedTrkg::AITracks");
         this.setTrajectoryType("TimeBasedTrkg::AITrajectory");
         this.setCovMatrixType("TimeBasedTrkg::AICovMat");
+        this.setCvtTrackType("CVTRec::Tracks");
+        this.setCvtTrajType("CVTRec::Trajectory");
     }
     
 }

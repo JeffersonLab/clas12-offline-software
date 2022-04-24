@@ -105,6 +105,15 @@ public class KFCovMatOps{
         return A;
     }
     
+    public double[][] inverse(double[][] C) {
+        double[][] Ci = null;
+        try {
+            Ci = mo.MatrixInversion(C);
+        } catch (Exception e) {
+            return null;
+        }
+        return Ci;
+    }
  
     /**
      * prints the matrix -- used for debugging
@@ -112,7 +121,7 @@ public class KFCovMatOps{
      * @param mat matrix
      * @param message
      */
-    public static void printMatrix(double[][] mat, String message) {
+    public void printMatrix(double[][] mat, String message) {
         int nrow = mat.length; 
         int ncol = mat[0].length; 
 
