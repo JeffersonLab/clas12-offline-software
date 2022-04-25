@@ -225,8 +225,8 @@ public class TimeToDistanceEstimator {
         int binlowT = this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binlowAlpha);  
         int binhighT = binlowT + 1; 
 
-        if(binhighT>TableLoader.maxBinIdxT[SecIdx][SlyrIdx][binlowB][binlowAlpha]) {
-            binhighT=TableLoader.maxBinIdxT[SecIdx][SlyrIdx][binlowB][binlowAlpha];
+        if(binhighT>TableLoader.NBINST-1) {
+            binhighT=TableLoader.NBINST-1;
         }
         return binhighT;
     }
