@@ -222,7 +222,7 @@ public class Surface implements Comparable<Surface> {
         return ZA/RhoX;
     }
     
-    public double getLocalDir(Point3D pos, Vector3D dir) {
+    public double getLocalDir(Vector3D dir) {
         if(this.type!=Type.PLANEWITHSTRIP && 
            this.type!=Type.CYLINDERWITHSTRIP && 
            this.type!=Type.LINE) 
@@ -233,15 +233,14 @@ public class Surface implements Comparable<Surface> {
                 return Math.abs(norm.dot(dir));
             }
             else if(this.type==Type.CYLINDERWITHSTRIP) {
-                this.toLocal().apply(pos);
-                this.toLocal().apply(dir);
-                Vector3D norm = pos.toVector3D().asUnit();
-                return Math.abs(norm.dot(dir));
+                Vector3D axis = this.cylinder.getAxis().direction().asUnit();
+                dir.sub(dir.projection(axis));
+                return Math.abs(dir.mag());
             }
             else if(this.type==Type.LINE) {
-                Vector3D norm = this.lineEndPoint1.vectorTo(this.lineEndPoint2).asUnit();
-                double cosdir = Math.abs(norm.dot(dir));
-                return Math.sqrt(1-cosdir*cosdir);
+                Vector3D axis = this.lineEndPoint1.vectorTo(this.lineEndPoint2).asUnit();
+                dir.sub(dir.projection(axis));
+                return Math.abs(dir.mag());
             }
             return 0;
         }
@@ -255,8 +254,8 @@ public class Surface implements Comparable<Surface> {
         return dE;
     }
     
-    public double getEloss(Point3D pos, Vector3D mom, double mass, int dir) {
-        double cosDir = this.getLocalDir(pos, mom);
+    public double getEloss(Vector3D mom, double mass, int dir) {
+        double cosDir = this.getLocalDir(mom.asUnit());
         double scale = 0;
         if(cosDir!=0) {
             double dE = -dir*this.getEloss(mom.mag(), mass)/cosDir;
@@ -267,8 +266,8 @@ public class Surface implements Comparable<Surface> {
         return scale;
     }
     
-    public double getDx(Point3D pos, Vector3D mom) {
-        double cosDir = this.getLocalDir(pos, mom);
+    public double getDx(Vector3D mom) {
+        double cosDir = this.getLocalDir(mom.asUnit());
         if(cosDir!=0)
           return this.getThickness()/cosDir;
         else

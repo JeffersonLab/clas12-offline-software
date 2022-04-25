@@ -39,17 +39,17 @@ public class TrackListFinder {
 
                 int charge = trk.getQ();
                 double maxPathLength = 5.0;//very loose cut 
-                cvtSwim.SetSwimParameters((trk.getHelix().xDCA()+trk.getHelix().getXb()) / 10, (trk.getHelix().yDCA()+trk.getHelix().getYb()) / 10, trk.getHelix().getZ0() / 10 , 
-                        Math.toDegrees(trk.getHelix().getPhiAtDCA()), Math.toDegrees(Math.acos(trk.getHelix().cosTheta())),
-                        trk.getP(), charge, 
-                        maxPathLength) ;
-
-                double[] pointAtCylRad = cvtSwim.SwimGenCylinder(new Point3D(0,0,0), new Point3D(0,0,1), Constants.CTOFINNERRADIUS/10, Constants.SWIMACCURACYCD/10);
-                if(pointAtCylRad!=null) {
-                    trk.setTrackPosAtCTOF(new Point3D(pointAtCylRad[0]*10, pointAtCylRad[1]*10, pointAtCylRad[2]*10));
-                    trk.setTrackDirAtCTOF(new Vector3D(pointAtCylRad[3]*10, pointAtCylRad[4]*10, pointAtCylRad[5]*10));
-                    trk.setPathToCTOF(pointAtCylRad[6]*10);
-                }
+//                cvtSwim.SetSwimParameters((trk.getHelix().xDCA()+trk.getHelix().getXb()) / 10, (trk.getHelix().yDCA()+trk.getHelix().getYb()) / 10, trk.getHelix().getZ0() / 10 , 
+//                        Math.toDegrees(trk.getHelix().getPhiAtDCA()), Math.toDegrees(Math.acos(trk.getHelix().cosTheta())),
+//                        trk.getP(), charge, 
+//                        maxPathLength) ;
+//
+//                double[] pointAtCylRad = cvtSwim.SwimGenCylinder(new Point3D(0,0,0), new Point3D(0,0,1), Constants.CTOFINNERRADIUS/10, Constants.SWIMACCURACYCD/10);
+//                if(pointAtCylRad!=null) {
+//                    trk.setTrackPosAtCTOF(new Point3D(pointAtCylRad[0]*10, pointAtCylRad[1]*10, pointAtCylRad[2]*10));
+//                    trk.setTrackDirAtCTOF(new Vector3D(pointAtCylRad[3]*10, pointAtCylRad[4]*10, pointAtCylRad[5]*10));
+//                    trk.setPathToCTOF(pointAtCylRad[6]*10);
+//                }
                 TrajectoryFinder trjFind = new TrajectoryFinder();
 
                 Trajectory traj = trjFind.findTrajectory(trk, cvtSwim, "final");

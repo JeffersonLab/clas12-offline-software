@@ -122,17 +122,6 @@ public class RecoBankWriter {
             bank.setFloat("ny",   i,  (float)cluslist.get(i).getN().y());
             bank.setFloat("nz",   i,  (float)cluslist.get(i).getN().z());
             bank.setFloat("e",    i,  (float)cluslist.get(i).getResolution()/10);
-//            cluslist.get(i).printInfo();
-//            System.out.println("N "+cluslist.get(i).getNFromTraj().toString()+" \n"+
-//                    " L "+cluslist.get(i).getL().toString()+" \n"+
-//                    " S "+cluslist.get(i).getS().toString()+" \n"+
-//                    " NxL "+cluslist.get(i).getN().cross(cluslist.get(i).getL()).toString()+" \n"+
-//                    " NxS "+cluslist.get(i).getN().cross(cluslist.get(i).getS()).toString()+" \n"+
-//                    " SxL "+cluslist.get(i).getS().cross(cluslist.get(i).getL()).toString()+" \n"+
-//                    " N.L "+cluslist.get(i).getN().dot(cluslist.get(i).getL())+
-//                    " N.S "+cluslist.get(i).getN().dot(cluslist.get(i).getS())+
-//                    " S.L "+cluslist.get(i).getS().dot(cluslist.get(i).getL())
-//            );
         }
         //bank.show();
         return bank;
@@ -459,11 +448,6 @@ public class RecoBankWriter {
         for (int i = 0; i < trkcands.size(); i++) {
             if(trkcands.get(i)==null)
                 continue;
-//            if(trkcands.get(i).getChi2()!=0) {
-//                bank.setByte("fittingMethod", i, (byte) 2);
-//            } else {
-//                bank.setByte("fittingMethod", i, (byte) 0);
-//            }
             bank.setByte("fittingMethod", i, (byte) trkcands.get(i).getSeed().getStatus());
             bank.setShort("ID", i, (short) trkcands.get(i).getId());
             bank.setByte("q", i, (byte)trkcands.get(i).getQ());
@@ -610,6 +594,10 @@ public class RecoBankWriter {
                 bank.setFloat("x",        k,  (float) (stVec.x()/10.));
                 bank.setFloat("y",        k,  (float) (stVec.y()/10.));
                 bank.setFloat("z",        k,  (float) (stVec.z()/10.));
+                bank.setFloat("cx",       k,  (float) (stVec.ux()));
+                bank.setFloat("cy",       k,  (float) (stVec.uy()));
+                bank.setFloat("cz",       k,  (float) (stVec.uz()));
+                bank.setFloat("p",        k,  (float) (stVec.getP()));
                 bank.setFloat("phi",      k,  (float) stVec.getTrkPhiAtSurface());
                 bank.setFloat("theta",    k,  (float) stVec.getTrkThetaAtSurface());
                 bank.setFloat("langle",   k,  (float) stVec.getTrkToModuleAngle());

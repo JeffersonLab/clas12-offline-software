@@ -4,7 +4,7 @@ package org.jlab.rec.cvt.trajectory;
 import org.jlab.rec.cvt.Constants;
 
 /**
- * A StateVec describes a cross measurement in the BST. It is characterized by a
+ * A StateVec describes a cross measurement in the CVT. It is characterized by a
  * point in the lab coordinate system at each module plane and by unit tangent
  * vectors to the track at the state-vec point.
  *
@@ -36,6 +36,7 @@ public class StateVec implements Comparable<StateVec> {
     private double _ux;
     private double _uy;
     private double _uz;
+    private double _p;
     
     public int getID() {
         return _ID;
@@ -43,6 +44,14 @@ public class StateVec implements Comparable<StateVec> {
 
     public void setID(int _ID) {
         this._ID = _ID;
+    }
+
+    public double getP() {
+        return _p;
+    }
+
+    public void setP(double _p) {
+        this._p = _p;
     }
 
     public double getPath() {

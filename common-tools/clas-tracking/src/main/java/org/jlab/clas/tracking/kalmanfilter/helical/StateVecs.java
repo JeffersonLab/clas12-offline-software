@@ -165,11 +165,11 @@ public class StateVecs extends AStateVecs {
         if(this.straight || mass<0) return;
                        
         Surface  surf = mv.measurements.get(vec.k).surface;
-        double pScale = surf.getEloss(vec.getPosition(), vec.getMomentum(), mass, dir);
+        double pScale = surf.getEloss(vec.getMomentum(), mass, dir);
         if(pScale>0) {
             vec.kappa = vec.kappa/pScale;
             vec.energyLoss = surf.getEloss(vec.getMomentum().mag(), mass);
-            vec.dx = surf.getDx(vec.getPosition(), vec.getMomentum());
+            vec.dx = surf.getDx(vec.getMomentum());
             vec.updateFromHelix();
         }
         else {

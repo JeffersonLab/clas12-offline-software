@@ -442,20 +442,25 @@ public class Track extends Trajectory implements Comparable<Track> {
         
         //get KF trajectories first
         double path = 0;
+        double mass = PDGDatabase.getParticleMass(this.getPID());
+        double beta = this.getP()/Math.sqrt(this.getP()*this.getP()+mass*mass);
+        
         HitOnTrack traj = null;       
         for(int index=1; index<trajs.size(); index++) {
             traj = this.trajs.get(index);            
-            path += traj.path;
             
             int layer = MLayer.getType(index).getLayer();
-            Vector3D dir = new Vector3D(traj.px, traj.py, traj.pz).asUnit();
+            Vector3D mom = new Vector3D(traj.px, traj.py, traj.pz);
+            Vector3D dir = mom.asUnit();
             Point3D  pos = new Point3D(traj.x, traj.y, traj.z);
-            
+            path += traj.path * beta/(mom.mag()/Math.sqrt(mom.mag2()+mass*mass));
+
             StateVec stVec = new StateVec(traj.x, traj.y, traj.z, dir.x(), dir.y(), dir.z());
             stVec.setPlaneIdx(traj.layer-1);
             stVec.setSurfaceDetector(MLayer.getDetectorType(index).getDetectorId());
             stVec.setSurfaceLayer(layer);
             stVec.setSurfaceSector(traj.sector);
+            stVec.setP(mom.mag());
             stVec.setPath(path);
             stVec.setDx(traj.dx);
             stVec.setID(this.getId());
@@ -497,24 +502,27 @@ public class Track extends Trajectory implements Comparable<Track> {
                 if(inters==null) break;
                 pos.set(inters[0]*10, inters[1]*10, inters[2]*10);
                 mom.setXYZ(inters[3],inters[4],inters[5]);
-                path += inters[6]*10;
+                path += inters[6]*10 * beta/(mom.mag()/Math.sqrt(mom.mag2()+mass*mass));
                 
                 StateVec stVec = new StateVec(pos.x(), pos.y(), pos.z(), mom.x()/mom.mag(), mom.y()/mom.mag(), mom.z()/mom.mag());
                 stVec.setSurfaceDetector(surface.getIndex());
                 stVec.setSurfaceSector(surface.getSector());
                 stVec.setSurfaceLayer(surface.getLayer()); 
                 stVec.setID(this.getId());
+                stVec.setTrkPhiAtSurface(mom.phi());
+                stVec.setTrkThetaAtSurface(mom.theta());
+                stVec.setP(mom.mag());
                 stVec.setPath(path);
-                stVec.setDx(surface.getDx(pos, mom));
-                stateVecs.add(stVec);
+                stVec.setDx(surface.getDx(mom));
+                stateVecs.add(stVec);                
                 
                 if(surface.getIndex() == DetectorType.CTOF.getDetectorId()) {
-                    this.setTrackPosAtCTOF(pos);
+                    this.setTrackPosAtCTOF(new Point3D(pos));
                     this.setTrackDirAtCTOF(mom.asUnit());
                     this.setPathToCTOF(path);
                 }
                 
-                surface.getEloss(pos, mom, PDGDatabase.getParticleMass(this.getPID()), 1);
+                surface.getEloss(mom, mass, 1);
                 if(mom.mag()==0) break;
             }
         }

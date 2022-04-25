@@ -101,9 +101,6 @@ public class Constants {
     
     public static int DEFAULTPID = 211;
 
-    public static final double CTOFINNERRADIUS = 250;     // 250 mm
-    public static final double CTOFOUTRRADIUS = 250 + 33;  // 283  mm
-        
     public  boolean EXCLUDELAYERS = false;
     private final Map<Integer,Integer> layersUsed = new HashMap<>();
     private final double[][]BMTPhiZRangeExcld = new double[2][2];

@@ -137,7 +137,7 @@ public class Measurements {
         ctof.addMaterial(Constants.SCINTILLATOR.clone(thickness*10));
         ctof.setIndex(DetectorType.CTOF.getDetectorId());
         ctof.setLayer(1);
-        ctof.setSector(0);
+        ctof.setSector(1);
         ctof.passive=true;
         ctof.notUsedInFit=true;
         return ctof;
@@ -164,7 +164,7 @@ public class Measurements {
             cnd.addMaterial(Constants.SCINTILLATOR.clone(thickness*10));
             cnd.setIndex(DetectorType.CND.getDetectorId());
             cnd.setLayer(ilayer+1);
-            cnd.setSector(0);
+            cnd.setSector(1);
             cnd.passive=true;
             cnd.notUsedInFit=true;
             surfaces.add(cnd);
