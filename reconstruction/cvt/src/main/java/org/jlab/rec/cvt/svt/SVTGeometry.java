@@ -4,6 +4,7 @@ import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.clas.tracking.kalmanfilter.Units;
 import org.jlab.clas.tracking.objects.Strip;
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
@@ -233,7 +234,7 @@ public class SVTGeometry {
         surface.setError(0);
         for(String key : SVTConstants.MATERIALPROPERTIES.keySet()) {
             double[] p = SVTConstants.MATERIALPROPERTIES.get(key);
-            surface.addMaterial(key, p[0]/2, p[1], p[2], p[3], p[4]);
+            surface.addMaterial(key, p[0]/2, p[1], p[2], p[3], p[4], Units.MM);
         }
         surface.notUsedInFit=false;
         return surface;
@@ -251,7 +252,8 @@ public class SVTGeometry {
                                   SVTConstants.TSHIELDRHO,
                                   SVTConstants.TSHIELDZOVERA,
                                   SVTConstants.TSHIELDRADLEN,
-                                  SVTConstants.TSHIELDI);
+                                  SVTConstants.TSHIELDI,
+                                  Units.MM);
         shieldSurface.passive=true;
         shieldSurface.notUsedInFit=true;
         return shieldSurface;
@@ -269,7 +271,8 @@ public class SVTGeometry {
                               SVTConstants.FARADAYCAGERHO[i],
                               SVTConstants.FARADAYCAGEZOVERA[i],
                               SVTConstants.FARADAYCAGERADLEN[i],
-                              SVTConstants.FARADAYCAGEI[i]);
+                              SVTConstants.FARADAYCAGEI[i],
+                              Units.MM);
         fcSurface.passive=true;
         fcSurface.notUsedInFit=true;
         return fcSurface;

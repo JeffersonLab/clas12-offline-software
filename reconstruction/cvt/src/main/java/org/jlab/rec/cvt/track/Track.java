@@ -1,20 +1,28 @@
 package org.jlab.rec.cvt.track;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import org.jlab.clas.pdg.PDGDatabase;
+import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.AKFitter.HitOnTrack;
+import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.clas.tracking.objects.Strip;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.measurement.MLayer;
 import org.jlab.rec.cvt.trajectory.Helix;
+import org.jlab.rec.cvt.trajectory.StateVec;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 
 /**
- * A class representing track candidates in the BST. A track has a trajectory
+ * A class representing track candidates in the CVT. A track has a trajectory
  * represented by an ensemble of geometrical state vectors along its path, a
  * charge and a momentum
  *
@@ -42,6 +50,7 @@ public class Track extends Trajectory implements Comparable<Track> {
     private int    _NDF;
     private double _Chi2;
     private int kfIterations;
+    private double[][] trackCovMat;
     private Map<Integer, HitOnTrack> trajs = null; // map of trajectories indexed by layer, to be filled based on the KF results
 
     
@@ -87,7 +96,7 @@ public class Track extends Trajectory implements Comparable<Track> {
         this.setChi2(kf.chi2);
         this.setSeed(seed);
         this.addAll(seed.getCrosses());
-        this.setTrajectories(kf.trajPoints);
+        this.setKFTrajectories(kf.trajPoints);
     }
     
         
@@ -192,10 +201,10 @@ public class Track extends Trajectory implements Comparable<Track> {
             cross.setAssociatedTrackID(trackId);
             Point3D  trackPos = null;
             Vector3D trackDir = null;
-            if(this.getTrajectories()!=null && Math.abs(this.getHelix().B)>0.0001) {
+            if(this.getKFTrajectories()!=null && Math.abs(this.getHelix().B)>0.0001) {
                 int layer = cross.getCluster1().getLayer();
                 int index = MLayer.getType(cross.getDetector(), layer).getIndex();
-                HitOnTrack traj = this.getTrajectories().get(index);
+                HitOnTrack traj = this.getKFTrajectories().get(index);
                 if(traj==null) return; //RDV check why
                 trackPos = new Point3D(traj.x, traj.y, traj.z);
                 trackDir = new Vector3D(traj.px, traj.py, traj.pz).asUnit();
@@ -211,15 +220,15 @@ public class Track extends Trajectory implements Comparable<Track> {
     
 
     public void update_Clusters(int trackId) {        
-        if(this.getTrajectories()!=null) {
+        if(this.getKFTrajectories()!=null) {
             for (int i = 0; i < this.getSeed().getClusters().size(); i++) {
                 Cluster cluster = this.getSeed().getClusters().get(i);
                 
                 int layer = cluster.getLayer();
                 int index = MLayer.getType(cluster.getDetector(), layer).getIndex();
                 
-                if(this.getTrajectories().get(index)!=null) // RDV check why it is necessary
-                    cluster.update(trackId, this.getTrajectories().get(index));
+                if(this.getKFTrajectories().get(index)!=null) // RDV check why it is necessary
+                    cluster.update(trackId, this.getKFTrajectories().get(index));
             }
         }
     }
@@ -374,7 +383,7 @@ public class Track extends Trajectory implements Comparable<Track> {
         this._Chi2 = _Chi2;
     }
 
-    public int getKfIterations() {
+    public int getKFIterations() {
         return kfIterations;
     }
 
@@ -382,11 +391,11 @@ public class Track extends Trajectory implements Comparable<Track> {
         kfIterations = iter;
     }
     
-    public Map<Integer, HitOnTrack> getTrajectories() {
+    public Map<Integer, HitOnTrack> getKFTrajectories() {
         return trajs;
     }
     
-    public final void setTrajectories(Map<Integer, HitOnTrack> trajectory) {
+    public final void setKFTrajectories(Map<Integer, HitOnTrack> trajectory) {
         this.trajs = trajectory;
     }
     
@@ -413,7 +422,6 @@ public class Track extends Trajectory implements Comparable<Track> {
         return 1000*this.kfIterations+nSVT*100+nBMTZ*10+nBMTC;
     }
     
-    private double[][] trackCovMat;
     /**
      * @return the trackCovMat
      */
@@ -428,6 +436,125 @@ public class Track extends Trajectory implements Comparable<Track> {
         this.trackCovMat = trackCovMat;
     }
     
+    public void findTrajectory(Swim swimmer, List<Surface> outer) {
+        
+        List<StateVec> stateVecs = new ArrayList<>();
+        
+        //get KF trajectories first
+        double path = 0;
+        HitOnTrack traj = null;       
+        for(int index=1; index<trajs.size(); index++) {
+            traj = this.trajs.get(index);            
+            path += traj.path;
+            
+            int layer = MLayer.getType(index).getLayer();
+            Vector3D dir = new Vector3D(traj.px, traj.py, traj.pz).asUnit();
+            Point3D  pos = new Point3D(traj.x, traj.y, traj.z);
+            
+            StateVec stVec = new StateVec(traj.x, traj.y, traj.z, dir.x(), dir.y(), dir.z());
+            stVec.setPlaneIdx(traj.layer-1);
+            stVec.setSurfaceDetector(MLayer.getDetectorType(index).getDetectorId());
+            stVec.setSurfaceLayer(layer);
+            stVec.setSurfaceSector(traj.sector);
+            stVec.setPath(path);
+            stVec.setDx(traj.dx);
+            stVec.setID(this.getId());
+            
+            if(MLayer.getDetectorType(index) == DetectorType.BST) {
+                Vector3D localDir = Constants.getInstance().SVTGEOMETRY.getLocalTrack(layer, traj.sector, dir);
+                stVec.setTrkPhiAtSurface(localDir.phi());
+                stVec.setTrkThetaAtSurface(localDir.theta());
+                stVec.setTrkToModuleAngle(Constants.getInstance().SVTGEOMETRY.getLocalAngle(layer, traj.sector, dir));
+                stVec.setCalcCentroidStrip(Constants.getInstance().SVTGEOMETRY.calcNearestStrip(traj.x, traj.y, traj.z, layer, traj.sector));
+            }
+            else if(MLayer.getDetectorType(index) == DetectorType.BMT) {
+                Vector3D localDir = Constants.getInstance().BMTGEOMETRY.getLocalTrack(layer, traj.sector, pos, dir);
+                stVec.setTrkPhiAtSurface(localDir.phi());
+                stVec.setTrkThetaAtSurface(localDir.theta());
+                stVec.setTrkToModuleAngle(Constants.getInstance().BMTGEOMETRY.getLocalAngle(layer, traj.sector, pos, dir));
+                int region = Constants.getInstance().BMTGEOMETRY.getRegion(layer);
+                if(BMTGeometry.getDetectorType(layer)==BMTType.C) 
+                    stVec.setCalcCentroidStrip(Constants.getInstance().BMTGEOMETRY.getCstrip(region, pos));
+                else
+                    stVec.setCalcCentroidStrip(Constants.getInstance().BMTGEOMETRY.getZstrip(region, pos));
+            }
+            if(stVec.getSurfaceDetector()>0) stateVecs.add(stVec);
+        }
+        // add outer detectors
+        if(traj!=null) {
+            
+            Vector3D mom = new Vector3D(traj.px, traj.py, traj.pz);
+            Point3D  pos = new Point3D(traj.x, traj.y, traj.z);
+            double maxPathLength = 1.5;   
+            
+            for(Surface surface : outer) {
+            
+                swimmer.SetSwimParameters(pos.x()/10, pos.y()/10, pos.z()/10, 
+                                      Math.toDegrees(mom.phi()), Math.toDegrees(mom.theta()), 
+                                      mom.mag(), this.getQ(), maxPathLength);                
+                double   r = surface.cylinder.baseArc().radius(); 
+                double[] inters = swimmer.SwimGenCylinder(new Point3D(0, 0, 0), new Point3D(0, 0, 1), r/10, Constants.SWIMACCURACYCD/10);                
+                if(inters==null) break;
+                pos.set(inters[0]*10, inters[1]*10, inters[2]*10);
+                mom.setXYZ(inters[3],inters[4],inters[5]);
+                path += inters[6]*10;
+                
+                StateVec stVec = new StateVec(pos.x(), pos.y(), pos.z(), mom.x()/mom.mag(), mom.y()/mom.mag(), mom.z()/mom.mag());
+                stVec.setSurfaceDetector(surface.getIndex());
+                stVec.setSurfaceSector(surface.getSector());
+                stVec.setSurfaceLayer(surface.getLayer()); 
+                stVec.setID(this.getId());
+                stVec.setPath(path);
+                stVec.setDx(surface.getDx(pos, mom));
+                stateVecs.add(stVec);
+                
+                if(surface.getIndex() == DetectorType.CTOF.getDetectorId()) {
+                    this.setTrackPosAtCTOF(pos);
+                    this.setTrackDirAtCTOF(mom.asUnit());
+                    this.setPathToCTOF(path);
+                }
+                
+                surface.getEloss(pos, mom, PDGDatabase.getParticleMass(this.getPID()), 1);
+                if(mom.mag()==0) break;
+            }
+        }
+        this.setTrajectory((ArrayList<StateVec>) stateVecs);
+    }
+    
+    public static void removeOverlappingTracks(List<Track> tracks) {
+            if(tracks==null)
+                return;
+            
+        List<Track> selectedTracks =  new ArrayList<>();
+        for (int i = 0; i < tracks.size(); i++) {
+            boolean overlap = false;
+            Track t1 = tracks.get(i);
+            for(int j=0; j<tracks.size(); j++ ) {
+                Track t2 = tracks.get(j);
+                if(i!=j && t1.overlapWith(t2) && !t1.betterThan(t2)) {
+                    overlap=true;
+                }
+            }
+            if(!overlap) selectedTracks.add(t1);
+        }
+
+        tracks.removeAll(tracks);
+        tracks.addAll(selectedTracks);
+    }
+    
+    public static void checkForOverlaps(List<Track> tracks, String msg) {
+        for (int i = 0; i < tracks.size(); i++) {
+            Track t1 = tracks.get(i);
+            for(int j=0; j<tracks.size(); j++ ) {
+                Track t2 = tracks.get(j);
+                if(i!=j && t1.overlapWith(t2)) {
+                    System.out.println(msg + " " + "overlap");
+                }
+            }
+        }        
+    }
+
+
     @Override
     public String toString() {
         String str = String.format("Track id=%d, q=%d, p=%.3f GeV pt=%.3f GeV, d0=%.3f deg, phi=%.3f deg, z0=%.3f deg, tandip=%.3f deg, NDF=%d, chi2=%.3f, seed method=%d\n", 

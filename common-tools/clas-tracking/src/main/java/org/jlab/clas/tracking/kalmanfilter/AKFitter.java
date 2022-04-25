@@ -176,17 +176,18 @@ public abstract class AKFitter {
     
     public void setTrajectory(AStateVecs sv, AMeasVecs mv) {
         trajPoints = new HashMap<>();
-        for (int k = 1; k < sv.smoothed().size(); k++) {
+        for (int k = 0; k < sv.smoothed().size(); k++) {
             int layer   = mv.measurements.get(k).layer;
+            int sector  = mv.measurements.get(k).surface.getSector();
             double tRes = mv.dh(k, sv.transported().get(k));
             double fRes = mv.dh(k, sv.filtered(false).get(k));
             double sRes = mv.dh(k, sv.smoothed().get(k));
             if(!mv.measurements.get(k).surface.passive) {
-                trajPoints.put(layer, new HitOnTrack(layer, sv.transported().get(k), tRes, fRes, sRes));
+                trajPoints.put(layer, new HitOnTrack(layer, sector, sv.transported().get(k), tRes, fRes, sRes));
                 if(mv.measurements.get(k).skip)
                     trajPoints.get(layer).isUsed = false;
             } else {
-                trajPoints.put(layer, new HitOnTrack(layer, sv.transported().get(k), -999, -999, -999));
+                trajPoints.put(layer, new HitOnTrack(layer, sector, sv.transported().get(k), -999, -999, -999));
                 trajPoints.get(layer).isUsed = false;
             }            
         } 
@@ -267,42 +268,54 @@ public abstract class AKFitter {
     public class HitOnTrack {
 
         public int layer;
+        public int sector;
         public double x;
         public double y;
         public double z;
         public double px;
         public double py;
         public double pz;
+        public double path;
+        public double dx;
+        public double dE;
         public double residual;
         public double transportedResidual;
         public double filteredResidual;
         public double smoothedResidual;
         public boolean isUsed = true;
         
-        public HitOnTrack(int layer, double x, double y, double z, 
-                          double px, double py, double pz, 
-                          double tRes, double fRes, double sRes) {
+        public HitOnTrack(int layer, int sector, double x, double y, double z, 
+                          double px, double py, double pz, double path, double dx,
+                          double de, double tRes, double fRes, double sRes) {
             this.layer = layer;
+            this.sector = sector;
             this.x = x;
             this.y = y;
             this.z = z;
             this.px = px;
             this.py = py;
             this.pz = pz;
+            this.path = path;
+            this.dx = dx;
+            this.dE = de;
             this.residual = sRes;
             this.transportedResidual = tRes;
             this.filteredResidual = fRes;
             this.smoothedResidual = sRes;
         }
         
-        public HitOnTrack(int layer, StateVec sv, double tRes, double fRes, double sRes) {
+        public HitOnTrack(int layer, int sector, StateVec sv, double tRes, double fRes, double sRes) {
             this.layer = layer;
+            this.sector = sector; 
             this.x = sv.x;
             this.y = sv.y;
             this.z = sv.z;
             this.px = sv.px;
             this.py = sv.py;
             this.pz = sv.pz;
+            this.path = sv.path;
+            this.dx = sv.dx;
+            this.dE = sv.energyLoss;
             this.residual = sRes;
             this.transportedResidual = tRes;
             this.filteredResidual = fRes;

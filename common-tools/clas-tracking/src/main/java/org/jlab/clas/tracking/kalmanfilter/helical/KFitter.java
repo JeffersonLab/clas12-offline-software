@@ -1,8 +1,6 @@
 package org.jlab.clas.tracking.kalmanfilter.helical;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.AKFitter;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs;
@@ -148,11 +146,11 @@ public class KFitter extends AKFitter {
     // sv.printlnStateVec(fVec);
                 sv.setStateVecPosAtMeasSite(fVec, mv.measurements.get(k), this.getSwimmer()); 
     // sv.printlnStateVec(fVec);
-                double dh_filt = mv.dh(k, fVec); 
+                fVec.residual = mv.dh(k, fVec); 
     //            System.out.println(dh_filt + " " + dh);
-                if (Double.isNaN(dh_filt) 
-                 || Math.abs(dh_filt) > Math.max(V, 10*Math.abs(dh))
-                 || Math.abs(dh_filt)/Math.sqrt(V)>this.getResidualsCut()) { 
+                if (Double.isNaN(fVec.residual) 
+                 || Math.abs(fVec.residual) > Math.max(V, 10*Math.abs(dh))
+                 || Math.abs(fVec.residual)/Math.sqrt(V)>this.getResidualsCut()) { 
                     this.NDF--;
                     mv.measurements.get(k).skip = true;
                 }

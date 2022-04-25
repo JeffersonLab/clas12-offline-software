@@ -9,6 +9,7 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.svt.SVTParameters;
+import org.jlab.rec.cvt.trajectory.StateVec;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 
@@ -54,7 +55,7 @@ public class TrackListFinder {
                 Trajectory traj = trjFind.findTrajectory(trk, cvtSwim, "final");
 
                 trk.setTrajectory(traj.getTrajectory());
-
+                
                 //if(trk.passCand == true)
                 tracks.add(trk);
             }
@@ -90,54 +91,54 @@ public class TrackListFinder {
     }
     
      
-    public static void removeBadTracks(List<Track> trkcands) {
-        if (trkcands == null) {
-            return;
-        }
-
-        int initial_size = trkcands.size();
-
-        for (int i = 1; i < initial_size + 1; i++) {
-            if (!trkcands.get(initial_size - i).isGood()) {
-                trkcands.remove(initial_size - i);
-            }
-        }
-    }
-
-    public static void removeOverlappingTracks(List<Track> tracks) {
-            if(tracks==null)
-                return;
-            
-        List<Track> selectedTracks =  new ArrayList<>();
-        for (int i = 0; i < tracks.size(); i++) {
-            boolean overlap = false;
-            Track t1 = tracks.get(i);
-            for(int j=0; j<tracks.size(); j++ ) {
-                Track t2 = tracks.get(j);
-                if(i!=j && t1.overlapWith(t2) && !t1.betterThan(t2)) {
-                    overlap=true;
-                }
-            }
-            if(!overlap) selectedTracks.add(t1);
-        }
-//        if(selectedTracks.size()<tracks.size()) {
-//            for(Track t : tracks) System.out.println("Tracks " + t.toString());
-//            for(Track t : selectedTracks) System.out.println("Selected " + t.toString());
+//    public static void removeBadTracks(List<Track> trkcands) {
+//        if (trkcands == null) {
+//            return;
 //        }
-        tracks.removeAll(tracks);
-        tracks.addAll(selectedTracks);
-    }
-    
-    public static void checkForOverlaps(List<Track> tracks, String msg) {
-        for (int i = 0; i < tracks.size(); i++) {
-            Track t1 = tracks.get(i);
-            for(int j=0; j<tracks.size(); j++ ) {
-                Track t2 = tracks.get(j);
-                if(i!=j && t1.overlapWith(t2)) {
-                    System.out.println(msg + " " + "overlap");
-                }
-            }
-        }        
-    }
+//
+//        int initial_size = trkcands.size();
+//
+//        for (int i = 1; i < initial_size + 1; i++) {
+//            if (!trkcands.get(initial_size - i).isGood()) {
+//                trkcands.remove(initial_size - i);
+//            }
+//        }
+//    }
+
+//    public static void removeOverlappingTracks(List<Track> tracks) {
+//            if(tracks==null)
+//                return;
+//            
+//        List<Track> selectedTracks =  new ArrayList<>();
+//        for (int i = 0; i < tracks.size(); i++) {
+//            boolean overlap = false;
+//            Track t1 = tracks.get(i);
+//            for(int j=0; j<tracks.size(); j++ ) {
+//                Track t2 = tracks.get(j);
+//                if(i!=j && t1.overlapWith(t2) && !t1.betterThan(t2)) {
+//                    overlap=true;
+//                }
+//            }
+//            if(!overlap) selectedTracks.add(t1);
+//        }
+////        if(selectedTracks.size()<tracks.size()) {
+////            for(Track t : tracks) System.out.println("Tracks " + t.toString());
+////            for(Track t : selectedTracks) System.out.println("Selected " + t.toString());
+////        }
+//        tracks.removeAll(tracks);
+//        tracks.addAll(selectedTracks);
+//    }
+//    
+//    public static void checkForOverlaps(List<Track> tracks, String msg) {
+//        for (int i = 0; i < tracks.size(); i++) {
+//            Track t1 = tracks.get(i);
+//            for(int j=0; j<tracks.size(); j++ ) {
+//                Track t2 = tracks.get(j);
+//                if(i!=j && t1.overlapWith(t2)) {
+//                    System.out.println(msg + " " + "overlap");
+//                }
+//            }
+//        }        
+//    }
 
 }

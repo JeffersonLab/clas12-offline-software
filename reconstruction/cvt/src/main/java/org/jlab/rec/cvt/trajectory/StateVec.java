@@ -29,6 +29,7 @@ public class StateVec implements Comparable<StateVec> {
     private double _TrkToModuleAngle;
     private double _CalcCentroidStrip;
     private double _Path;
+    private double _dx;
     private double _x;
     private double _y;
     private double _z;
@@ -50,6 +51,14 @@ public class StateVec implements Comparable<StateVec> {
 
     public void setPath(double _Path) {
         this._Path = _Path;
+    }
+
+    public double getDx() {
+        return _dx;
+    }
+
+    public void setDx(double _dx) {
+        this._dx = _dx;
     }
 
     public int getSurfaceDetector() {
@@ -280,4 +289,11 @@ public class StateVec implements Comparable<StateVec> {
         return return_val;
     }
 
+    @Override
+    public String toString() {
+        String s = String.format("id=%d \t detector=%d \t layer=%d \t sector=%d \t ", this._ID, this._SurfaceDetector, this._SurfaceLayer, this._SurfaceSector);
+        s += String.format("pos=(%.3f, %.3f, %.3f) \t dir=(%.3f, %.3f, %.3f) \t ", this._x, this._y, this._z, this._ux, this._uy, this._uz);
+        s += String.format("phi=%.3f \t theta=%.3f \t langle=%.3f \t path=%.3f \t dx=%.3f", this._TrkPhiAtSurface, this._TrkThetaAtSurface, this._TrkToModuleAngle, this._Path, this._dx);
+        return s;
+    }
 }

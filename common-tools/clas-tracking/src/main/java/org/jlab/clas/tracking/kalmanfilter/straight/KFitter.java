@@ -6,7 +6,7 @@ import org.jlab.clas.tracking.kalmanfilter.AMeasVecs;
 import org.jlab.clas.tracking.kalmanfilter.AStateVecs;
 import org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
-import org.jlab.clas.tracking.trackrep.Helix.Units;
+import org.jlab.clas.tracking.kalmanfilter.Units;
 import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
 
 /**
@@ -121,13 +121,12 @@ public class KFitter extends AKFitter {
                     fVec.tz -= K[3] * dh;
                     fVec.updateFromRay();
                     sv.setStateVecPosAtMeasSite(fVec, mv.measurements.get(k), null); 
-                    fVec.resi = mv.dh(k, fVec);
+                    fVec.residual = mv.dh(k, fVec);
                 }
-                double dh_filt = mv.dh(k, fVec); 
     //            System.out.println(dh_filt + " " + dh);
-                if (Double.isNaN(dh_filt) 
-                 || Math.abs(dh_filt) > Math.max(V, 10*Math.abs(dh))
-                 || Math.abs(dh_filt)/Math.sqrt(V)>this.getResidualsCut()) { 
+                if (Double.isNaN(fVec.residual) 
+                 || Math.abs(fVec.residual) > Math.max(V, 10*Math.abs(dh))
+                 || Math.abs(fVec.residual)/Math.sqrt(V)>this.getResidualsCut()) { 
                     this.NDF--;
                     mv.measurements.get(k).skip = true;
                 }

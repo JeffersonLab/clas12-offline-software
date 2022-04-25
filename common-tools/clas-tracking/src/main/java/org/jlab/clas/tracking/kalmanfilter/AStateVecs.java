@@ -9,7 +9,6 @@ import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs.MeasVec;
 import org.jlab.clas.tracking.kalmanfilter.helical.KFitter;
 import org.jlab.clas.tracking.trackrep.Helix;
-import org.jlab.clas.tracking.trackrep.Helix.Units;
 import org.jlab.geom.prim.Point3D;
 
 public abstract class AStateVecs {
@@ -74,7 +73,10 @@ public abstract class AStateVecs {
  
         StateVec fVec = new StateVec(iVec);
         
-        if(dir>0) this.corrForEloss(dir, fVec, mv);
+        if(dir>0) {
+            this.corrForEloss(dir, fVec, mv);
+            if(fVec == null) return fVec;
+        }
 
         if(!this.setStateVecPosAtMeasSite(fVec, mv.measurements.get(f), swimmer)) return null;
 
@@ -234,13 +236,15 @@ public abstract class AStateVecs {
         public double tz; //=pz/py
         public double dl;
 
-        public double resi = 0;
+        public double residual;
 
         public double[][] covMat;
         
         public double[][] F;
 
-        private double[] _ELoss = new double[3];
+        public double energyLoss;
+        public double dx;
+        public double path;
 
         public StateVec(int k) {
             this.k = k;
@@ -286,7 +290,10 @@ public abstract class AStateVecs {
             this.px = s.px;
             this.py = s.py;
             this.pz = s.pz;
-            this.resi = s.resi;
+            this.residual = s.residual;
+            this.energyLoss = s.energyLoss;
+            this.dx = s.dx;
+            this.path = s.path;
             this.covMat = this.copyMatrix(s.covMat);
             this.F = this.copyMatrix(s.F);
         }
@@ -433,14 +440,6 @@ public abstract class AStateVecs {
             this.z = this.z0 + this.dl*this.tz;
         }
 
-        public double[] get_ELoss() {
-            return _ELoss;
-        }
-
-        public void set_ELoss(double[] _ELoss) {
-            this._ELoss = _ELoss;
-        }
-
         public double[] getHelixArray() {
             double[] a = new double[5];
             for(int i=0; i<5; i++)
@@ -487,6 +486,14 @@ public abstract class AStateVecs {
             }
         }
 
+        public Point3D getPosition() {
+            return new Point3D(this.x, this.y, this.z);
+        }
+
+        public Vector3D getMomentum() {
+            return new Vector3D(this.px, this.py, this.pz);
+        }
+        
         @Override
         public String toString() {
             String s = String.format("%d) drho=%.4f phi0=%.4f kappa=%.4f dz=%.4f tanL=%.4f alpha=%.4f\n", this.k, this.d_rho, this.phi0, this.kappa, this.dz, this.tanL, this.alpha);
@@ -522,7 +529,7 @@ public abstract class AStateVecs {
             this.y = y;
             this.z = z;
 
-            swimmer.BfieldLab(x / units.unit(), y / units.unit(), z / units.unit(), b);
+            swimmer.BfieldLab(x / units.value(), y / units.value(), z / units.value(), b);
             this.Bx = b[0];
             this.By = b[1];
             this.Bz = b[2];
@@ -531,7 +538,7 @@ public abstract class AStateVecs {
         }
 
         public void set() {
-            swimmer.BfieldLab(x / units.unit(), y / units.unit(), z / units.unit(), b);
+            swimmer.BfieldLab(x / units.value(), y / units.value(), z / units.value(), b);
             this.Bx = b[0];
             this.By = b[1];
             this.Bz = b[2];

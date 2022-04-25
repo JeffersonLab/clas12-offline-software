@@ -10,6 +10,7 @@ import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.clas.tracking.kalmanfilter.Material;
+import org.jlab.clas.tracking.kalmanfilter.Units;
 
 import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
 import org.jlab.detector.base.DetectorType;
@@ -21,6 +22,7 @@ import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.base.Detector;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
+import org.jlab.rec.cvt.measurement.Measurements;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 
 public class Constants {
@@ -85,11 +87,12 @@ public class Constants {
     
     public static final int SEEDFITITERATIONS = 5;
     
-    private static final Material LH2 = new Material("LH2", 8.85, 0.0708E-3, 0.99212, 8904.0, 21.8);
-    private static final Material LD2 = new Material("LD2", 8.85, 0.1638E-3, 0.49650, 7691.0, 21.8);
-    public  static final Material TARGETKAPTON = new Material("Kapton", 50E-3, 1.42E-3, 0.501, 28.57, 79.6);
-    public  static final Material TARGETRHOACELL = new Material("Rhoacell", 10.4, 0.1E-3, 0.5392, 1000, 93.0);
-    public  static final Material VACUUM = new Material("Vacuum", 1, 0, 1, Double.POSITIVE_INFINITY, 100);
+    private static final Material LH2 = new Material("LH2", 8.85, 0.0708E-3, 0.99212, 8904.0, 21.8, Units.MM);
+    private static final Material LD2 = new Material("LD2", 8.85, 0.1638E-3, 0.49650, 7691.0, 21.8, Units.MM);
+    public  static final Material TARGETKAPTON = new Material("Kapton", 50E-3, 1.42E-3, 0.501, 285.7, 79.6, Units.MM);
+    public  static final Material TARGETRHOACELL = new Material("Rhoacell", 10.4, 0.1E-3, 0.5392, 1000, 93.0, Units.MM);
+    public  static final Material SCINTILLATOR = new Material("Scintillator", 1, 1.03E-3, 0.54141, 439.0, 64.7, Units.MM);
+    public  static final Material VACUUM = new Material("Vacuum", 1, 0, 1, Double.POSITIVE_INFINITY, 100, Units.MM);
     
     public static boolean KFFILTERON = true;
     public static boolean INITFROMMC = false;
@@ -111,6 +114,7 @@ public class Constants {
     public CTOFGeant4Factory CTOFGEOMETRY = null;
     public Detector          CNDGEOMETRY  = null;
     public List<Surface>     CVTSURFACES  = null;
+    public List<Surface>     OUTERSURFACES  = null;
     private double zTarget = 0;    
 
 
@@ -514,6 +518,8 @@ public class Constants {
         CVTSURFACES = new ArrayList<>();
         CVTSURFACES.addAll(SVTGEOMETRY.getSurfaces());
         CVTSURFACES.addAll(BMTGEOMETRY.getSurfaces());
+        
+        OUTERSURFACES = Measurements.getOuters();
     }
 
 }

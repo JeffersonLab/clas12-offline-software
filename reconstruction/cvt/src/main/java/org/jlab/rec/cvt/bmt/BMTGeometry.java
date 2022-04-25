@@ -16,6 +16,7 @@ import static org.jlab.rec.cvt.bmt.BMTConstants.E_DRIFT_MF;
 import static org.jlab.rec.cvt.bmt.Lorentz.getLorentzAngle;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.clas.tracking.kalmanfilter.Units;
 import org.jlab.clas.tracking.objects.Strip;
 import org.jlab.geom.prim.Transformation3D;
 import org.jlab.groot.data.H1F;
@@ -37,10 +38,11 @@ public class BMTGeometry {
     private final static double udf      = -9999; // mm
     public final static int NLAYERS = 6;
     public final static int NSECTORS = 3;
-    public static final int NPASSIVE = 1;
+    public static final int NPASSIVE = 2;
 
     private final static double[] INNERTUBEDIM = {140, 141, 366, 4}; // inner radius, outer radius, halflength, offset}
-    private final static double[] INNERTUBEMAT = {1.75E-3, 0.51342, 250.0, 78}; // density, Z/A, X0, I
+    private final static double[] OUTERTUBEDIM = {234, 235, 372, 5}; // inner radius, outer radius, halflength, offset}
+    private final static double[] TUBEMAT = {1.75E-3, 0.51342, 250.0, 78}; // density, Z/A, X0, I
     /**
      * Handles BMT geometry
      */
@@ -955,7 +957,7 @@ public class BMTGeometry {
         surface.setError(0); 
         for(String key : BMTConstants.getMaterials().keySet()) {
             double[] p = BMTConstants.getMaterials().get(key);
-            surface.addMaterial(key, p[0], p[1], p[2], p[3], p[4]);
+            surface.addMaterial(key, p[0], p[1], p[2], p[3], p[4], Units.MM);
         }
         surface.notUsedInFit=false;
         return surface;
@@ -969,12 +971,26 @@ public class BMTGeometry {
         Cylindrical3D tube = new Cylindrical3D(base, 2*INNERTUBEDIM[2]);
         Surface surface = new Surface(tube, new Strip(0,0,0), Constants.DEFAULTSWIMACC);
         surface.addMaterial("CarbonFiber", INNERTUBEDIM[1]-INNERTUBEDIM[0],
-                            INNERTUBEMAT[0], INNERTUBEMAT[1], INNERTUBEMAT[2], INNERTUBEMAT[3]);
+                            TUBEMAT[0], TUBEMAT[1], TUBEMAT[2], TUBEMAT[3], Units.MM);
         surface.passive=true;
         surface.notUsedInFit=true;
         return surface;
     }
-
+    
+    public Surface getOuterTube() {
+        Point3D origin = new Point3D(OUTERTUBEDIM[0], 0, OUTERTUBEDIM[3]-OUTERTUBEDIM[2]);
+        Point3D  center = new Point3D(0,0,OUTERTUBEDIM[3]-OUTERTUBEDIM[2]);
+        Vector3D axis   = new Vector3D(0,0,1);
+        Arc3D base = new Arc3D(origin, center, axis, 2*Math.PI);
+        Cylindrical3D tube = new Cylindrical3D(base, 2*OUTERTUBEDIM[2]);
+        Surface surface = new Surface(tube, new Strip(0,0,0), Constants.DEFAULTSWIMACC);
+        surface.addMaterial("CarbonFiber", OUTERTUBEDIM[1]-OUTERTUBEDIM[0],
+                            TUBEMAT[0], TUBEMAT[1], TUBEMAT[2], TUBEMAT[3], Units.MM);
+        surface.passive=true;
+        surface.notUsedInFit=true;
+        return surface;
+    }
+    
     /**
      * Executable method: implements checks
      * @param arg

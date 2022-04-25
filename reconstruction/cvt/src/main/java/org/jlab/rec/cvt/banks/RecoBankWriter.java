@@ -615,6 +615,7 @@ public class RecoBankWriter {
                 bank.setFloat("langle",   k,  (float) stVec.getTrkToModuleAngle());
                 bank.setFloat("centroid", k,  (float) stVec.getCalcCentroidStrip());
                 bank.setFloat("path",     k,  (float) stVec.getPath()/10);
+                bank.setFloat("dx",       k,  (float) stVec.getDx()/10);
                 k++;
 
             }
@@ -630,17 +631,17 @@ public class RecoBankWriter {
         //new trajectory
         int k = 0;
         for (int i = 0; i < trkcands.size(); i++) {
-            if (trkcands.get(i).getTrajectories() != null) {
-                k += trkcands.get(i).getTrajectories().keySet().size();
+            if (trkcands.get(i).getKFTrajectories() != null) {
+                k += trkcands.get(i).getKFTrajectories().keySet().size();
             }
         }
         DataBank bank = event.createBank(bankName, k);
         for (int i = 0; i < trkcands.size(); i++) {
-            if(trkcands.get(i).getTrajectories()==null)
+            if(trkcands.get(i).getKFTrajectories()==null)
                 continue;
             //Fill trajectory for Eloss debugging
             k = 0;
-            for (AKFitter.HitOnTrack t : trkcands.get(i).getTrajectories().values()) {
+            for (AKFitter.HitOnTrack t : trkcands.get(i).getKFTrajectories().values()) {
                 bank.setShort("id",             k, (short) trkcands.get(i).getId()); //trackid
                 bank.setByte("detector",        k, (byte)  MLayer.getDetectorType(t.layer).getDetectorId());
                 bank.setByte("layer",           k, (byte)  MLayer.getType(t.layer).getLayer());
@@ -651,6 +652,9 @@ public class RecoBankWriter {
                 bank.setFloat("px",             k, (float) (t.px));
                 bank.setFloat("py",             k, (float) (t.py));
                 bank.setFloat("pz",             k, (float) (t.pz));
+                bank.setFloat("path",           k, (float) (t.path));
+                bank.setFloat("dx",             k, (float) (t.dx));
+                bank.setFloat("dE",             k, (float) (t.dE));
                 bank.setFloat("trackRes",       k, (float) (t.residual));
                 bank.setFloat("transportedRes", k, (float) (t.transportedResidual));
                 bank.setFloat("filteredRes",    k, (float) (t.filteredResidual));

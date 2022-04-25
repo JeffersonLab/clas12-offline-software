@@ -2,8 +2,8 @@ package org.jlab.rec.cvt.splitservices;
 import org.jlab.rec.cvt.services.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.tracking.kalmanfilter.Units;
 import org.jlab.clas.tracking.kalmanfilter.straight.KFitter;
-import org.jlab.clas.tracking.trackrep.Helix.Units;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -145,7 +145,7 @@ public class CosmicTracksRec {
                     cosmic.addAll(pseudoCrosses); //VZ check for additional clusters, and only then re-run KF adding new clusters                    
                     //refit
                     kf.init(cosmic.getRay().getYXInterc(),cosmic.getRay().getYZInterc(),
-                            cosmic.getRay().getYXSlope(), cosmic.getRay().getYZSlope(), Units.CM, cov,
+                            cosmic.getRay().getYXSlope(), cosmic.getRay().getYZSlope(), Units.MM, cov,
                             measures.getMeasurements(cosmic)) ;
                     kf.runFitter();
                     if (kf.setFitFailed == false && kf.NDF>0 && kf.finalStateVec!=null) { 

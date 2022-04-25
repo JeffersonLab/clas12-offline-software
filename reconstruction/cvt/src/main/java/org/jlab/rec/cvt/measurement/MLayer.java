@@ -26,7 +26,8 @@ public enum MLayer {
     BMTLAYER4(15,    "BMT Layer 4",            4),
     BMTLAYER5(16,    "BMT Layer 5",            5),
     BMTLAYER6(17,    "BMT Layer 6",            6),
-    COSMICPLANE(18,  "Cosmic reference plane", 0);
+    BMTOUTERTUBE(18, "BMT Outer Tube",         0),
+    COSMICPLANE(19,  "Cosmic reference plane", 0);
 
     private final int id;
     private final String name;

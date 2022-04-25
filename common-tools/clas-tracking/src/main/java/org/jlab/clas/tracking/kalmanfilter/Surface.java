@@ -8,6 +8,7 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Arc3D;
 import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Transformation3D;
+import org.jlab.geom.prim.Vector3D;
 
 /**
  *
@@ -191,10 +192,18 @@ public class Surface implements Comparable<Surface> {
         this.materials.add(m);
     }
     
-    public void addMaterial(String name, double thickness, double density, double ZoverA, double X0, double IeV) {
-        this.materials.add(new Material(name, thickness, density, ZoverA, X0, IeV));
+    public void addMaterial(String name, double thickness, double density, double ZoverA, double X0, double IeV, Units unit) {
+        this.materials.add(new Material(name, thickness, density, ZoverA, X0, IeV, unit));
     }
     
+    public double getThickness() {
+        double t = 0;
+        for(Material m : this.materials) {
+            t += m.getThickness();
+        }
+        return t;
+    }
+
     public double getToverX0() {
         double lX0 = 0;
         for(Material m : this.materials) {
@@ -213,12 +222,57 @@ public class Surface implements Comparable<Surface> {
         return ZA/RhoX;
     }
     
-    public double getEloss(double p, double mass, double units) {
+    public double getLocalDir(Point3D pos, Vector3D dir) {
+        if(this.type!=Type.PLANEWITHSTRIP && 
+           this.type!=Type.CYLINDERWITHSTRIP && 
+           this.type!=Type.LINE) 
+           return 1;
+        else {
+            if(this.type==Type.PLANEWITHSTRIP) {
+                Vector3D norm = this.plane.normal();
+                return Math.abs(norm.dot(dir));
+            }
+            else if(this.type==Type.CYLINDERWITHSTRIP) {
+                this.toLocal().apply(pos);
+                this.toLocal().apply(dir);
+                Vector3D norm = pos.toVector3D().asUnit();
+                return Math.abs(norm.dot(dir));
+            }
+            else if(this.type==Type.LINE) {
+                Vector3D norm = this.lineEndPoint1.vectorTo(this.lineEndPoint2).asUnit();
+                double cosdir = Math.abs(norm.dot(dir));
+                return Math.sqrt(1-cosdir*cosdir);
+            }
+            return 0;
+        }
+    }    
+    
+    public double getEloss(double p, double mass) {
         double dE=0;
         for(Material m : this.materials) {
-            dE += m.getEloss(p, mass, units);
+            dE += m.getEloss(p, mass);
         }
         return dE;
+    }
+    
+    public double getEloss(Point3D pos, Vector3D mom, double mass, int dir) {
+        double cosDir = this.getLocalDir(pos, mom);
+        double scale = 0;
+        if(cosDir!=0) {
+            double dE = -dir*this.getEloss(mom.mag(), mass)/cosDir;
+            double Ecorr = Math.sqrt(mom.mag2() + mass*mass) + dE;
+            if(Ecorr>mass) scale = Math.sqrt(Ecorr*Ecorr - mass*mass)/mom.mag();
+            mom.scale(scale);
+        }
+        return scale;
+    }
+    
+    public double getDx(Point3D pos, Vector3D mom) {
+        double cosDir = this.getLocalDir(pos, mom);
+        if(cosDir!=0)
+          return this.getThickness()/cosDir;
+        else
+            return 0;
     }
     
     public double getThetaMS(double p, double mass, double cosEntranceAngle) {

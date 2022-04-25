@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.clas.tracking.objects.Strip;
-import org.jlab.clas.tracking.trackrep.Helix.Units;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Arc3D;
 import org.jlab.geom.prim.Cylindrical3D;
@@ -12,6 +11,7 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.geometry.prim.Line3d;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.cluster.Cluster;
@@ -53,6 +53,7 @@ public class Measurements {
         this.add(MLayer.INNERSVTCAGE.getIndex(), Constants.getInstance().SVTGEOMETRY.getFaradayCageSurfaces(0));
         this.add(MLayer.OUTERSVTCAGE.getIndex(), Constants.getInstance().SVTGEOMETRY.getFaradayCageSurfaces(1)); 
         this.add(MLayer.BMTINNERTUBE.getIndex(), Constants.getInstance().BMTGEOMETRY.getInnerTube()); 
+        this.add(MLayer.BMTOUTERTUBE.getIndex(), Constants.getInstance().BMTGEOMETRY.getOuterTube()); 
     }
     
     private void initCosmicSurfaces() {
@@ -63,11 +64,13 @@ public class Measurements {
         this.add(MLayer.INNERSVTCAGE.getIndex(1),  Constants.getInstance().SVTGEOMETRY.getFaradayCageSurfaces(0));
         this.add(MLayer.OUTERSVTCAGE.getIndex(1),  Constants.getInstance().SVTGEOMETRY.getFaradayCageSurfaces(1));       
         this.add(MLayer.BMTINNERTUBE.getIndex(1),  Constants.getInstance().BMTGEOMETRY.getInnerTube()); 
+        this.add(MLayer.BMTOUTERTUBE.getIndex(1),  Constants.getInstance().BMTGEOMETRY.getOuterTube()); 
         this.add(MLayer.SCHAMBER.getIndex(-1),     this.getScatteringChamber());
         this.add(MLayer.SHIELD.getIndex(-1),       Constants.getInstance().SVTGEOMETRY.getShieldSurface(), -1);
         this.add(MLayer.INNERSVTCAGE.getIndex(-1), Constants.getInstance().SVTGEOMETRY.getFaradayCageSurfaces(0), -1);
         this.add(MLayer.OUTERSVTCAGE.getIndex(-1), Constants.getInstance().SVTGEOMETRY.getFaradayCageSurfaces(1), -1);       
         this.add(MLayer.BMTINNERTUBE.getIndex(-1), Constants.getInstance().BMTGEOMETRY.getInnerTube());        
+        this.add(MLayer.BMTOUTERTUBE.getIndex(-1), Constants.getInstance().BMTGEOMETRY.getOuterTube()); 
     }
     
     private void add(int index, Surface surface) {
@@ -118,6 +121,64 @@ public class Measurements {
         return scatteringChamber;
     }
     
+    private static Surface getCTOF() {
+        
+        double radius    = Constants.getInstance().CTOFGEOMETRY.getRadius(1);
+        double thickness = Constants.getInstance().CTOFGEOMETRY.getThickness(1);
+        Line3d lineZ     = Constants.getInstance().CTOFGEOMETRY.getPaddle(1).getLineZ();
+        
+        Point3D  center = new Point3D(        0, 0, lineZ.origin().z);
+        Point3D  origin = new Point3D(radius*10, 0, lineZ.origin().z);
+        Vector3D axis   = new Vector3D(0,0,1);
+        Arc3D base = new Arc3D(origin, center, axis, 2*Math.PI);
+        Cylindrical3D barrel = new Cylindrical3D(base, lineZ.end().z -lineZ.origin().z);
+        
+        Surface ctof = new Surface(barrel, new Strip(0, 0, 0), Constants.DEFAULTSWIMACC);
+        ctof.addMaterial(Constants.SCINTILLATOR.clone(thickness*10));
+        ctof.setIndex(DetectorType.CTOF.getDetectorId());
+        ctof.setLayer(1);
+        ctof.setSector(0);
+        ctof.passive=true;
+        ctof.notUsedInFit=true;
+        return ctof;
+    }
+    
+    private static List<Surface> getCND() {
+        List<Surface> surfaces = new ArrayList<>();
+        
+        Vector3D axis   = new Vector3D(0,0,1);
+        
+        for(int ilayer=0; ilayer<Constants.getInstance().CNDGEOMETRY.getSector(0).getSuperlayer(0).getNumLayers(); ilayer++) {
+            
+            Point3D paddle = Constants.getInstance().CNDGEOMETRY.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getMidpoint();
+            
+            double radius    = Math.sqrt(paddle.x()*paddle.x()+paddle.y()*paddle.y());
+            double thickness = Constants.getInstance().CNDGEOMETRY.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getVolumeEdge(1).length();
+            double length    = Constants.getInstance().CNDGEOMETRY.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getLength();
+            Point3D       center = new Point3D(        0, 0, paddle.z() - length/2);
+            Point3D       origin = new Point3D(radius*10, 0, paddle.z() - length/2);
+            Arc3D           base = new Arc3D(origin, center, axis, 2*Math.PI);
+            Cylindrical3D barrel = new Cylindrical3D(base, length);
+            
+            Surface cnd = new Surface(barrel, new Strip(0, 0, 0), Constants.DEFAULTSWIMACC);
+            cnd.addMaterial(Constants.SCINTILLATOR.clone(thickness*10));
+            cnd.setIndex(DetectorType.CND.getDetectorId());
+            cnd.setLayer(ilayer+1);
+            cnd.setSector(0);
+            cnd.passive=true;
+            cnd.notUsedInFit=true;
+            surfaces.add(cnd);
+        }
+        return surfaces;
+    }
+    
+    public static List<Surface> getOuters() {
+        List<Surface> surfaces = new ArrayList<>();
+        surfaces.add(getCTOF());
+        surfaces.addAll(getCND());
+        return surfaces;
+    }
+    
     private Surface getCosmicPlane() {
         Point3D point = new Point3D(0,0,0);
         Point3D   ep1 = new Point3D(-300,0,0);
@@ -158,13 +219,13 @@ public class Measurements {
     }
 
     
-    public double getELoss(double p, double mass, Units units) {
+    public double getELoss(double p, double mass) {
         double pcorr = p;
         for(int i=0; i<cvtSurfaces.length; i++) {
             Surface surf = cvtSurfaces[i];
             if(surf==null) break;
             double E  = Math.sqrt(pcorr*pcorr + mass*mass);
-            double dE = surf.getEloss(pcorr, mass, units.unit());
+            double dE = surf.getEloss(pcorr, mass);
             double Ecorr = E + dE;
             pcorr = Math.sqrt(Ecorr*Ecorr-mass*mass); 
             if(debug) System.out.println(p + " " + pcorr + "\n" + surf.toString());

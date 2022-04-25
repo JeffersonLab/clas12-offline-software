@@ -1,14 +1,12 @@
 package org.jlab.clas.tracking.kalmanfilter.straight;
 
-import java.util.HashMap;
-import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs.MeasVec;
 import org.jlab.clas.tracking.kalmanfilter.AStateVecs;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.clas.tracking.kalmanfilter.Units;
 import org.jlab.clas.tracking.trackrep.Helix;
-import org.jlab.clas.tracking.trackrep.Helix.Units;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -42,6 +40,7 @@ public class StateVecs extends AStateVecs {
                 vec.x = inters.x()  ;
                 vec.y = inters.y()  ;
                 vec.z = inters.z()  ;
+                vec.path = inters.distance(ref);
             }
             if(mv.surface.cylinder!=null) {
                 mv.surface.toLocal().apply(ref);
@@ -59,6 +58,7 @@ public class StateVecs extends AStateVecs {
                 vec.x = cylInt.x();
                 vec.y = cylInt.y();
                 vec.z = cylInt.z();
+                vec.path = cylInt.distance(ref);
             } 
             return true;
         }

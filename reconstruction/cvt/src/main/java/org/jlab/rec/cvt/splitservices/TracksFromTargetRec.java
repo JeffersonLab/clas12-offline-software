@@ -17,13 +17,13 @@ import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.clas.tracking.kalmanfilter.Units;
 import org.jlab.rec.cvt.banks.RecoBankReader;
 import org.jlab.rec.cvt.measurement.Measurements;
 import org.jlab.rec.cvt.services.RecUtilities;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.StraightTrackSeeder;
 import org.jlab.rec.cvt.track.Track;
-import org.jlab.rec.cvt.track.TrackListFinder;
 import org.jlab.rec.cvt.track.TrackSeeder;
 import org.jlab.rec.cvt.track.TrackSeederCA;
 import org.jlab.utils.groups.IndexedTable;
@@ -122,7 +122,7 @@ public class TracksFromTargetRec {
         double solenoidScale = Constants.getInstance().getSolenoidScale();
         double solenoidValue = Constants.getInstance().getSolenoidMagnitude(); // already the absolute value
         
-        List<Track> trkcands = new ArrayList<>();
+        List<Track> tracks = new ArrayList<>();
         KFitter kf = new KFitter(kfFilterOn, kfIterations, Constants.KFDIR, swimmer, Constants.getInstance().KFMatrixLibrary);
         Measurements measure = new Measurements(xb, yb, Constants.getInstance().kfBeamSpotConstraint());
         for (Seed seed : CVTseeds) { 
@@ -135,7 +135,7 @@ public class TracksFromTargetRec {
             Vector3D p = seed.getHelix().getPXYZ(solenoidValue);
             
             if(Constants.getInstance().preElossCorrection && pid!=Constants.DEFAULTPID) {
-                double pcorr = measure.getELoss(p.mag(), PDGDatabase.getParticleMass(pid), Helix.Units.MM);
+                double pcorr = measure.getELoss(p.mag(), PDGDatabase.getParticleMass(pid));
                 p.scale(pcorr/p.mag());
             }
             
@@ -150,7 +150,7 @@ public class TracksFromTargetRec {
                 if(solenoidValue<0.001) p.scale(100/p.mag());
             }
             Helix hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
-                            solenoidValue, xb , yb, Helix.Units.MM);
+                            solenoidValue, xb , yb, Units.MM);
             double[][] cov = Constants.scaleCovMat(seed.getHelix().getCovMatrix(), covmatScale);
 
             if(solenoidValue>0.001 && Constants.LIGHTVEL * seed.getHelix().radius() *solenoidValue<Constants.PTCUT)
@@ -198,7 +198,7 @@ public class TracksFromTargetRec {
                         if(solenoidValue<0.001)
                             charge = 1;
                         hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
-                                        solenoidValue, xb, yb, Helix.Units.MM);
+                                        solenoidValue, xb, yb, Units.MM);
 
                         kf.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid)) ;
                         kf.runFitter();
@@ -214,7 +214,7 @@ public class TracksFromTargetRec {
                         }
                     }
                 }
-                trkcands.add(fittedTrack);
+                tracks.add(fittedTrack);
             }
         }
     
@@ -233,17 +233,16 @@ public class TracksFromTargetRec {
                 c.setAssociatedTrackID(-1);
             }
         }
-        List<Track> tracks = null;
-        if(!trkcands.isEmpty()) {
+        if(!tracks.isEmpty()) {
             // do a final cleanup
-            TrackListFinder.removeOverlappingTracks(trkcands); 
-            if(trkcands.isEmpty()) System.out.println("Error: no tracks left after overlap remover");
+            Track.removeOverlappingTracks(tracks); 
+            if(tracks.isEmpty()) System.out.println("Error: no tracks left after overlap remover");
             
-            tracks = TrackListFinder.getTracks(trkcands, swimmer);
             // update crosses and clusters on track
             for(int it = 0; it < tracks.size(); it++) {
                 int id = it + 1;
                 tracks.get(it).setId(id); 
+                tracks.get(it).findTrajectory(swimmer, Constants.getInstance().OUTERSURFACES);
                 tracks.get(it).update_Crosses(id);
                 tracks.get(it).update_Clusters(id);
                 tracks.get(it).setTrackCovMat(recUtil.getCovMatInTrackRep(tracks.get(it)));

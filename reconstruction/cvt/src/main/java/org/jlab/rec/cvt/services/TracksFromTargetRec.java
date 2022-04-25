@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.pdg.PDGDatabase;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.clas.tracking.kalmanfilter.Units;
 import org.jlab.clas.tracking.kalmanfilter.helical.KFitter;
 import org.jlab.clas.tracking.trackrep.Helix;
 import org.jlab.detector.base.DetectorType;
@@ -114,7 +115,7 @@ public class TracksFromTargetRec {
                 if(solenoidValue<0.001) p.scale(100/p.mag());
             }
             Helix hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
-                            solenoidValue, xb , yb, Helix.Units.MM);
+                            solenoidValue, xb , yb, Units.MM);
             double[][] cov = Constants.scaleCovMat(seed.getHelix().getCovMatrix(), 0);
 
             if(solenoidValue>0.001 && Constants.LIGHTVEL * seed.getHelix().radius() *solenoidValue<Constants.PTCUT)
@@ -153,7 +154,7 @@ public class TracksFromTargetRec {
                     if(solenoidValue<0.001)
                         charge = 1;
                     hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
-                                    solenoidValue, xb, yb, Helix.Units.MM);
+                                    solenoidValue, xb, yb, Units.MM);
 
                     kf.init(hlx, cov, xb, yb, 0, surfaces.getMeasurements(seed), PDGDatabase.getParticleMass(pid)) ;
                     kf.runFitter();
@@ -183,7 +184,7 @@ public class TracksFromTargetRec {
         List<Track> tracks = null;
         if(!trkcands.isEmpty()) {
             // do a final cleanup
-            TrackListFinder.removeOverlappingTracks(trkcands); 
+            Track.removeOverlappingTracks(trkcands); 
             if(trkcands.isEmpty()) System.out.println("Error: no tracks left after overlap remover");
             
             tracks = TrackListFinder.getTracks(trkcands, swimmer);

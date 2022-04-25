@@ -14,14 +14,16 @@ public class Material {
     private double ZoverA;
     private double X0;
     private double IeV;
+    private Units units; // 1 - cm, 10 - mm
 
-    public Material(String name, double thickness, double density, double ZoverA, double X0, double IeV) {
+    public Material(String name, double thickness, double density, double ZoverA, double X0, double IeV, Units units) {
         this.name = name;
         this.thickness = thickness;
         this.density = density;
         this.ZoverA = ZoverA;
         this.X0 = X0;
         this.IeV = IeV;
+        this.units = units;
     }
 
     public String getName() {
@@ -48,15 +50,23 @@ public class Material {
         return IeV;
     }
 
+    @Override
+    public Material clone() {
+        return new Material(this.name, this.thickness, this.density, this.ZoverA, this.X0, this.IeV, this.units);
+    }
     
-    public double getEloss(double p, double mass, double units) {
+    public Material clone(double newThickness) {
+        return new Material(this.name, newThickness, this.density, this.ZoverA, this.X0, this.IeV, this.units);
+    }
+    // RDV make units a property of the material
+    public double getEloss(double p, double mass) {
         if(mass==0) return 0;
         double beta = p / Math.sqrt(p * p + mass * mass);
         double s = PhysicsConstants.massElectron() / mass;
         double gamma = 1. / Math.sqrt(1 - beta * beta);
         double Wmax = 2. * PhysicsConstants.massElectron() * beta * beta * gamma * gamma
                 / (1. + 2. * s * gamma + s * s);
-        double K = 0.000307075 * units * units; //  GeV mol-1 cm2
+        double K = 0.000307075 * units.value() * units.value(); //  GeV mol-1 cm2
         double I = this.IeV * 1E-9;
         double logterm = 2. * PhysicsConstants.massElectron() * beta * beta * gamma * gamma * Wmax / (I * I);
         double dE = this.thickness * this.density * K * this.ZoverA

@@ -5,8 +5,8 @@ import org.jlab.clas.tracking.kalmanfilter.AMeasVecs;
 import org.jlab.clas.tracking.kalmanfilter.AMeasVecs.MeasVec;
 import org.jlab.clas.tracking.kalmanfilter.AStateVecs;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.clas.tracking.kalmanfilter.Units;
 import org.jlab.clas.tracking.trackrep.Helix;
-import org.jlab.clas.tracking.trackrep.Helix.Units;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -21,9 +21,7 @@ public class StateVecs extends AStateVecs {
     @Override
     public boolean getStateVecPosAtMeasSite(StateVec sv, AMeasVecs.MeasVec mv, Swim swim) {
         double[] swimPars = new double[7];
-        Point3D  pos = new Point3D(0,0,0);
-        Vector3D mom = new Vector3D(0,0,0);
-
+        
         if(mv.surface==null) return false;
         
         int dir = (int) Math.signum(mv.k-sv.k);
@@ -41,41 +39,45 @@ public class StateVecs extends AStateVecs {
         
         if(this.straight) {
 
+            Point3D st   = new Point3D(sv.x, sv.y, sv.z); 
+            Vector3D stu = new Vector3D(sv.px,sv.py,sv.pz).asUnit();
+            
             if(mv.surface.plane!=null) {
-                Line3D toPln = new Line3D(new Point3D(sv.x,sv.y,sv.z),new Vector3D(sv.px,sv.py,sv.pz).asUnit());
+                Line3D toPln = new Line3D(st, stu);
                 Point3D inters = new Point3D();
                 int ints = mv.surface.plane.intersection(toPln, inters);
                 sv.x = inters.x();
                 sv.y = inters.y();
-                sv.z = inters.z();                   
+                sv.z = inters.z();  
+                sv.path = inters.distance(st);
             }
             else if(mv.surface.cylinder!=null) {
-                Point3D st   = new Point3D(sv.x, sv.y, sv.z); 
-                Vector3D stu = new Vector3D(sv.px,sv.py,sv.pz).asUnit();
                 mv.surface.toLocal().apply(st);
                 mv.surface.toLocal().apply(stu);
-
                 double r = mv.surface.cylinder.baseArc().radius();
                 double delta = Math.sqrt((st.x()*stu.x()+st.y()*stu.y())*(st.x()*stu.x()+st.y()*stu.y())-(-r*r+st.x()*st.x()+st.y()*st.y())*(stu.x()*stu.x()+stu.y()*stu.y()));
                 double l = (-(st.x()*stu.x()+st.y()*stu.y())+delta)/(stu.x()*stu.x()+stu.y()*stu.y());
                 if(Math.signum(st.y()+l*stu.y())!=mv.hemisphere) {
                     l = (-(st.x()*stu.x()+st.y()*stu.y())-delta)/(stu.x()*stu.x()+stu.y()*stu.y()); 
                 } 
-                Point3D cylInt = new Point3D(st.x()+l*stu.x(),st.y()+l*stu.y(),st.z()+l*stu.z());
-                mv.surface.toGlobal().apply(cylInt);
+                Point3D inters = new Point3D(st.x()+l*stu.x(),st.y()+l*stu.y(),st.z()+l*stu.z());
+                mv.surface.toGlobal().apply(inters);
                 // RDV: should switch to use clas-geometry intersection method, not done now to alwys return a value
-                sv.x = cylInt.x();
-                sv.y = cylInt.y();
-                sv.z = cylInt.z();
+                sv.x = inters.x();
+                sv.y = inters.y();
+                sv.z = inters.z();
+                sv.path = inters.distance(st);
             }
         } else { 
             if(swim==null) { // applicable only to planes parallel to the z -axis
                 Helix helix = sv.getHelix(xref, yref);
                 if(mv.surface.plane!=null) {
-                    pos = helix.getHelixPointAtPlane(mv.surface.finitePlaneCorner1.x(), mv.surface.finitePlaneCorner1.y(),
-                            mv.surface.finitePlaneCorner2.x(), mv.surface.finitePlaneCorner2.y(), 10);
-                    mom = helix.getMomentumAtPlane(mv.surface.finitePlaneCorner1.x(), mv.surface.finitePlaneCorner1.y(),
-                            mv.surface.finitePlaneCorner2.x(), mv.surface.finitePlaneCorner2.y(), 10);
+                    Point3D pos = helix.getHelixPointAtPlane(mv.surface.finitePlaneCorner1.x(), mv.surface.finitePlaneCorner1.y(),
+                                                             mv.surface.finitePlaneCorner2.x(), mv.surface.finitePlaneCorner2.y(), 10);
+                    Vector3D mom = helix.getMomentumAtPlane(mv.surface.finitePlaneCorner1.x(), mv.surface.finitePlaneCorner1.y(),
+                                                            mv.surface.finitePlaneCorner2.x(), mv.surface.finitePlaneCorner2.y(), 10);
+                    sv.path = helix.getLAtPlane(mv.surface.finitePlaneCorner1.x(), mv.surface.finitePlaneCorner1.y(),
+                                                mv.surface.finitePlaneCorner2.x(), mv.surface.finitePlaneCorner2.y(), 10);
                     sv.x = pos.x();
                     sv.y = pos.y();
                     sv.z = pos.z();
@@ -85,8 +87,9 @@ public class StateVecs extends AStateVecs {
                 }
                 else {
                     double r = mv.surface.cylinder.baseArc().radius();
-                    pos = helix.getHelixPointAtR(r);
-                    mom = helix.getMomentumAtR(r);
+                    Point3D pos = helix.getHelixPointAtR(r);
+                    Vector3D mom = helix.getMomentumAtR(r);
+                    sv.path = helix.getLAtR(r);
                     sv.x = pos.x();
                     sv.y = pos.y();
                     sv.z = pos.z();
@@ -96,45 +99,47 @@ public class StateVecs extends AStateVecs {
                 }
             }
             else {
-                swim.SetSwimParameters(sv.x/units.unit(), sv.y/units.unit(), sv.z/units.unit(), 
+                swim.SetSwimParameters(sv.x/units.value(), sv.y/units.value(), sv.z/units.value(), 
                                    dir*sv.px, dir*sv.py, dir*sv.pz, 
                                    KFitter.polarity*(int) Math.signum(sv.kappa)*dir);
                 if(mv.surface.plane!=null) {
                     Vector3D norm = mv.surface.plane.normal();
-                    Point3D point = new Point3D(mv.surface.plane.point().x()/units.unit(),
-                                                mv.surface.plane.point().y()/units.unit(),
-                                                mv.surface.plane.point().z()/units.unit());
-                    double accuracy = mv.surface.swimAccuracy/units.unit();
+                    Point3D point = new Point3D(mv.surface.plane.point().x()/units.value(),
+                                                mv.surface.plane.point().y()/units.value(),
+                                                mv.surface.plane.point().z()/units.value());
+                    double accuracy = mv.surface.swimAccuracy/units.value();
                     swimPars = swim.SwimPlane(norm,point,accuracy);
  //                   swimPars = swim.AdaptiveSwimPlane(point.x(), point.y(), point.z(), norm.x(), norm.y(), norm.z(), accuracy);
                     if(swimPars==null)
                         return false;
 
-                    sv.x = swimPars[0]*units.unit();
-                    sv.y = swimPars[1]*units.unit();
-                    sv.z = swimPars[2]*units.unit();
+                    sv.x = swimPars[0]*units.value();
+                    sv.y = swimPars[1]*units.value();
+                    sv.z = swimPars[2]*units.value();
                     sv.px = swimPars[3]*dir;
                     sv.py = swimPars[4]*dir;
                     sv.pz = swimPars[5]*dir;
+                    sv.path = swimPars[6]*units.value();
                 }
                 else   {
                     double r = mv.surface.cylinder.baseArc().radius();
-                    Point3D p1 = new Point3D(mv.surface.cylinder.getAxis().origin().x()/units.unit(),
-                                             mv.surface.cylinder.getAxis().origin().y()/units.unit(),
-                                             mv.surface.cylinder.getAxis().origin().z()/units.unit()) ;
-                    Point3D p2 = new Point3D(mv.surface.cylinder.getAxis().end().x()/units.unit(),
-                                             mv.surface.cylinder.getAxis().end().y()/units.unit(),
-                                             mv.surface.cylinder.getAxis().end().z()/units.unit()) ;
-                    double accuracy = mv.surface.swimAccuracy/units.unit();
-                    swimPars = swim.SwimGenCylinder(p1, p2, r/units.unit(), accuracy);
+                    Point3D p1 = new Point3D(mv.surface.cylinder.getAxis().origin().x()/units.value(),
+                                             mv.surface.cylinder.getAxis().origin().y()/units.value(),
+                                             mv.surface.cylinder.getAxis().origin().z()/units.value()) ;
+                    Point3D p2 = new Point3D(mv.surface.cylinder.getAxis().end().x()/units.value(),
+                                             mv.surface.cylinder.getAxis().end().y()/units.value(),
+                                             mv.surface.cylinder.getAxis().end().z()/units.value()) ;
+                    double accuracy = mv.surface.swimAccuracy/units.value();
+                    swimPars = swim.SwimGenCylinder(p1, p2, r/units.value(), accuracy);
                     if(swimPars==null)
                         return false;
-                    sv.x = swimPars[0]*units.unit();
-                    sv.y = swimPars[1]*units.unit();
-                    sv.z = swimPars[2]*units.unit();
+                    sv.x = swimPars[0]*units.value();
+                    sv.y = swimPars[1]*units.value();
+                    sv.z = swimPars[2]*units.value();
                     sv.px = swimPars[3]*dir;
                     sv.py = swimPars[4]*dir;
                     sv.pz = swimPars[5]*dir;
+                    sv.path = swimPars[6]*units.value();
                }
             }
         }
@@ -159,21 +164,17 @@ public class StateVecs extends AStateVecs {
         
         if(this.straight || mass<0) return;
                        
-        Surface surf = mv.measurements.get(vec.k).surface;
-        double cosEntranceAngle = this.getLocalDirAtMeasSite(vec, mv.measurements.get(vec.k));
-
-        double p = Math.sqrt(vec.px*vec.px + vec.py*vec.py + vec.pz*vec.pz);
-        double E = Math.sqrt(p*p + mass*mass);
-        
-        double dE = -dir*surf.getEloss(p, mass, this.units.unit())/cosEntranceAngle;
-
-        double ECorr = E + dE;
-        double pCorr = Math.sqrt(ECorr*ECorr-mass*mass);
-//        System.out.println("Moving in direction " + dir + " including material from surface " + vec.k + " with X0 = " +  mv.measurements.get(vec.k).surface.getToverX0());
-//        System.out.println(p + " " + E + " " + dE + " " + pCorr);
-//        System.out.println(mv.measurements.get(vec.k).surface.toString());
-        vec.kappa = vec.kappa*p/pCorr;
-        vec.updateFromHelix();
+        Surface  surf = mv.measurements.get(vec.k).surface;
+        double pScale = surf.getEloss(vec.getPosition(), vec.getMomentum(), mass, dir);
+        if(pScale>0) {
+            vec.kappa = vec.kappa/pScale;
+            vec.energyLoss = surf.getEloss(vec.getMomentum().mag(), mass);
+            vec.dx = surf.getDx(vec.getPosition(), vec.getMomentum());
+            vec.updateFromHelix();
+        }
+        else {
+            vec = null;
+        }
     }
     
     @Override
