@@ -48,27 +48,6 @@ public enum DetectorType {
         detectorName = name;
     }
     
-    DetectorType(String name){
-        detectorName = name;
-        int i = -1;
-        for(DetectorType det: DetectorType.values()){
-            i++;
-            if(det.getName().equalsIgnoreCase(name)) break;
-        }
-        detectorId = i;
-    }
-    
-    DetectorType(int id){
-        detectorId = id;
-        String name = "UNDEFINED";
-        for(DetectorType det: DetectorType.values()){
-            name = det.getName();
-            if(det.getName().equalsIgnoreCase(name)) break;
-        }
-        detectorName = name;
-    }
-    
-    
     /**
      * Returns the name of the detector.
      * @return the name of the detector
