@@ -382,22 +382,26 @@ public class FittedHit extends Hit implements Comparable<Hit> {
            
             double deltatime_beta = 0;
             double deltadoca_beta = 0;
-            if (x != -1) {
-                if(Constants.getInstance().useUSETIMETBETA()==true) {
-                    deltatime_beta = calcDeltaTimeBetaTFCN(this.get_Time(), tab, beta);
-                } else {
-                    deltadoca_beta = calcDeltaDocaBeta(x, tab, beta);
-                }
-            }
+            
+            if(Constants.getInstance().useUSETIMETBETA()==true) {
+                deltatime_beta = calcDeltaTimeBetaTFCN(this.get_Time(), tab, beta);
+            } 
+            
             if(event.hasBank("MC::Particle")==false) {
                 distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), 
                         this.getCorrectedTime(this.get_Time(), deltatime_beta), 
-                        secIdx, slIdx) -deltadoca_beta;
+                        secIdx, slIdx);
             } else {
                 distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), 
                         this.getCorrectedTime(this.get_Time(), 0), 
                         secIdx, slIdx) ;
             }
+            //get deltadoca
+            if(Constants.getInstance().useUSETIMETBETA()==false) {
+                deltadoca_beta = calcDeltaDocaBeta(distance, tab, beta);
+            }
+            
+            distance -=deltadoca_beta;
             this.set_DeltaTimeBeta(deltatime_beta);
             this.set_DeltaDocaBeta(deltadoca_beta);
             
