@@ -31,10 +31,6 @@ public class FTResponse extends DetectorResponse {
     public DetectorType getType() {
         return _type;
     }
-
-    public void setType(String type) {
-        this._type.getType(type);
-    }
     
     public void setType(DetectorType type) {
         this._type = type;
