@@ -1,10 +1,9 @@
-package org.jlab.rec.cvt.splitservices;
+package org.jlab.rec.cvt.services;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;

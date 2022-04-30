@@ -1,4 +1,4 @@
-package org.jlab.rec.cvt.splitservices;
+package org.jlab.rec.cvt.services;
 
 import java.util.ArrayList;
 import java.util.List;
