@@ -7,6 +7,7 @@ import org.jlab.clas.tracking.kalmanfilter.AStateVecs;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.clas.tracking.kalmanfilter.Units;
 import org.jlab.clas.tracking.trackrep.Helix;
+import org.jlab.clas.tracking.utilities.MatrixOps;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;

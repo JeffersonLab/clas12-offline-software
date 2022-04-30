@@ -5,11 +5,7 @@ import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorType;
 
-import org.jlab.geom.prim.Point3D;
-import org.jlab.geom.prim.Vector3D;
-import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.svt.SVTParameters;
-import org.jlab.rec.cvt.trajectory.StateVec;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 

@@ -30,7 +30,7 @@ public abstract class AMeasVecs {
             mvec.surface = measSurfaces.get(i);
             if(mvec.surface.getError()!=0)
                 mvec.error = mvec.surface.getError();
-            mvec.skip = mvec.surface.notUsedInFit;
+            mvec.skip = mvec.surface.passive;
             mvec.hemisphere = measSurfaces.get(i).hemisphere;
             measurements.add(mvec);
         }

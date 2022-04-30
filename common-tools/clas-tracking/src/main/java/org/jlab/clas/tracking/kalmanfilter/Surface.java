@@ -35,8 +35,7 @@ public class Surface implements Comparable<Surface> {
     private List<Material> materials = new ArrayList<>();
     // this is for swimming
     public double swimAccuracy;
-    public boolean notUsedInFit = false;
-    public boolean passive = false; // RDV chek if passive and notUsedinFit could be mergeds
+    public boolean passive = false;
     public double hemisphere = 1;
     
     public Surface(Plane3D plane3d, Point3D refrPoint, Point3D c1, Point3D c2, double accuracy) {
@@ -115,9 +114,9 @@ public class Surface implements Comparable<Surface> {
     @Override
     public String toString() {
         String s = "Surface: ";
-        s = s + String.format("Type=%s Index=%d  Layer=%d  Sector=%d  Emisphere=%.1f X0=%.4f  Z/A=%.4f  Error=%.4f Skip=%b Passive=%b",
+        s = s + String.format("Type=%s Index=%d  Layer=%d  Sector=%d  Emisphere=%.1f X0=%.4f  Z/A=%.4f  Error=%.4f Passive=%b",
                                this.type.name(), this.getIndex(),this.getLayer(),this.getSector(),this.hemisphere,this.getToverX0(),
-                               this.getZoverA(),this.getError(),this.notUsedInFit, this.passive);
+                               this.getZoverA(),this.getError(), this.passive);
         if(type==Type.PLANEWITHSTRIP) {
             s = s + "\n\t" + this.plane.toString();
             s = s + "\n\t" + this.finitePlaneCorner1.toString();

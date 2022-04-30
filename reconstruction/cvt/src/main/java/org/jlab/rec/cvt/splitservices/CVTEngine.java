@@ -37,6 +37,7 @@ public class CVTEngine extends ReconstructionEngine {
     private String bmtCrossBank;
     private String cvtSeedBank;
     private String cvtTrackBank;
+    private String cvtUTrackBank;
     private String cvtTrajectoryBank;
     private String cvtKFTrajectoryBank;
     private String cvtCovMatBank;    
@@ -55,7 +56,7 @@ public class CVTEngine extends ReconstructionEngine {
     private String  excludeLayers       = null;
     private String  excludeBMTLayers    = null;
     private int     removeRegion        = 0;
-    private int     beamSpotConstraint  = 1;
+    private int     beamSpotConstraint  = 2;
     private double  beamSpotRadius      = 0.3;
     private String  targetMaterial      = "LH2";
     private boolean elossPrecorrection  = true;
@@ -112,6 +113,7 @@ public class CVTEngine extends ReconstructionEngine {
         this.setSvtCrossBank("BST" + prefix + "::Crosses");
         this.setSeedBank("CVT" + prefix + "::Seeds");
         this.setTrackBank("CVT" + prefix + "::Tracks");
+        this.setUTrackBank("CVT" + prefix + "::UTracks");
         this.setCovMatBank("CVT" + prefix + "::TrackCovMat");
         this.setTrajectoryBank("CVT" + prefix + "::Trajectory");
         this.setKFTrajectoryBank("CVT" + prefix + "::KFTrajectory");
@@ -123,6 +125,7 @@ public class CVTEngine extends ReconstructionEngine {
         super.registerOutputBank(this.svtCrossBank);
         super.registerOutputBank(this.cvtSeedBank);
         super.registerOutputBank(this.cvtTrackBank);
+        super.registerOutputBank(this.cvtUTrackBank);
         super.registerOutputBank(this.cvtCovMatBank);                
         super.registerOutputBank(this.cvtTrajectoryBank); 
         super.registerOutputBank(this.cvtKFTrajectoryBank); 
@@ -205,7 +208,7 @@ public class CVTEngine extends ReconstructionEngine {
                 List<Track> tracks = trackFinder.getTracks(event, this.isInitFromMc(), 
                                                                   this.isKfFilterOn(), 
                                                                   this.getKfIterations(), 
-                                                                  true, 0, this.getPid());
+                                                                  true, this.getPid());
 
                 if(seeds!=null) banks.add(RecoBankWriter.fillSeedBank(event, seeds, this.getSeedBank()));
                 if(tracks!=null) {
@@ -331,6 +334,10 @@ public class CVTEngine extends ReconstructionEngine {
         this.cvtTrackBank = cvtTrackBank;
     }
 
+    public void setUTrackBank(String cvtTrack0Bank) {
+        this.cvtUTrackBank = cvtTrack0Bank;
+    }
+
     public void setTrajectoryBank(String cvtTrajectoryBank) {
         this.cvtTrajectoryBank = cvtTrajectoryBank;
     }
@@ -373,6 +380,10 @@ public class CVTEngine extends ReconstructionEngine {
 
     public String getTrackBank() {
         return cvtTrackBank;
+    }
+
+    public String getUTrackBank() {
+        return cvtUTrackBank;
     }
 
     public String getTrajectoryBank() {

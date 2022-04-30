@@ -959,7 +959,7 @@ public class BMTGeometry {
             double[] p = BMTConstants.getMaterials().get(key);
             surface.addMaterial(key, p[0], p[1], p[2], p[3], p[4], Units.MM);
         }
-        surface.notUsedInFit=false;
+        surface.passive=false;
         return surface;
     }
     
@@ -973,7 +973,6 @@ public class BMTGeometry {
         surface.addMaterial("CarbonFiber", INNERTUBEDIM[1]-INNERTUBEDIM[0],
                             TUBEMAT[0], TUBEMAT[1], TUBEMAT[2], TUBEMAT[3], Units.MM);
         surface.passive=true;
-        surface.notUsedInFit=true;
         return surface;
     }
     
@@ -987,7 +986,6 @@ public class BMTGeometry {
         surface.addMaterial("CarbonFiber", OUTERTUBEDIM[1]-OUTERTUBEDIM[0],
                             TUBEMAT[0], TUBEMAT[1], TUBEMAT[2], TUBEMAT[3], Units.MM);
         surface.passive=true;
-        surface.notUsedInFit=true;
         return surface;
     }
     

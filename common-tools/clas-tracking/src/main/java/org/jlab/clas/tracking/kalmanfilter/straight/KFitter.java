@@ -17,7 +17,7 @@ public class KFitter extends AKFitter {
 
     public final StateVecs sv = new StateVecs();
     public final MeasVecs  mv = new MeasVecs();
-    public StateVecs.StateVec finalStateVec;
+    public StateVec finalStateVec;
 
     public KFitter(boolean filter, int iterations, int dir, Libr m) {
         super(filter, iterations, dir, null, m);

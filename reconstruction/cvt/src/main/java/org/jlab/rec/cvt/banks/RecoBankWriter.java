@@ -515,8 +515,67 @@ public class RecoBankWriter {
                 }
             }
             bank.setShort("status", i, (short) ((short) trkcands.get(i).getStatus()));
-//            bank.setFloat("circlefit_chi2_per_ndf", i,  (float) trkcands.get(i).getCircleFitChi2PerNDF());
-//            bank.setFloat("linefit_chi2_per_ndf", i,  (float) trkcands.get(i).getLineFitChi2PerNDF());
+            bank.setShort("seedID", i, (short) trkcands.get(i).getSeed().getId());
+            bank.setFloat("chi2", i,  (float) trkcands.get(i).getChi2());
+            bank.setShort("ndf", i, (short) trkcands.get(i).getNDF());
+            bank.setInt("pid", i, trkcands.get(i).getPID());
+        }
+        //bank.show();
+        return bank;
+
+    }
+    
+    public static DataBank fillUTrackBank(DataEvent event, List<Track> trkcands, String bankName) {
+        if (trkcands == null || trkcands.isEmpty()) return null;
+
+        DataBank bank = event.createBank(bankName, trkcands.size());
+        
+        // an array representing the ids of the crosses that belong to the track
+        for (int i = 0; i < trkcands.size(); i++) {
+            if(trkcands.get(i)==null)
+                continue;
+            Helix helix = trkcands.get(i).getSecondaryHelix();
+            bank.setShort("ID", i, (short) trkcands.get(i).getId());
+            bank.setByte("fittingMethod", i, (byte) trkcands.get(i).getSeed().getStatus());
+            bank.setByte("q", i, (byte)trkcands.get(i).getQ());
+            bank.setFloat("p", i,  (float) helix.getPXYZ(Constants.getSolenoidMagnitude()).mag());
+            bank.setFloat("pt", i,  (float) helix.getPt(Constants.getSolenoidMagnitude()));
+            bank.setFloat("phi0", i,  (float) helix.getPhiAtDCA());
+            bank.setFloat("tandip", i,  (float) helix.getTanDip());
+            bank.setFloat("z0", i,  (float) (helix.getZ0()/10.));
+            bank.setFloat("d0", i,  (float) (helix.getDCA()/10.));
+            bank.setFloat("xb", i,  (float) (helix.getXb()/10.0));
+            bank.setFloat("yb", i,  (float) (helix.getYb()/10.0));
+            // this is the format of the covariance matrix for helical tracks
+            // cov matrix = 
+            // | d_dca*d_dca                   d_dca*d_phi_at_dca            d_dca*d_curvature        0            0             |
+            // | d_phi_at_dca*d_dca     d_phi_at_dca*d_phi_at_dca     d_phi_at_dca*d_curvature        0            0             |
+            // | d_curvature*d_dca	    d_curvature*d_phi_at_dca      d_curvature*d_curvature         0            0             |
+            // | 0                              0                             0                    d_Z0*d_Z0                     |
+            // | 0                              0                             0                       0        d_tandip*d_tandip |X
+            double[][] covmatrix = helix.getCovMatrix();
+            if (covmatrix != null) {
+                bank.setFloat("cov_d02", i,  (float) covmatrix[0][0]/10/10 );
+                bank.setFloat("cov_d0phi0", i,  (float) covmatrix[0][1]/10 );
+                bank.setFloat("cov_d0rho", i,  (float) covmatrix[0][2] );
+                bank.setFloat("cov_phi02", i,  (float) covmatrix[1][1] );
+                bank.setFloat("cov_phi0rho", i,  (float) covmatrix[1][2]*10 );
+                bank.setFloat("cov_rho2", i,  (float) covmatrix[2][2]*10*10 );
+                bank.setFloat("cov_z02", i,  (float) covmatrix[3][3]/10/10 );
+                bank.setFloat("cov_z0tandip", i,  (float) covmatrix[3][4]/10 );
+                bank.setFloat("cov_tandip2", i,  (float) covmatrix[4][4] );
+            } else {
+                bank.setFloat("cov_d02", i, -999);
+                bank.setFloat("cov_d0phi0", i, -999);
+                bank.setFloat("cov_d0rho", i, -999);
+                bank.setFloat("cov_phi02", i, -999);
+                bank.setFloat("cov_phi0rho", i, -999);
+                bank.setFloat("cov_rho2", i, -999);
+                bank.setFloat("cov_z02", i, -999);
+                bank.setFloat("cov_z0tandip", i, -999);
+                bank.setFloat("cov_tandip2", i, -999);
+            }
+            bank.setShort("status", i, (short) ((short) trkcands.get(i).getStatus()));
             bank.setShort("seedID", i, (short) trkcands.get(i).getSeed().getId());
             bank.setFloat("chi2", i,  (float) trkcands.get(i).getChi2());
             bank.setShort("ndf", i, (short) trkcands.get(i).getNDF());

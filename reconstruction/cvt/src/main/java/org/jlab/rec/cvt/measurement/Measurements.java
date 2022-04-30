@@ -102,9 +102,9 @@ public class Measurements {
         target.addMaterial(Constants.TARGETKAPTON);
         target.setError(Constants.getInstance().getBeamRadius());
         if(beamSpot)
-            target.notUsedInFit = false;
+            target.passive = false;
         else
-            target.notUsedInFit = true;
+            target.passive = true;
         return target;
     }
     
@@ -117,7 +117,6 @@ public class Measurements {
         Surface scatteringChamber = new Surface(chamber, new Strip(0, 0, 0), Constants.DEFAULTSWIMACC);
         scatteringChamber.addMaterial(Constants.TARGETRHOACELL);
         scatteringChamber.passive=true;
-        scatteringChamber.notUsedInFit=true;
         return scatteringChamber;
     }
     
@@ -139,7 +138,6 @@ public class Measurements {
         ctof.setLayer(1);
         ctof.setSector(1);
         ctof.passive=true;
-        ctof.notUsedInFit=true;
         return ctof;
     }
     
@@ -166,7 +164,6 @@ public class Measurements {
             cnd.setLayer(ilayer+1);
             cnd.setSector(1);
             cnd.passive=true;
-            cnd.notUsedInFit=true;
             surfaces.add(cnd);
         }
         return surfaces;
@@ -189,7 +186,7 @@ public class Measurements {
         cosmic.addMaterial(Constants.VACUUM);
         cosmic.setError(1);
         cosmic.hemisphere = 1;
-        cosmic.notUsedInFit = true;
+        cosmic.passive = true;
         return cosmic;
     }
     
@@ -309,7 +306,7 @@ public class Measurements {
             Surface measure = cluster.measurement();
             measure.hemisphere = Math.signum(cluster.center().y());
             if((int)Constants.getInstance().getUsedLayers().get(layer)<1)
-                measure.notUsedInFit=true;
+                measure.passive=true;
             surfaces.add(measure);
         }
         return surfaces;
@@ -324,7 +321,6 @@ public class Measurements {
                     DetectorType type = MLayer.getDetectorType(id);
                     Surface surface = this.getDetectorSurface(seed, type, layer, 0);
                     if(surface == null) continue;
-                    surface.notUsedInFit=true;
                     surface.passive=true;
                     if(debug) System.out.println("Generating surface for missing index " + i + " detector " + type.getName() + " layer " + layer + " sector " + surface.getSector());
                     this.add(i, surface);
@@ -344,7 +340,6 @@ public class Measurements {
                     Surface surface = this.getDetectorSurface(ray, type, layer, hemisphere);
                     if(surface == null) continue;
                     surface.hemisphere=hemisphere;
-                    surface.notUsedInFit=true;
                     surface.passive=true;
                     if(debug) System.out.println("Generating surface for missing index " + i + " detector " + type.getName() + " layer " + layer + " sector " + surface.getSector());
                     this.add(i, surface);
@@ -393,6 +388,11 @@ public class Measurements {
             Point3D traj = seed.getHelix().getPointAtRadius(Constants.getInstance().BMTGEOMETRY.getRadius(layer));
             if(traj!=null && !Double.isNaN(traj.z())) 
                 return Constants.getInstance().BMTGEOMETRY.getSector(0, traj);
+            else if(layer>1) {
+                int twinIndex = MLayer.getType(DetectorType.BMT, layer-1).getIndex(hemisphere);
+                if(cvtSurfaces[twinIndex]!=null)
+                    return cvtSurfaces[twinIndex].getSector();
+            }
         }
         return 0;
     }

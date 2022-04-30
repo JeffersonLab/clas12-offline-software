@@ -18,8 +18,8 @@ public class KFitter extends AKFitter {
 
     private StateVecs sv = new StateVecs();
     private MeasVecs  mv = new MeasVecs();
-    public StateVecs.StateVec finalStateVec = null;    
-    public Helix KFHelix;
+    private StateVec finalSmoothedStateVec = null;    
+    private StateVec finalTransportedStateVec = null;    
 
     
     public KFitter(boolean filter, int iterations, int dir, Swim swim, Libr mo) {
@@ -29,8 +29,8 @@ public class KFitter extends AKFitter {
     public final void init(Helix helix, double[][] cov, 
                            double Xb, double Yb, double Zref, 
                            List<Surface> measSurfaces, double mass) {
-        finalStateVec = null;
-        KFHelix = null;
+        finalSmoothedStateVec = null;
+        finalTransportedStateVec = null; 
         this.NDF0 = -5;
         this.NDF  = -5;
         this.chi2 = Double.POSITIVE_INFINITY;
@@ -51,10 +51,45 @@ public class KFitter extends AKFitter {
         this.runFitter(sv, mv);
     }
 
+    public StateVec getStateVec() {
+        return this.getStateVec(0);
+    }
+    
+    public StateVec getStateVec(int mode) {
+        if(mode==1) {
+            return finalTransportedStateVec;           
+        }
+        else {
+            return finalSmoothedStateVec;
+        }
+    }
+    
+    public Helix getHelix() {
+        return this.getHelix(0);
+    }
+    
+    public Helix getHelix(int mode) {
+        if(mode==1) {
+            return finalTransportedStateVec.getHelix(this.getXb(), this.getYb());           
+        }
+        else {
+            return finalSmoothedStateVec.getHelix(this.getXb(), this.getYb());
+        }
+    }
+    
+    private StateVec setFinalStateVector(StateVec onPivot) {
+        StateVec vec = sv.new StateVec(onPivot);
+        vec.setPivot(this.getXb(), this.getYb(), 0);
+        vec.covMat = this.sv.propagateCovMat(onPivot, vec);
+        return vec;
+    }
+    
     @Override
     public void runFitter(AStateVecs sv, AMeasVecs mv) { 
         // System.out.println("******************************ITER "+totNumIter);
-        StateVecs.StateVec finalSVonPivot = null;
+        StateVec finalSmoothedOnPivot    = null;
+        StateVec finalTransportedOnPivot = null;
+        
         for (int it = 0; it < totNumIter; it++) {
             this.runFitterIter(sv, mv);
             // chi2
@@ -67,12 +102,12 @@ public class KFitter extends AKFitter {
                Double.isNaN(sv.smoothed().get(0).kappa)) {
                 this.setFitFailed = true;
                 break;
-            }
-            
+            }            
             // if chi2 improved and curvature is non-zero, save fit results but continue iterating
             else if(newchisq < this.chi2) {
                 this.chi2 = newchisq;
-                finalSVonPivot = sv.new StateVec(sv.smoothed().get(0));
+                finalSmoothedOnPivot    = sv.new StateVec(sv.smoothed().get(0));
+                finalTransportedOnPivot = sv.new StateVec(sv.transported(false).get(0));
                 this.setTrajectory(sv, mv);
             }
             // stop if chi2 got worse
@@ -81,10 +116,8 @@ public class KFitter extends AKFitter {
             }
         }
         if(!this.setFitFailed) {
-            finalStateVec = sv.new StateVec(finalSVonPivot);
-            finalStateVec.setPivot(this.getXb(), this.getYb(), 0);
-            finalStateVec.covMat = this.sv.propagateCovMat(finalSVonPivot, finalStateVec);
-            KFHelix = finalStateVec.getHelix(this.getXb(), this.getYb());
+            finalSmoothedStateVec    = this.setFinalStateVector(finalSmoothedOnPivot);
+            finalTransportedStateVec = this.setFinalStateVector(finalTransportedOnPivot);
         }
     }
 

@@ -236,7 +236,7 @@ public class SVTGeometry {
             double[] p = SVTConstants.MATERIALPROPERTIES.get(key);
             surface.addMaterial(key, p[0]/2, p[1], p[2], p[3], p[4], Units.MM);
         }
-        surface.notUsedInFit=false;
+        surface.passive=false;
         return surface;
     }
     
@@ -255,7 +255,6 @@ public class SVTGeometry {
                                   SVTConstants.TSHIELDI,
                                   Units.MM);
         shieldSurface.passive=true;
-        shieldSurface.notUsedInFit=true;
         return shieldSurface;
     }
 
@@ -274,7 +273,6 @@ public class SVTGeometry {
                               SVTConstants.FARADAYCAGEI[i],
                               Units.MM);
         fcSurface.passive=true;
-        fcSurface.notUsedInFit=true;
         return fcSurface;
     }
     

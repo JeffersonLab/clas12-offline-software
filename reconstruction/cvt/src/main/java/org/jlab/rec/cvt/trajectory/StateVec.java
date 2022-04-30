@@ -1,7 +1,13 @@
 package org.jlab.rec.cvt.trajectory;
 
 
+import org.jlab.clas.tracking.kalmanfilter.AKFitter.HitOnTrack;
+import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.measurement.MLayer;
 
 /**
  * A StateVec describes a cross measurement in the CVT. It is characterized by a
@@ -42,7 +48,7 @@ public class StateVec implements Comparable<StateVec> {
         return _ID;
     }
 
-    public void setID(int _ID) {
+    public final void setID(int _ID) {
         this._ID = _ID;
     }
 
@@ -50,7 +56,7 @@ public class StateVec implements Comparable<StateVec> {
         return _p;
     }
 
-    public void setP(double _p) {
+    public final void setP(double _p) {
         this._p = _p;
     }
 
@@ -58,7 +64,7 @@ public class StateVec implements Comparable<StateVec> {
         return _Path;
     }
 
-    public void setPath(double _Path) {
+    public final void setPath(double _Path) {
         this._Path = _Path;
     }
 
@@ -66,7 +72,7 @@ public class StateVec implements Comparable<StateVec> {
         return _dx;
     }
 
-    public void setDx(double _dx) {
+    public final void setDx(double _dx) {
         this._dx = _dx;
     }
 
@@ -74,7 +80,7 @@ public class StateVec implements Comparable<StateVec> {
         return _SurfaceDetector;
     }
 
-    public void setSurfaceDetector(int _SurfaceDetector) {
+    public final void setSurfaceDetector(int _SurfaceDetector) {
         this._SurfaceDetector = _SurfaceDetector;
     }
 
@@ -82,7 +88,7 @@ public class StateVec implements Comparable<StateVec> {
         return _SurfaceLayer;
     }
 
-    public void setSurfaceLayer(int _SurfaceLayer) {
+    public final void setSurfaceLayer(int _SurfaceLayer) {
         this._SurfaceLayer = _SurfaceLayer;
     }
 
@@ -90,7 +96,7 @@ public class StateVec implements Comparable<StateVec> {
         return _SurfaceSector;
     }
 
-    public void setSurfaceSector(int _SurfaceSector) {
+    public final void setSurfaceSector(int _SurfaceSector) {
         this._SurfaceSector = _SurfaceSector;
     }
 
@@ -111,7 +117,7 @@ public class StateVec implements Comparable<StateVec> {
         this._SurfaceComponent = _SurfaceComponent;
     }
     
-    public void setTrkPhiAtSurface(double _TrkPhiAtSurface) {
+    public final void setTrkPhiAtSurface(double _TrkPhiAtSurface) {
         this._TrkPhiAtSurface = _TrkPhiAtSurface;
     }
 
@@ -119,7 +125,7 @@ public class StateVec implements Comparable<StateVec> {
         return _TrkThetaAtSurface;
     }
 
-    public void setTrkThetaAtSurface(double _TrkThetaAtSurface) {
+    public final void setTrkThetaAtSurface(double _TrkThetaAtSurface) {
         this._TrkThetaAtSurface = _TrkThetaAtSurface;
     }
 
@@ -190,7 +196,7 @@ public class StateVec implements Comparable<StateVec> {
      * @param uy the y-component of the tangent to the helix at point (x,y,z)
      * @param uz the z-component of the tangent to the helix at point (x,y,z)
      */
-    public void set(double x, double y, double z, double ux, double uy, double uz) {
+    public final void set(double x, double y, double z, double ux, double uy, double uz) {
         _x=x;
         _y=y;
         _z=z;
@@ -222,7 +228,34 @@ public class StateVec implements Comparable<StateVec> {
         set(v._x, v._y, v._z, v._ux, v._uy, v._uz); 
     }
 
-    
+    public StateVec(int id, HitOnTrack traj, DetectorType type) {
+        Vector3D mom = new Vector3D(traj.px, traj.py, traj.pz);
+        Vector3D dir = mom.asUnit(); 
+        set(traj.x, traj.y, traj.z, dir.x(), dir.y(), dir.z());
+        this.setSurfaceDetector(type.getDetectorId());
+        this.setSurfaceLayer(traj.layer);
+        this.setSurfaceSector(traj.sector);
+        this.setP(mom.mag());
+        this.setTrkPhiAtSurface(mom.phi());
+        this.setTrkThetaAtSurface(mom.theta());
+        this.setPath(traj.path);
+        this.setDx(traj.dx);
+        this.setID(id);
+    }
+
+    public StateVec(int id, Point3D pos, Vector3D mom, Surface surface, double path) {
+        Vector3D dir = mom.asUnit();
+        set(pos.x(), pos.y(), pos.z(), dir.x(), dir.y(), dir.z());
+        this.setSurfaceDetector(surface.getIndex());
+        this.setSurfaceLayer(surface.getLayer());
+        this.setSurfaceSector(surface.getSector());
+        this.setP(mom.mag());
+        this.setTrkPhiAtSurface(mom.phi());
+        this.setTrkThetaAtSurface(mom.theta());
+        this.setPath(path);
+        this.setDx(surface.getDx(mom));
+        this.setID(id);
+    }
 
     /**
      * Description of x().

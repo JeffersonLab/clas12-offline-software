@@ -109,12 +109,7 @@ public class CosmicTracksRec {
                 ray = new Ray(v,p);
             }                
 
-            double[][] cov = new double[5][5];                
-            cov[0][0]=20;
-            cov[1][1]=20;
-            cov[2][2]=0.01; // ~8deg
-            cov[3][3]=0.01;
-            cov[4][4]=1;
+            double[][] cov = Constants.COVCOSMIC;
             kf.init(ray.getYXInterc(),ray.getYZInterc(),
                     ray.getYXSlope(), ray.getYZSlope(), Units.MM, cov,
                     measures.getMeasurements(seeds.get(k)));

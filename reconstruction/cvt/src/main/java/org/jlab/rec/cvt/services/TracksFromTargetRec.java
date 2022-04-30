@@ -116,13 +116,13 @@ public class TracksFromTargetRec {
             }
             Helix hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
                             solenoidValue, xb , yb, Units.MM);
-            double[][] cov = Constants.scaleCovMat(seed.getHelix().getCovMatrix(), 0);
+            double[][] cov = Constants.scaleCovMat(seed.getHelix().getCovMatrix());
 
             if(solenoidValue>0.001 && Constants.LIGHTVEL * seed.getHelix().radius() *solenoidValue<Constants.PTCUT)
                 continue;
             kf.init(hlx, cov, xb, yb, 0, surfaces.getMeasurements(seed), PDGDatabase.getParticleMass(pid)) ;
             kf.runFitter();
-            if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null) { 
+            if (kf.setFitFailed == false && kf.NDF>0 && kf.getHelix()!=null) { 
                 Track fittedTrack = new Track(seed, kf);
                 for(Cross c : fittedTrack) { 
                     if(c.getDetector()==DetectorType.BST) {
@@ -160,7 +160,7 @@ public class TracksFromTargetRec {
                     kf.runFitter();
 
                     // RDV get rid of added clusters if not true
-                    if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null)
+                    if (kf.setFitFailed == false && kf.NDF>0 && kf.getHelix()!=null)
                         fittedTrack = new Track(seed, kf);
                 }
                 trkcands.add(fittedTrack);

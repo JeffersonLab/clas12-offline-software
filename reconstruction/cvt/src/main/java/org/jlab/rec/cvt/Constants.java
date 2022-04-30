@@ -55,7 +55,7 @@ public class Constants {
     public boolean   isCosmics = false;
     public boolean   svtOnly = false;
     private int      removeRegion = 0;
-    public int       beamSpotConstraint = 1;
+    public int       beamSpotConstraint = 2;
     private double   beamRadius = 0.3; // mm
     public boolean   svtSeeding = true;
     public boolean   timeCuts = false;
@@ -221,31 +221,45 @@ public class Constants {
                                                                     {1.0,1.0,1.0, COVZ0Z0,1.0},
                                                                     {1.0,1.0,1.0,1.0, CONVTANLTANL}
                                                                 };
-    public static final double COVMATSCALE = 10;
-
-    public static double[][] scaleCovMat(double[][] matrix, double scale) {
+    
+    public static double[][] scaleCovMat(double[][] matrix) {
         int nrow = matrix.length; 
         int ncol = matrix[0].length; 
         if(nrow!=5 || ncol!=5) {
             throw new IllegalArgumentException("Error: wrong matrix dimension " + nrow + "x" + ncol);
         }
         double[][] scaledMatrix = new double[5][5];
-        if(scale==0) {
-            for(int i = 0; i<5; i++) {
-                for(int j = 0; j<5; j++) {
-                    scaledMatrix[i][j] = Constants.COVMATSCALEFACT[i][j]*matrix[i][j];
-                }
-            }
-        }
-        else {
-            for(int i = 0; i<5; i++) {
-                scaledMatrix[i][i] = scale*matrix[i][i];
+        for(int i = 0; i<5; i++) {
+            for(int j = 0; j<5; j++) {
+                scaledMatrix[i][j] = Constants.COVMATSCALEFACT[i][j]*matrix[i][j];
             }
         }
         return scaledMatrix;
     }
     
     
+    private static final double D0     = 10;
+    private static final double DPHI0  = Math.toRadians(10);
+    private static final double DRHO   = 0.01;
+    private static final double DTANL  = 0.2;
+    private static final double DZ0    = 20;
+    public static final double[][] COVHELIX = new double[][]{
+                                                             {D0*D0, 0, 0, 0, 0},
+                                                             {0, DPHI0*DPHI0, 0, 0, 0},
+                                                             {0, 0, DRHO*DRHO, 0, 0},
+                                                             {0, 0, 0, DZ0*DZ0, 0},
+                                                             {0, 0, 0, 0, DTANL*DTANL}
+                                                            };                
+           
+    public static final double[][] COVCOSMIC = new double[][]{
+                                                              { 20,  0, 0,    0,    0},
+                                                              {  0, 20, 0,    0,    0},
+                                                              {  0,  0, 0.01, 0,    0}, // ~8 deg
+                                                              {  0,  0, 0,    0.01, 0},
+                                                              {  0,  0, 0,    0,    1}
+                                                             };                
+
+                
     //public static final boolean DEBUGMODE =false;
     // for landau inverse calculation
     public static final double f[] = {

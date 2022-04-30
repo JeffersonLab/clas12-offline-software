@@ -7,7 +7,7 @@ import org.jlab.clas.pdg.PDGDatabase;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.AKFitter.HitOnTrack;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
-import org.jlab.clas.tracking.objects.Strip;
+import org.jlab.clas.tracking.kalmanfilter.helical.KFitter;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -52,8 +52,8 @@ public class Track extends Trajectory implements Comparable<Track> {
     private int kfIterations;
     private double[][] trackCovMat;
     private Map<Integer, HitOnTrack> trajs = null; // map of trajectories indexed by layer, to be filled based on the KF results
+    private Helix secondaryHelix;                  // for track with no beamSpot information
 
-    
 
     public Track(Helix helix) {
         super(helix);
@@ -71,27 +71,11 @@ public class Track extends Trajectory implements Comparable<Track> {
         this.addAll(seed.getCrosses());       
     }
 
-    public Track(Seed seed, org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf) {
-        super(new Helix(kf.KFHelix.getD0(), kf.KFHelix.getPhi0(), kf.KFHelix.getOmega(), 
-                        kf.KFHelix.getZ0(), kf.KFHelix.getTanL(), 
-                        kf.KFHelix.getXb(), kf.KFHelix.getYb()));
-        this.getHelix().B = kf.KFHelix.getB();
-        this.kfIterations = kf.numIter;
-        double c = Constants.LIGHTVEL;
-        //convert from kf representation to helix repr
-        double alpha = 1. / (c * Math.abs(kf.KFHelix.getB()));
-        double[][] kfCov = kf.finalStateVec.covMat;
-        for(int i = 0; i<5; i++) {
-            for(int j = 0; j<5; j++) {
-                if(i==2)
-                    kfCov[i][j]/=alpha;
-                if(j==2)
-                    kfCov[i][j]/=alpha;
-                
-            }
-        }
-        this.getHelix().setCovMatrix(kfCov);
+    public Track(Seed seed, KFitter kf) {
+        super(new Helix(kf.getHelix(), kf.getStateVec().covMat));
         this.setPXYZ();
+        this.setSecondaryHelix(new Helix(kf.getHelix(1), kf.getStateVec(1).covMat));
+        this.kfIterations = kf.numIter;
         this.setNDF(kf.NDF);
         this.setChi2(kf.chi2);
         this.setSeed(seed);
@@ -100,7 +84,7 @@ public class Track extends Trajectory implements Comparable<Track> {
     }
     
         
-    public Track(Seed seed, org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf, int pid) {
+    public Track(Seed seed, KFitter kf, int pid) {
         this(seed, kf);
         this.setPID(pid);
     }
@@ -157,6 +141,14 @@ public class Track extends Trajectory implements Comparable<Track> {
      */
     public void setP(double _P) {
         this._P = _P;
+    }
+
+    public Helix getSecondaryHelix() {
+        return secondaryHelix;
+    }
+
+    public void setSecondaryHelix(Helix secondaryHelix) {
+        this.secondaryHelix = secondaryHelix;
     }
 
     public Seed getSeed() {
@@ -450,20 +442,14 @@ public class Track extends Trajectory implements Comparable<Track> {
             traj = this.trajs.get(index);            
             
             int layer = MLayer.getType(index).getLayer();
+
             Vector3D mom = new Vector3D(traj.px, traj.py, traj.pz);
             Vector3D dir = mom.asUnit();
             Point3D  pos = new Point3D(traj.x, traj.y, traj.z);
             path += traj.path * beta/(mom.mag()/Math.sqrt(mom.mag2()+mass*mass));
 
-            StateVec stVec = new StateVec(traj.x, traj.y, traj.z, dir.x(), dir.y(), dir.z());
-            stVec.setPlaneIdx(traj.layer-1);
-            stVec.setSurfaceDetector(MLayer.getDetectorType(index).getDetectorId());
-            stVec.setSurfaceLayer(layer);
-            stVec.setSurfaceSector(traj.sector);
-            stVec.setP(mom.mag());
+            StateVec stVec = new StateVec(this.getId(), traj, MLayer.getDetectorType(index));
             stVec.setPath(path);
-            stVec.setDx(traj.dx);
-            stVec.setID(this.getId());
             
             if(MLayer.getDetectorType(index) == DetectorType.BST) {
                 Vector3D localDir = Constants.getInstance().SVTGEOMETRY.getLocalTrack(layer, traj.sector, dir);
@@ -504,16 +490,7 @@ public class Track extends Trajectory implements Comparable<Track> {
                 mom.setXYZ(inters[3],inters[4],inters[5]);
                 path += inters[6]*10 * beta/(mom.mag()/Math.sqrt(mom.mag2()+mass*mass));
                 
-                StateVec stVec = new StateVec(pos.x(), pos.y(), pos.z(), mom.x()/mom.mag(), mom.y()/mom.mag(), mom.z()/mom.mag());
-                stVec.setSurfaceDetector(surface.getIndex());
-                stVec.setSurfaceSector(surface.getSector());
-                stVec.setSurfaceLayer(surface.getLayer()); 
-                stVec.setID(this.getId());
-                stVec.setTrkPhiAtSurface(mom.phi());
-                stVec.setTrkThetaAtSurface(mom.theta());
-                stVec.setP(mom.mag());
-                stVec.setPath(path);
-                stVec.setDx(surface.getDx(mom));
+                StateVec stVec = new StateVec(this.getId(), pos, mom, surface, path);
                 stateVecs.add(stVec);                
                 
                 if(surface.getIndex() == DetectorType.CTOF.getDetectorId()) {

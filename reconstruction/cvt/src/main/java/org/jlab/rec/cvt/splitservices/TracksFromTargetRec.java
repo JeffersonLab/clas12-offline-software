@@ -116,7 +116,7 @@ public class TracksFromTargetRec {
     }
     
     public List<Track> getTracks(DataEvent event, boolean initFromMc, boolean kfFilterOn, int kfIterations, 
-                                 boolean searchMissingCls, double covmatScale, int pid) {
+                                 boolean searchMissingCls, int pid) {
         if(this.CVTseeds.isEmpty()) return null;
         
         double solenoidScale = Constants.getInstance().getSolenoidScale();
@@ -151,13 +151,13 @@ public class TracksFromTargetRec {
             }
             Helix hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
                             solenoidValue, xb , yb, Units.MM);
-            double[][] cov = Constants.scaleCovMat(seed.getHelix().getCovMatrix(), covmatScale);
+            double[][] cov = Constants.COVHELIX;
 
             if(solenoidValue>0.001 && Constants.LIGHTVEL * seed.getHelix().radius() *solenoidValue<Constants.PTCUT)
                 continue;
             kf.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid));
             kf.runFitter();
-            if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null) { 
+            if (kf.setFitFailed == false && kf.NDF>0 && kf.getHelix()!=null) { 
                 Track fittedTrack = new Track(seed, kf, pid);
                 for(Cross c : fittedTrack) { 
                     if(c.getDetector()==DetectorType.BST) {
@@ -176,7 +176,7 @@ public class TracksFromTargetRec {
                     List<Cross> bmtcrsOnTrack = recUtil.findCrossesOnBMTTrack(CVTcrosses.get(1), bmtclsOnTrack);
 
                     //VZ check for additional clusters, and only then re-run KF adding new clusters
-                if((clsOnTrack.size()>0 || bmtcrsOnTrack.size()>0) && false) { 
+                    if((clsOnTrack.size()>0 || bmtcrsOnTrack.size()>0) && false) { 
                         if(clsOnTrack.size()>0) 
                             seed.getClusters().addAll(clsOnTrack);
                         if(crsOnTrack.size()>0) {
@@ -203,7 +203,7 @@ public class TracksFromTargetRec {
                         kf.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid)) ;
                         kf.runFitter();
 
-                        if (kf.setFitFailed == false && kf.NDF>0 && kf.KFHelix!=null) { 
+                        if (kf.setFitFailed == false && kf.NDF>0 && kf.getHelix()!=null) { 
                             fittedTrack = new Track(seed, kf, pid);
                             for(Cross c : fittedTrack) { 
                                 if(c.getDetector()==DetectorType.BST) {

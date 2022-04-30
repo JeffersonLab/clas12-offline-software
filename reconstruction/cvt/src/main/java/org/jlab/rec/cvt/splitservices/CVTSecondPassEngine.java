@@ -44,7 +44,7 @@ public class CVTSecondPassEngine extends CVTEngine {
                 tracks = trackFinder.getTracks(event, this.isInitFromMc(), 
                                                       this.isKfFilterOn(), 
                                                       this.getKfIterations(), 
-                                                      false, 0, this.getPid());
+                                                      false, this.getPid());
             }
             
             List<DataBank> banks = new ArrayList<>();
@@ -57,6 +57,7 @@ public class CVTSecondPassEngine extends CVTEngine {
             if(seeds!=null) banks.add(RecoBankWriter.fillSeedBank(event, seeds, this.getSeedBank()));
             if(tracks!=null) {
                 banks.add(RecoBankWriter.fillTrackBank(event, tracks, this.getTrackBank()));
+                banks.add(RecoBankWriter.fillUTrackBank(event, tracks, this.getUTrackBank()));
                 banks.add(RecoBankWriter.fillTrackCovMatBank(event, tracks, this.getCovMat()));
                 banks.add(RecoBankWriter.fillTrajectoryBank(event, tracks, this.getTrajectoryBank()));
                 banks.add(RecoBankWriter.fillKFTrajectoryBank(event, tracks, this.getKFTrajectoryBank()));
