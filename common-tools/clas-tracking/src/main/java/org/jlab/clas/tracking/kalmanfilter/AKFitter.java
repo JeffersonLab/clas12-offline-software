@@ -177,18 +177,19 @@ public abstract class AKFitter {
     public void setTrajectory(AStateVecs sv, AMeasVecs mv) {
         trajPoints = new HashMap<>();
         for (int k = 0; k < sv.smoothed().size(); k++) {
-            int layer   = mv.measurements.get(k).layer;
+            int index   = mv.measurements.get(k).layer;
+            int layer   = mv.measurements.get(k).surface.getLayer();
             int sector  = mv.measurements.get(k).surface.getSector();
             double tRes = mv.dh(k, sv.transported().get(k));
             double fRes = mv.dh(k, sv.filtered(false).get(k));
             double sRes = mv.dh(k, sv.smoothed().get(k));
             if(!mv.measurements.get(k).surface.passive) {
-                trajPoints.put(layer, new HitOnTrack(layer, sector, sv.transported().get(k), tRes, fRes, sRes));
+                trajPoints.put(index, new HitOnTrack(layer, sector, sv.transported().get(k), tRes, fRes, sRes));
                 if(mv.measurements.get(k).skip)
-                    trajPoints.get(layer).isUsed = false;
+                    trajPoints.get(index).isUsed = false;
             } else {
-                trajPoints.put(layer, new HitOnTrack(layer, sector, sv.transported().get(k), -999, -999, -999));
-                trajPoints.get(layer).isUsed = false;
+                trajPoints.put(index, new HitOnTrack(layer, sector, sv.transported().get(k), -999, -999, -999));
+                trajPoints.get(index).isUsed = false;
             }            
         } 
     }

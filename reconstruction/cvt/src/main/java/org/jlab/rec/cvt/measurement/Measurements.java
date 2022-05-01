@@ -301,8 +301,7 @@ public class Measurements {
         
         for(Cluster cluster : clusters) {
             if(cluster.getDetector()!=type) continue;
-            int layer = cluster.getLayer();
-            if(type==DetectorType.BMT) layer += SVTGeometry.NLAYERS;
+            int layer = MLayer.getType(type, cluster.getLayer()).getCVTLayer();
             Surface measure = cluster.measurement();
             measure.hemisphere = Math.signum(cluster.center().y());
             if((int)Constants.getInstance().getUsedLayers().get(layer)<1)

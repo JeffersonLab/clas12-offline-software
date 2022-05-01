@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.banks;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.tracking.kalmanfilter.AKFitter;
+import org.jlab.clas.tracking.kalmanfilter.AKFitter.HitOnTrack;
 
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
@@ -688,11 +689,12 @@ public class RecoBankWriter {
                 continue;
             //Fill trajectory for Eloss debugging
             k = 0;
-            for (AKFitter.HitOnTrack t : trkcands.get(i).getKFTrajectories().values()) {
+            for (int index : trkcands.get(i).getKFTrajectories().keySet()) {
+                HitOnTrack t = trkcands.get(i).getKFTrajectories().get(index);
                 bank.setShort("id",             k, (short) trkcands.get(i).getId()); //trackid
-                bank.setByte("detector",        k, (byte)  MLayer.getDetectorType(t.layer).getDetectorId());
-                bank.setByte("layer",           k, (byte)  MLayer.getType(t.layer).getLayer());
-                bank.setByte("index",           k, (byte)  t.layer);
+                bank.setByte("detector",        k, (byte)  MLayer.getDetectorType(index).getDetectorId());
+                bank.setByte("layer",           k, (byte)  MLayer.getType(index).getLayer());
+                bank.setByte("index",           k, (byte)  index);
                 bank.setFloat("x",              k, (float) (t.x/10.));
                 bank.setFloat("y",              k, (float) (t.y/10.));
                 bank.setFloat("z",              k, (float) (t.z/10.));

@@ -17,6 +17,7 @@ import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.measurement.MLayer;
+import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.rec.cvt.trajectory.StateVec;
 import org.jlab.rec.cvt.trajectory.Trajectory;
@@ -441,35 +442,37 @@ public class Track extends Trajectory implements Comparable<Track> {
         for(int index=1; index<trajs.size(); index++) {
             traj = this.trajs.get(index);            
             
-            int layer = MLayer.getType(index).getLayer();
-
             Vector3D mom = new Vector3D(traj.px, traj.py, traj.pz);
             Vector3D dir = mom.asUnit();
             Point3D  pos = new Point3D(traj.x, traj.y, traj.z);
             path += traj.path * beta/(mom.mag()/Math.sqrt(mom.mag2()+mass*mass));
 
             StateVec stVec = new StateVec(this.getId(), traj, MLayer.getDetectorType(index));
+            stVec.setSurfaceLayer(MLayer.getType(index).getCVTLayer());
             stVec.setPath(path);
             
             if(MLayer.getDetectorType(index) == DetectorType.BST) {
-                Vector3D localDir = Constants.getInstance().SVTGEOMETRY.getLocalTrack(layer, traj.sector, dir);
+                Vector3D localDir = Constants.getInstance().SVTGEOMETRY.getLocalTrack(traj.layer, traj.sector, dir);
                 stVec.setTrkPhiAtSurface(localDir.phi());
                 stVec.setTrkThetaAtSurface(localDir.theta());
-                stVec.setTrkToModuleAngle(Constants.getInstance().SVTGEOMETRY.getLocalAngle(layer, traj.sector, dir));
-                stVec.setCalcCentroidStrip(Constants.getInstance().SVTGEOMETRY.calcNearestStrip(traj.x, traj.y, traj.z, layer, traj.sector));
+                stVec.setTrkToModuleAngle(Constants.getInstance().SVTGEOMETRY.getLocalAngle(traj.layer, traj.sector, dir));
+                stVec.setCalcCentroidStrip(Constants.getInstance().SVTGEOMETRY.calcNearestStrip(traj.x, traj.y, traj.z, traj.layer, traj.sector));
             }
             else if(MLayer.getDetectorType(index) == DetectorType.BMT) {
-                Vector3D localDir = Constants.getInstance().BMTGEOMETRY.getLocalTrack(layer, traj.sector, pos, dir);
+                Vector3D localDir = Constants.getInstance().BMTGEOMETRY.getLocalTrack(traj.layer, traj.sector, pos, dir);
                 stVec.setTrkPhiAtSurface(localDir.phi());
                 stVec.setTrkThetaAtSurface(localDir.theta());
-                stVec.setTrkToModuleAngle(Constants.getInstance().BMTGEOMETRY.getLocalAngle(layer, traj.sector, pos, dir));
-                int region = Constants.getInstance().BMTGEOMETRY.getRegion(layer);
-                if(BMTGeometry.getDetectorType(layer)==BMTType.C) 
+                stVec.setTrkToModuleAngle(Constants.getInstance().BMTGEOMETRY.getLocalAngle(traj.layer, traj.sector, pos, dir));
+                int region = Constants.getInstance().BMTGEOMETRY.getRegion(traj.layer);
+                if(BMTGeometry.getDetectorType(traj.layer)==BMTType.C) 
                     stVec.setCalcCentroidStrip(Constants.getInstance().BMTGEOMETRY.getCstrip(region, pos));
                 else
                     stVec.setCalcCentroidStrip(Constants.getInstance().BMTGEOMETRY.getZstrip(region, pos));
             }
-            if(stVec.getSurfaceDetector()>0) stateVecs.add(stVec);
+            if(stVec.getSurfaceDetector()>0) {
+                stVec.setSurfaceDetector(DetectorType.CVT.getDetectorId());
+                stateVecs.add(stVec);
+            }
         }
         // add outer detectors
         if(traj!=null) {
