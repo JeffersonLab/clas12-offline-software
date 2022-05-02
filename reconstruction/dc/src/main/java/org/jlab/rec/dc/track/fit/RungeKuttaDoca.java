@@ -42,72 +42,60 @@ public class RungeKuttaDoca {
         final double Zi = fVec.z;
         double BatMeas = 0;
 
-        while(Math.signum(z0 - Zi) *z<Math.signum(z0 - Zi) *z0) {
-            double x =  fVec.x;
-            double y =  fVec.y;
+        while (Math.signum(z0 - Zi) * z < Math.signum(z0 - Zi) * z0) {
             z = fVec.z;
-            double tx = fVec.tx;
-            double ty = fVec.ty;
-            double Q =  fVec.Q;
-            double dPath = fVec.deltaPath;
 
-            s= Math.signum(z0 - Zi) * stepSize;
+            s = Math.signum(z0 - Zi) * stepSize;
             if (Math.signum(z0 - Zi) *(z+s)>Math.signum(z0 - Zi) *z0)
                 s = Math.signum(z0 - Zi) * Math.abs(z0-z);
 
-            this.RK4transport(sector, Q, x, y, z, tx, ty, s, dcSwim, dPath, fVec);
+            this.RK4transport(sector, s, dcSwim, fVec);
 
-            if(Math.abs(fVec.B - BatMeas) < 0.0001) stepSize*=2;
+            if (Math.abs(fVec.B - BatMeas) < 0.0001) stepSize*=2;
 
             BatMeas = fVec.B;
         }
     }
 
     /**
-     * Transport using Runge Kutta 4 without updating the covariance matrix.
-     * Lab system = 1, TSC = 0.
+     * Transport using Runge Kutta 4 without updating the covariance matrix. Lab system = 1, TSC = 0.
+     * Internal state array (sN) is defined as {x, y, tx, ty}, since q doesn't change.
      */
-    void RK4transport(int sector, double q, double x0, double y0, double z0, double tx0, double ty0,
-                      double h, Swim swimmer, double dPath, StateVecsDoca.StateVec fVec) {
+    private void RK4transport(int sector, double h, Swim swim, StateVecsDoca.StateVec fVec) {
+        // Set initial state.
+        double z0 = fVec.z;
+        double qv = fVec.Q*v;
+        double[] s0 = {fVec.x, fVec.y, fVec.tx, fVec.ty};
+        double[] sNull = {0, 0, 0, 0};
 
-        swimmer.Bfield(sector, x0, y0, z0, _b);
-        double x1 = tx0;
-        double y1 = ty0;
-        double tx1=q*v*Ax(x1, y1);
-        double ty1=q*v*Ay(x1, y1);
+        // Transport.
+        double[] s1 = RK4step(sector, z0, 0,     swim, s0, sNull, qv);
+        double[] s2 = RK4step(sector, z0, 0.5*h, swim, s0, s1,    qv);
+        double[] s3 = RK4step(sector, z0, 0.5*h, swim, s0, s2,    qv);
+        double[] s4 = RK4step(sector, z0, h,     swim, s0, s3,    qv);
 
-        swimmer.Bfield(sector, x0+0.5*h*x1, y0+0.5*h*y1, z0+0.5*h, _b);
-        double x2 = tx0+0.5*h*tx1;
-        double y2 = ty0+0.5*h*ty1;
-        double tx2=q*v*Ax((tx0+0.5*h*tx1), (ty0+0.5*h*ty1));
-        double ty2=q*v*Ay((tx0+0.5*h*tx1), (ty0+0.5*h*ty1));
+        // Set final state.
+        fVec.z  += h;
+        fVec.x  += this.RK4(s1[0], s2[0], s3[0], s4[0], h);
+        fVec.y  += this.RK4(s1[1], s2[1], s3[1], s4[1], h);
+        fVec.tx += this.RK4(s1[2], s2[2], s3[2], s4[2], h);
+        fVec.ty += this.RK4(s1[3], s2[3], s3[3], s4[3], h);
 
-        swimmer.Bfield(sector, x0+0.5*h*x2, y0+0.5*h*y2, z0+0.5*h, _b);
-        double x3 = tx0+0.5*h*tx2;
-        double y3 = ty0+0.5*h*ty2;
-        double tx3=q*v*Ax((tx0+0.5*h*tx2), (ty0+0.5*h*ty2));
-        double ty3=q*v*Ay((tx0+0.5*h*tx2), (ty0+0.5*h*ty2));
+        fVec.B = Math.sqrt(_b[0]*_b[0] + _b[1]*_b[1] + _b[2]*_b[2]);
+        fVec.deltaPath += Math.sqrt((s0[0]-fVec.x)*(s0[0]-fVec.x)+(s0[1]-fVec.y)*(s0[1]-fVec.y)+h*h);
+    }
 
-        swimmer.Bfield(sector, x0+h*x3, y0+h*y3, z0+h, _b);
-        double x4 = tx0+h*tx3;
-        double y4 = ty0+h*ty3;
-        double tx4=q*v*Ax((tx0+h*tx3), (ty0+h*ty3));
-        double ty4=q*v*Ay((tx0+h*tx3), (ty0+h*ty3));
-
-        double x = x0 + this.RK4(x1, x2, x3, x4, h);
-        double y = y0 + this.RK4(y1, y2, y3, y4, h);
-        double tx = tx0 + this.RK4(tx1, tx2, tx3, tx4, h);
-        double ty = ty0 + this.RK4(ty1, ty2, ty3, ty4, h);
-        double z = z0+h;
-
-        fVec.x = x;
-        fVec.y  = y ;
-        fVec.z = z0+h;
-        fVec.tx = tx;
-        fVec.ty = ty;
-        fVec.Q = q;
-        fVec.B = Math.sqrt(_b[0]*_b[0]+_b[1]*_b[1]+_b[2]*_b[2]);
-        fVec.deltaPath = Math.sqrt((x0-x)*(x0-x)+(y0-y)*(y0-y)+h*h)+dPath;
+    /** Perform a single RK4 step without updating the covariance matrix. */
+    private double[] RK4step(int sector, double z0, double h, Swim swim, double[] sInit,
+                             double[] sPrev, double qv) {
+        swim.Bfield(sector, sInit[0]+h*sPrev[0], sInit[1]+h*sPrev[1], z0+h, _b);
+        double[] sNext = {0,0,0,0};
+        sNext[0] = sInit[2] + h*sPrev[2];
+        sNext[1] = sInit[3] + h*sPrev[3];
+        double C = C(sNext[0], sNext[1]);
+        sNext[2] = qv * Ax(C, sNext[0], sNext[1]);
+        sNext[3] = qv * Ay(C, sNext[0], sNext[1]);
+        return sNext;
     }
 
     /** Transport using Runge Kutta 4, updating the covariance matrix. */
@@ -295,6 +283,17 @@ public class RungeKuttaDoca {
 
     private double RK4(double k1, double k2, double k3, double k4, double h) {
         return h/6*(k1 + 2*k2 +2*k3 + k4);
+    }
+
+    private double C(double tx, double ty) {
+        return Math.sqrt(1 + tx*tx + ty*ty);
+    }
+
+    private double Ax(double C, double tx, double ty) {
+        return C * (ty * (tx * _b[0] + _b[2]) - (1 + tx * tx) * _b[1]);
+    }
+    private double Ay(double C, double tx, double ty) {
+        return C * (-tx * (ty * _b[1] + _b[2]) + (1 + ty * ty) * _b[0]);
     }
 
     private double Ax(double tx, double ty) {
