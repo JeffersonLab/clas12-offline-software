@@ -32,27 +32,22 @@ public class RungeKuttaDoca {
     }
 
     /** Swim to Z position without updating the covariance matrix. */
-    public void SwimToZ(int sector, StateVecsDoca.StateVec fVec, Swim dcSwim, double z0, float[] bf) {
+    public void SwimToZ(int sector, StateVecsDoca.StateVec fVec, Swim swim, double z0, float[] bf) {
         double stepSize = 1.0;
-        dcSwim.Bfield(sector, fVec.x, fVec.y, fVec.z, bf);
+        swim.Bfield(sector, fVec.x, fVec.y, fVec.z, bf);
 
-        fVec.B   = Math.sqrt(bf[0]*bf[0]+bf[1]*bf[1]+bf[2]*bf[2]);
+        fVec.B = Math.sqrt(bf[0]*bf[0] + bf[1]*bf[1] + bf[2]*bf[2]);
         double s = fVec.B;
-        double z = fVec.z;
-        final double Zi = fVec.z;
+        final double travelSign = Math.signum(z0 - fVec.z);
         double BatMeas = 0;
 
-        while (Math.signum(z0 - Zi) * z < Math.signum(z0 - Zi) * z0) {
-            z = fVec.z;
+        while(travelSign * fVec.z < travelSign * z0) {
+            s = travelSign * stepSize;
+            if (travelSign*(fVec.z+s) > travelSign*z0) s = travelSign*Math.abs(z0-fVec.z);
 
-            s = Math.signum(z0 - Zi) * stepSize;
-            if (Math.signum(z0 - Zi) *(z+s)>Math.signum(z0 - Zi) *z0)
-                s = Math.signum(z0 - Zi) * Math.abs(z0-z);
+            this.RK4transport(sector, s, swim, fVec);
 
-            this.RK4transport(sector, s, dcSwim, fVec);
-
-            if (Math.abs(fVec.B - BatMeas) < 0.0001) stepSize*=2;
-
+            if (Math.abs(fVec.B - BatMeas) < 0.0001) stepSize *= 2;
             BatMeas = fVec.B;
         }
     }
