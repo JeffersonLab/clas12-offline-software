@@ -81,7 +81,6 @@ public class BMTConstants {
     public static double[] ThetaL_grid = new double[405];    //Lorentz angle grid
     public static double[] E_grid = new double[405];         //Electric field value of the grid
     public static double[] B_grid = new double[405];        //Magnetic field value of the grid
-    public static double ThetaL = 0; 						// the Lorentz angle for 5-T B-field
     public static double emin=Double.MAX_VALUE;           //Emin of the grid
     public static double emax=0;                          //Emax of the grid
     public static double bmax=0;                          //Bmax of the grid
@@ -90,15 +89,7 @@ public class BMTConstants {
     public static int Nb=0;                               //Number of step for the magnetic field
   
     
-// THE HV CONSTANT
-    public static double[][] E_DRIFT_FF = new double[2*NREGIONS][3]; 
-    public static double[][] E_DRIFT_MF = new double[2*NREGIONS][3]; 
-
     public static final int STARTINGLAYR = 1;
-
-    public static double getThetaL() {
-        return ThetaL;
-    }
 
     public static double[] getCRZRADIUS() {
         return CRZRADIUS;
@@ -400,19 +391,5 @@ public class BMTConstants {
            pb = B_grid[j] ;
         }
    }
-   public static synchronized void setE_drift_FF(double[][] cHV_drift) {
-   	for (int i=0; i<2*NREGIONS;i++) {
-            for (int j=0; j<3;j++) {	
-                    E_DRIFT_FF[i][j] = 10*cHV_drift[i][j]/HDRIFT;
-            }	
-   	}
-  }
-   public static synchronized void setE_drift_MF(double[][] cHV_drift) {
-   	for (int i=0; i<2*NREGIONS;i++) {
-            for (int j=0; j<3;j++) {	
-                    E_DRIFT_MF[i][j]  = 10*cHV_drift[i][j]/HDRIFT;
-            }	
-   	}
-  }
    
 }

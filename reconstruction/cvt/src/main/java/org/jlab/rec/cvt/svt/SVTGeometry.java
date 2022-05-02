@@ -2,10 +2,12 @@ package org.jlab.rec.cvt.svt;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.clas.tracking.kalmanfilter.Units;
 import org.jlab.clas.tracking.objects.Strip;
+import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
 import org.jlab.geom.prim.Arc3D;
@@ -16,6 +18,8 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Line3d;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.Geometry;
+import org.jlab.utils.groups.IndexedTable;
 
 public class SVTGeometry {
 
@@ -25,11 +29,12 @@ public class SVTGeometry {
     public static final int NSTRIPS  = SVTConstants.NSTRIPS;
     public static final int[] NSECTORS = new int[NLAYERS];
     public static final int NPASSIVE = 3;
+    public IndexedTable lorentz = null;
     
     
-    
-    public SVTGeometry(SVTStripFactory factory) {
+    public SVTGeometry(SVTStripFactory factory, IndexedTable lorentz) {
         this._svtStripFactory = factory;
+        this.lorentz = lorentz;
         this.init();
     }
   
@@ -85,12 +90,25 @@ public class SVTGeometry {
         return SVTConstants.MODULELEN;
     }
         
-    public Line3D getStrip(int layer, int sector, int strip) {
+    public Line3D getStrip0(int layer, int sector, int strip) {
         Line3d line = this._svtStripFactory.getShiftedStrip(layer-1, sector-1, strip-1);
         return new Line3D(line.origin().x,line.origin().y,line.origin().z,
                           line.end().x,   line.end().y,   line.end().z);
     }
     
+    public Line3D getStrip(int layer, int sector, int strip) {
+        
+        Line3d line = this._svtStripFactory.getShiftedStrip(layer-1, sector-1, strip-1);
+        double   alpha = Math.toRadians(this.lorentz.getDoubleValue("angle", sector, layer, 0));   
+        double      dz = SVTConstants.SILICONTHK*Math.tan(alpha)/2;
+        Vector3D shift = this.getNormal(layer, sector).cross(new Vector3D(0, 0, 1)).multiply(dz);
+//        System.out.println(region + " " + alpha + " " + ralpha);
+        Line3D stripLine = new Line3D(line.origin().x,line.origin().y,line.origin().z,
+                                      line.end().x,   line.end().y,   line.end().z);
+        stripLine.translateXYZ(shift.x(), shift.y(), shift.z());
+        return stripLine;
+    }
+
     public Line3D getModule(int layer, int sector) {
         Line3d line = this._svtStripFactory.getModuleEndPoints(layer-1, sector-1);
         return new Line3D(line.origin().x,line.origin().y,line.origin().z,
@@ -241,8 +259,8 @@ public class SVTGeometry {
     }
     
     public Surface getShieldSurface() {
-        Point3D  center = new Point3D(0,                        0, Constants.getInstance().getZoffset()+SVTConstants.TSHIELDZPOS-SVTConstants.TSHIELDLENGTH/2);
-        Point3D  origin = new Point3D(SVTConstants.TSHIELDRMAX, 0, Constants.getInstance().getZoffset()+SVTConstants.TSHIELDZPOS-SVTConstants.TSHIELDLENGTH/2);
+        Point3D  center = new Point3D(0,                        0, Geometry.getInstance().getZoffset()+SVTConstants.TSHIELDZPOS-SVTConstants.TSHIELDLENGTH/2);
+        Point3D  origin = new Point3D(SVTConstants.TSHIELDRMAX, 0, Geometry.getInstance().getZoffset()+SVTConstants.TSHIELDZPOS-SVTConstants.TSHIELDLENGTH/2);
         Vector3D axis   = new Vector3D(0,0,1);
         Arc3D base = new Arc3D(origin, center, axis, 2*Math.PI);
         Cylindrical3D shieldCylinder = new Cylindrical3D(base, SVTConstants.TSHIELDLENGTH);
