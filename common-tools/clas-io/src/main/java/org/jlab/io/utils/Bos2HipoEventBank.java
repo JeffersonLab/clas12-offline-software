@@ -7,6 +7,8 @@ package org.jlab.io.utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -22,8 +24,8 @@ import org.jlab.io.hipo.HipoDataSync;
  * @author gavalian, kenjo
  */
 public class Bos2HipoEventBank {
-    private TreeMap<String,DataBank>  hipoDataBanks = new TreeMap<String,DataBank>();
-    private TreeMap<String,BosDataBank>    bosDataBanks = new TreeMap<String,BosDataBank>();
+    private Map<String,DataBank>  hipoDataBanks = new TreeMap<String,DataBank>();
+    private Map<String,BosDataBank>    bosDataBanks = new TreeMap<String,BosDataBank>();
 
     public Bos2HipoEventBank(){
 
@@ -86,7 +88,7 @@ public class Bos2HipoEventBank {
         if(this.bosDataBanks.containsKey("EVNT")==true){
             BosDataBank bEVNT = (BosDataBank) this.bosDataBanks.get("EVNT");
             int nrows = bEVNT.rows();
-
+            //System.out.printf("yo found EVNT size = %d\n",nrows);
             DataBank  hipoEVNTp = hipoEvent.createBank("EVENT::particle", nrows);
             for(int loop = 0; loop < nrows; loop++){
                 hipoEVNTp.setByte("status", loop, (byte) bEVNT.getInt("Status")[loop]);
@@ -134,6 +136,7 @@ public class Bos2HipoEventBank {
 
         this.hipoDataBanks.put("TGBI", hipoTGBIp);
         }
+        
         if(this.bosDataBanks.containsKey("TAGR")==true){
             BosDataBank tagr = (BosDataBank) this.bosDataBanks.get("TAGR");
             DataBank hipoTAGRp = hipoEvent.createBank("TAGGER::tagr",tagr.rows());
@@ -150,6 +153,57 @@ public class Bos2HipoEventBank {
             this.hipoDataBanks.put("TAGR", hipoTAGRp);
         }
 
+        
+        if(this.bosDataBanks.containsKey("TAGR")==true){
+            BosDataBank tagr = (BosDataBank) this.bosDataBanks.get("TAGR");
+            DataBank hipoTAGRp = hipoEvent.createBank("TAGGER::tagr",tagr.rows());
+            int nrows = tagr.rows();
+            for(int loop = 0; loop < nrows; loop++){
+                hipoTAGRp.setByte("status", loop , (byte) tagr.getInt("STAT")[loop]);
+                hipoTAGRp.setFloat("energy", loop, tagr.getFloat("ERG")[loop]);
+                //hipoTGPBp.setFloat("time", loop, tagr.getFloat("TPHO")[loop]-startTime[0]);
+                hipoTAGRp.setFloat("time", loop, tagr.getFloat("TPHO")[loop]);
+                hipoTAGRp.setShort("tid", loop, (short) tagr.getInt("T_id")[loop]);
+                hipoTAGRp.setShort("eid", loop, (short) tagr.getInt("E_id")[loop]);
+                hipoTAGRp.setFloat("ttag", loop, tagr.getFloat("TTAG")[loop]);
+            }
+            this.hipoDataBanks.put("TAGR", hipoTAGRp);
+        }
+        
+        if(this.bosDataBanks.containsKey("MCTK")==true){
+            BosDataBank bMCTK = (BosDataBank) this.bosDataBanks.get("MCTK");
+            BosDataBank bMCVX = null;
+            int         nrowsVX = 0;
+            
+            if(this.bosDataBanks.containsKey("MCVX")==true){
+                bMCVX = (BosDataBank) this.bosDataBanks.get("MCVX");
+                nrowsVX = bMCVX.rows();
+            }
+            
+            int rows = bMCTK.rows();
+            //System.out.printf(" =====> yo MCTK size = %d\n",rows);
+            DataBank hipoMCTK = hipoEvent.createBank("MC::particle", rows);
+            for(int loop = 0; loop < rows; loop++){
+                float mom = bMCTK.getFloat("pmom")[loop];
+                
+                int vrtIndex =  bMCTK.getInt("beg_vtx")[loop]-1;
+                
+                hipoMCTK.setByte("status", loop, (byte) 1);
+                hipoMCTK.setByte("charge", loop, (byte) bMCTK.getFloat("charge")[loop]);
+                hipoMCTK.setInt("pid", loop,bMCTK.getInt("id")[loop]);
+                
+                hipoMCTK.setFloat("px", loop, mom*bMCTK.getFloat("cx")[loop]);
+                hipoMCTK.setFloat("py", loop, mom*bMCTK.getFloat("cy")[loop]);
+                hipoMCTK.setFloat("pz", loop, mom*bMCTK.getFloat("cz")[loop]);
+                
+                if(bMCVX!=null&&nrowsVX>0&&vrtIndex>=0&&vrtIndex<nrowsVX){
+                    hipoMCTK.setFloat("vx", loop, mom*bMCVX.getFloat("x")[vrtIndex]);
+                    hipoMCTK.setFloat("vy", loop, mom*bMCVX.getFloat("y")[vrtIndex]);
+                    hipoMCTK.setFloat("vz", loop, mom*bMCVX.getFloat("z")[vrtIndex]);
+                }
+            }
+            this.hipoDataBanks.put("MCTK", hipoMCTK);
+        }
 
         if(this.bosDataBanks.containsKey("DCPB")){
             BosDataBank bDCPB = (BosDataBank) this.bosDataBanks.get("DCPB");
@@ -304,20 +358,33 @@ public class Bos2HipoEventBank {
 
     }
 
-    public TreeMap<String,DataBank>  getHipoBankStore(){
+    public Map<String,DataBank>  getHipoBankStore(){
         return this.hipoDataBanks;
     }
 
+    public Map<String,BosDataBank> getBosBanks(){
+        return this.bosDataBanks;
+    }
+    
     public void initBosBanks(BosDataEvent bosEvent){
         this.bosDataBanks.clear();
 
-	    if(bosEvent.hasBank("TAGR:1")){
+       /* if(bosEvent.hasBank("TAGR:1")){
+            BosDataBank tagr = (BosDataBank) bosEvent.getBank("TAGR:1");
+            this.bosDataBanks.put(tagr.getDescriptor().getName(), tagr);
+        }*/
+
+        if(bosEvent.hasBank("TAGR")){
             //BosDataBank hevt = (BosDataBank) bos_event.getBank("HEVT")
+            BosDataBank tagr = (BosDataBank) bosEvent.getBank("TAGR");
+            this.bosDataBanks.put(tagr.getDescriptor().getName(), tagr);
+        }
+        
+        if(bosEvent.hasBank("TAGR:1")){
             BosDataBank tagr = (BosDataBank) bosEvent.getBank("TAGR:1");
             this.bosDataBanks.put(tagr.getDescriptor().getName(), tagr);
         }
-
-
+        
         if(bosEvent.hasBank("TGBI")==true){
             BosDataBank bTGBI = (BosDataBank) bosEvent.getBank("TGBI");
             this.bosDataBanks.put(bTGBI.getDescriptor().getName(), bTGBI);
@@ -330,6 +397,16 @@ public class Bos2HipoEventBank {
         if(bosEvent.hasBank("HEVT")){
             BosDataBank bHEVT = (BosDataBank) bosEvent.getBank("HEVT");
             this.bosDataBanks.put(bHEVT.getDescriptor().getName(), bHEVT);
+        }
+        
+        if(bosEvent.hasBank("MCTK")){
+            BosDataBank bMCTK = (BosDataBank) bosEvent.getBank("MCTK");
+            this.bosDataBanks.put(bMCTK.getDescriptor().getName(), bMCTK);
+        }
+        
+        if(bosEvent.hasBank("MCVX")){
+            BosDataBank bMCVX = (BosDataBank) bosEvent.getBank("MCVX");
+            this.bosDataBanks.put(bMCVX.getDescriptor().getName(), bMCVX);
         }
 
         if(bosEvent.hasBank("EVNT")){
@@ -374,6 +451,7 @@ public class Bos2HipoEventBank {
     }
 
     public static void printUsage(){
+        
         System.out.println("\n \t Usage : bos2hipo [options] [output file] [input file]");
         System.out.println("\n\n Options: ");
         System.out.println("\t    -u : uncompressed");
@@ -416,6 +494,7 @@ public class Bos2HipoEventBank {
         Bos2HipoEventBank bos2hipo = new Bos2HipoEventBank();
 
         HipoDataSync  writer = new HipoDataSync();
+                
         writer.open(hipoFileName);
         writer.setCompressionType(compression);
 
@@ -435,11 +514,18 @@ public class Bos2HipoEventBank {
             //bosEvent.showBankInfo("EVNT");
             try{
 
-		        DataEvent hipoEvent = writer.createEvent();
+                DataEvent hipoEvent = writer.createEvent();
+                
                 bos2hipo.initBosBanks(bosEvent);
-
+                
+                Map<String,BosDataBank>  bosBanks = bos2hipo.getBosBanks();
+                
+                //System.out.printf("----- BOS BANKS FOUND = %d\n",bosBanks.size());
+                //Set<String> keys = bosBanks.keySet();
+                //for(String key : keys) System.out.println("\t-> " + key);
                 bos2hipo.initHipoBank(hipoEvent);
-                TreeMap<String,DataBank>  hipoBanks = bos2hipo.getHipoBankStore();
+                
+                Map<String,DataBank>  hipoBanks = bos2hipo.getHipoBankStore();
 
                 if(hipoBanks.containsKey("HEVT")==true){
                     hipoEvent.appendBanks(hipoBanks.get("HEVT"));
@@ -448,6 +534,10 @@ public class Bos2HipoEventBank {
                     hipoEvent.appendBanks(hipoBanks.get("EVNT"));
                 }
 
+                if(hipoBanks.containsKey("MCTK")==true){
+                    hipoEvent.appendBanks(hipoBanks.get("MCTK"));
+                }
+                
                 List<DataBank>  detectorBanks = new ArrayList<DataBank>();
                 //if(hipo) //##############################################
                 if(hipoBanks.containsKey("ICPB")==true){
@@ -490,11 +580,14 @@ public class Bos2HipoEventBank {
                     hipoEvent.appendBanks(banks);
                 }
 
-                if(hipoBanks.containsKey("EVNT")==true && hipoBanks.containsKey("HEVT")==true){
+                //if(hipoBanks.containsKey("EVNT")==true && hipoBanks.containsKey("HEVT")==true){
+                //System.out.println("banks count = " + detectorBanks.size() +  " : has HEVT = " + hipoBanks.containsKey("HEVT"));
+                if(hipoBanks.containsKey("HEVT")==true||hipoBanks.containsKey("MCTK")==true){
                     writer.writeEvent(hipoEvent);
                 }
             } catch (Exception e) {
                 System.out.println("---> error at event # " + progressCounter);
+                e.printStackTrace();
             }
         }
 

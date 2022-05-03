@@ -2,32 +2,20 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jlab.clas</groupId>
   <artifactId>clas12</artifactId>
-  <version>7.1.0-SNAPSHOT</version>
+  <version>8.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <parent>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>parent/pom.xml</relativePath>
-    <version>7.1.0-SNAPSHOT</version>
+    <version>8.0.0-SNAPSHOT</version>
   </parent>
-
-  <build>
-      <plugins>
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <configuration>
-                  <source>1.8</source>
-                  <target>1.8</target>
-              </configuration>
-          </plugin>
-      </plugins>
-  </build>
 
   <modules>
     <module>parent</module>
     <module>common-tools</module>
     <module>reconstruction</module>
   </modules>
+
 </project>
