@@ -7,7 +7,6 @@ import org.jlab.rec.cvt.trajectory.Helix;
 
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 
 
@@ -22,9 +21,8 @@ public class StraightTrackFitter {
     private Helix _helix;  // fit helix
     private double[] _chisq = new double[2];  // fit chi-squared [0]: circle [1] line
 
-    private LineFitter _xyfit   = new LineFitter();
+    private LineFitter _xyfit = new LineFitter();
     private LineFitter _linefit = new LineFitter();
-    private LineFitPars _xyfitpars;
     private LineFitPars _linefitpars;
     private HelicalTrackFitPars _helicalfitoutput;
     private double Xb;
@@ -59,12 +57,11 @@ public class StraightTrackFitter {
 
     private final List<Double> W = new ArrayList<>();
 
-    public FitStatus fit(List<Double> X, List<Double> Y, List<Double> Z, List<Double> Rho, 
-                         List<Double> errRt, List<Double> errRho, List<Double> ErrZ,
-                         double xb, double yb) {
+    public FitStatus fit(List<Double> X, List<Double> Y, List<Double> Z, List<Double> Rho, List<Double> errRt, List<Double> errRho, List<Double> ErrZ) {
         //  Initialize the various fitter outputs
-        Xb = xb;
-        Yb = yb;
+        
+        _linefitpars = null;
+        _helicalfitoutput = null;
         _chisq[0] = 0;
         _chisq[1] = 0;
         W.clear();
@@ -79,38 +76,44 @@ public class StraightTrackFitter {
         // check the status
         _xyfit = new LineFitter();
         boolean xyfitstatusOK = _xyfit.fitStatus(X, Y, W, new ArrayList<>(X.size()), X.size());
-        if (!xyfitstatusOK) {
-            return FitStatus.LineFitFailed; 
-        }        
-        _xyfitpars = _xyfit.getFit();
-        
-        //Line fit
-        _linefit = new LineFitter();
-        boolean linefitstatusOK = _linefit.fitStatus(Rho, Z, errRho, ErrZ, Z.size());
-        if (!linefitstatusOK) {
-            return FitStatus.LineFitFailed; 
-        }
-        _linefitpars = _linefit.getFit();
-        
-        Line3D  line = new Line3D(this.getPoint(X.get(0)), this.getPoint(X.get(1)));
-        Line3D  beam = new Line3D(new Point3D(this.getXb(), this.getYb(),0), new Vector3D(0,0,1));
-        Point3D doca = line.distance(beam).origin();
+        double slope = _xyfit.getFit().slope();
+        double intercept = _xyfit.getFit().intercept();
+        Line3D line = new Line3D(new Point3D(X.get(0),slope*X.get(0)+intercept,0), new Point3D(X.get(1),slope*X.get(1)+intercept,0));
+        double fit_dca = 0;
+        Point3D xydoca = line.distance(new Point3D(this.getXb(), this.getYb(),0)).origin();
         
         double fit_phi_at_dca = line.direction().phi();
+        
         if(Math.abs(Math.atan2(Y.get(0),X.get(0))-fit_phi_at_dca)>Math.PI/2) {
             fit_phi_at_dca+=Math.PI;
         }
-        double fit_dca = 0;
+        double x = xydoca.x();
+        double y = xydoca.y();
+        fit_dca = Math.atan2(-x,y);
         if(Math.cos(fit_phi_at_dca)>0.1) {
-            fit_dca = (doca.y()-getYb())/Math.cos(fit_phi_at_dca);
+            fit_dca = y/Math.cos(fit_phi_at_dca);
         } else {
-            fit_dca = -(doca.x()-getXb())/Math.sin(fit_phi_at_dca);
+            fit_dca = -x/Math.sin(fit_phi_at_dca);
         }
-        double fit_tandip = _linefitpars.slope();
-        double fit_Z0 = doca.z();
-        double fit_curvature = 1.e-12;
         
+        //Line fit
+        _linefit = new LineFitter();
 
+        boolean linefitstatusOK = _linefit.fitStatus(Rho, Z, errRho, ErrZ, Z.size());
+
+        if (!linefitstatusOK) {
+            return FitStatus.LineFitFailed; 
+        }
+        //  Get the results of the fits
+        _linefitpars = _linefit.getFit();
+
+        // get the parameters of the helix representation of the track
+        double fit_curvature = 1.e-12;
+        double fit_tandip = _linefitpars.slope();
+
+        //double fit_Z0 = _linefitpars.intercept();
+        double fit_Z0 = _linefitpars.intercept();
+        //fit_Z0 = (Math.abs(fit_dca)-_linefitpars.intercept())/ _linefitpars.slope() ; //reset for displaced vertex
         //require vertex position inside of the inner barrel
             if (Math.abs(fit_dca) > SVTGeometry.getLayerRadius(1) || Math.abs(fit_Z0) > 100) {
             return null;
@@ -135,13 +138,13 @@ public class StraightTrackFitter {
         //covr[4] =  delta_phi.delta_dca;
         //covr[5] =  delta_dca.delta_dca;
         
-        fit_covmatrix[0][0] = _xyfitpars.interceptErr() * _xyfitpars.interceptErr();
-        fit_covmatrix[1][1] = _xyfitpars.slopeErr() * _xyfitpars.slopeErr();
+        fit_covmatrix[0][0] = _xyfit.getFit().interceptErr() * _xyfit.getFit().interceptErr();
+        fit_covmatrix[1][1] = _xyfit.getFit().slopeErr() * _xyfit.getFit().slopeErr();
         fit_covmatrix[2][2] = 1.e-08;
         fit_covmatrix[3][3] = _linefitpars.interceptErr() * _linefitpars.interceptErr();
         fit_covmatrix[4][4] = _linefitpars.slopeErr() * _linefitpars.slopeErr();
 
-        Helix helixresult = new Helix(fit_dca, fit_phi_at_dca, fit_curvature, fit_Z0, fit_tandip, this.getXb(), this.getYb(), fit_covmatrix);
+        Helix helixresult = new Helix(fit_dca, fit_phi_at_dca, fit_curvature, fit_Z0, fit_tandip, 0, 0, fit_covmatrix);
 
         setHelix(helixresult);
         _chisq[0] = _linefitpars.chisq();
@@ -223,13 +226,4 @@ public class StraightTrackFitter {
         this.Yb = Yb;
     }
 
-    public Point3D getPoint(double x) {
-        if(_xyfitpars==null || _linefitpars==null) 
-            return null;
-        
-        double y = _xyfitpars.getValue(x);
-        double z = _linefitpars.getValue(Math.sqrt(x*x+y*y));
-        return new Point3D(x, y, z);
-    }
-    
 }

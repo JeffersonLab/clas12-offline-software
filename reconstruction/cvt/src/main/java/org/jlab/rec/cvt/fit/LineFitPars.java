@@ -69,10 +69,6 @@ public class LineFitPars {
         return ProbChi2perNDF.prob(chi2, ndf);
     }
     
-    public double getValue(double x) {
-        return x * _slope + _interc;
-    }
-    
     public Ray getYXRay() {
         return new Ray(this._slope, this._slopeErr, this._interc, this._intercErr, 0, 0, 0, 0);
     }
