@@ -463,11 +463,7 @@ public class Track extends Trajectory implements Comparable<Track> {
                 stVec.setTrkPhiAtSurface(localDir.phi());
                 stVec.setTrkThetaAtSurface(localDir.theta());
                 stVec.setTrkToModuleAngle(Geometry.getInstance().getBMT().getLocalAngle(traj.layer, traj.sector, pos, dir));
-                int region = Geometry.getInstance().getBMT().getRegion(traj.layer);
-                if(BMTGeometry.getDetectorType(traj.layer)==BMTType.C) 
-                    stVec.setCalcCentroidStrip(Geometry.getInstance().getBMT().getCstrip(region, pos));
-                else
-                    stVec.setCalcCentroidStrip(Geometry.getInstance().getBMT().getZstrip(region, pos));
+                stVec.setCalcCentroidStrip(Geometry.getInstance().getBMT().getStrip(traj.layer, traj.sector, pos));
             }
             if(stVec.getSurfaceDetector()>0) {
                 stVec.setSurfaceDetector(DetectorType.CVT.getDetectorId());
