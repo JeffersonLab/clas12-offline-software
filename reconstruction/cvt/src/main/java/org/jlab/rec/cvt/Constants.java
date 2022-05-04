@@ -211,11 +211,11 @@ public class Constants {
     }
     
     
-    private static final double D0     = 10;
-    private static final double DPHI0  = Math.toRadians(10);
-    private static final double DRHO   = 0.01;
-    private static final double DTANL  = 0.2;
-    private static final double DZ0    = 20;
+    private static final double D0     = 10;                    // 10 mm
+    private static final double DPHI0  = Math.toRadians(10);    // 10 deg
+    private static final double DRHO   = 0.01;                  // ~6-7 on kappa, i.e. 150 MeV on pt
+    private static final double DTANL  = 0.2;                   // 10 deg on theta
+    private static final double DZ0    = 20;                    // 20 mm
     public static final double[][] COVHELIX = new double[][]{
                                                              {D0*D0, 0, 0, 0, 0},
                                                              {0, DPHI0*DPHI0, 0, 0, 0},
