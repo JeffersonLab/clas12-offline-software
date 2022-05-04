@@ -21,11 +21,11 @@ public class Lorentz {
 
         if (xe < BMTConstants.emin) {
             xe = BMTConstants.emin;
-            System.err.println("Warning: E out of grid... setting it to Emin " + BMTConstants.emin);
+//            System.err.println("Warning: E out of grid... setting it to Emin " + BMTConstants.emin);
         }
         if (xe >= BMTConstants.emax) {
             xe = BMTConstants.emax;
-            System.err.println("Warning: E out of grid... setting it to Emax " + BMTConstants.emax);
+//            System.err.println("Warning: E out of grid... setting it to Emax " + BMTConstants.emax);
         }
         if (xb > BMTConstants.bmax) {
             xb = BMTConstants.bmax;
