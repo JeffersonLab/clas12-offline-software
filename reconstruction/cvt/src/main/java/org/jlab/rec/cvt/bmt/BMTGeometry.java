@@ -727,7 +727,7 @@ public class BMTGeometry {
      */
     private int getStripLocal(int layer, Point3D traj) {
         
-        BMTType type = this.getDetectorType(layer);
+        BMTType type = BMTGeometry.getDetectorType(layer);
         int region = this.getRegion(layer);
         switch (type) {
             case C:

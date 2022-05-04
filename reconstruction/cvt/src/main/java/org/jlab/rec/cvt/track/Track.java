@@ -17,7 +17,6 @@ import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.measurement.MLayer;
-import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.rec.cvt.trajectory.StateVec;
 import org.jlab.rec.cvt.trajectory.Trajectory;
@@ -463,11 +462,7 @@ public class Track extends Trajectory implements Comparable<Track> {
                 stVec.setTrkPhiAtSurface(localDir.phi());
                 stVec.setTrkThetaAtSurface(localDir.theta());
                 stVec.setTrkToModuleAngle(Constants.getInstance().BMTGEOMETRY.getLocalAngle(traj.layer, traj.sector, pos, dir));
-                int region = Constants.getInstance().BMTGEOMETRY.getRegion(traj.layer);
-                if(BMTGeometry.getDetectorType(traj.layer)==BMTType.C) 
-                    stVec.setCalcCentroidStrip(Constants.getInstance().BMTGEOMETRY.getCstrip(region, pos));
-                else
-                    stVec.setCalcCentroidStrip(Constants.getInstance().BMTGEOMETRY.getZstrip(region, pos));
+                stVec.setCalcCentroidStrip(Constants.getInstance().BMTGEOMETRY.getStrip(traj.layer, traj.sector, pos));
             }
             if(stVec.getSurfaceDetector()>0) {
                 stVec.setSurfaceDetector(DetectorType.CVT.getDetectorId());
