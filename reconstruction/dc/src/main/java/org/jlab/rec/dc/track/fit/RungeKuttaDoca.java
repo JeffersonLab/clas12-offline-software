@@ -1,6 +1,7 @@
 package org.jlab.rec.dc.track.fit;
 
 import java.util.ArrayList;
+import org.jlab.jnp.matrix.*;
 import org.jlab.clas.swimtools.Swim;
 
 /**
@@ -96,37 +97,8 @@ public class RungeKuttaDoca {
         double[][] s3 = RK4step(sector, fVec.z, 0.5*h, swim, s0, s2,    qv);
         double[][] s4 = RK4step(sector, fVec.z, h,     swim, s0, s3,    qv);
 
-        // === SET FINAL STATE =====================================================================
-        double[][] sFinal = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}};
-        for (int i = 0; i < 4; ++i) {
-            for (int j = 0; j < 4; ++j) {
-                if (j == 0) sFinal[i][j] += s0[i][j];
-                if (i == 2 && j == 1) sFinal[i][j] += 1;
-                if (i == 3 && j == 2) sFinal[i][j] += 1;
-                sFinal[i][j] += this.RK4(s1[i][j], s2[i][j], s3[i][j], s4[i][j], h);
-            }
-        }
-
-        // covMat = FCF^T; u = FC.
-        double[][] u = new double[5][5];
-        for (int j1 = 0; j1 < 5; j1++) {
-            u[0][j1] = covMat.covMat.get(0,j1) + covMat.covMat.get(2,j1) * sFinal[0][1]+ covMat.covMat.get(3,j1)* sFinal[0][2] + covMat.covMat.get(4,j1) * sFinal[0][3];
-            u[1][j1] = covMat.covMat.get(1,j1) + covMat.covMat.get(2,j1) * sFinal[1][1]+ covMat.covMat.get(3,j1)* sFinal[1][2] + covMat.covMat.get(4,j1) * sFinal[1][3];
-            u[2][j1] = covMat.covMat.get(2,j1) * sFinal[2][1] + covMat.covMat.get(3,j1)* sFinal[2][2]
-                     + covMat.covMat.get(4,j1) * sFinal[2][3];
-            u[3][j1] = covMat.covMat.get(2,j1) * sFinal[3][1] + covMat.covMat.get(3,j1)* sFinal[3][2]
-                     + covMat.covMat.get(4,j1) * sFinal[3][3];
-            u[4][j1] = covMat.covMat.get(4,j1);
-        }
-
-        double[][] C = new double[5][5];
-        for (int i1 = 0; i1 < 5; i1++) {
-            C[i1][0] = u[i1][0] + u[i1][2] * sFinal[0][1] + u[i1][3] * sFinal[0][2] + u[i1][4] * sFinal[0][3];
-            C[i1][1] = u[i1][1] + u[i1][2] * sFinal[1][1] + u[i1][3] * sFinal[1][2] + u[i1][4] * sFinal[1][3];
-            C[i1][2] = u[i1][2] * sFinal[2][1] + u[i1][3] * sFinal[2][2] + u[i1][4] * sFinal[2][3];
-            C[i1][3] = u[i1][2] * sFinal[3][1] + u[i1][3] * sFinal[3][2] + u[i1][4] * sFinal[3][3];
-            C[i1][4] = u[i1][4];
-        }
+        // Compute and set final state and covariance matrix.
+        double[][] sFinal = computeFinalState(h, s0, s1, s2, s3, s4);
 
         fVec.x   = sFinal[0][0];
         fVec.y   = sFinal[1][0];
@@ -136,7 +108,7 @@ public class RungeKuttaDoca {
         fVec.B   = Math.sqrt(_b[0]*_b[0]+_b[1]*_b[1]+_b[2]*_b[2]);
         fVec.deltaPath += Math.sqrt((s0[0][0]-fVec.x)*(s0[0][0]-fVec.x)
                                     + (s0[1][0]-fVec.y)*(s0[1][0]-fVec.y) + h*h);
-        fCov.covMat.set(C);
+        fCov.covMat.set(computeCovMat(covMat.covMat, sFinal));
     }
 
     /** Perform one RK4 step, updating the covariance matrix. */
@@ -168,6 +140,46 @@ public class RungeKuttaDoca {
         sNext[3][3] = this.dty_dq0( qv, sNext[0][0], sNext[1][0], sNext[0][3], sNext[1][3]);
 
         return sNext;
+    }
+
+    /** Compute the final state for each entry in the internal state matrix. */
+    private double[][] computeFinalState(double h, double[][] s0, double[][] s1, double[][] s2,
+                                         double[][] s3, double[][] s4) {
+        double[][] sFinal = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}};
+        for (int i = 0; i < 4; ++i) {
+            for (int j = 0; j < 4; ++j) {
+                if (j == 0) sFinal[i][j] += s0[i][j];
+                if (i == 2 && j == 1) sFinal[i][j] += 1;
+                if (i == 3 && j == 2) sFinal[i][j] += 1;
+                sFinal[i][j] += this.RK4(s1[i][j], s2[i][j], s3[i][j], s4[i][j], h);
+            }
+        }
+        return sFinal;
+    }
+
+    /** Compute the final covariance matrix. covMat = FCF^T; u = FC. */
+    private double[][] computeCovMat(Matrix cPrev, double[][] sFinal) {
+        double[][] u = new double[5][5];
+        for (int j = 0; j < 5; j++) {
+            u[0][j] = cPrev.get(0,j) + cPrev.get(2,j) * sFinal[0][1] + cPrev.get(3,j)* sFinal[0][2] + cPrev.get(4,j) * sFinal[0][3];
+            u[1][j] = cPrev.get(1,j) + cPrev.get(2,j) * sFinal[1][1]+ cPrev.get(3,j)* sFinal[1][2] + cPrev.get(4,j) * sFinal[1][3];
+            u[2][j] = cPrev.get(2,j) * sFinal[2][1] + cPrev.get(3,j)* sFinal[2][2]
+                     + cPrev.get(4,j) * sFinal[2][3];
+            u[3][j] = cPrev.get(2,j) * sFinal[3][1] + cPrev.get(3,j)* sFinal[3][2]
+                     + cPrev.get(4,j) * sFinal[3][3];
+            u[4][j] = cPrev.get(4,j);
+        }
+
+        double[][] cNext = new double[5][5];
+        for (int i = 0; i < 5; i++) {
+            cNext[i][0] = u[i][0] + u[i][2] * sFinal[0][1] + u[i][3] * sFinal[0][2] + u[i][4] * sFinal[0][3];
+            cNext[i][1] = u[i][1] + u[i][2] * sFinal[1][1] + u[i][3] * sFinal[1][2] + u[i][4] * sFinal[1][3];
+            cNext[i][2] = u[i][2] * sFinal[2][1] + u[i][3] * sFinal[2][2] + u[i][4] * sFinal[2][3];
+            cNext[i][3] = u[i][2] * sFinal[3][1] + u[i][3] * sFinal[3][2] + u[i][4] * sFinal[3][3];
+            cNext[i][4] = u[i][4];
+        }
+
+        return cNext;
     }
 
     private double RK4(double k1, double k2, double k3, double k4, double h) {
