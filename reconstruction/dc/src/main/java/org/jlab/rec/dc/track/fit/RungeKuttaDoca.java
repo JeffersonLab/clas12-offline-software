@@ -41,16 +41,15 @@ public class RungeKuttaDoca {
      */
     private void RK4transport(int sector, double h, Swim swim, StateVecsDoca.StateVec fVec) {
         // Set initial state.
-        double z0 = fVec.z;
         double qv = fVec.Q*v;
         double[] s0 = {fVec.x, fVec.y, fVec.tx, fVec.ty};
         double[] sNull = {0, 0, 0, 0};
 
         // Transport.
-        double[] s1 = RK4step(sector, z0, 0,     swim, s0, sNull, qv);
-        double[] s2 = RK4step(sector, z0, 0.5*h, swim, s0, s1,    qv);
-        double[] s3 = RK4step(sector, z0, 0.5*h, swim, s0, s2,    qv);
-        double[] s4 = RK4step(sector, z0, h,     swim, s0, s3,    qv);
+        double[] s1 = RK4step(sector, fVec.z, 0,     swim, s0, sNull, qv);
+        double[] s2 = RK4step(sector, fVec.z, 0.5*h, swim, s0, s1,    qv);
+        double[] s3 = RK4step(sector, fVec.z, 0.5*h, swim, s0, s2,    qv);
+        double[] s4 = RK4step(sector, fVec.z, h,     swim, s0, s3,    qv);
 
         // Set final state.
         fVec.z  += h;
@@ -87,128 +86,15 @@ public class RungeKuttaDoca {
     void RK4transport(int sector, double h, Swim swim, StateVecsDoca.CovMat covMat,
                       StateVecsDoca.StateVec fVec, StateVecsDoca.CovMat fCov) {
         // Set initial state and Jacobian.
-        double z0 = fVec.z;
         double qv = fVec.Q*v;
-
         double[][] s0 = {{fVec.x,0,0,0}, {fVec.y,0,0,0}, {fVec.tx,1,0,0}, {fVec.ty,0,1,0}};
         double[][] sNull = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}};
 
-        // === FIRST STEP ==========================================================================
-        // State
-        double[][] s1 = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}};
-        swim.Bfield(sector, s0[0][0], s0[1][0], z0, _b);
-        s1[0][0]  = s0[2][0];
-        s1[1][0]  = s0[3][0];
-        double C1  = C(s1[0][0], s1[1][0]);
-        s1[2][0] = qv*Ax(C1, s1[0][0], s1[1][0]);
-        s1[3][0] = qv*Ay(C1, s1[0][0], s1[1][0]);
-
-        // Jacobian:
-        s1[0][1] = s0[2][1];
-        s1[1][1] = s0[3][1];
-        s1[0][2] = s0[2][2];
-        s1[1][2] = s0[3][2];
-
-        s1[2][1] = qv * (dAx_dtx(s0[2][0],s0[3][0])*s0[2][1] + dAx_dty(s0[2][0],s0[3][0])*s0[3][1]);
-        s1[3][1] = qv * (dAy_dtx(s0[2][0],s0[3][0])*s0[2][1] + dAy_dty(s0[2][0],s0[3][0])*s0[3][1]);
-        s1[2][2] = qv * (dAx_dty(s0[2][0],s0[3][0])*s0[2][2] + dAx_dty(s0[2][0],s0[3][0])*s0[3][2]);
-        s1[3][2] = qv * (dAy_dty(s0[2][0],s0[3][0])*s0[2][2] + dAy_dty(s0[2][0],s0[3][0])*s0[3][2]);
-
-        s1[0][3] = s0[2][3];
-        s1[1][3] = s0[3][3];
-
-        s1[2][3] = v*Ax(C1, s1[0][0], s1[1][0]) + qv*(dAx_dtx(s0[2][0],s0[3][0])*s0[2][3]
-                                                      + dAx_dty(s0[2][0],s0[3][0])*s0[3][3]);
-        s1[3][3] = v*Ay(C1, s1[0][0], s1[1][0]) + qv*(dAy_dtx(s0[2][0],s0[3][0])*s0[2][3]
-                                                      + dAy_dty(s0[2][0],s0[3][0])*s0[3][3]);
-
-        // === SECOND STATE ========================================================================
-        double[][] s2 = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}};
-        swim.Bfield(sector, s0[0][0]+0.5*h*s1[0][0], s0[1][0]+0.5*h*s1[1][0], z0+0.5*h, _b);
-        s2[0][0] = s0[2][0]+0.5*h*s1[2][0];
-        s2[1][0] = s0[3][0]+0.5*h*s1[3][0];
-        double C2 = C(s2[0][0], s2[1][0]);
-        s2[2][0]=qv*Ax(C2, s2[0][0], s2[1][0]);
-        s2[3][0]=qv*Ay(C2, s2[0][0], s2[1][0]);
-
-        // Jacobian:
-        s2[0][1] = s0[2][1]+0.5*h*s1[2][1];
-        s2[1][1] = s0[3][1]+0.5*h*s1[3][1];
-        s2[0][2] = s0[2][2]+0.5*h*s1[2][2];
-        s2[1][2] = s0[3][2]+0.5*h*s1[3][2];
-
-        s2[2][1] = this.dtx_dtx0(qv,s2[0][0],s2[1][0], s0[2][1]+0.5*h*s1[2][1],s0[3][1]+0.5*h*s1[3][1]);
-        s2[3][1] = this.dty_dtx0(qv,s2[0][0],s2[1][0], s0[2][1]+0.5*h*s1[2][1],s0[3][1]+0.5*h*s1[3][1]);
-        s2[2][2] = this.dtx_dty0(qv,s2[0][0],s2[1][0], s0[2][2]+0.5*h*s1[2][2],s0[3][2]+0.5*h*s1[3][2]);
-        s2[3][2] = this.dty_dty0(qv,s2[0][0],s2[1][0], s0[2][2]+0.5*h*s1[2][2],s0[3][2]+0.5*h*s1[3][2]);
-
-        s2[0][3] = s0[2][3]+0.5*h*s1[2][3];
-        s2[1][3] = s0[3][3]+0.5*h*s1[3][3];
-
-        s2[2][3] = this.dtx_dq0(qv,s2[0][0],s2[1][0], s0[2][3]+0.5*h*s1[2][3],s0[3][3]+0.5*h*s1[3][3]);
-        s2[3][3] = this.dty_dq0(qv,s2[0][0],s2[1][0], s0[2][3]+0.5*h*s1[2][3],s0[3][3]+0.5*h*s1[3][3]);
-
-        // === THIRD STEP ==========================================================================
-        double[][] s3 = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}};
-        swim.Bfield(sector, s0[0][0]+0.5*h*s2[0][0], s0[1][0]+0.5*h*s2[1][0], z0+0.5*h, _b);
-        s3[0][0] = s0[2][0]+0.5*h*s2[2][0];
-        s3[1][0] = s0[3][0]+0.5*h*s2[3][0];
-        s3[2][0] = qv*Ax((s0[2][0]+0.5*h*s2[2][0]), (s0[3][0]+0.5*h*s2[3][0]));
-        s3[3][0] = qv*Ay((s0[2][0]+0.5*h*s2[2][0]), (s0[3][0]+0.5*h*s2[3][0]));
-
-        // Jacobian:
-        s3[0][1] = s0[2][1]+0.5*h*s2[2][1];
-        s3[1][1] = s0[3][1]+0.5*h*s2[3][1];
-        s3[0][2] = s0[2][2]+0.5*h*s2[2][2];
-        s3[1][2] = s0[3][2]+0.5*h*s2[3][2];
-
-        s3[2][1] = this.dtx_dtx0(qv, s0[2][0]+0.5*h*s2[2][0],s0[3][0]+0.5*h*s2[3][0],
-                                 s0[2][1]+0.5*h*s2[2][1],s0[3][1]+0.5*h*s2[3][1]);
-        s3[3][1] = this.dty_dtx0(qv,s0[2][0]+0.5*h*s2[2][0],s0[3][0]+0.5*h*s2[3][0],
-                                 s0[2][1]+0.5*h*s2[2][1],s0[3][1]+0.5*h*s2[3][1]);
-        s3[2][2] = this.dtx_dty0(qv,s0[2][0]+0.5*h*s2[2][0],s0[3][0]+0.5*h*s2[3][0],
-                                 s0[2][2]+0.5*h*s2[2][2],s0[3][2]+0.5*h*s2[3][2]);
-        s3[3][2] = this.dty_dty0(qv,s0[2][0]+0.5*h*s2[2][0],s0[3][0]+0.5*h*s2[3][0],
-                                 s0[2][2]+0.5*h*s2[2][2],s0[3][2]+0.5*h*s2[3][2]);
-
-        s3[0][3] = s0[2][3]+0.5*h*s2[2][3];
-        s3[1][3] = s0[3][3]+0.5*h*s2[3][3];
-
-        s3[2][3] = this.dtx_dq0(qv,s0[2][0]+0.5*h*s2[2][0],s0[3][0]+0.5*h*s2[3][0],
-                                s0[2][3]+0.5*h*s2[2][3],s0[3][3]+0.5*h*s2[3][3]);
-        s3[3][3] = this.dty_dq0(qv,s0[2][0]+0.5*h*s2[2][0],s0[3][0]+0.5*h*s2[3][0],
-                                s0[2][3]+0.5*h*s2[2][3],s0[3][3]+0.5*h*s2[3][3]);
-
-        // === FOURTH STEP =========================================================================
-        double[][] s4 = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}};
-        swim.Bfield(sector, s0[0][0]+h*s3[0][0], s0[1][0]+h*s3[1][0], z0+h, _b);
-        s4[0][0] = s0[2][0]+h*s3[2][0];
-        s4[1][0] = s0[3][0]+h*s3[3][0];
-        s4[2][0] = qv*Ax((s0[2][0]+h*s3[2][0]), (s0[3][0]+h*s3[3][0]));
-        s4[3][0] = qv*Ay((s0[2][0]+h*s3[2][0]), (s0[3][0]+h*s3[3][0]));
-
-         // Jacobian:
-        s4[0][1] = s0[2][1]+h*s3[2][1];
-        s4[1][1] = s0[3][1]+h*s3[3][1];
-        s4[0][2] = s0[2][2]+h*s3[2][2];
-        s4[1][2] = s0[3][2]+h*s3[3][2];
-
-        s4[2][1] = this.dtx_dtx0(qv,s0[2][0]+h*s3[2][0],s0[3][0]+h*s3[3][0],
-                                 s0[2][1]+h*s3[2][1],s0[3][1]+h*s3[3][1]);
-        s4[3][1] = this.dty_dtx0(qv,s0[2][0]+h*s3[2][0],s0[3][0]+h*s3[3][0],
-                                 s0[2][1]+h*s3[2][1],s0[3][1]+h*s3[3][1]);
-        s4[2][2] = this.dtx_dty0(qv,s0[2][0]+h*s3[2][0],s0[3][0]+h*s3[3][0],
-                                 s0[2][2]+h*s3[2][2],s0[3][2]+h*s3[3][2]);
-        s4[3][2] = this.dty_dty0(qv,s0[2][0]+h*s3[2][0],s0[3][0]+h*s3[3][0],
-                                 s0[2][2]+h*s3[2][2],s0[3][2]+h*s3[3][2]);
-
-        s4[0][3] = s0[2][3]+h*s3[2][3];
-        s4[1][3] = s0[3][3]+h*s3[3][3];
-
-        s4[2][3] = this.dtx_dq0(qv,s0[2][0]+h*s3[2][0],s0[3][0]+h*s3[3][0],
-                                s0[2][3]+h*s3[2][3],s0[3][3]+h*s3[3][3]);
-        s4[3][3] = this.dty_dq0(qv,s0[2][0]+h*s3[2][0],s0[3][0]+h*s3[3][0],
-                                s0[2][3]+h*s3[2][3],s0[3][3]+h*s3[3][3]);
+        // Perform steps.
+        double[][] s1 = RK4step(sector, fVec.z, 0,     swim, s0, sNull, qv);
+        double[][] s2 = RK4step(sector, fVec.z, 0.5*h, swim, s0, s1,    qv);
+        double[][] s3 = RK4step(sector, fVec.z, 0.5*h, swim, s0, s2,    qv);
+        double[][] s4 = RK4step(sector, fVec.z, h,     swim, s0, s3,    qv);
 
         // === SET FINAL STATE =====================================================================
         double[][] sFinal = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}};
@@ -242,15 +128,46 @@ public class RungeKuttaDoca {
             C[i1][4] = u[i1][4];
         }
 
-        fVec.x  = sFinal[0][0];
-        fVec.y  = sFinal[1][0];
-        fVec.tx = sFinal[2][0];
-        fVec.ty = sFinal[3][0];
-        fVec.z  = z0+h;
-        fVec.B  = Math.sqrt(_b[0]*_b[0]+_b[1]*_b[1]+_b[2]*_b[2]);
+        fVec.x   = sFinal[0][0];
+        fVec.y   = sFinal[1][0];
+        fVec.tx  = sFinal[2][0];
+        fVec.ty  = sFinal[3][0];
+        fVec.z  += h;
+        fVec.B   = Math.sqrt(_b[0]*_b[0]+_b[1]*_b[1]+_b[2]*_b[2]);
         fVec.deltaPath += Math.sqrt((s0[0][0]-fVec.x)*(s0[0][0]-fVec.x)
                                     + (s0[1][0]-fVec.y)*(s0[1][0]-fVec.y) + h*h);
         fCov.covMat.set(C);
+    }
+
+    /** Perform one RK4 step, updating the covariance matrix. */
+    private double[][] RK4step(int sector, double z0, double h, Swim swim,
+                               double[][] sInit, double[][] sPrev, double qv) {
+        double[][] sNext = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}};
+        swim.Bfield(sector, sInit[0][0] + h*sPrev[0][0], sInit[1][0] + h*sPrev[1][0], z0 + h, _b);
+
+        // State.
+        sNext[0][0] = sInit[2][0] + h*sPrev[2][0];
+        sNext[1][0] = sInit[3][0] + h*sPrev[3][0];
+        double C2 = C(sNext[0][0], sNext[1][0]);
+        sNext[2][0]=qv*Ax(C2, sNext[0][0], sNext[1][0]);
+        sNext[3][0]=qv*Ay(C2, sNext[0][0], sNext[1][0]);
+
+        // Jacobian.
+        sNext[0][1] = sInit[2][1] + h*sPrev[2][1];
+        sNext[0][2] = sInit[2][2] + h*sPrev[2][2];
+        sNext[0][3] = sInit[2][3] + h*sPrev[2][3];
+        sNext[1][1] = sInit[3][1] + h*sPrev[3][1];
+        sNext[1][2] = sInit[3][2] + h*sPrev[3][2];
+        sNext[1][3] = sInit[3][3] + h*sPrev[3][3];
+
+        sNext[2][1] = this.dtx_dtx0(qv, sNext[0][0], sNext[1][0], sNext[0][1], sNext[1][1]);
+        sNext[2][2] = this.dtx_dty0(qv, sNext[0][0], sNext[1][0], sNext[0][2], sNext[1][2]);
+        sNext[2][3] = this.dtx_dq0( qv, sNext[0][0], sNext[1][0], sNext[0][3], sNext[1][3]);
+        sNext[3][1] = this.dty_dtx0(qv, sNext[0][0], sNext[1][0], sNext[0][1], sNext[1][1]);
+        sNext[3][2] = this.dty_dty0(qv, sNext[0][0], sNext[1][0], sNext[0][2], sNext[1][2]);
+        sNext[3][3] = this.dty_dq0( qv, sNext[0][0], sNext[1][0], sNext[0][3], sNext[1][3]);
+
+        return sNext;
     }
 
     private double RK4(double k1, double k2, double k3, double k4, double h) {
