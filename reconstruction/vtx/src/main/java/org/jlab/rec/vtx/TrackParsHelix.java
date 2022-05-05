@@ -2,6 +2,7 @@ package org.jlab.rec.vtx;
 
 
 
+import org.jlab.clas.tracking.kalmanfilter.Units;
 import org.jlab.clas.tracking.trackrep.Helix;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -46,8 +47,7 @@ public class TrackParsHelix extends Helix {
                                        double px0, double py0, double pz0, 
                                        int q, double Bf, double xb, double yb) { 
 
-        this._helix = new Helix(x0,y0,z0,px0,py0,pz0,q,Bf,
-                            xb,yb,Helix.Units.CM);
+        this._helix = new Helix(x0,y0,z0,px0,py0,pz0,q,Bf,xb,yb,Units.CM);
         
         this._x0 = this._helix.getXb();
         this._y0 = this._helix.getYb();
