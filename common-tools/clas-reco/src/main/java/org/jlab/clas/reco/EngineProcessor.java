@@ -277,7 +277,7 @@ public class EngineProcessor {
             ProgressPrintout  progress = new ProgressPrintout();
             while(reader.hasEvent()==true){
                 DataEvent event = reader.getNextEvent();
-                if(eventCounter>nskip || nskip<0) {
+                if(nskip<=0 || eventCounter>nskip) {
                     processEvent(event);
                     writer.writeEvent(event);
                 }
