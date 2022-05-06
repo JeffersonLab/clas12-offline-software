@@ -1,6 +1,3 @@
-/**
- *
- */
 package org.jlab.rec.tof.hit;
 
 import java.text.DecimalFormat;
@@ -8,7 +5,6 @@ import org.jlab.geom.prim.Line3D;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.ctof.Constants;
-import org.jlab.utils.groups.IndexedTable;
 
 /**
  * @author ziegler
@@ -1322,7 +1318,7 @@ public abstract class AHit implements Comparable<AHit> {
         if(hposbin!=null) {
             int bin = (int) Math.floor(y/Constants.HPOSBINW) + Constants.HPOSBINS/2/((int) Constants.HPOSBINW);
             if(bin>=0 && bin<hposbin.length)
-                value += hposbin[bin]; 
+                value = hposa*y*y + hposb*y + hposc + hposbin[bin]; 
         }
         return value;
     }
