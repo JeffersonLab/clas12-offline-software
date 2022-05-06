@@ -79,9 +79,9 @@ public class EngineProcessor {
             "MAGFIELDS",
             "FTCAL", "FTHODO", "FTEB",
             "DCCR","DCHB","FTOFHB","EC",
-            "CVT","CTOF","CND","BAND",
+            "CVTFP","CTOF","CND","BAND",
             "HTCC","LTCC","EBHB",
-            "DCTB","FMT","FTOFTB","EBTB",
+            "DCTB","FMT","FTOFTB","CVT","EBTB",
             "RICHEB","RTPC", "MC"
         };
 
@@ -105,6 +105,7 @@ public class EngineProcessor {
             "org.jlab.service.dc.DCTBEngine",
             "org.jlab.service.fmt.FMTEngine",
             "org.jlab.service.ftof.FTOFTBEngine",
+            "org.jlab.rec.cvt.services.CVTSecondPassEngine",
             "org.jlab.service.eb.EBTBEngine",
             "org.jlab.rec.rich.RICHEBEngine",
             "org.jlab.service.rtpc.RTPCEngine",
