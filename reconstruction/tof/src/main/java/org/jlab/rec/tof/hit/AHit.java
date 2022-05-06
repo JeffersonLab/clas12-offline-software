@@ -7,6 +7,7 @@ import java.text.DecimalFormat;
 import org.jlab.geom.prim.Line3D;
 
 import org.jlab.geom.prim.Point3D;
+import org.jlab.rec.ctof.Constants;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -496,7 +497,7 @@ public abstract class AHit implements Comparable<AHit> {
     public void set_HitParams(int superlayer, double TW01, double TW02,
             double TW11, double TW12, double TW1P, double TW2P, 
             double TW0E, double TW1E, double TW2E, double TW3E, double TW4E, 
-            double HPOSa, double HPOSb, double HPOSc, double HPOSd, double HPOSe,
+            double HPOSa, double HPOSb, double HPOSc, double HPOSd, double HPOSe, double[] HPOSBIN,
             double lambda1, double lambda2,
             double yOffset, double v1, double v2, double v1Unc, double v2Unc,
             double PED1, double PED2, double PED1Unc, double PED2Unc,
@@ -542,7 +543,7 @@ public abstract class AHit implements Comparable<AHit> {
                 // // average of times
                 this.set_t(0.5 * (this.get_t1() - (pl / 2 + y) / v1 + this.get_t2() - (pl / 2 - y) / v2)
                           + this.calc_TWpos(y, TW1P, TW2P) 
-                          + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe));
+                          + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe, HPOSBIN));
                 // 4.1 Both TDCs --> Getting the uncertainty contribution from each
                 tErr = this.calc_tErr(this.get_y(), this.get_yUnc(), this.get_t1(),
                         this.get_t1Unc(), v1, v1Unc, this.get_t2(),
@@ -603,7 +604,7 @@ public abstract class AHit implements Comparable<AHit> {
                 // // average of times
                 this.set_t(0.5 * (this.get_t1() - (pl / 2 + y) / v1 + this.get_t2() - (pl / 2 - y) / v2) 
                           + this.calc_TWpos(y, TW1P, TW2P) 
-                          + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe));
+                          + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe, HPOSBIN));
                 tErr12 = this.calc_tErr12(TDC1Err, TDC2Err, LSBConv, LSBConvErr);
                 this.set_t1Unc(tErr12[0]);
                 this.set_t2Unc(tErr12[1]);
@@ -696,7 +697,7 @@ public abstract class AHit implements Comparable<AHit> {
                 {
                     this.set_t(this.get_t1() - (pl / 2 + y) / v1 - yOffset / 2.
                               + this.calc_TWpos(y, TW1P, TW2P) 
-                              + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe));
+                              + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe, HPOSBIN));
                 }
                 if (Character.toString(this.get_StatusWord().charAt(3)).equals("1")) // TDC2
                 // is
@@ -704,7 +705,7 @@ public abstract class AHit implements Comparable<AHit> {
                 {
                     this.set_t(this.get_t2() + (y - pl / 2) / v2 + yOffset / 2.
                               + this.calc_TWpos(y, TW1P, TW2P) 
-                              + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe));
+                              + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe, HPOSBIN));
                 }
                 tErr12 = this.calc_tErr12(TDC1Err, TDC2Err, LSBConv, LSBConvErr);
                 this.set_t1Unc(tErr12[0]);
@@ -784,7 +785,7 @@ public abstract class AHit implements Comparable<AHit> {
                 {
                     this.set_t(this.get_t1() - (pl / 2 + y) / v1 - yOffset / 2.
                               + this.calc_TWpos(y, TW1P, TW2P) 
-                              + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe));
+                              + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe, HPOSBIN));
                 }
                 if (Character.toString(this.get_StatusWord().charAt(3)).equals("1")) // TDC2
                 // is
@@ -792,7 +793,7 @@ public abstract class AHit implements Comparable<AHit> {
                 {
                     this.set_t(this.get_t2() + (y - pl / 2) / v2 + yOffset / 2.
                               + this.calc_TWpos(y, TW1P, TW2P) 
-                              + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe));
+                              + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe, HPOSBIN));
                 }
                 tErr12 = this.calc_tErr12(TDC1Err, TDC2Err, LSBConv, LSBConvErr);
                 this.set_t1Unc(tErr12[0]);
@@ -1313,10 +1314,17 @@ public abstract class AHit implements Comparable<AHit> {
     * @param hposc third correction parameter, currently not used
     * @param hposd fourth correction parameter, currently not used
     * @param hpose fifth correction parameter, currently not used
+    * @param hposbin tabulated correction
     * @return time offset in ns
     */     
-    private double calc_Hpos(double y, double hposa, double hposb, double hposc, double hposd, double hpose) {
-       return hposa*Math.exp(hposb*y);
+    private double calc_Hpos(double y, double hposa, double hposb, double hposc, double hposd, double hpose, double[] hposbin) {
+        double value = hposa*Math.exp(hposb*y);
+        if(hposbin!=null) {
+            int bin = (int) Math.floor(y/Constants.HPOSBINW) + Constants.HPOSBINS/2/((int) Constants.HPOSBINW);
+            if(bin>=0 && bin<hposbin.length)
+                value += hposbin[bin]; 
+        }
+        return value;
     }
     
     @Override

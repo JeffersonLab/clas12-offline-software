@@ -33,6 +33,10 @@ public class Constants {
     public static final double TDCJITTERU = 0; // TDC jitter
     public static final double TDCJITTERD = 0; // TDC jitter
 
+    // HPOSBIN correction
+    public static final int    HPOSBINS = 100;
+    public static final double HPOSBINW = 1.0; // cm
+    
     public static final double MINENERGY = 0.1; // 10th of MeV guess --> to be
     // optimized
 

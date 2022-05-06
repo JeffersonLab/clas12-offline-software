@@ -63,6 +63,7 @@ public class CTOFEngine extends ReconstructionEngine {
                     "/calibration/ctof/time_jitter",
                     "/calibration/ctof/fadc_offset",
                     "/calibration/ctof/hpos",
+                    "/calibration/ctof/hposbin",
                     "/calibration/ctof/cluster"
                 };
         
@@ -126,7 +127,8 @@ public class CTOFEngine extends ReconstructionEngine {
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/gain_balance"),
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/time_jitter"),
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/fadc_offset"),
-            this.getConstantsManager().getConstants(newRun, "/calibration/ctof/hpos"));
+            this.getConstantsManager().getConstants(newRun, "/calibration/ctof/hpos"),
+            this.getConstantsManager().getConstants(newRun, "/calibration/ctof/hposbin"));
 
         // 1) get the hits
         List<Hit> CTOFHits = hitRead.get_CTOFHits();
