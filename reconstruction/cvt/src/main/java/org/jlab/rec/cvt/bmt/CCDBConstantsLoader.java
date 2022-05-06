@@ -5,7 +5,6 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.rec.cvt.Constants;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

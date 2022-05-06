@@ -684,11 +684,11 @@ public class RecoBankWriter {
             }
         }
         DataBank bank = event.createBank(bankName, k);
+        k = 0;
         for (int i = 0; i < trkcands.size(); i++) {
             if(trkcands.get(i).getKFTrajectories()==null)
                 continue;
             //Fill trajectory for Eloss debugging
-            k = 0;
             for (int index : trkcands.get(i).getKFTrajectories().keySet()) {
                 HitOnTrack t = trkcands.get(i).getKFTrajectories().get(index);
                 bank.setShort("id",             k, (short) trkcands.get(i).getId()); //trackid
