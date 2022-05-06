@@ -120,9 +120,14 @@ public class RungeKuttaDoca {
         // State.
         sNext[0][0] = sInit[2][0] + h*sPrev[2][0];
         sNext[1][0] = sInit[3][0] + h*sPrev[3][0];
-        double C2 = C(sNext[0][0], sNext[1][0]);
-        sNext[2][0]=qv*Ax(C2, sNext[0][0], sNext[1][0]);
-        sNext[3][0]=qv*Ay(C2, sNext[0][0], sNext[1][0]);
+
+        double Csq  = Csq(sNext[0][0], sNext[1][0]);
+        double C    = C(Csq);
+        double Ax   = Ax(C, sNext[0][0], sNext[1][0]);
+        double Ay   = Ay(C, sNext[0][0], sNext[1][0]);
+
+        sNext[2][0] = qv * Ax;
+        sNext[3][0] = qv * Ay;
 
         // Jacobian.
         sNext[0][1] = sInit[2][1] + h*sPrev[2][1];
@@ -132,12 +137,17 @@ public class RungeKuttaDoca {
         sNext[1][2] = sInit[3][2] + h*sPrev[3][2];
         sNext[1][3] = sInit[3][3] + h*sPrev[3][3];
 
-        sNext[2][1] = this.dtx_dtx0(qv, sNext[0][0], sNext[1][0], sNext[0][1], sNext[1][1]);
-        sNext[2][2] = this.dtx_dty0(qv, sNext[0][0], sNext[1][0], sNext[0][2], sNext[1][2]);
-        sNext[2][3] = this.dtx_dq0( qv, sNext[0][0], sNext[1][0], sNext[0][3], sNext[1][3]);
-        sNext[3][1] = this.dty_dtx0(qv, sNext[0][0], sNext[1][0], sNext[0][1], sNext[1][1]);
-        sNext[3][2] = this.dty_dty0(qv, sNext[0][0], sNext[1][0], sNext[0][2], sNext[1][2]);
-        sNext[3][3] = this.dty_dq0( qv, sNext[0][0], sNext[1][0], sNext[0][3], sNext[1][3]);
+        double dAx_dtx = dAx_dtx(C, Csq, Ax, sNext[0][0], sNext[1][0]);
+        double dAx_dty = dAx_dty(C, Csq, Ax, sNext[0][0], sNext[1][0]);
+        double dAy_dtx = dAy_dtx(C, Csq, Ay, sNext[0][0], sNext[1][0]);
+        double dAy_dty = dAy_dty(C, Csq, Ay, sNext[0][0], sNext[1][0]);
+
+        sNext[2][1] = this.dtx_dtx0(qv, dAx_dtx, dAx_dty, sNext[0][1], sNext[1][1]);
+        sNext[2][2] = this.dtx_dty0(qv, dAx_dty, sNext[0][2], sNext[1][2]);
+        sNext[2][3] = this.dtx_dq0( qv, Ax, dAx_dtx, dAx_dty, sNext[0][3], sNext[1][3]);
+        sNext[3][1] = this.dty_dtx0(qv, dAy_dtx, dAy_dty, sNext[0][1], sNext[1][1]);
+        sNext[3][2] = this.dty_dty0(qv, dAy_dty, sNext[0][2], sNext[1][2]);
+        sNext[3][3] = this.dty_dq0( qv, Ay, dAy_dtx, dAy_dty, sNext[0][3], sNext[1][3]);
 
         return sNext;
     }
@@ -182,10 +192,12 @@ public class RungeKuttaDoca {
         return cNext;
     }
 
+    /** Get the final RK4 estimate. */
     private double RK4(double k1, double k2, double k3, double k4, double h) {
         return (h/6) * (k1 + 2*k2 + 2*k3 + k4);
     }
 
+    // Auxiliary calculations.
     private double C(double tx, double ty) {
         return Math.sqrt(1 + tx*tx + ty*ty);
     }
@@ -203,77 +215,40 @@ public class RungeKuttaDoca {
         return C * (-tx * (ty * _b[1] + _b[2]) + (1 + ty * ty) * _b[0]);
     }
 
-    private double Ax(double tx, double ty) {
-        double C = Math.sqrt(1 + tx * tx + ty * ty);
-        return C * (ty * (tx * _b[0] + _b[2]) - (1 + tx * tx) * _b[1]);
+    private double dAx_dtx(double C, double C2, double Ax, double tx, double ty) {
+        return tx * Ax/C2 + C * (ty*_b[0] - 2*tx*_b[1]);
     }
-    private double Ay(double tx, double ty) {
-        double C = Math.sqrt(1 + tx * tx + ty * ty);
-        return C * (-tx * (ty * _b[1] + _b[2]) + (1 + ty * ty) * _b[0]);
+    private double dAx_dty(double C, double C2, double Ax, double tx, double ty) {
+        return ty * Ax/C2 + C * (tx*_b[0] + _b[2]);
     }
-
-    private double dAx_dtx(double tx, double ty) {
-        double C2 = 1 + tx * tx + ty * ty;
-        double C = Math.sqrt(1 + tx * tx + ty * ty);
-        double Ax = C * (ty * (tx * _b[0] + _b[2]) - (1 + tx * tx) * _b[1]);
-        double Ay = C * (-tx * (ty * _b[1] + _b[2]) + (1 + ty * ty) * _b[0]);
-
-        return tx * Ax / C2 + C * (ty * _b[0] - 2 * tx * _b[1]);
+    private double dAy_dtx(double C, double C2, double Ay, double tx, double ty) {
+        return tx * Ay/C2 + C * (-ty*_b[1] - _b[2]);
     }
-    private double dAx_dty(double tx, double ty) {
-        double C2 = 1 + tx * tx + ty * ty;
-        double C = Math.sqrt(1 + tx * tx + ty * ty);
-        double Ax = C * (ty * (tx * _b[0] + _b[2]) - (1 + tx * tx) * _b[1]);
-        double Ay = C * (-tx * (ty * _b[1] + _b[2]) + (1 + ty * ty) * _b[0]);
-
-        return ty * Ax / C2 + C * (tx * _b[0] + _b[2]);
-    }
-    private double dAy_dtx(double tx, double ty) {
-        double C2 = 1 + tx * tx + ty * ty;
-        double C = Math.sqrt(1 + tx * tx + ty * ty);
-        double Ax = C * (ty * (tx * _b[0] + _b[2]) - (1 + tx * tx) * _b[1]);
-        double Ay = C * (-tx * (ty * _b[1] + _b[2]) + (1 + ty * ty) * _b[0]);
-
-        return tx * Ay / C2 + C * (-ty * _b[1] - _b[2]);
-    }
-    private double dAy_dty(double tx, double ty) {
-        double C2 = 1 + tx * tx + ty * ty;
-        double C = Math.sqrt(1 + tx * tx + ty * ty);
-        double Ax = C * (ty * (tx * _b[0] + _b[2]) - (1 + tx * tx) * _b[1]);
-        double Ay = C * (-tx * (ty * _b[1] + _b[2]) + (1 + ty * ty) * _b[0]);
-
-        return ty * Ay / C2 + C * (-tx * _b[1] + 2 * ty * _b[0]);
+    private double dAy_dty(double C, double C2, double Ay, double tx, double ty) {
+        return ty * Ay/C2 + C * (-tx*_b[1] + 2*ty*_b[0]);
     }
 
-    private double dtx_dtx0(double qv, double tx1, double ty1, double deltx_deltx0_1, double delty_deltx0_1) {
-        return qv*(dAx_dtx(tx1,ty1)*(deltx_deltx0_1)
-                + dAx_dty(tx1,ty1)*(delty_deltx0_1));
+    // Total derivatives.
+    private double dtx_dtx0(double qv, double dAx_dtx, double dAx_dty,
+                            double dtx_dtx0, double dty_dtx0) {
+        return qv * (dAx_dtx*dtx_dtx0 + dAx_dty*dty_dtx0);
     }
-
-    private double dty_dtx0(double qv, double tx1, double ty1, double deltx_deltx0_1, double delty_deltx0_1) {
-        return qv*(dAy_dtx(tx1,ty1)*(deltx_deltx0_1)
-                + dAy_dty(tx1,ty1)*(delty_deltx0_1));
+    private double dtx_dty0(double qv, double dAx_dty, double dtx_dty0, double dty_dty0) {
+        return qv * (dAx_dty*dtx_dty0 + dAx_dty*dty_dty0);
     }
-
-    private double dtx_dty0(double qv, double tx1, double ty1, double deltx_delty0_1, double delty_delty0_1) {
-        return qv*(dAx_dty(tx1,ty1)*(deltx_delty0_1)
-                + dAx_dty(tx1,ty1)*(delty_delty0_1));
+    private double dtx_dq0(double qv, double Ax, double dAx_dtx, double dAx_dty,
+                           double dtx_dq0, double dty_dq0) {
+        return v*Ax + qv * (dAx_dtx*dtx_dq0 + dAx_dty*dty_dq0);
     }
-
-    private double dty_dty0(double qv, double tx1, double ty1, double deltx_delty0_1, double delty_delty0_1) {
-        return qv*(dAy_dty(tx1,ty1)*(deltx_delty0_1)
-                + dAy_dty(tx1,ty1)*(delty_delty0_1));
+    private double dty_dtx0(double qv, double dAy_dtx, double dAy_dty,
+                            double dtx_dtx0, double dty_dtx0) {
+        return qv * (dAy_dtx*dtx_dtx0 + dAy_dty*dty_dtx0);
     }
-
-    private double dtx_dq0(double qv, double tx1, double ty1, double deltx_delq0_1, double delty_delq0_1) {
-        return v*Ax(tx1, ty1)
-                + qv*(dAx_dtx(tx1,ty1)*(deltx_delq0_1)
-                    + dAx_dty(tx1,ty1)*(delty_delq0_1));
+    private double dty_dty0(double qv, double dAy_dty, double dtx_dty0, double dty_dty0) {
+        return qv * (dAy_dty*dtx_dty0 + dAy_dty*dty_dty0);
     }
-
-    private double dty_dq0(double qv, double tx1, double ty1, double deltx_delq0_1, double delty_delq0_1) {
-        return v*Ay(tx1, ty1)
-                + qv*(dAy_dtx(tx1, ty1)*(deltx_delq0_1)
-                    + dAy_dty(tx1, ty1)*(delty_delq0_1));
+    private double dty_dq0(double qv, double Ay, double dAy_dtx, double dAy_dty,
+                           double dtx_dq0, double dty_dq0) {
+        return v*Ay + qv * (dAy_dtx*dtx_dq0 + dAy_dty*dty_dq0);
     }
 }
