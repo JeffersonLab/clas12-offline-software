@@ -169,23 +169,39 @@ public class RungeKuttaDoca {
 
     /** Compute the final covariance matrix. covMat = FCF^T; u = FC. */
     private double[][] computeCovMat(Matrix cPrev, double[][] sFinal) {
+        double dxdtx0 = sFinal[0][1];
+        double dxdty0 = sFinal[0][2];
+        double dxdq0  = sFinal[0][3];
+
+        double dydtx0 = sFinal[1][1];
+        double dydty0 = sFinal[1][2];
+        double dydq0  = sFinal[1][3];
+
+        double dtxdtx0 = sFinal[2][1];
+        double dtxdty0 = sFinal[2][2];
+        double dtxdq0  = sFinal[2][3];
+
+        double dtydtx0 = sFinal[3][1];
+        double dtydty0 = sFinal[3][2];
+        double dtydq0  = sFinal[3][3];
+
         double[][] u = new double[5][5];
         for (int j = 0; j < 5; j++) {
-            u[0][j] = cPrev.get(0,j) + cPrev.get(2,j) * sFinal[0][1] + cPrev.get(3,j)* sFinal[0][2] + cPrev.get(4,j) * sFinal[0][3];
-            u[1][j] = cPrev.get(1,j) + cPrev.get(2,j) * sFinal[1][1]+ cPrev.get(3,j)* sFinal[1][2] + cPrev.get(4,j) * sFinal[1][3];
-            u[2][j] = cPrev.get(2,j) * sFinal[2][1] + cPrev.get(3,j)* sFinal[2][2]
-                     + cPrev.get(4,j) * sFinal[2][3];
-            u[3][j] = cPrev.get(2,j) * sFinal[3][1] + cPrev.get(3,j)* sFinal[3][2]
-                     + cPrev.get(4,j) * sFinal[3][3];
+            u[0][j] = cPrev.get(0,j) + cPrev.get(2,j) * dxdtx0 + cPrev.get(3,j) * dxdty0
+                    + cPrev.get(4,j) * dxdq0;
+            u[1][j] = cPrev.get(1,j) + cPrev.get(2,j) * dydtx0 + cPrev.get(3,j) * dydty0
+                    + cPrev.get(4,j) * dydq0;
+            u[2][j] = cPrev.get(2,j) * dtxdtx0 + cPrev.get(3,j) * dtxdty0 + cPrev.get(4,j) * dtxdq0;
+            u[3][j] = cPrev.get(2,j) * dtydtx0 + cPrev.get(3,j) * dtydty0 + cPrev.get(4,j) * dtydq0;
             u[4][j] = cPrev.get(4,j);
         }
 
         double[][] cNext = new double[5][5];
         for (int i = 0; i < 5; i++) {
-            cNext[i][0] = u[i][0] + u[i][2] * sFinal[0][1] + u[i][3] * sFinal[0][2] + u[i][4] * sFinal[0][3];
-            cNext[i][1] = u[i][1] + u[i][2] * sFinal[1][1] + u[i][3] * sFinal[1][2] + u[i][4] * sFinal[1][3];
-            cNext[i][2] = u[i][2] * sFinal[2][1] + u[i][3] * sFinal[2][2] + u[i][4] * sFinal[2][3];
-            cNext[i][3] = u[i][2] * sFinal[3][1] + u[i][3] * sFinal[3][2] + u[i][4] * sFinal[3][3];
+            cNext[i][0] = u[i][0] + u[i][2] * dxdtx0 + u[i][3] * dxdty0 + u[i][4] * dxdq0;
+            cNext[i][1] = u[i][1] + u[i][2] * dydtx0 + u[i][3] * dydty0 + u[i][4] * dydq0;
+            cNext[i][2] = u[i][2] * dtxdtx0 + u[i][3] * dtxdty0 + u[i][4] * dtxdq0;
+            cNext[i][3] = u[i][2] * dtydtx0 + u[i][3] * dtydty0 + u[i][4] * dtydq0;
             cNext[i][4] = u[i][4];
         }
 
