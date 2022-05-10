@@ -145,10 +145,12 @@ public class Hit implements Comparable<Hit> {
         if(this.newClustering) {
             //sort by layer, then time, then edep
             int CompLyr = this.getLayer() < arg.getLayer() ? -1 : this.getLayer() == arg.getLayer() ? 0 : 1;
+            int CompStr = this.getStrip().getStrip() < arg.getStrip().getStrip()? -1 : this.getStrip().getStrip() == arg.getStrip().getStrip() ? 0 : 1;
             int CompEdep = this.getStrip().getEdep() > arg.getStrip().getEdep() ? -1 : this.getStrip().getEdep() == arg.getStrip().getEdep() ? 0 : 1;
             int CompTime = this.getStrip().getTime() < arg.getStrip().getTime() ? -1 : this.getStrip().getTime() == arg.getStrip().getTime() ? 0 : 1;
 
-            int return_val1 = ((CompTime == 0) ? CompEdep : CompTime);
+            int return_val2 = ((CompEdep == 0) ? CompStr : CompEdep);
+            int return_val1 = ((CompTime == 0) ? return_val2 : CompTime);
             int return_val = ((CompLyr == 0) ? return_val1 : CompLyr);
 
             return return_val;
@@ -276,9 +278,19 @@ public class Hit implements Comparable<Hit> {
     public int getAssociatedTrackID() {
         return AssociatedTrackID;
     }
+    
 
     public void setAssociatedTrackID(int associatedTrackID) {
         AssociatedTrackID = associatedTrackID;
     }
 
+    public String toString() {
+        String str = String.format("Hit id=%d, layer=%d, sector=%d, strip=%d, energy=%.3f, time=%.3f, residual=%.3f, clusterID=%d, trackID=%d", 
+                     this.getId(), this.getLayer(), this.getSector(), 
+                     this.getStrip().getStrip(), 
+                     this.getStrip().getEdep(), 
+                     this.getStrip().getTime(),
+                     this.getResidual(), this.getAssociatedClusterID(), this.getAssociatedTrackID());
+        return str;
+    }
 }

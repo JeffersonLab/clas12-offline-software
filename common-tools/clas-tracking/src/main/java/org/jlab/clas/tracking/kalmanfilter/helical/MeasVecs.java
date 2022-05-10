@@ -33,7 +33,7 @@ public class MeasVecs extends AMeasVecs {
         for(int i = 0; i < getDelta_d_a().length; i++) {
 //            System.out.println("initial statevec");sv.printlnStateVec(stateVec);
             SVplus.copy(stateVec);
-            SVminus .copy(stateVec);
+            SVminus.copy(stateVec);
 //            System.out.println("SVplus before shift");sv.printlnStateVec(SVplus);
             if(i ==0) {
                 SVplus.d_rho = SVplus.d_rho + getDelta_d_a()[i] / 2.;

@@ -16,8 +16,8 @@ import org.jlab.rec.cvt.svt.SVTGeometry;
 
 public class TrackSeederCA {
 
-    private final SVTGeometry sgeo = Constants.SVTGEOMETRY;
-    private final BMTGeometry bgeo = Constants.BMTGEOMETRY;
+    private final SVTGeometry sgeo = Constants.getInstance().SVTGEOMETRY;
+    private final BMTGeometry bgeo = Constants.getInstance().BMTGEOMETRY;
     private double xbeam;
     private double ybeam;
     private double bfield;
