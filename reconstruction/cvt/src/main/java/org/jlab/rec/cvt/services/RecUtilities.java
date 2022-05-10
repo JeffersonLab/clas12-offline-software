@@ -673,7 +673,7 @@ public class RecUtilities {
         
         tCov[2][0] = hCov[2][0]*delxdeld0+hCov[2][1]*delxdelphi0;
         tCov[2][1] = hCov[2][0]*delydeld0+hCov[2][1]*delydelphi0;
-        tCov[2][2] = hCov[2][3];
+        tCov[2][2] = hCov[3][3];
         tCov[2][3] = hCov[2][1]*delpxdelphi0+hCov[2][2]*delpxdelrho;
         tCov[2][4] = hCov[2][1]*delpydelphi0+hCov[2][2]*delpydelrho;
         tCov[2][5] = hCov[2][2]*delpzdelrho+hCov[2][4]*delpzdeltandip;
