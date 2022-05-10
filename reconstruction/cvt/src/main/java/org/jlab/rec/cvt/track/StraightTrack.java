@@ -22,14 +22,22 @@ import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 
 public class StraightTrack extends Trajectory{
 
-    private double _ndf;
+    private int _ndf;
     private double _chi2;
-    public Map<Integer, Cluster> clsMap;
+    private double[][] covmat;
+    private int status;
     public Map<Integer, HitOnTrack> trajs = null;
 
     public StraightTrack(Ray ray) {
         super(ray);
 
+    }
+    
+    public StraightTrack(StraightTrack seed, KFitter kf) {
+        super(new Ray(kf.finalStateVec.tx, kf.finalStateVec.x0, kf.finalStateVec.tz, kf.finalStateVec.z0));
+        this.addAll(seed);
+        this.setId(seed.getId());
+        this.update(kf);
     }
     
     public List<Cluster> getClusters() {
@@ -47,11 +55,14 @@ public class StraightTrack extends Trajectory{
     }
     
     
-    public void update(KFitter kf) {
+    public final void update(KFitter kf) {
         Ray the_ray = new Ray(kf.finalStateVec.tx, kf.finalStateVec.x0, kf.finalStateVec.tz, kf.finalStateVec.z0);                
         this.setRay(the_ray);
-        this.setchi2(kf.chi2);
-        this.trajs = kf.TrjPoints;
+        this.setChi2(kf.chi2);
+        this.setNDF(kf.NDF);
+        this.setStatus(kf.numIter*1000);
+        this.setCovMat(kf.finalStateVec.covMat);
+        this.trajs = kf.trajPoints;
         this.updateCrosses();
         this.updateClusters();
         this.findTrajectory();
@@ -94,26 +105,47 @@ public class StraightTrack extends Trajectory{
             int layer = cluster.getLayer();
             DetectorType type = cluster.getDetector();
             int index = MLayer.getType(type, layer).getIndex(hemisphere);
-            cluster.update(this.getId(), this.trajs.get(index));
+            if(this.trajs.containsKey(index)) 
+                cluster.update(this.getId(), this.trajs.get(index));
         }
     }
 
-    public double getndf() {
+    public int getNDF() {
         return _ndf;
     }
 
-    public void setndf(double _ndf) {
+    public void setNDF(int _ndf) {
         this._ndf = _ndf;
     }
 
-    public double getchi2() {
+    public double getChi2() {
         return _chi2;
     }
 
-    public void setchi2(double _chi2) {
+    public void setChi2(double _chi2) {
         this._chi2 = _chi2;
     }
 
+    public double[][] getCovMat() {
+        return covmat;
+    }
+
+    public void setCovMat(double[][] covmat) {
+        this.covmat = covmat;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public Map<Integer, HitOnTrack> getTrajectories() {
+        return trajs;
+    }
+    
     public boolean containsCross(Cross cross) {
         StraightTrack cand = this;
         boolean isInTrack = false;
@@ -182,7 +214,7 @@ public class StraightTrack extends Trajectory{
                     double YtrackIntersSurf = BMTIntersections[l][h][1];
                     double ZtrackIntersSurf = BMTIntersections[l][h][2];
                     //int SectorTrackIntersSurf = bmt_geo.isInSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf), Math.toRadians(BMTConstants.ISINSECTORJITTER));
-                    int SectorTrackIntersSurf = Constants.BMTGEOMETRY.getSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf));
+                    int SectorTrackIntersSurf = Constants.getInstance().BMTGEOMETRY.getSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf));
                     double PhiTrackIntersSurf = BMTIntersections[l][h][3];
                     double ThetaTrackIntersSurf = BMTIntersections[l][h][4];
                     double trkToMPlnAngl = BMTIntersections[l][h][5];

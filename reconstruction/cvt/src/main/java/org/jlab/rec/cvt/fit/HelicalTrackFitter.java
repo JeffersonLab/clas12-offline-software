@@ -195,11 +195,6 @@ public class HelicalTrackFitter {
         fit_covmatrix[4][4] = _linefitpars.slopeErr() * _linefitpars.slopeErr();
         fit_covmatrix[3][4] = _linefitpars.slopeIntercCov();
         fit_covmatrix[4][3] = _linefitpars.slopeIntercCov();
-        for(int i = 0; i<5; i++) {
-            for(int j = 0; j<5; j++) {
-                fit_covmatrix[i][j]*=Constants.COVMATSCALEFACT[i][j];
-            }
-        }
         
         if(fit_curvature==0) {
             return FitStatus.CircleFitFailed;

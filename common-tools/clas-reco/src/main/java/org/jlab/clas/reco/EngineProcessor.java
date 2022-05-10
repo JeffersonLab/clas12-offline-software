@@ -79,9 +79,9 @@ public class EngineProcessor {
             "MAGFIELDS",
             "FTCAL", "FTHODO", "FTEB",
             "DCCR","DCHB","FTOFHB","EC",
-            "CVT","CTOF","CND","BAND",
+            "CVTFP","CTOF","CND","BAND",
             "HTCC","LTCC","EBHB",
-            "DCTB","FMT","FTOFTB","EBTB",
+            "DCTB","FMT","FTOFTB","CVT","EBTB",
             "RICHEB","RTPC", "MC"
         };
 
@@ -105,6 +105,7 @@ public class EngineProcessor {
             "org.jlab.service.dc.DCTBEngine",
             "org.jlab.service.fmt.FMTEngine",
             "org.jlab.service.ftof.FTOFTBEngine",
+            "org.jlab.rec.cvt.services.CVTSecondPassEngine",
             "org.jlab.service.eb.EBTBEngine",
             "org.jlab.rec.rich.RICHEBEngine",
             "org.jlab.service.rtpc.RTPCEngine",
@@ -253,7 +254,7 @@ public class EngineProcessor {
     }
 
     public void processFile(String file, String output){
-        this.processFile(file, output, -1);
+        this.processFile(file, output, -1, -1);
     }
 
     /**
@@ -262,7 +263,7 @@ public class EngineProcessor {
      * @param output
      * @param nevents
      */
-    public void processFile(String file, String output, int nevents){
+    public void processFile(String file, String output, int nskip, int nevents){
         if(file.endsWith(".hipo")==true){
             HipoDataSource reader = new HipoDataSource();
             reader.open(file);
@@ -272,11 +273,15 @@ public class EngineProcessor {
             writer.setCompressionType(2);
             writer.open(output);
 
+            if(nskip>0 && nevents>0) nevents += nskip;
+            
             ProgressPrintout  progress = new ProgressPrintout();
             while(reader.hasEvent()==true){
                 DataEvent event = reader.getNextEvent();
-                processEvent(event);
-                writer.writeEvent(event);
+                if(nskip<=0 || eventCounter>nskip) {
+                    processEvent(event);
+                    writer.writeEvent(event);
+                }
                 eventCounter++;
                 if(nevents>0){
                     if(eventCounter>nevents) break;
@@ -305,6 +310,7 @@ public class EngineProcessor {
         parser.addRequired("-i","input.hipo");
         parser.setRequiresInputList(false);
         parser.addOption("-c","0","use default configuration [0 - no, 1 - yes/default, 2 - all services] ");
+        parser.addOption("-s","-1","number of events to skip");
         parser.addOption("-n","-1","number of events to process");
         parser.addOption("-y","0","yaml file");
         parser.addOption("-d","1","Debug level [0 - OFF, 1 - ON/default]");
@@ -327,6 +333,7 @@ public class EngineProcessor {
 
             EngineProcessor proc = new EngineProcessor();
             int config  = parser.getOption("-c").intValue();
+            int nskip   = parser.getOption("-s").intValue();
             int nevents = parser.getOption("-n").intValue();
             String yamlFileName = parser.getOption("-y").stringValue();
 
@@ -372,7 +379,7 @@ public class EngineProcessor {
                     proc.addEngine(engine);
                 }
             }
-            proc.processFile(inputFile,outputFile,nevents);
+            proc.processFile(inputFile,outputFile,nskip,nevents);
         }
     }
 }

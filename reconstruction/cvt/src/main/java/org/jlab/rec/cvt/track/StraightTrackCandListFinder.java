@@ -201,7 +201,7 @@ public class StraightTrackCandListFinder {
                 crossesToFitWithBMT.clear();
                 SVTmatches.clear();
                 for (Cross c : cand) { 
-                    if (c.getDetector()==DetectorType.BST && Constants.SVTGEOMETRY.isInFiducial(c.getRegion()*2-1, c.getSector(), c.getPoint())) {
+                    if (c.getDetector()==DetectorType.BST && Constants.getInstance().SVTGEOMETRY.isInFiducial(c.getRegion()*2-1, c.getSector(), c.getPoint())) {
                         SVTmatches.add(c);
                     }
                 }
@@ -235,9 +235,10 @@ public class StraightTrackCandListFinder {
                     cand = new StraightTrack(fitTrk.getray()); 
                     cand.addAll(crossesToFitWithBMT);
                     cand.updateCrosses();
-                    cand.setndf(NewMeasArrays._Y.size() + NewMeasArrays._Y_prime.size() - 4);
+                    cand.setNDF(NewMeasArrays._Y.size() + NewMeasArrays._Y_prime.size() - 4);
+                    cand.setCovMat(fitTrk.getray().getCovMat());
                     double chi2 = cand.calcStraightTrkChi2(); 
-                    cand.setchi2(chi2);
+                    cand.setChi2(chi2);
                     cand.setId(cands.size() + 1);
                     String crossNbs = "";
                     for(int ic = 0; ic < cand.size(); ic++)
@@ -412,13 +413,13 @@ public class StraightTrackCandListFinder {
             int region = iregion + 1;
             
             // match Z crosses
-            List<Cross> zCross = this.matchTrackToBMT(Constants.BMTGEOMETRY.getLayer(region, BMTType.Z), thecand.getRay(), bmtCrosses, 
-                                                Constants.COSMICSMINRESIDUALX/Constants.BMTGEOMETRY.getRadiusMidDrift(Constants.BMTGEOMETRY.getLayer(region, BMTType.Z)));
+            List<Cross> zCross = this.matchTrackToBMT(Constants.getInstance().BMTGEOMETRY.getLayer(region, BMTType.Z), thecand.getRay(), bmtCrosses, 
+                                 Constants.COSMICSMINRESIDUALX/Constants.getInstance().BMTGEOMETRY.getRadiusMidDrift(Constants.getInstance().BMTGEOMETRY.getLayer(region, BMTType.Z)));
             if(zCross!=null) 
                 BMTCrossList.addAll(zCross);
             
             // match Z crosses
-            List<Cross> cCross = this.matchTrackToBMT(Constants.BMTGEOMETRY.getLayer(region, BMTType.C), thecand.getRay(), bmtCrosses, Constants.COSMICSMINRESIDUALZ);
+            List<Cross> cCross = this.matchTrackToBMT(Constants.getInstance().BMTGEOMETRY.getLayer(region, BMTType.C), thecand.getRay(), bmtCrosses, Constants.getInstance().COSMICSMINRESIDUALZ);
             if(cCross!=null) 
                 BMTCrossList.addAll(cCross);
         } 
@@ -429,11 +430,11 @@ public class StraightTrackCandListFinder {
         
         List<Cross> matched = new ArrayList<>();
         
-        for(int is=0; is<Constants.BMTGEOMETRY.getNSectors(); is++) {
+        for(int is=0; is<Constants.getInstance().BMTGEOMETRY.getNSectors(); is++) {
             // get ray intersection with cross tile
             int sector = is+1;
             List<Point3D> trajs = new ArrayList<>();
-            int ntrajs = Constants.BMTGEOMETRY.getTileSurface(layer, sector).intersection(ray.toLine(), trajs);
+            int ntrajs = Constants.getInstance().BMTGEOMETRY.getTileSurface(layer, sector).intersection(ray.toLine(), trajs);
             if(ntrajs==0) continue;
             
             // find the closests cross-trajectory match
@@ -484,7 +485,7 @@ public class StraightTrackCandListFinder {
                             }
                         }
                         if (overlaps > 1) {
-                            if ((cands.get(k2).getchi2()) > (cands.get(k).getchi2())) {
+                            if ((cands.get(k2).getChi2()) > (cands.get(k).getChi2())) {
 
                                 cands.get(k2).setId(-999);
 
@@ -513,15 +514,15 @@ public class StraightTrackCandListFinder {
             int sector = c.getSector();
             
             Point3D traj = new Point3D();
-            int ntraj = Constants.SVTGEOMETRY.getPlane(layer, sector).intersection(track.getray().toLine(), traj);
+            int ntraj = Constants.getInstance().SVTGEOMETRY.getPlane(layer, sector).intersection(track.getray().toLine(), traj);
             
             if(ntraj!=1) 
                 c.reset();
-            else if(!Constants.SVTGEOMETRY.isInFiducial(layer, sector, traj)) 
+            else if(!Constants.getInstance().SVTGEOMETRY.isInFiducial(layer, sector, traj)) 
                 c.reset();
             else {
-                Vector3D distance = Constants.SVTGEOMETRY.toLocal(layer, sector, c.getPoint().vectorTo(traj));
-                if(Math.abs(distance.x())>Constants.COSMICSMINRESIDUALX ||
+                Vector3D distance = Constants.getInstance().SVTGEOMETRY.toLocal(layer, sector, c.getPoint().vectorTo(traj));
+                if(Math.abs(distance.x())>Constants.getInstance().COSMICSMINRESIDUALX ||
                    Math.abs(distance.z())>Constants.COSMICSMINRESIDUALZ) c.reset();
                 else
                     toKeep.add(c);
