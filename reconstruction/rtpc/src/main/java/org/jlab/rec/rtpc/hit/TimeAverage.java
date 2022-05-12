@@ -2,7 +2,7 @@
 
 /* This code takes the tracks from the Track Finder, and reduces the signals in the track to single
  * values in time by taking a weighted average of the signal using the ADC value as the weight
- * The end result is the same tracks but with hits which now have non-discritized times (not in 
+ * The end result is the same tracks but with hits which now have non-discritized times (not in
  * 120 ns slices) This is useful for the disentangler to split merged tracks
  */
 
@@ -19,28 +19,28 @@ import org.jlab.utils.groups.IndexedTable;
 
 
 public class TimeAverage {
-	
+    
     private ReducedTrackMap RTIDMap = new ReducedTrackMap();
-    private ReducedTrack rtrack; 
+    private ReducedTrack rtrack;
     private TrackMap TIDMap;
-    private ADCMap ADCMap;		
+    private ADCMap ADCMap;
     private List<Integer> tids;
-    private Track track; 
-    private double adc = 0; 
-    private double adcmax = 0; 
-    private double averagetime = 0; 
-    private double adcthresh = 0; 
-    private double sumnum = 0; 
-    private double sumden = 0; 
+    private Track track;
+    private double adc = 0;
+    private double adcmax = 0;
+    private double averagetime = 0;
+    private double adcthresh = 0;
+    private double sumnum = 0;
+    private double sumden = 0;
     private double gain = 1;
     private int row = 0;
     private int col = 0;
-    private double TFtotaltracktimeflag = 5000;
-            
+    private double TFtotaltracktimeflag = 3700; //NEW SEK: lowered value from 5000 - max drift time = 3458 ns
+    // In principle it's bad to have this hardwired, but for now we leave it...
     
     public TimeAverage(ConstantsManager manager, HitParameters params, int runNo) {
-        /*	
-         *Initializations 
+        /*
+         *Initializations
          */
         TIDMap = params.get_trackmap();
         ADCMap = params.get_ADCMap();
@@ -61,21 +61,21 @@ public class TimeAverage {
             Set<Integer> timesbypad = new HashSet<>();
             for(int pad : l) {
                 //g.add(new GraphErrors());
-                adcmax = 0; 
-                sumnum = 0; 
-                sumden = 0; 
+                adcmax = 0;
+                sumnum = 0;
+                sumden = 0;
                 timesbypad = track.PadTimeList(pad);
                 for(int time : timesbypad) { //Loop to calculate maximum adc value
-                    adc = ADCMap.getADC(pad,time);                 
+                    adc = ADCMap.getADC(pad,time);
                     if(adc > adcmax) {
-                        adcmax = adc; 
+                        adcmax = adc;
                     }
                 }
                 
                 adcthresh = adcmax/4;
                 for(int time : timesbypad) { //Loop to calculate weighted average time using ADC values which are above half of the maximum
                     adc = ADCMap.getADC(pad,time);
-                    if(adc > adcthresh) { 
+                    if(adc > adcthresh) {
                         sumnum += adc*time;
                         sumden += adc;
                     }
@@ -85,20 +85,20 @@ public class TimeAverage {
                 
                 gain = gains.getDoubleValue("gain", 1,(int)p.row(),(int)p.col());
                 //System.out.println("gain" + (int)p.col() + " " + (int)p.row() + " " + gain);
-                gain *= params.get_globalgain();
                 if(gain == 0) gain = 1;
+                gain *= params.get_globalgain();
                 HitVector v = new HitVector(pad,p.z(),p.phi(),averagetime,sumden/gain);
                 rtrack.addHit(v);
             }
             rtrack.sortHits();
-            if(Math.abs(rtrack.getLargeT()-rtrack.getSmallT()) < TFtotaltracktimeflag) rtrack.flagTrack();
-            RTIDMap.addTrack(rtrack);			
+            if(Math.abs(rtrack.getLargeT()-rtrack.getSmallT()) > TFtotaltracktimeflag)  rtrack.flagTrack(); //???NEW SEK: This used to be a "<" sign - seems wrong!!!
+            RTIDMap.addTrack(rtrack);
         }
 
         /*
          * Output
          */
 
-        params.set_rtrackmap(RTIDMap);		
+        params.set_rtrackmap(RTIDMap);
     }
 }
