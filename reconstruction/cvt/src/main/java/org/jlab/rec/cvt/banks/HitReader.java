@@ -1,6 +1,7 @@
 package org.jlab.rec.cvt.banks;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,13 +76,11 @@ public class HitReader {
      * Gets the BMT hits from the BMT dgtz bank
      *
      * @param event the data event
-     * @param adcConv converter from adc to values used in the analysis (i.e.
-     * Edep for gemc, adc for cosmics)
      * @param swim
      * @param status
      * @param timeCuts
      */
-    public void fetch_BMTHits(DataEvent event, ADCConvertor adcConv, Swim swim, IndexedTable status, IndexedTable timeCuts) {
+    public void fetch_BMTHits(DataEvent event, Swim swim, IndexedTable status, IndexedTable timeCuts) {
 
         // return if there is no BMT bank
         if (event.hasBank("BMT::adc") == false) {
@@ -122,7 +121,7 @@ public class HitReader {
                 // create the strip object for the BMT
                 Strip BmtStrip = new Strip(strip, ADCtoEdep, time);
                 BmtStrip.setStatus(status.getIntValue("status", sector, layer, strip));
-                if(Constants.TIMECUTS) {
+                if(Constants.getInstance().timeCuts) {
                     if(time!=0 && (time<tmin || time>tmax))
                         BmtStrip.setStatus(2);// calculate the strip parameters for the BMT hit
                 }
@@ -132,10 +131,11 @@ public class HitReader {
                 Hit hit = new Hit(DetectorType.BMT, BMTGeometry.getDetectorType(layer), sector, layer, BmtStrip);                
                 hit.setId(i+1);
                 // add this hit
-                if(hit.getLayer()+3!=Constants.getRmReg())
+                if(hit.getLayer()+3!=Constants.getInstance().getRmReg())
                     hits.add(hit);
             }
             // fills the list of BMT hits
+            Collections.sort(hits);
             this.setBMTHits(hits);
         }
     }
@@ -144,12 +144,11 @@ public class HitReader {
      * Gets the SVT hits from the BMT dgtz bank
      *
      * @param event the data event
-     * @param adcConv converter from adc to daq values
      * @param omitLayer
      * @param omitHemisphere
      * @param status
      */
-    public void fetch_SVTHits(DataEvent event, ADCConvertor adcConv, int omitLayer, int omitHemisphere, IndexedTable status) {
+    public void fetch_SVTHits(DataEvent event, int omitLayer, int omitHemisphere, IndexedTable status) {
 
         if (event.hasBank("BST::adc") == false) {
             //System.err.println("there is no BST bank ");
@@ -239,17 +238,17 @@ public class HitReader {
                 //if(adcConv.SVTADCtoDAQ(ADC[i], event)<50)
                 //    continue;
                 // create the strip object with the adc value converted to daq value used for cluster-centroid estimate
-                Strip SvtStrip = new Strip(strip, adcConv.SVTADCtoDAQ(ADC), time); 
+                Strip SvtStrip = new Strip(strip, ADCConvertor.SVTADCtoDAQ(ADC), time); 
                 SvtStrip.setPitch(SVTGeometry.getPitch());
                 // get the strip line
-                SvtStrip.setLine(Constants.SVTGEOMETRY.getStrip(layer, sector, strip));
-                SvtStrip.setModule(Constants.SVTGEOMETRY.getModule(layer, sector));
-                SvtStrip.setNormal(Constants.SVTGEOMETRY.getNormal(layer, sector)); 
+                SvtStrip.setLine(Constants.getInstance().SVTGEOMETRY.getStrip(layer, sector, strip));
+                SvtStrip.setModule(Constants.getInstance().SVTGEOMETRY.getModule(layer, sector));
+                SvtStrip.setNormal(Constants.getInstance().SVTGEOMETRY.getNormal(layer, sector)); 
                 // if the hit is useable in the analysis its status is =0
                 if (SvtStrip.getEdep() == 0) {
                     SvtStrip.setStatus(1);
                 }
-//                if (Constants.TIMECUTS) {
+//                if (Constants.getInstance().timeCuts) {
 //                    if(time > 0 && (time < 150 || time > 350)) {
 //                        SvtStrip.setStatus(2);// calculate the strip parameters for the BMT hit
 //                    }
@@ -277,11 +276,12 @@ public class HitReader {
                 Hit hit = new Hit(DetectorType.BST, BMTType.UNDEFINED, sector, layer, SvtStrip);
                 hit.setId(id);
                 // add this hit
-                if(hit.getRegion()!=Constants.getRmReg())      
+                if(hit.getRegion()!=Constants.getInstance().getRmReg())      
                     hits.add(hit);
             }
         }
         // fill the list of SVT hits
+        Collections.sort(hits);
         this.setSVTHits(hits);
 
     }

@@ -1,10 +1,16 @@
 package org.jlab.rec.cvt.trajectory;
 
 
+import org.jlab.clas.tracking.kalmanfilter.AKFitter.HitOnTrack;
+import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.measurement.MLayer;
 
 /**
- * A StateVec describes a cross measurement in the BST. It is characterized by a
+ * A StateVec describes a cross measurement in the CVT. It is characterized by a
  * point in the lab coordinate system at each module plane and by unit tangent
  * vectors to the track at the state-vec point.
  *
@@ -29,34 +35,52 @@ public class StateVec implements Comparable<StateVec> {
     private double _TrkToModuleAngle;
     private double _CalcCentroidStrip;
     private double _Path;
+    private double _dx;
     private double _x;
     private double _y;
     private double _z;
     private double _ux;
     private double _uy;
     private double _uz;
+    private double _p;
     
     public int getID() {
         return _ID;
     }
 
-    public void setID(int _ID) {
+    public final void setID(int _ID) {
         this._ID = _ID;
+    }
+
+    public double getP() {
+        return _p;
+    }
+
+    public final void setP(double _p) {
+        this._p = _p;
     }
 
     public double getPath() {
         return _Path;
     }
 
-    public void setPath(double _Path) {
+    public final void setPath(double _Path) {
         this._Path = _Path;
+    }
+
+    public double getDx() {
+        return _dx;
+    }
+
+    public final void setDx(double _dx) {
+        this._dx = _dx;
     }
 
     public int getSurfaceDetector() {
         return _SurfaceDetector;
     }
 
-    public void setSurfaceDetector(int _SurfaceDetector) {
+    public final void setSurfaceDetector(int _SurfaceDetector) {
         this._SurfaceDetector = _SurfaceDetector;
     }
 
@@ -64,7 +88,7 @@ public class StateVec implements Comparable<StateVec> {
         return _SurfaceLayer;
     }
 
-    public void setSurfaceLayer(int _SurfaceLayer) {
+    public final void setSurfaceLayer(int _SurfaceLayer) {
         this._SurfaceLayer = _SurfaceLayer;
     }
 
@@ -72,7 +96,7 @@ public class StateVec implements Comparable<StateVec> {
         return _SurfaceSector;
     }
 
-    public void setSurfaceSector(int _SurfaceSector) {
+    public final void setSurfaceSector(int _SurfaceSector) {
         this._SurfaceSector = _SurfaceSector;
     }
 
@@ -93,7 +117,7 @@ public class StateVec implements Comparable<StateVec> {
         this._SurfaceComponent = _SurfaceComponent;
     }
     
-    public void setTrkPhiAtSurface(double _TrkPhiAtSurface) {
+    public final void setTrkPhiAtSurface(double _TrkPhiAtSurface) {
         this._TrkPhiAtSurface = _TrkPhiAtSurface;
     }
 
@@ -101,7 +125,7 @@ public class StateVec implements Comparable<StateVec> {
         return _TrkThetaAtSurface;
     }
 
-    public void setTrkThetaAtSurface(double _TrkThetaAtSurface) {
+    public final void setTrkThetaAtSurface(double _TrkThetaAtSurface) {
         this._TrkThetaAtSurface = _TrkThetaAtSurface;
     }
 
@@ -172,7 +196,7 @@ public class StateVec implements Comparable<StateVec> {
      * @param uy the y-component of the tangent to the helix at point (x,y,z)
      * @param uz the z-component of the tangent to the helix at point (x,y,z)
      */
-    public void set(double x, double y, double z, double ux, double uy, double uz) {
+    public final void set(double x, double y, double z, double ux, double uy, double uz) {
         _x=x;
         _y=y;
         _z=z;
@@ -204,7 +228,34 @@ public class StateVec implements Comparable<StateVec> {
         set(v._x, v._y, v._z, v._ux, v._uy, v._uz); 
     }
 
-    
+    public StateVec(int id, HitOnTrack traj, DetectorType type) {
+        Vector3D mom = new Vector3D(traj.px, traj.py, traj.pz);
+        Vector3D dir = mom.asUnit(); 
+        set(traj.x, traj.y, traj.z, dir.x(), dir.y(), dir.z());
+        this.setSurfaceDetector(type.getDetectorId());
+        this.setSurfaceLayer(traj.layer);
+        this.setSurfaceSector(traj.sector);
+        this.setP(mom.mag());
+        this.setTrkPhiAtSurface(mom.phi());
+        this.setTrkThetaAtSurface(mom.theta());
+        this.setPath(traj.path);
+        this.setDx(traj.dx);
+        this.setID(id);
+    }
+
+    public StateVec(int id, Point3D pos, Vector3D mom, Surface surface, double path) {
+        Vector3D dir = mom.asUnit();
+        set(pos.x(), pos.y(), pos.z(), dir.x(), dir.y(), dir.z());
+        this.setSurfaceDetector(surface.getIndex());
+        this.setSurfaceLayer(surface.getLayer());
+        this.setSurfaceSector(surface.getSector());
+        this.setP(mom.mag());
+        this.setTrkPhiAtSurface(mom.phi());
+        this.setTrkThetaAtSurface(mom.theta());
+        this.setPath(path);
+        this.setDx(surface.getDx(mom));
+        this.setID(id);
+    }
 
     /**
      * Description of x().
@@ -264,13 +315,13 @@ public class StateVec implements Comparable<StateVec> {
     public int compareTo(StateVec arg) {
 
         int return_val = 0;
-        if (Constants.ISCOSMICDATA == false) {
+        if (Constants.getInstance().isCosmics == false) {
             int RegComp = this.getSurfaceLayer() < arg.getSurfaceLayer() ? -1 : this.getSurfaceLayer() == arg.getSurfaceLayer() ? 0 : 1;
             int IDComp = this.getID() < arg.getID() ? -1 : this.getID() == arg.getID() ? 0 : 1;
 
             return_val = ((RegComp == 0) ? IDComp : RegComp);
         }
-        if (Constants.ISCOSMICDATA == true) {
+        if (Constants.getInstance().isCosmics == true) {
             int RegComp = this.y() < arg.y() ? -1 : this.y() == arg.y() ? 0 : 1;
             int IDComp = this.getID() < arg.getID() ? -1 : this.getID() == arg.getID() ? 0 : 1;
 
@@ -280,4 +331,11 @@ public class StateVec implements Comparable<StateVec> {
         return return_val;
     }
 
+    @Override
+    public String toString() {
+        String s = String.format("id=%d \t detector=%d \t layer=%d \t sector=%d \t ", this._ID, this._SurfaceDetector, this._SurfaceLayer, this._SurfaceSector);
+        s += String.format("pos=(%.3f, %.3f, %.3f) \t dir=(%.3f, %.3f, %.3f) \t ", this._x, this._y, this._z, this._ux, this._uy, this._uz);
+        s += String.format("phi=%.3f \t theta=%.3f \t langle=%.3f \t path=%.3f \t dx=%.3f", this._TrkPhiAtSurface, this._TrkThetaAtSurface, this._TrkToModuleAngle, this._Path, this._dx);
+        return s;
+    }
 }

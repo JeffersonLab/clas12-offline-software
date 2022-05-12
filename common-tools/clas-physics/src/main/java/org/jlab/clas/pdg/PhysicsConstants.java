@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package org.jlab.clas.pdg;
 
 /**
@@ -26,6 +20,10 @@ public class PhysicsConstants {
     
     public static double massElectron(){
         return 0.000511;
+    }
+    
+    public static double massMuon() {
+        return 0.1056583755;
     }
     
     public static double massPionCharged(){

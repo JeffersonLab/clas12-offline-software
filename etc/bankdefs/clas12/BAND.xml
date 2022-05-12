@@ -1,0 +1,47 @@
+<evio_dictionary>
+    <bank name="BAND" tag="2100" info="Simulated BAND Hit Information">
+        <section name = "true" tag = "2101" num = "0" info = "Digitized information">
+            <column name="pid"     num="1"  type="int32"   info="ID of the first particle entering the sensitive volume"/>
+            <column name="mpid"    num="2"  type="int32"   info="ID of the mother of the first particle entering the sensitive volume"/>
+            <column name="tid"     num="3"  type="int32"   info="Track ID of the first particle entering the sensitive volume"/>
+            <column name="mtid"    num="4"  type="int32"   info="Track ID of the mother of the first particle entering the sensitive volume"/>
+            <column name="otid"    num="5"  type="int32"   info="Track ID of the original track that generated the first particle entering the sensitive volume"/>
+            <column name="trackE"  num="6"  type="float64" info="Energy of the track"/>
+            <column name="totEdep" num="7"  type="float64" info="Total Energy Deposited"/>
+            <column name="avgX"    num="8"  type="float64" info="Average X position in global reference system"/>
+            <column name="avgY"    num="9"  type="float64" info="Average Y position in global reference system"/>
+            <column name="avgZ"    num="10" type="float64" info="Average Z position in global reference system"/>
+            <column name="avgLx"   num="11" type="float64" info="Average X position in local reference system"/>
+            <column name="avgLy"   num="12" type="float64" info="Average Y position in local reference system"/>
+            <column name="avgLz"   num="13" type="float64" info="Average Z position in local reference system"/>
+            <column name="px"      num="14" type="float64" info="x component of momentum of the particle entering the sensitive volume"/>
+            <column name="py"      num="15" type="float64" info="y component of momentum of the particle entering the sensitive volume"/>
+            <column name="pz"      num="16" type="float64" info="z component of momentum of the particle entering the sensitive volume"/>
+            <column name="vx"      num="17" type="float64" info="x component of primary vertex of the particle entering the sensitive volume"/>
+            <column name="vy"      num="18" type="float64" info="y component of primary vertex of the particle entering the sensitive volume"/>
+            <column name="vz"      num="19" type="float64" info="z component of primary vertex of the particle entering the sensitive volume"/>
+            <column name="mvx"     num="20" type="float64" info="x component of primary vertex of the mother of the particle entering the sensitive volume"/>
+            <column name="mvy"     num="21" type="float64" info="y component of primary vertex of the mother of the particle entering the sensitive volume"/>
+            <column name="mvz"     num="22" type="float64" info="z component of primary vertex of the mother of the particle entering the sensitive volume"/>
+            <column name="avgT"    num="23" type="float64" info="Average time"/>
+            <column name="nsteps"  num="24" type="int32"   info="Number of steps"/>
+            <column name="procID"  num="25" type="int32"   info="Process ID"/>
+            <column name="hitn"    num="99" type="int32"   info="Hit1 Number"/>
+        </section>
+        <section name = "dgtz" tag = "2102" num = "0" info = "True Values">
+            <column name = "sector"    num = "1"  type = "int32"  info = "sector number"/>
+            <column name = "layer"     num = "2"  type = "int32"  info = "layer number (1-6)"/>
+	    <column name = "component" num = "3"  type = "int32"  info = "component number"/>
+
+            <column name = "ADCL"       num = "4"  type = "int32"  info = "ADC"/>
+            <column name = "amplitudeL" num = "5"  type = "int32"  info = "ADC amplitude"/>
+            <column name = "ADCtimeL"   num = "6"  type = "float64"  info = "time from ADC"/>
+            <column name = "TDCL"       num = "7"  type = "int32"  info = "TDC"/>
+            <column name = "ADCR"       num = "8"  type = "int32"  info = "ADC"/>
+            <column name = "amplitudeR" num = "9"  type = "int32"  info = "ADC amplitude"/>
+            <column name = "ADCtimeR"   num = "10"  type = "float64"  info = "time from ADC"/>
+            <column name = "TDCR"       num = "11"  type = "int32"  info = "TDC"/>
+            <column name = "hitn"      num = "99" type = "int32"  info = "hit number"/>
+        </section>
+    </bank>
+</evio_dictionary>

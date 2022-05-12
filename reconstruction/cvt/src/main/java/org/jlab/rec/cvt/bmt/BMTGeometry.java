@@ -16,6 +16,7 @@ import static org.jlab.rec.cvt.bmt.BMTConstants.E_DRIFT_MF;
 import static org.jlab.rec.cvt.bmt.Lorentz.getLorentzAngle;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.clas.tracking.kalmanfilter.Units;
 import org.jlab.clas.tracking.objects.Strip;
 import org.jlab.geom.prim.Transformation3D;
 import org.jlab.groot.data.H1F;
@@ -37,6 +38,11 @@ public class BMTGeometry {
     private final static double udf      = -9999; // mm
     public final static int NLAYERS = 6;
     public final static int NSECTORS = 3;
+    public static final int NPASSIVE = 2;
+
+    private final static double[] INNERTUBEDIM = {140, 141, 366, 4}; // inner radius, outer radius, halflength, offset}
+    private final static double[] OUTERTUBEDIM = {234, 235, 372, 5}; // inner radius, outer radius, halflength, offset}
+    private final static double[] TUBEMAT = {1.75E-3, 0.51342, 250.0, 78}; // density, Z/A, X0, I
     /**
      * Handles BMT geometry
      */
@@ -70,6 +76,20 @@ public class BMTGeometry {
         else {
                 return lC[ region - 1 ];
         }
+    }
+
+    /**
+     * @return the lZ
+     */
+    public static int[] getlZ() {
+        return lZ;
+    }
+
+    /**
+     * @return the lC
+     */
+    public static int[] getlC() {
+        return lC;
     }
 
     /**
@@ -273,43 +293,7 @@ public class BMTGeometry {
     public double getThickness() {
         
         return BMTConstants.HDRIFT;
-    }
-    
-    /**
-     * Return material thickness in units of X0
-     * @param layer
-     * @return thickness in units of radiation lengths  
-     */
-    public double getToverX0(int layer) {
-       if(!(layer>=1 && layer<=BMTConstants.NLAYERS)) 
-            throw new IllegalArgumentException("Error: invalid layer="+layer);
-       
-       return BMTConstants.getT_OVER_X0()[layer-1];
-     }
-    
-    /**
-     * Return material thickness
-     * @param layer
-     * @return thickness in mm
-     */
-    public double getMaterialThickness(int layer) {
-       if(!(layer>=1 && layer<=BMTConstants.NLAYERS)) 
-            throw new IllegalArgumentException("Error: invalid layer="+layer);
-       
-       return BMTConstants.getMaterial_T()[layer-1];
-     }
-    
-    /**
-     * Return effective Z/A
-     * @param layer
-     * @return Z over A 
-     */
-    public double getZoverA(int layer) {
-       if(!(layer>=1 && layer<=BMTConstants.NLAYERS)) 
-            throw new IllegalArgumentException("Error: invalid layer="+layer);
-       
-       return BMTConstants.getEFF_Z_OVER_A()[layer-1];
-     }    
+    }    
     
     /**
      * Return offset of the selected tile, identified by layer and sector
@@ -743,7 +727,7 @@ public class BMTGeometry {
      */
     private int getStripLocal(int layer, Point3D traj) {
         
-        BMTType type = this.getDetectorType(layer);
+        BMTType type = BMTGeometry.getDetectorType(layer);
         int region = this.getRegion(layer);
         switch (type) {
             case C:
@@ -884,7 +868,11 @@ public class BMTGeometry {
      * Return track vector for local angle calculations
      * 
      * 1) transform to the geometry service local frame first,
-     * 2) rotates to bring the track intersection at phi=0.
+     * 2) rotates to bring the track intersection at phi=90.
+     * 
+     * The final frame has:
+     * - z along the axis of the tile cylinder
+     * - y perpendicular to the surface
      * 
      * The y and x components determine the local angle for Z strips
      * The x and z components determine the local angle for C strips
@@ -894,13 +882,13 @@ public class BMTGeometry {
      * @param trackDir
      * @return track direction unit vector
     **/
-    private Vector3D getLocalTrack(int layer, int sector, Point3D trackPos, Vector3D trackDir) {               
+    public Vector3D getLocalTrack(int layer, int sector, Point3D trackPos, Vector3D trackDir) {               
         Vector3D dir = new Vector3D(trackDir).asUnit();
         Point3D  pos = new Point3D(trackPos);
         this.toLocal(layer, sector).apply(dir);
         this.toLocal(layer, sector).apply(pos);
         Vector3D n = pos.toVector3D().asUnit();
-        dir.rotateZ(-n.phi());
+        dir.rotateZ(-n.phi()+Math.PI/2);
         return dir;
     }
     
@@ -909,13 +897,13 @@ public class BMTGeometry {
      * the angle is positive for tracks going toward positive phi
      * @param layer
      * @param sector
-     * @param trakPos
+     * @param trackPos
      * @param trackDir
      * @return local angle
      */
-    public double getThetaZ(int layer, int sector, Point3D trakPos, Vector3D trackDir) { 
-        Vector3D dir = this.getLocalTrack(layer, sector, trakPos, trackDir);
-        return Math.atan(dir.y()/dir.x());
+    public double getThetaZ(int layer, int sector, Point3D trackPos, Vector3D trackDir) { 
+        Vector3D dir = this.getLocalTrack(layer, sector, trackPos, trackDir);
+        return Math.atan(dir.x()/dir.y());
     }
     
     /**
@@ -923,13 +911,20 @@ public class BMTGeometry {
      * the angle is positive for tracks going at positive z
      * @param layer
      * @param sector
-     * @param trakPos
+     * @param trackPos
      * @param trackDir
      * @return local angle
      */
-    public double getThetaC(int layer, int sector, Point3D trakPos, Vector3D trackDir) { 
-        Vector3D dir = this.getLocalTrack(layer, sector, trakPos, trackDir);
-        return Math.atan(dir.z()/dir.x());
+    public double getThetaC(int layer, int sector, Point3D trackPos, Vector3D trackDir) { 
+        Vector3D dir = this.getLocalTrack(layer, sector, trackPos, trackDir);
+        return Math.atan(dir.z()/dir.y());
+    }
+    
+    public double getLocalAngle(int layer, int sector,  Point3D trackPos, Vector3D trackDir) {
+        if(getDetectorType(layer) == BMTType.C)
+            return this.getThetaC(layer, sector, trackPos, trackDir);
+        else 
+            return this.getThetaZ(layer, sector, trackPos, trackDir);
     }
     
     public List<Surface> getSurfaces() {
@@ -960,14 +955,40 @@ public class BMTGeometry {
         surface.setSector(sector);
         surface.setTransformation(this.toGlobal(layer, sector));
         surface.setError(0); 
-        surface.setl_over_X0(this.getToverX0(layer));
-        surface.setZ_over_A_times_l(this.getZoverA(layer));
-        surface.setThickness(this.getMaterialThickness(layer));
-        surface.notUsedInFit=false;
+        for(String key : BMTConstants.getMaterials().keySet()) {
+            double[] p = BMTConstants.getMaterials().get(key);
+            surface.addMaterial(key, p[0], p[1], p[2], p[3], p[4], Units.MM);
+        }
+        surface.passive=false;
         return surface;
     }
     
-
+    public Surface getInnerTube() {
+        Point3D origin = new Point3D(INNERTUBEDIM[0], 0, INNERTUBEDIM[3]-INNERTUBEDIM[2]);
+        Point3D  center = new Point3D(0,0,INNERTUBEDIM[3]-INNERTUBEDIM[2]);
+        Vector3D axis   = new Vector3D(0,0,1);
+        Arc3D base = new Arc3D(origin, center, axis, 2*Math.PI);
+        Cylindrical3D tube = new Cylindrical3D(base, 2*INNERTUBEDIM[2]);
+        Surface surface = new Surface(tube, new Strip(0,0,0), Constants.DEFAULTSWIMACC);
+        surface.addMaterial("CarbonFiber", INNERTUBEDIM[1]-INNERTUBEDIM[0],
+                            TUBEMAT[0], TUBEMAT[1], TUBEMAT[2], TUBEMAT[3], Units.MM);
+        surface.passive=true;
+        return surface;
+    }
+    
+    public Surface getOuterTube() {
+        Point3D origin = new Point3D(OUTERTUBEDIM[0], 0, OUTERTUBEDIM[3]-OUTERTUBEDIM[2]);
+        Point3D  center = new Point3D(0,0,OUTERTUBEDIM[3]-OUTERTUBEDIM[2]);
+        Vector3D axis   = new Vector3D(0,0,1);
+        Arc3D base = new Arc3D(origin, center, axis, 2*Math.PI);
+        Cylindrical3D tube = new Cylindrical3D(base, 2*OUTERTUBEDIM[2]);
+        Surface surface = new Surface(tube, new Strip(0,0,0), Constants.DEFAULTSWIMACC);
+        surface.addMaterial("CarbonFiber", OUTERTUBEDIM[1]-OUTERTUBEDIM[0],
+                            TUBEMAT[0], TUBEMAT[1], TUBEMAT[2], TUBEMAT[3], Units.MM);
+        surface.passive=true;
+        return surface;
+    }
+    
     /**
      * Executable method: implements checks
      * @param arg
