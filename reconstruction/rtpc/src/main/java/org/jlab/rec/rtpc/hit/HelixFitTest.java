@@ -13,6 +13,7 @@ import org.jlab.clas.physics.Vector3;
 /**
  *
  * @author davidpayette
+ * Edited by M. Hattawy in 2022
  */
 public class HelixFitTest {
     private double chi2termthreshold = 20;
@@ -44,24 +45,27 @@ public class HelixFitTest {
     }
     private double phichi2(double phi0, double r, double R){
         double rterm = r/(2*R);
-	    if(Math.abs(r) > (2 * Math.abs(R))) rterm = 1; 
+	    //if(Math.abs(r) > (2 * Math.abs(R))) rterm = 1; 
+            if(Math.abs(r) > (2 * Math.abs(R))) rterm /= Math.abs(rterm); 
 	    return Math.toRadians(phi0) - Math.asin(rterm);
     }
     private double zchi2(double z0, double theta0, double r, double R){
         R = Math.abs(R);
 	    double rterm = r/(2*R);
-	    if(Math.abs(r) > (2 * Math.abs(R))) rterm = 1; 
-        return z0 + 2*R*Math.asin(rterm)/Math.tan(Math.toRadians(theta0));
+	    //if(Math.abs(r) > (2 * Math.abs(R))) rterm = 1; 
+            if(Math.abs(r) > (2 * Math.abs(R))) rterm /= Math.abs(rterm); 
+            return z0 + 2*R*Math.asin(rterm)/Math.tan(Math.toRadians(theta0));
     }
 
     private void findtrackparams(int TID, List<RecoHitVector> track, int iter){
         List<RecoHitVector> trackhitsA = new ArrayList<>();
         List<RecoHitVector> trackhitsB = new ArrayList<>();
         List<RecoHitVector> originaltrack = new ArrayList<>(track);
-        if(track.get(0).flag() > 0){
+        int counter = 0;
+        if(track.get(0).flag() > 0 ){
             for(RecoHitVector hit : track){
-                if(hit.flag() == 1) trackhitsA.add(hit);
-                else if(hit.flag() == 2) trackhitsB.add(hit);
+                 if(hit.flag() == 1 ) trackhitsA.add(hit);
+                 if(hit.flag() == 2) trackhitsB.add(hit);
             }
         }
 
@@ -74,8 +78,8 @@ public class HelixFitTest {
         boolean trackbused = false; 
         int numhitsA = 0;
         int numhitsB = 0; 
-        if(trackhitsA.size() > 0 && trackhitsB.size() > 0){
-            numhitsA = trackhitsA.size();
+        if(trackhitsA.size() > 10 ) {
+            numhitsA = (int) Math.round(0.9*trackhitsA.size());
             numhitsB = trackhitsB.size();
             szpos = new double[numhitsA][3];
             hit = 0; 
@@ -86,7 +90,7 @@ public class HelixFitTest {
             }
             ho = h.HelixFit(hit,szpos,fittobeamline);   
             ho.set_magfield(magfield);         
-            if(ho.get_Rho() > 0){ 
+            if(ho.get_Rho() > 0 && trackhitsB.size() > 10 ){ 
                 ho = new HelixFitObject();
                 szpos = new double[numhitsB][3];
                 hit = 0; 
@@ -105,7 +109,7 @@ public class HelixFitTest {
                 numhits = numhitsA;
                 track = trackhitsA;
             }
-        }else{
+          }else{
             szpos = new double[numhits][3];
             hit = 0; 
             for(hit = 0; hit < numhits; hit++){
@@ -115,7 +119,7 @@ public class HelixFitTest {
             }
             ho = h.HelixFit(hit,szpos,fittobeamline); 
             ho.set_magfield(magfield);
-        }
+              }
 
         double ADCsum = 0;
         hit = 0;
@@ -166,7 +170,8 @@ public class HelixFitTest {
             chi2zterm = (hitz - zchi2(vz,theta,hitr,R))*(hitz - zchi2(vz,theta,hitr,R))/denz;
             chi2term = chi2phiterm + chi2zterm;
             chi2 += chi2term;
-            if(chi2term > chi2termthreshold && iter == 0 && !cosmic && chi2culling) hitstoremove.add(hit); //if the hit messes up chi2 too much we are going to remove it
+            //if(chi2term > chi2termthreshold && iter == 0 && !cosmic && chi2culling) hitstoremove.add(hit); //if the hit messes up chi2 too much we are going to remove it
+             if(chi2term > chi2termthreshold && iter == 0 && !cosmic && chi2culling && track.get(hit).flag() == 0) hitstoremove.add(hit); 
         }
 
         if(hitstoremove.size() > 0 && iter == 0 && !cosmic && chi2culling){ //make a new track containing the hits leftover and fit it again

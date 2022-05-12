@@ -51,6 +51,7 @@ public class ReducedTrackMap {
 		List<HitVector> l = child.getAllHits();
 		ReducedTrack parent = getTrack(trackIDparent);
 		for(HitVector v : l) {
+                        v.flagHit(0);
 			parent.addHit(v);
 		}
 		removeTrack(trackID);
@@ -64,7 +65,7 @@ public class ReducedTrackMap {
 			v.flagHit(1);
 		}
 		for(HitVector v : l) {
-			v.flagHit(2);
+		        v.flagHit(2);
 			parent.addHit(v);			
 		}
 		removeTrack(trackID);

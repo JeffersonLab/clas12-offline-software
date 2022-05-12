@@ -101,13 +101,15 @@ public class RTPCEngine extends ReconstructionEngine{
             return true;
         }
 
-         int runNo = 10;
+        int runNo;
+        int eventNo;
         double magfield = 50.0;
         double magfieldfactor = 1;
 
         if(event.hasBank("RUN::config")==true){
             DataBank bank = event.getBank("RUN::config");
             runNo = bank.getInt("run", 0);
+            eventNo = bank.getInt("event",0);
             magfieldfactor = bank.getFloat("solenoid",0);
             if (runNo<=0) {
                 System.err.println("RTPCEngine:  got run <= 0 in RUN::config, skipping event.");
@@ -131,7 +133,7 @@ public class RTPCEngine extends ReconstructionEngine{
             //Calculate Average Time of Hit Signals
             TimeAverage TA = new TimeAverage(this.getConstantsManager(),params,runNo);
             //Disentangle Crossed Tracks
-            TrackDisentangler TD = new TrackDisentangler(params,disentangle);
+            TrackDisentangler TD = new TrackDisentangler(params,disentangle,eventNo);
             //Reconstruct Hits in Drift Region
             TrackHitReco TR = new TrackHitReco(params,hits,cosmic,magfield);
             //Helix Fit Tracks to calculate Track Parameters
