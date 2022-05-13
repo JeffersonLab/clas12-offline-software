@@ -101,8 +101,8 @@ public class RTPCEngine extends ReconstructionEngine{
             return true;
         }
 
-        int runNo;
-        int eventNo;
+        int runNo = 10;
+        int eventNo = 777;
         double magfield = 50.0;
         double magfieldfactor = 1;
 
