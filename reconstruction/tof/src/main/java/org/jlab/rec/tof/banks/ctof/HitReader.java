@@ -219,20 +219,20 @@ public class HitReader implements IMatchedHit {
     }
     
     private List<Hit> matchHitsToCVTTrk(List<Hit> CTOFhits, CTOFGeant4Factory ctofDetector, ArrayList<Track> tracks) {
-        if (tracks == null || tracks.size() == 0) {
+        if (tracks == null || tracks.isEmpty()) {
             return CTOFhits; // no hits were matched with DC tracks
         }
         // Instantiates the final list of hits
-        List<Hit> hitList = new ArrayList<Hit>();
+        List<Hit> hitList = new ArrayList<>();
         
         // Instantiates map of track intersections with the paddles
-        IndexedList<ArrayList<Track>> trkHitsMap = new IndexedList<ArrayList<Track>>(1);
+        IndexedList<ArrayList<Track>> trkHitsMap = new IndexedList<>(1);
         // calculate track intersections
         for (int i = 0; i < tracks.size(); i++) {
             Track trk = tracks.get(i);
 //            System.out.println(tracks.size() + " " + i + trk.toString());
             List<DetHit> trkHits = ctofDetector.getIntersections(trk.getLine());
-            if (trkHits != null && trkHits.size() > 0) {
+            if (trkHits != null && !trkHits.isEmpty()) {
                 for (DetHit hit : trkHits) {
                     CTOFDetHit trkHit = new CTOFDetHit(hit);
                     // check if intersection is in the "positive direction" and reject other intersections
@@ -244,7 +244,7 @@ public class HitReader implements IMatchedHit {
                         ctofTrkHit.setHit(trkHit);
                         // if map entry for the given paddle doesn't already exist, add it
                         if(!trkHitsMap.hasItem(trkHit.getPaddle())) { 
-                            ArrayList<Track> list = new ArrayList<Track>();
+                            ArrayList<Track> list = new ArrayList<>();
                             trkHitsMap.add(list, trkHit.getPaddle());
                         }
                         // add the track/intersection to the map

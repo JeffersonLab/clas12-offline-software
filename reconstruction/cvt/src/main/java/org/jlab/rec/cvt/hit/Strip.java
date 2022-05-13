@@ -210,7 +210,7 @@ public class Strip {
      * @param swim
      */
     public void calcBMTStripParams(int sector, int layer, Swim swim) {
-        BMTGeometry geo = Constants.BMTGEOMETRY;
+        BMTGeometry geo = Constants.getInstance().BMTGEOMETRY;
         
         int region = geo.getRegion(layer); // region index (1...3) 1=layers 1&2, 2=layers 3&4, 3=layers 5&6
         this.setToGlobal(geo.toGlobal(layer, sector));

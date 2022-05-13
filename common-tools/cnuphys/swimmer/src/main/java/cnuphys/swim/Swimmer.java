@@ -266,7 +266,11 @@ public final class Swimmer {
 
 		result.setNStep(ns);
 		result.setFinalS(sFinal);
-
+		if (del < accuracy) {
+			result.setStatus(0);
+		} else {
+			result.setStatus(-1);
+		}
 	}
 	   
         /**

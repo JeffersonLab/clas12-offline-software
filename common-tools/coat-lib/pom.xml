@@ -3,17 +3,8 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jlab.clas</groupId>
   <artifactId>coat-libs</artifactId>
-  <version>7.1.0-SNAPSHOT</version>
+  <version>8.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-
-  <!--
-  <parent>
-    <groupId>org.jlab.coat</groupId>
-    <artifactId>coat-clas-parent</artifactId>
-    <relativePath>../parent/pom.xml</relativePath>
-    <version>1.0-SNAPSHOT</version>
-  </parent>
-  -->
 
   <repositories>
     <repository>
@@ -30,9 +21,8 @@
     </repository>
   </repositories>
 
-  <!-- project Dependencies -->
-
   <dependencies>
+
     <dependency>
       <groupId>org.jlab.coda</groupId>
       <artifactId>jevio</artifactId>
@@ -58,13 +48,6 @@
       </exclusions>
     </dependency>
 
-<!--
-    <dependency>
-      <groupId>org.hep.hipo</groupId>
-      <artifactId>hipo</artifactId>
-      <version>2.0-SNAPSHOT</version>
-    </dependency>
--->
     <dependency>
       <groupId>org.jlab.coda</groupId>
       <artifactId>et</artifactId>
@@ -77,14 +60,18 @@
       <version>4.3-SNAPSHOT</version>
     </dependency>
 
-<!--
     <dependency>
-      <groupId>org.jama</groupId>
-      <artifactId>jama</artifactId>
-      <version>1.0</version>
+        <groupId>j4ml</groupId>
+        <artifactId>j4ml-neuroph</artifactId>
+        <version>0.9-SNAPSHOT</version>
     </dependency>
--->
 
+    <dependency>
+        <groupId>j4ml</groupId>
+        <artifactId>j4ml-clas12</artifactId>
+        <version>0.9-SNAPSHOT</version>
+    </dependency>
+	
     <dependency>
       <groupId>org.jama</groupId>
       <artifactId>jamapack</artifactId>
@@ -106,82 +93,68 @@
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-io</artifactId>
-      <version>7.1.0-SNAPSHOT</version>
+      <version>8.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clara-io</artifactId>
-      <version>7.1.0-SNAPSHOT</version>
+      <version>8.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-reco</artifactId>
-      <version>7.1.0-SNAPSHOT</version>
+      <version>8.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-utils</artifactId>
-      <version>7.1.0-SNAPSHOT</version>
+      <version>8.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-jcsg</artifactId>
-      <version>7.1.0-SNAPSHOT</version>
+      <version>8.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-detector</artifactId>
-      <version>7.1.0-SNAPSHOT</version>
+      <version>8.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-analysis</artifactId>
-      <version>7.1.0-SNAPSHOT</version>
+      <version>8.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-geometry</artifactId>
-      <version>7.1.0-SNAPSHOT</version>
+      <version>8.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-physics</artifactId>
-      <version>7.1.0-SNAPSHOT</version>
+      <version>8.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>swim-tools</artifactId>
-      <version>7.1.0-SNAPSHOT</version>
+      <version>8.0.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-tracking</artifactId>
-      <version>7.1.0-SNAPSHOT</version>
+      <version>8.0.0-SNAPSHOT</version>
     </dependency>
-
-    <!--
-    <dependency>
-      <groupId>org.jlab.clas</groupId>
-      <artifactId>clas-reco</artifactId>
-      <version>3.0-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jlab.clas</groupId>
-      <artifactId>clas-detector</artifactId>
-      <version>3.0-SNAPSHOT</version>
-    </dependency>
-    -->
 
     <dependency>
       <groupId>org.freehep</groupId>
@@ -201,69 +174,6 @@
       <version>0.4.4</version>
     </dependency>
 
-<!--
-    <dependency>
-      <groupId>cnuphys</groupId>
-      <artifactId>swimmer</artifactId>
-      <version>1.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>cnuphys</groupId>
-      <artifactId>magfield</artifactId>
-      <version>1.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>cnuphys</groupId>
-      <artifactId>snr</artifactId>
-      <version>1.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>cnuphys</groupId>
-      <artifactId>bCNU</artifactId>
-      <version>1.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>cnuphys</groupId>
-      <artifactId>bcnuimages</artifactId>
-      <version>1.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>cnuphys</groupId>
-      <artifactId>splot</artifactId>
-      <version>1.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>cnuphys</groupId>
-      <artifactId>splotimages</artifactId>
-      <version>1.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>cnuphys</groupId>
-      <artifactId>f2jutil</artifactId>
-      <version>1.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>cnuphys</groupId>
-      <artifactId>numRec</artifactId>
-      <version>1.0</version>
-    </dependency>
-
--->
-<!--
-    <dependency>
-      <groupId>cnuphys</groupId>
-      <artifactId>cnuphys</artifactId>
-      <version>2.0-SNAPSHOT</version>
-    </dependency>
--->
   </dependencies>
 
   <!-- BUILD section for creating one JAR -->
@@ -273,9 +183,18 @@
           <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-compiler-plugin</artifactId>
+              <version>3.8.0</version>
               <configuration>
-                  <source>1.8</source>
-                  <target>1.8</target>
+                  <encoding>UTF-8</encoding>
+                  <release>11</release>
+              </configuration>
+          </plugin>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-resources-plugin</artifactId>
+              <version>3.2.0</version>
+              <configuration>
+                  <encoding>${project.build.sourceEncoding}</encoding>
               </configuration>
           </plugin>
           <plugin>
