@@ -145,7 +145,8 @@ public class RungeKuttaDoca {
     }
 
     /** Compute the final state for each entry in the internal state matrix. */
-    private RK4Vec computeFinalState(double h, RK4Vec s0, RK4Vec s1, RK4Vec s2, RK4Vec s3, RK4Vec s4) {
+    private RK4Vec computeFinalState(double h, RK4Vec s0, RK4Vec s1, RK4Vec s2, RK4Vec s3,
+            RK4Vec s4) {
         RK4Vec sF = new RK4Vec();
 
         sF.x      = s0.x  + this.RK4(s1.x,      s2.x,      s3.x,      s4.x,      h);
@@ -171,29 +172,98 @@ public class RungeKuttaDoca {
         return sF;
     }
 
-    /** Compute the final covariance matrix. covMat = FCF^T; u = FC. */
-    private double[][] computeCovMat(Matrix cPrev, RK4Vec sF) {
-        double[][] u = new double[5][5];
-        for (int j = 0; j < 5; j++) {
-            u[0][j] = cPrev.get(0,j) + cPrev.get(2,j) * sF.dxdtx0 + cPrev.get(3,j) * sF.dxdty0
-                    + cPrev.get(4,j) * sF.dxdq0;
-            u[1][j] = cPrev.get(1,j) + cPrev.get(2,j) * sF.dydtx0 + cPrev.get(3,j) * sF.dydty0
-                    + cPrev.get(4,j) * sF.dydq0;
-            u[2][j] = cPrev.get(2,j) * sF.dtxdtx0 + cPrev.get(3,j) * sF.dtxdty0
-                    + cPrev.get(4,j) * sF.dtxdq0;
-            u[3][j] = cPrev.get(2,j) * sF.dtydtx0 + cPrev.get(3,j) * sF.dtydty0
-                    + cPrev.get(4,j) * sF.dtydq0;
-            u[4][j] = cPrev.get(4,j);
-        }
-
+    /** Compute the final covariance matrix. covMat = FCF^T. */
+    private double[][] computeCovMat(Matrix C, RK4Vec sF) {
         double[][] cNext = new double[5][5];
-        for (int i = 0; i < 5; i++) {
-            cNext[i][0] = u[i][0] + u[i][2] * sF.dxdtx0 + u[i][3] * sF.dxdty0 + u[i][4] * sF.dxdq0;
-            cNext[i][1] = u[i][1] + u[i][2] * sF.dydtx0 + u[i][3] * sF.dydty0 + u[i][4] * sF.dydq0;
-            cNext[i][2] = u[i][2] * sF.dtxdtx0 + u[i][3] * sF.dtxdty0 + u[i][4] * sF.dtxdq0;
-            cNext[i][3] = u[i][2] * sF.dtydtx0 + u[i][3] * sF.dtydty0 + u[i][4] * sF.dtydq0;
-            cNext[i][4] = u[i][4];
-        }
+        cNext[0][0] = C.get(0,0)+C.get(2,0)*sF.dxdtx0+C.get(3,0)*sF.dxdty0+C.get(4,0)*sF.dxdq0
+                    + sF.dxdq0 *(C.get(0,4)+C.get(2,4)*sF.dxdtx0+C.get(3,4)*sF.dxdty0+C.get(4,4)*sF.dxdq0)
+                    + sF.dxdtx0*(C.get(0,2)+C.get(2,2)*sF.dxdtx0+C.get(3,2)*sF.dxdty0+C.get(4,2)*sF.dxdq0)
+                    + sF.dxdty0*(C.get(0,3)+C.get(2,3)*sF.dxdtx0+C.get(3,3)*sF.dxdty0+C.get(4,3)*sF.dxdq0);
+
+        cNext[0][1] = C.get(0,1)+C.get(2,1)*sF.dxdtx0+C.get(3,1)*sF.dxdty0+C.get(4,1)*sF.dxdq0
+                    + sF.dydq0 *(C.get(0,4)+C.get(2,4)*sF.dxdtx0+C.get(3,4)*sF.dxdty0+C.get(4,4)*sF.dxdq0)
+                    + sF.dydtx0*(C.get(0,2)+C.get(2,2)*sF.dxdtx0+C.get(3,2)*sF.dxdty0+C.get(4,2)*sF.dxdq0)
+                    + sF.dydty0*(C.get(0,3)+C.get(2,3)*sF.dxdtx0+C.get(3,3)*sF.dxdty0+C.get(4,3)*sF.dxdq0);
+
+        cNext[0][2] = sF.dtxdq0 *(C.get(0,4)+C.get(2,4)*sF.dxdtx0+C.get(3,4)*sF.dxdty0+C.get(4,4)*sF.dxdq0)
+                    + sF.dtxdtx0*(C.get(0,2)+C.get(2,2)*sF.dxdtx0+C.get(3,2)*sF.dxdty0+C.get(4,2)*sF.dxdq0)
+                    + sF.dtxdty0*(C.get(0,3)+C.get(2,3)*sF.dxdtx0+C.get(3,3)*sF.dxdty0+C.get(4,3)*sF.dxdq0);
+
+        cNext[0][3] = sF.dtydq0 *(C.get(0,4)+C.get(2,4)*sF.dxdtx0+C.get(3,4)*sF.dxdty0+C.get(4,4)*sF.dxdq0)
+                    + sF.dtydtx0*(C.get(0,2)+C.get(2,2)*sF.dxdtx0+C.get(3,2)*sF.dxdty0+C.get(4,2)*sF.dxdq0)
+                    + sF.dtydty0*(C.get(0,3)+C.get(2,3)*sF.dxdtx0+C.get(3,3)*sF.dxdty0+C.get(4,3)*sF.dxdq0);
+
+        cNext[0][4] = C.get(0,4)+C.get(2,4)*sF.dxdtx0+C.get(3,4)*sF.dxdty0+C.get(4,4)*sF.dxdq0;
+
+        cNext[1][0] = C.get(1,0)+C.get(2,0)*sF.dydtx0+C.get(3,0)*sF.dydty0+C.get(4,0)*sF.dydq0
+                    + sF.dxdq0 *(C.get(1,4)+C.get(2,4)*sF.dydtx0+C.get(3,4)*sF.dydty0+C.get(4,4)*sF.dydq0)
+                    + sF.dxdtx0*(C.get(1,2)+C.get(2,2)*sF.dydtx0+C.get(3,2)*sF.dydty0+C.get(4,2)*sF.dydq0)
+                    + sF.dxdty0*(C.get(1,3)+C.get(2,3)*sF.dydtx0+C.get(3,3)*sF.dydty0+C.get(4,3)*sF.dydq0);
+
+        cNext[1][1] = C.get(1,1)+C.get(2,1)*sF.dydtx0+C.get(3,1)*sF.dydty0+C.get(4,1)*sF.dydq0
+                    + sF.dydq0 *(C.get(1,4)+C.get(2,4)*sF.dydtx0+C.get(3,4)*sF.dydty0+C.get(4,4)*sF.dydq0)
+                    + sF.dydtx0*(C.get(1,2)+C.get(2,2)*sF.dydtx0+C.get(3,2)*sF.dydty0+C.get(4,2)*sF.dydq0)
+                    + sF.dydty0*(C.get(1,3)+C.get(2,3)*sF.dydtx0+C.get(3,3)*sF.dydty0+C.get(4,3)*sF.dydq0);
+
+        cNext[1][2] = sF.dtxdq0 *(C.get(1,4)+C.get(2,4)*sF.dydtx0+C.get(3,4)*sF.dydty0+C.get(4,4)*sF.dydq0)
+                    + sF.dtxdtx0*(C.get(1,2)+C.get(2,2)*sF.dydtx0+C.get(3,2)*sF.dydty0+C.get(4,2)*sF.dydq0)
+                    + sF.dtxdty0*(C.get(1,3)+C.get(2,3)*sF.dydtx0+C.get(3,3)*sF.dydty0+C.get(4,3)*sF.dydq0);
+
+        cNext[1][3] = sF.dtydq0 *(C.get(1,4)+C.get(2,4)*sF.dydtx0+C.get(3,4)*sF.dydty0+C.get(4,4)*sF.dydq0)
+                    + sF.dtydtx0*(C.get(1,2)+C.get(2,2)*sF.dydtx0+C.get(3,2)*sF.dydty0+C.get(4,2)*sF.dydq0)
+                    + sF.dtydty0*(C.get(1,3)+C.get(2,3)*sF.dydtx0+C.get(3,3)*sF.dydty0+C.get(4,3)*sF.dydq0);
+
+        cNext[1][4] = C.get(1,4)+C.get(2,4)*sF.dydtx0+C.get(3,4)*sF.dydty0+C.get(4,4)*sF.dydq0;
+
+        cNext[2][0] = C.get(2,0)*sF.dtxdtx0+C.get(3,0)*sF.dtxdty0+C.get(4,0)*sF.dtxdq0
+                    + sF.dxdq0 *(C.get(2,4)*sF.dtxdtx0+C.get(3,4)*sF.dtxdty0+C.get(4,4)*sF.dtxdq0)
+                    + sF.dxdtx0*(C.get(2,2)*sF.dtxdtx0+C.get(3,2)*sF.dtxdty0+C.get(4,2)*sF.dtxdq0)
+                    + sF.dxdty0*(C.get(2,3)*sF.dtxdtx0+C.get(3,3)*sF.dtxdty0+C.get(4,3)*sF.dtxdq0);
+
+        cNext[2][1] = C.get(2,1)*sF.dtxdtx0+C.get(3,1)*sF.dtxdty0+C.get(4,1)*sF.dtxdq0
+                    + sF.dydq0 *(C.get(2,4)*sF.dtxdtx0+C.get(3,4)*sF.dtxdty0+C.get(4,4)*sF.dtxdq0)
+                    + sF.dydtx0*(C.get(2,2)*sF.dtxdtx0+C.get(3,2)*sF.dtxdty0+C.get(4,2)*sF.dtxdq0)
+                    + sF.dydty0*(C.get(2,3)*sF.dtxdtx0+C.get(3,3)*sF.dtxdty0+C.get(4,3)*sF.dtxdq0);
+
+        cNext[2][2] = sF.dtxdq0 *(C.get(2,4)*sF.dtxdtx0+C.get(3,4)*sF.dtxdty0+C.get(4,4)*sF.dtxdq0)
+                    + sF.dtxdtx0*(C.get(2,2)*sF.dtxdtx0+C.get(3,2)*sF.dtxdty0+C.get(4,2)*sF.dtxdq0)
+                    + sF.dtxdty0*(C.get(2,3)*sF.dtxdtx0+C.get(3,3)*sF.dtxdty0+C.get(4,3)*sF.dtxdq0);
+
+        cNext[2][3] = sF.dtydq0 *(C.get(2,4)*sF.dtxdtx0+C.get(3,4)*sF.dtxdty0+C.get(4,4)*sF.dtxdq0)
+                    + sF.dtydtx0*(C.get(2,2)*sF.dtxdtx0+C.get(3,2)*sF.dtxdty0+C.get(4,2)*sF.dtxdq0)
+                    + sF.dtydty0*(C.get(2,3)*sF.dtxdtx0+C.get(3,3)*sF.dtxdty0+C.get(4,3)*sF.dtxdq0);
+
+        cNext[2][4] = C.get(2,4)*sF.dtxdtx0+C.get(3,4)*sF.dtxdty0+C.get(4,4)*sF.dtxdq0;
+
+        cNext[3][0] = C.get(2,0)*sF.dtydtx0+C.get(3,0)*sF.dtydty0+C.get(4,0)*sF.dtydq0
+                    + sF.dxdq0 *(C.get(2,4)*sF.dtydtx0+C.get(3,4)*sF.dtydty0+C.get(4,4)*sF.dtydq0)
+                    + sF.dxdtx0*(C.get(2,2)*sF.dtydtx0+C.get(3,2)*sF.dtydty0+C.get(4,2)*sF.dtydq0)
+                    + sF.dxdty0*(C.get(2,3)*sF.dtydtx0+C.get(3,3)*sF.dtydty0+C.get(4,3)*sF.dtydq0);
+
+        cNext[3][1] = C.get(2,1)*sF.dtydtx0+C.get(3,1)*sF.dtydty0+C.get(4,1)*sF.dtydq0
+                    + sF.dydq0 *(C.get(2,4)*sF.dtydtx0+C.get(3,4)*sF.dtydty0+C.get(4,4)*sF.dtydq0)
+                    + sF.dydtx0*(C.get(2,2)*sF.dtydtx0+C.get(3,2)*sF.dtydty0+C.get(4,2)*sF.dtydq0)
+                    + sF.dydty0*(C.get(2,3)*sF.dtydtx0+C.get(3,3)*sF.dtydty0+C.get(4,3)*sF.dtydq0);
+
+        cNext[3][2] = sF.dtxdq0 *(C.get(2,4)*sF.dtydtx0+C.get(3,4)*sF.dtydty0+C.get(4,4)*sF.dtydq0)
+                    + sF.dtxdtx0*(C.get(2,2)*sF.dtydtx0+C.get(3,2)*sF.dtydty0+C.get(4,2)*sF.dtydq0)
+                    + sF.dtxdty0*(C.get(2,3)*sF.dtydtx0+C.get(3,3)*sF.dtydty0+C.get(4,3)*sF.dtydq0);
+
+        cNext[3][3] = sF.dtydq0 *(C.get(2,4)*sF.dtydtx0+C.get(3,4)*sF.dtydty0+C.get(4,4)*sF.dtydq0)
+                    + sF.dtydtx0*(C.get(2,2)*sF.dtydtx0+C.get(3,2)*sF.dtydty0+C.get(4,2)*sF.dtydq0)
+                    + sF.dtydty0*(C.get(2,3)*sF.dtydtx0+C.get(3,3)*sF.dtydty0+C.get(4,3)*sF.dtydq0);
+
+        cNext[3][4] = C.get(2,4)*sF.dtydtx0+C.get(3,4)*sF.dtydty0+C.get(4,4)*sF.dtydq0;
+
+        cNext[4][0] = C.get(4,0)+C.get(4,2)*sF.dxdtx0+C.get(4,3)*sF.dxdty0+C.get(4,4)*sF.dxdq0;
+
+        cNext[4][1] = C.get(4,1)+C.get(4,2)*sF.dydtx0+C.get(4,3)*sF.dydty0+C.get(4,4)*sF.dydq0;
+
+        cNext[4][2] = C.get(4,2)*sF.dtxdtx0+C.get(4,3)*sF.dtxdty0+C.get(4,4)*sF.dtxdq0;
+
+        cNext[4][3] = C.get(4,2)*sF.dtydtx0+C.get(4,3)*sF.dtydty0+C.get(4,4)*sF.dtydq0;
+
+        cNext[4][4] = C.get(4,4);
 
         return cNext;
     }
