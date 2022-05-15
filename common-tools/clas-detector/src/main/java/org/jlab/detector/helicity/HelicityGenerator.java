@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Helicity Pseudo-Random Sequence.
@@ -27,12 +29,12 @@ import java.util.Comparator;
  */
 public final class HelicityGenerator implements Comparable<HelicityGenerator>, Comparator<HelicityGenerator> {
 
+    static final Logger LOGGER = Logger.getLogger(HelicityGenerator.class.getName());
     public static final int REGISTER_SIZE=30;
     private final List<Integer> states=new ArrayList<>();
     private int offset=0;
     private int register=0;
     private long timestamp=0;
-    private int verbosity=0;
     private double clock=29.56; // Hz
 
     public HelicityGenerator(){}
@@ -185,17 +187,13 @@ public final class HelicityGenerator implements Comparable<HelicityGenerator>, C
      */
     public final boolean initialize(List<HelicityState> states) {
 
-        if (this.verbosity>0) {
-            System.out.println("HelicityGenerator:  Initializing with "+states.size()+" states ...");
-        }
+        LOGGER.log(Level.INFO, "HelicityGenerator:  Initializing with {0} states ...", states.size());
        
         // make sure they're time-ordered:
         Collections.sort(states);
         
-        if (this.verbosity>10) {
-            for (HelicityState state : states) {
-                System.out.println(state);
-            }
+        for (HelicityState state : states) {
+            LOGGER.log(Level.FINEST, "initializing with: {0}", state);
         }
         
         // reset this generator:
@@ -210,9 +208,7 @@ public final class HelicityGenerator implements Comparable<HelicityGenerator>, C
 
             // any initial state will do:
             if (iStates.isEmpty()) {
-                if (this.verbosity>2) {
-                    System.out.println("HelicityGenerator:  got first state: "+thisState);
-                }
+                LOGGER.log(Level.FINE, "got first state: {0}", thisState);
                 iStates.add(iState);
             }
 
@@ -222,9 +218,7 @@ public final class HelicityGenerator implements Comparable<HelicityGenerator>, C
             
                 // bad pair sync, reset the sequence:
                 if (thisState.getPairSync() == prevState.getPairSync()) {
-                    if (this.verbosity>1){
-                        System.out.println("HelicityGenerator:  got bad pair, resetting... "+prevState+" / "+thisState);
-                    }
+                    LOGGER.log(Level.INFO, "got bad pair, resetting... {0} / {1}", new Object[]{prevState, thisState});
                     iStates.clear();
                 }
 
@@ -235,9 +229,7 @@ public final class HelicityGenerator implements Comparable<HelicityGenerator>, C
                         prevState.getPatternSync().value()+
                         states.get(iStates.get(iStates.size()-2)).getPatternSync().value()+
                         states.get(iStates.get(iStates.size()-3)).getPatternSync().value() != 2 ){
-                    if (this.verbosity>1){
-                        System.out.println("HelicityGenerator:  got bad pattern, resetting... "+thisState);
-                    }
+                    LOGGER.log(Level.INFO, "got bad pattern, resetting... {0}", thisState);
                     iStates.clear();
                 }
            
@@ -250,9 +242,7 @@ public final class HelicityGenerator implements Comparable<HelicityGenerator>, C
                     // bad timestamp delta, reset the sequence:
                     if (seconds < (1.0-0.5)/this.clock ||
                         seconds > (1.0+0.5)/this.clock) {
-                        if (this.verbosity>1){
-                            System.out.println("HelicityGenerator:  got bad timestamp, resetting... ");
-                        }
+                        LOGGER.log(Level.INFO,"HelicityGenerator:  got bad timestamp, resetting... ");
                         iStates.clear();
                     }
 
@@ -293,11 +283,9 @@ public final class HelicityGenerator implements Comparable<HelicityGenerator>, C
                         this.timestamp += timestamps.get(kk);
                     }
                     this.timestamp /= timestamps.size();
-                    if (this.verbosity>1) {
-                        System.out.println("HelicityGenerator:  raw timestamps:  "+timestampsRaw);
-                        System.out.println("HelicityGenerator:  timestamps:      "+timestamps);
-                        System.out.println("HelicityGenerator:  modulo-corrected timestamp:  "+this.timestamp);
-                    }
+                    LOGGER.log(Level.INFO, "raw timestamps:  {0}", timestampsRaw);
+                    LOGGER.log(Level.INFO, "timestamps:      {0}", timestamps);
+                    LOGGER.log(Level.INFO, "modulo-corrected timestamp:  {0}", this.timestamp);
                     break;
                 }
 
@@ -315,11 +303,8 @@ public final class HelicityGenerator implements Comparable<HelicityGenerator>, C
                     double corr=(jj-this.offset)/this.clock*HelicitySequence.TIMESTAMP_CLOCK;
                     timestamps.add(timeStamp-corr);
                     timestampsRaw.add((double)timeStamp);
-                    if (this.verbosity>2) {
-                        System.out.println(this.verbosity);
-                        System.out.println(String.format("HelicityGenerator:  timestamp = %d/%.1f/%.2f",
+                    LOGGER.info(String.format("HelicityGenerator:  timestamp = %d/%.1f/%.2f",
                                 timeStamp,corr,timeStamp-corr));
-                    }
                 }
             }
         }
@@ -328,17 +313,11 @@ public final class HelicityGenerator implements Comparable<HelicityGenerator>, C
             System.err.println("HelicityGenerator:  Initialization Error.");
             this.reset();
         }
-        else if (this.verbosity>0) {
-            System.out.println("HelicityGenerator:  Initialized.");
-        }
+        LOGGER.fine("HelicityGenerator:  Initialized.");
 
         return this.initialized();
     }
     
-    public void setVerbosity(int verbosity) {
-        this.verbosity=verbosity;
-    }
-
     public int getOffset() {
         return this.offset;
     }

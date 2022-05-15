@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.Event;
@@ -46,6 +48,7 @@ import org.jlab.jnp.hipo4.io.HipoReader;
  */
 class HelicitySequence {
 
+    static final Logger LOGGER = Logger.getLogger(HelicitySequence.class.getName());
     public static final double TIMESTAMP_CLOCK=250.0e6; // Hz
     protected double helicityClock=29.56; // Hz
     protected HelicityPattern pattern=HelicityPattern.QUARTET;
@@ -54,15 +57,9 @@ class HelicitySequence {
     protected final Map<Long,HelicityGenerator> generators=new HashMap<>();
     protected final HelicityGenerator generator=new HelicityGenerator();
     protected final List<HelicityState> states=new ArrayList<>();
-    protected int verbosity=0;
 
     public HelicitySequence(){}
 
-    public void setVerbosity(int verbosity) {
-        this.verbosity=verbosity;
-        this.generator.setVerbosity(verbosity);
-    }
-   
     public boolean getHalfWavePlate() {
         return this.halfWavePlate;
     }
@@ -85,9 +82,7 @@ class HelicitySequence {
         
         if (!state.isValid()) return false;
         
-        if (this.verbosity>3) {
-            System.out.println("HelicitySequence:  adding state:  "+state);
-        }
+        LOGGER.log(Level.FINE, "HelicitySequence:  adding state:  {0}", state);
 
         // terminate if trying to add more than one run number:
         for (HelicityState hs : this.states) {
@@ -336,7 +331,7 @@ class HelicitySequence {
         // always reject the first state in the sequence, since it was
         // triggered by the first available readout and (usually) not
         // on an actual state change, so it's timestamp is invalid:
-        if (this.states.size()>0) {
+        if (!this.states.isEmpty()) {
             this.states.remove(0);
         }
         int nRejects=0;
@@ -363,22 +358,16 @@ class HelicitySequence {
      */
     protected final boolean analyze() {
 
-        if (verbosity>0) {
-            System.out.println("HelicitySequence:  Analyzing ....");
-        }
+        LOGGER.finest("HelicitySequence:  Analyzing ....");
 
         final int nRejects=this.rejectFalseFlips();
-        if (verbosity>0) {
-            System.out.println("HelicitySequence:  Rejected false flips:  "+nRejects);
-        }
+        LOGGER.log(Level.FINEST, "HelicitySequence:  Rejected false flips:  {0}", nRejects);
 
-        if (this.states.size()>0) {
+        if (!this.states.isEmpty()) {
             // just use first state to determine whether HWP is in:
             this.halfWavePlate = this.states.get(0).getHelicity().value() !=
                                  this.states.get(0).getHelicityRaw().value();
-            if (verbosity>1) {
-                System.out.println("HelicitySequnce:  HWP: "+this.halfWavePlate);
-            }
+            LOGGER.log(Level.FINE, "HelicitySequnce:  HWP: {0}", this.halfWavePlate);
         }
 
         this.analyzed=true;
@@ -412,14 +401,14 @@ class HelicitySequence {
             if (this.states.get(ii).getHelicity().value()*this.states.get(ii).getHelicityRaw().value() !=
                 this.states.get(ii-1).getHelicity().value()*this.states.get(ii-1).getHelicityRaw().value()) {
                 hwpErrors++;
-                if (verbosity>1) System.err.println("ERROR:  HelicitySequence HWP: "+ii);
+                LOGGER.log(Level.FINE, "ERROR:  HelicitySequence HWP: {0}", ii);
             }
             
             // check if neighboring syncs are the same (they shouldn't be):
             if (this.states.get(ii).getPairSync().value() == this.states.get(ii-1).getPairSync().value()) {
                 syncErrors++;
                 this.states.get(ii).addSwStatusMask(HelicityState.Mask.SYNC);
-                if (verbosity>1) System.err.println("ERROR: HelicitySequence SYNC: "+ii);
+                LOGGER.log(Level.FINE, "ERROR: HelicitySequence SYNC: {0}", ii);
             }
 
             // check if quartet sequence is broken (should be 1minus + 3plus):
@@ -430,7 +419,7 @@ class HelicitySequence {
                     this.states.get(ii-3).getPatternSync().value() != 2) {
                     quartetErrors++;
                     this.states.get(ii).addSwStatusMask(HelicityState.Mask.PATTERN);
-                    if (verbosity>1) System.err.println("ERROR:  HelicitySequence QUARTET: "+ii);
+                    LOGGER.log(Level.FINE, "ERROR:  HelicitySequence QUARTET: {0}", ii);
                 }
             }
 
@@ -439,14 +428,14 @@ class HelicitySequence {
             if (seconds < (1.0-0.5)/this.helicityClock) {
                 smallGapErrors++;
                 this.states.get(ii).addSwStatusMask(HelicityState.Mask.SMALLGAP);
-                if (verbosity>1) System.err.println("ERROR:  HelicitySequence TIMESTAMP: "+ii+" "+
-                        this.getTimestamp(ii)+" "+this.getTimestamp(ii-1)+" "+seconds+"s");
+                LOGGER.log(Level.FINE, "ERROR:  HelicitySequence TIMESTAMP: {0} {1} {2} {3}s",
+                        new Object[]{ii, this.getTimestamp(ii), this.getTimestamp(ii-1), seconds});
             }
             else if (seconds > (1.0+0.5)/this.helicityClock) {
                 bigGapErrors++;
                 this.states.get(ii).addSwStatusMask(HelicityState.Mask.BIGGAP);
-                if (verbosity>1) System.err.println("ERROR:  HelicitySequence TIMESTAMP: "+ii+" "+
-                        this.getTimestamp(ii)+" "+this.getTimestamp(ii-1)+" "+seconds+"s");
+                LOGGER.log(Level.FINE, "ERROR:  HelicitySequence TIMESTAMP: {0} {1} {2} {3}s",
+                        new Object[]{ii, this.getTimestamp(ii), this.getTimestamp(ii-1), seconds});
             }
         }
 
@@ -461,14 +450,14 @@ class HelicitySequence {
             }
         }
 
-        if (verbosity>0) {
-            System.out.println("HelicitySequence:  HWP       ERRORS:  "+hwpErrors);
-            System.out.println("HelicitySequence:  SYNC      ERRORS:  "+syncErrors);
-            System.out.println("HelicitySequence:  QUARTET   ERRORS:  "+quartetErrors);
-            System.out.println("HelicitySequence:  BIGGAP    ERRORS:  "+bigGapErrors);
-            System.out.println("HelicitySequence:  SMALLGAP  ERRORS:  "+smallGapErrors);
-            System.out.println("HelicitySequence:  GENERATOR ERRORS:  "+generatorErrors);
-        }
+        LOGGER.info(
+            "HWP       ERRORS:  "+hwpErrors+
+            "\nSYNC      ERRORS:  "+syncErrors+
+            "\nQUARTET   ERRORS:  "+quartetErrors+
+            "\nBIGGAP    ERRORS:  "+bigGapErrors+
+            "\nSMALLGAP  ERRORS:  "+smallGapErrors+
+            "\nGENERATOR ERRORS:  "+generatorErrors
+        );
 
         return (hwpErrors+syncErrors+quartetErrors+bigGapErrors+smallGapErrors+generatorErrors) == 0;
     }
