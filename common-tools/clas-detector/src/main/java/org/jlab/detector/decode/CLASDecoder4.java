@@ -667,7 +667,7 @@ public class CLASDecoder4 {
     public Bank createHelicityDecoderBank(EvioDataEvent event) {
         HelicityDecoderData data = this.codaDecoder.getDataEntries_HelicityDecoder(event);
         if(data!=null) {
-            Bank bank = new Bank(schemaFactory.getSchema("HEL::decoded"), 1);
+            Bank bank = new Bank(schemaFactory.getSchema("HEL::decoder"), 1);
             bank.putByte("helicity",        0, data.getHelicityState().getHelicity().value());
             bank.putByte("pair",            0, data.getHelicityState().getPairSync().value());
             bank.putByte("pattern",         0, data.getHelicityState().getPatternSync().value());

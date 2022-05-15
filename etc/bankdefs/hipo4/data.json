@@ -433,7 +433,7 @@
       ]
   },
   {
-      "name": "HEL::decoded",
+      "name": "HEL::decoder",
       "group": 22000,
       "item":  14,
       "info": "Helicity decoder board data",
