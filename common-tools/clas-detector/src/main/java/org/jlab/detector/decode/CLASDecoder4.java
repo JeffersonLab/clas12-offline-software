@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.detector.decode;
 
 import org.jlab.detector.scalers.DaqScalers;
@@ -13,6 +8,7 @@ import java.sql.Time;
 import java.util.Date;
 
 import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.decode.DetectorDataDgtz.HelicityDecoderData;
 import org.jlab.detector.helicity.HelicityBit;
 import org.jlab.detector.helicity.HelicityState;
 
@@ -568,6 +564,8 @@ public class CLASDecoder4 {
      * Otherwise returns null
      *
      * FIXME:  refactor this out more cleanly
+     * @param event
+     * @return 
      */
     public Bank[] createReconScalerBanks(Event event){
 
@@ -666,6 +664,38 @@ public class CLASDecoder4 {
         return state.getFlipBank(this.schemaFactory);
     }
 
+    public Bank createHelicityDecoderBank(EvioDataEvent event) {
+        HelicityDecoderData data = this.codaDecoder.getDataEntries_HelicityDecoder(event);
+        if(data!=null) {
+            Bank bank = new Bank(schemaFactory.getSchema("HEL::decoded"), 1);
+            bank.putByte("helicity",        0, data.getHelicityState().getHelicity().value());
+            bank.putByte("pair",            0, data.getHelicityState().getPairSync().value());
+            bank.putByte("pattern",         0, data.getHelicityState().getPatternSync().value());
+            bank.putByte("tSettle",         0, data.getTSettle().value());
+            bank.putByte("helicityPattern", 0, data.getHelicityPattern().value());
+            bank.putByte("polarity",        0, data.getPolarity());
+            bank.putByte("phase",           0, data.getPatternPhaseCount());
+            bank.putLong("timestamp",       0, data.getTimestamp());
+            bank.putInt("helicitySeed",     0, data.getHelicitySeed());
+            bank.putInt("nTStableRE",       0, data.getNTStableRisingEdge());
+            bank.putInt("nTStableFE",       0, data.getNTStableFallingEdge());
+            bank.putInt("nPattern",         0, data.getNPattern());
+            bank.putInt("nPair",            0, data.getNPair());
+            bank.putInt("tStableStart",     0, data.getTStableStart());
+            bank.putInt("tStableEnd",       0, data.getTStableEnd());
+            bank.putInt("tStableTime",      0, data.getTStableTime());
+            bank.putInt("tSettleTime",      0, data.getTSettleTime());
+            bank.putInt("patternArray",     0, data.getPatternWindows());
+            bank.putInt("pairArray",        0, data.getPairWindows());
+            bank.putInt("helicityArray",    0, data.getHelicityWindows());
+            bank.putInt("helicityPArray",   0, data.getHelicityPatternWindows());
+            return bank;
+        }
+        else 
+            return null;
+    }
+    
+    
     public static void main(String[] args){
 
         OptionParser parser = new OptionParser("decoder");
@@ -765,6 +795,8 @@ public class CLASDecoder4 {
                     if(trigger!=null) decodedEvent.write(trigger);
                     Bank onlineHelicity = decoder.createOnlineHelicityBank();
                     if(onlineHelicity!=null) decodedEvent.write(onlineHelicity);
+                    Bank decodedHelicity = decoder.createHelicityDecoderBank(event);
+                    if (decodedHelicity!=null) decodedEvent.write(decodedHelicity);
                     //decodedEvent.appendBanks(header);
                     //decodedEvent.appendBanks(trigger);
 
@@ -812,7 +844,7 @@ public class CLASDecoder4 {
                             decodedEvent.write(helicityFlip);
                             scalerEvent.write(helicityFlip);
                         }
-
+                        
                         writer.addEvent(scalerEvent, 1);
                     }
 
