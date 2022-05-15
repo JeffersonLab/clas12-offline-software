@@ -57,6 +57,7 @@ public class EvioHipoEvent4 {
         this.fillHipoEventLTCC(hipoEvent, event);
         this.fillHipoEventHTCC(hipoEvent, event);
         this.fillHipoEventRICH(hipoEvent, event);
+        this.fillHipoEventBAND(hipoEvent, event);
         this.fillHipoEventGenPart(hipoEvent, event);
         this.fillHipoEventTrueInfo(hipoEvent, event);
         this.fillHipoEventTrigger(hipoEvent, event);
@@ -483,6 +484,67 @@ public class EvioHipoEvent4 {
         }
     }
     
+    
+    public void fillHipoEventBAND(Event hipoEvent, EvioDataEvent evioEvent){
+        if(evioEvent.hasBank("BAND::dgtz")==true){
+            EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("BAND::dgtz");
+            int rows = evioBank.rows();
+            Bank hipoADC = new Bank(schemaFactory.getSchema("BAND::adc"), rows*2);
+            Bank hipoTDC = new Bank(schemaFactory.getSchema("BAND::tdc"), rows*2);            
+	    //System.out.println("**************************");
+	    //System.out.println("In band DGTZ\n");
+	    //evioBank.show();
+            for(int index = 0; index < evioBank.rows(); index++){
+		int i = index*2;
+
+		// For L PMT:
+                hipoADC .putByte("sector", 	i,      (byte)  evioBank.getInt("sector",index));
+                hipoADC .putByte("layer",  	i,      (byte)  evioBank.getInt("layer",index));
+                hipoADC .putShort("component",  i, 	(short) evioBank.getInt("component",index));
+                hipoADC .putByte("order", 	i,	(byte) 	0);
+                hipoADC .putInt("ADC", 		i, 	evioBank.getInt("ADCL", index));
+                hipoADC .putInt("amplitude", 	i, 	evioBank.getInt("amplitudeL", index));
+                hipoADC .putFloat("time", 	i, 	(float) evioBank.getDouble("ADCtimeL", index));
+                hipoADC .putShort("ped",  	i, 	(short) 0);
+
+                hipoTDC .putByte("sector", 	i,      (byte)  evioBank.getInt("sector",index));
+                hipoTDC .putByte("layer",  	i,      (byte)  evioBank.getInt("layer",index));
+                hipoTDC .putShort("component",  i, 	(short) evioBank.getInt("component",index));
+                hipoTDC .putByte("order", 	i,	(byte)  2);
+                hipoTDC .putInt("TDC", 		i, 	evioBank.getInt("TDCL", index));
+
+		// For R PMT:
+                hipoADC .putByte("sector", 	i+1,      (byte)  evioBank.getInt("sector",index));
+                hipoADC .putByte("layer",  	i+1,      (byte)  evioBank.getInt("layer",index));
+                hipoADC .putShort("component",  i+1, 	(short) evioBank.getInt("component",index));
+                hipoADC .putByte("order", 	i+1,	(byte) 	1);
+                hipoADC .putInt("ADC", 		i+1, 	evioBank.getInt("ADCR", index));
+                hipoADC .putInt("amplitude", 	i+1, 	evioBank.getInt("amplitudeR", index));
+                hipoADC .putFloat("time", 	i+1, 	(float) evioBank.getDouble("ADCtimeR", index));
+                hipoADC .putShort("ped",  	i+1, 	(short) 0);
+
+                hipoTDC .putByte("sector", 	i+1,      (byte)  evioBank.getInt("sector",index));
+                hipoTDC .putByte("layer",  	i+1,      (byte)  evioBank.getInt("layer",index));
+                hipoTDC .putShort("component",  i+1, 	(short) evioBank.getInt("component",index));
+                hipoTDC .putByte("order", 	i+1,	(byte)  3);
+                hipoTDC .putInt("TDC", 		i+1, 	evioBank.getInt("TDCR", index));
+
+
+            }
+            hipoEvent.write(hipoADC);
+            hipoEvent.write(hipoTDC);
+
+
+
+	    //System.out.println("ADC");
+	    //hipoADC.show();
+	    //System.out.println("TDC");
+	    //hipoTDC.show();
+	    //System.out.println("**************************");
+	    
+        }
+    }
+    
     public void fillHipoEventGenPart(Event hipoEvent, EvioDataEvent evioEvent){
         if(evioEvent.hasBank("GenPart::header")==true){
             EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("GenPart::header");
@@ -552,7 +614,7 @@ public class EvioHipoEvent4 {
     
    public void fillHipoEventTrueInfo(Event hipoEvent, EvioDataEvent evioEvent){
         
-        String[]        bankNames = new String[]{"BMT","BST","CND","CTOF","DC","EC","FMT","FTCAL","FTHODO","FTOF","FTTRK","HTCC","LTCC","PCAL","RICH","RTPC"};
+        String[]        bankNames = new String[]{"BMT","BST","CND","CTOF","DC","EC","FMT","FTCAL","FTHODO","FTOF","FTTRK","HTCC","LTCC","PCAL","RICH","RTPC","BAND"};
         DetectorType[]  bankTypes = new DetectorType[]{DetectorType.BMT,
                                                        DetectorType.BST,
                                                        DetectorType.CND,
@@ -568,7 +630,8 @@ public class EvioHipoEvent4 {
                                                        DetectorType.LTCC,
                                                        DetectorType.ECAL,
                                                        DetectorType.RICH,
-                                                       DetectorType.RTPC};
+                                                       DetectorType.RTPC,
+                                                       DetectorType.BAND};
         int rows = 0;
         for(int k = 0; k < bankNames.length; k++){
             if(evioEvent.hasBank(bankNames[k]+"::true")==true){
