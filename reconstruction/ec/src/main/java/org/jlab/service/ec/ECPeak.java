@@ -2,6 +2,7 @@ package org.jlab.service.ec;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.base.DetectorType;
 
@@ -20,6 +21,7 @@ public class ECPeak {
     private Line3D              peakLine   = new Line3D();
     public int                  indexMaxStrip = -1;
     private int                 peakOrder     = -1;
+    private byte                peakStatus    = 1;
     private double              peakDistanceEdge = 0.0;
     private double              peakMoment       = 0.0;
     private double              peakMoment2      = 0.0;
@@ -39,6 +41,10 @@ public class ECPeak {
     public void setOrder(int order) { this.peakOrder = order;}
     
     public int  getOrder() { return this.peakOrder;}
+    
+    public void setStatus(int val) {this.peakStatus+=val;}
+    
+    public byte getStatus()  {return peakStatus;}   
     
     public void setPeakId(int id){
         for(ECStrip strip : this.peakStrips){
@@ -100,6 +106,10 @@ public class ECPeak {
             }
         }
         return false;
+    }
+    
+    public List<ECStrip> getStrips(){
+        return this.peakStrips;
     }
     
     public int getADC(){
@@ -217,24 +227,31 @@ public class ECPeak {
         return (int) (energy_norm/energy_summ);
     }
     
-    private double integral(int strip, int left_right){
+    private double integral_old(int strip, boolean left_right){
         int count = 0;
         int intg  = 0;
         int value = this.peakStrips.get(strip).getADC();
-        if(left_right==0){
-            for(int i = strip + 1; i < this.peakStrips.size();i++){
+        if(!left_right){
+            for(int i = strip + 1; i < this.peakStrips.size(); i++){
                 count++;
                 intg += this.peakStrips.get(i).getADC();
             }
             
         } else {
-            for(int i = strip - 1; i >=0;i--){
+            for(int i = strip - 1; i >=0; i--){
                 count++;
                 intg += this.peakStrips.get(i).getADC();
             }
         }
         double norm = ((double) intg) - ((double) value)*count;
         return norm;
+    }
+    
+    private double integral(int strip, boolean pm){ //pm=true/false: adc summed for strip indices to the +/- of input strip
+        int count = 0, intg = 0;
+        int value = this.peakStrips.get(strip).getADC();
+        for(int i = (pm)?0:strip+1; i < ((pm)?strip:this.peakStrips.size());i++) {count++;intg += this.peakStrips.get(i).getADC();}        
+        return ((double) intg) - ((double) value)*count;        
     }
     
     public List<ECPeak>  splitPeak(int strip){
@@ -253,15 +270,18 @@ public class ECPeak {
         int     split = -1;
         double  ratio = 0.0;
         
-        int nstrips = this.peakStrips.size();
-        
         if(peakStrips.size()>3){
             for(int i = 1; i < peakStrips.size()-1; i++){
-                double left  = this.integral(i, 0);
-                double right = this.integral(i, 1);
+                double left  = this.integral(i, false);
+                double right = this.integral(i, true);
                 double lf_ratio = left/right;
-                //System.out.println(String.format("\t STRIP %d  %12.5f %12.5f  RATIO %8.5f", 
-                //        i,left,right,left/right));
+                if(ECCommon.debugSplit) {
+                	int  s = peakStrips.get(i).getDescriptor().getSector();
+                	int il = peakStrips.get(i).getDescriptor().getLayer(); 
+                    double oleft  = this.integral_old(i, false);
+                    double oright = this.integral_old(i, true);
+               	    System.out.println("getSplitStrip: "+s+" "+il+" "+i+" "+left+" "+right+" "+oleft+" "+oright);
+                }
                 if(left>0.0&&right>0.0&&lf_ratio>ratio){
                     split = i;
                     ratio = lf_ratio;

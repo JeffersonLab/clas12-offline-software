@@ -1,11 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.io.hipo;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataSync;
 
@@ -15,6 +13,7 @@ import org.jlab.jnp.hipo4.data.Event;
 import org.jlab.jnp.hipo4.data.Schema;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.jnp.hipo4.io.HipoWriter;
+import org.jlab.jnp.hipo4.io.HipoWriterSorted;
 
 
 /**
@@ -22,21 +21,23 @@ import org.jlab.jnp.hipo4.io.HipoWriter;
  * @author gavalian
  */
 public class HipoDataSync implements DataSync {
+
+    public static Logger LOGGER = Logger.getLogger(HipoDataSync.class.getName());
     
-    HipoWriter writer = null;
+    HipoWriterSorted writer = null;
     
     public HipoDataSync(){
-        this.writer = new HipoWriter();
+        this.writer = new HipoWriterSorted();
         this.writer.setCompressionType(2);
         String env = System.getenv("CLAS12DIR");
         writer.getSchemaFactory().initFromDirectory(env + "/etc/bankdefs/hipo4");
-        System.out.println("[HipoDataSync] ---> dictionary size = " + writer.getSchemaFactory().getSchemaList().size());
+        LOGGER.log(Level.INFO,"[HipoDataSync] ---> dictionary size = " + writer.getSchemaFactory().getSchemaList().size());
         //this.writer.getSchemaFactory().initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
         //this.writer.getSchemaFactory().show();
     }
     
     public HipoDataSync(SchemaFactory factory){
-        this.writer = new HipoWriter();
+        this.writer = new HipoWriterSorted();
         this.writer.setCompressionType(2);
         List<Schema>  schemas = factory.getSchemaList();
         for(Schema schema : schemas){
@@ -69,10 +70,12 @@ public class HipoDataSync implements DataSync {
         //EvioDataEvent  evioEvent = (EvioDataEvent) event;
         if(event instanceof HipoDataEvent) {
             HipoDataEvent hipoEvent = (HipoDataEvent) event;
-            this.writer.addEvent(hipoEvent.getHipoEvent());
+            
+            this.writer.addEvent(hipoEvent.getHipoEvent(),hipoEvent.getHipoEvent().getEventTag());
         }
     }
-
+    public HipoWriterSorted getWriter(){ return writer;}
+    
     public void close() {
         this.writer.close();
     }

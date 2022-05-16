@@ -1,82 +1,265 @@
 package org.jlab.rec.cvt;
 
+import cnuphys.magfield.MagneticFields;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+import org.jlab.clas.pdg.PhysicsConstants;
+import org.jlab.clas.swimtools.Swim;
+import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.clas.tracking.kalmanfilter.Material;
+import org.jlab.clas.tracking.kalmanfilter.Units;
+
+import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.GeometryFactory;
+import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
+import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
+import org.jlab.geom.base.ConstantProvider;
+import org.jlab.geom.base.Detector;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
+import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
+import org.jlab.rec.cvt.measurement.Measurements;
+import org.jlab.rec.cvt.svt.SVTGeometry;
+
 public class Constants {
+   
 
-    /**
-     * Constants used in the reconstruction
-     */
-    Constants() {
+    public static Logger LOGGER = Logger.getLogger(Constants.class.getName());
+
+   // private constructor for a singleton
+    private Constants() {
     }
+    
+    // singleton
+    private static Constants instance = null;
+    
+    /**
+     * public access to the singleton
+     * 
+     * @return the dc constants singleton
+     */
+    public static Constants getInstance() {
+            if (instance == null) {
+                    instance = new Constants();
+            }
+            return instance;
+    }
+    
+    private static boolean ConstantsLoaded;
 
-    // SIMULATION FLAG
-    public static boolean isSimulation = true;
-
+    // parameters configurable from yaml
+    public boolean   isCosmics = false;
+    public boolean   svtOnly = false;
+    private int      removeRegion = 0;
+    public int       beamSpotConstraint = 2;
+    private double   beamRadius = 0.3; // mm
+    public boolean   svtSeeding = true;
+    public boolean   timeCuts = false;
+    public boolean   preElossCorrection = true;
+    private Material targetMaterial = LH2;
+    public Libr      KFMatrixLibrary;
+    
+    
     // CONSTANTS USED IN RECONSTRUCTION
-    //---------------------------------
-    public static final double LIGHTVEL = 0.000299792458;       // velocity of light (mm/ns) - conversion factor from radius in mm to momentum in GeV/c 
+    //---------------------------------    
+    public static final double LIGHTVEL = PhysicsConstants.speedOfLight()*1e-5;  // velocity of light (mm/ns) - conversion factor from radius in mm to momentum in GeV/c 
 
     // selection cuts for helical tracks
-    public static final double MINRADCURV = 200.00; //in cm
+    public static final double PTCUT   = 0.125; // minimum pt in GeV
+    public static final double TANDIP  = 2;     // max value on dip angle
+    public static final double NDFCUT  = 0;     // minimum number of degres of freedom
+    public static final double CHI2CUT = 50;    // minimum chi2 per degrees of freedom
+    public static final double ZRANGE  = 300;   // defines z range as -ZRANGE:+ZRANGE in mm
+    public static final int    MINSVTCRSFORCOSMIC = 2; 
+    public static final double CIRCLEFIT_MAXCHI2 = 100;
 
-    private static boolean isCosmicsData = true;
-
-    private static boolean SVTOnly = false;
-
-    public static final boolean trk_comesfrmOrig = true;
-
-    public static boolean areConstantsLoaded = false;
-
-    public static final double CTOFINNERRADIUS = 250;     // 250 mm
-    public static final double CTOFOUTRRADIUS = 250 + 33;  // 283  mm
+    public static final double DEFAULTSWIMACC  = 0.020; // in mm
+    public static final double SWIMACCURACYSVT = 0.010; // in mm
+    public static final double SWIMACCURACYBMT = 0.020; // in mm
+    public static final double SWIMACCURACYCD  = 0.500; // in mm
     
-    private static double _Xb =0;
-    private static double _Yb =0;
-    private static double _RbErr = 1./Math.sqrt(12.);
+    public static final double COSMICSMINRESIDUALX = 120; // in mm
+    public static final double COSMICSMINRESIDUALZ =  12; // in mm
     
-    private static double _Zoffset = 0;
+    public static final int SEEDFITITERATIONS = 5;
     
-    private static int _rmReg = 0;
+    private static final Material LH2 = new Material("LH2", 8.85, 0.0708E-3, 0.99212, 8904.0, 21.8, Units.MM);
+    private static final Material LD2 = new Material("LD2", 8.85, 0.1638E-3, 0.49650, 7691.0, 21.8, Units.MM);
+    public  static final Material TARGETKAPTON = new Material("Kapton", 50E-3, 1.42E-3, 0.501, 285.7, 79.6, Units.MM);
+    public  static final Material TARGETRHOACELL = new Material("Rhoacell", 10.4, 0.1E-3, 0.5392, 1000, 93.0, Units.MM);
+    public  static final Material SCINTILLATOR = new Material("Scintillator", 1, 1.03E-3, 0.54141, 439.0, 64.7, Units.MM);
+    public  static final Material VACUUM = new Material("Vacuum", 1, 0, 1, Double.POSITIVE_INFINITY, 100, Units.MM);
+    
+    public static boolean KFFILTERON = true;
+    public static boolean INITFROMMC = false;
+    public static int     KFITERATIONS = 5;
+    public static int     KFDIR = 1;
+    
+    public static int DEFAULTPID = 211;
 
-    public static double getXb() {
-        return _Xb;
+    public  boolean EXCLUDELAYERS = false;
+    private final Map<Integer,Integer> layersUsed = new HashMap<>();
+    private final double[][]BMTPhiZRangeExcld = new double[2][2];
+    private int BMTLayerExcld = -1;
+    
+    public SVTGeometry       SVTGEOMETRY  = null;
+    public BMTGeometry       BMTGEOMETRY  = null;
+    public CTOFGeant4Factory CTOFGEOMETRY = null;
+    public Detector          CNDGEOMETRY  = null;
+    public List<Surface>     CVTSURFACES  = null;
+    public List<Surface>     OUTERSURFACES  = null;
+    private double zTarget = 0;    
+
+
+    public double getBeamRadius() {
+        return beamRadius;
     }
 
-    public static synchronized void setXb(double Xb) {
-        _Xb = Xb;
-    }
-
-    public static double getYb() {
-        return _Yb;
-    }
-
-    public static synchronized void setYb(double Yb) {
-        _Yb = Yb;
-    }
-
-    public static double getRbErr() {
-        return _RbErr;
-    }
-
-    public static synchronized void setRbErr(double RbErr) {
-        _RbErr = RbErr;
-    }
-
-    public static double getZoffset() {
-        return _Zoffset;
-    }
-
-    public static void setZoffset(double _Zoffset) {
-        Constants._Zoffset = _Zoffset;
-    }
-
-    public static int getRmReg() {
-        return _rmReg;
-    }
-
-    public static void setRmReg(int _reg) {
-        Constants._rmReg = _reg;
+    public boolean seedBeamSpotConstraint() {
+        return this.beamSpotConstraint>0;
     }
     
+    public boolean kfBeamSpotConstraint() {
+        return this.beamSpotConstraint==2;
+    }
+    
+    public double getZoffset() {
+        return zTarget;
+    }
+
+    public void setTargetMaterial(String material) {
+        if(material.equalsIgnoreCase("LH2"))
+            targetMaterial = LH2;
+        else if(material.equalsIgnoreCase("LD2") )
+            targetMaterial = LD2;
+        else
+            System.out.println("Unknown target material " + material + ", keeping current setting " + targetMaterial.getName());
+    }
+
+    public Material getTargetMaterial() {
+        return targetMaterial;
+    }
+    
+    public int getRmReg() {
+        return removeRegion;
+    }
+
+    /**
+     * @return the layersUsed
+     */
+    public Map getUsedLayers() {
+        return layersUsed;
+    }
+
+    /**
+     * @param layers
+     */
+    public void setUsedLayers(String layers) {
+        //all layers used --> 1
+        for(int i = 0; i < 12; i++)
+            layersUsed.put(i+1, 1);        
+        //Skip layers
+        if(layers!=null) {
+            String[] values = layers.split(",");
+            if(values.length==0) return;            
+            for(String value : values) {
+                int layer = Integer.valueOf(value);
+                layersUsed.put(layer, 0);
+            }
+            EXCLUDELAYERS=true;
+        }
+    }
+
+    public void setBMTExclude(String exbmtlys) {
+        if(exbmtlys!=null) {
+            String[] values = exbmtlys.split(",");
+            int layer = Integer.valueOf(values[0]);
+            double phi_min = (double) Float.valueOf(values[1]);
+            double phi_max = (double) Float.valueOf(values[2]);
+            double z_min = (double) Float.valueOf(values[3]);
+            double z_max = (double) Float.valueOf(values[4]);
+            BMTLayerExcld = layer;
+            BMTPhiZRangeExcld[0][0] = phi_min;
+            BMTPhiZRangeExcld[0][1] = phi_max;
+            BMTPhiZRangeExcld[1][0] = z_min;
+            BMTPhiZRangeExcld[1][1] = z_max;
+        }
+    }
+            
+            
+    /**
+     * @return the BMTPhiZRangeExcld
+     */
+    public double[][] getBMTPhiZRangeExcld() {
+        return BMTPhiZRangeExcld;
+    }
+
+    /**
+     * @return the BMTLayerExcld
+     */
+    public int getBMTLayerExcld() {
+        return BMTLayerExcld;
+    }
+    
+    private static final double COVD0D0      = 1.;///50.;
+    private static final double COVD0PHI0    = 1;//./50.;
+    private static final double COVD0RHO     = 1.;///50.;
+    private static final double COVPHI0PHI0  = 1.;///50.;
+    private static final double COVPHI0RHO   = 1.;///50.;
+    private static final double COVRHORHO    = 1.;//50.;
+    private static final double COVZ0Z0      = 10.;
+    private static final double CONVTANLTANL = 10.;
+    
+    public static double[][] COVMATSCALEFACT = new double[][]{
+                                                                    {COVD0D0, COVD0PHI0, COVD0RHO,1.0,1.0},
+                                                                    {COVD0PHI0,COVPHI0PHI0, COVPHI0RHO,1.0,1.0},
+                                                                    {COVD0RHO, COVPHI0RHO, COVRHORHO,1.0,1.0},
+                                                                    {1.0,1.0,1.0, COVZ0Z0,1.0},
+                                                                    {1.0,1.0,1.0,1.0, CONVTANLTANL}
+                                                                };
+    
+    public static double[][] scaleCovMat(double[][] matrix) {
+        int nrow = matrix.length; 
+        int ncol = matrix[0].length; 
+        if(nrow!=5 || ncol!=5) {
+            throw new IllegalArgumentException("Error: wrong matrix dimension " + nrow + "x" + ncol);
+        }
+        double[][] scaledMatrix = new double[5][5];
+        for(int i = 0; i<5; i++) {
+            for(int j = 0; j<5; j++) {
+                scaledMatrix[i][j] = Constants.COVMATSCALEFACT[i][j]*matrix[i][j];
+            }
+        }
+        return scaledMatrix;
+    }
+    
+    
+    private static final double D0     = 10;
+    private static final double DPHI0  = Math.toRadians(10);
+    private static final double DRHO   = 0.01;
+    private static final double DTANL  = 0.2;
+    private static final double DZ0    = 20;
+    public static final double[][] COVHELIX = new double[][]{
+                                                             {D0*D0, 0, 0, 0, 0},
+                                                             {0, DPHI0*DPHI0, 0, 0, 0},
+                                                             {0, 0, DRHO*DRHO, 0, 0},
+                                                             {0, 0, 0, DZ0*DZ0, 0},
+                                                             {0, 0, 0, 0, DTANL*DTANL}
+                                                            };                
+           
+    public static final double[][] COVCOSMIC = new double[][]{
+                                                              { 20,  0, 0,    0,    0},
+                                                              {  0, 20, 0,    0,    0},
+                                                              {  0,  0, 0.01, 0,    0}, // ~8 deg
+                                                              {  0,  0, 0,    0.01, 0},
+                                                              {  0,  0, 0,    0,    1}
+                                                             };                
+
+                
     //public static final boolean DEBUGMODE =false;
     // for landau inverse calculation
     public static final double f[] = {
@@ -248,49 +431,106 @@ public class Constants {
         40.157721, 41.622399, 43.202525, 44.912465, 46.769077, 48.792279,
         51.005773, 53.437996, 56.123356, 59.103894};
 
-    //public static final int CVTCONFIGSTARTREG = 2; // for 3SVT+3BMT
+    
+    public void setMatLib(String matLib) {
+        switch (matLib) {
+            case "JAMA":
+                KFMatrixLibrary = Libr.JAMA;
+                break;
+            case "JNP":
+                KFMatrixLibrary = Libr.JNP;
+                break;
+            case "APA":
+                KFMatrixLibrary = Libr.APA;
+                break;
+            case "EJML":
+                KFMatrixLibrary = Libr.EJML;    
+                break;
+            default:
+                KFMatrixLibrary = Libr.EJML;
+        } 
+    }
+    
+    public static double getSolenoidMagnitude() {
+        float[] b = new float[3];
+        Swim swimmer = new Swim();
+        swimmer.BfieldLab(0, 0, 0, b);
+        return Math.abs(b[2]);
+    }
 
-    public static synchronized void Load(boolean isCosmics, boolean isSVTonly) {
-        if (areConstantsLoaded) {
-            return;
+    public static double getSolenoidScale() {
+        return MagneticFields.getInstance().getScaleFactor(MagneticFields.FieldType.SOLENOID);
+    }
+    
+    public synchronized void initialize(String engine,
+                                        String variation, 
+                                        boolean isCosmics,
+                                        boolean svtOnly,
+                                        String excludeLayers,
+                                        String excludeBMTLayers,
+                                        int removeRegion,
+                                        int beamSpotConstraint,
+                                        double beamSpotRadius,
+                                        String targetMaterial,
+                                        boolean elosPrecorrection,
+                                        boolean svtSeeding,
+                                        boolean timeCuts,
+                                        String matrixLibrary) {
+        if (!ConstantsLoaded) {
+            this.isCosmics = isCosmics;
+            this.svtOnly      = svtOnly;
+            this.setUsedLayers(excludeLayers);
+            this.setBMTExclude(excludeBMTLayers);
+            this.removeRegion = removeRegion;
+            this.beamSpotConstraint = beamSpotConstraint;
+            this.beamRadius = beamSpotRadius;
+            this.setTargetMaterial(targetMaterial);
+            this.preElossCorrection = elosPrecorrection;
+            this.svtSeeding = svtSeeding;
+            this.timeCuts = timeCuts;
+            this.setMatLib(matrixLibrary);
+
+            loadGeometries(variation);
+
+            ConstantsLoaded = true;
         }
+    }
+    
+    public synchronized void initialize(String engine,
+                                        String variation) {
+        if (!ConstantsLoaded) {
+            
+            loadGeometries(variation);
 
+            ConstantsLoaded = true;
+        }
+    }
+    
+    public synchronized void loadGeometries(String variation) {
+        // Load other geometries
+        System.out.println(" CVT YAML VARIATION NAME + "+variation);
         
-        Constants.setCosmicsData(false);
-        setSVTOnly(isSVTonly);
-
-        org.jlab.rec.cvt.svt.Constants.Load();
-        org.jlab.rec.cvt.bmt.Constants.Load();
-
-        areConstantsLoaded = true;
-        System.out.println("CVT constants loaded ? " + areConstantsLoaded);
+        // Load target
+        ConstantProvider providerTG = GeometryFactory.getConstants(DetectorType.TARGET, 11, variation);
+        this.zTarget = providerTG.getDouble("/geometry/target/position",0)*10;
+                         
+        ConstantProvider providerCTOF = GeometryFactory.getConstants(DetectorType.CTOF, 11, variation);
+        CTOFGEOMETRY = new CTOFGeant4Factory(providerCTOF);        
+        CNDGEOMETRY  =  GeometryFactory.getDetector(DetectorType.CND, 11, variation);
         
-    }
-
-    public static final boolean isCosmicsData() {
-        return isCosmicsData;
-    }
-
-    public static final void setCosmicsData(boolean isCosmicsData) {
-        Constants.isCosmicsData = isCosmicsData;
-    }
-
-    public static final boolean isSVTOnly() {
-        return SVTOnly;
-    }
-
-    public static final void setSVTOnly(boolean sVTOnly) {
-        SVTOnly = sVTOnly;
-    }
-
-    private static double SOLENOIDSCALE = 0;
-
-    public static final void setSolenoidscale(double scale) {
-        SOLENOIDSCALE = scale;
-    }
-
-    public static final double getSolenoidscale() {
-        return SOLENOIDSCALE;
+        System.out.println(" LOADING CVT GEOMETRY...............................variation = "+variation);
+        CCDBConstantsLoader.Load(new DatabaseConstantProvider(11, variation));
+        System.out.println("SVT LOADING WITH VARIATION "+variation);
+        DatabaseConstantProvider cp = new DatabaseConstantProvider(11, variation);
+        SVTStripFactory svtFac = new SVTStripFactory(cp, true);
+        SVTGEOMETRY  = new SVTGeometry(svtFac);
+        BMTGEOMETRY  = new BMTGeometry();
+        
+        CVTSURFACES = new ArrayList<>();
+        CVTSURFACES.addAll(SVTGEOMETRY.getSurfaces());
+        CVTSURFACES.addAll(BMTGEOMETRY.getSurfaces());
+        
+        OUTERSURFACES = Measurements.getOuters();
     }
 
 }

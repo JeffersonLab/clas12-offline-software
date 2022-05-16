@@ -45,6 +45,9 @@ public class FTCALEngine extends ReconstructionEngine {
                 };
                 requireConstants(Arrays.asList(tables));
                 this.getConstantsManager().setVariation("default");
+
+                this.registerOutputBank("FTCAL::hits","FTCAL::clusters");
+                
                 return true;
 	}
 
@@ -52,9 +55,7 @@ public class FTCALEngine extends ReconstructionEngine {
 	public boolean processDataEvent(DataEvent event) {
             List<FTCALHit>     allHits           = new ArrayList();
             List<FTCALHit>     selectedHits      = new ArrayList();
-            List<FTCALCluster> allClusters       = new ArrayList();
-            List<FTCALCluster> selectedClusters  = new ArrayList();
-            List<FTCALCluster> correctedClusters = new ArrayList();
+            List<FTCALCluster> clusters          = new ArrayList();
             
             // update calibration constants based on run number if changed
             int run = setRunConditionsParameters(event);
@@ -65,11 +66,11 @@ public class FTCALEngine extends ReconstructionEngine {
                 // select good hits and order them by energy
                 selectedHits = reco.selectHits(allHits,this.getConstantsManager(), run);
                 // create clusters
-                allClusters = reco.findClusters(selectedHits, this.getConstantsManager(), run);
-                // select good clusters
-                selectedClusters = reco.selectClusters(allClusters, this.getConstantsManager(), run);
+                clusters = reco.findClusters(selectedHits, this.getConstantsManager(), run);
+                // set cluster status
+                reco.selectClusters(clusters, this.getConstantsManager(), run);
                 // write output banks
-                reco.writeBanks(event, selectedHits, selectedClusters, this.getConstantsManager(), run);
+                reco.writeBanks(event, selectedHits, clusters, this.getConstantsManager(), run);
             }
             return true;
 	}

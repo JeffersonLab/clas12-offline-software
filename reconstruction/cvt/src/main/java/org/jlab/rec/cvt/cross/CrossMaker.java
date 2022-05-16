@@ -2,11 +2,15 @@ package org.jlab.rec.cvt.cross;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.bmt.BMTConstants;
 
-import org.jlab.geom.prim.Point3D;
-import org.jlab.rec.cvt.bmt.Geometry;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
+import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
-import org.jlab.rec.cvt.svt.Constants;
+import org.jlab.rec.cvt.svt.SVTGeometry;
+import org.jlab.rec.cvt.svt.SVTParameters;
 
 /**
  * Driver class to make crosses
@@ -23,12 +27,11 @@ public class CrossMaker {
     /**
      *
      * @param clusters clusters
-     * @param svt_geo svt geometry
      * @return list of crosses for the SVT and BMT
      */
-    public ArrayList<ArrayList<Cross>> findCrosses(List<Cluster> clusters, org.jlab.rec.cvt.svt.Geometry svt_geo) {
+    public ArrayList<ArrayList<Cross>> findCrosses(List<Cluster> clusters) {
         // instantiate array of clusters that are sorted by detector (SVT, BMT [C, Z]) and inner/outer layers
-        ArrayList<ArrayList<Cluster>> sortedClusters = new ArrayList<ArrayList<Cluster>>();
+        ArrayList<ArrayList<Cluster>> sortedClusters = new ArrayList<>();
         // fill the sorted list
         sortedClusters = this.sortClusterByDetectorAndIO(clusters);
         // array indexes: array index 0 (1) = svt inner (outer) layer clusters, 2 (3) = bmt inner (outer) layers
@@ -36,10 +39,35 @@ public class CrossMaker {
         ArrayList<Cluster> svt_outerlayrclus = sortedClusters.get(1);
         ArrayList<Cluster> bmt_Clayrclus = sortedClusters.get(2);
         ArrayList<Cluster> bmt_Zlayrclus = sortedClusters.get(3);
+        ArrayList<Cluster> rbmt_Clayrclus = new ArrayList<>();
+        ArrayList<Cluster> rbmt_Zlayrclus = new ArrayList<>();
+        
+        for(Cluster cl : bmt_Zlayrclus) { 
+            if(cl.getLayer()==Constants.getInstance().getBMTLayerExcld()
+                    && cl.getPhi0()>Math.toRadians(Constants.getInstance().getBMTPhiZRangeExcld()[0][0])
+                    && cl.getPhi0()<=Math.toRadians(Constants.getInstance().getBMTPhiZRangeExcld()[0][1]) ) {
+                cl.flagForExclusion = true;
+                rbmt_Zlayrclus.add(cl); 
+            }
+        }
+        if(bmt_Zlayrclus.size()>0) {
+            bmt_Zlayrclus.removeAll(rbmt_Zlayrclus);
+        }
+        for(Cluster cl : bmt_Clayrclus) { 
+            if(cl.getLayer()==Constants.getInstance().getBMTLayerExcld()
+                    && cl.getZ()>Constants.getInstance().getBMTPhiZRangeExcld()[1][0]
+                    && cl.getZ()<=Constants.getInstance().getBMTPhiZRangeExcld()[1][1]) {
+                cl.flagForExclusion = true;
+                rbmt_Clayrclus.add(cl); 
+            }
+        }
+        if(bmt_Clayrclus.size()>0) {
+            bmt_Clayrclus.removeAll(rbmt_Clayrclus);
+        }
         // arrays of BMT and SVT crosses
-        ArrayList<Cross> BMTCrosses = this.findBMTCrosses(bmt_Clayrclus, bmt_Zlayrclus);
-        ArrayList<Cross> SVTCrosses = this.findSVTCrosses(svt_innerlayrclus, svt_outerlayrclus, svt_geo);
-
+        ArrayList<Cross> BMTCrosses = this.findBMTCrosses(bmt_Clayrclus, bmt_Zlayrclus,1000);
+        ArrayList<Cross> SVTCrosses = this.findSVTCrosses(svt_innerlayrclus, svt_outerlayrclus);
+        
         // instantiate the arraylists of sorted Crosses by detector type
         ArrayList<ArrayList<Cross>> sortedCrosses = new ArrayList<ArrayList<Cross>>();
         // array index 0 = SVT crosses, 1 = BMT crosses
@@ -53,72 +81,75 @@ public class CrossMaker {
      *
      * @param svt_innerlayrclus svt inner layer clusters
      * @param svt_outerlayrclus svt outer layer clusters
-     * @param svt_geo svt geometry
      * @return the list of SVT crosses reconstructed from clusters in the inner
      * and outer layers in a module
      */
     public ArrayList<Cross> findSVTCrosses(
             List<Cluster> svt_innerlayrclus,
-            List<Cluster> svt_outerlayrclus,
-            org.jlab.rec.cvt.svt.Geometry svt_geo) {
+            List<Cluster> svt_outerlayrclus) {
         // instantiate the list of crosses
-        ArrayList<Cross> crosses = new ArrayList<Cross>();
+        ArrayList<Cross> crosses = new ArrayList<>();
         int rid = 0; // cross id
         //loop over the clusters
         // inner clusters
         for (Cluster inlayerclus : svt_innerlayrclus) {
-            if(inlayerclus.get_TotalEnergy()<org.jlab.rec.cvt.svt.Constants.ETOTCUT)
+            if(inlayerclus.getTotalEnergy()<SVTParameters.ETOTCUT)
                 continue;
             // outer clusters
             for (Cluster outlayerclus : svt_outerlayrclus) {
-                if(outlayerclus.get_TotalEnergy()<org.jlab.rec.cvt.svt.Constants.ETOTCUT)
+                if(outlayerclus.getTotalEnergy()<SVTParameters.ETOTCUT)
                     continue;
                 // the diffence in layers between outer and inner is 1 for a double layer
-                if (outlayerclus.get_Layer() - inlayerclus.get_Layer() != 1) {
+                if (outlayerclus.getLayer() - inlayerclus.getLayer() != 1) {
                     continue;
                 }
                 // the sectors must be the same
-                if (outlayerclus.get_Sector() != inlayerclus.get_Sector()) {
+                if (outlayerclus.getSector() != inlayerclus.getSector()) {
                     continue;
                 }
                 
                     // define new cross ))
                 // a cut to avoid looping over all strips - from geometry there is a minimum (maximum) strip sum of inner and outer layers that can give a strip intersection
-                if ((inlayerclus.get_MinStrip() + outlayerclus.get_MinStrip() > Constants.sumStpNumMin)
-                        && (inlayerclus.get_MaxStrip() + outlayerclus.get_MaxStrip() < Constants.sumStpNumMax)) { // the intersection is valid
+                if ((inlayerclus.getMinStrip() + outlayerclus.getMinStrip() > SVTParameters.MINSTRIPSUM)
+                        && (inlayerclus.getMaxStrip() + outlayerclus.getMaxStrip() < SVTParameters.MAXSTRIPSUM)) { // the intersection is valid
 
                     // define new cross 
-                    Cross this_cross = new Cross("SVT", "", inlayerclus.get_Sector(), inlayerclus.get_Region(), rid++);
+                    Cross this_cross = new Cross(DetectorType.BST, BMTType.UNDEFINED, inlayerclus.getSector(), inlayerclus.getRegion(), rid++);
                     // cluster1 is the inner layer cluster
-                    this_cross.set_Cluster1(inlayerclus);
+                    this_cross.setCluster1(inlayerclus);
                     // cluster2 is the outer layer cluster
-                    this_cross.set_Cluster2(outlayerclus);
-                    this_cross.set_Id(rid);
+                    this_cross.setCluster2(outlayerclus);
+                    this_cross.setId(rid);
                     // sets the cross parameters (point3D and associated error) from the SVT geometry
-                    this_cross.set_CrossParamsSVT(null, svt_geo); 
+                    this_cross.updateSVTCross(null); 
                     // the uncorrected point obtained from default estimate that the track is at 90 deg wrt the module should not be null
-                    if (this_cross.get_Point0() != null) {
+                    if (this_cross.getPoint0() != null) {
                         //pass the cross to the arraylist of crosses
-                        this_cross.set_Id(crosses.size() + 1);
-                        this_cross.set_Detector("SVT");
-                        calcCentErr(this_cross, this_cross.get_Cluster1(), svt_geo);
-                        calcCentErr(this_cross, this_cross.get_Cluster2(), svt_geo);
+                        this_cross.setId(crosses.size() + 1);
+                        this_cross.setDetector(DetectorType.BST);
+                        calcCentErr(this_cross, this_cross.getCluster1());
+                        calcCentErr(this_cross, this_cross.getCluster2());
                         crosses.add(this_cross);
                     }
 
                 }
             }
         }
+        for (Cross c : crosses) {
+            int rg  = c.getRegion();
+            c.setOrderedRegion(rg);
+        }
         return crosses;
     }
 
-    private void calcCentErr(Cross c, Cluster Cluster1, org.jlab.rec.cvt.svt.Geometry svt_geo) {
-        double Z = svt_geo.transformToFrame(Cluster1.get_Sector(), Cluster1.get_Layer(), c.get_Point().x(), c.get_Point().y(), c.get_Point().z(), "local", "").z();
-        if(Z<0)
-            Z=0;
-        if(Z>Constants.ACTIVESENLEN)
-            Z=Constants.ACTIVESENLEN;
-        Cluster1.set_CentroidError(Cluster1.get_ResolutionAlongZ(Z, svt_geo) / (Constants.PITCH / Math.sqrt(12.)));
+    public void calcCentErr(Cross c, Cluster Cluster1) {
+        double Z = Constants.getInstance().SVTGEOMETRY.toLocal(Cluster1.getLayer(),
+                                                 Cluster1.getSector(),
+                                                 c.getPoint()).z();        
+        if(Z>SVTGeometry.getModuleLength()) Z=SVTGeometry.getModuleLength();
+        else if(Z<0) Z=0;
+        Cluster1.setCentroidError(Cluster1.getResolutionAlongZ(Z) /(SVTGeometry.getPitch() / Math.sqrt(12.)));
+        Cluster1.setResolution(Cluster1.getResolutionAlongZ(Z) );
     }
     /**
      *
@@ -127,43 +158,26 @@ public class CrossMaker {
      * @return list of reconstructed peudocrosses for the BMT which contain
      * measured x,y position for Z and measured z position for C detectors.
      */
-    private ArrayList<Cross> findBMTCrosses(
+    public ArrayList<Cross> findBMTCrosses(
             ArrayList<Cluster> Clayrclus,
-            ArrayList<Cluster> Zlayrclus) {
+            ArrayList<Cluster> Zlayrclus, 
+            int idx) {
         //instanciates the list of crosses
-        ArrayList<Cross> crosses = new ArrayList<Cross>();
+        ArrayList<Cross> crosses = new ArrayList<>();
 
-        // For BMT start id at 1000
-        int pid = 1000;
+        // For BMT start id at last id from existing list
+        int pid = idx;
         for (Cluster Zlayerclus : Zlayrclus) {
-            if (Zlayerclus.get_TotalEnergy() < org.jlab.rec.cvt.bmt.Constants.ETOTCUT) {
+            if (Zlayerclus.getTotalEnergy() < BMTConstants.ETOTCUT) {
                 continue;
             }
             // Z detector --> meas phi
             // define new cross 
-            Cross this_cross = new Cross("BMT", "Z", Zlayerclus.get_Sector(), Zlayerclus.get_Region(), pid++);
-            this_cross.set_Id(pid);
-            this_cross.set_Cluster1(Zlayerclus); // this is the inner shell
-            //the uncorrected x,y position of the Z detector cluster centroid.  This is calculated from the measured strips 
-            // in the cluster prior to taking Lorentz angle correction into account
-            double x0 = (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det) * Math.cos(Zlayerclus.get_Phi0());
-            double y0 = (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det) * Math.sin(Zlayerclus.get_Phi0());
-            double x0Er = -org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] * Math.sin(Zlayerclus.get_Phi0()) * Zlayerclus.get_PhiErr0();
-            double y0Er = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] * Math.cos(Zlayerclus.get_Phi0()) * Zlayerclus.get_PhiErr0();
-            // set only the coordinates for which there is a measurement
-            this_cross.set_Point0(new Point3D(x0, y0, Double.NaN));
-            this_cross.set_PointErr0(new Point3D(x0Er, y0Er, Double.NaN));
-            //the x,y position of the Z detector cluster centroid.  This is calculated from the Lorentz angle corrected strips 
-            double x = (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det) * Math.cos(Zlayerclus.get_Phi());
-            double y = (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det) * Math.sin(Zlayerclus.get_Phi());
-            double xEr = -org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] * Math.sin(Zlayerclus.get_Phi()) * Zlayerclus.get_PhiErr();
-            double yEr = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] * Math.cos(Zlayerclus.get_Phi()) * Zlayerclus.get_PhiErr();
-
-            // set only the coordinates for which there is a measurement (x,y)
-            this_cross.set_Point(new Point3D(x, y, Double.NaN));
-            this_cross.set_PointErr(new Point3D(Math.abs(xEr), Math.abs(yEr), Double.NaN));
-            this_cross.set_Cluster1(Zlayerclus);
-            if (this_cross.get_Point0() != null) {
+            Cross this_cross = new Cross(DetectorType.BMT, BMTType.Z, Zlayerclus.getSector(), Zlayerclus.getRegion(), pid++);
+            this_cross.setId(pid);
+            this_cross.setCluster1(Zlayerclus); 
+            this_cross.updateBMTCross(null, null);
+            if (this_cross.getPoint0() != null) {
                 //make arraylist
                 crosses.add(this_cross);
             }
@@ -171,36 +185,30 @@ public class CrossMaker {
         }
 
         for (Cluster Clayerclus : Clayrclus) {
-            if (Clayerclus.get_TotalEnergy() < org.jlab.rec.cvt.bmt.Constants.ETOTCUT) {
+            if (Clayerclus.getTotalEnergy() < BMTConstants.ETOTCUT) {
                 continue;
             }
             // C detector --> meas z
             // define new cross 
-            Cross this_cross = new Cross("BMT", "C", Clayerclus.get_Sector(), Clayerclus.get_Region(), pid++);
-            this_cross.set_Id(pid);
-
-            // measurement of z
-            double z = Clayerclus.get_Z();
-            double zErr = Clayerclus.get_ZErr();
-            // there is no measurement of x,y, hence only the z component is set
-            this_cross.set_Point0(new Point3D(Double.NaN, Double.NaN, z));
-            this_cross.set_PointErr0(new Point3D(Double.NaN, Double.NaN, zErr));
-            // at this stage there is no additional correction to the measured centroid
-            this_cross.set_Point(new Point3D(Double.NaN, Double.NaN, z));
-            this_cross.set_PointErr(new Point3D(Double.NaN, Double.NaN, zErr));
-            this_cross.set_Cluster1(Clayerclus);
-            if (this_cross.get_Point0() != null) {
+            Cross this_cross = new Cross(DetectorType.BMT, BMTType.C, Clayerclus.getSector(), Clayerclus.getRegion(), pid++);
+            this_cross.setId(pid);
+            this_cross.setCluster1(Clayerclus);
+            this_cross.updateBMTCross(null, null);
+            if (this_cross.getPoint0() != null) {
                 //make arraylist
                 crosses.add(this_cross);
-
             }
-
         }
 
+        for (Cross c : crosses) {
+            int rg  =  3 + 
+                    Constants.getInstance().BMTGEOMETRY.getLayer( c.getRegion(), c.getType()) ;
+            c.setOrderedRegion(rg);
+        }
         return crosses;
-
+        
     }
-
+    
     /**
      *
      * @param clusters the clusters
@@ -210,33 +218,33 @@ public class CrossMaker {
     public ArrayList<ArrayList<Cluster>> sortClusterByDetectorAndIO(
             List<Cluster> clusters) {
 
-        ArrayList<ArrayList<Cluster>> sortedClusters = new ArrayList<ArrayList<Cluster>>();
+        ArrayList<ArrayList<Cluster>> sortedClusters = new ArrayList<>();
         // svt
-        ArrayList<Cluster> svt_innerlayrclus = new ArrayList<Cluster>();
-        ArrayList<Cluster> svt_outerlayrclus = new ArrayList<Cluster>();
+        ArrayList<Cluster> svt_innerlayrclus = new ArrayList<>();
+        ArrayList<Cluster> svt_outerlayrclus = new ArrayList<>();
 
         // bmt
-        ArrayList<Cluster> bmt_Clayrclus = new ArrayList<Cluster>();
-        ArrayList<Cluster> bmt_Zlayrclus = new ArrayList<Cluster>();
+        ArrayList<Cluster> bmt_Clayrclus = new ArrayList<>();
+        ArrayList<Cluster> bmt_Zlayrclus = new ArrayList<>();
 
         // Sorting by layer first:
         for (Cluster theclus : clusters) {
-            if (theclus.get_Detector() == 1) {
-                if (Geometry.getZorC(theclus.get_Layer()) == 1) {
+            if (theclus.getDetector() == DetectorType.BMT) {
+                if (BMTGeometry.getDetectorType(theclus.getLayer()) == BMTType.Z) {
                     bmt_Zlayrclus.add(theclus);
                 }
 
-                if (Geometry.getZorC(theclus.get_Layer()) == 0) {
-                    bmt_Clayrclus.add(theclus);
+                if (BMTGeometry.getDetectorType(theclus.getLayer()) == BMTType.C) {
+                    bmt_Clayrclus.add(theclus); 
                 }
 
             }
-            if (theclus.get_Detector() == 0) {
-                if (theclus.get_Layer() % 2 == 0) {
+            if (theclus.getDetector() == DetectorType.BST) {
+                if (theclus.getLayer() % 2 == 0) {
                     svt_outerlayrclus.add(theclus);
                 }
 
-                if (theclus.get_Layer() % 2 == 1) {
+                if (theclus.getLayer() % 2 == 1) {
                     svt_innerlayrclus.add(theclus);
                 }
 
@@ -251,50 +259,4 @@ public class CrossMaker {
         return sortedClusters;
 
     }
-
-    /**
-     *
-     * @param crosses the crosses in the list
-     * @return the crosses that have been flagged as being part of a looper
-     * candidate in the SVT
-     */
-    public List<Cross> crossLooperCands(List<ArrayList<Cross>> crosses) {
-        // nb SVT layers
-        int nlayr = Constants.NLAYR;
-        // list of crosses in a sector
-        ArrayList<ArrayList<ArrayList<Cross>>> secList = new ArrayList<ArrayList<ArrayList<Cross>>>();
-
-        //initialize
-        for (int i = 0; i < nlayr; i++) {
-            secList.add(i, new ArrayList<ArrayList<Cross>>());
-            for (int j = 0; j < Constants.NSECT[i]; j++) {
-                secList.get(i).add(j, new ArrayList<Cross>());
-            }
-        }
-
-        // loop over the crosses in the SVT and use a simple counting algorithm for the number of crosses in a given sector
-        // a looper will have a pattern of multiple hits in the same sector
-        for (Cross c : crosses.get(0)) { // svt crosses
-
-            int l = c.get_Region() * 2;
-            int s = c.get_Sector();
-
-            secList.get(l - 1).get(s - 1).add(c);
-        }
-        ArrayList<Cross> listOfCrossesToRm = new ArrayList<Cross>();
-
-        for (int i = 0; i < nlayr; i++) {
-            for (int j = 0; j < Constants.NSECT[i]; j++) {
-                //System.out.println(" number of crosses in sector "+(j+1)+" = "+secList.get(i).get(j).size());
-                if (secList.get(i).get(j).size() > Constants.MAXNUMCROSSESINMODULE) {
-                    listOfCrossesToRm.addAll(secList.get(i).get(j));
-                }
-            }
-
-        }
-        //System.out.println(" number of crosses to remove "+listOfCrossesToRm.size());
-        return listOfCrossesToRm;
-
-    }
-
 }

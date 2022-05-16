@@ -4,8 +4,7 @@
 
 export MALLOC_ARENA_MAX=1
 
-echo +-------------------------------------------------------------------------
-echo "| DECODER GENERATION 4 (using HIPO-4 Library)"
-echo +-------------------------------------------------------------------------
-
-java -Xmx1536m -Xms1024m -cp "$CLAS12DIR/lib/clas/*:$CLAS12DIR/lib/plugins/*" org.jlab.detector.decode.CLASDecoder4 $*
+java -Xmx1536m -Xms1024m -XX:+UseSerialGC \
+    -cp "$CLAS12DIR/lib/clas/*:$CLAS12DIR/lib/plugins/*" \
+    org.jlab.detector.decode.CLASDecoder4 \
+    $*

@@ -3,14 +3,14 @@
 
   <groupId>org.jlab.clas</groupId>
   <artifactId>reconstruction</artifactId>
-  <version>6.5.13-SNAPSHOT</version>
+  <version>8.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <parent>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../parent/pom.xml</relativePath>
-    <version>6.5.13-SNAPSHOT</version>
+    <version>8.0.0-SNAPSHOT</version>
   </parent>
 
   <modules>
@@ -23,10 +23,13 @@
     <module>htcc</module>
     <module>cnd</module>
     <module>rich</module>
-    <module>fvt</module>
+    <module>fmt</module>
     <module>eb</module>
     <module>band</module>
+    <module>mc</module>
     <module>rtpc</module>
+    <module>mltn</module>
     <module>swaps</module>
+    <module>vtx</module>
   </modules>
 </project>

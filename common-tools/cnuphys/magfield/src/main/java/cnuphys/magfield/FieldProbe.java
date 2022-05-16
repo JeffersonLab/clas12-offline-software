@@ -227,13 +227,23 @@ public abstract class FieldProbe implements IField {
 
 			if (field instanceof Torus) {
 				return new TorusProbe((Torus) field);
-			} else if (field instanceof Solenoid) {
-				return new SolenoidProbe((Solenoid) field);
-			} else if (field instanceof RotatedCompositeField) {
+			} 
+			else if (field instanceof StandardSolenoid) {
+				return new StandardSolenoidProbe((StandardSolenoid) field);
+			} 
+			else if (field instanceof TransverseSolenoid) {
+				return new TransverseSolenoidProbe((TransverseSolenoid) field);
+			} 
+			else if (field instanceof RotatedCompositeField) {
 				return new RotatedCompositeProbe((RotatedCompositeField) field);
-			} else if (field instanceof CompositeField) {
+			} 
+			else if (field instanceof RotatedCompositeField) {
+				return new RotatedCompositeProbe((RotatedCompositeField) field);
+			} 
+			else if (field instanceof CompositeField) {
 				return new CompositeProbe((CompositeField) field);
-			} else {
+			} 
+			else {
 				(new Throwable()).printStackTrace();
 				System.err.println("WARNING: cannot create probe for " + field.getName() + "  class: "
 						+ field.getClass().getName());
@@ -388,9 +398,9 @@ public abstract class FieldProbe implements IField {
 	}
 
 	/**
-	 * Get B1 at a given index.
+	 * Get B1 at a given composite index.
 	 * 
-	 * @param index the index.
+	 * @param index the composite index.
 	 * @return the B1 at the given index.
 	 */
 	public final float getB1(int index) {
@@ -400,18 +410,18 @@ public abstract class FieldProbe implements IField {
 	/**
 	 * Get B2 at a given index.
 	 * 
-	 * @param index the index.
-	 * @return the B2 at the given index.
+	 * @param index the composite index.
+	 * @return the B2 at the given composite index.
 	 */
 	public final float getB2(int index) {
 		return _field.getB2(index);
 	}
 
 	/**
-	 * Get B3 at a given index.
+	 * Get B3 at a given composite index.
 	 * 
-	 * @param index the index.
-	 * @return the B3 at the given index.
+	 * @param index the composite index.
+	 * @return the B3 at the given composite index.
 	 */
 	public final float getB3(int index) {
 		return _field.getB3(index);

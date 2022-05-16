@@ -3,7 +3,7 @@
 
   <groupId>org.jlab.clas</groupId>
   <artifactId>clas12rec</artifactId>
-  <version>6.5.13-SNAPSHOT</version>
+  <version>8.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <repositories>
@@ -40,6 +40,13 @@
       <artifactId>spotbugs</artifactId>
       <version>3.1.12</version>
     </dependency>
+    
+    <dependency>
+      <groupId>org.jlab</groupId>
+      <artifactId>groot</artifactId>
+      <version>4.0.0-SNAPSHOT</version>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -83,6 +90,50 @@
           <windowtitle>coatjavadocs</windowtitle>
         </configuration>
       </plugin>
+      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.0</version>
+        <configuration>
+            <release>11</release>
+            <encoding>UTF-8</encoding>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.2.0</version>
+        <configuration>
+          <encoding>UTF-8</encoding>
+        </configuration>
+      </plugin>
+
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.2.2</version>
+          <configuration>
+              <archive>
+                  <manifest>
+                      <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                      <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                  </manifest>
+                  <manifestSections>
+                      <manifestSection>
+                          <name>${project.name}</name>
+                          <manifestEntries>
+                              <groupId>${project.groupId}</groupId>
+                              <artifactId>${project.artifactId}</artifactId>
+                              <version>${project.version}</version>
+                          </manifestEntries>
+                      </manifestSection>
+                  </manifestSections>
+              </archive>
+          </configuration>
+      </plugin>
+
     </plugins>
 
   </build>

@@ -39,15 +39,14 @@ public class DataEditor extends SimpleDialog implements TableModelListener {
 	/**
 	 * Edit the plot preferences
 	 * 
-	 * @param plotCanvas
-	 *            the plot being edited
+	 * @param plotCanvas the plot being edited
 	 */
 	public DataEditor(PlotCanvas plotCanvas) {
 		super("Plot Data", plotCanvas, true, APPLY, CLOSE);
 
 		// note components already created by super constructor
 		_plotCanvas = plotCanvas;
-		
+
 		addNorth();
 		pack();
 		setLabels();
@@ -74,8 +73,8 @@ public class DataEditor extends SimpleDialog implements TableModelListener {
 	}
 
 	/**
-	 * Override to create the component that goes in the center. Usually this is
-	 * the "main" component.
+	 * Override to create the component that goes in the center. Usually this is the
+	 * "main" component.
 	 * 
 	 * @return the component that is placed in the center
 	 */
@@ -87,14 +86,14 @@ public class DataEditor extends SimpleDialog implements TableModelListener {
 	/**
 	 * A button was hit. The default behavior is to shutdown the dialog.
 	 * 
-	 * @param command
-	 *            the label on the button that was hit.
+	 * @param command the label on the button that was hit.
 	 */
 	@Override
 	protected void handleCommand(String command) {
 		if (CLOSE.equals(command)) {
 			setVisible(false);
-		} else if (APPLY.equals(command)) {
+		}
+		else if (APPLY.equals(command)) {
 		}
 	}
 
@@ -119,8 +118,7 @@ public class DataEditor extends SimpleDialog implements TableModelListener {
 		JPanel npanel3 = new JPanel();
 		npanel3.setLayout(new FlowLayout(FlowLayout.CENTER));
 
-		String str3 = "X Range: [XXXXX.XX, XXXXX.XX]"
-				+ "  Y Range: [XXXXX.XX, XXXXX.XX]";
+		String str3 = "X Range: [XXXXX.XX, XXXXX.XX]" + "  Y Range: [XXXXX.XX, XXXXX.XX]";
 		_rangeLabel = new JLabel(str3);
 		_rangeLabel.setFont(_font);
 		npanel3.add(_rangeLabel);
@@ -138,8 +136,8 @@ public class DataEditor extends SimpleDialog implements TableModelListener {
 	}
 
 	private void setLabels() {
-		String str = "Number of rows: " + _table.getModel().getRowCount()
-				+ "  Number of columns: " + _table.getModel().getColumnCount();
+		String str = "Number of rows: " + _table.getModel().getRowCount() + "  Number of columns: "
+				+ _table.getModel().getColumnCount();
 		_rowColLabel.setText(str);
 
 		DataSet ds = _plotCanvas.getDataSet();
@@ -148,9 +146,8 @@ public class DataEditor extends SimpleDialog implements TableModelListener {
 		String yminString = DoubleFormat.doubleFormat(ds.getYmin(), 4, 3);
 		String ymaxString = DoubleFormat.doubleFormat(ds.getYmax(), 4, 3);
 
-		String str2 = String.format("<html><b>X Range:</b> [%s, %s]"
-				+ "&nbsp;&nbsp;&nbsp;<b>Y Range:</b> [%s, %s]", xminString,
-				xmaxString, yminString, ymaxString);
+		String str2 = String.format("<html><b>X Range:</b> [%s, %s]" + "&nbsp;&nbsp;&nbsp;<b>Y Range:</b> [%s, %s]",
+				xminString, xmaxString, yminString, ymaxString);
 
 		_rangeLabel.setText(str2);
 	}

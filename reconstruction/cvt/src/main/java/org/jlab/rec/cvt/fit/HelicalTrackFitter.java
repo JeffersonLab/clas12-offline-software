@@ -2,11 +2,10 @@ package org.jlab.rec.cvt.fit;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.rec.cvt.Constants;
 
-import org.jlab.rec.cvt.svt.Constants;
 import org.jlab.rec.cvt.trajectory.Helix;
-
-import Jama.Matrix;
+import org.jlab.rec.cvt.svt.SVTGeometry;
 
 /**
  * A fitter which does sequential fit (for r, phi coordinates) to a circle using
@@ -19,8 +18,8 @@ public class HelicalTrackFitter {
     private Helix _helix;  // fit helix
     private double[] _chisq = new double[2];  // fit chi-squared [0]: circle [1] line
 
-    private CircleCalculator _circlecalc = new CircleCalculator();
-    private CircleFitter _circlefit = new CircleFitter();
+    private CircleCalculator _circlecalc;
+    private CircleFitter _circlefit;
     private LineFitter _linefit = new LineFitter();
     private CircleCalcPars _circlecalcpars;
     private CircleFitPars _circlefitpars;
@@ -57,12 +56,12 @@ public class HelicalTrackFitter {
     public HelicalTrackFitter() {
     }
 
-    private List<Double> W = new ArrayList<Double>();
-    private List<Double> P0 = new ArrayList<Double>(2);
-    private List<Double> P1 = new ArrayList<Double>(2);
-    private List<Double> P2 = new ArrayList<Double>(2);
+    private final List<Double> W = new ArrayList<>();
+    private final List<Double> P0 = new ArrayList<>(2);
+    private final List<Double> P1 = new ArrayList<>(2);
+    private final List<Double> P2 = new ArrayList<>(2);
 
-    public FitStatus fit(List<Double> X, List<Double> Y, List<Double> Z, List<Double> Rho, List<Double> errRt, List<Double> errRho, List<Double> ErrZ) {
+    public FitStatus fit(List<Double> X, List<Double> Y, List<Double> Z, List<Double> Rho, List<Double> errRt, List<Double> errRho, List<Double> ErrZ, double xb, double yb) {
         //  Initialize the various fitter outputs
         _circlefitpars = null;
         _linefitpars = null;
@@ -84,7 +83,7 @@ public class HelicalTrackFitter {
 
         // fit the points 
         // check the status
-        _circlefit = new CircleFitter();
+        _circlefit = new CircleFitter(xb, yb);
         boolean circlefitstatusOK = _circlefit.fitStatus(X, Y, W, X.size());
 
         if (!circlefitstatusOK) { 
@@ -157,19 +156,16 @@ public class HelicalTrackFitter {
         double fit_phi_at_dca = _circlefitpars.phi();
         double fit_curvature = _circlefitpars.rho();
         double fit_tandip = _linefitpars.slope();
+        double fit_Z0 = _linefitpars.intercept() - _circlefitpars.arcLength(xb, yb, 0, 0)*fit_tandip;
 
-        //double fit_Z0 = _linefitpars.intercept();
-        double fit_Z0 = _linefitpars.intercept();
-        //fit_Z0 = (Math.abs(fit_dca)-_linefitpars.intercept())/ _linefitpars.slope() ; //reset for displaced vertex
-        //System.out.println("fit z0 "+_linefitpars.intercept());
         //require vertex position inside of the inner barrel
-        if (Math.abs(fit_dca) > Constants.MODULERADIUS[0][0]) {
+        if (Math.abs(fit_dca) > SVTGeometry.getLayerRadius(1)) {
 //            if (Math.abs(fit_dca) > Constants.MODULERADIUS[0][0] || Math.abs(fit_Z0) > 100) {
             return null;
         }
 
         // get the error matrix
-        Matrix fit_covmatrix = new Matrix(5, 5);
+       
         //error matrix (assuming that the circle fit and line fit parameters are uncorrelated)
         // | d_dca*d_dca                   d_dca*d_phi_at_dca            d_dca*d_curvature        0            0             |
         // | d_phi_at_dca*d_dca     d_phi_at_dca*d_phi_at_dca     d_phi_at_dca*d_curvature        0            0             |
@@ -177,7 +173,7 @@ public class HelicalTrackFitter {
         // | 0                              0                             0                    d_Z0*d_Z0                     |
         // | 0                              0                             0                       0        d_tandip*d_tandip |
         // 
-
+        double[][] fit_covmatrix = new double[5][5];
         // the circle covariance matrix
         //covr[0] =  delta_rho.delta_rho;
         //covr[1] =  delta_rho.delta_phi;
@@ -185,21 +181,27 @@ public class HelicalTrackFitter {
         //covr[3] =  delta_phi.delta_phi;
         //covr[4] =  delta_phi.delta_dca;
         //covr[5] =  delta_dca.delta_dca;
-        fit_covmatrix.set(0, 0, _circlefitpars.cov()[5]);
-        fit_covmatrix.set(1, 0, _circlefitpars.cov()[4]);
-        fit_covmatrix.set(2, 0, _circlefitpars.cov()[2]);
-        fit_covmatrix.set(0, 1, _circlefitpars.cov()[4]);
-        fit_covmatrix.set(1, 1, _circlefitpars.cov()[3]);
-        fit_covmatrix.set(2, 1, _circlefitpars.cov()[1]);
-        fit_covmatrix.set(0, 2, _circlefitpars.cov()[2]);
-        fit_covmatrix.set(1, 2, _circlefitpars.cov()[1]);
-        fit_covmatrix.set(2, 2, _circlefitpars.cov()[0]);
-        fit_covmatrix.set(3, 3, _linefitpars.interceptErr() * _linefitpars.interceptErr());
-        fit_covmatrix.set(4, 4, _linefitpars.slopeErr() * _linefitpars.slopeErr());
-
-        Helix helixresult = new Helix(fit_dca, fit_phi_at_dca, fit_curvature, fit_Z0, fit_tandip, fit_covmatrix);
-
-        set_helix(helixresult);
+        
+        fit_covmatrix[0][0] = _circlefitpars.cov()[5];
+        fit_covmatrix[1][0] = _circlefitpars.cov()[4];
+        fit_covmatrix[2][0] = _circlefitpars.cov()[2];
+        fit_covmatrix[0][1] = _circlefitpars.cov()[4];
+        fit_covmatrix[1][1] = _circlefitpars.cov()[3];
+        fit_covmatrix[2][1] = _circlefitpars.cov()[1];
+        fit_covmatrix[0][2] = _circlefitpars.cov()[2];
+        fit_covmatrix[1][2] = _circlefitpars.cov()[1];
+        fit_covmatrix[2][2] = _circlefitpars.cov()[0];
+        fit_covmatrix[3][3] = _linefitpars.interceptErr() * _linefitpars.interceptErr();
+        fit_covmatrix[4][4] = _linefitpars.slopeErr() * _linefitpars.slopeErr();
+        fit_covmatrix[3][4] = _linefitpars.slopeIntercCov();
+        fit_covmatrix[4][3] = _linefitpars.slopeIntercCov();
+        
+        if(fit_curvature==0) {
+            return FitStatus.CircleFitFailed;
+        }
+        Helix helixresult = new Helix(fit_dca, fit_phi_at_dca, fit_curvature, fit_Z0, fit_tandip, xb, yb, fit_covmatrix);
+        
+        sethelix(helixresult);
         _chisq[0] = _circlefitpars.chisq();
         _chisq[1] = _linefitpars.chisq();
 
@@ -230,11 +232,11 @@ public class HelicalTrackFitter {
         return _circlefitpars;
     }
 
-    public CircleCalcPars get_circlecalcpars() {
+    public CircleCalcPars getcirclecalcpars() {
         return _circlecalcpars;
     }
 
-    public void set_circlecalcpars(CircleCalcPars _circlecalcpars) {
+    public void setcirclecalcpars(CircleCalcPars _circlecalcpars) {
         this._circlecalcpars = _circlecalcpars;
     }
 
@@ -251,22 +253,21 @@ public class HelicalTrackFitter {
 
     public void setReferencePoint(double x, double y) {
         _circlefit.setrefcoords(x, y);
-        return;
     }
 
-    public Helix get_helix() {
+    public Helix gethelix() {
         return _helix;
     }
 
-    public void set_helix(Helix helix) {
+    public void sethelix(Helix helix) {
         this._helix = helix;
     }
 
-    public double[] get_chisq() {
+    public double[] getchisq() {
         return _chisq;
     }
 
-    public void set_covmat(double[] chisq) {
+    public void setcovmat(double[] chisq) {
         this._chisq = chisq;
     }
 

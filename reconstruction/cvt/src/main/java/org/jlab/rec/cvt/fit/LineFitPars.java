@@ -1,5 +1,6 @@
 package org.jlab.rec.cvt.fit;
 
+import org.jlab.rec.cvt.trajectory.Ray;
 import trackfitter.fitter.utilities.ProbChi2perNDF;
 
 /**
@@ -45,7 +46,7 @@ public class LineFitPars {
         return _intercErr;
     }
 
-    public double SlopeIntercCov() {
+    public double slopeIntercCov() {
         return _SlIntCov;
     }
 
@@ -57,7 +58,7 @@ public class LineFitPars {
         return _ndf;
     }
 
-    public double[] get_pointchi2() {
+    public double[] getPointChi2() {
         return _pointchi2;
     }
 
@@ -67,4 +68,17 @@ public class LineFitPars {
         int ndf = this.NDF();
         return ProbChi2perNDF.prob(chi2, ndf);
     }
+    
+    public double getValue(double x) {
+        return x * _slope + _interc;
+    }
+    
+    public Ray getYXRay() {
+        return new Ray(this._slope, this._slopeErr, this._interc, this._intercErr, 0, 0, 0, 0);
+    }
+    
+    public Ray getYZRay() {
+        return new Ray(0, 0, 0, 0, this._slope, this._slopeErr, this._interc, this._intercErr);
+    }
+            
 }

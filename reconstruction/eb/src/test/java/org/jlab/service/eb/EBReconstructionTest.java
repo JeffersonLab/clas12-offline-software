@@ -10,6 +10,7 @@ import org.jlab.clas.swimtools.MagFieldsEngine;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
+import org.jlab.logging.DefaultLogger;
 import org.jlab.service.dc.DCHBEngine;
 import org.jlab.service.dc.DCTBEngine;
 import org.jlab.service.ec.ECEngine;
@@ -94,6 +95,8 @@ public class EBReconstructionTest {
 
     @Test
     public void testEBReconstruction() {
+        DefaultLogger.debug();
+
         System.setProperty("CLAS12DIR", "../../");
         String dir = ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4");
         SchemaFactory schemaFactory = new SchemaFactory();

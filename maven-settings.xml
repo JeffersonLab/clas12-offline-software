@@ -1,0 +1,18 @@
+<!--
+At some version of maven, http is no longer allowed.  This is a workaround
+for freehep, which should probably instead be fixed in poms of the dependency
+that is pulling it in.
+-->
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 http://maven.apache.org/xsd/settings-1.2.0.xsd">
+    <mirrors>
+        <mirror>
+            <id>new-freehep</id>
+            <mirrorOf>freehep</mirrorOf>
+            <name>freehep</name>
+            <!--<url>https://java.freehep.org/maven2</url>-->
+            <url>https://srs.slac.stanford.edu/nexus/content/groups/freehep-maven2-public/</url>
+        </mirror>
+    </mirrors>
+</settings>

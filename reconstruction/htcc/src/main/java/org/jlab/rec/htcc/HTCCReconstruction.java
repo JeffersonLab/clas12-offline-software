@@ -23,6 +23,7 @@ public class HTCCReconstruction {
     public IndexedTable time;
     public IndexedTable ring_time;
     public IndexedTable cluster_par;
+    public IndexedTable status;
     public IndexedTable geometry;
 
     // Raw HTCC data from the bank
@@ -133,7 +134,9 @@ public class HTCCReconstruction {
 
         // Find all hits above the photoelectron threshold
         for (int hit = 0; hit < numHits; ++hit) {
-            if (npheArray[hit] > cluster_par.getDoubleValue("npheminhit", 0,0,0) && sectorArray[hit] > 0) {
+            if(    npheArray[hit] > cluster_par.getDoubleValue("npheminhit", 0,0,0) 
+                && sectorArray[hit] > 0
+                && status.getIntValue("status", sectorArray[hit],halfArray[hit],ringArray[hit])==0) {
                 remainingHits.add(hit);
             }
         }

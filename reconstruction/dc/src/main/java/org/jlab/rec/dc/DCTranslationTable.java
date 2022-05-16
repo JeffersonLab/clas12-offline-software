@@ -74,8 +74,12 @@ public class DCTranslationTable {
      * 13...19) channel : the channel on one DCRB (0...95)
      *
      * returns : the sector (1...6)
+     * @param crate
+     * @param slot
+     * @param channel
+     * @return 
      */
-    public Integer getSector(int crate, int slot, int channel) {
+    public int getSector(int crate, int slot, int channel) {
         int crateIdx = crate - 41;
         return crate_sector[crateIdx];
     }
@@ -85,8 +89,12 @@ public class DCTranslationTable {
      * 13...19) channel : the channel on one DCRB (0...95)
      *
      * returns : the layer (1...36)
+     * @param crate
+     * @param slot
+     * @param channel
+     * @return 
      */
-    public Integer getLayer(int crate, int slot, int channel) {
+    public int getLayer(int crate, int slot, int channel) {
 
 //	System.out.println( " crate " + crate + " slot " + slot + " channel " + channel);
         int slotIdx = slot - 1;

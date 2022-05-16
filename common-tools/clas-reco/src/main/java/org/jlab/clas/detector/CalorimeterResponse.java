@@ -19,6 +19,27 @@ public class CalorimeterResponse extends DetectorResponse {
     private final Vector3 secondMomentUVW = new Vector3(0,0,0);
     private final Vector3 thirdMomentUVW = new Vector3(0,0,0);
 
+    public CalorimeterResponse(){
+        super();
+    }
+
+    public CalorimeterResponse(CalorimeterResponse r) {
+        super();
+        this.copy(r);
+    }
+
+    public CalorimeterResponse(int sector, int layer, int component){
+        this.getDescriptor().setSectorLayerComponent(sector, layer, component);
+    }
+
+    public void copy(CalorimeterResponse r) {
+        super.copy(r);
+        widthUVW.copy(r.widthUVW);
+        coordUVW.copy(r.coordUVW);
+        secondMomentUVW.copy(r.secondMomentUVW);
+        thirdMomentUVW.copy(r.thirdMomentUVW);
+    }
+
     public void setWidthUVW(float u,float v,float w) {
         widthUVW.setXYZ(u,v,w);
     }
@@ -42,14 +63,6 @@ public class CalorimeterResponse extends DetectorResponse {
     }
     public Vector3 getThirdMomentUVW() {
         return thirdMomentUVW;
-    }
-
-    public CalorimeterResponse(){
-        super();
-    }
-
-    public CalorimeterResponse(int sector, int layer, int component){
-        this.getDescriptor().setSectorLayerComponent(sector, layer, component);
     }
 
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 

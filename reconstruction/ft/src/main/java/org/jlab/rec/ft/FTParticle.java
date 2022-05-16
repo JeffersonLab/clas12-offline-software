@@ -17,9 +17,10 @@ public class FTParticle {
 	private int _Charge;		         	          // 0/1 for photon/electron
 	private double _Time;      			          // time of the particle at the vertex
 	private double _Energy;			                  // total energy of the cluster including correction
+	private Vector3D _Vertex    = new Vector3D();             // vertex 
 	private Vector3D _Position  = new Vector3D();             // position 
 	private Vector3D _Direction = new Vector3D();             // direction 
-        private int _Cluster;					  // track pointer to cluster information in FTCALRec::cluster bank
+         private int _Cluster;					  // track pointer to cluster information in FTCALRec::cluster bank
 	private int _Signal;					  // track pointer to signal information in FTHODORec::cluster bank
         private int _Cross0;                                      // track pointer to cross information in FTTRKRec::cross bank (TRK0)
         private int _Cross1;                                      // track pointer to cross information in FTTRKRec::cross bank (TRK1)
@@ -30,13 +31,27 @@ public class FTParticle {
 		this.set_ID(cid);
 	}
 
-
+ 	public FTParticle(int cid, int charge, double fieldScale, FTResponse response, double vx, double vy, double vz) {
+            this.set_ID(cid);
+            this.setCharge(0);
+            this.setField(fieldScale);
+            this.setEnergy(response.getEnergy());
+            this.setPosition(response.getPosition());
+            this.setVertex(vx,vy,vz);
+            this.setDirection();
+            this.setTime(response.getTime() - this.getPath() / PhysicsConstants.speedOfLight());
+            this.setCalorimeterIndex(response.getId());
+            this.setHodoscopeIndex(-1);
+            this.setTrackerIndex(-1, 0);
+            this.setTrackerIndex(-1, 1);
+         }
+        
 	public int get_ID() {
 		return _ID;
 	}
 
 
-	public void set_ID(int _ID) {
+	public final void set_ID(int _ID) {
 		this._ID = _ID;
 	}
 
@@ -46,7 +61,7 @@ public class FTParticle {
 	}
 
 
-	public void setCharge(int _Charge) {
+	public final void setCharge(int _Charge) {
 		this._Charge = _Charge;
 	}
         
@@ -56,7 +71,7 @@ public class FTParticle {
 	}
 
 
-	public void setTime(double _Time) {
+	public final void setTime(double _Time) {
 		this._Time = _Time;
 	}
 
@@ -66,7 +81,7 @@ public class FTParticle {
 	}
 
 
-	public void setEnergy(double _Energy) {
+	public final void setEnergy(double _Energy) {
 		this._Energy = _Energy;
 	}
 
@@ -74,7 +89,7 @@ public class FTParticle {
             return _Position;
         }
 
-        public void setPosition(Vector3D _Position) {
+        public final void setPosition(Vector3D _Position) {
             this._Position = _Position;
         }
 
@@ -82,7 +97,7 @@ public class FTParticle {
             return _field;
         }
 
-        public void setField(double _field) {
+        public final void setField(double _field) {
             this._field = _field;
         }
 
@@ -91,12 +106,16 @@ public class FTParticle {
             return this._Direction;
         }
 
-        public void setDirection() {
-            this._Direction = this.getPosition().asUnit();            
+        public final void setDirection() {
+            Vector3D line = new Vector3D(this.getPosition());
+            line.sub(this.getVertex());
+            this._Direction = line.asUnit();            
         }
         
         public void setDirection(IndexedTable thetaTable, IndexedTable phiTable) {
             Vector3D direction = new Vector3D();
+            Vector3D line = new Vector3D(this.getPosition());
+            line.sub(this.getVertex());
             if(this._Charge==-1) {
                 double energy    = this._Energy;
                 double thetaCorr = Math.exp(thetaTable.getDoubleValue("thetacorr0", 1,1,0)+thetaTable.getDoubleValue("thetacorr1", 1,1,0)*energy)+
@@ -106,14 +125,28 @@ public class FTParticle {
 			     	   Math.exp(phiTable.getDoubleValue("phicorr2", 1,1,0)+phiTable.getDoubleValue("phicorr3", 1,1,0)*energy)+
 			     	   Math.exp(phiTable.getDoubleValue("phicorr4", 1,1,0)+phiTable.getDoubleValue("phicorr5", 1,1,0)*energy);
                 phiCorr          = Math.toRadians(phiCorr * this._field);
-                direction.setMagThetaPhi(1, this.getPosition().theta()+thetaCorr, this.getPosition().phi()-phiCorr);
+                direction.setMagThetaPhi(1, line.theta()+thetaCorr, line.phi()-phiCorr);
             }
             else {
-                direction = this.getPosition().asUnit();
+                direction = line.asUnit();
             }
             this._Direction = direction;
         }
 
+        public Vector3D getVertex() {
+            return _Vertex;
+        }
+
+        public final void setVertex(double x, double y, double z) {
+            this._Vertex.setXYZ(x, y, z);
+        }
+
+        public final double getPath() {
+            Vector3D path = new Vector3D(this.getPosition());
+            path.sub(this.getVertex());
+            return path.mag();
+        }
+        
         public Line3D getLastCross() {
             Line3D track = new Line3D();
             track.set(this._Position.toPoint3D(), this._Position);
@@ -125,7 +158,7 @@ public class FTParticle {
 	}
 
 
-	public void setCalorimeterIndex(int _Cluster) {
+	public final void setCalorimeterIndex(int _Cluster) {
 		this._Cluster = _Cluster;
 	}
 
@@ -135,7 +168,7 @@ public class FTParticle {
 	}
 
 
-	public void setHodoscopeIndex(int _Signal) {
+	public final void setHodoscopeIndex(int _Signal) {
 		this._Signal = _Signal;
 	}
         
@@ -143,7 +176,7 @@ public class FTParticle {
 		if(ndet==0){return _Cross0;}else{return _Cross1;}
 	}
       
-        public void setTrackerIndex(int _Cross, int ndet) {
+        public final void setTrackerIndex(int _Cross, int ndet) {
 		if(ndet==0){this._Cross0 = _Cross;}else{this._Cross1 = _Cross;}
 	}
         
@@ -154,7 +187,7 @@ public class FTParticle {
             int      bestIndex       = -1;
             for(int loop = 0; loop < hitList.size(); loop++){
                 FTResponse response = hitList.get(loop);
-                if(response.getAssociation()<0 && response.getType() == detectorType){
+                if(response.getAssociation()<0 && response.getType().equals(detectorType)){
                     Line3D  dist = cross.distance(response.getPosition().toPoint3D());
                     double hitdistance  = dist.length();
                     double timedistance = Math.abs(this.getTime() - (response.getTime()-response.getPosition().mag()/PhysicsConstants.speedOfLight()));       

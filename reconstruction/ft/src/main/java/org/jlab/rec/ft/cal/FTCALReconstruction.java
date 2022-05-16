@@ -26,6 +26,7 @@ public class FTCALReconstruction {
         IndexedTable timeOffsets   = manager.getConstants(run, "/calibration/ft/ftcal/time_offsets");
         IndexedTable timeWalk      = manager.getConstants(run, "/calibration/ft/ftcal/time_walk");
         IndexedTable cluster       = manager.getConstants(run, "/calibration/ft/ftcal/cluster");
+        IndexedTable status        = manager.getConstants(run, "/calibration/ft/ftcal/status");
 
         if(this.debugMode>=1) System.out.println("\nAnalyzing new event");
         List<FTCALHit> allhits = null;
@@ -35,13 +36,13 @@ public class FTCALReconstruction {
         }
         
         if(event instanceof HipoDataEvent) {
-            allhits = this.readRawHitsHipo(event,charge2Energy,timeOffsets,timeWalk,cluster);
+            allhits = this.readRawHitsHipo(event,charge2Energy,timeOffsets,timeWalk,cluster,status);
         }
         if(debugMode>=1) {
             System.out.println("Found " + allhits.size() + " hits");
             for(int i = 0; i < allhits.size(); i++) {
                 System.out.print(i + "\t");
-                allhits.get(i).showHit();
+                allhits.get(i).show();
             }
         }
         return allhits;
@@ -66,7 +67,7 @@ public class FTCALReconstruction {
             for(int i = 0; i < hits.size(); i++) 
             {	
                 System.out.print(i + "\t");
-                hits.get(i).showHit();
+                hits.get(i).show();
             }
         }
         return hits;
@@ -82,20 +83,20 @@ public class FTCALReconstruction {
         if(debugMode>=1) System.out.println("\nBuilding clusters");
         for(int ihit=0; ihit<hits.size(); ihit++) {
             FTCALHit hit = hits.get(ihit);
-            if(hit.get_ClusIndex()==0)  {                       // this hit is not yet associated with a cluster
+            if(hit.get_ClusID()==0)  {                       // this hit is not yet associated with a cluster
                 for(int jclus=0; jclus<clusters.size(); jclus++) {
                     FTCALCluster cluster = clusters.get(jclus);
                     if(cluster.containsHit(hit, thresholds, clusterTable)) {
-                        hit.set_ClusIndex(cluster.getID());     // attaching hit to previous cluster 
+                        hit.set_ClusID(cluster.getID());     // attaching hit to previous cluster 
                         cluster.add(hit);
                         if(debugMode>=1) System.out.println("Attaching hit " + ihit + " to cluster " + cluster.getID());
                         break;
                     }
                 }
             }
-            if(hit.get_ClusIndex()==0)  {                       // new cluster found
+            if(hit.get_ClusID()==0)  {                       // new cluster found
                 FTCALCluster cluster = new FTCALCluster(clusters.size()+1);
-                hit.set_ClusIndex(cluster.getID());
+                hit.set_ClusID(cluster.getID());
                 cluster.add(hit);
                 clusters.add(cluster);
                 if(debugMode>=1) System.out.println("Creating new cluster with ID " + cluster.getID());
@@ -104,15 +105,15 @@ public class FTCALReconstruction {
         return clusters;
     }
        
-    public List<FTCALCluster> selectClusters(List<FTCALCluster> allclusters, ConstantsManager manager, int run) {
+    public void selectClusters(List<FTCALCluster> clusters, ConstantsManager manager, int run) {
 
         IndexedTable   clusterTable = manager.getConstants(run, "/calibration/ft/ftcal/cluster");
         
-        List<FTCALCluster> clusters = new ArrayList();
-        for(int i=0; i<allclusters.size(); i++) {
-            if(allclusters.get(i).isgoodCluster(clusterTable)) clusters.add(allclusters.get(i));
+        for(int i=0; i<clusters.size(); i++) {
+            clusters.get(i).setStatus(clusterTable);
+            if(debugMode>=1) System.out.println("Setting status for cluster " + i + " " + clusters.get(i).toString());
         }
-        return clusters;
+        return;
     }
         
     
@@ -146,32 +147,45 @@ public class FTCALReconstruction {
                 bankHits.setFloat("energy",i,(float) hits.get(i).get_Edep());
                 bankHits.setFloat("time",i,(float) hits.get(i).get_Time());
                 bankHits.setShort("hitID",i,(short) hits.get(i).get_DGTZIndex());
-                bankHits.setShort("clusterID",i,(short) hits.get(i).get_ClusIndex());				
+                if(clusters.size()>0 && clusters.get(hits.get(i).get_ClusID()-1).getStatus()) {
+                    bankHits.setShort("clusterID",i,(short) hits.get(i).get_ClusID());
+                }
+                else {
+                    bankHits.setShort("clusterID",i,(short) 0);
+                }
             }	
+            if(debugMode>=1) bankHits.show();
             event.appendBanks(bankHits);
         }
         // cluster bank
         if(clusters.size()!=0) {
-            DataBank bankCluster = event.createBank("FTCAL::clusters", clusters.size());    
-            if(bankCluster==null){
-                System.out.println("ERROR CREATING BANK : FTCAL::clusters");
-                return;
+            List<FTCALCluster> selectedClusters  = new ArrayList();
+            for(int i =0; i< clusters.size(); i++) {
+                if(clusters.get(i).getStatus()) selectedClusters.add(clusters.get(i));
             }
-            for(int i = 0; i < clusters.size(); i++){
-                            bankCluster.setShort("id", i,(short) clusters.get(i).getID());
-                            bankCluster.setShort("size", i,(short) clusters.get(i).getSize());
-                            bankCluster.setFloat("x",i,(float) (clusters.get(i).getX()/10.0));
-                            bankCluster.setFloat("y",i, (float) (clusters.get(i).getY()/10.0));
-                            bankCluster.setFloat("z",i, (float) (clusters.get(i).getZ()/10.0));
-                            bankCluster.setFloat("widthX",i, (float) (clusters.get(i).getWidthX()/10.0));
-                            bankCluster.setFloat("widthY",i, (float) (clusters.get(i).getWidthY()/10.0));
-                            bankCluster.setFloat("radius",i, (float) (clusters.get(i).getRadius()/10.0));
-                            bankCluster.setFloat("time",i, (float) clusters.get(i).getTime());
-                            bankCluster.setFloat("energy",i, (float) clusters.get(i).getFullEnergy(energyTable));
-                            bankCluster.setFloat("recEnergy",i, (float) clusters.get(i).getEnergy());
-                            bankCluster.setFloat("maxEnergy",i, (float) clusters.get(i).getSeedEnergy());
+            if(selectedClusters.size()>0) {                
+                DataBank bankCluster = event.createBank("FTCAL::clusters", selectedClusters.size());    
+                if(bankCluster==null){
+                    System.out.println("ERROR CREATING BANK : FTCAL::clusters");
+                    return;
+                }
+                for(int i = 0; i < selectedClusters.size(); i++){
+                    bankCluster.setShort("id", i,(short) selectedClusters.get(i).getID());
+                    bankCluster.setShort("size", i,(short) selectedClusters.get(i).getSize());
+                    bankCluster.setFloat("x",i,(float) (selectedClusters.get(i).getX()/10.0));
+                    bankCluster.setFloat("y",i, (float) (selectedClusters.get(i).getY()/10.0));
+                    bankCluster.setFloat("z",i, (float) (selectedClusters.get(i).getZ()/10.0));
+                    bankCluster.setFloat("widthX",i, (float) (selectedClusters.get(i).getWidthX()/10.0));
+                    bankCluster.setFloat("widthY",i, (float) (selectedClusters.get(i).getWidthY()/10.0));
+                    bankCluster.setFloat("radius",i, (float) (selectedClusters.get(i).getRadius()/10.0));
+                    bankCluster.setFloat("time",i, (float) selectedClusters.get(i).getTime());
+                    bankCluster.setFloat("energy",i, (float) selectedClusters.get(i).getFullEnergy(energyTable));
+                    bankCluster.setFloat("recEnergy",i, (float) selectedClusters.get(i).getEnergy());
+                    bankCluster.setFloat("maxEnergy",i, (float) selectedClusters.get(i).getSeedEnergy());                   
+                }
+                if(debugMode>=1) bankCluster.show();
+                event.appendBanks(bankCluster);
             }
-            event.appendBanks(bankCluster);
         }
     }
     
@@ -193,30 +207,30 @@ public class FTCALReconstruction {
                         bankhits.setDouble("hitEnergy",i,hits.get(i).get_Edep());
                         bankhits.setDouble("hitTime",i,hits.get(i).get_Time());
                         bankhits.setInt("hitDGTZIndex",i,hits.get(i).get_DGTZIndex());
-                        bankhits.setInt("hitClusterIndex",i,hits.get(i).get_ClusIndex());	
+                        bankhits.setInt("hitClusterIndex",i,hits.get(i).get_ClusID());	
                 }				
         }	
         // cluster bank
         if(clusters.size()!=0){
                 bankclust = (EvioDataBank) event.getDictionary().createBank("FTCALRec::clusters",clusters.size());
                 for(int i =0; i< clusters.size(); i++) {
-                        if(debugMode>=1) clusters.get(i).showCluster();
-                        bankclust.setInt("clusID", i,clusters.get(i).getID());
-                        bankclust.setInt("clusSize", i,clusters.get(i).getSize());
-                        bankclust.setDouble("clusX",i,clusters.get(i).getX()/10.0);
-                        bankclust.setDouble("clusY",i,clusters.get(i).getY()/10.0);
-                        bankclust.setDouble("clusXX",i,clusters.get(i).getX2()/100.0);
-                        bankclust.setDouble("clusYY",i,clusters.get(i).getY2()/100.0);
-                        bankclust.setDouble("clusSigmaX",i,clusters.get(i).getWidthX()/10.0);
-                        bankclust.setDouble("clusSigmaY",i,clusters.get(i).getWidthY()/10.0);
-                        bankclust.setDouble("clusRadius",i,clusters.get(i).getRadius()/10.0);
-                        bankclust.setDouble("clusTime",i,clusters.get(i).getTime());
-                        bankclust.setDouble("clusEnergy",i,clusters.get(i).getFullEnergy(energyTable));
-                        bankclust.setDouble("clusRecEnergy",i,clusters.get(i).getEnergy());
-                        bankclust.setDouble("clusMaxEnergy",i,clusters.get(i).getSeedEnergy());
-                        bankclust.setDouble("clusTheta",i,clusters.get(i).getTheta());
-                        bankclust.setDouble("clusPhi",i,clusters.get(i).getPhi());				
-                }
+                        if(debugMode>=1) clusters.get(i).show();
+                            bankclust.setInt("clusID", i,clusters.get(i).getID());
+                            bankclust.setInt("clusSize", i,clusters.get(i).getSize());
+                            bankclust.setDouble("clusX",i,clusters.get(i).getX()/10.0);
+                            bankclust.setDouble("clusY",i,clusters.get(i).getY()/10.0);
+                            bankclust.setDouble("clusXX",i,clusters.get(i).getX2()/100.0);
+                            bankclust.setDouble("clusYY",i,clusters.get(i).getY2()/100.0);
+                            bankclust.setDouble("clusSigmaX",i,clusters.get(i).getWidthX()/10.0);
+                            bankclust.setDouble("clusSigmaY",i,clusters.get(i).getWidthY()/10.0);
+                            bankclust.setDouble("clusRadius",i,clusters.get(i).getRadius()/10.0);
+                            bankclust.setDouble("clusTime",i,clusters.get(i).getTime());
+                            bankclust.setDouble("clusEnergy",i,clusters.get(i).getFullEnergy(energyTable));
+                            bankclust.setDouble("clusRecEnergy",i,clusters.get(i).getEnergy());
+                            bankclust.setDouble("clusMaxEnergy",i,clusters.get(i).getSeedEnergy());
+                            bankclust.setDouble("clusTheta",i,clusters.get(i).getTheta());
+                            bankclust.setDouble("clusPhi",i,clusters.get(i).getPhi());
+                        }
 
                 // If there are no clusters, punt here but save the reconstructed hits 
                 if(bankclust!=null) {
@@ -251,7 +265,7 @@ public class FTCALReconstruction {
         return hits;
     }
     
-    public List<FTCALHit> readRawHitsHipo(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable timeWalk, IndexedTable cluster) {
+    public List<FTCALHit> readRawHitsHipo(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable timeWalk, IndexedTable cluster, IndexedTable status) {
         // getting raw data bank
 	if(debugMode>=1) System.out.println("Getting raw hits from FTCAL:adc bank");
 
@@ -266,7 +280,7 @@ public class FTCALReconstruction {
                 int iorder      = bankDGTZ.getByte("order",row);
                 int adc         = bankDGTZ.getInt("ADC",row);
                 float time      = bankDGTZ.getFloat("time",row);
-                if(adc!=-1 && time!=-1){
+                if(adc!=-1 && time!=-1 && status.getIntValue("status", isector, ilayer, icomponent)==0){
                     FTCALHit hit = new FTCALHit(row,icomponent, adc, time, charge2Energy, timeOffsets, timeWalk, cluster);
                     
                     ////////////////////////////////////////////////////////////////////////////////////////////////////

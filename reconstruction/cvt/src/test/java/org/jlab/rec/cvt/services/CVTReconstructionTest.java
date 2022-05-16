@@ -12,6 +12,7 @@ import org.jlab.analysis.physics.TestEvent;
 import org.jlab.analysis.math.ClasMath;
 import org.jlab.clas.swimtools.MagFieldsEngine;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
+import org.jlab.logging.DefaultLogger;
 import org.jlab.utils.CLASResources;
 import org.jlab.utils.system.ClasUtilsFile;
 
@@ -24,6 +25,8 @@ public class CVTReconstructionTest {
     @Test
     public void testCVTReconstruction() {
         
+        DefaultLogger.debug();
+
         System.setProperty("CLAS12DIR", "../../");
        
         String mapDir = CLASResources.getResourcePath("etc")+"/data/magfield";
@@ -45,15 +48,19 @@ public class CVTReconstructionTest {
         enf.init();
         enf.processDataEvent(testEvent);
         
-        CVTReconstruction CVTengine = new CVTReconstruction();
+        CVTEngine CVTengine = new CVTEngine();
         CVTengine.init();
         
         testEvent.show();
         CVTengine.processDataEvent(testEvent);
-        testEvent.show();
         EBHBEngine EBHBengine = new EBHBEngine();
         EBHBengine.init();
         EBHBengine.processDataEvent(testEvent);
+
+        CVTSecondPassEngine CVTSPengine = new CVTSecondPassEngine();
+        CVTSPengine.init();
+        CVTSPengine.processDataEvent(testEvent);
+        testEvent.show();
 
         EBTBEngine EBTBengine = new EBTBEngine();
         EBTBengine.init();

@@ -50,10 +50,13 @@ public class FTEBEngine extends ReconstructionEngine {
         String[] tables = new String[]{
             "/calibration/ft/ftcal/cluster",
             "/calibration/ft/ftcal/thetacorr",
-            "/calibration/ft/ftcal/phicorr"
+            "/calibration/ft/ftcal/phicorr",
+            "/geometry/target"
         };
         requireConstants(Arrays.asList(tables));
         this.getConstantsManager().setVariation("default");
+
+        this.registerOutputBank("FT::particles");
 
         return true;
     }
@@ -67,11 +70,12 @@ public class FTEBEngine extends ReconstructionEngine {
         if (run>=0) {
             reco.init(this.getSolenoid());
             FTresponses = reco.addResponses(event, this.getConstantsManager(), run);
-            FTparticles = reco.initFTparticles(FTresponses);
+
+            FTparticles = reco.initFTparticles(FTresponses, this.getConstantsManager(), run);
             if(FTparticles.size()>0){
                 reco.matchToTRKTwoDetectorsMultiHits(FTresponses, FTparticles);
                 reco.matchToHODO(FTresponses, FTparticles);
-//                reco.correctDirection(FTparticles, this.getConstantsManager(), run);  // correction to be applied only to FTcal and FThodo
+                reco.correctDirection(FTparticles, this.getConstantsManager(), run);
                 reco.writeBanks(event, FTparticles);
             }
         }
@@ -405,7 +409,7 @@ public class FTEBEngine extends ReconstructionEngine {
             } else {
                 DetectorEvent detectorEvent = DetectorData.readDetectorEvent(event);
                 PhysicsEvent gen = detectorEvent.getGeneratedEvent();
-                if (event.hasBank("FT::particles")) {
+                     if (event.hasBank("FT::particles")) {
                     DataBank bank = event.getBank("FT::particles");
                     int nrows = bank.rows();
                     if(nrows>0) nOfFTParticles++;

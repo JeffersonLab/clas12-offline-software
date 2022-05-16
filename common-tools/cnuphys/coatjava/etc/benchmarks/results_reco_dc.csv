@@ -1,8 +1,0 @@
-#----------------------------------------------------
-#  CORES, DCHB combined time (sec),  DCHB combined Average (ms), DCTB combined time (sec), 
-#  DCTB combined average (ms), Orchestrator Time (sec), Orchestrator time per event (ms)
-4  6142.48  307.11  14935.16 746.72 5296.81 264.83 
-8  7248.27  362.40  16801.74 840.05 3034.15 151.70
-16 7446.05  372.28  17439.99 871.96 1581.00 79.05
-32 8475.38  423.75  18269.55 913.43 862.26  43.11 
-

@@ -1,7 +1,13 @@
 package cnuphys.swim;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import cnuphys.adaptiveSwim.AdaptiveSwimResult;
+import cnuphys.adaptiveSwim.geometry.Cylinder;
+import cnuphys.adaptiveSwim.geometry.Point;
+import cnuphys.adaptiveSwim.geometry.Vector;
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
@@ -22,12 +28,16 @@ import cnuphys.swim.util.Plane;
  *
  */
 public final class Swimmer {
+	public static Logger LOGGER = Logger.getLogger(Swimmer.class.getName());
 
 	// Speed of light in m/s
 	public static final double C = 299792458.0; // m/s
 
 	// Min momentum to swim in GeV/c
 	public static final double MINMOMENTUM = 5e-05;
+	
+	//tolerance when swimmimg to a max path length
+	public static final double SMAX_TOLERANCE = 1.0e-4;  //meters
 
 	// We have different tableaus we can use for RK integration
 	public static final ButcherTableau _defaultTableau = ButcherTableau.DORMAND_PRINCE;
@@ -53,10 +63,10 @@ public final class Swimmer {
 
 	static {
 		setCLASTolerance(_eps);
-		System.out.println("\n***********************************");
-		System.out.println("* Swimmer package version: " + VERSION);
-		System.out.println("* contact: david.heddle@cnu.edu");
-		System.out.println("***********************************\n");
+		LOGGER.log(Level.FINE,"\n***********************************");
+		LOGGER.log(Level.FINE,"* Swimmer package version: " + VERSION);
+		LOGGER.log(Level.FINE,"* contact: david.heddle@cnu.edu");
+		LOGGER.log(Level.FINE,"***********************************\n");
 	}
 
 
@@ -142,7 +152,619 @@ public final class Swimmer {
 			CLAS_Tolerance[i + 3] = pTol;
 		}
 	}
+	
+	/**
+	 * Swims a particle with a built in stopper at the boundary of an
+	 * arbitrary cylinder. Uses an adaptive stepsize algorithm.
 
+	 * 
+	 * @param charge       the charge: -1 for electron, 1 for proton, etc
+	 * @param xo           the x vertex position in meters
+	 * @param yo           the y vertex position in meters
+	 * @param zo           the z vertex position in meters
+	 * @param momentum     initial momentum in GeV/c
+	 * @param theta        initial polar angle in degrees
+	 * @param phi          initial azimuthal angle in degrees
+	 * @param centerLineP1 one point [array: (x, y, z)] on the infinite center line (meters)
+	 * @param centerLineP2 another point [array: (x, y, z)] on the infinite center line (meters)
+	 * @param radius       the radius of the cylinder in meters
+	 * @param accuracy     the accuracy of the fixed rho termination, in meters
+	 * @param sMax         Max path length in meters. This determines the max number
+	 *                     of steps based on the step size. If a stopper is used,
+	 *                     the integration might terminate before all the steps are
+	 *                     taken. A reasonable value for CLAS is 8. meters
+	 * @param stepSize     the initial step size in meters.
+	 * @param relTolerance the error tolerance as fractional diffs. Note it is a
+	 *                     vector, the same dimension of the problem, e.g., 6 for
+	 *                     [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *                     1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 * @param result upon return, results from the swim including the final state vector [x, y, z, px/p, py/p, pz/p]
+	 */
+	public void swimCylinder(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+			double centerLineP1[],
+			double centerLineP2[],
+			double radius,
+			double accuracy, double sMax, double stepSize, double relTolerance[], AdaptiveSwimResult result)
+			throws RungeKuttaException {
+		
+		Cylinder targetCylinder = new Cylinder(centerLineP1, centerLineP2, radius);
+		
+		result.setInitialValues(charge, xo, yo, zo, momentum, theta, phi);
+
+		// set u to the starting state vector
+		double thetaRad = Math.toRadians(theta);
+		double phiRad = Math.toRadians(phi);
+		double sinTheta = Math.sin(thetaRad);
+
+		double px = sinTheta*Math.cos(phiRad); //px/p
+		double py = sinTheta*Math.sin(phiRad); //py/p
+		double pz = Math.cos(thetaRad); //pz/p
+		
+		double uf[] = result.getUf();
+		uf[0] = xo;
+		uf[1] = yo;
+		uf[2] = zo;
+		uf[3] = px;
+		uf[4] = py;
+		uf[5] = pz;
+		
+		if (momentum < MINMOMENTUM) {
+			System.err.println("Skipping low momentum fixed rho swim (A)");
+			result.setNStep(0);
+			result.setFinalS(0);
+			result.setStatus(-2);
+			return;
+		}
+				
+		double del = Double.POSITIVE_INFINITY;
+		int maxtry = 25;
+		int count = 0;
+		double sFinal = 0;
+		int ns = 0;
+		
+		
+		while ((count < maxtry) && (del > accuracy)) {
+
+			
+			uf = result.getUf();
+			if (count > 0) {
+				px = uf[3];
+				py = uf[4];
+				pz = uf[5];
+				theta = FastMath.acos2Deg(pz);
+				phi = FastMath.atan2Deg(py, px);
+			}
+			
+			
+			DefaultCylinderStopper stopper = new DefaultCylinderStopper(uf, sFinal, sMax, targetCylinder, accuracy);
+
+			ns += swim(charge, uf[0], uf[1], uf[2], momentum, theta, phi, stopper, null, sMax-sFinal, stepSize, relTolerance, null);
+			
+			System.arraycopy(stopper.getFinalU(), 0, result.getUf(), 0, result.getUf().length);
+			
+			sFinal = stopper.getFinalT();
+									
+			del = Math.abs(targetCylinder.distance(stopper.getFinalU()[0], stopper.getFinalU()[1], stopper.getFinalU()[2]));
+			
+			// succeed?
+			if (del < accuracy) {
+				break;
+			}
+
+			// passed max path length?
+			if (stopper.passedSmax()) {
+				break;
+			}
+			
+			count++;
+			
+			if (stopper.crossedBoundary()) {
+				stepSize = Math.max(stepSize / 2, del / 5);
+			}
+			
+		} // while
+
+		result.setNStep(ns);
+		result.setFinalS(sFinal);
+		if (del < accuracy) {
+			result.setStatus(0);
+		} else {
+			result.setStatus(-1);
+		}
+	}
+	   
+        /**
+	 * Swims a particle with a built in stopper at the boundary of an
+	 * arbitrary cylinder. Uses a fixed stepsize algorithm.
+	 * 
+	 * @param charge               the charge: -1 for electron, 1 for proton, etc
+	 * @param xo                   the x vertex position in meters
+	 * @param yo                   the y vertex position in meters
+	 * @param zo                   the z vertex position in meters
+	 * @param momentum             initial momentum in GeV/c
+	 * @param theta                initial polar angle in degrees
+	 * @param phi                  initial azimuthal angle in degrees
+	 * @param centerLineP1 one point [array: (x, y, z)] on the infinite center line (meters)
+	 * @param centerLineP2 another point [array: (x, y, z)] on the infinite center line (meters)
+	 * @param radius       the radius of the cylinder in meters
+	 *                             maxPathLength if reached first)
+	 * @param accuracy             the accuracy of the fixed rho termination, in
+	 *                             meters
+	 * @param stopper              an optional object that can terminate the
+	 *                             swimming based on some condition
+	 * @param sMax                 in meters. This determines the max number of
+	 *                             steps based on the step size. If a stopper is
+	 *                             used, the integration might terminate before all
+	 *                             the steps are taken. A reasonable value for CLAS
+	 *                             is 8. meters
+	 * @param stepSize             the uniform step size in meters.
+	 * @param result upon return, results from the swim including the final state vector [x, y, z, px/p, py/p, pz/p]
+	 */
+	public void swimCylinder(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+			double centerLineP1[],
+			double centerLineP2[],
+			double radius,
+			final double accuracy, double sMax, double stepSize, AdaptiveSwimResult result) {
+
+	// set u to the starting state vector
+		double thetaRad = Math.toRadians(theta);
+		double phiRad = Math.toRadians(phi);
+		double sinTheta = Math.sin(thetaRad);
+
+		double px = sinTheta*Math.cos(phiRad); //px/p
+		double py = sinTheta*Math.sin(phiRad); //py/p
+		double pz = Math.cos(thetaRad); //pz/p
+		
+		double uf[] = result.getUf();
+		uf[0] = xo;
+		uf[1] = yo;
+		uf[2] = zo;
+		uf[3] = px;
+		uf[4] = py;
+		uf[5] = pz;
+		
+		if (momentum < MINMOMENTUM) {
+			System.err.println("Skipping low momentum fixed rho swim (A)");
+			result.setNStep(0);
+			result.setFinalS(0);
+			result.setStatus(-2);
+			return;
+		}
+		
+		Cylinder targetCylinder = new Cylinder(centerLineP1, centerLineP2, radius);
+
+		//cutoff value of s with tolerance 
+		double sCutoff = sMax - SMAX_TOLERANCE;
+	
+		double del = Double.POSITIVE_INFINITY;
+		int maxtry = 25;
+		int count = 0;
+		double sFinal = 0;
+		int ns = 0;
+
+		while ((count < maxtry) && (del > accuracy)) {
+			
+			
+			uf = result.getUf();
+			if (count > 0) {
+				px = uf[3];
+				py = uf[4];
+				pz = uf[5];
+				theta = FastMath.acos2Deg(pz);
+				phi = FastMath.atan2Deg(py, px);
+			}
+			
+			
+			DefaultCylinderStopper stopper = new DefaultCylinderStopper(uf, sFinal, sMax, targetCylinder, accuracy);
+			
+			if ((sFinal + stepSize) > sMax) {
+				stepSize = sMax-sFinal;
+				
+				if (stepSize < 0) {
+					break;
+				}
+			}
+			
+
+
+			ns += swim(charge, uf[0], uf[1], uf[2], momentum, theta, phi, stopper, null, sMax-sFinal, stepSize);
+			
+			System.arraycopy(stopper.getFinalU(), 0, result.getUf(), 0, result.getUf().length);
+			
+			sFinal = stopper.getFinalT();	
+			
+			
+			del = Math.abs(targetCylinder.distance(stopper.getFinalU()[0], stopper.getFinalU()[1], stopper.getFinalU()[2]));
+
+
+			if ((sFinal) > sCutoff) {
+				break;
+			}
+						
+			count++;
+			stepSize = Math.min(stepSize, (sMax-sFinal)/4);
+
+//			stepSize /= 2;
+
+		} // while
+
+		result.setNStep(ns);
+		result.setFinalS(sFinal);
+
+		if (del < accuracy) {
+			result.setStatus(0);
+		} else {
+			result.setStatus(-1);
+		}
+	}
+	
+
+	/**
+	 * Swims a particle with a built in stopper for the rho coordinate.
+     * Uses an adaptive stepsize algorithm.
+	 * 
+	 * @param charge       the charge: -1 for electron, 1 for proton, etc
+	 * @param xo           the x vertex position in meters
+	 * @param yo           the y vertex position in meters
+	 * @param zo           the z vertex position in meters
+	 * @param momentum     initial momentum in GeV/c
+	 * @param theta        initial polar angle in degrees
+	 * @param phi          initial azimuthal angle in degrees
+	 * @param fixedRho     the fixed rho value (meters) that terminates (or
+	 *                     maxPathLength if reached first)
+	 * @param accuracy     the accuracy of the fixed rho termination, in meters
+	 * @param sMax         Max path length in meters. This determines the max number
+	 *                     of steps based on the step size. If a stopper is used,
+	 *                     the integration might terminate before all the steps are
+	 *                     taken. A reasonable value for CLAS is 8. meters
+	 * @param stepSize     the initial step size in meters.
+	 * @param relTolerance the error tolerance as fractional diffs. Note it is a
+	 *                     vector, the same dimension of the problem, e.g., 6 for
+	 *                     [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *                     1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 * @param result upon return, results from the swim including the final state vector [x, y, z, px/p, py/p, pz/p]
+	 * @throws RungeKuttaException
+	 */
+	
+	public void swimRho(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+			final double fixedRho, double accuracy, double sMax, double stepSize, double relTolerance[], AdaptiveSwimResult result)
+			throws RungeKuttaException {
+		
+		result.setInitialValues(charge, xo, yo, zo, momentum, theta, phi);
+
+		// set u to the starting state vector
+		double thetaRad = Math.toRadians(theta);
+		double phiRad = Math.toRadians(phi);
+		double sinTheta = Math.sin(thetaRad);
+
+		double px = sinTheta*Math.cos(phiRad); //px/p
+		double py = sinTheta*Math.sin(phiRad); //py/p
+		double pz = Math.cos(thetaRad); //pz/p
+		
+		double uf[] = result.getUf();
+		uf[0] = xo;
+		uf[1] = yo;
+		uf[2] = zo;
+		uf[3] = px;
+		uf[4] = py;
+		uf[5] = pz;
+		
+		if (momentum < MINMOMENTUM) {
+			System.err.println("Skipping low momentum fixed rho swim (A)");
+			result.setNStep(0);
+			result.setFinalS(0);
+			result.setStatus(-2);
+			return;
+		}
+				
+		double del = Double.POSITIVE_INFINITY;
+		int maxtry = 25;
+		int count = 0;
+		double sFinal = 0;
+		int ns = 0;
+		
+
+		while ((count < maxtry) && (del > accuracy)) {
+			
+			uf = result.getUf();
+			if (count > 0) {
+				px = uf[3];
+				py = uf[4];
+				pz = uf[5];
+				theta = FastMath.acos2Deg(pz);
+				phi = FastMath.atan2Deg(py, px);
+			}
+			
+			DefaultRhoStopper stopper = new DefaultRhoStopper(uf, sFinal, sMax, Math.hypot(uf[0], uf[1]), fixedRho, accuracy);
+
+			ns += swim(charge, uf[0], uf[1], uf[2], momentum, theta, phi, stopper, null, sMax-sFinal, stepSize, relTolerance, null);
+			
+			System.arraycopy(stopper.getFinalU(), 0, result.getUf(), 0, result.getUf().length);
+			
+			sFinal = stopper.getFinalT();
+									
+			del = Math.abs(stopper.getRho() - fixedRho);
+			
+			// succeed?
+			if (del < accuracy) {
+				break;
+			}
+
+			// passed max path length?
+			if (stopper.passedSmax()) {
+				break;
+			}
+			
+			count++;
+			
+			if (stopper.crossedBoundary()) {
+				stepSize = Math.max(stepSize / 2, del / 5);
+			}
+			
+			
+		} // while
+
+		result.setNStep(ns);
+		result.setFinalS(sFinal);
+	}
+	
+
+	/**
+	 * Swims a particle with a built it stopper for the rho coordinate.
+	 * Uses a fixed stepsize algorithm.
+	 * 
+	 * @param charge               the charge: -1 for electron, 1 for proton, etc
+	 * @param xo                   the x vertex position in meters
+	 * @param yo                   the y vertex position in meters
+	 * @param zo                   the z vertex position in meters
+	 * @param momentum             initial momentum in GeV/c
+	 * @param theta                initial polar angle in degrees
+	 * @param phi                  initial azimuthal angle in degrees
+	 * @param fixedRho             the fixed rho value (meters) that terminates (or
+	 *                             maxPathLength if reached first)
+	 * @param accuracy             the accuracy of the fixed rho termination, in
+	 *                             meters
+	 * @param stopper              an optional object that can terminate the
+	 *                             swimming based on some condition
+	 * @param sMax                 in meters. This determines the max number of
+	 *                             steps based on the step size. If a stopper is
+	 *                             used, the integration might terminate before all
+	 *                             the steps are taken. A reasonable value for CLAS
+	 *                             is 8. meters
+	 * @param stepSize             the uniform step size in meters.
+	 * @param result upon return, results from the swim including the final state vector [x, y, z, px/p, py/p, pz/p]
+	 */
+	public void swimRho(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+			final double fixedRho, final double accuracy, double sMax, double stepSize, AdaptiveSwimResult result) {
+
+	// set u to the starting state vector
+		double thetaRad = Math.toRadians(theta);
+		double phiRad = Math.toRadians(phi);
+		double sinTheta = Math.sin(thetaRad);
+
+		double px = sinTheta*Math.cos(phiRad); //px/p
+		double py = sinTheta*Math.sin(phiRad); //py/p
+		double pz = Math.cos(thetaRad); //pz/p
+		
+		double uf[] = result.getUf();
+		uf[0] = xo;
+		uf[1] = yo;
+		uf[2] = zo;
+		uf[3] = px;
+		uf[4] = py;
+		uf[5] = pz;
+		
+		if (momentum < MINMOMENTUM) {
+			System.err.println("Skipping low momentum fixed rho swim (A)");
+			result.setNStep(0);
+			result.setFinalS(0);
+			result.setStatus(-2);
+			return;
+		}
+		
+		double del = Double.POSITIVE_INFINITY;
+		int maxtry = 25;
+		int count = 0;
+		double sFinal = 0;
+		int ns = 0;
+		
+
+		while ((count < maxtry) && (del > accuracy)) {
+			
+			uf = result.getUf();
+			if (count > 0) {
+				px = uf[3];
+				py = uf[4];
+				pz = uf[5];
+				theta = FastMath.acos2Deg(pz);
+				phi = FastMath.atan2Deg(py, px);
+			}
+			
+			DefaultRhoStopper stopper = new DefaultRhoStopper(uf, sFinal, sMax, Math.hypot(uf[0], uf[1]), fixedRho, accuracy);
+
+			ns += swim(charge, uf[0], uf[1], uf[2], momentum, theta, phi, stopper, null, sMax-sFinal, stepSize);
+			
+			System.arraycopy(stopper.getFinalU(), 0, result.getUf(), 0, result.getUf().length);
+			
+			sFinal = stopper.getFinalT();
+									
+			del = Math.abs(stopper.getRho() - fixedRho);
+			
+			// succeed?
+			if (del < accuracy) {
+				break;
+			}
+
+			// passed max path length?
+			if (stopper.passedSmax()) {
+				break;
+			}
+			
+			count++;
+			
+			if (stopper.crossedBoundary()) {
+				stepSize = Math.max(stepSize / 2, del / 5);
+			}
+			
+			
+		} // while
+
+		result.setNStep(ns);
+		result.setFinalS(sFinal);
+		
+//		//cutoff value of s with tolerance 
+//		double sCutoff = sMax - SMAX_TOLERANCE;
+//	
+//		double del = Double.POSITIVE_INFINITY;
+//		int maxtry = 25;
+//		int count = 0;
+//		double sFinal = 0;
+//		int ns = 0;
+//
+//		while ((count < maxtry) && (del > accuracy)) {
+//			
+//			uf = result.getUf();
+//			if (count > 0) {
+//				px = uf[3];
+//				py = uf[4];
+//				pz = uf[5];
+//				theta = FastMath.acos2Deg(pz);
+//				phi = FastMath.atan2Deg(py, px);
+//			}
+//			
+//			double rhoCurr = Math.hypot(uf[0], uf[1]);
+//			
+//			DefaultRhoStopper stopper = new DefaultRhoStopper(uf, sFinal, sMax, rhoCurr, fixedRho, accuracy);
+//			
+//			if ((sFinal + stepSize) > sMax) {
+//				stepSize = sMax-sFinal;
+//				
+//				if (stepSize < 0) {
+//					break;
+//				}
+//			}
+//			
+//
+//
+//			ns += swim(charge, uf[0], uf[1], uf[2], momentum, theta, phi, stopper, null, sMax-sFinal, stepSize);
+//			
+//			System.arraycopy(stopper.getFinalU(), 0, result.getUf(), 0, result.getUf().length);
+//			
+//			sFinal = stopper.getFinalT();	
+//			
+//			
+//			double rholast = Math.hypot(result.getUf()[0], result.getUf()[1]);
+//			del = Math.abs(rholast - fixedRho);
+//
+//
+//			if ((sFinal) > sCutoff) {
+//				break;
+//			}
+//						
+//			count++;
+//			stepSize = Math.min(stepSize, (sMax-sFinal)/4);
+//
+////			stepSize /= 2;
+//
+//		} // while
+//
+//		result.setNStep(ns);
+//		result.setFinalS(sFinal);
+//
+//		if (del < accuracy) {
+//			result.setStatus(0);
+//		} else {
+//			result.setStatus(-1);
+//		}
+	}
+
+	public void swimPlane(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+			double normX, double normY, double normZ, double pointX, double pointY, double pointZ,
+			double accuracy, double sMax, double stepSize, double relTolerance[], AdaptiveSwimResult result)
+			throws RungeKuttaException {
+		
+		cnuphys.adaptiveSwim.geometry.Plane targetPlane = new cnuphys.adaptiveSwim.geometry.Plane(new Vector(normX,normY,normZ), new Point(pointX,pointY,pointZ));
+//                System.out.println(targetPlane.toString());
+		result.setInitialValues(charge, xo, yo, zo, momentum, theta, phi);
+
+		// set u to the starting state vector
+		double thetaRad = Math.toRadians(theta);
+		double phiRad = Math.toRadians(phi);
+		double sinTheta = Math.sin(thetaRad);
+
+		double px = sinTheta*Math.cos(phiRad); //px/p
+		double py = sinTheta*Math.sin(phiRad); //py/p
+		double pz = Math.cos(thetaRad); //pz/p
+		
+		double uf[] = result.getUf();
+		uf[0] = xo;
+		uf[1] = yo;
+		uf[2] = zo;
+		uf[3] = px;
+		uf[4] = py;
+		uf[5] = pz;
+//		System.out.println(xo + " " +yo + " " + zo + " " + targetPlane.signedDistance(xo, yo, zo));
+		if (momentum < MINMOMENTUM) {
+			System.err.println("Skipping low momentum fixed rho swim (A)");
+			result.setNStep(0);
+			result.setFinalS(0);
+			result.setStatus(-2);
+			return;
+		}
+				
+		double del = Double.POSITIVE_INFINITY;
+		int maxtry = 25;
+		int count = 0;
+		double sFinal = 0;
+		int ns = 0;
+		
+		
+		while ((count < maxtry) && (del > accuracy)) {
+
+			
+			uf = result.getUf();
+			if (count > 0) {
+				px = uf[3];
+				py = uf[4];
+				pz = uf[5];
+				theta = FastMath.acos2Deg(pz);
+				phi = FastMath.atan2Deg(py, px);
+			}
+			
+			
+			NewPlaneStopper stopper = new NewPlaneStopper(uf, sFinal, sMax, targetPlane, accuracy);
+
+			ns += swim(charge, uf[0], uf[1], uf[2], momentum, theta, phi, stopper, null, sMax-sFinal, stepSize, relTolerance, null);
+			
+			System.arraycopy(stopper.getFinalU(), 0, result.getUf(), 0, result.getUf().length);
+			
+			sFinal = stopper.getFinalT();
+									
+			del = Math.abs(targetPlane.signedDistance(stopper.getFinalU()[0], stopper.getFinalU()[1], stopper.getFinalU()[2]));
+//			System.out.println(del + " " + stopper.getFinalU()[0] + " " + stopper.getFinalU()[1] + " " + stopper.getFinalU()[2]);
+			// succeed?
+			if (del < accuracy) {
+				break;
+			}
+
+			// passed max path length?
+			if (stopper.passedSmax()) {
+				break;
+			}
+			
+			count++;
+			
+			if (stopper.crossedBoundary()) {
+				stepSize = Math.max(stepSize / 2, del / 5);
+			}
+			
+		} // while
+
+		result.setNStep(ns);
+		result.setFinalS(sFinal);
+
+	}
+     
 	/**
 	 * Get the tolerance used by the CLAS_Toleance array
 	 * 
@@ -492,8 +1114,8 @@ public final class Swimmer {
 	 * @param relTolerance
 	 *            the error tolerance as fractional diffs. Note it is a vector,
 	 *            the same dimension of the problem, e.g., 6 for
-	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
-	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 *                     [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *                     1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
 	 * @param hdata
 	 *            if not null, should be double[3]. Upon return, hdata[0] is the
 	 *            min stepsize used (m), hdata[1] is the average stepsize used
@@ -537,7 +1159,7 @@ public final class Swimmer {
 	 *            the accuracy of the fixed z termination, in meters
 	 * @param maxRad
 	 *            the max radial coordinate NOTE: NO LONGER USED (here for
-	 *            backwards compatibility)
+	 *                     backwards compatibility)
 	 * @param sMax
 	 *            Max path length in meters. This determines the max number of
 	 *            steps based on the step size. If a stopper is used, the
@@ -548,8 +1170,8 @@ public final class Swimmer {
 	 * @param relTolerance
 	 *            the error tolerance as fractional diffs. Note it is a vector,
 	 *            the same dimension of the problem, e.g., 6 for
-	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
-	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 *                     [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *                     1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
 	 * @param hdata
 	 *            if not null, should be double[3]. Upon return, hdata[0] is the
 	 *            min stepsize used (m), hdata[1] is the average stepsize used
@@ -623,7 +1245,7 @@ public final class Swimmer {
 	 *            if reached first)
 	 * @param accuracy
 	 *            the accuracy of the fixed z termination, in meters
-	 * @param maxRad maximum radial coordinate in meters
+	 * @param maxRad       maximum radial coordinate in meters
 	 * @param sMax
 	 *            Max path length in meters. This determines the max number of
 	 *            steps based on the step size. If a stopper is used, the
@@ -634,8 +1256,8 @@ public final class Swimmer {
 	 * @param relTolerance
 	 *            the error tolerance as fractional diffs. Note it is a vector,
 	 *            the same dimension of the problem, e.g., 6 for
-	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
-	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 *                     [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *                     1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
 	 * @param hdata
 	 *            if not null, should be double[3]. Upon return, hdata[0] is the
 	 *            min stepsize used (m), hdata[1] is the average stepsize used
@@ -718,7 +1340,7 @@ public final class Swimmer {
 		int count = 0;
 
 		// set the step size to half the accuracy
-	    stepSize = accuracy / 2;
+		stepSize = accuracy / 2;
 		
 		//set the reverse stepsize to about 1/10 of distance to cover
 //		int size = traj.size();
@@ -741,7 +1363,7 @@ public final class Swimmer {
 			xo = lastY[0];
 			yo = lastY[1];
 			zo = lastY[2];
-	//		stepSize = Math.max(accuracy, Math.abs((fixedZ-zo)/10));
+			// stepSize = Math.max(accuracy, Math.abs((fixedZ-zo)/10));
 			double px = lastY[3];
 			double py = lastY[4];
 			double pz = lastY[5];
@@ -821,8 +1443,8 @@ public final class Swimmer {
 	 * @param relTolerance
 	 *            the error tolerance as fractional diffs. Note it is a vector,
 	 *            the same dimension of the problem, e.g., 6 for
-	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
-	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 *                     [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *                     1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
 	 * @param hdata
 	 *            if not null, should be double[3]. Upon return, hdata[0] is the
 	 *            min stepsize used (m), hdata[1] is the average stepsize used
@@ -905,7 +1527,7 @@ public final class Swimmer {
 	 *            the accuracy of the distance from plane termination, in meters
 	 * @param maxRad
 	 *            the max radial coordinate NOTE: NO LONGER USED (here for
-	 *            backwards compatibility)
+	 *                     backwards compatibility)
 	 * @param sMax
 	 *            Max path length in meters. This determines the max number of
 	 *            steps based on the step size. If a stopper is used, the
@@ -916,8 +1538,8 @@ public final class Swimmer {
 	 * @param relTolerance
 	 *            the error tolerance as fractional diffs. Note it is a vector,
 	 *            the same dimension of the problem, e.g., 6 for
-	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
-	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 *                     [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *                     1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
 	 * @param hdata
 	 *            if not null, should be double[3]. Upon return, hdata[0] is the
 	 *            min stepsize used (m), hdata[1] is the average stepsize used
@@ -969,8 +1591,8 @@ public final class Swimmer {
 	 * @param relTolerance
 	 *            the error tolerance as fractional diffs. Note it is a vector,
 	 *            the same dimension of the problem, e.g., 6 for
-	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
-	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 *                     [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *                     1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
 	 * @param hdata
 	 *            if not null, should be double[3]. Upon return, hdata[0] is the
 	 *            min stepsize used (m), hdata[1] is the average stepsize used
@@ -982,7 +1604,7 @@ public final class Swimmer {
 			final double normX, final double normY, final double normZ, final double d, double accuracy, double sMax, double stepSize, double relTolerance[], double hdata[])
 			throws RungeKuttaException {
 		
-		Plane plane = Plane.createPlane(normX,  normY, normZ, d);
+		Plane plane = Plane.createPlane(normX, normY, normZ, d);
 		return swim(charge, xo, yo, zo, momentum, theta, phi, plane, accuracy, sMax, stepSize, relTolerance, hdata);
 
 	}
@@ -1020,8 +1642,8 @@ public final class Swimmer {
 	 * @param relTolerance
 	 *            the error tolerance as fractional diffs. Note it is a vector,
 	 *            the same dimension of the problem, e.g., 6 for
-	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
-	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 *                     [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *                     1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
 	 * @param hdata
 	 *            if not null, should be double[3]. Upon return, hdata[0] is the
 	 *            min stepsize used (m), hdata[1] is the average stepsize used
@@ -1038,7 +1660,7 @@ public final class Swimmer {
 				
 		//no field?
 		if ((charge == 0) || (getProbe().isZeroField())) {
-	//		System.err.println("Skipping neutral or no field swim (D)");
+			// System.err.println("Skipping neutral or no field swim (D)");
 			// just has to be proportional to velocity
 			SwimTrajectory traj = new SwimTrajectory(charge, xo, yo, zo, momentum, theta, phi);
 			double vz = momentum * FastMath.cos(Math.toRadians(theta));
@@ -1110,7 +1732,7 @@ public final class Swimmer {
 			
 			del = plane.distanceToPlane(lastY[0], lastY[1], lastY[2]);
 			stepSize = Math.max(accuracy, Math.abs(del/10));
-	//		System.out.print("COUNT: " + count + " StepSize: " + stepSize);
+			// System.out.print("COUNT: " + count + " StepSize: " + stepSize);
 
 			// System.err.println("New start state = " + String.format("(%9.6f,
 			// %9.6f, %9.6f) (%9.6f, %9.6f, %9.6f)", xo, yo, zo, px, py, pz));
@@ -1141,10 +1763,10 @@ public final class Swimmer {
 			
 			del = plane.distanceToPlane(lastY[0], lastY[1], lastY[2]);
 			
-	//		System.out.println("   del: " + del);
+			// System.out.println(" del: " + del);
 			count++;
-	//		stepSize /= 2;
-	//		stepSize = Math.max(accuracy, Math.abs(del/10));
+			// stepSize /= 2;
+			// stepSize = Math.max(accuracy, Math.abs(del/10));
 		} // while
 
 		// now can get overall avg stepsize
@@ -1179,7 +1801,7 @@ public final class Swimmer {
 	 *            the accuracy of the fixed z termination, in meters
 	 * @param maxRad
 	 *            the max radial coordinate NOTE: NO LONGER USED (here for
-	 *            backwards compatibility)
+	 *                     backwards compatibility)
 	 * @param sMax
 	 *            Max path length in meters. This determines the max number of
 	 *            steps based on the step size. If a stopper is used, the
@@ -1190,8 +1812,8 @@ public final class Swimmer {
 	 * @param relTolerance
 	 *            the error tolerance as fractional diffs. Note it is a vector,
 	 *            the same dimension of the problem, e.g., 6 for
-	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
-	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 *                     [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *                     1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
 	 * @param hdata
 	 *            if not null, should be double[3]. Upon return, hdata[0] is the
 	 *            min stepsize used (m), hdata[1] is the average stepsize used
@@ -1239,8 +1861,8 @@ public final class Swimmer {
 	 * @param relTolerance
 	 *            the error tolerance as fractional diffs. Note it is a vector,
 	 *            the same dimension of the problem, e.g., 6 for
-	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
-	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 *                     [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *                     1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
 	 * @param hdata
 	 *            if not null, should be double[3]. Upon return, hdata[0] is the
 	 *            min stepsize used (m), hdata[1] is the average stepsize used
@@ -1258,7 +1880,7 @@ public final class Swimmer {
 		
 		//no field?
 		if ((charge == 0) || (getProbe().isZeroField())) {
-	//		System.err.println("Skipping neutral or no field swim (D)");
+			// System.err.println("Skipping neutral or no field swim (D)");
 			// just has to be proportional to velocity
 			SwimTrajectory traj = new SwimTrajectory(charge, xo, yo, zo, momentum, theta, phi);
 			double vz = momentum * FastMath.cos(Math.toRadians(theta));
@@ -1335,7 +1957,7 @@ public final class Swimmer {
 			double py = lastY[4];
 			double pz = lastY[5];
 
-	//		stepSize = Math.max(accuracy, Math.abs((fixedZ-zo)/10));
+			// stepSize = Math.max(accuracy, Math.abs((fixedZ-zo)/10));
 
 			// System.err.println("New start state = " + String.format("(%9.6f,
 			// %9.6f, %9.6f) (%9.6f, %9.6f, %9.6f)", xo, yo, zo, px, py, pz));
@@ -1404,8 +2026,8 @@ public final class Swimmer {
 	 * @param relTolerance
 	 *            the error tolerance as fractional diffs. Note it is a vector,
 	 *            the same dimension of the problem, e.g., 6 for
-	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
-	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 *                     [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *                     1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
 	 * @param hdata
 	 *            if not null, should be double[3]. Upon return, hdata[0] is the
 	 *            min stepsize used (m), hdata[1] is the average stepsize used
@@ -1453,8 +2075,8 @@ public final class Swimmer {
 	 * @param relTolerance
 	 *            the error tolerance as fractional diffs. Note it is a vector,
 	 *            the same dimension of the problem, e.g., 6 for
-	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
-	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 *                     [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *                     1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
 	 * @param hdata
 	 *            if not null, should be double[3]. Upon return, hdata[0] is the
 	 *            min stepsize used (m), hdata[1] is the average stepsize used
@@ -1524,8 +2146,8 @@ public final class Swimmer {
 	 * @param relTolerance
 	 *            the error tolerance as fractional diffs. Note it is a vector,
 	 *            the same dimension of the problem, e.g., 6 for
-	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
-	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 *                      [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *                      1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
 	 * @param hdata
 	 *            if not null, should be double[3]. Upon return, hdata[0] (m) is
 	 *            the min stepsize used, hdata[1] (m) is the average stepsize

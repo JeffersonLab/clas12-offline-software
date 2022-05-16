@@ -3,28 +3,15 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jlab.clas</groupId>
   <artifactId>clas-io</artifactId>
-  <version>6.5.13-SNAPSHOT</version>
+  <version>8.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <parent>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../../parent/pom.xml</relativePath>
-    <version>6.5.13-SNAPSHOT</version>
+    <version>8.0.0-SNAPSHOT</version>
   </parent>
-
-  <build>
-      <plugins>
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <configuration>
-                  <source>1.8</source>
-                  <target>1.8</target>
-              </configuration>
-          </plugin>
-      </plugins>
-  </build>
 
   <dependencies>
 
@@ -34,28 +21,55 @@
       <version>4.3-SNAPSHOT</version>
     </dependency>
 
+    <!-- API, java.xml.bind module -->
     <dependency>
-      <groupId>javax.xml.bind</groupId>
-      <artifactId>jaxb-api</artifactId>
-      <version>2.3.0</version>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+      <version>2.3.2</version>
     </dependency>
-
+    
+    <!-- Runtime, com.sun.xml.bind module -->
+    <dependency>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-runtime</artifactId>
+      <version>2.3.2</version>
+    </dependency>
+        
     <dependency>
       <groupId>org.jlab.coda</groupId>
       <artifactId>jevio</artifactId>
-      <version>6.1-SNAPSHOT</version>
+      <version>6.2-SNAPSHOT</version>
+      <classifier>jar-with-dependencies</classifier>
+      <exclusions>
+        <exclusion>
+          <groupId>net.jpountz.lz4</groupId>
+          <artifactId>lz4-java</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.aha.compression</groupId>
+          <artifactId> AHACompressionAPI </artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.lmax</groupId>
+          <artifactId>disruptor</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>proguard</groupId>
+          <artifactId>proguard</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.jnp</groupId>
       <artifactId>jnp-hipo</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>2.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.jnp</groupId>
       <artifactId>jnp-hipo4</artifactId>
-      <version>4.0-SNAPSHOT</version>
+      <version>4.1-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -70,24 +84,19 @@
       <version>2.3-SNAPSHOT</version>
     </dependency>
 
-<!--
-    <dependency>
-      <groupId>org.jlab.clas</groupId>
-      <artifactId>clas-tools</artifactId>
-      <version>2.4-SNAPSHOT</version>
-    </dependency>
--->
-
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-utils</artifactId>
-      <version>6.5.13-SNAPSHOT</version>
+      <version>8.0.0-SNAPSHOT</version>
     </dependency>
-  </dependencies>
 
-  <properties>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-  </properties>
+    <dependency>
+        <groupId>org.jlab.clas</groupId>
+        <artifactId>clas-logging</artifactId>
+        <version>8.0.0-SNAPSHOT</version>
+        <scope>compile</scope>
+    </dependency>
+
+  </dependencies>
 
 </project>

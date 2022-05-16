@@ -2,33 +2,21 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jlab.clas</groupId>
   <artifactId>common-tools</artifactId>
-  <version>6.5.13-SNAPSHOT</version>
+  <version>8.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <parent>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../parent/pom.xml</relativePath>
-    <version>6.5.13-SNAPSHOT</version>
+    <version>8.0.0-SNAPSHOT</version>
   </parent>
-
-  <build>
-      <plugins>
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <configuration>
-                  <source>1.8</source>
-                  <target>1.8</target>
-              </configuration>
-          </plugin>
-      </plugins>
-  </build>
 
   <modules>
     <module>clas-utils</module>
     <module>clas-physics</module>
     <module>clas-io</module>
+    <module>clas-logging</module>
     <module>clas-geometry</module>
     <module>clas-jcsg</module>
     <module>clas-detector</module>
@@ -37,6 +25,8 @@
     <module>clas-analysis</module> 
     <module>swim-tools</module>
     <module>clas-math</module>
-
+    <module>clara-io</module>
+    <module>clas-tracking</module>
   </modules>
+
 </project>

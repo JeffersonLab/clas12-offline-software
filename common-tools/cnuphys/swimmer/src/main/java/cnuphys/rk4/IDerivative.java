@@ -20,7 +20,7 @@ public interface IDerivative {
 	 *            the value of the independent variable (usually t) (input).
 	 * @param y
 	 *            the values of the state vector (usually [x,y,z,vx,vy,vz]) at t
-	 *            (input).
+	 *             (input).
 	 * @param dydt
 	 *            will be filled with the values of the derivatives at t
 	 *            (output).

@@ -1,13 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.reco;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import cnuphys.magfield.MagneticField;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
 
@@ -17,9 +16,11 @@ import org.jlab.io.evio.EvioDataEvent;
  */
 public class DummyEngine extends ReconstructionEngine {
 
+    public static Logger LOGGER = Logger.getLogger(DummyEngine.class.getName());
+
     public DummyEngine(){
         super("DUMMY","gavalian","1.0");
-        System.out.println(">>>>>> Executing constructor");
+        LOGGER.log(Level.FINEST,">>>>>> Executing constructor");
     }
     
     @Override

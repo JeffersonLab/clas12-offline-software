@@ -1,0 +1,88 @@
+io-services:
+  reader:
+    class: org.jlab.io.clara.HipoToHipoReader
+    name: HipoToHipoReader
+  writer:
+    class: org.jlab.io.clara.HipoToHipoWriter
+    name: HipoToHipoWriter
+services:
+  - class: org.jlab.clas.swimtools.MagFieldsEngine
+    name: MAGFIELDS
+  - class: org.jlab.rec.ft.cal.FTCALEngine
+    name: FTCAL
+  - class: org.jlab.rec.ft.hodo.FTHODOEngine
+    name: FTHODO
+  - class: org.jlab.rec.ft.trk.FTTRKEngine
+    name: FTTRK
+  - class: org.jlab.rec.ft.FTEBEngine
+    name: FTEB
+# DC clustering: nominal algoritm, filled the cluster bank for ai and conventional tracking
+  - class: org.jlab.service.dc.DCHBClustering
+    name: DCCR
+# This is where the AI plugin would go.  THe AI code reads the HB clusters.  
+  - class: org.jlab.service.mltn.MLTDEngine
+    name: MLTD
+# DC using clustering on AI hits: NN assisted HB tracking
+  - class: org.jlab.service.dc.DCHBPostClusterAI
+    name: DCHAI
+  - class: org.jlab.service.ftof.FTOFHBEngine
+    name: FTOFHB
+  - class: org.jlab.service.ec.ECEngine
+    name: EC
+  - class: org.jlab.rec.cvt.services.CVTEngine
+    name: CVTFP
+  - class: org.jlab.service.ctof.CTOFEngine
+    name: CTOF
+  - class: org.jlab.service.cnd.CNDCalibrationEngine
+    name: CND
+  - class: org.jlab.service.band.BANDEngine
+    name: BAND
+  - class: org.jlab.service.htcc.HTCCReconstructionService
+    name: HTCC
+  - class: org.jlab.service.ltcc.LTCCEngine
+    name: LTCC
+  - class: org.jlab.service.eb.EBHBEngine
+    name: EBHB
+  - class: org.jlab.service.dc.DCTBEngine
+    name: DCTB
+  - class: org.jlab.service.fmt.FMTEngine
+    name: FMT
+  - class: org.jlab.rec.cvt.services.CVTSecondPassEngine
+    name: CVTSP
+  - class: org.jlab.service.ftof.FTOFTBEngine
+    name: FTOFTB
+  - class: org.jlab.service.eb.EBTBEngine
+    name: EBTB
+  - class: org.jlab.rec.rich.RICHEBEngine
+    name: RICH
+  - class: org.jlab.service.rtpc.RTPCEngine
+    name: RTPC
+configuration:
+  global:
+    variation: rga_fall2018
+#      timestamp: 12/31/2020-00:00:00
+  io-services:
+    writer:
+      compression: 2
+#      schema_dir: "absolute-path-to-schema-folder"
+#      for example:
+#      schema_dir: "/home/clas12-1/chef/myClara/plugins/clas12/etc/bankdefs/dst"
+  services:
+    MAGFIELDS:
+      magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
+      magfieldTorusMap: Full_torus_r251_phi181_z251_08May2018.dat
+    DCCR:
+      dcT2DFunc: "Polynomial"
+      dcWireDistortion: "true"  
+    DCHAI:
+      dcT2DFunc: "Polynomial"
+      dcWireDistortion: "true" 
+      outputBankPrefix: "HB"
+    DCTB:
+      dcT2DFunc: "Polynomial"
+      dcWireDistortion: "true" 
+    MLTD:
+      run: "5038"
+      
+mime-types:
+  - binary/data-hipo

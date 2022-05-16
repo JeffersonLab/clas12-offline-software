@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.jlab.clas</groupId>
+  <artifactId>clara-io</artifactId>
+  <version>8.0.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <parent>
+    <groupId>org.jlab.clas</groupId>
+    <artifactId>clas12rec</artifactId>
+    <relativePath>../../parent/pom.xml</relativePath>
+    <version>8.0.0-SNAPSHOT</version>
+  </parent>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>org.jlab.coda</groupId>
+      <artifactId>jclara</artifactId>
+      <version>4.3-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jlab.coda</groupId>
+      <artifactId>jevio</artifactId>
+      <version>6.2-SNAPSHOT</version>
+      <classifier>jar-with-dependencies</classifier>
+      <exclusions>
+        <exclusion>
+          <groupId>net.jpountz.lz4</groupId>
+          <artifactId>lz4-java</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.aha.compression</groupId>
+          <artifactId> AHACompressionAPI </artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.lmax</groupId>
+          <artifactId>disruptor</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>proguard</groupId>
+          <artifactId>proguard</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jlab.jnp</groupId>
+      <artifactId>jnp-hipo</artifactId>
+      <version>2.0-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jlab.jnp</groupId>
+      <artifactId>jnp-hipo4</artifactId>
+      <version>4.1-SNAPSHOT</version>
+    </dependency>
+
+  </dependencies>
+
+</project>

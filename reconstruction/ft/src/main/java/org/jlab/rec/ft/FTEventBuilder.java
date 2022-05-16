@@ -5,6 +5,7 @@ import java.util.List;
 import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.detector.base.DetectorLayer;
 import org.jlab.detector.calib.utils.ConstantsManager;
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 
@@ -170,24 +171,16 @@ public class FTEventBuilder {
         particle.setDirection(thetaCorr, phiCorr);
         }     
     }
-	
-    public List<FTParticle> initFTparticles(List<FTResponse> responses) {
+    
+    public List<FTParticle> initFTparticles(List<FTResponse> responses, ConstantsManager manager, int run) {
+        IndexedTable target = manager.getConstants(run, "/geometry/target");
+
         List<FTParticle> particles = new ArrayList<FTParticle>();
 //        this.FTparticles.clear();
         for (int i = 0; i < responses.size(); i++) {
-            if (responses.get(i).getType().getName() == "FTCAL") {
-                FTParticle track = new FTParticle(i);
-                // start assuming the cluster to be associated to a photon    PROVISIONAL to be updated with correct charge (if possible)
-                track.setCharge(0);
-                track.setField(this.solenoidField);
-                track.setEnergy(responses.get(i).getEnergy());
-                track.setPosition(responses.get(i).getPosition());
-                track.setDirection();
-                track.setTime(responses.get(i).getTime() - responses.get(i).getPosition().mag() / PhysicsConstants.speedOfLight());
-                track.setCalorimeterIndex(responses.get(i).getId());
-                track.setHodoscopeIndex(-1);
-                track.setTrackerIndex(-1, 0);
-                track.setTrackerIndex(-1, 1);
+            if (responses.get(i).getType()==DetectorType.FTCAL) {
+                // start assuming the cluster to be associated to a photon
+                FTParticle track = new FTParticle(i, 0, this.solenoidField, responses.get(i), 0, 0, target.getDoubleValue("position", 0,0,0));
                 particles.add(track);
                 responses.get(i).setAssociation(particles.size()-1);
             }
@@ -330,6 +323,9 @@ public class FTEventBuilder {
                     banktrack.setFloat("cx", i, (float) particles.get(i).getDirection().x());
                     banktrack.setFloat("cy", i, (float) particles.get(i).getDirection().y());
                     banktrack.setFloat("cz", i, (float) particles.get(i).getDirection().z());
+                    banktrack.setFloat("vx", i, (float) particles.get(i).getVertex().x());
+                    banktrack.setFloat("vy", i, (float) particles.get(i).getVertex().y());
+                    banktrack.setFloat("vz", i, (float) particles.get(i).getVertex().z());
                     banktrack.setFloat("time", i, (float) particles.get(i).getTime());
                     banktrack.setShort("calID", i, (short) particles.get(i).getCalorimeterIndex());
                     banktrack.setShort("hodoID", i, (short) particles.get(i).getHodoscopeIndex());

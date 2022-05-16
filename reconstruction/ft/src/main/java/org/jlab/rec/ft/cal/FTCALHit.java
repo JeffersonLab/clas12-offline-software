@@ -32,7 +32,7 @@ public class FTCALHit implements Comparable<FTCALHit>{
 		this.set_Dy( (this._IDY-FTCALConstantsLoader.CRYS_DELTA )* FTCALConstantsLoader.CRYS_WIDTH);
 		this.set_Dz(FTCALConstantsLoader.CRYS_ZPOS+cluster.getDoubleValue("depth_z", 1,1,0));
 		this.set_DGTZIndex(i);
-		this.set_ClusIndex(0);
+		this.set_ClusID(0);
 	}
 
 	public FTCALHit(int i, int ICOMPONENT, int ADC, float time, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable timeWalk, IndexedTable cluster) {
@@ -59,7 +59,7 @@ public class FTCALHit implements Comparable<FTCALHit>{
 		this.set_Dy( (this._IDY-FTCALConstantsLoader.CRYS_DELTA )* FTCALConstantsLoader.CRYS_WIDTH);
 		this.set_Dz(FTCALConstantsLoader.CRYS_ZPOS+cluster.getDoubleValue("depth_z", 1,1,0));
 		this.set_DGTZIndex(i);
-		this.set_ClusIndex(0);
+		this.set_ClusID(0);
 	}
 
 	private int _COMPONENT;		         	//	   Component number
@@ -197,12 +197,12 @@ public class FTCALHit implements Comparable<FTCALHit>{
 	}
 	
 	
-	public int get_ClusIndex() {
+	public int get_ClusID() {
 		return _ClusIndex;
 	}
 
 
-	public void set_ClusIndex(int _ClusIndex) {
+	public void set_ClusID(int _ClusIndex) {
 		this._ClusIndex = _ClusIndex;
 	}
 	
@@ -215,6 +215,7 @@ public class FTCALHit implements Comparable<FTCALHit>{
 		}		
 	}
 
+        @Override
 	public int compareTo(FTCALHit arg0) {
 		if(this.get_Edep()<arg0.get_Edep()) {
 			return 1;
@@ -223,15 +224,14 @@ public class FTCALHit implements Comparable<FTCALHit>{
 		}
 	}
         
-        public void showHit() {
-            System.out.println(
-                        + this.get_COMPONENT() + "\t" 
+        public void show() {
+            System.out.println(+ this.get_COMPONENT() + "\t" 
                         + this.get_IDX()       + "\t " 
                         + this.get_IDY()       + "\t"
                         + this.get_Edep()      + "\t"
                         + this.get_Time()      + "\t"
                         + this.get_DGTZIndex() + "\t"
-                        + this.get_ClusIndex());
+                        + this.get_ClusID());
         }
 		
 }

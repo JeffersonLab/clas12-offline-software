@@ -1,5 +1,59 @@
 [ 
  {
+    "name": "HitBasedTrkg::Hits",
+    "group": 20600,
+    "item" : 28,
+    "info": "reconstructed hits using DC wire positions",
+    "entries": [
+       {"name":"id",          "type":"S", "info":"id of the hit"},
+       {"name":"status",      "type":"S", "info":"id of the hit"},       
+       {"name":"sector",      "type":"B", "info":"DC sector"},
+       {"name":"superlayer",  "type":"B", "info":"DC superlayer (1...6)"},
+       {"name":"layer",       "type":"B", "info":"DC layer in superlayer (1...6)"},
+       {"name":"wire",        "type":"S", "info":"wire id of DC"},
+       {"name":"TDC",         "type":"I", "info":"raw time of the hit"},
+       {"name":"trkDoca",     "type":"F", "info":"track doca of the hit (in cm)"},
+       {"name":"docaError",   "type":"F", "info":"error on track doca of the hit"},
+       {"name":"LR",          "type":"B", "info":"Left/Right ambiguity of the hit"},
+       {"name":"LocX",        "type":"F", "info":"x in planar local coordinate system"},
+       {"name":"LocY",        "type":"F", "info":"y in planar local coordinate system"},
+       {"name":"X",           "type":"F", "info":"wire x-coordinate  in tilted-sector"},
+       {"name":"Z",           "type":"F", "info":"wire z-coordinate  in tilted-sector"},
+       {"name":"clusterID",   "type":"S", "info":"ID of associated cluster"}
+    ]
+  },
+ {
+    "name": "HitBasedTrkg::Clusters",
+    "group": 20600,
+    "item" : 29,
+    "info": "reconstructed clusters using DC wire positions",
+    "entries": [
+       {"name":"id",           "type":"S", "info":"id of the cluster"},
+       {"name":"status",       "type":"S", "info":"status of the cluster"},
+       {"name":"sector",       "type":"B", "info":"sector of the cluster"},
+       {"name":"superlayer",   "type":"B", "info":"superlayer of the cluster"},
+       {"name":"Hit1_ID",      "type":"S", "info":"id of hit1 in cluster"},
+       {"name":"Hit2_ID",      "type":"S", "info":"id of hit2 in cluster"},
+       {"name":"Hit3_ID",      "type":"S", "info":"id of hit3 in cluster"},
+       {"name":"Hit4_ID",      "type":"S", "info":"id of hit4 in cluster"},
+       {"name":"Hit5_ID",      "type":"S", "info":"id of hit5 in cluster"},
+       {"name":"Hit6_ID",      "type":"S", "info":"id of hit6 in cluster"},
+       {"name":"Hit7_ID",      "type":"S", "info":"id of hit7 in cluster"},
+       {"name":"Hit8_ID",      "type":"S", "info":"id of hit8 in cluster"},
+       {"name":"Hit9_ID",      "type":"S", "info":"id of hit9 in cluster"},
+       {"name":"Hit10_ID",     "type":"S", "info":"id of hit10 in cluster"},
+       {"name":"Hit11_ID",     "type":"S", "info":"id of hit11 in cluster"},
+       {"name":"Hit12_ID",     "type":"S", "info":"id of hit12 in cluster"},
+       {"name":"avgWire",      "type":"F", "info":"average wire number"},
+       {"name":"fitChisqProb", "type":"F", "info":"fit chisq prob."},
+       {"name":"fitSlope",     "type":"F", "info":"line fit slope"},
+       {"name":"fitSlopeErr",  "type":"F", "info":"error on slope"},
+       {"name":"fitInterc",    "type":"F", "info":"line fit intercept"},
+       {"name":"fitIntercErr", "type":"F", "info":"error on the intercept"},
+       {"name":"size",         "type":"B", "info":"cluster size"}
+       ]
+  },
+ {
     "name": "HitBasedTrkg::HBHits",
     "group": 20600,
     "item" : 21,
@@ -19,11 +73,7 @@
        {"name":"LocY",        "type":"F", "info":"y in planar local coordinate system"},
        {"name":"X",           "type":"F", "info":"wire x-coordinate  in tilted-sector"},
        {"name":"Z",           "type":"F", "info":"wire z-coordinate  in tilted-sector"},
-       {"name":"B",           "type":"F", "info":"B-field intensity at hit position in tilted-sector system"},
-       {"name":"TProp",       "type":"F", "info":"t propagation along the wire"},
-       {"name":"TFlight",     "type":"F", "info":"time of flight correction"},
-       {"name":"clusterID",   "type":"S", "info":"ID of associated cluster"},
-       {"name":"trkID",       "type":"B", "info":"ID of associated track"}
+       {"name":"clusterID",   "type":"S", "info":"ID of associated cluster"}
     ]
   },
  {
@@ -174,12 +224,31 @@
         {"name":"Cross1_ID",     "type":"S", "info":"id of first cross on track"},
         {"name":"Cross2_ID",     "type":"S", "info":"id of second cross on track"},
         {"name":"Cross3_ID",     "type":"S", "info":"id of third cross on track"},
+        {"name":"Cluster1_ID",   "type":"S", "info":"cluster ID in superlayer 1"},
+        {"name":"Cluster2_ID",   "type":"S", "info":"cluster ID in superlayer 2"},
+        {"name":"Cluster3_ID",   "type":"S", "info":"cluster ID in superlayer 3"},
+        {"name":"Cluster4_ID",   "type":"S", "info":"cluster ID in superlayer 4"},
+        {"name":"Cluster5_ID",   "type":"S", "info":"cluster ID in superlayer 5"},
+        {"name":"Cluster6_ID",   "type":"S", "info":"cluster ID in superlayer 6"},
         {"name":"q",        	 "type":"B", "info":"charge of the track"},
         {"name":"pathlength",    "type":"F", "info":"pathlength of the track"},
         {"name":"chi2",          "type":"F", "info":"fit chi2 of the track"},
         {"name":"ndf",           "type":"S", "info":"fit ndf of the track"}
     ]
   }, 
+  {
+    "name": "HitBasedTrkg::HBHitTrkId",
+    "group": 20600,
+    "item" : 27,
+    "info": "pointers between track and hit banks",
+    "entries": [
+        {"name":"id",            "type":"S", "info":"id of the hit"},    
+        {"name":"tid",           "type":"S", "info":"id of the track"},
+        {"name":"B",             "type":"F", "info":"B-field intensity at hit position in tilted-sector system"},
+        {"name":"TProp",         "type":"F", "info":"t propagation along the wire"},
+        {"name":"TFlight",       "type":"F", "info":"time of flight correction"}
+    ]
+  },
   {
     "name": "TimeBasedTrkg::TBHits",
     "group": 20600,
@@ -359,6 +428,12 @@
         {"name":"Cross1_ID",     "type":"S", "info":"id of first cross on track"},
         {"name":"Cross2_ID",     "type":"S", "info":"id of second cross on track"},
         {"name":"Cross3_ID",     "type":"S", "info":"id of third cross on track"},
+        {"name":"Cluster1_ID",   "type":"S", "info":"cluster ID in superlayer 1"},
+        {"name":"Cluster2_ID",   "type":"S", "info":"cluster ID in superlayer 2"},
+        {"name":"Cluster3_ID",   "type":"S", "info":"cluster ID in superlayer 3"},
+        {"name":"Cluster4_ID",   "type":"S", "info":"cluster ID in superlayer 4"},
+        {"name":"Cluster5_ID",   "type":"S", "info":"cluster ID in superlayer 5"},
+        {"name":"Cluster6_ID",   "type":"S", "info":"cluster ID in superlayer 6"},
         {"name":"q",        	 "type":"B", "info":"charge of the track"},
         {"name":"pathlength",    "type":"F", "info":"pathlength of the track"},
         {"name":"chi2",          "type":"F", "info":"fit chi2 of the track"},

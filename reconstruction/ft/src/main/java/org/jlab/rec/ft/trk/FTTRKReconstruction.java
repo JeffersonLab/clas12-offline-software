@@ -383,7 +383,6 @@ public class FTTRKReconstruction {
             int nrows = bankDGTZ.rows();
             if(nrows>FTConstants.TRK_MAXNUMBEROFHITS) return hits;   // if too many hits skip the event
             int hitId = -1;
-            int nsec1 = -1, nsec2 = -1;
             for(int row = 0; row < nrows; row++){
                 int isector     = bankDGTZ.getInt("sector",row);
                 int ilayer      = bankDGTZ.getInt("layer",row);
@@ -399,7 +398,7 @@ public class FTTRKReconstruction {
                  
                 // read just layer sectors only for real data (no montecarlo)
                 // PROVISIONAL: include correct run range for fall18 RGA runs & same FTTRK FEEE configuration
-                if(run != 10) icomponent = renumberFEE2RECRotatedAndAdjust_Fall18RGA(run, ilayer, icomponent);  
+                if(run >100) icomponent = renumberFEE2RECRotatedAndAdjust_Fall18RGA(run, ilayer, icomponent);  
 
                 if(adc>FTConstants.FTTRKMinAdcThreshold && adc<FTConstants.FTTRKMaxAdcThreshold && time!=-1 && icomponent!=-1){
                     FTTRKHit hit = new FTTRKHit(isector, ilayer, icomponent, (double)adc, (double)time, ++hitId);
