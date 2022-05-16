@@ -86,6 +86,10 @@ public class CLASDecoder4 {
         this.decoderDebugMode = mode;
     }
 
+    public void setVariation(String variation){
+        this.detectorDecoder.setVariation(variation);
+    }
+
     public void setRunNumber(int run){
         if(this.isRunNumberFixed==false){
             this.detectorDecoder.setRunNumber(run);
@@ -677,6 +681,7 @@ public class CLASDecoder4 {
         parser.addOption("-c", "2", "compression type (0-NONE, 1-LZ4 Fast, 2-LZ4 Best, 3-GZIP)");
         parser.addOption("-d", "0","debug mode, set >0 for more verbose output");
         parser.addOption("-m", "run","translation tables source (use -m devel for development tables)");
+        parser.addOption("-v", "default","CCDB variation");
         parser.addOption("-b", "16","record buffer size in MB");
         parser.addRequired("-o","output.hipo");
 
@@ -715,10 +720,12 @@ public class CLASDecoder4 {
             int compression = parser.getOption("-c").intValue();
             int  recordsize = parser.getOption("-b").intValue();
             int debug = parser.getOption("-d").intValue();
+            String variation = parser.getOption("-v").stringValue();
 
             CLASDecoder4 decoder = new CLASDecoder4(developmentMode);
 
             decoder.setDebugMode(debug);
+            decoder.setVariation(variation);
 
             //HipoDataSync writer = new HipoDataSync();
             System.out.println(" OUTPUT WRITER CHANGED TO JNP HIPO");

@@ -116,6 +116,13 @@ public class DetectorEventDecoder {
 
         scalerManager.init(Arrays.asList(new String[]{"/runcontrol/fcup","/runcontrol/slm","/runcontrol/hwp"}));
     }
+    
+    public void setVariation(String variation) {
+        translationManager.setVariation(variation);
+        fitterManager.setVariation(variation);
+        scalerManager.setVariation(variation);
+    }
+    
     /**
      * Set the flag to use extended fitter instead of basic fitter
      * which simply integrates over given bins inside of the given
