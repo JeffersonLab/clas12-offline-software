@@ -107,7 +107,7 @@ public class FTEBEngineTest extends ReconstructionEngine {
         if (run>=0) {
             reco.init(this.getSolenoid());
             FTresponses = reco.addResponses(event, this.getConstantsManager(), run);
-            FTparticles = reco.initFTparticles(FTresponses);
+            FTparticles = reco.initFTparticles(FTresponses, this.getConstantsManager(), run);
             if(FTparticles.size()>0){
                 reco.matchToTRKTwoDetectorsMultiHits(FTresponses, FTparticles);
                 reco.matchToHODO(FTresponses, FTparticles);
