@@ -18,6 +18,8 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 import java.io.InputStream;
 import java.io.FileInputStream;
+import java.util.Arrays;
+import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.utils.JsonUtils;
 import org.json.JSONObject;
 import org.jlab.logging.DefaultLogger;
@@ -29,11 +31,14 @@ import org.jlab.logging.DefaultLogger;
  */
 public class EngineProcessor {
 
-    private final Map<String,ReconstructionEngine>  processorEngines = new LinkedHashMap<String,ReconstructionEngine>();
+    private final Map<String,ReconstructionEngine>  processorEngines = 
+            new LinkedHashMap<String,ReconstructionEngine>();
     ReconstructionEngine  engineDummy = null;
     private static Logger LOGGER = Logger.getLogger(EngineProcessor.class.getPackage().getName());
-
-
+    private boolean updateDictionary = true;
+    
+    private List<String>  schemaExempt = Arrays.asList("RUN::config","DC::tdc");
+    
     public EngineProcessor(){
         this.engineDummy = new DummyEngine();
     }
@@ -48,6 +53,21 @@ public class EngineProcessor {
         this.processorEngines.put(name, engine);
     }
 
+    
+    private void updateDictionary(HipoDataSource source, HipoDataSync sync){
+        SchemaFactory fsync = sync.getWriter().getSchemaFactory();
+        SchemaFactory fsrc  = source.getReader().getSchemaFactory();
+        List<String> schemaList = fsync.getSchemaKeys();
+        for(int s = 0; s < schemaList.size(); s++){
+            if(schemaExempt.contains(schemaList.get(s))==false){
+                fsrc.remove(schemaList.get(s));
+                fsrc.addSchema(fsync.getSchema(schemaList.get(s)).getCopy());
+            } else {
+                LOGGER.log(Level.INFO, "[dictrionary-update] schema {0} is not being updated\n", 
+                        schemaList.get(s));
+            }
+        }
+    }
     public void initDefault(){
 
         String[] names = new String[]{
@@ -79,9 +99,9 @@ public class EngineProcessor {
             "MAGFIELDS",
             "FTCAL", "FTHODO", "FTEB",
             "DCCR","DCHB","FTOFHB","EC","RASTER",
-            "CVT","CTOF","CND","BAND",
-            "HTCC","LTCC","EBHB", 
-            "DCTB","FMT","FTOFTB","EBTB",
+            "CVTFP","CTOF","CND","BAND",
+            "HTCC","LTCC","EBHB",
+            "DCTB","FMT","FTOFTB","CVT","EBTB",
             "RICHEB","RTPC", "MC"
         };
 
@@ -106,6 +126,7 @@ public class EngineProcessor {
             "org.jlab.service.dc.DCTBEngine",
             "org.jlab.service.fmt.FMTEngine",
             "org.jlab.service.ftof.FTOFTBEngine",
+            "org.jlab.rec.cvt.services.CVTSecondPassEngine",
             "org.jlab.service.eb.EBTBEngine",
             "org.jlab.rec.rich.RICHEBEngine",
             "org.jlab.service.rtpc.RTPCEngine",
@@ -254,7 +275,7 @@ public class EngineProcessor {
     }
 
     public void processFile(String file, String output){
-        this.processFile(file, output, -1);
+        this.processFile(file, output, -1, -1);
     }
 
     /**
@@ -263,21 +284,29 @@ public class EngineProcessor {
      * @param output
      * @param nevents
      */
-    public void processFile(String file, String output, int nevents){
-        if(file.endsWith(".hipo")==true){
+    public void processFile(String file, String output, int nskip, int nevents){
+        if(file.endsWith(".hipo")==true||file.endsWith(".h5")==true
+                ||file.endsWith(".h4")==true){
             HipoDataSource reader = new HipoDataSource();
             reader.open(file);
-
+            
             int eventCounter = 0;
             HipoDataSync   writer = new HipoDataSync();
             writer.setCompressionType(2);
             writer.open(output);
 
+            if(updateDictionary==true)
+                updateDictionary(reader, writer);
+            
+            if(nskip>0 && nevents>0) nevents += nskip;
+            
             ProgressPrintout  progress = new ProgressPrintout();
             while(reader.hasEvent()==true){
                 DataEvent event = reader.getNextEvent();
-                processEvent(event);
-                writer.writeEvent(event);
+                if(nskip<=0 || eventCounter>nskip) {
+                    processEvent(event);
+                    writer.writeEvent(event);
+                }
                 eventCounter++;
                 if(nevents>0){
                     if(eventCounter>nevents) break;
@@ -286,7 +315,10 @@ public class EngineProcessor {
             }
             progress.showStatus();
             writer.close();
+        } else {
+            LOGGER.info("\n\n>>>> error in file extension (use .hipo,.h4 or .h5)\n>>>> how is this not simple ?\n");
         }
+        
     }
 
     /**
@@ -305,8 +337,10 @@ public class EngineProcessor {
         parser.addRequired("-i","input.hipo");
         parser.setRequiresInputList(false);
         parser.addOption("-c","0","use default configuration [0 - no, 1 - yes/default, 2 - all services] ");
+        parser.addOption("-s","-1","number of events to skip");
         parser.addOption("-n","-1","number of events to process");
         parser.addOption("-y","0","yaml file");
+        parser.addOption("-u","true","update dictionary from writer ? ");
         parser.addOption("-d","1","Debug level [0 - OFF, 1 - ON/default]");
         parser.setDescription("previously known as notsouseful-util");
 
@@ -327,9 +361,16 @@ public class EngineProcessor {
 
             EngineProcessor proc = new EngineProcessor();
             int config  = parser.getOption("-c").intValue();
+            int nskip   = parser.getOption("-s").intValue();
+            String update = parser.getOption("-u").stringValue();
             int nevents = parser.getOption("-n").intValue();
             String yamlFileName = parser.getOption("-y").stringValue();
 
+            //---------------------------------------------------------------//
+            // added by GG. to turn off the dictionary update                //
+            //---------------------------------------------------------------//
+            if(update.contains("false")==true) proc.updateDictionary = false;
+            
             if(!yamlFileName.equals("0")) {
                 try {
                     InputStream input = new FileInputStream(yamlFileName);
@@ -372,7 +413,7 @@ public class EngineProcessor {
                     proc.addEngine(engine);
                 }
             }
-            proc.processFile(inputFile,outputFile,nevents);
+            proc.processFile(inputFile,outputFile,nskip,nevents);
         }
     }
 }

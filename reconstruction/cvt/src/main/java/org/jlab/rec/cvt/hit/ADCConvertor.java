@@ -11,19 +11,13 @@ public class ADCConvertor {
 
     }
 
-    public double BMTADCtoDAQ(int adc) {
-
-        return adc;
-
-    }
-
     /**
      *
      * @param adc ADC value Converts ADC values to DAQ units -- used for BST
      * test stand analysis
      * @return 
      */
-    public double SVTADCtoDAQ(int adc) {
+    public static double SVTADCtoDAQ(int adc) {
         if (adc == -5) {
             return 1; // this is for running with Geantinos.  Geantinos have adc -5
         }
@@ -68,7 +62,7 @@ public class ADCConvertor {
         return value;
     }
 
-    private int returnRandomInteger(int aStart, int aEnd, Random aRandom) {
+    private static int returnRandomInteger(int aStart, int aEnd, Random aRandom) {
         if (aStart > aEnd) {
             return 0;
             //throw new IllegalArgumentException("Start cannot exceed End.");
@@ -98,7 +92,7 @@ public class ADCConvertor {
     /// function landau_quantile(x,sigma), which provides
     /// the inverse of the landau cumulative distribution.
     /// landau_quantile has been converted from CERNLIB ranlan(G110).
-    private double randomLandau(double mu, double sigma, Random aRandom) {
+    private static double randomLandau(double mu, double sigma, Random aRandom) {
 
         if (sigma <= 0) {
             return 0;
@@ -108,7 +102,7 @@ public class ADCConvertor {
         return res;
     }
 
-    private double landauQuantile(double z, double xi) {
+    private static double landauQuantile(double z, double xi) {
         // LANDAU quantile : algorithm from CERNLIB G110 ranlan
         // with scale parameter xi
 

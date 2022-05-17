@@ -363,35 +363,6 @@
     ]
   },
   {
-    "name" : "BAND::adc",
-    "group": 22100,
-    "item" : 11,
-    "info": "ADC bank for the Backward Angle Neutron Detector",
-    "entries":[
-      { "name":"sector"    , "type":"B", "info":"sector"},
-      { "name":"layer"     , "type":"B", "info":"layer (1-6)"},
-      { "name":"component" , "type":"S", "info":"strips"},
-      { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
-      { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
-      { "name":"amplitude" , "type":"I", "info":"ADC maximum"},
-      { "name":"time"      , "type":"F", "info":"time from pulse fit"},
-      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
-    ]
-  },
-  {
-    "name" : "BAND::tdc",
-    "group": 22100,
-    "item" : 12,
-    "info": "TDC bank for the Backward Angle Neutron Detector",
-    "entries":[
-      { "name":"sector"    , "type":"B", "info":"sector (=1)"},
-      { "name":"layer"     , "type":"B", "info":"layer (=1)"},
-      { "name":"component" , "type":"S", "info":"signal (1-2)"},
-      { "name":"order"     , "type":"B", "info":"order: 2 - TDCL , 3 - TDCR"},
-      { "name":"TDC"       , "type":"I", "info":"TDC value"}
-    ]
-  },
-  {
     "name" : "HEL::adc",
     "group": 22000,
     "item" : 11,
@@ -431,6 +402,64 @@
           {"name":"helicity",   "type":"B", "info":"online-delay-corrected helicity, with HWP-correction (0=UDF)"},
           {"name":"helicityRaw","type":"B", "info":"online-delay-corrected helicity (0=UDF)"}
       ]
+  },
+  {
+      "name": "HEL::decoder",
+      "group": 22000,
+      "item":  14,
+      "info": "Helicity decoder board data",
+      "entries":[
+          {"name":"helicity",        "type":"B", "info":"HELICITY"},
+          {"name":"pair",            "type":"B", "info":"PAIR_SYNC"},
+          {"name":"pattern",         "type":"B", "info":"PATTERN_SYNC"},
+          {"name":"tSettle",         "type":"B", "info":"T_SETTLE"},
+          {"name":"helicityPattern", "type":"B", "info":"HELICITY at pattern start"},
+          {"name":"polarity",        "type":"B", "info":"event polarity (XOR of 3,4)"},
+          {"name":"phase",           "type":"B", "info":"pattern phase count"},
+          {"name":"timestamp",       "type":"L", "info":"timestamp (4ns)"},
+          {"name":"helicitySeed",    "type":"I", "info":"helicity seed"},
+          {"name":"nTStableRE",      "type":"I", "info":"count of T_STABLE rising edge"},
+          {"name":"nTStableFE",      "type":"I", "info":"count of T_STABLE falling edge"},
+          {"name":"nPattern",        "type":"I", "info":"count of PATTERN_SYNC"},
+          {"name":"nPair",           "type":"I", "info":"count of PAIR_SYNC"},
+          {"name":"tStableStart",    "type":"I", "info":"time of trigger since start of T_STABLE (8 ns"},
+          {"name":"tStableEnd",      "type":"I", "info":"time of trigger since end of T_STABLE (8 ns"},
+          {"name":"tStableTime",     "type":"I", "info":"time duration of last complete T_STABLE period (8 ns"},
+          {"name":"tSettleTime",     "type":"I", "info":"time duration of last complete T_SETTLE period (8 ns"},
+          {"name":"patternArray",    "type":"I", "info":"last 32 windows of PATTERN_SYNC"},
+          {"name":"pairArray",       "type":"I", "info":"last 32 windows of PAIR_SYNC"},
+          {"name":"helicityArray",   "type":"I", "info":"last 32 windows of HELICITY_STATE"},
+          {"name":"helicityPArray",  "type":"I", "info":"last 32 windows of HELICITY_STATE at start of pattern"}
+      ]
+  },
+  {
+    "name" : "BAND::adc",
+    "group": 22100,
+    "item" : 11,
+    "info": "ADC bank for the Backward Angle Neutron Detector",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector"},
+      { "name":"layer"     , "type":"B", "info":"layer (1-6)"},
+      { "name":"component" , "type":"S", "info":"strips"},
+      { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
+      { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
+      { "name":"amplitude" , "type":"I", "info":"ADC maximum"},
+      { "name":"time"      , "type":"F", "info":"time from pulse fit"},
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
+    ]
+  },
+  {
+    "name" : "BAND::tdc",
+    "group": 22100,
+    "item" : 12,
+    "info": "TDC bank for the Backward Angle Neutron Detector",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (=1)"},
+      { "name":"layer"     , "type":"B", "info":"layer (=1)"},
+      { "name":"component" , "type":"S", "info":"signal (1-2)"},
+      { "name":"order"     , "type":"B", "info":"order: 2 - TDCL , 3 - TDCR"},
+      { "name":"TDC"       , "type":"I", "info":"TDC value"}
+    ]
   },
   {
     "name" : "RASTER::adc",
