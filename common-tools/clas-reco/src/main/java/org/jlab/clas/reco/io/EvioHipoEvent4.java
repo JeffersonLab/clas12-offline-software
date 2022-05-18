@@ -29,6 +29,8 @@ public class EvioHipoEvent4 {
 
     private static Logger LOGGER = Logger.getLogger(EvioHipoEvent4.class.getName());
     
+    private final double TDC_CONV = 23.45; //ps/channel
+    
     private SchemaFactory        schemaFactory = new SchemaFactory();
 
     public EvioHipoEvent4() {
@@ -173,7 +175,7 @@ public class EvioHipoEvent4 {
                 hipoADC.putShort("component",  i, (short) evioBank.getInt("strip",i));
                 hipoADC.putInt("ADC",  i, (byte) evioBank.getInt("ADC",i));
                 hipoADC.putFloat("time",  i, (float) evioBank.getInt("bco",i));
-                
+              
             }
             hipoEvent.write(hipoADC);
         }
@@ -275,7 +277,8 @@ public class EvioHipoEvent4 {
                 hipoADC.putByte("order", index,(byte) evioBank.getInt("side", i));
                 hipoADC.putInt("ADC", index, evioBank.getInt("ADC", i));
                 double tdc = (double) evioBank.getInt("TDC", i);
-                hipoADC.putFloat("time", i, (float) (tdc*24.0/1000));
+                //hipoADC.putFloat("time", i, (float) (tdc*24.0/1000)); 
+                hipoADC.putFloat("time", i, (float) (tdc*TDC_CONV/1000));
                 
                 hipoTDC.putByte("sector", index,      (byte)  1);
                 hipoTDC.putByte("layer",  index,      (byte)  1);
@@ -303,15 +306,17 @@ public class EvioHipoEvent4 {
                 hipoADC.putByte("order", index,(byte) 0);
                 hipoADC.putInt("ADC", index, evioBank.getInt("ADCL", i));
                 double tdcl = (double) evioBank.getInt("TDCL", i);
-                hipoADC.putFloat("time", index, (float) (tdcl*24.0/1000));
-                
+                //hipoADC.putFloat("time", index, (float) (tdcl*24.0/1000));
+                hipoADC.putFloat("time", index, (float) (tdcl*TDC_CONV /1000));
+
                 hipoADC.putByte("sector", index+1,      (byte)  evioBank.getInt("sector",i));
                 hipoADC.putByte("layer",  index+1,      (byte)  evioBank.getInt("layer",i));
                 hipoADC.putShort("component",  index+1, (short) evioBank.getInt("component",i));
                 hipoADC.putByte("order", index+1,(byte) 1);
                 hipoADC.putInt("ADC", index+1, evioBank.getInt("ADCR", i));
                 double tdcr = (double) evioBank.getInt("TDCR", i);
-                hipoADC.putFloat("time", index+1, (float) (tdcr*24.0/1000));
+                //hipoADC.putFloat("time", index+1, (float) (tdcr*24.0/1000));
+                hipoADC.putFloat("time", index+1, (float) (tdcr*TDC_CONV /1000));
                 
                 hipoTDC.putByte("sector", index,      (byte)  evioBank.getInt("sector",i));
                 hipoTDC.putByte("layer",  index,      (byte)  evioBank.getInt("layer",i));
@@ -401,7 +406,8 @@ public class EvioHipoEvent4 {
                 hipoADC.putByte("order", index,(byte) evioBank.getInt("side", i));
                 hipoADC.putInt("ADC", index, evioBank.getInt("ADC", i));
                 double tdc = (double) evioBank.getInt("TDC", i);
-                hipoADC.putFloat("time", i, (float) (tdc*24.0/1000));
+                //hipoADC.putFloat("time", i, (float) (tdc*24.0/1000));
+                hipoADC.putFloat("time", i, (float) (tdc*TDC_CONV /1000));
                 
                 hipoTDC.putByte("sector", index,      (byte)  evioBank.getInt("sector",i));
                 hipoTDC.putByte("layer",  index,      (byte)  evioBank.getInt("layer",i));
@@ -436,7 +442,8 @@ public class EvioHipoEvent4 {
         Bank hipoADC = new Bank(schemaFactory.getSchema("ECAL::adc"),nrows);
         Bank hipoTDC = new Bank(schemaFactory.getSchema("ECAL::tdc"),nrows);
        
-        final float tdc2ns = 0.02345f;
+        //final float tdc2ns = 0.02345f;
+        final float tdc2ns = (float) TDC_CONV/1000;
 
         int counter = 0;
         if(bankPCAL!=null){

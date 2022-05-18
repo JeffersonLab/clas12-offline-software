@@ -109,8 +109,10 @@ public class RasterEngine extends ReconstructionEngine {
         // create "fake" adc bank
         if(event.hasBank("MC::Particle")) {
         DataBank part = event.getBank("MC::Particle");
-        double[] adcs = {(part.getFloat("vx", 0)+Math.random()-0.5)*2000, 
-                         (part.getFloat("vy", 0)+Math.random()-0.5)*2000};
+        //double[] adcs = {(part.getFloat("vx", 0)+Math.random()-0.5)*2000, 
+        //                 (part.getFloat("vy", 0)+Math.random()-0.5)*2000};
+        double[] adcs = {(part.getFloat("vx", 0))*1000, 
+                         (part.getFloat("vy", 0))*1000};
         DataBank adc  = event.createBank("RASTER::adc", 2);
             for(int i=0; i<adcs.length;i++) {
                 adc.setByte("sector", i, (byte) 0);
@@ -129,7 +131,7 @@ public class RasterEngine extends ReconstructionEngine {
         engine.init();
  
         // open hipo file
-        String input = "/vol0/pilleux-l/Bureau/dev_COATJAVA/out_NH3_updated.hipo";
+        String input = "/vol0/pilleux-l/Bureau/dev_COATJAVA/rastersoftware/out_rastersoftware_eventsRndm9mm_updated_16.hipo";
         HipoDataSource  reader = new HipoDataSource();
         reader.open(input);
 		

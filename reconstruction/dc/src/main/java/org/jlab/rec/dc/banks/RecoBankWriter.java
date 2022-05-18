@@ -121,6 +121,11 @@ public class RecoBankWriter {
             bank.setFloat("B", i-rejCnt, (float) hitlist.get(i).getB());
             bank.setFloat("TProp", i-rejCnt, (float) hitlist.get(i).getTProp());
             bank.setFloat("TFlight", i-rejCnt, (float) hitlist.get(i).getTFlight());
+            if(hitlist.get(i).get_AssociatedHBTrackID()>-1) 
+            {
+                if(!event.hasBank("MC::Particle")) bank.setFloat("TProp", i, (float) hitlist.get(i).getSignalPropagTimeAlongWire());
+                bank.setFloat("TFlight", i, (float) hitlist.get(i).getSignalTimeOfFlight());
+            }
 //            if(i>0 && hitlist.get(i).get_Sector()==hitlist.get(i-1).get_Sector() && 
 //                     hitlist.get(i).get_Superlayer()==hitlist.get(i-1).get_Superlayer() && 
 //                     hitlist.get(i).get_Layer()==hitlist.get(i-1).get_Layer() && 
@@ -494,15 +499,24 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
             if(bank.getDescriptor().hasEntry("beta")){
                bank.setFloat("beta", i, (float) hitlist.get(i).get_Beta());
             }
-            if(hitlist.get(i).get_AssociatedTBTrackID()>-1 && !event.hasBank("MC::Particle")) {
+            /*if(hitlist.get(i).get_AssociatedTBTrackID()>-1 && !event.hasBank("MC::Particle")) {
                 if(hitlist.get(i).getSignalPropagTimeAlongWire()==0 || hitlist.get(i).get_AssociatedTBTrackID()<1) {
                     bank.setFloat("TProp", i, (float) hitlist.get(i).getTProp()); //old value if track fit failed
                 } else {
                     bank.setFloat("TProp", i, (float) hitlist.get(i).getSignalPropagTimeAlongWire()); //new calculated value
-                }
-                if(hitlist.get(i).getSignalTimeOfFlight()==0 || hitlist.get(i).get_AssociatedTBTrackID()<1) {
+                }*/   
+            if(hitlist.get(i).get_AssociatedTBTrackID()>-1) {
+                if(hitlist.get(i).getSignalPropagTimeAlongWire()!=0 && !event.hasBank("MC::Particle")) {
+                    bank.setFloat("TProp", i, (float) hitlist.get(i).getSignalPropagTimeAlongWire()); //new calculated value
+                }    
+                
+                
+                /*if(hitlist.get(i).getSignalTimeOfFlight()==0 || hitlist.get(i).get_AssociatedTBTrackID()<1) {
                     bank.setFloat("TFlight", i, (float) hitlist.get(i).getTFlight());
                 } else {
+                    bank.setFloat("TFlight", i, (float) hitlist.get(i).getSignalTimeOfFlight());
+                }*/
+                if(hitlist.get(i).getSignalTimeOfFlight()!=0) {
                     bank.setFloat("TFlight", i, (float) hitlist.get(i).getSignalTimeOfFlight());
                 }
             }
