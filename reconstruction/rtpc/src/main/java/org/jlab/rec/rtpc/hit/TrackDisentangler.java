@@ -26,11 +26,10 @@ public class TrackDisentangler {
     private double maxdeltaphi = 0.10;
     private double maxdeltazgap = 10;
     private double maxdeltaphigap = 0.12;
-    private double c0 = 20;
-    private double c1 = 0.07;
-    private double c2 = 8;
-    private double c3 = 240;
-    private int eventnum = 777;
+    private double c0;        
+    private double c1;          
+    private double c2;       
+    private double c3;         
     private double TFtotaltracktimeflag = 3700; //SEK: lowered value from 5000 - max drift time = 3458 ns
 
     public TrackDisentangler(HitParameters params, boolean disentangle, int eventnum){       
