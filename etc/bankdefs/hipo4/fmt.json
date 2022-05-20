@@ -1,65 +1,109 @@
- [
-  {
-  "name": "FMTRec::Hits",
-  "group": 20800,
-  "item" : 21,   
-  "info": "reconstructed FMT hits",
-  "entries": [
-        {"name":"ID",             "type":"S", "info":"hit ID"},
-        {"name":"sector",         "type":"B", "info":"hit sector"},
-        {"name":"layer",          "type":"B", "info":"hit layer"},
-        {"name":"strip",          "type":"I", "info":"hit strip"},
-        {"name":"fitResidual",    "type":"F", "info":"fitted hit residual"},
-        {"name":"trkingStat",     "type":"I", "info":"tracking status"},
-        {"name":"clusterID",      "type":"S", "info":"associated cluster ID"},
-        {"name":"trkID",          "type":"S", "info":"associated track ID"}
+[
+    {
+        "name": "FMT::Hits",
+        "group": 20800,
+        "item" : 21,
+        "info": "reconstructed FMT hits",
+        "entries": [
+            {"name":"sector",         "type":"B", "info":"hit sector"},
+            {"name":"layer",          "type":"B", "info":"hit layer"},
+            {"name":"strip",          "type":"S", "info":"hit strip"},
+            {"name":"energy",         "type":"F", "info":"hit energy"},
+            {"name":"time",           "type":"F", "info":"hit time"},
+            {"name":"localY",         "type":"F", "info":"hit local y coordinate"},
+            {"name":"residual",       "type":"F", "info":"fitted hit residual"},
+            {"name":"adcIndex",       "type":"S", "info":"associated adc index"},
+            {"name":"clusterIndex",   "type":"S", "info":"associated cluster index"},
+            {"name":"trackIndex",     "type":"S", "info":"associated track index"},
+            {"name":"status",         "type":"B", "info":"hits status (0==good)"}
         ]
-  },
-  {
-  "name": "FMTRec::Clusters",
-  "group": 20800,
-  "item" : 22,   
-  "info": "reconstructed FMT clusters",
-  "entries": [
-            {"name":"ID",              "type":"S", "info":"ID"},
+    },
+    {
+        "name": "FMT::Clusters",
+        "group": 20800,
+        "item" : 22,
+        "info": "reconstructed FMT clusters",
+        "entries": [
+            {"name":"index",           "type":"S", "info":"index"},
             {"name":"sector",          "type":"B", "info":"sector"},
             {"name":"layer",           "type":"B", "info":"layer"},
             {"name":"size",            "type":"S", "info":"cluster size"},
-            {"name":"ETot",            "type":"F", "info":"cluster total energy"},
-            {"name":"seedE",           "type":"F", "info":"energy of the seed "},
-            {"name":"seedStrip",       "type":"I", "info":"seed strip"},
-            {"name":"centroid",        "type":"F", "info":"centroid strip number"},
-            {"name":"centroidResidual","type":"F", "info":"centroid residual"},
-            {"name":"seedResidual",    "type":"F", "info":"seed residual"},
-            {"name":"Hit1_ID",         "type":"S", "info":"Index of hit 1 in cluster"},
-            {"name":"Hit2_ID",         "type":"S", "info":"Index of hit 2 in cluster"},
-            {"name":"Hit3_ID",         "type":"S", "info":"Index of hit 3 in cluster"},
-            {"name":"Hit4_ID",         "type":"S", "info":"Index of hit 4 in cluster"},
-            {"name":"Hit5_ID",         "type":"S", "info":"Index of hit 5 in cluster"},
-            {"name":"trkID",           "type":"S", "info":"associated track ID"}
-            ]
-  },
-  {
-  "name": "FMTRec::Crosses",
-  "group": 20800,
-  "item" : 25,   
-  "info": "reconstructed FMT crosses",
-  "entries": [
-            {"name":"ID",          "type":"S", "info":"ID"},
-            {"name":"sector",      "type":"B", "info":"sector"},
-            {"name":"region",      "type":"B", "info":"region"},
-            {"name":"x",           "type":"F", "info":"BMT cross x-coordinate"},
-            {"name":"y",           "type":"F", "info":"BMT cross y-coordinate"},
-            {"name":"z",           "type":"F", "info":"BMT cross z-coordinate"},
-            {"name":"err_x",       "type":"F", "info":"BMT cross x-coordinate error"},
-            {"name":"err_y",       "type":"F", "info":"BMT cross y-coordinate error"},
-            {"name":"err_z",       "type":"F", "info":"BMT cross z-coordinate error"},
-            {"name":"ux",          "type":"F", "info":"BMT cross x-direction (track unit tangent vector at the cross)"},
-            {"name":"uy",          "type":"F", "info":"BMT cross y-direction (track unit tangent vector at the cross)"},
-            {"name":"uz",          "type":"F", "info":"BMT cross z-direction (track unit tangent vector at the cross)"},
-            {"name":"Cluster1_ID", "type":"S", "info":"ID of the  cluster in the Cross"},
-            {"name":"Cluster2_ID", "type":"S", "info":"ID of the top layer  cluster in the Cross"},
-            {"name":"trkID",       "type":"S", "info":"associated track ID"}
-            ]
-  }
-  ]
+            {"name":"centroid",        "type":"F", "info":"centroid position in local coordinates"},
+            {"name":"centroidError",   "type":"F", "info":"centroid position error"},
+            {"name":"residual",        "type":"F", "info":"centroid residual"},
+            {"name":"doca",            "type":"F", "info":"dc track doca"},
+            {"name":"energy",          "type":"F", "info":"cluster total energy"},
+            {"name":"time",            "type":"F", "info":"cluster time"},
+            {"name":"seedStrip",       "type":"S", "info":"seed strip number"},
+            {"name":"seedIndex",       "type":"S", "info":"seed index in hits bank"},
+            {"name":"trackIndex",      "type":"S", "info":"associated track index"}
+        ]
+    },
+    {
+        "name": "FMT::Crosses",
+        "group": 20800,
+        "item" : 25,
+        "info": "reconstructed FMT crosses",
+        "entries": [
+            {"name":"index",         "type":"S", "info":"index"},
+            {"name":"sector",        "type":"B", "info":"sector"},
+            {"name":"region",        "type":"B", "info":"region"},
+            {"name":"x",             "type":"F", "info":"cross x-coordinate"},
+            {"name":"y",             "type":"F", "info":"cross y-coordinate"},
+            {"name":"z",             "type":"F", "info":"cross z-coordinate"},
+            {"name":"err_x",         "type":"F", "info":"cross x-coordinate error"},
+            {"name":"err_y",         "type":"F", "info":"cross y-coordinate error"},
+            {"name":"err_z",         "type":"F", "info":"cross z-coordinate error"},
+            {"name":"ux",            "type":"F", "info":"cross x-direction (track unit tangent vector at the cross)"},
+            {"name":"uy",            "type":"F", "info":"cross y-direction (track unit tangent vector at the cross)"},
+            {"name":"uz",            "type":"F", "info":"cross z-direction (track unit tangent vector at the cross)"},
+            {"name":"cluster1Index", "type":"S", "info":"index of the  cluster in the Cross"},
+            {"name":"cluster2Index", "type":"S", "info":"index of the top layer  cluster in the Cross"},
+            {"name":"trkID",         "type":"S", "info":"associated track index"}
+        ]
+    },
+    {
+        "name": "FMT::Tracks",
+        "group": 20800,
+        "item" : 36,
+        "info": "reconstructed tracks using FMT information",
+        "entries": [
+            {"name":"index",         "type":"S", "info":"index of the track in the DC bank"},
+            {"name":"status",        "type":"B", "info":"status of the track (0: refitted using FMT, 1: original DC track)"},
+            {"name":"sector",        "type":"B", "info":"sector of the track in DC"},
+            {"name":"Vtx0_x",        "type":"F", "info":"Vertex x-position of the swam track to the DOCA to the beamline (in cm)"},
+            {"name":"Vtx0_y",        "type":"F", "info":"Vertex y-position of the swam track to the DOCA to the beamline (in cm)"},
+            {"name":"Vtx0_z",        "type":"F", "info":"Vertex z-position of the swam track to the DOCA to the beamline (in cm)"},
+            {"name":"p0_x",          "type":"F", "info":"3-momentum x-coordinate of the swam track to the DOCA to the beamline (in GeV)"},
+            {"name":"p0_y",          "type":"F", "info":"3-momentum y-coordinate of the swam track to the DOCA to the beamline (in GeV)"},
+            {"name":"p0_z",          "type":"F", "info":"3-momentum z-coordinate of the swam track to the DOCA to the beamline (in GeV)"},
+            {"name":"q",             "type":"B", "info":"charge of the track"},
+            {"name":"chi2",          "type":"F", "info":"chi^2 of the fit"},
+            {"name":"NDF",           "type":"B", "info":"number of degrees of freedom of the fit"}
+        ]
+    },
+    {
+        "name": "FMT::Trajectory",
+        "group": 20800,
+        "item" : 37,
+        "info": "FMT tracks trajectory bank",
+        "entries": [
+            {"name":"index",    "type":"S", "info":"index of the track in the DC bank"},
+            {"name":"detector", "type":"B", "info":"id of the detector"},
+            {"name":"layer",    "type":"B", "info":"id of the layer"},
+            {"name":"x",        "type":"F", "info":"track x position at detector surface (cm)"},
+            {"name":"y",        "type":"F", "info":"track y position at detector surface (cm)"},
+            {"name":"z",        "type":"F", "info":"track z position at detector surface (cm)"},
+            {"name":"tx",       "type":"F", "info":"track unit direction vector x component at detector surface"},
+            {"name":"ty",       "type":"F", "info":"track unit direction vector y component at detector surface"},
+            {"name":"tz",       "type":"F", "info":"track unit direction vector z component at detector surface"},
+            {"name":"lx",       "type":"F", "info":"track x position in local coordinates (cm)"},
+            {"name":"ly",       "type":"F", "info":"track y position in local coordinates (cm)"},
+            {"name":"lz",       "type":"F", "info":"track z position in local coordinates (cm)"},
+            {"name":"dx",       "type":"F", "info":"DC track x position in local coordinates (cm)"},
+            {"name":"dy",       "type":"F", "info":"DC track y position in local coordinates (cm)"},
+            {"name":"dz",       "type":"F", "info":"DC track z position in local coordinates (cm)"},
+            {"name":"path",     "type":"F", "info":"pathlength of the track from the track vertex to the detector surface (cm)"}
+        ]
+    }
+]

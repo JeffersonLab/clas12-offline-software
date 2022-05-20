@@ -66,23 +66,14 @@ public class EBTBEngine extends EBEngine {
 
     @Override
     public void initBankNames() {
-        this.setEventBank("REC::Event");
-        this.setParticleBank("REC::Particle");
-        this.setEventBankFT("RECFT::Event");
-        this.setParticleBankFT("RECFT::Particle");
-        this.setCalorimeterBank("REC::Calorimeter");
-        this.setCherenkovBank("REC::Cherenkov");
-        this.setScintillatorBank("REC::Scintillator");
-        this.setScintClusterBank("REC::ScintExtras");
-        this.setTrackBank("REC::Track");
-        this.setCrossBank("REC::TrackCross");
-        this.setCovMatrixBank("REC::CovMat");
-        this.setTrajectoryBank("REC::Traj");        
-        this.setFTBank("REC::ForwardTagger");
-        this.setFTOFHitsType("FTOF::hits");
+        this.setOutputBankPrefix("REC");
+
+        this.setFTOFHitsType("FTOF::clusters");
         this.setTrackType("TimeBasedTrkg::TBTracks");
         this.setTrajectoryType("TimeBasedTrkg::Trajectory");
         this.setCovMatrixType("TimeBasedTrkg::TBCovMat");
+        this.setCvtTrackType("CVTRec::Tracks");
+        this.setCvtTrajType("CVTRec::Trajectory");
     }
     
 }

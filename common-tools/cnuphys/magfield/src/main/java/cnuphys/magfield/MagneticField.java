@@ -7,6 +7,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * For magnetic fields stored in a specific format. This is low-level,
@@ -17,6 +19,7 @@ import java.nio.FloatBuffer;
  * @version 1.0
  */
 public abstract class MagneticField implements IMagField {
+	public static Logger LOGGER = Logger.getLogger(MagneticField.class.getName());
 
 	/** Magic number used to check if byteswapping is necessary. */
 	public static final int MAGICNUMBER = 0xced;
@@ -133,12 +136,12 @@ public abstract class MagneticField implements IMagField {
 	 * @param scale the scale factor
 	 */
 	public final void setScaleFactor(double scale) {
-		System.out.println("CHANGING SCALE from " + _scaleFactor + " to " + scale + "  for " + getBaseFileName());
+		LOGGER.log(Level.INFO, "CHANGING SCALE from " + _scaleFactor + " to " + scale + "  for " + getBaseFileName());
 		if (Math.abs(scale - _scaleFactor) > TINY) {
 			_scaleFactor = scale;
 			MagneticFields.getInstance().changedScale(this);
 		} else {
-			System.out.println("Ignored inconsequential scale change for " + getBaseFileName());
+			LOGGER.log(Level.FINE, "Ignored inconsequential scale change for " + getBaseFileName());
 		}
 	}
 
@@ -428,13 +431,13 @@ public abstract class MagneticField implements IMagField {
 
 			boolean swap = false;
 			int magicnum = dos.readInt(); // magic number
-			
-			System.out.println(String.format("Magic number: %04x", magicnum));
+
+			LOGGER.log(Level.INFO, "Magic number: %04x", magicnum);
 
 			// TODO handle swapping if necessary
 			swap = (magicnum != MAGICNUMBER);
 			if (swap) {
-				System.err.println("byte swapping required but not yet implemented.");
+				LOGGER.log(Level.SEVERE, "byte swapping required but not yet implemented.");
 				dos.close();
 				return;
 			}
@@ -480,8 +483,8 @@ public abstract class MagneticField implements IMagField {
 
 			// read the bytes as a block
 			dos.read(bytes);
-//			ByteBuffer byteBuffer = ByteBuffer.wrap(bytes).asReadOnlyBuffer();
-//			field = byteBuffer.asFloatBuffer().asReadOnlyBuffer();
+			// ByteBuffer byteBuffer = ByteBuffer.wrap(bytes).asReadOnlyBuffer();
+			// field = byteBuffer.asFloatBuffer().asReadOnlyBuffer();
 			ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
 			field = byteBuffer.asFloatBuffer();
 
@@ -538,7 +541,7 @@ public abstract class MagneticField implements IMagField {
 			float val = field.get(i);
 			return val;
 		} catch (IndexOutOfBoundsException e) {
-			System.err.println("error in mag field index1 = " + index);
+			LOGGER.log(Level.SEVERE, "error in mag field index1 = " + index);
 			e.printStackTrace();
 			return 0;
 		}
@@ -575,9 +578,10 @@ public abstract class MagneticField implements IMagField {
 		float val = field.get(i);
 		return val;
 	}
-	
+
 	/**
 	 * Get a component of the magnetic field
+	 * 
 	 * @param componentIndex [1..3]
 	 * @param compositeIndex
 	 * @return the component
@@ -589,18 +593,18 @@ public abstract class MagneticField implements IMagField {
 
 		case 2:
 			return getB2(compositeIndex);
-			
+
 		case 3:
 			return getB3(compositeIndex);
-		
-		default: 
-			System.err.println("Asked for bad component of the magnetic field: [" + componentIndex + "] sould be 1, 2 or 3 only.");
+
+		default:
+			System.err.println(
+					"Asked for bad component of the magnetic field: [" + componentIndex + "] sould be 1, 2 or 3 only.");
 			System.exit(-1);
 		}
-		
+
 		return Double.NaN;
 	}
-
 
 	/**
 	 * Get the q1 coordinate.
@@ -667,23 +671,23 @@ public abstract class MagneticField implements IMagField {
 	 */
 	public static final void setInterpolate(boolean interpolate) {
 		_interpolate = interpolate;
-		
 		MagneticFields.getInstance().fixMenus();
-		
-		System.out.println("Interpolating fields: " + _interpolate);
+		LOGGER.log(Level.FINE, "Interpolating fields: " + _interpolate);
 	}
 
 	/**
 	 * Get the phi coordinate which will be q1
-	 * @return the phi Coordinate 
+	 * 
+	 * @return the phi Coordinate
 	 */
 	public GridCoordinate getPhiCoordinate() {
 		return q1Coordinate;
 	}
-	
+
 	/**
 	 * Get the x coordinate which will be q1
-	 * @return the x Coordinate 
+	 * 
+	 * @return the x Coordinate
 	 */
 	public GridCoordinate getXCoordinate() {
 		return q1Coordinate;
@@ -691,15 +695,16 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Get the R (rho) coordinate which will be q2
+	 * 
 	 * @return the r (rho) coordinate
 	 */
 	public GridCoordinate getRCoordinate() {
 		return q2Coordinate;
 	}
 
-
 	/**
 	 * Get the y coordinate which will be q2
+	 * 
 	 * @return the y coordinate
 	 */
 	public GridCoordinate getYCoordinate() {
@@ -708,6 +713,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Get the z coordinate which will be q3
+	 * 
 	 * @return the z coordinate
 	 */
 	public GridCoordinate getZCoordinate() {
@@ -842,6 +848,5 @@ public abstract class MagneticField implements IMagField {
 		}
 		return true;
 	}
-	
 
 }

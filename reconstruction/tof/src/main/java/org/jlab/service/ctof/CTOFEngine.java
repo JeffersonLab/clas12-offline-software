@@ -74,6 +74,8 @@ public class CTOFEngine extends ReconstructionEngine {
         ConstantProvider cp = GeometryFactory.getConstants(DetectorType.CTOF, 11, engineVariation);
         geometry = new CTOFGeant4Factory(cp);
         
+        this.registerOutputBank("CTOF::rawhits","CTOF::hits","CTOF::clusters");
+        
         return true;
     }
 

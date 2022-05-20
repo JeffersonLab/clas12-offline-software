@@ -116,11 +116,13 @@ public class SegmentFinder {
     }
     /**
      * @param allClusters the list of fitted clusters
-     * @param missingHits the list of hits that are not in the cluster (should be null for time-based tracking)
+     * @param event
+     * @param DcDetector
+     * @param runLayersEffs
      * @return the list of segments obtained from the clusters
      */
     public List<Segment> get_Segments(List<FittedCluster> allClusters, DataEvent event, DCGeant4Factory DcDetector, boolean runLayersEffs) {
-        List<Segment> segList = new ArrayList<Segment>();
+        List<Segment> segList = new ArrayList<>();
         for (FittedCluster fClus : allClusters) {
 
             if (fClus.size() > Constants.MAXCLUSSIZE) {
@@ -161,7 +163,7 @@ public class SegmentFinder {
      */
     public List<FittedCluster> selectTimeBasedSegments(
             List<FittedCluster> clusters) {
-        List<FittedCluster> selTimeBasedSegments = new ArrayList<FittedCluster>();
+        List<FittedCluster> selTimeBasedSegments = new ArrayList<>();
         for (int i = 0; i < clusters.size(); i++) {
             double AveDoca = 0;
             double AveCelSz = 0;

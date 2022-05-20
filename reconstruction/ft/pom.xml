@@ -9,80 +9,21 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <build>
-      <plugins>
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <configuration>
-                  <source>1.8</source>
-                  <target>1.8</target>
-              </configuration>
-          </plugin>
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-jar-plugin</artifactId>
-              <configuration>
-                  <archive>
-                      <manifest>
-                          <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                          <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                      </manifest>
-                      <manifestSections>
-                          <manifestSection>
-                              <name>${project.name}</name>
-                              <manifestEntries>
-                                  <groupId>${project.groupId}</groupId>
-                                  <artifactId>${project.artifactId}</artifactId>
-                                  <version>${project.version}</version>
-                              </manifestEntries>
-                          </manifestSection>
-                      </manifestSections>
-                  </archive>
-              </configuration>
-          </plugin>
-      </plugins>
-  </build>
-
   <parent>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../../parent/pom.xml</relativePath>
-    <version>6.6.4-SNAPSHOT</version>
+    <version>8.0.0-SNAPSHOT</version>
   </parent>
 
-  <repositories>
-    <repository>
-      <id>clas12maven</id>
-      <url>https://clasweb.jlab.org/clas12maven</url>
-    </repository>
-  </repositories>
-  
   <dependencies>
-
-    <dependency>
-      <groupId>org.jlab.coda</groupId>
-      <artifactId>jclara</artifactId>
-      <version>4.3-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jlab.clas</groupId>
-      <artifactId>clas-utils</artifactId>
-      <version>6.6.4-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jlab.clas</groupId>
-      <artifactId>clas-io</artifactId>
-      <version>6.6.4-SNAPSHOT</version>
-    </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-reco</artifactId>
-      <version>6.6.4-SNAPSHOT</version>
+      <version>8.0.0-SNAPSHOT</version>
     </dependency>
 
   </dependencies>
- </project>
+
+</project>

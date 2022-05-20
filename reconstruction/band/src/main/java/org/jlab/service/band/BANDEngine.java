@@ -83,7 +83,7 @@ public class BANDEngine extends ReconstructionEngine {
     
 			requireConstants(Arrays.asList(bandTables));
     		
-
+                        this.registerOutputBank("BAND::hits","BAND::rawhits","BAND::laser");
 		
 			return true;
 		}

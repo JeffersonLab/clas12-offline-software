@@ -49,5 +49,5 @@ echo "*    Version : 3a  Release : 2016       *"
 echo "*****************************************"
 echo " "
 echo " "
-export JAVA_OPTS="-Dsun.java2d.pmoffscreen=false -Xms1024m -Xmx2048m"
+export JAVA_OPTS="-Dsun.java2d.pmoffscreen=false -Djava.util.logging.config.file=$CLAS12DIR/etc/logging/debug.properties -Xms1024m -Xmx2048m -XX:+UseSerialGC"
 groovy -cp "$JYPATH" $*

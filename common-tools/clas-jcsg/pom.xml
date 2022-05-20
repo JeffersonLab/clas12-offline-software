@@ -3,28 +3,15 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jlab.clas</groupId>
   <artifactId>clas-jcsg</artifactId>
-  <version>6.6.4-SNAPSHOT</version>
+  <version>8.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <parent>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../../parent/pom.xml</relativePath>
-    <version>6.6.4-SNAPSHOT</version>
+    <version>8.0.0-SNAPSHOT</version>
   </parent>
-
-  <build>
-      <plugins>
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <configuration>
-                  <source>1.8</source>
-                  <target>1.8</target>
-              </configuration>
-          </plugin>
-      </plugins>
-  </build>
 
   <dependencies>
     <dependency>
@@ -40,12 +27,12 @@
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-geometry</artifactId>
-      <version>6.6.4-SNAPSHOT</version>
+      <version>8.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-detector</artifactId>
-      <version>6.6.4-SNAPSHOT</version>
+      <version>8.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>java3d</groupId>
@@ -59,15 +46,4 @@
     </dependency>
   </dependencies>
 
-  <repositories>
-    <repository>
-      <id>clas12maven</id>
-      <url>https://clasweb.jlab.org/clas12maven</url>
-    </repository>
-  </repositories>
-
-  <properties>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <maven.compiler.source>1.8</maven.compiler.source>
-  </properties>
 </project>

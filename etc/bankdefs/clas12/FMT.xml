@@ -35,6 +35,7 @@
             <column name="strip"  type="int32"  num="3" info="Strip Number" />
             <column name="Edep"   type="float64" num="4" info="deposited energy"/>
             <column name="ADC"    type="int32"  num="5" info="adc" />
+            <column name="time"   type="float64" num="6" info="Time of the hit" />
             <column name="hitn"   type="int32"  num="99" info="Hit Number" />
         </section>
     </bank>

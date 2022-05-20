@@ -1,163 +1,260 @@
 package org.jlab.rec.cvt.hit;
 
+import org.jlab.clas.swimtools.Swim;
+import org.jlab.geom.prim.Arc3D;
+import org.jlab.geom.prim.Cylindrical3D;
+import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
+import org.jlab.rec.cvt.bmt.BMTType;
+import org.jlab.rec.cvt.bmt.BMTConstants;
 
 public class Strip {
 
-    public Strip(int strip, double edep) {
+    public Strip(int strip, double edep, double time) {
         this._Strip = strip;
         this._Edep = edep;
+        this._Time = time;
     }
+    
 
-    private int _Strip;    	 							//	   strip read from daq 
-    private int _LCStrip;								//     strip number taking into account Lorentz angle correction (for MM Z detectors)
-    private double _Phi;  								//     for MM Z-detectors, the azimuth angle at the strip midwidth after LC
+    private int _Strip;    	//     strip read from daq 
+    private double _Edep;      	//     for simulation this corresponds to the energy deposited on the strip, in data it should be an ADC converted value
+    private double _Time;
+    private int _Status;        //     0=good, 1=bad edep, 2=bad tim, 3=dead                
+    
+    private int _LCStrip;	//     strip number taking into account Lorentz angle correction (for MM Z detectors)
+    private double _Phi;  	//     for MM Z-detectors, the azimuth angle at the strip midwidth after LC
     private double _PhiErr;
-    private double _Phi0;  								//     for MM Z-detectors, the azimuth angle at the strip midwidth before LC
+    private double _Phi0;  	//     for MM Z-detectors, the azimuth angle at the strip midwidth before LC
     private double _PhiErr0;
-
-    private double _Z;    								//     for MM C-detectors. the z position at the strip midwidth
+    private double _Z;
     private double _ZErr;
-    private double _Edep;      							//     for simulation this corresponds to the energy deposited on the strip, in data it should be an ADC converted value
-
-    private Point3D _ImplantPoint;						// 	   the end-point of the strip at implant (lab frame)
-    private Point3D _MidPoint;							//	   the mid-point of the strip (lab frame)
-    private Vector3D _StripDir;							// 	   unit direction vector along the strip (lab frame)
-
-    public int get_Strip() {
+    
+    private double _Pitch;
+    private Arc3D  _Arc;
+    private Line3D _Line;
+    private Cylindrical3D _Tile;
+    private Line3D _Module;
+    private Vector3D _Normal;
+    private Transformation3D toLocal;
+    private Transformation3D toGlobal;
+    
+    public int getStrip() {
         return _Strip;
     }
 
-    public void set_Strip(int _Strip) {
+    public void setStrip(int _Strip) {
         this._Strip = _Strip;
     }
 
-    public Point3D get_ImplantPoint() {
-        return _ImplantPoint;
+    public double getPitch() {
+        return _Pitch;
     }
 
-    public void set_ImplantPoint(Point3D _ImplantPoint) {
-        this._ImplantPoint = _ImplantPoint;
+    public void setPitch(double _Pitch) {
+        this._Pitch = _Pitch;
     }
 
-    public Point3D get_MidPoint() {
-        return _MidPoint;
+    public Arc3D getArc() {
+        return _Arc;
     }
 
-    public void set_MidPoint(Point3D _MidPoint) {
-        this._MidPoint = _MidPoint;
+    public void setArc(Arc3D _Arc) {
+        this._Arc = _Arc;
     }
 
-    public Vector3D get_StripDir() {
-        return _StripDir;
+    public Line3D getLine() {
+        return _Line;
     }
 
-    public void set_StripDir(Vector3D _StripDir) {
-        this._StripDir = _StripDir;
+    public void setLine(Line3D _Line) {
+        this._Line = _Line;
     }
 
-    public int get_LCStrip() {
+    public Cylindrical3D getTile() {
+        return _Tile;
+    }
+
+    public void setTile(Cylindrical3D _Tile) {
+        this._Tile = _Tile;
+    }
+
+    public Line3D getModule() {
+        return _Module;
+    }
+
+    public void setModule(Line3D _Module) {
+        this._Module = _Module;
+    }
+
+    public Vector3D getNormal() {
+        return _Normal;
+    }
+
+    public void setNormal(Vector3D _Normal) {
+        this._Normal = _Normal;
+    }
+
+    public Transformation3D toLocal() {
+        return toLocal;
+    }
+
+    public void setToLocal(Transformation3D toLocal) {
+        this.toLocal = toLocal;
+    }
+
+    public Transformation3D toGlobal() {
+        return toGlobal;
+    }
+
+    public void setToGlobal(Transformation3D toGlobal) {
+        this.toGlobal = toGlobal;
+    }
+
+    public int getLCStrip() {
         return _LCStrip;
     }
 
-    public void set_LCStrip(int _LCStrip) {
+    public void setLCStrip(int _LCStrip) {
         this._LCStrip = _LCStrip;
     }
 
-    public double get_Phi() {
+    public double getPhi() {
         return _Phi;
     }
 
-    public void set_Phi(double _Phi) {
+    public void setPhi(double _Phi) {
         this._Phi = _Phi;
     }
 
-    public double get_PhiErr() {
+    public double getPhiErr() {
         return _PhiErr;
     }
 
-    public void set_PhiErr(double _PhiErr) {
+    public void setPhiErr(double _PhiErr) {
         this._PhiErr = _PhiErr;
     }
 
-    public double get_Phi0() {
+    public double getPhi0() {
         return _Phi0;
     }
 
-    public void set_Phi0(double _Phi0) {
+    public void setPhi0(double _Phi0) {
         this._Phi0 = _Phi0;
     }
 
-    public double get_PhiErr0() {
+    public double getPhiErr0() {
         return _PhiErr0;
     }
 
-    public void set_PhiErr0(double _PhiErr0) {
+    public void setPhiErr0(double _PhiErr0) {
         this._PhiErr0 = _PhiErr0;
     }
 
-    public double get_Z() {
+    public double getZ() {
         return _Z;
     }
 
-    public void set_Z(double _Z) {
+    public void setZ(double _Z) {
         this._Z = _Z;
     }
 
-    public double get_ZErr() {
+    public double getZErr() {
         return _ZErr;
     }
 
-    public void set_ZErr(double _ZErr) {
+    public void setZErr(double _ZErr) {
         this._ZErr = _ZErr;
     }
 
-    public double get_Edep() {
+    public double getEdep() {
         return _Edep;
     }
 
-    public void set_Edep(double _Edep) {
+    public void setEdep(double _Edep) {
         this._Edep = _Edep;
     }
 
     /**
-     *
-     * @param geo the BMT geometry class Sets the Lorentz corrected phi and
-     * strip number for Z detectors, the z position for C detectors
+     * @return the _Time
      */
-    public void calc_BMTStripParams(org.jlab.rec.cvt.bmt.Geometry geo, int sector, int layer) {
+    public double getTime() {
+        return _Time;
+    }
 
-        if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer) == 0) { // C-dtectors
+    /**
+     * @param _Time the _Time to set
+     */
+    public void setTime(double _Time) {
+        this._Time = _Time;
+    }
+
+    public int getStatus() {
+        return _Status;
+    }
+
+    public void setStatus(int _Status) {
+        this._Status = _Status;
+    }
+
+    
+    /**
+     * 
+     *
+     * @param sector
+     * @param layer
+     * @param swim
+     */
+    public void calcBMTStripParams(int sector, int layer, Swim swim) {
+        BMTGeometry geo = Constants.getInstance().BMTGEOMETRY;
+        
+        int region = geo.getRegion(layer); // region index (1...3) 1=layers 1&2, 2=layers 3&4, 3=layers 5&6
+        this.setToGlobal(geo.toGlobal(layer, sector));
+        this.setToLocal(geo.toLocal(layer, sector));
+        this.setTile(geo.getTileSurface(layer, sector));
+        this.setPitch(geo.getPitch(layer, this.getStrip()));
+        
+        if (BMTGeometry.getDetectorType(layer) == BMTType.C) { // C-detectors
             // set z
-            double z = geo.CRCStrip_GetZ(layer, this.get_Strip());
-            this.set_Z(z);
+            //double z = geo.CRCStrip_GetZ(layer, this.getStrip());
+            Arc3D arcLine = geo.getCstrip(region, sector, this.getStrip());
+            this.setArc(arcLine);
+            this.setNormal(arcLine.bisect());
             // max z err
-            this.set_ZErr(geo.CRCStrip_GetPitch(layer, this.get_Strip()) / Math.sqrt(12.));
+            this.setZ(geo.getCstripZ(geo.getRegion(layer),this.getStrip()));
+            this.setZErr(geo.getPitch(layer, this.getStrip()) / Math.sqrt(12.));
+
         }
 
-        if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer) == 1) { // Z-detectors
-            geo.SetLorentzAngle(layer, sector);
-            double theMeasuredPhi = geo.CRZStrip_GetPhi(sector, layer, this.get_Strip());
-            double theLorentzCorrectedAngle = geo.LorentzAngleCorr(theMeasuredPhi, layer);
+        if (BMTGeometry.getDetectorType(layer) == BMTType.Z) { // Z-detectors
+            Line3D line = geo.getLCZstrip(geo.getRegion(layer), sector, this.getStrip(), swim);
+            this.setLine(line);
+            this.setNormal(this.getTile().getAxis().distance(line.midpoint()).direction().asUnit());            
             // set the phi 
-            this.set_Phi(theLorentzCorrectedAngle);
-            this.set_Phi0(theMeasuredPhi); // uncorrected
-            //System.out.println(" sec "+sector+" strip "+this.get_Strip()+" LC strip "+geo.getZStrip(layer, theLorentzCorrectedAngle));
-            int theLorentzCorrectedStrip = geo.getZStrip(layer, theLorentzCorrectedAngle);
+            Point3D local = geo.getIdealLCZstrip(region, sector, this.getStrip(), swim).midpoint();
+            double theMeasuredPhi = geo.getZstripPhi(geo.getRegion(layer), sector, this.getStrip());
+            double theLorentzCorrectedAngle = local.toVector3D().phi();
+            this.setPhi(theLorentzCorrectedAngle);
+            this.setPhi0(theMeasuredPhi); // uncorrected, can be outside of -pi,pi
+
             // get the strip number after correcting for Lorentz angle
-            this.set_LCStrip(theLorentzCorrectedStrip);
+            int theLorentzCorrectedStrip = geo.getStrip(layer,  sector, line.midpoint());
+            this.setLCStrip(theLorentzCorrectedStrip);
+            // RDV use xyz dependent ThetaLorentz
+            double sigma = BMTConstants.SIGMADRIFT / Math.cos(geo.getThetaLorentz(layer, sector)); // max sigma for drift distance  (HDRIFT) = total gap from top to mesh
 
-            double sigma = org.jlab.rec.cvt.bmt.Constants.SigmaDrift / Math.cos(org.jlab.rec.cvt.bmt.Constants.getThetaL()); // max sigma for drift distance  (hDrift) = total gap from top to mesh
-
-            int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6double Z0=0;
             //max phi err
-            double phiErrL = sigma / org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region];
+            double phiErrL = sigma / geo.getRadius(layer);
 
-            double phiErr = org.jlab.rec.cvt.bmt.Constants.getCRZWIDTH()[num_region] / org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region] / Math.sqrt(12.);
-            this.set_PhiErr(Math.sqrt(phiErr * phiErr + phiErrL * phiErrL));
-            //System.out.println("arcerr "+org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]+" * "+Math.toDegrees(sigma/org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]));
-            this.set_PhiErr0(phiErr);
+            double phiErr = geo.getPitch(layer, this.getStrip()) / geo.getRadius(layer) / Math.sqrt(12.);
+            this.setPhiErr(Math.sqrt(phiErr * phiErr + phiErrL * phiErrL));
+            this.setPhiErr0(phiErr);
+            
+            
         }
 
     }

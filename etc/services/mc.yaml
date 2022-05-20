@@ -1,9 +1,9 @@
 io-services:
   reader:
-    class: org.jlab.clas.std.services.convertors.HipoToHipoReader
+    class: org.jlab.io.clara.HipoToHipoReader
     name: HipoToHipoReader
   writer:
-    class: org.jlab.clas.std.services.convertors.HipoToHipoWriter
+    class: org.jlab.io.clara.HipoToHipoWriter
     name: HipoToHipoWriter
 services:
   - class: org.jlab.clas.swimtools.MagFieldsEngine
@@ -14,14 +14,24 @@ services:
     name: FTHODO
   - class: org.jlab.rec.ft.FTEBEngine
     name: FTEB
-  - class: org.jlab.service.dc.DCHBEngine
+# DC clustering: nominal algoritm, filled the cluster bank for ai and conventional tracking
+  - class: org.jlab.service.dc.DCHBClustering
+    name: DCCR
+# This is where the AI plugin would go.  THe AI code reads the HB clusters.  
+  - class: org.jlab.service.mltn.MLTDEngine
+    name: MLTD
+# DC using clustering: regular HB tracking
+  - class: org.jlab.service.dc.DCHBPostClusterConv
     name: DCHB
+# DC using clustering on AI hits: NN assisted HB tracking
+  - class: org.jlab.service.dc.DCHBPostClusterAI
+    name: DCHAI
   - class: org.jlab.service.ftof.FTOFHBEngine
     name: FTOFHB
   - class: org.jlab.service.ec.ECEngine
     name: EC
-  - class: org.jlab.rec.cvt.services.CVTReconstruction
-    name: CVT
+  - class: org.jlab.rec.cvt.services.CVTEngine
+    name: CVTFP
   - class: org.jlab.service.ctof.CTOFEngine
     name: CTOF
   - class: org.jlab.service.cnd.CNDCalibrationEngine
@@ -34,12 +44,24 @@ services:
     name: LTCC
   - class: org.jlab.service.eb.EBHBEngine
     name: EBHB
+  - class: org.jlab.service.eb.EBHBAIEngine
+    name: EBHAI
+# DC regular TB tracking    
   - class: org.jlab.service.dc.DCTBEngine
     name: DCTB
+# DC AI assisted TB tracking    
+  - class: org.jlab.service.dc.DCTBEngineAI
+    name: DCTAI  
+  - class: org.jlab.service.fmt.FMTEngine
+    name: FMT
+  - class: org.jlab.rec.cvt.services.CVTSecondPassEngine
+    name: CVTSP
   - class: org.jlab.service.ftof.FTOFTBEngine
     name: FTOFTB
   - class: org.jlab.service.eb.EBTBEngine
     name: EBTB
+  - class: org.jlab.service.eb.EBTBAIEngine
+    name: EBTAI
   - class: org.jlab.rec.rich.RICHEBEngine
     name: RICH
 configuration:

@@ -1,16 +1,23 @@
 package org.jlab.rec.cvt.trajectory;
 
-import Jama.*;
+
+import org.jlab.clas.tracking.kalmanfilter.AKFitter.HitOnTrack;
+import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.measurement.MLayer;
 
 /**
- * A StateVec describes a cross measurement in the BST. It is characterized by a
+ * A StateVec describes a cross measurement in the CVT. It is characterized by a
  * point in the lab coordinate system at each module plane and by unit tangent
  * vectors to the track at the state-vec point.
  *
  * @author ziegler
  *
  */
-public class StateVec extends Matrix implements Comparable<StateVec> {
+public class StateVec implements Comparable<StateVec> {
 
     
     /**
@@ -28,89 +35,113 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
     private double _TrkToModuleAngle;
     private double _CalcCentroidStrip;
     private double _Path;
-
-    public int get_ID() {
+    private double _dx;
+    private double _x;
+    private double _y;
+    private double _z;
+    private double _ux;
+    private double _uy;
+    private double _uz;
+    private double _p;
+    
+    public int getID() {
         return _ID;
     }
 
-    public void set_ID(int _ID) {
+    public final void setID(int _ID) {
         this._ID = _ID;
     }
 
-    public double get_Path() {
+    public double getP() {
+        return _p;
+    }
+
+    public final void setP(double _p) {
+        this._p = _p;
+    }
+
+    public double getPath() {
         return _Path;
     }
 
-    public void set_Path(double _Path) {
+    public final void setPath(double _Path) {
         this._Path = _Path;
     }
 
-    public int get_SurfaceDetector() {
+    public double getDx() {
+        return _dx;
+    }
+
+    public final void setDx(double _dx) {
+        this._dx = _dx;
+    }
+
+    public int getSurfaceDetector() {
         return _SurfaceDetector;
     }
 
-    public void set_SurfaceDetector(int _SurfaceDetector) {
+    public final void setSurfaceDetector(int _SurfaceDetector) {
         this._SurfaceDetector = _SurfaceDetector;
     }
 
-    public int get_SurfaceLayer() {
+    public int getSurfaceLayer() {
         return _SurfaceLayer;
     }
 
-    public void set_SurfaceLayer(int _SurfaceLayer) {
+    public final void setSurfaceLayer(int _SurfaceLayer) {
         this._SurfaceLayer = _SurfaceLayer;
     }
 
-    public int get_SurfaceSector() {
+    public int getSurfaceSector() {
         return _SurfaceSector;
     }
 
-    public void set_SurfaceSector(int _SurfaceSector) {
+    public final void setSurfaceSector(int _SurfaceSector) {
         this._SurfaceSector = _SurfaceSector;
     }
 
-    public double get_TrkPhiAtSurface() {
+    public double getTrkPhiAtSurface() {
         return _TrkPhiAtSurface;
     }
     /**
      * @return the _SurfaceComponent
      */
-    public int get_SurfaceComponent() {
+    public int getSurfaceComponent() {
         return _SurfaceComponent;
     }
 
     /**
      * @param _SurfaceComponent the _SurfaceComponent to set
      */
-    public void set_SurfaceComponent(int _SurfaceComponent) {
+    public void setSurfaceComponent(int _SurfaceComponent) {
         this._SurfaceComponent = _SurfaceComponent;
     }
     
-    public void set_TrkPhiAtSurface(double _TrkPhiAtSurface) {
+    public final void setTrkPhiAtSurface(double _TrkPhiAtSurface) {
         this._TrkPhiAtSurface = _TrkPhiAtSurface;
     }
 
-    public double get_TrkThetaAtSurface() {
+    public double getTrkThetaAtSurface() {
         return _TrkThetaAtSurface;
     }
 
-    public void set_TrkThetaAtSurface(double _TrkThetaAtSurface) {
+    public final void setTrkThetaAtSurface(double _TrkThetaAtSurface) {
         this._TrkThetaAtSurface = _TrkThetaAtSurface;
     }
 
-    public double get_TrkToModuleAngle() {
+    public double getTrkToModuleAngle() {
         return _TrkToModuleAngle;
     }
 
-    public void set_TrkToModuleAngle(double _TrkToModuleAngle) {
+    public void setTrkToModuleAngle(double _TrkToModuleAngle) {
         this._TrkToModuleAngle = _TrkToModuleAngle;
     }
 
-    public double get_CalcCentroidStrip() {
+    public double getCalcCentroidStrip() {
         return _CalcCentroidStrip;
     }
 
-    public void set_CalcCentroidStrip(double _CalcCentroidStrip) {
+    public void setCalcCentroidStrip(double _CalcCentroidStrip) {
         this._CalcCentroidStrip = _CalcCentroidStrip;
     }
 
@@ -122,7 +153,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * Instantiates a new vec.
      */
     public StateVec() {
-        super(6, 1);
+        set(0,0,0,0,0,0);
     }
 
     /**
@@ -131,12 +162,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @param V the v
      */
     public void set(StateVec V) {
-        set(0, 0, V.x());
-        set(1, 0, V.y());
-        set(2, 0, V.z());
-        set(3, 0, V.ux());
-        set(4, 0, V.uy());
-        set(5, 0, V.uz());
+        set(V.x(), V.y(), V.z(), V.ux(), V.uy(), V.uz());
     }
 
     private int _planeIdx;
@@ -146,7 +172,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @return the wire plane index in the series of planes used in the
      * trajectory
      */
-    public int get_planeIdx() {
+    public int getPlaneIdx() {
         return _planeIdx;
     }
 
@@ -156,7 +182,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @param _planeIdx wire plane index in the series of planes used in the
      * trajectory
      */
-    public void set_planeIdx(int _planeIdx) {
+    public void setPlaneIdx(int _planeIdx) {
         this._planeIdx = _planeIdx;
     }
 
@@ -170,13 +196,13 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @param uy the y-component of the tangent to the helix at point (x,y,z)
      * @param uz the z-component of the tangent to the helix at point (x,y,z)
      */
-    public void set(double x, double y, double z, double ux, double uy, double uz) {
-        set(0, 0, x);
-        set(1, 0, y);
-        set(2, 0, z);
-        set(3, 0, ux);
-        set(4, 0, uy);
-        set(5, 0, uz);
+    public final void set(double x, double y, double z, double ux, double uy, double uz) {
+        _x=x;
+        _y=y;
+        _z=z;
+        _ux=ux;
+        _uy=uy;
+        _uz=uz;
     }
 
     /**
@@ -190,13 +216,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @param uz the z-component of the tangent to the helix at point (x,y,z)
      */
     public StateVec(double x, double y, double z, double ux, double uy, double uz) {
-        super(6, 1);
-        set(0, 0, x);
-        set(1, 0, y);
-        set(2, 0, z);
-        set(3, 0, ux);
-        set(4, 0, uy);
-        set(5, 0, uz);
+        set(x, y, z, ux, uy, uz);
     }
 
     /**
@@ -205,28 +225,36 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @param v the v
      */
     public StateVec(StateVec v) {
-        super(6, 1);
-        set(0, 0, v.x());
-        set(1, 0, v.y());
-        set(2, 0, v.z());
-        set(3, 0, v.ux());
-        set(4, 0, v.uy());
-        set(5, 0, v.uz());
+        set(v._x, v._y, v._z, v._ux, v._uy, v._uz); 
     }
 
-    /**
-     * Instantiates a new StateVec.
-     *
-     * @param m the m
-     */
-    private StateVec(Matrix m) { //needed since Jama.Matrix cannot be casted into StateVec		
-        super(4, 1);
-        set(0, 0, m.get(0, 0));
-        set(1, 0, m.get(1, 0));
-        set(2, 0, m.get(2, 0));
-        set(3, 0, m.get(3, 0));
-        set(4, 0, m.get(4, 0));
-        set(5, 0, m.get(5, 0));
+    public StateVec(int id, HitOnTrack traj, DetectorType type) {
+        Vector3D mom = new Vector3D(traj.px, traj.py, traj.pz);
+        Vector3D dir = mom.asUnit(); 
+        set(traj.x, traj.y, traj.z, dir.x(), dir.y(), dir.z());
+        this.setSurfaceDetector(type.getDetectorId());
+        this.setSurfaceLayer(traj.layer);
+        this.setSurfaceSector(traj.sector);
+        this.setP(mom.mag());
+        this.setTrkPhiAtSurface(mom.phi());
+        this.setTrkThetaAtSurface(mom.theta());
+        this.setPath(traj.path);
+        this.setDx(traj.dx);
+        this.setID(id);
+    }
+
+    public StateVec(int id, Point3D pos, Vector3D mom, Surface surface, double path) {
+        Vector3D dir = mom.asUnit();
+        set(pos.x(), pos.y(), pos.z(), dir.x(), dir.y(), dir.z());
+        this.setSurfaceDetector(surface.getIndex());
+        this.setSurfaceLayer(surface.getLayer());
+        this.setSurfaceSector(surface.getSector());
+        this.setP(mom.mag());
+        this.setTrkPhiAtSurface(mom.phi());
+        this.setTrkThetaAtSurface(mom.theta());
+        this.setPath(path);
+        this.setDx(surface.getDx(mom));
+        this.setID(id);
     }
 
     /**
@@ -235,7 +263,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @return the x component
      */
     public double x() {
-        return (get(0, 0));
+        return _x;
     }
 
     /**
@@ -244,7 +272,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @return the y component
      */
     public double y() {
-        return (get(1, 0));
+        return _y;
     }
 
     /**
@@ -253,7 +281,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @return the z component
      */
     public double z() {
-        return (get(2, 0));
+        return _z;
     }
 
     /**
@@ -262,7 +290,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @return the ux component
      */
     public double ux() {
-        return (get(3, 0));
+        return _ux;
     }
 
     /**
@@ -271,7 +299,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @return the uy component
      */
     public double uy() {
-        return (get(4, 0));
+        return _uy;
     }
 
     /**
@@ -280,27 +308,34 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
      * @return the uz component
      */
     public double uz() {
-        return (get(5, 0));
+        return _uz;
     }
 
     @Override
     public int compareTo(StateVec arg) {
 
         int return_val = 0;
-        if (org.jlab.rec.cvt.Constants.isCosmicsData() == false) {
-            int RegComp = this.get_SurfaceLayer() < arg.get_SurfaceLayer() ? -1 : this.get_SurfaceLayer() == arg.get_SurfaceLayer() ? 0 : 1;
-            int IDComp = this.get_ID() < arg.get_ID() ? -1 : this.get_ID() == arg.get_ID() ? 0 : 1;
+        if (Constants.getInstance().isCosmics == false) {
+            int RegComp = this.getSurfaceLayer() < arg.getSurfaceLayer() ? -1 : this.getSurfaceLayer() == arg.getSurfaceLayer() ? 0 : 1;
+            int IDComp = this.getID() < arg.getID() ? -1 : this.getID() == arg.getID() ? 0 : 1;
 
             return_val = ((RegComp == 0) ? IDComp : RegComp);
         }
-        if (org.jlab.rec.cvt.Constants.isCosmicsData() == true) {
+        if (Constants.getInstance().isCosmics == true) {
             int RegComp = this.y() < arg.y() ? -1 : this.y() == arg.y() ? 0 : 1;
-            int IDComp = this.get_ID() < arg.get_ID() ? -1 : this.get_ID() == arg.get_ID() ? 0 : 1;
+            int IDComp = this.getID() < arg.getID() ? -1 : this.getID() == arg.getID() ? 0 : 1;
 
-            return_val = ((RegComp == 0) ? IDComp : RegComp);
+            return_val = RegComp;//((RegComp == 0) ? IDComp : RegComp);
         }
 
         return return_val;
     }
 
+    @Override
+    public String toString() {
+        String s = String.format("id=%d \t detector=%d \t layer=%d \t sector=%d \t ", this._ID, this._SurfaceDetector, this._SurfaceLayer, this._SurfaceSector);
+        s += String.format("pos=(%.3f, %.3f, %.3f) \t dir=(%.3f, %.3f, %.3f) \t ", this._x, this._y, this._z, this._ux, this._uy, this._uz);
+        s += String.format("phi=%.3f \t theta=%.3f \t langle=%.3f \t path=%.3f \t dx=%.3f", this._TrkPhiAtSurface, this._TrkThetaAtSurface, this._TrkToModuleAngle, this._Path, this._dx);
+        return s;
+    }
 }

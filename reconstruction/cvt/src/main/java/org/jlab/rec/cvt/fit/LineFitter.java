@@ -15,9 +15,9 @@ public class LineFitter {
     // the constructor
     public LineFitter() {
     }
-    private List<Double> w = new ArrayList<Double>();
-    // fit status
+    private final List<Double> w = new ArrayList<>();
 
+    // fit status
     public boolean fitStatus(List<Double> x, List<Double> y, List<Double> sigma_x, List<Double> sigma_y, int nbpoints) {
         boolean fitStat = false;
         if (nbpoints >= 2) {  // must have enough points to do the fit

@@ -2,17 +2,16 @@ package org.jlab.rec.dc.timetodistance;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import org.jlab.rec.dc.Constants;
-import static org.jlab.rec.dc.timetodistance.TableLoader.BfieldValues;
-import static org.jlab.rec.dc.timetodistance.TableLoader.maxTBin;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class TimeToDistanceEstimator {
 
     public TimeToDistanceEstimator() {
-            // TODO Auto-generated constructor stub
     }
     
+    private static final Logger LOGGER = Logger.getLogger(TimeToDistanceEstimator.class.getName());
     /**
      * 
      * @param x value on grid
@@ -39,9 +38,10 @@ public class TimeToDistanceEstimator {
 
     /**
     * 
-    * @param B B field in T
+     * @param Bf
     * @param alpha is the local angle in degrees
     * @param t time in ns
+     * @param SecIdx
     * @param SlyrIdx slyr index (0...5)
     * @return the distance to the wire in cm
     */
@@ -56,8 +56,8 @@ public class TimeToDistanceEstimator {
             binhighB = TableLoader.maxBinIdxB;
         }
 
-        double B1 = BfieldValues[binlowB];
-        double B2 = BfieldValues[binhighB];
+        double B1 = TableLoader.BfieldValues[binlowB];
+        double B2 = TableLoader.BfieldValues[binhighB];
 
          // for alpha ranges		
         int binlowAlpha  = this.getAlphaIdx(alpha);
@@ -89,15 +89,15 @@ public class TimeToDistanceEstimator {
          // interpolate in d for 2 values of alpha:		 
         double f_B_alpha1_t = interpolateLinear(t, this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binlowAlpha)*2., this.getTimeNextIdx(t, SecIdx, SlyrIdx, binhighB, binlowAlpha)*2., f_B_alpha1_t1, f_B_alpha1_t2);
         double f_B_alpha2_t = interpolateLinear(t, this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binhighAlpha)*2., this.getTimeNextIdx(t, SecIdx, SlyrIdx, binhighB, binhighAlpha)*2., f_B_alpha2_t1, f_B_alpha2_t2);
-        //System.out.println( TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binlowB][binlowAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binlowAlpha)]);
-        //System.out.println(SlyrIdx+" binlowB "+binlowB+" binlowAlpha "+binlowAlpha+" t "+this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binlowAlpha)+" time "+t);
-        //System.out.println(TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binlowB][binhighAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binhighAlpha)]);
-        //System.out.println(SlyrIdx+" binlowB "+binlowB+" binhighAlpha "+binhighAlpha+" t "+this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binhighAlpha)+" time "+t);
-        //System.out.println(TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binhighB][binlowAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binhighB, binlowAlpha)]);
-        //System.out.println(SlyrIdx+" binhighB "+binhighB+" binlowAlpha "+binlowAlpha+" t "+this.getTimeIdx(t, SecIdx, SlyrIdx, binhighB, binlowAlpha)+" time "+t);
-        //System.out.println(TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binhighB][binhighAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binhighB, binhighAlpha)]);
-        //System.out.println(SlyrIdx+" binhighB "+binhighB+" binhighAlpha "+binhighAlpha+" t "+this.getTimeIdx(t, SecIdx, SlyrIdx, binhighB, binhighAlpha)+" time "+t);
-        //System.out.println(" f_B_alpha1_t1 "+f_B_alpha1_t1+" f_B_alpha2_t1 "+f_B_alpha2_t1
+        //LOGGER.log(Level.FINE,  TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binlowB][binlowAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binlowAlpha)]);
+        //LOGGER.log(Level.FINE, SlyrIdx+" binlowB "+binlowB+" binlowAlpha "+binlowAlpha+" t "+this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binlowAlpha)+" time "+t);
+        //LOGGER.log(Level.FINE, TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binlowB][binhighAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binhighAlpha)]);
+        //LOGGER.log(Level.FINE, SlyrIdx+" binlowB "+binlowB+" binhighAlpha "+binhighAlpha+" t "+this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binhighAlpha)+" time "+t);
+        //LOGGER.log(Level.FINE, TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binhighB][binlowAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binhighB, binlowAlpha)]);
+        //LOGGER.log(Level.FINE, SlyrIdx+" binhighB "+binhighB+" binlowAlpha "+binlowAlpha+" t "+this.getTimeIdx(t, SecIdx, SlyrIdx, binhighB, binlowAlpha)+" time "+t);
+        //LOGGER.log(Level.FINE, TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binhighB][binhighAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binhighB, binhighAlpha)]);
+        //LOGGER.log(Level.FINE, SlyrIdx+" binhighB "+binhighB+" binhighAlpha "+binhighAlpha+" t "+this.getTimeIdx(t, SecIdx, SlyrIdx, binhighB, binhighAlpha)+" time "+t);
+        //LOGGER.log(Level.FINE, " f_B_alpha1_t1 "+f_B_alpha1_t1+" f_B_alpha2_t1 "+f_B_alpha2_t1
         //            +" f_B_alpha1_t2 "+f_B_alpha1_t2+" f_B_alpha2_t2 "+f_B_alpha2_t2
         //            +" f_B_alpha1_t "+f_B_alpha1_t+" f_B_alpha2_t "+f_B_alpha2_t);
         
@@ -161,13 +161,13 @@ public class TimeToDistanceEstimator {
         try{
             binIdx = Integer.parseInt(df.format(t1/2.) ) -1; 
         } catch (NumberFormatException e) {
-            System.out.println(" time bin error "+t1+" ");
+            LOGGER.log(Level.WARNING, " time bin error "+t1+" ");
         }
         if(binIdx<0) {
             binIdx = TableLoader.minBinIdxT;
         }
-        if(binIdx>maxTBin) {
-            binIdx = maxTBin ;
+        if(binIdx>TableLoader.maxTBin) {
+            binIdx = TableLoader.maxTBin ;
         }
 
         return binIdx;
@@ -194,7 +194,7 @@ public class TimeToDistanceEstimator {
         try{
             binIdx = Integer.parseInt(df.format(b1*b1) ) -1; 
         } catch (NumberFormatException e) {
-            System.out.println(" field bin error "+b1+" ");
+            LOGGER.log(Level.WARNING, " field bin error "+b1+" ");
         }
         if(binIdx<0) {
             binIdx = 0;
@@ -244,7 +244,7 @@ public class TimeToDistanceEstimator {
             } else {
                 dDoca = (7.6e-3 - 2.4e-4*time +9.8e-3*time*time - 3.8e-6*time*time*time)*5.5410595e-05;
             }
-            //System.out.println("time "+time +" added doca "+(float)dDoca);
+            //LOGGER.log(Level.FINE, "time "+time +" added doca "+(float)dDoca);
         }
         return dDoca;
     }

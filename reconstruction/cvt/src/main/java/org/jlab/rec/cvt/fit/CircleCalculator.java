@@ -59,7 +59,7 @@ public class CircleCalculator {
 
     private List<List<Double>> SortPoints(List<Double> p0, List<Double> p1, List<Double> p2) {
 
-        List<List<Double>> newArray = new ArrayList<List<Double>>();
+        List<List<Double>> newArray = new ArrayList<>();
 
         List<Double> midpoint = null;
         List<Double> nearestToTarget = null;

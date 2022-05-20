@@ -26,13 +26,13 @@ public class TrackReader {
 
          ArrayList<Track> Tracks = new ArrayList<Track>();
 
-        if (event.hasBank("CVTRec::Trajectory") == false) {
+        if (event.hasBank("CVT::Trajectory") == false) {
             // System.err.println("there is no CVT bank ");
             return Tracks;
         }
         else {
 
-            DataBank bank = event.getBank("CVTRec::Trajectory");
+            DataBank bank = event.getBank("CVT::Trajectory");
             int rows = bank.rows();
             for (int i = 0; i < rows; i++) {
                 if(bank.getByte("detector", i)==DetectorType.CTOF.getDetectorId()) {

@@ -22,7 +22,6 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
-import org.jlab.detector.geant4.v2.PCALGeant4Factory;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.FTOFDetHit;
 import org.jlab.geom.base.ConstantProvider;
@@ -32,7 +31,6 @@ import org.jlab.rec.dc.Constants;
 import org.jlab.utils.options.OptionParser;
 
 import java.util.Random;
-import org.jlab.detector.hits.PCALDetHit;
 import org.jlab.geom.DetectorHit;
 import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Path3D;
@@ -60,7 +58,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         r = new Random();
         MagFieldsEngine mf = new MagFieldsEngine();
         mf.initializeMagneticFields();
-        super.LoadTables();
+        super.init();
         return true;
     }
     public void processFile(int duplicates, float torScale, float solScale, int charge, int n, long seed,
@@ -70,7 +68,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         Swim sw = new Swim();
         PrintWriter pw = null;
         try {
-            System.out.println(" MAKING ROADS for: "
+            LOGGER.log(Level.INFO, " MAKING ROADS for: "
                     +"\n Torus:\t\t"   +String.valueOf(torScale)
                     +"\n Solenoid:\t"  +String.valueOf(solScale)
                     +"\n Charge:\t"    +String.valueOf(charge)
@@ -95,9 +93,10 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     +"ZSol" +String.valueOf(zSol)+"Duplicates" +String.valueOf(duplicates)+".txt";
             pw = new PrintWriter(fileName);
             this.r.setSeed(seed);
-            System.out.println("\n Random generator seed set to: " + seed);
-            System.out.println("\n Dictionary file name: " + fileName + "\n");
-            this.ProcessTracks(pw, dcDetector, ftofDetector, ecalDetector, sw, charge, n, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax,duplicates);
+            LOGGER.log(Level.INFO, "\n Random generator seed set to: " + seed);
+            LOGGER.log(Level.INFO, "\n Dictionary file name: " + fileName + "\n");
+            this.ProcessTracks(pw, Constants.getInstance().dcDetector, Constants.getInstance().ftofDetector, 
+                                   Constants.getInstance().ecalDetector, sw, charge, n, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax,duplicates);
             pw.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(TrackDictionaryMakerRNG.class.getName()).log(Level.SEVERE, null, ex);
@@ -174,9 +173,9 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         
         Point3D rotatedP = this.rotateToTiltedCoordSys(sector, new Point3D(swimVal[3], swimVal[4], swimVal[5]));
         Point3D rotatedX = this.rotateToTiltedCoordSys(sector, new Point3D(swimVal[0], swimVal[1], swimVal[2]));
-//System.out.println(" sector in TrackDictionary "+sector);
-        List<Integer> Wi = new ArrayList<Integer>();
-        List<Integer> Di = new ArrayList<Integer>();
+//LOGGER.log(Level.INFO, " sector in TrackDictionary "+sector);
+        List<Integer> Wi = new ArrayList<>();
+        List<Integer> Di = new ArrayList<>();
         int index=0;
         DCTDC DCtdc = new DCTDC();
         for (int sl = 0; sl < 6; sl++) {
@@ -206,7 +205,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         Line3D wl = new Line3D(new Point3D(p3dl.x, p3dl.y, p3dl.z), new Point3D(p3dr.x, p3dr.y, p3dr.z));
         double min = wl.distance(new Point3D(tx, ty, tz)).length();
         if(min<wMax*1.05) {
-            Wi.add(i + 1); //System.out.println("min "+min); ? one strip off
+            Wi.add(i + 1); //LOGGER.log(Level.INFO, "min "+min); ? one strip off
             Di.add((int)min);
         }
     }
@@ -260,7 +259,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
 
             
         for (int i = 0; i < numRandoms; i++) {
-            if(i%10000 == 0) System.out.println("\t" + i + " tracks generated, " + newDictionary.size() + " roads found");
+            if(i%10000 == 0) LOGGER.log(Level.INFO, "\t" + i + " tracks generated, " + newDictionary.size() + " roads found");
             Clear(wireArray);
             invP     =this.randomDouble((double)(1./PMax), (double) (1./PMin));
             phiDeg   =this.randomDouble((double) PhiMin, (double) PhiMax);
@@ -290,17 +289,17 @@ public class TrackDictionaryMakerRNG extends DCEngine{
             this.entry = "";
             for (int sl = 0; sl < 6; sl++) {
                 sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                this.swimtoLayer(sector, 0, sl, Wl1, dcDetector, sw);        
+                TrackDictionaryMakerRNG.swimtoLayer(sector, 0, sl, Wl1, dcDetector, sw);        
                 sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                this.swimtoLayer(sector, 1, sl, Wl2, dcDetector, sw);        
+                TrackDictionaryMakerRNG.swimtoLayer(sector, 1, sl, Wl2, dcDetector, sw);        
                 sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                this.swimtoLayer(sector, 2, sl, Wl3, dcDetector, sw);        
+                TrackDictionaryMakerRNG.swimtoLayer(sector, 2, sl, Wl3, dcDetector, sw);        
                 sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                this.swimtoLayer(sector, 3, sl, Wl4, dcDetector, sw);        
+                TrackDictionaryMakerRNG.swimtoLayer(sector, 3, sl, Wl4, dcDetector, sw);        
                 sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                this.swimtoLayer(sector, 4, sl, Wl5, dcDetector, sw);        
+                TrackDictionaryMakerRNG.swimtoLayer(sector, 4, sl, Wl5, dcDetector, sw);        
                 sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                this.swimtoLayer(sector, 5, sl, Wl6, dcDetector, sw);
+                TrackDictionaryMakerRNG.swimtoLayer(sector, 5, sl, Wl6, dcDetector, sw);
 
                             /*
                             double[] trk = sw.SwimToPlane(dcDetector.getSector(0).getSuperlayer(sl).getLayer(2).getComponent(0).getMidpoint().z());
@@ -365,7 +364,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                 wireArray[0+6*j]=Wl1.get(j); wireArray[1+6*j]=Wl2.get(j); wireArray[2+6*j]=Wl3.get(j); wireArray[3+6*j]=Wl4.get(j); wireArray[4+6*j]=Wl5.get(j); wireArray[5+6*j]=Wl6.get(j); 
             }
             if (count(Wl3) >=3) {
-                ArrayList<Integer> wires = new ArrayList<Integer>();
+                ArrayList<Integer> wires = new ArrayList<>();
                 for (int k = 0; k < 6; k++) {
                     for (int l=0; l<1; l++) {
                         if(wireArray[k*6 +l] > 0) {
@@ -385,7 +384,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                 if(newDictionary.containsKey(wires) && duplicates!=0)  {
                         int nRoad = newDictionary.get(wires) + 1;
                         newDictionary.replace(wires, nRoad);
-                       // System.out.println(" Number of duplicate roads "+nRoad+" p "+p+" theta "+thetaDeg+" phi "+phiDeg+" vz "+vzCm);
+                       // LOGGER.log(Level.INFO, " Number of duplicate roads "+nRoad+" p "+p+" theta "+thetaDeg+" phi "+phiDeg+" vz "+vzCm);
                 }
                 else {
                     newDictionary.put(wires, 1);
@@ -425,7 +424,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                 }   
             }
         }
-        System.out.println("\t" + numRandoms + " tracks generated, " + newDictionary.size() + " roads found");
+        LOGGER.log(Level.INFO, "\t" + numRandoms + " tracks generated, " + newDictionary.size() + " roads found");
     }
 
     public void ProcessCosmics(PrintWriter pw, DCGeant4Factory dcDetector, TrackDictionaryMakerRNG tw, Swim sw) {
@@ -481,7 +480,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
 
                         sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), 1);
 
-                        List<Integer> W = new ArrayList<Integer>();
+                        List<Integer> W = new ArrayList<>();
 
                         for (int sl = 0; sl < 6; sl++) {
 
@@ -536,12 +535,12 @@ public class TrackDictionaryMakerRNG extends DCEngine{
            
             if (wl.distance(new Point3D(trk[0], trk[1], trk[2])).length() < min) { 
                 min = wl.distance(new Point3D(trk[0], trk[1], trk[2])).length();
-                w = i; //System.out.println(" min "+min+" wire "+(i+1)+" sl "+sl+" l "+l+" trk "+trk[0]+", "+trk[1]+", "+trk[2]+" mp "+dcDetector.getWireMidpoint(sl, l, i)+" : "+dcDetector.getWireMidpoint(sl, l, 0).z);
+                w = i; //LOGGER.log(Level.INFO, " min "+min+" wire "+(i+1)+" sl "+sl+" l "+l+" trk "+trk[0]+", "+trk[1]+", "+trk[2]+" mp "+dcDetector.getWireMidpoint(sl, l, i)+" : "+dcDetector.getWireMidpoint(sl, l, 0).z);
             } 
         }
 
         if (min < wMax*1.01) {
-            Wi.add(w + 1); //System.out.println("min "+min);
+            Wi.add(w + 1); //LOGGER.log(Level.INFO, "min "+min);
             Di.add((int)min);
             addAdjacentHits(sector-1, sl, l, w+1, Wi, Di, dcDetector, wMax, trk[0], trk[1], trk[2]);
             addAdjacentHits(sector-1, sl, l, w-1, Wi, Di, dcDetector, wMax, trk[0], trk[1], trk[2]);
@@ -573,13 +572,13 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                 min = wl.distance(new Point3D(trk[0], trk[1], trk[2])).length();
                 wLeft = p3dl.y;
                 wRight= p3dr.y;
-                w = i; //System.out.println(" min "+min+" wire "+(i+1)+" sl "+sl+" l "+l+" trk "+trk[0]+", "+trk[1]+", "+trk[2]+" mp "+dcDetector.getWireMidpoint(sl, l, i)+" : "+dcDetector.getWireMidpoint(sl, l, 0).z);
+                w = i; //LOGGER.log(Level.INFO, " min "+min+" wire "+(i+1)+" sl "+sl+" l "+l+" trk "+trk[0]+", "+trk[1]+", "+trk[2]+" mp "+dcDetector.getWireMidpoint(sl, l, i)+" : "+dcDetector.getWireMidpoint(sl, l, 0).z);
             }  
         }
 
         if (min < wMax*1.01 && trk[1]>(wLeft-wMax) && trk[1]<(wRight+wMax)) {
-            Wi.add(w + 1); //System.out.println("min "+min);
- //           System.out.println(w + " " + sl + " " + l + " " + wLeft + " " + wRight);
+            Wi.add(w + 1); //LOGGER.log(Level.INFO, "min "+min);
+ //           LOGGER.log(Level.INFO, w + " " + sl + " " + l + " " + wLeft + " " + wRight);
         } else {
             Wi.add(0);
         }
@@ -672,11 +671,11 @@ public class TrackDictionaryMakerRNG extends DCEngine{
 
     private void resetGeom(String geomDBVar) {
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, Optional.ofNullable(geomDBVar).orElse("default"));
-        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, DCGeant4Factory.ENDPLATESBOWON);
+        Constants.getInstance().dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, DCGeant4Factory.ENDPLATESBOWON);
         
         for(int l=0; l<6; l++) {
-            Constants.wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
-            System.out.println("****************** WPDIST READ *********FROM RELOADED "+geomDBVar+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
+            Constants.getInstance().wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
+            LOGGER.log(Level.INFO, "****************** WPDIST READ *********FROM RELOADED "+geomDBVar+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
         }
         
     }
@@ -727,7 +726,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
             tm.resetGeom(dcVar);
             tm.processFile(duplicates,torus, solenoid, charge, n, seed, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax, zSol);
         } else {
-            System.out.println(" FIELDS NOT SET");
+            LOGGER.log(Level.INFO, " FIELDS NOT SET");
         }
     }
     

@@ -1,8 +1,9 @@
 package org.jlab.rec.cvt.track;
 
+import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
-import org.jlab.rec.cvt.svt.Constants;
-import org.jlab.rec.cvt.svt.Geometry;
+import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.svt.SVTParameters;
 import org.jlab.rec.cvt.trajectory.Helix;
 
 /**
@@ -15,31 +16,20 @@ public class EnergyLossCorr {
 
     public static final double C = 0.0002997924580;
 
-    public String massHypo = "pion";
-    /**
-     * Field instantiated using the torus and the solenoid
-     */
-    
-    double cosEntAnglesPlanes[];
-
+    public int massHypo = 211;
+    private double cosEntAnglesPlanes[];
     private double[][] Points;
-    //private double[][] CorrPoints;
     private Track _updatedTrack;
-
-    public Track get_UpdatedTrack() {
-        return _updatedTrack;
-    }
-
-    public void set_UpdatedTrack(Track updatedTrack) {
-        this._updatedTrack = updatedTrack;
-    }
-
     private Helix OrigTrack;
 
+   
+    private static final double MUMASS = 0.105658369;
+    
     /**
      * The constructor
      *
      * @param trkcand the track candidate
+     * @param bstSwim
      */
     public EnergyLossCorr(Track trkcand, Swim bstSwim) {
 
@@ -47,38 +37,37 @@ public class EnergyLossCorr {
             return;
         }
 
-        massHypo = trkcand.get_PID();
+        massHypo = trkcand.getPID();
 
-        OrigTrack = new Helix(trkcand.get_helix().get_dca(), trkcand.get_helix().get_phi_at_dca(), trkcand.get_helix().get_curvature(),
-                trkcand.get_helix().get_Z0(), trkcand.get_helix().get_tandip(), null);
+        OrigTrack = new Helix(trkcand.getHelix().getDCA(), trkcand.getHelix().getPhiAtDCA(), trkcand.getHelix().getCurvature(),
+                trkcand.getHelix().getZ0(), trkcand.getHelix().getTanDip(), trkcand.getHelix().getXb(), trkcand.getHelix().getYb(), null);
 
         init(trkcand, bstSwim);
     }
     
-    public void doCorrection(Track trkcand, Geometry geo, Swim bstSwim, float b[]) {
-        bstSwim.BfieldLab(Points[0][0] / 10, Points[0][0] / 10, Points[0][0] / 10, b);
-        double B = (double)b[2];
+    public void doCorrection(Track trkcand) {
+        double B = trkcand.getHelix().B;
         double ELossMax = 600; //600Mev 
         double stepSize = 0.001; //1 MeV
         int nbins = (int) ELossMax;
 
-        double pt0 = trkcand.get_Pt() + ELossMax * stepSize;// Assumes the max ELoss is 600 MeV
+        double pt0 = trkcand.getPt() + ELossMax * stepSize;// Assumes the max ELoss is 600 MeV
 
         double pt = pt0;
-        double curv = (Constants.LIGHTVEL * Math.abs(B)) * Math.signum(this.OrigTrack.get_curvature()) / pt;
+        double curv = (Constants.LIGHTVEL * Math.abs(B)) * Math.signum(this.OrigTrack.getCurvature()) / pt;
 
         for (int j = 0; j < nbins; j++) {
-            if (Math.abs(this.OrigTrack.get_curvature()) < Math.abs(curv)) {
-                double correctedCurv = (Constants.LIGHTVEL * Math.abs(B)) * Math.signum(this.OrigTrack.get_curvature()) / (pt + stepSize);
-                trkcand.get_helix().set_curvature(correctedCurv);
-                trkcand.set_HelicalTrack(trkcand.get_helix(), bstSwim, b);
+            if (Math.abs(this.OrigTrack.getCurvature()) < Math.abs(curv)) {
+                double correctedCurv = (Constants.LIGHTVEL * Math.abs(B)) * Math.signum(this.OrigTrack.getCurvature()) / (pt + stepSize);
+                trkcand.getHelix().setCurvature(correctedCurv);
+                trkcand.setPXYZ();
                 return;
             }
             pt = pt0 - j * stepSize;
 
             double aveCurv = 0;
             for (int k = 0; k < trkcand.size(); k++) {
-                aveCurv += doEnergyLossCorrection(k, pt, bstSwim, b);
+                aveCurv += doEnergyLossCorrection(k, pt, B);
             }
             aveCurv /= trkcand.size();
             curv = aveCurv;
@@ -94,22 +83,22 @@ public class EnergyLossCorr {
 
         cosEntAnglesPlanes = new double[trkcand.size()];
 
-        Track trkcandcopy = new Track(trkcand.get_helix(), bstSwim);
+        Track trkcandcopy = new Track(trkcand.getHelix());
         trkcandcopy.addAll(trkcand);
 
-        this.set_UpdatedTrack(trkcandcopy);
+        this.setUpdatedTrack(trkcandcopy);
 
         for (int m = 0; m < trkcand.size(); m++) {
-            Points[m][0] = trkcand.get(m).get_Point().x();
-            Points[m][1] = trkcand.get(m).get_Point().y();
-            Points[m][2] = trkcand.get(m).get_Point().z();
+            Points[m][0] = trkcand.get(m).getPoint().x();
+            Points[m][1] = trkcand.get(m).getPoint().y();
+            Points[m][2] = trkcand.get(m).getPoint().z();
 
-            double x = trkcand.get_helix().getPointAtRadius(Math.sqrt(Points[m][0] * Points[m][0] + Points[m][1] * Points[m][1])).x();
-            double ux = trkcand.get_helix().getTrackDirectionAtRadius(Math.sqrt(Points[m][0] * Points[m][0] + Points[m][1] * Points[m][1])).x();
-            double y = trkcand.get_helix().getPointAtRadius(Math.sqrt(Points[m][0] * Points[m][0] + Points[m][1] * Points[m][1])).y();
-            double uy = trkcand.get_helix().getTrackDirectionAtRadius(Math.sqrt(Points[m][0] * Points[m][0] + Points[m][1] * Points[m][1])).y();
-            double z = trkcand.get_helix().getPointAtRadius(Math.sqrt(Points[m][0] * Points[m][0] + Points[m][1] * Points[m][1])).z();
-            double uz = trkcand.get_helix().getTrackDirectionAtRadius(Math.sqrt(Points[m][0] * Points[m][0] + Points[m][1] * Points[m][1])).z();
+            double x = trkcand.getHelix().getPointAtRadius(Math.sqrt(Points[m][0] * Points[m][0] + Points[m][1] * Points[m][1])).x();
+            double ux = trkcand.getHelix().getTrackDirectionAtRadius(Math.sqrt(Points[m][0] * Points[m][0] + Points[m][1] * Points[m][1])).x();
+            double y = trkcand.getHelix().getPointAtRadius(Math.sqrt(Points[m][0] * Points[m][0] + Points[m][1] * Points[m][1])).y();
+            double uy = trkcand.getHelix().getTrackDirectionAtRadius(Math.sqrt(Points[m][0] * Points[m][0] + Points[m][1] * Points[m][1])).y();
+            double z = trkcand.getHelix().getPointAtRadius(Math.sqrt(Points[m][0] * Points[m][0] + Points[m][1] * Points[m][1])).z();
+            double uz = trkcand.getHelix().getTrackDirectionAtRadius(Math.sqrt(Points[m][0] * Points[m][0] + Points[m][1] * Points[m][1])).z();
 
             double cosEntranceAngle = Math.abs((x * ux + y * uy + z * uz) / Math.sqrt(x * x + y * y + z * z));
             cosEntAnglesPlanes[m] = cosEntranceAngle;
@@ -119,24 +108,22 @@ public class EnergyLossCorr {
     }
 
     //? Solve numerically stepping over pt until corr pt matches with fit omega... how much dedx corresponds to obs pt?
-    private double doEnergyLossCorrection(int m, double pt, Swim bstSwim, float b[]) {
-        bstSwim.BfieldLab(Points[m][0] / 10, Points[m][0] / 10, Points[m][0] / 10, b);
-        double B = b[2]; // Bfield takes units of cm
-
-        double tanL = this.OrigTrack.get_tandip();
+    private double doEnergyLossCorrection(int m, double pt, double B) {
+        
+        double tanL = this.OrigTrack.getTanDip();
 
         // pz = pt*tanL
         double pz = pt * tanL;
         double p = Math.sqrt(pt * pt + pz * pz);
 
-        double mass = MassHypothesis(massHypo); // assume given mass hypothesis 
+        double mass = massHypothesis(massHypo); // assume given mass hypothesis 
 
         double beta = p / Math.sqrt(p * p + mass * mass); // use particle momentum
         double gamma = 1. / Math.sqrt(1 - beta * beta);
 
         double cosEntranceAngle = cosEntAnglesPlanes[m];
 
-        double s = eMass / mass;
+        double s = PhysicsConstants.massElectron() / mass;
         //double Wmax = 2.*mass*beta*beta*gamma*gamma/(1.+2.*s*Math.sqrt(1+beta*gamma*beta*gamma)+s*s);
         double Wmax = 2. * mass * beta * beta * gamma * gamma / (1. + 2. * s * gamma + s * s);
         double I = 0.000000172;
@@ -146,22 +133,30 @@ public class EnergyLossCorr {
         double delta = 0.;
 
         //double dEdx = 0.0001535*(Constants.detMatZ/Constants.detMatA)*(Math.log(logterm)-2*beta*beta-delta)/(beta*beta);
-        double dEdx = 0.00001535 * Constants.detMatZ_ov_A_timesThickn * (Math.log(logterm) - 2 * beta * beta - delta) / (beta * beta);
+        double dEdx = 0.00001535 * SVTParameters.detMatZ_ov_A_timesThickn * (Math.log(logterm) - 2 * beta * beta - delta) / (beta * beta);
 
         double tmpPtot = p;
 
-        double tmpEtot = Math.sqrt(MassHypothesis(massHypo) * MassHypothesis(massHypo) + tmpPtot * tmpPtot);
+        double tmpEtot = Math.sqrt(massHypothesis(massHypo) * massHypothesis(massHypo) + tmpPtot * tmpPtot);
         //double tmpEtotCorrected = tmpEtot-dEdx*Constants.LAYRGAP/cosEntranceAngle;
         double tmpEtotCorrected = tmpEtot - dEdx / cosEntranceAngle;
 
-        double tmpPtotCorrSq = tmpEtotCorrected * tmpEtotCorrected - MassHypothesis(massHypo) * MassHypothesis(massHypo);
+        double tmpPtotCorrSq = tmpEtotCorrected * tmpEtotCorrected - massHypothesis(massHypo) * massHypothesis(massHypo);
 
         double newPt = Math.sqrt(tmpPtotCorrSq / (1 + tanL * tanL));
 
-        double newCurv = (Constants.LIGHTVEL * Math.abs(B)) * Math.signum(this.OrigTrack.get_curvature()) / newPt;
+        double newCurv = (Constants.LIGHTVEL * Math.abs(B)) * Math.signum(this.OrigTrack.getCurvature()) / newPt;
 
         return newCurv;
 
+    }
+
+    public Track getUpdatedTrack() {
+        return _updatedTrack;
+    }
+
+    public void setUpdatedTrack(Track updatedTrack) {
+        this._updatedTrack = updatedTrack;
     }
 
     /**
@@ -170,30 +165,21 @@ public class EnergyLossCorr {
      * hypothesis is the default value
      * @return the mass value for the given mass hypothesis in GeV/c^2
      */
-    public double MassHypothesis(String H) {
-        double value = piMass; //default
-        if (H.equals("proton")) {
-            value = pMass;
+    public double massHypothesis(int H) {
+        double value = PhysicsConstants.massPionCharged(); //default
+        if (H == 2212) {
+            value = PhysicsConstants.massProton();
         }
-        if (H.equals("electron")) {
-            value = eMass;
+        else if (H == 11) {
+            value = PhysicsConstants.massElectron();
         }
-        if (H.equals("pion")) {
-            value = piMass;
+        else if (H == 321) {
+            value = PhysicsConstants.massKaonCharged();
         }
-        if (H.equals("kaon")) {
-            value = KMass;
-        }
-        if (H.equals("muon")) {
-            value = muMass;
+        else if (H == 13) {
+            value = MUMASS;
         }
         return value;
     }
-
-    static double piMass = 0.13957018;
-    static double KMass = 0.493677;
-    static double muMass = 0.105658369;
-    static double eMass = 0.000510998;
-    static double pMass = 0.938272029;
 
 }
