@@ -23,6 +23,7 @@ import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.utils.JsonUtils;
 import org.json.JSONObject;
 import org.jlab.logging.DefaultLogger;
+import org.jlab.utils.ClaraYaml;
 
 
 /**
@@ -43,17 +44,6 @@ public class EngineProcessor {
         this.engineDummy = new DummyEngine();
     }
 
-    /**
-     * add a reconstruction engine to the chain
-     * @param name name of the engine in the chain
-     * @param engine engine class
-     */
-    public void addEngine(String name, ReconstructionEngine engine){
-        engine.init();
-        this.processorEngines.put(name, engine);
-    }
-
-    
     private void updateDictionary(HipoDataSource source, HipoDataSync sync){
         SchemaFactory fsync = sync.getWriter().getSchemaFactory();
         SchemaFactory fsrc  = source.getReader().getSchemaFactory();
@@ -153,6 +143,16 @@ public class EngineProcessor {
     }
 
     /**
+     * add a reconstruction engine to the chain
+     * @param name name of the engine in the chain
+     * @param engine engine class
+     */
+    public void addEngine(String name, ReconstructionEngine engine){
+        engine.init();
+        this.processorEngines.put(name, engine);
+    }
+
+    /**
      * Adding engine to the map the order of the services matters, since they will
      * be executed in order added.
      * @param name name for the service
@@ -165,12 +165,15 @@ public class EngineProcessor {
             c = Class.forName(clazz);
             if( ReconstructionEngine.class.isAssignableFrom(c)==true){
                 ReconstructionEngine engine = (ReconstructionEngine) c.newInstance();
-                if(!jsonConf.equals("null")) {
+                if(jsonConf != null && !jsonConf.equals("null")) {
                     EngineData input = new EngineData();
                     input.setData(EngineDataType.JSON.mimeType(), jsonConf);
                     engine.configure(input);
                 }
-                this.processorEngines.put(name, engine);
+                else {
+                    engine.init();
+                }
+                this.processorEngines.put(name == null ? engine.getName() : name, engine);
             } else {
                 LOGGER.log(Level.SEVERE,">>>> ERROR: class is not a reconstruction engine : " + clazz);
             }
@@ -191,49 +194,15 @@ public class EngineProcessor {
      * @param clazz class name including the package name
      */
     public void addEngine(String name, String clazz) {
-        Class c;
-        try {
-            c = Class.forName(clazz);
-            if( ReconstructionEngine.class.isAssignableFrom(c)==true){
-                ReconstructionEngine engine = (ReconstructionEngine) c.newInstance();
-                engine.init();
-                this.processorEngines.put(name, engine);
-            } else {
-                LOGGER.log(Level.SEVERE,">>>> ERROR: class is not a reconstruction engine : " + clazz);
-            }
-
-        } catch (ClassNotFoundException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
-        }
+        this.addEngine(name, clazz, null);
     }
 
     /**
      * Add reconstruction engine to the chain
      * @param clazz Engine class.
      */
-    public void addEngine( String clazz) {
-        Class c;
-        try {
-            c = Class.forName(clazz);
-            if( ReconstructionEngine.class.isAssignableFrom(c)==true){
-                ReconstructionEngine engine = (ReconstructionEngine) c.newInstance();
-                engine.init();
-                this.processorEngines.put(engine.getName(), engine);
-            } else {
-                LOGGER.log(Level.SEVERE, ">>>> ERROR: class is not a reconstruction engine : " + clazz);
-            }
-
-        } catch (ClassNotFoundException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
-        }
+    public void addEngine(String clazz) {
+        this.addEngine(null, clazz, null);
     }
 
     /**
@@ -371,30 +340,14 @@ public class EngineProcessor {
             if(update.contains("false")==true) proc.updateDictionary = false;
             
             if(!yamlFileName.equals("0")) {
-                try {
-                    InputStream input = new FileInputStream(yamlFileName);
-                    Yaml yaml = new Yaml();
-                    Map<String, Object> yamlConf = (Map<String, Object>) yaml.load(input);
-                    JSONObject jsonObject=new JSONObject(yamlConf);
-                    for(Object obj: jsonObject.getJSONArray("services")) {
-                        if(obj instanceof JSONObject) {
-                            JSONObject service = (JSONObject) obj;
-                            String name = service.getString("name");
-                            String engineClass = service.getString("class");
-                            JSONObject configs = JsonUtils.filterClaraYaml(jsonObject,name);
-                            if(configs.length()>0) {
-                              proc.addEngine(name, engineClass, configs.toString());
-                            } else {
-                              proc.addEngine(name, engineClass);
-                            }
-                        }
+                ClaraYaml yaml = new ClaraYaml(yamlFileName);
+                for (JSONObject service : yaml.services()) {
+                    JSONObject cfg = yaml.filter(service.getString("name"));
+                    if (cfg.length() > 0) {
+                        proc.addEngine(service.getString("name"),service.getString("class"),cfg.toString());
+                    } else {
+                        proc.addEngine(service.getString("name"),service.getString("class"));
                     }
-                } catch (FileNotFoundException ex) {
-                    LOGGER.log(Level.SEVERE, null, ex);
-                } catch (IOException ex) {
-                    LOGGER.log(Level.SEVERE, null, ex);
-                } catch (ClassCastException | YAMLException ex) {
-                    LOGGER.log(Level.SEVERE, null, ex);
                 }
             }
             else if (config>0){
