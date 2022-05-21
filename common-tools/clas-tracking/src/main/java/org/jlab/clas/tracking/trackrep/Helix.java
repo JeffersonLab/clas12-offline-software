@@ -1,4 +1,5 @@
 package org.jlab.clas.tracking.trackrep;
+import org.jlab.clas.tracking.kalmanfilter.Units;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
@@ -91,7 +92,7 @@ public class Helix {
     }
 
     public final double getLightVelocity() {
-        return LIGHTVEL*units.unit;
+        return LIGHTVEL*units.value();
     }    
         
     public void reset(double d0, double phi0, double omega, double z0, double tanL, double B){
@@ -408,30 +409,6 @@ public class Helix {
         return new Vector3D(getPx(getB(),l),getPy(getB(),l),getPz(getB()));
     }
     
-    public enum Units {
-        MM (10.0),
-        CM  (1.0);
-
-        private final double unit;  
-        
-        Units(double unit) {
-            this.unit = unit;
-        }
-        
-        public double unit() { 
-            return unit; 
-        }
-        
-        public static Units getUnit(double value) {
-            for (Units unit : Units.values()) {
-                if (unit.unit == value) {
-                    return unit;
-                }
-            }
-            return Units.CM;
-        }
-    }
-
     @Override
     public String toString() {
         String s = String.format("    drho=%.4f phi0=%.4f radius=%.4f z0=%.4f tanL=%.4f B=%.4f\n", this._d0, this._phi0, this._R, this._z0, this._tanL, this._B);

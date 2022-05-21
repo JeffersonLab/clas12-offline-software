@@ -19,8 +19,8 @@ import org.jlab.rec.cvt.svt.SVTParameters;
 
 public class TrackSeeder {
     
-    private final SVTGeometry sgeo = Constants.SVTGEOMETRY;
-    private final BMTGeometry bgeo = Constants.BMTGEOMETRY;
+    private final SVTGeometry sgeo = Constants.getInstance().SVTGEOMETRY;
+    private final BMTGeometry bgeo = Constants.getInstance().BMTGEOMETRY;
     private  double bfield;
     
     private final int NBINS = 36;
@@ -315,7 +315,7 @@ public class TrackSeeder {
             boolean fitStatus = false;
             if(mseed.getCrosses().size()>=3)
                 fitStatus = mseed.fit(Constants.SEEDFITITERATIONS, xbeam, ybeam, bfield);
-            if (fitStatus) {
+            if (fitStatus) { 
                 List<Cross> sameSectorCrosses = this.findCrossesInSameSectorAsSVTTrk(mseed, bmtC_crosses);
                 BMTmatches.clear();
                 if (sameSectorCrosses.size() >= 0) {
@@ -382,7 +382,6 @@ public class TrackSeeder {
     public List<Seed> findCandUsingMicroMegas(Seed trkCand, List<Cross> bmt_crosses) {
         List<ArrayList<Cross>> BMTCcrosses = new ArrayList<>();
         
-        ArrayList<Cross> matches = new ArrayList<>();
         Map<String, Seed> AllSeeds = new HashMap<>();
         int[] S = new int[3];
        
@@ -399,8 +398,6 @@ public class TrackSeeder {
                 BMTCcrosses.get(bmt_cross.getRegion() - 1).add(bmt_cross); 
         }
 
-        AllSeeds.clear();
-
         for (int r = 0; r < 3; r++) {
             S[r] = BMTCcrosses.get(r).size();
             if (S[r] == 0) {
@@ -413,7 +410,7 @@ public class TrackSeeder {
             for (int i2 = 0; i2 < S[1]; i2++) {
                 for (int i3 = 0; i3 < S[2]; i3++) {
 
-                    matches.clear();
+                    ArrayList<Cross> matches = new ArrayList<>();
 
                     if (BMTCcrosses.get(0).size() > 0 && i1 < BMTCcrosses.get(0).size()) {
                         if (this.passCcross(trkCand, BMTCcrosses.get(0).get(i1))) {
@@ -440,13 +437,11 @@ public class TrackSeeder {
                         BMTTrkSeed.setHelix(trkCand.getHelix());
                         BMTTrkSeed.setCrosses(matches);
                         AllSeeds.put(st,BMTTrkSeed);
-                        
+         
                         //if (AllSeeds.size() > 200) {
                         //    AllSeeds.clear();
                         //    return AllSeeds;
                         //}
-                        BMTTrkSeed = null;
-                                
                     }
                 }
             }

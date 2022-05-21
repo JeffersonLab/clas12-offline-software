@@ -89,7 +89,7 @@ public class Cell implements Comparable<Cell> {
             point.set(cross.getPoint().x(), cross.getPoint().y());
         }
         if (vw.equalsIgnoreCase("ZR")) {
-            point.set(cross.getPoint().z() - Constants.getZoffset(), cross.getRadius());
+            point.set(cross.getPoint().z() - Constants.getInstance().getZoffset(), cross.getRadius());
         }
         return point;
     }
