@@ -1,6 +1,5 @@
 package org.jlab.io.clara;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -26,8 +25,8 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriterSorte
     private static final String CONF_COMPRESSION = "compression";
     private static final String CONF_SCHEMA_DIR = "schema_dir";
     private static final String CONF_SCHEMA_FILTER = "schema_filter";
-    private List<Bank>       schemaBankList = new ArrayList<Bank>();
-    private final StringSubstitutor stringSub = new StringSubstitutor(System.getenv());
+    private final List<Bank> schemaBankList = new ArrayList<Bank>();
+    private final StringSubstitutor envSubstitutor = new StringSubstitutor(System.getenv());
 
 
     @Override
@@ -53,30 +52,21 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriterSorte
         String schemaDir = FileUtils.getEnvironmentPath("CLAS12DIR", "etc/bankdefs/hipo4");
         if (opts.has(CONF_SCHEMA_DIR)) {
             schemaDir = opts.getString(CONF_SCHEMA_DIR);
-            schemaDir = stringSub.replace(schemaDir);
+            schemaDir = envSubstitutor.replace(schemaDir);
             System.out.printf("%s service: schema directory = %s%n", getName(), schemaDir);
         }
         writer.getSchemaFactory().initFromDirectory(schemaDir);
 
         if (opts.has(CONF_SCHEMA_DIR)) {
-            //try {
-                // previous releases of COATJAVA may not have the setter
-                //Method filterSetter = getSchemaFilterSetter();
-                boolean useFilter = opts.optBoolean(CONF_SCHEMA_FILTER, true);
-                System.out.printf("%s service: schema filter = %b%n", getName(), useFilter);
-                //filterSetter.invoke(writer, useFilter);
-                
-                if(useFilter==true){
-                    int schemaSize = writer.getSchemaFactory().getSchemaList().size();
-                    for(int i = 0; i < schemaSize; i++){
-                        Bank dataBank = new Bank(writer.getSchemaFactory().getSchemaList().get(i));
-                        schemaBankList.add(dataBank);
-                    }
+            boolean useFilter = opts.optBoolean(CONF_SCHEMA_FILTER, true);
+            System.out.printf("%s service: schema filter = %b%n", getName(), useFilter);
+            if(useFilter==true){
+                int schemaSize = writer.getSchemaFactory().getSchemaList().size();
+                for(int i = 0; i < schemaSize; i++){
+                    Bank dataBank = new Bank(writer.getSchemaFactory().getSchemaList().get(i));
+                    schemaBankList.add(dataBank);
                 }
-           /* } catch (NoSuchMethodException | IllegalAccessException
-                        | IllegalArgumentException | InvocationTargetException e) {
-                System.out.printf("%s service: schema filter not supported%n", getName());
-            }*/
+            }
         }
     }
 
@@ -99,7 +89,7 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriterSorte
             if(eventTag == 1){
                 writer.addEvent( hipoEvent,eventTag);
             } else {
-                if(schemaBankList.size()>0){
+                if(!schemaBankList.isEmpty()){
                     Event reduced = hipoEvent.reduceEvent(schemaBankList);
                     writer.addEvent( reduced,eventTag);
                 } else {
