@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.text.StringSubstitutor;
 
 import org.jlab.clara.engine.EngineDataType;
 import org.jlab.clara.std.services.AbstractEventWriterService;
@@ -26,6 +27,8 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriterSorte
     private static final String CONF_SCHEMA_DIR = "schema_dir";
     private static final String CONF_SCHEMA_FILTER = "schema_filter";
     private List<Bank>       schemaBankList = new ArrayList<Bank>();
+    private final StringSubstitutor stringSub = new StringSubstitutor(System.getenv());
+
 
     @Override
     protected HipoWriterSorted createWriter(Path file, JSONObject opts) throws EventWriterException {
@@ -50,6 +53,7 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriterSorte
         String schemaDir = FileUtils.getEnvironmentPath("CLAS12DIR", "etc/bankdefs/hipo4");
         if (opts.has(CONF_SCHEMA_DIR)) {
             schemaDir = opts.getString(CONF_SCHEMA_DIR);
+            schemaDir = stringSub.replace(schemaDir);
             System.out.printf("%s service: schema directory = %s%n", getName(), schemaDir);
         }
         writer.getSchemaFactory().initFromDirectory(schemaDir);
