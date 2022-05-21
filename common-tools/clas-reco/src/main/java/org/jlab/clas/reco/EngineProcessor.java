@@ -1,7 +1,5 @@
 package org.jlab.clas.reco;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,17 +12,12 @@ import org.jlab.utils.benchmark.ProgressPrintout;
 import org.jlab.utils.options.OptionParser;
 import org.jlab.clara.engine.EngineData;
 import org.jlab.clara.engine.EngineDataType;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.error.YAMLException;
-import java.io.InputStream;
-import java.io.FileInputStream;
 import java.util.Arrays;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.utils.JsonUtils;
 import org.json.JSONObject;
 import org.jlab.logging.DefaultLogger;
 import org.jlab.utils.ClaraYaml;
-
 
 /**
  *
@@ -35,10 +28,9 @@ public class EngineProcessor {
     private final Map<String,ReconstructionEngine>  processorEngines = 
             new LinkedHashMap<String,ReconstructionEngine>();
     ReconstructionEngine  engineDummy = null;
-    private static Logger LOGGER = Logger.getLogger(EngineProcessor.class.getPackage().getName());
+    private static final Logger LOGGER = Logger.getLogger(EngineProcessor.class.getPackage().getName());
     private boolean updateDictionary = true;
-    
-    private List<String>  schemaExempt = Arrays.asList("RUN::config","DC::tdc");
+    private final List<String> schemaExempt = Arrays.asList("RUN::config","DC::tdc");
     
     public EngineProcessor(){
         this.engineDummy = new DummyEngine();
@@ -175,14 +167,10 @@ public class EngineProcessor {
                 }
                 this.processorEngines.put(name == null ? engine.getName() : name, engine);
             } else {
-                LOGGER.log(Level.SEVERE,">>>> ERROR: class is not a reconstruction engine : " + clazz);
+                LOGGER.log(Level.SEVERE, ">>>> ERROR: class is not a reconstruction engine : {0}", clazz);
             }
 
-        } catch (ClassNotFoundException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
         }
     }
@@ -223,7 +211,7 @@ public class EngineProcessor {
      * @param event
      */
     public void processEvent(DataEvent event){
-        for(Map.Entry<String,ReconstructionEngine>  engine : this.processorEngines.entrySet()){
+        for(Map.Entry<String,ReconstructionEngine> engine : this.processorEngines.entrySet()){
             try {
                 if (!engine.getValue().wroteConfig) {
                     engine.getValue().wroteConfig = true;
@@ -235,7 +223,7 @@ public class EngineProcessor {
                 }
                 engine.getValue().processDataEvent(event);
             } catch (Exception e){
-                LOGGER.log(Level.SEVERE,"[Exception] >>>>> engine : " + engine.getKey() + "\n\n");
+                LOGGER.log(Level.SEVERE, "[Exception] >>>>> engine : {0}\n\n", engine.getKey());
                 e.printStackTrace();
             }
         }
@@ -247,9 +235,10 @@ public class EngineProcessor {
 
     /**
      * process entire file through engine chain.
-     * @param file file name to process.
-     * @param output
-     * @param nevents
+     * @param file input file name to process
+     * @param output output filename
+     * @param nskip number of events to skip
+     * @param nevents number of events to process
      */
     public void processFile(String file, String output, int nskip, int nevents){
         if(file.endsWith(".hipo")==true||file.endsWith(".h5")==true
@@ -318,7 +307,6 @@ public class EngineProcessor {
             DefaultLogger.initialize();
         else
             DefaultLogger.debug();
-
 
         if(parser.hasOption("-i")==true&&parser.hasOption("-o")==true){
 
