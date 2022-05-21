@@ -62,7 +62,6 @@ public class KalmanFitter {
       double theta = Math.toRadians(params.get_finaltrackinfomap().get(TID).get_theta());
       double phi = Math.toRadians(params.get_finaltrackinfomap().get(TID).get_phi());
 
-
       final double x0 = 0.0 * SystemOfUnits.mm;
       final double y0 = 0.0 * SystemOfUnits.mm;
       final double z0 = params.get_finaltrackinfomap().get(TID).get_vz() * SystemOfUnits.mm;
@@ -88,46 +87,49 @@ public class KalmanFitter {
       KFitter kFitter =
           new KFitter(initialStateEstimate, initialErrorCovariance, stepper, propagator);
 
-      for (int k = 0; k < 1; k++) {
+      try {
+        for (int k = 0; k < 1; k++) {
 
+          for (Indicator indicator : forwardIndicators) {
+            kFitter.predict(indicator);
+            if (indicator.haveAHit()) {
+              kFitter.correct(indicator);
+            }
+          }
+          for (Indicator indicator : backwardIndicators) {
+            kFitter.predict(indicator);
+            if (indicator.haveAHit()) {
+              kFitter.correct(indicator);
+            }
+          }
+        }
+
+        KFitter kfitter =
+            new KFitter(
+                initialStateEstimate,
+                initialErrorCovariance,
+                new Stepper(kFitter.getStateEstimationVector().toArray()),
+                new Propagator(RK4));
         for (Indicator indicator : forwardIndicators) {
-          kFitter.predict(indicator);
-          if (indicator.haveAHit()) {
-            kFitter.correct(indicator);
-          }
+          kfitter.predict(indicator);
         }
-        for (Indicator indicator : backwardIndicators) {
-          kFitter.predict(indicator);
-          if (indicator.haveAHit()) {
-            kFitter.correct(indicator);
-          }
+        ADCTot = 0;
+        for (Hit hit : hitArrayList) {
+          ADCTot += hit.ADC();
         }
-      }
+        double s = kfitter.stepper.sTot;
+        double dEdx = ADCTot / s;
+        double p_drift = kfitter.stepper.p();
 
-      KFitter kfitter =
-          new KFitter(
-              initialStateEstimate,
-              initialErrorCovariance,
-              new Stepper(kFitter.getStateEstimationVector().toArray()),
-              new Propagator(RK4));
-      for (Indicator indicator : forwardIndicators) {
-        kfitter.predict(indicator);
-      }
-      ADCTot = 0;
-      for (Hit hit : hitArrayList) {
-        ADCTot += hit.ADC();
-      }
-      double s = kfitter.stepper.sTot;
-      double dEdx = ADCTot / s;
-      double p_drift = kfitter.stepper.p();
+        double vz = stepper.y[2];
+        double px = stepper.y[3];
+        double py = stepper.y[4];
+        double pz = stepper.y[5];
 
-      double vz = stepper.y[2];
-      double px = stepper.y[3];
-      double py = stepper.y[4];
-      double pz = stepper.y[5];
-
-      KalmanFitterInfo output = new KalmanFitterInfo(px, py, pz, vz, dEdx, p_drift);
-      KFTrackMap.put(TID, output);
+        KalmanFitterInfo output = new KalmanFitterInfo(px, py, pz, vz, dEdx, p_drift);
+        KFTrackMap.put(TID, output);
+      } catch (Exception ignored) {
+      }
     }
   }
 
