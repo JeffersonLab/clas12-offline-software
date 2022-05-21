@@ -145,8 +145,11 @@ public class RTPCEngine extends ReconstructionEngine {
       } catch (Exception ignored) {
       }
 
+      DataBank KFBank = writer.fillRTPCKFBank(event, KFTrackMap);
+
       event.appendBank(recoBank);
       event.appendBank(trackBank);
+      event.appendBank(KFBank);
 
     } else {
       return true;
