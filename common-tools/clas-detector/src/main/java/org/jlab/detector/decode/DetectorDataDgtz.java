@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.helicity.HelicityBit;
+import org.jlab.detector.helicity.HelicityState;
 import org.jlab.utils.data.DataUtils;
 
 /**
@@ -361,8 +363,208 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
         }        
     }
     
-       /**
-    * a class to hold TDC data
+    /**
+    * a class to hold Helicity decoder data data
+    */
+    
+    public static class HelicityDecoderData implements Comparable<HelicityDecoderData>{
+        
+        private HelicityState helicityState   = null;              // helicity, pair and pattern
+        private HelicityBit   tSettle         = HelicityBit.UDF;   // tSettle state
+        private HelicityBit   helicityPattern = HelicityBit.UDF;   // helicity at start of patterm
+        private byte polarity = 0;                                 // pattern polarity (XOR of 3,4) 
+        private byte patternPhaseCount = 0;                        // state position within pattern         
+        private long timestamp = 0;                                // event timestamp in 4 ns units
+        private int  helicitySeed = 0;                             // helicity random seed
+        private int  nTStableRisingEdge = 0;                       // count of tStable rising edges
+        private int  nTStableFallingEdge = 0;                      // count of tStable falling edges
+        private int  nPattern = 0;                                 // count of Pattern 
+        private int  nPair = 0;                                    // count of Pair 
+        private int  tStableStart = 0;                             // time since last tStable start 
+        private int  tStableEnd = 0;                               // time since last tStable end 
+        private int  tStableTime = 0;                              // duration of last tStable
+        private int  tSettleTime = 0;                              // duration of last tSettle 
+        private int  patternWindows = 0;                           // last 32 pattern windows 
+        private int  pairWindows = 0;                              // last 32 pair windows 
+        private int  helicityWindows = 0;                          // last 32 helicity windows
+        private int  helicityPatternWindows = 0;                   // last 32 helicity at start of pattern windows
+              
+        public HelicityDecoderData() {}
+
+        public HelicityDecoderData(byte helicity, byte pair, byte pattern) {
+            this.setHelicityState(new HelicityState(HelicityBit.create(helicity), 
+                                                    HelicityBit.create(pair), 
+                                                    HelicityBit.create(pattern)));
+        }
+
+        public HelicityState getHelicityState() {
+            return helicityState;
+        }
+
+        public void setHelicityState(HelicityState helicityState) {
+            this.helicityState = helicityState;
+        }
+
+        public long getTimestamp() {
+            return timestamp;
+        }
+
+        public void setTimestamp(long timestamp) {
+            this.timestamp = timestamp;
+        }
+
+        public int getHelicitySeed() {
+            return helicitySeed;
+        }
+
+        public void setHelicitySeed(int helicitySeed) {
+            this.helicitySeed = helicitySeed;
+        }
+
+        public int getNTStableRisingEdge() {
+            return nTStableRisingEdge;
+        }
+
+        public void setNTStableRisingEdge(int nTStableRisingEdge) {
+            this.nTStableRisingEdge = nTStableRisingEdge;
+        }
+
+        public int getNTStableFallingEdge() {
+            return nTStableFallingEdge;
+        }
+
+        public void setNTStableFallingEdge(int nTStableFallingEdge) {
+            this.nTStableFallingEdge = nTStableFallingEdge;
+        }
+
+        public int getNPattern() {
+            return nPattern;
+        }
+
+        public void setNPattern(int nPattern) {
+            this.nPattern = nPattern;
+        }
+
+        public int getNPair() {
+            return nPair;
+        }
+
+        public void setNPair(int nPair) {
+            this.nPair = nPair;
+        }
+
+        public int getTStableStart() {
+            return tStableStart;
+        }
+
+        public void setTStableStart(int tStableStart) {
+            this.tStableStart = tStableStart;
+        }
+
+        public int getTStableEnd() {
+            return tStableEnd;
+        }
+
+        public void setTStableEnd(int tStableEnd) {
+            this.tStableEnd = tStableEnd;
+        }
+
+        public int getTStableTime() {
+            return tStableTime;
+        }
+
+        public void setTStableTime(int tStableTime) {
+            this.tStableTime = tStableTime;
+        }
+
+        public int getTSettleTime() {
+            return tSettleTime;
+        }
+
+        public void setTSettleTime(int tSettleTime) {
+            this.tSettleTime = tSettleTime;
+        }
+
+        public HelicityBit getTSettle() {
+            return tSettle;
+        }
+
+        public void setTSettle(byte tSettle) {
+            this.tSettle = HelicityBit.create(tSettle);
+        }
+
+        public HelicityBit getHelicityPattern() {
+            return helicityPattern;
+        }
+
+        public void setHelicityPattern(byte helicityPattern) {
+            this.helicityPattern = HelicityBit.create(helicityPattern);
+        }
+
+        public byte getPolarity() {
+            return polarity;
+        }
+
+        public void setPolarity(byte polarity) {
+            this.polarity = polarity;
+        }
+
+        public byte getPatternPhaseCount() {
+            return patternPhaseCount;
+        }
+
+        public void setPatternPhaseCount(byte patternPhaseCount) {
+            this.patternPhaseCount = patternPhaseCount;
+        }
+
+        public int getPatternWindows() {
+            return patternWindows;
+        }
+
+        public void setPatternWindows(int patternWindows) {
+            this.patternWindows = patternWindows;
+        }
+
+        public int getPairWindows() {
+            return pairWindows;
+        }
+
+        public void setPairWindows(int pairWindows) {
+            this.pairWindows = pairWindows;
+        }
+
+        public int getHelicityWindows() {
+            return helicityWindows;
+        }
+
+        public void setHelicityWindows(int helicityWindows) {
+            this.helicityWindows = helicityWindows;
+        }
+
+        public int getHelicityPatternWindows() {
+            return helicityPatternWindows;
+        }
+
+        public void setHelicityPatternWindows(int helicityPatternWindows) {
+            this.helicityPatternWindows = helicityPatternWindows;
+        }
+        
+        
+        @Override
+        public String toString(){
+            String s = "HelicityDecoder : " + getHelicityState().toString();
+            return s;
+        }
+
+        public int compareTo(HelicityDecoderData o) {
+            if(this.getTimestamp()<o.getTimestamp()) return -1;
+            return 1;
+        }     
+    }
+    
+    
+    /**
+    * a class to hold VTP data
     */
     
     public static class VTPData implements Comparable<VTPData>{
