@@ -77,76 +77,158 @@ public class RungeKuttaDoca {
     }
 
     /** Transport using Runge Kutta 4, updating the covariance matrix. */
-    void RK4transport(int sector, double h, Swim swim, StateVecsDoca.CovMat covMat,
+    void RK4transport(int sector, double h, Swim swim, Matrix C,
                       StateVecsDoca.StateVec vec, StateVecsDoca.CovMat fCov) {
         // Set initial state and Jacobian.
         double qv = vec.Q*v;
+        double hh = 0.5*h;
         RK4Vec s0 = new RK4Vec(vec);
-        RK4Vec sNull = new RK4Vec();
 
-        // Perform steps.
-        RK4Vec s1 = RK4step(sector, vec.z, 0,     swim, s0, sNull, qv);
-        RK4Vec s2 = RK4step(sector, vec.z, 0.5*h, swim, s0, s1,    qv);
-        RK4Vec s3 = RK4step(sector, vec.z, 0.5*h, swim, s0, s2,    qv);
-        RK4Vec s4 = RK4step(sector, vec.z, h,     swim, s0, s3,    qv);
-
-        // Compute and set final state and covariance matrix.
-        RK4Vec sF = computeFinalState(h, s0, s1, s2, s3, s4);
-
-        vec.x   = sF.x;
-        vec.y   = sF.y;
-        vec.tx  = sF.tx;
-        vec.ty  = sF.ty;
-        vec.z  += h;
-        vec.B   = Math.sqrt(_b[0]*_b[0]+_b[1]*_b[1]+_b[2]*_b[2]);
-        vec.deltaPath += Math.sqrt((s0.x-vec.x)*(s0.x-vec.x) + (s0.y-vec.y)*(s0.y-vec.y) + h*h);
-        fCov.covMat.set(computeCovMat(covMat.covMat, sF));
-    }
-
-    /** Perform one RK4 step, updating the covariance matrix. */
-    private RK4Vec RK4step(int sector, double z0, double h, Swim swim,
-                               RK4Vec sInit, RK4Vec sPrev, double qv) {
-        RK4Vec sNext = new RK4Vec();
-        swim.Bfield(sector, sInit.x + h*sPrev.x, sInit.y + h*sPrev.y, z0 + h, _b);
+        // === FIRST STEP ==========================================================================
+        RK4Vec s1 = new RK4Vec();
+        swim.Bfield(sector, s0.x, s0.y, vec.z, _b);
 
         // State.
-        sNext.x = sInit.tx + h*sPrev.tx;
-        sNext.y = sInit.ty + h*sPrev.ty;
+        s1.x = s0.tx;
+        s1.y = s0.ty;
 
-        double Csq  = Csq(sNext.x, sNext.y);
-        double C    = C(Csq);
-        double Ax   = Ax(C, sNext.x, sNext.y);
-        double Ay   = Ay(C, sNext.x, sNext.y);
+        double Csq1  = Csq(s1.x, s1.y);
+        double C1    = C(Csq1);
+        double Ax1   = Ax(C1, s1.x, s1.y);
+        double Ay1   = Ay(C1, s1.x, s1.y);
 
-        sNext.tx = qv * Ax;
-        sNext.ty = qv * Ay;
+        s1.tx = qv * Ax1;
+        s1.ty = qv * Ay1;
 
         // Jacobian.
-        sNext.dxdtx0 = sInit.dtxdtx0 + h*sPrev.dtxdtx0;
-        sNext.dxdty0 = sInit.dtxdty0 + h*sPrev.dtxdty0;
-        sNext.dxdq0  = sInit.dtxdq0  + h*sPrev.dtxdq0;
-        sNext.dydtx0 = sInit.dtydtx0 + h*sPrev.dtydtx0;
-        sNext.dydty0 = sInit.dtydty0 + h*sPrev.dtydty0;
-        sNext.dydq0  = sInit.dtydq0  + h*sPrev.dtydq0;
+        s1.dxdtx0 = s0.dtxdtx0;
+        s1.dxdty0 = s0.dtxdty0;
+        s1.dxdq0  = s0.dtxdq0;
+        s1.dydtx0 = s0.dtydtx0;
+        s1.dydty0 = s0.dtydty0;
+        s1.dydq0  = s0.dtydq0;
 
-        double dAx_dtx = dAx_dtx(C, Csq, Ax, sNext.x, sNext.y);
-        double dAx_dty = dAx_dty(C, Csq, Ax, sNext.x, sNext.y);
-        double dAy_dtx = dAy_dtx(C, Csq, Ay, sNext.x, sNext.y);
-        double dAy_dty = dAy_dty(C, Csq, Ay, sNext.x, sNext.y);
+        double dAx1_dtx = dAx_dtx(C1, Csq1, Ax1, s1.x, s1.y);
+        double dAx1_dty = dAx_dty(C1, Csq1, Ax1, s1.x, s1.y);
+        double dAy1_dtx = dAy_dtx(C1, Csq1, Ay1, s1.x, s1.y);
+        double dAy1_dty = dAy_dty(C1, Csq1, Ay1, s1.x, s1.y);
 
-        sNext.dtxdtx0 = this.dtx_dtx0(qv,     dAx_dtx, dAx_dty, sNext.dxdtx0, sNext.dydtx0);
-        sNext.dtxdty0 = this.dtx_dty0(qv,              dAx_dty, sNext.dxdty0, sNext.dydty0);
-        sNext.dtxdq0  = this.dtx_dq0( qv, Ax, dAx_dtx, dAx_dty, sNext.dxdq0,  sNext.dydq0);
-        sNext.dtydtx0 = this.dty_dtx0(qv,     dAy_dtx, dAy_dty, sNext.dxdtx0, sNext.dydtx0);
-        sNext.dtydty0 = this.dty_dty0(qv,              dAy_dty, sNext.dxdty0, sNext.dydty0);
-        sNext.dtydq0  = this.dty_dq0( qv, Ay, dAy_dtx, dAy_dty, sNext.dxdq0,  sNext.dydq0);
+        s1.dtxdtx0 = this.dtx_dtx0(qv,      dAx1_dtx, dAx1_dty, s1.dxdtx0, s1.dydtx0);
+        s1.dtxdty0 = this.dtx_dty0(qv,                dAx1_dty, s1.dxdty0, s1.dydty0);
+        s1.dtxdq0  = this.dtx_dq0( qv, Ax1, dAx1_dtx, dAx1_dty, s1.dxdq0,  s1.dydq0);
+        s1.dtydtx0 = this.dty_dtx0(qv,      dAy1_dtx, dAy1_dty, s1.dxdtx0, s1.dydtx0);
+        s1.dtydty0 = this.dty_dty0(qv,                dAy1_dty, s1.dxdty0, s1.dydty0);
+        s1.dtydq0  = this.dty_dq0( qv, Ay1, dAy1_dtx, dAy1_dty, s1.dxdq0,  s1.dydq0);
 
-        return sNext;
-    }
+        // === SECOND STEP =========================================================================
+        RK4Vec s2 = new RK4Vec();
+        swim.Bfield(sector, s0.x + hh*s1.x, s0.y + hh*s1.y, vec.z + hh, _b);
 
-    /** Compute the final state for each entry in the internal state matrix. */
-    private RK4Vec computeFinalState(double h, RK4Vec s0, RK4Vec s1, RK4Vec s2, RK4Vec s3,
-            RK4Vec s4) {
+        // State.
+        s2.x = s0.tx + hh*s1.tx;
+        s2.y = s0.ty + hh*s1.ty;
+
+        double Csq2  = Csq(s2.x, s2.y);
+        double C2    = C(Csq2);
+        double Ax2   = Ax(C2, s2.x, s2.y);
+        double Ay2   = Ay(C2, s2.x, s2.y);
+
+        s2.tx = qv * Ax2;
+        s2.ty = qv * Ay2;
+
+        // Jacobian.
+        s2.dxdtx0 = s0.dtxdtx0 + hh*s1.dtxdtx0;
+        s2.dxdty0 = s0.dtxdty0 + hh*s1.dtxdty0;
+        s2.dxdq0  = s0.dtxdq0  + hh*s1.dtxdq0;
+        s2.dydtx0 = s0.dtydtx0 + hh*s1.dtydtx0;
+        s2.dydty0 = s0.dtydty0 + hh*s1.dtydty0;
+        s2.dydq0  = s0.dtydq0  + hh*s1.dtydq0;
+
+        double dAx2_dtx = dAx_dtx(C2, Csq2, Ax2, s2.x, s2.y);
+        double dAx2_dty = dAx_dty(C2, Csq2, Ax2, s2.x, s2.y);
+        double dAy2_dtx = dAy_dtx(C2, Csq2, Ay2, s2.x, s2.y);
+        double dAy2_dty = dAy_dty(C2, Csq2, Ay2, s2.x, s2.y);
+
+        s2.dtxdtx0 = this.dtx_dtx0(qv,      dAx2_dtx, dAx2_dty, s2.dxdtx0, s2.dydtx0);
+        s2.dtxdty0 = this.dtx_dty0(qv,                dAx2_dty, s2.dxdty0, s2.dydty0);
+        s2.dtxdq0  = this.dtx_dq0( qv, Ax2, dAx2_dtx, dAx2_dty, s2.dxdq0,  s2.dydq0);
+        s2.dtydtx0 = this.dty_dtx0(qv,      dAy2_dtx, dAy2_dty, s2.dxdtx0, s2.dydtx0);
+        s2.dtydty0 = this.dty_dty0(qv,                dAy2_dty, s2.dxdty0, s2.dydty0);
+        s2.dtydq0  = this.dty_dq0( qv, Ay2, dAy2_dtx, dAy2_dty, s2.dxdq0,  s2.dydq0);
+
+        // === THIRD STEP ==========================================================================
+        RK4Vec s3 = new RK4Vec();
+        swim.Bfield(sector, s0.x + hh*s2.x, s0.y + hh*s2.y, vec.z + hh, _b);
+
+        // State.
+        s3.x = s0.tx + hh*s2.tx;
+        s3.y = s0.ty + hh*s2.ty;
+
+        double Csq3  = Csq(s3.x, s3.y);
+        double C3    = C(Csq3);
+        double Ax3   = Ax(C3, s3.x, s3.y);
+        double Ay3   = Ay(C3, s3.x, s3.y);
+
+        s3.tx = qv * Ax3;
+        s3.ty = qv * Ay3;
+
+        // Jacobian.
+        s3.dxdtx0 = s0.dtxdtx0 + hh*s2.dtxdtx0;
+        s3.dxdty0 = s0.dtxdty0 + hh*s2.dtxdty0;
+        s3.dxdq0  = s0.dtxdq0  + hh*s2.dtxdq0;
+        s3.dydtx0 = s0.dtydtx0 + hh*s2.dtydtx0;
+        s3.dydty0 = s0.dtydty0 + hh*s2.dtydty0;
+        s3.dydq0  = s0.dtydq0  + hh*s2.dtydq0;
+
+        double dAx3_dtx = dAx_dtx(C3, Csq3, Ax3, s3.x, s3.y);
+        double dAx3_dty = dAx_dty(C3, Csq3, Ax3, s3.x, s3.y);
+        double dAy3_dtx = dAy_dtx(C3, Csq3, Ay3, s3.x, s3.y);
+        double dAy3_dty = dAy_dty(C3, Csq3, Ay3, s3.x, s3.y);
+
+        s3.dtxdtx0 = this.dtx_dtx0(qv,      dAx3_dtx, dAx3_dty, s3.dxdtx0, s3.dydtx0);
+        s3.dtxdty0 = this.dtx_dty0(qv,                dAx3_dty, s3.dxdty0, s3.dydty0);
+        s3.dtxdq0  = this.dtx_dq0( qv, Ax3, dAx3_dtx, dAx3_dty, s3.dxdq0,  s3.dydq0);
+        s3.dtydtx0 = this.dty_dtx0(qv,      dAy3_dtx, dAy3_dty, s3.dxdtx0, s3.dydtx0);
+        s3.dtydty0 = this.dty_dty0(qv,                dAy3_dty, s3.dxdty0, s3.dydty0);
+        s3.dtydq0  = this.dty_dq0( qv, Ay3, dAy3_dtx, dAy3_dty, s3.dxdq0,  s3.dydq0);
+
+        // === FOURTH STEP =========================================================================
+        RK4Vec s4 = new RK4Vec();
+        swim.Bfield(sector, s0.x + h*s3.x, s0.y + h*s3.y, vec.z + h, _b);
+
+        // State.
+        s4.x = s0.tx + h*s3.tx;
+        s4.y = s0.ty + h*s3.ty;
+
+        double Csq4  = Csq(s4.x, s4.y);
+        double C4    = C(Csq4);
+        double Ax4   = Ax(C4, s4.x, s4.y);
+        double Ay4   = Ay(C4, s4.x, s4.y);
+
+        s4.tx = qv * Ax4;
+        s4.ty = qv * Ay4;
+
+        // Jacobian.
+        s4.dxdtx0 = s0.dtxdtx0 + h*s3.dtxdtx0;
+        s4.dxdty0 = s0.dtxdty0 + h*s3.dtxdty0;
+        s4.dxdq0  = s0.dtxdq0  + h*s3.dtxdq0;
+        s4.dydtx0 = s0.dtydtx0 + h*s3.dtydtx0;
+        s4.dydty0 = s0.dtydty0 + h*s3.dtydty0;
+        s4.dydq0  = s0.dtydq0  + h*s3.dtydq0;
+
+        double dAx4_dtx = dAx_dtx(C4, Csq4, Ax4, s4.x, s4.y);
+        double dAx4_dty = dAx_dty(C4, Csq4, Ax4, s4.x, s4.y);
+        double dAy4_dtx = dAy_dtx(C4, Csq4, Ay4, s4.x, s4.y);
+        double dAy4_dty = dAy_dty(C4, Csq4, Ay4, s4.x, s4.y);
+
+        s4.dtxdtx0 = this.dtx_dtx0(qv,      dAx4_dtx, dAx4_dty, s4.dxdtx0, s4.dydtx0);
+        s4.dtxdty0 = this.dtx_dty0(qv,                dAx4_dty, s4.dxdty0, s4.dydty0);
+        s4.dtxdq0  = this.dtx_dq0( qv, Ax4, dAx4_dtx, dAx4_dty, s4.dxdq0,  s4.dydq0);
+        s4.dtydtx0 = this.dty_dtx0(qv,      dAy4_dtx, dAy4_dty, s4.dxdtx0, s4.dydtx0);
+        s4.dtydty0 = this.dty_dty0(qv,                dAy4_dty, s4.dxdty0, s4.dydty0);
+        s4.dtydq0  = this.dty_dq0( qv, Ay4, dAy4_dtx, dAy4_dty, s4.dxdq0,  s4.dydq0);
+
+        // === FINAL STATE =========================================================================
         RK4Vec sF = new RK4Vec();
 
         sF.x      = s0.x  + this.RK4(s1.x,      s2.x,      s3.x,      s4.x,      h);
@@ -169,103 +251,87 @@ public class RungeKuttaDoca {
         sF.dtydty0 = 1     + this.RK4(s1.dtydty0, s2.dtydty0, s3.dtydty0, s4.dtydty0, h);
         sF.dtydq0  =         this.RK4(s1.dtydq0,  s2.dtydq0,  s3.dtydq0,  s4.dtydq0,  h);
 
-        return sF;
-    }
+        vec.x   = sF.x;
+        vec.y   = sF.y;
+        vec.tx  = sF.tx;
+        vec.ty  = sF.ty;
+        vec.z  += h;
+        vec.B   = Math.sqrt(_b[0]*_b[0]+_b[1]*_b[1]+_b[2]*_b[2]);
+        vec.deltaPath += Math.sqrt((s0.x-vec.x)*(s0.x-vec.x) + (s0.y-vec.y)*(s0.y-vec.y) + h*h);
 
-    /** Compute the final covariance matrix. covMat = FCF^T. */
-    private double[][] computeCovMat(Matrix C, RK4Vec sF) {
-        double[][] cNext = new double[5][5];
-        cNext[0][0] = C.get(0,0)+C.get(2,0)*sF.dxdtx0+C.get(3,0)*sF.dxdty0+C.get(4,0)*sF.dxdq0
-                    + sF.dxdq0 *(C.get(0,4)+C.get(2,4)*sF.dxdtx0+C.get(3,4)*sF.dxdty0+C.get(4,4)*sF.dxdq0)
-                    + sF.dxdtx0*(C.get(0,2)+C.get(2,2)*sF.dxdtx0+C.get(3,2)*sF.dxdty0+C.get(4,2)*sF.dxdq0)
-                    + sF.dxdty0*(C.get(0,3)+C.get(2,3)*sF.dxdtx0+C.get(3,3)*sF.dxdty0+C.get(4,3)*sF.dxdq0);
+        // === COVARIANCE MATRIX ===================================================================
+        double[][] cF = new double[5][5]; // cF = FCF^T
+        cF[0][0] = C.get(0,0)+C.get(2,0)*sF.dxdtx0+C.get(3,0)*sF.dxdty0+C.get(4,0)*sF.dxdq0
+                + sF.dxdq0  *(C.get(0,4)+C.get(2,4)*sF.dxdtx0+C.get(3,4)*sF.dxdty0+C.get(4,4)*sF.dxdq0)
+                + sF.dxdtx0 *(C.get(0,2)+C.get(2,2)*sF.dxdtx0+C.get(3,2)*sF.dxdty0+C.get(4,2)*sF.dxdq0)
+                + sF.dxdty0 *(C.get(0,3)+C.get(2,3)*sF.dxdtx0+C.get(3,3)*sF.dxdty0+C.get(4,3)*sF.dxdq0);
+        cF[0][1] = C.get(0,1)+C.get(2,1)*sF.dxdtx0+C.get(3,1)*sF.dxdty0+C.get(4,1)*sF.dxdq0
+                + sF.dydq0  *(C.get(0,4)+C.get(2,4)*sF.dxdtx0+C.get(3,4)*sF.dxdty0+C.get(4,4)*sF.dxdq0)
+                + sF.dydtx0 *(C.get(0,2)+C.get(2,2)*sF.dxdtx0+C.get(3,2)*sF.dxdty0+C.get(4,2)*sF.dxdq0)
+                + sF.dydty0 *(C.get(0,3)+C.get(2,3)*sF.dxdtx0+C.get(3,3)*sF.dxdty0+C.get(4,3)*sF.dxdq0);
+        cF[0][2] =sF.dtxdq0 *(C.get(0,4)+C.get(2,4)*sF.dxdtx0+C.get(3,4)*sF.dxdty0+C.get(4,4)*sF.dxdq0)
+                + sF.dtxdtx0*(C.get(0,2)+C.get(2,2)*sF.dxdtx0+C.get(3,2)*sF.dxdty0+C.get(4,2)*sF.dxdq0)
+                + sF.dtxdty0*(C.get(0,3)+C.get(2,3)*sF.dxdtx0+C.get(3,3)*sF.dxdty0+C.get(4,3)*sF.dxdq0);
+        cF[0][3] =sF.dtydq0 *(C.get(0,4)+C.get(2,4)*sF.dxdtx0+C.get(3,4)*sF.dxdty0+C.get(4,4)*sF.dxdq0)
+                + sF.dtydtx0*(C.get(0,2)+C.get(2,2)*sF.dxdtx0+C.get(3,2)*sF.dxdty0+C.get(4,2)*sF.dxdq0)
+                + sF.dtydty0*(C.get(0,3)+C.get(2,3)*sF.dxdtx0+C.get(3,3)*sF.dxdty0+C.get(4,3)*sF.dxdq0);
+        cF[0][4] = C.get(0,4)+C.get(2,4)*sF.dxdtx0+C.get(3,4)*sF.dxdty0+C.get(4,4)*sF.dxdq0;
 
-        cNext[0][1] = C.get(0,1)+C.get(2,1)*sF.dxdtx0+C.get(3,1)*sF.dxdty0+C.get(4,1)*sF.dxdq0
-                    + sF.dydq0 *(C.get(0,4)+C.get(2,4)*sF.dxdtx0+C.get(3,4)*sF.dxdty0+C.get(4,4)*sF.dxdq0)
-                    + sF.dydtx0*(C.get(0,2)+C.get(2,2)*sF.dxdtx0+C.get(3,2)*sF.dxdty0+C.get(4,2)*sF.dxdq0)
-                    + sF.dydty0*(C.get(0,3)+C.get(2,3)*sF.dxdtx0+C.get(3,3)*sF.dxdty0+C.get(4,3)*sF.dxdq0);
+        cF[1][0] = C.get(1,0)+C.get(2,0)*sF.dydtx0+C.get(3,0)*sF.dydty0+C.get(4,0)*sF.dydq0
+                + sF.dxdq0  *(C.get(1,4)+C.get(2,4)*sF.dydtx0+C.get(3,4)*sF.dydty0+C.get(4,4)*sF.dydq0)
+                + sF.dxdtx0 *(C.get(1,2)+C.get(2,2)*sF.dydtx0+C.get(3,2)*sF.dydty0+C.get(4,2)*sF.dydq0)
+                + sF.dxdty0 *(C.get(1,3)+C.get(2,3)*sF.dydtx0+C.get(3,3)*sF.dydty0+C.get(4,3)*sF.dydq0);
+        cF[1][1] = C.get(1,1)+C.get(2,1)*sF.dydtx0+C.get(3,1)*sF.dydty0+C.get(4,1)*sF.dydq0
+                + sF.dydq0  *(C.get(1,4)+C.get(2,4)*sF.dydtx0+C.get(3,4)*sF.dydty0+C.get(4,4)*sF.dydq0)
+                + sF.dydtx0 *(C.get(1,2)+C.get(2,2)*sF.dydtx0+C.get(3,2)*sF.dydty0+C.get(4,2)*sF.dydq0)
+                + sF.dydty0 *(C.get(1,3)+C.get(2,3)*sF.dydtx0+C.get(3,3)*sF.dydty0+C.get(4,3)*sF.dydq0);
+        cF[1][2] =sF.dtxdq0 *(C.get(1,4)+C.get(2,4)*sF.dydtx0+C.get(3,4)*sF.dydty0+C.get(4,4)*sF.dydq0)
+                + sF.dtxdtx0*(C.get(1,2)+C.get(2,2)*sF.dydtx0+C.get(3,2)*sF.dydty0+C.get(4,2)*sF.dydq0)
+                + sF.dtxdty0*(C.get(1,3)+C.get(2,3)*sF.dydtx0+C.get(3,3)*sF.dydty0+C.get(4,3)*sF.dydq0);
+        cF[1][3] =sF.dtydq0 *(C.get(1,4)+C.get(2,4)*sF.dydtx0+C.get(3,4)*sF.dydty0+C.get(4,4)*sF.dydq0)
+                + sF.dtydtx0*(C.get(1,2)+C.get(2,2)*sF.dydtx0+C.get(3,2)*sF.dydty0+C.get(4,2)*sF.dydq0)
+                + sF.dtydty0*(C.get(1,3)+C.get(2,3)*sF.dydtx0+C.get(3,3)*sF.dydty0+C.get(4,3)*sF.dydq0);
+        cF[1][4] = C.get(1,4)+C.get(2,4)*sF.dydtx0+C.get(3,4)*sF.dydty0+C.get(4,4)*sF.dydq0;
 
-        cNext[0][2] = sF.dtxdq0 *(C.get(0,4)+C.get(2,4)*sF.dxdtx0+C.get(3,4)*sF.dxdty0+C.get(4,4)*sF.dxdq0)
-                    + sF.dtxdtx0*(C.get(0,2)+C.get(2,2)*sF.dxdtx0+C.get(3,2)*sF.dxdty0+C.get(4,2)*sF.dxdq0)
-                    + sF.dtxdty0*(C.get(0,3)+C.get(2,3)*sF.dxdtx0+C.get(3,3)*sF.dxdty0+C.get(4,3)*sF.dxdq0);
+        cF[2][0] = C.get(2,0)*sF.dtxdtx0+C.get(3,0)*sF.dtxdty0+C.get(4,0)*sF.dtxdq0
+                + sF.dxdq0  *(C.get(2,4)*sF.dtxdtx0+C.get(3,4)*sF.dtxdty0+C.get(4,4)*sF.dtxdq0)
+                + sF.dxdtx0 *(C.get(2,2)*sF.dtxdtx0+C.get(3,2)*sF.dtxdty0+C.get(4,2)*sF.dtxdq0)
+                + sF.dxdty0 *(C.get(2,3)*sF.dtxdtx0+C.get(3,3)*sF.dtxdty0+C.get(4,3)*sF.dtxdq0);
+        cF[2][1] = C.get(2,1)*sF.dtxdtx0+C.get(3,1)*sF.dtxdty0+C.get(4,1)*sF.dtxdq0
+                + sF.dydq0  *(C.get(2,4)*sF.dtxdtx0+C.get(3,4)*sF.dtxdty0+C.get(4,4)*sF.dtxdq0)
+                + sF.dydtx0 *(C.get(2,2)*sF.dtxdtx0+C.get(3,2)*sF.dtxdty0+C.get(4,2)*sF.dtxdq0)
+                + sF.dydty0 *(C.get(2,3)*sF.dtxdtx0+C.get(3,3)*sF.dtxdty0+C.get(4,3)*sF.dtxdq0);
+        cF[2][2] =sF.dtxdq0 *(C.get(2,4)*sF.dtxdtx0+C.get(3,4)*sF.dtxdty0+C.get(4,4)*sF.dtxdq0)
+                + sF.dtxdtx0*(C.get(2,2)*sF.dtxdtx0+C.get(3,2)*sF.dtxdty0+C.get(4,2)*sF.dtxdq0)
+                + sF.dtxdty0*(C.get(2,3)*sF.dtxdtx0+C.get(3,3)*sF.dtxdty0+C.get(4,3)*sF.dtxdq0);
+        cF[2][3] =sF.dtydq0 *(C.get(2,4)*sF.dtxdtx0+C.get(3,4)*sF.dtxdty0+C.get(4,4)*sF.dtxdq0)
+                + sF.dtydtx0*(C.get(2,2)*sF.dtxdtx0+C.get(3,2)*sF.dtxdty0+C.get(4,2)*sF.dtxdq0)
+                + sF.dtydty0*(C.get(2,3)*sF.dtxdtx0+C.get(3,3)*sF.dtxdty0+C.get(4,3)*sF.dtxdq0);
+        cF[2][4] = C.get(2,4)*sF.dtxdtx0+C.get(3,4)*sF.dtxdty0+C.get(4,4)*sF.dtxdq0;
 
-        cNext[0][3] = sF.dtydq0 *(C.get(0,4)+C.get(2,4)*sF.dxdtx0+C.get(3,4)*sF.dxdty0+C.get(4,4)*sF.dxdq0)
-                    + sF.dtydtx0*(C.get(0,2)+C.get(2,2)*sF.dxdtx0+C.get(3,2)*sF.dxdty0+C.get(4,2)*sF.dxdq0)
-                    + sF.dtydty0*(C.get(0,3)+C.get(2,3)*sF.dxdtx0+C.get(3,3)*sF.dxdty0+C.get(4,3)*sF.dxdq0);
+        cF[3][0] = C.get(2,0)*sF.dtydtx0+C.get(3,0)*sF.dtydty0+C.get(4,0)*sF.dtydq0
+                + sF.dxdq0  *(C.get(2,4)*sF.dtydtx0+C.get(3,4)*sF.dtydty0+C.get(4,4)*sF.dtydq0)
+                + sF.dxdtx0 *(C.get(2,2)*sF.dtydtx0+C.get(3,2)*sF.dtydty0+C.get(4,2)*sF.dtydq0)
+                + sF.dxdty0 *(C.get(2,3)*sF.dtydtx0+C.get(3,3)*sF.dtydty0+C.get(4,3)*sF.dtydq0);
+        cF[3][1] = C.get(2,1)*sF.dtydtx0+C.get(3,1)*sF.dtydty0+C.get(4,1)*sF.dtydq0
+                + sF.dydq0  *(C.get(2,4)*sF.dtydtx0+C.get(3,4)*sF.dtydty0+C.get(4,4)*sF.dtydq0)
+                + sF.dydtx0 *(C.get(2,2)*sF.dtydtx0+C.get(3,2)*sF.dtydty0+C.get(4,2)*sF.dtydq0)
+                + sF.dydty0 *(C.get(2,3)*sF.dtydtx0+C.get(3,3)*sF.dtydty0+C.get(4,3)*sF.dtydq0);
+        cF[3][2] =sF.dtxdq0 *(C.get(2,4)*sF.dtydtx0+C.get(3,4)*sF.dtydty0+C.get(4,4)*sF.dtydq0)
+                + sF.dtxdtx0*(C.get(2,2)*sF.dtydtx0+C.get(3,2)*sF.dtydty0+C.get(4,2)*sF.dtydq0)
+                + sF.dtxdty0*(C.get(2,3)*sF.dtydtx0+C.get(3,3)*sF.dtydty0+C.get(4,3)*sF.dtydq0);
+        cF[3][3] =sF.dtydq0 *(C.get(2,4)*sF.dtydtx0+C.get(3,4)*sF.dtydty0+C.get(4,4)*sF.dtydq0)
+                + sF.dtydtx0*(C.get(2,2)*sF.dtydtx0+C.get(3,2)*sF.dtydty0+C.get(4,2)*sF.dtydq0)
+                + sF.dtydty0*(C.get(2,3)*sF.dtydtx0+C.get(3,3)*sF.dtydty0+C.get(4,3)*sF.dtydq0);
+        cF[3][4] = C.get(2,4)*sF.dtydtx0+C.get(3,4)*sF.dtydty0+C.get(4,4)*sF.dtydq0;
 
-        cNext[0][4] = C.get(0,4)+C.get(2,4)*sF.dxdtx0+C.get(3,4)*sF.dxdty0+C.get(4,4)*sF.dxdq0;
+        cF[4][0] = C.get(4,0)+C.get(4,2)*sF.dxdtx0+C.get(4,3)*sF.dxdty0+C.get(4,4)*sF.dxdq0;
+        cF[4][1] = C.get(4,1)+C.get(4,2)*sF.dydtx0+C.get(4,3)*sF.dydty0+C.get(4,4)*sF.dydq0;
+        cF[4][2] = C.get(4,2)*sF.dtxdtx0+C.get(4,3)*sF.dtxdty0+C.get(4,4)*sF.dtxdq0;
+        cF[4][3] = C.get(4,2)*sF.dtydtx0+C.get(4,3)*sF.dtydty0+C.get(4,4)*sF.dtydq0;
+        cF[4][4] = C.get(4,4);
 
-        cNext[1][0] = C.get(1,0)+C.get(2,0)*sF.dydtx0+C.get(3,0)*sF.dydty0+C.get(4,0)*sF.dydq0
-                    + sF.dxdq0 *(C.get(1,4)+C.get(2,4)*sF.dydtx0+C.get(3,4)*sF.dydty0+C.get(4,4)*sF.dydq0)
-                    + sF.dxdtx0*(C.get(1,2)+C.get(2,2)*sF.dydtx0+C.get(3,2)*sF.dydty0+C.get(4,2)*sF.dydq0)
-                    + sF.dxdty0*(C.get(1,3)+C.get(2,3)*sF.dydtx0+C.get(3,3)*sF.dydty0+C.get(4,3)*sF.dydq0);
-
-        cNext[1][1] = C.get(1,1)+C.get(2,1)*sF.dydtx0+C.get(3,1)*sF.dydty0+C.get(4,1)*sF.dydq0
-                    + sF.dydq0 *(C.get(1,4)+C.get(2,4)*sF.dydtx0+C.get(3,4)*sF.dydty0+C.get(4,4)*sF.dydq0)
-                    + sF.dydtx0*(C.get(1,2)+C.get(2,2)*sF.dydtx0+C.get(3,2)*sF.dydty0+C.get(4,2)*sF.dydq0)
-                    + sF.dydty0*(C.get(1,3)+C.get(2,3)*sF.dydtx0+C.get(3,3)*sF.dydty0+C.get(4,3)*sF.dydq0);
-
-        cNext[1][2] = sF.dtxdq0 *(C.get(1,4)+C.get(2,4)*sF.dydtx0+C.get(3,4)*sF.dydty0+C.get(4,4)*sF.dydq0)
-                    + sF.dtxdtx0*(C.get(1,2)+C.get(2,2)*sF.dydtx0+C.get(3,2)*sF.dydty0+C.get(4,2)*sF.dydq0)
-                    + sF.dtxdty0*(C.get(1,3)+C.get(2,3)*sF.dydtx0+C.get(3,3)*sF.dydty0+C.get(4,3)*sF.dydq0);
-
-        cNext[1][3] = sF.dtydq0 *(C.get(1,4)+C.get(2,4)*sF.dydtx0+C.get(3,4)*sF.dydty0+C.get(4,4)*sF.dydq0)
-                    + sF.dtydtx0*(C.get(1,2)+C.get(2,2)*sF.dydtx0+C.get(3,2)*sF.dydty0+C.get(4,2)*sF.dydq0)
-                    + sF.dtydty0*(C.get(1,3)+C.get(2,3)*sF.dydtx0+C.get(3,3)*sF.dydty0+C.get(4,3)*sF.dydq0);
-
-        cNext[1][4] = C.get(1,4)+C.get(2,4)*sF.dydtx0+C.get(3,4)*sF.dydty0+C.get(4,4)*sF.dydq0;
-
-        cNext[2][0] = C.get(2,0)*sF.dtxdtx0+C.get(3,0)*sF.dtxdty0+C.get(4,0)*sF.dtxdq0
-                    + sF.dxdq0 *(C.get(2,4)*sF.dtxdtx0+C.get(3,4)*sF.dtxdty0+C.get(4,4)*sF.dtxdq0)
-                    + sF.dxdtx0*(C.get(2,2)*sF.dtxdtx0+C.get(3,2)*sF.dtxdty0+C.get(4,2)*sF.dtxdq0)
-                    + sF.dxdty0*(C.get(2,3)*sF.dtxdtx0+C.get(3,3)*sF.dtxdty0+C.get(4,3)*sF.dtxdq0);
-
-        cNext[2][1] = C.get(2,1)*sF.dtxdtx0+C.get(3,1)*sF.dtxdty0+C.get(4,1)*sF.dtxdq0
-                    + sF.dydq0 *(C.get(2,4)*sF.dtxdtx0+C.get(3,4)*sF.dtxdty0+C.get(4,4)*sF.dtxdq0)
-                    + sF.dydtx0*(C.get(2,2)*sF.dtxdtx0+C.get(3,2)*sF.dtxdty0+C.get(4,2)*sF.dtxdq0)
-                    + sF.dydty0*(C.get(2,3)*sF.dtxdtx0+C.get(3,3)*sF.dtxdty0+C.get(4,3)*sF.dtxdq0);
-
-        cNext[2][2] = sF.dtxdq0 *(C.get(2,4)*sF.dtxdtx0+C.get(3,4)*sF.dtxdty0+C.get(4,4)*sF.dtxdq0)
-                    + sF.dtxdtx0*(C.get(2,2)*sF.dtxdtx0+C.get(3,2)*sF.dtxdty0+C.get(4,2)*sF.dtxdq0)
-                    + sF.dtxdty0*(C.get(2,3)*sF.dtxdtx0+C.get(3,3)*sF.dtxdty0+C.get(4,3)*sF.dtxdq0);
-
-        cNext[2][3] = sF.dtydq0 *(C.get(2,4)*sF.dtxdtx0+C.get(3,4)*sF.dtxdty0+C.get(4,4)*sF.dtxdq0)
-                    + sF.dtydtx0*(C.get(2,2)*sF.dtxdtx0+C.get(3,2)*sF.dtxdty0+C.get(4,2)*sF.dtxdq0)
-                    + sF.dtydty0*(C.get(2,3)*sF.dtxdtx0+C.get(3,3)*sF.dtxdty0+C.get(4,3)*sF.dtxdq0);
-
-        cNext[2][4] = C.get(2,4)*sF.dtxdtx0+C.get(3,4)*sF.dtxdty0+C.get(4,4)*sF.dtxdq0;
-
-        cNext[3][0] = C.get(2,0)*sF.dtydtx0+C.get(3,0)*sF.dtydty0+C.get(4,0)*sF.dtydq0
-                    + sF.dxdq0 *(C.get(2,4)*sF.dtydtx0+C.get(3,4)*sF.dtydty0+C.get(4,4)*sF.dtydq0)
-                    + sF.dxdtx0*(C.get(2,2)*sF.dtydtx0+C.get(3,2)*sF.dtydty0+C.get(4,2)*sF.dtydq0)
-                    + sF.dxdty0*(C.get(2,3)*sF.dtydtx0+C.get(3,3)*sF.dtydty0+C.get(4,3)*sF.dtydq0);
-
-        cNext[3][1] = C.get(2,1)*sF.dtydtx0+C.get(3,1)*sF.dtydty0+C.get(4,1)*sF.dtydq0
-                    + sF.dydq0 *(C.get(2,4)*sF.dtydtx0+C.get(3,4)*sF.dtydty0+C.get(4,4)*sF.dtydq0)
-                    + sF.dydtx0*(C.get(2,2)*sF.dtydtx0+C.get(3,2)*sF.dtydty0+C.get(4,2)*sF.dtydq0)
-                    + sF.dydty0*(C.get(2,3)*sF.dtydtx0+C.get(3,3)*sF.dtydty0+C.get(4,3)*sF.dtydq0);
-
-        cNext[3][2] = sF.dtxdq0 *(C.get(2,4)*sF.dtydtx0+C.get(3,4)*sF.dtydty0+C.get(4,4)*sF.dtydq0)
-                    + sF.dtxdtx0*(C.get(2,2)*sF.dtydtx0+C.get(3,2)*sF.dtydty0+C.get(4,2)*sF.dtydq0)
-                    + sF.dtxdty0*(C.get(2,3)*sF.dtydtx0+C.get(3,3)*sF.dtydty0+C.get(4,3)*sF.dtydq0);
-
-        cNext[3][3] = sF.dtydq0 *(C.get(2,4)*sF.dtydtx0+C.get(3,4)*sF.dtydty0+C.get(4,4)*sF.dtydq0)
-                    + sF.dtydtx0*(C.get(2,2)*sF.dtydtx0+C.get(3,2)*sF.dtydty0+C.get(4,2)*sF.dtydq0)
-                    + sF.dtydty0*(C.get(2,3)*sF.dtydtx0+C.get(3,3)*sF.dtydty0+C.get(4,3)*sF.dtydq0);
-
-        cNext[3][4] = C.get(2,4)*sF.dtydtx0+C.get(3,4)*sF.dtydty0+C.get(4,4)*sF.dtydq0;
-
-        cNext[4][0] = C.get(4,0)+C.get(4,2)*sF.dxdtx0+C.get(4,3)*sF.dxdty0+C.get(4,4)*sF.dxdq0;
-
-        cNext[4][1] = C.get(4,1)+C.get(4,2)*sF.dydtx0+C.get(4,3)*sF.dydty0+C.get(4,4)*sF.dydq0;
-
-        cNext[4][2] = C.get(4,2)*sF.dtxdtx0+C.get(4,3)*sF.dtxdty0+C.get(4,4)*sF.dtxdq0;
-
-        cNext[4][3] = C.get(4,2)*sF.dtydtx0+C.get(4,3)*sF.dtydty0+C.get(4,4)*sF.dtydq0;
-
-        cNext[4][4] = C.get(4,4);
-
-        return cNext;
+        fCov.covMat.set(cF);
     }
 
     /** Get the final RK4 estimate. */
