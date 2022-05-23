@@ -16,13 +16,13 @@ import org.jlab.utils.groups.IndexedList;
 
 import org.jlab.utils.options.OptionParser;
 
-public class DictionaryValidate {
+public class DictionaryValidator {
 
     private Dictionary             dictionary = new Dictionary();
     private IndexedList<DataGroup> dataGroups = new IndexedList<DataGroup>(1);
     private EmbeddedCanvasTabbed   canvas     = new EmbeddedCanvasTabbed("Dictionary", "Matched Roads", "Matched Tracks", "Efficiency");
             
-    public DictionaryValidate(){
+    public DictionaryValidator(){
 
     }
 
@@ -427,7 +427,7 @@ public class DictionaryValidate {
 //        maxEvents = 100000;  
         boolean debug=false;
         
-        DictionaryValidate validator = new DictionaryValidate();
+        DictionaryValidator validator = new DictionaryValidator();
         validator.init(dictionaryFileName,sector,mode,thrs);                
     //        tm.printDictionary();
         validator.processFile(testFileName,wireSmear,pcalSmear,sector,mode,maxEvents, pid, charge,thrs);

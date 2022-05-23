@@ -53,8 +53,8 @@ public class Road {
             Particle road = new Particle(211*charge, px, py, pz, 0, 0, vz);
             for(int i=0; i<3; i++) road.setProperty("ECALe"+(i*3+1), Double.parseDouble(items[48+i]));
             for(int i=0; i<36; i++) this.dcWires[i] = Byte.parseByte(items[4+i]);
-            this.ftofPaddles[1] = Byte.parseByte(items[40]);                    
-            this.ftofPaddles[2] = Byte.parseByte(items[42]);                    
+            this.ftofPaddles[0] = Byte.parseByte(items[40]);                    
+            this.ftofPaddles[1] = Byte.parseByte(items[42]);                    
             for(int i=0; i<3; i++) this.ecalStrips[i] = Byte.parseByte(items[43+i]);
             this.htccMask = Byte.parseByte(items[46]);                    
             this.sector   = Byte.parseByte(items[47]);                    
@@ -484,7 +484,7 @@ public class Road {
     }
 
     public void setStrip(int layer, byte strip) {
-        if(layer>0 && layer<3) this.ecalStrips[layer-1] = strip;
+        if(layer>0 && layer<=3) this.ecalStrips[layer-1] = strip;
         else System.out.println("ROAD: error in setting the PCAL strip number for layer " + layer);
     }
 
@@ -511,11 +511,11 @@ public class Road {
         return sector;
     }
 
-    public int getSuperLayerHits(int superlayer) {
+    public int getLayerHits(int layer) {
         int n=0;
-        if(superlayer>0  && superlayer<=6) {
-            for(int i=0; i<6; i++) {
-                if(this.dcWires[i+(superlayer-1)*6]>0) n++;
+        if(layer>0  && layer<=6) {
+            for(int isl=0; isl<6; isl++) {
+                if(this.dcWires[layer-1+isl*6]>0) n++;
             }
         }
         return n;
@@ -547,11 +547,11 @@ public class Road {
                 }
             }
         }
-        road[6] = this.ftofPaddles[0];
+        road[6] = this.ftofPaddles[1];
         road[7] = this.ftofPaddles[2];
         road[8] = this.ecalStrips[0];
-        road[9] = this.ecalStrips[0];
-        road[10] = this.ecalStrips[0];
+        road[9] = this.ecalStrips[1];
+        road[10] = this.ecalStrips[2];
         road[11] = this.htccMask;
         road[12] = this.sector;
         return road;
@@ -573,7 +573,7 @@ public class Road {
         for(int i=0; i<this.ecalStrips.length; i++) str.append(String.format("%d\t", this.ecalStrips[i]));
         str.append(String.format("%d\t",   this.htccMask));
         str.append(String.format("%d\t",   this.sector));
-        for(int i=0; i<this.ecalStrips.length; i++) str.append(String.format("%.1\t", this.particle.getProperty("ECALe"+(i*3+1))));
+        for(int i=0; i<this.ecalStrips.length; i++) str.append(String.format("%.1f\t", this.particle.getProperty("ECALe"+(i*3+1))));
         return str.toString();
     }
 }

@@ -412,7 +412,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%.2f\t%d\t%d\t%d\t%d\t"
-                    + "%d\t%d\t0.0\t0.0\t0.0\n",
+                    + "%d\t%d\t0.0\t0.0\t0.0\t\n",
                     q, p, thetaDeg, phiDeg,
                     Wl1.get(0), Wl2.get(0), Wl3.get(0), Wl4.get(0), Wl5.get(0), Wl6.get(0), 
                     Wl1.get(1), Wl2.get(1), Wl3.get(1), Wl4.get(1), Wl5.get(1), Wl6.get(1), 
