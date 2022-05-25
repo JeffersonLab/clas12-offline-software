@@ -578,8 +578,8 @@ public class RecoBankWriter {
             }
             bank.setShort("status", i, (short) ((short) trkcands.get(i).getStatus()));
             bank.setShort("seedID", i, (short) trkcands.get(i).getSeed().getId());
-            bank.setFloat("chi2", i,  (float) trkcands.get(i).getChi2());
-            bank.setShort("ndf", i, (short) trkcands.get(i).getNDF());
+            bank.setFloat("chi2", i,  (float) trkcands.get(i).getSecondaryChi2());
+            bank.setShort("ndf", i, (short) trkcands.get(i).getSecondaryNDF());
             bank.setInt("pid", i, trkcands.get(i).getPID());
         }
         //bank.show();
@@ -592,25 +592,18 @@ public class RecoBankWriter {
 
         DataBank bank = event.createBank(bankName, trkcands.size());
         // an array representing the ids of the crosses that belong to the track
-
+        String[] covs = {"x", "y", "z", "px", "py", "pz"};
         for (int i = 0; i < trkcands.size(); i++) {
             if(trkcands.get(i)==null || trkcands.get(i).getTrackCovMat()==null)
                 continue;
             bank.setShort("ID", i, (short) trkcands.get(i).getId());
             double[][] covmatrix = trkcands.get(i).getTrackCovMat();
             if (covmatrix != null) {
-                String[][] names = new String[][]{
-                    {"cov_xx", "cov_xy", "cov_xz", "cov_xpx", "cov_xpy", "cov_xpz"},
-                    {"cov_yx", "cov_yy", "cov_yz", "cov_ypx", "cov_ypy", "cov_ypz"},
-                    {"cov_zx", "cov_zy", "cov_zz", "cov_zpx", "cov_zpy", "cov_zpz"},
-                    {"cov_pxx", "cov_pxy", "cov_pxz", "cov_pxpx", "cov_pxpy", "cov_pxpz"},
-                    {"cov_pyx", "cov_pyy", "cov_pyz", "cov_pypx", "cov_pypy", "cov_pypz"},
-                    {"cov_pzx", "cov_pzy", "cov_pzz", "cov_pzpx", "cov_pzpy", "cov_pzpz"}
-                };
-              
                 for(int r = 0; r<6; r++) {
                     for(int c = 0; c<6; c++) {
-                        bank.setFloat(names[r][c], i,  (float) covmatrix[r][c] );
+                        if(r<3) covmatrix[r][c] /=10;
+                        if(c<3) covmatrix[r][c] /=10;
+                        bank.setFloat("cov_"+covs[r]+covs[c], i,  (float) covmatrix[r][c] );
                     }
                 }
             }
