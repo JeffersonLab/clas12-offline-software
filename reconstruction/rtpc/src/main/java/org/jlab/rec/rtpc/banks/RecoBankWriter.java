@@ -60,7 +60,7 @@ public class RecoBankWriter {
         return bank;
     }	
     
-    public  DataBank fillRTPCTrackBank(DataEvent event, HitParameters params) {
+    public  DataBank fillRTPCTrackBank(DataEvent event, HitParameters params, float rtpc_vz_shift) {
 
         HashMap<Integer, FinalTrackInfo> finaltrackinfomap = params.get_finaltrackinfomap();
         HashMap<Integer, List<RecoHitVector>> recotrackmap = params.get_recotrackmap();
@@ -90,7 +90,7 @@ public class RecoBankWriter {
             bank.setFloat("px", row, (float) track.get_px()/1000);
             bank.setFloat("py", row, (float) track.get_py()/1000);
             bank.setFloat("pz", row, (float) track.get_pz()/1000);
-            bank.setFloat("vz", row, (float) (track.get_vz() - 22.0)/10);
+            bank.setFloat("vz", row, (float) (track.get_vz() + rtpc_vz_shift)/10);
             bank.setFloat("theta", row, (float) track.get_theta());
             bank.setFloat("phi", row, (float) track.get_phi());
             bank.setInt("nhits", row, track.get_numhits());
