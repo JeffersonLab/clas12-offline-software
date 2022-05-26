@@ -194,7 +194,9 @@ public class HitReader {
                 short strip = bankDGTZ.getShort("component", i);
                 int ADC     = bankDGTZ.getInt("ADC", i);
                 double time = 0;//bankDGTZ.getFloat("time", i);
-                int key = DetectorDescriptor.generateHashCode(sector, layer,(short) (strip/128)+1);
+                int tdcstrip = 1;
+                if(strip>128) tdcstrip = 129;
+                int key = DetectorDescriptor.generateHashCode(sector, layer, tdcstrip);
                 if(tdcs.containsKey(key)) {
                     time = tdcs.get(key);
                 }
