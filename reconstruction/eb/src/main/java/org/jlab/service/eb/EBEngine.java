@@ -137,6 +137,8 @@ public class EBEngine extends ReconstructionEngine {
         
         List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, cvtTrackType, cvtTrajType);
         eb.addTracks(ctracks);
+        
+        List<DetectorTrack> cutracks = DetectorData.readCentralDetectorTracks(de, "CVT::UTracks", cvtTrajType);
        
         // FIXME:  remove need for these indexing bookkeepers:
         eb.getPindexMap().put(0, tracks.size());
@@ -212,6 +214,11 @@ public class EBEngine extends ReconstructionEngine {
                 if (bankTraj != null) de.appendBanks(bankTraj);
                 DataBank bankCovMat = DetectorData.getCovMatrixBank(eb.getEvent().getParticles(), de, covMatrixBank);
                 if (bankCovMat != null) de.appendBanks(bankCovMat);
+
+                if (ctracks.size()>0) {
+                    DataBank x = DetectorData.getUTracksBank(eb.getEvent().getParticles(), de, "REC::UTrack", ctracks.size());
+                    de.appendBanks(x);
+                }
             }
       
             // update PID for FT-based start time:
