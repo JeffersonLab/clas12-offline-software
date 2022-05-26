@@ -75,7 +75,8 @@ public class RTPCEngine extends ReconstructionEngine{
             "/calibration/rtpc/gain_balance",
             "/calibration/rtpc/time_parms",
             "/calibration/rtpc/recon_parms",
-            "/calibration/rtpc/global_parms"
+            "/calibration/rtpc/global_parms",
+            "/geometry/rtpc/alignment"
         };
 
         requireConstants(Arrays.asList(rtpcTables));
@@ -121,7 +122,12 @@ public class RTPCEngine extends ReconstructionEngine{
         IndexedTable global_parms = this.getConstantsManager().getConstants(runNo, "/calibration/rtpc/global_parms");
         int hitsbound;
         hitsbound = (int) global_parms.getDoubleValue("MaxHitsEvent",0,0,0);
-        if(hits.size() > hitsbound) return true; 
+        if(hits.size() > hitsbound) return true;
+
+       // reading the central detectors z shift with respect to the FD 
+       IndexedTable rtpc_alignment = this.getConstantsManager().getConstants(runNo, "/geometry/rtpc/alignment");
+       float rtpc_vz_shift;
+       rtpc_vz_shift = (float) rtpc_alignment.getDoubleValue("deltaZ",0,0,0);
 
         if(event.hasBank("RTPC::adc")){
             params.init(this.getConstantsManager(), runNo);
@@ -141,7 +147,7 @@ public class RTPCEngine extends ReconstructionEngine{
 
             RecoBankWriter writer = new RecoBankWriter();
             DataBank recoBank = writer.fillRTPCHitsBank(event,params);
-            DataBank trackBank = writer.fillRTPCTrackBank(event,params);
+            DataBank trackBank = writer.fillRTPCTrackBank(event,params,rtpc_vz_shift);
 
             event.appendBank(recoBank);
             event.appendBank(trackBank);
