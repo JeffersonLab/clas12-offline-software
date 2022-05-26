@@ -471,7 +471,10 @@
             {"name":"vt",      "type":"F", "info":"RF and z corrected vertex time (ns)"},
             {"name":"beta",    "type":"F", "info":"particle beta measured by TOF"},
             {"name":"chi2pid", "type":"F", "info":"Chi2 of assigned PID"},
-            {"name":"status",  "type":"S", "info":"particle status (represents detector collection it passed)"}
+            {"name":"status",  "type":"S", "info":"particle status (represents detector collection it passed)"},
+            {"name":"px",       "type":"F", "info":"x component of the momentum (GeV)"},
+            {"name":"py",       "type":"F", "info":"y component of the momentum (GeV)"},
+            {"name":"pz",       "type":"F", "info":"z component of the momentum (GeV)"}
         ]
     }
 ]
