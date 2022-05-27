@@ -60,13 +60,15 @@ public class Constants {
     private int     T2D = 0;     
     private boolean USEDOUBLETS = false;
     
-    public static final String DOCARES      = "/calibration/dc/signal_generation/doca_resolution";
-    public static final String TIME2DIST    = "/calibration/dc/time_to_distance/time2dist";
-    public static final String T0CORRECTION = "/calibration/dc/time_corrections/T0Corrections";
-    public static final String TDCTCUTS     = "/calibration/dc/time_corrections/tdctimingcuts";
-    public static final String WIRESTAT     = "/calibration/dc/tracking/wire_status";
-    public static final String TIMEJITTER   = "/calibration/dc/time_jitter";
-    public static final String BEAMPOS      = "/geometry/beam/position";
+    public static final String DOCARES        = "/calibration/dc/signal_generation/doca_resolution";
+    public static final String TIME2DIST      = "/calibration/dc/time_to_distance/time2dist";
+    public static final String T2DPRESSURE    = "/calibration/dc/time_to_distance/t2d_pressure";
+    public static final String T2DPRESSUREREF = "/calibration/dc/time_to_distance/ref_pressure";
+    public static final String T0CORRECTION   = "/calibration/dc/time_corrections/T0Corrections";
+    public static final String TDCTCUTS       = "/calibration/dc/time_corrections/tdctimingcuts";
+    public static final String WIRESTAT       = "/calibration/dc/tracking/wire_status";
+    public static final String TIMEJITTER     = "/calibration/dc/time_jitter";
+    public static final String BEAMPOS        = "/geometry/beam/position";
 
     public static final String HITBASE = "HitBased";
     
