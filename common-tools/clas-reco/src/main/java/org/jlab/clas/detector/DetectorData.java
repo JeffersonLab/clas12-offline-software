@@ -393,6 +393,12 @@ public class DetectorData {
                 bank.setFloat("chi2", row, (float) p.getTrackChi2());
                 bank.setShort("NDF", row, (short) p.getNDF());
                 bank.setShort("status", row, (short) p.getTrackStatus());
+                bank.setFloat("px", row, (float) p.vector().x());
+                bank.setFloat("py", row, (float) p.vector().y());
+                bank.setFloat("pz", row, (float) p.vector().z());
+                bank.setFloat("vx", row, (float) p.vertex().x());
+                bank.setFloat("vy", row, (float) p.vertex().y());
+                bank.setFloat("vz", row, (float) p.vertex().z());
                 row = row + 1;
             }
         }
