@@ -1,6 +1,7 @@
 package org.jlab.analysis.roads;
 
 import java.util.ArrayList;
+import org.jlab.analysis.roads.Dictionary.TestMode;
 import org.jlab.clas.physics.Particle;
 import org.jlab.detector.base.DetectorLayer;
 import org.jlab.detector.base.DetectorType;
@@ -15,55 +16,65 @@ public class Road {
     
     public final int length = 51;
     private byte     sector = 0;
-    private byte[]   dcWires = new byte[36];
-    private byte[]   ftofPaddles = new byte[3];
-    private byte[]   ecalStrips  = new byte[3];
+    private final byte[]   dcWires     = new byte[36];
+    private final byte[]   ftofPaddles = new byte[3];
+    private final byte[]   ecalStrips  = new byte[3];
     private byte     htccMask = 0;
     private Particle particle = null;
+    private final byte[] binning = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
     public Road() {
-        this.particle = new Particle();
+        this.init();
     }
      
-    public Road(byte[] road, Particle particle) {
-        if(road.length!=13) System.out.println("ROAD: error in initializing road from byte arry with length " +road.length);
+    public Road(ArrayList<Byte> key, Particle particle) {
+        if(key.size()!=13) System.out.println("ROAD: error in initializing road from byte array with length " +key.size());
         else {
-            for(int i=0; i<6; i++) this.dcWires[i*6] = road[i];
-            this.ftofPaddles[1] = road[6];
-            this.ftofPaddles[2] = road[7];
-            for(int i=0; i<3; i++) this.ecalStrips[i] = road[8+i];
-            this.htccMask = road[11];
-            this.sector   = road[12];
+            for(int i=0; i<6; i++) this.dcWires[i*6] = key.get(i);
+            this.ftofPaddles[1] = key.get(6);
+            this.ftofPaddles[2] = key.get(7);
+            this.ecalStrips[0] = key.get(8);
+            this.ecalStrips[1] = key.get(9);
+            this.ecalStrips[2] = key.get(10);
+            this.htccMask = key.get(11);
+            this.sector   = key.get(12);
             this.particle=particle;
+            if(this.getSuperLayers()!=6) this.init();
         }
     }
     
     public Road(String line) {
-        String[] items = line.split("\t");
+        String[] items = line.split("\\s+");
         if(items.length!=this.length) System.out.println("ROAD: error in initializing road from string");
         else {
-            int charge   = Integer.parseInt(items[0]);
-            double p     = Double.parseDouble(items[1]);
-            double theta = Math.toRadians(Double.parseDouble(items[2]));
-            double phi   = Math.toRadians(Double.parseDouble(items[3]));
-            double vz    = Double.parseDouble(items[41]);
+            int charge   = Integer.parseInt(items[0].trim());
+            double p     = Double.parseDouble(items[1].trim());
+            double theta = Math.toRadians(Double.parseDouble(items[2].trim()));
+            double phi   = Math.toRadians(Double.parseDouble(items[3].trim()));
+            double vz    = Double.parseDouble(items[41].trim());
             double px    = p*Math.sin(theta)*Math.cos(phi);
             double py    = p*Math.sin(theta)*Math.sin(phi);
             double pz    = p*Math.cos(theta);
-            Particle road = new Particle(211*charge, px, py, pz, 0, 0, vz);
-            for(int i=0; i<3; i++) road.setProperty("ECALe"+(i*3+1), Double.parseDouble(items[48+i]));
-            for(int i=0; i<36; i++) this.dcWires[i] = Byte.parseByte(items[4+i]);
-            this.ftofPaddles[0] = Byte.parseByte(items[40]);                    
-            this.ftofPaddles[1] = Byte.parseByte(items[42]);                    
-            for(int i=0; i<3; i++) this.ecalStrips[i] = Byte.parseByte(items[43+i]);
-            this.htccMask = Byte.parseByte(items[46]);                    
-            this.sector   = Byte.parseByte(items[47]);                    
-            this.ftofPaddles[2] = Byte.parseByte(items[42]);                    
+            this.particle = new Particle(211*charge, px, py, pz, 0, 0, vz);
+            for(int i=0; i<36; i++) this.dcWires[i] = Byte.parseByte(items[4+i].trim());
+            this.ftofPaddles[1] = Byte.parseByte(items[40].trim());                    
+            this.ftofPaddles[2] = Byte.parseByte(items[42].trim());                    
+            for(int i=0; i<3; i++) this.ecalStrips[i] = Byte.parseByte(items[43+i].trim());
+            this.htccMask = Byte.parseByte(items[46].trim());                    
+            this.sector   = Byte.parseByte(items[47].trim());                    
+            for(int i=0; i<3; i++) this.particle.setProperty("ECALe"+(i*3+1), Double.parseDouble(items[48+i].trim()));
         }
+        if(!this.isValid()) this.init();
     }
 
+    public final void init() {
+        this.particle = new Particle();
+        for(int i=0; i<36; i++) this.dcWires[i] = 0;
+        for(int i=0; i<3; i++)  this.ftofPaddles[i] = 0;
+        for(int i=0; i<3; i++)  this.ecalStrips[i] = 0;        
+    }
     
-    public static ArrayList<Road> getRoads(DataEvent event, int chargeSelect, int pidSelect, double thrs) {
+    public static ArrayList<Road> getRoads(DataEvent event, int chargeSelect, int pidSelect, double thrs, double vzmin, double vzmax) {
         ArrayList<Road> roads = new ArrayList();
         DataBank runConfig       = null;
         DataBank recParticle     = null;
@@ -134,6 +145,7 @@ public class Road {
                                     recParticle.getFloat("vy", pindex),
                                     recParticle.getFloat("vz", pindex)); 
                     if(part.p()<thrs) continue; //use only roads with momentum above the selected value
+                    if(part.vz()<vzmin || part.vz()>vzmax) continue;
                     road.setParticle(part);
                     // get the DC wires' IDs
                     int trackSector = 0;
@@ -147,35 +159,34 @@ public class Road {
                         }
                     }
                     road.setSector((byte) trackSector);
-                    if(road.getSuperLayers()!=6) continue;
+                    if(road.getLayerHits(3)<3 || road.getSuperLayers()!=6) continue;
                     // now check other detectors
                      // check FTOF
                     if(recScintillator!=null) {
                         for(int j=0; j<recScintillator.rows(); j++) {
-                            if(recScintillator.getShort("pindex",j) == pindex) {
-                                detector   = recScintillator.getByte("detector", j);
+                            if(recScintillator.getShort("pindex",j) == pindex &&
+                               recScintillator.getByte("detector",j)==DetectorType.FTOF.getDetectorId()) {
                                 int layer  = recScintillator.getByte("layer",j);
                                 int paddle = recScintillator.getShort("component",j);
-                                if(detector==DetectorType.FTOF.getDetectorId()) road.setPaddle(layer, (byte) paddle);
+                                road.setPaddle(layer, (byte) paddle);
                             }
                         }
                     }
                     // check ECAL
                     if(recCalorimeter!=null && ecalCluster!=null) {
                         for(int j=0; j<recCalorimeter.rows(); j++) {
-                            if(recCalorimeter.getShort("pindex",j) == pindex) {
-                                detector      = recCalorimeter.getByte("detector", j);
+                            if(recCalorimeter.getShort("pindex",j) == pindex &&
+                               recCalorimeter.getByte("detector", j) == DetectorType.ECAL.getDetectorId()) {
                                 index         = recCalorimeter.getShort("index",j);
                                 int layer     = recCalorimeter.getByte("layer",j);
                                 double energy = recCalorimeter.getFloat("energy",j);
+                                road.setECALenergy(layer, energy);
                                 // use pcal only
-                                if(detector==DetectorType.ECAL.getDetectorId()) {
-                                        if(layer==DetectorLayer.PCAL) {
-                                        road.setStrip(1, (byte) ((ecalCluster.getInt("coordU",index)-4)/8+1));
-                                        road.setStrip(2, (byte) ((ecalCluster.getInt("coordV",index)-4)/8+1));
-                                        road.setStrip(3, (byte) ((ecalCluster.getInt("coordW",index)-4)/8+1));
-                                    }
-                                    road.setECALenergy(layer, energy);
+                                if(layer==DetectorLayer.PCAL) {
+                                    road.setStrip(1, (byte) ((ecalCluster.getInt("coordU",index)-4)/8+1));
+                                    road.setStrip(2, (byte) ((ecalCluster.getInt("coordV",index)-4)/8+1));
+                                    road.setStrip(3, (byte) ((ecalCluster.getInt("coordW",index)-4)/8+1));
+                                    break;
                                 }
                             }
                         }
@@ -233,7 +244,7 @@ public class Road {
                             }
                         }
                     }
-                    roads.add(road);
+                    if(road.isValid()) roads.add(road);
                 }
             }
         }
@@ -268,7 +279,7 @@ public class Road {
         double TableTheta3[] = {11.25, 18.75, 26.25};
         double TableTheta4[] = {13.75, 21.25, 28.75};
 
-        ArrayList<int[]> htccPMTS = new ArrayList<int[]>();
+        ArrayList<int[]> htccPMTS = new ArrayList<>();
 
         double p1, p2, ph_new;
 
@@ -294,7 +305,7 @@ public class Road {
         for (int i = 0; i < 4; i++) {
             // 1 hit case
             if (th == TableTheta1[i] && (phSec==-15 || phSec==15)) {
-                int htccPMT[] = new int[3];
+                int[] htccPMT = new int[3];
                 htccPMT[0] = sector;
                 if (phSec == -15.0) {
                     htccPMT[1] = 1;
@@ -307,7 +318,7 @@ public class Road {
             // 2 hits over phi
             else if (th == TableTheta1[i] && phSec==0) {
                 for(int k = 0; k < 2; k++) {
-                    int htccPMT[] = new int[3];
+                    int[] htccPMT = new int[3];
                     htccPMT[0] = sector;
                     htccPMT[1] = k + 1;
                     htccPMT[2] = i + 1;
@@ -317,7 +328,7 @@ public class Road {
             // 2 hits over sectors
             else if (th == TableTheta1[i] && phSec==-30) {
                 for(int k = 0; k < 2; k++) {
-                    int htccPMT[] = new int[3];
+                    int[] htccPMT = new int[3];
                     htccPMT[0] = sector + k; if(htccPMT[0]==7) htccPMT[0]=1;
                     htccPMT[1] = 2 - k;
                     htccPMT[2] = i + 1;
@@ -329,7 +340,7 @@ public class Road {
             // 2 hits over theta
             if (th == TableTheta2[i] && (phSec==-15 || phSec==15)) {
                 for(int k = 0; k < 2; k++) {
-                    int htccPMT[] = new int[3];
+                    int[] htccPMT = new int[3];
                     htccPMT[0] = sector;
                     if (phSec == -15.0) {
                         htccPMT[1] = 1;
@@ -344,7 +355,7 @@ public class Road {
             if (th == TableTheta2[i] && phSec==0) {
                 for(int k = 0; k < 2; k++) {
                 for(int j = 0; j < 2; j++) {
-                    int htccPMT[] = new int[3];
+                    int[] htccPMT = new int[3];
                     htccPMT[0] = sector;
                     htccPMT[1] = j + 1;
                     htccPMT[2] = i + 1 + k;
@@ -356,7 +367,7 @@ public class Road {
             if (th == TableTheta2[i] && phSec==-30) {
                 for(int k = 0; k < 2; k++) {
                 for(int j = 0; j < 2; j++) {
-                    int htccPMT[] = new int[3];
+                    int[] htccPMT = new int[3];
                     htccPMT[0] = sector + j; if(htccPMT[0]==7) htccPMT[0]=1;
                     htccPMT[1] = 2 - j;
                     htccPMT[2] = i + 1 + k;
@@ -370,7 +381,7 @@ public class Road {
             if (th == TableTheta3[i] && phSec==-5) {
                 for(int k = 0; k < 2; k++) {
                 for(int j = 0; j < 2; j++) {
-                    int htccPMT[] = new int[3];
+                    int[] htccPMT = new int[3];
                     htccPMT[0] = sector;
                     htccPMT[1] = j + 1;
                     htccPMT[2] = i + 1 + k;
@@ -381,7 +392,7 @@ public class Road {
             if (th == TableTheta3[i] && phSec==5) {
                 for(int k = 0; k < 2; k++) {
                 for(int j = 0; j < 2; j++) {
-                    int htccPMT[] = new int[3];
+                    int[] htccPMT = new int[3];
                     htccPMT[0] = sector;
                     htccPMT[1] = j + 1;
                     htccPMT[2] = i + 1 + k;
@@ -392,7 +403,7 @@ public class Road {
             if (th == TableTheta3[i] && phSec==-25) {
                 for(int k = 0; k < 2; k++) {
                 for(int j = 0; j < 2; j++) {
-                    int htccPMT[] = new int[3];
+                    int[] htccPMT = new int[3];
                     htccPMT[0] = sector - j; if(htccPMT[0]==0) htccPMT[0]=6;
                     htccPMT[1] = j + 1;
                     htccPMT[2] = i + 1 + k;
@@ -403,7 +414,7 @@ public class Road {
             if (th == TableTheta3[i] && phSec==25) {
                 for(int k = 0; k < 2; k++) {
                 for(int j = 0; j < 2; j++) {
-                    int htccPMT[] = new int[3];
+                    int[] htccPMT = new int[3];
                     htccPMT[0] = sector + j; if(htccPMT[0]==7) htccPMT[0]=1;
                     htccPMT[1] = 2 - j;
                     htccPMT[2] = i + 1 + k;
@@ -417,7 +428,7 @@ public class Road {
             if (th == TableTheta4[i] && phSec==-5) {
                 for(int k = 0; k < 2; k++) {
                 for(int j = 0; j < 2; j++) {
-                    int htccPMT[] = new int[3];
+                    int[] htccPMT = new int[3];
                     htccPMT[0] = sector;
                     htccPMT[1] = j + 1;
                     htccPMT[2] = i + 1 + k;
@@ -428,7 +439,7 @@ public class Road {
             if (th == TableTheta4[i] && phSec==5) {
                 for(int k = 0; k < 2; k++) {
                 for(int j = 0; j < 2; j++) {
-                    int htccPMT[] = new int[3];
+                    int[] htccPMT = new int[3];
                     htccPMT[0] = sector;
                     htccPMT[1] = j + 1;
                     htccPMT[2] = i + 1 + k;
@@ -439,7 +450,7 @@ public class Road {
             if (th == TableTheta4[i] && phSec==-25) {
                 for(int k = 0; k < 2; k++) {
                 for(int j = 0; j < 2; j++) {
-                    int htccPMT[] = new int[3];
+                    int[] htccPMT = new int[3];
                     htccPMT[0] = sector - j; if(htccPMT[0]==0) htccPMT[0]=6;
                     htccPMT[1] = j + 1;
                     htccPMT[2] = i + 1 + k;
@@ -450,7 +461,7 @@ public class Road {
             if (th == TableTheta4[i] && phSec==25) {
                 for(int k = 0; k < 2; k++) {
                 for(int j = 0; j < 2; j++) {
-                    int htccPMT[] = new int[3];
+                    int[] htccPMT = new int[3];
                     htccPMT[0] = sector + j; if(htccPMT[0]==7) htccPMT[0]=1;
                     htccPMT[1] = 2 - j;
                     htccPMT[2] = i + 1 + k;
@@ -492,15 +503,68 @@ public class Road {
         if(layer>0 && layer<= 36) this.dcWires[layer-1] = wire;
         else System.out.println("ROAD: error in setting the DC wire number for layer " + layer);
     }
+    
+    public void setDCbinning(int r1, int r2, int r3) {
+        binning[0] = (byte) r1;
+        binning[1] = (byte) r1;
+        binning[2] = (byte) r2;
+        binning[3] = (byte) r2;
+        binning[4] = (byte) r3;
+        binning[5] = (byte) r3;
+    }
+
+    public void setFTOFbinning(int bin) {
+        binning[6] = (byte) bin;
+        binning[7] = (byte) bin;
+    }
+
+    public void setPCALbinning(int bin) {
+        binning[8]  = (byte) bin;
+        binning[9]  = (byte) bin;
+        binning[10] = (byte) bin;
+    }
+
+    public void setSectorDependence(int dependence) {
+        if(dependence == 0) binning[12] = 6;
+        else                binning[12] = 1;
+    }
+    
+    public void setBinning(int dc, int pcal, int sector) {
+        this.setDCbinning(dc, dc, dc);
+        this.setFTOFbinning(pcal);
+        this.setPCALbinning(pcal);
+        this.setSectorDependence(sector);
+    }
 
     public byte getPaddle(int layer) {
-        if(layer>0 && layer<= 3) return 0;
-        else return ftofPaddles[layer-1];
+        if(layer>0 && layer<= 3 && this.ftofPaddles[layer-1]>0) {
+            int bin    = this.binning[5+layer];
+            int paddle = this.ftofPaddles[layer-1];
+            int binnedPaddle = ((int) ((paddle-1)/bin))*bin + 1;
+            return (byte) binnedPaddle;
+        }
+        else return 0;
     }
 
     public byte getStrip(int layer) {
-        if(layer>0 && layer<= 3) return 0;
-        else return ecalStrips[layer-1];
+        if(layer>0 && layer<= 3 && this.ecalStrips[layer-1]>0) {
+            int bin   = this.binning[7+layer];
+            int strip = this.ecalStrips[layer-1];
+            int binnedStrip = ((int) ((strip-1)/bin))*bin + 1;
+            return (byte) binnedStrip;
+        }
+        else return 0;
+    }
+
+    public byte getWire(int layer) {
+        if(layer>0 && layer<= 36 && this.dcWires[layer-1]>0) {
+            int isl  = (layer-1)/6;
+            int bin  = this.binning[isl];
+            int wire = this.dcWires[layer-1];
+            int binnedWire = ((int) ((wire-1)/bin))*bin + 1;
+            return (byte) binnedWire;
+        }
+        else return 0;
     }
 
     public byte getHtccMask() {
@@ -508,7 +572,10 @@ public class Road {
     }
 
     public byte getSector() {
-        return sector;
+        if(sector==0) return sector;
+        int bin = this.binning[12];
+        int sec = ((int) ((sector-1)/bin))*bin + 1;
+        return (byte) sec;
     }
 
     public int getLayerHits(int layer) {
@@ -521,7 +588,7 @@ public class Road {
         return n;
     }
     
-    public int getSuperLayers() {
+    public final int getSuperLayers() {
         int nSL=0;
         for(int isl=0; isl<6; isl++) {
             int nL=0;
@@ -537,43 +604,80 @@ public class Road {
         return particle;
     }
 
-    public byte[] getRoad() {
-        byte[] road = new byte[13];
-        for(int isl = 0; isl < 6; isl++) {
+    public ArrayList<Byte> getKey() {
+        return this.getKey(TestMode.DCFTOFPCALUVWHTCC);
+    }
+    
+    public ArrayList<Byte> getKey(TestMode mode) {
+        ArrayList<Byte> road = new ArrayList<>();
+        for(int isl=0; isl<6; isl++) {
             for(int il=0; il<6; il++) {
-                if(this.dcWires[isl*6 + il] != 0) {
-                   road[isl] = this.dcWires[il*6+il];
-                   break;
+                int layer = isl*6+il+1;
+                if(this.dcWires[layer-1] != 0) {
+                    road.add(this.getWire(layer));
+                    break;
                 }
             }
         }
-        road[6] = this.ftofPaddles[1];
-        road[7] = this.ftofPaddles[2];
-        road[8] = this.ecalStrips[0];
-        road[9] = this.ecalStrips[1];
-        road[10] = this.ecalStrips[2];
-        road[11] = this.htccMask;
-        road[12] = this.sector;
+        for(int i=6; i<13; i++) {
+            road.add((byte) 0);
+        }
+        if(mode.contains(TestMode.DCFTOFPCALU)) {
+            road.set(6, this.getPaddle(2));
+            road.set(7, this.getPaddle(3));
+            road.set(8, this.getStrip(1));
+            if(mode.contains(TestMode.DCFTOFPCALUVW)) {
+                road.set(9,  this.getStrip(2));
+                road.set(10, this.getStrip(3));
+                if(mode.contains(TestMode.DCFTOFPCALUVWHTCC))
+                    road.set(11, this.htccMask);
+            }
+        }
+        road.set(12, this.getSector());
         return road;
     }
-
     
+    public boolean isValid() {
+        return this.isValid(TestMode.DC);
+    }
+
+    public boolean isValid(TestMode mode) {
+        boolean value = this.getLayerHits(3)>=3 && this.getSuperLayers()==6;
+        if(mode == TestMode.DCFTOFPCALU) {
+            value = value && this.ftofPaddles[1]>0 && this.ecalStrips[0]>0;
+            if(mode == TestMode.DCFTOFPCALUVW) {
+                value = value && this.ecalStrips[1]>0 && this.ecalStrips[2]>0;
+                if(mode == TestMode.DCFTOFPCALUVWHTCC) {
+                    value = value && this.htccMask>0;
+                }
+            }
+        }
+        return value;
+    }
+    
+    public String toStringBrief(TestMode mode) {
+        String str = "";
+        ArrayList<Byte> key = this.getKey(mode);
+        for(int i=0; i<key.size(); i++) str += String.format("%4d ", (int) key.get(i));
+        return str;
+    }
+        
     @Override
     public String toString() {
-        StringBuilder str = new StringBuilder();
+        String str = "";
         
-        str.append(String.format("%d\t",   this.particle.charge()));
-        str.append(String.format("%.2f\t", this.particle.p()));
-        str.append(String.format("%.2f\t", Math.toDegrees(this.particle.theta())));
-        str.append(String.format("%.2f\t", Math.toDegrees(this.particle.phi())));
-        for(int i=0; i<this.dcWires.length; i++) str.append(String.format("%d\t", this.dcWires[i]));
-        str.append(String.format("%d\t",   this.ftofPaddles[1]));
-        str.append(String.format("%.2f\t", this.particle.vz()));
-        str.append(String.format("%d\t",   this.ftofPaddles[2]));
-        for(int i=0; i<this.ecalStrips.length; i++) str.append(String.format("%d\t", this.ecalStrips[i]));
-        str.append(String.format("%d\t",   this.htccMask));
-        str.append(String.format("%d\t",   this.sector));
-        for(int i=0; i<this.ecalStrips.length; i++) str.append(String.format("%.1f\t", this.particle.getProperty("ECALe"+(i*3+1))));
-        return str.toString();
+        str += String.format("%d ",    this.particle.charge());
+        str += String.format("%7.2f ", this.particle.p());
+        str += String.format("%7.2f ", Math.toDegrees(this.particle.theta()));
+        str += String.format("%7.2f ", Math.toDegrees(this.particle.phi()));
+        for(int i=0; i<this.dcWires.length; i++) str +=  String.format("%3d ", (int) this.dcWires[i]);
+        str += String.format("%3d ",   (int) this.ftofPaddles[1]);
+        str += String.format("%7.2f ", this.particle.vz());
+        str += String.format("%3d ",   (int) this.ftofPaddles[2]);
+        for(int i=0; i<this.ecalStrips.length; i++) str += String.format("%3d ", (int) this.ecalStrips[i]);
+        str += String.format("%3d ",   (int) this.htccMask);
+        str += String.format("%3d ",   (int) this.sector);
+        for(int i=0; i<this.ecalStrips.length; i++) str += String.format("%7.1f ", this.particle.getProperty("ECALe"+(i*3+1)));
+        return str;
     }
 }

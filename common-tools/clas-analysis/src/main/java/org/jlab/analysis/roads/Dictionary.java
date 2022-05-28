@@ -7,74 +7,65 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import org.jlab.clas.physics.Particle;
-import org.jlab.detector.base.DetectorLayer;
+import org.jlab.utils.benchmark.ProgressPrintout;
 
 /**
  *
  * @author devita, ziegler
  */
-public class Dictionary extends HashMap<byte[], Particle> {
-
+public class Dictionary extends HashMap<ArrayList<Byte>, Particle> {
+                
     public Dictionary() {
     }
     
-    
+        
     public void printDictionary() {
-        for(Map.Entry<byte[], Particle> entry : this.entrySet()) {
-            byte[] road       = entry.getKey();
+        for(Map.Entry<ArrayList<Byte>, Particle> entry : this.entrySet()) {
+            ArrayList<Byte> road = entry.getKey();
             Particle particle = entry.getValue();
             Road r = new Road(road,particle);
             System.out.println(r.toString());
         }
     }
 
-    public void readDictionary(String fileName, int sec, int mode, double thrs) {
+    public void readDictionary(String fileName, TestMode mode, int wireBinning, int stripBinning, int sectorDependence) {
         
         System.out.println("\nReading dictionary from file " + fileName);
-        int nLines = 0;
         int nFull  = 0;
         int nDupli = 0;
-        int nfirst = 0;
         
         File fileDict = new File(fileName);
         
         try {
             BufferedReader txtreader = new BufferedReader(new FileReader(fileDict));
             
+            ProgressPrintout progress = new ProgressPrintout();
+            
             String line = null;
             while ((line = txtreader.readLine()) != null) {
                 
-                nLines++;
-                if(nLines % 1000000 == 0) System.out.println("Read " + nLines + " roads");
-                
                 Road road = new Road(line);
-                if(road.getSuperLayers()!=6 || road.getParticle().p()< thrs) continue;
-                road.setSector((byte) (road.getSector()*sec));
-                if(mode<3) road.setHtccMask((byte) 0);
-                if(mode<2) {
-                    road.setStrip(DetectorLayer.PCAL_V, (byte) 0);
-                    road.setStrip(DetectorLayer.PCAL_W, (byte) 0);
-                }
-                if(mode<1) {
-                    road.setPaddle(DetectorLayer.FTOF1B, (byte) 0);
-                    road.setStrip(DetectorLayer.PCAL_U, (byte) 0);
-                }
+                road.setBinning(wireBinning, stripBinning, sectorDependence);
                 nFull++;
-                if(this.containsKey(road.getRoad())) {
+                if(this.containsKey(road.getKey(mode))) {
                     nDupli++;
                     if(nDupli<10) System.out.println("WARNING: found duplicate road");
                     else if(nDupli==10) System.out.println("WARNING: reached maximum number of warnings, switching to silent mode");
                 }
                 else {
-                    this.put(road.getRoad(), road.getParticle());
-                        
+                    this.put(road.getKey(mode), road.getParticle());
                 }
+                progress.setAsInteger("duplicates", nDupli);
+                progress.setAsInteger("good", this.size());
+                progress.setAsInteger("roads", nFull);
+                progress.updateStatus();
             }
             txtreader.close();
-            System.out.println("Found " + nLines + " roads with " + nFull + " full ones, " + nDupli + " duplicates and " + this.keySet().size() + " good ones");
+            progress.showStatus();
         } 
         catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -87,10 +78,10 @@ public class Dictionary extends HashMap<byte[], Particle> {
     public void writeDictionary(String filename) {
         
         try {
-            FileWriter writer = new FileWriter(filename, true);
+            FileWriter writer = new FileWriter(filename, false);
             BufferedWriter bufferedWriter = new BufferedWriter(writer);
  
-            for(Map.Entry<byte[],Particle> entry : this.entrySet()) {
+            for(Map.Entry<ArrayList<Byte>,Particle> entry : this.entrySet()) {
                 Road road = new Road(entry.getKey(), entry.getValue());
                 bufferedWriter.write(road.toString());
                 bufferedWriter.newLine();
@@ -101,4 +92,61 @@ public class Dictionary extends HashMap<byte[], Particle> {
         }
     }
     
+    
+    public static enum TestMode {
+            
+        UDF(-1,                      "Undefined"),
+        DC(0,                               "DC"),
+        DCFTOFPCALU(1,             "DCFTOFPCALU"),
+        DCFTOFPCALUVW(2,         "DCFTOFPCALUVW"),
+        DCFTOFPCALUVWHTCC(3, "DCFTOFPCALUVWHTCC");
+
+        private int mode;
+        private String name;
+        
+
+        TestMode() {
+            mode = -1;
+            name = "UNDEFINED";
+        }
+
+        TestMode(int mode, String name) {
+            this.mode = mode;
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getMode() {
+            return mode;
+        }
+
+        public boolean contains(TestMode mode) {
+            return this.getMode() >= mode.getMode();
+        }
+        
+        public static TestMode getTestMode(int mode) {
+            switch (mode) {
+                case 0:
+                    return TestMode.DC;
+                case 1:
+                    return TestMode.DCFTOFPCALU;
+                case 2:
+                    return TestMode.DCFTOFPCALUVW;
+                case 3:
+                    return TestMode.DCFTOFPCALUVWHTCC;
+                default:
+                    return TestMode.UDF;
+            }
+        }
+        
+        public static String getOptionsString() {
+            String s = "available options are ";
+            for(int i=0; i<3; i++)
+                s += i + "-" + TestMode.getTestMode(i).getName() + " " ;
+            return s;
+        }
+    }
 }

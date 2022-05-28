@@ -132,13 +132,13 @@ public class DictionaryGenerator {
 
                 Road road = this.getRoad(charge, p, thetaDeg, phiDeg, vxCm, vyCm, vzCm, swim);
 
-                if(road.getLayerHits(3)>=3 && road.getSuperLayers()==6) {
-                    if(dictionary.containsKey(road.getRoad()) && duplicates)  {
-                        dictionary.replace(road.getRoad(), road.getParticle());
+                if(road != null) {
+                    if(dictionary.containsKey(road.getKey()) && duplicates)  {
+                        dictionary.replace(road.getKey(), road.getParticle());
                            // System.out.println(" Number of duplicate roads "+nRoad+" p "+p+" theta "+thetaDeg+" phi "+phiDeg+" vz "+vzCm);
                     }
                     else {
-                        dictionary.put(road.getRoad(), road.getParticle());
+                        dictionary.put(road.getKey(), road.getParticle());
 
                         bufferedWriter.write(road.toString());
                         bufferedWriter.newLine();
@@ -216,6 +216,7 @@ public class DictionaryGenerator {
         road.setStrip(1, (byte) pcalU);
         road.setStrip(2, (byte) pcalV);
         road.setStrip(3, (byte) pcalW);
+        if(!road.isValid()) road = null;
         return road;
     }
     

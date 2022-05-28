@@ -1,6 +1,16 @@
 package org.jlab.analysis.roads;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import org.jlab.analysis.roads.Dictionary.TestMode;
+import org.jlab.io.base.DataEvent;
+import org.jlab.utils.benchmark.ProgressPrintout;
 import org.jlab.utils.options.OptionParser;
 
 /**
@@ -9,10 +19,7 @@ import org.jlab.utils.options.OptionParser;
  */
 public class DictionaryMerger {
 
-    private Dictionary dictionary = null;
-    private int nlines;
-    private int nfull;
-    private int ndupli;            
+    private Dictionary dictionary = null;            
     
     public DictionaryMerger(){
 
@@ -20,19 +27,7 @@ public class DictionaryMerger {
 
     public boolean init() {
         this.dictionary = new Dictionary();
-        this.nlines = 0;
-        this.ndupli = 0;
-        this.nfull  = 0;
         return true;
-    }
-    
-    
-    public void readDictionary(String filename) {
-        this.dictionary.readDictionary(filename, 1, 3, 0);
-    }
-    
-    public void writeDictionary(String filename) {
-        this.dictionary.writeDictionary(filename);
     }
     
     
@@ -57,11 +52,47 @@ public class DictionaryMerger {
             DictionaryMerger merger = new DictionaryMerger();
             merger.init();
 
-            for(String inputFile : inputList){
-                merger.readDictionary(inputFile);
-                merger.writeDictionary(outputFile);
+            ProgressPrintout progress = new ProgressPrintout();
+            int nDupli = 0;
+            int nRoads = 0;
+            try {
+                FileWriter writer = new FileWriter(outputFile, false);
+                BufferedWriter bufferedWriter = new BufferedWriter(writer);
+                
+                for(String inputFile : inputList) {
+        
+                    BufferedReader txtreader = new BufferedReader(new FileReader(inputFile));
 
-            }
+                    String line = null;
+                    while ((line = txtreader.readLine()) != null) {
+                        nRoads++;
+                        Road road = new Road(line);
+                        
+                        if(merger.dictionary.containsKey(road.getKey())) {
+                            nDupli++;
+                            if(nDupli<10) System.out.println("WARNING: found duplicate road");
+                            else if(nDupli==10) System.out.println("WARNING: reached maximum number of warnings, switching to silent mode");
+                        }
+                        else {
+                            merger.dictionary.put(road.getKey(), road.getParticle());
+                            bufferedWriter.write(road.toString());
+                            bufferedWriter.newLine();
+                        }
+                        progress.setAsInteger("duplicates", nDupli);
+                        progress.setAsInteger("good", merger.dictionary.size());
+                        progress.setAsInteger("roads", nRoads);
+                        progress.updateStatus();
+                    }
+                    txtreader.close();
+                }
+                progress.showStatus();
+            } 
+            catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } 
+            catch (IOException e) {
+                e.printStackTrace();
+            } 
         }
         else {
             parser.printUsage();
