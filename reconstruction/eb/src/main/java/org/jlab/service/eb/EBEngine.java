@@ -38,6 +38,8 @@ public class EBEngine extends ReconstructionEngine {
     String scintextrasBank = null;
     String cherenkovBank    = null;
     String trackBank        = null;
+    String UtrackBank        = null;
+    String trackUBank        = null;
     String crossBank        = null;
     String ftBank           = null;
     String trajectoryBank   = null;
@@ -77,6 +79,7 @@ public class EBEngine extends ReconstructionEngine {
         this.setScintillatorBank(prefix+"::Scintillator");
         this.setScintClusterBank(prefix+"::ScintExtras");
         this.setTrackBank(prefix+"::Track");
+        this.setUTrackBank(prefix+"::UTrack");
         this.setCrossBank(prefix+"::TrackCross");
         if (!this.getClass().isAssignableFrom(EBHBEngine.class) &&
             !this.getClass().isAssignableFrom(EBHBAIEngine.class)) {
@@ -215,7 +218,7 @@ public class EBEngine extends ReconstructionEngine {
                 if (bankCovMat != null) de.appendBanks(bankCovMat);
 
                 if (ctracks.size()>0) {
-                    DataBank x = DetectorData.getUTracksBank(eb.getEvent().getParticles(), de, "REC::UTrack", ctracks.size());
+                    DataBank x = DetectorData.getUTracksBank(eb.getEvent().getParticles(), de, UtrackBank, ctracks.size());
                     de.appendBanks(x);
                 }
             }
@@ -271,6 +274,10 @@ public class EBEngine extends ReconstructionEngine {
 
     public void setTrackBank(String trackBank) {
         this.trackBank = trackBank;
+    }
+    
+    public void setUTrackBank(String trackBank) {
+        this.UtrackBank = trackBank;
     }
     
     public void setFTBank(String ftBank) {
