@@ -52,7 +52,7 @@ public class DictionaryGenerator {
     private int     run = 11;
     private double  torus, solenoid;
     private double  solShift;
-    private long    seed = 0;
+    private long    randomSeed = 0;
     private int     charge = -1;
     private double  pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax, vr;
     private boolean duplicates = false;
@@ -85,7 +85,7 @@ public class DictionaryGenerator {
     
     public void generate(int n) {
         String filename = "Dictionary" 
-               + "_seed:"  + seed
+               + "_seed:"  + randomSeed
                + "_n:"     + n
                + "_var:"   + variation 
                + "_t:"     + torus
@@ -237,6 +237,7 @@ public class DictionaryGenerator {
         magfield.initializeMagneticFields();
         Swimmer.setMagneticFieldsScales(solenoid, torus, solShift);
 
+        randomSeed = seed;
         rand = new Random();
         rand.setSeed(seed);
         
@@ -254,7 +255,7 @@ public class DictionaryGenerator {
         +"\n Phi (deg):\t"     + phiMin + "-" + phiMax
         +"\n Vz (cm):\t"       + vzMin  + "-" + vzMax
         +"\n Vr (cm):\t"       + vr
-        +"\n Seed:\t\t"        + seed
+        +"\n Seed:\t\t"        + randomSeed
         +"\n Duplicates:\t"    + duplicates);
     }
     
