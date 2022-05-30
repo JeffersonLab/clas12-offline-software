@@ -8,7 +8,6 @@ package org.jlab.detector.decode;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,6 +17,7 @@ import org.jlab.coda.jevio.DataType;
 import org.jlab.coda.jevio.EvioException;
 import org.jlab.coda.jevio.EvioNode;
 import org.jlab.detector.decode.DetectorDataDgtz.ADCData;
+import org.jlab.detector.decode.DetectorDataDgtz.HelicityDecoderData;
 import org.jlab.detector.decode.DetectorDataDgtz.SCALERData;
 import org.jlab.detector.decode.DetectorDataDgtz.TDCData;
 import org.jlab.detector.decode.DetectorDataDgtz.VTPData;
@@ -87,6 +87,8 @@ public class CodaEventDecoder {
         rawEntries.addAll(scalerEntries);
 
         this.getDataEntries_EPICS(event);
+        this.getDataEntries_HelicityDecoder(event);
+
         this.setTimeStamp(event);
 
         return rawEntries;
@@ -1249,6 +1251,49 @@ public class CodaEventDecoder {
                 }
             }
         }
+    }
+
+    public HelicityDecoderData getDataEntries_HelicityDecoder(EvioDataEvent event){
+        HelicityDecoderData data = null;
+        List<EvioTreeBranch> branches = this.getEventBranches(event);
+        for(EvioTreeBranch branch : branches){
+            for(EvioNode node : branch.getNodes()){
+                if(node.getTag()==57651) {
+                    
+                    long[] longData = ByteDataTransformer.toLongArray(node.getStructureBuffer(true));
+                    int[]  intData  = ByteDataTransformer.toIntArray(node.getStructureBuffer(true));
+                    long  timeStamp = longData[2]&0x0000ffffffffffffL;
+                    
+                    int tsettle  = DataUtils.getInteger(intData[16], 0, 0) > 0 ? 1 : -1;
+                    int pattern  = DataUtils.getInteger(intData[16], 1, 1) > 0 ? 1 : -1;
+                    int pair     = DataUtils.getInteger(intData[16], 2, 2) > 0 ? 1 : -1;
+                    int helicity = DataUtils.getInteger(intData[16], 3, 3) > 0 ? 1 : -1;                             
+                    int start    = DataUtils.getInteger(intData[16], 4, 4) > 0 ? 1 : -1;                             
+                    int polarity = DataUtils.getInteger(intData[16], 5, 5) > 0 ? 1 : -1;                             
+                    int count    = DataUtils.getInteger(intData[16], 8, 11);
+                    data = new HelicityDecoderData((byte) helicity, (byte) pair, (byte) pattern);
+                    data.setTimestamp(timeStamp);
+                    data.setHelicitySeed(intData[7]);
+                    data.setNTStableRisingEdge(intData[8]);
+                    data.setNTStableFallingEdge(intData[9]);
+                    data.setNPattern(intData[10]);
+                    data.setNPair(intData[11]);
+                    data.setTStableStart(intData[12]);
+                    data.setTStableEnd(intData[13]);
+                    data.setTStableTime(intData[14]);
+                    data.setTSettleTime(intData[15]);
+                    data.setTSettle((byte) tsettle);
+                    data.setHelicityPattern((byte) start);
+                    data.setPolarity((byte) polarity);
+                    data.setPatternPhaseCount((byte) count);
+                    data.setPatternWindows(intData[17]);
+                    data.setPairWindows(intData[18]);
+                    data.setHelicityWindows(intData[19]);
+                    data.setHelicityPatternWindows(intData[20]);
+                }
+            }
+        }
+        return data;
     }
 
     public List<DetectorDataDgtz> getDataEntries_Scalers(EvioDataEvent event){

@@ -7,6 +7,7 @@ public class HitVector {
     private double phi; 
     private double time;
     private double adc;
+    private int flag; 
 
     public HitVector()
     {
@@ -15,6 +16,7 @@ public class HitVector {
         phi = 0; 
         time = 0; 
         adc = 0;
+        flag = 0; 
     }
 
     public HitVector(int padnum, double hittime, double padadc)
@@ -24,6 +26,7 @@ public class HitVector {
         phi = 0; 
         time = hittime; 
         adc = padadc;
+        flag = 0; 
     }
 
     public HitVector(int padnum, double zpad, double phipad, double hittime, double padadc)
@@ -33,6 +36,7 @@ public class HitVector {
         phi = phipad;
         time = hittime;
         adc = padadc;
+        flag = 0;
     }
 
     public void setpad(int padnum)
@@ -58,6 +62,16 @@ public class HitVector {
     public void setadc(double padadc)
     {
         adc = padadc;
+    }
+
+    public void flagHit(int f)
+    {
+        flag = f;
+    }
+
+    public int flag()
+    {
+        return flag; 
     }
 
     public int pad()
