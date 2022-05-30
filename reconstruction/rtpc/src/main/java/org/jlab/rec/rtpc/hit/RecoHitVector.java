@@ -8,11 +8,12 @@ public class RecoHitVector {
 	private double z;
 	private double dt;
 	private double time;
-        private double _adc;
-        private HitVector _smallhit;
-        private HitVector _largehit;
-        private double _r;
-        private double _phi;
+	private double _adc;
+	private HitVector _smallhit;
+	private HitVector _largehit;
+	private double _r;
+	private double _phi;
+	private int flag; 
        
 	
 	public RecoHitVector()
@@ -23,10 +24,11 @@ public class RecoHitVector {
 		z = 0; 
 		dt = 0;
 		time = 0;
-                _adc = 0;
+		_adc = 0;
+		flag = 0; 
 	}
 	
-	public RecoHitVector(int padnum, double xrec, double yrec, double zrec, double rrec, double phirec, double tdiff, double t, double adc, HitVector smallhit, HitVector largehit)
+	public RecoHitVector(int padnum, double xrec, double yrec, double zrec, double rrec, double phirec, double tdiff, double t, double adc, HitVector smallhit, HitVector largehit, int f)
 	{
 		pad = padnum; 
 		x = xrec;
@@ -34,12 +36,12 @@ public class RecoHitVector {
 		z = zrec;
 		dt = tdiff;
 		time = t;
-                _adc = adc;
-                _smallhit = smallhit;
-                _largehit = largehit;
-                _r = rrec;
-                _phi = phirec;
-                
+		_adc = adc;
+		_smallhit = smallhit;
+		_largehit = largehit;
+		_r = rrec;
+		_phi = phirec;
+		flag = f; 
 	}
 	
 	public void setpad(int padnum)
@@ -71,7 +73,15 @@ public class RecoHitVector {
 	{
             dt = tdiff;
 	}
+
+	public void setFlag(int f){
+		flag = f; 
+	}
 	
+	public int flag(){
+		return flag; 
+	}
+
 	public int pad()
 	{
             return pad;
