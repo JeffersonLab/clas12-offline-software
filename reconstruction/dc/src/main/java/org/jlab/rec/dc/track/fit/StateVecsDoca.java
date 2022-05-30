@@ -92,7 +92,7 @@ public class StateVecsDoca {
            // LOGGER.log(Level.FINE, " from "+(float)Z[i]+" to "+(float)Z[f]+" at "+(float)z+" By is "+bf[1]+" B is "+Math.sqrt(bf[0]*bf[0]+bf[1]*bf[1]+bf[2]*bf[2])/Bmax+" stepSize is "+s);
             if(Math.signum(Zf - Z[i]) *(z+s)>Math.signum(Zf - Z[i]) *Zf)
                 s=Math.signum(Zf - Z[i]) *Math.abs(Zf-z);
-            rk.RK4transport(sector, s, dcSwim, covMat.covMat, fVec, fCov);
+            rk.RK4transport(sector, s, dcSwim, covMat, fVec, fCov);
 
             // Q  process noise matrix estimate
 
@@ -184,7 +184,7 @@ public class StateVecsDoca {
             if(Math.signum(Z[f] - Z[i]) *(z+s)>Math.signum(Z[f] - Z[i]) *Z[f])
                 s=Math.signum(Z[f] - Z[i]) *Math.abs(Z[f]-z);
 
-            rk.RK4transport(sector, s, dcSwim, covMat.covMat, fVec, fCov);
+            rk.RK4transport(sector, s, dcSwim, covMat, fVec, fCov);
 
             // Q  process noise matrix estimate
 
@@ -287,7 +287,7 @@ public class StateVecsDoca {
             double dPath = fVec.deltaPath;
             covMat.covMat = fCov.covMat;
 
-            rk.RK4transport(sector, s, dcSwim, covMat.covMat, fVec, fCov);
+            rk.RK4transport(sector, s, dcSwim, covMat, fVec, fCov);
 
         }
 
