@@ -1,13 +1,16 @@
 package org.jlab.service.eb;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.clas.detector.DetectorEvent;
+import org.jlab.clas.detector.DetectorResponseComparators;
 import org.jlab.rec.eb.EBCCDBEnum;
+import org.jlab.clas.detector.matching.MatchCND;
 
 /*
  *
@@ -143,7 +146,7 @@ public class EBMatching {
             eventBuilder.getUnmatchedResponses(null, DetectorType.ECAL, ecalLayer);
 
         Vector3 vertex = new Vector3(0,0,0);
-        if (eventBuilder.getEvent().getParticles().size()>0) {
+        if (!eventBuilder.getEvent().getParticles().isEmpty()) {
             vertex.copy(eventBuilder.getEvent().getParticle(0).vertex());
         }
 
@@ -163,19 +166,77 @@ public class EBMatching {
 
     /**
      * find CD neutrals and append to particle list
+	 * @param de
+	 * @return whether any neutrals were added 
      */
     public boolean addCentralNeutrals(DetectorEvent de) {
 
-        int newneuts=0;
+        int newNeutrals = 0;
         
         Vector3 vertex = new Vector3(0,0,0);
-        if (de.getParticles().size()>0) {
+        if (!de.getParticles().isEmpty()) {
             vertex.copy(eventBuilder.getEvent().getParticle(0).vertex());
         }
 
-        List<DetectorResponse> respsCND =
-            eventBuilder.getUnmatchedResponses(null, DetectorType.CND, 0);
+        //
+        // This is the new case where CND only does intralayer clustering,
+        // and EB does CND's interlayer matching:
+        //
+        MatchCND matcher = new MatchCND(eventBuilder.ccdb.getVector3D(EBCCDBEnum.CND_MATCHING_dr),
+                eventBuilder.ccdb.getDouble(EBCCDBEnum.CND_MATCHING_dt));
+        List<DetectorResponse> cnd = eventBuilder.getUnmatchedResponses(null, DetectorType.CND, 0);
 
+        // This would be energy-based seeding, with no layer preferences:
+        //hits.sort(DetectorResponseComparators.energyCompare);
+        // This would be layer-based seeding, with energy preference within layers:
+        cnd.sort(DetectorResponseComparators.layerEnergy);
+
+        while (!cnd.isEmpty()) {
+
+			// CND clusters are already sorted such that the first one will
+			// always seed a new neutral:
+            DetectorResponse seed = cnd.remove(0);
+			final int pindex = de.getParticles().size();
+            DetectorParticle neutral = DetectorParticle.createNeutral(seed,vertex);
+            seed.setAssociation(pindex);
+            newNeutrals++;
+
+			// Associate any remaining CND clusters to this neutral:
+            for (int i=0; i<cnd.size(); i++) {
+                if (seed.getDescriptor().getLayer() ==  cnd.get(i).getDescriptor().getLayer()) {
+					continue;
+				}
+				if (matcher.matches(neutral, cnd.get(i))) {
+					DetectorResponse hit = cnd.remove(i);
+					neutral.addResponse(hit);
+					hit.setAssociation(pindex);
+					break;
+                }
+            }
+
+			// Associate any remaining CTOF clusters to this neutral:
+			List<DetectorResponse> ctof = eventBuilder.getUnmatchedResponses(null, DetectorType.CTOF, 0);
+            final int indx=neutral.getDetectorHit(ctof,DetectorType.CTOF,0,
+                    eventBuilder.ccdb.getDouble(EBCCDBEnum.CTOF_DZ));
+            if (indx >= 0) {
+                neutral.addResponse(ctof.get(indx),true);
+                ctof.get(indx).setAssociation(pindex);
+                // FIXME:  stop mixing Vector3 and Vector3D
+                final double dx = ctof.get(indx).getPosition().x()-vertex.x();
+                final double dy = ctof.get(indx).getPosition().y()-vertex.y();
+                final double dz = ctof.get(indx).getPosition().z()-vertex.z();
+                ctof.get(indx).setPath(Math.sqrt(dx*dx+dy*dy+dz*dz));
+            }
+
+            de.addParticle(neutral);
+        }
+        
+		return newNeutrals>0;
+           
+        /*
+        //
+        // This was the old case when CND did interlayer clustering:
+        //
         // make a new neutral particle for each unmatched CND cluster:
         for (DetectorResponse respCND : respsCND) {
 
@@ -215,8 +276,8 @@ public class EBMatching {
             de.addParticle(neutral);
             newneuts++;
         }
+        */
 
-        return newneuts>0;
     }
 
 }

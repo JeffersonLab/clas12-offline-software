@@ -4,6 +4,7 @@ import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.detector.matching.IMatch;
 
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.Vector3;
@@ -414,7 +415,12 @@ public class DetectorParticle implements Comparable {
     public void setMass(double mass){ this.particleMass = mass;}
     public void setPid(int pid){this.particlePID = pid;}
     public void setCharge(int charge) { this.detectorTrack.setCharge(charge);}
-    
+  
+    private int getDetectorHit2(List<DetectorResponse> hits, DetectorType type,
+            IMatch match) {
+        return match.bestMatch(this, hits, type);
+    }
+
     public int getDetectorHit(List<DetectorResponse>  hitList, DetectorType type,
             int detectorLayer,
             double distanceThreshold){
