@@ -3,28 +3,15 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jlab.clas</groupId>
   <artifactId>clas-io</artifactId>
-  <version>7.1.0-SNAPSHOT</version>
+  <version>8.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <parent>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../../parent/pom.xml</relativePath>
-    <version>7.1.0-SNAPSHOT</version>
+    <version>8.0.0-SNAPSHOT</version>
   </parent>
-
-  <build>
-      <plugins>
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <configuration>
-                  <source>1.8</source>
-                  <target>1.8</target>
-              </configuration>
-          </plugin>
-      </plugins>
-  </build>
 
   <dependencies>
 
@@ -34,12 +21,20 @@
       <version>4.3-SNAPSHOT</version>
     </dependency>
 
+    <!-- API, java.xml.bind module -->
     <dependency>
-      <groupId>javax.xml.bind</groupId>
-      <artifactId>jaxb-api</artifactId>
-      <version>2.3.0</version>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+      <version>2.3.2</version>
     </dependency>
-
+    
+    <!-- Runtime, com.sun.xml.bind module -->
+    <dependency>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-runtime</artifactId>
+      <version>2.3.2</version>
+    </dependency>
+        
     <dependency>
       <groupId>org.jlab.coda</groupId>
       <artifactId>jevio</artifactId>
@@ -89,30 +84,19 @@
       <version>2.3-SNAPSHOT</version>
     </dependency>
 
-<!--
-    <dependency>
-      <groupId>org.jlab.clas</groupId>
-      <artifactId>clas-tools</artifactId>
-      <version>2.4-SNAPSHOT</version>
-    </dependency>
--->
-
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-utils</artifactId>
-      <version>7.1.0-SNAPSHOT</version>
+      <version>8.0.0-SNAPSHOT</version>
     </dependency>
+
     <dependency>
         <groupId>org.jlab.clas</groupId>
         <artifactId>clas-logging</artifactId>
-        <version>7.1.0-SNAPSHOT</version>
+        <version>8.0.0-SNAPSHOT</version>
         <scope>compile</scope>
     </dependency>
-  </dependencies>
 
-  <properties>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-  </properties>
+  </dependencies>
 
 </project>

@@ -30,8 +30,7 @@ public abstract class AMeasVecs {
             mvec.surface = measSurfaces.get(i);
             if(mvec.surface.getError()!=0)
                 mvec.error = mvec.surface.getError();
-            mvec.l_over_X0 = mvec.surface.getl_over_X0(); 
-            mvec.skip = mvec.surface.notUsedInFit;
+            mvec.skip = mvec.surface.passive;
             mvec.hemisphere = measSurfaces.get(i).hemisphere;
             measurements.add(mvec);
         }
@@ -208,10 +207,6 @@ public abstract class AMeasVecs {
         public int k        = -1;
         public boolean passive = false;
         public boolean skip  = false;
-        // this is for multiple scattering estimates in track 
-        public double l_over_X0;
-        //this is for energy loss
-        public double Z_over_A_times_l;
         public double hemisphere = 1;
 
 

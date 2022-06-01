@@ -74,7 +74,8 @@ public class HipoDataSync implements DataSync {
             this.writer.addEvent(hipoEvent.getHipoEvent(),hipoEvent.getHipoEvent().getEventTag());
         }
     }
-
+    public HipoWriterSorted getWriter(){ return writer;}
+    
     public void close() {
         this.writer.close();
     }

@@ -5,7 +5,6 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.rec.cvt.Constants;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,10 +67,6 @@ public class CCDBConstantsLoader {
         double[][] CRCEDGE1 = new double[NREGIONS][NSECTORS];   // the angle of the first edge of each PCB detector A, B, C
         double[][] CRCEDGE2 = new double[NREGIONS][NSECTORS];   // the angle of the second edge of each PCB detector A, B, C
         double[] CRCXPOS = new double[NREGIONS]; 		// Distance on the PCB between the PCB first edge and the edge of the first strip in mm
-
-        double[] EFF_Z_OVER_A = new double[NLAYERS];
-        double[] T_OVER_X0    = new double[NLAYERS];
-        double[] TMAT         = new double[NLAYERS];
         
          int GRID_SIZE=405;
          double[] THETA_L_grid = new double [GRID_SIZE];
@@ -98,7 +93,7 @@ public class CCDBConstantsLoader {
         dbprovider.loadTable("/geometry/cvt/mvt/bmt_strip_L6");
         
         //load material budget:
-        dbprovider.loadTable("/geometry/cvt/mvt/bmt_material");
+        dbprovider.loadTable("/geometry/cvt/mvt/material");
         
          //load Lorentz angle table
         dbprovider.loadTable("/calibration/mvt/lorentz");
@@ -109,16 +104,7 @@ public class CCDBConstantsLoader {
         dbprovider.loadTable("/geometry/cvt/mvt/alignment");
         dbprovider.loadTable("/geometry/cvt/mvt/position");
         
-        //beam offset table
-        dbprovider.loadTable("/geometry/beam/position");
-        
-        //target position table
-        dbprovider.loadTable("/geometry/target");
-        
         dbprovider.disconnect();
-        
-        // target position
-        double ztarget = dbprovider.getDouble("/geometry/target/position", 0);
         
         // Getting the BMTConstants
         // 1) pitch info 
@@ -217,15 +203,18 @@ public class CCDBConstantsLoader {
         
         //material budget
         //===============
-        for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_material" + "/sector"); i++) {
-            int layer = dbprovider.getInteger("/geometry/cvt/mvt/bmt_material" + "/layer", i);
-            double thickness = dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/thickness", i)/10000.;
-            double Zeff =  dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/average_z", i);
-            double Aeff =  dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/average_a", i);
-            double X0 =  dbprovider.getDouble("/geometry/cvt/mvt/bmt_material" + "/x0", i);
-            EFF_Z_OVER_A[layer-1] += thickness*Zeff/Aeff;      
-            T_OVER_X0[layer-1]+=thickness/X0;
-            TMAT[layer-1] += thickness;
+        for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/material" + "/sector"); i++) {
+            int layer    = dbprovider.getInteger("/geometry/cvt/mvt/material" + "/layer", i);
+            int comp     = dbprovider.getInteger("/geometry/cvt/mvt/material" + "/component", i);
+            double[] properties = new double[5];
+            String name   = dbprovider.getString("/geometry/cvt/mvt/material" + "/name", i);
+            properties[0] = dbprovider.getDouble("/geometry/cvt/mvt/material" + "/thickness", i)/1000.;  // mm
+            properties[1] = dbprovider.getDouble("/geometry/cvt/mvt/material" + "/density", i)*1E-3;     // g/mm3
+            properties[2] = dbprovider.getDouble("/geometry/cvt/mvt/material" + "/average_Z", i)/
+                            dbprovider.getDouble("/geometry/cvt/mvt/material" + "/average_A", i);
+            properties[3] =  dbprovider.getDouble("/geometry/cvt/mvt/material" + "/X0", i)*10;           // mm
+            properties[4] =  dbprovider.getDouble("/geometry/cvt/mvt/material" + "/I", i);               // eV
+            BMTConstants.addMaterial(name, properties);
         }
         
         
@@ -287,10 +276,7 @@ public class CCDBConstantsLoader {
             BMTConstants.TOLOCAL[layer-1][sector-1]   = transform.inverse();
         }
         
-         
-        // target position mm
-        Constants.setZoffset(ztarget*10);
-        
+       
         BMTConstants.setCRCRADIUS(CRCRADIUS);
         BMTConstants.setCRZRADIUS(CRZRADIUS);
         BMTConstants.setCRZNSTRIPS(CRZNSTRIPS);
@@ -319,8 +305,6 @@ public class CCDBConstantsLoader {
         BMTConstants.setCRCGRPNMIN(CRCGRPNMIN);
         BMTConstants.setCRCGRPNMAX(CRCGRPNMAX);
         BMTConstants.setCRZWIDTH(CRZWIDTH);
-        BMTConstants.setEFF_Z_OVER_A(EFF_Z_OVER_A);
-        BMTConstants.setT_OVER_X0(T_OVER_X0);
         BMTConstants.setTHETAL_grid(THETA_L_grid);
         BMTConstants.setE_grid(ELEC_grid);
         BMTConstants.setB_grid(MAG_grid);

@@ -43,6 +43,13 @@ public class HelicityState implements Comparable<HelicityState>, Comparator<Heli
 
     public HelicityState(){}
 
+    public HelicityState(HelicityBit helicity, HelicityBit pairSync, HelicityBit patternSync){
+        this.helicityRaw = helicity;
+        this.helicity    = helicity;
+        this.pairSync    = pairSync;
+        this.patternSync = patternSync;
+    }
+
     /**
      * Compare based on timestamp for sorting and List insertion.
      * @param o1
