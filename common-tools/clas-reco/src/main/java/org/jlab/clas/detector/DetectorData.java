@@ -208,6 +208,9 @@ public class DetectorData {
             bank.setFloat("beta", row, (float) particles.get(row).getBeta());
             bank.setShort("status", row, (short) particles.get(row).getStatus().getValue());
             bank.setFloat("chi2pid", row, (float) particles.get(row).getPidQuality());
+            bank.setFloat("px", row, (float) particles.get(row).vector().x());
+            bank.setFloat("py", row, (float) particles.get(row).vector().y());
+            bank.setFloat("pz", row, (float) particles.get(row).vector().z());
         }
         return bank;
     }
