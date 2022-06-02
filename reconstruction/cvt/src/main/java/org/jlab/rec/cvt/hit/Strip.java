@@ -7,7 +7,7 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.bmt.BMTConstants;
@@ -210,7 +210,7 @@ public class Strip {
      * @param swim
      */
     public void calcBMTStripParams(int sector, int layer, Swim swim) {
-        BMTGeometry geo = Constants.getInstance().BMTGEOMETRY;
+        BMTGeometry geo = Geometry.getInstance().getBMT();
         
         int region = geo.getRegion(layer); // region index (1...3) 1=layers 1&2, 2=layers 3&4, 3=layers 5&6
         this.setToGlobal(geo.toGlobal(layer, sector));
@@ -244,8 +244,8 @@ public class Strip {
             // get the strip number after correcting for Lorentz angle
             int theLorentzCorrectedStrip = geo.getStrip(layer,  sector, line.midpoint());
             this.setLCStrip(theLorentzCorrectedStrip);
-            // RDV use xyz dependent ThetaLorentz
-            double sigma = BMTConstants.SIGMADRIFT / Math.cos(geo.getThetaLorentz(layer, sector)); // max sigma for drift distance  (HDRIFT) = total gap from top to mesh
+
+            double sigma = BMTConstants.SIGMADRIFT / Math.cos(geo.getThetaLorentz(layer, sector, line.midpoint(), swim)); // max sigma for drift distance  (HDRIFT) = total gap from top to mesh
 
             //max phi err
             double phiErrL = sigma / geo.getRadius(layer);

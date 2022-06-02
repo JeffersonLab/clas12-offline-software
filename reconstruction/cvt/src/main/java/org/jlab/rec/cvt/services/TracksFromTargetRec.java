@@ -18,6 +18,7 @@ import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.clas.tracking.kalmanfilter.Units;
+import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.banks.RecoBankReader;
 import org.jlab.rec.cvt.measurement.Measurements;
 import org.jlab.rec.cvt.track.Seed;
@@ -241,7 +242,7 @@ public class TracksFromTargetRec {
             for(int it = 0; it < tracks.size(); it++) {
                 int id = it + 1;
                 tracks.get(it).setId(id); 
-                tracks.get(it).findTrajectory(swimmer, Constants.getInstance().OUTERSURFACES);
+                tracks.get(it).findTrajectory(swimmer, Geometry.getInstance().geOuterSurfaces());
                 tracks.get(it).update_Crosses(id);
                 tracks.get(it).update_Clusters(id);
                 tracks.get(it).setTrackCovMat(recUtil.getCovMatInTrackRep(tracks.get(it)));

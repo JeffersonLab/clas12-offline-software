@@ -11,6 +11,7 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.hit.ADCConvertor;
@@ -243,9 +244,9 @@ public class HitReader {
                 Strip SvtStrip = new Strip(strip, ADCConvertor.SVTADCtoDAQ(ADC), time); 
                 SvtStrip.setPitch(SVTGeometry.getPitch());
                 // get the strip line
-                SvtStrip.setLine(Constants.getInstance().SVTGEOMETRY.getStrip(layer, sector, strip));
-                SvtStrip.setModule(Constants.getInstance().SVTGEOMETRY.getModule(layer, sector));
-                SvtStrip.setNormal(Constants.getInstance().SVTGEOMETRY.getNormal(layer, sector)); 
+                SvtStrip.setLine(Geometry.getInstance().getSVT().getStrip(layer, sector, strip));
+                SvtStrip.setModule(Geometry.getInstance().getSVT().getModule(layer, sector));
+                SvtStrip.setNormal(Geometry.getInstance().getSVT().getNormal(layer, sector)); 
                 // if the hit is useable in the analysis its status is =0
                 if (SvtStrip.getEdep() == 0) {
                     SvtStrip.setStatus(1);

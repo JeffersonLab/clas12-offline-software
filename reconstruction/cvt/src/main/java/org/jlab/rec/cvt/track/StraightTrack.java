@@ -10,6 +10,7 @@ import org.jlab.clas.tracking.kalmanfilter.straight.KFitter;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.bmt.BMTConstants;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
@@ -214,7 +215,7 @@ public class StraightTrack extends Trajectory{
                     double YtrackIntersSurf = BMTIntersections[l][h][1];
                     double ZtrackIntersSurf = BMTIntersections[l][h][2];
                     //int SectorTrackIntersSurf = bmt_geo.isInSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf), Math.toRadians(BMTConstants.ISINSECTORJITTER));
-                    int SectorTrackIntersSurf = Constants.getInstance().BMTGEOMETRY.getSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf));
+                    int SectorTrackIntersSurf = Geometry.getInstance().getBMT().getSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf));
                     double PhiTrackIntersSurf = BMTIntersections[l][h][3];
                     double ThetaTrackIntersSurf = BMTIntersections[l][h][4];
                     double trkToMPlnAngl = BMTIntersections[l][h][5];
