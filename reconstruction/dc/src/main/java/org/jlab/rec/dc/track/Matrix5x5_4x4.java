@@ -1,782 +1,787 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package org.jlab.rec.dc.track;
 
 /**
+ *
  * @author gavalian
- * @author benkel
  */
 public class Matrix5x5_4x4 {
- public static double determinant__00(Matrix A){
+ public static double determinant__00(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(6)>1e-30)
-            t0 = A.get(6)*(
-                + A.get(12)*(A.get(18)*A.get(24) - A.get(19)*A.get(23))
-                - A.get(17)*(A.get(13)*A.get(24) - A.get(14)*A.get(23))
-                + A.get(22)*(A.get(13)*A.get(19)-A.get(14)*A.get(18))
+        //if(A[1][1]>1e-30)
+            t0 = A[1][1]*(
+                + A[2][2]*(A[3][3]*A[4][4] - A[3][4]*A[4][3])
+                - A[3][2]*(A[2][3]*A[4][4] - A[2][4]*A[4][3])
+                + A[4][2]*(A[2][3]*A[3][4]-A[2][4]*A[3][3])
                 );
-        //if(A.get(11)>1e-30)
-            t1 = -A.get(11)*(
-                + A.get(7)*(A.get(18)*A.get(24) - A.get(19)*A.get(23))
-                - A.get(17)*(A.get(8)*A.get(24) - A.get(9)*A.get(23))
-                + A.get(22)*(A.get(8)*A.get(19) - A.get(9)*A.get(18))
+        //if(A[2][1]>1e-30)
+            t1 = -A[2][1]*(
+                + A[1][2]*(A[3][3]*A[4][4] - A[3][4]*A[4][3])
+                - A[3][2]*(A[1][3]*A[4][4] - A[1][4]*A[4][3])
+                + A[4][2]*(A[1][3]*A[3][4] - A[1][4]*A[3][3])
                 );
-        //if(A.get(16)>1e-30)
-            t2 = + A.get(16)*(
-                + A.get(7)*(A.get(13)*A.get(24) - A.get(14)*A.get(23))
-                - A.get(12)*(A.get(8)*A.get(24) - A.get(9)*A.get(23))
-                + A.get(22)*(A.get(8)*A.get(14) - A.get(9)*A.get(13))
+        //if(A[3][1]>1e-30)
+            t2 = + A[3][1]*(
+                + A[1][2]*(A[2][3]*A[4][4] - A[2][4]*A[4][3])
+                - A[2][2]*(A[1][3]*A[4][4] - A[1][4]*A[4][3])
+                + A[4][2]*(A[1][3]*A[2][4] - A[1][4]*A[2][3])
                 );
-        //if(A.get(21)>1e-30)
-            t3 = - A.get(21)*(
-                + A.get(7)*(A.get(13)*A.get(19) - A.get(14)*A.get(18))
-                - A.get(12)*(A.get(8)*A.get(19) - A.get(9)*A.get(18))
-                + A.get(17)*(A.get(8)*A.get(14) - A.get(9)*A.get(13))
+        //if(A[4][1]>1e-30)
+            t3 = - A[4][1]*(
+                + A[1][2]*(A[2][3]*A[3][4] - A[2][4]*A[3][3])
+                - A[2][2]*(A[1][3]*A[3][4] - A[1][4]*A[3][3])
+                + A[3][2]*(A[1][3]*A[2][4] - A[1][4]*A[2][3])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__01(Matrix A){
+ public static double determinant__01(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(5)>1e-30)
-            t0 = A.get(5)*(
-                + A.get(12)*(A.get(18)*A.get(24) - A.get(19)*A.get(23))
-                - A.get(17)*(A.get(13)*A.get(24) - A.get(14)*A.get(23))
-                + A.get(22)*(A.get(13)*A.get(19)-A.get(14)*A.get(18))
+        //if(A[1][0]>1e-30)
+            t0 = A[1][0]*(
+                + A[2][2]*(A[3][3]*A[4][4] - A[3][4]*A[4][3])
+                - A[3][2]*(A[2][3]*A[4][4] - A[2][4]*A[4][3])
+                + A[4][2]*(A[2][3]*A[3][4]-A[2][4]*A[3][3])
                 );
-        //if(A.get(10)>1e-30)
-            t1 = -A.get(10)*(
-                + A.get(7)*(A.get(18)*A.get(24) - A.get(19)*A.get(23))
-                - A.get(17)*(A.get(8)*A.get(24) - A.get(9)*A.get(23))
-                + A.get(22)*(A.get(8)*A.get(19) - A.get(9)*A.get(18))
+        //if(A[2][0]>1e-30)
+            t1 = -A[2][0]*(
+                + A[1][2]*(A[3][3]*A[4][4] - A[3][4]*A[4][3])
+                - A[3][2]*(A[1][3]*A[4][4] - A[1][4]*A[4][3])
+                + A[4][2]*(A[1][3]*A[3][4] - A[1][4]*A[3][3])
                 );
-        //if(A.get(15)>1e-30)
-            t2 = + A.get(15)*(
-                + A.get(7)*(A.get(13)*A.get(24) - A.get(14)*A.get(23))
-                - A.get(12)*(A.get(8)*A.get(24) - A.get(9)*A.get(23))
-                + A.get(22)*(A.get(8)*A.get(14) - A.get(9)*A.get(13))
+        //if(A[3][0]>1e-30)
+            t2 = + A[3][0]*(
+                + A[1][2]*(A[2][3]*A[4][4] - A[2][4]*A[4][3])
+                - A[2][2]*(A[1][3]*A[4][4] - A[1][4]*A[4][3])
+                + A[4][2]*(A[1][3]*A[2][4] - A[1][4]*A[2][3])
                 );
-        //if(A.get(20)>1e-30)
-            t3 = - A.get(20)*(
-                + A.get(7)*(A.get(13)*A.get(19) - A.get(14)*A.get(18))
-                - A.get(12)*(A.get(8)*A.get(19) - A.get(9)*A.get(18))
-                + A.get(17)*(A.get(8)*A.get(14) - A.get(9)*A.get(13))
+        //if(A[4][0]>1e-30)
+            t3 = - A[4][0]*(
+                + A[1][2]*(A[2][3]*A[3][4] - A[2][4]*A[3][3])
+                - A[2][2]*(A[1][3]*A[3][4] - A[1][4]*A[3][3])
+                + A[3][2]*(A[1][3]*A[2][4] - A[1][4]*A[2][3])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__02(Matrix A){
+ public static double determinant__02(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(5)>1e-30)
-            t0 = A.get(5)*(
-                + A.get(11)*(A.get(18)*A.get(24) - A.get(19)*A.get(23))
-                - A.get(16)*(A.get(13)*A.get(24) - A.get(14)*A.get(23))
-                + A.get(21)*(A.get(13)*A.get(19)-A.get(14)*A.get(18))
+        //if(A[1][0]>1e-30)
+            t0 = A[1][0]*(
+                + A[2][1]*(A[3][3]*A[4][4] - A[3][4]*A[4][3])
+                - A[3][1]*(A[2][3]*A[4][4] - A[2][4]*A[4][3])
+                + A[4][1]*(A[2][3]*A[3][4]-A[2][4]*A[3][3])
                 );
-        //if(A.get(10)>1e-30)
-            t1 = -A.get(10)*(
-                + A.get(6)*(A.get(18)*A.get(24) - A.get(19)*A.get(23))
-                - A.get(16)*(A.get(8)*A.get(24) - A.get(9)*A.get(23))
-                + A.get(21)*(A.get(8)*A.get(19) - A.get(9)*A.get(18))
+        //if(A[2][0]>1e-30)
+            t1 = -A[2][0]*(
+                + A[1][1]*(A[3][3]*A[4][4] - A[3][4]*A[4][3])
+                - A[3][1]*(A[1][3]*A[4][4] - A[1][4]*A[4][3])
+                + A[4][1]*(A[1][3]*A[3][4] - A[1][4]*A[3][3])
                 );
-        //if(A.get(15)>1e-30)
-            t2 = + A.get(15)*(
-                + A.get(6)*(A.get(13)*A.get(24) - A.get(14)*A.get(23))
-                - A.get(11)*(A.get(8)*A.get(24) - A.get(9)*A.get(23))
-                + A.get(21)*(A.get(8)*A.get(14) - A.get(9)*A.get(13))
+        //if(A[3][0]>1e-30)
+            t2 = + A[3][0]*(
+                + A[1][1]*(A[2][3]*A[4][4] - A[2][4]*A[4][3])
+                - A[2][1]*(A[1][3]*A[4][4] - A[1][4]*A[4][3])
+                + A[4][1]*(A[1][3]*A[2][4] - A[1][4]*A[2][3])
                 );
-        //if(A.get(20)>1e-30)
-            t3 = - A.get(20)*(
-                + A.get(6)*(A.get(13)*A.get(19) - A.get(14)*A.get(18))
-                - A.get(11)*(A.get(8)*A.get(19) - A.get(9)*A.get(18))
-                + A.get(16)*(A.get(8)*A.get(14) - A.get(9)*A.get(13))
+        //if(A[4][0]>1e-30)
+            t3 = - A[4][0]*(
+                + A[1][1]*(A[2][3]*A[3][4] - A[2][4]*A[3][3])
+                - A[2][1]*(A[1][3]*A[3][4] - A[1][4]*A[3][3])
+                + A[3][1]*(A[1][3]*A[2][4] - A[1][4]*A[2][3])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__03(Matrix A){
+ public static double determinant__03(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(5)>1e-30)
-            t0 = A.get(5)*(
-                + A.get(11)*(A.get(17)*A.get(24) - A.get(19)*A.get(22))
-                - A.get(16)*(A.get(12)*A.get(24) - A.get(14)*A.get(22))
-                + A.get(21)*(A.get(12)*A.get(19)-A.get(14)*A.get(17))
+        //if(A[1][0]>1e-30)
+            t0 = A[1][0]*(
+                + A[2][1]*(A[3][2]*A[4][4] - A[3][4]*A[4][2])
+                - A[3][1]*(A[2][2]*A[4][4] - A[2][4]*A[4][2])
+                + A[4][1]*(A[2][2]*A[3][4]-A[2][4]*A[3][2])
                 );
-        //if(A.get(10)>1e-30)
-            t1 = -A.get(10)*(
-                + A.get(6)*(A.get(17)*A.get(24) - A.get(19)*A.get(22))
-                - A.get(16)*(A.get(7)*A.get(24) - A.get(9)*A.get(22))
-                + A.get(21)*(A.get(7)*A.get(19) - A.get(9)*A.get(17))
+        //if(A[2][0]>1e-30)
+            t1 = -A[2][0]*(
+                + A[1][1]*(A[3][2]*A[4][4] - A[3][4]*A[4][2])
+                - A[3][1]*(A[1][2]*A[4][4] - A[1][4]*A[4][2])
+                + A[4][1]*(A[1][2]*A[3][4] - A[1][4]*A[3][2])
                 );
-        //if(A.get(15)>1e-30)
-            t2 = + A.get(15)*(
-                + A.get(6)*(A.get(12)*A.get(24) - A.get(14)*A.get(22))
-                - A.get(11)*(A.get(7)*A.get(24) - A.get(9)*A.get(22))
-                + A.get(21)*(A.get(7)*A.get(14) - A.get(9)*A.get(12))
+        //if(A[3][0]>1e-30)
+            t2 = + A[3][0]*(
+                + A[1][1]*(A[2][2]*A[4][4] - A[2][4]*A[4][2])
+                - A[2][1]*(A[1][2]*A[4][4] - A[1][4]*A[4][2])
+                + A[4][1]*(A[1][2]*A[2][4] - A[1][4]*A[2][2])
                 );
-        //if(A.get(20)>1e-30)
-            t3 = - A.get(20)*(
-                + A.get(6)*(A.get(12)*A.get(19) - A.get(14)*A.get(17))
-                - A.get(11)*(A.get(7)*A.get(19) - A.get(9)*A.get(17))
-                + A.get(16)*(A.get(7)*A.get(14) - A.get(9)*A.get(12))
+        //if(A[4][0]>1e-30)
+            t3 = - A[4][0]*(
+                + A[1][1]*(A[2][2]*A[3][4] - A[2][4]*A[3][2])
+                - A[2][1]*(A[1][2]*A[3][4] - A[1][4]*A[3][2])
+                + A[3][1]*(A[1][2]*A[2][4] - A[1][4]*A[2][2])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__04(Matrix A){
+ public static double determinant__04(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(5)>1e-30)
-            t0 = A.get(5)*(
-                + A.get(11)*(A.get(17)*A.get(23) - A.get(18)*A.get(22))
-                - A.get(16)*(A.get(12)*A.get(23) - A.get(13)*A.get(22))
-                + A.get(21)*(A.get(12)*A.get(18)-A.get(13)*A.get(17))
+        //if(A[1][0]>1e-30)
+            t0 = A[1][0]*(
+                + A[2][1]*(A[3][2]*A[4][3] - A[3][3]*A[4][2])
+                - A[3][1]*(A[2][2]*A[4][3] - A[2][3]*A[4][2])
+                + A[4][1]*(A[2][2]*A[3][3]-A[2][3]*A[3][2])
                 );
-        //if(A.get(10)>1e-30)
-            t1 = -A.get(10)*(
-                + A.get(6)*(A.get(17)*A.get(23) - A.get(18)*A.get(22))
-                - A.get(16)*(A.get(7)*A.get(23) - A.get(8)*A.get(22))
-                + A.get(21)*(A.get(7)*A.get(18) - A.get(8)*A.get(17))
+        //if(A[2][0]>1e-30)
+            t1 = -A[2][0]*(
+                + A[1][1]*(A[3][2]*A[4][3] - A[3][3]*A[4][2])
+                - A[3][1]*(A[1][2]*A[4][3] - A[1][3]*A[4][2])
+                + A[4][1]*(A[1][2]*A[3][3] - A[1][3]*A[3][2])
                 );
-        //if(A.get(15)>1e-30)
-            t2 = + A.get(15)*(
-                + A.get(6)*(A.get(12)*A.get(23) - A.get(13)*A.get(22))
-                - A.get(11)*(A.get(7)*A.get(23) - A.get(8)*A.get(22))
-                + A.get(21)*(A.get(7)*A.get(13) - A.get(8)*A.get(12))
+        //if(A[3][0]>1e-30)
+            t2 = + A[3][0]*(
+                + A[1][1]*(A[2][2]*A[4][3] - A[2][3]*A[4][2])
+                - A[2][1]*(A[1][2]*A[4][3] - A[1][3]*A[4][2])
+                + A[4][1]*(A[1][2]*A[2][3] - A[1][3]*A[2][2])
                 );
-        //if(A.get(20)>1e-30)
-            t3 = - A.get(20)*(
-                + A.get(6)*(A.get(12)*A.get(18) - A.get(13)*A.get(17))
-                - A.get(11)*(A.get(7)*A.get(18) - A.get(8)*A.get(17))
-                + A.get(16)*(A.get(7)*A.get(13) - A.get(8)*A.get(12))
+        //if(A[4][0]>1e-30)
+            t3 = - A[4][0]*(
+                + A[1][1]*(A[2][2]*A[3][3] - A[2][3]*A[3][2])
+                - A[2][1]*(A[1][2]*A[3][3] - A[1][3]*A[3][2])
+                + A[3][1]*(A[1][2]*A[2][3] - A[1][3]*A[2][2])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__10(Matrix A){
+ public static double determinant__10(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(1)>1e-30)
-            t0 = A.get(1)*(
-                + A.get(12)*(A.get(18)*A.get(24) - A.get(19)*A.get(23))
-                - A.get(17)*(A.get(13)*A.get(24) - A.get(14)*A.get(23))
-                + A.get(22)*(A.get(13)*A.get(19)-A.get(14)*A.get(18))
+        //if(A[0][1]>1e-30)
+            t0 = A[0][1]*(
+                + A[2][2]*(A[3][3]*A[4][4] - A[3][4]*A[4][3])
+                - A[3][2]*(A[2][3]*A[4][4] - A[2][4]*A[4][3])
+                + A[4][2]*(A[2][3]*A[3][4]-A[2][4]*A[3][3])
                 );
-        //if(A.get(11)>1e-30)
-            t1 = -A.get(11)*(
-                + A.get(2)*(A.get(18)*A.get(24) - A.get(19)*A.get(23))
-                - A.get(17)*(A.get(3)*A.get(24) - A.get(4)*A.get(23))
-                + A.get(22)*(A.get(3)*A.get(19) - A.get(4)*A.get(18))
+        //if(A[2][1]>1e-30)
+            t1 = -A[2][1]*(
+                + A[0][2]*(A[3][3]*A[4][4] - A[3][4]*A[4][3])
+                - A[3][2]*(A[0][3]*A[4][4] - A[0][4]*A[4][3])
+                + A[4][2]*(A[0][3]*A[3][4] - A[0][4]*A[3][3])
                 );
-        //if(A.get(16)>1e-30)
-            t2 = + A.get(16)*(
-                + A.get(2)*(A.get(13)*A.get(24) - A.get(14)*A.get(23))
-                - A.get(12)*(A.get(3)*A.get(24) - A.get(4)*A.get(23))
-                + A.get(22)*(A.get(3)*A.get(14) - A.get(4)*A.get(13))
+        //if(A[3][1]>1e-30)
+            t2 = + A[3][1]*(
+                + A[0][2]*(A[2][3]*A[4][4] - A[2][4]*A[4][3])
+                - A[2][2]*(A[0][3]*A[4][4] - A[0][4]*A[4][3])
+                + A[4][2]*(A[0][3]*A[2][4] - A[0][4]*A[2][3])
                 );
-        //if(A.get(21)>1e-30)
-            t3 = - A.get(21)*(
-                + A.get(2)*(A.get(13)*A.get(19) - A.get(14)*A.get(18))
-                - A.get(12)*(A.get(3)*A.get(19) - A.get(4)*A.get(18))
-                + A.get(17)*(A.get(3)*A.get(14) - A.get(4)*A.get(13))
+        //if(A[4][1]>1e-30)
+            t3 = - A[4][1]*(
+                + A[0][2]*(A[2][3]*A[3][4] - A[2][4]*A[3][3])
+                - A[2][2]*(A[0][3]*A[3][4] - A[0][4]*A[3][3])
+                + A[3][2]*(A[0][3]*A[2][4] - A[0][4]*A[2][3])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__11(Matrix A){
+ public static double determinant__11(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(0)>1e-30)
-            t0 = A.get(0)*(
-                + A.get(12)*(A.get(18)*A.get(24) - A.get(19)*A.get(23))
-                - A.get(17)*(A.get(13)*A.get(24) - A.get(14)*A.get(23))
-                + A.get(22)*(A.get(13)*A.get(19)-A.get(14)*A.get(18))
+        //if(A[0][0]>1e-30)
+            t0 = A[0][0]*(
+                + A[2][2]*(A[3][3]*A[4][4] - A[3][4]*A[4][3])
+                - A[3][2]*(A[2][3]*A[4][4] - A[2][4]*A[4][3])
+                + A[4][2]*(A[2][3]*A[3][4]-A[2][4]*A[3][3])
                 );
-        //if(A.get(10)>1e-30)
-            t1 = -A.get(10)*(
-                + A.get(2)*(A.get(18)*A.get(24) - A.get(19)*A.get(23))
-                - A.get(17)*(A.get(3)*A.get(24) - A.get(4)*A.get(23))
-                + A.get(22)*(A.get(3)*A.get(19) - A.get(4)*A.get(18))
+        //if(A[2][0]>1e-30)
+            t1 = -A[2][0]*(
+                + A[0][2]*(A[3][3]*A[4][4] - A[3][4]*A[4][3])
+                - A[3][2]*(A[0][3]*A[4][4] - A[0][4]*A[4][3])
+                + A[4][2]*(A[0][3]*A[3][4] - A[0][4]*A[3][3])
                 );
-        //if(A.get(15)>1e-30)
-            t2 = + A.get(15)*(
-                + A.get(2)*(A.get(13)*A.get(24) - A.get(14)*A.get(23))
-                - A.get(12)*(A.get(3)*A.get(24) - A.get(4)*A.get(23))
-                + A.get(22)*(A.get(3)*A.get(14) - A.get(4)*A.get(13))
+        //if(A[3][0]>1e-30)
+            t2 = + A[3][0]*(
+                + A[0][2]*(A[2][3]*A[4][4] - A[2][4]*A[4][3])
+                - A[2][2]*(A[0][3]*A[4][4] - A[0][4]*A[4][3])
+                + A[4][2]*(A[0][3]*A[2][4] - A[0][4]*A[2][3])
                 );
-        //if(A.get(20)>1e-30)
-            t3 = - A.get(20)*(
-                + A.get(2)*(A.get(13)*A.get(19) - A.get(14)*A.get(18))
-                - A.get(12)*(A.get(3)*A.get(19) - A.get(4)*A.get(18))
-                + A.get(17)*(A.get(3)*A.get(14) - A.get(4)*A.get(13))
+        //if(A[4][0]>1e-30)
+            t3 = - A[4][0]*(
+                + A[0][2]*(A[2][3]*A[3][4] - A[2][4]*A[3][3])
+                - A[2][2]*(A[0][3]*A[3][4] - A[0][4]*A[3][3])
+                + A[3][2]*(A[0][3]*A[2][4] - A[0][4]*A[2][3])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__12(Matrix A){
+ public static double determinant__12(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(0)>1e-30)
-            t0 = A.get(0)*(
-                + A.get(11)*(A.get(18)*A.get(24) - A.get(19)*A.get(23))
-                - A.get(16)*(A.get(13)*A.get(24) - A.get(14)*A.get(23))
-                + A.get(21)*(A.get(13)*A.get(19)-A.get(14)*A.get(18))
+        //if(A[0][0]>1e-30)
+            t0 = A[0][0]*(
+                + A[2][1]*(A[3][3]*A[4][4] - A[3][4]*A[4][3])
+                - A[3][1]*(A[2][3]*A[4][4] - A[2][4]*A[4][3])
+                + A[4][1]*(A[2][3]*A[3][4]-A[2][4]*A[3][3])
                 );
-        //if(A.get(10)>1e-30)
-            t1 = -A.get(10)*(
-                + A.get(1)*(A.get(18)*A.get(24) - A.get(19)*A.get(23))
-                - A.get(16)*(A.get(3)*A.get(24) - A.get(4)*A.get(23))
-                + A.get(21)*(A.get(3)*A.get(19) - A.get(4)*A.get(18))
+        //if(A[2][0]>1e-30)
+            t1 = -A[2][0]*(
+                + A[0][1]*(A[3][3]*A[4][4] - A[3][4]*A[4][3])
+                - A[3][1]*(A[0][3]*A[4][4] - A[0][4]*A[4][3])
+                + A[4][1]*(A[0][3]*A[3][4] - A[0][4]*A[3][3])
                 );
-        //if(A.get(15)>1e-30)
-            t2 = + A.get(15)*(
-                + A.get(1)*(A.get(13)*A.get(24) - A.get(14)*A.get(23))
-                - A.get(11)*(A.get(3)*A.get(24) - A.get(4)*A.get(23))
-                + A.get(21)*(A.get(3)*A.get(14) - A.get(4)*A.get(13))
+        //if(A[3][0]>1e-30)
+            t2 = + A[3][0]*(
+                + A[0][1]*(A[2][3]*A[4][4] - A[2][4]*A[4][3])
+                - A[2][1]*(A[0][3]*A[4][4] - A[0][4]*A[4][3])
+                + A[4][1]*(A[0][3]*A[2][4] - A[0][4]*A[2][3])
                 );
-        //if(A.get(20)>1e-30)
-            t3 = - A.get(20)*(
-                + A.get(1)*(A.get(13)*A.get(19) - A.get(14)*A.get(18))
-                - A.get(11)*(A.get(3)*A.get(19) - A.get(4)*A.get(18))
-                + A.get(16)*(A.get(3)*A.get(14) - A.get(4)*A.get(13))
+        //if(A[4][0]>1e-30)
+            t3 = - A[4][0]*(
+                + A[0][1]*(A[2][3]*A[3][4] - A[2][4]*A[3][3])
+                - A[2][1]*(A[0][3]*A[3][4] - A[0][4]*A[3][3])
+                + A[3][1]*(A[0][3]*A[2][4] - A[0][4]*A[2][3])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__13(Matrix A){
+ public static double determinant__13(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(0)>1e-30)
-            t0 = A.get(0)*(
-                + A.get(11)*(A.get(17)*A.get(24) - A.get(19)*A.get(22))
-                - A.get(16)*(A.get(12)*A.get(24) - A.get(14)*A.get(22))
-                + A.get(21)*(A.get(12)*A.get(19)-A.get(14)*A.get(17))
+        //if(A[0][0]>1e-30)
+            t0 = A[0][0]*(
+                + A[2][1]*(A[3][2]*A[4][4] - A[3][4]*A[4][2])
+                - A[3][1]*(A[2][2]*A[4][4] - A[2][4]*A[4][2])
+                + A[4][1]*(A[2][2]*A[3][4]-A[2][4]*A[3][2])
                 );
-        //if(A.get(10)>1e-30)
-            t1 = -A.get(10)*(
-                + A.get(1)*(A.get(17)*A.get(24) - A.get(19)*A.get(22))
-                - A.get(16)*(A.get(2)*A.get(24) - A.get(4)*A.get(22))
-                + A.get(21)*(A.get(2)*A.get(19) - A.get(4)*A.get(17))
+        //if(A[2][0]>1e-30)
+            t1 = -A[2][0]*(
+                + A[0][1]*(A[3][2]*A[4][4] - A[3][4]*A[4][2])
+                - A[3][1]*(A[0][2]*A[4][4] - A[0][4]*A[4][2])
+                + A[4][1]*(A[0][2]*A[3][4] - A[0][4]*A[3][2])
                 );
-        //if(A.get(15)>1e-30)
-            t2 = + A.get(15)*(
-                + A.get(1)*(A.get(12)*A.get(24) - A.get(14)*A.get(22))
-                - A.get(11)*(A.get(2)*A.get(24) - A.get(4)*A.get(22))
-                + A.get(21)*(A.get(2)*A.get(14) - A.get(4)*A.get(12))
+        //if(A[3][0]>1e-30)
+            t2 = + A[3][0]*(
+                + A[0][1]*(A[2][2]*A[4][4] - A[2][4]*A[4][2])
+                - A[2][1]*(A[0][2]*A[4][4] - A[0][4]*A[4][2])
+                + A[4][1]*(A[0][2]*A[2][4] - A[0][4]*A[2][2])
                 );
-        //if(A.get(20)>1e-30)
-            t3 = - A.get(20)*(
-                + A.get(1)*(A.get(12)*A.get(19) - A.get(14)*A.get(17))
-                - A.get(11)*(A.get(2)*A.get(19) - A.get(4)*A.get(17))
-                + A.get(16)*(A.get(2)*A.get(14) - A.get(4)*A.get(12))
+        //if(A[4][0]>1e-30)
+            t3 = - A[4][0]*(
+                + A[0][1]*(A[2][2]*A[3][4] - A[2][4]*A[3][2])
+                - A[2][1]*(A[0][2]*A[3][4] - A[0][4]*A[3][2])
+                + A[3][1]*(A[0][2]*A[2][4] - A[0][4]*A[2][2])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__14(Matrix A){
+ public static double determinant__14(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(0)>1e-30)
-            t0 = A.get(0)*(
-                + A.get(11)*(A.get(17)*A.get(23) - A.get(18)*A.get(22))
-                - A.get(16)*(A.get(12)*A.get(23) - A.get(13)*A.get(22))
-                + A.get(21)*(A.get(12)*A.get(18)-A.get(13)*A.get(17))
+        //if(A[0][0]>1e-30)
+            t0 = A[0][0]*(
+                + A[2][1]*(A[3][2]*A[4][3] - A[3][3]*A[4][2])
+                - A[3][1]*(A[2][2]*A[4][3] - A[2][3]*A[4][2])
+                + A[4][1]*(A[2][2]*A[3][3]-A[2][3]*A[3][2])
                 );
-        //if(A.get(10)>1e-30)
-            t1 = -A.get(10)*(
-                + A.get(1)*(A.get(17)*A.get(23) - A.get(18)*A.get(22))
-                - A.get(16)*(A.get(2)*A.get(23) - A.get(3)*A.get(22))
-                + A.get(21)*(A.get(2)*A.get(18) - A.get(3)*A.get(17))
+        //if(A[2][0]>1e-30)
+            t1 = -A[2][0]*(
+                + A[0][1]*(A[3][2]*A[4][3] - A[3][3]*A[4][2])
+                - A[3][1]*(A[0][2]*A[4][3] - A[0][3]*A[4][2])
+                + A[4][1]*(A[0][2]*A[3][3] - A[0][3]*A[3][2])
                 );
-        //if(A.get(15)>1e-30)
-            t2 = + A.get(15)*(
-                + A.get(1)*(A.get(12)*A.get(23) - A.get(13)*A.get(22))
-                - A.get(11)*(A.get(2)*A.get(23) - A.get(3)*A.get(22))
-                + A.get(21)*(A.get(2)*A.get(13) - A.get(3)*A.get(12))
+        //if(A[3][0]>1e-30)
+            t2 = + A[3][0]*(
+                + A[0][1]*(A[2][2]*A[4][3] - A[2][3]*A[4][2])
+                - A[2][1]*(A[0][2]*A[4][3] - A[0][3]*A[4][2])
+                + A[4][1]*(A[0][2]*A[2][3] - A[0][3]*A[2][2])
                 );
-        //if(A.get(20)>1e-30)
-            t3 = - A.get(20)*(
-                + A.get(1)*(A.get(12)*A.get(18) - A.get(13)*A.get(17))
-                - A.get(11)*(A.get(2)*A.get(18) - A.get(3)*A.get(17))
-                + A.get(16)*(A.get(2)*A.get(13) - A.get(3)*A.get(12))
+        //if(A[4][0]>1e-30)
+            t3 = - A[4][0]*(
+                + A[0][1]*(A[2][2]*A[3][3] - A[2][3]*A[3][2])
+                - A[2][1]*(A[0][2]*A[3][3] - A[0][3]*A[3][2])
+                + A[3][1]*(A[0][2]*A[2][3] - A[0][3]*A[2][2])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__20(Matrix A){
+ public static double determinant__20(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(1)>1e-30)
-            t0 = A.get(1)*(
-                + A.get(7)*(A.get(18)*A.get(24) - A.get(19)*A.get(23))
-                - A.get(17)*(A.get(8)*A.get(24) - A.get(9)*A.get(23))
-                + A.get(22)*(A.get(8)*A.get(19)-A.get(9)*A.get(18))
+        //if(A[0][1]>1e-30)
+            t0 = A[0][1]*(
+                + A[1][2]*(A[3][3]*A[4][4] - A[3][4]*A[4][3])
+                - A[3][2]*(A[1][3]*A[4][4] - A[1][4]*A[4][3])
+                + A[4][2]*(A[1][3]*A[3][4]-A[1][4]*A[3][3])
                 );
-        //if(A.get(6)>1e-30)
-            t1 = -A.get(6)*(
-                + A.get(2)*(A.get(18)*A.get(24) - A.get(19)*A.get(23))
-                - A.get(17)*(A.get(3)*A.get(24) - A.get(4)*A.get(23))
-                + A.get(22)*(A.get(3)*A.get(19) - A.get(4)*A.get(18))
+        //if(A[1][1]>1e-30)
+            t1 = -A[1][1]*(
+                + A[0][2]*(A[3][3]*A[4][4] - A[3][4]*A[4][3])
+                - A[3][2]*(A[0][3]*A[4][4] - A[0][4]*A[4][3])
+                + A[4][2]*(A[0][3]*A[3][4] - A[0][4]*A[3][3])
                 );
-        //if(A.get(16)>1e-30)
-            t2 = + A.get(16)*(
-                + A.get(2)*(A.get(8)*A.get(24) - A.get(9)*A.get(23))
-                - A.get(7)*(A.get(3)*A.get(24) - A.get(4)*A.get(23))
-                + A.get(22)*(A.get(3)*A.get(9) - A.get(4)*A.get(8))
+        //if(A[3][1]>1e-30)
+            t2 = + A[3][1]*(
+                + A[0][2]*(A[1][3]*A[4][4] - A[1][4]*A[4][3])
+                - A[1][2]*(A[0][3]*A[4][4] - A[0][4]*A[4][3])
+                + A[4][2]*(A[0][3]*A[1][4] - A[0][4]*A[1][3])
                 );
-        //if(A.get(21)>1e-30)
-            t3 = - A.get(21)*(
-                + A.get(2)*(A.get(8)*A.get(19) - A.get(9)*A.get(18))
-                - A.get(7)*(A.get(3)*A.get(19) - A.get(4)*A.get(18))
-                + A.get(17)*(A.get(3)*A.get(9) - A.get(4)*A.get(8))
+        //if(A[4][1]>1e-30)
+            t3 = - A[4][1]*(
+                + A[0][2]*(A[1][3]*A[3][4] - A[1][4]*A[3][3])
+                - A[1][2]*(A[0][3]*A[3][4] - A[0][4]*A[3][3])
+                + A[3][2]*(A[0][3]*A[1][4] - A[0][4]*A[1][3])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__21(Matrix A){
+ public static double determinant__21(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(0)>1e-30)
-            t0 = A.get(0)*(
-                + A.get(7)*(A.get(18)*A.get(24) - A.get(19)*A.get(23))
-                - A.get(17)*(A.get(8)*A.get(24) - A.get(9)*A.get(23))
-                + A.get(22)*(A.get(8)*A.get(19)-A.get(9)*A.get(18))
+        //if(A[0][0]>1e-30)
+            t0 = A[0][0]*(
+                + A[1][2]*(A[3][3]*A[4][4] - A[3][4]*A[4][3])
+                - A[3][2]*(A[1][3]*A[4][4] - A[1][4]*A[4][3])
+                + A[4][2]*(A[1][3]*A[3][4]-A[1][4]*A[3][3])
                 );
-        //if(A.get(5)>1e-30)
-            t1 = -A.get(5)*(
-                + A.get(2)*(A.get(18)*A.get(24) - A.get(19)*A.get(23))
-                - A.get(17)*(A.get(3)*A.get(24) - A.get(4)*A.get(23))
-                + A.get(22)*(A.get(3)*A.get(19) - A.get(4)*A.get(18))
+        //if(A[1][0]>1e-30)
+            t1 = -A[1][0]*(
+                + A[0][2]*(A[3][3]*A[4][4] - A[3][4]*A[4][3])
+                - A[3][2]*(A[0][3]*A[4][4] - A[0][4]*A[4][3])
+                + A[4][2]*(A[0][3]*A[3][4] - A[0][4]*A[3][3])
                 );
-        //if(A.get(15)>1e-30)
-            t2 = + A.get(15)*(
-                + A.get(2)*(A.get(8)*A.get(24) - A.get(9)*A.get(23))
-                - A.get(7)*(A.get(3)*A.get(24) - A.get(4)*A.get(23))
-                + A.get(22)*(A.get(3)*A.get(9) - A.get(4)*A.get(8))
+        //if(A[3][0]>1e-30)
+            t2 = + A[3][0]*(
+                + A[0][2]*(A[1][3]*A[4][4] - A[1][4]*A[4][3])
+                - A[1][2]*(A[0][3]*A[4][4] - A[0][4]*A[4][3])
+                + A[4][2]*(A[0][3]*A[1][4] - A[0][4]*A[1][3])
                 );
-        //if(A.get(20)>1e-30)
-            t3 = - A.get(20)*(
-                + A.get(2)*(A.get(8)*A.get(19) - A.get(9)*A.get(18))
-                - A.get(7)*(A.get(3)*A.get(19) - A.get(4)*A.get(18))
-                + A.get(17)*(A.get(3)*A.get(9) - A.get(4)*A.get(8))
+        //if(A[4][0]>1e-30)
+            t3 = - A[4][0]*(
+                + A[0][2]*(A[1][3]*A[3][4] - A[1][4]*A[3][3])
+                - A[1][2]*(A[0][3]*A[3][4] - A[0][4]*A[3][3])
+                + A[3][2]*(A[0][3]*A[1][4] - A[0][4]*A[1][3])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__22(Matrix A){
+ public static double determinant__22(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(0)>1e-30)
-            t0 = A.get(0)*(
-                + A.get(6)*(A.get(18)*A.get(24) - A.get(19)*A.get(23))
-                - A.get(16)*(A.get(8)*A.get(24) - A.get(9)*A.get(23))
-                + A.get(21)*(A.get(8)*A.get(19)-A.get(9)*A.get(18))
+        //if(A[0][0]>1e-30)
+            t0 = A[0][0]*(
+                + A[1][1]*(A[3][3]*A[4][4] - A[3][4]*A[4][3])
+                - A[3][1]*(A[1][3]*A[4][4] - A[1][4]*A[4][3])
+                + A[4][1]*(A[1][3]*A[3][4]-A[1][4]*A[3][3])
                 );
-        //if(A.get(5)>1e-30)
-            t1 = -A.get(5)*(
-                + A.get(1)*(A.get(18)*A.get(24) - A.get(19)*A.get(23))
-                - A.get(16)*(A.get(3)*A.get(24) - A.get(4)*A.get(23))
-                + A.get(21)*(A.get(3)*A.get(19) - A.get(4)*A.get(18))
+        //if(A[1][0]>1e-30)
+            t1 = -A[1][0]*(
+                + A[0][1]*(A[3][3]*A[4][4] - A[3][4]*A[4][3])
+                - A[3][1]*(A[0][3]*A[4][4] - A[0][4]*A[4][3])
+                + A[4][1]*(A[0][3]*A[3][4] - A[0][4]*A[3][3])
                 );
-        //if(A.get(15)>1e-30)
-            t2 = + A.get(15)*(
-                + A.get(1)*(A.get(8)*A.get(24) - A.get(9)*A.get(23))
-                - A.get(6)*(A.get(3)*A.get(24) - A.get(4)*A.get(23))
-                + A.get(21)*(A.get(3)*A.get(9) - A.get(4)*A.get(8))
+        //if(A[3][0]>1e-30)
+            t2 = + A[3][0]*(
+                + A[0][1]*(A[1][3]*A[4][4] - A[1][4]*A[4][3])
+                - A[1][1]*(A[0][3]*A[4][4] - A[0][4]*A[4][3])
+                + A[4][1]*(A[0][3]*A[1][4] - A[0][4]*A[1][3])
                 );
-        //if(A.get(20)>1e-30)
-            t3 = - A.get(20)*(
-                + A.get(1)*(A.get(8)*A.get(19) - A.get(9)*A.get(18))
-                - A.get(6)*(A.get(3)*A.get(19) - A.get(4)*A.get(18))
-                + A.get(16)*(A.get(3)*A.get(9) - A.get(4)*A.get(8))
+        //if(A[4][0]>1e-30)
+            t3 = - A[4][0]*(
+                + A[0][1]*(A[1][3]*A[3][4] - A[1][4]*A[3][3])
+                - A[1][1]*(A[0][3]*A[3][4] - A[0][4]*A[3][3])
+                + A[3][1]*(A[0][3]*A[1][4] - A[0][4]*A[1][3])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__23(Matrix A){
+ public static double determinant__23(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(0)>1e-30)
-            t0 = A.get(0)*(
-                + A.get(6)*(A.get(17)*A.get(24) - A.get(19)*A.get(22))
-                - A.get(16)*(A.get(7)*A.get(24) - A.get(9)*A.get(22))
-                + A.get(21)*(A.get(7)*A.get(19)-A.get(9)*A.get(17))
+        //if(A[0][0]>1e-30)
+            t0 = A[0][0]*(
+                + A[1][1]*(A[3][2]*A[4][4] - A[3][4]*A[4][2])
+                - A[3][1]*(A[1][2]*A[4][4] - A[1][4]*A[4][2])
+                + A[4][1]*(A[1][2]*A[3][4]-A[1][4]*A[3][2])
                 );
-        //if(A.get(5)>1e-30)
-            t1 = -A.get(5)*(
-                + A.get(1)*(A.get(17)*A.get(24) - A.get(19)*A.get(22))
-                - A.get(16)*(A.get(2)*A.get(24) - A.get(4)*A.get(22))
-                + A.get(21)*(A.get(2)*A.get(19) - A.get(4)*A.get(17))
+        //if(A[1][0]>1e-30)
+            t1 = -A[1][0]*(
+                + A[0][1]*(A[3][2]*A[4][4] - A[3][4]*A[4][2])
+                - A[3][1]*(A[0][2]*A[4][4] - A[0][4]*A[4][2])
+                + A[4][1]*(A[0][2]*A[3][4] - A[0][4]*A[3][2])
                 );
-        //if(A.get(15)>1e-30)
-            t2 = + A.get(15)*(
-                + A.get(1)*(A.get(7)*A.get(24) - A.get(9)*A.get(22))
-                - A.get(6)*(A.get(2)*A.get(24) - A.get(4)*A.get(22))
-                + A.get(21)*(A.get(2)*A.get(9) - A.get(4)*A.get(7))
+        //if(A[3][0]>1e-30)
+            t2 = + A[3][0]*(
+                + A[0][1]*(A[1][2]*A[4][4] - A[1][4]*A[4][2])
+                - A[1][1]*(A[0][2]*A[4][4] - A[0][4]*A[4][2])
+                + A[4][1]*(A[0][2]*A[1][4] - A[0][4]*A[1][2])
                 );
-        //if(A.get(20)>1e-30)
-            t3 = - A.get(20)*(
-                + A.get(1)*(A.get(7)*A.get(19) - A.get(9)*A.get(17))
-                - A.get(6)*(A.get(2)*A.get(19) - A.get(4)*A.get(17))
-                + A.get(16)*(A.get(2)*A.get(9) - A.get(4)*A.get(7))
+        //if(A[4][0]>1e-30)
+            t3 = - A[4][0]*(
+                + A[0][1]*(A[1][2]*A[3][4] - A[1][4]*A[3][2])
+                - A[1][1]*(A[0][2]*A[3][4] - A[0][4]*A[3][2])
+                + A[3][1]*(A[0][2]*A[1][4] - A[0][4]*A[1][2])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__24(Matrix A){
+ public static double determinant__24(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(0)>1e-30)
-            t0 = A.get(0)*(
-                + A.get(6)*(A.get(17)*A.get(23) - A.get(18)*A.get(22))
-                - A.get(16)*(A.get(7)*A.get(23) - A.get(8)*A.get(22))
-                + A.get(21)*(A.get(7)*A.get(18)-A.get(8)*A.get(17))
+        //if(A[0][0]>1e-30)
+            t0 = A[0][0]*(
+                + A[1][1]*(A[3][2]*A[4][3] - A[3][3]*A[4][2])
+                - A[3][1]*(A[1][2]*A[4][3] - A[1][3]*A[4][2])
+                + A[4][1]*(A[1][2]*A[3][3]-A[1][3]*A[3][2])
                 );
-        //if(A.get(5)>1e-30)
-            t1 = -A.get(5)*(
-                + A.get(1)*(A.get(17)*A.get(23) - A.get(18)*A.get(22))
-                - A.get(16)*(A.get(2)*A.get(23) - A.get(3)*A.get(22))
-                + A.get(21)*(A.get(2)*A.get(18) - A.get(3)*A.get(17))
+        //if(A[1][0]>1e-30)
+            t1 = -A[1][0]*(
+                + A[0][1]*(A[3][2]*A[4][3] - A[3][3]*A[4][2])
+                - A[3][1]*(A[0][2]*A[4][3] - A[0][3]*A[4][2])
+                + A[4][1]*(A[0][2]*A[3][3] - A[0][3]*A[3][2])
                 );
-        //if(A.get(15)>1e-30)
-            t2 = + A.get(15)*(
-                + A.get(1)*(A.get(7)*A.get(23) - A.get(8)*A.get(22))
-                - A.get(6)*(A.get(2)*A.get(23) - A.get(3)*A.get(22))
-                + A.get(21)*(A.get(2)*A.get(8) - A.get(3)*A.get(7))
+        //if(A[3][0]>1e-30)
+            t2 = + A[3][0]*(
+                + A[0][1]*(A[1][2]*A[4][3] - A[1][3]*A[4][2])
+                - A[1][1]*(A[0][2]*A[4][3] - A[0][3]*A[4][2])
+                + A[4][1]*(A[0][2]*A[1][3] - A[0][3]*A[1][2])
                 );
-        //if(A.get(20)>1e-30)
-            t3 = - A.get(20)*(
-                + A.get(1)*(A.get(7)*A.get(18) - A.get(8)*A.get(17))
-                - A.get(6)*(A.get(2)*A.get(18) - A.get(3)*A.get(17))
-                + A.get(16)*(A.get(2)*A.get(8) - A.get(3)*A.get(7))
+        //if(A[4][0]>1e-30)
+            t3 = - A[4][0]*(
+                + A[0][1]*(A[1][2]*A[3][3] - A[1][3]*A[3][2])
+                - A[1][1]*(A[0][2]*A[3][3] - A[0][3]*A[3][2])
+                + A[3][1]*(A[0][2]*A[1][3] - A[0][3]*A[1][2])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__30(Matrix A){
+ public static double determinant__30(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(1)>1e-30)
-            t0 = A.get(1)*(
-                + A.get(7)*(A.get(13)*A.get(24) - A.get(14)*A.get(23))
-                - A.get(12)*(A.get(8)*A.get(24) - A.get(9)*A.get(23))
-                + A.get(22)*(A.get(8)*A.get(14)-A.get(9)*A.get(13))
+        //if(A[0][1]>1e-30)
+            t0 = A[0][1]*(
+                + A[1][2]*(A[2][3]*A[4][4] - A[2][4]*A[4][3])
+                - A[2][2]*(A[1][3]*A[4][4] - A[1][4]*A[4][3])
+                + A[4][2]*(A[1][3]*A[2][4]-A[1][4]*A[2][3])
                 );
-        //if(A.get(6)>1e-30)
-            t1 = -A.get(6)*(
-                + A.get(2)*(A.get(13)*A.get(24) - A.get(14)*A.get(23))
-                - A.get(12)*(A.get(3)*A.get(24) - A.get(4)*A.get(23))
-                + A.get(22)*(A.get(3)*A.get(14) - A.get(4)*A.get(13))
+        //if(A[1][1]>1e-30)
+            t1 = -A[1][1]*(
+                + A[0][2]*(A[2][3]*A[4][4] - A[2][4]*A[4][3])
+                - A[2][2]*(A[0][3]*A[4][4] - A[0][4]*A[4][3])
+                + A[4][2]*(A[0][3]*A[2][4] - A[0][4]*A[2][3])
                 );
-        //if(A.get(11)>1e-30)
-            t2 = + A.get(11)*(
-                + A.get(2)*(A.get(8)*A.get(24) - A.get(9)*A.get(23))
-                - A.get(7)*(A.get(3)*A.get(24) - A.get(4)*A.get(23))
-                + A.get(22)*(A.get(3)*A.get(9) - A.get(4)*A.get(8))
+        //if(A[2][1]>1e-30)
+            t2 = + A[2][1]*(
+                + A[0][2]*(A[1][3]*A[4][4] - A[1][4]*A[4][3])
+                - A[1][2]*(A[0][3]*A[4][4] - A[0][4]*A[4][3])
+                + A[4][2]*(A[0][3]*A[1][4] - A[0][4]*A[1][3])
                 );
-        //if(A.get(21)>1e-30)
-            t3 = - A.get(21)*(
-                + A.get(2)*(A.get(8)*A.get(14) - A.get(9)*A.get(13))
-                - A.get(7)*(A.get(3)*A.get(14) - A.get(4)*A.get(13))
-                + A.get(12)*(A.get(3)*A.get(9) - A.get(4)*A.get(8))
+        //if(A[4][1]>1e-30)
+            t3 = - A[4][1]*(
+                + A[0][2]*(A[1][3]*A[2][4] - A[1][4]*A[2][3])
+                - A[1][2]*(A[0][3]*A[2][4] - A[0][4]*A[2][3])
+                + A[2][2]*(A[0][3]*A[1][4] - A[0][4]*A[1][3])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__31(Matrix A){
+ public static double determinant__31(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(0)>1e-30)
-            t0 = A.get(0)*(
-                + A.get(7)*(A.get(13)*A.get(24) - A.get(14)*A.get(23))
-                - A.get(12)*(A.get(8)*A.get(24) - A.get(9)*A.get(23))
-                + A.get(22)*(A.get(8)*A.get(14)-A.get(9)*A.get(13))
+        //if(A[0][0]>1e-30)
+            t0 = A[0][0]*(
+                + A[1][2]*(A[2][3]*A[4][4] - A[2][4]*A[4][3])
+                - A[2][2]*(A[1][3]*A[4][4] - A[1][4]*A[4][3])
+                + A[4][2]*(A[1][3]*A[2][4]-A[1][4]*A[2][3])
                 );
-        //if(A.get(5)>1e-30)
-            t1 = -A.get(5)*(
-                + A.get(2)*(A.get(13)*A.get(24) - A.get(14)*A.get(23))
-                - A.get(12)*(A.get(3)*A.get(24) - A.get(4)*A.get(23))
-                + A.get(22)*(A.get(3)*A.get(14) - A.get(4)*A.get(13))
+        //if(A[1][0]>1e-30)
+            t1 = -A[1][0]*(
+                + A[0][2]*(A[2][3]*A[4][4] - A[2][4]*A[4][3])
+                - A[2][2]*(A[0][3]*A[4][4] - A[0][4]*A[4][3])
+                + A[4][2]*(A[0][3]*A[2][4] - A[0][4]*A[2][3])
                 );
-        //if(A.get(10)>1e-30)
-            t2 = + A.get(10)*(
-                + A.get(2)*(A.get(8)*A.get(24) - A.get(9)*A.get(23))
-                - A.get(7)*(A.get(3)*A.get(24) - A.get(4)*A.get(23))
-                + A.get(22)*(A.get(3)*A.get(9) - A.get(4)*A.get(8))
+        //if(A[2][0]>1e-30)
+            t2 = + A[2][0]*(
+                + A[0][2]*(A[1][3]*A[4][4] - A[1][4]*A[4][3])
+                - A[1][2]*(A[0][3]*A[4][4] - A[0][4]*A[4][3])
+                + A[4][2]*(A[0][3]*A[1][4] - A[0][4]*A[1][3])
                 );
-        //if(A.get(20)>1e-30)
-            t3 = - A.get(20)*(
-                + A.get(2)*(A.get(8)*A.get(14) - A.get(9)*A.get(13))
-                - A.get(7)*(A.get(3)*A.get(14) - A.get(4)*A.get(13))
-                + A.get(12)*(A.get(3)*A.get(9) - A.get(4)*A.get(8))
+        //if(A[4][0]>1e-30)
+            t3 = - A[4][0]*(
+                + A[0][2]*(A[1][3]*A[2][4] - A[1][4]*A[2][3])
+                - A[1][2]*(A[0][3]*A[2][4] - A[0][4]*A[2][3])
+                + A[2][2]*(A[0][3]*A[1][4] - A[0][4]*A[1][3])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__32(Matrix A){
+ public static double determinant__32(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(0)>1e-30)
-            t0 = A.get(0)*(
-                + A.get(6)*(A.get(13)*A.get(24) - A.get(14)*A.get(23))
-                - A.get(11)*(A.get(8)*A.get(24) - A.get(9)*A.get(23))
-                + A.get(21)*(A.get(8)*A.get(14)-A.get(9)*A.get(13))
+        //if(A[0][0]>1e-30)
+            t0 = A[0][0]*(
+                + A[1][1]*(A[2][3]*A[4][4] - A[2][4]*A[4][3])
+                - A[2][1]*(A[1][3]*A[4][4] - A[1][4]*A[4][3])
+                + A[4][1]*(A[1][3]*A[2][4]-A[1][4]*A[2][3])
                 );
-        //if(A.get(5)>1e-30)
-            t1 = -A.get(5)*(
-                + A.get(1)*(A.get(13)*A.get(24) - A.get(14)*A.get(23))
-                - A.get(11)*(A.get(3)*A.get(24) - A.get(4)*A.get(23))
-                + A.get(21)*(A.get(3)*A.get(14) - A.get(4)*A.get(13))
+        //if(A[1][0]>1e-30)
+            t1 = -A[1][0]*(
+                + A[0][1]*(A[2][3]*A[4][4] - A[2][4]*A[4][3])
+                - A[2][1]*(A[0][3]*A[4][4] - A[0][4]*A[4][3])
+                + A[4][1]*(A[0][3]*A[2][4] - A[0][4]*A[2][3])
                 );
-        //if(A.get(10)>1e-30)
-            t2 = + A.get(10)*(
-                + A.get(1)*(A.get(8)*A.get(24) - A.get(9)*A.get(23))
-                - A.get(6)*(A.get(3)*A.get(24) - A.get(4)*A.get(23))
-                + A.get(21)*(A.get(3)*A.get(9) - A.get(4)*A.get(8))
+        //if(A[2][0]>1e-30)
+            t2 = + A[2][0]*(
+                + A[0][1]*(A[1][3]*A[4][4] - A[1][4]*A[4][3])
+                - A[1][1]*(A[0][3]*A[4][4] - A[0][4]*A[4][3])
+                + A[4][1]*(A[0][3]*A[1][4] - A[0][4]*A[1][3])
                 );
-        //if(A.get(20)>1e-30)
-            t3 = - A.get(20)*(
-                + A.get(1)*(A.get(8)*A.get(14) - A.get(9)*A.get(13))
-                - A.get(6)*(A.get(3)*A.get(14) - A.get(4)*A.get(13))
-                + A.get(11)*(A.get(3)*A.get(9) - A.get(4)*A.get(8))
+        //if(A[4][0]>1e-30)
+            t3 = - A[4][0]*(
+                + A[0][1]*(A[1][3]*A[2][4] - A[1][4]*A[2][3])
+                - A[1][1]*(A[0][3]*A[2][4] - A[0][4]*A[2][3])
+                + A[2][1]*(A[0][3]*A[1][4] - A[0][4]*A[1][3])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__33(Matrix A){
+ public static double determinant__33(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(0)>1e-30)
-            t0 = A.get(0)*(
-                + A.get(6)*(A.get(12)*A.get(24) - A.get(14)*A.get(22))
-                - A.get(11)*(A.get(7)*A.get(24) - A.get(9)*A.get(22))
-                + A.get(21)*(A.get(7)*A.get(14)-A.get(9)*A.get(12))
+        //if(A[0][0]>1e-30)
+            t0 = A[0][0]*(
+                + A[1][1]*(A[2][2]*A[4][4] - A[2][4]*A[4][2])
+                - A[2][1]*(A[1][2]*A[4][4] - A[1][4]*A[4][2])
+                + A[4][1]*(A[1][2]*A[2][4]-A[1][4]*A[2][2])
                 );
-        //if(A.get(5)>1e-30)
-            t1 = -A.get(5)*(
-                + A.get(1)*(A.get(12)*A.get(24) - A.get(14)*A.get(22))
-                - A.get(11)*(A.get(2)*A.get(24) - A.get(4)*A.get(22))
-                + A.get(21)*(A.get(2)*A.get(14) - A.get(4)*A.get(12))
+        //if(A[1][0]>1e-30)
+            t1 = -A[1][0]*(
+                + A[0][1]*(A[2][2]*A[4][4] - A[2][4]*A[4][2])
+                - A[2][1]*(A[0][2]*A[4][4] - A[0][4]*A[4][2])
+                + A[4][1]*(A[0][2]*A[2][4] - A[0][4]*A[2][2])
                 );
-        //if(A.get(10)>1e-30)
-            t2 = + A.get(10)*(
-                + A.get(1)*(A.get(7)*A.get(24) - A.get(9)*A.get(22))
-                - A.get(6)*(A.get(2)*A.get(24) - A.get(4)*A.get(22))
-                + A.get(21)*(A.get(2)*A.get(9) - A.get(4)*A.get(7))
+        //if(A[2][0]>1e-30)
+            t2 = + A[2][0]*(
+                + A[0][1]*(A[1][2]*A[4][4] - A[1][4]*A[4][2])
+                - A[1][1]*(A[0][2]*A[4][4] - A[0][4]*A[4][2])
+                + A[4][1]*(A[0][2]*A[1][4] - A[0][4]*A[1][2])
                 );
-        //if(A.get(20)>1e-30)
-            t3 = - A.get(20)*(
-                + A.get(1)*(A.get(7)*A.get(14) - A.get(9)*A.get(12))
-                - A.get(6)*(A.get(2)*A.get(14) - A.get(4)*A.get(12))
-                + A.get(11)*(A.get(2)*A.get(9) - A.get(4)*A.get(7))
+        //if(A[4][0]>1e-30)
+            t3 = - A[4][0]*(
+                + A[0][1]*(A[1][2]*A[2][4] - A[1][4]*A[2][2])
+                - A[1][1]*(A[0][2]*A[2][4] - A[0][4]*A[2][2])
+                + A[2][1]*(A[0][2]*A[1][4] - A[0][4]*A[1][2])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__34(Matrix A){
+ public static double determinant__34(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(0)>1e-30)
-            t0 = A.get(0)*(
-                + A.get(6)*(A.get(12)*A.get(23) - A.get(13)*A.get(22))
-                - A.get(11)*(A.get(7)*A.get(23) - A.get(8)*A.get(22))
-                + A.get(21)*(A.get(7)*A.get(13)-A.get(8)*A.get(12))
+        //if(A[0][0]>1e-30)
+            t0 = A[0][0]*(
+                + A[1][1]*(A[2][2]*A[4][3] - A[2][3]*A[4][2])
+                - A[2][1]*(A[1][2]*A[4][3] - A[1][3]*A[4][2])
+                + A[4][1]*(A[1][2]*A[2][3]-A[1][3]*A[2][2])
                 );
-        //if(A.get(5)>1e-30)
-            t1 = -A.get(5)*(
-                + A.get(1)*(A.get(12)*A.get(23) - A.get(13)*A.get(22))
-                - A.get(11)*(A.get(2)*A.get(23) - A.get(3)*A.get(22))
-                + A.get(21)*(A.get(2)*A.get(13) - A.get(3)*A.get(12))
+        //if(A[1][0]>1e-30)
+            t1 = -A[1][0]*(
+                + A[0][1]*(A[2][2]*A[4][3] - A[2][3]*A[4][2])
+                - A[2][1]*(A[0][2]*A[4][3] - A[0][3]*A[4][2])
+                + A[4][1]*(A[0][2]*A[2][3] - A[0][3]*A[2][2])
                 );
-        //if(A.get(10)>1e-30)
-            t2 = + A.get(10)*(
-                + A.get(1)*(A.get(7)*A.get(23) - A.get(8)*A.get(22))
-                - A.get(6)*(A.get(2)*A.get(23) - A.get(3)*A.get(22))
-                + A.get(21)*(A.get(2)*A.get(8) - A.get(3)*A.get(7))
+        //if(A[2][0]>1e-30)
+            t2 = + A[2][0]*(
+                + A[0][1]*(A[1][2]*A[4][3] - A[1][3]*A[4][2])
+                - A[1][1]*(A[0][2]*A[4][3] - A[0][3]*A[4][2])
+                + A[4][1]*(A[0][2]*A[1][3] - A[0][3]*A[1][2])
                 );
-        //if(A.get(20)>1e-30)
-            t3 = - A.get(20)*(
-                + A.get(1)*(A.get(7)*A.get(13) - A.get(8)*A.get(12))
-                - A.get(6)*(A.get(2)*A.get(13) - A.get(3)*A.get(12))
-                + A.get(11)*(A.get(2)*A.get(8) - A.get(3)*A.get(7))
+        //if(A[4][0]>1e-30)
+            t3 = - A[4][0]*(
+                + A[0][1]*(A[1][2]*A[2][3] - A[1][3]*A[2][2])
+                - A[1][1]*(A[0][2]*A[2][3] - A[0][3]*A[2][2])
+                + A[2][1]*(A[0][2]*A[1][3] - A[0][3]*A[1][2])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__40(Matrix A){
+ public static double determinant__40(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(1)>1e-30)
-            t0 = A.get(1)*(
-                + A.get(7)*(A.get(13)*A.get(19) - A.get(14)*A.get(18))
-                - A.get(12)*(A.get(8)*A.get(19) - A.get(9)*A.get(18))
-                + A.get(17)*(A.get(8)*A.get(14)-A.get(9)*A.get(13))
+        //if(A[0][1]>1e-30)
+            t0 = A[0][1]*(
+                + A[1][2]*(A[2][3]*A[3][4] - A[2][4]*A[3][3])
+                - A[2][2]*(A[1][3]*A[3][4] - A[1][4]*A[3][3])
+                + A[3][2]*(A[1][3]*A[2][4]-A[1][4]*A[2][3])
                 );
-        //if(A.get(6)>1e-30)
-            t1 = -A.get(6)*(
-                + A.get(2)*(A.get(13)*A.get(19) - A.get(14)*A.get(18))
-                - A.get(12)*(A.get(3)*A.get(19) - A.get(4)*A.get(18))
-                + A.get(17)*(A.get(3)*A.get(14) - A.get(4)*A.get(13))
+        //if(A[1][1]>1e-30)
+            t1 = -A[1][1]*(
+                + A[0][2]*(A[2][3]*A[3][4] - A[2][4]*A[3][3])
+                - A[2][2]*(A[0][3]*A[3][4] - A[0][4]*A[3][3])
+                + A[3][2]*(A[0][3]*A[2][4] - A[0][4]*A[2][3])
                 );
-        //if(A.get(11)>1e-30)
-            t2 = + A.get(11)*(
-                + A.get(2)*(A.get(8)*A.get(19) - A.get(9)*A.get(18))
-                - A.get(7)*(A.get(3)*A.get(19) - A.get(4)*A.get(18))
-                + A.get(17)*(A.get(3)*A.get(9) - A.get(4)*A.get(8))
+        //if(A[2][1]>1e-30)
+            t2 = + A[2][1]*(
+                + A[0][2]*(A[1][3]*A[3][4] - A[1][4]*A[3][3])
+                - A[1][2]*(A[0][3]*A[3][4] - A[0][4]*A[3][3])
+                + A[3][2]*(A[0][3]*A[1][4] - A[0][4]*A[1][3])
                 );
-        //if(A.get(16)>1e-30)
-            t3 = - A.get(16)*(
-                + A.get(2)*(A.get(8)*A.get(14) - A.get(9)*A.get(13))
-                - A.get(7)*(A.get(3)*A.get(14) - A.get(4)*A.get(13))
-                + A.get(12)*(A.get(3)*A.get(9) - A.get(4)*A.get(8))
+        //if(A[3][1]>1e-30)
+            t3 = - A[3][1]*(
+                + A[0][2]*(A[1][3]*A[2][4] - A[1][4]*A[2][3])
+                - A[1][2]*(A[0][3]*A[2][4] - A[0][4]*A[2][3])
+                + A[2][2]*(A[0][3]*A[1][4] - A[0][4]*A[1][3])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__41(Matrix A){
+ public static double determinant__41(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(0)>1e-30)
-            t0 = A.get(0)*(
-                + A.get(7)*(A.get(13)*A.get(19) - A.get(14)*A.get(18))
-                - A.get(12)*(A.get(8)*A.get(19) - A.get(9)*A.get(18))
-                + A.get(17)*(A.get(8)*A.get(14)-A.get(9)*A.get(13))
+        //if(A[0][0]>1e-30)
+            t0 = A[0][0]*(
+                + A[1][2]*(A[2][3]*A[3][4] - A[2][4]*A[3][3])
+                - A[2][2]*(A[1][3]*A[3][4] - A[1][4]*A[3][3])
+                + A[3][2]*(A[1][3]*A[2][4]-A[1][4]*A[2][3])
                 );
-        //if(A.get(5)>1e-30)
-            t1 = -A.get(5)*(
-                + A.get(2)*(A.get(13)*A.get(19) - A.get(14)*A.get(18))
-                - A.get(12)*(A.get(3)*A.get(19) - A.get(4)*A.get(18))
-                + A.get(17)*(A.get(3)*A.get(14) - A.get(4)*A.get(13))
+        //if(A[1][0]>1e-30)
+            t1 = -A[1][0]*(
+                + A[0][2]*(A[2][3]*A[3][4] - A[2][4]*A[3][3])
+                - A[2][2]*(A[0][3]*A[3][4] - A[0][4]*A[3][3])
+                + A[3][2]*(A[0][3]*A[2][4] - A[0][4]*A[2][3])
                 );
-        //if(A.get(10)>1e-30)
-            t2 = + A.get(10)*(
-                + A.get(2)*(A.get(8)*A.get(19) - A.get(9)*A.get(18))
-                - A.get(7)*(A.get(3)*A.get(19) - A.get(4)*A.get(18))
-                + A.get(17)*(A.get(3)*A.get(9) - A.get(4)*A.get(8))
+        //if(A[2][0]>1e-30)
+            t2 = + A[2][0]*(
+                + A[0][2]*(A[1][3]*A[3][4] - A[1][4]*A[3][3])
+                - A[1][2]*(A[0][3]*A[3][4] - A[0][4]*A[3][3])
+                + A[3][2]*(A[0][3]*A[1][4] - A[0][4]*A[1][3])
                 );
-        //if(A.get(15)>1e-30)
-            t3 = - A.get(15)*(
-                + A.get(2)*(A.get(8)*A.get(14) - A.get(9)*A.get(13))
-                - A.get(7)*(A.get(3)*A.get(14) - A.get(4)*A.get(13))
-                + A.get(12)*(A.get(3)*A.get(9) - A.get(4)*A.get(8))
+        //if(A[3][0]>1e-30)
+            t3 = - A[3][0]*(
+                + A[0][2]*(A[1][3]*A[2][4] - A[1][4]*A[2][3])
+                - A[1][2]*(A[0][3]*A[2][4] - A[0][4]*A[2][3])
+                + A[2][2]*(A[0][3]*A[1][4] - A[0][4]*A[1][3])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__42(Matrix A){
+ public static double determinant__42(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(0)>1e-30)
-            t0 = A.get(0)*(
-                + A.get(6)*(A.get(13)*A.get(19) - A.get(14)*A.get(18))
-                - A.get(11)*(A.get(8)*A.get(19) - A.get(9)*A.get(18))
-                + A.get(16)*(A.get(8)*A.get(14)-A.get(9)*A.get(13))
+        //if(A[0][0]>1e-30)
+            t0 = A[0][0]*(
+                + A[1][1]*(A[2][3]*A[3][4] - A[2][4]*A[3][3])
+                - A[2][1]*(A[1][3]*A[3][4] - A[1][4]*A[3][3])
+                + A[3][1]*(A[1][3]*A[2][4]-A[1][4]*A[2][3])
                 );
-        //if(A.get(5)>1e-30)
-            t1 = -A.get(5)*(
-                + A.get(1)*(A.get(13)*A.get(19) - A.get(14)*A.get(18))
-                - A.get(11)*(A.get(3)*A.get(19) - A.get(4)*A.get(18))
-                + A.get(16)*(A.get(3)*A.get(14) - A.get(4)*A.get(13))
+        //if(A[1][0]>1e-30)
+            t1 = -A[1][0]*(
+                + A[0][1]*(A[2][3]*A[3][4] - A[2][4]*A[3][3])
+                - A[2][1]*(A[0][3]*A[3][4] - A[0][4]*A[3][3])
+                + A[3][1]*(A[0][3]*A[2][4] - A[0][4]*A[2][3])
                 );
-        //if(A.get(10)>1e-30)
-            t2 = + A.get(10)*(
-                + A.get(1)*(A.get(8)*A.get(19) - A.get(9)*A.get(18))
-                - A.get(6)*(A.get(3)*A.get(19) - A.get(4)*A.get(18))
-                + A.get(16)*(A.get(3)*A.get(9) - A.get(4)*A.get(8))
+        //if(A[2][0]>1e-30)
+            t2 = + A[2][0]*(
+                + A[0][1]*(A[1][3]*A[3][4] - A[1][4]*A[3][3])
+                - A[1][1]*(A[0][3]*A[3][4] - A[0][4]*A[3][3])
+                + A[3][1]*(A[0][3]*A[1][4] - A[0][4]*A[1][3])
                 );
-        //if(A.get(15)>1e-30)
-            t3 = - A.get(15)*(
-                + A.get(1)*(A.get(8)*A.get(14) - A.get(9)*A.get(13))
-                - A.get(6)*(A.get(3)*A.get(14) - A.get(4)*A.get(13))
-                + A.get(11)*(A.get(3)*A.get(9) - A.get(4)*A.get(8))
+        //if(A[3][0]>1e-30)
+            t3 = - A[3][0]*(
+                + A[0][1]*(A[1][3]*A[2][4] - A[1][4]*A[2][3])
+                - A[1][1]*(A[0][3]*A[2][4] - A[0][4]*A[2][3])
+                + A[2][1]*(A[0][3]*A[1][4] - A[0][4]*A[1][3])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__43(Matrix A){
+ public static double determinant__43(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(0)>1e-30)
-            t0 = A.get(0)*(
-                + A.get(6)*(A.get(12)*A.get(19) - A.get(14)*A.get(17))
-                - A.get(11)*(A.get(7)*A.get(19) - A.get(9)*A.get(17))
-                + A.get(16)*(A.get(7)*A.get(14)-A.get(9)*A.get(12))
+        //if(A[0][0]>1e-30)
+            t0 = A[0][0]*(
+                + A[1][1]*(A[2][2]*A[3][4] - A[2][4]*A[3][2])
+                - A[2][1]*(A[1][2]*A[3][4] - A[1][4]*A[3][2])
+                + A[3][1]*(A[1][2]*A[2][4]-A[1][4]*A[2][2])
                 );
-        //if(A.get(5)>1e-30)
-            t1 = -A.get(5)*(
-                + A.get(1)*(A.get(12)*A.get(19) - A.get(14)*A.get(17))
-                - A.get(11)*(A.get(2)*A.get(19) - A.get(4)*A.get(17))
-                + A.get(16)*(A.get(2)*A.get(14) - A.get(4)*A.get(12))
+        //if(A[1][0]>1e-30)
+            t1 = -A[1][0]*(
+                + A[0][1]*(A[2][2]*A[3][4] - A[2][4]*A[3][2])
+                - A[2][1]*(A[0][2]*A[3][4] - A[0][4]*A[3][2])
+                + A[3][1]*(A[0][2]*A[2][4] - A[0][4]*A[2][2])
                 );
-        //if(A.get(10)>1e-30)
-            t2 = + A.get(10)*(
-                + A.get(1)*(A.get(7)*A.get(19) - A.get(9)*A.get(17))
-                - A.get(6)*(A.get(2)*A.get(19) - A.get(4)*A.get(17))
-                + A.get(16)*(A.get(2)*A.get(9) - A.get(4)*A.get(7))
+        //if(A[2][0]>1e-30)
+            t2 = + A[2][0]*(
+                + A[0][1]*(A[1][2]*A[3][4] - A[1][4]*A[3][2])
+                - A[1][1]*(A[0][2]*A[3][4] - A[0][4]*A[3][2])
+                + A[3][1]*(A[0][2]*A[1][4] - A[0][4]*A[1][2])
                 );
-        //if(A.get(15)>1e-30)
-            t3 = - A.get(15)*(
-                + A.get(1)*(A.get(7)*A.get(14) - A.get(9)*A.get(12))
-                - A.get(6)*(A.get(2)*A.get(14) - A.get(4)*A.get(12))
-                + A.get(11)*(A.get(2)*A.get(9) - A.get(4)*A.get(7))
+        //if(A[3][0]>1e-30)
+            t3 = - A[3][0]*(
+                + A[0][1]*(A[1][2]*A[2][4] - A[1][4]*A[2][2])
+                - A[1][1]*(A[0][2]*A[2][4] - A[0][4]*A[2][2])
+                + A[2][1]*(A[0][2]*A[1][4] - A[0][4]*A[1][2])
                 );
         return t0 + t1 + t2 + t3;
     }
- public static double determinant__44(Matrix A){
+ public static double determinant__44(double A[][]){
         double t0 = 0.0;
         double t1 = 0.0;
         double t2 = 0.0;
         double t3 = 0.0;
-        //if(A.get(0)>1e-30)
-            t0 = A.get(0)*(
-                + A.get(6)*(A.get(12)*A.get(18) - A.get(13)*A.get(17))
-                - A.get(11)*(A.get(7)*A.get(18) - A.get(8)*A.get(17))
-                + A.get(16)*(A.get(7)*A.get(13)-A.get(8)*A.get(12))
+        //if(A[0][0]>1e-30)
+            t0 = A[0][0]*(
+                + A[1][1]*(A[2][2]*A[3][3] - A[2][3]*A[3][2])
+                - A[2][1]*(A[1][2]*A[3][3] - A[1][3]*A[3][2])
+                + A[3][1]*(A[1][2]*A[2][3]-A[1][3]*A[2][2])
                 );
-        //if(A.get(5)>1e-30)
-            t1 = -A.get(5)*(
-                + A.get(1)*(A.get(12)*A.get(18) - A.get(13)*A.get(17))
-                - A.get(11)*(A.get(2)*A.get(18) - A.get(3)*A.get(17))
-                + A.get(16)*(A.get(2)*A.get(13) - A.get(3)*A.get(12))
+        //if(A[1][0]>1e-30)
+            t1 = -A[1][0]*(
+                + A[0][1]*(A[2][2]*A[3][3] - A[2][3]*A[3][2])
+                - A[2][1]*(A[0][2]*A[3][3] - A[0][3]*A[3][2])
+                + A[3][1]*(A[0][2]*A[2][3] - A[0][3]*A[2][2])
                 );
-        //if(A.get(10)>1e-30)
-            t2 = + A.get(10)*(
-                + A.get(1)*(A.get(7)*A.get(18) - A.get(8)*A.get(17))
-                - A.get(6)*(A.get(2)*A.get(18) - A.get(3)*A.get(17))
-                + A.get(16)*(A.get(2)*A.get(8) - A.get(3)*A.get(7))
+        //if(A[2][0]>1e-30)
+            t2 = + A[2][0]*(
+                + A[0][1]*(A[1][2]*A[3][3] - A[1][3]*A[3][2])
+                - A[1][1]*(A[0][2]*A[3][3] - A[0][3]*A[3][2])
+                + A[3][1]*(A[0][2]*A[1][3] - A[0][3]*A[1][2])
                 );
-        //if(A.get(15)>1e-30)
-            t3 = - A.get(15)*(
-                + A.get(1)*(A.get(7)*A.get(13) - A.get(8)*A.get(12))
-                - A.get(6)*(A.get(2)*A.get(13) - A.get(3)*A.get(12))
-                + A.get(11)*(A.get(2)*A.get(8) - A.get(3)*A.get(7))
+        //if(A[3][0]>1e-30)
+            t3 = - A[3][0]*(
+                + A[0][1]*(A[1][2]*A[2][3] - A[1][3]*A[2][2])
+                - A[1][1]*(A[0][2]*A[2][3] - A[0][3]*A[2][2])
+                + A[2][1]*(A[0][2]*A[1][3] - A[0][3]*A[1][2])
                 );
         return t0 + t1 + t2 + t3;
     }
