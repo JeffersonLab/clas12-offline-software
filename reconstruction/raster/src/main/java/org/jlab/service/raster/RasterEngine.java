@@ -50,10 +50,7 @@ public class RasterEngine extends ReconstructionEngine {
     
     @Override
     public boolean processDataEvent(DataEvent event) {
-        
-        //For testing : Write fake ADC bank
-        mcToRasterBank(event);
-        
+               
         // Read run number from RUN::config bank
         int run=-1;
         if (event.hasBank("RUN::config")) {
@@ -64,8 +61,17 @@ public class RasterEngine extends ReconstructionEngine {
             return false;
         }        
         
-        // check if input bank exist, otherwise do nothing
-        if(!event.hasBank("RASTER::adc")) return true;
+        IndexedTable adc2position = this.getConstantsManager().getConstants(run, "/calibration/raster/adc_to_position");
+        
+        // check if input bank exist, otherwise write a "fake" raster bank for MC or do nothing
+        if(!event.hasBank("RASTER::adc")) 
+        {
+            if(event.hasBank("MC::Particle")) 
+                mcToRasterBank(event, adc2position);
+            else
+                return true;
+        }
+        
         
         // check if input bank has two rows, otherwise give warning
         DataBank adcBank = event.getBank("RASTER::adc");
@@ -77,7 +83,6 @@ public class RasterEngine extends ReconstructionEngine {
         // get calibration table
         double xpos = udfPos;
         double ypos = udfPos;
-        IndexedTable adc2position = this.getConstantsManager().getConstants(run, "/calibration/raster/adc_to_position");
         for(int i=0; i<adcBank.rows(); i++) {
             int component = adcBank.getShort("component", i);
             int adc       = adcBank.getInt("ADC", i);
@@ -105,12 +110,12 @@ public class RasterEngine extends ReconstructionEngine {
         return pos;
     }
     
-    public void mcToRasterBank(DataEvent event){
+    public void mcToRasterBank(DataEvent event, IndexedTable adc2pos){
         // create "fake" adc bank
         if(event.hasBank("MC::Particle")) {
         DataBank part = event.getBank("MC::Particle");
-        double[] adcs = {(part.getFloat("vx", 0)+Math.random()-0.5)*2000, 
-                         (part.getFloat("vy", 0)+Math.random()-0.5)*2000};
+        double[] adcs = {(part.getFloat("vx", 0)-adc2pos.getDoubleValue("p0", 0, 0, 0))/adc2pos.getDoubleValue("p1", 0, 0, 0)
+                         ,(part.getFloat("vy", 0)-adc2pos.getDoubleValue("p0", 0, 0, 1))/adc2pos.getDoubleValue("p1", 0, 0, 1)};
         DataBank adc  = event.createBank("RASTER::adc", 2);
             for(int i=0; i<adcs.length;i++) {
                 adc.setByte("sector", i, (byte) 0);
@@ -129,7 +134,7 @@ public class RasterEngine extends ReconstructionEngine {
         engine.init();
  
         // open hipo file
-        String input = "/vol0/pilleux-l/Bureau/dev_COATJAVA/out_NH3_updated.hipo";
+        String input = "/vol0/pilleux-l/Bureau/dev_COATJAVA/rastersoftware/out_rastersoftware_eventsRndm9mm_updated_16.hipo";
         HipoDataSource  reader = new HipoDataSource();
         reader.open(input);
 		
@@ -148,11 +153,6 @@ public class RasterEngine extends ReconstructionEngine {
             // for comparison
             DataBank MC_Part = event.getBank("MC::Particle");
             System.out.print("MC position read : " + MC_Part.getFloat("vx",0) +"\n");
-                        
-            // create adc bank
-            engine.mcToRasterBank(event);
-            DataBank Raster_adc = event.getBank("RASTER::adc");
-            System.out.print("ADC value written from MC bank : " + Raster_adc.getInt("ADC",0) +"\n");
             
             // run the raster engine
             engine.processDataEvent(event);
@@ -164,8 +164,8 @@ public class RasterEngine extends ReconstructionEngine {
                 double ypos = bank.getFloat("y", 0);
                 // fill histograms
                 System.out.print("Raster position : " + xpos + "\n");
-                hx.fill(Raster_adc.getInt("ADC",0), xpos);
-                hy.fill(Raster_adc.getInt("ADC",1), ypos);
+                hx.fill(bank.getInt("ADC",0), xpos);
+                hy.fill(bank.getInt("ADC",1), ypos);
             }
             
         }
@@ -180,6 +180,7 @@ public class RasterEngine extends ReconstructionEngine {
         canvas.cd(1); canvas.draw(hy);
         frame.add(canvas);
         frame.setLocationRelativeTo(null);
-        frame.setVisible(true);    
+        frame.setVisible(true);
+
     }
 }
