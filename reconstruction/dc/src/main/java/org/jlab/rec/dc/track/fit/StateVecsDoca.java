@@ -1,8 +1,6 @@
 package org.jlab.rec.dc.track.fit;
 
-// import org.jlab.jnp.matrix.*;
-import org.jlab.rec.dc.track.Matrix5x5;
-import org.jlab.rec.dc.track.Matrix;
+import org.jlab.jnp.matrix.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -234,7 +232,6 @@ public class StateVecsDoca {
         this.trackTraj.put(f, fVec);
         this.trackCov.put(f, fCov);
     }
-
     public double getX0(double z) {
         double X0 = Constants.AIRRADLEN;
         double tolerance = 0.01;
