@@ -1,6 +1,5 @@
 package org.jlab.rec.dc.track;
 
-// import org.jlab.jnp.matrix.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.geom.prim.Point3D;

@@ -9,7 +9,6 @@ import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.fit.StateVecsDoca.CovMat;
 import org.jlab.rec.dc.track.fit.StateVecsDoca.StateVec;
-// import org.jlab.jnp.matrix.*;
 import org.jlab.rec.dc.track.Matrix;
 import org.jlab.rec.dc.track.Matrix5x5;
 

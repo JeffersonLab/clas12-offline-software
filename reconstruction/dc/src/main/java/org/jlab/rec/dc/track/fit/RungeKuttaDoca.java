@@ -1,7 +1,6 @@
 package org.jlab.rec.dc.track.fit;
 
 import java.util.ArrayList;
-// import org.jlab.jnp.matrix.*;
 import org.jlab.rec.dc.track.Matrix;
 import org.jlab.clas.swimtools.Swim;
 
