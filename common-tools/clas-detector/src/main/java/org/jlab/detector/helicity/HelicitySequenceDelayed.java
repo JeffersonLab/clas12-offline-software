@@ -1,5 +1,6 @@
 package org.jlab.detector.helicity;
 
+import java.util.logging.Level;
 import org.jlab.utils.groups.IndexedTable;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 
@@ -56,18 +57,18 @@ public class HelicitySequenceDelayed extends HelicitySequence {
             this.delay=it.getIntValue("delay",0,0,0);
             this.pattern=HelicityPattern.create((byte)it.getIntValue("pattern",0,0,0));
             this.generator.setClock(this.helicityClock);
-            System.out.println(String.format("HelicitySequenceDelayed:  got parameters from CCDB for run %d:",runNumber));
-            System.out.println(String.format("HelicitySequenceDelayed:  CCDB clock: %.4f seconds",this.helicityClock));
-            System.out.println(String.format("HelicitySequenceDelayed:  CCDB delay: %d windows",this.delay));
-            System.out.println(String.format("HelicitySequenceDelayed:  CCDB pattern: %s",this.pattern));
+            LOGGER.info(String.format("got parameters from CCDB for run %d:",runNumber));
+            LOGGER.info(String.format("CCDB clock: %.4f seconds",this.helicityClock));
+            LOGGER.info(String.format("CCDB delay: %d windows",this.delay));
+            LOGGER.info(String.format("CCDB pattern: %s",this.pattern));
             if (this.pattern != HelicityPattern.QUARTET) {
-                System.err.println("HelicitySequenceDelayed:  not ready for non-QUARTET pattern");
+                LOGGER.severe("not ready for non-QUARTET pattern");
                 return false;
             }
             return true;
         }
         catch (Exception e) {
-            System.err.println(String.format("HelicitySequence:  error retrieving clock from ccdb for run %d",runNumber));
+            LOGGER.severe(String.format("HelicitySequence:  error retrieving clock from ccdb for run %d",runNumber));
             return false;
         }
     }
@@ -164,25 +165,21 @@ public class HelicitySequenceDelayed extends HelicitySequence {
   
     @Override
     public void show() {
-        System.out.println("GENERATORTIMESTAMP:  "+this.generator.getTimestamp());
+        LOGGER.log(Level.INFO, "GENERATORTIMESTAMP:  {0}",
+                this.generator.getTimestamp());
         HelicityState prev=super.getState(0);
         for (int ii=0; ii<this.size(); ii++) {
             if (super.getState(ii).getPatternSync()==HelicityBit.PLUS) continue;
-            //System.out.print(String.format("%4d %6s %6s %6s",
-            //        ii,
-            //        super.getState(ii).getInfo(prev,ii),
-            //        super.getState(ii).getHelicity(),
-            //        super.getGenerated(ii)));
             final long ts=super.getState(ii).getTimestamp()+1;
-            System.out.print(String.format("%4d %6s %6s %6s",
+            LOGGER.info(String.format("%4d %6s %6s %6s",
                     ii,
                     this.getState(ii).getInfo(prev,ii),
                     this.search(ts),
                     this.searchGenerated(ts)));
             if (super.getState(ii).getSwStatus()!=0) {
-                System.out.print("   "+String.format("0x%04x",super.getState(ii).getSwStatus()));
+                LOGGER.log(Level.SEVERE, "   {0}",
+                        String.format("0x%04x",super.getState(ii).getSwStatus()));
             }
-            System.out.println();
             prev=super.getState(ii);
         }
     }

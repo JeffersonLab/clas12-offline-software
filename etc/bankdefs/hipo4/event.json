@@ -363,6 +363,52 @@
         ]
     },
     {
+        "name": "REC::UTrack",
+        "group": 300,
+        "item" : 44,
+        "info": "Track information for Particles bank",
+        "entries": [
+            {"name":"index",    "type":"S", "info":"index of the track in the specific detector bank"},
+            {"name":"pindex",   "type":"S", "info":"row number in the particle bank hit is associated with"},
+            {"name":"detector", "type":"B", "info":"Detector ID, as defined in org.jlab.detector.base.DetectorType"},
+            {"name":"sector",   "type":"B", "info":"Sector of the track"},
+            {"name":"status",   "type":"S", "info":"status of the track"},
+            {"name":"q",        "type":"B", "info":"charge of the track"},
+            {"name":"chi2",     "type":"F", "info":"Chi2 (or quality) track fitting"},
+            {"name":"NDF",      "type":"S", "info":"number of degrees of freedom in track fitting"},
+            {"name":"hbindex",  "type":"S", "info":"row number of corresponding track in RECHB::Track"},
+            {"name":"px",       "type":"F", "info":"x component of the momentum (GeV)"},
+            {"name":"py",       "type":"F", "info":"y component of the momentum (GeV)"},
+            {"name":"pz",       "type":"F", "info":"z component of the momentum (GeV)"},
+            {"name":"vx",       "type":"F", "info":"x component of the vertex (cm)"},
+            {"name":"vy",       "type":"F", "info":"y component of the vertex (cm)"},
+            {"name":"vz",       "type":"F", "info":"z component of the vertex (cm)"}
+        ]
+    },
+    {
+        "name": "RECHB::UTrack",
+        "group": 300,
+        "item" : 45,
+        "info": "Track information for Particles bank",
+        "entries": [
+            {"name":"index",    "type":"S", "info":"index of the track in the specific detector bank"},
+            {"name":"pindex",   "type":"S", "info":"row number in the particle bank hit is associated with"},
+            {"name":"detector", "type":"B", "info":"Detector ID, as defined in org.jlab.detector.base.DetectorType"},
+            {"name":"sector",   "type":"B", "info":"Sector of the track"},
+            {"name":"status",   "type":"S", "info":"status of the track"},
+            {"name":"q",        "type":"B", "info":"charge of the track"},
+            {"name":"chi2",     "type":"F", "info":"Chi2 (or quality) track fitting"},
+            {"name":"NDF",      "type":"S", "info":"number of degrees of freedom in track fitting"},
+            {"name":"hbindex",  "type":"S", "info":"row number of corresponding track in RECHB::Track"},
+            {"name":"px",       "type":"F", "info":"x component of the momentum (GeV)"},
+            {"name":"py",       "type":"F", "info":"y component of the momentum (GeV)"},
+            {"name":"pz",       "type":"F", "info":"z component of the momentum (GeV)"},
+            {"name":"vx",       "type":"F", "info":"x component of the vertex (cm)"},
+            {"name":"vy",       "type":"F", "info":"y component of the vertex (cm)"},
+            {"name":"vz",       "type":"F", "info":"z component of the vertex (cm)"}
+        ]
+    },
+    {
         "name": "REC::TrackCross",
         "group": 300,
         "item" : 37,
@@ -472,7 +518,10 @@
             {"name":"vt",      "type":"F", "info":"RF and z corrected vertex time (ns)"},
             {"name":"beta",    "type":"F", "info":"particle beta measured by TOF"},
             {"name":"chi2pid", "type":"F", "info":"Chi2 of assigned PID"},
-            {"name":"status",  "type":"S", "info":"particle status (represents detector collection it passed)"}
+            {"name":"status",  "type":"S", "info":"particle status (represents detector collection it passed)"},
+            {"name":"px",       "type":"F", "info":"x component of the momentum (GeV)"},
+            {"name":"py",       "type":"F", "info":"y component of the momentum (GeV)"},
+            {"name":"pz",       "type":"F", "info":"z component of the momentum (GeV)"}
         ]
     }
 ]

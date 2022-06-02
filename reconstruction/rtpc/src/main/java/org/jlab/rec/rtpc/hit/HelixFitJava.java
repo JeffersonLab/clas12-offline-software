@@ -770,7 +770,7 @@ public class HelixFitJava {
 	      rf[npt]= 0.0001;  //rf=0 will cause chi2=nan problem
 	      pf[npt]= 0.0;
 	      zf[npt]= 0.0; 
-	      wfi[npt]= 10.0;
+	      wfi[npt]= 10.0; 
 	      wzf[npt]= 0.0; /* zero weight for Z on the beamline point*/
 	      //This means that don't calculate the chi square for Z on the beamline point
 	      npt++;
