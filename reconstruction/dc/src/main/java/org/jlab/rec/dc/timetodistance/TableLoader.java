@@ -107,21 +107,21 @@ public class TableLoader {
                 FracDmaxAtMinVel[s][r] = t2dTab.getDoubleValue("c1_a0", s+1,r+1,0)
                         +t2dTab.getDoubleValue("c1_a1", s+1,r+1,0)*dp;
                 v0[s][r] = t2dTab.getDoubleValue("v0_a0", s+1,r+1,0)
-                        +t2dTab.getDoubleValue("v0_a1", s+1,r+1,0)*dp;
+                        +t2dTab.getDoubleValue("v0_a1", s+1,r+1,0)*dp+t2dTab.getDoubleValue("v0_a2", s+1,r+1,0)*dp*dp;
                 vmid[s][r] = t2dTab.getDoubleValue("vmid_a0", s+1,r+1,0)
-                        +t2dTab.getDoubleValue("vmid_a1", s+1,r+1,0)*dp;
+                        +t2dTab.getDoubleValue("vmid_a1", s+1,r+1,0)*dp+t2dTab.getDoubleValue("vmid_a2", s+1,r+1,0)*dp*dp;
                 delta_bfield_coefficient[s][r] = t2dTab.getDoubleValue("delta_bfield_a0", s+1,r+1,0)
-                        +t2dTab.getDoubleValue("delta_bfield_a1", s+1,r+1,0)*dp;
+                        +t2dTab.getDoubleValue("delta_bfield_a1", s+1,r+1,0)*dp+t2dTab.getDoubleValue("delta_bfield_a2", s+1,r+1,0)*dp*dp;
                 b1[s][r] = t2dTab.getDoubleValue("b1_a0", s+1,r+1,0)
-                        +t2dTab.getDoubleValue("b1_a1", s+1,r+1,0)*dp;
+                        +t2dTab.getDoubleValue("b1_a1", s+1,r+1,0)*dp+t2dTab.getDoubleValue("b1_a2", s+1,r+1,0)*dp*dp;
                 b2[s][r] = t2dTab.getDoubleValue("b2_a0", s+1,r+1,0)
-                        +t2dTab.getDoubleValue("b2_a1", s+1,r+1,0)*dp;
+                        +t2dTab.getDoubleValue("b2_a1", s+1,r+1,0)*dp+t2dTab.getDoubleValue("b2_a2", s+1,r+1,0)*dp*dp;
                 b3[s][r] = t2dTab.getDoubleValue("b3_a0", s+1,r+1,0)
-                        +t2dTab.getDoubleValue("b3_a1", s+1,r+1,0)*dp;
+                        +t2dTab.getDoubleValue("b3_a1", s+1,r+1,0)*dp+t2dTab.getDoubleValue("b3_a2", s+1,r+1,0)*dp*dp;
                 b4[s][r] = t2dTab.getDoubleValue("b4_a0", s+1,r+1,0)
-                        +t2dTab.getDoubleValue("b4_a1", s+1,r+1,0)*dp;
+                        +t2dTab.getDoubleValue("b4_a1", s+1,r+1,0)*dp+t2dTab.getDoubleValue("b4_a2", s+1,r+1,0)*dp*dp;
                 Tmax[s][r] = t2dTab.getDoubleValue("tmax_a0", s+1,r+1,0)
-                        +t2dTab.getDoubleValue("tmax_a1", s+1,r+1,0)*dp;
+                        +t2dTab.getDoubleValue("tmax_a1", s+1,r+1,0)*dp+t2dTab.getDoubleValue("tmax_a2", s+1,r+1,0)*dp*dp;
             }
         }
         Fill();
