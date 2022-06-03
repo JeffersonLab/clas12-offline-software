@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.bmt.BMTConstants;
 
 import org.jlab.rec.cvt.bmt.BMTGeometry;
@@ -143,7 +144,7 @@ public class CrossMaker {
     }
 
     public void calcCentErr(Cross c, Cluster Cluster1) {
-        double Z = Constants.getInstance().SVTGEOMETRY.toLocal(Cluster1.getLayer(),
+        double Z = Geometry.getInstance().getSVT().toLocal(Cluster1.getLayer(),
                                                  Cluster1.getSector(),
                                                  c.getPoint()).z();        
         if(Z>SVTGeometry.getModuleLength()) Z=SVTGeometry.getModuleLength();
@@ -202,7 +203,7 @@ public class CrossMaker {
 
         for (Cross c : crosses) {
             int rg  =  3 + 
-                    Constants.getInstance().BMTGEOMETRY.getLayer( c.getRegion(), c.getType()) ;
+                    Geometry.getInstance().getBMT().getLayer( c.getRegion(), c.getType()) ;
             c.setOrderedRegion(rg);
         }
         return crosses;

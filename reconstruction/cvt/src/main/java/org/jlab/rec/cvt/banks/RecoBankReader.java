@@ -10,6 +10,7 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
@@ -49,9 +50,9 @@ public class RecoBankReader {
                 int trkStatus  = bank.getByte("trkingStat", i);
                 int status     = bank.getByte("status", i);
                 Hit hit = new Hit(DetectorType.BST, BMTType.UNDEFINED, sector, layer, new Strip(strip, energy, time));
-                hit.getStrip().setLine(Constants.getInstance().SVTGEOMETRY.getStrip(layer, sector, strip));
-                hit.getStrip().setModule(Constants.getInstance().SVTGEOMETRY.getModule(layer, sector));
-                hit.getStrip().setNormal(Constants.getInstance().SVTGEOMETRY.getNormal(layer, sector));
+                hit.getStrip().setLine(Geometry.getInstance().getSVT().getStrip(layer, sector, strip));
+                hit.getStrip().setModule(Geometry.getInstance().getSVT().getModule(layer, sector));
+                hit.getStrip().setNormal(Geometry.getInstance().getSVT().getNormal(layer, sector));
                 hit.getStrip().setPitch(SVTGeometry.getPitch());
                 hit.getStrip().setStatus(status);
                 hit.setId(id);
@@ -319,8 +320,8 @@ public class RecoBankReader {
                 cr.setPointErr(new Point3D(err_x,err_y,err_z));
                 cr.setPoint0(new Point3D(x0,y0,z0));
                 cr.setPointErr0(new Point3D(err_x0,err_y0,err_z0));
-                cr.setOrderedRegion(Constants.getInstance().BMTGEOMETRY.getLayer(region, cr.getType())+SVTGeometry.NREGIONS); // RDV check if is used and fix definition here and in CrossMaker
-                cr.setCluster1(new Cluster(DetectorType.BMT, cr.getType(), sector, Constants.getInstance().BMTGEOMETRY.getLayer(region, cr.getType()), clid1));
+                cr.setOrderedRegion(Geometry.getInstance().getBMT().getLayer(region, cr.getType())+SVTGeometry.NREGIONS); // RDV check if is used and fix definition here and in CrossMaker
+                cr.setCluster1(new Cluster(DetectorType.BMT, cr.getType(), sector, Geometry.getInstance().getBMT().getLayer(region, cr.getType()), clid1));
                 crosses.add(cr);
             }
             return crosses;

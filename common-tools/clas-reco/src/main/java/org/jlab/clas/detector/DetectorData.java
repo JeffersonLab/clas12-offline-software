@@ -379,6 +379,33 @@ public class DetectorData {
         return bank;
     }
 
+    public static DataBank getUTracksBank(List<DetectorParticle> particles, DataEvent event, String bank_name, int rows) {
+        DataBank bank = event.createBank(bank_name, rows);
+        int row = 0;
+        for (int i = 0; i < particles.size(); i++) {
+            DetectorParticle p = particles.get(i);
+            if (p.getTrackDetector() == DetectorType.CVT.getDetectorId()) {
+                bank.setShort("index", row, (short) p.getTrackIndex());
+                bank.setShort("pindex", row, (short) i);
+                bank.setByte("sector", row, (byte) p.getTrackSector());
+                bank.setByte("detector", row, (byte) p.getTrackDetector());
+                bank.setByte("q", row, (byte) p.getCharge());
+                bank.setFloat("chi2", row, (float) p.getTrackChi2());
+                bank.setShort("NDF", row, (short) p.getNDF());
+                bank.setShort("status", row, (short) p.getTrackStatus());
+                bank.setFloat("px", row, (float) p.vector().x());
+                bank.setFloat("py", row, (float) p.vector().y());
+                bank.setFloat("pz", row, (float) p.vector().z());
+                bank.setFloat("vx", row, (float) p.vertex().x());
+                bank.setFloat("vy", row, (float) p.vertex().y());
+                bank.setFloat("vz", row, (float) p.vertex().z());
+                row = row + 1;
+            }
+        }
+        return bank;
+    }
+
+
     public static DataBank getTrajectoriesBank(List<DetectorParticle> particles, DataEvent event, String bank_name) {
 
         // these are going to be dropped from REC::Traj:

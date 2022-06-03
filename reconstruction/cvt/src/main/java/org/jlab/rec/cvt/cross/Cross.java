@@ -8,6 +8,7 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.svt.SVTGeometry;
@@ -471,7 +472,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         int layer  = this.getCluster1().getLayer();
         int sector = this.getCluster1().getSector();
         
-        Point3D cross = Constants.getInstance().SVTGEOMETRY.getCross(sector, layer, this.getCluster1().getLine(), this.getCluster2().getLine(), trackDir);
+        Point3D cross = Geometry.getInstance().getSVT().getCross(sector, layer, this.getCluster1().getLine(), this.getCluster2().getLine(), trackDir);
   
         return cross;
     }
@@ -490,9 +491,9 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         Point3D cross = this.getSVTCrossPoint(trackDir);
         if(cross!=null) {
             // get the strip resolution
-            Point3D local = Constants.getInstance().SVTGEOMETRY.toLocal(layer, sector, cross);
-            double sigma1 = Constants.getInstance().SVTGEOMETRY.getSingleStripResolution(layer, this.getCluster1().getSeedStrip().getStrip(), local.z());
-            double sigma2 = Constants.getInstance().SVTGEOMETRY.getSingleStripResolution(layer, this.getCluster2().getSeedStrip().getStrip(), local.z());
+            Point3D local = Geometry.getInstance().getSVT().toLocal(layer, sector, cross);
+            double sigma1 = Geometry.getInstance().getSVT().getSingleStripResolution(layer, this.getCluster1().getSeedStrip().getStrip(), local.z());
+            double sigma2 = Geometry.getInstance().getSVT().getSingleStripResolution(layer, this.getCluster2().getSeedStrip().getStrip(), local.z());
             
             // get the error associated to each strip
             Vector3D error1 = this.getSVTCrossDerivative(1, trackDir).multiply(sigma1);
@@ -545,12 +546,12 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         Point3D crossAPlus  = null;
         Point3D crossAMinus = null;
         if(clusA.getLayer()%2 == 1) {
-            crossAPlus  = Constants.getInstance().SVTGEOMETRY.getCross(sector, layer, stripAPlus,  clusB.getLine(), trackDir);
-            crossAMinus = Constants.getInstance().SVTGEOMETRY.getCross(sector, layer, stripAMinus, clusB.getLine(), trackDir);
+            crossAPlus  = Geometry.getInstance().getSVT().getCross(sector, layer, stripAPlus,  clusB.getLine(), trackDir);
+            crossAMinus = Geometry.getInstance().getSVT().getCross(sector, layer, stripAMinus, clusB.getLine(), trackDir);
         }
         else {
-            crossAPlus  = Constants.getInstance().SVTGEOMETRY.getCross(sector, layer, clusB.getLine(),  stripAPlus, trackDir);
-            crossAMinus = Constants.getInstance().SVTGEOMETRY.getCross(sector, layer, clusB.getLine(), stripAMinus, trackDir);
+            crossAPlus  = Geometry.getInstance().getSVT().getCross(sector, layer, clusB.getLine(),  stripAPlus, trackDir);
+            crossAMinus = Geometry.getInstance().getSVT().getCross(sector, layer, clusB.getLine(), stripAMinus, trackDir);
         }
         
         // if at least one is non-null, calculate the derivative
