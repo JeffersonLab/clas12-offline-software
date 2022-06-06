@@ -118,21 +118,11 @@ public class FTCALReconstruction {
         
     
     public void writeBanks(DataEvent event, List<FTCALHit> hits, List<FTCALCluster> clusters, ConstantsManager manager, int run){
-
+        
         IndexedTable   energyTable = manager.getConstants(run, "/calibration/ft/ftcal/energycorr");
-
-        if(event instanceof EvioDataEvent) {
-            writeEvioBanks(event, hits, clusters, energyTable);
-        }
-        else if(event instanceof HipoDataEvent) {
-            writeHipoBanks(event, hits, clusters, energyTable);
-        }
-    }
-    
-    private void writeHipoBanks(DataEvent event, List<FTCALHit> hits, List<FTCALCluster> clusters, IndexedTable energyTable){
         
         // hits banks
-        if(hits.size()!=0) {
+        if(!hits.isEmpty()) {
             DataBank bankHits = event.createBank("FTCAL::hits", hits.size());    
             if(bankHits==null){
                 System.out.println("ERROR CREATING BANK : FTCAL::hits");
@@ -147,7 +137,7 @@ public class FTCALReconstruction {
                 bankHits.setFloat("energy",i,(float) hits.get(i).get_Edep());
                 bankHits.setFloat("time",i,(float) hits.get(i).get_Time());
                 bankHits.setShort("hitID",i,(short) hits.get(i).get_DGTZIndex());
-                if(clusters.size()>0 && clusters.get(hits.get(i).get_ClusID()-1).getStatus()) {
+                if(!clusters.isEmpty() && clusters.get(hits.get(i).get_ClusID()-1).getStatus()) {
                     bankHits.setShort("clusterID",i,(short) hits.get(i).get_ClusID());
                 }
                 else {
@@ -158,12 +148,12 @@ public class FTCALReconstruction {
             event.appendBanks(bankHits);
         }
         // cluster bank
-        if(clusters.size()!=0) {
+        if(!clusters.isEmpty()) {
             List<FTCALCluster> selectedClusters  = new ArrayList();
             for(int i =0; i< clusters.size(); i++) {
                 if(clusters.get(i).getStatus()) selectedClusters.add(clusters.get(i));
             }
-            if(selectedClusters.size()>0) {                
+            if(!selectedClusters.isEmpty()) {                
                 DataBank bankCluster = event.createBank("FTCAL::clusters", selectedClusters.size());    
                 if(bankCluster==null){
                     System.out.println("ERROR CREATING BANK : FTCAL::clusters");
@@ -188,71 +178,16 @@ public class FTCALReconstruction {
             }
         }
     }
-    
-
-
-    private void writeEvioBanks(DataEvent event, List<FTCALHit> hits, List<FTCALCluster> clusters, IndexedTable energyTable) {
-                          
-        EvioDataBank bankhits  = null;
-        EvioDataBank bankclust = null;
-		
-        // hits banks
-        if(hits.size()!=0) {
-                bankhits = (EvioDataBank) event.getDictionary().createBank("FTCALRec::hits",hits.size());
-                for(int i=0; i<hits.size(); i++) {
-                        bankhits.setInt("idx",i,hits.get(i).get_IDX());
-                        bankhits.setInt("idy",i,hits.get(i).get_IDY());
-                        bankhits.setDouble("hitX",i,hits.get(i).get_Dx()/10.0);
-                        bankhits.setDouble("hitY",i,hits.get(i).get_Dy()/10.0);
-                        bankhits.setDouble("hitEnergy",i,hits.get(i).get_Edep());
-                        bankhits.setDouble("hitTime",i,hits.get(i).get_Time());
-                        bankhits.setInt("hitDGTZIndex",i,hits.get(i).get_DGTZIndex());
-                        bankhits.setInt("hitClusterIndex",i,hits.get(i).get_ClusID());	
-                }				
-        }	
-        // cluster bank
-        if(clusters.size()!=0){
-                bankclust = (EvioDataBank) event.getDictionary().createBank("FTCALRec::clusters",clusters.size());
-                for(int i =0; i< clusters.size(); i++) {
-                        if(debugMode>=1) clusters.get(i).show();
-                            bankclust.setInt("clusID", i,clusters.get(i).getID());
-                            bankclust.setInt("clusSize", i,clusters.get(i).getSize());
-                            bankclust.setDouble("clusX",i,clusters.get(i).getX()/10.0);
-                            bankclust.setDouble("clusY",i,clusters.get(i).getY()/10.0);
-                            bankclust.setDouble("clusXX",i,clusters.get(i).getX2()/100.0);
-                            bankclust.setDouble("clusYY",i,clusters.get(i).getY2()/100.0);
-                            bankclust.setDouble("clusSigmaX",i,clusters.get(i).getWidthX()/10.0);
-                            bankclust.setDouble("clusSigmaY",i,clusters.get(i).getWidthY()/10.0);
-                            bankclust.setDouble("clusRadius",i,clusters.get(i).getRadius()/10.0);
-                            bankclust.setDouble("clusTime",i,clusters.get(i).getTime());
-                            bankclust.setDouble("clusEnergy",i,clusters.get(i).getFullEnergy(energyTable));
-                            bankclust.setDouble("clusRecEnergy",i,clusters.get(i).getEnergy());
-                            bankclust.setDouble("clusMaxEnergy",i,clusters.get(i).getSeedEnergy());
-                            bankclust.setDouble("clusTheta",i,clusters.get(i).getTheta());
-                            bankclust.setDouble("clusPhi",i,clusters.get(i).getPhi());
-                        }
-
-                // If there are no clusters, punt here but save the reconstructed hits 
-                if(bankclust!=null) {
-                        event.appendBanks(bankhits,bankclust);
-                }
-                else if (bankhits!=null) {
-                        event.appendBank(bankhits);
-                }
-        }
-    }
 
     public List<FTCALHit> readRawHits(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable timeWalk, IndexedTable cluster) {
         // getting raw data bank
 	if(debugMode>=1) System.out.println("Getting raw hits from FTCAL:dgtz bank");
 
-        List<FTCALHit>  hits = new ArrayList<FTCALHit>();
+        List<FTCALHit>  hits = new ArrayList<>();
 	if(event.hasBank("FTCAL::dgtz")==true) {
             EvioDataBank bankDGTZ = (EvioDataBank) event.getBank("FTCAL::dgtz");
             int nrows = bankDGTZ.rows();
             for(int row = 0; row < nrows; row++){
-                int isector     = bankDGTZ.getInt("sector",row);
-                int ilayer      = bankDGTZ.getInt("layer",row);
                 int icomponent  = bankDGTZ.getInt("component",row);
                 int adc         = bankDGTZ.getInt("ADC",row);
                 int tdc         = bankDGTZ.getInt("TDC",row);
@@ -269,7 +204,7 @@ public class FTCALReconstruction {
         // getting raw data bank
 	if(debugMode>=1) System.out.println("Getting raw hits from FTCAL:adc bank");
 
-        List<FTCALHit>  hits = new ArrayList<FTCALHit>();
+        List<FTCALHit>  hits = new ArrayList<>();
 	if(event.hasBank("FTCAL::adc")==true) {
             DataBank bankDGTZ = event.getBank("FTCAL::adc");
             int nrows = bankDGTZ.rows();
@@ -277,7 +212,6 @@ public class FTCALReconstruction {
                 int isector     = bankDGTZ.getByte("sector",row);
                 int ilayer      = bankDGTZ.getByte("layer",row);
                 int icomponent  = bankDGTZ.getShort("component",row);
-                int iorder      = bankDGTZ.getByte("order",row);
                 int adc         = bankDGTZ.getInt("ADC",row);
                 float time      = bankDGTZ.getFloat("time",row);
                 if(adc!=-1 && time!=-1 && status.getIntValue("status", isector, ilayer, icomponent)==0){
