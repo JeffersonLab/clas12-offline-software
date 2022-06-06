@@ -107,7 +107,7 @@ public class DetectorEventDecoder {
         tablesTrans = Arrays.asList(new String[]{
             "/daq/tt/ftcal","/daq/tt/fthodo","/daq/tt/fttrk","/daq/tt/ltcc",
             "/daq/tt/ec","/daq/tt/ftof","/daq/tt/htcc","/daq/tt/dc","/daq/tt/ctof","/daq/tt/cnd","/daq/tt/svt",
-            "/daq/tt/rf","/daq/tt/bmt","/daq/tt/fmt","/daq/tt/rich","/daq/tt/hel","/daq/tt/band","/daq/tt/rtpc"
+            "/daq/tt/rf","/daq/tt/bmt","/daq/tt/fmt","/daq/tt/rich2","/daq/tt/hel","/daq/tt/band","/daq/tt/rtpc"
         });
 
         translationManager.init(keysTrans,tablesTrans);
