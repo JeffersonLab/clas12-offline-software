@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.rec.ft;
 
 import org.jlab.clas.detector.DetectorResponse;
@@ -18,7 +13,7 @@ public class FTResponse extends DetectorResponse {
     private DetectorType _type;      // FTCAL, FTHODO, FTTRK
     private int    _size;            // cluster multiplicity
     private int    _id;              // response ID (ordinal number of hit)
-    private int    _trkDet;          // number of TRK detector (0,1)
+    private byte   _module;          // number of TRK detector (0,1)
     
     
     public FTResponse() {
@@ -52,23 +47,18 @@ public class FTResponse extends DetectorResponse {
         this._id = id;
     }
     
-    public int getTrkDet() {
-        return _trkDet;
+    public byte getModule() {
+        return _module;
     }
     
-    public void setTrkDet(byte layer) { 
-    // if the name of the module is passed it is a byte variable        
-        if(layer == DetectorLayer.FTTRK_MODULE1){         
-            this._trkDet = 0;
-        }else if(layer == DetectorLayer.FTTRK_MODULE2){
-            this._trkDet = 1;
-        }
+    public void setModule(byte module) { 
+        this._module = module;
     }
-   
-    public void setTrkDet(int ndet) {
-        this._trkDet = ndet;
-    }
-    
+//   
+//    public void setTrkDet(int ndet) {
+//        this._module = DetectorLayer;
+//    }
+//    
     public void show() {
         System.out.println("ID = "+ this.getId()
                     + " Type = "  + this.getType()

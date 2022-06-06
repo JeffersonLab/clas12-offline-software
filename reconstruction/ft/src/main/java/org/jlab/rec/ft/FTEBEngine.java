@@ -35,7 +35,7 @@ import org.jlab.rec.ft.trk.FTTRKReconstruction;
 
 public class FTEBEngine extends ReconstructionEngine {
 
-    FTEventBuilder reco;
+    FTEventBuilder reco = new FTEventBuilder();
     int Run = -1;
     double Solenoid;
     
@@ -45,7 +45,6 @@ public class FTEBEngine extends ReconstructionEngine {
 
     @Override
     public boolean init() {
-        reco = new FTEventBuilder();
         reco.debugMode = 0;
         String[] tables = new String[]{
             "/calibration/ft/ftcal/cluster",
@@ -63,16 +62,14 @@ public class FTEBEngine extends ReconstructionEngine {
 
     @Override
     public boolean processDataEvent(DataEvent event) {
-        List<FTParticle> FTparticles = new ArrayList<FTParticle>();
-        List<FTResponse> FTresponses = new ArrayList<FTResponse>();
-
+        
         int run = this.setRunConditionsParameters(event);
         if (run>=0) {
             reco.init(this.getSolenoid());
-            FTresponses = reco.addResponses(event, this.getConstantsManager(), run);
+            List<FTResponse> FTresponses = reco.addResponses(event, this.getConstantsManager(), run);
 
-            FTparticles = reco.initFTparticles(FTresponses, this.getConstantsManager(), run);
-            if(FTparticles.size()>0){
+            List<FTParticle> FTparticles = reco.initFTparticles(FTresponses, this.getConstantsManager(), run);
+            if(!FTparticles.isEmpty()){
                 reco.matchToTRKTwoDetectorsMultiHits(FTresponses, FTparticles);
                 reco.matchToHODO(FTresponses, FTparticles);
                 reco.correctDirection(FTparticles, this.getConstantsManager(), run);
@@ -359,10 +356,6 @@ public class FTEBEngine extends ReconstructionEngine {
         EmbeddedCanvas canvasCALTRK = new EmbeddedCanvas();
         canvasCALTRK.divide(3,1);
         
-        double diffRadTolerance = FTConstants.TRK1_TRK2_RADTOL;
-        double diffPhiTolerance = FTConstants.TRK1_TRK2_PHITOL; 
-        double diffThetaTolerance = FTConstants.TRK1_TRK2_THETATOL;
-        
         int nev = 0;
         int nevWithCrosses = 0, ncrosses2 = 0, nOfFTParticles = 0;
         int TRK1 = DetectorLayer.FTTRK_MODULE1 - 1;
@@ -495,11 +488,11 @@ public class FTEBEngine extends ReconstructionEngine {
                                             // if the cluster is formed by >= 3 strips take the centroid
                                             int clustsize1 =  bankcl.getShort("size", icl1ok);
                                             int clustsize2 =  bankcl.getShort("size", icl2ok);
-                                            if(clustsize1>=FTConstants.TRK_MIN_ClusterSizeForCentroid){
+                                            if(clustsize1>=FTConstants.TRK_MIN_CLUSTER_SIZE_CENTROID){
                                                 int sector = FTTRKReconstruction.findSector(seed1);
                                                 if(!(sector == 0 || sector == 1 || sector == 18 || sector == 19))  seed1 = cent1;
                                             } 
-                                            if(clustsize2>=FTConstants.TRK_MIN_ClusterSizeForCentroid){
+                                            if(clustsize2>=FTConstants.TRK_MIN_CLUSTER_SIZE_CENTROID){
                                                 int sector = FTTRKReconstruction.findSector(seed2);
                                                 if(!(sector == 0 || sector == 1 || sector == 18 || sector == 19))  seed2 = cent2;
                                             }

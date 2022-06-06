@@ -29,7 +29,7 @@ public class FTTRKEngine extends ReconstructionEngine {
 	public FTTRKEngine() {
 		super("FTTRK", "devita", "1.0");
 	}
-
+        
 	FTTRKReconstruction reco;
 	
 	@Override
@@ -49,7 +49,10 @@ public class FTTRKEngine extends ReconstructionEngine {
             FTTRKConstantsLoader.Load(11, this.getConstantsManager().getVariation());
             reco = new FTTRKReconstruction();
 	    reco.debugMode=0;
-
+            
+            if(this.getEngineConfigString("fall18TT")!=null) {
+                FTTRKConstantsLoader.ADJUSTTT = Boolean.parseBoolean(this.getEngineConfigString("fall18TT"));
+            }
 /*
             String[]  tables = new String[]{ 
                 "/calibration/ft/fthodo/charge_to_energy",
@@ -68,20 +71,18 @@ public class FTTRKEngine extends ReconstructionEngine {
 
 	@Override
 	public boolean processDataEvent(DataEvent event) {
-            List<FTTRKHit> allHits      = new ArrayList();
-            ArrayList<FTTRKCluster> clusters = new ArrayList();
-            ArrayList<FTTRKCross>   crosses  = new ArrayList();
-            
             // update calibration constants based on run number if changed
             int run = setRunConditionsParameters(event);
             
             if(run>=0) {
                 // get hits fron banks
-                allHits = reco.initFTTRK(event,this.getConstantsManager(), run); 
+                List<FTTRKHit> allHits = reco.initFTTRK(event,this.getConstantsManager(), run); 
                 // create clusters
-                clusters = reco.findClusters(allHits);
+                List<FTTRKCluster> clusters = reco.findClusters(allHits);
                 // create crosses
-                crosses = reco.findCrosses(clusters);
+                List<FTTRKCross> crosses = reco.findCrosses(clusters);
+                // update hit banks with associated clusters/crosses information
+                reco.updateAllHitsWithAssociatedIDs(allHits, clusters);
                 // write output banks
                 reco.writeBanks(event, allHits, clusters, crosses);
             }
@@ -179,10 +180,8 @@ public class FTTRKEngine extends ReconstructionEngine {
 //        int nev1 = 0; int nev2 = 20000; for(nev=nev1; nev<nev2; nev++){   // debug only a set of events (uncomment while loop in case)
             DataEvent event = (DataEvent) reader.getNextEvent();
             if(debug>=1) System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~ processing event ~~~~~~~~~~~ " + nev); 
-            
-            ArrayList<FTTRKCluster> clusters = new ArrayList();
-            
-            clusters = trk.processDataEventAndGetClusters(event);
+                        
+            ArrayList<FTTRKCluster> clusters = trk.processDataEventAndGetClusters(event);
             int nStripsInClusters = 0;
 
             DetectorEvent detectorEvent = DetectorData.readDetectorEvent(event);
@@ -240,7 +239,7 @@ public class FTTRKEngine extends ReconstructionEngine {
             canvasCl.draw(hHitL1);  // dummy histogram
             // iterate along the cluster list for every event
             if(debug>=1) System.out.println("clusters size --- " + clusters.size());
-            if(clusters.size()!=0){
+            if(!clusters.isEmpty()){
                 // get one cluster and iterate over all the strips contained in it
                 for(int i = 0; i < clusters.size(); i++){
                     // get a single cluster and count its strip, extract the information on extremal points of the segment

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.rec.ft.trk;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.geom.prim.Line3D;
@@ -41,8 +36,9 @@ public class FTTRKConstantsLoader {
         public static double[][][] stripsY;    //Give the  end-points y-coordinates of the strip segment
         public static double[] stripslength;  //Give the strip length   
       
+        public static boolean ADJUSTTT = false;
         public static boolean CSTLOADED = false;
-        static DatabaseConstantProvider dbprovider = null;
+        private static DatabaseConstantProvider dbprovider = null;
         
       
         public static synchronized void Load(int run, String var) {

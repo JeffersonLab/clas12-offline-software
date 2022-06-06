@@ -173,7 +173,7 @@ import org.jlab.rec.ft.FTConstants;
                 double maxEn2 = -1;
                 int maxI = -1;
                 int maxI2nd = -1;
-                int maxStripsForTM = FTConstants.TRK_MAX_StripsForTruncatedMean; // truncated mean: minimum energy  HARDCODED 
+                int maxStripsForTM = FTConstants.TRK_MAX_STRIPS_FOR_TRUNCATED_MEAN; // truncated mean: minimum energy  HARDCODED 
                 if(nbhits>maxStripsForTM){
                     // max energy strip
                     for(int i=0; i< nbhits; i++){

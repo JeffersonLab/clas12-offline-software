@@ -630,11 +630,11 @@ public class FTEBEngineTest extends ReconstructionEngine {
                                             // if the cluster is formed by >= 3 strips take the centroid
                                             int clustsize1 =  bankcl.getShort("size", icl1ok);
                                             int clustsize2 =  bankcl.getShort("size", icl2ok);
-                                            if(clustsize1>=FTConstants.TRK_MIN_ClusterSizeForCentroid){
+                                            if(clustsize1>=FTConstants.TRK_MIN_CLUSTER_SIZE_CENTROID){
                                                 int sector = FTTRKReconstruction.findSector(seed1);
                                                 if(!(sector == 0 || sector == 1 || sector == 18 || sector == 19))  seed1 = cent1;
                                             } 
-                                            if(clustsize2>=FTConstants.TRK_MIN_ClusterSizeForCentroid){
+                                            if(clustsize2>=FTConstants.TRK_MIN_CLUSTER_SIZE_CENTROID){
                                                 int sector = FTTRKReconstruction.findSector(seed2);
                                                 if(!(sector == 0 || sector == 1 || sector == 18 || sector == 19))  seed2 = cent2;
                                             }
