@@ -113,7 +113,6 @@ public class FTCALReconstruction {
             clusters.get(i).setStatus(clusterTable);
             if(debugMode>=1) System.out.println("Setting status for cluster " + i + " " + clusters.get(i).toString());
         }
-        return;
     }
         
     
