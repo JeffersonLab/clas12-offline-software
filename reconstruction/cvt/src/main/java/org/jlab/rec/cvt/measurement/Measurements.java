@@ -13,6 +13,7 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Line3d;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.svt.SVTGeometry;
@@ -49,28 +50,28 @@ public class Measurements {
         cvtSurfaces = new Surface[NSURFACES+2];
         this.add(MLayer.TARGET.getIndex(),       this.getTarget(xbeam, ybeam, beamSpot));
         this.add(MLayer.SCHAMBER.getIndex(),     this.getScatteringChamber());
-        this.add(MLayer.SHIELD.getIndex(),       Constants.getInstance().SVTGEOMETRY.getShieldSurface());
-        this.add(MLayer.INNERSVTCAGE.getIndex(), Constants.getInstance().SVTGEOMETRY.getFaradayCageSurfaces(0));
-        this.add(MLayer.OUTERSVTCAGE.getIndex(), Constants.getInstance().SVTGEOMETRY.getFaradayCageSurfaces(1)); 
-        this.add(MLayer.BMTINNERTUBE.getIndex(), Constants.getInstance().BMTGEOMETRY.getInnerTube()); 
-        this.add(MLayer.BMTOUTERTUBE.getIndex(), Constants.getInstance().BMTGEOMETRY.getOuterTube()); 
+        this.add(MLayer.SHIELD.getIndex(),       Geometry.getInstance().getSVT().getShieldSurface());
+        this.add(MLayer.INNERSVTCAGE.getIndex(), Geometry.getInstance().getSVT().getFaradayCageSurfaces(0));
+        this.add(MLayer.OUTERSVTCAGE.getIndex(), Geometry.getInstance().getSVT().getFaradayCageSurfaces(1)); 
+        this.add(MLayer.BMTINNERTUBE.getIndex(), Geometry.getInstance().getBMT().getInnerTube()); 
+        this.add(MLayer.BMTOUTERTUBE.getIndex(), Geometry.getInstance().getBMT().getOuterTube()); 
     }
     
     private void initCosmicSurfaces() {
         cvtSurfaces = new Surface[NSURFACES*2+3];
         this.add(MLayer.COSMICPLANE.getIndex(1),   this.getCosmicPlane());
         this.add(MLayer.SCHAMBER.getIndex(1),      this.getScatteringChamber());
-        this.add(MLayer.SHIELD.getIndex(1),        Constants.getInstance().SVTGEOMETRY.getShieldSurface());
-        this.add(MLayer.INNERSVTCAGE.getIndex(1),  Constants.getInstance().SVTGEOMETRY.getFaradayCageSurfaces(0));
-        this.add(MLayer.OUTERSVTCAGE.getIndex(1),  Constants.getInstance().SVTGEOMETRY.getFaradayCageSurfaces(1));       
-        this.add(MLayer.BMTINNERTUBE.getIndex(1),  Constants.getInstance().BMTGEOMETRY.getInnerTube()); 
-        this.add(MLayer.BMTOUTERTUBE.getIndex(1),  Constants.getInstance().BMTGEOMETRY.getOuterTube()); 
+        this.add(MLayer.SHIELD.getIndex(1),        Geometry.getInstance().getSVT().getShieldSurface());
+        this.add(MLayer.INNERSVTCAGE.getIndex(1),  Geometry.getInstance().getSVT().getFaradayCageSurfaces(0));
+        this.add(MLayer.OUTERSVTCAGE.getIndex(1),  Geometry.getInstance().getSVT().getFaradayCageSurfaces(1));       
+        this.add(MLayer.BMTINNERTUBE.getIndex(1),  Geometry.getInstance().getBMT().getInnerTube()); 
+        this.add(MLayer.BMTOUTERTUBE.getIndex(1),  Geometry.getInstance().getBMT().getOuterTube()); 
         this.add(MLayer.SCHAMBER.getIndex(-1),     this.getScatteringChamber());
-        this.add(MLayer.SHIELD.getIndex(-1),       Constants.getInstance().SVTGEOMETRY.getShieldSurface(), -1);
-        this.add(MLayer.INNERSVTCAGE.getIndex(-1), Constants.getInstance().SVTGEOMETRY.getFaradayCageSurfaces(0), -1);
-        this.add(MLayer.OUTERSVTCAGE.getIndex(-1), Constants.getInstance().SVTGEOMETRY.getFaradayCageSurfaces(1), -1);       
-        this.add(MLayer.BMTINNERTUBE.getIndex(-1), Constants.getInstance().BMTGEOMETRY.getInnerTube());        
-        this.add(MLayer.BMTOUTERTUBE.getIndex(-1), Constants.getInstance().BMTGEOMETRY.getOuterTube()); 
+        this.add(MLayer.SHIELD.getIndex(-1),       Geometry.getInstance().getSVT().getShieldSurface(), -1);
+        this.add(MLayer.INNERSVTCAGE.getIndex(-1), Geometry.getInstance().getSVT().getFaradayCageSurfaces(0), -1);
+        this.add(MLayer.OUTERSVTCAGE.getIndex(-1), Geometry.getInstance().getSVT().getFaradayCageSurfaces(1), -1);       
+        this.add(MLayer.BMTINNERTUBE.getIndex(-1), Geometry.getInstance().getBMT().getInnerTube());        
+        this.add(MLayer.BMTOUTERTUBE.getIndex(-1), Geometry.getInstance().getBMT().getOuterTube()); 
     }
     
     private void add(int index, Surface surface) {
@@ -109,8 +110,8 @@ public class Measurements {
     }
     
     private Surface getScatteringChamber() {
-        Point3D  center = new Point3D(0, 0, Constants.getInstance().getZoffset()-100);
-        Point3D  origin = new Point3D(39.5, 0, Constants.getInstance().getZoffset()-100);
+        Point3D  center = new Point3D(0, 0, Geometry.getInstance().getZoffset()-100);
+        Point3D  origin = new Point3D(39.5, 0, Geometry.getInstance().getZoffset()-100);
         Vector3D axis   = new Vector3D(0,0,1);
         Arc3D base = new Arc3D(origin, center, axis, 2*Math.PI);
         Cylindrical3D chamber = new Cylindrical3D(base, 200);
@@ -122,9 +123,9 @@ public class Measurements {
     
     private static Surface getCTOF() {
         
-        double radius    = Constants.getInstance().CTOFGEOMETRY.getRadius(1);
-        double thickness = Constants.getInstance().CTOFGEOMETRY.getThickness(1);
-        Line3d lineZ     = Constants.getInstance().CTOFGEOMETRY.getPaddle(1).getLineZ();
+        double radius    = Geometry.getInstance().getCTOF().getRadius(1);
+        double thickness = Geometry.getInstance().getCTOF().getThickness(1);
+        Line3d lineZ     = Geometry.getInstance().getCTOF().getPaddle(1).getLineZ();
         
         Point3D  center = new Point3D(        0, 0, lineZ.origin().z);
         Point3D  origin = new Point3D(radius*10, 0, lineZ.origin().z);
@@ -146,13 +147,13 @@ public class Measurements {
         
         Vector3D axis   = new Vector3D(0,0,1);
         
-        for(int ilayer=0; ilayer<Constants.getInstance().CNDGEOMETRY.getSector(0).getSuperlayer(0).getNumLayers(); ilayer++) {
+        for(int ilayer=0; ilayer<Geometry.getInstance().getCND().getSector(0).getSuperlayer(0).getNumLayers(); ilayer++) {
             
-            Point3D paddle = Constants.getInstance().CNDGEOMETRY.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getMidpoint();
+            Point3D paddle = Geometry.getInstance().getCND().getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getMidpoint();
             
             double radius    = Math.sqrt(paddle.x()*paddle.x()+paddle.y()*paddle.y());
-            double thickness = Constants.getInstance().CNDGEOMETRY.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getVolumeEdge(1).length();
-            double length    = Constants.getInstance().CNDGEOMETRY.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getLength();
+            double thickness = Geometry.getInstance().getCND().getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getVolumeEdge(1).length();
+            double length    = Geometry.getInstance().getCND().getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getLength();
             Point3D       center = new Point3D(        0, 0, paddle.z() - length/2);
             Point3D       origin = new Point3D(radius*10, 0, paddle.z() - length/2);
             Arc3D           base = new Arc3D(origin, center, axis, 2*Math.PI);
@@ -365,9 +366,9 @@ public class Measurements {
     private Surface getDetectorSurface(DetectorType type, int layer, int sector) {
         Surface surface = null;
         if(type==DetectorType.BST)
-            surface = Constants.getInstance().SVTGEOMETRY.getSurface(layer, sector, new Strip(0, 0, 0));
+            surface = Geometry.getInstance().getSVT().getSurface(layer, sector, new Strip(0, 0, 0));
         else if(type==DetectorType.BMT)
-            surface = Constants.getInstance().BMTGEOMETRY.getSurface(layer, sector, new Strip(0, 0, 0));
+            surface = Geometry.getInstance().getBMT().getSurface(layer, sector, new Strip(0, 0, 0));
         return surface;
     }
 
@@ -375,18 +376,18 @@ public class Measurements {
     private int getSector(Seed seed, DetectorType type, int layer, int hemisphere) {
         Helix helix = seed.getHelix();
         if(type==DetectorType.BST) { 
-            int twinLayer = Constants.getInstance().SVTGEOMETRY.getTwinLayer(layer);
+            int twinLayer = Geometry.getInstance().getSVT().getTwinLayer(layer);
             int twinIndex = MLayer.getType(DetectorType.BST, twinLayer).getIndex(hemisphere);
             if(cvtSurfaces[twinIndex]!=null) 
                 return cvtSurfaces[twinIndex].getSector();
-            Point3D traj = helix.getPointAtRadius(Constants.getInstance().SVTGEOMETRY.getLayerRadius(layer));
+            Point3D traj = helix.getPointAtRadius(Geometry.getInstance().getSVT().getLayerRadius(layer));
             if(traj!=null && !Double.isNaN(traj.z())) 
-                return Constants.getInstance().SVTGEOMETRY.getSector(layer, traj);
+                return Geometry.getInstance().getSVT().getSector(layer, traj);
         }
         else if(type==DetectorType.BMT) {
-            Point3D traj = seed.getHelix().getPointAtRadius(Constants.getInstance().BMTGEOMETRY.getRadius(layer));
+            Point3D traj = seed.getHelix().getPointAtRadius(Geometry.getInstance().getBMT().getRadius(layer));
             if(traj!=null && !Double.isNaN(traj.z())) 
-                return Constants.getInstance().BMTGEOMETRY.getSector(0, traj);
+                return Geometry.getInstance().getBMT().getSector(0, traj);
             else if(layer>1) {
                 int twinIndex = MLayer.getType(DetectorType.BMT, layer-1).getIndex(hemisphere);
                 if(cvtSurfaces[twinIndex]!=null)
@@ -399,7 +400,7 @@ public class Measurements {
     private int getSector(StraightTrack cosmic, DetectorType type, int layer, int hemisphere) {
 
         if(type==DetectorType.BST) {   
-            int twinLayer = Constants.getInstance().SVTGEOMETRY.getTwinLayer(layer);
+            int twinLayer = Geometry.getInstance().getSVT().getTwinLayer(layer);
             int twinIndex = MLayer.getType(DetectorType.BST, twinLayer).getIndex(hemisphere);
             if(cvtSurfaces[twinIndex]!=null)
                 return cvtSurfaces[twinIndex].getSector();
@@ -416,7 +417,7 @@ public class Measurements {
             double x = trajs[layer-1][(hemisphere+1)/2][0];
             double y = trajs[layer-1][(hemisphere+1)/2][1];
             double z = trajs[layer-1][(hemisphere+1)/2][2];
-            return Constants.getInstance().BMTGEOMETRY.getSector(layer, Math.atan2(y, x));
+            return Geometry.getInstance().getBMT().getSector(layer, Math.atan2(y, x));
         }
         return 0;
         

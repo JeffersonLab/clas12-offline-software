@@ -23,7 +23,7 @@ public class DCEngine extends ReconstructionEngine {
     private boolean  useTimeBeta    = false;
     private boolean  useBetaCut     = false;
     private boolean  useDoublets    = false;
-    private int      t2d            = 0;
+    private int      t2d            = 1;
     private int      nSuperLayer    = 5;
     private String   geoVariation   = "default";
     private String   bankType       = "HitBasedTrkg";
@@ -65,8 +65,10 @@ public class DCEngine extends ReconstructionEngine {
             useBetaCut =Boolean.valueOf(this.getEngineConfigString("dcBetaCut"));
         
         //T2D Function
-        if(this.getEngineConfigString("dcT2DFunc")!=null)       
-            if(this.getEngineConfigString("dcT2DFunc").equalsIgnoreCase("Polynomial")) {
+        if(this.getEngineConfigString("dcT2DFunc")!=null) {      
+            if(this.getEngineConfigString("dcT2DFunc").equalsIgnoreCase("Exponential"))
+                t2d=0;
+            else if(this.getEngineConfigString("dcT2DFunc").equalsIgnoreCase("Polynomial"))
                 t2d=1;
         }
         

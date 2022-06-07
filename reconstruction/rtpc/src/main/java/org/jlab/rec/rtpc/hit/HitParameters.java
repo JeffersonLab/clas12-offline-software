@@ -66,15 +66,25 @@ public class HitParameters {
     private double _tshiftfactorlong = 0;
     private double _chi2termthreshold = 20;
     private double _chi2percthreshold = 50;
+    private double _globalgain = 0; 
+    private double _Pcorr1 = 0; 
+    private double _Pcorr2 = 0; 
+    private double _Pcorr3 = 0; 
+    private double _c0 = 0; 
+    private double _c1 = 0; 
+    private double _c2 = 0; 
+    private double _c3 = 0;
+    private double _c4 = 0;
 
     public void init(ConstantsManager manager, int runNo){
         IndexedTable time_offsets = manager.getConstants(runNo, "/calibration/rtpc/time_offsets");
         IndexedTable time_parms = manager.getConstants(runNo, "/calibration/rtpc/time_parms");
         IndexedTable recon_parms = manager.getConstants(runNo, "/calibration/rtpc/recon_parms");
+        IndexedTable global_parms = manager.getConstants(runNo, "/calibration/rtpc/global_parms");
         
-        _TrigWindSize = (int) recon_parms.getDoubleValue("Dtm", 1,1,3);
-        _chi2termthreshold = recon_parms.getDoubleValue("Dzm", 1,1,3);
-        _chi2percthreshold = recon_parms.getDoubleValue("Dphim",1,1,3);
+        _TrigWindSize = (int) global_parms.getDoubleValue("TimeWindow", 0,0,0);
+        _chi2termthreshold = global_parms.getDoubleValue("Chi2Thresh", 0,0,0);
+        _chi2percthreshold = global_parms.getDoubleValue("ThreshPerc", 0,0,0);
         _timeadjlimit = (int) recon_parms.getDoubleValue("Dtm", 1,1,1);
         _zthreshTF = recon_parms.getDoubleValue("Dzm", 1,1,1);
         _phithreshTF = recon_parms.getDoubleValue("Dphim", 1,1,1);
@@ -103,8 +113,17 @@ public class HitParameters {
         _tp = time_offsets.getDoubleValue("tp", 1,1,3);
         _tr = time_offsets.getDoubleValue("tr", 1,1,3);
         _tcathode = time_parms.getDoubleValue("z0", 1,1,7);
-        _tshiftfactorshort = time_parms.getDoubleValue("z1",1,1,7);
-        _tshiftfactorlong = time_parms.getDoubleValue("z2",1,1,7);
+        _tshiftfactorshort = global_parms.getDoubleValue("TShiftShort", 0,0,0);
+        _tshiftfactorlong = global_parms.getDoubleValue("TShiftLong", 0,0,0);
+        _globalgain = global_parms.getDoubleValue("GlobalGain",0,0,0);
+        _Pcorr1 = global_parms.getDoubleValue("Pcorr1",0,0,0);
+        _Pcorr2 = global_parms.getDoubleValue("Pcorr2",0,0,0);
+        _Pcorr3 = global_parms.getDoubleValue("Pcorr3",0,0,0);
+        _c0 = global_parms.getDoubleValue("c0",0,0,0);
+        _c1 = global_parms.getDoubleValue("c1",0,0,0);
+        _c2 = global_parms.getDoubleValue("c2",0,0,0);
+        _c3 = global_parms.getDoubleValue("c3",0,0,0);
+        _c4 = global_parms.getDoubleValue("c4",0,0,0);
     }
     
     public int get_SignalStepSize(){return _SignalStepSize;} // step size of the signal before integration (arbitrary value)
@@ -170,6 +189,15 @@ public class HitParameters {
     public double get_TFtotalpadtimeflag(){return _TFtotalpadtimeflag;}
     public double get_chi2termthreshold(){return _chi2termthreshold;}
     public double get_chi2percthreshold(){return _chi2percthreshold;}
+    public double get_globalgain(){return _globalgain;}
+    public double get_Pcorr1(){return _Pcorr1;}
+    public double get_Pcorr2(){return _Pcorr2;}
+    public double get_Pcorr3(){return _Pcorr3;}
+    public double get_c0(){return _c0;}
+    public double get_c1(){return _c1;}
+    public double get_c2(){return _c2;}
+    public double get_c3(){return _c3;}
+    public double get_c4(){return _c4;}
 
     public void set_ADCMap(ADCMap _ADCMap){this._ADCMap = _ADCMap;}
     public void set_TimeMap(HashMap<Integer, List<Double>> _TimeMap){this._TimeMap = _TimeMap;}
