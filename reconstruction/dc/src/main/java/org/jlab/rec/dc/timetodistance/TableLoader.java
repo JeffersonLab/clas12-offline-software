@@ -93,35 +93,52 @@ public class TableLoader {
         AlphaBounds[0][0] = 0;
         AlphaBounds[5][1] = 30;
     }
-    public static synchronized void Fill(IndexedTable t2dTab, IndexedTable t2dPressRef, IndexedTable pressure) {
+    public static synchronized void Fill(IndexedTable t2dPressure, IndexedTable t2dPressRef, IndexedTable pressure) {
         if (T2DLOADED) return;
         
         
         double p_ref = t2dPressRef.getDoubleValue("pressure", 0,0,0);
-        double p = pressure.getDoubleValue("pressure", 0,0,0);
+        double p = pressure.getDoubleValue("pressure", 0,0,3);
         double dp = p - p_ref;
         
         for(int s = 0; s<6; s++ ){ // loop over sectors
             for(int r = 0; r<6; r++ ){ //loop over slys
                 // Fill constants
-                FracDmaxAtMinVel[s][r] = t2dTab.getDoubleValue("c1_a0", s+1,r+1,0)
-                        +t2dTab.getDoubleValue("c1_a1", s+1,r+1,0)*dp;
-                v0[s][r] = t2dTab.getDoubleValue("v0_a0", s+1,r+1,0)
-                        +t2dTab.getDoubleValue("v0_a1", s+1,r+1,0)*dp+t2dTab.getDoubleValue("v0_a2", s+1,r+1,0)*dp*dp;
-                vmid[s][r] = t2dTab.getDoubleValue("vmid_a0", s+1,r+1,0)
-                        +t2dTab.getDoubleValue("vmid_a1", s+1,r+1,0)*dp+t2dTab.getDoubleValue("vmid_a2", s+1,r+1,0)*dp*dp;
-                delta_bfield_coefficient[s][r] = t2dTab.getDoubleValue("delta_bfield_a0", s+1,r+1,0)
-                        +t2dTab.getDoubleValue("delta_bfield_a1", s+1,r+1,0)*dp+t2dTab.getDoubleValue("delta_bfield_a2", s+1,r+1,0)*dp*dp;
-                b1[s][r] = t2dTab.getDoubleValue("b1_a0", s+1,r+1,0)
-                        +t2dTab.getDoubleValue("b1_a1", s+1,r+1,0)*dp+t2dTab.getDoubleValue("b1_a2", s+1,r+1,0)*dp*dp;
-                b2[s][r] = t2dTab.getDoubleValue("b2_a0", s+1,r+1,0)
-                        +t2dTab.getDoubleValue("b2_a1", s+1,r+1,0)*dp+t2dTab.getDoubleValue("b2_a2", s+1,r+1,0)*dp*dp;
-                b3[s][r] = t2dTab.getDoubleValue("b3_a0", s+1,r+1,0)
-                        +t2dTab.getDoubleValue("b3_a1", s+1,r+1,0)*dp+t2dTab.getDoubleValue("b3_a2", s+1,r+1,0)*dp*dp;
-                b4[s][r] = t2dTab.getDoubleValue("b4_a0", s+1,r+1,0)
-                        +t2dTab.getDoubleValue("b4_a1", s+1,r+1,0)*dp+t2dTab.getDoubleValue("b4_a2", s+1,r+1,0)*dp*dp;
-                Tmax[s][r] = t2dTab.getDoubleValue("tmax_a0", s+1,r+1,0)
-                        +t2dTab.getDoubleValue("tmax_a1", s+1,r+1,0)*dp+t2dTab.getDoubleValue("tmax_a2", s+1,r+1,0)*dp*dp;
+                FracDmaxAtMinVel[s][r] = t2dPressure.getDoubleValue("c1_a0", s+1,r+1,0)
+                        +t2dPressure.getDoubleValue("c1_a1", s+1,r+1,0)*dp;
+                v0[s][r] = t2dPressure.getDoubleValue("v0_a0", s+1,r+1,0)
+                        +t2dPressure.getDoubleValue("v0_a1", s+1,r+1,0)*dp
+                        +t2dPressure.getDoubleValue("v0_a2", s+1,r+1,0)*dp*dp;
+                vmid[s][r] = t2dPressure.getDoubleValue("vmid_a0", s+1,r+1,0)
+                        +t2dPressure.getDoubleValue("vmid_a1", s+1,r+1,0)*dp
+                        +t2dPressure.getDoubleValue("vmid_a2", s+1,r+1,0)*dp*dp;
+                delta_bfield_coefficient[s][r] = t2dPressure.getDoubleValue("delta_bfield_a0", s+1,r+1,0)
+                        +t2dPressure.getDoubleValue("delta_bfield_a1", s+1,r+1,0)*dp
+                        +t2dPressure.getDoubleValue("delta_bfield_a2", s+1,r+1,0)*dp*dp;
+                b1[s][r] = t2dPressure.getDoubleValue("b1_a0", s+1,r+1,0)
+                        +t2dPressure.getDoubleValue("b1_a1", s+1,r+1,0)*dp
+                        +t2dPressure.getDoubleValue("b1_a2", s+1,r+1,0)*dp*dp;
+                b2[s][r] = t2dPressure.getDoubleValue("b2_a0", s+1,r+1,0)
+                        +t2dPressure.getDoubleValue("b2_a1", s+1,r+1,0)*dp
+                        +t2dPressure.getDoubleValue("b2_a2", s+1,r+1,0)*dp*dp;
+                b3[s][r] = t2dPressure.getDoubleValue("b3_a0", s+1,r+1,0)
+                        +t2dPressure.getDoubleValue("b3_a1", s+1,r+1,0)*dp
+                        +t2dPressure.getDoubleValue("b3_a2", s+1,r+1,0)*dp*dp;
+                b4[s][r] = t2dPressure.getDoubleValue("b4_a0", s+1,r+1,0)
+                        +t2dPressure.getDoubleValue("b4_a1", s+1,r+1,0)*dp
+                        +t2dPressure.getDoubleValue("b4_a2", s+1,r+1,0)*dp*dp;
+                Tmax[s][r] = t2dPressure.getDoubleValue("tmax_a0", s+1,r+1,0)
+                        +t2dPressure.getDoubleValue("tmax_a1", s+1,r+1,0)*dp
+                        +t2dPressure.getDoubleValue("tmax_a2", s+1,r+1,0)*dp*dp;
+                System.out.println("["+s+"]"+r+"] : "+ 
+                            vmid[s][r] +","+
+                            v0[s][r] +","+
+                            b1[s][r] +","+
+                            b2[s][r] +","+
+                            b3[s][r] +","+
+                            b4[s][r] +","+
+                            Tmax[s][r] +","+
+                            FracDmaxAtMinVel[s][r] );
             }
         }
         Fill();
@@ -270,14 +287,14 @@ public class TableLoader {
         if(x>dmax)
             x=dmax;
         
-        if(Constants.getInstance().getT2D()==0) {
+        //if(Constants.getInstance().getT2D()==0) {
             
-            return T2DFunctions.ExpoFcn(x, alpha, bfield, v0[s][r], deltanm[s][r], 0.615, 
-                tmax, dmax, delBf, Bb1, Bb2, Bb3, Bb4, superlayer) + delta_T0[s][r];
-        } else {
+            //return T2DFunctions.ExpoFcn(x, alpha, bfield, v0[s][r], deltanm[s][r], 0.615, 
+            //    tmax, dmax, delBf, Bb1, Bb2, Bb3, Bb4, superlayer) + delta_T0[s][r];
+       // } else {
             return T2DFunctions.polyFcnMac(x, alpha, bfield, v0[s][r], vmid[s][r], FracDmaxAtMinVel[s][r], 
                 tmax, dmax, delBf, Bb1, Bb2, Bb3, Bb4, superlayer) ;
-        }
+        //}
     }
     
     public static double[][] delta_T0 = new double[6][6];

@@ -57,7 +57,7 @@ public class Constants {
     private boolean USETSTART = true;
     private boolean USETIMETBETA = false;
     private boolean CHECKBETA = false;
-    private int     T2D = 0;     
+    private int     T2D = 1;     
     private boolean USEDOUBLETS = false;
     
     public static final String DOCARES        = "/calibration/dc/signal_generation/doca_resolution";
