@@ -79,11 +79,14 @@ public class DCTBEngine extends DCEngine {
         // get Field
         Swim dcSwim = new Swim();        
        
-        // fill T2D table//TableLoader.Fill(this.getConstantsManager().getConstants(run, Constants.TIME2DIST));
+        // fill T2D table
+        if(Constants.getInstance().getT2D()==0) {
+            TableLoader.Fill(this.getConstantsManager().getConstants(run, Constants.TIME2DIST));
+        } else {
         TableLoader.Fill(this.getConstantsManager().getConstants(run, Constants.T2DPRESSURE),
                 this.getConstantsManager().getConstants(run, Constants.T2DPRESSUREREF),
                 this.getConstantsManager().getConstants(run, Constants.PRESSURE));
-
+        }
         ClusterFitter cf = new ClusterFitter();
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
 
