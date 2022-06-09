@@ -101,21 +101,22 @@ public class DetectorEventDecoder {
 
     public final void initDecoder(){
         keysTrans = Arrays.asList(new String[]{
-		"FTCAL","FTHODO","FTTRK","LTCC","ECAL","FTOF","HTCC","DC","CTOF","CND","BST","RF","BMT","FMT","RICH","HEL","BAND","RTPC"
+		"FTCAL","FTHODO","FTTRK","LTCC","ECAL","FTOF","HTCC","DC","CTOF","CND","BST","RF","BMT","FMT","RICH","HEL","BAND","RTPC","RASTER"
         });
 
         tablesTrans = Arrays.asList(new String[]{
             "/daq/tt/ftcal","/daq/tt/fthodo","/daq/tt/fttrk","/daq/tt/ltcc",
             "/daq/tt/ec","/daq/tt/ftof","/daq/tt/htcc","/daq/tt/dc","/daq/tt/ctof","/daq/tt/cnd","/daq/tt/svt",
-            "/daq/tt/rf","/daq/tt/bmt","/daq/tt/fmt","/daq/tt/rich","/daq/tt/hel","/daq/tt/band","/daq/tt/rtpc"
+            "/daq/tt/rf","/daq/tt/bmt","/daq/tt/fmt","/daq/tt/rich","/daq/tt/hel","/daq/tt/band","/daq/tt/rtpc",
+            "/daq/tt/raster"
         });
 
         translationManager.init(keysTrans,tablesTrans);
         
-        keysFitter   = Arrays.asList(new String[]{"FTCAL","FTHODO","FTTRK","FTOF","LTCC","ECAL","HTCC","CTOF","CND","BMT","FMT","HEL","RF","BAND"});
+        keysFitter   = Arrays.asList(new String[]{"FTCAL","FTHODO","FTTRK","FTOF","LTCC","ECAL","HTCC","CTOF","CND","BMT","FMT","HEL","RF","BAND","RASTER"});
         tablesFitter = Arrays.asList(new String[]{
             "/daq/fadc/ftcal","/daq/fadc/fthodo","/daq/config/fttrk","/daq/fadc/ftof","/daq/fadc/ltcc","/daq/fadc/ec",
-            "/daq/fadc/htcc","/daq/fadc/ctof","/daq/fadc/cnd","/daq/config/bmt","/daq/config/fmt","/daq/fadc/hel","/daq/fadc/rf","/daq/fadc/band"
+            "/daq/fadc/htcc","/daq/fadc/ctof","/daq/fadc/cnd","/daq/config/bmt","/daq/config/fmt","/daq/fadc/hel","/daq/fadc/rf","/daq/fadc/band","/daq/fadc/raster"
         });
         fitterManager.init(keysFitter, tablesFitter);
 
