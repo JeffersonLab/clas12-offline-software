@@ -80,7 +80,7 @@ public class EngineProcessor {
         String[] names = new String[]{
             "MAGFIELDS",
             "FTCAL", "FTHODO", "FTEB",
-            "DCCR","DCHB","FTOFHB","EC",
+            "DCCR","DCHB","FTOFHB","EC","RASTER",
             "CVTFP","CTOF","CND","BAND",
             "HTCC","LTCC","EBHB",
             "DCTB","FMT","FTOFTB","CVT","EBTB",
@@ -96,6 +96,7 @@ public class EngineProcessor {
             "org.jlab.service.dc.DCHBPostClusterConv",
             "org.jlab.service.ftof.FTOFHBEngine",
             "org.jlab.service.ec.ECEngine",
+            "org.jlab.service.raster.RasterEngine",
             "org.jlab.rec.cvt.services.CVTEngine",
             "org.jlab.service.ctof.CTOFEngine",
             //"org.jlab.service.cnd.CNDEngine",
@@ -288,7 +289,6 @@ public class EngineProcessor {
     }
 
     public static void main(String[] args){
-
         OptionParser parser = new OptionParser("recon-util");
         parser.addRequired("-o","output.hipo");
         parser.addRequired("-i","input.hipo");
