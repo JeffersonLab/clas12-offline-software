@@ -166,7 +166,7 @@ public class FTEventBuilder {
                 for(int k=0; k<nHitsOnTRK; k++){ // k: loop on hits on TRK
                     if (iTrk[k][j] > 0) {
                         if (debugMode >= 1) System.out.println("found signal in FTTRK" + iTrk[k][j]);
-                        track.setCharge(-999); // provisional, for no field tracking
+//                        track.setCharge(-999); // provisional, for no field tracking
                         track.setTrackerIndex(responses.get(iTrk[k][j]).getId(), j); 
                         responses.get(iTrk[k][j]).setHitIndex(iTrk[k][j]);
                         responses.get(iTrk[k][j]).setAssociation(i);
