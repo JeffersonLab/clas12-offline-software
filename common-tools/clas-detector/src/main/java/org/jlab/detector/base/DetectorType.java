@@ -48,6 +48,7 @@ public enum DetectorType {
         detectorId = id;
         detectorName = name;
     }
+    
     /**
      * Returns the name of the detector.
      * @return the name of the detector

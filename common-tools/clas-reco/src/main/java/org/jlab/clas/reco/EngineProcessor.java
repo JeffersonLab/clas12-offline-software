@@ -79,7 +79,7 @@ public class EngineProcessor {
 
         String[] names = new String[]{
             "MAGFIELDS",
-            "FTCAL", "FTHODO", "FTEB",
+            "FTCAL", "FTHODO", "FTTRK", "FTEB",
             "DCCR","DCHB","FTOFHB","EC","RASTER",
             "CVTFP","CTOF","CND","BAND",
             "HTCC","LTCC","EBHB",
@@ -91,6 +91,7 @@ public class EngineProcessor {
             "org.jlab.clas.swimtools.MagFieldsEngine",
             "org.jlab.rec.ft.cal.FTCALEngine",
             "org.jlab.rec.ft.hodo.FTHODOEngine",
+            "org.jlab.rec.ft.trk.FTTRKEngine",
             "org.jlab.rec.ft.FTEBEngine",
             "org.jlab.service.dc.DCHBClustering",
             "org.jlab.service.dc.DCHBPostClusterConv",
