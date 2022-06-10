@@ -73,10 +73,6 @@ public class CCDBConstantsLoader {
          double[] ELEC_grid = new double [GRID_SIZE];
          double[] MAG_grid = new double [GRID_SIZE];
          
-         // HV settings for Lorentz Angle
-         double [][] HV_DRIFT_FF= new double [NLAYERS][NSECTORS];
-         double [][] HV_DRIFT_MF= new double [NLAYERS][NSECTORS];
-         
         // Load the tables
         
         // using
@@ -97,9 +93,7 @@ public class CCDBConstantsLoader {
         
          //load Lorentz angle table
         dbprovider.loadTable("/calibration/mvt/lorentz");
-        dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_fullfield");
-        dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_midfield");
-
+        
         //load alignment parameters
         dbprovider.loadTable("/geometry/cvt/mvt/alignment");
         dbprovider.loadTable("/geometry/cvt/mvt/position");
@@ -225,16 +219,6 @@ public class CCDBConstantsLoader {
          	ELEC_grid[i]=dbprovider.getDouble("/calibration/mvt/lorentz/Edrift",i);
          	MAG_grid[i]=dbprovider.getDouble("/calibration/mvt/lorentz/Bfield",i);
         }
-         
-         for (int i = 0; i<NLAYERS; i++) {
-        	HV_DRIFT_FF[i][0]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_1", i);
-    		HV_DRIFT_FF[i][1]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_2", i);
-    		HV_DRIFT_FF[i][2]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_3", i);
-        	HV_DRIFT_MF[i][0]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_1", i);
-                HV_DRIFT_MF[i][1]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_2", i);
-                HV_DRIFT_MF[i][2]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_3", i);
-        	 
-        }
         
         // alignment and offsets
         double xpos = dbprovider.getDouble("/geometry/cvt/mvt/position/x", 0 );
@@ -309,8 +293,6 @@ public class CCDBConstantsLoader {
         BMTConstants.setE_grid(ELEC_grid);
         BMTConstants.setB_grid(MAG_grid);
         BMTConstants.setPar_grid();
-        BMTConstants.setE_drift_FF(HV_DRIFT_FF);
-        BMTConstants.setE_drift_MF(HV_DRIFT_MF);
         dbprovider.disconnect();
         CSTLOADED = true;
     }

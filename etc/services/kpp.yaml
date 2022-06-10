@@ -90,5 +90,15 @@ configuration:
 #    EBTB:
 #      variation: default
 #      timestamp: 08/22/2018
+    DCRC:
+      dcT2DFunc: "Exponential"  
+    DCHB:
+      dcT2DFunc: "Exponential"  
+    DCHAI:
+      dcT2DFunc: "Exponential"  
+    DCTB:
+      dcT2DFunc: "Exponential"  
+    DCTAI:
+      dcT2DFunc: "Exponential"  
 mime-types:
   - binary/data-hipo

@@ -51,7 +51,22 @@ public class ReducedTrackMap {
 		List<HitVector> l = child.getAllHits();
 		ReducedTrack parent = getTrack(trackIDparent);
 		for(HitVector v : l) {
+                        v.flagHit(0);
 			parent.addHit(v);
+		}
+		removeTrack(trackID);
+	}
+
+	public void mergeTracksBackbend(int trackIDparent, int trackID) {
+		ReducedTrack child = getTrack(trackID);
+		List<HitVector> l = child.getAllHits();
+		ReducedTrack parent = getTrack(trackIDparent);
+		for(HitVector v : parent.getAllHits()){
+			v.flagHit(1);
+		}
+		for(HitVector v : l) {
+		        v.flagHit(2);
+			parent.addHit(v);			
 		}
 		removeTrack(trackID);
 	}

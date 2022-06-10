@@ -1,7 +1,6 @@
 package org.jlab.rec.cvt.track;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +8,7 @@ import org.jlab.clas.swimtools.Swim;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cross.Cross;
@@ -19,8 +19,8 @@ import org.jlab.rec.cvt.svt.SVTParameters;
 
 public class TrackSeeder {
     
-    private final SVTGeometry sgeo = Constants.getInstance().SVTGEOMETRY;
-    private final BMTGeometry bgeo = Constants.getInstance().BMTGEOMETRY;
+    private final SVTGeometry sgeo = Geometry.getInstance().getSVT();
+    private final BMTGeometry bgeo = Geometry.getInstance().getBMT();
     private  double bfield;
     
     private final int NBINS = 36;
