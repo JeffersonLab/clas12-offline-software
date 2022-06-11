@@ -44,8 +44,6 @@ public class Constants {
     
     public static boolean DEBUG = false;
 
-    public static boolean INITFROMMC = false;
-
     // PHYSICS CONSTANTS
     public static final double SPEEDLIGHT = 29.97924580;
     public static final double LIGHTVEL = 0.00299792458;        // velocity of light (cm/ns) - conversion factor from radius in cm to momentum in GeV/c
