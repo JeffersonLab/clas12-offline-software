@@ -179,7 +179,8 @@ public class DCTBEngine extends DCEngine {
             HBtrk.set_FitChi2(trkbank.getFloat("chi2", i));
             StateVec HBFinalSV = new StateVec(trkbank.getFloat("x", i), trkbank.getFloat("y", i), 
                     trkbank.getFloat("tx", i), trkbank.getFloat("ty", i));
-            HBFinalSV.setZ(trkbank.getFloat("z", i));
+            double Zref = trkbank.getFloat("z", i);
+            HBFinalSV.setZ(Zref);
             HBtrk.setFinalStateVec(HBFinalSV);
 //            Matrix initCMatrix = new Matrix();
 //            initCMatrix.set(new double[][]{
@@ -232,7 +233,24 @@ public class DCTBEngine extends DCEngine {
             //if(TrackArray[i].get_FitChi2()>200) {
             //    resetTrackParams(TrackArray[i], new DCSwimmer());
             //}
+           
+            if(Constants.INITFROMMC) {
+                double Zref = TrackArray1.getFinalStateVec().getZ();
+                double[] pars = recUtil.mcTrackPars(event, dcSwim, Zref);
+                double x = pars[0];
+                double y = pars[1];
+                double tx = pars[3]/pars[5];
+                double ty = pars[4]/pars[5];
+                
+                StateVec HBFinalSV = new StateVec(x,y, tx, ty);
+                HBFinalSV.setZ(Zref);
+                TrackArray1.setFinalStateVec(HBFinalSV);
+            }
+            
             KFitterDoca kFit = new KFitterDoca(TrackArray1, Constants.getInstance().dcDetector, true, dcSwim, 0);
+            if(Constants.INITFROMMC) 
+                kFit.filterOn = false;
+            
             StateVec fn = new StateVec();
             kFit.runFitter(TrackArray1.get(0).get_Sector());
             if (kFit.setFitFailed==false && kFit.finalStateVec!=null) { 

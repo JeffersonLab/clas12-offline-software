@@ -44,6 +44,8 @@ public class Constants {
     
     public static boolean DEBUG = false;
 
+    public static boolean INITFROMMC = false;
+
     // PHYSICS CONSTANTS
     public static final double SPEEDLIGHT = 29.97924580;
     public static final double LIGHTVEL = 0.00299792458;        // velocity of light (cm/ns) - conversion factor from radius in cm to momentum in GeV/c
@@ -312,7 +314,8 @@ public class Constants {
                                         int t2d, 
                                         boolean useDoublets,
                                         int nSuperLayer,
-                                        int selectedSector) {
+                                        int selectedSector,
+                                        double[][] shifts) {
         if (ConstantsLoaded) {
             printConfig(engine);
         }
@@ -329,7 +332,7 @@ public class Constants {
 
             LoadConstants();
 
-            LoadGeometry(GEOVARIATION);
+            LoadGeometry(GEOVARIATION, shifts);
 
             ConstantsLoaded = true;
             printConfig(engine);
@@ -343,7 +346,7 @@ public class Constants {
         else {
             LoadConstants();
 
-            LoadGeometry(GEOVARIATION);
+            LoadGeometry(GEOVARIATION, null);
 
             ConstantsLoaded = true;
             printConfig(engine);
@@ -430,10 +433,10 @@ public class Constants {
             
     }
 
-    private synchronized void LoadGeometry(String geoVariation) {
+    private synchronized void LoadGeometry(String geoVariation, double[][] shifts) {
         // Load the geometry
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, geoVariation);
-        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, ENDPLATESBOWING);
+        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, ENDPLATESBOWING, shifts);
         for(int l=0; l<6; l++) {
             wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
         }
