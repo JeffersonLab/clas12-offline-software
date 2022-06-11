@@ -197,7 +197,6 @@ public class SVTGeometry {
      * 
      * 2) for even layers, it rotates by 180 deg to have the y axis
      * pointing outward
-     *      *
      * @param layer
      * @param sector
      * @param trackDir

@@ -776,6 +776,4 @@ public class RecUtilities {
         return crosses;
     }
     
-    
-    
 }

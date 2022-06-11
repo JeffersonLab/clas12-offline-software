@@ -309,8 +309,7 @@ public class TrackSeeder {
                 }
             }
         }
-
-
+        
         for(Seed mseed : seedScan) { 
             boolean fitStatus = false;
             if(mseed.getCrosses().size()>=3)
@@ -437,7 +436,6 @@ public class TrackSeeder {
                         BMTTrkSeed.setHelix(trkCand.getHelix());
                         BMTTrkSeed.setCrosses(matches);
                         AllSeeds.put(st,BMTTrkSeed);
-         
                         //if (AllSeeds.size() > 200) {
                         //    AllSeeds.clear();
                         //    return AllSeeds;

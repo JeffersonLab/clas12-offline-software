@@ -860,5 +860,4 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
         return str;
     }
 
-
 }

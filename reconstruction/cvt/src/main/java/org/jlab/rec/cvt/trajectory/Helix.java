@@ -99,7 +99,6 @@ public class Helix {
         this.yb = yb;
     }
 
-    
     public double getDCA() {
         return _dca;
     }
