@@ -577,7 +577,7 @@ public final class DCGeant4Factory extends Geant4Factory {
 						.rotateY(-dbref.thtilt(isuper/2));
                         
                         //implement end-plates bow in the tilted sector coordinate system (ziegler)
-                        if(dbref.getEndPlatesStatus() || true)
+                        if(dbref.getEndPlatesStatus())
                             wires[isec][isuper][ilayer][iwire].correctEnds();
                         //dc alignment implementation
                         wires[isec][isuper][ilayer][iwire].translate(regionMids[isec][isuper/2].times(-1.0));
