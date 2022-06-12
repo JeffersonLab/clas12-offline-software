@@ -216,6 +216,7 @@ public class Measurements {
         return active;
     }
 
+    
     public double getELoss(double p, double mass) {
         double pcorr = p;
         for(int i=0; i<cvtSurfaces.length; i++) {

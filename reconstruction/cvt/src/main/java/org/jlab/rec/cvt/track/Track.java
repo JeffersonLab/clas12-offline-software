@@ -94,57 +94,6 @@ public class Track extends Trajectory implements Comparable<Track> {
         this.setPID(pid);
     }
 
-    public Track(Helix helix) {
-        super(helix);
-        if (helix != null) {
-            this.setPXYZ();
-        }
-    }
-    
-    public Track(Seed seed) {
-        super(seed.getHelix());
-        this.setSeed(seed);
-        this.setPXYZ();
-        this.setNDF(seed.getNDF());
-        this.setChi2(seed.getChi2());
-        this.addAll(seed.getCrosses());       
-    }
-
-    public Track(Seed seed, org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf) {
-        super(new Helix(kf.KFHelix.getD0(), kf.KFHelix.getPhi0(), kf.KFHelix.getOmega(), 
-                        kf.KFHelix.getZ0(), kf.KFHelix.getTanL(), 
-                        kf.KFHelix.getXb(), kf.KFHelix.getYb()));
-        this.getHelix().B = kf.KFHelix.getB();
-        this.kfIterations = kf.numIter;
-        double c = Constants.LIGHTVEL;
-        //convert from kf representation to helix repr
-        double alpha = 1. / (c * Math.abs(kf.KFHelix.getB()));
-        double[][] kfCov = kf.finalStateVec.covMat;
-        for(int i = 0; i<5; i++) {
-            for(int j = 0; j<5; j++) {
-                if(i==2)
-                    kfCov[i][j]/=alpha;
-                if(j==2)
-                    kfCov[i][j]/=alpha;
-                
-            }
-        }
-        
-        //kfCov[0][0]/=10;
-        //kfCov[3][3]/=10;
-        //kfCov[1][1]*=10;
-        //kfCov[2][2]*=10;
-        //kfCov[4][4]*=10;
-        
-        this.getHelix().setCovMatrix(kfCov);
-        this.setPXYZ();
-        this.setNDF(kf.NDF);
-        this.setChi2(kf.chi2);
-        this.setSeed(seed);
-        this.addAll(seed.getCrosses());
-        this.setTrajectories(kf.TrjPoints);
-    }
-    
     /**
      *
      * @return the charge
@@ -609,6 +558,7 @@ public class Track extends Trajectory implements Comparable<Track> {
         }        
     }
 
+
     @Override
     public String toString() {
         String str = String.format("Track id=%d, q=%d, p=%.3f GeV pt=%.3f GeV, d0=%.3f deg, phi=%.3f deg, z0=%.3f deg, tandip=%.3f deg, NDF=%d, chi2=%.3f, seed method=%d\n", 
@@ -619,5 +569,7 @@ public class Track extends Trajectory implements Comparable<Track> {
         for(Cluster c: this.getSeed().getClusters()) str = str + c.toString() + "\n";
         return str;
     }
+
+    
 
 }

@@ -95,6 +95,11 @@ public class ClusterFinder {
                         
                         this_cluster.calc_CentroidParams();
 
+//                        for (Hit h : this_cluster) {
+//                            h.newClustering = false;
+//                        }
+//                        Collections.sort(this_cluster);
+                       
                         //make list of clusters
                         clusters.add(this_cluster);
                     }

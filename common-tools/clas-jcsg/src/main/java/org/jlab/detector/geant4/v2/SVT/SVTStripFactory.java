@@ -364,57 +364,6 @@ public class SVTStripFactory
 	
 	
 	/**
-	 * Returns the normal the module in the lab frame, depending on this factory's setup.
-	 * 
-	 * @param aLayer an index starting from 0
-	 * @param aSector an index starting from 0
-	 * @return Vector3d unit vector, normal to the plane, pointing radially outwards
-	 * 
-	 * @see SVTStripFactory#setApplyAlignmentShifts
-	 * @see SVTStripFactory#isSetApplyAlignmentShifts
-	 */
-	public Vector3d getModuleNormal( int aLayer, int aSector)
-	{
-              int[] rm = SVTConstants.convertLayer2RegionModule(aLayer);
-              
-              Vector3d[] corners = this.getLayerCorners(aLayer, aSector);
-              
-              Vector3d v1 = corners[1].minus(corners[0]); // along the short edge             
-              if(rm[1]==0) v1 = v1.negated();             // for odd layers, reverse the vector to have the normal always pointing radially outward
-              Vector3d v2 = corners[2].minus(corners[1]); // along the long edge, pointing to positive z
-              return v1.cross(v2).normalized();
-	}
-
-         /**
-	 * Returns the end points of the module in the lab frame, depending on this factory's setup.
-	 * 
-	 * @param aLayer an index starting from 0
-	 * @param aSector an index starting from 0
-	 * @return Line3d going from origin to e end of modules
-	 * 
-	 * @see SVTStripFactory#setApplyAlignmentShifts
-	 * @see SVTStripFactory#isSetApplyAlignmentShifts
-	 */
-	public Line3d getModuleEndPoints( int aLayer, int aSector )
-	{
-              Vector3d[] corners = null;
-              if( bShift )
-                    corners = getShiftedLayerCorners(aLayer, aSector );
-              else
-                    corners = getIdealLayerCorners(aLayer, aSector );
-              
-              int[] rm = SVTConstants.convertLayer2RegionModule(aLayer);
-              if(rm[1]==0) { // odd layers
-                    return new Line3d(corners[1], corners[0]);
-              }
-              else { //even layers
-                    return new Line3d(corners[0], corners[1]);
-              }
-	}
-	
-	
-	
-	/**
 	 * Returns the corners of a sensor layer in the lab frame, depending on this factory's setup.
 	 * 
 	 * @param aLayer an index starting from 0

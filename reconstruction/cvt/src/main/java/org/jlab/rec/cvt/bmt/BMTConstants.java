@@ -351,13 +351,6 @@ public class BMTConstants {
         BMTConstants.MATERIALPROPERTIES.put(name, properties);
     }
     
-    public static double[] getMaterial_T() {
-        return TMAT;
-    }
-    public static synchronized void setMaterial_T(double[] t) {
-        TMAT = t;
-    }
-    
     public static synchronized void setTHETAL_grid(double[] cThetaL_grid) {
   	ThetaL_grid  = cThetaL_grid;
    }
