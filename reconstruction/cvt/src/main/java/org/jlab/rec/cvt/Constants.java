@@ -177,7 +177,7 @@ public class Constants {
     public int getBMTLayerExcld() {
         return BMTLayerExcld;
     }
-
+    
     private static final double COVD0D0      = 1.;///50.;
     private static final double COVD0PHI0    = 1;//./50.;
     private static final double COVD0RHO     = 1.;///50.;

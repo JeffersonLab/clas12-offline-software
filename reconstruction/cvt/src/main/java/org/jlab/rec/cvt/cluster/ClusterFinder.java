@@ -94,7 +94,7 @@ public class ClusterFinder {
                         }
                         
                         this_cluster.calc_CentroidParams();
-
+                       
 //                        for (Hit h : this_cluster) {
 //                            h.newClustering = false;
 //                        }
