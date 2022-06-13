@@ -12,6 +12,8 @@ services:
     name: FTCAL
   - class: org.jlab.rec.ft.hodo.FTHODOEngine
     name: FTHODO
+  - class: org.jlab.rec.ft.trk.FTTRKEngine
+    name: FTTRK
   - class: org.jlab.rec.ft.FTEBEngine
     name: FTEB
 # DC clustering: nominal algoritm, filled the cluster bank for ai and conventional tracking
@@ -88,5 +90,15 @@ configuration:
 #    EBTB:
 #      variation: default
 #      timestamp: 08/22/2018
+    DCRC:
+      dcT2DFunc: "Exponential"  
+    DCHB:
+      dcT2DFunc: "Exponential"  
+    DCHAI:
+      dcT2DFunc: "Exponential"  
+    DCTB:
+      dcT2DFunc: "Exponential"  
+    DCTAI:
+      dcT2DFunc: "Exponential"  
 mime-types:
   - binary/data-hipo

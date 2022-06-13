@@ -1,5 +1,5 @@
-[ 
- {
+[
+ { 
     "name": "FTCAL::hits",
     "group": 21000,
     "item" : 21,
@@ -15,7 +15,7 @@
               {"name":"hitID", 	   "type":"S", "info":"Hit Pointer to ADC bank"},
               {"name":"clusterID", "type":"S", "info":"Hit Pointer to Cluster Bank"}
     ]
-  },
+ },
  {
     "name": "FTCAL::clusters",
     "group": 21000,
@@ -90,8 +90,64 @@
               {"name":"time",   "type":"F", "info":"track Time" },
               {"name":"calID",  "type":"S", "info":"pointer to cluster bank"},
               {"name":"hodoID", "type":"S", "info":"pointer to signal bank"},
-              {"name":"trkID",  "type":"S", "info":"pointer to cross banks"}
+              {"name":"trk0ID", "type":"S", "info":"pointer to first cross bank"},
+              {"name":"trk1ID", "type":"S", "info":"pointer to second cross bank"}
  
     ]
+  },
+  {
+    "name": "FTTRK::hits",
+    "group": 21300,
+    "item": 21,
+    "info": "Reconstructed Hits in FT tracker",
+    "entries": [
+              {"name":"sector",    "type":"B",  "info":"sector number"},
+              {"name":"layer",     "type":"B",  "info":"layer number"},
+              {"name":"component", "type":"S", "info":"component number"},
+              {"name":"x",         "type":"F", "info":"Hit X position (cm)" },
+              {"name":"y",         "type":"F", "info":"Hit Y position (cm)" },
+              {"name":"z",         "type":"F", "info":"Hit Z position (cm)" },
+              {"name":"energy",    "type":"F", "info":"Hit Energy" },
+              {"name":"time",      "type":"F", "info":"Hit Time" },
+              {"name":"hitID",     "type":"S", "info":"Hit Pointer to ADC bank"},
+              {"name":"clusterID", "type":"S", "info":"Hit Pointer to Cluster Bank"}
+    ]
+  },
+  {
+    "name": "FTTRK::clusters",
+    "group": 21300,
+    "item": 22,
+    "info": "Reconstructed clusters in FT tracker",
+    "entries": [
+              {"name":"size",             "type":"S",  "info":"Cluster size"},
+              {"name":"id",               "type":"S",  "info":"Cluster ID"},
+              {"name":"sector",           "type":"B",  "info":"Cluster sector"},
+              {"name":"layer",            "type":"B",  "info":"Cluster layer"},
+              {"name":"energy",           "type":"F",  "info":"Cluster total energy" },
+              {"name":"maxEnergy",        "type":"F",  "info":"Seed energy"},
+              {"name":"seed",             "type":"S",  "info":"Seed strip"},
+              {"name":"centroid",         "type":"F",  "info":"Centroid strip number"}
+    ]
+  },
+  {
+    "name": "FTTRK::crosses",
+    "group": 21300,
+    "item": 23,    
+    "info": "Reconstructed crosses in FT tracker",
+    "entries": [
+             {"name":"size",        "type":"S", "info":"Size of cross bank"},
+             {"name":"id",          "type":"S", "info":"Cross ID"},
+             {"name":"sector",      "type":"B",  "info":"Cross sector"},
+             {"name":"detector",    "type":"B",  "info":"Cross detector"},
+             {"name":"x",           "type":"F", "info":"Cross X position (cm)"},
+             {"name":"y",           "type":"F", "info":"Cross Y position (cm)"},
+             {"name":"z",           "type":"F", "info":"Cross Z position (cm)"},
+             {"name":"energy",      "type":"F", "info":"Cross Energy" },
+             {"name":"time",        "type":"F", "info":"Cross Time" },
+             {"name":"Cluster1ID",  "type":"S", "info":"ID of the upstream layer cluster in the Cross"},
+             {"name":"Cluster2ID",  "type":"S", "info":"ID of the downstream layer cluster in the Cross"}
+    ]
   }
+
+
 ]

@@ -233,7 +233,7 @@ public class CVTEngine extends ReconstructionEngine {
 
         event.appendBanks(banks.toArray(new DataBank[0]));
             
-        
+
         return true;
     }
 
