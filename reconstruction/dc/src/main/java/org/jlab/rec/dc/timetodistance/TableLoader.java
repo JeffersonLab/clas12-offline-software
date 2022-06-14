@@ -98,7 +98,7 @@ public class TableLoader {
         
         
         double p_ref = t2dPressRef.getDoubleValue("pressure", 0,0,0);
-        double p = pressure.getDoubleValue("pressure", 0,0,3);
+        double p = pressure.getDoubleValue("value", 0,0,3);
         double dp = p - p_ref;
         
         for(int s = 0; s<6; s++ ){ // loop over sectors
