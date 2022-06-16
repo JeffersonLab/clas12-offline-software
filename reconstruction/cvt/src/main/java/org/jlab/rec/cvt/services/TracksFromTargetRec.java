@@ -47,10 +47,10 @@ public class TracksFromTargetRec {
     private double yb;
     
     
-    public TracksFromTargetRec(Swim swimmer, IndexedTable beamPos) {
+    public TracksFromTargetRec(Swim swimmer, double[] beamPos) {
         this.swimmer = swimmer;
-        this.xb = beamPos.getDoubleValue("x_offset", 0, 0, 0)*10;
-        this.yb = beamPos.getDoubleValue("y_offset", 0, 0, 0)*10;
+        this.xb = beamPos[0];
+        this.yb = beamPos[1];
     }
     
        
