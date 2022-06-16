@@ -10,7 +10,6 @@ import org.jlab.jnp.hipo4.io.HipoReader;
 import org.jlab.jnp.hipo4.data.Event;
 import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
-import org.jlab.detector.scalers.DaqScalers;
 
 /**
  * For easy access to most recent scaler readout for any given event.
@@ -83,7 +82,7 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
         final int n = index<0 ? -index-2 : index;
         return n;
     }
-   
+
     protected boolean add(DaqScalers ds) {
         if (this.scalers.isEmpty()) {
             this.scalers.add(ds);
@@ -97,8 +96,10 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
                 return true;
             }
             else if (index<0) {
-                // it's a unique timestamp, insert it:
-                this.scalers.add(-index-1,ds);
+                // it's a unique timestamp, insert it if it's non-zero:
+                if (ds.dsc2.beamCharge > 0) {
+                    this.scalers.add(-index-1,ds);
+                }
                 return true;
             }
             else {
@@ -107,7 +108,7 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
             }
         }
     }
-    
+
     /**
      * @param timestamp TI timestamp (i.e. RUN::config.timestamp)
      * @return the most recent DaqScalers for the given timestamp
