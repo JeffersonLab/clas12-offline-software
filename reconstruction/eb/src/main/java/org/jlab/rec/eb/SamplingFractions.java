@@ -1,7 +1,5 @@
 package org.jlab.rec.eb;
 
-import static java.lang.Math.pow;
-
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.detector.base.DetectorType;
 
@@ -12,22 +10,26 @@ import org.jlab.detector.base.DetectorType;
 
 public class SamplingFractions {
 
-    private static DetectorType detType = DetectorType.ECAL;
+    public static final DetectorType DET_TYPE = DetectorType.ECAL;
+
+    public static double calc(double measuredEnergy, Double[] par) {
+        return par[0]*(par[1] + par[2]/measuredEnergy + par[3]*Math.pow(measuredEnergy,-2));
+	}
 
     /**
+     * @param pid
+     * @param part
+     * @param ccdb
      * @return mean of sampling fraction
      */
     public static double getMean(
             final int pid,
             final DetectorParticle part,
             final EBCCDBConstants ccdb) {
-        final int sector = part.getSector(detType);
-        final double measuredEnergy = part.getEnergy(detType);
+        final int sector = part.getSector(DET_TYPE);
+        final double measuredEnergy = part.getEnergy(DET_TYPE);
         Double[] p;
-        switch (pid) {
-            case -11:
-                p = ccdb.getSectorArray(EBCCDBEnum.ELEC_SF,sector);
-                break;
+        switch (Math.abs(pid)) {
             case 11:
                 p = ccdb.getSectorArray(EBCCDBEnum.ELEC_SF,sector);
                 break;
@@ -37,23 +39,23 @@ public class SamplingFractions {
             default:
                 throw new RuntimeException("Unknown sampling fraction for pid="+pid);
         }
-        return p[0]*(p[1] + p[2]/measuredEnergy + p[3]*pow(measuredEnergy,-2));
+        return SamplingFractions.calc(measuredEnergy, p);
     }
     
     /**
+     * @param pid
+     * @param part
+     * @param ccdb
      * @return sigma of sampling fraction
      */
     public static double getSigma(
             final int pid,
             final DetectorParticle part,
             final EBCCDBConstants ccdb) {
-        final int sector = part.getSector(detType);
-        final double measuredEnergy = part.getEnergy(detType);
+        final int sector = part.getSector(DET_TYPE);
+        final double measuredEnergy = part.getEnergy(DET_TYPE);
         Double[] p;
-        switch (pid) {
-            case -11:
-                p = ccdb.getSectorArray(EBCCDBEnum.ELEC_SFS,sector);
-                break;
+        switch (Math.abs(pid)) {
             case 11:
                 p = ccdb.getSectorArray(EBCCDBEnum.ELEC_SFS,sector);
                 break;
@@ -63,20 +65,24 @@ public class SamplingFractions {
             default:
                 throw new RuntimeException("Unknown sampling fraction for pid="+pid);
         }
-        return p[0]*(p[1] + p[2]/measuredEnergy + p[3]*pow(measuredEnergy,-2));
+        return SamplingFractions.calc(measuredEnergy, p);
     }
    
     /**
+     * @param pid
+     * @param part
+     * @param ccdb
      * @return number of sigma from mean
      */
     public static double getNSigma(
             final int pid,
             final DetectorParticle part,
             final EBCCDBConstants ccdb) {
-        final double samplingFraction = part.getEnergyFraction(detType);
+        final double samplingFraction = part.getEnergyFraction(DET_TYPE);
         final double mean  = getMean( pid,part,ccdb);
         final double sigma = getSigma(pid,part,ccdb);
         return (samplingFraction-mean)/sigma;
     }
+
 }
 

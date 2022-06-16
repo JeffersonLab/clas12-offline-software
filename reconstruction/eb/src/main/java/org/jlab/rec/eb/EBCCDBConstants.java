@@ -23,6 +23,8 @@ public class EBCCDBConstants {
 
     private static final String[] EB_TABLE_NAMES={
             "electron_sf",
+            "electron_sf_poly",
+            "electron_subsf_poly",
             "photon_sf",
             "neutron_beta",
             "cnd_neutron_beta",
@@ -230,6 +232,13 @@ public class EBCCDBConstants {
         loadSectorsArrays(EBCCDBEnum.PHOT_SF,"photon_sf",  sf);
         loadSectorsArrays(EBCCDBEnum.ELEC_SFS,"electron_sf",sfs);
         loadSectorsArrays(EBCCDBEnum.PHOT_SFS,"photon_sf",  sfs);
+
+        String[] sf_p={"m0","m1","m2","m3","m4","m5","m6"};
+        String[] sfs_p={"s0","s1","s2","s3","s4","s5","s6"};
+        loadSectorsArrays(EBCCDBEnum.ELEC_SF_POLY, "electron_sf_poly", sf_p);
+        loadSectorsArrays(EBCCDBEnum.ELEC_SUBSF_POLY, "electron_subsf_poly", sf_p);
+        loadSectorsArrays(EBCCDBEnum.ELEC_SFS_POLY, "electron_sf_poly", sfs_p);
+        loadSectorsArrays(EBCCDBEnum.ELEC_SUBSFS_POLY, "electron_subsf_poly", sfs_p);
 
         loadDouble(EBCCDBEnum.PCAL_MATCHING,"ecal_matching","dr2",0,1,0);
         loadDouble(EBCCDBEnum.ECIN_MATCHING,"ecal_matching","dr2",0,4,0);

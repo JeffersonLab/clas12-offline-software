@@ -360,7 +360,13 @@ public class DetectorParticle implements Comparable {
         if(this.vector().mag()<0.00001) return 0.0;
         return energy/this.vector().mag();
     }
-    
+
+    public double getEnergyFraction(DetectorType type, int... layer){
+        double energy = this.getEnergy(type, layer);
+        if(this.vector().mag()<0.00001) return 0.0;
+        return energy/this.vector().mag();
+    }
+
     public double getEnergy(DetectorType type){
         double energy = 0.0;
         for(DetectorResponse r : this.responseStore){
@@ -371,12 +377,15 @@ public class DetectorParticle implements Comparable {
         return energy;
     }
     
-    public double getEnergy(DetectorType type, int layer){
+    public double getEnergy(DetectorType type, int... layer){
         double energy = 0.0;
         for(DetectorResponse r : this.responseStore) {
-            if (r.getDescriptor().getType()==type &&
-               r.getDescriptor().getLayer()==layer) {
-                energy += r.getEnergy();
+            if (r.getDescriptor().getType()==type) {
+                for (int l : layer) {
+                    if (r.getDescriptor().getLayer() == l) { 
+                        energy += r.getEnergy();
+                    }
+                }
             }
         }
         return energy;

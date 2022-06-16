@@ -82,10 +82,15 @@ public class EBUtil {
         final double nphe = p.getNphe(DetectorType.HTCC);
         if (nphe < ccdb.getDouble(EBCCDBEnum.HTCC_NPHE_CUT)) return false;
         
-        // require ECAL sampling fraction:
-        final double sfNSigma = SamplingFractions.getNSigma(11,p,ccdb);
         final double nSigmaCut = ccdb.getSectorDouble(EBCCDBEnum.ELEC_SF_nsigma,sector);
-        if (abs(sfNSigma) > nSigmaCut) return false;
+        
+        // require total ECAL sampling fraction:
+        final double ns1 = SamplingFractionsPoly.getNSigma(11,p,ccdb,SamplingFractionsPoly.Type.TOTAL);
+        if (abs(ns1) > nSigmaCut) return false;
+       
+        // require partial ECAL sampling fraction:
+        final double ns2 = SamplingFractionsPoly.getNSigma(11,p,ccdb,SamplingFractionsPoly.Type.PARTIAL);
+        if (abs(ns2) > nSigmaCut) return false;
        
         // require PCAL minimum energy:
         final double minPcalEnergy = ccdb.getSectorDouble(EBCCDBEnum.ELEC_PCAL_min_energy,sector);

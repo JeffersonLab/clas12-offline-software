@@ -22,6 +22,7 @@ import org.jlab.rec.eb.EBCCDBEnum;
 import org.jlab.rec.eb.EBUtil;
 import org.jlab.rec.eb.SamplingFractions;
 import org.jlab.rec.eb.EBRadioFrequency;
+import org.jlab.rec.eb.SamplingFractionsPoly;
 
 /**
  * @author gavalian
@@ -529,7 +530,7 @@ public class EBAnalyzer {
 
             // electron/positron:
             else if (abs(pid)==11) {
-                q = SamplingFractions.getNSigma(pid,p,ccdb);
+                q = SamplingFractionsPoly.getNSigma(pid,p,ccdb);
             }
 
             // based on timing:
