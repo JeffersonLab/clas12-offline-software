@@ -413,10 +413,11 @@ class HelicitySequence {
 
             // check if quartet sequence is broken (should be 1minus + 3plus):
             if (ii > 2) {
-                if (this.states.get(ii-0).getPatternSync().value()+
+                if (Math.abs(
+                    this.states.get(ii-0).getPatternSync().value()+
                     this.states.get(ii-1).getPatternSync().value()+
                     this.states.get(ii-2).getPatternSync().value()+
-                    this.states.get(ii-3).getPatternSync().value() != 2) {
+                    this.states.get(ii-3).getPatternSync().value()) != 2) {
                     quartetErrors++;
                     this.states.get(ii).addSwStatusMask(HelicityState.Mask.PATTERN);
                     LOGGER.log(Level.FINE, "ERROR:  HelicitySequence QUARTET: {0}", ii);
