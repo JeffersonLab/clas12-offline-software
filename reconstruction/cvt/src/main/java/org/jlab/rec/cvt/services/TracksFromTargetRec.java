@@ -26,7 +26,6 @@ import org.jlab.rec.cvt.track.StraightTrackSeeder;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.track.TrackSeeder;
 import org.jlab.rec.cvt.track.TrackSeederCA;
-import org.jlab.utils.groups.IndexedTable;
 
 /**
  *

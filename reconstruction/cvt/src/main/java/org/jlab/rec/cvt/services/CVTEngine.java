@@ -208,7 +208,7 @@ public class CVTEngine extends ReconstructionEngine {
                 }            
             } 
             else {
-                double[] xyBeam = reco.getBeamSpot(event, beamPos)
+                double[] xyBeam = CVTReconstruction.getBeamSpot(event, beamPos);
                 TracksFromTargetRec  trackFinder = new TracksFromTargetRec(swimmer, xyBeam);
                 List<Seed>   seeds = trackFinder.getSeeds(clusters, crosses);
                 List<Track> tracks = trackFinder.getTracks(event, this.isInitFromMc(), 
