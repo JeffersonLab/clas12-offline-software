@@ -99,6 +99,7 @@ public class RandomTriggerFilter {
         parser.setRequiresInputList(false);
         parser.addOption("-c"    ,"-1", "minimum beam current");
         parser.addOption("-n"    ,"-1", "maximum number of events to process");
+        parser.addOption("-m"    ,"80)","maximum current for histogram");
         parser.parse(args);
 
         List<String> inputList = parser.getInputList();
@@ -177,7 +178,8 @@ public class RandomTriggerFilter {
             }
             writer.close();
             
-            filter.getFcupFilter().showStats();
+            filter.getFcupFilter().showStats(parser.getOption("-m").intValue());
+
         }
     }
 }

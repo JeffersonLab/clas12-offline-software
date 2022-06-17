@@ -106,14 +106,14 @@ public class FilterFcup implements Worker {
     /**
      * Show beam current histogram
      */
-    public void showStats() {
+    public void showStats(int maxCurrent) {
         System.out.println("\n\n");
         System.out.println(" BEAM CURRENT HISTOGRAM (ENTRIES ARE EVENTS)\n");        
         TextHistogram histo = new TextHistogram();
         Map<String,Double> sizeMap = this.getCurrentMap();
         histo.setPrecision(0);
         histo.setMinDecriptorWidth(28);
-        histo.setWidth(80);
+        histo.setWidth(maxCurrent);
         histo.setData(sizeMap);
         histo.print();
     }
