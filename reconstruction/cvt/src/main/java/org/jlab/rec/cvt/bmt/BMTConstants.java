@@ -1,5 +1,7 @@
 package org.jlab.rec.cvt.bmt;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
@@ -60,9 +62,10 @@ public class BMTConstants {
     private static double[][] CRCEDGE1 = new double[NREGIONS][3]; 	// the angle of the first edge of each PCB detector A, B, C
     private static double[][] CRCEDGE2 = new double[NREGIONS][3]; 	// the angle of the second edge of each PCB detector A, B, C
     private static double[] CRCXPOS = new double[NREGIONS]; 		// Distance on the PCB between the PCB first edge and the edge of the first strip in mm
-    private static double[] EFF_Z_OVER_A = new double[NREGIONS*2];      // for ELOSS
-    private static double[] T_OVER_X0 = new double[NREGIONS*2];         // for M.Scat.
-    private static double[] TMAT = new double[NREGIONS*2];              // for M.Scat.
+
+    // map of material properties for dE/dx and mult. scat
+    // the array contains thickness density in g/mm3, Z/A, X0, I (eV)
+    private static Map<String, double[]> MATERIALPROPERTIES = new LinkedHashMap<>();
 
   
     // THE RECONSTRUCTION CONSTANTS
@@ -78,7 +81,6 @@ public class BMTConstants {
     public static double[] ThetaL_grid = new double[405];    //Lorentz angle grid
     public static double[] E_grid = new double[405];         //Electric field value of the grid
     public static double[] B_grid = new double[405];        //Magnetic field value of the grid
-    public static double ThetaL = 0; 						// the Lorentz angle for 5-T B-field
     public static double emin=Double.MAX_VALUE;           //Emin of the grid
     public static double emax=0;                          //Emax of the grid
     public static double bmax=0;                          //Bmax of the grid
@@ -87,15 +89,7 @@ public class BMTConstants {
     public static int Nb=0;                               //Number of step for the magnetic field
   
     
-// THE HV CONSTANT
-    public static double[][] E_DRIFT_FF = new double[2*NREGIONS][3]; 
-    public static double[][] E_DRIFT_MF = new double[2*NREGIONS][3]; 
-
     public static final int STARTINGLAYR = 1;
-
-    public static double getThetaL() {
-        return ThetaL;
-    }
 
     public static double[] getCRZRADIUS() {
         return CRZRADIUS;
@@ -345,25 +339,16 @@ public class BMTConstants {
         CRCXPOS = cRCXPOS;
     }
 
-    public static double[] getEFF_Z_OVER_A() {
-        return EFF_Z_OVER_A;
+    public static Map<String, double[]> getMaterials() {
+        return MATERIALPROPERTIES;
     }
-    public static synchronized void setEFF_Z_OVER_A(double[] eFF_Z_OVER_A) {
-        EFF_Z_OVER_A = eFF_Z_OVER_A;
-    }
-    
-    public static double[] getT_OVER_X0() {
-        return T_OVER_X0;
-    }
-    public static synchronized void setT_OVER_X0(double[] t_OVER_X0) {
-        T_OVER_X0 = t_OVER_X0;
+
+    public static synchronized void setMaterials(Map<String, double[]> properties) {
+        BMTConstants.MATERIALPROPERTIES = properties;
     }
     
-    public static double[] getMaterial_T() {
-        return TMAT;
-    }
-    public static synchronized void setMaterial_T(double[] t) {
-        TMAT = t;
+    public static synchronized void addMaterial(String name, double[] properties) {
+        BMTConstants.MATERIALPROPERTIES.put(name, properties);
     }
     
     public static synchronized void setTHETAL_grid(double[] cThetaL_grid) {
@@ -406,19 +391,5 @@ public class BMTConstants {
            pb = B_grid[j] ;
         }
    }
-   public static synchronized void setE_drift_FF(double[][] cHV_drift) {
-   	for (int i=0; i<2*NREGIONS;i++) {
-            for (int j=0; j<3;j++) {	
-                    E_DRIFT_FF[i][j] = 10*cHV_drift[i][j]/HDRIFT;
-            }	
-   	}
-  }
-   public static synchronized void setE_drift_MF(double[][] cHV_drift) {
-   	for (int i=0; i<2*NREGIONS;i++) {
-            for (int j=0; j<3;j++) {	
-                    E_DRIFT_MF[i][j]  = 10*cHV_drift[i][j]/HDRIFT;
-            }	
-   	}
-  }
    
 }

@@ -45,7 +45,7 @@ public class SVTStripFactory
 	 */
 	public SVTStripFactory( DatabaseConstantProvider cp, boolean applyAlignmentShifts )
 	{
-		SVTConstants.load( cp );
+		SVTConstants.connect( cp );
 		setApplyAlignmentShifts( applyAlignmentShifts );
 		if( bShift == true && SVTConstants.getLayerSectorAlignmentData()== null ){
 			System.err.println("error: SVTStripFactory: no shifts loaded");
