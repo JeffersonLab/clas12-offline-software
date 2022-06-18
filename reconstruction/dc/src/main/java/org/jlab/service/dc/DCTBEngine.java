@@ -207,6 +207,7 @@ public class DCTBEngine extends DCEngine {
         //6) find the list of  track candidates
         // read beam offsets from database
         double beamXoffset, beamYoffset;
+	IndexedTable beamOffset = this.getConstantsManager().getConstants(run, Constants.BEAMPOS);
         beamXoffset = beamOffset.getDoubleValue("x_offset", 0, 0, 0)*10;
         beamYoffset = beamOffset.getDoubleValue("y_offset", 0, 0, 0)*10;
         if(event.hasBank("RASTER::position")){
