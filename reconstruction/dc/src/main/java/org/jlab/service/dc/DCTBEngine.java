@@ -208,12 +208,12 @@ public class DCTBEngine extends DCEngine {
         // read beam offsets from database
         double beamXoffset, beamYoffset;
 	IndexedTable beamOffset = this.getConstantsManager().getConstants(run, Constants.BEAMPOS);
-        beamXoffset = beamOffset.getDoubleValue("x_offset", 0, 0, 0)*10;
-        beamYoffset = beamOffset.getDoubleValue("y_offset", 0, 0, 0)*10;
+        beamXoffset = beamOffset.getDoubleValue("x_offset", 0, 0, 0);
+        beamYoffset = beamOffset.getDoubleValue("y_offset", 0, 0, 0);
         if(event.hasBank("RASTER::position")){
             DataBank raster_bank = event.getBank("RASTER::position");
-            beamXoffset += raster_bank.getFloat("x", 0)*10;
-            beamYoffset += raster_bank.getFloat("y", 0)*10;
+            beamXoffset += raster_bank.getFloat("x", 0);
+            beamYoffset += raster_bank.getFloat("y", 0);
         }
 	TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
         TrajectoryFinder trjFind = new TrajectoryFinder();
