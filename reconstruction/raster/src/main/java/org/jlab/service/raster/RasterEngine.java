@@ -23,8 +23,8 @@ import org.jlab.utils.groups.IndexedTable;
 public class RasterEngine extends ReconstructionEngine {
 
     private final double udfPos = -999;
-    private final int    xComponent = 0;
-    private final int    yComponent = 1;
+    private final int    xComponent = 1;
+    private final int    yComponent = 2;
     
     public static final Logger LOGGER = Logger.getLogger(RasterEngine.class.getName());
 
@@ -113,17 +113,17 @@ public class RasterEngine extends ReconstructionEngine {
     public void mcToRasterBank(DataEvent event, IndexedTable adc2pos){
         // create "fake" adc bank
         if(event.hasBank("MC::Particle")) {
-        DataBank part = event.getBank("MC::Particle");
-        double[] adcs = {(part.getFloat("vx", 0)-adc2pos.getDoubleValue("p0", 0, 0, 0))/adc2pos.getDoubleValue("p1", 0, 0, 0)
-                         ,(part.getFloat("vy", 0)-adc2pos.getDoubleValue("p0", 0, 0, 1))/adc2pos.getDoubleValue("p1", 0, 0, 1)};
-        DataBank adc  = event.createBank("RASTER::adc", 2);
+            DataBank part = event.getBank("MC::Particle");
+            double[] adcs = {(part.getFloat("vx", 0)-adc2pos.getDoubleValue("p0", 0, 0, xComponent))/adc2pos.getDoubleValue("p1", 0, 0, xComponent)
+                            ,(part.getFloat("vy", 0)-adc2pos.getDoubleValue("p0", 0, 0, yComponent))/adc2pos.getDoubleValue("p1", 0, 0, yComponent)};
+            DataBank adc  = event.createBank("RASTER::adc", 2);
             for(int i=0; i<adcs.length;i++) {
                 adc.setByte("sector", i, (byte) 0);
                 adc.setByte("layer", i, (byte) 0);
-                adc.setShort("component", i, (short) i);
+                adc.setShort("component", i, (short) (i+1));
                 adc.setInt("ped", i, (int) adcs[i]);
             }
-        event.appendBank(adc);
+            event.appendBank(adc);
         }
     }
 
