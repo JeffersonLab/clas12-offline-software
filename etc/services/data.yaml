@@ -16,6 +16,8 @@ services:
     name: FTTRK
   - class: org.jlab.rec.ft.FTEBEngine
     name: FTEB
+  - class: org.jlab.service.raster.RasterEngine
+    name: RASTER
 # DC clustering: nominal algoritm, filled the cluster bank for ai and conventional tracking
   - class: org.jlab.service.dc.DCHBClustering
     name: DCCR
