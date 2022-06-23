@@ -23,8 +23,8 @@ import org.jlab.utils.groups.IndexedTable;
 public class RasterEngine extends ReconstructionEngine {
 
     private final double udfPos = -999;
-    private final int    xComponent = 0;
-    private final int    yComponent = 1;
+    private final int    xComponent = 1;
+    private final int    yComponent = 2;
     
     public static final Logger LOGGER = Logger.getLogger(RasterEngine.class.getName());
 
@@ -85,7 +85,7 @@ public class RasterEngine extends ReconstructionEngine {
         double ypos = udfPos;
         for(int i=0; i<adcBank.rows(); i++) {
             int component = adcBank.getShort("component", i);
-            int adc       = adcBank.getInt("ADC", i);
+            int adc       = adcBank.getInt("ped", i);
             if(component == xComponent) xpos = this.convertADC(adc2position, component, adc);
             if(component == yComponent) ypos = this.convertADC(adc2position, component, adc);
         }
@@ -113,17 +113,17 @@ public class RasterEngine extends ReconstructionEngine {
     public void mcToRasterBank(DataEvent event, IndexedTable adc2pos){
         // create "fake" adc bank
         if(event.hasBank("MC::Particle")) {
-        DataBank part = event.getBank("MC::Particle");
-        double[] adcs = {(part.getFloat("vx", 0)-adc2pos.getDoubleValue("p0", 0, 0, 0))/adc2pos.getDoubleValue("p1", 0, 0, 0)
-                         ,(part.getFloat("vy", 0)-adc2pos.getDoubleValue("p0", 0, 0, 1))/adc2pos.getDoubleValue("p1", 0, 0, 1)};
-        DataBank adc  = event.createBank("RASTER::adc", 2);
+            DataBank part = event.getBank("MC::Particle");
+            double[] adcs = {(part.getFloat("vx", 0)-adc2pos.getDoubleValue("p0", 0, 0, xComponent))/adc2pos.getDoubleValue("p1", 0, 0, xComponent)
+                            ,(part.getFloat("vy", 0)-adc2pos.getDoubleValue("p0", 0, 0, yComponent))/adc2pos.getDoubleValue("p1", 0, 0, yComponent)};
+            DataBank adc  = event.createBank("RASTER::adc", 2);
             for(int i=0; i<adcs.length;i++) {
                 adc.setByte("sector", i, (byte) 0);
                 adc.setByte("layer", i, (byte) 0);
-                adc.setShort("component", i, (short) i);
-                adc.setInt("ADC", i, (int) adcs[i]);
+                adc.setShort("component", i, (short) (i+1));
+                adc.setInt("ped", i, (int) adcs[i]);
             }
-        event.appendBank(adc);
+            event.appendBank(adc);
         }
     }
 
@@ -164,8 +164,8 @@ public class RasterEngine extends ReconstructionEngine {
                 double ypos = bank.getFloat("y", 0);
                 // fill histograms
                 System.out.print("Raster position : " + xpos + "\n");
-                hx.fill(bank.getInt("ADC",0), xpos);
-                hy.fill(bank.getInt("ADC",1), ypos);
+                hx.fill(bank.getInt("ped",0), xpos);
+                hy.fill(bank.getInt("ped",1), ypos);
             }
             
         }

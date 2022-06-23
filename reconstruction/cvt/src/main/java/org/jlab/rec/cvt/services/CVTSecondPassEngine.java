@@ -44,7 +44,8 @@ public class CVTSecondPassEngine extends CVTEngine {
         if(Constants.getInstance().isCosmics) {
             return true;
         } else {
-            TracksFromTargetRec trackFinder = new TracksFromTargetRec(swimmer, beamPos);
+            double[] xyBeam = CVTReconstruction.getBeamSpot(event, beamPos);
+            TracksFromTargetRec  trackFinder = new TracksFromTargetRec(swimmer, xyBeam);
             List<Seed>  seeds  = trackFinder.getSeedsFromBanks(event);
             List<Track> tracks = null;
             if(seeds!=null) {

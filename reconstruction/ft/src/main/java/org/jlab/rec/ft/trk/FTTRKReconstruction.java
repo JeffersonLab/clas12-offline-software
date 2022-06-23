@@ -395,6 +395,8 @@ public class FTTRKReconstruction {
             System.out.println("Getting raw hits from FTTRK:adc bank");
         }
 
+        boolean isMC =event.hasBank("MC::Particle");
+        
         List<FTTRKHit> hits = new ArrayList<>();
         if (event.hasBank("FTTRK::adc") == true) {
             DataBank bankDGTZ = event.getBank("FTTRK::adc");
@@ -416,7 +418,7 @@ public class FTTRKReconstruction {
                 // read just layer sectors only for real data (no montecarlo)
                 // PROVISIONAL: include correct run range for fall18 RGA runs & same FTTRK FEE configuration
                 if (FTTRKConstantsLoader.ADJUSTTT) {
-                    icomponent = renumberFEE2RECRotatedAndAdjust_Fall18RGA(run, ilayer, icomponent);
+                    icomponent = renumberFEE2RECRotatedAndAdjust_Fall18RGA(ilayer, icomponent);
                 }
 
                 if (adc > FTConstants.TRK_ADC_MINIMUM && adc < FTConstants.TRK_ADC_MAXIMUM && time != -1 && icomponent != -1) {
@@ -430,7 +432,7 @@ public class FTTRKReconstruction {
                     // if((ilayer==4) && icomponent>=1 && icomponent>64) isHitAccepted = false;
 
                     // selection on strip time
-                    if (time < FTConstants.TRK_STRIP_MIN_TIME || time > FTConstants.TRK_STRIP_MAX_TIME) {
+                    if ((time < FTConstants.TRK_STRIP_MIN_TIME || time > FTConstants.TRK_STRIP_MAX_TIME) && !isMC) {
                         isHitAccepted = false;
                     }
                     // icomponent = -1: strip is off
@@ -748,91 +750,87 @@ public class FTTRKReconstruction {
         return (newStripNumber);
     }
 
-    public int renumberFEE2REC(int run, int ilayer, int icomponent) {
-//  apply strip renumbering  only
-        if (run > 10) {
-            icomponent = renumberStrip(ilayer, icomponent);
-        }
+    public int renumberFEE2REC(int ilayer, int icomponent) {
+        //  apply strip renumbering  only
+        icomponent = renumberStrip(ilayer, icomponent);
         return icomponent;
     }
 
-    public int renumberFEE2RECRotatedAndAdjust_Fall18RGA(int run, int ilayer, int icomponent) {
-//  apply the renumbering schema - method 2 
-        if (run > 0) {
-            icomponent = renumberStrip(ilayer, icomponent);
-            // overturn layer 1+4
-            if (ilayer == DetectorLayer.FTTRK_LAYER1 || ilayer == DetectorLayer.FTTRK_LAYER4) {
-                icomponent = overturnModule(ilayer, icomponent);
+    public int renumberFEE2RECRotatedAndAdjust_Fall18RGA(int ilayer, int icomponent) {
+        //  apply the renumbering schema - method 2 
+        icomponent = renumberStrip(ilayer, icomponent);
+        // overturn layer 1+4
+        if (ilayer == DetectorLayer.FTTRK_LAYER1 || ilayer == DetectorLayer.FTTRK_LAYER4) {
+            icomponent = overturnModule(ilayer, icomponent);
+        }
+
+        int isec1 = -1;
+        if (ilayer == DetectorLayer.FTTRK_LAYER1) {
+            isec1 = findSector(icomponent);
+            if (isec1 == 1) {
+                icomponent = reverseStripInSecondHalf(icomponent);
+            } else if (isec1 == 6) {
+                icomponent = swapSectors(icomponent, 7);
+                icomponent = reverseStripsInSector(icomponent);
+            } else if (isec1 == 7) {
+                icomponent = swapSectors(icomponent, 6);
+                icomponent = reverseStripsInSector(icomponent);
+            } else if (isec1 == 13) {
+                icomponent = reverseStripsInSector(icomponent);
+            } else if (isec1 == 14) {
+                icomponent = reverseStripsInSector(icomponent);
+            } else if (isec1 == 18) {
+                icomponent = reverseStripInFirstHalf(icomponent);
             }
 
-            int isec1 = -1;
-            if (ilayer == DetectorLayer.FTTRK_LAYER1) {
-                isec1 = findSector(icomponent);
-                if (isec1 == 1) {
-                    icomponent = reverseStripInSecondHalf(icomponent);
-                } else if (isec1 == 6) {
-                    icomponent = swapSectors(icomponent, 7);
-                    icomponent = reverseStripsInSector(icomponent);
-                } else if (isec1 == 7) {
-                    icomponent = swapSectors(icomponent, 6);
-                    icomponent = reverseStripsInSector(icomponent);
-                } else if (isec1 == 13) {
-                    icomponent = reverseStripsInSector(icomponent);
-                } else if (isec1 == 14) {
-                    icomponent = reverseStripsInSector(icomponent);
-                } else if (isec1 == 18) {
-                    icomponent = reverseStripInFirstHalf(icomponent);
+        } else if (ilayer == DetectorLayer.FTTRK_LAYER2) {
+            isec1 = findSector(icomponent);
+            if (isec1 == 1) {
+                icomponent = reverseStripsInSector(icomponent);
+                if (icomponent > (stripsInLongSector + stripsInShortSector) / 2) {
+                    icomponent -= 8;        // 96
                 }
+            } else if (isec1 == 3) {
+                icomponent = reverseStripsInSector(icomponent);
+            }
 
-            } else if (ilayer == DetectorLayer.FTTRK_LAYER2) {
-                isec1 = findSector(icomponent);
-                if (isec1 == 1) {
-                    icomponent = reverseStripsInSector(icomponent);
-                    if (icomponent > (stripsInLongSector + stripsInShortSector) / 2) {
-                        icomponent -= 8;        // 96
-                    }
-                } else if (isec1 == 3) {
-                    icomponent = reverseStripsInSector(icomponent);
-                }
+        } else if (ilayer == DetectorLayer.FTTRK_LAYER3) {
+            isec1 = findSector(icomponent);
+            if (isec1 == 11) {
+                icomponent = swapSectors(icomponent, 10);
+            } else if (isec1 == 10) {
+                icomponent = swapSectors(icomponent, 11);
+            }
+            // reverse sectors 10-11 + flip horizontal
+            int newsec = findSector(icomponent);
+            if (newsec == 11 || newsec == 10) {
+                icomponent = reverseStripsInSector(icomponent);
+            }
+            icomponent = flipStripHorizontal(ilayer, icomponent);
 
-            } else if (ilayer == DetectorLayer.FTTRK_LAYER3) {
-                isec1 = findSector(icomponent);
-                if (isec1 == 11) {
-                    icomponent = swapSectors(icomponent, 10);
-                } else if (isec1 == 10) {
-                    icomponent = swapSectors(icomponent, 11);
-                }
-                // reverse sectors 10-11 + flip horizontal
-                int newsec = findSector(icomponent);
-                if (newsec == 11 || newsec == 10) {
-                    icomponent = reverseStripsInSector(icomponent);
-                }
-                icomponent = flipStripHorizontal(ilayer, icomponent);
+            isec1 = findSector(icomponent);
 
-                isec1 = findSector(icomponent);
+            if (isec1 == 8) {
+                icomponent = reverseStripsInSector(icomponent);
+            } else if (isec1 == 14) {
+                icomponent = swapSectors(icomponent, 15);
+                icomponent = reverseStripsInSector(icomponent);
+            } else if (isec1 == 15) {
+                icomponent = swapSectors(icomponent, 14);
+                icomponent = reverseStripsInSector(icomponent);
+            }
 
-                if (isec1 == 8) {
-                    icomponent = reverseStripsInSector(icomponent);
-                } else if (isec1 == 14) {
-                    icomponent = swapSectors(icomponent, 15);
-                    icomponent = reverseStripsInSector(icomponent);
-                } else if (isec1 == 15) {
-                    icomponent = swapSectors(icomponent, 14);
-                    icomponent = reverseStripsInSector(icomponent);
-                }
-
-            } else if (ilayer == DetectorLayer.FTTRK_LAYER4) {
-                isec1 = findSector(icomponent);
-                if (isec1 == 1) {
-                    icomponent = reverseStripInSecondHalf(icomponent);
-                } else if (isec1 == 5) {
-                    icomponent = reverseStripsInSector(icomponent);
-                } else if (isec1 == 6) {
-                    icomponent = reverseStripsInSector(icomponent);
-                } else if (isec1 == 18) {
-                    icomponent = swapHalves(icomponent);
-                    icomponent = reverseStripInSecondHalf(icomponent);
-                }
+        } else if (ilayer == DetectorLayer.FTTRK_LAYER4) {
+            isec1 = findSector(icomponent);
+            if (isec1 == 1) {
+                icomponent = reverseStripInSecondHalf(icomponent);
+            } else if (isec1 == 5) {
+                icomponent = reverseStripsInSector(icomponent);
+            } else if (isec1 == 6) {
+                icomponent = reverseStripsInSector(icomponent);
+            } else if (isec1 == 18) {
+                icomponent = swapHalves(icomponent);
+                icomponent = reverseStripInSecondHalf(icomponent);
             }
         }
 

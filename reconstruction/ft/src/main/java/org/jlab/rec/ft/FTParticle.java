@@ -232,7 +232,7 @@ public class FTParticle {
                     double timedistance = Math.abs(this.getTime() - (response.getTime()-response.getPosition().mag()/PhysicsConstants.speedOfLight()));       
 
                     double t=response.getTime();
-                    int det = response.getModule();
+                    int idet = response.getModule()-1;
                     
                     if(timedistance<timeThreshold && hitdistance<distanceThreshold){
                         minimumDistance = hitdistance;
@@ -242,7 +242,7 @@ public class FTParticle {
                     
                     if(bestidx>-1){
                         if(hitList.get(bestidx).getSize() < FTConstants.TRK_MIN_CROSS_NUMBER) bestidx=-1;
-                        bestIndex[det] = bestidx;
+                            bestIndex[idet] = bestidx;
                         }
                     }   
                 }
@@ -291,15 +291,15 @@ public class FTParticle {
                         double timedistance = Math.abs(this.getTime() - (response.getTime()-response.getPosition().mag()/PhysicsConstants.speedOfLight()));       
 
                         double t=response.getTime();
-                        int det = response.getModule();
+                        int idet = response.getModule()-1;
                         
                         if(timedistance<timeThreshold && hitdistance<distanceThreshold){
                             bestidx = loop;
-                            if(det==TRK1) {
+                            if(idet==TRK1) {
                                 hitDistancesDet0.set(lTRK, hitdistance);
                                 hitOrderDet0.set(lTRK, loop);
                             }
-                            if(det==TRK2){
+                            if(idet==TRK2){
                                 hitDistancesDet1.set(lTRK, hitdistance);
                                 hitOrderDet1.set(lTRK, loop);
                             }
@@ -308,10 +308,10 @@ public class FTParticle {
                         if(bestidx>-1){
                             if(hitList.get(bestidx).getSize() < FTConstants.TRK_MIN_CROSS_NUMBER){
                                 bestidx=-1;
-                                if(det==TRK1){
+                                if(idet==TRK1){
                                     hitDistancesDet0.set(lTRK, -1.);
                                     hitOrderDet0.set(lTRK, -1);
-                                }else if(det==TRK2){
+                                }else if(idet==TRK2){
                                     hitDistancesDet1.set(lTRK, -1.);
                                     hitOrderDet1.set(lTRK, -1);
                                 }    
