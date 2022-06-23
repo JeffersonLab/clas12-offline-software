@@ -2,6 +2,7 @@ package org.jlab.rec.rtpc.banks;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.rec.rtpc.KalmanFilter.KalmanFitterInfo;
 import org.jlab.rec.rtpc.hit.HitParameters;
 import org.jlab.rec.rtpc.hit.RecoHitVector;
 import java.util.List;
@@ -11,12 +12,6 @@ import org.jlab.rec.rtpc.hit.PadVector;
 
 public class RecoBankWriter {
 
-    /**
-     * 
-     * @param hitlist the list of  hits that are of the type Hit.
-     * @return hits bank
-     *
-     */
     public  DataBank fillRTPCHitsBank(DataEvent event, HitParameters params) {
 
         int listsize = 0;
@@ -116,5 +111,36 @@ public class RecoBankWriter {
         }
         //bank.show();
         return bank;
-    }	
+    }
+
+	public DataBank fillRTPCKFBank(DataEvent event, HashMap<Integer, KalmanFitterInfo> kfTrackMap) {
+        int listsize = kfTrackMap.size();
+        if(listsize == 0) return null;
+        int row = 0;
+
+
+        DataBank bank = event.createBank("RTPC::KFtracks", listsize);
+
+
+        if (bank == null) {
+            System.err.println("COULD NOT CREATE A BANK!!!!!!");
+            return null;
+        }
+
+        for(int TID : kfTrackMap.keySet()) {
+            KalmanFitterInfo track = kfTrackMap.get(TID);
+
+            bank.setInt("trkID", row, TID);
+            bank.setFloat("px", row, (float) track.get_px()/1000);
+            bank.setFloat("py", row, (float) track.get_py()/1000);
+            bank.setFloat("pz", row, (float) track.get_pz()/1000);
+            bank.setFloat("vz", row, (float) track.get_vz()/10);
+            bank.setFloat("dedx", row, (float) track.get_dEdx());
+            bank.setFloat("p_drift", row, (float) track.get_p_drift()/1000);
+
+            row++;
+        }
+        //bank.show();
+        return bank;
+	}
 }

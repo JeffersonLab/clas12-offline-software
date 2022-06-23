@@ -82,6 +82,7 @@ public class FinalTrackInfo {
     public double get_pz(){
         return _pz;
     }
+    public double get_p() {return Math.sqrt(_px*_px + _py*_py + _pz*_pz);}
     public double get_tl(){
         return _tl;
     }

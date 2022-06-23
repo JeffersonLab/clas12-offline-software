@@ -35,7 +35,7 @@ public class PhysicalConstants {
     //        - AKA, unified atomic mass unit (u)
     // amu    - atomic mass unit
     //
-    static final double electron_mass_c2 = 0.510998910 * MeV;
+    public static final double electron_mass_c2 = 0.510998910 * MeV;
     public static final double   proton_mass_c2 = 938.272013 * MeV;
     static final double  neutron_mass_c2 = 939.56536 * MeV;
     static final double           amu_c2 = 931.494028 * MeV;
@@ -61,7 +61,7 @@ public class PhysicalConstants {
             *classic_electr_radius
             *classic_electr_radius;
 
-    static final double twopi_mc2_rcl2 = twopi*electron_mass_c2
+    public static final double twopi_mc2_rcl2 = twopi*electron_mass_c2
             *classic_electr_radius
             *classic_electr_radius / 100;
 
