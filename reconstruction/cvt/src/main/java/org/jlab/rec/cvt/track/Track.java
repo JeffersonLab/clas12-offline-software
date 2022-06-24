@@ -13,6 +13,7 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
@@ -471,18 +472,18 @@ public class Track extends Trajectory implements Comparable<Track> {
             stVec.setPath(path);
             
             if(MLayer.getDetectorType(index) == DetectorType.BST) {
-                Vector3D localDir = Constants.getInstance().SVTGEOMETRY.getLocalTrack(traj.layer, traj.sector, dir);
+                Vector3D localDir = Geometry.getInstance().getSVT().getLocalTrack(traj.layer, traj.sector, dir);
                 stVec.setTrkPhiAtSurface(localDir.phi());
                 stVec.setTrkThetaAtSurface(localDir.theta());
-                stVec.setTrkToModuleAngle(Constants.getInstance().SVTGEOMETRY.getLocalAngle(traj.layer, traj.sector, dir));
-                stVec.setCalcCentroidStrip(Constants.getInstance().SVTGEOMETRY.calcNearestStrip(traj.x, traj.y, traj.z, traj.layer, traj.sector));
+                stVec.setTrkToModuleAngle(Geometry.getInstance().getSVT().getLocalAngle(traj.layer, traj.sector, dir));
+                stVec.setCalcCentroidStrip(Geometry.getInstance().getSVT().calcNearestStrip(traj.x, traj.y, traj.z, traj.layer, traj.sector));
             }
             else if(MLayer.getDetectorType(index) == DetectorType.BMT) {
-                Vector3D localDir = Constants.getInstance().BMTGEOMETRY.getLocalTrack(traj.layer, traj.sector, pos, dir);
+                Vector3D localDir = Geometry.getInstance().getBMT().getLocalTrack(traj.layer, traj.sector, pos, dir);
                 stVec.setTrkPhiAtSurface(localDir.phi());
                 stVec.setTrkThetaAtSurface(localDir.theta());
-                stVec.setTrkToModuleAngle(Constants.getInstance().BMTGEOMETRY.getLocalAngle(traj.layer, traj.sector, pos, dir));
-                stVec.setCalcCentroidStrip(Constants.getInstance().BMTGEOMETRY.getStrip(traj.layer, traj.sector, pos));
+                stVec.setTrkToModuleAngle(Geometry.getInstance().getBMT().getLocalAngle(traj.layer, traj.sector, pos, dir));
+                stVec.setCalcCentroidStrip(Geometry.getInstance().getBMT().getStrip(traj.layer, traj.sector, pos));
             }
             if(stVec.getSurfaceDetector()>0) {
                 stVec.setSurfaceDetector(DetectorType.CVT.getDetectorId());

@@ -211,10 +211,16 @@ public class DCTBEngine extends DCEngine {
         
         //6) find the list of  track candidates
         // read beam offsets from database
-        IndexedTable beamOffset = this.getConstantsManager().getConstants(run, Constants.BEAMPOS);
-        double beamXoffset = beamOffset.getDoubleValue("x_offset", 0,0,0);
-        double beamYoffset = beamOffset.getDoubleValue("y_offset", 0,0,0);
-        TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
+        double beamXoffset, beamYoffset;
+	IndexedTable beamOffset = this.getConstantsManager().getConstants(run, Constants.BEAMPOS);
+        beamXoffset = beamOffset.getDoubleValue("x_offset", 0, 0, 0);
+        beamYoffset = beamOffset.getDoubleValue("y_offset", 0, 0, 0);
+        if(event.hasBank("RASTER::position")){
+            DataBank raster_bank = event.getBank("RASTER::position");
+            beamXoffset += raster_bank.getFloat("x", 0);
+            beamYoffset += raster_bank.getFloat("y", 0);
+        }
+	TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
         TrajectoryFinder trjFind = new TrajectoryFinder();
         for (Track TrackArray1 : TrackArray) {
             if (TrackArray1 == null || TrackArray1.get_ListOfHBSegments() == null || TrackArray1.get_ListOfHBSegments().size() < 5) {

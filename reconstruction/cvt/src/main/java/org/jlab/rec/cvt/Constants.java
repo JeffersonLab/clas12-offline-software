@@ -1,36 +1,22 @@
 package org.jlab.rec.cvt;
 
 import cnuphys.magfield.MagneticFields;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
-import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.clas.tracking.kalmanfilter.Material;
 import org.jlab.clas.tracking.kalmanfilter.Units;
 
 import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
-import org.jlab.detector.base.DetectorType;
-import org.jlab.detector.base.GeometryFactory;
-import org.jlab.detector.calib.utils.DatabaseConstantProvider;
-import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
-import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
-import org.jlab.geom.base.ConstantProvider;
-import org.jlab.geom.base.Detector;
-import org.jlab.rec.cvt.bmt.BMTGeometry;
-import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
-import org.jlab.rec.cvt.measurement.Measurements;
-import org.jlab.rec.cvt.svt.SVTGeometry;
 
 public class Constants {
    
 
     public static Logger LOGGER = Logger.getLogger(Constants.class.getName());
 
-   // private constructor for a singleton
+    // private constructor for a singleton
     private Constants() {
     }
     
@@ -40,7 +26,7 @@ public class Constants {
     /**
      * public access to the singleton
      * 
-     * @return the dc constants singleton
+     * @return the cvt constants singleton
      */
     public static Constants getInstance() {
             if (instance == null) {
@@ -106,15 +92,6 @@ public class Constants {
     private final double[][]BMTPhiZRangeExcld = new double[2][2];
     private int BMTLayerExcld = -1;
     
-    public SVTGeometry       SVTGEOMETRY  = null;
-    public BMTGeometry       BMTGEOMETRY  = null;
-    public CTOFGeant4Factory CTOFGEOMETRY = null;
-    public Detector          CNDGEOMETRY  = null;
-    public List<Surface>     CVTSURFACES  = null;
-    public List<Surface>     OUTERSURFACES  = null;
-    private double zTarget = 0;    
-
-
     public double getBeamRadius() {
         return beamRadius;
     }
@@ -127,10 +104,6 @@ public class Constants {
         return this.beamSpotConstraint==2;
     }
     
-    public double getZoffset() {
-        return zTarget;
-    }
-
     public void setTargetMaterial(String material) {
         if(material.equalsIgnoreCase("LH2"))
             targetMaterial = LH2;
@@ -238,11 +211,11 @@ public class Constants {
     }
     
     
-    private static final double D0     = 10;
-    private static final double DPHI0  = Math.toRadians(10);
-    private static final double DRHO   = 0.01;
-    private static final double DTANL  = 0.2;
-    private static final double DZ0    = 20;
+    private static final double D0     = 10;                    // 10 mm
+    private static final double DPHI0  = Math.toRadians(10);    // 10 deg
+    private static final double DRHO   = 0.01;                  // ~6-7 on kappa, i.e. 150 MeV on pt
+    private static final double DTANL  = 0.2;                   // 10 deg on theta
+    private static final double DZ0    = 20;                    // 20 mm
     public static final double[][] COVHELIX = new double[][]{
                                                              {D0*D0, 0, 0, 0, 0},
                                                              {0, DPHI0*DPHI0, 0, 0, 0},
@@ -463,7 +436,6 @@ public class Constants {
     }
     
     public synchronized void initialize(String engine,
-                                        String variation, 
                                         boolean isCosmics,
                                         boolean svtOnly,
                                         String excludeLayers,
@@ -490,8 +462,6 @@ public class Constants {
             this.timeCuts = timeCuts;
             this.setMatLib(matrixLibrary);
 
-            loadGeometries(variation);
-
             ConstantsLoaded = true;
         }
     }
@@ -500,37 +470,10 @@ public class Constants {
                                         String variation) {
         if (!ConstantsLoaded) {
             
-            loadGeometries(variation);
-
             ConstantsLoaded = true;
         }
     }
     
-    public synchronized void loadGeometries(String variation) {
-        // Load other geometries
-        System.out.println(" CVT YAML VARIATION NAME + "+variation);
-        
-        // Load target
-        ConstantProvider providerTG = GeometryFactory.getConstants(DetectorType.TARGET, 11, variation);
-        this.zTarget = providerTG.getDouble("/geometry/target/position",0)*10;
-                         
-        ConstantProvider providerCTOF = GeometryFactory.getConstants(DetectorType.CTOF, 11, variation);
-        CTOFGEOMETRY = new CTOFGeant4Factory(providerCTOF);        
-        CNDGEOMETRY  =  GeometryFactory.getDetector(DetectorType.CND, 11, variation);
-        
-        System.out.println(" LOADING CVT GEOMETRY...............................variation = "+variation);
-        CCDBConstantsLoader.Load(new DatabaseConstantProvider(11, variation));
-        System.out.println("SVT LOADING WITH VARIATION "+variation);
-        DatabaseConstantProvider cp = new DatabaseConstantProvider(11, variation);
-        SVTStripFactory svtFac = new SVTStripFactory(cp, true);
-        SVTGEOMETRY  = new SVTGeometry(svtFac);
-        BMTGEOMETRY  = new BMTGeometry();
-        
-        CVTSURFACES = new ArrayList<>();
-        CVTSURFACES.addAll(SVTGEOMETRY.getSurfaces());
-        CVTSURFACES.addAll(BMTGEOMETRY.getSurfaces());
-        
-        OUTERSURFACES = Measurements.getOuters();
-    }
+
 
 }

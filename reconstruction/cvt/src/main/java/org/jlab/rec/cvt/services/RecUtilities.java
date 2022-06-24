@@ -30,6 +30,7 @@ import org.jlab.detector.base.DetectorType;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.cross.CrossMaker;
 import org.jlab.rec.cvt.fit.CircleFitPars;
@@ -50,7 +51,7 @@ public class RecUtilities {
         List<Cross> rmCrosses = new ArrayList<>();
         
         for(Cross c : crosses.get(0)) {
-            if(!Constants.getInstance().SVTGEOMETRY.isInFiducial(c.getCluster1().getLayer(), c.getSector(), c.getPoint()))
+            if(!Geometry.getInstance().getSVT().isInFiducial(c.getCluster1().getLayer(), c.getSector(), c.getPoint()))
                 rmCrosses.add(c);
         }
        
@@ -92,8 +93,8 @@ public class RecUtilities {
                 Ray ray = trkcand.getRay();
                 Point3D top    = new Point3D();
                 Point3D bottom = new Point3D();
-                Constants.getInstance().SVTGEOMETRY.getPlane(layertop, sector).intersection(ray.toLine(), top);
-                Constants.getInstance().SVTGEOMETRY.getPlane(layerbot, sector).intersection(ray.toLine(), bottom);
+                Geometry.getInstance().getSVT().getPlane(layertop, sector).intersection(ray.toLine(), top);
+                Geometry.getInstance().getSVT().getPlane(layerbot, sector).intersection(ray.toLine(), bottom);
                 
                 if(top.y()>bottom.y()) {
                     clsList.add(trkcand.get(i).getCluster1());
@@ -119,11 +120,11 @@ public class RecUtilities {
                 
                 Ray ray = trkcand.getRay();
                 Point3D traj = new Point3D();
-                Constants.getInstance().SVTGEOMETRY.getPlane(layer, sector).intersection(ray.toLine(), traj);
+                Geometry.getInstance().getSVT().getPlane(layer, sector).intersection(ray.toLine(), traj);
                 
                 int key = SVTGeometry.getModuleId(layer, sector);
                 
-                if(traj!=null && Constants.getInstance().SVTGEOMETRY.isInFiducial(layer, sector, traj)) {
+                if(traj!=null && Geometry.getInstance().getSVT().isInFiducial(layer, sector, traj)) {
                     double  doca    = Double.POSITIVE_INFINITY;
                     // loop over all clusters in the same sector and layer that are not associated to s track
                     for(Cluster cls : allClusters) {
@@ -190,7 +191,7 @@ public class RecUtilities {
                 
                 // check the angle between the trajectory point and the sector 
                 // and skip sectors that are too far (more than the sector angular coverage)
-                Vector3D n = Constants.getInstance().SVTGEOMETRY.getNormal(layer, sector);
+                Vector3D n = Geometry.getInstance().getSVT().getNormal(layer, sector);
                 double deltaPhi = Math.acos(helixPoint.toVector3D().asUnit().dot(n));
                 double buffer = Math.toRadians(1.);
                 if(Math.abs(deltaPhi)>2*Math.PI/SVTGeometry.NSECTORS[ilayer]+buffer) continue;
@@ -199,14 +200,14 @@ public class RecUtilities {
                 
                 // calculate trajectory
                 Point3D traj = null;
-                Point3D  p = Constants.getInstance().SVTGEOMETRY.getModule(layer, sector).origin();
+                Point3D  p = Geometry.getInstance().getSVT().getModule(layer, sector).origin();
                 Point3D pm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
                 inters = swimmer.SwimPlane(n, pm, Constants.DEFAULTSWIMACC/10);
                 if(inters!=null) {
                     traj = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
                 } 
                 // if trajectory is valid, look for missing clusters
-                if(traj!=null && Constants.getInstance().SVTGEOMETRY.isInFiducial(layer, sector, traj)) {
+                if(traj!=null && Geometry.getInstance().getSVT().isInFiducial(layer, sector, traj)) {
                     double  doca    = Double.POSITIVE_INFINITY; 
                     //if(clusterMap.containsKey(key)) {
                     //    Cluster cluster = clusterMap.get(key);
@@ -261,7 +262,7 @@ public class RecUtilities {
         // for each layer
         for (int ilayer = 0; ilayer < BMTGeometry.NLAYERS; ilayer++) {
             int layer = ilayer + 1;
-            double radius  = Constants.getInstance().BMTGEOMETRY.getRadiusMidDrift(layer);
+            double radius  = Geometry.getInstance().getBMT().getRadiusMidDrift(layer);
             // identify the sector the track may be going through (this doesn't account for misalignments
             Point3D helixPoint = helix.getPointAtRadius(radius);
             // reinitilize swimmer from last surface
@@ -274,7 +275,7 @@ public class RecUtilities {
                 
                 // check the angle between the trajectory point and the sector 
                 // and skip sectors that are too far (more than the sector angular coverage)
-                if(Constants.getInstance().BMTGEOMETRY.inDetector(layer, sector, helixPoint)==false)
+                if(Geometry.getInstance().getBMT().inDetector(layer, sector, helixPoint)==false)
                     continue;
                  
                 // calculate trajectory
@@ -289,7 +290,7 @@ public class RecUtilities {
                 
                
                 // if trajectory is valid, look for missing clusters
-                if(traj!=null && Constants.getInstance().BMTGEOMETRY.inDetector(layer, sector, traj)) {
+                if(traj!=null && Geometry.getInstance().getBMT().inDetector(layer, sector, traj)) {
                     double  doca    = Double.POSITIVE_INFINITY; 
                     // loop over all clusters in the same sector and layer that are not associated to s track
                     for(Cluster cls : allClusters) {
@@ -344,7 +345,7 @@ public class RecUtilities {
                 cluster.setSeedResidual(p);             
                 for (Hit hit : cluster) {
                     double doca1 = hit.residual(p);
-                    double sigma1 = Constants.getInstance().SVTGEOMETRY.getSingleStripResolution(layer, hit.getStrip().getStrip(), traj.get(layer).z);
+                    double sigma1 = Geometry.getInstance().getSVT().getSingleStripResolution(layer, hit.getStrip().getStrip(), traj.get(layer).z);
                     hit.setstripResolutionAtDoca(sigma1);
                     hit.setdocaToTrk(doca1);  
                     if(traj.get(layer).isUsed)

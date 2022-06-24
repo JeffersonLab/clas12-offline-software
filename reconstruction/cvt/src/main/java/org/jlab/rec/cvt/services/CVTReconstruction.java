@@ -117,6 +117,18 @@ public class CVTReconstruction {
         return run;
     }
 
+    public static double[] getBeamSpot(DataEvent event, IndexedTable beamPos) {
+        double[] xyBeam = new double[2];
+        xyBeam[0] = beamPos.getDoubleValue("x_offset", 0, 0, 0)*10;
+        xyBeam[1] = beamPos.getDoubleValue("y_offset", 0, 0, 0)*10;
+        if(event.hasBank("RASTER::position")){
+            DataBank raster_bank = event.getBank("RASTER::position");
+            xyBeam[0] += raster_bank.getFloat("x", 0)*10;
+            xyBeam[1] += raster_bank.getFloat("y", 0)*10;
+        }
+        return xyBeam;
+    }
+    
     public List<ArrayList<Hit>> getCVThits() {
         return CVThits;
     }
