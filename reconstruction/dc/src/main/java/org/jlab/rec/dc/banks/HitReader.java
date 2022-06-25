@@ -106,14 +106,14 @@ public class HitReader {
      * @param tab2
      * @param tab3
      * @param DcDetector
-     * @param triggerPhase
+     * @param tdcJitter
      */
     public void fetch_DCHits(DataEvent event, Clas12NoiseAnalysis noiseAnalysis,
                              NoiseReductionParameters parameters,
                              Clas12NoiseResult results, IndexedTable tab,
                              IndexedTable tab2, IndexedTable tab3,
                              DCGeant4Factory DcDetector,
-                             double triggerPhase) {
+                             double tdcJitter) {
 
         if (!event.hasBank(bankNames.getTdcBank())) {
             _DCHits = new ArrayList<>();
@@ -134,15 +134,17 @@ public class HitReader {
         int rows = bankDGTZ.rows();
         int[] sector = new int[rows];
         int[] layer = new int[rows];
+        int[] superlayer = new int[rows];
         int[] wire = new int[rows];
         int[] tdc = new int[rows];
         int[] useMChit = new int[rows];
 
         for (int i = 0; i < rows; i++) {
-            sector[i] = bankDGTZ.getByte("sector", i);
-            layer[i] = bankDGTZ.getByte("layer", i);
-            wire[i] = bankDGTZ.getShort("component", i);
-            tdc[i] = bankDGTZ.getInt("TDC", i);
+            sector[i]     = bankDGTZ.getByte("sector", i);
+            layer[i]      = (bankDGTZ.getByte("layer", i)-1)%6 + 1;
+            superlayer[i] = (bankDGTZ.getByte("layer", i)-1)/6 + 1;
+            wire[i]       = bankDGTZ.getShort("component", i);
+            tdc[i]        = bankDGTZ.getInt("TDC", i) - (int) tdcJitter;
 
         }
 
@@ -156,44 +158,28 @@ public class HitReader {
                 }
             }
         }
-        int size = layer.length;
-        int[] layerNum = new int[size];
-        int[] superlayerNum = new int[size];
-        double[] smearedTime = new double[size];
 
         List<Hit> hits = new ArrayList<>();
 
-        for (int i = 0; i < size; i++) {
-            if (tdc.length > 0) {
-                smearedTime[i] = (double) tdc[i] - triggerPhase;
-                if (smearedTime[i] < 0) {
-                    smearedTime[i] = 1;
-                }
-            }
-
-            superlayerNum[i] = (layer[i] - 1) / 6 + 1;
-            layerNum[i] = layer[i] - (superlayerNum[i] - 1) * 6;
-
-        }
         results.clear();
         noiseAnalysis.clear();
 
 
-         noiseAnalysis.findNoise(sector, superlayerNum, layerNum, wire, results);
+         noiseAnalysis.findNoise(sector, superlayer, layer, wire, results);
 
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < rows; i++) {
             boolean passHit = true;
             if (tab3 != null) {
-                if (tab3.getIntValue("status", sector[i], layer[i], wire[i]) != 0)
+                if (tab3.getIntValue("status", sector[i], layer[i]+(superlayer[i]-1)*6, wire[i]) != 0)
                     passHit = false;
             }
-            if (passHit && wire[i] != -1 && !results.noise[i] && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
+            if (passHit && wire[i] != -1 && !results.noise[i] && useMChit[i] != -1 && !(superlayer[i] == 0)) {
 
                 double timeCutMin = 0;
                 double timeCutMax = 0;
                 double timeCutLC = 0;
 
-                int region = ((superlayerNum[i] + 1) / 2);
+                int region = ((superlayer[i] + 1) / 2);
 
                 switch (region) {
                     case 1:
@@ -219,26 +205,26 @@ public class HitReader {
                 }
                 boolean passTimingCut = false;
 
-                if (region == 1 && smearedTime[i] > timeCutMin && smearedTime[i] < timeCutMax)
+                if (region == 1 && tdc[i] > timeCutMin && tdc[i] < timeCutMax)
                     passTimingCut = true;
                 if (region == 2) {
                     double Bscale = Swimmer.getTorScale() * Swimmer.getTorScale();
                     if (wire[i] >= 56) {
-                        if (smearedTime[i] > timeCutMin &&
-                                smearedTime[i] < timeCutMax + timeCutLC * (double) (112 - wire[i] / 56) * Bscale)
+                        if (tdc[i] > timeCutMin &&
+                                tdc[i] < timeCutMax + timeCutLC * (double) (112 - wire[i] / 56) * Bscale)
                             passTimingCut = true;
                     } else {
-                        if (smearedTime[i] > timeCutMin &&
-                                smearedTime[i] < timeCutMax + timeCutLC * (double) (56 - wire[i] / 56) * Bscale)
+                        if (tdc[i] > timeCutMin &&
+                                tdc[i] < timeCutMax + timeCutLC * (double) (56 - wire[i] / 56) * Bscale)
                             passTimingCut = true;
                     }
                 }
-                if (region == 3 && smearedTime[i] > timeCutMin && smearedTime[i] < timeCutMax)
+                if (region == 3 && tdc[i] > timeCutMin && tdc[i] < timeCutMax)
                     passTimingCut = true;
 
                 if (passTimingCut) { // cut on spurious hits
-                    //Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, hitno[i]);			
-                    Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], tdc[i], (i + 1));
+                    //Hit hit = new Hit(sector[i], superlayer[i], layer[i], wire[i], smearedTime[i], 0, 0, hitno[i]);			
+                    Hit hit = new Hit(sector[i], superlayer[i], layer[i], wire[i], tdc[i], (i + 1));
                     hit.set_Id(i + 1);
                     hit.calc_CellSize(DcDetector);
                     double posError = hit.get_CellSize() / Math.sqrt(12.);
