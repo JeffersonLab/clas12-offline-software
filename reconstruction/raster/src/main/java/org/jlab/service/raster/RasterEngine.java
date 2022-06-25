@@ -1,4 +1,6 @@
 package org.jlab.service.raster;
+
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -25,6 +27,7 @@ public class RasterEngine extends ReconstructionEngine {
     private final double udfPos = -999;
     private final int    xComponent = 1;
     private final int    yComponent = 2;
+    private boolean mcToRaster = false;
     
     public static final Logger LOGGER = Logger.getLogger(RasterEngine.class.getName());
 
@@ -42,6 +45,9 @@ public class RasterEngine extends ReconstructionEngine {
         
         //remove raster bank in case it existed previously
         this.registerOutputBank("RASTER::position");
+        
+        if(this.getEngineConfigString("mcToRaster")!=null)       
+            mcToRaster = Boolean.valueOf(this.getEngineConfigString("mcToRaster"));
         
         System.out.println("["+this.getName()+"] --> raster is ready....");
         return true;
@@ -66,7 +72,7 @@ public class RasterEngine extends ReconstructionEngine {
         // check if input bank exist, otherwise write a "fake" raster bank for MC or do nothing
         if(!event.hasBank("RASTER::adc")) 
         {
-            if(event.hasBank("MC::Particle")) 
+            if(event.hasBank("MC::Particle") && mcToRaster) 
                 mcToRasterBank(event, adc2position);
             else
                 return true;
@@ -121,7 +127,7 @@ public class RasterEngine extends ReconstructionEngine {
                 adc.setByte("sector", i, (byte) 0);
                 adc.setByte("layer", i, (byte) 0);
                 adc.setShort("component", i, (short) (i+1));
-                adc.setInt("ped", i, (int) adcs[i]);
+                adc.setShort("ped", i, (short) adcs[i]);
             }
             event.appendBank(adc);
         }
