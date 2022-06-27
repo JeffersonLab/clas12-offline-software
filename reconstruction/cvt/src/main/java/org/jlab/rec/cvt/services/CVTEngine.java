@@ -9,6 +9,7 @@ import org.jlab.clas.swimtools.Swim;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
@@ -50,7 +51,6 @@ public class CVTEngine extends ReconstructionEngine {
     private boolean initFromMc = false;    
     
     // yaml setting passed to Constants class
-    private String  variation           = "default";
     private boolean isCosmics           = false;
     private boolean svtOnly             = false;
     private String  excludeLayers       = null;
@@ -78,7 +78,6 @@ public class CVTEngine extends ReconstructionEngine {
     public boolean init() {        
         this.loadConfiguration();
         Constants.getInstance().initialize(this.getName(),
-                                           this.variation, 
                                            isCosmics,
                                            svtOnly,
                                            excludeLayers,
@@ -174,11 +173,17 @@ public class CVTEngine extends ReconstructionEngine {
         Swim swimmer = new Swim();
         
         int run = this.getRun(event); 
-        IndexedTable svtStatus = this.getConstantsManager().getConstants(run, "/calibration/svt/status");
-        IndexedTable bmtStatus = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_status");
-        IndexedTable bmtTime   = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_time");
-        IndexedTable beamPos   = this.getConstantsManager().getConstants(run, "/geometry/beam/position");
-
+        if(run<=0) return true;
+        
+        IndexedTable svtStatus  = this.getConstantsManager().getConstants(run, "/calibration/svt/status");
+        IndexedTable svtLorentz = this.getConstantsManager().getConstants(run, "/calibration/svt/lorentz_angle");
+        IndexedTable bmtStatus  = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_status");
+        IndexedTable bmtTime    = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_time");
+        IndexedTable bmtVoltage = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_voltage");
+        IndexedTable beamPos    = this.getConstantsManager().getConstants(run, "/geometry/beam/position");
+        
+        Geometry.initialize(this.getConstantsManager().getVariation(), 11, svtLorentz, bmtVoltage);
+        
         CVTReconstruction reco = new CVTReconstruction(swimmer);
         
         List<ArrayList<Hit>>         hits = reco.readHits(event, svtStatus, bmtStatus, bmtTime);
@@ -203,7 +208,8 @@ public class CVTEngine extends ReconstructionEngine {
                 }            
             } 
             else {
-                TracksFromTargetRec  trackFinder = new TracksFromTargetRec(swimmer, beamPos);
+                double[] xyBeam = CVTReconstruction.getBeamSpot(event, beamPos);
+                TracksFromTargetRec  trackFinder = new TracksFromTargetRec(swimmer, xyBeam);
                 List<Seed>   seeds = trackFinder.getSeeds(clusters, crosses);
                 List<Track> tracks = trackFinder.getTracks(event, this.isInitFromMc(), 
                                                                   this.isKfFilterOn(), 
@@ -228,7 +234,7 @@ public class CVTEngine extends ReconstructionEngine {
 
         event.appendBanks(banks.toArray(new DataBank[0]));
             
-        
+
         return true;
     }
 
@@ -236,9 +242,6 @@ public class CVTEngine extends ReconstructionEngine {
     public void loadConfiguration() {            
         
         // general (pass-independent) settings
-        if (this.getEngineConfigString("variation")!=null) 
-            this.variation = this.getEngineConfigString("variation");
-               
         if (this.getEngineConfigString("cosmics")!=null) 
             this.isCosmics = Boolean.valueOf(this.getEngineConfigString("cosmics"));
                
@@ -273,7 +276,7 @@ public class CVTEngine extends ReconstructionEngine {
             this.timeCuts = Boolean.parseBoolean(this.getEngineConfigString("timeCuts"));
         
         if (this.getEngineConfigString("matLib")!=null)
-            this. matrixLibrary = this.getEngineConfigString("matLib");
+            this.matrixLibrary = this.getEngineConfigString("matLib");
         
         // service dependent configuration settings
         if(this.getEngineConfigString("elossPid")!=null) 
@@ -294,8 +297,10 @@ public class CVTEngine extends ReconstructionEngine {
     public void initConstantsTables() {
         String[] tables = new String[]{
             "/calibration/svt/status",
+            "/calibration/svt/lorentz_angle",
             "/calibration/mvt/bmt_time",
             "/calibration/mvt/bmt_status",
+            "/calibration/mvt/bmt_voltage",
             "/geometry/beam/position"
         };
         requireConstants(Arrays.asList(tables));

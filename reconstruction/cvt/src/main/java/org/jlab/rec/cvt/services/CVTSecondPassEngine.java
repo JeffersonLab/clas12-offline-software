@@ -6,6 +6,7 @@ import org.jlab.clas.swimtools.Swim;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.Track;
@@ -30,14 +31,21 @@ public class CVTSecondPassEngine extends CVTEngine {
     public boolean processDataEvent(DataEvent event) {
 
         int run = this.getRun(event);
+        if(run<=0) return true;
+
         Swim swimmer = new Swim();
 
-        IndexedTable beamPos   = this.getConstantsManager().getConstants(run, "/geometry/beam/position");
+        IndexedTable svtLorentz = this.getConstantsManager().getConstants(run, "/calibration/svt/lorentz_angle");
+        IndexedTable bmtVoltage = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_voltage");
+        IndexedTable beamPos    = this.getConstantsManager().getConstants(run, "/geometry/beam/position");
+        
+        Geometry.initialize(this.getConstantsManager().getVariation(), 11, svtLorentz, bmtVoltage);
         
         if(Constants.getInstance().isCosmics) {
             return true;
         } else {
-            TracksFromTargetRec trackFinder = new TracksFromTargetRec(swimmer, beamPos);
+            double[] xyBeam = CVTReconstruction.getBeamSpot(event, beamPos);
+            TracksFromTargetRec  trackFinder = new TracksFromTargetRec(swimmer, xyBeam);
             List<Seed>  seeds  = trackFinder.getSeedsFromBanks(event);
             List<Track> tracks = null;
             if(seeds!=null) {

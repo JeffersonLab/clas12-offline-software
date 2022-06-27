@@ -197,7 +197,7 @@ public abstract class AKFitter {
     
     public double calc_chi2(AStateVecs sv, AMeasVecs mv) {
         double chisq = 0;
-        int ndf = this.NDF0;
+        this.NDF = this.NDF0;
 
         int k0 = 0;
         int kf = mv.measurements.size()-1;
@@ -215,7 +215,7 @@ public abstract class AKFitter {
                     double dh    = mv.dh(k, sv.smoothed().get(k));
                     double error = mv.measurements.get(k).error;
                     chisq += dh*dh / error/error;
-                    ndf++;
+                    this.NDF++;
 //                    System.out.println(k + " " + mv.measurements.get(k).surface.getLayer() + " " + dh + " " + error + " " + chisq + " " + ndf);
                 }
                 if(k< mv.measurements.size()-1) {
