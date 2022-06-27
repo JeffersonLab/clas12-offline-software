@@ -63,13 +63,9 @@ public class RasterEngine extends ReconstructionEngine {
         
         IndexedTable adc2position = this.getConstantsManager().getConstants(run, "/calibration/raster/adc_to_position");
         
-        // check if input bank exist, otherwise write a "fake" raster bank for MC or do nothing
-        if(!event.hasBank("RASTER::adc")) 
-        {
-            if(event.hasBank("MC::Particle")) 
-                mcToRasterBank(event, adc2position);
-            else
-                return true;
+        // check if input bank exist, otherwise do nothing
+        if(!event.hasBank("RASTER::adc")) {
+            return true;
         }
         
         
@@ -109,24 +105,6 @@ public class RasterEngine extends ReconstructionEngine {
                      adc2pos.getDoubleValue("p1", 0, 0, component)*ADC;
         return pos;
     }
-    
-    public void mcToRasterBank(DataEvent event, IndexedTable adc2pos){
-        // create "fake" adc bank
-        if(event.hasBank("MC::Particle")) {
-            DataBank part = event.getBank("MC::Particle");
-            double[] adcs = {(part.getFloat("vx", 0)-adc2pos.getDoubleValue("p0", 0, 0, xComponent))/adc2pos.getDoubleValue("p1", 0, 0, xComponent)
-                            ,(part.getFloat("vy", 0)-adc2pos.getDoubleValue("p0", 0, 0, yComponent))/adc2pos.getDoubleValue("p1", 0, 0, yComponent)};
-            DataBank adc  = event.createBank("RASTER::adc", 2);
-            for(int i=0; i<adcs.length;i++) {
-                adc.setByte("sector", i, (byte) 0);
-                adc.setByte("layer", i, (byte) 0);
-                adc.setShort("component", i, (short) (i+1));
-                adc.setInt("ped", i, (int) adcs[i]);
-            }
-            event.appendBank(adc);
-        }
-    }
-
     
     public static void main(String arg[]) {
         
