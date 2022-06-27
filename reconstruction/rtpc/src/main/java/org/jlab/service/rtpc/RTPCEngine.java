@@ -32,6 +32,7 @@ public class RTPCEngine extends ReconstructionEngine {
   private int fitToBeamline = 1;
   private boolean disentangle = true;
   private boolean chi2culling = true;
+  private boolean kfStatus = true;
 
   @Override
   public boolean init() {
@@ -40,6 +41,7 @@ public class RTPCEngine extends ReconstructionEngine {
     String beamfit = this.getEngineConfigString("rtpcBeamlineFit");
     String disentangler = this.getEngineConfigString("rtpcDisentangler");
     String chi2cull = this.getEngineConfigString("rtpcChi2Cull");
+    String kfstatus = this.getEngineConfigString("rtpcKF");
 
     if (sim != null) {
       simulation = Boolean.parseBoolean(sim);
@@ -61,6 +63,10 @@ public class RTPCEngine extends ReconstructionEngine {
       chi2culling = Boolean.parseBoolean(chi2cull);
     }
 
+    if(kfstatus != null){
+      kfStatus = Boolean.parseBoolean(kfstatus);
+    }
+
     String[] rtpcTables =
         new String[] {
           "/calibration/rtpc/time_offsets",
@@ -79,8 +85,8 @@ public class RTPCEngine extends ReconstructionEngine {
   @Override
   public boolean processDataEvent(DataEvent event) {
 
-    disentangle = false;
-    simulation = true;
+    // disentangle = false;
+    // simulation = true;
 
     HitParameters params = new HitParameters();
 
@@ -125,7 +131,7 @@ public class RTPCEngine extends ReconstructionEngine {
 
       // if (count != 2) return true;
       // if (count < 4 || count > 10) return true;
-      if (count > 10000) return true;
+      // if (count > 10000) return true;
 
       params.init(this.getConstantsManager(), runNo);
 
@@ -142,30 +148,28 @@ public class RTPCEngine extends ReconstructionEngine {
       // Helix Fit Tracks to calculate Track Parameters
       new HelixFitTest(params, fitToBeamline, Math.abs(magfield), cosmic, chi2culling);
 
-      HashMap<Integer, KalmanFitterInfo> KFTrackMap = new HashMap<>();
-      try {
-        // New Hit Strategy
-        HashMap<Integer, List<RecoHitVector>> reconTrackMap = new HashMap<>();
-        new NewHitStrategy(params, event, reconTrackMap);
-        new KalmanFitter(params, event, reconTrackMap, KFTrackMap, magfield, simulation);
-        success++;
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-
-      System.out.println(
-          "count = " + count + " success = " + success + " ratio = " + success / count);
-
       RecoBankWriter writer = new RecoBankWriter();
       DataBank recoBank = writer.fillRTPCHitsBank(event, params);
       DataBank trackBank = writer.fillRTPCTrackBank(event, params);
-      DataBank KFBank = writer.fillRTPCKFBank(event, KFTrackMap);
 
       event.appendBank(recoBank);
       event.appendBank(trackBank);
-      event.appendBank(KFBank);
 
-      System.out.println("Test !!!");
+      if (kfStatus) {
+        HashMap<Integer, KalmanFitterInfo> KFTrackMap = new HashMap<>();
+        try {
+          // New Hit Strategy
+          HashMap<Integer, List<RecoHitVector>> reconTrackMap = new HashMap<>();
+          new NewHitStrategy(params, event, reconTrackMap);
+          new KalmanFitter(params, event, reconTrackMap, KFTrackMap, magfield, simulation);
+          success++;
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+        DataBank KFBank = writer.fillRTPCKFBank(event, KFTrackMap);
+        event.appendBank(KFBank);
+      }
+
 
     } else {
       return true;

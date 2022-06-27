@@ -169,6 +169,7 @@ public class KalmanFitter {
       double p_drift = kfitter.stepper.p();
 
       // Output
+      /*
       FileWriter writer = new FileWriter("PlotPython/" + "output.dat", true);
       double p_mc = Math.sqrt(px_mc * px_mc + py_mc * py_mc + pz_mc * pz_mc);
       double pt_mc = Math.hypot(px_mc, py_mc);
@@ -214,6 +215,7 @@ public class KalmanFitter {
         writer.write("" + theta_e + ' ' + p_e + '\n');
         writer.close();
       }
+       */
 
       double vz = stepper.y[2];
       double px = stepper.y[3];
