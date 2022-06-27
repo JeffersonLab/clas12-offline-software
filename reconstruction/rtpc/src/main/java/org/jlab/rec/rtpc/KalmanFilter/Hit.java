@@ -40,26 +40,13 @@ public class Hit implements Comparable<Hit> {
 
   public RealMatrix get_MeasurementNoise() {
     // double alpha = 0.01 // for simulation
-    double alpha = 0.005;
+    double alpha = 0.01;
     double relativeADC = this.ADC / this.ADCTot;
     double weight = alpha / relativeADC;
 
     double sigma_r = 70.0 / this.r * 2;
     double sigma_phi = Math.toRadians(2);
     double sigma_z = 1;
-
-    // System.out.println("relativeADC = " + relativeADC);
-    // System.out.println("weight = " + weight);
-
-    // RealMatrix test = new Array2DRowRealMatrix(
-    //         new double[][] {
-    //                 {sigma_r * sigma_r, 0, 0},
-    //                 {0, sigma_phi * sigma_phi, 0},
-    //                 {0, 0, sigma_z * sigma_z}
-    //         })
-    //         .scalarMultiply(weight);
-
-    // System.out.println("R = " + outputMatrix(test));
 
     return new Array2DRowRealMatrix(
             new double[][] {

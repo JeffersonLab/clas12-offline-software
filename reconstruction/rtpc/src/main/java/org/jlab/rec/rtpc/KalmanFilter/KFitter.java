@@ -1,70 +1,14 @@
 package org.jlab.rec.rtpc.KalmanFilter;
 
-/* ************************************************************************************************************
- *  Class for Discrete Extended Kalman Filter
- *  The system to be estimated is defined as a discrete nonlinear dynamic system:
- *              x(k) = f[x(k-1), u(k-1)] + v(k)     ; x = Nx1,    u = Mx1
- *              y(k) = h[x(k)] + n(k)               ; y = Zx1
- *
- *        Where:
- *          x(k) : State Variable at time-k                          : Nx1
- *          y(k) : Measured output at time-k                         : Zx1
- *          u(k) : System input at time-k                            : Mx1
- *          v(k) : Process noise, AWGN assumed, w/ covariance Qn     : Nx1
- *          n(k) : Measurement noise, AWGN assumed, w/ covariance Rn : Nx1
- *
- *          f(..), h(..) is a nonlinear transformation of the system to be estimated.
- *
- ***************************************************************************************************
- *      Extended Kalman Filter algorithm:
- *          Initialization:
- *              x(k=0|k=0) = Expected value of x at time-0 (i.e. x(k=0)), typically set to zero.
- *              P(k=0|k=0) = Identity matrix * covariant(P(k=0)), typically initialized with some
- *                            big number.
- *              Q, R       = Covariance matrices of process & measurement. As this implementation
- *                            the noise as AWGN (and same value for every variable), this is set
- *                            to Q=diag(QInit,...,QInit) and R=diag(RInit,...,RInit).
- *
- *
- *          EKF Calculation (every sampling time):
- *              Calculate the Jacobian matrix of f (i.e. F):
- *                  F = d(f(..))/dx |x(k-1|k-1),u(k-1)                               ...{EKF_1}
- *
- *              Predict x(k) through nonlinear function f:
- *                  x(k|k-1) = f[x(k-1|k-1), u(k-1)]                                 ...{EKF_2}
- *
- *              Predict P(k) using linearized f (i.e. F):
- *                  P(k|k-1)  = F*P(k-1|k-1)*F' + Q                                  ...{EKF_3}
- *
- *              Calculate the Jacobian matrix of h (i.e. C):
- *                  C = d(h(..))/dx |x(k|k-1)                                        ...{EKF_4}
- *
- *              Predict residual covariance S using linearized h (i.e. H):
- *                  S       = C*P(k|k-1)*C' + R                                      ...{EKF_5}
- *
- *              Calculate the kalman gain:
- *                  K       = P(k|k-1)*C'*(S^-1)                                     ...{EKF_6}
- *
- *              Correct x(k) using kalman gain:
- *                  x(k|k) = x(k|k-1) + K*[y(k) - h(x(k|k-1))]                       ...{EKF_7}
- *
- *              Correct P(k) using kalman gain:
- *                  P(k|k)  = (I - K*C)*P(k|k-1)                                     ...{EKF_8}
- *
- *
- *
- *
- ************************************************************************************************************/
-
-import org.apache.commons.math3.linear.*;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.util.MathUtils;
-import org.jlab.rec.rtpc.KalmanFilter.EnergyLoss.PhysicalConstants;
 
 import java.io.FileWriter;
-import java.io.IOException;
 
 import static org.jlab.rec.rtpc.KalmanFilter.EnergyLoss.PhysicalConstants.*;
-import static org.jlab.rec.rtpc.KalmanFilter.EnergyLoss.SystemOfUnits.eplus;
 
 public class KFitter {
 
@@ -84,111 +28,21 @@ public class KFitter {
     this.propagator = propagator;
   }
 
-  public void predict(Indicator indicator, int k) throws Exception {
-    predict(indicator, null, k);
+  public void predict(Indicator indicator) throws Exception {
+    predict(indicator, null);
   }
 
-  public void predict(Indicator indicator, FileWriter writer, int k) throws Exception {
+  public void predict(Indicator indicator, FileWriter writer) throws Exception {
     // Initialization
     stepper.initialize(indicator);
-
-    // System.out.print("Before prediction k = " + k + " ");
-    // stepper.print();
-
     Stepper stepper1 = new Stepper(stepper.y);
 
     // project the state estimation ahead (a priori state) : xHat(k)- = f(xHat(k-1))
     stateEstimation = propagator.f(stepper, indicator.R, writer);
 
-    // System.out.print("After prediction");
-    // stepper.print();
-
     // project the covariance matrix ahead
-    // RealMatrix transitionMatrix;
-    // if (indicator.direction) transitionMatrix = forwardF(stateEstimation, stepper.s);
-    // else transitionMatrix = backwardF(stateEstimation, stepper.s);
     RealMatrix transitionMatrix = F(indicator, stepper1);
     RealMatrix transitionMatrixT = transitionMatrix.transpose();
-
-    // Process noise
-    /*double ds = stepper.s;
-    double dEdx = stepper.dEdx;
-    double std = 5;
-    double Bz = propagator.Bz();
-    double q = 1 * eplus * c_light;
-    double p =
-        Math.sqrt(
-            stepper.y[3] * stepper.y[3]
-                + stepper.y[4] * stepper.y[4]
-                + stepper.y[5] * stepper.y[5]);
-    double v = Math.pow(ds, 2) / (p * p);
-    double v1 = -(Bz * ds * ds * q) / (p * p);
-    double v2 = (Bz * ds * ds * q) / (p * p);
-    double v3 = (Bz * ds * ds * q * q) / (p * p) + 1;
-    RealMatrix processNoise =
-        MatrixUtils.createRealMatrix(
-                new double[][] {
-                  {v, 0.0, 0.0, ds / p, v1, 0.0},
-                  {0.0, v, 0.0, v2, ds / p, 0.0},
-                  {0.0, 0.0, v, 0.0, 0.0, ds / p},
-                  {ds / p, v2, 0.0, v3*(dEdx*100), 0.0, 0.0},
-                  {v1, ds / p, 0.0, 0.0, v3*(dEdx*100), 0.0},
-                  {0.0, 0.0, ds / p, 0.0, 0.0, 1*(dEdx*100)}
-                })
-            .scalarMultiply(std);
-    double dEdx = stepper.dEdx;
-    double px = Math.abs(stepper.y[3]);
-    double py = Math.abs(stepper.y[4]);
-    double pz = Math.abs(stepper.y[5]);
-    double p = Math.sqrt(px * px + py * py + pz * pz);
-    double std = 50;
-    RealMatrix processNoise =
-        MatrixUtils.createRealMatrix(
-            new double[][] {
-              {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-              {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-              {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-              {0.0, 0.0, 0.0, std * (1.0 / (px / p) * dEdx * 100), 0.0, 0.0},
-              {0.0, 0.0, 0.0, 0.0, std * (1.0 / (py / p) * dEdx * 100), 0.0},
-              {0.0, 0.0, 0.0, 0.0, 0.0, std * (1.0 / (pz / p) * dEdx * 100)}
-            });
-
-    double px = Math.abs(stepper.y[3]);
-    double py = Math.abs(stepper.y[4]);
-    double pz = Math.abs(stepper.y[5]);
-    double p = Math.sqrt(px * px + py * py + pz * pz);
-    double mass = proton_mass_c2;
-    double kineticEnergy = Math.sqrt(mass * mass + p * p) - mass;
-
-    double ratio = electron_mass_c2 / mass;
-    double tau = kineticEnergy / mass;
-    double tmax = 2.0 * electron_mass_c2 * tau * (tau + 2.) / (1. + 2.0 * (tau + 1.) * ratio + ratio * ratio);
-
-    double gam = tau + 1.0;
-    double bg2 = tau * (tau + 2.0);
-    double beta2 = bg2 / (gam * gam);
-
-    double eDensity = indicator.material.GetElectronDensity();
-    double chargeSquare = 1;
-
-    double s = stepper.s;
-    double E = Math.sqrt(p * p + mass * mass);
-
-    double Omega = PhysicalConstants.twopi_mc2_rcl2 * chargeSquare * eDensity / beta2 * tmax * s * (1.0 - beta2/2);
-    double mom_prim = Math.sqrt((E - Omega) * (E - Omega) - mass * mass);
-
-    double std = 3;
-    RealMatrix processNoise =
-            MatrixUtils.createRealMatrix(
-                    new double[][] {
-                            {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-                            {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-                            {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-                            {0.0, 0.0, 0.0, std * (px * mom_prim/p), 0.0, 0.0},
-                            {0.0, 0.0, 0.0, 0.0, std * (py * mom_prim/p), 0.0},
-                            {0.0, 0.0, 0.0, 0.0, 0.0, std * (pz * mom_prim/p)}
-                    });
-    */
 
     double px = Math.abs(stepper.y[3]);
     double py = Math.abs(stepper.y[4]);
@@ -232,22 +86,12 @@ public class KFitter {
               {0.0, 0.0, 0.0, 0.0, 0.0, std * sigma2_pz}
             });
 
-    // System.out.println("Q = " + outputMatrix(processNoise));
-    // System.out.println("F = " + outputMatrix(transitionMatrix));
-    // System.out.println("P = " + outputMatrix(errorCovariance));
-
     // project the error covariance ahead P(k)- = F * P(k-1) * F' + Q
     errorCovariance =
         transitionMatrix.multiply(errorCovariance).multiply(transitionMatrixT).add(processNoise);
-
-    // System.out.println("P_prop = " + outputMatrix(errorCovariance));
   }
 
   public void correct(Indicator indicator) {
-    correct(indicator, null);
-  }
-
-  public void correct(Indicator indicator, FileWriter writer) {
 
     RealVector z = indicator.hit.get_Vector();
     RealMatrix measurementNoise;
@@ -263,9 +107,6 @@ public class KFitter {
       measurementNoise = indicator.hit.get_MeasurementNoise();
     }
 
-    RealMatrixFormat matrixFormat = new RealMatrixFormat("", "", "", "\n", "", ", ");
-    // System.out.println("R = " + outputMatrix(measurementNoise));
-
     RealMatrix measurementMatrix = H(stateEstimation);
     RealMatrix measurementMatrixT = measurementMatrix.transpose();
 
@@ -277,7 +118,7 @@ public class KFitter {
             .add(measurementNoise);
 
     // Inn = z(k) - h(xHat(k)-)
-    RealVector innovation = innovation(z, stateEstimation);
+    RealVector innovation = innovation(z);
     RealMatrix kalmanGain =
         errorCovariance.multiply(measurementMatrixT).multiply(MatrixUtils.inverse(S));
 
@@ -294,180 +135,6 @@ public class KFitter {
 
     // Give back to the stepper the new stateEstimation
     stepper.y = stateEstimation.toArray();
-
-    // System.out.print("After correction");
-    // stepper.print();
-
-    if (writer != null) {
-      try {
-        writer.write(
-            ""
-                + stepper
-                + ' '
-                + errorCovariance.getEntry(0, 0)
-                + ' '
-                + errorCovariance.getEntry(1, 1)
-                + ' '
-                + errorCovariance.getEntry(2, 2)
-                + ' '
-                + errorCovariance.getEntry(3, 3)
-                + ' '
-                + errorCovariance.getEntry(4, 4)
-                + ' '
-                + errorCovariance.getEntry(5, 5)
-                + '\n');
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
-  }
-
-  private RealMatrix forwardF(RealVector x, double s) {
-
-    double q = 1;
-    double k = eplus * q * c_light;
-
-    double px0 = x.getEntry(3);
-    double py0 = x.getEntry(4);
-    double pz0 = x.getEntry(5);
-    double p = Math.sqrt(px0 * px0 + py0 * py0 + pz0 * pz0);
-
-    double Bz = this.propagator.Bz();
-
-    double sin = Math.sin(Bz * k * q * s / p);
-    double cos = Math.cos(Bz * k * q * s / p);
-
-    // fx derivative
-    double dfxdx = 1.0;
-    double dfxdy = 0.0;
-    double dfxdz = 0.0;
-    double dfxdpx = sin / (Bz * k * q);
-    double dfxdpy = (1.0 - cos) / (Bz * k * q);
-    double dfxdpz = 0.0;
-
-    // fy derivative
-    double dfydx = 0.0;
-    double dfydy = 1.0;
-    double dfydz = 0.0;
-    double dfydpx = (cos - 1) / (Bz * k * q);
-    double dfydpy = sin / (Bz * k * q);
-    double dfydpz = 0.0;
-
-    // fz derivative
-    double dfzdx = 0.0;
-    double dfzdy = 0.0;
-    double dfzdz = 1.0;
-    double dfzdpx = 0.0;
-    double dfzdpy = 0.0;
-    double dfzdpz = s / p;
-
-    // fpx derivative
-    double dfpxdx = 0.0;
-    double dfpxdy = 0.0;
-    double dfpxdz = 0.0;
-    double dfpxdpx = cos;
-    double dfpxdpy = sin;
-    double dfpxdpz = 0.0;
-
-    // fpy derivative
-    double dfpydx = 0.0;
-    double dfpydy = 0.0;
-    double dfpydz = 0.0;
-    double dfpydpx = -sin;
-    double dfpydpy = cos;
-    double dfpydpz = 0.0;
-
-    // fpy derivative
-    double dfpzdx = 0.0;
-    double dfpzdy = 0.0;
-    double dfpzdz = 0.0;
-    double dfpzdpx = 0.0;
-    double dfpzdpy = 0.0;
-    double dfpzdpz = 1.0;
-
-    return MatrixUtils.createRealMatrix(
-        new double[][] {
-          {dfxdx, dfxdy, dfxdz, dfxdpx, dfxdpy, dfxdpz},
-          {dfydx, dfydy, dfydz, dfydpx, dfydpy, dfydpz},
-          {dfzdx, dfzdy, dfzdz, dfzdpx, dfzdpy, dfzdpz},
-          {dfpxdx, dfpxdy, dfpxdz, dfpxdpx, dfpxdpy, dfpxdpz},
-          {dfpydx, dfpydy, dfpydz, dfpydpx, dfpydpy, dfpydpz},
-          {dfpzdx, dfpzdy, dfpzdz, dfpzdpx, dfpzdpy, dfpzdpz}
-        });
-  }
-
-  private RealMatrix backwardF(RealVector x, double s) {
-
-    double q = 1;
-    double k = eplus * q * c_light;
-
-    double px0 = x.getEntry(3);
-    double py0 = x.getEntry(4);
-    double pz0 = x.getEntry(5);
-    double p = Math.sqrt(px0 * px0 + py0 * py0 + pz0 * pz0);
-
-    double Bz = this.propagator.Bz();
-
-    double sin = Math.sin(Bz * k * q * s / p);
-    double cos = Math.cos(Bz * k * q * s / p);
-
-    // fx derivative
-    double dfxdx = 1.0;
-    double dfxdy = 0.0;
-    double dfxdz = 0.0;
-    double dfxdpx = -sin / (Bz * k * q);
-    double dfxdpy = (1.0 - cos) / (Bz * k * q);
-    double dfxdpz = 0.0;
-
-    // fy derivative
-    double dfydx = 0.0;
-    double dfydy = 1.0;
-    double dfydz = 0.0;
-    double dfydpx = (cos - 1) / (Bz * k * q);
-    double dfydpy = -sin / (Bz * k * q);
-    double dfydpz = 0.0;
-
-    // fz derivative
-    double dfzdx = 0.0;
-    double dfzdy = 0.0;
-    double dfzdz = 1.0;
-    double dfzdpx = 0.0;
-    double dfzdpy = 0.0;
-    double dfzdpz = -s / p;
-
-    // fpx derivative
-    double dfpxdx = 0.0;
-    double dfpxdy = 0.0;
-    double dfpxdz = 0.0;
-    double dfpxdpx = cos;
-    double dfpxdpy = -sin;
-    double dfpxdpz = 0.0;
-
-    // fpy derivative
-    double dfpydx = 0.0;
-    double dfpydy = 0.0;
-    double dfpydz = 0.0;
-    double dfpydpx = sin;
-    double dfpydpy = cos;
-    double dfpydpz = 0.0;
-
-    // fpy derivative
-    double dfpzdx = 0.0;
-    double dfpzdy = 0.0;
-    double dfpzdz = 0.0;
-    double dfpzdpx = 0.0;
-    double dfpzdpy = 0.0;
-    double dfpzdpz = 1.0;
-
-    return MatrixUtils.createRealMatrix(
-        new double[][] {
-          {dfxdx, dfxdy, dfxdz, dfxdpx, dfxdpy, dfxdpz},
-          {dfydx, dfydy, dfydz, dfydpx, dfydpy, dfydpz},
-          {dfzdx, dfzdy, dfzdz, dfzdpx, dfzdpy, dfzdpz},
-          {dfpxdx, dfpxdy, dfpxdz, dfpxdpx, dfpxdpy, dfpxdpz},
-          {dfpydx, dfpydy, dfpydz, dfpydpx, dfpydpy, dfpydpz},
-          {dfpzdx, dfpzdy, dfpzdz, dfpzdpx, dfpzdpy, dfpzdpz}
-        });
   }
 
   private RealMatrix F(Indicator indicator, Stepper stepper1) throws Exception {
@@ -530,7 +197,6 @@ public class KFitter {
 
     double xx = x.getEntry(0);
     double yy = x.getEntry(1);
-    double zz = x.getEntry(2);
 
     double drdx = (xx) / (Math.hypot(xx, yy));
     double drdy = (yy) / (Math.hypot(xx, yy));
@@ -561,7 +227,7 @@ public class KFitter {
         });
   }
 
-  private RealVector innovation(RealVector z, RealVector x) {
+  private RealVector innovation(RealVector z) {
 
     RealVector h = h(stateEstimation);
     double rz = z.getEntry(0);

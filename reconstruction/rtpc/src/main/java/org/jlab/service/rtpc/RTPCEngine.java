@@ -7,7 +7,6 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.rec.rtpc.HitStrategy.NewHitStrategy;
-import org.jlab.rec.rtpc.KalmanFilter.KalmanFilterTestV3;
 import org.jlab.rec.rtpc.KalmanFilter.KalmanFitter;
 import org.jlab.rec.rtpc.KalmanFilter.KalmanFitterInfo;
 import org.jlab.rec.rtpc.banks.HitReader;
@@ -26,7 +25,8 @@ public class RTPCEngine extends ReconstructionEngine {
     super("RTPC", "davidp", "3.0");
   }
 
-  int count = 0;
+  double count = 0;
+  double success = 0;
   private boolean simulation = false;
   private boolean cosmic = false;
   private int fitToBeamline = 1;
@@ -123,10 +123,9 @@ public class RTPCEngine extends ReconstructionEngine {
 
       count++;
 
-      // if (count != 12) return true;
+      // if (count != 2) return true;
       // if (count < 4 || count > 10) return true;
       if (count > 10000) return true;
-      System.out.println("count = " + count);
 
       params.init(this.getConstantsManager(), runNo);
 
@@ -143,24 +142,30 @@ public class RTPCEngine extends ReconstructionEngine {
       // Helix Fit Tracks to calculate Track Parameters
       new HelixFitTest(params, fitToBeamline, Math.abs(magfield), cosmic, chi2culling);
 
-
       HashMap<Integer, KalmanFitterInfo> KFTrackMap = new HashMap<>();
       try {
         // New Hit Strategy
         HashMap<Integer, List<RecoHitVector>> reconTrackMap = new HashMap<>();
         new NewHitStrategy(params, event, reconTrackMap);
         new KalmanFitter(params, event, reconTrackMap, KFTrackMap, magfield, simulation);
-      } catch (Exception e) {e.printStackTrace();
+        success++;
+      } catch (Exception e) {
+        e.printStackTrace();
       }
+
+      System.out.println(
+          "count = " + count + " success = " + success + " ratio = " + success / count);
 
       RecoBankWriter writer = new RecoBankWriter();
       DataBank recoBank = writer.fillRTPCHitsBank(event, params);
       DataBank trackBank = writer.fillRTPCTrackBank(event, params);
-      // DataBank KFBank = writer.fillRTPCKFBank(event, KFTrackMap);
+      DataBank KFBank = writer.fillRTPCKFBank(event, KFTrackMap);
 
       event.appendBank(recoBank);
       event.appendBank(trackBank);
-      // event.appendBank(KFBank);
+      event.appendBank(KFBank);
+
+      System.out.println("Test !!!");
 
     } else {
       return true;
@@ -172,7 +177,7 @@ public class RTPCEngine extends ReconstructionEngine {
 
     double starttime = System.nanoTime();
 
-    String inputFile = "proton_100k_250-350MeV.hipo";
+    String inputFile = "proton_100k_70-90MeV_fullZ.hipo";
     // String inputFile =  "data_elastic_radiative.hipo";
     String outputFile = "output.hipo";
 

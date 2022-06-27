@@ -2,10 +2,6 @@ package org.jlab.rec.rtpc.KalmanFilter;
 
 import org.jlab.rec.rtpc.KalmanFilter.EnergyLoss.*;
 
-import java.util.Arrays;
-
-import static org.jlab.rec.rtpc.KalmanFilter.EnergyLoss.PhysicalConstants.electron_mass_c2;
-
 public class RungeKutta4 {
   private final int numberOfVariables;
   private final Particle particle;

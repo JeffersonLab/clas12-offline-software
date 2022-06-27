@@ -135,7 +135,7 @@ public class RecoBankWriter {
             bank.setFloat("py", row, (float) track.get_py()/1000);
             bank.setFloat("pz", row, (float) track.get_pz()/1000);
             bank.setFloat("vz", row, (float) track.get_vz()/10);
-            bank.setFloat("dedx", row, (float) track.get_dEdx());
+            bank.setFloat("dEdx", row, (float) track.get_dEdx());
             bank.setFloat("p_drift", row, (float) track.get_p_drift()/1000);
 
             row++;

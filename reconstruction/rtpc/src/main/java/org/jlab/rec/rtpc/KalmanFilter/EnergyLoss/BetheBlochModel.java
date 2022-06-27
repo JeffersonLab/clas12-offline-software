@@ -98,8 +98,8 @@ public class BetheBlochModel {
             }
 
             // density correction
-            double x = Math.log(bg2) / twoln10;
-            dedx -= GetDensityCorrection(x, material);
+            // double x = Math.log(bg2) / twoln10;
+            // dedx -= GetDensityCorrection(x, material);
 
             // shell correction
             dedx -= 2.0 * ShellCorrection(material, kineticEnergy);
@@ -108,7 +108,7 @@ public class BetheBlochModel {
             dedx *= twopi_mc2_rcl2 * chargeSquare * eDensity / beta2;
 
             //High order correction
-            dedx += HighOrderCorrections(p, material, kineticEnergy, cutEnergy);
+            // dedx += HighOrderCorrections(p, material, kineticEnergy, cutEnergy);
         } else {
             dedx *= twopi_mc2_rcl2 * chargeSquare * eDensity / beta2;
         }
