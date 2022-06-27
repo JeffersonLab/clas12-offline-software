@@ -804,6 +804,7 @@ public class HelixFitJava {
 	    C                                       +VE IF AXIS ENCIRCLED
 	    C                  Z0           [CM]    Z POS AT R=D0
 	    */
+
         //reconstruct the output
         Rho = (double) (1.0 / vv0[0]); /* minimum distance to z=0 */
         phi0 = vv0[2]; /* in xy plane, direction of track relative to x axis */
@@ -863,5 +864,6 @@ public class HelixFitJava {
         //System.out.println("DOCA " + h.get_DCA());
         return h;
     }
+
 
 }
