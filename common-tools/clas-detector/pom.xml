@@ -23,7 +23,7 @@
     <dependency>
       <groupId>org.jlab.jnp</groupId>
       <artifactId>jnp-hipo4</artifactId>
-      <version>4.1-SNAPSHOT</version>
+      <version>4.2-SNAPSHOT</version>
     </dependency>
 
     <dependency>
