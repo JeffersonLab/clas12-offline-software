@@ -5,6 +5,8 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
+import org.jlab.rec.rtpc.HitStrategy.NewHitStrategy;
+import org.jlab.rec.rtpc.KalmanFilter.KalmanFitterInfo;
 import org.jlab.rec.rtpc.banks.HitReader;
 import org.jlab.rec.rtpc.banks.RecoBankWriter;
 import org.jlab.rec.rtpc.hit.*;
@@ -12,6 +14,7 @@ import org.jlab.utils.groups.IndexedTable;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class RTPCEngine extends ReconstructionEngine {
@@ -141,6 +144,20 @@ public class RTPCEngine extends ReconstructionEngine {
 
       event.appendBank(recoBank);
       event.appendBank(trackBank);
+
+      if (kfStatus) {
+        HashMap<Integer, KalmanFitterInfo> KFTrackMap = new HashMap<>();
+        try {
+          // New Hit Strategy
+          HashMap<Integer, List<RecoHitVector>> reconTrackMap = new HashMap<>();
+          new NewHitStrategy(params, event, reconTrackMap);
+
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+        DataBank KFBank = writer.fillRTPCKFBank(event, KFTrackMap);
+        event.appendBank(KFBank);
+      }
 
     } else {
       return true;
