@@ -147,7 +147,7 @@ public class TableLoader {
                                     if(tbin>maxTBin)
                                         maxTBin = tbin;
                                     //if(tbin>maxBinIdxT[s][r][ibfield][icosalpha]) {
-                                        //maxBinIdxT[s][r][ibfield][icosalpha] = NBINST; 
+                                    maxBinIdxT[s][r][ibfield][icosalpha] = NBINST; 
                                     //} //LOGGER.log(Level.FINE, "tbin "+tbin+" tmax "+tmax+ "s "+s+" sl "+r );
                                     if(DISTFROMTIME[s][r][ibfield][icosalpha][tbin]==0) {
                                         // firstbin = bi
