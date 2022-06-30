@@ -20,13 +20,18 @@ import org.jlab.jnp.hipo4.data.SchemaFactory;
  * @author baltzell
  */
 public class DaqScalersSequence implements Comparator<DaqScalers> {
-  
+ 
+	public enum TYPE {
+		HELICITY_LATCHED,
+		RUN_INTEGRATED
+	}
+
     public static final double TI_CLOCK_FREQ = 250e6; // Hz
     
     protected final List<DaqScalers> scalers=new ArrayList<>();
     
     private Bank rcfgBank=null;
-  
+ 
     public class Interval {
         private DaqScalers previous = null;
         private DaqScalers next = null;
@@ -84,6 +89,10 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
     }
 
     protected boolean add(DaqScalers ds) {
+		return this.add(ds, false);
+	}
+
+    protected boolean add(DaqScalers ds, boolean helicity) {
         if (this.scalers.isEmpty()) {
             this.scalers.add(ds);
             return true;
@@ -96,10 +105,8 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
                 return true;
             }
             else if (index<0) {
-                // it's a unique timestamp, insert it if it's non-zero:
-                if (ds.dsc2.beamCharge > 0) {
-                    this.scalers.add(-index-1,ds);
-                }
+                // it's a unique timestamp, insert it:
+                this.scalers.add(-index-1,ds);
                 return true;
             }
             else {
@@ -165,6 +172,32 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
         event2.read(this.rcfgBank);
         final long t2 = this.rcfgBank.getLong("timestamp",0);
         return this.getInterval(t1,t2);
+    }
+
+    /**
+     * Get a copy of the sequence with all null readouts removed, to workaround
+     * scaler readout issues in some data sets where the helicity and integrating
+     * scalers aren't readout in the same event, e.g., RG-M.
+     * 
+     * @param type the scaler type to prune for
+     * @return the pruned sequence
+     */
+    public DaqScalersSequence prune(TYPE type) {
+        DaqScalersSequence ret = new DaqScalersSequence();
+        switch (type) {
+            case HELICITY_LATCHED:
+                for (DaqScalers ds : this.scalers) {
+                    if (ds.struck.clock > 0) ret.add(ds);
+                }
+                break;
+            case RUN_INTEGRATED:
+                ret.add(this.scalers.get(0));
+                for (DaqScalers ds : this.scalers.subList(1,this.scalers.size())) {
+                    if (ds.dsc2.beamCharge > 0) ret.add(ds);
+                }
+                break;
+        }
+        return ret;
     }
 
     /**

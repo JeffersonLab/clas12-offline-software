@@ -17,6 +17,7 @@ import org.jlab.detector.scalers.DaqScalersSequence;
 
 import org.jlab.detector.helicity.HelicityBit;
 import org.jlab.detector.helicity.HelicitySequenceManager;
+import org.jlab.detector.scalers.DaqScalersSequence.TYPE;
 
 import org.jlab.utils.options.OptionParser;
 
@@ -75,7 +76,9 @@ public class Tag1ToEvent {
         }
 
         HelicitySequenceManager helSeq = new HelicitySequenceManager(8,inputList,doHelicityFlip);
-        DaqScalersSequence chargeSeq = DaqScalersSequence.readSequence(inputList);
+        DaqScalersSequence tmpSeq = DaqScalersSequence.readSequence(inputList);
+        DaqScalersSequence chargeRunSeq = tmpSeq.prune(TYPE.RUN_INTEGRATED);
+        DaqScalersSequence chargeHelSeq = tmpSeq.prune(TYPE.HELICITY_LATCHED);
 
         HipoWriterSorted writer = new HipoWriterSorted();
         writer.getSchemaFactory().initFromDirectory(ClasUtilsFile.getResourceDir("COATJAVA", "etc/bankdefs/hipo4"));
@@ -125,7 +128,8 @@ public class Tag1ToEvent {
 
                 // do the lookups:
                 HelicityBit hb = helSeq.search(event);
-                DaqScalers ds = chargeSeq.get(event);
+                DaqScalers dsRun = chargeRunSeq.get(event);
+                DaqScalers dsHel = chargeHelSeq.get(event);
 
                 // count helicity good/bad;
                 if (Math.abs(hb.value())==1) goodHelicity++;
@@ -142,12 +146,14 @@ public class Tag1ToEvent {
                 }
 
                 // write beam charge to REC::Event:
-                if (ds==null) badCharge++;
+                if (dsRun==null) badCharge++;
                 else {
                     goodCharge++;
                     if (doBeamCharge) {
-                        recEventBank.putFloat("beamCharge",0, (float) ds.dsc2.getBeamChargeGated());
-                        recEventBank.putDouble("liveTime",0,ds.dsc2.getLivetime());
+                        recEventBank.putFloat("beamCharge",0, (float) 
+							dsRun.dsc2.getBeamChargeGated());
+                        recEventBank.putDouble("liveTime",0, (float)
+							dsHel.struck.getLivetime());
                     }
                 }
 
