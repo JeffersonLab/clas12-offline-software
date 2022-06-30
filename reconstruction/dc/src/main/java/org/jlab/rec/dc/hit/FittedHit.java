@@ -371,7 +371,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             double alpha = Math.atan(trkAngle);
             
             // correct alpha with theta0, the angle corresponding to the isochrone lines twist due to the electric field
-            alpha-=Swimmer.getTorScale()*theta0;
+            alpha-=Math.signum(Swimmer.getTorScale())*theta0;
             
             this.setAlpha(Math.toDegrees(alpha));
             //reduce the corrected angle 
