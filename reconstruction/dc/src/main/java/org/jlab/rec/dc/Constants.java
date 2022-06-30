@@ -315,7 +315,8 @@ public class Constants {
                                         int t2d, 
                                         boolean useDoublets,
                                         int nSuperLayer,
-                                        int selectedSector) {
+                                        int selectedSector,
+                                        double[][] shifts) {
         if (ConstantsLoaded) {
             printConfig(engine);
         }
@@ -332,7 +333,7 @@ public class Constants {
 
             LoadConstants();
 
-            LoadGeometry(GEOVARIATION);
+            LoadGeometry(GEOVARIATION, shifts);
 
             ConstantsLoaded = true;
             printConfig(engine);
@@ -346,7 +347,7 @@ public class Constants {
         else {
             LoadConstants();
 
-            LoadGeometry(GEOVARIATION);
+            LoadGeometry(GEOVARIATION, null);
 
             ConstantsLoaded = true;
             printConfig(engine);
@@ -433,10 +434,10 @@ public class Constants {
             
     }
 
-    private synchronized void LoadGeometry(String geoVariation) {
+    private synchronized void LoadGeometry(String geoVariation, double[][] shifts) {
         // Load the geometry
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, geoVariation);
-        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, ENDPLATESBOWING);
+        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, ENDPLATESBOWING, shifts);
         for(int l=0; l<6; l++) {
             wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
         }

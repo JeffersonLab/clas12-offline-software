@@ -17,17 +17,18 @@ public class DCEngine extends ReconstructionEngine {
     private final Banks  bankNames = new Banks();
     
     // options configured from yaml
-    private int      selectedSector = 0;
-    private boolean  wireDistortion = false;
-    private boolean  useStartTime   = true;
-    private boolean  useTimeBeta    = false;
-    private boolean  useBetaCut     = false;
-    private boolean  useDoublets    = false;
-    private int      t2d            = 1;
-    private int      nSuperLayer    = 5;
-    private String   geoVariation   = "default";
-    private String   bankType       = "HitBasedTrkg";
-    private String   outBankPrefix  = null;
+    private int        selectedSector = 0;
+    private boolean    wireDistortion = false;
+    private boolean    useStartTime   = true;
+    private boolean    useTimeBeta    = false;
+    private boolean    useBetaCut     = false;
+    private boolean    useDoublets    = false;
+    private int        t2d            = 0;
+    private int        nSuperLayer    = 5;
+    private String     geoVariation   = "default";
+    private String     bankType       = "HitBasedTrkg";
+    private String     outBankPrefix  = null;
+    private double[][] shifts         = new double[Constants.NREG][6];
         
     public static final Logger LOGGER = Logger.getLogger(ReconstructionEngine.class.getName());
 
@@ -86,6 +87,24 @@ public class DCEngine extends ReconstructionEngine {
         if(this.getEngineConfigString("outputBankPrefix")!=null) {
             outBankPrefix = this.getEngineConfigString("outputBankPrefix");
         }
+        
+        // Set geometry shifts for alignment code
+        if(this.getEngineConfigString("alignmentShifts")!=null) {
+            String[] alignmentShift = this.getEngineConfigString("alignmentShifts").split(",");
+            System.out.println(alignmentShift[0]);
+            for(int i=0; i<alignmentShift.length; i++) {
+                if(alignmentShift[i].strip().matches("r[123]_c?[xyz]:.*")) {
+                    String shift = alignmentShift[i].split(":")[0];
+                    double value = Double.parseDouble(alignmentShift[i].split(":")[1]);
+                    int region = Integer.parseInt(shift.substring(1, 2));
+                    int iaxis = 0;
+                    if(shift.endsWith("y"))      iaxis = 1;
+                    else if(shift.endsWith("z")) iaxis = 2;
+                    if(shift.contains("c")) iaxis +=3;
+                    shifts[region-1][iaxis] = value;
+                }
+            }
+        }
     }
 
 
@@ -126,7 +145,8 @@ public class DCEngine extends ReconstructionEngine {
                                            t2d,
                                            useDoublets,
                                            nSuperLayer, 
-                                           selectedSector);
+                                           selectedSector,
+                                           shifts);
         this.LoadTables();
         this.initBanks();
         this.setDropBanks();
