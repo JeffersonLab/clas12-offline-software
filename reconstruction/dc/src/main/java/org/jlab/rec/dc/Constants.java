@@ -359,7 +359,7 @@ public class Constants {
         LOGGER.log(Level.INFO, "["+engine+"] run with sector selection = " + SECTORSELECT);
         LOGGER.log(Level.INFO, "["+engine+"] run with start time option = " + USETSTART);
         LOGGER.log(Level.INFO, "["+engine+"] run with wire distortions = " + ENDPLATESBOWING);
-        LOGGER.log(Level.INFO, "["+engine+"] run with with new tBeta configuration = " + USETIMETBETA);
+        LOGGER.log(Level.INFO, "["+engine+"] run with with time Beta correction (is false for doca Beta correction) = " + USETIMETBETA);
         LOGGER.log(Level.INFO, "["+engine+"] run with with Beta cut = " + CHECKBETA);
         LOGGER.log(Level.INFO, "["+engine+"] run with time to distance function set to exponential/polynomial (0/1) = " + T2D);
         LOGGER.log(Level.INFO, "["+engine+"] run with with hit doublets recovery = " + USEDOUBLETS);

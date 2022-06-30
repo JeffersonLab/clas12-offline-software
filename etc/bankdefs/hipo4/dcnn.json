@@ -199,6 +199,7 @@
         {"name":"trkDoca",      "type":"F", "info":"track doca of the hit (in cm)"},
         {"name":"timeResidual", "type":"F", "info":"time residual of the hit (in cm)"},
         {"name":"fitResidual",  "type":"F", "info":"fit residual of the hit (in cm, from KF)"},
+        {"name":"dDoca",        "type":"F", "info":"delta Doca correction (cm)"},
         {"name":"LR",           "type":"B", "info":"Left/Right ambiguity of the hit"},
         {"name":"X",            "type":"F", "info":"wire x-coordinate  in tilted-sector"},
         {"name":"Z",            "type":"F", "info":"wire z-coordinate  in tilted-sector"},
