@@ -128,7 +128,7 @@ public class TableLoader {
                         double bfield = BfieldValues[ibfield];
 
                         for(int icosalpha =0; icosalpha<maxBinIdxAlpha+1; icosalpha++) {
-
+                                maxBinIdxT[s][r][ibfield][icosalpha] = NBINST; 
                                 double cos30minusalpha = Math.cos(Math.toRadians(30.)) + (double) (icosalpha)*(1. - Math.cos(Math.toRadians(30.)))/5.;
                                 double alpha = -(Math.toDegrees(Math.acos(cos30minusalpha)) - 30);
                                 int nxmax = (int) (dmax*cos30minusalpha/stepSize); 
@@ -147,7 +147,7 @@ public class TableLoader {
                                     if(tbin>maxTBin)
                                         maxTBin = tbin;
                                     //if(tbin>maxBinIdxT[s][r][ibfield][icosalpha]) {
-                                        //maxBinIdxT[s][r][ibfield][icosalpha] = NBINST; 
+                                    //maxBinIdxT[s][r][ibfield][icosalpha] = NBINST; 
                                     //} //LOGGER.log(Level.FINE, "tbin "+tbin+" tmax "+tmax+ "s "+s+" sl "+r );
                                     if(DISTFROMTIME[s][r][ibfield][icosalpha][tbin]==0) {
                                         // firstbin = bi
