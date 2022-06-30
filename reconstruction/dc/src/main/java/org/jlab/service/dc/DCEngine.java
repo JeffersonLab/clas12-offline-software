@@ -114,6 +114,9 @@ public class DCEngine extends ReconstructionEngine {
         Map<String,Integer> dcTables = new HashMap<>();
         dcTables.put(Constants.DOCARES,3);
         dcTables.put(Constants.TIME2DIST,3);
+        dcTables.put(Constants.PRESSURE, 3);
+        dcTables.put(Constants.T2DPRESSURE,3);
+        dcTables.put(Constants.T2DPRESSUREREF,3);
         dcTables.put(Constants.T0CORRECTION,4);
         dcTables.put(Constants.TDCTCUTS,3);
         dcTables.put(Constants.TIMEJITTER,3);
