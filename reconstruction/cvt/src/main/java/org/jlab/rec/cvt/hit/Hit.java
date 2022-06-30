@@ -32,6 +32,7 @@ public class Hit implements Comparable<Hit> {
     private int AssociatedTrackID = -1;     // the track ID associated with that hit
 
     public boolean newClustering = false;
+    public int MCstatus = -1;
 
     // constructor
     public Hit(DetectorType detector, BMTType type, int sector, int layer, Strip strip) {

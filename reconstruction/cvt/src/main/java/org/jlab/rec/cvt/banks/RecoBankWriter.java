@@ -141,7 +141,7 @@ public class RecoBankWriter {
 
         DataBank bank = event.createBank(bankName, crosses.size());
 
-        for (int j = 0; j < crosses.size(); j++) {
+        for (int j = 0; j < crosses.size(); j++) { 
             bank.setShort("ID", j, (short) crosses.get(j).getId());
             bank.setByte("sector", j, (byte) crosses.get(j).getSector());
             bank.setByte("region", j, (byte) crosses.get(j).getRegion());
@@ -414,11 +414,12 @@ public class RecoBankWriter {
                 hitStrg += "_ID";  
                 bank.setShort(hitStrg, i, (short) -1);
             }
+           
             for (int j = 0; j < seeds.get(i).getCrosses().size(); j++) {
                 if(j<9) {
                     String hitStrg = "Cross";
                     hitStrg += (j + 1);
-                    hitStrg += "_ID";  //System.out.println(" j "+j+" matched id "+trkcands.get(i).get(j).getId());
+                    hitStrg += "_ID"; 
                     bank.setShort(hitStrg, i, (short) seeds.get(i).getCrosses().get(j).getId());
                 }
             }

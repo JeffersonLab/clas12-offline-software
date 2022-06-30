@@ -63,8 +63,8 @@ public class CVTEngine extends ReconstructionEngine {
     private boolean svtSeeding          = true;
     private boolean timeCuts            = false;
     private String  matrixLibrary       = "EJML";
-    
-    
+    private boolean useOnlyTruth        = false;
+    private boolean useSVTLinkerSeeder  = true;
     public CVTEngine(String name) {
         super(name, "ziegler", "5.0");
     }
@@ -89,7 +89,9 @@ public class CVTEngine extends ReconstructionEngine {
                                            elossPrecorrection,
                                            svtSeeding,
                                            timeCuts,
-                                           matrixLibrary);
+                                           matrixLibrary,
+                                           useOnlyTruth,
+                                           useSVTLinkerSeeder);
 
         this.initConstantsTables();
         this.registerBanks();
@@ -131,7 +133,7 @@ public class CVTEngine extends ReconstructionEngine {
     }
     
     public int getRun(DataEvent event) {
-                
+    
         if (event.hasBank("RUN::config") == false) {
             System.err.println("RUN CONDITIONS NOT READ!");
             return 0;
@@ -139,7 +141,6 @@ public class CVTEngine extends ReconstructionEngine {
 
         DataBank bank = event.getBank("RUN::config");
         int run = bank.getInt("run", 0); 
-                
         return run;
     }
 
@@ -210,11 +211,13 @@ public class CVTEngine extends ReconstructionEngine {
             else {
                 TracksFromTargetRec  trackFinder = new TracksFromTargetRec(swimmer, beamPos);
                 List<Seed>   seeds = trackFinder.getSeeds(clusters, crosses);
+                
+                
                 List<Track> tracks = trackFinder.getTracks(event, this.isInitFromMc(), 
                                                                   this.isKfFilterOn(), 
                                                                   this.getKfIterations(), 
                                                                   true, this.getPid());
-
+                
                 if(seeds!=null) banks.add(RecoBankWriter.fillSeedBank(event, seeds, this.getSeedBank()));
                 if(tracks!=null) {
                     banks.add(RecoBankWriter.fillTrackBank(event, tracks, this.getTrackBank()));
@@ -286,6 +289,12 @@ public class CVTEngine extends ReconstructionEngine {
         
         if (this.getEngineConfigString("initFromMC")!=null)
             this.initFromMc = Boolean.valueOf(this.getEngineConfigString("initFromMC"));
+        
+        if (this.getEngineConfigString("useOnlyTruthHits")!=null)
+            this.useOnlyTruth = Boolean.valueOf(this.getEngineConfigString("useOnlyTruthHits"));
+        
+        if (this.getEngineConfigString("useSVTLinkerSeeder")!=null)
+            this.useSVTLinkerSeeder = Boolean.valueOf(this.getEngineConfigString("useSVTLinkerSeeder"));
         
         if (this.getEngineConfigString("kfIterations")!=null)
             this.kfIterations = Integer.valueOf(this.getEngineConfigString("kfIterations"));

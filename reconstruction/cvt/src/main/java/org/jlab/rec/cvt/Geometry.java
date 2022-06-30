@@ -28,7 +28,8 @@ public class Geometry {
     private Detector          cndGeometry  = null;
     private List<Surface>     cvtSurfaces  = null;
     private List<Surface>   outerSurfaces  = null;
-    private double zTarget = 0;    
+    private double zTarget = 0;  
+    private double zLength = 0;  
 
     private static boolean LOADED;
     
@@ -63,6 +64,7 @@ public class Geometry {
         // Load target
         ConstantProvider providerTG = GeometryFactory.getConstants(DetectorType.TARGET, run, variation);
         this.zTarget = providerTG.getDouble("/geometry/target/position",0)*10;
+        this.zLength = providerTG.getDouble("/geometry/target/length",0)*10;
                          
         ConstantProvider providerCTOF = GeometryFactory.getConstants(DetectorType.CTOF, run, variation);
         ctofGeometry = new CTOFGeant4Factory(providerCTOF);        
@@ -85,9 +87,14 @@ public class Geometry {
         return zTarget;
     }
 
+    public double getZlength() {
+        return zLength;
+    }
+    
     public SVTGeometry getSVT() {
         return svtGeometry;
     }
+    
 
     public BMTGeometry getBMT() {
         return bmtGeometry;

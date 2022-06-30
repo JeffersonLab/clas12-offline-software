@@ -15,7 +15,13 @@ public class Constants {
    
 
     public static Logger LOGGER = Logger.getLogger(Constants.class.getName());
-
+    public static double CAANGLE1= 1.75;
+    public static double CAANGLE2=0.551;
+    public static double CAANGLE3=30.;
+    public static double CAANGLE4=19.;
+    public static double CAANGLE5=3.5;
+    
+    
     // private constructor for a singleton
     private Constants() {
     }
@@ -43,8 +49,10 @@ public class Constants {
     private int      removeRegion = 0;
     public int       beamSpotConstraint = 2;
     private double   beamRadius = 0.3; // mm
-    public boolean   svtSeeding = true;
+    public boolean   svtSeeding = false;
+    public boolean   svtLinkerSeeding = false;
     public boolean   timeCuts = false;
+    public boolean   useOnlyTruthHits = false;
     public boolean   preElossCorrection = true;
     private Material targetMaterial = LH2;
     public Libr      KFMatrixLibrary;
@@ -55,11 +63,12 @@ public class Constants {
     public static final double LIGHTVEL = PhysicsConstants.speedOfLight()*1e-5;  // velocity of light (mm/ns) - conversion factor from radius in mm to momentum in GeV/c 
 
     // selection cuts for helical tracks
-    public static final double PTCUT   = 0.125; // minimum pt in GeV
+    public static final double PTCUT   = 0.25; // minimum pt in GeV
     public static final double TANDIP  = 2;     // max value on dip angle
     public static final double NDFCUT  = 0;     // minimum number of degres of freedom
     public static final double CHI2CUT = 50;    // minimum chi2 per degrees of freedom
-    public static final double ZRANGE  = 300;   // defines z range as -ZRANGE:+ZRANGE in mm
+    public static final double RESICUT = 5;    // minimum resi in PR
+    public static final double ZRANGE  = 10;   // defines z range as -ZRANGE:+ZRANGE in mm
     public static final int    MINSVTCRSFORCOSMIC = 2; 
     public static final double CIRCLEFIT_MAXCHI2 = 100;
 
@@ -120,7 +129,9 @@ public class Constants {
     public int getRmReg() {
         return removeRegion;
     }
-
+    public boolean useOnlyMCTruthHits() {
+        return useOnlyTruthHits;
+    }
     /**
      * @return the layersUsed
      */
@@ -447,7 +458,9 @@ public class Constants {
                                         boolean elosPrecorrection,
                                         boolean svtSeeding,
                                         boolean timeCuts,
-                                        String matrixLibrary) {
+                                        String matrixLibrary,
+                                        boolean useOnlyTruth,
+                                        boolean useSVTLinkerSeeder) {
         if (!ConstantsLoaded) {
             this.isCosmics = isCosmics;
             this.svtOnly      = svtOnly;
@@ -461,7 +474,8 @@ public class Constants {
             this.svtSeeding = svtSeeding;
             this.timeCuts = timeCuts;
             this.setMatLib(matrixLibrary);
-
+            this.useOnlyTruthHits=useOnlyTruth;
+            this.svtLinkerSeeding = useSVTLinkerSeeder;
             ConstantsLoaded = true;
         }
     }

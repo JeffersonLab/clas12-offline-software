@@ -2,7 +2,9 @@ package org.jlab.rec.cvt.track;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -35,6 +37,7 @@ public class Seed implements Comparable<Seed>{
     private double _lineFitChi2PerNDF;   	// the linear fit to get the track dip angle
     private int    _NDF;
     private double _chi2;
+    private List<Seed> _overlappingSeed;
     
     
     public Seed() {
@@ -54,6 +57,20 @@ public class Seed implements Comparable<Seed>{
     public Seed(List<Cross> crosses, Helix helix) {
         this.setCrosses(crosses);
         this.setHelix(helix);
+    }
+
+    /**
+     * @return the _overlappingSeed
+     */
+    public List<Seed> getOverlappingSeeds() {
+        return _overlappingSeed;
+    }
+
+    /**
+     * @param _overlappingSeed the _overlappingSeed to set
+     */
+    public void setOverlappingSeed(List<Seed> _overlappingSeed) {
+        this._overlappingSeed = _overlappingSeed;
     }
 
     public Helix getHelix() {
@@ -107,7 +124,7 @@ public class Seed implements Comparable<Seed>{
         return this.phi;
     }
         
-    private void setClusters() {
+    private void setClusters() { 
         List<Cluster> clusters = new ArrayList<>(); 
         for(Cross c : this.getCrosses()) { 
 	    if(c.getDetector()==DetectorType.BST) {
@@ -185,10 +202,12 @@ public class Seed implements Comparable<Seed>{
     }
 
     @Override
-    public int compareTo(Seed arg) {
-    	return ( this._Crosses.size() > arg.getCrosses().size() ) ? -1 : ( this._Crosses.size() == arg.getCrosses().size() ) ? 0 : 1;        
+    public int compareTo(Seed tr) {
+    	//sort by NDF and chi2
+        int ProbComp  = this.getChi2() < tr.getChi2() ? -1 : this.getChi2() == tr.getChi2() ? 0 : 1;
+        int OtherComp = this.getNDF() > tr.getNDF() ? -1 : this.getNDF() == tr.getNDF() ? 0 : 1;
+        return ((OtherComp == 0) ? ProbComp : OtherComp);
     }
-    
 
     public boolean fit(int fitIter, double xb, double yb, double bfield) {
         
@@ -343,17 +362,26 @@ public class Seed implements Comparable<Seed>{
      * @return 
      */    
     public boolean isGood() {
+        //if(Constants.getInstance().svtOnly==false && this.getNDF()<1) 
+        //    return false;
+//        int nSVT=0;
+//        for(Cross c : this.getCrosses()) {
+//            if(c.getDetector()==DetectorType.BST)
+//                nSVT++;
+//        }
+//        if(nSVT==0)
+//            System.out.println("no SVT? "+this.toString());
         if(Double.isNaN(this.getChi2())) 
             return false;
         else if(this.getChi2() > Constants.CHI2CUT * (this.getNDF() + 5)) 
             return false;
-        else if(this.getNDF() < Constants.NDFCUT) 
+        if(this.getNDF() < Constants.NDFCUT) 
             return false;
-        else if(this.getHelix().getPt(this.getHelix().B) < Constants.PTCUT) 
+        if(this.getHelix().getPt(this.getHelix().B) < Constants.PTCUT) 
             return false;
 //        else if(Math.abs(this.getHelix().getTanDip()) > Constants.TANDIP) 
 //            return false;
-        else if(Math.abs(this.getHelix().getZ0()) > Constants.ZRANGE) 
+        if(Math.abs(Geometry.getInstance().getZoffset()-this.getHelix().getZ0()) > Geometry.getInstance().getZlength()+Constants.ZRANGE) 
             return false;
         else 
             return true;
@@ -366,16 +394,16 @@ public class Seed implements Comparable<Seed>{
      * @return true if this track quality is better than the given track
      */    
     public boolean betterThan(Seed o) {
-        if(this.getNDF()>o.getNDF()) 
-            return true;
-        else if(this.getNDF()==o.getNDF()) {
-            if(this.getChi2()/this.getNDF() < o.getChi2()/o.getNDF())
+        //if(this.getNDF()>o.getNDF()) 
+        //    return true;
+        if(this.getNDF()==o.getNDF()) {
+            if(this.getChi2() < o.getChi2())
                 return true;
             else return false;
         }
         else
-            return false;
-    }
+            return true;
+        }
     
     /**
      * Check track overlaps with the given track
@@ -386,7 +414,7 @@ public class Seed implements Comparable<Seed>{
     public boolean overlapWith(Seed o) {
         int nc = 0;
         for(Cross c : this.getCrosses()) {
-            if(c.getType()==BMTType.C) continue; //skim BMTC
+            //if(c.getType()==BMTType.C) continue; //skim BMTC
             if(o.getCrosses().contains(c)) nc++;
         }
         if(nc >1) return true;
@@ -394,23 +422,55 @@ public class Seed implements Comparable<Seed>{
     }
     
     public static void removeOverlappingSeeds(List<Seed> seeds) {
-            if(seeds==null)
-                return;
+        if(seeds==null)
+            return;
             
-        List<Seed> selectedSeeds =  new ArrayList<>();
+        List<Seed> selectedSeeds =  null;
         for (int i = 0; i < seeds.size(); i++) {
-            boolean overlap = false;
+            
             Seed t1 = seeds.get(i);
+            selectedSeeds =  new ArrayList<>();
             for(int j=0; j<seeds.size(); j++ ) {
                 Seed t2 = seeds.get(j);
-                if(i!=j && t1.overlapWith(t2) && !t1.betterThan(t2)) {
-                    overlap=true;
+                if(i!=j && t1.overlapWith(t2)) {
+                    selectedSeeds.add(t2);
                 }
             }
-            if(!overlap) selectedSeeds.add(t1);
+            
+            t1.setOverlappingSeed(selectedSeeds);
+            //System.out.println(t1.getOverlappingSeeds().size()+") Check for seed ovrl "+t1.toString());
+            //for(Seed s : t1.getOverlappingSeeds()) {
+            //    System.out.println("ovl has seed "+s.toString());
+            //}
         }
-        seeds.removeAll(seeds);
-        seeds.addAll(selectedSeeds);
+        //seeds.removeAll(seeds);
+        //seeds.addAll(selectedSeeds);
+        selectedSeeds =  new ArrayList<>();
+        //Get the best seeds from each list
+       
+        Map<Double, Seed> seedMap = new HashMap<>();
+        for (Seed s : seeds) {
+            
+            List<Seed> oSeeds  =  new ArrayList<>();
+            //System.out.println(" seed "+s.toString());
+            //for(int o = 0; o< s.getOverlappingSeeds().size(); o++) { 
+            //    System.out.println("has ov seed "+s.getOverlappingSeeds().get(o).toString());
+                
+            //}
+            oSeeds.add(s);
+            oSeeds.addAll(s.getOverlappingSeeds());
+            Collections.sort(oSeeds);  //System.out.println("sorted  "+oSeeds.size());
+            //for(int o = 0; o< oSeeds.size(); o++) {  //System.out.println("sorted seed "+oSeeds.get(o).toString());
+                if(seedMap.containsKey(oSeeds.get(0).getChi2())) {
+                    seedMap.replace(oSeeds.get(0).getChi2(), oSeeds.get(0));
+                } else {
+                    seedMap.put(oSeeds.get(0).getChi2(), oSeeds.get(0));
+                }
+            //}
+        }
+        seeds.clear();
+        seeds.addAll(new ArrayList<>(seedMap.values()));
+        
     }
     
     @Override

@@ -22,6 +22,7 @@ import org.jlab.rec.cvt.track.StraightTrackSeeder;
 import org.jlab.rec.cvt.track.StraightTrackCandListFinder;
 import org.jlab.rec.cvt.track.TrackSeeder;
 import org.jlab.rec.cvt.track.TrackSeederCA;
+import org.jlab.rec.cvt.track.TrackSeederSVTLinker;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -47,6 +48,41 @@ import org.jlab.rec.cvt.trajectory.Ray;
  */
 public class RecUtilities {
 
+     public void CleanupSpuriousSVTCrosses(List<Cross> crosses, List<Track> trks) {
+        List<Cross> rmCrosses = new ArrayList<>();
+        
+        for(Cross c : crosses) {
+            if(!Geometry.getInstance().getSVT().isInFiducial(c.getCluster1().getLayer(), c.getSector(), c.getPoint()))
+                rmCrosses.add(c);
+        }
+       
+        
+        for(int j = 0; j<crosses.size(); j++) {
+            for(Cross c : rmCrosses) {
+                if(crosses.get(j).getId()==c.getId())
+                    crosses.remove(j);
+            }
+        } 
+        
+       
+//        if(trks!=null && rmCrosses!=null) {
+//            List<Cross> rmFromTrk = new ArrayList<>();
+//            for(Track t:trks) {
+//                //boolean rmFlag=false;
+//                for(Cross c: rmCrosses) {
+//                    if(c!=null && t!=null && c.getAssociatedTrackID()==t.getId())
+//                        rmFromTrk.add(c);
+//                }
+//                t.removeAll(rmFromTrk);
+//                //if(rmFlag==true)
+//                //    rmFromTrk.add(t);
+//            }
+//            // RDV why removing the whole track?
+//           // trks.removeAll(rmFromTrk);
+//        }
+    }
+    
+    
     public void CleanupSpuriousCrosses(List<ArrayList<Cross>> crosses, List<Track> trks) {
         List<Cross> rmCrosses = new ArrayList<>();
         
@@ -771,7 +807,43 @@ public class RecUtilities {
         }
         return crosses;
     }
-    
+
+    public static void getUniqueSeedList(List<Seed> seeds) {
+        List<Seed> dupl = new ArrayList<>();
+        Map<Double, Seed> seedmap = new HashMap<>();
+        for(Seed s : seeds) {
+            double key = getTrackKey(s); 
+            if(Double.isNaN(key)) {
+                dupl.add(s);
+            } else {
+                if(seedmap.containsKey(key)) {
+                    dupl.add(s); 
+                } else {
+                    seedmap.put(key, s);
+                }
+            }
+        }
+        seeds.removeAll(dupl);
+    }
+
+    static double getTrackKey(Seed s) {
+        List<Cross> crs = s.getCrosses();
+        double x = 0;
+        double y = 0;
+        double z = 0;
+        for(Cross c : crs) {
+            if(!Double.isNaN(c.getPoint0().x()))
+                x+=c.getPoint0().x();
+            if(!Double.isNaN(c.getPoint0().y()))
+                y+=c.getPoint0().y();
+            if(!Double.isNaN(c.getPoint0().z()))
+                z+=c.getPoint0().z();
+        }
+        x/=crs.size();
+        y/=crs.size();
+        z/=crs.size();
+        return new Vector3D(x,y,z).mag();
+    }
     
     
 }

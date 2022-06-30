@@ -13,7 +13,6 @@ import org.jlab.geom.prim.Arc3D;
 import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Transformation3D;
-import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.hit.Strip;

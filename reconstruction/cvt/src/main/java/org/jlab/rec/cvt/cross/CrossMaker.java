@@ -94,7 +94,7 @@ public class CrossMaker {
         //loop over the clusters
         // inner clusters
         for (Cluster inlayerclus : svt_innerlayrclus) {
-            if(inlayerclus.getTotalEnergy()<SVTParameters.ETOTCUT)
+           if(inlayerclus.getTotalEnergy()<SVTParameters.ETOTCUT)
                 continue;
             // outer clusters
             for (Cluster outlayerclus : svt_outerlayrclus) {
@@ -125,14 +125,20 @@ public class CrossMaker {
                     this_cross.updateSVTCross(null); 
                     // the uncorrected point obtained from default estimate that the track is at 90 deg wrt the module should not be null
                     if (this_cross.getPoint0() != null) {
-                        //pass the cross to the arraylist of crosses
-                        this_cross.setId(crosses.size() + 1);
-                        this_cross.setDetector(DetectorType.BST);
-                        calcCentErr(this_cross, this_cross.getCluster1());
-                        calcCentErr(this_cross, this_cross.getCluster2());
-                        crosses.add(this_cross);
-                    }
+                        double zo = this_cross.getCluster2().getLine().origin().z();
+                        double ze = this_cross.getCluster2().getLine().end().z();
+                        double z = this_cross.getPoint0().z();
+                        double range = Math.abs(ze-zo)+SVTParameters.CROSSZCUT;
+                        if(Math.abs(z-zo)<range && Math.abs(z-ze)<range ) {
+                            //pass the cross to the arraylist of crosses
+                            this_cross.setId(crosses.size() + 1);
+                            this_cross.setDetector(DetectorType.BST);
+                            calcCentErr(this_cross, this_cross.getCluster1());
+                            calcCentErr(this_cross, this_cross.getCluster2());
 
+                            crosses.add(this_cross);
+                        }
+                    }
                 }
             }
         }

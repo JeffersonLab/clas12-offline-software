@@ -16,7 +16,9 @@ public class SVTParameters {
     public static int MAXSVTHITS = 700;
     public static int MAXSVTCROSSES = 1000;
     public static double RESIMAX = 5;
-
+    public static double TIMECUTLOW = 55;
+    public static double MAXDOCA2STRIP = 0.8;
+    public static double MAXDOCA2STRIPS = 1.5;
     // THRESHOLDS
     public static int INITTHRESHOLD = 30;
     public static int DELTATHRESHOLD = 15;
@@ -25,6 +27,8 @@ public class SVTParameters {
     public static double ETOTCUT = 10.0;
     // cut on Edep min;
     public static double EDEPMIN = 0.020; //20keV=0.020
+    //cut on cross point0 z
+    public static double CROSSZCUT= 10;
 
     // selection cuts for helical tracks
     public static final double MINRADCURV = 200.00; //in cm

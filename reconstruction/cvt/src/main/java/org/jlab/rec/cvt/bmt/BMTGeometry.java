@@ -631,6 +631,7 @@ public class BMTGeometry {
         
         Vector3D vec = new Vector3D(Math.cos(localAngle),Math.sin(localAngle),0);
         if(Double.isNaN(localAngle)) vec = null;
+        if(vec==null) return 0;
         int sector = 0;
         double width = 0.5; // Math.cos(60deg);
         double delta = -1;

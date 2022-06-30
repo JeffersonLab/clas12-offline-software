@@ -18,6 +18,7 @@ import org.jlab.rec.cvt.hit.ADCConvertor;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.hit.Strip;
 import org.jlab.rec.cvt.svt.SVTGeometry;
+import org.jlab.rec.cvt.svt.SVTParameters;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -113,12 +114,15 @@ public class HitReader {
                 int strip   = bankDGTZ.getShort("component", i);
                 double ADCtoEdep = bankDGTZ.getInt("ADC", i);
                 double time      = bankDGTZ.getFloat("time", i);
-               
+                int order   = bankDGTZ.getByte("order", i);
+                //if (order == 1) {
+                //    continue;
+                //}
                 //fix for now... no adc in GEMC
                 if (ADCtoEdep < 1) {
                     continue;
                 }
-
+                
                 // create the strip object for the BMT
                 Strip BmtStrip = new Strip(strip, ADCtoEdep, time);
                 BmtStrip.setStatus(status.getIntValue("status", sector, layer, strip));
@@ -131,9 +135,17 @@ public class HitReader {
                 
                 Hit hit = new Hit(DetectorType.BMT, BMTGeometry.getDetectorType(layer), sector, layer, BmtStrip);                
                 hit.setId(i+1);
+                if (event.hasBank("MC::Event"))
+                    hit.MCstatus = order;
                 // add this hit
-                if(hit.getLayer()+3!=Constants.getInstance().getRmReg())
-                    hits.add(hit);
+                if(hit.getLayer()+3!=Constants.getInstance().getRmReg()) {
+                    if(Constants.getInstance().useOnlyMCTruthHits() ) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                    } else {
+                        hits.add(hit);
+                    }
+                }
             }
             // fills the list of BMT hits
             Collections.sort(hits);
@@ -173,6 +185,13 @@ public class HitReader {
                     byte layer  = bankDGTZ.getByte("layer", i);
                     short strip = bankDGTZ.getShort("component", i);
                     double time = bankDGTZ.getFloat("time", i);
+                    
+                    //if (order == 1) {
+                    //    continue;
+                    //}
+                    //if(time<SVTParameters.TIMECUTLOW) 
+                    //    continue;
+                    
                     int key = DetectorDescriptor.generateHashCode(sector, layer, strip);
                     if(tdcs.containsKey(key)) {
                         if(time<tdcs.get(key))
@@ -188,7 +207,7 @@ public class HitReader {
                 if (bankDGTZ.getInt("ADC", i) < 0) {
                     continue; // ignore hits TDC hits with ADC==-1 
                 }
-                
+                int order   = bankDGTZ.getByte("order", i);
                 int id      = i + 1;
                 byte sector = bankDGTZ.getByte("sector", i);
                 byte layer  = bankDGTZ.getByte("layer", i);
@@ -249,36 +268,20 @@ public class HitReader {
                 if (SvtStrip.getEdep() == 0) {
                     SvtStrip.setStatus(1);
                 }
-//                if (Constants.getInstance().timeCuts) {
-//                    if(time > 0 && (time < 150 || time > 350)) {
-//                        SvtStrip.setStatus(2);// calculate the strip parameters for the BMT hit
-//                    }
-//                }
-//                SvtStrip.setStatus(status.getIntValue("status", sector, layer, strip));
-                
-                // BMTGeometry implementation using the geometry package:  Charles Platt
-//                Line3d shiftedStrip   = geo.getStrip(layer[i]-1, sector[i]-1, strip[i]-1);
-//
- //               Vector3d o1            = shiftedStrip.origin();
- //               Vector3d e1            = shiftedStrip.end();
-
-//                Point3D  MP  = new  Point3D(( o1.x + e1.x ) /2.,
- //                                           ( o1.y + e1.y ) /2.,
- //                                           ( o1.z + e1.z ) /2. );
- //               Vector3D Dir = new Vector3D((-o1.x + e1.x ),
- //                                           (-o1.y + e1.y ),
- //                                           (-o1.z + e1.z )     );
-
-//                Point3D passVals = new Point3D(o1.x, o1.y, o1.z); //switch from Vector3d to Point3D
-//                SvtStrip.setImplantPoint(passVals);
-
-
                 // create the hit object
                 Hit hit = new Hit(DetectorType.BST, BMTType.UNDEFINED, sector, layer, SvtStrip);
                 hit.setId(id);
+                if (event.hasBank("MC::Event"))
+                    hit.MCstatus = order;
                 // add this hit
-                if(hit.getRegion()!=Constants.getInstance().getRmReg())      
-                    hits.add(hit);
+                if(hit.getRegion()!=Constants.getInstance().getRmReg()) {     
+                    if(Constants.getInstance().useOnlyMCTruthHits() ) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                    } else {
+                        hits.add(hit); 
+                    }
+                }
             }
         }
         // fill the list of SVT hits
