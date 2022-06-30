@@ -46,14 +46,12 @@ public class DCReconstructionTest {
     MagFieldsEngine enf = new MagFieldsEngine();
     enf.init();
     enf.processDataEvent(testEvent);
-    DCHBClustering engineHBC = new DCHBClustering();
-    engineHBC.init();
-    engineHBC.processDataEvent(testEvent); 
-    
+    DCHBClustering      engineCL = new DCHBClustering();
     DCHBPostClusterConv engineHB = new DCHBPostClusterConv();
+    engineCL.init();
     engineHB.init();
-    engineHB.processDataEvent(testEvent);
-    
+    engineCL.processDataEvent(testEvent); 
+    engineHB.processDataEvent(testEvent); 
     if(testEvent.hasBank("HitBasedTrkg::HBTracks")) {
         testEvent.getBank("HitBasedTrkg::HBTracks").show();
     }

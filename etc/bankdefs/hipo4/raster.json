@@ -1,0 +1,12 @@
+[ 
+ {
+    "name": "RASTER::position",
+    "group": 22200,
+    "item" : 21,
+    "info": "Reconstructed raster position",
+    "entries": [
+              {"name":"x",       "type":"F", "info":"x position (cm)"},
+              {"name":"y",       "type":"F", "info":"y position (cm)"}
+    ]
+  }
+]

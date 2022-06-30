@@ -69,6 +69,56 @@
     ]
   },
  {
+    "bank": "FTTRK::hits",
+    "group": 21321,
+    "info": "Reconstructed Hits in FT hodoscope",
+    "items": [
+              {"name":"sector",    "id":2,  "type":"int8",  "info":"sector number"},
+              {"name":"layer",           "id":3,  "type":"int8",  "info":"layer number"},
+              {"name":"component", "id":4,  "type":"int16", "info":"component number"},
+              {"name":"x",         "id":5,  "type":"float", "info":"Hit X position (cm)" },
+              {"name":"y",         "id":6,  "type":"float", "info":"Hit Y position (cm)" },
+              {"name":"z",         "id":7,  "type":"float", "info":"Hit Z position (cm)" },
+              {"name":"energy",    "id":8,  "type":"float", "info":"Hit Energy" },
+              {"name":"time",      "id":9,  "type":"float", "info":"Hit Time" },
+              {"name":"hitID",           "id":10, "type":"int16", "info":"Hit Pointer to ADC bank"},
+              {"name":"clusterID", "id":11, "type":"int16", "info":"Hit Pointer to Cluster Bank"}
+    ]
+  },
+ {
+    "bank": "FTTRK::clusters",
+    "group": 21322,
+    "info": "Reconstructed clusters in FT tracker",
+    "items": [
+              {"name":"size",             "id":1,  "type":"int16",  "info":"Cluster size"},
+              {"name":"id",               "id":2,  "type":"int16",  "info":"Cluster ID"},
+              {"name":"sector",           "id":3,  "type":"int8",   "info":"Cluster sector"},
+              {"name":"layer",            "id":4,  "type":"int8",   "info":"Cluster layer"},
+              {"name":"energy",           "id":5,  "type":"float",  "info":"Cluster total energy"},
+              {"name":"maxEnergy",        "id":6,  "type":"float",  "info":"Seed energy "},
+              {"name":"seed",             "id":7,  "type":"int16",  "info":"Seed strip"},
+              {"name":"centroid",         "id":8,  "type":"float",  "info":"Centroid strip number"}
+    ]
+  },
+ {
+    "bank": "FTTRK::crosses",
+    "group": 21323,
+    "info": "Reconstructed crosses in FT tracker",
+    "items": [
+             {"name":"size",        "id":1,  "type":"int16", "info":"Size of cross bank"},
+             {"name":"id",          "id":2,  "type":"int16", "info":"Cross ID"},
+             {"name":"sector",      "id":3,  "type":"int8",  "info":"Cross sector"},
+             {"name":"detector",    "id":4,  "type":"int8",  "info":"Cross detector"},
+             {"name":"x",           "id":5,  "type":"float", "info":"Cross X position (cm)"},
+             {"name":"y",           "id":6,  "type":"float", "info":"Cross Y position (cm)"},
+             {"name":"z",           "id":7,  "type":"float", "info":"Cross Z position (cm)"},
+             {"name":"energy",      "id":8,  "type":"float", "info":"Energy associated to the Cross"},
+             {"name":"time",        "id":9,  "type":"float", "info":"Time associated to the Cross"},
+             {"name":"Cluster1ID",  "id":10, "type":"int16", "info":"ID of the bottom layer cluster in the Cross"},
+             {"name":"Cluster2ID",  "id":11, "type":"int16", "info":"ID of the top layer cluster in the Cross"}             
+    ]
+  },
+ {
     "bank": "FT::particles",
     "group": 20924,
     "info": "Reconstructed Particles in FT",

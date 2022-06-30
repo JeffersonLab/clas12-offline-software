@@ -371,8 +371,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             double alpha = Math.atan(trkAngle);
             
             // correct alpha with theta0, the angle corresponding to the isochrone lines twist due to the electric field
-            if(event.hasBank("MC::Particle")==false)
-                alpha-=Swimmer.getTorScale()*theta0;
+            alpha-=Swimmer.getTorScale()*theta0;
             
             this.setAlpha(Math.toDegrees(alpha));
             //reduce the corrected angle 
@@ -668,7 +667,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         }    
         
         double MaxSag = Constants.getInstance().getWIREDIST()*A*C*wire*wire*FastMath.cos(Math.toRadians(25.))*FastMath.cos(Math.toRadians(30.));
-        
+
         double delta_x = MaxSag*(1.-Math.abs(y)/(0.5*wireLen))*(1.-Math.abs(y)/(0.5*wireLen));
         
         //x+=delta_x;

@@ -7,6 +7,7 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 
 import org.jlab.rec.cvt.cluster.Cluster;
@@ -277,9 +278,9 @@ public class Seed implements Comparable<Seed>{
             if (bmtCSz > 0) {
                 for (int j = svtSz * useSVTdipAngEst; j < svtSz * useSVTdipAngEst + bmtCSz; j++) {
                     Z.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).getPoint().z());
-                    Rho.add(j, Constants.BMTGEOMETRY.getRadiusMidDrift(BMTCrossesC.get(j - svtSz * useSVTdipAngEst).getCluster1().getLayer()));
+                    Rho.add(j, Geometry.getInstance().getBMT().getRadiusMidDrift(BMTCrossesC.get(j - svtSz * useSVTdipAngEst).getCluster1().getLayer()));
                     
-                    ErrRho.add(j, Constants.BMTGEOMETRY.getThickness()/2 / Math.sqrt(12.));
+                    ErrRho.add(j, Geometry.getInstance().getBMT().getThickness()/2 / Math.sqrt(12.));
                     ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).getPointErr().z());
                 }
             }
@@ -419,6 +420,7 @@ public class Seed implements Comparable<Seed>{
                      Math.toDegrees(this.getHelix().getPhiAtDCA()), this.getHelix().getZ0(), this.getHelix().getTanDip(),
                      this.getNDF(), this.getChi2(), this.getStatus());
         for(Cross c: this.getCrosses()) str = str + c.toString() + "\n";
+        for(Cluster c: this.getClusters()) str = str + c.toString() + "\n";
         return str;
     }
 }

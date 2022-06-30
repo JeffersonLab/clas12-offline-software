@@ -141,7 +141,7 @@ public class FTCALHit implements Comparable<FTCALHit>{
 	}
 
 
-	public void set_Edep(double edep) {
+	public final void set_Edep(double edep) {
 		this._Edep = edep;
 	}
 
@@ -152,7 +152,7 @@ public class FTCALHit implements Comparable<FTCALHit>{
 	}
 
 
-	public void set_Time(double Time) {
+	public final void set_Time(double Time) {
 		this._Time = Time;
 	}
 	
@@ -162,7 +162,7 @@ public class FTCALHit implements Comparable<FTCALHit>{
 	}
 
 
-	public void set_Dx(double Dx) {
+	public final void set_Dx(double Dx) {
 		this._Dx = Dx;
 	}
 
@@ -172,7 +172,7 @@ public class FTCALHit implements Comparable<FTCALHit>{
 	}
 
 
-	public void set_Dy(double Dy) {
+	public final void set_Dy(double Dy) {
 		this._Dy = Dy;
 	}
 
@@ -182,7 +182,7 @@ public class FTCALHit implements Comparable<FTCALHit>{
 	}
 
 
-	public void set_Dz(double Dz) {
+	public final void set_Dz(double Dz) {
 		this._Dz = Dz;
 	}
 
@@ -192,7 +192,7 @@ public class FTCALHit implements Comparable<FTCALHit>{
 	}
 
 
-	public void set_DGTZIndex(int _DGTZIndex) {
+	public final void set_DGTZIndex(int _DGTZIndex) {
 		this._DGTZIndex = _DGTZIndex;
 	}
 	
@@ -202,7 +202,7 @@ public class FTCALHit implements Comparable<FTCALHit>{
 	}
 
 
-	public void set_ClusID(int _ClusIndex) {
+	public final void set_ClusID(int _ClusIndex) {
 		this._ClusIndex = _ClusIndex;
 	}
 	

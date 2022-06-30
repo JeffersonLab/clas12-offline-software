@@ -9,6 +9,7 @@ import org.jlab.detector.base.DetectorType;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.fit.CircleFitter;
@@ -351,7 +352,7 @@ public class StraightTrackSeeder {
             }
             //if (bmt_geo.isInDetector(bmt_crosses.get(i).getRegion()*2-1, angle, jitter) 
             //        == bmt_crosses.get(i).getSector() - 1) 
-            if (Constants.BMTGEOMETRY.inDetector(bmt_crosses.get(i).getRegion()*2-1, bmt_crosses.get(i).getSector(), ref)==true){
+            if (Geometry.getInstance().getBMT().inDetector(bmt_crosses.get(i).getRegion()*2-1, bmt_crosses.get(i).getSector(), ref)==true){
                 bmt_crossesInSec.add(bmt_crosses.get(i)); 
             }
             
@@ -450,9 +451,9 @@ public class StraightTrackSeeder {
             if (bmtCSz > 0) {
                 for (int j = svtSz * useSVTdipAngEst; j < svtSz * useSVTdipAngEst + bmtCSz; j++) {
                     Z.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).getPoint().z());
-                    Rho.add(j, Constants.BMTGEOMETRY.getRadiusMidDrift(BMTCrossesC.get(j - svtSz * useSVTdipAngEst).getCluster1().getLayer()));
+                    Rho.add(j, Geometry.getInstance().getBMT().getRadiusMidDrift(BMTCrossesC.get(j - svtSz * useSVTdipAngEst).getCluster1().getLayer()));
                     
-                    ErrRho.add(j, Constants.BMTGEOMETRY.getThickness()/2 / Math.sqrt(12.));
+                    ErrRho.add(j, Geometry.getInstance().getBMT().getThickness()/2 / Math.sqrt(12.));
                     ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).getPointErr().z());
                 }
             }
@@ -573,11 +574,11 @@ public class StraightTrackSeeder {
         double dzdrsum = trkCand.getHelix().getTanDip();
 
         double z_bmt = bmt_Ccross.getPoint().z();
-        double r_bmt = Constants.BMTGEOMETRY.getRadius(bmt_Ccross.getCluster1().getLayer());
+        double r_bmt = Geometry.getInstance().getBMT().getRadius(bmt_Ccross.getCluster1().getLayer());
         
         Point3D refPoint = trkCand.getCrosses().get(0).getPoint(); 
         //if (bmt_geo.isInSector(bmt_Ccross.getCluster1().getLayer(), Math.atan2(refPoint.y(), refPoint.x()), Math.toRadians(10)) != bmt_Ccross.getSector()) {
-        if (Constants.BMTGEOMETRY.getSector(bmt_Ccross.getCluster1().getLayer(), Math.atan2(refPoint.y(), refPoint.x())) != bmt_Ccross.getSector()) {
+        if (Geometry.getInstance().getBMT().getSector(bmt_Ccross.getCluster1().getLayer(), Math.atan2(refPoint.y(), refPoint.x())) != bmt_Ccross.getSector()) {
             return false;
         }
         double dzdr_bmt = z_bmt / r_bmt;

@@ -72,6 +72,8 @@ public class EBTBEngine extends EBEngine {
         this.setTrackType("TimeBasedTrkg::TBTracks");
         this.setTrajectoryType("TimeBasedTrkg::Trajectory");
         this.setCovMatrixType("TimeBasedTrkg::TBCovMat");
+        this.setCvtTrackType("CVTRec::Tracks");
+        this.setCvtTrajType("CVTRec::Trajectory");
     }
     
 }

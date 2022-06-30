@@ -30,11 +30,13 @@ import org.jlab.detector.base.DetectorType;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.cross.CrossMaker;
 import org.jlab.rec.cvt.fit.CircleFitPars;
 import org.jlab.rec.cvt.fit.CircleFitter;
 import org.jlab.rec.cvt.svt.SVTGeometry;
+import org.jlab.rec.cvt.svt.SVTParameters;
 import org.jlab.rec.cvt.trajectory.Ray;
 /**
  * Service to return reconstructed TRACKS
@@ -49,7 +51,7 @@ public class RecUtilities {
         List<Cross> rmCrosses = new ArrayList<>();
         
         for(Cross c : crosses.get(0)) {
-            if(!Constants.SVTGEOMETRY.isInFiducial(c.getCluster1().getLayer(), c.getSector(), c.getPoint()))
+            if(!Geometry.getInstance().getSVT().isInFiducial(c.getCluster1().getLayer(), c.getSector(), c.getPoint()))
                 rmCrosses.add(c);
         }
        
@@ -91,8 +93,8 @@ public class RecUtilities {
                 Ray ray = trkcand.getRay();
                 Point3D top    = new Point3D();
                 Point3D bottom = new Point3D();
-                Constants.SVTGEOMETRY.getPlane(layertop, sector).intersection(ray.toLine(), top);
-                Constants.SVTGEOMETRY.getPlane(layerbot, sector).intersection(ray.toLine(), bottom);
+                Geometry.getInstance().getSVT().getPlane(layertop, sector).intersection(ray.toLine(), top);
+                Geometry.getInstance().getSVT().getPlane(layerbot, sector).intersection(ray.toLine(), bottom);
                 
                 if(top.y()>bottom.y()) {
                     clsList.add(trkcand.get(i).getCluster1());
@@ -118,11 +120,11 @@ public class RecUtilities {
                 
                 Ray ray = trkcand.getRay();
                 Point3D traj = new Point3D();
-                Constants.SVTGEOMETRY.getPlane(layer, sector).intersection(ray.toLine(), traj);
+                Geometry.getInstance().getSVT().getPlane(layer, sector).intersection(ray.toLine(), traj);
                 
                 int key = SVTGeometry.getModuleId(layer, sector);
                 
-                if(traj!=null && Constants.SVTGEOMETRY.isInFiducial(layer, sector, traj)) {
+                if(traj!=null && Geometry.getInstance().getSVT().isInFiducial(layer, sector, traj)) {
                     double  doca    = Double.POSITIVE_INFINITY;
                     // loop over all clusters in the same sector and layer that are not associated to s track
                     for(Cluster cls : allClusters) {
@@ -154,7 +156,8 @@ public class RecUtilities {
         
     }
     
-    public List<Cluster> findClustersOnTrk(List<Cluster> allClusters, List<Cluster> seedCluster, Helix helix, double P, int Q, Swim swimmer) { 
+    public List<Cluster> findClustersOnTrk(List<Cluster> allClusters, 
+            List<Cluster> seedCluster, Helix helix, double P, int Q, Swim swimmer) { 
         // initialize swimmer starting from the track vertex
         double maxPathLength = 1; 
         Point3D vertex = helix.getVertex();
@@ -188,7 +191,7 @@ public class RecUtilities {
                 
                 // check the angle between the trajectory point and the sector 
                 // and skip sectors that are too far (more than the sector angular coverage)
-                Vector3D n = Constants.SVTGEOMETRY.getNormal(layer, sector);
+                Vector3D n = Geometry.getInstance().getSVT().getNormal(layer, sector);
                 double deltaPhi = Math.acos(helixPoint.toVector3D().asUnit().dot(n));
                 double buffer = Math.toRadians(1.);
                 if(Math.abs(deltaPhi)>2*Math.PI/SVTGeometry.NSECTORS[ilayer]+buffer) continue;
@@ -197,14 +200,14 @@ public class RecUtilities {
                 
                 // calculate trajectory
                 Point3D traj = null;
-                Point3D  p = Constants.SVTGEOMETRY.getModule(layer, sector).origin();
+                Point3D  p = Geometry.getInstance().getSVT().getModule(layer, sector).origin();
                 Point3D pm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
                 inters = swimmer.SwimPlane(n, pm, Constants.DEFAULTSWIMACC/10);
                 if(inters!=null) {
                     traj = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
                 } 
                 // if trajectory is valid, look for missing clusters
-                if(traj!=null && Constants.SVTGEOMETRY.isInFiducial(layer, sector, traj)) {
+                if(traj!=null && Geometry.getInstance().getSVT().isInFiducial(layer, sector, traj)) {
                     double  doca    = Double.POSITIVE_INFINITY; 
                     //if(clusterMap.containsKey(key)) {
                     //    Cluster cluster = clusterMap.get(key);
@@ -259,7 +262,7 @@ public class RecUtilities {
         // for each layer
         for (int ilayer = 0; ilayer < BMTGeometry.NLAYERS; ilayer++) {
             int layer = ilayer + 1;
-            double radius  = Constants.BMTGEOMETRY.getRadiusMidDrift(layer);
+            double radius  = Geometry.getInstance().getBMT().getRadiusMidDrift(layer);
             // identify the sector the track may be going through (this doesn't account for misalignments
             Point3D helixPoint = helix.getPointAtRadius(radius);
             // reinitilize swimmer from last surface
@@ -272,7 +275,7 @@ public class RecUtilities {
                 
                 // check the angle between the trajectory point and the sector 
                 // and skip sectors that are too far (more than the sector angular coverage)
-                if(Constants.BMTGEOMETRY.inDetector(layer, sector, helixPoint)==false)
+                if(Geometry.getInstance().getBMT().inDetector(layer, sector, helixPoint)==false)
                     continue;
                  
                 // calculate trajectory
@@ -287,7 +290,7 @@ public class RecUtilities {
                 
                
                 // if trajectory is valid, look for missing clusters
-                if(traj!=null && Constants.BMTGEOMETRY.inDetector(layer, sector, traj)) {
+                if(traj!=null && Geometry.getInstance().getBMT().inDetector(layer, sector, traj)) {
                     double  doca    = Double.POSITIVE_INFINITY; 
                     // loop over all clusters in the same sector and layer that are not associated to s track
                     for(Cluster cls : allClusters) {
@@ -317,13 +320,15 @@ public class RecUtilities {
         return clustersOnTrack;
     }
     
-    List<Cross> findCrossesOnBMTTrack(List<Cluster> bmtclsOnTrack, CrossMaker cm, int idx) {
+    public List<Cross> findCrossesOnBMTTrack(List<Cross> allCrosses, List<Cluster> bmtclsOnTrack) {
          // fill the sorted list
-        ArrayList<ArrayList<Cluster>> sortedClusters = cm.sortClusterByDetectorAndIO(bmtclsOnTrack);
-        ArrayList<Cluster> bmt_Clayrclus = sortedClusters.get(2);
-        ArrayList<Cluster> bmt_Zlayrclus = sortedClusters.get(3);
-        ArrayList<Cross> BMTCrosses = cm.findBMTCrosses(bmt_Clayrclus, bmt_Zlayrclus, idx);
-        
+        List<Cross> BMTCrosses = new ArrayList<>();
+        for(Cluster cluster : bmtclsOnTrack) {
+            for(Cross cross : allCrosses) {
+                if(cluster.getId()==cross.getCluster1().getId()) BMTCrosses.add(cross);
+            }
+        }
+        if(BMTCrosses.size()!=bmtclsOnTrack.size()) System.out.println("Error: cross missing from list");
         return BMTCrosses;
     }
     
@@ -336,14 +341,14 @@ public class RecUtilities {
                 int layer  = trkcand.getClusters().get(i).getLayer();
                 int sector = trkcand.getClusters().get(i).getSector();
                 Point3D p = new Point3D(traj.get(layer).x, traj.get(layer).y, traj.get(layer).z);
-                cluster.setCentroidResidual(traj.get(layer).resi);
+                cluster.setCentroidResidual(traj.get(layer).residual);
                 cluster.setSeedResidual(p);             
                 for (Hit hit : cluster) {
                     double doca1 = hit.residual(p);
-                    double sigma1 = Constants.SVTGEOMETRY.getSingleStripResolution(layer, hit.getStrip().getStrip(), traj.get(layer).z);
+                    double sigma1 = Geometry.getInstance().getSVT().getSingleStripResolution(layer, hit.getStrip().getStrip(), traj.get(layer).z);
                     hit.setstripResolutionAtDoca(sigma1);
                     hit.setdocaToTrk(doca1);  
-                    if(traj.get(layer).isMeasUsed)
+                    if(traj.get(layer).isUsed)
                         hit.setTrkgStatus(1);
                 }
             }
@@ -365,15 +370,15 @@ public class RecUtilities {
                 trkcand.getCrosses().get(c).setDir(v); 
                 Cluster cluster = trkcand.getCrosses().get(c).getCluster1();
                 if (trkcand.getCrosses().get(c).getType()==BMTType.Z) {
-                    cluster.setCentroidResidual(traj.get(layer).resi*cluster.getTile().baseArc().radius());
+                    cluster.setCentroidResidual(traj.get(layer).residual*cluster.getTile().baseArc().radius());
                 }
                 else if (trkcand.getCrosses().get(c).getType()==BMTType.C) {
-                    cluster.setCentroidResidual(traj.get(layer).resi);
+                    cluster.setCentroidResidual(traj.get(layer).residual);
                     cluster.setSeedResidual(p); 
                 }
                 for (Hit hit : cluster) {
                     hit.setdocaToTrk(hit.residual(p));
-                    if(traj.get(layer).isMeasUsed) hit.setTrkgStatus(1);
+                    if(traj.get(layer).isUsed) hit.setTrkgStatus(1);
                 }
             }
         }
@@ -404,7 +409,7 @@ public class RecUtilities {
             int layr2 = 0;
             if(c.getDetector()==DetectorType.BMT) {
                 layr = c.getOrderedRegion()+3;
-                if((int)Constants.getUsedLayers().get(layr)>0) {
+                if((int)Constants.getInstance().getUsedLayers().get(layr)>0) {
                     c.isInSeed = false;
                     //System.out.println("refit "+c.printInfo());
                     refib.add(c);
@@ -412,8 +417,8 @@ public class RecUtilities {
             } else {
                 layr = c.getCluster1().getLayer();
                 layr2 = c.getCluster2().getLayer();
-                if((int)Constants.getUsedLayers().get(layr)>0 
-                        && (int)Constants.getUsedLayers().get(layr2)>0) {
+                if((int)Constants.getInstance().getUsedLayers().get(layr)>0 
+                        && (int)Constants.getInstance().getUsedLayers().get(layr2)>0) {
                     c.updateSVTCross(null); 
                     c.isInSeed = false;
                     refi.add(c); 
@@ -493,15 +498,15 @@ public class RecUtilities {
             c.setAssociatedTrackID(-1);
             if(c.getDetector()==DetectorType.BMT) {
                 layr = c.getOrderedRegion()+3;
-                if((int)Constants.getUsedLayers().get(layr)>0) {
+                if((int)Constants.getInstance().getUsedLayers().get(layr)>0) {
                     c.isInSeed = false;
                     refib.add(c);
                 }
             } else {
                 layr = c.getCluster1().getLayer();
                 layr2 = c.getCluster2().getLayer();
-                if((int)Constants.getUsedLayers().get(layr)>0 
-                        && (int)Constants.getUsedLayers().get(layr2)>0) {
+                if((int)Constants.getInstance().getUsedLayers().get(layr)>0 
+                        && (int)Constants.getInstance().getUsedLayers().get(layr2)>0) {
                     c.updateSVTCross(null);
                     c.isInSeed = false;
                    // System.out.println("refit "+c.printInfo());
@@ -547,7 +552,7 @@ public class RecUtilities {
             int layr2 = 0;
             if(c.getDetector()==DetectorType.BMT) {
                 layr = c.getOrderedRegion()+3;
-                if((int)Constants.getUsedLayers().get(layr)>0) {
+                if((int)Constants.getInstance().getUsedLayers().get(layr)>0) {
                     c.isInSeed = false;
                 //    System.out.println("refit "+c.printInfo());
                     refib.add(c);
@@ -555,8 +560,8 @@ public class RecUtilities {
             } else {
                 layr = c.getCluster1().getLayer();
                 layr2 = c.getCluster2().getLayer();
-                if((int)Constants.getUsedLayers().get(layr)>0 
-                        && (int)Constants.getUsedLayers().get(layr2)>0) {
+                if((int)Constants.getInstance().getUsedLayers().get(layr)>0 
+                        && (int)Constants.getInstance().getUsedLayers().get(layr2)>0) {
                     c.updateSVTCross(null);
                     c.isInSeed = false;
                    // System.out.println("refit "+c.printInfo());
@@ -642,73 +647,77 @@ public class RecUtilities {
         
         double delpzdeltandip = pt;
         
-        tCov[0][0] = (hCov[0][0]*delxdeld0+hCov[1][0]*delxdelphi0)*delxdeld0
-                    +(hCov[0][1]*delxdeld0+hCov[1][1]*delxdelphi0)*delxdelphi0;
-        tCov[0][1] = (hCov[0][0]*delxdeld0+hCov[1][0]*delxdelphi0)*delydeld0
-                    +(hCov[0][1]*delxdeld0+hCov[1][1]*delxdelphi0)*delydelphi0;
-        tCov[0][2] = (hCov[0][3]*delxdeld0+hCov[1][3]*delxdelphi0);
-        tCov[0][3] = (hCov[0][1]*delxdeld0+hCov[1][1]*delxdelphi0)*delpxdelphi0
-                    +(hCov[0][2]*delxdeld0+hCov[1][2]*delxdelphi0)*delpxdelrho;
-        tCov[0][4] = (hCov[0][1]*delxdeld0+hCov[1][1]*delxdelphi0)*delpydelphi0
-                    +(hCov[0][2]*delxdeld0+hCov[1][2]*delxdelphi0)*delpydelrho;
-        tCov[0][5] = (hCov[0][2]*delxdeld0+hCov[1][2]*delxdelphi0)*delpzdelrho
-                    +(hCov[0][4]*delxdeld0+hCov[1][4]*delxdelphi0)*delpzdeltandip;
+        tCov[0][0] = (hCov[0][0]*delxdeld0+hCov[0][1]*delxdelphi0)*delxdeld0
+                    +(hCov[1][0]*delxdeld0+hCov[1][1]*delxdelphi0)*delxdelphi0;
+        tCov[0][1] = (hCov[0][0]*delydeld0+hCov[0][1]*delydelphi0)*delxdeld0
+                    +(hCov[1][0]*delydeld0+hCov[1][1]*delydelphi0)*delxdelphi0;
+        tCov[0][2] =  hCov[0][3]*delxdeld0+hCov[1][3]*delxdelphi0;
+        tCov[0][3] = (hCov[0][1]*delpxdelphi0+hCov[0][2]*delpxdelrho)*delxdeld0
+                    +(hCov[1][1]*delpxdelphi0+hCov[1][2]*delpxdelrho)*delxdelphi0;
+        tCov[0][4] = (hCov[0][1]*delpydelphi0+hCov[0][2]*delpydelrho)*delxdeld0
+                    +(hCov[1][1]*delpydelphi0+hCov[1][2]*delpydelrho)*delxdelphi0;
+        tCov[0][5] = (hCov[0][2]*delpzdelrho+hCov[0][4]*delpzdeltandip)*delxdeld0
+                    +(hCov[1][2]*delpzdelrho+hCov[1][4]*delpzdeltandip)*delxdelphi0;
         
         
-        tCov[1][0] = (hCov[0][0]*delydeld0+hCov[1][0]*delydelphi0)*delxdeld0
-                    +(hCov[0][1]*delydeld0+hCov[1][1]*delydelphi0)*delxdelphi0;
-        tCov[1][1] = (hCov[0][0]*delydeld0+hCov[1][0]*delydelphi0)*delydeld0
-                    +(hCov[0][1]*delydeld0+hCov[1][1]*delydelphi0)*delydelphi0;
+        tCov[1][0] = (hCov[0][0]*delxdeld0+hCov[0][1]*delxdelphi0)*delydeld0
+                    +(hCov[1][0]*delxdeld0+hCov[1][1]*delxdelphi0)*delydelphi0;
+        tCov[1][1] = (hCov[0][0]*delydeld0+hCov[0][1]*delydelphi0)*delydeld0
+                    +(hCov[1][0]*delydeld0+hCov[1][1]*delydelphi0)*delydelphi0;
         tCov[1][2] = (hCov[0][3]*delydeld0+hCov[1][3]*delydelphi0);
-        tCov[1][3] = (hCov[0][1]*delydeld0+hCov[1][1]*delydelphi0)*delpxdelphi0
-                    +(hCov[0][2]*delydeld0+hCov[1][2]*delydelphi0)*delpxdelrho;
-        tCov[1][4] = (hCov[0][1]*delydeld0+hCov[1][1]*delydelphi0)*delpydelphi0
-                    +(hCov[0][2]*delydeld0+hCov[1][2]*delydelphi0)*delpydelrho;
-        tCov[1][5] = (hCov[0][2]*delydeld0+hCov[1][2]*delydelphi0)*delpzdelrho
-                    +(hCov[0][4]*delydeld0+hCov[1][4]*delydelphi0)*delpzdeltandip;
+        tCov[1][3] = (hCov[0][1]*delpxdelphi0+hCov[0][2]*delpxdelrho)*delydeld0
+                    +(hCov[1][1]*delpxdelphi0+hCov[1][2]*delpxdelrho)*delydelphi0;
+        tCov[1][4] = (hCov[0][1]*delpydelphi0+hCov[0][2]*delpydelrho)*delydeld0
+                    +(hCov[1][1]*delpydelphi0+hCov[1][2]*delpydelrho)*delydelphi0;
+        tCov[1][5] = (hCov[0][2]*delpzdelrho+hCov[0][4]*delpzdeltandip)*delydeld0
+                    +(hCov[1][2]*delpzdelrho+hCov[1][4]*delpzdeltandip)*delydelphi0;
         
-        tCov[2][0] = hCov[2][0]*delxdeld0+hCov[2][1]*delxdelphi0;
-        tCov[2][1] = hCov[2][0]*delydeld0+hCov[2][1]*delydelphi0;
-        tCov[2][2] = hCov[2][3];
-        tCov[2][3] = hCov[2][1]*delpxdelphi0+hCov[2][2]*delpxdelrho;
-        tCov[2][4] = hCov[2][1]*delpydelphi0+hCov[2][2]*delpydelrho;
-        tCov[2][5] = hCov[2][2]*delpzdelrho+hCov[2][4]*delpzdeltandip;
         
-        tCov[3][0] = (hCov[1][0]*delpxdelphi0+hCov[2][0]*delpxdelrho)*delxdeld0
-                    +(hCov[1][1]*delpxdelphi0+hCov[2][1]*delpxdelrho)*delxdelphi0;
-        tCov[3][1] = (hCov[1][0]*delpxdelphi0+hCov[2][0]*delpxdelrho)*delydeld0
-                    +(hCov[1][1]*delpxdelphi0+hCov[2][1]*delpxdelrho)*delydelphi0;
-        tCov[3][2] = (hCov[1][3]*delpxdelphi0+hCov[2][3]*delpxdelrho);
-        tCov[3][3] = (hCov[1][1]*delpxdelphi0+hCov[2][1]*delpxdelrho)*delpxdelphi0
-                    +(hCov[1][2]*delpxdelphi0+hCov[2][2]*delpxdelrho)*delpxdelrho;
-        tCov[3][4] = (hCov[1][1]*delpxdelphi0+hCov[2][1]*delpxdelrho)*delpydelphi0
-                    +(hCov[1][2]*delpxdelphi0+hCov[2][2]*delpxdelrho)*delpydelrho;
-        tCov[3][5] = (hCov[1][2]*delpxdelphi0+hCov[2][2]*delpxdelrho)*delpzdelrho
-                    +(hCov[1][4]*delpxdelphi0+hCov[2][4]*delpxdelrho)*delpzdeltandip;
+        tCov[2][0] = (hCov[3][0]*delxdeld0+hCov[3][1]*delxdelphi0);
+        tCov[2][1] = (hCov[3][0]*delydeld0+hCov[3][1]*delydelphi0);
+        tCov[2][2] =  hCov[3][3];
+        tCov[2][3] = (hCov[3][1]*delpxdelphi0+hCov[3][2]*delpxdelrho);
+        tCov[2][4] = (hCov[3][1]*delpydelphi0+hCov[3][2]*delpydelrho);
+        tCov[2][5] = (hCov[3][2]*delpzdelrho+hCov[3][4]*delpzdeltandip);
+
+
+        tCov[3][0] = (hCov[1][0]*delxdeld0+hCov[1][1]*delxdelphi0)*delpxdelphi0
+                    +(hCov[2][0]*delxdeld0+hCov[2][1]*delxdelphi0)*delpxdelrho;
+        tCov[3][1] = (hCov[1][0]*delydeld0+hCov[1][1]*delydelphi0)*delpxdelphi0
+                    +(hCov[2][0]*delydeld0+hCov[2][1]*delydelphi0)*delpxdelrho;
+        tCov[3][2] =  hCov[1][3]*delpxdelphi0+hCov[2][3]*delpxdelrho;
+        tCov[3][3] = (hCov[1][1]*delpxdelphi0+hCov[1][2]*delpxdelrho)*delpxdelphi0
+                    +(hCov[2][1]*delpxdelphi0+hCov[2][2]*delpxdelrho)*delpxdelrho;
+        tCov[3][4] = (hCov[1][1]*delpydelphi0+hCov[1][2]*delpydelrho)*delpxdelphi0
+                    +(hCov[2][1]*delpydelphi0+hCov[2][2]*delpydelrho)*delpxdelrho;
+        tCov[3][5] = (hCov[1][2]*delpzdelrho+hCov[1][4]*delpzdeltandip)*delpxdelphi0
+                    +(hCov[2][2]*delpzdelrho+hCov[2][4]*delpzdeltandip)*delpxdelrho;
+                
         
-        tCov[4][0] = (hCov[1][0]*delpydelphi0+hCov[2][0]*delpydelrho)*delxdeld0
-                    +(hCov[1][1]*delpydelphi0+hCov[2][1]*delpydelrho)*delxdelphi0;
-        tCov[4][1] = (hCov[1][0]*delpydelphi0+hCov[2][0]*delpydelrho)*delydeld0
-                    +(hCov[1][1]*delpydelphi0+hCov[2][1]*delpydelrho)*delydelphi0;
-        tCov[4][2] = (hCov[1][3]*delpydelphi0+hCov[2][3]*delpydelrho);
-        tCov[4][3] = (hCov[1][1]*delpydelphi0+hCov[2][1]*delpydelrho)*delpxdelphi0
-                    +(hCov[1][2]*delpydelphi0+hCov[2][2]*delpydelrho)*delpxdelrho;
-        tCov[4][4] = (hCov[1][1]*delpydelphi0+hCov[2][1]*delpydelrho)*delpydelphi0
-                    +(hCov[1][2]*delpydelphi0+hCov[2][2]*delpydelrho)*delpydelrho;
-        tCov[4][5] = (hCov[1][2]*delpydelphi0+hCov[2][2]*delpydelrho)*delpzdelrho
-                    +(hCov[1][4]*delpydelphi0+hCov[2][4]*delpydelrho)*delpzdeltandip;
-      
-        tCov[5][0] = (hCov[2][0]*delpzdelrho+hCov[4][0]*delpzdeltandip)*delxdeld0
-                    +(hCov[2][1]*delpzdelrho+hCov[4][1]*delpzdeltandip)*delxdelphi0;
-        tCov[5][1] = (hCov[2][0]*delpzdelrho+hCov[4][0]*delpzdeltandip)*delydeld0
-                    +(hCov[2][1]*delpzdelrho+hCov[4][1]*delpzdeltandip)*delydelphi0;
-        tCov[5][2] = (hCov[2][3]*delpzdelrho+hCov[4][3]*delpzdeltandip);
-        tCov[5][3] = (hCov[2][1]*delpzdelrho+hCov[4][1]*delpzdeltandip)*delpxdelphi0
-                    +(hCov[2][2]*delpzdelrho+hCov[4][2]*delpzdeltandip)*delpxdelrho;
-        tCov[5][4] = (hCov[2][1]*delpzdelrho+hCov[4][1]*delpzdeltandip)*delpydelphi0
-                    +(hCov[2][2]*delpzdelrho+hCov[4][2]*delpzdeltandip)*delpydelrho;
-        tCov[5][5] = (hCov[2][2]*delpzdelrho+hCov[4][2]*delpzdeltandip)*delpzdelrho
-                    +(hCov[2][4]*delpzdelrho+hCov[4][4]*delpzdeltandip)*delpzdeltandip;
+        tCov[4][0] = (hCov[1][0]*delxdeld0+hCov[1][1]*delxdelphi0)*delpydelphi0
+                    +(hCov[2][0]*delxdeld0+hCov[2][1]*delxdelphi0)*delpydelrho;
+        tCov[4][1] = (hCov[1][0]*delydeld0+hCov[1][1]*delydelphi0)*delpydelphi0
+                    +(hCov[2][0]*delydeld0+hCov[2][1]*delydelphi0)*delpydelrho;
+        tCov[4][2] =  hCov[1][3]*delpydelphi0+hCov[2][3]*delpydelrho;
+        tCov[4][3] = (hCov[1][1]*delpxdelphi0+hCov[1][2]*delpxdelrho)*delpydelphi0
+                    +(hCov[2][1]*delpxdelphi0+hCov[2][2]*delpxdelrho)*delpydelrho;
+        tCov[4][4] = (hCov[1][1]*delpydelphi0+hCov[1][2]*delpydelrho)*delpydelphi0
+                    +(hCov[2][1]*delpydelphi0+hCov[2][2]*delpydelrho)*delpydelrho;
+        tCov[4][5] = (hCov[1][2]*delpzdelrho+hCov[1][4]*delpzdeltandip)*delpydelphi0
+                    +(hCov[2][2]*delpzdelrho+hCov[2][4]*delpzdeltandip)*delpydelrho;
+              
+        
+        tCov[5][0] = (hCov[2][0]*delxdeld0+hCov[2][1]*delxdelphi0)*delpzdelrho
+                    +(hCov[4][0]*delxdeld0+hCov[4][1]*delxdelphi0)*delpzdeltandip;
+        tCov[5][1] = (hCov[2][0]*delydeld0+hCov[2][1]*delydelphi0)*delpzdelrho
+                    +(hCov[4][0]*delydeld0+hCov[4][1]*delydelphi0)*delpzdeltandip;        
+        tCov[5][2] =  hCov[2][3]*delpzdelrho+hCov[4][3]*delpzdeltandip;        
+        tCov[5][3] = (hCov[2][1]*delpxdelphi0+hCov[2][2]*delpxdelrho)*delpzdelrho
+                    +(hCov[4][1]*delpxdelphi0+hCov[4][2]*delpxdelrho)*delpzdeltandip;        
+        tCov[5][4] = (hCov[2][1]*delpydelphi0+hCov[2][2]*delpydelrho)*delpzdelrho
+                    +(hCov[4][1]*delpydelphi0+hCov[4][2]*delpydelrho)*delpzdeltandip;
+        tCov[5][5] = (hCov[2][2]*delpzdelrho+hCov[2][4]*delpzdeltandip)*delpzdelrho
+                    +(hCov[4][2]*delpzdelrho+hCov[4][4]*delpzdeltandip)*delpzdeltandip;
         
         //for (int k = 0; k < 6; k++) {
         //    System.out.println(tCov[k][0]+"	"+tCov[k][1]+"	"+tCov[k][2]+"	"+tCov[k][3]+"	"+tCov[k][4]+"	"+tCov[k][5]);
@@ -716,6 +725,55 @@ public class RecUtilities {
         //System.out.println("    ");
         
         return tCov;
+    }
+
+    public List<Cross> findCrossesFromClustersOnTrk(List<Cross> allCrosses, List<Cluster> clsOnTrack, Track track) {
+        CrossMaker cm = new CrossMaker();
+        List<Cross> crosses = new ArrayList<>();
+        for (Cluster cl1 : clsOnTrack) {//inner layer
+            if(cl1.getLayer()%2==0) 
+                continue;
+            //mke crosses using these clusters
+            for (Cluster cl2 : clsOnTrack) { //outer layer
+                if(cl2.getLayer()%2==1) 
+                    continue;
+                
+                if (cl1.getRegion() == cl2.getRegion() && cl1.getSector() == cl2.getSector()
+                        && cl1.getMinStrip() + cl2.getMinStrip() > SVTParameters.MINSTRIPSUM
+                        && cl1.getMaxStrip() + cl2.getMaxStrip() < SVTParameters.MAXSTRIPSUM) {
+                    Cross this_cross = null;
+                    for(Cross c : allCrosses) {
+                        if(c.getCluster1().getId()==cl1.getId() && c.getCluster2().getId()==cl2.getId())
+                            this_cross = c;
+                    }
+                    if(this_cross==null) {
+                        System.out.print("Found NNNNNNNNNNNNNNNNNNNNNNew cross");
+                        // define new cross 
+                        this_cross = new Cross(DetectorType.BST, BMTType.UNDEFINED, cl1.getSector(), cl1.getRegion(), allCrosses.size()+1);
+                        this_cross.setOrderedRegion(cl1.getRegion());
+                        this_cross.setCluster1(cl1);
+                        this_cross.setCluster2(cl2);
+                        // sets the cross parameters (point3D and associated error) from the SVT geometry
+                        this_cross.updateSVTCross(null);
+                        // the uncorrected point obtained from default estimate that the track is at 90 deg wrt the module should not be null
+                        if (this_cross.getPoint0() != null) {     
+                            this_cross.setDetector(DetectorType.BST);
+                            cm.calcCentErr(this_cross, this_cross.getCluster1());
+                            cm.calcCentErr(this_cross, this_cross.getCluster2());
+                        }
+                        allCrosses.add(this_cross);
+                    }
+                    if (track.getHelix() != null && track.getHelix().getCurvature() != 0) {
+                        double R = this_cross.getPoint().toVector3D().rho();
+                        this_cross.update(track.getHelix().getPointAtRadius(R), track.getHelix().getTrackDirectionAtRadius(R));
+                        this_cross.setAssociatedTrackID(track.getSeed().getClusters().get(0).getAssociatedTrackID());
+                    }
+                    this_cross.setAssociatedTrackID(track.getSeed().getClusters().get(0).getAssociatedTrackID());
+                    crosses.add(this_cross);
+                }
+            }
+        }
+        return crosses;
     }
     
     

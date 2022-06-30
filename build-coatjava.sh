@@ -87,8 +87,9 @@ rm -rf coatjava
 mkdir -p coatjava
 cp -r bin coatjava/
 cp -r etc coatjava/
-# create schema directories for partial reconstruction outputs		
-which python >& /dev/null && python=python || python=python3
+
+# create schema directories for partial reconstruction outputs
+which python3 >& /dev/null && python=python3 || python=python
 $python etc/bankdefs/util/bankSplit.py coatjava/etc/bankdefs/hipo4 || exit 1
 mkdir -p coatjava/lib/clas
 cp external-dependencies/JEventViewer-1.1.jar coatjava/lib/clas/
