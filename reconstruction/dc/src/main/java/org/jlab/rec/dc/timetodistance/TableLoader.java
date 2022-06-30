@@ -27,7 +27,7 @@ public class TableLoader {
     private static final double[] AlphaMid = new double[6];
     private static final double[][] AlphaBounds = new double[6][2];
     public static int minBinIdxT  = 0;
-    //public static final int[][][][] maxBinIdxT  = new int[6][6][8][6];
+    public static final int[][][][] maxBinIdxT  = new int[6][6][8][6];
     public static double[][][][][] DISTFROMTIME = new double[6][6][maxBinIdxB+1][maxBinIdxAlpha+1][NBINST]; // sector slyr alpha Bfield time bins [s][r][ibfield][icosalpha][tbin]    
     public static int maxTBin = -1;
         //public static double[] distbetaValues = new double[]{0.16, 0.16, 0.08, 0.08, 0.08, 0.08};
