@@ -17,7 +17,7 @@ public class TableLoader {
 
     private static boolean T2DLOADED = false;
     
-    public static final int NBINST=2000;
+    private static final int NBINST=2000;
     
     public static final double[] BfieldValues = new double[]{0.0000, 1.0000, 1.4142, 1.7321, 2.0000, 2.2361, 2.4495, 2.6458};
     public static int minBinIdxB = 0;
