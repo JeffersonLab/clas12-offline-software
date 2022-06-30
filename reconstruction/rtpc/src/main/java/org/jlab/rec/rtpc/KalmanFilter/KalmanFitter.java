@@ -229,7 +229,7 @@ public class KalmanFitter {
 
 	double p_correction(double theta) {
 
-		double[] params = {0.07909, 0.024, -0.004232, -0.003898, -0.0004198, 0.001195, 0.001358};
+		double[] params = {0.075, 0.024, -0.004232, -0.003898, -0.0004198, 0.001195, 0.001358};
 
 		return params[6] * Math.pow(theta - Math.PI / 2, 12)
 				+ params[5] * Math.pow(theta - Math.PI / 2, 10)
