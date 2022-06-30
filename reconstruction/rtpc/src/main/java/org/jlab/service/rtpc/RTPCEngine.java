@@ -7,6 +7,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
 import org.jlab.clas.reco.EngineProcessor;
 
 import org.jlab.clas.reco.ReconstructionEngine;
@@ -24,7 +25,8 @@ import org.jlab.rec.rtpc.hit.TrackHitReco;
 import org.jlab.rec.rtpc.hit.HelixFitTest;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.utils.groups.IndexedTable;
-
+import org.jlab.rec.rtpc.KalmanFilter.KalmanFitter;
+import org.jlab.rec.rtpc.KalmanFilter.KalmanFitterInfo;
 
 
 
@@ -40,6 +42,7 @@ public class RTPCEngine extends ReconstructionEngine{
     private int fitToBeamline = 1;
     private boolean disentangle = true;
     private boolean chi2culling = true; 
+    private boolean kfStatus = true;
 
     @Override
     public boolean init() {
@@ -49,6 +52,7 @@ public class RTPCEngine extends ReconstructionEngine{
         String disentangler = this.getEngineConfigString("rtpcDisentangler");
 	String chi2cull = this.getEngineConfigString("rtpcChi2Cull");
         //System.out.println(sim + " " + cosm + " " + beamfit);
+        String kfstatus = this.getEngineConfigString("rtpcKF");
 
         if(sim != null){
             simulation = Boolean.valueOf(sim);
@@ -69,6 +73,9 @@ public class RTPCEngine extends ReconstructionEngine{
         if(chi2cull != null){
            chi2culling = Boolean.valueOf(chi2cull);
         }
+        if (kfstatus != null) {
+			kfStatus = Boolean.parseBoolean(kfstatus);
+		}
 
         String[] rtpcTables = new String[]{
             "/calibration/rtpc/time_offsets",
@@ -151,6 +158,13 @@ public class RTPCEngine extends ReconstructionEngine{
 
             event.appendBank(recoBank);
             event.appendBank(trackBank);
+
+            if (kfStatus) {
+				HashMap<Integer, KalmanFitterInfo> KFTrackMap = new HashMap<>();
+				new KalmanFitter(params, KFTrackMap, magfield);
+				DataBank KFBank = writer.fillRTPCKFBank(event, KFTrackMap);
+				event.appendBank(KFBank);
+			}
 
 
         }
