@@ -460,6 +460,7 @@ public class Seed implements Comparable<Seed>{
             oSeeds.add(s);
             oSeeds.addAll(s.getOverlappingSeeds());
             Collections.sort(oSeeds);  //System.out.println("sorted  "+oSeeds.size());
+            //this.removeCompleteOverlaps(oSeeds);
             //for(int o = 0; o< oSeeds.size(); o++) {  //System.out.println("sorted seed "+oSeeds.get(o).toString());
                 if(seedMap.containsKey(oSeeds.get(0).getChi2())) {
                     seedMap.replace(oSeeds.get(0).getChi2(), oSeeds.get(0));
@@ -482,5 +483,21 @@ public class Seed implements Comparable<Seed>{
         for(Cross c: this.getCrosses()) str = str + c.toString() + "\n";
         for(Cluster c: this.getClusters()) str = str + c.toString() + "\n";
         return str;
+    }
+
+    private void removeCompleteOverlaps(List<Seed> oSeeds) {
+        
+    }
+    
+    private class Key implements Comparable<Key> {
+
+        public int[] crossIds;
+       
+        
+
+        @Override
+        public int compareTo(Key o) {
+            throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        }
     }
 }
