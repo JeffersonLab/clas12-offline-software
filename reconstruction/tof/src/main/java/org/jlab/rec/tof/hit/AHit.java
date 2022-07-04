@@ -1318,7 +1318,8 @@ public abstract class AHit implements Comparable<AHit> {
         if(hposbin!=null) {
             int bin = (int) Math.floor(y/Constants.HPOSBINW) + Constants.HPOSBINS/2/((int) Constants.HPOSBINW);
             if(bin>=0 && bin<hposbin.length)
-                value = hposa*y*y + hposb*y + hposc + hposbin[bin]; 
+                value = hposbin[bin]; // use hposbin only with no analytical correction
+//                value = hposa*y*y + hposb*y + hposc + hposbin[bin]; 
         }
         return value;
     }
