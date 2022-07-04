@@ -12,27 +12,20 @@ services:
     name: FTCAL
   - class: org.jlab.rec.ft.hodo.FTHODOEngine
     name: FTHODO
-  - class: org.jlab.rec.ft.trk.FTTRKEngine
-    name: FTTRK
   - class: org.jlab.rec.ft.FTEBEngine
     name: FTEB
-  - class: org.jlab.service.raster.RasterEngine
-    name: RASTER
 # DC clustering: nominal algoritm, filled the cluster bank for ai and conventional tracking
   - class: org.jlab.service.dc.DCHBClustering
     name: DCCR
-# This is where the AI plugin would go.  THe AI code reads the HB clusters.  
-  - class: org.jlab.service.mltn.MLTDEngine
-    name: MLTD
-# DC using clustering on AI hits: NN assisted HB tracking
-  - class: org.jlab.service.dc.DCHBPostClusterAI
-    name: DCHAI
+# DC using clustering: regular HB tracking
+  - class: org.jlab.service.dc.DCHBPostClusterConv
+    name: DCHB
   - class: org.jlab.service.ftof.FTOFHBEngine
     name: FTOFHB
   - class: org.jlab.service.ec.ECEngine
     name: EC
   - class: org.jlab.rec.cvt.services.CVTEngine
-    name: CVTFP
+    name: CVT
   - class: org.jlab.service.ctof.CTOFEngine
     name: CTOF
   - class: org.jlab.service.cnd.CNDCalibrationEngine
@@ -45,12 +38,11 @@ services:
     name: LTCC
   - class: org.jlab.service.eb.EBHBEngine
     name: EBHB
+# DC regular TB tracking    
   - class: org.jlab.service.dc.DCTBEngine
     name: DCTB
   - class: org.jlab.service.fmt.FMTEngine
     name: FMT
-  - class: org.jlab.rec.cvt.services.CVTSecondPassEngine
-    name: CVTSP
   - class: org.jlab.service.ftof.FTOFTBEngine
     name: FTOFTB
   - class: org.jlab.service.eb.EBTBEngine
@@ -75,16 +67,21 @@ configuration:
       magfieldTorusMap: Full_torus_r251_phi181_z251_08May2018.dat
     DCCR:
       dcT2DFunc: "Polynomial"
-      dcWireDistortion: "true"  
-    DCHAI:
+      dcWireDistortion: "true"
+      dcGeometryVariation: "default"
+      alignmentShifts: "null"
+      # for example:
+      # alignmentShifts: "r1_cz:0.2,r3_x:0.1"
+    DCHB:
       dcT2DFunc: "Polynomial"
-      dcWireDistortion: "true" 
-      outputBankPrefix: "HB"
+      dcWireDistortion: "true"
+      dcGeometryVariation: "default"
+      alignmentShifts: "null"
     DCTB:
       dcT2DFunc: "Polynomial"
-      dcWireDistortion: "true" 
-    MLTD:
-      run: "5038"
-      
+      dcWireDistortion: "true"
+      dcGeometryVariation: "default"
+      alignmentShifts: "null"
+
 mime-types:
   - binary/data-hipo
