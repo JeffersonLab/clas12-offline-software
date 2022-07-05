@@ -250,14 +250,20 @@ public class TracksFromTargetRec {
     
 
         // reset cross and cluster IDs
-        for(Cross c : this.SVTcrosses) {
-            c.setAssociatedTrackID(-1);
+        if(SVTcrosses!=null) {
+            for(Cross c : this.SVTcrosses) {
+                c.setAssociatedTrackID(-1);
+            }
         }
-        for(Cross c : this.BMTcrosses) {
-            c.setAssociatedTrackID(-1);
+        if(BMTcrosses!=null) {
+            for(Cross c : this.BMTcrosses) {
+                c.setAssociatedTrackID(-1);
+            }
         }
-        for(Cluster c : SVTclusters) {
-            c.setAssociatedTrackID(-1);
+        if(SVTclusters!=null) {
+            for(Cluster c : SVTclusters) {
+                c.setAssociatedTrackID(-1);
+            }
         }
         if(BMTclustersHM!=null) {
             for(Cluster c : BMTclusters) {
@@ -280,20 +286,23 @@ public class TracksFromTargetRec {
             //    System.out.println("Fit " + tracks.get(it).toString());
             }
         }
-        for(Cross c : this.SVTcrosses) { 
-            if(c.getAssociatedTrackID()==-1) {
-                    c.reset();
-            }
-        } 
-        for(Cross c : this.BMTcrosses) {
-            if(c.getAssociatedTrackID()==-1) {
-                    c.reset();
-            }
-            if(c.getId()>2000) { //if matched cross failed tracking resol requirements, reset its id
-                c.setId(c.getId()-1000);
+        if(SVTcrosses!=null) {
+            for(Cross c : this.SVTcrosses) { 
+                if(c.getAssociatedTrackID()==-1) {
+                        c.reset();
+                }
+            } 
+        }
+        if(BMTcrosses!=null) {
+            for(Cross c : this.BMTcrosses) {
+                if(c.getAssociatedTrackID()==-1) {
+                        c.reset();
+                }
+                if(c.getId()>2000) { //if matched cross failed tracking resol requirements, reset its id
+                    c.setId(c.getId()-1000);
+                }
             }
         }
-
 
 //        //------------------------ RDV check with Veronique
 //        // set index associations
@@ -337,10 +346,14 @@ public class TracksFromTargetRec {
             Collection<Seed> values = CVTseedsHM.values();
             CVTseeds = new ArrayList<>(values);
         }
-        SVTclusters = new ArrayList<>(SVTclustersHM.values());
-        BMTclusters = new ArrayList<>(BMTclustersHM.values());
-        SVTcrosses = new ArrayList<>(SVTcrossesHM.values());
-        BMTcrosses = new ArrayList<>(BMTcrossesHM.values());
+        if(SVTclustersHM!=null)
+            SVTclusters = new ArrayList<>(SVTclustersHM.values());
+        if(BMTclustersHM!=null) 
+            BMTclusters = new ArrayList<>(BMTclustersHM.values());
+        if(SVTcrossesHM!=null)
+            SVTcrosses = new ArrayList<>(SVTcrossesHM.values());
+        if(BMTcrossesHM!=null)
+            BMTcrosses = new ArrayList<>(BMTcrossesHM.values());
         
         return CVTseeds;
     }
