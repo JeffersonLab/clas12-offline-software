@@ -63,7 +63,7 @@ public class TrackSeederSVTLinker {
         //Use CA to get the lines
         List<Cell> zrnodes = tca.runCAMaker("ZR", 5, bmtC_crosses);
         List<ArrayList<Cross>> zrtracks = tca.getCAcandidates(zrnodes);
-        
+        this.removeCompleteZROverlaps(zrtracks);
         List<Seed> cands = this.match2BST(zrtracks, crosses);
 
         for (Seed seed : cands) {
@@ -90,8 +90,8 @@ public class TrackSeederSVTLinker {
         //sort the crosses in lists
         for(Cross c : crosses) {
             if(c.getDetector()==DetectorType.BST) {
-               
-                List<Integer> sec = this.getSector(c.getSector(), c.getRegion());
+                
+                List<Integer> sec = this.getSector(c.getSector(), c.getRegion()); 
                 for(int i =0; i<sec.size(); i++) {
                     if(svtcrs.containsKey(sec.get(i))) {  
                         if(svtcrs.get(sec.get(i)).containsKey(c.getRegion())) {
@@ -130,7 +130,7 @@ public class TrackSeederSVTLinker {
             List<Double> R = new ArrayList<>();
             List<Double> Z = new ArrayList<>();
             List<Double> EZ = new ArrayList<>();
-            int sector = zrcross.get(0).getSector();
+            int sector = zrcross.get(0).getSector(); 
             for (Cross c : zrcross) { 
                 R.add(bgeo.getRadiusMidDrift(c.getCluster1().getLayer()));
                 Z.add(c.getPoint().z());
@@ -138,44 +138,51 @@ public class TrackSeederSVTLinker {
             }
             if(R.size()<2) continue;
             LineFitter ft = new LineFitter();
-            boolean status = ft.fitStatus(Z, R, EZ, null, Z.size());
-            if (status == false) {
-                //System.err.println(" BMTC FIT FAILED");
-            }
+            boolean status = ft.fitStatus(R, Z, EZ, null, Z.size());
+            
             LineFitPars fpars = ft.getFit();
             if (fpars == null) {
                 continue;
             }
             double b = fpars.intercept();
             double m = fpars.slope();
-
+            
             List<Cross> pass = new ArrayList<>();
             if(svtcrs.containsKey(sector)) {   
                 for(int creg =1; creg<4; creg++) { //find the best BST match in each region
-                    if(svtcrs.get(sector).containsKey(creg)) {
+                    if(svtcrs.get(sector).containsKey(creg)) { 
                         Collections.sort(svtcrs.get(sector).get(creg));
                         double bestdeltasum = 9999;
                         Cross bestCross = null;
                         for (Cross c : svtcrs.get(sector).get(creg)) {
-
+                        
                             Point3D tref = new Point3D(xbeam, ybeam, b);
-                            Point3D end = new Point3D(c.getPoint().x(), c.getPoint().y(), (c.getPoint().toVector3D().rho() - b) / m);
-                            Vector3D dir = tref.vectorTo(end).asUnit();
-                            Line3D tline = new Line3D(tref, dir);
-                            Line3D sline1 = c.getCluster1().getLine();
-                            Line3D sline2 = c.getCluster2().getLine();
-                            double delta1 = sline1.distance(tline).length();
-                            double delta2 = sline2.distance(tline).length();
-
-                            if(delta1<SVTParameters.MAXDOCA2STRIP && delta2<SVTParameters.MAXDOCA2STRIP 
-                                    && delta1+delta2<SVTParameters.MAXDOCA2STRIPS) {
-                                if(delta1+delta2<bestdeltasum) {
-                                   bestdeltasum= delta1+delta2;
-                                   bestCross = c;
-                               }
+                            double Zref = 0;
+                            
+                            //if(Math.abs(m)>0.0000001)
+                                //Zref = (c.getPoint().toVector3D().rho() - b) / m;
+                            Zref = m*c.getPoint().toVector3D().rho() + b;
+                            double zo = c.getCluster2().getLine().origin().z();
+                            double ze = c.getCluster2().getLine().end().z();
+                            double range = Math.abs(ze-zo)+SVTParameters.CROSSZCUT; 
+                            if(Math.abs(Zref-zo)<range && Math.abs(Zref-ze)<range ) { 
+                                Point3D end = new Point3D(c.getPoint().x(), c.getPoint().y(), Zref);
+                                Vector3D dir = tref.vectorTo(end).asUnit();
+                                Line3D tline = new Line3D(tref, dir); 
+                                Line3D sline1 = c.getCluster1().getLine();
+                                Line3D sline2 = c.getCluster2().getLine();
+                                double delta1 = sline1.distance(tline).length();
+                                double delta2 = sline2.distance(tline).length(); 
+                                if(delta1<SVTParameters.MAXDOCA2STRIP && delta2<SVTParameters.MAXDOCA2STRIP 
+                                        && delta1+delta2<SVTParameters.MAXDOCA2STRIPS) { 
+                                    if(delta1+delta2<bestdeltasum) {
+                                       bestdeltasum= delta1+delta2;
+                                       bestCross = c; 
+                                   }
+                                }
                             }
                         }
-                        if(bestCross!=null) {
+                        if(bestCross!=null) { 
                             pass.add(bestCross);
                         }
                     }
@@ -245,4 +252,58 @@ public class TrackSeederSVTLinker {
         return sec;
     }
 
+    private void removeCompleteZROverlaps(List<ArrayList<Cross>> zrtracks) {
+        List<ArrayList<Cross>>twoCros = new ArrayList<>();
+        List<ArrayList<Cross>> threeCros = new ArrayList<>();
+        List<ArrayList<Cross>> rmCros = new ArrayList<>();
+        for(List<Cross> zrtrk : zrtracks) {
+            if(zrtrk.size()==3) {
+                threeCros.add((ArrayList<Cross>) zrtrk);
+            }
+            if(zrtrk.size()==2) 
+                twoCros.add((ArrayList<Cross>) zrtrk);
+        }
+        int[] id3 = new int[3];
+        int[] id2 = new int[3];
+        for(List<Cross> zrtrk3 : threeCros) {
+            for(int i =0; i<3; i++)
+                id3[i] = -1;
+            for(Cross c : zrtrk3) {
+                id3[c.getRegion()-1] = c.getId(); 
+            }
+            for(List<Cross> zrtrk2 : twoCros) {
+                for(int i =0; i<3; i++)
+                    id2[i] = -1;
+                for(Cross c : zrtrk2) {
+                    id2[c.getRegion()-1] = c.getId();
+                }
+                int count = 0;
+                for(int i =0; i<3; i++) {
+                    if(id2[i] != -1 && id2[i] ==id3[i]) {
+                        count++;
+                    }
+                }
+                if(count ==2) {
+                    int missRegIdx = -1;
+                    for(int i =0; i<3; i++) { 
+                        if(id2[i] == -1) {
+                              missRegIdx = i; 
+                        }
+                    }
+                    double sl = (zrtrk2.get(0).getPoint().toVector3D().rho() - zrtrk2.get(1).getPoint().toVector3D().rho())/(zrtrk2.get(0).getPoint().z() - zrtrk2.get(1).getPoint().z());
+                    double in = zrtrk2.get(0).getPoint().toVector3D().rho()-sl*zrtrk2.get(0).getPoint().z();
+                    double Rm = zrtrk3.get(missRegIdx).getPoint().toVector3D().rho();
+                    double Zm = zrtrk3.get(missRegIdx).getPoint().z();
+                    double Rc = sl*Zm +in;
+                    if(Math.abs(Rc-Rm)<0.0005) {
+                        rmCros.add((ArrayList<Cross>) zrtrk2); //3-cross list is good w/in 500 microns
+                    }  else {
+                        rmCros.add((ArrayList<Cross>) zrtrk3); // 3-cross list has outlier
+                    }
+                }
+            }
+        }
+        zrtracks.removeAll(rmCros);
+    }
+    
 }

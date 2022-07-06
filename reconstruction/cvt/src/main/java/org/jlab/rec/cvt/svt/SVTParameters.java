@@ -17,8 +17,8 @@ public class SVTParameters {
     public static int MAXSVTCROSSES = 1000;
     public static double RESIMAX = 5;
     public static double TIMECUTLOW = 55;
-    public static double MAXDOCA2STRIP = 0.8;
-    public static double MAXDOCA2STRIPS = 1.5;
+    public static double MAXDOCA2STRIP = 0.8-0.2;
+    public static double MAXDOCA2STRIPS = 1.5-0.5;
     // THRESHOLDS
     public static int INITTHRESHOLD = 30;
     public static int DELTATHRESHOLD = 15;
