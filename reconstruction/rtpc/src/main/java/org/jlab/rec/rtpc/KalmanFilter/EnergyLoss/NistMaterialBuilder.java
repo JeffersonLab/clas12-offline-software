@@ -2,6 +2,7 @@ package org.jlab.rec.rtpc.KalmanFilter.EnergyLoss;
 
 import java.util.Objects;
 import java.util.Vector;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.jlab.rec.rtpc.KalmanFilter.EnergyLoss.Material.NTP_Temperature;
 import static org.jlab.rec.rtpc.KalmanFilter.EnergyLoss.PhysicalConstants.STP_Pressure;
@@ -78,7 +79,7 @@ public class NistMaterialBuilder {
                 if (matIndex.get(i) == -1) {
                     mat = BuildMaterial(i);
                 } else {
-                    Vector<Material> theMaterialTable = Material.GetMaterialTable();
+                    CopyOnWriteArrayList<Material> theMaterialTable = Material.GetMaterialTable();
                     mat = (theMaterialTable).get(matIndex.get(i));
                 }
 
@@ -1413,7 +1414,7 @@ public class NistMaterialBuilder {
     }
 
     public Material FindMaterial(String name) {
-        Vector<Material> theMaterialTable = Material.GetMaterialTable();
+        CopyOnWriteArrayList<Material> theMaterialTable = Material.GetMaterialTable();
         Material ptr = null;
         for (Material mat : theMaterialTable) {
             if (Objects.equals(name, mat.GetName())) {
