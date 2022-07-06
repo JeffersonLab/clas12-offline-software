@@ -38,13 +38,28 @@ public class Seed implements Comparable<Seed>{
     private int    _NDF;
     private double _chi2;
     private List<Seed> _overlappingSeed;
-    
+    private Key _key;
     
     public Seed() {
     }
 
+    /**
+     * @return the _key
+     */
+    public Key getKey() {
+        return _key;
+    }
+
+    /**
+     * @param _key the _key to set
+     */
+    public void setKey(Key _key) {
+        this._key = _key;
+    }
+
     public Seed(List<Cross> crosses) {
         this.setCrosses(crosses);
+        this.setKey(new Key(this));
     }
 
     public Seed(List<Cross> crosses, double doca, double rho, double phi) {
@@ -52,11 +67,13 @@ public class Seed implements Comparable<Seed>{
         this.setDoca(doca);
         this.setRho(rho);
         this.setPhi(phi);
+        this.setKey(new Key(this));
     }
 
     public Seed(List<Cross> crosses, Helix helix) {
         this.setCrosses(crosses);
         this.setHelix(helix);
+        this.setKey(new Key(this));
     }
 
     /**
@@ -200,13 +217,32 @@ public class Seed implements Comparable<Seed>{
        
         return id;
     }
-
+    public int sortingMethod = 0;
+    
     @Override
     public int compareTo(Seed tr) {
-    	//sort by NDF and chi2
-        int ProbComp  = this.getChi2() < tr.getChi2() ? -1 : this.getChi2() == tr.getChi2() ? 0 : 1;
-        int OtherComp = this.getNDF() > tr.getNDF() ? -1 : this.getNDF() == tr.getNDF() ? 0 : 1;
-        return ((OtherComp == 0) ? ProbComp : OtherComp);
+        int value;
+        if(tr.sortingMethod ==0) {
+            //sort by NDF and chi2
+            int ProbComp  = this.getChi2() < tr.getChi2() ? -1 : this.getChi2() == tr.getChi2() ? 0 : 1;
+            int OtherComp = this.getNDF() > tr.getNDF() ? -1 : this.getNDF() == tr.getNDF() ? 0 : 1;
+            value = ((OtherComp == 0) ? ProbComp : OtherComp);
+        } else {
+            int[] K = new int[9];
+            for(int k = 0; k<9; k++) {
+                K[k] = this.getKey().crossIds[k] < tr.getKey().crossIds[k] ? -1 : this.getKey().crossIds[k] == tr.getKey().crossIds[k] ? 0 : 1;
+            }
+            
+            int[] R = new int[8];
+            R[0] = ((K[0] == 0) ? K[1] : K[0]);
+            for(int k = 0; k<7; k++) {
+                R[k+1] = ((R[k] == 0) ? K[k+2] : R[k]);
+            }
+            
+            value = R[7];
+        }
+        
+        return value;
     }
 
     public boolean fit(int fitIter, double xb, double yb, double bfield) {
@@ -459,15 +495,18 @@ public class Seed implements Comparable<Seed>{
             //}
             oSeeds.add(s);
             oSeeds.addAll(s.getOverlappingSeeds());
-            Collections.sort(oSeeds);  //System.out.println("sorted  "+oSeeds.size());
-            //this.removeCompleteOverlaps(oSeeds);
-            //for(int o = 0; o< oSeeds.size(); o++) {  //System.out.println("sorted seed "+oSeeds.get(o).toString());
-                if(seedMap.containsKey(oSeeds.get(0).getChi2())) {
-                    seedMap.replace(oSeeds.get(0).getChi2(), oSeeds.get(0));
-                } else {
-                    seedMap.put(oSeeds.get(0).getChi2(), oSeeds.get(0));
-                }
-            //}
+            //remove complete overlaps
+            removeCompleteOverlaps(oSeeds); 
+            //get best seed
+            setSortingMethod(oSeeds, 0);
+            Collections.sort(oSeeds);  
+            
+            if(seedMap.containsKey(oSeeds.get(0).getChi2())) {
+                seedMap.replace(oSeeds.get(0).getChi2(), oSeeds.get(0));
+            } else {
+                seedMap.put(oSeeds.get(0).getChi2(), oSeeds.get(0));
+            }
+            
         }
         seeds.clear();
         seeds.addAll(new ArrayList<>(seedMap.values()));
@@ -485,19 +524,102 @@ public class Seed implements Comparable<Seed>{
         return str;
     }
 
-    private void removeCompleteOverlaps(List<Seed> oSeeds) {
-        
+    private static void setSortingMethod(List<Seed> seeds, int m) {
+        for(Seed s : seeds) {
+            s.sortingMethod = m;
+            
+        }
+    }
+    private static void removeCompleteOverlaps(List<Seed> oSeeds) {
+        //setSortingMethod(oSeeds, 1);
+        Collections.sort(oSeeds);
+        List<Seed> oSeedsSubset = new ArrayList<>();
+        for(int i =0; i< oSeeds.size(); i++) {
+            Seed seed1 = oSeeds.get(i);
+            for(int j =i; j< oSeeds.size(); j++) {
+                if(j==i) continue;
+                Seed seed2 = oSeeds.get(j);
+                Seed subseed = subSet(seed1, seed2);
+                if(subseed!=null) {
+                    Seed seed_1 = null; 
+                    Seed seed_2 = null;
+                    if(subseed.getCrosses().size()==seed2.getCrosses().size()) {
+                        seed_2 = seed2;
+                        seed_1 = seed1;
+                    } else {
+                        seed_2 = seed1;
+                        seed_1 = seed2;
+                    }
+                    //if the chi2/ndf diff consistent keep the larger seed
+                    if((seed_1.getChi2()/seed_1.getNDF())/(seed_2.getChi2()/seed_2.getNDF()) < 1.0*(seed_1.getCrosses().size()-seed_2.getCrosses().size())) {
+                        oSeedsSubset.add(seed_2); 
+                    } else {
+                        oSeedsSubset.add(seed_1); 
+                    }
+                } 
+            }
+        }
+        oSeeds.removeAll(oSeedsSubset);
     }
     
-    private class Key implements Comparable<Key> {
+    private static Seed subSet(Seed seeda, Seed seedb) {
+        Seed seed1 = null; 
+        Seed seed2 = null;
+        if(seeda.getCrosses().size()>seedb.getCrosses().size()) {
+            seed1 = seeda;
+            seed2 = seedb;
+        } else {
+            seed1 = seedb;
+            seed2 = seeda;
+        }
+        if(seed1.getKey()==null || seed2.getKey()==null)
+            return null;
+        int count=0; //the number of 
+        for(int k = 0; k<9; k++) {
+            if(seed1.getKey().crossIds[k]!=0 && seed2.getKey().crossIds[k]!=0) {
+                if(seed1.getKey().crossIds[k]-seed2.getKey().crossIds[k]==0)
+                    count++;
+            }
+        }
+        if(count==seed2.getCrosses().size()) {//all the crosses in the smaller seeds are in the larger seed
+           
+            return seed2;
+        } else {
+            return null;
+        }
+    }
+    public class Key implements Comparable<Key> {
 
-        public int[] crossIds;
+        public int[] crossIds = new int[9];
        
-        
+        public Key(Seed seed) {
+            for(Cross c : seed.getCrosses()) {
+                int l =0;
+                if(c.getDetector()==DetectorType.BST) {
+                    l = c.getRegion();
+                } else {
+                    l = c.getCluster1().getLayer();
+                }
+                crossIds[l-1]=c.getId();
+            }
+        }
 
+        
+        
         @Override
-        public int compareTo(Key o) {
-            throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        public int compareTo(Key o) { //sort by cross ids in layers
+            int[] K = new int[9];
+            for(int k = 0; k<9; k++) {
+                K[k] = this.crossIds[k] < o.crossIds[k] ? -1 : this.crossIds[k] == o.crossIds[k] ? 0 : 1;
+            }
+            
+            int[] R = new int[8];
+            R[0] = ((K[0] == 0) ? K[1] : K[0]);
+            for(int k = 0; k<7; k++) {
+                R[k+1] = ((R[k] == 0) ? K[k+2] : R[k]);
+            }
+            
+            return R[7];
         }
     }
 }

@@ -24,6 +24,7 @@ import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.banks.RecoBankReader;
 import org.jlab.rec.cvt.measurement.Measurements;
 import org.jlab.rec.cvt.track.Seed;
+import org.jlab.rec.cvt.track.Seed.Key;
 import org.jlab.rec.cvt.track.StraightTrackSeeder;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.track.TrackSeeder;
@@ -119,6 +120,9 @@ public class TracksFromTargetRec {
                     seeds.removeAll(failed);
                 }
             }
+        }
+        for(Seed s : seeds) { 
+            s.setKey(s.new Key(s));
         }
         Seed.removeOverlappingSeeds(seeds);
         
@@ -443,5 +447,5 @@ public class TracksFromTargetRec {
         if(CVTseeds!=null)
             CVTseeds.clear();
     }
-    
+
 }
