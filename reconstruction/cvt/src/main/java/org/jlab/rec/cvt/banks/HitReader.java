@@ -273,7 +273,7 @@ public class HitReader {
                 // create the hit object
                 Hit hit = new Hit(DetectorType.BST, BMTType.UNDEFINED, sector, layer, SvtStrip);
                 hit.setId(id);
-                if (event.hasBank("MC::Event"))
+                if (event.hasBank("MC::Particle"))
                     hit.MCstatus = order;
                 // add this hit
                 if(hit.getRegion()!=Constants.getInstance().getRmReg()) {     
