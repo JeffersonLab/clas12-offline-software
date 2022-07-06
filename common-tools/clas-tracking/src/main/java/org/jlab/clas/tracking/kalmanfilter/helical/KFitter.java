@@ -20,7 +20,7 @@ public class KFitter extends AKFitter {
     private MeasVecs  mv = new MeasVecs();
     private StateVec finalSmoothedStateVec = null;    
     private StateVec finalTransportedStateVec = null;    
-
+    
     
     public KFitter(boolean filter, int iterations, int dir, Swim swim, Libr mo) {
         super(filter, iterations, dir, swim, mo);
@@ -37,7 +37,7 @@ public class KFitter extends AKFitter {
         this.numIter = 0;
         this.setFitFailed = false;
         mv.setMeasVecs(measSurfaces);
-        for (int i = 1; i < mv.measurements.size(); i++) {
+        for (int i = 0; i < mv.measurements.size(); i++) {
             if(mv.measurements.get(i).skip==false) {
                 this.NDF++;
             }
@@ -51,6 +51,46 @@ public class KFitter extends AKFitter {
         this.runFitter(sv, mv);
     }
 
+    public double getChi2() {
+        return this.getChi2(0);
+    }
+    
+    public double getChi2(int mode) {
+        if(mode==1) {
+            double chi2 = 0;
+            for(int k = 1; k< mv.measurements.size(); k++) {
+                if(!mv.measurements.get(k).skip) {
+                    double dh    = mv.dh(k, sv.smoothed().get(k));
+                    double error = mv.measurements.get(k).error;
+                    chi2 += dh*dh / error/error;
+                }
+            }
+            return chi2;           
+        }
+        else {
+            return this.chi2;
+        }
+    }
+    
+    public int getNDF() {
+        return this.getNDF(0);
+    }
+    
+    public int getNDF(int mode) {
+        if(mode==1) {
+            int ndf = this.NDF0;
+            for(int k = 1; k< mv.measurements.size(); k++) {
+                if(!mv.measurements.get(k).skip) {
+                    ndf++;
+                }
+            }
+            return ndf;           
+        }
+        else {
+            return this.NDF;
+        }
+    }
+    
     public StateVec getStateVec() {
         return this.getStateVec(0);
     }

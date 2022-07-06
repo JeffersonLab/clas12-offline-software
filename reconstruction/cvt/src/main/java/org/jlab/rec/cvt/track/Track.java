@@ -59,6 +59,8 @@ public class Track extends Trajectory implements Comparable<Track> {
     private double[][] trackCovMat;
     private Map<Integer, HitOnTrack> trajs = null; // map of trajectories indexed by layer, to be filled based on the KF results
     private Helix secondaryHelix;                  // for track with no beamSpot information
+    private double secondaryChi2;                  // for track with no beamSpot information
+    private int    secondaryNDF;                   // for track with no beamSpot information
 
 
     public Track(Helix helix) {
@@ -82,8 +84,10 @@ public class Track extends Trajectory implements Comparable<Track> {
         this.setPXYZ();
         this.setSecondaryHelix(new Helix(kf.getHelix(1), kf.getStateVec(1).covMat));
         this.kfIterations = kf.numIter;
-        this.setNDF(seed.getNDF());
-        this.setChi2(kf.chi2);
+        this.setNDF(kf.getNDF());
+        this.setChi2(kf.getChi2(0));
+        this.setSecondaryChi2(kf.getChi2(1));
+        this.setSecondaryNDF(kf.getNDF(1));
         this.setSeed(seed);
         this.addAll(seed.getCrosses());
         this.setKFTrajectories(kf.trajPoints);
@@ -155,6 +159,22 @@ public class Track extends Trajectory implements Comparable<Track> {
 
     public void setSecondaryHelix(Helix secondaryHelix) {
         this.secondaryHelix = secondaryHelix;
+    }
+
+    public double getSecondaryChi2() {
+        return secondaryChi2;
+    }
+
+    public void setSecondaryChi2(double secondaryChi2) {
+        this.secondaryChi2 = secondaryChi2;
+    }
+
+    public int getSecondaryNDF() {
+        return secondaryNDF;
+    }
+
+    public void setSecondaryNDF(int secondaryNDF) {
+        this.secondaryNDF = secondaryNDF;
     }
 
     public Seed getSeed() {
@@ -488,11 +508,7 @@ public class Track extends Trajectory implements Comparable<Track> {
                 stVec.setTrkPhiAtSurface(localDir.phi());
                 stVec.setTrkThetaAtSurface(localDir.theta());
                 stVec.setTrkToModuleAngle(Geometry.getInstance().getBMT().getLocalAngle(traj.layer, traj.sector, pos, dir));
-                int region = Geometry.getInstance().getBMT().getRegion(traj.layer);
-                if(BMTGeometry.getDetectorType(traj.layer)==BMTType.C) 
-                    stVec.setCalcCentroidStrip(Geometry.getInstance().getBMT().getCstrip(region, pos));
-                else
-                    stVec.setCalcCentroidStrip(Geometry.getInstance().getBMT().getZstrip(region, pos));
+                stVec.setCalcCentroidStrip(Geometry.getInstance().getBMT().getStrip(traj.layer, traj.sector, pos));
             }
             if(stVec.getSurfaceDetector()>0) {
                 stVec.setSurfaceDetector(DetectorType.CVT.getDetectorId());

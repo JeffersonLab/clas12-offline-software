@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.Event;
@@ -18,9 +20,9 @@ import org.jlab.jnp.hipo4.io.HipoReader;
  */
 public final class HelicitySequenceManager {
 
+    static final Logger LOGGER = Logger.getLogger(HelicitySequence.class.getName());
     SchemaFactory schema=null;
     private final int delay;
-    private int verbosity=1;
     private boolean flip=false;
     private volatile Map<Integer,HelicitySequenceDelayed> seqMap=new HashMap<>();
     Bank rcfgBank=null;
@@ -51,20 +53,12 @@ public final class HelicitySequenceManager {
         initialize(reader);
     }
 
-    public void setVerbosity(int verbosity) {
-        this.verbosity=verbosity;
-        for (HelicitySequence hs : seqMap.values()) {
-            hs.setVerbosity(verbosity);
-        }
-    }
-
     private boolean addState(int runno,HelicityState state) {
         if (runno <= 0) return false;
         if (!seqMap.containsKey(runno)) {
             seqMap.put(runno, new HelicitySequenceDelayed(delay));
-            seqMap.get(runno).setVerbosity(verbosity);
             if (!seqMap.get(runno).setRunNumber(runno)) {
-              System.err.println("HelicitySequenceManager:  error retrieving from CCDB, ABORT.");
+              LOGGER.severe("error retrieving from CCDB, ABORT.");
               System.exit(1);
             }
         }
@@ -194,7 +188,7 @@ public final class HelicitySequenceManager {
 
     public void show() {
         for (Entry<Integer, HelicitySequenceDelayed> x : seqMap.entrySet()) {
-            System.out.println("Run Number:::::::::::::::::: "+x.getKey());
+            LOGGER.log(Level.CONFIG, "Run Number:::::::::::::::::: {0}", x.getKey());
             x.getValue().show();
         }
     }

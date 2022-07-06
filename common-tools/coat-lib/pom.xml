@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jlab.clas</groupId>
   <artifactId>coat-libs</artifactId>
-  <version>8.0.0-SNAPSHOT</version>
+  <version>8.1.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <repositories>
@@ -93,67 +93,67 @@
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-io</artifactId>
-      <version>8.0.0-SNAPSHOT</version>
+      <version>8.1.2-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clara-io</artifactId>
-      <version>8.0.0-SNAPSHOT</version>
+      <version>8.1.2-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-reco</artifactId>
-      <version>8.0.0-SNAPSHOT</version>
+      <version>8.1.2-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-utils</artifactId>
-      <version>8.0.0-SNAPSHOT</version>
+      <version>8.1.2-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-jcsg</artifactId>
-      <version>8.0.0-SNAPSHOT</version>
+      <version>8.1.2-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-detector</artifactId>
-      <version>8.0.0-SNAPSHOT</version>
+      <version>8.1.2-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-analysis</artifactId>
-      <version>8.0.0-SNAPSHOT</version>
+      <version>8.1.2-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-geometry</artifactId>
-      <version>8.0.0-SNAPSHOT</version>
+      <version>8.1.2-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-physics</artifactId>
-      <version>8.0.0-SNAPSHOT</version>
+      <version>8.1.2-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>swim-tools</artifactId>
-      <version>8.0.0-SNAPSHOT</version>
+      <version>8.1.2-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-tracking</artifactId>
-      <version>8.0.0-SNAPSHOT</version>
+      <version>8.1.2-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -183,9 +183,18 @@
           <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-compiler-plugin</artifactId>
+              <version>3.8.0</version>
               <configuration>
-                  <source>1.8</source>
-                  <target>1.8</target>
+                  <encoding>UTF-8</encoding>
+                  <release>11</release>
+              </configuration>
+          </plugin>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-resources-plugin</artifactId>
+              <version>3.2.0</version>
+              <configuration>
+                  <encoding>${project.build.sourceEncoding}</encoding>
               </configuration>
           </plugin>
           <plugin>
