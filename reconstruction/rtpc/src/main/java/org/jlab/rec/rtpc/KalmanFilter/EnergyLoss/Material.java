@@ -3,6 +3,7 @@ package org.jlab.rec.rtpc.KalmanFilter.EnergyLoss;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Vector;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.jlab.rec.rtpc.KalmanFilter.EnergyLoss.PhysicalConstants.*;
 import static org.jlab.rec.rtpc.KalmanFilter.EnergyLoss.State.*;
@@ -178,7 +179,7 @@ public class Material {
     }
 
 
-    public static Vector<Material> GetMaterialTable() {
+    public static CopyOnWriteArrayList<Material> GetMaterialTable() {
         return theMaterialTable;
     }
 
@@ -373,7 +374,7 @@ public class Material {
 
     public static double NTP_Temperature = 293.15 * kelvin;
 
-    private static final Vector<Material> theMaterialTable = new Vector<>();
+    private static final CopyOnWriteArrayList<Material> theMaterialTable = new CopyOnWriteArrayList<>();
 
     private Material fBaseMaterial;
 
