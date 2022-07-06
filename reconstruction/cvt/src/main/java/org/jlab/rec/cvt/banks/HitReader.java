@@ -135,7 +135,7 @@ public class HitReader {
                 
                 Hit hit = new Hit(DetectorType.BMT, BMTGeometry.getDetectorType(layer), sector, layer, BmtStrip);                
                 hit.setId(i+1);
-                if (event.hasBank("MC::Event"))
+                if (event.hasBank("MC::Particle"))
                     hit.MCstatus = order;
                 // add this hit
                 if(hit.getLayer()+3!=Constants.getInstance().getRmReg()) {
