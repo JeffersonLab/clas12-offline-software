@@ -86,9 +86,9 @@ public class TracksFromTargetRec {
                 trseed.unUsedHitsOnly = true;
                 seeds = trseed.findSeed(this.SVTcrosses, null);
             } else {
-                //TrackSeederCA trseedca = new TrackSeederCA(swimmer, xb, yb);  // cellular automaton seeder
-                //seeds = trseedca.findSeed(this.SVTcrosses, this.BMTcrosses);
-                //recUtil.getUniqueSeedList(seeds);
+                TrackSeederCA trseedca = new TrackSeederCA(swimmer, xb, yb);  // cellular automaton seeder
+                seeds = trseedca.findSeed(this.SVTcrosses, this.BMTcrosses);
+                recUtil.getUniqueSeedList(seeds);
                 if(Constants.getInstance().svtLinkerSeeding) {
                     TrackSeederSVTLinker trseed = new TrackSeederSVTLinker(swimmer, xb, yb);  // new seeder
                     seeds.addAll(trseed.findSeed(this.SVTcrosses, this.BMTcrosses));
