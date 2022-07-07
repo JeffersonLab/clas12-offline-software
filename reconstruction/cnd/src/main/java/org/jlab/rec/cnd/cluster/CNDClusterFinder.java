@@ -87,7 +87,7 @@ public class CNDClusterFinder {
                     double deltaZ = Math.abs(thisHit.Z() - otherHit.Z());
                     double deltaT = Math.abs(thisHit.Time() - otherHit.Time());
                     double deltaLayer = Math.abs(thisHit.Layer() - otherHit.Layer());
-
+                    double deltaSector = thisHit.Sector() - otherHit.Sector();
                     /*
                      * System.out.println("X " + thisHit.X() + " " + otherHit.X() + " " + deltaX);
                      * System.out.println("Y " + thisHit.Y() + " " + otherHit.Y() + " " + deltaY);
@@ -96,9 +96,14 @@ public class CNDClusterFinder {
                      * deltaT);
                      */
 
-                    if (deltaX / 10.0 < dX && deltaY / 10.0 < dY && deltaZ / 10.0 < dZ && deltaT < dT
-                            && deltaLayer == 0) {
-
+                    //if (deltaX / 10.0 < dX && deltaY / 10.0 < dY && deltaZ / 10.0 < dZ && deltaT < dT
+                    //        && deltaLayer == 0) {
+                    if (deltaZ / 10.0 < dZ && deltaT < dT && deltaLayer == 0
+                            && ((thisHit.Sector() != 1 && thisHit.Sector() != 24 && Math.abs(deltaSector) < 2)
+                                    || (thisHit.Sector() == 1
+                                            && (deltaSector == -1 || deltaSector == 0 || deltaSector == -23))
+                                    || (thisHit.Sector() == 24
+                                            && (deltaSector == 1 || deltaSector == 0 || deltaSector == 23)))) {
                         good_index = k;
 
                     } else {
