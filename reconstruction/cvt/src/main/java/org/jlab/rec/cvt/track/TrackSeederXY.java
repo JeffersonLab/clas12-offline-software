@@ -6,19 +6,14 @@ import java.util.List;
 import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorType;
-
-import org.jlab.geom.prim.Point3D;
-import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
-import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.fit.CircleFitter;
 import org.jlab.rec.cvt.fit.CircleFitPars;
 import org.jlab.rec.cvt.svt.SVTGeometry;
-import org.jlab.rec.cvt.svt.SVTParameters;
 
 public class TrackSeederXY {
     
