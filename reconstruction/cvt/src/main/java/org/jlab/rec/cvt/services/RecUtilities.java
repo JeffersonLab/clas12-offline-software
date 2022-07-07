@@ -783,7 +783,7 @@ public class RecUtilities {
                             this_cross = c;
                     }
                     if(this_cross==null) {
-                        System.out.print("Found NNNNNNNNNNNNNNNNNNNNNNew cross");
+                        //System.out.print("Found NNNNNNNNNNNNNNNNNNNNNNew cross");
                         // define new cross 
                         this_cross = new Cross(DetectorType.BST, BMTType.UNDEFINED, cl1.getSector(), cl1.getRegion(), allCrosses.size()+1);
                         this_cross.setOrderedRegion(cl1.getRegion());

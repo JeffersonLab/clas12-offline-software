@@ -4,22 +4,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.rec.cvt.Constants;
-import org.jlab.rec.cvt.Geometry;
-import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.fit.CircleFitter;
 import org.jlab.rec.cvt.fit.CircleFitPars;
-import org.jlab.rec.cvt.svt.SVTGeometry;
 
 public class TrackSeederXY {
     
-    private final SVTGeometry sgeo = Geometry.getInstance().getSVT();
-    private final BMTGeometry bgeo = Geometry.getInstance().getBMT();
-    private  double bfield;
     
     private final int NBINS = 36;
     private final double[] phiShift = new double[]{0,65,90}; // move the bin edge to handle bin boundaries
@@ -34,11 +27,8 @@ public class TrackSeederXY {
     private double ybeam;
     public boolean unUsedHitsOnly = false;
     
-    public TrackSeederXY(Swim swimmer, double xb, double yb) {
-        float[] b = new float[3];
-        swimmer.BfieldLab(0, 0, 0, b);
-        this.bfield = Math.abs(b[2]);
-
+    public TrackSeederXY(double xb, double yb) {
+        
         //init lists for scan
         sortedCrosses = new ArrayList<>();
         for(int i =0; i<NBINS; i++) {

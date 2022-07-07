@@ -34,7 +34,8 @@ public class TrackSeederSVTLinker {
         this.bfield = Math.abs(b[2]);
         this.xbeam = xb;
         this.ybeam = yb;
-        trseed2 = new TrackSeederXY(swimmer, xb, yb);
+        trseed1 = new TrackSeederRZ();
+        trseed2 = new TrackSeederXY(xb, yb);
         trseed2.unUsedHitsOnly=false;
         
         tca = new TrackSeederCA(swimmer, xb, yb);
@@ -61,9 +62,26 @@ public class TrackSeederSVTLinker {
         }
 
         //Use CA to get the lines
-        List<Cell> zrnodes = tca.runCAMaker("ZR", 5, bmtC_crosses);
-        List<ArrayList<Cross>> zrtracks = tca.getCAcandidates(zrnodes);
-        this.removeCompleteZROverlaps(zrtracks);
+        //List<Cell> zrnodes = tca.runCAMaker("ZR", 5, bmtC_crosses);
+        //List<ArrayList<Cross>> zrtracks = tca.getCAcandidates(zrnodes);
+        //this.removeCompleteZROverlaps(zrtracks);
+        
+        //use new line finder
+        List<ArrayList<Cross>> zrtracks = trseed1.getSeeds(bmt_crosses);
+        
+//        System.out.println(zrtracks.size()+" vs "+zrtracks2.size());
+//        for(List<Cross> cs : zrtracks) {
+//            System.out.println("CA SEED");
+//            for(Cross c : cs) {
+//                System.out.println(c.printInfo());
+//            }
+//        }
+//        for(List<Cross> cs : zrtracks2) {
+//            System.out.println("MY SEED");
+//            for(Cross c : cs) {
+//                System.out.println(c.printInfo());
+//            }
+//        }
         List<Seed> cands = this.match2BST(zrtracks, crosses);
 
         for (Seed seed : cands) {
@@ -81,6 +99,7 @@ public class TrackSeederSVTLinker {
 
     
     double secAngRg[][] = new double[][]{{-87.,147.0},{27.0,153.0},{-93,33.0}};
+    TrackSeederRZ trseed1 ;
     TrackSeederXY trseed2 ;
     private List<Seed> match2BST(List<ArrayList<Cross>> zrtracks, List<Cross> crosses) {
        
@@ -290,12 +309,23 @@ public class TrackSeederSVTLinker {
                               missRegIdx = i; 
                         }
                     }
-                    double sl = (zrtrk2.get(0).getPoint().toVector3D().rho() - zrtrk2.get(1).getPoint().toVector3D().rho())/(zrtrk2.get(0).getPoint().z() - zrtrk2.get(1).getPoint().z());
-                    double in = zrtrk2.get(0).getPoint().toVector3D().rho()-sl*zrtrk2.get(0).getPoint().z();
+//                    double sl = (zrtrk2.get(0).getPoint().toVector3D().rho() - zrtrk2.get(1).getPoint().toVector3D().rho())/(zrtrk2.get(0).getPoint().z() - zrtrk2.get(1).getPoint().z());
+//                    double in = zrtrk2.get(0).getPoint().toVector3D().rho()-sl*zrtrk2.get(0).getPoint().z();
+//                    double Rm = zrtrk3.get(missRegIdx).getPoint().toVector3D().rho();
+//                    double Zm = zrtrk3.get(missRegIdx).getPoint().z();
+//                    double Rc = sl*Zm +in;
+//                    if(Math.abs(Rc-Rm)<0.0005) {
+//                        rmCros.add((ArrayList<Cross>) zrtrk2); //3-cross list is good w/in 500 microns
+//                    }  else {
+//                        rmCros.add((ArrayList<Cross>) zrtrk3); // 3-cross list has outlier
+//                    }
+                    double sl = (zrtrk2.get(0).getPoint().z() - zrtrk2.get(1).getPoint().z())/(zrtrk2.get(0).getPoint().toVector3D().rho() - zrtrk2.get(1).getPoint().toVector3D().rho());
+                    double in = -sl*zrtrk2.get(0).getPoint().toVector3D().rho()+zrtrk2.get(0).getPoint().z();
                     double Rm = zrtrk3.get(missRegIdx).getPoint().toVector3D().rho();
                     double Zm = zrtrk3.get(missRegIdx).getPoint().z();
-                    double Rc = sl*Zm +in;
-                    if(Math.abs(Rc-Rm)<0.0005) {
+                    double Zc = sl*Rm +in;
+                    double Zerr = zrtrk3.get(missRegIdx).getPointErr().z();
+                    if(Math.abs(Zc-Zm)<Zerr*3) {//3sigma
                         rmCros.add((ArrayList<Cross>) zrtrk2); //3-cross list is good w/in 500 microns
                     }  else {
                         rmCros.add((ArrayList<Cross>) zrtrk3); // 3-cross list has outlier
