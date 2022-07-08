@@ -66,7 +66,7 @@ public class Constants {
     public static final double PTCUT   = 0.25; // minimum pt in GeV
     public static final double TANDIP  = 2;     // max value on dip angle
     public static final double NDFCUT  = 0;     // minimum number of degres of freedom
-    public static final double CHI2CUT = 50;    // minimum chi2 per degrees of freedom
+    public static final double CHI2CUT = 10;    // 50, minimum chi2 per degrees of freedom
     public static final double RESICUT = 5;    // minimum resi in PR
     public static final double ZRANGE  = 10;   // defines z range as -ZRANGE:+ZRANGE in mm
     public static final int    MINSVTCRSFORCOSMIC = 2; 

@@ -28,6 +28,8 @@ public class TrackSeederSVTLinker {
     private double ybeam;
     private double bfield;
     private TrackSeederCA tca;
+    private Map <Integer, Map <Integer, List<Cross>>> svtcrs;
+    private Map <Integer, Map <Integer, List<Cross>>> bmtcrs;
     public TrackSeederSVTLinker(Swim swimmer, double xb, double yb) {
         float[] b = new float[3];
         swimmer.BfieldLab(0, 0, 0, b);
@@ -37,75 +39,16 @@ public class TrackSeederSVTLinker {
         trseed1 = new TrackSeederRZ();
         trseed2 = new TrackSeederXY(xb, yb);
         trseed2.unUsedHitsOnly=false;
-        
+        svtcrs= new HashMap<>();
+        bmtcrs= new HashMap<>();
         tca = new TrackSeederCA(swimmer, xb, yb);
             
     }
 
-    
-    public List<Seed> findSeed(List<Cross> svt_crosses, List<Cross> bmt_crosses) {
+    public void sortXYCrosses(List<Cross> crosses) {
+        svtcrs.clear();
+        bmtcrs.clear();
         
-        List<Seed> seedlist = new ArrayList<>();
-
-        ArrayList<Cross> crosses = new ArrayList<>();
-        ArrayList<Cross> bmtC_crosses = new ArrayList<>();
-        
-        crosses.addAll(svt_crosses);
-        
-        for (Cross c : bmt_crosses) {
-            if (c.getType() == BMTType.Z) {
-                crosses.add(c);
-            }
-            if (c.getType() == BMTType.C) {
-                bmtC_crosses.add(c);
-            }
-        }
-
-        //Use CA to get the lines
-        //List<Cell> zrnodes = tca.runCAMaker("ZR", 5, bmtC_crosses);
-        //List<ArrayList<Cross>> zrtracks = tca.getCAcandidates(zrnodes);
-        //this.removeCompleteZROverlaps(zrtracks);
-        
-        //use new line finder
-        List<ArrayList<Cross>> zrtracks = trseed1.getSeeds(bmt_crosses);
-        
-//        System.out.println(zrtracks.size()+" vs "+zrtracks2.size());
-//        for(List<Cross> cs : zrtracks) {
-//            System.out.println("CA SEED");
-//            for(Cross c : cs) {
-//                System.out.println(c.printInfo());
-//            }
-//        }
-//        for(List<Cross> cs : zrtracks2) {
-//            System.out.println("MY SEED");
-//            for(Cross c : cs) {
-//                System.out.println(c.printInfo());
-//            }
-//        }
-        List<Seed> cands = this.match2BST(zrtracks, crosses);
-
-        for (Seed seed : cands) {
-            //if(this.doesnotContains(seedlist, seed))
-                seedlist.add(seed);
-        }
-        
-        for (Seed bseed : seedlist) {
-            for (Cross c : bseed.getCrosses()) {
-                c.isInSeed = true;
-            }
-        }
-        return seedlist;
-    }
-
-    
-    double secAngRg[][] = new double[][]{{-87.,147.0},{27.0,153.0},{-93,33.0}};
-    TrackSeederRZ trseed1 ;
-    TrackSeederXY trseed2 ;
-    private List<Seed> match2BST(List<ArrayList<Cross>> zrtracks, List<Cross> crosses) {
-       
-        List<Seed> result = new ArrayList<>();
-        Map <Integer, Map <Integer, List<Cross>>> svtcrs= new HashMap<>();
-        Map <Integer, Map <Integer, List<Cross>>> bmtcrs= new HashMap<>();
         //sort the crosses in lists
         for(Cross c : crosses) {
             if(c.getDetector()==DetectorType.BST) {
@@ -143,6 +86,75 @@ public class TrackSeederSVTLinker {
                 }
             }
         }
+        
+    }
+    
+    public List<Seed> findSeed(List<Cross> svt_crosses, List<Cross> bmt_crosses) {
+        
+        List<Seed> seedlist = new ArrayList<>();
+
+        ArrayList<Cross> crosses = new ArrayList<>();
+        ArrayList<Cross> bmtC_crosses = new ArrayList<>();
+        
+        crosses.addAll(svt_crosses);
+        
+        for (Cross c : bmt_crosses) {
+            if (c.getType() == BMTType.Z) {
+                crosses.add(c);
+            }
+            if (c.getType() == BMTType.C) {
+                bmtC_crosses.add(c);
+            }
+        }
+
+        
+//        //Use CA to get the lines
+//       List<Cell> zrnodes = tca.runCAMaker("ZR", 5, bmtC_crosses);
+//       List<ArrayList<Cross>> zrtracks = tca.getCAcandidates(zrnodes);
+//       this.removeCompleteZROverlaps(zrtracks);
+//        
+        //use new line finder
+        this.sortXYCrosses(crosses);
+        List<ArrayList<Cross>> zrtracks = trseed1.getSeeds(bmtC_crosses,svtcrs);
+        //this.removeCompleteZROverlaps(zrtracks);
+        
+//        System.out.println(zrtracks.size()+" vs "+zrtracks2.size());
+//        for(List<Cross> cs : zrtracks) {
+//            System.out.println("CA SEED");
+//            for(Cross c : cs) {
+//                System.out.println(c.printInfo());
+//            }
+//        }
+//        for(List<Cross> cs : zrtracks2) {
+//            System.out.println("MY SEED");
+//            for(Cross c : cs) {
+//                System.out.println(c.printInfo());
+//            }
+//        }
+        List<Seed> cands = this.match2BST(zrtracks, svtcrs, bmtcrs);
+
+        for (Seed seed : cands) {
+            //if(this.doesnotContains(seedlist, seed))
+                seedlist.add(seed);
+        }
+        
+        for (Seed bseed : seedlist) {
+            for (Cross c : bseed.getCrosses()) {
+                c.isInSeed = true;
+            }
+        }
+        return seedlist;
+    }
+
+    
+    double secAngRg[][] = new double[][]{{-87.,147.0},{27.0,153.0},{-93,33.0}};
+    TrackSeederRZ trseed1 ;
+    TrackSeederXY trseed2 ;
+    private List<Seed> match2BST(List<ArrayList<Cross>> zrtracks, 
+            Map <Integer, Map <Integer, List<Cross>>> svtcrs, 
+            Map <Integer, Map <Integer, List<Cross>>> bmtcrs) {
+       
+        List<Seed> result = new ArrayList<>();
         
         //loop over the line cands
         for (List<Cross> zrcross : zrtracks) {  
@@ -325,7 +337,7 @@ public class TrackSeederSVTLinker {
                     double Zm = zrtrk3.get(missRegIdx).getPoint().z();
                     double Zc = sl*Rm +in;
                     double Zerr = zrtrk3.get(missRegIdx).getPointErr().z();
-                    if(Math.abs(Zc-Zm)<Zerr*3) {//3sigma
+                    if(Math.abs(Zc-Zm)<Zerr*5) {//5sigma
                         rmCros.add((ArrayList<Cross>) zrtrk2); //3-cross list is good w/in 500 microns
                     }  else {
                         rmCros.add((ArrayList<Cross>) zrtrk3); // 3-cross list has outlier

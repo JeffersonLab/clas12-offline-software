@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.jlab.detector.base.DetectorType;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.Geometry;
-import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cross.Cross;
 
 public class TrackSeederRZ {
@@ -15,9 +13,10 @@ public class TrackSeederRZ {
     private List<ArrayList<ArrayList<Cross>>> sortedCrosses;
 
     public boolean unUsedHitsOnly = false;
-    
-    public TrackSeederRZ() {
+    private Map <Integer, Map <Integer, List<Cross>>> bmtcrs;
         
+    public TrackSeederRZ() {
+        bmtcrs= new HashMap<>();
         //init lists for scan
         sortedCrosses = new ArrayList<>();
         for(int i =0; i<3; i++) {
@@ -30,28 +29,26 @@ public class TrackSeederRZ {
     }
     
     
-    public  List<ArrayList<Cross>> getSeeds(List<Cross> crosses) {
+    public  List<ArrayList<Cross>> getSeeds(List<Cross> crosses,
+            Map <Integer, Map <Integer, List<Cross>>> svtcrs) {
         List<ArrayList<Cross>> result = new ArrayList<>();
-       
-        Map <Integer, Map <Integer, List<Cross>>> bmtcrs= new HashMap<>();
+        bmtcrs.clear();
         //sort the crosses in lists
-        for(Cross c : crosses) {
-            if(c.getDetector()==DetectorType.BMT) {
-
-                if(c.getType()==BMTType.C) { 
-                    if(bmtcrs.containsKey(c.getSector())) {  
-                        if(bmtcrs.get(c.getSector()).containsKey(c.getRegion())) {
-                            bmtcrs.get(c.getSector()).get(c.getRegion()).add(c);
-                        } else {
-                            bmtcrs.get(c.getSector()).put(c.getRegion(), new ArrayList<>());
-                            bmtcrs.get(c.getSector()).get(c.getRegion()).add(c);
-                        }
-                    } else {
-                        bmtcrs.put(c.getSector(), new HashMap<>());
-                        bmtcrs.get(c.getSector()).put(c.getRegion(), new ArrayList<>());
-                        bmtcrs.get(c.getSector()).get(c.getRegion()).add(c);
-                    }
+        for(Cross c : crosses) { 
+            if(!svtcrs.containsKey(c.getSector()))
+                    continue;
+            
+            if(bmtcrs.containsKey(c.getSector())) {  
+                if(bmtcrs.get(c.getSector()).containsKey(c.getRegion())) {
+                    bmtcrs.get(c.getSector()).get(c.getRegion()).add(c);
+                } else {
+                    bmtcrs.get(c.getSector()).put(c.getRegion(), new ArrayList<>());
+                    bmtcrs.get(c.getSector()).get(c.getRegion()).add(c);
                 }
+            } else {
+                bmtcrs.put(c.getSector(), new HashMap<>());
+                bmtcrs.get(c.getSector()).put(c.getRegion(), new ArrayList<>());
+                bmtcrs.get(c.getSector()).get(c.getRegion()).add(c);
             }
         }
         Map<Integer, ArrayList<Cross>> seeds = new HashMap<>();
@@ -61,7 +58,7 @@ public class TrackSeederRZ {
             int[] N = new int[]{1,1,1}; //number of crosses in each region
             for(int creg =1; creg<4; creg++) { //loop over regions
                 if(bmtcrs.get(sector).containsKey(creg)) { 
-                    N[creg-1] = bmtcrs.get(sector).get(creg).size();
+                    N[creg-1] = bmtcrs.get(sector).get(creg).size(); 
                 }
             }
             
@@ -82,7 +79,7 @@ public class TrackSeederRZ {
                         if(seed.size()==1) 
                             continue;
                         if(seed.size()==2) 
-                            if(this.interceptOK(seed.get(0), seed.get(1))){
+                            if(this.interceptOK(seed.get(0), seed.get(1))){ 
                                 seedij = new ArrayList<>();
                                 seedij.add(seed.get(0));
                                 seedij.add(seed.get(1));
@@ -100,30 +97,30 @@ public class TrackSeederRZ {
                                 if(!seeds.containsKey(key))
                                     seeds.put(key,(ArrayList<Cross>) seedij);
                             } else {
-                                if(this.interceptOK(seed.get(0), seed.get(1))) {
-                                    seedij = new ArrayList<>();
-                                    seedij.add(seed.get(0));
-                                    seedij.add(seed.get(1));
-                                    int key = (seed.get(0).getId()-900)*1000+(seed.get(1).getId()-900);
-                                    if(!seeds.containsKey(key))
-                                        seeds.put(key,(ArrayList<Cross>) seedij);
-                                }
-                                if(this.interceptOK(seed.get(0), seed.get(2))) {
-                                    seedij = new ArrayList<>();
-                                    seedij.add(seed.get(0));
-                                    seedij.add(seed.get(2));
-                                    int key = (seed.get(0).getId()-900)*1000+(seed.get(2).getId()-900);
-                                    if(!seeds.containsKey(key))
-                                        seeds.put(key,(ArrayList<Cross>) seedij);
-                                }
-                                if(this.interceptOK(seed.get(1), seed.get(2))) {
-                                    seedij = new ArrayList<>();
-                                    seedij.add(seed.get(1));
-                                    seedij.add(seed.get(2));
-                                    int key = (seed.get(1).getId()-900)*1000+(seed.get(2).getId()-900);
-                                    if(!seeds.containsKey(key))
-                                        seeds.put(key,(ArrayList<Cross>) seedij);
-                                }
+//                                if(this.interceptOK(seed.get(0), seed.get(1))) {
+//                                    seedij = new ArrayList<>();
+//                                    seedij.add(seed.get(0));
+//                                    seedij.add(seed.get(1));
+//                                    int key = (seed.get(0).getId()-900)*1000+(seed.get(1).getId()-900);
+//                                    if(!seeds.containsKey(key))
+//                                        seeds.put(key,(ArrayList<Cross>) seedij);
+//                                }
+//                                if(this.interceptOK(seed.get(0), seed.get(2))) {
+//                                    seedij = new ArrayList<>();
+//                                    seedij.add(seed.get(0));
+//                                    seedij.add(seed.get(2));
+//                                    int key = (seed.get(0).getId()-900)*1000+(seed.get(2).getId()-900);
+//                                    if(!seeds.containsKey(key))
+//                                        seeds.put(key,(ArrayList<Cross>) seedij);
+//                                }
+//                                if(this.interceptOK(seed.get(1), seed.get(2))) {
+//                                    seedij = new ArrayList<>();
+//                                    seedij.add(seed.get(1));
+//                                    seedij.add(seed.get(2));
+//                                    int key = (seed.get(1).getId()-900)*1000+(seed.get(2).getId()-900);
+//                                    if(!seeds.containsKey(key))
+//                                        seeds.put(key,(ArrayList<Cross>) seedij);
+//                                }
                             }
                         }
                     }
@@ -161,7 +158,7 @@ public class TrackSeederRZ {
         double Rm = c2.getPoint().toVector3D().rho();
         double Zm = c2.getPoint().z();
         double Zc = sl*Rm +in;
-        double Zerr = c2.getPointErr().z();
+        double Zerr = c2.getPointErr().z(); 
         if(Math.abs(Zc-Zm)<Zerr*5) {
             value = true;  
         } 
