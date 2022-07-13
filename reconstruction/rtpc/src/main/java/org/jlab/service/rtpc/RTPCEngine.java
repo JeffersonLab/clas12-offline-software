@@ -25,9 +25,6 @@ import org.jlab.rec.rtpc.hit.TrackHitReco;
 import org.jlab.rec.rtpc.hit.HelixFitTest;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.utils.groups.IndexedTable;
-import org.jlab.rec.rtpc.KalmanFilter.KalmanFitter;
-import org.jlab.rec.rtpc.KalmanFilter.KalmanFitterInfo;
-
 
 
 public class RTPCEngine extends ReconstructionEngine{
@@ -158,13 +155,6 @@ public class RTPCEngine extends ReconstructionEngine{
 
             event.appendBank(recoBank);
             event.appendBank(trackBank);
-
-            if (kfStatus) {
-				HashMap<Integer, KalmanFitterInfo> KFTrackMap = new HashMap<>();
-				new KalmanFitter(params, KFTrackMap, magfield);
-				DataBank KFBank = writer.fillRTPCKFBank(event, KFTrackMap);
-				event.appendBank(KFBank);
-			}
 
 
         }
