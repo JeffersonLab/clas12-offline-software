@@ -249,7 +249,7 @@ public class RTPCEngine extends ReconstructionEngine{
         Units units = Units.CM;
 
         String name_De = "deuteriumGas";
-        double thickness_De = 10;
+        double thickness_De = 1;
         double density_De = 9.37E-4;
         double ZoverA_De = 0.496499;
         double X0_De = 0;
@@ -259,7 +259,7 @@ public class RTPCEngine extends ReconstructionEngine{
                         name_De, thickness_De, density_De, ZoverA_De, X0_De, IeV_De, units);
 
         String name_Bo = "BONuS12Gas";
-        double thickness_Bo = 10;
+        double thickness_Bo = 1;
         double density_Bo = 4.9778E-4;
         double ZoverA_Bo = 0.49989;
         double X0_Bo = 0;
@@ -269,7 +269,7 @@ public class RTPCEngine extends ReconstructionEngine{
                         name_Bo, thickness_Bo, density_Bo, ZoverA_Bo, X0_Bo, IeV_Bo, units);
 
         String name_My = "Mylar";
-        double thickness_My = 10;
+        double thickness_My = 1;
         double density_My = 1.4;
         double ZoverA_My = 0.501363;
         double X0_My = 0;
@@ -279,7 +279,7 @@ public class RTPCEngine extends ReconstructionEngine{
                         name_My, thickness_My, density_My, ZoverA_My, X0_My, IeV_My, units);
 
         String name_Ka = "Kapton";
-        double thickness_Ka = 10;
+        double thickness_Ka = 1;
         double density_Ka = 1.42;
         double ZoverA_Ka = 0.500722;
         double X0_Ka = 0;

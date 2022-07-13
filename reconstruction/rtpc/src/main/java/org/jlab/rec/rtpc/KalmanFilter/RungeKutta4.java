@@ -125,7 +125,8 @@ public class RungeKutta4 {
 		double mom = Math.sqrt(yIn[3] * yIn[3] + yIn[4] * yIn[4] + yIn[5] * yIn[5]);
 		double E = Math.sqrt(mom * mom + mass * mass);
 
-		double DeltaE = ComputeDEDX(mom, mass, h, material) * 1000; // MeV/cm
+		double dedx = material.getEloss(mom, mass) * 1000;
+		double DeltaE = dedx * h;
 
 		stepper.dEdx += DeltaE;
 
@@ -136,35 +137,5 @@ public class RungeKutta4 {
 		yIn[3] *= mom_prim / mom;
 		yIn[4] *= mom_prim / mom;
 		yIn[5] *= mom_prim / mom;
-	}
-
-	public double ComputeDEDX(
-			double p,
-			double mass,
-			double thickness,
-			org.jlab.clas.tracking.kalmanfilter.Material material) {
-		if (mass == 0) return 0;
-		double beta = p / Math.sqrt(p * p + mass * mass);
-		double s = PhysicsConstants.massElectron() / mass;
-		double gamma = 1. / Math.sqrt(1 - beta * beta);
-		double Wmax =
-				2.
-						* PhysicsConstants.massElectron()
-						* beta
-						* beta
-						* gamma
-						* gamma
-						/ (1. + 2. * s * gamma + s * s);
-		double K = 0.000307075; //  GeV mol-1 cm2
-		double I = material.getIeV() * 1E-9;
-		double logterm =
-				2. * PhysicsConstants.massElectron() * beta * beta * gamma * gamma * Wmax / (I * I);
-		return thickness
-				* material.getDensity()
-				* K
-				* material.getZoverA()
-				* (0.5 * Math.log(logterm) - beta * beta)
-				/ beta
-				/ beta;
 	}
 }
