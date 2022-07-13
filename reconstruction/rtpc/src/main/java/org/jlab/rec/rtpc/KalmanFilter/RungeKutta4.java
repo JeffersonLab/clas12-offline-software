@@ -125,7 +125,7 @@ public class RungeKutta4 {
 		double mom = Math.sqrt(yIn[3] * yIn[3] + yIn[4] * yIn[4] + yIn[5] * yIn[5]);
 		double E = Math.sqrt(mom * mom + mass * mass);
 
-		double dedx = material.getEloss(mom, mass) * 1000;
+		double dedx = material.getEloss(mom/1000, mass/1000) * 1000;
 		double DeltaE = dedx * h;
 
 		stepper.dEdx += DeltaE;
