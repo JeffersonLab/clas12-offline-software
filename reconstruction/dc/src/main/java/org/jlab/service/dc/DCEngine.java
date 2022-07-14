@@ -20,7 +20,6 @@ public class DCEngine extends ReconstructionEngine {
     private int        selectedSector = 0;
     private boolean    wireDistortion = false;
     private boolean    useStartTime   = true;
-    private boolean    useTimeBeta    = false;
     private boolean    useBetaCut     = false;
     private boolean    useDoublets    = false;
     private int        t2d            = 0;
@@ -57,10 +56,6 @@ public class DCEngine extends ReconstructionEngine {
         if(this.getEngineConfigString("dcWireDistortion")!=null)       
             wireDistortion = Boolean.parseBoolean(this.getEngineConfigString("dcWireDistortion"));
         
-        //Use time in tBeta function (true: use time; false: use track doca)
-        if(this.getEngineConfigString("dcTimeTBeta")!=null)
-            useTimeBeta = (Boolean.valueOf(this.getEngineConfigString("dcTimeTBeta")));
-            useTimeBeta =false; //always force to false
         //Use beta cut(true: use time; false: use track doca)
         if(this.getEngineConfigString("dcBetaCut")!=null)
             useBetaCut =Boolean.valueOf(this.getEngineConfigString("dcBetaCut"));
@@ -140,7 +135,6 @@ public class DCEngine extends ReconstructionEngine {
                                            geoVariation, 
                                            wireDistortion, 
                                            useStartTime, 
-                                           useTimeBeta, 
                                            useBetaCut, 
                                            t2d,
                                            useDoublets,
