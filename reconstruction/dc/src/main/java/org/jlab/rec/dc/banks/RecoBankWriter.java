@@ -471,6 +471,9 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
             if(bank.getDescriptor().hasEntry("tBeta")){
                bank.setFloat("tBeta", i, (float) hitlist.get(i).get_DeltaTimeBeta());
             }
+            if(bank.getDescriptor().hasEntry("dDoca")){
+               bank.setFloat("dDoca", i, (float) hitlist.get(i).get_DeltaDocaBeta());
+            }
             if(bank.getDescriptor().hasEntry("fitResidual")){
                bank.setFloat("fitResidual", i, (float) hitlist.get(i).get_TrkResid());
             }

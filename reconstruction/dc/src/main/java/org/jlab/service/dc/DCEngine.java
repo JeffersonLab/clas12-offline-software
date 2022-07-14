@@ -60,7 +60,7 @@ public class DCEngine extends ReconstructionEngine {
         //Use time in tBeta function (true: use time; false: use track doca)
         if(this.getEngineConfigString("dcTimeTBeta")!=null)
             useTimeBeta = (Boolean.valueOf(this.getEngineConfigString("dcTimeTBeta")));
-        
+            useTimeBeta =false; //always force to false
         //Use beta cut(true: use time; false: use track doca)
         if(this.getEngineConfigString("dcBetaCut")!=null)
             useBetaCut =Boolean.valueOf(this.getEngineConfigString("dcBetaCut"));
@@ -114,6 +114,9 @@ public class DCEngine extends ReconstructionEngine {
         Map<String,Integer> dcTables = new HashMap<>();
         dcTables.put(Constants.DOCARES,3);
         dcTables.put(Constants.TIME2DIST,3);
+        dcTables.put(Constants.PRESSURE, 3);
+        dcTables.put(Constants.T2DPRESSURE,3);
+        dcTables.put(Constants.T2DPRESSUREREF,3);
         dcTables.put(Constants.T0CORRECTION,4);
         dcTables.put(Constants.TDCTCUTS,3);
         dcTables.put(Constants.TIMEJITTER,3);

@@ -60,13 +60,16 @@ public class Constants {
     private int     T2D = 1;     // 1=polynomial, 0=exponential
     private boolean USEDOUBLETS = false;
     
-    public static final String DOCARES      = "/calibration/dc/signal_generation/doca_resolution";
-    public static final String TIME2DIST    = "/calibration/dc/time_to_distance/time2dist";
-    public static final String T0CORRECTION = "/calibration/dc/time_corrections/T0Corrections";
-    public static final String TDCTCUTS     = "/calibration/dc/time_corrections/tdctimingcuts";
-    public static final String WIRESTAT     = "/calibration/dc/tracking/wire_status";
-    public static final String TIMEJITTER   = "/calibration/dc/time_jitter";
-    public static final String BEAMPOS      = "/geometry/beam/position";
+    public static final String DOCARES        = "/calibration/dc/signal_generation/doca_resolution";
+    public static final String TIME2DIST      = "/calibration/dc/time_to_distance/time2dist";
+    public static final String T2DPRESSURE    = "/calibration/dc/time_to_distance/t2d_pressure";
+    public static final String PRESSURE       = "/hall/weather/pressure";
+    public static final String T2DPRESSUREREF = "/calibration/dc/time_to_distance/ref_pressure";
+    public static final String T0CORRECTION   = "/calibration/dc/time_corrections/T0Corrections";
+    public static final String TDCTCUTS       = "/calibration/dc/time_corrections/tdctimingcuts";
+    public static final String WIRESTAT       = "/calibration/dc/tracking/wire_status";
+    public static final String TIMEJITTER     = "/calibration/dc/time_jitter";
+    public static final String BEAMPOS        = "/geometry/beam/position";
 
     public static final String HITBASE = "HitBased";
     
@@ -356,7 +359,7 @@ public class Constants {
         LOGGER.log(Level.INFO, "["+engine+"] run with sector selection = " + SECTORSELECT);
         LOGGER.log(Level.INFO, "["+engine+"] run with start time option = " + USETSTART);
         LOGGER.log(Level.INFO, "["+engine+"] run with wire distortions = " + ENDPLATESBOWING);
-        LOGGER.log(Level.INFO, "["+engine+"] run with with new tBeta configuration = " + USETIMETBETA);
+        LOGGER.log(Level.INFO, "["+engine+"] run with with time Beta correction (is false for doca Beta correction) = " + USETIMETBETA);
         LOGGER.log(Level.INFO, "["+engine+"] run with with Beta cut = " + CHECKBETA);
         LOGGER.log(Level.INFO, "["+engine+"] run with time to distance function set to exponential/polynomial (0/1) = " + T2D);
         LOGGER.log(Level.INFO, "["+engine+"] run with with hit doublets recovery = " + USEDOUBLETS);

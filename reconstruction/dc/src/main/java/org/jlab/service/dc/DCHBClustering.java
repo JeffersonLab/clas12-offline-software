@@ -41,8 +41,7 @@ public class DCHBClustering extends DCEngine {
         int run = this.getRun(event);
         if(run==0) return true;
         
-        double triggerPhase = 0;
-        this.getTriggerPhase(event);
+        double triggerPhase = this.getTriggerPhase(event);
 
         /* 1 */
         // get Field
