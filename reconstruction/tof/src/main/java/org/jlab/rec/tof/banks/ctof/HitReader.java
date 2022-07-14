@@ -58,7 +58,8 @@ public class HitReader implements IMatchedHit {
             IndexedTable constants5, 
             IndexedTable constants6, 
             IndexedTable constants7, 
-            IndexedTable constants8) {
+            IndexedTable constants8, 
+            IndexedTable constants9) {
         /*
         0: "/calibration/ctof/attenuation"),
         1: "/calibration/ctof/effective_velocity"),
@@ -68,7 +69,8 @@ public class HitReader implements IMatchedHit {
         5: "/calibration/ctof/gain_balance"),
         6: "/calibration/ctof/time_jitter"),
         7: "/calibration/ctof/fadc_offset"),
-        7: "/calibration/ctof/hpos"));
+        7: "/calibration/ctof/hpos"),
+        7: "/calibration/ctof/hposbin"));
         */
 
         double triggerPhase = this.getTriggerPhase(timeStamp, constants6);
@@ -144,7 +146,8 @@ public class HitReader implements IMatchedHit {
              constants2, 
              constants3, 
              constants5, 
-             constants8);
+             constants8, 
+             constants9);
             // DetHits.get(hit.get_Panel()-1).add(hit);
         }
         // List<Hit> unique_hits = this.removeDuplicatedHits(updated_hits);

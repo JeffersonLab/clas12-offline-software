@@ -115,6 +115,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
         double HPOSc = this.HPOSc(null);
         double HPOSd = this.HPOSd(null);
         double HPOSe = this.HPOSe(null);
+        double[] HPOSBIN = this.HPOSBIN(null);
         double lambdaL = this.lambda1(constants0);
         this.set_lambda1(lambdaL);
         this.set_lambda1Unc(this.lambda1Unc(constants0));
@@ -146,7 +147,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
         this.set_HitParams(superlayer, TW0L, TW0R, TW1L, TW1R, TW1P, TW2P, 
                 TW0E, TW1E, TW2E, TW3E, TW4E,
-                HPOSa, HPOSb, HPOSc, HPOSd, HPOSe, lambdaL,lambdaR, 
+                HPOSa, HPOSb, HPOSc, HPOSd, HPOSe, HPOSBIN, lambdaL,lambdaR, 
                 yOffset, vL, vR, vLUnc, vRUnc, PEDL, PEDR, PEDLUnc,
                 PEDRUnc, paddle2paddle, RFPad, timeOffset, triggerPhase, LSBConv, LSBConvErr,
                 ADCLErr, ADCRErr, TDCLErr, TDCRErr, ADC_MIP, ADC_MIPErr,
@@ -305,6 +306,11 @@ public class Hit extends AHit implements IGetCalibrationParams {
     @Override
     public double HPOSe(IndexedTable tab) {
         return 0;
+    }
+
+    @Override
+    public double[] HPOSBIN(IndexedTable tab) {
+        return null;
     }
 
     @Override
