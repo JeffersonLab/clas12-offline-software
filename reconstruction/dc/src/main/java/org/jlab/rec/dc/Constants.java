@@ -310,7 +310,6 @@ public class Constants {
                                         String variation, 
                                         boolean wireDistortion,
                                         boolean useStartTime,
-                                        boolean useTimeBeta,
                                         boolean useBetaCut,
                                         int t2d, 
                                         boolean useDoublets,
@@ -324,7 +323,6 @@ public class Constants {
             GEOVARIATION    = variation;
             ENDPLATESBOWING = wireDistortion;
             USETSTART       = useStartTime;
-            USETIMETBETA    = useTimeBeta;
             CHECKBETA       = useBetaCut;
             T2D             = t2d;
             USEDOUBLETS     = useDoublets;
