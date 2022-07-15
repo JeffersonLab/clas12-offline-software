@@ -61,7 +61,7 @@ public class KFitter {
 		double E = Math.sqrt(p * p + mass * mass);
 		double dE = Math.abs(stepper.dEdx);
 
-		double K = 0.307075;
+		double K = 0.000307075;
 		double sigma2_dE = indicator.material.getDensity() * K * indicator.material.getZoverA() / beta2 * tmax * s / 10 * (1.0 - beta2 / 2) * 1000 * 1000;
 		double dp_prim_ddE = (E + dE) / Math.sqrt((E + dE) * (E + dE) - mass * mass);
 		double sigma2_px = Math.pow(px / p, 2) * Math.pow(dp_prim_ddE, 2) * sigma2_dE;
