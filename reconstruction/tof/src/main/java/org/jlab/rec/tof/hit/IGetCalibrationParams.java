@@ -38,6 +38,8 @@ public interface IGetCalibrationParams {
 
     public double HPOSe(IndexedTable tab);
 
+    public double[] HPOSBIN(IndexedTable tab);
+
     public double lambda1(IndexedTable tab);
 
     public double lambda2(IndexedTable tab);
