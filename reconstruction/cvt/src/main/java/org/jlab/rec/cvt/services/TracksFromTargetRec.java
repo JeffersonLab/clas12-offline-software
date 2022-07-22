@@ -202,6 +202,7 @@ public class TracksFromTargetRec {
                     //refit adding missing clusters
                     List<Cluster> clsOnTrack = recUtil.findClustersOnTrk(this.SVTclusters, seed.getClusters(), fittedTrack.getHelix(),
                             fittedTrack.getP(), fittedTrack.getQ(), swimmer); //VZ: finds missing clusters; RDV fix 0 error
+                    
                     List<Cross> crsOnTrack = recUtil.findCrossesFromClustersOnTrk(this.SVTcrosses, clsOnTrack, fittedTrack);
 
                     List<Cluster> bmtclsOnTrack = recUtil.findBMTClustersOnTrk(this.BMTclusters, seed.getCrosses(), fittedTrack.getHelix(),
@@ -209,9 +210,10 @@ public class TracksFromTargetRec {
                     List<Cross> bmtcrsOnTrack = recUtil.findCrossesOnBMTTrack(this.BMTcrosses, bmtclsOnTrack);
 
                     //VZ check for additional clusters, and only then re-run KF adding new clusters
-                    if((clsOnTrack.size()>0 || bmtcrsOnTrack.size()>0) && false) { 
-                        if(clsOnTrack.size()>0) 
+                    if((clsOnTrack.size()>0 || bmtcrsOnTrack.size()>0) ) { 
+                        if(clsOnTrack.size()>0) {
                             seed.getClusters().addAll(clsOnTrack);
+                        }
                         if(crsOnTrack.size()>0) {
                             seed.getCrosses().addAll(crsOnTrack);
                         }

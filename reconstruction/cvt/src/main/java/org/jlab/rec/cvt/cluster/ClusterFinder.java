@@ -91,15 +91,15 @@ public class ClusterFinder {
                         }
                         for (Hit h : hits) {
                             h.setAssociatedClusterID(this_cluster.getId());
-                            h.newClustering = true; //RDV fix me!
+                            //h.newClustering = true; //RDV fix me!
                         }
                         
                         this_cluster.calc_CentroidParams();
-                        if(this_cluster.getDetector()==DetectorType.BST) {
-                            for (Hit h : this_cluster) {
-                                h.newClustering = false;
-                            }
-                        }
+                        //if(this_cluster.getDetector()==DetectorType.BST) {
+                        //    for (Hit h : this_cluster) {
+                        //        h.newClustering = false;
+                        //    }
+                        //}
                         Collections.sort(this_cluster);
                        
                         //make list of clusters

@@ -21,7 +21,7 @@ import org.jlab.rec.cvt.track.StraightTrack;
 import org.jlab.rec.cvt.track.StraightTrackSeeder;
 import org.jlab.rec.cvt.track.StraightTrackCandListFinder;
 import org.jlab.rec.cvt.track.TrackSeeder;
-import org.jlab.rec.cvt.track.TrackSeederCA;
+//import org.jlab.rec.cvt.track.TrackSeederCA;
 import org.jlab.rec.cvt.track.TrackSeederSVTLinker;
 
 import java.util.Collections;
@@ -506,8 +506,8 @@ public class RecUtilities {
     
     //RDV: to be checked: causes track crosses to be overwritten
     @Deprecated
-    public List<Seed> reFit(List<Seed> seedlist, Swim swimmer,  TrackSeederCA trseed,  TrackSeeder trseed2, double xb, double yb) {
-        trseed = new TrackSeederCA(swimmer, xb, yb);
+    public List<Seed> reFit(List<Seed> seedlist, Swim swimmer,  TrackSeederSVTLinker trseed,  TrackSeeder trseed2, double xb, double yb) {
+        trseed = new TrackSeederSVTLinker(swimmer, xb, yb);
         trseed2 = new TrackSeeder(swimmer, xb, yb);
         List<Seed> filtlist = new ArrayList<>();
         if(seedlist==null)
@@ -523,7 +523,7 @@ public class RecUtilities {
         return filtlist;
     }
     
-    public List<Seed> reFitSeed(Seed bseed, Swim swimmer,  TrackSeederCA trseed,  TrackSeeder trseed2) {
+    public List<Seed> reFitSeed(Seed bseed, Swim swimmer,  TrackSeederSVTLinker trseed,  TrackSeeder trseed2) {
         boolean pass = true;
 
         List<Cross> refib = new ArrayList<>();

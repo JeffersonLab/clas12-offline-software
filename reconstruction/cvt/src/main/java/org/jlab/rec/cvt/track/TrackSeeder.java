@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorType;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.Constants;
@@ -340,15 +341,44 @@ public class TrackSeeder {
                 if(bestSeed!= null) seedlist.add(bestSeed);
             }
         }
-       
-        // remove overlapping seeds
-        Seed.removeOverlappingSeeds(seedlist);
+//        List<Seed> rmSeeds = new ArrayList<>();
+//        for (Seed bseed : seedlist) { 
+//            int countnSVT=0;
+//            int countnBMTZ=0;
+//            int countnBMTC=0;
+//            bseed.setStatus(-2);
+//            for(Cross c : bseed.getCrosses()) {
+//                if(c.getDetector() == DetectorType.BST)
+//                    countnSVT++;
+//                if(c.getType()==BMTType.C)
+//                    countnBMTC++;
+//                if(c.getType()==BMTType.Z)
+//                    countnBMTZ++;
+//            }
+//            if(countnSVT==3) 
+//                bseed.setStatus(2);
+//            if(countnSVT==2 && countnBMTZ>0 && countnBMTC>1) 
+//                bseed.setStatus(2);
+//            if(countnSVT==1 && countnBMTZ>1 && countnBMTC>1) 
+//                bseed.setStatus(2);
+//        }
+//        for (Seed bseed : seedlist) {
+//            if(bseed.getStatus()==-2)
+//                System.out.println(bseed.toString());
+//            //    rmSeeds.add(bseed);
+//        }
+//        seedlist.removeAll(rmSeeds);
         
-        for (Seed bseed : seedlist) { 
-            for(Cross c : bseed.getCrosses()) {
-                c.isInSeed = true;
+        if(!seedlist.isEmpty()) {
+            // remove overlapping seeds
+            Seed.removeOverlappingSeeds(seedlist);
+
+            for (Seed bseed : seedlist) { 
+                for(Cross c : bseed.getCrosses()) {
+                    c.isInSeed = true;
+                }
+                bseed.setStatus(2);
             }
-            bseed.setStatus(2);
         }
         return seedlist;
     }
