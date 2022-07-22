@@ -425,7 +425,7 @@ final class Wire {
     
     private void setMiddle() {
         double t = -leftend.y/direction.y;
-        midpoint.set(leftend.add(direction.times(t)));
+        midpoint.set(leftend.plus(direction.times(t)));
     }
         
     public Vector3d mid() {
