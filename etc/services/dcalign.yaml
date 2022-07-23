@@ -66,17 +66,14 @@ configuration:
       magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
       magfieldTorusMap: Full_torus_r251_phi181_z251_25Jan2021.dat
     DCCR:
-      dcWireDistortion: "true"
       dcGeometryVariation: "default"
       alignmentShifts: "null"
       # for example:
       # alignmentShifts: "r1_cz:0.2,r3_x:0.1"
     DCHB:
-      dcWireDistortion: "true"
       dcGeometryVariation: "default"
       alignmentShifts: "null"
     DCTB:
-      dcWireDistortion: "true"
       dcGeometryVariation: "default"
       alignmentShifts: "null"
 
