@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import org.jlab.clas.pdg.PDGDatabase;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.clas.tracking.kalmanfilter.AKFitter;
 import org.jlab.clas.tracking.kalmanfilter.helical.KFitter;
 import org.jlab.clas.tracking.trackrep.Helix;
 import org.jlab.detector.base.DetectorType;
@@ -197,12 +198,10 @@ public class TracksFromTargetRec {
                         c.getCluster2().setAssociatedTrackID(0);
                     }
                 }
-                if (searchMissingCls) {
-                    
+                if (searchMissingCls) { 
                     //refit adding missing clusters
-                    List<Cluster> clsOnTrack = recUtil.findClustersOnTrk(this.SVTclusters, seed.getClusters(), fittedTrack.getHelix(),
-                            fittedTrack.getP(), fittedTrack.getQ(), swimmer); //VZ: finds missing clusters; RDV fix 0 error
-                    
+                    List<Cluster> clsOnTrack = recUtil.findClustersOnTrk(this.SVTclusters, seed.getClusters(), fittedTrack, swimmer); //VZ: finds missing clusters; RDV fix 0 error
+
                     List<Cross> crsOnTrack = recUtil.findCrossesFromClustersOnTrk(this.SVTcrosses, clsOnTrack, fittedTrack);
 
                     List<Cluster> bmtclsOnTrack = recUtil.findBMTClustersOnTrk(this.BMTclusters, seed.getCrosses(), fittedTrack.getHelix(),

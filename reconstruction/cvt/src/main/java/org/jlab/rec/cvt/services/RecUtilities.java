@@ -27,7 +27,9 @@ import org.jlab.rec.cvt.track.TrackSeederSVTLinker;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map.Entry;
+import org.jlab.clas.tracking.kalmanfilter.AKFitter;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -193,15 +195,18 @@ public class RecUtilities {
     }
     
     public List<Cluster> findClustersOnTrk(List<Cluster> allClusters, 
-            List<Cluster> seedCluster, Helix helix, double P, int Q, Swim swimmer) { 
-        // initialize swimmer starting from the track vertex
-        double maxPathLength = 1; 
-        Point3D vertex = helix.getVertex();
-        swimmer.SetSwimParameters(vertex.x()/10, vertex.y()/10, vertex.z()/10, 
-                     Math.toDegrees(helix.getPhiAtDCA()), Math.toDegrees(Math.acos(helix.cosTheta())),
-                     P, Q, maxPathLength) ;
-        double[] inters = null;
-
+            List<Cluster> seedCluster, Track trk, Swim swimmer) { 
+        Map<Integer, AKFitter.HitOnTrack> trj = trk.getKFTrajectories();
+        //make a map to get the traj at the layers
+        Map<Integer, AKFitter.HitOnTrack> trj2 = new HashMap<>();
+        for (Map.Entry<Integer, AKFitter.HitOnTrack> entry : trj.entrySet()) {
+            if(entry.getKey()>3 && entry.getKey()<10) {
+                if(entry.getValue().layer!=0) {
+                    trj2.put(entry.getValue().layer, entry.getValue());
+                   
+                }
+            }
+        }
         // load SVT clusters that are in the seed
         Map<Integer,Cluster> clusterMap = new HashMap<>();
         for(Cluster cluster : seedCluster) {
@@ -213,47 +218,36 @@ public class RecUtilities {
         // for each layer
         for (int ilayer = 0; ilayer < SVTGeometry.NLAYERS; ilayer++) {
             int layer = ilayer + 1;
-
-            // identify the sector the track may be going through (this doesn't account for misalignments
-            Point3D helixPoint = helix.getPointAtRadius(SVTGeometry.getLayerRadius(layer));
-            
-            // reinitilize swimmer from last surface
-            if(inters!=null) {
-                swimmer.SetSwimParameters(inters[0], inters[1], inters[2], inters[3], inters[4], inters[5], Q);
-            }
             
             for(int isector=0; isector<SVTGeometry.NSECTORS[ilayer]; isector++) {
                 int sector = isector+1;
                 
-                // check the angle between the trajectory point and the sector 
-                // and skip sectors that are too far (more than the sector angular coverage)
-                Vector3D n = Geometry.getInstance().getSVT().getNormal(layer, sector);
-                double deltaPhi = Math.acos(helixPoint.toVector3D().asUnit().dot(n));
-                double buffer = Math.toRadians(1.);
-                if(Math.abs(deltaPhi)>2*Math.PI/SVTGeometry.NSECTORS[ilayer]+buffer) continue;
+                // calculate trajectory
+                Point3D trajPoint = null;
+                
+                
+                if(trj2.containsKey(layer))  {
+                    if(trj2.get(layer).sector == sector) {
+                        trajPoint = new Point3D(trj2.get(layer).x,trj2.get(layer).y,trj2.get(layer).z);
+                    }
+                }
                 
                 int key = SVTGeometry.getModuleId(layer, sector);
                 
-                // calculate trajectory
-                Point3D traj = null;
-                Point3D  p = Geometry.getInstance().getSVT().getModule(layer, sector).origin();
-                Point3D pm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
-                inters = swimmer.SwimPlane(n, pm, Constants.DEFAULTSWIMACC/10);
-                if(inters!=null) {
-                    traj = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
-                } 
+                
+                 
                 // if trajectory is valid, look for missing clusters
-                if(traj!=null && Geometry.getInstance().getSVT().isInFiducial(layer, sector, traj)) {
+                if(trajPoint!=null && Geometry.getInstance().getSVT().isInFiducial(layer, sector, trajPoint)) {
                     double  doca    = Double.POSITIVE_INFINITY; 
                     //if(clusterMap.containsKey(key)) {
                     //    Cluster cluster = clusterMap.get(key);
-                    //    doca = cluster.residual(traj); 
+                    //    doca = cluster.residual(trajPoint); 
                     //}
                     // loop over all clusters in the same sector and layer that are noy associated to s track
-                    for(Cluster cls : allClusters) {
-                        if(cls.getAssociatedTrackID()==-1 && cls.getSector()==sector && cls.getLayer()==layer) {
-                            double clsDoca = cls.residual(traj); 
-                            // save the ones that have better doca
+                    for(Cluster cls : allClusters) { 
+                        if(cls.getAssociatedTrackID()==-1 && cls.getSector()==sector && cls.getLayer()==layer) { 
+                            double clsDoca = cls.residual(trajPoint); 
+                            // save the ones that have better doca 
                             if(Math.abs(clsDoca)<Math.abs(doca) && Math.abs(clsDoca)<10*cls.size()*cls.getSeedStrip().getPitch()/Math.sqrt(12)) {
                                 if(clusterMap.containsKey(key) && clusterMap.get(key).getAssociatedTrackID()==-1) {
                                     clusterMap.replace(key, cls); 
