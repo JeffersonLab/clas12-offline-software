@@ -22,7 +22,7 @@ public class DCEngine extends ReconstructionEngine {
     private boolean    useStartTime   = true;
     private boolean    useBetaCut     = false;
     private boolean    useDoublets    = false;
-    private int        t2d            = 0;
+    private int        t2d            = 1;
     private int        nSuperLayer    = 5;
     private String     geoVariation   = "default";
     private String     bankType       = "HitBasedTrkg";
