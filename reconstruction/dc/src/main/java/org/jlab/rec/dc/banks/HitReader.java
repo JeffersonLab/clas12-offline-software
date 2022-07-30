@@ -169,7 +169,10 @@ public class HitReader {
         }
 
         long tiTimeStamp = this.getTITimeStamp(event);
-        if(tiTimeStamp<=0) return;
+        if(tiTimeStamp<0) {
+            _DCHits = new ArrayList<>();
+            return;
+        }
         
         double tiJitter = this.getTIJitter(event, timejitter);
         
