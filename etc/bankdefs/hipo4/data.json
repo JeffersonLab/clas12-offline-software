@@ -102,6 +102,17 @@
     ]
   },
   {
+    "name" : "DC::jitter",
+    "group": 20600,
+    "item" : 13,
+    "info": "DCRB timestamps bank",
+    "entries":[
+      { "name":"crate"     , "type":"B", "info":"crate"},
+      { "name":"slot"      , "type":"B", "info":"slot"},
+      { "name":"timestamp" , "type":"L", "info":"timestamp (in units of 8 ns)"}
+    ]
+  },
+  {
     "name" : "DC::doca",
     "group": 20600,
     "item" : 14,
