@@ -41,8 +41,6 @@ public class DCHBClustering extends DCEngine {
         int run = this.getRun(event);
         if(run==0) return true;
         
-        double triggerPhase = this.getTriggerPhase(event);
-
         /* 1 */
         // get Field
         Swim dcSwim = new Swim();
@@ -70,11 +68,12 @@ public class DCHBClustering extends DCEngine {
                 noiseAnalysis,
                 parameters,
                 results,
+                Constants.getInstance().getReverseTT(run, super.getConstantsManager().getConstants(run, Constants.TT)),
                 super.getConstantsManager().getConstants(run, Constants.TIME2DIST),
                 super.getConstantsManager().getConstants(run, Constants.TDCTCUTS),
                 super.getConstantsManager().getConstants(run, Constants.WIRESTAT),
-                Constants.getInstance().dcDetector,
-                triggerPhase);
+                super.getConstantsManager().getConstants(run, Constants.TIMEJITTER),
+                Constants.getInstance().dcDetector);
         /* 10 */
         //I) get the hits
         List<Hit> hits = hitRead.get_DCHits(Constants.getInstance().SECTORSELECT);

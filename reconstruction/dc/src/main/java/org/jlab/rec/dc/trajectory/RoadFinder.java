@@ -131,7 +131,7 @@ public class RoadFinder  {
                 double trkX = a[0]*z*z+a[1]*z+a[2]; 
                 int calcWire = segTrj.getWireOnTrajectory(segList.get(0).get_Sector(), slyr, layer, trkX, DcDetector) ;
                 FittedHit pseudoHit = new FittedHit(segList.get(0).get_Sector(),slyr, layer, calcWire,
-                                0, -1); 
+                                0, 0, -1); 
                 //estimate the error on the hit as the cellSize/sqrt(12)
                 pseudoHit.calc_CellSize(DcDetector);
                 pseudoHit.calc_GeomCorr(DcDetector, 0);
@@ -172,7 +172,7 @@ public class RoadFinder  {
             int calcWire = segTrj.getWireOnTrajectory(pseudoSeg.get_Sector(), pseudoSeg.get_Superlayer(), layer, trkX, DcDetector);
 
             FittedHit pseudoHit = new FittedHit(segList.get(0).get_Sector(),pseudoSeg.get_Superlayer(), layer, calcWire,
-                            0, -1); 
+                            0, 0, -1); 
             pseudoHit.set_DocaErr(pseudoHit.get_CellSize()/Math.sqrt(12.)/FastMath.cos(Math.toRadians(6.)));
             pseudoHit.updateHitPosition(DcDetector);
             pseudoHit.calc_GeomCorr(DcDetector, 0);

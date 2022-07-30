@@ -437,7 +437,7 @@ public class ClusterFinder {
 
                     if (hit.get_LeftRightAmb() != 0) {
                         FittedHit newhit = new FittedHit(hit.get_Sector(), hit.get_Superlayer(), hit.get_Layer(), hit.get_Wire(),
-                                hit.get_TDC(), hit.get_Id());
+                                hit.get_TDC(), hit.getJitter(), hit.get_Id());
                         newhit.set_Doca(hit.get_Doca());
                         newhit.set_DocaErr(hit.get_DocaErr());
                         newhit.setT0(hit.getT0()); 

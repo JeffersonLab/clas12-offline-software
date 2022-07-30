@@ -60,8 +60,6 @@ public class DCHBEngine extends DCEngine {
         int run = this.getRun(event);
         if(run==0) return true;
         
-        double triggerPhase = this.getTriggerPhase(event);
-
        
        if (event.hasBank("MC::Particle") && this.getEngineConfigString("wireDistort")==null) {
            Constants.getInstance().setWIREDIST(0);
@@ -94,11 +92,12 @@ public class DCHBEngine extends DCEngine {
                 noiseAnalysis,
                 parameters,
                 results,
+                Constants.getInstance().getReverseTT(run, super.getConstantsManager().getConstants(run, Constants.TT)),
                 super.getConstantsManager().getConstants(run, Constants.TIME2DIST),
                 super.getConstantsManager().getConstants(run, Constants.TDCTCUTS),
                 super.getConstantsManager().getConstants(run, Constants.WIRESTAT),
-                Constants.getInstance().dcDetector,
-                triggerPhase);
+                super.getConstantsManager().getConstants(run, Constants.TIMEJITTER),
+                Constants.getInstance().dcDetector);
         /* 10 */
         //I) get the hits
         List<Hit> hits = hitRead.get_DCHits();
