@@ -196,7 +196,7 @@ public class HitReader {
             wire[i]       = bankDGTZ.getShort("component", i);
             tdc[i]        = bankDGTZ.getInt("TDC", i);
             jitter[i]     = (int) tiJitter;  // use TI jitter correction by default, but replace with DCRB correction if available
-            if(dcrbJitter.getRowCount()>0) {
+            if(dcrbJitter!= null) {
                 if(!reverseTT.hasEntry(sector[i], bankDGTZ.getByte("layer", i), wire[i], 0))
                     LOGGER.log(Level.SEVERE, "Missing TT entry for slco = " + sector[i] + " " + bankDGTZ.getByte("layer", i) + " " + wire[i] + " " + 0);
                 int crate = reverseTT.getIntValue("crate", sector[i], bankDGTZ.getByte("layer", i), wire[i], 0);
