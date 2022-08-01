@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.rec.dc.track.fit.basefit;
 
 import java.util.ArrayList;
@@ -20,7 +15,7 @@ public class LineFitter {
 	// the constructor
 	public LineFitter() {
 	}
-	private List<Double> w = new ArrayList<Double>();
+	private final List<Double> w = new ArrayList<Double>();
 	// fit status
 	public boolean fitStatus(List<Double> x, List<Double> y, List<Double> sigma_x, List<Double> sigma_y, int nbpoints) {
 		boolean fitStat = false;

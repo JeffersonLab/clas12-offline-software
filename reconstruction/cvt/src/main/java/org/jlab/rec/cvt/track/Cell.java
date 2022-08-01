@@ -7,6 +7,7 @@ import java.util.*;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.Geometry;
 
 /**
  * Base cell for the cellular automaton A cell is defined by two crosses and its
@@ -89,7 +90,7 @@ public class Cell implements Comparable<Cell> {
             point.set(cross.getPoint().x(), cross.getPoint().y());
         }
         if (vw.equalsIgnoreCase("ZR")) {
-            point.set(cross.getPoint().z() - Constants.getZoffset(), cross.getRadius());
+            point.set(cross.getPoint().z() - Geometry.getInstance().getZoffset(), cross.getRadius());
         }
         return point;
     }

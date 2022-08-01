@@ -14,6 +14,7 @@ import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Transformation3D;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.hit.Strip;
 /**
@@ -42,7 +43,7 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
     private double _Phi;  			// local LC phi and error for BMT-Z
     private double _PhiErr;
     private double _Phi0;  			// local uncorrected phi and error for BMT-Z 
-    private double _PhiErr0;                                                        
+    private double _PhiErr0;                    // RDV could be removed                                    
     private double _Z;    			// local Z and correspondng error for BMT-C
     private double _ZErr;                       
     private Line3D _Line;                     // 3D line for SVT and BMT-Z
@@ -317,8 +318,8 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
                 if (strpNb >= max) {
                     max = strpNb;
                 }
-                // getting the seed strip which is defined as the strip with the largest deposited energy
-                if (seed==null || strpEn >= seed.getStrip().getEdep()) {
+                // getting the seed strip which is defined as the first in the cluster according to the chosen ordering
+                if (seed==null) {
                     seed = thehit;
                 }
 
@@ -684,34 +685,25 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
 //                                                                                                 endPt1.x(), endPt1.y(), endPt1.z(),
 //                                                                                                 endPt2.x(), endPt2.y(), endPt2.z());
             Plane3D plane = new Plane3D(endPt1, this.getN());
-            surface = Constants.SVTGEOMETRY.getSurface(this.getLayer(), this.getSector(), this.getId(), 
+            surface = Geometry.getInstance().getSVT().getSurface(this.getLayer(), this.getSector(), this.getId(), 
                                                        this.getCentroid(), this.getLine());
             surface.hemisphere = Math.signum(this.center().y());
             surface.setError(this.getResolution()); 
         }
         else {
             if(this.getType()==BMTType.C) {
-                surface = Constants.BMTGEOMETRY.getSurfaceC(this.getLayer(), this.getSector(), this.getId(), 
+                surface = Geometry.getInstance().getBMT().getSurfaceC(this.getLayer(), this.getSector(), this.getId(), 
                                                             this.getCentroid(), this.getCentroidValue());
             }
             else {
                 Point3D point = new Point3D(this.getLine().midpoint());
                 this.toLocal().apply(point);
-                surface = Constants.BMTGEOMETRY.getSurfaceZ(this.getLayer(), this.getSector(), this.getId(), 
+                surface = Geometry.getInstance().getBMT().getSurfaceZ(this.getLayer(), this.getSector(), this.getId(), 
                                                             this.getCentroid(), point.x(), point.y(), this.getCentroidValue());           
             }
             surface.setError(this.getCentroidError());
         }
         return surface;
-    }
-        
-    /**
-     *
-     */
-    public void printInfo() {
-        String s = " cluster: Detector " + this.getDetector().getName() +"  Detector Type " + this.getType().getName() + " ID " + this.getId() + " Sector " + this.getSector() 
-                + " Layer " + this.getLayer() + " tID " + this.getAssociatedTrackID()+ " Size " + this.size() +" centroid "+this.getCentroid() + this.size() +" centroidValue "+this.getCentroidValue();
-        System.out.println(s);
     }
 
     /**
@@ -736,7 +728,7 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
         double res = 0;
 
         for (int i = 0; i < nbhits; i++) {
-            double rstrp = Constants.SVTGEOMETRY.getSingleStripResolution(this.get(i).getLayer(), this.get(i).getStrip().getStrip(), Z);
+            double rstrp = Geometry.getInstance().getSVT().getSingleStripResolution(this.get(i).getLayer(), this.get(i).getStrip().getStrip(), Z);
             res += rstrp * rstrp;
         }
         return Math.sqrt(res);
@@ -832,7 +824,7 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
         Vector3D trackDir = new Vector3D(traj.px, traj.py, traj.pz).asUnit();
                 
         this.setAssociatedTrackID(trackId);
-        this.setCentroidResidual(traj.resi);
+        this.setCentroidResidual(traj.residual);
         this.setSeedResidual(trackPos); 
         this.setTrakInters(trackPos);
 
@@ -843,7 +835,7 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
             this.setL(this.getS().cross(this.getN()).asUnit());
         }
         if(this.getDetector()==DetectorType.BMT && this.getType()==BMTType.Z) {  
-            this.setCentroidResidual(traj.resi*this.getTile().baseArc().radius());    
+            this.setCentroidResidual(traj.residual*this.getTile().baseArc().radius());    
         }
         
         for (Hit hit : this) {
@@ -851,20 +843,21 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
             double doca1 = hit.residual(trackPos);
             hit.setdocaToTrk(doca1);  
             if(this.getDetector()==DetectorType.BST) {
-                Point3D local = Constants.SVTGEOMETRY.toLocal(this.getLayer(), this.getSector(), trackPos);
-                double sigma1 = Constants.SVTGEOMETRY.getSingleStripResolution(this.getLayer(), hit.getStrip().getStrip(), local.z());
+                Point3D local = Geometry.getInstance().getSVT().toLocal(this.getLayer(), this.getSector(), trackPos);
+                double sigma1 = Geometry.getInstance().getSVT().getSingleStripResolution(this.getLayer(), hit.getStrip().getStrip(), local.z());
                 hit.setstripResolutionAtDoca(sigma1);
             }
-            if(traj.isMeasUsed) hit.setTrkgStatus(1);
+            if(traj.isUsed) hit.setTrkgStatus(1);
         }
           
     }
 
     @Override
     public String toString() {
-        String s = "Cluster Id" + this.getId() + " " + this.getDetector() + " " +this.getType();
-        s +=  " layer " + this.getLayer() + " sector " + this.getSector() + " centroid " + this.getCentroid() + " phi " + this.getPhi();
-        return s;
+        String str = String.format("Cluster id=%d %s %s layer=%d sector=%d centroid=%.3f value=%.3f error=%.3f resolution=%.3f phi=%.3f phi0=%.3f size=%d", 
+                                    this.getId(), this.getDetector(), this.getType(), this.getLayer(), this.getSector(), this.getCentroid(),
+                                    this.getCentroidValue(), this.getCentroidError(), this.getResolution(), this.getPhi(), this.getPhi0(), this.size());
+        return str;
     }
 
 

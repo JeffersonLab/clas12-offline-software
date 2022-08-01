@@ -2,6 +2,9 @@ package org.jlab.service.eb;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
 import org.jlab.clas.detector.*;
@@ -21,6 +24,8 @@ import org.jlab.rec.eb.EBRadioFrequency;
  */
 public class EBEngine extends ReconstructionEngine {
 
+    public static Logger LOGGER = Logger.getLogger(EBEngine.class.getName());
+
     boolean usePOCA = false;
 
     // output banks:
@@ -33,6 +38,8 @@ public class EBEngine extends ReconstructionEngine {
     String scintextrasBank = null;
     String cherenkovBank    = null;
     String trackBank        = null;
+    String UtrackBank        = null;
+    String trackUBank        = null;
     String crossBank        = null;
     String ftBank           = null;
     String trajectoryBank   = null;
@@ -43,6 +50,8 @@ public class EBEngine extends ReconstructionEngine {
     String ftofHitsType     = null;
     String trajectoryType   = null;
     String covMatrixType    = null;
+    String cvtTrackType     = null;
+    String cvtTrajType      = null;
     
     public EBEngine(String name){
         super(name,"gavalian","1.0");
@@ -62,6 +71,26 @@ public class EBEngine extends ReconstructionEngine {
         throw new RuntimeException("EBEngine cannot be used directly.  Use EBTBEngine/EBHBEngine instead.");
     }
 
+    public void setOutputBankPrefix(String prefix) {
+        this.setEventBank(prefix+"::Event");
+        this.setParticleBank(prefix+"::Particle");
+        this.setCalorimeterBank(prefix+"::Calorimeter");
+        this.setCherenkovBank(prefix+"::Cherenkov");
+        this.setScintillatorBank(prefix+"::Scintillator");
+        this.setScintClusterBank(prefix+"::ScintExtras");
+        this.setTrackBank(prefix+"::Track");
+        this.setUTrackBank(prefix+"::UTrack");
+        this.setCrossBank(prefix+"::TrackCross");
+        if (!this.getClass().isAssignableFrom(EBHBEngine.class) &&
+            !this.getClass().isAssignableFrom(EBHBAIEngine.class)) {
+            this.setEventBankFT(prefix+"FT::Event");
+            this.setParticleBankFT(prefix+"FT::Particle");
+            this.setCovMatrixBank(prefix+"::CovMat");
+            this.setTrajectoryBank(prefix+"::Traj");        
+        }
+        this.setFTBank(prefix+"::ForwardTagger");
+    }
+
     public boolean processDataEvent(DataEvent de,EBScalers ebs) {
 
         // check run number, get constants from CCDB:
@@ -70,7 +99,7 @@ public class EBEngine extends ReconstructionEngine {
             run=de.getBank("RUN::config").getInt("run",0);
         }
         if (run<=0) {
-            System.out.println("EBEngine:  found no run number, CCDB constants not loaded, skipping event.");
+            LOGGER.log(Level.WARNING,"EBEngine:  found no run number, CCDB constants not loaded, skipping event.");
             return false;
         }
 
@@ -108,8 +137,10 @@ public class EBEngine extends ReconstructionEngine {
         List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType, trajectoryType, covMatrixType);
         eb.addTracks(tracks);      
         
-        List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks", "CVTRec::Trajectory");
+        List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, cvtTrackType, cvtTrajType);
         eb.addTracks(ctracks);
+        
+        List<DetectorTrack> cutracks = DetectorData.readCentralDetectorTracks(de, "CVT::UTracks", cvtTrajType);
        
         // FIXME:  remove need for these indexing bookkeepers:
         eb.getPindexMap().put(0, tracks.size());
@@ -185,6 +216,11 @@ public class EBEngine extends ReconstructionEngine {
                 if (bankTraj != null) de.appendBanks(bankTraj);
                 DataBank bankCovMat = DetectorData.getCovMatrixBank(eb.getEvent().getParticles(), de, covMatrixBank);
                 if (bankCovMat != null) de.appendBanks(bankCovMat);
+
+                if (ctracks.size()>0) {
+                    DataBank x = DetectorData.getUTracksBank(eb.getEvent().getParticles(), de, UtrackBank, ctracks.size());
+                    de.appendBanks(x);
+                }
             }
       
             // update PID for FT-based start time:
@@ -240,6 +276,10 @@ public class EBEngine extends ReconstructionEngine {
         this.trackBank = trackBank;
     }
     
+    public void setUTrackBank(String trackBank) {
+        this.UtrackBank = trackBank;
+    }
+    
     public void setFTBank(String ftBank) {
         this.ftBank = ftBank;
     }
@@ -272,6 +312,14 @@ public class EBEngine extends ReconstructionEngine {
         this.trajectoryType = trajectoryType;
     }
 
+    public void setCvtTrackType(String trackType) {
+        this.cvtTrackType = trackType;
+    }
+    
+    public void setCvtTrajType(String trajectoryType) {
+        this.cvtTrajType = trajectoryType;
+    }
+    
     @Override
     public boolean init() {
 
@@ -287,6 +335,10 @@ public class EBEngine extends ReconstructionEngine {
         this.registerOutputBank(ftBank);
         this.registerOutputBank(trajectoryBank);
         this.registerOutputBank(covMatrixBank);
+
+	if (this.getEngineConfigString("outputBankPrefix")!=null) {
+	    this.setOutputBankPrefix(this.getEngineConfigString("outputBankPrefix"));
+        }
 
         requireConstants(EBCCDBConstants.getAllTableNames());
 

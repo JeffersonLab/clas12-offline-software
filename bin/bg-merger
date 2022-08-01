@@ -4,4 +4,7 @@
 
 export MALLOC_ARENA_MAX=1
 
-java -Xmx1536m -Xms1024m -cp "$CLAS12DIR/lib/clas/*:$CLAS12DIR/lib/services/*:$CLAS12DIR/lib/utils/*" org.jlab.analysis.eventmerger.EventMerger $*
+java -Xmx1536m -Xms1024m -XX:+UseSerialGC \
+    -cp "$CLAS12DIR/lib/clas/*:$CLAS12DIR/lib/services/*:$CLAS12DIR/lib/utils/*" \
+    org.jlab.analysis.eventmerger.EventMerger \
+    $*

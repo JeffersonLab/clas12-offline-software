@@ -1,6 +1,6 @@
 #!/bin/bash
 
-usage='build-coatjava.sh [--quiet] [--spotbugs] [--nomaps] [--unittests]'
+usage='build-coatjava.sh [-h] [--quiet] [--spotbugs] [--nomaps] [--unittests]'
 
 quiet="no"
 runSpotBugs="no"
@@ -24,7 +24,7 @@ do
     then
         quiet="yes"
     else
-        echo $usage
+        echo "$usage"
         exit
     fi
 done
@@ -87,8 +87,10 @@ rm -rf coatjava
 mkdir -p coatjava
 cp -r bin coatjava/
 cp -r etc coatjava/
-# create schema directories for partial reconstruction outputs		
-python etc/bankdefs/util/bankSplit.py coatjava/etc/bankdefs/hipo4 || exit 1
+
+# create schema directories for partial reconstruction outputs
+which python3 >& /dev/null && python=python3 || python=python
+$python etc/bankdefs/util/bankSplit.py coatjava/etc/bankdefs/hipo4 || exit 1
 mkdir -p coatjava/lib/clas
 cp external-dependencies/JEventViewer-1.1.jar coatjava/lib/clas/
 cp external-dependencies/vecmath-1.3.1-2.jar coatjava/lib/clas/
@@ -123,7 +125,6 @@ if [ $? != 0 ] ; then echo "mvn package failure" ; exit 1 ; fi
 cd -
 
 cp common-tools/coat-lib/target/coat-libs-*-SNAPSHOT.jar coatjava/lib/clas/
-cp reconstruction/*/target/clas12detector-*-SNAPSHOT.jar coatjava/lib/services/
-
+cp reconstruction/*/target/clas12detector-*-SNAPSHOT*.jar coatjava/lib/services/
 
 echo "COATJAVA SUCCESSFULLY BUILT !"

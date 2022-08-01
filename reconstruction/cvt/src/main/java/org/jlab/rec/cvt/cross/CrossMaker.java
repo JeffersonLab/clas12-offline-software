@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.bmt.BMTConstants;
 
 import org.jlab.rec.cvt.bmt.BMTGeometry;
@@ -43,9 +44,9 @@ public class CrossMaker {
         ArrayList<Cluster> rbmt_Zlayrclus = new ArrayList<>();
         
         for(Cluster cl : bmt_Zlayrclus) { 
-            if(cl.getLayer()==Constants.getBMTLayerExcld()
-                    && cl.getPhi0()>Math.toRadians(Constants.getBMTPhiZRangeExcld()[0][0])
-                    && cl.getPhi0()<=Math.toRadians(Constants.getBMTPhiZRangeExcld()[0][1]) ) {
+            if(cl.getLayer()==Constants.getInstance().getBMTLayerExcld()
+                    && cl.getPhi0()>Math.toRadians(Constants.getInstance().getBMTPhiZRangeExcld()[0][0])
+                    && cl.getPhi0()<=Math.toRadians(Constants.getInstance().getBMTPhiZRangeExcld()[0][1]) ) {
                 cl.flagForExclusion = true;
                 rbmt_Zlayrclus.add(cl); 
             }
@@ -54,9 +55,9 @@ public class CrossMaker {
             bmt_Zlayrclus.removeAll(rbmt_Zlayrclus);
         }
         for(Cluster cl : bmt_Clayrclus) { 
-            if(cl.getLayer()==Constants.getBMTLayerExcld()
-                    && cl.getZ()>Constants.getBMTPhiZRangeExcld()[1][0]
-                    && cl.getZ()<=Constants.getBMTPhiZRangeExcld()[1][1]) {
+            if(cl.getLayer()==Constants.getInstance().getBMTLayerExcld()
+                    && cl.getZ()>Constants.getInstance().getBMTPhiZRangeExcld()[1][0]
+                    && cl.getZ()<=Constants.getInstance().getBMTPhiZRangeExcld()[1][1]) {
                 cl.flagForExclusion = true;
                 rbmt_Clayrclus.add(cl); 
             }
@@ -142,8 +143,8 @@ public class CrossMaker {
         return crosses;
     }
 
-    private void calcCentErr(Cross c, Cluster Cluster1) {
-        double Z = Constants.SVTGEOMETRY.toLocal(Cluster1.getLayer(),
+    public void calcCentErr(Cross c, Cluster Cluster1) {
+        double Z = Geometry.getInstance().getSVT().toLocal(Cluster1.getLayer(),
                                                  Cluster1.getSector(),
                                                  c.getPoint()).z();        
         if(Z>SVTGeometry.getModuleLength()) Z=SVTGeometry.getModuleLength();
@@ -202,7 +203,7 @@ public class CrossMaker {
 
         for (Cross c : crosses) {
             int rg  =  3 + 
-                    Constants.BMTGEOMETRY.getLayer( c.getRegion(), c.getType()) ;
+                    Geometry.getInstance().getBMT().getLayer( c.getRegion(), c.getType()) ;
             c.setOrderedRegion(rg);
         }
         return crosses;

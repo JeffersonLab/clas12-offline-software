@@ -152,8 +152,8 @@ public class FTHODOCluster extends ArrayList<FTHODOHit> {
 	}
 
         public boolean isgoodCluster() {
-            if(this.getSize()  > FTHODOConstantsLoader.cluster_min_size   &&
-               this.getEnergy()> FTHODOConstantsLoader.cluster_min_energy && 
+            if(this.getSize()  > FTHODOConstantsLoader.CLUSTER_MIN_SIZE   &&
+               this.getEnergy()> FTHODOConstantsLoader.CLUSTER_MIN_ENERGY && 
                this.getLayerMultiplicity(1)>0 && this.getLayerMultiplicity(2)>0) {
                     return true;
             }
@@ -171,9 +171,9 @@ public class FTHODOCluster extends ArrayList<FTHODOHit> {
 //                System.out.println("DT: " + tDiff + "(" + FTHODOConstantsLoader.time_window 
 //                             + ")\t DX: " + xDiff + "(" + FTHODOConstantsLoader.hit_distance 
 //                             + ")\t DY: " + yDiff + "(" + FTHODOConstantsLoader.hit_distance + ")");
-                if(tDiff <= FTHODOConstantsLoader.time_window && 
-                   xDiff <= FTHODOConstantsLoader.hit_distance && 
-                   yDiff <= FTHODOConstantsLoader.hit_distance) addFlag = true;
+                if(tDiff <= FTHODOConstantsLoader.TIME_WINDOW && 
+                   xDiff <= FTHODOConstantsLoader.HIT_DISTANCE && 
+                   yDiff <= FTHODOConstantsLoader.HIT_DISTANCE) addFlag = true;
             }
             return addFlag;
         }

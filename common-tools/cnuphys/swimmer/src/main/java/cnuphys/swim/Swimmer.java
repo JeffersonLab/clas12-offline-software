@@ -1,6 +1,8 @@
 package cnuphys.swim;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import cnuphys.adaptiveSwim.AdaptiveSwimResult;
 import cnuphys.adaptiveSwim.geometry.Cylinder;
@@ -26,6 +28,7 @@ import cnuphys.swim.util.Plane;
  *
  */
 public final class Swimmer {
+	public static Logger LOGGER = Logger.getLogger(Swimmer.class.getName());
 
 	// Speed of light in m/s
 	public static final double C = 299792458.0; // m/s
@@ -60,10 +63,10 @@ public final class Swimmer {
 
 	static {
 		setCLASTolerance(_eps);
-		System.out.println("\n***********************************");
-		System.out.println("* Swimmer package version: " + VERSION);
-		System.out.println("* contact: david.heddle@cnu.edu");
-		System.out.println("***********************************\n");
+		LOGGER.log(Level.FINE,"\n***********************************");
+		LOGGER.log(Level.FINE,"* Swimmer package version: " + VERSION);
+		LOGGER.log(Level.FINE,"* contact: david.heddle@cnu.edu");
+		LOGGER.log(Level.FINE,"***********************************\n");
 	}
 
 
@@ -263,7 +266,11 @@ public final class Swimmer {
 
 		result.setNStep(ns);
 		result.setFinalS(sFinal);
-
+		if (del < accuracy) {
+			result.setStatus(0);
+		} else {
+			result.setStatus(-1);
+		}
 	}
 	   
         /**

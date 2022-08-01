@@ -12,16 +12,24 @@ services:
     name: FTCAL
   - class: org.jlab.rec.ft.hodo.FTHODOEngine
     name: FTHODO
+  - class: org.jlab.rec.ft.trk.FTTRKEngine
+    name: FTTRK
   - class: org.jlab.rec.ft.FTEBEngine
     name: FTEB
-  - class: org.jlab.service.dc.DCHBEngine
+  - class: org.jlab.service.raster.RasterEngine
+    name: RASTER
+# DC clustering: nominal algoritm, filled the cluster bank for ai and conventional tracking
+  - class: org.jlab.service.dc.DCHBClustering
+    name: DCCR
+# DC using clustering: regular HB tracking
+  - class: org.jlab.service.dc.DCHBPostClusterConv
     name: DCHB
   - class: org.jlab.service.ftof.FTOFHBEngine
     name: FTOFHB
   - class: org.jlab.service.ec.ECEngine
     name: EC
-  - class: org.jlab.rec.cvt.services.CVTRecNewKF
-    name: CVT
+  - class: org.jlab.rec.cvt.services.CVTEngine
+    name: CVTFP
   - class: org.jlab.service.ctof.CTOFEngine
     name: CTOF
   - class: org.jlab.service.cnd.CNDCalibrationEngine
@@ -34,8 +42,13 @@ services:
     name: LTCC
   - class: org.jlab.service.eb.EBHBEngine
     name: EBHB
+# DC regular TB tracking    
   - class: org.jlab.service.dc.DCTBEngine
     name: DCTB
+  - class: org.jlab.service.fmt.FMTEngine
+    name: FMT
+  - class: org.jlab.rec.cvt.services.CVTSecondPassEngine
+    name: CVTSP
   - class: org.jlab.service.ftof.FTOFTBEngine
     name: FTOFTB
   - class: org.jlab.service.eb.EBTBEngine
@@ -46,7 +59,7 @@ services:
     name: RTPC
 configuration:
   global:
-      variation: rga_fall2018
+    variation: rga_fall2018
 #      timestamp: 12/31/2020-00:00:00
   io-services:
     writer:
@@ -57,13 +70,13 @@ configuration:
   services:
     MAGFIELDS:
       magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
-      magfieldTorusMap: Full_torus_r251_phi181_z251_08May2018.dat      
+      magfieldTorusMap: Full_torus_r251_phi181_z251_25Jan2021.dat
+    DCCR:
+      dcWireDistortion: "true"
     DCHB:
-      dcGeometryVariation: rga_fall2018
-      dcT2DFunc: "Polynomial"
       dcWireDistortion: "true"
     DCTB:
-      dcGeometryVariation: rga_fall2018
+      dcWireDistortion: "true"
 
 mime-types:
   - binary/data-hipo

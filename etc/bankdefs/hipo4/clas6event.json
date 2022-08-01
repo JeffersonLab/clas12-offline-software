@@ -64,6 +64,25 @@
       {"name": "lcstat",  "type": "B",   "info": "pointer to cc bank"}
   ]
  },
+    {
+  "name": "MC::particle",
+  "group": 31000,
+  "item" : 55,
+  "info": "Container Bank for reconstructed CLAS6 Data",
+  "entries": [
+      {"name": "status",  "type": "B",   "info": "status of the particle"},
+      {"name": "charge",  "type": "B",   "info": "charge of the particle"},
+      {"name": "pid",     "type": "I",   "info": "particle ID"},
+      {"name": "beta",   "type": "F",   "info": "Particle velocity in the units of c (=R_trk/TOF/c)"},
+      {"name": "mass",    "type": "F",   "info": "particle mass calculated from beta"},
+      {"name": "px",      "type": "F",   "info": "x component of momentum"},
+      {"name": "py",      "type": "F",   "info": "y component of momentum"},
+      {"name": "pz",      "type": "F",   "info": "z component of momentum"},
+      {"name": "vx",      "type": "F",   "info": "x component of vertex"},
+      {"name": "vy",      "type": "F",   "info": "y component of vertex"},
+      {"name": "vz",      "type": "F",   "info": "z component of vertex"}
+  ]
+ },
  {
   "name": "EVENT::detector",
   "group": 31000,
