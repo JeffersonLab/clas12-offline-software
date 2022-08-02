@@ -75,7 +75,7 @@ public class Constants {
     public static final String WIRESTAT       = "/calibration/dc/tracking/wire_status";
     public static final String TIMEJITTER     = "/calibration/dc/time_jitter";
     public static final String BEAMPOS        = "/geometry/beam/position";
-    private final Map<Integer, IndexedTable> reverseTTs = new LinkedHashMap<>();
+    private static final Map<Integer, IndexedTable> reverseTTs = new LinkedHashMap<>();
     
     public static final String HITBASE = "HitBased";
     
@@ -438,13 +438,14 @@ public class Constants {
             
     }
 
-    public IndexedTable getReverseTT(int run, IndexedTable tt) {
+    public synchronized IndexedTable getReverseTT(int run, IndexedTable tt) {
         if(!reverseTTs.containsKey(run))
             this.addReverseTT(run, tt);
         return reverseTTs.get(run);
     }
     
-    private synchronized void addReverseTT(int run, IndexedTable tt) {
+    private void addReverseTT(int run, IndexedTable tt) {
+        LOGGER.info("Reversing translation table for run " + run);
         IndexedTable reverse = new IndexedTable(4, "crate/I:slot/I:channel/I");
         for(int row=0; row<tt.getRowCount(); row++) {
             int crate   = Integer.valueOf((String)tt.getValueAt(row,0));
