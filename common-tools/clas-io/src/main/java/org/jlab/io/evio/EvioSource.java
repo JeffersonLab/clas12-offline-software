@@ -219,7 +219,7 @@ public class EvioSource implements DataSource {
 	 */
 
 	public boolean hasEvent() {
-		if (currentEvent >= currentFileEntries)
+		if (currentEvent > currentFileEntries)
 			return false;
 		return true;
 	}
