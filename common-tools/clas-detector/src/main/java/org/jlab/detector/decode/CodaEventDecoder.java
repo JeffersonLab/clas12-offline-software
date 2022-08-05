@@ -63,7 +63,7 @@ public class CodaEventDecoder {
     public List<DetectorDataDgtz> getDataEntries(EvioDataEvent event){
         
         int event_size = event.getHandler().getStructure().getByteBuffer().array().length;
-    
+   
         // This had been inserted to accommodate large EVIO events that
         // were unreadable in JEVIO versions prior to 6.2:
         //if(event_size>600*1024){
@@ -71,6 +71,10 @@ public class CodaEventDecoder {
         //    return new ArrayList<DetectorDataDgtz>();
         //}
         
+        // zero out the trigger bits, but let the others properties inherit
+        // from the previous event, in the case where there's no HEAD bank:
+        this.setTriggerBits(0);
+
         List<DetectorDataDgtz>  rawEntries = new ArrayList<DetectorDataDgtz>();
         List<EvioTreeBranch> branches = this.getEventBranches(event);
         for(EvioTreeBranch branch : branches){
