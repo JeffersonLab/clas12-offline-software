@@ -16,6 +16,8 @@ services:
     name: FTTRK
   - class: org.jlab.rec.ft.FTEBEngine
     name: FTEB
+  - class: org.jlab.service.raster.RasterEngine
+    name: RASTER
 # DC clustering: nominal algoritm, filled the cluster bank for ai and conventional tracking
   - class: org.jlab.service.dc.DCHBClustering
     name: DCCR
@@ -81,22 +83,17 @@ configuration:
   services:
     MAGFIELDS:
       magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
-      magfieldTorusMap: Full_torus_r251_phi181_z251_08May2018.dat
+      magfieldTorusMap: Full_torus_r251_phi181_z251_25Jan2021.dat
     DCCR:
-      dcT2DFunc: "Polynomial"
       dcWireDistortion: "true" 
     DCHB:
-      dcT2DFunc: "Polynomial"
       dcWireDistortion: "true" 
     DCHAI:
-      dcT2DFunc: "Polynomial"
       dcWireDistortion: "true" 
       outputBankPrefix: "AI"
     DCTB:
-      dcT2DFunc: "Polynomial"
       dcWireDistortion: "true" 
     DCTAI:
-      dcT2DFunc: "Polynomial"
       dcWireDistortion: "true"
       outputBankPrefix: "AI"
     MLTD:

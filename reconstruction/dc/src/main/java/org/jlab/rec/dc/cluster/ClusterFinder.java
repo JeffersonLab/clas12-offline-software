@@ -444,6 +444,7 @@ public class ClusterFinder {
                         newhit.set_Beta(hit.get_Beta());
                         newhit.setB(hit.getB());
                         newhit.set_DeltaTimeBeta(hit.get_DeltaTimeBeta());
+                        newhit.set_DeltaDocaBeta(hit.get_DeltaDocaBeta());
                         newhit.setTStart(hit.getTStart());
                         newhit.setTProp(hit.getTProp());
                         newhit.betaFlag= hit.betaFlag;
