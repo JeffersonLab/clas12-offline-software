@@ -14,7 +14,6 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.Geometry;
-import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.measurement.MLayer;
@@ -479,6 +478,8 @@ public class Track extends Trajectory implements Comparable<Track> {
                 stVec.setCalcCentroidStrip(Geometry.getInstance().getSVT().calcNearestStrip(traj.x, traj.y, traj.z, traj.layer, traj.sector));
             }
             else if(MLayer.getDetectorType(index) == DetectorType.BMT) {
+//                System.out.println(pos.toString() + " " + dir.toString());
+//                if(Double.isNaN(pos.x())) System.exit(1);
                 Vector3D localDir = Geometry.getInstance().getBMT().getLocalTrack(traj.layer, traj.sector, pos, dir);
                 stVec.setTrkPhiAtSurface(localDir.phi());
                 stVec.setTrkThetaAtSurface(localDir.theta());
@@ -567,6 +568,9 @@ public class Track extends Trajectory implements Comparable<Track> {
                      this.getNDF(), this.getChi2(), this.getSeed().getStatus());
         for(Cross c: this) str = str + c.toString() + "\n";
         for(Cluster c: this.getSeed().getClusters()) str = str + c.toString() + "\n";
+        if(this.trajs!=null) {
+            for(HitOnTrack h : trajs.values()) str = str + h.toString() + "\n";
+        }
         return str;
     }
 

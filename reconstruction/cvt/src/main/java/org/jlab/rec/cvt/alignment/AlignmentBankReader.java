@@ -1,6 +1,7 @@
 package org.jlab.rec.cvt.alignment;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.jlab.detector.base.DetectorType;
@@ -10,12 +11,14 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.rec.cvt.banks.RecoBankReader;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.hit.Strip;
+import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.StraightTrack;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.trajectory.Helix;
@@ -36,14 +39,14 @@ public class AlignmentBankReader {
             fetch_SVTClusters(event);
         }
 
-        if (event.hasBank("BSTRec::Crosses") == false) {
+        if (event.hasBank("BST::Crosses") == false) {
             //System.err.println("there is no BST bank ");
             _SVTcrosses = new ArrayList<>();
 
             return;
         }
         _SVTcrosses = new ArrayList<>();
-        DataBank bank = event.getBank("BSTRec::Crosses");
+        DataBank bank = event.getBank("BST::Crosses");
 
         for (int j = 0; j < bank.rows(); j++) {
             int region = bank.getByte("region", j);
@@ -79,14 +82,14 @@ public class AlignmentBankReader {
             fetch_BMTClusters(event);
         }
 
-        if (event.hasBank("BMTRec::Crosses") == false) {
+        if (event.hasBank("BMT::Crosses") == false) {
             //System.err.println("there is no BST bank ");
             _BMTcrosses = new ArrayList<Cross>();
 
             return;
         }
         _BMTcrosses = new ArrayList<Cross>();
-        DataBank bank = event.getBank("BMTRec::Crosses");
+        DataBank bank = event.getBank("BMT::Crosses");
 
         for (int j = 0; j < bank.rows(); j++) {
             int region = bank.getByte("region", j);
@@ -116,11 +119,11 @@ public class AlignmentBankReader {
     }
 
     public void fetch_BMTClusters(DataEvent event) {
-        _BMTclusters = new ArrayList<Cluster>();
+        _BMTclusters = new ArrayList<>();
         if (_BMThits == null) {
             this.fetch_BMTHits(event);
         }
-        DataBank bank = event.getBank("BMTRec::Clusters");
+        DataBank bank = event.getBank("BMT::Clusters");
 
         for (int i = 0; i < bank.rows(); i++) {
 
@@ -288,6 +291,96 @@ public class AlignmentBankReader {
 
     ArrayList<Track> _tracks;
 
+    public List<StraightTrack> getCosmics(DataEvent event) {
+
+        
+        _SVTclusters = RecoBankReader.readBSTClusterBank(event);
+        _BMTclusters = RecoBankReader.readBMTClusterBank(event);
+        
+        
+        _SVTcrosses = RecoBankReader.readBSTCrossBank(event);
+        _BMTcrosses = RecoBankReader.readBMTCrossBank(event);
+        if(_SVTcrosses!=null) {
+            for(Cross cross : _SVTcrosses) {
+                cross.setCluster1(_SVTclusters.get(cross.getCluster1().getId()-1));
+                cross.setCluster2(_SVTclusters.get(cross.getCluster2().getId()-1)); 
+            }
+        }
+        if(_BMTcrosses!=null) {
+            for(Cross cross : _BMTcrosses) {
+                cross.setCluster1(_BMTclusters.get(cross.getCluster1().getId()-1));
+            }
+        }
+                       
+        List<StraightTrack> tracks = RecoBankReader.readCVTCosmicsBank(event);
+        if(tracks == null) 
+            return null;
+        
+        for(StraightTrack track : tracks) {
+            
+            List<Cross> crosses = new ArrayList<>();
+            for(Cross cross : _SVTcrosses) {
+                if(cross.getAssociatedTrackID()==track.getId())
+                    crosses.add(cross);
+            }
+            if(_BMTcrosses!=null) {
+                for(Cross cross : _BMTcrosses) {
+                    if(cross.getAssociatedTrackID()==track.getId())
+                        crosses.add(cross);
+                }
+            }
+            track.addAll(crosses);
+           
+        }
+       
+        return tracks;
+    }
+
+    public List<Track> getTracks(DataEvent event) {
+
+        
+        _SVTclusters = RecoBankReader.readBSTClusterBank(event);
+        _BMTclusters = RecoBankReader.readBMTClusterBank(event);
+        
+        
+        _SVTcrosses = RecoBankReader.readBSTCrossBank(event);
+        _BMTcrosses = RecoBankReader.readBMTCrossBank(event);
+        if(_SVTcrosses!=null) {
+            for(Cross cross : _SVTcrosses) {
+                cross.setCluster1(_SVTclusters.get(cross.getCluster1().getId()-1));
+                cross.setCluster2(_SVTclusters.get(cross.getCluster2().getId()-1)); 
+            }
+        }
+        if(_BMTcrosses!=null) {
+            for(Cross cross : _BMTcrosses) {
+                cross.setCluster1(_BMTclusters.get(cross.getCluster1().getId()-1));
+            }
+        }
+                       
+        List<Track> tracks = RecoBankReader.readCVTTracksBank(event);
+        if(tracks == null) 
+            return null;
+        
+        for(Track track : tracks) {
+            
+            List<Cross> crosses = new ArrayList<>();
+            for(Cross cross : _SVTcrosses) {
+                if(cross.getAssociatedTrackID()==track.getId())
+                    crosses.add(cross);
+            }
+            if(_BMTcrosses!=null) {
+                for(Cross cross : _BMTcrosses) {
+                    if(cross.getAssociatedTrackID()==track.getId())
+                        crosses.add(cross);
+                }
+            }
+            track.addAll(crosses);
+           
+        }
+       
+        return tracks;
+    }
+
     public void fetch_Tracks(DataEvent event, double zShift) {
 
         if (_SVTcrosses == null) {
@@ -296,16 +389,14 @@ public class AlignmentBankReader {
         if (_BMTcrosses == null) {
             fetch_BMTCrosses(event, zShift);
         }
-        if (event.hasBank("CVTRec::Tracks") == false) {
+        if (event.hasBank("CVT::Tracks") == false) {
             //System.err.println("there is no BST bank ");
             _tracks = new ArrayList<>();
 
             return;
         }
 
-        List<Hit> hits = new ArrayList<>();
-
-        DataBank bank = event.getBank("CVTRec::Tracks");
+        DataBank bank = event.getBank("CVT::Tracks");
 
         int rows = bank.rows();
 
@@ -344,7 +435,7 @@ public class AlignmentBankReader {
 
         for (int i = 0; i < rows; i++) {
             // get the cosmics ray unit direction vector
-            Track track = new Track(new Helix(d0s[i] * 10, phi0s[i], curvatures[i] / 10, (z0s[i] - zShift) * 10, tandips[i], xbs[i] * 10, ybs[i] * 10));
+            Track track = new Track(new Helix(d0s[i] * 10, phi0s[i], Math.max(curvatures[i] / 10, 1E-5), (z0s[i] - zShift) * 10, tandips[i], xbs[i] * 10, ybs[i] * 10));
             track.setId(ids[i]);
             track.setChi2(chi2s[i]);
             track.setNDF(ndfs[i]);
@@ -400,7 +491,7 @@ public class AlignmentBankReader {
         if (_SVTHits == null) {
             this.fetch_SVTHits(event);
         }
-        DataBank bank = event.getBank("BSTRec::Clusters");
+        DataBank bank = event.getBank("BST::Clusters");
 
         for (int i = 0; i < bank.rows(); i++) {
 
@@ -462,7 +553,7 @@ public class AlignmentBankReader {
     }
 
     private void fetch_SVTHits(DataEvent event) {
-        DataBank bank = event.getBank("BSTRec::Hits");
+        DataBank bank = event.getBank("BST::Hits");
 
         _SVTHits = new ArrayList<Hit>();
         for (int i = 0; i < bank.rows(); i++) {
@@ -484,7 +575,7 @@ public class AlignmentBankReader {
     }
 
     public void fetch_BMTHits(DataEvent event) {
-        DataBank bank = event.getBank("BSTRec::Hits");
+        DataBank bank = event.getBank("BMT::Hits");
 
         _BMThits = new ArrayList<Hit>();
         for (int i = 0; i < bank.rows(); i++) {

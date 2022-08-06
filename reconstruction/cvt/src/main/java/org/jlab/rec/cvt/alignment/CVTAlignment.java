@@ -5,11 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.jlab.clas.reco.ReconstructionEngine;
-//import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorType;
-//import org.jlab.detector.calib.utils.DatabaseConstantProvider;
-//import org.jlab.detector.geant4.v2.SVT.SVTConstants;
-//import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -17,7 +13,6 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 
 import org.jlab.rec.cvt.bmt.BMTType;
-//import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.svt.SVTGeometry;
@@ -27,93 +22,26 @@ import org.jlab.rec.cvt.trajectory.Ray;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 
 import Jama.Matrix;
+import org.jlab.rec.cvt.banks.RecoBankReader;
 //import eu.mihosoft.vrl.v3d.Vector3d;
 
 /**
- * Service to return reconstructed TRACKS
- * format
+ * Service to build input information for CVT KAA alignment
  *
- * @author ziegler
+ * @author spaul
  *
  */
 public class CVTAlignment extends ReconstructionEngine {
 
-	//org.jlab.rec.cvt.bmt.BMTGeometry BMTGeom;
-	//CTOFGeant4Factory CTOFGeom;
-	//SVTStripFactory svtIdealStripFactory;
-
 	public CVTAlignment() {
 		super("CVTAlignment", "spaul", "4.0");
-
-		//BMTGeom = new org.jlab.rec.cvt.bmt.BMTGeometry();
-
 	}
 
-	String FieldsConfig = "";
-	int Run = -1;
+	private String FieldsConfig = "";
+	private int Run = -1;
 	public boolean isSVTonly = false;
 	private Boolean svtTopBottomSep;
-	/*public void setRunConditionsParameters(DataEvent event, String FieldsConfig, int iRun, boolean addMisAlignmts, String misAlgnFile) {
-		if (event.hasBank("RUN::config") == false) {
-			System.err.println("RUN CONDITIONS NOT READ!");
-			return;
-		}
-
-		int Run = iRun;
-
-		boolean isMC = false;
-		boolean isCosmics = false;
-		DataBank bank = event.getBank("RUN::config");
-		//System.out.println("EVENTNUM "+bank.getInt("event",0));
-		if (bank.getByte("type", 0) == 0) {
-			isMC = true;
-		}
-		if (bank.getByte("mode", 0) == 1) {
-			isCosmics = true;
-		}
-
-
-
-		// Load the fields
-		//-----------------
-		String newConfig = "SOLENOID" + bank.getFloat("solenoid", 0);
-
-		if (FieldsConfig.equals(newConfig) == false) {
-			// Load the Constants
-
-			this.setFieldsConfig(newConfig);
-		}
-		FieldsConfig = newConfig;
-
-		// Load the constants
-		//-------------------
-		int newRun = bank.getInt("run", 0);
-
-		if (Run != newRun) {
-			boolean align=false;
-			//Load field scale
-			double SolenoidScale =(double) bank.getFloat("solenoid", 0);
-			Constants.setSolenoidscale(SolenoidScale);
-			if(Math.abs(SolenoidScale)<0.001)
-				Constants.setCosmicsData(true);
-
-			//System.out.println(" LOADING BMT GEOMETRY...............................variation = "+variationName);
-			//CCDBConstantsLoader.Load(new DatabaseConstantProvider(newRun, variationName));
-			//            System.out.println("SVT LOADING WITH VARIATION "+variationName);
-			//            DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, variationName);
-			//            cp = SVTConstants.connect( cp );
-			//            cp.disconnect();  
-			//            SVTStripFactory svtFac = new SVTStripFactory(cp, true);
-			//            SVTGeom.setSvtStripFactory(svtFac);
-			Constants.Load(isCosmics, isSVTonly);
-			this.setRun(newRun);
-
-		}
-
-		Run = newRun;
-		this.setRun(Run);
-	}*/
-
+	
 	public int getRun() {
 		return Run;
 	}
@@ -165,11 +93,9 @@ public class CVTAlignment extends ReconstructionEngine {
 
 		List<? extends Trajectory> tracks;
 		if(isCosmics) {
-			reader.fetch_Cosmics(event, shift);
-			tracks = reader.get_Cosmics();
+			tracks = reader.getCosmics(event);
 		} else {
-			reader.fetch_Tracks(event, shift);
-			tracks = reader.get_Tracks();
+			tracks = reader.getTracks(event);
 		}
 		
 		/*System.out.println(reader.get_ClustersSVT().size()+ " clusters found in SVT");
@@ -189,7 +115,7 @@ public class CVTAlignment extends ReconstructionEngine {
 		List<Matrix> qs = new ArrayList<Matrix>();
 		List<Integer> trackIDs = new ArrayList<>();
 
-		if (tracks.size() < 3)
+		if (tracks!=null && tracks.size() < 3)
 		tracksLoop : for (Trajectory track : tracks) {
 
 			if(Math.abs(getDoca(track))>maxDocaCut)
@@ -372,7 +298,6 @@ public class CVTAlignment extends ReconstructionEngine {
 							}
 							//}
 						}
-						continue;
 					}
 					
 	
@@ -423,7 +348,7 @@ public class CVTAlignment extends ReconstructionEngine {
 		//event.show();
 		
 		//only include events that have tracks that will be used in alignment
-		if(As.size() == 0)
+		if(As.isEmpty())
 			return false;
 		return true;
 

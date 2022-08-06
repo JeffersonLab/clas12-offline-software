@@ -19,8 +19,10 @@ import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.hit.Strip;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.track.Seed;
+import org.jlab.rec.cvt.track.StraightTrack;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.trajectory.Helix;
+import org.jlab.rec.cvt.trajectory.Ray;
 
 /**
  *
@@ -328,7 +330,7 @@ public class RecoBankReader {
         }
     }
     
-    public static List<Seed> readCVTSeedsBank(DataEvent event, double xb, double yb) {
+    public static List<Seed> readCVTSeedsBank(DataEvent event) {
         
         if(!event.hasBank("CVT::Seeds"))
             return null;
@@ -345,8 +347,8 @@ public class RecoBankReader {
                 double d0     = bank.getFloat("d0", i)*10;
                 int    q      = bank.getByte("q", i);
                 int    type   = bank.getByte("fittingMethod", i);
-//                double xb     = bank.getFloat("xb", i);
-//                double yb     = bank.getFloat("yb", i);
+                double xb     = bank.getFloat("xb", i)*10;
+                double yb     = bank.getFloat("yb", i)*10;
                 Helix helix = new Helix( pt, d0, phi0, z0, tandip, q, xb, yb, Constants.getSolenoidMagnitude());
                 double[][] covmatrix = new double[5][5];
                 covmatrix[0][0] = bank.getFloat("cov_d02", i)*10*10;
@@ -381,7 +383,7 @@ public class RecoBankReader {
         }
     }    
     
-    public static List<Track> readCVTTracksBank(DataEvent event, double xb, double yb) {
+    public static List<Track> readCVTTracksBank(DataEvent event) {
         
         if(!event.hasBank("CVT::Tracks"))
             return null;
@@ -397,8 +399,8 @@ public class RecoBankReader {
                 double z0     = bank.getFloat("z0", i)*10;
                 double d0     = bank.getFloat("d0", i)*10;
                 int    q      = bank.getByte("q", i);
-//                double xb     = bank.getFloat("xb", i);
-//                double yb     = bank.getFloat("yb", i);
+                double xb     = bank.getFloat("xb", i)*10;
+                double yb     = bank.getFloat("yb", i)*10;
                 Helix helix = new Helix( pt, d0, phi0, z0, tandip, q, xb, yb, Constants.getSolenoidMagnitude());
                 double[][] covmatrix = new double[5][5];
                 covmatrix[0][0] = bank.getFloat("cov_d02", i)*10*10;
@@ -437,5 +439,31 @@ public class RecoBankReader {
         }
     }
     
+    public static List<StraightTrack> readCVTCosmicsBank(DataEvent event) {
+        
+        if(!event.hasBank("CVTRec::Cosmics"))
+            return null;
+        else {
+            List<StraightTrack> tracks = new ArrayList<>();        
     
+            DataBank bank = event.getBank("CVTRec::Cosmics");
+            for(int i = 0; i < bank.rows(); i++) {
+                int    tid      = bank.getShort("ID", i);
+                double chi2     = bank.getFloat("chi2", i);
+                int    ndf      = bank.getShort("ndf", i);
+                double yxSlope  = bank.getFloat("trkline_yx_slope", i);
+                double yxInterc = bank.getFloat("trkline_yx_interc", i)*10;
+                double yzSlope  = bank.getFloat("trkline_yz_slope", i);
+                double yzInterc = bank.getFloat("trkline_yz_interc", i)*10;
+                
+                Ray ray = new Ray(yxSlope, yxInterc, yzSlope, yzInterc);
+                StraightTrack track = new StraightTrack(ray);
+                track.setId(tid);
+                track.setChi2(chi2);
+                track.setNDF(ndf);
+                tracks.add(track);
+            }
+            return tracks;
+        }
+    }
 }

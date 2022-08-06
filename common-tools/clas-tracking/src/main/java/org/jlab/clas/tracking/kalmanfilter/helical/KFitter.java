@@ -139,7 +139,8 @@ public class KFitter extends AKFitter {
             if(Double.isNaN(newchisq) ||
                sv.smoothed().get(0)==null ||
                sv.smoothed().get(0).kappa==0 || 
-               Double.isNaN(sv.smoothed().get(0).kappa)) {
+               Double.isNaN(sv.smoothed().get(0).kappa) || 
+               Double.isNaN(sv.smoothed().get(0).dz)) {
                 this.setFitFailed = true;
                 break;
             }            

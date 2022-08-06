@@ -241,6 +241,7 @@ public class TracksFromTargetRec {
             for(int it = 0; it < tracks.size(); it++) {
                 int id = it + 1;
                 tracks.get(it).setId(id); 
+//                System.out.println("Fit " + tracks.get(it).toString());
                 tracks.get(it).findTrajectory(swimmer, Geometry.getInstance().geOuterSurfaces());
                 tracks.get(it).update_Crosses(id);
                 tracks.get(it).update_Clusters(id);
@@ -338,12 +339,12 @@ public class TracksFromTargetRec {
             CVTcrosses.add(new ArrayList<>());
         }
                        
-        List<Seed> seeds = RecoBankReader.readCVTSeedsBank(event, xb, yb);
+        List<Seed> seeds = RecoBankReader.readCVTSeedsBank(event);
         if(seeds == null) 
             return null;
         
         
-        List<Track> tracks = RecoBankReader.readCVTTracksBank(event, xb, yb);
+        List<Track> tracks = RecoBankReader.readCVTTracksBank(event);
         if(tracks == null) 
             return null;
         

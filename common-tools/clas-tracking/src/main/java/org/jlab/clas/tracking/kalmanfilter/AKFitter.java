@@ -322,6 +322,13 @@ public abstract class AKFitter {
             this.filteredResidual = fRes;
             this.smoothedResidual = sRes;
         }
+        
+        @Override
+        public String toString() {
+            String str = String.format("HitOnTrack layer=%d sector=%d x=%.3f y=%.3f z=%.3f px=%.3f py=%.3f pz=%.3f residual=%.3f", 
+                                    this.layer, this.sector, this.x, this.y, this.z, this.px, this.py, this.pz, this.residual);
+            return str;
+        }
     }
     
     public void printConfig() {
