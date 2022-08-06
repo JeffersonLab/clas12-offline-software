@@ -142,8 +142,8 @@ public class AlignmentBankReader {
                 cluster.setSeedResidual(10*bank.getFloat("seedResidual", i));
             }
             else {
-                cluster.setCentroidResidual(bank.getFloat("centroidResidual", i));
-                cluster.setSeedResidual(bank.getFloat("seedResidual", i));                
+                cluster.setCentroidResidual(10*bank.getFloat("centroidResidual", i));
+                cluster.setSeedResidual(10*bank.getFloat("seedResidual", i));                
             }
             cluster.setAssociatedTrackID(bank.getShort("trkID", i));
             cluster.setLine(new Line3D(
@@ -166,7 +166,7 @@ public class AlignmentBankReader {
                     bank.getFloat("lx", i),
                     bank.getFloat("ly", i),
                     bank.getFloat("lz", i)));
-            cluster.setResolution(bank.getFloat("e", i));
+            cluster.setResolution(10*bank.getFloat("e", i));
 
             Point3D x1 = new Point3D(
                     10*bank.getFloat("x1", i),
@@ -504,8 +504,8 @@ public class AlignmentBankReader {
             cluster.setCentroid(bank.getFloat("centroid", i));
             //cluster.setSeedEnergy(bank.getFloat("seedE",i));
             //cluster.setSeedEnergy(bank.getFloat("seedE",i));
-            cluster.setCentroidResidual(bank.getFloat("centroidResidual", i));
-            cluster.setSeedResidual(bank.getFloat("seedResidual", i));
+            cluster.setCentroidResidual(10*bank.getFloat("centroidResidual", i));
+            cluster.setSeedResidual(10*bank.getFloat("seedResidual", i));
             cluster.setAssociatedTrackID(bank.getShort("trkID", i));
             cluster.setLine(new Line3D(
                     10*bank.getFloat("x1", i),
