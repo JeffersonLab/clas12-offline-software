@@ -294,12 +294,12 @@ public class AlignmentBankReader {
     public List<StraightTrack> getCosmics(DataEvent event) {
 
         
-        _SVTclusters = RecoBankReader.readBSTClusterBank(event);
-        _BMTclusters = RecoBankReader.readBMTClusterBank(event);
+        _SVTclusters = RecoBankReader.readBSTClusterBank(event, "BSTRec::Clusters");
+        _BMTclusters = RecoBankReader.readBMTClusterBank(event, "BMTRec::Clusters");
         
         
-        _SVTcrosses = RecoBankReader.readBSTCrossBank(event);
-        _BMTcrosses = RecoBankReader.readBMTCrossBank(event);
+        _SVTcrosses = RecoBankReader.readBSTCrossBank(event, "BSTRec::Crosses");
+        _BMTcrosses = RecoBankReader.readBMTCrossBank(event, "BMTRec::Crosses");
         if(_SVTcrosses!=null) {
             for(Cross cross : _SVTcrosses) {
                 cross.setCluster1(_SVTclusters.get(cross.getCluster1().getId()-1));
@@ -312,7 +312,7 @@ public class AlignmentBankReader {
             }
         }
                        
-        List<StraightTrack> tracks = RecoBankReader.readCVTCosmicsBank(event);
+        List<StraightTrack> tracks = RecoBankReader.readCVTCosmicsBank(event, "CVTRec::Cosmics");
         if(tracks == null) 
             return null;
         
@@ -339,12 +339,12 @@ public class AlignmentBankReader {
     public List<Track> getTracks(DataEvent event) {
 
         
-        _SVTclusters = RecoBankReader.readBSTClusterBank(event);
-        _BMTclusters = RecoBankReader.readBMTClusterBank(event);
+        _SVTclusters = RecoBankReader.readBSTClusterBank(event, "BST::Clusters");
+        _BMTclusters = RecoBankReader.readBMTClusterBank(event, "BMT::Clusters");
         
         
-        _SVTcrosses = RecoBankReader.readBSTCrossBank(event);
-        _BMTcrosses = RecoBankReader.readBMTCrossBank(event);
+        _SVTcrosses = RecoBankReader.readBSTCrossBank(event, "BST::Crosses");
+        _BMTcrosses = RecoBankReader.readBMTCrossBank(event, "BMT::Crosses");
         if(_SVTcrosses!=null) {
             for(Cross cross : _SVTcrosses) {
                 cross.setCluster1(_SVTclusters.get(cross.getCluster1().getId()-1));
@@ -357,7 +357,7 @@ public class AlignmentBankReader {
             }
         }
                        
-        List<Track> tracks = RecoBankReader.readCVTTracksBank(event);
+        List<Track> tracks = RecoBankReader.readCVTTracksBank(event, "CVT::Tracks");
         if(tracks == null) 
             return null;
         

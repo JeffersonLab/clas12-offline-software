@@ -31,14 +31,14 @@ import org.jlab.rec.cvt.trajectory.Ray;
 public class RecoBankReader {
     
        
-    public static List<Hit> readBSTHitBank(DataEvent event) {
+    public static List<Hit> readBSTHitBank(DataEvent event, String bankname) {
         
-        if(!event.hasBank("BST::Hits"))
+        if(!event.hasBank(bankname))
             return null;
         else {
             List<Hit> hits = new ArrayList<>();        
             
-            DataBank bank = event.getBank("BST::Hits");
+            DataBank bank = event.getBank(bankname);
             for(int i = 0; i < bank.rows(); i++) {
                 int id     = bank.getShort("ID", i);
                 int sector = bank.getByte("sector", i);
@@ -68,14 +68,14 @@ public class RecoBankReader {
         }
     }
             
-    public static List<Hit>  readBMTHitBank(DataEvent event) {
+    public static List<Hit>  readBMTHitBank(DataEvent event, String bankname) {
         
-        if(!event.hasBank("BMT::Hits"))
+        if(!event.hasBank(bankname))
             return null;
         else {
             List<Hit> hits = new ArrayList<>();        
             
-            DataBank bank = event.getBank("BMT::Hits");
+            DataBank bank = event.getBank(bankname);
             for(int i = 0; i < bank.rows(); i++) {
                 int id     = bank.getShort("ID", i);
                 int sector = bank.getByte("sector", i);
@@ -101,14 +101,14 @@ public class RecoBankReader {
         }
     }
                         
-    public static List<Cluster> readBSTClusterBank(DataEvent event) {
+    public static List<Cluster> readBSTClusterBank(DataEvent event, String bankname) {
         
-        if(!event.hasBank("BST::Clusters"))
+        if(!event.hasBank(bankname))
             return null;
         else {
             List<Cluster> clusters = new ArrayList<>();        
             
-            DataBank bank = event.getBank("BST::Clusters");
+            DataBank bank = event.getBank(bankname);
             for(int i = 0; i < bank.rows(); i++) {
                 int id     = bank.getShort("ID", i);
                 int tid    = bank.getShort("trkID", i);
@@ -157,14 +157,14 @@ public class RecoBankReader {
     }
         
         
-    public static List<Cluster> readBMTClusterBank(DataEvent event) {
+    public static List<Cluster> readBMTClusterBank(DataEvent event, String bankname) {
         
-        if(!event.hasBank("BMT::Clusters"))
+        if(!event.hasBank(bankname))
             return null;
         else {
             List<Cluster> clusters = new ArrayList<>();        
             
-            DataBank bank = event.getBank("BMT::Clusters");
+            DataBank bank = event.getBank(bankname);
             for(int i = 0; i < bank.rows(); i++) {
                 int id     = bank.getShort("ID", i);
                 int tid    = bank.getShort("trkID", i);
@@ -236,14 +236,14 @@ public class RecoBankReader {
 
     
     
-    public static List<Cross> readBSTCrossBank(DataEvent event) {
+    public static List<Cross> readBSTCrossBank(DataEvent event, String bankname) {
         
-        if(!event.hasBank("BST::Crosses"))
+        if(!event.hasBank(bankname))
             return null;
         else {
             List<Cross> crosses = new ArrayList<>();        
     
-            DataBank bank = event.getBank("BST::Crosses");        
+            DataBank bank = event.getBank(bankname);        
             for(int i = 0; i < bank.rows(); i++) {
                 int id     = bank.getShort("ID", i);
                 int tid    = bank.getShort("trkID", i);
@@ -283,14 +283,14 @@ public class RecoBankReader {
         }
     }
         
-    public static List<Cross> readBMTCrossBank(DataEvent event) {
+    public static List<Cross> readBMTCrossBank(DataEvent event, String bankname) {
         
-        if(!event.hasBank("BMT::Crosses"))
+        if(!event.hasBank(bankname))
             return null;
         else {
             List<Cross> crosses = new ArrayList<>();        
     
-            DataBank bank = event.getBank("BMT::Crosses");
+            DataBank bank = event.getBank(bankname);
             for(int i = 0; i < bank.rows(); i++) {
                 int id     = bank.getShort("ID", i);
                 int tid    = bank.getShort("trkID", i);
@@ -330,14 +330,14 @@ public class RecoBankReader {
         }
     }
     
-    public static List<Seed> readCVTSeedsBank(DataEvent event) {
+    public static List<Seed> readCVTSeedsBank(DataEvent event, String bankname) {
         
-        if(!event.hasBank("CVT::Seeds"))
+        if(!event.hasBank(bankname))
             return null;
         else {
             List<Seed> seeds = new ArrayList<>();        
     
-            DataBank bank = event.getBank("CVT::Seeds");
+            DataBank bank = event.getBank(bankname);
             for(int i = 0; i < bank.rows(); i++) {
                 int    tid    = bank.getShort("ID", i);
                 double pt     = bank.getFloat("pt", i);
@@ -383,14 +383,14 @@ public class RecoBankReader {
         }
     }    
     
-    public static List<Track> readCVTTracksBank(DataEvent event) {
+    public static List<Track> readCVTTracksBank(DataEvent event, String bankname) {
         
-        if(!event.hasBank("CVT::Tracks"))
+        if(!event.hasBank(bankname))
             return null;
         else {
             List<Track> tracks = new ArrayList<>();        
     
-            DataBank bank = event.getBank("CVT::Tracks");
+            DataBank bank = event.getBank(bankname);
             for(int i = 0; i < bank.rows(); i++) {
                 int    tid    = bank.getShort("ID", i);
                 double pt     = bank.getFloat("pt", i);
@@ -439,14 +439,14 @@ public class RecoBankReader {
         }
     }
     
-    public static List<StraightTrack> readCVTCosmicsBank(DataEvent event) {
+    public static List<StraightTrack> readCVTCosmicsBank(DataEvent event, String bankname) {
         
-        if(!event.hasBank("CVTRec::Cosmics"))
+        if(!event.hasBank(bankname))
             return null;
         else {
             List<StraightTrack> tracks = new ArrayList<>();        
     
-            DataBank bank = event.getBank("CVTRec::Cosmics");
+            DataBank bank = event.getBank(bankname);
             for(int i = 0; i < bank.rows(); i++) {
                 int    tid      = bank.getShort("ID", i);
                 double chi2     = bank.getFloat("chi2", i);

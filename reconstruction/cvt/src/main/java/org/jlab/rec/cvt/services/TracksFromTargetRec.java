@@ -275,8 +275,8 @@ public class TracksFromTargetRec {
     public List<Seed> getSeedsFromBanks(DataEvent event) {
         
                 
-        SVThits = RecoBankReader.readBSTHitBank(event);
-        BMThits = RecoBankReader.readBMTHitBank(event);
+        SVThits = RecoBankReader.readBSTHitBank(event, "BST::Hits");
+        BMThits = RecoBankReader.readBMTHitBank(event, "BMT::Hits");
         if(SVThits!= null) {
             Collections.sort(SVThits);
         }
@@ -288,8 +288,8 @@ public class TracksFromTargetRec {
         }
 
         
-        SVTclusters = RecoBankReader.readBSTClusterBank(event);
-        BMTclusters = RecoBankReader.readBMTClusterBank(event);
+        SVTclusters = RecoBankReader.readBSTClusterBank(event, "BST::Clusters");
+        BMTclusters = RecoBankReader.readBMTClusterBank(event, "BMT::Clusters");
         if(SVThits!=null && SVTclusters!=null) {
             for(Hit hit : SVThits) {
                 if(hit.getAssociatedClusterID()>0) {
@@ -317,8 +317,8 @@ public class TracksFromTargetRec {
            } 
         }
         
-        List<Cross> SVTcrosses = RecoBankReader.readBSTCrossBank(event);
-        List<Cross> BMTcrosses = RecoBankReader.readBMTCrossBank(event);
+        List<Cross> SVTcrosses = RecoBankReader.readBSTCrossBank(event, "BST::Crosses");
+        List<Cross> BMTcrosses = RecoBankReader.readBMTCrossBank(event, "BMT::Crosses");
         if(SVTcrosses!=null) {
             for(Cross cross : SVTcrosses) {
                 cross.setCluster1(SVTclusters.get(cross.getCluster1().getId()-1));
@@ -339,12 +339,12 @@ public class TracksFromTargetRec {
             CVTcrosses.add(new ArrayList<>());
         }
                        
-        List<Seed> seeds = RecoBankReader.readCVTSeedsBank(event);
+        List<Seed> seeds = RecoBankReader.readCVTSeedsBank(event, "CVT::Seeds");
         if(seeds == null) 
             return null;
         
         
-        List<Track> tracks = RecoBankReader.readCVTTracksBank(event);
+        List<Track> tracks = RecoBankReader.readCVTTracksBank(event, "CVT::Tracks");
         if(tracks == null) 
             return null;
         
