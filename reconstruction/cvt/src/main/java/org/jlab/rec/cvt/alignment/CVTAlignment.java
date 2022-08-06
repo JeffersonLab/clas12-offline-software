@@ -92,10 +92,17 @@ public class CVTAlignment extends ReconstructionEngine {
 		//reader.fetch_Cosmics(event, SVTGeom, 0);
 
 		List<? extends Trajectory> tracks;
+//		if(isCosmics) {
+//			tracks = reader.getCosmics(event);
+//		} else {
+//			tracks = reader.getTracks(event);
+//		}
 		if(isCosmics) {
-			tracks = reader.getCosmics(event);
+                        reader.fetch_Cosmics(event, shift);
+			tracks = reader.get_Cosmics();
 		} else {
-			tracks = reader.getTracks(event);
+			reader.fetch_Tracks(event, shift);
+			tracks = reader.get_Tracks();
 		}
 		
 		/*System.out.println(reader.get_ClustersSVT().size()+ " clusters found in SVT");
