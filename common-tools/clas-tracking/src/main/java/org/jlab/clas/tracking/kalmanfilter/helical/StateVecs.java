@@ -7,7 +7,6 @@ import org.jlab.clas.tracking.kalmanfilter.AStateVecs;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.clas.tracking.kalmanfilter.Units;
 import org.jlab.clas.tracking.trackrep.Helix;
-import org.jlab.clas.tracking.utilities.MatrixOps;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -246,7 +245,7 @@ public class StateVecs extends AStateVecs {
         double cosEntranceAngle = this.getLocalDirAtMeasSite(vec, mv.measurements.get(vec.k));
 
         double p = Math.sqrt(vec.px*vec.px + vec.py*vec.py + vec.pz*vec.pz);
-        if(this.straight) p = 1;
+        if(this.straight) p = 100;
         
         // Highland-Lynch-Dahl formula
         double sctRMS = surf.getThetaMS(p, mass, cosEntranceAngle);

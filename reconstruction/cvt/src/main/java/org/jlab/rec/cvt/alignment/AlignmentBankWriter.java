@@ -7,6 +7,11 @@ import org.jlab.io.base.DataEvent;
 
 import Jama.Matrix;
 
+/**
+ *
+ * @author spaul
+ *
+ */
 public class AlignmentBankWriter {
 	
 	public void write_Matrix(DataEvent event, String matrixName, List<Matrix> matrices) {

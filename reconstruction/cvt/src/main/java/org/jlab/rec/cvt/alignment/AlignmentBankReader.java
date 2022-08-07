@@ -22,6 +22,11 @@ import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.rec.cvt.trajectory.Ray;
 
+/**
+ *
+ * @author spaul
+ *
+ */
 public class AlignmentBankReader {
 
     private List<StraightTrack> _cosmics;
