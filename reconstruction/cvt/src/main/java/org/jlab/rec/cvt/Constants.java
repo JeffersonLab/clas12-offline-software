@@ -10,6 +10,7 @@ import org.jlab.clas.tracking.kalmanfilter.Material;
 import org.jlab.clas.tracking.kalmanfilter.Units;
 
 import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
+import org.jlab.rec.cvt.svt.SVTParameters;
 
 public class Constants {
    
@@ -460,7 +461,9 @@ public class Constants {
                                         boolean timeCuts,
                                         String matrixLibrary,
                                         boolean useOnlyTruth,
-                                        boolean useSVTLinkerSeeder) {
+                                        boolean useSVTLinkerSeeder,
+                                        double docacut,
+                                        double docacutsum) {
         if (!ConstantsLoaded) {
             this.isCosmics = isCosmics;
             this.svtOnly      = svtOnly;
@@ -476,6 +479,8 @@ public class Constants {
             this.setMatLib(matrixLibrary);
             this.useOnlyTruthHits=useOnlyTruth;
             this.svtLinkerSeeding = useSVTLinkerSeeder;
+            SVTParameters.setMAXDOCA2STRIP(docacut);
+            SVTParameters.setMAXDOCA2STRIPS(docacutsum);
             ConstantsLoaded = true;
         }
     }

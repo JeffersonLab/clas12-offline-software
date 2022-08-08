@@ -65,12 +65,15 @@ public class CVTEngine extends ReconstructionEngine {
     private String  matrixLibrary       = "EJML";
     private boolean useOnlyTruth        = false;
     private boolean useSVTLinkerSeeder  = true;
+    private double docacut = 0.6;
+    private double docacutsum = 1.0;
+    
     public CVTEngine(String name) {
-        super(name, "ziegler", "5.0");
+        super(name, "ziegler", "6.0");
     }
 
     public CVTEngine() {
-        super("CVTEngine", "ziegler", "5.0");
+        super("CVTEngine", "ziegler", "6.0");
     }
 
     
@@ -91,7 +94,9 @@ public class CVTEngine extends ReconstructionEngine {
                                            timeCuts,
                                            matrixLibrary,
                                            useOnlyTruth,
-                                           useSVTLinkerSeeder);
+                                           useSVTLinkerSeeder,
+                                           docacut,
+                                           docacutsum);
 
         this.initConstantsTables();
         this.registerBanks();
@@ -140,7 +145,7 @@ public class CVTEngine extends ReconstructionEngine {
         }
 
         DataBank bank = event.getBank("RUN::config");
-        int run = bank.getInt("run", 0); 
+        int run = bank.getInt("run", 0);  //System.out.println("event "+bank.getInt("event", 0));
         return run;
     }
 
@@ -300,6 +305,11 @@ public class CVTEngine extends ReconstructionEngine {
         if (this.getEngineConfigString("kfIterations")!=null)
             this.kfIterations = Integer.valueOf(this.getEngineConfigString("kfIterations"));
         
+        if (this.getEngineConfigString("docacut")!=null)
+            this.docacut = Double.valueOf(this.getEngineConfigString("docacut"));
+        
+        if (this.getEngineConfigString("docacutsum")!=null)
+            this.docacutsum = Double.valueOf(this.getEngineConfigString("docacutsum"));
     }
 
 
@@ -435,5 +445,7 @@ public class CVTEngine extends ReconstructionEngine {
         System.out.println("["+this.getName()+"] initialize KF from true MC information "+this.initFromMc);
         System.out.println("["+this.getName()+"] number of KF iterations set to "+this.kfIterations);
     }
+
+    
 
 }

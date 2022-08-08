@@ -11,14 +11,42 @@ public class SVTParameters {
      */
     SVTParameters() {
     }
+
+    /**
+     * @return the MAXDOCA2STRIP
+     */
+    public static double getMAXDOCA2STRIP() {
+        return MAXDOCA2STRIP;
+    }
+
+    /**
+     * @param aMAXDOCA2STRIP the MAXDOCA2STRIP to set
+     */
+    public static void setMAXDOCA2STRIP(double aMAXDOCA2STRIP) {
+        MAXDOCA2STRIP = aMAXDOCA2STRIP;
+    }
+
+    /**
+     * @return the MAXDOCA2STRIPS
+     */
+    public static double getMAXDOCA2STRIPS() {
+        return MAXDOCA2STRIPS;
+    }
+
+    /**
+     * @param aMAXDOCA2STRIPS the MAXDOCA2STRIPS to set
+     */
+    public static void setMAXDOCA2STRIPS(double aMAXDOCA2STRIPS) {
+        MAXDOCA2STRIPS = aMAXDOCA2STRIPS;
+    }
     
     //CUTS
     public static int MAXSVTHITS = 700;
     public static int MAXSVTCROSSES = 1000;
     public static double RESIMAX = 5;
     public static double TIMECUTLOW = 55;
-    public static double MAXDOCA2STRIP = 0.8-0.2;
-    public static double MAXDOCA2STRIPS = 1.5-0.5;
+    private static double MAXDOCA2STRIP;
+    private static double MAXDOCA2STRIPS;
     // THRESHOLDS
     public static int INITTHRESHOLD = 30;
     public static int DELTATHRESHOLD = 15;

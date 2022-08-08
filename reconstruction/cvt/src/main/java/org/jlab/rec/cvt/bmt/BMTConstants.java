@@ -22,6 +22,8 @@ public class BMTConstants {
     //CUTS
     public static double MAXCLUSSIZE = 5;
     public static int MAXBMTHITS = 700;
+    
+    public static double BMTLINERESISNSIG=5;                        // cut to pass line with 3 BMT points
     //public static final int STARTINGLAYR = 5;						// current configuration is 3 SVT + 3BMT (outermost BST ring)
     public static double ETOTCUT = 0.0;
     // THE GEOMETRY CONSTANTS

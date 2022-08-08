@@ -18,7 +18,6 @@ import org.jlab.rec.cvt.hit.ADCConvertor;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.hit.Strip;
 import org.jlab.rec.cvt.svt.SVTGeometry;
-import org.jlab.rec.cvt.svt.SVTParameters;
 import org.jlab.utils.groups.IndexedTable;
 
 /**

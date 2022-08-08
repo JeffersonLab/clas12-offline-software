@@ -119,8 +119,8 @@ public class TrackSeederXY {
 
             int binIdx = (int) (phi / (360./NBINS) );
            
-            if(binIdx>35)
-                binIdx = 35;
+            if(binIdx>NBINS-1)
+                binIdx = NBINS-1;
             sortedCrosses.get(binIdx).get(crosses.get(i).getRegion() - 1).add(crosses.get(i));
             LPhi[binIdx][crosses.get(i).getRegion() - 1]++; 
         }

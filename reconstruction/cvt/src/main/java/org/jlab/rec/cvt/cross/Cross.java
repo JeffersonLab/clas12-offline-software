@@ -241,7 +241,9 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     public Point3D getPointErr() {
         return _PointErr;
     }
-
+    public double getZErr() {
+        return _PointErr.z();
+    }
     /**
      * Sets a 3-dimensional error on the 3-D point
      *

@@ -27,7 +27,6 @@ public class TrackSeederSVTLinker {
     private double xbeam;
     private double ybeam;
     private double bfield;
-    private TrackSeederCA tca;
     private Map <Integer, Map <Integer, List<Cross>>> svtcrs;
     private Map <Integer, Map <Integer, List<Cross>>> bmtcrs;
     public TrackSeederSVTLinker(Swim swimmer, double xb, double yb) {
@@ -41,7 +40,6 @@ public class TrackSeederSVTLinker {
         trseed2.unUsedHitsOnly=false;
         svtcrs= new HashMap<>();
         bmtcrs= new HashMap<>();
-        tca = new TrackSeederCA(swimmer, xb, yb);
             
     }
 
@@ -117,20 +115,7 @@ public class TrackSeederSVTLinker {
         this.sortXYCrosses(crosses);
         List<ArrayList<Cross>> zrtracks = trseed1.getSeeds(bmtC_crosses,svtcrs);
         //this.removeCompleteZROverlaps(zrtracks);
-        
-//        System.out.println(zrtracks.size()+" vs "+zrtracks2.size());
-//        for(List<Cross> cs : zrtracks) {
-//            System.out.println("CA SEED");
-//            for(Cross c : cs) {
-//                System.out.println(c.printInfo());
-//            }
-//        }
-//        for(List<Cross> cs : zrtracks2) {
-//            System.out.println("MY SEED");
-//            for(Cross c : cs) {
-//                System.out.println(c.printInfo());
-//            }
-//        }
+      
         List<Seed> cands = this.match2BST(zrtracks, svtcrs, bmtcrs);
 
         for (Seed seed : cands) {
@@ -204,8 +189,8 @@ public class TrackSeederSVTLinker {
                                 Line3D sline2 = c.getCluster2().getLine();
                                 double delta1 = sline1.distance(tline).length();
                                 double delta2 = sline2.distance(tline).length(); 
-                                if(delta1<SVTParameters.MAXDOCA2STRIP && delta2<SVTParameters.MAXDOCA2STRIP 
-                                        && delta1+delta2<SVTParameters.MAXDOCA2STRIPS) { 
+                                if(delta1<SVTParameters.getMAXDOCA2STRIP() && delta2<SVTParameters.getMAXDOCA2STRIP()
+                                        && delta1+delta2<SVTParameters.getMAXDOCA2STRIPS()) { 
                                     if(delta1+delta2<bestdeltasum) {
                                        bestdeltasum= delta1+delta2;
                                        bestCross = c; 
@@ -230,7 +215,7 @@ public class TrackSeederSVTLinker {
                 
                 List<Seed> myseeds = trseed2.findSeed(pass); //Find XY seeds matched to RZ seeds using the BST as a linker
                 
-                for(Seed s : myseeds) {
+                for(Seed s : myseeds) { 
                     s.getCrosses().addAll(zrcross);
                     s.setCrosses(s.getCrosses()) ;
                     s.fit(3, xbeam, ybeam, bfield);
