@@ -8,16 +8,14 @@ package org.jlab.io.utils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.bos.BosDataBank;
 import org.jlab.io.bos.BosDataEvent;
 import org.jlab.io.bos.BosDataSource;
-import org.jlab.io.hipo.HipoDataBank;
-import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.io.hipo.HipoDataSync;
+import org.jlab.logging.DefaultLogger;
 
 /**
  *
@@ -460,6 +458,9 @@ public class Bos2HipoEventBank {
     }
 
     public static void main(String[] args){
+
+        DefaultLogger.debug();
+
         int compression = -1;
 
         if(args.length<3){
