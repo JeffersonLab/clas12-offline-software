@@ -1,6 +1,7 @@
 package org.jlab.rec.cvt.track;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,7 @@ public class TrackSeederRZ {
             int[] N = new int[]{1,1,1}; //number of crosses in each region
             for(int creg =1; creg<4; creg++) { //loop over regions
                 if(bmtcrs.get(sector).containsKey(creg)) { 
+                    bmtcrs.get(sector).get(creg).sort(Comparator.comparing(Cross::getZ));
                     N[creg-1] = bmtcrs.get(sector).get(creg).size(); 
                 }
             }
@@ -96,31 +98,31 @@ public class TrackSeederRZ {
                                 int key = (seed.get(0).getId()-900)*1000000+(seed.get(1).getId()-900)*1000+(seed.get(2).getId()-900);
                                 if(!seeds.containsKey(key))
                                     seeds.put(key,(ArrayList<Cross>) seedij);
-                            } else {
-//                                if(this.interceptOK(seed.get(0), seed.get(1))) {
-//                                    seedij = new ArrayList<>();
-//                                    seedij.add(seed.get(0));
-//                                    seedij.add(seed.get(1));
-//                                    int key = (seed.get(0).getId()-900)*1000+(seed.get(1).getId()-900);
-//                                    if(!seeds.containsKey(key))
-//                                        seeds.put(key,(ArrayList<Cross>) seedij);
-//                                }
-//                                if(this.interceptOK(seed.get(0), seed.get(2))) {
-//                                    seedij = new ArrayList<>();
-//                                    seedij.add(seed.get(0));
-//                                    seedij.add(seed.get(2));
-//                                    int key = (seed.get(0).getId()-900)*1000+(seed.get(2).getId()-900);
-//                                    if(!seeds.containsKey(key))
-//                                        seeds.put(key,(ArrayList<Cross>) seedij);
-//                                }
-//                                if(this.interceptOK(seed.get(1), seed.get(2))) {
-//                                    seedij = new ArrayList<>();
-//                                    seedij.add(seed.get(1));
-//                                    seedij.add(seed.get(2));
-//                                    int key = (seed.get(1).getId()-900)*1000+(seed.get(2).getId()-900);
-//                                    if(!seeds.containsKey(key))
-//                                        seeds.put(key,(ArrayList<Cross>) seedij);
-//                                }
+                            } else { 
+                                if(this.interceptOK(seed.get(0), seed.get(1))) {
+                                    seedij = new ArrayList<>();
+                                    seedij.add(seed.get(0));
+                                    seedij.add(seed.get(1));
+                                    int key = (seed.get(0).getId()-900)*1000+(seed.get(1).getId()-900);
+                                    if(!seeds.containsKey(key))
+                                        seeds.put(key,(ArrayList<Cross>) seedij);
+                                }
+                                if(this.interceptOK(seed.get(0), seed.get(2))) {
+                                    seedij = new ArrayList<>();
+                                    seedij.add(seed.get(0));
+                                    seedij.add(seed.get(2));
+                                    int key = (seed.get(0).getId()-900)*1000+(seed.get(2).getId()-900);
+                                    if(!seeds.containsKey(key))
+                                        seeds.put(key,(ArrayList<Cross>) seedij);
+                                }
+                                if(this.interceptOK(seed.get(1), seed.get(2))) {
+                                    seedij = new ArrayList<>();
+                                    seedij.add(seed.get(1));
+                                    seedij.add(seed.get(2));
+                                    int key = (seed.get(1).getId()-900)*1000+(seed.get(2).getId()-900);
+                                    if(!seeds.containsKey(key))
+                                        seeds.put(key,(ArrayList<Cross>) seedij);
+                                }
                             }
                         }
                     }
@@ -129,11 +131,40 @@ public class TrackSeederRZ {
         }
         
         seeds.forEach((key,value) -> result.add(value));
-        
+        removeCompleteZROverlaps(result);
         return result;
     }
     
 
+    private void removeCompleteZROverlaps(List<ArrayList<Cross>> zrtracks) {
+        List<ArrayList<Cross>>twoCros = new ArrayList<>();
+        List<ArrayList<Cross>> threeCros = new ArrayList<>();
+        List<ArrayList<Cross>> rmCros = new ArrayList<>();
+        for(List<Cross> zrtrk : zrtracks) {
+            if(zrtrk.size()==3) {
+                threeCros.add((ArrayList<Cross>) zrtrk);
+            }
+            if(zrtrk.size()==2) 
+                twoCros.add((ArrayList<Cross>) zrtrk);
+        }
+        boolean rm = false;
+        for(List<Cross> zrtrk3 : threeCros) {
+            for(List<Cross> zrtrk2 : twoCros) {
+                rm = false;
+                if(zrtrk2.get(0).getId()==zrtrk3.get(0).getId() && zrtrk2.get(1).getId()==zrtrk3.get(1).getId())   
+                    rm = true;
+                if(zrtrk2.get(0).getId()==zrtrk3.get(0).getId() && zrtrk2.get(1).getId()==zrtrk3.get(2).getId())   
+                    rm = true;
+                if(zrtrk2.get(0).getId()==zrtrk3.get(1).getId() && zrtrk2.get(1).getId()==zrtrk3.get(2).getId())   
+                    rm = true;
+                if(rm = true) {
+                    rmCros.add((ArrayList<Cross>) zrtrk2);
+                }
+            }
+        }
+            
+        zrtracks.removeAll(rmCros);
+    }
     private boolean interceptOK(Cross c1, Cross c2) { 
         
         boolean value = false;
