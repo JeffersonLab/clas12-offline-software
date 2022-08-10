@@ -627,7 +627,7 @@ public class BMTGeometry {
             full  = true;
             layer = 1;
         }
-        int region = this.getRegion(layer);   
+        //int region = this.getRegion(layer);   
         
         Vector3D vec = new Vector3D(Math.cos(localAngle),Math.sin(localAngle),0);
         if(Double.isNaN(localAngle)) vec = null;
