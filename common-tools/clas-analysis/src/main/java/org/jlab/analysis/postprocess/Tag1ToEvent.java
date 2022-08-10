@@ -119,24 +119,34 @@ public class Tag1ToEvent {
 
                 event.remove(recEventBank.getSchema());
 
-                if (doHelicityFlip && helFlipBank.getRows()>0) {
-                    event.remove(helFlipBank.getSchema());
-                    helFlipBank.setByte("helicity", 0, (byte)-helFlipBank.getByte("helicity",0));
-                    helFlipBank.setByte("helicityRaw", 0, (byte)-helFlipBank.getByte("helicityRaw",0));
-                    event.write(helFlipBank);
-                }
-
-                // do the lookups:
+                // do the sequence lookups:
                 HelicityBit hb = helSeq.search(event);
                 DaqScalers ds = chargeSeq.get(event);
+                HelicityBit hbraw = helSeq.getHalfWavePlate(event) ? HelicityBit.getFlipped(hb) : hb;
 
                 // count helicity good/bad;
                 if (Math.abs(hb.value())==1) goodHelicity++;
                 else badHelicity++;
 
+                if (doHelicityFlip) {
+
+                    // flip this event's helicity:
+                    hb = HelicityBit.getFlipped(hb);
+                    hbraw = HelicityBit.getFlipped(hb);
+                
+                    // flip the helicity in the HEL::flip bank:
+                    if (helFlipBank.getRows()>0) {
+                        event.remove(helFlipBank.getSchema());
+                        helFlipBank.setByte("helicity", 0, (byte)-helFlipBank.getByte("helicity",0));
+                        helFlipBank.setByte("helicityRaw", 0, (byte)-helFlipBank.getByte("helicityRaw",0));
+                        event.write(helFlipBank);
+                    }
+                }
+
                 // write delay-corrected helicty to REC::Event:
                 if (doHelicityDelay) {
                     recEventBank.putByte("helicity",0,hb.value());
+                    recEventBank.putByte("helicityRaw",0,hbraw.value());
                 }
                 // flip the non-delay-corrected helicity in place in REC::Event:
                 else if (doHelicityFlip) {
