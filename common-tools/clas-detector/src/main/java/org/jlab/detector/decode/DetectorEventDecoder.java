@@ -45,6 +45,18 @@ public class DetectorEventDecoder {
         }
     }
 
+    public void setTimestamp(String timestamp) {
+        translationManager.setTimeStamp(timestamp);
+        fitterManager.setTimeStamp(timestamp);
+        scalerManager.setTimeStamp(timestamp);
+    }
+
+    private void setVariation(String variation) {
+        translationManager.setVariation(variation);
+        fitterManager.setVariation(variation);
+        scalerManager.setVariation(variation);
+    }
+
     public void setRunNumber(int run){
         this.runNumber = run;
     }
@@ -95,8 +107,8 @@ public class DetectorEventDecoder {
         tablesFitter = Arrays.asList(new String[]{"/daq/fadc/clasdev/htcc"});
         translationManager.init(keysTrans,tablesTrans);
         fitterManager.init(keysFitter, tablesFitter);
-        
         scalerManager.init(Arrays.asList(new String[]{"/runcontrol/fcup","/runcontrol/slm","/runcontrol/hwp"}));
+       
     }
 
     public final void initDecoder(){
