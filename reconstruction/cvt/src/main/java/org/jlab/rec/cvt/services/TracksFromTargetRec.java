@@ -155,6 +155,9 @@ public class TracksFromTargetRec {
         
         List<Track> tracks = new ArrayList<>();
         KFitter kf = new KFitter(kfFilterOn, kfIterations, Constants.KFDIR, swimmer, Constants.getInstance().KFMatrixLibrary);
+        KFitter kf2 = new KFitter(kfFilterOn, kfIterations, Constants.KFDIR, swimmer, Constants.getInstance().KFMatrixLibrary);
+        kf2.filterOn = false;
+        kf2.numIter=1;
         Measurements measure = new Measurements(xb, yb, Constants.getInstance().kfBeamSpotConstraint());
         for (Seed seed : this.CVTseeds) { 
             //seed.update_Crosses();
@@ -189,6 +192,7 @@ public class TracksFromTargetRec {
             //System.out.println("initializing fitter...");
             kf.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid));
             kf.runFitter();
+            
             
             if (kf.setFitFailed == false && kf.NDF>0 && kf.getHelix()!=null) { 
                 Track fittedTrack = new Track(seed, kf, pid);
@@ -249,8 +253,24 @@ public class TracksFromTargetRec {
                     }
                 }
                 //System.out.println("Track "+fittedTrack.toString());
-                tracks.add(fittedTrack);
-            } 
+                if(this.missingSVTCrosses(fittedTrack) == false)
+                    tracks.add(fittedTrack);
+            } else {
+                kf2.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid));
+                kf2.runFitter();
+                if(kf2.getHelix()!=null) {
+                    Track fittedTrack = new Track(seed, kf2, pid);
+                    for(Cross c : fittedTrack) { 
+                        if(c.getDetector()==DetectorType.BST) {
+                            c.getCluster1().setAssociatedTrackID(0);
+                            c.getCluster2().setAssociatedTrackID(0);
+                        }
+                    }
+                    if(this.missingSVTCrosses(fittedTrack) == false)
+                        tracks.add(fittedTrack);
+                }
+            }
+            
         }
     
 
@@ -318,6 +338,16 @@ public class TracksFromTargetRec {
 
     }
 
+    private boolean missingSVTCrosses(Track s) {
+                
+        boolean nosvt = true;
+        for(Cross c : s) {
+            if(c.getDetector() == DetectorType.BST)
+                nosvt = false;
+        }
+        
+        return nosvt;
+    }
      
     public List<Seed> getSeedsFromBanks(DataEvent event) {
         
