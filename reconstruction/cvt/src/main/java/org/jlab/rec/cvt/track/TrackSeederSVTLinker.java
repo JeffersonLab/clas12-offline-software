@@ -158,7 +158,7 @@ public class TrackSeederSVTLinker {
             
             LineFitPars fpars = ft.getFit();
             if (fpars == null) {
-                continue;
+                continue; 
             }
             double b = fpars.intercept();
             double m = fpars.slope();

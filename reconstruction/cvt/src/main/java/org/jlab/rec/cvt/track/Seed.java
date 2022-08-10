@@ -515,12 +515,19 @@ public class Seed implements Comparable<Seed>{
     
     @Override
     public String toString() {
-        String str = String.format("Track id=%d, q=%d, omega=%.3f mm-1, d0=%.3f mm, phi=%.3f deg, dz=%.3f mm, tanL=%.3f, NDF=%d, chi2=%.3f, seed method=%d\n", 
-                     this.getId(), this.getHelix().getCharge(), this.getHelix().getCurvature(), this.getHelix().getDCA(),
-                     Math.toDegrees(this.getHelix().getPhiAtDCA()), this.getHelix().getZ0(), this.getHelix().getTanDip(),
-                     this.getNDF(), this.getChi2(), this.getStatus());
-        for(Cross c: this.getCrosses()) str = str + c.toString() + "\n";
-        for(Cluster c: this.getClusters()) str = str + c.toString() + "\n";
+        String str ="";
+        if(this.getHelix()!=null) {
+            str = String.format("Track id=%d, q=%d, omega=%.3f mm-1, d0=%.3f mm, phi=%.3f deg, dz=%.3f mm, tanL=%.3f, NDF=%d, chi2=%.3f, seed method=%d\n", 
+                         this.getId(), this.getHelix().getCharge(), this.getHelix().getCurvature(), this.getHelix().getDCA(),
+                         Math.toDegrees(this.getHelix().getPhiAtDCA()), this.getHelix().getZ0(), this.getHelix().getTanDip(),
+                         this.getNDF(), this.getChi2(), this.getStatus());
+            for(Cross c: this.getCrosses()) str = str + c.toString() + "\n";
+            for(Cluster c: this.getClusters()) str = str + c.toString() + "\n";
+        } else {
+            
+            for(Cross c: this.getCrosses()) str = str + c.toString() + "\n";
+            for(Cluster c: this.getClusters()) str = str + c.toString() + "\n";
+        }
         return str;
     }
 

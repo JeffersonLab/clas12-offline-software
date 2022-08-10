@@ -203,7 +203,7 @@ public class TrackSeederXY {
                     fpars = this.CircleFit(mseed.getCrosses());
                 }
             }
-            if (fpars!=null) { 
+            if (fpars!=null) {
                 seedlist.add(mseed);
             }
         }
