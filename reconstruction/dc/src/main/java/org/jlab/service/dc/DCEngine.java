@@ -20,10 +20,9 @@ public class DCEngine extends ReconstructionEngine {
     private int        selectedSector = 0;
     private boolean    wireDistortion = false;
     private boolean    useStartTime   = true;
-    private boolean    useTimeBeta    = false;
     private boolean    useBetaCut     = false;
     private boolean    useDoublets    = false;
-    private int        t2d            = 0;
+    private int        t2d            = 1;
     private int        nSuperLayer    = 5;
     private String     geoVariation   = "default";
     private String     bankType       = "HitBasedTrkg";
@@ -56,10 +55,6 @@ public class DCEngine extends ReconstructionEngine {
         // Wire distortions
         if(this.getEngineConfigString("dcWireDistortion")!=null)       
             wireDistortion = Boolean.parseBoolean(this.getEngineConfigString("dcWireDistortion"));
-        
-        //Use time in tBeta function (true: use time; false: use track doca)
-        if(this.getEngineConfigString("dcTimeTBeta")!=null)
-            useTimeBeta = (Boolean.valueOf(this.getEngineConfigString("dcTimeTBeta")));
         
         //Use beta cut(true: use time; false: use track doca)
         if(this.getEngineConfigString("dcBetaCut")!=null)
@@ -114,6 +109,9 @@ public class DCEngine extends ReconstructionEngine {
         Map<String,Integer> dcTables = new HashMap<>();
         dcTables.put(Constants.DOCARES,3);
         dcTables.put(Constants.TIME2DIST,3);
+        dcTables.put(Constants.PRESSURE, 3);
+        dcTables.put(Constants.T2DPRESSURE,3);
+        dcTables.put(Constants.T2DPRESSUREREF,3);
         dcTables.put(Constants.T0CORRECTION,4);
         dcTables.put(Constants.TDCTCUTS,3);
         dcTables.put(Constants.TIMEJITTER,3);
@@ -137,7 +135,6 @@ public class DCEngine extends ReconstructionEngine {
                                            geoVariation, 
                                            wireDistortion, 
                                            useStartTime, 
-                                           useTimeBeta, 
                                            useBetaCut, 
                                            t2d,
                                            useDoublets,

@@ -1,4 +1,4 @@
-[   
+[
     {
 	"name": "RTPC::hits",
 	"group": 21900,
@@ -47,5 +47,20 @@
 	    {"name":"max_phi", "type":"F", "info":"Largest reconstructed phi (rad)"},
 	    {"name":"tdiff",      "type":"F", "info":"Time shift (ns)"}
 	]
-    }	
+    }	,
+	{
+		"name": "RTPC::KFtracks",
+		"group": 21900,
+		"item": 23,
+		"info": "Kalman Fitter track info",
+		"entries": [
+			{"name": "trkID", "type": "I", "info": "Track ID of the hit"},
+			{"name": "px", "type": "F", "info": "X component of the momentum (GeV)"},
+			{"name": "py", "type": "F", "info": "Y component of the momentum (GeV)"},
+			{"name": "pz", "type": "F", "info": "Z component of the momentum (GeV)"},
+			{"name": "vz", "type": "F", "info": "Z component of the reconstructed vertex (cm)"},
+			{"name": "dEdx", "type": "F", "info": "dEdx for the Track (MeV/mm)"},
+			{"name": "p_drift", "type": "F", "info": "Momentum in the drift region (GeV)"}
+		]
+	}
 ]

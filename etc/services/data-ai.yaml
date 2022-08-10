@@ -72,16 +72,13 @@ configuration:
   services:
     MAGFIELDS:
       magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
-      magfieldTorusMap: Full_torus_r251_phi181_z251_08May2018.dat
+      magfieldTorusMap: Full_torus_r251_phi181_z251_25Jan2021.dat
     DCCR:
-      dcT2DFunc: "Polynomial"
       dcWireDistortion: "true"  
     DCHAI:
-      dcT2DFunc: "Polynomial"
       dcWireDistortion: "true" 
       outputBankPrefix: "HB"
     DCTB:
-      dcT2DFunc: "Polynomial"
       dcWireDistortion: "true" 
     MLTD:
       run: "5038"
