@@ -742,7 +742,7 @@ public class CLASDecoder4 {
             decoder.setRunNumber(nrun,true);
         }
 
-        if (parser.getOption("-x") != null) {
+        if (parser.getOption("-x").getValue() != null) {
             decoder.detectorDecoder.setTimestamp(parser.getOption("-x").stringValue());
         }
 
