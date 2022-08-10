@@ -109,12 +109,16 @@ public class KFitter extends AKFitter {
     }
     
     public Helix getHelix(int mode) {
+        Helix helx = null;
         if(mode==1) {
-            return finalTransportedStateVec.getHelix(this.getXb(), this.getYb());           
+            if(finalTransportedStateVec!=null)
+                helx = finalTransportedStateVec.getHelix(this.getXb(), this.getYb());           
         }
         else {
-            return finalSmoothedStateVec.getHelix(this.getXb(), this.getYb());
+            if(finalTransportedStateVec!=null)
+                helx = finalSmoothedStateVec.getHelix(this.getXb(), this.getYb());
         }
+        return helx;
     }
     
     private StateVec setFinalStateVector(StateVec onPivot) {
