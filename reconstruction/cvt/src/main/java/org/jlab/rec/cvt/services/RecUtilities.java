@@ -824,6 +824,24 @@ public class RecUtilities {
         seeds.removeAll(dupl);
     }
 
+    public static List<Seed> getOverlappingSeedList(List<Seed> seeds) {
+        List<Seed> dupl = new ArrayList<>();
+        Map<Double, Seed> seedmap = new HashMap<>();
+        for(Seed s : seeds) {
+            double key = getTrackKey(s); 
+            if(Double.isNaN(key)) {
+                dupl.add(s);
+            } else {
+                if(seedmap.containsKey(key)) {
+                    dupl.add(s); 
+                } else {
+                    seedmap.put(key, s);
+                }
+            }
+        }
+        return dupl;
+    }
+    
     static double getTrackKey(Seed s) {
         List<Cross> crs = s.getCrosses();
         double x = 0;
