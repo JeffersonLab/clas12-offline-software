@@ -481,6 +481,8 @@ public class Constants {
             this.svtLinkerSeeding = useSVTLinkerSeeder;
             SVTParameters.setMAXDOCA2STRIP(docacut);
             SVTParameters.setMAXDOCA2STRIPS(docacutsum);
+            
+            System.out.println("DOCA CUTS "+docacut+" & "+docacutsum);
             ConstantsLoaded = true;
         }
     }

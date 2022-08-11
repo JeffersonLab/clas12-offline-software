@@ -28,6 +28,14 @@ import org.jlab.utils.groups.IndexedTable;
  */
 public class CVTEngine extends ReconstructionEngine {
 
+
+    /**
+     * @param docacutsum the docacutsum to set
+     */
+    public void setDocacutsum(double docacutsum) {
+        this.docacutsum = docacutsum;
+    }
+
     private int Run = -1;
 
     private String svtHitBank;
@@ -94,8 +102,8 @@ public class CVTEngine extends ReconstructionEngine {
                                            timeCuts,
                                            matrixLibrary,
                                            useOnlyTruth,
-                                           useSVTLinkerSeeder,
-                                           docacut,
+                                           useSVTLinkerSeeder, 
+                                           docacut, 
                                            docacutsum);
 
         this.initConstantsTables();
@@ -171,6 +179,27 @@ public class CVTEngine extends ReconstructionEngine {
     
     public boolean kfBeamSpot() {
         return this.beamSpotConstraint==2;
+    }
+    
+    /**
+     * @return the docacut
+     */
+    public double getDocacut() {
+        return docacut;
+    }
+
+    /**
+     * @param docacut the docacut to set
+     */
+    public void setDocacut(double docacut) {
+        this.docacut = docacut;
+    }
+
+    /**
+     * @return the docacutsum
+     */
+    public double getDocacutsum() {
+        return docacutsum;
     }
     
     @Override
@@ -306,10 +335,10 @@ public class CVTEngine extends ReconstructionEngine {
             this.kfIterations = Integer.valueOf(this.getEngineConfigString("kfIterations"));
         
         if (this.getEngineConfigString("docacut")!=null)
-            this.docacut = Double.valueOf(this.getEngineConfigString("docacut"));
+            this.setDocacut((double) Double.valueOf(this.getEngineConfigString("docacut")));
         
         if (this.getEngineConfigString("docacutsum")!=null)
-            this.docacutsum = Double.valueOf(this.getEngineConfigString("docacutsum"));
+            this.setDocacutsum((double) Double.valueOf(this.getEngineConfigString("docacutsum")));
     }
 
 
@@ -444,6 +473,8 @@ public class CVTEngine extends ReconstructionEngine {
         System.out.println("["+this.getName()+"] run with Kalman-Filter status set to "+this.kfFilterOn);
         System.out.println("["+this.getName()+"] initialize KF from true MC information "+this.initFromMc);
         System.out.println("["+this.getName()+"] number of KF iterations set to "+this.kfIterations);
+        System.out.println("["+this.getName()+"] doca cut "+this.docacut);
+        System.out.println("["+this.getName()+"] doca cut sum "+this.docacutsum);
     }
 
     
