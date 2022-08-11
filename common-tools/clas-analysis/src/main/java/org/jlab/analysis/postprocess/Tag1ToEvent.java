@@ -132,7 +132,7 @@ public class Tag1ToEvent {
 
                     // flip this event's helicity:
                     hb = HelicityBit.getFlipped(hb);
-                    hbraw = HelicityBit.getFlipped(hb);
+                    hbraw = HelicityBit.getFlipped(hbraw);
                 
                     // flip the helicity in the HEL::flip bank:
                     if (helFlipBank.getRows()>0) {
