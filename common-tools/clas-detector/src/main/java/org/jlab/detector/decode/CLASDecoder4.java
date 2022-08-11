@@ -38,7 +38,7 @@ public class CLASDecoder4 {
 
     private CodaEventDecoder          codaDecoder = null;
     private DetectorEventDecoder  detectorDecoder = null;
-    private List<DetectorDataDgtz>       dataList = new ArrayList<DetectorDataDgtz>();
+    private List<DetectorDataDgtz>       dataList = new ArrayList<>();
     private HipoDataSync                   writer = null;
     private HipoDataEvent               hipoEvent = null;
     private boolean              isRunNumberFixed = false;
@@ -159,7 +159,7 @@ public class CLASDecoder4 {
      */
     public List<DetectorDataDgtz>  getEntriesADC(DetectorType type,
             List<DetectorDataDgtz> entries){
-        List<DetectorDataDgtz>  adc = new ArrayList<DetectorDataDgtz>();
+        List<DetectorDataDgtz>  adc = new ArrayList<>();
         for(DetectorDataDgtz entry : entries){
             if(entry.getDescriptor().getType()==type){
                 if(entry.getADCSize()>0&&entry.getTDCSize()==0){
@@ -182,7 +182,7 @@ public class CLASDecoder4 {
      */
     public List<DetectorDataDgtz>  getEntriesTDC(DetectorType type,
             List<DetectorDataDgtz> entries){
-        List<DetectorDataDgtz>  tdc = new ArrayList<DetectorDataDgtz>();
+        List<DetectorDataDgtz>  tdc = new ArrayList<>();
         for(DetectorDataDgtz entry : entries){
             if(entry.getDescriptor().getType()==type){
                 if(entry.getTDCSize()>0&&entry.getADCSize()==0){
@@ -204,7 +204,7 @@ public class CLASDecoder4 {
      */
     public List<DetectorDataDgtz>  getEntriesVTP(DetectorType type,
         List<DetectorDataDgtz> entries){
-        List<DetectorDataDgtz>  vtp = new ArrayList<DetectorDataDgtz>();
+        List<DetectorDataDgtz>  vtp = new ArrayList<>();
         for(DetectorDataDgtz entry : entries){
             if(entry.getDescriptor().getType()==type){
                 if(entry.getVTPSize()>0){
@@ -226,7 +226,7 @@ public class CLASDecoder4 {
      */
     public List<DetectorDataDgtz>  getEntriesSCALER(DetectorType type,
         List<DetectorDataDgtz> entries){
-        List<DetectorDataDgtz>  scaler = new ArrayList<DetectorDataDgtz>();
+        List<DetectorDataDgtz>  scaler = new ArrayList<>();
         for(DetectorDataDgtz entry : entries){
             if(entry.getDescriptor().getType()==type){
                 if(entry.getSCALERSize()>0){
@@ -768,7 +768,6 @@ public class CLASDecoder4 {
                 
                 Bank epics = decoder.createEpicsBank();
                 
-                int eventTag;
                 decodedEvent.read(rawScaler);
                 decodedEvent.read(rawRunConf);
                 decodedEvent.read(helicityAdc);
