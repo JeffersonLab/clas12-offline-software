@@ -5,6 +5,7 @@ import org.jlab.jnp.hipo4.data.*;
 import org.jlab.jnp.hipo4.io.HipoReader;
 import org.jlab.jnp.hipo4.io.HipoWriterSorted;
 import org.jlab.jnp.utils.json.JsonObject;
+import org.jlab.logging.DefaultLogger;
 import org.jlab.utils.benchmark.ProgressPrintout;
 import org.jlab.utils.options.OptionParser;
 import org.jlab.utils.system.ClasUtilsFile;
@@ -92,7 +93,9 @@ public class RandomTriggerFilter {
     }
 
     public static void main(String[] args){
-      
+
+        DefaultLogger.debug();
+
         OptionParser parser = new OptionParser("trigger-filter");
         parser.addRequired("-o"    ,"output file");
         parser.addRequired("-b"    ,"trigger bit (0-63)");
