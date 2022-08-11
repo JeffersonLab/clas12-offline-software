@@ -212,13 +212,11 @@ public class CodaEventDecoder {
         if(cbranch == null ) return null;
 
         for(EvioNode node : cbranch.getNodes()){
-
            if(node.getTag()==tagid){
                 //  This is regular integrated pulse mode, used for FTOF
                 // FTCAL and EC/PCAL
                 return this.getADCEntries_Tag(crate, node, event,tagid);
             }
-
         }
         return adc;
     }
@@ -261,7 +259,6 @@ public class CodaEventDecoder {
                 //  This is regular integrated pulse mode, used for FTOF
                 // FTCAL and EC/PCAL
                 return this.getDataEntries_57601(crate, node, event);
-                //return this.getDataEntriesMode_7(crate,node, event);
             }
             else if(node.getTag()==57627){
                 //  This is regular integrated pulse mode, used for MM
