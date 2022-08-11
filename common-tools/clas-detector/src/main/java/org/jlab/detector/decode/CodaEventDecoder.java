@@ -1208,17 +1208,17 @@ public class CodaEventDecoder {
                     else if(node.getDataLength()==5) { // trigger supervisor crate
                         this.setTriggerBits(intData[6]);
                     }
-		    else if(node.getDataLength()==6) { // New format Dec 1 2017 (run 1701)
-			this.setTriggerBits(intData[6]<<16|intData[7]);
-		    }
-		    else if(node.getDataLength()==7) { // New format Dec 1 2017 (run 1701)
-			long word = (( (long) intData[7])<<32) | (intData[6]&0xffffffffL);
-			this.setTriggerBits(word);
+                    else if(node.getDataLength()==6) { // New format Dec 1 2017 (run 1701)
+                        this.setTriggerBits(intData[6]<<16|intData[7]);
+                    }
+                    else if(node.getDataLength()==7) { // New format Dec 1 2017 (run 1701)
+                        long word = (( (long) intData[7])<<32) | (intData[6]&0xffffffffL);
+                        this.setTriggerBits(word);
                         this.triggerWords.clear();
                         for(int i=6; i<=8; i++) {
                             this.triggerWords.add(intData[i]);
                         }
-		    }
+                    }
                 }
             }
         }
