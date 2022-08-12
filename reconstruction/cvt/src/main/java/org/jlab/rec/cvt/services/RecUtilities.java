@@ -146,7 +146,8 @@ public class RecUtilities {
         
         
         for(Cluster cluster : clsList) {
-            clusterMap.put(SVTGeometry.getModuleId(cluster.getLayer(), cluster.getSector()), cluster);
+            if(cluster.size()<=Constants.getInstance().getSvtmaxclussize()) 
+                clusterMap.put(SVTGeometry.getModuleId(cluster.getLayer(), cluster.getSector()), cluster);
         }  
         
         // for each layer
@@ -212,7 +213,8 @@ public class RecUtilities {
         for(Cluster cluster : seedCluster) {
             if(cluster.getDetector() == DetectorType.BMT)
                 continue;
-            clusterMap.put(SVTGeometry.getModuleId(cluster.getLayer(), cluster.getSector()), cluster);
+            if(cluster.size()<=Constants.getInstance().getSvtmaxclussize()) 
+                clusterMap.put(SVTGeometry.getModuleId(cluster.getLayer(), cluster.getSector()), cluster);
         }   
         
         // for each layer
