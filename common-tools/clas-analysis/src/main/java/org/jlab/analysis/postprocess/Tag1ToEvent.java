@@ -17,6 +17,7 @@ import org.jlab.detector.scalers.DaqScalersSequence;
 
 import org.jlab.detector.helicity.HelicityBit;
 import org.jlab.detector.helicity.HelicitySequenceManager;
+import org.jlab.logging.DefaultLogger;
 
 import org.jlab.utils.options.OptionParser;
 
@@ -45,6 +46,8 @@ public class Tag1ToEvent {
     };
     
     public static void main(String[] args) {
+
+        DefaultLogger.debug();
 
         OptionParser parser = new OptionParser("postprocess");
         parser.addOption("-q","0","do beam charge and livetime (0/1=false/true)");
