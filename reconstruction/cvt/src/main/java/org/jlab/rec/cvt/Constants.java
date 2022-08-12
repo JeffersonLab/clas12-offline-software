@@ -57,7 +57,9 @@ public class Constants {
     public boolean   preElossCorrection = true;
     private Material targetMaterial = LH2;
     public Libr      KFMatrixLibrary;
-    
+    private int svtmaxclussize = 30;
+    private int bmtcmaxclussize =30;
+    private int bmtzmaxclussize =30;
     
     // CONSTANTS USED IN RECONSTRUCTION
     //---------------------------------    
@@ -188,6 +190,48 @@ public class Constants {
      */
     public int getBMTLayerExcld() {
         return BMTLayerExcld;
+    }
+
+    /**
+     * @return the svtmaxclussize
+     */
+    public int getSvtmaxclussize() {
+        return svtmaxclussize;
+    }
+
+    /**
+     * @param svtmaxclussize the svtmaxclussize to set
+     */
+    public void setSvtmaxclussize(int svtmaxclussize) {
+        this.svtmaxclussize = svtmaxclussize;
+    }
+
+    /**
+     * @return the bmtcmaxclussize
+     */
+    public int getBmtcmaxclussize() {
+        return bmtcmaxclussize;
+    }
+
+    /**
+     * @param bmtcmaxclussize the bmtcmaxclussize to set
+     */
+    public void setBmtcmaxclussize(int bmtcmaxclussize) {
+        this.bmtcmaxclussize = bmtcmaxclussize;
+    }
+
+    /**
+     * @return the bmtzmaxclussize
+     */
+    public int getBmtzmaxclussize() {
+        return bmtzmaxclussize;
+    }
+
+    /**
+     * @param bmtzmaxclussize the bmtzmaxclussize to set
+     */
+    public void setBmtzmaxclussize(int bmtzmaxclussize) {
+        this.bmtzmaxclussize = bmtzmaxclussize;
     }
     
     private static final double COVD0D0      = 1.;///50.;
@@ -463,7 +507,10 @@ public class Constants {
                                         boolean useOnlyTruth,
                                         boolean useSVTLinkerSeeder,
                                         double docacut,
-                                        double docacutsum) {
+                                        double docacutsum,
+                                        int svtmaxclussize,
+                                        int bmtcmaxclussize,
+                                        int bmtzmaxclussize) {
         if (!ConstantsLoaded) {
             this.isCosmics = isCosmics;
             this.svtOnly      = svtOnly;
@@ -481,8 +528,9 @@ public class Constants {
             this.svtLinkerSeeding = useSVTLinkerSeeder;
             SVTParameters.setMAXDOCA2STRIP(docacut);
             SVTParameters.setMAXDOCA2STRIPS(docacutsum);
-            
-            System.out.println("DOCA CUTS "+docacut+" & "+docacutsum);
+            this.setSvtmaxclussize(svtmaxclussize);
+            this.setBmtcmaxclussize(bmtcmaxclussize);
+            this.setBmtzmaxclussize(bmtzmaxclussize);
             ConstantsLoaded = true;
         }
     }

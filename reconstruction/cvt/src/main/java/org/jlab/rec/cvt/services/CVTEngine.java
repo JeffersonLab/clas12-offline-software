@@ -75,6 +75,9 @@ public class CVTEngine extends ReconstructionEngine {
     private boolean useSVTLinkerSeeder  = true;
     private double docacut = 0.6;
     private double docacutsum = 1.0;
+    private int svtmaxclussize = 10;
+    private int bmtcmaxclussize = 20;
+    private int bmtzmaxclussize = 15;
     
     public CVTEngine(String name) {
         super(name, "ziegler", "6.0");
@@ -104,7 +107,10 @@ public class CVTEngine extends ReconstructionEngine {
                                            useOnlyTruth,
                                            useSVTLinkerSeeder, 
                                            docacut, 
-                                           docacutsum);
+                                           docacutsum,
+                                           svtmaxclussize,
+                                           bmtcmaxclussize,
+                                           bmtzmaxclussize);
 
         this.initConstantsTables();
         this.registerBanks();
@@ -339,6 +345,16 @@ public class CVTEngine extends ReconstructionEngine {
         
         if (this.getEngineConfigString("docacutsum")!=null)
             this.setDocacutsum((double) Double.valueOf(this.getEngineConfigString("docacutsum")));
+        
+        if (this.getEngineConfigString("svtmaxclussize")!=null)
+            this.setDocacutsum((int) Integer.valueOf(this.getEngineConfigString("svtmaxclussize")));
+        
+        if (this.getEngineConfigString("bmtcmaxclussize")!=null)
+            this.setDocacutsum((int) Integer.valueOf(this.getEngineConfigString("bmtcmaxclussize")));
+        
+        if (this.getEngineConfigString("bmtzmaxclussize")!=null)
+            this.setDocacutsum((int) Integer.valueOf(this.getEngineConfigString("bmtzmaxclussize")));
+        
     }
 
 
@@ -475,6 +491,10 @@ public class CVTEngine extends ReconstructionEngine {
         System.out.println("["+this.getName()+"] number of KF iterations set to "+this.kfIterations);
         System.out.println("["+this.getName()+"] doca cut "+this.docacut);
         System.out.println("["+this.getName()+"] doca cut sum "+this.docacutsum);
+        System.out.println("["+this.getName()+"] max svt  cluster size "+this.svtmaxclussize);
+        System.out.println("["+this.getName()+"] max bmt-c  cluster size "+this.bmtcmaxclussize);
+        System.out.println("["+this.getName()+"] max btm-z  cluster size "+this.bmtzmaxclussize);
+        
     }
 
     
