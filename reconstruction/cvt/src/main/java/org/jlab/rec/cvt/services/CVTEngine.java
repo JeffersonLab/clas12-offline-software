@@ -75,7 +75,7 @@ public class CVTEngine extends ReconstructionEngine {
     private boolean useSVTLinkerSeeder  = true;
     private double docacut = 0.6;
     private double docacutsum = 1.0;
-    private int svtmaxclussize = 10;
+    private int svtmaxclussize = 12;
     private int bmtcmaxclussize = 20;
     private int bmtzmaxclussize = 15;
     
