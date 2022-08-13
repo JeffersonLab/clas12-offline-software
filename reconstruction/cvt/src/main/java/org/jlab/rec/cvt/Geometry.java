@@ -1,5 +1,6 @@
 package org.jlab.rec.cvt;
 
+import cnuphys.magfield.MagneticFields;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
@@ -60,6 +61,10 @@ public class Geometry {
  
     private synchronized void load(String variation, int run, IndexedTable svtLorentz, IndexedTable bmtVoltage) {
         
+        if(Constants.getInstance().isCosmics) {
+            MagneticFields.getInstance().getSolenoid().setScaleFactor(1e-7);
+            MagneticFields.getInstance().getTorus().setScaleFactor(1e-7); 
+        }
         // Load target
         ConstantProvider providerTG = GeometryFactory.getConstants(DetectorType.TARGET, run, variation);
         this.zTarget = providerTG.getDouble("/geometry/target/position",0)*10;

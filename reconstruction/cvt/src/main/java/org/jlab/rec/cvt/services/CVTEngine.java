@@ -169,9 +169,7 @@ public class CVTEngine extends ReconstructionEngine {
     
     @Override
     public boolean processDataEvent(DataEvent event) {
-        
-        Swim swimmer = new Swim();
-        
+                
         int run = this.getRun(event); 
         if(run<=0) return true;
         
@@ -183,6 +181,8 @@ public class CVTEngine extends ReconstructionEngine {
         IndexedTable beamPos    = this.getConstantsManager().getConstants(run, "/geometry/beam/position");
         
         Geometry.initialize(this.getConstantsManager().getVariation(), 11, svtLorentz, bmtVoltage);
+
+        Swim swimmer = new Swim();
         
         CVTReconstruction reco = new CVTReconstruction(swimmer);
         
