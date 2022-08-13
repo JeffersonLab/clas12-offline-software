@@ -53,7 +53,12 @@ public class KFitter extends AKFitter {
             // chi2
             double newchisq = this.calc_chi2(sv, mv); 
             // if curvature is 0, fit failed
-            if(Double.isNaN(newchisq) || sv.smoothed().get(0)==null) {
+            if(Double.isNaN(newchisq) || 
+               sv.smoothed().get(0)==null ||
+               Double.isNaN(sv.smoothed().get(0).x0) ||
+               Double.isNaN(sv.smoothed().get(0).z0) ||
+               Double.isNaN(sv.smoothed().get(0).tx) ||
+               Double.isNaN(sv.smoothed().get(0).tz)) {
                 this.setFitFailed = true;
                 break;
             }

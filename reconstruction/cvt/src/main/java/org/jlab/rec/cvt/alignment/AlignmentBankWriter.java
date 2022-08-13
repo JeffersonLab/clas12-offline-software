@@ -29,6 +29,8 @@ public class AlignmentBankWriter {
 			bank.setShort("columns",i,(short) matrices.get(i).getColumnDimension());
 			for(int j = 0; j<matrices.get(i).getRowDimension(); j++) {
 				for(int k = 0; k<matrices.get(i).getColumnDimension(); k++) {
+                                    if(Double.isNaN(matrices.get(i).get(j,k))) 
+                                        System.out.println(event.getBank("RUN::config").getInt("event", 0) + " " + matrixName + " " + matrices.get(i).get(j,k));
 					bank.setFloat("element_"+j+"_"+k, i, (float) matrices.get(i).get(j,k));
 				}
 			}
