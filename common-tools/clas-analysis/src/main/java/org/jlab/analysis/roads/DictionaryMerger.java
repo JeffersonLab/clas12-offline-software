@@ -6,10 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import org.jlab.analysis.roads.Dictionary.TestMode;
-import org.jlab.io.base.DataEvent;
+import org.jlab.logging.DefaultLogger;
 import org.jlab.utils.benchmark.ProgressPrintout;
 import org.jlab.utils.options.OptionParser;
 
@@ -33,6 +31,8 @@ public class DictionaryMerger {
     
     public static void main(String[] args) {
         
+        DefaultLogger.debug();
+
         OptionParser parser = new OptionParser("dict-merger");
         parser.addOption("-o","output.txt", "output dictionary file");
         parser.parse(args);
