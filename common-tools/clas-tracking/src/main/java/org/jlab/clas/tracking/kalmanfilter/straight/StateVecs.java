@@ -108,7 +108,7 @@ public class StateVecs extends AStateVecs {
         Surface surf = mv.measurements.get(vec.k).surface;
         double cosEntranceAngle = this.getLocalDirAtMeasSite(vec, mv.measurements.get(vec.k));
 
-        double p = 1;
+        double p = 100;
         
         // Highland-Lynch-Dahl formula
         double sctRMS = surf.getThetaMS(p, mass, cosEntranceAngle);
