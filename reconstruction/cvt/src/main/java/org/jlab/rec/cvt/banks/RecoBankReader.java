@@ -207,7 +207,7 @@ public class RecoBankReader {
                     Line3D ln = new Line3D(ax1,ay1,az1, ax2,ay2,az2);
                     Point3D  origin = new Point3D(x1,y1,z1);
                     Point3D  center = ln.distance(origin).origin();
-                    Vector3D normal = ln.direction();
+                    Vector3D normal = ln.direction().asUnit();
                     Arc3D arc = new Arc3D(origin, center, normal, theta);
                     cls.setArc(arc);
                     cls.setCentroidValue(centroidValue*10);
@@ -433,6 +433,11 @@ public class RecoBankReader {
                 track.setPID(pid);
                 track.setKFIterations((int) status/1000);
                 track.setSeed(seed);
+                for (int j = 0; j < 9; j++) {
+                    int crossId = bank.getShort("Cross"+(j+1)+"_ID", i);
+                    DetectorType det = crossId>1000 ? DetectorType.BMT : DetectorType.BST;
+                    if(crossId>0) track.add(new Cross(det, BMTType.UNDEFINED, 0, 0, crossId));
+                }
                 tracks.add(track);
             }
             return tracks;
@@ -461,6 +466,12 @@ public class RecoBankReader {
                 track.setId(tid);
                 track.setChi2(chi2);
                 track.setNDF(ndf);
+                
+                for (int j = 0; j < 18; j++) {
+                    int crossId = bank.getShort("Cross"+(j+1)+"_ID", i);
+                    DetectorType det = crossId>1000 ? DetectorType.BMT : DetectorType.BST;
+                    if(crossId>0) track.add(new Cross(det, BMTType.UNDEFINED, 0, 0, crossId));
+                }
                 tracks.add(track);
             }
             return tracks;

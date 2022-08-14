@@ -3,7 +3,7 @@
    "name": "Align::I",
     "group": 20501,
     "item" : 1,
-    "info": "Matrix I for the cvt alignment",
+    "info": "Matrix I with alignment indices for CVT",
     "entries": [
         {"name":"rows",  "type":"S", "info":"number of rows"},
         {"name":"columns",  "type":"S", "info":"number of columns"},
@@ -37,7 +37,7 @@
    "name": "Align::A",
     "group": 20501,
     "item" : 2,
-    "info": "Matrix A for the cvt alignment",
+    "info": "Matrix A with alignment derivatives for CVT",
     "entries": [
         {"name":"rows",  "type":"S", "info":"number of rows"},
         {"name":"columns",  "type":"S", "info":"number of columns"},
@@ -3503,7 +3503,7 @@
    "name": "Align::B",
     "group": 20501,
     "item" : 3,
-    "info": "Matrix B for the cvt alignment",
+    "info": "Matrix B with track derivatives for CVT alignment",
     "entries": [
         {"name":"rows",  "type":"S", "info":"number of rows"},
         {"name":"columns",  "type":"S", "info":"number of columns"},
@@ -3609,7 +3609,7 @@
    "name": "Align::V",
     "group": 20501,
     "item" : 4,
-    "info": "Matrix V for the cvt alignment",
+    "info": "Matrix V with measurement covariance elements for CVT alignment",
     "entries": [
         {"name":"rows",  "type":"S", "info":"number of rows"},
         {"name":"columns",  "type":"S", "info":"number of columns"},
@@ -4195,7 +4195,7 @@
    "name": "Align::c",
     "group": 20501,
     "item" : 5,
-    "info": "Matrix c for the cvt alignment",
+    "info": "Matrix c with track predictions for CVT alignment",
     "entries": [
         {"name":"rows",  "type":"S", "info":"number of rows"},
         {"name":"columns",  "type":"S", "info":"number of columns"},
@@ -4229,7 +4229,7 @@
    "name": "Align::m",
     "group": 20501,
     "item" : 6,
-    "info": "Matrix m for the cvt alignment",
+    "info": "Matrix m with measurements for CVT alignment",
     "entries": [
         {"name":"rows",  "type":"S", "info":"number of rows"},
         {"name":"columns",  "type":"S", "info":"number of columns"},
@@ -4263,7 +4263,7 @@
    "name": "Align::misc",
     "group": 20501,
     "item" : 7,
-    "info": "miscellaneous values and stats for the cvt alignment",
+    "info": "Miscellaneous values and stats for CVT alignment",
     "entries": [
         {"name":"run",    "type":"I", "info":"run number"},
         {"name":"event",  "type":"I", "info":"event number"}, 
@@ -4278,7 +4278,7 @@
    "name": "Align::q",
     "group": 20501,
     "item" : 8,
-    "info": "parameters of the track.  Typically d0, phi0, z0, tandip",
+    "info": "Track parameters (typically d0, phi0, z0, tandip)",
     "entries": [
         {"name":"rows",  "type":"S", "info":"number of rows"},
         {"name":"columns",  "type":"S", "info":"number of columns"},
