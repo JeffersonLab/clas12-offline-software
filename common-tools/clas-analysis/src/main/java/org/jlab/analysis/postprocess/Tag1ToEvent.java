@@ -89,8 +89,9 @@ public class Tag1ToEvent {
 
         Event configEvent = new Event();
         
-        // we're going to modify this bank:
+        // we're going to modify these banks:
         Bank recEventBank = new Bank(writer.getSchemaFactory().getSchema("REC::Event"));
+        Bank helScalerBank = new Bank(writer.getSchemaFactory().getSchema("HEL::scaler"));
         
         // we're going to modify this bank if doHelicityFlip is set:
         Bank helFlipBank = new Bank(writer.getSchemaFactory().getSchema("HEL::flip"));
@@ -116,8 +117,10 @@ public class Tag1ToEvent {
                 reader.nextEvent(event);
                 event.read(recEventBank);
                 event.read(helFlipBank);
+                event.read(helScalerBank);
 
                 event.remove(recEventBank.getSchema());
+                event.remove(helScalerBank.getSchema());
 
                 // do the sequence lookups:
                 HelicityBit hb = helSeq.search(event);
@@ -143,10 +146,12 @@ public class Tag1ToEvent {
                     }
                 }
 
-                // write delay-corrected helicty to REC::Event:
+                // write delay-corrected helicty to REC::Event and HEL::scaler:
                 if (doHelicityDelay) {
                     recEventBank.putByte("helicity",0,hb.value());
                     recEventBank.putByte("helicityRaw",0,hbraw.value());
+                    helScalerBank.putByte("helicity",0,hb.value());
+                    helScalerBank.putByte("helicityRaw",0,hbraw.value());
                 }
                 // flip the non-delay-corrected helicity in place in REC::Event:
                 else if (doHelicityFlip) {
@@ -178,6 +183,7 @@ public class Tag1ToEvent {
 
                 // update the output file:
                 event.write(recEventBank);
+                event.write(helScalerBank);
                 writer.addEvent(event, event.getEventTag());
             }
             reader.close();
