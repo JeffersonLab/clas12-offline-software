@@ -62,7 +62,11 @@ public class CodaEventDecoder {
         //    return new ArrayList<DetectorDataDgtz>();
         //}
         
-        List<DetectorDataDgtz>  rawEntries = new ArrayList<>();
+        // zero out the trigger bits, but let the others properties inherit
+        // from the previous event, in the case where there's no HEAD bank:
+        this.setTriggerBits(0);
+
+        List<DetectorDataDgtz>  rawEntries = new ArrayList<DetectorDataDgtz>();
         List<EvioTreeBranch> branches = this.getEventBranches(event);
         for(EvioTreeBranch branch : branches){
             List<DetectorDataDgtz>  list = this.getDataEntries(event,branch.getTag());
