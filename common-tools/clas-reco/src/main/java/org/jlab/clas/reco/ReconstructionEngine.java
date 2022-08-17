@@ -18,12 +18,13 @@ import org.jlab.clara.engine.EngineData;
 import org.jlab.clara.engine.EngineDataType;
 import org.jlab.clara.engine.EngineStatus;
 import org.jlab.detector.calib.utils.ConstantsManager;
-
 import org.jlab.io.base.DataBank;
+
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioFactory;
 import org.jlab.io.hipo.HipoDataEvent;
+import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.Event;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.utils.JsonUtils;
@@ -275,14 +276,14 @@ public abstract class ReconstructionEngine implements Engine {
             mask = mask.substring(2);
         }
         triggerMask = Long.parseLong(mask,16);
-        LOGGER.log(Level.INFO, "Trigger mask set to : 0x%16x", triggerMask);
+        LOGGER.log(Level.INFO, String.format("[CONFIGURE][%s] Trigger mask set to : 0x%016x", this.getName(), triggerMask));
     }
 
     public long getTriggerMask() {
         return triggerMask;
     }
     
-    private boolean applyTriggerMask(DataEvent event) {
+    public boolean applyTriggerMask(DataEvent event) {
         boolean triggerStatus = true;
         if(event.hasBank("RUN::config")) {
             DataBank configBank = event.getBank("RUN::config");
