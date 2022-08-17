@@ -288,7 +288,7 @@ public abstract class ReconstructionEngine implements Engine {
         if(event.hasBank("RUN::config")) {
             DataBank configBank = event.getBank("RUN::config");
             long triggerWord  = configBank.getLong("trigger", 0);
-            if(triggerWord!=0L) triggerStatus = (triggerWord&triggerMask)!=0L;
+            if(triggerWord!=0) triggerStatus = (triggerWord&triggerMask)!=0L;
         }
         return triggerStatus;          
     }
