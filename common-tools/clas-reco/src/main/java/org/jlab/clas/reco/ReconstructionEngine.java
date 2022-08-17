@@ -54,7 +54,7 @@ public abstract class ReconstructionEngine implements Engine {
     volatile boolean dropOutputBanks = false;
     private final Set<String> outputBanks = new HashSet<>();
     
-    volatile long eventMask = 0xFFFFFFFFFFFFFFFFL;
+    volatile long triggerMask = 0xFFFFFFFFFFFFFFFFL;
 
     String             engineName        = "UnknownEngine";
     String             engineAuthor      = "N.T.";
@@ -274,12 +274,12 @@ public abstract class ReconstructionEngine implements Engine {
         if(mask.startsWith("0x")==true){
             mask = mask.substring(2);
         }
-        eventMask = Long.parseLong(mask,16);
-        LOGGER.log(Level.INFO, "Trigger mask set to : 0x%16x", eventMask);
+        triggerMask = Long.parseLong(mask,16);
+        LOGGER.log(Level.INFO, "Trigger mask set to : 0x%16x", triggerMask);
     }
 
     public long getTriggerMask() {
-        return eventMask;
+        return triggerMask;
     }
     
     private boolean applyTriggerMask(DataEvent event) {
@@ -287,7 +287,7 @@ public abstract class ReconstructionEngine implements Engine {
         if(event.hasBank("RUN::config")) {
             DataBank configBank = event.getBank("RUN::config");
             long triggerWord  = configBank.getLong("trigger", 0);
-            triggerStatus = (triggerWord&eventMask)!=0L;
+            triggerStatus = (triggerWord&triggerMask)!=0L;
         }
         return triggerStatus;          
     }
