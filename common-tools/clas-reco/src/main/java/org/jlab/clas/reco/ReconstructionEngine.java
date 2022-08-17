@@ -24,7 +24,6 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioFactory;
 import org.jlab.io.hipo.HipoDataEvent;
-import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.Event;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.utils.JsonUtils;
@@ -85,7 +84,7 @@ public abstract class ReconstructionEngine implements Engine {
     public void registerOutputBank(String... bankName) {
         outputBanks.addAll(Arrays.asList(bankName));
         if (this.dropOutputBanks) {
-            System.out.println(String.format("[%s]  dropping banks:  %s",this.getName(), Arrays.toString(bankName)));
+            LOGGER.log(Level.INFO, String.format("[%s]  dropping banks:  %s",this.getName(), Arrays.toString(bankName)));
         }
     }
 
@@ -98,7 +97,7 @@ public abstract class ReconstructionEngine implements Engine {
      */
     public void requireConstants(Map<String,Integer> tables){
         if(constManagerMap.containsKey(this.getClass().getName())==false){
-            System.out.println("[ConstantsManager] ---> create a new one for module : " + this.getClass().getName());
+            LOGGER.log(Level.INFO,"[ConstantsManager] ---> create a new one for module : " + this.getClass().getName());
             ConstantsManager manager = new ConstantsManager();
             manager.init(tables);
             constManagerMap.put(this.getClass().getName(), manager);
@@ -176,7 +175,6 @@ public abstract class ReconstructionEngine implements Engine {
           LOGGER.log(Level.SEVERE,"[Wooops] ---> something went wrong with " + this.getDescription());
           e.printStackTrace();
       }
-      System.out.println("----> I am doing nothing");
         
         try {
             if(engineConfiguration.length()>2){
@@ -279,7 +277,7 @@ public abstract class ReconstructionEngine implements Engine {
         LOGGER.log(Level.INFO, String.format("[CONFIGURE][%s] Trigger mask set to : 0x%016x", this.getName(), triggerMask));
     }
 
-    public boolean applyTriggerMask(DataEvent event) {
+    public final boolean applyTriggerMask(DataEvent event) {
         boolean triggerStatus = true;
         if(event.hasBank("RUN::config")) {
             DataBank configBank = event.getBank("RUN::config");
