@@ -38,18 +38,16 @@ public class CLASDecoder4 {
 
     private CodaEventDecoder          codaDecoder = null;
     private DetectorEventDecoder  detectorDecoder = null;
-    private List<DetectorDataDgtz>       dataList = new ArrayList<DetectorDataDgtz>();
+    private List<DetectorDataDgtz>       dataList = new ArrayList<>();
     private HipoDataSync                   writer = null;
     private HipoDataEvent               hipoEvent = null;
     private boolean              isRunNumberFixed = false;
     private int                  decoderDebugMode = 0;
     private SchemaFactory        schemaFactory = new SchemaFactory();
-//    private String[]      detectorBanksAdc = new String[]{"FTOF::adc","ECAL::adc",""};
 
     public CLASDecoder4(boolean development){
         codaDecoder = new CodaEventDecoder();
         detectorDecoder = new DetectorEventDecoder(development);
-        //dictionary.initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
         writer = new HipoDataSync();
         hipoEvent = (HipoDataEvent) writer.createEvent();
         String dir = ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4");
@@ -60,7 +58,6 @@ public class CLASDecoder4 {
     public CLASDecoder4(){
         codaDecoder = new CodaEventDecoder();
         detectorDecoder = new DetectorEventDecoder();
-        //dictionary.initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
         writer = new HipoDataSync();
         hipoEvent = (HipoDataEvent) writer.createEvent();
         String dir = ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4");
@@ -107,7 +104,6 @@ public class CLASDecoder4 {
 
                     dataList = codaDecoder.getDataEntries( (EvioDataEvent) event);
                     
-                    //dataList = new ArrayList<DetectorDataDgtz>();
                     //-----------------------------------------------------------------------------
                     // This part reads the BITPACKED FADC data from tag=57638 Format (cmcms)
                     // Then unpacks into Detector Digigitized data, and appends to existing buffer
@@ -116,17 +112,13 @@ public class CLASDecoder4 {
                     
                     List<FADCData>  fadcPacked = codaDecoder.getADCEntries((EvioDataEvent) event);
                     
-                    /*for(FADCData data : fadcPacked){
-                    data.show();
-                    }*/
-                    
                     if(fadcPacked!=null){
                         List<DetectorDataDgtz> fadcUnpacked = FADCData.convert(fadcPacked);
                         dataList.addAll(fadcUnpacked);
                     }
                     //  END of Bitpacked section
                     //-----------------------------------------------------------------------------
-                    //this.decoderDebugMode = 4;
+                    
                     if(this.decoderDebugMode>0){
                         System.out.println("\n>>>>>>>>> RAW decoded data");
                         for(DetectorDataDgtz data : dataList){
@@ -150,10 +142,6 @@ public class CLASDecoder4 {
             }
         }
 
-        /*for(DetectorDataDgtz data : dataList){
-            System.out.println(data);
-        }*/
-        //System.out.println("\t >>>>> digitized data : size = " + dataList.size());
     }
     /**
      * return list of digitized ADC values from internal list
@@ -171,7 +159,7 @@ public class CLASDecoder4 {
      */
     public List<DetectorDataDgtz>  getEntriesADC(DetectorType type,
             List<DetectorDataDgtz> entries){
-        List<DetectorDataDgtz>  adc = new ArrayList<DetectorDataDgtz>();
+        List<DetectorDataDgtz>  adc = new ArrayList<>();
         for(DetectorDataDgtz entry : entries){
             if(entry.getDescriptor().getType()==type){
                 if(entry.getADCSize()>0&&entry.getTDCSize()==0){
@@ -180,8 +168,6 @@ public class CLASDecoder4 {
             }
         }
 
-        //System.out.println("\t>>>>> produced list = " + entries.size()
-        //+ "  adc store = " + adc.size());
         return adc;
     }
 
@@ -196,7 +182,7 @@ public class CLASDecoder4 {
      */
     public List<DetectorDataDgtz>  getEntriesTDC(DetectorType type,
             List<DetectorDataDgtz> entries){
-        List<DetectorDataDgtz>  tdc = new ArrayList<DetectorDataDgtz>();
+        List<DetectorDataDgtz>  tdc = new ArrayList<>();
         for(DetectorDataDgtz entry : entries){
             if(entry.getDescriptor().getType()==type){
                 if(entry.getTDCSize()>0&&entry.getADCSize()==0){
@@ -204,8 +190,6 @@ public class CLASDecoder4 {
                 }
             }
         }
-        //System.out.println("\t>>>>> produced list  TYPE = "  + type + "  size = " + entries.size()
-        //+ "  tdc store = " + adc.size());
         return tdc;
     }
 
@@ -220,7 +204,7 @@ public class CLASDecoder4 {
      */
     public List<DetectorDataDgtz>  getEntriesVTP(DetectorType type,
         List<DetectorDataDgtz> entries){
-        List<DetectorDataDgtz>  vtp = new ArrayList<DetectorDataDgtz>();
+        List<DetectorDataDgtz>  vtp = new ArrayList<>();
         for(DetectorDataDgtz entry : entries){
             if(entry.getDescriptor().getType()==type){
                 if(entry.getVTPSize()>0){
@@ -228,7 +212,6 @@ public class CLASDecoder4 {
                 }
             }
         }
-//        System.out.println("\t>>>>> produced list  TYPE = "  + type + "  size = " + entries.size() + "  vtp store = " + vtp.size());
         return vtp;
     }
 
@@ -243,7 +226,7 @@ public class CLASDecoder4 {
      */
     public List<DetectorDataDgtz>  getEntriesSCALER(DetectorType type,
         List<DetectorDataDgtz> entries){
-        List<DetectorDataDgtz>  scaler = new ArrayList<DetectorDataDgtz>();
+        List<DetectorDataDgtz>  scaler = new ArrayList<>();
         for(DetectorDataDgtz entry : entries){
             if(entry.getDescriptor().getType()==type){
                 if(entry.getSCALERSize()>0){
@@ -251,7 +234,6 @@ public class CLASDecoder4 {
                 }
             }
         }
-//        System.out.println("\t>>>>> produced list  TYPE = "  + type + "  size = " + entries.size() + "  vtp store = " + vtp.size());
         return scaler;
     }
 
@@ -271,7 +253,7 @@ public class CLASDecoder4 {
             adcBANK.putInt("ADC", i, adcDGTZ.get(i).getADCData(0).getADC());
             adcBANK.putFloat("time", i, (float) adcDGTZ.get(i).getADCData(0).getTime());
             adcBANK.putShort("ped", i, (short) adcDGTZ.get(i).getADCData(0).getPedestal());
-            if(name == "BST::adc") adcBANK.putLong("timestamp", i, adcDGTZ.get(i).getADCData(0).getTimeStamp()); // 1234 = dummy placeholder value
+            if(name == "BST::adc") adcBANK.putLong("timestamp", i, adcDGTZ.get(i).getADCData(0).getTimeStamp());
             if(name.equals("BMT::adc")||name.equals("FMT::adc")|| name.equals("FTTRK::adc")){
             	adcBANK.putInt("ADC", i, adcDGTZ.get(i).getADCData(0).getHeight());
             	adcBANK.putInt("integral", i, adcDGTZ.get(i).getADCData(0).getIntegral());
@@ -341,8 +323,6 @@ public class CLASDecoder4 {
 
         for(int i = 0; i < vtpDGTZ.size(); i++){
             vtpBANK.putByte("crate", i, (byte) vtpDGTZ.get(i).getDescriptor().getCrate());
-//            vtpBANK.setByte("slot", i, (byte) vtpDGTZ.get(i).getDescriptor().getSlot());
-//            vtpBANK.setShort("channel", i, (short) vtpDGTZ.get(i).getDescriptor().getChannel());
             vtpBANK.putInt("word", i, vtpDGTZ.get(i).getVTPData(0).getWord());
         }
         return vtpBANK;
@@ -363,7 +343,6 @@ public class CLASDecoder4 {
             scalerBANK.putByte("quartet", i, (byte) scalerDGTZ.get(i).getSCALERData(0).getQuartet());
             scalerBANK.putLong("value", i, scalerDGTZ.get(i).getSCALERData(0).getValue());
         }
-//        if(scalerBANK.rows()>0)scalerBANK.show();
         return scalerBANK;
     }
 
@@ -607,12 +586,8 @@ public class CLASDecoder4 {
     }
     
     public Bank createBonusBank(){
-        //System.out.println("create bonus bank function...");
         if(schemaFactory.hasSchema("RTPC::adc")==false) return null;
-        //System.out.println("bank descriptor does exist");
         List<DetectorDataDgtz> bonusData = this.getEntriesADC(DetectorType.RTPC);
-        //System.out.println("number of entries in the list = " + bonusData.size()
-        //+ "  data list size = " + dataList.size());
         int totalSize = 0;
         for(int i = 0; i < bonusData.size(); i++){
             short[]  pulse = bonusData.get(i).getADCData(0).getPulseArray();
@@ -710,180 +685,143 @@ public class CLASDecoder4 {
         parser.addOption("-r", "-1","run number in the header bank (-1 means use CODA run)");
         parser.addOption("-t", "-0.5","torus current in the header bank");
         parser.addOption("-s", "0.5","solenoid current in the header bank");
+        parser.addOption("-x", null,"CCDB timestamp (MM/DD/YYYY-HH:MM:SS)");
 
         parser.parse(args);
 
         List<String> inputList = parser.getInputList();
 
-        if(parser.hasOption("-o")==true){
+        if(inputList.isEmpty()==true){
+            parser.printUsage();
+            System.out.println("\n >>>> error : no input file is specified....\n");
+            System.exit(0);
+        }
 
-            if(inputList.isEmpty()==true){
-                parser.printUsage();
-                System.out.println("\n >>>> error : no input file is specified....\n");
-                System.exit(0);
-            }
+        String modeDevel = parser.getOption("-m").stringValue();
+        boolean developmentMode = false;
 
-            String modeDevel = parser.getOption("-m").stringValue();
-            boolean developmentMode = false;
+        if(modeDevel.compareTo("run")!=0&&modeDevel.compareTo("devel")!=0){
+            parser.printUsage();
+            System.out.println("\n >>>> error : mode has to be set to \"run\" or \"devel\" ");
+            System.exit(0);
+        }
 
-            if(modeDevel.compareTo("run")!=0&&modeDevel.compareTo("devel")!=0){
-                parser.printUsage();
-                System.out.println("\n >>>> error : mode has to be set to \"run\" or \"devel\" ");
-                System.exit(0);
-            }
+        if(modeDevel.compareTo("devel")==0){
+            developmentMode = true;
+        }
 
+        String outputFile = parser.getOption("-o").stringValue();
+        int compression = parser.getOption("-c").intValue();
+        int  recordsize = parser.getOption("-b").intValue();
+        int debug = parser.getOption("-d").intValue();
 
-            if(modeDevel.compareTo("devel")==0){
-                developmentMode = true;
-            }
+        CLASDecoder4 decoder = new CLASDecoder4(developmentMode);
 
-            String outputFile = parser.getOption("-o").stringValue();
-            int compression = parser.getOption("-c").intValue();
-            int  recordsize = parser.getOption("-b").intValue();
-            int debug = parser.getOption("-d").intValue();
+        decoder.setDebugMode(debug);
 
-            CLASDecoder4 decoder = new CLASDecoder4(developmentMode);
+        HipoWriterSorted writer = new HipoWriterSorted();
+        writer.setCompressionType(compression);
+        writer.getSchemaFactory().initFromDirectory(ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4"));
 
-            decoder.setDebugMode(debug);
+        Bank   rawScaler = new Bank(writer.getSchemaFactory().getSchema("RAW::scaler"));
+        Bank  rawRunConf = new Bank(writer.getSchemaFactory().getSchema("RUN::config"));
+        Bank  helicityAdc = new Bank(writer.getSchemaFactory().getSchema("HEL::adc"));
+        Event scalerEvent = new Event();
 
-            //HipoDataSync writer = new HipoDataSync();
-            System.out.println(" OUTPUT WRITER CHANGED TO JNP HIPO");
-            /*HipoWriter writer = new HipoWriter();
-            writer.setCompressionType(compression);
-            writer.getSchemaFactory().initFromDirectory(ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4"));
-            */
+        int nrun = parser.getOption("-r").intValue();
+        double torus = parser.getOption("-t").doubleValue();
+        double solenoid = parser.getOption("-s").doubleValue();
 
-            HipoWriterSorted writer = new HipoWriterSorted();
-            writer.setCompressionType(compression);
-            writer.getSchemaFactory().initFromDirectory(ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4"));
+        writer.open(outputFile);
+        ProgressPrintout progress = new ProgressPrintout();
+        System.out.println("INPUT LIST SIZE = " + inputList.size());
+        int nevents = parser.getOption("-n").intValue();
+        int counter = 0;
 
-            Bank   rawScaler = new Bank(writer.getSchemaFactory().getSchema("RAW::scaler"));
-            Bank  rawRunConf = new Bank(writer.getSchemaFactory().getSchema("RUN::config"));
-            Bank  helicityAdc = new Bank(writer.getSchemaFactory().getSchema("HEL::adc"));
-            Event scalerEvent = new Event();
+        if(nrun>0){
+            decoder.setRunNumber(nrun,true);
+        }
 
+        if (parser.getOption("-x").getValue() != null) {
+            decoder.detectorDecoder.setTimestamp(parser.getOption("-x").stringValue());
+        }
 
-            int nrun = parser.getOption("-r").intValue();
-            double torus = parser.getOption("-t").doubleValue();
-            double solenoid = parser.getOption("-s").doubleValue();
-
-
-            writer.open(outputFile);
-            ProgressPrintout progress = new ProgressPrintout();
-            System.out.println("INPUT LIST SIZE = " + inputList.size());
-            int nevents = parser.getOption("-n").intValue();
-            int counter = 0;
-
-            if(nrun>0){
-                decoder.setRunNumber(nrun,true);
-            }
-
-            for(String inputFile : inputList){
-                EvioSource reader = new EvioSource();
-                reader.open(inputFile);
-
-                HelicityState prevHelicity = new HelicityState();
-
-                while(reader.hasEvent()==true){
-                    EvioDataEvent event = (EvioDataEvent) reader.getNextEvent();
-
-                    Event  decodedEvent = decoder.getDataEvent(event);
-
-                    Bank   header = decoder.createHeaderBank( nrun, counter, (float) torus, (float) solenoid);
-                    if(header!=null) decodedEvent.write(header);
-                    Bank   trigger = decoder.createTriggerBank();
-                    if(trigger!=null) decodedEvent.write(trigger);
-                    Bank onlineHelicity = decoder.createOnlineHelicityBank();
-                    if(onlineHelicity!=null) decodedEvent.write(onlineHelicity);
-                    Bank decodedHelicity = decoder.createHelicityDecoderBank(event);
-                    if (decodedHelicity!=null) decodedEvent.write(decodedHelicity);
-                    //decodedEvent.appendBanks(header);
-                    //decodedEvent.appendBanks(trigger);
-
-                    Bank epics = decoder.createEpicsBank();
-
-                    //HipoDataEvent dhe = (HipoDataEvent) decodedEvent;
-                    //writer.writeEvent(dhe.getHipoEvent());
-
-                    int eventTag;
-                    decodedEvent.read(rawScaler);
-                    decodedEvent.read(rawRunConf);
-                    decodedEvent.read(helicityAdc);
-
-                    // check for changes to helicity state:
-                    Bank helicityFlip = null;
-                    if (helicityAdc.getRows()>0) {
-                        HelicityState thisHelicity = HelicityState.createFromFadcBank(helicityAdc);
-                        if (!thisHelicity.isValid() || !thisHelicity.equals(prevHelicity)) {
-                            helicityFlip = decoder.createHelicityFlipBank(decodedEvent,thisHelicity);
-                            //System.out.println("FLIP:  "+thisHelicity.getInfo(prevHelicity,counter));
-                            prevHelicity = thisHelicity;
-                        }
-                    }
-
-                    if(rawScaler.getRows()>0 || epics!=null || helicityFlip!=null) {
-                        scalerEvent.reset();
-
-                        if(rawScaler.getRows()>0) scalerEvent.write(rawScaler);
-                        if(rawRunConf.getRows()>0) scalerEvent.write(rawRunConf);
-
-                        Bank[] scalers = decoder.createReconScalerBanks(decodedEvent);
-                        if (scalers != null) {
-                            for (Bank b : scalers) {
-                                decodedEvent.write(b);
-                                scalerEvent.write(b);
-                            }
-                        }
-
-                        if (epics!=null) {
-                            decodedEvent.write(epics);
-                            scalerEvent.write(epics);
-                        }
-
-                        if (helicityFlip!=null) {
-                            decodedEvent.write(helicityFlip);
-                            scalerEvent.write(helicityFlip);
-                        }
-                        
-                        writer.addEvent(scalerEvent, 1);
-                    }
-
-                    writer.addEvent(decodedEvent,0);
-
-                    counter++;
-                    progress.updateStatus();
-                    if(counter%25000==0){
-                        System.gc();
-                    }
-                    if(nevents>0){
-                        if(counter>=nevents) break;
+        for(String inputFile : inputList){
+            EvioSource reader = new EvioSource();
+            reader.open(inputFile);
+            
+            HelicityState prevHelicity = new HelicityState();
+            
+            while(reader.hasEvent()==true){
+                EvioDataEvent event = (EvioDataEvent) reader.getNextEvent();
+                
+                Event  decodedEvent = decoder.getDataEvent(event);
+                
+                Bank   header = decoder.createHeaderBank( nrun, counter, (float) torus, (float) solenoid);
+                if(header!=null) decodedEvent.write(header);
+                Bank   trigger = decoder.createTriggerBank();
+                if(trigger!=null) decodedEvent.write(trigger);
+                Bank onlineHelicity = decoder.createOnlineHelicityBank();
+                if(onlineHelicity!=null) decodedEvent.write(onlineHelicity);
+                Bank decodedHelicity = decoder.createHelicityDecoderBank(event);
+                if (decodedHelicity!=null) decodedEvent.write(decodedHelicity);
+                
+                Bank epics = decoder.createEpicsBank();
+                
+                decodedEvent.read(rawScaler);
+                decodedEvent.read(rawRunConf);
+                decodedEvent.read(helicityAdc);
+                
+                // check for changes to helicity state:
+                Bank helicityFlip = null;
+                if (helicityAdc.getRows()>0) {
+                    HelicityState thisHelicity = HelicityState.createFromFadcBank(helicityAdc);
+                    if (!thisHelicity.isValid() || !thisHelicity.equals(prevHelicity)) {
+                        helicityFlip = decoder.createHelicityFlipBank(decodedEvent,thisHelicity);
+                        prevHelicity = thisHelicity;
                     }
                 }
+                
+                if(rawScaler.getRows()>0 || epics!=null || helicityFlip!=null) {
+                    scalerEvent.reset();
+                    
+                    if(rawScaler.getRows()>0) scalerEvent.write(rawScaler);
+                    if(rawRunConf.getRows()>0) scalerEvent.write(rawRunConf);
+                    
+                    Bank[] scalers = decoder.createReconScalerBanks(decodedEvent);
+                    if (scalers != null) {
+                        for (Bank b : scalers) {
+                            decodedEvent.write(b);
+                            scalerEvent.write(b);
+                        }
+                    }
+                    
+                    if (epics!=null) {
+                        decodedEvent.write(epics);
+                        scalerEvent.write(epics);
+                    }
+                    
+                    if (helicityFlip!=null) {
+                        decodedEvent.write(helicityFlip);
+                        scalerEvent.write(helicityFlip);
+                    }
+                    
+                    writer.addEvent(scalerEvent, 1);
+                }
+                
+                writer.addEvent(decodedEvent,0);
+                
+                counter++;
+                progress.updateStatus();
+                if(counter%25000==0){
+                    System.gc();
+                }
+                if(nevents>0){
+                    if(counter>=nevents) break;
+                }
             }
-            writer.close();
         }
-
-        /*
-        CLASDecoder decoder = new CLASDecoder();
-        EvioSource reader = new EvioSource();
-        reader.open("/Users/gavalian/Work/Software/Release-4a.0/DataSet/raw/sector2_000233_mode7.evio.0");
-        int icounter = 0;
-        while(reader.hasEvent()==true){
-            EvioDataEvent event = (EvioDataEvent) reader.getNextEvent();
-            decoder.initEvent(event);
-            decoder.getEntriesADC(DetectorType.FTOF);
-            decoder.getEntriesTDC(DetectorType.FTOF);
-            System.out.println("----");
-
-            DataBank  bankADC = decoder.getDataBankADC("FTOF::adc", DetectorType.FTOF);
-            DataBank  bankTDC = decoder.getDataBankTDC("FTOF::tdc", DetectorType.FTOF);
-            bankADC.show();
-            bankTDC.show();
-            DataEvent  decodedEvent = decoder.getDataEvent();
-            decodedEvent.show();
-            icounter++;
-        }
-        System.out.println("done... processed events " + icounter);
-        */
+        writer.close();
+        
     }
 }
