@@ -13,7 +13,7 @@
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../../parent/pom.xml</relativePath>
-    <version>8.2.2-SNAPSHOT</version>
+    <version>8.2.3-SNAPSHOT</version>
   </parent>
 
   <dependencies>
@@ -21,12 +21,12 @@
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-reco</artifactId>
-      <version>8.2.2-SNAPSHOT</version>
+      <version>8.2.3-SNAPSHOT</version>
     </dependency>
       <dependency>
           <groupId>org.jlab.clas</groupId>
           <artifactId>clas-tracking</artifactId>
-          <version>8.2.2-SNAPSHOT</version>
+          <version>8.2.3-SNAPSHOT</version>
           <scope>compile</scope>
       </dependency>
 
