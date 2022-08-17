@@ -283,7 +283,7 @@ public abstract class ReconstructionEngine implements Engine {
     }
     
     private boolean applyTriggerMask(DataEvent event) {
-        boolean triggerStatus = false;
+        boolean triggerStatus = true;
         if(event.hasBank("RUN::config")) {
             DataBank configBank = event.getBank("RUN::config");
             long triggerWord  = configBank.getLong("trigger", 0);
