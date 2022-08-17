@@ -271,7 +271,7 @@ public abstract class ReconstructionEngine implements Engine {
         return true;
     }
   
-    public void setTriggerMask(String mask) {
+    private void setTriggerMask(String mask) {
         if(mask.startsWith("0x")==true){
             mask = mask.substring(2);
         }
@@ -279,10 +279,6 @@ public abstract class ReconstructionEngine implements Engine {
         LOGGER.log(Level.INFO, String.format("[CONFIGURE][%s] Trigger mask set to : 0x%016x", this.getName(), triggerMask));
     }
 
-    public long getTriggerMask() {
-        return triggerMask;
-    }
-    
     public boolean applyTriggerMask(DataEvent event) {
         boolean triggerStatus = true;
         if(event.hasBank("RUN::config")) {
