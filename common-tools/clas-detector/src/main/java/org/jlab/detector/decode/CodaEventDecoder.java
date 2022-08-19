@@ -720,9 +720,9 @@ public class CodaEventDecoder {
                 int jdata = 0;  // item counter
                 for( int i = 0 ; i < cdatatypes.size();  ) { // loop over data types
 
-                	Byte CRATE     =  (Byte)cdataitems.get( jdata++ ); i++;
-                	//Integer EV_ID  = (Integer)cdataitems.get( jdata++ ); i++;
-                	Long TIMESTAMP =  (Long)cdataitems.get( jdata++ ); i++;
+                	Byte CRATE      =  (Byte)cdataitems.get( jdata++ ); i++;
+                	Integer EV_ID   = (Integer)cdataitems.get( jdata++ ); i++;
+                	Long TIMESTAMP  =  (Long)cdataitems.get( jdata++ ); i++;
                 	Short nChannels =  (Short)cdataitems.get( jdata++ ); i++;
 
                 	for( int ch=0; ch<nChannels; ch++ ) {
@@ -778,7 +778,7 @@ public class CodaEventDecoder {
         // Micromegas packed data
         // ----------------------
 
-        ArrayList<DetectorDataDgtz>  entries = new ArrayList<DetectorDataDgtz>();
+        ArrayList<DetectorDataDgtz>  entries = new ArrayList<>();
         if(node.getTag()==57641){
             try {
                 ByteBuffer     compBuffer = node.getByteData(true);
@@ -790,9 +790,9 @@ public class CodaEventDecoder {
                 int jdata = 0;  // item counter
                 for( int i = 0 ; i < cdatatypes.size();  ) { // loop over data types
 
-                	Byte SLOT     =  (Byte)cdataitems.get( jdata++ ); i++;
-                	//Integer EV_ID  = (Integer)cdataitems.get( jdata++ ); i++;
-                	Long TIMESTAMP =  (Long)cdataitems.get( jdata++ ); i++;
+                	Byte SLOT       =  (Byte)cdataitems.get( jdata++ ); i++;
+                	Integer EV_ID   =  (Integer)cdataitems.get( jdata++ ); i++;
+                	Long TIMESTAMP  =  (Long)cdataitems.get( jdata++ ); i++;
                 	Short nChannels =  (Short)cdataitems.get( jdata++ ); i++;
 
                 	for( int ch=0; ch<nChannels; ch++ ) {
