@@ -31,7 +31,7 @@ import org.jlab.utils.groups.IndexedTable;
 public class HitReader {
 
     public HitReader() {
-
+        
     }
 
     // the list of BMT hits
@@ -72,7 +72,7 @@ public class HitReader {
     public void setSVTHits(List<Hit> _SVTHits) {
         this._SVTHits = _SVTHits;
     }
-
+    
     /**
      * Gets the BMT hits from the BMT dgtz bank
      *
@@ -90,9 +90,11 @@ public class HitReader {
 
             return;
         }
-
+        
         // instanciates the list of hits
         List<Hit> hits = new ArrayList<>();
+        List<Hit> hits50c = new ArrayList<>();
+        List<Hit> hits50z = new ArrayList<>();
         // gets the BMT dgtz bank
         DataBank bankDGTZ = event.getBank("BMT::adc");
         // fills the arrays corresponding to the hit variables
@@ -136,18 +138,57 @@ public class HitReader {
                 hit.setId(i+1);
                 if (event.hasBank("MC::Particle"))
                     hit.MCstatus = order;
+                
                 // add this hit
                 if(hit.getLayer()+3!=Constants.getInstance().getRmReg()) {
                     if(Constants.getInstance().useOnlyMCTruthHits() ) {
                         if(hit.MCstatus==0)
                             hits.add(hit);
-                    } else {
+                    } 
+                    else if(Constants.getInstance().useOnlyBMTTruthHits ) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                    }
+                    else if(Constants.getInstance().useOnlyBMTCTruthHits && hit.getType()==BMTType.C) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                    }
+                    else if(Constants.getInstance().useOnlyBMTZTruthHits && hit.getType()==BMTType.Z) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                    }
+                    else if(Constants.getInstance().useOnlyBMTC50PercTruthHits && hit.getType()==BMTType.C) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                        if(hit.MCstatus==1)
+                            hits50c.add(hit);
+                    }
+                    else if(Constants.getInstance().useOnlyBMTC50PercTruthHits && hit.getType()==BMTType.Z) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                        if(hit.MCstatus==1)
+                            hits50z.add(hit);
+                    }
+                    else {
                         hits.add(hit);
                     }
                 }
             }
+            if(Constants.getInstance().useOnlyBMTC50PercTruthHits) {
+                int s = hits50c.size()/2;
+                for(int i = 0; i<s; i++) {
+                    hits.add(hits50c.get(i));
+                }
+            }
+            if(Constants.getInstance().useOnlyBMTZ50PercTruthHits) {
+                int s = hits50z.size()/2;
+                for(int i = 0; i<s; i++) {
+                    hits.add(hits50z.get(i));
+                }
+            }
             // fills the list of BMT hits
             Collections.sort(hits);
+            
             this.setBMTHits(hits);
         }
     }
@@ -218,6 +259,11 @@ public class HitReader {
                 int key = DetectorDescriptor.generateHashCode(sector, layer, tdcstrip);
                 if(tdcs.containsKey(key)) {
                     time = tdcs.get(key);
+                    //time tag
+                    if(Constants.getInstance().useSVTTimingCuts) {
+                        if(this.passTimingCuts(ADC, time)==false) 
+                            continue;
+                        }
                 }
 //                else {
 //                    System.out.println("missing time for " + sector + " " + layer + " " + strip);
@@ -274,6 +320,7 @@ public class HitReader {
                 hit.setId(id);
                 if (event.hasBank("MC::Particle"))
                     hit.MCstatus = order;
+                
                 // add this hit
                 if(hit.getRegion()!=Constants.getInstance().getRmReg()) {     
                     if(Constants.getInstance().useOnlyMCTruthHits() ) {
@@ -289,6 +336,21 @@ public class HitReader {
         Collections.sort(hits);
         this.setSVTHits(hits);
 
+    }
+
+    private boolean passTimingCuts(int adc, double time) {
+        int tdc = (int) time;
+        boolean pass = true;
+        if(adc == 0 && ((tdc > 0 && tdc < 160) || tdc > 400)) pass = false;
+        else if(adc == 1 && ((tdc > 0 && tdc < 160) || tdc > 340)) pass = false;
+        else if(adc == 2 && ((tdc > 0 && tdc < 160) || tdc > 320)) pass = false;
+        else if(adc == 3 && ((tdc > 0 && tdc < 160) || tdc > 300)) pass = false;
+        else if(adc == 4 && ((tdc > 0 && tdc < 160) || tdc > 290)) pass = false;
+        else if(adc == 5 && ((tdc > 0 && tdc < 170) || tdc > 280)) pass = false;
+        else if(adc == 6 && ((tdc > 0 && tdc < 180) || tdc > 280)) pass = false;
+        else if(adc == 7 && ((tdc > 0 && tdc < 170) || tdc > 280)) pass = false;
+    
+        return pass;   
     }
 
 }

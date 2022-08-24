@@ -401,6 +401,8 @@ public class RecoBankReader {
                 seed.setLineFitChi2PerNDF(lineChi2);
                 seed.setChi2(chi2);
                 seed.setNDF(ndf);
+                seed.percentTruthMatch = bank.getFloat("fracmctru", i);
+                seed.totpercentTruthMatch = bank.getFloat("fracmcmatch", i);
                 
                 List<Cross> crossesOnTrk = new ArrayList<>();
                 for (int j = 0; j < 9; j++) {

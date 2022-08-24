@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import org.jlab.clas.pdg.PDGDatabase;
 import org.jlab.clas.swimtools.Swim;
-import org.jlab.clas.tracking.kalmanfilter.AKFitter;
 import org.jlab.clas.tracking.kalmanfilter.helical.KFitter;
 import org.jlab.clas.tracking.trackrep.Helix;
 import org.jlab.detector.base.DetectorType;
@@ -125,8 +124,11 @@ public class TracksFromTargetRec {
         for(Seed s : seeds) { 
             s.setKey(s.new Key(s));
         }
-        Seed.removeOverlappingSeeds(seeds);
-        
+        if(Constants.getInstance().removeOverlappingSeeds) 
+            Seed.removeOverlappingSeeds(seeds);
+     
+        if(Constants.getInstance().flagSeeds)
+            Seed.flagMCSeeds(seeds);
         if(seeds ==null || seeds.isEmpty()) {
             recUtil.CleanupSpuriousSVTCrosses(this.SVTcrosses, null) ;
 //            RecoBankWriter.appendCVTBanks(event, SVThits, BMThits, SVTclustersHM, BMTclustersHM, crosses, null, null, 1);
@@ -137,9 +139,19 @@ public class TracksFromTargetRec {
         for(int i=0; i<seeds.size(); i++) { 
             int id = i+1;
             seeds.get(i).setId(id);
-            Track track = new Track(seeds.get(i));
-            track.update_Crosses(id);
+        //    Track track = new Track(seeds.get(i));
+        //    track.update_Crosses(id);
         }
+        if(Constants.getInstance().flagSeeds && Constants.getInstance().removeOverlappingSeeds==false) {
+            List<Seed> ovlrm = Seed.getOverlapRemovedSeeds(seeds);//seeds flagged for removal have negative ids.
+            for(Seed s : seeds) {
+                s.setId(s.getId()*-1);
+            }
+            for(Seed s : ovlrm) {
+                s.setId(s.getId()*-1);
+            }
+        }
+        
         this.CVTseeds = seeds;
         // Got seeds;
         return seeds;
@@ -160,6 +172,7 @@ public class TracksFromTargetRec {
         kf2.numIter=1;
         Measurements measure = new Measurements(xb, yb, Constants.getInstance().kfBeamSpotConstraint());
         for (Seed seed : this.CVTseeds) { 
+            if(seed.getId()<0) continue;
             //seed.update_Crosses();
             //System.out.println("Seed"+seed.toString());
             List<Surface> surfaces = measure.getMeasurements(seed);
@@ -196,6 +209,7 @@ public class TracksFromTargetRec {
             
             if (kf.setFitFailed == false && kf.NDF>0 && kf.getHelix()!=null) { 
                 Track fittedTrack = new Track(seed, kf, pid);
+                fittedTrack.update_Crosses(seed.getId());
                 for(Cross c : fittedTrack) { 
                     if(c.getDetector()==DetectorType.BST) {
                         c.getCluster1().setAssociatedTrackID(0);

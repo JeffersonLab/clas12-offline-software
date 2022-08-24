@@ -62,7 +62,10 @@ public class CVTSecondPassEngine extends CVTEngine {
             if(trackFinder.getBMTclusters()!=null) banks.add(RecoBankWriter.fillBMTClusterBank(event, trackFinder.getBMTclusters(), this.getBmtClusterBank()));
             if(trackFinder.getSVTcrosses()!=null) banks.add(RecoBankWriter.fillSVTCrossBank(event, trackFinder.getSVTcrosses(), this.getSvtCrossBank()));
             if(trackFinder.getBMTcrosses()!=null) banks.add(RecoBankWriter.fillBMTCrossBank(event, trackFinder.getBMTcrosses(), this.getBmtCrossBank()));
-            if(seeds!=null) banks.add(RecoBankWriter.fillSeedBank(event, seeds, this.getSeedBank()));
+            if(seeds!=null) {
+                banks.add(RecoBankWriter.fillSeedBank(event, seeds, this.getSeedBank()));
+                banks.add(RecoBankWriter.fillSeedClusBank(event, seeds, this.getSeedClusBank()));
+            }
             if(tracks!=null) {
                 banks.add(RecoBankWriter.fillTrackBank(event, tracks, this.getTrackBank()));
                 banks.add(RecoBankWriter.fillUTrackBank(event, tracks, this.getUTrackBank()));

@@ -37,7 +37,7 @@ public class CVTReconstruction {
         this.swimmer = swimmer;
     }
 
-
+    
     public List<ArrayList<Hit>> readHits(DataEvent event, IndexedTable svtStatus, IndexedTable bmtStatus, IndexedTable bmtTime) {
         
         HitReader hitRead = new HitReader();
@@ -60,8 +60,22 @@ public class CVTReconstruction {
         else {
             CVThits.add((ArrayList<Hit>) BMThits);
         }
+        int totmctru =0;
+        for(Hit h : CVThits.get(0)) {
+            if(h.MCstatus==0) {
+                totmctru++;
+            }
+        }
+        for(Hit h : CVThits.get(1)) {
+            if(h.MCstatus==0) {
+                totmctru++;
+            }
+        }
+        setTotalNbTruHits(totmctru);
         return CVThits;
     }
+    // for single track truth matching
+    private static int totalNbTruHits =0;
     
     public List<ArrayList<Cluster>> findClusters() {
         
@@ -163,6 +177,20 @@ public class CVTReconstruction {
 
     public List<Cross> getBMTcrosses() {
         return CVTcrosses.get(1);
+    }
+
+    /**
+     * @return the totalNbTruHits
+     */
+    public static int getTotalNbTruHits() {
+        return totalNbTruHits;
+    }
+
+    /**
+     * @param aTotalNbTruHits the totalNbTruHits to set
+     */
+    public static void setTotalNbTruHits(int aTotalNbTruHits) {
+        totalNbTruHits = aTotalNbTruHits;
     }
 
 

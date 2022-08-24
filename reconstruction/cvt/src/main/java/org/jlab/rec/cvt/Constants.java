@@ -21,6 +21,7 @@ public class Constants {
     public static double CAANGLE3=30.;
     public static double CAANGLE4=19.;
     public static double CAANGLE5=3.5;
+    public boolean seedingDebugMode =false;
     
     
     // private constructor for a singleton
@@ -54,12 +55,20 @@ public class Constants {
     public boolean   svtLinkerSeeding = false;
     public boolean   timeCuts = false;
     public boolean   useOnlyTruthHits = false;
+    public boolean   useOnlyBMTTruthHits = false;
+    public boolean   useOnlyBMTCTruthHits = false;
+    public boolean   useOnlyBMTZTruthHits = false;
+    public boolean   useOnlyBMTC50PercTruthHits = false;
+    public boolean   useOnlyBMTZ50PercTruthHits = false;
     public boolean   preElossCorrection = true;
     private Material targetMaterial = LH2;
     public Libr      KFMatrixLibrary;
     private int svtmaxclussize = 30;
     private int bmtcmaxclussize =30;
     private int bmtzmaxclussize =30;
+    public boolean useSVTTimingCuts =  false;
+    public boolean removeOverlappingSeeds = false;
+    public boolean flagSeeds = true;
     
     // CONSTANTS USED IN RECONSTRUCTION
     //---------------------------------    
@@ -135,6 +144,28 @@ public class Constants {
     public boolean useOnlyMCTruthHits() {
         return useOnlyTruthHits;
     }
+
+    /**
+     * @return the useOnlyBMTTruthHits
+     */
+    public boolean useOnlyBMTTruthHits() {
+        return useOnlyBMTTruthHits;
+    }
+
+    /**
+     * @return the useOnlyBMTCTruthHits
+     */
+    public boolean useOnlyBMTCTruthHits() {
+        return useOnlyBMTCTruthHits;
+    }
+    
+    /**
+     * @return the useOnlyBMTCTruthHits
+     */
+    public boolean useOnlyBMTZTruthHits() {
+        return useOnlyBMTZTruthHits;
+    }
+    
     /**
      * @return the layersUsed
      */
@@ -503,6 +534,9 @@ public class Constants {
                                         boolean elosPrecorrection,
                                         boolean svtSeeding,
                                         boolean timeCuts,
+                                        boolean useSVTTimingCuts,
+                                        boolean removeOverlappingSeeds,
+                                        boolean flagSeeds,
                                         String matrixLibrary,
                                         boolean useOnlyTruth,
                                         boolean useSVTLinkerSeeder,
@@ -523,6 +557,9 @@ public class Constants {
             this.preElossCorrection = elosPrecorrection;
             this.svtSeeding = svtSeeding;
             this.timeCuts = timeCuts;
+            this.useSVTTimingCuts = useSVTTimingCuts;
+            this.removeOverlappingSeeds = removeOverlappingSeeds;
+            this.flagSeeds = flagSeeds;
             this.setMatLib(matrixLibrary);
             this.useOnlyTruthHits=useOnlyTruth;
             this.svtLinkerSeeding = useSVTLinkerSeeder;

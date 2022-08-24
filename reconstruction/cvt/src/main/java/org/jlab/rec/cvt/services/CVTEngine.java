@@ -45,6 +45,7 @@ public class CVTEngine extends ReconstructionEngine {
     private String bmtClusterBank;
     private String bmtCrossBank;
     private String cvtSeedBank;
+    private String cvtSeedClusBank;
     private String cvtTrackBank;
     private String cvtUTrackBank;
     private String cvtTrajectoryBank;
@@ -69,15 +70,18 @@ public class CVTEngine extends ReconstructionEngine {
     private String  targetMaterial      = "LH2";
     private boolean elossPrecorrection  = true;
     private boolean svtSeeding          = true;
-    private boolean timeCuts            = false;
+    private boolean timeCuts            = true;
+    public boolean useSVTTimingCuts =  false;
+    public boolean removeOverlappingSeeds = true;
+    public boolean flagSeeds = false;
     private String  matrixLibrary       = "EJML";
     private boolean useOnlyTruth        = false;
     private boolean useSVTLinkerSeeder  = true;
     private double docacut = 0.6;
     private double docacutsum = 1.0;
-    private int svtmaxclussize = 12;
-    private int bmtcmaxclussize = 20;
-    private int bmtzmaxclussize = 15;
+    private int svtmaxclussize = 100;
+    private int bmtcmaxclussize = 100;
+    private int bmtzmaxclussize = 100;
     
     public CVTEngine(String name) {
         super(name, "ziegler", "6.0");
@@ -103,6 +107,9 @@ public class CVTEngine extends ReconstructionEngine {
                                            elossPrecorrection,
                                            svtSeeding,
                                            timeCuts,
+                                           useSVTTimingCuts,
+                                           removeOverlappingSeeds,
+                                           flagSeeds,
                                            matrixLibrary,
                                            useOnlyTruth,
                                            useSVTLinkerSeeder, 
@@ -132,6 +139,7 @@ public class CVTEngine extends ReconstructionEngine {
         this.setSvtClusterBank("BST" + prefix + "::Clusters");
         this.setSvtCrossBank("BST" + prefix + "::Crosses");
         this.setSeedBank("CVT" + prefix + "::Seeds");
+        this.setSeedClusBank("CVT" + prefix + "::SeedClusters");
         this.setTrackBank("CVT" + prefix + "::Tracks");
         this.setUTrackBank("CVT" + prefix + "::UTracks");
         this.setCovMatBank("CVT" + prefix + "::TrackCovMat");
@@ -144,6 +152,7 @@ public class CVTEngine extends ReconstructionEngine {
         super.registerOutputBank(this.svtClusterBank);
         super.registerOutputBank(this.svtCrossBank);
         super.registerOutputBank(this.cvtSeedBank);
+        super.registerOutputBank(this.cvtSeedClusBank);
         super.registerOutputBank(this.cvtTrackBank);
         super.registerOutputBank(this.cvtUTrackBank);
         super.registerOutputBank(this.cvtCovMatBank);                
@@ -159,7 +168,10 @@ public class CVTEngine extends ReconstructionEngine {
         }
 
         DataBank bank = event.getBank("RUN::config");
-        int run = bank.getInt("run", 0);  //System.out.println("event "+bank.getInt("event", 0));
+        int run = bank.getInt("run", 0);  
+        if(Constants.getInstance().seedingDebugMode) {
+            System.out.println("EVENT "+bank.getInt("event", 0));
+        }
         return run;
     }
 
@@ -259,7 +271,10 @@ public class CVTEngine extends ReconstructionEngine {
                                                                   this.getKfIterations(), 
                                                                   true, this.getPid());
                 
-                if(seeds!=null) banks.add(RecoBankWriter.fillSeedBank(event, seeds, this.getSeedBank()));
+                if(seeds!=null) {
+                    banks.add(RecoBankWriter.fillSeedBank(event, seeds, this.getSeedBank()));
+                    banks.add(RecoBankWriter.fillSeedClusBank(event, seeds, this.getSeedClusBank()));
+                }
                 if(tracks!=null) {
                     banks.add(RecoBankWriter.fillTrackBank(event, tracks, this.getTrackBank()));
     //                banks.add(RecoBankWriter.fillTrackCovMatBank(event, tracks, this.getCovMat()));
@@ -316,7 +331,15 @@ public class CVTEngine extends ReconstructionEngine {
             this.svtSeeding = Boolean.parseBoolean(this.getEngineConfigString("svtSeeding"));
         
         if(this.getEngineConfigString("timeCuts")!=null) 
-            this.timeCuts = Boolean.parseBoolean(this.getEngineConfigString("timeCuts"));
+            this.timeCuts = Boolean.parseBoolean(this.getEngineConfigString("timeCuts")); 
+        if(this.getEngineConfigString("useSVTTimingCuts")!=null) 
+            this.useSVTTimingCuts = Boolean.parseBoolean(this.getEngineConfigString("useSVTTimingCuts"));
+        
+        if(this.getEngineConfigString("removeOverlappingSeeds")!=null) 
+            this.removeOverlappingSeeds = Boolean.parseBoolean(this.getEngineConfigString("removeOverlappingSeeds"));
+        
+        if(this.getEngineConfigString("flagSeeds")!=null) 
+            this.flagSeeds = Boolean.parseBoolean(this.getEngineConfigString("flagSeeds"));
         
         if (this.getEngineConfigString("matLib")!=null)
             this.matrixLibrary = this.getEngineConfigString("matLib");
@@ -398,6 +421,10 @@ public class CVTEngine extends ReconstructionEngine {
     public void setSeedBank(String cvtSeedBank) {
         this.cvtSeedBank = cvtSeedBank;
     }
+    
+    public void setSeedClusBank(String cvtSeedClusBank) {
+        this.cvtSeedClusBank = cvtSeedClusBank;
+    }
 
     public void setTrackBank(String cvtTrackBank) {
         this.cvtTrackBank = cvtTrackBank;
@@ -446,7 +473,10 @@ public class CVTEngine extends ReconstructionEngine {
     public String getSeedBank() {
         return cvtSeedBank;
     }
-
+    
+    public String getSeedClusBank() {
+        return cvtSeedClusBank;
+    }
     public String getTrackBank() {
         return cvtTrackBank;
     }
