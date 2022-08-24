@@ -37,7 +37,9 @@
         {"name":"Cross8_ID",      "type":"S", "info":"ID of cross in the track"},
         {"name":"Cross9_ID",      "type":"S", "info":"ID of cross in the track"},
         {"name":"xb",             "type":"F", "info":"x offset  "},
-        {"name":"yb",             "type":"F", "info":"y offset  "}
+        {"name":"yb",             "type":"F", "info":"y offset  "},
+        {"name":"fracmctru",      "type":"F", "info":"percentage of hits on track truth matched  "},
+        {"name":"fracmcmatch",      "type":"F", "info":"percentage of hits on track truth matched over total nb true hits "}
     ]
   },
   {
@@ -347,7 +349,9 @@
         {"name":"Cross8_ID",      "type":"S", "info":"ID of cross in the track"},
         {"name":"Cross9_ID",      "type":"S", "info":"ID of cross in the track"},
         {"name":"xb",             "type":"F", "info":"x offset  "},
-        {"name":"yb",             "type":"F", "info":"y offset  "}
+        {"name":"yb",             "type":"F", "info":"y offset  "},
+        {"name":"fracmctru",      "type":"F", "info":"percentage of hits on track truth matched  "},
+        {"name":"fracmcmatch",      "type":"F", "info":"percentage of hits on track truth matched over total nb true hits "}
     ]
   },
   {
@@ -480,6 +484,50 @@
         {"name":"filteredRes",    "type":"F", "info":"filtered residual (-999 for passive layer)"},
         {"name":"smoothedRes",    "type":"F", "info":"smoothed residual (-999 for passive layer)"}
     ]
+  },
+  {
+    "name": "CVT::SeedClusters",
+    "group": 20500,
+    "item" : 43,   
+    "info": "Ids of clusters on track for 12 layers of CVT",
+    "entries": [
+        {"name":"id",             "type":"S", "info":"id of the track"},
+        {"name":"Clus1_ID",       "type":"S", "info":"ID of cluster on track in layer 1"},
+        {"name":"Clus2_ID",       "type":"S", "info":"ID of cluster on track in layer 2"},
+        {"name":"Clus3_ID",       "type":"S", "info":"ID of cluster on track in layer 3"},
+        {"name":"Clus4_ID",       "type":"S", "info":"ID of cluster on track in layer 4"},
+        {"name":"Clus5_ID",       "type":"S", "info":"ID of cluster on track in layer 5"},
+        {"name":"Clus6_ID",       "type":"S", "info":"ID of cluster on track in layer 6"},
+        {"name":"Clus7_ID",       "type":"S", "info":"ID of cluster on track in layer 7"},
+        {"name":"Clus8_ID",       "type":"S", "info":"ID of cluster on track in layer 8"},
+        {"name":"Clus9_ID",       "type":"S", "info":"ID of cluster on track in layer 9"},
+        {"name":"Clus10_ID",      "type":"S", "info":"ID of cluster on track in layer 10"},
+        {"name":"Clus11_ID",      "type":"S", "info":"ID of cluster on track in layer 11"},
+        {"name":"Clus12_ID",      "type":"S", "info":"ID of cluster on track in layer 12"},
+        {"name":"prob",           "type":"F", "info":"AI seed probability"}
+    ]
+  },
+  {
+    "name": "CVTRec::SeedClusters",
+    "group": 20500,
+    "item" : 44,   
+    "info": "Ids of clusters on track for 12 layers of CVT",
+    "entries": [
+        {"name":"id",             "type":"S", "info":"id of the track"},
+        {"name":"Clus1_ID",       "type":"S", "info":"ID of cluster on track in layer 1"},
+        {"name":"Clus2_ID",       "type":"S", "info":"ID of cluster on track in layer 2"},
+        {"name":"Clus3_ID",       "type":"S", "info":"ID of cluster on track in layer 3"},
+        {"name":"Clus4_ID",       "type":"S", "info":"ID of cluster on track in layer 4"},
+        {"name":"Clus5_ID",       "type":"S", "info":"ID of cluster on track in layer 5"},
+        {"name":"Clus6_ID",       "type":"S", "info":"ID of cluster on track in layer 6"},
+        {"name":"Clus7_ID",       "type":"S", "info":"ID of cluster on track in layer 7"},
+        {"name":"Clus8_ID",       "type":"S", "info":"ID of cluster on track in layer 8"},
+        {"name":"Clus9_ID",       "type":"S", "info":"ID of cluster on track in layer 9"},
+        {"name":"Clus10_ID",      "type":"S", "info":"ID of cluster on track in layer 10"},
+        {"name":"Clus11_ID",      "type":"S", "info":"ID of cluster on track in layer 11"},
+        {"name":"Clus12_ID",      "type":"S", "info":"ID of cluster on track in layer 12"},
+        {"name":"prob",           "type":"F", "info":"AI seed probability"}
+    ]
   }
-
-]
+  
+ ]
