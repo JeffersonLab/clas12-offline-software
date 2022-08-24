@@ -157,7 +157,7 @@ public class TrackSeederRZ {
                     rm = true;
                 if(zrtrk2.get(0).getId()==zrtrk3.get(1).getId() && zrtrk2.get(1).getId()==zrtrk3.get(2).getId())   
                     rm = true;
-                if(rm = true) {
+                if(rm == true) {
                     rmCros.add((ArrayList<Cross>) zrtrk2);
                 }
             }

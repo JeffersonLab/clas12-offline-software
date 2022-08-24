@@ -115,9 +115,13 @@ public class TrackSeederSVTLinker {
         this.sortXYCrosses(crosses);
         List<ArrayList<Cross>> zrtracks = trseed1.getSeeds(bmtC_crosses,svtcrs);
         //this.removeCompleteZROverlaps(zrtracks);
-      
+        if(Constants.getInstance().seedingDebugMode) {
+            this.printListCrosses(zrtracks, "RZ Seeds");
+        }
         List<Seed> cands = this.match2BST(zrtracks, svtcrs, bmtcrs);
-
+        if(Constants.getInstance().seedingDebugMode) {
+            this.printListSeedCrosses(cands, "SVT Seeds");
+        }
         for (Seed seed : cands) {
             //if(this.doesnotContains(seedlist, seed))
                 seedlist.add(seed);
@@ -125,7 +129,7 @@ public class TrackSeederSVTLinker {
         
         for (Seed bseed : seedlist) {
             for (Cross c : bseed.getCrosses()) {
-                c.isInSeed = true;
+                //c.isInSeed = true;
             }
         }
         return seedlist;
@@ -220,8 +224,13 @@ public class TrackSeederSVTLinker {
                     s.setCrosses(s.getCrosses()) ;
                     s.fit(3, xbeam, ybeam, bfield);
                    
-                    if(s.getChi2()<Constants.CHI2CUT*s.getCrosses().size())
+                    if(s.getChi2()<Constants.CHI2CUT*s.getCrosses().size()) {
+                        s.setStatus(3);
+                        for(Cross c : s.getCrosses()) {
+                            c.isInSeed = true;
+                        }
                         result.add(s);
+                    }
                 }
             }
         }
@@ -332,5 +341,28 @@ public class TrackSeederSVTLinker {
         }
         zrtracks.removeAll(rmCros);
     }
-    
+
+    private void printListCrosses(List<ArrayList<Cross>> cands, String strg) {
+        System.out.println(strg);
+        System.out.println("========");
+        int cnt=0;
+        for(List<Cross> cand : cands) {
+            System.out.println("seed "+cnt++);
+            for(Cross c : cand) {
+                System.out.println(c.printInfo());
+            }
+        }    
+    }
+
+    private void printListSeedCrosses(List<Seed> cands, String strg) {
+    System.out.println(strg);
+        System.out.println("========");
+        int cnt=0;
+        for(Seed cand : cands) {
+            System.out.println("seed "+cnt++);
+            for(Cross c : cand.getCrosses()) {
+                System.out.println(c.printInfo());
+            }
+        }    
+    }
 }

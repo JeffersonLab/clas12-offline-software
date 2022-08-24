@@ -212,12 +212,12 @@ public class TrackSeederXY {
         for (Seed bseed : seedlist) { 
             bseed.getClusters().clear();
             for(Cross c : bseed.getCrosses()) {
-                c.isInSeed = true;
+                //c.isInSeed = true;
                 bseed.getClusters().add(c.getCluster1());
                 if(c.getCluster2()!=null)
                     bseed.getClusters().add(c.getCluster2());
             }
-            bseed.setStatus(3);
+            //bseed.setStatus(3);
         }
        
         return seedlist;

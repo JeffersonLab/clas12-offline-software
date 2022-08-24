@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
-import org.jlab.detector.base.DetectorType;
-
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.Geometry;
@@ -295,6 +293,9 @@ public class TrackSeeder {
                     double d = pars.doca();
                     double r = pars.rho();
                     double f = pars.phi();
+                    mseed.setDoca(d);
+                    mseed.setRho(r);
+                    mseed.setPhi(f);
                     for (Cross c : seedcrs) {
                         double xi = c.getPoint().x();
                         double yi = c.getPoint().y();
@@ -314,8 +315,9 @@ public class TrackSeeder {
 
         for(Seed mseed : seedScan) { 
             boolean fitStatus = false;
-            if(mseed.getCrosses().size()>=3)
+            if(mseed.getCrosses().size()>=3) {
                 fitStatus = mseed.fit(Constants.SEEDFITITERATIONS, xbeam, ybeam, bfield);
+            }
             if (fitStatus) { 
                 List<Cross> sameSectorCrosses = this.findCrossesInSameSectorAsSVTTrk(mseed, bmtC_crosses);
                 BMTmatches.clear();
@@ -371,8 +373,10 @@ public class TrackSeeder {
         
         if(!seedlist.isEmpty()) {
             // remove overlapping seeds
-            Seed.removeOverlappingSeeds(seedlist);
-
+            if(Constants.getInstance().removeOverlappingSeeds)
+                Seed.removeOverlappingSeeds(seedlist);
+            if(Constants.getInstance().flagSeeds)
+                    Seed.flagMCSeeds(seedlist);
             for (Seed bseed : seedlist) { 
                 for(Cross c : bseed.getCrosses()) {
                     c.isInSeed = true;

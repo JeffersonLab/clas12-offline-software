@@ -16,6 +16,8 @@ import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.fit.HelicalTrackFitter;
 import org.jlab.rec.cvt.fit.HelicalTrackFitter.FitStatus;
+import org.jlab.rec.cvt.hit.Hit;
+import org.jlab.rec.cvt.services.CVTReconstruction;
 import org.jlab.rec.cvt.trajectory.Helix;
 
 /**
@@ -24,6 +26,7 @@ import org.jlab.rec.cvt.trajectory.Helix;
  *
  */
 public class Seed implements Comparable<Seed>{
+
 
     private int id;
     private int status;
@@ -39,6 +42,8 @@ public class Seed implements Comparable<Seed>{
     private double _chi2;
     private List<Seed> _overlappingSeed;
     private Key _key;
+    public double percentTruthMatch;
+    public double totpercentTruthMatch;
     
     public Seed() {
     }
@@ -227,6 +232,9 @@ public class Seed implements Comparable<Seed>{
             int ProbComp  = this.getChi2() < tr.getChi2() ? -1 : this.getChi2() == tr.getChi2() ? 0 : 1;
             int OtherComp = this.getNDF() > tr.getNDF() ? -1 : this.getNDF() == tr.getNDF() ? 0 : 1;
             value = ((OtherComp == 0) ? ProbComp : OtherComp);
+        } 
+        else if(tr.sortingMethod ==1) {
+            return this.totpercentTruthMatch > tr.totpercentTruthMatch ? -1 : this.totpercentTruthMatch == tr.totpercentTruthMatch ? 0 : 1;
         } else {
             int[] K = new int[9];
             for(int k = 0; k<9; k++) {
@@ -378,6 +386,7 @@ public class Seed implements Comparable<Seed>{
         return true;
     }
 
+    
     /**
      * Updates the crosses positions based on trajectories or helix
      */
@@ -385,6 +394,18 @@ public class Seed implements Comparable<Seed>{
         if (this.getHelix() != null && this.getHelix().getCurvature() != 0) {
             for (int i = 0; i < this.getCrosses().size(); i++) {
                 Cross cross = this.getCrosses().get(i);
+                double R = Math.sqrt(cross.getPoint().x() * cross.getPoint().x() + cross.getPoint().y() * cross.getPoint().y());
+                Point3D  trackPos = this.getHelix().getPointAtRadius(R);
+                Vector3D trackDir = this.getHelix().getTrackDirectionAtRadius(R);
+                cross.update(trackPos, trackDir);
+            }
+        }
+    }
+    
+    public void update_Crosses(List<Cross> crosses) {
+        if (this.getHelix() != null && this.getHelix().getCurvature() != 0) {
+            for (int i = 0; i < crosses.size(); i++) {
+                Cross cross = crosses.get(i);
                 double R = Math.sqrt(cross.getPoint().x() * cross.getPoint().x() + cross.getPoint().y() * cross.getPoint().y());
                 Point3D  trackPos = this.getHelix().getPointAtRadius(R);
                 Vector3D trackDir = this.getHelix().getTrackDirectionAtRadius(R);
@@ -447,7 +468,7 @@ public class Seed implements Comparable<Seed>{
      * @param o the other track
      * @return true if this track overlaps with the given track, false otherwise
      */
-    public boolean overlapWith(Seed o) {
+    public boolean overlapWithUsingCrosses(Seed o) {
         int nc = 0;
         for(Cross c : this.getCrosses()) {
             //if(c.getType()==BMTType.C) continue; //skim BMTC
@@ -457,10 +478,59 @@ public class Seed implements Comparable<Seed>{
         else      return false;
     }
     
+    public boolean overlapWithUsingClusters(Seed o) {
+        int nc = 0;
+        for(Cluster c : this.getClusters()) {
+            if(o.getClusters().contains(c)) nc++;
+        }
+        if(nc >1) return true;
+        else      return false;
+    }
+    
+    public static void flagMCSeeds(List<Seed> seeds) {
+        int hitcnt = 0;
+        int mchitcnt = 0; 
+        for(Seed s : seeds) {
+            hitcnt = 0;
+            mchitcnt = 0;
+            List<Cluster> cls = s.getClusters();
+            for(Cluster cl : cls) {
+                for(Hit h : cl) {
+                    hitcnt++;
+                    if(h.MCstatus==0) 
+                        mchitcnt++;
+                }
+            }
+            s.percentTruthMatch = (double) (mchitcnt*100.0/hitcnt);
+            s.totpercentTruthMatch = (double) (mchitcnt*100.0/CVTReconstruction.getTotalNbTruHits());
+        }
+    }
+    
     public static void removeOverlappingSeeds(List<Seed> seeds) {
         if(seeds==null)
             return;
-            
+  
+        List<Seed> ovlrem = getOverlapRemovedSeeds(seeds);
+        if(ovlrem!=null) {
+            seeds.clear();
+            seeds.addAll(ovlrem);
+        }
+    }
+    
+    public static List<Seed> getOverlapRemovedSeeds(List<Seed> seeds) { 
+        if(seeds==null)
+            return null;
+        List<Seed> ovlrem = new ArrayList<>();
+        ovlrem.addAll(seeds);
+        while(ovlrem.size()!=getOverlapRemovedSeeds1Pass(ovlrem).size()) {
+            ovlrem = getOverlapRemovedSeeds1Pass(ovlrem);
+        }
+        return ovlrem;
+    }
+    public static List<Seed> getOverlapRemovedSeeds1Pass(List<Seed> seeds) { 
+        if(seeds==null)
+            return null;
+        List<Seed> goodseeds = new ArrayList<>();    
         List<Seed> selectedSeeds =  null;
         for (int i = 0; i < seeds.size(); i++) {
             
@@ -468,7 +538,7 @@ public class Seed implements Comparable<Seed>{
             selectedSeeds =  new ArrayList<>();
             for(int j=0; j<seeds.size(); j++ ) {
                 Seed t2 = seeds.get(j);
-                if(i!=j && t1.overlapWith(t2)) {
+                if(i!=j && t1.overlapWithUsingClusters(t2)) {
                     selectedSeeds.add(t2);
                 }
             }
@@ -508,9 +578,9 @@ public class Seed implements Comparable<Seed>{
             }
             
         }
-        seeds.clear();
-        seeds.addAll(new ArrayList<>(seedMap.values()));
         
+        goodseeds.addAll(new ArrayList<>(seedMap.values()));
+        return goodseeds;
     }
     
     @Override
