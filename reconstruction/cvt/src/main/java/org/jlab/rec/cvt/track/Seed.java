@@ -501,8 +501,10 @@ public class Seed implements Comparable<Seed>{
                         mchitcnt++;
                 }
             }
-            s.percentTruthMatch = (double) (mchitcnt*100.0/hitcnt);
-            s.totpercentTruthMatch = (double) (mchitcnt*100.0/CVTReconstruction.getTotalNbTruHits());
+            if(hitcnt!=0)
+                s.percentTruthMatch = (double) (mchitcnt*100.0/hitcnt);
+            if(CVTReconstruction.getTotalNbTruHits()!=0)
+                s.totpercentTruthMatch = (double) (mchitcnt*100.0/CVTReconstruction.getTotalNbTruHits());
         }
     }
     
