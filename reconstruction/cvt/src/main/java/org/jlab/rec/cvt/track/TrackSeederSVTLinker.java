@@ -159,7 +159,12 @@ public class TrackSeederSVTLinker {
             if(R.size()<2) continue;
             LineFitter ft = new LineFitter();
             boolean status = ft.fitStatus(R, Z, EZ, null, Z.size());
-            
+            if(Constants.getInstance().seedingDebugMode) {
+                System.out.println("Matching to ");
+                for (Cross c : zrcross) { 
+                    System.out.println(c.printInfo());
+                }
+            }
             LineFitPars fpars = ft.getFit();
             if (fpars == null) {
                 continue; 
@@ -169,11 +174,10 @@ public class TrackSeederSVTLinker {
             
             List<Cross> pass = new ArrayList<>();
             if(svtcrs.containsKey(sector)) {   
-                for(int creg =1; creg<4; creg++) { //find the best BST match in each region
+                for(int creg =1; creg<4; creg++) { 
                     if(svtcrs.get(sector).containsKey(creg)) { 
                         Collections.sort(svtcrs.get(sector).get(creg));
-                        double bestdeltasum = 9999;
-                        Cross bestCross = null;
+                       
                         for (Cross c : svtcrs.get(sector).get(creg)) {
                         
                             Point3D tref = new Point3D(xbeam, ybeam, b);
@@ -193,17 +197,21 @@ public class TrackSeederSVTLinker {
                                 Line3D sline2 = c.getCluster2().getLine();
                                 double delta1 = sline1.distance(tline).length();
                                 double delta2 = sline2.distance(tline).length(); 
+                                if(Constants.getInstance().seedingDebugMode) {
+                                    System.out.println("Check for m = "+m+" b = "+b);
+                                    System.out.println(c.printInfo());
+                                    System.out.println("delta1 "+delta1+" delta2 "+delta2);
+                                }
                                 if(delta1<SVTParameters.getMAXDOCA2STRIP() && delta2<SVTParameters.getMAXDOCA2STRIP()
                                         && delta1+delta2<SVTParameters.getMAXDOCA2STRIPS()) { 
-                                    if(delta1+delta2<bestdeltasum) {
-                                       bestdeltasum= delta1+delta2;
-                                       bestCross = c; 
-                                   }
+                                    pass.add(c);
+                                    if(Constants.getInstance().seedingDebugMode) {
+                                        System.out.println("Pass ");
+                                        System.out.println(c.printInfo());
+                                    }
+                                   
                                 }
                             }
-                        }
-                        if(bestCross!=null) { 
-                            pass.add(bestCross);
                         }
                     }
                 }
@@ -215,6 +223,11 @@ public class TrackSeederSVTLinker {
                         if(bmtcrs.get(sector).containsKey(i))
                             pass.addAll(new ArrayList<>(bmtcrs.get(sector).get(i)));
                     }
+                }
+                if(Constants.getInstance().seedingDebugMode) {
+                    System.out.println("Looking for circle:");
+                    for(Cross c : pass) 
+                        System.out.println(c.printInfo());
                 }
                 
                 List<Seed> myseeds = trseed2.findSeed(pass); //Find XY seeds matched to RZ seeds using the BST as a linker
