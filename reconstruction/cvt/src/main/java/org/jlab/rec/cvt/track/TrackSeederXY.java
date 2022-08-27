@@ -189,7 +189,7 @@ public class TrackSeederXY {
         for(Seed mseed : seedScan) { 
             CircleFitPars fpars = null;
             
-            if(mseed.getCrosses().size()>2) {
+            if(mseed.getCrosses().size()>=2) {
                 fpars =
                         this.CircleFit(mseed.getCrosses());
                
@@ -203,7 +203,7 @@ public class TrackSeederXY {
                     fpars = this.CircleFit(mseed.getCrosses());
                 }
             }
-            if (fpars!=null) {
+            if (fpars!=null && this.countType(mseed.getCrosses(), DetectorType.BST)>0 && mseed.getCrosses().size()>2) {
                 seedlist.add(mseed);
             }
         }
@@ -223,7 +223,14 @@ public class TrackSeederXY {
         return seedlist;
     }
     
-    
+    private int countType(List<Cross> cand, DetectorType dt) {
+        int countsvt=0;
+        for(Cross c : cand) 
+            if(c.getDetector()==dt)
+                countsvt++;
+        
+        return countsvt;
+    }
     private double calcResi(double rho, double d0, double phi0, double xc, double yc) {
         double r = Math.sqrt(xc*xc+yc*yc);
         double par = 1. - ((r * r - d0 * d0) * rho * rho) / (2. * (1. + d0 * Math.abs(rho)));
