@@ -140,7 +140,7 @@ public class EBEngine extends ReconstructionEngine {
         List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, cvtTrackType, cvtTrajType);
         eb.addTracks(ctracks);
         
-        List<DetectorTrack> cutracks = DetectorData.readCentralDetectorTracks(de, "CVT::UTracks", cvtTrajType);
+        List<DetectorTrack> cutracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::UTracks", cvtTrajType);
        
         // FIXME:  remove need for these indexing bookkeepers:
         eb.getPindexMap().put(0, tracks.size());
@@ -171,7 +171,7 @@ public class EBEngine extends ReconstructionEngine {
         eb.processForwardTagger(de);
 
         // create REC:detector banks:
-        if(eb.getEvent().getParticles().size()>0){
+        if(!eb.getEvent().getParticles().isEmpty()){
        
             Collections.sort(eb.getEvent().getParticles());
 
@@ -185,30 +185,30 @@ public class EBEngine extends ReconstructionEngine {
             de.appendBanks(bankEve);
 
             List<DetectorResponse> calorimeters = eb.getEvent().getCalorimeterResponseList();
-            if(calorimeterBank!=null && calorimeters.size()>0) {
+            if(calorimeterBank!=null && !calorimeters.isEmpty()) {
                 DataBank bankCal = DetectorData.getCalorimeterResponseBank(calorimeters, de, calorimeterBank);
                 de.appendBanks(bankCal);
             }
             List<DetectorResponse> scintillators = eb.getEvent().getScintillatorResponseList();
-            if(scintillatorBank!=null && scintillators.size()>0) {
+            if(scintillatorBank!=null && !scintillators.isEmpty()) {
                 DataBank bankSci = DetectorData.getScintillatorResponseBank(scintillators, de, scintillatorBank);
                 de.appendBanks(bankSci);               
                 DataBank eaxtbankSci = DetectorData.getScintExtrasResponseBank(scintillators, de, scintextrasBank);
                 de.appendBanks(eaxtbankSci);               
             }
             List<DetectorResponse> cherenkovs = eb.getEvent().getCherenkovResponseList();
-            if(cherenkovBank!=null && cherenkovs.size()>0) {
+            if(cherenkovBank!=null && !cherenkovs.isEmpty()) {
                 DataBank bankChe = DetectorData.getCherenkovResponseBank(cherenkovs, de, cherenkovBank);
                 de.appendBanks(bankChe);
             }
             
             List<DetectorResponse> taggers = eb.getEvent().getTaggerResponseList();
-            if (ftBank!=null && taggers.size()>0) {
+            if (ftBank!=null && !taggers.isEmpty()) {
                 DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(taggers, de, ftBank);
                 de.appendBanks(bankForwardTagger);
             }
 
-            if (trackBank!=null && (tracks.size()>0 || ctracks.size()>0) ) {
+            if (trackBank!=null && (!tracks.isEmpty() || !ctracks.isEmpty()) ) {
                 final int ntracks = tracks.size() + ctracks.size();
                 DataBank bankTrack = DetectorData.getTracksBank(eb.getEvent().getParticles(), de, trackBank, ntracks);
                 de.appendBanks(bankTrack);
@@ -217,8 +217,8 @@ public class EBEngine extends ReconstructionEngine {
                 DataBank bankCovMat = DetectorData.getCovMatrixBank(eb.getEvent().getParticles(), de, covMatrixBank);
                 if (bankCovMat != null) de.appendBanks(bankCovMat);
 
-                if (ctracks.size()>0) {
-                    DataBank x = DetectorData.getUTracksBank(eb.getEvent().getParticles(), de, UtrackBank, ctracks.size());
+                if (!cutracks.isEmpty()) {
+                    DataBank x = DetectorData.getUTracksBank(eb.getEvent().getParticles(), de, UtrackBank, cutracks.size());
                     de.appendBanks(x);
                 }
             }

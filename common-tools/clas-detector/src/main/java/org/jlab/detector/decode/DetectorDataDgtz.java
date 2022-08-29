@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package org.jlab.detector.decode;
 
 import java.util.ArrayList;
@@ -20,12 +14,11 @@ import org.jlab.utils.data.DataUtils;
  */
 public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
     
-    private final List<ADCData>       adcStore   = new ArrayList<ADCData>();
-    private final List<TDCData>       tdcStore   = new ArrayList<TDCData>();
-    private final List<VTPData>       vtpStore   = new ArrayList<VTPData>();
-    private final List<SCALERData> scalerStore   = new ArrayList<SCALERData>();
-    //private final List<ADCPulse>  pulseStore = new ArrayList<ADCPulse>();    
-    private Long                 timeStamp = 0L;
+    private final List<ADCData>       adcStore   = new ArrayList<>();
+    private final List<TDCData>       tdcStore   = new ArrayList<>();
+    private final List<VTPData>       vtpStore   = new ArrayList<>();
+    private final List<SCALERData> scalerStore   = new ArrayList<>();
+    private Long timeStamp = 0L;
     
     private final DetectorDescriptor  descriptor = new DetectorDescriptor();
     
@@ -185,9 +178,7 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
         private long   pulseTimeStamp  = 0L;
 
         
-        private List<short[]>   adcPulse = new ArrayList<short[]>();
-        
-        private boolean isPedistalSubtracted = false;
+        private List<short[]>   adcPulse = new ArrayList<>();
         
         public ADCData(){
             
@@ -295,8 +286,6 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
         }
         
         public ADCData setTimeWord(int timeWord){
-//            pulseTimeCourse = DataUtils.getInteger(timeWord, 0, 5);
-//            int timeFine    = DataUtils.getInteger(timeWord, 6, 16);
             int timeFine    = DataUtils.getInteger(timeWord, 0, 5);
             pulseTimeCourse = DataUtils.getInteger(timeWord, 6, 15);
             pulseTime = pulseTimeCourse*4.0 + timeFine*0.0625;

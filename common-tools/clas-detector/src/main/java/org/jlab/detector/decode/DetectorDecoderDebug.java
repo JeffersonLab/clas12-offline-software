@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.detector.decode;
 
 import java.util.HashMap;
@@ -28,7 +23,7 @@ public class DetectorDecoderDebug {
     public DetectorDecoderDebug(){
         codaDecoder = new CodaEventDecoder();
     }
-    
+
     public int getDifference(DetectorDataDgtz a, DetectorDataDgtz b){
         int summ = 0;
         short[] ap = a.getADCData(0).getPulseArray();
@@ -44,14 +39,14 @@ public class DetectorDecoderDebug {
         
         return summ;
     }
-    
+
     public void compareMaps(Map<Integer,DetectorDataDgtz> raw, Map<Integer,DetectorDataDgtz> packed, int eventNumber){
         int size = raw.size();
         int comparedSize = 0;
-        
+
         this.totalEvent++;
         this.totalRawSize += size;
-        
+
         for(Map.Entry<Integer,DetectorDataDgtz> entry : raw.entrySet()){
             if(packed.containsKey(entry.getKey())==false){
                 System.out.println(
@@ -73,14 +68,14 @@ public class DetectorDecoderDebug {
                 }
             }
         }
-        
+
         this.totalComparedSize+=comparedSize;
         System.out.println(String.format(">>> COMPARISION FOR event #%8d ->  processed %8d / passed %8d",
                 eventNumber,size,comparedSize));
     }
-    
+
     public Map<Integer,DetectorDataDgtz> getADCMapPacked(DataEvent event){
-        Map<Integer,DetectorDataDgtz> dataMap = new HashMap<Integer,DetectorDataDgtz>();
+        Map<Integer,DetectorDataDgtz> dataMap = new HashMap<>();
          List<FADCData>  fadcPacked = codaDecoder.getADCEntries((EvioDataEvent) event);
          if(fadcPacked!=null){
              List<DetectorDataDgtz> fadcUnpacked = FADCData.convert(fadcPacked);
@@ -99,12 +94,12 @@ public class DetectorDecoderDebug {
          }
         return dataMap;
     }
-    
+
     public Map<Integer,DetectorDataDgtz> getADCMapRaw(DataEvent event){
-        
-        Map<Integer,DetectorDataDgtz> dataMap = new HashMap<Integer,DetectorDataDgtz>();
+
+        Map<Integer,DetectorDataDgtz> dataMap = new HashMap<>();
         List<DetectorDataDgtz> dataList = codaDecoder.getDataEntries( (EvioDataEvent) event);
-        
+
         for(DetectorDataDgtz data : dataList){
             if (data.getADCSize()>0) {
                 if(data.getADCData(0).getPulseSize()>0){
@@ -117,10 +112,10 @@ public class DetectorDecoderDebug {
                 }
             }
         }
-        
+
         return dataMap;
     }
-    
+
     public void printComparisonStats()  {
         System.out.println("\n Comparison statistics:");
         System.out.println("\t Number of events:         " + this.totalEvent);
@@ -128,10 +123,10 @@ public class DetectorDecoderDebug {
         System.out.println("\t Number of matched pulses: " + this.totalComparedSize);        
         System.out.println("\t Number of errors:         " + this.totalErrors);        
     }
-    
+
     public static void main(String[] args){
         String inputFile = "/Users/gavalian/Work/Software/project-5a.0.0/data/raw/test_004714.evio.00000";
-        
+
         if(args.length>0){
             inputFile = args[0];
         }
@@ -147,6 +142,6 @@ public class DetectorDecoderDebug {
             eventNumber++;
         }
         debugger.printComparisonStats();
-                
+
     }
 }

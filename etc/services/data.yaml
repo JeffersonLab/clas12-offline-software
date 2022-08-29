@@ -61,6 +61,7 @@ configuration:
   global:
     variation: rga_fall2018
 #      timestamp: 12/31/2020-00:00:00
+#      triggerMask: "0x1"
   io-services:
     writer:
       compression: 2
