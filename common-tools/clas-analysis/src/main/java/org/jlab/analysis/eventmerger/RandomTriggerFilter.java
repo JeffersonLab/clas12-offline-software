@@ -18,6 +18,7 @@ import org.jlab.utils.system.ClasUtilsFile;
  * Options: 
  *      -c : minimum beam current (default = -1)
  *      -n : maximum number of events to process (default = -1)
+ *      -m : maximum beam current nA for histogram (default = 80)
  * 
  *  Event is filtered if selected trigger bit is set and no other bit is
  * 
@@ -94,12 +95,12 @@ public class RandomTriggerFilter {
     public static void main(String[] args){
       
         OptionParser parser = new OptionParser("trigger-filter");
-        parser.addRequired("-o"    ,"output file");
-        parser.addRequired("-b"    ,"trigger bit (0-63)");
-        parser.setRequiresInputList(false);
-        parser.addOption("-c"    ,"-1", "minimum beam current");
-        parser.addOption("-n"    ,"-1", "maximum number of events to process");
-        parser.addOption("-m"    ,"80)","maximum current for histogram");
+        parser.addRequired("-o",    "output file");
+        parser.addRequired("-b",    "trigger bit (0-63)");
+        parser.addOption("-c","-1", "minimum beam current");
+        parser.addOption("-n","-1", "maximum number of events to process");
+        parser.addOption("-m","80", "maximum current for histogram");
+        parser.setRequiresInputList(true);
         parser.parse(args);
 
         List<String> inputList = parser.getInputList();
@@ -111,12 +112,6 @@ public class RandomTriggerFilter {
             double minCurrent = parser.getOption("-c").doubleValue();
             int maxEvents     = parser.getOption("-n").intValue();
 
-            if(inputList.isEmpty()==true){
-                parser.printUsage();
-                System.out.println("\n >>>> error : no input file is specified....\n");
-                System.exit(0);
-            }
-            
             if(triggerBit<0 || triggerBit>63) {
                 parser.printUsage();
                 System.out.println("\n >>>> error : invalid trigger bit....\n");
