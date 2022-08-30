@@ -375,8 +375,8 @@ public class TrackSeeder {
             // remove overlapping seeds
             if(Constants.getInstance().removeOverlappingSeeds)
                 Seed.removeOverlappingSeeds(seedlist);
-            if(Constants.getInstance().flagSeeds)
-                    Seed.flagMCSeeds(seedlist);
+            //if(Constants.getInstance().flagSeeds)
+            //        Seed.flagMCSeeds(seedlist);
             for (Seed bseed : seedlist) { 
                 for(Cross c : bseed.getCrosses()) {
                     c.isInSeed = true;

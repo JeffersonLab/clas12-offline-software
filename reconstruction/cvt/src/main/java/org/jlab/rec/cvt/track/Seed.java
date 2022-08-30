@@ -487,12 +487,13 @@ public class Seed implements Comparable<Seed>{
         else      return false;
     }
     
-    public static void flagMCSeeds(List<Seed> seeds) {
+    public static void flagMCSeeds(List<Seed> seeds, int totTruthHits) {
         int hitcnt = 0;
         int mchitcnt = 0; 
         for(Seed s : seeds) {
             hitcnt = 0;
             mchitcnt = 0;
+            s.setClusters();
             List<Cluster> cls = s.getClusters();
             for(Cluster cl : cls) {
                 for(Hit h : cl) {
@@ -503,8 +504,8 @@ public class Seed implements Comparable<Seed>{
             }
             if(hitcnt!=0)
                 s.percentTruthMatch = (double) (mchitcnt*100.0/hitcnt);
-            if(CVTReconstruction.getTotalNbTruHits()!=0)
-                s.totpercentTruthMatch = (double) (mchitcnt*100.0/CVTReconstruction.getTotalNbTruHits());
+            if(totTruthHits!=0)
+                s.totpercentTruthMatch = (double) (mchitcnt*100.0/totTruthHits);
         }
     }
     

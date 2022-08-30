@@ -55,6 +55,7 @@ public class TracksFromTargetRec {
     private Swim swimmer;
     private double xb; 
     private double yb;
+    public int totTruthHits;
     
     
     public TracksFromTargetRec(Swim swimmer, double[] beamPos) {
@@ -128,7 +129,7 @@ public class TracksFromTargetRec {
             Seed.removeOverlappingSeeds(seeds);
      
         if(Constants.getInstance().flagSeeds)
-            Seed.flagMCSeeds(seeds);
+            Seed.flagMCSeeds(seeds, this.totTruthHits);
         if(seeds ==null || seeds.isEmpty()) {
             recUtil.CleanupSpuriousSVTCrosses(this.SVTcrosses, null) ;
 //            RecoBankWriter.appendCVTBanks(event, SVThits, BMThits, SVTclustersHM, BMTclustersHM, crosses, null, null, 1);

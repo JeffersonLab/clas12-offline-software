@@ -61,12 +61,12 @@ public class CVTReconstruction {
             CVThits.add((ArrayList<Hit>) BMThits);
         }
         int totmctru =0;
-        for(Hit h : CVThits.get(0)) {
+        for(Hit h : SVThits) {
             if(h.MCstatus==0) {
                 totmctru++;
             }
         }
-        for(Hit h : CVThits.get(1)) {
+        for(Hit h : BMThits) {
             if(h.MCstatus==0) {
                 totmctru++;
             }
@@ -74,8 +74,6 @@ public class CVTReconstruction {
         setTotalNbTruHits(totmctru);
         return CVThits;
     }
-    // for single track truth matching
-    private static int totalNbTruHits =0;
     
     public List<ArrayList<Cluster>> findClusters() {
         
@@ -179,17 +177,20 @@ public class CVTReconstruction {
         return CVTcrosses.get(1);
     }
 
+    // for single track truth matching
+    private int totalNbTruHits =0;
+    
     /**
      * @return the totalNbTruHits
      */
-    public static int getTotalNbTruHits() {
+    public int getTotalNbTruHits() {
         return totalNbTruHits;
     }
 
     /**
      * @param aTotalNbTruHits the totalNbTruHits to set
      */
-    public static void setTotalNbTruHits(int aTotalNbTruHits) {
+    public void setTotalNbTruHits(int aTotalNbTruHits) {
         totalNbTruHits = aTotalNbTruHits;
     }
 
