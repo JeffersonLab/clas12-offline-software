@@ -131,6 +131,14 @@ public class TrackSeederRZ {
         }
         
         seeds.forEach((key,value) -> result.add(value));
+        if(Constants.getInstance().seedingDebugMode) {
+            System.out.println("ALL RZ SEEDS");
+            for(List<Cross> s : result) {
+                System.out.println("RZ SEED:");
+                for(Cross c : s)
+                    System.out.println(c.printInfo());
+            }
+        }
         removeCompleteZROverlaps(result);
         return result;
     }
@@ -166,7 +174,11 @@ public class TrackSeederRZ {
         zrtracks.removeAll(rmCros);
     }
     private boolean interceptOK(Cross c1, Cross c2) { 
-        
+        if(Constants.getInstance().seedingDebugMode) {
+            System.out.println("RZ Condidering (2):");
+            System.out.println(c1.printInfo());
+            System.out.println(c2.printInfo());
+        }
         boolean value = false;
         double sl = (c1.getPoint().z() - c2.getPoint().z())/(c1.getPoint().toVector3D().rho() - c2.getPoint().toVector3D().rho());
         double in = -sl*c1.getPoint().toVector3D().rho()+c1.getPoint().z();
@@ -175,11 +187,18 @@ public class TrackSeederRZ {
         
         if(Math.abs(targetCen-in)<targetLen+Constants.ZRANGE)
            value = true;
-        
+        if(Constants.getInstance().seedingDebugMode) 
+            System.out.println("Passing: "+ value);
         return value;
     }
 
     private boolean line3OK(Cross c1, Cross c2, Cross c3) {
+        if(Constants.getInstance().seedingDebugMode) {
+            System.out.println("RZ Condidering (3):");
+            System.out.println(c1.printInfo());
+            System.out.println(c2.printInfo());
+            System.out.println(c3.printInfo());
+        }
         boolean value = false;
         if(interceptOK(c1,c3)==false)
             return value;
@@ -193,6 +212,8 @@ public class TrackSeederRZ {
         if(Math.abs(Zc-Zm)<Zerr*5) {
             value = true;  
         } 
+        if(Constants.getInstance().seedingDebugMode) 
+            System.out.println("Passing: "+ value);
         return value;
     }
 }
