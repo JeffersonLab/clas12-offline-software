@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.Geometry;
@@ -13,12 +14,10 @@ import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.fit.CircleFitter;
 import org.jlab.rec.cvt.fit.CircleFitPars;
-import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.svt.SVTParameters;
 
 public class TrackSeeder {
     
-    private final SVTGeometry sgeo = Geometry.getInstance().getSVT();
     private final BMTGeometry bgeo = Geometry.getInstance().getBMT();
     private  double bfield;
     
@@ -26,7 +25,7 @@ public class TrackSeeder {
     private final double[] phiShift = new double[]{0, 65, 90}; // move the bin edge to handle bin boundaries
     private List<ArrayList<Cross>> scan ;
     private Map<Double, ArrayList<Cross>> seedMap ; // init seeds;
-    private List<ArrayList<ArrayList<Cross>>> sortedCrosses;
+    private Map<Integer, Map<Integer, ArrayList<Cross>>> sortedCrosses ;
     private List<Seed> seedScan ;
     private List<Double> Xs ;
     private List<Double> Ys ;
@@ -41,13 +40,8 @@ public class TrackSeeder {
         this.bfield = Math.abs(b[2]);
 
         //init lists for scan
-        sortedCrosses = new ArrayList<>();
-        for(int i =0; i<NBINS; i++) {
-            sortedCrosses.add(i, new ArrayList<>() );
-            for(int l =0; l<3; l++) {
-                sortedCrosses.get(i).add(l,new ArrayList<>() );
-            }
-        }
+        sortedCrosses = new HashMap<>();
+        
         scan = new ArrayList<>();
         seedMap = new HashMap<>(); // init seeds;
         seedScan = new ArrayList<>();
@@ -59,11 +53,12 @@ public class TrackSeeder {
         ybeam = yb;
     }
     
+    
     private void matchSeed(List<Cross> othercrs) {
         if(othercrs==null || othercrs.isEmpty())
             return;
         
-        for (Seed seed : seedScan) {
+        for (Seed seed : getSeedScan()) {
             double d = seed.getDoca();
             double r = seed.getRho();
             double f = seed.getPhi();
@@ -125,11 +120,11 @@ public class TrackSeeder {
             }
         }
         Seed seed = new Seed(seedcrs, d, r, f);
-        seedScan.add(seed);
+        getSeedScan().add(seed);
     }
     
     /*
-    Finds BMT seeds
+    Finds SVT seeds
     */
     public void findSeedCrossList(List<Cross> crosses) {
         
@@ -141,22 +136,18 @@ public class TrackSeeder {
         for(int i = 0; i< phiShift.length; i++) {
             findSeedCrossesFixedBin(crosses, phiShift[i]); 
         }
-        
+        if(Constants.getInstance().seedingDebugMode) {
+            seedMap.forEach((key,value) -> this.printInfo(value));
+        }
         seedMap.forEach((key,value) -> this.fitSeed(value));
     }
    
     
-    /*
-    Scans overphase space to find groups of BMT crosses 
-    */
     private void findSeedCrossesFixedBin(List<Cross> crosses, double phiShift) {
-        for(int b =0; b<NBINS; b++) {
-            for(int l =0; l<3; l++) {
-                sortedCrosses.get(b).get(l).clear();
-            }
-        }
+        sortedCrosses.clear();
         int[][] LPhi = new int[NBINS][3];
         for (int i = 0; i < crosses.size(); i++) {
+            crosses.get(i).reset();
             double phi = Math.toDegrees(crosses.get(i).getPoint().toVector3D().phi());
 
             phi += phiShift;
@@ -165,55 +156,60 @@ public class TrackSeeder {
             }
 
             int binIdx = (int) (phi / (360./NBINS) );
-            if(binIdx>35)
-                binIdx = 35;
-            sortedCrosses.get(binIdx).get(crosses.get(i).getRegion() - 1).add(crosses.get(i));
-            LPhi[binIdx][crosses.get(i).getRegion() - 1]++; 
+            if(binIdx>NBINS-1)
+                binIdx = NBINS-1;
+            if(!sortedCrosses.containsKey(binIdx)) {
+                sortedCrosses.put(binIdx, new HashMap<Integer, ArrayList<Cross>>());
+                sortedCrosses.get(binIdx).put(crosses.get(i).getRegion() - 1, new ArrayList<Cross>());
+                sortedCrosses.get(binIdx).get(crosses.get(i).getRegion() - 1).add(crosses.get(i));
+                LPhi[binIdx][crosses.get(i).getRegion() - 1]++; 
+                
+            } else {
+                if(!sortedCrosses.get(binIdx).containsKey(crosses.get(i).getRegion() - 1)) {
+                    sortedCrosses.get(binIdx).put(crosses.get(i).getRegion() - 1, new ArrayList<Cross>());
+                    sortedCrosses.get(binIdx).get(crosses.get(i).getRegion() - 1).add(crosses.get(i));
+                    LPhi[binIdx][crosses.get(i).getRegion() - 1]++; 
+                } else {
+                    sortedCrosses.get(binIdx).get(crosses.get(i).getRegion() - 1).add(crosses.get(i));
+                    LPhi[binIdx][crosses.get(i).getRegion() - 1]++; 
+                }
+            }
         }
         
+        
         for (int b = 0; b < NBINS; b++) {
-            int max_layers =0;
             for (int la = 0; la < 3; la++) { 
-                if(LPhi[b][la]>0)
-                    max_layers++;
+                if(LPhi[b][la]==0) {
+                    LPhi[b][la]=1;
+                } 
             }
-            if (sortedCrosses.get(b) != null && max_layers >= 2) { 
-                double SumLyr=0;
-                while(LPhi[b][0]+LPhi[b][1]+ LPhi[b][2]>=max_layers) {
-                    if(SumLyr!=LPhi[b][0]+LPhi[b][1]+ LPhi[b][2]) {
-                        SumLyr = LPhi[b][0]+LPhi[b][1]+ LPhi[b][2];
-                    } 
-                    ArrayList<Cross> hits = new ArrayList<>(); 
-                    for (int la = 0; la < 3; la++) {
-                        if (sortedCrosses.get(b).get(la) != null && LPhi[b][la]>0) { 
-                            if (sortedCrosses.get(b).get(la).get(LPhi[b][la]-1) != null 
-                                    && sortedCrosses.get(b).get(la).size()>0) {
-                                hits.add(sortedCrosses.get(b).get(la).get(LPhi[b][la]-1)); 
-                                
-                                if(LPhi[b][la]>1)
-                                   LPhi[b][la]--; 
-                                if(SumLyr==max_layers)
-                                    LPhi[b][la]=0; 
+        }
+        List<Cross> hits = new ArrayList<>(); 
+        for (int b = 0; b < NBINS; b++) {
+            if(!sortedCrosses.containsKey(b)) continue;
+            
+            for(int i1 = 0; i1< LPhi[b][0]; i1++) {
+                for(int i2 = 0; i2< LPhi[b][1]; i2++) {
+                    for(int i3 = 0; i3< LPhi[b][2]; i3++) {
+                        hits.clear();
+                        if(sortedCrosses.get(b).containsKey(0))
+                            hits.add(sortedCrosses.get(b).get(0).get(i1));
+                        if(sortedCrosses.get(b).containsKey(1))
+                            hits.add(sortedCrosses.get(b).get(1).get(i2));
+                        if(sortedCrosses.get(b).containsKey(2))
+                            hits.add(sortedCrosses.get(b).get(2).get(i3));
+                        if(hits.size()==3) {
+                            if(this.checkZ((ArrayList<Cross>) hits)) {
+                                this.addToSeedMap((ArrayList<Cross>) hits);
                             }
                         }
                     }
-                   
-                    if (hits.size() >= 2) {
-                        double seedIdx=0;
-                        int s = hits.size();
-                        int index = (int) Math.pow(2,s);
-                        for(Cross c : hits) {
-                            seedIdx +=c.getId()*Math.pow(10, index);
-                            index-=4;
-                        }
-                        seedMap.put(seedIdx, hits);
-                    }
                 }
+
             }
         }
     }
 
-    
 
     List<Seed> BMTmatches = new ArrayList<>();
     public List<Seed> findSeed(List<Cross> bst_crosses, List<Cross> bmt_crosses) {
@@ -260,7 +256,7 @@ public class TrackSeeder {
         this.findSeedCrossList(svt_crosses);
         this.matchSeed(crosses);
         
-        for(Seed mseed : seedScan) { 
+        for(Seed mseed : getSeedScan()) { 
             List<Cross> seedcrs = mseed.getCrosses();
    
             // loop until a good circular fit. removing far crosses each time
@@ -313,9 +309,9 @@ public class TrackSeeder {
         }
 
 
-        for(Seed mseed : seedScan) { 
+        for(Seed mseed : getSeedScan()) { 
             boolean fitStatus = false;
-            if(mseed.getCrosses().size()>=3) {
+            if(mseed.getCrosses().size()>2) {
                 fitStatus = mseed.fit(Constants.SEEDFITITERATIONS, xbeam, ybeam, bfield);
             }
             if (fitStatus) { 
@@ -343,33 +339,7 @@ public class TrackSeeder {
                 if(bestSeed!= null) seedlist.add(bestSeed);
             }
         }
-//        List<Seed> rmSeeds = new ArrayList<>();
-//        for (Seed bseed : seedlist) { 
-//            int countnSVT=0;
-//            int countnBMTZ=0;
-//            int countnBMTC=0;
-//            bseed.setStatus(-2);
-//            for(Cross c : bseed.getCrosses()) {
-//                if(c.getDetector() == DetectorType.BST)
-//                    countnSVT++;
-//                if(c.getType()==BMTType.C)
-//                    countnBMTC++;
-//                if(c.getType()==BMTType.Z)
-//                    countnBMTZ++;
-//            }
-//            if(countnSVT==3) 
-//                bseed.setStatus(2);
-//            if(countnSVT==2 && countnBMTZ>0 && countnBMTC>1) 
-//                bseed.setStatus(2);
-//            if(countnSVT==1 && countnBMTZ>1 && countnBMTC>1) 
-//                bseed.setStatus(2);
-//        }
-//        for (Seed bseed : seedlist) {
-//            if(bseed.getStatus()==-2)
-//                System.out.println(bseed.toString());
-//            //    rmSeeds.add(bseed);
-//        }
-//        seedlist.removeAll(rmSeeds);
+
         
         if(!seedlist.isEmpty()) {
             // remove overlapping seeds
@@ -517,7 +487,69 @@ public class TrackSeeder {
     }
 
     private boolean inSamePhiRange(Seed seed, Cross c) {
-        return true;
+        boolean value = false;
+        double angle =Math.toDegrees(seed.getCrosses().get(seed.getCrosses().size()-1).getPoint().toVector3D().angle(c.getPoint().toVector3D()));
+        if(Math.abs(angle)<25) 
+            value = true;
+        return value;
     }
 
+    private void printInfo(ArrayList<Cross> value) {
+        System.out.println("SVTSTANDALONE SEED:"); 
+        for(Cross c : value) {
+            System.out.println(c.printInfo());
+        }
+        
+    }
+
+    private void addToSeedMap(ArrayList<Cross> hitlist) {
+        ArrayList<Cross> hits = new ArrayList<>();
+        double seedIdx=0;
+        int s = hitlist.size();
+        int index = (int) Math.pow(2,s);
+        for(Cross c : hitlist) {
+            hits.add(c);
+            seedIdx +=c.getId()*Math.pow(10, index);
+            index-=4;
+        }
+        
+        seedMap.put(seedIdx, hits);    
+    }
+    private boolean checkZ(ArrayList<Cross> hits) {
+        boolean value = true;
+        if(hits.get(0).getDetector()==DetectorType.BST && hits.get(1).getDetector()==DetectorType.BST && hits.get(2).getDetector()==DetectorType.BST ) {
+             value = false;
+        } else {
+            return value;
+        }
+        Cross c1 = hits.get(0);
+        Cross c2 = hits.get(1);
+        Cross c3 = hits.get(2);
+        double sl = (c1.getPoint().z() - c3.getPoint().z())/(c1.getPoint().toVector3D().rho() - c3.getPoint().toVector3D().rho());
+        double in = -sl*c1.getPoint().toVector3D().rho()+c1.getPoint().z();
+        
+        double Rm = c2.getPoint().toVector3D().rho();
+        double Zm = c2.getPoint().z();
+        double Zc = sl*Rm +in;
+        double Zerr = c2.getPointErr().z(); 
+        
+        if(Math.abs(Zc-Zm)<Zerr*20) {
+            value = true;  
+        }
+        return value;
+    }
+
+    /**
+     * @return the seedScan
+     */
+    public List<Seed> getSeedScan() {
+        return seedScan;
+    }
+
+    /**
+     * @param seedScan the seedScan to set
+     */
+    public void setSeedScan(List<Seed> seedScan) {
+        this.seedScan = seedScan;
+    }
 }
