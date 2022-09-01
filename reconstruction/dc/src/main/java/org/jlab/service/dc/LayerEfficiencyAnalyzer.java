@@ -227,13 +227,9 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         List<Segment> segments = new ArrayList<>();
         
         //instantiate bank writer
-        HitReader hitRead = new HitReader(this.getBanks());
+        HitReader hitRead = new HitReader(this.getBanks(), super.getConstantsManager(), Constants.getInstance().dcDetector);
 
-            hitRead.read_HBHits(event, 
-            super.getConstantsManager().getConstants(run, Constants.DOCARES),
-            super.getConstantsManager().getConstants(run, Constants.TIME2DIST),
-            super.getConstantsManager().getConstants(run, Constants.T0CORRECTION),
-            Constants.getInstance().dcDetector, tde);
+        hitRead.read_HBHits(event, tde);
         //hitRead.read_TBHits(event, 
         //    super.getConstantsManager().getConstants(newRun, Constants.DOCARES),
         //    super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST), tde, Constants.getT0(), Constants.getT0Err());

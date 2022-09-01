@@ -100,12 +100,8 @@ public class DCTBEngine extends DCEngine {
         //instantiate bank writer
         RecoBankWriter rbc = new RecoBankWriter(this.getBanks());
 
-        HitReader hitRead = new HitReader(this.getBanks()); //vz; modified reader to read regular or ai hits
-        hitRead.read_HBHits(event, 
-            this.getConstantsManager().getConstants(run, Constants.DOCARES),
-            this.getConstantsManager().getConstants(run, Constants.TIME2DIST),
-            this.getConstantsManager().getConstants(run, Constants.T0CORRECTION),
-            Constants.getInstance().dcDetector, tde);
+        HitReader hitRead = new HitReader(this.getBanks(), super.getConstantsManager(), Constants.getInstance().dcDetector); //vz; modified reader to read regular or ai hits
+        hitRead.read_HBHits(event, tde);
         //I) get the hits
         List<FittedHit> hits = hitRead.get_HBHits();
         //II) process the hits
