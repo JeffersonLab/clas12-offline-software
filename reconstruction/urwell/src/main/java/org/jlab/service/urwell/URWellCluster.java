@@ -16,7 +16,7 @@ public class URWellCluster {
    
     
     private DetectorDescriptor  desc          = new DetectorDescriptor(DetectorType.URWELL);
-    private List<URWellStrip>   clusterStrips = new ArrayList<URWellStrip>();
+    private List<URWellStrip>   clusterStrips = new ArrayList<>();
     private Line3D              clusterLine   = new Line3D();
     public int                  indexMaxStrip = -1;
     private byte                clusterStatus    = 1;
@@ -170,7 +170,7 @@ public class URWellCluster {
     	
         List<URWellCluster>  clusterList = new ArrayList<>();
         
-        if(stripList.size()>0){
+        if(!stripList.isEmpty()){
             for(int loop = 0; loop < stripList.size(); loop++){ //Loop over all strips 
                 boolean stripAdded = false;                
                 for(URWellCluster  cluster : clusterList) {

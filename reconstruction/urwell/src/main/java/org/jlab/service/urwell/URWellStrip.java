@@ -6,6 +6,7 @@ import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.geom.prim.Line3D;
+import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 
 /**
@@ -133,23 +134,23 @@ public class URWellStrip implements Comparable {
     
     public static List<URWellStrip> getStrips(DataEvent event, ConstantsManager ccdb) {
         List<URWellStrip> hits = new ArrayList<>();
-//        if(event.hasBank("ECAL::adc")==true){
-//            DataBank bank = event.getBank("ECAL::adc");
-//            for(int i = 0; i < bank.rows(); i++){
-//                int  is = bank.getByte("sector", i);
-//                int  il = bank.getByte("layer", i); 
-//                int  ip = bank.getShort("component", i);
-//                int adc = bank.getInt("ADC", i);
-//                float t = bank.getFloat("time", i) + (float) tmf.getDoubleValue("offset",is,il,ip) // FADC-TDC offset (sector, layer, PMT)
-//                                                   + (float)  fo.getDoubleValue("offset",is,il,0); // FADC-TDC offset (sector, layer) 
-//                
+        if(event.hasBank("URWELL::adc")==true){
+            DataBank bank = event.getBank("URWELL::adc");
+            for(int i = 0; i < bank.rows(); i++){
+                int  sector = bank.getByte("sector", i);
+                int   layer = bank.getByte("layer", i); 
+                int    comp = bank.getShort("component", i);
+                int     adc = bank.getInt("ADC", i);
+                double time = bank.getFloat("time", i);
+                        
 //		        if (status.getIntValue("status",is,il,ip)==3) continue;    
 //		    
-//                ECStrip  strip = new ECStrip(is, il, ip); 
-//                
-//                strip.setADC(adc);
+                URWellStrip  strip = new URWellStrip(sector,  layer,   comp); 
+                
+                strip.setADC(adc);
 //                strip.setTriggerPhase(triggerPhase);
-//                strip.setID(i+1);
+                strip.setId(i+1);
+                strip.setTDC((int) time);
 //                
 //                double sca = (is==5)?AtoE5[ind[il-1]]:AtoE[ind[il-1]]; 
 //                if (variation=="clas6") sca = 1.0;  
@@ -166,8 +167,8 @@ public class URWellStrip implements Comparable {
 //                    }
 //                    strip.setTDC(tdc); 
 //                }              
-//            }
-//        }         
+            }
+        }         
         return hits;
     }
     
