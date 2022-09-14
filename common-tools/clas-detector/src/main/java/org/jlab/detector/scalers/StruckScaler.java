@@ -3,6 +3,16 @@ package org.jlab.detector.scalers;
 import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.utils.groups.IndexedTable;
 
+/**
+ * The Struck is a multi-channel scaler that can buffer many readings over very
+ * short dwell times, advanced by and latched to input control signals.
+ * 
+ * The CLAS12 DAQ uses this device to readout helicity-latched counts for the
+ * purpose of beam-spin asymmetry measurements, and that's what this class is
+ * geared towards.
+ * 
+ * @author baltzell
+ */
 public class StruckScaler extends DaqScaler {
 
     private static final boolean GATEINVERTED=false;

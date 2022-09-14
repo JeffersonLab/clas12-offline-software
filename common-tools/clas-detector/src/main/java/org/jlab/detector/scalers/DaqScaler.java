@@ -1,6 +1,7 @@
 package org.jlab.detector.scalers;
 
 import org.jlab.utils.groups.IndexedTable;
+import org.jlab.detector.helicity.HelicityPeriod;
 
 public class DaqScaler {
 
@@ -43,12 +44,31 @@ public class DaqScaler {
     public double getBeamChargeSLM() { return beamChargeSLM; }
     public double getBeamChargeGatedSLM() { return beamChargeGatedSLM; }
 
+    public enum Gating {
+        GATED,
+        UNGATED
+    }
+
     /**
-     * Manually choose dwell and live-dwell times, e.g. if clock rolls over. 
-     * @param fcupTable
-     * @param slmTable
-     * @param seconds
-     * @param liveSeconds 
+     * Determine whether the clock looks more like tsettle or tstable periods.
+     * @param clock
+     * @param helTable /runcontrol/helicity CCDB table
+     * @return the type of helicity period 
+     */
+    public HelicityPeriod.Period getHelicityPeriod(long clock, IndexedTable helTable) {
+        final double clockSeconds = (double)clock / this.clockFreq;
+        // these guys are in microseconds in CCDB, convert them to seconds:
+        final double tsettleSeconds = 1E6 * helTable.getDoubleValue("tsettle",0,0,0);
+        final double tstableSeconds = 1E6 * helTable.getDoubleValue("tstable",0,0,0);
+        return HelicityPeriod.getHelicityPeriod(clockSeconds, tstableSeconds, tsettleSeconds);
+    }
+
+    /**
+     * Manually choose dwell and live-dwell times, e.g. if clock rolls over.
+     * @param fcupTable /runcontrol/fcup CCDB table
+     * @param slmTable  /runcontrol/slm CCDB table
+     * @param seconds dwell time
+     * @param liveSeconds live dwell time
      */
     protected void calibrate(IndexedTable fcupTable,IndexedTable slmTable,double seconds,double liveSeconds) {
 
@@ -81,8 +101,8 @@ public class DaqScaler {
    
     /**
      * Use the scaler's own clock to get dwell and live-dwell times
-     * @param fcupTable
-     * @param slmTable 
+     * @param fcupTable /runcontrol/fcup CCDB table
+     * @param slmTable  /runcontrol/slm CCDB table
      */
     protected final void calibrate(IndexedTable fcupTable,IndexedTable slmTable) {
         this.calibrate(fcupTable,slmTable,this.getClockSeconds(),this.getGatedClockSeconds());
