@@ -27,6 +27,8 @@ public class Dsc2Scaler extends DaqScaler{
     private static final int CHAN_SLM=49;
     private static final int CHAN_CLOCK=50;
 
+    public Dsc2Scaler() {}
+
     /**
      * @param bank RAW::scaler bank
      * @param fcupTable /runcontrol/fcup CCDB table
