@@ -612,6 +612,8 @@ public class CLASDecoder4 {
                 getConstants(this.detectorDecoder.getRunNumber(),"/runcontrol/fcup");
         IndexedTable slmTable = this.detectorDecoder.scalerManager.
                 getConstants(this.detectorDecoder.getRunNumber(),"/runcontrol/slm");
+        IndexedTable helTable = this.detectorDecoder.scalerManager.
+                getConstants(this.detectorDecoder.getRunNumber(),"/runcontrol/helicity");
 
         // get unix event time (in seconds), and convert to Java's date (via milliseconds):
         Date uet=new Date(configBank.getInt("unixtime",0)*1000L);
@@ -626,7 +628,7 @@ public class CLASDecoder4 {
             // abort if no RCDB access (e.g. offsite)
             return null;
         }
-        return DaqScalers.createBanks(schemaFactory,rawScalerBank,fcupTable,slmTable,rst,uet);
+        return DaqScalers.createBanks(schemaFactory,rawScalerBank,fcupTable,slmTable,helTable,rst,uet);
     }
     
     public Bank createBonusBank(){

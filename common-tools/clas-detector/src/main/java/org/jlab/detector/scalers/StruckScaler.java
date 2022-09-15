@@ -2,6 +2,7 @@ package org.jlab.detector.scalers;
     
 import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.utils.groups.IndexedTable;
+import org.jlab.detector.helicity.HelicityPeriod;
 
 /**
  * The Struck is a multi-channel scaler that can buffer many readings over very
@@ -28,39 +29,104 @@ public class StruckScaler extends DaqScaler {
     private static final int SLOT_GATED=0;
     private static final int SLOT_UNGATED=1;
 
-    // these are the non-settle periods:
-    private static final int CHAN_FCUP=0;
-    private static final int CHAN_SLM=1;
-    private static final int CHAN_CLOCK=2;
+    // these channels correspond to the settle/tsettle periods, but figuring
+    // out which is which requires the checking the clock:
+    private static final int CHAN_FCUP_A=0;
+    private static final int CHAN_SLM_A=1;
+    private static final int CHAN_CLOCK_A=2;
+    private static final int CHAN_FCUP_B=32;
+    private static final int CHAN_SLM_B=33;
+    private static final int CHAN_CLOCK_B=34;
 
-    // these are the settle periods (currently ignored):
-    private static final int CHAN_FCUP_SETTLE=32;
-    private static final int CHAN_SLM_SETTLE=33;
-    private static final int CHAN_CLOCK_SETTLE=34;
+    public enum StruckPeriod {
+        A,
+        B,
+        UDF;
+        public static StruckPeriod create(int struckChannel) {
+            switch (struckChannel) {
+                case CHAN_FCUP_A:
+                    return A;
+                case CHAN_SLM_A:
+                    return A;
+                case CHAN_CLOCK_A:
+                    return A;
+                case CHAN_FCUP_B:
+                    return B;
+                case CHAN_SLM_B:
+                    return B;
+                case CHAN_CLOCK_B:
+                    return B;
+                default:
+                    return UDF;
+            }
+        }
+    }
+
+    //public class StruckHelicityPeriod {
+    //    HelicityPeriod helPeriod;
+    //    StruckPeriod struckPeriod;
+    //    public StruckHelicityPeriod(HelicityPeriod hp, StruckPeriod sp) {
+    //        this.helPeriod = hp;
+    //        this.struckPeriod = sp;
+    //    }
+    //}
 
     public StruckScaler() {}
 
-    public StruckScaler(Bank bank,IndexedTable fcupTable, IndexedTable slmTable) {
+    /**
+     * Look for an ungated clock readout whose value corresponds to the helicity
+     * tsettle period, and return it's Struck period.
+     * @param bank
+     * @return 
+     */
+    public final StruckPeriod getStablePeriod(Bank bank, IndexedTable helTable) {
+        for (int k=0; k<bank.getRows(); k++){
+            if (bank.getInt("crate",k)!=CRATE) continue;
+            if (bank.getInt("slot",k)!=SLOT_UNGATED) continue;
+            final int chan = bank.getInt("channel",k);
+            if (chan==CHAN_CLOCK_A || chan==CHAN_CLOCK_B) {
+                final long clck = bank.getLong("value",k);
+                if (this.getHelicityPeriod(clck,helTable) == HelicityPeriod.TSTABLE) {
+                    return StruckPeriod.create(chan);
+                }
+            }
+        }
+        return StruckPeriod.UDF;
+    }
+
+    public StruckScaler(Bank bank,IndexedTable fcupTable, IndexedTable slmTable, IndexedTable helTable) {
 
         // the STRUCK's clock is 1 MHz
         this.clockFreq = 1e6;
 
-        // this will get the last entries (most recent) in the bank
+        // Here we're going to assume the stable period is the same Struck period
+        // throughout a single readout.  Almost always correct ...
+        // FIXME
+        StruckPeriod stablePeriod = this.getStablePeriod(bank, helTable);
+
+        // Couldn't find an ungated clock in the stable period, so there's
+        // nothing useful we can do:
+        if (stablePeriod == StruckPeriod.UDF) return;
+        
         for (int k=0; k<bank.getRows(); k++){
-            if (bank.getInt("crate",k)!=CRATE) {
-                continue;
-            }
+
+            if (bank.getInt("crate",k)!=CRATE) continue;
+
+            // If the period doesn't correspond to tstable, ignore it:
+            StruckPeriod thisPeriod = StruckPeriod.create(bank.getInt("channel",k));
+            if (thisPeriod != stablePeriod) continue;
+
             if (bank.getInt("slot",k)==SLOT_GATED) {
                 switch (bank.getInt("channel",k)) {
-                    case CHAN_FCUP:
+                    case CHAN_FCUP_A:
                         this.helicity = bank.getByte("helicity",k) > 0 ? POSITIVE : NEGATIVE;
                         this.quartet = bank.getByte("quartet",k)   > 0 ? POSITIVE : NEGATIVE;
                         this.gatedFcup = bank.getLong("value",k);
                         break;
-                    case CHAN_SLM:
+                    case CHAN_SLM_A:
                         this.gatedSlm = bank.getLong("value",k);
                         break;
-                    case CHAN_CLOCK:
+                    case CHAN_CLOCK_A:
                         this.gatedClock = bank.getLong("value",k);
                         break;
                     default:
@@ -69,13 +135,13 @@ public class StruckScaler extends DaqScaler {
             }
             else if (bank.getInt("slot",k)==SLOT_UNGATED) {
                 switch (bank.getInt("channel",k)) {
-                    case CHAN_FCUP:
+                    case CHAN_FCUP_B:
                         this.fcup = bank.getLong("value",k);
                         break;
-                    case CHAN_SLM:
+                    case CHAN_SLM_B:
                         this.slm = bank.getLong("value",k);
                         break;
-                    case CHAN_CLOCK:
+                    case CHAN_CLOCK_B:
                         this.clock = bank.getLong("value",k);
                         break;
                     default:

@@ -44,23 +44,18 @@ public class DaqScaler {
     public double getBeamChargeSLM() { return beamChargeSLM; }
     public double getBeamChargeGatedSLM() { return beamChargeGatedSLM; }
 
-    public enum Gating {
-        GATED,
-        UNGATED
-    }
-
     /**
      * Determine whether the clock looks more like tsettle or tstable periods.
      * @param clock
      * @param helTable /runcontrol/helicity CCDB table
      * @return the type of helicity period 
      */
-    public HelicityPeriod.Period getHelicityPeriod(long clock, IndexedTable helTable) {
+    public HelicityPeriod getHelicityPeriod(long clock, IndexedTable helTable) {
         final double clockSeconds = (double)clock / this.clockFreq;
         // these guys are in microseconds in CCDB, convert them to seconds:
         final double tsettleSeconds = 1E6 * helTable.getDoubleValue("tsettle",0,0,0);
         final double tstableSeconds = 1E6 * helTable.getDoubleValue("tstable",0,0,0);
-        return HelicityPeriod.getHelicityPeriod(clockSeconds, tstableSeconds, tsettleSeconds);
+        return HelicityPeriod.create(clockSeconds, tstableSeconds, tsettleSeconds);
     }
 
     /**

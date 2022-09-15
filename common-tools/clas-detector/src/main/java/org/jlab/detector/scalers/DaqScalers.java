@@ -93,8 +93,8 @@ public class DaqScalers {
      * @param seconds duration between run start and current event
      * @return 
      */
-    public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,double seconds) {
-        StruckScaler struck = new StruckScaler(rawScalerBank,fcupTable,slmTable);
+    public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable,double seconds) {
+        StruckScaler struck = new StruckScaler(rawScalerBank,fcupTable,slmTable,helTable);
         Dsc2Scaler dsc2 = new Dsc2Scaler(rawScalerBank,fcupTable,slmTable,seconds);
         if (dsc2.getClock()>0 || struck.getClock()>0) {
             DaqScalers ds=new DaqScalers();
@@ -113,8 +113,8 @@ public class DaqScalers {
      * @param uet unix event time
      * @return 
      */
-    public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,Date rst, Date uet) {
-        return DaqScalers.create(rawScalerBank,fcupTable,slmTable,DaqScalers.getSeconds(rst, uet));
+    public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable,Date rst, Date uet) {
+        return DaqScalers.create(rawScalerBank,fcupTable,slmTable,helTable,DaqScalers.getSeconds(rst, uet));
     }
     
     /**
@@ -125,9 +125,9 @@ public class DaqScalers {
      * @param slmTable /runcontrol/slm from CCDB
      * @return  
      */
-    public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable) {
+    public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable) {
         Dsc2Scaler dsc2 = new Dsc2Scaler(rawScalerBank,fcupTable,slmTable);
-        return DaqScalers.create(rawScalerBank,fcupTable,slmTable,dsc2.getGatedClockSeconds());
+        return DaqScalers.create(rawScalerBank,fcupTable,slmTable,helTable,dsc2.getGatedClockSeconds());
     }
 
     /**
@@ -164,8 +164,8 @@ public class DaqScalers {
      * @param slmTable /runcontrol/slm CCDB table
      * @return [RUN::scaler,HEL::scaler] banks
      */
-    public static Bank[] createBanks(SchemaFactory schema,Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable) {
-        DaqScalers ds = DaqScalers.create(rawScalerBank,fcupTable,slmTable);
+    public static Bank[] createBanks(SchemaFactory schema,Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable) {
+        DaqScalers ds = DaqScalers.create(rawScalerBank,fcupTable,slmTable,helTable);
         if (ds==null) return null;
         Bank ret[] = {ds.createRunBank(schema),ds.createHelicityBank(schema)};
         return ret;
@@ -179,15 +179,15 @@ public class DaqScalers {
      * @param seconds duration between run start and current event
      * @return [RUN::scaler,HEL::scaler] banks
      */
-    public static Bank[] createBanks(SchemaFactory schema,Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,double seconds) {
-        DaqScalers ds = DaqScalers.create(rawScalerBank,fcupTable,slmTable,seconds);
+    public static Bank[] createBanks(SchemaFactory schema,Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable,double seconds) {
+        DaqScalers ds = DaqScalers.create(rawScalerBank,fcupTable,slmTable,helTable,seconds);
         if (ds==null) return null;
         Bank ret[] = {ds.createRunBank(schema),ds.createHelicityBank(schema)};
         return ret;
     }
 
-    public static Bank[] createBanks(SchemaFactory schema,Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,Date rst,Date uet) {
-        return DaqScalers.createBanks(schema,rawScalerBank,fcupTable,slmTable,DaqScalers.getSeconds(rst,uet));
+    public static Bank[] createBanks(SchemaFactory schema,Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable,Date rst,Date uet) {
+        return DaqScalers.createBanks(schema,rawScalerBank,fcupTable,slmTable,helTable,DaqScalers.getSeconds(rst,uet));
     }
 
 }
