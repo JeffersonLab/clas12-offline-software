@@ -26,6 +26,7 @@ public class RebuildScalers {
 
     static final String CCDB_FCUP_TABLE="/runcontrol/fcup";
     static final String CCDB_SLM_TABLE="/runcontrol/slm";
+    static final String CCDB_HEL_TABLE="/runcontrol/slm";
     
     public static void main(String[] args) {
 
@@ -55,7 +56,7 @@ public class RebuildScalers {
         Bank runConfigBank = new Bank(writer.getSchemaFactory().getSchema("RUN::config"));
             
         ConstantsManager conman = new ConstantsManager();
-        conman.init(Arrays.asList(new String[]{CCDB_FCUP_TABLE,CCDB_SLM_TABLE}));
+        conman.init(Arrays.asList(new String[]{CCDB_FCUP_TABLE,CCDB_SLM_TABLE,CCDB_HEL_TABLE}));
         
         for (String filename : inputList) {
 
@@ -65,6 +66,7 @@ public class RebuildScalers {
             RCDBConstants rcdb = null;
             IndexedTable ccdb_fcup = null;
             IndexedTable ccdb_slm = null;
+            IndexedTable ccdb_hel = null;
 
             while (reader.hasNext()) {
 
@@ -83,6 +85,7 @@ public class RebuildScalers {
                 if (runConfigBank.getInt("run",0) >= 100) {
                     ccdb_fcup = conman.getConstants(runConfigBank.getInt("run",0),CCDB_FCUP_TABLE);
                     ccdb_slm = conman.getConstants(runConfigBank.getInt("run",0),CCDB_SLM_TABLE);
+                    ccdb_hel = conman.getConstants(runConfigBank.getInt("run",0),CCDB_HEL_TABLE);
                     rcdb = conman.getRcdbConstants(runConfigBank.getInt("run",0));
                 }
 
@@ -94,7 +97,7 @@ public class RebuildScalers {
                     Time rst = rcdb.getTime("run_start_time");
                     Date uet = new Date(runConfigBank.getInt("unixtime",0)*1000L);
        
-                    DaqScalers ds = DaqScalers.create(rawScalerBank, ccdb_fcup, ccdb_slm, rst, uet);
+                    DaqScalers ds = DaqScalers.create(rawScalerBank, ccdb_fcup, ccdb_slm, ccdb_hel, rst, uet);
                     runScalerBank = ds.createRunBank(writer.getSchemaFactory());
                     helScalerBank = ds.createHelicityBank(writer.getSchemaFactory());
                     
