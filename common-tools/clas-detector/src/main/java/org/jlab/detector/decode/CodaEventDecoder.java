@@ -1266,12 +1266,26 @@ public class CodaEventDecoder {
                     int num = node.getNum();
                     int[] intData =  ByteDataTransformer.toIntArray(node.getStructureBuffer(true));
 //                    if(intData.length!=0) System.out.println(" TRIGGER BANK LENGTH = " + intData.length);
+                    boolean intervalMeaningFlipped = false;
+                    for(int loop = 2; loop < intData.length; loop++){
+                        int id  = DataUtils.getInteger(intData[loop], 24, 28);
+                        if( id == 2){  // Clock
+                            int value = DataUtils.getInteger(intData[loop], 0, 23);
+                            int interval = DataUtils.getInteger(intData[loop], 29, 29);
+                            if( (interval == 0 && value < 2000) || (interval == 1 && value > 2000) ){
+                                intervalMeaningFlipped = true;
+                            }
+                        }
+                    }
                     for(int loop = 2; loop < intData.length; loop++){
                         int  dataEntry = intData[loop];
                         if(node.getTag()==57637) {
                             int helicity = DataUtils.getInteger(dataEntry, 31, 31);
                             int quartet  = DataUtils.getInteger(dataEntry, 30, 30);
                             int interval = DataUtils.getInteger(dataEntry, 29, 29);
+                            if( intervalMeaningFlipped ){ // 1 -> 0 and 0 -> 1
+                                interval = 1 - interval;
+                            }
                             int id       = DataUtils.getInteger(dataEntry, 24, 28);
                             long value   = DataUtils.getLongFromInt(DataUtils.getInteger(dataEntry,  0, 23));
                             if(id < 3) {
@@ -1356,6 +1370,11 @@ public class CodaEventDecoder {
                         int  slot      = DataUtils.getInteger(dataEntry, 27, 31 );
                         int  chan      = DataUtils.getInteger(dataEntry, 19, 25);
                         int  value     = DataUtils.getInteger(dataEntry,  0, 18);
+                        System.out.println("Crate: " + String.format("%2d", crate) +
+                                " raw: " + String.format("0x%08X", dataEntry)+
+                                " Slot: " + String.format("%3d", slot)+
+                                " Chan: " + String.format("%3d", chan)+
+                                " Value: " + String.format("%12d", value));
                         DetectorDataDgtz   entry = new DetectorDataDgtz(crate,slot,chan);
                         entry.addTDC(new TDCData(value));
                         tdcEntries.add(entry);
