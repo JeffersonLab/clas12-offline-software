@@ -43,12 +43,6 @@ public class DaqScaler {
     public double getBeamChargeSLM() { return beamChargeSLM; }
     public double getBeamChargeGatedSLM() { return beamChargeGatedSLM; }
 
-    public enum Gating {
-        GATED,
-        UNGATED,
-        UDF;
-    }
-
     /**
      * Manually choose dwell and live-dwell times, e.g. if clock rolls over.
      * @param fcupTable /runcontrol/fcup CCDB table

@@ -2,6 +2,7 @@ package org.jlab.detector.scalers;
     
 import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.utils.groups.IndexedTable;
+import org.jlab.detector.helicity.HelicityBit;
 import org.jlab.detector.helicity.HelicityPeriod;
 
 /**
@@ -18,11 +19,8 @@ public class StruckScaler extends DaqScaler {
 
     private static final boolean GATEINVERTED=false;
 
-    private final byte UDF=0;
-    private final byte POSITIVE=1;
-    private final byte NEGATIVE=-1;
-    private byte helicity=UDF;
-    private byte quartet=UDF;
+    private byte helicity = HelicityBit.UDF.value();
+    private byte quartet = HelicityBit.UDF.value();
     public byte getHelicity() { return this.helicity; }
     public byte getQuartet() { return this.quartet; }
 
@@ -41,12 +39,12 @@ public class StruckScaler extends DaqScaler {
     /**
      * The input signal mapping.
      */
-    public enum Channel {
+    public enum Input {
         FCUP,
         SLM,
         CLOCK,
         UDF;
-        public static boolean equals(Channel s, int c) {
+        public static boolean equals(Input s, int c) {
             switch (s) {
                 case FCUP:
                     return c==CHAN_FCUP_A || c==CHAN_FCUP_B;
@@ -148,44 +146,30 @@ public class StruckScaler extends DaqScaler {
             // If it doesn't correspond to tstable, ignore it:
             if (thisPeriod != stablePeriod) continue;
 
-            // Determine the gating for this bank row, and, if undefined,
-            // just ignore it:
-            Gating gating = Gating.UDF;
-            switch (bank.getInt("slot",k)) {
-                case SLOT_GATED:
-                    gating = Gating.GATED;
-                    break;
-                case SLOT_UNGATED:
-                    gating = Gating.UNGATED;
-                    break;
-                default:
-                    continue;
-            }
-
             // Finally, do somthing useful:
             final int chan = bank.getInt("channel",k);
-            switch (gating) {
-                case GATED:
-                    if (Channel.equals(Channel.FCUP, chan)) {
-                        this.helicity = bank.getByte("helicity",k) > 0 ? POSITIVE : NEGATIVE;
-                        this.quartet = bank.getByte("quartet",k)   > 0 ? POSITIVE : NEGATIVE;
+            switch (bank.getInt("slot",k)) {
+                case SLOT_GATED:
+                    if (Input.equals(Input.FCUP, chan)) {
+                        this.helicity = HelicityBit.create(bank.getByte("helicity",k)).value();
+                        this.quartet = HelicityBit.create(bank.getByte("quartet",k)).value();
                         this.gatedFcup = bank.getLong("value",k);
                     }
-                    else if (Channel.equals(Channel.SLM, chan)) {
+                    else if (Input.equals(Input.SLM, chan)) {
                         this.gatedSlm = bank.getLong("value",k);
                     }
-                    else if (Channel.equals(Channel.CLOCK, chan)) {
+                    else if (Input.equals(Input.CLOCK, chan)) {
                         this.gatedClock = bank.getLong("value",k);
                     }
                     break;
-                case UNGATED:
-                    if (Channel.equals(Channel.FCUP, chan)) {
+                case SLOT_UNGATED:
+                    if (Input.equals(Input.FCUP, chan)) {
                         this.fcup = bank.getLong("value",k);
                     }
-                    else if (Channel.equals(Channel.SLM, chan)) {
+                    else if (Input.equals(Input.SLM, chan)) {
                         this.slm = bank.getLong("value",k);
                     }
-                    else if (Channel.equals(Channel.CLOCK, chan)) {
+                    else if (Input.equals(Input.CLOCK, chan)) {
                         this.clock = bank.getLong("value",k);
                     }
                     break;
