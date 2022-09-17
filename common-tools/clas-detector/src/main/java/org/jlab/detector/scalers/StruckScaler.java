@@ -19,16 +19,17 @@ public class StruckScaler extends DaqScaler {
 
     private static final boolean GATEINVERTED=false;
 
-    private byte helicity = HelicityBit.UDF.value();
-    private byte quartet = HelicityBit.UDF.value();
-    public byte getHelicity() { return this.helicity; }
-    public byte getQuartet() { return this.quartet; }
+    private HelicityBit helicity = HelicityBit.UDF;
+    private HelicityBit quartet = HelicityBit.UDF;
+    public HelicityBit getHelicity() { return this.helicity; }
+    public HelicityBit getQuartet() { return this.quartet; }
 
+    // These slots corrspond to gated/ungated scalers in RAW::scaler.
     private static final int SLOT_GATED=0;
     private static final int SLOT_UNGATED=1;
 
-    // these channels correspond to the settle/tsettle periods, but figuring
-    // out which is which requires the checking the clock:
+    // These channels correspond to the settle/tsettle periods in RAW::scaler,
+    // but figuring out which is which requires checking the clock:
     private static final int CHAN_FCUP_A=0;
     private static final int CHAN_SLM_A=1;
     private static final int CHAN_CLOCK_A=2;
@@ -37,29 +38,39 @@ public class StruckScaler extends DaqScaler {
     private static final int CHAN_CLOCK_B=34;
 
     /**
-     * The input signal mapping.
+     * Convenience for mapping channel number to input signal.
      */
     public enum Input {
         FCUP,
         SLM,
         CLOCK,
         UDF;
-        public static boolean equals(Input s, int c) {
-            switch (s) {
-                case FCUP:
-                    return c==CHAN_FCUP_A || c==CHAN_FCUP_B;
-                case SLM:
-                    return c==CHAN_SLM_A || c==CHAN_SLM_B;
-                case CLOCK:
-                    return c==CHAN_CLOCK_A || c==CHAN_CLOCK_B;
+        public static Input create(int struckChannel) {
+            switch (struckChannel) {
+                case CHAN_FCUP_A:
+                    return FCUP;
+                case CHAN_SLM_A:
+                    return SLM;
+                case CHAN_CLOCK_A:
+                    return CLOCK;
+                case CHAN_FCUP_B:
+                    return FCUP;
+                case CHAN_SLM_B:
+                    return SLM;
+                case CHAN_CLOCK_B:
+                    return CLOCK;
                 default:
-                    return false;
-            } 
+                    return UDF;
+            }
+        }
+        public static boolean equals(Input input, int struckChannel) {
+            return create(struckChannel) == input;
         }
     }
    
     /**
-     * The period mapping, which corresponds to helicity period.
+     * Convenience for mapping channel number to scaler period.
+     * Ultimately this period will map to helicity tsettle/tstable.
      */
     public enum Period {
         A,
@@ -83,11 +94,14 @@ public class StruckScaler extends DaqScaler {
                     return UDF;
             }
         }
+        public static boolean equals(Period period, int struckChannel) {
+            return create(struckChannel) == period;
+        }
     }
 
     /**
-     * Determine whether the clock looks more like tsettle or tstable periods.
-     * @param clock
+     * Determine whether a clock readout looks more like tsettle or tstable periods.
+     * @param clock the value of this clock readout
      * @param helTable /runcontrol/helicity CCDB table
      * @return the type of helicity period 
      */
@@ -102,9 +116,9 @@ public class StruckScaler extends DaqScaler {
     /**
      * Look for an ungated clock readout whose value corresponds to the helicity
      * tsettle period, and return it's Struck period.
-     * @param bank
+     * @param bank a RAW::scaler bank
      * @param helTable /runcontrol/helicity CCDB table
-     * @return 
+     * @return the type of Struck period 
      */
     public final Period getStablePeriod(Bank bank, IndexedTable helTable) {
         for (int k=0; k<bank.getRows(); k++){
@@ -121,6 +135,13 @@ public class StruckScaler extends DaqScaler {
         return Period.UDF;
     }
 
+    /**
+     * 
+     * @param bank a RAW::scaler bank
+     * @param fcupTable /runcontrol/fcup CCDB table
+     * @param slmTable /runcontrol/slm CCDB table
+     * @param helTable /runcontrol/helicity CCDB table
+     */
     public StruckScaler(Bank bank,IndexedTable fcupTable, IndexedTable slmTable, IndexedTable helTable) {
 
         // the STRUCK's clock is 1 MHz
@@ -146,13 +167,13 @@ public class StruckScaler extends DaqScaler {
             // If it doesn't correspond to tstable, ignore it:
             if (thisPeriod != stablePeriod) continue;
 
-            // Finally, do somthing useful:
+            // Interpret the scaler values:
             final int chan = bank.getInt("channel",k);
             switch (bank.getInt("slot",k)) {
                 case SLOT_GATED:
                     if (Input.equals(Input.FCUP, chan)) {
-                        this.helicity = HelicityBit.create(bank.getByte("helicity",k)).value();
-                        this.quartet = HelicityBit.create(bank.getByte("quartet",k)).value();
+                        this.helicity = HelicityBit.create(bank.getByte("helicity",k));
+                        this.quartet = HelicityBit.create(bank.getByte("quartet",k));
                         this.gatedFcup = bank.getLong("value",k);
                     }
                     else if (Input.equals(Input.SLM, chan)) {
