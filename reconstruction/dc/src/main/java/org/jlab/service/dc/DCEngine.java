@@ -107,6 +107,7 @@ public class DCEngine extends ReconstructionEngine {
 
         // Load tables
         Map<String,Integer> dcTables = new HashMap<>();
+        dcTables.put(Constants.TT,3);
         dcTables.put(Constants.DOCARES,3);
         dcTables.put(Constants.TIME2DIST,3);
         dcTables.put(Constants.PRESSURE, 3);
@@ -178,22 +179,4 @@ public class DCEngine extends ReconstructionEngine {
         int run = bank.getInt("run", 0);
         return run;
     }
-
-    public double getTriggerPhase(DataEvent event) {
-        DataBank  bank = event.getBank("RUN::config");
-        int        run = bank.getInt("run", 0);
-        long timeStamp = bank.getLong("timestamp", 0);
-        
-        double triggerPhase = 0;
-        if (run>0 && timeStamp>=0) {
-           IndexedTable tabJ = super.getConstantsManager().getConstants(run, Constants.TIMEJITTER);
-           double period = tabJ.getDoubleValue("period", 0, 0, 0);
-           int    phase  = tabJ.getIntValue("phase", 0, 0, 0);
-           int    cycles = tabJ.getIntValue("cycles", 0, 0, 0);
-
-           if (cycles > 0) triggerPhase = period * ((timeStamp + phase) % cycles);
-        }
-        return triggerPhase;
-    }
-
 }

@@ -223,7 +223,8 @@ public class EngineProcessor {
                 if (engine.getValue().dropOutputBanks) {
                     engine.getValue().dropBanks(event);
                 }
-                engine.getValue().processDataEvent(event);
+                if(engine.getValue().applyTriggerMask(event))
+                    engine.getValue().processDataEvent(event);
             } catch (Exception e){
                 LOGGER.log(Level.SEVERE, "[Exception] >>>>> engine : {0}\n\n", engine.getKey());
                 e.printStackTrace();

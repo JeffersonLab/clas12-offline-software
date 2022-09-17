@@ -6,6 +6,9 @@ import java.util.List;
 
 import java.sql.Time;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import org.jlab.detector.base.DetectorDescriptor;
 
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.decode.DetectorDataDgtz.HelicityDecoderData;
@@ -283,6 +286,37 @@ public class CLASDecoder4 {
         return tdcBANK;
     }
 
+    public Bank getDataBankTimeStamp(String name, DetectorType type) {
+
+        List<DetectorDataDgtz> tdcDGTZ = this.getEntriesTDC(type);
+        if(schemaFactory.hasSchema(name)==false) return null;
+        Map<Integer, DetectorDataDgtz> tsMap = new LinkedHashMap<>();
+        for(DetectorDataDgtz tdc : tdcDGTZ) {
+            DetectorDescriptor desc = tdc.getDescriptor();
+            int hash = ((desc.getCrate()<<8)&0xFF00) | (desc.getSlot()&0x00FF);
+            if(tsMap.containsKey(hash)) {
+                if(tsMap.get(hash).getTimeStamp() != tdc.getTimeStamp()) 
+                    System.out.println("WARNING: inconsistent timestamp for DCRB crate/slot " + desc.getCrate() + "/" + desc.getSlot());
+            }
+            else {
+                tsMap.put(hash, tdc);
+            }
+        }
+        
+        Bank tsBANK = new Bank(schemaFactory.getSchema(name), tsMap.size());
+
+        if(tsBANK==null) return null;
+        
+        int i=0;
+        for(DetectorDataDgtz tdc : tsMap.values()) {
+            tsBANK.putByte("crate", i, (byte) tdc.getDescriptor().getCrate());
+            tsBANK.putByte("slot",  i, (byte) tdc.getDescriptor().getSlot());
+            tsBANK.putLong("timestamp", i, tdc.getTimeStamp());
+            i++;
+        }
+        return tsBANK;
+    }
+    
     public Bank getDataBankUndecodedADC(String name, DetectorType type){
         List<DetectorDataDgtz> adcDGTZ = this.getEntriesADC(type);
         Bank adcBANK = new Bank(schemaFactory.getSchema(name), adcDGTZ.size());
@@ -384,6 +418,16 @@ public class CLASDecoder4 {
             }
         }
 
+        try {
+            Bank tsBank = getDataBankTimeStamp("DC::jitter", DetectorType.DC);
+            if(tsBank != null) {
+                if(tsBank.getRows()>0) {
+                    event.write(tsBank);
+                }
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
         /**
          * Adding un-decoded banks to the event
          */
