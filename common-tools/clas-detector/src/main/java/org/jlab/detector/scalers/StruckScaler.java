@@ -226,7 +226,9 @@ public class StruckScaler extends DaqScaler {
     /**
      * Get all the "good" helicity intervals readout in one RAW::scaler bank.
      * Here "good" means tstable, which requires an existing clock reading that
-     * also looks like the tstable helicity interval.
+     * also looks like the tstable helicity interval.  Note, this should also
+     * get rid of any cases where things didn't get full initialized and resulted
+     * in -1 values in HEL::scaler.
      * @param bank a RAW::scaler bank
      * @param fcupTable /runcontrol/fcup CCDB table
      * @param slmTable /runcontrol/slm CCDB table
