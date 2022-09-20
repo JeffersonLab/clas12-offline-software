@@ -202,6 +202,8 @@ public class TrackSeeder {
                             if(this.checkZ((ArrayList<Cross>) hits)) {
                                 this.addToSeedMap((ArrayList<Cross>) hits);
                             }
+                        } else if(hits.size()==2) {
+                            this.addToSeedMap((ArrayList<Cross>) hits);
                         }
                     }
                 }
@@ -489,7 +491,8 @@ public class TrackSeeder {
     private boolean inSamePhiRange(Seed seed, Cross c) {
         boolean value = false;
         double angle =Math.toDegrees(seed.getCrosses().get(seed.getCrosses().size()-1).getPoint().toVector3D().angle(c.getPoint().toVector3D()));
-        if(Math.abs(angle)<25) 
+        
+        if(Math.abs(angle)<45) 
             value = true;
         return value;
     }
@@ -532,7 +535,6 @@ public class TrackSeeder {
         double Zm = c2.getPoint().z();
         double Zc = sl*Rm +in;
         double Zerr = c2.getPointErr().z(); 
-        
         if(Math.abs(Zc-Zm)<Zerr*20) {
             value = true;  
         }
