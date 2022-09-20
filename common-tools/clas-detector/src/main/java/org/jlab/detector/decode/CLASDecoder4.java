@@ -590,7 +590,7 @@ public class CLASDecoder4 {
      * @param event
      * @return 
      */
-    public Bank[] createReconScalerBanks(Event event){
+    public List<Bank> createReconScalerBanks(Event event){
 
         // abort if run number corresponds to simulation:
         if (this.detectorDecoder.getRunNumber() < 1000) return null;
@@ -833,15 +833,12 @@ public class CLASDecoder4 {
                     
                     if(rawScaler.getRows()>0) scalerEvent.write(rawScaler);
                     if(rawRunConf.getRows()>0) scalerEvent.write(rawRunConf);
-                    
-                    Bank[] scalers = decoder.createReconScalerBanks(decodedEvent);
-                    if (scalers != null) {
-                        for (Bank b : scalers) {
-                            decodedEvent.write(b);
-                            scalerEvent.write(b);
-                        }
+
+                    for (Bank b : decoder.createReconScalerBanks(decodedEvent)) {
+                        decodedEvent.write(b);
+                        scalerEvent.write(b);
                     }
-                    
+
                     if (epics!=null) {
                         decodedEvent.write(epics);
                         scalerEvent.write(epics);
