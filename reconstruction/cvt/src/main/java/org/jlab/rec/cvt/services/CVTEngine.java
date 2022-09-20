@@ -77,8 +77,8 @@ public class CVTEngine extends ReconstructionEngine {
     private String  matrixLibrary       = "EJML";
     private boolean useOnlyTruth        = false;
     private boolean useSVTLinkerSeeder  = true;
-    private double docacut = 0.6;
-    private double docacutsum = 1.0;
+    private double docacut = 0.65;
+    private double docacutsum = 1.1;
     private int svtmaxclussize = 100;
     private int bmtcmaxclussize = 100;
     private int bmtzmaxclussize = 100;
@@ -114,9 +114,9 @@ public class CVTEngine extends ReconstructionEngine {
                                            useOnlyTruth,
                                            useSVTLinkerSeeder, 
                                            docacut, 
-                                           docacutsum,
-                                           svtmaxclussize,
-                                           bmtcmaxclussize,
+                                           docacutsum, 
+                                           svtmaxclussize, 
+                                           bmtcmaxclussize, 
                                            bmtzmaxclussize);
 
         this.initConstantsTables();
@@ -218,6 +218,48 @@ public class CVTEngine extends ReconstructionEngine {
      */
     public double getDocacutsum() {
         return docacutsum;
+    }
+
+    /**
+     * @return the svtmaxclussize
+     */
+    public int getSvtmaxclussize() {
+        return svtmaxclussize;
+    }
+
+    /**
+     * @param svtmaxclussize the svtmaxclussize to set
+     */
+    public void setSvtmaxclussize(int svtmaxclussize) {
+        this.svtmaxclussize = svtmaxclussize;
+    }
+
+    /**
+     * @return the bmtcmaxclussize
+     */
+    public int getBmtcmaxclussize() {
+        return bmtcmaxclussize;
+    }
+
+    /**
+     * @param bmtcmaxclussize the bmtcmaxclussize to set
+     */
+    public void setBmtcmaxclussize(int bmtcmaxclussize) {
+        this.bmtcmaxclussize = bmtcmaxclussize;
+    }
+
+    /**
+     * @return the bmtzmaxclussize
+     */
+    public int getBmtzmaxclussize() {
+        return bmtzmaxclussize;
+    }
+
+    /**
+     * @param bmtzmaxclussize the bmtzmaxclussize to set
+     */
+    public void setBmtzmaxclussize(int bmtzmaxclussize) {
+        this.bmtzmaxclussize = bmtzmaxclussize;
     }
     
     @Override
@@ -371,13 +413,13 @@ public class CVTEngine extends ReconstructionEngine {
             this.setDocacutsum((double) Double.valueOf(this.getEngineConfigString("docacutsum")));
         
         if (this.getEngineConfigString("svtmaxclussize")!=null)
-            this.setDocacutsum((int) Integer.valueOf(this.getEngineConfigString("svtmaxclussize")));
+            this.setSvtmaxclussize((int) Integer.valueOf(this.getEngineConfigString("svtmaxclussize")));
         
         if (this.getEngineConfigString("bmtcmaxclussize")!=null)
-            this.setDocacutsum((int) Integer.valueOf(this.getEngineConfigString("bmtcmaxclussize")));
+            this.setBmtcmaxclussize((int) Integer.valueOf(this.getEngineConfigString("bmtcmaxclussize")));
         
         if (this.getEngineConfigString("bmtzmaxclussize")!=null)
-            this.setDocacutsum((int) Integer.valueOf(this.getEngineConfigString("bmtzmaxclussize")));
+            this.setBmtzmaxclussize((int) Integer.valueOf(this.getEngineConfigString("bmtzmaxclussize")));
         
     }
 
@@ -522,9 +564,9 @@ public class CVTEngine extends ReconstructionEngine {
         System.out.println("["+this.getName()+"] number of KF iterations set to "+this.kfIterations);
         System.out.println("["+this.getName()+"] doca cut "+this.docacut);
         System.out.println("["+this.getName()+"] doca cut sum "+this.docacutsum);
-        System.out.println("["+this.getName()+"] max svt  cluster size "+this.svtmaxclussize);
-        System.out.println("["+this.getName()+"] max bmt-c  cluster size "+this.bmtcmaxclussize);
-        System.out.println("["+this.getName()+"] max btm-z  cluster size "+this.bmtzmaxclussize);
+        System.out.println("["+this.getName()+"] max svt  cluster size "+this.getSvtmaxclussize());
+        System.out.println("["+this.getName()+"] max bmt-c  cluster size "+this.getBmtcmaxclussize());
+        System.out.println("["+this.getName()+"] max btm-z  cluster size "+this.getBmtzmaxclussize());
         
     }
 

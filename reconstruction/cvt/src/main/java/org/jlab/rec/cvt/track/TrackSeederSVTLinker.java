@@ -200,7 +200,7 @@ public class TrackSeederSVTLinker {
                                 if(Constants.getInstance().seedingDebugMode) {
                                     System.out.println("Check for m = "+m+" b = "+b);
                                     System.out.println(c.printInfo());
-                                    System.out.println("delta1 "+delta1+" delta2 "+delta2);
+                                    System.out.println("delta1 "+delta1+" delta2 "+delta2+ " max "+SVTParameters.getMAXDOCA2STRIP());
                                 }
                                 if(delta1<SVTParameters.getMAXDOCA2STRIP() && delta2<SVTParameters.getMAXDOCA2STRIP()
                                         && delta1+delta2<SVTParameters.getMAXDOCA2STRIPS()) { 
