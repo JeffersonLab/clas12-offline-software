@@ -43,6 +43,11 @@ public class DaqScaler {
     public double getBeamChargeSLM() { return beamChargeSLM; }
     public double getBeamChargeGatedSLM() { return beamChargeGatedSLM; }
 
+    @Override
+    public String toString() {
+        return String.format("%d %d %d %d %d %d",fcup,clock,slm,gatedFcup,gatedClock,gatedSlm);
+    }
+
     /**
      * Manually choose dwell and live-dwell times, e.g. if clock rolls over.
      * @param fcupTable /runcontrol/fcup CCDB table

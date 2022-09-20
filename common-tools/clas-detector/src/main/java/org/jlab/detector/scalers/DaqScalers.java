@@ -41,7 +41,7 @@ import org.jlab.utils.groups.IndexedTable;
 public class DaqScalers {
 
     public Dsc2Scaler dsc2=null;
-    public StruckScaler struck=null;
+    public StruckScalers struck=null;
 
     private long timestamp=0;
     public void setTimestamp(long timestamp) { this.timestamp=timestamp; }
@@ -90,13 +90,15 @@ public class DaqScalers {
      * @param rawScalerBank HIPO RAW::scaler bank
      * @param fcupTable /runcontrol/fcup from CCDB
      * @param slmTable /runcontrol/slm from CCDB
+     * @param helTable
      * @param seconds duration between run start and current event
      * @return 
      */
     public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable,double seconds) {
-        StruckScaler struck = new StruckScaler(rawScalerBank,fcupTable,slmTable,helTable);
+        //StruckScaler struck = new StruckScaler(rawScalerBank,fcupTable,slmTable,helTable);
+        StruckScalers struck = StruckScalers.readAllPruned(rawScalerBank,fcupTable,slmTable,helTable);
         Dsc2Scaler dsc2 = new Dsc2Scaler(rawScalerBank,fcupTable,slmTable,seconds);
-        if (dsc2.getClock()>0 || struck.getClock()>0) {
+        if (dsc2.getClock()>0 || !struck.isEmpty()) {
             DaqScalers ds=new DaqScalers();
             ds.dsc2=dsc2;
             ds.struck=struck;
@@ -109,6 +111,7 @@ public class DaqScalers {
      * @param rawScalerBank HIPO RAW::scaler bank
      * @param fcupTable /runcontrol/fcup from CCDB
      * @param slmTable /runcontrol/slm from CCDB
+     * @param helTable /runcontrol/helicity from CCDB
      * @param rst run start time
      * @param uet unix event time
      * @return 
@@ -123,6 +126,7 @@ public class DaqScalers {
      * @param rawScalerBank HIPO RAW::scaler bank
      * @param fcupTable /runcontrol/fcup from CCDB
      * @param slmTable /runcontrol/slm from CCDB
+     * @param helTable /runcontrol/helicity from CCDB
      * @return  
      */
     public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable) {
@@ -138,7 +142,7 @@ public class DaqScalers {
         Bank bank = new Bank(schema.getSchema("RUN::scaler"),1);
         bank.putFloat("fcup",0,(float)this.dsc2.getBeamCharge());
         bank.putFloat("fcupgated",0,(float)this.dsc2.getBeamChargeGated());
-        bank.putFloat("livetime",0,(float)this.struck.getLivetimeClock());
+        bank.putFloat("livetime",0,(float)this.struck.get(this.struck.size()-1).getLivetimeClock());
         return bank;
     }
 
@@ -147,13 +151,15 @@ public class DaqScalers {
      * @return HEL::scaler banks
      */
     public Bank createHelicityBank(SchemaFactory schema) {
-        Bank bank = new Bank(schema.getSchema("HEL::scaler"),1);
-        bank.putFloat("fcup",0,(float)this.struck.getBeamCharge());
-        bank.putFloat("fcupgated",0,(float)this.struck.getBeamChargeGated());
-        bank.putFloat("slm",0,(float)this.struck.getBeamChargeSLM());
-        bank.putFloat("slmgated",0,(float)this.struck.getBeamChargeGatedSLM());
-        bank.putFloat("clock",0,(float)this.struck.getClock());
-        bank.putFloat("clockgated",0,(float)this.struck.getGatedClock());
+        Bank bank = new Bank(schema.getSchema("HEL::scaler"),this.struck.size());
+        for (StruckScaler ss : this.struck) {
+            bank.putFloat("fcup",0,(float)ss.getBeamCharge());
+            bank.putFloat("fcupgated",0,(float)ss.getBeamChargeGated());
+            bank.putFloat("slm",0,(float)ss.getBeamChargeSLM());
+            bank.putFloat("slmgated",0,(float)ss.getBeamChargeGatedSLM());
+            bank.putFloat("clock",0,(float)ss.getClock());
+            bank.putFloat("clockgated",0,(float)ss.getGatedClock());
+        }
         return bank;
     }
         
@@ -162,6 +168,7 @@ public class DaqScalers {
      * @param schema bank schema
      * @param fcupTable /runcontrol/fcup CCDB table
      * @param slmTable /runcontrol/slm CCDB table
+     * @param helTable /runcontrol/helicity CCDB table
      * @return [RUN::scaler,HEL::scaler] banks
      */
     public static Bank[] createBanks(SchemaFactory schema,Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable) {
@@ -176,6 +183,7 @@ public class DaqScalers {
      * @param schema bank schema
      * @param fcupTable /runcontrol/fcup CCDB table
      * @param slmTable /runcontrol/slm CCDB table
+     * @param helTable /runcontrol/helicity CCDB table
      * @param seconds duration between run start and current event
      * @return [RUN::scaler,HEL::scaler] banks
      */

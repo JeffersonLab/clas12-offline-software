@@ -1,7 +1,5 @@
 package org.jlab.detector.scalers;
     
-import java.util.List;
-import java.util.ArrayList;
 import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.utils.groups.IndexedTable;
 import org.jlab.detector.helicity.HelicityBit;
@@ -21,14 +19,16 @@ public class StruckScaler extends DaqScaler {
 
     private static final boolean GATEINVERTED=false;
 
-    private HelicityBit helicity = HelicityBit.UDF;
-    private HelicityBit quartet = HelicityBit.UDF;
+    protected HelicityBit helicity = HelicityBit.UDF;
+    protected HelicityBit quartet = HelicityBit.UDF;
+    public void setHelicity(HelicityBit b) { this.helicity=b; }
+    public void setQuartet(HelicityBit b) { this.quartet=b; }
     public HelicityBit getHelicity() { return this.helicity; }
     public HelicityBit getQuartet() { return this.quartet; }
 
     // These slots corrspond to gated/ungated scalers in RAW::scaler.
-    private static final int SLOT_GATED=0;
-    private static final int SLOT_UNGATED=1;
+    public static final int SLOT_GATED=0;
+    public static final int SLOT_UNGATED=1;
 
     // These channels correspond to the settle/tsettle periods in RAW::scaler,
     // but figuring out which is which requires checking the clock:
@@ -44,11 +44,14 @@ public class StruckScaler extends DaqScaler {
     public void setInterval(Interval intvl) {
         this.interval = intvl;
     }
+    public Interval getInterval() {
+        return this.interval;
+    }
 
     /**
      * Convenience for mapping channel number in RAW::scaler to input signal.
      */
-    public enum Input {
+    public static enum Input {
         FCUP,
         SLM,
         CLOCK,
@@ -80,7 +83,7 @@ public class StruckScaler extends DaqScaler {
      * Convenience for mapping channel number in RAW::scaler to scaler period.
      * Ultimately this period will map to helicity tsettle/tstable.
      */
-    public enum Interval {
+    public static enum Interval {
         A,
         B,
         UDF;
@@ -102,8 +105,8 @@ public class StruckScaler extends DaqScaler {
                     return UDF;
             }
         }
-        public static boolean equals(Interval period, int struckChannel) {
-            return create(struckChannel) == period;
+        public static boolean equals(Interval interval, int struckChannel) {
+            return create(struckChannel) == interval;
         }
     }
 
@@ -113,7 +116,7 @@ public class StruckScaler extends DaqScaler {
      * @param helTable /runcontrol/helicity CCDB table
      * @return the type of helicity period 
      */
-    public HelicityInterval getHelicityPeriod(long clock, IndexedTable helTable) {
+    public HelicityInterval getHelicityInterval(long clock, IndexedTable helTable) {
         final double clockSeconds = (double)clock / this.clockFreq;
         // these guys are in microseconds in CCDB, convert them to seconds:
         final double tsettleSeconds = 1E6 * helTable.getDoubleValue("tsettle",0,0,0);
@@ -126,8 +129,8 @@ public class StruckScaler extends DaqScaler {
      * @param helTable /runcontrol/helicity CCDB table
      * @return the type of helicity period 
      */
-    public HelicityInterval getHelicityPeriod(IndexedTable helTable) {
-        return this.getHelicityPeriod(this.clock, helTable);
+    public HelicityInterval getHelicityInterval(IndexedTable helTable) {
+        return this.getHelicityInterval(this.clock, helTable);
     }
 
 
@@ -138,14 +141,14 @@ public class StruckScaler extends DaqScaler {
      * @param helTable /runcontrol/helicity CCDB table
      * @return the type of Struck period 
      */
-    public final Interval getStablePeriod(Bank bank, IndexedTable helTable) {
+    public final Interval getStableInterval(Bank bank, IndexedTable helTable) {
         for (int k=0; k<bank.getRows(); k++){
             if (bank.getInt("crate",k)!=CRATE) continue;
             if (bank.getInt("slot",k)!=SLOT_UNGATED) continue;
             final int chan = bank.getInt("channel",k);
             if (chan==CHAN_CLOCK_A || chan==CHAN_CLOCK_B) {
                 final long clck = bank.getLong("value",k);
-                if (this.getHelicityPeriod(clck,helTable) == HelicityInterval.TSTABLE) {
+                if (this.getHelicityInterval(clck,helTable) == HelicityInterval.TSTABLE) {
                     return Interval.create(chan);
                 }
             }
@@ -153,96 +156,8 @@ public class StruckScaler extends DaqScaler {
         return Interval.UDF;
     }
 
-    private StruckScaler() {
+    public StruckScaler() {
         this.clockFreq = 1e6;
-    }
-
-    /**
-     * Get all intervals readout in one RAW::scaler bank.
-     * @param bank a RAW::scaler bank
-     * @param fcupTable /runcontrol/fcup CCDB table
-     * @param slmTable /runcontrol/slm CCDB table
-     * @param helTable /runcontrol/helicity CCDB table
-     * @return all tstable intervals 
-     */
-    public static List<StruckScaler> readAll(Bank bank, IndexedTable fcupTable, IndexedTable slmTable, IndexedTable helTable) {
-
-        List<StruckScaler> ret = new ArrayList<>();
-        StruckScaler reading = new StruckScaler();
-
-        for (int k=0; k<bank.getRows(); ++k) {
-
-            if (bank.getInt("crate",k) != CRATE) continue;
-
-            final int chan = bank.getInt("channel",k);
-            final Interval intvl = Interval.create(chan);
-
-            // Found a new interval:
-            if (ret.isEmpty() || intvl != ret.get(ret.size()-1).interval) {
-                reading = new StruckScaler();
-                reading.setInterval(intvl);
-                ret.add(reading);
-            }
-
-            switch (bank.getInt("slot",k)) {
-                case SLOT_GATED:
-                    if (Input.equals(Input.FCUP, chan)) {
-                        reading.helicity = HelicityBit.create(bank.getByte("helicity",k));
-                        reading.quartet = HelicityBit.create(bank.getByte("quartet",k));
-                        reading.gatedFcup = bank.getLong("value",k);
-                    }
-                    else if (Input.equals(Input.SLM, chan)) {
-                        reading.gatedSlm = bank.getLong("value",k);
-                    }
-                    else if (Input.equals(Input.CLOCK, chan)) {
-                        reading.gatedClock = bank.getLong("value",k);
-                    }
-                    break;
-                case SLOT_UNGATED:
-                    if (Input.equals(Input.FCUP, chan)) {
-                        reading.fcup = bank.getLong("value",k);
-                    }
-                    else if (Input.equals(Input.SLM, chan)) {
-                        reading.slm = bank.getLong("value",k);
-                    }
-                    else if (Input.equals(Input.CLOCK, chan)) {
-                        reading.clock = bank.getLong("value",k);
-                    }
-                    break;
-                default:
-                    break;
-            }
-            
-        }
-
-        // go back and "calibrate" all of them, e.g. convert to beam charge and livetime:
-        for (StruckScaler ss : ret) { 
-            ss.calibrate(fcupTable,slmTable);
-        }
-
-        return ret;
-    }
-    
-    /**
-     * Get all the "good" helicity intervals readout in one RAW::scaler bank.
-     * Here "good" means tstable, which requires an existing clock reading that
-     * also looks like the tstable helicity interval.  Note, this should also
-     * get rid of any cases where things didn't get full initialized and resulted
-     * in -1 values in HEL::scaler.
-     * @param bank a RAW::scaler bank
-     * @param fcupTable /runcontrol/fcup CCDB table
-     * @param slmTable /runcontrol/slm CCDB table
-     * @param helTable /runcontrol/helicity CCDB table
-     * @return all tstable intervals 
-     */
-    public List<StruckScaler> readAllPruned(Bank bank, IndexedTable fcupTable, IndexedTable slmTable, IndexedTable helTable) {
-        List<StruckScaler> ret = StruckScaler.readAll(bank, fcupTable, slmTable, helTable);
-        for (StruckScaler ss : ret) {
-            if (ss.getHelicityPeriod(helTable) != HelicityInterval.TSTABLE) {
-                ret.remove(ss);
-            }
-        }
-        return ret;
     }
 
     /**
@@ -252,7 +167,6 @@ public class StruckScaler extends DaqScaler {
      * @param slmTable /runcontrol/slm CCDB table
      * @param helTable /runcontrol/helicity CCDB table
      */
-    @Deprecated
     public StruckScaler(Bank bank,IndexedTable fcupTable, IndexedTable slmTable, IndexedTable helTable) {
 
         // the STRUCK's clock is 1 MHz
@@ -261,7 +175,7 @@ public class StruckScaler extends DaqScaler {
         // Here we're going to assume the stable period is the same Struck
         // period throughout a single readout.  Almost always correct ...
         // FIXME
-        Interval stablePeriod = this.getStablePeriod(bank, helTable);
+        Interval stablePeriod = this.getStableInterval(bank, helTable);
 
         // Couldn't find an ungated clock in the stable period, so there's
         // nothing useful we can do:
