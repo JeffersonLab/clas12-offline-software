@@ -73,7 +73,7 @@ public class CVTEngine extends ReconstructionEngine {
     private boolean timeCuts            = true;
     public boolean useSVTTimingCuts =  false;
     public boolean removeOverlappingSeeds = true;
-    public boolean flagSeeds = false;
+    public boolean flagSeeds = true;
     private String  matrixLibrary       = "EJML";
     private boolean useOnlyTruth        = false;
     private boolean useSVTLinkerSeeder  = true;
