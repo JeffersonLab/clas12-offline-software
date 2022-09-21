@@ -133,8 +133,10 @@ public class URWellStrip implements Comparable {
     }
     
     public static List<URWellStrip> getStrips(DataEvent event, ConstantsManager ccdb) {
-        List<URWellStrip> hits = new ArrayList<>();
-        if(event.hasBank("URWELL::adc")==true){
+        
+        List<URWellStrip> strips = new ArrayList<>();
+        
+        if(event.hasBank("URWELL::adc")){
             DataBank bank = event.getBank("URWELL::adc");
             for(int i = 0; i < bank.rows(); i++){
                 int  sector = bank.getByte("sector", i);
@@ -147,29 +149,19 @@ public class URWellStrip implements Comparable {
 //		    
                 URWellStrip  strip = new URWellStrip(sector,  layer,   comp); 
                 
-                strip.setADC(adc);
 //                strip.setTriggerPhase(triggerPhase);
                 strip.setId(i+1);
+                strip.setADC(adc);
                 strip.setTDC((int) time);
-//                
-//                double sca = (is==5)?AtoE5[ind[il-1]]:AtoE[ind[il-1]]; 
-//                if (variation=="clas6") sca = 1.0;  
-//                
-//                if(strip.getADC()>sca*ECCommon.stripThreshold[ind[il-1]]) strips.add(strip); 
-//                
-//                float  tmax = 1000; int tdc = 0;
-//                
-//                if (tdcs.hasItem(is,il,ip)) {
-//                    float radc = (float)Math.sqrt(adc);
-//                    for (float tdcc : tdcs.getItem(is,il,ip)) {
-//                         float tdif = tps*tdcc - (float)gtw.getDoubleValue("time_walk",is,il,0)/radc - triggerPhase - FTOFFSET - t; 
-//                        if (Math.abs(tdif)<TMFCUT&&tdif<tmax) {tmax = tdif; tdc = (int)tdcc;}
-//                    }
-//                    strip.setTDC(tdc); 
-//                }              
+                strip.setEnergy(strip.ADC*URWellConstants.ADCTOENERGY);
+                strip.setTime(strip.TDC*URWellConstants.TDCTOTIME);
+                
+                if(strip.getEnergy()>URWellConstants.THRESHOLD) strips.add(strip);
+
+                System.out.println(strip.toString());
             }
         }         
-        return hits;
+        return strips;
     }
     
     @Override

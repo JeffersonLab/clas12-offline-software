@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataBank;
+import org.jlab.io.hipo.HipoDataSource;
 
 /**
  *
@@ -50,9 +51,9 @@ public class URWellEngine extends ReconstructionEngine {
         }
         
         List<URWellStrip> hits = URWellStrip.getStrips(event, this.getConstantsManager());
-        List<URWellCluster> clusters = URWellCluster.createClusters(hits);
+//        List<URWellCluster> clusters = URWellCluster.createClusters(hits);
         
-        this.writeHipoBanks(event, hits, clusters);
+//        this.writeHipoBanks(event, hits, clusters);
         
         return true;
     }
@@ -98,4 +99,23 @@ public class URWellEngine extends ReconstructionEngine {
 //         de.appendBanks(bankS,bankC);
     }
 
+        public static void main (String arg[])  {
+            
+		URWellEngine engine = new URWellEngine();
+		engine.init();
+                
+		String input = "/Users/devita/out.hipo";
+                
+                
+		HipoDataSource  reader = new HipoDataSource();
+		reader.open(input);
+		
+                while(reader.hasEvent()) {
+                    DataEvent event = reader.getNextEvent();
+                    
+                    engine.processDataEvent(event);
+                    
+                }
+                reader.close();
+        }
 }
