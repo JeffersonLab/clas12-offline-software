@@ -206,6 +206,16 @@ public class DaqScalers {
         return ret;
     }
 
+    /**
+     * @param rawScalerBank RAW::scaler bank
+     * @param schema bank schema
+     * @param fcupTable /runcontrol/fcup CCDB table
+     * @param slmTable /runcontrol/slm CCDB table
+     * @param helTable /runcontrol/helicity CCDB table
+     * @param rst run start time
+     * @param uet event time
+     * @return [RUN::scaler,HEL::scaler] banks
+     */
     public static List<Bank> createBanks(SchemaFactory schema,Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable,Date rst,Date uet) {
         return DaqScalers.createBanks(schema,rawScalerBank,fcupTable,slmTable,helTable,DaqScalers.getSeconds(rst,uet));
     }
