@@ -592,20 +592,22 @@ public class CLASDecoder4 {
      */
     public List<Bank> createReconScalerBanks(Event event){
 
+        List<Bank> ret = new ArrayList<>();
+
         // abort if run number corresponds to simulation:
-        if (this.detectorDecoder.getRunNumber() < 1000) return null;
+        if (this.detectorDecoder.getRunNumber() < 1000) return ret;
 
         // abort if we don't know about the required banks:
-        if(schemaFactory.hasSchema("RUN::config")==false) return null;
-        if(schemaFactory.hasSchema("RAW::scaler")==false) return null;
-        if(schemaFactory.hasSchema("RUN::scaler")==false) return null;
+        if(schemaFactory.hasSchema("RUN::config")==false) return ret;
+        if(schemaFactory.hasSchema("RAW::scaler")==false) return ret;
+        if(schemaFactory.hasSchema("RUN::scaler")==false) return ret;
 
         // retrieve necessary input banks, else abort:
         Bank configBank = new Bank(schemaFactory.getSchema("RUN::config"),1);
         Bank rawScalerBank = new Bank(schemaFactory.getSchema("RAW::scaler"),1);
         event.read(configBank);
         event.read(rawScalerBank);
-        if (configBank.getRows()<1 || rawScalerBank.getRows()<1) return null;
+        if (configBank.getRows()<1 || rawScalerBank.getRows()<1) return ret;
 
         // retrieve fcup/slm calibrations from slm:
         IndexedTable fcupTable = this.detectorDecoder.scalerManager.
@@ -626,9 +628,10 @@ public class CLASDecoder4 {
         }
         catch (Exception e) {
             // abort if no RCDB access (e.g. offsite)
-            return null;
+            return ret;
         }
-        return DaqScalers.createBanks(schemaFactory,rawScalerBank,fcupTable,slmTable,helTable,rst,uet);
+        ret.addAll(DaqScalers.createBanks(schemaFactory,rawScalerBank,fcupTable,slmTable,helTable,rst,uet));
+        return ret;
     }
     
     public Bank createBonusBank(){

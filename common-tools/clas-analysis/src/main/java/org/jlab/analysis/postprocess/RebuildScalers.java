@@ -101,14 +101,19 @@ public class RebuildScalers {
                     runScalerBank = ds.createRunBank(writer.getSchemaFactory());
                     helScalerBank = ds.createHelicityBank(writer.getSchemaFactory());
                     
-                    // the scaler banks always are slightly after the helicity changes, so
-                    // assign the previous (delay-corrected) helicity state to this scaler reading:
-                    helScalerBank.putByte("helicity",0,helSeq.search(event,-1).value());
-                    if (helSeq.getHalfWavePlate(event))
-                        helScalerBank.putByte("helicityRaw",0,(byte)(-1*helSeq.search(event,-1).value()));
-                    else
-                        helScalerBank.putByte("helicityRaw",0,helSeq.search(event,-1).value());
-                   
+                    // the scaler banks always are slightly after the helicity changes,
+                    // so assign the previous (delay-corrected) helicity state to the
+                    // last scaler reading and then walk backwards:
+                    for (int ii=0; ii<helScalerBank.getRows(); ii++) {
+                        final int row = helScalerBank.getRows() - ii - 1;
+                        final int offset = ii - 1;
+                        helScalerBank.putByte("helicity",row,helSeq.search(event,offset).value());
+                        if (helSeq.getHalfWavePlate(event))
+                            helScalerBank.putByte("helicityRaw",0,(byte)(-1*helSeq.search(event,offset).value()));
+                        else
+                            helScalerBank.putByte("helicityRaw",0,helSeq.search(event,offset).value());
+                    }
+
                     // put modified HEL/RUN::scaler back in the event:
                     event.write(runScalerBank);
                     event.write(helScalerBank);
