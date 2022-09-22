@@ -90,14 +90,14 @@ public class TrackHitReco {
             if(allhits.size() < minhitcount) continue;
             track.sortHits();
             smallthit = track.getSmallTHit();
-            largethit = track.getLargeTHit();
-            smallt = smallthit.time();
-            larget = largethit.time();
-	    smallz = smallthit.z();
-	    largez = (largethit.z() + smallthit.z())/2;
+            largethit = track.getLargeTHit();      
+	        smallz = smallthit.z();
+            largez = (largethit.z() + smallthit.z())/2;
+            smallt = smallthit.time() - get_rec_coef(a_t,smallz) + a_t[0]; 
+            larget = largethit.time() - get_rec_coef(a_t,smallz) - get_rec_coef(b_t,largez) + a_t[0] + b_t[0] ;
             largetpad = largethit.pad();
-            tdiffshort = tcathode + get_rec_coef(a_t,smallz) - a_t[0] - smallt;
-            tdifflong = tcathode + get_rec_coef(a_t,smallz) + get_rec_coef(b_t,largez) - a_t[0] - b_t[0] - larget;
+            tdiffshort = get_rec_coef(a_t,smallz) - smallt;
+            tdifflong = tcathode - larget;
             tdiffshort *= tshiftfactorshort;
             tdifflong *= tshiftfactorlong;
             tdiff = tdiffshort + tdifflong;
@@ -130,7 +130,7 @@ public class TrackHitReco {
                 x_rec=r_rec*(Math.cos(phi_rec));
                 y_rec=r_rec*(Math.sin(phi_rec));
                 if(!Double.isNaN(x_rec) && !Double.isNaN(y_rec) && !Double.isNaN(hit.z())){
-                    recotrackmap.get(TID).add(new RecoHitVector(cellID,x_rec,y_rec,hit.z(),r_rec,phi_rec,tdiff,Time,hit.adc(),smallthit,largethit));
+                    recotrackmap.get(TID).add(new RecoHitVector(cellID,x_rec,y_rec,hit.z(),r_rec,phi_rec,tdiff,Time,hit.adc(),smallthit,largethit, hit.flag()));
                 }
             }
         }

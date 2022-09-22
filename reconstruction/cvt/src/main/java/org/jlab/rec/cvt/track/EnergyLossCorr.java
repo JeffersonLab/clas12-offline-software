@@ -16,7 +16,7 @@ public class EnergyLossCorr {
 
     public static final double C = 0.0002997924580;
 
-    public String massHypo = "pion";
+    public int massHypo = 211;
     private double cosEntAnglesPlanes[];
     private double[][] Points;
     private Track _updatedTrack;
@@ -165,18 +165,18 @@ public class EnergyLossCorr {
      * hypothesis is the default value
      * @return the mass value for the given mass hypothesis in GeV/c^2
      */
-    public double massHypothesis(String H) {
+    public double massHypothesis(int H) {
         double value = PhysicsConstants.massPionCharged(); //default
-        if (H.equals("proton")) {
+        if (H == 2212) {
             value = PhysicsConstants.massProton();
         }
-        else if (H.equals("electron")) {
+        else if (H == 11) {
             value = PhysicsConstants.massElectron();
         }
-        else if (H.equals("kaon")) {
+        else if (H == 321) {
             value = PhysicsConstants.massKaonCharged();
         }
-        else if (H.equals("muon")) {
+        else if (H == 13) {
             value = MUMASS;
         }
         return value;

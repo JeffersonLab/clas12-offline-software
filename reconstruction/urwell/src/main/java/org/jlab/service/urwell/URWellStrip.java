@@ -25,6 +25,7 @@ public class URWellStrip implements Comparable {
     private int          TDC = 0;
     private int           id = -1;       // ID of the hit. this shows the row number of the corresponding hit in the ADC bank
     private int    clusterId = -1;       // Id (row number) of the cluster that this hit belongs to
+    private int       status = 0;
     
     private Line3D stripLine = new Line3D();    
     
@@ -106,11 +107,21 @@ public class URWellStrip implements Comparable {
     public void setTime(double time) {
         this.time = time;
     }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
     
     public boolean isNeighbour(URWellStrip strip){
         if(strip.getDescriptor().getSector()==this.desc.getSector()&&
            strip.getDescriptor().getLayer()==this.desc.getLayer()){
-           if(Math.abs(strip.getDescriptor().getComponent()-this.desc.getComponent())<=1) return true;
+            int s1 = strip.getDescriptor().getComponent();
+            int s2 = this.desc.getComponent();
+            if(Math.abs(s1-s2)<=1 && URWellConstants.getChamber(s1)==URWellConstants.getChamber(s2)) return true;
         }
         return false;
     }
@@ -145,8 +156,6 @@ public class URWellStrip implements Comparable {
                 int     adc = bank.getInt("ADC", i);
                 double time = bank.getFloat("time", i);
                         
-//		        if (status.getIntValue("status",is,il,ip)==3) continue;    
-//		    
                 URWellStrip  strip = new URWellStrip(sector,  layer,   comp); 
                 
 //                strip.setTriggerPhase(triggerPhase);
@@ -155,10 +164,11 @@ public class URWellStrip implements Comparable {
                 strip.setTDC((int) time);
                 strip.setEnergy(strip.ADC*URWellConstants.ADCTOENERGY);
                 strip.setTime(strip.TDC*URWellConstants.TDCTOTIME);
+                strip.setLine(new Line3D(comp, -1, 0, comp, 1, 0)); //provisional for testing
+                strip.setStatus(0);
                 
                 if(strip.getEnergy()>URWellConstants.THRESHOLD) strips.add(strip);
 
-                System.out.println(strip.toString());
             }
         }         
         return strips;

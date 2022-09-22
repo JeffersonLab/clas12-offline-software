@@ -87,6 +87,7 @@ public class RecoBankWriter {
         bank.setByte("LR", i-rejCnt, (byte) hitlist.get(i).get_LeftRightAmb());
         bank.setShort("clusterID", i-rejCnt, (short) hitlist.get(i).get_AssociatedClusterID());
         bank.setInt("TDC",i-rejCnt,hitlist.get(i).get_TDC());
+        bank.setByte("jitter",i, (byte) hitlist.get(i).getJitter());
         
     }
 
@@ -471,6 +472,9 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
             if(bank.getDescriptor().hasEntry("tBeta")){
                bank.setFloat("tBeta", i, (float) hitlist.get(i).get_DeltaTimeBeta());
             }
+            if(bank.getDescriptor().hasEntry("dDoca")){
+               bank.setFloat("dDoca", i, (float) hitlist.get(i).get_DeltaDocaBeta());
+            }
             if(bank.getDescriptor().hasEntry("fitResidual")){
                bank.setFloat("fitResidual", i, (float) hitlist.get(i).get_TrkResid());
             }
@@ -486,6 +490,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
             bank.setFloat("timeResidual", i, (float) hitlist.get(i).get_TimeResidual());
             
             bank.setInt("TDC",i,hitlist.get(i).get_TDC());
+            bank.setByte("jitter",i, (byte) hitlist.get(i).getJitter());
             bank.setFloat("B", i, (float) hitlist.get(i).getB());
             bank.setFloat("TProp", i, (float) hitlist.get(i).getTProp());
             bank.setFloat("TFlight", i, (float) hitlist.get(i).getTFlight());
@@ -798,7 +803,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
 
         for (Hit hit : hits) {
             FittedHit fhit = new FittedHit(hit.get_Sector(), hit.get_Superlayer(),
-                    hit.get_Layer(), hit.get_Wire(), hit.get_TDC(),
+                    hit.get_Layer(), hit.get_Wire(), hit.get_TDC(), hit.getJitter(),
                     hit.get_Id());
             fhit.set_Id(hit.get_Id());
             fhit.set_DocaErr(hit.get_DocaErr());

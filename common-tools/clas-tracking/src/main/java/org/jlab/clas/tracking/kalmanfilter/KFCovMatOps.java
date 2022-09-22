@@ -47,7 +47,73 @@ public class KFCovMatOps{
         }
         return Cinv;
     }
+        
+    public double[][] smoothCovMat(double[][] C_n_kp1, double[][] C_k, double[][] A , double[][] C_k_kp1) {
+        double[][] At = null;
+        try {
+            At = mo.MatrixTranspose(A);
+        } catch (Exception e) {
+            return null;
+        }
+        double[][] dC = null;
+        try {
+            dC = mo.MatrixSubtraction(C_n_kp1, C_k_kp1);
+        } catch (Exception e) {
+            return null;
+        }
+        double[][] Ca = null;
+        try {
+            Ca = mo.MatrixMultiplication(dC, At);
+        } catch (Exception e) {
+            return null;
+        }
+        double[][] Caa = null;
+        try {
+            Caa = mo.MatrixMultiplication(A, Ca);
+        } catch (Exception e) {
+            return null;
+        }
+        double[][] Cn = null;
+        try {
+            Cn = mo.MatrixAddition(C_k, Caa);
+        } catch (Exception e) {
+            return null;
+        }
+        
+        return Cn;
+    }
+ 
+    public double[][] smoothingCorr(double[][] C_k, double[][] FMatT , double[][] C_k_kp1) {
+        double[][] Ci = null;
+        try {
+            Ci = mo.MatrixInversion(C_k_kp1);
+        } catch (Exception e) {
+            return null;
+        }
+        double[][] Ca = null;
+        try {
+            Ca = mo.MatrixMultiplication(C_k, FMatT);
+        } catch (Exception e) {
+            return null;
+        }
+        double[][] A = null;
+        try {
+            A = mo.MatrixMultiplication(Ca, Ci);
+        } catch (Exception e) {
+            return null;
+        }
+        return A;
+    }
     
+    public double[][] inverse(double[][] C) {
+        double[][] Ci = null;
+        try {
+            Ci = mo.MatrixInversion(C);
+        } catch (Exception e) {
+            return null;
+        }
+        return Ci;
+    }
  
     /**
      * prints the matrix -- used for debugging
@@ -55,7 +121,7 @@ public class KFCovMatOps{
      * @param mat matrix
      * @param message
      */
-    public static void printMatrix(double[][] mat, String message) {
+    public void printMatrix(double[][] mat, String message) {
         int nrow = mat.length; 
         int ncol = mat[0].length; 
 

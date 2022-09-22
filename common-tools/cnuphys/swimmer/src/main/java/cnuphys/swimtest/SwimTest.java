@@ -1,12 +1,14 @@
 package cnuphys.swimtest;
 
 import java.awt.BorderLayout;
+
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.Point2D;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -54,8 +56,12 @@ import cnuphys.swim.Swimmer;
 import cnuphys.swim.Swimming;
 import cnuphys.swimZ.SwimZStateVector;
 import cnuphys.adaptiveSwim.geometry.Cylinder;
+import cnuphys.adaptiveSwim.geometry.Plane;
 
 public class SwimTest {
+	
+	//which swimmer
+	public enum SWIMMER {OLD, NEW};
 
 	private static String _homeDir = System.getProperty("user.home");
 	private static String _currentWorkingDirectory = System.getProperty("user.dir");
@@ -182,6 +188,7 @@ public class SwimTest {
 	private static JMenu adaptiveTestMenu() {
 		JMenu atmenu = new JMenu("Test AdaptiveSwim Package");
 
+		final JMenuItem planeInterpItem = new JMenuItem("Interpolate");
 		final JMenuItem rhoItem = new JMenuItem("Rho Test");
 		final JMenuItem beamLineItem = new JMenuItem("Beamline Test");
 		final JMenuItem retraceItem = new JMenuItem("Retrace Test");
@@ -198,6 +205,8 @@ public class SwimTest {
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource() == rhoItem) {
 					AdaptiveTests.rhoTest();
+				} else if (e.getSource() == planeInterpItem) {
+					interpolateToPlaneTest(20, 33557799);
 				} else if (e.getSource() == beamLineItem) {
 					AdaptiveBeamlineSwimTest.beamLineTest();
 				} else if (e.getSource() == retraceItem) {
@@ -218,6 +227,7 @@ public class SwimTest {
 			}
 		};
 
+		planeInterpItem.addActionListener(al);
 		rhoItem.addActionListener(al);
 		beamLineItem.addActionListener(al);
 		retraceItem.addActionListener(al);
@@ -227,6 +237,7 @@ public class SwimTest {
 		cylinderItem.addActionListener(al);
 		noStopperItem.addActionListener(al);
 
+		atmenu.add(planeInterpItem);
 		atmenu.add(rhoItem);
 		atmenu.add(beamLineItem);
 		atmenu.add(retraceItem);
@@ -1142,6 +1153,58 @@ public class SwimTest {
 
 	}
 	
+	//swim all or some of the random data
+	private static void SwimRandomData(Swimmer swimmer, AdaptiveSwimmer newSwimmer, RandomData data, int nmax) {
+		if (swimmer != null) {
+			
+			double rMax = 4;
+			double sMax = 8;
+			double stepSize = 1.0e-3; // m
+			DefaultSwimStopper stopper = new DefaultSwimStopper(rMax);
+			
+			int len = Math.min(data.count, nmax);
+			for (int i = 0; i < len; i++) {
+				
+//				public SwimTrajectory swim(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+//						IStopper stopper, double sMax, double stepSize, double relTolerance[], double hdata[])			
+				
+				
+				try {
+					SwimTrajectory traj = swimmer.swim(data.charge[i], data.xo[i], 
+							data.yo[i], data.zo[i], 
+							data.p[i], data.theta[i], data.phi[i], stopper, sMax,
+							stepSize, Swimmer.CLAS_Tolerance, null);
+					
+					Swimming.addMCTrajectory(traj);
+				} catch (RungeKuttaException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	//interpolate to plane
+	private static void interpolateToPlaneTest(int n, long seed) {
+		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITE);
+	    System.err.println("Interpolate to plane test");
+		
+		Swimmer swimmer = new Swimmer();
+		
+		//generate some random data
+//		public RandomData(int n, long seed,
+//				double xmin, double dx,
+//				double ymin, double dy,
+//				double zmin, double dz,
+//				double pmin, double dp,
+//				double thetamin, double dtheta,
+//				double phimin, double dphi) {
+			
+		RandomData data = new RandomData(n, seed);
+		
+		SwimRandomData(swimmer, null, data, 100);
+	}
+	
 	//test the uniform step size swim to rho
 	private static void uniformSwimToRhoTest(int n, long seed) {
 		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITE);
@@ -1217,7 +1280,7 @@ public class SwimTest {
 	 * 
 	 * @param arg command line arguments (ignored)
 	 */
-	public static void main(String arg[]) {
+	public static void Xmain(String arg[]) {
 		final MagneticFields mf = MagneticFields.getInstance();
 		FastMath.setMathLib(FastMath.MathLib.FAST);
 
@@ -1244,7 +1307,8 @@ public class SwimTest {
 		
 		//gemcTrackTest();
 		
-		uniformSwimToRhoTest(20, 33557799);
+		//uniformSwimToRhoTest(20, 33557799);
+		interpolateToPlaneTest(20, 33557799);
 
 
 		// write out data file
@@ -1277,9 +1341,21 @@ public class SwimTest {
 	 * 
 	 * @param arg command line arguments (ignored)
 	 */
-	public static void Xmain(String arg[]) {
+	public static void main(String arg[]) {
 
-		initMagField();
+		final MagneticFields mf = MagneticFields.getInstance();
+		File mfdir = new File(System.getProperty("user.home"), "magfield");
+		System.out.println("mfdir exists: " + (mfdir.exists() && mfdir.isDirectory()));
+		try {
+			mf.initializeMagneticFields(mfdir.getPath(), "Symm_torus_r2501_phi16_z251_24Apr2018.dat",
+					"Symm_solenoid_r601_phi1_z1201_13June2018.dat");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			System.exit(1);
+		} catch (MagneticFieldInitializationException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 
 		System.out.println("Active Field Description: " + MagneticFields.getInstance().getActiveFieldDescription());
 
@@ -1315,5 +1391,22 @@ public class SwimTest {
 	}
 	
 
+    class InterpPlaneResult {
+    	
+    	//state vectors: [x, y, z, px/p, py/p, pz/p]
+    	
+    	//last state vector on one side of plane
+    	public double[] u0;
+    	
+    	//last state vector on other side of plane
+    	public double[] u1;
+    	
+    	// which swimmer
+    	public SWIMMER whichSwimmer;
+    	
+    	//the plane
+    	public Plane plane;
+    	
+    }
 
 }

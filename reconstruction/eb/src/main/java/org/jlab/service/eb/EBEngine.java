@@ -15,7 +15,6 @@ import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
 import org.jlab.rec.eb.EBScalers;
 import org.jlab.rec.eb.EBRadioFrequency;
-import org.jlab.service.ec.ECEngine;
 
 /**
  *
@@ -39,6 +38,8 @@ public class EBEngine extends ReconstructionEngine {
     String scintextrasBank = null;
     String cherenkovBank    = null;
     String trackBank        = null;
+    String UtrackBank        = null;
+    String trackUBank        = null;
     String crossBank        = null;
     String ftBank           = null;
     String trajectoryBank   = null;
@@ -49,6 +50,8 @@ public class EBEngine extends ReconstructionEngine {
     String ftofHitsType     = null;
     String trajectoryType   = null;
     String covMatrixType    = null;
+    String cvtTrackType     = null;
+    String cvtTrajType      = null;
     
     public EBEngine(String name){
         super(name,"gavalian","1.0");
@@ -76,6 +79,7 @@ public class EBEngine extends ReconstructionEngine {
         this.setScintillatorBank(prefix+"::Scintillator");
         this.setScintClusterBank(prefix+"::ScintExtras");
         this.setTrackBank(prefix+"::Track");
+        this.setUTrackBank(prefix+"::UTrack");
         this.setCrossBank(prefix+"::TrackCross");
         if (!this.getClass().isAssignableFrom(EBHBEngine.class) &&
             !this.getClass().isAssignableFrom(EBHBAIEngine.class)) {
@@ -133,8 +137,10 @@ public class EBEngine extends ReconstructionEngine {
         List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType, trajectoryType, covMatrixType);
         eb.addTracks(tracks);      
         
-        List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks", "CVTRec::Trajectory");
+        List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, cvtTrackType, cvtTrajType);
         eb.addTracks(ctracks);
+        
+        List<DetectorTrack> cutracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::UTracks", cvtTrajType);
        
         // FIXME:  remove need for these indexing bookkeepers:
         eb.getPindexMap().put(0, tracks.size());
@@ -165,7 +171,7 @@ public class EBEngine extends ReconstructionEngine {
         eb.processForwardTagger(de);
 
         // create REC:detector banks:
-        if(eb.getEvent().getParticles().size()>0){
+        if(!eb.getEvent().getParticles().isEmpty()){
        
             Collections.sort(eb.getEvent().getParticles());
 
@@ -179,30 +185,30 @@ public class EBEngine extends ReconstructionEngine {
             de.appendBanks(bankEve);
 
             List<DetectorResponse> calorimeters = eb.getEvent().getCalorimeterResponseList();
-            if(calorimeterBank!=null && calorimeters.size()>0) {
+            if(calorimeterBank!=null && !calorimeters.isEmpty()) {
                 DataBank bankCal = DetectorData.getCalorimeterResponseBank(calorimeters, de, calorimeterBank);
                 de.appendBanks(bankCal);
             }
             List<DetectorResponse> scintillators = eb.getEvent().getScintillatorResponseList();
-            if(scintillatorBank!=null && scintillators.size()>0) {
+            if(scintillatorBank!=null && !scintillators.isEmpty()) {
                 DataBank bankSci = DetectorData.getScintillatorResponseBank(scintillators, de, scintillatorBank);
                 de.appendBanks(bankSci);               
                 DataBank eaxtbankSci = DetectorData.getScintExtrasResponseBank(scintillators, de, scintextrasBank);
                 de.appendBanks(eaxtbankSci);               
             }
             List<DetectorResponse> cherenkovs = eb.getEvent().getCherenkovResponseList();
-            if(cherenkovBank!=null && cherenkovs.size()>0) {
+            if(cherenkovBank!=null && !cherenkovs.isEmpty()) {
                 DataBank bankChe = DetectorData.getCherenkovResponseBank(cherenkovs, de, cherenkovBank);
                 de.appendBanks(bankChe);
             }
             
             List<DetectorResponse> taggers = eb.getEvent().getTaggerResponseList();
-            if (ftBank!=null && taggers.size()>0) {
+            if (ftBank!=null && !taggers.isEmpty()) {
                 DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(taggers, de, ftBank);
                 de.appendBanks(bankForwardTagger);
             }
 
-            if (trackBank!=null && (tracks.size()>0 || ctracks.size()>0) ) {
+            if (trackBank!=null && (!tracks.isEmpty() || !ctracks.isEmpty()) ) {
                 final int ntracks = tracks.size() + ctracks.size();
                 DataBank bankTrack = DetectorData.getTracksBank(eb.getEvent().getParticles(), de, trackBank, ntracks);
                 de.appendBanks(bankTrack);
@@ -210,6 +216,11 @@ public class EBEngine extends ReconstructionEngine {
                 if (bankTraj != null) de.appendBanks(bankTraj);
                 DataBank bankCovMat = DetectorData.getCovMatrixBank(eb.getEvent().getParticles(), de, covMatrixBank);
                 if (bankCovMat != null) de.appendBanks(bankCovMat);
+
+                if (!cutracks.isEmpty()) {
+                    DataBank x = DetectorData.getUTracksBank(eb.getEvent().getParticles(), de, UtrackBank, cutracks.size());
+                    de.appendBanks(x);
+                }
             }
       
             // update PID for FT-based start time:
@@ -265,6 +276,10 @@ public class EBEngine extends ReconstructionEngine {
         this.trackBank = trackBank;
     }
     
+    public void setUTrackBank(String trackBank) {
+        this.UtrackBank = trackBank;
+    }
+    
     public void setFTBank(String ftBank) {
         this.ftBank = ftBank;
     }
@@ -297,6 +312,14 @@ public class EBEngine extends ReconstructionEngine {
         this.trajectoryType = trajectoryType;
     }
 
+    public void setCvtTrackType(String trackType) {
+        this.cvtTrackType = trackType;
+    }
+    
+    public void setCvtTrajType(String trajectoryType) {
+        this.cvtTrajType = trajectoryType;
+    }
+    
     @Override
     public boolean init() {
 

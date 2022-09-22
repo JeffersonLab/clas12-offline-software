@@ -52,7 +52,7 @@ public class DCHBPostClusterConv extends DCEngine {
         if(run==0) return true;
         
         /* IO */
-        HitReader      reader = new HitReader(this.getBanks());
+        HitReader      reader = new HitReader(this.getBanks(), Constants.getInstance().dcDetector);
         RecoBankWriter writer = new RecoBankWriter(this.getBanks());
         // get Field
         Swim dcSwim = new Swim();
@@ -64,7 +64,7 @@ public class DCHBPostClusterConv extends DCEngine {
         List<FittedHit> fhits = new ArrayList<>();
         
         //1) read the hits from the banks
-        Map<Integer, ArrayList<FittedHit>> hits = reader.read_Hits(event, Constants.getInstance().dcDetector);
+        Map<Integer, ArrayList<FittedHit>> hits = reader.read_Hits(event);
         if(hits == null || hits.isEmpty())
             return true;
         //2) find the clusters from these hits
