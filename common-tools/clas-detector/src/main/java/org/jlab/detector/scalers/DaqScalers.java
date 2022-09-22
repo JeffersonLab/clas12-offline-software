@@ -172,9 +172,11 @@ public class DaqScalers {
     public static List<Bank> createBanks(SchemaFactory schema,Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable) {
         DaqScalers ds = DaqScalers.create(rawScalerBank,fcupTable,slmTable,helTable);
         List<Bank> ret = new ArrayList<>();
+        // only add the RUN::scaler bank if we actually got a DSC2 readout:
         if (ds.dsc2.getClock()>0 || ds.dsc2.getGatedClock()>0) {
             ret.add(ds.createRunBank(schema));
         }
+        // only add the HEL::scaler bank if we actually got a Struck readout:
         if (!ds.struck.isEmpty()) {
             ret.add(ds.createHelicityBank(schema));
         }
@@ -193,9 +195,11 @@ public class DaqScalers {
     public static List<Bank> createBanks(SchemaFactory schema,Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable,double seconds) {
         DaqScalers ds = DaqScalers.create(rawScalerBank,fcupTable,slmTable,helTable,seconds);
         List<Bank> ret = new ArrayList<>();
+        // only add the RUN::scaler bank if we actually got a DSC2 readout:
         if (ds.dsc2.getClock()>0 || ds.dsc2.getGatedClock()>0) {
             ret.add(ds.createRunBank(schema));
         }
+        // only add the HEL::scaler bank if we actually got a Struck readout:
         if (!ds.struck.isEmpty()) {
             ret.add(ds.createHelicityBank(schema));
         }
