@@ -48,6 +48,11 @@ public class StruckScaler extends DaqScaler {
         return this.interval;
     }
 
+    @Override
+    public String toString() {
+        return String.format("i=%s h=%d q=%d %s",this.interval,this.helicity.value(),this.quartet.value(),super.toString());
+    }
+
     /**
      * Convenience for mapping channel number in RAW::scaler to input signal.
      */
@@ -167,6 +172,7 @@ public class StruckScaler extends DaqScaler {
      * @param slmTable /runcontrol/slm CCDB table
      * @param helTable /runcontrol/helicity CCDB table
      */
+    @Deprecated
     public StruckScaler(Bank bank,IndexedTable fcupTable, IndexedTable slmTable, IndexedTable helTable) {
 
         // the STRUCK's clock is 1 MHz
@@ -197,8 +203,8 @@ public class StruckScaler extends DaqScaler {
             switch (bank.getInt("slot",k)) {
                 case SLOT_GATED:
                     if (Input.equals(Input.FCUP, chan)) {
-                        this.helicity = HelicityBit.create(bank.getByte("helicity",k));
-                        this.quartet = HelicityBit.create(bank.getByte("quartet",k));
+                        this.helicity = HelicityBit.createFromRawBit(bank.getByte("helicity",k));
+                        this.quartet = HelicityBit.createFromRawBit(bank.getByte("quartet",k));
                         this.gatedFcup = bank.getLong("value",k);
                     }
                     else if (Input.equals(Input.SLM, chan)) {

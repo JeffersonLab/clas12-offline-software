@@ -26,7 +26,7 @@ public class DaqScaler {
     public final double getLivetimeClock() { return (double)this.gatedClock / this.clock; }
     public final double getLivetimeFcup() {return (double)this.gatedFcup / this.fcup; } 
     public final double getLivetimeSLM() {return (double)this.gatedSlm / this.slm; } 
-       
+
     protected double beamCharge=0;
     protected double beamChargeGated=0;
     protected double beamChargeSLM=0;
@@ -45,7 +45,21 @@ public class DaqScaler {
 
     @Override
     public String toString() {
-        return String.format("%d %d %d %d %d %d",fcup,clock,slm,gatedFcup,gatedClock,gatedSlm);
+        return String.format("c=%d/%d f=%d/%d s=%d/%d",clock,gatedClock,fcup,gatedFcup,slm,gatedSlm);
+    }
+
+    /**
+     * Add raw values from another scaler reading to this one.
+     * Note, corresponding beam charges will need to be calibrated.
+     * @param other 
+     */
+    public void add(DaqScaler other) {
+        this.fcup += other.fcup;
+        this.slm += other.slm;
+        this.clock += other.clock;
+        this.gatedFcup += other.gatedFcup;
+        this.gatedClock += other.gatedClock;
+        this.gatedSlm += other.gatedSlm;
     }
 
     /**
@@ -83,7 +97,7 @@ public class DaqScaler {
             }
         }
     }
-   
+
     /**
      * Use the scaler's own clock to get dwell and live-dwell times
      * @param fcupTable /runcontrol/fcup CCDB table

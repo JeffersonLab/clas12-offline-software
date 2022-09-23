@@ -97,7 +97,7 @@ public class DaqScalers {
      * @return 
      */
     public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable,double seconds) {
-        StruckScalers struck = StruckScalers.readAllPruned(rawScalerBank,fcupTable,slmTable,helTable);
+        StruckScalers struck = StruckScalers.read(rawScalerBank,fcupTable,slmTable,helTable);
         Dsc2Scaler dsc2 = new Dsc2Scaler(rawScalerBank,fcupTable,slmTable,seconds);
         DaqScalers ds = new DaqScalers();
         ds.dsc2 = dsc2;
@@ -140,7 +140,8 @@ public class DaqScalers {
         Bank bank = new Bank(schema.getSchema("RUN::scaler"),1);
         bank.putFloat("fcup",0,(float)this.dsc2.getBeamCharge());
         bank.putFloat("fcupgated",0,(float)this.dsc2.getBeamChargeGated());
-        bank.putFloat("livetime",0,(float)this.struck.get(this.struck.size()-1).getLivetimeClock());
+        if (this.struck.size() > 0)
+          bank.putFloat("livetime",0,(float)this.struck.get(this.struck.size()-1).getLivetimeClock());
         return bank;
     }
 

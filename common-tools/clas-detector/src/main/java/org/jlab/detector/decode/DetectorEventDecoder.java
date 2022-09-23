@@ -100,7 +100,7 @@ public class DetectorEventDecoder {
         });
         fitterManager.init(keysFitter, tablesFitter);
 
-        scalerManager.init(Arrays.asList(new String[]{"/runcontrol/fcup","/runcontrol/slm","/runcontrol/hwp"}));
+        scalerManager.init(Arrays.asList(new String[]{"/runcontrol/fcup","/runcontrol/slm","/runcontrol/hwp","/runcontrol/helicity"}));
     }
 
     /**

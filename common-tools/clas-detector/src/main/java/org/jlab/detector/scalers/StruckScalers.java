@@ -10,55 +10,89 @@ import org.jlab.detector.scalers.StruckScaler.Input;
 
 /**
  *
- * This is an extension of the StruckScaler class to support multiple tstable
- * helicity intervals in a single RAW::scaler bank.
+ * This is an extension of the StruckScaler class to support multiple intervals
+ * reported in a single RAW::scaler bank, merge intervals created from false
+ * advances, strip out single types of helicity intervals, e.g., tstable, 
+ * disentangle odd readout patterns, etc. 
  * 
  * @author baltzell
  */
 public class StruckScalers extends ArrayList<StruckScaler> {
 
+    IndexedTable fcupTable;
+    IndexedTable slmTable;
+    IndexedTable helTable;
+
+    /**
+     * @param fcupTable CCDB's /runcontrol/fcup
+     * @param slmTable CCDB's /runcontrol/slm
+     * @param helTable CCDB's /runcontrol/helicity
+     * @param bank a RAW::scaler bank
+     * @return
+     */
+    public static StruckScalers read(Bank bank, IndexedTable fcupTable, IndexedTable slmTable, IndexedTable helTable) {
+        StruckScalers ss = new StruckScalers(fcupTable, slmTable, helTable);
+        ss.read(bank);
+        ss.disentangle();
+        System.out.println("--------------------------------------");
+        System.out.println(ss);
+        System.out.println("--------------------------------------");
+        ss.add();
+        ss.strip();
+        ss.calibrate();
+        return ss;        
+    }
+
     @Override
     public String toString() {
         String ret = new String();
         for (StruckScaler ss : this) {
-            ret += ss.toString();
-            ret += "\n"+super.toString();
+            ret += ss.toString() + "\n";
         }
         return ret;
     }
 
     /**
+     * @param fcupTable CCDB's /runcontrol/fcup
+     * @param slmTable CCDB's /runcontrol/slm
+     * @param helTable CCDB's /runcontrol/helicity
+     */
+    private StruckScalers(IndexedTable fcupTable, IndexedTable slmTable, IndexedTable helTable) {
+        this.fcupTable = fcupTable;
+        this.slmTable = slmTable;
+        this.helTable = helTable;
+    }
+
+    /**
      * Get all intervals readout in one RAW::scaler bank.
      * @param bank a RAW::scaler bank
-     * @param fcupTable /runcontrol/fcup CCDB table
-     * @param slmTable /runcontrol/slm CCDB table
-     * @param helTable /runcontrol/helicity CCDB table
-     * @return all tstable intervals 
      */
-    public static StruckScalers readAll(Bank bank, IndexedTable fcupTable, IndexedTable slmTable, IndexedTable helTable) {
+    private void read(Bank bank) {
 
-        StruckScalers ret = new StruckScalers();
         StruckScaler reading = new StruckScaler();
 
         for (int k=0; k<bank.getRows(); ++k) {
 
+            // we've got other types of scalers in RAW::scaler, ignore them:
             if (bank.getInt("crate",k) != StruckScaler.CRATE) continue;
+            if (bank.getInt("slot",k) != StruckScaler.SLOT_GATED &&
+                bank.getInt("slot",k) != StruckScaler.SLOT_UNGATED) continue;
 
             final int chan = bank.getInt("channel",k);
             final Interval intvl = Interval.create(chan);
 
-            // Found a new interval:
-            if (ret.isEmpty() || intvl != ret.get(ret.size()-1).getInterval()) {
+            // found a new interval, register it:
+            if (this.isEmpty() || intvl != this.get(this.size()-1).getInterval()) {
                 reading = new StruckScaler();
                 reading.setInterval(intvl);
-                ret.add(reading);
+                this.add(reading);
             }
 
             switch (bank.getInt("slot",k)) {
                 case StruckScaler.SLOT_GATED:
                     if (Input.equals(Input.FCUP, chan)) {
-                        reading.helicity = HelicityBit.create(bank.getByte("helicity",k));
-                        reading.quartet = HelicityBit.create(bank.getByte("quartet",k));
+                        reading.helicity = HelicityBit.createFromRawBit(bank.getByte("helicity",k));
+                        reading.quartet = HelicityBit.createFromRawBit(bank.getByte("quartet",k));
                         reading.gatedFcup = bank.getLong("value",k);
                     }
                     else if (Input.equals(Input.SLM, chan)) {
@@ -82,41 +116,82 @@ public class StruckScalers extends ArrayList<StruckScaler> {
                 default:
                     break;
             }
-            
         }
-
-        // go back and "calibrate" all of them, e.g. convert to beam charge and livetime:
-        for (StruckScaler ss : ret) { 
-            ss.calibrate(fcupTable,slmTable);
-        }
-
-        return ret;
     }
 
     /**
-     * Get all the "good" helicity intervals readout in one RAW::scaler bank.
-     * Here "good" means tstable, which requires an existing clock reading that
-     * also looks like the tstable helicity interval.  Note, this should also
-     * get rid of any cases where things didn't get fully initialized and resulted
-     * in -1 values in HEL::scaler.
-     * @param bank a RAW::scaler bank
-     * @param fcupTable /runcontrol/fcup CCDB table
-     * @param slmTable /runcontrol/slm CCDB table
-     * @param helTable /runcontrol/helicity CCDB table
-     * @return all tstable intervals 
+     * Convert raw scaler counts into beam charge:
      */
-    public static StruckScalers readAllPruned(Bank bank, IndexedTable fcupTable, IndexedTable slmTable, IndexedTable helTable) {
-        StruckScalers ret = StruckScalers.readAll(bank, fcupTable, slmTable, helTable);
-        for (StruckScaler ss : ret) {
-            if (ss.getHelicityInterval(helTable) != HelicityInterval.TSTABLE) {
-                ret.remove(ss);
-            }
+    private void calibrate() {
+        for (StruckScaler ss : this) {
+            ss.calibrate(this.fcupTable, this.slmTable);
         }
-        return ret;
     }
 
-    public static void main(String[] args) {
-        StruckScalers s = new StruckScalers();
-        System.out.println(s);
+    /**
+     * When there's one interval in a RAW::scaler bank, that interval is 
+     * represented by contiguous bank rows.  But when there's multiple intervals,
+     * the gated/ungated are interspersed.  Here we disentangle that mess.
+     */
+    private void disentangle() {
+        for (int ii=0; ii<this.size(); ii+=2) {
+            
+        }
+        
     }
+
+    /**
+     * Merge two intervals into one by adding their contents.
+     * @param source the interval to remove after adding it to the other one
+     * @param destination the interval to update and keep 
+     */
+    private void add(int source, int destination) {
+        this.get(destination).add(this.get(source));
+        this.remove(source);
+    }
+
+    /**
+     * Identify intervals created by false advances, remove them, and add them
+     * to the previous interval.
+     */
+    private void add() {
+        while (true) {
+            boolean added = false;
+            for (int ii=1; ii<this.size(); ii++) {
+                if (this.get(ii).helicity != this.get(ii-1).helicity) continue;
+                this.add(ii, ii-1);
+                added = true; 
+            }
+            if (!added) break;
+        }
+    }
+
+    /**
+     * Remove all non-tstable intervals.  Note, this should also get rid of any
+     * cases where things didn't get fully initialized and resulted in -1 values
+     * in HEL::scaler, e.g. when the Struck isn't even readout but the RAW::scaler
+     * bank exists.
+     */
+    private void strip() {
+        this.strip(HelicityInterval.TSTABLE);
+    }
+
+    /**
+     * Remove all intervals that don't look like the given interval.
+     * @param interval the type of helicity interval to preserve
+     */
+    private void strip(HelicityInterval interval) {
+        while (true) {
+            boolean removed = false;
+            for (int ii=0; ii<this.size(); ii++) {
+                if (this.get(ii).getHelicityInterval(this.helTable) != interval) {
+                    this.remove(ii);
+                    removed = true;
+                    break;
+                }
+            }
+            if (!removed) break;
+        }
+    }
+
 }
