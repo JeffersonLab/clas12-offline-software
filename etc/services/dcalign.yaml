@@ -53,7 +53,7 @@ services:
     name: RTPC
 configuration:
   global:
-    variation: rga_fall2018
+    variation: rgb_spring2019
 #      timestamp: 12/31/2020-00:00:00
   io-services:
     writer:
