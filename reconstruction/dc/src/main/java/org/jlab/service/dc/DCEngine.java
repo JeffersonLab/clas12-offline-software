@@ -21,6 +21,7 @@ public class DCEngine extends ReconstructionEngine {
     private boolean    useStartTime   = true;
     private boolean    useBetaCut     = false;
     private boolean    useDoublets    = true;
+    private boolean    dcrbJitter     = false;
     private boolean    swapDCRBBits   = false;
     private int        t2d            = 1;
     private int        nSuperLayer    = 5;
@@ -72,7 +73,10 @@ public class DCEngine extends ReconstructionEngine {
         if(this.getEngineConfigString("dcDoublets")!=null)       
             useDoublets = Boolean.valueOf(this.getEngineConfigString("dcDoublets"));
         
-        
+        //Apply the jitter correction based on DCRB timestamps
+        if(this.getEngineConfigString("dcrbJitter")!=null)       
+            dcrbJitter = Boolean.valueOf(this.getEngineConfigString("dcrbJitter"));
+                
         //Swap DCRB timestamp bits
         if(this.getEngineConfigString("swapDCRBBits")!=null)       
             swapDCRBBits = Boolean.valueOf(this.getEngineConfigString("swapDCRBBits"));
@@ -144,6 +148,7 @@ public class DCEngine extends ReconstructionEngine {
                                            useBetaCut, 
                                            t2d,
                                            useDoublets,
+                                           dcrbJitter,
                                            swapDCRBBits,
                                            nSuperLayer, 
                                            selectedSector,

@@ -191,6 +191,14 @@ public class HitReader {
         return jitter;
     }
     
+    private int getJitter(int sector, int layer, int wire, int order) {
+        int jitter = this.getTIJitter();  // use TI jitter correction by default, but replace with DCRB correction if available
+        if(Constants.getInstance().useDCRBJITTER() && dcrbjitters!=null && reverseTT!=null) {
+            jitter = this.getDCRBJitter(sector, layer, wire, order);
+        }
+        return jitter;
+    }
+    
     public void fetch_DCHits(DataEvent event, Clas12NoiseAnalysis noiseAnalysis,
                              NoiseReductionParameters parameters,
                              Clas12NoiseResult results) {
@@ -240,13 +248,8 @@ public class HitReader {
             superlayer[i] = (bankDGTZ.getByte("layer", i)-1)/6 + 1;
             wire[i]       = bankDGTZ.getShort("component", i);
             order[i]      = bankDGTZ.getByte("order", i);
-            tdc[i]        = bankDGTZ.getInt("TDC", i);
-            jitter[i]     = this.getTIJitter();  // use TI jitter correction by default, but replace with DCRB correction if available
-            if(dcrbjitters!=null && reverseTT!=null) {
-                jitter[i] = this.getDCRBJitter(sector[i], bankDGTZ.getByte("layer", i), wire[i], order[i]);
-//                if(jitter[i]!=-4*bankDGTZ.getByte("order", i)) System.out.println(jitter[i] + " " + -4*bankDGTZ.getByte("order", i));
-            }
-            tdc[i] -= jitter[i];
+            jitter[i]     = this.getJitter(sector[i], bankDGTZ.getByte("layer", i), wire[i], order[i]);
+            tdc[i]        = bankDGTZ.getInt("TDC", i) - jitter[i];
         }
 
 
