@@ -26,7 +26,7 @@ public class RebuildScalers {
 
     static final String CCDB_FCUP_TABLE="/runcontrol/fcup";
     static final String CCDB_SLM_TABLE="/runcontrol/slm";
-    static final String CCDB_HEL_TABLE="/runcontrol/slm";
+    static final String CCDB_HEL_TABLE="/runcontrol/helicity";
     
     public static void main(String[] args) {
 
