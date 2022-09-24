@@ -152,7 +152,7 @@ public class HitReader {
         return jitter;
     }
 
-    private void getDCRBJitters() {
+    private void getDCRBJitters(boolean swapBits) {
         
         if(tiTimeStamp>=0 && event.hasBank(bankNames.getTimeStampBank())) {
             
@@ -163,6 +163,9 @@ public class HitReader {
                 int  crate     = bankTS.getByte("crate", i);
                 int  slot      = bankTS.getByte("slot", i);
                 long timestamp = bankTS.getLong("timestamp", i);
+                if(swapBits) {
+                    timestamp = (Long) (((timestamp&0x0000ffffff000000L)>>24)|((timestamp&0x0000000000ffffffL)<<24));
+                }
                 int  jitter    = (int) (tiTimeStamp-(2*timestamp-4))*4;
                 dcrbjitters.addEntry(crate, slot);
                 dcrbjitters.setIntValue(jitter, "jitter", crate, slot);
@@ -217,7 +220,7 @@ public class HitReader {
             return;
         }
         
-        this.getDCRBJitters();
+        this.getDCRBJitters(Constants.getInstance().isSWAPDCRBBITS());
         
         DataBank bankDGTZ = event.getBank(bankNames.getTdcBank());
 

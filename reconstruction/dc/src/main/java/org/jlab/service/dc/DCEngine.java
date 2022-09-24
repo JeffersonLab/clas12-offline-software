@@ -9,7 +9,6 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.banks.Banks;
-import org.jlab.utils.groups.IndexedTable;
 
 public class DCEngine extends ReconstructionEngine {
 
@@ -21,7 +20,8 @@ public class DCEngine extends ReconstructionEngine {
     private boolean    wireDistortion = false;
     private boolean    useStartTime   = true;
     private boolean    useBetaCut     = false;
-    private boolean    useDoublets    = false;
+    private boolean    useDoublets    = true;
+    private boolean    swapDCRBBits   = false;
     private int        t2d            = 1;
     private int        nSuperLayer    = 5;
     private String     geoVariation   = "default";
@@ -71,6 +71,11 @@ public class DCEngine extends ReconstructionEngine {
         //Recover hit doublets
         if(this.getEngineConfigString("dcDoublets")!=null)       
             useDoublets = Boolean.valueOf(this.getEngineConfigString("dcDoublets"));
+        
+        
+        //Swap DCRB timestamp bits
+        if(this.getEngineConfigString("swapDCRBBits")!=null)       
+            swapDCRBBits = Boolean.valueOf(this.getEngineConfigString("swapDCRBBits"));
         
         //NSUPERLAYERTRACKING
         if(this.getEngineConfigString("dcFOOST")!=null)
@@ -139,6 +144,7 @@ public class DCEngine extends ReconstructionEngine {
                                            useBetaCut, 
                                            t2d,
                                            useDoublets,
+                                           swapDCRBBits,
                                            nSuperLayer, 
                                            selectedSector,
                                            shifts);
