@@ -50,7 +50,7 @@ public class DaqScaler {
 
     /**
      * Add raw values from another scaler reading to this one.
-     * Note, corresponding beam charges will need to be calibrated.
+     * Note, "calibrate" will need to be called afterwards.
      * @param other 
      */
     public void add(DaqScaler other) {

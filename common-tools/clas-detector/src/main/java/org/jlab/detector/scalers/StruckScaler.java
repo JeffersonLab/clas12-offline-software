@@ -12,6 +12,9 @@ import org.jlab.detector.helicity.HelicityInterval;
  * The CLAS12 DAQ uses this device to readout helicity-latched counts for the
  * purpose of beam-spin asymmetry measurements, and that's what this class is
  * geared towards.
+ *
+ * At some point over the years, readout patterns changed and this class alone
+ * is no longer sufficient.  See StruckScalers instead.
  * 
  * @author baltzell
  */
@@ -39,7 +42,7 @@ public class StruckScaler extends DaqScaler {
     private static final int CHAN_SLM_B=33;
     private static final int CHAN_CLOCK_B=34;
 
-    private Interval interval;
+    protected Interval interval;
 
     public void setInterval(Interval intvl) {
         this.interval = intvl;
@@ -124,9 +127,9 @@ public class StruckScaler extends DaqScaler {
     public HelicityInterval getHelicityInterval(long clock, IndexedTable helTable) {
         final double clockSeconds = (double)clock / this.clockFreq;
         // these guys are in microseconds in CCDB, convert them to seconds:
-        final double tsettleSeconds = 1E6 * helTable.getDoubleValue("tsettle",0,0,0);
-        final double tstableSeconds = 1E6 * helTable.getDoubleValue("tstable",0,0,0);
-        return HelicityInterval.create(clockSeconds, tstableSeconds, tsettleSeconds);
+        final double tsettleSeconds = 1E-6 * helTable.getDoubleValue("tsettle",0,0,0);
+        final double tstableSeconds = 1E-6 * helTable.getDoubleValue("tstable",0,0,0);
+        return HelicityInterval.createLoose(clockSeconds, tsettleSeconds, tstableSeconds);
     }
     
     /**
@@ -137,7 +140,6 @@ public class StruckScaler extends DaqScaler {
     public HelicityInterval getHelicityInterval(IndexedTable helTable) {
         return this.getHelicityInterval(this.clock, helTable);
     }
-
 
     /**
      * Look for the first ungated clock readout whose value corresponds to the
@@ -180,7 +182,6 @@ public class StruckScaler extends DaqScaler {
 
         // Here we're going to assume the stable period is the same Struck
         // period throughout a single readout.  Almost always correct ...
-        // FIXME
         Interval stablePeriod = this.getStableInterval(bank, helTable);
 
         // Couldn't find an ungated clock in the stable period, so there's
