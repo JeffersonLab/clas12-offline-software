@@ -10,17 +10,16 @@ public enum HelicityInterval {
     TSTABLE,
     UDF;
 
-    private static final double tolerance = 0.1;
-
     /**
-     * Determine whether the clock looks more like tsettle or tstable intervals.
-     * All three just need to be in the same units.
+     * Determine whether the clock looks like tsettle or tstable intervals within 
+     * a given relative tolerance.  All three times just need to be in the same units.
+     * @param tolerance
      * @param clock
      * @param tsettle
      * @param tstable
      * @return the type of helicity interval 
      */
-    public static HelicityInterval createStrict(double clock, double tsettle, double tstable) {
+    public static HelicityInterval createStrict(double tolerance, double clock, double tsettle, double tstable) {
         if (clock < 0) {
             return UDF;
         }
@@ -33,7 +32,17 @@ public enum HelicityInterval {
         return UDF;
     }
 
-    public static HelicityInterval createLoose(double clock, double tsettle, double tstable) {
+    /**
+     * Determine whether the clock looks more like tsettle within a given 
+     * tolerance, else assume it's tstable.  All three times just need to be
+     * in the same units.
+     * @param tolerance
+     * @param clock
+     * @param tsettle
+     * @param tstable
+     * @return the type of helicity interval 
+     */
+    public static HelicityInterval createLoose(double tolerance, double clock, double tsettle, double tstable) {
         if (clock < 0) {
             return UDF;
         }
@@ -42,5 +51,6 @@ public enum HelicityInterval {
         }
         return TSTABLE;
     }
+    
 }
 
