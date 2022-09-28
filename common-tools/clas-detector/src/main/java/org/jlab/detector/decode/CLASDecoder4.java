@@ -590,28 +590,32 @@ public class CLASDecoder4 {
      * @param event
      * @return 
      */
-    public Bank[] createReconScalerBanks(Event event){
+    public List<Bank> createReconScalerBanks(Event event){
+
+        List<Bank> ret = new ArrayList<>();
 
         // abort if run number corresponds to simulation:
-        if (this.detectorDecoder.getRunNumber() < 1000) return null;
+        if (this.detectorDecoder.getRunNumber() < 1000) return ret;
 
         // abort if we don't know about the required banks:
-        if(schemaFactory.hasSchema("RUN::config")==false) return null;
-        if(schemaFactory.hasSchema("RAW::scaler")==false) return null;
-        if(schemaFactory.hasSchema("RUN::scaler")==false) return null;
+        if(schemaFactory.hasSchema("RUN::config")==false) return ret;
+        if(schemaFactory.hasSchema("RAW::scaler")==false) return ret;
+        if(schemaFactory.hasSchema("RUN::scaler")==false) return ret;
 
         // retrieve necessary input banks, else abort:
         Bank configBank = new Bank(schemaFactory.getSchema("RUN::config"),1);
         Bank rawScalerBank = new Bank(schemaFactory.getSchema("RAW::scaler"),1);
         event.read(configBank);
         event.read(rawScalerBank);
-        if (configBank.getRows()<1 || rawScalerBank.getRows()<1) return null;
+        if (configBank.getRows()<1 || rawScalerBank.getRows()<1) return ret;
 
         // retrieve fcup/slm calibrations from slm:
         IndexedTable fcupTable = this.detectorDecoder.scalerManager.
                 getConstants(this.detectorDecoder.getRunNumber(),"/runcontrol/fcup");
         IndexedTable slmTable = this.detectorDecoder.scalerManager.
                 getConstants(this.detectorDecoder.getRunNumber(),"/runcontrol/slm");
+        IndexedTable helTable = this.detectorDecoder.scalerManager.
+                getConstants(this.detectorDecoder.getRunNumber(),"/runcontrol/helicity");
 
         // get unix event time (in seconds), and convert to Java's date (via milliseconds):
         Date uet=new Date(configBank.getInt("unixtime",0)*1000L);
@@ -624,9 +628,10 @@ public class CLASDecoder4 {
         }
         catch (Exception e) {
             // abort if no RCDB access (e.g. offsite)
-            return null;
+            return ret;
         }
-        return DaqScalers.createBanks(schemaFactory,rawScalerBank,fcupTable,slmTable,rst,uet);
+        ret.addAll(DaqScalers.createBanks(schemaFactory,rawScalerBank,fcupTable,slmTable,helTable,rst,uet));
+        return ret;
     }
     
     public Bank createBonusBank(){
@@ -831,15 +836,12 @@ public class CLASDecoder4 {
                     
                     if(rawScaler.getRows()>0) scalerEvent.write(rawScaler);
                     if(rawRunConf.getRows()>0) scalerEvent.write(rawRunConf);
-                    
-                    Bank[] scalers = decoder.createReconScalerBanks(decodedEvent);
-                    if (scalers != null) {
-                        for (Bank b : scalers) {
-                            decodedEvent.write(b);
-                            scalerEvent.write(b);
-                        }
+
+                    for (Bank b : decoder.createReconScalerBanks(decodedEvent)) {
+                        decodedEvent.write(b);
+                        scalerEvent.write(b);
                     }
-                    
+
                     if (epics!=null) {
                         decodedEvent.write(epics);
                         scalerEvent.write(epics);

@@ -929,7 +929,6 @@ public class CodaEventDecoder {
                     Byte    slot = (Byte)     cdataitems.get(position);
                     //Integer trig = (Integer)  cdataitems.get(position+1);
                     Long    time = (Long)     cdataitems.get(position+2);
-                    // swap first and second 24 bits
                     Integer nchannels = (Integer) cdataitems.get(position+3);
                     int counter  = 0;
                     position = position + 4;
@@ -1167,7 +1166,7 @@ public class CodaEventDecoder {
             for(EvioNode node : cbranch.getNodes()){
                 if(node.getTag()==57607){
                     int[] intData = ByteDataTransformer.toIntArray(node.getStructureBuffer(true));
-                    for(int loop = 0; loop < intData.length; loop++){
+                    for(int loop = 2; loop < intData.length; loop++){
                         int  dataEntry = intData[loop];
                         int  slot      = DataUtils.getInteger(dataEntry, 27, 31 );
                         int  chan      = DataUtils.getInteger(dataEntry, 19, 25);
