@@ -99,6 +99,13 @@
     "entries": [
         {"name":"ID",             "type":"S", "info":"ID"},
         {"name":"fittingMethod",  "type":"B", "info":"fitting method (1 for global fit, 2 for Kalman Filter)"},
+        {"name":"c_x",            "type":"F", "info":"x-coordinate of a helical trk point extrapolated to a cylinder at 25 cm radius from the lab origin (cm unit)"},
+        {"name":"c_y",            "type":"F", "info":"y-coordinate of a helical trk point extrapolated to a cylinder at 25 cm radius from the lab origin (cm unit)"},
+        {"name":"c_z",            "type":"F", "info":"z-coordinate of a helical trk point extrapolated to a cylinder at 25 cm radius from the lab origin (cm unit)b"},
+        {"name":"c_ux",           "type":"F", "info":"x-coordinate of a helical trk direction extrapolated to a cylinder at 25 cm radius from the lab origin (cm unit)"},
+        {"name":"c_uy",           "type":"F", "info":"y-coordinate of a helical trk direction extrapolated to a cylinder at 25 cm radius from the lab origin (cm unit)"},
+        {"name":"c_uz",           "type":"F", "info":"z-coordinate of a helical trk direction extrapolated to a cylinder at 25 cm radius from the lab origin (cm unit)"},
+        {"name":"pathlength",     "type":"F", "info":"total pathlength from the origin to the reference point (in cm)"},
         {"name":"q",              "type":"B", "info":"charge"},
         {"name":"p",              "type":"F", "info":"total momentum"},
         {"name":"pt",             "type":"F", "info":"transverse momentum"},

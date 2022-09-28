@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
+import org.jlab.logging.DefaultLogger;
 import org.jlab.utils.benchmark.ProgressPrintout;
 
 import org.jlab.utils.options.OptionParser;
@@ -69,6 +70,8 @@ public class DictionaryCreator {
 
     public static void main(String[] args) {
         
+        DefaultLogger.debug();
+
         OptionParser parser = new OptionParser("dict-validation");
         parser.addRequired("-o"      , "dictionary file name");
         parser.addRequired("-i"      , "event file");
