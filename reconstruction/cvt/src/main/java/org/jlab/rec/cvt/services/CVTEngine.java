@@ -77,8 +77,8 @@ public class CVTEngine extends ReconstructionEngine {
     private String  matrixLibrary       = "EJML";
     private boolean useOnlyTruth        = false;
     private boolean useSVTLinkerSeeder  = true;
-    private double docacut = 0.65;
-    private double docacutsum = 1.1;
+    private double docacut = 0.75;
+    private double docacutsum = 1.15;
     private int svtmaxclussize = 100;
     private int bmtcmaxclussize = 100;
     private int bmtzmaxclussize = 100;
