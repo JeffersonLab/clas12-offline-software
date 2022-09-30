@@ -32,5 +32,6 @@
     <module>swaps</module>
     <module>raster</module>
     <module>vtx</module>
+    <module>alert</module>
   </modules>
 </project>
