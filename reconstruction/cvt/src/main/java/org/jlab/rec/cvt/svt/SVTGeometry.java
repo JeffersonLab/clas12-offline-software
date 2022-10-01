@@ -474,4 +474,27 @@ public class SVTGeometry {
         else
             return true;
     }
+    
+    public boolean isInside(int layer, int sector, Point3D traj) {
+        
+        Point3D local = this.toLocal(layer, sector, traj);
+        
+        if(local.x()<0 || local.x()>SVTConstants.ACTIVESENWID)
+            return false;
+        else if(local.z()<0 || local.z()>SVTConstants.MODULELEN)
+            return false;
+        else
+            return true;
+    }
+    
+    public double distanceToEdge(int layer, int sector, Point3D traj) {
+        
+        if(this.isInside(layer, sector, traj)) {
+            Point3D local = this.toLocal(layer, sector, traj);
+            double xmin = Math.min(local.x(), SVTConstants.ACTIVESENWID-local.x());
+            double zmin = Math.min(local.z(), SVTConstants.MODULELEN-local.z());
+            return Math.min(xmin, zmin);
+        }
+        return 0;
+    }
 }

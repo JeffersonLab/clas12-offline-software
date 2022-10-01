@@ -130,7 +130,7 @@ public class DCHBPostClusterAI extends DCEngine {
             for (Track trk : trkcands) {
                 // reset the id
                 trk.set_Id(trkId);
-                trkcandFinder.matchHits(trk.get_Trajectory(),
+                trkcandFinder.matchHits(trk.getStateVecs(),
                         trk,
                         Constants.getInstance().dcDetector,
                         dcSwim);
@@ -147,6 +147,7 @@ public class DCHBPostClusterAI extends DCEngine {
                         if(h2.get_AssociatedHBTrackID()>0) fhits.add(h2);
                     }
                 }
+                trk.calcTrajectory(trk.getId(), dcSwim, trk.get_Vtx0(), trk.get_pAtOrig(), trk.get_Q());
                 trkId++;
             }
         }
@@ -166,7 +167,8 @@ public class DCHBPostClusterAI extends DCEngine {
                     writer.fillHBSegmentsBank(event, segments),
                     writer.fillHBCrossesBank(event, crosses),
                     writer.fillHBTracksBank(event, trkcands),
-                    writer.fillHBHitsTrkIdBank(event, fhits) );
+                    writer.fillHBHitsTrkIdBank(event, fhits),
+                    writer.fillHBTrajectoryBank(event, trkcands));
         } 
         return true;
     }

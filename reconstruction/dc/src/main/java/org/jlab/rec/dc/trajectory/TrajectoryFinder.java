@@ -56,14 +56,14 @@ public class TrajectoryFinder {
             return traj;
         }
         traj.addAll(candCrossList);
-        traj.set_Sector(candCrossList.get(0).get_Sector());
+        traj.setSector(candCrossList.get(0).get_Sector());
         fitTrajectory(traj);
         if (this.TrajChisqProbFitXZ<Constants.TCHISQPROBFITXZ) {
             return null;
         }
-        traj.set_Trajectory(getStateVecsAlongTrajectory(DcDetector));
-        traj.set_IntegralBdl(integralBdl(candCrossList.get(0).get_Sector(), DcDetector, dcSwim));
-        traj.set_PathLength(PathLength);
+        traj.setStateVecs(getStateVecsAlongTrajectory(DcDetector));
+        traj.setIntegralBdl(integralBdl(candCrossList.get(0).get_Sector(), DcDetector, dcSwim));
+        traj.setPathLength(PathLength);
         
         return traj;
     }

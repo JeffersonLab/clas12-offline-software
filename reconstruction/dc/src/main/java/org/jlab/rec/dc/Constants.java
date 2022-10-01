@@ -87,10 +87,10 @@ public class Constants {
     public FTOFGeant4Factory  ftofDetector = null;
     public Detector           ecalDetector = null;
     public Detector           fmtDetector  = null;
-    public TrajectorySurfaces tSurf        = null;
+    public TrajectorySurfaces trajSurfaces        = null;
     
-    public static final double HTCCRADIUS=175;
-    public static final double LTCCPLANE=653.09;
+    public static final double HTCCRADIUS = 175;
+    public static final double LTCCPLANE  = 653.09;
     
     // other CLAS12 parameters
     public static final  int NSECT  = 6;
@@ -504,8 +504,8 @@ public class Constants {
         ecalDetector =  GeometryFactory.getDetector(DetectorType.ECAL, 11, geoVariation);
         fmtDetector =  GeometryFactory.getDetector(DetectorType.FMT, 11, geoVariation);
         // create the surfaces
-        tSurf = new TrajectorySurfaces();
-        tSurf.LoadSurfaces(targetPosition, targetLength,dcDetector, ftofDetector, ecalDetector, fmtDetector);        
+        trajSurfaces = new TrajectorySurfaces();
+        trajSurfaces.loadSurface(targetPosition, targetLength,dcDetector, ftofDetector, ecalDetector, fmtDetector);        
     }
    
 

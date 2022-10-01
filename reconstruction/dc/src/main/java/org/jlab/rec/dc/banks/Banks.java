@@ -74,7 +74,7 @@ public class Banks {
     
     private String getOutputBank(String item) {
         String bank = this.outBankType + "::" + this.outPrefix + item;
-        if(outPrefix.equals("TB") && item.equals("Trajectory"))
+        if((outPrefix.equals("HB") || outPrefix.equals("TB")) && item.equals("Trajectory"))
             bank = this.outBankType + "::" + item;
         return bank;
     }
