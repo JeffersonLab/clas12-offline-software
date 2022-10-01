@@ -62,6 +62,8 @@ public class Constants {
     private boolean CHECKBETA = false;
     private int     T2D = 1;     // 1=polynomial, 0=exponential
     private boolean USEDOUBLETS = false;
+    private boolean DCRBJITTER = false;
+    private boolean SWAPDCRBBITS = false;
     
     // DATABASE TABLES
     public static final String TT             = "/daq/tt/dc";
@@ -311,6 +313,22 @@ public class Constants {
     public void setUSEDOUBLETS(boolean USEDOUBLETS) {
         this.USEDOUBLETS = USEDOUBLETS;
     }
+
+    public boolean useDCRBJITTER() {
+        return DCRBJITTER;
+    }
+
+    public void setDCRBJITTER(boolean DCRBJITTER) {
+        this.DCRBJITTER = DCRBJITTER;
+    }
+
+    public boolean isSWAPDCRBBITS() {
+        return SWAPDCRBBITS;
+    }
+
+    public void setSWAPDCRBBITS(boolean SWAPDCRBBITS) {
+        this.SWAPDCRBBITS = SWAPDCRBBITS;
+    }
     
     public synchronized void initialize(String engine,
                                         String variation, 
@@ -319,6 +337,8 @@ public class Constants {
                                         boolean useBetaCut,
                                         int t2d, 
                                         boolean useDoublets,
+                                        boolean dcrbJitter,
+                                        boolean swapDCRBBits,
                                         int nSuperLayer,
                                         int selectedSector,
                                         double[][] shifts) {
@@ -332,6 +352,8 @@ public class Constants {
             CHECKBETA       = useBetaCut;
             T2D             = t2d;
             USEDOUBLETS     = useDoublets;
+            DCRBJITTER      = dcrbJitter;  
+            SWAPDCRBBITS    = swapDCRBBits;
             NSUPERLAYERTRACKING = nSuperLayer;
             SECTORSELECT    = selectedSector;
 
@@ -367,6 +389,8 @@ public class Constants {
         LOGGER.log(Level.INFO, "["+engine+"] run with with Beta cut = " + CHECKBETA);
         LOGGER.log(Level.INFO, "["+engine+"] run with time to distance function set to exponential/polynomial (0/1) = " + T2D);
         LOGGER.log(Level.INFO, "["+engine+"] run with with hit doublets recovery = " + USEDOUBLETS);
+        LOGGER.log(Level.INFO, "["+engine+"] run with with DCRB jitter correction = " + SWAPDCRBBITS);
+        LOGGER.log(Level.INFO, "["+engine+"] run with with DCRB timestamp bit swap = " + SWAPDCRBBITS);
         LOGGER.log(Level.INFO, "["+engine+"] run with with Five-out-of-six-superlayer-trkg = " + NSUPERLAYERTRACKING);        
     }
     

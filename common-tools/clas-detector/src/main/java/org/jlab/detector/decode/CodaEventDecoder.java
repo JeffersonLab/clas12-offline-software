@@ -929,8 +929,6 @@ public class CodaEventDecoder {
                     Byte    slot = (Byte)     cdataitems.get(position);
                     //Integer trig = (Integer)  cdataitems.get(position+1);
                     Long    time = (Long)     cdataitems.get(position+2);
-                    // swap first and second 24 bits
-                    Long ts = (Long) (((time&0x0000ffffff000000L)>>24)|((time&0x0000000000ffffffL)<<24));
                     Integer nchannels = (Integer) cdataitems.get(position+3);
                     int counter  = 0;
                     position = position + 4;
@@ -941,7 +939,7 @@ public class CodaEventDecoder {
                         counter++;
                         DetectorDataDgtz   entry = new DetectorDataDgtz(crate,slot,channel);
                         entry.addTDC(new TDCData(tdc));
-                        entry.setTimeStamp(ts);
+                        entry.setTimeStamp(time);
                         entries.add(entry);
                     }
                 }
@@ -1168,7 +1166,7 @@ public class CodaEventDecoder {
             for(EvioNode node : cbranch.getNodes()){
                 if(node.getTag()==57607){
                     int[] intData = ByteDataTransformer.toIntArray(node.getStructureBuffer(true));
-                    for(int loop = 0; loop < intData.length; loop++){
+                    for(int loop = 2; loop < intData.length; loop++){
                         int  dataEntry = intData[loop];
                         int  slot      = DataUtils.getInteger(dataEntry, 27, 31 );
                         int  chan      = DataUtils.getInteger(dataEntry, 19, 25);
