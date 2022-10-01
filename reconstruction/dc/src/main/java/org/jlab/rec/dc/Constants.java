@@ -87,7 +87,7 @@ public class Constants {
     public FTOFGeant4Factory  ftofDetector = null;
     public Detector           ecalDetector = null;
     public Detector           fmtDetector  = null;
-    public TrajectorySurfaces trajSurfaces        = null;
+    public TrajectorySurfaces trajSurfaces = null;
     
     public static final double HTCCRADIUS = 175;
     public static final double LTCCPLANE  = 653.09;
