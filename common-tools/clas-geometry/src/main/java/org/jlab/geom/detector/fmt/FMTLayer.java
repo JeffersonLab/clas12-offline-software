@@ -3,6 +3,8 @@ package org.jlab.geom.detector.fmt;
 import org.jlab.geom.DetectorId;
 import org.jlab.geom.abs.AbstractLayer;
 import org.jlab.geom.component.TrackerStrip;
+import org.jlab.geom.prim.Sector3D;
+import org.jlab.geom.prim.Transformation3D;
 
 /**
  * A Forward Micromegas Tracker  (FMT) {@link org.jlab.geom.base.Layer Layer}.
@@ -21,8 +23,7 @@ import org.jlab.geom.component.TrackerStrip;
  */
 public class FMTLayer extends AbstractLayer<TrackerStrip> {
     
-    private double rmin;
-    private double rmax;
+    private Sector3D arcSector = new Sector3D();
     
     protected FMTLayer(int sectorId, int superlayerId, int layerId) {
         super(DetectorId.FMT, sectorId, superlayerId, layerId, false);
@@ -42,15 +43,7 @@ public class FMTLayer extends AbstractLayer<TrackerStrip> {
      * @return
      */
     public double getRmin() {
-        return rmin;
-    }
-
-    /**
-     * Set the minimum radius
-     * @param rmin
-     */
-    public void setRmin(double rmin) {
-        this.rmin = rmin;
+        return arcSector.innerRadius();
     }
 
     /**
@@ -58,16 +51,19 @@ public class FMTLayer extends AbstractLayer<TrackerStrip> {
      * @return
      */
     public double getRmax() {
-        return rmax;
+        return arcSector.outerRadius();
     }
 
     /**
-     * Set the maximum radius
-     * @param rmax
+     * Returns the Sector3D describing the layer surface
+     * @return
      */
-    public void setRmax(double rmax) {
-        this.rmax = rmax;
+    public Sector3D getTrajectorySurface() {
+        return this.arcSector;
     }
-
     
+    @Override
+    protected void onSetTransformation(Transformation3D transform) {
+        transform.apply(arcSector);
+    }
 }

@@ -128,13 +128,13 @@ public class DCHBPostClusterConv extends DCEngine {
         /* 19 */
         // track found
         int trkId = 1;
-        if (trkcands.size() > 0) {
+        if (!trkcands.isEmpty()) {
             // remove overlaps
             trkcandFinder.removeOverlappingTracks(trkcands);
             for (Track trk : trkcands) {
                 // reset the id
                 trk.set_Id(trkId);
-                trkcandFinder.matchHits(trk.get_Trajectory(),
+                trkcandFinder.matchHits(trk.getStateVecs(),
                         trk,
                         Constants.getInstance().dcDetector,
                         dcSwim);
@@ -205,13 +205,13 @@ public class DCHBPostClusterConv extends DCEngine {
                 dcSwim, false);
 
         // remove overlaps
-        if (mistrkcands.size() > 0) {
+        if (!mistrkcands.isEmpty()) {
             trkcandFinder.removeOverlappingTracks(mistrkcands);
             for (Track trk : mistrkcands) {
-
+                
                 // reset the id
                 trk.set_Id(trkId);
-                trkcandFinder.matchHits(trk.get_Trajectory(),
+                trkcandFinder.matchHits(trk.getStateVecs(),
                         trk,
                         Constants.getInstance().dcDetector,
                         dcSwim);
@@ -232,6 +232,7 @@ public class DCHBPostClusterConv extends DCEngine {
         
         //gather all the hits for pointer bank creation
         for (Track trk : trkcands) {
+            trk.calcTrajectory(trk.getId(), dcSwim, trk.get_Vtx0(), trk.get_pAtOrig(), trk.get_Q());
             for (Cross c : trk) {
                 c.set_CrossDirIntersSegWires();
                 trkcandFinder.setHitDoubletsInfo(c.get_Segment1());
@@ -264,7 +265,8 @@ public class DCHBPostClusterConv extends DCEngine {
                     writer.fillHBSegmentsBank(event, segments),
                     writer.fillHBCrossesBank(event, crosses),
                     writer.fillHBTracksBank(event, trkcands),
-                    writer.fillHBHitsTrkIdBank(event, fhits));
+                    writer.fillHBHitsTrkIdBank(event, fhits),
+                    writer.fillHBTrajectoryBank(event, trkcands));
         }
         return true;
     }

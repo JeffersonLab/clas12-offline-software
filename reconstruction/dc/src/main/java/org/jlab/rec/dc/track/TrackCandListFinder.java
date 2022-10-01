@@ -296,7 +296,7 @@ public class TrackCandListFinder {
                 cand.set_Region1TrackX(trkR1X);
                 cand.set_Region1TrackP(new Point3D(trkDir.x(), trkDir.y(), trkDir.z()));
 
-                cand.set_PathLength(trkR3X.distance(trkVtx));
+                cand.setPathLength(trkR3X.distance(trkVtx));
             }
         }
     }
@@ -362,7 +362,7 @@ public class TrackCandListFinder {
         double uxOuter = VecAtTarOut[3] / cand.get_P();
         double uyOuter = VecAtTarOut[4] / cand.get_P();
         double uzOuter = VecAtTarOut[5] / cand.get_P();
-        //Cross crossR = new Cross(cand.get(2).get_Sector(), cand.get(2).get_Region(), -1);
+        //Cross crossR = new Cross(cand.get(2).getSector(), cand.get(2).get_Region(), -1);
         Cross crossR = new Cross(cand.get(cand.size() - 1).get_Sector(),
                 cand.get(cand.size() - 1).get_Region(), -1);
         Point3D xOuterExtp = crossR.getCoordsInLab(xOuter, yOuter, zOuter);
@@ -412,7 +412,7 @@ public class TrackCandListFinder {
                 -R3TrkMomentum.z(),
                 -cand.get_Q());
         // recalc new vertex using plane stopper
-        //int sector = cand.get(2).get_Sector();
+        //int sector = cand.get(2).getSector();
         int sector = cand.get(cand.size() - 1).get_Sector();
         double theta_n = ((double) (sector - 1)) * Math.toRadians(60.);
         double x_n = Math.cos(theta_n);
@@ -499,7 +499,7 @@ public class TrackCandListFinder {
         double uxOuter = VecAtTarOut[3] / cand.get_P();
         double uyOuter = VecAtTarOut[4] / cand.get_P();
         double uzOuter = VecAtTarOut[5] / cand.get_P();
-        //Cross crossR = new Cross(cand.get(2).get_Sector(), cand.get(2).get_Region(), -1);
+        //Cross crossR = new Cross(cand.get(2).getSector(), cand.get(2).get_Region(), -1);
         Cross crossR = new Cross(cand.get(cand.size() - 1).get_Sector(),
                 cand.get(cand.size() - 1).get_Region(), -1);
         Point3D xOuterExtp = crossR.getCoordsInLab(xOuter, yOuter, zOuter);
@@ -556,9 +556,9 @@ public class TrackCandListFinder {
         }
         
        // recalc new vertex using plane stopper
-        //int sector = cand.get(2).get_Sector();
+        //int sector = cand.get(2).getSector();
         //double[] Vt = null;
-        //int sector = cand.get(cand.size() - 1).get_Sector();
+        //int sector = cand.get(cand.size() - 1).getSector();
         //double theta_n = ((double) (sector - 1)) * Math.toRadians(60.);
         //double x_n = Math.cos(theta_n);
         //double y_n = Math.sin(theta_n);
@@ -663,6 +663,9 @@ public class TrackCandListFinder {
                 LOGGER.log(Level.FINE, "------------------------------------------------------------------ ");
             }
         }
+        List<Track> badTracks = new ArrayList<>();
+        for(Track t : trkcands) if(!t.isGood()) badTracks.add(t);
+        trkcands.removeAll(badTracks);
         
         List<Track> selectedTracks =  new ArrayList<>();
         for (int i = 0; i < trkcands.size(); i++) {
@@ -888,7 +891,7 @@ public class TrackCandListFinder {
             //look for straight tracks    
             if (aCrossList.size() == 3 && Math.abs(TORSCALE) < 0.001) {
                 cand.addAll(aCrossList);
-                cand.set_Sector(aCrossList.get(0).get_Sector());
+                cand.setSector(aCrossList.get(0).get_Sector());
                 //no field --> fit straight track
                 this.getStraightTrack(cand);
                 if (cand.get_pAtOrig() != null) {
@@ -934,12 +937,12 @@ public class TrackCandListFinder {
                             cand.set_FitConvergenceStatus(kFit.ConvStatus);
                             cand.set_Id(cands.size() + 1);
                             cand.set_CovMat(kFit.finalCovMat.covMat);
-                            cand.set_Trajectory(kFit.kfStateVecsAlongTrajectory);
+                            cand.setStateVecs(kFit.kfStateVecsAlongTrajectory);
                             // add candidate to list of tracks
                             cands.add(cand);
                         }
                     }
-                    //this.matchHits(traj.get_Trajectory(), cand, DcDetector);
+                    //this.matchHits(traj.getStateVecs(), cand, DcDetector);
                     cands.add(cand);
                 }
             }
@@ -981,16 +984,16 @@ public class TrackCandListFinder {
 
             if (aCrossList.size() == 3 && this.PassNSuperlayerTracking(aCrossList, cand)) {
                 cand.addAll(aCrossList);
-                cand.set_Sector(aCrossList.get(0).get_Sector());
+                cand.setSector(aCrossList.get(0).get_Sector());
 
                 // set the candidate trajectory using the parametrization of the track trajectory
                 // and estimate intefral Bdl along that path
-                cand.set_Trajectory(traj.get_Trajectory());
-                cand.set_IntegralBdl(traj.get_IntegralBdl());
+                cand.setStateVecs(traj.getStateVecs());
+                cand.setIntegralBdl(traj.getIntegralBdl());
 
                 //require 3 crosses to make a track (allows for 1 pseudo-cross)
                 if (cand.size() == 3) {
-                //    LOGGER.log(Level.FINE, "---- cand in sector " + aCrossList.get(0).get_Sector());
+                //    LOGGER.log(Level.FINE, "---- cand in sector " + aCrossList.get(0).getSector());
                 //    LOGGER.log(Level.FINE, aCrossList.get(0).printInfo());
                 //    LOGGER.log(Level.FINE, aCrossList.get(1).printInfo());
                 //    LOGGER.log(Level.FINE, aCrossList.get(2).printInfo());
@@ -1034,7 +1037,7 @@ public class TrackCandListFinder {
 
                     double chisq = Double.POSITIVE_INFINITY;
                     double chi2;
-                    double iBdl = traj.get_IntegralBdl();
+                    double iBdl = traj.getIntegralBdl();
                     double[] pars;
 
                     if(LOGGER.getLevel()==Level.FINE) {
@@ -1043,7 +1046,7 @@ public class TrackCandListFinder {
                     pars = getTrackInitFit(cand.get(0).get_Sector(), x1, y1, z1, x2, y2, z2, x3, y3, z3,
                             ux, uy, uz, thX, thY,
                             theta1s1, theta3s1,
-                            traj.get_IntegralBdl(), TORSCALE, dcSwim);
+                            traj.getIntegralBdl(), TORSCALE, dcSwim);
                     chi2 = pars[0];
                     if (chi2 < chisq) {
                         chisq = chi2;
@@ -1060,7 +1063,7 @@ public class TrackCandListFinder {
                     pars = getTrackInitFit(cand.get(0).get_Sector(), x1, y1, z1, x2, y2, z2, x3, y3, z3,
                             ux, uy, uz, thX, thY,
                             theta1s1, theta3s2,
-                            traj.get_IntegralBdl(), TORSCALE, dcSwim);
+                            traj.getIntegralBdl(), TORSCALE, dcSwim);
                     chi2 = pars[0];
                     if (chi2 < chisq) {
                         chisq = chi2;
@@ -1077,7 +1080,7 @@ public class TrackCandListFinder {
                     pars = getTrackInitFit(cand.get(0).get_Sector(), x1, y1, z1, x2, y2, z2, x3, y3, z3,
                             ux, uy, uz, thX, thY,
                             theta1s2, theta3s1,
-                            traj.get_IntegralBdl(), TORSCALE, dcSwim);
+                            traj.getIntegralBdl(), TORSCALE, dcSwim);
                     chi2 = pars[0];
                     if (chi2 < chisq) {
                         chisq = chi2;
@@ -1094,7 +1097,7 @@ public class TrackCandListFinder {
                     pars = getTrackInitFit(cand.get(0).get_Sector(), x1, y1, z1, x2, y2, z2, x3, y3, z3,
                             ux, uy, uz, thX, thY,
                             theta1s2, theta3s2,
-                            traj.get_IntegralBdl(), TORSCALE, dcSwim);
+                            traj.getIntegralBdl(), TORSCALE, dcSwim);
                     chi2 = pars[0];
                     if (chi2 < chisq) {
                         theta1 = theta1s2;
@@ -1110,7 +1113,7 @@ public class TrackCandListFinder {
                     // compute delta theta using the non-pseudo segments in region 1 and 3
 
                     // get integral Bdl from the swimmer trajectory
-                    //double iBdl = traj.get_IntegralBdl(); 
+                    //double iBdl = traj.getIntegralBdl(); 
                     if (iBdl != 0) {
                         // momentum estimate if Bdl is non zero and the track has curvature  
                         double p = calcInitTrkP(ux, uy, uz, thX, thY,
@@ -1174,7 +1177,7 @@ public class TrackCandListFinder {
                                 cand.set_FitConvergenceStatus(kFit.ConvStatus);
 
                                 cand.set_CovMat(kFit.finalCovMat.covMat);
-                                cand.set_Trajectory(kFit.kfStateVecsAlongTrajectory);
+                                cand.setStateVecs(kFit.kfStateVecsAlongTrajectory);
 
                                 cand.setFinalStateVec(fitStateVec);
                                 cand.set_Id(cands.size() + 1);

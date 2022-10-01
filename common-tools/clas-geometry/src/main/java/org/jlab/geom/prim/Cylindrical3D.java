@@ -424,9 +424,28 @@ public final class Cylindrical3D implements Face3D {
     private boolean checkTheta(Point3D point) {
         Vector3D pBA = baseArc.center().vectorTo(point);
         double t = baseArc.normal().angle(baseArc.originVector(), pBA);
+        if(t<0) t += 2*Math.PI;
         return (0 <= t && t <= baseArc.theta());
     }
     
+    /**
+     * Distance between the point and the closest cylinder edge 
+     * @param point the point
+     * @return distance if point is on the surface, 0 otherwise
+     */
+    public double distanceToEdge(Point3D point) {
+        if(this.isOnSurface(point)) {
+            Vector3D pBA = baseArc.center().vectorTo(point);
+            double h = pBA.dot(baseArc.normal().asUnit());
+            double t = baseArc.normal().angle(baseArc.originVector(), pBA);
+            if(t<0) t += 2*Math.PI;
+            double hmin = Math.min(h, height-h);
+            double rmin = Math.min(t, baseArc.theta()-t)*baseArc.radius();
+            return Math.min(hmin, rmin);
+        }
+        return 0;
+    }
+
     @Override
     public void translateXYZ(double dx, double dy, double dz) {
         baseArc.translateXYZ(dx, dy, dz);

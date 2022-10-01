@@ -2,6 +2,7 @@ package org.jlab.geom.detector.ec;
 
 import org.jlab.geom.DetectorId;
 import org.jlab.geom.abs.AbstractSuperlayer;
+import org.jlab.geom.prim.Triangle3D;
 
 
 /**
@@ -32,5 +33,17 @@ public class ECSuperlayer extends AbstractSuperlayer<ECLayer> {
     @Override
     public String getType() {
         return "EC Superlayer";
+    }
+    
+    /**
+     * Returns the superlayer thickness
+     * @return thickness
+     */
+    public double getThickness() {
+        double thickness = 0;
+        for(ECLayer layer : this.getAllLayers()) {
+            thickness += layer.getThickness();
+        }
+        return thickness;
     }
 }

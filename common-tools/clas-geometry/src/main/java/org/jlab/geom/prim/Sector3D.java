@@ -129,6 +129,46 @@ public final class Sector3D implements Face3D {
         return outerArc.radius();
     }
     
+    /**
+     * Test whether the given point is inside the area of this {@code Sector3D}.
+     * @param p the given point
+     * @return true if inside or false if outside
+     */
+    public boolean isInside(Point3D p) {
+
+        Arc3D  arc = this.innerArc();
+        double   r = p.distance(arc.center());
+        if(r > this.innerRadius() && r < this.outerRadius()) {
+            Vector3D vecP = arc.center().vectorTo(p);
+            Vector3D vecO = arc.center().vectorTo(arc.origin());
+            double  angle = vecP.angle(vecO);
+            if(angle<0) angle += 2*Math.PI;
+            if(angle<arc.theta())
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * Computes the minimum distance of the given point from the edges of 
+     * this {@code Sector3D}.
+     * @param p the given point
+     * @return the distance to the {@code Sector3D} edges if inside or 0 if outside
+     */    
+    public double distanceFromEdge(Point3D p) {
+        if(this.isInside(p)) {
+            double r = p.distance(this.innerArc().center());
+            double distance = Math.min(r-this.innerRadius(), this.outerRadius()-r);
+            for(int i=0; i<2; i++) {
+                double disti = new Line3D(this.point(i), this.point(i+2)).distance(p).length();
+                if(disti < distance) distance = disti;
+            }
+            return distance;
+        }
+        else
+            return 0;
+    }      
+
     @Override
     public Point3D point(int index) {
         switch (index) {

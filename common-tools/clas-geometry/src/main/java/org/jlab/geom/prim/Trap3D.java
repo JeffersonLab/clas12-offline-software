@@ -3,38 +3,38 @@ package org.jlab.geom.prim;
 import java.util.List;
 
 /**
- * A 3D triangle represented by three points.
+ * A 3D trapezoid represented by four points laying on the same plane.
  * <p>
- * Since any three points in 3D space that are not collinear define a plane,
- * a triangle can be converted into a plane via {@link #plane()}.
- * <p>
- * The normal of the surface of a triangle is oriented such that when looking
- * antiparallel to the normal towards the triangle the triangle's points wound
+ * The normal of the surface of a trapezoid is oriented such that when looking
+ * antiparallel to the normal towards the trapezoid the Trap's points wound
  * counterclockwise. Conversely, when looking in a direction parallel to the
  * normal, the points are wound in a clockwise fashion.
  * <p>
- * The intersection of a line with a triangle can be calculated using the
+ * The intersection of a line with a trapezoid can be calculated using the
  * intersection methods:
  * {@link #intersection(org.jlab.geom.prim.Line3D, List) intersection(...)}, 
  * {@link #intersectionRay(org.jlab.geom.prim.Line3D, List) intersectionRay(...)}, 
  * {@link #intersectionSegment(org.jlab.geom.prim.Line3D, List) intersectionSegment(...)}.
  *
- * @author gavalian
+ * @author devita
  */
-public final class Triangle3D implements Face3D {
+public final class Trap3D implements Face3D {
     private final Point3D point0 = new Point3D(); // the first point
     private final Point3D point1 = new Point3D(); // the second point
     private final Point3D point2 = new Point3D(); // the third point
-
+    private final Point3D point3 = new Point3D(); // the third point
+    
+    private final static double SMALL_NUMBER = 1E-6;
+    
     /**
-     * Constructs a new {@code Triangle3D} with all three points at the origin.
+     * Constructs a new {@code Trap3D} with all three points at the origin.
      */
-    public Triangle3D() {
+    public Trap3D() {
         // nothing to do
     }
 
     /**
-     * Constructs a new {@code Triangle3D} with the points at the specified
+     * Constructs a new {@code Trap3D} with the points at the specified
      * coordinates.
      *
      * @param x0 x coordinate of the first point
@@ -46,47 +46,58 @@ public final class Triangle3D implements Face3D {
      * @param x2 x coordinate of the third point
      * @param y2 y coordinate of the third point
      * @param z2 z coordinate of the third point
+     * @param x3 x coordinate of the fourth point
+     * @param y3 y coordinate of the fourth point
+     * @param z3 z coordinate of the fourth point
      */
-    public Triangle3D(
+    public Trap3D(
             double x0, double y0, double z0,
             double x1, double y1, double z1,
-            double x2, double y2, double z2) {
-        set(x0, y0, z0, x1, y1, z1, x2, y2, z2);
+            double x2, double y2, double z2,
+            double x3, double y3, double z3) {
+        set(x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3);
+        if(!isPlanar()) {
+            System.err.println("Error: provided points are not coplanar");
+        }
     }
 
     /**
-     * Constructs a new {@code Triangle3D} from the given points.
+     * Constructs a new {@code Trap3D} from the given points.
      *
      * @param point0 the first point
      * @param point1 the second point
      * @param point2 the third point
+     * @param point3 the fourth point
      */
-    public Triangle3D(Point3D point0, Point3D point1, Point3D point2) {
-        set(point0, point1, point2);
+    public Trap3D(Point3D point0, Point3D point1, Point3D point2, Point3D point3) {
+        set(point0, point1, point2, point3);
+        if(!isPlanar()) {
+            System.err.println("Error: provided points are not coplanar");
+        }
     }
 
     /**
-     * Constructs a new {@code Triangle3D} with its points coinciding with the
-     * points of the given triangle.
+     * Constructs a new {@code Trap3D} with its points coinciding with the
+     * points of the given Trap.
      *
-     * @param triangle the triangle to copy
+     * @param Trap the Trap to copy
      */
-    public Triangle3D(Triangle3D triangle) {
-        copy(triangle);
+    public Trap3D(Trap3D Trap) {
+        copy(Trap);
     }
 
     /**
-     * Sets the points of this {@code Triangle3D} to coincide with points of the
-     * given triangle.
+     * Sets the points of this {@code Trap3D} to coincide with points of the
+     * given Trap.
      *
-     * @param triangle the triangle to copy
+     * @param Trap the Trap to copy
      */
-    public void copy(Triangle3D triangle) {
-        set(triangle.point0, triangle.point1, triangle.point2);
+    public void copy(Trap3D Trap) {
+        set(Trap.point0, Trap.point1, Trap.point2, Trap.point3);
     }
 
     /**
-     * Sets the points of the triangle to coincide with the given coordinates.
+     * Sets the points of the Trap to coincide with the given coordinates.
      *
      * @param x0 x coordinate of the first point
      * @param y0 y coordinate of the first point
@@ -97,27 +108,43 @@ public final class Triangle3D implements Face3D {
      * @param x2 x coordinate of the third point
      * @param y2 y coordinate of the third point
      * @param z2 z coordinate of the third point
+     * @param x3 x coordinate of the fourth point
+     * @param y3 y coordinate of the fourth point
+     * @param z3 z coordinate of the fourth point
      */
     public void set(
             double x0, double y0, double z0,
             double x1, double y1, double z1,
-            double x2, double y2, double z2) {
+            double x2, double y2, double z2,
+            double x3, double y3, double z3) {
         point0.set(x0, y0, z0);
         point1.set(x1, y1, z1);
         point2.set(x2, y2, z2);
+        point3.set(x3, y3, z3);
     }
 
     /**
-     * Sets the points of this {@code Triangle3D} to coincide with the given points.
+     * Sets the points of this {@code Trap3D} to coincide with the given points.
      *
      * @param point0 the first point
      * @param point1 the second point
      * @param point2 the third point
+     * @param point3 the fourth point
      */
-    public void set(Point3D point0, Point3D point1, Point3D point2) {
+    public void set(Point3D point0, Point3D point1, Point3D point2, Point3D point3) {
         this.point0.copy(point0);
         this.point1.copy(point1);
         this.point2.copy(point2);
+        this.point3.copy(point3);
+    }
+    
+    /**
+     * Check trapezoid planarity
+     * 
+     * @return true if the four points are on a plane, false otherwise 
+     */
+    public boolean isPlanar() {
+        return this.isInPlane(point3);
     }
 
     @Override
@@ -129,23 +156,26 @@ public final class Triangle3D implements Face3D {
                 return point1;
             case 2:
                 return point2;
+            case 3:
+                return point3;
         }
-        System.err.println("Warning: Triangle3D point(int index): invalid index=" + index);
+        System.err.println("Warning: Trap3D point(int index): invalid index=" + index);
         return null;
     }
 
     /**
-     * Constructs a new {@code Point3D} at the geometric mean of the three
-     * points in this {@code Triangle3D}.
-     * @return the center of this {@code Triangle3D}
+     * Constructs a new {@code Point3D} at the geometric mean of the four
+     * points in this {@code Trap3D}.
+     * @return the center of this {@code Trap3D}
      */
     public Point3D center() {
-        return Point3D.average(point0, point1, point2);
+        return Point3D.average(point0, point1, point2, point3);
     }
 
     /**
-     * Constructs the unit vector normal to the plane of this {@code Triangle3D}.
-     * @return the normal to the plane of this {@code Triangle3D}
+     * Constructs the normal vector to the trapezoid plane, defined 
+     * from the first three points
+     * @return unit vector {@code Trap3D}
      */
     public Vector3D normal() {
         Vector3D vec1 = point0.vectorTo(point1);
@@ -154,23 +184,33 @@ public final class Triangle3D implements Face3D {
     }
     
     /**
-     * Constructs the the plane of this {@code Triangle3D}.
-     * @return the plane of this {@code Triangle3D}
+     * Constructs the plane representing the trapezoid surface
+     * @return the plane of this {@code Trap3D}
      */
     public Plane3D plane() {
         return new Plane3D(center(), normal());
     }
-    
+
     /**
-     * Test whether the given point is inside the area of this {@code Triangle3D}.
+     * Test whether the given point is in the trapezoid plane
+     * @param p the given point
+     * @return true or false {@code Trap3D}
+     */
+    public boolean isInPlane(Point3D p) {
+        double distance = Math.abs(point0.vectorTo(p).dot(this.normal()));
+        return distance<SMALL_NUMBER;
+    }
+
+    /**
+     * Test whether the given point is inside the area of this {@code Trap3D}.
      * @param p the given point
      * @return true if inside or false if outside
      */
     public boolean isInside(Point3D p) {
 
         Vector3D n = this.normal();
-        int sign = (int) Math.signum(this.point(2).vectorTo(this.point(0)).cross(this.point(2).vectorTo(p)).dot(n));
-        for(int i=0; i<2; i++) {
+        int sign = (int) Math.signum(this.point(3).vectorTo(this.point(0)).cross(this.point(3).vectorTo(p)).dot(n));
+        for(int i=0; i<3; i++) {
             int signi = (int) Math.signum(this.point(i).vectorTo(this.point(i+1)).cross(this.point(i).vectorTo(p)).dot(n));
             if(signi != sign)
                 return false;
@@ -180,14 +220,14 @@ public final class Triangle3D implements Face3D {
 
     /**
      * Computes the minimum distance of the given point from the edges of 
-     * this {@code Triangle3D}.
+     * this {@code Trap3D}.
      * @param p the given point
-     * @return the distance to the {@code Triangle3D} edges if inside or 0 if outside
+     * @return the distance to the {@code Trap3D} edges if inside or 0 if outside
      */
     public double distanceFromEdge(Point3D p) {
         if(this.isInside(p)) {
-            double distance = new Line3D(this.point(2), this.point(0)).distance(p).length();
-            for(int i=0; i<2; i++) {
+            double distance = new Line3D(this.point(3), this.point(0)).distance(p).length();
+            for(int i=0; i<3; i++) {
                 double disti = new Line3D(this.point(i), this.point(i+1)).distance(p).length();
                 if(disti < distance) distance = disti;
             }
@@ -196,7 +236,7 @@ public final class Triangle3D implements Face3D {
         else
             return 0;
     }             
-
+        
     @Override
     public int intersection(Line3D line, List<Point3D> intersections) {
         Vector3D v0 = point0.vectorTo(point1);
@@ -283,6 +323,7 @@ public final class Triangle3D implements Face3D {
         point0.translateXYZ(x, y, z);
         point1.translateXYZ(x, y, z);
         point2.translateXYZ(x, y, z);
+        point3.translateXYZ(x, y, z);
     }
 
     @Override
@@ -290,6 +331,7 @@ public final class Triangle3D implements Face3D {
         point0.rotateX(angle);
         point1.rotateX(angle);
         point2.rotateX(angle);
+        point3.rotateX(angle);
     }
 
     @Override
@@ -297,6 +339,7 @@ public final class Triangle3D implements Face3D {
         point0.rotateY(angle);
         point1.rotateY(angle);
         point2.rotateY(angle);
+        point3.rotateY(angle);
     }
 
     @Override
@@ -304,6 +347,7 @@ public final class Triangle3D implements Face3D {
         point0.rotateZ(angle);
         point1.rotateZ(angle);
         point2.rotateZ(angle);
+        point3.rotateZ(angle);
     }
 
     /**
@@ -316,9 +360,10 @@ public final class Triangle3D implements Face3D {
 
     @Override
     public String toString() {
-        return String.format("Triangle3D:\t(%12.5f %12.5f %12.5f) (%12.5f %12.5f %12.5f) (%12.5f %12.5f %12.5f)",
+        return String.format("Trap3D:\t(%12.5f %12.5f %12.5f) (%12.5f %12.5f %12.5f) (%12.5f %12.5f %12.5f) (%12.5f %12.5f %12.5f)",
                 point0.x(), point0.y(), point0.z(),
                 point1.x(), point1.y(), point1.z(),
-                point2.x(), point2.y(), point2.z());
+                point2.x(), point2.y(), point2.z(),
+                point3.x(), point3.y(), point3.z());
     }
 }
