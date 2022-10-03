@@ -1,12 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.detector.examples;
 
 import java.awt.BorderLayout;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -26,6 +20,7 @@ import org.jlab.io.base.DataEventType;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.task.DataSourceProcessorPane;
 import org.jlab.io.task.IDataEventListener;
+import org.jlab.logging.DefaultLogger;
 
 /**
  *
@@ -179,6 +174,7 @@ public class RawEventViewer implements IDataEventListener,DetectorListener {
     }
     
     public static void main(String[] args){
+        DefaultLogger.debug();
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         RawEventViewer viewer = new RawEventViewer();

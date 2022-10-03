@@ -76,8 +76,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * @param id
      */
     public FittedHit(int sector, int superlayer, int layer, int wire,
-            int TDC, int id) {
-        super(sector, superlayer, layer, wire, TDC, id);
+            int TDC, int jitter, int id) {
+        super(sector, superlayer, layer, wire, TDC, jitter, id);
         
         this.set_lX(layer);
         this.set_lY(layer, wire);
@@ -1068,7 +1068,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     @Override
     public FittedHit clone() throws CloneNotSupportedException {
         FittedHit hitClone = new FittedHit(this.get_Sector(), this.get_Superlayer(), this.get_Layer(), this.get_Wire(),
-                    this.get_TDC(), this.get_Id());
+                    this.get_TDC(), this.getJitter(), this.get_Id());
             hitClone.set_Doca(this.get_Doca());
             hitClone.set_DocaErr(this.get_DocaErr());
             hitClone.setT0(this.getT0()); 

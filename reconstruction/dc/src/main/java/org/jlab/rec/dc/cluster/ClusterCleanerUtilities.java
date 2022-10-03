@@ -371,7 +371,7 @@ public class ClusterCleanerUtilities {
         for (FittedHit hit : notLRClus) {
 
             FittedHit newhitPos = new FittedHit(hit.get_Sector(), hit.get_Superlayer(), hit.get_Layer(), hit.get_Wire(),
-                    hit.get_TDC(), hit.get_Id());
+                    hit.get_TDC(), hit.getJitter(), hit.get_Id());
             newhitPos.set_Doca(hit.get_Doca());
             newhitPos.set_DocaErr(hit.get_DocaErr());
             newhitPos.setT0(hit.getT0()); 
@@ -399,7 +399,7 @@ public class ClusterCleanerUtilities {
             newhitPos.set_AssociatedHBTrackID(hit.get_AssociatedHBTrackID());
 
             FittedHit newhitNeg = new FittedHit(hit.get_Sector(), hit.get_Superlayer(), hit.get_Layer(), hit.get_Wire(),
-                    hit.get_TDC(), hit.get_Id());
+                    hit.get_TDC(), hit.getJitter(), hit.get_Id());
             newhitNeg.set_Doca(hit.get_Doca());
             newhitNeg.set_DocaErr(hit.get_DocaErr());
             newhitNeg.setT0(hit.getT0()); 

@@ -3,6 +3,17 @@ package org.jlab.detector.scalers;
 import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.utils.groups.IndexedTable;
 
+/**
+ * The DSC2 is a JLab-designed discriminator board with 2 thresholds, called TDC
+ * and TRG, with independent outputs, both gated and ungated, and corresponding
+ * VME-readable scalers.
+ * 
+ * The CLAS12 DAQ uses this board to periodically readout run-integrated scalers
+ * like the Faraday cup and SLM, for the purposes of total beam-charge measurements,
+ * and that's what this class is geared towards.
+ * 
+ * @author baltzell
+ */
 public class Dsc2Scaler extends DaqScaler{
 
     private static final boolean GATEINVERTED=true;
@@ -18,7 +29,13 @@ public class Dsc2Scaler extends DaqScaler{
 
     public Dsc2Scaler() {}
 
-    public Dsc2Scaler(Bank bank,IndexedTable fcupTable,IndexedTable slmTable,double seconds) {
+    /**
+     * @param bank RAW::scaler bank
+     * @param fcupTable /runcontrol/fcup CCDB table
+     * @param slmTable  /runcontrol/slm CCDB table
+     * @param seconds dwell time, provided in case the clock rolls over
+     */
+    public Dsc2Scaler(Bank bank, IndexedTable fcupTable, IndexedTable slmTable, double seconds) {
 
         // the DSC2's clock is (currently) 1 MHz
         // FIXME:  use CCDB
@@ -67,7 +84,7 @@ public class Dsc2Scaler extends DaqScaler{
      * @param fcupTable /runcontrol/fcup CCDB table
      * @param slmTable  /runcontrol/slm CCDB table
      */
-    public Dsc2Scaler(Bank bank,IndexedTable fcupTable,IndexedTable slmTable) {
+    public Dsc2Scaler(Bank bank, IndexedTable fcupTable, IndexedTable slmTable) {
         this(bank,fcupTable,slmTable,1);
         this.calibrate(fcupTable,slmTable);
     }
@@ -80,7 +97,7 @@ public class Dsc2Scaler extends DaqScaler{
      * @param slmTable /runcontrol/slm CCDB table
      * @param seconds 
      */
-    protected final void calibrate(IndexedTable fcupTable,IndexedTable slmTable,double seconds) {
+    protected final void calibrate(IndexedTable fcupTable, IndexedTable slmTable, double seconds) {
         if (this.slm>0) {
             super.calibrate(fcupTable,slmTable,seconds,seconds*((double)this.gatedSlm)/this.slm);
         }

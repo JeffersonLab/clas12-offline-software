@@ -7,6 +7,7 @@ package org.jlab.rec.dc.banks;
 public class Banks {
     
     private final String tdcBank    = "DC::tdc";
+    private final String tsBank     = "DC::jitter";
     private final String docaBank   = "DC::doca";
     
     private final String aiBank     = "ai::tracks";
@@ -45,6 +46,10 @@ public class Banks {
     
     public String getTdcBank() {
         return tdcBank;
+    }
+
+    public String getTimeStampBank() {
+        return tsBank;
     }
 
     public String getDocaBank() {
