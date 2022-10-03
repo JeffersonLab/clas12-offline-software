@@ -1,12 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.analysis.eventmerger;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
+import org.jlab.logging.DefaultLogger;
 import org.jlab.utils.benchmark.ProgressPrintout;
 import org.jlab.utils.options.OptionParser;
 
@@ -24,17 +20,15 @@ import org.jlab.utils.options.OptionParser;
  * FIXME: event tags are not preserved
  */
 
-
 public class EventMerger {
-
    
     public EventMerger() {
     }
 
-    
-
     public static void main(String[] args)  {
-        
+
+        DefaultLogger.debug();
+
         OptionParser parser = new OptionParser("bg-merger");
         parser.addRequired("-o"    ,"merged file");
         parser.addRequired("-i"    ,"input data file");

@@ -6,6 +6,7 @@ import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.geom.prim.Line3D;
+import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 
 /**
@@ -24,6 +25,7 @@ public class URWellStrip implements Comparable {
     private int          TDC = 0;
     private int           id = -1;       // ID of the hit. this shows the row number of the corresponding hit in the ADC bank
     private int    clusterId = -1;       // Id (row number) of the cluster that this hit belongs to
+    private int       status = 0;
     
     private Line3D stripLine = new Line3D();    
     
@@ -105,11 +107,21 @@ public class URWellStrip implements Comparable {
     public void setTime(double time) {
         this.time = time;
     }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
     
     public boolean isNeighbour(URWellStrip strip){
         if(strip.getDescriptor().getSector()==this.desc.getSector()&&
            strip.getDescriptor().getLayer()==this.desc.getLayer()){
-           if(Math.abs(strip.getDescriptor().getComponent()-this.desc.getComponent())<=1) return true;
+            int s1 = strip.getDescriptor().getComponent();
+            int s2 = this.desc.getComponent();
+            if(Math.abs(s1-s2)<=1 && URWellConstants.getChamber(s1)==URWellConstants.getChamber(s2)) return true;
         }
         return false;
     }
@@ -132,43 +144,34 @@ public class URWellStrip implements Comparable {
     }
     
     public static List<URWellStrip> getStrips(DataEvent event, ConstantsManager ccdb) {
-        List<URWellStrip> hits = new ArrayList<>();
-//        if(event.hasBank("ECAL::adc")==true){
-//            DataBank bank = event.getBank("ECAL::adc");
-//            for(int i = 0; i < bank.rows(); i++){
-//                int  is = bank.getByte("sector", i);
-//                int  il = bank.getByte("layer", i); 
-//                int  ip = bank.getShort("component", i);
-//                int adc = bank.getInt("ADC", i);
-//                float t = bank.getFloat("time", i) + (float) tmf.getDoubleValue("offset",is,il,ip) // FADC-TDC offset (sector, layer, PMT)
-//                                                   + (float)  fo.getDoubleValue("offset",is,il,0); // FADC-TDC offset (sector, layer) 
-//                
-//		        if (status.getIntValue("status",is,il,ip)==3) continue;    
-//		    
-//                ECStrip  strip = new ECStrip(is, il, ip); 
-//                
-//                strip.setADC(adc);
+        
+        List<URWellStrip> strips = new ArrayList<>();
+        
+        if(event.hasBank("URWELL::adc")){
+            DataBank bank = event.getBank("URWELL::adc");
+            for(int i = 0; i < bank.rows(); i++){
+                int  sector = bank.getByte("sector", i);
+                int   layer = bank.getByte("layer", i); 
+                int    comp = bank.getShort("component", i);
+                int     adc = bank.getInt("ADC", i);
+                double time = bank.getFloat("time", i);
+                        
+                URWellStrip  strip = new URWellStrip(sector,  layer,   comp); 
+                
 //                strip.setTriggerPhase(triggerPhase);
-//                strip.setID(i+1);
-//                
-//                double sca = (is==5)?AtoE5[ind[il-1]]:AtoE[ind[il-1]]; 
-//                if (variation=="clas6") sca = 1.0;  
-//                
-//                if(strip.getADC()>sca*ECCommon.stripThreshold[ind[il-1]]) strips.add(strip); 
-//                
-//                float  tmax = 1000; int tdc = 0;
-//                
-//                if (tdcs.hasItem(is,il,ip)) {
-//                    float radc = (float)Math.sqrt(adc);
-//                    for (float tdcc : tdcs.getItem(is,il,ip)) {
-//                         float tdif = tps*tdcc - (float)gtw.getDoubleValue("time_walk",is,il,0)/radc - triggerPhase - FTOFFSET - t; 
-//                        if (Math.abs(tdif)<TMFCUT&&tdif<tmax) {tmax = tdif; tdc = (int)tdcc;}
-//                    }
-//                    strip.setTDC(tdc); 
-//                }              
-//            }
-//        }         
-        return hits;
+                strip.setId(i+1);
+                strip.setADC(adc);
+                strip.setTDC((int) time);
+                strip.setEnergy(strip.ADC*URWellConstants.ADCTOENERGY);
+                strip.setTime(strip.TDC*URWellConstants.TDCTOTIME);
+                strip.setLine(new Line3D(comp, -1, 0, comp, 1, 0)); //provisional for testing
+                strip.setStatus(0);
+                
+                if(strip.getEnergy()>URWellConstants.THRESHOLD) strips.add(strip);
+
+            }
+        }         
+        return strips;
     }
     
     @Override

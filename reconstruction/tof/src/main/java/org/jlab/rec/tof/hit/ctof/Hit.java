@@ -59,7 +59,8 @@ public class Hit extends AHit implements IGetCalibrationParams {
             IndexedTable constants2, 
             IndexedTable constants3, 
             IndexedTable constants5, 
-            IndexedTable constants8) {
+            IndexedTable constants8, 
+            IndexedTable constants9) {
         /*
         0: "/calibration/ctof/attenuation"),
         1: "/calibration/ctof/effective_velocity"),
@@ -67,7 +68,8 @@ public class Hit extends AHit implements IGetCalibrationParams {
         3: "/calibration/ctof/tdc_conv"),
         4: "/calibration/ctof/status"),
         5: "/calibration/ctof/gain_balance"),
-        5: "/calibration/ctof/hpos"));
+        5: "/calibration/ctof/hpos"),
+        5: "/calibration/ctof/hposbin"));
         */
         double pl = this.get_paddleLine().length();
 
@@ -88,6 +90,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
         double HPOSc = this.HPOSc(constants8);
         double HPOSd = this.HPOSd(constants8);
         double HPOSe = this.HPOSe(constants8);
+        double[] HPOSBIN = this.HPOSBIN(constants9);
         double lambdaU = this.lambda1(constants0);
         this.set_lambda1(lambdaU);
         this.set_lambda1Unc(this.lambda1Unc(constants0));
@@ -119,7 +122,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
         this.set_HitParams(superlayer, TW0U, TW0D, TW1U, TW1D, TW1P, TW2P, 
                 TW0E, TW1E, TW2E, TW3E, TW4E, 
-                HPOSa, HPOSb, HPOSc, HPOSd, HPOSe, lambdaU,lambdaD, 
+                HPOSa, HPOSb, HPOSc, HPOSd, HPOSe, HPOSBIN, lambdaU,lambdaD, 
                 yOffset, vU, vD, vUUnc, vDUnc, PEDU, PEDD, PEDUUnc,
                 PEDDUnc, paddle2paddle, RFPad, timeOffset, triggerPhase, LSBConv, LSBConvErr,
                 ADCUErr, ADCDErr, TDCUErr, TDCDErr, ADC_MIP, ADC_MIPErr,
@@ -290,6 +293,17 @@ public class Hit extends AHit implements IGetCalibrationParams {
     @Override
     public double HPOSe(IndexedTable tab) {
          return tab.getDoubleValue("hpose", this.get_Sector(),this.get_Panel(),this.get_Paddle());
+    }
+
+    @Override
+    public double[] HPOSBIN(IndexedTable tab) {
+        double[] hposbin = null;
+        if(tab.getDoubleValue("bin0", this.get_Sector(),this.get_Panel(),this.get_Paddle())!=0) {
+            hposbin = new double[Constants.HPOSBINS];
+            for(int i=0; i<hposbin.length; i++)
+                hposbin[i] = tab.getDoubleValue("bin"+(i+1), this.get_Sector(),this.get_Panel(),this.get_Paddle());
+        }
+        return hposbin;
     }
 
     @Override

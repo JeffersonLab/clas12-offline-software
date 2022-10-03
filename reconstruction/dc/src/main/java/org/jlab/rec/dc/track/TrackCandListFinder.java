@@ -672,8 +672,11 @@ public class TrackCandListFinder {
                 Track t2 = trkcands.get(j);
 //                LOGGER.log(Level.FINE, "Checking overlaps for tracks ");
 //                t1.printInfo();t2.printInfo();
-                if(i!=j && t1.overlaps(t2) && !t1.bestChi2(t2)) {
-                    overlap=true;
+                if(i!=j && t1.overlaps(t2)) {
+                    if(t1.get_FitChi2()>t2.get_FitChi2())
+                        overlap=true;
+                    else if(t1.get_FitChi2()==t2.get_FitChi2() && i>j)
+                        overlap=true;
                 }
 //               LOGGER.log(Level.FINE, overlap);
             }

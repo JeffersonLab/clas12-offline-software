@@ -6,6 +6,7 @@ import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 
 import org.jlab.rec.cvt.bmt.BMTType;
@@ -16,8 +17,8 @@ import org.jlab.rec.cvt.svt.SVTGeometry;
 
 public class TrackSeederCA {
 
-    private final SVTGeometry sgeo = Constants.SVTGEOMETRY;
-    private final BMTGeometry bgeo = Constants.BMTGEOMETRY;
+    private final SVTGeometry sgeo = Geometry.getInstance().getSVT();
+    private final BMTGeometry bgeo = Geometry.getInstance().getBMT();
     private double xbeam;
     private double ybeam;
     private double bfield;

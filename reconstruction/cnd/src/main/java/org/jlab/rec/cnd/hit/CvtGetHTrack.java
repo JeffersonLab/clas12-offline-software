@@ -40,14 +40,14 @@ public class CvtGetHTrack { // this class is used to extract helical tracks from
 			//System.out.println(" no event");
 		}
 
-		if (event.hasBank("CVTRec::Trajectory") == false) {
+		if (event.hasBank("CVT::Trajectory") == false) {
 			// check if there are some cvt tracks in the event
 			//System.out.println(" no cvt tracks");
 		}
 
-		if (event.hasBank("CVTRec::Trajectory") == true) {
+		if (event.hasBank("CVT::Trajectory") == true) {
 
-			DataBank bank = event.getBank("CVTRec::Trajectory");
+			DataBank bank = event.getBank("CVT::Trajectory");
 
 			int nt = bank.rows();   // number of tracks in the cvt event
 			CVTTrack trk = new CVTTrack();
@@ -119,14 +119,14 @@ public class CvtGetHTrack { // this class is used to extract helical tracks from
 
 		//old code (kept only for quick reference)
 /*
-		   if (event.hasBank("CVTRec::Tracks") == false) {
+		   if (event.hasBank("CVT::Tracks") == false) {
 			// check if there are some cvt tracks in the event
             //System.out.println(" no cvt tracks");
         }
-        if (event.hasBank("CVTRec::Tracks") == true) {
+        if (event.hasBank("CVT::Tracks") == true) {
 
             //System.out.println(" cvt tracks present");
-            DataBank bank = event.getBank("CVTRec::Tracks");
+            DataBank bank = event.getBank("CVT::Tracks");
             DataBank config = event.getBank("RUN::config");
 
             int nt = bank.rows();   // number of tracks in the cvt event

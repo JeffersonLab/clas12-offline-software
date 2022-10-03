@@ -293,7 +293,7 @@ public class CircleFitter {
         double Vp_phid = JVJT[1][2];
         double Vp_dd = JVJT[2][2];
         //3. Fill the covariance matrix
-        if(Constants.seedBeamSpotConstraint()==false) {
+        if(Constants.getInstance().seedBeamSpotConstraint()==false) {
             _covr[0] =  Vp_rhorho;
             _covr[1] =  Vp_rhophi;
             _covr[2] =  Vp_rhod;

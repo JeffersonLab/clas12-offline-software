@@ -437,13 +437,14 @@ public class ClusterFinder {
 
                     if (hit.get_LeftRightAmb() != 0) {
                         FittedHit newhit = new FittedHit(hit.get_Sector(), hit.get_Superlayer(), hit.get_Layer(), hit.get_Wire(),
-                                hit.get_TDC(), hit.get_Id());
+                                hit.get_TDC(), hit.getJitter(), hit.get_Id());
                         newhit.set_Doca(hit.get_Doca());
                         newhit.set_DocaErr(hit.get_DocaErr());
                         newhit.setT0(hit.getT0()); 
                         newhit.set_Beta(hit.get_Beta());
                         newhit.setB(hit.getB());
                         newhit.set_DeltaTimeBeta(hit.get_DeltaTimeBeta());
+                        newhit.set_DeltaDocaBeta(hit.get_DeltaDocaBeta());
                         newhit.setTStart(hit.getTStart());
                         newhit.setTProp(hit.getTProp());
                         newhit.betaFlag= hit.betaFlag;

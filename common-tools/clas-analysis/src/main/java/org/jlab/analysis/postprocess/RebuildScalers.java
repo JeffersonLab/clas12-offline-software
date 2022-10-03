@@ -12,6 +12,7 @@ import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.Event;
 import org.jlab.jnp.hipo4.io.HipoReader;
 import org.jlab.jnp.hipo4.io.HipoWriterSorted;
+import org.jlab.logging.DefaultLogger;
 import org.jlab.utils.groups.IndexedTable;
 import org.jlab.utils.options.OptionParser;
 import org.jlab.utils.system.ClasUtilsFile;
@@ -27,7 +28,9 @@ public class RebuildScalers {
     static final String CCDB_SLM_TABLE="/runcontrol/slm";
     
     public static void main(String[] args) {
-        
+
+        DefaultLogger.debug();
+
         OptionParser parser = new OptionParser("rebuildscaler");
         parser.addRequired("-o","output.hipo");
         parser.parse(args);

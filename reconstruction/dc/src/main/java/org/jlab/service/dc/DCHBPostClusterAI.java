@@ -53,7 +53,8 @@ public class DCHBPostClusterAI extends DCEngine {
         }
         
         /* IO */
-        HitReader reader      = new HitReader(this.getBanks());
+        HitReader reader      = new HitReader(this.getBanks(), Constants.getInstance().dcDetector);
+        reader.initialize(event);
         RecoBankWriter writer = new RecoBankWriter(this.getBanks());
         // get Field
         Swim dcSwim = new Swim();
@@ -70,7 +71,7 @@ public class DCHBPostClusterAI extends DCEngine {
         List<Segment> segments = null;
         List<FittedHit> fhits = null;
 
-        reader.read_NNHits(event, Constants.getInstance().dcDetector);
+        reader.read_NNHits(event);
 
         //I) get the lists
         List<Hit> hits = reader.get_DCHits();
