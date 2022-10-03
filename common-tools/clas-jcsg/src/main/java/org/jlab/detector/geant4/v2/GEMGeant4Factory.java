@@ -15,247 +15,11 @@ import org.jlab.detector.volume.G4World;
 import org.jlab.detector.volume.Geant4Basic;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geometry.prim.Line3d;
-
-/**
- *
- * @author kenjo
- */
-/*
-final class GEMdatabase {
-
-    private final int nSectors = 6;
-    private final int nRegions = 3;
-    private final int nSupers = 6;
-
-
-    private final double dist2tgt[] = new double[nRegions];
-    private final double xdist[] = new double[nRegions];
-    private final double frontgap[] = new double[nRegions];
-    private final double midgap[] = new double[nRegions];
-    private final double backgap[] = new double[nRegions];
-    private final double thopen[] = new double[nRegions];
-    private final double thtilt[] = new double[nRegions];
-
-    private final double thmin[] = new double[nSupers];
-    private final double thster[] = new double[nSupers];
-    private final double wpdist[] = new double[nSupers];
-    private final double cellthickness[] = new double[nSupers];
-    private final int nsenselayers[] = new int[nSupers];
-    private final int nguardlayers[] = new int[nSupers];
-    private final int nfieldlayers[] = new int[nSupers];
-    private final double superwidth[] = new double[nSupers];
-
-    private final double align_dx[][] = new double[nSectors][nRegions];
-    private final double align_dy[][] = new double[nSectors][nRegions];
-    private final double align_dz[][] = new double[nSectors][nRegions];
-
-    private final double align_dthetax[][] = new double[nSectors][nRegions];
-    private final double align_dthetay[][] = new double[nSectors][nRegions];
-    private final double align_dthetaz[][] = new double[nSectors][nRegions];
-    
-    private int nsensewires;
-    private int nguardwires;
-    
-  
-
-    
-    private final String dcdbpath = "/geometry/dc/";
-    private static GEMdatabase instance = null;
-
-    private GEMdatabase() {
-    }
-
-    public static GEMdatabase getInstance() {
-        if (instance == null) {
-            instance = new GEMdatabase();
-        }
-        return instance;
-    }
-
-    public void connect(ConstantProvider cp) {
-
-        nguardwires = cp.getInteger(dcdbpath + "layer/nguardwires", 0);
-        nsensewires = cp.getInteger(dcdbpath + "layer/nsensewires", 0);
-        
-        for (int ireg = 0; ireg < nRegions; ireg++) {
-            dist2tgt[ireg] = cp.getDouble(dcdbpath + "region/dist2tgt", ireg)*Length.cm;
-            xdist[ireg] = cp.getDouble(dcdbpath + "region/xdist", ireg)*Length.cm;
-            frontgap[ireg] = cp.getDouble(dcdbpath + "region/frontgap", ireg)*Length.cm;
-            midgap[ireg] = cp.getDouble(dcdbpath + "region/midgap", ireg)*Length.cm;
-            backgap[ireg] = cp.getDouble(dcdbpath + "region/backgap", ireg)*Length.cm;
-            thopen[ireg] = Math.toRadians(cp.getDouble(dcdbpath + "region/thopen", ireg));
-            thtilt[ireg] = Math.toRadians(cp.getDouble(dcdbpath + "region/thtilt", ireg));
-        }
-        for (int isuper = 0; isuper < nSupers; isuper++) {
-            thmin[isuper] = Math.toRadians(cp.getDouble(dcdbpath + "superlayer/thmin", isuper));
-            thster[isuper] = Math.toRadians(cp.getDouble(dcdbpath + "superlayer/thster", isuper));
-            wpdist[isuper] = cp.getDouble(dcdbpath + "superlayer/wpdist", isuper)*Length.cm;
-            cellthickness[isuper] = cp.getDouble(dcdbpath + "superlayer/cellthickness", isuper);
-            nsenselayers[isuper] = cp.getInteger(dcdbpath + "superlayer/nsenselayers", isuper);
-            nguardlayers[isuper] = cp.getInteger(dcdbpath + "superlayer/nguardlayers", isuper);
-            nfieldlayers[isuper] = cp.getInteger(dcdbpath + "superlayer/nfieldlayers", isuper);
-
-            superwidth[isuper] = wpdist[isuper] * (nsenselayers[isuper] + nguardlayers[isuper] - 1) * cellthickness[isuper];
-        }
-
-        int alignrows = cp.length(dcdbpath+"alignment/dx");
-        for(int irow = 0; irow< alignrows; irow++) {
-               int isec = cp.getInteger(dcdbpath + "alignment/sector",irow)-1;
-               int ireg = cp.getInteger(dcdbpath + "alignment/region",irow)-1;
-
-               align_dx[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dx",irow);
-               align_dy[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dy",irow);
-               align_dz[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dz",irow);
-
-               align_dthetax[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dtheta_x",irow);
-               align_dthetay[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dtheta_y",irow);
-               align_dthetaz[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dtheta_z",irow);
-        }
-        
-    }
-    
-    public double dist2tgt(int ireg) {
-        return dist2tgt[ireg];
-    }
-
-    public double xdist(int ireg) {
-        return xdist[ireg];
-    }
-
-    public double frontgap(int ireg) {
-        return frontgap[ireg];
-    }
-
-    public double midgap(int ireg) {
-        return midgap[ireg];
-    }
-
-    public double backgap(int ireg) {
-        return backgap[ireg];
-    }
-
-    public double thopen(int ireg) {
-        return thopen[ireg];
-    }
-
-    public double thtilt(int ireg) {
-        return thtilt[ireg];
-    }
-
-    public double thmin(int isuper) {
-        return thmin[isuper];
-    }
-
-    public double thster(int isuper) {
-        return thster[isuper];
-    }
-
-    public double wpdist(int isuper) {
-        return wpdist[isuper];
-    }
-
-    public double cellthickness(int isuper) {
-        return cellthickness[isuper];
-    }
-
-    public int nsenselayers(int isuper) {
-        return nsenselayers[isuper];
-    }
-
-    public int nguardlayers(int isuper) {
-        return nguardlayers[isuper];
-    }
-
-    public int nfieldlayers(int isuper) {
-        return nfieldlayers[isuper];
-    }
-
-    public double superwidth(int isuper) {
-        return superwidth[isuper];
-    }
-
-    public int nsensewires() {
-        return nsensewires;
-    }
-
-    public int nguardwires() {
-        return nguardwires;
-    }
-
-    public int nsuperlayers() {
-        return nSupers;
-    }
-
-    public int nregions() {
-        return nRegions;
-    }
-
-    public int nsectors() {
-        return nSectors;
-    }
-    
-    public double getAlignmentThetaX(int isec, int ireg) {
-        return align_dthetax[isec][ireg];
-    }
-
-    public double getAlignmentThetaY(int isec, int ireg) {
-        return align_dthetay[isec][ireg];
-    }
-
-    public double getAlignmentThetaZ(int isec, int ireg) {
-        return align_dthetaz[isec][ireg];
-    }
-
-    public Vector3d getAlignmentShift(int isec, int ireg) {
-        return new Vector3d(align_dx[isec][ireg], align_dy[isec][ireg], align_dz[isec][ireg]);
-    }
-}
-*/
-/*
-final class Strip extends Line3d {
-
-    public Strip(Vector3d origin, Vector3d end) {
-        super(origin, end);
-    }
-
-
-    public Vector3d dir() {
-        Vector3d dir = this.end().minus(this.origin()).normalized();
-        return dir;
-    }
-
-    public Vector3d top() {
-        if (this.origin().y < this.end().y) {
-            return new Vector3d(this.end());
-        }
-        return new Vector3d(this.origin());
-    }
-
-    public Vector3d bottom() {
-        if (this.origin().y < this.end().y) {
-            return new Vector3d(this.origin());
-        }
-        return new Vector3d(this.end());
-    }
-
-    public double length() {
-        Vector3d length = new Vector3d(this.end());
-        return length.minus(this.origin()).magnitude();
-    }
-
-    public Vector3d center() {
-        Vector3d center = this.origin().plus(this.end()).dividedBy(2.0);
-        return center;
-    }
-}
-*/
+import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 ///////////////////////////////////////////////////
 public final class GEMGeant4Factory extends Geant4Factory {
-
-//    GEMdatabase dbref = GEMdatabase.getInstance();
-
-  //  private final HashMap<String, String> properties = new HashMap<>();
-    private final double x_enlargement = 0.5;
+   private final double x_enlargement = 0.5;
     private final double y_enlargement = 1.;
     private final double z_enlargement = 0.1;
     private final double microgap = 0.01;
@@ -263,7 +27,7 @@ public final class GEMGeant4Factory extends Geant4Factory {
     private final double th_open = 54.; // opening angle between endplate planes
     private final double th_tilt = 25; // theta tilt
     private final double th_min = 4.694; // polar angle to the base of first chamber
-    private final double distance_urwell2dc0 = 4;
+    private final double distance_urwell2dc0 = 4.;
     private final double dist_2_tgt = (228.078-distance_urwell2dc0); //206.93 distance from the target to the first chamber - 228.078 is DC-region1
     private final double sector_height = 146.21;  //height of each sector 
     private final double dx0_chamber0 = 5.197;    // halfbase of chamber 1 
@@ -304,7 +68,7 @@ public final class GEMGeant4Factory extends Geant4Factory {
         double chamber_t =0;
          for (int i=0; i< chamber_volumes_thickness.length; i++ )chamber_t+=chamber_volumes_thickness[i];
          return chamber_t;
-}
+  }
 
     ///////////////////////////////////////////////////
     public Geant4Basic createRegion(int isector, int iregion) {
@@ -397,12 +161,14 @@ public final class GEMGeant4Factory extends Geant4Factory {
     }
 
 
-    public static void main(String[] args) {
+     public static void main(String[] args) {
         ConstantProvider cp = GeometryFactory.getConstants(DetectorType.DC, 11, "default");
         GEMGeant4Factory factory = new GEMGeant4Factory(cp);
             
         for(Geant4Basic volume : factory.getAllVolumes()) {
+     //       volume.get
             System.out.println(volume.gemcString());
         }
+
     }
 }
