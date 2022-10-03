@@ -26,7 +26,7 @@ public class CalibrationConstantsLoader {
                 "/calibration/cnd/Energy",
                 "/calibration/cnd/time_jitter",
 		"/geometry/cnd/cndgeom",
-		"/geometry/target"
+		"/geometry/target", "/calibration/cnd/cluster"
             };
 
         public CalibrationConstantsLoader(int run, ConstantsManager ccdb) {
@@ -53,6 +53,12 @@ public class CalibrationConstantsLoader {
 	public double[] THICKNESS                = new double[1];
 	public double[] INNERRADIUS              = new double[1];
 	public double[] ZTARGET                  = new double[1];
+
+    public double DX = 0;
+    public double DY = 0;
+    public double DZ = 0;
+    public double DT = 0;
+
 	//Calibration and geometry parameters from DB    
 
         public static String[] getCndTables() {
@@ -124,6 +130,10 @@ public class CalibrationConstantsLoader {
 //            for(int iLay = 1; iLay <=3; iLay++) {
 //              System.out.println("Length and Zoff "+LENGTH[iLay-1]+" "+ZOFFSET[iLay-1]);
 //            }
+             DX = tabJs.get(12).getDoubleValue("deltax", 0, 0, 0);
+             DY = tabJs.get(12).getDoubleValue("deltay", 0, 0, 0);
+             DZ = tabJs.get(12).getDoubleValue("deltaz", 0, 0, 0);
+             DT = tabJs.get(12).getDoubleValue("deltat", 0, 0, 0);
 
     } 
 
