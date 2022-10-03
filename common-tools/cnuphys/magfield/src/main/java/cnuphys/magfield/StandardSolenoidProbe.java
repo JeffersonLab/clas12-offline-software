@@ -33,7 +33,7 @@ public class StandardSolenoidProbe extends SolenoidProbe {
 
 	/**
 	 * Get the field in kG
-	 * 
+	 *
 	 * @param x      the x coordinate in cm
 	 * @param y      the y coordinate in cm
 	 * @param z      the z coordinate in cm
@@ -62,14 +62,14 @@ public class StandardSolenoidProbe extends SolenoidProbe {
 		y -= _solenoid.getShiftY();
 		z -= _solenoid.getShiftZ();
 
-		double rho = FastMath.sqrt(x * x + y * y);
+		double rho = Math.sqrt(x * x + y * y);
 		double phi = FastMath.atan2Deg(y, x);
 		fieldCylindrical(_cell, phi, rho, z, result);
 	}
 
 	/**
 	 * Get the field by bilinear interpolation.
-	 * 
+	 *
 	 * @param cell   holds cached nearest neighbors
 	 * @param phi    azimuthal angle in degrees.
 	 * @param rho    the cylindrical rho coordinate in cm.
@@ -91,13 +91,13 @@ public class StandardSolenoidProbe extends SolenoidProbe {
 		double rphi = Math.toRadians(phi);
 		double cos = Math.cos(rphi);
 		double sin = Math.sin(rphi);
-		
+
 		//The solenoid map has cylindrical field components
 		double bphi = result[0]; //0 if symmetric
 		double brho = result[1];
 		result[X] = (float) (brho * cos);
 		result[Y] = (float) (brho * sin);
-	
+
 
 		double sf = _solenoid.getScaleFactor();
 		result[X] *= sf;

@@ -148,7 +148,7 @@ public class ComponentZoomer implements MouseListener, MouseMotionListener {
 
 	/**
 	 * Given two points, return the rectangle
-	 * 
+	 *
 	 * @param p1 one point
 	 * @param p2 the other point
 	 * @return the rectangle created from two points

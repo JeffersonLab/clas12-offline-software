@@ -9,23 +9,23 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 public class TestData implements Serializable {
-	
+
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 2968299793724503616L;
 	public String torusFile;
 	public String solenoidFile;
 	public String javaVersion;
-	
+
 	public float x[];
 	public float y[];
 	public float z[];
-	
+
 	public float result[][];
-	
+
 	public transient float testResult[][];
-	
+
 	public TestData(int n) {
 		javaVersion = System.getProperty("java.version");
 		x = new float[n];
@@ -33,13 +33,13 @@ public class TestData implements Serializable {
 		z = new float[n];
 		result = new float[n][3];
 	}
-	
+
 	public int count() {
 		return (x == null) ? 0 : x.length;
 	}
 	/**
 	 * Reads a serializable object from a file.
-	 * 
+	 *
 	 * @param fullfn the full path.
 	 * @return the deserialized object.
 	 */
@@ -77,12 +77,12 @@ public class TestData implements Serializable {
 		}
 		return (TestData)obj;
 	}
-	
+
 	/**
 	 * serialWrite writes out a TestData object to a file.
-	 * 
+	 *
 	 * @param obj    the serializable object.
-	 * 
+	 *
 	 * @param fullfn the full path.
 	 */
 	public static void serialWrite(TestData obj, String fullfn) {
@@ -122,6 +122,6 @@ public class TestData implements Serializable {
 			}
 		}
 	}
-	
+
 
 }

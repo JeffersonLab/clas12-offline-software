@@ -8,7 +8,7 @@ public class CreateTestTrajectories {
 	public static void createTestTraj(long seed, int num) {
 		Random rand = new Random(seed);
 		TestTrajectories test = new TestTrajectories();
-				
+
 	}
 
 }

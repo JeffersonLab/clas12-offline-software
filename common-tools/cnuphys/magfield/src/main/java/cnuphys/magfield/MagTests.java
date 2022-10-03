@@ -9,9 +9,10 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.time.Duration;
-import java.time.Instant;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.util.Random;
+
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -26,14 +27,14 @@ import cnuphys.magfield.converter.Converter;
 
 /**
  * Static testing of the magnetic field
- * 
+ *
  * @author heddle
  *
  */
 public class MagTests {
-	
+
 	public static boolean TestMode;
-	
+
 	private static final JMenuItem reconfigItem = new JMenuItem("Remove Solenoid and Torus Overlap");
 	private static int _sector = 1;
 	final static MagneticFieldCanvas canvas1 = new MagneticFieldCanvas(_sector, -50, 0, 650, 350.,
@@ -43,206 +44,56 @@ public class MagTests {
 	private static String options[] = { "Random, with active field", " Along line, with active field",
 			"Random, with active PROBE", " Along line, with active PROBE" };
 
-
-	// test the test data file.
-	public static void testTestData(String path) {
-
-		File file = new File(path);
-
-		if (!file.exists()) {
-			System.err.println("FATAL ERROR did not find file [" + path + "]");
-			System.exit(1);
-		}
-
-		TestData td = null;
-		try {
-			td = TestData.serialRead(path);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-
-		System.err.println("Successfully deserialized TestData file.");
-		System.err.println("Number of data points: " + td.count());
-
-		String javaVersion = System.getProperty("java.version");
-
-		boolean sameJava = td.javaVersion.contentEquals(javaVersion);
-
-		System.err.println(String.format("Data java version: [%s] This java version: [%s] same: %s", td.javaVersion,
-				javaVersion, sameJava));
-
-		// using the same fields?
-		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITE);
-		FieldProbe ifield = FieldProbe.factory();
-
-		String torusFile = new String(MagneticFields.getInstance().getTorusBaseName());
-
-		boolean sameTorus = td.torusFile.contentEquals(torusFile);
-		System.err.println(
-				String.format("Data Torus: [%s] This Torus: [%s] same: %s", td.torusFile, torusFile, sameTorus));
-
-		String solenoidFile = new String(MagneticFields.getInstance().getSolenoidBaseName());
-
-		boolean sameSolenoid = td.solenoidFile.contentEquals(solenoidFile);
-		System.err.println(String.format("Data Solenoid: [%s] This Solenoid: [%s] same: %s", td.solenoidFile,
-				solenoidFile, sameSolenoid));
-
-		td.testResult = new float[td.count()][3];
-
-		int nLoop = 10;
-
-		System.err.println("Number of field values in test: " + td.count());
-		System.err.println("Number of loops over the points: " + nLoop);
-		System.err.println("Priming the pump.");
-
-		for (int j = 0; j < nLoop; j++) {
-			for (int i = 0; i < td.count(); i++) {
-				ifield.field(td.x[i], td.y[i], td.z[i], td.testResult[i]);
-			}
-		}
-
-		System.err.println("Timing start.");
-		Instant start = Instant.now();
-		for (int j = 0; j < nLoop; j++) {
-			for (int i = 0; i < td.count(); i++) {
-				ifield.field(td.x[i], td.y[i], td.z[i], td.testResult[i]);
-			}
-		}
-
-		Instant end = Instant.now();
-		long millis = Duration.between(start, end).toMillis();
-		System.err.println("Calculation time: " + millis + "ms");
-
-		// now look for differences
-
-		int biggestAbsIndex = -1;
-		double biggestAbsDiff = 0;
-
-		for (int i = 0; i < td.count(); i++) {
-			double delX = td.testResult[i][0] - td.result[i][0];
-			double delY = td.testResult[i][1] - td.result[i][1];
-			double delZ = td.testResult[i][2] - td.result[i][2];
-
-			double absDiff = Math.sqrt(delX * delX + delY * delY + delZ * delZ);
-
-			if (absDiff > biggestAbsDiff) {
-				biggestAbsDiff = absDiff;
-				biggestAbsIndex = i;
-			}
-
-		}
-
-		if (biggestAbsIndex < 0) {
-			System.err.println("The field values produced are exactly the same as the test data.\nDone.");
-			System.exit(0);
-		} else {
-
-			System.err.println(String.format("Biggest absolute difference: %12.6f kG", biggestAbsDiff));
-			System.err.println(String.format("At (x,y,z) = (%9.4f, %9.4f, %9.4f) cm", td.x[biggestAbsIndex],
-					td.y[biggestAbsIndex], td.z[biggestAbsIndex]));
-			System.err.println(String.format("Test Value (%12.6f, %12.6f, %12.6f) kG", td.result[biggestAbsIndex][0],
-					td.result[biggestAbsIndex][1], td.result[biggestAbsIndex][2]));
-			System.err
-					.println(String.format("This Value (%12.6f, %12.6f, %12.6f) kG", td.testResult[biggestAbsIndex][0],
-							td.testResult[biggestAbsIndex][1], td.testResult[biggestAbsIndex][2]));
-		}
-
+	private static void timeMessage(String msg, long duration) {
+		System.out.println(String.format("%s  %7.4f s", msg, (duration)/1.0e9));
 	}
 
 
 
 	// test speeding up tited system calls
-	private static void tiltSpeedupTest(int n, long seed) {
-		System.err.println("\nTilted Sector Speedup Test");
+	private static void tiltedTest() {
+		System.out.println("\nTilted Sector Speedup Test");
+
+		long seed = 5347632765L;
+
+		int num = 50000000;
+
 		Random rand = new Random(seed);
 		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITEROTATED);
 
-		//hold the results
-		Comparison results[] = new Comparison[n];
+		float x[] = new float[num];
+		float y[] = new float[num];
+		float z[] = new float[num];
 
-		
+		float result[] = new float[3];
+
 		//get the test data
-		for (int i = 0; i < n; i++) {
-			results[i] = new Comparison();
-			results[i].sect = 1 + rand.nextInt(6);
-			results[i].x = 100 + 20 * rand.nextFloat();
-			results[i].y = -40 + 20 * rand.nextFloat();
-			results[i].z = 290 + 30 * rand.nextFloat();
+		for (int i = 0; i < num; i++) {
+			x[i] = 100 + 20 * rand.nextFloat();
+			y[i] = -40 + 20 * rand.nextFloat();
+			z[i] = 290 + 30 * rand.nextFloat();
 		}
-		
-		RotatedCompositeProbe probe = (RotatedCompositeProbe) FieldProbe.factory();
-		
-		//prime pump
-		for (int i = 0; i < 100; i++) {
-			probe.field(results[i].sect, results[i].x, results[i].y, results[i].z, results[i].oldResult);
-		}
-		
-		TestMode = true;
-		for (int i = 0; i < 100; i++) {
-			probe.field(results[i].sect, results[i].x, results[i].y, results[i].z, results[i].newResult);
-		}
-		
-		TestMode = false;
-		
-		
-		Instant start = Instant.now();
-		for (int i = 0; i < n; i++) {
-			probe.field(results[i].sect, results[i].x, results[i].y, results[i].z, results[i].oldResult);
-		}
-		Instant end = Instant.now();
-		long oldmillis = Duration.between(start, end).toMillis();
-		System.err.println("Old time: " + oldmillis + "ms");
-		
-		TestMode = true;
-		
-		start = Instant.now();
-		for (int i = 0; i < n; i++) {
-			probe.field(results[i].sect, results[i].x, results[i].y, results[i].z, results[i].newResult);
-		}
-		end = Instant.now();
-		long newmillis = Duration.between(start, end).toMillis();
-		System.err.println("New time: " + newmillis + "ms");
-		System.err.println("percent diff: " + 100.*((oldmillis-newmillis)/((double)oldmillis)));
-		
-		float maxDiff = 0;
-		for (int i = 0; i < n; i++) {
-			maxDiff = Math.max(maxDiff, results[i].maxCompDiff());
-//			System.err.println(results[i]);
-		}
-		System.err.println("Number of random points: " + n);
-		System.err.println("Max Component Diff: " + maxDiff);
 
-		System.err.println("Using same point over and over to test probe effect");
-		TestMode = false;
-		
-		start = Instant.now();
-		for (int i = 0; i < n; i++) {
-			probe.field(2, results[0].x, results[0].y, results[0].z, results[0].oldResult);
+		RotatedCompositeProbe probe = (RotatedCompositeProbe) FieldProbe.factory();
+
+		long threadId = Thread.currentThread().getId();
+		long start = cpuTime(threadId);
+		for (int i = 0; i < num; i++) {
+			probe.field(1, x[i], y[i], z[i], result);
 		}
-		end = Instant.now();
-		oldmillis = Duration.between(start, end).toMillis();
-		System.err.println("Old time: " + oldmillis + "ms");
-		
-		TestMode = true;
-		
-		start = Instant.now();
-		for (int i = 0; i < n; i++) {
-			probe.field(2, results[0].x, results[0].y, results[0].z, results[0].newResult);
-		}
-		end = Instant.now();
-		newmillis = Duration.between(start, end).toMillis();
-		System.err.println("New time: " + newmillis + "ms");
-		System.err.println("percent diff: " + 100.*((oldmillis-newmillis)/((double)oldmillis)));
-		
+		timeMessage("time ", cpuTime(threadId) - start);
+
+
 	}
 
 	// timing tests
 	private static void timingTest(int option) {
+		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITE);
+
 		System.out.println("Timing tests: [" + options[option] + "]");
 		long seed = 5347632765L;
 
-		int num = 10000000;
+		int num = 50000000;
 
 		float x[] = new float[num];
 		float y[] = new float[num];
@@ -260,8 +111,8 @@ public class MagTests {
 				float rho = 600 * rand.nextFloat();
 				double phi = Math.toRadians(30 * rand.nextFloat());
 
-				x[i] = (float) (rho * FastMath.cos(phi));
-				y[i] = (float) (rho * FastMath.sin(phi));
+				x[i] = (float) (rho * Math.cos(phi));
+				y[i] = (float) (rho * Math.sin(phi));
 			}
 		} else if (option == 1) {
 			double dT = 1. / (num - 1);
@@ -273,34 +124,41 @@ public class MagTests {
 			}
 		}
 
-		// prime the pump
-		for (int i = 0; i < num; i++) {
-			ifield.field(x[i], y[i], z[i], result);
-		}
+		//timing test
+		long threadId = Thread.currentThread().getId();
 
-		double sum = 0;
-		for (int outer = 0; outer < 5; outer++) {
-			long time = System.currentTimeMillis();
+			long time = cpuTime(threadId);
 
 			for (int i = 0; i < num; i++) {
 				ifield.field(x[i], y[i], z[i], result);
 			}
 
-			double del = (System.currentTimeMillis() - time) / 1000.;
-			sum += del;
+			timeMessage("time ", cpuTime(threadId) - time);
 
-			System.out.println("loop " + (outer + 1) + " time  = " + del + " sec");
-
-		}
-		System.out.println("avg " + (sum / 5.) + " sec");
 
 	}
+
+	//cpu time
+    public static long cpuTime(long threadID) {
+        ThreadMXBean mxBean = ManagementFactory.getThreadMXBean();
+        if (mxBean.isThreadCpuTimeSupported()) {
+            try {
+                return mxBean.getThreadCpuTime(threadID);
+            } catch (UnsupportedOperationException e) {
+                System.out.println(e.toString());
+            }
+        } else {
+            System.out.println("Not supported");
+        }
+        return 0;
+    }
+
 
 	public static JMenu getTestMenu() {
 
 		JMenu testMenu = new JMenu("Tests");
 
-		final JMenuItem tiltItem = new JMenuItem("Tilted System Speedup Test");
+		final JMenuItem tiltItem = new JMenuItem("Tilted System Test");
 		final JMenuItem test0Item = new JMenuItem("Timing Test Random Points");
 		final JMenuItem test1Item = new JMenuItem("Timing Test Along a Line");
 
@@ -313,7 +171,7 @@ public class MagTests {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource() == tiltItem) {
-					tiltSpeedupTest(5000000, 97746291);
+					tiltedTest();
 				} else if (e.getSource() == test0Item) {
 					timingTest(0);
 				} else if (e.getSource() == test1Item) {
@@ -344,14 +202,14 @@ public class MagTests {
 		testMenu.add(solenoidConvertItem);
 		testMenu.add(torusConvertItem);
 
-		
+
 
 		return testMenu;
 	}
 
 	/**
 	 * Print a memory report
-	 * 
+	 *
 	 * @param message a message to add on
 	 */
 	public static void memoryReport(String message) {
@@ -370,7 +228,7 @@ public class MagTests {
 		sb.append(" Free memory in JVM: " + String.format("%6.1f", free) + "MB\n");
 		sb.append(" Used memory in JVM: " + String.format("%6.1f", used) + "MB\n");
 
-		System.err.println(sb.toString());
+		System.out.println(sb.toString());
 	}
 
 	private static void fixMenus() {
@@ -411,7 +269,7 @@ public class MagTests {
 		WindowAdapter windowAdapter = new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent event) {
-				System.err.println("Done");
+				System.out.println("Done");
 				System.exit(1);
 			}
 		};
@@ -421,9 +279,9 @@ public class MagTests {
 			@Override
 			public void magneticFieldChanged() {
 				label.setText(" Torus: " + MagneticFields.getInstance().getTorusPath());
-				System.err.println("Field changed. Torus path: " + MagneticFields.getInstance().getTorusPath());
+				System.out.println("Field changed. Torus path: " + MagneticFields.getInstance().getTorusPath());
 				fixMenus();
-				MagneticFields.getInstance().printCurrentConfiguration(System.err);
+				MagneticFields.getInstance().printCurrentConfiguration(System.out);
 			}
 
 		};
@@ -495,6 +353,6 @@ public class MagTests {
 	}
 
 
-	
+
 
 }

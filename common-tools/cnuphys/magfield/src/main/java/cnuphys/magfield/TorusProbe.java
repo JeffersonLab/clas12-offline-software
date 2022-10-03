@@ -1,7 +1,5 @@
 package cnuphys.magfield;
 
-import java.io.PrintStream;
-
 /**
  *
  * @author gavalian
@@ -19,7 +17,7 @@ public class TorusProbe extends FieldProbe {
 
 	/**
 	 * Create a probe for use with the torus
-	 * 
+	 *
 	 * @param field the torus field
 	 */
 	public TorusProbe(Torus field) {
@@ -38,35 +36,10 @@ public class TorusProbe extends FieldProbe {
 		q3Coordinate = _torus.q3Coordinate.clone();
 
 	}
-	
-	/**
-	 * Create a probe for use with the torus Used only for the weird DoubleTorus
-	 * 
-	 * @param field the torus field
-	 */
-	public TorusProbe(Torus field, boolean set) {
-		super(field);
-
-		if (set) {
-			if (MagneticFields.getInstance().getTorus() != field) {
-				MagneticFields.getInstance().setTorus(field);
-			}
-		}
-
-		_torus = field;
-
-		_cell = new Cell3D(this);
-		_fullMap = _torus.isFullMap();
-
-		q1Coordinate = _torus.q1Coordinate.clone();
-		q2Coordinate = _torus.q2Coordinate.clone();
-		q3Coordinate = _torus.q3Coordinate.clone();
-
-	}
 
 	/**
 	 * Get the field in kG
-	 * 
+	 *
 	 * @param x      the x coordinate in cm
 	 * @param y      the y coordinate in cm
 	 * @param z      the z coordinate in cm
@@ -95,7 +68,7 @@ public class TorusProbe extends FieldProbe {
 		y -= _torus.getShiftY();
 		z -= _torus.getShiftZ();
 
-		double rho = FastMath.sqrt(x * x + y * y);
+		double rho = FastMath.hypot(x,  y);
 		double phi = FastMath.atan2Deg(y, x);
 		fieldCylindrical(_cell, phi, rho, z, result);
 	}
@@ -103,7 +76,7 @@ public class TorusProbe extends FieldProbe {
 	/**
 	 * Get the field by trilinear interpolation. Assumes all shifting from
 	 * misalignment is done.
-	 * 
+	 *
 	 * @param phi    azimuthal angle in degrees.
 	 * @param rho    the cylindrical rho coordinate in cm.
 	 * @param z      coordinate in cm
@@ -174,19 +147,5 @@ public class TorusProbe extends FieldProbe {
 		return relativePhi;
 	}
 
-	/**
-	 * Check whether the field boundaries include the point
-	 * 
-	 * @param phi azimuthal angle in degrees.
-	 * @param rho the cylindrical rho coordinate in cm.
-	 * @param z   coordinate in cm
-	 * @return <code>true</code> if the point is included in the boundary of the
-	 *         field
-	 * 
-	 */
-//	@Override
-//	public boolean containsCylindrical(double phi, double rho, double z) {	
-//		return _torus.contains(rho, z);
-//	}
 
 }

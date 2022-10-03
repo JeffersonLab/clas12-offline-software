@@ -33,7 +33,7 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 
 	{
 		renderHints.put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-	};
+	}
 
 	protected AffineTransform _localToWorld;
 	protected AffineTransform _worldToLocal;
@@ -48,8 +48,6 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 	private String _extraText = "";
 
 	private FieldProbe _field;
-	private SolenoidProbe _sProbe;
-	private TorusProbe _tProbe;
 
 	// coordinate system
 	public enum CSType {
@@ -63,11 +61,11 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 	private ColorScaleModel _colorModel;
 
 	// trajectories
-	private Vector<Trajectory> _trajectories = new Vector<Trajectory>(5, 2);
+	private Vector<Trajectory> _trajectories = new Vector<>(5, 2);
 
 	/**
 	 * Create a canvas
-	 * 
+	 *
 	 * @param xmin
 	 * @param perpMin min value in direction perpendicular to z (the beam direction)
 	 * @param width
@@ -95,8 +93,6 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 			public void magneticFieldChanged() {
 				_colorModel = null;
 				_field = FieldProbe.factory();
-				_sProbe = (SolenoidProbe) FieldProbe.factory(MagneticFields.getInstance().getSolenoid());
-				_tProbe = (TorusProbe) FieldProbe.factory(MagneticFields.getInstance().getTorus());
 				repaint();
 			}
 
@@ -128,7 +124,7 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 
 	/**
 	 * Set a trajectory
-	 * 
+	 *
 	 * @param xx
 	 * @param yy
 	 * @param zz
@@ -149,7 +145,7 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 
 	/**
 	 * Draw a single trajectory
-	 * 
+	 *
 	 * @param g      the graphics context
 	 * @param bounds
 	 */
@@ -255,11 +251,11 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 
 		// vertical lines
 		wp.y = 0.;
-		for (int i = 0; i < hvals.length; i++) {
-			wp.x = hvals[i];
+		for (double hval : hvals) {
+			wp.x = hval;
 			worldToLocal(pp, wp);
 			g.drawLine(pp.x, bounds.y, pp.x, bounds.y + bounds.height);
-			String s = String.format("%-4.0f", hvals[i]);
+			String s = String.format("%-4.0f", hval);
 
 			int tx = pp.x - fm.stringWidth(s) / 2;
 			int ty = bounds.y + bounds.height - fm.getHeight();
@@ -271,8 +267,8 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 
 		// horizontal lines
 		wp.x = 200.;
-		for (int i = 0; i < vvals.length; i++) {
-			wp.y = vvals[i];
+		for (double vval : vvals) {
+			wp.y = vval;
 			worldToLocal(pp, wp);
 			g.drawLine(bounds.x, pp.y, bounds.x + bounds.width, pp.y);
 
@@ -281,7 +277,7 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 				g.drawLine(bounds.x, pp.y - 1, bounds.x + bounds.width, pp.y - 1);
 				g.setColor(Color.black);
 			}
-			String s = String.format(" %-4.0f ", vvals[i]);
+			String s = String.format(" %-4.0f ", vval);
 
 			int tx = bounds.x + bounds.width - fm.stringWidth(s);
 			int ty = pp.y + fm.getHeight() / 2;
@@ -343,8 +339,6 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 		// get probes
 		if (_field == null) {
 			_field = FieldProbe.factory();
-			_sProbe = (SolenoidProbe) FieldProbe.factory(MagneticFields.getInstance().getSolenoid());
-			_tProbe = (TorusProbe) FieldProbe.factory(MagneticFields.getInstance().getTorus());
 		}
 
 		for (int sx = bounds.x; sx < bounds.x + bounds.width; sx += w) {
@@ -442,7 +436,7 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 
 	/**
 	 * This converts a screen or pixel point to a world point.
-	 * 
+	 *
 	 * @param pp contains the local (screen-pixel) point.
 	 * @param wp will hold the resultant world point.
 	 */
@@ -455,7 +449,7 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 
 	/**
 	 * This converts a world point to a screen or pixel point.
-	 * 
+	 *
 	 * @param pp will hold the resultant local (screen-pixel) point.
 	 * @param wp contains world point.
 	 */
@@ -468,7 +462,7 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 
 	/**
 	 * Get the values array for the plot.
-	 * 
+	 *
 	 * @return the values array.
 	 */
 	public static double getFieldValues()[] {
@@ -493,7 +487,7 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 
 	/**
 	 * Get the color array for the plot.
-	 * 
+	 *
 	 * @return the color array for the plot.
 	 */
 	public static Color getFieldColors()[] {
@@ -560,8 +554,6 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 					double phi = FastMath.atan2Deg(xyz[1], xyz[0]);
 					double rho = FastMath.hypot(xyz[0], xyz[1]);
 
-					boolean inSolenoid = _sProbe.contains(xyz[0], xyz[1], xyz[2]);
-					boolean inTorus = _tProbe.contains(xyz[0], xyz[1], xyz[2]);
 
 					double bmag = Math.sqrt(Bx * Bx + By * By + Bz * Bz);
 					s = String.format(
@@ -575,8 +567,6 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 					double gmag = Math.sqrt(gx * gx + gy * gy + gz * gz);
 
 					s += String.format(" Grad %-4.2f T/m", gmag * 10);
-
-					s += " inS " + inSolenoid + " inT " + inTorus;
 
 					break;
 				// case YZ:

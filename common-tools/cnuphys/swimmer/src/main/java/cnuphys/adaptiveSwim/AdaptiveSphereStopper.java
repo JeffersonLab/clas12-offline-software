@@ -1,74 +1,118 @@
 package cnuphys.adaptiveSwim;
 
 
+
 import cnuphys.adaptiveSwim.geometry.Sphere;
-import cnuphys.swim.SwimTrajectory;
 
 public class AdaptiveSphereStopper extends AAdaptiveStopper {
-	
-	//the target cylinder
+
 	private Sphere _targetSphere;
 	
-	//the newest distance to the cylinder
+	//the newest distance to the sphere
+	private double _prevDist;
+
+	//the newest distance to the sphere
 	private double _newDist;
-	
-	
+
+	//the start sign of the distance
+	private double _startSign;
+
 	/**
-	 * Cylinder  stopper  (does check max path length)
-	 * @param u0                initial state vector
-	 * @param sf                the maximum value of the path length in meters
-	 * @param targetSphere      the target sphere
+	 * Sphere  stopper  (does check max path length)
+	 * @param sMax                the maximum value of the path length in meters
+	 * @param targetSphere    the target cylinder
 	 * @param accuracy          the accuracy in meters
-	 * @param trajectory        optional swim trajectory (can be null)
+	 * @param result holds the results, its u statevector should have been initialized
+	 * to the starting vector
 	 */
-	public AdaptiveSphereStopper(final double[] u0, final double sf, Sphere targetSphere, double accuracy, SwimTrajectory trajectory) {
-		super(u0, sf, accuracy, trajectory);
+	public AdaptiveSphereStopper(double sMax, Sphere targetSphere, double accuracy, AdaptiveSwimResult result) {
+		super(sMax, accuracy, result);
 		_targetSphere = targetSphere;
-		
 	}
 	
+	/**
+	 * Sphere  stopper  (does check max path length)
+	 * This assumes a sphere centered on the origin
+	 * @param sMax                the maximum value of the path length in meters
+	 * @param targetSphere    the target cylinder
+	 * @param accuracy          the accuracy in meters
+	 * @param result holds the results, its u statevector should have been initialized
+	 * to the starting vector
+	 */
+	public AdaptiveSphereStopper(double sMax, double radius, double accuracy, AdaptiveSwimResult result) {
+		this(sMax, new Sphere(radius), accuracy, result);
+	}
+	
+	/**
+	 * For doing things like setting the initial sign and distance
+	 */
+	@Override
+	public void initialize() {
+		double u[] = _result.getU();
+		_prevDist = _targetSphere.signedDistance(u[0], u[1], u[2]);
+		_newDist = _prevDist;
+
+		_startSign = sign();		
+	}
+
 
 	@Override
 	public boolean stopIntegration(double snew, double[] unew) {
-		
 		//a negative distance means we are inside the cylinder
-		//we don't care so take abs val
-		_newDist = Math.abs(_targetSphere.distance(unew[0], unew[1], unew[2]));
+		_newDist = _targetSphere.signedDistance(unew[0], unew[1], unew[2]);
 
-		// within accuracy?
-		//note this could also result with s > smax
-		if (_newDist < _accuracy) {
+		// within accuracy? Accept and stop
+		if (Math.abs(_newDist) < _accuracy) {
 			accept(snew, unew);
+			_result.setStatus(AdaptiveSwimmer.SWIM_SUCCESS);
   			return true;
 		}
 
-		//stop and don't accept new data. We exceeded smax
-		if (snew > _sf) {
+		//stop but don't accept new data. We crossed the target  boundary
+		if (sign() != _startSign) {
+			_result.setStatus(AdaptiveSwimmer.SWIM_CROSSED_BOUNDARY);
+			
+			//use prev distance to calculate next step
+			_del = Math.abs(_prevDist);
 			return true;
 		}
+
+
+		//stop and accept new data. We exceeded smax and didn't hit the target
+		if (snew > _sMax) {
+			accept(snew, unew);
+			_result.setStatus(AdaptiveSwimmer.SWIM_TARGET_MISSED);
+			return true;
+		}
+
+		//see if we jumped over the sphere but intersect it
+		//only relevant if we started outside
+		//if so, treat as sign change
+		if (_startSign > 0) {
+			if (_targetSphere.segmentIntersects(unew[0], unew[1], unew[2], _result.getU()[0],
+					_result.getU()[1], _result.getU()[2])) {
 				
+				System.out.println("JUMPED OVER SPHERE");
+				_result.setStatus(AdaptiveSwimmer.SWIM_CROSSED_BOUNDARY);
+				
+				//use prev distance to calculate next step
+				_del = Math.abs(_prevDist);
+				return true;
+			}
+		}
 		//accept new data and continue
 		accept(snew, unew);
+		_prevDist = _newDist;
 		return false;
 	}
 
 
-	/**
-	 * Accept a new integration step
-	 * @param snew the new value of s in meters
-	 * @param unew the new state vector
-	 */
-	@Override
-	protected void accept(double snew, double[] unew) {
-		super.accept(snew, unew);
-		
-		//do not take a step that might leap us over the sphere
-		//this is necessary because there is no crossover "side" for a cylinder
-		//like for a plane or fixed z,rho
-		
-		double newMaxStep = Math.min(_THEMAXSTEP, Math.max(AdaptiveSwimUtilities.MIN_STEPSIZE, _newDist/5));
-	
-		setMaxStep(newMaxStep);
+
+	//get the sign based on the current signed distance
+	private int sign() {
+		return (_newDist < 0) ? -1 : 1;
 	}
+	
+
 
 }

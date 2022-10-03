@@ -6,7 +6,7 @@ public final class RotatedCompositeField extends CompositeField {
 
 	/**
 	 * Print the current configuration
-	 * 
+	 *
 	 * @param ps the print stream
 	 */
 	@Override

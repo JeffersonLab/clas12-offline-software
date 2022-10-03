@@ -42,7 +42,7 @@ public class ColorScaleModel {
 	 * in the space between 2 values. However, this is not a requirement. It will
 	 * still give sensible results. Also, the value array is NOT assumed to be
 	 * equally spaced.
-	 * 
+	 *
 	 * @param values the array of values.
 	 * @param colors the array of colors.
 	 */
@@ -57,7 +57,7 @@ public class ColorScaleModel {
 	 * in the space between 2 values. However, this is not a requirement. It will
 	 * still give sensible results. Also, the value array is NOT assumed to be
 	 * equally spaced.
-	 * 
+	 *
 	 * @param comment an extra comment.
 	 * @param values  the array of values.
 	 * @param colors  the array of colors.
@@ -73,7 +73,7 @@ public class ColorScaleModel {
 	 * in the space between 2 values. However, this is not a requirement. It will
 	 * still give sensible results. Also, the value array is NOT assumed to be
 	 * equally spaced.
-	 * 
+	 *
 	 * @param comment      an extra comment.
 	 * @param values       the array of values.
 	 * @param colors       the array of colors.
@@ -107,7 +107,7 @@ public class ColorScaleModel {
 	 * value = 8.01 -> tooBigColor
 	 * <p>
 	 * value = 4 (exactly) -> G
-	 * 
+	 *
 	 * @param value the for which we want the color.
 	 * @return the color corresponding to the value.
 	 */
@@ -131,7 +131,7 @@ public class ColorScaleModel {
 	 * value = 8.01 -> tooBigColor
 	 * <p>
 	 * value = 4 (exactly) -> G
-	 * 
+	 *
 	 * @param value                 the for which we want the color.
 	 * @param useColorInterpolation if <code>true</code>, use color interpolation.
 	 * @return the color corresponding to the value.
@@ -192,7 +192,7 @@ public class ColorScaleModel {
 	/**
 	 * Compute the fraction difference between two points, normalized to the full
 	 * scale.
-	 * 
+	 *
 	 * @param v1 one value.
 	 * @param v2 the other value.
 	 * @return the fractional difference.
@@ -211,7 +211,7 @@ public class ColorScaleModel {
 
 	/**
 	 * Get the minimum value of the values array.
-	 * 
+	 *
 	 * @return the minimum value of the values array.
 	 */
 	public double getMinValue() {
@@ -220,7 +220,7 @@ public class ColorScaleModel {
 
 	/**
 	 * Get the maximum value of the values array.
-	 * 
+	 *
 	 * @return the maximum value of the values array.
 	 */
 	public double getMaxValue() {
@@ -229,7 +229,7 @@ public class ColorScaleModel {
 
 	/**
 	 * Get the color array.
-	 * 
+	 *
 	 * @return the color array.
 	 */
 	public Color[] getColors() {
@@ -238,7 +238,7 @@ public class ColorScaleModel {
 
 	/**
 	 * Get the too-big color.
-	 * 
+	 *
 	 * @return the color used for a "too big" value.
 	 */
 	public Color getTooBigColor() {
@@ -247,7 +247,7 @@ public class ColorScaleModel {
 
 	/**
 	 * Get the too-small color.
-	 * 
+	 *
 	 * @return the color used for a "too small" value.
 	 */
 	public Color getTooSmallColor() {
@@ -256,7 +256,7 @@ public class ColorScaleModel {
 
 	/**
 	 * Get the values array.
-	 * 
+	 *
 	 * @return the values array.
 	 */
 	public double[] getValues() {
@@ -265,7 +265,7 @@ public class ColorScaleModel {
 
 	/**
 	 * Get the comment of the color scale.
-	 * 
+	 *
 	 * @return the color scale comment.
 	 */
 	public String getComment() {
@@ -274,7 +274,7 @@ public class ColorScaleModel {
 
 	/**
 	 * Get the precision used for display.
-	 * 
+	 *
 	 * @return the precision used for display.
 	 */
 	public int getPrecision() {
@@ -304,7 +304,7 @@ public class ColorScaleModel {
 
 	/**
 	 * Get the color based on the fract.
-	 * 
+	 *
 	 * @param c1
 	 * @param c2
 	 * @param fract
@@ -327,11 +327,6 @@ public class ColorScaleModel {
 		int g2 = c2.getGreen();
 		int b2 = c2.getBlue();
 		int a2 = c2.getAlpha();
-
-		// int r3 = r1 + (int) (fract * (r2 - r1));
-		// int g3 = g1 + (int) (fract * (g2 - g1));
-		// int b3 = b1 + (int) (fract * (b2 - b1));
-		// int a3 = a1 + (int) (fract * (a2 - a1));
 
 		double f = 1.0 / fract;
 		double h = 1.0 / (1.0 - fract);

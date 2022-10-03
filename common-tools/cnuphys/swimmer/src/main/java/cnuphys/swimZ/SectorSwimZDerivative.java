@@ -59,7 +59,7 @@ public class SectorSwimZDerivative extends SwimZDerivative {
 		double ty = x[3];
 		double txsq = tx * tx;
 		double tysq = ty * ty;
-		double fact = FastMath.sqrt(1 + txsq + tysq);
+		double fact = Math.sqrt(1 + txsq + tysq);
 //		double txty = tx*ty;
 		double Ax = fact * (ty * (tx * B[0] + B[2]) - (1 + txsq) * B[1]);
 		double Ay = fact * (-tx * (ty * B[1] + B[2]) + (1 + tysq) * B[0]);

@@ -1,10 +1,10 @@
 package cnuphys.magfield;
 
 public class RotatedCompositeProbe extends CompositeProbe {
-	
+
 	//Constants used in the tilted <--> lab translations
 	//The mij below are the numerical values that result from taking
-	//the two sequential matrices that convert from the tilted sector 
+	//the two sequential matrices that convert from the tilted sector
 	//system to the CLAS sector system to the CLAS lab system and
 	//back. The angles are fixed: -25° in the first case and nπ/3
 	//in the second. With t being -25° and s being nπ/3 the combined
@@ -17,9 +17,9 @@ public class RotatedCompositeProbe extends CompositeProbe {
 	//      | sin(t)           0           cos(t)   |
 	//      _                                       _
 	//
-	
+
 	//for example, cos(25°)sin(60°) = m31 = 0.784885567
-	
+
 	private static final float m11 = 0.906307787f;
 	private static final float m12 = 0.422618262f;
 	private static final float m21 = 0.453153894f;
@@ -33,18 +33,18 @@ public class RotatedCompositeProbe extends CompositeProbe {
 	private final double _angle = -25.0;
 	private final double _sin25 = Math.sin(Math.toRadians(_angle));
 	private final double _cos25 = Math.cos(Math.toRadians(_angle));
-	
+
 
 	public RotatedCompositeProbe(RotatedCompositeField field) {
 		super(field);
 	}
-	
-	
+
+
 	/**
 	 * Obtain the magnetic field at a given location expressed in Cartesian
 	 * coordinates of the tilted sector system. The field is returned as a Cartesian
 	 * vector in kiloGauss.
-	 * 
+	 *
 	 * @param sector the sector [1..6]
 	 * @param xtilt     the tilted x coordinate in cm
 	 * @param ytilt     the tilted y coordinate in cm

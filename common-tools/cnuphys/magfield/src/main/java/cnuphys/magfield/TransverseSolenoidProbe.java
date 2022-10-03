@@ -1,17 +1,17 @@
 package cnuphys.magfield;
 
 public class TransverseSolenoidProbe extends SolenoidProbe {
-	
+
 	// cell used to cache corner information
 	private Cell3D _cell;
 
 	// the transverse solenoid field
 	private TransverseSolenoid _transverseSolenoid;
 
-	
+
 	/**
 	 * Create a probe for use with the transverse solenoid field
-	 * 
+	 *
 	 * @param field the transverse solenoid field
 	 */
 	public TransverseSolenoidProbe(TransverseSolenoid field) {

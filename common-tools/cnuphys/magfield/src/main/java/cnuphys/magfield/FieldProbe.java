@@ -38,7 +38,7 @@ public abstract class FieldProbe implements IField {
 
 	/**
 	 * Create a probe, which is a thread safe way to use the field
-	 * 
+	 *
 	 * @param field the underlying field
 	 */
 	public FieldProbe(IMagField field) {
@@ -53,7 +53,7 @@ public abstract class FieldProbe implements IField {
 
 	/**
 	 * Get the underlying field
-	 * 
+	 *
 	 * @return the field that backs this probe
 	 */
 	public IMagField getField() {
@@ -62,7 +62,7 @@ public abstract class FieldProbe implements IField {
 
 	/**
 	 * Get the name of the field
-	 * 
+	 *
 	 * @return the name of the underlying field
 	 */
 	@Override
@@ -73,7 +73,7 @@ public abstract class FieldProbe implements IField {
 	/**
 	 * Get the field magnitude in kiloGauss at a given location expressed in
 	 * Cartesian coordinates.
-	 * 
+	 *
 	 * @param x the x coordinate in cm
 	 * @param y the y coordinate in cm
 	 * @param z the z coordinate in cm
@@ -88,7 +88,7 @@ public abstract class FieldProbe implements IField {
 
 	/**
 	 * Obtain the maximum field magnitude of any point in the map.
-	 * 
+	 *
 	 * @return the maximum field magnitude in the units of the map.
 	 */
 	@Override
@@ -98,7 +98,7 @@ public abstract class FieldProbe implements IField {
 
 	/**
 	 * Checks whether the field has been set to always return zero.
-	 * 
+	 *
 	 * @return <code>true</code> if the field is set to return zero.
 	 */
 	@Override
@@ -108,7 +108,7 @@ public abstract class FieldProbe implements IField {
 
 	/**
 	 * Get the composite index to take me to the correct place in the buffer.
-	 * 
+	 *
 	 * @param n1 the index in the q1 direction
 	 * @param n2 the index in the q2 direction
 	 * @param n3 the index in the q3 direction
@@ -123,7 +123,7 @@ public abstract class FieldProbe implements IField {
 	 * Obtain the magnetic field at a given location expressed in Cartesian
 	 * coordinates in the sector (not lab or global) system. The field is returned
 	 * as a Cartesian vector in kiloGauss.
-	 * 
+	 *
 	 * @param sector the sector [1..6]
 	 * @param x      the x sector coordinate in cm
 	 * @param y      the y sector coordinate in cm
@@ -207,7 +207,7 @@ public abstract class FieldProbe implements IField {
 
 	/**
 	 * Get the appropriate probe for the active field
-	 * 
+	 *
 	 * @return the probe for the active field
 	 */
 	public static FieldProbe factory() {
@@ -218,7 +218,7 @@ public abstract class FieldProbe implements IField {
 
 	/**
 	 * Get the appropriate probe for the given field
-	 * 
+	 *
 	 * @return the probe for the given field
 	 */
 	public static FieldProbe factory(IMagField field) {
@@ -227,22 +227,22 @@ public abstract class FieldProbe implements IField {
 
 			if (field instanceof Torus) {
 				return new TorusProbe((Torus) field);
-			} 
+			}
 			else if (field instanceof StandardSolenoid) {
 				return new StandardSolenoidProbe((StandardSolenoid) field);
-			} 
+			}
 			else if (field instanceof TransverseSolenoid) {
 				return new TransverseSolenoidProbe((TransverseSolenoid) field);
-			} 
+			}
 			else if (field instanceof RotatedCompositeField) {
 				return new RotatedCompositeProbe((RotatedCompositeField) field);
-			} 
+			}
 			else if (field instanceof RotatedCompositeField) {
 				return new RotatedCompositeProbe((RotatedCompositeField) field);
-			} 
+			}
 			else if (field instanceof CompositeField) {
 				return new CompositeProbe((CompositeField) field);
-			} 
+			}
 			else {
 				(new Throwable()).printStackTrace();
 				System.err.println("WARNING: cannot create probe for " + field.getName() + "  class: "
@@ -261,7 +261,7 @@ public abstract class FieldProbe implements IField {
 
 	/**
 	 * Check whether the field boundaries include the point
-	 * 
+	 *
 	 * @param x the x coordinate in the map units
 	 * @param y the y coordinate in the map units
 	 * @param z the z coordinate in the map units
@@ -275,18 +275,18 @@ public abstract class FieldProbe implements IField {
 
 	/**
 	 * Check whether the field boundaries include the point
-	 * 
+	 *
 	 * @param phi azimuthal angle in degrees.
 	 * @param rho the cylindrical rho coordinate in cm.
 	 * @param z   coordinate in cm
 	 * @return <code>true</code> if the point is included in the boundary of the
 	 *         field
-	 * 
+	 *
 	 */
 
 	/**
 	 * Get the sector [1..6] from the phi value
-	 * 
+	 *
 	 * @param phi the value of phi in degrees
 	 * @return the sector [1..6]
 	 */
@@ -341,7 +341,7 @@ public abstract class FieldProbe implements IField {
 
 	/**
 	 * Get the maximum z coordinate of the field boundary
-	 * 
+	 *
 	 * @return the maximum z coordinate of the field boundary
 	 */
 	public double getZMax() {
@@ -350,7 +350,7 @@ public abstract class FieldProbe implements IField {
 
 	/**
 	 * Get the minimum z coordinate of the field boundary
-	 * 
+	 *
 	 * @return the minimum z coordinate of the field boundary
 	 */
 	public double getZMin() {
@@ -359,7 +359,7 @@ public abstract class FieldProbe implements IField {
 
 	/**
 	 * Get the maximum rho coordinate of the field boundary
-	 * 
+	 *
 	 * @return the maximum rho coordinate of the field boundary
 	 */
 	public double getRhoMax() {
@@ -368,7 +368,7 @@ public abstract class FieldProbe implements IField {
 
 	/**
 	 * Get the minimum rho coordinate of the field boundary
-	 * 
+	 *
 	 * @return the minimum rho coordinate of the field boundary
 	 */
 	public double getRhoMin() {
@@ -377,7 +377,7 @@ public abstract class FieldProbe implements IField {
 
 	/**
 	 * Get the maximum phi coordinate of the field boundary (deg)
-	 * 
+	 *
 	 * @return the maximum phi coordinate of the field boundary
 	 */
 	public double getPhiMax() {
@@ -390,7 +390,7 @@ public abstract class FieldProbe implements IField {
 
 	/**
 	 * Get the minimum phi coordinate of the field boundary (deg)
-	 * 
+	 *
 	 * @return the minimum phi coordinate of the field boundary
 	 */
 	public double getPhiMin() {
@@ -399,7 +399,7 @@ public abstract class FieldProbe implements IField {
 
 	/**
 	 * Get B1 at a given composite index.
-	 * 
+	 *
 	 * @param index the composite index.
 	 * @return the B1 at the given index.
 	 */
@@ -409,7 +409,7 @@ public abstract class FieldProbe implements IField {
 
 	/**
 	 * Get B2 at a given index.
-	 * 
+	 *
 	 * @param index the composite index.
 	 * @return the B2 at the given composite index.
 	 */
@@ -419,7 +419,7 @@ public abstract class FieldProbe implements IField {
 
 	/**
 	 * Get B3 at a given composite index.
-	 * 
+	 *
 	 * @param index the composite index.
 	 * @return the B3 at the given composite index.
 	 */

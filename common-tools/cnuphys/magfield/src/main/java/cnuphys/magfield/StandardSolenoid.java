@@ -1,5 +1,5 @@
 /*
- * 
+ *
  */
 package cnuphys.magfield;
 
@@ -31,16 +31,6 @@ public final class StandardSolenoid extends Solenoid {
 
 
 	/**
-	 * Checks this field active.
-	 * 
-	 * @return <code>true</code> if this field is active;
-	 */
-	@Override
-	public boolean isActive() {
-		return MagneticFields.getInstance().hasActiveSolenoid();
-	}
-
-	/**
 	 * Obtain a solenoid object from a binary file, probably
 	 * "clas12_solenoid_fieldmap_binary.dat"
 	 *
@@ -58,7 +48,7 @@ public final class StandardSolenoid extends Solenoid {
 
 	/**
 	 * Get the name of the field
-	 * 
+	 *
 	 * @return the name
 	 */
 	@Override
@@ -68,7 +58,7 @@ public final class StandardSolenoid extends Solenoid {
 
 	/**
 	 * Get some data as a string.
-	 * 
+	 *
 	 * @return a string representation.
 	 */
 	@Override
@@ -80,7 +70,7 @@ public final class StandardSolenoid extends Solenoid {
 
 	/**
 	 * Print the current configuration
-	 * 
+	 *
 	 * @param ps the print stream
 	 */
 	@Override
@@ -88,14 +78,14 @@ public final class StandardSolenoid extends Solenoid {
 		ps.println(String.format("SOLENOID scale: %6.3f file: %s", _scaleFactor,
 				MagneticFields.getInstance().getSolenoidBaseName()));
 	}
-	
+
 	/**
 	 * main method used for testing.
 	 *
 	 * @param arg command line arguments
 	 */
 	public static void main(String arg[]) {
-		
+
 		// covert the new ascii to binary
 		File asciiFile = new File("../../../data/clas12SolenoidFieldMap.dat.txt");
 		if (!asciiFile.exists()) {
@@ -150,7 +140,7 @@ public final class StandardSolenoid extends Solenoid {
 
 		}
 	}
-	
+
 	//tokenize a string
 	private static String[] tokens(String str, String delimiter) {
 
@@ -167,12 +157,12 @@ public final class StandardSolenoid extends Solenoid {
 
 	/**
 	 * Get the next non comment line
-	 * 
+	 *
 	 * @param bufferedReader a buffered reader which should be linked to an ascii
 	 *                       file
 	 * @return the next non comment line (or <code>null</code>)
 	 */
-	
+
 	private static String nextNonComment(BufferedReader bufferedReader) {
 		String s = null;
 		try {
@@ -180,10 +170,10 @@ public final class StandardSolenoid extends Solenoid {
 			if (s != null) {
 				s = s.trim();
 			}
-			
-			
+
+
 			while ((s != null) && (s.startsWith("<") || (s.length() < 1) || s.startsWith("r(mm"))) {
-				
+
 				s = bufferedReader.readLine();
 
 				if (s != null) {

@@ -13,7 +13,7 @@ public class CompositeField extends ArrayList<IMagField> implements IMagField {
 
 	/**
 	 * Checks whether the field has been set to always return zero.
-	 * 
+	 *
 	 * @return <code>true</code> if the field is set to return zero.
 	 */
 	@Override
@@ -65,7 +65,7 @@ public class CompositeField extends ArrayList<IMagField> implements IMagField {
 
 	/**
 	 * Check whether we have a torus field
-	 * 
+	 *
 	 * @return <code>true</code> if we have a torus
 	 */
 	public boolean hasTorus() {
@@ -80,7 +80,7 @@ public class CompositeField extends ArrayList<IMagField> implements IMagField {
 
 	/**
 	 * Check whether we have a solenoid field
-	 * 
+	 *
 	 * @return <code>true</code> if we have a solenoid
 	 */
 	public boolean hasSolenoid() {
@@ -92,10 +92,10 @@ public class CompositeField extends ArrayList<IMagField> implements IMagField {
 
 		return false;
 	}
-	
+
 	/**
 	 * Check whether we have a transverse solenoid field
-	 * 
+	 *
 	 * @return <code>true</code> if we have a transverse solenoid
 	 */
 	public boolean hasTransverseSolenoid() {
@@ -151,7 +151,7 @@ public class CompositeField extends ArrayList<IMagField> implements IMagField {
 
 	/**
 	 * Print the current configuration
-	 * 
+	 *
 	 * @param ps the print stream
 	 */
 	@Override

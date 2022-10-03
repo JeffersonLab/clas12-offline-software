@@ -1,5 +1,6 @@
 package cnuphys.adaptiveSwim.geometry;
 
+
 /**
  * A plane is defined by the equation (r - ro).norm = 0 Where r is an arbitrary
  * point on the plane, ro is a given point on the plane and norm is the normal
@@ -8,7 +9,7 @@ package cnuphys.adaptiveSwim.geometry;
  * @author heddle
  *
  */
-public class Plane {
+public class Plane extends AGeometric {
 
 	// unit vector normal to plane
 	public final Vector norm;
@@ -55,36 +56,33 @@ public class Plane {
 
 
 	/**
-	 * Distance from a point to the plane
-	 * 
-	 * @param p the point in question
-	 * @return the distance to the plane
+	 * Create a plane from a normal vector and a point on the plane
+	 * @param nx x component of normal vector
+	 * @param ny y component of normal vector
+	 * @param nz z component of normal vector
+	 * @param px x component of point on plane
+	 * @param py y component of point on plane
+	 * @param pz z component of point on plane
 	 */
-	public double distance(Point p) {
-		return distance(p.x, p.y, p.z);
+	public Plane(double nx, double ny, double nz, double px, double py, double pz) {
+		
+		this(new Vector(nx, ny, nz), 
+				new Point(px, py, pz));
 	}
 
 	/**
-	 * Distance from a point to the plane
-	 * 
-	 * @param x the x coordinate
-	 * @param y the y coordinate
-	 * @param z the z coordinate
-	 * @return the distance to the plane
+	 * Create a line from two points and then get the intersection with the plane
+	 * @param p1 one point
+	 * @param p2 another point
+	 * @param p will hold the intersection, NaNs if no intersection
+	 * @return the t parameter. If NaN it means the line is parallel to the plane.
+	 *         If t [0,1] then the segment intersects the plane. If t outside [0, 1]
+	 *         the infinite line intersects the plane, but not the segment
 	 */
-	public double distance(double x, double y, double z) {
-		return Math.abs(signedDistance(x, y, z));
-	}
-
-	/**
-	 * Signed distance from a point to the plane
-	 * 
-	 * @param p the point in question
-	 * @return the signed distance (indicates which side you are on where norm
-	 *         defines positive side)
-	 */
-	public double signedDistance(Point p) {
-		return signedDistance(p.x, p.y, p.z);
+	@Override
+	public double interpolate(Point p1, Point p2, Point p) {
+		Line line = new Line(p1, p2);
+		return lineIntersection(line, p);
 	}
 
 	/**
@@ -96,6 +94,7 @@ public class Plane {
 	 * @return the signed distance (indicates which side you are on where norm
 	 *         defines positive side)
 	 */
+	@Override
 	public double signedDistance(double x, double y, double z) {
 		if (Double.isNaN(_denom)) {
 			_denom = Math.sqrt(a * a + b * b + c * c);
@@ -109,7 +108,7 @@ public class Plane {
 	 * @param line         the line
 	 * @param intersection will hold the point of intersection
 	 * @return the t parameter. If NaN it means the line is parallel to the plane.
-	 *         If t [0,1] then the segment intersects the line. If t outside [0, 1]
+	 *         If t [0,1] then the segment intersects the plane. If t outside [0, 1]
 	 *         the infinite line intersects the plane, but not the segment
 	 */
 	public double lineIntersection(Line line, Point intersection) {
@@ -373,72 +372,6 @@ public class Plane {
 		}
 
 		return coords;
-	}
-	
-	private static void valCheck(Plane p, float[] coords, int index) {
-		int j = 3*index;
-		double x = coords[j];
-		double y = coords[j+1];
-		double z = coords[j+2];
-		double val = p.a*x + p.b*y + p.c*z - p.d;
-		System.out.println(String.format("  coord check [%d] (%-9.5f, %-9.5f, %-9.5f) val = %-9.5f (should be 0)", 
-				index, x, y, z, val));
-	}
-
-	public static void main(String arg[]) {
-//		Plane p = constantPhiPlane(30);
-
-		Point zero = new Point(0, 0, 0);
-		Vector nn = new Vector(0, 0, 1);
-		Plane zp = new Plane(nn, zero);
-		
-		float coords[] = zp.planeQuadCoordinates(1000);
-		for (int i = 0; i < 4; i++) {
-			Plane.valCheck(zp, coords, i);
-		}
-		
-		System.out.println();
-
-		Point p = new Point(1, 1, 1);
-		Vector norm = new Vector(1, 1, 1);
-
-		Plane plane = new Plane(norm, p);
-
-		System.out.println("Init plane: " + plane);
-
-		System.out.println("should be 0: " + plane.distance(p));
-		
-		coords = plane.planeQuadCoordinates(1000);
-		for (int i = 0; i < 4; i++) {
-			Plane.valCheck(plane, coords, i);
-		}
-
-		Point po = new Point(2, 4, -7);
-		Point p1 = new Point(0, 2, 5);
-		Point intersection = new Point();
-		System.out.println("distance to ((2, 4, -7)): " + plane.distance(po));
-
-		Line line = new Line(po, p1);
-		double t = plane.lineIntersection(line, intersection);
-		System.out.println(" t = " + t + "   intersect: " + intersection);
-
-		double phi = -210;
-		plane = constantPhiPlane(phi);
-		System.out.println("constant phi plane phi = " + phi);
-		t = plane.lineIntersection(line, intersection);
-		System.out.println(" t = " + t + "   intersect: " + intersection + "  phicheck = "
-				+ Math.toDegrees(Math.atan2(intersection.y, intersection.x)));
-		
-		coords = plane.planeQuadCoordinates(1000);
-		for (int i = 0; i < 4; i++) {
-			Plane.valCheck(plane, coords, i);
-		}
-
-
-		// intersection of two phi planes should be z axis
-		Plane pp1 = constantPhiPlane(57);
-		Plane pp2 = constantPhiPlane(99);
-		System.out.println("Intersection of two phi planes: " + pp1.planeIntersection(pp2));
 	}
 
 }

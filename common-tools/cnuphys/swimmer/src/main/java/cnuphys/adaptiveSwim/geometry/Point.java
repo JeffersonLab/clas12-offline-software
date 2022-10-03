@@ -109,7 +109,7 @@ public class Point {
 	 */
 	@Override
 	public String toString() {
-		return String.format("(%10.6G, %10.6G, %10.6G)", x, y, z);
+		return String.format("(%-10.6f, %-10.6f, %-10.6f)", x, y, z);
 	}
 	
 	/**

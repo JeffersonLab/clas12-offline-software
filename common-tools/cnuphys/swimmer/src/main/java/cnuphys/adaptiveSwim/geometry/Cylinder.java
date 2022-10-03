@@ -1,7 +1,7 @@
 package cnuphys.adaptiveSwim.geometry;
 
 /**
- * A cylinder is defined by a centerline and a radius
+ * An INFINITE cylinder is defined by a centerline and a radius
  * @author heddle
  *
  */
@@ -40,6 +40,17 @@ public class Cylinder {
 	 * @param p a point
 	 * @return the perpendicular distance
 	 */
+	public double signedDistance(Point p) {
+		double lineDist = _centerLine.distance(p);
+		return lineDist - _radius;
+	}
+	
+    /**
+	 * Set the path length of the swim
+     * @deprecated Use {@link Cylinder#signedDistance} instead.
+	 * @param p a point
+	 * @return the perpendicular distance
+     */
 	public double distance(Point p) {
 		double lineDist = _centerLine.distance(p);
 		return lineDist - _radius;
@@ -53,9 +64,24 @@ public class Cylinder {
 	 * @param z the z coordinate
 	 * @return the perpendicular distance
 	 */
+	public double signedDistance(double x, double y, double z) {
+		Point p = new Point(x, y, z);
+		return signedDistance(p);
+	}
+	
+	/**
+	 * Get the shortest distance between the surface of this infinite cylinder and a point.
+	 * If the value is negative, we are inside the cylinder.
+	 * @deprecated Use {@link Cylinder#signedDistance} instead.
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 * @param z the z coordinate
+	 * @return the perpendicular distance
+	 */
 	public double distance(double x, double y, double z) {
 		Point p = new Point(x, y, z);
 		return distance(p);
 	}
+
 
 }

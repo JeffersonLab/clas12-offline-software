@@ -1,12 +1,12 @@
 /*
- * 
+ *
  */
 package cnuphys.magfield;
 
 /**
  * Different coordinate systems for either field or grid, for data in field map
  * files.
- * 
+ *
  * @author David Heddle
  * @author Nicole Schumacher
  * @version 1.0
@@ -18,7 +18,7 @@ public enum CoordinateSystem {
 
 	/**
 	 * Get the coordinate system from an integer
-	 * 
+	 *
 	 * @param val the integer value
 	 * @return the coordinate system
 	 */

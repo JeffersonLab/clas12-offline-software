@@ -7,25 +7,17 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * For magnetic fields stored in a specific format. This is low-level,
  * essentiall a container for the field values
- * 
+ *
  * @author David Heddle
  * @author Nicole Schumacher
  * @version 1.0
  */
 public abstract class MagneticField implements IMagField {
-	public static Logger LOGGER = Logger.getLogger(MagneticField.class.getName());
-
 	/** Magic number used to check if byteswapping is necessary. */
 	public static final int MAGICNUMBER = 0xced;
-
-	// used to reconfigure fields so solenoid and torus do not overlap
-	private double _fakeZMax = Float.POSITIVE_INFINITY;
 
 	/** misalignment tolerance */
 	public static final double MISALIGNTOL = 1.0e-6; // cm
@@ -130,18 +122,21 @@ public abstract class MagneticField implements IMagField {
 
 	private static final double TINY = 1.0e-5;
 
+	//is this field effectively 0?
+	private boolean _isZero;
+
 	/**
 	 * Scale the field.
-	 * 
+	 *
 	 * @param scale the scale factor
 	 */
 	public final void setScaleFactor(double scale) {
-		LOGGER.log(Level.INFO, "CHANGING SCALE from " + _scaleFactor + " to " + scale + "  for " + getBaseFileName());
 		if (Math.abs(scale - _scaleFactor) > TINY) {
 			_scaleFactor = scale;
+
+			_isZero = (Math.abs(_scaleFactor) < 1.0e-6);
+
 			MagneticFields.getInstance().changedScale(this);
-		} else {
-			LOGGER.log(Level.FINE, "Ignored inconsequential scale change for " + getBaseFileName());
 		}
 	}
 
@@ -152,7 +147,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Change the shift in the x direction
-	 * 
+	 *
 	 * @param shiftX the shift in cm
 	 */
 	public final void setShiftX(double shiftX) {
@@ -161,7 +156,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Change the shift in the y direction
-	 * 
+	 *
 	 * @param shiftY the shift in cm
 	 */
 	public final void setShiftY(double shiftY) {
@@ -170,7 +165,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Change the shift in the z direction
-	 * 
+	 *
 	 * @param shiftZ the shift in cm
 	 */
 	public final void setShiftZ(double shiftZ) {
@@ -179,7 +174,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Get the shift in x.
-	 * 
+	 *
 	 * @return the x shift in cm.
 	 */
 	public final double getShiftX() {
@@ -188,7 +183,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Get the shift in y.
-	 * 
+	 *
 	 * @return the y shift in cm.
 	 */
 	public final double getShiftY() {
@@ -197,7 +192,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Get the shift in z.
-	 * 
+	 *
 	 * @return the z shift in cm.
 	 */
 	public final double getShiftZ() {
@@ -206,26 +201,17 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Checks whether the field has been set to always return zero.
-	 * 
+	 *
 	 * @return <code>true</code> if the field is set to return zero.
 	 */
 	@Override
 	public boolean isZeroField() {
-		return (Math.abs(_scaleFactor) < 1.0e-6);
-	}
-
-	/**
-	 * For debugging you can set the field to always return 0.
-	 * 
-	 * @param zeroField if set to <code>true</code> the field will always return 0.
-	 */
-	public final void setZeroField(boolean zeroField) {
-		setScaleFactor(0.0);
+		return _isZero;
 	}
 
 	/**
 	 * Get the creation date
-	 * 
+	 *
 	 * @return the creation date as a string
 	 */
 	public String getCreationDate() {
@@ -242,7 +228,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Get the composite index to take me to the correct place in the buffer.
-	 * 
+	 *
 	 * @param n1 the index in the q1 direction
 	 * @param n2 the index in the q2 direction
 	 * @param n3 the index in the q3 direction
@@ -255,7 +241,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Convert a composite index back to the coordinate indices
-	 * 
+	 *
 	 * @param index    the composite index.
 	 * @param qindices the coordinate indices
 	 */
@@ -274,7 +260,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Obtain the maximum field magnitude of any point in the map.
-	 * 
+	 *
 	 * @return the maximum field magnitude in the units of the map.
 	 */
 	@Override
@@ -284,7 +270,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Get the maximum field magnitude.
-	 * 
+	 *
 	 * @return the index of the max field magnitude.
 	 */
 	public final int maxFieldMagnitude() {
@@ -300,7 +286,7 @@ public abstract class MagneticField implements IMagField {
 		double sum = 0.0;
 
 		for (int i = 0; i < numFieldPoints; i++) {
-			double fm = FastMath.sqrt(squareMagnitude(i));
+			double fm = Math.sqrt(squareMagnitude(i));
 			sum += fm;
 
 			if (fm > maxf) {
@@ -316,7 +302,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Get the square of magnitude for a given index.
-	 * 
+	 *
 	 * @param index the index.
 	 * @return the square of field magnitude at the given index.
 	 */
@@ -330,7 +316,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Get the vector for a given index.
-	 * 
+	 *
 	 * @param index the index.
 	 * @param vv    an array of three floats to hold the result.
 	 */
@@ -343,7 +329,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Get some data as a string.
-	 * 
+	 *
 	 * @return a string representation.
 	 */
 	@Override
@@ -403,7 +389,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Get the base file name of the field map
-	 * 
+	 *
 	 * @return the base file name
 	 */
 	public String getBaseFileName() {
@@ -432,12 +418,9 @@ public abstract class MagneticField implements IMagField {
 			boolean swap = false;
 			int magicnum = dos.readInt(); // magic number
 
-			LOGGER.log(Level.INFO, "Magic number: %04x", magicnum);
-
 			// TODO handle swapping if necessary
 			swap = (magicnum != MAGICNUMBER);
 			if (swap) {
-				LOGGER.log(Level.SEVERE, "byte swapping required but not yet implemented.");
 				dos.close();
 				return;
 			}
@@ -498,7 +481,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Get the magnitude for a given index.
-	 * 
+	 *
 	 * @param index the index.
 	 * @return the field magnitude at the given index.
 	 */
@@ -507,12 +490,12 @@ public abstract class MagneticField implements IMagField {
 		float B1 = field.get(i);
 		float B2 = field.get(i + 1);
 		float B3 = field.get(i + 2);
-		return FastMath.sqrt(B1 * B1 + B2 * B2 + B3 * B3);
+		return Math.sqrt(B1 * B1 + B2 * B2 + B3 * B3);
 	}
 
 	/**
 	 * Get the location at a given index
-	 * 
+	 *
 	 * @param index the composite index
 	 * @param r     a vector that holds the three components of the location
 	 */
@@ -526,7 +509,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Get the B1 component at a given composite index.
-	 * 
+	 *
 	 * @param index the composite index.
 	 * @return the B1 at the given composite index.
 	 */
@@ -541,7 +524,6 @@ public abstract class MagneticField implements IMagField {
 			float val = field.get(i);
 			return val;
 		} catch (IndexOutOfBoundsException e) {
-			LOGGER.log(Level.SEVERE, "error in mag field index1 = " + index);
 			e.printStackTrace();
 			return 0;
 		}
@@ -549,7 +531,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Get the B2 component at a given composite index.
-	 * 
+	 *
 	 * @param index the composite index.
 	 * @return the B2 at the given composite index.
 	 */
@@ -565,7 +547,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Get the B3 component at a given composite index.
-	 * 
+	 *
 	 * @param index the composite index.
 	 * @return the B3 at the given composite index.
 	 */
@@ -581,7 +563,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Get a component of the magnetic field
-	 * 
+	 *
 	 * @param componentIndex [1..3]
 	 * @param compositeIndex
 	 * @return the component
@@ -657,7 +639,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Check whether we interpolate or use nearest neighbor
-	 * 
+	 *
 	 * @return the interpolate flag
 	 */
 	public static final boolean isInterpolate() {
@@ -666,18 +648,17 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Set whether we interpolate or use nearest neighbor
-	 * 
+	 *
 	 * @param interpolate the interpolate flag to set
 	 */
 	public static final void setInterpolate(boolean interpolate) {
 		_interpolate = interpolate;
 		MagneticFields.getInstance().fixMenus();
-		LOGGER.log(Level.FINE, "Interpolating fields: " + _interpolate);
 	}
 
 	/**
 	 * Get the phi coordinate which will be q1
-	 * 
+	 *
 	 * @return the phi Coordinate
 	 */
 	public GridCoordinate getPhiCoordinate() {
@@ -686,7 +667,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Get the x coordinate which will be q1
-	 * 
+	 *
 	 * @return the x Coordinate
 	 */
 	public GridCoordinate getXCoordinate() {
@@ -695,7 +676,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Get the R (rho) coordinate which will be q2
-	 * 
+	 *
 	 * @return the r (rho) coordinate
 	 */
 	public GridCoordinate getRCoordinate() {
@@ -704,7 +685,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Get the y coordinate which will be q2
-	 * 
+	 *
 	 * @return the y coordinate
 	 */
 	public GridCoordinate getYCoordinate() {
@@ -713,7 +694,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Get the z coordinate which will be q3
-	 * 
+	 *
 	 * @return the z coordinate
 	 */
 	public GridCoordinate getZCoordinate() {
@@ -722,7 +703,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Is the map misaligned in the X direction?
-	 * 
+	 *
 	 * @return <code>true</code> if map is misaligned
 	 */
 	public boolean isMisalignedX() {
@@ -731,7 +712,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Is the map misaligned in the Y direction?
-	 * 
+	 *
 	 * @return <code>true</code> if map is misaligned
 	 */
 	public boolean isMisalignedY() {
@@ -740,7 +721,7 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Is the map misaligned in the Z direction?
-	 * 
+	 *
 	 * @return <code>true</code> if map is misaligned
 	 */
 	public boolean isMisalignedZ() {
@@ -749,29 +730,11 @@ public abstract class MagneticField implements IMagField {
 
 	/**
 	 * Is the map misaligned in any direction?
-	 * 
+	 *
 	 * @return <code>true</code> if solenoid is misaligned
 	 */
 	public boolean isMisaligned() {
 		return (isMisalignedX() || isMisalignedY() || isMisalignedZ());
-	}
-
-	/**
-	 * Get the fake z lim used to remove overlap with torus
-	 * 
-	 * @return the fake z lim used to remove overlap with torus (cm)
-	 */
-	public double getFakeZMax() {
-		return _fakeZMax;
-	}
-
-	/**
-	 * Set the fake z lim used to remove overlap with torus
-	 * 
-	 * @param zlim the new value in cm
-	 */
-	public void setFakeZMax(double zlim) {
-		_fakeZMax = zlim;
 	}
 
 	public double getZMax() {
@@ -791,15 +754,8 @@ public abstract class MagneticField implements IMagField {
 	}
 
 	/**
-	 * Checks this field active.
-	 * 
-	 * @return <code>true</code> if this field is active;
-	 */
-	public abstract boolean isActive();
-
-	/**
 	 * Checks whether the field boundary contain the given point.
-	 * 
+	 *
 	 * @param x the x coordinate in cm
 	 * @param y the y coordinate in cm
 	 * @param z the z coordinate in cm
@@ -807,10 +763,6 @@ public abstract class MagneticField implements IMagField {
 	 */
 	@Override
 	public boolean contains(double x, double y, double z) {
-
-		if (!isActive()) {
-			return false;
-		}
 
 		// apply the shifts
 		x -= _shiftX;
@@ -825,25 +777,14 @@ public abstract class MagneticField implements IMagField {
 	 * Checks whether the field boundary contain the given point. Note the azimuthal
 	 * coordinate is not provided because it is assumed that all fields are valid
 	 * for all phi.
-	 * 
+	 *
 	 * @param rho the cylindrical radius in cm
 	 * @param z   the z coordinate in cm
 	 * @return <code>true</code> if the field contains the given point
 	 */
 	private boolean contains(double rho, double z) {
 
-		// assumes z has already been shifted backwards
-		if (z >= _fakeZMax) {
-			return false;
-		}
-
-		if (z < getZMin()) {
-			return false;
-		}
-		if (z > getZMax()) {
-			return false;
-		}
-		if ((rho < getRhoMin()) || (rho > getRhoMax())) {
+		if ((z < getZMin()) || (z > getZMax()) || (rho < getRhoMin()) || (rho > getRhoMax())) {
 			return false;
 		}
 		return true;

@@ -4,11 +4,11 @@ import java.util.ArrayList;
 
 public class CompositeProbe extends FieldProbe {
 
-	protected ArrayList<FieldProbe> probes = new ArrayList<FieldProbe>();
+	protected ArrayList<FieldProbe> probes = new ArrayList<>();
 
 	/**
 	 * Create a composite probe from a composite field.
-	 * 
+	 *
 	 * @param field the composite field
 	 */
 	public CompositeProbe(CompositeField field) {
@@ -23,7 +23,7 @@ public class CompositeProbe extends FieldProbe {
 	 * Obtain the magnetic field at a given location expressed in Cartesian
 	 * coordinates for the sector system. The field is returned as a Cartesian
 	 * vector in kiloGauss.
-	 * 
+	 *
 	 * @param sector the sector [1..6]
 	 * @param x      the x sector coordinate in cm
 	 * @param y      the y sector coordinate in cm
@@ -75,7 +75,7 @@ public class CompositeProbe extends FieldProbe {
 
 	/**
 	 * Checks whether the field has been set to always return zero.
-	 * 
+	 *
 	 * @return <code>true</code> if the field is set to return zero.
 	 */
 	@Override
@@ -116,7 +116,7 @@ public class CompositeProbe extends FieldProbe {
 
 	/**
 	 * Check whether we have a torus field
-	 * 
+	 *
 	 * @return <code>true</code> if we have a torus
 	 */
 	public boolean hasTorus() {
@@ -131,7 +131,7 @@ public class CompositeProbe extends FieldProbe {
 
 	/**
 	 * Check whether we have a solenoid field
-	 * 
+	 *
 	 * @return <code>true</code> if we have a solenoid
 	 */
 	public boolean hasSolenoid() {

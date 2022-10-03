@@ -8,8 +8,8 @@ import cnuphys.adaptiveSwim.AdaptiveSwimmer;
 import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.MagneticFields;
-import cnuphys.magfield.RotatedCompositeProbe;
 import cnuphys.magfield.MagneticFields.FieldType;
+import cnuphys.magfield.RotatedCompositeProbe;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.Swimmer;
@@ -42,12 +42,12 @@ public class SectorTest {
 		double stepSize = 0.01;
 
 		System.out.println("=======");
-		
-		
+
+
 		//compare old swimmer and adaptive
 		AdaptiveSwimmer adaptiveSwimmer = new AdaptiveSwimmer();
 		Swimmer swimmer = new Swimmer(MagneticFields.getInstance().getRotatedCompositeField());
-		
+
 
 		swimmer.getProbe().getField().printConfiguration(System.out);
 
@@ -75,42 +75,42 @@ public class SectorTest {
 				e.printStackTrace();
 			}
 		}
-		
+
 		System.out.println("\n******  NEW ADAPTIVE Swimmer ");
-		
+
 		AdaptiveSwimResult swimResult = new AdaptiveSwimResult(true);
 		stepSize = 0.01;  //initial ss = 1 cm
 		double eps = 1.0e-6;
-		
+
 		for (int sector = 1; sector <= 6; sector++) {
 			try {
 				adaptiveSwimmer.sectorSwimZ(sector, charge, x0, y0, z0, pTot, theta, phi, z, accuracy, 10, stepSize, eps, swimResult);
 				SwimTrajectory traj = swimResult.getTrajectory();
-				
+
 				FieldProbe probe = adaptiveSwimmer.getProbe();
-				
+
 				traj.sectorComputeBDL(sector, (RotatedCompositeProbe) probe);
 				System.out.println("BDL = " + traj.getComputedBDL() + " kG-m");
 
 				double lastY[] = swimResult.getLastTrajectoryPoint();
 				System.out.print("Sector: " + sector + "  ");
 				SwimTest.printVect(lastY, " last ");
-				System.out.println("Final s: " + swimResult.getFinalS());
+				System.out.println("Final s: " + swimResult.getS());
 			}
 			catch (AdaptiveSwimException e) {
 				e.printStackTrace();
 			}
 		}
 
-		
+
 		System.out.println("\nSwim backwards test");
-		
-		
-		
+
+
+
 		System.out.println("\nSwim backwards test (OLD)");
-		
+
 		try {
-			
+
 			x0 = 0;
 			y0 = 0;
 			z0 = 0;
@@ -119,7 +119,7 @@ public class SectorTest {
 			phi = 5;
 			z = 5.75;
 
-			
+
 			SwimTrajectory traj = swimmer.sectorSwim(1, charge, x0, y0, z0, pTot, theta, phi, z, accuracy, 10, 10, stepSize,
 					Swimmer.CLAS_Tolerance, hdata);
 
@@ -130,36 +130,36 @@ public class SectorTest {
 
 			double lastY[] = traj.lastElement();
 			SwimTest.printVect(lastY, " last  (OLD, FORWARD) ");
-			
+
 			z = z0;
 			x0 = lastY[0];
 			y0 = lastY[1];
 			z0 = lastY[2];
-			
+
 			double txf = -lastY[3];
 			double tyf = -lastY[4];
 			double tzf = -lastY[5];
-			
-			
+
+
 			theta = FastMath.acos2Deg(tzf);
 			phi = FastMath.atan2Deg(tyf, txf);
-			
+
 			traj = swimmer.sectorSwim(1, -charge, x0, y0, z0, pTot, theta, phi, 0, accuracy, 10, 10, stepSize,
 					Swimmer.CLAS_Tolerance, hdata);
-			
+
 			lastY = traj.lastElement();
 			SwimTest.printVect(lastY, " last  (OLD, BACKWARD) ");
-						
-			
+
+
 		} catch (RungeKuttaException e) {
 			e.printStackTrace();
 		}
 
-		
+
 		System.out.println("\nSwim backwards test (NEW");
-		
+
 		try {
-			
+
 			x0 = 0;
 			y0 = 0;
 			z0 = 0;
@@ -171,18 +171,18 @@ public class SectorTest {
 			adaptiveSwimmer.sectorSwimZ(1, charge, x0, y0, z0, pTot, theta, phi, z, accuracy, 10, stepSize, eps, swimResult);
 			double lastY[] = swimResult.getLastTrajectoryPoint();
 			SwimTest.printVect(lastY, " last (NEW, FORWARD) ");
-			
-			
+
+
 			z = z0;
 			x0 = lastY[0];
 			y0 = lastY[1];
 			z0 = lastY[2];
-			
+
 			double txf = -lastY[3];
 			double tyf = -lastY[4];
 			double tzf = -lastY[5];
-			
-			
+
+
 			theta = FastMath.acos2Deg(tzf);
 			phi = FastMath.atan2Deg(tyf, txf);
 
@@ -194,7 +194,7 @@ public class SectorTest {
 		catch (AdaptiveSwimException e) {
 			e.printStackTrace();
 		}
-	
+
 
 		if (true)
 			return;
@@ -242,7 +242,7 @@ public class SectorTest {
 
 		Random rand = new Random(88779911);
 		long time = System.currentTimeMillis();
-		
+
 		double aX0[] = new double[num];
 		double aY0[] = new double[num];
 		double aZ0[] = new double[num];
@@ -251,11 +251,11 @@ public class SectorTest {
 		double aPhi[] = new double[num];
 		double aP[] = new double[num];
 		int aSect[] = new int[num];
-		
+
 		for (int i = 0; i < num; i++) {
 			aSect[i] = rand.nextInt(6) + 1;
 			double rho = 0.1 + 2 * rand.nextDouble(); // meters
-			
+
 			aZ0[i] = 0.5 + 4 * rand.nextDouble(); // meters
 			aZ[i] = 0.5 + 4 * rand.nextDouble(); // meters
 			aP[i] = 1. + 2 * rand.nextDouble();
@@ -265,7 +265,7 @@ public class SectorTest {
 			aX0[i] = rho * Math.cos(phiLoc);
 			aY0[i] = rho * Math.sin(phiLoc);
 		}
-		
+
 		for (int i = 0; i < num; i++) {
 
 			try {
@@ -280,8 +280,8 @@ public class SectorTest {
 
 		time = System.currentTimeMillis() - time;
 		System.out.println("DONE avg swim time OLD SWIMMER = " + (((double) time) / num) + " ms");
-		
-		
+
+
 
 		time = System.currentTimeMillis();
 		for (int i = 0; i < num; i++) {
@@ -297,9 +297,9 @@ public class SectorTest {
 
 		time = System.currentTimeMillis() - time;
 		System.out.println("DONE avg swim time NEW ADPSWIMMER = " + (((double) time) / num) + " ms");
-		
+
 		System.out.println("\nLooking for biggest difference");
-		
+
 		int worstIndex = -1;
 		double maxDiff = -1;
 		double sum = 0;
@@ -308,18 +308,18 @@ public class SectorTest {
 				SwimTrajectory traj = swimmer.sectorSwim(aSect[i], charge, aX0[i], y0, aZ0[i], aP[i],
 						aTheta[i], aPhi[i], aZ[i], accuracy, 10,
 						stepSize, Swimmer.CLAS_Tolerance, hdata);
-				
+
 				adaptiveSwimmer.sectorSwimZ(aSect[i], charge, aX0[i], y0, aZ0[i], aP[i],
 						aTheta[i], aPhi[i], aZ[i], accuracy, 10, stepSize, eps, swimResult);
 
 				double diff = trajDiff(traj, swimResult.getTrajectory());
 				sum += diff;
-				
+
 				if (diff > maxDiff) {
 					maxDiff = diff;
 					worstIndex = i;
 				}
-				
+
 			} catch (RungeKuttaException e) {
 				e.printStackTrace();
 			} catch (AdaptiveSwimException e) {
@@ -329,19 +329,19 @@ public class SectorTest {
 		System.out.println("Max diff: " + maxDiff);
 		System.out.println("Avg diff: " + sum/num);
 		System.out.println("Worst case diff:");
-		
+
 		int i = worstIndex;
 		try {
-			
+
 			System.out.println("\nWorst case last for OLD: ");
 			SwimTrajectory traj = swimmer.sectorSwim(aSect[i], charge, aX0[i], y0, aZ0[i], aP[i],
 					aTheta[i], aPhi[i], aZ[i], accuracy, 10,
 					stepSize, Swimmer.CLAS_Tolerance, hdata);
-			
-			
+
+
 			FieldProbe probe = adaptiveSwimmer.getProbe();
-			
-			
+
+
 			traj.sectorComputeBDL(aSect[i], (RotatedCompositeProbe) probe);
 			System.out.println("BDL = " + traj.getComputedBDL() + " kG-m");
 
@@ -352,7 +352,7 @@ public class SectorTest {
 			System.out.println("\nWorst case last for NEW: ");
 			adaptiveSwimmer.sectorSwimZ(aSect[i], charge, aX0[i], y0, aZ0[i], aP[i],
 					aTheta[i], aPhi[i], aZ[i], accuracy, 10, stepSize, eps, swimResult);
-			
+
 			traj = swimResult.getTrajectory();
 			traj.sectorComputeBDL(aSect[i], (RotatedCompositeProbe) probe);
 			System.out.println("BDL = " + traj.getComputedBDL() + " kG-m");
@@ -361,28 +361,28 @@ public class SectorTest {
 			System.out.print("Sector: " + aSect[i] + "  ");
 			SwimTest.printVect(lastY, " last ");
 
-			
+
 		} catch (RungeKuttaException e) {
 			e.printStackTrace();
 		} catch (AdaptiveSwimException e) {
 			e.printStackTrace();
 		}
 
-		
-		
+
+
 	}
-	
+
 	private static double trajDiff(SwimTrajectory traj1, SwimTrajectory traj2) {
 		double lastY1[] = traj1.lastElement();
 		double lastY2[] = traj2.lastElement();
-		
+
 		double diff = 0;
-		
+
 		for (int i = 0; i < 6; i++) {
 			double del = lastY2[i] - lastY1[i];
 			diff += (del*del);
 		}
-		
+
 		return Math.sqrt(diff);
 	}
 }

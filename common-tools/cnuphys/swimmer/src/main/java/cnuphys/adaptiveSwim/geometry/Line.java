@@ -199,34 +199,4 @@ public class Line {
 		return getP(0.5);
 	}
 
-	// testing
-	public static void main(String arg[]) {
-		Point p1 = new Point(0, 0, 0);
-		Point p2 = new Point(1, 1, 0);
-
-		Line line = new Line(p1, p2);
-
-		Point p = new Point(-10, 10, 5);
-
-		System.out.println(p.toString() + "     distance = " + line.distance(p) + " on line: " + line.pointOnLine(p));
-
-		p.set(999., 999., 0.001);
-		System.out.println(
-				p.toString() + "     distance = " + line.distance(p) + " on line: " + line.pointOnLine(p, 0.01));
-		
-		
-		Point p3 = new Point(0, 0, 0);
-		Point p4 = new Point(0, 0, 1);
-
-		Line zaxis = new Line(p3, p4);
-
-		System.out.println("Created a line corresponding to the z axis");
-		System.out.println("Should be 0: " + zaxis.distance(0, 0, 99));
-		System.out.println("Should be 100: " + zaxis.distance(-100, 0, 99));
-		
-		double d = zaxis.distance(-10, 10, -999);
-		System.out.println("Should be 200: " + (d*d));
-
-	}
-
 }

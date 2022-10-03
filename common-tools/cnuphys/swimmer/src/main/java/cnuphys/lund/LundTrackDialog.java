@@ -36,7 +36,7 @@ import cnuphys.swimZ.SwimZResult;
 @SuppressWarnings("serial")
 public class LundTrackDialog extends JDialog {
 	
-	public enum SWIM_ALGORITHM {STANDARD, FIXEDZ, FIXEDS, FIXEDRHO}
+	public enum SWIM_ALGORITHM {STANDARD, FIXEDZ, FIXEDRHO}
 	
 	private SWIM_ALGORITHM _algorithm = SWIM_ALGORITHM.STANDARD;
 
@@ -86,25 +86,16 @@ public class LundTrackDialog extends JDialog {
 
 	// fixed z cutoff
 	private JRadioButton _fixedZRB;
-	
-	// fixed s (pathlength) cutoff
-    private JRadioButton _fixedSRB;
-	
+		
 	// fixed z cutoff
 	private JRadioButton _fixedRhoRB;
 
 	// fixed Rho value
 	private JTextField _fixedRho;
 
-
 	// fixed Z value
 	private JTextField _fixedZ;
 	
-	
-	// fixed S (pathlength) value
-	private JTextField _fixedS;
-	
-
 	// accuracy in fixed z
 	private JTextField _accuracy;
 
@@ -173,10 +164,6 @@ public class LundTrackDialog extends JDialog {
 				else if (_fixedRhoRB.isSelected()) {
 					_algorithm = SWIM_ALGORITHM.FIXEDRHO;
 				}
-				else if (_fixedSRB.isSelected()) {
-					_algorithm = SWIM_ALGORITHM.FIXEDS;
-				}
-
 
 				fixState();
 			}
@@ -185,24 +172,20 @@ public class LundTrackDialog extends JDialog {
 		
 		_standardRB = new JRadioButton("Standard");
 		_fixedZRB = new JRadioButton("Fixed Z");
-		_fixedSRB = new JRadioButton("Fixed S");
 
 		_fixedRhoRB = new JRadioButton("Fixed " + SMALL_RHO);
 		
 		
 		_standardRB.setSelected((_algorithm == SWIM_ALGORITHM.STANDARD));
 		_fixedZRB.setSelected((_algorithm == SWIM_ALGORITHM.FIXEDZ));
-		_fixedSRB.setSelected((_algorithm == SWIM_ALGORITHM.FIXEDS));
 		_fixedRhoRB.setSelected((_algorithm == SWIM_ALGORITHM.FIXEDRHO));
 		
 		_standardRB.addActionListener(al);
 		_fixedZRB.addActionListener(al);
-		_fixedSRB.addActionListener(al);
 		_fixedRhoRB.addActionListener(al);
 		
 		bg.add(_standardRB);
 		bg.add(_fixedZRB);
-		bg.add(_fixedSRB);
 		bg.add(_fixedRhoRB);
 		
 		fixState();
@@ -213,7 +196,6 @@ public class LundTrackDialog extends JDialog {
 	private void fixState() {
 		_fixedZ.setEnabled(_fixedZRB.isSelected());
 		_fixedRho.setEnabled(_fixedRhoRB.isSelected());
-		_fixedS.setEnabled(_fixedSRB.isSelected());
 	}
 
 	/**
@@ -331,16 +313,6 @@ public class LundTrackDialog extends JDialog {
 				prompt = "RESULT from fixed Z swim:\n";
 				break;
 				
-			case FIXEDS:
-				// convert accuracy from microns to meters
-				accuracy = Double.parseDouble(_accuracy.getText()) / 1.0e6;
-				double targetS = Double.parseDouble(_fixedS.getText()) / 100; // meters
-				swimmer.swimS(lid.getCharge(), xo, yo, zo, momentum, theta, phi, accuracy, targetS,
-						stepSize, eps, result);
-				prompt = "RESULT from fixed S swim:\n";
-				break;
-
-
 			case FIXEDRHO:
 				// convert accuracy from microns to meters
 				accuracy = Double.parseDouble(_accuracy.getText()) / 1.0e6;
@@ -360,7 +332,7 @@ public class LundTrackDialog extends JDialog {
 				traj.setLundId(lid);
 				traj.computeBDL(swimmer.getProbe());
 
-				result.printOut(System.out, prompt + result);
+				result.printOut(System.out, prompt);
 				Swimming.addMCTrajectory(traj);
 			}
 
@@ -483,13 +455,11 @@ public class LundTrackDialog extends JDialog {
 	private JPanel cutoffPanel() {
 		
 		_fixedZ = new JTextField(8);
-		_fixedS = new JTextField(8);
 		_fixedRho = new JTextField(8);
 
 		_accuracy = new JTextField(8);
 
 		_fixedRho.setText("100.0");
-		_fixedS.setText("29.990");
 		_fixedZ.setText("575.0");
 
 		_accuracy.setText("10");
@@ -501,8 +471,6 @@ public class LundTrackDialog extends JDialog {
 
 		box.add(Box.createVerticalStrut(5));
 		box.add(labeledTextField("      Stopping Z", _fixedZ, "cm", -1));
-		box.add(Box.createVerticalStrut(5));
-		box.add(labeledTextField("      Stopping S", _fixedS, "cm", -1));
 		box.add(Box.createVerticalStrut(5));
 		box.add(labeledTextField("      Stopping " + SMALL_RHO, _fixedRho, "cm", -1));
 		box.add(Box.createVerticalStrut(5));
@@ -523,7 +491,6 @@ public class LundTrackDialog extends JDialog {
 		spanel.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 0));
 		spanel.add(_standardRB);
 		spanel.add(_fixedZRB);
-		spanel.add(_fixedSRB);
 		spanel.add(_fixedRhoRB);
 
 		JPanel panel = new JPanel();

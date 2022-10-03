@@ -12,9 +12,9 @@ import cnuphys.magfield.MagneticFields;
 import cnuphys.swim.SwimTrajectory;
 
 public class SwimTestData implements Serializable {
-	
+
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 3683250826826946912L;
 	public String torusFile;
@@ -24,7 +24,7 @@ public class SwimTestData implements Serializable {
 	public double sMax;
 	public double stepSize;
 	public double distanceBetweenSaves;
-	
+
 	public int[] charge;
 	public double xo[];
 	public double yo[];
@@ -32,10 +32,10 @@ public class SwimTestData implements Serializable {
 	public double p[];
 	public double theta[];
 	public double phi[];
-	
+
 	public SwimTrajectory[] results;
 	public transient SwimTrajectory[] testResults;
-	
+
 	public SwimTestData(double rMax, double sMax, double stepSize, double distanceBetweenSaves, int n) {
 		javaVersion = System.getProperty("java.version");
 		torusFile = new String(MagneticFields.getInstance().getTorusBaseName());
@@ -45,7 +45,7 @@ public class SwimTestData implements Serializable {
 		this.sMax = sMax;
 		this.stepSize = stepSize;
 		this.distanceBetweenSaves = distanceBetweenSaves;
-		
+
 		charge = new int[n];
 		xo = new double[n];
 		yo = new double[n];
@@ -55,14 +55,14 @@ public class SwimTestData implements Serializable {
 		phi = new double[n];
 		results = new SwimTrajectory[n];
 	}
-	
+
 	public int count() {
 		return (xo == null) ? 0 : xo.length;
 	}
-	
+
 	/**
 	 * Reads a serializable object from a file.
-	 * 
+	 *
 	 * @param fullfn the full path.
 	 * @return the deserialized object.
 	 */
@@ -100,12 +100,12 @@ public class SwimTestData implements Serializable {
 		}
 		return (SwimTestData)obj;
 	}
-	
+
 	/**
 	 * serialWrite writes out a SwimTestData object to a file.
-	 * 
+	 *
 	 * @param obj    the serializable object.
-	 * 
+	 *
 	 * @param fullfn the full path.
 	 */
 	public static void serialWrite(SwimTestData obj, String fullfn) {
@@ -147,6 +147,6 @@ public class SwimTestData implements Serializable {
 			}
 		}
 	}
-	
+
 
 }

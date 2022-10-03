@@ -1,11 +1,11 @@
 /*
- * 
+ *
  */
 package cnuphys.magfield;
 
 /**
  * Units for the magnetic field in a field map file.
- * 
+ *
  * @author Dr. David Heddle
  * @author Nicole Schumacher
  * @version 1.0
@@ -16,7 +16,7 @@ public enum FieldUnit {
 
     /**
      * Get the field unit from an integer
-     * 
+     *
 	 * @param val the integer value
      * @return the field unit
      */

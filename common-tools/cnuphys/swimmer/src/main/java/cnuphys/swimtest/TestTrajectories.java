@@ -28,12 +28,12 @@ public class TestTrajectories implements Serializable {
 	private Vector<TrajectorySummary> summaries;
 
 	public TestTrajectories() {
-		summaries = new Vector<TrajectorySummary>();
+		summaries = new Vector<>();
 	}
 
 	/**
 	 * add a summary to the collection
-	 * 
+	 *
 	 * @param summary the summary to add
 	 */
 	public void addTrajectory(TrajectorySummary summary) {
@@ -42,7 +42,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Get the relative tolerance used by the swimmer
-	 * 
+	 *
 	 * @return the relative tolerance
 	 */
 	public double[] getReletiveTolerance() {
@@ -51,7 +51,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Set the relative tolerance for the swimmer
-	 * 
+	 *
 	 * @param relTol the relative tolerance
 	 * @return this object for chaining
 	 */
@@ -64,7 +64,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Get the initial step size
-	 * 
+	 *
 	 * @return the initial step size in meters
 	 */
 	public double get() {
@@ -73,7 +73,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Set the initial step size
-	 * 
+	 *
 	 * @param value the value in meters
 	 * @return this object for chaining
 	 */
@@ -84,7 +84,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Get the z stopping accuracy
-	 * 
+	 *
 	 * @return the z stopping accuracy in meters
 	 */
 	public double getAccuracy() {
@@ -93,7 +93,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Set the z stopping accuracy in meters
-	 * 
+	 *
 	 * @param value the value in meters
 	 * @return this object for chaining
 	 */
@@ -104,7 +104,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Get the max path length
-	 * 
+	 *
 	 * @return the max path length in meters
 	 */
 	public double getMaxPathLength() {
@@ -113,7 +113,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Set the max path length
-	 * 
+	 *
 	 * @param value the value in meters
 	 * @return this object for chaining
 	 */
@@ -124,7 +124,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Get the z stopping value in meters
-	 * 
+	 *
 	 * @return the z stopping value in meters
 	 */
 	public double getFixedZ() {
@@ -133,7 +133,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Set the z stopping value in meters
-	 * 
+	 *
 	 * @param value the value in meters
 	 * @return this object for chaining
 	 */
@@ -144,7 +144,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Get the path to the torus
-	 * 
+	 *
 	 * @return the path used by the torus
 	 */
 	public String getTorusPath() {
@@ -153,7 +153,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Set the path used by the torus
-	 * 
+	 *
 	 * @param path the full path
 	 * @return this object for chaining
 	 */
@@ -164,7 +164,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Get the scale factor used by the torus
-	 * 
+	 *
 	 * @return the scale factor used by the torus
 	 */
 	public double getTorusScale() {
@@ -173,7 +173,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Set the scale factor used by the torus
-	 * 
+	 *
 	 * @param scale the scale factor
 	 * @return this object for chaining
 	 */
@@ -184,7 +184,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Get the scale factor used by the solenoid
-	 * 
+	 *
 	 * @return the scale factor used by the solenoid
 	 */
 	public double getSolenoidScale() {
@@ -193,7 +193,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Set the scale factor used by the solenoid
-	 * 
+	 *
 	 * @param scale the scale solenoid
 	 * @return this object for chaining
 	 */
@@ -204,7 +204,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Was the torus used
-	 * 
+	 *
 	 * @return <code>true</code> if the torus was included in the swimming
 	 */
 	public boolean includeTorus() {
@@ -213,7 +213,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Set whether we included the torus
-	 * 
+	 *
 	 * @param incTorus the value of the flag
 	 * @return this object for chaining
 	 */
@@ -224,7 +224,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Set whether we included the solenoid
-	 * 
+	 *
 	 * @param incSolenoid the value of the flag
 	 */
 	public TestTrajectories setIncludeSolenoid(boolean incSolenoid) {
@@ -234,7 +234,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Was the solenoid used
-	 * 
+	 *
 	 * @return <code>true</code> if the solenoid was included in the swimming
 	 */
 	public boolean includeSolenoid() {
@@ -243,7 +243,7 @@ public class TestTrajectories implements Serializable {
 
 	/**
 	 * Get the number of summaries
-	 * 
+	 *
 	 * @return the number of summaries
 	 */
 	public int size() {

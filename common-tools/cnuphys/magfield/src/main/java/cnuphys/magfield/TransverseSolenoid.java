@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintStream;
 
 public class TransverseSolenoid extends Solenoid {
-	
+
 	/**
 	 * private constructor to instantiate a TransverseSolenoid
 	 */
@@ -18,10 +18,10 @@ public class TransverseSolenoid extends Solenoid {
 	public String getName() {
 		return "Transverse Solenoid";
 	}
-	
+
 	/**
 	 * Get some data as a string.
-	 * 
+	 *
 	 * @return a string representation.
 	 */
 	@Override
@@ -33,7 +33,7 @@ public class TransverseSolenoid extends Solenoid {
 
 	/**
 	 * Print the current configuration
-	 * 
+	 *
 	 * @param ps the print stream
 	 */
 	@Override
@@ -43,16 +43,6 @@ public class TransverseSolenoid extends Solenoid {
 	}
 
 
-	/**
-	 * Checks this field active.
-	 * 
-	 * @return <code>true</code> if this field is active;
-	 */
-	@Override
-	public boolean isActive() {
-		return MagneticFields.getInstance().hasActiveSolenoid();
-	}
-	
 	/**
 	 * Obtain a transverse solenoid object from a binary file.
 	 *
@@ -70,7 +60,7 @@ public class TransverseSolenoid extends Solenoid {
 
 	/**
 	 * Checks whether the field boundary contain the given point.
-	 * 
+	 *
 	 * @param x the x coordinate in cm
 	 * @param y the y coordinate in cm
 	 * @param z the z coordinate in cm
@@ -79,30 +69,26 @@ public class TransverseSolenoid extends Solenoid {
 	@Override
 	public boolean contains(double x, double y, double z) {
 
-		if (!isActive()) {
-			return false;
-		}
-
 		// apply the shifts
 		x -= _shiftX;
 		if ((x < q1Coordinate.getMin()) || (x > q1Coordinate.getMax())) {
 			return false;
 		}
-		
-		
+
+
 		y -= _shiftY;
 		if ((y < q2Coordinate.getMin()) || (y > q2Coordinate.getMax())) {
 			return false;
 		}
 
-		
+
 		z -= _shiftZ;
 		if ((z < q3Coordinate.getMin()) || (z > q3Coordinate.getMax())) {
 			return false;
 		}
 
 
-		
+
 		return true;
 	}
 

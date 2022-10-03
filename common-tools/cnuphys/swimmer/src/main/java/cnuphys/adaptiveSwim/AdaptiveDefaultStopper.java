@@ -1,32 +1,47 @@
 package cnuphys.adaptiveSwim;
 
-import cnuphys.swim.SwimTrajectory;
 
 public class AdaptiveDefaultStopper extends AAdaptiveStopper {
 
-	private static final double TOL = 1.0e-5; //meters
-	
-	private double _sCutoff;
-			
 	/**
-	 * Rho  stopper  (does check max path length)
-	 * @param u0          initial state vector
-	 * @param sf          final path length meters
-	 * @param trajectory  optional trajectory
+	 * Default stopper simply checks pathlength. If the max pathlength is exceeded
+	 * we stop.
+	 * @param sMax          max path length meters
+	 * @param result holds the results, its u statevector should have been initialized
+	 * to the starting vector
 	 */
-	public AdaptiveDefaultStopper(final double[] u0, final double sf, SwimTrajectory trajectory) {
-		super(u0, sf, Double.NaN, trajectory);
-		_sCutoff = sf - TOL;
+	public AdaptiveDefaultStopper(final double sMax, AdaptiveSwimResult result) {
+		super(sMax, Double.NaN, result);
 	}
 
-	
+	/**
+	 * For doing things like setting the initial sign and distance
+	 */
+	@Override
+	public void initialize() {
+		//do nothing
+	}
+
+
 	@Override
 	public boolean stopIntegration(double snew, double[] unew) {
-		
+		//the point that exceeds _sMax will also be accepted
 		accept(snew, unew);
-		
-		// within tolerance?
-		return (snew > _sCutoff);
+
+		if (snew > _sMax) {
+			_result.setStatus(AdaptiveSwimmer.SWIM_SUCCESS);
+			return true;
+		}
+
+		return false;
 	}
-	
+
+
+	@Override
+	public double getNewStepSize(double h) {
+		// should not be called
+		System.err.println("getNewStepSize should not have been called for the defaultStopper.");
+		return 0;
+	}
+
 }

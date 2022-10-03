@@ -31,7 +31,7 @@ public class Cell2D {
 
 	/**
 	 * Create a 2D cell (for solenoid)
-	 * 
+	 *
 	 * @param probe the magnetic probe
 	 */
 	public Cell2D(FieldProbe probe) {
@@ -97,12 +97,12 @@ public class Cell2D {
 
 	/**
 	 * Check whether the cell boundaries (not the map boundaries) include the point
-	 * 
+	 *
 	 * @param rho the cylindrical rho coordinate in cm.
 	 * @param z   coordinate in cm
 	 * @return <code>true</code> if the point is included in the boundary of the
 	 *         field
-	 * 
+	 *
 	 */
 	public boolean containedCylindrical(double rho, double z) {
 		return ((rho > q2Min) && (rho < q2Max) && (z > q3Min) && (z < q3Max));
@@ -110,7 +110,7 @@ public class Cell2D {
 
 	/**
 	 * Calculate the field in kG in cylindrical components
-	 * 
+	 *
 	 * @param rho rho coordinate in cm
 	 * @param z z coordinate in cm
 	 * @param result field in kG in cylindrical components
@@ -136,8 +136,8 @@ public class Cell2D {
 		double f1 = (rho - q2Min) * q2Norm;
 		double f2 = (z - q3Min) * q3Norm;
 
-		f1 = f1 - Math.floor(f1);
-		f2 = f2 - Math.floor(f2);
+//		f1 = f1 - Math.floor(f1);
+//		f2 = f2 - Math.floor(f2);
 
 		double g1 = 1 - f1;
 		double g2 = 1 - f2;
@@ -153,7 +153,7 @@ public class Cell2D {
 		result[1] = (float) brho;
 		result[2] = (float) bz;
 
-//		} 
+//		}
 //	else {
 //			for (int i = 0; i < 3; i++) {
 //				result[i] = 0f;
