@@ -35,7 +35,7 @@
       <dependency>
         <groupId>org.jlab.clas</groupId>
         <artifactId>clas-math</artifactId>
-        <version>8.3.2-SNAPSHOT</version>
+        <version>8c.3.2-SNAPSHOT</version>
       </dependency>
 
     </dependencies>
