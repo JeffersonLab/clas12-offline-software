@@ -562,8 +562,8 @@ public class CVTEngine extends ReconstructionEngine {
         System.out.println("["+this.getName()+"] run with Kalman-Filter status set to "+this.kfFilterOn);
         System.out.println("["+this.getName()+"] initialize KF from true MC information "+this.initFromMc);
         System.out.println("["+this.getName()+"] number of KF iterations set to "+this.kfIterations);
-        System.out.println("["+this.getName()+"] doca cut "+this.docacut);
-        System.out.println("["+this.getName()+"] doca cut sum "+this.docacutsum);
+        System.out.println("["+this.getName()+"] SLA doca cut "+this.docacut);
+        System.out.println("["+this.getName()+"] SLA docasum cut "+this.docacutsum);
         System.out.println("["+this.getName()+"] max svt  cluster size "+this.getSvtmaxclussize());
         System.out.println("["+this.getName()+"] max bmt-c  cluster size "+this.getBmtcmaxclussize());
         System.out.println("["+this.getName()+"] max btm-z  cluster size "+this.getBmtzmaxclussize());
