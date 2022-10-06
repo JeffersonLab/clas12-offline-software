@@ -30,10 +30,27 @@ public enum HelicityBit {
     }
 
     public static HelicityBit getFlipped(HelicityBit bit) {
-        if (bit==PLUS) return MINUS;
-        if (bit==MINUS) return PLUS;
-        if (bit==DNE) return DNE;
-        return UDF;
+        switch (bit) {
+            case PLUS:
+                return MINUS;
+            case MINUS:
+                return PLUS;
+            case DNE:
+                return DNE;
+            default:
+                return UDF;
+        }
     }
 
+    public static HelicityBit createFromRawBit(byte bit) {
+        switch (bit) {
+            case 0:
+                return MINUS;
+            case 1:
+                return PLUS;
+            default:
+                return UDF;
+        }
+        
+    }
 }

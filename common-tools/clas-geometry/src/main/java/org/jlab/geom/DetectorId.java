@@ -22,7 +22,9 @@ public enum DetectorId implements Showable {
     CTOF      (11, "CTOF"),
     FTOF      (10, "FTOF"),
     DC        (13, "DC"),
-    EC        (15, "EC");
+    EC        (15, "EC"),
+    AHDC      (23, "AHDC"),
+    ATOF      (24, "ATOF");
     
     // Detector id numbers should be based on the CLAS12 Bank Numbering scheme
     private final int detectorId;
