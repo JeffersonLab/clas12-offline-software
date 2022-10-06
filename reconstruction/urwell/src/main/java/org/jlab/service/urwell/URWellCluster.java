@@ -16,6 +16,7 @@ public class URWellCluster extends ArrayList<URWellStrip> {
    
     
     private DetectorDescriptor  desc          = new DetectorDescriptor(DetectorType.URWELL);
+    private int                 id;  
     private Line3D              clusterLine   = new Line3D();
     public int                  indexMaxStrip = -1;
     private byte                clusterStatus =  1;
@@ -28,18 +29,27 @@ public class URWellCluster extends ArrayList<URWellStrip> {
         this.indexMaxStrip = 0;
     }
     
-    public Line3D  getLine() {return this.clusterLine;}
-    
-    
-    public void setStatus(int val) {this.clusterStatus+=val;}
-    
-    public byte getStatus()  {return clusterStatus;}   
-    
-    public void setClusterId(int id){
-        for(URWellStrip strip : this){
-            strip.setClusterId(id);
-        }
+    public int getId() {
+        return id;
     }
+    
+    public DetectorDescriptor getDescriptor(){
+        return this.desc;
+    }
+    
+    public int getSector() {
+        return this.desc.getSector();
+    }
+    
+    public int getLayer() {
+        return this.desc.getLayer();
+    }
+    
+    public int getChamber() {
+        return this.get(0).getChamber();
+    }
+    
+    public Line3D  getLine() {return this.clusterLine;}    
     
     public double getEnergy(){
         double energy = 0.0;
@@ -71,10 +81,6 @@ public class URWellCluster extends ArrayList<URWellStrip> {
         return 0.0;
     }
 	
-    public DetectorDescriptor getDescriptor(){
-        return this.desc;
-    }
-    
     public URWellStrip getMaxURWellStrip() {
     	    return this.get(this.indexMaxStrip);
     }
@@ -105,6 +111,17 @@ public class URWellCluster extends ArrayList<URWellStrip> {
         return adc;
     }
     
+    public void setStatus(int val) {this.clusterStatus+=val;}
+    
+    public byte getStatus()  {return clusterStatus;}   
+    
+    public void setClusterId(int id){
+        this.id = id;
+        for(URWellStrip strip : this){
+            strip.setClusterId(id);
+        }
+    }
+
     public void redoClusterLine(){
         
         Point3D pointOrigin = new Point3D(0.0,0.0,0.0);
@@ -168,6 +185,15 @@ public class URWellCluster extends ArrayList<URWellStrip> {
         }
         return clusterList;
     }   
+    
+    public static List<URWellCluster> getClusters(List<URWellCluster> clusters, int sector, int layer) {
+        List<URWellCluster> selectedClusters = new ArrayList<>();
+        for(URWellCluster cluster : clusters) {
+            if(cluster.getSector()==sector && cluster.getLayer()==layer)
+                selectedClusters.add(cluster);
+        }
+        return selectedClusters;
+    }
     
     @Override
     public String toString(){

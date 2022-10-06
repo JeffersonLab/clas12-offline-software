@@ -24,12 +24,5 @@ public class URWellConstants {
 
     // cluster
     public final static double COINCTIME = 100;
-    
-    public static int getChamber(int strip) {
-        for(int i=0; i<NCHAMBER; i++) {
-            if(strip>=STRIPMIN[i] && strip<=STRIPMAX[i])
-                return (i+1);
-        }
-        return 0;
-    }
+
 }

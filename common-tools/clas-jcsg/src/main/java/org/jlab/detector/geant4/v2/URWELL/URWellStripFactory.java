@@ -7,29 +7,42 @@ import eu.mihosoft.vrl.v3d.Vector3d;
 import org.jlab.detector.volume.Geant4Basic;
 import java.util.List;
 import org.jlab.detector.hits.DetHit;
+import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Point3D;
 import org.jlab.geometry.prim.Straight;
+import org.jlab.utils.groups.IndexedList;
 
-public class URWellStripFactory {
 
-    DatabaseConstantProvider cp = new DatabaseConstantProvider(11, "default");
-    URWellGeant4Factory factory = new URWellGeant4Factory(cp);
 
+public final class URWellStripFactory {
+
+    URWellGeant4Factory factory;
+    IndexedList<Line3D> globalStrips = new IndexedList(3);
+    IndexedList<Line3D> localStrips  = new IndexedList(3);
+    
+    public URWellStripFactory() {
+    }
+    
     public URWellStripFactory(DatabaseConstantProvider cp) {
-        URWellConstants.connect(cp);
-
+        this.init(cp);
+    }
+    
+    public void init(DatabaseConstantProvider cp) {
+        factory = new URWellGeant4Factory(cp);
+        this.fillStripLists();
     }
 
-    public int[] getNumberStripSector() {
-        int[] nStrips = new int[3];
+    public int getNStripSector() {
+        int nStrips = 0;
         for (int i = 0; i < URWellConstants.NCHAMBERS; i++) {
-            nStrips[i] = getNumberStripChamber(i);
+            nStrips += getNStripChamber(i);
         }
         return nStrips;
     }
 
-    public int getNumberStripChamber(int aChamber) {
+    public int getNStripChamber(int ichamber) {
 
-        double[] dim = factory.getChamberDimensions(aChamber);
+        double[] dim = factory.getChamberDimensions(ichamber);
 
         double xHalfSmallBase = dim[0];
         double xHalfLargeBase = dim[1];
@@ -56,36 +69,38 @@ public class URWellStripFactory {
     }
 
     public int getChamberIndex(int strip) {
-        int chamberIndex = 0;
-        if (strip <= getNumberStripChamber(0)) {
-            chamberIndex = 0;
+        int nStripTotal = 0;
+        for(int i=0; i<URWellConstants.NCHAMBERS; i++) {
+            nStripTotal += this.getNStripChamber(i);
+            if(strip <= nStripTotal)
+                return i;
         }
-        else if (strip > getNumberStripChamber(0)
-                && strip <= (getNumberStripChamber(0) + getNumberStripChamber(1))) {
-            chamberIndex = 1;
-        }
-        else if (strip > (getNumberStripChamber(0) + getNumberStripChamber(1))) {
-            chamberIndex = 2;
-        }
-        return chamberIndex;
+        return -1;
     }
 
-    public Line3d createStrip(int sector, int layer, int strip) {
-
-        Line3d stripLine;
-
+    private int getLocalStripId(int strip) {
+        
         int chamberIndex = getChamberIndex(strip);
 
-        //Strip ID wrt sector -> strip ID chamber (from 1 to getNumberStripChamber)
-        int[] nStripChamber = getNumberStripSector();
+        //Strip ID wrt sector -> strip ID chamber (from 1 to getNStripChamber)
         int nStripTotal = 0;
         if (chamberIndex > 0) {
             for (int i = 0; i < chamberIndex; i++) {
-                nStripTotal += nStripChamber[i];
+                nStripTotal += this.getNStripChamber(i);
             }
         }
-        //Strip ID: from 1 to  getNumberStripChamber       
+
+        //Strip ID: from 1 to  getNStripChamber       
         int cStrip = strip - nStripTotal;
+        
+        return cStrip;
+    }
+        
+    private Line3d createStrip(int sector, int layer, int strip) {
+
+        int chamberIndex = getChamberIndex(strip);
+                
+        int cStrip = this.getLocalStripId(strip);
 
         // CHAMBER reference frame
         // new numeration with stri ID_strip=0 crossing (0,0,0) of chamber
@@ -118,7 +133,7 @@ public class URWellStripFactory {
         Vector3d end = new Vector3d(eX, eY, eZ);
 
         // Get Chamber Volume
-        Geant4Basic chamberVolume = factory.getChamberVolume(chamberIndex+1, sector, strip);
+        Geant4Basic chamberVolume = factory.getChamberVolume(sector, chamberIndex+1);
         // 2 point defined before wrt the GLOBAL frame     
         Vector3d globalOrigin = chamberVolume.getGlobalTransform().transform(origin);
         Vector3d globalEnd    = chamberVolume.getGlobalTransform().transform(end);
@@ -129,13 +144,11 @@ public class URWellStripFactory {
         chamberVolume.makeSensitive();
         List<DetHit> Hits = chamberVolume.getIntersections(line);
         if (Hits.size() >= 1) {
-            stripLine = new Line3d(Hits.get(0).origin(), Hits.get(0).end());
+            return new Line3d(Hits.get(0).origin(), Hits.get(0).end());
 
         } else {
-            stripLine = null;
+            return null;
         }
-
-        return stripLine;
     }
 
     public Line3d getGLobalStrip(int sector, int layer, int strip) {
@@ -145,7 +158,7 @@ public class URWellStripFactory {
         return stripLine;
     }
 
-    public Line3d getLocalStrip(int sector, int layer, int strip) {
+    private Line3d getLocalStrip(int sector, int layer, int strip) {
 
         Line3d globalStrip = createStrip(sector, layer, strip);
         Geant4Basic sVolume = factory.getSectorVolume(sector);
@@ -157,7 +170,43 @@ public class URWellStripFactory {
 
         return localStrip;
     }
+    
+    public Line3D toLocal(int sector, Line3D global) {
+        Line3D local = new Line3D();
+        local.copy(global);
+        local.rotateZ(Math.toRadians(-60*(sector-1)));
+        local.rotateY(Math.toRadians(-URWellConstants.THTILT));
+        return local;
+    }
+    
+    private void fillStripLists() {
 
+        for(int is=0; is<URWellConstants.NSECTORS; is++) {
+            int sector = is+1;
+            for(int il=0; il<URWellConstants.NLAYERS; il++) {
+                int layer = il+1;
+                for(int ic=0; ic<this.getNStripSector(); ic++) {
+                    int strip = ic+1;
+                    Line3d line = this.createStrip(sector, layer, strip);
+                    Point3D origin = new Point3D(line.origin().x, line.origin().y, line.origin().z);
+                    Point3D end    = new Point3D(line.end().x,    line.end().y,    line.end().z);
+                    Line3D global = new Line3D(origin, end);
+                    Line3D local = this.toLocal(sector, global);
+                    this.globalStrips.add(global, is+1, il+1, ic+1);
+                    this.localStrips.add(local, is+1, il+1, ic+1);
+                }
+            }
+        }
+    }
+    
+    public Line3D getStrip(int sector, int layer, int strip) {
+        return globalStrips.getItem(sector, layer, strip);
+    }
+    
+    public Line3D getStripLocal(int sector, int layer, int strip) {
+        return localStrips.getItem(sector, layer, strip);
+    }
+    
     public static void main(String[] args) {
         DatabaseConstantProvider cp = new DatabaseConstantProvider(11, "default");
 

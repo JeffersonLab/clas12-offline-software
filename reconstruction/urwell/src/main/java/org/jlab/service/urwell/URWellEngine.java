@@ -1,12 +1,16 @@
 package org.jlab.service.urwell;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
 import org.jlab.clas.reco.ReconstructionEngine;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+import org.jlab.detector.geant4.v2.URWELL.URWellStripFactory;
+import org.jlab.geom.prim.Point3D;
 import org.jlab.groot.data.H1F;
-import org.jlab.groot.data.H2F;
 import org.jlab.groot.fitter.DataFitter;
 import org.jlab.groot.graphics.EmbeddedCanvas;
 import org.jlab.groot.group.DataGroup;
@@ -25,6 +29,7 @@ public class URWellEngine extends ReconstructionEngine {
 
     public static Logger LOGGER = Logger.getLogger(URWellEngine.class.getName());
 
+    public static URWellStripFactory factory = new URWellStripFactory();
 
     public URWellEngine() {
         super("URWell","bondi","1.0");
@@ -34,9 +39,15 @@ public class URWellEngine extends ReconstructionEngine {
     public boolean init() {
 
         // init ConstantsManager to read constants from CCDB
-        // load geometry
-        // register output banks for drop option
-        System.out.println("["+this.getName()+"] --> URWells are ready....");
+        String variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
+        DatabaseConstantProvider cp = new DatabaseConstantProvider(11, variationName);
+        factory.init(cp);
+        // register output banks for drop option        
+        this.registerOutputBank("URWELL::hits");
+        this.registerOutputBank("URWELL::clusters");
+        this.registerOutputBank("URWELL::crosses");
+
+        LOGGER.log(Level.INFO, "--> URWells are ready...");
         return true;
     }
 
@@ -57,10 +68,11 @@ public class URWellEngine extends ReconstructionEngine {
             }
         }
         
-        List<URWellStrip>     strips = URWellStrip.getStrips(event, this.getConstantsManager());
+        List<URWellStrip>     strips = URWellStrip.getStrips(event, factory, this.getConstantsManager());
         List<URWellCluster> clusters = URWellCluster.createClusters(strips);
+        List<URWellCross>    crosses = URWellCross.createCrosses(clusters);
         
-        this.writeHipoBanks(event, strips, clusters);
+        this.writeHipoBanks(event, strips, clusters, crosses);
         
         return true;
     }
@@ -68,7 +80,8 @@ public class URWellEngine extends ReconstructionEngine {
     
     private void writeHipoBanks(DataEvent de, 
                                 List<URWellStrip>     strips, 
-                                List<URWellCluster> clusters){
+                                List<URWellCluster> clusters, 
+                                List<URWellCross>    crosses){
 	    
         DataBank bankS = de.createBank("URWELL::hits", strips.size());
         for(int h = 0; h < strips.size(); h++){
@@ -84,6 +97,7 @@ public class URWellEngine extends ReconstructionEngine {
         
         DataBank bankC = de.createBank("URWELL::clusters", clusters.size());        
         for(int c = 0; c < clusters.size(); c++){
+            bankS.setShort("id",       c, (short) clusters.get(c).getId());
             bankC.setByte("sector",    c,  (byte) clusters.get(c).get(0).getDescriptor().getSector());
             bankC.setByte("layer",     c,  (byte) clusters.get(c).get(0).getDescriptor().getLayer());
             bankC.setShort("strip",    c, (short) clusters.get(c).getMaxStrip());
@@ -98,11 +112,23 @@ public class URWellEngine extends ReconstructionEngine {
             bankC.setShort("size",     c, (short) clusters.get(c).size());
             bankC.setShort("status",   c, (short) clusters.get(c).getStatus()); 
         }       
-        de.appendBanks(bankS,bankC);
+        
+        DataBank bankX = de.createBank("URWELL::crosses", crosses.size());        
+        for(int c = 0; c < crosses.size(); c++){
+            bankX.setShort("id",       c, (short) crosses.get(c).getId());
+            bankX.setByte("sector",    c,  (byte) crosses.get(c).getSector());
+            bankX.setFloat("x",        c, (float) crosses.get(c).point().x());
+            bankX.setFloat("y",        c, (float) crosses.get(c).point().y());
+            bankX.setFloat("z",        c, (float) crosses.get(c).point().z());
+            bankX.setShort("cluster1", c, (short) crosses.get(c).getCluster1()); 
+            bankX.setShort("cluster2", c, (short) crosses.get(c).getCluster2()); 
+            bankX.setShort("status",   c, (short) crosses.get(c).getStatus()); 
+        }       
+        de.appendBanks(bankS,bankC,bankX);
     }
 
     
-    public static void gitGauss(H1F histo) {
+    public static void fitGauss(H1F histo) {
         double mean  = histo.getMean();
         double amp   = histo.getBinContent(histo.getMaximumBin());
         double rms   = histo.getRMS();
@@ -139,16 +165,17 @@ public class URWellEngine extends ReconstructionEngine {
         URWellEngine engine = new URWellEngine();
         engine.init();
 
-        String input = "/Users/devita/urwell.hipo";
+        String input = "/Users/devita/urwell2.hipo";
 
         DataGroup dg = new DataGroup(3, 2);
+        String[] axes = {"x", "y"};
         for(int il=0; il<URWellConstants.NLAYER; il++) {
             int layer = il+1;
             H1F h1 = new H1F("hiEnergyL"+layer, "Cluster Energy (eV)", "Counts", 100, 0., 1500.);         
             h1.setOptStat(Integer.parseInt("1111")); 
             H1F h2 = new H1F("hiTimeL"+layer, "Cluster Time (ns)", "Counts", 100, 0., 400.);         
             h2.setOptStat(Integer.parseInt("1111")); 
-            H1F h3 = new H1F("hiSpaceL"+layer, "Space Resolution (mm)", "Counts", 100, -2.5, 2.5);         
+            H1F h3 = new H1F("hiSpace"+axes[il], "Cross #Delta" + axes[il] + " (mm)", "Counts", 100, -2.0, 2.0);         
             h3.setOptStat(Integer.parseInt("1111")); 
             dg.addDataSet(h1, il*3 + 0);
             dg.addDataSet(h2, il*3 + 1);
@@ -163,16 +190,48 @@ public class URWellEngine extends ReconstructionEngine {
 
             engine.processDataEvent(event);
             
+            double xtrue = 0;
+            double ytrue = 0;
+            double ztrue = 0;
+            Point3D mc = new Point3D();
+            if(event.hasBank("MC::True")) {
+                DataBank bankMC = event.getBank("MC::True");
+                bankMC.show();
+                for(int i=0; i<bankMC.rows(); i++) {
+                    int detector = bankMC.getByte("detector",i);  
+                    if(detector==DetectorType.URWELL.getDetectorId()) {
+                        xtrue = bankMC.getFloat("avgX",i);
+                        ytrue = bankMC.getFloat("avgY",i);
+                        ztrue = bankMC.getFloat("avgZ",i);
+                        mc = new Point3D(xtrue, ytrue, ztrue);
+                        break;
+                    }
+                }
+            }
+            mc.rotateY(-Math.toRadians(25.0));
+            System.out.println(mc);
             if(event.hasBank("URWELL::clusters")) {
-                DataBank bank = event.getBank("URWELL::clusters");
-                for(int i=0; i<bank.rows(); i++) {
-                    int    layer  = bank.getByte("layer", i);
-                    double energy = bank.getFloat("energy", i);
-                    double time   = bank.getFloat("time", i);
-                    double x      = bank.getFloat("xo", i);
+                DataBank bankC = event.getBank("URWELL::clusters");
+                bankC.show();
+                for(int i=0; i<bankC.rows(); i++) {
+                    int    layer  = bankC.getByte("layer", i);
+                    double energy = bankC.getFloat("energy", i);
+                    double time   = bankC.getFloat("time", i);
                     dg.getH1F("hiEnergyL"+layer).fill(energy);
                     dg.getH1F("hiTimeL"+layer).fill(time);
-                    dg.getH1F("hiSpaceL"+layer).fill(x-722.5-22.7*(layer-1));
+                }
+            }
+            if(event.hasBank("URWELL::crosses")) {
+                DataBank bankX = event.getBank("URWELL::crosses");
+                bankX.show();
+                for(int i=0; i<bankX.rows(); i++) {
+                    double x = bankX.getFloat("x", i);
+                    double y = bankX.getFloat("y", i);
+                    double z = bankX.getFloat("z", i);
+                    Point3D rec = new Point3D(x*10, y*10, z*10);
+                    rec.rotateY(-Math.toRadians(25));
+                    dg.getH1F("hiSpace"+axes[0]).fill(rec.x()-mc.x());
+                    dg.getH1F("hiSpace"+axes[1]).fill(rec.y()-mc.y());
                 }
             }
 
@@ -180,8 +239,8 @@ public class URWellEngine extends ReconstructionEngine {
         reader.close();
         
         for(int i=0; i<URWellConstants.NLAYER; i++) {
-           URWellEngine.gitGauss(dg.getH1F("hiTimeL"+(i+1)));
-           URWellEngine.gitGauss(dg.getH1F("hiSpaceL"+(i+1)));
+           URWellEngine.fitGauss(dg.getH1F("hiTimeL"+(i+1)));
+           URWellEngine.fitGauss(dg.getH1F("hiSpace"+axes[i]));
         }
         JFrame frame = new JFrame("URWell Reconstruction");
         frame.setSize(800,800);

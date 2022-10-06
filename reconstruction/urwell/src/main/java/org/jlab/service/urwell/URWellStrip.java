@@ -5,6 +5,7 @@ import java.util.List;
 import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.calib.utils.ConstantsManager;
+import org.jlab.detector.geant4.v2.URWELL.URWellStripFactory;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -20,7 +21,9 @@ import org.jlab.io.base.DataEvent;
 public class URWellStrip implements Comparable {
     
     private DetectorDescriptor  desc = new DetectorDescriptor(DetectorType.URWELL);
-
+    
+    private int      chamber = 0;
+    
     private int          ADC = 0;
     private int          TDC = 0;
     private int           id = -1;       // ID of the hit. this shows the row number of the corresponding hit in the ADC bank
@@ -50,6 +53,22 @@ public class URWellStrip implements Comparable {
 
     public void setDescriptor(DetectorDescriptor desc) {
         this.desc = desc;
+    }
+
+    public int getSector() {
+        return this.desc.getSector();
+    }
+    
+    public int getLayer() {
+        return this.desc.getLayer();
+    }
+    
+    public int getChamber() {
+        return chamber;
+    }
+
+    public void setChamber(int chamber) {
+        this.chamber = chamber;
     }
 
     public int getADC() {
@@ -121,7 +140,7 @@ public class URWellStrip implements Comparable {
            strip.getDescriptor().getLayer()==this.desc.getLayer()){
             int s1 = strip.getDescriptor().getComponent();
             int s2 = this.desc.getComponent();
-            if(Math.abs(s1-s2)<=1 && URWellConstants.getChamber(s1)==URWellConstants.getChamber(s2)) return true;
+            if(Math.abs(s1-s2)<=1 && this.getChamber()==strip.getChamber()) return true;
         }
         return false;
     }
@@ -143,7 +162,7 @@ public class URWellStrip implements Comparable {
         return -1;
     }
     
-    public static List<URWellStrip> getStrips(DataEvent event, ConstantsManager ccdb) {
+    public static List<URWellStrip> getStrips(DataEvent event, URWellStripFactory factory, ConstantsManager ccdb) {
         
         List<URWellStrip> strips = new ArrayList<>();
         
@@ -164,7 +183,8 @@ public class URWellStrip implements Comparable {
                 strip.setTDC((int) time);
                 strip.setEnergy(strip.ADC*URWellConstants.ADCTOENERGY);
                 strip.setTime(strip.TDC*URWellConstants.TDCTOTIME);
-                strip.setLine(new Line3D(comp, -1, 0, comp, 1, 0)); //provisional for testing
+                strip.setLine(factory.getStrip(sector, layer, comp)); 
+                strip.setChamber(factory.getChamberIndex(comp)+1);
                 strip.setStatus(0);
                 
                 if(strip.getEnergy()>URWellConstants.THRESHOLD) strips.add(strip);

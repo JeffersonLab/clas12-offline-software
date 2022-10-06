@@ -16,7 +16,7 @@ public final class URWellGeant4Factory extends Geant4Factory {
     
     ///////////////////////////////////////////////////
     public URWellGeant4Factory( DatabaseConstantProvider cp) {
-        URWellConstants.load( cp );
+        URWellConstants.connect(cp );
         motherVolume = new G4World("fc");
 
         for (int iregion = 0; iregion < 1; iregion++) {
@@ -32,7 +32,7 @@ public final class URWellGeant4Factory extends Geant4Factory {
          for (int i=0; i< URWellConstants.CHAMBERVOLUMESTHICKNESS.length; i++ )
              chamberT+=URWellConstants.CHAMBERVOLUMESTHICKNESS[i];
          return chamberT;
-}
+    }
 
     ///////////////////////////////////////////////////
     public Geant4Basic createRegion(int isector, int iregion) {
@@ -118,10 +118,10 @@ public final class URWellGeant4Factory extends Geant4Factory {
         return  chamberVolume;
     }
     
-    public double[] getChamberDimensions(int chamber){
+    public double[] getChamberDimensions(int ichamber){
     
         double[] chamberDimensions = new double[3];
-        chamberDimensions[0] = (chamber*URWellConstants.SECTORHEIGHT/URWellConstants.NCHAMBERS)
+        chamberDimensions[0] = (ichamber*URWellConstants.SECTORHEIGHT/URWellConstants.NCHAMBERS)
                              * Math.tan(Math.toRadians(URWellConstants.THOPEN/2.))
                              + URWellConstants.DX0CHAMBER0 ;
     
@@ -134,7 +134,7 @@ public final class URWellGeant4Factory extends Geant4Factory {
     }
 
     
-    public Geant4Basic getChamberVolume(int chamber, int sector, int strip) {
+    public Geant4Basic getChamberVolume(int sector, int chamber) {
 
         int r = 1;
         int s = sector;

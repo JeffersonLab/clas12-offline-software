@@ -14,6 +14,7 @@ public class URWellConstants {
     public final static double ZENLARGEMENT = 0.1;
    
     public final static int NSECTORS  = 6;    //number of sectors
+    public final static int NLAYERS   = 2;    //number of sectors
     public final static int NCHAMBERS = 3;    //number of chambers
 
     // Sector geometrical parameters
@@ -24,9 +25,9 @@ public class URWellConstants {
     public final static double DX0CHAMBER0  = 5.197;   // halfbase of chamber 1 
   
     // Chamber volumes  and materials 
-    public final static double[] CHAMBERVOLUMESTHICKNESS = {0.0025, 0.0005, 0.3,                               // window
+    public final static double[] CHAMBERVOLUMESTHICKNESS = {0.0025, 0.0005,0.3,                                // window
                                                             0.0025, 0.0005,0.4,                                // cathode
-                                                            0.0005, 0.005, 0.0005,                             //uRWell + DlC
+                                                            0.0005, 0.005, 0.0005,                             // uRWell + DlC
                                                             0.0005, 0.005, 0.0005,                             // Capacitive sharing layer1
                                                             0.0005, 0.005, 0.0005,                             // Capacitive sharing layer2
                                                             0.005,  0.0005,0.005, 0.005,  0.0005,0.005, 0.005, // Readout

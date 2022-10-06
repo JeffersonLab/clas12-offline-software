@@ -36,5 +36,22 @@
        {"name":"size",        "type":"S", "info":"size of the cluster"},
        {"name":"status",      "type":"S", "info":"status of the cluster"}
     ]
+  },
+  {
+    "name": "URWELL::crosses",
+    "group": 22300,
+    "item" : 23,
+    "info": "reconstructed crosses from URWELL",
+    "entries": [
+       {"name":"id",          "type":"S", "info":"id of the cross"},
+       {"name":"sector",      "type":"B", "info":"sector of URWELL"},
+       {"name":"layer",       "type":"B", "info":"Layer of URWELL"},
+       {"name":"x",           "type":"F", "info":"X coordinate"},
+       {"name":"y",           "type":"F", "info":"Y coordinate"},
+       {"name":"z",           "type":"F", "info":"Z coordinate"},
+       {"name":"cluster1",    "type":"S", "info":"id of the cluster in the V layer"},
+       {"name":"cluster2",    "type":"S", "info":"id of the cluster in the W layer"},
+       {"name":"status",      "type":"S", "info":"status of the cluster"}
+    ]
   }
 ]
