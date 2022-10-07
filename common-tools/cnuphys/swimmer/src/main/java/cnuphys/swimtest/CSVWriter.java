@@ -72,7 +72,7 @@ public class CSVWriter {
 
 		for (int i = 0; i < len; i++) {
 			boolean last = (i == (len-1));
-			sb.append(DoubleFormat.doubleFormat(vals[i], 6, 3));
+			sb.append(DoubleFormat.doubleFormat(vals[i], 5, 3));
 			if (!last) {
 				sb.append(", ");
 			}
@@ -104,7 +104,7 @@ public class CSVWriter {
 		StringBuffer sb = new StringBuffer(guessSize);
 
 		for (int i = 0; i < len; i++) {
-			sb.append(DoubleFormat.doubleFormat(vals[i], 6, 3));
+			sb.append(DoubleFormat.doubleFormat(vals[i], 5, 3));
 			sb.append(", ");
 		}
 

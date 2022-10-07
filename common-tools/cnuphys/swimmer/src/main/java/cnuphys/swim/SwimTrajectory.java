@@ -283,6 +283,20 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	}
 
 	/**
+	 * Replace the last point in the trajectory
+	 * @param u the new last point
+	 * @param s the new last pathlength
+	 */
+	public void replaceLastPoint(double u[], double s) {
+		if (isEmpty()) {
+			return;
+		}
+		
+		remove(size()-1);
+		add(u, s);
+	}
+	
+	/**
 	 * Get the average phi for this trajectory based on positions, not directions
 	 * 
 	 * @return the average phi value in degrees

@@ -15,7 +15,6 @@ public class AdaptiveSwimIntersection {
 	//closest we get on the "left"
 	//the original side is always called "left"
 	private Point _left = new Point();
-	private double _leftAbsDist = Double.POSITIVE_INFINITY;
 	private double _sLeft;
 	
 	private double _txLeft;
@@ -24,7 +23,6 @@ public class AdaptiveSwimIntersection {
 
 	//closest we get on the "right"
 	private Point _right = new Point();
-	private double _rightAbsDist = Double.POSITIVE_INFINITY;
 	private double _sRight;
 	
 	private double _txRight;
@@ -51,38 +49,29 @@ public class AdaptiveSwimIntersection {
 
 
 	/**
-	 * See if the next step on the left is closer to the target.
+	 * Set the next left (staring side) point
 	 * @param u the state vector
 	 * @param s the path length
-	 * @param absDist the absolute distance to the target
 	 */
-	public void checkSetLeft(double u[], double s, double absDist) {
-		if (absDist < _leftAbsDist) {
-			_left.set(u[0], u[1], u[2]);
-			_sLeft = s;
-			_txLeft = u[3];
-			_tyLeft = u[4];
-			_tzLeft = u[5];
-			_leftAbsDist = absDist;
-		}
+	public void setLeft(double u[], double s) {
+		_left.set(u[0], u[1], u[2]);
+		_sLeft = s;
+		_txLeft = u[3];
+		_tyLeft = u[4];
+		_tzLeft = u[5];
 	}
 
 	/**
-	 * See if the next step on the right is closer to the target.
+	 * See what should be the only "far side" point
 	 * @param u the state vector
-	 * 	 * @param s the path length
-
-	 * @param absDist the absolute distance to the target
+	 * @param s the path length
 	 */
-	public void checkSetRight(double u[], double s, double absDist) {
-		if (absDist < _rightAbsDist) {
-			_right.set(u[0], u[1], u[2]);
-			_sRight = s;
-			_txRight = u[3];
-			_tyRight = u[4];
-			_tzRight = u[5];
-			_rightAbsDist = absDist;
-		}
+	public void setRight(double u[], double s) {
+		_right.set(u[0], u[1], u[2]);
+		_sRight = s;
+		_txRight = u[3];
+		_tyRight = u[4];
+		_tzRight = u[5];
 	}
 
 	/**
@@ -91,8 +80,6 @@ public class AdaptiveSwimIntersection {
 	public void reset() {
 		_left.set(Double.NaN, Double.NaN, Double.NaN);
 		_right.set(Double.NaN, Double.NaN, Double.NaN);
-		_leftAbsDist = Double.POSITIVE_INFINITY;
-		_rightAbsDist = Double.POSITIVE_INFINITY;
 		_intersection.set(Double.NaN, Double.NaN, Double.NaN);
 		_distance = Double.NaN;
 
@@ -121,7 +108,7 @@ public class AdaptiveSwimIntersection {
 	 * @param geom the object (e.g., plane) that is being intersected.
 	 */
 	public void computeIntersection(AGeometric geom) {
-		double t = geom.interpolate(_right, _left, _intersection);
+		double t = geom.interpolate(_left, _right, _intersection);
 		_s = _sLeft + t * (_sRight - _sLeft);
 		_tx = _txLeft + t * (_txRight - _txLeft);
 		_ty = _tyLeft + t * (_tyRight - _tyLeft);
@@ -151,6 +138,10 @@ public class AdaptiveSwimIntersection {
 		return _intersection;
 	}
 	
+	/**
+	 * Set a u based on interpolated values
+	 * @param u the state vector to fill
+	 */
 	public void setU(double u[]) {
 		u[0] = _intersection.x;
 		u[1] = _intersection.y;

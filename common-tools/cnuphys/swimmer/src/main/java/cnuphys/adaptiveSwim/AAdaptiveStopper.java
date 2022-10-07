@@ -58,11 +58,13 @@ public abstract class AAdaptiveStopper implements IAdaptiveStopper {
 	}
 
 	/**
-	 * Accept a new integration step
+	 * Accept a new integration step. This is also where the step is optionally added to the 
+	 * trajectory.
 	 * @param snew the new value of s in meters
 	 * @param unew the new state vector
 	 */
 	protected void accept(double snew, double[] unew) {
+		
 		_result.setU(unew);
         _result.setS(snew);
 

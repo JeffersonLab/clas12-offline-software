@@ -142,7 +142,7 @@ public class AdaptiveSwimmer {
 			IAdaptiveStopper stopper) throws AdaptiveSwimException {
 
 		//initialization; the initial state vector will be placed in the result object by init
-		init(charge, xo, yo, zo, momentum, theta, phi, stopper);
+		init(charge, xo, yo, zo, momentum, theta, phi, 0, stopper);
 
 		//neutral? Just return a line
 		if (charge == 0) {
@@ -351,30 +351,24 @@ public class AdaptiveSwimmer {
 	 * @param u0 the initial state vector
 	 * @param s0 the initial pathlength, in case this is a continuation swim
 	 * @param sf the final or maximum path length
-	 * @param h0 the initial step size
-	 * @param result the swim result
+	 * @param h           the initial stepsize in meters
+	 * @param eps         the overall fractional tolerance (e.g., 1.0e-5)
+	 * @param result      the container for some of the swimming results	 * @param result the swim result
 	 * @throws AdaptiveSwimException
 	 */
-	private void swimSignChange(double[] u0, double so, double sf, double h0,
-			double eps, final Derivative deriv, AAdaptiveStopper stopper, AdaptiveSwimResult result) throws AdaptiveSwimException {
+	private void swimSignChange(double[] u0, double so, double sf, double h,
+			double eps, final Derivative deriv, ASignChangeStopper stopper, 
+			AdaptiveSwimResult result) throws AdaptiveSwimException {
 
 
 		ButcherAdvance advancer = new ButcherAdvance(ButcherTableau.CASH_KARP);
 
 		try {
-			AdaptiveSwimUtilities.driver(h0, deriv, stopper, advancer, eps);
+			AdaptiveSwimUtilities.driver(h, deriv, stopper, advancer, eps);
 		} catch (AdaptiveSwimException e) {
 			// put in a message that allows us to reproduce the track
 		}
-
-		double currentS = stopper.getS();
-		if (currentS > stopper.getSmax()) {
-			result.setStatus(SWIM_TARGET_MISSED);
-			return;
-		}
-
-		result.setStatus(SWIM_SUCCESS);
-
+		
 	}
 
 	/**
@@ -423,7 +417,7 @@ public class AdaptiveSwimmer {
 		double s = result.getS();
 		double signedDist = targetPlane.signedDistance(u);
 
-		intersection.checkSetLeft(u, s, Math.abs(signedDist));
+		intersection.setLeft(u, s);
 
 		double del = Math.abs(signedDist); //should be less than accuracy
 
@@ -440,8 +434,10 @@ public class AdaptiveSwimmer {
 		if (result.getStatus() != SWIM_SUCCESS) {
 			return;
 		}
-
 		
+		//if get here, the next to last point is on the "left" side of
+		//the target, and last is on the right 
+
 		double[] uf = result.getU();
 		signedDist = targetPlane.signedDistance(uf);
 		s = result.getS();
@@ -450,13 +446,79 @@ public class AdaptiveSwimmer {
 		//the last point on the trajectory will be a point on the start side of the intersection that is within the
 		//requested accuracy.
 
-		intersection.checkSetRight(uf, s, Math.abs(signedDist));
+		intersection.setRight(uf, s);
 		result.computeIntersection(targetPlane);
 		
 		
 		result.setS(intersection.getS());
 		intersection.setU(result.getU());
+		
+		//replace last point in traj (which will be the point on the right) with last point in result
+		if (result.hasTrajectory()) {
+			result.getTrajectory().replaceLastPoint(result.getU(), result.getS());
+		}
 	}
+	
+	/**
+	 * Swim to a plane using the current active field. In this case, interpolate the
+	 * last two points (one on each side) so that the final point is right on the
+	 * plane.
+	 *
+	 * @param charge      in integer units of e
+	 * @param xo          the x vertex position in meters
+	 * @param yo          the y vertex position in meters
+	 * @param zo          the z vertex position in meters
+	 * @param p           the momentum in GeV/c
+	 * @param theta       the initial polar angle in degrees
+	 * @param phi         the initial azimuthal angle in degrees
+	 * @param targetPlane the target plane
+	 * @param sf          the final (max) value of the independent variable
+	 *                    (pathlength) unless the integration is terminated by the
+	 *                    stopper
+	 * @param h          the initial stepsize in meters
+	 * @param eps         the overall fractional tolerance (e.g., 1.0e-5)
+	 * @param result      the container for some of the swimming results
+	 * @throws AdaptiveSwimException
+	 */
+	public void swimPlaneInterp(int charge, double xo, double yo, double zo,
+			double p, double theta, double phi, Plane targetPlane, double sf,
+			double h, double eps, AdaptiveSwimResult result) throws AdaptiveSwimException {
+		
+	
+		Derivative deriv = new Derivative(charge, p, _probe);
+
+		AdaptiveSwimIntersection intersection = result.getIntersection();
+		intersection.reset();
+		
+		PlaneSignChangeStopper pscStopper = new PlaneSignChangeStopper(sf, targetPlane, result);
+
+		//initialization; the initial state vector will be placed in the result object by init
+		init(charge, xo, yo, zo, p, theta, phi, 0, pscStopper);
+
+		swimSignChange(result.getU(), result.getS(), sf, h, eps, deriv, pscStopper, result);
+
+		if (result.getStatus() != SWIM_SUCCESS) {
+			return;
+		}
+		
+		//if get here, the next to last point is on the "left" side of
+		//the target, and last is on the right 
+
+		//get the interpolated intersection. Note this  will NOT be the last trajectory point.
+		//the last point on the trajectory will be a point on the start side of the intersection that is within the
+		//requested accuracy.
+
+		result.computeIntersection(targetPlane);
+		
+		result.setS(intersection.getS());
+		intersection.setU(result.getU());
+		
+		//replace last point in traj (which will be the point on the right) with last point in result
+		if (result.hasTrajectory()) {
+			result.getTrajectory().replaceLastPoint(result.getU(), result.getS());
+		}
+	}
+
 
 	/**
 	 * Swim to an arbitrary infinitely long cylinder using the current active field
@@ -636,7 +698,7 @@ public class AdaptiveSwimmer {
 	 * @param stopper the adaptive stopper
 	 */
 	private void init(int charge, double xo, double yo, double zo, double momentum,
-			double theta, double phi, IAdaptiveStopper stopper) {
+			double theta, double phi, double s, IAdaptiveStopper stopper) {
 
 		//create a swim result
 		AdaptiveSwimResult result = stopper.getResult();
@@ -653,6 +715,7 @@ public class AdaptiveSwimmer {
 		result.setInitialValues(charge, xo, yo, zo, momentum, theta, phi);
 
 		stuffU(result.getU(), xo, yo, zo, momentum, theta, phi);
+		result.setS(s);
 		stopper.initialize();
 
 	}

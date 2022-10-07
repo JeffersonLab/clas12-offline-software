@@ -465,6 +465,64 @@ public final class Swimmer {
     }
     
 
+	/**
+     * 
+     * @param charge               the charge: -1 for electron, 1 for proton, etc
+     * @param xo                   the x vertex position in meters
+     * @param yo                   the y vertex position in meters
+     * @param zo                   the z vertex position in meters
+     * @param momentum             initial momentum in GeV/c
+     * @param theta                initial polar angle in degrees
+     * @param phi                  initial azimuthal angle in degrees
+     * @param normX                x component of the normal to the plane
+     * @param normY                y component of the normal to the plane
+     * @param normZ                z component of the normal to the plane
+     * @param pointX               x coordinate of point in plane
+     * @param pointY               y coordinate of point in plane
+     * @param pointZ               z coordinate of point in plane
+     * @param sMax                 maximum path length (m)
+     * @param stepSize             initial stepsize (m)
+ 	 * @param eps                  the overall fractional tolerance (e.g., 1.0e-6)
+     * @param result               holds the result
+     * @throws AdaptiveSwimException
+     */
+    public void swimPlaneInterp(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+            double normX, double normY, double normZ, double pointX, double pointY, double pointZ,
+            double sMax, double stepSize, double eps, AdaptiveSwimResult result)
+            throws AdaptiveSwimException {
+        cnuphys.adaptiveSwim.geometry.Plane targetPlane = new cnuphys.adaptiveSwim.geometry.Plane(new Vector(normX,normY,normZ), new Point(pointX,pointY,pointZ));
+
+        swimPlaneInterp(charge, xo, yo, zo, momentum, theta, phi, targetPlane, 
+                sMax, stepSize, eps, result);
+    }
+    
+    /**
+     * 
+     * @param charge               the charge: -1 for electron, 1 for proton, etc
+     * @param xo                   the x vertex position in meters
+     * @param yo                   the y vertex position in meters
+     * @param zo                   the z vertex position in meters
+     * @param momentum             initial momentum in GeV/c
+     * @param theta                initial polar angle in degrees
+     * @param phi                  initial azimuthal angle in degrees
+     * @param targetPlane
+     * @param sMax
+     * @param stepSize
+     * @param relTolerance
+     * @param result
+     * @throws AdaptiveSwimException
+     */
+    public void swimPlaneInterp(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+            cnuphys.adaptiveSwim.geometry.Plane targetPlane,
+            double sf, double h0, double eps, AdaptiveSwimResult result)
+            throws AdaptiveSwimException {
+        
+        _newSwimmer.swimPlaneInterp(charge, xo, yo, zo,
+                momentum, theta, phi, targetPlane, sf, h0, eps, result);
+    
+    }
+    
+
 
 	public void swimPlane(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
 			double normX, double normY, double normZ, double pointX, double pointY, double pointZ,

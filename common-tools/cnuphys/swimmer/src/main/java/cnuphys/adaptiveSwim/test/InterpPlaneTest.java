@@ -37,10 +37,10 @@ public class InterpPlaneTest {
 	    
 	    //write the header row
 	    writer.writeRow("charge", "xo (m)", "yo (m)", "zo (m)", "p (GeV/c)", "theta (deg)", "phi (deg)", 
-	    		"status", "xf_new", "yf_new", "zf_new", "s_new", "dist_new", 
-	    		"status", "xf_new", "yf_new", "zf_new", "s_new", "dist_new");
+	    		"status", "xf_int", "yf_int", "zf_int", "s_int", "dist_int", 
+	    		"status", "xf_gag", "yf_gag", "zf_gag", "s_gag", "dist_gag");
 	    
-		Swimmer swimmer = new Swimmer(); //old
+//		Swimmer swimmer = new Swimmer(); //old
 		AdaptiveSwimmer adaptiveSwimmer = new AdaptiveSwimmer(); //new
 		
 		//results for old and new
@@ -57,23 +57,17 @@ public class InterpPlaneTest {
 			double p = data.p;
 			double theta = data.theta;
 			double phi = data.phi;
-			double nx = data.nx;
-			double ny = data.ny;
-			double nz = data.nz;
-			double px = data.px;
-			double py = data.py;
-			double pz = data.pz;
 
 			
 			result.reset();
 			writer.writeStartOfRow(charge, 100 * xo, 100 * yo, 100 * zo, p, theta, phi);
 
-			// OLD
+			// acc req
 			
 			try {
-				swimmer.swimPlaneInterp(charge, xo, yo, zo, p, theta, phi, 
-						nx, ny, nz, px, py, pz, 
-						data.accuracy, data.sMax, data.stepSize, eps, result);
+				adaptiveSwimmer.swimPlaneInterp(charge, xo, yo, zo, p, 
+						theta, phi, data.plane, data.accuracy,
+						data.sMax, data.stepSize, eps, result);
 				
 				planeSwimResult(writer, data.plane, result);
 
@@ -84,10 +78,10 @@ public class InterpPlaneTest {
 
 			result.reset();
 
-			// NEW
+			// gagik suggestion
 			try {
 				adaptiveSwimmer.swimPlaneInterp(charge, xo, yo, zo, p, 
-						theta, phi, data.plane, data.accuracy,
+						theta, phi, data.plane,
 						data.sMax, data.stepSize, eps, result);
 				
 				planeSwimResult(writer, data.plane, result);
@@ -106,8 +100,8 @@ public class InterpPlaneTest {
 
 		//timing test
 		long threadId = Thread.currentThread().getId();
-		long newTime;
-		long oldTime;
+		long intTime;
+		long gagTime;
 		
 		long start = SwimTest.cpuTime(threadId);
 
@@ -120,29 +114,23 @@ public class InterpPlaneTest {
 			double p = data.p;
 			double theta = data.theta;
 			double phi = data.phi;
-			double nx = data.nx;
-			double ny = data.ny;
-			double nz = data.nz;
-			double px = data.px;
-			double py = data.py;
-			double pz = data.pz;
 
 			
 			result.reset();
 
-			// OLD
+			// INT
 			try {
-				swimmer.swimPlaneInterp(charge, xo, yo, zo, p, theta, phi, 
-						nx, ny, nz, px, py, pz, 
-						data.accuracy, data.sMax, data.stepSize, eps, result);
+				adaptiveSwimmer.swimPlaneInterp(charge, xo, yo, zo, p, 
+						theta, phi, data.plane, data.accuracy,
+						data.sMax, data.stepSize, eps, result);
 			
 			} catch (AdaptiveSwimException e) {
-				System.err.println("OLD Swimmer Failed." + "  final pathlength = " + result.getFinalS());
+				System.err.println("INT Swimmer Failed." + "  final pathlength = " + result.getS());
 				e.printStackTrace();
 			}
 		} //for
 		
-		oldTime = SwimTest.cpuTime(threadId) - start;
+		intTime = SwimTest.cpuTime(threadId) - start;
 		
 		start = SwimTest.cpuTime(threadId);
 
@@ -160,27 +148,27 @@ public class InterpPlaneTest {
 			result.reset();
 
 
-			// NEW
+			// GAGIK
 			
 			try {
 				adaptiveSwimmer.swimPlaneInterp(charge, xo, yo, zo, p, 
-						theta, phi, data.plane, data.accuracy,
+						theta, phi, data.plane,
 						data.sMax, data.stepSize, eps, result);
 				
 
 			} catch (AdaptiveSwimException e1) {
-				System.err.println("NEW Swimmer Failed." + "  final pathlength = " + result.getFinalS());
+				System.err.println("INT Swimmer Failed." + "  final pathlength = " + result.getS());
 				e1.printStackTrace();
 			}
 
 	
 		} //for	
 		
-		newTime = SwimTest.cpuTime(threadId) - start;
+		gagTime = SwimTest.cpuTime(threadId) - start;
 
-		System.err.println("old time: " + oldTime);
-		System.err.println("new time: " + newTime);
-		System.err.println("ratio new/old = " + (double)newTime/(double)oldTime);
+		System.err.println("int time: " + intTime);
+		System.err.println("gag time: " + gagTime);
+		System.err.println("ratio gag/int = " + (double)gagTime/(double)intTime);
 
 		System.err.println("done");
 
