@@ -11,13 +11,13 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 
 /**
- * Add description
+ * URWell strip, defined based on ADC bank information and 3D line provided 
+ * by the geometry service 
  * 
  * @author bondi, devita
  */
 
-// remove add methods as needed
-// read ADC bank
+
 public class URWellStrip implements Comparable {
     
     private DetectorDescriptor  desc = new DetectorDescriptor(DetectorType.URWELL);
@@ -146,8 +146,7 @@ public class URWellStrip implements Comparable {
     }
     
     public boolean isInTime(URWellStrip strip) {
-        if (Math.abs(this.getTime() - strip.getTime()) < URWellConstants.COINCTIME) return true;
-        return false;
+        return Math.abs(this.getTime() - strip.getTime()) < URWellConstants.COINCTIME;
     }     
     
     @Override

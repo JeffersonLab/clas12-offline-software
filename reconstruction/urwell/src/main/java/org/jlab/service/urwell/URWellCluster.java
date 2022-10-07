@@ -8,7 +8,7 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 
 /**
- * Add description
+ * URWell in-layer cluster
  * 
  * @author bondi, devita
  */
@@ -59,29 +59,23 @@ public class URWellCluster extends ArrayList<URWellStrip> {
         return energy;
     }
     
-    public double getEnergy(Point3D point){
-        double energy = 0.0;
-        for(URWellStrip strip : this){
-            energy += strip.getEnergy();
-        }
-        return energy;
-    }
-        
     public double getTime(){
+        double time = 0.0;
+        for(URWellStrip strip : this){
+            time += strip.getTime()*strip.getEnergy();
+        }
+        time /= this.getEnergy();
+        return time;
+    }
+    
+    public double getSeedTime(){
         if(this.indexMaxStrip >= 0 && this.indexMaxStrip < this.size()){
             return this.get(indexMaxStrip).getTime();
         }
             return 0.0;
     }
 
-    public double getTime(Point3D point) {
-        if (this.indexMaxStrip >= 0 && this.indexMaxStrip < this.size()) {
-                return this.get(indexMaxStrip).getTime();
-        }
-        return 0.0;
-    }
-	
-    public URWellStrip getMaxURWellStrip() {
+    public URWellStrip getSeedStrip() {
     	    return this.get(this.indexMaxStrip);
     }
     

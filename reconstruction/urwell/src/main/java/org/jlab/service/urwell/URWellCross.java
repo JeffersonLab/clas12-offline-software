@@ -7,7 +7,7 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
 /**
- *
+ * URWell V-W clusters
  * @author devita
  */
 public class URWellCross {
@@ -21,8 +21,9 @@ public class URWellCross {
     private int cluster2;
     
     private Point3D cross;
-
-    private int status;
+    private double  energy;
+    private double  time;
+    private int     status;
     
     
     
@@ -35,6 +36,8 @@ public class URWellCross {
         if(nint==1) {
             this.sector = c1.getSector();
             this.cross  = point;
+            this.energy = c1.getEnergy() + c2.getEnergy();
+            this.time   = (c1.getTime() + c2.getTime())/2;
             this.cluster1 = c1.getId();
             this.cluster2 = c2.getId();
         }
@@ -67,6 +70,14 @@ public class URWellCross {
     public Point3D point() {
         return cross;
     }   
+
+    public double getEnergy() {
+        return energy;
+    }
+
+    public double getTime() {
+        return time;
+    }
     
     public int getStatus() {
         return status;

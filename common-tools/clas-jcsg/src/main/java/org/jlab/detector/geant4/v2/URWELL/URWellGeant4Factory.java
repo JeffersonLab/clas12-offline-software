@@ -9,12 +9,19 @@ import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 
 
 
-
-///////////////////////////////////////////////////
+/**
+ * Generate GEANT4 volume for the URWELL detector
+ * 
+ * @author bondi
+ */
 public final class URWellGeant4Factory extends Geant4Factory {
     
     
-    ///////////////////////////////////////////////////
+
+    /**
+     * Create the URWELL full geometry
+     * @param cp
+     */
     public URWellGeant4Factory( DatabaseConstantProvider cp) {
         URWellConstants.connect(cp );
         motherVolume = new G4World("fc");
@@ -27,6 +34,12 @@ public final class URWellGeant4Factory extends Geant4Factory {
         }
     }
 
+    /**
+     * Calculates the total detector thickness from the sum of the individual
+     * layers thicknesses
+     * 
+     * @return thickness in cm
+     */
     public double getChamberThickness(){
         double chamberT =0;
          for (int i=0; i< URWellConstants.CHAMBERVOLUMESTHICKNESS.length; i++ )
@@ -34,7 +47,15 @@ public final class URWellGeant4Factory extends Geant4Factory {
          return chamberT;
     }
 
-    ///////////////////////////////////////////////////
+
+    /**
+     * Creates and positions the region volume in the given sector, and 
+     * populates it with the three chamber volumes
+     * 
+     * @param isector (0-5)
+     * @param iregion (0)
+     * @return the region volume
+     */
     public Geant4Basic createRegion(int isector, int iregion) {
 
        
@@ -66,7 +87,7 @@ public final class URWellGeant4Factory extends Geant4Factory {
          for (int ich = 0; ich < URWellConstants.NCHAMBERS; ich++) {
              double y_chamber = (2*ich+1)*(URWellConstants.SECTORHEIGHT/URWellConstants.NCHAMBERS/2+0.05);
              //double y_chamber = (2*ich+1)*(SECTORHEIGHT/nChambers/2);
-             Geant4Basic chamberVolume = this.createChamber(ich, iregion, isector);
+             Geant4Basic chamberVolume = this.createChamber(isector, iregion, ich);
              chamberVolume.setName("rg" + (iregion + 1) + "_s" + (isector + 1) + "_c" + (ich +1));
              chamberVolume.setMother(sectorVolume);
              chamberVolume.translate(0.0,y_chamber-URWellConstants.SECTORHEIGHT/2,0. );
@@ -76,9 +97,18 @@ public final class URWellGeant4Factory extends Geant4Factory {
         return sectorVolume;
     }
 
-    ///////////////////////////////////////////////////
     
-    public Geant4Basic createChamber(int iChamber, int iRegion, int iSector) {
+
+    /**
+     * Creates the chamber volume 
+     * 
+     * @param iSector (0-5)
+     * @param iRegion (0)
+     * @param iChamber (0, 1, 2)
+     * @return the chamber volume
+     */
+    
+    public Geant4Basic createChamber(int iSector, int iRegion, int iChamber) {
         
   
         double chamberDZ    = (this.getChamberThickness())/2. + URWellConstants.ZENLARGEMENT/2;
@@ -118,6 +148,12 @@ public final class URWellGeant4Factory extends Geant4Factory {
         return  chamberVolume;
     }
     
+    /**
+     * Calculates the chamber dimensions
+     * 
+     * @param ichamber (0, 1, 2)
+     * @return an array of doubles containing the x, y, z, dimensions
+     */
     public double[] getChamberDimensions(int ichamber){
     
         double[] chamberDimensions = new double[3];
@@ -133,7 +169,13 @@ public final class URWellGeant4Factory extends Geant4Factory {
         return chamberDimensions;
     }
 
-    
+    /**
+     * Returns the chamber volume for the chosen sector and chamber
+     * 
+     * @param sector (1-6)
+     * @param chamber (1, 2, 3)
+     * @return the chamber volume
+     */
     public Geant4Basic getChamberVolume(int sector, int chamber) {
 
         int r = 1;
@@ -147,6 +189,12 @@ public final class URWellGeant4Factory extends Geant4Factory {
                       .orElse(null);
     }
 
+    /**
+     * Returns the sector volume for the given sector number
+     * 
+     * @param sector (1-6)
+     * @return the sector volume
+     */
     public Geant4Basic getSectorVolume(int sector) {
 
         int r = 1;
@@ -168,7 +216,7 @@ public final class URWellGeant4Factory extends Geant4Factory {
             
         factory.getAllVolumes().forEach(volume -> {
             System.out.println(volume.gemcString());
-       });
+        });
         
      
 

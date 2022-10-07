@@ -1,37 +1,56 @@
 package org.jlab.detector.geant4.v2.URWELL;
 
-import org.jlab.detector.calib.utils.DatabaseConstantProvider;
-import org.jlab.geometry.prim.Line3d;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
-import org.jlab.detector.volume.Geant4Basic;
 import java.util.List;
+import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.hits.DetHit;
+import org.jlab.detector.volume.Geant4Basic;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geometry.prim.Line3d;
 import org.jlab.geometry.prim.Straight;
 import org.jlab.utils.groups.IndexedList;
 
-
-
+/**
+ * Creates and handles the URWELL detector strips as 3D lines
+ * 
+ * @author bondi
+ */
 public final class URWellStripFactory {
 
     URWellGeant4Factory factory;
     IndexedList<Line3D> globalStrips = new IndexedList(3);
     IndexedList<Line3D> localStrips  = new IndexedList(3);
     
+
     public URWellStripFactory() {
     }
     
+    /**
+     * Create the strip factory based on constants from CCDB.
+     * Currently constants are defined in the URWellConstants class. 
+     * They will be moved to CCDB when finalized).
+     * @param cp database provide
+     */
     public URWellStripFactory(DatabaseConstantProvider cp) {
         this.init(cp);
     }
     
+    /**
+     * Initialize the factory by the strip maps
+     * @param cp
+     */
     public void init(DatabaseConstantProvider cp) {
         factory = new URWellGeant4Factory(cp);
         this.fillStripLists();
     }
 
+    /**
+     * Calculates the total number of strips in a sector
+     * 
+     * @return the strip number
+     */
     public int getNStripSector() {
         int nStrips = 0;
         for (int i = 0; i < URWellConstants.NCHAMBERS; i++) {
@@ -40,6 +59,12 @@ public final class URWellStripFactory {
         return nStrips;
     }
 
+    /**
+     * Calculates the number of strips in the given chamber
+     * 
+     * @param ichamber (0, 1, 2)
+     * @return the strip number (1-N)
+     */
     public int getNStripChamber(int ichamber) {
 
         double[] dim = factory.getChamberDimensions(ichamber);
@@ -68,6 +93,12 @@ public final class URWellStripFactory {
         return nStrips;
     }
 
+    /**
+     * Provides the index of the chamber containing the strip with the given ID
+     * 
+     * @param strip (1 to N)
+     * @return the chamber index (0, 1, 2)
+     */
     public int getChamberIndex(int strip) {
         int nStripTotal = 0;
         for(int i=0; i<URWellConstants.NCHAMBERS; i++) {
@@ -96,6 +127,13 @@ public final class URWellStripFactory {
         return cStrip;
     }
         
+    /**
+     * Builds the given strip line in the CLAS12 frame
+     * @param sector (1-6)
+     * @param layer (1-2)
+     * @param strip (1-N)
+     * @return the 3D strip line as a Line3d
+     */
     private Line3d createStrip(int sector, int layer, int strip) {
 
         int chamberIndex = getChamberIndex(strip);
@@ -151,13 +189,13 @@ public final class URWellStripFactory {
         }
     }
 
-    public Line3d getGLobalStrip(int sector, int layer, int strip) {
-
-        Line3d stripLine = createStrip(sector, layer, strip);
-
-        return stripLine;
-    }
-
+    /**
+     * Provides the given strip line in the sector local frame
+     * @param sector (1-6)
+     * @param layer (1-2)
+     * @param strip (1-N)
+     * @return the 3D strip line as a Line3d
+     */
     private Line3d getLocalStrip(int sector, int layer, int strip) {
 
         Line3d globalStrip = createStrip(sector, layer, strip);
@@ -171,6 +209,12 @@ public final class URWellStripFactory {
         return localStrip;
     }
     
+    /**
+     * Transform the given strip line to the tilted frame
+     * @param sector (1-6)
+     * @param global
+     * @return the 3D strip line in the tilted frame as a Line3D
+     */
     public Line3D toLocal(int sector, Line3D global) {
         Line3D local = new Line3D();
         local.copy(global);
@@ -199,11 +243,25 @@ public final class URWellStripFactory {
         }
     }
     
+    /**
+     * Provides the 3D line for the given strip in the CLAS12 frame
+     * @param sector (1-6)
+     * @param layer (1-2)
+     * @param strip (1-N)
+     * @return the 3D strip line in the CLAS12 frame as a Line3D
+     */
     public Line3D getStrip(int sector, int layer, int strip) {
         return globalStrips.getItem(sector, layer, strip);
     }
     
-    public Line3D getStripLocal(int sector, int layer, int strip) {
+    /**
+     * Provides the 3D line for the given strip in the tilted frame
+     * @param sector (1-6)
+     * @param layer (1-2)
+     * @param strip (1-N)
+     * @return the 3D strip line in the tilted frame as a Line3D
+     */
+    public Line3D getTiltedStrip(int sector, int layer, int strip) {
         return localStrips.getItem(sector, layer, strip);
     }
     

@@ -117,6 +117,8 @@ public class URWellEngine extends ReconstructionEngine {
         for(int c = 0; c < crosses.size(); c++){
             bankX.setShort("id",       c, (short) crosses.get(c).getId());
             bankX.setByte("sector",    c,  (byte) crosses.get(c).getSector());
+            bankX.setFloat("energy",   c, (float) crosses.get(c).getEnergy());
+            bankX.setFloat("time",     c, (float) crosses.get(c).getTime());
             bankX.setFloat("x",        c, (float) crosses.get(c).point().x());
             bankX.setFloat("y",        c, (float) crosses.get(c).point().y());
             bankX.setFloat("z",        c, (float) crosses.get(c).point().z());
@@ -165,7 +167,7 @@ public class URWellEngine extends ReconstructionEngine {
         URWellEngine engine = new URWellEngine();
         engine.init();
 
-        String input = "/Users/devita/urwell2.hipo";
+        String input = "/Users/devita/urwell3d.hipo";
 
         DataGroup dg = new DataGroup(3, 2);
         String[] axes = {"x", "y"};
@@ -196,7 +198,6 @@ public class URWellEngine extends ReconstructionEngine {
             Point3D mc = new Point3D();
             if(event.hasBank("MC::True")) {
                 DataBank bankMC = event.getBank("MC::True");
-                bankMC.show();
                 for(int i=0; i<bankMC.rows(); i++) {
                     int detector = bankMC.getByte("detector",i);  
                     if(detector==DetectorType.URWELL.getDetectorId()) {
