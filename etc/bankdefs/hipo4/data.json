@@ -487,6 +487,21 @@
       { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
     ]
   },
+{
+    "name" : "URWELL::adc",
+    "group": 22300,
+    "item" : 11,
+    "info": "ADC bank for the URWELL",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (11-63)"},
+      { "name":"layer"     , "type":"B", "info":"layer (1-2)"},
+      { "name":"component" , "type":"S", "info":"strip"},
+      { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
+      { "name":"ADC"       , "type":"I", "info":"ADC charge"},
+      { "name":"time"      , "type":"F", "info":"time"},
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
+    ]
+  },  
   {
     "name" : "RAW::adc",
     "group": 20000,
