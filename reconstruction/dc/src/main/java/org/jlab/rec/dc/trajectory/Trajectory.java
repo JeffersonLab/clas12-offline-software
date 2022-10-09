@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import org.jlab.clas.swimtools.Swim;
-import org.jlab.detector.base.DetectorLayer;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -33,7 +32,7 @@ public class Trajectory extends ArrayList<Cross> {
     private List<StateVec> stateVecs;
     private List<TrajectoryStateVec> trajStateVecs = new ArrayList<>();
 
-    private final static double TOLERANCE = 0.1; //swimming toleerance
+    private final static double TOLERANCE = 0.1; // trajectory toleerance (cm)
    
     public List<StateVec> getStateVecs() {
         return stateVecs;
@@ -223,16 +222,19 @@ public class Trajectory extends ArrayList<Cross> {
                 int dir = 1;
                 double path = 0;
                 double bdl  = 0;
-                if(surface.getDetectorType() == DetectorType.FMT) 
+                if(surface.getDetectorType() == DetectorType.FMT) {
+                    if(surface.vectorToPlane(v).dot(p)<=0) continue; // skip FMT is track vertex is on downstream side
                     dcSwim.SetSwimParameters(v.x(), v.y(), v.z(), p.x(), p.y(), p.z(), q);
+                }
                 else {
                     dcSwim.SetSwimParameters(htccPars[0], htccPars[1], htccPars[2], htccPars[3], htccPars[4], htccPars[5], q);
                     path = htccPars[6];
                     bdl  = htccPars[7];
                 }
                 double[] tPars = dcSwim.SwimToPlaneBoundary(surface.getD(), surface.getNormal(), dir);
-                if(tPars==null || surface.distanceFromPlane(tPars[0], tPars[1], tPars[2])>TOLERANCE) return;
-                this.addTrajectoryPoint(tPars[0], tPars[1], tPars[2], tPars[3], tPars[4], tPars[5], tPars[6]+path, tPars[7]+bdl, surface);
+                if(tPars==null) return;
+                if(surface.distanceFromPlane(tPars[0], tPars[1], tPars[2])<TOLERANCE) // save trajectory only if on surface (
+                    this.addTrajectoryPoint(tPars[0], tPars[1], tPars[2], tPars[3], tPars[4], tPars[5], tPars[6]+path, tPars[7]+bdl, surface);
             }            
         }
     }
