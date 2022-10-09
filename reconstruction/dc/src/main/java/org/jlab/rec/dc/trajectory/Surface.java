@@ -141,6 +141,17 @@ public class Surface {
         return this.distanceFromPlane(new Point3D(x, y, z));
     }
     
+    public Vector3D vectorToPlane(Point3D point) {
+        if(contour != null) 
+            return this.contour.vectorToPlane(point);
+        else
+            return null;
+    }
+    
+    public Vector3D vectorToPlane(double x, double y, double z) {
+        return this.vectorToPlane(new Point3D(x, y, z));
+    }
+    
     public double dx(Point3D point, Vector3D dir) {
         if(this.isInside(point)) {
             return dir.dot(this.plane.normal())*this.thickness;
@@ -177,6 +188,8 @@ public class Surface {
         public abstract double distanceFromEdge(Point3D p);
 
         public abstract double distanceFromPlane(Point3D p);
+
+        public abstract Vector3D vectorToPlane(Point3D p);
     }
     
     public class TrapContour extends Contour{
@@ -202,6 +215,13 @@ public class Surface {
             Line3D line = new Line3D();
             this.contour.plane().distance(p, line);
             return line.length();
+        }
+
+        @Override
+        public Vector3D vectorToPlane(Point3D p) {
+            Line3D line = new Line3D();
+            this.contour.plane().distance(p, line);
+            return line.direction().asUnit();            
         }
 
         @Override
@@ -236,6 +256,13 @@ public class Surface {
         }
 
         @Override
+        public Vector3D vectorToPlane(Point3D p) {
+            Line3D line = new Line3D();
+            this.contour.plane().distance(p, line);
+            return line.direction().asUnit();            
+        }
+
+        @Override
         public String toString() {
             return this.contour.toString();
         }
@@ -264,6 +291,13 @@ public class Surface {
             Line3D line = new Line3D();
             this.contour.plane().distance(p, line);
             return line.length();
+        }
+
+        @Override
+        public Vector3D vectorToPlane(Point3D p) {
+            Line3D line = new Line3D();
+            this.contour.plane().distance(p, line);
+            return line.direction().asUnit();            
         }
 
         @Override
