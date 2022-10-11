@@ -100,19 +100,8 @@ public class RebuildScalers {
                     DaqScalers ds = DaqScalers.create(rawScalerBank, ccdb_fcup, ccdb_slm, ccdb_hel, rst, uet);
                     runScalerBank = ds.createRunBank(writer.getSchemaFactory());
                     helScalerBank = ds.createHelicityBank(writer.getSchemaFactory());
-                    
-                    // the scaler banks always are slightly after the helicity changes,
-                    // so assign the previous (delay-corrected) helicity state to the
-                    // last scaler reading and then walk backwards:
-                    for (int ii=0; ii<helScalerBank.getRows(); ii++) {
-                        final int row = helScalerBank.getRows() - ii - 1;
-                        final int offset = ii - 1;
-                        helScalerBank.putByte("helicity",row,helSeq.search(event,offset).value());
-                        if (helSeq.getHalfWavePlate(event))
-                            helScalerBank.putByte("helicityRaw",0,(byte)(-1*helSeq.search(event,offset).value()));
-                        else
-                            helScalerBank.putByte("helicityRaw",0,helSeq.search(event,offset).value());
-                    }
+                   
+                    RebuildScalers.assignScalerHelicity(event, helScalerBank, helSeq);
 
                     // put modified HEL/RUN::scaler back in the event:
                     event.write(runScalerBank);
@@ -125,4 +114,26 @@ public class RebuildScalers {
         }
         writer.close();
     }
+
+    /**
+     * Assign the delay-corrected helicity to the HEL::scaler bank's rows
+     * @param event the event containing the scaler reading
+     * @param bank the HEL::scaler bank
+     * @param seq previously initialized helicity sequence
+     */
+    public static void assignScalerHelicity(Event event, Bank bank, HelicitySequenceManager seq) {
+        // the scaler banks always are slightly after the helicity changes,
+        // so assign the previous (delay-corrected) helicity state to the
+        // last scaler reading and then walk backwards:
+        for (int ii=0; ii<bank.getRows(); ii++) {
+            final int row = bank.getRows() - ii - 1;
+            final int offset = ii - 1;
+            bank.putByte("helicity",row,seq.search(event,offset).value());
+            if (seq.getHalfWavePlate(event))
+                bank.putByte("helicityRaw",0,(byte)(-1*seq.search(event,offset).value()));
+            else
+                bank.putByte("helicityRaw",0,seq.search(event,offset).value());
+        }
+    }
+
 }
