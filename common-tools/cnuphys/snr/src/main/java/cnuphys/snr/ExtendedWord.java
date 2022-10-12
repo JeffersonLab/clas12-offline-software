@@ -327,41 +327,6 @@ public class ExtendedWord {
 			}
 		}
 	}
-
-	/**
-	 * Bleed the specified number of bits right.
-	 * 
-	 * @param n the number of bits to bleed right.
-	 */
-	public synchronized void OLDbleedRight(int n) {
-//		if (rightWorkSpace == null) {
-//			rightWorkSpace = new ExtendedWord();
-//			rightWorkSpace.words = new long[words.length];
-//		}
-//
-//		ExtendedWord.copy(this, rightWorkSpace);
-//
-//		if (n < 4) {
-//			for (int j = 0; j < n; j++) {
-//				rightWorkSpace.shiftRight(1);
-//				ExtendedWord.bitwiseOr(this, rightWorkSpace, this);
-//			}
-//			return;
-//		}
-//
-//		int m = (n + 1) / 2;
-//		int k = n - m;
-//
-//		for (int j = 0; j < m; j++) {
-//			rightWorkSpace.shiftRight(1);
-//			ExtendedWord.bitwiseOr(this, rightWorkSpace, this);
-//		}
-//
-//		ExtendedWord.copy(this, rightWorkSpace);
-//		rightWorkSpace.shiftRight(k);
-//		ExtendedWord.bitwiseOr(this, rightWorkSpace, this);
-
-	}
 	
 	/**
 	 * Bleed the specified number of bits left.
@@ -398,45 +363,10 @@ public class ExtendedWord {
 	}
 
 
-
-	/**
-	 * Bleed the specified number of bits left.
-	 * 
-	 * @param n the number of bits to bleed left.
-	 */
-	public synchronized void OLDbleedLeft(int n) {
-//		if (leftWorkSpace == null) {
-//			leftWorkSpace = new ExtendedWord();
-//			leftWorkSpace.words = new long[words.length];
-//		}
-//
-//		ExtendedWord.copy(this, leftWorkSpace);
-//
-//		if (n < 4) {
-//			for (int j = 0; j < n; j++) {
-//				leftWorkSpace.shiftLeft(1);
-//				ExtendedWord.bitwiseOr(this, leftWorkSpace, this);
-//			}
-//			return;
-//		}
-//
-//		int m = (n + 1) / 2;
-//		int k = n - m;
-//
-//		for (int j = 0; j < m; j++) {
-//			leftWorkSpace.shiftLeft(1);
-//			ExtendedWord.bitwiseOr(this, leftWorkSpace, this);
-//		}
-//
-//		ExtendedWord.copy(this, leftWorkSpace);
-//		leftWorkSpace.shiftLeft(k);
-//		ExtendedWord.bitwiseOr(this, leftWorkSpace, this);
-	}
-
 	/**
 	 * Create a binary string representation.
 	 * 
-	 * @return
+	 * @return a binary string representation
 	 */
 	public String binaryString() {
 		StringBuffer sb = new StringBuffer(WORDSIZE * words.length);
@@ -534,22 +464,6 @@ public class ExtendedWord {
 		return words;
 	}
 
-	public static int countCommonBits(ExtendedWord a, ExtendedWord b, ExtendedWord work1, ExtendedWord work2,
-			ExtendedWord work3) {
-
-		bitwiseAnd(a, b, work1);
-		a.negate();
-		b.negate();
-		bitwiseAnd(a, b, work2);
-
-		bitwiseOr(work1, work2, work3);
-
-		// restore
-		a.negate();
-		b.negate();
-
-		return work3.bitCount();
-	}
 
 	/**
 	 * Hash this ExtendedWord into a String

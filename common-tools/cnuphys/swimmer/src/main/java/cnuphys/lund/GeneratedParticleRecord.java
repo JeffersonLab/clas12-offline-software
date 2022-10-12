@@ -12,15 +12,6 @@ import java.util.StringTokenizer;
  */
 public class GeneratedParticleRecord implements Serializable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -2460631848401695481L;
-	// for use in hask keys
-	private static final String HASH_DELIM = "$";
-	private static final int HASHRADIX = 36;
-	private static final double HASHFACT = 100.;
-
 
 	// the charge (-1 for electron, etc.)
 	private int _charge;
@@ -125,6 +116,39 @@ public class GeneratedParticleRecord implements Serializable {
 	public double getPhi() {
 		return _phi;
 	}
+	
+	
+	/**
+	 * Get the one-based sector
+	 * @return [1..6]
+	 */
+	public int getSector() {
+		// convert phi to [0..360]
+
+		while (_phi < 0) {
+			_phi += 360.0;
+		}
+		while (_phi > 360.0) {
+			_phi -= 360.0;
+		}
+
+		if ((_phi > 330) || (_phi <= 30)) {
+			return 1;
+		}
+		if (_phi <= 90.0) {
+			return 2;
+		}
+		if (_phi <= 150.0) {
+			return 3;
+		}
+		if (_phi <= 210.0) {
+			return 4;
+		}
+		if (_phi <= 270.0) {
+			return 5;
+		}
+		return 6;
+	}
 
 	/**
 	 * The total energy in GeV. This requires that we specify what particle this
@@ -159,77 +183,6 @@ public class GeneratedParticleRecord implements Serializable {
 				_xo, _yo, _zo, _momentum, _theta, _phi);
 	}
 	
-	/**
-	 * Records a reduced precision String version as a hash key
-	 * @param rpr the GeneratedParticleRecord
-	 * @return a reduced precision String version
-	 */
-	public String hashKey() {
-		return hashKey(this);
-	}
-	
-	/**
-	 * Records a reduced precision String version as a hash key
-	 * @param rpr the GeneratedParticleRecord
-	 * @return a reduced precision String version
-	 */
-	public static String hashKey(GeneratedParticleRecord rpr) {
-		
-		StringBuilder sb = new StringBuilder(128);
-		sb.append(rpr._charge);
-		sb.append(HASH_DELIM);
-		sb.append(valStr(rpr._xo));
-		sb.append(HASH_DELIM);
-		sb.append(valStr(rpr._yo));
-		sb.append(HASH_DELIM);
-		sb.append(valStr(rpr._zo));
-		sb.append(HASH_DELIM);
-		sb.append(valStr(rpr._momentum));
-		sb.append(HASH_DELIM);
-		sb.append(valStr(rpr._theta));
-		sb.append(HASH_DELIM);
-		sb.append(valStr(rpr._phi));
-		
-		return sb.toString();
-	}
-	
-	private static final double TINY = 1.0e-4;
-	public static String valStr(double f) {
-		if (Math.abs(f) < TINY) {
-			return "0";
-		}
-		else {
-			long s = Math.round(HASHFACT*f);
-			String hs = Long.toString(s, HASHRADIX);
-			return hs;
-		}
-	}
-		
-	public static GeneratedParticleRecord fromHash(String hash) {
-		StringTokenizer t = new StringTokenizer(hash, HASH_DELIM);
-		int charge = Integer.parseInt(t.nextToken());
-		double xo = ((double)(Long.valueOf(t.nextToken(), HASHRADIX)))/HASHFACT;
-		double yo = ((double)(Long.valueOf(t.nextToken(), HASHRADIX)))/HASHFACT;
-		double zo = ((double)(Long.valueOf(t.nextToken(), HASHRADIX)))/HASHFACT;
-		double p = ((double)(Long.valueOf(t.nextToken(), HASHRADIX)))/HASHFACT;
-		double theta = ((double)(Long.valueOf(t.nextToken(), HASHRADIX)))/HASHFACT;
-		
-		String pstr = t.nextToken();
-		double phi = ((double)(Long.valueOf(pstr, HASHRADIX)))/HASHFACT;
-		
-		return new GeneratedParticleRecord(charge, xo, yo, zo, p, theta, phi);
-	}
-	
-	public static void main(String[] arg) {
-		GeneratedParticleRecord gpr = new GeneratedParticleRecord(-1, 1.0, 2.0, 3.00001, 5.6789, -45.6789, 359.99);
-		
-		String hash = gpr.hashKey();
-		System.err.println("HASH [" + hash + "]");
-		
-		GeneratedParticleRecord gprp = fromHash(hash);
-		
-		System.err.println("HASH [" + gprp.hashKey() + "]");
-		System.err.println("done");
-	}
+
 
 }
