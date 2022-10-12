@@ -250,8 +250,11 @@ public class Histo2DData {
 			return;
 		}
 
-		// System.err.println(" BINX, BINY: " + binX + ", " + binY);
-		_counts[binX][binY]++;
+		try {
+			_counts[binX][binY]++;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		_maxCount = Math.max(_maxCount, _counts[binX][binY]);
 	}
@@ -351,7 +354,7 @@ public class Histo2DData {
 		}
 		return _gridY[bin];
 	}
-
+	
 	/**
 	 * Get the x bin for a given x value. Will return the zero-based bin number or
 	 * OUTOFRANGE.
@@ -373,6 +376,9 @@ public class Histo2DData {
 			index = -(index + 1); // now the insertion point.
 		}
 		int bin = index - 1;
+		
+		bin = Math.max(0, Math.min(_gridX.length - 2, bin));
+
 
 		return bin;
 	}
@@ -398,6 +404,8 @@ public class Histo2DData {
 			index = -(index + 1); // now the insertion point.
 		}
 		int bin = index - 1;
+		
+		bin = Math.max(0, Math.min(_gridY.length - 2, bin));
 
 		return bin;
 	}

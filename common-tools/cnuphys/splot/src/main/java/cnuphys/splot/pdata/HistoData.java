@@ -35,8 +35,6 @@ public class HistoData {
 	private long _underCount;
 	private long _overCount;
 
-	// true for even bin spacing
-	private boolean _uniformBins;
 
 	// use rms or sigma in legend
 	private boolean _rmsInHistoLegend = true;
@@ -62,7 +60,6 @@ public class HistoData {
 	 */
 	public HistoData(String name, double valMin, double valMax, int numBins) {
 		this(name, evenBins(valMin, valMax, numBins));
-		_uniformBins = true;
 	}
 	
 
@@ -413,10 +410,7 @@ public class HistoData {
 		}
 		int bin = index - 1;
 
-		if (bin < 0) {
-			// System.err.println("Fix negative bin " + bin);
-			bin = 0;
-		}
+		bin = Math.max(0, Math.min(_grid.length - 2, bin));
 		return bin;
 	}
 
