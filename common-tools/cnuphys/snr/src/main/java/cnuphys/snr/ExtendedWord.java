@@ -1,24 +1,16 @@
 package cnuphys.snr;
 
 import java.util.Random;
-import java.util.StringTokenizer;
 
 public class ExtendedWord {
 
 	// Used for clarity. In JAVA, longs are 64 bits on all machines.
 	private static int WORDSIZE = 64;
 
-	// for use in hask keys
-	private static final String HASH_DELIM = "$";
 	private static final int HASHRADIX = 36;
 
 	// Word with all bits on
 	private static final long ALLBITSON = 0xFFFFFFFFFFFFFFFFL;
-
-	// for base62 encoding
-	private static final char[] digits = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
-	private static final int RADIX62 = 62;
-	private static final long MAX62 = Long.MAX_VALUE / RADIX62;
 
 	/**
 	 * Holds the composite words. words[0] is least significant.
@@ -38,7 +30,7 @@ public class ExtendedWord {
 	/**
 	 * Creates an extended word made up of an array of longs. Note that in JAVA a
 	 * long is always 64 bits, independent of machine.
-	 * 
+	 *
 	 * @param bitsNeeded the number of bits needed.
 	 */
 	public ExtendedWord(int bitsNeeded) {
@@ -54,13 +46,13 @@ public class ExtendedWord {
 
 	/**
 	 * Create using words
-	 * 
+	 *
 	 * @param words the words
 	 */
 	public ExtendedWord(long words[]) {
 		this.words = words;
 	}
-	
+
 	/**
 	 * Test for equality with another word
 	 * @param ew the test word
@@ -70,19 +62,19 @@ public class ExtendedWord {
 		if (words.length != ew.words.length) {
 			return false;
 		}
-		
+
 		for (int i = 0; i < words.length; i++) {
 			if (words[i] != ew.words[i]) {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
 
 	/**
 	 * Set the bit at a given location
-	 * 
+	 *
 	 * @param bit the bit to set.
 	 */
 	public void setBit(int bit) {
@@ -90,10 +82,10 @@ public class ExtendedWord {
 		int b = bit % WORDSIZE;
 		words[wordIndex] = setBit(words[wordIndex], b);
 	}
-	
+
 	/**
 	 * Clear the bit at a given location
-	 * 
+	 *
 	 * @param bit the bit to clear.
 	 */
 	public void clearBit(int bit) {
@@ -105,7 +97,7 @@ public class ExtendedWord {
 
 	/**
 	 * Check if a given bit is on,
-	 * 
+	 *
 	 * @param bit the bit to check.
 	 * @return <code>true</code> if the bit is set.
 	 */
@@ -135,7 +127,7 @@ public class ExtendedWord {
 
 	/**
 	 * See if this extended word is zero
-	 * 
+	 *
 	 * @return <code>if this extended word is zero
 	 */
 	public boolean isZero() {
@@ -149,7 +141,7 @@ public class ExtendedWord {
 
 	/**
 	 * Count all the on bits in the extended word.
-	 * 
+	 *
 	 * @return count of all the on bits in the extended word.
 	 */
 	public int bitCount() {
@@ -164,7 +156,7 @@ public class ExtendedWord {
 
 	/**
 	 * Copy value from one extended word to another.
-	 * 
+	 *
 	 * @param src
 	 * @param dest
 	 */
@@ -186,7 +178,7 @@ public class ExtendedWord {
 	/**
 	 * Perform a bitwise and on two extended words. They are assumed to be of the
 	 * same size.
-	 * 
+	 *
 	 * @param u      one of the extended words
 	 * @param v      the other extended word.
 	 * @param result where the result is stored. Can be u or v.
@@ -200,7 +192,7 @@ public class ExtendedWord {
 	/**
 	 * Perform a bitwise or on two extended words. They are assumed to be of the
 	 * same size.
-	 * 
+	 *
 	 * @param u      one of the extended words
 	 * @param v      the other extended word.
 	 * @param result where the result is stored. Can be u or v.
@@ -214,7 +206,7 @@ public class ExtendedWord {
 	/**
 	 * Perform a bitwise xor on two extended words. They are assumed to be of the
 	 * same size.
-	 * 
+	 *
 	 * @param u      one of the extended words
 	 * @param v      the other extended word.
 	 * @param result where the result is stored. Can be u or v.
@@ -228,7 +220,7 @@ public class ExtendedWord {
 	/**
 	 * Shift the extended word right. CURRENT LIMITATION: can only shift up to 64
 	 * bits.
-	 * 
+	 *
 	 * @param n the number of places to shift.
 	 */
 	public void shiftRight(int n) {
@@ -248,12 +240,12 @@ public class ExtendedWord {
 			}
 		}
 	}
-	
+
 	/**
-	 * Shift the extended word right and or with self. 
+	 * Shift the extended word right and or with self.
 	 * CURRENT LIMITATION: can only shift up to 64
 	 * bits.
-	 * 
+	 *
 	 * @param n the number of places to shift.
 	 */
 	public ExtendedWord shiftRightAndOr(int n) {
@@ -272,16 +264,16 @@ public class ExtendedWord {
 				words[i] |= temp;
 			}
 		}
-		
+
 		return this;
 	}
 
-	
+
 	/**
-	 * Shift the extended word left and or with self. 
+	 * Shift the extended word left and or with self.
 	 * CURRENT LIMITATION: can only shift up to 64
 	 * bits.
-	 * 
+	 *
 	 * @param n the number of places to shift.
 	 */
 	public ExtendedWord shiftLeftAndOr(int n) {
@@ -300,14 +292,14 @@ public class ExtendedWord {
 				words[i] |= temp;
 			}
 		}
-		
+
 		return this;
 	}
 
 	/**
 	 * Shift the extended word left. CURRENT LIMITATION: can only shift up to 64
 	 * bits.
-	 * 
+	 *
 	 * @param n the number of places to shift.
 	 */
 	public void shiftLeft(int n) {
@@ -327,45 +319,45 @@ public class ExtendedWord {
 			}
 		}
 	}
-	
+
 	/**
 	 * Bleed the specified number of bits left.
-	 * 
+	 *
 	 * @param n the number of bits to bleed left.
 	 */
 	public synchronized void bleedLeft(int n) {
-		
+
 		int bleedAmount = 1;
 		while (n > 0) {
 			shiftLeftAndOr(bleedAmount);
 			n = n - bleedAmount;
-			
+
 			bleedAmount = Integer.min(n, 2*bleedAmount);
-			
+
 		}
 	}
-	
+
 	/**
 	 * Bleed the specified number of bits right.
-	 * 
+	 *
 	 * @param n the number of bits to bleed right.
 	 */
 	public synchronized void bleedRight(int n) {
-		
+
 		int bleedAmount = 1;
 		while (n > 0) {
 			shiftRightAndOr(bleedAmount);
 			n = n - bleedAmount;
-			
+
 			bleedAmount = Integer.min(n, 2*bleedAmount);
-			
+
 		}
 	}
 
 
 	/**
 	 * Create a binary string representation.
-	 * 
+	 *
 	 * @return a binary string representation
 	 */
 	public String binaryString() {
@@ -379,7 +371,7 @@ public class ExtendedWord {
 
 	/**
 	 * Create a string representation.
-	 * 
+	 *
 	 * @return a string representation.
 	 */
 	@Override
@@ -389,7 +381,7 @@ public class ExtendedWord {
 
 	/**
 	 * Return a binary string representation of a byte.
-	 * 
+	 *
 	 * @param b the byte in question. Sample results
 	 *          <p>
 	 *          b = 17 -> 00010001
@@ -420,7 +412,7 @@ public class ExtendedWord {
 
 	/**
 	 * checkBit returns true if the control bit is set in the bits variable.
-	 * 
+	 *
 	 * @param word the long that holds the bits.
 	 * @param _b   the bit to check.
 	 * @return <code>true</code> if the bit is set.
@@ -432,7 +424,7 @@ public class ExtendedWord {
 
 	/**
 	 * setBit sets the given control bit.
-	 * 
+	 *
 	 * @param bits The long that holds the bits.
 	 * @param bit  the bit to set.
 	 * @return The modified bits.
@@ -441,10 +433,10 @@ public class ExtendedWord {
 		bits |= (1L << bit);
 		return bits;
 	}
-	
+
 	/**
 	 * clearBit clears the given control bit.
-	 * 
+	 *
 	 * @param bits The long that holds the bits.
 	 * @param bit  the bit to clear.
 	 * @return The modified bits.
@@ -457,7 +449,7 @@ public class ExtendedWord {
 
 	/**
 	 * Get the underlying words
-	 * 
+	 *
 	 * @return the words
 	 */
 	public long[] getWords() {
@@ -467,16 +459,13 @@ public class ExtendedWord {
 
 	/**
 	 * Hash this ExtendedWord into a String
-	 * 
+	 *
 	 * @return a String suitable as a hash or map key
 	 */
 	public String hashKey() {
 		StringBuilder sb = new StringBuilder(128);
 
 		for (long word : getWords()) {
-			if (sb.length() > 0) {
-				sb.append(HASH_DELIM);
-			}
 			if (word != 0) {
 				String hexStr = Long.toString(word, HASHRADIX);
 				sb.append(hexStr);
@@ -488,165 +477,7 @@ public class ExtendedWord {
 		return sb.toString();
 	}
 
-	/**
-	 * Hash this ExtendedWord into a String in base 62
-	 * 
-	 * @return a String suitable as a hash or map key
-	 */
-	public String hashKey62() {
-		StringBuilder sb = new StringBuilder(128);
 
-		for (long word : getWords()) {
-			if (sb.length() > 0) {
-				sb.append(HASH_DELIM);
-			}
-			if (word != 0) {
-				String s62 = encode62(word);
-				sb.append(s62);
-			} else {
-				sb.append('0');
-			}
-		}
-
-		return sb.toString();
-	}
-
-	/**
-	 * Convert back to an ExtendedWord from a hash key
-	 * 
-	 * @param hash the key
-	 * @return the equivalent ExtendedWord
-	 */
-	public static ExtendedWord fromHash(String hash) {
-		StringTokenizer t = new StringTokenizer(hash, HASH_DELIM);
-		int num = t.countTokens();
-
-		long[] words = new long[num];
-		for (int i = 0; i < num; i++) {
-			words[i] = Long.valueOf(t.nextToken(), HASHRADIX);
-		}
-
-		return new ExtendedWord(words);
-	}
-
-	/**
-	 * Convert back to an ExtendedWord from a hash key
-	 * 
-	 * @param hash the key
-	 * @return the equivalent ExtendedWord
-	 */
-	public static ExtendedWord fromHash62(String hash) {
-		StringTokenizer t = new StringTokenizer(hash, HASH_DELIM);
-		int num = t.countTokens();
-
-		long[] words = new long[num];
-		for (int i = 0; i < num; i++) {
-			words[i] = parseLong62(t.nextToken());
-		}
-
-		return new ExtendedWord(words);
-	}
-
-	/**
-	 * Helper for parsing longs.
-	 *
-	 * @param str the string to parse
-	 * @return the parsed long value
-	 * @throws NumberFormatException if there is an error
-	 * @throws NullPointerException  if decode is true and str is null
-	 * @see #parseLong(String, int)
-	 * @see #decode(String)
-	 */
-	private static long parseLong62(String str) {
-		if (str == null) {
-			throw new NumberFormatException();
-		}
-
-		int index = 0;
-		int len = str.length();
-		boolean isNeg = false;
-
-		if (len == 0) {
-			throw new NumberFormatException();
-		}
-
-		int ch = str.charAt(index);
-		if (ch == '-') {
-			if (len == 1)
-				throw new NumberFormatException();
-
-			isNeg = true;
-			ch = str.charAt(++index);
-		}
-
-		if (index == len) {
-			throw new NumberFormatException();
-		}
-
-		long val = 0;
-		while (index < len) {
-			if (val < 0 || val > MAX62)
-				throw new NumberFormatException();
-
-			ch = digit62(str.charAt(index++));
-			val = val * RADIX62 + ch;
-			if (ch < 0 || (val < 0 && (!isNeg || val != Long.MIN_VALUE)))
-				throw new NumberFormatException();
-		}
-		return isNeg ? -val : val;
-	}
-
-	// get the value of a digit for base 62
-	private static int digit62(char ch) {
-		if (Character.isDigit(ch)) {
-			return ch - '0';
-		}
-
-		else if (Character.isLowerCase(ch)) {
-			return 10 + ch - 'a';
-		}
-
-		return 36 + ch - 'A';
-	}
-
-	/**
-	 * Encode a long into a base 62 String. Based on the toString implementation in
-	 * the Java Long class.
-	 * 
-	 * @param number the number to encode
-	 * @return a base 62 number
-	 */
-	public static String encode62(long num) {
-
-		// For negative numbers, print out the absolute value w/ a leading '-'.
-		// Use an array large enough for a binary number.
-		char[] buffer = new char[65];
-		int i = 65;
-		boolean isNeg = false;
-		if (num < 0) {
-			isNeg = true;
-			num = -num;
-
-			// When the value is MIN_VALUE, it overflows when made positive
-			if (num < 0) {
-				buffer[--i] = digits[(int) (-(num + RADIX62) % RADIX62)];
-				num = -(num / RADIX62);
-			}
-		}
-
-		do {
-			buffer[--i] = digits[(int) (num % RADIX62)];
-			num /= RADIX62;
-		} while (num > 0);
-
-		if (isNeg)
-			buffer[--i] = '-';
-
-		// Package constructor avoids an array copy.
-		return new String(buffer, i, 65 - i);
-
-	}
-	
 	/**
 	 * Create a random word
 	 * @param bitsNeeded the number of bits needeed
@@ -665,137 +496,5 @@ public class ExtendedWord {
 	    return ew;
 	}
 
-	//test the hashing
-	private static void hashTest() {
-		Random rand = new Random();
-		ExtendedWord a = randomWord(112, rand, 0.5f);
-		ExtendedWord b = randomWord(112, rand, 0.5f);
-
-		String ahash = a.hashKey();
-		String bhash = b.hashKey();
-
-//		System.err.println("" + a);
-		System.err.println("ahash [" + ahash + "]");
-		System.err.println("bhash [" + bhash + "]");
-
-		ExtendedWord ap = fromHash(ahash);
-		ExtendedWord bp = fromHash(bhash);
-
-		System.err.println(" a = " + a);
-		System.err.println("ap = " + ap);
-		System.err.println(" b = " + b);
-		System.err.println("bp = " + bp);
-
-		System.err.println("\nNow try base 62");
-//		System.err.println("digitsChar62[0] = " + digitsChar62[61]);
-
-		String ahash62 = a.hashKey62();
-		String bhash62 = b.hashKey62();
-		System.err.println("ahash62 [" + ahash62 + "]");
-		System.err.println("bhash62 [" + bhash62 + "]");
-
-		ExtendedWord a62 = fromHash62(ahash62);
-		ExtendedWord b62 = fromHash62(bhash62);
-
-		System.err.println("  a = " + a);
-		System.err.println("a62 = " + a62);
-		System.err.println("  b = " + b);
-		System.err.println("b62 = " + b62);
-	}
-	
-	private static void bleedTest() {
-//		Random rand = new Random();
-//		ExtendedWord ew = randomWord(112, rand, 0.1f);
-//		
-//		int bleedAmount = 5;
-//		
-//		ExtendedWord ewCopy = new ExtendedWord(112);
-//		copy(ew, ewCopy);
-//
-////		System.err.println("     ew = " + ew);
-//		ew.bleedLeft(bleedAmount);
-////		System.err.println("    *ew = " + ew);
-//
-////		System.err.println(" ewCopy = " + ewCopy);
-//		ewCopy.newBleedLeft(bleedAmount);
-////		System.err.println("*ewCopy = " + ewCopy);
-//		
-//		if (ew.equals(ewCopy)) {
-//	//		System.err.println("The two results are equal");
-//		}
-//		else {
-//			System.err.println("ERROR The two results are not equal");	
-//			System.exit(1);
-//		}
-		
-	}
-	
-	private static void bleedTimingTest() {
-//		//prime pump
-//		
-//		for (int i = 0; i < 1000; i++) {
-//			bleedTest();
-//		}
-//		
-//		long seed = 34635591;
-//		int bleedAmount = 5;
-//		int num = 1000000;
-//		float hitProb = 0.1f;
-//		
-//		ExtendedWord ewOld[] = new ExtendedWord[num];
-//		ExtendedWord ewNew[] = new ExtendedWord[num];
-//
-//		
-//		//create words
-//		Random rand = new Random(seed);
-//		for (int i = 0; i < num; i++) {
-//			ewOld[i] = randomWord(112, rand, hitProb);
-//			ewNew[i] = new ExtendedWord(112);
-//			copy(ewOld[i], ewNew[i]);
-//		}
-//		
-//		long time = System.currentTimeMillis();
-//		
-//		for (int i = 0; i < num; i++) {
-//			ewNew[i].newBleedRight(bleedAmount);
-//		}
-//		
-//		System.err.println("New Time: " + (System.currentTimeMillis() - time));
-//
-//		time = System.currentTimeMillis();
-//		
-//		for (int i = 0; i < num; i++) {
-//			ewOld[i].bleedRight(bleedAmount);
-//		}
-//		
-//		System.err.println("Old Time: " + (System.currentTimeMillis() - time));
-//		
-//		
-//		
-//		//equatity check
-//		for (int i = 0; i < num; i++) {
-//			if (!ewOld[i].equals(ewNew[i])) {
-//				System.err.println("Equality test FAILED for i = " + i);
-//			}
-//		}
-//
-//		System.err.println("Passed timing equality test");
-	}
-	
-	/**
-	 * Main program for testing
-	 * @param arg
-	 */
-	public static void main(String arg[]) {
-		// hashTest();
-
-		int num = 100000;
-		for (int i = 0; i < num; i++) {
-			bleedTest();
-		}
-		System.err.println("Tested " + num + " successfully");
-		
-		bleedTimingTest();
-	}
 
 }

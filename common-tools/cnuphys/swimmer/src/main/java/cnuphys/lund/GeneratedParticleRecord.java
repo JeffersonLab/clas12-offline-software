@@ -175,6 +175,14 @@ public class GeneratedParticleRecord implements Serializable {
 	public double getKineticEnergy(LundId lundId) {
 		return getTotalEnergy(lundId) - lundId.getMass();
 	}
+	
+	/**
+	 * Output for including in a csv file
+	 * @return
+	 */
+	public String csvString() {
+		return String.format("%8.5f, %8.5f, %8.5f, %6.3f, %6.3f, %6.3f", _xo, _yo, _zo, _momentum, _theta, _phi);
+	}
 
 	@Override
 	public String toString() {
