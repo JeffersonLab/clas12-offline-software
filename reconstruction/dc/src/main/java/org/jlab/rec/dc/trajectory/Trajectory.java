@@ -233,7 +233,7 @@ public class Trajectory extends ArrayList<Cross> {
                 }
                 double[] tPars = dcSwim.SwimToPlaneBoundary(surface.getD(), surface.getNormal(), dir);
                 if(tPars==null) return;
-                if(surface.distanceFromPlane(tPars[0], tPars[1], tPars[2])<TOLERANCE) // save trajectory only if on surface (
+                if(surface.distanceFromPlane(tPars[0], tPars[1], tPars[2])<TOLERANCE && surface.distanceFromEdge(tPars[0], tPars[1], tPars[2])>=-99) // save trajectory only if on surface (
                     this.addTrajectoryPoint(tPars[0], tPars[1], tPars[2], tPars[3], tPars[4], tPars[5], tPars[6]+path, tPars[7]+bdl, surface);
             }            
         }

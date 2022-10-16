@@ -222,19 +222,20 @@ public final class Trap3D implements Face3D {
      * Computes the minimum distance of the given point from the edges of 
      * this {@code Trap3D}.
      * @param p the given point
-     * @return the distance to the {@code Trap3D} edges if inside or 0 if outside
+     * @return the signed distance to the {@code Trap3D} edges, positive if inside or negative if outside
      */
     public double distanceFromEdge(Point3D p) {
-        if(this.isInside(p)) {
-            double distance = new Line3D(this.point(3), this.point(0)).distance(p).length();
-            for(int i=0; i<3; i++) {
-                double disti = new Line3D(this.point(i), this.point(i+1)).distance(p).length();
-                if(disti < distance) distance = disti;
+        double distance = new Line3D(this.point(3), this.point(0)).distanceSegment(p).length();
+        for (int i = 0; i < 3; i++) {
+            double disti = new Line3D(this.point(i), this.point(i+1)).distanceSegment(p).length();
+            if (disti < distance) {
+                distance = disti;
             }
-            return distance;
         }
-        else
-            return 0;
+        if (!this.isInside(p)) {
+            distance *= -1;
+        }
+        return distance;
     }             
         
     @Override
