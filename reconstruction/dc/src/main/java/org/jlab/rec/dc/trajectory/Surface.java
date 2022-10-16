@@ -123,18 +123,22 @@ public class Surface {
             return true;
     }
 
+    public double distanceFromEdge(double x, double y, double z) {
+        return this.distanceFromEdge(new Point3D(x, y, z));
+    }
+    
     public double distanceFromEdge(Point3D point) {
         if(contour != null) 
             return this.contour.distanceFromEdge(point);
         else
-            return -1;
+            return -99;
     }
     
     public double distanceFromPlane(Point3D point) {
         if(contour != null) 
             return this.contour.distanceFromPlane(point);
         else
-            return -1;
+            return -99;
     }
     
     public double distanceFromPlane(double x, double y, double z) {

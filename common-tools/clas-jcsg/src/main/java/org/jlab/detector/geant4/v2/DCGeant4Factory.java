@@ -7,6 +7,8 @@ import org.jlab.detector.volume.G4Trap;
 import org.jlab.detector.volume.G4World;
 import org.jlab.detector.volume.Geant4Basic;
 import org.jlab.geom.base.ConstantProvider;
+import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Trap3D;
 
 /**
@@ -721,12 +723,33 @@ public final class DCGeant4Factory extends Geant4Factory {
         Wire lw1 = new Wire(isector+1, isuperlayer, ilayer+1, nsgwires - 1);
         
         // move to CLAS12 frame
-        Vector3d p0 = lw0.right().rotateZ(Math.toRadians(-90 + isector*60));//.rotateY(-dbref.thtilt(isuperlayer/2));
-        Vector3d p1 = lw0.left().rotateZ(Math.toRadians(-90 + isector*60));//.rotateY(-dbref.thtilt(isuperlayer/2)); 
-        Vector3d p2 = lw1.left().rotateZ(Math.toRadians(-90 + isector*60));//.rotateY(-dbref.thtilt(isuperlayer/2)); 
-        Vector3d p3 = lw1.right().rotateZ(Math.toRadians(-90 + isector*60));//.rotateY(-dbref.thtilt(isuperlayer/2)); 
+        Vector3d p0 = lw0.right().rotateZ(Math.toRadians(-90 + isector*60));
+        Vector3d p1 = lw0.left().rotateZ(Math.toRadians(-90 + isector*60));
+        Vector3d p2 = lw1.left().rotateZ(Math.toRadians(-90 + isector*60)); 
+        Vector3d p3 = lw1.right().rotateZ(Math.toRadians(-90 + isector*60)); 
         
-        Trap3D trapezoid = new Trap3D(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, p3.x, p3.y, p3.z);
+        // define left and right side lines and their intersection
+        Line3D left  = new Line3D(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
+        Line3D right = new Line3D(p0.x, p0.y, p0.z, p3.x, p3.y, p3.z);
+        Point3D v = left.distance(right).origin();
+        
+        // shift the left or right origin, depending on distance from "triangle" vertex
+        double dleft  = v.distance(left.origin());
+        double dright = v.distance(right.origin());
+        if(dleft<dright)
+            left.setOrigin(left.lerpPoint((dright-dleft)/left.length()));
+        else 
+            right.setOrigin(right.lerpPoint((dleft-dright)/right.length()));
+        
+        // shift the left or right end, depending on lengths
+        double lleft  = left.length();
+        double lright = right.length();
+        if(lleft<lright)
+            right.setEnd(right.lerpPoint(lleft/lright));
+        else 
+            left.setEnd(left.lerpPoint(lright/lleft));
+        
+        Trap3D trapezoid = new Trap3D(right.origin(), left.origin(), left.end(), right.end());
         
         return trapezoid;
     } 
