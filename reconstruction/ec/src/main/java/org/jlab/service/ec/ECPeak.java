@@ -264,7 +264,7 @@ public class ECPeak implements Comparable {
     	return 0;
     }
     
-    int gg1_getSplitIndex(){ //split0: Gagik's original splitter used in pass1
+    int gg1_getSplitIndex(){ //split0: Gagik's original splitter used in pass1 (called getSplitStrip in previous releases)
         int     split = -1;
         double  ratio = 0.0;
         
@@ -289,7 +289,7 @@ public class ECPeak implements Comparable {
         return split;
     }
         
-    int gg2_getSplitIndex(){ //split1: lcsmith implementation of splitrules to reject duplicate peaks 
+    int gg2_getSplitIndex(){ //split1: lcsmith variation implementing splitRules to reject duplicate peaks 
         int     split = -1;
         double  ratio_lo = 0.05, ratio_hi = 1e7;
         int splitStripLast=-100, splitEnergyLast=0;

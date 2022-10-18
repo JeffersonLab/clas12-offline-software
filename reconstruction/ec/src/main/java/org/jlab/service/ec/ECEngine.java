@@ -285,6 +285,21 @@ public class ECEngine extends ReconstructionEngine {
     	ECCommon.useUnsharedTime = val;
     } 
     
+    public void setTWCorrections(boolean val) {
+    	LOGGER.log(Level.INFO,"ECengine: useTWCorrections = "+val);
+    	ECCommon.useTWCorrections = val;
+    }
+    
+    public void setUsePass2Timing(boolean val) {
+    	LOGGER.log(Level.INFO,"ECengine: usePass2Timing = "+val);
+    	ECCommon.usePass2Timing = val;
+    }
+    
+    public void setUsePass2Recon(boolean val) {
+    	LOGGER.log(Level.INFO,"ECengine: usePass2Recon = "+val);
+    	ECCommon.usePass2Recon = val;
+    }
+    
     public void setUseFADCTime(boolean val) {
     	LOGGER.log(Level.INFO,"ECengine: UseFADCTime = "+val);   	
     	ECCommon.useFADCTime = val;
@@ -360,8 +375,8 @@ public class ECEngine extends ReconstructionEngine {
                 "/calibration/ec/attenuation", 
                 "/calibration/ec/gain", 
                 "/calibration/ec/timing",
-                "/calibration/ec/ftiming",
                 "/calibration/ec/ftime",
+                "/calibration/ec/dtime",
                 "/calibration/ec/fdjitter",
                 "/calibration/ec/time_jitter",
                 "/calibration/ec/fadc_offset",
@@ -371,6 +386,8 @@ public class ECEngine extends ReconstructionEngine {
                 "/calibration/ec/torus_gain_shift",
                 "/calibration/ec/global_time_walk",
                 "/calibration/ec/effective_velocity",
+                "/calibration/ec/fveff",
+                "/calibration/ec/dveff",
                 "/calibration/ec/tmf_offset",
                 "/calibration/ec/tmf_window",
                 "/calibration/ec/status"
@@ -402,6 +419,7 @@ public class ECEngine extends ReconstructionEngine {
         setPeakThresholds(18,20,15);  //pass1 18,20,15
         setClusterThresholds(0,0,0);
         setClusterCuts(7,15,20);      //pass1 7,15,20
+        setUsePass2Timing(true);
         setSplitMethod(0);            //pass1 0=gagik method
         setSplitThresh(3,3,3);        //pass1 3,3,3
         setTouchID(1);                //pass1 1

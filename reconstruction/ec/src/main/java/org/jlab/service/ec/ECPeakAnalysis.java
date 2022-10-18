@@ -11,7 +11,7 @@ import java.util.List;
 public class ECPeakAnalysis {
 	
 	static int splitIndex;
-	static int splitStrip;
+	static int splitStrip; //for debugging
     
     public static int getPeakSplitIndex(List<ECPeak> peaks){        
         for(int i = 0; i < peaks.size(); i++){
