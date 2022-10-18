@@ -147,6 +147,8 @@ public class ECCommon {
     	
         int run = getRunNumber(event);
         
+        if(run==11) usePass2Timing = false;
+        
         manager.setVariation(variation);
 
         IndexedTable    atten = manager.getConstants(run, "/calibration/ec/attenuation");
