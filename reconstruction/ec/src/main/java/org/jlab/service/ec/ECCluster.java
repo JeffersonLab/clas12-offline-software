@@ -127,8 +127,8 @@ public class ECCluster implements Comparable {
     }
 	
     public double getTime(int view){ 
-        return useFT ? getFTime(view):getDTime(view);
-    } 
+        return useFT ? getFTime(view):getDTime(view)<=0?getFTime(view):getDTime(view);
+    }	
     
     public double getFTime(int view) {
     	return clusterPeaks.get(view).getFTime(clusterHitPosition);

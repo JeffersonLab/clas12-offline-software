@@ -66,7 +66,7 @@ public class ECStrip implements Comparable {
         desc.setSectorLayerComponent(sector, layer, component);
         ftc = new ExtendedTWCFTime(); //FADC timing calibration
         dtc = ECCommon.usePass2Timing ? new ExtendedTWCDTime() : new ExtendedTWCTime(); //choose pass2 or pass1 for TDC timing
-        tc  = ECCommon.useFADCTime ? ftc : dtc; //for user selected calibration of FADC or TDC timing
+        tc  = ECCommon.useFADCTime ? ftc : dtc; //user selected calibration of FADC or TDC timing
     }
 	
     public DetectorDescriptor getDescriptor(){
@@ -219,11 +219,8 @@ public class ECStrip implements Comparable {
         } 
         
         public double getExtendedTWC(double x) {
-        	return test() ? fTimA2 + Math.exp(-(x-fTimA3)/fTimA4)+1-Math.exp( (x-fTimA5)/fTimA6):0;
-        }
-        
-        public boolean test() {
-        	return fTimA2!=0 && fTimA4!=0;
+        	if(fTimA4==0 || fTimA6==0) return 0;
+        	return fTimA2 + Math.exp(-(x-fTimA3)/fTimA4)+1-Math.exp( (x-fTimA5)/fTimA6);
         }
         
     	public double getTWCTime() {
