@@ -7,6 +7,10 @@ public class DaqScaler {
     protected static final String RAWBANKNAME="RAW::scaler";
     protected static final int CRATE=64;
 
+    public long timestamp=-1;
+    public int eventnumber=-1;
+    public int unixtime=-1;
+
     protected double clockFreq=1;   // Hz
     protected long fcup=-1;         // counts
     protected long clock=-1;        // counts

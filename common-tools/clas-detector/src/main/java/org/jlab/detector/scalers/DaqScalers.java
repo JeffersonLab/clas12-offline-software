@@ -40,7 +40,14 @@ import org.jlab.utils.groups.IndexedTable;
  *
  * @author baltzell
  */
-public class DaqScalers {
+public class DaqScalers implements Comparable {
+
+    @Override
+    public int compareTo(Object o) {
+        if (this.timestamp < ((DaqScalers)o).timestamp) return -1;
+        if (this.timestamp > ((DaqScalers)o).timestamp) return 1;
+        return 0;
+    }
 
     public Dsc2Scaler dsc2=null;
     public StruckScalers struck=null;

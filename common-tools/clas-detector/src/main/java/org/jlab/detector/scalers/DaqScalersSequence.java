@@ -5,11 +5,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import org.jlab.detector.calib.utils.ConstantsManager;
 
+import org.jlab.logging.DefaultLogger;
 import org.jlab.jnp.hipo4.io.HipoReader;
 import org.jlab.jnp.hipo4.data.Event;
 import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
+import org.jlab.utils.groups.IndexedTable;
 
 /**
  * For easy access to most recent scaler readout for any given event.
@@ -26,7 +29,9 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
     protected final List<DaqScalers> scalers=new ArrayList<>();
     
     private Bank rcfgBank=null;
-  
+
+    public List<DaqScalers> getList() { return scalers; }
+
     public class Interval {
         private DaqScalers previous = null;
         private DaqScalers next = null;
@@ -70,6 +75,18 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
         return 0;
     }
   
+    public void show() {
+        for (int ii=0; ii<scalers.size(); ++ii) {
+            Dsc2Scaler d = scalers.get(ii).dsc2;
+            String s = String.format("%d",scalers.get(ii).getTimestamp());
+            s += String.format(" %d %d",d.getClock(),d.getGatedClock());
+            s += String.format(" %d %d",d.getFcup(),d.getGatedFcup());
+            s += String.format(" %d %d",d.getSlm(),d.getGatedSlm());
+            s += String.format(" %f %f",d.getBeamCharge(),d.getBeamChargeGated());
+            System.out.println(s);
+        }
+    }
+
     protected int findIndex(long timestamp) {
         if (this.scalers.isEmpty()) return -1;
         if (timestamp < this.scalers.get(0).getTimestamp()) return -1;
@@ -174,7 +191,7 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
      * @return  sequence
      */
     public static DaqScalersSequence readSequence(List<String> filenames) {
-       
+      
         DaqScalersSequence seq=new DaqScalersSequence();
 
         for (String filename : filenames) {
@@ -216,8 +233,112 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
         
         return seq;
     }
-    
+  
+    public static DaqScalersSequence readSequenceRaw(String... filenames) {
+        return readSequenceRaw(Arrays.asList(filenames));
+    }
+
+    /**
+     * This reads tag=1 events for RAW::scaler banks, and initializes and returns
+     * a {@link DaqScalersSequence} that can be used to access the most recent scaler
+     * readout for any given event.
+     * 
+     * @param filenames list of names of HIPO files to read
+     * @return  sequence
+     */
+    public static DaqScalersSequence readSequenceRaw(List<String> filenames) {
+
+        final String CCDB_FCUP_TABLE="/runcontrol/fcup";
+        final String CCDB_SLM_TABLE="/runcontrol/slm";
+        final String CCDB_HEL_TABLE="/runcontrol/helicity";
+        ConstantsManager conman = new ConstantsManager();
+        conman.init(Arrays.asList(new String[]{CCDB_FCUP_TABLE,CCDB_SLM_TABLE,CCDB_HEL_TABLE}));
+
+        DaqScalersSequence seq=new DaqScalersSequence();
+
+        for (String filename : filenames) {
+
+            HipoReader reader = new HipoReader();
+            reader.setTags(1);
+            reader.open(filename);
+
+            if (seq.rcfgBank==null) {
+                seq.rcfgBank = new Bank(reader.getSchemaFactory().getSchema("RUN::config"));
+            }
+
+            SchemaFactory schema = reader.getSchemaFactory();
+            Event event=new Event();
+            Bank scalerBank=new Bank(schema.getSchema("RAW::scaler"));
+            Bank configBank=new Bank(schema.getSchema("RUN::config"));
+
+            while (reader.hasNext()) {
+            
+                reader.nextEvent(event);
+                event.read(scalerBank);
+                event.read(configBank);
+                    
+                IndexedTable ccdb_fcup = conman.getConstants(configBank.getInt("run",0),CCDB_FCUP_TABLE);
+                IndexedTable ccdb_slm = conman.getConstants(configBank.getInt("run",0),CCDB_SLM_TABLE);
+                IndexedTable ccdb_hel = conman.getConstants(configBank.getInt("run",0),CCDB_HEL_TABLE);
+
+                if (scalerBank.getRows()<1) continue;
+                if (configBank.getRows()<1) continue;
+        
+                DaqScalers ds = DaqScalers.create(scalerBank, ccdb_fcup, ccdb_slm, ccdb_hel);
+                ds.setTimestamp(configBank.getLong("timestamp",0));
+                seq.add(ds);
+            }
+
+            reader.close();
+        }
+        
+        return seq;
+    }
+
+    /**
+     * Fix DSC2 clock rollover and recalibrate now using the the DSC2 clock
+     * instead of an external one.  Note, this requires data starting from early
+     * enough in a run, and no large gaps later, in order not to miss any
+     * rollovers.
+     * @param fcupTable
+     * @param slmTable 
+     */
+    public void fixClockRollover(IndexedTable fcupTable, IndexedTable slmTable) {
+        // maximum unsiged 32-bit, used to store the DSC2 clock:
+        final long max=4294967295L;
+        long offset=0;
+        for (int ii=1; ii<this.scalers.size(); ++ii) {
+            if (this.scalers.get(ii).dsc2.clock < this.scalers.get(ii).dsc2.clock-offset) {
+                offset += max;
+            }
+            this.scalers.get(ii).dsc2.clock += offset;
+            this.scalers.get(ii).dsc2.gatedClock += offset;
+            this.scalers.get(ii).dsc2.calibrate(fcupTable, slmTable);
+        }
+    }
+
     public static void main(String[] args) {
+      
+        DefaultLogger.debug();
+
+        String filename="/Users/baltzell/data/jpsitcs_005340.hipo";
+
+        ConstantsManager conman = new ConstantsManager();
+        conman.init(Arrays.asList(new String[]{"/runcontrol/fcup","/runcontrol/slm"}));
+                
+        IndexedTable fcup = conman.getConstants(5340,"/runcontrol/fcup");
+        IndexedTable slm = conman.getConstants(5340,"/runcontrol/slm");
+
+        DaqScalersSequence seq = DaqScalersSequence.readSequenceRaw(filename);
+        
+        seq.show();
+
+        seq.fixClockRollover(fcup,slm);
+
+        seq.show();
+    }
+
+    public static void main2(String[] args) {
         
         final String dir="/Users/baltzell/data/CLAS12/rg-a/decoded/6b.2.0/";
         final String file="clas_005038.evio.00000-00004.hipo";
