@@ -49,6 +49,7 @@ public class ECCommon {
     public static Boolean     useNewTimeCal = true;
     public static Boolean useUnsharedEnergy = true;
     public static Boolean  useTWCorrections = true;
+    public static Boolean  useDTCorrections = true;
     public static Boolean     usePass2Recon = false;
     public static Boolean    usePass2Timing = true;
     public static int     UnsharedEnergyCut = 6;
@@ -147,7 +148,7 @@ public class ECCommon {
     	
         int run = getRunNumber(event);
         
-        if(run==11) usePass2Timing = false;
+        if(run<=100) usePass2Timing = false;
         
         manager.setVariation(variation);
 

@@ -121,15 +121,21 @@ public class ECCluster implements Comparable {
         return clusterPeaks.get(view).getEnergy(clusterHitPosition);
     }  
     
-    public double getTime(boolean flag) {
-    	useFT = flag;
+    public double getTime() {
     	return ECCommon.useUnsharedTime? getUnsharedRawADCTime():getRawADCTime();
-    }
-	
-    public double getTime(int view){ 
-        return useFT ? getFTime(view):getDTime(view)<=0?getFTime(view):getDTime(view);
-    }	
+    } 
     
+    public double getTime(Boolean val) {
+    	useFT = val;
+    	return ECCommon.useUnsharedTime? getUnsharedRawADCTime():getRawADCTime();
+    } 
+    
+    public double getTime(int view){ 
+    	if (ECCommon.useFADCTime || useFT) return getFTime(view);
+    	Boolean reject = ECCommon.useDTCorrections && getDTime(view)<=0; 
+        return reject ? getFTime(view):getDTime(view);
+    }
+  
     public double getFTime(int view) {
     	return clusterPeaks.get(view).getFTime(clusterHitPosition);
     }
@@ -259,7 +265,7 @@ public class ECCluster implements Comparable {
     public String toString(){
         StringBuilder str = new StringBuilder();
         str.append(String.format("[****] CLUSTER >>>>> RE=%6.3f E=%6.3f DT=%6.2f DT123=%6.2f %6.2f %6.2f FT123=%6.2f %6.2f %6.2f ShC=%1d ShV=%1d    >>> ",
-        getRawEnergy(),getEnergy(),getTime(false),getDTime(0),getDTime(1),getDTime(2),getFTime(0),getFTime(1),getFTime(2),sharedCluster,sharedView));
+        getRawEnergy(),getEnergy(),getTime(),getDTime(0),getDTime(1),getDTime(2),getFTime(0),getFTime(1),getFTime(2),sharedCluster,sharedView));
         str.append(clusterHitPosition.toString());
         str.append(String.format("  error = %6.5f\n",clusterSize));
         for(int view = 0; view < 3; view++){

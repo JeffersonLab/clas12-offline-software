@@ -139,7 +139,7 @@ public class ECEngine extends ReconstructionEngine {
             bankC.setShort("status", c, (short) clusters.get(c).getStatus());
             bankC.setByte("layer",   c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getLayer());
             bankC.setFloat("energy", c, (float) clusters.get(c).getEnergy());           
-            bankC.setFloat("time",   c, (float) clusters.get(c).getTime(false)); //true=use FADC timing
+            bankC.setFloat("time",   c, (float) clusters.get(c).getTime()); 
             bankC.setByte("idU",     c,  (byte) clusters.get(c).UVIEW_ID);
             bankC.setByte("idV",     c,  (byte) clusters.get(c).VVIEW_ID);
             bankC.setByte("idW",     c,  (byte) clusters.get(c).WVIEW_ID);
@@ -191,8 +191,8 @@ public class ECEngine extends ReconstructionEngine {
             bankD2.setShort("dbstV",  c, (short) clusters.get(c).clusterPeaks.get(1).getDBStatus());
             bankD2.setShort("dbstW",  c, (short) clusters.get(c).clusterPeaks.get(2).getDBStatus());
             bankD2.setFloat("energy", c, (float) clusters.get(c).getEnergy());
-            bankD2.setFloat("time",   c, (float) clusters.get(c).getTime(false));
             bankD2.setFloat("ftime",  c, (float) clusters.get(c).getTime(true));
+            bankD2.setFloat("time",   c, (float) clusters.get(c).getTime(false));
             bankD2.setFloat("rawEU",  c, (float) clusters.get(c).getRawEnergy(0));
             bankD2.setFloat("rawEV",  c, (float) clusters.get(c).getRawEnergy(1));
             bankD2.setFloat("rawEW",  c, (float) clusters.get(c).getRawEnergy(2));
@@ -288,6 +288,11 @@ public class ECEngine extends ReconstructionEngine {
     public void setTWCorrections(boolean val) {
     	LOGGER.log(Level.INFO,"ECengine: useTWCorrections = "+val);
     	ECCommon.useTWCorrections = val;
+    }
+    
+    public void setDTCorrections(boolean val) {
+    	LOGGER.log(Level.INFO,"ECengine: useDTCorrections = "+val);
+    	ECCommon.useDTCorrections = val;
     }
     
     public void setUsePass2Timing(boolean val) {
@@ -419,7 +424,8 @@ public class ECEngine extends ReconstructionEngine {
         setPeakThresholds(18,20,15);  //pass1 18,20,15
         setClusterThresholds(0,0,0);
         setClusterCuts(7,15,20);      //pass1 7,15,20
-        setUsePass2Timing(true);
+        setDTCorrections(true);
+        setUsePass2Timing(true);      //pass1 false
         setSplitMethod(0);            //pass1 0=gagik method
         setSplitThresh(3,3,3);        //pass1 3,3,3
         setTouchID(1);                //pass1 1
