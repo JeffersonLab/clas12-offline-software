@@ -233,9 +233,18 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
         
         return seq;
     }
-  
+ 
     public static DaqScalersSequence readSequenceRaw(String... filenames) {
-        return readSequenceRaw(Arrays.asList(filenames));
+        final String CCDB_FCUP_TABLE="/runcontrol/fcup";
+        final String CCDB_SLM_TABLE="/runcontrol/slm";
+        final String CCDB_HEL_TABLE="/runcontrol/helicity";
+        ConstantsManager conman = new ConstantsManager();
+        conman.init(Arrays.asList(new String[]{CCDB_FCUP_TABLE,CCDB_SLM_TABLE,CCDB_HEL_TABLE}));
+        return readSequenceRaw(conman, filenames);
+    }
+
+    public static DaqScalersSequence readSequenceRaw(ConstantsManager conman, String... filenames) {
+        return readSequenceRaw(conman, Arrays.asList(filenames));
     }
 
     /**
@@ -246,13 +255,7 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
      * @param filenames list of names of HIPO files to read
      * @return  sequence
      */
-    public static DaqScalersSequence readSequenceRaw(List<String> filenames) {
-
-        final String CCDB_FCUP_TABLE="/runcontrol/fcup";
-        final String CCDB_SLM_TABLE="/runcontrol/slm";
-        final String CCDB_HEL_TABLE="/runcontrol/helicity";
-        ConstantsManager conman = new ConstantsManager();
-        conman.init(Arrays.asList(new String[]{CCDB_FCUP_TABLE,CCDB_SLM_TABLE,CCDB_HEL_TABLE}));
+    public static DaqScalersSequence readSequenceRaw(ConstantsManager conman, List<String> filenames) {
 
         DaqScalersSequence seq=new DaqScalersSequence();
 
@@ -277,9 +280,9 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
                 event.read(scalerBank);
                 event.read(configBank);
                     
-                IndexedTable ccdb_fcup = conman.getConstants(configBank.getInt("run",0),CCDB_FCUP_TABLE);
-                IndexedTable ccdb_slm = conman.getConstants(configBank.getInt("run",0),CCDB_SLM_TABLE);
-                IndexedTable ccdb_hel = conman.getConstants(configBank.getInt("run",0),CCDB_HEL_TABLE);
+                IndexedTable ccdb_fcup = conman.getConstants(configBank.getInt("run",0),"/runcontrol/fcup");
+                IndexedTable ccdb_slm = conman.getConstants(configBank.getInt("run",0),"/runcontrol/slm");
+                IndexedTable ccdb_hel = conman.getConstants(configBank.getInt("run",0),"/runcontrol/helicity");
 
                 if (scalerBank.getRows()<1) continue;
                 if (configBank.getRows()<1) continue;
@@ -329,7 +332,7 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
         IndexedTable fcup = conman.getConstants(5340,"/runcontrol/fcup");
         IndexedTable slm = conman.getConstants(5340,"/runcontrol/slm");
 
-        DaqScalersSequence seq = DaqScalersSequence.readSequenceRaw(filename);
+        DaqScalersSequence seq = DaqScalersSequence.readSequenceRaw(conman, filename);
         
         seq.show();
 
