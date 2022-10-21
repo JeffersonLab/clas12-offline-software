@@ -412,7 +412,7 @@ public class Track extends Trajectory implements Comparable<Track>{
     
     public boolean isGood() {
         boolean isGood=true;
-        if(this._trakOrig.distance(0, 0, 0)>Constants.HTCCRADIUS) isGood=false;
+        if(this._trakOrig.distance(0, 0, 0)>Constants.HTCCRADIUS && this._trakOrig.z()>0) isGood=false;
         return isGood;
     }
     /**
