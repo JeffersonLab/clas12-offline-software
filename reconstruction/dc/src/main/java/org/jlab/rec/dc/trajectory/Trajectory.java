@@ -215,7 +215,7 @@ public class Trajectory extends ArrayList<Cross> {
                                         -q);
                 double[] tPars = dcSwim.SwimToPlaneBoundary(surface.getD(), surface.getNormal(), dir);
                 if(tPars==null || surface.distanceFromPlane(tPars[0], tPars[1], tPars[2])>TOLERANCE) return;
-                this.addTrajectoryPoint(tPars[0], tPars[1], tPars[2], -tPars[3], -tPars[4], -tPars[5], tPars[2]-v.z(), Math.abs((tPars[2]-v.z())*b[2]), surface);
+                this.addTrajectoryPoint(tPars[0], tPars[1], tPars[2], -tPars[3], -tPars[4], -tPars[5], last.getPath()-tPars[6], last.getiBdl()-tPars[7], surface);
             }
             // swim forward from vertex to FMT and from HTCC to FD planes
             else {
