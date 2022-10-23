@@ -434,16 +434,22 @@ public final class Cylindrical3D implements Face3D {
      * @return distance if point is on the surface, 0 otherwise
      */
     public double distanceToEdge(Point3D point) {
-        if(this.isOnSurface(point)) {
-            Vector3D pBA = baseArc.center().vectorTo(point);
-            double h = pBA.dot(baseArc.normal().asUnit());
-            double t = baseArc.normal().angle(baseArc.originVector(), pBA);
-            if(t<0) t += 2*Math.PI;
-            double hmin = Math.min(h, height-h);
-            double rmin = Math.min(t, baseArc.theta()-t)*baseArc.radius();
+        Vector3D pBA = baseArc.center().vectorTo(point);
+        double h = pBA.dot(baseArc.normal().asUnit());
+        double t = baseArc.normal().angle(baseArc.originVector(), pBA);
+        if(t<0) t += 2*Math.PI;
+        double hmin = Math.min(Math.abs(h), Math.abs(height-h));
+        double rmin = Math.min(Math.abs(t), Math.abs(baseArc.theta()-t))*baseArc.radius();
+        if(baseArc.theta()>=2*Math.PI)
+            rmin = Double.MAX_VALUE;
+        if(h<0 || h>height)
+            hmin *= -1;
+        if(t<0 || t>baseArc.theta())
+            rmin *= -1;
+        if(rmin>0 || hmin>0)
             return Math.min(hmin, rmin);
-        }
-        return 0;
+        else
+            return Math.max(hmin, rmin);
     }
 
     @Override

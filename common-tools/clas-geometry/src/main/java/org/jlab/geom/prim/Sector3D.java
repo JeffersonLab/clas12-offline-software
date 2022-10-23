@@ -158,9 +158,11 @@ public final class Sector3D implements Face3D {
     public double distanceFromEdge(Point3D p) {
         double r = p.distance(this.innerArc().center());
         double distance = Math.min(r-this.innerRadius(), this.outerRadius()-r);
-        for(int i=0; i<2; i++) {
-            double disti = new Line3D(this.point(i), this.point(i+2)).distanceSegment(p).length();
-            if(disti < distance) distance = disti;
+        if(this.outerArc.theta()<2*Math.PI) {
+            for(int i=0; i<2; i++) {
+                double disti = new Line3D(this.point(i), this.point(i+2)).distanceSegment(p).length();
+                if(disti < distance) distance = disti;
+            }
         }
         if(!this.isInside(p)) 
             distance *= -1;
