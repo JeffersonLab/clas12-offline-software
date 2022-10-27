@@ -62,6 +62,8 @@ public class Constants {
     private boolean CHECKBETA = false;
     private int     T2D = 1;     // 1=polynomial, 0=exponential
     private boolean USEDOUBLETS = false;
+    private boolean DCRBJITTER = false;
+    private boolean SWAPDCRBBITS = false;
     
     // DATABASE TABLES
     public static final String TT             = "/daq/tt/dc";
@@ -85,10 +87,10 @@ public class Constants {
     public FTOFGeant4Factory  ftofDetector = null;
     public Detector           ecalDetector = null;
     public Detector           fmtDetector  = null;
-    public TrajectorySurfaces tSurf        = null;
+    public TrajectorySurfaces trajSurfaces = null;
     
-    public static final double HTCCRADIUS=175;
-    public static final double LTCCPLANE=653.09;
+    public static final double HTCCRADIUS = 175;
+    public static final double LTCCPLANE  = 653.09;
     
     // other CLAS12 parameters
     public static final  int NSECT  = 6;
@@ -311,6 +313,22 @@ public class Constants {
     public void setUSEDOUBLETS(boolean USEDOUBLETS) {
         this.USEDOUBLETS = USEDOUBLETS;
     }
+
+    public boolean useDCRBJITTER() {
+        return DCRBJITTER;
+    }
+
+    public void setDCRBJITTER(boolean DCRBJITTER) {
+        this.DCRBJITTER = DCRBJITTER;
+    }
+
+    public boolean isSWAPDCRBBITS() {
+        return SWAPDCRBBITS;
+    }
+
+    public void setSWAPDCRBBITS(boolean SWAPDCRBBITS) {
+        this.SWAPDCRBBITS = SWAPDCRBBITS;
+    }
     
     public synchronized void initialize(String engine,
                                         String variation, 
@@ -319,6 +337,8 @@ public class Constants {
                                         boolean useBetaCut,
                                         int t2d, 
                                         boolean useDoublets,
+                                        boolean dcrbJitter,
+                                        boolean swapDCRBBits,
                                         int nSuperLayer,
                                         int selectedSector,
                                         double[][] shifts) {
@@ -332,6 +352,8 @@ public class Constants {
             CHECKBETA       = useBetaCut;
             T2D             = t2d;
             USEDOUBLETS     = useDoublets;
+            DCRBJITTER      = dcrbJitter;  
+            SWAPDCRBBITS    = swapDCRBBits;
             NSUPERLAYERTRACKING = nSuperLayer;
             SECTORSELECT    = selectedSector;
 
@@ -367,6 +389,8 @@ public class Constants {
         LOGGER.log(Level.INFO, "["+engine+"] run with with Beta cut = " + CHECKBETA);
         LOGGER.log(Level.INFO, "["+engine+"] run with time to distance function set to exponential/polynomial (0/1) = " + T2D);
         LOGGER.log(Level.INFO, "["+engine+"] run with with hit doublets recovery = " + USEDOUBLETS);
+        LOGGER.log(Level.INFO, "["+engine+"] run with with DCRB jitter correction = " + SWAPDCRBBITS);
+        LOGGER.log(Level.INFO, "["+engine+"] run with with DCRB timestamp bit swap = " + SWAPDCRBBITS);
         LOGGER.log(Level.INFO, "["+engine+"] run with with Five-out-of-six-superlayer-trkg = " + NSUPERLAYERTRACKING);        
     }
     
@@ -480,8 +504,8 @@ public class Constants {
         ecalDetector =  GeometryFactory.getDetector(DetectorType.ECAL, 11, geoVariation);
         fmtDetector =  GeometryFactory.getDetector(DetectorType.FMT, 11, geoVariation);
         // create the surfaces
-        tSurf = new TrajectorySurfaces();
-        tSurf.LoadSurfaces(targetPosition, targetLength,dcDetector, ftofDetector, ecalDetector, fmtDetector);        
+        trajSurfaces = new TrajectorySurfaces();
+        trajSurfaces.loadSurface(targetPosition, targetLength,dcDetector, ftofDetector, ecalDetector, fmtDetector);        
     }
    
 

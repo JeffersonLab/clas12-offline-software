@@ -28,6 +28,7 @@ public enum DetectorType {
     HEL       (20, "HEL"),
     BAND      (21, "BAND"),
     RASTER    (22, "RASTER"),
+    URWELL    (23, "URWELL"),
     TARGET    (100, "TARGET"),
     ECIN      (110, "ECIN"),
     ECOUT     (111, "ECOUT"),

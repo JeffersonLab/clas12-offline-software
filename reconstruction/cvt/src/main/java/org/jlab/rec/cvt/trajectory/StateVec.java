@@ -7,7 +7,6 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.Constants;
-import org.jlab.rec.cvt.measurement.MLayer;
 
 /**
  * A StateVec describes a cross measurement in the CVT. It is characterized by a
@@ -43,6 +42,7 @@ public class StateVec implements Comparable<StateVec> {
     private double _uy;
     private double _uz;
     private double _p;
+    private double _edge;
     
     public int getID() {
         return _ID;
@@ -74,6 +74,14 @@ public class StateVec implements Comparable<StateVec> {
 
     public final void setDx(double _dx) {
         this._dx = _dx;
+    }
+
+    public double getEdge() {
+        return _edge;
+    }
+
+    public void setEdge(double _edge) {
+        this._edge = _edge;
     }
 
     public int getSurfaceDetector() {

@@ -183,6 +183,28 @@
     ]
   },
   {
+    "name": "HitBasedTrkg::AITrajectory",
+    "group": 20600,
+    "item" : 68,
+    "info": "Trajectory bank",
+    "entries": [
+        {"name":"id",       "type":"S", "info":"id of the track"},
+        {"name":"detector", "type":"B", "info":"id of the detector"},
+        {"name":"sector",   "type":"B", "info":"id of the sector"},
+        {"name":"layer",    "type":"B", "info":"id of the layer"},
+        {"name":"x",        "type":"F", "info":"track x position at detector surface (cm)"},
+        {"name":"y",        "type":"F", "info":"track y position at detector surface (cm)"},
+        {"name":"z",        "type":"F", "info":"track z position at detector surface (cm)"},
+        {"name":"tx",       "type":"F", "info":"track unit direction vector x component at detector surface"},
+        {"name":"ty",       "type":"F", "info":"track unit direction vector y component at detector surface"},
+        {"name":"tz",       "type":"F", "info":"track unit direction vector z component at detector surface"},
+        {"name":"B",        "type":"F", "info":"B-field magnitude at detector surface (cm)"},
+        {"name":"path",     "type":"F", "info":"pathlength of the track from the track vertex to the detector surface (cm)"},
+        {"name":"dx",       "type":"F", "info":"pathlength of the track through the detector element (cm)"},
+        {"name":"edge",     "type":"F", "info":"distance to the closest detector edge (cm), -1 if edge is not defined, 0 if outside, >0 if inside"}
+    ]
+  },
+  {
     "name": "TimeBasedTrkg::AIHits",
     "group": 20600,
     "item" : 71,
@@ -403,6 +425,7 @@
     "entries": [
         {"name":"id",       "type":"S", "info":"id of the track"},
         {"name":"detector", "type":"B", "info":"id of the detector"},
+        {"name":"sector",   "type":"B", "info":"id of the sector"},
         {"name":"layer",    "type":"B", "info":"id of the layer"},
         {"name":"x",        "type":"F", "info":"track x position at detector surface (cm)"},
         {"name":"y",        "type":"F", "info":"track y position at detector surface (cm)"},
@@ -411,7 +434,9 @@
         {"name":"ty",       "type":"F", "info":"track unit direction vector y component at detector surface"},
         {"name":"tz",       "type":"F", "info":"track unit direction vector z component at detector surface"},
         {"name":"B",        "type":"F", "info":"B-field magnitude at detector surface (cm)"},
-        {"name":"path",     "type":"F", "info":"pathlength of the track from the track vertex to the detector surface (cm)"}
+        {"name":"path",     "type":"F", "info":"pathlength of the track from the track vertex to the detector surface (cm)"},
+        {"name":"dx",       "type":"F", "info":"pathlength of the track through the detector element (cm)"},
+        {"name":"edge",     "type":"F", "info":"distance to the closest detector edge (cm), -1 if edge is not defined, 0 if outside, >0 if inside"}
     ]
   }
  
