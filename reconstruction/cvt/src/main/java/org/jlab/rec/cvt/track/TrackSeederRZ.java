@@ -185,7 +185,7 @@ public class TrackSeederRZ {
         double targetCen = Geometry.getInstance().getZoffset();
         double targetLen = Geometry.getInstance().getZlength();
         
-        if(Math.abs(targetCen-in)<targetLen+Constants.ZRANGE)
+        if(Math.abs(targetCen-in)<targetLen+Constants.getInstance().getZRANGE())
            value = true;
         if(Constants.getInstance().seedingDebugMode) 
             System.out.println("Passing: "+ value);

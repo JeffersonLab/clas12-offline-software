@@ -203,7 +203,7 @@ public class TracksFromTargetRec {
                             solenoidValue, xb , yb, Units.MM);
             double[][] cov = Constants.COVHELIX;
 
-            if(solenoidValue>0.001 && Constants.LIGHTVEL * seed.getHelix().radius() *solenoidValue<Constants.PTCUT)
+            if(solenoidValue>0.001 && Constants.LIGHTVEL * seed.getHelix().radius() *solenoidValue<Constants.getInstance().getPTCUT())
                 continue;
             //System.out.println("initializing fitter...");
             kf.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid));

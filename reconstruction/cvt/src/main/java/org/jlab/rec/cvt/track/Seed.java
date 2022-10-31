@@ -434,11 +434,11 @@ public class Seed implements Comparable<Seed>{
             return false;
         if(this.getNDF() < Constants.NDFCUT) 
             return false;
-        if(this.getHelix().getPt(this.getHelix().B) < Constants.PTCUT) 
+        if(this.getHelix().getPt(this.getHelix().B) < Constants.getInstance().getPTCUT()) 
             return false;
 //        else if(Math.abs(this.getHelix().getTanDip()) > Constants.TANDIP) 
 //            return false;
-        if(Math.abs(Geometry.getInstance().getZoffset()-this.getHelix().getZ0()) > Geometry.getInstance().getZlength()+Constants.ZRANGE) 
+        if(Math.abs(Geometry.getInstance().getZoffset()-this.getHelix().getZ0()) > Geometry.getInstance().getZlength()+Constants.getInstance().getZRANGE()) 
             return false;
         else 
             return true;
