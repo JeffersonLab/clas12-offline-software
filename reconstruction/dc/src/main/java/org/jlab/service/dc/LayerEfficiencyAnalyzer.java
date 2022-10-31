@@ -13,6 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import org.jlab.clas.swimtools.MagFieldsEngine;
+//import org.jlab.clas.swimtools.Swim;
 
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.rec.dc.Constants;
@@ -35,6 +36,7 @@ import org.jlab.rec.dc.cluster.FittedCluster;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.segment.SegmentFinder;
+import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.trajectory.SegmentTrajectory;
 
@@ -43,6 +45,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
 
     public LayerEfficiencyAnalyzer(){
         super("LE");
+        this.getBanks().init("HitBasedTrkg", "HB", "");
         tde = new TimeToDistanceEstimator();
         //plotting stuff
         mainPanel = new JPanel();	
@@ -80,16 +83,43 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
     
     public double[] maxDoca = new double[6];
     
+    private int        selectedSector = 0;
+    private boolean    wireDistortion = false;
+    private boolean    useStartTime   = true;
+    private boolean    useBetaCut     = false;
+    private boolean    useDoublets    = true;
+    private boolean    dcrbJitter     = false;
+    private boolean    swapDCRBBits   = false;
+    private int        t2d            = 1;
+    private int        nSuperLayer    = 5;
+    private String     geoVariation   = "default";
+     private double[][] shifts         = new double[Constants.NREG][6];
+   
     @Override
     public boolean init() {
         
+//        this.setOptions();
+//        Constants.getInstance().initialize("LayerEfficiency");
+//        Constants.getInstance().setT2D(1);
+//        this.LoadTables();
+//        this.getBanks().init("TimBasedTrkg", "HB", "TB");
+//        this.setDropBanks();
+
         this.setOptions();
-        Constants.getInstance().initialize("LayerEfficiency");
-        Constants.getInstance().setT2D(1);
+        Constants.getInstance().initialize(this.getName(),
+                                           geoVariation, 
+                                           wireDistortion, 
+                                           useStartTime, 
+                                           useBetaCut, 
+                                           t2d,
+                                           useDoublets,
+                                           dcrbJitter,
+                                           swapDCRBBits,
+                                           nSuperLayer, 
+                                           selectedSector,
+                                           shifts);
         this.LoadTables();
-        this.getBanks().init("TimBasedTrkg", "HB", "TB");
         this.setDropBanks();
-        
         maxDoca[0]=0.8;maxDoca[1]=0.9;maxDoca[2]=1.3;maxDoca[3]=1.4;maxDoca[4]=1.9;maxDoca[5]=2.0;
         //plots
         can1 = new EmbeddedCanvas(); 
@@ -155,6 +185,8 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
 
     @Override
     public void setDropBanks() {
+        super.registerOutputBank(this.getBanks().getHitsBank());
+        super.registerOutputBank(this.getBanks().getClustersBank());
         super.registerOutputBank("TimeBasedTrkg::TBSegmentTrajectory");
     }
     
@@ -218,6 +250,29 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         
         int run = this.getRun(event);
         if(run==0) return true;
+        String revs = "REC::Event";
+        double T_Start = 0;
+        if(Constants.getInstance().isUSETSTART() == true) {
+            if(event.hasBank(revs)==true) {
+                T_Start = event.getBank(revs).getFloat("startTime", 0);
+                if(T_Start<0) { 
+                    return true; // quit if start time not found in data
+                }
+            } else { 
+                return true; // no REC HB bank
+            }
+        }
+        // get Field
+//        Swim dcSwim = new Swim();        
+       
+        // fill T2D table
+        if(Constants.getInstance().getT2D()==0) {
+            TableLoader.Fill(this.getConstantsManager().getConstants(run, Constants.TIME2DIST));
+        } else {
+        TableLoader.Fill(this.getConstantsManager().getConstants(run, Constants.T2DPRESSURE),
+                this.getConstantsManager().getConstants(run, Constants.T2DPRESSUREREF),
+                this.getConstantsManager().getConstants(run, Constants.PRESSURE));
+        }
         
         //LOGGER.log(Level.FINE, " RUNNING TIME BASED....................................");
         ClusterFitter cf = new ClusterFitter();
@@ -228,8 +283,9 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         
         //instantiate bank writer
         HitReader hitRead = new HitReader(this.getBanks(), super.getConstantsManager(), Constants.getInstance().dcDetector);
-
-        hitRead.read_HBHits(event, tde);
+        System.out.println(" Reading hits....................................");
+        
+        hitRead.read_HBHits(event, tde, revs);
         //hitRead.read_TBHits(event, 
         //    super.getConstantsManager().getConstants(newRun, Constants.DOCARES),
         //    super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST), tde, Constants.getT0(), Constants.getT0Err());
@@ -238,7 +294,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         if(hitRead.get_HBHits()==null)
             return true;
         if(!hitRead.get_HBHits().isEmpty()) {
-            hits = hitRead.get_HBHits();
+            hits.addAll(hitRead.get_HBHits());
         } else {
             return true;
         }
@@ -248,10 +304,10 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         if(hits.isEmpty() ) {
                 return true;
         }
-
+           
         //2) find the clusters from these hits
         ClusterFinder clusFinder = new ClusterFinder();
-
+System.out.println(" RUNNING cluster finder....................................");
         clusters = clusFinder.FindTimeBasedClusters(event, hits, cf, ct, 
                 super.getConstantsManager().getConstants(run, Constants.TIME2DIST), Constants.getInstance().dcDetector, tde);
 
@@ -263,7 +319,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         SegmentFinder segFinder = new SegmentFinder();
 
         List<FittedCluster> pclusters = segFinder.selectTimeBasedSegments(clusters);
-
+System.out.println(" RUNNING segment finder....................................");
         segments =  segFinder.get_Segments(pclusters, event, Constants.getInstance().dcDetector, true);
         
         if(segments!=null && segments.size()>0) {
@@ -274,6 +330,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
                     continue;
                 }
                 SegmentTrajectory trj = aSeglist.get_Trajectory();
+             System.out.println("trj "+trj.get_SegmentId());
                 for (int l = 0; l < 6; l++) {
                     bankE.setShort("segmentID", index, (short) trj.get_SegmentId());
                     bankE.setByte("sector", index, (byte) trj.get_Sector());
@@ -284,7 +341,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
                     index++;
                 }
             }
-            
+            bankE.show();
             event.appendBank(bankE);
         }
         return true;
@@ -431,6 +488,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         
         MagFieldsEngine enf = new MagFieldsEngine();
         enf.init();
+        
         LayerEfficiencyAnalyzer tm = new LayerEfficiencyAnalyzer();
         tm.init();
         

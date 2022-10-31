@@ -413,19 +413,36 @@ public class HitReader {
         this.read_HBHits(tde);
     }
     
+    public void read_HBHits(DataEvent event, TimeToDistanceEstimator tde, String recBankName) {
+        this.initialize(event);
+        this.read_HBHits(tde, recBankName);
+    }
+    
     /**
      * Reads HB DC hits written to the DC bankAI
      *
      * @param tde        
      */
-    private void read_HBHits(TimeToDistanceEstimator tde) {
+    private void read_HBHits(TimeToDistanceEstimator tde ) {
+        
+        String recBankName = bankNames.getRecEventBank();
+        this.read_HBHits(tde, recBankName);
+    }
+    
+    
+    /**
+     * Reads HB DC hits written to the DC bankAI
+     *
+     * @param tde        
+     * @param recBankName 
+     */
+    private void read_HBHits(TimeToDistanceEstimator tde, String recBankName) {
         /*
         0: this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
         1: this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d")
         */
         String bankName    = bankNames.getInputHitsBank();
         String pointName   = bankNames.getInputIdsBank();
-        String recBankName = bankNames.getRecEventBank();
         
         LOGGER.log(Level.FINE,"Reading hb banks for "+ bankName + ", " + pointName + " " + recBankName);
         
@@ -483,7 +500,7 @@ public class HitReader {
             clusterID[i] = bank.getShort("clusterID", i);
             trkID[i] = -1;
             if(this.id2tid.containsKey(id[i]) ){
-                trkID[i]    = this.id2tid.get(id[i]);
+                trkID[i]    = this.id2tid.get(id[i]); System.out.println("trkid "+trkID[i] );
                  B[i]       = this.id2tidB.get(id[i]);
                  tProp[i]   = this.id2tidtProp.get(id[i]);
                  tFlight[i] = this.id2tidtFlight.get(id[i]);
