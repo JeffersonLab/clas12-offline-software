@@ -407,14 +407,14 @@ public abstract class AStateVecs {
         public Helix getHelix(double xref, double yref) {
             StateVec vec = new StateVec(0, xref, yref, 0, this);
 
-            int turningSign = (int) Math.signum(vec.kappa) * KFitter.polarity;
+            int turningSign = (int) Math.signum(vec.kappa) * KFitter.polarity; 
             double bfield   = 1 / vec.alpha / lightVel;
             double R        = vec.alpha / Math.abs(vec.kappa);
             double phi0     = vec.phi0 + Math.PI / 2;
             if (Math.abs(phi0) > Math.PI) phi0 -= Math.signum(phi0) * 2 * Math.PI;
             double tanDip   = vec.tanL;
             double z0       = vec.z0 + vec.dz;
-            double omega    = -turningSign / R;
+            double omega    = turningSign * KFitter.polarity / R;  
             double d0       = -vec.d_rho;
             
             Helix helix = new Helix(d0, phi0, omega, z0, tanDip, turningSign, bfield, xref, yref, units);

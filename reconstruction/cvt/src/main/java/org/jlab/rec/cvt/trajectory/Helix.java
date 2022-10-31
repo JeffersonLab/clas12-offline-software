@@ -53,8 +53,8 @@ public class Helix {
     }
 
     public Helix(double pt, double d0, double phi0, double Z0, double tandip, int q, double xb, double yb, double solenoidMag) {
-        double curvature = -(double)q*Constants.LIGHTVEL*solenoidMag/pt;
-        setDCA(d0);
+        double curvature = (double)q*Constants.LIGHTVEL*solenoidMag/pt * Math.signum(Constants.getSolenoidScale());
+        setDCA(d0); 
         setPhiAtDCA(phi0);
         setCurvature(curvature);
         setZ0(Z0);
@@ -63,7 +63,7 @@ public class Helix {
         setYb(yb);
     } 
     
-    public Helix(org.jlab.clas.tracking.trackrep.Helix helix, double[][] matrix) {
+    public Helix(org.jlab.clas.tracking.trackrep.Helix helix, double[][] matrix) { 
         this(helix.getD0(), helix.getPhi0(), helix.getOmega(), helix.getZ0(), 
              helix.getTanL(), helix.getXb(), helix.getYb());
         this.B = helix.getB();

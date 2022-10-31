@@ -32,7 +32,8 @@ public class CVTSecondPassEngine extends CVTEngine {
 
         int run = this.getRun(event);
         if(run<=0) return true;
-
+        if(Constants.getInstance().seedingDebugMode)
+            System.out.println("SECOND PASS TRACKING...................");
         Swim swimmer = new Swim();
 
         IndexedTable svtLorentz = this.getConstantsManager().getConstants(run, "/calibration/svt/lorentz_angle");

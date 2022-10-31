@@ -168,7 +168,9 @@ public class TracksFromTargetRec {
         
         List<Track> tracks = new ArrayList<>();
         KFitter kf = new KFitter(kfFilterOn, kfIterations, Constants.KFDIR, swimmer, Constants.getInstance().KFMatrixLibrary);
+        kf.polarity = (int) Math.signum(Constants.getSolenoidScale());
         KFitter kf2 = new KFitter(kfFilterOn, kfIterations, Constants.KFDIR, swimmer, Constants.getInstance().KFMatrixLibrary);
+        kf2.polarity = (int) Math.signum(Constants.getSolenoidScale());
         kf2.filterOn = false;
         kf2.numIter=1;
         Measurements measure = new Measurements(xb, yb, Constants.getInstance().kfBeamSpotConstraint());
@@ -247,7 +249,7 @@ public class TracksFromTargetRec {
                         //reset pars
                         v = fittedTrack.getHelix().getVertex();
                         p = fittedTrack.getHelix().getPXYZ(solenoidValue);
-                        charge = (int) (Math.signum(solenoidScale)*fittedTrack.getHelix().getCharge());
+                        charge = (int) fittedTrack.getHelix().getCharge();
                         if(solenoidValue<0.001)
                             charge = 1;
                         hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
@@ -319,6 +321,7 @@ public class TracksFromTargetRec {
             for(int it = 0; it < tracks.size(); it++) {
                 int id = it + 1;
                 tracks.get(it).setId(id); 
+                //tracks.get(it).setQ(tracks.get(it).getQ());
                 tracks.get(it).findTrajectory(swimmer, Geometry.getInstance().geOuterSurfaces());
                 tracks.get(it).update_Crosses(id);
                 tracks.get(it).update_Clusters(id);

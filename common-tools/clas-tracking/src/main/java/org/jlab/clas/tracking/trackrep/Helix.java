@@ -1,5 +1,6 @@
 package org.jlab.clas.tracking.trackrep;
 import org.jlab.clas.tracking.kalmanfilter.Units;
+import org.jlab.clas.tracking.kalmanfilter.helical.KFitter;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
@@ -63,7 +64,7 @@ public class Helix {
     
     public Helix(double x0, double y0, double z0, double px0, double py0, double pz0,
             int q, double B, double xb, double yb, Units unit) {
-        _turningSign = q;
+        _turningSign = q; 
         _B           = B;
         units        = unit;
         double pt    = Math.sqrt(px0*px0 + py0*py0);
@@ -73,7 +74,7 @@ public class Helix {
         _phi0        = Math.atan2(py0, px0);
         _tanL        = pz0/pt;
         _z0          = z0;
-        _omega       = (double) -_turningSign/_R;
+        _omega       = (double) KFitter.polarity*_turningSign/_R ; 
         double S = Math.sin(_phi0);
         double C = Math.cos(_phi0);
         if(Math.abs(S)>=Math.abs(C)) {
