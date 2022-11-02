@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.detector.decode;
 
 import java.nio.ByteBuffer;
@@ -52,11 +47,11 @@ public class AbsDetectorDataDecoder implements DetectorDataDecoder {
         if(this.translationTable==null){
             System.out.println("[AbsDetectorDataDecoder] **** error *** the table for ["
                     + detectorName + "] is not present.");
-            return new ArrayList<DetectorDataDgtz>();
+            return new ArrayList<>();
         }
         
         DetectorType  type = DetectorType.getType(detectorName);
-        List<DetectorDataDgtz> data = new ArrayList<DetectorDataDgtz>();
+        List<DetectorDataDgtz> data = new ArrayList<>();
         for(DetectorDataDgtz dgtz : dgtzData){
             int crate    = dgtz.getDescriptor().getCrate();
             int slot     = dgtz.getDescriptor().getSlot();
@@ -80,11 +75,9 @@ public class AbsDetectorDataDecoder implements DetectorDataDecoder {
         List<DetectorDataDgtz> translatedData = this.decode(dgtzData);      
         List<DetectorDataDgtz> tdc = AbsDetectorDataDecoder.getTDCData(translatedData);
         List<DetectorDataDgtz> adc = AbsDetectorDataDecoder.getADCData(translatedData);
-        //System.out.println(String.format("%8s: data size = %8d , decoded data size = %d  ADC = %d , TDC = %d",this.getName(),
-        //        dgtzData.size(),translatedData.size(),adc.size(),tdc.size()));
 
-        List<DataBank>  dataBanks = new ArrayList<DataBank>();
-        if(tdc.size()>0){
+        List<DataBank>  dataBanks = new ArrayList<>();
+        if(!tdc.isEmpty()){
             DataBank  bankTDC = event.createBank(detectorName+"::tdc", tdc.size());
             if(bankTDC==null){
                 System.out.println(" ERROR Trying to create bank " + detectorName+"::tdc");
@@ -108,7 +101,7 @@ public class AbsDetectorDataDecoder implements DetectorDataDecoder {
         /**
          * Write ADC pulses
          */
-        if(adc.size()>0){
+        if(!adc.isEmpty()){
             byte[] bufferArray = new byte[256];
             ByteBuffer buffer = ByteBuffer.wrap(bufferArray);
             buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -127,11 +120,6 @@ public class AbsDetectorDataDecoder implements DetectorDataDecoder {
                 
                 System.arraycopy(buffer.array(), 0, pulseBuffer.array(), position, packedLength);
                 position += packedLength;
-                //System.out.print(String.format("%08X : ", data.getDescriptor().getHashCode()));
-                //System.out.println(
-                //        data.getDescriptor().toString() + " PULSE SIZE = " 
-                //        + pulse.length*2 + "  LENGTH = " + buffer.limit());
-                
             }
             DataBank bankPULSES = event.createBank(getName() + "::pulse", position);
             for(int i = 0; i < position; i++) bankPULSES.setByte("data", i, pulseBuffer.get(i));
@@ -139,6 +127,7 @@ public class AbsDetectorDataDecoder implements DetectorDataDecoder {
         }
         return dataBanks;
     }
+
     /**
      * returns a list of values from the list that are TDC values.
      * used to filter out TDC values for creating the banks
@@ -146,7 +135,7 @@ public class AbsDetectorDataDecoder implements DetectorDataDecoder {
      * @return list that contains only TDC digitized data
      */
     public static List<DetectorDataDgtz>  getTDCData(List<DetectorDataDgtz> dgtzData){
-        List<DetectorDataDgtz> tdc = new ArrayList<DetectorDataDgtz>();
+        List<DetectorDataDgtz> tdc = new ArrayList<>();
         for(DetectorDataDgtz dgtz : dgtzData){
             if(dgtz.getTDCSize()>0){
                 tdc.add(dgtz);
@@ -154,18 +143,15 @@ public class AbsDetectorDataDecoder implements DetectorDataDecoder {
         }
         return tdc;
     }
-    
+
     public static List<DetectorDataDgtz>  getADCData(List<DetectorDataDgtz> dgtzData){
-        List<DetectorDataDgtz> adc = new ArrayList<DetectorDataDgtz>();
+        List<DetectorDataDgtz> adc = new ArrayList<>();
         for(DetectorDataDgtz dgtz : dgtzData){
             if(dgtz.getADCSize()>0){
-                for(int i = 0; i < dgtz.getADCSize(); i++){
-                    //System.out.println(" ADC " + i + "  PULSE SIZE = " + dgtz.getADCData(i).getPulseSize());
-                }
                 adc.add(dgtz);
             }
         }
         return adc;
     }
-    
+
 }

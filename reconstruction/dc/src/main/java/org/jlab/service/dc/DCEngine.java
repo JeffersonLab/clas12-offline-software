@@ -9,7 +9,6 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.banks.Banks;
-import org.jlab.utils.groups.IndexedTable;
 
 public class DCEngine extends ReconstructionEngine {
 
@@ -21,7 +20,9 @@ public class DCEngine extends ReconstructionEngine {
     private boolean    wireDistortion = false;
     private boolean    useStartTime   = true;
     private boolean    useBetaCut     = false;
-    private boolean    useDoublets    = false;
+    private boolean    useDoublets    = true;
+    private boolean    dcrbJitter     = false;
+    private boolean    swapDCRBBits   = false;
     private int        t2d            = 1;
     private int        nSuperLayer    = 5;
     private String     geoVariation   = "default";
@@ -72,6 +73,14 @@ public class DCEngine extends ReconstructionEngine {
         if(this.getEngineConfigString("dcDoublets")!=null)       
             useDoublets = Boolean.valueOf(this.getEngineConfigString("dcDoublets"));
         
+        //Apply the jitter correction based on DCRB timestamps
+        if(this.getEngineConfigString("dcrbJitter")!=null)       
+            dcrbJitter = Boolean.valueOf(this.getEngineConfigString("dcrbJitter"));
+                
+        //Swap DCRB timestamp bits
+        if(this.getEngineConfigString("swapDCRBBits")!=null)       
+            swapDCRBBits = Boolean.valueOf(this.getEngineConfigString("swapDCRBBits"));
+        
         //NSUPERLAYERTRACKING
         if(this.getEngineConfigString("dcFOOST")!=null)
             if(!Boolean.valueOf(this.getEngineConfigString("dcFOOST"))) {
@@ -107,6 +116,7 @@ public class DCEngine extends ReconstructionEngine {
 
         // Load tables
         Map<String,Integer> dcTables = new HashMap<>();
+        dcTables.put(Constants.TT,3);
         dcTables.put(Constants.DOCARES,3);
         dcTables.put(Constants.TIME2DIST,3);
         dcTables.put(Constants.PRESSURE, 3);
@@ -138,6 +148,8 @@ public class DCEngine extends ReconstructionEngine {
                                            useBetaCut, 
                                            t2d,
                                            useDoublets,
+                                           dcrbJitter,
+                                           swapDCRBBits,
                                            nSuperLayer, 
                                            selectedSector,
                                            shifts);
@@ -178,22 +190,4 @@ public class DCEngine extends ReconstructionEngine {
         int run = bank.getInt("run", 0);
         return run;
     }
-
-    public double getTriggerPhase(DataEvent event) {
-        DataBank  bank = event.getBank("RUN::config");
-        int        run = bank.getInt("run", 0);
-        long timeStamp = bank.getLong("timestamp", 0);
-        
-        double triggerPhase = 0;
-        if (run>0 && timeStamp>=0) {
-           IndexedTable tabJ = super.getConstantsManager().getConstants(run, Constants.TIMEJITTER);
-           double period = tabJ.getDoubleValue("period", 0, 0, 0);
-           int    phase  = tabJ.getIntValue("phase", 0, 0, 0);
-           int    cycles = tabJ.getIntValue("cycles", 0, 0, 0);
-
-           if (cycles > 0) triggerPhase = period * ((timeStamp + phase) % cycles);
-        }
-        return triggerPhase;
-    }
-
 }

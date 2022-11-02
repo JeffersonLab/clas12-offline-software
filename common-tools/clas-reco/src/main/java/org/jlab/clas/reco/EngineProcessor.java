@@ -80,7 +80,7 @@ public class EngineProcessor {
         String[] names = new String[]{
             "MAGFIELDS",
             "FTCAL", "FTHODO", "FTTRK", "FTEB",
-            "DCCR","DCHB","FTOFHB","EC","RASTER",
+            "URWELL", "DCCR", "DCHB","FTOFHB","EC","RASTER",
             "CVTFP","CTOF","CND","BAND",
             "HTCC","LTCC","EBHB",
             "DCTB","FMT","FTOFTB","CVT","EBTB",
@@ -93,6 +93,7 @@ public class EngineProcessor {
             "org.jlab.rec.ft.hodo.FTHODOEngine",
             "org.jlab.rec.ft.trk.FTTRKEngine",
             "org.jlab.rec.ft.FTEBEngine",
+            "org.jlab.service.urwell.URWellEngine",
             "org.jlab.service.dc.DCHBClustering",
             "org.jlab.service.dc.DCHBPostClusterConv",
             "org.jlab.service.ftof.FTOFHBEngine",
@@ -223,7 +224,8 @@ public class EngineProcessor {
                 if (engine.getValue().dropOutputBanks) {
                     engine.getValue().dropBanks(event);
                 }
-                engine.getValue().processDataEvent(event);
+                if(engine.getValue().applyTriggerMask(event))
+                    engine.getValue().processDataEvent(event);
             } catch (Exception e){
                 LOGGER.log(Level.SEVERE, "[Exception] >>>>> engine : {0}\n\n", engine.getKey());
                 e.printStackTrace();

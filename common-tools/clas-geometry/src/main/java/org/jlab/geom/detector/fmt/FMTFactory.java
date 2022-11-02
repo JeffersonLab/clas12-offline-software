@@ -5,6 +5,7 @@ import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.base.DetectorTransformation;
 import org.jlab.geom.base.Factory;
 import org.jlab.geom.component.TrackerStrip;
+import org.jlab.geom.prim.Arc3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
@@ -169,8 +170,7 @@ public class FMTFactory implements Factory <FMTDetector, FMTSector, FMTSuperlaye
         layer.getBoundary().addFace(new Triangle3D(pUR, pUL, pLR));
                 
         layer.getPlane().set(0, 0, 0, 0, 0, -1);
-        layer.setRmin(beamHole);
-        layer.setRmax(rMax);
+        layer.getTrajectorySurface().set(new Arc3D(new Point3D(rMax, 0, 0), layer.getPlane().point(), layer.getPlane().normal(), 2*Math.PI), rMax - beamHole);
         
         Transformation3D transform = new Transformation3D();
         transform.rotateY(Math.toRadians(180));
