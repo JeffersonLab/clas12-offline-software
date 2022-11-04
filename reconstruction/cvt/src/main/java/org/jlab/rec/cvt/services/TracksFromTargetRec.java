@@ -321,7 +321,6 @@ public class TracksFromTargetRec {
             for(int it = 0; it < tracks.size(); it++) {
                 int id = it + 1;
                 tracks.get(it).setId(id); 
-                tracks.get(it).setQ(tracks.get(it).getQ()*(int) Math.signum(Constants.getSolenoidScale()));
                 tracks.get(it).findTrajectory(swimmer, Geometry.getInstance().geOuterSurfaces());
                 tracks.get(it).update_Crosses(id);
                 tracks.get(it).update_Clusters(id);
