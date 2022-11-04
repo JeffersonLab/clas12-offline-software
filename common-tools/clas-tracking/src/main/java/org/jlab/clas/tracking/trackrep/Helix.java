@@ -112,8 +112,8 @@ public class Helix {
         setR(1./Math.abs(getOmega()));
         _xd = -getD0()*getSinphi0()+_xb;
         _yd =  getD0()*getCosphi0()+_yb;
-        _xc = -(_turningSign*_R + _d0)*getSinphi0()+_xb;
-        _yc =  (_turningSign*_R + _d0)*getCosphi0()+_yb;
+        _xc = -(-(double)KFitter.polarity*_turningSign*_R + _d0)*getSinphi0()+_xb; 
+        _yc =  (-(double)KFitter.polarity*_turningSign*_R + _d0)*getCosphi0()+_yb;
         _x  = getX(0);
         _y  = getY(0);
         _z  = getZ(0);
@@ -191,12 +191,14 @@ public class Helix {
         return getLightVelocity() * getR() * B;
     }
     
-    public double getX(double l){
-        return getXc() + getTurningSign()*getR()*Math.sin(getPhi(l));
+    public double getX(double l){ 
+        double s = (double) -KFitter.polarity; 
+        return getXc() + s*getTurningSign()*getR()*Math.sin(getPhi(l)); 
     }
     
-    public double getY(double l){
-        return getYc() - getTurningSign()*getR()*Math.cos(getPhi(l));
+    public double getY(double l){ 
+    double s = (double) -KFitter.polarity; 
+        return getYc() - s*getTurningSign()*getR()*Math.cos(getPhi(l));
     }
     
     public double getZ(double l){

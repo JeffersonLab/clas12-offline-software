@@ -181,7 +181,7 @@ public class KFitter extends AKFitter {
                 //get the projector Matrix
                 double[] H = mv.H(fVec, sv,  mv.measurements.get(k), this.getSwimmer());
     //            System.out.println(k + " " + mv.measurements.get(k).layer + " " + H[0] + " " + H[1] + " " + H[2] + " " + H[3] + " " + H[4] + " " +dh );
-
+                
                 double[][] CaInv =  this.getMatrixOps().filterCovMat(H, fVec.covMat, V);
                 if (CaInv != null) {
                         fVec.covMat = CaInv;
@@ -193,7 +193,7 @@ public class KFitter extends AKFitter {
                     // the gain matrix
                     K[j] = 0;
                     for (int i = 0; i < 5; i++) {
-                        K[j] += H[i] * fVec.covMat[j][i] / V;
+                        K[j] += H[i] * fVec.covMat[j][i] / V; 
                     } 
                 }
                 if(sv.straight) {
@@ -217,7 +217,7 @@ public class KFitter extends AKFitter {
                     fVec.dz    -= K[3] * dh;
                     fVec.tanL  -= K[4] * dh;
                 }
-
+    
                 if(this.getSwimmer()!=null && !sv.straight) fVec.rollBack(mv.rollBackAngle);
                 fVec.updateFromHelix();
     // sv.printlnStateVec(fVec);
