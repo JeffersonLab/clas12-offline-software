@@ -123,6 +123,7 @@ public class TracksFromTargetRec {
         
         List<Track> tracks = new ArrayList<>();
         KFitter kf = new KFitter(kfFilterOn, kfIterations, Constants.KFDIR, swimmer, Constants.getInstance().KFMatrixLibrary);
+        KFitter.polarity = (int)Math.signum(Constants.getSolenoidScale());
         Measurements measure = new Measurements(xb, yb, Constants.getInstance().kfBeamSpotConstraint());
         for (Seed seed : CVTseeds) { 
 //            seed.update_Crosses();
