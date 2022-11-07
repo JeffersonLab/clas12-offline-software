@@ -14,7 +14,7 @@ public class RecoBankWriter {
 	public DataBank fillAHDCHitsBank(DataEvent event, ArrayList<Hit> hitList) {
 		if (hitList == null || hitList.size() == 0) return null;
 
-		DataBank bank = event.createBank("AHDC::Hits", hitList.size());
+		DataBank bank = event.createBank("ALRTDC::Hits", hitList.size());
 
 		for (int i = 0; i < hitList.size(); i++) {
 
@@ -31,7 +31,7 @@ public class RecoBankWriter {
 	public DataBank fillPreClustersBank(DataEvent event, ArrayList<PreCluster> preClusters) {
 		if (preClusters == null || preClusters.size() == 0) return null;
 
-		DataBank bank = event.createBank("AHDC::PreClusters", preClusters.size());
+		DataBank bank = event.createBank("ALRTDC::PreClusters", preClusters.size());
 
 		for (int i = 0; i < preClusters.size(); i++) {
 			bank.setFloat("X", i, (float) preClusters.get(i).get_X());
@@ -44,7 +44,7 @@ public class RecoBankWriter {
 	public DataBank fillClustersBank(DataEvent event, ArrayList<Cluster> clusters) {
 		if (clusters == null || clusters.size() == 0) return null;
 
-		DataBank bank = event.createBank("AHDC::Clusters", clusters.size());
+		DataBank bank = event.createBank("ALRTDC::Clusters", clusters.size());
 
 		for (int i = 0; i < clusters.size(); i++) {
 			bank.setFloat("X", i, (float) clusters.get(i).get_X());
@@ -67,7 +67,7 @@ public class RecoBankWriter {
 		double   pz_mc    = particle.getFloat("pz", 0) * 1000;
 
 		int      row  = 0;
-		DataBank bank = event.createBank("AHDC::MC", row + 1);
+		DataBank bank = event.createBank("ALRTDC::MC", row + 1);
 		bank.setFloat("x", row, (float) x_mc);
 		bank.setFloat("y", row, (float) y_mc);
 		bank.setFloat("z", row, (float) z_mc);
@@ -80,7 +80,7 @@ public class RecoBankWriter {
 
 	public DataBank fillAHDCTrackBank(DataEvent event, ArrayList<Track> tracks) {
 
-		DataBank bank = event.createBank("AHDC::Track", tracks.size());
+		DataBank bank = event.createBank("ALRTDC::Track", tracks.size());
 
 		int row = 0;
 
@@ -108,7 +108,7 @@ public class RecoBankWriter {
 
 	public DataBank fillAHDCKFTrackBank(DataEvent event, ArrayList<Track> tracks) {
 
-		DataBank bank = event.createBank("AHDC::KFTrack", tracks.size());
+		DataBank bank = event.createBank("ALRTDC::KFTrack", tracks.size());
 
 		int row = 0;
 

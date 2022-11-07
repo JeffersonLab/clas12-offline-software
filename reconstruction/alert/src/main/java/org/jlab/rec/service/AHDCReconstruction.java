@@ -23,6 +23,7 @@ import org.jlab.rec.ahdc.Track.Track;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class AHDCReconstruction extends ReconstructionEngine {
@@ -37,7 +38,7 @@ public class AHDCReconstruction extends ReconstructionEngine {
 
 	@Override
 	public boolean init() {
-		simulation    = true;
+		simulation    = false;
 		findingMethod = "distance";
 
 		if (materialMap == null) {
@@ -69,7 +70,7 @@ public class AHDCReconstruction extends ReconstructionEngine {
 
 		magfield = 50 * magfieldfactor;
 
-		if (event.hasBank("AHDC::adc")) {
+		if (event.hasBank("ALRTDC::adc")) {
 
 			// I) Read raw hit
 			HitReader hitRead = new HitReader(event, simulation);
@@ -126,19 +127,22 @@ public class AHDCReconstruction extends ReconstructionEngine {
 			// VII) Write bank
 			RecoBankWriter writer = new RecoBankWriter();
 
-			DataBank recoMCBank         = writer.fillAHDCMCTrackBank(event);
 			DataBank recoHitsBank       = writer.fillAHDCHitsBank(event, AHDC_Hits);
 			DataBank recoPreClusterBank = writer.fillPreClustersBank(event, AHDC_PreClusters);
 			DataBank recoClusterBank    = writer.fillClustersBank(event, AHDC_Clusters);
 			DataBank recoTracksBank     = writer.fillAHDCTrackBank(event, AHDC_Tracks);
 			DataBank recoKFTracksBank   = writer.fillAHDCKFTrackBank(event, AHDC_Tracks);
 
-			event.appendBank(recoMCBank);
 			event.appendBank(recoHitsBank);
 			event.appendBank(recoPreClusterBank);
 			event.appendBank(recoClusterBank);
 			event.appendBank(recoTracksBank);
 			event.appendBank(recoKFTracksBank);
+
+			if (simulation) {
+				DataBank recoMCBank = writer.fillAHDCMCTrackBank(event);
+				event.appendBank(recoMCBank);
+			}
 
 		}
 		return true;
@@ -151,7 +155,7 @@ public class AHDCReconstruction extends ReconstructionEngine {
 		int    nEvent     = 0;
 		int    maxEvent   = 1000;
 		int    myEvent    = 3;
-		String inputFile  = "proton_60-100MeV.hipo";
+		String inputFile  = "alert_out_update.hipo";
 		String outputFile = "output.hipo";
 
 		if (new File(outputFile).delete()) System.out.println("output.hipo is delete.");
@@ -170,13 +174,13 @@ public class AHDCReconstruction extends ReconstructionEngine {
 
 		while (reader.hasEvent() && nEvent < maxEvent) {
 			nEvent++;
+			// if (nEvent % 100 == 0) System.out.println("nEvent = " + nEvent);
 			DataEvent event = reader.getNextEvent();
 
 			// if (nEvent != myEvent) continue;
-			System.out.println("nEvent = " + nEvent);
+			// System.out.println("***********  NEXT EVENT ************");
+			// event.show();
 
-			System.out.println("***********  NEXT EVENT ************");
-			event.show();
 			en.processDataEvent(event);
 			writer.writeEvent(event);
 

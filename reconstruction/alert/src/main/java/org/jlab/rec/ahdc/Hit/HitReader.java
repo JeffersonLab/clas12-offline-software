@@ -18,15 +18,16 @@ public class HitReader {
 	public void fetch_AHDCHits(DataEvent event) {
 		ArrayList<Hit> hits = new ArrayList<>();
 
-		DataBank bankDGTZ = event.getBank("AHDC::adc");
+		DataBank bankDGTZ = event.getBank("ALRTDC::adc");
 
-		if (event.hasBank("AHDC::adc")) {
+		if (event.hasBank("ALRTDC::adc")) {
 			for (int i = 0; i < bankDGTZ.rows(); i++) {
 				int    id         = i + 1;
-				int    superlayer = bankDGTZ.getByte("superlayer", i);
-				int    layer      = bankDGTZ.getByte("layer", i);
-				int    wire       = bankDGTZ.getShort("wire", i);
-				double doca       = bankDGTZ.getFloat("doca", i);
+				int    number     = bankDGTZ.getByte("layer", i);
+				int    layer      = number % 10;
+				int    superlayer = (int) (number % 100) / 10;
+				int    wire       = bankDGTZ.getShort("component", i);
+				double doca       = bankDGTZ.getShort("ped", i) / 1000.0;
 
 				hits.add(new Hit(id, superlayer, layer, wire, doca));
 			}
@@ -41,11 +42,11 @@ public class HitReader {
 
 		if (event.hasBank("MC::True")) {
 			for (int i = 0; i < bankSIMU.rows(); i++) {
-				int     pid     = bankSIMU.getInt("pid", i);
-				double  x_true  = bankSIMU.getFloat("avgX", i);
-				double  y_true  = bankSIMU.getFloat("avgY", i);
-				double  z_true  = bankSIMU.getFloat("avgZ", i);
-				double  trackE  = bankSIMU.getFloat("trackE", i);
+				int    pid    = bankSIMU.getInt("pid", i);
+				double x_true = bankSIMU.getFloat("avgX", i);
+				double y_true = bankSIMU.getFloat("avgY", i);
+				double z_true = bankSIMU.getFloat("avgZ", i);
+				double trackE = bankSIMU.getFloat("trackE", i);
 
 				truehits.add(new TrueHit(pid, x_true, y_true, z_true, trackE));
 			}
