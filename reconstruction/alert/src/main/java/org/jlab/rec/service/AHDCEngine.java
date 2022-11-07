@@ -23,16 +23,15 @@ import org.jlab.rec.ahdc.Track.Track;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
-public class AHDCReconstruction extends ReconstructionEngine {
+public class AHDCEngine extends ReconstructionEngine {
 
 	private boolean                   simulation;
 	private String                    findingMethod;
 	private HashMap<String, Material> materialMap;
 
-	public AHDCReconstruction() {
+	public AHDCEngine() {
 		super("ALERT", "ouillon", "1.0.1");
 	}
 
@@ -162,7 +161,7 @@ public class AHDCReconstruction extends ReconstructionEngine {
 
 		System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
-		AHDCReconstruction en = new AHDCReconstruction();
+		AHDCEngine en = new AHDCEngine();
 
 		HipoDataSource reader = new HipoDataSource();
 		HipoDataSync   writer = new HipoDataSync();
