@@ -44,6 +44,7 @@ public class EBCCDBConstants {
         "/runcontrol/helicity",
         "/geometry/target",
         "/calibration/ftof/tres",
+        "/calibration/cnd/cluster",
         //"/calibration/ctof/tres"
     };
 
@@ -270,6 +271,9 @@ public class EBCCDBConstants {
         loadDouble(EBCCDBEnum.CND_DR,"cnd_matching","dr",0,0,0);
         loadDouble(EBCCDBEnum.CND_DPHI,"cnd_matching","dphi",0,0,0);
         loadDouble(EBCCDBEnum.CND_DZ,"cnd_matching","dz",0,0,0);
+
+        loadVector3D(EBCCDBEnum.CND_MATCHING_dr,"/calibration/cnd/cluster","deltax","deltay","deltaz",0,0,0);
+        loadDouble(EBCCDBEnum.CND_MATCHING_dt,"/calibration/cnd/cluster","deltat",0,0,0);
 
         loadDouble(EBCCDBEnum.CND_NEUTRON_maxBeta,"cnd_neutron_beta","neutron_beta",0,0,0);
 
