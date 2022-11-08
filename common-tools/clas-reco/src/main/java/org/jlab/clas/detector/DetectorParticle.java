@@ -284,11 +284,21 @@ public class DetectorParticle implements Comparable {
         }
         return true;
     }
-    
+
     public List<DetectorResponse>  getDetectorResponses(){
         return this.responseStore;
     }
-    
+
+    public List<DetectorResponse> getDetectorResponses(DetectorType type) {
+        List <DetectorResponse> ret = new ArrayList<>();
+        for (DetectorResponse r : this.responseStore) {
+            if (r.getDescriptor().getType() == type) {
+                ret.add(r);
+            }
+        }
+        return ret;
+    }
+
     public DetectorResponse getHit(DetectorType type){
         return getHit(type,-1);
     }
