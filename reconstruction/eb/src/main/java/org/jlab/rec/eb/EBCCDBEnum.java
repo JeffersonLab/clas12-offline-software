@@ -49,6 +49,8 @@ public enum EBCCDBEnum {
     CND_DR,
     CND_DPHI,
     CND_DZ,
+    CND_MATCHING_dr,
+    CND_MATCHING_dt,
     CND_NEUTRON_maxBeta,
     HTCC_DTHETA,
     HTCC_DPHI,
