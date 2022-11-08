@@ -1,28 +1,31 @@
-package org.jlab.rec.rich;
+package org.jlab.detector.geom.RICH;
 
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geom.prim.Point3D;
+
 
 // ----------------
 public class RICHIntersection{
 // ----------------
 // class to store information at component boundary
 
+    private int isec   = 0;
     private int ilayer = 0;
-    private int icompo= 0;
-    private int ipoly = 0;
-    private int itype = 0;   // 1=entrance, 2=exit
+    private int icompo = 0;
+    private int ipoly  = 0;
+    private int itype  = 0;   // 1=entrance, 2=exit
 
     private Point3D  position = null;
     private Vector3D normal = null;
 
-    private float nin = 0;  
-    private float nout = 0;  
+    private double nin = 0;  
+    private double nout = 0;  
 
 
     // ----------------
-    public RICHIntersection(int ilay, int ico, int ipo, int ityp, Point3D vec, Vector3D vno){
+    public RICHIntersection(int isec, int ilay, int ico, int ipo, int ityp, Point3D vec, Vector3D vno){
     // ----------------
+        this.isec   = isec;
         this.ilayer = ilay;
         this.icompo = ico;
         this.ipoly  = ipo;
@@ -32,9 +35,17 @@ public class RICHIntersection{
         this.normal   = vno;
 
         // default values to be updated for aerogel
-        this.nin = (float) RICHConstants.RICH_AIR_INDEX;
-        this.nout = (float) RICHConstants.RICH_AIR_INDEX;
+        this.nin  =  RICHGeoConstants.RICH_AIR_INDEX;
+        this.nout =  RICHGeoConstants.RICH_AIR_INDEX;
     }
+
+
+    // ----------------
+    public int get_sector() {
+    // ----------------
+        return isec;
+    }
+
 
     // ----------------
     public int get_layer() {
@@ -42,11 +53,13 @@ public class RICHIntersection{
         return ilayer;
     }
 
+
     // ----------------
     public void set_layer(int ilay) {
     // ----------------
         this.ilayer = ilay;
     }
+
 
     // ----------------
     public int get_component() {
@@ -85,25 +98,25 @@ public class RICHIntersection{
     }
 
     // ----------------
-    public float get_nin() {
+    public double get_nin() {
     // ----------------
         return nin;
     }
 
     // ----------------
-    public void set_nin(float ninside) {
+    public void set_nin(double ninside) {
     // ----------------
         this.nin = ninside;
     }
 
     // ----------------
-    public float get_nout() {
+    public double get_nout() {
     // ----------------
         return nout;
     }
 
     // ----------------
-    public void set_nout(float noutside) {
+    public void set_nout(double noutside) {
     // ----------------
         this.nout = noutside;
     }

@@ -10,6 +10,7 @@ public class RICHCluster extends ArrayList<RICHHit> {
      */
 
     private int clusid;    // cluster ID
+    private int signal;    // pointer to the derived RICH signal 
     
     // constructor
     // ----------------
@@ -19,16 +20,21 @@ public class RICHCluster extends ArrayList<RICHHit> {
     }
 
     // ----------------
-    public int get_id() {
+    public int get_id() { return this.clusid; }
     // ----------------
-          return this.clusid;
-    }
 
     // ----------------
-    public void set_id(int cluid) {
+    public void set_id(int cluid) { this.clusid = cluid; }
     // ----------------
-          this.clusid = cluid;
-    }
+
+    // ----------------
+    public int get_signal() { return this.signal; }
+    // ----------------
+
+    // ----------------
+    public void set_signal(int signal) { this.signal = signal; }
+    // ----------------
+
 
     // ----------------
     public int get_size() {
@@ -38,24 +44,76 @@ public class RICHCluster extends ArrayList<RICHHit> {
     }
 
     // ----------------
-    public float get_charge() {
+    public double get_charge() {
     // ----------------
           // return measured charge
-          float clusterEnergy = 0;
+          double clusterEnergy = 0;
           for(int i=0; i<this.size(); i++) {
               clusterEnergy += this.get(i).get_duration();
           }
           return clusterEnergy;
     }
 
+
+   // ----------------
+    public int get_iMax() {
     // ----------------
-    public float get_time() {
+    // return anode with maximum charge
+
+        int    imax      = 0;
+        double maxcharge = 0;
+        for(int i=0; i<this.size(); i++) {
+            if(this.get(i).get_duration()>maxcharge){
+                imax=i;
+                maxcharge=this.get(i).get_duration();
+            }
+        }
+        return imax;
+    }
+
+
     // ----------------
-          return this.get(0).get_time();
+    //public int get_MaxAnode() {
+    // ----------------
+    // return anode with maximum charge
+
+      /*  int    imax      = 0;
+        double maxcharge = 0;
+        for(int i=0; i<this.size(); i++) {
+            if(this.get(i).get_duration()>maxcharge){
+                imax=i;
+                maxcharge=this.get(i).get_duration();
+            }
+        }
+        return this.get(imax).get_anode();
+    }
+
+
+    // ----------------
+    public int get_MaxPMT() {
+    // ----------------
+    // return anode with maximum charge
+
+        int    imax      = 0;
+        double maxcharge = 0;
+        for(int i=0; i<this.size(); i++) {
+            if(this.get(i).get_duration()>maxcharge){
+                imax=i;
+                maxcharge=this.get(i).get_duration();
+            }
+        }
+        return this.get(imax).get_pmt();
+    }*/
+
+
+    // ----------------
+    public double get_time() {
+    // ----------------
+          return this.get(0).get_Time();
     }
 
     // ----------------
-    public float get_rawtime() {
+    public double get_rawtime() {
     // ----------------
           return this.get(0).get_rawtime();
     }
@@ -76,21 +134,21 @@ public class RICHCluster extends ArrayList<RICHHit> {
     }
 
     // ----------------
-    public float get_x() {
+    public double get_x() {
     // ----------------
         // returns x coordinate of first hit
         return this.get(0).get_x();
     }
 
     // ----------------
-      public float get_y() {
+      public double get_y() {
     // ----------------
         // returns y coordinate of first hit
         return this.get(0).get_y();
     }
 
     // ----------------
-     public float get_z() {
+     public double get_z() {
     // ----------------
         // returns z coordinate of first hit
 
@@ -101,11 +159,10 @@ public class RICHCluster extends ArrayList<RICHHit> {
             if(this.get(0).get_tile()<139){
                 return 0;
             }else{
-                return (float) RICHConstants.COSMIC_TRACKING_Z;
+                return  RICHConstants.COSMIC_TRACKING_Z;
             }
         }
      }
-
 
     // ----------------
     public double get_wtime() {
@@ -115,7 +172,7 @@ public class RICHCluster extends ArrayList<RICHHit> {
         double clusterTime    = 0;
         for(int i=0; i<this.size(); i++) {
             RICHHit hit = this.get(i);
-            clusterTime += hit.get_duration()*hit.get_time();              
+            clusterTime += hit.get_duration()*hit.get_Time();              
         }
         clusterTime /= clusterEnergy;
         return clusterTime;
@@ -291,7 +348,7 @@ public class RICHCluster extends ArrayList<RICHHit> {
         if(this.get(0).get_pmt()!=hit.get_pmt())return addFlag;
 
         for(int j = 0; j< this.size(); j++) {
-            float tDiff = Math.abs(hit.get_time() - this.get(j).get_time());
+            double tDiff = Math.abs(hit.get_Time() - this.get(j).get_Time());
             int xDiff = Math.abs(hit.get_idx()  - this.get(j).get_idx());
             int yDiff = Math.abs(hit.get_idy()  - this.get(j).get_idy());
             if(tDiff <= RICHConstants.CLUSTER_TIME_WINDOW && xDiff <= 1 && yDiff <= 1 && (xDiff + yDiff) >0) addFlag = true;

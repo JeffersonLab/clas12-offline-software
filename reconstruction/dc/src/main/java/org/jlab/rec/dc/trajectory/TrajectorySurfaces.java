@@ -10,6 +10,7 @@ import org.jlab.detector.base.DetectorType;
 
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
+import org.jlab.detector.geom.RICH.RICHGeoFactory;
 import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
@@ -44,7 +45,7 @@ public class TrajectorySurfaces {
     }
 
     public void loadSurface(double targetPosition, double targetLength, DCGeant4Factory dcDetector,
-            FTOFGeant4Factory ftofDetector, Detector ecalDetector, Detector fmtDetector) {
+            FTOFGeant4Factory ftofDetector, Detector ecalDetector, Detector fmtDetector, RICHGeoFactory richDetector) {
         // creating Boundaries for MS
         Constants.getInstance().Z[0]= targetPosition;
         Constants.getInstance().Z[1]= dcDetector.getWireMidpoint(0, 0, 0, 0).z;
@@ -108,6 +109,19 @@ public class TrajectorySurfaces {
                 ECLayer      ecalLayer      = (ECLayer) ecalSuperlayer.getLayer(layer);
                 this.detectorPlanes.get(isector).add(new Surface(DetectorType.ECAL, sector, id, (Triangle3D) ecalLayer.getTrajectorySurface(), ecalSuperlayer.getThickness()));
             }
+
+            // Add RICH
+            int[] richPlanes = {DetectorLayer.RICH_MAPMT, DetectorLayer.RICH_AEROGEL_B1, DetectorLayer.RICH_AEROGEL_B2, DetectorLayer.RICH_AEROGEL_L1};
+            for(int i=0; i<richPlanes.length; i++) {
+                Plane3D richPlane = richDetector.get_TrajPlane(sector,richPlanes[i]);
+                if(richPlane!=null) {
+                    P = richPlane.point().toVector3D();
+                    n = richPlane.normal().multiply(-1);
+                    d = P.dot(n);
+                    this.detectorPlanes.get(isector).add(new Surface(DetectorType.RICH, richPlanes[i], d, n.x(), n.y(), n.z()));
+                }
+            }
+
         }
     }
     
