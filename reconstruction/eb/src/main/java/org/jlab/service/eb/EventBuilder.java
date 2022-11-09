@@ -79,7 +79,7 @@ public class EventBuilder {
                 detectorEvent.addParticle(new DetectorParticleTraj(tracks.get(i)));
         }
     }
-    
+
     public void addParticles(List<DetectorParticle> particles) {
         for(int i = 0 ; i < particles.size(); i++){
             detectorEvent.addParticle(particles.get(i));
