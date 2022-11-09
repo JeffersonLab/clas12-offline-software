@@ -39,7 +39,6 @@ public class EBEngine extends ReconstructionEngine {
     String cherenkovBank    = null;
     String trackBank        = null;
     String UtrackBank        = null;
-    String trackUBank        = null;
     String crossBank        = null;
     String ftBank           = null;
     String trajectoryBank   = null;
@@ -218,7 +217,7 @@ public class EBEngine extends ReconstructionEngine {
                 if (bankCovMat != null) de.appendBanks(bankCovMat);
 
                 if (!cutracks.isEmpty()) {
-                    DataBank x = DetectorData.getUTracksBank(eb.getEvent().getParticles(), de, UtrackBank, cutracks.size());
+                    DataBank x = DetectorData.getUTracksBank(cutracks, ctracks, de, UtrackBank);
                     de.appendBanks(x);
                 }
             }
