@@ -152,7 +152,7 @@ public class HitReader {
         return jitter;
     }
 
-    private void getDCRBJitters() {
+    private void getDCRBJitters(boolean swapBits) {
         
         if(tiTimeStamp>=0 && event.hasBank(bankNames.getTimeStampBank())) {
             
@@ -163,6 +163,9 @@ public class HitReader {
                 int  crate     = bankTS.getByte("crate", i);
                 int  slot      = bankTS.getByte("slot", i);
                 long timestamp = bankTS.getLong("timestamp", i);
+                if(swapBits) {
+                    timestamp = (Long) (((timestamp&0x0000ffffff000000L)>>24)|((timestamp&0x0000000000ffffffL)<<24));
+                }
                 int  jitter    = (int) (tiTimeStamp-(2*timestamp-4))*4;
                 dcrbjitters.addEntry(crate, slot);
                 dcrbjitters.setIntValue(jitter, "jitter", crate, slot);
@@ -185,6 +188,14 @@ public class HitReader {
             jitter = dcrbjitters.getIntValue("jitter", crate, slot);
 //                if(jitter[i]!=-4*bankDGTZ.getByte("order", i)) System.out.println(jitter[i] + " " + -4*bankDGTZ.getByte("order", i));
         }    
+        return jitter;
+    }
+    
+    private int getJitter(int sector, int layer, int wire, int order) {
+        int jitter = this.getTIJitter();  // use TI jitter correction by default, but replace with DCRB correction if available
+        if(Constants.getInstance().useDCRBJITTER() && dcrbjitters!=null && reverseTT!=null) {
+            jitter = this.getDCRBJitter(sector, layer, wire, order);
+        }
         return jitter;
     }
     
@@ -217,7 +228,7 @@ public class HitReader {
             return;
         }
         
-        this.getDCRBJitters();
+        this.getDCRBJitters(Constants.getInstance().isSWAPDCRBBITS());
         
         DataBank bankDGTZ = event.getBank(bankNames.getTdcBank());
 
@@ -237,13 +248,8 @@ public class HitReader {
             superlayer[i] = (bankDGTZ.getByte("layer", i)-1)/6 + 1;
             wire[i]       = bankDGTZ.getShort("component", i);
             order[i]      = bankDGTZ.getByte("order", i);
-            tdc[i]        = bankDGTZ.getInt("TDC", i);
-            jitter[i]     = this.getTIJitter();  // use TI jitter correction by default, but replace with DCRB correction if available
-            if(dcrbjitters!=null && reverseTT!=null) {
-                jitter[i] = this.getDCRBJitter(sector[i], bankDGTZ.getByte("layer", i), wire[i], order[i]);
-//                if(jitter[i]!=-4*bankDGTZ.getByte("order", i)) System.out.println(jitter[i] + " " + -4*bankDGTZ.getByte("order", i));
-            }
-            tdc[i] -= jitter[i];
+            jitter[i]     = this.getJitter(sector[i], bankDGTZ.getByte("layer", i), wire[i], order[i]);
+            tdc[i]        = bankDGTZ.getInt("TDC", i) - jitter[i];
         }
 
 

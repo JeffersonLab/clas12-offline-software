@@ -180,7 +180,7 @@ public class DCHBEngine extends DCEngine {
             for (Track trk : trkcands) {
                 // reset the id
                 trk.set_Id(trkId);
-                trkcandFinder.matchHits(trk.get_Trajectory(),
+                trkcandFinder.matchHits(trk.getStateVecs(),
                         trk,
                         Constants.getInstance().dcDetector,
                         dcSwim);
@@ -251,7 +251,7 @@ public class DCHBEngine extends DCEngine {
 
                 // reset the id
                 trk.set_Id(trkId);
-                trkcandFinder.matchHits(trk.get_Trajectory(),
+                trkcandFinder.matchHits(trk.getStateVecs(),
                         trk,
                         Constants.getInstance().dcDetector,
                         dcSwim);

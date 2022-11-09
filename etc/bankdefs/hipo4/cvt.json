@@ -288,7 +288,8 @@
         {"name":"langle",   "type":"F", "info":"local angle with module surface (rad)"},
         {"name":"centroid", "type":"F", "info":"estimated strip centroid"},
         {"name":"path",     "type":"F", "info":"pathlength of the track from the track vertex to the detector surface (cm)"},
-        {"name":"dx",       "type":"F", "info":"pathlength of the track within the detector (cm)"}
+        {"name":"dx",       "type":"F", "info":"pathlength of the track within the detector (cm)"},
+        {"name":"edge",     "type":"F", "info":"distance to the closest detector edge (cm), -1 if edge is not defined, 0 if outside, >0 if inside"}
     ]
   },
   {
@@ -460,7 +461,8 @@
         {"name":"langle",   "type":"F", "info":"local angle with module surface (rad)"},
         {"name":"centroid", "type":"F", "info":"estimated strip centroid"},
         {"name":"path",     "type":"F", "info":"pathlength of the track from the track vertex to the detector surface (cm)"},
-        {"name":"dx",       "type":"F", "info":"pathlength of the track within the detector (cm)"}
+        {"name":"dx",       "type":"F", "info":"pathlength of the track within the detector (cm)"},
+        {"name":"edge",     "type":"F", "info":"distance to the closest detector edge (cm), -1 if edge is not defined, 0 if outside, >0 if inside"}
     ]
   },
   {

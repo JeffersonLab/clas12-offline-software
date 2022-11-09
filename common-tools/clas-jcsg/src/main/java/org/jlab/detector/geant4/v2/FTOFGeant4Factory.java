@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.detector.geant4.v2;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
@@ -18,6 +13,7 @@ import static org.jlab.detector.units.SystemOfUnits.Length;
 import org.jlab.detector.volume.G4World;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.prim.Plane3D;
+import org.jlab.geom.prim.Trap3D;
 
 /**
  *
@@ -44,6 +40,8 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         "1a", "1b", "2"
     };
 
+    private final int[] nPaddles = new int[stringLayers.length];
+    
     public FTOFGeant4Factory(ConstantProvider provider) {
         motherVolume = new G4World("fc");
 
@@ -121,7 +119,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
 
     private List<G4Box> createLayer(ConstantProvider cp, int layer) {
 
-        int numPaddles          = cp.length(stringLayers[layer - 1] + "/paddles/paddle");
+        nPaddles[layer-1]       = cp.length(stringLayers[layer - 1] + "/paddles/paddle");
         double paddlewidth      = cp.getDouble(stringLayers[layer - 1] + "/panel/paddlewidth", 0);
         double paddlethickness  = cp.getDouble(stringLayers[layer - 1] + "/panel/paddlethickness", 0);
         double gap              = cp.getDouble(stringLayers[layer - 1] + "/panel/gap", 0);
@@ -135,15 +133,15 @@ public final class FTOFGeant4Factory extends Geant4Factory {
 
         List<G4Box> paddleVolumes = new ArrayList<>();
 
-        for (int ipaddle = 0; ipaddle < numPaddles; ipaddle++) {
+        for (int ipaddle = 0; ipaddle < nPaddles[layer-1]; ipaddle++) {
             double paddlelength = cp.getDouble(paddleLengthStr, ipaddle);
             String vname = String.format("sci_S%d_L%d_C%d", 0, layer, ipaddle + 1);
             G4Box volume = new G4Box(vname, paddlelength / 2. * Length.cm, paddlethickness / 2. * Length.cm, paddlewidth / 2.0 * Length.cm);
             volume.makeSensitive();
 
             int ipair = (int) ipaddle/2;
-            double zoffset = (ipaddle - numPaddles / 2. + 0.5) * (paddlewidth + gap);
-            if(layer==2) zoffset = (ipair - numPaddles/4-0.5) * (2*paddlewidth + gap + pairgap) + ((ipaddle%2)+0.5) * (paddlewidth + gap);
+            double zoffset = (ipaddle - nPaddles[layer-1] / 2. + 0.5) * (paddlewidth + gap);
+            if(layer==2) zoffset = (ipair - nPaddles[layer-1]/4-0.5) * (2*paddlewidth + gap + pairgap) + ((ipaddle%2)+0.5) * (paddlewidth + gap);
 
             volume.translate(0.0, 0.0, zoffset * Length.cm);
 
@@ -217,6 +215,33 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         return new Plane3D(x, y, z, normal.x, normal.y, normal.z);
     }
 
+    public Trap3D getTrajectorySurface(int sector, int layer) {
+        if (sector < 1 || sector > 6
+                || layer < 1 || layer > 3) {
+            System.err.println("ERROR!!!");
+            System.err.println("Component: sector: " + sector + ", layer: " + layer + " doesn't exist");
+            throw new IndexOutOfBoundsException();
+        }
+
+        int ivolume = (sector - 1) * 3 + layer - 1;
+
+        List<Geant4Basic> paddles = motherVolume.getChildren().get(ivolume).getChildren();
+        G4Box padl0 = (G4Box) paddles.get(0);
+        G4Box padln = (G4Box) paddles.get(nPaddles[layer-1]-1);
+
+        Vector3d dy = padl0.getLineZ().diff().dividedBy(2);
+
+        Vector3d p0 = padl0.getLineX().end().clone().sub(dy);
+        Vector3d p1 = padl0.getLineX().origin().clone().sub(dy);
+        Vector3d p2 = padln.getLineX().origin().clone().add(dy);
+        Vector3d p3 = padln.getLineX().end().clone().add(dy);
+        
+        Trap3D trapezoid = new Trap3D(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, p3.x, p3.y, p3.z);
+        
+        return trapezoid; 
+    }
+    
+    
     public G4World getMother() {
         return motherVolume;
     }
