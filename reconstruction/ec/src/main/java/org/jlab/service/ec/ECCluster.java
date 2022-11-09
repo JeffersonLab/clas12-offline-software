@@ -36,7 +36,6 @@ public class ECCluster implements Comparable {
     public byte    sharedCluster = -1;
     private byte      sharedView =  0; //1=U, 2=V, 3=W, 4=UV, 5=UW, 6=VW
     public int            zone   = 0;
-    private boolean        useFT = false;
        
     public ECCluster(ECPeak u, ECPeak v, ECPeak w){
         
@@ -122,18 +121,11 @@ public class ECCluster implements Comparable {
     }  
     
     public double getTime() {
-    	return ECCommon.useUnsharedTime? getUnsharedRawADCTime():getRawADCTime();
+    	return ECCommon.useUnsharedTime ? getUnsharedRawADCTime():getRawADCTime();
     } 
-    
-    public double getTime(Boolean val) {
-    	useFT = val;
-    	return ECCommon.useUnsharedTime? getUnsharedRawADCTime():getRawADCTime();
-    } 
-    
-    public double getTime(int view){ 
-    	if (ECCommon.useFADCTime || useFT) return getFTime(view);
-    	Boolean reject = ECCommon.useDTCorrections && getDTime(view)<=0; 
-        return reject ? getFTime(view):getDTime(view);
+ 
+    public double getTime(int view) {
+    	return clusterPeaks.get(view).getTime(clusterHitPosition);   	
     }
   
     public double getFTime(int view) {
@@ -143,7 +135,7 @@ public class ECCluster implements Comparable {
     public double getDTime(int view) {
     	return clusterPeaks.get(view).getDTime(clusterHitPosition);
     }
-    
+
     public double getMaxEnergyTime() {
         // For cluster time use timing from U,V,W peak with largest reconstructed energy		
         if      ((getEnergy(0) > getEnergy(1)) && 
