@@ -14,7 +14,6 @@ import java.util.List;
 public final class Cylindrical3D implements Face3D {
     private final Arc3D baseArc = new Arc3D();
     private double height;
-
     /**
      * Constructs a new {@code Cylindrical3D} such that the arc of the surface
      * is centered around the z axis, the radius is one, the arc begins at x=1
@@ -71,6 +70,28 @@ public final class Cylindrical3D implements Face3D {
         this.baseArc.copy(arc);
     }
     
+    /**
+     * Sets the axis of this cylinder.
+     * @param axis the base of the cylindrical segment
+     */
+    public void setAxis(Line3D axis) {
+        this.baseArc.setCenter(axis.origin());
+        this.baseArc.setNormal(axis.originDir());
+        this.height = axis.length();
+    }
+    
+    /**
+     * returns the axis of this cylinder.
+     * @return the axis of the cylindrical segment
+     */
+    public Line3D getAxis() {
+        Point3D origin = new Point3D(baseArc.center());
+        Vector3D   dir = new Vector3D(baseArc.normal());
+        dir.setMag(height);
+        Line3D axis = new Line3D(origin,dir);
+        return axis;
+    }
+
     /**
      * Sets the height of this cylindrical segment.
      * @param height the height
@@ -403,9 +424,34 @@ public final class Cylindrical3D implements Face3D {
     private boolean checkTheta(Point3D point) {
         Vector3D pBA = baseArc.center().vectorTo(point);
         double t = baseArc.normal().angle(baseArc.originVector(), pBA);
+        if(t<0) t += 2*Math.PI;
         return (0 <= t && t <= baseArc.theta());
     }
     
+    /**
+     * Distance between the point and the closest cylinder edge 
+     * @param point the point
+     * @return distance if point is on the surface, 0 otherwise
+     */
+    public double distanceToEdge(Point3D point) {
+        Vector3D pBA = baseArc.center().vectorTo(point);
+        double h = pBA.dot(baseArc.normal().asUnit());
+        double t = baseArc.normal().angle(baseArc.originVector(), pBA);
+        if(t<0) t += 2*Math.PI;
+        double hmin = Math.min(Math.abs(h), Math.abs(height-h));
+        double rmin = Math.min(Math.abs(t), Math.abs(baseArc.theta()-t))*baseArc.radius();
+        if(baseArc.theta()>=2*Math.PI)
+            rmin = Double.MAX_VALUE;
+        if(h<0 || h>height)
+            hmin *= -1;
+        if(t<0 || t>baseArc.theta())
+            rmin *= -1;
+        if(rmin>0 || hmin>0)
+            return Math.min(hmin, rmin);
+        else
+            return Math.max(hmin, rmin);
+    }
+
     @Override
     public void translateXYZ(double dx, double dy, double dz) {
         baseArc.translateXYZ(dx, dy, dz);

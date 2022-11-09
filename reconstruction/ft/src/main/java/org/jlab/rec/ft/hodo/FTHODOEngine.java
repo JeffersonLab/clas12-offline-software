@@ -1,13 +1,11 @@
 package org.jlab.rec.ft.hodo;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.JFrame;
 import org.jlab.clas.detector.DetectorData;
 import org.jlab.clas.detector.DetectorEvent;
-import org.jlab.clas.physics.GenericKinematicFitter;
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.groot.data.H1F;
@@ -16,7 +14,6 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
-import org.jlab.io.evio.EvioSource;
 import org.jlab.io.hipo.HipoDataSource;
 
 
@@ -49,20 +46,17 @@ public class FTHODOEngine extends ReconstructionEngine {
 
 	@Override
 	public boolean processDataEvent(DataEvent event) {
-            List<FTHODOHit> allHits      = new ArrayList();
-            List<FTHODOHit> selectedHits = new ArrayList();
-            List<FTHODOCluster> clusters = new ArrayList();
-            
+
             // update calibration constants based on run number if changed
             int run = setRunConditionsParameters(event);
             
             if(run>=0) {
                 // get hits fron banks
-                allHits = reco.initFTHODO(event,this.getConstantsManager(), run);
+                List<FTHODOHit> allHits = reco.initFTHODO(event,this.getConstantsManager(), run);
                 // select good hits and order them by energy
-                selectedHits = reco.selectHits(allHits); 
+                List<FTHODOHit> selectedHits = reco.selectHits(allHits); 
                 // create clusters
-                clusters = reco.findClusters(selectedHits);
+                List<FTHODOCluster> clusters = reco.findClusters(selectedHits);
                 // write output banks
                 reco.writeBanks(event, selectedHits, clusters);
             }

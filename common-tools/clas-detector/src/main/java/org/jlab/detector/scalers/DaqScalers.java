@@ -1,6 +1,8 @@
 package org.jlab.detector.scalers;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.utils.groups.IndexedTable;
@@ -41,12 +43,12 @@ import org.jlab.utils.groups.IndexedTable;
 public class DaqScalers {
 
     public Dsc2Scaler dsc2=null;
-    public StruckScaler struck=null;
+    public StruckScalers struck=null;
 
     private long timestamp=0;
     public void setTimestamp(long timestamp) { this.timestamp=timestamp; }
     public long getTimestamp(){ return this.timestamp; }
-    
+
     /**
      * Get seconds between two dates assuming the differ by not more than 24 hours.
      *
@@ -90,44 +92,44 @@ public class DaqScalers {
      * @param rawScalerBank HIPO RAW::scaler bank
      * @param fcupTable /runcontrol/fcup from CCDB
      * @param slmTable /runcontrol/slm from CCDB
+     * @param helTable
      * @param seconds duration between run start and current event
      * @return 
      */
-    public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,double seconds) {
-        StruckScaler struck = new StruckScaler(rawScalerBank,fcupTable,slmTable);
+    public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable,double seconds) {
+        StruckScalers struck = StruckScalers.read(rawScalerBank,fcupTable,slmTable,helTable);
         Dsc2Scaler dsc2 = new Dsc2Scaler(rawScalerBank,fcupTable,slmTable,seconds);
-        if (dsc2.getClock()>0 || struck.getClock()>0) {
-            DaqScalers ds=new DaqScalers();
-            ds.dsc2=dsc2;
-            ds.struck=struck;
-            return ds;
-        }
-        return null;
+        DaqScalers ds = new DaqScalers();
+        ds.dsc2 = dsc2;
+        ds.struck = struck;
+        return ds;
     }
-    
+
     /**
      * @param rawScalerBank HIPO RAW::scaler bank
      * @param fcupTable /runcontrol/fcup from CCDB
      * @param slmTable /runcontrol/slm from CCDB
+     * @param helTable /runcontrol/helicity from CCDB
      * @param rst run start time
      * @param uet unix event time
      * @return 
      */
-    public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,Date rst, Date uet) {
-        return DaqScalers.create(rawScalerBank,fcupTable,slmTable,DaqScalers.getSeconds(rst, uet));
+    public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable,Date rst, Date uet) {
+        return DaqScalers.create(rawScalerBank,fcupTable,slmTable,helTable,DaqScalers.getSeconds(rst, uet));
     }
-    
+
     /**
      * Same as create(Bank,IndexedTable,double), except relies on DSC2's clock.
      *
      * @param rawScalerBank HIPO RAW::scaler bank
      * @param fcupTable /runcontrol/fcup from CCDB
      * @param slmTable /runcontrol/slm from CCDB
+     * @param helTable /runcontrol/helicity from CCDB
      * @return  
      */
-    public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable) {
+    public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable) {
         Dsc2Scaler dsc2 = new Dsc2Scaler(rawScalerBank,fcupTable,slmTable);
-        return DaqScalers.create(rawScalerBank,fcupTable,slmTable,dsc2.getGatedClockSeconds());
+        return DaqScalers.create(rawScalerBank,fcupTable,slmTable,helTable,dsc2.getGatedClockSeconds());
     }
 
     /**
@@ -138,7 +140,8 @@ public class DaqScalers {
         Bank bank = new Bank(schema.getSchema("RUN::scaler"),1);
         bank.putFloat("fcup",0,(float)this.dsc2.getBeamCharge());
         bank.putFloat("fcupgated",0,(float)this.dsc2.getBeamChargeGated());
-        bank.putFloat("livetime",0,(float)this.struck.getLivetimeClock());
+        if (this.struck.size() > 0)
+          bank.putFloat("livetime",0,(float)this.struck.get(this.struck.size()-1).getLivetimeClock());
         return bank;
     }
 
@@ -147,47 +150,75 @@ public class DaqScalers {
      * @return HEL::scaler banks
      */
     public Bank createHelicityBank(SchemaFactory schema) {
-        Bank bank = new Bank(schema.getSchema("HEL::scaler"),1);
-        bank.putFloat("fcup",0,(float)this.struck.getBeamCharge());
-        bank.putFloat("fcupgated",0,(float)this.struck.getBeamChargeGated());
-        bank.putFloat("slm",0,(float)this.struck.getBeamChargeSLM());
-        bank.putFloat("slmgated",0,(float)this.struck.getBeamChargeGatedSLM());
-        bank.putFloat("clock",0,(float)this.struck.getClock());
-        bank.putFloat("clockgated",0,(float)this.struck.getGatedClock());
+        Bank bank = new Bank(schema.getSchema("HEL::scaler"),this.struck.size());
+        for (StruckScaler ss : this.struck) {
+            bank.putFloat("fcup",0,(float)ss.getBeamCharge());
+            bank.putFloat("fcupgated",0,(float)ss.getBeamChargeGated());
+            bank.putFloat("slm",0,(float)ss.getBeamChargeSLM());
+            bank.putFloat("slmgated",0,(float)ss.getBeamChargeGatedSLM());
+            bank.putFloat("clock",0,(float)ss.getClock());
+            bank.putFloat("clockgated",0,(float)ss.getGatedClock());
+        }
         return bank;
     }
-        
+
     /**
      * @param rawScalerBank RAW::scaler bank
      * @param schema bank schema
      * @param fcupTable /runcontrol/fcup CCDB table
      * @param slmTable /runcontrol/slm CCDB table
+     * @param helTable /runcontrol/helicity CCDB table
      * @return [RUN::scaler,HEL::scaler] banks
      */
-    public static Bank[] createBanks(SchemaFactory schema,Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable) {
-        DaqScalers ds = DaqScalers.create(rawScalerBank,fcupTable,slmTable);
-        if (ds==null) return null;
-        Bank ret[] = {ds.createRunBank(schema),ds.createHelicityBank(schema)};
-        return ret;
-    }
-    
-    /**
-     * @param rawScalerBank RAW::scaler bank
-     * @param schema bank schema
-     * @param fcupTable /runcontrol/fcup CCDB table
-     * @param slmTable /runcontrol/slm CCDB table
-     * @param seconds duration between run start and current event
-     * @return [RUN::scaler,HEL::scaler] banks
-     */
-    public static Bank[] createBanks(SchemaFactory schema,Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,double seconds) {
-        DaqScalers ds = DaqScalers.create(rawScalerBank,fcupTable,slmTable,seconds);
-        if (ds==null) return null;
-        Bank ret[] = {ds.createRunBank(schema),ds.createHelicityBank(schema)};
+    public static List<Bank> createBanks(SchemaFactory schema,Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable) {
+        DaqScalers ds = DaqScalers.create(rawScalerBank,fcupTable,slmTable,helTable);
+        List<Bank> ret = new ArrayList<>();
+        // only add the RUN::scaler bank if we actually got a DSC2 readout:
+        if (ds.dsc2.getClock()>0 || ds.dsc2.getGatedClock()>0) {
+            ret.add(ds.createRunBank(schema));
+        }
+        // only add the HEL::scaler bank if we actually got a Struck readout:
+        if (!ds.struck.isEmpty()) {
+            ret.add(ds.createHelicityBank(schema));
+        }
         return ret;
     }
 
-    public static Bank[] createBanks(SchemaFactory schema,Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,Date rst,Date uet) {
-        return DaqScalers.createBanks(schema,rawScalerBank,fcupTable,slmTable,DaqScalers.getSeconds(rst,uet));
+    /**
+     * @param rawScalerBank RAW::scaler bank
+     * @param schema bank schema
+     * @param fcupTable /runcontrol/fcup CCDB table
+     * @param slmTable /runcontrol/slm CCDB table
+     * @param helTable /runcontrol/helicity CCDB table
+     * @param seconds duration between run start and current event
+     * @return [RUN::scaler,HEL::scaler] banks
+     */
+    public static List<Bank> createBanks(SchemaFactory schema,Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable,double seconds) {
+        DaqScalers ds = DaqScalers.create(rawScalerBank,fcupTable,slmTable,helTable,seconds);
+        List<Bank> ret = new ArrayList<>();
+        // only add the RUN::scaler bank if we actually got a DSC2 readout:
+        if (ds.dsc2.getClock()>0 || ds.dsc2.getGatedClock()>0) {
+            ret.add(ds.createRunBank(schema));
+        }
+        // only add the HEL::scaler bank if we actually got a Struck readout:
+        if (!ds.struck.isEmpty()) {
+            ret.add(ds.createHelicityBank(schema));
+        }
+        return ret;
+    }
+
+    /**
+     * @param rawScalerBank RAW::scaler bank
+     * @param schema bank schema
+     * @param fcupTable /runcontrol/fcup CCDB table
+     * @param slmTable /runcontrol/slm CCDB table
+     * @param helTable /runcontrol/helicity CCDB table
+     * @param rst run start time
+     * @param uet event time
+     * @return [RUN::scaler,HEL::scaler] banks
+     */
+    public static List<Bank> createBanks(SchemaFactory schema,Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable,Date rst,Date uet) {
+        return DaqScalers.createBanks(schema,rawScalerBank,fcupTable,slmTable,helTable,DaqScalers.getSeconds(rst,uet));
     }
 
 }

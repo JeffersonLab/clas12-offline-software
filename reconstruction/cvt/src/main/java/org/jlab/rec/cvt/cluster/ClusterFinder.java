@@ -1,9 +1,8 @@
 package org.jlab.rec.cvt.cluster;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
-import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
 
 /**
@@ -16,16 +15,16 @@ public class ClusterFinder {
     public ClusterFinder() {
 
     }
-
+    
     // cluster finding algorithm
     // the loop is done over sectors 
     Hit[][][] HitArray;
     int nstrip = 1200; // max number of strips
     int nlayr = 6;
     int nsec = 18;
-    public ArrayList<Cluster> findClusters(List<Hit> hits2,org.jlab.rec.cvt.bmt.Geometry geo_bmt) // the number of strips depends on the layer 
+    public ArrayList<Cluster> findClusters(List<Hit> hits2) // the number of strips depends on the layer 
     {
-        ArrayList<Cluster> clusters = new ArrayList<Cluster>();
+        ArrayList<Cluster> clusters = new ArrayList<>();
 
         // a Hit Array is used to identify clusters		
         HitArray = new Hit[nstrip][nlayr][nsec];
@@ -34,13 +33,17 @@ public class ClusterFinder {
         // with valid hits
         for (Hit hit : hits2) {
 
-            if (hit.get_Strip().get_Strip() == -1) {
+            if (hit.getStrip().getStrip() == -1) {
                 continue;
             }
 
-            int w = hit.get_Strip().get_Strip();
-            int l = hit.get_Layer();
-            int s = hit.get_Sector();
+            if (hit.getStrip().getStatus()!=0) {
+                continue;
+            }
+
+            int w = hit.getStrip().getStrip();
+            int l = hit.getLayer();
+            int s = hit.getSector();
             
             if (w > 0 && w < nstrip) {
                 HitArray[w - 1][l - 1][s - 1] = hit; 
@@ -61,34 +64,46 @@ public class ClusterFinder {
                     // if there's a hit, it's a cluster candidate
                     if (HitArray[si][l][s] != null || (si < nstrip - 1 && HitArray[si + 1][l][s] != null)) { 
                         // vector of hits in the cluster candidate
-                        ArrayList<FittedHit> hits = new ArrayList<FittedHit>();
+                        ArrayList<Hit> hits = new ArrayList<>();
 
                         // adding all hits in this and all the subsequent
                         // strip until there's a strip with no hit
                         while ((si < nstrip - 1 && HitArray[si + 1][l][s] != null) || (HitArray[si][l][s] != null && si < nstrip)) {
                             if (HitArray[si][l][s] != null) { // continue clustering skipping over bad hit
-                                FittedHit hitInCls = new FittedHit(HitArray[si][l][s].get_Detector(), HitArray[si][l][s].get_DetectorType(), HitArray[si][l][s].get_Sector(), HitArray[si][l][s].get_Layer(), HitArray[si][l][s].get_Strip());
-                                hitInCls.set_Id(HitArray[si][l][s].get_Id());
-
-                                hits.add(hitInCls);
+                                hits.add(HitArray[si][l][s]);
                             }
                             si++;
                         }
-
+                    
                         // define new cluster 
-                        Cluster this_cluster = new Cluster(hits.get(0).get_Detector(), hits.get(0).get_DetectorType(), hits.get(0).get_Sector(), l + 1, cid++);
-                        this_cluster.set_Id(clusters.size() + 1);
+                        Cluster this_cluster = new Cluster(hits.get(0).getDetector(), hits.get(0).getType(), hits.get(0).getSector(), l + 1, cid++);
+                        this_cluster.setId(clusters.size() + 1);
                         // add hits to the cluster
                         this_cluster.addAll(hits); 
-                        for (FittedHit h : hits) { 
-                            h.set_AssociatedClusterID(this_cluster.get_Id());
+                        if(hits.size()>2) {
+                            for(int hi = 1; hi<hits.size()-1; hi++) { //interpolate between neighboring strips
+                                if(hits.get(hi).getStrip().getEdep()<hits.get(hi-1).getStrip().getEdep()
+                                        && hits.get(hi).getStrip().getEdep()<hits.get(hi+1).getStrip().getEdep()) {
+                                    hits.get(hi).getStrip().setEdep(0.5*(hits.get(hi-1).getStrip().getEdep()+hits.get(hi+1).getStrip().getEdep()));
+                                }
+                            }
                         }
-
-                        this_cluster.calc_CentroidParams(geo_bmt);
-                        //make arraylist
+                        for (Hit h : hits) {
+                            h.setAssociatedClusterID(this_cluster.getId());
+                            h.newClustering = true; //RDV fix me!
+                        }
+                        
+                        this_cluster.calc_CentroidParams();
+                       
+//                        for (Hit h : this_cluster) {
+//                            h.newClustering = false;
+//                        }
+//                        Collections.sort(this_cluster);
+                       
+                        //make list of clusters
                         clusters.add(this_cluster);
-
                     }
+                    
                     // if no hits, check for next wire coordinate
                     si++;
                 }

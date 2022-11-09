@@ -318,6 +318,28 @@ public class BandHitFinder {
 					Hit.SetIndexLpmt(indexleft);
 					Hit.SetIndexRpmt(indexright);
 
+					//System.out.println("*************************");
+					//System.out.println("s"+sector);
+					//System.out.println("l"+layer);
+					//System.out.println("c"+component);
+					//System.out.println("tof tdc"+mtime_tdc);
+					//System.out.println("tof fadc"+mtime_fadc);
+					//System.out.println("tdiff tdc"+tdiff_tdc);
+					//System.out.println("tdiff fadc"+tdiff_fadc);
+					//System.out.println("adcL"+adcL_corr);
+					//System.out.println("adcR"+adcR_corr);
+					//System.out.println("tL fadc"+ftdcleft);
+					//System.out.println("tR fadc"+ftdcright);
+					//System.out.println("tL tdc"+tdcleft);
+					//System.out.println("tR tdc"+tdcright);
+					//System.out.println("x"+xposHit);
+					//System.out.println("y"+yposHit);
+					//System.out.println("z"+zposHit);
+					//System.out.println("iL"+indexleft);
+					//System.out.println("iR"+indexright);
+					//System.out.println("*************************");
+
+
 					coincidences.add(Hit);
 					break; // Found a hit match for this bar, so let's move on to the next possible bar
 				

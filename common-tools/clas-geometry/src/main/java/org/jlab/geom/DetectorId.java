@@ -17,11 +17,14 @@ public enum DetectorId implements Showable {
     BST       ( 1, "BST"),
     CND       ( 3, "CND"),
     RICH      ( 6, "RICH"),
+    FMT       ( 8, "FMT"),
     FTCAL     ( 9, "FTCAL"),
     CTOF      (11, "CTOF"),
     FTOF      (10, "FTOF"),
     DC        (13, "DC"),
-    EC        (15, "EC");
+    EC        (15, "EC"),
+    AHDC      (23, "AHDC"),
+    ATOF      (24, "ATOF");
     
     // Detector id numbers should be based on the CLAS12 Bank Numbering scheme
     private final int detectorId;

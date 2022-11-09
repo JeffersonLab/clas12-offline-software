@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.detector.decode;
 
 import java.util.ArrayList;
@@ -16,8 +11,6 @@ import org.jlab.io.base.DataDescriptor;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioSource;
-import org.jlab.io.hipo.HipoDataSource;
-import org.jlab.utils.groups.IndexedList;
 
 /**
  *
@@ -30,7 +23,6 @@ public class DetectorBankDgtz {
     public static final int     BANKTYPE_ADC_TDC = 3;
     public static final int BANKTYPE_ADCLR_TDCLR = 4;
     public static final int BANKTYPE_ADCUD_TDCUD = 5;
-
     
     private List<DetectorDataDgtz>  dgtzData = new ArrayList<DetectorDataDgtz>();
     private String                  bankName = "FTOF::dgtz";
@@ -57,7 +49,6 @@ public class DetectorBankDgtz {
         return 0;
     }
     
-    
     public static DetectorCollection<List<DetectorDataDgtz>> getDetectorData(DetectorType type, List<DetectorDataDgtz> dataDgtz){
         DetectorCollection<List<DetectorDataDgtz>>  dataList = new DetectorCollection<List<DetectorDataDgtz>>();
         
@@ -66,12 +57,8 @@ public class DetectorBankDgtz {
     
     public final void readFromEvent(DataEvent event, String bank){
         
-        //DataDescriptor desc = event.getDictionary().getDescriptor(bank);        
         this.dgtzData.clear();
         this.bankType = DetectorBankDgtz.BANKTYPE_ADCLR_TDCLR;
-        /*if(desc==null){        
-            return;
-        }*/
         
         int type = bankType;//getBankType(desc);
         if(event.hasBank(bank)==true){
@@ -115,13 +102,11 @@ public class DetectorBankDgtz {
             }
         }
         
-        //DataDescriptor desc = event.getDictionary().getDescriptor(bank);
     }
     
     public final void readFromEvent(DataEvent event){
         this.readFromEvent(event, bankName);
     }
-    
     
     public void show(){
         System.out.println("bank show #### " + bankName);
@@ -130,20 +115,8 @@ public class DetectorBankDgtz {
             System.out.println(data.toString());
         }
     }
+
     public static void main(String[] args){
-        
-        /*DetectorBankDgtz bank = new DetectorBankDgtz();
-        HipoDataSource reader = new HipoDataSource();
-        reader.open("/Users/gavalian/Work/Software/Release-9.0/COATJAVA/challenge/rec.short.hipo");
-        int counter = 0;
-        while(reader.hasEvent()==true){
-            DataEvent event = reader.getNextEvent();
-            bank.readFromEvent(event, "FTOF::dgtz");
-            bank.show();
-            counter++;
-            
-            if(counter>10) break;
-        }*/
         
         EvioSource reader = new EvioSource();
         reader.open("/Users/gavalian/Work/Software/Release-9.0/COATJAVA/gagik/sector2_000233_mode7.evio.0");

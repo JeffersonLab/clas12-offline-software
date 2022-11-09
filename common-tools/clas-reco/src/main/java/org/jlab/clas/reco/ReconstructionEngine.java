@@ -18,6 +18,7 @@ import org.jlab.clara.engine.EngineData;
 import org.jlab.clara.engine.EngineDataType;
 import org.jlab.clara.engine.EngineStatus;
 import org.jlab.detector.calib.utils.ConstantsManager;
+import org.jlab.io.base.DataBank;
 
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
@@ -35,6 +36,8 @@ import org.json.JSONObject;
  */
 public abstract class ReconstructionEngine implements Engine {
 
+    Logger LOGGER = Logger.getLogger(ReconstructionEngine.class.getName());
+
     public static final String CONFIG_BANK_NAME = "COAT::config";
     
     volatile ConstantsManager                       constantsManager;
@@ -48,8 +51,10 @@ public abstract class ReconstructionEngine implements Engine {
     
     volatile boolean wroteConfig = false;
 
-    private boolean dropOutputBanks = false;
-    private final Set<String> outputBanks = new HashSet<String>();
+    volatile boolean dropOutputBanks = false;
+    private final Set<String> outputBanks = new HashSet<>();
+    
+    volatile long triggerMask = 0xFFFFFFFFFFFFFFFFL;
 
     String             engineName        = "UnknownEngine";
     String             engineAuthor      = "N.T.";
@@ -79,7 +84,7 @@ public abstract class ReconstructionEngine implements Engine {
     public void registerOutputBank(String... bankName) {
         outputBanks.addAll(Arrays.asList(bankName));
         if (this.dropOutputBanks) {
-            System.out.println(String.format("[%s]  dropping banks:  %s",this.getName(), Arrays.toString(bankName)));
+            LOGGER.log(Level.INFO, String.format("[%s]  dropping banks:  %s",this.getName(), Arrays.toString(bankName)));
         }
     }
 
@@ -92,7 +97,7 @@ public abstract class ReconstructionEngine implements Engine {
      */
     public void requireConstants(Map<String,Integer> tables){
         if(constManagerMap.containsKey(this.getClass().getName())==false){
-            System.out.println("[ConstantsManager] ---> create a new one for module : " + this.getClass().getName());
+            LOGGER.log(Level.INFO,"[ConstantsManager] ---> create a new one for module : " + this.getClass().getName());
             ConstantsManager manager = new ConstantsManager();
             manager.init(tables);
             constManagerMap.put(this.getClass().getName(), manager);
@@ -101,7 +106,7 @@ public abstract class ReconstructionEngine implements Engine {
 
     public void requireConstants(List<String> tables){
         if(constManagerMap.containsKey(this.getClass().getName())==false){
-            System.out.println("[ConstantsManager] ---> create a new one for module : " + this.getClass().getName());
+            LOGGER.log(Level.INFO,"[ConstantsManager] ---> create a new one for module : " + this.getClass().getName());
             ConstantsManager manager = new ConstantsManager();
             manager.init(tables);
             constManagerMap.put(this.getClass().getName(), manager);
@@ -134,10 +139,10 @@ public abstract class ReconstructionEngine implements Engine {
         
         if (ed.getMimeType().equals(EngineDataType.JSON.toString())) {
             this.engineConfiguration = (String) ed.getData();
-            System.out.println("[CONFIGURE][" + this.getName() + "] ---> JSON Data : " + this.engineConfiguration);
+            LOGGER.log(Level.INFO,"[CONFIGURE][" + this.getName() + "] ---> JSON Data : " + this.engineConfiguration);
         } else {
             this.engineConfiguration = "";
-            System.out.println("[CONFIGURE][" + this.getName() + "] *** WARNING *** ---> NO JSON Data provided");
+            LOGGER.log(Level.INFO,"[CONFIGURE][" + this.getName() + "] *** WARNING *** ---> NO JSON Data provided");
         }
        
         // store yaml contents for easy access by engines:
@@ -156,34 +161,36 @@ public abstract class ReconstructionEngine implements Engine {
           constManagerMap = new ConcurrentHashMap<>();
       if(engineDictionary == null)
           engineDictionary = new SchemaFactory();
-      System.out.println("--- engine configuration is called " + this.getDescription());
+      LOGGER.log(Level.INFO,"--- engine configuration is called " + this.getDescription());
       try {
           if (this.getEngineConfigString("dropBanks")!=null &&
                   this.getEngineConfigString("dropBanks").equals("true")) {
               dropOutputBanks=true;
           }
+          if (this.getEngineConfigString("triggerMask")!=null) {
+              this.setTriggerMask(this.getEngineConfigString("triggerMask"));
+          }
           this.init();
       } catch (Exception e){
-          System.out.println("[Wooops] ---> something went wrong with " + this.getDescription());
+          LOGGER.log(Level.SEVERE,"[Wooops] ---> something went wrong with " + this.getDescription());
           e.printStackTrace();
       }
-      System.out.println("----> I am doing nothing");
         
-      try {
-          if(engineConfiguration.length()>2){
-              String variation = this.getStringConfigParameter(engineConfiguration, "variation");
-              System.out.println("[CONFIGURE]["+ this.getName() +"] ---->  Setting variation : " + variation);
-              if(variation.length()>2)
-                  this.setVariation(variation);
-              String timestamp = this.getStringConfigParameter(engineConfiguration, "timestamp");
-              System.out.println("[CONFIGURE]["+ this.getName() +"] ---->  Setting timestamp : " + timestamp);
-              if(timestamp.length()>2)
-                  this.setTimeStamp(timestamp);
-          } else {
-              System.out.println("[CONFIGURE][" + this.getName() + "] *** WARNING *** ---> configuration string is too short (" + this.engineConfiguration + ")");
-          }
+        try {
+            if(engineConfiguration.length()>2){
+//                String variation = this.getStringConfigParameter(engineConfiguration, "services", "variation");
+                String variation = this.getStringConfigParameter(engineConfiguration, "variation");
+                LOGGER.log(Level.INFO,"[CONFIGURE]["+ this.getName() +"] ---->  Setting variation : " + variation);
+                if(variation.length()>2) this.setVariation(variation);
+                String timestamp = this.getStringConfigParameter(engineConfiguration, "timestamp");
+                LOGGER.log(Level.INFO,"[CONFIGURE]["+ this.getName() +"] ---->  Setting timestamp : " + timestamp);
+                if(timestamp.length()>2) this.setTimeStamp(timestamp);
+            } else {
+                LOGGER.log(Level.WARNING,"[CONFIGURE][" + this.getName() +"] *** WARNING *** ---> configuration string is too short ("
+                 + this.engineConfiguration + ")");
+            }
         } catch (Exception e){
-            System.out.println("[Engine] " + getName() + " failet to set variation");
+            LOGGER.log(Level.SEVERE,"[Engine] " + getName() + " failed to set variation", e);
         }
         return ed;
     }
@@ -198,7 +205,7 @@ public abstract class ReconstructionEngine implements Engine {
             if(base.has(key)==true){
                 variation = base.getString(key);
             } else {
-                System.out.println("[JSON]" + this.getName() + " **** warning **** does not contain key = " + key);
+                LOGGER.log(Level.WARNING,"[JSON]" + this.getName() + " **** warning **** does not contain key = " + key);
             }
             /*
             js = base.get(key);
@@ -241,7 +248,7 @@ public abstract class ReconstructionEngine implements Engine {
     
     public void setVariation(String variation){
        for(Map.Entry<String,ConstantsManager> entry : constManagerMap.entrySet()){
-           System.out.println("[MAP MANAGER][" + this.getName() + "] ---> Setting " + entry.getKey() + " : variation = "
+           LOGGER.log(Level.INFO,"[MAP MANAGER][" + this.getName() + "] ---> Setting " + entry.getKey() + " : variation = "
                    + variation );
            entry.getValue().setVariation(variation);
        }
@@ -249,7 +256,7 @@ public abstract class ReconstructionEngine implements Engine {
     
     public void setTimeStamp(String timestamp){
         for(Map.Entry<String,ConstantsManager> entry : constManagerMap.entrySet()){
-           System.out.println("[MAP MANAGER][" + this.getName() + "] ---> Setting " + entry.getKey() + " : variation = "
+            LOGGER.log(Level.INFO,"[MAP MANAGER][" + this.getName() + "] ---> Setting " + entry.getKey() + " : variation = "
                    + timestamp );
            entry.getValue().setTimeStamp(timestamp);
        }
@@ -262,6 +269,24 @@ public abstract class ReconstructionEngine implements Engine {
         return true;
     }
   
+    private void setTriggerMask(String mask) {
+        if(mask.startsWith("0x")==true){
+            mask = mask.substring(2);
+        }
+        triggerMask = Long.parseLong(mask,16);
+        LOGGER.log(Level.INFO, String.format("[CONFIGURE][%s] Trigger mask set to : 0x%016x", this.getName(), triggerMask));
+    }
+
+    public final boolean applyTriggerMask(DataEvent event) {
+        boolean triggerStatus = true;
+        if(event.hasBank("RUN::config")) {
+            DataBank configBank = event.getBank("RUN::config");
+            long triggerWord  = configBank.getLong("trigger", 0);
+            if(triggerWord!=0) triggerStatus = (triggerWord&triggerMask)!=0L;
+        }
+        return triggerStatus;          
+    }
+    
     /**
      * Generate a configuration section to drop in a HIPO bank, as the
      * engineConfigMap appended with the software version.  Here the top level
@@ -281,6 +306,15 @@ public abstract class ReconstructionEngine implements Engine {
         ret.put("yaml", service);
         return ret;
     }
+    
+    public void dropBanks(DataEvent event) {
+        for (String bankName : this.outputBanks) {
+            if (event.hasBank(bankName)) {
+                event.removeBank(bankName);
+            }
+        }
+    }
+    
     
     @Override
     public EngineData execute(EngineData input) {
@@ -314,20 +348,17 @@ public abstract class ReconstructionEngine implements Engine {
                 output.setDescription(msg);
                 return output;
             }
-
+                    
             try {
                 if (!this.wroteConfig) {
                     this.wroteConfig = true;
                     JsonUtils.extend(dataEventHipo, CONFIG_BANK_NAME, "json", this.generateConfig());
                 }
                 if (this.dropOutputBanks) {
-                    for (String bankName : this.outputBanks) {
-                        if (dataEventHipo.hasBank(bankName)) {
-                            dataEventHipo.removeBank(bankName);
-                        }
-                    }
+                    this.dropBanks(dataEventHipo);
                 }
-                this.processDataEvent(dataEventHipo);
+                if(this.applyTriggerMask(dataEventHipo))
+                    this.processDataEvent(dataEventHipo);
                 output.setData(mt, dataEventHipo.getHipoEvent());
             } catch (Exception e) {
                 String msg = String.format("Error processing input event%n%n%s", ClaraUtil.reportException(e));

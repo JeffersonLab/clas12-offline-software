@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.detector.geant4.v2;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
@@ -12,6 +7,9 @@ import org.jlab.detector.volume.G4Trap;
 import org.jlab.detector.volume.G4World;
 import org.jlab.detector.volume.Geant4Basic;
 import org.jlab.geom.base.ConstantProvider;
+import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Trap3D;
 
 /**
  *
@@ -22,6 +20,7 @@ final class DCdatabase {
     private final int nSectors = 6;
     private final int nRegions = 3;
     private final int nSupers = 6;
+    private final int nShifts = 6;
 
     private final double dist2tgt[] = new double[nRegions];
     private final double xdist[] = new double[nRegions];
@@ -71,8 +70,12 @@ final class DCdatabase {
         return instance;
     }
 
-    public void connect(ConstantProvider cp) {
+    public void connect(ConstantProvider cp, double[][] shifts) {
 
+        if(shifts==null || shifts.length!=nRegions || shifts[0].length!=nShifts) {
+            shifts = new double[nRegions][nShifts];
+        }
+        
         nguardwires = cp.getInteger(dcdbpath + "layer/nguardwires", 0);
         nsensewires = cp.getInteger(dcdbpath + "layer/nsensewires", 0);
         ministagger = cp.getDouble(dcdbpath + "ministagger/ministagger", 0);
@@ -97,19 +100,28 @@ final class DCdatabase {
 
             superwidth[isuper] = wpdist[isuper] * (nsenselayers[isuper] + nguardlayers[isuper] - 1) * cellthickness[isuper];
         }
-
+        double scaleTest=1;
         int alignrows = cp.length(dcdbpath+"alignment/dx");
         for(int irow = 0; irow< alignrows; irow++) {
                int isec = cp.getInteger(dcdbpath + "alignment/sector",irow)-1;
                int ireg = cp.getInteger(dcdbpath + "alignment/region",irow)-1;
 
-               align_dx[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dx",irow);
-               align_dy[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dy",irow);
-               align_dz[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dz",irow);
+            Vector3d align_delta    = new Vector3d(shifts[ireg][0], shifts[ireg][1], shifts[ireg][2]);
+            Vector3d align_position = new Vector3d(scaleTest*cp.getDouble(dcdbpath + "alignment/dx",irow),
+                                                   scaleTest*cp.getDouble(dcdbpath + "alignment/dy",irow),
+                                                   scaleTest*cp.getDouble(dcdbpath + "alignment/dz",irow));
+            align_position = align_position.rotateZ(-isec*Math.toRadians(60));
+            align_position = align_position.rotateY(-thtilt[ireg]);
+            align_position = align_position.add(align_delta);
+            align_position = align_position.rotateY(thtilt[ireg]);
+            align_position = align_position.rotateZ(isec*Math.toRadians(60));
+            align_dx[isec][ireg]=align_position.x;
+            align_dy[isec][ireg]=align_position.y;
+            align_dz[isec][ireg]=align_position.z;
 
-               align_dthetax[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dtheta_x",irow);
-               align_dthetay[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dtheta_y",irow);
-               align_dthetaz[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dtheta_z",irow);
+            align_dthetax[isec][ireg]=shifts[ireg][3]+scaleTest*cp.getDouble(dcdbpath + "alignment/dtheta_x",irow);
+            align_dthetay[isec][ireg]=shifts[ireg][4]+scaleTest*cp.getDouble(dcdbpath + "alignment/dtheta_y",irow);
+            align_dthetaz[isec][ireg]=shifts[ireg][5]+scaleTest*cp.getDouble(dcdbpath + "alignment/dtheta_z",irow);
         }
         
         int endplatesrows = cp.length(dcdbpath+"endplatesbow/coefficient");
@@ -259,41 +271,37 @@ final class Wire {
     private Vector3d rightend;
 
     public Wire translate(Vector3d vshift) {
-        midpoint.add(vshift);
-        center.add(vshift);
         leftend.add(vshift);
         rightend.add(vshift);
-
+        setCenter();
+        setMiddle();
         return this;
     }
 
     public Wire rotateX(double rotX) {
-        midpoint.rotateX(rotX);
-        center.rotateX(rotX);
         direction.rotateX(rotX);
         leftend.rotateX(rotX);
         rightend.rotateX(rotX);
-
+        setCenter();
+        setMiddle();
         return this;
     }
 
     public Wire rotateY(double rotY) {
-        midpoint.rotateY(rotY);
-        center.rotateY(rotY);
         direction.rotateY(rotY);
         leftend.rotateY(rotY);
         rightend.rotateY(rotY);
-
+        setCenter();
+        setMiddle();
         return this;
     }
 
     public Wire rotateZ(double rotZ) {
-        midpoint.rotateZ(rotZ);
-        center.rotateZ(rotZ);
         direction.rotateZ(rotZ);
         leftend.rotateZ(rotZ);
         rightend.rotateZ(rotZ);
-
+        setCenter();
+        setMiddle();
         return this;
     }
 
@@ -414,6 +422,15 @@ final class Wire {
                 ilayer>0 && ilayer<=dbref.nsenselayers(isuper);
     }
 
+    private void setCenter() {  
+        center.set(leftend.plus(rightend).dividedBy(2.0));
+    }
+    
+    private void setMiddle() {
+        double t = -leftend.y/direction.y;
+        midpoint.set(leftend.plus(direction.times(t)));
+    }
+        
     public Vector3d mid() {
         return new Vector3d(midpoint);
     }
@@ -477,18 +494,24 @@ public final class DCGeant4Factory extends Geant4Factory {
 
     ///////////////////////////////////////////////////
     public DCGeant4Factory(ConstantProvider provider) {
-        this(provider, MINISTAGGEROFF, ENDPLATESBOWOFF);
+        this(provider, MINISTAGGEROFF, ENDPLATESBOWOFF, null);
     }
 
     ///////////////////////////////////////////////////
     public DCGeant4Factory(ConstantProvider provider, boolean ministaggerStatus,
             boolean endplatesStatus) {
+        this(provider, ministaggerStatus, endplatesStatus, null);
+    }
+    
+    ///////////////////////////////////////////////////
+    public DCGeant4Factory(ConstantProvider provider, boolean ministaggerStatus,
+            boolean endplatesStatus, double[][] shifts) {
         dbref.setMinistaggerStatus(ministaggerStatus);
         dbref.setEndPlatesStatus(endplatesStatus);
         
         motherVolume = new G4World("fc");
 
-        dbref.connect(provider);
+        dbref.connect(provider, shifts);
         nsgwires = dbref.nsensewires() + dbref.nguardwires();
 
         for (int iregion = 0; iregion < 3; iregion++) {
@@ -695,6 +718,47 @@ public final class DCGeant4Factory extends Geant4Factory {
         return layerVolume;
     }
 
+    public Trap3D getTrajectorySurface(int isector, int isuperlayer, int ilayer) {
+        Wire lw0 = new Wire(isector+1, isuperlayer, ilayer+1, 0);
+        Wire lw1 = new Wire(isector+1, isuperlayer, ilayer+1, nsgwires - 1);
+        
+        // move to CLAS12 frame
+        Vector3d p0 = lw0.right().rotateZ(Math.toRadians(-90 + isector*60));
+        Vector3d p1 = lw0.left().rotateZ(Math.toRadians(-90 + isector*60));
+        Vector3d p2 = lw1.left().rotateZ(Math.toRadians(-90 + isector*60)); 
+        Vector3d p3 = lw1.right().rotateZ(Math.toRadians(-90 + isector*60)); 
+        
+        // define left and right side lines and their intersection
+        Line3D left  = new Line3D(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
+        Line3D right = new Line3D(p0.x, p0.y, p0.z, p3.x, p3.y, p3.z);
+        Point3D v = left.distance(right).origin();
+        
+        // shift the left or right origin, depending on distance from "triangle" vertex
+        double dleft  = v.distance(left.origin());
+        double dright = v.distance(right.origin());
+        if(dleft<dright)
+            left.setOrigin(left.lerpPoint((dright-dleft)/left.length()));
+        else 
+            right.setOrigin(right.lerpPoint((dleft-dright)/right.length()));
+        
+        // shift the left or right end, depending on lengths
+        double lleft  = left.length();
+        double lright = right.length();
+        if(lleft<lright)
+            right.setEnd(right.lerpPoint(lleft/lright));
+        else 
+            left.setEnd(left.lerpPoint(lright/lleft));
+        
+        Trap3D trapezoid = new Trap3D(right.origin(), left.origin(), left.end(), right.end());
+        
+        return trapezoid;
+    } 
+
+    
+    public double getCellSize(int isuperlayer) {
+        return dbref.cellthickness(isuperlayer);
+    }
+    
     /*
     public void printWires(){
         System.out.println("hello");

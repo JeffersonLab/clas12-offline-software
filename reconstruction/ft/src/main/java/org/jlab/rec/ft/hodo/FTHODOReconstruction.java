@@ -50,7 +50,7 @@ public class FTHODOReconstruction {
     public List<FTHODOHit> selectHits(List<FTHODOHit> allhits) {
 
         if(debugMode>=1) System.out.println("\nSelecting hits");
-        ArrayList<FTHODOHit> hits = new ArrayList<FTHODOHit>();
+        ArrayList<FTHODOHit> hits = new ArrayList<>();
         
         for(int i = 0; i < allhits.size(); i++) 
         {
@@ -99,18 +99,8 @@ public class FTHODOReconstruction {
     }
     
     public void writeBanks(DataEvent event, List<FTHODOHit> hits, List<FTHODOCluster> clusters){
-        if(event instanceof EvioDataEvent) {
-            writeEvioBanks(event, hits, clusters);
-        }
-        else if(event instanceof HipoDataEvent) {
-            writeHipoBanks(event, hits, clusters);
-        }
-    }
-    
-    private void writeHipoBanks(DataEvent event, List<FTHODOHit> hits, List<FTHODOCluster> clusters){
-        
         // hits banks
-        if(hits.size()!=0) {
+        if(!hits.isEmpty()) {
             DataBank bankHits = event.createBank("FTHODO::hits", hits.size());    
             if(bankHits==null){
                 System.out.println("ERROR CREATING BANK : FTHODO::hits");
@@ -131,7 +121,7 @@ public class FTHODOReconstruction {
             event.appendBanks(bankHits);
         }
         // cluster bank
-        if(clusters.size()!=0){
+        if(!clusters.isEmpty()){
             DataBank bankCluster = event.createBank("FTHODO::clusters", clusters.size());    
             if(bankCluster==null){
                 System.out.println("ERROR CREATING BANK : FTHODO::clusters");
@@ -153,60 +143,11 @@ public class FTHODOReconstruction {
         }
     }
     
-
-
-    private void writeEvioBanks(DataEvent event, List<FTHODOHit> hits, List<FTHODOCluster> clusters) {
-                          
-        EvioDataBank bankhits  = null;
-        EvioDataBank bankclust = null;
-		
-        // hits banks
-        if(hits.size()!=0) {
-                bankhits = (EvioDataBank) event.getDictionary().createBank("FTHODORec::hits",hits.size());
-                for(int i=0; i<hits.size(); i++) {
-                    bankhits.setInt("id",i,hits.get(i).get_ID());
-                    bankhits.setInt("sector",i,hits.get(i).get_Sector());
-                    bankhits.setInt("layer",i,hits.get(i).get_Layer());
-                    bankhits.setDouble("hitX",i,hits.get(i).get_Dx()/10.0);
-                    bankhits.setDouble("hitY",i,hits.get(i).get_Dy()/10.0);
-                    bankhits.setDouble("hitEnergy",i,hits.get(i).get_Edep());
-                    bankhits.setDouble("hitTime",i,hits.get(i).get_Time());
-                    bankhits.setInt("hitDGTZIndex",i,hits.get(i).get_DGTZIndex());
-                    bankhits.setInt("hitClusterIndex",i,hits.get(i).get_ClusterIndex());
-                }				
-        }	
-        // cluster bank
-        if(clusters.size()!=0){
-                bankclust = (EvioDataBank) event.getDictionary().createBank("FTHODORec::clusters",clusters.size());
-                for(int i =0; i< clusters.size(); i++) {
-                        if(debugMode>=1) clusters.get(i).showCluster();
-                            bankclust.setInt("clusterID", i,clusters.get(i).getID());
-                            bankclust.setInt("clusterSize", i,clusters.get(i).size());
-                            bankclust.setDouble("clusterX",i,clusters.get(i).getX()/10.0);
-                            bankclust.setDouble("clusterY",i,clusters.get(i).getY()/10.0);
-                            bankclust.setDouble("clusterDX",i,clusters.get(i).getWidthX()/10.0);
-                            bankclust.setDouble("clusterDY",i,clusters.get(i).getWidthY()/10.0);
-                            bankclust.setDouble("clusterTime",i,clusters.get(i).getTime());
-                            bankclust.setDouble("clusterEnergy",i,clusters.get(i).getEnergy());
-                            bankclust.setDouble("clusterTheta",i,clusters.get(i).getTheta());
-                            bankclust.setDouble("clusterPhi",i,clusters.get(i).getPhi());
-                }
-        }
-
-        // If there are no clusters, punt here but save the reconstructed hits 
-        if(bankclust!=null) {
-                event.appendBanks(bankhits,bankclust);
-        }
-        else if (bankhits!=null) {
-                event.appendBank(bankhits);
-        }
-        
-    }
     public List<FTHODOHit> readRawHits(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable geometry) {
         // getting raw data bank
 	if(debugMode>=1) System.out.println("Getting raw hits from FTHODO:dgtz bank");
 
-        List<FTHODOHit>  hits = new ArrayList<FTHODOHit>();
+        List<FTHODOHit>  hits = new ArrayList<>();
 	if(event.hasBank("FTHODO::dgtz")==true) {
             EvioDataBank bankDGTZ = (EvioDataBank) event.getBank("FTHODO::dgtz");
             int nrows = bankDGTZ.rows();
@@ -229,7 +170,7 @@ public class FTHODOReconstruction {
         // getting raw data bank
 	if(debugMode>=1) System.out.println("Getting raw hits from FTHODO:adc bank");
 
-        List<FTHODOHit>  hits = new ArrayList<FTHODOHit>();
+        List<FTHODOHit>  hits = new ArrayList<>();
 	if(event.hasBank("FTHODO::adc")==true) {
             DataBank bankDGTZ = event.getBank("FTHODO::adc");
             int nrows = bankDGTZ.rows();
@@ -237,7 +178,6 @@ public class FTHODOReconstruction {
                 int isector     = bankDGTZ.getByte("sector",row);
                 int ilayer      = bankDGTZ.getByte("layer",row);
                 int icomponent  = bankDGTZ.getShort("component",row);
-                int iorder      = bankDGTZ.getByte("order",row);
                 int adc         = bankDGTZ.getInt("ADC",row);
                 float time      = bankDGTZ.getFloat("time",row);
                 if(adc!=-1 && time!=-1 && status.getIntValue("status", isector, ilayer, icomponent)==0){

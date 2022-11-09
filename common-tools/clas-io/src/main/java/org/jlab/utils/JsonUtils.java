@@ -33,6 +33,14 @@ public class JsonUtils {
     }
     
     /**
+     * Just print it to the screen, nicely.
+     * @param json 
+     */
+    public static void show(JSONObject json) {
+        JsonUtils.show(JsonUtils.JSON2Json(json));
+    }
+    
+    /**
      *  Just print it to the screen, nicely.
      * @param bank
      * @param varName 
@@ -231,36 +239,5 @@ public class JsonUtils {
         return extend(event, bankName, varName, Map2Json(extension));
     }
 
-    /**
-     * Emulate the way CLARA parses the full YAML and presents it in EngineData.
-     * The "global" and "service" subsections in the "configuration" section get
-     * squashed into one namespace, and service-specific keys override any
-     * globals of the same name.
-     *
-     * @param claraJson the full CLARA YAML contents
-     * @param serviceName the name of the service in CLARA YAML (not class name)
-     * @return data in the format the given CLARA service would see
-     */
-    public static JSONObject filterClaraYaml(JSONObject claraJson, String serviceName) {
-        JSONObject ret = new JSONObject();
-        if (claraJson.has("configuration")) {
-            JSONObject config = claraJson.getJSONObject("configuration");
-            if (config.has("global")) {
-                JSONObject globals = config.getJSONObject("global");
-                for (String key : globals.keySet()) {
-                    ret.accumulate(key, globals.getString(key));
-                }
-            }
-            if (config.has("services")) {
-                if (config.getJSONObject("services").has(serviceName)) {
-                    JSONObject service = config.getJSONObject("services").getJSONObject(serviceName);
-                    for (String key : service.keySet()) {
-                        ret.put(key, service.getString(key));
-                    }
-                }
-            }
-        }
-        return ret;
-    }
     
 }

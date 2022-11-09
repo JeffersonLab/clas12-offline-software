@@ -26,7 +26,7 @@ public class DaqScaler {
     public final double getLivetimeClock() { return (double)this.gatedClock / this.clock; }
     public final double getLivetimeFcup() {return (double)this.gatedFcup / this.fcup; } 
     public final double getLivetimeSLM() {return (double)this.gatedSlm / this.slm; } 
-       
+
     protected double beamCharge=0;
     protected double beamChargeGated=0;
     protected double beamChargeSLM=0;
@@ -43,12 +43,31 @@ public class DaqScaler {
     public double getBeamChargeSLM() { return beamChargeSLM; }
     public double getBeamChargeGatedSLM() { return beamChargeGatedSLM; }
 
+    @Override
+    public String toString() {
+        return String.format("c=%d/%d f=%d/%d s=%d/%d",clock,gatedClock,fcup,gatedFcup,slm,gatedSlm);
+    }
+
     /**
-     * Manually choose dwell and live-dwell times, e.g. if clock rolls over. 
-     * @param fcupTable
-     * @param slmTable
-     * @param seconds
-     * @param liveSeconds 
+     * Add raw values from another scaler reading to this one.
+     * Note, "calibrate" will need to be called afterwards.
+     * @param other 
+     */
+    public void add(DaqScaler other) {
+        this.fcup += other.fcup;
+        this.slm += other.slm;
+        this.clock += other.clock;
+        this.gatedFcup += other.gatedFcup;
+        this.gatedClock += other.gatedClock;
+        this.gatedSlm += other.gatedSlm;
+    }
+
+    /**
+     * Manually choose dwell and live-dwell times, e.g. if clock rolls over.
+     * @param fcupTable /runcontrol/fcup CCDB table
+     * @param slmTable  /runcontrol/slm CCDB table
+     * @param seconds dwell time
+     * @param liveSeconds live dwell time
      */
     protected void calibrate(IndexedTable fcupTable,IndexedTable slmTable,double seconds,double liveSeconds) {
 
@@ -78,11 +97,11 @@ public class DaqScaler {
             }
         }
     }
-   
+
     /**
      * Use the scaler's own clock to get dwell and live-dwell times
-     * @param fcupTable
-     * @param slmTable 
+     * @param fcupTable /runcontrol/fcup CCDB table
+     * @param slmTable  /runcontrol/slm CCDB table
      */
     protected final void calibrate(IndexedTable fcupTable,IndexedTable slmTable) {
         this.calibrate(fcupTable,slmTable,this.getClockSeconds(),this.getGatedClockSeconds());

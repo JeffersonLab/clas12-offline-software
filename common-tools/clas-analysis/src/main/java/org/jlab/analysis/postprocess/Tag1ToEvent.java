@@ -17,6 +17,7 @@ import org.jlab.detector.scalers.DaqScalersSequence;
 
 import org.jlab.detector.helicity.HelicityBit;
 import org.jlab.detector.helicity.HelicitySequenceManager;
+import org.jlab.logging.DefaultLogger;
 
 import org.jlab.utils.options.OptionParser;
 
@@ -31,6 +32,8 @@ import org.jlab.utils.options.OptionParser;
  * 
  * FIXME:  DaqScalersSequence doesn't manage run numbers.  Until then, we
  * cannot mix run numbers here.
+ * 
+ * FIXME:  delay=8 is hardcoded below, should come from CCDB.  
  *
  * @author wphelps
  * @author baltzell
@@ -43,6 +46,8 @@ public class Tag1ToEvent {
     };
     
     public static void main(String[] args) {
+
+        DefaultLogger.debug();
 
         OptionParser parser = new OptionParser("postprocess");
         parser.addOption("-q","0","do beam charge and livetime (0/1=false/true)");
@@ -63,12 +68,12 @@ public class Tag1ToEvent {
         String fileout = parser.getOption("-o").stringValue();
 
         // helicity / beamcharge options:
-        final boolean doHelicity = parser.getOption("-d").intValue() != 0;
+        final boolean doHelicityDelay = parser.getOption("-d").intValue() != 0;
         final boolean doBeamCharge = parser.getOption("-q").intValue() != 0;
         final boolean doHelicityFlip = parser.getOption("-f").intValue() != 0;
-        if (!doHelicity && !doBeamCharge) {
+        if (!doHelicityDelay && !doBeamCharge && !doHelicityFlip) {
             parser.printUsage();
-            System.err.println("\n >>>>> error : at least one of -q/-d must be specified\n");
+            System.err.println("\n >>>>> error : at least one of -q/-d/-f must be specified\n");
             System.exit(1);
         }
 
@@ -84,8 +89,9 @@ public class Tag1ToEvent {
 
         Event configEvent = new Event();
         
-        // we're going to modify this bank:
+        // we're going to modify these banks:
         Bank recEventBank = new Bank(writer.getSchemaFactory().getSchema("REC::Event"));
+        Bank helScalerBank = new Bank(writer.getSchemaFactory().getSchema("HEL::scaler"));
         
         // we're going to modify this bank if doHelicityFlip is set:
         Bank helFlipBank = new Bank(writer.getSchemaFactory().getSchema("HEL::flip"));
@@ -111,27 +117,45 @@ public class Tag1ToEvent {
                 reader.nextEvent(event);
                 event.read(recEventBank);
                 event.read(helFlipBank);
+                event.read(helScalerBank);
 
                 event.remove(recEventBank.getSchema());
+                event.remove(helScalerBank.getSchema());
 
-                if (doHelicityFlip && helFlipBank.getRows()>0) {
-                    event.remove(helFlipBank.getSchema());
-                    helFlipBank.setByte("helicity", 0, (byte)-helFlipBank.getByte("helicity",0));
-                    helFlipBank.setByte("helicityRaw", 0, (byte)-helFlipBank.getByte("helicityRaw",0));
-                    event.write(helFlipBank);
-                }
-
-                // do the lookups:
+                // do the sequence lookups:
                 HelicityBit hb = helSeq.search(event);
                 DaqScalers ds = chargeSeq.get(event);
+                HelicityBit hbraw = helSeq.getHalfWavePlate(event) ? HelicityBit.getFlipped(hb) : hb;
 
                 // count helicity good/bad;
                 if (Math.abs(hb.value())==1) goodHelicity++;
                 else badHelicity++;
 
-                // write heliicty to REC::Event:
-                if (doHelicity) {
+                if (doHelicityFlip) {
+
+                    // flip this event's helicity:
+                    hb = HelicityBit.getFlipped(hb);
+                    hbraw = HelicityBit.getFlipped(hbraw);
+                
+                    // flip the helicity in the HEL::flip bank:
+                    if (helFlipBank.getRows()>0) {
+                        event.remove(helFlipBank.getSchema());
+                        helFlipBank.setByte("helicity", 0, (byte)-helFlipBank.getByte("helicity",0));
+                        helFlipBank.setByte("helicityRaw", 0, (byte)-helFlipBank.getByte("helicityRaw",0));
+                        event.write(helFlipBank);
+                    }
+                }
+
+                // write delay-corrected helicty to REC::Event and HEL::scaler:
+                if (doHelicityDelay) {
                     recEventBank.putByte("helicity",0,hb.value());
+                    recEventBank.putByte("helicityRaw",0,hbraw.value());
+                    RebuildScalers.assignScalerHelicity(event, helScalerBank, helSeq);
+                }
+                // flip the non-delay-corrected helicity in place in REC::Event:
+                else if (doHelicityFlip) {
+                    recEventBank.putByte("helicity",0,(byte)-recEventBank.getByte("helicity",0));
+                    recEventBank.putByte("helicityRaw",0,(byte)-recEventBank.getByte("helicityRaw",0));
                 }
 
                 // write beam charge to REC::Event:
@@ -158,6 +182,7 @@ public class Tag1ToEvent {
 
                 // update the output file:
                 event.write(recEventBank);
+                event.write(helScalerBank);
                 writer.addEvent(event, event.getEventTag());
             }
             reader.close();

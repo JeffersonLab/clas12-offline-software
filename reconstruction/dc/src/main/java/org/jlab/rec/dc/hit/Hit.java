@@ -17,11 +17,16 @@ public class Hit implements Comparable<Hit> {
     private int _Layer;    	 						//	   layer [1,...6]
     private int _Wire;    	 						//	   wire [1...112]
     private int _TDC;
+    private int _Jitter;
     private int _Id;
     private double _cellSize;
     private double _DocaErr;
     // class implements Comparable interface to allow for sorting a collection of hits by wire number values
     public int NNTrkId;
+    public int NNClusId;
+    public double NNTrkP;
+    public double NNTrkTheta;
+    public double NNTrkPhi;
     
     // constructors
     /**
@@ -31,13 +36,15 @@ public class Hit implements Comparable<Hit> {
      * @param layer (1...6)
      * @param wire (1...112)
      * @param TDC TDC
+     * @param Id
      */
-    public Hit(int sector, int superlayer, int layer, int wire, int TDC, int Id) {
+    public Hit(int sector, int superlayer, int layer, int wire, int TDC, int jitter, int Id) {
         this._Sector = sector;
         this._Superlayer = superlayer;
         this._Layer = layer;
         this._Wire = wire;
         this._TDC = TDC;
+        this._Jitter = jitter;
         this._Id = Id;
 
     }
@@ -128,6 +135,10 @@ public class Hit implements Comparable<Hit> {
         this._TDC = TDC;
     }
     
+    public int getJitter() {
+        return _Jitter;
+    }
+    
     /**
      *
      * @return the ID
@@ -163,7 +174,7 @@ public class Hit implements Comparable<Hit> {
 
     /**
      *
-     * @param arg0 the other hit
+     * @param arg
      * @return an int used to sort a collection of hits by wire number. Sorting
      * by wire is used in clustering.
      */
@@ -188,6 +199,7 @@ public class Hit implements Comparable<Hit> {
      * @param layer layer number from 1 to 6
      * @param wire wire number from 1 to 112 calculates the center of the cell
      * as a function of wire number in the local superlayer coordinate system.
+     * @return y
      */
     public double calcLocY(int layer, int wire) {
 

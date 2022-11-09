@@ -86,9 +86,6 @@ public class MVTFitter {
 	private void fineTimeStampCorrection (long timeStamp, double fineTimeStampResolution) {
 		this.timestamp = timeStamp;
 		String binaryTimeStamp = Long.toBinaryString(timeStamp); //get 64 bit timestamp in binary format
-            //byte fineTimeStamp = Byte.parseByte(binaryTimeStamp.substring(binaryTimeStamp.length()-3,binaryTimeStamp.length()),2); //fineTimeStamp : keep and convert last 3 bits of binary timestamp
-            //timeMax += (double) ((fineTimeStamp+0.5) * fineTimeStampResolution); //fineTimeStampCorrection
-            //added condition
             if (binaryTimeStamp.length()>=3){
                 byte fineTimeStamp = Byte.parseByte(binaryTimeStamp.substring(binaryTimeStamp.length()-3,binaryTimeStamp.length()),2); //fineTimeStamp : keep and convert last 3 bits of binary timestamp
                 timeMax += (double) ((fineTimeStamp+0.5) * fineTimeStampResolution); //fineTimeStampCorrection

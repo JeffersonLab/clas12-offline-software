@@ -21,6 +21,7 @@ public class CircleCalcPars {
 
     /**
      * Returns the x coordinate of the reference point
+     * @return 
      */
     public double xcen() {
         return _xc;
@@ -28,6 +29,7 @@ public class CircleCalcPars {
 
     /**
      * Returns the y coordinate of the reference point
+     * @return 
      */
     public double ycen() {
         return _yc;

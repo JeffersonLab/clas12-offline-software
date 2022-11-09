@@ -99,6 +99,7 @@ public class TrackVec extends Matrix {
      * Instantiates a new vec
      *
      * @param v the v
+     * @param sec
      */
     public TrackVec(TrackVec v, int sec) {
             super(6,1);
@@ -282,10 +283,10 @@ public class TrackVec extends Matrix {
         }
         return sector;
     }
-    private double cos_tilt = FastMath.cos(Math.toRadians(25.));
-    private double sin_tilt = FastMath.sin(Math.toRadians(25.));
+    private final double cos_tilt = FastMath.cos(Math.toRadians(25.));
+    private final double sin_tilt = FastMath.sin(Math.toRadians(25.));
     
-    private double rad60 = Math.toRadians(60.);
+    private final double rad60 = Math.toRadians(60.);
     /*
     public Point3D getCoordsInLab(double X, double Y, double Z) {
         Point3D PointInSec = this.getCoordsInSector(X, Y, Z);

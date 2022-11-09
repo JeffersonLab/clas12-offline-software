@@ -32,6 +32,7 @@ public class CircleFitPars {
 
     /**
      * Returns the x coordinate of the reference point
+     * @return 
      */
     public double xref() {
         return _xref;
@@ -39,6 +40,7 @@ public class CircleFitPars {
 
     /**
      * Returns the y coordinate of the reference point
+     * @return 
      */
     public double yref() {
         return _yref;
@@ -46,6 +48,7 @@ public class CircleFitPars {
 
     /**
      * Returns the radius of curvature
+     * @return 
      */
     public double rho() {
         return _rho;
@@ -53,6 +56,7 @@ public class CircleFitPars {
 
     /**
      * Returns the phi at the reference point
+     * @return 
      */
     public double phi() {
         return _phi;
@@ -60,6 +64,7 @@ public class CircleFitPars {
 
     /**
      * Returns the doca to the reference point
+     * @return 
      */
     public double doca() {
         return _dca;
@@ -67,6 +72,7 @@ public class CircleFitPars {
 
     /**
      * Returns the chi^2 of the fit
+     * @return 
      */
     public double chisq() {
         return _chisq;
@@ -74,6 +80,7 @@ public class CircleFitPars {
 
     /**
      * Returns the covariance matrix of the fit
+     * @return 
      */
     public double[] cov() {
         double[] tmpmat = new double[6];
@@ -81,15 +88,45 @@ public class CircleFitPars {
         return tmpmat;
     }
 
-//	public static void main(String[] args)
-    //{
-    //double[] cov = {1.,0.,1.,0.,1.,0.};
-    //CirclePars cirf = new CirclePars(0.,0.,0.01,0.3,0.1, 15., cov);
-    //System.out.println(cirf);
-    //double[] covmat = cirf.cov();
-    //for(int i=0; i<covmat.length; i++)
-    //	{
-//			System.out.println(covmat[i]);
-//		}
-//	}
+    /**
+     * Returns the circle radius
+     * @return 
+     */
+    public double radius() {
+        return 1. / _rho;
+    }
+
+    /**
+     * Returns the circle center x coordinate
+     * @return 
+     */
+    public double xc() {
+        return (radius() - _dca) * Math.sin(_phi) + _xref;
+    }
+
+    /**
+     * Returns the circle center y coordinate
+     * @return 
+     */
+    public double yc() {
+        return (-radius() + _dca) * Math.cos(_phi) + _yref;
+    }
+
+    /**
+     * Returns the circle arc length between two points
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
+     * @return 
+     */
+    public double arcLength(double x1, double y1, double x2, double y2) {
+        double phi1  = Math.atan2(y1-yc(), x1-xc());
+        double phi2  = Math.atan2(y2-yc(), x2-xc());
+        double dphi = phi2 - phi1;
+        if(Math.abs(dphi)>Math.PI) dphi -= Math.signum(dphi)*2*Math.PI;
+        return -radius()*dphi;
+    }
+
+
 }

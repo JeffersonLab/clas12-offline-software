@@ -1,15 +1,18 @@
 package org.jlab.rec.ft;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.pdg.PhysicsConstants;
+import org.jlab.detector.base.DetectorLayer;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.utils.groups.IndexedTable;
-
+import org.jlab.rec.ft.trk.FTTRKConstantsLoader;
 
 public class FTParticle {
 
-	
 	private int _ID;                                          // track ID
 	private int _Charge;		         	          // 0/1 for photon/electron
 	private double _Time;      			          // time of the particle at the vertex
@@ -19,8 +22,9 @@ public class FTParticle {
 	private Vector3D _Direction = new Vector3D();             // direction 
          private int _Cluster;					  // track pointer to cluster information in FTCALRec::cluster bank
 	private int _Signal;					  // track pointer to signal information in FTHODORec::cluster bank
-	private int _Cross;					  // track pointer to cross information in FTTRKRec::cluster bank
-         private double _field;
+        private int _Cross0;                                      // track pointer to cross information in FTTRKRec::cross bank (TRK0)
+        private int _Cross1;                                      // track pointer to cross information in FTTRKRec::cross bank (TRK1)
+        private double _field;
         	
 	// constructor
 	public FTParticle(int cid) {
@@ -28,17 +32,18 @@ public class FTParticle {
 	}
 
  	public FTParticle(int cid, int charge, double fieldScale, FTResponse response, double vx, double vy, double vz) {
-		this.set_ID(cid);
-                   this.setCharge(0);
-                   this.setField(fieldScale);
-                   this.setEnergy(response.getEnergy());
-                   this.setPosition(response.getPosition());
-                   this.setVertex(vx,vy,vz);
-                   this.setDirection();
-                   this.setTime(response.getTime() - this.getPath() / PhysicsConstants.speedOfLight());
-                   this.setCalorimeterIndex(response.getId());
-                   this.setHodoscopeIndex(-1);
-                   this.setTrackerIndex(-1);
+            this.set_ID(cid);
+            this.setCharge(0);
+            this.setField(fieldScale);
+            this.setEnergy(response.getEnergy());
+            this.setPosition(response.getPosition());
+            this.setVertex(vx,vy,vz);
+            this.setDirection();
+            this.setTime(response.getTime() - this.getPath() / PhysicsConstants.speedOfLight());
+            this.setCalorimeterIndex(response.getId());
+            this.setHodoscopeIndex(-1);
+            this.setTrackerIndex(-1, 0);
+            this.setTrackerIndex(-1, 1);
          }
         
 	public int get_ID() {
@@ -46,7 +51,7 @@ public class FTParticle {
 	}
 
 
-	public void set_ID(int _ID) {
+	public final void set_ID(int _ID) {
 		this._ID = _ID;
 	}
 
@@ -56,7 +61,7 @@ public class FTParticle {
 	}
 
 
-	public void setCharge(int _Charge) {
+	public final void setCharge(int _Charge) {
 		this._Charge = _Charge;
 	}
         
@@ -66,7 +71,7 @@ public class FTParticle {
 	}
 
 
-	public void setTime(double _Time) {
+	public final void setTime(double _Time) {
 		this._Time = _Time;
 	}
 
@@ -76,7 +81,7 @@ public class FTParticle {
 	}
 
 
-	public void setEnergy(double _Energy) {
+	public final void setEnergy(double _Energy) {
 		this._Energy = _Energy;
 	}
 
@@ -84,7 +89,7 @@ public class FTParticle {
             return _Position;
         }
 
-        public void setPosition(Vector3D _Position) {
+        public final void setPosition(Vector3D _Position) {
             this._Position = _Position;
         }
 
@@ -92,7 +97,7 @@ public class FTParticle {
             return _field;
         }
 
-        public void setField(double _field) {
+        public final void setField(double _field) {
             this._field = _field;
         }
 
@@ -101,7 +106,7 @@ public class FTParticle {
             return this._Direction;
         }
 
-        public void setDirection() {
+        public final void setDirection() {
             Vector3D line = new Vector3D(this.getPosition());
             line.sub(this.getVertex());
             this._Direction = line.asUnit();            
@@ -132,11 +137,11 @@ public class FTParticle {
             return _Vertex;
         }
 
-        public void setVertex(double x, double y, double z) {
+        public final void setVertex(double x, double y, double z) {
             this._Vertex.setXYZ(x, y, z);
         }
 
-        public double getPath() {
+        public final double getPath() {
             Vector3D path = new Vector3D(this.getPosition());
             path.sub(this.getVertex());
             return path.mag();
@@ -153,7 +158,7 @@ public class FTParticle {
 	}
 
 
-	public void setCalorimeterIndex(int _Cluster) {
+	public final void setCalorimeterIndex(int _Cluster) {
 		this._Cluster = _Cluster;
 	}
 
@@ -163,22 +168,20 @@ public class FTParticle {
 	}
 
 
-	public void setHodoscopeIndex(int _Signal) {
+	public final void setHodoscopeIndex(int _Signal) {
 		this._Signal = _Signal;
 	}
-
-
-	public int getTrackerIndex() {
-		return _Cross;
-	}
-
-
-	public void setTrackerIndex(int _Cross) {
-		this._Cross = _Cross;
-	}
-
-        public int getDetectorHit(List<FTResponse>  hitList, String detectorType, double distanceThreshold, double timeThresholds){
         
+        public int getTrackerIndex(int ndet) {
+		if(ndet==0){return _Cross0;}else{return _Cross1;}
+	}
+      
+        public final void setTrackerIndex(int _Cross, int ndet) {
+		if(ndet==0){this._Cross0 = _Cross;}else{this._Cross1 = _Cross;}
+	}
+        
+
+        public int getDetectorHit(List<FTResponse>  hitList, DetectorType detectorType, double distanceThreshold, double timeThreshold){
             Line3D cross = this.getLastCross();
             double   minimumDistance = 500.0;
             int      bestIndex       = -1;
@@ -187,21 +190,167 @@ public class FTParticle {
                 if(response.getAssociation()<0 && response.getType().equals(detectorType)){
                     Line3D  dist = cross.distance(response.getPosition().toPoint3D());
                     double hitdistance  = dist.length();
-                    double timedistance = Math.abs(this.getTime()-(response.getTime()-response.getPosition().mag()/PhysicsConstants.speedOfLight()));
- //                   System.out.println(" LOOP = " + loop + "   distance = " + hitdistance);
-                    if(timedistance<timeThresholds&&hitdistance<distanceThreshold&&hitdistance<minimumDistance){
+                    double timedistance = Math.abs(this.getTime() - (response.getTime()-response.getPosition().mag()/PhysicsConstants.speedOfLight()));       
+                    if(hitdistance<distanceThreshold && hitdistance<minimumDistance && timedistance<timeThreshold){
                         minimumDistance = hitdistance;
-                        bestIndex       = loop;
+                        bestIndex = loop;
+                        if(FTEventBuilder.debugMode >=1 && detectorType==DetectorType.FTTRK ){
+                            System.out.println("best hit distance and time " + minimumDistance + " " + timedistance);
+                            System.out.println("cross center coordinates x, y " + response.getPosition().toPoint3D().x() + " , " +
+                               response.getPosition().toPoint3D().y());
+                        }
                     }
                 }
             }
             if(bestIndex>-1) {
-                if(hitList.get(bestIndex).getSize()<FTConstants.HODO_MIN_CLUSTER_SIZE) bestIndex=-1;
+                // if bestHit is on hodo require at least two hits overall on HODO
+                if(detectorType==DetectorType.FTHODO) {
+                    if(hitList.get(bestIndex).getSize()<FTConstants.HODO_MIN_CLUSTER_SIZE) 
+                        bestIndex=-1;
+                }
+                // if bestHit is on trk require at least two crosses overall in FTTRK
+                if(detectorType==DetectorType.FTTRK){
+                    if(hitList.get(bestIndex).getSize() < FTConstants.TRK_MIN_CROSS_NUMBER) {
+                        bestIndex=-1;
+                    }
+                }
             }
             return bestIndex;
         }
         
-        public void show() {
+        // not used
+        public int[] getTRKBestHits(List<FTResponse>  hitList, int it, double distanceThreshold, double timeThreshold){
+            Line3D cross = this.getLastCross();
+            double   minimumDistance = 500.0;
+            int[] bestIndex = {-1, -1};
+            for(int loop = 0; loop < hitList.size(); loop++){
+                int bestidx = -1;
+                FTResponse response = hitList.get(loop);
+                if(response.getAssociation()<0 && response.getType().getName() == "FTTRK"){
+                    Line3D  dist = cross.distance(response.getPosition().toPoint3D());
+                    double hitdistance  = dist.length();
+                    double timedistance = Math.abs(this.getTime() - (response.getTime()-response.getPosition().mag()/PhysicsConstants.speedOfLight()));       
+
+                    double t=response.getTime();
+                    int idet = response.getModule()-1;
+                    
+                    if(timedistance<timeThreshold && hitdistance<distanceThreshold){
+                        minimumDistance = hitdistance;
+                        bestidx = loop;
+                    }
+                    // select index of the detector                    
+                    
+                    if(bestidx>-1){
+                        if(hitList.get(bestidx).getSize() < FTConstants.TRK_MIN_CROSS_NUMBER) bestidx=-1;
+                            bestIndex[idet] = bestidx;
+                        }
+                    }   
+                }
+                return bestIndex;
+        }
+        
+        
+        public int [][] getTRKOrderedListOfHits(List<FTResponse>  hitList, int it, double distanceThreshold, double timeThreshold){
+            
+            int TRK1 = DetectorLayer.FTTRK_MODULE1 - 1;  // tracker id=0
+            int TRK2 = DetectorLayer.FTTRK_MODULE2 - 1;   // tracker id=1
+            
+            Line3D cross = this.getLastCross();
+            int ndetectors = FTTRKConstantsLoader.NSupLayers;
+            int hitsTRK = 0;
+            for(int l=0; l<hitList.size(); l++){
+                if(hitList.get(l).getType()==DetectorType.FTTRK) hitsTRK++;
+            }
+            int[][] bestIndices; 
+            if(hitsTRK != 0){
+                bestIndices = new int[hitsTRK][ndetectors];
+                ArrayList<Double> hitDistancesDet0 = new ArrayList<>(hitsTRK);
+                ArrayList<Integer> hitOrderDet0 = new ArrayList<>(hitsTRK);
+                ArrayList<Double> hitDistancesDet1 = new ArrayList<>(hitsTRK);
+                ArrayList<Integer> hitOrderDet1 = new ArrayList<>(hitsTRK);
+                int lTRK = -1;
+                //init
+                for(int l=0; l<hitsTRK; l++){
+                    bestIndices[l][TRK1] = bestIndices[l][TRK2] = -1;
+                    hitDistancesDet0.add(l, -1.);
+                    hitOrderDet0.add(l, 1);
+                    hitDistancesDet1.add(l, -1.);
+                    hitOrderDet1.add(l, 1);
+                }
+                for(int loop = 0; loop < hitList.size(); loop++){
+                    int bestidx = -1;
+                    FTResponse response = hitList.get(loop);
+                    if(response.getAssociation()<0 && response.getType()==DetectorType.FTTRK){
+                        lTRK++;
+                        hitDistancesDet0.add(lTRK, -1.);
+                        hitDistancesDet1.add(lTRK, -1.);
+                        hitOrderDet0.add(lTRK, -1);
+                        hitOrderDet1.add(lTRK, -1);
+                        Line3D  dist = cross.distance(response.getPosition().toPoint3D());
+                        double hitdistance  = dist.length();
+                        double timedistance = Math.abs(this.getTime() - (response.getTime()-response.getPosition().mag()/PhysicsConstants.speedOfLight()));       
+
+                        double t=response.getTime();
+                        int idet = response.getModule()-1;
+                        
+                        if(timedistance<timeThreshold && hitdistance<distanceThreshold){
+                            bestidx = loop;
+                            if(idet==TRK1) {
+                                hitDistancesDet0.set(lTRK, hitdistance);
+                                hitOrderDet0.set(lTRK, loop);
+                            }
+                            if(idet==TRK2){
+                                hitDistancesDet1.set(lTRK, hitdistance);
+                                hitOrderDet1.set(lTRK, loop);
+                            }
+                        }                    
+                    
+                        if(bestidx>-1){
+                            if(hitList.get(bestidx).getSize() < FTConstants.TRK_MIN_CROSS_NUMBER){
+                                bestidx=-1;
+                                if(idet==TRK1){
+                                    hitDistancesDet0.set(lTRK, -1.);
+                                    hitOrderDet0.set(lTRK, -1);
+                                }else if(idet==TRK2){
+                                    hitDistancesDet1.set(lTRK, -1.);
+                                    hitOrderDet1.set(lTRK, -1);
+                                }    
+                            }
+                        }
+                    }   
+                }
+                // sort the two arrays as a function of the distance
+                ArrayList<Double> iniHitDis0 = new ArrayList<Double>();
+                ArrayList<Double> iniHitDis1 = new ArrayList<Double>(); 
+                for(int l=0; l<hitsTRK; l++){
+                    iniHitDis0.add(l, hitDistancesDet0.get(l));
+                    iniHitDis1.add(l, hitDistancesDet1.get(l));
+                }
+                int[] orderedIndices0 = new int[hitsTRK];
+                int[] orderedIndices1 = new int[hitsTRK];
+                Collections.sort(hitDistancesDet0, Collections.reverseOrder());
+                Collections.sort(hitDistancesDet1, Collections.reverseOrder());
+                for(int l=0; l<hitsTRK; l++){
+                    orderedIndices0[l] = orderedIndices1[l] = -1;
+                    for(int k=0; k<hitsTRK; k++){
+                        if(hitDistancesDet0.get(l) == iniHitDis0.get(k) && hitDistancesDet0.get(l)>0) orderedIndices0[l] = hitOrderDet0.get(k);
+                        if(hitDistancesDet1.get(l) == iniHitDis1.get(k) && hitDistancesDet1.get(l)>0) orderedIndices1[l] = hitOrderDet1.get(k);
+                    }
+                }
+                // compose the double arrays of indices ordered by distance
+                for(int l=0; l < hitsTRK; l++){
+                    bestIndices[l][TRK1] = orderedIndices0[l];
+                    bestIndices[l][TRK2] = orderedIndices1[l];
+                }
+            }else{ 
+                bestIndices = new int[1][2];
+                bestIndices[0][TRK1] = bestIndices[0][TRK2] = -1;
+            }
+            return bestIndices;
+        }
+        
+        
+        public void show() {            
             System.out.println( "FT Particle info " +
                                 " Charge = "+ this.getCharge() +
                                 " E = "     + this.getEnergy() +                    
