@@ -217,7 +217,7 @@ public class EBEngine extends ReconstructionEngine {
                 if (bankCovMat != null) de.appendBanks(bankCovMat);
 
                 if (!cutracks.isEmpty()) {
-                    DataBank x = DetectorData.getUTracksBank(eb.getEvent().getParticles(), de, UtrackBank, cutracks.size());
+                    DataBank x = DetectorData.getUTracksBank(cutracks, ctracks, de, UtrackBank);
                     de.appendBanks(x);
                 }
             }
