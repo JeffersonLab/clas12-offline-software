@@ -5,7 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
+import org.jlab.clas.physics.Vector3;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataEvent;
 
 
@@ -196,7 +198,7 @@ public class DetectorEvent {
         }
         return null;
     }
-    
+
     @Override
     public String toString(){
         StringBuilder str = new StringBuilder();
