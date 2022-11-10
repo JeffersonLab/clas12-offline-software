@@ -197,17 +197,33 @@ public class DetectorTrack implements Comparable {
         this.trackP.setXYZ(px, py, pz);
         return this;
     }
-    
+   
+    public DetectorTrack setVector(Vector3 v) {
+        return this.setVector(v.x(),v.y(),v.z());
+    }
+
     public DetectorTrack setVertex(double vx, double vy, double vz){
         this.trackVertex.setXYZ(vx, vy, vz);
         return this;
+    }
+
+    public DetectorTrack setVertex(Vector3 v) {
+        return setVertex(v.x(),v.y(),v.z());
     }
     
     public DetectorTrack setPath(double path){
         this.trackPath = path;
         return this;
     }
-    
+
+    public DetectorTrack setNeutralPath(Vector3 vertex, Vector3D end) {
+        this.setVertex(vertex);
+        this.setTrackEnd(end);
+        Vector3 path = new Vector3(end.x(),end.y(),end.z());
+        path.sub(vertex);
+        return this.setPath(path.mag());
+    }
+   
     public DetectorTrack setSector(int sector){
         this.trackSector = sector;
         return this;
@@ -216,6 +232,10 @@ public class DetectorTrack implements Comparable {
     public DetectorTrack setTrackEnd(double x, double y, double z){
         this.trackEnd.setXYZ(x, y, z);
         return this;
+    }
+
+    public DetectorTrack setTrackEnd(Vector3D v) {
+        return this.setTrackEnd(v.x(),v.y(),v.z());
     }
     
     public void     setNDF(int x) {this.ndf = x;}
