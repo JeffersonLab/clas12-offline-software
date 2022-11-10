@@ -115,4 +115,8 @@ public class FinalTrackInfo {
     public double get_ADCsum(){
         return _ADCsum;
     }
+    public double get_p() {
+        return Math.sqrt(_px * _px + _py * _py + _pz * _pz);
+    }
+
 }

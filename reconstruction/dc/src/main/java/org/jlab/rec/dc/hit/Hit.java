@@ -17,6 +17,7 @@ public class Hit implements Comparable<Hit> {
     private int _Layer;    	 						//	   layer [1,...6]
     private int _Wire;    	 						//	   wire [1...112]
     private int _TDC;
+    private int _Jitter;
     private int _Id;
     private double _cellSize;
     private double _DocaErr;
@@ -37,12 +38,13 @@ public class Hit implements Comparable<Hit> {
      * @param TDC TDC
      * @param Id
      */
-    public Hit(int sector, int superlayer, int layer, int wire, int TDC, int Id) {
+    public Hit(int sector, int superlayer, int layer, int wire, int TDC, int jitter, int Id) {
         this._Sector = sector;
         this._Superlayer = superlayer;
         this._Layer = layer;
         this._Wire = wire;
         this._TDC = TDC;
+        this._Jitter = jitter;
         this._Id = Id;
 
     }
@@ -131,6 +133,10 @@ public class Hit implements Comparable<Hit> {
      */
     public void set_TDC(int TDC) {
         this._TDC = TDC;
+    }
+    
+    public int getJitter() {
+        return _Jitter;
     }
     
     /**

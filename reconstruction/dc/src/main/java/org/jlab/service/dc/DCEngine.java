@@ -9,7 +9,6 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.banks.Banks;
-import org.jlab.utils.groups.IndexedTable;
 
 public class DCEngine extends ReconstructionEngine {
 
@@ -17,17 +16,19 @@ public class DCEngine extends ReconstructionEngine {
     private final Banks  bankNames = new Banks();
     
     // options configured from yaml
-    private int      selectedSector = 0;
-    private boolean  wireDistortion = false;
-    private boolean  useStartTime   = true;
-    private boolean  useTimeBeta    = false;
-    private boolean  useBetaCut     = false;
-    private boolean  useDoublets    = false;
-    private int      t2d            = 1;
-    private int      nSuperLayer    = 5;
-    private String   geoVariation   = "default";
-    private String   bankType       = "HitBasedTrkg";
-    private String   outBankPrefix  = null;
+    private int        selectedSector = 0;
+    private boolean    wireDistortion = false;
+    private boolean    useStartTime   = true;
+    private boolean    useBetaCut     = false;
+    private boolean    useDoublets    = true;
+    private boolean    dcrbJitter     = false;
+    private boolean    swapDCRBBits   = false;
+    private int        t2d            = 1;
+    private int        nSuperLayer    = 5;
+    private String     geoVariation   = "default";
+    private String     bankType       = "HitBasedTrkg";
+    private String     outBankPrefix  = null;
+    private double[][] shifts         = new double[Constants.NREG][6];
         
     public static final Logger LOGGER = Logger.getLogger(ReconstructionEngine.class.getName());
 
@@ -56,10 +57,6 @@ public class DCEngine extends ReconstructionEngine {
         if(this.getEngineConfigString("dcWireDistortion")!=null)       
             wireDistortion = Boolean.parseBoolean(this.getEngineConfigString("dcWireDistortion"));
         
-        //Use time in tBeta function (true: use time; false: use track doca)
-        if(this.getEngineConfigString("dcTimeTBeta")!=null)
-            useTimeBeta = (Boolean.valueOf(this.getEngineConfigString("dcTimeTBeta")));
-        
         //Use beta cut(true: use time; false: use track doca)
         if(this.getEngineConfigString("dcBetaCut")!=null)
             useBetaCut =Boolean.valueOf(this.getEngineConfigString("dcBetaCut"));
@@ -76,6 +73,14 @@ public class DCEngine extends ReconstructionEngine {
         if(this.getEngineConfigString("dcDoublets")!=null)       
             useDoublets = Boolean.valueOf(this.getEngineConfigString("dcDoublets"));
         
+        //Apply the jitter correction based on DCRB timestamps
+        if(this.getEngineConfigString("dcrbJitter")!=null)       
+            dcrbJitter = Boolean.valueOf(this.getEngineConfigString("dcrbJitter"));
+                
+        //Swap DCRB timestamp bits
+        if(this.getEngineConfigString("swapDCRBBits")!=null)       
+            swapDCRBBits = Boolean.valueOf(this.getEngineConfigString("swapDCRBBits"));
+        
         //NSUPERLAYERTRACKING
         if(this.getEngineConfigString("dcFOOST")!=null)
             if(!Boolean.valueOf(this.getEngineConfigString("dcFOOST"))) {
@@ -86,6 +91,24 @@ public class DCEngine extends ReconstructionEngine {
         if(this.getEngineConfigString("outputBankPrefix")!=null) {
             outBankPrefix = this.getEngineConfigString("outputBankPrefix");
         }
+        
+        // Set geometry shifts for alignment code
+        if(this.getEngineConfigString("alignmentShifts")!=null) {
+            String[] alignmentShift = this.getEngineConfigString("alignmentShifts").split(",");
+            System.out.println(alignmentShift[0]);
+            for(int i=0; i<alignmentShift.length; i++) {
+                if(alignmentShift[i].strip().matches("r[123]_c?[xyz]:.*")) {
+                    String shift = alignmentShift[i].split(":")[0];
+                    double value = Double.parseDouble(alignmentShift[i].split(":")[1]);
+                    int region = Integer.parseInt(shift.substring(1, 2));
+                    int iaxis = 0;
+                    if(shift.endsWith("y"))      iaxis = 1;
+                    else if(shift.endsWith("z")) iaxis = 2;
+                    if(shift.contains("c")) iaxis +=3;
+                    shifts[region-1][iaxis] = value;
+                }
+            }
+        }
     }
 
 
@@ -93,8 +116,12 @@ public class DCEngine extends ReconstructionEngine {
 
         // Load tables
         Map<String,Integer> dcTables = new HashMap<>();
+        dcTables.put(Constants.TT,3);
         dcTables.put(Constants.DOCARES,3);
         dcTables.put(Constants.TIME2DIST,3);
+        dcTables.put(Constants.PRESSURE, 3);
+        dcTables.put(Constants.T2DPRESSURE,3);
+        dcTables.put(Constants.T2DPRESSUREREF,3);
         dcTables.put(Constants.T0CORRECTION,4);
         dcTables.put(Constants.TDCTCUTS,3);
         dcTables.put(Constants.TIMEJITTER,3);
@@ -118,12 +145,14 @@ public class DCEngine extends ReconstructionEngine {
                                            geoVariation, 
                                            wireDistortion, 
                                            useStartTime, 
-                                           useTimeBeta, 
                                            useBetaCut, 
                                            t2d,
                                            useDoublets,
+                                           dcrbJitter,
+                                           swapDCRBBits,
                                            nSuperLayer, 
-                                           selectedSector);
+                                           selectedSector,
+                                           shifts);
         this.LoadTables();
         this.initBanks();
         this.setDropBanks();
@@ -161,22 +190,4 @@ public class DCEngine extends ReconstructionEngine {
         int run = bank.getInt("run", 0);
         return run;
     }
-
-    public double getTriggerPhase(DataEvent event) {
-        DataBank  bank = event.getBank("RUN::config");
-        int        run = bank.getInt("run", 0);
-        long timeStamp = bank.getLong("timestamp", 0);
-        
-        double triggerPhase = 0;
-        if (run>0 && timeStamp>=0) {
-           IndexedTable tabJ = super.getConstantsManager().getConstants(run, Constants.TIMEJITTER);
-           double period = tabJ.getDoubleValue("period", 0, 0, 0);
-           int    phase  = tabJ.getIntValue("phase", 0, 0, 0);
-           int    cycles = tabJ.getIntValue("cycles", 0, 0, 0);
-
-           if (cycles > 0) triggerPhase = period * ((timeStamp + phase) % cycles);
-        }
-        return triggerPhase;
-    }
-
 }

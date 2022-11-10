@@ -379,28 +379,23 @@ public class DetectorData {
         return bank;
     }
 
-    public static DataBank getUTracksBank(List<DetectorParticle> particles, DataEvent event, String bank_name, int rows) {
-        DataBank bank = event.createBank(bank_name, rows);
-        int row = 0;
-        for (int i = 0; i < particles.size(); i++) {
-            DetectorParticle p = particles.get(i);
-            if (p.getTrackDetector() == DetectorType.CVT.getDetectorId()) {
-                bank.setShort("index", row, (short) p.getTrackIndex());
-                bank.setShort("pindex", row, (short) i);
-                bank.setByte("sector", row, (byte) p.getTrackSector());
-                bank.setByte("detector", row, (byte) p.getTrackDetector());
-                bank.setByte("q", row, (byte) p.getCharge());
-                bank.setFloat("chi2", row, (float) p.getTrackChi2());
-                bank.setShort("NDF", row, (short) p.getNDF());
-                bank.setShort("status", row, (short) p.getTrackStatus());
-                bank.setFloat("px", row, (float) p.vector().x());
-                bank.setFloat("py", row, (float) p.vector().y());
-                bank.setFloat("pz", row, (float) p.vector().z());
-                bank.setFloat("vx", row, (float) p.vertex().x());
-                bank.setFloat("vy", row, (float) p.vertex().y());
-                bank.setFloat("vz", row, (float) p.vertex().z());
-                row = row + 1;
-            }
+    public static DataBank getUTracksBank(List<DetectorTrack> utracks, List<DetectorTrack>tracks, DataEvent event, String bank_name) {
+        DataBank bank = event.createBank(bank_name, tracks.size());
+        for (int i = 0; i < tracks.size(); i++) {
+            bank.setShort("index", i,   (short) utracks.get(i).getTrackIndex());
+            bank.setShort("pindex", i,  (short) tracks.get(i).getAssociation());
+            bank.setByte("sector", i,   (byte) utracks.get(i).getSector());
+            bank.setByte("detector", i, (byte) utracks.get(i).getDetectorID());
+            bank.setByte("q", i,        (byte) utracks.get(i).getCharge());
+            bank.setFloat("chi2", i,    (float) utracks.get(i).getchi2());
+            bank.setShort("NDF", i,     (short) utracks.get(i).getNDF());
+            bank.setShort("status", i,  (short) utracks.get(i).getStatus());
+            bank.setFloat("px", i,      (float) utracks.get(i).getVector().x());
+            bank.setFloat("py", i,      (float) utracks.get(i).getVector().y());
+            bank.setFloat("pz", i,      (float) utracks.get(i).getVector().z());
+            bank.setFloat("vx", i,      (float) utracks.get(i).getVertex().x());
+            bank.setFloat("vy", i,      (float) utracks.get(i).getVertex().y());
+            bank.setFloat("vz", i,      (float) utracks.get(i).getVertex().z());
         }
         return bank;
     }

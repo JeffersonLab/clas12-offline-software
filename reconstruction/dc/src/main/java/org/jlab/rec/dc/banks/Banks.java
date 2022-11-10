@@ -7,6 +7,7 @@ package org.jlab.rec.dc.banks;
 public class Banks {
     
     private final String tdcBank    = "DC::tdc";
+    private final String tsBank     = "DC::jitter";
     private final String docaBank   = "DC::doca";
     
     private final String aiBank     = "ai::tracks";
@@ -47,6 +48,10 @@ public class Banks {
         return tdcBank;
     }
 
+    public String getTimeStampBank() {
+        return tsBank;
+    }
+
     public String getDocaBank() {
         return docaBank;
     }
@@ -69,7 +74,7 @@ public class Banks {
     
     private String getOutputBank(String item) {
         String bank = this.outBankType + "::" + this.outPrefix + item;
-        if(outPrefix.equals("TB") && item.equals("Trajectory"))
+        if((outPrefix.equals("HB") || outPrefix.equals("TB")) && item.equals("Trajectory"))
             bank = this.outBankType + "::" + item;
         return bank;
     }

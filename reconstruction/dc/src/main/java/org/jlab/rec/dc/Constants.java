@@ -5,6 +5,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import cnuphys.snr.NoiseReductionParameters;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
@@ -12,6 +14,7 @@ import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.base.Detector;
 import org.jlab.rec.dc.trajectory.TrajectorySurfaces;
+import org.jlab.utils.groups.IndexedTable;
 
 /**
  * Constants used in the reconstruction
@@ -59,15 +62,23 @@ public class Constants {
     private boolean CHECKBETA = false;
     private int     T2D = 1;     // 1=polynomial, 0=exponential
     private boolean USEDOUBLETS = false;
+    private boolean DCRBJITTER = false;
+    private boolean SWAPDCRBBITS = false;
     
-    public static final String DOCARES      = "/calibration/dc/signal_generation/doca_resolution";
-    public static final String TIME2DIST    = "/calibration/dc/time_to_distance/time2dist";
-    public static final String T0CORRECTION = "/calibration/dc/time_corrections/T0Corrections";
-    public static final String TDCTCUTS     = "/calibration/dc/time_corrections/tdctimingcuts";
-    public static final String WIRESTAT     = "/calibration/dc/tracking/wire_status";
-    public static final String TIMEJITTER   = "/calibration/dc/time_jitter";
-    public static final String BEAMPOS      = "/geometry/beam/position";
-
+    // DATABASE TABLES
+    public static final String TT             = "/daq/tt/dc";
+    public static final String DOCARES        = "/calibration/dc/signal_generation/doca_resolution";
+    public static final String TIME2DIST      = "/calibration/dc/time_to_distance/time2dist";
+    public static final String T2DPRESSURE    = "/calibration/dc/time_to_distance/t2d_pressure";
+    public static final String PRESSURE       = "/hall/weather/pressure";
+    public static final String T2DPRESSUREREF = "/calibration/dc/time_to_distance/ref_pressure";
+    public static final String T0CORRECTION   = "/calibration/dc/time_corrections/T0Corrections";
+    public static final String TDCTCUTS       = "/calibration/dc/time_corrections/tdctimingcuts";
+    public static final String WIRESTAT       = "/calibration/dc/tracking/wire_status";
+    public static final String TIMEJITTER     = "/calibration/dc/time_jitter";
+    public static final String BEAMPOS        = "/geometry/beam/position";
+    private static final Map<Integer, IndexedTable> reverseTTs = new LinkedHashMap<>();
+    
     public static final String HITBASE = "HitBased";
     
     // GEOMETRY PARAMETERS
@@ -76,10 +87,10 @@ public class Constants {
     public FTOFGeant4Factory  ftofDetector = null;
     public Detector           ecalDetector = null;
     public Detector           fmtDetector  = null;
-    public TrajectorySurfaces tSurf        = null;
+    public TrajectorySurfaces trajSurfaces = null;
     
-    public static final double HTCCRADIUS=175;
-    public static final double LTCCPLANE=653.09;
+    public static final double HTCCRADIUS = 175;
+    public static final double LTCCPLANE  = 653.09;
     
     // other CLAS12 parameters
     public static final  int NSECT  = 6;
@@ -302,17 +313,35 @@ public class Constants {
     public void setUSEDOUBLETS(boolean USEDOUBLETS) {
         this.USEDOUBLETS = USEDOUBLETS;
     }
+
+    public boolean useDCRBJITTER() {
+        return DCRBJITTER;
+    }
+
+    public void setDCRBJITTER(boolean DCRBJITTER) {
+        this.DCRBJITTER = DCRBJITTER;
+    }
+
+    public boolean isSWAPDCRBBITS() {
+        return SWAPDCRBBITS;
+    }
+
+    public void setSWAPDCRBBITS(boolean SWAPDCRBBITS) {
+        this.SWAPDCRBBITS = SWAPDCRBBITS;
+    }
     
     public synchronized void initialize(String engine,
                                         String variation, 
                                         boolean wireDistortion,
                                         boolean useStartTime,
-                                        boolean useTimeBeta,
                                         boolean useBetaCut,
                                         int t2d, 
                                         boolean useDoublets,
+                                        boolean dcrbJitter,
+                                        boolean swapDCRBBits,
                                         int nSuperLayer,
-                                        int selectedSector) {
+                                        int selectedSector,
+                                        double[][] shifts) {
         if (ConstantsLoaded) {
             printConfig(engine);
         }
@@ -320,16 +349,17 @@ public class Constants {
             GEOVARIATION    = variation;
             ENDPLATESBOWING = wireDistortion;
             USETSTART       = useStartTime;
-            USETIMETBETA    = useTimeBeta;
             CHECKBETA       = useBetaCut;
             T2D             = t2d;
             USEDOUBLETS     = useDoublets;
+            DCRBJITTER      = dcrbJitter;  
+            SWAPDCRBBITS    = swapDCRBBits;
             NSUPERLAYERTRACKING = nSuperLayer;
             SECTORSELECT    = selectedSector;
 
             LoadConstants();
 
-            LoadGeometry(GEOVARIATION);
+            LoadGeometry(GEOVARIATION, shifts);
 
             ConstantsLoaded = true;
             printConfig(engine);
@@ -343,7 +373,7 @@ public class Constants {
         else {
             LoadConstants();
 
-            LoadGeometry(GEOVARIATION);
+            LoadGeometry(GEOVARIATION, null);
 
             ConstantsLoaded = true;
             printConfig(engine);
@@ -355,10 +385,12 @@ public class Constants {
         LOGGER.log(Level.INFO, "["+engine+"] run with sector selection = " + SECTORSELECT);
         LOGGER.log(Level.INFO, "["+engine+"] run with start time option = " + USETSTART);
         LOGGER.log(Level.INFO, "["+engine+"] run with wire distortions = " + ENDPLATESBOWING);
-        LOGGER.log(Level.INFO, "["+engine+"] run with with new tBeta configuration = " + USETIMETBETA);
+        LOGGER.log(Level.INFO, "["+engine+"] run with with time Beta correction (is false for doca Beta correction) = " + USETIMETBETA);
         LOGGER.log(Level.INFO, "["+engine+"] run with with Beta cut = " + CHECKBETA);
         LOGGER.log(Level.INFO, "["+engine+"] run with time to distance function set to exponential/polynomial (0/1) = " + T2D);
         LOGGER.log(Level.INFO, "["+engine+"] run with with hit doublets recovery = " + USEDOUBLETS);
+        LOGGER.log(Level.INFO, "["+engine+"] run with with DCRB jitter correction = " + SWAPDCRBBITS);
+        LOGGER.log(Level.INFO, "["+engine+"] run with with DCRB timestamp bit swap = " + SWAPDCRBBITS);
         LOGGER.log(Level.INFO, "["+engine+"] run with with Five-out-of-six-superlayer-trkg = " + NSUPERLAYERTRACKING);        
     }
     
@@ -430,10 +462,35 @@ public class Constants {
             
     }
 
-    private synchronized void LoadGeometry(String geoVariation) {
+    public synchronized IndexedTable getReverseTT(int run, IndexedTable tt) {
+        if(!reverseTTs.containsKey(run))
+            this.addReverseTT(run, tt);
+        return reverseTTs.get(run);
+    }
+    
+    private void addReverseTT(int run, IndexedTable tt) {
+        LOGGER.info("Reversing translation table for run " + run);
+        IndexedTable reverse = new IndexedTable(4, "crate/I:slot/I:channel/I");
+        for(int row=0; row<tt.getRowCount(); row++) {
+            int crate   = Integer.valueOf((String)tt.getValueAt(row,0));
+            int slot    = Integer.valueOf((String)tt.getValueAt(row,1));
+            int channel = Integer.valueOf((String)tt.getValueAt(row,2));
+            int sector  = tt.getIntValue("sector",    crate,slot,channel);
+            int layer   = tt.getIntValue("layer",     crate,slot,channel);
+            int comp    = tt.getIntValue("component", crate,slot,channel);
+            int order   = tt.getIntValue("order",     crate,slot,channel);
+            reverse.addEntry(sector, layer, comp, order);
+            reverse.setIntValue(crate,   "crate",   sector, layer, comp, order);
+            reverse.setIntValue(slot,    "slot",    sector, layer, comp, order);
+            reverse.setIntValue(channel, "channel", sector, layer, comp, order);
+        }
+        reverseTTs.put(run, reverse);
+    }
+    
+    private synchronized void LoadGeometry(String geoVariation, double[][] shifts) {
         // Load the geometry
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, geoVariation);
-        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, ENDPLATESBOWING);
+        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, ENDPLATESBOWING, shifts);
         for(int l=0; l<6; l++) {
             wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
         }
@@ -447,8 +504,8 @@ public class Constants {
         ecalDetector =  GeometryFactory.getDetector(DetectorType.ECAL, 11, geoVariation);
         fmtDetector =  GeometryFactory.getDetector(DetectorType.FMT, 11, geoVariation);
         // create the surfaces
-        tSurf = new TrajectorySurfaces();
-        tSurf.LoadSurfaces(targetPosition, targetLength,dcDetector, ftofDetector, ecalDetector, fmtDetector);        
+        trajSurfaces = new TrajectorySurfaces();
+        trajSurfaces.loadSurface(targetPosition, targetLength,dcDetector, ftofDetector, ecalDetector, fmtDetector);        
     }
    
 

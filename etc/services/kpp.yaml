@@ -92,7 +92,7 @@ configuration:
 #    EBTB:
 #      variation: default
 #      timestamp: 08/22/2018
-    DCRC:
+    DCCR:
       dcT2DFunc: "Exponential"  
     DCHB:
       dcT2DFunc: "Exponential"  

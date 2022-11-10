@@ -2,12 +2,10 @@ package org.jlab.rec.cvt.svt;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.clas.tracking.kalmanfilter.Units;
 import org.jlab.clas.tracking.objects.Strip;
-import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
 import org.jlab.geom.prim.Arc3D;
@@ -473,5 +471,33 @@ public class SVTGeometry {
             return false;
         else
             return true;
+    }
+    
+    public boolean isInside(int layer, int sector, Point3D traj) {
+        
+        Point3D local = this.toLocal(layer, sector, traj);
+        
+        if(local.x()<0 || local.x()>SVTConstants.ACTIVESENWID)
+            return false;
+        else if(local.z()<0 || local.z()>SVTConstants.MODULELEN)
+            return false;
+        else
+            return true;
+    }
+    
+    public double distanceToEdge(int layer, int sector, Point3D traj) {
+        
+        Point3D local = this.toLocal(layer, sector, traj);
+        double xmin = Math.min(Math.abs(local.x()), Math.abs(SVTConstants.ACTIVESENWID-local.x()));
+        double zmin = Math.min(Math.abs(local.z()), Math.abs(SVTConstants.MODULELEN-local.z()));
+        if(local.x()<0 || local.x()>SVTConstants.ACTIVESENWID)
+            xmin *= -1;
+        if(local.z()<0 || local.z()>SVTConstants.MODULELEN)
+            zmin *= -1;
+        if((0<local.x() && local.x()<SVTConstants.ACTIVESENWID) || 
+           (0<local.z() && local.z()<SVTConstants.MODULELEN))
+            return Math.min(xmin, zmin);
+        else
+            return Math.max(xmin, zmin);
     }
 }

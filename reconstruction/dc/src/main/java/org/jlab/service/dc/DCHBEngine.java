@@ -60,8 +60,6 @@ public class DCHBEngine extends DCEngine {
         int run = this.getRun(event);
         if(run==0) return true;
         
-        double triggerPhase = this.getTriggerPhase(event);
-
        
        if (event.hasBank("MC::Particle") && this.getEngineConfigString("wireDistort")==null) {
            Constants.getInstance().setWIREDIST(0);
@@ -88,17 +86,10 @@ public class DCHBEngine extends DCEngine {
         /* 7 */
         RecoBankWriter rbc = new RecoBankWriter(this.getBanks());
         /* 8 */
-        HitReader hitRead = new HitReader(this.getBanks());
+        HitReader hitRead = new HitReader(this.getBanks(), super.getConstantsManager(), Constants.getInstance().dcDetector);
         /* 9 */
-        hitRead.fetch_DCHits(event,
-                noiseAnalysis,
-                parameters,
-                results,
-                super.getConstantsManager().getConstants(run, Constants.TIME2DIST),
-                super.getConstantsManager().getConstants(run, Constants.TDCTCUTS),
-                super.getConstantsManager().getConstants(run, Constants.WIRESTAT),
-                Constants.getInstance().dcDetector,
-                triggerPhase);
+        hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results);
+        
         /* 10 */
         //I) get the hits
         List<Hit> hits = hitRead.get_DCHits();
@@ -189,7 +180,7 @@ public class DCHBEngine extends DCEngine {
             for (Track trk : trkcands) {
                 // reset the id
                 trk.set_Id(trkId);
-                trkcandFinder.matchHits(trk.get_Trajectory(),
+                trkcandFinder.matchHits(trk.getStateVecs(),
                         trk,
                         Constants.getInstance().dcDetector,
                         dcSwim);
@@ -260,7 +251,7 @@ public class DCHBEngine extends DCEngine {
 
                 // reset the id
                 trk.set_Id(trkId);
-                trkcandFinder.matchHits(trk.get_Trajectory(),
+                trkcandFinder.matchHits(trk.getStateVecs(),
                         trk,
                         Constants.getInstance().dcDetector,
                         dcSwim);

@@ -52,7 +52,7 @@ public class DCHBPostClusterConv extends DCEngine {
         if(run==0) return true;
         
         /* IO */
-        HitReader      reader = new HitReader(this.getBanks());
+        HitReader      reader = new HitReader(this.getBanks(), Constants.getInstance().dcDetector);
         RecoBankWriter writer = new RecoBankWriter(this.getBanks());
         // get Field
         Swim dcSwim = new Swim();
@@ -64,7 +64,7 @@ public class DCHBPostClusterConv extends DCEngine {
         List<FittedHit> fhits = new ArrayList<>();
         
         //1) read the hits from the banks
-        Map<Integer, ArrayList<FittedHit>> hits = reader.read_Hits(event, Constants.getInstance().dcDetector);
+        Map<Integer, ArrayList<FittedHit>> hits = reader.read_Hits(event);
         if(hits == null || hits.isEmpty())
             return true;
         //2) find the clusters from these hits
@@ -128,13 +128,13 @@ public class DCHBPostClusterConv extends DCEngine {
         /* 19 */
         // track found
         int trkId = 1;
-        if (trkcands.size() > 0) {
+        if (!trkcands.isEmpty()) {
             // remove overlaps
             trkcandFinder.removeOverlappingTracks(trkcands);
             for (Track trk : trkcands) {
                 // reset the id
                 trk.set_Id(trkId);
-                trkcandFinder.matchHits(trk.get_Trajectory(),
+                trkcandFinder.matchHits(trk.getStateVecs(),
                         trk,
                         Constants.getInstance().dcDetector,
                         dcSwim);
@@ -205,13 +205,13 @@ public class DCHBPostClusterConv extends DCEngine {
                 dcSwim, false);
 
         // remove overlaps
-        if (mistrkcands.size() > 0) {
+        if (!mistrkcands.isEmpty()) {
             trkcandFinder.removeOverlappingTracks(mistrkcands);
             for (Track trk : mistrkcands) {
-
+                
                 // reset the id
                 trk.set_Id(trkId);
-                trkcandFinder.matchHits(trk.get_Trajectory(),
+                trkcandFinder.matchHits(trk.getStateVecs(),
                         trk,
                         Constants.getInstance().dcDetector,
                         dcSwim);
@@ -232,6 +232,7 @@ public class DCHBPostClusterConv extends DCEngine {
         
         //gather all the hits for pointer bank creation
         for (Track trk : trkcands) {
+            trk.calcTrajectory(trk.getId(), dcSwim, trk.get_Vtx0(), trk.get_pAtOrig(), trk.get_Q());
             for (Cross c : trk) {
                 c.set_CrossDirIntersSegWires();
                 trkcandFinder.setHitDoubletsInfo(c.get_Segment1());
@@ -264,7 +265,8 @@ public class DCHBPostClusterConv extends DCEngine {
                     writer.fillHBSegmentsBank(event, segments),
                     writer.fillHBCrossesBank(event, crosses),
                     writer.fillHBTracksBank(event, trkcands),
-                    writer.fillHBHitsTrkIdBank(event, fhits));
+                    writer.fillHBHitsTrkIdBank(event, fhits),
+                    writer.fillHBTrajectoryBank(event, trkcands));
         }
         return true;
     }

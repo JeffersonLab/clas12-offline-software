@@ -755,7 +755,9 @@ public class EvioHipoEvent4 {
     }
     
     public static void main(String[] args){
-        
+
+        DefaultLogger.debug();
+
         OptionParser parser = new OptionParser();
         parser.addRequired("-o");
         parser.addOption("-r","10");
