@@ -75,7 +75,8 @@ public class DetectorEvent {
         this.eventHeader = eventHeader;
     }
     
-    public void addParticle(DetectorParticle particle){        
+    public void addParticle(DetectorParticle particle){
+        particle.getTrack().setAssociation(this.particleList.size());
         this.particleList.add(particle);
     }
     
