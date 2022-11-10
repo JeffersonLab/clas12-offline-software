@@ -170,6 +170,14 @@ public class EBAnalyzer {
                 event.getEventHeader().setStartTimeFT(startTime);
                 assignParticleStartTimes(event,DetectorType.FTCAL,-1);
 
+                // reassign neutrals' vertices:
+                for (DetectorParticle p : event.getParticles()) {
+                    if (p.getCharge()==0) {
+                        p.getTrack().setNeutralPath(
+                                event.getTriggerParticle().vertex(),p.getTrack().getTrackEnd());
+                    }
+                }
+
                 // recalculate betas, pids, etc:
                 this.assignBetas(event,true);
                 this.assignPids(event,true);
@@ -177,7 +185,7 @@ public class EBAnalyzer {
         }
         this.assignNeutralMomenta(event);
     }
-    
+   
     /**
      *
      * Determine event start time from trigger particle, assign particles'
