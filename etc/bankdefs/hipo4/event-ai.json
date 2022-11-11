@@ -206,8 +206,8 @@
             {"name":"cx",      "type":"F", "info":"direction cosline of the track at the detector surface"},
             {"name":"cy",      "type":"F", "info":"direction cosline of the track at the detector surface"},
             {"name":"cz",      "type":"F", "info":"direction cosline of the track at the detector surface"},
-            {"name":"path",    "type":"F", "info":"pathlength of the track to the detector surface from the DOCA point (cm)"},
-            {"name":"edge",    "type":"F", "info":""}
+            {"name":"path",    "type":"F", "info":"path length from primary vertex to the detector surface (cm)"},
+            {"name":"edge",    "type":"F", "info":"signed distance between track position and closest detector edge (cm)"}
         ]
     },
     {
@@ -512,8 +512,8 @@
             {"name":"cx",      "type":"F", "info":"direction cosline of the track at the detector surface"},
             {"name":"cy",      "type":"F", "info":"direction cosline of the track at the detector surface"},
             {"name":"cz",      "type":"F", "info":"direction cosline of the track at the detector surface"},
-            {"name":"path",    "type":"F", "info":"pathlength of the track to the detector surface from the DOCA point (cm)"},
-            {"name":"edge",    "type":"F", "info":""}
+            {"name":"path",    "type":"F", "info":"path length from primary vertex to the detector surface (cm)"},
+            {"name":"edge",    "type":"F", "info":"signed distance between track position and closest detector edge (cm)"}
         ]
     },
     {
