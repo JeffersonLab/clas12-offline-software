@@ -54,6 +54,7 @@ public class Constants {
     public boolean   svtSeeding = false;
     public boolean   svtLinkerSeeding = false;
     public boolean   timeCuts = false;
+    public boolean   bmtHVCuts = false;
     public boolean   useOnlyTruthHits = false;
     public boolean   useOnlyBMTTruthHits = false;
     public boolean   useOnlyBMTCTruthHits = false;
@@ -557,6 +558,7 @@ public class Constants {
                                         boolean elosPrecorrection,
                                         boolean svtSeeding,
                                         boolean timeCuts,
+                                        boolean hvCuts,
                                         boolean useSVTTimingCuts,
                                         boolean removeOverlappingSeeds,
                                         boolean flagSeeds,
@@ -582,6 +584,7 @@ public class Constants {
             this.preElossCorrection = elosPrecorrection;
             this.svtSeeding = svtSeeding;
             this.timeCuts = timeCuts;
+            this.bmtHVCuts = hvCuts;
             this.useSVTTimingCuts = useSVTTimingCuts;
             this.removeOverlappingSeeds = removeOverlappingSeeds;
             this.flagSeeds = flagSeeds;

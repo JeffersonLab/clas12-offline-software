@@ -12,6 +12,7 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.Geometry;
+import org.jlab.rec.cvt.bmt.BMTConstants;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.hit.ADCConvertor;
@@ -81,7 +82,8 @@ public class HitReader {
      * @param status
      * @param timeCuts
      */
-    public void fetch_BMTHits(DataEvent event, Swim swim, IndexedTable status, IndexedTable timeCuts) {
+    public void fetch_BMTHits(DataEvent event, Swim swim, IndexedTable status, 
+            IndexedTable timeCuts, IndexedTable bmtStripVoltage, IndexedTable bmtStripVoltageThresh) {
 
         // return if there is no BMT bank
         if (event.hasBank("BMT::adc") == false) {
@@ -130,6 +132,22 @@ public class HitReader {
                 if(Constants.getInstance().timeCuts) {
                     if(time!=0 && (time<tmin || time>tmax))
                         BmtStrip.setStatus(2);// calculate the strip parameters for the BMT hit
+                }
+                if(Constants.getInstance().bmtHVCuts) {
+                    if(bmtStripVoltage!=null && bmtStripVoltage.hasEntry(sector,layer,0) && 
+                            bmtStripVoltageThresh!=null && bmtStripVoltageThresh.hasEntry(sector,layer,0)) {
+                        double hv  = bmtStripVoltage.getDoubleValue("HV", sector,layer,0); 
+                        double hv1 = bmtStripVoltageThresh.getDoubleValue("HV1", sector,layer,0); 
+                        double hv2 = bmtStripVoltageThresh.getDoubleValue("HV2", sector,layer,0); 
+                        double hv3 = bmtStripVoltageThresh.getDoubleValue("HV3", sector,layer,0); 
+                        
+                        if(hv<hv1) 
+                            BmtStrip.setStatus(4);
+                        if(hv>=hv1 && hv<hv2) 
+                            BmtStrip.setStatus(5);
+                        if(hv>=hv2 && hv<hv3) 
+                            BmtStrip.setStatus(6);
+                    }
                 }
                 BmtStrip.calcBMTStripParams(sector, layer, swim); // for Z detectors the Lorentz angle shifts the strip measurement; calc_Strip corrects for this effect
                 // create the hit object for detector type BMT

@@ -38,7 +38,7 @@ public class ClusterFinder {
                 continue;
             }
 
-            if (hit.getStrip().getStatus()!=0) {
+            if (hit.getStrip().getStatus()>0 && hit.getStrip().getStatus()<5) {
                 continue;
             }
 

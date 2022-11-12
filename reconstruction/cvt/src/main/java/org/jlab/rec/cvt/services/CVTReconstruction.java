@@ -38,12 +38,15 @@ public class CVTReconstruction {
     }
 
     
-    public List<ArrayList<Hit>> readHits(DataEvent event, IndexedTable svtStatus, IndexedTable bmtStatus, IndexedTable bmtTime) {
+    public List<ArrayList<Hit>> readHits(DataEvent event, IndexedTable svtStatus, 
+            IndexedTable bmtStatus, IndexedTable bmtTime, 
+            IndexedTable bmtStripVoltage, IndexedTable bmtStripVoltageThresh) {
         
         HitReader hitRead = new HitReader();
         hitRead.fetch_SVTHits(event, -1, -1, svtStatus);
         if(Constants.getInstance().svtOnly==false)
-          hitRead.fetch_BMTHits(event, swimmer, bmtStatus, bmtTime);
+          hitRead.fetch_BMTHits(event, swimmer, bmtStatus, bmtTime, 
+                  bmtStripVoltage, bmtStripVoltageThresh);
 
         //I) get the hits
         List<Hit> SVThits = hitRead.getSVTHits();

@@ -71,7 +71,8 @@ public class CVTEngine extends ReconstructionEngine {
     private boolean elossPrecorrection  = true;
     private boolean svtSeeding          = true;
     private boolean timeCuts            = true;
-    public boolean useSVTTimingCuts =  false;
+    private boolean hvCuts              = false;
+    public boolean useSVTTimingCuts     =  false;
     public boolean removeOverlappingSeeds = true;
     public boolean flagSeeds = true;
     private String  matrixLibrary       = "EJML";
@@ -109,6 +110,7 @@ public class CVTEngine extends ReconstructionEngine {
                                            elossPrecorrection,
                                            svtSeeding,
                                            timeCuts,
+                                           hvCuts,
                                            useSVTTimingCuts,
                                            removeOverlappingSeeds,
                                            flagSeeds,
@@ -274,18 +276,21 @@ public class CVTEngine extends ReconstructionEngine {
         int run = this.getRun(event); 
         if(run<=0) return true;
         
-        IndexedTable svtStatus  = this.getConstantsManager().getConstants(run, "/calibration/svt/status");
-        IndexedTable svtLorentz = this.getConstantsManager().getConstants(run, "/calibration/svt/lorentz_angle");
-        IndexedTable bmtStatus  = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_status");
-        IndexedTable bmtTime    = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_time");
-        IndexedTable bmtVoltage = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_voltage");
-        IndexedTable beamPos    = this.getConstantsManager().getConstants(run, "/geometry/beam/position");
+        IndexedTable svtStatus          = this.getConstantsManager().getConstants(run, "/calibration/svt/status");
+        IndexedTable svtLorentz         = this.getConstantsManager().getConstants(run, "/calibration/svt/lorentz_angle");
+        IndexedTable bmtStatus          = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_status");
+        IndexedTable bmtTime            = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_time");
+        IndexedTable bmtVoltage         = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_voltage");
+        IndexedTable bmtStripVoltage    = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_strip_voltage");
+        IndexedTable bmtStripThreshold  = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_strip_voltage_thresholds");
+        IndexedTable beamPos            = this.getConstantsManager().getConstants(run, "/geometry/beam/position");
         
         Geometry.initialize(this.getConstantsManager().getVariation(), 11, svtLorentz, bmtVoltage);
         
         CVTReconstruction reco = new CVTReconstruction(swimmer);
         
-        List<ArrayList<Hit>>         hits = reco.readHits(event, svtStatus, bmtStatus, bmtTime);
+        List<ArrayList<Hit>>         hits = reco.readHits(event, svtStatus, bmtStatus, bmtTime, 
+                                                            bmtStripVoltage, bmtStripThreshold);
         List<ArrayList<Cluster>> clusters = reco.findClusters();
         List<ArrayList<Cross>>    crosses = reco.findCrosses();
         
@@ -379,6 +384,10 @@ public class CVTEngine extends ReconstructionEngine {
         
         if(this.getEngineConfigString("timeCuts")!=null) 
             this.timeCuts = Boolean.parseBoolean(this.getEngineConfigString("timeCuts")); 
+        
+        if(this.getEngineConfigString("hvCuts")!=null) 
+            this.hvCuts = Boolean.parseBoolean(this.getEngineConfigString("hvCuts")); 
+        
         if(this.getEngineConfigString("useSVTTimingCuts")!=null) 
             this.useSVTTimingCuts = Boolean.parseBoolean(this.getEngineConfigString("useSVTTimingCuts"));
         
@@ -441,6 +450,8 @@ public class CVTEngine extends ReconstructionEngine {
             "/calibration/mvt/bmt_time",
             "/calibration/mvt/bmt_status",
             "/calibration/mvt/bmt_voltage",
+            "/calibration/mvt/bmt_strip_voltage",
+            "/calibration/mvt/bmt_strip_voltage_thresholds",
             "/geometry/beam/position"
         };
         requireConstants(Arrays.asList(tables));
@@ -567,6 +578,7 @@ public class CVTEngine extends ReconstructionEngine {
         System.out.println("["+this.getName()+"] Pre-Eloss correction set to " + Constants.getInstance().preElossCorrection);
         System.out.println("["+this.getName()+"] run SVT-based seeding set to "+ Constants.getInstance().svtSeeding);
         System.out.println("["+this.getName()+"] run BMT timing cuts set to "+ Constants.getInstance().timeCuts);
+        System.out.println("["+this.getName()+"] run BMT HV masks "+ Constants.getInstance().bmtHVCuts);
         System.out.println("["+this.getName()+"] run with matLib "+ Constants.getInstance().KFMatrixLibrary.toString() + " library");
         System.out.println("["+this.getName()+"] ELoss mass set for particle "+ pid);
         System.out.println("["+this.getName()+"] run with Kalman-Filter status set to "+this.kfFilterOn);
