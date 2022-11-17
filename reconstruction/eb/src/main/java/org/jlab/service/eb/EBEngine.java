@@ -82,14 +82,14 @@ public class EBEngine extends ReconstructionEngine {
         this.setTrackBank(prefix+"::Track");
         this.setUTrackBank(prefix+"::UTrack");
         this.setCrossBank(prefix+"::TrackCross");
+        this.setTrajectoryBank(prefix+"::Traj");
+        this.setFTBank(prefix+"::ForwardTagger");
         if (!this.getClass().isAssignableFrom(EBHBEngine.class) &&
             !this.getClass().isAssignableFrom(EBHBAIEngine.class)) {
             this.setEventBankFT(prefix+"FT::Event");
             this.setParticleBankFT(prefix+"FT::Particle");
             this.setCovMatrixBank(prefix+"::CovMat");
-            this.setTrajectoryBank(prefix+"::Traj");        
         }
-        this.setFTBank(prefix+"::ForwardTagger");
     }
 
     public boolean processDataEvent(DataEvent de,EBScalers ebs) {

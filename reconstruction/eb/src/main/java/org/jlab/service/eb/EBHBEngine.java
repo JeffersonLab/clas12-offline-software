@@ -14,7 +14,7 @@ public class EBHBEngine extends EBEngine {
     
     public EBHBEngine(){
         super("EBHB");
-        setUsePOCA(true);
+        setUsePOCA(false);
     }
    
     @Override
@@ -30,6 +30,7 @@ public class EBHBEngine extends EBEngine {
         this.setFTOFHitsType("FTOF::hbclusters");
         this.setCvtTrackType("CVT::Tracks");
         this.setCvtTrajType("CVT::Trajectory");
+        this.setTrajectoryType("HitBasedTrkg::Trajectory");
     }
     
 }

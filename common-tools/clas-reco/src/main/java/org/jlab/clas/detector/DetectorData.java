@@ -469,6 +469,7 @@ public class DetectorData {
                         bank.setFloat("cx", row, (float) traj.get(detId, layId).getCross().direction().asUnit().x());
                         bank.setFloat("cy", row, (float) traj.get(detId, layId).getCross().direction().asUnit().y());
                         bank.setFloat("cz", row, (float) traj.get(detId, layId).getCross().direction().asUnit().z());
+                        bank.setFloat("edge", row, (float) traj.get(detId, layId).getEdge());
                         row = row + 1;
                     }
                 }
@@ -574,6 +575,7 @@ public class DetectorData {
                         int layId = trajBank.getByte("layer", ii);
                         float bField = trajBank.getFloat("B", ii);
                         float pathLength = trajBank.getFloat("path", ii);
+                        float edge= trajBank.getFloat("edge", ii);
                         float xx = trajBank.getFloat("x", ii);
                         float yy = trajBank.getFloat("y", ii);
                         float zz = trajBank.getFloat("z", ii);
@@ -581,7 +583,7 @@ public class DetectorData {
                                 xx + track.getMaxLineLength() * trajBank.getFloat("tx", ii),
                                 yy + track.getMaxLineLength() * trajBank.getFloat("ty", ii),
                                 zz + track.getMaxLineLength() * trajBank.getFloat("tz", ii));
-                        track.addTrajectoryPoint(detId, layId, traj, bField, pathLength);
+                        track.addTrajectoryPoint(detId, layId, traj, bField, pathLength, edge);
                     }
                 }
                 if (covBank != null) {
