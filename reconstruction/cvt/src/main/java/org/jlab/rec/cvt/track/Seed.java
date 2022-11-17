@@ -428,20 +428,18 @@ public class Seed implements Comparable<Seed>{
 //        }
 //        if(nSVT==0)
 //            System.out.println("no SVT? "+this.toString());
+        boolean pass = true;
         if(Double.isNaN(this.getChi2())) 
-            return false;
-        else if(this.getChi2() > Constants.CHI2CUT * (this.getNDF() + 5)) 
-            return false;
+            pass = false;
+        if(this.getChi2() > Constants.CHI2CUT * (this.getNDF() + 5)) 
+            pass = false;
         if(this.getNDF() < Constants.NDFCUT) 
-            return false;
+            pass = false;
         if(this.getHelix().getPt(this.getHelix().B) < Constants.getInstance().getPTCUT()) 
-            return false;
-//        else if(Math.abs(this.getHelix().getTanDip()) > Constants.TANDIP) 
-//            return false;
+            pass = false;
         if(Math.abs(Geometry.getInstance().getZoffset()-this.getHelix().getZ0()) > Geometry.getInstance().getZlength()+Constants.getInstance().getZRANGE()) 
-            return false;
-        else 
-            return true;
+            pass = false;
+        return pass;
     }
     
     /**

@@ -54,11 +54,17 @@ public class TrackSeeder {
     }
     
     
-    private void matchSeed(List<Cross> othercrs) {
-        if(othercrs==null || othercrs.isEmpty())
+    private void matchSeed(List<Cross> bmtcrs, List<Cross> svtcrs) {
+        if(svtcrs==null || svtcrs.isEmpty())
             return;
+        List<Cross> othercrs = new ArrayList<>();
         
         for (Seed seed : getSeedScan()) {
+            othercrs.clear();
+            othercrs.addAll(svtcrs);
+            othercrs.removeAll(seed.getCrosses());
+            if(bmtcrs!=null)
+                othercrs.addAll(bmtcrs);
             double d = seed.getDoca();
             double r = seed.getRho();
             double f = seed.getPhi();
@@ -78,6 +84,8 @@ public class TrackSeeder {
                 }
             }
         }
+        this.getUniqueSeeds(getSeedScan());
+        this.splitSeeds(getSeedScan());
     }
     
     public void fitSeed(List<Cross> seedcrs) {
@@ -256,7 +264,7 @@ public class TrackSeeder {
             }
         }
         this.findSeedCrossList(svt_crosses);
-        this.matchSeed(crosses);
+        this.matchSeed(crosses, svt_crosses);
         
         for(Seed mseed : getSeedScan()) { 
             List<Cross> seedcrs = mseed.getCrosses();
@@ -553,5 +561,96 @@ public class TrackSeeder {
      */
     public void setSeedScan(List<Seed> seedScan) {
         this.seedScan = seedScan;
+    }
+    
+        private void splitSeeds(List<Seed> seedScan) {
+        Map<Integer, List<Cross>> crsMap = new HashMap<>();
+        List<Seed> seeds = new ArrayList<>();
+        for(Seed s : seedScan) {
+            seeds.addAll(this.seedSplitter(s, crsMap));
+        }
+        seedScan.clear();
+        seedScan.addAll(seeds);
+    }
+    private List<Seed> seedSplitter(Seed seed, Map<Integer, List<Cross>> crsMap) {
+        crsMap.clear();
+        List<Seed> seeds =  new ArrayList<>();
+        List<Cross> crsList = seed.getCrosses();
+        for(Cross c : crsList) { 
+            int region = c.getRegion();
+            if(c.getDetector()==DetectorType.BMT)
+                region+=3;
+            if(!crsMap.containsKey(region)) {
+                crsMap.put(region, new ArrayList<>());
+                crsMap.get(region).add(c);
+            } else {
+                crsMap.get(region).add(c);
+            }
+        }
+        
+        int L[] = new int[6];
+        for(int i = 0; i<6; i++) {
+            if(crsMap.containsKey(i+1)==true) {
+                L[i]=crsMap.get(i+1).size();
+            }
+        }
+        for(int i = 0; i<6; i++) {
+            if(L[i]==0)
+                L[i]=1;
+        }
+        for(int i1 = 0; i1<L[0]; i1++) {
+            for(int i2 = 0; i2<L[1]; i2++) {
+                for(int i3 = 0; i3<L[2]; i3++) {
+                    for(int i4 = 0; i4<L[3]; i4++) {
+                        for(int i5 = 0; i5<L[4]; i5++) {
+                            for(int i6 = 0; i6<L[5]; i6++) {
+                                 ArrayList<Cross> list = new ArrayList<>();
+                                if(crsMap.containsKey(1)==true) {
+                                    ArrayList<Cross> list1 = (ArrayList<Cross>) crsMap.get(1);
+                                    list.add(list1.get(i1)); 
+                                }
+                                if(crsMap.containsKey(2)==true) {
+                                    ArrayList<Cross> list1 = (ArrayList<Cross>) crsMap.get(2);
+                                    list.add(list1.get(i2));
+                                }
+                                if(crsMap.containsKey(3)==true) {
+                                    ArrayList<Cross> list1 = (ArrayList<Cross>) crsMap.get(3);
+                                    list.add(list1.get(i3));
+                                } 
+                                if(crsMap.containsKey(4)==true) {
+                                    ArrayList<Cross> list1 = (ArrayList<Cross>) crsMap.get(4);
+                                    list.add(list1.get(i4));
+                                }
+                                if(crsMap.containsKey(5)==true) {
+                                    ArrayList<Cross> list1 = (ArrayList<Cross>) crsMap.get(5);
+                                    list.add(list1.get(i5));
+                                }
+                                if(crsMap.containsKey(6)==true) {
+                                    ArrayList<Cross> list1 = (ArrayList<Cross>) crsMap.get(6);
+                                    list.add(list1.get(i6));
+                                } 
+                                Seed s = new Seed(list);
+                                seeds.add(s); 
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return seeds;
+        
+    }
+
+    private void getUniqueSeeds(List<Seed> seedScan) {
+        List<Seed> seeds = new ArrayList<>();
+        Map<Seed.Key, Seed> seedMap = new HashMap<>();
+        for(Seed s : seedScan) { 
+            s.setKey(s.new Key(s));
+            seedMap.put(s.getKey(), s); 
+        }
+        seeds.addAll(seedMap.values());
+        seedScan.clear();
+        seedScan.addAll(seeds);
     }
 }
