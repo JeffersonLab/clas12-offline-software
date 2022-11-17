@@ -52,8 +52,8 @@ public class Helix {
         setYb(yb);
     }
 
-    public Helix(double pt, double d0, double phi0, double Z0, double tandip, int q, double xb, double yb, double solenoidMag) {
-        double curvature = (double)q*Constants.LIGHTVEL*solenoidMag/pt * Math.signum(Constants.getSolenoidScale());
+    public Helix(double pt, double d0, double phi0, double Z0, double tandip, int q, double xb, double yb) {
+        double curvature = (double)q*Constants.LIGHTVEL*Constants.getSolenoidMagnitude()/pt * Math.signum(Constants.getSolenoidScale());
         setDCA(d0);
         setPhiAtDCA(phi0);
         setCurvature(curvature);
