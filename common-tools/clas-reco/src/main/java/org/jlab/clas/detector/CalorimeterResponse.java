@@ -25,40 +25,6 @@ public class CalorimeterResponse extends DetectorResponse {
     private final Vector3 peakTDCTime = new Vector3(0,0,0);
     private final Vector3 peakFADCTime = new Vector3(0,0,0);
 
-    public void setPeakStatus(int u, int v, int w) {
-        this.dbStatus[0] = u;
-        this.dbStatus[1] = v;
-        this.dbStatus[2] = w;
-    }
-    public int[] getPeakStatus() {
-        return this.dbStatus;
-    }
-    public Vector3 getRawPeakEnergy() {
-        return this.rawPeakEnergy;
-    }
-    public Vector3 getReconPeakEnergy() {
-        return this.reconPeakEnergy;
-    }
-    public Vector3 getPeakTDCTime() {
-        return this.peakTDCTime;
-    }
-    public Vector3 getPeakFADCTime() {
-        return this.peakFADCTime;
-    }
-
-    public void setRawPeakEnergy(float u,float v,float w) {
-        this.rawPeakEnergy.setXYZ(u,v,w);
-    }
-    public void setReconPeakEnergy(float u,float v,float w) {
-        this.reconPeakEnergy.setXYZ(u,v,w);
-    }
-    public void setPeakTDCTime(float u,float v,float w) {
-        this.peakTDCTime.setXYZ(u,v,w);
-    }
-    public void setPeakFADCTime(float u,float v,float w) {
-        this.peakFADCTime.setXYZ(u,v,w);
-    }
-
     public CalorimeterResponse(){
         super();
     }
@@ -103,6 +69,39 @@ public class CalorimeterResponse extends DetectorResponse {
     }
     public Vector3 getThirdMomentUVW() {
         return thirdMomentUVW;
+    }
+    public void setPeakStatus(int u, int v, int w) {
+        this.dbStatus[0] = u;
+        this.dbStatus[1] = v;
+        this.dbStatus[2] = w;
+    }
+    public int[] getPeakStatus() {
+        return this.dbStatus;
+    }
+    public Vector3 getRawPeakEnergy() {
+        return this.rawPeakEnergy;
+    }
+    public Vector3 getReconPeakEnergy() {
+        return this.reconPeakEnergy;
+    }
+    public Vector3 getPeakTDCTime() {
+        return this.peakTDCTime;
+    }
+    public Vector3 getPeakFADCTime() {
+        return this.peakFADCTime;
+    }
+
+    public void setRawPeakEnergy(float u,float v,float w) {
+        this.rawPeakEnergy.setXYZ(u,v,w);
+    }
+    public void setReconPeakEnergy(float u,float v,float w) {
+        this.reconPeakEnergy.setXYZ(u,v,w);
+    }
+    public void setPeakTDCTime(float u,float v,float w) {
+        this.peakTDCTime.setXYZ(u,v,w);
+    }
+    public void setPeakFADCTime(float u,float v,float w) {
+        this.peakFADCTime.setXYZ(u,v,w);
     }
 
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 

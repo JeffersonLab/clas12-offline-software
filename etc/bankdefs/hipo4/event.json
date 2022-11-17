@@ -155,6 +155,29 @@
         ]
     },
     {
+        "name": "RECHB::CaloExtras",
+        "group": 300,
+        "item" : 24,
+        "info": "Calorimeter Cluster Parameters",
+        "entries": [
+            {"name":"dbstU",       "id":1, "type":"S", "info":"DB status + U strip*10"},
+            {"name":"dbstV",       "id":2, "type":"S", "info":"DB status + V strip*10"},
+            {"name":"dbstW",       "id":3, "type":"S", "info":"DB status + W strip*10"},
+            {"name":"rawEU",       "id":4, "type":"F", "info":"raw U peak energy"},
+            {"name":"rawEV",       "id":5, "type":"F", "info":"raw V peak energy"},
+            {"name":"rawEW",       "id":6, "type":"F", "info":"raw W peak energy"},
+            {"name":"recEU",       "id":7, "type":"F", "info":"recon U peak energy"},
+            {"name":"recEV",       "id":8, "type":"F", "info":"recon V peak energy"},
+            {"name":"recEW",       "id":9, "type":"F", "info":"recon W peak energy"},
+            {"name":"recDTU",      "id":10, "type":"F", "info":"recon U peak Dtime"},
+            {"name":"recDTV",      "id":11, "type":"F", "info":"recon V peak Dtime"},
+            {"name":"recDTW",      "id":12, "type":"F", "info":"recon W peak Dtime"},
+            {"name":"recFTU",      "id":13, "type":"F", "info":"recon U peak Ftime"},
+            {"name":"recFTV",      "id":14, "type":"F", "info":"recon V peak Ftime"},
+            {"name":"recFTW",      "id":15, "type":"F", "info":"recon W peak Ftime"}
+        ]
+    },
+    {
         "name": "RECHB::Track",
         "group": 300,
         "item" : 16,
@@ -348,7 +371,7 @@
     {
         "name": "REC::CaloExtras",
         "group": 300,
-        "item" : 44,
+        "item" : 46,
         "info": "Calorimeter Cluster Parameters",
         "entries": [
             {"name":"dbstU",       "id":1, "type":"S", "info":"DB status + U strip*10"},
