@@ -263,9 +263,9 @@ public class DetectorData {
         DataBank bank = event.createBank(bank_name, responses.size());
         for (int row = 0; row < responses.size(); row++) {
             CalorimeterResponse r = (CalorimeterResponse) responses.get(row);
-            bank.setShort("dbstU", row, r.getPeakStatus()[0] );
-            bank.setShort("dbstV", row, r.getPeakStatus()[1] );
-            bank.setShort("dbstW", row, r.getPeakStatus()[2] );
+            bank.setShort("dbstU", row, (short)r.getPeakStatus()[0] );
+            bank.setShort("dbstV", row, (short)r.getPeakStatus()[1] );
+            bank.setShort("dbstW", row, (short)r.getPeakStatus()[2] );
             bank.setFloat("rawEU", row, (float)r.getRawPeakEnergy().x() );
             bank.setFloat("rawEV", row, (float)r.getRawPeakEnergy().y() );
             bank.setFloat("rawEW", row, (float)r.getRawPeakEnergy().z() );
