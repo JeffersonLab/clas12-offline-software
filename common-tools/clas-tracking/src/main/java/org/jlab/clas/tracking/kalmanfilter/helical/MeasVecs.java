@@ -72,8 +72,8 @@ public class MeasVecs extends AMeasVecs {
                 SVminus.toDoca();
             }
             
-            SVplus.updateFromHelix();
-            SVminus.updateFromHelix();
+            //SVplus.updateFromHelix();
+            //SVminus.updateFromHelix();
             sv.setStateVecPosAtMeasSite(SVplus,  mv, null);
             sv.setStateVecPosAtMeasSite(SVminus, mv, null);
 //            sv.printlnStateVec(SVplus);
