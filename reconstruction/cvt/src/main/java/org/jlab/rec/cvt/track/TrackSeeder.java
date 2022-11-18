@@ -86,6 +86,12 @@ public class TrackSeeder {
         }
         this.getUniqueSeeds(getSeedScan());
         this.splitSeeds(getSeedScan());
+        if(Constants.getInstance().seedingDebugMode) {
+            System.out.println("SSA AFTER MATCHING");
+            for(Seed s : getSeedScan()) {
+                System.out.println(s.toString());
+            }
+        }
     }
     
     public void fitSeed(List<Cross> seedcrs) {
@@ -268,7 +274,7 @@ public class TrackSeeder {
         
         for(Seed mseed : getSeedScan()) { 
             List<Cross> seedcrs = mseed.getCrosses();
-   
+            
             // loop until a good circular fit. removing far crosses each time
             boolean circlefitstatusOK = false;
             while( ! circlefitstatusOK && seedcrs.size()>=3 ){
@@ -324,7 +330,7 @@ public class TrackSeeder {
             if(mseed.getCrosses().size()>2) {
                 fitStatus = mseed.fit(Constants.SEEDFITITERATIONS, xbeam, ybeam, bfield);
             }
-            if (fitStatus) { 
+            if (fitStatus) {  
                 List<Cross> sameSectorCrosses = this.findCrossesInSameSectorAsSVTTrk(mseed, bmtC_crosses);
                 BMTmatches.clear();
                 if (sameSectorCrosses.size() >= 0) {
@@ -337,7 +343,9 @@ public class TrackSeeder {
                 for (Seed bseed : BMTmatches) {
                     //refit using the BMT
                     fitStatus = bseed.fit(Constants.SEEDFITITERATIONS, xbeam, ybeam, bfield);
-
+                    if(Constants.getInstance().seedingDebugMode) {
+                        System.out.println("Pass SSA "+bseed.isGood()+" "+bseed.toString());
+                    }
                     if (fitStatus && bseed.getCircleFitChi2PerNDF()<chi2_Circ
                                   && bseed.getLineFitChi2PerNDF()<chi2_Line
                                   && bseed.isGood()) {
@@ -362,6 +370,8 @@ public class TrackSeeder {
                     c.isInSeed = true;
                 }
                 bseed.setStatus(2);
+                if(Constants.getInstance().seedingDebugMode)
+                    System.out.println("SSA after fit "+bseed.toString());
             }
         }
         return seedlist;

@@ -80,6 +80,8 @@ public class Constants {
     public static final double TANDIP  = 2;     // max value on dip angle
     public static final double NDFCUT  = 0;     // minimum number of degres of freedom
     public static final double CHI2CUT = 10;    // 50, minimum chi2 per degrees of freedom
+    public static final double CHI2CUTSSA = 30;    // 50, minimum chi2 per degrees of freedom for SVTSTANDALONE (SSA)
+    public static final double DZCUTBUFFEESSA = 10; //dz cut additional contribution to account for SSA poorer resolution
     public static final double RESICUT = 5;    // minimum resi in PR
     private static double ZRANGE  = 10;   // defines z range as -ZRANGE:+ZRANGE in mm
     public static final int    MINSVTCRSFORCOSMIC = 2; 

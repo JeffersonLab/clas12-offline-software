@@ -106,8 +106,8 @@ public class TracksFromTargetRec {
                 }
                 List<Seed> failed = new ArrayList<>();
                 for(Seed s : seeds) { 
-                    if(s.getChi2()>Constants.CHI2CUT*s.getCrosses().size())
-                        failed.add(s);
+                    //if(s.getChi2()>Constants.CHI2CUT*s.getCrosses().size())
+                    //    failed.add(s);
                     if(s.getHelix()==null)
                         failed.add(s);
                 }

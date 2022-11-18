@@ -428,16 +428,23 @@ public class Seed implements Comparable<Seed>{
 //        }
 //        if(nSVT==0)
 //            System.out.println("no SVT? "+this.toString());
+        if(Constants.getInstance().seedingDebugMode) {
+            System.out.println("Pass SSA , c2 ok "+(this.getChi2() <= Constants.CHI2CUTSSA * (this.getNDF() + 5)) 
+                    +" ndf ok "+ (this.getNDF() >= Constants.NDFCUT) 
+                    +" pt ok "+ (this.getHelix().getPt(this.getHelix().B) >= Constants.getInstance().getPTCUT()) 
+                    +" dz ok "+ (Math.abs(Geometry.getInstance().getZoffset()-this.getHelix().getZ0()) <= Geometry.getInstance().getZlength()+Constants.getInstance().getZRANGE()) 
+                    +" ");
+        }
         boolean pass = true;
         if(Double.isNaN(this.getChi2())) 
             pass = false;
-        if(this.getChi2() > Constants.CHI2CUT * (this.getNDF() + 5)) 
+        if(this.getChi2() > Constants.CHI2CUTSSA * (this.getNDF() + 5)) 
             pass = false;
         if(this.getNDF() < Constants.NDFCUT) 
             pass = false;
         if(this.getHelix().getPt(this.getHelix().B) < Constants.getInstance().getPTCUT()) 
             pass = false;
-        if(Math.abs(Geometry.getInstance().getZoffset()-this.getHelix().getZ0()) > Geometry.getInstance().getZlength()+Constants.getInstance().getZRANGE()) 
+        if(Math.abs(Geometry.getInstance().getZoffset()-this.getHelix().getZ0()) > Geometry.getInstance().getZlength()+Constants.getInstance().getZRANGE()+Constants.DZCUTBUFFEESSA) 
             pass = false;
         return pass;
     }
