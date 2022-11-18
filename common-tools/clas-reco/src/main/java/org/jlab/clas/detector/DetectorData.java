@@ -258,6 +258,29 @@ public class DetectorData {
         }
         return bank;
     }
+    
+    public static DataBank getCaloExtrasResponseBank(List<DetectorResponse> responses, DataEvent event, String bank_name) {
+        DataBank bank = event.createBank(bank_name, responses.size());
+        for (int row = 0; row < responses.size(); row++) {
+            CalorimeterResponse r = (CalorimeterResponse) responses.get(row);
+            bank.setShort("dbstU", row, (short)r.getPeakStatus()[0] );
+            bank.setShort("dbstV", row, (short)r.getPeakStatus()[1] );
+            bank.setShort("dbstW", row, (short)r.getPeakStatus()[2] );
+            bank.setFloat("rawEU", row, (float)r.getRawPeakEnergy().x() );
+            bank.setFloat("rawEV", row, (float)r.getRawPeakEnergy().y() );
+            bank.setFloat("rawEW", row, (float)r.getRawPeakEnergy().z() );
+            bank.setFloat("recEU", row, (float)r.getReconPeakEnergy().x() );
+            bank.setFloat("recEV", row, (float)r.getReconPeakEnergy().y() );
+            bank.setFloat("recEW", row, (float)r.getReconPeakEnergy().z() );
+            bank.setFloat("recDTU", row, (float)r.getPeakTDCTime().x() );
+            bank.setFloat("recDTV", row, (float)r.getPeakTDCTime().y() );
+            bank.setFloat("recDTW", row, (float)r.getPeakTDCTime().z() );
+            bank.setFloat("recFTU", row, (float)r.getPeakFADCTime().x() );
+            bank.setFloat("recFTV", row, (float)r.getPeakFADCTime().y() );
+            bank.setFloat("recFTW", row, (float)r.getPeakFADCTime().z() );
+        }
+        return bank;
+    }
 
     public static DataBank getScintillatorResponseBank(List<DetectorResponse> responses, DataEvent event, String bank_name) {
         DataBank bank = event.createBank(bank_name, responses.size());
