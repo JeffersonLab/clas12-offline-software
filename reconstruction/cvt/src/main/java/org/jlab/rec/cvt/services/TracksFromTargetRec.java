@@ -115,7 +115,7 @@ public class TracksFromTargetRec {
     }
     
     public List<Track> getTracks(DataEvent event, boolean initFromMc, boolean kfFilterOn, int kfIterations, 
-                                 boolean searchMissingCls, int pid) {
+                                 boolean searchMissingCls, int elossPid) {
         if(this.CVTseeds.isEmpty()) return null;
         
         double solenoidScale = Constants.getInstance().getSolenoidScale();
@@ -126,6 +126,7 @@ public class TracksFromTargetRec {
         KFitter.polarity = (int)Math.signum(Constants.getSolenoidScale());
         Measurements measure = new Measurements(xb, yb, Constants.getInstance().kfBeamSpotConstraint());
         for (Seed seed : CVTseeds) { 
+            int pid = elossPid;
 //            seed.update_Crosses();
 //            System.out.println(seed.toString());
             List<Surface> surfaces = measure.getMeasurements(seed);
