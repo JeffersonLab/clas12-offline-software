@@ -1,7 +1,7 @@
 #!/bin/bash
 
 webDir=http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/eb
-webVersion=5.0-fid-r11
+webVersion=5.1-fid-r11
 webDir=$webDir/$webVersion
 
 # coatjava must already be built at ../../coatjava/
