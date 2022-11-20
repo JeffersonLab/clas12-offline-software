@@ -5,39 +5,35 @@ import java.util.List;
 /**
  *
  * @author gavalian
- * modified lcsmith 2/22/22
+ * modified lcsmith 
  */
 
 public class ECPeakAnalysis {
-	
-	static int splitIndex;
-	static int splitStrip; //for debugging
     
-    public static int getPeakSplitIndex(List<ECPeak> peaks){        
+    public static int[] getPeakSplitIndex(List<ECPeak> peaks){ 
+    	int [] split = {-1,-1}; 
         for(int i = 0; i < peaks.size(); i++){
-            splitIndex = peaks.get(i).getSplitIndex(ECCommon.splitMethod); //index of strip used to split peak
-            splitStrip = peaks.get(i).getSplitStrip(); //strip used to split peak
-            if(splitIndex>=0) return i; //index of peak tagged to be split
+            split[0] = peaks.get(i).getSplitIndex(ECCommon.splitMethod); //index of strip used to split peak
+            split[1] = peaks.get(i).getSplitStrip(); //strip used to split peak
+            if(split[0]>=0) return split; //index of peak tagged to be split
         }
-        return -1;
+        return split;
     }
     
     public static void splitPeaks(List<ECPeak> peaks){
-        
+        int [] split;
         while(true){ //repeat processing all peaks until no split found
         	if(ECCommon.debugSplit) System.out.println(" ");
-            int index = getPeakSplitIndex(peaks);
-        	if(ECCommon.debugSplit) System.out.println("New Iteration "+splitIndex+" "+splitStrip);
-            if(index<0){
+            split = getPeakSplitIndex(peaks);
+        	if(ECCommon.debugSplit) System.out.println("New Iteration "+split[0]+" "+split[1]);
+            if(split[0]<0){
                 return; // no split was found in any peak.  Exit.
             } else {
-                ECPeak  peak = peaks.get(index); //retrieve tagged peak with split candidate
-                peaks.remove(index); //tagged peak removed from list 
-                peaks.addAll(peak.splitPeak(splitIndex)); //two split peaks returned to list
+                ECPeak  peak = peaks.get(split[0]); //retrieve tagged peak with split candidate
+                peaks.remove(split[0]); //tagged peak removed from list 
+                peaks.addAll(peak.splitPeak(split[0])); //two split peaks returned to list
             }
         }
-    }
-    
-    
-    
+    }   
+      
 }
