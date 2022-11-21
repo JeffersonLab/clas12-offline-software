@@ -28,7 +28,7 @@ import org.jlab.rec.cvt.track.Seed.Key;
 import org.jlab.rec.cvt.track.StraightTrackSeeder;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.track.TrackSeeder;
-//import org.jlab.rec.cvt.track.TrackSeederCA;
+import org.jlab.rec.cvt.track.TrackSeederCA;
 import org.jlab.rec.cvt.track.TrackSeederSVTLinker;
 //import org.jlab.utils.groups.IndexedTable;
 
@@ -88,13 +88,13 @@ public class TracksFromTargetRec {
                 trseed.unUsedHitsOnly = true;
                 seeds = trseed.findSeed(this.SVTcrosses, null);
             } else {
-                //TrackSeederCA trseedca = new TrackSeederCA(swimmer, xb, yb);  // cellular automaton seeder
-                //seeds = trseedca.findSeed(this.SVTcrosses, this.BMTcrosses);
-                //recUtil.getUniqueSeedList(seeds);
                 if(Constants.getInstance().svtLinkerSeeding) {
                     TrackSeederSVTLinker trseed = new TrackSeederSVTLinker(swimmer, xb, yb);  // new seeder
                     seeds.addAll(trseed.findSeed(this.SVTcrosses, this.BMTcrosses));
-                } 
+                } else {
+                    TrackSeederCA trseedca = new TrackSeederCA(swimmer, xb, yb);  // cellular automaton seeder
+                    seeds.addAll(trseedca.findSeed(this.SVTcrosses, this.BMTcrosses));
+                }
                 //second seeding algorithm to search for SVT only tracks, and/or tracks missed by the CA
                 if(Constants.getInstance().svtSeeding) {
                     TrackSeeder trseed2 = new TrackSeeder(swimmer, xb, yb);
@@ -107,8 +107,8 @@ public class TracksFromTargetRec {
                 }
                 List<Seed> failed = new ArrayList<>();
                 for(Seed s : seeds) { 
-                    //if(s.getChi2()>Constants.CHI2CUT*s.getCrosses().size())
-                    //    failed.add(s);
+                    if(s.getChi2()>Constants.CHI2CUT*s.getCrosses().size())
+                        failed.add(s);
                     if(s.getHelix()==null)
                         failed.add(s);
                 }
