@@ -54,42 +54,52 @@ public class TrackSeeder {
     }
     
     
-    private void matchSeed(List<Cross> bmtcrs, List<Cross> svtcrs) {
-        if(svtcrs==null || svtcrs.isEmpty())
+    private void matchSeed(List<Cross> othercrs) {
+        if(othercrs==null || othercrs.isEmpty())
             return;
-        List<Cross> othercrs = new ArrayList<>();
-        
+        Map<Integer, List<Cross>> crsMap = new HashMap<>();
         for (Seed seed : getSeedScan()) {
-            othercrs.clear();
-            othercrs.addAll(svtcrs);
-            othercrs.removeAll(seed.getCrosses());
-            if(bmtcrs!=null)
-                othercrs.addAll(bmtcrs);
+            crsMap.clear();
             double d = seed.getDoca();
             double r = seed.getRho();
             double f = seed.getPhi();
 
             for (Cross c : othercrs ) { 
                 if(this.inSamePhiRange(seed, c)== true) {
-                    double xi = c.getPoint().x(); 
-                    double yi = c.getPoint().y();
-                    double ri = Math.sqrt(xi*xi+yi*yi);
-                    double fi = Math.atan2(yi,xi) ;
-
-                    double res = this.calcResi(r, ri, d, f, fi);
-                    if(Math.abs(res)<SVTParameters.RESIMAX) { 
-                        // add to seed    
-                        seed.getCrosses().add(c);
+                    int region = c.getRegion();
+                    if(c.getDetector()!=DetectorType.BMT)
+                        continue;
+                    if(!crsMap.containsKey(region)) {
+                        crsMap.put(region, new ArrayList<>());
+                        crsMap.get(region).add(c);
+                    } else {
+                        crsMap.get(region).add(c);
                     }
                 }
             }
-        }
-        this.getUniqueSeeds(getSeedScan());
-        this.splitSeeds(getSeedScan());
-        if(Constants.getInstance().seedingDebugMode) {
-            System.out.println("SSA AFTER MATCHING");
-            for(Seed s : getSeedScan()) {
-                System.out.println(s.toString());
+            
+            for(int rix = 0; rix<3; rix++) {
+            
+                if(crsMap.containsKey(rix+1)) {
+                    Cross bestCross = null;
+                    double bestRes = 999999;
+                    for (Cross c : crsMap.get(rix+1) ) { 
+
+                        double xi = c.getPoint().x(); 
+                        double yi = c.getPoint().y();
+                        double ri = Math.sqrt(xi*xi+yi*yi);
+                        double fi = Math.atan2(yi,xi) ;
+
+                        double res = this.calcResi(r, ri, d, f, fi);
+
+                        if(Math.abs(res)<SVTParameters.RESIMAX && Math.abs(res)<bestRes) { 
+                            bestCross = c;  
+                            bestRes = Math.abs(res);
+                        }
+                    }
+                    if(bestCross!=null)
+                        seed.getCrosses().add(bestCross);
+                }
             }
         }
     }
@@ -270,11 +280,11 @@ public class TrackSeeder {
             }
         }
         this.findSeedCrossList(svt_crosses);
-        this.matchSeed(crosses, svt_crosses);
+        this.matchSeed(crosses);
         
         for(Seed mseed : getSeedScan()) { 
             List<Cross> seedcrs = mseed.getCrosses();
-            
+   
             // loop until a good circular fit. removing far crosses each time
             boolean circlefitstatusOK = false;
             while( ! circlefitstatusOK && seedcrs.size()>=3 ){
@@ -330,7 +340,7 @@ public class TrackSeeder {
             if(mseed.getCrosses().size()>2) {
                 fitStatus = mseed.fit(Constants.SEEDFITITERATIONS, xbeam, ybeam, bfield);
             }
-            if (fitStatus) {  
+            if (fitStatus) { 
                 List<Cross> sameSectorCrosses = this.findCrossesInSameSectorAsSVTTrk(mseed, bmtC_crosses);
                 BMTmatches.clear();
                 if (sameSectorCrosses.size() >= 0) {
@@ -343,9 +353,7 @@ public class TrackSeeder {
                 for (Seed bseed : BMTmatches) {
                     //refit using the BMT
                     fitStatus = bseed.fit(Constants.SEEDFITITERATIONS, xbeam, ybeam, bfield);
-                    if(Constants.getInstance().seedingDebugMode) {
-                        System.out.println("Pass SSA "+bseed.isGood()+" "+bseed.toString());
-                    }
+
                     if (fitStatus && bseed.getCircleFitChi2PerNDF()<chi2_Circ
                                   && bseed.getLineFitChi2PerNDF()<chi2_Line
                                   && bseed.isGood()) {
@@ -370,8 +378,6 @@ public class TrackSeeder {
                     c.isInSeed = true;
                 }
                 bseed.setStatus(2);
-                if(Constants.getInstance().seedingDebugMode)
-                    System.out.println("SSA after fit "+bseed.toString());
             }
         }
         return seedlist;
@@ -571,96 +577,5 @@ public class TrackSeeder {
      */
     public void setSeedScan(List<Seed> seedScan) {
         this.seedScan = seedScan;
-    }
-    
-        private void splitSeeds(List<Seed> seedScan) {
-        Map<Integer, List<Cross>> crsMap = new HashMap<>();
-        List<Seed> seeds = new ArrayList<>();
-        for(Seed s : seedScan) {
-            seeds.addAll(this.seedSplitter(s, crsMap));
-        }
-        seedScan.clear();
-        seedScan.addAll(seeds);
-    }
-    private List<Seed> seedSplitter(Seed seed, Map<Integer, List<Cross>> crsMap) {
-        crsMap.clear();
-        List<Seed> seeds =  new ArrayList<>();
-        List<Cross> crsList = seed.getCrosses();
-        for(Cross c : crsList) { 
-            int region = c.getRegion();
-            if(c.getDetector()==DetectorType.BMT)
-                region+=3;
-            if(!crsMap.containsKey(region)) {
-                crsMap.put(region, new ArrayList<>());
-                crsMap.get(region).add(c);
-            } else {
-                crsMap.get(region).add(c);
-            }
-        }
-        
-        int L[] = new int[6];
-        for(int i = 0; i<6; i++) {
-            if(crsMap.containsKey(i+1)==true) {
-                L[i]=crsMap.get(i+1).size();
-            }
-        }
-        for(int i = 0; i<6; i++) {
-            if(L[i]==0)
-                L[i]=1;
-        }
-        for(int i1 = 0; i1<L[0]; i1++) {
-            for(int i2 = 0; i2<L[1]; i2++) {
-                for(int i3 = 0; i3<L[2]; i3++) {
-                    for(int i4 = 0; i4<L[3]; i4++) {
-                        for(int i5 = 0; i5<L[4]; i5++) {
-                            for(int i6 = 0; i6<L[5]; i6++) {
-                                 ArrayList<Cross> list = new ArrayList<>();
-                                if(crsMap.containsKey(1)==true) {
-                                    ArrayList<Cross> list1 = (ArrayList<Cross>) crsMap.get(1);
-                                    list.add(list1.get(i1)); 
-                                }
-                                if(crsMap.containsKey(2)==true) {
-                                    ArrayList<Cross> list1 = (ArrayList<Cross>) crsMap.get(2);
-                                    list.add(list1.get(i2));
-                                }
-                                if(crsMap.containsKey(3)==true) {
-                                    ArrayList<Cross> list1 = (ArrayList<Cross>) crsMap.get(3);
-                                    list.add(list1.get(i3));
-                                } 
-                                if(crsMap.containsKey(4)==true) {
-                                    ArrayList<Cross> list1 = (ArrayList<Cross>) crsMap.get(4);
-                                    list.add(list1.get(i4));
-                                }
-                                if(crsMap.containsKey(5)==true) {
-                                    ArrayList<Cross> list1 = (ArrayList<Cross>) crsMap.get(5);
-                                    list.add(list1.get(i5));
-                                }
-                                if(crsMap.containsKey(6)==true) {
-                                    ArrayList<Cross> list1 = (ArrayList<Cross>) crsMap.get(6);
-                                    list.add(list1.get(i6));
-                                } 
-                                Seed s = new Seed(list);
-                                seeds.add(s); 
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-        return seeds;
-        
-    }
-
-    private void getUniqueSeeds(List<Seed> seedScan) {
-        List<Seed> seeds = new ArrayList<>();
-        Map<Seed.Key, Seed> seedMap = new HashMap<>();
-        for(Seed s : seedScan) { 
-            s.setKey(s.new Key(s));
-            seedMap.put(s.getKey(), s); 
-        }
-        seeds.addAll(seedMap.values());
-        seedScan.clear();
-        seedScan.addAll(seeds);
     }
 }
