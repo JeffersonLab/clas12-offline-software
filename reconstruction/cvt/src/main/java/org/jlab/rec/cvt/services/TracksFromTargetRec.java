@@ -47,6 +47,7 @@ public class TracksFromTargetRec {
     private Map<Integer, Cross> SVTcrossesHM;
     private Map<Integer, Cross> BMTcrossesHM;
     private Map<Integer, Seed> CVTseedsHM ;
+    private Map<Integer, Seed> CVTseedsHMOK ;
     private List<Cluster> SVTclusters;
     private List<Cluster> BMTclusters;
     private List<Cross> SVTcrosses;
@@ -159,7 +160,7 @@ public class TracksFromTargetRec {
     }
     
     public List<Track> getTracks(DataEvent event, boolean initFromMc, boolean kfFilterOn, int kfIterations, 
-                                 boolean searchMissingCls, int pid) {
+                                 boolean searchMissingCls, int elossPid) {
         if(this.CVTseeds==null) return null;
         if(this.CVTseeds.isEmpty()) return null;
         
@@ -176,11 +177,12 @@ public class TracksFromTargetRec {
         Measurements measure = new Measurements(xb, yb, Constants.getInstance().kfBeamSpotConstraint());
         for (Seed seed : this.CVTseeds) { 
             if(seed.getId()<0) continue;
+            int pid = elossPid;
             //seed.update_Crosses();
             //System.out.println("Seed"+seed.toString());
             List<Surface> surfaces = measure.getMeasurements(seed);
-             
-            if(pid==0) pid = this.getTrackPid(event, seed.getId());
+            
+            if(pid==0) pid = this.getTrackPid(event, seed.getId()); 
             Point3D  v = seed.getHelix().getVertex();
             Vector3D p = seed.getHelix().getPXYZ(solenoidValue);
             
@@ -395,8 +397,13 @@ public class TracksFromTargetRec {
         if(CVTseedsHM == null) {
             return null;
         } else {
-            Collection<Seed> values = CVTseedsHM.values();
-            CVTseeds = new ArrayList<>(values);
+            CVTseedsHMOK = RecoBankReader.readCVTTracksBank(event, xb, yb, CVTseedsHM, SVTcrossesHM, BMTcrossesHM);
+            if(CVTseedsHMOK == null) {
+                return null;
+            } else {
+                Collection<Seed> values = CVTseedsHMOK.values();
+                CVTseeds = new ArrayList<>(values);
+            }
         }
         if(SVTclustersHM!=null)
             SVTclusters = new ArrayList<>(SVTclustersHM.values());

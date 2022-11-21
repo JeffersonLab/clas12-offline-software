@@ -353,7 +353,7 @@ public class RecoBankReader {
             return crosses;
         }
     }
-    
+    //sets seeds from first pass tracks
     public static Map<Integer, Seed> readCVTSeedsBank(DataEvent event, double xb, double yb, Map<Integer, Cross> svtCrosses, Map<Integer, Cross> bmtCrosses) {
         
         if(!event.hasBank("CVT::Seeds") || svtCrosses==null)
@@ -429,12 +429,13 @@ public class RecoBankReader {
         }
     }    
     
-    public static List<Track> readCVTTracksBank(DataEvent event, double xb, double yb, Map<Integer, Seed> cvtSeeds) {
+    public static Map<Integer, Seed> readCVTTracksBank(DataEvent event, double xb, double yb, Map<Integer, Seed> cvtSeeds,
+            Map<Integer, Cross> svtCrosses, Map<Integer, Cross> bmtCrosses) {
         
         if(!event.hasBank("CVT::Tracks"))
             return null;
         else {
-            List<Track> tracks = new ArrayList<>();        
+            Map<Integer, Seed> seeds = new HashMap<>();          
     
             DataBank bank = event.getBank("CVT::Tracks");
             for(int i = 0; i < bank.rows(); i++) {
@@ -469,18 +470,34 @@ public class RecoBankReader {
                 int    seedId   = bank.getShort("seedID", i);
                 int    type   = bank.getByte("fittingMethod", i);
                 
-                Track track = new Track(helix);
-                track.setId(tid);
-                track.getHelix().setCovMatrix(covmatrix);
-                track.setChi2(chi2);
-                track.setNDF(ndf);
-                track.setPID(pid);
-                track.setKFIterations((int) status/1000);
-                track.setSeed(cvtSeeds.get(seedId));
-                track.getSeed().setStatus(type);
-                tracks.add(track);
+                Seed seed = cvtSeeds.get(seedId);
+                seed.setId(tid);
+                seed.setHelix(helix);
+                seed.getHelix().setCovMatrix(covmatrix);
+                seed.setStatus(type);
+                
+                List<Cross> crossesOnTrk = new ArrayList<>();
+                for (int j = 0; j < 9; j++) {
+                    String hitStrg = "Cross";
+                    hitStrg += (j + 1);
+                    hitStrg += "_ID";  
+                    int cid = (int) bank.getShort(hitStrg, i);
+                    if(svtCrosses.containsKey(cid)) { 
+                        crossesOnTrk.add(svtCrosses.get(cid));
+                        
+                    }
+                    if(bmtCrosses!=null) {
+                        if(bmtCrosses.containsKey(cid)) { 
+                            crossesOnTrk.add(bmtCrosses.get(cid));
+                        }        
+                    }
+                }
+                
+                seed.setCrosses(crossesOnTrk);
+               
+                seeds.put(tid, seed);
             }
-            return tracks;
+            return seeds;
         }
     }
     
