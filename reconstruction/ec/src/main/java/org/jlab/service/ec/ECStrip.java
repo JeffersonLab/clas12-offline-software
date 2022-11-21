@@ -56,7 +56,7 @@ public class ECStrip implements Comparable {
     private Line3D         stripLine = new Line3D();
     private double stripDistanceEdge = 0.0;
     
-    private static final double coincTIME = 25.; //ns. 	
+    private static double  coincTIME = 25.; //ns. 	
     private double                   time = 0;
     private double              fgtw,dgtw = 0; //global time walk correction
     
