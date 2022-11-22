@@ -20,7 +20,7 @@ public class MatchSteradians extends AMatch {
      * @param dt 
      */
     public MatchSteradians(double dtheta, double dphi, double dt) {
-        this.limit_dtheta = dtheta;
+        this.limit_dtheta = Math.toRadians(dtheta);
         this.limit_dphi = Math.toRadians(dphi);
         this.limit_dt = dt;
     }
@@ -30,7 +30,7 @@ public class MatchSteradians extends AMatch {
      * @param dphi must be in units=degrees!!!!
      */
     public MatchSteradians(double dtheta, double dphi) {
-        this.limit_dtheta = dtheta;
+        this.limit_dtheta = Math.toRadians(dtheta);
         this.limit_dphi = Math.toRadians(dphi);
         this.limit_dt = -1;
     }
