@@ -9,7 +9,7 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.rec.eb.EBCCDBEnum;
 import org.jlab.clas.detector.DetectorResponseComparators;
-import org.jlab.clas.detector.matching.MatchCND;
+import org.jlab.clas.detector.matching.MatchCylindrical;
 
 /*
  *
@@ -181,8 +181,10 @@ public class EBMatching {
         // This is the new case where CND only does intralayer clustering,
         // and EB does CND's interlayer matching:
         //
-        MatchCND matcher = new MatchCND(eventBuilder.ccdb.getVector3D(EBCCDBEnum.CND_MATCHING_dr),
-                eventBuilder.ccdb.getDouble(EBCCDBEnum.CND_MATCHING_dt));
+        MatchCylindrical matcher = new MatchCylindrical(
+		eventBuilder.ccdb.getDouble(EBCCDBEnum.CND_DZ),
+		eventBuilder.ccdb.getDouble(EBCCDBEnum.CND_DPHI),
+		eventBuilder.ccdb.getDouble(EBCCDBEnum.CND_DT));
         List<DetectorResponse> cnd = eventBuilder.getUnmatchedResponses(null, DetectorType.CND, 0);
 
         // This would be energy-based seeding, with no layer preferences:
