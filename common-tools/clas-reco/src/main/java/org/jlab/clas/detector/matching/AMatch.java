@@ -31,18 +31,26 @@ public abstract class AMatch implements IMatch {
         return getDeltaPhi(Math.atan2(p1.y(),p1.x()),Math.atan2(p2.y(),p2.x()));
     }
 
-    private int findMatch(DetectorParticle p, List<DetectorResponse> r,
-            DetectorType type, final int layer, final boolean first) {
+    /**
+     * Find a matching response in the given list for the given particle.
+     * @param p the particle
+     * @param r the list of responses
+     * @param t the requested detector type to consider
+     * @param l the requested detector layer to consider
+     * @param first whether to accept the first match, else look for the best one
+     * @return the index of the resulting match, else negative
+     */
+    private int findMatch(DetectorParticle p, List<DetectorResponse> r, DetectorType t, final int l, final boolean first) {
         int bestIndex = -1;
         double bestQuality = Double.POSITIVE_INFINITY;
         for (int i=0; i<r.size(); i++) {
             if (r.get(i).getAssociation()>=0 && !sharing) {
                 continue;
             }
-            if (type != null && r.get(i).getDescriptor().getType() != type) {
+            if (t != null && r.get(i).getDescriptor().getType() != t) {
                 continue;
             }
-            if (layer >= 0 && r.get(i).getDescriptor().getLayer() != layer) {
+            if (l >= 0 && r.get(i).getDescriptor().getLayer() != l) {
                 continue;
             }
             if (this.matches(p,r.get(i))) {
@@ -58,28 +66,62 @@ public abstract class AMatch implements IMatch {
         return bestIndex;
     }
 
+    /**
+     * Find the first matching response in the given list for the given particle.
+     * @param p the particle
+     * @param r the list of responses
+     * @param t the requested detector type to consider
+     * @param l the requested detector layer to consider
+     * @return the index of the resulting match, else negative
+     */
     @Override
-    public final int firstMatch(DetectorParticle p, List<DetectorResponse> r,
-            DetectorType type, final int layer) {
-        return this.findMatch(p, r, type, layer, true);
-    }
-    
-    @Override
-    public final int firstMatch(DetectorParticle p, List<DetectorResponse> r, DetectorType t) {
-        return this.firstMatch(p, r, t, -1);
+    public final int firstMatch(DetectorParticle p, List<DetectorResponse> r, DetectorType t, final int l) {
+        return this.findMatch(p, r, t, l,true);
     }
 
+    /**
+     * Find the first matching response in the given list for the given particle.
+     * @param p the particle
+     * @param r the list of responses
+     * @param t the requested detector type to consider
+     * @return the index of the resulting match, else negative
+     */
     @Override
-    public final int bestMatch(DetectorParticle p, List<DetectorResponse> r,
-            DetectorType type, final int layer) {
-        return this.findMatch(p, r, type, layer, false);
+    public final int firstMatch(DetectorParticle p, List<DetectorResponse> r, DetectorType t) {
+        return this.firstMatch(p, r, t,-1);
+    }
+
+    /**
+     * Find the best matching response in the given list for the given particle.
+     * @param p the particle
+     * @param r the list of responses
+     * @param t the requested detector type to consider
+     * @param l the requested detector layer to consider
+     * @return the index of the resulting match, else negative
+     */
+    @Override
+    public final int bestMatch(DetectorParticle p, List<DetectorResponse> r, DetectorType t, final int l) {
+        return this.findMatch(p, r, t, l,false);
     }
     
+    /**
+     * Find the best matching response in the given list for the given particle.
+     * @param p the particle
+     * @param r the list of responses
+     * @param t the requested detector type to consider
+     * @return the index of the resulting match, else negative
+     */
     @Override
     public final int bestMatch(DetectorParticle p, List<DetectorResponse> r, DetectorType t) {
         return this.bestMatch(p, r, t, -1);
     }
 
+    /**
+     * Compare the quality of two particle-response pairs.
+     * @param a
+     * @param b
+     * @return 
+     */
     @Override
     public int compare(Pair<DetectorParticle,DetectorResponse> a,
                        Pair<DetectorParticle,DetectorResponse> b) {
