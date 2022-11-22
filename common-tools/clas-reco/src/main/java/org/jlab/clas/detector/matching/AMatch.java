@@ -5,6 +5,7 @@ import javafx.util.Pair;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.geom.prim.Point3D;
 
 /**
  *
@@ -20,6 +21,14 @@ public abstract class AMatch implements IMatch {
 
     public final boolean getSharing() {
         return this.sharing;
+    }
+
+    public static double getDeltaPhi(double phi1, double phi2) {
+        return Math.IEEEremainder(phi1-phi2,2.*Math.PI);
+    }
+
+    public static double getDeltaPhi(Point3D p1, Point3D p2) {
+        return getDeltaPhi(Math.atan2(p1.y(),p1.x()),Math.atan2(p2.y(),p2.x()));
     }
 
     private int findMatch(DetectorParticle p, List<DetectorResponse> r,
