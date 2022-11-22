@@ -16,30 +16,30 @@ public class MatchCylindrical extends AMatch {
 
     /**
      * 
-     * @param dz cm
-     * @param dphi deg
-     * @param dt ns
+     * @param dz 
+     * @param dphi must be in units=degrees!!!!
+     * @param dt 
      */
     public MatchCylindrical(double dz, double dphi, double dt) {
-	this.limit_dz = dz;
-	this.limit_dphi = Math.toRadians(dphi);
-	this.limit_dt = dt;
+        this.limit_dz = dz;
+        this.limit_dphi = Math.toRadians(dphi);
+        this.limit_dt = dt;
     }
 
     @Override
     public boolean matches(DetectorParticle p, DetectorResponse r) {
-	TrajectoryPoint tp = p.getTrack().getTrajectoryPoint(r.getDescriptor());
-	if (tp == null) return false;
-	double dz = tp.getCross().origin().vectorTo(r.getPosition().toPoint3D()).z();
-	double dphi = getDeltaPhi(tp.getCross().origin(),r.getPosition().toPoint3D());
-	if (Math.abs(dz) > this.limit_dz) return false;
-	if (Math.abs(dphi) > this.limit_dphi) return false;
-	if (this.limit_dt>0) {
-	    for (DetectorResponse x : p.getDetectorResponses()) {
+        TrajectoryPoint tp = p.getTrack().getTrajectoryPoint(r.getDescriptor());
+        if (tp == null) return false;
+        final double dz = tp.getCross().origin().vectorTo(r.getPosition().toPoint3D()).z();
+        final double dphi = getDeltaPhi(tp.getCross().origin(),r.getPosition().toPoint3D());
+        if (Math.abs(dz) > this.limit_dz) return false;
+        if (Math.abs(dphi) > this.limit_dphi) return false;
+        if (this.limit_dt>0) {
+            for (DetectorResponse x : p.getDetectorResponses()) {
                 if (r.getDescriptor().getType() == x.getDescriptor().getType()) {
                     if (Math.abs(x.getTime() - r.getTime()) > this.limit_dt) {
                         return false;
-		    }
+                    }
                 }
             }
         }
@@ -48,11 +48,11 @@ public class MatchCylindrical extends AMatch {
 
     @Override
     public double quality(DetectorParticle p, DetectorResponse r) {
-	if (!this.matches(p,r)) return Double.POSITIVE_INFINITY;
-	TrajectoryPoint tp = p.getTrack().getTrajectoryPoint(r.getDescriptor());
-	double dz = tp.getCross().origin().vectorTo(r.getPosition().toPoint3D()).z();
-	double dphi = getDeltaPhi(tp.getCross().origin(),r.getPosition().toPoint3D());
-	return Math.pow(dz,2)+Math.pow(dphi,2);
+        if (!this.matches(p,r)) return Double.POSITIVE_INFINITY;
+        TrajectoryPoint tp = p.getTrack().getTrajectoryPoint(r.getDescriptor());
+        double dz = tp.getCross().origin().vectorTo(r.getPosition().toPoint3D()).z();
+        double dphi = getDeltaPhi(tp.getCross().origin(),r.getPosition().toPoint3D());
+        return Math.pow(dz,2)+Math.pow(dphi,2);
     }
 
 }
