@@ -155,6 +155,29 @@
         ]
     },
     {
+        "name": "RECHB::CaloExtras",
+        "group": 300,
+        "item" : 24,
+        "info": "Calorimeter Cluster Parameters",
+        "entries": [
+            {"name":"dbstU",       "id":1, "type":"S", "info":"DB status + U strip*10"},
+            {"name":"dbstV",       "id":2, "type":"S", "info":"DB status + V strip*10"},
+            {"name":"dbstW",       "id":3, "type":"S", "info":"DB status + W strip*10"},
+            {"name":"rawEU",       "id":4, "type":"F", "info":"raw U peak energy"},
+            {"name":"rawEV",       "id":5, "type":"F", "info":"raw V peak energy"},
+            {"name":"rawEW",       "id":6, "type":"F", "info":"raw W peak energy"},
+            {"name":"recEU",       "id":7, "type":"F", "info":"recon U peak energy (GeV)"},
+            {"name":"recEV",       "id":8, "type":"F", "info":"recon V peak energy (GeV)"},
+            {"name":"recEW",       "id":9, "type":"F", "info":"recon W peak energy (GeV)"},
+            {"name":"recDTU",      "id":10, "type":"F", "info":"recon U peak TDC time (ns)"},
+            {"name":"recDTV",      "id":11, "type":"F", "info":"recon V peak TDC time (ns)"},
+            {"name":"recDTW",      "id":12, "type":"F", "info":"recon W peak TDC time (ns)"},
+            {"name":"recFTU",      "id":13, "type":"F", "info":"recon U peak FADC time (ns)"},
+            {"name":"recFTV",      "id":14, "type":"F", "info":"recon V peak FADC time (ns)"},
+            {"name":"recFTW",      "id":15, "type":"F", "info":"recon W peak FADC time (ns)"}
+        ]
+    },
+    {
         "name": "RECHB::Track",
         "group": 300,
         "item" : 16,
@@ -188,6 +211,26 @@
             {"name":"c_uy",     "type":"F", "info":"Cross unit y-direction vector in the lab"},
             {"name":"c_uz",     "type":"F", "info":"Cross unit z-direction vector in the lab"},
             {"name":"status",   "type":"S", "info":"hit status"}
+        ]
+    },
+    {
+        "name": "RECHB::Traj",
+        "group": 300,
+        "item" : 18,
+        "info": "Trajectory information for Particles bank",
+        "entries": [
+            {"name":"pindex",  "type":"S", "info":"index of the particle in REC::Particle"},
+            {"name":"index",   "type":"S", "info":"index of the track in its tracking bank"},
+            {"name":"detector","type":"B", "info":"DetectorID as defined in org.jlab.detector.DetectorType"},
+            {"name":"layer",   "type":"B", "info":"Layer ID as defined in org.jlab.detector.DetectorLayer"},
+            {"name":"x",       "type":"F", "info":"x-position of the track at the detector surface (cm)"},
+            {"name":"y",       "type":"F", "info":"y-position of the track at the detector surface (cm)"},
+            {"name":"z",       "type":"F", "info":"z-position of the track at the detector surface (cm)"},
+            {"name":"cx",      "type":"F", "info":"direction cosline of the track at the detector surface"},
+            {"name":"cy",      "type":"F", "info":"direction cosline of the track at the detector surface"},
+            {"name":"cz",      "type":"F", "info":"direction cosline of the track at the detector surface"},
+            {"name":"path",    "type":"F", "info":"path length from primary vertex to the detector surface (cm)"},
+            {"name":"edge",    "type":"F", "info":"signed distance between track position and closest detector edge (cm)"}
         ]
     },
     {
@@ -346,6 +389,29 @@
         ]
     },
     {
+        "name": "REC::CaloExtras",
+        "group": 300,
+        "item" : 46,
+        "info": "Calorimeter Cluster Parameters",
+        "entries": [
+            {"name":"dbstU",       "id":1, "type":"S", "info":"DB status + U strip*10"},
+            {"name":"dbstV",       "id":2, "type":"S", "info":"DB status + V strip*10"},
+            {"name":"dbstW",       "id":3, "type":"S", "info":"DB status + W strip*10"},
+            {"name":"rawEU",       "id":4, "type":"F", "info":"raw U peak energy"},
+            {"name":"rawEV",       "id":5, "type":"F", "info":"raw V peak energy"},
+            {"name":"rawEW",       "id":6, "type":"F", "info":"raw W peak energy"},
+            {"name":"recEU",       "id":7, "type":"F", "info":"recon U peak energy (GeV)"},
+            {"name":"recEV",       "id":8, "type":"F", "info":"recon V peak energy (GeV)"},
+            {"name":"recEW",       "id":9, "type":"F", "info":"recon W peak energy (GeV)"},
+            {"name":"recDTU",      "id":10, "type":"F", "info":"recon U peak TDC time (ns)"},
+            {"name":"recDTV",      "id":11, "type":"F", "info":"recon V peak TDC time (ns)"},
+            {"name":"recDTW",      "id":12, "type":"F", "info":"recon W peak TDC time (ns)"},
+            {"name":"recFTU",      "id":13, "type":"F", "info":"recon U peak FADC time (ns)"},
+            {"name":"recFTV",      "id":14, "type":"F", "info":"recon V peak FADC time (ns)"},
+            {"name":"recFTW",      "id":15, "type":"F", "info":"recon W peak FADC time (ns)"}
+        ]
+    },
+    {
         "name": "REC::Track",
         "group": 300,
         "item" : 36,
@@ -495,7 +561,8 @@
             {"name":"cx",      "type":"F", "info":"direction cosline of the track at the detector surface"},
             {"name":"cy",      "type":"F", "info":"direction cosline of the track at the detector surface"},
             {"name":"cz",      "type":"F", "info":"direction cosline of the track at the detector surface"},
-            {"name":"path",    "type":"F", "info":"pathlength of the track to the detector surface from the DOCA point (cm)"}
+            {"name":"path",    "type":"F", "info":"path length from primary vertex to the detector surface (cm)"},
+            {"name":"edge",    "type":"F", "info":"signed distance between track position and closest detector edge (cm)"}
         ]
     },
     {

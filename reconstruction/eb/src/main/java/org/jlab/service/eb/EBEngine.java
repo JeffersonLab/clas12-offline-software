@@ -24,7 +24,7 @@ import org.jlab.rec.eb.EBRadioFrequency;
  */
 public class EBEngine extends ReconstructionEngine {
 
-    public static Logger LOGGER = Logger.getLogger(EBEngine.class.getName());
+    public static final Logger LOGGER = Logger.getLogger(EBEngine.class.getName());
 
     boolean usePOCA = false;
 
@@ -34,12 +34,12 @@ public class EBEngine extends ReconstructionEngine {
     String particleBank     = null;
     String particleBankFT   = null;
     String calorimeterBank  = null;
+    String caloextrasBank   = null;
     String scintillatorBank = null;
-    String scintextrasBank = null;
+    String scintextrasBank  = null;
     String cherenkovBank    = null;
     String trackBank        = null;
-    String UtrackBank        = null;
-    String trackUBank        = null;
+    String utrackBank       = null;
     String crossBank        = null;
     String ftBank           = null;
     String trajectoryBank   = null;
@@ -75,20 +75,21 @@ public class EBEngine extends ReconstructionEngine {
         this.setEventBank(prefix+"::Event");
         this.setParticleBank(prefix+"::Particle");
         this.setCalorimeterBank(prefix+"::Calorimeter");
+        this.setCaloExtrasBank(prefix+"::CaloExtras");
         this.setCherenkovBank(prefix+"::Cherenkov");
         this.setScintillatorBank(prefix+"::Scintillator");
-        this.setScintClusterBank(prefix+"::ScintExtras");
+        this.setScintExtrasBank(prefix+"::ScintExtras");
         this.setTrackBank(prefix+"::Track");
         this.setUTrackBank(prefix+"::UTrack");
         this.setCrossBank(prefix+"::TrackCross");
+        this.setTrajectoryBank(prefix+"::Traj");
+        this.setFTBank(prefix+"::ForwardTagger");
         if (!this.getClass().isAssignableFrom(EBHBEngine.class) &&
             !this.getClass().isAssignableFrom(EBHBAIEngine.class)) {
             this.setEventBankFT(prefix+"FT::Event");
             this.setParticleBankFT(prefix+"FT::Particle");
             this.setCovMatrixBank(prefix+"::CovMat");
-            this.setTrajectoryBank(prefix+"::Traj");        
         }
-        this.setFTBank(prefix+"::ForwardTagger");
     }
 
     public boolean processDataEvent(DataEvent de,EBScalers ebs) {
@@ -188,6 +189,8 @@ public class EBEngine extends ReconstructionEngine {
             if(calorimeterBank!=null && !calorimeters.isEmpty()) {
                 DataBank bankCal = DetectorData.getCalorimeterResponseBank(calorimeters, de, calorimeterBank);
                 de.appendBanks(bankCal);
+                DataBank bankCaloExtras = DetectorData.getCaloExtrasResponseBank(calorimeters, de, caloextrasBank);
+                de.appendBanks(bankCaloExtras);               
             }
             List<DetectorResponse> scintillators = eb.getEvent().getScintillatorResponseList();
             if(scintillatorBank!=null && !scintillators.isEmpty()) {
@@ -218,7 +221,7 @@ public class EBEngine extends ReconstructionEngine {
                 if (bankCovMat != null) de.appendBanks(bankCovMat);
 
                 if (!cutracks.isEmpty()) {
-                    DataBank x = DetectorData.getUTracksBank(eb.getEvent().getParticles(), de, UtrackBank, cutracks.size());
+                    DataBank x = DetectorData.getUTracksBank(cutracks, ctracks, de, utrackBank);
                     de.appendBanks(x);
                 }
             }
@@ -240,84 +243,88 @@ public class EBEngine extends ReconstructionEngine {
         return true;
     }
 
-    public void setEventBank(String eventBank) {
-        this.eventBank = eventBank;
+    public void setEventBank(String name) {
+        this.eventBank = name;
     }
 
-    public void setParticleBank(String particleBank) {
-        this.particleBank = particleBank;
+    public void setParticleBank(String name) {
+        this.particleBank = name;
     }
 
-    public void setEventBankFT(String eventBank) {
-        this.eventBankFT = eventBank;
+    public void setEventBankFT(String name) {
+        this.eventBankFT = name;
     }
 
-    public void setParticleBankFT(String particleBank) {
-        this.particleBankFT = particleBank;
+    public void setParticleBankFT(String name) {
+        this.particleBankFT = name;
     }
     
-    public void setCalorimeterBank(String calorimeterBank) {
-        this.calorimeterBank = calorimeterBank;
+    public void setCalorimeterBank(String name) {
+        this.calorimeterBank = name;
     }
 
-    public void setScintillatorBank(String scintillatorBank) {
-        this.scintillatorBank = scintillatorBank;
+    public void setScintillatorBank(String name) {
+        this.scintillatorBank = name;
     }
 
-    public void setScintClusterBank(String scintclusterBank) {
-        this.scintextrasBank = scintclusterBank;
+    public void setScintExtrasBank(String name) {
+        this.scintextrasBank = name;
     }
 
-    public void setCherenkovBank(String cherenkovBank) {
-        this.cherenkovBank = cherenkovBank;
+    public void setCaloExtrasBank(String name) {
+        this.caloextrasBank = name;
     }
 
-    public void setTrackBank(String trackBank) {
-        this.trackBank = trackBank;
+    public void setCherenkovBank(String name) {
+        this.cherenkovBank = name;
+    }
+
+    public void setTrackBank(String name) {
+        this.trackBank = name;
     }
     
-    public void setUTrackBank(String trackBank) {
-        this.UtrackBank = trackBank;
+    public void setUTrackBank(String name) {
+        this.utrackBank = name;
     }
     
-    public void setFTBank(String ftBank) {
-        this.ftBank = ftBank;
+    public void setFTBank(String name) {
+        this.ftBank = name;
     }
 
-    public void setCrossBank(String crossBank) {
-        this.crossBank = crossBank;
+    public void setCrossBank(String name) {
+        this.crossBank = name;
     }
 
-    public void setTrajectoryBank(String trajectoryBank) {
-        this.trajectoryBank = trajectoryBank;
+    public void setTrajectoryBank(String name) {
+        this.trajectoryBank = name;
     }
     
-    public void setCovMatrixBank(String covMatrixBank) {
-        this.covMatrixBank = covMatrixBank;
+    public void setCovMatrixBank(String name) {
+        this.covMatrixBank = name;
     }
     
-    public void setTrackType(String trackType) {
-        this.trackType = trackType;
+    public void setTrackType(String name) {
+        this.trackType = name;
     }
     
-    public void setFTOFHitsType(String hitsType) {
-        this.ftofHitsType = hitsType;
+    public void setFTOFHitsType(String name) {
+        this.ftofHitsType = name;
     }
 
-    public void setCovMatrixType(String covMatrixType) {
-        this.covMatrixType = covMatrixType;
+    public void setCovMatrixType(String name) {
+        this.covMatrixType = name;
     }
 
-    public void setTrajectoryType(String trajectoryType) {
-        this.trajectoryType = trajectoryType;
+    public void setTrajectoryType(String name) {
+        this.trajectoryType = name;
     }
 
-    public void setCvtTrackType(String trackType) {
-        this.cvtTrackType = trackType;
+    public void setCvtTrackType(String name) {
+        this.cvtTrackType = name;
     }
     
-    public void setCvtTrajType(String trajectoryType) {
-        this.cvtTrajType = trajectoryType;
+    public void setCvtTrajType(String name) {
+        this.cvtTrajType = name;
     }
     
     @Override
@@ -328,7 +335,9 @@ public class EBEngine extends ReconstructionEngine {
         this.registerOutputBank(eventBankFT);
         this.registerOutputBank(particleBankFT);
         this.registerOutputBank(calorimeterBank);
+        this.registerOutputBank(caloextrasBank);
         this.registerOutputBank(scintillatorBank);
+        this.registerOutputBank(scintextrasBank);
         this.registerOutputBank(cherenkovBank);
         this.registerOutputBank(trackBank);
         this.registerOutputBank(crossBank);

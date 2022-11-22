@@ -19,6 +19,7 @@ import org.jlab.clas.tracking.kalmanfilter.Units;
 import org.jlab.clas.tracking.objects.Strip;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.geom.prim.Transformation3D;
+import org.jlab.groot.data.GraphErrors;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.graphics.EmbeddedCanvasTabbed;
 import org.jlab.io.base.DataBank;
@@ -972,6 +973,52 @@ public class BMTGeometry {
         return surface;
     }
     
+    public DataGroup draw() {
+                
+        CCDBConstantsLoader.Load(new DatabaseConstantProvider(11, "rgb_spring2019"));
+        ConstantsManager ccdb = new ConstantsManager();
+        ccdb.init(Arrays.asList("/calibration/mvt/bmt_voltage"));
+        ccdb.setVariation("default");
+        IndexedTable hv = ccdb.getConstants(11, "/calibration/mvt/bmt_voltage");
+        
+        BMTGeometry newGeo = new BMTGeometry(hv);
+        
+        DataGroup dgBMT = new DataGroup(1, 1);
+        for(int i=0; i<2; i++) {
+            GraphErrors gUpstream   = new GraphErrors("Upstream"   + i);
+            gUpstream.setMarkerColor(i+1);
+            gUpstream.setMarkerSize(2);
+            gUpstream.setTitleX("x (mm)");
+            gUpstream.setTitleY("y (mm)");
+            GraphErrors gDownstream = new GraphErrors("Downstream" + i);
+            gDownstream.setMarkerColor(i==0 ? 1 : 5);
+            gDownstream.setMarkerSize(2);
+            gDownstream.setTitleX("x (mm)");
+            gDownstream.setTitleY("y (mm)");
+            dgBMT.addDataSet(gUpstream,   0);
+            dgBMT.addDataSet(gDownstream, 0);
+        }
+            
+
+        for(int i=1; i<=BMTConstants.NLAYERS; i++) {
+            if(BMTGeometry.getDetectorType(i)==BMTType.Z) {
+                int region = newGeo.getRegion(i);
+                for(int j=1; j<=BMTConstants.NSECTORS; j++) {
+                    for(int k=0; k<=newGeo.getNStrips(i); k++) {
+                        Line3D strip0 = newGeo.getIdealZstrip(region, j, k);
+                        Line3D strip1 = newGeo.getZstrip(region, j, k);
+                        System.out.println(strip1);
+                        dgBMT.getGraph("Upstream0").addPoint(strip0.origin().x(), strip0.origin().y(), 0, 0);
+                        dgBMT.getGraph("Upstream1").addPoint(strip1.origin().x(), strip1.origin().y(), 0, 0);
+                        dgBMT.getGraph("Downstream0").addPoint(strip0.end().x(), strip0.end().y(), 0, 0);
+                        dgBMT.getGraph("Downstream1").addPoint(strip1.end().x(), strip1.end().y(), 0, 0);
+                    }
+                }
+            }
+        }        
+        return dgBMT;
+    }
+    
     /**
      * Executable method: implements checks
      * @param arg
@@ -983,7 +1030,7 @@ public class BMTGeometry {
         ccdb.init(Arrays.asList("/calibration/mvt/bmt_voltage"));
         ccdb.setVariation("default");
         IndexedTable hv = ccdb.getConstants(11, "/calibration/mvt/bmt_voltage");
-        
+
         BMTGeometry newGeo = new BMTGeometry(hv);
         
         System.out.println("\nLayer number for region and detector type:");
@@ -1145,7 +1192,7 @@ public class BMTGeometry {
         }
         
         JFrame frame = new JFrame("BMT geometry");
-        frame.setSize(1200, 800);
+        frame.setSize(800, 800);
         EmbeddedCanvasTabbed canvas = new EmbeddedCanvasTabbed("BMT");
         canvas.getCanvas("BMT").draw(dgBMT);
         frame.add(canvas);

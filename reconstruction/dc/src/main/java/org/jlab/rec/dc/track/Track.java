@@ -412,14 +412,14 @@ public class Track extends Trajectory implements Comparable<Track>{
     
     public boolean isGood() {
         boolean isGood=true;
-        if(this._trakOrig.distance(0, 0, 0)>Constants.HTCCRADIUS) isGood=false;
+        if(this._trakOrig.distance(0, 0, 0)>Constants.HTCCRADIUS && this._trakOrig.z()>0) isGood=false;
         return isGood;
     }
     /**
      * Basic track info
      */
     public void printInfo() {
-        String str = "Track "+this._Id+" Sector= "+this.get_Sector()+" Q= "+this._Q+" P= "+this._P+" chi2="+this.get_FitChi2();
+        String str = "Track "+this._Id+" Sector= "+this.getSector()+" Q= "+this._Q+" P= "+this._P+" chi2="+this.get_FitChi2();
         for(int i=0; i<this.size(); i++) str += " cross" + (i+1) + "= " + this.get(i).get_Id();
         System.out.println(str);
     }
@@ -464,7 +464,7 @@ public class Track extends Trajectory implements Comparable<Track>{
             int return_val_a5 = ((return_val5 ==0) ? return_val_a4 : return_val5);
             int return_val_a6 = ((return_val6 ==0) ? return_val_a5 : return_val6);
 
-            int returnSec = this.get_Sector() < arg.get_Sector() ? -1 : this.get_Sector() == arg.get_Sector() ? 0 : 1; 
+            int returnSec = this.getSector() < arg.getSector() ? -1 : this.getSector() == arg.getSector() ? 0 : 1; 
 
             return ((returnSec ==0) ? return_val_a6 : returnSec);
     }

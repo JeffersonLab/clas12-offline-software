@@ -168,8 +168,6 @@ public class TableLoader {
         //CCDBTables 2 =  "/calibration/dc/time_corrections/T0_correction";	
         
         double stepSize = 0.0010;
-        DecimalFormat df = new DecimalFormat("#");
-        df.setRoundingMode(RoundingMode.CEILING);
         
         FillAlpha();
         
@@ -194,8 +192,8 @@ public class TableLoader {
 
                                     double x = (double)(idist+1)*stepSize;
                                     double timebfield = calc_Time( x,  alpha, bfield, s+1, r+1) ;
-                                    
-                                    int tbin = Integer.parseInt(df.format(timebfield/2.) ) -1;
+
+                                    int tbin = (int) Math.floor(timebfield/2);
                                     
                                     if(tbin<0 || tbin>NBINST-1) {
                                         //System.err.println("Problem with tbin");
