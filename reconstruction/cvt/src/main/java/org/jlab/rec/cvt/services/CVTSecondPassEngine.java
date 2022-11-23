@@ -56,6 +56,15 @@ public class CVTSecondPassEngine extends CVTEngine {
                                                       false, this.getPid());
             }
             
+            if(tracks!=null) {
+                for(Track t : tracks) {
+                    // keep track id from first to second pass
+                    if(event.hasBank("CVT::Tracks")) {
+                        DataBank bank = event.getBank("CVT::Tracks");
+                        t.setId(bank.getShort("ID", t.getSeed().FirstPassIdx));
+                    }
+                } 
+            }
             List<DataBank> banks = new ArrayList<>();
             if(trackFinder.getSVThits()!=null) banks.add(RecoBankWriter.fillSVTHitBank(event, trackFinder.getSVThits(), this.getSvtHitBank()));
             if(trackFinder.getBMThits()!=null) banks.add(RecoBankWriter.fillBMTHitBank(event, trackFinder.getBMThits(), this.getBmtHitBank()));

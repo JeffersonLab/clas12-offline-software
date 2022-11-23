@@ -83,7 +83,7 @@ public class CVTEngine extends ReconstructionEngine {
     private int svtmaxclussize = 100;
     private int bmtcmaxclussize = 100;
     private int bmtzmaxclussize = 100;
-    private double ptcut = 0.250;
+    private double rcut = 120.0;
     private double z0cut = 10;
     
     public CVTEngine(String name) {
@@ -122,7 +122,7 @@ public class CVTEngine extends ReconstructionEngine {
                                            svtmaxclussize, 
                                            bmtcmaxclussize, 
                                            bmtzmaxclussize,
-                                           ptcut,
+                                           rcut,
                                            z0cut);
 
         this.initConstantsTables();
@@ -434,8 +434,8 @@ public class CVTEngine extends ReconstructionEngine {
         if (this.getEngineConfigString("bmtzmaxclussize")!=null)
             this.setBmtzmaxclussize((int) Integer.valueOf(this.getEngineConfigString("bmtzmaxclussize")));
         
-        if (this.getEngineConfigString("ptcut")!=null)
-            this.ptcut = Double.valueOf(this.getEngineConfigString("ptcut"));
+        if (this.getEngineConfigString("rcut")!=null)
+            this.rcut = Double.valueOf(this.getEngineConfigString("rcut"));
         
         if (this.getEngineConfigString("z0cut")!=null)
             this.z0cut = Double.valueOf(this.getEngineConfigString("z0cut"));
@@ -589,7 +589,7 @@ public class CVTEngine extends ReconstructionEngine {
         System.out.println("["+this.getName()+"] max svt  cluster size "+this.getSvtmaxclussize());
         System.out.println("["+this.getName()+"] max bmt-c  cluster size "+this.getBmtcmaxclussize());
         System.out.println("["+this.getName()+"] max btm-z  cluster size "+this.getBmtzmaxclussize());
-        System.out.println("["+this.getName()+"] pt cut (GeV) "+this.ptcut);
+        System.out.println("["+this.getName()+"] helix radius cut (mm) "+this.rcut);
         System.out.println("["+this.getName()+"] z0 cut (mm from target edges) "+this.z0cut); 
         
         

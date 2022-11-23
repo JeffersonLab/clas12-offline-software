@@ -107,6 +107,10 @@ public class TracksFromTargetRec {
                 }
                 List<Seed> failed = new ArrayList<>();
                 for(Seed s : seeds) { 
+                    if(Constants.getInstance().seedingDebugMode) {
+                        System.out.println("Before chi2 cut");
+                        System.out.println(s.toString());
+                    }  
                     if(s.getChi2()>Constants.CHI2CUT*s.getCrosses().size())
                         failed.add(s);
                     if(s.getHelix()==null)
@@ -124,11 +128,23 @@ public class TracksFromTargetRec {
             }
         }
         for(Seed s : seeds) { 
+            if(Constants.getInstance().seedingDebugMode) {
+                System.out.println("Before overlap remover");
+                System.out.println(s.toString());
+            }       
             s.setKey(s.new Key(s));
         }
         if(Constants.getInstance().removeOverlappingSeeds) 
             Seed.removeOverlappingSeeds(seeds);
-     
+        
+        if(Constants.getInstance().seedingDebugMode) {
+            for(Seed s : seeds) { 
+            
+                System.out.println("After overlap remover");
+                System.out.println(s.toString());
+            }
+        }
+        
         if(Constants.getInstance().flagSeeds)
             Seed.flagMCSeeds(seeds, this.totTruthHits);
         if(seeds ==null || seeds.isEmpty()) {
@@ -205,8 +221,10 @@ public class TracksFromTargetRec {
                             solenoidValue, xb , yb, Units.MM);
             double[][] cov = Constants.COVHELIX;
 
-            if(solenoidValue>0.001 && Constants.LIGHTVEL * seed.getHelix().radius() *solenoidValue<Constants.getInstance().getPTCUT())
+            //if(solenoidValue>0.001 && Constants.LIGHTVEL * seed.getHelix().radius() *solenoidValue<Constants.getInstance().getPTCUT())
+            if(solenoidValue>0.001 && seed.getHelix().radius() <Constants.getInstance().getRCUT())    
                 continue;
+            
             //System.out.println("initializing fitter...");
             kf.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid));
             kf.runFitter();
@@ -275,18 +293,20 @@ public class TracksFromTargetRec {
                 if(this.missingSVTCrosses(fittedTrack) == false)
                     tracks.add(fittedTrack);
             } else {
-                kf2.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid));
-                kf2.runFitter();
-                if(kf2.getHelix()!=null) {
-                    Track fittedTrack = new Track(seed, kf2, pid);
-                    for(Cross c : fittedTrack) { 
-                        if(c.getDetector()==DetectorType.BST) {
-                            c.getCluster1().setAssociatedTrackID(0);
-                            c.getCluster2().setAssociatedTrackID(0);
+                if(Constants.getInstance().KFfailRecovery) {
+                    kf2.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid));
+                    kf2.runFitter();
+                    if(kf2.getHelix()!=null) {
+                        Track fittedTrack = new Track(seed, kf2, pid);
+                        for(Cross c : fittedTrack) { 
+                            if(c.getDetector()==DetectorType.BST) {
+                                c.getCluster1().setAssociatedTrackID(0);
+                                c.getCluster2().setAssociatedTrackID(0);
+                            }
                         }
+                        if(this.missingSVTCrosses(fittedTrack) == false)
+                            tracks.add(fittedTrack);
                     }
-                    if(this.missingSVTCrosses(fittedTrack) == false)
-                        tracks.add(fittedTrack);
                 }
             }
             
