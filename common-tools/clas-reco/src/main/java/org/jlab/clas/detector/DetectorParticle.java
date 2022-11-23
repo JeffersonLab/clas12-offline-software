@@ -264,22 +264,20 @@ public class DetectorParticle implements Comparable {
             if(res.getDescriptor().getType()==type) hits++;
         }
         if(hits==0) return false;
-        if(hits>1 && type!=DetectorType.CTOF && type!=DetectorType.ECAL){
-            // don't warn for CTOF, since it currently doesn't do clustering
-            // don't warn for ECAL, since it has multiple layers
+        if(hits>1 && type!=DetectorType.ECAL && type!=DetectorType.CND){
+            // don't warn for ECAL or CND, since they have multiple layers
             System.out.println("[Warning] DetectorParticle.hasHit(type): Too many hits for detector type = " + type);
         }
         return true;
     }
-    
+
     public boolean hasHit(DetectorType type, int layer){
         int hits = 0;
         for( DetectorResponse res : this.responseStore){
             if(res.getDescriptor().getType()==type&&res.getDescriptor().getLayer()==layer) hits++;
         }
         if(hits==0) return false;
-        if(hits>1 && type!=DetectorType.CTOF){
-            // don't warn for CTOF, since it currently doesn't do clustering
+        if(hits>1){
             System.out.println("[Warning] DetectorParticle.hasHit(type,layer): Too many hits for detector type = " + type);
         }
         return true;
