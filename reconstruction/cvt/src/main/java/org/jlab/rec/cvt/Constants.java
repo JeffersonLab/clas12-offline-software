@@ -70,13 +70,14 @@ public class Constants {
     public boolean useSVTTimingCuts =  false;
     public boolean removeOverlappingSeeds = false;
     public boolean flagSeeds = true;
+    public boolean KFfailRecovery = false;
     
     // CONSTANTS USED IN RECONSTRUCTION
     //---------------------------------    
     public static final double LIGHTVEL = PhysicsConstants.speedOfLight()*1e-5;  // velocity of light (mm/ns) - conversion factor from radius in mm to momentum in GeV/c 
 
     // selection cuts for helical tracks
-    private static double PTCUT   = 0.25; // minimum pt in GeV
+    private static double RCUT   = 120.0; // minimum radius of helix in mm
     public static final double TANDIP  = 2;     // max value on dip angle
     public static final double NDFCUT  = 0;     // minimum number of degres of freedom
     public static final double CHI2CUT = 10;    // 50, minimum chi2 per degrees of freedom
@@ -269,14 +270,14 @@ public class Constants {
     }
 
     /**
-     * @return the PTCUT
+     * @return the RCUT
      */
-    public static double getPTCUT() {
-        return PTCUT;
+    public static double getRCUT() {
+        return RCUT;
     }
     
-    public static void setPTCUT(double pc) {
-        PTCUT = pc;
+    public static void setRCUT(double r) {
+        RCUT = r;
     }
 
 
@@ -572,7 +573,7 @@ public class Constants {
                                         int svtmaxclussize,
                                         int bmtcmaxclussize,
                                         int bmtzmaxclussize,
-                                        double ptcut,
+                                        double rcut,
                                         double z0cut) {
         if (!ConstantsLoaded) {
             this.isCosmics = isCosmics;
@@ -598,7 +599,7 @@ public class Constants {
             this.setSvtmaxclussize(svtmaxclussize);
             this.setBmtcmaxclussize(bmtcmaxclussize);
             this.setBmtzmaxclussize(bmtzmaxclussize);
-            this.setPTCUT(ptcut);
+            this.setRCUT(rcut);
             this.setZRANGE(z0cut);
             ConstantsLoaded = true;
         }

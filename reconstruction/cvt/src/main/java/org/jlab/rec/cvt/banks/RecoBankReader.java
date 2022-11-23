@@ -475,7 +475,7 @@ public class RecoBankReader {
                 seed.setHelix(helix);
                 seed.getHelix().setCovMatrix(covmatrix);
                 seed.setStatus(type);
-                
+                seed.FirstPassIdx = i;
                 List<Cross> crossesOnTrk = new ArrayList<>();
                 for (int j = 0; j < 9; j++) {
                     String hitStrg = "Cross";
