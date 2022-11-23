@@ -3,12 +3,13 @@ package org.jlab.clas.detector.matching;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorTrack.TrajectoryPoint;
+import org.jlab.clas.physics.Vector3;
 
 /**
  * 
  * @author baltzell
  */
-public class MatchCylindrical extends AMatch {
+public class MatchCND extends AMatch {
 
     private final double limit_dz;
     private final double limit_dphi;
@@ -20,7 +21,7 @@ public class MatchCylindrical extends AMatch {
      * @param dphi must be in units=degrees!!!!
      * @param dt 
      */
-    public MatchCylindrical(double dz, double dphi, double dt) {
+    public MatchCND(double dz, double dphi, double dt) {
         this.limit_dz = dz;
         this.limit_dphi = Math.toRadians(dphi);
         this.limit_dt = dt;
@@ -30,8 +31,30 @@ public class MatchCylindrical extends AMatch {
     public boolean matches(DetectorParticle p, DetectorResponse r) {
         return matches(p,r,false);
     }
-
+    
     public boolean matches(DetectorParticle p, DetectorResponse r, boolean uniqueLayer) {
+        return p.getCharge() == 0 ? matchesNeutral(p,r,uniqueLayer) : matchesCharged(p,r,uniqueLayer);
+    }
+
+    public boolean matchesNeutral(DetectorParticle p, DetectorResponse r, boolean uniqueLayer) {
+        final double dphi = getDeltaPhi(r.getPosition().phi(), p.getTrack().getVector().phi());
+        final double dz = p.getDetectorResponses().get(0).getPosition().z() - r.getPosition().z();
+        if (Math.abs(dphi) > this.limit_dphi) return false;
+        if (Math.abs(dz) > this.limit_dz) return false;
+        for (DetectorResponse x : p.getDetectorResponses()) {
+            if (uniqueLayer && r.getDescriptor().getLayer() == x.getDescriptor().getLayer()) {
+                return false;
+            }
+            if (r.getDescriptor().getType() == x.getDescriptor().getType()) {
+                if (this.limit_dt>0 && Math.abs(x.getTime() - r.getTime()) > this.limit_dt) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public boolean matchesCharged(DetectorParticle p, DetectorResponse r, boolean uniqueLayer) {
         TrajectoryPoint tp = p.getTrack().getTrajectoryPoint(r.getDescriptor());
         if (tp == null) return false;
         final double dz = tp.getCross().origin().vectorTo(r.getPosition().toPoint3D()).z();

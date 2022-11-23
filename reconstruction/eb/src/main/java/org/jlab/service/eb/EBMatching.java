@@ -9,7 +9,7 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.rec.eb.EBCCDBEnum;
 import org.jlab.clas.detector.DetectorResponseComparators;
-import org.jlab.clas.detector.matching.MatchCylindrical;
+import org.jlab.clas.detector.matching.MatchCND;
 
 /*
  *
@@ -181,7 +181,7 @@ public class EBMatching {
         // This is the new case where CND only does intralayer clustering,
         // and EB does CND's interlayer matching:
         //
-        MatchCylindrical matcher = new MatchCylindrical(
+        MatchCND matcher = new MatchCND(
                 eventBuilder.ccdb.getDouble(EBCCDBEnum.CND_DZ),
                 eventBuilder.ccdb.getDouble(EBCCDBEnum.CND_DPHI),
                 eventBuilder.ccdb.getDouble(EBCCDBEnum.CND_DT));

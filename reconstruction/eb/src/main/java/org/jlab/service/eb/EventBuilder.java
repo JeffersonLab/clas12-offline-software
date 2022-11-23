@@ -21,7 +21,7 @@ import org.jlab.clas.detector.TaggerResponse;
 import org.jlab.clas.detector.CherenkovResponse;
 import org.jlab.clas.detector.DetectorResponseFactory;
 import org.jlab.clas.detector.matching.IMatch;
-import org.jlab.clas.detector.matching.MatchCylindrical;
+import org.jlab.clas.detector.matching.MatchCND;
 import org.jlab.clas.physics.Vector3;
 
 import org.jlab.rec.eb.EBCCDBConstants;
@@ -50,7 +50,7 @@ public class EventBuilder {
     public EventBuilder(EBCCDBConstants ccdb){
         this.ccdb=ccdb;
         
-        this.cndMatcher = new MatchCylindrical(
+        this.cndMatcher = new MatchCND(
 		    ccdb.getDouble(EBCCDBEnum.CND_DZ),
 		    ccdb.getDouble(EBCCDBEnum.CND_DPHI),
 		    ccdb.getDouble(EBCCDBEnum.CND_DT));
