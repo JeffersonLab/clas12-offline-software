@@ -687,11 +687,13 @@ public class DetectorData {
                         float cx = (float) (Math.sin(theta) * Math.cos(phi));
                         float cy = (float) (Math.sin(theta) * Math.sin(phi));
 
+                        float edge = trajBank.getFloat("edge", ii);
+
                         Line3D traj = new Line3D(xx, yy, zz,
                                 xx + track.getMaxLineLength() * cx,
                                 yy + track.getMaxLineLength() * cy,
                                 zz + track.getMaxLineLength() * cz);
-                        track.addTrajectoryPoint(detId, layId, traj, 0, pathLength);
+                        track.addTrajectoryPoint(detId, layId, traj, 0, pathLength, edge);
                     }
                 }
 
