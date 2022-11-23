@@ -8,7 +8,7 @@ import org.jlab.clas.detector.DetectorTrack.TrajectoryPoint;
  * 
  * @author baltzell
  */
-public class MatchSteradians extends AMatch {
+public class MatchThetaPhi extends AMatch {
 
     private final double limit_dtheta;
     private final double limit_dphi;
@@ -19,7 +19,7 @@ public class MatchSteradians extends AMatch {
      * @param dphi must be in units=degrees!!!!
      * @param dt 
      */
-    public MatchSteradians(double dtheta, double dphi, double dt) {
+    public MatchThetaPhi(double dtheta, double dphi, double dt) {
         this.limit_dtheta = Math.toRadians(dtheta);
         this.limit_dphi = Math.toRadians(dphi);
         this.limit_dt = dt;
@@ -29,7 +29,7 @@ public class MatchSteradians extends AMatch {
      * @param dtheta must be in units=degrees!!!! 
      * @param dphi must be in units=degrees!!!!
      */
-    public MatchSteradians(double dtheta, double dphi) {
+    public MatchThetaPhi(double dtheta, double dphi) {
         this.limit_dtheta = Math.toRadians(dtheta);
         this.limit_dphi = Math.toRadians(dphi);
         this.limit_dt = -1;
