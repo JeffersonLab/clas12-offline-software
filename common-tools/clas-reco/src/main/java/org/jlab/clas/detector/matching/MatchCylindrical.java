@@ -25,21 +25,26 @@ public class MatchCylindrical extends AMatch {
         this.limit_dphi = Math.toRadians(dphi);
         this.limit_dt = dt;
     }
-
+    
     @Override
     public boolean matches(DetectorParticle p, DetectorResponse r) {
+        return matches(p,r,false);
+    }
+
+    public boolean matches(DetectorParticle p, DetectorResponse r, boolean uniqueLayer) {
         TrajectoryPoint tp = p.getTrack().getTrajectoryPoint(r.getDescriptor());
         if (tp == null) return false;
         final double dz = tp.getCross().origin().vectorTo(r.getPosition().toPoint3D()).z();
         final double dphi = getDeltaPhi(tp.getCross().origin(),r.getPosition().toPoint3D());
         if (Math.abs(dz) > this.limit_dz) return false;
         if (Math.abs(dphi) > this.limit_dphi) return false;
-        if (this.limit_dt>0) {
-            for (DetectorResponse x : p.getDetectorResponses()) {
-                if (r.getDescriptor().getType() == x.getDescriptor().getType()) {
-                    if (Math.abs(x.getTime() - r.getTime()) > this.limit_dt) {
-                        return false;
-                    }
+        for (DetectorResponse x : p.getDetectorResponses()) {
+            if (uniqueLayer && r.getDescriptor().getLayer() == x.getDescriptor().getLayer()) {
+                return false;
+            }
+            if (r.getDescriptor().getType() == x.getDescriptor().getType()) {
+                if (this.limit_dt>0 && Math.abs(x.getTime() - r.getTime()) > this.limit_dt) {
+                    return false;
                 }
             }
         }
