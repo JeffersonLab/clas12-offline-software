@@ -30,7 +30,7 @@ public abstract class AMatch implements IMatch {
     public static double getDeltaPhi(Point3D p1, Point3D p2) {
         return getDeltaPhi(Math.atan2(p1.y(),p1.x()),Math.atan2(p2.y(),p2.x()));
     }
-
+    
     /**
      * Find a matching response in the given list for the given particle.
      * @param p the particle
