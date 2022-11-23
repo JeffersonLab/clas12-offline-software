@@ -210,6 +210,10 @@ public class TrackSeederXY {
         
         //update the cluster list
         for (Seed bseed : seedlist) { 
+            if(Constants.getInstance().seedingDebugMode) {
+                System.out.println("XY seed");
+                System.out.println(bseed.toString());
+            }
             bseed.getClusters().clear();
             for(Cross c : bseed.getCrosses()) {
                 //c.isInSeed = true;

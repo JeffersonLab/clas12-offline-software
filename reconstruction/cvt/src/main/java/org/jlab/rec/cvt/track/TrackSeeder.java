@@ -409,10 +409,13 @@ public class TrackSeeder {
         return bmt_crossesInSec;
     }
 
+    List<ArrayList<Cross>> BMTCcrosses = new ArrayList<>();
+    Map<String, Seed> AllSeeds = new HashMap<>();
     public List<Seed> findCandUsingMicroMegas(Seed trkCand, List<Cross> bmt_crosses) {
-        List<ArrayList<Cross>> BMTCcrosses = new ArrayList<>();
         
-        Map<String, Seed> AllSeeds = new HashMap<>();
+        BMTCcrosses.clear();
+        AllSeeds.clear();
+        
         int[] S = new int[3];
        
         for (int r = 0; r < 3; r++) {
@@ -435,13 +438,14 @@ public class TrackSeeder {
             }
             
         }
+        
+        ArrayList<Cross> matches = new ArrayList<>();
 
         for (int i1 = 0; i1 < S[0]; i1++) {
             for (int i2 = 0; i2 < S[1]; i2++) {
                 for (int i3 = 0; i3 < S[2]; i3++) {
-
-                    ArrayList<Cross> matches = new ArrayList<>();
-
+                    matches.clear();
+                    
                     if (BMTCcrosses.get(0).size() > 0 && i1 < BMTCcrosses.get(0).size()) {
                         if (this.passCcross(trkCand, BMTCcrosses.get(0).get(i1))) {
                             matches.add(BMTCcrosses.get(0).get(i1));
@@ -467,7 +471,6 @@ public class TrackSeeder {
                         BMTTrkSeed.setHelix(trkCand.getHelix());
                         BMTTrkSeed.setCrosses(matches);
                         AllSeeds.put(st,BMTTrkSeed);
-         
                         //if (AllSeeds.size() > 200) {
                         //    AllSeeds.clear();
                         //    return AllSeeds;
@@ -480,7 +483,6 @@ public class TrackSeeder {
         List<Seed> outputSeeds = new ArrayList<>();
         for(Seed s : AllSeeds.values())
             outputSeeds.add(s);
-        
         return outputSeeds;
     }
 
