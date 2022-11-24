@@ -19,8 +19,8 @@ public class DetectorResponseComparators {
     public static final class EnergyCompare implements Comparator<DetectorResponse> {
         @Override
         public int compare(DetectorResponse a, DetectorResponse b) {
-            if (a.getEnergy() > b.getEnergy()) return 1;
-            if (a.getEnergy() < b.getEnergy()) return -1;
+            if (a.getEnergy() > b.getEnergy()) return -1;
+            if (a.getEnergy() < b.getEnergy()) return  1;
             return 0;
         }
     }
@@ -30,8 +30,8 @@ public class DetectorResponseComparators {
     public static final class TimeCompare implements Comparator<DetectorResponse> {
         @Override
         public int compare(DetectorResponse a, DetectorResponse b) {
-            if (a.getTime() < b.getTime()) return 1;
-            if (a.getTime() > b.getTime()) return -1;
+            if (a.getTime() < b.getTime()) return -1;
+            if (a.getTime() > b.getTime()) return  1;
             return 0;
         }
     }
@@ -41,8 +41,8 @@ public class DetectorResponseComparators {
     public static final class PathCompare implements Comparator<DetectorResponse> {
         @Override
         public int compare(DetectorResponse a, DetectorResponse b) {
-            if (a.getPath() < b.getPath()) return 1;
-            if (a.getPath() > b.getPath()) return -1;
+            if (a.getPath() < b.getPath()) return -1;
+            if (a.getPath() > b.getPath()) return  1;
             return 0;
         }
     }
@@ -54,10 +54,10 @@ public class DetectorResponseComparators {
     public static final class LayerEnergyCompare implements Comparator<DetectorResponse> {
         @Override
         public int compare(DetectorResponse a, DetectorResponse b) {
-            if (a.getDescriptor().getLayer() < b.getDescriptor().getLayer()) return 1;
-            if (a.getDescriptor().getLayer() > b.getDescriptor().getLayer()) return -1;
-            if (a.getEnergy() > b.getEnergy()) return 1;
-            if (a.getEnergy() < b.getEnergy()) return -1;
+            if (a.getDescriptor().getLayer() < b.getDescriptor().getLayer()) return -1;
+            if (a.getDescriptor().getLayer() > b.getDescriptor().getLayer()) return  1;
+            if (a.getEnergy() > b.getEnergy()) return -1;
+            if (a.getEnergy() < b.getEnergy()) return  1;
             return 0;
         }
     }
