@@ -546,32 +546,13 @@ public class Seed implements Comparable<Seed>{
             ovlrem = getOverlapRemovedSeeds1Pass(ovlrem);
         }
         
-        //remove all  seeds with that overlap with  list (ovlrem) that contains the best seeds
-        List<Seed> overlappingSeeds =  new ArrayList<>();
-        List<Seed> ovlrem2 = new ArrayList<>();
-        ovlrem2.addAll(seeds);
-        ovlrem2.removeAll(ovlrem);
-        for (Seed s2 : ovlrem2) {
-            for(Seed s : ovlrem) {
-                if(s2.overlapWithUsingClusters(s)) {
-                    s2.setId(-99999);
-                }
-            }
+        while(ovlrem.size()!=appendSeedList(seeds, ovlrem).size() ){
+            ovlrem = appendSeedList(seeds, ovlrem);
         }
-        for(Seed s2 :  ovlrem2) {
-            if(s2.getId()==-99999) 
-                overlappingSeeds.add(s2);
-        }
-        ovlrem2.removeAll(overlappingSeeds);
-        //get the best seeds from what remains
-        if(!ovlrem2.isEmpty()) {
-            while(ovlrem2.size()!=getOverlapRemovedSeeds1Pass(ovlrem2).size()) {
-                ovlrem2 = getOverlapRemovedSeeds1Pass(ovlrem2);
-            }
-        }
-        ovlrem.addAll(ovlrem2);
+        
         return ovlrem;
     }
+    
     public static void setOverlaps(List<Seed> seeds) { 
         if(seeds==null)
             return ;
@@ -731,6 +712,34 @@ public class Seed implements Comparable<Seed>{
         }
     }
 
+    private  static List<Seed> appendSeedList(List<Seed> seeds, List<Seed> ovlrem) {
+        
+        List<Seed> overlappingSeeds =  new ArrayList<>();
+        List<Seed> ovlrem2 = new ArrayList<>();
+        ovlrem2.addAll(seeds);
+        ovlrem2.removeAll(ovlrem);
+        for (Seed s2 : ovlrem2) {
+            for(Seed s : ovlrem) {
+                if(s2.overlapWithUsingClusters(s)) {
+                    s2.setId(-99999);
+                }
+            }
+        }
+        for(Seed s2 :  ovlrem2) {
+            if(s2.getId()==-99999) 
+                overlappingSeeds.add(s2);
+        }
+        ovlrem2.removeAll(overlappingSeeds);
+        //get the best seeds from what remains
+        if(!ovlrem2.isEmpty()) {
+            while(ovlrem2.size()!=getOverlapRemovedSeeds1Pass(ovlrem2).size()) {
+                ovlrem2 = getOverlapRemovedSeeds1Pass(ovlrem2);
+            }
+        }
+        ovlrem2.addAll(ovlrem);
+        
+        return ovlrem2;
+    }
     
     public class Key implements Comparable<Key> {
 
