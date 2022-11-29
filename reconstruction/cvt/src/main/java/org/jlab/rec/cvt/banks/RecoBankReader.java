@@ -373,7 +373,7 @@ public class RecoBankReader {
                 int    type   = bank.getByte("fittingMethod", i);
 //                double xb     = bank.getFloat("xb", i);
 //                double yb     = bank.getFloat("yb", i);
-                Helix helix = new Helix( pt, d0, phi0, z0, tandip, q, xb, yb, Constants.getSolenoidMagnitude());
+                Helix helix = new Helix( pt, d0, phi0, z0, tandip, q, xb, yb);
                 double[][] covmatrix = new double[5][5];
                 covmatrix[0][0] = bank.getFloat("cov_d02", i)*10*10;
                 covmatrix[0][1] = bank.getFloat("cov_d0phi0", i)*10 ;
@@ -448,7 +448,7 @@ public class RecoBankReader {
                 int    q      = bank.getByte("q", i);
 //                double xb     = bank.getFloat("xb", i);
 //                double yb     = bank.getFloat("yb", i);
-                Helix helix = new Helix( pt, d0, phi0, z0, tandip, q, xb, yb, Constants.getSolenoidMagnitude());
+                Helix helix = new Helix( pt, d0, phi0, z0, tandip, q, xb, yb);
                 double[][] covmatrix = new double[5][5];
                 covmatrix[0][0] = bank.getFloat("cov_d02", i)*10*10;
                 covmatrix[0][1] = bank.getFloat("cov_d0phi0", i)*10 ;

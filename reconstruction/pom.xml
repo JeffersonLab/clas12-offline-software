@@ -32,5 +32,7 @@
     <module>swaps</module>
     <module>raster</module>
     <module>vtx</module>
+    <module>urwell</module>
+
   </modules>
 </project>

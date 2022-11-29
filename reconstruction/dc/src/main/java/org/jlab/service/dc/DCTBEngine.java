@@ -172,7 +172,7 @@ public class DCTBEngine extends DCEngine {
         for (int i = 0; i < trkrows; i++) {
             Track HBtrk = new Track();
             HBtrk.set_Id(trkbank.getShort("id", i));
-            HBtrk.set_Sector(trkbank.getByte("sector", i));
+            HBtrk.setSector(trkbank.getByte("sector", i));
             HBtrk.set_Q(trkbank.getByte("q", i));
             HBtrk.set_pAtOrig(new Vector3D(trkbank.getFloat("p0_x", i), trkbank.getFloat("p0_y", i), trkbank.getFloat("p0_z", i)));
             HBtrk.set_P(HBtrk.get_pAtOrig().mag());
@@ -247,7 +247,7 @@ public class DCTBEngine extends DCEngine {
                 }
                 TrackArray1.set_FitChi2(kFit.chi2);
                 TrackArray1.set_FitNDF(kFit.NDF);
-                TrackArray1.set_Trajectory(kFit.kfStateVecsAlongTrajectory);
+                TrackArray1.setStateVecs(kFit.kfStateVecsAlongTrajectory);
                 TrackArray1.set_FitConvergenceStatus(kFit.ConvStatus);
                 //TrackArray[i].set_Id(TrackArray[i].size()+1);
                 //TrackArray[i].set_CovMat(kFit.finalCovMat.covMat);
@@ -263,35 +263,16 @@ public class DCTBEngine extends DCEngine {
             }
         }
         
-        
-        //for(int i = 0; i < crosses.size(); i++) {
-        //    crosses.get(i).set_Id(i+1);
-        //}
-        // track found	
-        //int trkId = 1;
 
-        if(trkcands.size()>0) {
+        if(!trkcands.isEmpty()) {
             //trkcandFinder.removeOverlappingTracks(trkcands);		// remove overlaps
             for(Track trk: trkcands) {
                 int trkId = trk.get_Id();
                 // reset the id
                 //trk.set_Id(trkId);
-                trkcandFinder.matchHits(trk.get_Trajectory(), trk, Constants.getInstance().dcDetector, dcSwim);
-                trk.calcTrajectory(trkId, dcSwim, trk.get_Vtx0().x(), trk.get_Vtx0().y(), trk.get_Vtx0().z(), 
-                        trk.get_pAtOrig().x(), trk.get_pAtOrig().y(), trk.get_pAtOrig().z(), trk.get_Q(), 
-                        Constants.getInstance().tSurf);
-//                for(int j = 0; j< trk.trajectory.size(); j++) {
-//                LOGGER.log(Level.FINE, trk.get_Id()+" "+trk.trajectory.size()+" ("+trk.trajectory.get(j).getDetId()+") ["+
-//                            trk.trajectory.get(j).getDetName()+"] "+
-//                            (float)trk.trajectory.get(j).getX()/trk.get_P()+", "+
-//                            (float)trk.trajectory.get(j).getY()/trk.get_P()+", "+
-//                            (float)trk.trajectory.get(j).getZ()/trk.get_P()+", "+
-//                            (float)trk.trajectory.get(j).getpX()/trk.get_P()+", "+
-//                            (float)trk.trajectory.get(j).getpY()/trk.get_P()+", "+
-//                            (float)trk.trajectory.get(j).getpZ()/trk.get_P()+", "+
-//                            (float)trk.trajectory.get(j).getPathLen()+" "
-//                            );               
-//                }
+                trkcandFinder.matchHits(trk.getStateVecs(), trk, Constants.getInstance().dcDetector, dcSwim);
+                trk.calcTrajectory(trkId, dcSwim, trk.get_Vtx0(), trk.get_pAtOrig(), trk.get_Q());
+                LOGGER.log(Level.FINE, trk.toString());               
 
                 for(Cross c : trk) { 
                     c.set_CrossDirIntersSegWires();

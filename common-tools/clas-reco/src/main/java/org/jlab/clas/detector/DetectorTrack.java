@@ -24,12 +24,14 @@ public class DetectorTrack implements Comparable {
         private Line3D traj=null;
         private float bField = 0;
         private float pathLength = -1;
-        public TrajectoryPoint(int detId,int layId,Line3D traj,float bField,float pathLength) {
+        private float edge=-99;
+        public TrajectoryPoint(int detId,int layId,Line3D traj,float bField,float pathLength,float edge) {
             this.detId=detId;
             this.layId=layId;
             this.traj=traj;
             this.bField=bField;
             this.pathLength=pathLength;
+            this.edge=edge;
         }
         public TrajectoryPoint(int detId,int layId,Line3D traj) {
             this.layId=layId;
@@ -41,6 +43,7 @@ public class DetectorTrack implements Comparable {
         public Line3D getCross() { return traj; }
         public float getBField() { return bField; }
         public float getPathLength() { return pathLength; }
+        public float getEdge() { return edge; }
     }
 
     public class Trajectory {
@@ -48,15 +51,19 @@ public class DetectorTrack implements Comparable {
         private int size=0;
         private Map < Integer, Map <Integer,TrajectoryPoint> > traj = new LinkedHashMap<>();
         
-        public void add(int detId,int layId,Line3D traj,float bField,float pathLength) {
+        public void add(int detId,int layId,Line3D traj,float bField,float pathLength,float edge) {
             if (!this.traj.containsKey(detId)) {
                 this.traj.put(detId,new LinkedHashMap<>());
             }
             if (this.traj.get(detId).containsKey(layId)) {
                 throw new RuntimeException("Duplicate detector type/layer: "+detId+"/"+layId);
             }
-            this.traj.get(detId).put(layId,new TrajectoryPoint(detId,layId,traj,bField,pathLength));
+            this.traj.get(detId).put(layId,new TrajectoryPoint(detId,layId,traj,bField,pathLength,edge));
             this.size++;
+        }
+        
+        public void add(int detId,int layId,Line3D traj,float bField,float pathLength) {
+            add(detId,layId,traj,bField,pathLength,-99);
         }
 
         public void add(int detId,int layId,Line3D traj) {
@@ -164,6 +171,10 @@ public class DetectorTrack implements Comparable {
         this.trackVertex.setXYZ(vx, vy, vz);
     }
 
+    
+    public void addTrajectoryPoint(int detId,int layId,Line3D traj,float bField,float pathLength,float edge) {
+        this.trajectory.add(detId,layId,traj,bField,pathLength,edge);
+    }
     public void addTrajectoryPoint(int detId,int layId,Line3D traj,float bField,float pathLength) {
         this.trajectory.add(detId,layId,traj,bField,pathLength);
     }
@@ -197,17 +208,33 @@ public class DetectorTrack implements Comparable {
         this.trackP.setXYZ(px, py, pz);
         return this;
     }
-    
+   
+    public DetectorTrack setVector(Vector3 v) {
+        return this.setVector(v.x(),v.y(),v.z());
+    }
+
     public DetectorTrack setVertex(double vx, double vy, double vz){
         this.trackVertex.setXYZ(vx, vy, vz);
         return this;
+    }
+
+    public DetectorTrack setVertex(Vector3 v) {
+        return setVertex(v.x(),v.y(),v.z());
     }
     
     public DetectorTrack setPath(double path){
         this.trackPath = path;
         return this;
     }
-    
+
+    public DetectorTrack setNeutralPath(Vector3 vertex, Vector3D end) {
+        this.setVertex(vertex);
+        this.setTrackEnd(end);
+        Vector3 path = new Vector3(end.x(),end.y(),end.z());
+        path.sub(vertex);
+        return this.setPath(path.mag());
+    }
+   
     public DetectorTrack setSector(int sector){
         this.trackSector = sector;
         return this;
@@ -216,6 +243,10 @@ public class DetectorTrack implements Comparable {
     public DetectorTrack setTrackEnd(double x, double y, double z){
         this.trackEnd.setXYZ(x, y, z);
         return this;
+    }
+
+    public DetectorTrack setTrackEnd(Vector3D v) {
+        return this.setTrackEnd(v.x(),v.y(),v.z());
     }
     
     public void     setNDF(int x) {this.ndf = x;}

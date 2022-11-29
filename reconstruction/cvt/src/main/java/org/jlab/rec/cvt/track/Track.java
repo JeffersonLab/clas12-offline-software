@@ -18,7 +18,6 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.Geometry;
-import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.measurement.MLayer;
@@ -502,6 +501,7 @@ public class Track extends Trajectory implements Comparable<Track> {
                 stVec.setTrkThetaAtSurface(localDir.theta());
                 stVec.setTrkToModuleAngle(Geometry.getInstance().getSVT().getLocalAngle(traj.layer, traj.sector, dir));
                 stVec.setCalcCentroidStrip(Geometry.getInstance().getSVT().calcNearestStrip(traj.x, traj.y, traj.z, traj.layer, traj.sector));
+                stVec.setEdge(Geometry.getInstance().getSVT().distanceToEdge(traj.layer, traj.sector, pos));
             }
             else if(MLayer.getDetectorType(index) == DetectorType.BMT) {
                 Vector3D localDir = Geometry.getInstance().getBMT().getLocalTrack(traj.layer, traj.sector, pos, dir);
@@ -509,6 +509,7 @@ public class Track extends Trajectory implements Comparable<Track> {
                 stVec.setTrkThetaAtSurface(localDir.theta());
                 stVec.setTrkToModuleAngle(Geometry.getInstance().getBMT().getLocalAngle(traj.layer, traj.sector, pos, dir));
                 stVec.setCalcCentroidStrip(Geometry.getInstance().getBMT().getStrip(traj.layer, traj.sector, pos));
+                stVec.setEdge(Geometry.getInstance().getBMT().getTileSurface(traj.layer, traj.sector).distanceToEdge(pos));
             }
             if(stVec.getSurfaceDetector()>0) {
                 stVec.setSurfaceDetector(DetectorType.CVT.getDetectorId());
@@ -535,6 +536,7 @@ public class Track extends Trajectory implements Comparable<Track> {
                 path += inters[6]*10 * beta/(mom.mag()/Math.sqrt(mom.mag2()+mass*mass));
                 
                 StateVec stVec = new StateVec(this.getId(), pos, mom, surface, path);
+                stVec.setEdge(surface.cylinder.distanceToEdge(pos));
                 stateVecs.add(stVec);                
                 
                 if(surface.getIndex() == DetectorType.CTOF.getDetectorId()) {

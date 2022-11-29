@@ -191,12 +191,12 @@ public class Helix {
         return getLightVelocity() * getR() * B;
     }
     
-    public double getX(double l){ 
+    public double getX(double l){
         double s = (double) -KFitter.polarity; 
         return getXc() + s*getTurningSign()*getR()*Math.sin(getPhi(l)); 
     }
     
-    public double getY(double l){ 
+    public double getY(double l){
     double s = (double) -KFitter.polarity; 
         return getYc() - s*getTurningSign()*getR()*Math.cos(getPhi(l));
     }

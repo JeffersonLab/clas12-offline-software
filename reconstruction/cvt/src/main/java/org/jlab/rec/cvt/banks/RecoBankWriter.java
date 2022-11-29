@@ -705,6 +705,7 @@ public class RecoBankWriter {
                 bank.setFloat("centroid", k,  (float) stVec.getCalcCentroidStrip());
                 bank.setFloat("path",     k,  (float) stVec.getPath()/10);
                 bank.setFloat("dx",       k,  (float) stVec.getDx()/10);
+                bank.setFloat("edge",     k,  (float) stVec.getEdge()/10);
                 k++;
 
             }

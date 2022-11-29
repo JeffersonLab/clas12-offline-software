@@ -80,11 +80,11 @@ public class EngineProcessor {
         String[] names = new String[]{
             "MAGFIELDS",
             "FTCAL", "FTHODO", "FTTRK", "FTEB",
-            "DCCR","DCHB","FTOFHB","EC","RASTER",
+            "URWELL", "DCCR", "DCHB","FTOFHB","EC","RASTER",
             "CVTFP","CTOF","CND","BAND",
             "HTCC","LTCC","EBHB",
             "DCTB","FMT","FTOFTB","CVT","EBTB",
-            "RICHEB","RTPC"
+            "RICHEB","RTPC","MC"
         };
 
         String[] services = new String[]{
@@ -93,6 +93,7 @@ public class EngineProcessor {
             "org.jlab.rec.ft.hodo.FTHODOEngine",
             "org.jlab.rec.ft.trk.FTTRKEngine",
             "org.jlab.rec.ft.FTEBEngine",
+            "org.jlab.service.urwell.URWellEngine",
             "org.jlab.service.dc.DCHBClustering",
             "org.jlab.service.dc.DCHBPostClusterConv",
             "org.jlab.service.ftof.FTOFHBEngine",
@@ -112,7 +113,8 @@ public class EngineProcessor {
             "org.jlab.rec.cvt.services.CVTSecondPassEngine",
             "org.jlab.service.eb.EBTBEngine",
             "org.jlab.rec.rich.RICHEBEngine",
-            "org.jlab.service.rtpc.RTPCEngine"
+            "org.jlab.service.rtpc.RTPCEngine",
+            "org.jlab.service.mc.TruthMatch"
         };
 
         for(int i = 0; i < names.length; i++){

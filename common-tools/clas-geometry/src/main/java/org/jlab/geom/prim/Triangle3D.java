@@ -143,16 +143,61 @@ public final class Triangle3D implements Face3D {
         return Point3D.average(point0, point1, point2);
     }
 
+    /**
+     * Constructs the unit vector normal to the plane of this {@code Triangle3D}.
+     * @return the normal to the plane of this {@code Triangle3D}
+     */
     public Vector3D normal() {
         Vector3D vec1 = point0.vectorTo(point1);
         Vector3D vec2 = point0.vectorTo(point2);
-        return vec1.cross(vec2);
+        return vec1.cross(vec2).asUnit();
     }
     
+    /**
+     * Constructs the the plane of this {@code Triangle3D}.
+     * @return the plane of this {@code Triangle3D}
+     */
     public Plane3D plane() {
         return new Plane3D(center(), normal());
     }
     
+    /**
+     * Test whether the given point is inside the area of this {@code Triangle3D}.
+     * @param p the given point
+     * @return true if inside or false if outside
+     */
+    public boolean isInside(Point3D p) {
+
+        Vector3D n = this.normal();
+        int sign = (int) Math.signum(this.point(2).vectorTo(this.point(0)).cross(this.point(2).vectorTo(p)).dot(n));
+        for(int i=0; i<2; i++) {
+            int signi = (int) Math.signum(this.point(i).vectorTo(this.point(i+1)).cross(this.point(i).vectorTo(p)).dot(n));
+            if(signi != sign)
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * Computes the minimum distance of the given point from the edges of 
+     * this {@code Triangle3D}.
+     * @param p the given point
+     * @return the signed distance to the {@code Triangle3D} edges, positive if inside or negative if outside
+     */
+    public double distanceFromEdge(Point3D p) {
+        double distance = new Line3D(this.point(2), this.point(0)).distanceSegment(p).length();
+        for (int i = 0; i < 2; i++) {
+            double disti = new Line3D(this.point(i), this.point(i+1)).distanceSegment(p).length();
+            if (disti < distance) {
+                distance = disti;
+            }
+        }
+        if (!this.isInside(p)) {
+            distance *= -1;
+        }
+        return distance;
+    }             
+
     @Override
     public int intersection(Line3D line, List<Point3D> intersections) {
         Vector3D v0 = point0.vectorTo(point1);
