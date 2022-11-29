@@ -11,7 +11,6 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
@@ -21,7 +20,6 @@ import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.hit.Strip;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.track.Seed;
-import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.trajectory.Helix;
 
 /**
@@ -463,10 +461,10 @@ public class RecoBankReader {
                 covmatrix[3][4] = bank.getFloat("cov_z0tandip", i)*10;
                 covmatrix[4][3] = bank.getFloat("cov_z0tandip", i)*10;
                 covmatrix[4][4] = bank.getFloat("cov_tandip2", i);
-                int    status   = bank.getShort("status", i);
-                double chi2     = bank.getFloat("chi2", i);
-                int    ndf      = bank.getShort("ndf", i);
-                int    pid      = bank.getInt("pid", i);
+            //    int    status   = bank.getShort("status", i);
+            //    double chi2     = bank.getFloat("chi2", i);
+            //    int    ndf      = bank.getShort("ndf", i);
+            //    int    pid      = bank.getInt("pid", i);
                 int    seedId   = bank.getShort("seedID", i);
                 int    type   = bank.getByte("fittingMethod", i);
                 
