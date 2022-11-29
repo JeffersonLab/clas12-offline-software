@@ -8,7 +8,7 @@ cd `dirname $0`
 # Script is exporting existing Jar files to repository
 #-------------------------------------------------------------------------------------------------
 
-VERSION=8.3.4
+VERSION=8c.3.4
 
 mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file \
     -Dfile=target/coat-libs-${VERSION}-SNAPSHOT.jar \
