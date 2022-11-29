@@ -53,6 +53,49 @@ public class TrackSeeder {
         ybeam = yb;
     }
     
+    private void getSeedMissingSVTCross(List<Cross> othercrs) {
+        if(othercrs==null || othercrs.isEmpty())
+            return;
+         List<Cross> crsInMReg = new ArrayList<>();
+        for (Seed seed : getSeedScan()) {
+            crsInMReg.clear();
+            double d = seed.getDoca();
+            double r = seed.getRho();
+            double f = seed.getPhi();
+            int mreg = this.findMissingSVTRegion(seed);
+            
+            if(mreg!=0) {
+                for (Cross c : othercrs ) { 
+                    int region = c.getRegion();
+                    if(c.getDetector()==DetectorType.BST && this.inSamePhiRange(seed, c)== true && region ==mreg) {
+                        crsInMReg.add(c);
+                    }
+                }
+            }
+            if(!crsInMReg.isEmpty()) {
+               
+                Cross bestCross = null;
+                double bestRes = 999999;
+                for (Cross c : crsInMReg ) { 
+
+                    double xi = c.getPoint().x(); 
+                    double yi = c.getPoint().y();
+                    double ri = Math.sqrt(xi*xi+yi*yi);
+                    double fi = Math.atan2(yi,xi) ;
+
+                    double res = this.calcResi(r, ri, d, f, fi);
+
+                    if(Math.abs(res)<SVTParameters.RESIMAX && Math.abs(res)<bestRes) { 
+                        bestCross = c;  
+                        bestRes = Math.abs(res);
+                    }
+                }
+                if(bestCross!=null)
+                    seed.getCrosses().add(bestCross);
+        
+            }
+        }
+    }
     
     private void matchSeed(List<Cross> othercrs) {
         if(othercrs==null || othercrs.isEmpty())
@@ -280,6 +323,7 @@ public class TrackSeeder {
             }
         }
         this.findSeedCrossList(svt_crosses);
+        this.getSeedMissingSVTCross(svt_crosses);
         this.matchSeed(crosses);
         
         for(Seed mseed : getSeedScan()) { 
@@ -567,6 +611,21 @@ public class TrackSeeder {
         return value;
     }
 
+    private int findMissingSVTRegion(Seed seed) {
+        int missingReg = 0;
+        int mR[] = new int[3];
+        List<Cross> crs = seed.getCrosses();
+        for(Cross c : crs) {
+            mR[c.getRegion()-1]++;
+        }
+        for(int i =0; i<3; i++) {
+            if(mR[i]==0) {
+                missingReg = i+1;
+            }
+        }
+        return missingReg;
+    }
+    
     /**
      * @return the seedScan
      */
