@@ -69,9 +69,11 @@ public class CVTReconstruction {
                 totmctru++;
             }
         }
-        for(Hit h : BMThits) {
-            if(h.MCstatus==0) {
-                totmctru++;
+        if(BMThits!=null && !BMThits.isEmpty()) {
+            for(Hit h : BMThits) {
+                if(h.MCstatus==0) {
+                    totmctru++;
+                }
             }
         }
         setTotalNbTruHits(totmctru);
