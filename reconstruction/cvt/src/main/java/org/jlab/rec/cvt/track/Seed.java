@@ -2,7 +2,6 @@ package org.jlab.rec.cvt.track;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +17,6 @@ import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.fit.HelicalTrackFitter;
 import org.jlab.rec.cvt.fit.HelicalTrackFitter.FitStatus;
 import org.jlab.rec.cvt.hit.Hit;
-import org.jlab.rec.cvt.services.CVTReconstruction;
 import org.jlab.rec.cvt.trajectory.Helix;
 
 /**
@@ -214,12 +212,6 @@ public class Seed implements Comparable<Seed>{
         this._chi2 = _chi2;
     }
 
-    public double getGoodTrkChi2ovNDF() {
-        double value = 99999;
-        if(_NDF>0) 
-            value = _chi2/_NDF;
-        return value;
-    }
     public String getIntIdentifier() {
         
         String id = "";
@@ -491,37 +483,23 @@ public class Seed implements Comparable<Seed>{
         else      return false;
     }
     
-    public boolean overlapWithUsingClustersold(Seed o) {
-        int nc = 0;
-        for(Cluster c : this.getClusters()) {
-            if(o.getClusters().contains(c)) nc++;
-        }
-        if(nc >1) return true;
-        else      return false;
-    }
+//    public boolean overlapWithUsingClusters(Seed o) {
+//        int nc = 0;
+//        for(Cluster c : this.getClusters()) {
+//            if(o.getClusters().contains(c)) nc++;
+//        }
+//        if(nc >1) return true;
+//        else      return false;
+//    }
     public boolean overlapWithUsingClusters(Seed o) {
         boolean ov = false;
-        for(Cross c : this._Crosses) {
-            for(Cross co : o._Crosses) {
-                if(c.getDetector()==DetectorType.BST && co.getDetector()==DetectorType.BST 
-                        && c.getSector()==co.getSector() && c.getRegion()==co.getRegion()) {
-                    if(c.getId()==co.getId()) {
-                        ov = true;
-                    } else {
-                        if(c.getCluster1().getLayer()==co.getCluster1().getLayer()
-                                && c.getCluster1().getId()==c.getCluster1().getId()) ov = true;
-                        if(c.getCluster2().getLayer()==co.getCluster2().getLayer() 
-                                && c.getCluster2().getId()==c.getCluster2().getId()) ov = true;
-                    }
-                } 
-                if(c.getDetector()==DetectorType.BMT && co.getDetector()==DetectorType.BMT 
-                        && c.getSector()==co.getSector() && c.getRegion()==co.getRegion()) {
-                    if(c.getId()==co.getId()) ov = true;
-                }
-            }
-        }
-        
-        return ov;
+        for(Cluster c : this._Clusters) {
+           for(Cluster co : o._Clusters) {
+               if(c.getDetector()==co.getDetector() && c.getLayer()==co.getLayer() && c.getId()==co.getId()) 
+                   ov = true;
+           }
+       }
+       return ov; 
     }
     
     public static void flagMCSeeds(List<Seed> seeds, int totTruthHits) {
@@ -549,19 +527,58 @@ public class Seed implements Comparable<Seed>{
     public static void removeOverlappingSeeds(List<Seed> seeds) {
         if(seeds==null)
             return;
-  
+        for(Seed s : seeds) {
+            s.setClusters();
+        }
         List<Seed> ovlrem = getOverlapRemovedSeeds(seeds);
         if(ovlrem!=null) {
             seeds.clear();
             seeds.addAll(ovlrem);
         }
     }
-    public static int MAXSEEDS = 50;
+    
     public static List<Seed> getOverlapRemovedSeeds(List<Seed> seeds) { 
         if(seeds==null)
             return null;
+        List<Seed> ovlrem = new ArrayList<>();
+        ovlrem.addAll(seeds);
+        while(ovlrem.size()!=getOverlapRemovedSeeds1Pass(ovlrem).size()) {
+            ovlrem = getOverlapRemovedSeeds1Pass(ovlrem);
+        }
+        
+        //remove all  seeds with that overlap with  list (ovlrem) that contains the best seeds
+        List<Seed> overlappingSeeds =  new ArrayList<>();
+        List<Seed> ovlrem2 = new ArrayList<>();
+        ovlrem2.addAll(seeds);
+        ovlrem2.removeAll(ovlrem);
+        for (Seed s2 : ovlrem2) {
+            for(Seed s : ovlrem) {
+                if(s2.overlapWithUsingClusters(s)) {
+                    s2.setId(-99999);
+                }
+            }
+        }
+        for(Seed s2 :  ovlrem2) {
+            if(s2.getId()==-99999) 
+                overlappingSeeds.add(s2);
+        }
+        ovlrem2.removeAll(overlappingSeeds);
+        //get the best seeds from what remains
+        if(!ovlrem2.isEmpty()) {
+            while(ovlrem2.size()!=getOverlapRemovedSeeds1Pass(ovlrem2).size()) {
+                ovlrem2 = getOverlapRemovedSeeds1Pass(ovlrem2);
+            }
+        }
+        ovlrem.addAll(ovlrem2);
+        return ovlrem;
+    }
+    public static void setOverlaps(List<Seed> seeds) { 
+        if(seeds==null)
+            return ;
+        List<Seed> goodseeds = new ArrayList<>();    
         List<Seed> selectedSeeds =  null;
         for (int i = 0; i < seeds.size(); i++) {
+            
             Seed t1 = seeds.get(i);
             selectedSeeds =  new ArrayList<>();
             for(int j=0; j<seeds.size(); j++ ) {
@@ -570,65 +587,18 @@ public class Seed implements Comparable<Seed>{
                     selectedSeeds.add(t2);
                 }
             }
+            
             t1.setOverlappingSeed(selectedSeeds);
         }
-        List<Seed> ovlrem = new ArrayList<>();
-        List<Seed> ovlrem2 = new ArrayList<>();
-        for(Seed s : seeds) {
-            if(s.getOverlappingSeeds().size()<MAXSEEDS) { //if the seed has fewer than MAXSEEDS seeds that overlap with it pass it along
-                ovlrem.add(s);
-            } else {
-                ovlrem2.add(s); //else put it in a separate list
-            }
-        }
-        
-        if(ovlrem2.size()>MAXSEEDS*3) { //if the separate list size is 3X MAXSEEDS only keep the seeds with the best chi2
-            ovlrem2.sort(Comparator.comparing(Seed::getGoodTrkChi2ovNDF));
-            for(int i = 0; i<MAXSEEDS*3; i++) {
-                ovlrem.add(ovlrem2.get(i));
-            }
-        } else {
-            ovlrem.addAll(ovlrem2);
-        }
-        ovlrem2.clear();
-        ovlrem2.addAll(ovlrem);
-        
-        while(ovlrem.size()!=getOverlapRemovedSeeds1Pass(ovlrem).size()) {
-            ovlrem = getOverlapRemovedSeeds1Pass(ovlrem);
-        }
-       // return ovlrem;
-        
-        //lost seed recovery
-        List<Seed> selectedSeeds2  =  new ArrayList<>();
-        for(Seed s : ovlrem) { 
-            if(Constants.getInstance().seedingDebugMode)
-                System.out.println("passed seed  "+s.toString());
-            for(int j=0; j<ovlrem2.size(); j++ ) {
-                Seed t2 = ovlrem2.get(j);
-                if(!s.overlapWithUsingClusters(t2) ) {
-                    selectedSeeds2.add(t2); 
-                    if(Constants.getInstance().seedingDebugMode) {
-                        System.out.println("Recover seed  "+t2.toString());
-                    }
-                } 
-            }
-        }
-        if(!selectedSeeds2.isEmpty())
-            ovlrem.addAll(selectedSeeds2);
-        List<Seed> ovlrem3 = new ArrayList<>();
-        ovlrem3.addAll(ovlrem);
-        while(ovlrem3.size()!=getOverlapRemovedSeeds1Pass(ovlrem3).size()) {
-            ovlrem3 = getOverlapRemovedSeeds1Pass(ovlrem3);
-        }
-        return ovlrem3;
-        
     }
+    
     public static List<Seed> getOverlapRemovedSeeds1Pass(List<Seed> seeds) { 
         if(seeds==null)
             return null;
         List<Seed> goodseeds = new ArrayList<>();    
         List<Seed> selectedSeeds =  null;
         for (int i = 0; i < seeds.size(); i++) {
+            
             Seed t1 = seeds.get(i);
             selectedSeeds =  new ArrayList<>();
             for(int j=0; j<seeds.size(); j++ ) {
@@ -639,13 +609,13 @@ public class Seed implements Comparable<Seed>{
             }
             
             t1.setOverlappingSeed(selectedSeeds);
-            
+            //System.out.println(t1.getOverlappingSeeds().size()+") Check for seed ovrl "+t1.toString());
             //for(Seed s : t1.getOverlappingSeeds()) {
             //    System.out.println("ovl has seed "+s.toString());
             //}
         }
         //seeds.removeAll(seeds);
-        //seeds.addAll(selectedSeeds);
+        //seeds.addAll(overlappingSeeds);
         selectedSeeds =  new ArrayList<>();
         //Get the best seeds from each list
        
@@ -715,7 +685,7 @@ public class Seed implements Comparable<Seed>{
                 if(subseed!=null) {
                     Seed seed_1 = null; 
                     Seed seed_2 = null;
-                    if(subseed.getCrosses().size()==seed2.getCrosses().size()) {
+                    if(subseed._Crosses.size()==seed2._Crosses.size()) {
                         seed_2 = seed2;
                         seed_1 = seed1;
                     } else {
@@ -760,6 +730,8 @@ public class Seed implements Comparable<Seed>{
             return null;
         }
     }
+
+    
     public class Key implements Comparable<Key> {
 
         public int[] crossIds = new int[9];
