@@ -8,6 +8,7 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
+import org.jlab.rec.dc.track.fit.StateVecsDoca;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 
@@ -415,6 +416,37 @@ public class Track extends Trajectory implements Comparable<Track>{
         if(this._trakOrig.distance(0, 0, 0)>Constants.HTCCRADIUS && this._trakOrig.z()>0) isGood=false;
         return isGood;
     }
+    
+    private double[][] _CovMatLab;
+    public double[][] get_CovMatLab() {
+        return _CovMatLab;
+    }
+    public void set_CovMatLab(double[][] _CovMatLab) {
+        this._CovMatLab = _CovMatLab;
+    }
+    
+     public void getCovMatToLab(int sector, StateVecsDoca.StateVec stateVecAtVtx, Matrix covMatAtVtx, double z) {
+        
+        //the parameters in the TCS
+        double[] q = new double[6];
+        q[0] = stateVecAtVtx.x;
+        q[1] = stateVecAtVtx.y;
+        q[2] = z;
+        q[3] = stateVecAtVtx.tx;
+        q[4] = stateVecAtVtx.ty;
+        q[5] = stateVecAtVtx.Q;
+        int charge = (int) Math.signum(stateVecAtVtx.Q);
+        
+        double[][] CST = new double[5][5];
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 5; j++) {
+                CST[i][j] = covMatAtVtx.get(i, j);
+            }
+        }
+        double[][] C = CovMatUtil.getCovMatToLab(sector, charge, q, CST);
+        this.set_CovMatLab(C);
+     }
+    
     /**
      * Basic track info
      */
