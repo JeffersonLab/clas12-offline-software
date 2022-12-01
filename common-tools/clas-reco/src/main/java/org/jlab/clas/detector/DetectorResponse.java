@@ -222,60 +222,6 @@ public class DetectorResponse {
         return sectorShifted<=3 ? sectorShifted-3+6 : sectorShifted-3;
     }
 
-    /*
-    Order by energy, largest to smallest
-    */
-    public static class EnergyCompare implements Comparator<DetectorResponse> {
-        @Override
-        public int compare(DetectorResponse a, DetectorResponse b) {
-            if (a.getEnergy() > b.getEnergy()) return 1;
-            if (a.getEnergy() < b.getEnergy()) return -1;
-            return 0;
-        }
-    }
-    /*
-    Order by time, smallest to largest
-    */
-    public static class TimeCompare implements Comparator<DetectorResponse> {
-        @Override
-        public int compare(DetectorResponse a, DetectorResponse b) {
-            if (a.getTime() < b.getTime()) return 1;
-            if (a.getTime() > b.getTime()) return -1;
-            return 0;
-        }
-    }
-
-    /*
-    Order by path, smallest to largest
-    */
-    public static class PathCompare implements Comparator<DetectorResponse> {
-        @Override
-        public int compare(DetectorResponse a, DetectorResponse b) {
-            if (a.getPath() < b.getPath()) return 1;
-            if (a.getPath() > b.getPath()) return -1;
-            return 0;
-        }
-    }
-
-    /*
-    Ordering by layer, smallest to largest, and within each layer by energy,
-    largest to smallest.
-    */
-    public static class LayerEnergyCompare implements Comparator<DetectorResponse> {
-        public int compare(DetectorResponse a, DetectorResponse b) {
-            if (a.getDescriptor().getLayer() < b.getDescriptor().getLayer()) return 1;
-            if (a.getDescriptor().getLayer() > b.getDescriptor().getLayer()) return -1;
-            if (a.getEnergy() > b.getEnergy()) return 1;
-            if (a.getEnergy() < b.getEnergy()) return -1;
-            return 0;
-        }
-    }
-
-    public static final LayerEnergyCompare layerEnergyCompare = new LayerEnergyCompare();
-    public static final EnergyCompare energyCompare = new EnergyCompare();
-    public static final TimeCompare timeCompare = new TimeCompare();
-    public static final PathCompare pathCompare = new PathCompare();
-    
     @Override
     public String toString(){
         StringBuilder str = new StringBuilder();
