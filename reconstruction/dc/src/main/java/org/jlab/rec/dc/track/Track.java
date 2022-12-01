@@ -425,17 +425,15 @@ public class Track extends Trajectory implements Comparable<Track>{
         this._CovMatLab = _CovMatLab;
     }
     
-     public void getCovMatToLab(int sector, StateVecsDoca.StateVec stateVecAtVtx, Matrix covMatAtVtx, double z) {
-        
+     public void getCovMatToLab(int sector, int charge, Point3D X, Vector3D P,  Matrix covMatAtVtx) {
         //the parameters in the TCS
         double[] q = new double[6];
-        q[0] = stateVecAtVtx.x;
-        q[1] = stateVecAtVtx.y;
-        q[2] = z;
-        q[3] = stateVecAtVtx.tx;
-        q[4] = stateVecAtVtx.ty;
-        q[5] = stateVecAtVtx.Q;
-        int charge = (int) Math.signum(stateVecAtVtx.Q);
+        q[0] = X.x();
+        q[1] = X.y();
+        q[2] = X.z();
+        q[3] = P.x();
+        q[4] = P.y();
+        q[5] = P.z();
         
         double[][] CST = new double[5][5];
         for (int i = 0; i < 5; i++) {
@@ -443,7 +441,7 @@ public class Track extends Trajectory implements Comparable<Track>{
                 CST[i][j] = covMatAtVtx.get(i, j);
             }
         }
-        double[][] C = CovMatUtil.getCovMatToLab(sector, charge, q, CST);
+        double[][] C = CovMatUtil.getCartesianCovMat(sector, charge, q, CST);
         this.set_CovMatLab(C);
      }
     

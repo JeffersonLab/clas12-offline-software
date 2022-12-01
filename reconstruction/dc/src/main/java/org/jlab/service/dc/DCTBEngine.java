@@ -11,6 +11,7 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.jnp.matrix.Matrix;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.banks.HitReader;
 import org.jlab.rec.dc.banks.RecoBankWriter;
@@ -182,15 +183,6 @@ public class DCTBEngine extends DCEngine {
                     trkbank.getFloat("tx", i), trkbank.getFloat("ty", i));
             HBFinalSV.setZ(trkbank.getFloat("z", i));
             HBtrk.setFinalStateVec(HBFinalSV);
-//            Matrix initCMatrix = new Matrix();
-//            initCMatrix.set(new double[][]{
-//            {trkcovbank.getFloat("C11", i), trkcovbank.getFloat("C12", i), trkcovbank.getFloat("C13", i), trkcovbank.getFloat("C14", i), trkcovbank.getFloat("C15", i)},
-//            {trkcovbank.getFloat("C21", i), trkcovbank.getFloat("C22", i), trkcovbank.getFloat("C23", i), trkcovbank.getFloat("C24", i), trkcovbank.getFloat("C25", i)},
-//            {trkcovbank.getFloat("C31", i), trkcovbank.getFloat("C32", i), trkcovbank.getFloat("C33", i), trkcovbank.getFloat("C34", i), trkcovbank.getFloat("C35", i)},
-//            {trkcovbank.getFloat("C41", i), trkcovbank.getFloat("C42", i), trkcovbank.getFloat("C43", i), trkcovbank.getFloat("C44", i), trkcovbank.getFloat("C45", i)},
-//            {trkcovbank.getFloat("C51", i), trkcovbank.getFloat("C52", i), trkcovbank.getFloat("C53", i), trkcovbank.getFloat("C54", i), trkcovbank.getFloat("C55", i)}
-//            });
-//            HBtrk.set_CovMat(initCMatrix);
             TrackArray[HBtrk.get_Id()-1] = HBtrk; 
             TrackArray[HBtrk.get_Id()-1].set_Status(0);
         }
@@ -256,7 +248,9 @@ public class DCTBEngine extends DCEngine {
                 }
                 // get CovMat at vertex
                 Point3D VTCS = crosses.get(0).getCoordsInSector(TrackArray1.get_Vtx0().x(), TrackArray1.get_Vtx0().y(), TrackArray1.get_Vtx0().z());
-                TrackArray1.set_CovMat(kFit.propagateToVtx(crosses.get(0).get_Sector(), VTCS.z()));
+                Matrix CTCS = kFit.propagateToVtx(crosses.get(0).get_Sector(), VTCS.z());
+                //Transform cov mat in lab frame
+                TrackArray1.getCovMatToLab(crosses.get(0).get_Sector(), TrackArray1.get_Q(), TrackArray1.get_Vtx0(), TrackArray1.get_pAtOrig(), CTCS);               
                 if (TrackArray1.isGood()) {
                     trkcands.add(TrackArray1);
                 }

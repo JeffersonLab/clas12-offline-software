@@ -402,49 +402,38 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
         return this.fillTrajectoryBank(event, candlist);
     }
     
+    String[][] covMatElts = new String[][] {{"delx_delx", "delx_dely", "delx_delz", "delx_delpx", "delx_delpy", "delx_delpz"},
+        {"dely_delx", "dely_dely", "dely_delz", "dely_delpx", "dely_delpy", "dely_delpz"},
+        {"delz_delx", "delz_dely", "delz_delz", "delz_delpx", "delz_delpy", "delz_delpz"},
+        {"delpx_delx", "delpx_dely", "delpx_delz", "delpx_delpx", "delpx_delpy", "delpx_delpz"},
+        {"delpy_delx", "delpy_dely", "delpy_delz", "delpy_delpx", "delpy_delpy", "delpy_delpz"},
+        {"delpz_delx", "delpz_dely", "delpz_delz", "delpz_delpx", "delpz_delpy", "delpz_delpz"}
+    };
     /**
      *
      * @param event hipo event
      * @param candlist tracks
-     * @return covariance matrix from HB fits to be used for starting TB tracking
+     * @return covariance matrix in cartesian coordinates in the lab frame
      */
     private DataBank fillTrackCovMatBank(DataEvent event, List<Track> candlist) {
 
-        DataBank bank = event.createBank(bankNames.getCovmatBank(), candlist.size());
+       DataBank bank = event.createBank(bankNames.getCovmatBank(), candlist.size());
 
         for (int i = 0; i < candlist.size(); i++) {
             bank.setShort("id", i, (short) candlist.get(i).get_Id());
-            if(candlist.get(i).get_CovMat()!=null) {
-                bank.setFloat("C11", i, (float) candlist.get(i).get_CovMat().get(0, 0));
-                bank.setFloat("C12", i, (float) candlist.get(i).get_CovMat().get(0, 1));
-                bank.setFloat("C13", i, (float) candlist.get(i).get_CovMat().get(0, 2));
-                bank.setFloat("C14", i, (float) candlist.get(i).get_CovMat().get(0, 3));
-                bank.setFloat("C15", i, (float) candlist.get(i).get_CovMat().get(0, 4));
-                bank.setFloat("C21", i, (float) candlist.get(i).get_CovMat().get(1, 0));
-                bank.setFloat("C22", i, (float) candlist.get(i).get_CovMat().get(1, 1));
-                bank.setFloat("C23", i, (float) candlist.get(i).get_CovMat().get(1, 2));
-                bank.setFloat("C24", i, (float) candlist.get(i).get_CovMat().get(1, 3));
-                bank.setFloat("C25", i, (float) candlist.get(i).get_CovMat().get(1, 4));
-                bank.setFloat("C31", i, (float) candlist.get(i).get_CovMat().get(2, 0));
-                bank.setFloat("C32", i, (float) candlist.get(i).get_CovMat().get(2, 1));
-                bank.setFloat("C33", i, (float) candlist.get(i).get_CovMat().get(2, 2));
-                bank.setFloat("C34", i, (float) candlist.get(i).get_CovMat().get(2, 3));
-                bank.setFloat("C35", i, (float) candlist.get(i).get_CovMat().get(2, 4));
-                bank.setFloat("C41", i, (float) candlist.get(i).get_CovMat().get(3, 0));
-                bank.setFloat("C42", i, (float) candlist.get(i).get_CovMat().get(3, 1));
-                bank.setFloat("C43", i, (float) candlist.get(i).get_CovMat().get(3, 2));
-                bank.setFloat("C44", i, (float) candlist.get(i).get_CovMat().get(3, 3));
-                bank.setFloat("C45", i, (float) candlist.get(i).get_CovMat().get(3, 4));
-                bank.setFloat("C51", i, (float) candlist.get(i).get_CovMat().get(4, 0));
-                bank.setFloat("C52", i, (float) candlist.get(i).get_CovMat().get(4, 1));
-                bank.setFloat("C53", i, (float) candlist.get(i).get_CovMat().get(4, 2));
-                bank.setFloat("C54", i, (float) candlist.get(i).get_CovMat().get(4, 3));
-                bank.setFloat("C55", i, (float) candlist.get(i).get_CovMat().get(4, 4));
-            }
+            
+            if(candlist.get(i).get_CovMatLab()!=null) {
+                for(int mi = 0; mi <6; mi++) {
+                    for(int mj = 0; mj <6; mj++) {
+                        bank.setFloat(covMatElts[mi][mj], i, (float) candlist.get(i).get_CovMatLab()[mi][mj]);
+                    }
+                }
+            } 
         }
         //bank.show();
         return bank;
     }
+    
      /**
      *
      * @param event the EvioEvent

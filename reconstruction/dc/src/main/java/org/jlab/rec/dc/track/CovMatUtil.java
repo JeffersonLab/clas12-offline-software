@@ -17,11 +17,11 @@ public class CovMatUtil {
      * 
      * @param sector the DC sector of the track
      * @param charge the track charge
-     * @param q the track parameters in the Tilted Coordinate System (x',y',z',px'/pz',py'/pz',charge/p) at the vertex
+     * @param q the track parameters in the lab frame at the vertex
      * @param TCSCov the track covariance matrix in the Tilted Coordinate System at the vertex
      * @return the track covariance matrix in the lab frame in cartesian coordimates (x,y,z,px,py,pz)
      */
-    public static double[][] getCovMatToLab(int sector, int charge, double[] q, 
+    public static double[][] getCartesianCovMat(int sector, int charge, double[] q, 
             double[][] TCSCov) {
         double[][] C = new double[6][6]; // C' = F^T C F
         double[][] CF = new double[5][6];
@@ -92,13 +92,13 @@ public class CovMatUtil {
             {0, 0, 0, del_pxH_del_tyT, del_pyH_del_tyT, del_pzH_del_tyT},
             {0, 0, 0, del_pxH_del_QT, del_pyH_del_QT, del_pzH_del_QT}};
         
-        double[][] FT = new double[][]{
-            {del_xH_del_xT, del_xH_del_yT, del_xH_del_zT, 0, 0},
-            {del_yH_del_xT, del_yH_del_yT, del_yH_del_zT, 0, 0},
-            {del_zH_del_xT, 0, del_yH_del_zT, 0, 0},
-            {0, 0, del_pxH_del_txT, del_pxH_del_tyT, del_pxH_del_QT},
-            {0, 0, del_pyH_del_txT, del_pyH_del_tyT, del_pyH_del_QT}, 
-            {0, 0, del_pzH_del_txT, del_pzH_del_tyT, del_pzH_del_QT}};
+        double[][] FT = new double[6][5];
+        for(int i = 0; i<6; i++) {
+            for(int j = 0; j<5; j++) {
+                FT[i][j] = F[j][i];
+            }
+        }        
+          
         
         for (int k = 0; k < 5; k++) {
             for (int i = 0; i < 6; i++) {
@@ -111,7 +111,7 @@ public class CovMatUtil {
         for (int k = 0; k < 6; k++) {
             for (int i = 0; i < 5; i++) {
                  for (int j = 0; j < 6; j++) {
-                     C[k][j] += CF[i][k] * FT[j][i];
+                     C[k][j] += CF[i][k] * FT[j][i]; 
                 }
             }
         }
@@ -126,8 +126,8 @@ public class CovMatUtil {
         t[0] = xl[0];
         t[1] = xl[1];
         t[2] = xl[2];
-        t[3] = pl[3]/pl[5];
-        t[4] = pl[4]/pl[5];
+        t[3] = pl[0]/pl[2];
+        t[4] = pl[1]/pl[2];
         t[5] = charge/Math.sqrt(q[3]*q[3]+q[4]*q[4]+q[5]*q[5]);
         
         return q;
