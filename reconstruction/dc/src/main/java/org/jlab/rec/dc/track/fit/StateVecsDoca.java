@@ -78,10 +78,12 @@ public class StateVecsDoca {
         double BatMeas = iVec.B;
 
         while(Math.signum(Zf - Z[i]) *z<Math.signum(Zf - Z[i]) *Zf) {
+            z = fVec.z;
+            if(z == Z[f]) break;
+
             //LOGGER.log(Level.FINE, " RK step num "+(j+1)+" = "+(float)s+" nSteps = "+nSteps);
             double x =  fVec.x;
             double y =  fVec.y;
-            z = fVec.z;
             double tx = fVec.tx;
             double ty = fVec.ty;
             double Q =  fVec.Q;
@@ -169,10 +171,12 @@ public class StateVecsDoca {
         double BatMeas = iVec.B;
 
         while(Math.signum(Z[f] - Z[i]) *z<Math.signum(Z[f] - Z[i]) *Z[f]) {
+            z = fVec.z;
+            if(z == Z[f]) break;
+
             //LOGGER.log(Level.FINE, " RK step num "+(j+1)+" = "+(float)s+" nSteps = "+nSteps);
             double x =  fVec.x;
             double y =  fVec.y;
-            z = fVec.z;
             double tx = fVec.tx;
             double ty = fVec.ty;
             double Q =  fVec.Q;
