@@ -122,7 +122,7 @@ public class DetectorTrack implements Comparable {
     private Vector3      trackP = new Vector3();
     private Vector3 trackVertex = new Vector3();
 
-    private float[][] covMatrix = new float[5][5];
+    private float[][] covMatrix = new float[6][6];
     private List<Line3D> trackCrosses = new ArrayList<>();
  
     private Trajectory trajectory=new Trajectory();

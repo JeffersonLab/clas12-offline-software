@@ -521,6 +521,13 @@ public class DetectorData {
         return vec;
     }
 
+    static final String[][] covMatElts = new String[][] {{"delx_delx", "delx_dely", "delx_delz", "delx_delpx", "delx_delpy", "delx_delpz"},
+        {"dely_delx", "dely_dely", "dely_delz", "dely_delpx", "dely_delpy", "dely_delpz"},
+        {"delz_delx", "delz_dely", "delz_delz", "delz_delpx", "delz_delpy", "delz_delpz"},
+        {"delpx_delx", "delpx_dely", "delpx_delz", "delpx_delpx", "delpx_delpy", "delpx_delpz"},
+        {"delpy_delx", "delpy_dely", "delpy_delz", "delpy_delpx", "delpy_delpy", "delpy_delpz"},
+        {"delpz_delx", "delpz_dely", "delpz_delz", "delpz_delpx", "delpz_delpy", "delpz_delpz"}
+    };
     public static List<DetectorTrack> readDetectorTracks(DataEvent event, String bank_name, String traj_bank_name, String cov_bank_name) {
 
         List<DetectorTrack> tracks = new ArrayList<>();
@@ -587,14 +594,14 @@ public class DetectorData {
                     }
                 }
                 if (covBank != null) {
-                    final int dimCovMat = 5;
+                    final int dimCovMat = 6;
                     for (int ii = 0; ii < covBank.rows(); ii++) {
                         if (covBank.getInt("id", ii) != trkId) {
                             continue;
                         }
                         for (int jj = 1; jj <= dimCovMat; jj++) {
                             for (int kk = 1; kk <= dimCovMat; kk++) {
-                                float ele = covBank.getFloat(String.format("C%d%d", jj, kk), ii);
+                                float ele = covBank.getFloat(covMatElts[jj - 1][kk - 1], ii);
                                 track.setCovMatrix(jj - 1, kk - 1, ele);
                             }
                         }
