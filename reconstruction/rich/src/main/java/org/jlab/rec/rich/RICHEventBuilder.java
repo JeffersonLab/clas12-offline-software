@@ -74,33 +74,37 @@ public class RICHEventBuilder{
         /*
         *   look for RICH - DC matches
         */
+        if(debugMode>=1)System.out.format("process_DCData \n");
         if(!process_DCData(event, richpar)) return false;
-        richtime.save_ProcessTime(3, richevent.get_CPUTime());
+        richtime.save_ProcessTime(3, richevent);
 
         richio.write_RECBank(event, richevent, richpar);
 
         /*
         *   create RICH particles
         */
+        if(debugMode>=1)System.out.format("process_RICHData\n");
         if(!process_RICHData(event, richtrace, richpar, richcal)) return false;
-        richtime.save_ProcessTime(4, richevent.get_CPUTime());
+        richtime.save_ProcessTime(4, richevent);
 
         /*
         *   analytic solution (direct light only)
         */
+        if(debugMode>=1)System.out.format("analyze_Cherenkovs\n");
         if(!analyze_Cherenkovs(richtrace, richpar)) return false;
-        richtime.save_ProcessTime(5, richevent.get_CPUTime());
+        richtime.save_ProcessTime(5, richevent);
 
         /*
         *   ray-traced solution (all photons)
         */
+        if(debugMode>=1)System.out.format("reco_Cherenkovs\n");
         if(!reco_Cherenkovs(richtrace, richpar, richcal)) return false;
-        richtime.save_ProcessTime(6, richevent.get_CPUTime());
+        richtime.save_ProcessTime(6, richevent);
 
         if(debugMode>=1)richevent.showEvent();
 
         richio.write_CherenkovBanks(event, richevent, richpar);
-        richtime.save_ProcessTime(7, richevent.get_CPUTime());
+        richtime.save_ProcessTime(7, richevent);
 
         return true;
 

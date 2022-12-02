@@ -447,7 +447,7 @@ public class RICHLayer extends ArrayList<RICHComponent> {
         for (int ic=0; ic<ncross; ic++){
             Point3D new_point = crosses.get(ic);
             if(debugMode>=1)System.out.format(" cross with sphere %s --> %7.2f \n",new_point.toStringBrief(2),new_point.distance(pary));
-            if(new_point.distance(pary)<geopar.MIN_SPHE_DIST){
+            if(new_point.distance(pary)<geopar.MAX_SPHE_DIST){
                  
                 return new_point.toVector3D();
 
@@ -749,7 +749,7 @@ public class RICHLayer extends ArrayList<RICHComponent> {
                               id,ifacompo,iface,G4inter.toStringBrief(2),ray.origin().z(),point.z(),vers,Delta_z, norm.toStringBrief(3),
                               glnorm.toStringBrief(3));
 
-            if(G4inter.distance(ray.origin())<geopar.MIN_RAY_DIST){if(debugMode>=1)System.out.format("     --> too close \n"); continue;}
+            if(G4inter.distance(ray.origin())<geopar.MIN_RAY_STEP){if(debugMode>=1)System.out.format("     --> too close \n"); continue;}
             if(post==1){
                 if(vers*Delta_z<0){if(debugMode>=1)System.out.format("     --> wrong progression \n"); continue;}
             }else{
@@ -808,7 +808,7 @@ public class RICHLayer extends ArrayList<RICHComponent> {
             for (int ic=0; ic<ncross; ic++){
                 Point3D new_point = crosses.get(ic);
                 if(debugMode>=1)System.out.format(" cross with sphere %s \n",new_point.toStringBrief(2));
-                if(new_point.distance(intersection.get_pos())<geopar.MIN_SPHE_DIST){
+                if(new_point.distance(intersection.get_pos())<geopar.MAX_SPHE_DIST){
 
                     Vector3D new_norm = sphere.getNormal(new_point.x(), new_point.y(), new_point.z()).asUnit().multiply(-1.0);
                     new_inter = new RICHIntersection(sector, ilay, icompo, 0, exit, new_point, new_norm);

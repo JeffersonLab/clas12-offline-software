@@ -35,14 +35,16 @@ public class RICHTime{
 
 
     // ----------------
-    public void save_ProcessTime(int iphase, long reftime){
+    public void save_ProcessTime(int iphase, RICHEvent richevent){
     // ----------------
+    // reftime is defined at the initialization of richEvent
 
         int debugMode = 0;
 
+        double reftime = richevent.get_CPUTime();
+        long newtime = System.nanoTime();
         if(iphase>-1 && iphase<NTIME){
 
-            long newtime = System.nanoTime();
             double dtime = (double) (newtime - reftime) * 1.0e-6;
             double stime = (double) reftime * 1.0e-9;
 
@@ -52,6 +54,7 @@ public class RICHTime{
             if(debugMode==1)System.out.format("Phase %3d: Save time %3d  %10.4f vs %10.4f \n", iphase, richprocess_ntimes[iphase], dtime, stime);
 
         }
+        richevent.set_CPUTime(newtime);
 
     }
 
@@ -60,8 +63,12 @@ public class RICHTime{
     public void dump_ProcessTime(){
     // ----------------
 
-        String str[] = {" INIT     "," CCDB     ", " RAW-RICH " ," DC-RICH  ", " HADRONS  ", " ANALYTIC ", " TRACED   ", " WRITE    ", " CLOSE    "};
+        int debugMode = 0;
 
+        String str[] = {" INIT     "," CCDB     ", " RAW-RICH " ," DC-RICH  ", " HADRONS  ", " ANALYTIC ", " TRACED   ", " WRITE    ", " CLOSE    "};
+        String seve = "EVENT     ";
+
+        double tot = 0.0;
         for(int i=0; i<NTIME; i++){
             double time = 0.0;
             if(richprocess_ntimes[i]>0){
@@ -69,14 +76,17 @@ public class RICHTime{
                 for(int j=i-1; j>-1; j--){
                     if(richprocess_ntimes[j]>0){found=j; break;}
                 }
-                if(found>-1){
-                    time = (richprocess_time[i]/richprocess_ntimes[i]-richprocess_time[found]/richprocess_ntimes[found]);
-                }else{
+                //if(found>-1){
+                //    time = (richprocess_time[i]/richprocess_ntimes[i]-richprocess_time[found]/richprocess_ntimes[found]);
+                //}else{
                     time = richprocess_time[i]/richprocess_ntimes[i];
-                }
-                System.out.format(" PHASE %3d: %s  average over %6d  time %10.4f ms \n", i, str[i], richprocess_ntimes[i], time);
+                //}
+                tot += time;
+                System.out.format(" PHASE %3d: %s  %12.4f  average over %6d  time %10.4f ms \n", i, str[i], richprocess_time[i], richprocess_ntimes[i], time);
             }
         }
+        double zero = 0.0 ;
+        System.out.format(" TOTAL    :   %s  %12.4f  average over %6d  time %10.4f ms \n", seve, zero, richprocess_ntimes[0], tot);
 
         /*for(int i=NTIME-1; i>-1; i--){
             double time = 0.0;

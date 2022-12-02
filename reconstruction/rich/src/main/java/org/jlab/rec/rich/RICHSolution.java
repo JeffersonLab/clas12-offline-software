@@ -103,6 +103,10 @@ public class RICHSolution {
     // ----------------
 
     // ----------------
+    public boolean is_OK() { if(OK>10)return true; return false;} 
+    // ----------------
+
+    // ----------------
     public int get_hypo(int charge) { 
     // ----------------
         int hypo_ch = hypo;

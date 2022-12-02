@@ -20,6 +20,7 @@ import org.jlab.geometry.prim.Line3d;
 
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Trap3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Sphere3D;   
@@ -264,7 +265,7 @@ public class RICHGeoFactory{
     // planes for effective ray tracing
     // ATT: to be done: aerogel cromatic dispersion, mirror reflectivity vs wavelength
 
-        int debugMode = 1;
+        int debugMode = 0;
 
         /*
         * Generate the layers of components
@@ -377,6 +378,8 @@ public class RICHGeoFactory{
         }
         if(debugMode>=2)show_RICH("Real RICH Geometry", "RR");
 
+        //test_TrajectorySurface();
+
     }
 
 
@@ -446,6 +449,58 @@ public class RICHGeoFactory{
     public IndexedTable get_richTable(){
     //------------------------------
         return geocal.richTable;
+    }
+
+
+    //------------------------------
+    public void test_TrajectorySurface(){
+    //------------------------------
+
+        int debugMode = 1;
+        int sector = 4;
+
+        if(debugMode>=1)System.out.format("test_TrajectorySurface \n");
+        int[] richLayers = {DetectorLayer.RICH_MAPMT, DetectorLayer.RICH_AEROGEL_B1, DetectorLayer.RICH_AEROGEL_B2, DetectorLayer.RICH_AEROGEL_L1};
+        for(int i=0; i<richLayers.length; i++) {
+            Trap3D trap = get_TrajectorySurface(sector,richLayers[i]);
+            double thick = get_TrajectoryThickness(sector,richLayers[i]);
+            if(debugMode>=1){
+                System.out.format("Layer %3d  thickness %7.2f \n",i,thick);
+                trap.show();
+            }
+        }
+
+    }
+
+    //------------------------------
+    public Trap3D get_TrajectorySurface(int isec, int ilayer) {
+    //------------------------------
+
+        if(geocal.find_RICHModule(isec)>0){
+            RICHLayer layer = get_Layer(isec, "MAPMT");
+            if(ilayer==DetectorLayer.RICH_AEROGEL_B1) layer = get_Layer(isec, "AEROGEL_2CM_B1");
+            else if(ilayer==DetectorLayer.RICH_AEROGEL_B2) layer = get_Layer(isec, "AEROGEL_2CM_B2");
+            else if(ilayer==DetectorLayer.RICH_AEROGEL_L1) layer = get_Layer(isec, "AEROGEL_3CM_L1");
+
+            Vector3D orient = layer.get_Vinside();
+            return toTrap3D(layer.get_GlobalSurf(), orient);
+        }
+
+        return null;
+    }
+        
+    //------------------------------
+    public double get_TrajectoryThickness(int isec, int ilayer) {
+    //------------------------------
+
+        if(geocal.find_RICHModule(isec)>0){
+            if(ilayer==DetectorLayer.RICH_MAPMT)           return 0.1;
+            else if(ilayer==DetectorLayer.RICH_AEROGEL_B1) return 2.0;
+            else if(ilayer==DetectorLayer.RICH_AEROGEL_B2) return 2.0;
+            else if(ilayer==DetectorLayer.RICH_AEROGEL_L1) return 6.0;
+        }
+
+        return 0.0;
     }
 
 
@@ -544,7 +599,7 @@ public class RICHGeoFactory{
 
 
     //------------------------------
-    public Shape3D build_GlobalPlane(Shape3D plane, Vector3D orient) {
+    public Shape3D build_GlobalPlane(Shape3D plane, Vector3D orient, double delta) {
     //------------------------------
         /*
         *  build a global tracking plane from the detailed component surface
@@ -553,12 +608,21 @@ public class RICHGeoFactory{
 
         int debugMode = 0;
         if(plane==null) return null;
-        if(debugMode>=1)System.out.format("build_GlobalPlane: orient %s \n",orient.toStringBrief(3));
 
-        Vector3d extre1 = new Vector3d(0.0, 0.0, 0.0);
-        Vector3d extre2 = new Vector3d(0.0, 0.0, 0.0);
-        Vector3d extre3 = new Vector3d(0.0, 0.0, 0.0);
-        Vector3d extre4 = new Vector3d(0.0, 0.0, 0.0);
+        Point3D tmpex1 = new Point3D(0.0, 0.0, 0.0);
+        Point3D tmpex2 = new Point3D(0.0, 0.0, 0.0);
+        Point3D tmpex3 = new Point3D(0.0, 0.0, 0.0);
+        Point3D tmpex4 = new Point3D(0.0, 0.0, 0.0);
+
+        Point3D extre1 = new Point3D(0.0, 0.0, 0.0);
+        Point3D extre2 = new Point3D(0.0, 0.0, 0.0);
+        Point3D extre3 = new Point3D(0.0, 0.0, 0.0);
+        Point3D extre4 = new Point3D(0.0, 0.0, 0.0);
+
+        Vector3D ylab  = new Vector3D(0.0, 1.0, 0.0);
+        Vector3D deltadir = orient.cross(ylab);
+        if(deltadir.x()<0)deltadir = orient.cross(ylab.multiply(-1));
+        if(debugMode>=1)System.out.format("build_GlobalPlane: orient %s  delta %7.2f  deltadir %s \n",orient.toStringBrief(3),delta,deltadir.toStringBrief(3));
 
         /*
         * look for the extremes in x
@@ -588,14 +652,15 @@ public class RICHGeoFactory{
 
                 if(Math.abs(f.point(ipo).x() - xmin) < 0.5 && f.point(ipo).y() < ymin ) {
                     ymin = f.point(ipo).y();
-                    extre1 = toVector3d(f.point(ipo));
+                    tmpex1 = new Point3D(f.point(ipo));
                 }
                 if(Math.abs(f.point(ipo).x() - xmin) < 0.5 && f.point(ipo).y() > ymax ) {
                     ymax = f.point(ipo).y();
-                    extre2 = toVector3d(f.point(ipo));
+                    tmpex2 = new Point3D(f.point(ipo));
                 }
             }
         }
+
 
         /*
         * look for the points at exreme y for xmax 
@@ -609,24 +674,61 @@ public class RICHGeoFactory{
 
                 if(Math.abs(f.point(ipo).x() - xmax) < 0.5 && f.point(ipo).y() < ymin ) {
                     ymin = f.point(ipo).y();
-                    extre3 = toVector3d(f.point(ipo));
+                    tmpex3 = new Point3D(f.point(ipo));
                 }
                 if(Math.abs(f.point(ipo).x() - xmax) < 0.5 && f.point(ipo).y() > ymax ) {
                     ymax = f.point(ipo).y();
-                    extre4 = toVector3d(f.point(ipo));
+                    tmpex4 = new Point3D(f.point(ipo));
                 }
             }
         }
 
+
+        double a = (tmpex3.y()-tmpex1.y())/(tmpex3.x()-tmpex1.x());
+        double b = tmpex3.y() - a * tmpex3.x();
+
+        double xx = tmpex1.x()-delta*deltadir.x();
+        double yy = a*(tmpex1.x()-delta*deltadir.x()) + (b - delta);
+        double zz = tmpex1.z()-delta*deltadir.z();
+        extre1.set( xx, yy, zz);
+        xx = tmpex3.x()+delta*deltadir.x();
+        yy = a*(tmpex3.x()+delta*deltadir.x()) + (b - delta);
+        zz = tmpex3.z()+delta*deltadir.z();
+        extre3.set( xx, yy, zz);
+
+        xx = tmpex2.x()-delta*deltadir.x();
+        yy = -a*(tmpex2.x()-delta*deltadir.x()) - (b - delta);
+        zz = tmpex2.z()-delta*deltadir.z();
+        extre2.set( xx, yy, zz);
+        xx = tmpex4.x()+delta*deltadir.x();
+        yy = -a*(tmpex4.x()+delta*deltadir.x()) - (b - delta);
+        zz = tmpex4.z()+delta*deltadir.z();
+        extre4.set( xx, yy, zz);
+
+        if(debugMode>=1){
+            Vector3D aa = new Vector3D(extre1.x()-tmpex1.x(), extre1.y()-tmpex1.y(), extre1.z()-tmpex1.z());
+            Vector3D bb = new Vector3D(extre2.x()-tmpex2.x(), extre2.y()-tmpex2.y(), extre2.z()-tmpex2.z());
+            System.out.format(" %s  |  %s \n",tmpex1.toStringBrief(3),tmpex2.toStringBrief(3));
+            System.out.format(" %s  |  %s \n",aa.toStringBrief(3),bb.toStringBrief(3));
+            System.out.format(" %s  |  %s \n",extre1.toStringBrief(3),extre2.toStringBrief(3));
+
+            aa = new Vector3D(extre3.x()-tmpex3.x(), extre3.y()-tmpex3.y(), extre3.z()-tmpex3.z());
+            bb = new Vector3D(extre4.x()-tmpex4.x(), extre4.y()-tmpex4.y(), extre4.z()-tmpex4.z());
+            System.out.format(" %s  |  %s \n",tmpex3.toStringBrief(3),tmpex4.toStringBrief(3));
+            System.out.format(" %s  |  %s \n",aa.toStringBrief(3),bb.toStringBrief(3));
+            System.out.format(" %s  |  %s \n",extre3.toStringBrief(3),extre4.toStringBrief(3));
+        }
+
+
         /*
         *  preserve the same normal of the original plane
         */
-        Face3D half1 = new Triangle3D( toPoint3D(extre1), toPoint3D(extre2), toPoint3D(extre3));
-        Face3D half2 = new Triangle3D( toPoint3D(extre2), toPoint3D(extre4), toPoint3D(extre3));
+        Face3D half1 = new Triangle3D( extre1, extre2, extre3);
+        Face3D half2 = new Triangle3D( extre2, extre4, extre3);
         Shape3D guess_one = new Shape3D(half1, half2);
 
-        Face3D half3 = new Triangle3D( toPoint3D(extre3), toPoint3D(extre2), toPoint3D(extre1));
-        Face3D half4 = new Triangle3D( toPoint3D(extre3), toPoint3D(extre4), toPoint3D(extre2));
+        Face3D half3 = new Triangle3D( extre3, extre2, extre1);
+        Face3D half4 = new Triangle3D( extre3, extre4, extre2);
         Shape3D guess_two = new Shape3D(half3, half4);
 
         Vector3D plane_norm = orient;
@@ -682,24 +784,27 @@ public class RICHGeoFactory{
                 }
 
             }*/
-            global_surf = build_GlobalPlane(layer.merge_CompoSurfs(), orient);
+
+            double delta = 0.0;
+            if(layer.is_mapmt())delta=geopar.MAPMT_EXTEND;
+            global_surf = build_GlobalPlane(layer.merge_CompoSurfs(), orient, delta);
 
             if(layer.is_aerogel()){
-                Shape3D other_global = build_GlobalPlane(layer.merge_CompoSurfs(), orient.multiply(-1.0));
+                Shape3D other_global = build_GlobalPlane(layer.merge_CompoSurfs(), orient.multiply(-1.0), delta);
                 merge_Shape3D(global_surf, other_global);
             }
         }
 
         layer.set_GlobalSurf( global_surf);
         if(debugMode>=1 && global_surf.size()>0){
-            String head = String.format("GLOB %3d 0 ",layer.id());
+            String head = String.format("GLOB %3d %3d 0 ",layer.sector(),layer.id());
             System.out.format("Globa %3d Normal %s \n",layer.id(),toString(get_Shape3D_Normal(global_surf)));
             for (int ifa=0; ifa<global_surf.size(); ifa++){
                 System.out.format("Face %3d Normal %s \n",ifa,toTriangle3D(global_surf.face(ifa)).normal().asUnit().toStringBrief(3));
             }
             show_Shape3D(global_surf, null, head);
         }
- 
+
     }
 
 
@@ -729,6 +834,7 @@ public class RICHGeoFactory{
             layer.set_TrackingSphere(sphere);
             for (int ico=0; ico<layer.size(); ico++){ 
                 layer.set_TrackingSphere( new Sphere3D(center.x(), center.y(), center.z(), radius), ico); 
+                if(debugMode>=1)System.out.format(" MIRR sec %3d lay %3d ico %3d : sphere center %s radius %7.2f \n",layer.sector(),layer.id(),ico,toString(center), radius);
             }
 
         }
@@ -742,7 +848,7 @@ public class RICHGeoFactory{
                 Vector3D center = layer.get_CompoCenter(ico, normal);
 
                 Sphere3D sphere = new Sphere3D(center.x(), center.y(), center.z(), radius);
-                if(debugMode>=1)System.out.format(" AERO lay %3d ico %3d : sphere center %s radius %7.2f \n",layer.id(),ico,toString(center), radius);
+                if(debugMode>=1)System.out.format(" AERO sec %3d lay %3d ico %3d : sphere center %s radius %7.2f \n",layer.sector(),layer.id(),ico,toString(center), radius);
                 layer.set_TrackingSphere(sphere, ico);
 
             }
@@ -760,7 +866,7 @@ public class RICHGeoFactory{
         layer.set_NominalPlane( generate_NominalPlane(layer, 0) );
         int isec = layer.sector();
         if(debugMode>=1){ 
-            String head = " RR "+ isec +" "+ layer.id() + " 10 ";
+            String head = String.format("NOMI %3d %3d  0 ",isec,layer.id());
             show_Shape3D(layer.get_NominalPlane(), null, head);
         }
 
@@ -771,7 +877,7 @@ public class RICHGeoFactory{
 
                     if(debugMode>=1){ 
                         int nco = ico+10;
-                        String head = " RR "+ isec +" "+ layer.id() +" "+ nco;
+                        String head = String.format("NOMI %3d %3d %3d ",isec,layer.id(),nco);
                         show_Shape3D(compo.get_NominalPlane(), null, head);
                     }
             }
@@ -845,7 +951,7 @@ public class RICHGeoFactory{
             compo.set_TrackingSurf(plane);
             if(debugMode>=1 && plane.size()>0){
                 System.out.format("Compo %3d %3d Normal %s \n",layer.id(),ico,toString(get_Shape3D_Normal(plane)));
-                String head = String.format("COMP %3d %3d ",layer.id(),ico);
+                String head = String.format("COMP %3d %3d %3d ",layer.sector(),layer.id(),ico);
                 show_Shape3D(plane, null, head);
             }
         }
@@ -1715,6 +1821,42 @@ public class RICHGeoFactory{
         return lout;
      }
 
+
+     //------------------------------
+     public Trap3D toTrap3D(Shape3D surf, Vector3D orient) {
+     //------------------------------
+
+        int debugMode = 1;
+        ArrayList<Point3D> points = new ArrayList<Point3D>();
+
+        if(debugMode>=1)System.out.format("Convert Shape3D into Trap3D \n");
+        for (int ifa=0; ifa<surf.size(); ifa++){
+            Face3D f = surf.face(ifa);
+            if(toTriangle3D(f).normal().angle(orient)>Math.PI/4.)continue;
+            for (int ip=0; ip<3; ip++){
+     
+                if(debugMode>=1)System.out.format("face %3d point %3d %s ",ifa,ip,f.point(ip).toStringBrief(2));
+                int found = 0;
+                for (int jp=0; jp<points.size(); jp++){
+                    if(f.point(ip).distance(points.get(jp)) < 1e-3) found=1;               
+                }
+                if(found==0){
+                    points.add(f.point(ip));
+                    if(debugMode>=1)System.out.format(" --> taken \n");
+                }else{
+                    if(debugMode>=1)System.out.format("\n");
+                }
+            }
+        }
+
+        if(debugMode>=1)System.out.format("Found %4d points in shape \n",points.size());
+        if(points.size()!=4)return null;
+        Trap3D trap = new Trap3D(points.get(0), points.get(1), points.get(2), points.get(3));
+
+        return trap;
+     }
+
+
     //------------------------------
     public void translate_Triangle3D(Triangle3D tri, Vector3d shift) {
     //------------------------------
@@ -1769,10 +1911,11 @@ public class RICHGeoFactory{
             for (int ilay=0; ilay<NLAY; ilay++){
                 RICHLayer layer = get_Layer(isec, ilay);
                 String ini = head + " "+ isec +" "+ ilay + " 0 ";
+                String ani = " AA  "+ isec +" "+ ilay + " 0 ";
                 if(layer.is_aerogel() || layer.is_mapmt()){
                     show_Shape3D(layer.get_GlobalSurf(), null, ini);
                     if(layer.is_aerogel()){
-                        show_Shape3D(layer.get_TrackingSurf(), null, "AA");
+                        show_Shape3D(layer.get_TrackingSurf(), null, ani);
                         for(int ico=0; ico<layer.size(); ico++) System.out.format("HH %4d %4d %s \n", ilay, ico, layer.get_CompoBary(ico).toStringBrief(2));
                     }
                     if(layer.is_mapmt())show_Shape3D(layer.get_TrackingSurf(), null, "PP");

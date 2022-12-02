@@ -111,14 +111,12 @@ public class TrajectorySurfaces {
             }
 
             // Add RICH
-            int[] richPlanes = {DetectorLayer.RICH_MAPMT, DetectorLayer.RICH_AEROGEL_B1, DetectorLayer.RICH_AEROGEL_B2, DetectorLayer.RICH_AEROGEL_L1};
-            for(int i=0; i<richPlanes.length; i++) {
-                Plane3D richPlane = richDetector.get_TrajPlane(sector,richPlanes[i]);
-                if(richPlane!=null) {
-                    P = richPlane.point().toVector3D();
-                    n = richPlane.normal().multiply(-1);
-                    d = P.dot(n);
-                    this.detectorPlanes.get(isector).add(new Surface(DetectorType.RICH, richPlanes[i], d, n.x(), n.y(), n.z()));
+            int[] richLayers = {DetectorLayer.RICH_MAPMT, DetectorLayer.RICH_AEROGEL_B1, DetectorLayer.RICH_AEROGEL_B2, DetectorLayer.RICH_AEROGEL_L1};
+            for(int i=0; i<richLayers.length; i++) {
+                Trap3D surf = richDetector.get_TrajectorySurface(sector, richLayers[i]);
+                double thick = richDetector.get_TrajectoryThickness(sector,richLayers[i]);
+                if(surf!=null) {
+                    this.detectorPlanes.get(isector).add(new Surface(DetectorType.RICH, sector, richayers[i], surf, thick);
                 }
             }
 

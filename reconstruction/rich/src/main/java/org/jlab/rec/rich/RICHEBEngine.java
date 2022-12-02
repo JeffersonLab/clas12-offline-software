@@ -107,7 +107,7 @@ public class RICHEBEngine extends ReconstructionEngine {
         RICHEventBuilder       reb       = new RICHEventBuilder(event, richevent, richgeo, richio);
         RICHRayTrace           richtrace = new RICHRayTrace(richgeo, richpar); 
         
-        richtime.save_ProcessTime(0, richevent.get_CPUTime());
+        richtime.save_ProcessTime(0, richevent);
 
         if(debugMode>=1){
             System.out.println("---------------------------------");
@@ -116,6 +116,7 @@ public class RICHEBEngine extends ReconstructionEngine {
         }
 
 	//  Initialize the CCDB information
+        if(debugMode>=1)System.out.println("----- Load CCDB data \n");
         int run = richevent.get_RunID(); 
         if(run>0){
             richpar.load_CCDB(this.getConstantsManager(), run, Ncalls);
@@ -126,25 +127,27 @@ public class RICHEBEngine extends ReconstructionEngine {
         }
         Ncalls++;
 
-        richtime.save_ProcessTime(1, richevent.get_CPUTime());
+        richtime.save_ProcessTime(1, richevent);
 
 
 	/*
 	Process RICH signals to get hits and clusters
 	*/
         if(richpar.PROCESS_RAWDATA==1){
+            if(debugMode>=1)System.out.println("----- Process raw data \n");
             richio.clear_LowBanks(event); 
             rpmt.process_RawData(event, richpar, richcal);
-            richtime.save_ProcessTime(2, richevent.get_CPUTime());
+            richtime.save_ProcessTime(2, richevent);
         }
 
 	/*
 	Process RICH-DC event reconstruction
 	*/
         if(richpar.PROCESS_DATA==1){
+            if(debugMode>=1)System.out.println("----- Process data \n");
             richio.clear_HighBanks(event); 
             if( !reb.process_Data(event, richpar, richcal, richtrace, richtime)) return false;
-            richtime.save_ProcessTime(8, richevent.get_CPUTime());
+            richtime.save_ProcessTime(8, richevent);
         }
 
         if(richpar.DEBUG_PROC_TIME>=1) richtime.dump_ProcessTime();

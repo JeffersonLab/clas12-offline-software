@@ -853,7 +853,7 @@ public class RICHEvent {
 
                     // prob for backgound
                     prob = pho.pid_probability(hadron, 0, recotype);
-                    if(prob-1>=richpar.PIXEL_NOMINAL_BACKGR){
+                    if(prob-1>=richpar.PIXEL_NOMINAL_DARKRATE){
                         lh_bg[hypo] += Math.log(prob);
                         ch_bg[hypo] += Math.log(prob)*etac;
                         n_bg[hypo]++;
@@ -870,7 +870,7 @@ public class RICHEvent {
                     if(hypo==2) reco.set_KProb(Math.log(prob)*FAC);
                     if(hypo==3) reco.set_PrProb(Math.log(prob)*FAC);
 
-                    if(prob-1>richpar.PIXEL_NOMINAL_BACKGR){
+                    if(prob-1>richpar.PIXEL_NOMINAL_DARKRATE){
                         lh_sig[hypo] += Math.log(prob);
                         ch_sig[hypo] += Math.log(prob)*etac;
                         n_sig[hypo]++;
@@ -1071,8 +1071,8 @@ public class RICHEvent {
 
                 if(reco.get_OK()<11)continue;
 
-                System.out.format("sele pixel %4d for %s pho %4d %3d %7.2f OK  %3d  [%6d] %3d\n",
-                    pho.get_HitIndex(), stype, pho.get_id(), pho.get_type(), reco.get_EtaC()*MRAD, reco.get_OK(),reco.get_FirstRefle(), reco.status());
+                System.out.format("sele pixel %4d for %s pho %4d %3d %7.2f OK  %3d  [%6d : %6d %6d ] %3d\n",
+                    pho.get_HitIndex(), stype, pho.get_id(), pho.get_type(), reco.get_EtaC()*MRAD, reco.get_OK(),reco.get_FirstRefle(), reco.get_RefleLayers(), reco.get_RefleCompos(), reco.status());
             }
 
         }
@@ -1174,7 +1174,7 @@ public class RICHEvent {
                 }
                 if(photon.trial_pho!=null && distmin<4){
                     double tprob=photon.trial_pho.time_probability(photon.get_HitTime(), 1);
-                    if(tprob>richpar.PIXEL_NOMINAL_BACKGR){
+                    if(tprob>richpar.PIXEL_NOMINAL_DARKRATE){
                         match_chi2+=Math.pow((distmin/richpar.RICH_HITMATCH_RMS),2);
                         match_nchi2++;
                         if(debugMode>=1)System.out.format("  -->  store throw id %d  xy %8.2f %8.2f  time %7.2f  --> dist %7.2f  ch2 %7.2f  tprob %8.6f %10.2f \n",

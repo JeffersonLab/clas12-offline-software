@@ -355,10 +355,10 @@ public class RICHRayTrace{
                     if(debugMode>=1) System.out.format(" found PMT hit %s  dist %6.2f \n", new_hit.toStringBrief(2), new_hit.distance(last_ori));
                 }
             }
-            if(front_nrefl>1){
+            if(front_nrefl>richpar.RAY_NFRONT_REFLE){
                 lost = true; 
                 new_hit=new_intersection.get_pos();
-                if(debugMode>=1) System.out.format(" double front reflection: stop at front %s \n",new_hit.toStringBrief(2));
+                if(debugMode>=1)System.out.format(" double front reflection: stop at front %s \n",new_hit.toStringBrief(2));
             }
             if(new_hit==null && new_intersection==null){
                 lost = true; 
@@ -550,7 +550,10 @@ public class RICHRayTrace{
         if(Math.abs(Cos_EtaC)<1.)EtaCmin = Math.acos(Cos_EtaC);
 
         int ntrials = 0;
-        while (dist > photon.nominal_sChAngle()*RICHConstants.GAP_NOMINAL_SIZE*richpar.RAYTRACE_PRECISION && ntrials<richpar.RAYTRACE_MAX_NSTEPS){ 
+        if(debugMode>=1)System.out.format("check %7.2f [%7.2f %7.2f %7.2f --> %7.2f] :  %4d [%4d] \n ",dist,
+                       photon.nominal_sChAngle(), RICHConstants.GAP_NOMINAL_SIZE, richpar.RAYTRACE_RESO_FRAC,
+                       photon.nominal_sChAngle()*RICHConstants.GAP_NOMINAL_SIZE*richpar.RAYTRACE_RESO_FRAC,ntrials,richpar.RAYTRACE_MAX_NSTEPS);
+        while (dist > photon.nominal_sChAngle()*RICHConstants.GAP_NOMINAL_SIZE*richpar.RAYTRACE_RESO_FRAC && ntrials<richpar.RAYTRACE_MAX_NSTEPS){ 
 
             if(debugMode>=1){ 
                 System.out.format(" Attempt %d  with the %7.1f (%7.2f)  phi %7.2f  EtaC  %7.2f\n",ntrials, the_min*MRAD, the_min*RAD, phi_min*RAD, EtaCmin*MRAD); 

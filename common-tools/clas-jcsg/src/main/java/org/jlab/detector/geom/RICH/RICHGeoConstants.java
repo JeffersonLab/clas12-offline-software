@@ -34,9 +34,6 @@ public class RICHGeoConstants {
     public static final double AERO_CUT_DIMENSION         =   165.;      // Aerogel heigth for the first two shaped tiles
     public static final double RICH_AIR_INDEX             =   1.000273;  // AIR n used in Mirazita's code (da CCDB)
 
-    //public static final double PHOTON_DISTMIN_TRACING     =   0.0001;    // max distance to set initial values for tracing photons
-    //public static final double PHOTON_DISTMIN_SPHERE      =   200.;      // max distance to approximate the spherical mirror with triangles
-    
     public static final double RICH_TABLE_FROM_FILE       =   0;         // read rich module configuration
     public static final double ALIGN_TABLE_FROM_FILE      =   0;         // read alignment calibration values from local txt files
     public static final double AERO_OPTICS_FROM_FILE      =   0;         // read aerogel nominal optics values from local txt files
@@ -45,12 +42,6 @@ public class RICHGeoConstants {
 
     public static final int    NALIMAX                    =   126;       // maximum number of potential alignments (with all aerogel tiles)
     public static final int    NALIGN                     =   24;        // number of components with indipendent alignment
-    //public static final int    ccdb_ila[] = {0,201,202,203,204,301,301,301,301,301,301,301,302,302,302,302,302,302,302,302,302,302,302,401};
-    //public static final int    ccdb_ico[] = {0,  0,  0,  0,  0,  1,  2,  3,  4,  5,  6,  7,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10,  0};
-
-                               //                                 BO  F1  F2  R1  R2   L1  L2
-    //public static final int    tool_ila[] = {0,  1,  2,  3,  4, 11,  5,  6,  9, 10,  7,  8, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 13};
-    //public static final int    tool_ico[] = {0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10,  0};
 
 
     public static final   Vector3D vfront   = new Vector3D(-0.42,   0.00,   0.91);
@@ -60,8 +51,6 @@ public class RICHGeoConstants {
     public static final   Vector3D vback    = new Vector3D( 0.42,   0.00,  -0.91);
     public static final   Vector3D vsphere  = new Vector3D( 0.76,   0.00,  -0.65);
 
-    //public static final   Point3D Csphere  = new Point3D( -45.868, 0.0, 391.977);
-    //public static final   double  Rsphere  = 270.;
 
     public static final int    anode_map[] = { 60,58,59,57,52,50,51,49,44,42,43,41,36,34,35,
                                                33,28,26,27,25,20,18,19,17,12,10,11,9,4,2,3,1,5,7,6,8,13,15,14,16,21,

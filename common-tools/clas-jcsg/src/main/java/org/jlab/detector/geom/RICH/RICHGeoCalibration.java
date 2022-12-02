@@ -43,7 +43,7 @@ public class RICHGeoCalibration {
     public void load_CCDB(ConstantsManager manager, int run, int ncalls, RICHGeoParameters geopar){
     //------------------------------
 
-        int debugMode = 1;
+        int debugMode = 0;
 
         this.geopar = geopar;
 
@@ -308,7 +308,6 @@ public class RICHGeoCalibration {
                     float  hr  = Float.parseFloat(array[8]);
 
                     geopar.DO_ALIGNMENT    = idc;
-                    geopar.ALIGN_RICH_REF   = iref;
                     geopar.ALIGN_PMT_PIVOT  = ipiv;
                     geopar.APPLY_SURVEY    = isur;
 
@@ -318,7 +317,6 @@ public class RICHGeoCalibration {
                     if(debugMode>=1 || geopar.DEBUG_GEO_CONSTS>0){
 
                         System.out.format("TEXT PARA    DO_ALIGNMENT                 %7d \n", geopar.DO_ALIGNMENT);
-                        System.out.format("TEXT PARA    ALIGN_RICH_REF               %7d \n", geopar.ALIGN_RICH_REF);
                         System.out.format("TEXT PARA    ALIGN_PMT_PIVOT              %7d \n", geopar.ALIGN_PMT_PIVOT);
                         System.out.format("TEXT PARA    APPLY_SURVEY                 %7d \n", geopar.APPLY_SURVEY);
 

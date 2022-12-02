@@ -302,9 +302,9 @@ public class RICHParticle {
 
         int debugMode = 0;
 
-        if(debugMode>=1)System.out.format("Pixel back %7.2f %7.2f (1e-9)\n",pixel_backr*1e9,richpar.PIXEL_NOMINAL_BACKGR*1e9);
+        if(debugMode>=1)System.out.format("Pixel back %7.2f %7.2f (1e-9)\n",pixel_backr*1e9,richpar.PIXEL_NOMINAL_DARKRATE*1e9);
         if(richpar.USE_CALIBRATED_PIXELS==1 && pixel_backr>0) return pixel_backr;
-        return richpar.PIXEL_NOMINAL_BACKGR;
+        return richpar.PIXEL_NOMINAL_DARKRATE;
 
     }
 
@@ -498,7 +498,7 @@ public class RICHParticle {
     public double nominal_sChAngle(){
     // ----------------
 
-        return richpar.RICH_DIRECT_RMS;
+        return richpar.RICH_NOMINAL_SANGLE;
     }
 
 
@@ -888,8 +888,9 @@ public class RICHParticle {
         }
         
         double prob = funt*dfunt;
+        double back = richpar.PIXEL_NOMINAL_DARKRATE*richpar.NSIGMA_TIME*richpar.PIXEL_NOMINAL_STIME;
 
-        if(debugMode>=1)if(prob>richpar.PIXEL_NOMINAL_BACKGR)System.out.format(
+        if(debugMode>=1)if(prob>back)System.out.format(
                      "TIM prob   meant %8.3f  time %8.3f -->  %g  %g \n",
                      meant,testtime,funt*dfunt,Math.log(prob)); 
         return prob;
@@ -951,7 +952,8 @@ public class RICHParticle {
             
         }
 
-        double prob = 1 + pixel_eff *func*dfunc*funt*dfunt + richpar.PIXEL_NOMINAL_BACKGR;
+        double back = richpar.PIXEL_NOMINAL_DARKRATE*richpar.NSIGMA_TIME*richpar.PIXEL_NOMINAL_STIME;
+        double prob = 1 + pixel_eff *func*dfunc*funt*dfunt + back;
 
         if(debugMode>=1)System.out.format(
                      "PID prob %4d    mean %7.2f etaC %7.2f sigma %7.2f   meant %7.2f (%7.2f + %7.2f) time %7.2f sigmat %7.2f  eff %7.2f -->  %10.4g  %10.4g  %8.4f e-3\n",hypo_pid,
@@ -1018,8 +1020,8 @@ public class RICHParticle {
             if(inorma==1)funt = 1. / (sigmat*Math.sqrt(2* Math.PI));
             
         }
-
-        double prob = 1 + pixel_eff *func*dfunc*funt*dfunt + richpar.PIXEL_NOMINAL_BACKGR;
+        double back = richpar.PIXEL_NOMINAL_DARKRATE*richpar.NSIGMA_TIME*richpar.PIXEL_NOMINAL_STIME;
+        double prob = 1 + pixel_eff *func*dfunc*funt*dfunt + back;
 
         if(debugMode>=1)System.out.format(
                      "PID prob %4d    mean %7.2f etaC %7.2f sigma %7.2f   meant %7.2f (%7.2f + %7.2f) time %7.2f sigmat %7.2f  eff %7.2f -->  %10.4g  %10.4g  %8.4f\n",hypo_pid,
@@ -1055,6 +1057,7 @@ public class RICHParticle {
         }
 
         double ftheta = 0.0;
+        //                    fraction           rad             mrad (consistent with normalization)
         double dtheta = reco.get_dthe_pixel()*nominal_sChAngle()*MRAD;
         if(mean>0 && sigma>0){
             if(iref==0){

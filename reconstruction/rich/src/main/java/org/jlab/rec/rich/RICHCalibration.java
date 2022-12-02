@@ -381,10 +381,6 @@ public class RICHCalibration{
                get_PixelDarkRate(isec, ipmt, 1), get_PixelDarkRate(isec, ipmt, 2), get_PixelDarkRate(isec, ipmt, 63), get_PixelDarkRate(isec, ipmt, 64));
             if(ipmt==10)System.out.format("CCDB PIXEL DARKRATE ....... \n");
 
-            if(ipmt<=2 || ipmt>=390)System.out.format("CCDB PIXEL NTIME   ipmt %4d  %8d (ch1)  %8d (ch2)  %8d (ch63)  %8d (ch64) \n", ipmt,
-               get_PixelNTime(isec, ipmt, 1), get_PixelNTime(isec, ipmt, 2), get_PixelNTime(isec, ipmt, 63), get_PixelNTime(isec, ipmt, 64));
-            if(ipmt==10)System.out.format("CCDB PIXEL NTIME    ....... \n");
-
             if(ipmt<=2 || ipmt>=390)System.out.format("CCDB PIXEL MTIME   ipmt %4d  %8.2f (ch1)  %8.2f (ch2)  %8.2f (ch63)  %8.2f (ch64) \n", ipmt,
                get_PixelMeanTime(isec, ipmt, 1), get_PixelMeanTime(isec, ipmt, 2), get_PixelMeanTime(isec, ipmt, 63), get_PixelMeanTime(isec, ipmt, 64));
             if(ipmt==10)System.out.format("CCDB PIXEL MTIME    ....... \n");
@@ -604,15 +600,6 @@ public class RICHCalibration{
         int irich = find_RICHModule(isec);
         if(irich==0)return 0.0;
         return pixelTables.get(irich-1).getDoubleValue("sigma_t", isec, ipmt, ich);
-    }
-
-
-    //------------------------------
-    public int get_PixelNTime(int isec, int ipmt, int ich) { 
-    //------------------------------
-        int irich = find_RICHModule(isec);
-        if(irich==0)return 0;
-        return pixelTables.get(irich-1).getIntValue("N_t", isec, ipmt, ich);
     }
 
 
