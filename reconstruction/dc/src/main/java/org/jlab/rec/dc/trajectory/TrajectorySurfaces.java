@@ -21,6 +21,7 @@ import org.jlab.geom.detector.ec.ECLayer;
 import org.jlab.geom.detector.ec.ECSuperlayer;
 import org.jlab.geom.detector.fmt.FMTLayer;
 import org.jlab.geom.prim.Plane3D;
+import org.jlab.geom.prim.Trap3D;
 import org.jlab.geom.prim.Triangle3D;
 
 /**
@@ -116,7 +117,7 @@ public class TrajectorySurfaces {
                 Trap3D surf = richDetector.get_TrajectorySurface(sector, richLayers[i]);
                 double thick = richDetector.get_TrajectoryThickness(sector,richLayers[i]);
                 if(surf!=null) {
-                    this.detectorPlanes.get(isector).add(new Surface(DetectorType.RICH, sector, richayers[i], surf, thick);
+                    this.detectorPlanes.get(isector).add(new Surface(DetectorType.RICH, sector, richLayers[i], surf, thick));
                 }
             }
 
