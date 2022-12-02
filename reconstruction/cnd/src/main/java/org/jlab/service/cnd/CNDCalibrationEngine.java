@@ -142,7 +142,7 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 
         //// clustering of the CND hits
         CNDClusterFinder cndclusterFinder = new CNDClusterFinder();
-        ArrayList<CNDCluster> cndclusters = cndclusterFinder.findClusters(hits);
+        ArrayList<CNDCluster> cndclusters = cndclusterFinder.findClusters(hits,constantsLoader);
             
         
         
