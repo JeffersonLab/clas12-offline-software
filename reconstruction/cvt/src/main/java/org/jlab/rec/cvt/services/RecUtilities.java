@@ -37,7 +37,8 @@ import org.jlab.rec.cvt.fit.CircleFitPars;
 import org.jlab.rec.cvt.fit.CircleFitter;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.svt.SVTParameters;
-import org.jlab.rec.cvt.track.CovMatUtil;
+import org.jlab.clas.tracking.utilities.CovMatUtil;
+import org.jlab.clas.tracking.utilities.Units;
 import org.jlab.rec.cvt.trajectory.Ray;
 /**
  * Service to return reconstructed TRACKS
@@ -620,7 +621,8 @@ public class RecUtilities {
         double phi0 = trk.getHelix().getPhiAtDCA();
         double tandip = trk.getHelix().getTanDip();
         
-        tCov = CovMatUtil.getCartesianCovMat(Constants.getSolenoidMagnitude(),trk.getQ(), pt, d0, phi0, d0, tandip, hCov);
+        tCov = CovMatUtil.getCartesianCovMat(Constants.getSolenoidMagnitude()*Math.signum(Constants.getSolenoidScale()),
+                Units.MM, trk.getQ(), pt, d0, phi0, d0, tandip, hCov);
         
         
         return tCov;

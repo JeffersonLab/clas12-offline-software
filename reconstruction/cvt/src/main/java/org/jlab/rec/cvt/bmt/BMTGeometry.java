@@ -15,7 +15,7 @@ import org.jlab.groot.group.DataGroup;
 import static org.jlab.rec.cvt.bmt.Lorentz.getLorentzAngle;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
-import org.jlab.clas.tracking.kalmanfilter.Units;
+import org.jlab.clas.tracking.utilities.Units;
 import org.jlab.clas.tracking.objects.Strip;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.geom.prim.Transformation3D;

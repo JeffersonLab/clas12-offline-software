@@ -2,7 +2,7 @@ package org.jlab.rec.cvt.services;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.clas.tracking.kalmanfilter.Units;
+import org.jlab.clas.tracking.utilities.Units;
 import org.jlab.clas.tracking.kalmanfilter.straight.KFitter;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Point3D;

@@ -1,5 +1,6 @@
 package org.jlab.rec.dc.track;
 
+import org.jlab.clas.tracking.utilities.CovMatUtil;
 import org.jlab.jnp.matrix.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +9,6 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
-import org.jlab.rec.dc.track.fit.StateVecsDoca;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 
@@ -441,7 +441,8 @@ public class Track extends Trajectory implements Comparable<Track>{
                 CST[i][j] = covMatAtVtx.get(i, j);
             }
         }
-        double[][] C = CovMatUtil.getCartesianCovMat(sector, charge, q, CST);
+        double[][] C = CovMatUtil.getCartesianCovMat(sector, charge, 
+                X.x(), X.y(), X.z(),P.x(), P.y(), P.z(), CST);
         this.set_CovMatLab(C);
      }
     

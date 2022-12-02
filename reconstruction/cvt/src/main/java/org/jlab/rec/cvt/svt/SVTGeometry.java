@@ -4,7 +4,7 @@ import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
-import org.jlab.clas.tracking.kalmanfilter.Units;
+import org.jlab.clas.tracking.utilities.Units;
 import org.jlab.clas.tracking.objects.Strip;
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;

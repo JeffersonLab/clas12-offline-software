@@ -2,10 +2,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package org.jlab.rec.cvt.track;
+package org.jlab.clas.tracking.utilities;
 
 import org.jlab.clas.clas.math.FastMath;
-import org.jlab.rec.cvt.Constants;
+import static org.jlab.clas.tracking.trackrep.Helix.LIGHTVEL;
 
 /**
  *
@@ -16,17 +16,19 @@ public class CovMatUtil {
 
     /**
      * 
-     * @param solenoidMag
+     * @param signedSolenoidMag
+     * @param unit
      * @param charge
      * @param pt
      * @param d0
      * @param phi0
      * @param Z0
      * @param tandip
-     * @param hCov
-     * @return covariance matrix in cartesian format
+     * @param hCov  covariance matrix in helical representation
+     * @return  covariance matrix in cartesian format
      */
-    public static double[][] getCartesianCovMat(double solenoidMag, int charge, double pt, double d0, double phi0, double Z0, double tandip, 
+    public static double[][] getCartesianCovMat(double signedSolenoidMag, Units unit, 
+            int charge, double pt, double d0, double phi0, double Z0, double tandip, 
             double[][] hCov) {
         double[][] tCov = new double[6][6];
         
@@ -36,10 +38,8 @@ public class CovMatUtil {
         // | d_curvature*d_dca	    d_curvature*d_phi_at_dca      d_curvature*d_curvature     0            0             |
         // | 0                              0                             0                    d_Z0*d_Z0                     |
         // | 0                              0                             0                       0        d_tandip*d_tandip |
-        // (double pt, double d0, double phi0, double Z0, double tandip, int q, double solenoidMag) {
-        double c = Constants.LIGHTVEL;
-        double rho = (double)charge*c*solenoidMag/pt * Math.signum(Constants.getSolenoidScale());
-        //double Bz = 1./Math.abs(rho);
+        
+        double rho = getRhoFromPt(signedSolenoidMag, unit, charge, pt); 
         
         double delxdeld0 = -Math.sin(phi0);
         double delxdelphi0 = -d0*Math.cos(phi0);
@@ -135,6 +135,139 @@ public class CovMatUtil {
         //System.out.println("    ");
         
         return tCov;
+    }
+    /**
+     * 
+     * @param signedSolenoidMag
+     * @param unit (CM or MM)
+     * @param charge
+     * @param pt
+     * @return track curvature (signed quantity in Units)
+     */
+    private static double getRhoFromPt(double signedSolenoidMag, Units unit, int charge, double pt) {
+        double c = LIGHTVEL*unit.value();
+        double rho = (double)charge*c*signedSolenoidMag/pt;
+        
+        return rho;
+    }
+    
+    /**
+     * 
+     * @param sector
+     * @param charge
+     * @param x
+     * @param y
+     * @param z
+     * @param px
+     * @param py
+     * @param pz
+     * @param TCSCov the track covariance matrix in the Tilted Coordinate System at the vertex
+     * @return the track covariance matrix in the lab frame in cartesian coordimates (x,y,z,px,py,pz)
+     */
+    public static double[][] getCartesianCovMat(int sector, int charge, 
+            double x, double y, double z, double px, double py, double pz, 
+            double[][] TCSCov) {
+        double[] q = new double[6];
+        q[0]=x;
+        q[1]=y;
+        q[2]=z;
+        q[3]=px;
+        q[4]=py;
+        q[5]=pz;
+        double[][] C = new double[6][6]; // C' = F^T C F
+        double[][] CF = new double[5][6];
+        //the parameters in the TCS
+        double[] t = localFramePars(sector, charge, q);
+        
+        double Q = (double) charge;
+        
+        double thetaS = Math.PI/3*(sector -1);
+        double thetaT = Math.toDegrees(-25.0);
+        
+        double cS = Math.cos(thetaS);
+        double sS = Math.sin(thetaS);
+        double cT = Math.cos(thetaT);
+        double sT = Math.sin(thetaT);
+        
+        double del_xH_del_xT = cS*cT;
+        double del_xH_del_yT = - sS;
+        double del_xH_del_zT = cS*sT;
+        
+        double del_yH_del_xT = sS*cT;
+        double del_yH_del_yT = cS;
+        double del_yH_del_zT = sS*sT;
+        
+        double del_zH_del_xT = -sT;
+        double del_zH_del_zT = cT;
+        
+        double del_pxH_del_txT = Q/t[5] *
+                (cS*cT*t[4]*t[4]+sS*t[3]*t[4]-cS*sT*t[3]+cS*cT)/
+                (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5])*(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
+        
+        double del_pxH_del_tyT = Q/t[5] *
+                (-sS*t[3]*t[3]-cS*cT*t[3]*t[4]-cS*sT*t[4]-sS)/
+                (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5])*(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
+        
+        double del_pxH_del_QT = Q/(t[5]*t[5]) *
+                (-cS*cT*t[3]+sS*t[4]-cS*sT)/
+                (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
+        
+        double del_pyH_del_txT = Q/t[5] *
+                (sS*cT*t[4]*t[4]-cS*t[3]*t[4]-sS*sT*t[3]+sS*cT)/
+                (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5])*(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
+        
+        double del_pyH_del_tyT = Q/t[5] *
+                (cS*t[3]*t[3]-sS*cT*t[3]*t[4]-sS*sT*t[4]+cS)/
+                (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5])*(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
+        
+        double del_pyH_del_QT = Q/(t[5]*t[5]) *
+                (-sS*cT*t[3]-cS*t[4]-sS*sT)/
+                (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
+        
+        double del_pzH_del_txT = Q/t[5] *
+                (-sT*t[4]*t[4]-cT*t[3]-sT)/
+                (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5])*(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
+        
+        double del_pzH_del_tyT = Q/t[5] *
+                (sT*t[3]*t[4]-cT*t[4])/
+                (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5])*(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
+        
+        double del_pzH_del_QT = Q/(t[5]*t[5]) *
+                (sT*t[3]-cT*t[4])/
+                (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
+        
+        double[][] F = new double[][]{
+            {del_xH_del_xT, del_yH_del_xT, del_zH_del_xT, 0, 0, 0},
+            {del_xH_del_yT, del_yH_del_yT, 0, 0, 0, 0},
+            {del_xH_del_zT, del_yH_del_zT, del_zH_del_zT, del_pxH_del_txT, del_pyH_del_txT, del_pzH_del_txT},
+            {0, 0, 0, del_pxH_del_tyT, del_pyH_del_tyT, del_pzH_del_tyT},
+            {0, 0, 0, del_pxH_del_QT, del_pyH_del_QT, del_pzH_del_QT}};
+        
+        double[][] FT = new double[6][5];
+        for(int i = 0; i<6; i++) {
+            for(int j = 0; j<5; j++) {
+                FT[i][j] = F[j][i];
+            }
+        }        
+          
+        
+        for (int k = 0; k < 5; k++) {
+            for (int i = 0; i < 6; i++) {
+                 for (int j = 0; j < 5; j++) {
+                     CF[k][i] += F[j][i] * TCSCov[k][j];
+                }
+            }
+        }
+        
+        for (int k = 0; k < 6; k++) {
+            for (int i = 0; i < 5; i++) {
+                 for (int j = 0; j < 6; j++) {
+                     C[k][j] += CF[i][k] * FT[j][i]; 
+                }
+            }
+        }
+        
+        return C;
     }
 
     private static double[] localFramePars(int sector, int charge, double[] q) {

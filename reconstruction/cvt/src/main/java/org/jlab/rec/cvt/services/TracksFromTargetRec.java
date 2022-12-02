@@ -17,7 +17,7 @@ import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
-import org.jlab.clas.tracking.kalmanfilter.Units;
+import org.jlab.clas.tracking.utilities.Units;
 import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.banks.RecoBankReader;
 import org.jlab.rec.cvt.measurement.Measurements;

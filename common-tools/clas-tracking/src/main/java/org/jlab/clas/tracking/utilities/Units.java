@@ -1,4 +1,4 @@
-package org.jlab.clas.tracking.kalmanfilter;
+package org.jlab.clas.tracking.utilities;
 
 /**
  *

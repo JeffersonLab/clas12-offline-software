@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.Material;
-import org.jlab.clas.tracking.kalmanfilter.Units;
+import org.jlab.clas.tracking.utilities.Units;
 
 import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
 

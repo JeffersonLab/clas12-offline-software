@@ -6,7 +6,7 @@ import org.jlab.clas.tracking.kalmanfilter.AMeasVecs;
 import org.jlab.clas.tracking.kalmanfilter.AStateVecs;
 import org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
-import org.jlab.clas.tracking.kalmanfilter.Units;
+import org.jlab.clas.tracking.utilities.Units;
 import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
 
 /**

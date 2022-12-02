@@ -71,6 +71,13 @@
           <artifactId>clas-math</artifactId>
           <version>8.3.4-SNAPSHOT</version>
       </dependency>
+      
+       <dependency>
+        <groupId>org.jlab.clas</groupId>
+        <artifactId>clas-tracking</artifactId>
+        <version>8.3.4-SNAPSHOT</version>
+      </dependency>
+      
   </dependencies>
 
 </project>
