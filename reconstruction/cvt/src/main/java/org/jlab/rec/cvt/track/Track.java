@@ -454,7 +454,7 @@ public class Track extends Trajectory implements Comparable<Track> {
                 nBMTC++;
             }
         }
-        return 1000*this.kfIterations+nSVT*100+nBMTZ*10+nBMTC;
+        return 10000*this.kfIterations+nSVT*1000+nBMTZ*100+nBMTC*10+this.getSeed().getStatus();
     }
     
     /**
