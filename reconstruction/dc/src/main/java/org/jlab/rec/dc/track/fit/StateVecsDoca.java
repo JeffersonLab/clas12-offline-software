@@ -79,7 +79,7 @@ public class StateVecsDoca {
 
         while(Math.signum(Zf - Z[i]) *z<Math.signum(Zf - Z[i]) *Zf) {
             z = fVec.z;
-            if(z == Z[f]) break;
+            if(z == Zf) break;
 
             //LOGGER.log(Level.FINE, " RK step num "+(j+1)+" = "+(float)s+" nSteps = "+nSteps);
             double x =  fVec.x;
