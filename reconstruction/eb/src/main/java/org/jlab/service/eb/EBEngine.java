@@ -118,7 +118,7 @@ public class EBEngine extends ReconstructionEngine {
         EBRadioFrequency rf = new EBRadioFrequency(ccdb);
         eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+ccdb.getDouble(EBCCDBEnum.RF_OFFSET));
         
-        List<DetectorResponse> responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.ECAL,"ECAL::moments");
+        List<DetectorResponse> responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.ECAL,"ECAL::moments", "ECAL::calib");
         List<DetectorResponse> responseFTOF = ScintillatorResponse.readHipoEvent(de, ftofHitsType, DetectorType.FTOF);
         List<DetectorResponse> responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::clusters", DetectorType.CTOF);
         List<DetectorResponse> responseCND  = ScintillatorResponse.readHipoEvent(de, "CND::clusters", DetectorType.CND);
