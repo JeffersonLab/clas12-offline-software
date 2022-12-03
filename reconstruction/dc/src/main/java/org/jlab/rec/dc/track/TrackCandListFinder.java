@@ -943,7 +943,7 @@ public class TrackCandListFinder {
                         }
                     }
                     //this.matchHits(traj.getStateVecs(), cand, DcDetector);
-                    cands.add(cand);
+//                    cands.add(cand);
                 }
             }
         }
