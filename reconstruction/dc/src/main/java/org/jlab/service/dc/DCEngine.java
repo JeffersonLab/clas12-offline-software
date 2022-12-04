@@ -26,10 +26,12 @@ public class DCEngine extends ReconstructionEngine {
     private int        t2d            = 1;
     private int        nSuperLayer    = 5;
     private String     geoVariation   = "default";
+    private boolean    denoise        = false;
     private String     bankType       = "HitBasedTrkg";
+    private String     inBankPrefix   = null;
     private String     outBankPrefix  = null;
     private double[][] shifts         = new double[Constants.NREG][6];
-        
+    
     public static final Logger LOGGER = Logger.getLogger(ReconstructionEngine.class.getName());
 
 
@@ -86,7 +88,16 @@ public class DCEngine extends ReconstructionEngine {
             if(!Boolean.valueOf(this.getEngineConfigString("dcFOOST"))) {
                 nSuperLayer =6;
             }    
-                
+                        
+        // set flag for denoise support (Engine dependent)
+        if(this.getEngineConfigString("denoise")!=null)       
+            denoise = Boolean.valueOf(this.getEngineConfigString("denoise"));
+
+        //Set input bank names
+        if(this.getEngineConfigString("inputBankPrefix")!=null) {
+            inBankPrefix = this.getEngineConfigString("inputBankPrefix");
+        }
+
         //Set output bank names
         if(this.getEngineConfigString("outputBankPrefix")!=null) {
             outBankPrefix = this.getEngineConfigString("outputBankPrefix");
@@ -108,7 +119,7 @@ public class DCEngine extends ReconstructionEngine {
                     shifts[region-1][iaxis] = value;
                 }
             }
-        }
+        }        
     }
 
 
@@ -160,24 +171,23 @@ public class DCEngine extends ReconstructionEngine {
     }
 
     private void initBanks() {
-        if(this.getBankPrefix()!=null) this.getBanks().init(outBankPrefix);
+        if(inBankPrefix==null && outBankPrefix!=null) 
+            this.getBanks().init(outBankPrefix);
+        if(inBankPrefix!=null && outBankPrefix!=null) 
+            this.getBanks().init(inBankPrefix, outBankPrefix);
         LOGGER.log(Level.INFO,"["+this.getName()+"] bank names set for " + this.getBanks().toString());       
     }
 
     public Banks getBanks() {
         return bankNames;
     }
-    
-    public void setBankPrefix(String prefix) {
-        this.outBankPrefix = prefix;
-    }
-
-    public String getBankPrefix() {
-        return this.outBankPrefix;
-    }
-    
+        
     public void setDropBanks() {
         
+    }
+    
+    public boolean doDenoise() {
+        return this.denoise;
     }
     
     public int getRun(DataEvent event) {

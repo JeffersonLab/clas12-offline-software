@@ -203,7 +203,14 @@ public class HitReader {
                              NoiseReductionParameters parameters,
                              Clas12NoiseResult results) {
         this.initialize(event);
-        this.fetch_DCHits(noiseAnalysis, parameters, results);
+        this.fetch_DCHits(false, noiseAnalysis, parameters, results);
+    }
+        
+    public void fetch_DCHits(DataEvent event, boolean filterOnOrder, Clas12NoiseAnalysis noiseAnalysis,
+                             NoiseReductionParameters parameters,
+                             Clas12NoiseResult results) {
+        this.initialize(event);
+        this.fetch_DCHits(filterOnOrder, noiseAnalysis, parameters, results);
     }
      /**
      * reads the hits using clas-io methods to get the EvioBank for the DC and
@@ -214,7 +221,7 @@ public class HitReader {
      * @param parameters
      * @param results
      */
-    private void fetch_DCHits(Clas12NoiseAnalysis noiseAnalysis,
+    private void fetch_DCHits(boolean filterOnOrder, Clas12NoiseAnalysis noiseAnalysis,
                              NoiseReductionParameters parameters,
                              Clas12NoiseResult results) {
 
@@ -271,6 +278,8 @@ public class HitReader {
 
         for (int i = 0; i < rows; i++) {
             boolean passHit = true;
+            if(filterOnOrder && order[i]!=0)
+                passHit = false;
             if (wirestat != null) {
                 if (wirestat.getIntValue("status", sector[i], layer[i]+(superlayer[i]-1)*6, wire[i]) != 0)
                     passHit = false;
