@@ -13,7 +13,7 @@
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../../parent/pom.xml</relativePath>
-    <version>8c.3.4-SNAPSHOT</version>	    
+    <version>8.4.0-SNAPSHOT</version>	    
   </parent>
 
   <dependencies>
@@ -21,7 +21,7 @@
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-reco</artifactId>
-      <version>8c.3.4-SNAPSHOT</version>	      
+      <version>8.4.0-SNAPSHOT</version>	      
     </dependency>
 
   </dependencies>
