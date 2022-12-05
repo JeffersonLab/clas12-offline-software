@@ -53,7 +53,9 @@ public abstract class ReconstructionEngine implements Engine {
 
     volatile boolean dropOutputBanks = false;
     private final Set<String> outputBanks = new HashSet<>();
-    
+
+    private boolean ignoreInvalidRunNumbers = true;
+
     volatile long triggerMask = 0xFFFFFFFFFFFFFFFFL;
 
     String             engineName        = "UnknownEngine";
@@ -166,6 +168,10 @@ public abstract class ReconstructionEngine implements Engine {
           if (this.getEngineConfigString("dropBanks")!=null &&
                   this.getEngineConfigString("dropBanks").equals("true")) {
               dropOutputBanks=true;
+          }
+          if (this.getEngineConfigString("ignoreInvalidRunNumbers")!=null &&
+                  this.getEngineConfigString("ignoreInvalidRunNumbers").equals("false")) {
+              ignoreInvalidRunNumbers=false;
           }
           if (this.getEngineConfigString("triggerMask")!=null) {
               this.setTriggerMask(this.getEngineConfigString("triggerMask"));
@@ -314,7 +320,15 @@ public abstract class ReconstructionEngine implements Engine {
             }
         }
     }
-    
+
+    public boolean checkRunNumber(DataEvent event) {
+        if (!this.ignoreInvalidRunNumbers) return true;
+        int run = 0;
+        if (event.hasBank("RUN::config")) {
+            run = event.getBank("RUN::config").getInt("run",0);
+        }
+        return run>0;
+    }
     
     @Override
     public EngineData execute(EngineData input) {
@@ -357,8 +371,11 @@ public abstract class ReconstructionEngine implements Engine {
                 if (this.dropOutputBanks) {
                     this.dropBanks(dataEventHipo);
                 }
-                if(this.applyTriggerMask(dataEventHipo))
-                    this.processDataEvent(dataEventHipo);
+                if(this.applyTriggerMask(dataEventHipo)) {
+                    if (this.checkRunNumber(dataEventHipo)) {
+                        this.processDataEvent(dataEventHipo);
+                    }
+                }
                 output.setData(mt, dataEventHipo.getHipoEvent());
             } catch (Exception e) {
                 String msg = String.format("Error processing input event%n%n%s", ClaraUtil.reportException(e));
