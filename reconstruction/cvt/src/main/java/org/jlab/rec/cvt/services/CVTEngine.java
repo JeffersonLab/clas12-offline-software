@@ -274,7 +274,6 @@ public class CVTEngine extends ReconstructionEngine {
         Swim swimmer = new Swim();
         
         int run = this.getRun(event); 
-        if(run<=0) return true;
         
         IndexedTable svtStatus          = this.getConstantsManager().getConstants(run, "/calibration/svt/status");
         IndexedTable svtLorentz         = this.getConstantsManager().getConstants(run, "/calibration/svt/lorentz_angle");
