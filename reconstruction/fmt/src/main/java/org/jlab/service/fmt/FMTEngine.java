@@ -78,12 +78,6 @@ public class FMTEngine extends ReconstructionEngine {
         DataBank runConfig = event.getBank("RUN::config");
         if (runConfig == null || runConfig.rows() == 0) return true;
         int run         = runConfig.getInt("run", 0);
-        int eventNumber = runConfig.getInt("event", 0);
-                
-        if (run<=0) {
-            System.out.println("FMTEngine:  found no run number, CCDB constants not loaded, skipping event.");
-            return false;
-        }
                 
         // Set swimmer.
         Swim swimmer = new Swim();

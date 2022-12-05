@@ -31,7 +31,6 @@ public class CVTSecondPassEngine extends CVTEngine {
     public boolean processDataEvent(DataEvent event) {
 
         int run = this.getRun(event);
-        if(run<=0) return true;
 
         Swim swimmer = new Swim();
 

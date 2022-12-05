@@ -99,10 +99,6 @@ public class EBEngine extends ReconstructionEngine {
         if (de.hasBank("RUN::config")) {
             run=de.getBank("RUN::config").getInt("run",0);
         }
-        if (run<=0) {
-            LOGGER.log(Level.WARNING,"EBEngine:  found no run number, CCDB constants not loaded, skipping event.");
-            return false;
-        }
 
         EBCCDBConstants ccdb = new EBCCDBConstants(run,this.getConstantsManager());
 
