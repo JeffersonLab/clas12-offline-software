@@ -14,7 +14,7 @@ public class EBHBAIEngine extends EBEngine {
     
     public EBHBAIEngine(){
         super("EBHBAI");
-        setUsePOCA(true);
+        setUsePOCA(false);
     }
    
     @Override
@@ -27,9 +27,10 @@ public class EBHBAIEngine extends EBEngine {
 	this.setOutputBankPrefix("RECHBAI");
 
 	this.setTrackType("HitBasedTrkg::AITracks");
-         this.setFTOFHitsType("FTOF::hbclusters");
+        this.setFTOFHitsType("FTOF::hbclusters");
         this.setCvtTrackType("CVT::Tracks");
         this.setCvtTrajType("CVT::Trajectory");
+        this.setTrajectoryType("HitBasedTrkg::AITrajectory");
     }
     
 }
