@@ -25,13 +25,15 @@ public class DetectorTrack implements Comparable {
         private float bField = 0;
         private float pathLength = -1;
         private float edge=-99;
-        public TrajectoryPoint(int detId,int layId,Line3D traj,float bField,float pathLength,float edge) {
+        private float dx=-1;
+        public TrajectoryPoint(int detId,int layId,Line3D traj,float bField,float pathLength,float edge,float dx) {
             this.detId=detId;
             this.layId=layId;
             this.traj=traj;
             this.bField=bField;
             this.pathLength=pathLength;
             this.edge=edge;
+            this.dx=dx;
         }
         public TrajectoryPoint(int detId,int layId,Line3D traj) {
             this.layId=layId;
@@ -51,19 +53,19 @@ public class DetectorTrack implements Comparable {
         private int size=0;
         private Map < Integer, Map <Integer,TrajectoryPoint> > traj = new LinkedHashMap<>();
         
-        public void add(int detId,int layId,Line3D traj,float bField,float pathLength,float edge) {
+        public void add(int detId,int layId,Line3D traj,float bField,float pathLength,float edge,float dx) {
             if (!this.traj.containsKey(detId)) {
                 this.traj.put(detId,new LinkedHashMap<>());
             }
             if (this.traj.get(detId).containsKey(layId)) {
                 throw new RuntimeException("Duplicate detector type/layer: "+detId+"/"+layId);
             }
-            this.traj.get(detId).put(layId,new TrajectoryPoint(detId,layId,traj,bField,pathLength,edge));
+            this.traj.get(detId).put(layId,new TrajectoryPoint(detId,layId,traj,bField,pathLength,edge,dx));
             this.size++;
         }
         
         public void add(int detId,int layId,Line3D traj,float bField,float pathLength) {
-            add(detId,layId,traj,bField,pathLength,-99);
+            add(detId,layId,traj,bField,pathLength,-99,-1);
         }
 
         public void add(int detId,int layId,Line3D traj) {
@@ -176,8 +178,8 @@ public class DetectorTrack implements Comparable {
     }
 
     
-    public void addTrajectoryPoint(int detId,int layId,Line3D traj,float bField,float pathLength,float edge) {
-        this.trajectory.add(detId,layId,traj,bField,pathLength,edge);
+    public void addTrajectoryPoint(int detId,int layId,Line3D traj,float bField,float pathLength,float edge,float dx) {
+        this.trajectory.add(detId,layId,traj,bField,pathLength,edge,dx);
     }
     public void addTrajectoryPoint(int detId,int layId,Line3D traj,float bField,float pathLength) {
         this.trajectory.add(detId,layId,traj,bField,pathLength);

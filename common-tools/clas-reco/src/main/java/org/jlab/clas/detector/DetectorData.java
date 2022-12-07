@@ -576,6 +576,7 @@ public class DetectorData {
                         float bField = trajBank.getFloat("B", ii);
                         float pathLength = trajBank.getFloat("path", ii);
                         float edge= trajBank.getFloat("edge", ii);
+                        float dx= trajBank.getFloat("dx", ii);
                         float xx = trajBank.getFloat("x", ii);
                         float yy = trajBank.getFloat("y", ii);
                         float zz = trajBank.getFloat("z", ii);
@@ -583,7 +584,7 @@ public class DetectorData {
                                 xx + track.getMaxLineLength() * trajBank.getFloat("tx", ii),
                                 yy + track.getMaxLineLength() * trajBank.getFloat("ty", ii),
                                 zz + track.getMaxLineLength() * trajBank.getFloat("tz", ii));
-                        track.addTrajectoryPoint(detId, layId, traj, bField, pathLength, edge);
+                        track.addTrajectoryPoint(detId, layId, traj, bField, pathLength, edge, dx);
                     }
                 }
                 if (covBank != null) {
@@ -688,12 +689,13 @@ public class DetectorData {
                         float cy = (float) (Math.sin(theta) * Math.sin(phi));
 
                         float edge = trajBank.getFloat("edge", ii);
+                        float dx = trajBank.getFloat("dx", ii);
 
                         Line3D traj = new Line3D(xx, yy, zz,
                                 xx + track.getMaxLineLength() * cx,
                                 yy + track.getMaxLineLength() * cy,
                                 zz + track.getMaxLineLength() * cz);
-                        track.addTrajectoryPoint(detId, layId, traj, 0, pathLength, edge);
+                        track.addTrajectoryPoint(detId, layId, traj, 0, pathLength, edge, dx);
                     }
                 }
 
