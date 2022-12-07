@@ -23,7 +23,7 @@ public class MatchTrajDistance extends AMatch {
 
     @Override
     public double quality(DetectorParticle p, DetectorResponse r) {
-        if (p.getTrackTrajectory().hasLayer(r.getDescriptor())) { 
+        if (p.getTrackTrajectory().contains(r.getDescriptor())) { 
             Line3D traj = p.getTrackTrajectory().get(r.getDescriptor()).getCross();
             return traj.distance(r.getPosition().toPoint3D()).length();
         }
