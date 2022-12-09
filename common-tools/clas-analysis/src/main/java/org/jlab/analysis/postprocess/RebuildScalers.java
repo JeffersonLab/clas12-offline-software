@@ -1,8 +1,8 @@
 package org.jlab.analysis.postprocess;
 
 import java.sql.Time;
+import java.time.ZoneId;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.detector.calib.utils.RCDBConstants;
@@ -28,12 +28,15 @@ public class RebuildScalers {
     static final String CCDB_SLM_TABLE="/runcontrol/slm";
     static final String CCDB_HEL_TABLE="/runcontrol/helicity";
     
+    static final ZoneId zoneId = ZoneId.of( "America/New_York" );
+
     public static void main(String[] args) {
 
         DefaultLogger.debug();
 
         OptionParser parser = new OptionParser("rebuildscaler");
         parser.addRequired("-o","output.hipo");
+        parser.addOption("-t", "", "CCDB timestamp");
         parser.parse(args);
         List<String> inputList = parser.getInputList();
         if(inputList.isEmpty()==true){
@@ -56,6 +59,7 @@ public class RebuildScalers {
         Bank runConfigBank = new Bank(writer.getSchemaFactory().getSchema("RUN::config"));
             
         ConstantsManager conman = new ConstantsManager();
+        if(parser.getOption("-t")!=null && !parser.getOption("-t").stringValue().isBlank()) conman.setTimeStamp(parser.getOption("-t").stringValue());
         conman.init(Arrays.asList(new String[]{CCDB_FCUP_TABLE,CCDB_SLM_TABLE,CCDB_HEL_TABLE}));
         
         for (String filename : inputList) {
@@ -89,15 +93,15 @@ public class RebuildScalers {
                     rcdb = conman.getRcdbConstants(runConfigBank.getInt("run",0));
                 }
 
-                // now rebuild the RUN::scaler bank: 
-                if (rcdb!=null && ccdb_fcup !=null && rawScalerBank.getRows()>0) {
+                // now rebuild the RUN::scaler bank, ignore events with 0 timestamp: 
+                if (rcdb!=null && ccdb_fcup !=null && rawScalerBank.getRows()>0 && runConfigBank.getLong("timestamp", 0)>0) {
                     
                     // Inputs for calculation run duration in seconds, since for
                     // some run periods the DSC2 clock rolls over during a run.
                     Time rst = rcdb.getTime("run_start_time");
-                    Date uet = new Date(runConfigBank.getInt("unixtime",0)*1000L);
-       
-                    DaqScalers ds = DaqScalers.create(rawScalerBank, ccdb_fcup, ccdb_slm, ccdb_hel, rst, uet);
+                    long uet = runConfigBank.getInt("unixtime",0);
+
+                    DaqScalers ds = DaqScalers.create(rawScalerBank, ccdb_fcup, ccdb_slm, ccdb_hel, zoneId, rst, uet);
                     runScalerBank = ds.createRunBank(writer.getSchemaFactory());
                     helScalerBank = ds.createHelicityBank(writer.getSchemaFactory());
                    

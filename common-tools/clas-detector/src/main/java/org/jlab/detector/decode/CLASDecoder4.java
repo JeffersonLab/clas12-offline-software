@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import java.sql.Time;
-import java.util.Date;
+import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.jlab.detector.base.DetectorDescriptor;
@@ -46,8 +46,9 @@ public class CLASDecoder4 {
     private HipoDataEvent               hipoEvent = null;
     private boolean              isRunNumberFixed = false;
     private int                  decoderDebugMode = 0;
-    private SchemaFactory        schemaFactory = new SchemaFactory();
-
+    private SchemaFactory           schemaFactory = new SchemaFactory();
+    private ZoneId                       timeZone = ZoneId.of( "America/New_York" );
+    
     public CLASDecoder4(boolean development){
         codaDecoder = new CodaEventDecoder();
         detectorDecoder = new DetectorEventDecoder(development);
@@ -617,8 +618,8 @@ public class CLASDecoder4 {
         IndexedTable helTable = this.detectorDecoder.scalerManager.
                 getConstants(this.detectorDecoder.getRunNumber(),"/runcontrol/helicity");
 
-        // get unix event time (in seconds), and convert to Java's date (via milliseconds):
-        Date uet=new Date(configBank.getInt("unixtime",0)*1000L);
+        // get unix event time (in seconds):
+        long uet = configBank.getInt("unixtime",0);
 
         // retrieve RCDB run start time:
         Time rst;
@@ -630,7 +631,7 @@ public class CLASDecoder4 {
             // abort if no RCDB access (e.g. offsite)
             return ret;
         }
-        ret.addAll(DaqScalers.createBanks(schemaFactory,rawScalerBank,fcupTable,slmTable,helTable,rst,uet));
+        ret.addAll(DaqScalers.createBanks(schemaFactory,rawScalerBank,fcupTable,slmTable,helTable,timeZone,rst,uet));
         return ret;
     }
     

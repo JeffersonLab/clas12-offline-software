@@ -1,5 +1,9 @@
 package org.jlab.detector.scalers;
 
+import java.sql.Time;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -73,6 +77,23 @@ public class DaqScalers {
     }
 
     /**
+     * Get seconds between two times specified as a local time and a unix time
+     * assuming they differ by less than 24 h
+     * 
+     * @param zone run start time zone
+     * @param rst  run start local local time
+     * @param uet  unix event time
+     * @return 
+     */
+    public static double getSeconds(ZoneId zone, Time rst,long uet) {
+        // seconds since 00:00:00, on their given day:
+        ZonedDateTime et = ZonedDateTime.ofInstant(Instant.ofEpochSecond(uet), zone);
+        ZonedDateTime st = ZonedDateTime.of(et.toLocalDate(), rst.toLocalTime(), zone);
+        if(st.isAfter(et)) st.minusDays(1L);
+        return (double) (et.toInstant().getEpochSecond()-st.toInstant().getEpochSecond());
+    }
+
+    /**
      * @param runScalerBank HIPO RUN::scaler bank
      * @return 
      */
@@ -116,6 +137,20 @@ public class DaqScalers {
      */
     public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable,Date rst, Date uet) {
         return DaqScalers.create(rawScalerBank,fcupTable,slmTable,helTable,DaqScalers.getSeconds(rst, uet));
+    }
+
+    /**
+     * @param rawScalerBank HIPO RAW::scaler bank
+     * @param fcupTable /runcontrol/fcup from CCDB
+     * @param slmTable /runcontrol/slm from CCDB
+     * @param helTable /runcontrol/helicity from CCDB
+     * @param zone run start time zone
+     * @param rst  run start time
+     * @param uet  unix event time
+     * @return 
+     */
+    public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable,ZoneId zone,Time rst,long uet) {
+        return DaqScalers.create(rawScalerBank,fcupTable,slmTable,helTable,DaqScalers.getSeconds(zone, rst, uet));
     }
 
     /**
@@ -219,6 +254,20 @@ public class DaqScalers {
      */
     public static List<Bank> createBanks(SchemaFactory schema,Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable,Date rst,Date uet) {
         return DaqScalers.createBanks(schema,rawScalerBank,fcupTable,slmTable,helTable,DaqScalers.getSeconds(rst,uet));
+    }
+
+    /**
+     * @param rawScalerBank RAW::scaler bank
+     * @param schema bank schema
+     * @param fcupTable /runcontrol/fcup CCDB table
+     * @param slmTable /runcontrol/slm CCDB table
+     * @param helTable /runcontrol/helicity CCDB table
+     * @param rst run start time
+     * @param uet event time
+     * @return [RUN::scaler,HEL::scaler] banks
+     */
+    public static List<Bank> createBanks(SchemaFactory schema,Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable,ZoneId zone,Time rst,long uet) {
+        return DaqScalers.createBanks(schema,rawScalerBank,fcupTable,slmTable,helTable,DaqScalers.getSeconds(zone,rst,uet));
     }
 
 }
