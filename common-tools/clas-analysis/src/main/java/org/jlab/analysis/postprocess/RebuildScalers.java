@@ -1,7 +1,6 @@
 package org.jlab.analysis.postprocess;
 
 import java.sql.Time;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import org.jlab.detector.calib.utils.ConstantsManager;
@@ -28,8 +27,6 @@ public class RebuildScalers {
     static final String CCDB_SLM_TABLE="/runcontrol/slm";
     static final String CCDB_HEL_TABLE="/runcontrol/helicity";
     
-    static final ZoneId zoneId = ZoneId.of( "America/New_York" );
-
     public static void main(String[] args) {
 
         DefaultLogger.debug();
@@ -101,7 +98,7 @@ public class RebuildScalers {
                     Time rst = rcdb.getTime("run_start_time");
                     long uet = runConfigBank.getInt("unixtime",0);
 
-                    DaqScalers ds = DaqScalers.create(rawScalerBank, ccdb_fcup, ccdb_slm, ccdb_hel, zoneId, rst, uet);
+                    DaqScalers ds = DaqScalers.create(rawScalerBank, ccdb_fcup, ccdb_slm, ccdb_hel, rst, uet);
                     runScalerBank = ds.createRunBank(writer.getSchemaFactory());
                     helScalerBank = ds.createHelicityBank(writer.getSchemaFactory());
                    

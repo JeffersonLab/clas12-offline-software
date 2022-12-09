@@ -53,6 +53,8 @@ public class DaqScalers {
     public void setTimestamp(long timestamp) { this.timestamp=timestamp; }
     public long getTimestamp(){ return this.timestamp; }
 
+    private static final ZoneId zoneId = ZoneId.of( "America/New_York" );
+
     /**
      * Get seconds between two dates assuming the differ by not more than 24 hours.
      *
@@ -80,17 +82,16 @@ public class DaqScalers {
      * Get seconds between two times specified as a local time and a unix time
      * assuming they differ by less than 24 h
      * 
-     * @param zone run start time zone
      * @param rst  run start local local time
      * @param uet  unix event time
      * @return 
      */
-    public static double getSeconds(ZoneId zone, Time rst,long uet) {
+    public static double getSeconds(Time rst,long uet) {
         // seconds since 00:00:00, on their given day:
-        ZonedDateTime et = ZonedDateTime.ofInstant(Instant.ofEpochSecond(uet), zone);
-        ZonedDateTime st = ZonedDateTime.of(et.toLocalDate(), rst.toLocalTime(), zone);
+        ZonedDateTime et = ZonedDateTime.ofInstant(Instant.ofEpochSecond(uet), zoneId);
+        ZonedDateTime st = ZonedDateTime.of(et.toLocalDate(), rst.toLocalTime(), zoneId);
         if(st.isAfter(et)) st.minusDays(1L);
-        return (double) (et.toInstant().getEpochSecond()-st.toInstant().getEpochSecond());
+        return (double) (et.toEpochSecond()-st.toEpochSecond());
     }
 
     /**
@@ -149,8 +150,8 @@ public class DaqScalers {
      * @param uet  unix event time
      * @return 
      */
-    public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable,ZoneId zone,Time rst,long uet) {
-        return DaqScalers.create(rawScalerBank,fcupTable,slmTable,helTable,DaqScalers.getSeconds(zone, rst, uet));
+    public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable,Time rst,long uet) {
+        return DaqScalers.create(rawScalerBank,fcupTable,slmTable,helTable,DaqScalers.getSeconds(rst, uet));
     }
 
     /**
@@ -266,8 +267,8 @@ public class DaqScalers {
      * @param uet event time
      * @return [RUN::scaler,HEL::scaler] banks
      */
-    public static List<Bank> createBanks(SchemaFactory schema,Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable,ZoneId zone,Time rst,long uet) {
-        return DaqScalers.createBanks(schema,rawScalerBank,fcupTable,slmTable,helTable,DaqScalers.getSeconds(zone,rst,uet));
+    public static List<Bank> createBanks(SchemaFactory schema,Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,IndexedTable helTable,Time rst,long uet) {
+        return DaqScalers.createBanks(schema,rawScalerBank,fcupTable,slmTable,helTable,DaqScalers.getSeconds(rst,uet));
     }
 
 }
