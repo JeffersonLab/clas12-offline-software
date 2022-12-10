@@ -44,16 +44,16 @@ public class RICHEBEngine extends ReconstructionEngine {
     // ----------------
 
         int debugMode = 0;
-        if(debugMode>=1)System.out.format("I am in RICHEBEngine \n");
+        if(debugMode>=1)System.out.format("I am in RICHEBEngine init \n");
 
 
         String[] richTables = new String[]{
-                    "/geometry/rich/setup",
-                    "/geometry/rich/geo_parameter",
-                    "/geometry/rich/module1/aerogel",
-                    "/geometry/rich/module2/aerogel",
-                    "/geometry/rich/module1/alignment",
-                    "/geometry/rich/module2/alignment",
+                    "/test/rich/setup",
+                    "/test/rich/geo_parameter",
+                    "/test/rich/module1/aerogel",
+                    "/test/rich/module2/aerogel",
+                    "/test/rich/module1/alignment",
+                    "/test/rich/module2/alignment",
                     "/calibration/rich/reco_flag",
                     "/calibration/rich/reco_parameter",
                     "/calibration/rich/module1/time_walk",
@@ -80,7 +80,7 @@ public class RICHEBEngine extends ReconstructionEngine {
         this.getConstantsManager().setVariation(engineVariation);
 
         // Get the constant tables for reconstruction parameters, geometry and optical characterization
-        int run = 11;
+        int run = 5038;
 
         richgeo   = new RICHGeoFactory(1, this.getConstantsManager(), run);
         richtime.init_ProcessTime();

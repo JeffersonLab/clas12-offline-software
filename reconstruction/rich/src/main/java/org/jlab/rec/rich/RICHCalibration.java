@@ -116,7 +116,7 @@ public class RICHCalibration{
                                        manager.getConstants(run, "/calibration/rich/module2/status_mirror"), irich );
             }*/
 
-            if((debugMode>=1 || richpar.DEBUG_CAL_COST>=1) && ncalls<richpar.DEBUG_CAL_COST) {
+            if((debugMode>=1 || richpar.DEBUG_CAL_COST>=1) && ncalls<Math.max(1,richpar.DEBUG_CAL_COST)) {
                 System.out.format("------------------------------------------------------------- \n");
                 System.out.format("RICH: Load RECO Calibration from CCDB for RICH %4d  sector %4d  run %6d (ncalls %3d) \n", irich, isec, run, ncalls);
                 System.out.format("------------------------------------------------------------- \n");
@@ -129,7 +129,7 @@ public class RICHCalibration{
 
                 init_CalConstantsTxT(1, isec, ncalls);
 
-                if((debugMode>=1 || richpar.DEBUG_CAL_COST>=1) && ncalls<richpar.DEBUG_CAL_COST) {
+                if((debugMode>=1 || richpar.DEBUG_CAL_COST>=1) && ncalls<Math.max(1,richpar.DEBUG_CAL_COST)) {
                         System.out.format("------------------------------------------------------------- \n");
                         System.out.format("RICH: Load TIME calib constants from local TxT file for RICH 4d  sector %4d  run %6d \n", irich, isec, run);
                         System.out.format("------------------------------------------------------------- \n");
@@ -142,7 +142,7 @@ public class RICHCalibration{
 
                 init_CalConstantsTxT(2, isec, ncalls);
 
-                if((debugMode>=1 || richpar.DEBUG_CAL_COST>=1) && ncalls<richpar.DEBUG_CAL_COST) {
+                if((debugMode>=1 || richpar.DEBUG_CAL_COST>=1) && ncalls<Math.max(1,richpar.DEBUG_CAL_COST)) {
                         System.out.format("------------------------------------------------------------- \n");
                         System.out.format("RICH: Load AERO calib constants from local TxT file for RICH 4d  sector %4d  run %6d \n", irich, isec, run);
                         System.out.format("------------------------------------------------------------- \n");
@@ -155,7 +155,7 @@ public class RICHCalibration{
 
                 init_CalConstantsTxT(3, isec, ncalls);
 
-                if((debugMode>=1 || richpar.DEBUG_CAL_COST>=1) && ncalls<richpar.DEBUG_CAL_COST) {
+                if((debugMode>=1 || richpar.DEBUG_CAL_COST>=1) && ncalls<Math.max(1,richpar.DEBUG_CAL_COST)) {
                         System.out.format("------------------------------------------------------------- \n");
                         System.out.format("RICH: Load PIXEL calib constants from local TxT file for RICH 4d  sector %4d  run %6d \n", irich, isec, run);
                         System.out.format("------------------------------------------------------------- \n");
@@ -283,7 +283,8 @@ public class RICHCalibration{
                     int iaer  = Integer.parseInt(array[2]);
                     int iqua  = Integer.parseInt(array[3]);
 
-                    if((debugMode>=1 || richpar.DEBUG_CAL_COST>=1) && ncalls<=richpar.DEBUG_CAL_COST)System.out.format("Read chele for AERO lay %3d  compo %3d quadrant  %3d", idlay, iaer, iqua);
+                    if((debugMode>=1 || richpar.DEBUG_CAL_COST>=1) && ncalls<Math.max(1,richpar.DEBUG_CAL_COST))
+                        System.out.format("Read chele for AERO lay %3d  compo %3d quadrant  %3d", idlay, iaer, iqua);
 
                     int ndir     = Integer.parseInt(array[4]);
                     float chdir  = Float.parseFloat(array[5]);
@@ -313,7 +314,7 @@ public class RICHCalibration{
                 e.printStackTrace();
             }
 
-            if((debugMode>=1 || richpar.DEBUG_CAL_COST>=1) && ncalls<=richpar.DEBUG_CAL_COST)System.out.format("initConstants: DONE \n");
+            if((debugMode>=1 || richpar.DEBUG_CAL_COST>=1) && ncalls<Math.max(1,richpar.DEBUG_CAL_COST))System.out.format("initConstants: DONE \n");
 
         }
 

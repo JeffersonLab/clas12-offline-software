@@ -50,15 +50,15 @@ public class RICHGeoCalibration {
         if(RICHGeoConstants.RICH_TABLE_FROM_FILE==1){
             //init_RICHTableTxT();
             init_RICHTableDummy();
-            if((debugMode>=1 || geopar.DEBUG_GEO_CONSTS>=1) && ncalls<=geopar.DEBUG_GEO_CONSTS) dump_RICHSetup("TXT  ");
+            if((debugMode>=1 || geopar.DEBUG_GEO_CONSTS>=1) && ncalls<Math.max(1,geopar.DEBUG_GEO_CONSTS)) dump_RICHSetup("TXT  ");
             
         }else{
-            init_RICHTableCCDB( manager.getConstants(run, "/geometry/rich/setup") );
-            if((debugMode>=1 || geopar.DEBUG_GEO_CONSTS>=1) && ncalls<=geopar.DEBUG_GEO_CONSTS) {
+            init_RICHTableCCDB( manager.getConstants(run, "/test/rich/setup") );
+            if((debugMode>=1 || geopar.DEBUG_GEO_CONSTS>=1) && ncalls<Math.max(1,geopar.DEBUG_GEO_CONSTS)) {
                 System.out.format("------------------------------------------------------------- \n");
                 System.out.format("RICH: Load GEO Setup from CCDB for run %6d \n", run);
                 System.out.format("------------------------------------------------------------- \n");
-                System.out.format("Banks \n /geometry/rich/setup \n");
+                System.out.format("Banks \n /test/rich/setup \n");
 
                 dump_RICHSetup("CCDB ");
                 }
@@ -69,12 +69,12 @@ public class RICHGeoCalibration {
             int isec = find_RICHSector(irich);
 
             if(isec==0) continue;
-            String aero_bank = String.format("/geometry/rich/module%1d/aerogel",irich);  
-            String alig_bank = String.format("/geometry/rich/module%1d/alignment",irich);
+            String aero_bank = String.format("/test/rich/module%1d/aerogel",irich);  
+            String alig_bank = String.format("/test/rich/module%1d/alignment",irich);
             init_GeoCalibrationCCDB( manager.getConstants(run, aero_bank),
                                      manager.getConstants(run, alig_bank) );
 
-            if((debugMode>=1 || geopar.DEBUG_GEO_CONSTS>=1) && ncalls<=geopar.DEBUG_GEO_CONSTS) {
+            if((debugMode>=1 || geopar.DEBUG_GEO_CONSTS>=1) && ncalls<Math.max(1,geopar.DEBUG_GEO_CONSTS)) {
                 System.out.format("------------------------------------------------------------- \n");
                 System.out.format("RICH: Load GEO Calibration from CCDB for RICH %4d  sector %4d  run %6d \n", irich, isec, run);
                 System.out.format("------------------------------------------------------------- \n");
@@ -87,7 +87,7 @@ public class RICHGeoCalibration {
 
                 init_AliCalibrationTxT(irich, ncalls);
 
-                if((debugMode>=1 || geopar.DEBUG_GEO_CONSTS>=1) && ncalls<=geopar.DEBUG_GEO_CONSTS) {
+                if((debugMode>=1 || geopar.DEBUG_GEO_CONSTS>=1) && ncalls<Math.max(1,geopar.DEBUG_GEO_CONSTS)) {
                         System.out.format("------------------------------------------------------------- \n");
                         System.out.format("RICH: Load ALI Calibration from local TxT file for RICH 4d  sector %4d  run %6d \n", irich, isec, run);
                         System.out.format("------------------------------------------------------------- \n");
@@ -100,7 +100,7 @@ public class RICHGeoCalibration {
 
                 init_AerCalibrationTxT(ncalls);
 
-                if((debugMode>=1 || geopar.DEBUG_GEO_CONSTS>=1) && ncalls<=geopar.DEBUG_GEO_CONSTS) {
+                if((debugMode>=1 || geopar.DEBUG_GEO_CONSTS>=1) && ncalls<=Math.max(1,geopar.DEBUG_GEO_CONSTS)) {
                         System.out.format("------------------------------------------------------------- \n");
                         System.out.format("RICH: Load AER Calibration from local TxT file for RICH 4d  sector %4d  run %6d \n", irich, isec, run);
                         System.out.format("------------------------------------------------------------- \n");

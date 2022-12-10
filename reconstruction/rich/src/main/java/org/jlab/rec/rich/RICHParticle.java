@@ -518,7 +518,7 @@ public class RICHParticle {
         double arg = 0.0;
         double beta = get_beta(pid);
         if(beta>0) arg = 1.0/beta/refi_emission;
-        if(debugMode>=1)  System.out.format(" Expected Ch Angle %8.4f  beta %8.4f  n %7.3f  arg %8.4f\n",get_mass(pid),beta,refi_emission, Math.acos(arg)*MRAD);
+        if(debugMode>=1)  System.out.format(" Nominal Ch Angle %8.4f  beta %8.4f  n %7.3f  arg %8.4f\n",get_mass(pid),beta,refi_emission, Math.acos(arg)*MRAD);
 
         if(arg>0.0 && arg<1.0) return Math.acos(arg);
         return 0.0;
@@ -572,8 +572,8 @@ public class RICHParticle {
 
         double arg = 0.0;
         if(beta>0) arg = 1.0/beta*cose;
-        if(debugMode>=1)  System.out.format(" Expected Ch Angle %7.2f %8.4f  beta %8.4f  n %7.3f  arg %8.4f [%4d %4d]\n",
-              chele_emission[irefle]*1000,get_mass(pid),beta,refi_emission, Math.acos(arg)*MRAD, ilay_emission, ico_emission);
+        if(debugMode>=1)  System.out.format(" Calibrated Ch Angle %7.2f %8.4f  beta %8.4f  n %7.3f  arg %8.4f [%4d %4d]\n",
+              chele_emission[irefle]*MRAD,get_mass(pid),beta,refi_emission, Math.acos(arg)*MRAD, ilay_emission, ico_emission);
 
         if(arg>0.0 && arg<1.0) return Math.acos(arg);
         return 0.0;

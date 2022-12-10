@@ -151,10 +151,8 @@ public class RICHio {
 
         if(richevent.get_nPho()>0)write_PhotonBank(event, richevent, richpar);
 
-        //if(richevent.get_nPho()>0)write_RingCherBank(event, richevent, richpar);
         if(richevent.get_nPho()>0)write_RingBank(event, richevent, richpar);
 
-        //if(richevent.get_nHad()>0)write_HadCherBank(event, richevent, richpar);
         if(richevent.get_nHad()>0)write_ParticleBank(event, richevent, richpar);
 
     }
@@ -385,77 +383,6 @@ public class RICHio {
 
     }
 
-    // ----------------
-    //public void write_HadCherBank(DataEvent event, RICHEvent richevent, RICHParameters richpar) {
-    // ----------------
-
-    /*  int debugMode = 0;
-
-        int NHAD = richevent.get_nHad();
-        if(debugMode>=1)System.out.format("Creating Bank for %5d Hadrons \n", NHAD);
-
-        if(NHAD>0) {
-            if(debugMode>=1)System.out.println(" --> Creating the RICH::hadCher Bank ");
-            DataBank bankHads = event.createBank("RICH::hadCher", NHAD);
-            if(bankHads==null){
-                System.out.println("ERROR CREATING BANK : RICH::hadCher");
-                return;
-            }
-
-            for(int i = 0; i < NHAD; i++){
-
-                RICHParticle had = richevent.get_Hadron(i);
-                double dT_max = richpar.PIXEL_NOMINAL_STIME*3;
-
-                if(debugMode>0)System.out.format(" RICHio %4d %4d %4d %5d %5d %5d %5d  \n",
-                    had.get_id(),had.get_HitIndex(),had.get_ParentIndex(),had.ilay_emission,had.ico_emission,had.ico_entrance,had.traced.get_BestH());
-
-                if(had.get_id()>255)continue;
-                if(had.get_HitIndex()>255)continue;
-                if(had.get_ParentIndex()>255)continue;
-                if(had.ilay_emission>255)continue;
-                if(had.ico_emission>255)continue;
-                if(had.ico_entrance>255)continue;
-                //if(had.traced.get_BestH()>255)continue;
-
-                if(debugMode>0)System.out.format(" RICHio %7.2f %7.2f %5d %7.2f %9.4f %9.4f \n",had.min_changle(0)*MRAD,had.max_changle(0)*MRAD,
-                          had.traced.get_BestH(),had.traced.get_RQP(),had.traced.get_ElProb(),had.traced.get_PiProb());
-
-                bankHads.setByte("id",             i ,(byte) had.get_id());
-                bankHads.setByte("hindex",         i, (byte) had.get_HitIndex());
-                bankHads.setByte("pindex",         i, (byte) had.get_ParentIndex());
-
-                bankHads.setByte("emilay",         i, (byte) had.ilay_emission);
-                bankHads.setByte("emico",          i, (byte) had.ico_emission);
-                bankHads.setByte("enico",          i, (byte) had.ico_entrance);
-                bankHads.setShort("emqua",         i, (short) had.iqua_emission);
-                bankHads.setFloat("mchi2",         i, (float) had.traced.get_machi2());
-
-                bankHads.setFloat("ch_min",        i, (float) had.min_changle(0));
-                bankHads.setFloat("ch_max",        i, (float) had.max_changle(0));
-                bankHads.setFloat("dt_max",        i, (float) dT_max);
-                bankHads.setFloat("ch_dir",        i, (float) had.traced.get_Chdir());
-                bankHads.setFloat("ch_lat",        i, (float) had.traced.get_Chlat());
-                bankHads.setFloat("ch_spe",        i, (float) had.traced.get_Chspe());
-
-                int ipid = had.traced.get_BestH();
-                int mypid = 0;
-                if(ipid==11)mypid=1;
-                if(ipid==211)mypid=3;
-                if(ipid==321)mypid=4;
-                if(ipid==2212)mypid=5;
-                bankHads.setByte("best_PID",       i, (byte) mypid);
-                bankHads.setFloat("RQ_prob",       i, (float) had.traced.get_RQP());
-                bankHads.setFloat("el_prob",       i, (float) had.traced.get_ElProb());
-                bankHads.setFloat("pi_prob",       i, (float) had.traced.get_PiProb());
-                bankHads.setFloat("k_prob",        i, (float) had.traced.get_KProb());
-                bankHads.setFloat("pr_prob",       i, (float) had.traced.get_PrProb());
-            }
-            event.appendBanks(bankHads);
-        }
-
-    }*/
-
 
     // ----------------
     public void write_ParticleBank(DataEvent event, RICHEvent richevent, RICHParameters richpar) {
@@ -520,96 +447,6 @@ public class RICHio {
             event.appendBanks(bankPart);
         }
 
-    }
-
-
-    // ----------------
-    public void write_RingCherBank(DataEvent event, RICHEvent richevent, RICHParameters richpar) {
-    // ----------------
-
-    /*    int debugMode = 0;
-
-        int SELE = 11;
-
-        int NPHO = richevent.get_nPho();
-        if(debugMode>=1)System.out.format("Creating Bank for %5d Ring Cherenkovs \n", NPHO);
-        
-        if(NPHO!=0) {
-
-            int Nring = 0;
-
-            for(int i = 0; i < NPHO; i++){
-                RICHParticle pho = richevent.get_Photon(i);
-                if(!pho.is_real()) continue;
-                if(pho.analytic.get_OK()==SELE || pho.traced.is_used()) Nring++;
-            }
-
-            if(debugMode>=1)System.out.format(" --> Creating the RICH::ringCher Bank for Npho %5d Nring %5d \n",NPHO,Nring);
-            DataBank bankRing = event.createBank("RICH::ringCher", Nring);
-            if(bankRing==null){
-                System.out.println("ERROR CREATING BANK : RICH::ringCher");
-                return;
-            }
-
-
-            int ientry = 0;
-            for(int i = 0; i < NPHO; i++){
-
-                RICHParticle pho = richevent.get_Photon(i);
-
-                // consistency
-                if(ientry>Nring) continue;
-
-                // only reconstructed photons
-                if(!pho.is_real()) continue;
- 
-                RICHParticle had = richevent.get_Hadron( pho.get_ParentIndex() );
-
-                double htime  = pho.get_HitTime();
-                double a_time = pho.get_StartTime() + pho.analytic.get_time();
-                double t_time = pho.get_StartTime() + pho.traced.get_time();
-
-                double a_etaC = pho.analytic.get_EtaC();
-                double t_etaC = pho.traced.get_EtaC();
-
-                if(debugMode>=1)System.out.format(" rche %3d %3d flag %3d %3d ",i,ientry,pho.analytic.get_OK(),pho.traced.get_OK());
-                // skip no real Cherenkov solution
-                if(pho.analytic.get_OK()==SELE || pho.traced.is_used()){
-
-                    if(had.get_ParentIndex()>255)continue;
-                    if(pho.get_HitAnode()>255)continue;
-                    if(pho.traced.get_nrefle()>255)continue;
-
-                    if(debugMode>=1)System.out.format("   --> store \n");
-
-                    bankRing.setShort("id",     ientry, (short) pho.get_id());
-                    bankRing.setShort("hindex", ientry, (short) pho.get_HitIndex());
-                    bankRing.setByte("pindex",  ientry, (byte) had.get_ParentIndex());
-
-                    bankRing.setShort("pmt",    ientry, (short) pho.get_HitPMT());
-                    bankRing.setByte("anode",   ientry, (byte) ho.get_HitAnode());
-                    bankRing.setFloat("time",   ientry, (float) htime);
-
-                    bankRing.setFloat("apath",  ientry, (float) pho.analytic.get_path());
-                    bankRing.setFloat("atime",  ientry, (float) a_time );
-                    bankRing.setFloat("aEtaC",  ientry, (float) a_etaC );
-
-                    bankRing.setFloat("tpath",  ientry, (float) pho.traced.get_path());
-                    bankRing.setFloat("ttime",  ientry, (float) t_time );
-                    bankRing.setFloat("tEtaC",  ientry, (float) t_etaC );
-
-                    bankRing.setByte("nrfl",    ientry, (byte) pho.traced.get_nrefle());
-                    bankRing.setShort("1rfl",   ientry, (short) pho.traced.get_FirstRefle());
-
-                    ientry++;
-
-                }else{
-                    if(debugMode>=1)System.out.format(" \n");
-                }
-
-            }
-            event.appendBanks(bankRing);
-        }*/
     }
 
 

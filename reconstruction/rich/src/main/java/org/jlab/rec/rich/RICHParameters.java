@@ -93,7 +93,7 @@ public class RICHParameters{
         init_FlagCCDB( manager.getConstants(run, "/calibration/rich/reco_flag") );
         init_ParameterCCDB( manager.getConstants(run, "/calibration/rich/reco_parameter") );
 
-        if((debugMode>=1 || DEBUG_RECO_FLAG>=1) && ncalls<DEBUG_RECO_FLAG){
+        if((debugMode>=1 || DEBUG_RECO_FLAG>=1) && ncalls<Math.max(1,DEBUG_RECO_FLAG)){
             System.out.format("------------------------------------------------------------- \n");
             System.out.format("RICH: Load RECO Flags from CCDB for run %6d  (ncalls %3d) \n", run,ncalls);
             System.out.format("------------------------------------------------------------- \n");
@@ -102,7 +102,7 @@ public class RICHParameters{
             dump_RecoFlags(run);
         }
 
-        if((debugMode>=1 || DEBUG_RECO_PAR>=1) && ncalls<DEBUG_RECO_PAR) {
+        if((debugMode>=1 || DEBUG_RECO_PAR>=1) && ncalls<Math.max(1,DEBUG_RECO_PAR)) {
             System.out.format("------------------------------------------------------------- \n");
             System.out.format("RICH: Load RECO Parameters from CCDB for run %6d (ncalls %3d) \n", run,ncalls);
             System.out.format("------------------------------------------------------------- \n");

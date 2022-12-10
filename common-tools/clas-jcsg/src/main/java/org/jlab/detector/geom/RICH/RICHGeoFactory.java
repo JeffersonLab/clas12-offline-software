@@ -70,12 +70,12 @@ public class RICHGeoFactory{
         if(FactoryMode==0){
             // add RICH tables to a different Engine
             String[] richTables = new String[]{
-                    "/geometry/rich/setup",
-                    "/geometry/rich/geo_parameter",
-                    "/geometry/rich/module1/aerogel",
-                    "/geometry/rich/module2/aerogel",
-                    "/geometry/rich/module1/alignment",
-                    "/geometry/rich/module2/alignment"
+                    "/test/rich/setup",
+                    "/test/rich/geo_parameter",
+                    "/test/rich/module1/aerogel",
+                    "/test/rich/module2/aerogel",
+                    "/test/rich/module1/alignment",
+                    "/test/rich/module2/alignment"
                  };
             manager.init(Arrays.asList(richTables));
         }
@@ -456,7 +456,7 @@ public class RICHGeoFactory{
     public void test_TrajectorySurface(){
     //------------------------------
 
-        int debugMode = 1;
+        int debugMode = 0;
         int sector = 4;
 
         if(debugMode>=1)System.out.format("test_TrajectorySurface \n");
@@ -719,6 +719,25 @@ public class RICHGeoFactory{
             System.out.format(" %s  |  %s \n",extre3.toStringBrief(3),extre4.toStringBrief(3));
         }
 
+
+        /*
+        *  impose symmetry
+        */
+
+        if(extre4.x()>extre3.x()){ if(debugMode>=1)System.out.format("Adjust 3x %10.7f in %10.7f \n",extre3.x(),extre4.x()); extre3.setX(extre4.x());}
+        if(extre4.y()>-extre3.y()){ if(debugMode>=1)System.out.format("Adjust 3y %10.7f in %10.7f \n",extre3.y(),-extre4.y()); extre3.setY(-extre4.y());}
+        if(extre3.x()>extre4.x()){ if(debugMode>=1)System.out.format("Adjust 4x %10.7f in %10.7f \n",extre4.x(),extre3.x()); extre4.setX(extre3.x());}
+        if(-extre3.y()>extre4.y()){ if(debugMode>=1)System.out.format("Adjust 4y %10.7f in %10.7f \n",extre4.y(),-extre3.y()); extre4.setY(-extre3.y());}
+
+        if(extre2.x()<extre1.x()){ if(debugMode>=1)System.out.format("Adjust 2x %10.7f in %10.7f \n",extre1.x(),extre2.x()); extre1.setX(extre2.x());}
+        if(extre2.y()>-extre1.y()){ if(debugMode>=1)System.out.format("Adjust 2y %10.7f in %10.7f \n",extre1.y(),-extre2.y()); extre1.setY(-extre2.y());}
+        if(extre1.x()<extre2.x()){ if(debugMode>=1)System.out.format("Adjust 1x %10.7f in %10.7f \n",extre2.x(),extre1.x()); extre2.setX(extre1.x());}
+        if(-extre1.y()>extre2.y()){ if(debugMode>=1)System.out.format("Adjust 1y %10.7f in %10.7f \n",extre2.y(),-extre1.y()); extre2.setY(-extre1.y());}
+
+        if(debugMode>=1){
+            System.out.format("1: %s  | 2: %s \n",extre1.toStringBrief(7),extre2.toStringBrief(7));
+            System.out.format("3: %s  | 4: %s \n",extre3.toStringBrief(7),extre4.toStringBrief(7));
+        }
 
         /*
         *  preserve the same normal of the original plane
@@ -1826,7 +1845,7 @@ public class RICHGeoFactory{
      public Trap3D toTrap3D(Shape3D surf, Vector3D orient) {
      //------------------------------
 
-        int debugMode = 1;
+        int debugMode = 0;
         ArrayList<Point3D> points = new ArrayList<Point3D>();
 
         if(debugMode>=1)System.out.format("Convert Shape3D into Trap3D \n");
