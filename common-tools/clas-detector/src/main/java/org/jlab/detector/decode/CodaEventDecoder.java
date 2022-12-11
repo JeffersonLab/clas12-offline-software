@@ -284,6 +284,10 @@ public class CodaEventDecoder {
                 //  RTPC  data decoding
                 return this.getDataEntries_57641(crate, node, event);
             }
+            else if(node.getTag()==57631){
+                //  RTPC  data decoding
+                return this.getDataEntries_57631(crate, node, event);
+            }
         }
         return bankEntries;
     }
@@ -846,6 +850,86 @@ public class CodaEventDecoder {
     }
 
     /**
+     * Skeleton of URWell APV25 decoding
+     * @param crate
+     * @param node
+     * @param event
+     * @return
+     */
+    public List<DetectorDataDgtz>  getDataEntries_57631(Integer crate, EvioNode node, EvioDataEvent event){
+        
+        ArrayList<DetectorDataDgtz>  entries = new ArrayList<>();
+        if(node.getTag()==57631){
+            try {
+                ByteBuffer     compBuffer = node.getByteData(true);
+                CompositeData  compData = new CompositeData(compBuffer.array(),event.getByteOrder());
+
+                List<DataType> cdatatypes = compData.getTypes();
+                List<Object>   cdataitems = compData.getItems();
+
+                // copied from MM as a guidance
+//                int jdata = 0;  // item counter
+//                for( int i = 0 ; i < cdatatypes.size();  ) { // loop over data types
+//
+//                	Byte SLOT       =  (Byte)cdataitems.get( jdata++ ); i++;
+//                	Integer EV_ID   =  (Integer)cdataitems.get( jdata++ ); i++;
+//                	Long TIMESTAMP  =  (Long)cdataitems.get( jdata++ ); i++;
+//                	Short nChannels =  (Short)cdataitems.get( jdata++ ); i++;
+//
+//                	for( int ch=0; ch<nChannels; ch++ ) {
+//                    	Short CHANNEL = (Short)cdataitems.get( jdata++ ); i++;
+//
+//
+//                        int nPulses = (Byte)cdataitems.get( jdata++ ); i++;
+//                        for(int np = 0; np < nPulses; np++){
+//
+//                            int firstChannel = (Byte) cdataitems.get( jdata++ ); i++;
+//
+//                            int nBytes = (Byte)cdataitems.get( jdata++ ); i++;
+//
+//                            DetectorDataDgtz bank = new DetectorDataDgtz(crate,SLOT.intValue(),CHANNEL.intValue());
+//
+//                            int nSamples = nBytes*8/12;
+//                            short[] samples = new short[ nSamples ];
+//
+//                            int s = 0;
+//                            for( int b=0;b<nBytes;b++ ) {
+//                                short data = (short)((byte)cdataitems.get( jdata++ )&0xFF);
+//
+//                                s = (int)Math.floor( b * 8./12. );
+//                                if( b%3 != 1) {
+//                                    samples[s] += (short)data;
+//                                }
+//                                else {
+//                                    samples[s] += (data&0x000F)<<8;
+//                                    if( s+1 < nSamples ) samples[s+1] += ((data&0x00F0)>>4)<<8;
+//                                }
+//                            }
+//                            i++;
+//
+//                            ADCData adcData = new ADCData();
+//                            adcData.setTimeStamp(TIMESTAMP);
+//                            adcData.setPulse(samples);
+//                            adcData.setTime(firstChannel);
+//                            bank.addADC(adcData);
+//                            
+//                            entries.add(bank);
+//                        }
+//                    } // end loop on channels
+//                } // end loop on data types
+//                return entries;
+
+            } catch (EvioException ex) {
+                ByteBuffer     compBuffer = node.getByteData(true);
+                Logger.getLogger(CodaEventDecoder.class.getName()).log(Level.SEVERE, "Exception in CRATE = " + crate + "  RUN = " + this.runNumber
+                + "  EVENT = " + this.eventNumber + " LENGTH = " + compBuffer.array().length, ex);
+                this.printByteBuffer(compBuffer, 120, 20);
+            }
+        }
+        return entries;
+    }
+
+    /**
      * Decoding MODE 7 data. for given crate.
      * @param crate
      * @param node
@@ -1198,14 +1282,16 @@ public class CodaEventDecoder {
                 if(node.getTag()==57610){
                     long[] longData = ByteDataTransformer.toLongArray(node.getStructureBuffer(true));
                     int[]  intData  = ByteDataTransformer.toIntArray(node.getStructureBuffer(true));
-                    long     tStamp = longData[2]&0x0000ffffffffffffL;
 
 		    // Below is endian swap if needed
 		    //long    ntStamp = (((long)(intData[5]&0x0000ffffL))<<32) | (intData[4]&0xffffffffL);
 		    //System.out.println(longData[2]+" "+tStamp+" "+crate+" "+node.getDataLength());
 
                     DetectorDataDgtz entry = new DetectorDataDgtz(crate,0,0);
-                    entry.setTimeStamp(tStamp);
+                    if(longData.length>2) {
+                        long tStamp = longData[2]&0x0000ffffffffffffL;
+                        entry.setTimeStamp(tStamp);
+                    }
                     if(node.getDataLength()==4) tiEntries.add(entry);
                     else if(node.getDataLength()==5) { // trigger supervisor crate
                         this.setTriggerBits(intData[6]);
