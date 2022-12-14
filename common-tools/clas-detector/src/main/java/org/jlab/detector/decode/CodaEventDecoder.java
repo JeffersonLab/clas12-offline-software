@@ -893,20 +893,19 @@ public class CodaEventDecoder {
 
         ArrayList<DetectorDataDgtz> entries = new ArrayList<>();
         if (node.getTag() == 57631) {
-            
+
             int HybridID = -1;
             int FECID = -1;
-                                    
+
 //            try {
             int[] intBuff = node.getIntData();
 
             // =============== Switch Endianness
-            for( int iBuf = 0; iBuf < intBuff.length; iBuf++ ){
+            for (int iBuf = 0; iBuf < intBuff.length; iBuf++) {
                 intBuff[iBuf] = Integer.reverseBytes(intBuff[iBuf]);
             }
-            
-            //node.get
 
+            //node.get
             System.out.println("The crate is " + crate);
             System.out.println("========== The array is ===========");
             int ind_inRow = 0;
@@ -918,21 +917,65 @@ public class CodaEventDecoder {
 //                    System.out.println();
 //                    ind_inRow = 0;
 //                }
-                                
-                if( ((intBuff[idata + 1] >> 8) & 0xffffff) == 0x414443 ){
-                    
-                    System.out.println("Kuku" + intBuff[idata + 1]);
-                }else if (intBuff[idata + 1] == 0xfafafafa) {
+
+                if (((intBuff[idata + 1] >> 8) & 0xffffff) == 0x414443) {
+
+                    System.out.println("Kuku " + String.format("%x", intBuff[idata + 1]));
+                } else if (intBuff[idata + 1] == 0xfafafafa) {
                     idata += 1;
                 }
-                
-                
+
             }
             System.out.println("========== End of the loop ===========");
 
-            
-            
-            
+            /**
+             * Will fill here some arrays for debugging, and see what we get in
+             * the output bank.
+             */
+            Short nSamp = 3;
+
+            int n_Hybrid = 12;
+
+            int n_ch_PerHybrid = 128;
+
+            for (int iHyb = 0; iHyb < n_Hybrid; iHyb++) {
+                Integer slot = iHyb;
+                for (int iCh = 0; iCh < n_ch_PerHybrid; iCh++) {
+
+                    DetectorDataDgtz bank = new DetectorDataDgtz(crate, slot.intValue(), iCh);
+
+                    short ADCValues[] = new short[nSamp];
+
+                    for (short iSamp = 0; iSamp < nSamp; iSamp++) {
+                        ADCValues[iSamp] = (short) (1234 + 10 * (iSamp + 1) % 2);
+                    }
+
+                    ADCData adcData = new ADCData();
+                    adcData.setTimeStamp(0);
+                    adcData.setPulse(ADCValues);
+                    bank.addADC(adcData);
+                    entries.add(bank);
+                }
+            }
+
+//            
+//                        Short channel = (Short) cdataitems.get(position);
+//                        Integer length = (Integer) cdataitems.get(position + 1);
+//                        DetectorDataDgtz bank = new DetectorDataDgtz(crate, slot.intValue(), channel.intValue());
+//
+//                        short[] shortbuffer = new short[length];
+//                        for (int loop = 0; loop < length; loop++) {
+//                            Short sample = (Short) cdataitems.get(position + 2 + loop);
+//                            shortbuffer[loop] = sample;
+//                        }
+//                        //Added pulse fitting for MMs
+//                        ADCData adcData = new ADCData();
+//                        adcData.setTimeStamp(time);
+//                        adcData.setPulse(shortbuffer);
+//                        bank.addADC(adcData);
+//                        entries.add(bank);
+//                        position += 2 + length;
+//                        counter++;
 //                CompositeData compData = new CompositeData(compBuffer.array(), event.getByteOrder());
 //                List<DataType> cdatatypes = compData.getTypes();
 //                List<Object> cdataitems = compData.getItems();
