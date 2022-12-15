@@ -947,7 +947,8 @@ public class CodaEventDecoder {
                     short ADCValues[] = new short[nSamp];
 
                     for (short iSamp = 0; iSamp < nSamp; iSamp++) {
-                        ADCValues[iSamp] = (short) (1234 + 10 * (iSamp + 1) % 2);
+                        ADCValues[iSamp] = (short) (1234 + iSamp);
+                        //System.out.println("Values = " + ADCValues[iSamp]);
                     }
 
                     ADCData adcData = new ADCData();
