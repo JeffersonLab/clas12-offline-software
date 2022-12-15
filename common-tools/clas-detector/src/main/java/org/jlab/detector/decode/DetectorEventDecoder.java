@@ -146,8 +146,11 @@ public class DetectorEventDecoder {
             int crate    = data.getDescriptor().getCrate();
             int slot     = data.getDescriptor().getSlot();
             int channel  = data.getDescriptor().getChannel();
+            
+            
             for(String table : keysFitter){
                 //custom MM fitter
+
             	if( ( (table.equals("BMT"))&&(data.getDescriptor().getType().getName().equals("BMT")) )
                  || ( (table.equals("FMT"))&&(data.getDescriptor().getType().getName().equals("FMT")) )
                  || ( (table.equals("FTTRK"))&&(data.getDescriptor().getType().getName().equals("FTTRK")) ) ){
@@ -164,7 +167,10 @@ public class DetectorEventDecoder {
                         adc.setIntegral((int) (mvtFitter.integral));
                         adc.setTimeStamp(mvtFitter.timestamp);
                     }
-                } 
+                }
+                else if(table.equals("URWELL") && data.getDescriptor().getType().getName().equals("URWELL")){
+                    System.out.println("ADC Size is " +  data.getADCSize() );
+                }
                 // in case a parameter table is needed for URWELL decoding, table should be added at line 96-100
 //                else if (table.equals("BMT") && data.getDescriptor().getType().getName().equals("BMT")){
 //                    continue;
@@ -204,6 +210,32 @@ public class DetectorEventDecoder {
                     }
                 }
             }
+            
+            // ======== End of loop over tables ========
+            
+            /**
+             * To me it would have been more intuitive to put the "URWELL" in the "keysFitter" list, but the code crashes that, way.
+             * I think it happens inside the "fitterManager.init(keysFitter, tablesFitter);", where probably it tries to read some values from the DB,
+             * as we don't plan to do any fit, and hence don't have table in then, I chose to have it in a separate loop. // Rafo
+             */
+            if( data.getDescriptor().getType().getName().equals("URWELL") ){
+                System.out.println( "data.getADCSize() = " + data.getADCSize() );
+                ADCData adc = data.getADCData(0);                
+                System.out.println(adc.toString()); 
+                System.out.println("Pulse size of ADC is " + adc.getPulseSize());
+                System.out.println("adc.getPulseValue(0) = " + adc.getPulseValue(0) );
+                
+                System.out.println( "ADC integral before setting the value is " + adc.getIntegral());
+                adc.setIntegral( 459 );
+                adc.setHeight((short)111);
+                System.out.println( "ADC integral after setting the value is " + adc.getIntegral());
+                System.out.println( "ADC integral by calling it from the object \"data\" is " + data.getADCData(0).getIntegral());
+                adc.setTime(99);
+                adc.setTimeStamp(123456789);
+                adc.setPedestal((short)31);
+                
+            }
+            
         }
     }
 }
