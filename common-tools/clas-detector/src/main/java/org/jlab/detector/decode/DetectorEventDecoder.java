@@ -219,17 +219,17 @@ public class DetectorEventDecoder {
              * as we don't plan to do any fit, and hence don't have table in then, I chose to have it in a separate loop. // Rafo
              */
             if( data.getDescriptor().getType().getName().equals("URWELL") ){
-                System.out.println( "data.getADCSize() = " + data.getADCSize() );
+                //System.out.println( "data.getADCSize() = " + data.getADCSize() );
                 ADCData adc = data.getADCData(0);                
-                System.out.println(adc.toString()); 
-                System.out.println("Pulse size of ADC is " + adc.getPulseSize());
-                System.out.println("adc.getPulseValue(0) = " + adc.getPulseValue(0) );
-                
-                System.out.println( "ADC integral before setting the value is " + adc.getIntegral());
+//                System.out.println(adc.toString()); 
+//                System.out.println("Pulse size of ADC is " + adc.getPulseSize());
+//                System.out.println("adc.getPulseValue(0) = " + adc.getPulseValue(0) );
+//                
+//                System.out.println( "ADC integral before setting the value is " + adc.getIntegral());
                 adc.setIntegral( 459 );
                 adc.setHeight((short)111);
-                System.out.println( "ADC integral after setting the value is " + adc.getIntegral());
-                System.out.println( "ADC integral by calling it from the object \"data\" is " + data.getADCData(0).getIntegral());
+//                System.out.println( "ADC integral after setting the value is " + adc.getIntegral());
+//                System.out.println( "ADC integral by calling it from the object \"data\" is " + data.getADCData(0).getIntegral());
                 adc.setTime(99);
                 adc.setTimeStamp(123456789);
                 adc.setPedestal((short)31);

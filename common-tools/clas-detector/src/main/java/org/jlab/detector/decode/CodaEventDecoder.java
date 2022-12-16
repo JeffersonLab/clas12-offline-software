@@ -926,7 +926,6 @@ public class CodaEventDecoder {
                 }
 
             }
-            System.out.println("========== End of the loop ===========");
 
             /**
              * Will fill here some arrays for debugging, and see what we get in
@@ -954,6 +953,7 @@ public class CodaEventDecoder {
                     ADCData adcData = new ADCData();
                     adcData.setTimeStamp(0);
                     adcData.setPulse(ADCValues);
+                    adcData.setIntegral(6789);                    
                     bank.addADC(adcData);
                     entries.add(bank);
                 }

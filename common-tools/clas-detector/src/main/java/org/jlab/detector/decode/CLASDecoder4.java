@@ -247,13 +247,13 @@ public class CLASDecoder4 {
         if(schemaFactory.hasSchema(name)==false) return null;
 
         Bank adcBANK = new Bank(schemaFactory.getSchema(name), adcDGTZ.size());
-
         for(int i = 0; i < adcDGTZ.size(); i++){
             adcBANK.putByte("sector", i, (byte) adcDGTZ.get(i).getDescriptor().getSector());
             adcBANK.putByte("layer", i, (byte) adcDGTZ.get(i).getDescriptor().getLayer());
             adcBANK.putShort("component", i, (short) adcDGTZ.get(i).getDescriptor().getComponent());
             adcBANK.putByte("order", i, (byte) adcDGTZ.get(i).getDescriptor().getOrder());
             adcBANK.putInt("ADC", i, adcDGTZ.get(i).getADCData(0).getADC());
+            
             adcBANK.putFloat("time", i, (float) adcDGTZ.get(i).getADCData(0).getTime());
             adcBANK.putShort("ped", i, (short) adcDGTZ.get(i).getADCData(0).getPedestal());
             if(name == "BST::adc") adcBANK.putLong("timestamp", i, adcDGTZ.get(i).getADCData(0).getTimeStamp());
@@ -263,6 +263,9 @@ public class CLASDecoder4 {
             	adcBANK.putLong("timestamp", i, adcDGTZ.get(i).getADCData(0).getTimeStamp());
             }
             if(name == "BAND::adc") adcBANK.putInt("amplitude", i, adcDGTZ.get(i).getADCData(0).getHeight());
+            if( name == "URWELL::adc" ){
+                adcBANK.putInt("ADC", i, adcDGTZ.get(i).getADCData(0).getIntegral());
+            }
          }
         return adcBANK;
     }
