@@ -224,12 +224,13 @@ public class TracksFromTargetRec {
             //if(solenoidValue>0.001 && Constants.LIGHTVEL * seed.getHelix().radius() *solenoidValue<Constants.getInstance().getPTCUT())
             if(solenoidValue>0.001 && seed.getHelix().radius() <Constants.getInstance().getRCUT())    
                 continue;
-            
-            //System.out.println("initializing fitter...");
+            if(Constants.getInstance().seedingDebugMode)
+                System.out.println("initializing fitter...");
             kf.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid));
             kf.runFitter();
             
-            
+            if(Constants.getInstance().seedingDebugMode)
+                        System.out.println("KF status ... "+kf.setFitFailed+" ndf "+kf.NDF+" helix "+kf.getHelix());
             if (kf.setFitFailed == false && kf.NDF>0 && kf.getHelix()!=null) { 
                 Track fittedTrack = new Track(seed, kf, pid);
                 fittedTrack.update_Crosses(seed.getId());
@@ -294,10 +295,12 @@ public class TracksFromTargetRec {
                     tracks.add(fittedTrack);
             } else {
                 if(Constants.getInstance().KFfailRecovery) {
+                    if(Constants.getInstance().seedingDebugMode) System.out.println("TRACK RECOVERY");
                     kf2.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid));
                     kf2.runFitter();
-                    if(kf2.getHelix()!=null) {
-                        Track fittedTrack = new Track(seed, kf2, pid);
+                    if(kf2.getHelix()!=null) { 
+                        Track fittedTrack = new Track(seed, kf2, pid); 
+                        if(Constants.getInstance().seedingDebugMode) System.out.println("RECOVED..."+fittedTrack.toString());
                         for(Cross c : fittedTrack) { 
                             if(c.getDetector()==DetectorType.BST) {
                                 c.getCluster1().setAssociatedTrackID(0);
@@ -347,7 +350,7 @@ public class TracksFromTargetRec {
                 tracks.get(it).update_Crosses(id);
                 tracks.get(it).update_Clusters(id);
                 tracks.get(it).setTrackCovMat(recUtil.getCovMatInTrackRep(tracks.get(it)));
-            //    System.out.println("Fit " + tracks.get(it).toString());
+                if(Constants.getInstance().seedingDebugMode) System.out.println("Fit " + tracks.get(it).toString());
             }
         }
         if(SVTcrosses!=null) {

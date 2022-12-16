@@ -70,7 +70,7 @@ public class Constants {
     public boolean useSVTTimingCuts =  false;
     public boolean removeOverlappingSeeds = false;
     public boolean flagSeeds = true;
-    public boolean KFfailRecovery = false;
+    public boolean KFfailRecovery = true;
     
     // CONSTANTS USED IN RECONSTRUCTION
     //---------------------------------    
