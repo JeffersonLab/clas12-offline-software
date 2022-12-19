@@ -257,7 +257,7 @@ public class CLASDecoder4 {
             adcBANK.putFloat("time", i, (float) adcDGTZ.get(i).getADCData(0).getTime());
             adcBANK.putShort("ped", i, (short) adcDGTZ.get(i).getADCData(0).getPedestal());
             if(name == "BST::adc") adcBANK.putLong("timestamp", i, adcDGTZ.get(i).getADCData(0).getTimeStamp());
-            if(name.equals("BMT::adc")||name.equals("FMT::adc")|| name.equals("FTTRK::adc")){
+            if(name.equals("BMT::adc")||name.equals("FMT::adc") || name.equals("FTTRK::adc")){
             	adcBANK.putInt("ADC", i, adcDGTZ.get(i).getADCData(0).getHeight());
             	adcBANK.putInt("integral", i, adcDGTZ.get(i).getADCData(0).getIntegral());
             	adcBANK.putLong("timestamp", i, adcDGTZ.get(i).getADCData(0).getTimeStamp());
@@ -265,6 +265,7 @@ public class CLASDecoder4 {
             if(name == "BAND::adc") adcBANK.putInt("amplitude", i, adcDGTZ.get(i).getADCData(0).getHeight());
             if( name == "URWELL::adc" ){
                 adcBANK.putInt("ADC", i, adcDGTZ.get(i).getADCData(0).getIntegral());
+                adcBANK.putFloat("time", i, 1000*(adcDGTZ.get(i).getDescriptor().getLayer() - 1) + adcDGTZ.get(i).getDescriptor().getComponent() );
             }
          }
         return adcBANK;
