@@ -3,6 +3,8 @@ package org.jlab.detector.decode;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jlab.coda.jevio.ByteDataTransformer;
@@ -891,13 +893,29 @@ public class CodaEventDecoder {
      */
     public List<DetectorDataDgtz> getDataEntries_57631(Integer crate, EvioNode node, EvioDataEvent event) {
 
+        final Integer APV_MIN_LENGTH = 64;
+        final Short HEADER = 1500;
+        final int n_APV_CH = 128;
         ArrayList<DetectorDataDgtz> entries = new ArrayList<>();
-        if (node.getTag() == 57631) {
 
-            int HybridID = -1;
+        if (node.getTag()
+                == 57631) {
+
+            /**
+             * Note: this is made for decoding only SRS-APV data from uRWELL
+             * test prototype. In this prototype only one FEC and only one Crate
+             * is used. We will use this assumption, and make the code easier.
+             * In case there will be more than one FEC and/or crate, then this
+             * getDataEntries_57631 method will not work.
+             * 
+             * The decoding algorithm was borrowed from the repository below, and in particular from the given file
+             * https://github.com/xbai0624/mpd_baseline_evaluation/blob/hb_quick_check/src/SRSRawEventDecoder.cpp
+             */
+            Map<Short, ArrayList<Short>> m_APV = new HashMap<>();
+
+            Short HybridID = -1;
             int FECID = -1;
 
-//            try {
             int[] intBuff = node.getIntData();
 
             // =============== Switch Endianness
@@ -905,88 +923,111 @@ public class CodaEventDecoder {
                 intBuff[iBuf] = Integer.reverseBytes(intBuff[iBuf]);
             }
 
-            //node.get
-            System.out.println("The crate is " + crate);
-            System.out.println("========== The array is ===========");
-            int ind_inRow = 0;
-            int nMaxInRiw = 20;
             for (int idata = 0; idata < intBuff.length; idata++) {
-//                System.out.print(String.format("%x", intBuff[idata]) + "\t");
-//                ind_inRow = ind_inRow + 1;
-//                if( ind_inRow > nMaxInRiw ){
-//                    System.out.println();
-//                    ind_inRow = 0;
-//                }
 
+                /**
+                 * When we meet 0x414443, then the least significant byte will represent the Hybrid ID, and
+                 * the most significant 2 bytes of the next word represents the FEC ID. In our case we use only one 1 FEC, so it will
+                 * always be 0. We also don't plan to use/store this variable in the output data file.
+                 */
                 if (((intBuff[idata + 1] >> 8) & 0xffffff) == 0x414443) {
 
-                    System.out.println("Kuku " + String.format("%x", intBuff[idata + 1]));
-                } else if (intBuff[idata + 1] == 0xfafafafa) {
-                    idata += 1;
-                }
+                    HybridID = (short) (intBuff[idata + 1] & 0xff);
+                    FECID = (intBuff[idata + 2] >> 16) & 0xff;
 
+                    if (m_APV.containsKey(HybridID) && m_APV.get(HybridID).size() > APV_MIN_LENGTH) {
+                        System.err.println("Duplicate entry for the same Hybrid #" + HybridID);
+                    }
+
+                    m_APV.put(HybridID, new ArrayList<>());
+
+                    idata += 2;
+
+                    /**
+                     * The 0xfafafafa means the end of SRS data
+                     */
+                } else if (intBuff[idata + 1] == 0xfafafafa) {
+                    
+                    /**
+                     * One word (32 bit) here represents 2 APV data (each actually has least significant 12 bits only).
+                     * Below we split the word into 2 Shorts, and then switch endiannes of it one more time
+                     */
+                    Short word16bit1 = (short) ((intBuff[idata] >> 16) & 0xffff);
+                    word16bit1 = Short.reverseBytes(word16bit1);
+                    Short word16bit2 = (short) (intBuff[idata] & 0xffff);
+                    word16bit2 = Short.reverseBytes(word16bit2);
+                    
+                    m_APV.get(HybridID).add(word16bit1);
+                    m_APV.get(HybridID).add(word16bit2);
+
+                    idata += 1;
+                } else {
+                    /**
+                     * In all other cases the data is just APV data, so will will fill
+                     * the APV buffer, again after splitting it into two words and
+                     * switching the endianness.
+                     */
+                    Short word16bit1 = (short) ((intBuff[idata] >> 16) & 0xffff);
+                    word16bit1 = Short.reverseBytes(word16bit1);
+                    Short word16bit2 = (short) (intBuff[idata] & 0xffff);
+                    word16bit2 = Short.reverseBytes(word16bit2);
+
+                    m_APV.get(HybridID).add(word16bit1);
+                    m_APV.get(HybridID).add(word16bit2);
+                }
             }
 
             /**
-             * Will fill here some arrays for debugging, and see what we get in
-             * the output bank.
+             * All data is already read from the SRS crate.
+             * Now for each Hybrid, will loop over APV data and from it will extract ADC data for each
+             * channel and time sample. Then for each (Channel, time sample) will
+             * create DetectorDataDgtz bank, and fill corresponding ts and ADC.
+             * 
+             * Here we don't use pedestal. The time sample will be assigned to pedestal
              */
-            Short nSamp = 3;
 
-            int n_Hybrid = 12;
+            
+            /**
+             * Loop over data for all Hybrids.
+             * The key of the map represents the HybridID, and the value of the map is anr ArrayList representing the 
+             * APV data of the given Hybrid
+             */
+            for (Map.Entry<Short, ArrayList<Short>> entry : m_APV.entrySet()) {
 
-            int n_ch_PerHybrid = 128;
+                ArrayList<Short> cur_APV = entry.getValue();
+                Short slot = entry.getKey(); // Here slot is the same as the HybridID
+                
+                
+                Short ts = 0; // ts = Time Sample
+                for (int i_apv = 0; i_apv < cur_APV.size() - 3; i_apv++) {
+                    
+                    /**
+                     * In APV the ADC starts when three consecutive entries have values less than the HEADER (value=1500).
+                     * After those three samples we also should skip 9 additional data representing 8 (address) and 1 (error), then the next 128 channels should
+                     * represent ADC values of the given timesample of the given APV. Then the pattern repeats itself 
+                     * 
+                     */
+                    if ((Short) (cur_APV.get(i_apv)) < HEADER && (Short) (cur_APV.get(i_apv + 1)) < HEADER && (Short) (cur_APV.get(i_apv + 2)) < HEADER && i_apv + 138 < cur_APV.size() + 1) {
 
-            for (int iHyb = 0; iHyb < n_Hybrid; iHyb++) {
-                Integer slot = iHyb;
-                for (int iCh = 0; iCh < n_ch_PerHybrid; iCh++) {
+                        i_apv = i_apv + 12; // Note 12 = 3 words < HEADED + 8 address word + 1 Error word // Details should be in APV documentation.
 
-                    DetectorDataDgtz bank = new DetectorDataDgtz(crate, slot.intValue(), iCh);
+                        for (int ich = 0; ich < n_APV_CH; ich++) {
+                            DetectorDataDgtz bank = new DetectorDataDgtz(crate, slot.intValue(), ich);
+                            ADCData adcData = new ADCData();
 
-                    short ADCValues[] = new short[nSamp];
+                            adcData.setIntegral((int) (cur_APV.get(i_apv)));
+                            adcData.setPedestal(ts);
+                            bank.addADC(adcData);
+                            entries.add(bank);
+                            i_apv = i_apv + 1;
+                        }
+                        i_apv = i_apv - 1;
+                        ts++;
 
-                    for (short iSamp = 0; iSamp < nSamp; iSamp++) {
-                        ADCValues[iSamp] = (short) (1234 + iSamp);
-                        //System.out.println("Values = " + ADCValues[iSamp]);
                     }
-
-                    ADCData adcData = new ADCData();
-                    adcData.setTimeStamp(0);
-                    adcData.setPulse(ADCValues);
-                    adcData.setIntegral(6789);                    
-                    bank.addADC(adcData);
-                    entries.add(bank);
                 }
-            }
 
-//            
-//                        Short channel = (Short) cdataitems.get(position);
-//                        Integer length = (Integer) cdataitems.get(position + 1);
-//                        DetectorDataDgtz bank = new DetectorDataDgtz(crate, slot.intValue(), channel.intValue());
-//
-//                        short[] shortbuffer = new short[length];
-//                        for (int loop = 0; loop < length; loop++) {
-//                            Short sample = (Short) cdataitems.get(position + 2 + loop);
-//                            shortbuffer[loop] = sample;
-//                        }
-//                        //Added pulse fitting for MMs
-//                        ADCData adcData = new ADCData();
-//                        adcData.setTimeStamp(time);
-//                        adcData.setPulse(shortbuffer);
-//                        bank.addADC(adcData);
-//                        entries.add(bank);
-//                        position += 2 + length;
-//                        counter++;
-//                CompositeData compData = new CompositeData(compBuffer.array(), event.getByteOrder());
-//                List<DataType> cdatatypes = compData.getTypes();
-//                List<Object> cdataitems = compData.getItems();
-            // copied from MM as a guidance
-//            } catch (EvioException ex) {
-//                ByteBuffer compBuffer = node.getByteData(true);
-//                Logger.getLogger(CodaEventDecoder.class.getName()).log(Level.SEVERE, "Exception in CRATE = " + crate + "  RUN = " + this.runNumber
-//                        + "  EVENT = " + this.eventNumber + " LENGTH = " + compBuffer.array().length, ex);
-//                this.printByteBuffer(compBuffer, 120, 20);
-//            }
+            }
         }
         return entries;
     }
@@ -1047,8 +1088,10 @@ public class CodaEventDecoder {
                     }
                 }
                 return entries;
+
             } catch (EvioException ex) {
-                Logger.getLogger(CodaEventDecoder.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(CodaEventDecoder.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         }
         return entries;
@@ -1155,8 +1198,10 @@ public class CodaEventDecoder {
                 }
 
                 return entries;
+
             } catch (EvioException ex) {
-                Logger.getLogger(CodaEventDecoder.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(CodaEventDecoder.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         }
         return entries;

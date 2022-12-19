@@ -150,7 +150,7 @@ public class DetectorEventDecoder {
             
             for(String table : keysFitter){
                 //custom MM fitter
-
+                
             	if( ( (table.equals("BMT"))&&(data.getDescriptor().getType().getName().equals("BMT")) )
                  || ( (table.equals("FMT"))&&(data.getDescriptor().getType().getName().equals("FMT")) )
                  || ( (table.equals("FTTRK"))&&(data.getDescriptor().getType().getName().equals("FTTRK")) ) ){
