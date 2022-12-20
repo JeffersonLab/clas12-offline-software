@@ -116,7 +116,7 @@ public class KFitter extends AKFitter {
         }
         else {
             if(finalTransportedStateVec!=null)
-                helx = finalSmoothedStateVec.getHelix(this.getXb(), this.getYb());
+                helx = finalSmoothedStateVec.getHelix(this.getXb(), this.getYb()); 
         }
         return helx;
     }
@@ -144,7 +144,7 @@ public class KFitter extends AKFitter {
                sv.smoothed().get(0)==null ||
                sv.smoothed().get(0).kappa==0 || 
                Double.isNaN(sv.smoothed().get(0).kappa)) {
-                this.setFitFailed = true;
+                this.setFitFailed = true; 
                 break;
             }            
             // if chi2 improved and curvature is non-zero, save fit results but continue iterating
@@ -230,6 +230,9 @@ public class KFitter extends AKFitter {
                  || Math.abs(fVec.residual)/Math.sqrt(V)>this.getResidualsCut()) { 
                     this.NDF--;
                     mv.measurements.get(k).skip = true;
+                    fVec = sv.new StateVec(vec);
+                    if(this.getSwimmer()!=null && !sv.straight) fVec.rollBack(mv.rollBackAngle);
+                    fVec.updateFromHelix();
                 }
             }
             return fVec;
