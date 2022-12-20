@@ -20,9 +20,9 @@
       <version>11</version>
     </dependency>
     <dependency>
-      <groupId>org.jlab.ccdb</groupId>
-      <artifactId>ccdb</artifactId>
-      <version>1.2</version>
+      <groupId>org.jlab.ccdbrcdb</groupId>
+      <artifactId>ccdbrcdb</artifactId>
+      <version>1.0</version>
     </dependency>
   </dependencies>
 
