@@ -11,6 +11,7 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
@@ -470,6 +471,80 @@ public class RecoBankReader {
                 
                 Seed seed = cvtSeeds.get(seedId);
                 seed.setId(tid);
+                seed.setHelix(seed.getHelix());
+                seed.getHelix().setCovMatrix(seed.getHelix().getCovMatrix());
+                seed.setStatus(type);
+                seed.FirstPassIdx = i;
+                List<Cross> crossesOnTrk = new ArrayList<>();
+                for (int j = 0; j < 9; j++) {
+                    String hitStrg = "Cross";
+                    hitStrg += (j + 1);
+                    hitStrg += "_ID";  
+                    int cid = (int) bank.getShort(hitStrg, i);
+                    if(svtCrosses.containsKey(cid)) { 
+                        crossesOnTrk.add(svtCrosses.get(cid));
+                        
+                    }
+                    if(bmtCrosses!=null) {
+                        if(bmtCrosses.containsKey(cid)) { 
+                            crossesOnTrk.add(bmtCrosses.get(cid));
+                        }        
+                    }
+                }
+                
+                seed.setCrosses(crossesOnTrk);
+                if(Constants.getInstance().seedingDebugMode) 
+                    System.out.println("Recompose seed "+seed.toString());
+                seeds.put(tid, seed);
+            }
+            return seeds;
+        }
+    }
+    
+    /*
+    public static Map<Integer, Seed> readCVTTracksBank(DataEvent event, double xb, double yb, Map<Integer, Seed> cvtSeeds,
+            Map<Integer, Cross> svtCrosses, Map<Integer, Cross> bmtCrosses) {
+        
+        if(!event.hasBank("CVT::Tracks"))
+            return null;
+        else {
+            Map<Integer, Seed> seeds = new HashMap<>();          
+    
+            DataBank bank = event.getBank("CVT::Tracks");
+            for(int i = 0; i < bank.rows(); i++) {
+                int    tid    = bank.getShort("ID", i);
+                double pt     = bank.getFloat("pt", i);
+                double phi0   = bank.getFloat("phi0", i);
+                double tandip = bank.getFloat("tandip", i);
+                double z0     = bank.getFloat("z0", i)*10;
+                double d0     = bank.getFloat("d0", i)*10;
+                int    q      = bank.getByte("q", i);
+//                double xb     = bank.getFloat("xb", i);
+//                double yb     = bank.getFloat("yb", i);
+                Helix helix = new Helix( pt, d0, phi0, z0, tandip, q, xb, yb);
+                double[][] covmatrix = new double[5][5];
+                covmatrix[0][0] = bank.getFloat("cov_d02", i)*10*10;
+                covmatrix[0][1] = bank.getFloat("cov_d0phi0", i)*10 ;
+                covmatrix[0][2] = bank.getFloat("cov_d0rho", i);
+                covmatrix[1][0] = bank.getFloat("cov_d0phi0", i)*10 ;
+                covmatrix[1][1] = bank.getFloat("cov_phi02", i);
+                covmatrix[1][2] = bank.getFloat("cov_phi0rho", i)/10 ;
+                covmatrix[2][0] = bank.getFloat("cov_d0rho", i);
+                covmatrix[2][1] = bank.getFloat("cov_phi0rho", i)/10 ;
+                covmatrix[2][2] = bank.getFloat("cov_rho2", i)/10/10;
+                covmatrix[3][3] = bank.getFloat("cov_z02", i)*10*10;
+                covmatrix[3][4] = bank.getFloat("cov_z0tandip", i)*10;
+                covmatrix[4][3] = bank.getFloat("cov_z0tandip", i)*10;
+                covmatrix[4][4] = bank.getFloat("cov_tandip2", i);
+            //    int    status   = bank.getShort("status", i);
+            //    double chi2     = bank.getFloat("chi2", i);
+            //    int    ndf      = bank.getShort("ndf", i);
+            //    int    pid      = bank.getInt("pid", i);
+                int    seedId   = bank.getShort("seedID", i);
+                int    type   = bank.getByte("fittingMethod", i);
+                
+                Seed seed = cvtSeeds.get(seedId);
+                seed.setId(tid);
                 seed.setHelix(helix);
                 seed.getHelix().setCovMatrix(covmatrix);
                 seed.setStatus(type);
@@ -498,6 +573,6 @@ public class RecoBankReader {
             return seeds;
         }
     }
-    
+    */
     
 }
