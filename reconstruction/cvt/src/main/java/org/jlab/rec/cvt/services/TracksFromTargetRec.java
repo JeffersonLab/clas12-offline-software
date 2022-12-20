@@ -220,7 +220,7 @@ public class TracksFromTargetRec {
             Helix hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
                             solenoidValue, xb , yb, Units.MM);
             double[][] cov = Constants.COVHELIX;
-
+            
             //if(solenoidValue>0.001 && Constants.LIGHTVEL * seed.getHelix().radius() *solenoidValue<Constants.getInstance().getPTCUT())
             if(solenoidValue>0.001 && seed.getHelix().radius() <Constants.getInstance().getRCUT())    
                 continue;
@@ -230,7 +230,7 @@ public class TracksFromTargetRec {
             kf.runFitter();
             
             if(Constants.getInstance().seedingDebugMode)
-                        System.out.println("KF status ... "+kf.setFitFailed+" ndf "+kf.NDF+" helix "+kf.getHelix());
+                System.out.println("KF status ... "+kf.setFitFailed+" ndf "+kf.NDF+" helix "+kf.getHelix());
             if (kf.setFitFailed == false && kf.NDF>0 && kf.getHelix()!=null) { 
                 Track fittedTrack = new Track(seed, kf, pid);
                 fittedTrack.update_Crosses(seed.getId());
@@ -294,7 +294,7 @@ public class TracksFromTargetRec {
                 if(this.missingSVTCrosses(fittedTrack) == false)
                     tracks.add(fittedTrack);
             } else {
-                if(Constants.getInstance().KFfailRecovery) {
+                if(Constants.getInstance().KFfailRecovery && Math.abs(pid)!=45) {
                     if(Constants.getInstance().seedingDebugMode) System.out.println("TRACK RECOVERY");
                     kf2.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid));
                     kf2.runFitter();
