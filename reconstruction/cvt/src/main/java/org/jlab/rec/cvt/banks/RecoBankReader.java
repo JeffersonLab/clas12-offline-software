@@ -471,8 +471,10 @@ public class RecoBankReader {
                 
                 Seed seed = cvtSeeds.get(seedId);
                 seed.setId(tid);
-                seed.setHelix(seed.getHelix());
-                seed.getHelix().setCovMatrix(seed.getHelix().getCovMatrix());
+                //seed.setHelix(seed.getHelix());
+                //seed.getHelix().setCovMatrix(seed.getHelix().getCovMatrix());
+                seed.setHelix(helix);
+                seed.getHelix().setCovMatrix(covmatrix);
                 seed.setStatus(type);
                 seed.FirstPassIdx = i;
                 List<Cross> crossesOnTrk = new ArrayList<>();
