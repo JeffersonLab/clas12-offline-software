@@ -22,7 +22,7 @@
     <dependency>
       <groupId>org.jlab.ccdbrcdb</groupId>
       <artifactId>ccdbrcdb</artifactId>
-      <version>1.0</version>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
