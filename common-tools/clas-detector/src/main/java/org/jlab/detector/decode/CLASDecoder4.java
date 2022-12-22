@@ -732,6 +732,7 @@ public class CLASDecoder4 {
         parser.addOption("-d", "0","debug mode, set >0 for more verbose output");
         parser.addOption("-m", "run","translation tables source (use -m devel for development tables)");
         parser.addOption("-b", "16","record buffer size in MB");
+        parser.addOption("-v", "default","record buffer size in MB");
         parser.addRequired("-o","output.hipo");
 
 
@@ -799,6 +800,13 @@ public class CLASDecoder4 {
             decoder.detectorDecoder.setTimestamp(parser.getOption("-x").stringValue());
         }
 
+        if ( parser.getOption("-v").getValue() != null ){
+            System.out.println("Using the Variation " + parser.getOption("-v").stringValue());
+            
+            decoder.detectorDecoder.setVariation(parser.getOption("-v").stringValue());
+            
+        }
+        
         for(String inputFile : inputList){
             EvioSource reader = new EvioSource();
             reader.open(inputFile);
