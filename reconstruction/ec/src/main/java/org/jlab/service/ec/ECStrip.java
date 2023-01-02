@@ -60,92 +60,60 @@ public class ECStrip implements Comparable {
     private double                   time = 0;
     private double              fgtw,dgtw = 0; //global time walk correction
     
+    private EnergyCorrection          ecc = null;
     private TimeCorrection     tc,ftc,dtc = null; 
     
     public ECStrip(int sector, int layer, int component){
         desc.setSectorLayerComponent(sector, layer, component);
+        ecc = ECCommon.usePass2Energy ? new pass2Energy() : new pass1Energy(); 
         ftc = ECCommon.usePass2Timing ? new ExtendedTWCFTime() : new ExtendedTWCTime(); //FADC timing pass2:pass1
         dtc = ECCommon.usePass2Timing ? new ExtendedTWCDTime() : new ExtendedTWCTime(); //TDC  timing pass2:pass1
         tc  = ECCommon.useFADCTime ? ftc : dtc; //user selected for FADC:TDC timing calibration 
     }
-	
-    public DetectorDescriptor getDescriptor(){
-    	return desc;
-    }
     
-    public void setStatus(int val) {
-    	status = (short) val;
-    }
-    
-    public short getDBStatus() {
-    	return (short) (desc.getComponent()*10 + status);
-    }
-    
-    public ECStrip setADC(int adc){
-        iADC = adc;
-        return this;
-    }
-    
-    public ECStrip setTDC(int tdc){ // DSC/TDC timing
-        iTDC = tdc;
-        return this;
-    }
-    
-    public ECStrip setTADC(float tdc) { // FADC timing
-    	iTADC = tdc;
-    	return this;
-    }
-	
-    public int getADC(){
-        return iADC;
-    }
-
-    public int getTDC(){
-        return ECCommon.useFADCTime ? (int) (iTADC/iTimA1) : iTDC;
-    }
-    
-    public double getRawTime(){
-       	return tc.getRawTime();
-    }
-    
-    public double getPhaseCorrectedTime() { 
-        return tc.getPhaseCorrectedTime();
-    }
-    
-    public double getRawTime(boolean phaseCorrection) {
- 	    return phaseCorrection ? getPhaseCorrectedTime():getRawTime();
-    }
-    
-    public double getTWCTime() {
-    	return tc.getTWCTime();    	
-    }
-    
-    public boolean useFT() {
-    	boolean test1 = ECCommon.useFADCTime;
-    	boolean test2 = ECCommon.useFTpcal && desc.getLayer()==1;
-    	boolean test3 = ECCommon.useDTCorrections && getDTime()<=0;
-    	return test1 || test2 || test3;
-    }
-    
-    public double getTime() {
-        return (useFT() ? getFTime():getDTime());    	
-    }
-    
-    public double getDTime() {
-    	return dtc.getTime();
-    }
-    
-    public double getFTime() {
-    	return ftc.getTime();
+    abstract class EnergyCorrection {
+        public abstract double getRawEnergy(); 
+        public abstract double getEcorr(double dist);
+        public abstract double getEnergy(Point3D point);
     }
     
     abstract class TimeCorrection {
-    	public abstract double getRawTime();
-    	public abstract double getPhaseCorrectedTime();
-    	public abstract double getTWCTime();    	
-    	public abstract double getTime();
+        public abstract double getRawTime();
+        public abstract double getPhaseCorrectedTime();
+        public abstract double getTWCTime();    	
+        public abstract double getTime();
+    }
+
+    public class pass1Energy extends EnergyCorrection {
+        public double getRawEnergy() {
+            return iADC*iGain*iADC_to_MEV;
+        }
+        public double getEcorr(double dist) {
+            return iAttenLengthA*Math.exp(-dist/iAttenLengthB) + iAttenLengthC;    	
+        }
+        
+        public double getEnergy(Point3D point) {
+            edist = point.distance(stripLine.end());
+            return getRawEnergy()/getEcorr(edist);
+        }
     }
     
+    public class pass2Energy extends EnergyCorrection {    	
+        public double getRawEnergy() {
+    	    return iADC*iGain*iADC_to_MEV;
+        }
+    	
+        public double getEcorr(double dist) {
+            return desc.getLayer()<4 ? iAttenLengthA*(Math.exp(-dist/40) + iAttenLengthB*Math.exp(-dist/400)):
+                                       iAttenLengthA*Math.exp(-dist/iAttenLengthB);    	
+        }
+        
+        public double getEnergy(Point3D point) {
+            edist = point.distance(stripLine.end());
+            return getRawEnergy()/getEcorr(edist);
+        }
+    }       
+
     public class SimpleTWCTime extends TimeCorrection {    	
         public double getRawTime(){
            	return iTDC * iTimA1;
@@ -238,10 +206,80 @@ public class ECStrip implements Comparable {
     	public double getTime() {
           	return getTWCTime() - fTimA0;    
     	}	
-    }         
+    }     
+	
+    public DetectorDescriptor getDescriptor(){
+    	return desc;
+    }
     
+    public void setStatus(int val) {
+    	status = (short) val;
+    }
+    
+    public short getDBStatus() {
+    	return (short) (desc.getComponent()*10 + status);
+    } 
+    
+    public ECStrip setADC(int adc){
+        iADC = adc;
+        return this;
+    }
+    
+    public ECStrip setTDC(int tdc){ // DSC/TDC timing
+        iTDC = tdc;
+        return this;
+    }
+    
+    public ECStrip setTADC(float tdc) { // FADC timing
+    	iTADC = tdc;
+    	return this;
+    }
+	
+    public int getADC(){
+        return iADC;
+    }
+
+    public int getTDC(){
+        return ECCommon.useFADCTime ? (int) (iTADC/iTimA1) : iTDC;
+    }
+    
+    public double getRawTime(){
+       	return tc.getRawTime();
+    }
+    
+    public double getPhaseCorrectedTime() { 
+        return tc.getPhaseCorrectedTime();
+    }
+    
+    public double getRawTime(boolean phaseCorrection) {
+ 	    return phaseCorrection ? getPhaseCorrectedTime():getRawTime();
+    }
+
+    public double getTWCTime() {
+    	return tc.getTWCTime();    	
+    }
+    
+    public boolean useFT() {
+    	boolean test1 = ECCommon.useFADCTime;
+    	boolean test2 = ECCommon.useFTpcal && desc.getLayer()==1;
+    	boolean test3 = ECCommon.useDTCorrections && getDTime()<=0;
+    	return test1 || test2 || test3;
+    }
+    
+    public double getTime() {
+        return (useFT() ? getFTime():getDTime());    	
+    }
+    
+    public double getDTime() {
+    	return dtc.getTime();
+    }
+    
+    public double getFTime() {
+    	return ftc.getTime();
+    }
+	             
     public double getEnergy(){
-        return iADC*iGain*iADC_to_MEV;
+        return ecc.getRawEnergy();
     }
     
     public void setDistanceEdge(double val){
@@ -315,7 +353,7 @@ public class ECStrip implements Comparable {
     } 
     
     public double getVeff() {
-      return (useFT() ? fveff : (ECCommon.usePass2Timing ? dveff:veff));
+        return (useFT() ? fveff : (ECCommon.usePass2Timing ? dveff:veff));
     }
            
     public void setGain(double val){
@@ -405,12 +443,11 @@ public class ECStrip implements Comparable {
     }	
     
     public double getEnergy(Point3D point){
-        edist = point.distance(stripLine.end());
-        return iADC*iGain*iADC_to_MEV/getEcorr(-edist);
+    	return ecc.getEnergy(point);
     }
     
     public double getEcorr(double dist) {
-        return iAttenLengthA*Math.exp(dist/iAttenLengthB) + iAttenLengthC;    	
+        return ecc.getEcorr(dist);    	
     }
     
     public double getTime(Point3D point) { 		
@@ -473,7 +510,7 @@ public class ECStrip implements Comparable {
         StringBuilder str = new StringBuilder();
         str.append(String.format("----> strip (%3d %3d %3d) ADC/TDC/FTDC  %5d %5d %5.1f  ENERGY=%6.4f TIME=%6.2f DTIME=%6.2f FTIME=%6.2f FDIST=%6.2f S/P/C=(%2d %2d %2d)", 
                 desc.getSector(),desc.getLayer(),desc.getComponent(),
-                iADC,iTDC,iTADC,getEnergy(),getTime(),getDTime(),getFTime(),getTdist(),stripId,peakID,clusterId));
+                iADC,iTDC,iTADC,getEnergy(),getDTime(),getFTime(),getTdist(),stripId,peakID,clusterId));
         str.append(String.format("  GAIN (%5.3f) ATT (%5.1f)", 
                 iGain,iAttenLengthB));
         return str.toString();
