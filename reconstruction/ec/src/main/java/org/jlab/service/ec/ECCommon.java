@@ -151,7 +151,7 @@ public class ECCommon {
         
         isMC = run<=100;
         
-        if(isMC) {usePass2Timing = false; useDTCorrections = false; useFTpcal = false;}
+        if(isMC) {usePass2Timing = false; usePass2Energy = false; useDTCorrections = false; useFTpcal = false;}
         
         manager.setVariation(variation);
 
