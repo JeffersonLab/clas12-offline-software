@@ -332,8 +332,9 @@ public class RICHEventBuilder{
                 }
 
                 if(debugMode>=1) System.out.format(" AERO: %4d cross found \n",naero_cross);
-                if(naero_cross==3){
-                    int iaero = richgeo.select_AeroforTraj(isec, aero_cross[0], aero_cross[1], aero_cross[2]);
+                if(naero_cross==1){
+                    //int iaero = richgeo.select_AeroforTraj(isec, aero_cross[0], aero_cross[1], aero_cross[2]);
+                    int iaero==0;
                     traj_cross[1] = new Line3D( aero_cross[iaero].origin(), aero_cross[iaero].end());
                     traj_path[1] = aero_path[iaero];
                     ntraj_cross++;
@@ -350,8 +351,8 @@ public class RICHEventBuilder{
                         tr.setPath(traj_path[k]);
 
                     }
-                }
-                if(ntraj_cross==1){
+                }else{
+                //if(ntraj_cross==1){
                     //pass1: only dc planes are available, take only (first and last) cross at DC3 
                     tr.addCross(traj_cross[0].origin().x(), traj_cross[0].origin().y(), traj_cross[0].origin().z(),
                                 traj_cross[0].end().x(), traj_cross[0].end().y(), traj_cross[0].end().z() );
