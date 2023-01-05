@@ -56,10 +56,6 @@ public class RasterEngine extends ReconstructionEngine {
         if (event.hasBank("RUN::config")) {
             run = event.getBank("RUN::config").getInt("run",0);
         }
-        if (run<=0) {
-            LOGGER.log(Level.WARNING,"RasterEngine:  found no run number, CCDB constants not loaded, skipping event.");
-            return false;
-        }        
         
         IndexedTable adc2position = this.getConstantsManager().getConstants(run, "/calibration/raster/adc_to_position");
         

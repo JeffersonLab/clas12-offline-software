@@ -75,6 +75,8 @@ configuration:
       magfieldTorusMap: Full_torus_r251_phi181_z251_25Jan2021.dat
     MLTD:
       run: "6302"
+    DCHAI:
+      outputBankPrefix: "HB"
       
 mime-types:
   - binary/data-hipo

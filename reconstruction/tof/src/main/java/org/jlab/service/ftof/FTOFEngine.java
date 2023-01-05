@@ -99,10 +99,7 @@ public class FTOFEngine extends ReconstructionEngine {
         //-------------------
         int  newRun = bank.getInt("run", 0);
         long timeStamp = bank.getLong("timestamp", 0);
-        if (newRun<=0) {
-            System.err.println("FTOFEngine:  got run <= 0 in RUN::config, skipping event.");
-            return false;
-        }
+        
         if (timeStamp==-1) {
             System.err.println("FTOFEngine:  got 0 timestamp, skipping event");
             return false;
