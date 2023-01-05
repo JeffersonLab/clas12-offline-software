@@ -346,7 +346,7 @@ public class RICHEventBuilder{
                     for (int k=1; k<3; k++){
                         tr.addCross(traj_cross[k].origin().x(), traj_cross[k].origin().y(), traj_cross[k].origin().z(),
                                     traj_cross[k].end().x(), traj_cross[k].end().y(), traj_cross[k].end().z() );
-                        tr.addTrajectoryPoint(detid, k-1, traj_cross[k], (float) 0., (float) traj_path[k]); 
+                        tr.getTrajectory().add(new DetectorTrack.TrajectoryPoint(detid, k-1, traj_cross[k], (float) traj_path[k], (float) 0., (float) 0.)); 
                         tr.setPath(traj_path[k]);
 
                     }
@@ -355,7 +355,7 @@ public class RICHEventBuilder{
                     //pass1: only dc planes are available, take only (first and last) cross at DC3 
                     tr.addCross(traj_cross[0].origin().x(), traj_cross[0].origin().y(), traj_cross[0].origin().z(),
                                 traj_cross[0].end().x(), traj_cross[0].end().y(), traj_cross[0].end().z() );
-                    tr.addTrajectoryPoint(detid, 0, traj_cross[0], (float) 0., (float) traj_path[0]); 
+                    tr.getTrajectory().add(new DetectorTrack.TrajectoryPoint(detid, 0, traj_cross[0], (float) traj_path[0], (float) 0., (float) 0.)); 
                     tr.setPath(traj_path[0]);
                 }
 

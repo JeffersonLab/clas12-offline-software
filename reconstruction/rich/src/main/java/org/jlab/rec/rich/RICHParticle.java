@@ -1122,8 +1122,8 @@ public class RICHParticle {
     public double calc_HypoC2(RICHParticle hadron, int hypo_pid, int recotype) {
     // ----------------
     /*
-    * calculate probability for a given pid hypothesis
-    * based on the particle momentum and RICH resolution;
+    * calculate chi2 for a given pid hypothesis
+    * based on angle and time of RICH resolution;
     */
 
         int debugMode = 0;

@@ -140,7 +140,7 @@ public class RICHGeoCalibration {
         double sscale = geopar.ALIGN_SHIFT_SCALE;
         double ascale = geopar.ALIGN_ANGLE_SCALE / RICHGeoConstants.MRAD;  // to convert in rad
 
-        String ali_filename = "calibration/rich/richModule"+irich+"/Alignments.txt";
+        String ali_filename = "calibration/rich/module"+irich+"/alignment.txt";
 
         try {
 
@@ -171,6 +171,9 @@ public class RICHGeoCalibration {
                     if(debugMode>=1){
                         System.out.format("ALIGN conversion %4d %3d --> %4d %3d \n",lla,cco,ila,ico);
                         System.out.format(" --> %7.3f %7.3f %7.3f %7.3f %7.3f %7.3f  %7.3f %7.3f\n",dx,dy,dz,thx,thy,thz,sscale,ascale);
+                        int tla = get_MisaIla(ila, ico);
+                        int tco = get_MisaIco(ila, ico);
+                        System.out.format("test conversion rich %3d %3d --> ccdb %3d %3d \n",ila,ico,tla,tco);
                     }
 
                     // the rotation is assumed to be in the component local ref system

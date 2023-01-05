@@ -60,7 +60,7 @@ rechbai = ["RECHBAI::Event","RECHBAI::Particle","RECHBAI::Calorimeter","RECHBAI:
 # special, detector-specific raw banks that are kept in DSTs (for now):
 band   = ["BAND::laser"]
 raster = ["RASTER::position"]
-rich   = ["RICH::tdc","RICH::ringCher","RICH::hadCher"]
+rich   = ["RICH::tdc","RICH::Ring","RICH::Particle"]
 rtpc   = ["RTPC::hits","RTPC::tracks","RTPC::KFtracks"]
 dets   = band + raster + rich + rtpc
 
