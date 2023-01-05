@@ -318,8 +318,8 @@ public class RICHEventBuilder{
                                 ntraj_cross++;
                             }
                             if(jdet==DetectorType.RICH.getDetectorId() && jlay>=2 && jlay<=4){
-                                aero_cross[jlay-2] = new Line3D(jx, jy, jz, vdir.x(), vdir.y(), vdir.z());
-                                aero_path[jlay-2] = path;
+                                aero_cross[naero_cross] = new Line3D(jx, jy, jz, vdir.x(), vdir.y(), vdir.z());
+                                aero_path[naero_cross] = path;
                                 if(debugMode>=1) System.out.format(" AER ");
                                 naero_cross++;
                             }
