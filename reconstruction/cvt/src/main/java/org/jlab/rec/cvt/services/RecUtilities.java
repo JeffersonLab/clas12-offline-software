@@ -29,7 +29,6 @@ import java.util.Comparator;
 import java.util.Map.Entry;
 import org.jlab.clas.tracking.kalmanfilter.AKFitter;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -250,7 +249,7 @@ public class RecUtilities {
                         if(cls.getAssociatedTrackID()==-1 && cls.getSector()==sector && cls.getLayer()==layer) { 
                             double clsDoca = cls.residual(trajPoint); 
                             // save the ones that have better doca 
-                            if(Math.abs(clsDoca)<Math.abs(doca) && Math.abs(clsDoca)<10*cls.size()*cls.getSeedStrip().getPitch()/Math.sqrt(12)) {
+                            if(Math.abs(clsDoca)<Math.abs(doca) && Math.abs(clsDoca)<SVTParameters.TOCLUSN*cls.getSeedStrip().getPitch()/Math.sqrt(12)) {
                                 if(clusterMap.containsKey(key) && clusterMap.get(key).getAssociatedTrackID()==-1) {
                                     clusterMap.replace(key, cls); 
                                 } else {
@@ -801,7 +800,7 @@ public class RecUtilities {
                         this_cross.setAssociatedTrackID(track.getSeed().getClusters().get(0).getAssociatedTrackID());
                     }
                     this_cross.setAssociatedTrackID(track.getSeed().getClusters().get(0).getAssociatedTrackID());
-                    crosses.add(this_cross);
+                    crosses.add(this_cross); 
                 }
             }
         }

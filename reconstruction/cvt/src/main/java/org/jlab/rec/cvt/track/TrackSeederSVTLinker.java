@@ -105,12 +105,6 @@ public class TrackSeederSVTLinker {
             }
         }
 
-        
-//        //Use CA to get the lines
-//       List<Cell> zrnodes = tca.runCAMaker("ZR", 5, bmtC_crosses);
-//       List<ArrayList<Cross>> zrtracks = tca.getCAcandidates(zrnodes);
-//       this.removeCompleteZROverlaps(zrtracks);
-//        
         //use new line finder
         this.sortXYCrosses(crosses);
         List<ArrayList<Cross>> zrtracks = trseed1.getSeeds(bmtC_crosses,svtcrs);
@@ -128,9 +122,9 @@ public class TrackSeederSVTLinker {
         }
         
         for (Seed bseed : seedlist) {
-            for (Cross c : bseed.getCrosses()) {
+            //for (Cross c : bseed.getCrosses()) {
                 //c.isInSeed = true;
-            }
+            //}
         }
         return seedlist;
     }
@@ -235,7 +229,7 @@ public class TrackSeederSVTLinker {
                 for(Seed s : myseeds) { 
                     s.getCrosses().addAll(zrcross);
                     s.setCrosses(s.getCrosses()) ;
-                    s.fit(3, xbeam, ybeam, bfield);
+                    s.fit(Constants.SEEDFITITERATIONS, xbeam, ybeam, bfield);
                    
                     if(s.getChi2()<Constants.CHI2CUT*s.getCrosses().size()) {
                         s.setStatus(3);

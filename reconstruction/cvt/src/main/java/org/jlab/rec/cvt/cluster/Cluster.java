@@ -31,6 +31,7 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
     private BMTType  _Type;                   //   The detector type  for BMT C or Z
     private int _Sector;      		//	sector[1...]
     private int _Layer;    	 		//	layer [1,...]
+    private int _Tlayer;                // layer in tracker comprising 6 svt layers and 6 bmt layer [1...12]
     private int _Id;			//	cluster Id
     private double _Centroid; 		// after LC (Lorentz Correction)
     private double _Centroid0; 		// before LC
@@ -70,7 +71,9 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
         this._Sector = sector;
         this._Layer = layer;
         this._Id = cid;
-
+        this._Tlayer = layer;
+        if(detector==DetectorType.BMT) 
+            this._Tlayer+=6;
     }
 
     /**
@@ -130,6 +133,20 @@ public class Cluster extends ArrayList<Hit> implements Comparable<Cluster> {
      */
     public void setLayer(int _Layer) {
         this._Layer = _Layer;
+    }
+
+    /**
+     * @return the _Tlayer
+     */
+    public int getTlayer() {
+        return _Tlayer;
+    }
+
+    /**
+     * @param _Tlayer the _Tlayer to set
+     */
+    public void setTlayer(int _Tlayer) {
+        this._Tlayer = _Tlayer;
     }
 
     /**

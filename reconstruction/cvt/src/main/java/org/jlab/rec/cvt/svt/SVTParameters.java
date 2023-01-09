@@ -57,7 +57,8 @@ public class SVTParameters {
     public static double EDEPMIN = 0.020; //20keV=0.020
     //cut on cross point0 z
     public static double CROSSZCUT= 10;
-
+    // matching clusters cut parameter (n * single strip resolution)
+    public static double TOCLUSN = 20;
     // selection cuts for helical tracks
     public static final double MINRADCURV = 200.00; //in cm
 

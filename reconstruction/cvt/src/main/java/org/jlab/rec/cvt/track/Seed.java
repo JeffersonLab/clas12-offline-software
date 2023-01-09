@@ -168,15 +168,20 @@ public class Seed implements Comparable<Seed>{
         this._Clusters.addAll(clusters);
         Collections.sort(_Clusters);
     }
+    
+    public void add_Crosses(List<Cross> crosses) {
+        this._Crosses.addAll(crosses);
+        Collections.sort(_Crosses);
+    }
 
     public List<Cross> getCrosses() {
         Collections.sort(_Crosses);
         return _Crosses;
     }
 
-    public final void setCrosses(List<Cross> _Crosses) {
-        Collections.sort(_Crosses);
-        this._Crosses = _Crosses;
+    public final void setCrosses(List<Cross> crosses) {
+        Collections.sort(crosses);
+        this._Crosses = crosses;
         this.setClusters();
     }
 
