@@ -1,6 +1,7 @@
 package org.jlab.rec.dc.track;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -10,14 +11,15 @@ import java.util.logging.Logger;
 import org.jlab.clas.clas.math.FastMath;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
+import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.jnp.matrix.Matrix;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.cross.Cross;
 import org.jlab.rec.dc.cross.CrossList;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
-import org.jlab.rec.dc.track.fit.KFitterDoca;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
@@ -25,11 +27,17 @@ import org.jlab.rec.dc.trajectory.TrajectoryFinder;
 import trackfitter.fitter.LineFitPars;
 import trackfitter.fitter.LineFitter;
 
+import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.clas.tracking.kalmanfilter.zReference.KFitter;
+import org.jlab.clas.tracking.kalmanfilter.zReference.StateVecs;
+import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
+import org.jlab.clas.tracking.utilities.RungeKuttaDoca;
+
 /**
  * A class with a method implementing an algorithm that finds lists of track
  * candidates in the DC
  *
- * @author ziegler
+ * @author ziegler, tongtong
  */
 
 public class TrackCandListFinder {
@@ -352,6 +360,7 @@ public class TrackCandListFinder {
 
         // swimming to a ref points outside of the last DC region
         double[] VecAtTarOut = dcSwim.SwimToPlaneTiltSecSys(cand.get(0).get_Sector(), 592);
+
         if (VecAtTarOut == null) {
             return;
         }
@@ -689,24 +698,6 @@ public class TrackCandListFinder {
         trkcands.addAll(selectedTracks);
     }
     
-//    public void removeOverlappingTracks(List<Track> trkcands) { 
-//        List<Track> selectedTracks = new ArrayList<Track>();
-//        List<Track> list = new ArrayList<Track>();
-//        int size = trkcands.size();
-//        for (int i = 0; i < size; i++) {
-//            list.clear();
-//            this.getOverlapLists(trkcands.get(i), trkcands, list);
-//            trkcands.removeAll(list);
-//            size -= list.size();
-//            Track selectedTrk = this.FindBestTrack(list);
-//            if (selectedTrk == null)
-//                continue;
-//            //if(this.ListContainsTrack(selectedTracks, selectedTrk)==false)
-//            selectedTracks.add(selectedTrk);
-//        }
-//        //trkcands.removeAll(trkcands);
-//        trkcands.addAll(selectedTracks);
-//    }
     /**
      * @param selectedTracks the list of selected tracks
      * @param selectedTrk the selected track
@@ -902,48 +893,49 @@ public class TrackCandListFinder {
                             cand.get(0).get_Dir().x() / cand.get(0).get_Dir().z(),
                             cand.get(0).get_Dir().y() / cand.get(0).get_Dir().z());
                     cand.set_StateVecAtReg1MiddlePlane(VecAtReg1MiddlePlane);
-                    // initialize the fitter with the candidate track
-                    KFitterDoca kFit = new KFitterDoca(cand, DcDetector, false, dcSwim, 0);
-                    kFit.totNumIter = 1;
-
-                    if(LOGGER.getLevel()==Level.FINE) {
-                        startTime = System.currentTimeMillis();
-                    }
-                    kFit.runFitter(cand.get(0).get_Sector());
-                    LOGGER.log(Level.FINE, "Kalman fitter = " + (System.currentTimeMillis() - startTime));
                     
-
-                    if (kFit.finalStateVec == null) {
+                    
+                    LOGGER.log(Level.FINE, "Kalman fitter - 2 = " + (System.currentTimeMillis() - startTime));                        
+                    
+					KFitter kFZRef = new KFitter(true, 1, 1, dcSwim, Constants.getInstance().Z, Libr.JNP);
+					List<Surface> measSurfaces = getMeasSurfaces(cand, DcDetector);
+					StateVecs svs = new StateVecs();
+					org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec initSV = svs.new StateVec(0);
+					getInitState(cand, measSurfaces.get(0).z, 0, initSV, dcSwim, new float[3]);
+					kFZRef.init(measSurfaces, initSV);						
+					
+                    kFZRef.runFitter();
+                    
+                    if (kFZRef.finalStateVec == null) {
                         continue;
                     }
+                    
+                    List<org.jlab.rec.dc.trajectory.StateVec> kfStateVecsAlongTrajectory = setKFStateVecsAlongTrajectory(kFZRef);                                      
 
-                    // initialize the state vector corresponding to the last measurement site
                     StateVec fn = new StateVec();
+					if (!kFZRef.setFitFailed && kFZRef.finalStateVec != null) {
+                        fn.set(kFZRef.finalStateVec.x, kFZRef.finalStateVec.y, kFZRef.finalStateVec.tx, kFZRef.finalStateVec.ty);
+						fn.setZ(kFZRef.finalStateVec.z);
+						cand.setFinalStateVec(fn);
 
-                    //LOGGER.log(Level.FINE, " fit failed due to chi2 "+kFit.setFitFailed+" p "+1./Math.abs(kFit.finalStateVec.Q));
-                    if (!kFit.setFitFailed && kFit.finalStateVec != null) {
-                        // set the state vector at the last measurement site
-                        fn.set(kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty);
-                        //set the track parameters if the filter does not fail
-                        fn.setZ(kFit.finalStateVec.z);
-                        cand.setFinalStateVec(fn);
-                        cand.set_P(1. / Math.abs(kFit.finalStateVec.Q));
-                        cand.set_Q((int) Math.signum(kFit.finalStateVec.Q));
-                        this.setTrackPars(cand, traj, trjFind, fn, kFit.finalStateVec.z, DcDetector, dcSwim);
-                        if(cand.fit_Successful==true) {
-                            // candidate parameters are set from the state vector
-                            cand.set_FitChi2(kFit.chi2);
-                            cand.set_FitNDF(kFit.NDF);
-                            cand.set_FitConvergenceStatus(kFit.ConvStatus);
-                            cand.set_Id(cands.size() + 1);
-                            cand.set_CovMat(kFit.finalCovMat.covMat);
-                            cand.setStateVecs(kFit.kfStateVecsAlongTrajectory);
-                            // add candidate to list of tracks
-                            cands.add(cand);
-                        }
-                    }
-                    //this.matchHits(traj.getStateVecs(), cand, DcDetector);
-//                    cands.add(cand);
+						// set the track parameters
+						cand.set_P(1. / Math.abs(kFZRef.finalStateVec.Q));
+						cand.set_Q((int) Math.signum(kFZRef.finalStateVec.Q));
+						this.setTrackPars(cand, traj, trjFind, fn, kFZRef.finalStateVec.z, DcDetector, dcSwim);
+
+						if (cand.fit_Successful == true) {
+							// candidate parameters
+							cand.set_FitChi2(kFZRef.chi2);
+							cand.set_FitNDF(kFZRef.NDF);
+							cand.set_FitConvergenceStatus(kFZRef.ConvStatus);
+							cand.set_Id(cands.size() + 1);
+							cand.set_CovMat(kFZRef.finalStateVec.CM);
+							cand.setStateVecs(kfStateVecsAlongTrajectory);																					
+							
+							// add candidate to list of tracks	
+							cands.add(cand);
+						}
+					}
                 }
             }
         }
@@ -952,6 +944,8 @@ public class TrackCandListFinder {
 
     private List<Track> findCurvedTracks(CrossList crossList, DCGeant4Factory DcDetector, double TORSCALE, Swim dcSwim,
             boolean donotapplyCuts) {
+    	    	
+    	
         if(LOGGER.getLevel()==Level.FINE) {
             startTime2 = System.currentTimeMillis();
         }
@@ -1142,42 +1136,49 @@ public class TrackCandListFinder {
                                 cand.get(0).get_Dir().x() / cand.get(0).get_Dir().z(),
                                 cand.get(0).get_Dir().y() / cand.get(0).get_Dir().z());
                         cand.set_StateVecAtReg1MiddlePlane(VecAtReg1MiddlePlane);
-                        // initialize the fitter with the candidate track
-                        KFitterDoca kFit = null;
+                        
+                        
                         StateVec fitStateVec = null;
-                        
-                        LOGGER.log(Level.FINE, "Kalman fitter - 2 = " + (System.currentTimeMillis() - startTime));
-                        
                         // prefer to initialize the seed with region 2 cross due to higher background in region 1
                         int crossIdxinList = 1;
                         if (cand.get(1).isPseudoCross) {
                             crossIdxinList = 0;
                         }
-                        kFit = new KFitterDoca(cand, DcDetector, false, dcSwim, crossIdxinList);
-                        kFit.totNumIter = 10;
-                        kFit.runFitter(cand.get(0).get_Sector());
-                        if (kFit.finalStateVec == null) {
+                        
+                        LOGGER.log(Level.FINE, "Kalman fitter - 2 = " + (System.currentTimeMillis() - startTime));                        
+                        
+						KFitter kFZRef = new KFitter(true, 10, 1, dcSwim, Constants.getInstance().Z, Libr.JNP);
+						List<Surface> measSurfaces = getMeasSurfaces(cand, DcDetector);
+						StateVecs svs = new StateVecs();
+						org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec initSV = svs.new StateVec(0);
+						getInitState(cand, measSurfaces.get(0).z, crossIdxinList, initSV, dcSwim, new float[3]);
+						kFZRef.init(measSurfaces, initSV);						
+						
+                        kFZRef.runFitter();
+                        List<org.jlab.rec.dc.trajectory.StateVec> kfStateVecsAlongTrajectory = setKFStateVecsAlongTrajectory(kFZRef);
+                        
+                        if (kFZRef.finalStateVec == null) {
                             continue;
                         } else {
-                            if (kFit.chi2 < Constants.MAXCHI2) {
+                            if (kFZRef.chi2 < Constants.MAXCHI2) {
                                 
-                                fitStateVec = new StateVec(kFit.finalStateVec.x,
-                                        kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty);
-                                q = (int) Math.signum(kFit.finalStateVec.Q);
-                                p = 1. / Math.abs(kFit.finalStateVec.Q);
-                                fitStateVec.setZ(kFit.finalStateVec.z);
+                                fitStateVec = new StateVec(kFZRef.finalStateVec.x,
+                                		kFZRef.finalStateVec.y, kFZRef.finalStateVec.tx, kFZRef.finalStateVec.ty);
+                                q = (int) Math.signum(kFZRef.finalStateVec.Q);
+                                p = 1. / Math.abs(kFZRef.finalStateVec.Q);
+                                fitStateVec.setZ(kFZRef.finalStateVec.z);
 
                                 //set the track parameters 
                                 cand.set_P(p);
                                 cand.set_Q(q);
 
                                 // candidate parameters 
-                                cand.set_FitChi2(kFit.chi2);
-                                cand.set_FitNDF(kFit.NDF);
-                                cand.set_FitConvergenceStatus(kFit.ConvStatus);
+                                cand.set_FitChi2(kFZRef.chi2);
+                                cand.set_FitNDF(kFZRef.NDF);
+                                cand.set_FitConvergenceStatus(kFZRef.ConvStatus);
 
-                                cand.set_CovMat(kFit.finalCovMat.covMat);
-                                cand.setStateVecs(kFit.kfStateVecsAlongTrajectory);
+                                cand.set_CovMat(kFZRef.finalStateVec.CM);
+                                cand.setStateVecs(kfStateVecsAlongTrajectory);                                    							
 
                                 cand.setFinalStateVec(fitStateVec);
                                 cand.set_Id(cands.size() + 1);
@@ -1187,15 +1188,204 @@ public class TrackCandListFinder {
                                         DcDetector, dcSwim);
                                 // add candidate to list of tracks
                                 if (cand.fit_Successful = true) {
-                                    cands.add(cand);
+                                    cands.add(cand);                                    
                                 }
                             }
                         }
+                                          
+
                     }
                 }
             }
         }
         return cands;
     }
+    
+    public List<org.jlab.rec.dc.trajectory.StateVec> setKFStateVecsAlongTrajectory(KFitter kFZRef) {
+    	List<org.jlab.rec.dc.trajectory.StateVec> kfStateVecsAlongTrajectory = new ArrayList<>();
+    	
+    	for(int i = 0; i < kFZRef.kfStateVecsAlongTrajectory.size(); i++) {
+    		org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec svc = kFZRef.kfStateVecsAlongTrajectory.get(i);
+    		
+    		org.jlab.rec.dc.trajectory.StateVec sv = new org.jlab.rec.dc.trajectory.StateVec(svc.x, svc.y, svc.tx, svc.ty);
+            sv.setZ(svc.z);
+            sv.setB(svc.B);
+            sv.setPathLength(svc.getPathLength());  
+            sv.setProjector(svc.getProjector());
+            sv.setProjectorDoca(svc.getProjectorDoca());
+            kfStateVecsAlongTrajectory.add(sv);
+    	}
+    	
+    	return kfStateVecsAlongTrajectory;
+    }
+
+    public void getInitState(Track trkcand, double z0, int c, org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec initStateVec, Swim dcSwim, float[] bf) {
+
+    	Point3D trkCrs = trkcand.get(c).get_Point();
+    	Point3D trkCrsD = trkcand.get(c).get_Dir();
+    	//org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec initSV = svs.new StateVec(0);
+    	initStateVec.x = trkCrs.x();
+    	initStateVec.y = trkCrs.y();
+    	initStateVec.z = trkCrs.z();
+    	initStateVec.tx = trkCrsD.x()/trkCrsD.z();
+    	initStateVec.ty = trkCrsD.y()/trkCrsD.z();
+    	initStateVec.Q = trkcand.get_Q() / trkcand.get_P();
+
+    	RungeKuttaDoca rk = new RungeKuttaDoca();
+    	rk.SwimToZ(trkcand.get(0).get_Sector(), initStateVec, dcSwim, z0, bf);        
+
+    	//LOGGER.log(Level.FINE, (0)+"] init "+this.trackTraj.get(0).x+","+this.trackTraj.get(0).y+","+
+    	//             this.trackTraj.get(0).z+","+this.trackTraj.get(0).tx+","+this.trackTraj.get(0).ty+" "+1/this.trackTraj.get(0).Q); 
+    	double err_sl1 = trkcand.get(0).get_Segment1().get_fittedCluster().get_clusterLineFitSlopeErr();
+    	double err_sl2 = trkcand.get(0).get_Segment2().get_fittedCluster().get_clusterLineFitSlopeErr();
+    	double err_it1 = trkcand.get(0).get_Segment1().get_fittedCluster().get_clusterLineFitInterceptErr();
+    	double err_it2 = trkcand.get(0).get_Segment2().get_fittedCluster().get_clusterLineFitInterceptErr();
+    	double wy_over_wx = (FastMath.cos(Math.toRadians(6.)) / FastMath.sin(Math.toRadians(6.)));
+
+    	double eux = 0.5 * Math.sqrt(err_sl1 * err_sl1 + err_sl2 * err_sl2);
+    	double euy = 0.5 * wy_over_wx * Math.sqrt(err_sl1 * err_sl1 + err_sl2 * err_sl2);
+    	double z = trkcand.get(0).get_Point().z();
+    	double ex = 0.5 * Math.sqrt(err_it1 * err_it1 + err_it2 * err_it2 + z * z * (err_sl1 * err_sl1 + err_sl2 * err_sl2));
+    	double ey = 0.5 * wy_over_wx * Math.sqrt(err_it1 * err_it1 + err_it2 * err_it2 + z * z * (err_sl1 * err_sl1 + err_sl2 * err_sl2));
+    	double epSq = 0.001 * trkcand.get_P() * trkcand.get_P();
+
+    	
+        Matrix initCMatrix = new Matrix();
+        initCMatrix.set(ex * ex, 0, 0, 0, 0,
+            0, ey * ey, 0, 0, 0,
+            0, 0, eux * eux, 0, 0,
+            0, 0, 0, euy * euy, 0,
+            0, 0, 0, 0, epSq
+        );
+                       
+
+    	initStateVec.CM = initCMatrix;          
+    }    
+
+    public List<Surface> getMeasSurfaces(Track trkcand, DCGeant4Factory DcDetector) {
+
+    	List<HitOnTrack> hOTS = new ArrayList<>(); // the list of hits on track                
+    	FittedHit hitOnTrk;
+    	// loops over the regions (1 to 3) and the superlayers in a region (1 to 2) and obtains the hits on track
+    	for (int c = 0; c < 3; c++) {
+    		for (int s = 0; s < 2; s++) {
+    			for (int h = 0; h < trkcand.get(c).get(s).size(); h++) {
+    				//                    if (trkcand.get(c).get(s).get(h).get_Id() == -1 /*|| trkcand.get(c).get(s).get(h).get_Id() == 0*/) { //PASS1
+    				if (trkcand.get(c).get(s).get(h).get_Id() == -1 || trkcand.get(c).get(s).get(h).get_Id() == 0) { 
+    					continue;
+    				}
+    				trkcand.get(c).get(s).get(h).calc_CellSize(DcDetector);
+    				hitOnTrk = trkcand.get(c).get(s).get(h); 
+    				int slayr = trkcand.get(c).get(s).get(h).get_Superlayer();
+
+    				double sl1 = trkcand.get(c).get(s).get_fittedCluster().get_clusterLineFitSlope();
+    				double it1 = trkcand.get(c).get(s).get_fittedCluster().get_clusterLineFitIntercept();
+
+    				double Z = hitOnTrk.get_Z();
+    				double X = sl1 * Z + it1;
+
+    				HitOnTrack hot = new HitOnTrack(slayr, X, Z,  
+    						trkcand.get(c).get(s).get(h).get_WireMaxSag(),
+    						trkcand.get(c).get(s).get(h).get_WireLine()
+    						);
+    				double err_sl1 = trkcand.get(c).get(s).get_fittedCluster().get_clusterLineFitSlopeErr();
+
+    				double err_it1 = trkcand.get(c).get(s).get_fittedCluster().get_clusterLineFitInterceptErr();
+    				double err_cov1 = trkcand.get(c).get(s).get_fittedCluster().get_clusterLineFitSlIntCov();
+
+    				hot._Unc[0] = Math.sqrt(err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1);
+    				hot._hitError = err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1 + 2 * Z * err_cov1 + trkcand.get(c).get(s).get(h).get_DocaErr()*trkcand.get(c).get(s).get(h).get_DocaErr();
+    				//if(trkcand.get(c).get(s).get(h).get_Time()/CCDBConstants.getTMAXSUPERLAYER()[trkcand.get(c).get(s).get(h).get_Sector()-1][trkcand.get(c).get(s).get(h).get_Superlayer()-1]<1.1)
+    				// hot._hitError = 100000; //exclude outoftimers from fit
+    				hot.region = trkcand.get(c).get(s).get(h).get_Region();
+    				hot.sector = trkcand.get(c).get(s).get(h).get_Sector();
+    				hot.superlayer = trkcand.get(c).get(s).get(h).get_Superlayer();
+    				hot.layer = trkcand.get(c).get(s).get(h).get_Layer();                    
+
+    				hot._doca[0] = trkcand.get(c).get(s).get(h).get_ClusFitDoca();
+
+    				double LR = Math.signum(trkcand.get(c).get(s).get(h).get_XWire()-trkcand.get(c).get(s).get(h).get_X());
+
+    				hot._doca[0]*=LR;
+    				hot._hitError = trkcand.get(c).get(s).get(h).get_DocaErr()*trkcand.get(c).get(s).get(h).get_DocaErr();
+    				//LOGGER.log(Level.FINE, " Z "+Z+" ferr "+(float)(hot._Unc /(hot._hitError/4.)));
+    				hot._Unc[0] = hot._hitError;
+    				hOTS.add(hot);
+
+    			}
+    		}
+    	}
+    	Collections.sort(hOTS); // sort the collection in order of increasing Z value (i.e. going downstream from the target)
+    	// identify double hits and take the average position          
+    	for (int i = 0; i < hOTS.size(); i++) {
+    		if (i > 0) {
+    			if (Math.abs(hOTS.get(i - 1)._Z - hOTS.get(i)._Z)<0.01) {
+    				hOTS.get(i - 1)._doca[1] = hOTS.get(i)._doca[0];
+    				hOTS.get(i - 1)._Unc[1] = hOTS.get(i)._Unc[0];
+    				hOTS.get(i - 1)._wireLine[1] = hOTS.get(i)._wireLine[0];
+    				hOTS.remove(i);
+    				hOTS.get(i - 1).nMeas = 2;
+    			}
+    		}
+    	}        
+
+    	List<Surface> surfaces =  new ArrayList<>(hOTS.size());
+    	for (int i = 0; i < hOTS.size(); i++) {
+    		Surface surf = new Surface(hOTS.get(i).region, hOTS.get(i)._Z, hOTS.get(i)._X, hOTS.get(i)._tilt, hOTS.get(i)._wireMaxSag, 
+    				hOTS.get(i)._doca, hOTS.get(i)._Unc, hOTS.get(i)._hitError, hOTS.get(i)._wireLine);
+    		surf.setSector(hOTS.get(i).sector);
+    		surf.setSuperLayer(hOTS.get(i).superlayer);
+    		surf.setLayer(hOTS.get(i).layer);
+    		surf.setNMeas(hOTS.get(i).nMeas);
+    		surfaces.add(i, surf);
+    	}
+
+    	return surfaces;
+    }
+
+    public class HitOnTrack implements Comparable<HitOnTrack> {
+
+    	public double _hitError;
+    	public double _X;
+    	public double _Z;
+    	public double[] _Unc = new double[2];
+    	public double _tilt;
+    	public double[] _doca = new double[2];
+    	public double _wireMaxSag;
+    	public Line3D[] _wireLine = new Line3D[2];
+    	public int region;
+    	public int superlayer;
+    	public int sector;
+    	public int layer;
+    	public int nMeas = 1;
+
+
+    	public HitOnTrack(int superlayer, double X, double Z, double wiremaxsag, Line3D wireLine) {
+    		_X = X;
+    		_Z = Z;
+    		_wireMaxSag = wiremaxsag;
+    		_wireLine[0] = wireLine;
+    		_doca[0] = -99;
+    		_doca[1] = -99;
+    		_Unc[0] = 1;
+    		_Unc[1] = 1;
+
+    		//use stereo angle in fit based on wire direction
+    		_tilt = 90-Math.toDegrees(wireLine.direction().asUnit().angle(new Vector3D(1,0,0)));
+    	}
+
+    	@Override
+    	public int compareTo(HitOnTrack o) {
+    		if (this._Z == o._Z) {
+    			return 0;
+    		}
+    		if (this._Z > o._Z) {
+    			return 1;
+    		} else {
+    			return -1;
+    		}
+    	}
+    }
+
 
 }

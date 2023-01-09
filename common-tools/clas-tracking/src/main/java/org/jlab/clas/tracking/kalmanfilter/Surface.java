@@ -7,6 +7,7 @@ import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Arc3D;
 import org.jlab.geom.prim.Cylindrical3D;
+import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Transformation3D;
 import org.jlab.geom.prim.Vector3D;
 
@@ -37,6 +38,41 @@ public class Surface implements Comparable<Surface> {
     public double swimAccuracy;
     public boolean passive = false;
     public double hemisphere = 1;
+    
+    // For DC
+    public double z;
+    public double x;
+    public double[] unc = new double[2];
+    public double tilt;
+    public double[] doca = new double[2];
+    public double wireMaxSag;
+    public Line3D[] wireLine = new Line3D[2];
+    public boolean reject = false;
+    public int region;
+    public int superlayer;
+    public int nMeas = 1;
+    
+    public void setNMeas(int n) {
+    	nMeas = n;
+    }
+    
+    public int getNMeas() {
+    	return nMeas;
+    }
+    
+    // For DC
+    public Surface(int region, double z, double x, double tilt, double wireMaxSag, double[] doca, double[] unc, double error, Line3D[] wireLine) {
+    	type = Type.LINEDOCA;
+    	this.region = region;
+    	this.z = z;
+        this.x = x;
+        this.tilt = tilt;
+        this.wireMaxSag = wireMaxSag;
+        this.doca = doca;
+        this.unc = unc;
+        this.error = error;
+        this.wireLine = wireLine;
+    }
     
     public Surface(Plane3D plane3d, Point3D refrPoint, Point3D c1, Point3D c2, double accuracy) {
         type = Type.PLANEWITHPOINT;
@@ -167,6 +203,20 @@ public class Surface implements Comparable<Surface> {
      */
     public void setLayer(int layer) {
         this.layer = layer;
+    }
+    
+    /**
+     * @return the superlayer
+     */
+    public int getSuperLayer() {
+        return superlayer;
+    }
+
+    /**
+     * @param superlayer the superlayer to set
+     */
+    public void setSuperLayer(int superlayer) {
+        this.superlayer = superlayer;
     }
 
     /**

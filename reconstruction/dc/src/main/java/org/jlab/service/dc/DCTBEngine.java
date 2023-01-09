@@ -1,16 +1,20 @@
 package org.jlab.service.dc;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
+import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.jnp.matrix.Matrix;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.banks.HitReader;
 import org.jlab.rec.dc.banks.RecoBankWriter;
@@ -27,11 +31,16 @@ import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
-import org.jlab.rec.dc.track.fit.KFitterDoca;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
 import org.jlab.utils.groups.IndexedTable;
+
+import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.clas.tracking.kalmanfilter.zReference.KFitter;
+import org.jlab.clas.tracking.kalmanfilter.zReference.StateVecs;
+import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
+import org.jlab.clas.tracking.utilities.RungeKuttaDoca;
 
 public class DCTBEngine extends DCEngine {
     
@@ -60,7 +69,6 @@ public class DCTBEngine extends DCEngine {
     
     @Override
     public boolean processDataEvent(DataEvent event) {
-
         int run = this.getRun(event);
         if(run==0) return true;
         
@@ -165,9 +173,6 @@ public class DCTBEngine extends DCEngine {
         DataBank trkbank = event.getBank(this.getBanks().getInputTracksBank());
         //DataBank trkcovbank = event.getBank("TimeBasedTrkg::TBCovMat");
         int trkrows = trkbank.rows();
-        //if(trkbank.rows()!=trkcovbank.rows()) {
-        //    return true; // HB tracks not saved correctly
-        //}
         Track[] TrackArray = new Track[trkrows];
         for (int i = 0; i < trkrows; i++) {
             Track HBtrk = new Track();
@@ -182,15 +187,6 @@ public class DCTBEngine extends DCEngine {
                     trkbank.getFloat("tx", i), trkbank.getFloat("ty", i));
             HBFinalSV.setZ(trkbank.getFloat("z", i));
             HBtrk.setFinalStateVec(HBFinalSV);
-//            Matrix initCMatrix = new Matrix();
-//            initCMatrix.set(new double[][]{
-//            {trkcovbank.getFloat("C11", i), trkcovbank.getFloat("C12", i), trkcovbank.getFloat("C13", i), trkcovbank.getFloat("C14", i), trkcovbank.getFloat("C15", i)},
-//            {trkcovbank.getFloat("C21", i), trkcovbank.getFloat("C22", i), trkcovbank.getFloat("C23", i), trkcovbank.getFloat("C24", i), trkcovbank.getFloat("C25", i)},
-//            {trkcovbank.getFloat("C31", i), trkcovbank.getFloat("C32", i), trkcovbank.getFloat("C33", i), trkcovbank.getFloat("C34", i), trkcovbank.getFloat("C35", i)},
-//            {trkcovbank.getFloat("C41", i), trkcovbank.getFloat("C42", i), trkcovbank.getFloat("C43", i), trkcovbank.getFloat("C44", i), trkcovbank.getFloat("C45", i)},
-//            {trkcovbank.getFloat("C51", i), trkcovbank.getFloat("C52", i), trkcovbank.getFloat("C53", i), trkcovbank.getFloat("C54", i), trkcovbank.getFloat("C55", i)}
-//            });
-//            HBtrk.set_CovMat(initCMatrix);
             TrackArray[HBtrk.get_Id()-1] = HBtrk; 
             TrackArray[HBtrk.get_Id()-1].set_Status(0);
         }
@@ -217,8 +213,9 @@ public class DCTBEngine extends DCEngine {
             beamYoffset += raster_bank.getFloat("y", 0);
         }
 	TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
-        TrajectoryFinder trjFind = new TrajectoryFinder();
-        for (Track TrackArray1 : TrackArray) {
+        TrajectoryFinder trjFind = new TrajectoryFinder();        
+        
+        for (Track TrackArray1 : TrackArray) {        	        	
             if (TrackArray1 == null || TrackArray1.get_ListOfHBSegments() == null || TrackArray1.get_ListOfHBSegments().size() < 5) {
                 continue;
             }
@@ -228,44 +225,52 @@ public class DCTBEngine extends DCEngine {
                 continue;
             }
             crosses.addAll(TrackArray1);
-            //if(TrackArray[i].get_FitChi2()>200) {
-            //    resetTrackParams(TrackArray[i], new DCSwimmer());
-            //}
-            KFitterDoca kFit = new KFitterDoca(TrackArray1, Constants.getInstance().dcDetector, true, dcSwim, 0);
-            StateVec fn = new StateVec();
-            kFit.runFitter(TrackArray1.get(0).get_Sector());
-            if (kFit.setFitFailed==false && kFit.finalStateVec!=null) { 
+            
+			KFitter kFZRef = new KFitter(true, 30, 1, dcSwim, Constants.getInstance().Z, Libr.JNP);
+			List<Surface> measSurfaces = getMeasSurfaces(TrackArray1, Constants.getInstance().dcDetector);
+			StateVecs svs = new StateVecs();
+			org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec initSV = svs.new StateVec(0);
+			getInitState(TrackArray1, measSurfaces.get(0).z, initSV, kFZRef, dcSwim, new float[3]);
+			kFZRef.initFromHB(measSurfaces, initSV, TrackArray1.get(0).get(0).get(0).get_Beta());			
+			kFZRef.runFitter();
+			List<org.jlab.rec.dc.trajectory.StateVec> kfStateVecsAlongTrajectory = setKFStateVecsAlongTrajectory(kFZRef);			
+			
+            StateVec fn = new StateVec(); 
+            if (kFZRef.setFitFailed==false && kFZRef.finalStateVec!=null) { 
                 // set the state vector at the last measurement site
-                fn.set(kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty); 
+                fn.set(kFZRef.finalStateVec.x, kFZRef.finalStateVec.y, kFZRef.finalStateVec.tx, kFZRef.finalStateVec.ty); 
                 //set the track parameters if the filter does not fail
-                TrackArray1.set_P(1./Math.abs(kFit.finalStateVec.Q));
-                TrackArray1.set_Q((int)Math.signum(kFit.finalStateVec.Q));
-                trkcandFinder.setTrackPars(TrackArray1, new Trajectory(), trjFind, fn, kFit.finalStateVec.z, Constants.getInstance().dcDetector, dcSwim, beamXoffset, beamYoffset);
+                TrackArray1.set_P(1./Math.abs(kFZRef.finalStateVec.Q));
+                TrackArray1.set_Q((int)Math.signum(kFZRef.finalStateVec.Q));                
+                
+                trkcandFinder.setTrackPars(TrackArray1, new Trajectory(), trjFind, fn, kFZRef.finalStateVec.z, Constants.getInstance().dcDetector, dcSwim, beamXoffset, beamYoffset);
                 // candidate parameters are set from the state vector
                 if (TrackArray1.fit_Successful == false) {
                     continue;
-                }
-                TrackArray1.set_FitChi2(kFit.chi2);
-                TrackArray1.set_FitNDF(kFit.NDF);
-                TrackArray1.setStateVecs(kFit.kfStateVecsAlongTrajectory);
-                TrackArray1.set_FitConvergenceStatus(kFit.ConvStatus);
-                //TrackArray[i].set_Id(TrackArray[i].size()+1);
-                //TrackArray[i].set_CovMat(kFit.finalCovMat.covMat);
+                }                
+                
+                TrackArray1.set_FitChi2(kFZRef.chi2);
+                TrackArray1.set_FitNDF(kFZRef.NDF);
+                TrackArray1.setStateVecs(kfStateVecsAlongTrajectory);
+                TrackArray1.set_FitConvergenceStatus(kFZRef.ConvStatus);
                 if (TrackArray1.get_Vtx0().toVector3D().mag() > 500) {
                     continue;
                 }
+                
                 // get CovMat at vertex
                 Point3D VTCS = crosses.get(0).getCoordsInSector(TrackArray1.get_Vtx0().x(), TrackArray1.get_Vtx0().y(), TrackArray1.get_Vtx0().z());
-                TrackArray1.set_CovMat(kFit.propagateToVtx(crosses.get(0).get_Sector(), VTCS.z()));
+                TrackArray1.set_CovMat(kFZRef.propagateToVtx(crosses.get(0).get_Sector(), VTCS.z()));
+                
                 if (TrackArray1.isGood()) {
                     trkcands.add(TrackArray1);
                 }
-            }
-        }
-        
 
+            }
+              		
+        }        
+    	
         if(!trkcands.isEmpty()) {
-            //trkcandFinder.removeOverlappingTracks(trkcands);		// remove overlaps
+            //trkcandFinder.removeOverlappingTracks(trkcands);		// remove overlaps        	        	
             for(Track trk: trkcands) {
                 int trkId = trk.get_Id();
                 // reset the id
@@ -310,8 +315,247 @@ public class DCTBEngine extends DCEngine {
         return true;
     }
 
+    public List<org.jlab.rec.dc.trajectory.StateVec> setKFStateVecsAlongTrajectory(KFitter kFZRef) {
+    	List<org.jlab.rec.dc.trajectory.StateVec> kfStateVecsAlongTrajectory = new ArrayList<>();
+    	
+    	for(int i = 0; i < kFZRef.kfStateVecsAlongTrajectory.size(); i++) {
+    		org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec svc = kFZRef.kfStateVecsAlongTrajectory.get(i);
+    		
+    		org.jlab.rec.dc.trajectory.StateVec sv = new org.jlab.rec.dc.trajectory.StateVec(svc.x, svc.y, svc.tx, svc.ty);
+            sv.setZ(svc.z);
+            sv.setB(svc.B);
+            sv.setPathLength(svc.getPathLength());   
+            kfStateVecsAlongTrajectory.add(sv);
+    	}
+    	
+    	return kfStateVecsAlongTrajectory;
+    }
     
+    public void getInitState(Track trkcand, double z0, org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec initStateVec, KFitter kf, Swim dcSwim, float[] bf) {
+        if (trkcand != null && trkcand.getFinalStateVec()!=null ) {
+            initStateVec.x = trkcand.getFinalStateVec().x();
+            initStateVec.y = trkcand.getFinalStateVec().y();
+            initStateVec.z = trkcand.getFinalStateVec().getZ();
+            initStateVec.tx = trkcand.getFinalStateVec().tanThetaX();
+            initStateVec.ty = trkcand.getFinalStateVec().tanThetaY();
+            initStateVec.Q = ((double) trkcand.get_Q())/trkcand.get_P();
 
+            RungeKuttaDoca rk = new RungeKuttaDoca();
+            rk.SwimToZ(trkcand.get(0).get_Sector(), initStateVec, dcSwim, z0, bf);
+
+            //initCM.covMat = trkcand.get_CovMat();
+            //test
+            StateVecs svs = new StateVecs();
+            org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec rinitSV = svs.new StateVec(0);
+            rinitSV.x = trkcand.getFinalStateVec().x();
+            rinitSV.y = trkcand.getFinalStateVec().y();
+            rinitSV.z = trkcand.getFinalStateVec().getZ();
+            rinitSV.tx = trkcand.getFinalStateVec().tanThetaX();
+            rinitSV.ty = trkcand.getFinalStateVec().tanThetaY();
+            rinitSV.Q = ((double) trkcand.get_Q())/trkcand.get_P();
+            double[] FTF = new double[25];
+            double[] F = this.F(trkcand.get(0).get_Sector(), z0, rinitSV, rk, dcSwim, bf);
+            for(int i = 0; i<5; i++) {
+                FTF[i*5+i]=F[i]*F[i];
+
+            }
+
+            //Matrix initCMatrix = new Matrix(FTF);
+            Matrix initCMatrix = new Matrix();
+            initCMatrix.set(FTF);
+            initStateVec.CM = initCMatrix;
+            
+        } else {
+            kf.setFitFailed = true;
+        }
+
+    }
+    
+    private org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec reset(org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec sv, org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec stateVec) {
+    	StateVecs svs = new StateVecs();
+        sv = svs.new StateVec(stateVec.k);
+        sv.x = stateVec.x;
+        sv.y = stateVec.y;
+        sv.tx = stateVec.tx;
+        sv.ty = stateVec.ty;
+        sv.z = stateVec.z;
+        sv.Q = stateVec.Q;
+
+        return sv;
+    }
+    private void swimToSite(int sector, double z0,
+    		org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec SVplus, org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec SVminus, RungeKuttaDoca rk, Swim dcSwim, float[] bf) {
+
+        rk.SwimToZ(sector, SVplus, dcSwim, z0, bf);
+        rk.SwimToZ(sector, SVminus, dcSwim, z0, bf);
+    }
+    
+    double[] F(int sector, double z0, org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec stateVec, RungeKuttaDoca rk, Swim dcSwim, float[] bf) {
+        double[] _F = new double[5];
+        org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec SVplus = null;
+        org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec SVminus = null;
+
+        SVplus = this.reset(SVplus, stateVec);
+        SVminus = this.reset(SVminus, stateVec);
+
+        double delt_x = 0.05;
+        SVplus.x += delt_x/2.;
+        SVminus.x-= delt_x/2.;
+
+        this.swimToSite(sector, z0, SVplus, SVminus, rk, dcSwim, bf);
+
+        _F[0] = (SVplus.x - SVminus.x)/delt_x;
+
+        SVplus = this.reset(SVplus, stateVec);
+        SVminus = this.reset(SVminus, stateVec);
+
+        double delt_y = 0.05;
+        SVplus.y += delt_y/2.;
+        SVminus.y-= delt_y/2.;
+
+        this.swimToSite(sector, z0, SVplus, SVminus, rk, dcSwim, bf);
+
+        _F[1] = (SVplus.y - SVminus.y)/delt_y;
+
+        SVplus = this.reset(SVplus, stateVec);
+        SVminus = this.reset(SVminus, stateVec);
+
+        double delt_tx = 0.001;
+        SVplus.tx += delt_tx/2.;
+        SVminus.tx-= delt_tx/2.;
+
+        this.swimToSite(sector, z0, SVplus, SVminus, rk, dcSwim, bf);
+
+        _F[2] = (SVplus.tx - SVminus.tx)/delt_tx;
+
+        SVplus = this.reset(SVplus, stateVec);
+        SVminus = this.reset(SVminus, stateVec);
+
+        double delt_ty = 0.001;
+        SVplus.ty += delt_ty/2.;
+        SVminus.ty-= delt_ty/2.;
+
+        this.swimToSite(sector, z0, SVplus, SVminus, rk, dcSwim, bf);
+
+        _F[3] = (SVplus.ty - SVminus.ty)/delt_ty;
+
+        SVplus = this.reset(SVplus, stateVec);
+        SVminus = this.reset(SVminus, stateVec);
+
+
+        _F[4] = 0.01/Math.abs(SVplus.Q);
+
+        return _F;
+
+    }
+        
+    public List<Surface> getMeasSurfaces(Track trk, DCGeant4Factory DcDetector) { 
+        List<HitOnTrack> hOTS = new ArrayList<>(); // the list of hits on track		
+        FittedHit hitOnTrk;
+        for(int s = 0; s < trk.get_ListOfHBSegments().size(); s++) {
+            for(int h = 0; h < trk.get_ListOfHBSegments().get(s).size(); h++) { 
+                trk.get_ListOfHBSegments().get(s).get(h).calc_CellSize(DcDetector);
+                hitOnTrk = trk.get_ListOfHBSegments().get(s).get(h); 
+                int slayr = trk.get_ListOfHBSegments().get(s).get(h).get_Superlayer();
+
+                double sl1 = trk.get_ListOfHBSegments().get(s).get_fittedCluster().get_clusterLineFitSlope();
+                double it1 = trk.get_ListOfHBSegments().get(s).get_fittedCluster().get_clusterLineFitIntercept();
+
+                double Z = hitOnTrk.get_Z();
+                double X = sl1 * Z + it1;
+                HitOnTrack hot = new HitOnTrack(slayr, X, Z, 
+                        hitOnTrk.get_WireMaxSag(),
+                        hitOnTrk.get_WireLine());
+                
+                hot._doca[0] = trk.get_ListOfHBSegments().get(s).get(h).get_Doca();
+                
+                double LR = Math.signum(trk.get_ListOfHBSegments().get(s).get(h).get_XWire()-trk.get_ListOfHBSegments().get(s).get(h).get_X());
+                hot._doca[0]*=LR;
+                hot._hitError = trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr()*trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr();
+                //LOGGER.log(Level.FINE, " Z "+Z+" ferr "+(float)(hot._Unc /(hot._hitError/4.)));
+                hot._Unc[0] = hot._hitError;
+                hot.region = trk.get_ListOfHBSegments().get(s).get(h).get_Region();
+				hot.sector = trk.get_ListOfHBSegments().get(s).get(h).get_Sector();
+				hot.superlayer = trk.get_ListOfHBSegments().get(s).get(h).get_Superlayer();
+				hot.layer = trk.get_ListOfHBSegments().get(s).get(h).get_Layer();   
+                hOTS.add(hot);                
+            }
+        }
+                                       
+        Collections.sort(hOTS); // sort the collection in order of increasing Z value (i.e. going downstream from the target)
+        // identify double hits and take the average position		
+        for (int i = 0; i < hOTS.size(); i++) {
+            if (i > 0) {
+                if (Math.abs(hOTS.get(i - 1)._Z - hOTS.get(i)._Z)<0.01) {
+                    hOTS.get(i - 1)._doca[1] = hOTS.get(i)._doca[0];
+                    hOTS.get(i - 1)._Unc[1] = hOTS.get(i)._Unc[0];
+                    hOTS.get(i - 1)._wireLine[1] = hOTS.get(i)._wireLine[0];
+                    hOTS.remove(i);
+                    hOTS.get(i - 1).nMeas = 2;
+                }
+            }
+        }                
+
+        List<Surface> surfaces = new ArrayList<>(hOTS.size());
+        
+    	for (int i = 0; i < hOTS.size(); i++) {
+    		Surface surf = new Surface(hOTS.get(i).region, hOTS.get(i)._Z, hOTS.get(i)._X, hOTS.get(i)._tilt, hOTS.get(i)._wireMaxSag, 
+    				hOTS.get(i)._doca, hOTS.get(i)._Unc, hOTS.get(i)._hitError, hOTS.get(i)._wireLine);
+    		surf.setSector(hOTS.get(i).sector);
+    		surf.setSuperLayer(hOTS.get(i).superlayer);
+    		surf.setLayer(hOTS.get(i).layer);
+    		surf.setNMeas(hOTS.get(i).nMeas);
+    		surfaces.add(i, surf);
+    	}
+
+    	return surfaces;
+    }
+    
+    public class HitOnTrack implements Comparable<HitOnTrack> {
+
+    	public double _hitError;
+    	public double _X;
+    	public double _Z;
+    	public double[] _Unc = new double[2];
+    	public double _tilt;
+    	public double[] _doca = new double[2];
+    	public double _wireMaxSag;
+    	public Line3D[] _wireLine = new Line3D[2];
+    	public int region;
+    	public int superlayer;
+    	public int sector;
+    	public int layer;
+    	public int nMeas = 1;
+
+
+    	public HitOnTrack(int superlayer, double X, double Z, double wiremaxsag, Line3D wireLine) {
+    		_X = X;
+    		_Z = Z;
+    		_wireMaxSag = wiremaxsag;
+    		_wireLine[0] = wireLine;
+    		_doca[0] = -99;
+    		_doca[1] = -99;
+    		_Unc[0] = 1;
+    		_Unc[1] = 1;
+
+    		//use stereo angle in fit based on wire direction
+    		_tilt = 90-Math.toDegrees(wireLine.direction().asUnit().angle(new Vector3D(1,0,0)));
+    	}
+
+    	@Override
+    	public int compareTo(HitOnTrack o) {
+    		if (this._Z == o._Z) {
+    			return 0;
+    		}
+    		if (this._Z > o._Z) {
+    			return 1;
+    		} else {
+    			return -1;
+    		}
+    	}
+    }
+    
+        
     private int get_Status(Track track) {
         int miss = 0;    
         
