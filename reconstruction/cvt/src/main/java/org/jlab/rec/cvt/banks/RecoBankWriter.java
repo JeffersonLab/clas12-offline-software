@@ -510,7 +510,7 @@ public class RecoBankWriter {
         for (int i = 0; i < trkcands.size(); i++) {
             if(trkcands.get(i)==null)
                 continue;
-            bank.setByte("fittingMethod", i, (byte) trkcands.get(i).getSeed().getStatus());
+            bank.setByte("nKFIters", i, (byte) trkcands.get(i).getKFIterations());
             bank.setShort("ID", i, (short) trkcands.get(i).getId());
             bank.setByte("q", i, (byte)trkcands.get(i).getQ());
             bank.setFloat("p", i,  (float) trkcands.get(i).getP());
@@ -585,7 +585,7 @@ public class RecoBankWriter {
                 continue;
             Helix helix = trkcands.get(i).getSecondaryHelix();
             bank.setShort("ID", i, (short) trkcands.get(i).getId());
-            bank.setByte("fittingMethod", i, (byte) trkcands.get(i).getSeed().getStatus());
+            bank.setByte("nKFIters", i, (byte) trkcands.get(i).getKFIterations());
             bank.setByte("q", i, (byte)trkcands.get(i).getQ());
             bank.setFloat("p", i,  (float) helix.getPXYZ(Constants.getSolenoidMagnitude()).mag());
             bank.setFloat("pt", i,  (float) helix.getPt(Constants.getSolenoidMagnitude()));

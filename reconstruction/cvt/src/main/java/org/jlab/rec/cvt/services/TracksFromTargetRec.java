@@ -291,89 +291,120 @@ public class TracksFromTargetRec {
                         }
                     }
                 }
+                fittedTrack.setStatus(1);
                 //System.out.println("Track "+fittedTrack.toString());
                 if(this.missingSVTCrosses(fittedTrack) == false)
                     tracks.add(fittedTrack);
             } else {
                 if(Constants.getInstance().KFfailRecovery && Math.abs(pid)!=45) { 
-                    if(Constants.getInstance().seedingDebugMode) System.out.println("TRACK RECOVERY");
-                    kf2.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid));
-                    kf2.runFitter();
-                    if(kf2.getHelix()!=null) { 
-                        Track fittedTrack = new Track(seed, kf2, pid); 
-                        if(Constants.getInstance().seedingDebugMode) System.out.println("RECOVERED..."+fittedTrack.toString());
-                        for(Cross c : fittedTrack) { 
-                            if(c.getDetector()==DetectorType.BST) {
-                                c.getCluster1().setAssociatedTrackID(0);
-                                c.getCluster2().setAssociatedTrackID(0);
-                            }
-                        }
-                        //refit adding missing clusters
-                        List<Cluster> clsOnTrack = recUtil.findClustersOnTrk(this.SVTclusters, seed.getClusters(), fittedTrack, swimmer); //VZ: finds missing clusters; RDV fix 0 error
-                        List<Cross> crsOnTrack = recUtil.findCrossesFromClustersOnTrk(this.SVTcrosses, clsOnTrack, fittedTrack);
-                        
-                        if(clsOnTrack.size()>0) {
-                            seed.add_Clusters(clsOnTrack);
-                        }
-                        seed.getClusters().sort(Comparator.comparing(Cluster::getTlayer));
-                        if(crsOnTrack.size()>0) {
-                            seed.add_Crosses(crsOnTrack);
-                        }
-                        
-                        //Collections.sort(seed.getClusters());
-                        //Collections.sort(seed.getCrosses());
-                        
-                        seed.fit(3, xb, yb, solenoidValue);
-                        
-                        //reset pars
-                        v = seed.getHelix().getVertex();
-                        p = seed.getHelix().getPXYZ(solenoidValue);
-                        
-                        charge = (int) (Math.signum(solenoidScale)*seed.getHelix().getCharge());
-                        if(solenoidValue<0.001)
-                            charge = 1;
-                        
-                        hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
-                                        solenoidValue, xb, yb, Units.MM);
-                        surfaces.clear();
-                        surfaces = measure.getMeasurements(seed); 
-                        kf.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid)) ;
-                        kf.runFitter();
-                        if(Constants.getInstance().seedingDebugMode) System.out.println("Seed with searched clusters "+seed.toString());
-                        if(Constants.getInstance().seedingDebugMode)
-                        System.out.println("KF status ... failed "+kf.setFitFailed+" ndf "+kf.NDF+" helix "+kf.getHelix());
-                        if (kf.setFitFailed == false && kf.NDF>0 && kf.getHelix()!=null) { 
-                            fittedTrack = new Track(seed, kf, pid);
+                    Track fittedTrack = null;
+                    
+                    if(Constants.getInstance().KFfailRecovMisCls) {
+                        fittedTrack = recUtil.recovTrkMisClusSearch(seed, hlx, cov, kf2, kf, pid, surfaces, xb, yb,
+                            this.SVTclusters, this.SVTcrosses, 
+                            swimmer, solenoidScale, solenoidValue, measure);
+                        if(fittedTrack!=null)
+                            fittedTrack.setStatus(1);
+                    } 
+                    if((Constants.getInstance().KFfailRecovMisCls && fittedTrack==null) || !Constants.getInstance().KFfailRecovMisCls ){
+                        //dump seed
+                        kf2.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid)); 
+                        kf2.runFitter();
+                        if(kf2.getHelix()!=null) { 
+                            if(Constants.getInstance().seedingDebugMode) System.out.println("Seed failed again "+seed.toString());
+                            fittedTrack = new Track(seed, kf2, pid); 
                             if(Constants.getInstance().seedingDebugMode) System.out.println("RECOVERED..."+fittedTrack.toString());
+                            fittedTrack.setStatus(-1);
                             for(Cross c : fittedTrack) { 
                                 if(c.getDetector()==DetectorType.BST) {
                                     c.getCluster1().setAssociatedTrackID(0);
                                     c.getCluster2().setAssociatedTrackID(0);
                                 }
                             }
-                            if(this.missingSVTCrosses(fittedTrack) == false)
-                            tracks.add(fittedTrack);
-                        } else {
-                            kf2.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid)); 
-                            kf2.runFitter();
-                            if(kf2.getHelix()!=null) { 
-                                if(Constants.getInstance().seedingDebugMode) System.out.println("Seed failed again "+seed.toString());
-                                fittedTrack = new Track(seed, kf2, pid); 
-                                if(Constants.getInstance().seedingDebugMode) System.out.println("RECOVERED..."+fittedTrack.toString());
-                                for(Cross c : fittedTrack) { 
-                                    if(c.getDetector()==DetectorType.BST) {
-                                        c.getCluster1().setAssociatedTrackID(0);
-                                        c.getCluster2().setAssociatedTrackID(0);
-                                    }
-                                }
-                            }
-                            if(this.missingSVTCrosses(fittedTrack) == false)
-                            tracks.add(fittedTrack);
                         }
                     }
+                    if(fittedTrack!=null && this.missingSVTCrosses(fittedTrack) == false)
+                        tracks.add(fittedTrack);
+                    
+//                    if(Constants.getInstance().seedingDebugMode) System.out.println("TRACK RECOVERY");
+//                    kf2.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid));
+//                    kf2.runFitter();
+//                    if(kf2.getHelix()==null)  
+//                        continue;
+//                    Track fittedTrack = new Track(seed, kf2, pid); 
+//                    if(Constants.getInstance().seedingDebugMode) System.out.println("RECOVERED..."+fittedTrack.toString());
+//                    for(Cross c : fittedTrack) { 
+//                        if(c.getDetector()==DetectorType.BST) {
+//                            c.getCluster1().setAssociatedTrackID(0);
+//                            c.getCluster2().setAssociatedTrackID(0);
+//                        }
+//                    }
+//                    //refit adding missing clusters
+//                    List<Cluster> clsOnTrack = recUtil.findClustersOnTrk(this.SVTclusters, seed.getClusters(), fittedTrack, swimmer); //VZ: finds missing clusters; RDV fix 0 error
+//                    List<Cross> crsOnTrack = recUtil.findCrossesFromClustersOnTrk(this.SVTcrosses, clsOnTrack, fittedTrack);
+//
+//                    if(clsOnTrack.size()>0) {
+//                        seed.add_Clusters(clsOnTrack);
+//                    }
+//                    seed.getClusters().sort(Comparator.comparing(Cluster::getTlayer));
+//                    if(crsOnTrack.size()>0) {
+//                        seed.add_Crosses(crsOnTrack);
+//                    }
+//
+//                    //Collections.sort(seed.getClusters());
+//                    //Collections.sort(seed.getCrosses());
+//
+//                    seed.fit(3, xb, yb, solenoidValue);
+//
+//                    //reset pars
+//                    v = seed.getHelix().getVertex();
+//                    p = seed.getHelix().getPXYZ(solenoidValue);
+//
+//                    charge = (int) (Math.signum(solenoidScale)*seed.getHelix().getCharge());
+//                    if(solenoidValue<0.001)
+//                        charge = 1;
+//
+//                    hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
+//                                    solenoidValue, xb, yb, Units.MM);
+//                    surfaces.clear();
+//                    surfaces = measure.getMeasurements(seed); 
+//                    kf.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid)) ;
+//                    kf.runFitter();
+//                    if(Constants.getInstance().seedingDebugMode) System.out.println("Seed with searched clusters "+seed.toString());
+//                    if(Constants.getInstance().seedingDebugMode)
+//                    System.out.println("KF status ... failed "+kf.setFitFailed+" ndf "+kf.NDF+" helix "+kf.getHelix());
+//                    if (kf.setFitFailed == false && kf.NDF>0 && kf.getHelix()!=null) { 
+//                        fittedTrack = new Track(seed, kf, pid);
+//                        if(Constants.getInstance().seedingDebugMode) System.out.println("RECOVERED..."+fittedTrack.toString());
+//                        for(Cross c : fittedTrack) { 
+//                            if(c.getDetector()==DetectorType.BST) {
+//                                c.getCluster1().setAssociatedTrackID(0);
+//                                c.getCluster2().setAssociatedTrackID(0);
+//                            }
+//                        }
+//                       if(this.missingSVTCrosses(fittedTrack) == false)
+//                        tracks.add(fittedTrack);
+//                    } 
+//                    else 
+//                    {
+//                        kf2.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid)); 
+//                        kf2.runFitter();
+//                        if(kf2.getHelix()!=null) { 
+//                            if(Constants.getInstance().seedingDebugMode) System.out.println("Seed failed again "+seed.toString());
+//                            fittedTrack = new Track(seed, kf2, pid); 
+//                            if(Constants.getInstance().seedingDebugMode) System.out.println("RECOVERED..."+fittedTrack.toString());
+//                            for(Cross c : fittedTrack) { 
+//                                if(c.getDetector()==DetectorType.BST) {
+//                                    c.getCluster1().setAssociatedTrackID(0);
+//                                    c.getCluster2().setAssociatedTrackID(0);
+//                                }
+//                            }
+//                        }
+//                        if(this.missingSVTCrosses(fittedTrack) == false)
+//                        tracks.add(fittedTrack);
+//                    }
                 } 
             }
-            
         }
     
 

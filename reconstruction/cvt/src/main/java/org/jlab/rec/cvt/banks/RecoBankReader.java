@@ -467,7 +467,7 @@ public class RecoBankReader {
             //    int    ndf      = bank.getShort("ndf", i);
             //    int    pid      = bank.getInt("pid", i);
                 int    seedId   = bank.getShort("seedID", i);
-                int    type   = bank.getByte("fittingMethod", i);
+                int    type   = bank.getShort("status", i)/1000;
                 
                 Seed seed = cvtSeeds.get(seedId);
                 seed.setId(tid);

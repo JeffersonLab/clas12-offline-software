@@ -75,6 +75,8 @@ public class CVTEngine extends ReconstructionEngine {
     public boolean useSVTTimingCuts     =  false;
     public boolean removeOverlappingSeeds = true;
     public boolean flagSeeds = true;
+    public boolean KFfailRecovery = true;
+    public boolean KFfailRecovMisCls = true;
     private String  matrixLibrary       = "EJML";
     private boolean useOnlyTruth        = false;
     private boolean useSVTLinkerSeeder  = true;
@@ -114,6 +116,8 @@ public class CVTEngine extends ReconstructionEngine {
                                            useSVTTimingCuts,
                                            removeOverlappingSeeds,
                                            flagSeeds,
+                                           KFfailRecovery,
+                                           KFfailRecovMisCls, 
                                            matrixLibrary,
                                            useOnlyTruth,
                                            useSVTLinkerSeeder, 
@@ -395,6 +399,12 @@ public class CVTEngine extends ReconstructionEngine {
         
         if(this.getEngineConfigString("flagSeeds")!=null) 
             this.flagSeeds = Boolean.parseBoolean(this.getEngineConfigString("flagSeeds"));
+
+        if(this.getEngineConfigString("KFfailRecovery")!=null) 
+            this.KFfailRecovery = Boolean.parseBoolean(this.getEngineConfigString("KFfailRecovery"));
+        
+        if(this.getEngineConfigString("KFfailRecovMisCls")!=null) 
+            this.KFfailRecovMisCls = Boolean.parseBoolean(this.getEngineConfigString("KFfailRecovMisCls"));
         
         if (this.getEngineConfigString("matLib")!=null)
             this.matrixLibrary = this.getEngineConfigString("matLib");

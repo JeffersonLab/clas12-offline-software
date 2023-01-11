@@ -16,7 +16,7 @@ import org.jlab.rec.cvt.fit.CircleFitter;
 import org.jlab.rec.cvt.fit.CircleFitPars;
 import org.jlab.rec.cvt.svt.SVTParameters;
 
-public class TrackSeeder {
+public class TrackSeederTest {
     
     private final BMTGeometry bgeo = Geometry.getInstance().getBMT();
     private  double bfield;
@@ -34,7 +34,7 @@ public class TrackSeeder {
     private double ybeam;
     public boolean unUsedHitsOnly = false;
     
-    public TrackSeeder(Swim swimmer, double xb, double yb) {
+    public TrackSeederTest(Swim swimmer, double xb, double yb) {
         float[] b = new float[3];
         swimmer.BfieldLab(0, 0, 0, b);
         this.bfield = Math.abs(b[2]);
@@ -53,28 +53,95 @@ public class TrackSeeder {
         ybeam = yb;
     }
     
-    
-    private void matchSeed(List<Cross> othercrs) {
+    private void getSeedMissingSVTCross(List<Cross> othercrs) {
         if(othercrs==null || othercrs.isEmpty())
             return;
-        
+         List<Cross> crsInMReg = new ArrayList<>();
         for (Seed seed : getSeedScan()) {
+            crsInMReg.clear();
             double d = seed.getDoca();
             double r = seed.getRho();
             double f = seed.getPhi();
+            int mreg = this.findMissingSVTRegion(seed);
+            
+            if(mreg!=0) {
+                for (Cross c : othercrs ) { 
+                    int region = c.getRegion();
+                    if(c.getDetector()==DetectorType.BST && this.inSamePhiRange(seed, c)== true && region ==mreg) {
+                        crsInMReg.add(c);
+                    }
+                }
+            }
+            if(!crsInMReg.isEmpty()) {
+               
+                Cross bestCross = null;
+                double bestRes = 999999;
+                for (Cross c : crsInMReg ) { 
 
-            for (Cross c : othercrs ) { 
-                if(this.inSamePhiRange(seed, c)== true) {
                     double xi = c.getPoint().x(); 
                     double yi = c.getPoint().y();
                     double ri = Math.sqrt(xi*xi+yi*yi);
                     double fi = Math.atan2(yi,xi) ;
 
                     double res = this.calcResi(r, ri, d, f, fi);
-                    if(Math.abs(res)<SVTParameters.RESIMAX) { 
-                        // add to seed    
-                        seed.getCrosses().add(c);
+
+                    if(Math.abs(res)<SVTParameters.RESIMAX && Math.abs(res)<bestRes) { 
+                        bestCross = c;  
+                        bestRes = Math.abs(res);
                     }
+                }
+                if(bestCross!=null)
+                    seed.getCrosses().add(bestCross);
+        
+            }
+        }
+    }
+    
+    private void matchSeed(List<Cross> othercrs) {
+        if(othercrs==null || othercrs.isEmpty())
+            return;
+        Map<Integer, List<Cross>> crsMap = new HashMap<>();
+        for (Seed seed : getSeedScan()) {
+            crsMap.clear();
+            double d = seed.getDoca();
+            double r = seed.getRho();
+            double f = seed.getPhi();
+
+            for (Cross c : othercrs ) { 
+                if(this.inSamePhiRange(seed, c)== true) {
+                    int region = c.getRegion();
+                    if(c.getDetector()!=DetectorType.BMT)
+                        continue;
+                    if(!crsMap.containsKey(region)) {
+                        crsMap.put(region, new ArrayList<>());
+                        crsMap.get(region).add(c);
+                    } else {
+                        crsMap.get(region).add(c);
+                    }
+                }
+            }
+            
+            for(int rix = 0; rix<3; rix++) {
+            
+                if(crsMap.containsKey(rix+1)) {
+                    Cross bestCross = null;
+                    double bestRes = 999999;
+                    for (Cross c : crsMap.get(rix+1) ) { 
+
+                        double xi = c.getPoint().x(); 
+                        double yi = c.getPoint().y();
+                        double ri = Math.sqrt(xi*xi+yi*yi);
+                        double fi = Math.atan2(yi,xi) ;
+
+                        double res = this.calcResi(r, ri, d, f, fi);
+
+                        if(Math.abs(res)<SVTParameters.RESIMAX && Math.abs(res)<bestRes) { 
+                            bestCross = c;  
+                            bestRes = Math.abs(res);
+                        }
+                    }
+                    if(bestCross!=null)
+                        seed.getCrosses().add(bestCross);
                 }
             }
         }
@@ -256,6 +323,7 @@ public class TrackSeeder {
             }
         }
         this.findSeedCrossList(svt_crosses);
+        this.getSeedMissingSVTCross(svt_crosses);
         this.matchSeed(crosses);
         
         for(Seed mseed : getSeedScan()) { 
@@ -385,10 +453,13 @@ public class TrackSeeder {
         return bmt_crossesInSec;
     }
 
+    List<ArrayList<Cross>> BMTCcrosses = new ArrayList<>();
+    Map<String, Seed> AllSeeds = new HashMap<>();
     public List<Seed> findCandUsingMicroMegas(Seed trkCand, List<Cross> bmt_crosses) {
-        List<ArrayList<Cross>> BMTCcrosses = new ArrayList<>();
         
-        Map<String, Seed> AllSeeds = new HashMap<>();
+        BMTCcrosses.clear();
+        AllSeeds.clear();
+        
         int[] S = new int[3];
        
         for (int r = 0; r < 3; r++) {
@@ -411,13 +482,14 @@ public class TrackSeeder {
             }
             
         }
+        
+        ArrayList<Cross> matches = new ArrayList<>();
 
         for (int i1 = 0; i1 < S[0]; i1++) {
             for (int i2 = 0; i2 < S[1]; i2++) {
                 for (int i3 = 0; i3 < S[2]; i3++) {
-
-                    ArrayList<Cross> matches = new ArrayList<>();
-
+                    matches.clear();
+                    
                     if (BMTCcrosses.get(0).size() > 0 && i1 < BMTCcrosses.get(0).size()) {
                         if (this.passCcross(trkCand, BMTCcrosses.get(0).get(i1))) {
                             matches.add(BMTCcrosses.get(0).get(i1));
@@ -443,7 +515,6 @@ public class TrackSeeder {
                         BMTTrkSeed.setHelix(trkCand.getHelix());
                         BMTTrkSeed.setCrosses(matches);
                         AllSeeds.put(st,BMTTrkSeed);
-         
                         //if (AllSeeds.size() > 200) {
                         //    AllSeeds.clear();
                         //    return AllSeeds;
@@ -456,7 +527,6 @@ public class TrackSeeder {
         List<Seed> outputSeeds = new ArrayList<>();
         for(Seed s : AllSeeds.values())
             outputSeeds.add(s);
-        
         return outputSeeds;
     }
 
@@ -541,6 +611,21 @@ public class TrackSeeder {
         return value;
     }
 
+    private int findMissingSVTRegion(Seed seed) {
+        int missingReg = 0;
+        int mR[] = new int[3];
+        List<Cross> crs = seed.getCrosses();
+        for(Cross c : crs) {
+            mR[c.getRegion()-1]++;
+        }
+        for(int i =0; i<3; i++) {
+            if(mR[i]==0) {
+                missingReg = i+1;
+            }
+        }
+        return missingReg;
+    }
+    
     /**
      * @return the seedScan
      */

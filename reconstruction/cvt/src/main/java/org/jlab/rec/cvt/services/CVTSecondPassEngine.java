@@ -3,11 +3,14 @@ package org.jlab.rec.cvt.services;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
+import org.jlab.rec.cvt.cluster.Cluster;
+import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.utils.groups.IndexedTable;
@@ -62,8 +65,14 @@ public class CVTSecondPassEngine extends CVTEngine {
                     if(event.hasBank("CVT::Tracks")) {
                         DataBank bank = event.getBank("CVT::Tracks");
                         t.setId(bank.getShort("ID", t.getSeed().FirstPassIdx));
+                        for(Cross c : t) { 
+                            c.setAssociatedTrackID(t.getId());
+                        }
+                        for(Cluster c: t.getSeed().getClusters()) {
+                            c.setAssociatedTrackID(t.getId());
+                        }
                     }
-                } 
+                }
             }
             List<DataBank> banks = new ArrayList<>();
             if(trackFinder.getSVThits()!=null) banks.add(RecoBankWriter.fillSVTHitBank(event, trackFinder.getSVThits(), this.getSvtHitBank()));

@@ -433,8 +433,11 @@ public class Track extends Trajectory implements Comparable<Track> {
     public final void setKFTrajectories(Map<Integer, HitOnTrack> trajectory) {
         this.trajs = trajectory;
     }
-    
+    private int _status;
     public int getStatus() {
+        return _status;
+    }
+    public int setStatus(int passKFFlag) {
         //for status word:
         int nSVT  = 0;
         int nBMTZ = 0;
@@ -454,7 +457,7 @@ public class Track extends Trajectory implements Comparable<Track> {
                 nBMTC++;
             }
         }
-        return 10000*this.kfIterations+nSVT*1000+nBMTZ*100+nBMTC*10+this.getSeed().getStatus();
+        return passKFFlag*nSVT*1000+nBMTZ*100+nBMTC*10+this.getSeed().getStatus();
     }
     
     /**

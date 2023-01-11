@@ -22,6 +22,7 @@ public class Constants {
     public static double CAANGLE4=19.;
     public static double CAANGLE5=3.5;
     public boolean seedingDebugMode =false;
+   
     
     
     // private constructor for a singleton
@@ -71,7 +72,8 @@ public class Constants {
     public boolean removeOverlappingSeeds = false;
     public boolean flagSeeds = true;
     public boolean KFfailRecovery = true;
-    
+    public boolean KFfailRecovMisCls = true;
+     
     // CONSTANTS USED IN RECONSTRUCTION
     //---------------------------------    
     public static final double LIGHTVEL = PhysicsConstants.speedOfLight()*1e-5;  // velocity of light (mm/ns) - conversion factor from radius in mm to momentum in GeV/c 
@@ -565,6 +567,8 @@ public class Constants {
                                         boolean useSVTTimingCuts,
                                         boolean removeOverlappingSeeds,
                                         boolean flagSeeds,
+                                        boolean KFfailRecovery,
+                                        boolean KFfailRecovMisCls, 
                                         String matrixLibrary,
                                         boolean useOnlyTruth,
                                         boolean useSVTLinkerSeeder,
@@ -591,6 +595,8 @@ public class Constants {
             this.useSVTTimingCuts = useSVTTimingCuts;
             this.removeOverlappingSeeds = removeOverlappingSeeds;
             this.flagSeeds = flagSeeds;
+            this.KFfailRecovery = KFfailRecovery;
+            this.KFfailRecovMisCls = KFfailRecovMisCls;
             this.setMatLib(matrixLibrary);
             this.useOnlyTruthHits=useOnlyTruth;
             this.svtLinkerSeeding = useSVTLinkerSeeder;

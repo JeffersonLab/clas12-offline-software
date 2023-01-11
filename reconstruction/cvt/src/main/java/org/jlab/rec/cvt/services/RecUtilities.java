@@ -2,7 +2,7 @@ package org.jlab.rec.cvt.services;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import org.jlab.clas.pdg.PDGDatabase;
 import java.util.Map;
 import java.util.HashMap;
 import org.jlab.rec.cvt.trajectory.Helix;
@@ -28,6 +28,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map.Entry;
 import org.jlab.clas.tracking.kalmanfilter.AKFitter;
+import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.clas.tracking.kalmanfilter.Units;
+import org.jlab.clas.tracking.kalmanfilter.helical.KFitter;
 import org.jlab.detector.base.DetectorType;
 
 import org.jlab.io.base.DataBank;
@@ -37,6 +40,7 @@ import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.cross.CrossMaker;
 import org.jlab.rec.cvt.fit.CircleFitPars;
 import org.jlab.rec.cvt.fit.CircleFitter;
+import org.jlab.rec.cvt.measurement.Measurements;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.svt.SVTParameters;
 import org.jlab.rec.cvt.trajectory.Ray;
@@ -861,6 +865,71 @@ public class RecUtilities {
         z/=crs.size();
         return new Vector3D(x,y,z).mag();
     }
-    
+
+    Track recovTrkMisClusSearch(Seed seed, org.jlab.clas.tracking.trackrep.Helix hlx, double[][] cov, KFitter kf2, KFitter kf, int pid, 
+            List<Surface> surfaces, double xb, double yb, List<Cluster> SVTclusters, List<Cross> SVTcrosses, 
+            Swim swimmer, double solenoidScale, double solenoidValue, Measurements measure) {
+        
+        Track fittedTrack  = null;
+        if(Constants.getInstance().seedingDebugMode) System.out.println("TRACK RECOVERY");
+        kf2.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid));
+        kf2.runFitter();
+        if(kf2.getHelix()==null)  
+            return null;
+        fittedTrack = new Track(seed, kf2, pid); 
+        if(Constants.getInstance().seedingDebugMode) System.out.println("RECOVERED..."+fittedTrack.toString());
+        for(Cross c : fittedTrack) { 
+            if(c.getDetector()==DetectorType.BST) {
+                c.getCluster1().setAssociatedTrackID(0);
+                c.getCluster2().setAssociatedTrackID(0);
+            }
+        }
+        //refit adding missing clusters
+        List<Cluster> clsOnTrack = this.findClustersOnTrk(SVTclusters, seed.getClusters(), fittedTrack, swimmer); //VZ: finds missing clusters; RDV fix 0 error
+        List<Cross> crsOnTrack = this.findCrossesFromClustersOnTrk(SVTcrosses, clsOnTrack, fittedTrack);
+
+        if(clsOnTrack.size()>0) {
+            seed.add_Clusters(clsOnTrack);
+        }
+        seed.getClusters().sort(Comparator.comparing(Cluster::getTlayer));
+        if(crsOnTrack.size()>0) {
+            seed.add_Crosses(crsOnTrack);
+        }
+
+        //Collections.sort(seed.getClusters());
+        //Collections.sort(seed.getCrosses());
+
+        seed.fit(3, xb, yb, solenoidValue);
+
+        //reset pars
+        Point3D v = seed.getHelix().getVertex();
+        Vector3D p = seed.getHelix().getPXYZ(solenoidValue);
+
+        int charge = (int) (Math.signum(solenoidScale)*seed.getHelix().getCharge());
+        if(solenoidValue<0.001)
+            charge = 1;
+
+        org.jlab.clas.tracking.trackrep.Helix hlx2 = new org.jlab.clas.tracking.trackrep.Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
+                        solenoidValue, xb, yb, Units.MM);
+        surfaces.clear();
+        surfaces = measure.getMeasurements(seed); 
+        kf.init(hlx2, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid)) ;
+        kf.runFitter();
+        if(Constants.getInstance().seedingDebugMode) System.out.println("Seed with searched clusters "+seed.toString());
+        if(Constants.getInstance().seedingDebugMode)
+        System.out.println("KF status ... failed "+kf.setFitFailed+" ndf "+kf.NDF+" helix "+kf.getHelix());
+        if (kf.setFitFailed == false && kf.NDF>0 && kf.getHelix()!=null) { 
+            fittedTrack = new Track(seed, kf, pid);
+            if(Constants.getInstance().seedingDebugMode) System.out.println("RECOVERED..."+fittedTrack.toString());
+            for(Cross c : fittedTrack) { 
+                if(c.getDetector()==DetectorType.BST) {
+                    c.getCluster1().setAssociatedTrackID(0);
+                    c.getCluster2().setAssociatedTrackID(0);
+                }
+            }
+        }
+        return fittedTrack;
+    }
+
     
 }

@@ -61,7 +61,7 @@ public class StraightTrack extends Trajectory{
         this.setRay(the_ray);
         this.setChi2(kf.chi2);
         this.setNDF(kf.NDF);
-        this.setStatus(kf.numIter*10000);
+        this.setStatus(kf.numIter*1000);
         this.setCovMat(kf.finalStateVec.covMat);
         this.trajs = kf.trajPoints;
         this.updateCrosses();
