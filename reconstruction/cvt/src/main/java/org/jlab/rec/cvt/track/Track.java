@@ -437,7 +437,7 @@ public class Track extends Trajectory implements Comparable<Track> {
     public int getStatus() {
         return _status;
     }
-    public int setStatus(int passKFFlag) {
+    public void setStatus(int passKFFlag) {
         //for status word:
         int nSVT  = 0;
         int nBMTZ = 0;
@@ -457,7 +457,7 @@ public class Track extends Trajectory implements Comparable<Track> {
                 nBMTC++;
             }
         }
-        return passKFFlag*nSVT*1000+nBMTZ*100+nBMTC*10+this.getSeed().getStatus();
+        _status = passKFFlag*(nSVT*1000+nBMTZ*100+nBMTC*10+this.getSeed().getStatus());
     }
     
     /**
