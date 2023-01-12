@@ -57,17 +57,6 @@ public class URWellEngine extends ReconstructionEngine {
     @Override
     public boolean processDataEvent(DataEvent event) {
         
-        int run = -1;
-        
-        if(event.hasBank("RUN::config")){
-            DataBank bank = event.getBank("RUN::config");
-            run = bank.getInt("run", 0);
-            if (run<=0) {
-                LOGGER.log(Level.WARNING,"URwellEngine:  got run <= 0 in RUN::config, skipping event.");
-                return false;
-            }
-        }
-        
         List<URWellStrip>     strips = URWellStrip.getStrips(event, factory, this.getConstantsManager());
         List<URWellCluster> clusters = URWellCluster.createClusters(strips);
         List<URWellCross>    crosses = URWellCross.createCrosses(clusters);

@@ -267,9 +267,9 @@ public class EBCCDBConstants {
         loadDouble(EBCCDBEnum.CTOF_DPHI,"ctof_matching","dphi",0,0,0);
         loadDouble(EBCCDBEnum.CTOF_DZ,"ctof_matching","dz",0,0,0);
         
-        loadDouble(EBCCDBEnum.CND_DR,"cnd_matching","dr",0,0,0);
         loadDouble(EBCCDBEnum.CND_DPHI,"cnd_matching","dphi",0,0,0);
         loadDouble(EBCCDBEnum.CND_DZ,"cnd_matching","dz",0,0,0);
+        loadDouble(EBCCDBEnum.CND_DT,"cnd_matching","t1",0,0,0);
 
         loadDouble(EBCCDBEnum.CND_NEUTRON_maxBeta,"cnd_neutron_beta","neutron_beta",0,0,0);
 

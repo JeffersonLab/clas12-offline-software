@@ -129,6 +129,7 @@ public class ConstantsManager {
                 desc.getMap().put(tk.get(i), table);
                 LOGGER.log(Level.INFO, String.format("***** >>> adding : %14s / table = %s", tk.get(i), tableName));
             } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, e.getMessage());
                 LOGGER.log(Level.SEVERE, "[ConstantsManager] ---> error reading table : " + tableName);
                 // This happens if missing table or variation. No point in trying
                 // again, just set error status to trigger abort.

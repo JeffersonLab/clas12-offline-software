@@ -127,10 +127,6 @@ public class RTPCEngine extends ReconstructionEngine{
             runNo = bank.getInt("run", 0);
             eventNo = bank.getInt("event",0);
             magfieldfactor = bank.getFloat("solenoid",0);
-            if (runNo<=0) {
-                System.err.println("RTPCEngine:  got run <= 0 in RUN::config, skipping event.");
-                return false;
-            }
         }
 	
         magfield = 50 * magfieldfactor;

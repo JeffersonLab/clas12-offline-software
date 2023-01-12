@@ -99,10 +99,6 @@ public class EBEngine extends ReconstructionEngine {
         if (de.hasBank("RUN::config")) {
             run=de.getBank("RUN::config").getInt("run",0);
         }
-        if (run<=0) {
-            LOGGER.log(Level.WARNING,"EBEngine:  found no run number, CCDB constants not loaded, skipping event.");
-            return false;
-        }
 
         EBCCDBConstants ccdb = new EBCCDBConstants(run,this.getConstantsManager());
 
@@ -118,7 +114,7 @@ public class EBEngine extends ReconstructionEngine {
         EBRadioFrequency rf = new EBRadioFrequency(ccdb);
         eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+ccdb.getDouble(EBCCDBEnum.RF_OFFSET));
         
-        List<DetectorResponse> responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.ECAL,"ECAL::moments");
+        List<DetectorResponse> responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.ECAL,"ECAL::moments", "ECAL::calib");
         List<DetectorResponse> responseFTOF = ScintillatorResponse.readHipoEvent(de, ftofHitsType, DetectorType.FTOF);
         List<DetectorResponse> responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::clusters", DetectorType.CTOF);
         List<DetectorResponse> responseCND  = ScintillatorResponse.readHipoEvent(de, "CND::clusters", DetectorType.CND);
