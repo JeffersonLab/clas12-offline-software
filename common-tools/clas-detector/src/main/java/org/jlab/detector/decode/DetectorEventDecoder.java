@@ -93,10 +93,10 @@ public class DetectorEventDecoder {
 
         translationManager.init(keysTrans,tablesTrans);
         
-        keysFitter   = Arrays.asList(new String[]{"FTCAL","FTHODO","FTTRK","FTOF","LTCC","ECAL","HTCC","CTOF","CND","BMT","FMT","HEL","RF","BAND","RASTER"});
+        keysFitter   = Arrays.asList(new String[]{"FTCAL","FTHODO","FTTRK","FTOF","LTCC","ECAL","HTCC","CTOF","CND","BMT","FMT","HEL","RF","BAND","RASTER", "crate_test3"});
         tablesFitter = Arrays.asList(new String[]{
             "/daq/fadc/ftcal","/daq/fadc/fthodo","/daq/config/fttrk","/daq/fadc/ftof","/daq/fadc/ltcc","/daq/fadc/ec",
-            "/daq/fadc/htcc","/daq/fadc/ctof","/daq/fadc/cnd","/daq/config/bmt","/daq/config/fmt","/daq/fadc/hel","/daq/fadc/rf","/daq/fadc/band","/daq/fadc/raster"
+            "/daq/fadc/htcc","/daq/fadc/ctof","/daq/fadc/cnd","/daq/config/bmt","/daq/config/fmt","/daq/fadc/hel","/daq/fadc/rf","/daq/fadc/band","/daq/fadc/raster","/daq/fadc/clasdev/crate_test3"
         });
         fitterManager.init(keysFitter, tablesFitter);
 
@@ -183,6 +183,9 @@ public class DetectorEventDecoder {
                         int nsb = daq.getIntValue("nsb", crate,slot,channel);
                         int tet = daq.getIntValue("tet", crate,slot,channel);
                         int ped = 0;
+                        
+                        //System.out.println("nsa = " + nsa + "    nsb = " + nsb + "     tet = " + tet  );
+                        
                         if(table.equals("RF")&&data.getDescriptor().getType().getName().equals("RF")) ped = daq.getIntValue("pedestal", crate,slot,channel);
                         if(data.getADCSize()>0){
                             for(int i = 0; i < data.getADCSize(); i++){
@@ -195,6 +198,7 @@ public class DetectorEventDecoder {
                                                             +  crate + " / " + slot + " / " + channel);
                                     }
                                     int adc_corrected = extendedFitter.adc + extendedFitter.ped*(nsa+nsb);
+                                    //System.out.println("ADC Corrected = " + adc_corrected);
                                     adc.setHeight((short) this.extendedFitter.pulsePeakValue);
                                     adc.setIntegral(adc_corrected);
                                     adc.setTimeWord(this.extendedFitter.t0);
