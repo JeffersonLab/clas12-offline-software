@@ -156,7 +156,7 @@ public class ECCommon {
         manager.setVariation(variation);
 
         IndexedTable   atten1 = manager.getConstants(run, "/calibration/ec/attenuation");
-        IndexedTable   atten2 = manager.getConstants(run, "/calibration/ec/attenpass2"); //pass2
+        IndexedTable   atten2 = manager.getConstants(run, "/calibration/ec/atten");    //pass2
         IndexedTable     gain = manager.getConstants(run, "/calibration/ec/gain");
         IndexedTable    itime = manager.getConstants(run, "/calibration/ec/timing"); 
         IndexedTable    ftime = manager.getConstants(run, "/calibration/ec/ftime");    //pass2
@@ -221,13 +221,17 @@ public class ECCommon {
             if(!usePass2Energy) { 
             strip.setAttenuation(atten1.getDoubleValue("A", sector,layer,component),
                                  atten1.getDoubleValue("B", sector,layer,component),
-                                 atten1.getDoubleValue("C", sector,layer,component));
+                                 atten1.getDoubleValue("C", sector,layer,component),
+                                 0,
+                               100);
             }
             
             if(usePass2Energy) { 
             strip.setAttenuation(atten2.getDoubleValue("A", sector,layer,component),
                                  atten2.getDoubleValue("B", sector,layer,component),
-                                 0);
+                                 atten2.getDoubleValue("C", sector,layer,component),
+                                 atten2.getDoubleValue("D", sector,layer,component),
+                                 atten2.getDoubleValue("E", sector,layer,component));
             }
             
             double ccdbGain =   gain.getDoubleValue("gain", sector,layer,component)*ggs.getDoubleValue("gain_shift",sector,layer,0);

@@ -25,9 +25,11 @@ public class ECStrip implements Comparable {
     private float             iTADC = 0;
     private double            iGain = 1.0;
     private double     iADC_to_MEV  = 1.0/10000.0;
-    private double    iAttenLengthA = 1.0;
-    private double    iAttenLengthB = 50000.0;
-    private double    iAttenLengthC = 0.0;
+    private double          iAttenA = 1.0;
+    private double          iAttenB = 50000.0;
+    private double          iAttenC = 0.0;
+    private double          iAttenD = 40.0;
+    private double          iAttenE = 400.0;
     private double    iTimA0=0,iTimA1=0,iTimA2=0,iTimA3=0,iTimA4=0; //pass1
     private double    fTim00,iTim00 = 0; // Global TDC offset
     private double    fTimA0,dTimA0 = 0; // Offset in ns (before applying a1)
@@ -65,7 +67,7 @@ public class ECStrip implements Comparable {
     
     public ECStrip(int sector, int layer, int component){
         desc.setSectorLayerComponent(sector, layer, component);
-        ecc = ECCommon.usePass2Energy ? new pass2Energy() : new pass1Energy(); 
+        ecc = new corrEnergy(); 
         ftc = ECCommon.usePass2Timing ? new ExtendedTWCFTime() : new ExtendedTWCTime(); //FADC timing pass2:pass1
         dtc = ECCommon.usePass2Timing ? new ExtendedTWCDTime() : new ExtendedTWCTime(); //TDC  timing pass2:pass1
         tc  = ECCommon.useFADCTime ? ftc : dtc; //user selected for FADC:TDC timing calibration 
@@ -83,30 +85,15 @@ public class ECStrip implements Comparable {
         public abstract double getTWCTime();    	
         public abstract double getTime();
     }
-
-    public class pass1Energy extends EnergyCorrection {
-        public double getRawEnergy() {
-            return iADC*iGain*iADC_to_MEV;
-        }
-        public double getEcorr(double dist) {
-            return iAttenLengthA*Math.exp(-dist/iAttenLengthB) + iAttenLengthC;    	
-        }
         
-        public double getEnergy(Point3D point) {
-            edist = point.distance(stripLine.end());
-            return getRawEnergy()/getEcorr(edist);
-        }
-    }
-    
-    public class pass2Energy extends EnergyCorrection {    	
+    public class corrEnergy extends EnergyCorrection {    	
         public double getRawEnergy() {
     	    return iADC*iGain*iADC_to_MEV;
         }
-    	
+
         public double getEcorr(double dist) {
-            return desc.getLayer()<4 ? iAttenLengthA*(Math.exp(-dist/40) + iAttenLengthB*Math.exp(-dist/400)):
-                                       iAttenLengthA*Math.exp(-dist/iAttenLengthB);    	
-        }
+            return iAttenA*(Math.exp(-dist/iAttenB)+iAttenD*Math.exp(-dist/iAttenE)) + iAttenC;   	
+        } 
         
         public double getEnergy(Point3D point) {
             edist = point.distance(stripLine.end());
@@ -322,10 +309,12 @@ public class ECStrip implements Comparable {
         return clusterId;
     }
     
-    public void setAttenuation(double a, double b, double c){
-        iAttenLengthA = a;
-        iAttenLengthB = b;
-        iAttenLengthC = c;
+    public void setAttenuation(double a, double b, double c, double d, double e){
+        iAttenA = a;
+        iAttenB = b;
+        iAttenC = c;
+        iAttenD = d;
+        iAttenE = e;
     }
     
     public void setTriggerPhase(int val) {
@@ -512,7 +501,7 @@ public class ECStrip implements Comparable {
                 desc.getSector(),desc.getLayer(),desc.getComponent(),
                 iADC,iTDC,iTADC,getEnergy(),getDTime(),getFTime(),getTdist(),stripId,peakID,clusterId));
         str.append(String.format("  GAIN (%5.3f) ATT (%5.1f)", 
-                iGain,iAttenLengthB));
+                iGain,iAttenB));
         return str.toString();
     }
 }

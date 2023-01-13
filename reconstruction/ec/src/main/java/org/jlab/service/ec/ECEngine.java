@@ -372,7 +372,7 @@ public class ECEngine extends ReconstructionEngine {
     	
         String[]  ecTables = new String[]{
                 "/calibration/ec/attenuation", 
-                "/calibration/ec/attenpass2", 
+                "/calibration/ec/atten", 
                 "/calibration/ec/gain", 
                 "/calibration/ec/timing",
                 "/calibration/ec/ftime",
