@@ -638,7 +638,7 @@ public class CodaEventDecoder {
                             Short sample = (Short) cdataitems.get(position + 2 + loop);
                             shortbuffer[loop] = sample;
                         }
-
+                        
                         bank.addPulse(shortbuffer);
                         bank.setTimeStamp(time);
                         entries.add(bank);
@@ -1427,7 +1427,8 @@ public class CodaEventDecoder {
     public static void main(String[] args) {
         EvioSource reader = new EvioSource();
         //reader.open("/Users/devita/clas_004013.evio.1000");
-        reader.open("/work/clas12/rafopar/uRWELL/Readout/APV25/urwell_001142.evio.00000");
+        //reader.open("/work/clas12/rafopar/uRWELL/Readout/APV25/urwell_001142.evio.00000");
+        reader.open("/work/clas12/rafopar/uRWELL/Readout/APV25/urwell_001164.evio.00000");
         CodaEventDecoder decoder = new CodaEventDecoder();
         DetectorEventDecoder detectorDecoder = new DetectorEventDecoder();
 
