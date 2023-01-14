@@ -467,8 +467,8 @@ public class RecoBankReader {
             //    int    ndf      = bank.getShort("ndf", i);
             //    int    pid      = bank.getInt("pid", i);
                 int    seedId   = bank.getShort("seedID", i);
-                int    type   = bank.getShort("status", i)/1000;
-                
+                int    status   = Math.abs(bank.getShort("status", i));
+                int type = status - (int) (status/10) * 10; 
                 Seed seed = cvtSeeds.get(seedId);
                 seed.setId(tid);
                 //seed.setHelix(seed.getHelix());
