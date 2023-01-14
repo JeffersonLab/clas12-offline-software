@@ -151,6 +151,8 @@ public class EventBuilder {
                 findMatchingHit(n,p,detectorResponses,DetectorType.CND,3, this.cndMatcher );
             }
 
+            // set dedx by combining trajectory information with hit energy:
+            p.setDedx();
         }
 
         // Special treatment for HTCC, with coarse resolution.

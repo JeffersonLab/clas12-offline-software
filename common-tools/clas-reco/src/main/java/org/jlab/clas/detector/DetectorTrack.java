@@ -10,6 +10,7 @@ import org.jlab.clas.physics.Vector3;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.io.base.DataBank;
 
 /**
  *
@@ -18,56 +19,59 @@ import org.jlab.geom.prim.Vector3D;
  */
 public class DetectorTrack implements Comparable {
 
-    public class TrajectoryPoint {
+    public static class TrajectoryPoint {
         private int detId = -1;
         private int layId = -1;
         private Line3D traj=null;
-        private float bField = 0;
         private float pathLength = -1;
         private float edge=-99;
-        public TrajectoryPoint(int detId,int layId,Line3D traj,float bField,float pathLength,float edge) {
+        private float dx=-1;
+        public TrajectoryPoint(DataBank bank, int row) {
+            this.detId = bank.getInt("detector", row);
+            this.layId = bank.getByte("layer", row);
+            this.pathLength = bank.getFloat("path", row);
+            this.edge = bank.getFloat("edge", row);
+            this.dx  = bank.getFloat("dx", row);
+            float xx = bank.getFloat("x", row);
+            float yy = bank.getFloat("y", row);
+            float zz = bank.getFloat("z", row);
+            // cvt and dc have different trajectory banks:(
+            boolean c = bank.getDescriptor().hasEntry("cx");
+            this.traj = new Line3D(xx, yy, zz,
+                    xx + MAX_LINE_LENGTH * bank.getFloat(c?"cx":"tx", row),
+                    yy + MAX_LINE_LENGTH * bank.getFloat(c?"cy":"ty", row),
+                    zz + MAX_LINE_LENGTH * bank.getFloat(c?"cz":"tz", row));
+        }
+        public TrajectoryPoint(int detId,int layId,Line3D traj,float pathLength,float edge,float dx) {
             this.detId=detId;
             this.layId=layId;
             this.traj=traj;
-            this.bField=bField;
             this.pathLength=pathLength;
             this.edge=edge;
-        }
-        public TrajectoryPoint(int detId,int layId,Line3D traj) {
-            this.layId=layId;
-            this.detId=detId;
-            this.traj=traj;
+            this.dx=dx;
         }
         public int getDetectorId() { return detId; }
         public int getLayerId()  { return layId; }
         public Line3D getCross() { return traj; }
-        public float getBField() { return bField; }
         public float getPathLength() { return pathLength; }
         public float getEdge() { return edge; }
+        public float getDx() { return dx; }
     }
 
-    public class Trajectory {
+    public static class Trajectory {
 
         private int size=0;
         private Map < Integer, Map <Integer,TrajectoryPoint> > traj = new LinkedHashMap<>();
         
-        public void add(int detId,int layId,Line3D traj,float bField,float pathLength,float edge) {
-            if (!this.traj.containsKey(detId)) {
-                this.traj.put(detId,new LinkedHashMap<>());
+        public void add(TrajectoryPoint tp) {
+            if (!this.traj.containsKey(tp.detId)) {
+                this.traj.put(tp.detId,new LinkedHashMap<>());
             }
-            if (this.traj.get(detId).containsKey(layId)) {
-                throw new RuntimeException("Duplicate detector type/layer: "+detId+"/"+layId);
+            if (this.traj.get(tp.detId).containsKey(tp.layId)) {
+                throw new RuntimeException("Duplicate detector type/layer: "+tp.detId+"/"+tp.layId);
             }
-            this.traj.get(detId).put(layId,new TrajectoryPoint(detId,layId,traj,bField,pathLength,edge));
+            this.traj.get(tp.detId).put(tp.layId,tp);
             this.size++;
-        }
-        
-        public void add(int detId,int layId,Line3D traj,float bField,float pathLength) {
-            add(detId,layId,traj,bField,pathLength,-99);
-        }
-
-        public void add(int detId,int layId,Line3D traj) {
-            this.add(detId,layId,traj,0.0f,-1.0f);
         }
 
         public Set<Integer> getDetectors() {
@@ -94,17 +98,21 @@ public class DetectorTrack implements Comparable {
             return this.get(dd.getType().getDetectorId(),dd.getLayer());
         }
 
-        public boolean hasDetector(int detId) {
+        public boolean contains(int detId) {
             return this.traj.containsKey(detId);
         }
 
-        public boolean hasLayer(int detId,int layId) {
-            if (!this.hasDetector(detId)) return false;
+        public boolean contains(int detId,int layId) {
+            if (!this.contains(detId)) return false;
             return this.traj.get(detId).containsKey(layId);
         }
 
-        public boolean hasLayer(DetectorDescriptor dd) {
-            return this.hasLayer(dd.getType().getDetectorId(),dd.getLayer());
+        public boolean contains(DetectorDescriptor dd) {
+            return this.contains(dd.getType().getDetectorId(),dd.getLayer());
+        }
+
+        public boolean contains(DetectorResponse dr) {
+            return this.contains(dr.getDescriptor());
         }
 
         public int size() {
@@ -131,7 +139,7 @@ public class DetectorTrack implements Comparable {
  
     private Trajectory trajectory=new Trajectory();
     
-    private double MAX_LINE_LENGTH = 1500.0;
+    private static double MAX_LINE_LENGTH = 1500.0;
 
     public void setCovMatrix(int ii,int jj,float val) {
         covMatrix[ii][jj] = val;
@@ -175,19 +183,8 @@ public class DetectorTrack implements Comparable {
         this.trackVertex.setXYZ(vx, vy, vz);
     }
 
-    
-    public void addTrajectoryPoint(int detId,int layId,Line3D traj,float bField,float pathLength,float edge) {
-        this.trajectory.add(detId,layId,traj,bField,pathLength,edge);
-    }
-    public void addTrajectoryPoint(int detId,int layId,Line3D traj,float bField,float pathLength) {
-        this.trajectory.add(detId,layId,traj,bField,pathLength);
-    }
-    public void addTrajectoryPoint(int detId,int layId,Line3D traj) {
-        this.addTrajectoryPoint(detId,layId,traj,0.0f,-1.0f);
-    }
-
     public double getPathLength(DetectorType type,int layId) {
-        if (!trajectory.hasLayer(type.getDetectorId(),layId)) return -1.0;
+        if (!trajectory.contains(type.getDetectorId(),layId)) return -1.0;
         return trajectory.get(type.getDetectorId(),layId).getPathLength();
     }
 
@@ -197,6 +194,10 @@ public class DetectorTrack implements Comparable {
 
     public TrajectoryPoint getTrajectoryPoint(DetectorDescriptor dd) {
         return this.trajectory.get(dd);
+    }
+    
+    public TrajectoryPoint getTrajectoryPoint(DetectorResponse dr) {
+        return this.trajectory.get(dr.getDescriptor());
     }
     
     public Trajectory getTrajectory() {
@@ -276,9 +277,9 @@ public class DetectorTrack implements Comparable {
     public void addCross(double x, double y, double z,
             double ux, double uy, double uz){
         Line3D line = new Line3D(x,y,z,
-                x + ux*this.MAX_LINE_LENGTH,
-                y + uy*this.MAX_LINE_LENGTH,
-                z + uz*this.MAX_LINE_LENGTH
+                x + ux*DetectorTrack.MAX_LINE_LENGTH,
+                y + uy*DetectorTrack.MAX_LINE_LENGTH,
+                z + uz*DetectorTrack.MAX_LINE_LENGTH
         );
         this.trackCrosses.add(line);
     }
