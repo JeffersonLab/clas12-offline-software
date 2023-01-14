@@ -44,6 +44,13 @@ public class CalorimeterResponse extends DetectorResponse {
         coordUVW.copy(r.coordUVW);
         secondMomentUVW.copy(r.secondMomentUVW);
         thirdMomentUVW.copy(r.thirdMomentUVW);
+        rawPeakEnergy.copy(r.rawPeakEnergy);
+        reconPeakEnergy.copy(r.reconPeakEnergy);
+        peakTDCTime.copy(r.peakTDCTime);
+        peakFADCTime.copy(r.peakFADCTime);
+        dbStatus[0] = r.dbStatus[0];
+        dbStatus[1] = r.dbStatus[1];
+        dbStatus[2] = r.dbStatus[2];
     }
 
     public void setWidthUVW(float u,float v,float w) {
@@ -104,26 +111,19 @@ public class CalorimeterResponse extends DetectorResponse {
         this.peakFADCTime.setXYZ(u,v,w);
     }
 
+    /**
+     * Read just the main calorimeter cluster bank.
+     * @param event
+     * @param bankName
+     * @param type
+     * @return 
+     */
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
-            String bankName, DetectorType type, String momentsBankName, String extrasBankName){        
+            String bankName, DetectorType type) {
         List<DetectorResponse> responseList = new ArrayList<>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
-            DataBank momentsBank=null,extrasBank=null;
-            if (momentsBankName!=null && event.hasBank(momentsBankName)) {
-                momentsBank=event.getBank(momentsBankName);
-                if (bank.rows() != momentsBank.rows()) {
-                    throw new RuntimeException("Bank length mismatch: "+bankName+" and "+momentsBankName);
-                }
-            }
-            if (extrasBankName!=null && event.hasBank(extrasBankName)) {
-                extrasBank=event.getBank(extrasBankName);
-                if (bank.rows() != extrasBank.rows()) {
-                    throw new RuntimeException("Bank length mismatch: "+bankName+" and "+extrasBankName);
-                }
-            }
-            int nrows = bank.rows();
-            for(int row = 0; row < nrows; row++){
+            for(int row = 0; row < bank.rows(); row++){
                 int sector = bank.getByte("sector", row);
                 int layer = bank.getByte("layer", row);
                 CalorimeterResponse  response = new CalorimeterResponse(sector,layer,0);
@@ -137,61 +137,89 @@ public class CalorimeterResponse extends DetectorResponse {
                 float v = bank.getFloat("widthV",row);
                 float w = bank.getFloat("widthW",row);
                 response.setWidthUVW(u,v,w);
-                if (momentsBank!=null) {
-                    u = momentsBank.getFloat("distU",row);
-                    v = momentsBank.getFloat("distV",row);
-                    w = momentsBank.getFloat("distW",row);
-                    response.setCoordUVW(u,v,w);
-                    u = momentsBank.getFloat("m2u",row);
-                    v = momentsBank.getFloat("m2v",row);
-                    w = momentsBank.getFloat("m2w",row);
-                    response.setSecondMomentUVW(u,v,w);
-                    u = momentsBank.getFloat("m3u",row);
-                    v = momentsBank.getFloat("m3v",row);
-                    w = momentsBank.getFloat("m3w",row);
-                    response.setThirdMomentUVW(u,v,w);
-                }
-                if (extrasBank!=null) {
-                    int i = extrasBank.getShort("dbstU",row);
-                    int j = extrasBank.getShort("dbstV",row);
-                    int k = extrasBank.getShort("dbstW",row);
-                    response.setPeakStatus(i,j,k);
-                    u = extrasBank.getFloat("rawEU",row);
-                    v = extrasBank.getFloat("rawEV",row);
-                    w = extrasBank.getFloat("rawEW",row);
-                    response.setRawPeakEnergy(u,v,w);
-                    u = extrasBank.getFloat("recEU",row);
-                    v = extrasBank.getFloat("recEV",row);
-                    w = extrasBank.getFloat("recEW",row);
-                    response.setReconPeakEnergy(u,v,w);
-                    u = extrasBank.getFloat("recDTU",row);
-                    v = extrasBank.getFloat("recDTV",row);
-                    w = extrasBank.getFloat("recDTW",row);
-                    response.setPeakTDCTime(u,v,w);
-                    u = extrasBank.getFloat("recFTU",row);
-                    v = extrasBank.getFloat("recFTV",row);
-                    w = extrasBank.getFloat("recFTW",row);
-                    response.setPeakFADCTime(u,v,w);
-                }
                 response.setEnergy(bank.getFloat("energy", row));
                 response.setTime(bank.getFloat("time", row));
                 response.setStatus(bank.getInt("status",row));
-
                 responseList.add((DetectorResponse)response);
             }
         }
         return responseList;
-    }
-
+    }   
+   
+    /**
+     * Read the main calorimeter cluster bank and its moments partner bank.
+     * @param event
+     * @param bankName
+     * @param type
+     * @param momentsBankName
+     * @return 
+     */
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
             String bankName, DetectorType type, String momentsBankName) {
-        return readHipoEvent(event, bankName, type, momentsBankName, null);
+        List<DetectorResponse> responseList = readHipoEvent(event, bankName, type);
+        DataBank momentsBank = event.getBank(momentsBankName);
+        if (responseList.size() != momentsBank.rows()) {
+            throw new RuntimeException("Bank length mismatch: "+bankName+" and "+momentsBankName);
+        }
+        for(int row = 0; row < momentsBank.rows(); row++){
+            float u,v,w;
+            u = momentsBank.getFloat("distU",row);
+            v = momentsBank.getFloat("distV",row);
+            w = momentsBank.getFloat("distW",row);
+            ((CalorimeterResponse)responseList.get(row)).setCoordUVW(u,v,w);
+            u = momentsBank.getFloat("m2u",row);
+            v = momentsBank.getFloat("m2v",row);
+            w = momentsBank.getFloat("m2w",row);
+            ((CalorimeterResponse)responseList.get(row)).setSecondMomentUVW(u,v,w);
+            u = momentsBank.getFloat("m3u",row);
+            v = momentsBank.getFloat("m3v",row);
+            w = momentsBank.getFloat("m3w",row);
+            ((CalorimeterResponse)responseList.get(row)).setThirdMomentUVW(u,v,w);
+        }
+        return responseList;
     }
-
+   
+    /**
+     * Read the main calorimeter cluster bank and its moments and extras partner banks.
+     * @param event
+     * @param bankName
+     * @param type
+     * @param momentsBankName
+     * @param extrasBankName
+     * @return 
+     */
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
-            String bankName, DetectorType type) {
-        return readHipoEvent(event, bankName, type, null, null);
-    }
+            String bankName, DetectorType type, String momentsBankName, String extrasBankName){
+        List<DetectorResponse> responseList = readHipoEvent(event, bankName, type, momentsBankName);
+        DataBank extrasBank = event.getBank(extrasBankName);
+        if (responseList.size() != extrasBank.rows()) {
+            throw new RuntimeException("Bank length mismatch: "+bankName+" and "+extrasBankName);
+        }
+        for(int row = 0; row < extrasBank.rows(); row++){
+            float u,v,w;
+            int i = extrasBank.getShort("dbstU",row);
+            int j = extrasBank.getShort("dbstV",row);
+            int k = extrasBank.getShort("dbstW",row);
+            ((CalorimeterResponse)responseList.get(row)).setPeakStatus(i,j,k);
+            u = extrasBank.getFloat("rawEU",row);
+            v = extrasBank.getFloat("rawEV",row);
+            w = extrasBank.getFloat("rawEW",row);
+            ((CalorimeterResponse)responseList.get(row)).setRawPeakEnergy(u,v,w);
+            u = extrasBank.getFloat("recEU",row);
+            v = extrasBank.getFloat("recEV",row);
+            w = extrasBank.getFloat("recEW",row);
+            ((CalorimeterResponse)responseList.get(row)).setReconPeakEnergy(u,v,w);
+            u = extrasBank.getFloat("recDTU",row);
+            v = extrasBank.getFloat("recDTV",row);
+            w = extrasBank.getFloat("recDTW",row);
+            ((CalorimeterResponse)responseList.get(row)).setPeakTDCTime(u,v,w);
+            u = extrasBank.getFloat("recFTU",row);
+            v = extrasBank.getFloat("recFTV",row);
+            w = extrasBank.getFloat("recFTW",row);
+            ((CalorimeterResponse)responseList.get(row)).setPeakFADCTime(u,v,w);
+        }
+        return responseList;
+    } 
 
 }
 

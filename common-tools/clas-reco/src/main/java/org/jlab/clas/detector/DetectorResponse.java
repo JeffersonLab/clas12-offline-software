@@ -1,6 +1,7 @@
 package org.jlab.clas.detector;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.base.DetectorType;
@@ -220,7 +221,7 @@ public class DetectorResponse {
         // rotate back to proper sector:
         return sectorShifted<=3 ? sectorShifted-3+6 : sectorShifted-3;
     }
-    
+
     @Override
     public String toString(){
         StringBuilder str = new StringBuilder();
