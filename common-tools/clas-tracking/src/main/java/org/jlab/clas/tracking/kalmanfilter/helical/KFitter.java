@@ -46,7 +46,44 @@ public class KFitter extends AKFitter {
         this.setYb(Yb);
         sv.init( helix, cov, Xb, Yb, Zref, mass, this.getSwimmer());
     }
+    /**
+     * Fail safe mode for low pt tracks that fail filtering and smoothing
+     */
+    public void runFitterNoFiltFailSafe() {
+        int k0 = 0;
+        int kf = mv.measurements.size() - 1;
         
+        boolean init = this.initIter(sv, mv);
+        if(!init) return;
+           
+        //re-init state vector and cov mat for forward 
+        //this.initOneWayIter(sv, k0);
+        
+        // transport in forward direction
+        boolean forward = this.runOneWayFitterIter(sv, mv, k0, kf);
+        if (!forward) return;
+        
+        finalSmoothedStateVec    = this.setFinalStateVector(sv.initSV);
+        finalTransportedStateVec = this.setFinalStateVector(sv.initSV);
+        double chisq = 0;
+        this.NDF=0;
+        for(int k = 0; k< mv.measurements.size(); k++) {
+            int index   = mv.measurements.get(k).layer;
+            int layer   = mv.measurements.get(k).surface.getLayer();
+            int sector  = mv.measurements.get(k).surface.getSector();
+            
+            if(!mv.measurements.get(k).surface.passive) {
+                double dh    = mv.dh(k, sv.transported().get(k));
+                double error = mv.measurements.get(k).error;
+                chisq += dh*dh / error/error;
+                this.NDF++;
+                trajPoints.put(index, new HitOnTrack(layer, sector, sv.transported().get(k), dh,dh,dh));
+            } else {
+                trajPoints.put(index, new HitOnTrack(layer, sector, sv.transported().get(k), -999, -999, -999));
+            }
+        }
+        this.chi2 = chisq; 
+    }    
     public void runFitter() {
         this.runFitter(sv, mv);
     }
@@ -115,7 +152,7 @@ public class KFitter extends AKFitter {
                 helx = finalTransportedStateVec.getHelix(this.getXb(), this.getYb());           
         }
         else {
-            if(finalTransportedStateVec!=null)
+            if(finalSmoothedStateVec!=null)
                 helx = finalSmoothedStateVec.getHelix(this.getXb(), this.getYb()); 
         }
         return helx;
@@ -145,7 +182,7 @@ public class KFitter extends AKFitter {
                sv.smoothed().get(0).kappa==0 || 
                Double.isNaN(sv.smoothed().get(0).kappa)) {
                 this.setFitFailed = true; 
-                break;
+                break; 
             }            
             // if chi2 improved and curvature is non-zero, save fit results but continue iterating
             else if(newchisq < this.chi2) {
