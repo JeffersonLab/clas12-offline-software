@@ -67,7 +67,7 @@ public class Banks {
 
     public String getAiBank() {
         if(inPrefix!=null && !inPrefix.isBlank())
-            aiBank = inPrefix+"::tracks";
+            aiBank = "ai" + inPrefix.toLowerCase() +"::tracks";
         return aiBank;
     }
     

@@ -47,7 +47,7 @@
     },
 
     {
-	"name": "DN::tracks",
+	"name": "aidn::tracks",
 	"group": 4200,
 	"item" : 4,
 	"info" : "tracks identified with denoised AI",
