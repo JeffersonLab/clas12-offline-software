@@ -66,7 +66,7 @@ public class KFitter extends AKFitter {
         finalSmoothedStateVec    = this.setFinalStateVector(sv.initSV);
         finalTransportedStateVec = this.setFinalStateVector(sv.initSV);
         double chisq = 0;
-        this.NDF=0;
+        this.NDF=-5;
         for(int k = 0; k< mv.measurements.size(); k++) {
             int index   = mv.measurements.get(k).layer;
             int layer   = mv.measurements.get(k).surface.getLayer();
