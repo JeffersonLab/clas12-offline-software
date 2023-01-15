@@ -80,6 +80,7 @@ public class RICHEBEngine extends ReconstructionEngine {
         this.getConstantsManager().setVariation(engineVariation);
 
         // Get the constant tables for reconstruction parameters, geometry and optical characterization
+        // ATT PASS2
         int run = 5038;
 
         richgeo   = new RICHGeoFactory(1, this.getConstantsManager(), run);

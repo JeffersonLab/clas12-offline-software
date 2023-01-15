@@ -281,6 +281,7 @@ public class RICHEventBuilder{
                 double aero_path[] = {0.0, 0.0, 0.0};
                 Line3D traj_cross[]  = new Line3D[3];
                 Line3D aero_cross[]  = new Line3D[3];
+                int    aero_lay[]    = {0,0,0};
                 for (int j=0; j<rbank.rows(); j++){
                     int jpr = (int) rbank.getShort("pindex",j);
                     int jtk = (int) rbank.getShort("index",j);
@@ -301,63 +302,64 @@ public class RICHEventBuilder{
                             double jcz =  (double) rbank.getFloat("cz",j);
                             double path =  (double) rbank.getFloat("path",j);
                             
-                            if(debugMode>=1) System.out.format(" --> %7.2f %7.2f %7.2f | %7.2f %7.2f %7.2f ",jx,jy,jz,jcx,jcy,jcz);
                             Vector3D vdir = new Vector3D(jcx, jcy, jcz);
                             if(!vdir.unit()) continue;
+                            // ATT pass2
+                            if(jdet==DetectorType.RICH.getDetectorId())continue;
 
                             if(jdet==DetectorType.DC.getDetectorId() && jlay==36){
                                 traj_cross[0] = new Line3D(jx, jy, jz, vdir.x(), vdir.y(), vdir.z());
                                 traj_path[0] = path;
-                                if(debugMode>=1) System.out.format(" DC3 ");
+                                if(debugMode>=1) System.out.format(" --> DC3 ");
                                 ntraj_cross++;
                             }
                             if(jdet==DetectorType.RICH.getDetectorId() && jlay==1){
-                                traj_cross[2] = new Line3D(jx, jy, jz, vdir.x(), vdir.y(), vdir.z());
-                                traj_path[2] = path;
-                                if(debugMode>=1) System.out.format(" PMT ");
+                                traj_cross[1] = new Line3D(jx, jy, jz, vdir.x(), vdir.y(), vdir.z());
+                                traj_path[1] = path;
+                                if(debugMode>=1) System.out.format(" --> PMT ");
                                 ntraj_cross++;
                             }
                             if(jdet==DetectorType.RICH.getDetectorId() && jlay>=2 && jlay<=4){
                                 aero_cross[naero_cross] = new Line3D(jx, jy, jz, vdir.x(), vdir.y(), vdir.z());
                                 aero_path[naero_cross] = path;
-                                if(debugMode>=1) System.out.format(" AER ");
+                                aero_lay[naero_cross] = jlay;
+                                if(debugMode>=1) System.out.format(" --> AER ");
                                 naero_cross++;
                             }
                             if(debugMode>=1) System.out.format(" --> %7.2f %7.2f %7.2f | %7.2f %7.2f %7.2f -> %s | path %7.2f ",
                                   jx,jy,jz,jcx,jcy,jcz,vdir.toStringBrief(2),path);
                         }
 
-                        if(debugMode>=1) System.out.format("\n");
+                        if(debugMode>=1) System.out.format(" [%3d % 3d]\n",ntraj_cross,naero_cross);
                     }
                 }
 
+                //overwrite DC3 with first AERO if present
                 if(debugMode>=1) System.out.format(" AERO: %4d cross found \n",naero_cross);
-                if(naero_cross==1){
-                    //int iaero = richgeo.select_AeroforTraj(isec, aero_cross[0], aero_cross[1], aero_cross[2]);
-                    int iaero=0;
-                    traj_cross[1] = new Line3D( aero_cross[iaero].origin(), aero_cross[iaero].end());
-                    traj_path[1] = aero_path[iaero];
-                    ntraj_cross++;
+                if(naero_cross>0){
+                    double minpath = 999.;
+                    for (int ia=0; ia<naero_cross; ia++){
+                        if(aero_path[ia]>0 && aero_path[ia]<minpath){
+                            if(traj_path[0]==0.0)ntraj_cross++;
+                            traj_cross[0] = new Line3D( aero_cross[ia].origin(), aero_cross[ia].end());
+                            traj_path[0] = aero_path[ia];
+                            minpath = aero_path[ia];
+                            if(debugMode>=1) System.out.format("  take aero %3d %3d  path %7.2f \n",ia,aero_lay[ia],traj_path[0]);
+                        }
+                    }
                 }
 
                 int detid = DetectorType.RICH.getDetectorId();
-                if(debugMode>=1) System.out.format(" TRAJ: %4d cross found \n",ntraj_cross);
-                if(ntraj_cross==3){
-                    //pass2: rich planes are avaialble, take cross at aerogel (first) and mapmt (last)
-                    for (int k=1; k<3; k++){
+                if(debugMode>=1) System.out.format(" TRAJ: %4d crosses found \n",ntraj_cross);
+                for (int k=0; k<ntraj_cross; k++){
+                    if(traj_path[k]>0){
                         tr.addCross(traj_cross[k].origin().x(), traj_cross[k].origin().y(), traj_cross[k].origin().z(),
-                                    traj_cross[k].end().x(), traj_cross[k].end().y(), traj_cross[k].end().z() );
-                        tr.getTrajectory().add(new DetectorTrack.TrajectoryPoint(detid, k-1, traj_cross[k], (float) traj_path[k], (float) 0., (float) 0.)); 
+                                traj_cross[k].end().x(), traj_cross[k].end().y(), traj_cross[k].end().z() );
+                        tr.getTrajectory().add(new DetectorTrack.TrajectoryPoint(detid, k, traj_cross[k], (float) traj_path[k], (float) 0., (float) 0.)); 
                         tr.setPath(traj_path[k]);
-
+                        if(debugMode>=1) System.out.format(" TRAJ: store cross %4d:  %3d %3d with path %7.2f \n",k,DetectorType.RICH.getDetectorId(),k,traj_path[k]);
                     }
-                }else{
-                //if(ntraj_cross==1){
-                    //pass1: only dc planes are available, take only (first and last) cross at DC3 
-                    tr.addCross(traj_cross[0].origin().x(), traj_cross[0].origin().y(), traj_cross[0].origin().z(),
-                                traj_cross[0].end().x(), traj_cross[0].end().y(), traj_cross[0].end().z() );
-                    tr.getTrajectory().add(new DetectorTrack.TrajectoryPoint(detid, 0, traj_cross[0], (float) traj_path[0], (float) 0., (float) 0.)); 
-                    tr.setPath(traj_path[0]);
+
                 }
 
                 if(tr.getCrossCount()==0){if(debugMode>=1)System.out.format("Traj not found \n"); continue;}
@@ -462,31 +464,37 @@ public class RICHEventBuilder{
         int np = clasevent.getParticles().size();
         for(int n = 0; n < np; n++){
             DetectorParticle  p = this.clasevent.getParticle(n);
-            Line3D trajectory = p.getLastCross();
-            Point3D ori = trajectory.origin();
-            Point3D end = trajectory.end();
-            if(debugMode>=1)  System.out.format("Particle n %4d   itr %3d    path %8.1f   ori %s   end %s\n",
-                   n,p.getTrackIndex(),p.getPathLength(),ori.toStringBrief(2),end.toStringBrief(2));
 
-            // Matching tracks to RICH:
+            if(debugMode>=1){
+                Line3D trajectory = p.getLastCross();
+                Point3D ori = trajectory.origin();
+                Point3D end = trajectory.end();
+                System.out.format("Particle n %4d   itr %3d    path %8.1f   ori %s   end %s\n",
+                            n,p.getTrackIndex(),p.getPathLength(),ori.toStringBrief(2),end.toStringBrief(2));
+            }
+
+            // Matching tracks to RICH: from LastCross minimum distance in any direction
             Double rich_match_cut = richpar.RICH_DCMATCH_CUT;
             int index = p.getDetectorHit(richevent.get_ResClus(), DetectorType.RICH, -1, rich_match_cut);
             //int index = getDetectorHit(p, richevent.get_ResClus(), DetectorType.RICH, -1, rich_match_cut);
             if(index>=0){
 
                 DetectorResponse res = richevent.get_ResClu(index);
-                double dz = res.getPosition().z() - p.getLastCross().origin().z();
-                if(debugMode>=1)  System.out.format(" --> match found %4d pos %s  dz %7.2f \n", index, res.getPosition().toStringBrief(2), dz); 
+                Point3D ocross = p.getLastCross().origin();
+                double dz = res.getPosition().z() - ocross.z();
+                if(debugMode>=1)  System.out.format(" --> match found %4d  par %s  clu %s  dz %7.2f \n", index, ocross.toStringBrief(2), res.getPosition().toStringBrief(2), dz); 
 
                 // while storing the match, calculates the matched position as middle point between track and hit 
                 // and path (track last cross plus distance to hit) assuming the hit is downstream of last cross
                 p.addResponse(res, true);
                 if(dz<0){
+                    // go backward instead of forward from LastCross
                     double extra = p.getPathLength(res.getPosition());
                     res.setPath( res.getPath()-2*extra);
                     if(debugMode>=1)  System.out.format(" --> Negative Delta z %7.2f --> correct path by %7.2 \n", dz, -2*extra); 
                 }
 
+                // Status brings the pindex of the original track to fix the hipo cross-indexes
                 res.setAssociation(p.getTrackStatus());
             }
 
@@ -593,7 +601,7 @@ public class RICHEventBuilder{
                 if(exr!=null) nexr++;
             }
 
-            // ATT: define the response treatment in special cases
+            // define the response treatment in special cases
             if(nexr==0){if(debugMode>=1)System.out.format("No RICH intersection for particle with nresp %d and theta %8.2f \n",nr,theta*RAD); continue;}
             if(nr==1)Match_chi2 = 2*exr.getMatchedDistance()/richpar.RICH_HITMATCH_RMS;
 
@@ -805,13 +813,14 @@ public class RICHEventBuilder{
         }
         if(extra==null) return null;
 
-        //ATT: this extrapath is correct being calculated along the extrapolated trajectory
+        // this extrapath is correct being calculated along the extrapolated trajectory
         double extrapath = extra.distance( p.getLastCross().origin() );
         if(extra.z()<p.getLastCross().origin().z()) extrapath*=-1;
         
         DetectorResponse exr = new DetectorResponse( p.getTrackSector(), imir, 0);
         exr.getDescriptor().setType(DetectorType.RICH);
         //ATT: this path is correctly extrapolatd along the trajectory
+        //ATT: setPath should find r.getPath() if not zero value!
         exr.setPath(p.getPathLength() + extrapath);
 
         if(r!=null){

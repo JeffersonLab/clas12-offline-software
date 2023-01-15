@@ -75,29 +75,6 @@ public class RICHGeoParameters {
 
     }
 
-    /*//------------------------------
-    public void init_ParametersCCDB(IndexedTable paraConstants) {
-    //------------------------------
-
-        int debugMode = 0;
-
-        DO_ALIGNMENT                =  paraConstants.getIntValue("flag1", 4, 0, 0);
-        ALIGN_PMT_PIVOT             =  paraConstants.getIntValue("flag4", 4, 0, 0);
-        APPLY_SURVEY                =  paraConstants.getIntValue("flag5", 4, 0, 0);
-
-        ALIGN_SHIFT_SCALE           =  paraConstants.getDoubleValue("par9", 4, 0, 0);
-        ALIGN_ANGLE_SCALE           =  paraConstants.getDoubleValue("par10", 4, 0, 0);
-
-        DEBUG_GEO_PARAMS            =  (int) paraConstants.getDoubleValue("par7", 4, 0, 0);
-
-        // ATT: da rimuovere nella produzione
-        //DO_ALIGNMENT                  =  0;
-        //DEBUG_GEO_PARAMS            =  1;
-        //DEBUG_GEO_CONSTS            =  1;
-
-    }*/
-
-
     //------------------------------
     public void init_ParametersCCDB(IndexedTable paraConstants) {
     //------------------------------

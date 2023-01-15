@@ -859,7 +859,7 @@ public class RICHEvent {
                         n_bg[hypo]++;
                         if(debugMode>=2)System.out.format(" --> etac %8.4f for background %10.4g %10.4g \n", etac*MRAD, prob, Math.log(prob));
                     }else{
-                        //System.out.format("ATT: wrong prob  for background %g \n",prob-1);
+                        //System.out.format(" Wrong prob  for background %g \n",prob-1);
                     }
 
                     // prob for signal
@@ -877,7 +877,7 @@ public class RICHEvent {
                         if(debugMode>=1)System.out.format(" --> etac %8.4f %g %g \n", etac*MRAD, prob, Math.log(prob));
                     }else{
                         if(debugMode>=1)System.out.format(" \n");
-                        //System.out.format("ATT: wrong prob  for electron %g \n",prob-1);
+                        //System.out.format(" Wrong prob  for electron %g \n",prob-1);
                     }
 
                     if(debugMode>=2) pho.shortshow();
@@ -1050,7 +1050,7 @@ public class RICHEvent {
                             if(roth.get_OK()==11){
                                 reco.set_OK( reco.get_OK()+100 );
                                 // take elemets for likelihood calculation
-                                // ATT: take first hypo as most probable (to be refined)
+                                // ATT: take first working hypo as most probable (to be refined)
                                 reco.set_dthe_res( roth.get_dthe_res());
                                 reco.set_dphi_res( roth.get_dphi_res());
                                 reco.set_dthe_bin( roth.get_dthe_bin());

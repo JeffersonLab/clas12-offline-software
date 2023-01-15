@@ -705,7 +705,7 @@ public class RICHLayer extends ArrayList<RICHComponent> {
         if((this.is_aerogel() || this.is_spherical_mirror()) && ico==-1){
         //if(this.is_aerogel() && ico==-1)
             global = false;
-            splane = "compo surf  ";
+            splane = "compo  surf";
             plane = this.get_TrackingSurf();
         }
 

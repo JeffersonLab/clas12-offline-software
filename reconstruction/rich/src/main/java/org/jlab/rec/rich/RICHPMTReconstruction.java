@@ -345,9 +345,9 @@ public class RICHPMTReconstruction {
         }
 
         if(debugMode>=1){
-            System.out.println("-------------------------");
-            System.out.println("List of selected Clusters");
-            System.out.println("-------------------------");
+            System.out.format("-------------------------\n");
+            System.out.format("List of selected Clusters %4d \n",clusters.size());
+            System.out.format("-------------------------\n");
             for(int i=0; i<clusters.size(); i++) {
                 clusters.get(i).showCluster();
             }

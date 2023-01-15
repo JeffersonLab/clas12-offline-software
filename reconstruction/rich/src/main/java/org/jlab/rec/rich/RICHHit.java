@@ -51,7 +51,7 @@ public class RICHHit implements Comparable<RICHHit>{
 
         int debugMode = 0;
 
-	// ATT: Edge channel runs [1:192], Hit channel runs [0:191]
+	// Edge channel runs [1:192], Hit channel runs [0:191]
         this.id        = hid;
         this.sector    = lead.get_sector();
         this.tile      = lead.get_tile();

@@ -115,7 +115,7 @@ public class RICHParticle {
         this.sector        = p.getTrackSector();
         this.charge        = p.getCharge();
 
-        // ATT: exr already account for track extrapolation at the RICH surface and possible cluster match
+        // exr already account for track extrapolation at the RICH surface and possible cluster match
         this.hit.set_id( exr.getHitIndex() );
         this.hit.set_Position( exr.getPosition().toPoint3D() );
         this.hit.set_Time( exr.getTime() );
@@ -568,8 +568,6 @@ public class RICHParticle {
         double beta = get_beta(pid);
         double cose = Math.cos(chele_emission[irefle]);
 
-        //if(chele_emission[irefle]==0)System.out.format(" ATT no changle \n");
-
         double arg = 0.0;
         if(beta>0) arg = 1.0/beta*cose;
         if(debugMode>=1)  System.out.format(" Calibrated Ch Angle %7.2f %8.4f  beta %8.4f  n %7.3f  arg %8.4f [%4d %4d]\n",
@@ -703,28 +701,32 @@ public class RICHParticle {
         int debugMode = 0;
         boolean found_exit = false;
         boolean found_entrance = false;
-
-        if(debugMode>=3)  System.out.println(" \n RICHParticle::set_aerogel_points \n");
         RICHIntersection compo     = null;
 
-        if(debugMode>=3)  System.out.println(" Look for intersection with layer 201 \n");
+        if(debugMode>=1){ 
+            if(debugMode>=3)  System.out.println(" \n RICHParticle::set_aerogel_points \n");
+            System.out.format(" from ray %s \n",direct_ray.origin().toStringBrief(2));
+            if(debugMode>=3)  System.out.println(" Look for intersection with layer 201 \n");
+        }
         RICHIntersection entrance  = richtrace.get_Layer(sector, "AEROGEL_2CM_B1").find_Entrance(direct_ray, -1);
+        if(debugMode>=1 && entrance!=null)  System.out.format(" B1 entrance %4d %6d  %s \n",entrance.get_layer(),entrance.get_component(), entrance.get_pos().toStringBrief(2));
         RICHIntersection exit      = richtrace.get_Layer(sector, "AEROGEL_2CM_B1").find_Exit(direct_ray, -1);
+        if(debugMode>=1 && exit!=null)      System.out.format(" B1 exit     %4d %6d  %s \n",exit.get_layer(),exit.get_component(), exit.get_pos().toStringBrief(2));
 
         if(entrance==null || exit==null){
             if(debugMode>=3)  System.out.println(" Look for intersection with layer 202 \n");
             entrance  = richtrace.get_Layer(sector, "AEROGEL_2CM_B2").find_Entrance(direct_ray, -1);
+            if(debugMode>=1 && entrance!=null)  System.out.format(" B2 entrance %4d %6d  %s \n",entrance.get_layer(),entrance.get_component(), entrance.get_pos().toStringBrief(2));
             exit      = richtrace.get_Layer(sector, "AEROGEL_2CM_B2").find_Exit(direct_ray, -1);
+            if(debugMode>=1 && exit!=null)      System.out.format(" B2 exit     %4d %6d  %s \n",exit.get_layer(),exit.get_component(), exit.get_pos().toStringBrief(2));
         }
 
         if(entrance==null || exit==null){
             if(debugMode>=3)  System.out.println(" Look for intersection with layer 203/204 \n");
             entrance  = richtrace.get_Layer(sector, "AEROGEL_3CM_L2").find_Entrance(direct_ray, -1);
+            if(debugMode>=1 && entrance!=null)  System.out.format(" B3 entrance %4d %6d  %s \n",entrance.get_layer(),entrance.get_component(), entrance.get_pos().toStringBrief(2));
             exit      = richtrace.get_Layer(sector, "AEROGEL_3CM_L1").find_Exit(direct_ray, -1);
-            if(debugMode>=1){
-                if(entrance!=null)  System.out.format(" 3cm entrance %4d %6d  %s \n",entrance.get_layer(),entrance.get_component(), entrance.get_pos().toStringBrief(2));
-                if(exit!=null)      System.out.format(" 3cm exit     %4d %6d  %s \n",exit.get_layer(),exit.get_component(), exit.get_pos().toStringBrief(2));
-            }
+            if(debugMode>=1 && exit!=null)      System.out.format(" B3 exit     %4d %6d  %s \n",exit.get_layer(),exit.get_component(), exit.get_pos().toStringBrief(2));
         }
 
         if(entrance==null || exit==null){

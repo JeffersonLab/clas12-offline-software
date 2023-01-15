@@ -265,7 +265,7 @@ public class RICHGeoFactory{
     // planes for effective ray tracing
     // ATT: to be done: aerogel cromatic dispersion, mirror reflectivity vs wavelength
 
-        int debugMode = 0;
+        int debugMode = 2;
 
         /*
         * Generate the layers of components
@@ -467,6 +467,10 @@ public class RICHGeoFactory{
             if(debugMode>=1){
                 System.out.format("Layer %3d  thickness %7.2f \n",i,thick);
                 trap.show();
+                Point3D p = new Point3D(-157.51, -0.84,535.13);
+                int inside = 0;
+                if(trap.isInside(p))inside=1;
+                System.out.format("Point %s %4d \n",p.toStringBrief(2),inside);
             }
         }
 
@@ -1847,6 +1851,7 @@ public class RICHGeoFactory{
 
         int debugMode = 0;
         ArrayList<Point3D> points = new ArrayList<Point3D>();
+        ArrayList<Point3D> opoints = new ArrayList<Point3D>();
 
         if(debugMode>=1)System.out.format("Convert Shape3D into Trap3D \n");
         for (int ifa=0; ifa<surf.size(); ifa++){
@@ -1870,8 +1875,30 @@ public class RICHGeoFactory{
 
         if(debugMode>=1)System.out.format("Found %4d points in shape \n",points.size());
         if(points.size()!=4)return null;
-        Trap3D trap = new Trap3D(points.get(0), points.get(1), points.get(2), points.get(3));
 
+        Point3D cen = Point3D.average(points.get(0), points.get(1), points.get(2), points.get(3));
+        int found[] = {0, 0, 0, 0};
+        for (int ip=0; ip<4; ip++){
+            int jsel = -1;
+            double phimin = 999;
+            if(debugMode>=1)System.out.format("Ordering cycle %3d \n",ip);
+            for (int jp=0; jp<points.size(); jp++){
+                if(found[jp]==1)continue;
+                if(points.get(jp).vectorFrom(cen).phi() <= phimin){ 
+                    phimin = points.get(jp).vectorFrom(cen).phi();
+                    jsel = jp;
+                    if(debugMode>=1)System.out.format("   %3d --> %7.2f \n",jp,phimin); 
+                }
+            }
+            if(jsel>-1){
+                opoints.add(points.get(jsel));
+                found[jsel]=1;
+                if(debugMode>=1)System.out.format("       --> take \n");
+            }
+        }
+
+
+        Trap3D trap = new Trap3D(opoints.get(0), opoints.get(1), opoints.get(2), opoints.get(3));
         return trap;
      }
 
