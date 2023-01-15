@@ -2013,12 +2013,14 @@ public class RICHGeoFactory{
     // ----------------
 
         if(name!=null) System.out.format(" %s ----------------------- %s \n", name, toString(get_Shape3D_Bary(plane)));
-        for (int ifa=0; ifa<plane.size(); ifa++){
-            Face3D f = plane.face(ifa);
-            if(head==null){
-                System.out.format(" %s %s %s \n", toString(f.point(0)), toString(f.point(1)), toString(f.point(2)));
-            }else{
-                System.out.format(" %s %s %s %s \n", head, toString(f.point(0)), toString(f.point(1)), toString(f.point(2)));
+        if(plane!=null){
+            for (int ifa=0; ifa<plane.size(); ifa++){
+                Face3D f = plane.face(ifa);
+                if(head==null){
+                    System.out.format(" %s %s %s \n", toString(f.point(0)), toString(f.point(1)), toString(f.point(2)));
+                }else{
+                    System.out.format(" %s %s %s %s \n", head, toString(f.point(0)), toString(f.point(1)), toString(f.point(2)));
+                }
             }
         }
     }
