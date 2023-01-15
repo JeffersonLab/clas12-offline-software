@@ -265,7 +265,7 @@ public class RICHGeoFactory{
     // planes for effective ray tracing
     // ATT: to be done: aerogel cromatic dispersion, mirror reflectivity vs wavelength
 
-        int debugMode = 2;
+        int debugMode = 0;
 
         /*
         * Generate the layers of components
