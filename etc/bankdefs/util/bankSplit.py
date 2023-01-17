@@ -65,10 +65,10 @@ rtpc   = ["RTPC::hits","RTPC::tracks","RTPC::KFtracks"]
 dets   = band + raster + rich + rtpc
 
 # additions for the calibration schema:
-calib = ["BAND::adc","BAND::laser","BAND::tdc","BAND::hits","BAND::rawhits","CND::adc","CND::hits","CND::tdc","CTOF::adc","CTOF::hits","CTOF::tdc","CVTRec::Tracks","CVTRec::UTracks","ECAL::adc","ECAL::calib","ECAL::clusters","ECAL::peaks","ECAL::tdc","FMT::Hits","FMT::Clusters","FMT::Tracks","FMT::Trajectory","FT::particles","FTCAL::adc","FTCAL::clusters","FTCAL::hits","FTHODO::adc","FTHODO::clusters","FTHODO::hits","FTTRK::adc","FTTRK::clusters","FTTRK::hits","FTTRK::crosses","FTOF::adc","FTOF::hits","FTOF::tdc","HTCC::adc","HTCC::rec","LTCC::adc","LTCC::clusters","RASTER::adc","RAW::vtp","RF::adc","RF::tdc","RICH::tdc","RICH::hits","RICH::hadCher","RICH::hadrons","RICH::photons","RICH::ringCher","RTPC::adc","RTPC::hits","RTPC::tracks","RUN::rf","RUN::trigger","TimeBasedTrkg::TBCrosses","TimeBasedTrkg::TBHits","TimeBasedTrkg::TBSegments","TimeBasedTrkg::TBSegmentTrajectory","TimeBasedTrkg::TBTracks","TimeBasedTrkg::Trajectory"]
+calib = ["BAND::adc","BAND::laser","BAND::tdc","BAND::hits","BAND::rawhits","CND::adc","CND::hits","CND::tdc","CTOF::adc","CTOF::hits","CTOF::tdc","CVTRec::Tracks","CVTRec::UTracks","ECAL::adc","ECAL::calib","ECAL::clusters","ECAL::peaks","ECAL::tdc","FMT::Hits","FMT::Clusters","FMT::Tracks","FMT::Trajectory","FT::particles","FTCAL::adc","FTCAL::clusters","FTCAL::hits","FTHODO::adc","FTHODO::clusters","FTHODO::hits","FTTRK::clusters","FTTRK::hits","FTTRK::crosses","FTOF::adc","FTOF::hits","FTOF::tdc","HTCC::adc","HTCC::rec","LTCC::adc","LTCC::clusters","RASTER::adc","RF::adc","RF::tdc","RICH::tdc","RICH::hits","RICH::hadCher","RICH::hadrons","RICH::photons","RICH::ringCher","RTPC::adc","RTPC::hits","RTPC::tracks","RUN::rf","RUN::trigger","TimeBasedTrkg::TBHits","TimeBasedTrkg::TBTracks"]
 
 # additions for the monitoring schema:
-mon = ["BMT::adc","BMTRec::Clusters","BMTRec::Crosses","BMTRec::Hits","BMTRec::LayerEffs","BST::adc","BSTRec::Clusters","BSTRec::Crosses","BSTRec::Hits","BSTRec::LayerEffs","CND::clusters","CVTRec::Trajectory","ECAL::hits","FMT::adc","HEL::adc","HitBasedTrkg::HBTracks"]
+mon = ["BMT::adc","BMTRec::Clusters","BMTRec::Crosses","BMTRec::Hits","BMTRec::LayerEffs","BST::adc","BSTRec::Clusters","BSTRec::Crosses","BSTRec::Hits","BSTRec::LayerEffs","CND::clusters","CVTRec::Trajectory","ECAL::hits","FMT::adc","FTTRK::adc","HEL::adc","HitBasedTrkg::HBTracks","RAW::vtp","TimeBasedTrkg::TBCrosses","TimeBasedTrkg::TBSegments","TimeBasedTrkg::TBSegmentTrajectory","TimeBasedTrkg::Trajectory"]
 
 #ebrerun = list(dst)
 #ebrerun.extend(["FTOF::hits","TimeBasedTrkg::TBTracks","TimeBasedTrkg::Trajectory","TimeBasedTrkg::TBCovMat","HitBasedTrkg::HBTracks","FTOF::hbhits","ECAL::clusters","CTOF::hits","CND::clusters","HTCC::rec","LTCC::clusters","ECAL::moments","CVTRec::Tracks","CVTRec::Trajectory","FT::particles","FTCAL::clusters","FTHODO::clusters","RUN:rf"])
@@ -76,8 +76,8 @@ mon = ["BMT::adc","BMTRec::Clusters","BMTRec::Crosses","BMTRec::Hits","BMTRec::L
 dst = rectbai + rectb + mc + tag1 + dets
 dsthb = dst + rechbai + rechb
 
-calib.extend(dsthb)
-mon.extend(calib)
+calib.extend(dst)
+mon.extend(calib + rechbai + rechb)
 
 create("dst/", set(dst))
 create("dsthb/", set(dsthb))

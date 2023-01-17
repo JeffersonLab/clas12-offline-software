@@ -53,6 +53,7 @@ public class ECCommon {
     
     public static Boolean     usePass2Recon = false;
     public static Boolean    usePass2Timing = true;
+    public static Boolean    usePass2Energy = true;
     public static int     UnsharedEnergyCut = 6;
     public static Boolean   useUnsharedTime = true;
     public static Boolean       useFADCTime = false;
@@ -154,7 +155,8 @@ public class ECCommon {
         
         manager.setVariation(variation);
 
-        IndexedTable    atten = manager.getConstants(run, "/calibration/ec/attenuation");
+        IndexedTable   atten1 = manager.getConstants(run, "/calibration/ec/attenuation");
+        IndexedTable   atten2 = manager.getConstants(run, "/calibration/ec/atten");    //pass2
         IndexedTable     gain = manager.getConstants(run, "/calibration/ec/gain");
         IndexedTable    itime = manager.getConstants(run, "/calibration/ec/timing"); 
         IndexedTable    ftime = manager.getConstants(run, "/calibration/ec/ftime");    //pass2
@@ -216,9 +218,21 @@ public class ECCommon {
             }
             // End of the edit.
             
-            strip.setAttenuation(atten.getDoubleValue("A", sector,layer,component),
-                                 atten.getDoubleValue("B", sector,layer,component),
-                                 atten.getDoubleValue("C", sector,layer,component));
+            if(!usePass2Energy) { 
+            strip.setAttenuation(atten1.getDoubleValue("A", sector,layer,component),
+                                 atten1.getDoubleValue("B", sector,layer,component),
+                                 atten1.getDoubleValue("C", sector,layer,component),
+                                 0,
+                               100);
+            }
+            
+            if(usePass2Energy) { 
+            strip.setAttenuation(atten2.getDoubleValue("A", sector,layer,component),
+                                 atten2.getDoubleValue("B", sector,layer,component),
+                                 atten2.getDoubleValue("C", sector,layer,component),
+                                 atten2.getDoubleValue("D", sector,layer,component),
+                                 atten2.getDoubleValue("E", sector,layer,component));
+            }
             
             double ccdbGain =   gain.getDoubleValue("gain", sector,layer,component)*ggs.getDoubleValue("gain_shift",sector,layer,0);
             double run2Gain = r2gain.getDoubleValue("gain", sector,layer,component);  
