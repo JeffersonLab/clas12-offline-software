@@ -304,8 +304,6 @@ public class RICHEventBuilder{
                             
                             Vector3D vdir = new Vector3D(jcx, jcy, jcz);
                             if(!vdir.unit()) continue;
-                            // ATT pass2
-                            if(jdet==DetectorType.RICH.getDetectorId())continue;
 
                             if(jdet==DetectorType.DC.getDetectorId() && jlay==36){
                                 traj_cross[0] = new Line3D(jx, jy, jz, vdir.x(), vdir.y(), vdir.z());
@@ -377,21 +375,8 @@ public class RICHEventBuilder{
                 particle.setPid(CLASpid);
                 particle.setBeta( particle.getTheoryBeta(CLASpid) );
                 particle.setMass( PDGDatabase.getParticleById(CLASpid).mass() );
-                // FIX ME! 
+                // ATT: FIX ME! 
                 clasevent.addParticle(particle);
-
-                /* just a check
-                int[] richPlanes = {DetectorLayer.RICH_MAPMT, DetectorLayer.RICH_AEROGEL_B1, DetectorLayer.RICH_AEROGEL_B2, DetectorLayer.RICH_AEROGEL_L1};
-                int is=3;
-                for(int ii=0; ii<richPlanes.length; ii++) {
-                    Plane3D richPlane = richgeo.get_TrajPlane(is+1,richPlanes[ii]);
-                    if(richPlane!=null) {
-                        Vector3D P = richPlane.point().toVector3D();
-                        Vector3D n = richPlane.normal().multiply(-1);
-                        double d = P.dot(n);
-                        System.out.format(" TRAJ plane %s  %s --> %7.4f \n",P.toStringBrief(4),n.toStringBrief(4), d);
-                    }
-                }*/
 
             }
 
@@ -992,58 +977,4 @@ public class RICHEventBuilder{
             end.x(),end.y(),end.z());
     }
 
-
-    /*public int getDetectorHit(DetectorParticle p, List<DetectorResponse>  hitList, DetectorType type,
-            int detectorLayer,
-            double distanceThreshold){
-         
-        Line3D   trajectory = p.getTrack().getLastCross();
-        Point3D  hitPoint = new Point3D();
-        double   minimumDistance = 500.0;
-        int      bestIndex       = -1;
-
-        boolean hitSharing=false;
-        for (int ii=0; ii<sharedDetectors.length && p.getCharge()!=0; ii++) {
-            if (type == sharedDetectors[ii]) {
-                hitSharing=true;
-                break;
-            }
-        }
-
-        System.out.format("Sono in getDetectorHit\n");
-
-        for(int loop = 0; loop < hitList.size(); loop++){
-           
-            DetectorResponse response = hitList.get(loop);
- 
-            // same-sector requirement between hit and track:
-            if (response.getSector()>0 && p.getTrack().getSector()>0) {
-              if (response.getSector() != p.getTrack().getSector()) {
-                  continue;
-              }
-            }
-            System.out.format("Superato sector %3d \n",loop);
-            
-            if(response.getDescriptor().getType()==type){
-                System.out.format("type ok %3d %3d %3d\n",loop,detectorLayer,response.getDescriptor().getLayer());
-              if(detectorLayer<=0 || response.getDescriptor().getLayer()==detectorLayer){
-                System.out.format("layer ok %3d %3d \n",loop,response.getAssociation());
-               if(hitSharing || response.getAssociation()<0) {
-                hitPoint.set(
-                        response.getPosition().x(),
-                        response.getPosition().y(),
-                        response.getPosition().z()
-                        );
-                double hitdistance = trajectory.distance(hitPoint).length();
-                System.out.format("verifico %3d %7.2f \n",loop,hitdistance);
-                if (hitdistance<distanceThreshold && hitdistance<minimumDistance) {
-                    minimumDistance = hitdistance;
-                    bestIndex       = loop;
-                }
-            }
-            }
-            }
-        }
-        return bestIndex;
-    }*/
 }

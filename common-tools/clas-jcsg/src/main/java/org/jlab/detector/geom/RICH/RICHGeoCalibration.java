@@ -53,12 +53,12 @@ public class RICHGeoCalibration {
             if((debugMode>=1 || geopar.DEBUG_GEO_CONSTS>=1) && ncalls<Math.max(1,geopar.DEBUG_GEO_CONSTS)) dump_RICHSetup("TXT  ");
             
         }else{
-            init_RICHTableCCDB( manager.getConstants(run, "/test/rich/setup") );
+            init_RICHTableCCDB( manager.getConstants(run, "/geometry/rich/setup") );
             if((debugMode>=1 || geopar.DEBUG_GEO_CONSTS>=1) && ncalls<Math.max(1,geopar.DEBUG_GEO_CONSTS)) {
                 System.out.format("------------------------------------------------------------- \n");
                 System.out.format("RICH: Load GEO Setup from CCDB for run %6d \n", run);
                 System.out.format("------------------------------------------------------------- \n");
-                System.out.format("Banks \n /test/rich/setup \n");
+                System.out.format("Banks \n /geometry/rich/setup \n");
 
                 dump_RICHSetup("CCDB ");
                 }
@@ -69,8 +69,8 @@ public class RICHGeoCalibration {
             int isec = find_RICHSector(irich);
 
             if(isec==0) continue;
-            String aero_bank = String.format("/test/rich/module%1d/aerogel",irich);  
-            String alig_bank = String.format("/test/rich/module%1d/alignment",irich);
+            String aero_bank = String.format("/geometry/rich/module%1d/aerogel",irich);  
+            String alig_bank = String.format("/geometry/rich/module%1d/alignment",irich);
             init_GeoCalibrationCCDB( manager.getConstants(run, aero_bank),
                                      manager.getConstants(run, alig_bank) );
 

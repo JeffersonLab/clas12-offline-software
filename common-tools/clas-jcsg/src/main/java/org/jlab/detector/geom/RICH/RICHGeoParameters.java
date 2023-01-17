@@ -49,13 +49,13 @@ public class RICHGeoParameters {
 
         int debugMode = 0;
 
-        init_ParametersCCDB( manager.getConstants(run, "/test/rich/geo_parameter") );
+        init_ParametersCCDB( manager.getConstants(run, "/geometry/rich/geo_parameter") );
 
         if((debugMode>=1 || DEBUG_GEO_PARAMS>=1) && ncalls<Math.max(1,DEBUG_GEO_PARAMS)) {
             System.out.format("------------------------------------------------------------- \n");
             System.out.format("RICH: Load GEO parameters from CCDB for run %6d \n", run);
             System.out.format("------------------------------------------------------------- \n");
-            System.out.format("Banks \n /test/rich/geo_parameter\n");
+            System.out.format("Banks \n /geometry/rich/geo_parameter\n");
  
             dump_Parameters();
         }

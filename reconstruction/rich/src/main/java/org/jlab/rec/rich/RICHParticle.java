@@ -1112,8 +1112,8 @@ public class RICHParticle {
             //    Npho,ftheta*dtheta,dphi,ftime*dtime,prob);
             System.out.format(" T %6.2f (%6.2f, %5.2f) ",
                 hit.get_Time(),recot+meant,sigmat);
-            System.out.format("--> %5.1f %10.4g %10.4g %10.4g %10.4g %10.4g --> %8.4g \n", 
-                Npho,ftheta,dtheta,dphi,ftime,dtime,prob);
+            System.out.format("--> %5.1f %10.4g %10.4g %10.4g %10.4g %10.4g %10.4g --> %8.4g \n\n", 
+                Npho,ftheta,dtheta,dphi,ftime,dtime,backgr,prob);
         }
         return prob;
 

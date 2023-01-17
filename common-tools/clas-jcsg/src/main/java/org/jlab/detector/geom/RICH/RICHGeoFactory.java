@@ -70,12 +70,12 @@ public class RICHGeoFactory{
         if(FactoryMode==0){
             // add RICH tables to a different Engine
             String[] richTables = new String[]{
-                    "/test/rich/setup",
-                    "/test/rich/geo_parameter",
-                    "/test/rich/module1/aerogel",
-                    "/test/rich/module2/aerogel",
-                    "/test/rich/module1/alignment",
-                    "/test/rich/module2/alignment"
+                    "/geometry/rich/setup",
+                    "/geometry/rich/geo_parameter",
+                    "/geometry/rich/module1/aerogel",
+                    "/geometry/rich/module2/aerogel",
+                    "/geometry/rich/module1/alignment",
+                    "/geometry/rich/module2/alignment"
                  };
             manager.init(Arrays.asList(richTables));
         }
