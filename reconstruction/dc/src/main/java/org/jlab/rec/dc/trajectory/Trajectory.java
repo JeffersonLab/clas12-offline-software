@@ -235,7 +235,7 @@ public class Trajectory extends ArrayList<Cross> {
                 if(tPars==null) return;
                 double MAXDIST = -99;
                 if(surface.getDetectorType() == DetectorType.RICH) MAXDIST = -1;
-                if(surface.distanceFromPlane(tPars[0], tPars[1], tPars[2])<TOLERANCE && surface.distanceFromEdge(tPars[0], tPars[1], tPars[2])>=MAXDIST){ // save trajectory only if on surface (
+                if(surface.distanceFromPlane(tPars[0], tPars[1], tPars[2])<TOLERANCE && surface.distanceFromEdge(tPars[0], tPars[1], tPars[2])>=MAXDIST) // save trajectory only if on surface (
                     this.addTrajectoryPoint(tPars[0], tPars[1], tPars[2], tPars[3], tPars[4], tPars[5], tPars[6]+path, tPars[7]+bdl, surface);
             }            
         }
