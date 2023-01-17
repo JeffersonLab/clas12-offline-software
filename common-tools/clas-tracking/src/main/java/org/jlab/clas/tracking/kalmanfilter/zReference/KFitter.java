@@ -425,7 +425,7 @@ public class KFitter extends AKFitter {
         StateVec sVec;
         
         // To be changed: to match wit the old package, we make the following codes. Could be changed when other codes for application of calcFinalChisq are changed.
-        if(nofilter || sv.trackTrajF.size() < svzLength) {
+        if(nofilter || (sv.trackTrajF.get(k) == null)) {
         	sVec = sv.trackTrajT.get(k);
         }
         else {
