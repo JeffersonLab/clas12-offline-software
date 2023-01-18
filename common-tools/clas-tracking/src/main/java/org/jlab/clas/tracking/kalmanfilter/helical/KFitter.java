@@ -142,7 +142,11 @@ public class KFitter extends AKFitter {
     }
     
     public Helix getHelix() {
-        return this.getHelix(0);
+        Helix hlx = this.getHelix(0);
+        if(Double.isNaN(hlx.getD0()) || Double.isNaN(hlx.getPhi0()) || Double.isNaN(hlx.getOmega()) 
+                || Double.isNaN(hlx.getTanL()) || Double.isNaN(hlx.getZ0())) 
+            return null;
+        return hlx;
     }
     
     public Helix getHelix(int mode) {
