@@ -75,6 +75,7 @@ public class CVTEngine extends ReconstructionEngine {
     public boolean useSVTTimingCuts     =  false;
     public boolean removeOverlappingSeeds = true;
     public boolean flagSeeds = true;
+    public boolean gemcIgnBMT0ADC = false;
     public boolean KFfailRecovery = true;
     public boolean KFfailRecovMisCls = true;
     private String  matrixLibrary       = "EJML";
@@ -116,6 +117,7 @@ public class CVTEngine extends ReconstructionEngine {
                                            useSVTTimingCuts,
                                            removeOverlappingSeeds,
                                            flagSeeds,
+                                           gemcIgnBMT0ADC,
                                            KFfailRecovery,
                                            KFfailRecovMisCls, 
                                            matrixLibrary,
@@ -399,6 +401,9 @@ public class CVTEngine extends ReconstructionEngine {
         
         if(this.getEngineConfigString("flagSeeds")!=null) 
             this.flagSeeds = Boolean.parseBoolean(this.getEngineConfigString("flagSeeds"));
+        
+        if(this.getEngineConfigString("gemcIgnBMT0ADC")!=null) 
+            this.gemcIgnBMT0ADC = Boolean.parseBoolean(this.getEngineConfigString("gemcIgnBMT0ADC"));
 
         if(this.getEngineConfigString("KFfailRecovery")!=null) 
             this.KFfailRecovery = Boolean.parseBoolean(this.getEngineConfigString("KFfailRecovery"));

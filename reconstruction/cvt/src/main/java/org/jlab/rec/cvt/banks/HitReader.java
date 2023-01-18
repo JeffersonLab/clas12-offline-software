@@ -122,10 +122,14 @@ public class HitReader {
                 //    continue;
                 //}
                 //fix for now... no adc in GEMC
-                if (ADCtoEdep < 1) {
+                if(Constants.getInstance().gemcIgnBMT0ADC==false) {
+                    if (ADCtoEdep < 1) {
+                        continue;
+                    }
+                }
+                if(strip<1) {
                     continue;
                 }
-                
                 // create the strip object for the BMT
                 Strip BmtStrip = new Strip(strip, ADCtoEdep, time);
                 BmtStrip.setStatus(status.getIntValue("status", sector, layer, strip));

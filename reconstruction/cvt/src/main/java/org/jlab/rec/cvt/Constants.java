@@ -73,6 +73,7 @@ public class Constants {
     public boolean flagSeeds = true;
     public boolean KFfailRecovery = true;
     public boolean KFfailRecovMisCls = true;
+    public boolean gemcIgnBMT0ADC = false;
      
     // CONSTANTS USED IN RECONSTRUCTION
     //---------------------------------    
@@ -567,6 +568,7 @@ public class Constants {
                                         boolean useSVTTimingCuts,
                                         boolean removeOverlappingSeeds,
                                         boolean flagSeeds,
+                                        boolean gemcIgnBMT0ADC,
                                         boolean KFfailRecovery,
                                         boolean KFfailRecovMisCls, 
                                         String matrixLibrary,
@@ -595,6 +597,7 @@ public class Constants {
             this.useSVTTimingCuts = useSVTTimingCuts;
             this.removeOverlappingSeeds = removeOverlappingSeeds;
             this.flagSeeds = flagSeeds;
+            this.gemcIgnBMT0ADC = gemcIgnBMT0ADC;
             this.KFfailRecovery = KFfailRecovery;
             this.KFfailRecovMisCls = KFfailRecovMisCls;
             this.setMatLib(matrixLibrary);
