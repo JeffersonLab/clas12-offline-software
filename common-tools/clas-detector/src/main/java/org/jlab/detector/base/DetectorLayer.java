@@ -39,6 +39,11 @@ public class DetectorLayer {
     public static final byte FTTRK_LAYER2=2;
     public static final byte FTTRK_LAYER3=3;
     public static final byte FTTRK_LAYER4=4;
+
+    public static final byte RICH_MAPMT=1;
+    public static final byte RICH_AEROGEL_B1=2;
+    public static final byte RICH_AEROGEL_B2=3;
+    public static final byte RICH_AEROGEL_L1=4;
     
 }
 
