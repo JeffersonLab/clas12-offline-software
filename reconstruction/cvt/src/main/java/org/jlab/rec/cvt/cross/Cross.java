@@ -233,6 +233,10 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     public double getY() {
         return this._Point.y();
     }
+    
+    public double getZ() {
+        return this._Point.z();
+    }
     /**
      *
      * @return a 3-dimensional error on the 3-D point characterizing the
@@ -241,7 +245,9 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     public Point3D getPointErr() {
         return _PointErr;
     }
-
+    public double getZErr() {
+        return _PointErr.z();
+    }
     /**
      * Sets a 3-dimensional error on the 3-D point
      *

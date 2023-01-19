@@ -375,6 +375,8 @@ public class Measurements {
     
     private int getSector(Seed seed, DetectorType type, int layer, int hemisphere) {
         Helix helix = seed.getHelix();
+        if(helix==null)
+            return 0;
         if(type==DetectorType.BST) { 
             int twinLayer = Geometry.getInstance().getSVT().getTwinLayer(layer);
             int twinIndex = MLayer.getType(DetectorType.BST, twinLayer).getIndex(hemisphere);

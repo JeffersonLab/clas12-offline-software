@@ -53,7 +53,7 @@ public class MakerCA {
             // The angles are in degrees
             double R1 = cell.getC1().getRadius();
             double R2 = cell.getC2().getRadius();
-            double angle = 1.75 * (R2 - R1) + 0.551; // in cm; TODO: create setters and getters for the parameters
+            double angle = Constants.CAANGLE1 * (R2 - R1) + Constants.CAANGLE2; // in cm; TODO: create setters and getters for the parameters
 //			if( Math.toDegrees(va.angle(vb)) > this._abCrs ) return false;
             if (Math.toDegrees(va.angle(vb)) > angle) {
                 return false;
@@ -70,14 +70,14 @@ public class MakerCA {
             // and tight selections on BMT
             if (cell.getC1().getDetector() == DetectorType.BST) {
                 if (cell.getC2().getDetector() == DetectorType.BST) {
-                    if (Math.toDegrees(va.angle(vb)) > 30.) {
+                    if (Math.toDegrees(va.angle(vb)) > Constants.CAANGLE3) {
                         return false;
                     }
-                } else if (Math.toDegrees(va.angle(vb)) > 19.) {
+                } else if (Math.toDegrees(va.angle(vb)) > Constants.CAANGLE4) {
                     return false;
                 }
             } else {
-                if (Math.toDegrees(va.angle(vb)) > 3.5) {
+                if (Math.toDegrees(va.angle(vb)) > Constants.CAANGLE5) {
                     return false;
                 }
             }

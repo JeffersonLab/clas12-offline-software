@@ -10,12 +10,21 @@ import org.jlab.clas.tracking.kalmanfilter.Material;
 import org.jlab.clas.tracking.kalmanfilter.Units;
 
 import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
+import org.jlab.rec.cvt.svt.SVTParameters;
 
 public class Constants {
    
 
     public static Logger LOGGER = Logger.getLogger(Constants.class.getName());
-
+    public static double CAANGLE1= 1.75;
+    public static double CAANGLE2=0.551;
+    public static double CAANGLE3=30.;
+    public static double CAANGLE4=19.;
+    public static double CAANGLE5=3.5;
+    public boolean seedingDebugMode =false;
+   
+    
+    
     // private constructor for a singleton
     private Constants() {
     }
@@ -43,23 +52,42 @@ public class Constants {
     private int      removeRegion = 0;
     public int       beamSpotConstraint = 2;
     private double   beamRadius = 0.3; // mm
-    public boolean   svtSeeding = true;
+    public boolean   svtSeeding = false;
+    public boolean   svtLinkerSeeding = false;
     public boolean   timeCuts = false;
+    public boolean   bmtHVCuts = false;
+    public boolean   useOnlyTruthHits = false;
+    public boolean   useOnlyBMTTruthHits = false;
+    public boolean   useOnlyBMTCTruthHits = false;
+    public boolean   useOnlyBMTZTruthHits = false;
+    public boolean   useOnlyBMTC50PercTruthHits = false;
+    public boolean   useOnlyBMTZ50PercTruthHits = false;
     public boolean   preElossCorrection = true;
     private Material targetMaterial = LH2;
     public Libr      KFMatrixLibrary;
-    
-    
+    private int svtmaxclussize = 30;
+    private int bmtcmaxclussize =30;
+    private int bmtzmaxclussize =30;
+    public boolean useSVTTimingCuts =  false;
+    public boolean removeOverlappingSeeds = false;
+    public boolean flagSeeds = true;
+    public boolean KFfailRecovery = true;
+    public boolean KFfailRecovMisCls = true;
+    public boolean gemcIgnBMT0ADC = false;
+     
     // CONSTANTS USED IN RECONSTRUCTION
     //---------------------------------    
     public static final double LIGHTVEL = PhysicsConstants.speedOfLight()*1e-5;  // velocity of light (mm/ns) - conversion factor from radius in mm to momentum in GeV/c 
 
     // selection cuts for helical tracks
-    public static final double PTCUT   = 0.125; // minimum pt in GeV
+    private static double RCUT   = 120.0; // minimum radius of helix in mm
     public static final double TANDIP  = 2;     // max value on dip angle
     public static final double NDFCUT  = 0;     // minimum number of degres of freedom
-    public static final double CHI2CUT = 50;    // minimum chi2 per degrees of freedom
-    public static final double ZRANGE  = 300;   // defines z range as -ZRANGE:+ZRANGE in mm
+    public static final double CHI2CUT = 10;    // 50, minimum chi2 per degrees of freedom
+    public static final double CHI2CUTSSA = 10;    // 50, minimum chi2 per degrees of freedom for SVTSTANDALONE (SSA)
+    public static final double DZCUTBUFFEESSA = 0; //dz cut additional contribution to account for SSA poorer resolution
+    public static final double RESICUT = 5;    // minimum resi in PR
+    private static double ZRANGE  = 10;   // defines z range as -ZRANGE:+ZRANGE in mm
     public static final int    MINSVTCRSFORCOSMIC = 2; 
     public static final double CIRCLEFIT_MAXCHI2 = 100;
 
@@ -120,7 +148,31 @@ public class Constants {
     public int getRmReg() {
         return removeRegion;
     }
+    public boolean useOnlyMCTruthHits() {
+        return useOnlyTruthHits;
+    }
 
+    /**
+     * @return the useOnlyBMTTruthHits
+     */
+    public boolean useOnlyBMTTruthHits() {
+        return useOnlyBMTTruthHits;
+    }
+
+    /**
+     * @return the useOnlyBMTCTruthHits
+     */
+    public boolean useOnlyBMTCTruthHits() {
+        return useOnlyBMTCTruthHits;
+    }
+    
+    /**
+     * @return the useOnlyBMTCTruthHits
+     */
+    public boolean useOnlyBMTZTruthHits() {
+        return useOnlyBMTZTruthHits;
+    }
+    
     /**
      * @return the layersUsed
      */
@@ -176,6 +228,71 @@ public class Constants {
      */
     public int getBMTLayerExcld() {
         return BMTLayerExcld;
+    }
+
+    /**
+     * @return the svtmaxclussize
+     */
+    public int getSvtmaxclussize() {
+        return svtmaxclussize;
+    }
+
+    /**
+     * @param svtmaxclussize the svtmaxclussize to set
+     */
+    public void setSvtmaxclussize(int svtmaxclussize) {
+        this.svtmaxclussize = svtmaxclussize;
+    }
+
+    /**
+     * @return the bmtcmaxclussize
+     */
+    public int getBmtcmaxclussize() {
+        return bmtcmaxclussize;
+    }
+
+    /**
+     * @param bmtcmaxclussize the bmtcmaxclussize to set
+     */
+    public void setBmtcmaxclussize(int bmtcmaxclussize) {
+        this.bmtcmaxclussize = bmtcmaxclussize;
+    }
+
+    /**
+     * @return the bmtzmaxclussize
+     */
+    public int getBmtzmaxclussize() {
+        return bmtzmaxclussize;
+    }
+
+    /**
+     * @param bmtzmaxclussize the bmtzmaxclussize to set
+     */
+    public void setBmtzmaxclussize(int bmtzmaxclussize) {
+        this.bmtzmaxclussize = bmtzmaxclussize;
+    }
+
+    /**
+     * @return the RCUT
+     */
+    public static double getRCUT() {
+        return RCUT;
+    }
+    
+    public static void setRCUT(double r) {
+        RCUT = r;
+    }
+
+
+    /**
+     * @return the ZRANGE
+     */
+    public static double getZRANGE() {
+        return ZRANGE;
+    }
+    
+    public static void setZRANGE(double zr) {
+        ZRANGE = zr;
     }
     
     private static final double COVD0D0      = 1.;///50.;
@@ -447,7 +564,23 @@ public class Constants {
                                         boolean elosPrecorrection,
                                         boolean svtSeeding,
                                         boolean timeCuts,
-                                        String matrixLibrary) {
+                                        boolean hvCuts,
+                                        boolean useSVTTimingCuts,
+                                        boolean removeOverlappingSeeds,
+                                        boolean flagSeeds,
+                                        boolean gemcIgnBMT0ADC,
+                                        boolean KFfailRecovery,
+                                        boolean KFfailRecovMisCls, 
+                                        String matrixLibrary,
+                                        boolean useOnlyTruth,
+                                        boolean useSVTLinkerSeeder,
+                                        double docacut,
+                                        double docacutsum,
+                                        int svtmaxclussize,
+                                        int bmtcmaxclussize,
+                                        int bmtzmaxclussize,
+                                        double rcut,
+                                        double z0cut) {
         if (!ConstantsLoaded) {
             this.isCosmics = isCosmics;
             this.svtOnly      = svtOnly;
@@ -460,8 +593,23 @@ public class Constants {
             this.preElossCorrection = elosPrecorrection;
             this.svtSeeding = svtSeeding;
             this.timeCuts = timeCuts;
+            this.bmtHVCuts = hvCuts;
+            this.useSVTTimingCuts = useSVTTimingCuts;
+            this.removeOverlappingSeeds = removeOverlappingSeeds;
+            this.flagSeeds = flagSeeds;
+            this.gemcIgnBMT0ADC = gemcIgnBMT0ADC;
+            this.KFfailRecovery = KFfailRecovery;
+            this.KFfailRecovMisCls = KFfailRecovMisCls;
             this.setMatLib(matrixLibrary);
-
+            this.useOnlyTruthHits=useOnlyTruth;
+            this.svtLinkerSeeding = useSVTLinkerSeeder;
+            SVTParameters.setMAXDOCA2STRIP(docacut);
+            SVTParameters.setMAXDOCA2STRIPS(docacutsum);
+            this.setSvtmaxclussize(svtmaxclussize);
+            this.setBmtcmaxclussize(bmtcmaxclussize);
+            this.setBmtzmaxclussize(bmtzmaxclussize);
+            this.setRCUT(rcut);
+            this.setZRANGE(z0cut);
             ConstantsLoaded = true;
         }
     }

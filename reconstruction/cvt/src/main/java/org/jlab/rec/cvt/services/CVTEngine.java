@@ -28,6 +28,14 @@ import org.jlab.utils.groups.IndexedTable;
  */
 public class CVTEngine extends ReconstructionEngine {
 
+
+    /**
+     * @param docacutsum the docacutsum to set
+     */
+    public void setDocacutsum(double docacutsum) {
+        this.docacutsum = docacutsum;
+    }
+
     private int Run = -1;
 
     private String svtHitBank;
@@ -37,6 +45,7 @@ public class CVTEngine extends ReconstructionEngine {
     private String bmtClusterBank;
     private String bmtCrossBank;
     private String cvtSeedBank;
+    private String cvtSeedClusBank;
     private String cvtTrackBank;
     private String cvtUTrackBank;
     private String cvtTrajectoryBank;
@@ -61,16 +70,31 @@ public class CVTEngine extends ReconstructionEngine {
     private String  targetMaterial      = "LH2";
     private boolean elossPrecorrection  = true;
     private boolean svtSeeding          = true;
-    private boolean timeCuts            = false;
+    private boolean timeCuts            = true;
+    private boolean hvCuts              = false;
+    public boolean useSVTTimingCuts     =  false;
+    public boolean removeOverlappingSeeds = true;
+    public boolean flagSeeds = true;
+    public boolean gemcIgnBMT0ADC = false;
+    public boolean KFfailRecovery = true;
+    public boolean KFfailRecovMisCls = true;
     private String  matrixLibrary       = "EJML";
-    
+    private boolean useOnlyTruth        = false;
+    private boolean useSVTLinkerSeeder  = true;
+    private double docacut = 0.75;
+    private double docacutsum = 1.15;
+    private int svtmaxclussize = 100;
+    private int bmtcmaxclussize = 100;
+    private int bmtzmaxclussize = 100;
+    private double rcut = 120.0;
+    private double z0cut = 10;
     
     public CVTEngine(String name) {
-        super(name, "ziegler", "5.0");
+        super(name, "ziegler", "6.0");
     }
 
     public CVTEngine() {
-        super("CVTEngine", "ziegler", "5.0");
+        super("CVTEngine", "ziegler", "6.0");
     }
 
     
@@ -89,7 +113,23 @@ public class CVTEngine extends ReconstructionEngine {
                                            elossPrecorrection,
                                            svtSeeding,
                                            timeCuts,
-                                           matrixLibrary);
+                                           hvCuts,
+                                           useSVTTimingCuts,
+                                           removeOverlappingSeeds,
+                                           flagSeeds,
+                                           gemcIgnBMT0ADC,
+                                           KFfailRecovery,
+                                           KFfailRecovMisCls, 
+                                           matrixLibrary,
+                                           useOnlyTruth,
+                                           useSVTLinkerSeeder, 
+                                           docacut, 
+                                           docacutsum, 
+                                           svtmaxclussize, 
+                                           bmtcmaxclussize, 
+                                           bmtzmaxclussize,
+                                           rcut,
+                                           z0cut);
 
         this.initConstantsTables();
         this.registerBanks();
@@ -111,6 +151,7 @@ public class CVTEngine extends ReconstructionEngine {
         this.setSvtClusterBank("BST" + prefix + "::Clusters");
         this.setSvtCrossBank("BST" + prefix + "::Crosses");
         this.setSeedBank("CVT" + prefix + "::Seeds");
+        this.setSeedClusBank("CVT" + prefix + "::SeedClusters");
         this.setTrackBank("CVT" + prefix + "::Tracks");
         this.setUTrackBank("CVT" + prefix + "::UTracks");
         this.setCovMatBank("CVT" + prefix + "::TrackCovMat");
@@ -123,6 +164,7 @@ public class CVTEngine extends ReconstructionEngine {
         super.registerOutputBank(this.svtClusterBank);
         super.registerOutputBank(this.svtCrossBank);
         super.registerOutputBank(this.cvtSeedBank);
+        super.registerOutputBank(this.cvtSeedClusBank);
         super.registerOutputBank(this.cvtTrackBank);
         super.registerOutputBank(this.cvtUTrackBank);
         super.registerOutputBank(this.cvtCovMatBank);                
@@ -131,15 +173,17 @@ public class CVTEngine extends ReconstructionEngine {
     }
     
     public int getRun(DataEvent event) {
-                
+    
         if (event.hasBank("RUN::config") == false) {
             System.err.println("RUN CONDITIONS NOT READ!");
             return 0;
         }
 
         DataBank bank = event.getBank("RUN::config");
-        int run = bank.getInt("run", 0); 
-                
+        int run = bank.getInt("run", 0);  
+        if(Constants.getInstance().seedingDebugMode) {
+            System.out.println("EVENT "+bank.getInt("event", 0));
+        }
         return run;
     }
 
@@ -167,6 +211,69 @@ public class CVTEngine extends ReconstructionEngine {
         return this.beamSpotConstraint==2;
     }
     
+    /**
+     * @return the docacut
+     */
+    public double getDocacut() {
+        return docacut;
+    }
+
+    /**
+     * @param docacut the docacut to set
+     */
+    public void setDocacut(double docacut) {
+        this.docacut = docacut;
+    }
+
+    /**
+     * @return the docacutsum
+     */
+    public double getDocacutsum() {
+        return docacutsum;
+    }
+
+    /**
+     * @return the svtmaxclussize
+     */
+    public int getSvtmaxclussize() {
+        return svtmaxclussize;
+    }
+
+    /**
+     * @param svtmaxclussize the svtmaxclussize to set
+     */
+    public void setSvtmaxclussize(int svtmaxclussize) {
+        this.svtmaxclussize = svtmaxclussize;
+    }
+
+    /**
+     * @return the bmtcmaxclussize
+     */
+    public int getBmtcmaxclussize() {
+        return bmtcmaxclussize;
+    }
+
+    /**
+     * @param bmtcmaxclussize the bmtcmaxclussize to set
+     */
+    public void setBmtcmaxclussize(int bmtcmaxclussize) {
+        this.bmtcmaxclussize = bmtcmaxclussize;
+    }
+
+    /**
+     * @return the bmtzmaxclussize
+     */
+    public int getBmtzmaxclussize() {
+        return bmtzmaxclussize;
+    }
+
+    /**
+     * @param bmtzmaxclussize the bmtzmaxclussize to set
+     */
+    public void setBmtzmaxclussize(int bmtzmaxclussize) {
+        this.bmtzmaxclussize = bmtzmaxclussize;
+    }
+    
     @Override
     public boolean processDataEvent(DataEvent event) {
         
@@ -174,18 +281,21 @@ public class CVTEngine extends ReconstructionEngine {
         
         int run = this.getRun(event); 
         
-        IndexedTable svtStatus  = this.getConstantsManager().getConstants(run, "/calibration/svt/status");
-        IndexedTable svtLorentz = this.getConstantsManager().getConstants(run, "/calibration/svt/lorentz_angle");
-        IndexedTable bmtStatus  = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_status");
-        IndexedTable bmtTime    = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_time");
-        IndexedTable bmtVoltage = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_voltage");
-        IndexedTable beamPos    = this.getConstantsManager().getConstants(run, "/geometry/beam/position");
+        IndexedTable svtStatus          = this.getConstantsManager().getConstants(run, "/calibration/svt/status");
+        IndexedTable svtLorentz         = this.getConstantsManager().getConstants(run, "/calibration/svt/lorentz_angle");
+        IndexedTable bmtStatus          = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_status");
+        IndexedTable bmtTime            = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_time");
+        IndexedTable bmtVoltage         = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_voltage");
+        IndexedTable bmtStripVoltage    = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_strip_voltage");
+        IndexedTable bmtStripThreshold  = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_strip_voltage_thresholds");
+        IndexedTable beamPos            = this.getConstantsManager().getConstants(run, "/geometry/beam/position");
         
         Geometry.initialize(this.getConstantsManager().getVariation(), 11, svtLorentz, bmtVoltage);
         
         CVTReconstruction reco = new CVTReconstruction(swimmer);
         
-        List<ArrayList<Hit>>         hits = reco.readHits(event, svtStatus, bmtStatus, bmtTime);
+        List<ArrayList<Hit>>         hits = reco.readHits(event, svtStatus, bmtStatus, bmtTime, 
+                                                            bmtStripVoltage, bmtStripThreshold);
         List<ArrayList<Cluster>> clusters = reco.findClusters();
         List<ArrayList<Cross>>    crosses = reco.findCrosses();
         
@@ -209,13 +319,19 @@ public class CVTEngine extends ReconstructionEngine {
             else {
                 double[] xyBeam = CVTReconstruction.getBeamSpot(event, beamPos);
                 TracksFromTargetRec  trackFinder = new TracksFromTargetRec(swimmer, xyBeam);
+                trackFinder.totTruthHits = reco.getTotalNbTruHits();
                 List<Seed>   seeds = trackFinder.getSeeds(clusters, crosses);
+                
+                
                 List<Track> tracks = trackFinder.getTracks(event, this.isInitFromMc(), 
                                                                   this.isKfFilterOn(), 
                                                                   this.getKfIterations(), 
                                                                   true, this.getPid());
-
-                if(seeds!=null) banks.add(RecoBankWriter.fillSeedBank(event, seeds, this.getSeedBank()));
+                
+                if(seeds!=null) {
+                    banks.add(RecoBankWriter.fillSeedBank(event, seeds, this.getSeedBank()));
+                    banks.add(RecoBankWriter.fillSeedClusBank(event, seeds, this.getSeedClusBank()));
+                }
                 if(tracks!=null) {
                     banks.add(RecoBankWriter.fillTrackBank(event, tracks, this.getTrackBank()));
     //                banks.add(RecoBankWriter.fillTrackCovMatBank(event, tracks, this.getCovMat()));
@@ -233,7 +349,7 @@ public class CVTEngine extends ReconstructionEngine {
 
         event.appendBanks(banks.toArray(new DataBank[0]));
             
-
+        
         return true;
     }
 
@@ -272,7 +388,28 @@ public class CVTEngine extends ReconstructionEngine {
             this.svtSeeding = Boolean.parseBoolean(this.getEngineConfigString("svtSeeding"));
         
         if(this.getEngineConfigString("timeCuts")!=null) 
-            this.timeCuts = Boolean.parseBoolean(this.getEngineConfigString("timeCuts"));
+            this.timeCuts = Boolean.parseBoolean(this.getEngineConfigString("timeCuts")); 
+        
+        if(this.getEngineConfigString("hvCuts")!=null) 
+            this.hvCuts = Boolean.parseBoolean(this.getEngineConfigString("hvCuts")); 
+        
+        if(this.getEngineConfigString("useSVTTimingCuts")!=null) 
+            this.useSVTTimingCuts = Boolean.parseBoolean(this.getEngineConfigString("useSVTTimingCuts"));
+        
+        if(this.getEngineConfigString("removeOverlappingSeeds")!=null) 
+            this.removeOverlappingSeeds = Boolean.parseBoolean(this.getEngineConfigString("removeOverlappingSeeds"));
+        
+        if(this.getEngineConfigString("flagSeeds")!=null) 
+            this.flagSeeds = Boolean.parseBoolean(this.getEngineConfigString("flagSeeds"));
+        
+        if(this.getEngineConfigString("gemcIgnBMT0ADC")!=null) 
+            this.gemcIgnBMT0ADC = Boolean.parseBoolean(this.getEngineConfigString("gemcIgnBMT0ADC"));
+
+        if(this.getEngineConfigString("KFfailRecovery")!=null) 
+            this.KFfailRecovery = Boolean.parseBoolean(this.getEngineConfigString("KFfailRecovery"));
+        
+        if(this.getEngineConfigString("KFfailRecovMisCls")!=null) 
+            this.KFfailRecovMisCls = Boolean.parseBoolean(this.getEngineConfigString("KFfailRecovMisCls"));
         
         if (this.getEngineConfigString("matLib")!=null)
             this.matrixLibrary = this.getEngineConfigString("matLib");
@@ -287,8 +424,35 @@ public class CVTEngine extends ReconstructionEngine {
         if (this.getEngineConfigString("initFromMC")!=null)
             this.initFromMc = Boolean.valueOf(this.getEngineConfigString("initFromMC"));
         
+        if (this.getEngineConfigString("useOnlyTruthHits")!=null)
+            this.useOnlyTruth = Boolean.valueOf(this.getEngineConfigString("useOnlyTruthHits"));
+        
+        if (this.getEngineConfigString("useSVTLinkerSeeder")!=null)
+            this.useSVTLinkerSeeder = Boolean.valueOf(this.getEngineConfigString("useSVTLinkerSeeder"));
+        
         if (this.getEngineConfigString("kfIterations")!=null)
             this.kfIterations = Integer.valueOf(this.getEngineConfigString("kfIterations"));
+        
+        if (this.getEngineConfigString("docacut")!=null)
+            this.setDocacut((double) Double.valueOf(this.getEngineConfigString("docacut")));
+        
+        if (this.getEngineConfigString("docacutsum")!=null)
+            this.setDocacutsum((double) Double.valueOf(this.getEngineConfigString("docacutsum")));
+        
+        if (this.getEngineConfigString("svtmaxclussize")!=null)
+            this.setSvtmaxclussize((int) Integer.valueOf(this.getEngineConfigString("svtmaxclussize")));
+        
+        if (this.getEngineConfigString("bmtcmaxclussize")!=null)
+            this.setBmtcmaxclussize((int) Integer.valueOf(this.getEngineConfigString("bmtcmaxclussize")));
+        
+        if (this.getEngineConfigString("bmtzmaxclussize")!=null)
+            this.setBmtzmaxclussize((int) Integer.valueOf(this.getEngineConfigString("bmtzmaxclussize")));
+        
+        if (this.getEngineConfigString("rcut")!=null)
+            this.rcut = Double.valueOf(this.getEngineConfigString("rcut"));
+        
+        if (this.getEngineConfigString("z0cut")!=null)
+            this.z0cut = Double.valueOf(this.getEngineConfigString("z0cut"));
         
     }
 
@@ -300,6 +464,8 @@ public class CVTEngine extends ReconstructionEngine {
             "/calibration/mvt/bmt_time",
             "/calibration/mvt/bmt_status",
             "/calibration/mvt/bmt_voltage",
+            "/calibration/mvt/bmt_strip_voltage",
+            "/calibration/mvt/bmt_strip_voltage_thresholds",
             "/geometry/beam/position"
         };
         requireConstants(Arrays.asList(tables));
@@ -332,6 +498,10 @@ public class CVTEngine extends ReconstructionEngine {
 
     public void setSeedBank(String cvtSeedBank) {
         this.cvtSeedBank = cvtSeedBank;
+    }
+    
+    public void setSeedClusBank(String cvtSeedClusBank) {
+        this.cvtSeedClusBank = cvtSeedClusBank;
     }
 
     public void setTrackBank(String cvtTrackBank) {
@@ -381,7 +551,10 @@ public class CVTEngine extends ReconstructionEngine {
     public String getSeedBank() {
         return cvtSeedBank;
     }
-
+    
+    public String getSeedClusBank() {
+        return cvtSeedClusBank;
+    }
     public String getTrackBank() {
         return cvtTrackBank;
     }
@@ -419,11 +592,23 @@ public class CVTEngine extends ReconstructionEngine {
         System.out.println("["+this.getName()+"] Pre-Eloss correction set to " + Constants.getInstance().preElossCorrection);
         System.out.println("["+this.getName()+"] run SVT-based seeding set to "+ Constants.getInstance().svtSeeding);
         System.out.println("["+this.getName()+"] run BMT timing cuts set to "+ Constants.getInstance().timeCuts);
+        System.out.println("["+this.getName()+"] run BMT HV masks "+ Constants.getInstance().bmtHVCuts);
         System.out.println("["+this.getName()+"] run with matLib "+ Constants.getInstance().KFMatrixLibrary.toString() + " library");
         System.out.println("["+this.getName()+"] ELoss mass set for particle "+ pid);
         System.out.println("["+this.getName()+"] run with Kalman-Filter status set to "+this.kfFilterOn);
         System.out.println("["+this.getName()+"] initialize KF from true MC information "+this.initFromMc);
         System.out.println("["+this.getName()+"] number of KF iterations set to "+this.kfIterations);
+        System.out.println("["+this.getName()+"] SLA doca cut "+this.docacut);
+        System.out.println("["+this.getName()+"] SLA docasum cut "+this.docacutsum);
+        System.out.println("["+this.getName()+"] max svt  cluster size "+this.getSvtmaxclussize());
+        System.out.println("["+this.getName()+"] max bmt-c  cluster size "+this.getBmtcmaxclussize());
+        System.out.println("["+this.getName()+"] max btm-z  cluster size "+this.getBmtzmaxclussize());
+        System.out.println("["+this.getName()+"] helix radius cut (mm) "+this.rcut);
+        System.out.println("["+this.getName()+"] z0 cut (mm from target edges) "+this.z0cut); 
+        
+        
     }
+
+    
 
 }

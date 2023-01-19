@@ -20,7 +20,7 @@ public abstract class AKFitter {
     // parameters
     private double _Xb; //beam axis pars
     private double _Yb;
-    private double resiCut = 100;//residual cut for the measurements
+    private double resiCut = 50;//residual cut for the measurements
 
     // return variables
     public boolean setFitFailed = false;

@@ -63,7 +63,7 @@ public class Helix {
         setYb(yb);
     } 
     
-    public Helix(org.jlab.clas.tracking.trackrep.Helix helix, double[][] matrix) {
+    public Helix(org.jlab.clas.tracking.trackrep.Helix helix, double[][] matrix) { 
         this(helix.getD0(), helix.getPhi0(), helix.getOmega(), helix.getZ0(), 
              helix.getTanL(), helix.getXb(), helix.getYb());
         this.B = helix.getB();

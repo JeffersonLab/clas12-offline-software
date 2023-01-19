@@ -64,7 +64,7 @@ public class Helix {
     
     public Helix(double x0, double y0, double z0, double px0, double py0, double pz0,
             int q, double B, double xb, double yb, Units unit) {
-        _turningSign = q;
+        _turningSign = q; 
         _B           = B;
         units        = unit;
         double pt    = Math.sqrt(px0*px0 + py0*py0);

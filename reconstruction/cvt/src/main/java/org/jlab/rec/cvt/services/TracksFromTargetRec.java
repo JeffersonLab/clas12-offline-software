@@ -1,8 +1,11 @@
 package org.jlab.rec.cvt.services;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import org.jlab.clas.pdg.PDGDatabase;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.helical.KFitter;
@@ -22,10 +25,13 @@ import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.banks.RecoBankReader;
 import org.jlab.rec.cvt.measurement.Measurements;
 import org.jlab.rec.cvt.track.Seed;
+import org.jlab.rec.cvt.track.Seed.Key;
 import org.jlab.rec.cvt.track.StraightTrackSeeder;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.track.TrackSeeder;
 import org.jlab.rec.cvt.track.TrackSeederCA;
+import org.jlab.rec.cvt.track.TrackSeederSVTLinker;
+//import org.jlab.utils.groups.IndexedTable;
 
 /**
  *
@@ -37,13 +43,21 @@ public class TracksFromTargetRec {
     
     private List<Hit> SVThits;
     private List<Hit> BMThits;
+    private Map<Integer, Cluster> SVTclustersHM;
+    private Map<Integer, Cluster> BMTclustersHM;
+    private Map<Integer, Cross> SVTcrossesHM;
+    private Map<Integer, Cross> BMTcrossesHM;
+    private Map<Integer, Seed> CVTseedsHM ;
+    private Map<Integer, Seed> CVTseedsHMOK ;
     private List<Cluster> SVTclusters;
     private List<Cluster> BMTclusters;
-    private List<ArrayList<Cross>> CVTcrosses = new ArrayList<>();
-    private List<Seed>    CVTseeds = new ArrayList<>();
+    private List<Cross> SVTcrosses;
+    private List<Cross> BMTcrosses;
+    private List<Seed>    CVTseeds ;
     private Swim swimmer;
     private double xb; 
     private double yb;
+    public int totTruthHits;
     
     
     public TracksFromTargetRec(Swim swimmer, double[] beamPos) {
@@ -54,16 +68,17 @@ public class TracksFromTargetRec {
     
        
     public List<Seed> getSeeds(List<ArrayList<Cluster>> clusters, List<ArrayList<Cross>> crosses) {
+        this.init();
         this.SVTclusters = clusters.get(0);
         this.BMTclusters = clusters.get(1);
-        this.CVTcrosses = crosses;   
-        
+        this.SVTcrosses = crosses.get(0);   
+        this.BMTcrosses = crosses.get(1);  
         double solenoidValue = Constants.getSolenoidMagnitude(); // already the absolute value
-        
+        List<Seed> seeds = new ArrayList<>();
         // make list of crosses consistent with a track candidate
         if(solenoidValue<0.001) {
             StraightTrackSeeder trseed = new StraightTrackSeeder(xb, yb);
-            CVTseeds = trseed.findSeed(this.CVTcrosses.get(0), this.CVTcrosses.get(1), Constants.getInstance().svtOnly);
+            seeds = trseed.findSeed(this.SVTcrosses, this.BMTcrosses, Constants.getInstance().svtOnly);
             // RDV, disabled because it seems to create fake tracks, skipping measurement in KF
 //            if(Constants.getInstance().EXCLUDELAYERS==true) {
 //                seeds = recUtil.reFit(seeds, swimmer, trseed); // RDV can we juts refit?
@@ -72,50 +87,98 @@ public class TracksFromTargetRec {
             if(Constants.getInstance().svtOnly) {
                 TrackSeeder trseed = new TrackSeeder(swimmer, xb, yb);
                 trseed.unUsedHitsOnly = true;
-                CVTseeds = trseed.findSeed(this.CVTcrosses.get(0), null);
+                seeds = trseed.findSeed(this.SVTcrosses, null);
             } else {
-                TrackSeederCA trseed = new TrackSeederCA(swimmer, xb, yb);  // cellular automaton seeder
-                CVTseeds = trseed.findSeed(this.CVTcrosses.get(0), this.CVTcrosses.get(1));
-                
+                if(Constants.getInstance().svtLinkerSeeding) {
+                    TrackSeederSVTLinker trseed = new TrackSeederSVTLinker(swimmer, xb, yb);  // new seeder
+                    seeds.addAll(trseed.findSeed(this.SVTcrosses, this.BMTcrosses));
+                } else {
+                    TrackSeederCA trseedca = new TrackSeederCA(swimmer, xb, yb);  // cellular automaton seeder
+                    seeds.addAll(trseedca.findSeed(this.SVTcrosses, this.BMTcrosses));
+                }
                 //second seeding algorithm to search for SVT only tracks, and/or tracks missed by the CA
                 if(Constants.getInstance().svtSeeding) {
                     TrackSeeder trseed2 = new TrackSeeder(swimmer, xb, yb);
                     trseed2.unUsedHitsOnly = true;
-                    CVTseeds.addAll( trseed2.findSeed(this.CVTcrosses.get(0), this.CVTcrosses.get(1)));
+                    seeds.addAll( trseed2.findSeed(this.SVTcrosses, this.BMTcrosses));
                     // RDV, disabled because it seems to create fake tracks, skipping measurement in KF
 //                    if(Constants.getInstance().EXCLUDELAYERS==true) {
 //                        seeds = recUtil.reFit(seeds, swimmer, trseed, trseed2);
 //                    }
                 }
+                List<Seed> failed = new ArrayList<>();
+                for(Seed s : seeds) { 
+                    if(Constants.getInstance().seedingDebugMode) {
+                        System.out.println("Before chi2 cut");
+                        System.out.println(s.toString());
+                    }  
+                    if(s.getChi2()>Constants.CHI2CUT*s.getCrosses().size())
+                        failed.add(s);
+                    if(s.getHelix()==null)
+                        failed.add(s);
+                }
+                seeds.removeAll(failed);
                 if(!Constants.getInstance().seedBeamSpotConstraint()) {
-                    List<Seed> failed = new ArrayList<>();
-                    for(Seed s : CVTseeds) {
+                    failed = new ArrayList<>();
+                    for(Seed s : seeds) {
                         if(!recUtil.reFitCircle(s, Constants.getInstance().SEEDFITITERATIONS, xb, yb))
                             failed.add(s);
                     }
-                    CVTseeds.removeAll(failed);
+                    seeds.removeAll(failed);
                 }
             }
         }
-        if(CVTseeds ==null || CVTseeds.isEmpty()) {
-            recUtil.CleanupSpuriousCrosses(this.CVTcrosses, null) ;
-//            RecoBankWriter.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null, null, 1);
+        for(Seed s : seeds) { 
+            if(Constants.getInstance().seedingDebugMode) {
+                System.out.println("Before overlap remover");
+                System.out.println(s.toString());
+            }       
+            s.setKey(s.new Key(s));
+        }
+        if(Constants.getInstance().removeOverlappingSeeds) 
+            Seed.removeOverlappingSeeds(seeds);
+        
+        if(Constants.getInstance().seedingDebugMode) {
+            for(Seed s : seeds) { 
+            
+                System.out.println("After overlap remover");
+                System.out.println(s.toString());
+            }
+        }
+        
+        if(Constants.getInstance().flagSeeds)
+            Seed.flagMCSeeds(seeds, this.totTruthHits);
+        if(seeds ==null || seeds.isEmpty()) {
+            recUtil.CleanupSpuriousSVTCrosses(this.SVTcrosses, null) ;
+//            RecoBankWriter.appendCVTBanks(event, SVThits, BMThits, SVTclustersHM, BMTclustersHM, crosses, null, null, 1);
             return null;
         }   
-        
+        //
         // create track candidate list, set seed IDs and do a final update to crosses
-        for(int i=0; i<CVTseeds.size(); i++) {
+        for(int i=0; i<seeds.size(); i++) { 
             int id = i+1;
-            CVTseeds.get(i).setId(id);
-            Track track = new Track(CVTseeds.get(i));
-            track.update_Crosses(id);
+            seeds.get(i).setId(id);
+        //    Track track = new Track(seeds.get(i));
+        //    track.update_Crosses(id);
         }
+        if(Constants.getInstance().flagSeeds && Constants.getInstance().removeOverlappingSeeds==false) {
+            List<Seed> ovlrm = Seed.getOverlapRemovedSeeds(seeds);//seeds flagged for removal have negative ids.
+            for(Seed s : seeds) {
+                s.setId(s.getId()*-1);
+            }
+            for(Seed s : ovlrm) {
+                s.setId(s.getId()*-1);
+            }
+        }
+        
+        this.CVTseeds = seeds;
         // Got seeds;
-        return CVTseeds;
+        return seeds;
     }
     
     public List<Track> getTracks(DataEvent event, boolean initFromMc, boolean kfFilterOn, int kfIterations, 
                                  boolean searchMissingCls, int elossPid) {
+        if(this.CVTseeds==null) return null;
         if(this.CVTseeds.isEmpty()) return null;
         
         double solenoidScale = Constants.getInstance().getSolenoidScale();
@@ -123,18 +186,22 @@ public class TracksFromTargetRec {
         
         List<Track> tracks = new ArrayList<>();
         KFitter kf = new KFitter(kfFilterOn, kfIterations, Constants.KFDIR, swimmer, Constants.getInstance().KFMatrixLibrary);
-        KFitter.polarity = (int)Math.signum(Constants.getSolenoidScale());
+        kf.polarity = (int) Math.signum(Constants.getSolenoidScale());
+        KFitter kf2 = new KFitter(kfFilterOn, kfIterations, Constants.KFDIR, swimmer, Constants.getInstance().KFMatrixLibrary);
+        kf2.polarity = (int) Math.signum(Constants.getSolenoidScale());
+        kf2.filterOn = false;
+        kf2.numIter=1;
         Measurements measure = new Measurements(xb, yb, Constants.getInstance().kfBeamSpotConstraint());
-        for (Seed seed : CVTseeds) { 
+        for (Seed seed : this.CVTseeds) { 
+            if(seed.getId()<0) continue;
             int pid = elossPid;
-//            seed.update_Crosses();
-//            System.out.println(seed.toString());
+            //seed.update_Crosses();
+            //System.out.println("Seed"+seed.toString());
             List<Surface> surfaces = measure.getMeasurements(seed);
-
-            if(pid==0) pid = this.getTrackPid(event, seed.getId());
+            
+            if(pid==0) pid = this.getTrackPid(event, seed.getId()); 
             Point3D  v = seed.getHelix().getVertex();
             Vector3D p = seed.getHelix().getPXYZ(solenoidValue);
-            
             if(Constants.getInstance().preElossCorrection && pid!=Constants.DEFAULTPID) {
                 double pcorr = measure.getELoss(p.mag(), PDGDatabase.getParticleMass(pid));
                 p.scale(pcorr/p.mag());
@@ -153,33 +220,41 @@ public class TracksFromTargetRec {
             Helix hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
                             solenoidValue, xb , yb, Units.MM);
             double[][] cov = Constants.COVHELIX;
-
-            if(solenoidValue>0.001 && Constants.LIGHTVEL * seed.getHelix().radius() *solenoidValue<Constants.PTCUT)
+            
+            //if(solenoidValue>0.001 && Constants.LIGHTVEL * seed.getHelix().radius() *solenoidValue<Constants.getInstance().getPTCUT())
+            if(solenoidValue>0.001 && seed.getHelix().radius() <Constants.getInstance().getRCUT())    
                 continue;
+            if(Constants.getInstance().seedingDebugMode)
+                System.out.println("initializing fitter...");
             kf.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid));
             kf.runFitter();
+            
+            if(Constants.getInstance().seedingDebugMode)
+                System.out.println("KF status ... failed "+kf.setFitFailed+" ndf "+kf.NDF+" helix "+kf.getHelix());
             if (kf.setFitFailed == false && kf.NDF>0 && kf.getHelix()!=null) { 
                 Track fittedTrack = new Track(seed, kf, pid);
+                fittedTrack.update_Crosses(seed.getId());
                 for(Cross c : fittedTrack) { 
                     if(c.getDetector()==DetectorType.BST) {
                         c.getCluster1().setAssociatedTrackID(0);
                         c.getCluster2().setAssociatedTrackID(0);
                     }
                 }
-                if (searchMissingCls) {
+                if (searchMissingCls) { 
                     //refit adding missing clusters
-                    List<Cluster> clsOnTrack = recUtil.findClustersOnTrk(SVTclusters, seed.getClusters(), fittedTrack.getHelix(),
-                            fittedTrack.getP(), fittedTrack.getQ(), swimmer); //VZ: finds missing clusters; RDV fix 0 error
-                    List<Cross> crsOnTrack = recUtil.findCrossesFromClustersOnTrk(CVTcrosses.get(0), clsOnTrack, fittedTrack);
+                    List<Cluster> clsOnTrack = recUtil.findClustersOnTrk(this.SVTclusters, seed.getClusters(), fittedTrack, swimmer); //VZ: finds missing clusters; RDV fix 0 error
 
-                    List<Cluster> bmtclsOnTrack = recUtil.findBMTClustersOnTrk(BMTclusters, seed.getCrosses(), fittedTrack.getHelix(),
+                    List<Cross> crsOnTrack = recUtil.findCrossesFromClustersOnTrk(this.SVTcrosses, clsOnTrack, fittedTrack);
+
+                    List<Cluster> bmtclsOnTrack = recUtil.findBMTClustersOnTrk(this.BMTclusters, seed.getCrosses(), fittedTrack.getHelix(),
                             fittedTrack.getP(), fittedTrack.getQ(), swimmer); //VZ: finds missing clusters
-                    List<Cross> bmtcrsOnTrack = recUtil.findCrossesOnBMTTrack(CVTcrosses.get(1), bmtclsOnTrack);
+                    List<Cross> bmtcrsOnTrack = recUtil.findCrossesOnBMTTrack(this.BMTcrosses, bmtclsOnTrack);
 
                     //VZ check for additional clusters, and only then re-run KF adding new clusters
-                    if((clsOnTrack.size()>0 || bmtcrsOnTrack.size()>0) && false) { 
-                        if(clsOnTrack.size()>0) 
+                    if((clsOnTrack.size()>0 || bmtcrsOnTrack.size()>0) ) { 
+                        if(clsOnTrack.size()>0) {
                             seed.getClusters().addAll(clsOnTrack);
+                        }
                         if(crsOnTrack.size()>0) {
                             seed.getCrosses().addAll(crsOnTrack);
                         }
@@ -191,16 +266,17 @@ public class TracksFromTargetRec {
                         }
                         Collections.sort(seed.getClusters());
                         Collections.sort(seed.getCrosses());
-                        
+                        surfaces.clear();
+                        surfaces = measure.getMeasurements(seed);
                         //reset pars
                         v = fittedTrack.getHelix().getVertex();
                         p = fittedTrack.getHelix().getPXYZ(solenoidValue);
-                        charge = (int) (Math.signum(solenoidScale)*fittedTrack.getHelix().getCharge());
+                        charge = (int) (Math.signum(solenoidScale)*seed.getHelix().getCharge());
                         if(solenoidValue<0.001)
                             charge = 1;
                         hlx = new Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
                                         solenoidValue, xb, yb, Units.MM);
-
+                        
                         kf.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid)) ;
                         kf.runFitter();
 
@@ -215,28 +291,71 @@ public class TracksFromTargetRec {
                         }
                     }
                 }
-                tracks.add(fittedTrack);
+                fittedTrack.setStatus(1);
+                if(this.missingSVTCrosses(fittedTrack) == false)
+                    tracks.add(fittedTrack);
+            } else {
+                if(Constants.getInstance().KFfailRecovery && Math.abs(pid)!=45) { 
+                    Track fittedTrack = null;
+                    if(Constants.getInstance().KFfailRecovMisCls) { 
+                        fittedTrack = recUtil.recovTrkMisClusSearch(seed, hlx, cov, kf2, kf, pid, surfaces, xb, yb,
+                            this.SVTclusters, this.SVTcrosses, 
+                            swimmer, solenoidScale, solenoidValue, measure);
+                        if(fittedTrack!=null) {
+                            fittedTrack.setStatus(1); 
+                            if(Constants.getInstance().seedingDebugMode) 
+                                System.out.println("RECOVERED..."+fittedTrack.toString());
+                        } 
+                    } 
+                    if((Constants.getInstance().KFfailRecovMisCls && fittedTrack==null) || !Constants.getInstance().KFfailRecovMisCls ){
+                        //dump seed
+                        kf2.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid)); 
+                        kf2.runFitterNoFiltFailSafe();
+                        if(kf2.getHelix()!=null) { 
+                            fittedTrack = new Track(seed, kf2, pid); 
+                            if(Constants.getInstance().seedingDebugMode) 
+                                System.out.println("RECOVERED..."+fittedTrack.toString());
+                            fittedTrack.setStatus(-1);
+                            for(Cross c : fittedTrack) { 
+                                if(c.getDetector()==DetectorType.BST) {
+                                    c.getCluster1().setAssociatedTrackID(0);
+                                    c.getCluster2().setAssociatedTrackID(0);
+                                }
+                            }
+                        }
+                    }
+                    if(fittedTrack!=null && this.missingSVTCrosses(fittedTrack) == false)
+                        tracks.add(fittedTrack);
+
+                } 
             }
         }
     
 
         // reset cross and cluster IDs
-        for(int det = 0; det<2; det++) {
-            for(Cross c : CVTcrosses.get(det)) {
+        if(SVTcrosses!=null) {
+            for(Cross c : this.SVTcrosses) {
                 c.setAssociatedTrackID(-1);
             }
         }
-        for(Cluster c : SVTclusters) {
-            c.setAssociatedTrackID(-1);
+        if(BMTcrosses!=null) {
+            for(Cross c : this.BMTcrosses) {
+                c.setAssociatedTrackID(-1);
+            }
         }
-        if(BMTclusters!=null) {
+        if(SVTclusters!=null) {
+            for(Cluster c : SVTclusters) {
+                c.setAssociatedTrackID(-1);
+            }
+        }
+        if(BMTclustersHM!=null) {
             for(Cluster c : BMTclusters) {
                 c.setAssociatedTrackID(-1);
             }
         }
         if(!tracks.isEmpty()) {
             // do a final cleanup
-            Track.removeOverlappingTracks(tracks); 
+            //Track.removeOverlappingTracks(tracks); 
             if(tracks.isEmpty()) System.out.println("Error: no tracks left after overlap remover");
             
             // update crosses and clusters on track
@@ -247,21 +366,26 @@ public class TracksFromTargetRec {
                 tracks.get(it).update_Crosses(id);
                 tracks.get(it).update_Clusters(id);
                 tracks.get(it).setTrackCovMat(recUtil.getCovMatInTrackRep(tracks.get(it)));
-//                System.out.println("Fit " + tracks.get(it).toString());
+                if(Constants.getInstance().seedingDebugMode) System.out.println("Fit " + tracks.get(it).toString());
             }
         }
-        for(int det = 0; det<2; det++) {
-            for(Cross c : CVTcrosses.get(det)) {
+        if(SVTcrosses!=null) {
+            for(Cross c : this.SVTcrosses) { 
                 if(c.getAssociatedTrackID()==-1) {
-                    c.reset();
-                    if(det==1 && c.getId()>2000) { //if matched cross failed tracking resol requirements, reset its id
-                        c.setId(c.getId()-1000);
-                    } 
+                        c.reset();
                 }
-                
+            } 
+        }
+        if(BMTcrosses!=null) {
+            for(Cross c : this.BMTcrosses) {
+                if(c.getAssociatedTrackID()==-1) {
+                        c.reset();
+                }
+                if(c.getId()>2000) { //if matched cross failed tracking resol requirements, reset its id
+                    c.setId(c.getId()-1000);
+                }
             }
         }
-
 
 //        //------------------------ RDV check with Veronique
 //        // set index associations
@@ -272,10 +396,21 @@ public class TracksFromTargetRec {
 
     }
 
+    private boolean missingSVTCrosses(Track s) {
+                
+        boolean nosvt = true;
+        for(Cross c : s) {
+            if(c.getDetector() == DetectorType.BST)
+                nosvt = false;
+        }
         
+        return nosvt;
+    }
+     
     public List<Seed> getSeedsFromBanks(DataEvent event) {
         
-                
+        this.init();
+        
         SVThits = RecoBankReader.readBSTHitBank(event);
         BMThits = RecoBankReader.readBMTHitBank(event);
         if(SVThits!= null) {
@@ -289,93 +424,35 @@ public class TracksFromTargetRec {
         }
 
         
-        SVTclusters = RecoBankReader.readBSTClusterBank(event);
-        BMTclusters = RecoBankReader.readBMTClusterBank(event);
-        if(SVThits!=null && SVTclusters!=null) {
-            for(Hit hit : SVThits) {
-                if(hit.getAssociatedClusterID()>0) {
-                    SVTclusters.get(hit.getAssociatedClusterID()-1).add(hit);
-                    hit.newClustering = true;
-                }
-            }
-            for(Cluster cluster : SVTclusters) {
-               Collections.sort(cluster);
-               cluster.setSeed(cluster.get(0));
-               for(Hit hit: cluster) hit.newClustering=false;
-            }
-        }
-        if(BMThits!=null && BMTclusters!=null) {
-            for(Hit hit : BMThits) {
-                if(hit.getAssociatedClusterID()>0) {
-                    BMTclusters.get(hit.getAssociatedClusterID()-1).add(hit);
-                    hit.newClustering = true;
-                }
-            }
-           for(Cluster cluster : BMTclusters) {
-               Collections.sort(cluster);
-               cluster.setSeed(cluster.get(0));
-               for(Hit hit: cluster) hit.newClustering=false;
-           } 
-        }
+        SVTclustersHM = RecoBankReader.readBSTClusterBank(event, SVThits);
+        BMTclustersHM = RecoBankReader.readBMTClusterBank(event, BMThits);
         
-        List<Cross> SVTcrosses = RecoBankReader.readBSTCrossBank(event);
-        List<Cross> BMTcrosses = RecoBankReader.readBMTCrossBank(event);
-        if(SVTcrosses!=null) {
-            for(Cross cross : SVTcrosses) {
-                cross.setCluster1(SVTclusters.get(cross.getCluster1().getId()-1));
-                cross.setCluster2(SVTclusters.get(cross.getCluster2().getId()-1)); 
-            }
-            CVTcrosses.add((ArrayList<Cross>) SVTcrosses);
-        }
-        else {
-            CVTcrosses.add(new ArrayList<>());
-        }
-        if(BMTcrosses!=null) {
-            for(Cross cross : BMTcrosses) {
-                cross.setCluster1(BMTclusters.get(cross.getCluster1().getId()-1));
-            }
-            CVTcrosses.add((ArrayList<Cross>) BMTcrosses);
-        }
-        else {
-            CVTcrosses.add(new ArrayList<>());
-        }
+        
+        SVTcrossesHM = RecoBankReader.readBSTCrossBank(event, SVTclustersHM);
+        BMTcrossesHM = RecoBankReader.readBMTCrossBank(event, BMTclustersHM);
+        
                        
-        List<Seed> seeds = RecoBankReader.readCVTSeedsBank(event, xb, yb);
-        if(seeds == null) 
+        CVTseedsHM = RecoBankReader.readCVTSeedsBank(event, xb, yb, SVTcrossesHM, BMTcrossesHM);
+        if(CVTseedsHM == null) {
             return null;
-        
-        
-        List<Track> tracks = RecoBankReader.readCVTTracksBank(event, xb, yb);
-        if(tracks == null) 
-            return null;
-        
-        for(Track track : tracks) {
-            Seed seed = track.getSeed();
-            seed.setHelix(track.getHelix());
-            seed.getHelix().setCovMatrix(seeds.get(seed.getId()-1).getHelix().getCovMatrix());
-            seed.setChi2(track.getChi2());
-            seed.setNDF(track.getNDF());
-            seed.setId(track.getId());
-            
-            List<Cross> crosses = new ArrayList<>();
-            for(Cross cross : SVTcrosses) {
-                if(cross.getAssociatedTrackID()==seed.getId())
-                    crosses.add(cross);
+        } else {
+            CVTseedsHMOK = RecoBankReader.readCVTTracksBank(event, xb, yb, CVTseedsHM, SVTcrossesHM, BMTcrossesHM);
+            if(CVTseedsHMOK == null) {
+                return null;
+            } else {
+                Collection<Seed> values = CVTseedsHMOK.values();
+                CVTseeds = new ArrayList<>(values);
             }
-            if(BMTcrosses!=null) {
-                for(Cross cross : BMTcrosses) {
-                    if(cross.getAssociatedTrackID()==seed.getId())
-                        crosses.add(cross);
-                }
-            }
-            seed.setCrosses(crosses);
-            for(Cluster cluster : SVTclusters) {
-                if(cluster.getAssociatedTrackID()==seed.getId() && !seed.getClusters().contains(cluster)) 
-                    seed.getClusters().add(cluster);
-            }
-            CVTseeds.add(seed);
         }
-       
+        if(SVTclustersHM!=null)
+            SVTclusters = new ArrayList<>(SVTclustersHM.values());
+        if(BMTclustersHM!=null) 
+            BMTclusters = new ArrayList<>(BMTclustersHM.values());
+        if(SVTcrossesHM!=null)
+            SVTcrosses = new ArrayList<>(SVTcrossesHM.values());
+        if(BMTcrossesHM!=null)
+            BMTcrosses = new ArrayList<>(BMTcrossesHM.values());
+        
         return CVTseeds;
     }
 
@@ -424,17 +501,45 @@ public class TracksFromTargetRec {
     }
 
     public List<Cross> getSVTcrosses() {
-        if(CVTcrosses.get(0)==null || CVTcrosses.get(0).isEmpty())
+        if(SVTcrosses==null || SVTcrosses.isEmpty())
             return null;
         else
-            return CVTcrosses.get(0);
+            return SVTcrosses;
     }
     
     public List<Cross> getBMTcrosses() {
-        if(CVTcrosses.get(1)==null || CVTcrosses.get(1).isEmpty())
+        if(BMTcrosses==null || BMTcrosses.isEmpty())
             return null;
         else
-            return CVTcrosses.get(1);
+            return BMTcrosses;
     }
-    
+
+    private void init() {
+        //clear the lists
+        if(SVThits!=null)
+            SVThits.clear();
+        if(BMThits!=null)
+            BMThits.clear();
+        if(SVTclustersHM!=null)
+            SVTclustersHM.clear();
+        if(BMTclustersHM!=null)
+            BMTclustersHM.clear();
+        if(SVTcrossesHM!=null)
+            SVTcrossesHM.clear();
+        if(BMTcrossesHM!=null)
+            BMTcrossesHM.clear();
+        if(CVTseedsHM!=null)
+            CVTseedsHM.clear();
+        if(SVTclusters!=null)
+            SVTclusters.clear();
+        if(BMTclusters!=null)
+            BMTclusters.clear();
+        if(SVTcrosses!=null)
+            SVTcrosses.clear();
+        if(BMTcrosses!=null)
+            BMTcrosses.clear();
+        if(CVTseeds!=null)
+            CVTseeds.clear();
+    }
+
 }
