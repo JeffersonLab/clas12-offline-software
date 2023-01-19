@@ -168,7 +168,8 @@ public class DCTBEngine extends DCEngine {
         //if(trkbank.rows()!=trkcovbank.rows()) {
         //    return true; // HB tracks not saved correctly
         //}
-        Track[] TrackArray = new Track[trkrows];
+        //Track[] TrackArray = new Track[trkrows];
+        Map<Integer, Track> TrackArray = new HashMap<>();
         for (int i = 0; i < trkrows; i++) {
             Track HBtrk = new Track();
             HBtrk.set_Id(trkbank.getShort("id", i));
@@ -191,17 +192,23 @@ public class DCTBEngine extends DCEngine {
 //            {trkcovbank.getFloat("C51", i), trkcovbank.getFloat("C52", i), trkcovbank.getFloat("C53", i), trkcovbank.getFloat("C54", i), trkcovbank.getFloat("C55", i)}
 //            });
 //            HBtrk.set_CovMat(initCMatrix);
-            TrackArray[HBtrk.get_Id()-1] = HBtrk; 
-            TrackArray[HBtrk.get_Id()-1].set_Status(0);
+    
+            //TrackArray[HBtrk.get_Id()-1] = HBtrk; 
+            //TrackArray[HBtrk.get_Id()-1].set_Status(0);
+            TrackArray.put(HBtrk.get_Id(), HBtrk);
+            TrackArray.get(HBtrk.get_Id()).set_Status(0);
         }
-        if(TrackArray==null) {
+        if(TrackArray.isEmpty()) {
             return true; // HB tracks not saved correctly
         }
         for(Segment seg : segments) {
             if(seg.get(0).get_AssociatedHBTrackID()>0) {
-                    TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].get_ListOfHBSegments().add(seg); 
+                if(TrackArray.containsKey(seg.get(0).get_AssociatedHBTrackID())) {
+                    TrackArray.get(seg.get(0).get_AssociatedHBTrackID()).get_ListOfHBSegments().add(seg); 
+                    //TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].get_ListOfHBSegments().add(seg); 
                     if(seg.get_Status()==1)
-                        TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].set_Status(1);
+                        TrackArray.get(seg.get(0).get_AssociatedHBTrackID()).set_Status(1);
+                }
             }
         }
         
@@ -218,7 +225,9 @@ public class DCTBEngine extends DCEngine {
         }
 	TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
         TrajectoryFinder trjFind = new TrajectoryFinder();
-        for (Track TrackArray1 : TrackArray) {
+        for (Integer tid : TrackArray.keySet()) {
+        //for (Track TrackArray1 : TrackArray) {
+        Track TrackArray1 = TrackArray.get(tid);
             if (TrackArray1 == null || TrackArray1.get_ListOfHBSegments() == null || TrackArray1.get_ListOfHBSegments().size() < 5) {
                 continue;
             }
