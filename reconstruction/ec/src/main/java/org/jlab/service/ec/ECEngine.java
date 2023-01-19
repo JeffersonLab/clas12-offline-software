@@ -284,6 +284,11 @@ public class ECEngine extends ReconstructionEngine {
     	ECCommon.usePass2Timing = val;
     }
     
+    public void setUsePass2Energy(boolean val) {
+    	LOGGER.log(Level.INFO,"ECengine: usePass2Energy = "+val);
+    	ECCommon.usePass2Energy = val;
+    }
+    
     public void setUsePass2Recon(boolean val) {
     	LOGGER.log(Level.INFO,"ECengine: usePass2Recon = "+val);
     	ECCommon.usePass2Recon = val;
@@ -367,6 +372,7 @@ public class ECEngine extends ReconstructionEngine {
     	
         String[]  ecTables = new String[]{
                 "/calibration/ec/attenuation", 
+                "/calibration/ec/atten", 
                 "/calibration/ec/gain", 
                 "/calibration/ec/timing",
                 "/calibration/ec/ftime",
@@ -413,8 +419,9 @@ public class ECEngine extends ReconstructionEngine {
         setPeakThresholds(18,20,15);  //pass1 18,20,15
         setClusterThresholds(0,0,0);
         setClusterCuts(7,15,20);      //pass1 7,15,20
-        setDTCorrections(ECCommon.useDTCorrections); //replace missing DSC time with FADC time
-        setUsePass2Timing(ECCommon.usePass2Timing);  //use pass2 CCDB tables for FADC/DSC calibrations        
+        setDTCorrections(ECCommon.useDTCorrections); //replace missing TDC time with FADC time
+        setUsePass2Energy(ECCommon.usePass2Energy);  //use pass2 CCDB tables for attenuation  
+        setUsePass2Timing(ECCommon.usePass2Timing);  //use pass2 CCDB tables for FADC/TDC calibrations        
         setUseFTpcal(ECCommon.useFTpcal);            //use FADC time for all PCAL channels
         setSplitMethod(0);            //pass1 0=gagik method
         setSplitThresh(3,3,3);        //pass1 3,3,3
