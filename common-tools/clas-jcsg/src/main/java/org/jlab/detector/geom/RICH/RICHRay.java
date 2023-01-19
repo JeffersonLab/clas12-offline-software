@@ -1,4 +1,4 @@
-package org.jlab.rec.rich;
+package org.jlab.detector.geom.RICH;
 
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geom.prim.Point3D;

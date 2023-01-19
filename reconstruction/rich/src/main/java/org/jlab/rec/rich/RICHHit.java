@@ -1,35 +1,41 @@
 package org.jlab.rec.rich;
 
-import org.jlab.detector.geant4.v2.RICHGeant4Factory;
-import eu.mihosoft.vrl.v3d.Vector3d;
+import org.jlab.detector.geom.RICH.RICHGeoFactory;
+
+import org.jlab.geom.prim.Point3D;
+
+//import org.jlab.detector.geom.RICH.RICHGeoFactory;
 
 // ----------------
 public class RICHHit implements Comparable<RICHHit>{
 // ----------------
 // class implements Comparable interface to allow for sorting a collection of hits by Time values
 
-    private int debugMode = 0;
-
-    private int id;                                   //         id
+    private int id = -1;                              //         id
     private int sector;                               //         Sector
     private int tile;                                 //         Front-End TILE ID
     private int channel;                              //         MAROC channel
     private int pmt;                                  //         MA-PMT ID
     private int anode;                                //         MA-PMT anode
+    private int lead;                                 //         ID of the leading edge
+    private int trail;                                //         ID of the trailing edge
+    private int signal;                               //         pointer to the derived RICH signal
+
     private int idx;                                  //         anode local  idx (within PMT)
     private int idy;                                  //         anode local  idy (within PMT)
     private int glx;                                  //         anode global idx (onto RICH plane)
     private int gly;                                  //         anode global idy (onto RICH plane)
 
-    private float x;                                  //         anode global x (within CLAS)
-    private float y;                                  //         anode global y (within CLAS)
-    private float z;                                  //         anode global z (within CLAS)
-    private float time;                               //         Hit time
-    private float rawtime;                            //         Hit rawtime
+    private double x;                                 //         anode global x (within CLAS)
+    private double y;                                 //         anode global y (within CLAS)
+    private double z;                                 //         anode global z (within CLAS)
+    private double time;                              //         Hit time
+    private double rawtime;                           //         Hit rawtime
 
     private int duration;                             //         Hit duration
     private int cluster;                              //         parent cluster ID
     private int xtalk;                                //         xtalk type
+    private int status;                               //         MA-PMT pixel status
 
 
     // ----------------
@@ -37,61 +43,49 @@ public class RICHHit implements Comparable<RICHHit>{
     // ----------------
     }
 
+
     // ----------------
-    public RICHHit(int hid, RICHTool tool, int phase, RICHEdge lead, RICHEdge trail) {
+    public RICHHit(int hid, int phase, RICHEdge lead, RICHEdge trail, RICHGeoFactory richgeo, RICHCalibration richcal) {
     // ----------------
 
 
-	// ATT: Edge channel runs [1:192], Hit channel runs [0:191]
+        int debugMode = 0;
+
+	// Edge channel runs [1:192], Hit channel runs [0:191]
         this.id        = hid;
         this.sector    = lead.get_sector();
         this.tile      = lead.get_tile();
-        this.pmt       = tool.Tile2PMT(tile, lead.get_channel());  // run from1  to 391
+        this.pmt       = richgeo.Tile2PMT(tile, lead.get_channel());  // run from 1  to 391
         this.channel   = (lead.get_channel()-1)%64;     
-        this.anode     = tool.Maroc2Anode(channel);                // run from 1 to 64
-        this.idx       = tool.Anode2idx(anode);
-        this.idy       = tool.Anode2idy(anode);
-        this.glx       = tool.get_Globalidx(pmt, anode);
-        this.gly       = tool.get_Globalidy(pmt, anode);
+        this.anode     = richgeo.Maroc2Anode(channel);                // run from 1 to 64
+        this.lead      = lead.get_id();
+        this.trail     = trail.get_id();
+
+        this.idx       = richgeo.get_PixelMap().Anode2idx(anode);
+        this.idy       = richgeo.get_PixelMap().Anode2idy(anode);
+        this.glx       = richgeo.get_PixelMap().get_Globalidx(pmt, anode);
+        this.gly       = richgeo.get_PixelMap().get_Globalidy(pmt, anode);
         this.duration  = trail.get_tdc()-lead.get_tdc();
 
-        /*float twalk_corr = 0;
-        if(this.duration < 59){
-              twalk_corr = (float) this.duration * tool.getPMTtimewalk(pmt, 2) + tool.getPMTtimewalk(pmt, 1);
-        }else{
-              twalk_corr = (float) this.duration * tool.getPMTtimewalk(pmt, 4) + tool.getPMTtimewalk(pmt, 3);
-        }*/
+        double twalk_corr = richcal.get_PixelTimeWalk(sector, pmt, this.duration);
+        double toff_corr  = richcal.get_PixelTimeOff(sector, pmt, anode);
 
-        double twalk_corr = 0;
-        double D0 = tool.getPMTtimewalk(pmt, 1);
-        double T0 = tool.getPMTtimewalk(pmt, 2);
-        double m1 = tool.getPMTtimewalk(pmt, 3);
-        double m2 = tool.getPMTtimewalk(pmt, 4);
-        double f1 = m1 * this.duration + T0;
-        double f1T = m1 * D0 + T0;
-
-        double f2 = m2 * (this.duration - D0) + f1T;
-        twalk_corr = f1;
-        if (this.duration > D0) twalk_corr = f2;
-
-        this.rawtime   = (float) lead.get_tdc();
-        this.time      = (float) (lead.get_tdc() + phase*4 + tool.getPMTtimeoff(pmt, anode) - twalk_corr);
-        //this.time      = (float) (lead.get_tdc() + tool.getFTOFphase()*4 + tool.getPMTtimeoff(pmt, anode));
+        this.status    = richcal.get_PixelStatus(sector, pmt, anode);
+        this.rawtime   = lead.get_tdc();
+        this.time      = (lead.get_tdc() + phase*4 + toff_corr - twalk_corr);
         this.cluster   = 0;
         this.xtalk     = 0;
             
-        if(debugMode>=1)System.out.format("Correzione time  pmt %3d  anode %4d  dur %5d  raw %7.2f  toff %7.2f  twalk (%7.2f %7.2f %7.3f %7.3f --> %7.3f %7.3f) %7.3f  --> time %7.2f \n",
-                                           this.pmt,this.anode,this.duration, this.rawtime, tool.getPMTtimeoff(pmt, anode), 
-                                           D0, T0, m1, m2, f1, f2, twalk_corr, this.time);
+        if(debugMode>=1)System.out.format("Correzione time  pmt %3d  anode %4d  dur %5d  raw %7.2f  toff %7.2f  twalk %7.3f  --> time %7.2f \n",
+                                           this.pmt,this.anode,this.duration, this.rawtime, toff_corr, twalk_corr, this.time);
 
 	if(debugMode>=1)System.out.format(" Hittime %4d %4d %8d %7.2f %7d %7.2f %7.2f %7.2f \n", hid, pmt, this.duration, this.rawtime, 
-                                           phase*4, tool.getPMTtimeoff(pmt, anode), -twalk_corr, this.time);
+                                           phase*4, toff_corr, -twalk_corr, this.time);
 
-        //Vector3d CenPos = tool.GetPixelCenter(pmt,anode);
-        Vector3d CesPos = tool.get_Pixel_Center(pmt,anode);
-        this.x         = (float) CesPos.x;
-        this.y         = (float) CesPos.y;
-        this.z         = (float) CesPos.z;
+        Point3D CesPos = richgeo.get_Pixel_Center(sector, pmt,anode);
+        this.x         =  CesPos.x();
+        this.y         =  CesPos.y();
+        this.z         =  CesPos.z();
 
 	if(debugMode>=1)System.out.format(" Hit pmt %4d  anode %3d -->  %8.2f %8.2f %8.2f \n", pmt, anode, this.x, this.y, this.z);
 
@@ -99,81 +93,83 @@ public class RICHHit implements Comparable<RICHHit>{
 
 
     // ----------------
-    public int get_id() {
+    public int get_id() { return id; }
     // ----------------
-        return id;
-    }
 
     // ----------------
-    public void set_id(int id) {
+    public void set_id(int id) { this.id = id; }
     // ----------------
-        this.id = id;
-    }
           
     // ----------------
-    public int get_sector() {
+    public int get_sector() { return sector; }
     // ----------------
-        return sector;
-    }
 
     // ----------------
-    public void set_sector(int sector) {
+    public int get_status() { return status; }
     // ----------------
-        this.sector = sector;
-    }
 
     // ----------------
-    public int get_channel() {
+    public void set_sector(int sector) { this.sector = sector; }
     // ----------------
-        return channel;
-    }
 
     // ----------------
-    public void set_channel(int channel) {
+    public int get_channel() { return channel; }
     // ----------------
-        this.channel = channel;
-    }
 
     // ----------------
-    public int get_tile() {
+    public void set_channel(int channel) { this.channel = channel; }
     // ----------------
-        return tile;
-    }
-
 
     // ----------------
-    public void set_tile(int tile) {
+    public int get_tile() { return tile; }
     // ----------------
-        this.tile = tile;
-    }
 
     // ----------------
-    public int get_pmt() {
+    public void set_tile(int tile) { this.tile = tile; }
     // ----------------
-        return pmt;
-    }
+
+    // ----------------
+    public int get_pmt() { return pmt; }
+    // ----------------
 
 
     // ----------------
-    public void set_pmt(int pmt) {
+    public void set_pmt(int pmt) { this.pmt = pmt; }
     // ----------------
-        this.pmt = pmt;
-    }
     
     // ----------------
-    public int get_anode() {
+    public int get_anode() { return anode; }
     // ----------------
-        return anode;
-    }
-
 
     // ----------------
-    public void set_anode(int anode) {
+    public void set_anode(int anode) { this.anode = anode; }
     // ----------------
-        this.anode = anode;
-    }
 
-    
+    // ----------------
+    public int get_lead() { return lead; }
+    // ----------------
+
+    // ----------------
+    public void set_lead(int lead) { this.lead = lead; }
+    // ----------------
+
+    // ----------------
+    public int get_trail() { return trail; }
+    // ----------------
+
+    // ----------------
+    public void set_trail(int trail) { this.trail = trail; }
+    // ----------------
+
+    // ----------------
+    public int get_signal() { return signal; }
+    // ----------------
+
+    // ----------------
+    public void set_signal(int signal) { this.signal = signal; }
+    // ----------------
+
+
     // ----------------
     public int get_idx() {
     // ----------------
@@ -230,39 +226,62 @@ public class RICHHit implements Comparable<RICHHit>{
     }
 
     // ----------------
-    public float get_x() {
+    public Point3D get_Position() {
+    // ----------------
+        return new Point3D(x,y,z);
+    }
+
+
+    // ----------------
+    public void set_Position(Point3D pos){
+    // ----------------
+        set_Position( pos.x(), pos.y(), pos.z() );
+    }
+
+
+    // ----------------
+    public void set_Position(double x, double y, double z) {
+    // ----------------
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+
+    // ----------------
+    public double get_x() {
     // ----------------
         return x;
     }
 
 
     // ----------------
-    public void set_x(float x) {
+    public void set_x(double x) {
     // ----------------
         this.x = x;
     }
 
     // ----------------
-    public float get_y() {
+    public double get_y() {
     // ----------------
         return y;
     }
 
 
     // ----------------
-    public void set_y(float y) {
+    public void set_y(double y) {
     // ----------------
         this.y = y;
     }
 
     // ----------------
-    public float get_z() {
+    public double get_z() {
     // ----------------
         return z;
     }
 
     // ----------------
-    public void set_z(float z) {
+    public void set_z(double z) {
     // ----------------
         this.z = z;
     }
@@ -283,20 +302,20 @@ public class RICHHit implements Comparable<RICHHit>{
 
 
     // ----------------
-    public float get_time() {
+    public double get_Time() {
     // ----------------
         return time;
     }
 
 
     // ----------------
-    public void set_time(int time) {
+    public void set_Time(double time) {
     // ----------------
         this.time = time;
     }
 
     // ----------------
-    public float get_rawtime() {
+    public double get_rawtime() {
     // ----------------
         return rawtime;
     }
@@ -337,7 +356,7 @@ public class RICHHit implements Comparable<RICHHit>{
     public boolean passHitSelection(RICHHit hit) {
     // ----------------
         // a selection cut to pass the edge
-        if(hit.get_time() > 0) {
+        if(hit.get_Time() > 0) {
             return true;
         } else {
             return false;
@@ -361,7 +380,7 @@ public class RICHHit implements Comparable<RICHHit>{
     public boolean IsinNonet(RICHHit hit, RICHHit nonet) {
     // ----------------
         boolean addFlag = false;
-        float tDiff = Math.abs(hit.get_time() - nonet.get_time());
+        double tDiff = Math.abs(hit.get_Time() - nonet.get_Time());
         int xDiff = Math.abs(hit.get_idx()  - nonet.get_idx());
         int yDiff = Math.abs(hit.get_idy()  - nonet.get_idy());
         if(tDiff <= RICHConstants.CLUSTER_TIME_WINDOW && xDiff <= 1 && yDiff <= 1 && (xDiff + yDiff) >0) addFlag = true;
@@ -372,8 +391,10 @@ public class RICHHit implements Comparable<RICHHit>{
     // ----------------
     public void showHit() {
     // ----------------
-        System.out.format("Hit ID %3d Sec %2d Til %4d PMT %4d Ch %4d And %3d idx %2d idy %2d glx %3d gly %3d xyz %7.2f %7.2f %7.2f clu %3d xtk %5d tim %7.1f %7.1f dur %3d \n",
+        System.out.format("Hit ID %3d (%3d, %3d) Sec %2d Til %4d PMT %4d Ch %4d And %3d idx %2d idy %2d glx %3d gly %3d xyz %7.2f %7.2f %7.2f clu %3d xtk %5d tim %7.1f %7.1f dur %3d \n",
             this.get_id(),
+            this.get_lead(),
+            this.get_trail(),
             this.get_sector(),
             this.get_tile(),  
             this.get_pmt(),     
@@ -388,7 +409,7 @@ public class RICHHit implements Comparable<RICHHit>{
             this.get_z(),     
             this.get_cluster(), 
             this.get_xtalk(), 
-            this.get_time(),    
+            this.get_Time(),    
             this.get_rawtime(),    
             this.get_duration());
     }
