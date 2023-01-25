@@ -2,7 +2,6 @@ package org.jlab.service.eb;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jlab.clas.reco.ReconstructionEngine;
@@ -170,8 +169,7 @@ public class EBEngine extends ReconstructionEngine {
         // create REC:detector banks:
         if(!eb.getEvent().getParticles().isEmpty()){
        
-            Collections.sort(eb.getEvent().getParticles());
-
+            eb.getEvent().sort();
             eb.setParticleStatuses();
             //eb.setEventStatuses();
             
@@ -341,8 +339,8 @@ public class EBEngine extends ReconstructionEngine {
         this.registerOutputBank(trajectoryBank);
         this.registerOutputBank(covMatrixBank);
 
-	if (this.getEngineConfigString("outputBankPrefix")!=null) {
-	    this.setOutputBankPrefix(this.getEngineConfigString("outputBankPrefix"));
+	    if (this.getEngineConfigString("outputBankPrefix")!=null) {
+	        this.setOutputBankPrefix(this.getEngineConfigString("outputBankPrefix"));
         }
 
         requireConstants(EBCCDBConstants.getAllTableNames());
