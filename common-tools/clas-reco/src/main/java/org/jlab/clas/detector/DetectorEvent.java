@@ -5,9 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.clas.physics.Vector3;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataEvent;
 
 
@@ -27,7 +25,6 @@ public class DetectorEvent {
     }
    
     public void sort() {
-        System.err.println("DetectorEvent:  Not ready for sorting!!!!!!!!!");
         Collections.sort(particleList);
         setAssociation();
     }
@@ -179,6 +176,7 @@ public class DetectorEvent {
                     r.addAssociation(index);
                 }
             }
+            particleList.get(index).getTrack().setAssociation(index);
         }
     }
 
