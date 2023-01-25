@@ -27,15 +27,21 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
     
     private Bank rcfgBank=null;
   
-    public class Interval {
+    public static class Interval {
         private DaqScalers previous = null;
         private DaqScalers next = null;
-        protected Interval(DaqScalersSequence seq, long t1, long t2) {
+        public Interval(DaqScalersSequence seq) {
+            if (!seq.scalers.isEmpty()) {
+                this.previous = seq.scalers.get(0);
+                this.next = seq.scalers.get(seq.scalers.size()-1);
+            }
+        }
+        public Interval(DaqScalersSequence seq, long t1, long t2) {
             final int idx1 = seq.findIndex(t1);
             final int idx2 = seq.findIndex(t2);
-            if (idx1>=0 && idx2<scalers.size()-1) {
-                this.previous = scalers.get(idx1);
-                this.next = scalers.get(idx2+1);
+            if (idx1>=0 && idx2<seq.scalers.size()-1) {
+                this.previous = seq.scalers.get(idx1);
+                this.next = seq.scalers.get(idx2+1);
             }
         }
         public double getBeamChargeGated() {
@@ -124,6 +130,13 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
     public DaqScalers get(Event event) {
         event.read(this.rcfgBank);
         return this.get(this.rcfgBank.getLong("timestamp", 0));
+    }
+
+    /**
+     * @return largest available interval of scaler readings 
+     */
+    public Interval getInterval() {
+        return new Interval(this);
     }
 
     /**
