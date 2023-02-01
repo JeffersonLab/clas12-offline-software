@@ -3,7 +3,7 @@
   "name": "BSTRec::Hits",
   "group": 20200,
   "item" : 21,   
-  "info": "first pass reconstructed BST hits on track",
+  "info": "second pass reconstructed BST hits on track",
   "entries": [
         {"name":"ID",             "type":"S", "info":"hit ID"},
         {"name":"sector",         "type":"B", "info":"hit sector"},
@@ -16,6 +16,26 @@
         {"name":"clusterID",      "type":"S", "info":"associated cluster ID"},
         {"name":"trkID",          "type":"S", "info":"associated track ID"},
         {"name":"status",         "type":"B", "info":"status (0=good)"}
+        ]
+  },
+  {
+  "name": "BSTRec::HitsPos",
+  "group": 20200,
+  "item" : 39,   
+  "info": "reconstructed BST hits on track",
+  "entries": [
+        {"name":"ID",             "type":"S", "info":"hit ID"},
+        {"name":"sector",         "type":"B", "info":"hit sector"},
+        {"name":"layer",          "type":"B", "info":"hit layer"},
+        {"name":"strip",          "type":"S", "info":"hit strip"},
+        {"name":"r1",             "type":"F", "info":"r1"},
+        {"name":"theta1",         "type":"F", "info":"theta1"},
+        {"name":"phi1",           "type":"F", "info":"phi1"},
+        {"name":"r2",             "type":"F", "info":"r2"},
+        {"name":"theta2",         "type":"F", "info":"theta2"},
+        {"name":"phi2",           "type":"F", "info":"phi2"},
+        {"name":"tstatus",        "type":"B", "info":"mc truth status (1=good)"},
+        {"name":"rstatus",        "type":"B", "info":"rec status (1=good)"}
         ]
   },
   {
@@ -121,6 +141,26 @@
         {"name":"clusterID",      "type":"S", "info":"associated cluster ID"},
         {"name":"trkID",          "type":"S", "info":"associated track ID"},
         {"name":"status",         "type":"B", "info":"status (0=good)"}
+        ]
+  },
+  {
+  "name": "BST::HitsPos",
+  "group": 20200,
+  "item" : 40,   
+  "info": "reconstructed BST hits on track",
+  "entries": [
+        {"name":"ID",             "type":"S", "info":"hit ID"},
+        {"name":"sector",         "type":"B", "info":"hit sector"},
+        {"name":"layer",          "type":"B", "info":"hit layer"},
+        {"name":"strip",          "type":"S", "info":"hit strip"},
+        {"name":"r1",             "type":"F", "info":"r1"},
+        {"name":"theta1",         "type":"F", "info":"theta1"},
+        {"name":"phi1",           "type":"F", "info":"phi1"},
+        {"name":"r2",             "type":"F", "info":"r2"},
+        {"name":"theta2",         "type":"F", "info":"theta2"},
+        {"name":"phi2",           "type":"F", "info":"phi2"},
+        {"name":"tstatus",        "type":"B", "info":"mc truth status (1=good)"},
+        {"name":"rstatus",        "type":"B", "info":"rec status (1=good)"}
         ]
   },
   {
