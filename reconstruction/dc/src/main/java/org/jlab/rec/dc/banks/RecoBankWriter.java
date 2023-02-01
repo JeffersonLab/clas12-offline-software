@@ -8,6 +8,7 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.cluster.FittedCluster;
 import org.jlab.rec.dc.cross.Cross;
+import org.jlab.rec.dc.cross.MCCross;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.hit.Hit;
 import org.jlab.rec.dc.segment.Segment;
@@ -690,6 +691,34 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
         return bank;
     }
 
+     /**
+     *
+     * @param event the EvioEvent
+     * @return crosses bank
+     */
+    private DataBank fillMCCrossesBank(DataEvent event, List<MCCross> crosslist) {
+        int banksize=crosslist.size();
+        String name = "MC::Crosses";
+        DataBank bank = event.createBank(name, banksize);
+        
+        int index=0;
+        for (MCCross aCrosslist : crosslist) {
+            bank.setShort("id", index, (short) aCrosslist.get_Id());
+            bank.setByte("sector", index, (byte) aCrosslist.get_Sector());
+            bank.setByte("region", index, (byte) aCrosslist.get_Region());
+            bank.setFloat("x", index, (float) aCrosslist.get_Point().x());
+            bank.setFloat("y", index, (float) aCrosslist.get_Point().y());
+            bank.setFloat("z", index, (float) aCrosslist.get_Point().z());
+            bank.setFloat("ux", index, (float) aCrosslist.get_Dir().x());
+            bank.setFloat("uy", index, (float) aCrosslist.get_Dir().y());
+            bank.setFloat("uz", index, (float) aCrosslist.get_Dir().z());
+            bank.setShort("Segment1_ID", index, (short) aCrosslist.get_Segment1().get_Id());
+            bank.setShort("Segment2_ID", index, (short) aCrosslist.get_Segment2().get_Id());
+            index++;
+            
+        }
+        return bank;
+    }
     /**
      *
      * @param event the EvioEvent
@@ -864,7 +893,6 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
             );
         }
     }
-
     public void fillAllTBBanks(DataEvent event, List<FittedHit> fhits, List<FittedCluster> clusters,
             List<Segment> segments, List<Cross> crosses,
             List<Track> trkcands) {
@@ -888,6 +916,48 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
                     this.fillTBClustersBank(event, clusters),
                     this.fillTBSegmentsBank(event, segments),
                     this.fillTBCrossesBank(event, crosses));
+        }
+        if (segments != null && crosses == null) {
+            event.appendBanks(this.fillTBHitsBank(event, fhits),
+                    this.fillTBClustersBank(event, clusters),
+                    this.fillTBSegmentsBank(event, segments));
+        }
+
+        if (clusters != null && segments == null) {
+            event.appendBanks(this.fillTBHitsBank(event, fhits),
+                    this.fillTBClustersBank(event, clusters));
+        }
+
+        if (fhits != null && clusters == null) {
+            event.appendBanks(this.fillTBHitsBank(event, fhits));
+        }
+    }
+    
+    public void fillAllTBBanks(DataEvent event, List<FittedHit> fhits, List<FittedCluster> clusters,
+            List<Segment> segments, List<Cross> crosses, List<MCCross> mccrosses,
+            List<Track> trkcands) {
+
+        if (event == null) {
+            return;
+        }
+
+        if (trkcands != null) {
+            event.appendBanks(this.fillTBHitsBank(event, fhits),
+                    this.fillTBClustersBank(event, clusters),
+                    this.fillTBSegmentsBank(event, segments),
+                    this.fillTBCrossesBank(event, crosses),
+                    this.fillMCCrossesBank(event, mccrosses),
+                    this.fillTBTracksBank(event, trkcands),
+                    this.fillTrajectoryBank(event, trkcands),
+                    this.fillTrackCovMatBank(event, trkcands)
+                    );
+        }
+        if (crosses != null && trkcands == null) {
+            event.appendBanks(this.fillTBHitsBank(event, fhits),
+                    this.fillTBClustersBank(event, clusters),
+                    this.fillTBSegmentsBank(event, segments),
+                    this.fillTBCrossesBank(event, crosses),
+                    this.fillMCCrossesBank(event, mccrosses));
         }
         if (segments != null && crosses == null) {
             event.appendBanks(this.fillTBHitsBank(event, fhits),

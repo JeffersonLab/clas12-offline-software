@@ -20,6 +20,7 @@ import org.jlab.rec.dc.cluster.ClusterFitter;
 import org.jlab.rec.dc.cluster.FittedCluster;
 import org.jlab.rec.dc.cross.Cross;
 import org.jlab.rec.dc.cross.CrossMaker;
+import org.jlab.rec.dc.cross.MCCross;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.segment.SegmentFinder;
@@ -94,6 +95,7 @@ public class DCTBEngine extends DCEngine {
         List<FittedCluster> clusters = new ArrayList<>();
         List<Segment> segments = new ArrayList<>();
         List<Cross> crosses = new ArrayList<>();
+        List<MCCross> mcCrosses = new ArrayList<>();
         List<Track> trkcands = new ArrayList<>();
         
         LOGGER.log(Level.FINE, "TB AI "+ this.getName());
@@ -231,6 +233,19 @@ public class DCTBEngine extends DCEngine {
             //if(TrackArray[i].get_FitChi2()>200) {
             //    resetTrackParams(TrackArray[i], new DCSwimmer());
             //}
+            if(event.hasBank("MC::Particle") && event.getBank("MC::Particle").rows()==1) {
+                MCCross.mcTrackPars(event);
+                mcCrosses = new ArrayList<>();
+                for(Cross c : crosses) { 
+                    MCCross mc = new MCCross(c.get_Sector(), c.get_Region(), c.get_Id(), event,
+                    dcSwim, Constants.getInstance().dcDetector);
+                    if(mc!=null) {
+                        mc.set_Segment1(c.get_Segment1());
+                        mc.set_Segment2(c.get_Segment2());
+                        mcCrosses.add(mc);
+                    }
+                }
+            }
             KFitterDoca kFit = new KFitterDoca(TrackArray1, Constants.getInstance().dcDetector, true, dcSwim, 0);
             StateVec fn = new StateVec();
             kFit.runFitter(TrackArray1.get(0).get_Sector());
@@ -299,14 +314,23 @@ public class DCTBEngine extends DCEngine {
         }    
        
         this.ensureUniqueness(fhits, clusters, segments, crosses);
-        if(trkcands.isEmpty()) {
+        if(event.hasBank("MC::Particle") && event.getBank("MC::Particle").rows()==1) {
+            if(trkcands.isEmpty()) {
 
-            rbc.fillAllTBBanks(event, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
-            return true;
+                rbc.fillAllTBBanks(event, fhits, clusters, segments, crosses, mcCrosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
+                return true;
+            }
+
+            rbc.fillAllTBBanks(event, fhits, clusters, segments, crosses, mcCrosses, trkcands);
+        } else {
+            if(trkcands.isEmpty()) {
+
+                rbc.fillAllTBBanks(event, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
+                return true;
+            }
+
+            rbc.fillAllTBBanks(event, fhits, clusters, segments, crosses, trkcands);
         }
-        
-        rbc.fillAllTBBanks(event, fhits, clusters, segments, crosses, trkcands);
-
         return true;
     }
 
