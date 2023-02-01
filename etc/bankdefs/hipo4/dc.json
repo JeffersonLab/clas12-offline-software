@@ -474,6 +474,26 @@
     ]
   },
   {
+    "name": "MC::Crosses",
+    "group": 20600,
+    "item" : 55,
+    "info": "MC crosses",
+    "entries": [
+        {"name":"id",            "type":"S", "info":"id of the cross"},
+        {"name":"status",        "type":"S", "info":"status of the cross"},
+        {"name":"sector",        "type":"B", "info":"sector of the cross"},
+        {"name":"region",        "type":"B", "info":"region of the cross"},
+        {"name":"x",             "type":"F", "info":"DC track cross x-coordinate (in the DC tilted sector coordinate system)"},
+        {"name":"y",             "type":"F", "info":"DC track cross y-coordinate (in the DC tilted sector coordinate system)"},
+        {"name":"z",             "type":"F", "info":"DC track cross z-coordinate (in the DC tilted sector coordinate system)"},
+        {"name":"ux",            "type":"F", "info":"DC track cross x-direction (in the DC tilted sector coordinate system)"},
+        {"name":"uy",            "type":"F", "info":"DC track cross y-direction (in the DC tilted sector coordinate system)"},
+        {"name":"uz",            "type":"F", "info":"DC track cross z-direction (in the DC tilted sector coordinate system)"},
+        {"name":"Segment1_ID",   "type":"S", "info":"id of first superlayer used in segment"},
+        {"name":"Segment2_ID",   "type":"S", "info":"id of second superlayer used in segment"}
+    ]
+  },
+  {
     "name": "TimeBasedTrkg::TBTracks",
     "group": 20600,
     "item" : 36,
