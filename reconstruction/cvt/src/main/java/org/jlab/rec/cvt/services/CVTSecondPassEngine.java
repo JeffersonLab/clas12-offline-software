@@ -76,6 +76,7 @@ public class CVTSecondPassEngine extends CVTEngine {
             }
             List<DataBank> banks = new ArrayList<>();
             if(trackFinder.getSVThits()!=null) banks.add(RecoBankWriter.fillSVTHitBank(event, trackFinder.getSVThits(), this.getSvtHitBank()));
+            if(trackFinder.getSVThits()!=null) banks.add(RecoBankWriter.fillSVTHitPosBank(event, trackFinder.getSVThits(), this.getSvtHitPosBank()));
             if(trackFinder.getBMThits()!=null) banks.add(RecoBankWriter.fillBMTHitBank(event, trackFinder.getBMThits(), this.getBmtHitBank()));
             if(trackFinder.getSVTclusters()!=null) banks.add(RecoBankWriter.fillSVTClusterBank(event, trackFinder.getSVTclusters(), this.getSvtClusterBank()));
             if(trackFinder.getBMTclusters()!=null) banks.add(RecoBankWriter.fillBMTClusterBank(event, trackFinder.getBMTclusters(), this.getBmtClusterBank()));

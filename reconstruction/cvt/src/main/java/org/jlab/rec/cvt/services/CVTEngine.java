@@ -39,6 +39,7 @@ public class CVTEngine extends ReconstructionEngine {
     private int Run = -1;
 
     private String svtHitBank;
+    private String svtHitPosBank;
     private String svtClusterBank;
     private String svtCrossBank;
     private String bmtHitBank;
@@ -148,6 +149,7 @@ public class CVTEngine extends ReconstructionEngine {
         this.setBmtClusterBank("BMT" + prefix + "::Clusters");
         this.setBmtCrossBank("BMT" + prefix + "::Crosses");
         this.setSvtHitBank("BST" + prefix + "::Hits");
+        this.setSvtHitPosBank("BST" + prefix + "::HitsPos");
         this.setSvtClusterBank("BST" + prefix + "::Clusters");
         this.setSvtCrossBank("BST" + prefix + "::Crosses");
         this.setSeedBank("CVT" + prefix + "::Seeds");
@@ -161,6 +163,7 @@ public class CVTEngine extends ReconstructionEngine {
         super.registerOutputBank(this.bmtClusterBank);
         super.registerOutputBank(this.bmtCrossBank);
         super.registerOutputBank(this.svtHitBank);
+        super.registerOutputBank(this.svtHitPosBank);
         super.registerOutputBank(this.svtClusterBank);
         super.registerOutputBank(this.svtCrossBank);
         super.registerOutputBank(this.cvtSeedBank);
@@ -341,6 +344,7 @@ public class CVTEngine extends ReconstructionEngine {
             }
         }
         banks.add(RecoBankWriter.fillSVTHitBank(event, hits.get(0), this.getSvtHitBank()));
+        banks.add(RecoBankWriter.fillSVTHitPosBank(event, hits.get(0), this.getSvtHitPosBank()));
         banks.add(RecoBankWriter.fillBMTHitBank(event, hits.get(1), this.getBmtHitBank()));
         banks.add(RecoBankWriter.fillSVTClusterBank(event, clusters.get(0), this.getSvtClusterBank()));
         banks.add(RecoBankWriter.fillBMTClusterBank(event, clusters.get(1), this.getBmtClusterBank()));
@@ -475,6 +479,10 @@ public class CVTEngine extends ReconstructionEngine {
     public void setSvtHitBank(String bstHitBank) {
         this.svtHitBank = bstHitBank;
     }
+    
+    public void setSvtHitPosBank(String bstHitPosBank) {
+        this.svtHitPosBank = bstHitPosBank;
+    }
 
     public void setSvtClusterBank(String bstClusterBank) {
         this.svtClusterBank = bstClusterBank;
@@ -526,6 +534,10 @@ public class CVTEngine extends ReconstructionEngine {
     
     public String getSvtHitBank() {
         return svtHitBank;
+    }
+    
+    public String getSvtHitPosBank() {
+        return svtHitPosBank;
     }
 
     public String getSvtClusterBank() {

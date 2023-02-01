@@ -62,6 +62,44 @@ public class RecoBankWriter {
 
     }
 
+    public static DataBank fillSVTHitPosBank(DataEvent event, List<Hit> hitlist, String bankName) {
+        if (hitlist == null || hitlist.isEmpty()) return null;
+
+        DataBank bank = event.createBank(bankName, hitlist.size());
+        
+        for (int i = 0; i < hitlist.size(); i++) {
+            if(hitlist.get(i).MCstatus==0) {
+                if(hitlist.get(i).getAssociatedTrackID()!=-1) 
+                    hitlist.get(i).getStrip().setMcStat(new int[]{1,1});
+                if(hitlist.get(i).getAssociatedTrackID()==-1) 
+                    hitlist.get(i).getStrip().setMcStat(new int[]{1,0});
+            } else {
+                if(hitlist.get(i).getAssociatedTrackID()!=-1) 
+                    hitlist.get(i).getStrip().setMcStat(new int[]{0,1});
+                if(hitlist.get(i).getAssociatedTrackID()==-1) 
+                    hitlist.get(i).getStrip().setMcStat(new int[]{0,0});
+            }
+            bank.setShort("ID", i, (short) hitlist.get(i).getId());
+            bank.setByte("layer", i, (byte) hitlist.get(i).getLayer());
+            bank.setByte("sector", i, (byte) hitlist.get(i).getSector());
+            bank.setShort("strip", i, (short) hitlist.get(i).getStrip().getStrip());
+
+            bank.setFloat("r1", i,  (float) hitlist.get(i).getStrip().getSVTStripR1());
+            bank.setFloat("theta1", i,  (float) hitlist.get(i).getStrip().getSVTStripTheta1());
+            bank.setFloat("phi1", i,  (float) hitlist.get(i).getStrip().getSVTStripPhi1());
+            bank.setFloat("r2", i,  (float) hitlist.get(i).getStrip().getSVTStripR2());
+            bank.setFloat("theta2", i,  (float) hitlist.get(i).getStrip().getSVTStripTheta2());
+            bank.setFloat("phi2", i,  (float) hitlist.get(i).getStrip().getSVTStripPhi2());
+            
+            bank.setByte("tstatus", i, (byte) hitlist.get(i).getStrip().getMcStat()[0]); 
+            bank.setByte("rstatus", i, (byte) hitlist.get(i).getStrip().getMcStat()[1]); 
+            
+        }
+        //bank.show();
+        return bank;
+
+    }
+    
     /**
      *
      * @param event

@@ -18,6 +18,8 @@ public class Strip {
         this._Strip = strip;
         this._Edep = edep;
         this._Time = time;
+        mcStat[0]=1;
+        mcStat[1]=1;
     }
     
 
@@ -43,14 +45,52 @@ public class Strip {
     private Transformation3D toLocal;
     private Transformation3D toGlobal;
     
+    private int[] mcStat = new int[2];
+    
     public int getStrip() {
         return _Strip;
     }
 
-    public void setStrip(int _Strip) {
-        this._Strip = _Strip;
+
+    public double getSVTStripR1() {
+        return this.getLine().origin().toVector3D().r();
+    }
+    
+    public double getSVTStripTheta1() {
+        return this.getLine().origin().toVector3D().theta();
     }
 
+    public double getSVTStripPhi1() {
+        return this.getLine().origin().toVector3D().phi();
+    }
+
+    public double getSVTStripR2() {
+        return this.getLine().end().toVector3D().r();
+    }
+    
+    public double getSVTStripTheta2() {
+        return this.getLine().end().toVector3D().theta();
+    }
+
+    public double getSVTStripPhi2() {
+        return this.getLine().end().toVector3D().phi();
+    }
+
+    /**
+     * @return the mcStat
+     */
+    public int[] getMcStat() {
+        return mcStat;
+    }
+
+    /**
+     * @param mcStat the mcStat to set: [0][1]=00, if wrong track, not on track; 01, if wrong track, hit-on-track; 10, if right track, not on track; 11, if right track, hit-on-track
+     */
+    public void setMcStat(int[] mcStat) {
+        this.mcStat = mcStat;
+    }
+
+    
     public double getPitch() {
         return _Pitch;
     }
