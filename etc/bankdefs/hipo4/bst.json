@@ -34,8 +34,8 @@
         {"name":"r2",             "type":"F", "info":"r2"},
         {"name":"theta2",         "type":"F", "info":"theta2"},
         {"name":"phi2",           "type":"F", "info":"phi2"},
-        {"name":"tstatus",        "type":"B", "info":"mc truth status (1=good)"},
-        {"name":"rstatus",        "type":"B", "info":"rec status (1=good)"}
+        {"name":"tstatus",        "type":"B", "info":"mc truth status (1=right track )"},
+        {"name":"rstatus",        "type":"B", "info":"rec status (1=right hit on track reconstructed)"}
         ]
   },
   {
