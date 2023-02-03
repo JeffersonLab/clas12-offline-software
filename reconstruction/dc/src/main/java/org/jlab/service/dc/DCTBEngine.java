@@ -213,9 +213,9 @@ public class DCTBEngine extends DCEngine {
             beamYoffset += raster_bank.getFloat("y", 0);
         }
 	TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
-        TrajectoryFinder trjFind = new TrajectoryFinder();        
-        
-        for (Track TrackArray1 : TrackArray) {        	        	
+        TrajectoryFinder trjFind = new TrajectoryFinder();
+
+        for (Track TrackArray1 : TrackArray) {
             if (TrackArray1 == null || TrackArray1.get_ListOfHBSegments() == null || TrackArray1.get_ListOfHBSegments().size() < 5) {
                 continue;
             }
@@ -225,17 +225,17 @@ public class DCTBEngine extends DCEngine {
                 continue;
             }
             crosses.addAll(TrackArray1);
-            
-			KFitter kFZRef = new KFitter(true, 30, 1, dcSwim, Constants.getInstance().Z, Libr.JNP);
-			List<Surface> measSurfaces = getMeasSurfaces(TrackArray1, Constants.getInstance().dcDetector);
-			StateVecs svs = new StateVecs();
-			org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec initSV = svs.new StateVec(0);
-			getInitState(TrackArray1, measSurfaces.get(0).z, initSV, kFZRef, dcSwim, new float[3]);
-			kFZRef.initFromHB(measSurfaces, initSV, TrackArray1.get(0).get(0).get(0).get_Beta());			
-			kFZRef.runFitter();
-			List<org.jlab.rec.dc.trajectory.StateVec> kfStateVecsAlongTrajectory = setKFStateVecsAlongTrajectory(kFZRef);			
-			
-            StateVec fn = new StateVec(); 
+
+            KFitter kFZRef = new KFitter(true, 30, 1, dcSwim, Constants.getInstance().Z, Libr.JNP);
+            List<Surface> measSurfaces = getMeasSurfaces(TrackArray1, Constants.getInstance().dcDetector);
+            StateVecs svs = new StateVecs();
+            org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec initSV = svs.new StateVec(0);
+            getInitState(TrackArray1, measSurfaces.get(0).z, initSV, kFZRef, dcSwim, new float[3]);
+            kFZRef.initFromHB(measSurfaces, initSV, TrackArray1.get(0).get(0).get(0).get_Beta());
+            kFZRef.runFitter();
+            List<org.jlab.rec.dc.trajectory.StateVec> kfStateVecsAlongTrajectory = setKFStateVecsAlongTrajectory(kFZRef);
+
+            StateVec fn = new StateVec();
             if (kFZRef.setFitFailed==false && kFZRef.finalStateVec!=null) { 
                 // set the state vector at the last measurement site
                 fn.set(kFZRef.finalStateVec.x, kFZRef.finalStateVec.y, kFZRef.finalStateVec.tx, kFZRef.finalStateVec.ty); 

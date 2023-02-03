@@ -3,6 +3,7 @@ package org.jlab.clas.tracking.kalmanfilter;
 /**
  *
  * @author ziegler
+ * @author Tongtong Cao
  */
 public enum Type {
     UDF(-1), PLANEWITHPOINT(0), PLANEWITHLINE(1), PLANEWITHSTRIP(2),

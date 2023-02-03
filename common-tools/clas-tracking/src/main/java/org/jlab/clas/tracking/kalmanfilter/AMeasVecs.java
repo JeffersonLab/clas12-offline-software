@@ -14,6 +14,7 @@ import org.jlab.geom.prim.Transformation3D;
 /**
  *
  * @author ziegler
+ * @author Tongtong Cao
  */
 
 public abstract class AMeasVecs {

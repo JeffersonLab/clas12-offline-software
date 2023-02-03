@@ -13,6 +13,12 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.jnp.matrix.Matrix;
 import org.jlab.jnp.matrix.Matrix5x5;
 
+/**
+ *
+ * @author ziegler
+ * @author Tongtong Cao
+ */
+
 public abstract class AStateVecs {
 
     public Units units;

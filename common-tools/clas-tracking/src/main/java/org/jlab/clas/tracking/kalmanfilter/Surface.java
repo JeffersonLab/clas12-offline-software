@@ -14,6 +14,7 @@ import org.jlab.geom.prim.Vector3D;
 /**
  *
  * @author ziegler
+ * @author Tongtong Cao
  */
 public class Surface implements Comparable<Surface> {
     

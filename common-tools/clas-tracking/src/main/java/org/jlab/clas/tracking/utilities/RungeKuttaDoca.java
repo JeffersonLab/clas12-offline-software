@@ -8,6 +8,7 @@ import org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec;;
  * Swims a given state vector to a given Z position using Runge Kutta 4 transport.
  * @author ziegler
  * @author benkel
+ * @author Tongtong Cao
  */
 public class RungeKuttaDoca {
     private final float[] _b = new float[3];

@@ -909,33 +909,33 @@ public class TrackCandListFinder {
                     if (kFZRef.finalStateVec == null) {
                         continue;
                     }
-                    
-                    List<org.jlab.rec.dc.trajectory.StateVec> kfStateVecsAlongTrajectory = setKFStateVecsAlongTrajectory(kFZRef);                                      
+
+                    List<org.jlab.rec.dc.trajectory.StateVec> kfStateVecsAlongTrajectory = setKFStateVecsAlongTrajectory(kFZRef);
 
                     StateVec fn = new StateVec();
-					if (!kFZRef.setFitFailed && kFZRef.finalStateVec != null) {
+                    if (!kFZRef.setFitFailed && kFZRef.finalStateVec != null) {
                         fn.set(kFZRef.finalStateVec.x, kFZRef.finalStateVec.y, kFZRef.finalStateVec.tx, kFZRef.finalStateVec.ty);
-						fn.setZ(kFZRef.finalStateVec.z);
-						cand.setFinalStateVec(fn);
+                        fn.setZ(kFZRef.finalStateVec.z);
+                        cand.setFinalStateVec(fn);
 
-						// set the track parameters
-						cand.set_P(1. / Math.abs(kFZRef.finalStateVec.Q));
-						cand.set_Q((int) Math.signum(kFZRef.finalStateVec.Q));
-						this.setTrackPars(cand, traj, trjFind, fn, kFZRef.finalStateVec.z, DcDetector, dcSwim);
+                        // set the track parameters
+                        cand.set_P(1. / Math.abs(kFZRef.finalStateVec.Q));
+                        cand.set_Q((int) Math.signum(kFZRef.finalStateVec.Q));
+                        this.setTrackPars(cand, traj, trjFind, fn, kFZRef.finalStateVec.z, DcDetector, dcSwim);
 
-						if (cand.fit_Successful == true) {
-							// candidate parameters
-							cand.set_FitChi2(kFZRef.chi2);
-							cand.set_FitNDF(kFZRef.NDF);
-							cand.set_FitConvergenceStatus(kFZRef.ConvStatus);
-							cand.set_Id(cands.size() + 1);
-							cand.set_CovMat(kFZRef.finalStateVec.CM);
-							cand.setStateVecs(kfStateVecsAlongTrajectory);																					
-							
-							// add candidate to list of tracks	
-							cands.add(cand);
-						}
-					}
+                        if (cand.fit_Successful == true) {
+                            // candidate parameters
+                            cand.set_FitChi2(kFZRef.chi2);
+                            cand.set_FitNDF(kFZRef.NDF);
+                            cand.set_FitConvergenceStatus(kFZRef.ConvStatus);
+                            cand.set_Id(cands.size() + 1);
+                            cand.set_CovMat(kFZRef.finalStateVec.CM);
+                            cand.setStateVecs(kfStateVecsAlongTrajectory);
+
+                            // add candidate to list of tracks	
+                            cands.add(cand);
+                        }
+                    }
                 }
             }
         }
