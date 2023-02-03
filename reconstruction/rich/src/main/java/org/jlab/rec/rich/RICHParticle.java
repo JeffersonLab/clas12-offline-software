@@ -1153,7 +1153,7 @@ public class RICHParticle {
         double ftime  = Math.pow((hit.get_Time() - recot - meant)/sigmat, 2);
 
         double prob = ftheta + ftime;
-        if(prob>12)prob=12.;
+        //if(prob>12)prob=12.;
 
         if(debugMode>=1){
             System.out.format("HYPO %4d %4d %3d: A %6.2f (%6.2f, %5.2f) ",

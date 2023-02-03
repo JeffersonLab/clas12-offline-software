@@ -505,6 +505,10 @@ public class RICHSolution {
     // ----------------
 
     // ----------------
+    public void set_BestH(int bestH) { this.bestH = bestH;}
+    // ----------------
+
+    // ----------------
     public double get_BestCH() { return bestch; }
     // ----------------
 
@@ -588,12 +592,13 @@ public class RICHSolution {
 
         if(elprob>0){
             if(piprob>0){
-                if(elprob>piprob){
-                    Re_QP = 1-piprob/elprob;
-                    if(bestH==0 || bestH==RICHConstants.HYPO_LUND[1]) bestH=RICHConstants.HYPO_LUND[0];
-                }else{
-                    Re_QP = 1-elprob/piprob;
-                }
+                //ATT: pass2 works with only hadrons PID to not geenrate confusion.
+                //if(elprob>piprob){
+                //    Re_QP = 1-piprob/elprob;
+                //    if(bestH==0 || bestH==RICHConstants.HYPO_LUND[1]) bestH=RICHConstants.HYPO_LUND[0];
+                //}else{
+                Re_QP = 1-elprob/piprob;
+                //}
             }else{
                 Re_QP = 1.0;
                 bestprob = elprob;
@@ -651,12 +656,13 @@ public class RICHSolution {
 
         if(elprob>0){
             if(piprob>0){
-                if(elprob<piprob){
-                    Re_QP = 1-elprob/piprob;
-                    if(bestH==0 || bestH==RICHConstants.HYPO_LUND[1]) bestH=RICHConstants.HYPO_LUND[0];
-                }else{
-                    Re_QP = 1-piprob/elprob;
-                }
+                //ATT: pass2 works with only hadrons PID to not geenrate confusion.
+                //if(elprob<piprob){
+                // Re_QP = 1-elprob/piprob;
+                //    if(bestH==0 || bestH==RICHConstants.HYPO_LUND[1]) bestH=RICHConstants.HYPO_LUND[0];
+                //}else{
+                Re_QP = 1-piprob/elprob;
+                //}
             }else{
                 Re_QP = 1.0;
                 bestprob = elprob;
@@ -698,11 +704,14 @@ public class RICHSolution {
         }
 
         if(elprob>0){
-            if(elprob>piprob){
-                Re_QP = 1-piprob/elprob;
+            if(piprob>0){
+                //ATT: pass2 works with only hadrons PID to not geenrate confusion.
+                //if(elprob>piprob){
+                //Re_QP = 1-piprob/elprob;
                 //if(bestH==0 || bestH==RICHConstants.HYPO_LUND[1]) bestH=RICHConstants.HYPO_LUND[0];
-            }else{
+                //}else{
                 Re_QP = 1-elprob/piprob;
+                //}
             }
         }
         if(debugMode==1)System.out.format(" --> %5d (%10.4g) %5d (%10.4g) %8.4f %8.4f \n",bestH,bestprob,secH,secprob,R_QP,Re_QP);
