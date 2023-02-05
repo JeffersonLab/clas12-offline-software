@@ -167,7 +167,7 @@ public class Swim {
         _x0 = xcm / 100;
         _y0 = ycm / 100;
         _z0 = zcm / 100;
-
+        this.checkR(_x0, _y0, _z0);
     }
 
     /**
@@ -196,7 +196,7 @@ public class Swim {
         _x0 = xcm / 100;
         _y0 = ycm / 100;
         _z0 = zcm / 100;
-
+        this.checkR(_x0, _y0, _z0);
     }
 
     public double[] SwimToPlaneTiltSecSys(int sector, double z_cm) {

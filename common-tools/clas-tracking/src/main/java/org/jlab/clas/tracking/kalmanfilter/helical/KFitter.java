@@ -46,7 +46,44 @@ public class KFitter extends AKFitter {
         this.setYb(Yb);
         sv.init( helix, cov, Xb, Yb, Zref, mass, this.getSwimmer());
     }
+    /**
+     * Fail safe mode for low pt tracks that fail filtering and smoothing
+     */
+    public void runFitterNoFiltFailSafe() {
+        int k0 = 0;
+        int kf = mv.measurements.size() - 1;
         
+        boolean init = this.initIter(sv, mv);
+        if(!init) return;
+           
+        //re-init state vector and cov mat for forward 
+        //this.initOneWayIter(sv, k0);
+        
+        // transport in forward direction
+        boolean forward = this.runOneWayFitterIter(sv, mv, k0, kf);
+        if (!forward) return;
+        
+        finalSmoothedStateVec    = this.setFinalStateVector(sv.initSV);
+        finalTransportedStateVec = this.setFinalStateVector(sv.initSV);
+        double chisq = 0;
+        this.NDF=-5;
+        for(int k = 0; k< mv.measurements.size(); k++) {
+            int index   = mv.measurements.get(k).layer;
+            int layer   = mv.measurements.get(k).surface.getLayer();
+            int sector  = mv.measurements.get(k).surface.getSector();
+            
+            if(!mv.measurements.get(k).surface.passive) {
+                double dh    = mv.dh(k, sv.transported().get(k));
+                double error = mv.measurements.get(k).error;
+                chisq += dh*dh / error/error;
+                this.NDF++;
+                trajPoints.put(index, new HitOnTrack(layer, sector, sv.transported().get(k), dh,dh,dh));
+            } else {
+                trajPoints.put(index, new HitOnTrack(layer, sector, sv.transported().get(k), -999, -999, -999));
+            }
+        }
+        this.chi2 = chisq; 
+    }    
     public void runFitter() {
         this.runFitter(sv, mv);
     }
@@ -105,16 +142,26 @@ public class KFitter extends AKFitter {
     }
     
     public Helix getHelix() {
-        return this.getHelix(0);
+        Helix hlx = this.getHelix(0);
+        if(hlx!=null) {
+            if(Double.isNaN(hlx.getD0()) || Double.isNaN(hlx.getPhi0()) || Double.isNaN(hlx.getOmega()) 
+                    || Double.isNaN(hlx.getTanL()) || Double.isNaN(hlx.getZ0())) 
+                return null;
+        }
+        return hlx;
     }
     
     public Helix getHelix(int mode) {
+        Helix helx = null;
         if(mode==1) {
-            return finalTransportedStateVec.getHelix(this.getXb(), this.getYb());           
+            if(finalTransportedStateVec!=null)
+                helx = finalTransportedStateVec.getHelix(this.getXb(), this.getYb());           
         }
         else {
-            return finalSmoothedStateVec.getHelix(this.getXb(), this.getYb());
+            if(finalSmoothedStateVec!=null)
+                helx = finalSmoothedStateVec.getHelix(this.getXb(), this.getYb()); 
         }
+        return helx;
     }
     
     private StateVec setFinalStateVector(StateVec onPivot) {
@@ -140,8 +187,8 @@ public class KFitter extends AKFitter {
                sv.smoothed().get(0)==null ||
                sv.smoothed().get(0).kappa==0 || 
                Double.isNaN(sv.smoothed().get(0).kappa)) {
-                this.setFitFailed = true;
-                break;
+                this.setFitFailed = true; 
+                break; 
             }            
             // if chi2 improved and curvature is non-zero, save fit results but continue iterating
             else if(newchisq < this.chi2) {
@@ -177,7 +224,7 @@ public class KFitter extends AKFitter {
                 //get the projector Matrix
                 double[] H = mv.H(fVec, sv,  mv.measurements.get(k), this.getSwimmer());
     //            System.out.println(k + " " + mv.measurements.get(k).layer + " " + H[0] + " " + H[1] + " " + H[2] + " " + H[3] + " " + H[4] + " " +dh );
-
+                
                 double[][] CaInv =  this.getMatrixOps().filterCovMat(H, fVec.covMat, V);
                 if (CaInv != null) {
                         fVec.covMat = CaInv;
@@ -189,7 +236,7 @@ public class KFitter extends AKFitter {
                     // the gain matrix
                     K[j] = 0;
                     for (int i = 0; i < 5; i++) {
-                        K[j] += H[i] * fVec.covMat[j][i] / V;
+                        K[j] += H[i] * fVec.covMat[j][i] / V; 
                     } 
                 }
                 if(sv.straight) {
@@ -213,7 +260,7 @@ public class KFitter extends AKFitter {
                     fVec.dz    -= K[3] * dh;
                     fVec.tanL  -= K[4] * dh;
                 }
-
+    
                 if(this.getSwimmer()!=null && !sv.straight) fVec.rollBack(mv.rollBackAngle);
                 fVec.updateFromHelix();
     // sv.printlnStateVec(fVec);
@@ -226,6 +273,9 @@ public class KFitter extends AKFitter {
                  || Math.abs(fVec.residual)/Math.sqrt(V)>this.getResidualsCut()) { 
                     this.NDF--;
                     mv.measurements.get(k).skip = true;
+                    fVec = sv.new StateVec(vec);
+                    if(this.getSwimmer()!=null && !sv.straight) fVec.rollBack(mv.rollBackAngle);
+                    fVec.updateFromHelix();
                 }
             }
             return fVec;

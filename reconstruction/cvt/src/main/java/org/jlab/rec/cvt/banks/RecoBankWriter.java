@@ -1,9 +1,12 @@
 package org.jlab.rec.cvt.banks;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.jlab.clas.tracking.kalmanfilter.AKFitter;
 import org.jlab.clas.tracking.kalmanfilter.AKFitter.HitOnTrack;
+import org.jlab.detector.base.DetectorType;
 
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
@@ -141,7 +144,7 @@ public class RecoBankWriter {
 
         DataBank bank = event.createBank(bankName, crosses.size());
 
-        for (int j = 0; j < crosses.size(); j++) {
+        for (int j = 0; j < crosses.size(); j++) { 
             bank.setShort("ID", j, (short) crosses.get(j).getId());
             bank.setByte("sector", j, (byte) crosses.get(j).getSector());
             bank.setByte("region", j, (byte) crosses.get(j).getRegion());
@@ -366,11 +369,78 @@ public class RecoBankWriter {
 
     }
 
+    public static DataBank fillSeedClusBank(DataEvent event, List<Seed> seeds, String bankName) {
+        if (seeds == null || seeds.isEmpty()) return null;
+        Map<String, Integer> clusmap = new HashMap<>();
+        
+        List<Cluster> clsList = new ArrayList<>();
+        DataBank bank = event.createBank(bankName, seeds.size());
+        for (int i = 0; i < seeds.size(); i++) {
+            if(seeds.get(i)==null)
+                continue;
+            bank.setShort("id", i, (short) seeds.get(i).getId());
+            clsList.clear();
+            clusmap.clear();
+            for (int j = 0; j < 12; j++) {
+                String stg = "Clus";
+                stg += (j + 1);
+                stg += "_ID";  
+                clusmap.put(stg, -1);
+            }
+            clsList = seeds.get(i).getClusters();
+            for(Cluster cl : clsList) {
+                int layer = cl.getLayer();
+                if(cl.getDetector()==DetectorType.BMT)
+                    layer+=6;
+                String stg = "Clus";
+                stg += layer;
+                stg += "_ID"; 
+                clusmap.put(stg, cl.getId());
+            }
+            for (int j = 0; j < 12; j++) {
+                String stg = "Clus";
+                stg += (j + 1);
+                stg += "_ID";  
+                int cid = (int) clusmap.get(stg);
+                bank.setShort(stg, i, (short) cid);
+            }
+        }
+        return bank;
+    }
+    public static void fillTrkCrossBank(DataBank bank, Map<String, Integer> clusmap, List<Cross> cList, int i) {       
+        clusmap.clear();
+        for (int j = 0; j < 9; j++) {
+            String stg = "Cross";
+            stg += (j + 1);
+            stg += "_ID";  
+            clusmap.put(stg, -1);
+        }
+        for(Cross c : cList) {
+            int layer = 0;
+            if(c.getDetector()==DetectorType.BMT) {
+                layer=c.getCluster1().getLayer() + 3;
+            } else {
+                layer = c.getRegion();
+            }
+            String stg = "Cross";
+            stg += layer;
+            stg += "_ID"; 
+            clusmap.put(stg, c.getId());
+        }
+        for (int j = 0; j < 9; j++) {
+            String stg = "Cross";
+            stg += (j + 1);
+            stg += "_ID";  
+            int cid = (int) clusmap.get(stg);
+            bank.setShort(stg, i, (short) cid);
+        }
+    }
+    
     public static DataBank fillSeedBank(DataEvent event, List<Seed> seeds, String bankName) {
         if (seeds == null || seeds.isEmpty()) return null;
 
         DataBank bank = event.createBank(bankName, seeds.size());
-        
+        Map<String, Integer> clusmap = new HashMap<>();
         for (int i = 0; i < seeds.size(); i++) {
             if(seeds.get(i)==null)
                 continue;
@@ -407,21 +477,12 @@ public class RecoBankWriter {
             }
             bank.setFloat("xb", i,  (float) (helix.getXb()/10.0));
             bank.setFloat("yb", i,  (float) (helix.getYb()/10.0));
+            bank.setFloat("fracmctru", i,  (float) seeds.get(i).percentTruthMatch);
+            bank.setFloat("fracmcmatch", i,  (float) seeds.get(i).totpercentTruthMatch);
+            
             // fills the list of cross ids for crosses belonging to that reconstructed track
-             for (int j = 0; j < 9; j++) {
-                String hitStrg = "Cross";
-                hitStrg += (j + 1);
-                hitStrg += "_ID";  
-                bank.setShort(hitStrg, i, (short) -1);
-            }
-            for (int j = 0; j < seeds.get(i).getCrosses().size(); j++) {
-                if(j<9) {
-                    String hitStrg = "Cross";
-                    hitStrg += (j + 1);
-                    hitStrg += "_ID";  //System.out.println(" j "+j+" matched id "+trkcands.get(i).get(j).getId());
-                    bank.setShort(hitStrg, i, (short) seeds.get(i).getCrosses().get(j).getId());
-                }
-            }
+            fillTrkCrossBank(bank,clusmap, seeds.get(i).getCrosses(), i);
+             
             bank.setFloat("circlefit_chi2_per_ndf", i,  (float) seeds.get(i).getCircleFitChi2PerNDF());
             bank.setFloat("linefit_chi2_per_ndf", i,  (float) seeds.get(i).getLineFitChi2PerNDF());
             bank.setFloat("chi2", i,  (float) seeds.get(i).getChi2());
@@ -444,12 +505,12 @@ public class RecoBankWriter {
         if (trkcands == null || trkcands.isEmpty()) return null;
 
         DataBank bank = event.createBank(bankName, trkcands.size());
-        
+        Map<String, Integer> clusmap = new HashMap<>();
         // an array representing the ids of the crosses that belong to the track
         for (int i = 0; i < trkcands.size(); i++) {
             if(trkcands.get(i)==null)
                 continue;
-            bank.setByte("fittingMethod", i, (byte) trkcands.get(i).getSeed().getStatus());
+            bank.setByte("nKFIters", i, (byte) trkcands.get(i).getKFIterations());
             bank.setShort("ID", i, (short) trkcands.get(i).getId());
             bank.setByte("q", i, (byte)trkcands.get(i).getQ());
             bank.setFloat("p", i,  (float) trkcands.get(i).getP());
@@ -500,21 +561,8 @@ public class RecoBankWriter {
                 bank.setFloat("pathlength", i,  (float) (trkcands.get(i).getPathToCTOF() / 10.)); // conversion to cm
             }
             // fills the list of cross ids for crosses belonging to that reconstructed track
-            for (int j = 0; j < 9; j++) {
-                String hitStrg = "Cross";
-                hitStrg += (j + 1);
-                hitStrg += "_ID";  
-                bank.setShort(hitStrg, i, (short) -1);
-                
-            }
-            for (int j = 0; j < trkcands.get(i).size(); j++) {
-                if(j<9) {
-                    String hitStrg = "Cross";
-                    hitStrg += (j + 1);
-                    hitStrg += "_ID";  //System.out.println(" j "+j+" matched id "+trkcands.get(i).get(j).getId());
-                    bank.setShort(hitStrg, i, (short) trkcands.get(i).get(j).getId());
-                }
-            }
+            fillTrkCrossBank(bank,clusmap, trkcands.get(i), i);
+            
             bank.setShort("status", i, (short) ((short) trkcands.get(i).getStatus()));
             bank.setShort("seedID", i, (short) trkcands.get(i).getSeed().getId());
             bank.setFloat("chi2", i,  (float) trkcands.get(i).getChi2());
@@ -537,7 +585,7 @@ public class RecoBankWriter {
                 continue;
             Helix helix = trkcands.get(i).getSecondaryHelix();
             bank.setShort("ID", i, (short) trkcands.get(i).getId());
-            bank.setByte("fittingMethod", i, (byte) trkcands.get(i).getSeed().getStatus());
+            bank.setByte("nKFIters", i, (byte) trkcands.get(i).getKFIterations());
             bank.setByte("q", i, (byte)trkcands.get(i).getQ());
             bank.setFloat("p", i,  (float) helix.getPXYZ(Constants.getSolenoidMagnitude()).mag());
             bank.setFloat("pt", i,  (float) helix.getPt(Constants.getSolenoidMagnitude()));
@@ -657,6 +705,7 @@ public class RecoBankWriter {
                 bank.setFloat("centroid", k,  (float) stVec.getCalcCentroidStrip());
                 bank.setFloat("path",     k,  (float) stVec.getPath()/10);
                 bank.setFloat("dx",       k,  (float) stVec.getDx()/10);
+                bank.setFloat("edge",     k,  (float) stVec.getEdge()/10);
                 k++;
 
             }
@@ -986,6 +1035,9 @@ public class RecoBankWriter {
         
         DataBank bank11 = fillKFTrajectoryBank(event, tracks, "CVTRec::KFTrajectory");
         if (bank11 != null) banks.add(bank11);
+        
+        DataBank bank12 = fillSeedClusBank(event, seeds, "CVTRec::SeedClusters");
+        if (bank12 != null) banks.add(bank12);
         
         event.appendBanks(banks.toArray(new DataBank[0]));
     }

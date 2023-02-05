@@ -225,7 +225,7 @@ public class HelixCrossListFinder {
         double dzdrsum = avg_tandip*countCrosses;
         double z_bmt = bmt_Ccross.getPoint().z();
         double r_bmt = bmt_Ccross.getRadius();
-        System.out.println(bmt_Ccross.getPoint().toString() + " " + bmt_Ccross.getRadius());
+        //.println(bmt_Ccross.getPoint().toString() + " " + bmt_Ccross.getRadius());
         double dzdr_bmt = z_bmt / r_bmt;
         if (Math.abs(1 - (dzdrsum / (double) (countCrosses)) / ((dzdrsum + dzdr_bmt) / (double) (countCrosses + 1))) <= SVTParameters.DZDRCUT) // add this to the track
             pass = true;

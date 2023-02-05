@@ -150,8 +150,7 @@ public class Tag1ToEvent {
                 if (doHelicityDelay) {
                     recEventBank.putByte("helicity",0,hb.value());
                     recEventBank.putByte("helicityRaw",0,hbraw.value());
-                    helScalerBank.putByte("helicity",0,hb.value());
-                    helScalerBank.putByte("helicityRaw",0,hbraw.value());
+                    RebuildScalers.assignScalerHelicity(event, helScalerBank, helSeq);
                 }
                 // flip the non-delay-corrected helicity in place in REC::Event:
                 else if (doHelicityFlip) {

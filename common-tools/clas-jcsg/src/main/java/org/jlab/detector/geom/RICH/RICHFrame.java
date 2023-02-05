@@ -1,4 +1,4 @@
-package org.jlab.rec.rich;
+package org.jlab.detector.geom.RICH;
 
 import org.jlab.geom.prim.Vector3D;
 
@@ -62,6 +62,22 @@ public class RICHFrame {
     // ----------------
     public RICHFrame clone() { return new RICHFrame(xref, yref, zref, bref);}
     // ----------------
+
+    // ----------------
+    public RICHFrame rotate(Vector3D axis, double angle) {
+    // ---------------- 
+
+        Vector3D xrot = xref.clone();
+        Vector3D yrot = yref.clone();
+        Vector3D zrot = zref.clone();
+        Vector3D brot = bref.clone();
+        axis.rotate(xrot, angle);
+        axis.rotate(yrot, angle);
+        axis.rotate(zrot, angle);
+        axis.rotate(brot, angle);
+        return new RICHFrame(xrot, yrot, zrot, brot);
+
+    }
 
 
     // ----------------

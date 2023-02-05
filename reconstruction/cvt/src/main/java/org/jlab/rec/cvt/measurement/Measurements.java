@@ -127,11 +127,11 @@ public class Measurements {
         double thickness = Geometry.getInstance().getCTOF().getThickness(1);
         Line3d lineZ     = Geometry.getInstance().getCTOF().getPaddle(1).getLineZ();
         
-        Point3D  center = new Point3D(        0, 0, lineZ.origin().z);
-        Point3D  origin = new Point3D(radius*10, 0, lineZ.origin().z);
+        Point3D  center = new Point3D(        0, 0, lineZ.origin().z*10);
+        Point3D  origin = new Point3D(radius*10, 0, lineZ.origin().z*10);
         Vector3D axis   = new Vector3D(0,0,1);
         Arc3D base = new Arc3D(origin, center, axis, 2*Math.PI);
-        Cylindrical3D barrel = new Cylindrical3D(base, lineZ.end().z -lineZ.origin().z);
+        Cylindrical3D barrel = new Cylindrical3D(base, (lineZ.end().z -lineZ.origin().z)*10);
         
         Surface ctof = new Surface(barrel, new Strip(0, 0, 0), Constants.DEFAULTSWIMACC);
         ctof.addMaterial(Constants.SCINTILLATOR.clone(thickness*10));
@@ -154,10 +154,10 @@ public class Measurements {
             double radius    = Math.sqrt(paddle.x()*paddle.x()+paddle.y()*paddle.y());
             double thickness = Geometry.getInstance().getCND().getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getVolumeEdge(1).length();
             double length    = Geometry.getInstance().getCND().getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getLength();
-            Point3D       center = new Point3D(        0, 0, paddle.z() - length/2);
-            Point3D       origin = new Point3D(radius*10, 0, paddle.z() - length/2);
+            Point3D       center = new Point3D(        0, 0, (paddle.z() - length/2)*10);
+            Point3D       origin = new Point3D(radius*10, 0, (paddle.z() - length/2)*10);
             Arc3D           base = new Arc3D(origin, center, axis, 2*Math.PI);
-            Cylindrical3D barrel = new Cylindrical3D(base, length);
+            Cylindrical3D barrel = new Cylindrical3D(base, length*10);
             
             Surface cnd = new Surface(barrel, new Strip(0, 0, 0), Constants.DEFAULTSWIMACC);
             cnd.addMaterial(Constants.SCINTILLATOR.clone(thickness*10));
@@ -375,6 +375,8 @@ public class Measurements {
     
     private int getSector(Seed seed, DetectorType type, int layer, int hemisphere) {
         Helix helix = seed.getHelix();
+        if(helix==null)
+            return 0;
         if(type==DetectorType.BST) { 
             int twinLayer = Geometry.getInstance().getSVT().getTwinLayer(layer);
             int twinIndex = MLayer.getType(DetectorType.BST, twinLayer).getIndex(hemisphere);

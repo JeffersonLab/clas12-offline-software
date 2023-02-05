@@ -12,6 +12,7 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.Geometry;
+import org.jlab.rec.cvt.bmt.BMTConstants;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.hit.ADCConvertor;
@@ -31,7 +32,7 @@ import org.jlab.utils.groups.IndexedTable;
 public class HitReader {
 
     public HitReader() {
-
+        
     }
 
     // the list of BMT hits
@@ -72,7 +73,7 @@ public class HitReader {
     public void setSVTHits(List<Hit> _SVTHits) {
         this._SVTHits = _SVTHits;
     }
-
+    
     /**
      * Gets the BMT hits from the BMT dgtz bank
      *
@@ -81,7 +82,8 @@ public class HitReader {
      * @param status
      * @param timeCuts
      */
-    public void fetch_BMTHits(DataEvent event, Swim swim, IndexedTable status, IndexedTable timeCuts) {
+    public void fetch_BMTHits(DataEvent event, Swim swim, IndexedTable status, 
+            IndexedTable timeCuts, IndexedTable bmtStripVoltage, IndexedTable bmtStripVoltageThresh) {
 
         // return if there is no BMT bank
         if (event.hasBank("BMT::adc") == false) {
@@ -90,9 +92,11 @@ public class HitReader {
 
             return;
         }
-
+        
         // instanciates the list of hits
         List<Hit> hits = new ArrayList<>();
+        List<Hit> hits50c = new ArrayList<>();
+        List<Hit> hits50z = new ArrayList<>();
         // gets the BMT dgtz bank
         DataBank bankDGTZ = event.getBank("BMT::adc");
         // fills the arrays corresponding to the hit variables
@@ -113,12 +117,19 @@ public class HitReader {
                 int strip   = bankDGTZ.getShort("component", i);
                 double ADCtoEdep = bankDGTZ.getInt("ADC", i);
                 double time      = bankDGTZ.getFloat("time", i);
-               
+                int order   = bankDGTZ.getByte("order", i);
+                //if (order == 1) {
+                //    continue;
+                //}
                 //fix for now... no adc in GEMC
-                if (ADCtoEdep < 1) {
+                if(Constants.getInstance().gemcIgnBMT0ADC==false) {
+                    if (ADCtoEdep < 1) {
+                        continue;
+                    }
+                }
+                if(strip<1) {
                     continue;
                 }
-
                 // create the strip object for the BMT
                 Strip BmtStrip = new Strip(strip, ADCtoEdep, time);
                 BmtStrip.setStatus(status.getIntValue("status", sector, layer, strip));
@@ -126,17 +137,80 @@ public class HitReader {
                     if(time!=0 && (time<tmin || time>tmax))
                         BmtStrip.setStatus(2);// calculate the strip parameters for the BMT hit
                 }
+                if(Constants.getInstance().bmtHVCuts) {
+                    if(bmtStripVoltage!=null && bmtStripVoltage.hasEntry(sector,layer,0) && 
+                            bmtStripVoltageThresh!=null && bmtStripVoltageThresh.hasEntry(sector,layer,0)) {
+                        double hv  = bmtStripVoltage.getDoubleValue("HV", sector,layer,0); 
+                        double hv1 = bmtStripVoltageThresh.getDoubleValue("HV1", sector,layer,0); 
+                        double hv2 = bmtStripVoltageThresh.getDoubleValue("HV2", sector,layer,0); 
+                        double hv3 = bmtStripVoltageThresh.getDoubleValue("HV3", sector,layer,0); 
+                        
+                        if(hv<hv1) 
+                            BmtStrip.setStatus(4);
+                        if(hv>=hv1 && hv<hv2) 
+                            BmtStrip.setStatus(5);
+                        if(hv>=hv2 && hv<hv3) 
+                            BmtStrip.setStatus(6);
+                    }
+                }
                 BmtStrip.calcBMTStripParams(sector, layer, swim); // for Z detectors the Lorentz angle shifts the strip measurement; calc_Strip corrects for this effect
                 // create the hit object for detector type BMT
                 
                 Hit hit = new Hit(DetectorType.BMT, BMTGeometry.getDetectorType(layer), sector, layer, BmtStrip);                
                 hit.setId(i+1);
+                if (Constants.getInstance().flagSeeds)
+                    hit.MCstatus = order;
+                
                 // add this hit
-                if(hit.getLayer()+3!=Constants.getInstance().getRmReg())
-                    hits.add(hit);
+                if(hit.getLayer()+3!=Constants.getInstance().getRmReg()) {
+                    if(Constants.getInstance().useOnlyMCTruthHits() ) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                    } 
+                    else if(Constants.getInstance().useOnlyBMTTruthHits ) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                    }
+                    else if(Constants.getInstance().useOnlyBMTCTruthHits && hit.getType()==BMTType.C) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                    }
+                    else if(Constants.getInstance().useOnlyBMTZTruthHits && hit.getType()==BMTType.Z) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                    }
+                    else if(Constants.getInstance().useOnlyBMTC50PercTruthHits && hit.getType()==BMTType.C) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                        if(hit.MCstatus==1)
+                            hits50c.add(hit);
+                    }
+                    else if(Constants.getInstance().useOnlyBMTC50PercTruthHits && hit.getType()==BMTType.Z) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                        if(hit.MCstatus==1)
+                            hits50z.add(hit);
+                    }
+                    else {
+                        hits.add(hit);
+                    }
+                }
+            }
+            if(Constants.getInstance().useOnlyBMTC50PercTruthHits) {
+                int s = hits50c.size()/2;
+                for(int i = 0; i<s; i++) {
+                    hits.add(hits50c.get(i));
+                }
+            }
+            if(Constants.getInstance().useOnlyBMTZ50PercTruthHits) {
+                int s = hits50z.size()/2;
+                for(int i = 0; i<s; i++) {
+                    hits.add(hits50z.get(i));
+                }
             }
             // fills the list of BMT hits
             Collections.sort(hits);
+            
             this.setBMTHits(hits);
         }
     }
@@ -173,6 +247,13 @@ public class HitReader {
                     byte layer  = bankDGTZ.getByte("layer", i);
                     short strip = bankDGTZ.getShort("component", i);
                     double time = bankDGTZ.getFloat("time", i);
+                    
+                    //if (order == 1) {
+                    //    continue;
+                    //}
+                    //if(time<SVTParameters.TIMECUTLOW) 
+                    //    continue;
+                    
                     int key = DetectorDescriptor.generateHashCode(sector, layer, strip);
                     if(tdcs.containsKey(key)) {
                         if(time<tdcs.get(key))
@@ -188,7 +269,7 @@ public class HitReader {
                 if (bankDGTZ.getInt("ADC", i) < 0) {
                     continue; // ignore hits TDC hits with ADC==-1 
                 }
-                
+                int order   = bankDGTZ.getByte("order", i);
                 int id      = i + 1;
                 byte sector = bankDGTZ.getByte("sector", i);
                 byte layer  = bankDGTZ.getByte("layer", i);
@@ -200,6 +281,11 @@ public class HitReader {
                 int key = DetectorDescriptor.generateHashCode(sector, layer, tdcstrip);
                 if(tdcs.containsKey(key)) {
                     time = tdcs.get(key);
+                    //time tag
+                    if(Constants.getInstance().useSVTTimingCuts) {
+                        if(this.passTimingCuts(ADC, time)==false) 
+                            continue;
+                        }
                 }
 //                else {
 //                    System.out.println("missing time for " + sector + " " + layer + " " + strip);
@@ -251,42 +337,42 @@ public class HitReader {
                 if (SvtStrip.getEdep() == 0) {
                     SvtStrip.setStatus(1);
                 }
-//                if (Constants.getInstance().timeCuts) {
-//                    if(time > 0 && (time < 150 || time > 350)) {
-//                        SvtStrip.setStatus(2);// calculate the strip parameters for the BMT hit
-//                    }
-//                }
-//                SvtStrip.setStatus(status.getIntValue("status", sector, layer, strip));
-                
-                // BMTGeometry implementation using the geometry package:  Charles Platt
-//                Line3d shiftedStrip   = geo.getStrip(layer[i]-1, sector[i]-1, strip[i]-1);
-//
- //               Vector3d o1            = shiftedStrip.origin();
- //               Vector3d e1            = shiftedStrip.end();
-
-//                Point3D  MP  = new  Point3D(( o1.x + e1.x ) /2.,
- //                                           ( o1.y + e1.y ) /2.,
- //                                           ( o1.z + e1.z ) /2. );
- //               Vector3D Dir = new Vector3D((-o1.x + e1.x ),
- //                                           (-o1.y + e1.y ),
- //                                           (-o1.z + e1.z )     );
-
-//                Point3D passVals = new Point3D(o1.x, o1.y, o1.z); //switch from Vector3d to Point3D
-//                SvtStrip.setImplantPoint(passVals);
-
-
                 // create the hit object
                 Hit hit = new Hit(DetectorType.BST, BMTType.UNDEFINED, sector, layer, SvtStrip);
                 hit.setId(id);
+                if (Constants.getInstance().flagSeeds)
+                    hit.MCstatus = order;
+                
                 // add this hit
-                if(hit.getRegion()!=Constants.getInstance().getRmReg())      
-                    hits.add(hit);
+                if(hit.getRegion()!=Constants.getInstance().getRmReg()) {     
+                    if(Constants.getInstance().useOnlyMCTruthHits() ) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                    } else {
+                        hits.add(hit); 
+                    }
+                }
             }
         }
         // fill the list of SVT hits
         Collections.sort(hits);
         this.setSVTHits(hits);
 
+    }
+
+    private boolean passTimingCuts(int adc, double time) {
+        int tdc = (int) time;
+        boolean pass = true;
+        if(adc == 0 && ((tdc > 0 && tdc < 160) || tdc > 400)) pass = false;
+        else if(adc == 1 && ((tdc > 0 && tdc < 160) || tdc > 340)) pass = false;
+        else if(adc == 2 && ((tdc > 0 && tdc < 160) || tdc > 320)) pass = false;
+        else if(adc == 3 && ((tdc > 0 && tdc < 160) || tdc > 300)) pass = false;
+        else if(adc == 4 && ((tdc > 0 && tdc < 160) || tdc > 290)) pass = false;
+        else if(adc == 5 && ((tdc > 0 && tdc < 170) || tdc > 280)) pass = false;
+        else if(adc == 6 && ((tdc > 0 && tdc < 180) || tdc > 280)) pass = false;
+        else if(adc == 7 && ((tdc > 0 && tdc < 170) || tdc > 280)) pass = false;
+    
+        return pass;   
     }
 
 }

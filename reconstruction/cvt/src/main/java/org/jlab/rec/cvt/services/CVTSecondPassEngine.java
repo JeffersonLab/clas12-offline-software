@@ -3,11 +3,14 @@ package org.jlab.rec.cvt.services;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.Geometry;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
+import org.jlab.rec.cvt.cluster.Cluster;
+import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.utils.groups.IndexedTable;
@@ -31,8 +34,9 @@ public class CVTSecondPassEngine extends CVTEngine {
     public boolean processDataEvent(DataEvent event) {
 
         int run = this.getRun(event);
-        if(run<=0) return true;
-
+        if(Constants.getInstance().seedingDebugMode)
+            System.out.println("SECOND PASS TRACKING...................");
+        
         Swim swimmer = new Swim();
 
         IndexedTable svtLorentz = this.getConstantsManager().getConstants(run, "/calibration/svt/lorentz_angle");
@@ -55,6 +59,21 @@ public class CVTSecondPassEngine extends CVTEngine {
                                                       false, this.getPid());
             }
             
+            if(tracks!=null) {
+                for(Track t : tracks) {
+                    // keep track id from first to second pass
+                    if(event.hasBank("CVT::Tracks")) {
+                        DataBank bank = event.getBank("CVT::Tracks");
+                        t.setId(bank.getShort("ID", t.getSeed().FirstPassIdx));
+                        for(Cross c : t) { 
+                            c.setAssociatedTrackID(t.getId());
+                        }
+                        for(Cluster c: t.getSeed().getClusters()) {
+                            c.setAssociatedTrackID(t.getId());
+                        }
+                    }
+                }
+            }
             List<DataBank> banks = new ArrayList<>();
             if(trackFinder.getSVThits()!=null) banks.add(RecoBankWriter.fillSVTHitBank(event, trackFinder.getSVThits(), this.getSvtHitBank()));
             if(trackFinder.getBMThits()!=null) banks.add(RecoBankWriter.fillBMTHitBank(event, trackFinder.getBMThits(), this.getBmtHitBank()));
@@ -62,7 +81,10 @@ public class CVTSecondPassEngine extends CVTEngine {
             if(trackFinder.getBMTclusters()!=null) banks.add(RecoBankWriter.fillBMTClusterBank(event, trackFinder.getBMTclusters(), this.getBmtClusterBank()));
             if(trackFinder.getSVTcrosses()!=null) banks.add(RecoBankWriter.fillSVTCrossBank(event, trackFinder.getSVTcrosses(), this.getSvtCrossBank()));
             if(trackFinder.getBMTcrosses()!=null) banks.add(RecoBankWriter.fillBMTCrossBank(event, trackFinder.getBMTcrosses(), this.getBmtCrossBank()));
-            if(seeds!=null) banks.add(RecoBankWriter.fillSeedBank(event, seeds, this.getSeedBank()));
+            if(seeds!=null) {
+                banks.add(RecoBankWriter.fillSeedBank(event, seeds, this.getSeedBank()));
+                banks.add(RecoBankWriter.fillSeedClusBank(event, seeds, this.getSeedClusBank()));
+            }
             if(tracks!=null) {
                 banks.add(RecoBankWriter.fillTrackBank(event, tracks, this.getTrackBank()));
                 banks.add(RecoBankWriter.fillUTrackBank(event, tracks, this.getUTrackBank()));

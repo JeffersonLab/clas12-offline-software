@@ -2,7 +2,7 @@ package org.jlab.rec.rich;
 
 import org.jlab.detector.geant4.v2.SVT.Matrix;
 
-import eu.mihosoft.vrl.v3d.Vector3d;
+import org.jlab.geom.prim.Vector3D;
 
 //Class created by gangel
 //for the JLAB package 
@@ -19,10 +19,10 @@ public class Quaternion {
 	public Quaternion() {
 	}
 
-	public Quaternion(double angle, Vector3d rotationAxis) {
-		x = rotationAxis.x * Math.sin(angle / 2);
-		y = rotationAxis.y * Math.sin(angle / 2);
-		z = rotationAxis.z * Math.sin(angle / 2);
+	public Quaternion(double angle, Vector3D rotationAxis) {
+		x = rotationAxis.x() * Math.sin(angle / 2);
+		y = rotationAxis.y() * Math.sin(angle / 2);
+		z = rotationAxis.z() * Math.sin(angle / 2);
 		w = Math.cos(angle / 2);
 	}
 
@@ -37,10 +37,10 @@ public class Quaternion {
 	 * @param angle the angle of rotation
 	 * @param rotationAxis the rotation axis (normal two the vector plane)
 	 */
-	public void set(double angle, Vector3d rotationAxis) {
-		x = rotationAxis.x * Math.sin(angle / 2);
-		y = rotationAxis.y * Math.sin(angle / 2);
-		z = rotationAxis.z * Math.sin(angle / 2);
+	public void set(double angle, Vector3D rotationAxis) {
+		x = rotationAxis.x() * Math.sin(angle / 2);
+		y = rotationAxis.y() * Math.sin(angle / 2);
+		z = rotationAxis.z() * Math.sin(angle / 2);
 		w = Math.cos(angle / 2);
 	}
 
@@ -97,17 +97,17 @@ public class Quaternion {
 
 
     //-----------------
-    public Vector3d rotate(Vector3d point) {
+    public Vector3D rotate(Vector3D vector) {
     //-----------------
     /** 
-     * public void rotate(Vector3d point, Vector3d rotatedPoint) {
+     * public void rotate(Vector3D vector, Vector3D rotatedVector) {
      * Implementing the Quaternion Fomula for Rotation: P' = Q.P.Q*
-     * @param point the vector 3d that needs to be rotate
-     * @param rotatedPoint the rotated vector
+     * @param vetor the vector 3d that needs to be rotate
+     * @param rotatedVector the rotated vector
      */
 
-        Vector3d rotatedPoint = new Vector3d(0.,0.,0.);
-        Quaternion quatTp1    = new Quaternion(0, point.x, point.y, point.z);
+        Vector3D rotatedVector = new Vector3D(0.,0.,0.);
+        Quaternion quatTp1    = new Quaternion(0, vector.x(), vector.y(), vector.z());
         Quaternion quatTp2    = new Quaternion();
         Quaternion quatTp3    = new Quaternion();
         quatTp2 = this.multiply(quatTp1);
@@ -115,11 +115,11 @@ public class Quaternion {
         quatTp1.conjugate();
         quatTp3 = quatTp2.multiply(quatTp1);
 
-        rotatedPoint.x = quatTp3.x;
-        rotatedPoint.y = quatTp3.y;
-        rotatedPoint.z = quatTp3.z;
+        rotatedVector.setX(quatTp3.x);
+        rotatedVector.setY(quatTp3.y);
+        rotatedVector.setZ(quatTp3.z);
 
-        return rotatedPoint;
+        return rotatedVector;
     }
 
 	

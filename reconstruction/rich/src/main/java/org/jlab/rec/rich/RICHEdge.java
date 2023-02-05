@@ -9,6 +9,7 @@ public class RICHEdge implements Comparable<RICHEdge>{
     public RICHEdge(int i, int isector, int ilayer, int icomponent, int iorder, int itdc) {
     // ----------------
 
+        this.id        = i;
         this.sector    = isector;
         this.tile      = ilayer;
         this.channel   = icomponent;
@@ -21,6 +22,7 @@ public class RICHEdge implements Comparable<RICHEdge>{
       }
 
 
+    private int id;                                   //         ID
     private int sector;                               //         Sector
     private int tile;                                 //         Front-End TILE ID
     private int channel;                              //         MAROC channel
@@ -31,87 +33,72 @@ public class RICHEdge implements Comparable<RICHEdge>{
     private int tdc;                                  //         Edge TDC 
     private int hit;                                  //         Hit belonging to
           
-    // ----------------
-    public int get_sector() {
-    // ----------------
-        return sector;
-    }
 
     // ----------------
-    public void set_sector(int sector) {
+    public int get_id() { return id;}
     // ----------------
-        this.sector = sector;
-    }
 
     // ----------------
-    public int get_channel() {
+    public void set_id(int id) { this.id = id; }
     // ----------------
-        return channel;
-    }
 
     // ----------------
-    public void set_channel(int channel) {
+    public int get_sector() { return sector;}
     // ----------------
-        this.channel = channel;
-    }
 
     // ----------------
-    public int get_tile() {
+    public void set_sector(int sector) { this.sector = sector; }
     // ----------------
-        return tile;
-    }
+
+    // ----------------
+    public int get_channel() { return channel; }
+    // ----------------
+
+    // ----------------
+    public void set_channel(int channel) { this.channel = channel; }
+    // ----------------
+
+    // ----------------
+    public int get_tile() { return tile; }
+    // ----------------
 
 
     // ----------------
-    public void set_tile(int tile) {
+    public void set_tile(int tile) { this.tile = tile; }
     // ----------------
-        this.tile = tile;
-    }
 
     
     // ----------------
-    public int get_polarity() {
+    public int get_polarity() { return polarity; }
     // ----------------
-        return polarity;
-    }
 
 
     // ----------------
-    public void set_polarity(int polarity) {
+    public void set_polarity(int polarity) { this.polarity = polarity; }
     // ----------------
-        this.polarity = polarity;
-    }
 
 
     // ----------------
-    public int get_tdc() {
+    public int get_tdc() { return tdc; }
     // ----------------
-        return tdc;
-    }
 
 
     // ----------------
-    public void set_tdc(int tdc) {
+    public void set_tdc(int tdc) { this.tdc = tdc; }
     // ----------------
-        this.tdc = tdc;
-    }
 
     // ----------------
-    public int get_hit() {
+    public int get_hit() { return hit; }
     // ----------------
-        return hit;
-    }
 
 
     // ----------------
-    public void set_hit(int hit) {
+    public void set_hit(int hit) { this.hit = hit; }
     // ----------------
-        this.hit = hit;
-    }
 
     
     // ----------------
-    public boolean passEdgeSelection() {
+    public boolean pass_EdgeSelection() {
     // ----------------
         // a selection cut to pass the edge
         if(this.get_tdc() > 0) {
@@ -152,6 +139,7 @@ public class RICHEdge implements Comparable<RICHEdge>{
     public void showEdge() {
     // ----------------
         System.out.println(
+            + this.get_id()          + "\t" 
             + this.get_sector()      + "\t" 
             + this.get_tile()        + "\t" 
             + this.get_channel()     + "\t" 

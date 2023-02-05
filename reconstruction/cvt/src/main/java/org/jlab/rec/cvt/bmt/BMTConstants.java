@@ -22,8 +22,13 @@ public class BMTConstants {
     //CUTS
     public static double MAXCLUSSIZE = 5;
     public static int MAXBMTHITS = 700;
+    
+    public static double BMTLINERESISNSIG=5;                        // cut to pass line with 3 BMT points
     //public static final int STARTINGLAYR = 5;						// current configuration is 3 SVT + 3BMT (outermost BST ring)
     public static double ETOTCUT = 0.0;
+    public static double HVLOEFFLOBOUND = 450.0;                    // lower bound for range within which a BMT strip is considered inefficient
+    public static double HVHIEFFUPBOUND = 480.0;                    // upper bound for range within which a BMT strip is considered inefficient
+            
     // THE GEOMETRY CONSTANTS
     public static final int NREGIONS = 3;						// 3 regions of MM 
     public static final int NLAYERS   = NREGIONS*2;					// 6 layer

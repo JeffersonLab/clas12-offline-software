@@ -8,8 +8,7 @@ import org.jlab.clas.pdg.PhysicsConstants;
 
 /**
  * Override methods to use new tracking trajectory surfaces.
- * (Currently unavailable for hit-based tracking.)
- * 
+ * @author baltzell
  */
 public class DetectorParticleTraj extends DetectorParticle {
     
@@ -24,7 +23,7 @@ public class DetectorParticleTraj extends DetectorParticle {
         
         // Protect against odd tracks that don't have trajectory intersection:
         if (detectorLayer<1) {
-            if (!detectorTrack.getTrajectory().hasDetector(type.getDetectorId())) {
+            if (!detectorTrack.getTrajectory().contains(type.getDetectorId())) {
                 return -1;
             }
         }

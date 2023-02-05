@@ -11,12 +11,42 @@ public class SVTParameters {
      */
     SVTParameters() {
     }
+
+    /**
+     * @return the MAXDOCA2STRIP
+     */
+    public static double getMAXDOCA2STRIP() {
+        return MAXDOCA2STRIP;
+    }
+
+    /**
+     * @param aMAXDOCA2STRIP the MAXDOCA2STRIP to set
+     */
+    public static void setMAXDOCA2STRIP(double aMAXDOCA2STRIP) {
+        MAXDOCA2STRIP = aMAXDOCA2STRIP;
+    }
+
+    /**
+     * @return the MAXDOCA2STRIPS
+     */
+    public static double getMAXDOCA2STRIPS() {
+        return MAXDOCA2STRIPS;
+    }
+
+    /**
+     * @param aMAXDOCA2STRIPS the MAXDOCA2STRIPS to set
+     */
+    public static void setMAXDOCA2STRIPS(double aMAXDOCA2STRIPS) {
+        MAXDOCA2STRIPS = aMAXDOCA2STRIPS;
+    }
     
     //CUTS
     public static int MAXSVTHITS = 700;
     public static int MAXSVTCROSSES = 1000;
     public static double RESIMAX = 5;
-
+    public static double TIMECUTLOW = 55;
+    private static double MAXDOCA2STRIP;
+    private static double MAXDOCA2STRIPS;
     // THRESHOLDS
     public static int INITTHRESHOLD = 30;
     public static int DELTATHRESHOLD = 15;
@@ -25,7 +55,10 @@ public class SVTParameters {
     public static double ETOTCUT = 10.0;
     // cut on Edep min;
     public static double EDEPMIN = 0.020; //20keV=0.020
-
+    //cut on cross point0 z
+    public static double CROSSZCUT= 10;
+    // matching clusters cut parameter (n * single strip resolution)
+    public static double TOCLUSN = 20;
     // selection cuts for helical tracks
     public static final double MINRADCURV = 200.00; //in cm
 

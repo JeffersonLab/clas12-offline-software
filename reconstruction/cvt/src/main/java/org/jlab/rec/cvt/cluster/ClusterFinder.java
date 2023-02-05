@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.cluster;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.rec.cvt.hit.Hit;
 
 /**
@@ -37,7 +38,7 @@ public class ClusterFinder {
                 continue;
             }
 
-            if (hit.getStrip().getStatus()!=0) {
+            if (hit.getStrip().getStatus()>0 && hit.getStrip().getStatus()<5) {
                 continue;
             }
 
@@ -90,15 +91,16 @@ public class ClusterFinder {
                         }
                         for (Hit h : hits) {
                             h.setAssociatedClusterID(this_cluster.getId());
-                            h.newClustering = true; //RDV fix me!
+                            //h.newClustering = true; //RDV fix me!
                         }
                         
                         this_cluster.calc_CentroidParams();
-                       
-//                        for (Hit h : this_cluster) {
-//                            h.newClustering = false;
-//                        }
-//                        Collections.sort(this_cluster);
+                        //if(this_cluster.getDetector()==DetectorType.BST) {
+                        //    for (Hit h : this_cluster) {
+                        //        h.newClustering = false;
+                        //    }
+                        //}
+                        Collections.sort(this_cluster);
                        
                         //make list of clusters
                         clusters.add(this_cluster);
