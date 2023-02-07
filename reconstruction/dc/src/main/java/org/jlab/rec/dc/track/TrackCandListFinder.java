@@ -893,19 +893,18 @@ public class TrackCandListFinder {
                             cand.get(0).get_Dir().x() / cand.get(0).get_Dir().z(),
                             cand.get(0).get_Dir().y() / cand.get(0).get_Dir().z());
                     cand.set_StateVecAtReg1MiddlePlane(VecAtReg1MiddlePlane);
-                    
-                    
-                    LOGGER.log(Level.FINE, "Kalman fitter - 2 = " + (System.currentTimeMillis() - startTime));                        
-                    
-					KFitter kFZRef = new KFitter(true, 1, 1, dcSwim, Constants.getInstance().Z, Libr.JNP);
-					List<Surface> measSurfaces = getMeasSurfaces(cand, DcDetector);
-					StateVecs svs = new StateVecs();
-					org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec initSV = svs.new StateVec(0);
-					getInitState(cand, measSurfaces.get(0).z, 0, initSV, dcSwim, new float[3]);
-					kFZRef.init(measSurfaces, initSV);						
-					
+
+                    LOGGER.log(Level.FINE, "Kalman fitter - 2 = " + (System.currentTimeMillis() - startTime));
+
+                    KFitter kFZRef = new KFitter(true, 1, 1, dcSwim, Constants.getInstance().Z, Libr.JNP);
+                    List<Surface> measSurfaces = getMeasSurfaces(cand, DcDetector);
+                    StateVecs svs = new StateVecs();
+                    org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec initSV = svs.new StateVec(0);
+                    getInitState(cand, measSurfaces.get(0).z, 0, initSV, dcSwim, new float[3]);
+                    kFZRef.init(measSurfaces, initSV);
+
                     kFZRef.runFitter();
-                    
+
                     if (kFZRef.finalStateVec == null) {
                         continue;
                     }
@@ -1144,15 +1143,15 @@ public class TrackCandListFinder {
                         if (cand.get(1).isPseudoCross) {
                             crossIdxinList = 0;
                         }
-                        
-                        LOGGER.log(Level.FINE, "Kalman fitter - 2 = " + (System.currentTimeMillis() - startTime));                        
-                        
-						KFitter kFZRef = new KFitter(true, 10, 1, dcSwim, Constants.getInstance().Z, Libr.JNP);
-						List<Surface> measSurfaces = getMeasSurfaces(cand, DcDetector);
-						StateVecs svs = new StateVecs();
-						org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec initSV = svs.new StateVec(0);
-						getInitState(cand, measSurfaces.get(0).z, crossIdxinList, initSV, dcSwim, new float[3]);
-						kFZRef.init(measSurfaces, initSV);						
+
+                        LOGGER.log(Level.FINE, "Kalman fitter - 2 = " + (System.currentTimeMillis() - startTime));
+
+                        KFitter kFZRef = new KFitter(true, 10, 1, dcSwim, Constants.getInstance().Z, Libr.JNP);
+                        List<Surface> measSurfaces = getMeasSurfaces(cand, DcDetector);
+                        StateVecs svs = new StateVecs();
+                        org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec initSV = svs.new StateVec(0);
+                        getInitState(cand, measSurfaces.get(0).z, crossIdxinList, initSV, dcSwim, new float[3]);
+                        kFZRef.init(measSurfaces, initSV);						
 						
                         kFZRef.runFitter();
                         List<org.jlab.rec.dc.trajectory.StateVec> kfStateVecsAlongTrajectory = setKFStateVecsAlongTrajectory(kFZRef);
