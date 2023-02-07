@@ -63,8 +63,8 @@ public class RICHHit implements Comparable<RICHHit>{
 
         this.idx       = richgeo.get_PixelMap().Anode2idx(anode);
         this.idy       = richgeo.get_PixelMap().Anode2idy(anode);
-        this.glx       = richgeo.get_PixelMap().get_Globalidx(pmt, anode);
-        this.gly       = richgeo.get_PixelMap().get_Globalidy(pmt, anode);
+        //this.glx       = richgeo.get_PixelMap().get_Globalidx(pmt, anode);
+        //this.gly       = richgeo.get_PixelMap().get_Globalidy(pmt, anode);
         this.duration  = trail.get_tdc()-lead.get_tdc();
 
         double twalk_corr = richcal.get_PixelTimeWalk(sector, pmt, this.duration);
