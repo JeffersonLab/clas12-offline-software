@@ -141,9 +141,11 @@ public class DCHBPostClusterAI extends DCEngine {
                     trkcandFinder.setHitDoubletsInfo(c.get_Segment1());
                     trkcandFinder.setHitDoubletsInfo(c.get_Segment2());
                     for (FittedHit h1 : c.get_Segment1()) {
+                        h1.set_AssociatedTBTrackID(trkId);
                         if(h1.get_AssociatedHBTrackID()>0) fhits.add(h1);
                     }
                     for (FittedHit h2 : c.get_Segment2()) {
+                        h2.set_AssociatedTBTrackID(trkId);
                         if(h2.get_AssociatedHBTrackID()>0) fhits.add(h2);
                     }
                 }
