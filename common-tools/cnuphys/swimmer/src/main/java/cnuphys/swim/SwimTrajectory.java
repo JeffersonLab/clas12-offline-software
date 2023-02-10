@@ -9,6 +9,7 @@ import cnuphys.lund.LundId;
 import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.RotatedCompositeProbe;
+import cnuphys.swimtest.RandomData;
 
 /**
  * Combines a generated particle record with a path (trajectory). A trajectory
@@ -610,6 +611,17 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		double gamma = energy / mass;
 		double beta = Math.sqrt(1.0 - 1.0 / (gamma * gamma));
 		return beta;
+	}
+	
+	//for testing closest approach alg
+	public static void main(String arg[]) {
+		System.out.println("testing closest approach algorithm for VZ");
+		
+		//create some random initial data
+		int n = 10;
+		long seed = 45636479L;
+		RandomData randomData = new RandomData(n, seed, 0, 0.1, 0, 0.1, 0, 0.1, 4, 9, 25, 25, 0, 360);
+		
 	}
 
 }
