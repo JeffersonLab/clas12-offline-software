@@ -568,5 +568,48 @@ public class SwimTrajectory extends ArrayList<double[]> {
 			ps.println(str);
 		}
 	}
+	
+	
+	/**
+	 * Compute the distance of closest approach in time. (not the over-all geometric closest
+	 * approach of the trajectories, but the closest they get at any time.)
+	 * @param traj1  one trajectory
+	 * @param traj2  other trajectory
+	 * @param p1 momentum of traj 1 in GeV/c
+	 * @param p2  momentum of traj 2 in GeV/c
+	 * @param lundId2 Lund (PDG) id for traj1. If not known, set to <= 0. This will be used
+	 * to compute the speed from the momentum. If not known, speed of light assumed.
+	 * @param lundId2 Lund (PDG) id for traj2, as for traj1
+	 * @param deltaT time in ns between start of traj1 and start of traj2. Can be negative, in which
+	 * case traj2 starts first.
+	 * 
+	 * @param results upon return, results[0] is the closest approach in time,
+	 * results[1] is the time in nS
+	 */
+
+	public static void closestApproach(SwimTrajectory traj1, SwimTrajectory traj2, 
+			double p1, double p2,
+			int lundId1, int lundId2, double deltaT, double results[]) {
+
+		double beta1 = 1; // v/c
+		double beta2 = 1; // v/c
+
+		if (lundId1 > 0) {}
+		
+	}
+	
+	/**
+	 * Get the relativistic beta (v/c)
+	 * @param momentum the momentum
+	 * @param mass the mass in the same units as the momentum
+	 * @return beta
+	 */
+	private double beta(double momentum, double mass) {
+		double energy = Math.sqrt(momentum * momentum + mass * mass);
+
+		double gamma = energy / mass;
+		double beta = Math.sqrt(1.0 - 1.0 / (gamma * gamma));
+		return beta;
+	}
 
 }
