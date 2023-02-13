@@ -24,5 +24,10 @@ public class URWellConstants {
 
     // cluster
     public final static double COINCTIME = 100;
+    
+    // cross
+    public final static double deltaE = 200;
+    public final static double deltaT = 50;
+    public final static double meanT = 180;
 
 }

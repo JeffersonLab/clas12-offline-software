@@ -8,7 +8,7 @@ package org.jlab.clas.tracking.kalmanfilter;
 public enum Type {
     UDF(-1), PLANEWITHPOINT(0), PLANEWITHLINE(1), PLANEWITHSTRIP(2),
     CYLINDERWITHPOINT(3), CYLINDERWITHLINE(4), CYLINDERWITHARC(5), 
-    CYLINDERWITHSTRIP(6), LINE(7), LINEDOCA(8);
+    CYLINDERWITHSTRIP(6), LINE(7), LINEDOCA(8), PLANEURWELL(9);
     private final int value;
 
     Type(int value) {

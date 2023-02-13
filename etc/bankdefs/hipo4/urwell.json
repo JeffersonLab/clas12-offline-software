@@ -55,5 +55,52 @@
        {"name":"cluster2",    "type":"S", "info":"id of the cluster in the W layer"},
        {"name":"status",      "type":"S", "info":"status of the cluster"}
     ]
+  },
+  {
+    "name": "HitBasedTrkg::HBURWellCrosses",
+    "group": 22300,
+    "item" : 31,
+    "info": "crosses from URWEL",
+    "entries": [
+       {"name":"id",          "type":"S", "info":"id of the cross"},
+       {"name":"tid",         "type":"S", "info":"track id"},
+       {"name":"sector",      "type":"B", "info":"sector of URWELL"},
+       {"name":"layer",       "type":"B", "info":"Layer of URWELL"},
+       {"name":"energy",      "type":"F", "info":"Energy of the cross (eV)"},
+       {"name":"time",        "type":"F", "info":"Time of the cross (ns)"},
+       {"name":"x",           "type":"F", "info":"X in global coordinate (cm)"},
+       {"name":"y",           "type":"F", "info":"Y in global coordinate (cm)"},
+       {"name":"z",           "type":"F", "info":"Z in global coordinate (cm)"},
+       {"name":"x_local",     "type":"F", "info":"X in tilted sector coordinate (cm)"},
+       {"name":"y_local",     "type":"F", "info":"Y in tilted sector coordinate (cm)"},
+       {"name":"z_local",     "type":"F", "info":"Z in tilted sector coordinate (cm)"},
+       {"name":"cluster1",    "type":"S", "info":"id of the cluster in the V layer"},
+       {"name":"cluster2",    "type":"S", "info":"id of the cluster in the W layer"},
+       {"name":"status",      "type":"S", "info":"status of the cluster"}
+    ]
+  },
+  {
+    "name": "TimeBasedTrkg::TBURWellCrosses",
+    "group": 22300,
+    "item" : 32,
+    "info": "crosses from URWEL",
+    "entries": [
+       {"name":"id",          "type":"S", "info":"id of the cross"},
+       {"name":"tid",         "type":"S", "info":"track id"},
+       {"name":"sector",      "type":"B", "info":"sector of URWELL"},
+       {"name":"layer",       "type":"B", "info":"Layer of URWELL"},
+       {"name":"energy",      "type":"F", "info":"Energy of the cross (eV)"},
+       {"name":"time",        "type":"F", "info":"Time of the cross (ns)"},
+       {"name":"x",           "type":"F", "info":"X in global coordinate (cm)"},
+       {"name":"y",           "type":"F", "info":"Y in global coordinate (cm)"},
+       {"name":"z",           "type":"F", "info":"Z in global coordinate (cm)"},
+       {"name":"x_local",     "type":"F", "info":"X in tilted sector coordinate (cm)"},
+       {"name":"y_local",     "type":"F", "info":"Y in tilted sector coordinate (cm)"},
+       {"name":"z_local",     "type":"F", "info":"Z in tilted sector coordinate (cm)"},
+       {"name":"cluster1",    "type":"S", "info":"id of the cluster in the V layer"},
+       {"name":"cluster2",    "type":"S", "info":"id of the cluster in the W layer"},
+       {"name":"status",      "type":"S", "info":"status of the cluster"}
+    ]
   }
+    
 ]

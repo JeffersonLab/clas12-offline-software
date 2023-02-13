@@ -197,7 +197,7 @@ public class Trajectory extends ArrayList<Cross> {
         double[] htccPars = dcSwim.SwimToSphere(Constants.HTCCRADIUS);
         if(htccPars==null) return;
         this.addTrajectoryPoint(htccPars[0], htccPars[1], htccPars[2], htccPars[3], htccPars[4], htccPars[5], htccPars[6], htccPars[7], DetectorType.HTCC, 1); 
-
+        
         //Swim to planes
         for(int j = 0; j<Constants.getInstance().trajSurfaces.getDetectorPlanes().get(is).size(); j++) {
             

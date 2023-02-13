@@ -21,16 +21,20 @@ import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.segment.SegmentFinder;
 import org.jlab.rec.dc.track.Track;
-import org.jlab.rec.dc.track.TrackCandListFinder;
+import org.jlab.rec.dc.track.TrackCandListWithURWellFinder;
+import org.jlab.rec.dc.track.URWellDCCrossesList;
 import org.jlab.rec.dc.trajectory.Road;
 import org.jlab.rec.dc.trajectory.RoadFinder;
+import org.jlab.rec.urwell.reader.URWellReader;
+import org.jlab.rec.urwell.reader.URWellCross;
+import org.jlab.rec.dc.track.URWellDCCrossesListFinder;
 
 /**
  *
- * @author ziegler
+ * @author Tongtong Cao
  */
-public class DCHBPostClusterConv extends DCEngine {
-    public DCHBPostClusterConv() {
+public class DCURWellHBPostClusterConv extends DCEngine {
+    public DCURWellHBPostClusterConv() {
         super("DCHB");
         this.getBanks().init("HitBasedTrkg", "", "HB");
     }
@@ -119,9 +123,17 @@ public class DCHBPostClusterConv extends DCEngine {
                 null,
                 dcSwim, false);
         /* 18 */
+        
+        URWellReader uRWellReader = new URWellReader(event, "HB");
+        List<URWellCross> urCrosses = uRWellReader.getUrwellCrosses();
+        
+        URWellDCCrossesListFinder uRWellDCCrossListLister = new URWellDCCrossesListFinder();
+        
+        URWellDCCrossesList urDCCrossesList = uRWellDCCrossListLister.candURWellDCCrossLists(urCrosses, crosslist);
+                
         //6) find the list of  track candidates
-        TrackCandListFinder trkcandFinder = new TrackCandListFinder(Constants.HITBASE);
-        trkcands = trkcandFinder.getTrackCands(crosslist,
+        TrackCandListWithURWellFinder trkcandFinder = new TrackCandListWithURWellFinder(Constants.HITBASE);
+        trkcands = trkcandFinder.getTrackCands(urDCCrossesList,
                 Constants.getInstance().dcDetector,
                 Swimmer.getTorScale(),
                 dcSwim, false);
@@ -142,7 +154,8 @@ public class DCHBPostClusterConv extends DCEngine {
             }
         }
         
-        //gather all the hits for pointer bank creation
+        //gather all the hits and URWell crosses for pointer bank creation
+        List<URWellCross> urCrossesOnTrks = new ArrayList<URWellCross>();
         for (Track trk : trkcands) {
             trk.calcTrajectory(trk.getId(), dcSwim, trk.get_Vtx0(), trk.get_pAtOrig(), trk.get_Q());
             for (Cross c : trk) {
@@ -160,7 +173,14 @@ public class DCHBPostClusterConv extends DCEngine {
                     if(h2.get_AssociatedHBTrackID()>0) fhits.add(h2);
                 }
             }
+            if(trk.get_URWellCross() != null){
+                urCrossesOnTrks.add(trk.get_URWellCross()); 
+                trk.get_URWellCross().set_tid(trk.get_Id());
+            }
         }
+                
+        
+        
         
         // no candidate found, stop here and save the hits,
         // the clusters, the segments, the crosses
@@ -169,17 +189,19 @@ public class DCHBPostClusterConv extends DCEngine {
                     writer.fillHBHitsBank(event, fhits),
                     writer.fillHBClustersBank(event, clusters),
                     writer.fillHBSegmentsBank(event, segments),
-                    writer.fillHBCrossesBank(event, crosses));
+                    writer.fillHBCrossesBank(event, crosses),
+                    writer.fillHBURWellCrossesBank(event, urCrossesOnTrks));                         
         } else {
             event.appendBanks(
                     writer.fillHBHitsBank(event, fhits),
                     writer.fillHBClustersBank(event, clusters),
                     writer.fillHBSegmentsBank(event, segments),
                     writer.fillHBCrossesBank(event, crosses),
+                    writer.fillHBURWellCrossesBank(event, urCrossesOnTrks),
                     writer.fillHBTracksBank(event, trkcands),
                     writer.fillHBHitsTrkIdBank(event, fhits),
                     writer.fillHBTrajectoryBank(event, trkcands));
         }
         return true;
-    }
+    }       
 }

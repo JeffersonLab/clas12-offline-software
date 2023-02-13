@@ -23,7 +23,7 @@ public abstract class AMeasVecs {
 
     public void setMeasVecs(List<Surface> measSurfaces) {
         measurements = new ArrayList<>();
-        if(measSurfaces.get(0).type != Type.LINEDOCA) // Measurements from DC has been sorted 
+        if(measSurfaces.get(0).type != Type.LINEDOCA && measSurfaces.get(0).type != Type.PLANEURWELL) // Measurements from URWell and DC has been sorted 
         	Collections.sort(measSurfaces);
         for(int i = 0; i < measSurfaces.size(); i++) {
             MeasVec mvec = new MeasVec();
@@ -40,7 +40,12 @@ public abstract class AMeasVecs {
             	mvec.sector = measSurfaces.get(i).getSector();
             	mvec.superlayer = measSurfaces.get(i).getSuperLayer();
             	mvec.layer = measSurfaces.get(i).getLayer();
-            }            	
+            }
+            else if(measSurfaces.get(i).type == Type.PLANEURWELL){
+                mvec.region = measSurfaces.get(i).region;
+                mvec.layer = measSurfaces.get(i).getLayer();
+            	mvec.sector = measSurfaces.get(i).getSector();
+            }
         }
     }
     

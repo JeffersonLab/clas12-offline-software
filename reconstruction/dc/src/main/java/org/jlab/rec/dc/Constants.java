@@ -92,6 +92,8 @@ public class Constants {
     public static final double HTCCRADIUS = 175;
     public static final double LTCCPLANE  = 653.09;
     
+    public static final double URWELLLOCALZ  = 226.0464; 
+    
     // other CLAS12 parameters
     public static final  int NSECT  = 6;
     public static final  int NSLAY  = 6;
@@ -184,7 +186,7 @@ public class Constants {
 
     public static final int MAXCLUSSIZE = 14;
 
-    public static final double MAXCHI2 = 10000;
+    public static final double MAXCHI2 = 1000000;
 
     public static double HBTCHI2CUT = 2000;
 

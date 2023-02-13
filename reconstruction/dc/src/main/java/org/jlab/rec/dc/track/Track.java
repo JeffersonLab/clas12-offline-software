@@ -10,6 +10,7 @@ import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
+import org.jlab.rec.urwell.reader.URWellCross;
 
 /**
  * A class representing track candidates in the DC.  A track has a trajectory represented by an ensemble of geometrical state vectors along its path, 
@@ -65,9 +66,92 @@ public class Track extends Trajectory implements Comparable<Track>{
     private int _fitConvergenceStatus;
     private StateVec finalStateVec ;
     
+    private URWellCross urCross;
+    private Point3D _URWellPointGlobal;
+    private Point3D _URWellPGlobal;
+    private Point3D _URWellPointLocal;
+    private Point3D _URWellPLocal;
+    
     
     public Track() {
     }
+    
+    /**
+     * 
+     * @return URWell point on track in global coordinates
+     */
+    public Point3D get_URWellPointGlobal() {
+        return _URWellPointGlobal;
+    }
+    /**
+     * 
+     * @param uRWellPointGlobal URWell point on track in global coordinates
+     */
+    public void set_URWellPointGlobal(Point3D uRWellPointGlobal) {
+        this._URWellPointGlobal = uRWellPointGlobal;
+    }
+    
+        /**
+     * 
+     * @return URWell Momentum at URWell point on track in global coordinates
+     */
+    public Point3D get_URWellPGlobal() {
+        return _URWellPGlobal;
+    }
+    /**
+     * 
+     * @param uRWellDirGlobal Momentum at URWell point on track in global coordinates
+     */
+    public void set_URWellPGlobal(Point3D uRWellPGlobal) {
+        this._URWellPGlobal = uRWellPGlobal;
+    }
+    
+        
+    /**
+     * 
+     * @return URWell point on track in local coordinates
+     */
+    public Point3D get_URWellPointLocal() {
+        return _URWellPointLocal;
+    }
+    /**
+     * 
+     * @param uRWellPointLocal URWell point on track in local coordinates
+     */
+    public void set_URWellPointLocal(Point3D uRWellPointLocal) {
+        this._URWellPointLocal = uRWellPointLocal;
+    }
+    
+        /**
+     * 
+     * @return URWell Omentum at URWell point on track in local coordinates
+     */
+    public Point3D get_URWellPLocal() {
+        return _URWellPLocal;
+    }
+    /**
+     * 
+     * @param uRWellPLocal Momentum at URWell point on track in local coordinates
+     */
+    public void set_URWellPLocal(Point3D uRWellPLocal) {
+        this._URWellPLocal = uRWellPLocal;
+    }
+    
+    /**
+     * 
+     * @return URWell cross of track
+     */
+    public URWellCross get_URWellCross() {
+        return urCross;
+    }
+    /**
+     * 
+     * @param urCross URWell cross
+     */
+    public void set_URWellCross(URWellCross urCross) {
+        this.urCross = urCross;
+    }
+    
     /**
      * 
      * @return missing superlayer of the track
@@ -411,6 +495,8 @@ public class Track extends Trajectory implements Comparable<Track>{
     }
     
     public boolean isGood() {
+        if(this._trakOrig == null) return false;
+        
         boolean isGood=true;
         if(this._trakOrig.distance(0, 0, 0)>Constants.HTCCRADIUS && this._trakOrig.z()>0) isGood=false;
         return isGood;

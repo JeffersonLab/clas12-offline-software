@@ -53,12 +53,28 @@ public class Surface implements Comparable<Surface> {
     public int superlayer;
     public int nMeas = 1;
     
+    // For URWell
+    public double y;
+    public double x_err;
+    public double y_err;
+    
     public void setNMeas(int n) {
     	nMeas = n;
     }
     
     public int getNMeas() {
     	return nMeas;
+    }
+    
+    // For URWell
+    public Surface(int sector, double x, double y, double z, double x_err, double y_err) {
+        type = Type.PLANEURWELL;
+        this.sector = sector;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.x_err = x_err;
+        this.y_err = y_err;
     }
     
     // For DC

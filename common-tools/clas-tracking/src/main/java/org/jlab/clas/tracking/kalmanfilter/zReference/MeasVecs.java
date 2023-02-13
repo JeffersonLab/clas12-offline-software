@@ -16,7 +16,7 @@ import org.jlab.geom.prim.Point3D;
  * @author tongtong cao
  */
 public class MeasVecs extends AMeasVecs {
-
+    
     public double[] H(double x, double y, double z, Line3D wireLine) {
         double[] hMatrix = new double[5];
         double Err = 0.025;
