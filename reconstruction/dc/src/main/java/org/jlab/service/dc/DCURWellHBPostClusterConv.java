@@ -153,6 +153,96 @@ public class DCURWellHBPostClusterConv extends DCEngine {
                 trkId++;
             }
         }
+        List<Segment> crossSegsNotOnTrack = new ArrayList<>();
+        List<Segment> psegments = new ArrayList<>();
+
+        for (Cross c : crosses) {
+            if (!c.get_Segment1().isOnTrack)
+                crossSegsNotOnTrack.add(c.get_Segment1());
+            if (!c.get_Segment2().isOnTrack)
+                crossSegsNotOnTrack.add(c.get_Segment2());
+        }
+
+        RoadFinder rf = new RoadFinder();
+        List<Road> allRoads = rf.findRoads(segments, Constants.getInstance().dcDetector);
+        List<Segment> Segs2Road = new ArrayList<>();
+        for (Road r : allRoads) { 
+            Segs2Road.clear();
+            int missingSL = -1;
+            for (int ri = 0; ri < 3; ri++) {
+                if (r.get(ri).associatedCrossId == -1) {
+                    if (r.get(ri).get_Superlayer() % 2 == 1) {
+                        missingSL = r.get(ri).get_Superlayer() + 1;
+                    } else {
+                        missingSL = r.get(ri).get_Superlayer() - 1;
+                    }
+                }
+            } 
+            if(missingSL==-1) 
+                continue;
+            for (int ri = 0; ri < 3; ri++) {
+                for (Segment s : crossSegsNotOnTrack) {
+                    if (s.get_Sector() == r.get(ri).get_Sector() &&
+                            s.get_Region() == r.get(ri).get_Region() &&
+                            s.associatedCrossId == r.get(ri).associatedCrossId &&
+                            r.get(ri).associatedCrossId != -1) {
+                        if (s.get_Superlayer() % 2 == missingSL % 2)
+                            Segs2Road.add(s); 
+                    }
+                }
+            }
+            if (Segs2Road.size() == 2) {
+                Segment pSegment = rf.findRoadMissingSegment(Segs2Road,
+                        Constants.getInstance().dcDetector,
+                        r.a);
+                if (pSegment != null)
+                    psegments.add(pSegment);
+            }
+        }
+
+        segments.addAll(psegments);
+        List<Cross> pcrosses = crossMake.find_Crosses(segments, Constants.getInstance().dcDetector);
+
+        CrossList pcrosslist = crossLister.candCrossLists(event, pcrosses,
+                false,
+                null,
+                Constants.getInstance().dcDetector,
+                null,
+                dcSwim, true);
+        //pcrosslist.removeDuplicates(crosslist); 
+        
+        URWellDCCrossesList purDCCrossesList = uRWellDCCrossListLister.candURWellDCCrossLists(urCrosses, pcrosslist);
+
+        List<Track> mistrkcands = trkcandFinder.getTrackCands(purDCCrossesList,
+                Constants.getInstance().dcDetector,
+                Swimmer.getTorScale(),
+                dcSwim, false);
+
+        // remove overlaps
+        if (!mistrkcands.isEmpty()) {
+            trkcandFinder.removeOverlappingTracks(mistrkcands);
+            for (Track trk : mistrkcands) {
+                
+                // reset the id
+                trk.set_Id(trkId);
+                trkcandFinder.matchHits(trk.getStateVecs(),
+                        trk,
+                        Constants.getInstance().dcDetector,
+                        dcSwim);
+                trkId++;
+            }
+        }
+
+        trkcands.addAll(mistrkcands);
+
+        LOGGER.log(Level.FINE, "Found after 5STg "+mistrkcands.size()+" HB seeds ");
+        for(int i = 0; i< trkcands.size(); i++) {
+            LOGGER.log(Level.FINE, "cand "+i);
+            for(Cross c : trkcands.get(i)) {
+                LOGGER.log(Level.FINE, c.printInfo());
+            }
+            LOGGER.log(Level.FINE, "------------------------------------------------------------------ ");
+        }
         
         //gather all the hits and URWell crosses for pointer bank creation
         List<URWellCross> urCrossesOnTrks = new ArrayList<URWellCross>();
@@ -189,8 +279,7 @@ public class DCURWellHBPostClusterConv extends DCEngine {
                     writer.fillHBHitsBank(event, fhits),
                     writer.fillHBClustersBank(event, clusters),
                     writer.fillHBSegmentsBank(event, segments),
-                    writer.fillHBCrossesBank(event, crosses),
-                    writer.fillHBURWellCrossesBank(event, urCrossesOnTrks));                         
+                    writer.fillHBCrossesBank(event, crosses));                      
         } else {
             event.appendBanks(
                     writer.fillHBHitsBank(event, fhits),

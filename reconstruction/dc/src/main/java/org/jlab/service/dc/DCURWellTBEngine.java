@@ -321,7 +321,7 @@ public class DCURWellTBEngine extends DCEngine {
         this.ensureUniqueness(fhits, clusters, segments, crosses);
         if(trkcands.isEmpty()) {
 
-            rbc.fillAllTBBanks(event, fhits, clusters, segments, crosses, urCrosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
+            rbc.fillAllTBBanks(event, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
             return true;
         }        
         
