@@ -123,12 +123,10 @@ public class DCURWellHBPostClusterConv extends DCEngine {
                 null,
                 dcSwim, false);
         /* 18 */
-        
+        // Read urwell crosses, and make urwell-dc-crosses combos
         URWellReader uRWellReader = new URWellReader(event, "HB");
-        List<URWellCross> urCrosses = uRWellReader.getUrwellCrosses();
-        
-        URWellDCCrossesListFinder uRWellDCCrossListLister = new URWellDCCrossesListFinder();
-        
+        List<URWellCross> urCrosses = uRWellReader.getUrwellCrosses();        
+        URWellDCCrossesListFinder uRWellDCCrossListLister = new URWellDCCrossesListFinder();        
         URWellDCCrossesList urDCCrossesList = uRWellDCCrossListLister.candURWellDCCrossLists(urCrosses, crosslist);
                 
         //6) find the list of  track candidates

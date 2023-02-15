@@ -44,6 +44,11 @@ import org.jlab.rec.dc.track.TrackCandListWithURWellFinder;
 import org.jlab.rec.urwell.reader.URWellCross;
 import org.jlab.rec.urwell.reader.URWellReader;
 
+/**
+ *
+ * @author Tongtong Cao
+ */
+
 public class DCURWellTBEngine extends DCEngine {
     
     private TimeToDistanceEstimator tde = null;
@@ -172,7 +177,8 @@ public class DCURWellTBEngine extends DCEngine {
             return true;
         }
         
-        URWellReader uRWellReader = new URWellReader(event, "TB");
+        // Read urwell crosses on HB tracks
+        URWellReader uRWellReader = new URWellReader(event, this.getBanks().getPrefix());
         List<URWellCross> urCrosses = uRWellReader.getUrwellCrosses();
         
         DataBank trkbank = event.getBank(this.getBanks().getInputTracksBank());

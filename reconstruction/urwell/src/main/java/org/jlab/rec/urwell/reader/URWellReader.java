@@ -27,15 +27,19 @@ public class URWellReader{
     }
     
     public URWellReader(DataEvent event, String type) {
-        if(type == "HB"){
+        if(type == "HB"){            
             if(event.hasBank("URWELL::clusters"))
                 this.readClusters(event.getBank("URWELL::clusters"));
             if(event.hasBank("URWELL::crosses"))
                 this.readCrosses(event.getBank("URWELL::crosses"));
         }
-        else if(type == "TB"){                        
+        else if(type == "TB"){ 
             if(event.hasBank("HitBasedTrkg::HBURWellCrosses"))
                 this.readHBCrosses(event.getBank("HitBasedTrkg::HBURWellCrosses"));
+        }
+        else if(type == "AI"){   
+            if(event.hasBank("HitBasedTrkg::AIURWellCrosses"))
+                this.readHBCrosses(event.getBank("HitBasedTrkg::AIURWellCrosses"));
         }
     }
     

@@ -38,7 +38,7 @@ import org.jlab.rec.urwell.reader.URWellCross;
  * A class with a method implementing an algorithm that finds lists of track
  * candidates in the DC
  *
- * @author ziegler, tongtong
+ * @author Tongtong Cao
  */
 
 public class TrackCandListWithURWellFinder {
