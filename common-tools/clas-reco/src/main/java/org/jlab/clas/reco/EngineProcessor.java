@@ -13,6 +13,8 @@ import org.jlab.utils.options.OptionParser;
 import org.jlab.clara.engine.EngineData;
 import org.jlab.clara.engine.EngineDataType;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.utils.JsonUtils;
 import org.json.JSONObject;
@@ -25,16 +27,13 @@ import org.jlab.utils.ClaraYaml;
  */
 public class EngineProcessor {
 
-    private final Map<String,ReconstructionEngine>  processorEngines = 
-            new LinkedHashMap<String,ReconstructionEngine>();
-    ReconstructionEngine  engineDummy = null;
+    private final Map<String,ReconstructionEngine>  processorEngines = new LinkedHashMap<>();
     private static final Logger LOGGER = Logger.getLogger(EngineProcessor.class.getPackage().getName());
     private boolean updateDictionary = true;
+    private final Set<String> banksToKeep = new HashSet<>();
     private final List<String> schemaExempt = Arrays.asList("RUN::config","DC::tdc");
-    
-    public EngineProcessor(){
-        this.engineDummy = new DummyEngine();
-    }
+
+    public EngineProcessor(){}
 
     private void updateDictionary(HipoDataSource source, HipoDataSync sync){
         SchemaFactory fsync = sync.getWriter().getSchemaFactory();
@@ -50,6 +49,23 @@ public class EngineProcessor {
             }
         }
     }
+
+    private void addBanksToKeep(String schemaDirectory) {
+        SchemaFactory schema = new SchemaFactory();
+        schema.initFromDirectory(schemaDirectory);
+        banksToKeep.addAll(schema.getSchemaKeys());
+    }
+
+    private void removeBanks(DataEvent event) {
+        if (!banksToKeep.isEmpty()) {
+            for (String bankName : event.getBankList()) {
+                if (!banksToKeep.contains(bankName)) {
+                    event.removeBank(bankName);
+                }
+            }
+        }
+    }
+
     public void initDefault(){
 
         String[] names = new String[]{
@@ -266,7 +282,7 @@ public class EngineProcessor {
                 DataEvent event = reader.getNextEvent();
                 if(nskip<=0 || eventCounter>nskip) {
                     processEvent(event);
-                    writer.writeEvent(event);
+                    removeBanks(event);
                 }
                 eventCounter++;
                 if(nevents>0){
@@ -303,61 +319,60 @@ public class EngineProcessor {
         parser.addOption("-y","0","yaml file");
         parser.addOption("-u","true","update dictionary from writer ? ");
         parser.addOption("-d","1","Debug level [0 - OFF, 1 - ON/default]");
+        parser.addOption("-S",null,"schema directory");
         parser.setDescription("previously known as notsouseful-util");
 
         parser.parse(args);
 
-        if(parser.getOption("-d").intValue() == 0)
-            DefaultLogger.initialize();
-        else
-            DefaultLogger.debug();
+        if(parser.getOption("-d").intValue() == 0) DefaultLogger.initialize();
+        else DefaultLogger.debug();
 
-        if(parser.hasOption("-i")==true&&parser.hasOption("-o")==true){
+        List<String> services = parser.getInputList();
 
-            List<String> services = parser.getInputList();
+        String  inputFile = parser.getOption("-i").stringValue();
+        String outputFile = parser.getOption("-o").stringValue();
 
-            String  inputFile = parser.getOption("-i").stringValue();
-            String outputFile = parser.getOption("-o").stringValue();
+        EngineProcessor proc = new EngineProcessor();
 
-            EngineProcessor proc = new EngineProcessor();
-            int config  = parser.getOption("-c").intValue();
-            int nskip   = parser.getOption("-s").intValue();
-            String update = parser.getOption("-u").stringValue();
-            int nevents = parser.getOption("-n").intValue();
-            String yamlFileName = parser.getOption("-y").stringValue();
+        if (parser.getOption("-S").stringValue() != null)
+            proc.addBanksToKeep(parser.getOption("-S").stringValue());
+        int config  = parser.getOption("-c").intValue();
+        int nskip   = parser.getOption("-s").intValue();
+        int nevents = parser.getOption("-n").intValue();
+        String yamlFileName = parser.getOption("-y").stringValue();
 
-            //---------------------------------------------------------------//
-            // added by GG. to turn off the dictionary update                //
-            //---------------------------------------------------------------//
-            if(update.contains("false")==true) proc.updateDictionary = false;
-            
-            if(!yamlFileName.equals("0")) {
-                ClaraYaml yaml = new ClaraYaml(yamlFileName);
-                for (JSONObject service : yaml.services()) {
-                    JSONObject cfg = yaml.filter(service.getString("name"));
-                    if (cfg.length() > 0) {
-                        proc.addEngine(service.getString("name"),service.getString("class"),cfg.toString());
-                    } else {
-                        proc.addEngine(service.getString("name"),service.getString("class"));
-                    }
-                }
+        String update = parser.getOption("-u").stringValue();
+        if(update.contains("false")==true) proc.updateDictionary = false;
+
+        if(!yamlFileName.equals("0")) {
+            ClaraYaml yaml = new ClaraYaml(yamlFileName);
+            if (yaml.schemaDirectory() != null) {
+                proc.addBanksToKeep(yaml.schemaDirectory());
             }
-            else if (config>0){
-                if(config>2){
-                    proc.initCaloDebug();
-                } else if(config==2){
-                    proc.initAll();
+            for (JSONObject service : yaml.services()) {
+                JSONObject cfg = yaml.filter(service.getString("name"));
+                if (cfg.length() > 0) {
+                    proc.addEngine(service.getString("name"),service.getString("class"),cfg.toString());
                 } else {
-                    proc.initDefault();
+                    proc.addEngine(service.getString("name"),service.getString("class"));
                 }
             }
-            else {
-                for(String engine : services){
-                    System.out.println("Adding reconstruction engine " + engine);
-                    proc.addEngine(engine);
-                }
-            }
-            proc.processFile(inputFile,outputFile,nskip,nevents);
         }
+        else if (config>0){
+            if(config>2){
+                proc.initCaloDebug();
+            } else if(config==2){
+                proc.initAll();
+            } else {
+                proc.initDefault();
+            }
+        }
+        else {
+            for(String engine : services){
+                System.out.println("Adding reconstruction engine " + engine);
+                proc.addEngine(engine);
+            }
+        }
+        proc.processFile(inputFile,outputFile,nskip,nevents);
     }
 }
