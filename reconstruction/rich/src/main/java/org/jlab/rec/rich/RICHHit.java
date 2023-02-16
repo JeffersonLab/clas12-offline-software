@@ -61,27 +61,29 @@ public class RICHHit implements Comparable<RICHHit>{
         this.lead      = lead.get_id();
         this.trail     = trail.get_id();
 
-        this.idx       = richgeo.get_PixelMap().Anode2idx(anode);
-        this.idy       = richgeo.get_PixelMap().Anode2idy(anode);
-        //this.glx       = richgeo.get_PixelMap().get_Globalidx(pmt, anode);
-        //this.gly       = richgeo.get_PixelMap().get_Globalidy(pmt, anode);
         this.duration  = trail.get_tdc()-lead.get_tdc();
 
         double twalk_corr = richcal.get_PixelTimeWalk(sector, pmt, this.duration);
         double toff_corr  = richcal.get_PixelTimeOff(sector, pmt, anode);
 
         this.status    = richcal.get_PixelStatus(sector, pmt, anode);
+        // to flag spurios hits (in not-existing sensors) coming from FPGA SEU indeuced by radiation
+        if(this.pmt==0)this.status = 1;
         this.rawtime   = lead.get_tdc();
         this.time      = (lead.get_tdc() + phase*4 + toff_corr - twalk_corr);
         this.cluster   = 0;
         this.xtalk     = 0;
             
-        if(debugMode>=1)System.out.format("Correzione time  pmt %3d  anode %4d  dur %5d  raw %7.2f  toff %7.2f  twalk %7.3f  --> time %7.2f \n",
-                                           this.pmt,this.anode,this.duration, this.rawtime, toff_corr, twalk_corr, this.time);
+        if(debugMode>=2)System.out.format("Correzione time  til %3d ch %6d pmt %3d  anode %4d  dur %5d  raw %7.2f  toff %7.2f  twalk %7.3f  --> time %7.2f \n",
+                                           this.tile, this.channel, this.pmt,this.anode,this.duration, this.rawtime, toff_corr, twalk_corr, this.time);
 
-	if(debugMode>=1)System.out.format(" Hittime %4d %4d %8d %7.2f %7d %7.2f %7.2f %7.2f \n", hid, pmt, this.duration, this.rawtime, 
+	if(debugMode>=2)System.out.format(" Hittime %4d %4d %8d %7.2f %7d %7.2f %7.2f %7.2f \n", hid, pmt, this.duration, this.rawtime, 
                                            phase*4, toff_corr, -twalk_corr, this.time);
 
+        //this.glx       = richgeo.get_PixelMap().get_Globalidx(pmt, anode);
+        //this.gly       = richgeo.get_PixelMap().get_Globalidy(pmt, anode);
+        this.idx       = richgeo.get_PixelMap().Anode2idx(anode);
+        this.idy       = richgeo.get_PixelMap().Anode2idy(anode);
         Point3D CesPos = richgeo.get_Pixel_Center(sector, pmt,anode);
         this.x         =  CesPos.x();
         this.y         =  CesPos.y();
