@@ -315,8 +315,9 @@ public class RICHSolution {
                 }else{
                     icompo = 0;
                 }
-                if(debugMode>0)System.out.format("ray %3d is_good %6d %3d %3d \n",i,raytracks.get(i).get_type(),ilay,icompo);
-                if(richcal.get_MirrorStatus(isec, ilay, icompo)>0){status=1; return;}
+                int check = richcal.get_MirrorStatus(isec, ilay, icompo+1);
+                if(debugMode>0)System.out.format("check ray %3d %6d %3d %3d --> %3d \n",i,raytracks.get(i).get_type(),ilay,icompo, check);
+                if(check>0){status=1; return;}
             }
         }
         return;

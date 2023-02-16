@@ -575,7 +575,10 @@ public class RICHEvent {
                     RICHSolution reco = pho.traced;
                     if(recotype==0) reco = pho.analytic;
 
-                    if(!reco.is_used()) continue;
+                    if(!reco.is_used()) {
+                        if(debugMode>=2)System.out.format("pho %4d %3d %3d rejected %3d %3d \n",pho.get_id(),pho.get_ParentIndex(), pho.get_HitIndex(), reco.get_OK(), reco.status()); 
+                        continue;
+                    }
 
                     double etac    = reco.get_EtaC();
                     int    irefle  = reco.get_RefleType();
@@ -1060,7 +1063,7 @@ public class RICHEvent {
                         if(oth.get_id()!=pho.get_id() && oth.get_ParentIndex()==hadron.get_id() && oth.get_HitIndex()==pho.get_HitIndex()){
                             RICHSolution roth = oth.traced;
                             if(recotype==0) roth = oth.analytic;
-                            if(roth.get_OK()==11){
+                            if(roth.get_OK()==11 && roth.status()==0){
                                 reco.set_OK( reco.get_OK()+100 );
                                 // take elemets for likelihood calculation
                                 // ATT: take first working hypo as most probable (to be refined)
