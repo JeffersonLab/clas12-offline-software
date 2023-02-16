@@ -77,6 +77,19 @@ public class ClaraYaml {
         return services;
     }
 
+    public String schemaDirectory() {
+        if (json.has("configuration")) {
+            JSONObject jcfg = json.getJSONObject("configuration");
+            if (jcfg.has("io-services")) {
+                JSONObject jio = jcfg.getJSONObject("io-services");
+                if (jio.has("writer")) {
+                    return jio.getJSONObject("writer").getString("schema_dir");
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * Get the service's configuration as presented by CLARA.
      * @param serviceName
