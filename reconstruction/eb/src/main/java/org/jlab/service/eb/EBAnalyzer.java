@@ -12,6 +12,7 @@ import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.DetectorLayer;
 
 import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.pdg.PDGDatabase;
@@ -467,7 +468,7 @@ public class EBAnalyzer {
                     }
                     break;
                 case 22:
-                    if (pidFromTimingCheck) {
+                    if (pidFromTimingCheck && p.hasHit(DetectorType.ECAL, DetectorLayer.PCAL)) {
                         this.finalizePID(p,pid);
                     }
                     break;
