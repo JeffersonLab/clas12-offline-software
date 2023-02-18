@@ -202,7 +202,7 @@ public class CNDClusterFinder {
                 acluster.set_time(seedHit.Time());
                 acluster.set_nhits(clustered_hits.getItem(k).size());
                 acluster.set_energysum(energy_cluster);
-                acluster.set_status(0);
+                acluster.set_status(seedHit.get_status());
                 acluster.set_pathLengthThruBar(pathlengththroughbar);
                 
                 
