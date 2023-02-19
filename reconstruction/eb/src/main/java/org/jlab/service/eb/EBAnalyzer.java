@@ -468,8 +468,11 @@ public class EBAnalyzer {
                     }
                     break;
                 case 22:
-                    if (pidFromTimingCheck && p.hasHit(DetectorType.ECAL, DetectorLayer.PCAL)) {
-                        this.finalizePID(p,pid);
+                    if (pidFromTimingCheck) {
+                        if (!p.getStatus().isForward() ||
+                             p.hasHit(DetectorType.ECAL, DetectorLayer.PCAL)) {
+                            this.finalizePID(p,pid);
+                        }
                     }
                     break;
             }
