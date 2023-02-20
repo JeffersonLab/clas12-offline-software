@@ -158,7 +158,11 @@ public class Surface {
     
     public double dx(Point3D point, Vector3D dir) {
         if(this.isInside(point)) {
-            return dir.dot(this.plane.normal())*this.thickness;
+            double cosdir = dir.dot(this.plane.normal());
+            if(cosdir!=0)
+                return this.thickness/cosdir;
+            else
+                return 0;
         }
         return 0;
     }
