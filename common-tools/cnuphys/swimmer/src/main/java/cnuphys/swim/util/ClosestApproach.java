@@ -30,6 +30,7 @@ public class ClosestApproach {
 			double p1, double p2,
 			int lundId1, int lundId2, double deltaT, double results[]) {
 
+		//get the velocities, or assume speed of light
 		double beta1 = 1; // v/c
 		double beta2 = 1; // v/c
 
