@@ -1,0 +1,163 @@
+[
+	{
+		"name": "ALRTDC::Hits",
+		"group": 23000,
+		"item": 23,
+		"info": "Raw Hits",
+		"entries": [
+			{
+				"name": "ID",
+				"type": "S",
+				"info": "hit id"
+			}, {
+				"name": "layer",
+				"type": "B",
+				"info": "layer number"
+			}, {
+				"name": "superlayer",
+				"type": "B",
+				"info": "superlayer number"
+			}, {
+				"name": "wire",
+				"type": "I",
+				"info": "wire number"
+			}, {
+				"name": "Doca",
+				"type": "D",
+				"info": "distance od closest approch (mm)"
+			}
+		]
+	}, {
+	"name": "ALRTDC::PreClusters",
+	"group": 23000,
+	"item": 24,
+	"info": "Pre Clusters info",
+	"entries": [
+		{
+			"name": "X",
+			"type": "F",
+			"info": "X info (mm)"
+		}, {
+			"name": "Y",
+			"type": "F",
+			"info": "Y info (mm)"
+		}
+	]
+}, {
+	"name": "ALRTDC::Clusters",
+	"group": 23000,
+	"item": 25,
+	"info": "Clusters info",
+	"entries": [
+		{
+			"name": "X",
+			"type": "F",
+			"info": "X info (mm)"
+		}, {
+			"name": "Y",
+			"type": "F",
+			"info": "Y info (mm)"
+		}, {
+			"name": "Z",
+			"type": "F",
+			"info": "Z info (mm)"
+		}
+	]
+}, {
+	"name": "ALRTDC::Track",
+	"group": 23000,
+	"item": 21,
+	"info": "Reco Tracks",
+	"entries": [
+		{
+			"name": "x",
+			"type": "F",
+			"info": "x position in mm"
+		}, {
+			"name": "y",
+			"type": "F",
+			"info": "y position in mm"
+		}, {
+			"name": "z",
+			"type": "F",
+			"info": "z position in mm"
+		}, {
+			"name": "px",
+			"type": "F",
+			"info": "px in MeV"
+		}, {
+			"name": "py",
+			"type": "F",
+			"info": "py in MeV"
+		}, {
+			"name": "pz",
+			"type": "F",
+			"info": "pz in MeV"
+		}
+	]
+}, {
+	"name": "ALRTDC::KFTrack",
+	"group": 23000,
+	"item": 26,
+	"info": "Reco Kalman Filter Tracks",
+	"entries": [
+		{
+			"name": "x",
+			"type": "F",
+			"info": "x position in mm"
+		}, {
+			"name": "y",
+			"type": "F",
+			"info": "y position in mm"
+		}, {
+			"name": "z",
+			"type": "F",
+			"info": "z position in mm"
+		}, {
+			"name": "px",
+			"type": "F",
+			"info": "px in MeV"
+		}, {
+			"name": "py",
+			"type": "F",
+			"info": "py in MeV"
+		}, {
+			"name": "pz",
+			"type": "F",
+			"info": "pz in MeV"
+		}
+	]
+}, {
+	"name": "ALRTDC::MC",
+	"group": 23000,
+	"item": 22,
+	"info": "MC Tracks",
+	"entries": [
+		{
+			"name": "x",
+			"type": "F",
+			"info": "x position in mm"
+		}, {
+			"name": "y",
+			"type": "F",
+			"info": "y position in mm"
+		}, {
+			"name": "z",
+			"type": "F",
+			"info": "z position in mm"
+		}, {
+			"name": "px",
+			"type": "F",
+			"info": "px in MeV"
+		}, {
+			"name": "py",
+			"type": "F",
+			"info": "py in MeV"
+		}, {
+			"name": "pz",
+			"type": "F",
+			"info": "pz in MeV"
+		}
+	]
+}
+]
