@@ -867,9 +867,9 @@ public class RecUtilities {
     }
 
     Track recovTrkMisClusSearch(Seed seed, org.jlab.clas.tracking.trackrep.Helix hlx, double[][] cov, KFitter kf2, KFitter kf, int pid, 
-            List<Surface> surfaces, double xb, double yb, List<Cluster> SVTclusters, List<Cross> SVTcrosses, 
+            List<Surface> surfaces0, double xb, double yb, List<Cluster> SVTclusters, List<Cross> SVTcrosses, 
             Swim swimmer, double solenoidScale, double solenoidValue, Measurements measure) {
-        
+        List<Surface> surfaces = surfaces0;
         Track fittedTrack  = null;
         if(Constants.getInstance().seedingDebugMode) System.out.println("TRACK RECOVERY");
         kf2.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid));
@@ -927,9 +927,15 @@ public class RecUtilities {
                     c.getCluster2().setAssociatedTrackID(0);
                 }
             }
+            fittedTrack.setStatus(1); 
+        } else {
+            if(fittedTrack!=null) {
+                fittedTrack.setStatus(-1); 
+                if(Constants.getInstance().seedingDebugMode) 
+                    System.out.println("RECOVERED...with negative status "+fittedTrack.toString());
+                
+            }      
         }
         return fittedTrack;
     }
-
-    
 }

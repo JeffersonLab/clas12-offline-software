@@ -302,13 +302,13 @@ public class TracksFromTargetRec {
                         fittedTrack = recUtil.recovTrkMisClusSearch(seed, hlx, cov, kf2, kf, pid, surfaces, xb, yb,
                             this.SVTclusters, this.SVTcrosses, 
                             swimmer, solenoidScale, solenoidValue, measure);
-                        if(fittedTrack!=null) {
-                            fittedTrack.setStatus(1); 
-                            if(Constants.getInstance().seedingDebugMode) 
-                                System.out.println("RECOVERED..."+fittedTrack.toString());
-                        } 
+//                        if(fittedTrack!=null) {
+//                            fittedTrack.setStatus(1); 
+//                            if(Constants.getInstance().seedingDebugMode) 
+//                                System.out.println("RECOVERED..."+fittedTrack.toString());
+//                        } 
                     } 
-                    if((Constants.getInstance().KFfailRecovMisCls && fittedTrack==null) || !Constants.getInstance().KFfailRecovMisCls ){
+                    if((Constants.getInstance().KFfailRecovMisCls && fittedTrack==null) ){
                         //dump seed
                         kf2.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid)); 
                         kf2.runFitterNoFiltFailSafe();

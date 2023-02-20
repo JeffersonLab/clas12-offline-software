@@ -548,7 +548,7 @@ public class Track extends Trajectory implements Comparable<Track> {
                     this.setPathToCTOF(path);
                 }
                 
-                surface.getEloss(mom, mass, 1);
+                //surface.getEloss(mom, mass, 1);
                 if(mom.mag()==0) break;
             }
         }
