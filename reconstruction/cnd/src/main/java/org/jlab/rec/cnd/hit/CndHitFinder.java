@@ -255,7 +255,7 @@ public class CndHitFinder {
 
 					//from silvia
 
-                    if(Math.abs(z_dh_hit - z_hit) / 10 < 2 && Math.abs(hit_d.Tprop() - hit_n.Tprop()) < 0.5)
+                    if(Math.abs(z_dh_hit - z_hit) / 10 < Parameters.DeltaZDH && Math.abs(hit_d.Tprop() - hit_n.Tprop()) < Parameters.DeltaTDH)
                     {
                     	GoodHit.set_status(1);
                     }
