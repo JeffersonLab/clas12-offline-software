@@ -337,6 +337,8 @@ public class HitReader {
                 if (SvtStrip.getEdep() == 0) {
                     SvtStrip.setStatus(1);
                 }
+                //get status from ccdb
+                SvtStrip.setStatus(status.getIntValue("status", sector, layer, strip));
                 // create the hit object
                 Hit hit = new Hit(DetectorType.BST, BMTType.UNDEFINED, sector, layer, SvtStrip);
                 hit.setId(id);
