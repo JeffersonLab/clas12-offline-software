@@ -65,6 +65,7 @@ public class DCHBPostClusterAI extends DCEngine {
         /* 7 */
         /* 8 */
         //AI
+        List<Track> allTrkcands = new ArrayList<>(); 
         List<Track> trkcands = null;
         List<Cross> crosses = null;
         List<FittedCluster> clusters = null;
@@ -119,8 +120,15 @@ public class DCHBPostClusterAI extends DCEngine {
         trkcands = trkcandFinder.getTrackCands(crosslist,
             Constants.getInstance().dcDetector,
             Swimmer.getTorScale(),
-            dcSwim, true);
+            dcSwim, true, allTrkcands);
 
+        if (!allTrkcands.isEmpty()) {
+            event.appendBanks(writer.fillTrackCandidatesBank(event, allTrkcands),
+            writer.fillTrackCandsDCMeasurementsBank(event, allTrkcands),   
+            writer.fillTrackCandsIterationsBank(event, allTrkcands),
+            writer.fillTrackCandsStatesBank(event, allTrkcands));  
+        }
+                
         // track found
         clusters = new ArrayList<>();
         int trkId = 1;

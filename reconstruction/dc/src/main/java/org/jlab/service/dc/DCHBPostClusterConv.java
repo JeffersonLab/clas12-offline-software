@@ -57,6 +57,8 @@ public class DCHBPostClusterConv extends DCEngine {
         // get Field
         Swim dcSwim = new Swim();
      
+        List<Track> allTrkcands = new ArrayList<>();  
+        List<Track> allMistrkcands = new ArrayList<>();   
         List<Track> trkcands = null;
         List<Cross> crosses = null;
         List<FittedCluster> clusters = null;
@@ -124,7 +126,14 @@ public class DCHBPostClusterConv extends DCEngine {
         trkcands = trkcandFinder.getTrackCands(crosslist,
                 Constants.getInstance().dcDetector,
                 Swimmer.getTorScale(),
-                dcSwim, false);
+                dcSwim, false, allTrkcands);
+        
+        if (!allTrkcands.isEmpty()) {
+            event.appendBanks(writer.fillTrackCandidatesBank(event, allTrkcands),
+            writer.fillTrackCandsDCMeasurementsBank(event, allTrkcands),   
+            writer.fillTrackCandsIterationsBank(event, allTrkcands),
+            writer.fillTrackCandsStatesBank(event, allTrkcands));  
+        }
         /* 19 */
         // track found
         int trkId = 1;
@@ -202,7 +211,14 @@ public class DCHBPostClusterConv extends DCEngine {
         List<Track> mistrkcands = trkcandFinder.getTrackCands(pcrosslist,
                 Constants.getInstance().dcDetector,
                 Swimmer.getTorScale(),
-                dcSwim, false);
+                dcSwim, false, allMistrkcands);
+        
+        if (!allMistrkcands.isEmpty()) {
+            event.appendBanks(writer.fillTrackCandidatesBank(event, allMistrkcands),
+            writer.fillTrackCandsDCMeasurementsBank(event, allMistrkcands),   
+            writer.fillTrackCandsIterationsBank(event, allMistrkcands),
+            writer.fillTrackCandsStatesBank(event, allMistrkcands));  
+        }
 
         // remove overlaps
         if (!mistrkcands.isEmpty()) {

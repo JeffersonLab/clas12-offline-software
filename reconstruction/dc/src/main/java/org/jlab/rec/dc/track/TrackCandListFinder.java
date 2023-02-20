@@ -216,12 +216,12 @@ public class TrackCandListFinder {
      * @return a list of track candidates in the DC
      */
     public List<Track> getTrackCands(CrossList crossList, DCGeant4Factory DcDetector, double TORSCALE, Swim dcSwim,
-            boolean donotapplyCuts) {
+            boolean donotapplyCuts, List<Track> allTrkcands) {
         List<Track> cands = null;
         if (Math.abs(TORSCALE) < 0.001) {
-            cands = this.findStraightTracks(crossList, DcDetector, TORSCALE, dcSwim);
+            cands = this.findStraightTracks(crossList, DcDetector, TORSCALE, dcSwim, allTrkcands);
         } else {
-            cands = this.findCurvedTracks(crossList, DcDetector, TORSCALE, dcSwim, donotapplyCuts);
+            cands = this.findCurvedTracks(crossList, DcDetector, TORSCALE, dcSwim, donotapplyCuts, allTrkcands);
         }
         return cands;
     }
@@ -852,7 +852,7 @@ public class TrackCandListFinder {
         return Math.signum(ycen);
     }
 
-    private List<Track> findStraightTracks(CrossList crossList, DCGeant4Factory DcDetector, double TORSCALE, Swim dcSwim) {
+    private List<Track> findStraightTracks(CrossList crossList, DCGeant4Factory DcDetector, double TORSCALE, Swim dcSwim, List<Track> allTrkCands) {
 
         if(LOGGER.getLevel()==Level.FINE) {
             startTime2 = System.currentTimeMillis();
@@ -896,14 +896,33 @@ public class TrackCandListFinder {
 
                     LOGGER.log(Level.FINE, "Kalman fitter - 2 = " + (System.currentTimeMillis() - startTime));
 
+                    int maxIter = 1;
+                    int seedRegion = 1;                    
                     KFitter kFZRef = new KFitter(true, 1, 1, dcSwim, Constants.getInstance().Z, Libr.JNP);
                     List<Surface> measSurfaces = getMeasSurfaces(cand, DcDetector);
                     StateVecs svs = new StateVecs();
                     org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec initSV = svs.new StateVec(0);
-                    getInitState(cand, measSurfaces.get(0).z, 0, initSV, dcSwim, new float[3]);
+                    getInitState(cand, measSurfaces.get(0).z, seedRegion-1, initSV, dcSwim, new float[3]);
                     kFZRef.init(measSurfaces, initSV);
 
                     kFZRef.runFitter();
+                    
+                    if(kFZRef.setFitFailed || kFZRef.getStopIteration()) cand.set_KFStatus(0);
+                    cand.set_MaxIter(maxIter);
+                    cand.set_SeedRegion(seedRegion);
+                    cand.set_SeedStateVec(initSV);
+                    cand.set_Q((int) Math.signum(initSV.Q));
+                    cand.set_KFChi2(kFZRef.getKFChi2());
+                    cand.set_FitChi2(kFZRef.chi2);
+                    cand.set_FitNDF(kFZRef.NDF);
+
+                    cand.set_MeasVecs(kFZRef.getMeasVecs());
+                    cand.set_FitFailedMap(kFZRef.getSetFitFailedMap());
+                    cand.set_StopIterationMap(kFZRef.getStopIterationMap());
+                    cand.set_SVMap(kFZRef.getSVMap());
+                    cand.set_Chi2KFMap(kFZRef.getChi2KFMap());
+
+                    allTrkCands.add(cand);
 
                     if (kFZRef.finalStateVec == null) {
                         continue;
@@ -942,7 +961,7 @@ public class TrackCandListFinder {
     }
 
     private List<Track> findCurvedTracks(CrossList crossList, DCGeant4Factory DcDetector, double TORSCALE, Swim dcSwim,
-            boolean donotapplyCuts) {
+            boolean donotapplyCuts, List<Track> allTrkcands) {
     	    	
     	
         if(LOGGER.getLevel()==Level.FINE) {
@@ -1146,7 +1165,9 @@ public class TrackCandListFinder {
 
                         LOGGER.log(Level.FINE, "Kalman fitter - 2 = " + (System.currentTimeMillis() - startTime));
 
-                        KFitter kFZRef = new KFitter(true, 10, 1, dcSwim, Constants.getInstance().Z, Libr.JNP);
+                        int maxIter = 10;
+                        int seedRegion = crossIdxinList+1;
+                        KFitter kFZRef = new KFitter(true, maxIter, 1, dcSwim, Constants.getInstance().Z, Libr.JNP);
                         List<Surface> measSurfaces = getMeasSurfaces(cand, DcDetector);
                         StateVecs svs = new StateVecs();
                         org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec initSV = svs.new StateVec(0);
@@ -1155,6 +1176,23 @@ public class TrackCandListFinder {
 						
                         kFZRef.runFitter();
                         List<org.jlab.rec.dc.trajectory.StateVec> kfStateVecsAlongTrajectory = setKFStateVecsAlongTrajectory(kFZRef);
+                        
+                        if(kFZRef.setFitFailed || kFZRef.getStopIteration()) cand.set_KFStatus(0);
+                        cand.set_MaxIter(maxIter);
+                        cand.set_SeedRegion(seedRegion);
+                        cand.set_SeedStateVec(initSV);
+                        cand.set_Q(q);
+                        cand.set_KFChi2(kFZRef.getKFChi2());        
+                        cand.set_FitChi2(kFZRef.chi2);
+                        cand.set_FitNDF(kFZRef.NDF);
+
+                        cand.set_MeasVecs(kFZRef.getMeasVecs());
+                        cand.set_FitFailedMap(kFZRef.getSetFitFailedMap());
+                        cand.set_StopIterationMap(kFZRef.getStopIterationMap());
+                        cand.set_SVMap(kFZRef.getSVMap());
+                        cand.set_Chi2KFMap(kFZRef.getChi2KFMap());
+
+                        allTrkcands.add(cand);   
                         
                         if (kFZRef.finalStateVec == null) {
                             continue;

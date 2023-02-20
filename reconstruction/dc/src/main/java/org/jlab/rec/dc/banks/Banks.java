@@ -118,6 +118,26 @@ public class Banks {
     public String getTracksBank() {
         return this.getOutputBank("Tracks");
     }
+        
+    public String getTrackCandidatesBank() {
+        return this.getOutputBank("TrkCands");
+    }
+
+    public String getTrackCandsDCMeasurementsBank() {
+        return this.getOutputBank("TrkCandsDCMeasurements");
+    }
+    
+    public String getTrackCandsURWellMeasurementsBank() {
+        return this.getOutputBank("TrkCandsURWellMeasurements");
+    }
+
+    public String getTrackCandsIterationsBank() {
+        return this.getOutputBank("TrkCandsIterations");
+    }
+
+    public String getTrackCandsStatesBank() {
+        return this.getOutputBank("TrkCandsStates");
+    }
 
     public String getIdsBank() {
         return this.getOutputBank("HitTrkId");

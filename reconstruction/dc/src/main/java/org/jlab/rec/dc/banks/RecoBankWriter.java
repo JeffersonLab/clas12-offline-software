@@ -2,6 +2,7 @@ package org.jlab.rec.dc.banks;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.tracking.kalmanfilter.Type;
 import org.jlab.detector.base.DetectorType;
 
 import org.jlab.io.base.DataBank;
@@ -1087,4 +1088,320 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
             event.appendBanks(this.fillTBHitsBank(event, fhits));
         }
     }
+    
+     /**
+     *
+     * @param event the EvioEvent
+     * @return track candidate bank
+     */
+    public DataBank fillTrackCandidatesBank(DataEvent event, List<Track> candlist) {
+
+        String name = bankNames.getTrackCandidatesBank();                 
+        DataBank bank = event.createBank(name, candlist.size());
+
+        for (int i = 0; i < candlist.size(); i++) {
+            short trkCand_id = (short) (i + 1);
+            bank.setShort("id", i, trkCand_id);
+            bank.setShort("status", i, (short) (100+candlist.get(i).get_Status()*10+candlist.get(i).get_MissingSuperlayer()));
+            bank.setShort("kf_status", i, (short) candlist.get(i).get_KFStatus());
+            bank.setByte("sector", i, (byte) candlist.get(i).getSector());
+            bank.setShort("max_iter", i, (short) candlist.get(i).get_MaxIter());
+            bank.setShort("total_iters", i, (short) candlist.get(i).get_Chi2KFMap().size());
+            bank.setByte("q", i, (byte) candlist.get(i).get_Q());
+            bank.setFloat("kf_chi2", i, (float) candlist.get(i).get_KFChi2());    
+            bank.setFloat("chi2", i, (float) candlist.get(i).get_FitChi2());
+            bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
+
+            bank.setByte("region_seed", i, (byte) candlist.get(i).get_SeedRegion());
+            bank.setFloat("seed_x", i, (float) candlist.get(i).get_SeedStateVec().x);
+            bank.setFloat("seed_y", i, (float) candlist.get(i).get_SeedStateVec().y);
+            bank.setFloat("seed_tx", i, (float) candlist.get(i).get_SeedStateVec().tx);
+            bank.setFloat("seed_ty", i, (float) candlist.get(i).get_SeedStateVec().ty);
+            bank.setFloat("seed_Q", i, (float) candlist.get(i).get_SeedStateVec().Q);
+
+            bank.setFloat("seed_c00", i, (float) candlist.get(i).get_SeedStateVec().CM.get(0, 0));
+            bank.setFloat("seed_c11", i, (float) candlist.get(i).get_SeedStateVec().CM.get(1,1));
+            bank.setFloat("seed_c22", i, (float) candlist.get(i).get_SeedStateVec().CM.get(2,2));
+            bank.setFloat("seed_c33", i, (float) candlist.get(i).get_SeedStateVec().CM.get(3,3));
+            bank.setFloat("seed_c44", i, (float) candlist.get(i).get_SeedStateVec().CM.get(4,4));
+
+           //fill associated IDs
+            for(int r = 0; r < 3; r++) {
+                bank.setShort("Cross"+String.valueOf(r+1)+"_ID", 
+                    i, (short) -1);
+            }
+            for(int k = 0; k < candlist.get(i).size(); k++) {
+                bank.setShort("Cross"+String.valueOf(candlist.get(i).get(k).get_Region())+"_ID", 
+                    i, (short) candlist.get(i).get(k).get_Id());
+            }
+        }
+
+        return bank;
+    }
+
+    public DataBank fillTrackCandsDCMeasurementsBank(DataEvent event, List<Track> candlist) {
+
+        int totalRows = 0;
+        for (int i = 0; i < candlist.size(); i++) {
+            for (int j = 0; j < candlist.get(i).get_MeasVecs().measurements.size(); j++) {
+                if(candlist.get(i).get_MeasVecs().measurements.get(j).surface.type == Type.LINEDOCA)
+                    totalRows += candlist.get(i).get_MeasVecs().measurements.get(j).surface.nMeas;          
+            }                        
+        }
+
+        String name = bankNames.getTrackCandsDCMeasurementsBank();
+        DataBank bank = event.createBank(name, totalRows);
+        int index = 0;
+        for (int i = 0; i < candlist.size(); i++) {
+            short trkCand_id = (short) (i + 1);
+            for (int j = 0; j < candlist.get(i).get_MeasVecs().measurements.size(); j++) {
+                if(candlist.get(i).get_MeasVecs().measurements.get(j).surface.type == Type.LINEDOCA){
+                    for (int k = 0; k < candlist.get(i).get_MeasVecs().measurements.get(j).surface.nMeas; k++) {
+                        bank.setShort("trkCand_id", index, trkCand_id);
+                        bank.setByte("sector", index, (byte) candlist.get(i).getSector());
+                        bank.setByte("layer", index, (byte) ((candlist.get(i).get_MeasVecs().measurements.get(j).superlayer -1 ) * 6 + candlist.get(i).get_MeasVecs().measurements.get(j).layer));
+                        bank.setFloat("x", index, (float) candlist.get(i).get_MeasVecs().measurements.get(j).surface.x);
+                        bank.setFloat("z", index, (float) candlist.get(i).get_MeasVecs().measurements.get(j).surface.z);
+                        bank.setFloat("doca", index, (float) candlist.get(i).get_MeasVecs().measurements.get(j).surface.doca[k]);
+                        bank.setFloat("unc", index, (float) Math.sqrt(candlist.get(i).get_MeasVecs().measurements.get(j).surface.unc[k]));
+
+                        bank.setFloat("x_wire", index, (float) candlist.get(i).get_MeasVecs().measurements.get(j).surface.wireLine[k].origin().x());
+                        bank.setFloat("y_wire", index, (float) candlist.get(i).get_MeasVecs().measurements.get(j).surface.wireLine[k].origin().y());
+                        bank.setFloat("z_wire", index, (float) candlist.get(i).get_MeasVecs().measurements.get(j).surface.wireLine[k].origin().z());
+                        bank.setFloat("dirX_wire", index, (float) candlist.get(i).get_MeasVecs().measurements.get(j).surface.wireLine[k].direction().asUnit().x());
+                        bank.setFloat("dirY_wire", index, (float) candlist.get(i).get_MeasVecs().measurements.get(j).surface.wireLine[k].direction().asUnit().y());
+                        bank.setFloat("dirZ_wire", index, (float) candlist.get(i).get_MeasVecs().measurements.get(j).surface.wireLine[k].direction().asUnit().z());
+
+                        index++;
+                    }
+                }
+            }
+        }
+
+        return bank;
+    }
+    
+    public DataBank fillTrackCandsURWellMeasurementsBank(DataEvent event, List<Track> candlist) {
+
+        int totalRows = 0;
+        for (int i = 0; i < candlist.size(); i++) {
+            for (int j = 0; j < candlist.get(i).get_MeasVecs().measurements.size(); j++) {
+                if (candlist.get(i).get_MeasVecs().measurements.get(j).surface.type == Type.PLANEURWELL) 
+                    totalRows ++;
+            }
+        }
+
+        String name = bankNames.getTrackCandsURWellMeasurementsBank();
+        DataBank bank = event.createBank(name, totalRows);
+        int index = 0;
+        for (int i = 0; i < candlist.size(); i++) {
+            short trkCand_id = (short) (i + 1);
+            for (int j = 0; j < candlist.get(i).get_MeasVecs().measurements.size(); j++) {
+                if (candlist.get(i).get_MeasVecs().measurements.get(j).surface.type == Type.PLANEURWELL) {
+                    bank.setShort("trkCand_id", index, trkCand_id);
+                    bank.setByte("sector", index, (byte) candlist.get(i).getSector());
+                    bank.setByte("layer", index, (byte) candlist.get(i).get_MeasVecs().measurements.get(j).layer);
+                    bank.setFloat("x", index, (float) candlist.get(i).get_MeasVecs().measurements.get(j).surface.x);
+                    bank.setFloat("y", index, (float) candlist.get(i).get_MeasVecs().measurements.get(j).surface.y);
+                    bank.setFloat("z", index, (float) candlist.get(i).get_MeasVecs().measurements.get(j).surface.z);
+                    bank.setFloat("x_unc", index, (float) candlist.get(i).get_MeasVecs().measurements.get(j).surface.x_err);
+                    bank.setFloat("y_unc", index, (float) candlist.get(i).get_MeasVecs().measurements.get(j).surface.y_err);
+                    
+                    index++;
+                }
+            }
+        }
+
+        return bank;
+    }
+
+    public DataBank fillTrackCandsIterationsBank(DataEvent event, List<Track> candlist) {
+        int totalRows = 0;
+        for (int i = 0; i < candlist.size(); i++) {
+            totalRows += candlist.get(i).get_Chi2KFMap().size();                        
+        }
+
+        String name = bankNames.getTrackCandsIterationsBank();
+        DataBank bank = event.createBank(name, totalRows);
+        int index = 0;
+        for (int i = 0; i < candlist.size(); i++) {
+            short trkCand_id = (short) (i + 1);            
+            for(int j = 0; j < candlist.get(i).get_Chi2KFMap().size(); j++){
+               bank.setShort("trkCand_id", index, trkCand_id);
+               bank.setShort("index", index, (short)(j+1));
+               bank.setByte("failed", index, (byte)(candlist.get(i).get_SetFitFailedMap().get(j+1)?1:0));
+               bank.setByte("broken", index, (byte)(candlist.get(i).get_StopIterationMap().get(j+1)?1:0));
+               bank.setFloat("chi2_kf", index, candlist.get(i).get_Chi2KFMap().get(j+1).floatValue());
+
+               index++;
+            }
+        }        
+        return bank;
+    }
+
+    public DataBank fillTrackCandsStatesBank(DataEvent event, List<Track> candlist) {
+        int totalRows = 0;
+        for (int i = 0; i < candlist.size(); i++) {
+            for (int iter : candlist.get(i).get_SVMap().keySet()) {
+                for(int site: candlist.get(i).get_SVMap().get(iter).trackTrajT.keySet()){
+                    if(candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site) != null) totalRows++;
+                    else break;
+                }
+                for(int site: candlist.get(i).get_SVMap().get(iter).trackTrajF.keySet()){
+                    if(candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site) != null) totalRows++;
+                    else break;
+                }
+                for(int site: candlist.get(i).get_SVMap().get(iter).trackTrajP.keySet()){
+                    if(candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site) != null) totalRows++;
+                    else break;
+                }
+                for(int site: candlist.get(i).get_SVMap().get(iter).trackTrajB.keySet()){
+                    if(candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site) != null) totalRows++;
+                    else break;                    
+                }
+            }
+        }
+
+        String name = bankNames.getTrackCandsStatesBank();
+        DataBank bank = event.createBank(name, totalRows);
+        int index = 0;
+        for (int i = 0; i < candlist.size(); i++) {
+            short trkCand_id = (short) (i + 1);
+            for (int iter : candlist.get(i).get_SVMap().keySet()) {
+                for (int site : candlist.get(i).get_SVMap().get(iter).trackTrajT.keySet()) {
+                    if (candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site) != null) {
+                        bank.setShort("trkCand_id", index, trkCand_id);
+                        bank.setShort("iter_index", index, (short) iter);
+                        bank.setByte("sector", index, (byte) candlist.get(i).getSector());
+                        bank.setByte("category", index, (byte) 1);
+                        bank.setFloat("x", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).x);
+                        bank.setFloat("y", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).y);
+                        bank.setFloat("z", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).z);
+                        bank.setFloat("tx", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).tx);
+                        bank.setFloat("ty", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).ty);
+                        bank.setFloat("Q", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).Q);
+                        bank.setFloat("c00", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).CM.get(0, 0));
+                        bank.setFloat("c01", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).CM.get(0, 1));
+                        bank.setFloat("c02", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).CM.get(0, 2));
+                        bank.setFloat("c03", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).CM.get(0, 3));
+                        bank.setFloat("c04", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).CM.get(0, 4));
+                        bank.setFloat("c11", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).CM.get(1, 1));
+                        bank.setFloat("c12", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).CM.get(1, 2));
+                        bank.setFloat("c13", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).CM.get(1, 3));
+                        bank.setFloat("c14", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).CM.get(1, 4));
+                        bank.setFloat("c22", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).CM.get(2, 2));
+                        bank.setFloat("c23", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).CM.get(2, 3));
+                        bank.setFloat("c24", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).CM.get(2, 4));
+                        bank.setFloat("c33", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).CM.get(3, 3));
+                        bank.setFloat("c34", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).CM.get(3, 4));
+                        bank.setFloat("c44", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).CM.get(4, 4));
+
+                        index++;
+                    } 
+                    else break;
+                }
+                for (int site : candlist.get(i).get_SVMap().get(iter).trackTrajF.keySet()) {
+                    if (candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site) != null) {
+                        bank.setShort("trkCand_id", index, trkCand_id);
+                        bank.setShort("iter_index", index, (short) iter);
+                        bank.setByte("sector", index, (byte) candlist.get(i).getSector());
+                        bank.setByte("category", index, (byte) 2);
+                        bank.setFloat("x", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).x);
+                        bank.setFloat("y", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).y);
+                        bank.setFloat("z", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).z);
+                        bank.setFloat("tx", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).tx);
+                        bank.setFloat("ty", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).ty);
+                        bank.setFloat("Q", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).Q);
+                        bank.setFloat("c00", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).CM.get(0, 0));
+                        bank.setFloat("c01", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).CM.get(0, 1));
+                        bank.setFloat("c02", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).CM.get(0, 2));
+                        bank.setFloat("c03", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).CM.get(0, 3));
+                        bank.setFloat("c04", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).CM.get(0, 4));
+                        bank.setFloat("c11", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).CM.get(1, 1));
+                        bank.setFloat("c12", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).CM.get(1, 2));
+                        bank.setFloat("c13", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).CM.get(1, 3));
+                        bank.setFloat("c14", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).CM.get(1, 4));
+                        bank.setFloat("c22", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).CM.get(2, 2));
+                        bank.setFloat("c23", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).CM.get(2, 3));
+                        bank.setFloat("c24", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).CM.get(2, 4));
+                        bank.setFloat("c33", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).CM.get(3, 3));
+                        bank.setFloat("c34", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).CM.get(3, 4));
+                        bank.setFloat("c44", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).CM.get(4, 4));
+
+                        index++;
+                    } 
+                    else break;
+                }
+
+                for (int site : candlist.get(i).get_SVMap().get(iter).trackTrajP.keySet()) {
+                    if (candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site) != null) {
+                        bank.setShort("trkCand_id", index, trkCand_id);
+                        bank.setShort("iter_index", index, (short) iter);
+                        bank.setByte("sector", index, (byte) candlist.get(i).getSector());
+                        bank.setByte("category", index, (byte) 3);
+                        bank.setFloat("x", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).x);
+                        bank.setFloat("y", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).y);
+                        bank.setFloat("z", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).z);
+                        bank.setFloat("tx", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).tx);
+                        bank.setFloat("ty", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).ty);
+                        bank.setFloat("Q", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).Q);
+                        bank.setFloat("c00", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).CM.get(0, 0));
+                        bank.setFloat("c01", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).CM.get(0, 1));
+                        bank.setFloat("c02", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).CM.get(0, 2));
+                        bank.setFloat("c03", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).CM.get(0, 3));
+                        bank.setFloat("c04", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).CM.get(0, 4));
+                        bank.setFloat("c11", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).CM.get(1, 1));
+                        bank.setFloat("c12", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).CM.get(1, 2));
+                        bank.setFloat("c13", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).CM.get(1, 3));
+                        bank.setFloat("c14", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).CM.get(1, 4));
+                        bank.setFloat("c22", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).CM.get(2, 2));
+                        bank.setFloat("c23", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).CM.get(2, 3));
+                        bank.setFloat("c24", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).CM.get(2, 4));
+                        bank.setFloat("c33", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).CM.get(3, 3));
+                        bank.setFloat("c34", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).CM.get(3, 4));
+                        bank.setFloat("c44", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).CM.get(4, 4));
+
+                        index++;
+                    } 
+                    else break;
+                }
+
+                for (int site : candlist.get(i).get_SVMap().get(iter).trackTrajB.keySet()) {
+                    if (candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site) != null) {
+                        bank.setShort("trkCand_id", index, trkCand_id);
+                        bank.setShort("iter_index", index, (short) iter);
+                        bank.setByte("sector", index, (byte) candlist.get(i).getSector());
+                        bank.setByte("category", index, (byte) 4);
+                        bank.setFloat("x", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).x);
+                        bank.setFloat("y", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).y);
+                        bank.setFloat("z", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).z);
+                        bank.setFloat("tx", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).tx);
+                        bank.setFloat("ty", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).ty);
+                        bank.setFloat("Q", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).Q);
+                        bank.setFloat("c00", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).CM.get(0, 0));
+                        bank.setFloat("c01", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).CM.get(0, 1));
+                        bank.setFloat("c02", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).CM.get(0, 2));
+                        bank.setFloat("c03", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).CM.get(0, 3));
+                        bank.setFloat("c04", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).CM.get(0, 4));
+                        bank.setFloat("c11", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).CM.get(1, 1));
+                        bank.setFloat("c12", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).CM.get(1, 2));
+                        bank.setFloat("c13", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).CM.get(1, 3));
+                        bank.setFloat("c14", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).CM.get(1, 4));
+                        bank.setFloat("c22", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).CM.get(2, 2));
+                        bank.setFloat("c23", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).CM.get(2, 3));
+                        bank.setFloat("c24", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).CM.get(2, 4));
+                        bank.setFloat("c33", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).CM.get(3, 3));
+                        bank.setFloat("c34", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).CM.get(3, 4));
+                        bank.setFloat("c44", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).CM.get(4, 4));
+
+                        index++;
+                    } 
+                    else break;
+                }
+            }
+        }
+
+        return bank;
+    }
+
 }

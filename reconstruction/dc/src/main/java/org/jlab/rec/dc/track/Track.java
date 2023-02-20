@@ -11,6 +11,9 @@ import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.urwell.reader.URWellCross;
+import org.jlab.clas.tracking.kalmanfilter.zReference.MeasVecs;
+import org.jlab.clas.tracking.kalmanfilter.zReference.StateVecs;
+import java.util.Map;
 
 /**
  * A class representing track candidates in the DC.  A track has a trajectory represented by an ensemble of geometrical state vectors along its path, 
@@ -71,6 +74,135 @@ public class Track extends Trajectory implements Comparable<Track>{
     private Point3D _URWellPGlobal;
     private Point3D _URWellPointLocal;
     private Point3D _URWellPLocal;
+    
+    private int KFStatus = 1;
+    private int maxIter;
+    private double chi2_kf;
+
+    private int seedRegion;
+    private org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec seedStateVec;
+    private MeasVecs mv;
+
+    private Map<Integer, Boolean> setFitFailedMap;
+    private Map<Integer, Boolean> stopIterationMap; 
+    private Map<Integer, StateVecs> svMap;
+    private Map<Integer, Double> chi2KFMap;
+    
+        /**
+     * @return status of KF processing
+     */
+    public int get_KFStatus(){
+        return KFStatus;
+    }
+
+    /**
+     * @param status status of KF processing to set
+     */
+    public void set_KFStatus(int status){
+        this.KFStatus = status;
+    } 
+
+    /**
+     * @return KF chi2
+     */
+    public double get_KFChi2(){
+        return chi2_kf;
+    }
+
+    /**
+     * @param status KF chi2 to set
+     */
+    public void set_KFChi2(double chi2_kf){
+        this.chi2_kf = chi2_kf;
+    } 
+
+    /**
+     * @return the maximum of iteration
+     */
+    public int get_MaxIter(){
+        return maxIter;
+    }
+
+    /**
+     * @param maxIter maximum of iteration to set
+     */
+    public void set_MaxIter(int maxIter){
+        this.maxIter = maxIter;
+    }        
+
+    /**
+     * @return region of seed
+     */
+    public int get_SeedRegion(){
+        return seedRegion;
+    }
+
+    /**
+     * @param seedRegion region of seed to set
+     */
+    public void set_SeedRegion(int seedRegion){
+        this.seedRegion = seedRegion;
+    }  
+
+    /**
+     * @return the seedStateVec
+     */
+    public org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec get_SeedStateVec() {
+        return seedStateVec;
+    }
+
+    /**
+     * @param seedStateVec the seedStateVec to set
+     */
+    public void set_SeedStateVec(org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec seedStateVec) {
+        this.seedStateVec = seedStateVec;
+    }  
+
+    /**
+     * @return the measures
+     */
+    public MeasVecs get_MeasVecs() {
+        return mv;
+    }
+
+    /**
+     * @param mv the measures to set
+     */
+    public void set_MeasVecs(MeasVecs mv) {
+        this.mv = mv;
+    }
+
+    public Map<Integer, Boolean> get_SetFitFailedMap(){
+        return setFitFailedMap;
+    }
+
+    public void set_FitFailedMap(Map<Integer, Boolean> setFitFailedMap){
+        this.setFitFailedMap = setFitFailedMap;
+    }
+
+    public Map<Integer, Boolean> get_StopIterationMap(){
+        return stopIterationMap;
+    }
+
+    public void set_StopIterationMap(Map<Integer, Boolean> stopIterationMap){
+        this.stopIterationMap = stopIterationMap;
+    }
+
+    public Map<Integer, StateVecs> get_SVMap(){
+        return svMap;
+    }
+
+    public void set_SVMap(Map<Integer, StateVecs> svMap){
+        this.svMap = svMap;
+    }
+
+    public Map<Integer, Double> get_Chi2KFMap(){
+        return chi2KFMap;
+    }
+
+    public void set_Chi2KFMap(Map<Integer, Double> chi2KFMap){
+        this.chi2KFMap = chi2KFMap;
+    }
     
     
     public Track() {

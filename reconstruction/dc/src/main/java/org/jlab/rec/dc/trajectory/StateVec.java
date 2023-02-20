@@ -64,6 +64,16 @@ public class StateVec extends Matrix {
         this._planeIdx = _planeIdx;
     }
     
+    private double Q;
+
+    public double getQ() {
+        return Q;
+    }
+
+    public void setQ(double Q) {
+        this.Q = Q;
+    }
+    
     private double z;
 
     public double getZ() {

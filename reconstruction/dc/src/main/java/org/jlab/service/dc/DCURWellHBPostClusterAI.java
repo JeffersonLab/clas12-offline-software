@@ -69,6 +69,7 @@ public class DCURWellHBPostClusterAI extends DCEngine {
         /* 7 */
         /* 8 */
         //AI
+        List<Track> allTrkcands = new ArrayList<>(); 
         List<Track> trkcands = null;
         List<Cross> crosses = null;
         List<FittedCluster> clusters = null;
@@ -130,7 +131,15 @@ public class DCURWellHBPostClusterAI extends DCEngine {
         trkcands = trkcandFinder.getTrackCands(urDCCrossesList,
             Constants.getInstance().dcDetector,
             Swimmer.getTorScale(),
-            dcSwim, true);
+            dcSwim, true, allTrkcands);
+        
+        if (!allTrkcands.isEmpty()) {
+            event.appendBanks(writer.fillTrackCandidatesBank(event, allTrkcands),
+            writer.fillTrackCandsDCMeasurementsBank(event, allTrkcands),  
+            writer.fillTrackCandsURWellMeasurementsBank(event, allTrkcands), 
+            writer.fillTrackCandsIterationsBank(event, allTrkcands),
+            writer.fillTrackCandsStatesBank(event, allTrkcands));  
+        }
 
         // track found
         clusters = new ArrayList<>();

@@ -215,6 +215,7 @@ public class DCTBEngine extends DCEngine {
 	TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
         TrajectoryFinder trjFind = new TrajectoryFinder();
 
+        List<Track> allTrkcands = new ArrayList<>();  
         for (Track TrackArray1 : TrackArray) {
             if (TrackArray1 == null || TrackArray1.get_ListOfHBSegments() == null || TrackArray1.get_ListOfHBSegments().size() < 5) {
                 continue;
@@ -225,8 +226,10 @@ public class DCTBEngine extends DCEngine {
                 continue;
             }
             crosses.addAll(TrackArray1);
-
-            KFitter kFZRef = new KFitter(true, 30, 1, dcSwim, Constants.getInstance().Z, Libr.JNP);
+            
+            int maxIter = 30;
+            int seedRegion = 1;
+            KFitter kFZRef = new KFitter(true, maxIter, 1, dcSwim, Constants.getInstance().Z, Libr.JNP);
             List<Surface> measSurfaces = getMeasSurfaces(TrackArray1, Constants.getInstance().dcDetector);
             StateVecs svs = new StateVecs();
             org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec initSV = svs.new StateVec(0);
@@ -235,6 +238,25 @@ public class DCTBEngine extends DCEngine {
             kFZRef.runFitter();
             List<org.jlab.rec.dc.trajectory.StateVec> kfStateVecsAlongTrajectory = setKFStateVecsAlongTrajectory(kFZRef);
 
+            if (kFZRef.setFitFailed || kFZRef.getStopIteration()) {
+                TrackArray1.set_KFStatus(0);
+            }
+            TrackArray1.set_MaxIter(maxIter);
+            TrackArray1.set_SeedRegion(seedRegion);
+            TrackArray1.set_SeedStateVec(initSV);
+            TrackArray1.set_Q((int)Math.signum(initSV.Q));
+            TrackArray1.set_KFChi2(kFZRef.getKFChi2());
+            TrackArray1.set_FitChi2(kFZRef.chi2);
+            TrackArray1.set_FitNDF(kFZRef.NDF);
+
+            TrackArray1.set_MeasVecs(kFZRef.getMeasVecs());
+            TrackArray1.set_FitFailedMap(kFZRef.getSetFitFailedMap());
+            TrackArray1.set_StopIterationMap(kFZRef.getStopIterationMap());
+            TrackArray1.set_SVMap(kFZRef.getSVMap());
+            TrackArray1.set_Chi2KFMap(kFZRef.getChi2KFMap());
+
+            allTrkcands.add(TrackArray1);
+            
             StateVec fn = new StateVec();
             if (kFZRef.setFitFailed==false && kFZRef.finalStateVec!=null) { 
                 // set the state vector at the last measurement site
@@ -269,6 +291,13 @@ public class DCTBEngine extends DCEngine {
               		
         }        
     	
+        if (!allTrkcands.isEmpty()) {
+            event.appendBanks(rbc.fillTrackCandidatesBank(event, allTrkcands));
+            event.appendBanks(rbc.fillTrackCandsDCMeasurementsBank(event, allTrkcands));   
+            event.appendBanks(rbc.fillTrackCandsIterationsBank(event, allTrkcands));
+            event.appendBanks(rbc.fillTrackCandsStatesBank(event, allTrkcands));  
+        }
+        
         if(!trkcands.isEmpty()) {
             //trkcandFinder.removeOverlappingTracks(trkcands);		// remove overlaps        	        	
             for(Track trk: trkcands) {

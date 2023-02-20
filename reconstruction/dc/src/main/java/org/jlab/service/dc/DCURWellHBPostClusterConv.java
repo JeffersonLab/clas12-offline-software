@@ -61,6 +61,8 @@ public class DCURWellHBPostClusterConv extends DCEngine {
         // get Field
         Swim dcSwim = new Swim();
      
+        List<Track> allTrkcands = new ArrayList<>();  
+        List<Track> allMistrkcands = new ArrayList<>();  
         List<Track> trkcands = null;
         List<Cross> crosses = null;
         List<FittedCluster> clusters = null;
@@ -134,7 +136,15 @@ public class DCURWellHBPostClusterConv extends DCEngine {
         trkcands = trkcandFinder.getTrackCands(urDCCrossesList,
                 Constants.getInstance().dcDetector,
                 Swimmer.getTorScale(),
-                dcSwim, false);
+                dcSwim, false, allTrkcands);
+        
+        if (!allTrkcands.isEmpty()) {
+            event.appendBanks(writer.fillTrackCandidatesBank(event, allTrkcands),
+            writer.fillTrackCandsDCMeasurementsBank(event, allTrkcands),   
+            writer.fillTrackCandsURWellMeasurementsBank(event, allTrkcands),  
+            writer.fillTrackCandsIterationsBank(event, allTrkcands),
+            writer.fillTrackCandsStatesBank(event, allTrkcands));  
+        }
         /* 19 */
         // track found
         int trkId = 1;
@@ -214,7 +224,15 @@ public class DCURWellHBPostClusterConv extends DCEngine {
         List<Track> mistrkcands = trkcandFinder.getTrackCands(purDCCrossesList,
                 Constants.getInstance().dcDetector,
                 Swimmer.getTorScale(),
-                dcSwim, false);
+                dcSwim, false, allMistrkcands);
+        
+        if (!allMistrkcands.isEmpty()) {
+            event.appendBanks(writer.fillTrackCandidatesBank(event, allMistrkcands),
+            writer.fillTrackCandsDCMeasurementsBank(event, allMistrkcands),
+            writer.fillTrackCandsURWellMeasurementsBank(event, allMistrkcands),     
+            writer.fillTrackCandsIterationsBank(event, allMistrkcands),
+            writer.fillTrackCandsStatesBank(event, allMistrkcands));  
+        }
 
         // remove overlaps
         if (!mistrkcands.isEmpty()) {

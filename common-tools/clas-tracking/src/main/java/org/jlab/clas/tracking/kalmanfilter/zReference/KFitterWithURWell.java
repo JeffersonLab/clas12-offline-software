@@ -19,6 +19,8 @@ import org.jlab.clas.tracking.utilities.MatrixOps.Libr;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.jnp.matrix.*;
 import org.jlab.clas.tracking.kalmanfilter.Type;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  *
@@ -52,6 +54,11 @@ public class KFitterWithURWell extends AKFitter {
 
     private boolean TBT = false;
 
+    private Map<Integer, Boolean> setFitFailedMap = new HashMap<>();
+    private Map<Integer, Boolean> stopIterationMap = new HashMap<>(); 
+    private Map<Integer, StateVecs> svMap = new HashMap<>();
+    private Map<Integer, Double> chi2KFMap = new HashMap<>(); 
+    
     Matrix first_inverse = new Matrix();
     Matrix addition = new Matrix();
     Matrix result = new Matrix();
@@ -146,37 +153,65 @@ public class KFitterWithURWell extends AKFitter {
                         if (k == svzLength - 1) {
                             if (!sv.transport(sector, k, k - 2, this.sv.trackTrajF.get(k), mv, this.getSwimmer(), forward)) {
                                 this.stopIteration = true;
+                                setFitFailedMap.put(i, this.setFitFailed);
+                                stopIterationMap.put(i, this.stopIteration);
+                                svMap.put(i, this.sv);
+                                chi2KFMap.put(i, this.chi2kf);
                                 break;
                             }
                         } else {
                             if (!sv.transport(sector, k, k - 2, this.sv.trackTrajB.get(k), mv, this.getSwimmer(), forward)) {
                                 this.stopIteration = true;
+                                setFitFailedMap.put(i, this.setFitFailed);
+                                stopIterationMap.put(i, this.stopIteration);
+                                svMap.put(i, this.sv);
+                                chi2KFMap.put(i, this.chi2kf);
                                 break;
                             }
                         }
 
                         if (!this.filter(k - 2, forward)) {
                             this.stopIteration = true;
+                            setFitFailedMap.put(i, this.setFitFailed);
+                            stopIterationMap.put(i, this.stopIteration);
+                            svMap.put(i, this.sv);
+                            chi2KFMap.put(i, this.chi2kf);
                             break;
                         }
 
                         if (!sv.transport(sector, k - 2, k - 1, this.sv.trackTrajB.get(k - 2), mv, this.getSwimmer(), forward)) {
                             this.stopIteration = true;
+                            setFitFailedMap.put(i, this.setFitFailed);
+                            stopIterationMap.put(i, this.stopIteration);
+                            svMap.put(i, this.sv);
+                            chi2KFMap.put(i, this.chi2kf);
                             break;
                         }
 
                         if (!this.filter(k - 1, forward)) {
                             this.stopIteration = true;
+                            setFitFailedMap.put(i, this.setFitFailed);
+                            stopIterationMap.put(i, this.stopIteration);
+                            svMap.put(i, this.sv);
+                            chi2KFMap.put(i, this.chi2kf);
                             break;
                         }
                     } else {
                         if (!sv.transport(sector, 1, 0, this.sv.trackTrajB.get(1), mv, this.getSwimmer(), forward)) {
                             this.stopIteration = true;
+                            setFitFailedMap.put(i, this.setFitFailed);
+                            stopIterationMap.put(i, this.stopIteration);
+                            svMap.put(i, this.sv);
+                            chi2KFMap.put(i, this.chi2kf);
                             break;
                         }
 
                         if (!this.filter(0, forward)) {
                             this.stopIteration = true;
+                            setFitFailedMap.put(i, this.setFitFailed);
+                            stopIterationMap.put(i, this.stopIteration);
+                            svMap.put(i, this.sv);
+                            chi2KFMap.put(i, this.chi2kf);
                             break;
                         }
                     }
@@ -184,6 +219,10 @@ public class KFitterWithURWell extends AKFitter {
             }
 
             if (this.stopIteration) {
+                setFitFailedMap.put(i, this.setFitFailed);
+                stopIterationMap.put(i, this.stopIteration);
+                svMap.put(i, this.sv);
+                chi2KFMap.put(i, this.chi2kf);
                 break;
             }
 
@@ -200,17 +239,29 @@ public class KFitterWithURWell extends AKFitter {
                     if (i == 1) {
                         if (!this.sv.transport(sector, 0, 1, this.sv.trackTrajT.get(0), mv, this.getSwimmer(), forward)) {
                             this.stopIteration = true;
+                            setFitFailedMap.put(i, this.setFitFailed);
+                            stopIterationMap.put(i, this.stopIteration);
+                            svMap.put(i, this.sv);
+                            chi2KFMap.put(i, this.chi2kf);
                             break;
                         }
                     } else {
                         if (!this.sv.transport(sector, 0, 1, this.sv.trackTrajB.get(0), mv, this.getSwimmer(), forward)) {
                             this.stopIteration = true;
+                            setFitFailedMap.put(i, this.setFitFailed);
+                            stopIterationMap.put(i, this.stopIteration);
+                            svMap.put(i, this.sv);
+                            chi2KFMap.put(i, this.chi2kf);
                             break;
                         }
                     }
                 } else {
                     if (!this.sv.transport(sector, k, k + 1, this.sv.trackTrajF.get(k), mv, this.getSwimmer(), forward)) {
                         this.stopIteration = true;
+                        setFitFailedMap.put(i, this.setFitFailed);
+                        stopIterationMap.put(i, this.stopIteration);
+                        svMap.put(i, this.sv);
+                        chi2KFMap.put(i, this.chi2kf);
                         break;
                     }
 
@@ -218,12 +269,26 @@ public class KFitterWithURWell extends AKFitter {
 
                 if (!this.filter(k + 1, forward)) {
                     this.stopIteration = true;
+                    setFitFailedMap.put(i, this.setFitFailed);
+                    stopIterationMap.put(i, this.stopIteration);
+                    svMap.put(i, this.sv);
+                    chi2KFMap.put(i, this.chi2kf);
                     break;
                 }
             }
 
             if (this.stopIteration) {
+                setFitFailedMap.put(i, this.setFitFailed);
+                stopIterationMap.put(i, this.stopIteration);
+                svMap.put(i, this.sv);
+                chi2KFMap.put(i, this.chi2kf);
                 break;
+            }
+            else{
+                setFitFailedMap.put(i, this.setFitFailed);
+                stopIterationMap.put(i, this.stopIteration);
+                svMap.put(i, this.sv);
+                chi2KFMap.put(i, this.chi2kf); 
             }
 
             if (i > 1) {
@@ -612,6 +677,30 @@ public class KFitterWithURWell extends AKFitter {
 
     public StateVecs getStateVecs() {
         return sv;
+    }
+    
+        public boolean getStopIteration(){
+        return stopIteration;
+    }
+
+    public double getKFChi2(){
+        return chi2kf;
+    }
+
+    public Map<Integer, Boolean> getSetFitFailedMap(){
+        return setFitFailedMap;
+    }
+
+    public Map<Integer, Boolean> getStopIterationMap(){
+        return stopIterationMap;
+    }
+
+    public Map<Integer, StateVecs> getSVMap(){
+        return svMap;
+    }
+
+    public Map<Integer, Double> getChi2KFMap(){
+        return chi2KFMap;
     }
 
     public void printlnMeasVecs() {
