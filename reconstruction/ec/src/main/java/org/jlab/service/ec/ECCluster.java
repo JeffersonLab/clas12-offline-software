@@ -236,6 +236,15 @@ public class ECCluster implements Comparable {
         return -1;
     }
     
+    public static Line3D getClusterGeometry(ECPeak u, ECPeak v, ECPeak w){
+        Line3D uLine  = u.getLine();
+        Line3D vLine  = v.getLine();
+        Line3D wLine  = w.getLine();
+        Line3D uvLine = uLine.distance(vLine);
+        Line3D uvDistTo_w = wLine.distance(uvLine.midpoint());
+        return uvDistTo_w;
+    }
+    
     public final void getClusterGeometry(){
         Line3D uLine  = clusterPeaks.get(0).getLine();
         Line3D vLine  = clusterPeaks.get(1).getLine();
