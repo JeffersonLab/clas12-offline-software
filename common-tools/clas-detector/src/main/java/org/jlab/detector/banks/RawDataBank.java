@@ -20,6 +20,7 @@ public class RawDataBank extends FilteredBank {
         for (int i = 0; i < decades.length; i++) {
             if (decades[i]%10 != 0 || decades[i]>120) {
                 System.err.println("BAD DECADE!!!!!!!!!!!!!!!");
+                continue;
             }
             for (int j = 0; j<10; j++) {
                 filterList.add(decades[i] + j);
@@ -34,10 +35,10 @@ public class RawDataBank extends FilteredBank {
         return this.intValue("sector", index);
     }
     public int layer(int index){
-        return this.intValue("sector", index);
+        return this.intValue("layer", index);
     }
     public int component(int index){
-        return this.intValue("sector", index);
+        return this.intValue("component", index);
     }
     public int adc(int index){
         return this.intValue("ADC", index);
@@ -66,10 +67,10 @@ public class RawDataBank extends FilteredBank {
 	        fadc.show();
 	        for(int j = 0; j < ftof.size(); j++){
 		        System.out.printf("%3d %3d %3d %4d, order = %5d, true index = %4d\n",j,
-				  ftof.intValue("sector",j),
-                  ftof.intValue("layer",j),
-                  ftof.intValue("component",j),
-                  ftof.intValue("order",j),
+				  ftof.sector(j),
+                  ftof.layer(j),
+                  ftof.component(j),
+                  ftof.trueOrder(j),
                   ftof.trueIndex(j));
 	        }
         }
