@@ -1,69 +1,40 @@
 package org.jlab.detector.banks;
 
 /**
- * The second (and third) digits of ADC/TDC bank's order variable can be used to
- * encode additional information (as long as the first digit is left unmanipulated).
- * This defines the convention for those higher digits in production data.
+ * The second and third digits of ADC/TDC bank's order variable can be used
+ * to encode additional information (as long as the first digit is left
+ * unmanipulated), and this enum just defines the convention for those higher
+ * digits in production data.
  *
+ * These order categories are all mutually exclusive, and denoising is
+ * categorized into levels, from 0 (least noisy) to 4 (most noisy).
+ * 
  * @author baltzell
  */
 public enum RawOrderType {
 
-    UNDEFINED  ( -1, "UDFF"),
-    A0         (  0, "0"),    
-    BACKGROUND ( 10, "BACKGROUND"),    
-    DENOISED   ( 20, "DENOISED"),
-    A3         ( 30, "3"),
-    A4         ( 40, "4"),
-    A5         ( 50, "5"),
-    A6         ( 60, "6"),
-    A7         ( 70, "7"),
-    A8         ( 80, "8"),
-    A9         ( 90, "9");
+    NOISE0          (  0),  // normal hits retained by denoising level-0
+    BGADDED         ( 10),  // hits added by background merging
+    BGREMOVED       ( 20),  // hits removed during background merging 
+    RESERVED        ( 30),  // reserved for later use
+    NOISE1          ( 40),  // normal hits retained by level-1 denoising
+    NOISE2          ( 50),  // normal hits retained by level-2 denoising
+    NOISE3          ( 60),  // normal hits retained by level-3 denoising
+    BGADDED_NOISE1  ( 70),  // background hits retained by level-1 denoising
+    BGADDED_NOISE2  ( 80),  // background hits retained by level-2 denoising
+    BGADDED_NOISE3  ( 90),  // background hits retained by level-3 denoising
+    USER1           (100),
+    USER2           (110),
+    USER3           (120);
 
     private final int rawOrderId;
-    private final String rawOrderName;
 
-    RawOrderType(){
-        rawOrderId = 0;
-        rawOrderName = "UNDEFINED";
-    }
-
-    RawOrderType(int id, String name){
+    private RawOrderType(int id){
         rawOrderId = id;
-        rawOrderName = name;
     }
 
-    /**
-     * Returns the name of the detector.
-     * @return the name of the detector
-     */
-    public String getName() {
-        return rawOrderName;
-    }
-
-    /**
-     * Returns the id number of the detector.
-     * @return the id number of the detector
-     */
     public int getTypeId() {
         return rawOrderId;
-    }
-
-    public static RawOrderType getType(String name) {
-        name = name.trim();
-        for(RawOrderType id: RawOrderType.values())
-            if (id.getName().equalsIgnoreCase(name)) 
-                return id;
-        return UNDEFINED;
-    }
-
-    public static RawOrderType getType(Integer orderId) {
-
-        for(RawOrderType id: RawOrderType.values())
-            if (id.getTypeId() == orderId) 
-                return id;
-        return UNDEFINED;
     }
 
 }

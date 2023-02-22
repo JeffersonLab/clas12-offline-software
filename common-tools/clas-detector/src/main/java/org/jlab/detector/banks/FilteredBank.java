@@ -10,6 +10,8 @@ import org.jlab.jnp.hipo4.data.Schema;
 import org.jlab.jnp.hipo4.io.HipoReader;
 
 /**
+ * Utility to provide access to a bank filtered on a certain variable while
+ * maintaining mapping to the true row index in the bank.
  *
  * @author gavalian
  * @author baltzell
