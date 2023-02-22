@@ -6,9 +6,10 @@ import org.jlab.jnp.hipo4.data.Schema;
 import org.jlab.jnp.hipo4.io.HipoReader;
 
 /**
- * FilterBank specific to ADC/TDC banks, filtered on order by decades.  This
+ * FilterBank specific to raw ADC/TDC banks, filtered on order by decades.  This
  * is to leverage hijacking the higher digits of order to encode additional
- * information.  See RawOrderType.
+ * information, and avoid reconstruction engines or others from manually
+ * interpreting order.  See RawOrderType for conventions.
  * 
  * @author baltzell
  */
@@ -84,7 +85,7 @@ public class RawDataBank extends FilteredBank {
         RawDataBank ftof = new RawDataBank(r.getSchemaFactory().getSchema("FTOF::adc"),40);
         Bank        fadc = new Bank(r.getSchemaFactory().getSchema("FTOF::adc"));
         
-        ftof.setFilter(RawOrderType.BACKGROUND,RawOrderType.DENOISED);
+        ftof.setFilter(RawOrderType.NOISE0,RawOrderType.BGREMOVED);
         
         for(int i = 0; i < 10; i++){
             r.nextEvent(e);
