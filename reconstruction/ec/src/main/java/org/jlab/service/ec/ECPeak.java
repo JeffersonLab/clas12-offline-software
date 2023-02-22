@@ -163,7 +163,7 @@ public class ECPeak implements Comparable {
 
             double energyMev = peakStrips.get(i).getEnergy()*1000.0; //raw strip energy, no attenuation correction           
             double le = Math.max(0.,ECCommon.logParam + Math.log(energyMev/peakEnergy)); //logParam==0 used in pass1
-            //NaN for energyMeV<=1 MeV le=0 !!!
+
             peakDistanceEdge += peakStrips.get(i).getDistanceEdge()*le; //used for lu, lv, lw fiducials
             
             pointOrigin.setX(pointOrigin.x()+line.origin().x()*le);
@@ -190,6 +190,9 @@ public class ECPeak implements Comparable {
         );
         
         // Shower peak moments
+	    
+	logSumm = 0.0;
+	    
         for(int i = 0; i < peakStrips.size(); i++){            
             double stripDistance = peakStrips.get(i).getDistanceEdge();
             double dist = peakDistanceEdge - stripDistance;
@@ -198,6 +201,7 @@ public class ECPeak implements Comparable {
             peakMoment  += dist*dist*dist*dist*energyLog;           
             peakMoment2 += dist*dist*energyLog;
             peakMoment3 += dist*dist*dist*energyLog;
+            logSumm += energyLog;
         }
         
         peakMoment = peakMoment/logSumm;
