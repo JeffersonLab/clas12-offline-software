@@ -28,7 +28,7 @@ public class RawDataBank extends FilteredBank {
     }
 
     public int trueOrder(int index){
-        return this.intValue("order", index)/10;
+        return this.intValue("order", index)%10;
     }
     public int sector(int index){
         return this.intValue("sector", index);
