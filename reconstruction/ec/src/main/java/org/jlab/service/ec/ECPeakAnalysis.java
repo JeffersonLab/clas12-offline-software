@@ -151,4 +151,49 @@ public class ECPeakAnalysis {
             }
         }*/
     }
+    
+    public static int  findMatchForCluster(ECCluster c, List<ECCluster> list){
+        for(int i = 0; i < list.size(); i++){
+            ECCluster l = list.get(i);
+            if(l.getPeak(0).getMaxStrip()==c.getPeak(0).getMaxStrip()
+                    &&l.getPeak(1).getMaxStrip()==c.getPeak(1).getMaxStrip()) return i;
+            
+            if(l.getPeak(0).getMaxStrip()==c.getPeak(0).getMaxStrip()
+                    &&l.getPeak(2).getMaxStrip()==c.getPeak(2).getMaxStrip()) return i;
+                
+            if(l.getPeak(1).getMaxStrip()==c.getPeak(1).getMaxStrip()
+                    &&l.getPeak(2).getMaxStrip()==c.getPeak(2).getMaxStrip()) return i;
+        }
+        return -1;
+    }
+    
+    public static void doClusterCleanup(List<ECCluster> clusters){
+        List<ECCluster> tmp = new ArrayList<>();
+        tmp.addAll(clusters);
+        
+        clusters.clear();
+        
+        while(!tmp.isEmpty()){
+            ECCluster c = tmp.get(0);
+            tmp.remove(0);
+            int index = ECPeakAnalysis.findMatchForCluster(c, tmp);
+            if(index<0){
+                clusters.add(c);
+            } else {
+                ECCluster l = tmp.get(index);
+                tmp.remove(index);
+                l.getClusterGeometry();
+                c.getClusterGeometry();
+                //System.out.println(" found a sharing cluster...");
+                if(c.getClusterSize()<l.getClusterSize()){
+                    clusters.add(c);
+                    //System.out.printf("\t choosing one %8.4f %8.4f\n",c.getClusterSize(),l.getClusterSize());
+                } else {
+                    clusters.add(l);
+                    //System.out.printf("\t choosing two %8.4f %8.4f\n",c.getClusterSize(),l.getClusterSize());
+                }
+            }
+            
+        }
+    }
 }

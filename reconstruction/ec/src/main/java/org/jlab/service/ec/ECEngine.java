@@ -36,12 +36,31 @@ public class ECEngine extends ReconstructionEngine {
         List<ECPeak>       ecPeaks = ECCommon.processPeaks(ECCommon.createPeaks(ecStrips)); // thresholds, split peaks -> update peak-lines          
         List<ECCluster> ecClusters = new ArrayList<ECCluster>();  
         
-        ecClusters.addAll(ECCommon.createClusters(ecPeaks,1)); //PCAL
-        ecClusters.addAll(ECCommon.createClusters(ecPeaks,4)); //ECinner 
-        ecClusters.addAll(ECCommon.createClusters(ecPeaks,7)); //ECouter
+        List<ECCluster> tmpPCAL  = ECCommon.createClusters(ecPeaks,1);
+        List<ECCluster> tmpECIN  = ECCommon.createClusters(ecPeaks,4);
+        List<ECCluster> tmpECOUT = ECCommon.createClusters(ecPeaks,7);
+        
+        // - Thsi is the part that identifies clusters with 2 views shared,
+        // - and picks the one with best cluster size.
+        
+        ECPeakAnalysis.doClusterCleanup(tmpPCAL);
+        ECPeakAnalysis.doClusterCleanup(tmpECIN);
+        ECPeakAnalysis.doClusterCleanup(tmpECOUT);
+        
+        // - commented by Gagik - now created clusters for each of sub-modules
+        // - will be analyzed to eliminate clusters that share two views with 
+        // - another cluster. The best matrching cluster will be left 
+        // - after this procedure.
+        //ecClusters.addAll(ECCommon.createClusters(ecPeaks,1)); //PCAL
+        //ecClusters.addAll(ECCommon.createClusters(ecPeaks,4)); //ECinner 
+        //ecClusters.addAll(ECCommon.createClusters(ecPeaks,7)); //ECouter
+        
+        ecClusters.addAll(tmpPCAL); //PCAL
+        ecClusters.addAll(tmpECIN); //ECinner 
+        ecClusters.addAll(tmpECOUT); //ECouter
         
         ECCommon.shareClustersEnergy(ecClusters);  // Repair 2 clusters which share the same peaks
-       
+        
         for (int iCl = 0; iCl < ecClusters.size(); iCl++) {
             // As clusters are already defined at this point, we can fill the clusterID of ECStrips belonging to the given cluster
             // === U strips ===
