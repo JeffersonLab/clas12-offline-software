@@ -21,46 +21,84 @@ public class FilteredBank {
     private final List<Integer> indexList = new ArrayList<>();
     protected final Set<Integer> filterList = new HashSet<>();
 
-    public FilteredBank(Schema sch, int allocate, String filterVar){
-        dataBank = new Bank(sch, allocate);
-        this.filterVar = filterVar;
+    /**
+     * @param schema schema for the bank to filter
+     * @param allocate number of rows to allocate
+     * @param variableName name of the variable to filter on 
+     */
+    public FilteredBank(Schema schema, int allocate, String variableName){
+        dataBank = new Bank(schema, allocate);
+        filterVar = variableName;
     }
 
-    public final void setFilter(int... orders){
+    /**
+     * Set the filtering criteria
+     * @param values values to filter for
+     */
+    public final void setFilter(int... values){
         filterList.clear();
-        for(int i = 0; i < orders.length; i++) filterList.add(orders[i]);
+        for(int i = 0; i < values.length; i++)
+            filterList.add(values[i]);
     }
 
+    /**
+     * Read the bank and prepare filtering
+     */ 
     public void read(Event evt){
         evt.read(dataBank);        
         this.notifyRead();
     }
 
+    /**
+     * Prepare filtering for the current bank's values
+     */
     protected void notifyRead(){
         indexList.clear();
         int rows = dataBank.getRows();
         for(int i = 0; i < rows; i++){
-            int order = dataBank.getInt(filterVar, i);
-            if (filterList.contains(order)) indexList.add(i);
+            int value = dataBank.getInt(filterVar, i);
+            if (filterList.contains(value)) indexList.add(i);
         }
     }
 
+    /**
+     * @return number of bank rows that satisfy filtering criteria
+     */
     public int size(){ 
         return this.indexList.size();
     }
 
+    /**
+     * @param varName name of the bank variable
+     * @param index filtered index to retrieve
+     * @return value for the filtered index
+     */
     public int intValue(String varName, int index ){
         return dataBank.getInt(varName, indexList.get(index));
     }
 
+    /**
+     * @param varName name of the bank variable
+     * @param index filtered index to retrieve
+     * @return value for the filtered index
+     */
     public long longValue(String varName, int index ){
         return dataBank.getLong(varName, indexList.get(index));
     }
 
+    /**
+     * @param varName name of the bank variable
+     * @param index filtered index to retrieve
+     * @return value for the filtered index
+     */
     public float floatValue(String varName, int index ){
         return dataBank.getFloat(varName, indexList.get(index));
     }
 
+    /**
+     * @param index filtered index to retrieve
+     * @return true bank row index corresponding to the filtered index
+     */
     public int trueIndex(int index){
         return this.indexList.get(index);
     }
