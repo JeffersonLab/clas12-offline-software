@@ -6,7 +6,10 @@ import org.jlab.jnp.hipo4.data.Schema;
 import org.jlab.jnp.hipo4.io.HipoReader;
 
 /**
- *
+ * FilterBank specific to ADC/TDC banks, filtered on order by decades.  This
+ * is to leverage hijacking the higher digits of order to encode additional
+ * information.  See RawOrderType.
+ * 
  * @author baltzell
  */
 public class RawDataBank extends FilteredBank {
@@ -15,34 +18,59 @@ public class RawDataBank extends FilteredBank {
         super(sch, allocate, "order");
     }
 
-    public final void setDecadeOrderFilter(int... decades) {
-        filterList.clear();
-        for (int i = 0; i < decades.length; i++) {
-            if (decades[i]%10 != 0 || decades[i]>120) {
-                System.err.println("BAD DECADE!!!!!!!!!!!!!!!");
-                continue;
-            }
+    public final void setFilter(RawOrderType... types) {
+        for (int i=0; i<types.length; i++) {
             for (int j = 0; j<10; j++) {
-                filterList.add(decades[i] + j);
+                filterList.add(j + types[i].getTypeId());
             }
         }
     }
 
+    /**
+     * Maybe we should name this something else?
+     * @param index filtered index
+     * @return raw/true order, the first digit
+     */
     public int trueOrder(int index){
         return this.intValue("order", index)%10;
     }
+
+    /**
+     * @param index filtered index
+     * @return sector value
+     */
     public int sector(int index){
         return this.intValue("sector", index);
     }
+    
+    /**
+     * @param index filtered index
+     * @return layer value
+     */
     public int layer(int index){
         return this.intValue("layer", index);
     }
+    
+    /**
+     * @param index filtered index
+     * @return component value
+     */
     public int component(int index){
         return this.intValue("component", index);
     }
+    
+    /**
+     * @param index filtered index
+     * @return adc value
+     */
     public int adc(int index){
         return this.intValue("ADC", index);
     }
+    
+    /**
+     * @param index filtered index
+     * @return tdc value
+     */
     public int tdc(int index){
         return this.intValue("TDC", index);
     }
@@ -56,7 +84,7 @@ public class RawDataBank extends FilteredBank {
         RawDataBank ftof = new RawDataBank(r.getSchemaFactory().getSchema("FTOF::adc"),40);
         Bank        fadc = new Bank(r.getSchemaFactory().getSchema("FTOF::adc"));
         
-        ftof.setDecadeOrderFilter(0);
+        ftof.setFilter(RawOrderType.BACKGROUND,RawOrderType.DENOISED);
         
         for(int i = 0; i < 10; i++){
             r.nextEvent(e);
