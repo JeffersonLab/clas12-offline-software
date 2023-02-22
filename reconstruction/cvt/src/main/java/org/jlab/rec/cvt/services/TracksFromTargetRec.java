@@ -106,27 +106,28 @@ public class TracksFromTargetRec {
 //                        seeds = recUtil.reFit(seeds, swimmer, trseed, trseed2);
 //                    }
                 }
-                List<Seed> failed = new ArrayList<>();
-                for(Seed s : seeds) { 
-                    if(Constants.getInstance().seedingDebugMode) {
-                        System.out.println("Before chi2 cut");
-                        System.out.println(s.toString());
-                    }  
-                    if(s.getChi2()>Constants.CHI2CUT*s.getCrosses().size())
-                        failed.add(s);
-                    if(s.getHelix()==null)
+            } //mv bracket
+            List<Seed> failed = new ArrayList<>();
+            for(Seed s : seeds) { 
+                if(Constants.getInstance().seedingDebugMode) {
+                    System.out.println("Before chi2 cut");
+                    System.out.println(s.toString());
+                }  
+                if(s.getChi2()>Constants.CHI2CUT*s.getCrosses().size())
+                    failed.add(s);
+                if(s.getHelix()==null)
+                    failed.add(s);
+            }
+            seeds.removeAll(failed);
+            if(!Constants.getInstance().seedBeamSpotConstraint()) {
+                failed = new ArrayList<>();
+                for(Seed s : seeds) {
+                    if(!recUtil.reFitCircle(s, Constants.getInstance().SEEDFITITERATIONS, xb, yb))
                         failed.add(s);
                 }
                 seeds.removeAll(failed);
-                if(!Constants.getInstance().seedBeamSpotConstraint()) {
-                    failed = new ArrayList<>();
-                    for(Seed s : seeds) {
-                        if(!recUtil.reFitCircle(s, Constants.getInstance().SEEDFITITERATIONS, xb, yb))
-                            failed.add(s);
-                    }
-                    seeds.removeAll(failed);
-                }
             }
+            //} //mv bracket
         }
         for(Seed s : seeds) { 
             if(Constants.getInstance().seedingDebugMode) {
@@ -186,7 +187,7 @@ public class TracksFromTargetRec {
         
         List<Track> tracks = new ArrayList<>();
         KFitter kf = new KFitter(kfFilterOn, kfIterations, Constants.KFDIR, swimmer, Constants.getInstance().KFMatrixLibrary);
-        kf.polarity = (int) Math.signum(Constants.getSolenoidScale());
+        kf.polarity = (int) Math.signum(Constants.getSolenoidScale()); 
         KFitter kf2 = new KFitter(kfFilterOn, kfIterations, Constants.KFDIR, swimmer, Constants.getInstance().KFMatrixLibrary);
         kf2.polarity = (int) Math.signum(Constants.getSolenoidScale());
         kf2.filterOn = false;
@@ -301,20 +302,20 @@ public class TracksFromTargetRec {
                         fittedTrack = recUtil.recovTrkMisClusSearch(seed, hlx, cov, kf2, kf, pid, surfaces, xb, yb,
                             this.SVTclusters, this.SVTcrosses, 
                             swimmer, solenoidScale, solenoidValue, measure);
-                        if(fittedTrack!=null) {
-                            fittedTrack.setStatus(1); 
-                            if(Constants.getInstance().seedingDebugMode) 
-                                System.out.println("RECOVERED..."+fittedTrack.toString());
-                        } 
+//                        if(fittedTrack!=null) {
+//                            fittedTrack.setStatus(1); 
+//                            if(Constants.getInstance().seedingDebugMode) 
+//                                System.out.println("RECOVERED..."+fittedTrack.toString());
+//                        } 
                     } 
-                    if((Constants.getInstance().KFfailRecovMisCls && fittedTrack==null) || !Constants.getInstance().KFfailRecovMisCls ){
+                    if((Constants.getInstance().KFfailRecovMisCls && fittedTrack==null) ){
                         //dump seed
                         kf2.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid)); 
                         kf2.runFitterNoFiltFailSafe();
                         if(kf2.getHelix()!=null) { 
                             fittedTrack = new Track(seed, kf2, pid); 
                             if(Constants.getInstance().seedingDebugMode) 
-                                System.out.println("RECOVERED..."+fittedTrack.toString());
+                                System.out.println("RECOVERED SEED..."+fittedTrack.toString());
                             fittedTrack.setStatus(-1);
                             for(Cross c : fittedTrack) { 
                                 if(c.getDetector()==DetectorType.BST) {
