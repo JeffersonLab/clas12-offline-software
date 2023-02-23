@@ -19,7 +19,7 @@ double torusScale = -1.0;
 double solenoidScale = 1.0;
 boolean isCentral = false;
 boolean isForwardTagger = false;
-int nEvents = 100;
+int nEvents = 1000;
 
 // parse command line options:
 def cli=new CliBuilder(usage:"gen.groovy -pid <#> [options]", stopAtNonOption:false);//, formatter:hf);
@@ -66,6 +66,9 @@ switch (Math.abs(pid)) {
         break;
     case 22:
         fileStub+="gamma";
+        break;
+    case 45:
+        fileStub+="deuteron";
         break;
     default:
         throw new RuntimeException("Invalid PID:  "+pid);

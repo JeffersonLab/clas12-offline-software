@@ -593,11 +593,16 @@ public class RICHGeoFactory{
     //------------------------------
 
         int ilay = 12;
-        Face3D compo_face = get_Layer(isec, ilay).get_CompoFace(ipmt-1, 0);
-        Vector3d Vertex = toVector3d( compo_face.point(1) );
+        if(geocal.find_RICHModule(isec)>0){
+
+            Face3D compo_face = get_Layer(isec, ilay).get_CompoFace(ipmt-1, 0);
+            Vector3d Vertex = toVector3d( compo_face.point(1) );
         
-        Vector3d VPixel = Vertex.plus(pmtpixels.GetPixelCenter(anode));
-        return new Point3D (VPixel.x, -VPixel.y, VPixel.z);
+            Vector3d VPixel = Vertex.plus(pmtpixels.GetPixelCenter(anode));
+            return new Point3D (VPixel.x, -VPixel.y, VPixel.z);
+        }
+
+        return new Point3D(0.0, 0.0, 0.0);
 
     }
 
@@ -1605,6 +1610,13 @@ public class RICHGeoFactory{
             }
         }  
         return -1;
+    }
+
+
+    //------------------------------
+    public int find_RICHModule(int isec){
+    //------------------------------
+        return geocal.find_RICHModule(isec);
     }
 
 
