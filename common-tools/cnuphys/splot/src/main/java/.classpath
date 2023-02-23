@@ -8,5 +8,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="/numericalRec/lib/f2jutil.jar"/>
 	<classpathentry kind="lib" path="/numericalRec/lib/numRec.jar"/>
+	<classpathentry kind="lib" path="lib/bcnuimages.jar"/>
 	<classpathentry kind="output" path="cnuphys/bin"/>
 </classpath>

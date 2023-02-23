@@ -99,9 +99,14 @@ public class RandomData {
 
 		System.out.println("phimin: " + phimin);
 		count = n;
-	    rand = new Random(seed);
 
-	    charge = new int[n];
+		if (seed < 0) {
+			rand = new Random();
+		} else {
+			rand = new Random(seed);
+		}
+
+		charge = new int[n];
 	    xo = new double[n];
 	    yo = new double[n];
 	    zo = new double[n];
