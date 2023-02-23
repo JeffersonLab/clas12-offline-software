@@ -46,6 +46,12 @@ public class AdaptiveSwimResult {
 			_trajectory = new SwimTrajectory();
 		}
 	}
+	
+	public void reset() {
+		if (_trajectory != null) {
+			_trajectory = new SwimTrajectory();
+		}
+	}
 		
 	/**
 	 * Does this result hold a trajectory?
