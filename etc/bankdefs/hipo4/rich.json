@@ -207,12 +207,12 @@
             {"name":"mass",           "type":"F", "info":"reconstructed mass for best hypo"},
 
             {"name":"best_PID",       "type":"S", "info":"most probable PID choice"},
-            {"name":"RQ_prob",        "type":"F", "info":"goodness of hadron choice parameter (1=anambiguos, 0=random)"},
-            {"name":"ReQ_prob",       "type":"F", "info":"goodness of elecgtron choice parameter (1=anambiguos, 0=random)"},
-            {"name":"el_prob",        "type":"F", "info":"probability to be an electron"},
-            {"name":"pi_prob",        "type":"F", "info":"probability to be an pion"},
-            {"name":"k_prob",         "type":"F", "info":"probability to be an kaon"},
-            {"name":"pr_prob",        "type":"F", "info":"probability to be an proton"},
+            {"name":"RQ",             "type":"F", "info":"goodness of hadron choice parameter (1=anambiguos, 0=random)"},
+            {"name":"ReQ",            "type":"F", "info":"goodness of elecgtron choice parameter (1=anambiguos, 0=random)"},
+            {"name":"el_logl",        "type":"F", "info":"probability to be an electron"},
+            {"name":"pi_logl",        "type":"F", "info":"probability to be an pion"},
+            {"name":"k_logl",         "type":"F", "info":"probability to be an kaon"},
+            {"name":"pr_logl",        "type":"F", "info":"probability to be an proton"},
 
             {"name":"best_ch",        "type":"F", "info":"Average etaC for best hypothesis"},
             {"name":"best_c2",        "type":"F", "info":"chi2 for best hypothesis"},
