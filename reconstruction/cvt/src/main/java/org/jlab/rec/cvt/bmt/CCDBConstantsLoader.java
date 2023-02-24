@@ -294,7 +294,7 @@ public class CCDBConstantsLoader {
         BMTConstants.setB_grid(MAG_grid);
         BMTConstants.setPar_grid();
         dbprovider.disconnect();
-        CSTLOADED = true;
+//        CSTLOADED = true;
     }
 
 }
