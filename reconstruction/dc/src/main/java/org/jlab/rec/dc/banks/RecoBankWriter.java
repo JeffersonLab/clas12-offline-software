@@ -9,6 +9,8 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.cluster.FittedCluster;
 import org.jlab.rec.dc.cross.Cross;
+import org.jlab.rec.dc.mc.MCHit;
+import org.jlab.rec.dc.mc.MCCross;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.hit.Hit;
 import org.jlab.rec.dc.segment.Segment;
@@ -1403,5 +1405,75 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
 
         return bank;
     }
+    
+    public DataBank fillMCDCHitsBank(DataEvent event, List<MCHit> hitlist) {
+        int banksize=hitlist.size();
+        String name = "MC::DCHits";
+        DataBank bank = event.createBank(name, banksize);
+
+        int index=0;
+        for (MCHit hit : hitlist) {
+            bank.setShort("id", index, (short) hit.getId());
+            bank.setShort("status", index, (short) hit.getStatus());    
+            bank.setByte("sector", index, (byte) hit.getSector());
+            bank.setByte("superlayer", index, (byte) hit.getSuperlayer());
+            bank.setByte("layer", index, (byte) hit.getLayer());  
+            bank.setFloat("x", index, (float) hit.getPoint().x());
+            bank.setFloat("y", index, (float) hit.getPoint().y());
+            bank.setFloat("z", index, (float) hit.getPoint().z());
+            bank.setFloat("ux", index, (float) hit.getDir().x());
+            bank.setFloat("uy", index, (float) hit.getDir().y());
+            bank.setFloat("uz", index, (float) hit.getDir().z());
+            bank.setFloat("p", index, (float) hit.getP());   
+            index++;
+        }
+        return bank;
+    }  
+    
+    public DataBank fillMCURWellCrossesBank(DataEvent event, List<MCCross> crosslist) {
+        int banksize=crosslist.size();
+        String name = "MC::URWellCrosses";
+        DataBank bank = event.createBank(name, banksize);
+
+        int index=0;
+        for (MCCross cross : crosslist) {
+            bank.setShort("id", index, (short) cross.getId());
+            bank.setShort("status", index, (short) cross.getStatus()); 
+            bank.setByte("sector", index, (byte) cross.getSector());
+            bank.setByte("region", index, (byte) cross.getRegion());
+            bank.setFloat("x", index, (float) cross.getPoint().x());
+            bank.setFloat("y", index, (float) cross.getPoint().y());
+            bank.setFloat("z", index, (float) cross.getPoint().z());
+            bank.setFloat("ux", index, (float) cross.getDir().x());
+            bank.setFloat("uy", index, (float) cross.getDir().y());
+            bank.setFloat("uz", index, (float) cross.getDir().z());
+            bank.setFloat("p", index, (float) cross.getP()); 
+            index++;
+        }
+        return bank;
+    }  
+    
+    public DataBank fillMCDCCrossesBank(DataEvent event, List<MCCross> crosslist) {
+        int banksize=crosslist.size();
+        String name = "MC::DCCrosses";
+        DataBank bank = event.createBank(name, banksize);
+
+        int index=0;
+        for (MCCross cross : crosslist) {
+            bank.setShort("id", index, (short) cross.getId());
+            bank.setShort("status", index, (short) cross.getStatus()); 
+            bank.setByte("sector", index, (byte) cross.getSector());
+            bank.setByte("region", index, (byte) cross.getRegion());
+            bank.setFloat("x", index, (float) cross.getPoint().x());
+            bank.setFloat("y", index, (float) cross.getPoint().y());
+            bank.setFloat("z", index, (float) cross.getPoint().z());
+            bank.setFloat("ux", index, (float) cross.getDir().x());
+            bank.setFloat("uy", index, (float) cross.getDir().y());
+            bank.setFloat("uz", index, (float) cross.getDir().z());
+            bank.setFloat("p", index, (float) cross.getP()); 
+            index++;
+        }
+        return bank;
+    }    
 
 }

@@ -65,6 +65,9 @@ public class DCHBEngine extends DCEngine {
            Constants.getInstance().setWIREDIST(0);
        }
 
+        List<Track> allTrkcands = new ArrayList<>();  
+        List<Track> allMistrkcands = new ArrayList<>(); 
+        
         /* 1 */
         // get Field
         Swim dcSwim = new Swim();
@@ -169,7 +172,7 @@ public class DCHBEngine extends DCEngine {
         List<Track> trkcands = trkcandFinder.getTrackCands(crosslist,
                 Constants.getInstance().dcDetector,
                 Swimmer.getTorScale(),
-                dcSwim, false);
+                dcSwim, false, allTrkcands);
         /* 19 */
 
         // track found
@@ -242,7 +245,7 @@ public class DCHBEngine extends DCEngine {
         List<Track> mistrkcands = trkcandFinder.getTrackCands(pcrosslist,
                 Constants.getInstance().dcDetector,
                 Swimmer.getTorScale(),
-                dcSwim, false);
+                dcSwim, false, allMistrkcands);
 
         // remove overlaps
         if (mistrkcands.size() > 0) {
