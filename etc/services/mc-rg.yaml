@@ -61,7 +61,6 @@ configuration:
   io-services:
     writer:
       compression: 2
-# settings below are for GEMC, compatible with 4.3.0
   services:
     MAGFIELDS:
       magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
