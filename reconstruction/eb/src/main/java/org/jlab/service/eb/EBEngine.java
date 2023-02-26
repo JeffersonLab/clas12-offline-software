@@ -337,6 +337,7 @@ public class EBEngine extends ReconstructionEngine {
         this.registerOutputBank(scintextrasBank);
         this.registerOutputBank(cherenkovBank);
         this.registerOutputBank(trackBank);
+        this.registerOutputBank(utrackBank);
         this.registerOutputBank(crossBank);
         this.registerOutputBank(ftBank);
         this.registerOutputBank(trajectoryBank);
