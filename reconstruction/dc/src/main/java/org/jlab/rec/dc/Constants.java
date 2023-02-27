@@ -93,8 +93,8 @@ public class Constants {
     public static final double LTCCPLANE  = 653.09;
     
     public static final double URWELLLOCALZ  = 226.0464; // cm
-    public static final double URWELLXRESOLUTION = 0.035; // cm
-    public static final double URWELLYRESOLUTION = 0.035; // cm
+    public static final double URWELLXRESOLUTION = 0.01; // cm
+    public static final double URWELLYRESOLUTION = 0.04; // cm
     // other CLAS12 parameters
     public static final  int NSECT  = 6;
     public static final  int NSLAY  = 6;
