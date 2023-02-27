@@ -94,6 +94,7 @@ public class EngineProcessor {
             "org.jlab.rec.ft.trk.FTTRKEngine",
             "org.jlab.rec.ft.FTEBEngine",
             "org.jlab.service.urwell.URWellEngine",
+            "org.jlab.service.urwell.URWellMatchEngine",
             "org.jlab.service.dc.DCHBClustering",
             "org.jlab.service.dc.DCHBPostClusterConv",
             "org.jlab.service.ftof.FTOFHBEngine",

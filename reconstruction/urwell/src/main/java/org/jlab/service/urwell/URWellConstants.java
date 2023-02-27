@@ -25,4 +25,9 @@ public class URWellConstants {
     // cluster
     public final static double COINCTIME = 100;
 
+    // crosses
+    public final static double DELTAE = 200; // max cluster energy difference
+    public final static double DELTAT = 50;  // max cluster time difference
+    public final static double MEANT  = 180; // and offset   
+
 }

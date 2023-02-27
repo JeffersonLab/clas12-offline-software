@@ -18,6 +18,10 @@ services:
     name: FTEB
   - class: org.jlab.service.raster.RasterEngine
     name: RASTER
+  - class: org.jlab.service.urwell.URWellEngine
+    name: URWELL
+  - class: org.jlab.service.urwell.URWellMatchEngine
+    name: URWM
 # DC clustering: nominal algoritm, filled the cluster bank for ai and conventional tracking
   - class: org.jlab.service.dc.DCHBClustering
     name: DCCR

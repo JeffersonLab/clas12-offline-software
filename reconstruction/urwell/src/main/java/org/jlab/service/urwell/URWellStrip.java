@@ -173,10 +173,10 @@ public class URWellStrip implements Comparable {
                 int    comp = bank.getShort("component", i);
                 int     adc = bank.getInt("ADC", i);
                 double time = bank.getFloat("time", i);
+                if(comp==0) continue; // should not happen, should be fixed in simulations
                         
-                URWellStrip  strip = new URWellStrip(sector,  layer,   comp); 
-                
-//                strip.setTriggerPhase(triggerPhase);
+                URWellStrip  strip = new URWellStrip(sector,  layer,   comp);
+
                 strip.setId(i+1);
                 strip.setADC(adc);
                 strip.setTDC((int) time);

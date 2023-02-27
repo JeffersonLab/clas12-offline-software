@@ -40,9 +40,24 @@ public class URWellCross {
             this.time   = (c1.getTime() + c2.getTime())/2;
             this.cluster1 = c1.getId();
             this.cluster2 = c2.getId();
+            this.status = 0;
+            if(Math.abs(c1.getEnergy()-c2.getEnergy())>URWellConstants.DELTAE) 
+                this.status += 1;
+            if(Math.abs(c1.getTime()-c2.getTime())>URWellConstants.DELTAT)     
+                this.status += 2;
+            if(Math.abs(this.time - URWellConstants.MEANT)>1.2*URWellConstants.DELTAT)
+                this.status += 4;
         }
     }
 
+    public URWellCross(int sector, double x, double y, double z, double energy, double time, int status){
+        this.sector = sector;
+        this.cross  = new Point3D(x, y, z);
+        this.energy = energy;
+        this.time   = time;
+        this.status = status;
+    }
+            
     public void setId(int id) {
         this.id = id;
     }
@@ -58,7 +73,7 @@ public class URWellCross {
     public int getChamber() {
         return this.chamber;
     }
-    
+
     public int getCluster1() {
         return cluster1;
     }
@@ -84,7 +99,7 @@ public class URWellCross {
     }
 
     public static List<URWellCross> createCrosses(List<URWellCluster> clusters) {
-        
+
         List<URWellCross> crosses = new ArrayList<>();
         
         for(int is=0; is<URWellConstants.NSECTOR; is++) {

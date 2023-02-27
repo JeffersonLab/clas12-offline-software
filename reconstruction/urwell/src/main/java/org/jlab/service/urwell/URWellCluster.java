@@ -18,8 +18,8 @@ public class URWellCluster extends ArrayList<URWellStrip> {
     private DetectorDescriptor  desc          = new DetectorDescriptor(DetectorType.URWELL);
     private int                 id;  
     private Line3D              clusterLine   = new Line3D();
-    public int                  indexMaxStrip = -1;
-    private byte                clusterStatus =  1;
+    public  int                 indexMaxStrip = -1;
+    private short               clusterStatus =  0;
     
     public URWellCluster(URWellStrip strip){
         this.desc.setSectorLayerComponent(strip.getDescriptor().getSector(), 
@@ -107,7 +107,7 @@ public class URWellCluster extends ArrayList<URWellStrip> {
     
     public void setStatus(int val) {this.clusterStatus+=val;}
     
-    public byte getStatus()  {return clusterStatus;}   
+    public short getStatus()  {return clusterStatus;}   
     
     public void setClusterId(int id){
         this.id = id;

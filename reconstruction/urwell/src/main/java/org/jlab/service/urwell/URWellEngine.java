@@ -86,7 +86,7 @@ public class URWellEngine extends ReconstructionEngine {
         
         DataBank bankC = de.createBank("URWELL::clusters", clusters.size());        
         for(int c = 0; c < clusters.size(); c++){
-            bankS.setShort("id",       c, (short) clusters.get(c).getId());
+            bankC.setShort("id",       c, (short) clusters.get(c).getId());
             bankC.setByte("sector",    c,  (byte) clusters.get(c).get(0).getDescriptor().getSector());
             bankC.setByte("layer",     c,  (byte) clusters.get(c).get(0).getDescriptor().getLayer());
             bankC.setShort("strip",    c, (short) clusters.get(c).getMaxStrip());
