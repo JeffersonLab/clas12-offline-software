@@ -575,7 +575,10 @@ public class RICHEvent {
                     RICHSolution reco = pho.traced;
                     if(recotype==0) reco = pho.analytic;
 
-                    if(!reco.is_used()) continue;
+                    if(!reco.is_used()) {
+                        if(debugMode>=2)System.out.format("pho %4d %3d %3d rejected %3d %3d \n",pho.get_id(),pho.get_ParentIndex(), pho.get_HitIndex(), reco.get_OK(), reco.status()); 
+                        continue;
+                    }
 
                     double etac    = reco.get_EtaC();
                     int    irefle  = reco.get_RefleType();
@@ -660,23 +663,36 @@ public class RICHEvent {
         RICHSolution hreco = hadron.traced;
         if(recotype==0)hreco = hadron.analytic;
         double newRQ = hreco.assign_HypoPID(lh_all);
-        hadron.set_RICHpid(hreco.get_BestH());
 
         int best_hypo = -1;
+        int zero = 0; 
         double bestRL = 0.0;
+        double bestC2 = 0.0;
         if(hreco.get_BestH()>0){
             for (int hypo=0; hypo<RICHConstants.N_HYPO; hypo++){
                 int hypo_pid = RICHConstants.HYPO_LUND[hypo];
                 if(hypo_pid==hreco.get_BestH()){
+                    // check the hypothesis has at least a signal candidate 
+                    if(n_sig[hypo]==0) {
+                        if(debugMode==1)System.out.format("Reset PID \n");
+                        hreco.set_BestH(zero);
+                        continue;
+                    }
                     best_hypo = hypo;
-                    bestRL = (lh_all[hypo]+lh_ref[hypo])/(2*n_sig[hypo]-1);
+                    if(n_tot[hypo]>0){
+                        if(debugMode==1)System.out.format("Define reduced RL and C2\n");
+                        bestRL = (lh_all[hypo]+lh_ref[hypo])/(2*n_tot[hypo]);
+                        bestC2 = c2_sig[hypo]/(2*n_tot[hypo]);
+                    }
                 }
             }
         }
+
+        hadron.set_RICHpid(hreco.get_BestH());
         if(best_hypo>=0){
             hreco.set_BestRL(bestRL);
+            hreco.set_BestC2(bestC2);
             hreco.set_BestCH(ch_sig[best_hypo]);
-            hreco.set_BestC2(c2_sig[best_hypo]);
             hreco.set_BestNpho(n_tot[best_hypo]);
             hreco.set_BestMass(ma_sig[best_hypo]);
 
@@ -691,9 +707,9 @@ public class RICHEvent {
         if(debugMode>=1){
             for (int hypo=0; hypo<RICHConstants.N_HYPO; hypo++){
                 int hypo_pid = RICHConstants.HYPO_LUND[hypo];
-                System.out.format(" [%5d] %5d [%7.2f] %4d %4d %4d %4d [%10.4g %10.4g %10.4g] --> %10.4g %10.4g %7.2f\n",
+                System.out.format(" [%5d] %5d [%7.2f] %4d %4d %4d %4d [%10.4g %10.4g %10.4g] --> %10.4f %10.4g (%10.4g %7.2f)\n",
                         hypo_pid, hreco.get_BestH(), n_exp[hypo], n_tot[hypo], n_sig[hypo], n_bck[hypo], n_spe[hypo],
-                        lh_sig[hypo], lh_ref[hypo], lh_dnn[hypo], lh_all[hypo], (lh_all[hypo]+lh_ref[hypo])/(2*n_sig[hypo]-1), c2_sig[hypo]);
+                        lh_sig[hypo], lh_ref[hypo], lh_dnn[hypo], lh_all[hypo], (lh_all[hypo]+lh_ref[hypo]), (lh_all[hypo]+lh_ref[hypo])/(2*n_tot[hypo]), c2_sig[hypo]/(2*n_tot[hypo]));
             }
 
             String hstri = "Traced PID";
@@ -702,12 +718,12 @@ public class RICHEvent {
                 hstri,runID,eventID, hadron.get_momentum(), hadron.lab_theta*RAD, hadron.get_CLASpid());
             if(best_hypo>=0){
                 int hypo_pid = RICHConstants.HYPO_LUND[best_hypo];
-                double c2r = 12.;
-                if(n_sig[best_hypo]>1) c2r = c2_sig[best_hypo]/(n_sig[best_hypo]-1);
+                //double c2r = 12.;
+                //if(n_sig[best_hypo]>1) c2r = c2_sig[best_hypo]/(2*n_sig[best_hypo]);
                 System.out.format("%5d %5d Npho %6d %6d %6d [%6.2f] Eta %7.2f [%7.2f]  C2 %7.2f [%7.2f]  RQ %7.3f %7.3f %4d %4d \n",
                     hadron.get_RICHpid(), hreco.get_secH(), 
                     n_sig[best_hypo], n_bck[best_hypo], n_spe[best_hypo], n_exp[best_hypo], ch_sig[best_hypo]*MRAD, hadron.changle(11,0)*MRAD,
-                    bestRL, c2r, newRQ, hreco.get_ReQP(),hadron.ilay_emission, hadron.ico_emission);
+                    bestRL, bestC2, newRQ, hreco.get_ReQP(),hadron.ilay_emission, hadron.ico_emission);
             }else{
                 System.out.format("\n");
             }
@@ -1047,7 +1063,7 @@ public class RICHEvent {
                         if(oth.get_id()!=pho.get_id() && oth.get_ParentIndex()==hadron.get_id() && oth.get_HitIndex()==pho.get_HitIndex()){
                             RICHSolution roth = oth.traced;
                             if(recotype==0) roth = oth.analytic;
-                            if(roth.get_OK()==11){
+                            if(roth.get_OK()==11 && roth.status()==0){
                                 reco.set_OK( reco.get_OK()+100 );
                                 // take elemets for likelihood calculation
                                 // ATT: take first working hypo as most probable (to be refined)

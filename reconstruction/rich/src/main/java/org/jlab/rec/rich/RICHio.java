@@ -431,12 +431,12 @@ public class RICHio {
                 bankPart.setFloat("mchi2",         i, (float) had.traced.get_machi2());
 
                 bankPart.setShort("best_PID",      i, (short) had.traced.get_BestH(had.charge()));
-                bankPart.setFloat("RQ_prob",       i, (float) had.traced.get_RQP());
-                bankPart.setFloat("ReQ_prob",      i, (float) had.traced.get_ReQP());
-                bankPart.setFloat("el_prob",       i, (float) had.traced.get_ElProb());
-                bankPart.setFloat("pi_prob",       i, (float) had.traced.get_PiProb());
-                bankPart.setFloat("k_prob",        i, (float) had.traced.get_KProb());
-                bankPart.setFloat("pr_prob",       i, (float) had.traced.get_PrProb());
+                bankPart.setFloat("RQ",            i, (float) had.traced.get_RQP());
+                bankPart.setFloat("ReQ",           i, (float) had.traced.get_ReQP());
+                bankPart.setFloat("el_logl",       i, (float) had.traced.get_ElProb());
+                bankPart.setFloat("pi_logl",       i, (float) had.traced.get_PiProb());
+                bankPart.setFloat("k_logl",        i, (float) had.traced.get_KProb());
+                bankPart.setFloat("pr_logl",       i, (float) had.traced.get_PrProb());
 
                 bankPart.setFloat("best_ch",       i, (float) had.traced.get_BestCH());
                 bankPart.setFloat("best_c2",       i, (float) had.traced.get_BestC2());
