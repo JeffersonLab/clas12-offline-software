@@ -107,6 +107,54 @@ public class Track extends Trajectory implements Comparable<Track>{
         this._Status = _Status;
     }
     
+    public int getStatus() { 
+//for each region: 
+//0 superlayer 1 is OK and superlayer 2 is OK (OK means no missing layers ==> 6 layers in the track segment has one or 2 hits)
+//1 superlayer 1 is OK and superlayer 2 has missing layers; 
+//2 superlayer 1 is OK and superlayer 2 is missing; 
+//3 superlayer 1 has missing layers and superlayer 2 is OK;
+//4 superlayer 1 has missing layers and superlayer 2 has missing layers;
+//5 superlayer 1 has missing layers and superlayer 2 is missing;
+//6 superlayer 1 is missing and superlayer 2 is OK;
+//7 superlayer 1 is missing and superlayer 2 has missing layers;
+//8 superlayer 1 is missing and superlayer 2 is missing; //should not happen at this stage
+
+
+        int st[] = new int[3];
+        
+        for(int i =0; i< this.size(); i++) {
+            int s[] = new int[2];//[slyr]-->0: OK; 1:missing layers; 2 missing
+            int r = this.get(i).get_Region()-1;
+            if(this.get(i).get_Segment1()!=null && this.get(i).get_Segment1().get_Id()!=-1) {
+                if(this.get(i).get_Segment1().MissingLayerCount()>0) {
+                    s[0] = 1;
+                } else {
+                    s[0] = 0;
+                }
+            } else {
+                s[0] = 2;
+            }
+            if(this.get(i).get_Segment2()!=null && this.get(i).get_Segment2().get_Id()!=-1) {
+                if(this.get(i).get_Segment2().MissingLayerCount()>0) {
+                    s[1] = 1;
+                } else {
+                    s[1] = 0;
+                }
+            } else {
+                s[1] = 2;
+            }
+            if(s[0]==0 && s[1]==0) st[r] = 0;
+            if(s[0]==0 && s[1]==1) st[r] = 1;
+            if(s[0]==0 && s[1]==2) st[r] = 2;
+            if(s[0]==1 && s[1]==0) st[r] = 3;
+            if(s[0]==1 && s[1]==1) st[r] = 4;
+            if(s[0]==1 && s[1]==2) st[r] = 5;
+            if(s[0]==2 && s[1]==0) st[r] = 6;
+            if(s[0]==2 && s[1]==1) st[r] = 7;
+            if(s[0]==2 && s[1]==2) st[r] = 8;
+        }
+        return 1000+100*st[0]+10*st[1]+st[2];
+    }
     /**
      * 
      * @return id of the track
