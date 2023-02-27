@@ -189,6 +189,8 @@ public class ECPeak implements Comparable {
                 pointEnd.z()/logSumm
         );
         
+        logSumm = 0.0; // added according to issue 1057
+        
         // Shower peak moments
         for(int i = 0; i < peakStrips.size(); i++){            
             double stripDistance = peakStrips.get(i).getDistanceEdge();
