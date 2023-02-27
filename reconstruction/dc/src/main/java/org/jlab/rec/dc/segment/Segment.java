@@ -85,6 +85,19 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
         return stat;
     }
     
+    public int MissingLayerCount() {
+        int stat = 0;    
+        
+        int L[] = new int[6];
+        for (FittedHit aThi : this) {
+            L[aThi.get_Layer() - 1]++;
+        }
+        for(int l = 0; l<6; l++) {
+            if(L[l]==0)
+                stat++;
+        }
+        return stat;
+    }
     /**
      *
      * @return the fitted cluster
