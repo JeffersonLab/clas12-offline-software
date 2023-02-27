@@ -149,6 +149,24 @@
     ]
   },
   {
+    "name": "MC::URWellHits",
+    "group": 22300,
+    "item" : 80,
+    "info": "MC hits",
+    "entries": [
+        {"name":"id",            "type":"S", "info":"id of the hit"},
+        {"name":"status",        "type":"S", "info":"status of the hit"},
+        {"name":"sector",        "type":"B", "info":"sector of the hit"},
+        {"name":"x",             "type":"F", "info":"hit x-coordinate (in the tilted sector coordinate system)"},
+        {"name":"y",             "type":"F", "info":"hit y-coordinate (in the tilted sector coordinate system)"},
+        {"name":"z",             "type":"F", "info":"hit z-coordinate (in the tilted sector coordinate system)"},
+        {"name":"ux",            "type":"F", "info":"hit x-direction (in the tilted sector coordinate system)"},
+        {"name":"uy",            "type":"F", "info":"hit y-direction (in the tilted sector coordinate system)"},
+        {"name":"uz",            "type":"F", "info":"hit z-direction (in the tilted sector coordinate system)"},
+        {"name":"p",            "type":"F", "info":"hit momentum"}
+    ]
+  },
+  {
     "name": "MC::URWellCrosses",
     "group": 22300,
     "item" : 81,

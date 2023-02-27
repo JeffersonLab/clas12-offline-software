@@ -1117,6 +1117,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
             bank.setByte("region_seed", i, (byte) candlist.get(i).get_SeedRegion());
             bank.setFloat("seed_x", i, (float) candlist.get(i).get_SeedStateVec().x);
             bank.setFloat("seed_y", i, (float) candlist.get(i).get_SeedStateVec().y);
+            bank.setFloat("seed_z", i, (float) candlist.get(i).get_SeedStateVec().z);
             bank.setFloat("seed_tx", i, (float) candlist.get(i).get_SeedStateVec().tx);
             bank.setFloat("seed_ty", i, (float) candlist.get(i).get_SeedStateVec().ty);
             bank.setFloat("seed_Q", i, (float) candlist.get(i).get_SeedStateVec().Q);
@@ -1403,6 +1404,28 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
             }
         }
 
+        return bank;
+    }
+    
+    public DataBank fillMCURWellHitsBank(DataEvent event, List<MCHit> hitlist) {
+        int banksize=hitlist.size();
+        String name = "MC::URWellHits";
+        DataBank bank = event.createBank(name, banksize);
+
+        int index=0;
+        for (MCHit hit : hitlist) {
+            bank.setShort("id", index, (short) hit.getId());
+            bank.setShort("status", index, (short) hit.getStatus());    
+            bank.setByte("sector", index, (byte) hit.getSector());
+            bank.setFloat("x", index, (float) hit.getPoint().x());
+            bank.setFloat("y", index, (float) hit.getPoint().y());
+            bank.setFloat("z", index, (float) hit.getPoint().z());
+            bank.setFloat("ux", index, (float) hit.getDir().x());
+            bank.setFloat("uy", index, (float) hit.getDir().y());
+            bank.setFloat("uz", index, (float) hit.getDir().z());
+            bank.setFloat("p", index, (float) hit.getP());   
+            index++;
+        }
         return bank;
     }
     

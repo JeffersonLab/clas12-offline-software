@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.logging.Level;
+import org.jlab.clas.clas.math.FastMath;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.io.base.DataBank;
@@ -13,7 +14,6 @@ import org.jlab.rec.dc.mc.MCHit;
 import org.jlab.rec.dc.mc.MCCross;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.banks.RecoBankWriter;
-import org.jlab.rec.dc.trajectory.TrackVec;
 import static org.jlab.service.dc.DCEngine.LOGGER;
 
 /**
@@ -50,84 +50,63 @@ public class DCURWellMCEngine extends DCEngine {
 
         List<MCHit> dcHits = new ArrayList<>();
         int dcHits_id = 0;
-        List<MCCross> uRWELLCrosses = new ArrayList<>();
+        List<MCHit> uRWellHits = new ArrayList<>();
+        int uRWellHits_id = 0;
+        List<MCCross> uRWellCrosses = new ArrayList<>();
         List<MCCross> dcCrosses = new ArrayList<>();
 
-        List<Double> x_list_uRWELL = new ArrayList<>();
-        List<Double> y_list_uRWELL = new ArrayList<>();
-        List<Double> z_list_uRWELL = new ArrayList<>();
-        List<Double> px_list_uRWELL = new ArrayList<>();
-        List<Double> py_list_uRWELL = new ArrayList<>();
-        List<Double> pz_list_uRWELL = new ArrayList<>();
-
         if (event.hasBank("MC::True")) {
-
             DataBank bank = event.getBank("MC::True");
             for (int row = 0; row < event.getBank("MC::True").rows(); row++) {
                 // Get information of MC particle in the lab frame
-                pars[0] = (double) bank.getFloat("avgX", row) / 10.;
-                pars[1] = (double) bank.getFloat("avgY", row) / 10.;
-                pars[2] = (double) bank.getFloat("avgZ", row) / 10.;
-                pars[3] = (double) bank.getFloat("px", row) / 1000.;
-                pars[4] = (double) bank.getFloat("py", row) / 1000.;
-                pars[5] = (double) bank.getFloat("pz", row) / 1000.;
-                int pid = bank.getInt("pid", row);
                 int detector = bank.getInt("detector", row);
-
-                if (detector == 6) {
+                if (detector == 6 || detector == 23) {
+                    pars[0] = (double) bank.getFloat("avgX", row) / 10.;
+                    pars[1] = (double) bank.getFloat("avgY", row) / 10.;
+                    pars[2] = (double) bank.getFloat("avgZ", row) / 10.;
+                    pars[3] = (double) bank.getFloat("px", row) / 1000.;
+                    pars[4] = (double) bank.getFloat("py", row) / 1000.;
+                    pars[5] = (double) bank.getFloat("pz", row) / 1000.;
+                    charge = getCharge(bank.getInt("pid", row));
                     sector = getSector(pars);
-
-                    if(sector != -1){
-                        TrackVec tv = new TrackVec();
-                        double[] xpars = tv.TransformToTiltSectorFrame(sector, pars[0], pars[1], pars[2]);
-                        double[] ppars = tv.TransformToTiltSectorFrame(sector, pars[3], pars[4], pars[5]);
-
+                    if (sector != -1) {
+                        double[] xpars = TransformToTiltSectorFrame(sector, pars);
+                        double[] ppars = TransformToTiltSectorFrame(sector, pars);
+                        
                         //DC hits
                         if (detector == 6) {
-                            if (charge == -999) {
-                                charge = getCharge(pid);
-                            }
                             MCHit mcHit = new MCHit(dcHits_id++, sector, xpars, ppars, ZMap, 1);
-                            dcHits.add(mcHit);
+                            dcHits.add(mcHit);                     
+                        }
+
+                        if (detector == 23) {
+                            MCHit mcHit = new MCHit(uRWellHits_id++, sector, xpars, ppars, 1);
+                            uRWellHits.add(mcHit);
                         }
                     }
                 }
-                
-                if (detector == 23) {
-                        x_list_uRWELL.add(pars[0]);
-                        y_list_uRWELL.add(pars[1]);
-                        z_list_uRWELL.add(pars[2]);
-                        px_list_uRWELL.add(pars[3]);
-                        py_list_uRWELL.add(pars[4]);
-                        pz_list_uRWELL.add(pars[5]);
-                 }
             }
 
-            // uRWELL cross is set as average of all uRWELL hits
-            int list_size_uRWELL = x_list_uRWELL.size();
-            if (list_size_uRWELL != 0) {
-                double x_sum_uRWELL = 0, y_sum_uRWELL = 0, z_sum_uRWELL = 0;
-                double px_sum_uRWELL = 0, py_sum_uRWELL = 0, pz_sum_uRWELL = 0;
-                for (int i = 0; i < x_list_uRWELL.size(); i++) {
-                    x_sum_uRWELL += x_list_uRWELL.get(i);
-                    y_sum_uRWELL += y_list_uRWELL.get(i);
-                    z_sum_uRWELL += z_list_uRWELL.get(i);
-                    px_sum_uRWELL += px_list_uRWELL.get(i);
-                    py_sum_uRWELL += py_list_uRWELL.get(i);
-                    pz_sum_uRWELL += pz_list_uRWELL.get(i);
+            // For uRWELL cross, transport from the first uRWELL hit        
+            if (uRWellHits.size() > 0) {
+                double z = Constants.URWELLLOCALZ;
+                MCHit hit = uRWellHits.get(0);
+                double p = hit.getP();
+                Point3D dir = hit.getDir();
+                Point3D point = hit.getPoint();
+                if(point.z() < z){
+                    swim.SetSwimParameters(point.x(), point.y(), point.z(), p * dir.x(), p * dir.y(), p * dir.z(), charge);
+                }
+                else{
+                    swim.SetSwimParameters(point.x(), point.y(), point.z(), -p * dir.x(), -p * dir.y(), -p * dir.z(), charge);
                 }
 
-                double x_aver[] = {x_sum_uRWELL / list_size_uRWELL, y_sum_uRWELL / list_size_uRWELL, z_sum_uRWELL / list_size_uRWELL};
-                double p_aver[] = {px_sum_uRWELL / list_size_uRWELL, py_sum_uRWELL / list_size_uRWELL, pz_sum_uRWELL / list_size_uRWELL};
-                sector = getSector(x_aver);
-                
-                if(sector != -1){
-                    TrackVec tv = new TrackVec();
-                    double[] xpars = tv.TransformToTiltSectorFrame(sector, x_aver[0], x_aver[1], x_aver[2]);
-                    double[] ppars = tv.TransformToTiltSectorFrame(sector, p_aver[0], p_aver[1], p_aver[2]);
-
-                    MCCross mcCross = new MCCross(1, sector, 0, xpars, ppars, 1);
-                    uRWELLCrosses.add(mcCross);
+                double spars[] = swim.SwimToPlaneTiltSecSys(hit.getSector(), z);
+                if (spars != null) {
+                    double xpars[] = {spars[0], spars[1], spars[2]};
+                    double ppars[] = {spars[3], spars[4], spars[5]};
+                    MCCross mcCross = new MCCross(1, hit.getSector(), 0, xpars, ppars, -1);
+                    uRWellCrosses.add(mcCross);
                 }
             }
 
@@ -176,8 +155,9 @@ public class DCURWellMCEngine extends DCEngine {
                 }
             }
 
+            event.appendBank(writer.fillMCURWellHitsBank(event, uRWellHits));
             event.appendBank(writer.fillMCDCHitsBank(event, dcHits));
-            event.appendBank(writer.fillMCURWellCrossesBank(event, uRWELLCrosses));
+            event.appendBank(writer.fillMCURWellCrossesBank(event, uRWellCrosses));
             event.appendBank(writer.fillMCDCCrossesBank(event, dcCrosses));
         }
 
@@ -195,10 +175,36 @@ public class DCURWellMCEngine extends DCEngine {
 
     private int getSector(double[] pars) {
         double phi = Math.toDegrees(Math.atan2(pars[1], pars[0]));
-        if(phi < 0) phi += 360;
+        if (phi < 0) {
+            phi += 360;
+        }
         phi += 30;
-        int sec = (int) phi/60 + 1;
-        if(sec == 7) sec = 1;
+        int sec = (int) phi / 60 + 1;
+        if (sec == 7) {
+            sec = 1;
+        }
         return sec;
-    }    
+    }
+
+    private double[] TransformToTiltSectorFrame(int sector, double[] pos) {
+
+        double cos_tilt = Math.cos(Math.toRadians(25.));
+        double sin_tilt = Math.sin(Math.toRadians(25.));
+        double rad60 = Math.toRadians(60.);
+
+        double x = pos[0];
+        double y = pos[1];
+        double Z = pos[2];
+
+        int t = -1;
+        double X = x * Math.cos((sector - 1) * t * rad60) - y * Math.sin((sector - 1) * t * rad60);
+        double ry = x * Math.sin((sector - 1) * t * rad60) + y * Math.cos((sector - 1) * t * rad60);
+
+        t = 1;
+        double rz = (double) t * X * sin_tilt + Z * cos_tilt;
+        double rx = X * cos_tilt - (double) t * Z * sin_tilt;
+
+        double[] r = {rx, ry, rz};
+        return r;
+    }
 }

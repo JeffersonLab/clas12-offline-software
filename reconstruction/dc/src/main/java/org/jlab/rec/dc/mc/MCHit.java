@@ -11,10 +11,10 @@ import org.jlab.rec.dc.Constants;
 public class MCHit {
 
     private int status;
-    private int sector;
-    private int superlayer;
-    private int layer;
-    private int id;
+    private int sector = -1;
+    private int superlayer = -1;
+    private int layer = -1;
+    private int id = -1;
     private Point3D point;
     private Point3D dir;
     private double p;
@@ -28,8 +28,7 @@ public class MCHit {
         dir = p3D.asUnit().toPoint3D();
         getSSL(ssl);
 
-    }
-    
+    }        
 
     public MCHit(int id, int sector, double[] xpars, double[] ppars, Map<Integer, Double> ZMap, int status) {
         this.status = status;
@@ -42,6 +41,15 @@ public class MCHit {
 
     }
     
+    public MCHit(int id, int sector, double[] xpars, double[] ppars, int status) {
+        this.status = status;
+        this.sector = sector;
+        point = new Point3D(xpars[0], xpars[1], xpars[2]);
+        Vector3D p3D = new Vector3D(ppars[0], ppars[1], ppars[2]);
+        p = p3D.mag();
+        dir = p3D.asUnit().toPoint3D();
+    }
+    
     private void getSSL(int ssl){
         this.superlayer = (int)ssl/6 + 1;
         this.layer = (int)ssl%6 + 1;               
@@ -51,7 +59,8 @@ public class MCHit {
         for(int key: ZMap.keySet()){
             if(Math.abs(ZMap.get(key) - pos) < 0.5){
                 this.superlayer = (int)key/6 + 1;
-                this.layer = (int)key%6 + 1;               
+                this.layer = (int)key%6 + 1;  
+                break;
             }
         }
     }
