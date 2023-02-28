@@ -23,6 +23,10 @@ public class DCURWellMCFromVertexEngine extends DCEngine {
     private int charge = -999;
     private int sector = -1;
     private Map<Integer, Double> ZMap = new HashMap<Integer, Double>();
+    
+    final private double cos_tilt = Math.cos(Math.toRadians(25.));
+    final private double sin_tilt = Math.sin(Math.toRadians(25.));
+    final private double rad60 = Math.toRadians(60.);
 
     public DCURWellMCFromVertexEngine() {
         super("MC");
@@ -143,11 +147,6 @@ public class DCURWellMCFromVertexEngine extends DCEngine {
     }
     
     private double[] TransformToTiltSectorFrame(int sector, double[] pos) {
-
-        double cos_tilt = Math.cos(Math.toRadians(25.));
-        double sin_tilt = Math.sin(Math.toRadians(25.));
-        double rad60 = Math.toRadians(60.);
-
         double x = pos[0];
         double y = pos[1];
         double Z = pos[2];

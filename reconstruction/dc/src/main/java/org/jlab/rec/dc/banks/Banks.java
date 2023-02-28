@@ -124,15 +124,15 @@ public class Banks {
     }
 
     public String getTrackCandsDCMeasurementsBank() {
-        return this.getOutputBank("TrkCandsDCMeasurements");
+        return this.getOutputBank("TrkCandsDCMeas");
     }
     
     public String getTrackCandsURWellMeasurementsBank() {
-        return this.getOutputBank("TrkCandsURWellMeasurements");
+        return this.getOutputBank("TrkCandsURMeas");
     }
 
     public String getTrackCandsIterationsBank() {
-        return this.getOutputBank("TrkCandsIterations");
+        return this.getOutputBank("TrkCandsIters");
     }
 
     public String getTrackCandsStatesBank() {

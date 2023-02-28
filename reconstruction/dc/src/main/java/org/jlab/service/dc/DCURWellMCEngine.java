@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import org.jlab.clas.clas.math.FastMath;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.io.base.DataBank;
@@ -24,6 +23,10 @@ public class DCURWellMCEngine extends DCEngine {
     private int charge = -999;
     private int sector = -1;
     private Map<Integer, Double> ZMap = new HashMap<Integer, Double>();
+    
+    final private double cos_tilt = Math.cos(Math.toRadians(25.));
+    final private double sin_tilt = Math.sin(Math.toRadians(25.));
+    final private double rad60 = Math.toRadians(60.);
 
     public DCURWellMCEngine() {
         super("MC");
@@ -52,7 +55,7 @@ public class DCURWellMCEngine extends DCEngine {
         int uRWellHits_id = 0;
         List<MCCross> uRWellCrosses = new ArrayList<>();
         List<MCCross> dcCrosses = new ArrayList<>();
-
+        
         if (event.hasBank("MC::True")) {
             DataBank bank = event.getBank("MC::True");
             for (int row = 0; row < event.getBank("MC::True").rows(); row++) {
@@ -185,11 +188,6 @@ public class DCURWellMCEngine extends DCEngine {
     }
 
     private double[] TransformToTiltSectorFrame(int sector, double[] pos) {
-
-        double cos_tilt = Math.cos(Math.toRadians(25.));
-        double sin_tilt = Math.sin(Math.toRadians(25.));
-        double rad60 = Math.toRadians(60.);
-
         double x = pos[0];
         double y = pos[1];
         double Z = pos[2];

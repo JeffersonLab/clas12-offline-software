@@ -499,7 +499,7 @@
     ]
   },
   {
-    "name": "HitBasedTrkg::AITrkCandsDCMeasurements",
+    "name": "HitBasedTrkg::AITrkCandsDCMeas",
     "group": 20600,
     "item" : 111,
     "info": "measurements for track candidates",
@@ -520,7 +520,7 @@
     ]
   },
   {
-    "name": "HitBasedTrkg::AITrkCandsURWellMeasurements",
+    "name": "HitBasedTrkg::AITrkCandsURMeas",
     "group": 20600,
     "item" : 112,
     "info": "measurements for track candidates",
@@ -536,7 +536,7 @@
     ]
   },
   {
-    "name": "HitBasedTrkg::AITrkCandsIterations",
+    "name": "HitBasedTrkg::AITrkCandsIters",
     "group": 20600,
     "item" : 113,
     "info": "basic information for iterations of track candidates",
@@ -615,7 +615,7 @@
     ]
   },
   {
-    "name": "TimeBasedTrkg::AITrkCandsDCMeasurements",
+    "name": "TimeBasedTrkg::AITrkCandsDCMeas",
     "group": 20600,
     "item" : 116,
     "info": "measurements for track candidates",
@@ -636,7 +636,7 @@
     ]
   },
   {
-    "name": "TimeBasedTrkg::AITrkCandsURWellMeasurements",
+    "name": "TimeBasedTrkg::AITrkCandsURMeas",
     "group": 20600,
     "item" : 117,
     "info": "measurements for track candidates",
@@ -652,7 +652,7 @@
     ]
   },
   {
-    "name": "TimeBasedTrkg::AITrkCandsIterations",
+    "name": "TimeBasedTrkg::AITrkCandsIters",
     "group": 20600,
     "item" : 118,
     "info": "basic information for iterations of track candidates",
