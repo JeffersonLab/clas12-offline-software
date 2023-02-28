@@ -84,9 +84,14 @@ mon.extend(calib + rechbai + rechb)
 ebrerun = list(dst)
 ebrerun.extend(["FTOF::clusters","FTOF::hbclusters","TimeBasedTrkg::TBTracks","TimeBasedTrkg::Trajectory","TimeBasedTrkg::TBCovMat","HitBasedTrkg::HBTracks","HitBasedTrkg::Trajectory","ECAL::clusters","CTOF::clusters","CND::clusters","HTCC::rec","LTCC::clusters","ECAL::moments","CVTRec::Tracks","CVTRec::Trajectory","FT::particles","FTCAL::clusters","FTHODO::clusters","RUN::rf"])
 
+# EC rerun schema adds ECAL raw banks to the EB rerun scehma:
+ecrerun = list(ebrerun)
+ecrerun.extend(["ECAL::tdc","ECAL::adc"])
+
 create("dst/", set(dst))
 create("dsthb/", set(dsthb))
 create("calib/", set(calib))
 create("mon/",  set(mon))
 create("ebrerun/", set(ebrerun))
+create("ecrerun/", set(ecrerun))
 
