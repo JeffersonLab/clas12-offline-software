@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.logging.Level;
 import org.jlab.clas.clas.math.FastMath;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.clas.swimtools.Swim;
@@ -14,7 +13,6 @@ import org.jlab.rec.dc.mc.MCHit;
 import org.jlab.rec.dc.mc.MCCross;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.banks.RecoBankWriter;
-import static org.jlab.service.dc.DCEngine.LOGGER;
 
 /**
  * @author Tongtong Cao
@@ -69,14 +67,15 @@ public class DCURWellMCEngine extends DCEngine {
                     pars[5] = (double) bank.getFloat("pz", row) / 1000.;
                     charge = getCharge(bank.getInt("pid", row));
                     sector = getSector(pars);
+                    double [] xparas = {pars[0], pars[1], pars[2]};
+                    double [] pparas = {pars[3], pars[4], pars[5]};
+                    double[] xpars = TransformToTiltSectorFrame(sector, xparas);
+                    double[] ppars = TransformToTiltSectorFrame(sector, pparas);
                     if (sector != -1) {
-                        double[] xpars = TransformToTiltSectorFrame(sector, pars);
-                        double[] ppars = TransformToTiltSectorFrame(sector, pars);
-                        
                         //DC hits
                         if (detector == 6) {
                             MCHit mcHit = new MCHit(dcHits_id++, sector, xpars, ppars, ZMap, 1);
-                            dcHits.add(mcHit);                     
+                            dcHits.add(mcHit);
                         }
 
                         if (detector == 23) {
@@ -94,10 +93,9 @@ public class DCURWellMCEngine extends DCEngine {
                 double p = hit.getP();
                 Point3D dir = hit.getDir();
                 Point3D point = hit.getPoint();
-                if(point.z() < z){
+                if (point.z() < z) {
                     swim.SetSwimParameters(point.x(), point.y(), point.z(), p * dir.x(), p * dir.y(), p * dir.z(), charge);
-                }
-                else{
+                } else {
                     swim.SetSwimParameters(point.x(), point.y(), point.z(), -p * dir.x(), -p * dir.y(), -p * dir.z(), charge);
                 }
 
@@ -204,7 +202,7 @@ public class DCURWellMCEngine extends DCEngine {
         double rz = (double) t * X * sin_tilt + Z * cos_tilt;
         double rx = X * cos_tilt - (double) t * Z * sin_tilt;
 
-        double[] r = {rx, ry, rz};
+        double[] r = {rx, ry, rz};       
         return r;
     }
 }

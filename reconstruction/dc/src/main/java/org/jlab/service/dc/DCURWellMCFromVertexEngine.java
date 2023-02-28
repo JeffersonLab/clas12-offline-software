@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.logging.Level;
-import org.jlab.geom.prim.Point3D;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -13,8 +11,6 @@ import org.jlab.rec.dc.mc.MCHit;
 import org.jlab.rec.dc.mc.MCCross;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.banks.RecoBankWriter;
-import org.jlab.rec.dc.trajectory.TrackVec;
-import static org.jlab.service.dc.DCEngine.LOGGER;
 
 /**
  * @author Tongtong Cao
@@ -70,9 +66,10 @@ public class DCURWellMCFromVertexEngine extends DCEngine {
                 sector = getSector(pars, swim, charge);
                 if (sector != -1) {                    
                     // DC hits
-                    TrackVec tv = new TrackVec();
-                    double[] xpars = tv.TransformToTiltSectorFrame(sector, pars[0], pars[1], pars[2]);
-                    double[] ppars = tv.TransformToTiltSectorFrame(sector, pars[3], pars[4], pars[5]);
+                    double [] xparas = {pars[0], pars[1], pars[2]};
+                    double [] pparas = {pars[3], pars[4], pars[5]};
+                    double[] xpars = TransformToTiltSectorFrame(sector, xparas);
+                    double[] ppars = TransformToTiltSectorFrame(sector, pparas);
                     swim.SetSwimParameters(xpars[0], xpars[1], xpars[2], ppars[0], ppars[1], ppars[2], charge);
                     for (int key : ZMap.keySet()) {
                         double paras[] = swim.SwimToPlaneTiltSecSys(sector, ZMap.get(key));
@@ -143,5 +140,27 @@ public class DCURWellMCFromVertexEngine extends DCEngine {
         } else {
             return -1;
         }
+    }
+    
+    private double[] TransformToTiltSectorFrame(int sector, double[] pos) {
+
+        double cos_tilt = Math.cos(Math.toRadians(25.));
+        double sin_tilt = Math.sin(Math.toRadians(25.));
+        double rad60 = Math.toRadians(60.);
+
+        double x = pos[0];
+        double y = pos[1];
+        double Z = pos[2];
+
+        int t = -1;
+        double X = x * Math.cos((sector - 1) * t * rad60) - y * Math.sin((sector - 1) * t * rad60);
+        double ry = x * Math.sin((sector - 1) * t * rad60) + y * Math.cos((sector - 1) * t * rad60);
+
+        t = 1;
+        double rz = (double) t * X * sin_tilt + Z * cos_tilt;
+        double rx = X * cos_tilt - (double) t * Z * sin_tilt;
+
+        double[] r = {rx, ry, rz};
+        return r;
     }
 }
