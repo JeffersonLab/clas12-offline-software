@@ -82,7 +82,7 @@ mon.extend(calib + rechbai + rechb)
 
 # EB rerun schema is DSTs plus whatever is necessary to rerun EB:
 ebrerun = list(dst)
-ebrerun.extend(["FTOF::clusters","FTOF::hbclusters","TimeBasedTrkg::TBTracks","TimeBasedTrkg::Trajectory","TimeBasedTrkg::TBCovMat","HitBasedTrkg::HBTracks","HitBasedTrkg::Trajectory","ECAL::clusters","CTOF::clusters","CND::clusters","HTCC::rec","LTCC::clusters","ECAL::moments","CVTRec::Tracks","CVTRec::Trajectory","FT::particles","FTCAL::clusters","FTHODO::clusters","RUN:rf"])
+ebrerun.extend(["FTOF::clusters","FTOF::hbclusters","TimeBasedTrkg::TBTracks","TimeBasedTrkg::Trajectory","TimeBasedTrkg::TBCovMat","HitBasedTrkg::HBTracks","HitBasedTrkg::Trajectory","ECAL::clusters","CTOF::clusters","CND::clusters","HTCC::rec","LTCC::clusters","ECAL::moments","CVTRec::Tracks","CVTRec::Trajectory","FT::particles","FTCAL::clusters","FTHODO::clusters","RUN::rf"])
 
 create("dst/", set(dst))
 create("dsthb/", set(dsthb))
