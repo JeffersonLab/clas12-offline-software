@@ -1,5 +1,6 @@
 package org.jlab.clas.reco;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +14,6 @@ import org.jlab.utils.options.OptionParser;
 import org.jlab.clara.engine.EngineData;
 import org.jlab.clara.engine.EngineDataType;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.utils.JsonUtils;
 import org.json.JSONObject;
@@ -30,7 +29,7 @@ public class EngineProcessor {
     private final Map<String,ReconstructionEngine>  processorEngines = new LinkedHashMap<>();
     private static final Logger LOGGER = Logger.getLogger(EngineProcessor.class.getPackage().getName());
     private boolean updateDictionary = true;
-    private final Set<String> banksToKeep = new HashSet<>();
+    private SchemaFactory banksToKeep = null;
     private final List<String> schemaExempt = Arrays.asList("RUN::config","DC::tdc");
 
     public EngineProcessor(){}
@@ -50,16 +49,16 @@ public class EngineProcessor {
         }
     }
 
-    private void addBanksToKeep(String schemaDirectory) {
-        SchemaFactory schema = new SchemaFactory();
-        schema.initFromDirectory(schemaDirectory);
-        banksToKeep.addAll(schema.getSchemaKeys());
+    private void setBanksToKeep(String schemaDirectory) {
+        LOGGER.log(Level.INFO, "Using schema directory:  "+schemaDirectory);
+        banksToKeep = new SchemaFactory();
+        banksToKeep.initFromDirectory(schemaDirectory);
     }
 
     private void removeBanks(DataEvent event) {
-        if (!banksToKeep.isEmpty()) {
+        if (banksToKeep != null) {
             for (String bankName : event.getBankList()) {
-                if (!banksToKeep.contains(bankName)) {
+                if (!banksToKeep.hasSchema(bankName)) {
                     event.removeBank(bankName);
                 }
             }
@@ -274,7 +273,11 @@ public class EngineProcessor {
 
             if(updateDictionary==true)
                 updateDictionary(reader, writer);
-            
+           
+            if (this.banksToKeep != null) {
+                writer.getWriter().getSchemaFactory().reduce(banksToKeep.getSchemaKeys());
+            }
+
             if(nskip>0 && nevents>0) nevents += nskip;
             
             ProgressPrintout  progress = new ProgressPrintout();
@@ -283,6 +286,8 @@ public class EngineProcessor {
                 if(nskip<=0 || eventCounter>nskip) {
                     processEvent(event);
                     removeBanks(event);
+                    //writer.getWriter().getSchemaFactory().reduce(schemaExempt)
+                    writer.writeEvent(event);
                 }
                 eventCounter++;
                 if(nevents>0){
@@ -335,7 +340,7 @@ public class EngineProcessor {
         EngineProcessor proc = new EngineProcessor();
 
         if (parser.getOption("-S").stringValue() != null)
-            proc.addBanksToKeep(parser.getOption("-S").stringValue());
+            proc.setBanksToKeep(parser.getOption("-S").stringValue());
         int config  = parser.getOption("-c").intValue();
         int nskip   = parser.getOption("-s").intValue();
         int nevents = parser.getOption("-n").intValue();
@@ -347,7 +352,7 @@ public class EngineProcessor {
         if(!yamlFileName.equals("0")) {
             ClaraYaml yaml = new ClaraYaml(yamlFileName);
             if (yaml.schemaDirectory() != null) {
-                proc.addBanksToKeep(yaml.schemaDirectory());
+                proc.setBanksToKeep(yaml.schemaDirectory());
             }
             for (JSONObject service : yaml.services()) {
                 JSONObject cfg = yaml.filter(service.getString("name"));
