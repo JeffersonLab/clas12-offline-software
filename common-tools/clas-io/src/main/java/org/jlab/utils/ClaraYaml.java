@@ -83,7 +83,10 @@ public class ClaraYaml {
             if (jcfg.has("io-services")) {
                 JSONObject jio = jcfg.getJSONObject("io-services");
                 if (jio.has("writer")) {
-                    return jio.getJSONObject("writer").getString("schema_dir");
+                    JSONObject jwri = jio.getJSONObject("writer");
+                    if (jwri.has("schema_dir")) {
+                        return jwri.getString("schema_dir");
+                    }
                 }
             }
         }
