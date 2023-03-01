@@ -268,15 +268,16 @@ public class EngineProcessor {
             int eventCounter = 0;
             HipoDataSync   writer = new HipoDataSync();
             writer.setCompressionType(2);
+
+            // this doesn't work (before or after "open"):
+            //if (this.banksToKeep != null)
+            //    writer.getWriter().getSchemaFactory().reduce(banksToKeep.getSchemaKeys());
+
             writer.open(output);
 
             if(updateDictionary==true)
                 updateDictionary(reader, writer);
            
-            if (this.banksToKeep != null) {
-                writer.getWriter().getSchemaFactory().reduce(banksToKeep.getSchemaKeys());
-            }
-
             if(nskip>0 && nevents>0) nevents += nskip;
             
             ProgressPrintout  progress = new ProgressPrintout();
@@ -284,8 +285,10 @@ public class EngineProcessor {
                 DataEvent event = reader.getNextEvent();
                 if(nskip<=0 || eventCounter>nskip) {
                     processEvent(event);
+
+                    // this works:
                     removeBanks(event);
-                    //writer.getWriter().getSchemaFactory().reduce(schemaExempt)
+
                     writer.writeEvent(event);
                 }
                 eventCounter++;
@@ -338,8 +341,6 @@ public class EngineProcessor {
 
         EngineProcessor proc = new EngineProcessor();
 
-        if (parser.getOption("-S").stringValue() != null)
-            proc.setBanksToKeep(parser.getOption("-S").stringValue());
         int config  = parser.getOption("-c").intValue();
         int nskip   = parser.getOption("-s").intValue();
         int nevents = parser.getOption("-n").intValue();
@@ -377,6 +378,11 @@ public class EngineProcessor {
                 proc.addEngine(engine);
             }
         }
+
+        // command-line schema overrides YAML:
+        if (parser.getOption("-S").stringValue() != null)
+            proc.setBanksToKeep(parser.getOption("-S").stringValue());
+
         proc.processFile(inputFile,outputFile,nskip,nevents);
     }
 }
