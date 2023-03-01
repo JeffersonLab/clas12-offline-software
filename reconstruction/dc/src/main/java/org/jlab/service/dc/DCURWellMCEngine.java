@@ -98,17 +98,25 @@ public class DCURWellMCEngine extends DCEngine {
                 Point3D point = hit.getPoint();
                 if (point.z() < z) {
                     swim.SetSwimParameters(point.x(), point.y(), point.z(), p * dir.x(), p * dir.y(), p * dir.z(), charge);
+                    double spars[] = swim.SwimToPlaneTiltSecSys(hit.getSector(), z);
+                    if (spars != null) {
+                        double xpars[] = {spars[0], spars[1], spars[2]};
+                        double ppars[] = {spars[3], spars[4], spars[5]};
+                        MCCross mcCross = new MCCross(1, hit.getSector(), 0, xpars, ppars, -1);
+                        uRWellCrosses.add(mcCross);
+                    }
                 } else {
                     swim.SetSwimParameters(point.x(), point.y(), point.z(), -p * dir.x(), -p * dir.y(), -p * dir.z(), charge);
+                    double spars[] = swim.SwimToPlaneTiltSecSys(hit.getSector(), z);
+                    if (spars != null) {
+                        double xpars[] = {spars[0], spars[1], spars[2]};
+                        double ppars[] = {-spars[3], -spars[4], -spars[5]};
+                        MCCross mcCross = new MCCross(1, hit.getSector(), 0, xpars, ppars, -1);
+                        uRWellCrosses.add(mcCross);
+                    }
                 }
 
-                double spars[] = swim.SwimToPlaneTiltSecSys(hit.getSector(), z);
-                if (spars != null) {
-                    double xpars[] = {spars[0], spars[1], spars[2]};
-                    double ppars[] = {spars[3], spars[4], spars[5]};
-                    MCCross mcCross = new MCCross(1, hit.getSector(), 0, xpars, ppars, -1);
-                    uRWellCrosses.add(mcCross);
-                }
+
             }
 
             // For each DC cross, firstly get a hit closest to and before the cross, and then propagate to the cross
@@ -148,7 +156,7 @@ public class DCURWellMCEngine extends DCEngine {
                         double spars[] = swim.SwimToPlaneTiltSecSys(hit.getSector(), z);
                         if (spars != null) {
                             double xpars[] = {spars[0], spars[1], spars[2]};
-                            double ppars[] = {spars[3], spars[4], spars[5]};
+                            double ppars[] = {-spars[3], -spars[4], -spars[5]};
                             MCCross mcCross = new MCCross(i + 1, hit.getSector(), i + 1, xpars, ppars, -1);
                             dcCrosses.add(mcCross);
                         }
