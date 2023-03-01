@@ -337,21 +337,18 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
         String name = bankNames.getURWellCrossesBank();
         DataBank bank = event.createBank(name, urCrosses.size());
         
-        for (int i = 0; i < urCrosses.size(); i++) {
+        for (int i = 0; i < urCrosses.size(); i++) {                        
             bank.setShort("id",       i, (short) urCrosses.get(i).id());
             bank.setShort("tid",      i, (short) urCrosses.get(i).get_tid());
             bank.setByte("sector",    i,  (byte) urCrosses.get(i).sector());
             bank.setFloat("energy",   i, (float) urCrosses.get(i).energy());
             bank.setFloat("time",     i, (float) urCrosses.get(i).time());
-            bank.setFloat("x",        i, (float) urCrosses.get(i).position().x());
-            bank.setFloat("y",        i, (float) urCrosses.get(i).position().y());
-            bank.setFloat("z",        i, (float) urCrosses.get(i).position().z());
-            bank.setFloat("x_local",  i, (float) urCrosses.get(i).local().x());
-            bank.setFloat("y_local",  i, (float) urCrosses.get(i).local().y());
-            bank.setFloat("z_local",  i, (float) urCrosses.get(i).local().z());
+            bank.setFloat("x",        i, (float) urCrosses.get(i).local().x());
+            bank.setFloat("y",        i, (float) urCrosses.get(i).local().y());
+            bank.setFloat("z",        i, (float) urCrosses.get(i).local().z());
             bank.setShort("cluster1", i, (short) urCrosses.get(i).cluster1()); 
             bank.setShort("cluster2", i, (short) urCrosses.get(i).cluster2()); 
-            bank.setShort("status",   i, (short) urCrosses.get(i).status());         
+            bank.setShort("status",   i, (short) urCrosses.get(i).status());  
         }
         
         return bank;        
@@ -390,19 +387,13 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
                 bank.setFloat("t1_py", i, (float) candlist.get(i).get_Region1TrackP().y());
                 bank.setFloat("t1_pz", i, (float) candlist.get(i).get_Region1TrackP().z());
             }
-            if(candlist.get(i).get_URWellPointGlobal() != null && candlist.get(i).get_URWellPointLocal() != null){
-                bank.setFloat("URWell_x", i, (float) candlist.get(i).get_URWellPointGlobal().x());
-                bank.setFloat("URWell_y", i, (float) candlist.get(i).get_URWellPointGlobal().y());
-                bank.setFloat("URWell_z", i, (float) candlist.get(i).get_URWellPointGlobal().z());
-                bank.setFloat("URWell_px", i, (float) candlist.get(i).get_URWellPGlobal().x());
-                bank.setFloat("URWell_py", i, (float) candlist.get(i).get_URWellPGlobal().y());
-                bank.setFloat("URWell_pz", i, (float) candlist.get(i).get_URWellPGlobal().z());
-                bank.setFloat("URWell_x_local", i, (float) candlist.get(i).get_URWellPointLocal().x());
-                bank.setFloat("URWell_y_local", i, (float) candlist.get(i).get_URWellPointLocal().y());
-                bank.setFloat("URWell_z_local", i, (float) candlist.get(i).get_URWellPointLocal().z());
-                bank.setFloat("URWell_px_local", i, (float) candlist.get(i).get_URWellPLocal().x());
-                bank.setFloat("URWell_py_local", i, (float) candlist.get(i).get_URWellPLocal().y());
-                bank.setFloat("URWell_pz_local", i, (float) candlist.get(i).get_URWellPLocal().z());
+            if(candlist.get(i).get_URWellPointLocal() != null){
+                bank.setFloat("URWell_x", i, (float) candlist.get(i).get_URWellPointLocal().x());
+                bank.setFloat("URWell_y", i, (float) candlist.get(i).get_URWellPointLocal().y());
+                bank.setFloat("URWell_z", i, (float) candlist.get(i).get_URWellPointLocal().z());
+                bank.setFloat("URWell_px", i, (float) candlist.get(i).get_URWellPLocal().x());
+                bank.setFloat("URWell_py", i, (float) candlist.get(i).get_URWellPLocal().y());
+                bank.setFloat("URWell_pz", i, (float) candlist.get(i).get_URWellPLocal().z());
             }
             bank.setFloat("pathlength", i, (float) candlist.get(i).get_TotPathLen());
             bank.setFloat("Vtx0_x", i, (float) candlist.get(i).get_Vtx0().x());
@@ -758,12 +749,9 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
             bank.setByte("sector",    i,  (byte) urCrosses.get(i).sector());
             bank.setFloat("energy",   i, (float) urCrosses.get(i).energy());
             bank.setFloat("time",     i, (float) urCrosses.get(i).time());
-            bank.setFloat("x",        i, (float) urCrosses.get(i).position().x());
-            bank.setFloat("y",        i, (float) urCrosses.get(i).position().y());
-            bank.setFloat("z",        i, (float) urCrosses.get(i).position().z());
-            bank.setFloat("x_local",  i, (float) urCrosses.get(i).local().x());
-            bank.setFloat("y_local",  i, (float) urCrosses.get(i).local().y());
-            bank.setFloat("z_local",  i, (float) urCrosses.get(i).local().z());
+            bank.setFloat("x",        i, (float) urCrosses.get(i).local().x());
+            bank.setFloat("y",        i, (float) urCrosses.get(i).local().y());
+            bank.setFloat("z",        i, (float) urCrosses.get(i).local().z());
             bank.setShort("cluster1", i, (short) urCrosses.get(i).cluster1()); 
             bank.setShort("cluster2", i, (short) urCrosses.get(i).cluster2()); 
             bank.setShort("status",   i, (short) urCrosses.get(i).status());         
@@ -811,19 +799,13 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
                 bank.setFloat("t1_py", i, (float) candlist.get(i).get_Region1TrackP().y());
                 bank.setFloat("t1_pz", i, (float) candlist.get(i).get_Region1TrackP().z());
             }
-            if(candlist.get(i).get_URWellPointGlobal() != null && candlist.get(i).get_URWellPointLocal() != null){
-                bank.setFloat("URWell_x", i, (float) candlist.get(i).get_URWellPointGlobal().x());
-                bank.setFloat("URWell_y", i, (float) candlist.get(i).get_URWellPointGlobal().y());
-                bank.setFloat("URWell_z", i, (float) candlist.get(i).get_URWellPointGlobal().z());
-                bank.setFloat("URWell_px", i, (float) candlist.get(i).get_URWellPGlobal().x());
-                bank.setFloat("URWell_py", i, (float) candlist.get(i).get_URWellPGlobal().y());
-                bank.setFloat("URWell_pz", i, (float) candlist.get(i).get_URWellPGlobal().z());
-                bank.setFloat("URWell_x_local", i, (float) candlist.get(i).get_URWellPointLocal().x());
-                bank.setFloat("URWell_y_local", i, (float) candlist.get(i).get_URWellPointLocal().y());
-                bank.setFloat("URWell_z_local", i, (float) candlist.get(i).get_URWellPointLocal().z());
-                bank.setFloat("URWell_px_local", i, (float) candlist.get(i).get_URWellPLocal().x());
-                bank.setFloat("URWell_py_local", i, (float) candlist.get(i).get_URWellPLocal().y());
-                bank.setFloat("URWell_pz_local", i, (float) candlist.get(i).get_URWellPLocal().z());
+            if(candlist.get(i).get_URWellPointLocal() != null){
+                bank.setFloat("URWell_x", i, (float) candlist.get(i).get_URWellPointLocal().x());
+                bank.setFloat("URWell_y", i, (float) candlist.get(i).get_URWellPointLocal().y());
+                bank.setFloat("URWell_z", i, (float) candlist.get(i).get_URWellPointLocal().z());
+                bank.setFloat("URWell_px", i, (float) candlist.get(i).get_URWellPLocal().x());
+                bank.setFloat("URWell_py", i, (float) candlist.get(i).get_URWellPLocal().y());
+                bank.setFloat("URWell_pz", i, (float) candlist.get(i).get_URWellPLocal().z());
             }
             
             bank.setFloat("pathlength", i, (float) candlist.get(i).get_TotPathLen());

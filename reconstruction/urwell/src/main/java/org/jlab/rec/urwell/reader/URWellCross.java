@@ -37,11 +37,10 @@ public class URWellCross {
         this.status =  status;
     }
     
-    public URWellCross(int id, int tid, int sector, double x, double y, double z, double x_local, double y_local, double z_local, double energy, double time, int cluster1, int cluster2, int status) {
+    public URWellCross(int id, int tid, int sector, double x_local, double y_local, double z_local, double energy, double time, int cluster1, int cluster2, int status) {
         this.id = id;
         this.tid = tid;
         this.desc.setSectorLayerComponent(sector, 0, 0);
-        this.global = new Point3D(x, y, z);
         this.local = new Point3D(x_local, y_local, z_local);
         this.energy = energy;
         this.time = time;

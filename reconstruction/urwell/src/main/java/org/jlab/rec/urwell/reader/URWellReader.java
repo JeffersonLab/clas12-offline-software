@@ -113,18 +113,15 @@ public class URWellReader{
             int id = bank.getShort("id", i);
             int tid = bank.getShort("tid", i);    
             int    sector = bank.getByte("sector", i);
-            double x      = bank.getFloat("x", i);
-            double y      = bank.getFloat("y", i);
-            double z      = bank.getFloat("z", i);
-            double x_local = bank.getFloat("x_local", i);
-            double y_local = bank.getFloat("y_local", i);
-            double z_local = bank.getFloat("z_local", i);  
+            double x_local = bank.getFloat("x", i);
+            double y_local = bank.getFloat("y", i);
+            double z_local = bank.getFloat("z", i);  
             double energy = bank.getFloat("energy", i);
             double time   = bank.getFloat("time", i);
             int  cluster1 = bank.getShort("cluster1", i);
             int  cluster2 = bank.getShort("cluster2", i); 
             int status = bank.getShort("status", i); 
-            URWellCross cross = new URWellCross(id, tid, sector, x, y, z, x_local, y_local, z_local, energy, time, cluster1, cluster2, status);
+            URWellCross cross = new URWellCross(id, tid, sector, x_local, y_local, z_local, energy, time, cluster1, cluster2, status);
             urCrosses.add(cross);
         }
     }
