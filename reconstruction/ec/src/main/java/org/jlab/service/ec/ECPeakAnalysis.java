@@ -3,7 +3,9 @@ package org.jlab.service.ec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.jlab.display.ec.Renderer;
 import org.jlab.geom.prim.Line3D;
+import org.jlab.service.ec.ECPeakSplitter.ECPeakSplitterMargin;
 
 /**
  *
@@ -19,7 +21,7 @@ import org.jlab.geom.prim.Line3D;
 public class ECPeakAnalysis {
     
     static final int[][] otherLayers = new int[][]{
-        {0,0},{0,0},{0,0},{0,0},{5,6},{4,6},{4,5},{8,9},{7,9},{7,8}
+        {0,0},{2,3},{1,3},{1,2},{5,6},{4,6},{4,5},{8,9},{7,9},{7,8}
     };
     
     public static int[] getPeakSplitIndex(List<ECPeak> peaks){ 
@@ -47,7 +49,7 @@ public class ECPeakAnalysis {
             }
         }
     }   
-      
+    
     /**
      * This part is added to acommodate for tricky algorithm to check if the 
      * splitting makes sense. Implemented on 02/20/2023
@@ -61,8 +63,10 @@ public class ECPeakAnalysis {
         split[1] = peak.getSplitStrip(); //strip used to split peak
         split[2] = 0;
         if(split[0]>=0) {
+            
             int layer = peak.getDescriptor().getLayer();
             if(layer==1||layer==2||layer==3) return split;
+            
             List<ECPeak>  others = ECPeakAnalysis.getMatchingPeaks(peak, allPeaks);
             if(others.size()!=2) return split;
 
@@ -131,6 +135,20 @@ public class ECPeakAnalysis {
             ECPeak peak = current.get(0); current.remove(0);
             int[] split = ECPeakAnalysis.getPeakSplitIndex(peak, current);
             if(split[0]>=0){
+                List<ECPeak> result = peak.splitPeak(split[0]);
+                double en1 = result.get(0).getMaxECStrip().getEnergy();
+                double en2 = result.get(1).getMaxECStrip().getEnergy();
+                
+                double en11 = Math.max(en1, en2);
+                double en22 = Math.min(en1, en2);
+                double ens = peak.getStripEnergy(split[0]);
+                
+                Renderer r = new Renderer(8,peak.getEnergies());
+                System.out.println(r);
+                System.out.printf(">>> SPLIT : %9.5f %9.5f %9.5f, RATIO = \"%.5f, %.5f %.5f\" %s\n",
+                            en11,en22,ens,en22/en11,ens/en11,ens/en22 ,peak.getString());
+               
+                
                 peaks.addAll(peak.splitPeak(split[0]));
             } else {
                 peaks.add(peak);
@@ -150,6 +168,62 @@ public class ECPeakAnalysis {
                 peaks.addAll(peak.splitPeak(split[0])); //two split peaks returned to list
             }
         }*/
+    }
+    
+    
+    public static void splitPeaksAlternative2(List<ECPeak> peaks){
+        
+        ECPeakSplitterMargin m = new ECPeakSplitterMargin();
+        
+        List<ECPeak> current = new ArrayList<>();
+        List<ECPeak>   whole = new ArrayList<>();
+        
+        current.addAll(peaks);
+        whole.addAll(peaks);
+        
+        peaks.clear();
+        //System.out.printf("--- split peaks start current = %d, peaks = %d\n",current.size(), peaks.size());
+        
+        while(!current.isEmpty()){
+            ECPeak peak = current.get(0); current.remove(0);
+            
+            List<ECPeak> splitPeaks = m.split(peak);
+            if(splitPeaks.size()==2){
+                
+                int sector   = peak.getDescriptor().getSector();
+                int  layer   = peak.getDescriptor().getLayer();
+                int[] layers = ECPeakAnalysis.otherLayers[layer];
+                
+                List<ECPeak> one = ECPeakAnalysis.getListForSectorLayer(whole, sector, layers[0]);
+                List<ECPeak> two = ECPeakAnalysis.getListForSectorLayer(whole, sector, layers[1]);
+                
+                //int[] cluster = ECPeakAnalysis.getBestCluster(peak, one, two);
+                
+                List<ECPeak> others = ECPeakAnalysis.getMatchingPeaks(peak, current);
+                if(others.size()==2){
+                    List<ECPeak>   oneView  = m.split(others.get(0));
+                    List<ECPeak>   twoView  = m.split(others.get(1));
+                    //Renderer  r = new Renderer(8,peak.getEnergies());
+                    //System.out.println(r);
+                    //System.out.printf(" >>> found splittable peak : others = %d %d (%d %d) \n",
+                    //        oneView.size(),twoView.size(), one.size(), two.size());
+                    if(oneView.size()==1&&twoView.size()==1){
+                        if(one.size()>1||two.size()>1){
+                            peaks.addAll(splitPeaks);                            
+                        } else { peaks.add(peak);}
+                    } else {
+                        peaks.addAll(splitPeaks);
+                    }
+                } else {
+                    peaks.addAll(splitPeaks);
+                }
+            } else {
+                peaks.add(peak);
+            }
+            
+           
+        }
+       
     }
     
     public static int  findMatchForCluster(ECCluster c, List<ECCluster> list){
@@ -194,6 +268,15 @@ public class ECPeakAnalysis {
                 }
             }
             
+        }
+    }
+    
+    
+    
+    public static void doPeakCleanup(List<ECPeak> peaks){
+        ECPeakSplitterMargin m = new ECPeakSplitterMargin();
+        for(int i = 0; i < peaks.size(); i++){
+            m.split(peaks.get(i));
         }
     }
 }

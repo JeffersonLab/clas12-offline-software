@@ -43,9 +43,13 @@ public class ECEngine extends ReconstructionEngine {
         // - Thsi is the part that identifies clusters with 2 views shared,
         // - and picks the one with best cluster size.
         
+        
+        //ECPeakAnalysis.doPeakCleanup(ecPeaks);
+        
         ECPeakAnalysis.doClusterCleanup(tmpPCAL);
         ECPeakAnalysis.doClusterCleanup(tmpECIN);
         ECPeakAnalysis.doClusterCleanup(tmpECOUT);
+        
         
         // - commented by Gagik - now created clusters for each of sub-modules
         // - will be analyzed to eliminate clusters that share two views with 
