@@ -260,7 +260,7 @@ navigated at [this
 website](https://clasweb.jlab.org/cgi-bin/ccdb/objects). Here's an image
 of the Event Builder's table layout in CCDB:
 
-![](EBCCDB.png "EBCCDB.png")
+![](doc/EBCCDB.png "EBCCDB.png")
 
 ## ECAL Sampling Fraction Parameterization
 
