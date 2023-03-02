@@ -199,7 +199,8 @@ public class ECPeakAnalysis {
                 
                 //int[] cluster = ECPeakAnalysis.getBestCluster(peak, one, two);
                 
-                List<ECPeak> others = ECPeakAnalysis.getMatchingPeaks(peak, current);
+                List<ECPeak> others = ECPeakAnalysis.getMatchingPeaks(peak, whole);
+                
                 if(others.size()==2){
                     List<ECPeak>   oneView  = m.split(others.get(0));
                     List<ECPeak>   twoView  = m.split(others.get(1));
@@ -208,8 +209,8 @@ public class ECPeakAnalysis {
                     //System.out.printf(" >>> found splittable peak : others = %d %d (%d %d) \n",
                     //        oneView.size(),twoView.size(), one.size(), two.size());
                     if(oneView.size()==1&&twoView.size()==1){
-                        if(one.size()>1||two.size()>1){
-                            peaks.addAll(splitPeaks);                            
+                        if(one.size()>1&&two.size()>1){
+                            peaks.addAll(splitPeaks); 
                         } else { peaks.add(peak);}
                     } else {
                         peaks.addAll(splitPeaks);
@@ -217,6 +218,7 @@ public class ECPeakAnalysis {
                 } else {
                     peaks.addAll(splitPeaks);
                 }
+                
             } else {
                 peaks.add(peak);
             }
