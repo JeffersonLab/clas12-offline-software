@@ -1,5 +1,29 @@
 # Event Builder
 
+## Table of Contents
+* [Overview](#overview)
+* [Output Banks](#output-banks)
+* [Beam Helicity](#beam-helicity)
+* [Beam Radio Frequency](#beam-radio-frequency)
+* [Particle Creation](#particle-creation)
+  + [Charged Particles](#charged-particles)
+  + [Neutral Particles](#neutral-particles)
+    - [Forward](#forward)
+    - [Central](#central)
+  + [Forward Tagger](#forward-tagger)
+* [Event Start Time](#event-start-time)
+* [Particle Identification](#particle-identification)
+  + [Electron/Positron](#electron-positron)
+  + [Charged Hadrons](#charged-hadrons)
+    - [Cherenkov Vetoes](#cherenkov-vetoes)
+  + [Neutrals](#neutrals)
+    - [Forward Detector](#forward-detector)
+    - [Central Detector](#central-detector)
+    - [Forward Tagger](#forward-tagger-1)
+  + [RICH](#rich)
+* [CLAS Calibration Database](#clas-calibration-database)
+  + [ECAL Sampling Fraction Parameterization](#ecal-sampling-fraction-parameterization)
+
 ## Overview
 The roles of the Event Builder are:
 
