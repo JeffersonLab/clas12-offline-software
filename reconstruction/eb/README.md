@@ -196,7 +196,7 @@ timing cuts are effectively halfway between these theoretical curves,
 and tightening those cuts can be achieved with `REC::Particle.chi2pid`.
 
 <figure>
-<img src="ftof-bvsp-May2018a.png" title="ftof-bvsp-May2018a.png" width="500" alt="ftof-bvsp-May2018a.png" /><figcaption aria-hidden="true">ftof-bvsp-May2018a.png</figcaption>
+<img src="doc/ftof-bvsp-May2018a.png" title="ftof-bvsp-May2018a.png" width="500"/><figcaption aria-hidden="true">ftof-bvsp-May2018a.png</figcaption>
 </figure>
 
 ### Cherenkov Vetoes
