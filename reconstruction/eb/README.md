@@ -155,8 +155,7 @@ hit):
 2.  60 MeV in PCAL
 3.  5-sigma cuts on a parameterized momentum-dependent sampling fraction
     -   where "sampling fraction" is ECAL visible energy deposition
-        (PCAL+Inner+Outer) divided by momentum ([ see details on the
-        parameterization](CLAS12_EventBuilder#ECAL_Sampling_Fraction_Parameterization "wikilink"))
+        (PCAL+Inner+Outer) divided by momentum [see details on the parameterization](#ECAL-Sampling-Fraction-Parameterization)
 
 These parameters are stored in CCDB, and the variable
 `REC::Particle.chi2pid` is assigned as the number of σ from the expected
