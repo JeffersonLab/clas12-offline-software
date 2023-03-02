@@ -20,9 +20,7 @@ structure of each bank is always contained in the
 [event.json](https://github.com/JeffersonLab/clas12-offline-software/blob/development/etc/bankdefs/hipo4/event.json)
 file in the offline software repository. Here's the bank listing, and
 for more details on their relationships and contents see [CLAS12
-DSTs](CLAS12_DSTs "wikilink").
-
-<tt>
+DSTs](https://clasweb.jlab.org/wiki/index.php/CLAS12_DSTs  "wikilink").
 
 -   REC::Event
 -   REC::Particle
@@ -30,11 +28,9 @@ DSTs](CLAS12_DSTs "wikilink").
 -   REC::Scintillator
 -   REC::Cherenkov
 -   REC::Track
--   REC::Traj </tt>(track trajectory)<tt>
--   REC::CovMat </tt>(track covariance matrix)<tt>
--   REC::VertDoca </tt>(multi-particle vertices, currently unused)<tt>
-
-</tt>
+-   REC::Traj (track trajectory)
+-   REC::CovMat (track covariance matrix)
+-   REC::VertDoca (multi-particle vertices, currently unused)
 
 # Beam Helicity
 
@@ -45,7 +41,7 @@ module, and the helicity state for a given event is assigned binarily
 based on the readout FADC waveform for that event. The result is stored
 in `REC::Event.helicity` with a value of -1/+1 for the two helicity
 states, while anything else is an invalid/unknown state. See the [DST
-documentation](CLAS12_DSTs "wikilink") for information on delayed
+documentation](https://clasweb.jlab.org/wiki/index.php/CLAS12_DSTs "wikilink") for information on delayed
 helicity.
 
 # Beam Radio Frequency
