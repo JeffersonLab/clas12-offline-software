@@ -273,13 +273,13 @@ public class ClosestApproach {
 		UnivariateFunction function = t -> trajDist(t, x1, y1, z1, t1, result1, x2, y2, z2, t2, result2);
 		UnivariateObjectiveFunction func = new UnivariateObjectiveFunction(function);
 
-		double rel = 1.0e-5;
-		double abs = 1.0e-8;
+		double rel = 1.0e-4;
+		double abs = 1.0e-6;
 
 		BrentOptimizer opt = new BrentOptimizer(rel, abs);
 
-		MaxIter maxIter = new MaxIter(100);
-		MaxEval maxEval = new MaxEval(200);
+		MaxIter maxIter = new MaxIter(1000);
+		MaxEval maxEval = new MaxEval(2000);
 		SearchInterval interval = new SearchInterval(tMin, tMax);
 		UnivariatePointValuePair min = opt.optimize(maxIter, maxEval, func, GoalType.MINIMIZE, interval);
 
