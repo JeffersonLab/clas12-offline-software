@@ -268,21 +268,23 @@ public class Geometry {
 
     /**
      * Compares the CVT geometry for two geometry variations selected from 
-     * command line, compensating for the average offset between the SVT-R1 
-     * strip upstream endpoints
+     * command line, with the option of compensating for the average offset 
+     * between the SVT-R1 strip upstream endpoints
      * @param args
      */
     public static void main(String[] args) {
         DefaultLogger.debug();
         OptionParser parser = new OptionParser("Compare CVT geometries from two variations");
         parser.setRequiresInputList(false);
-        parser.addOption("-var1",  "default",        "geometry variation 1");
-        parser.addOption("-var2",  "rgb_spring2019", "geometry variation 2");
+        parser.addOption("-var1",   "default",        "geometry variation 1");
+        parser.addOption("-var2",   "rgb_spring2019", "geometry variation 2");
+        parser.addOption("-offset", "0",              "compensate for the average offset of SVT-R1 strip upstream end (1)");
         parser.parse(args);
         
         int run = 11;
         String var1 = parser.getOption("-var1").stringValue();
         String var2 = parser.getOption("-var2").stringValue();
+        boolean compensateOffset = parser.getOption("-offset").intValue()==1;
         
         ConstantsManager ccdb = new ConstantsManager();
         ccdb.init(Arrays.asList("/calibration/svt/lorentz_angle", "/calibration/mvt/bmt_voltage"));
@@ -310,7 +312,7 @@ public class Geometry {
         for(int i=0; i<SVTGeometry.NREGIONS; i++) {
             List<Line3D> svt1 = Geometry.getSVT(run, i+1, var1, svtLorentz);
             List<Line3D> svt2 = Geometry.getSVT(run, i+1, var2, svtLorentz);
-            if(i==0) offset = Geometry.getOffset(svt1, svt2);
+            if(i==0 && compensateOffset) offset = Geometry.getOffset(svt1, svt2);
             canvas.getCanvas("SVT-R" + (i+1)).draw(Geometry.compareStrips(svt1, svt2, offset));
         }
         canvas.getCanvas("BMT-Z").draw(Geometry.compareStrips(Geometry.getBMT(BMTType.Z, run, var1, bmtVoltage), Geometry.getBMT(BMTType.Z, run, var2, bmtVoltage), offset));
