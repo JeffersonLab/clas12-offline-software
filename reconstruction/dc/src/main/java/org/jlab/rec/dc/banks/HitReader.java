@@ -255,7 +255,7 @@ public class HitReader {
             superlayer[i] = (bankDGTZ.getByte("layer", i)-1)/6 + 1;
             wire[i]       = bankDGTZ.getShort("component", i);
             order[i]      = bankDGTZ.getByte("order", i);
-            jitter[i]     = this.getJitter(sector[i], bankDGTZ.getByte("layer", i), wire[i], order[i]);
+            jitter[i]     = this.getJitter(sector[i], bankDGTZ.getByte("layer", i), wire[i], order[i]%10);
             tdc[i]        = bankDGTZ.getInt("TDC", i) - jitter[i];
         }
 
