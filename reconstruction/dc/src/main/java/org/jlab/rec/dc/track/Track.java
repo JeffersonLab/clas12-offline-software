@@ -97,15 +97,15 @@ public class Track extends Trajectory implements Comparable<Track>{
         this._singleSuperlayer = _singleSuperlayer;
     }
     
-    private int _Status=0;
-
-    public int get_Status() {
-        return _Status;
-    }
-
-    public void set_Status(int _Status) {
-        this._Status = _Status;
-    }
+//    private int _Status=0;
+//
+//    public int get_Status() {
+//        return _Status;
+//    }
+//
+//    public void set_Status(int _Status) {
+//        this._Status = _Status;
+//    }
     
     private int _BitStatus=0;
 
