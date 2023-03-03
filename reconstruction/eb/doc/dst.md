@@ -309,6 +309,11 @@ REC::Response banks.
 -   `x/y/z` (cm) and `cx/cy/cz`
     -   the position and direction cosines of the track's trajectory at
         a given detector
+-   `path` (cm)
+    -   the path length of the track from its vertex to the given detector
+-   `edge` (cm)
+    -   the signed distance of the track position to the closest detector edge 
+        (positive if the track position is inside the detector boundaries and negative if outside)         
 
 #### `REC::ScintExtras`
 This bank is row-wise synchronized with REC::Scintillator
