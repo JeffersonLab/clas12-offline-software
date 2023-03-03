@@ -192,18 +192,18 @@ public class DCTBEngine extends DCEngine {
 //            });
 //            HBtrk.set_CovMat(initCMatrix);
             TrackArray[HBtrk.get_Id()-1] = HBtrk; 
-            TrackArray[HBtrk.get_Id()-1].set_Status(0);
+//            TrackArray[HBtrk.get_Id()-1].set_Status(0);
         }
         if(TrackArray==null) {
             return true; // HB tracks not saved correctly
         }
-        for(Segment seg : segments) {
-            if(seg.get(0).get_AssociatedHBTrackID()>0) {
-                    TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].get_ListOfHBSegments().add(seg); 
-                    if(seg.get_Status()==1)
-                        TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].set_Status(1);
-            }
-        }
+//        for(Segment seg : segments) {
+//            if(seg.get(0).get_AssociatedHBTrackID()>0) {
+//                    TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].get_ListOfHBSegments().add(seg); 
+//                    if(seg.get_Status()==1)
+//                        TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].set_Status(1);
+//            }
+//        }
         
         //6) find the list of  track candidates
         // read beam offsets from database
