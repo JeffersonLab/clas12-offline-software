@@ -24,15 +24,28 @@ import cnuphys.swim.Swimmer;
 import cnuphys.swimtest.RandomData;
 
 public class ClosestApproach {
+	
+	//default values
+	private static double defRelTol = 1.4e-4;
+	private static double defAbsTol = 1.4e-6;
+	private static int defMaxIter = 1000;
+	private static int defMaxEval = 2000;
+
 
 	// basic euclidian distance
 	private static double distance(double x1, double y1, double z1, double x2, double y2, double z2) {
+		return Math.sqrt(distanceSq(x1, y1, z1, x2, y2, z2));
+	}
+	
+	// basic euclidian distance squared
+	private static double distanceSq(double x1, double y1, double z1, double x2, double y2, double z2) {
 		double dx = x2 - x1;
 		double dy = y2 - y1;
 		double dz = z2 - z1;
 
-		return Math.sqrt(dx * dx + dy * dy + dz * dz);
+		return dx * dx + dy * dy + dz * dz;
 	}
+
 
 	// generate a random LundId from a small set. Used by testing
 	// to create a random Lund particle.
@@ -127,8 +140,6 @@ public class ClosestApproach {
 		result[3] = interp(tx, t, tval, index);
 		result[4] = interp(ty, t, tval, index);
 		result[5] = interp(tz, t, tval, index);
-
-
 	}
 
 
@@ -153,14 +164,42 @@ public class ClosestApproach {
 	public static ClosestApproachResult closestApproach(SwimTrajectory traj1, SwimTrajectory traj2, double p1, double p2, int lundId1,
 			int lundId2, double deltaT) {
 
+		return closestApproach(traj1, traj2, p1, p2, lundId1, lundId2, deltaT, defRelTol, defAbsTol, defMaxIter, defMaxEval);
+	}
+	
+	/**
+	 * 
+	 * Compute the distance of closest approach in time. (not the over-all geometric
+	 * closest approach of the trajectories, but the closest they get at any time.)
+	 * 
+	 * @param traj1   one trajectory
+	 * @param traj2   other trajectory
+	 * @param p1      momentum of traj 1 in GeV/c
+	 * @param p2      momentum of traj 2 in GeV/c
+	 * @param lundId2 Lund (PDG) id for traj1. If not known, set to <= 0. This will
+	 *                be used to compute the speed from the momentum. If not known,
+	 *                speed of light assumed.
+	 * @param lundId2 Lund (PDG) id for traj2, as for traj1
+	 * @param deltaT  time in ns between start of traj1 and start of traj2. Can be
+	 *                negative, in which case traj2 starts first.
+	 * @param relTol  relative tolerance
+	 * @param absTol  absoluteToleration
+	 * @param maxIter max number of iterations
+	 * @param maxEval max number of evaluations
+	 * @return the object holding the results
+	 */
+	public static ClosestApproachResult closestApproach(SwimTrajectory traj1, SwimTrajectory traj2, double p1, double p2, int lundId1,
+			int lundId2, double deltaT, double relTol, double absTol, int maxIter, int maxEval) {
+
 		LundId lid1 = LundSupport.getInstance().get(lundId1);
 		LundId lid2 = LundSupport.getInstance().get(lundId2);
 
 		// a zero mass will result in beta = 1
 		double mass1 = (lid1 != null) ? lid1.getMass() : 0;
 		double mass2 = (lid2 != null) ? lid2.getMass() : 0;
-		return closestApproach(traj1, traj2, p1, p2, mass1, mass2, deltaT);
+		return closestApproach(traj1, traj2, p1, p2, mass1, mass2, deltaT, relTol, absTol, maxIter, maxEval);
 	}
+
 
 	/**
 	 * Compute the distance of closest approach in time. (not the over-all geometric
@@ -181,6 +220,30 @@ public class ClosestApproach {
 	public static ClosestApproachResult closestApproach(SwimTrajectory traj1, SwimTrajectory traj2, double p1, double p2, double m1,
 			double m2, double deltaT) {
 
+		return closestApproach(traj1, traj2, p1, p2, m1, m2, deltaT, defRelTol, defAbsTol, defMaxIter, defMaxEval);
+	}
+	
+	/**
+	 * Compute the distance of closest approach in time. (not the over-all geometric
+	 * closest approach of the trajectories, but the closest they get at any time.)
+	 * 
+	 * @param traj1   one trajectory
+	 * @param traj2   other trajectory
+	 * @param p1      momentum of traj 1 in GeV/c
+	 * @param p2      momentum of traj 2 in GeV/c
+	 * @param m1      mass of particle 1 in GeV/c^2
+	 * @param m1      mass of particle 1 in GeV/c^2
+	 * @param deltaT  time in ns between start of traj1 and start of traj2. Can be
+	 *                negative, in which case traj2 starts first.
+	 * @param relTol  relative tolerance
+	 * @param absTol  absoluteToleration
+	 * @param maxIter max number of iterations
+	 * @param maxEval max number of evaluations
+	 * @return the object holding the results
+	 */
+	public static ClosestApproachResult closestApproach(SwimTrajectory traj1, SwimTrajectory traj2, double p1, double p2, double m1,
+			double m2, double deltaT, double relTol, double absTol, int maxIter, int maxEval) {
+
 		double beta1 = 1;
 		double beta2 = 1;
 
@@ -191,8 +254,10 @@ public class ClosestApproach {
 			beta2 = beta(p2, m2);
 		}
 
-		return closestApproach(traj1, traj2, beta1, beta2, deltaT);
+		return closestApproach(traj1, traj2, beta1, beta2, deltaT, relTol, absTol, maxIter, maxEval);
 	}
+
+	
 
 	/**
 	 * Compute the distance of closest approach in time. (not the over-all geometric
@@ -209,6 +274,29 @@ public class ClosestApproach {
 	 */
 	public static ClosestApproachResult closestApproach(SwimTrajectory traj1, SwimTrajectory traj2, double beta1, double beta2,
 			double deltaT) {
+
+		return closestApproach(traj1, traj2, beta1, beta2, deltaT, defRelTol, defAbsTol, defMaxIter, defMaxEval);
+	}
+
+	
+	/**
+	 * Compute the distance of closest approach in time. (not the over-all geometric
+	 * closest approach of the trajectories, but the closest they get at any time.)
+	 * 
+	 * @param traj1   one trajectory
+	 * @param traj2   other trajectory
+	 * @param beta1   the v/c for trajectory 1
+	 * @param beta2   the v/c for trajectory 2
+	 * @param deltaT  time in ns between start of traj1 and start of traj2. Can be
+	 *                negative, in which case traj2 starts first.
+	 * @param relTol  relative tolerance
+	 * @param absTol  absoluteToleration
+	 * @param maxIterations max number of iterations
+	 * @param maxEvaluations max number of evaluations
+	 * @return the object holding the results
+	 */
+	public static ClosestApproachResult closestApproach(SwimTrajectory traj1, SwimTrajectory traj2, double beta1,
+			double beta2, double deltaT, double relTol, double absTol, int maxIterations, int maxEvaluations) {
 
 		if ((traj1 == null) || (traj2 == null)) {
 			return null;
@@ -270,21 +358,21 @@ public class ClosestApproach {
 		double result2[] = new double[3];
 
 		// use brent algorithm from apache common maths to get minimum
-		UnivariateFunction function = t -> trajDist(t, x1, y1, z1, t1, result1, x2, y2, z2, t2, result2);
+		UnivariateFunction function = t -> trajDistSq(t, x1, y1, z1, t1, result1, x2, y2, z2, t2, result2);
 		UnivariateObjectiveFunction func = new UnivariateObjectiveFunction(function);
 
-		double rel = 1.0e-4;
-		double abs = 1.0e-6;
 
-		BrentOptimizer opt = new BrentOptimizer(rel, abs);
+		BrentOptimizer opt = new BrentOptimizer(relTol, absTol);
 
-		MaxIter maxIter = new MaxIter(1000);
-		MaxEval maxEval = new MaxEval(2000);
+		MaxIter maxIter = new MaxIter(maxIterations);
+		MaxEval maxEval = new MaxEval(maxEvaluations);
 		SearchInterval interval = new SearchInterval(tMin, tMax);
 		UnivariatePointValuePair min = opt.optimize(maxIter, maxEval, func, GoalType.MINIMIZE, interval);
 
 		caResult.t = min.getPoint();
-		caResult.doca = min.getValue();
+		
+		//minimized distSq but want min dist
+		caResult.doca = Math.sqrt(min.getValue());
 		
 		
 		//get state vectors at intersection
@@ -301,14 +389,14 @@ public class ClosestApproach {
 		return caResult;
 	}
 
-	//the distance between two linear interpolations of two trajectories
-	private static double trajDist(double t, double x1[], double y1[], double z1[], double t1[], double result1[],
+	//the distance squared between two linear interpolations of two trajectories
+	private static double trajDistSq(double t, double x1[], double y1[], double z1[], double t1[], double result1[],
 			double x2[], double y2[], double z2[], double t2[], double result2[]) {
 
 		linearInterp(x1, y1, z1, t1, t, result1);
 		linearInterp(x2, y2, z2, t2, t, result2);
 
-		return distance(result1[0], result1[1], result1[2], result2[0], result2[1], result2[2]);
+		return distanceSq(result1[0], result1[1], result1[2], result2[0], result2[1], result2[2]);
 
 	}
 
