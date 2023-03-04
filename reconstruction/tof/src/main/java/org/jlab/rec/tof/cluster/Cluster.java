@@ -44,7 +44,7 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
     private double _EnergyUnc; // uncertainty in total energy of the cluster
     private double _tUn; // uncertainty in cluster time
 
-    private int _StatusWord; // a status word for seed hit: 0 - full information
+    private int _StatusWord; // bitwise-OR of cluster hit status
     
     private double _pathLengthThruBar; // total pathlength of the track throught the bars of the cluster
     
