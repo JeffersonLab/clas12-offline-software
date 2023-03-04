@@ -1,6 +1,7 @@
 package org.jlab.rec.tof.hit;
 
 import java.text.DecimalFormat;
+import org.jlab.detector.banks.RawOrder;
 import org.jlab.geom.prim.Line3D;
 
 import org.jlab.geom.prim.Point3D;
@@ -259,12 +260,28 @@ public abstract class AHit implements Comparable<AHit> {
         this._lambda2Unc = _lambda2Unc;
     }
 
-    public String get_StatusWord() {
+    public int getStatus() {
+        int status =0;
+        for(int bitIndex=0; bitIndex<4; bitIndex++) {
+            status += ((_StatusWord >> bitIndex) & 1)*Math.pow(10, bitIndex);
+        }
+        return status;
+    }
+
+    public int get_StatusWord() {
         return _StatusWord;
     }
 
-    public void set_StatusWord(String _StatusWord) {
+    public void set_StatusWord(int _StatusWord) {
         this._StatusWord = _StatusWord;
+    }
+
+    public void set_Status(RawOrder order, int status) {
+        this._StatusWord |= (status & 1) << order.getTypeId();
+    }
+
+    public boolean hasValid(RawOrder order) {
+        return (_StatusWord & (1 << order.getTypeId()))==0;
     }
 
     public int get_AssociatedClusterID() {
@@ -386,9 +403,8 @@ public abstract class AHit implements Comparable<AHit> {
     // (CTOF) U)
     private double _lambda2Unc; // uncertainty in attenuation length ((FTOF) R
     // (CTOF) D)
-    private String _StatusWord; // a status word: 1111 - fully functioning,
-    // 0111-noADC1, 1011-noTDC1, 1101-noADC2,
-    // 1110-noTDC2((FTOF) L=1,R=2 (CTOF) U=1,D=2)
+    private int _StatusWord; // 4-bits status word: 0000 - fully functioning,
+    // 0001-noADC1, 0010-noADC2, 0100-noTDC1, 1000-noTDC2((FTOF) L=1,R=2 (CTOF) U=1,D=2)
     private int _AssociatedClusterID = -1;
     private double AdcToEConv; // conversion factor
     private double _y = Double.NaN; // hit coordinate measured with respect to
@@ -502,7 +518,7 @@ public abstract class AHit implements Comparable<AHit> {
             double TDC2Err, double ADC_MIP, double ADC_MIPErr, double DEDX_MIP,
             double ScinBarThickn, double pl) {
         // the order of calculation matters depending on the status
-        String status = this.get_StatusWord();
+        int status = this.getStatus();
         // initializing the values:
         double y = Double.NaN; // y = hit coordinate measured with respect to
         // the center of the scintillation bar (cm)
@@ -516,7 +532,7 @@ public abstract class AHit implements Comparable<AHit> {
         double expFac2 = 0;
         switch (status) {
 
-            case "1111": // Good: TDC1, TDC2, ADC1, ADC2
+            case 0: // Good: TDC1, TDC2, ADC1, ADC2
                 // 1. Compute time-walk corrections:
                 this.set_timeWalk1(this.calc_timeWalk(TW0E, TW01, TW11,
                         (int) (this.get_ADC1() - PED1)));
@@ -571,8 +587,8 @@ public abstract class AHit implements Comparable<AHit> {
 
                 break;
 
-            case "0111":
-            case "1101": // Good: TDC1, TDC2 Missing: ADC1 or ADC2
+            case  1:      // "0001", i.e. missing ADC1
+            case 10:      // "0010", i.e. missing ADC2
                 // 1. Compute hit coordinate from hit times t1, t2:
                 if (!Double.isNaN(this.get_yTrk())) // use tracking info
                 {
@@ -618,7 +634,7 @@ public abstract class AHit implements Comparable<AHit> {
                         ScinBarThickn, PED1Unc, PED2Unc, ADC1Err, ADC2Err);
                 // 6. Compute the energy deposited using the valid ADC only
                 // 6.1 And compute the uncertainty in the deposited energy
-                if (Character.toString(this.get_StatusWord().charAt(0)).equals("1")) { // ADC1
+                if (this.hasValid(RawOrder.ADC1)) { // ADC1
                     // is
                     // valid
                     this.set_Energy1Unc(ePMTErr12[0]); // PMT1 energy uncertainty
@@ -630,7 +646,7 @@ public abstract class AHit implements Comparable<AHit> {
                             this.get_lambda1Unc(), 0, 0, 0, 0);
                     this.set_EnergyUnc(eErr);
                 }
-                if (Character.toString(this.get_StatusWord().charAt(2)).equals("1")) { // ADC2
+                if (this.hasValid(RawOrder.ADC2)) { // ADC2
                     // is
                     // valid
                     this.set_Energy2Unc(ePMTErr12[1]); // PMT2 energy uncertainty
@@ -653,8 +669,8 @@ public abstract class AHit implements Comparable<AHit> {
 
                 break;
 
-            case "1011":
-            case "1110": // Good: ADC1, ADC2 Missing: TDC1 or TDC2
+            case  100:
+            case 1000: // Good: ADC1, ADC2 Missing: TDC1 or TDC2
                 // 1. Compute time-walk corrections:
                 this.set_timeWalk1(this.calc_timeWalk(TW0E, TW01, TW11,
                         (int) (this.get_ADC1() - PED1)));
@@ -687,7 +703,7 @@ public abstract class AHit implements Comparable<AHit> {
                 t12 = this.calc_t12(paddle2paddle, timeOffset, triggerPhase, LSBConv, RFPad);
                 this.set_t1(t12[0]);
                 this.set_t2(t12[1]);
-                if (Character.toString(this.get_StatusWord().charAt(1)).equals("1")) // TDC1
+                if (this.hasValid(RawOrder.TDC1)) // TDC1
                 // is
                 // valid
                 {
@@ -695,7 +711,7 @@ public abstract class AHit implements Comparable<AHit> {
                               + this.calc_TWpos(y, TW1P, TW2P) 
                               + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe, HPOSBIN));
                 }
-                if (Character.toString(this.get_StatusWord().charAt(3)).equals("1")) // TDC2
+                if (this.hasValid(RawOrder.TDC2)) // TDC2
                 // is
                 // valid
                 {
@@ -706,7 +722,7 @@ public abstract class AHit implements Comparable<AHit> {
                 tErr12 = this.calc_tErr12(TDC1Err, TDC2Err, LSBConv, LSBConvErr);
                 this.set_t1Unc(tErr12[0]);
                 this.set_t2Unc(tErr12[1]);
-                if (Character.toString(this.get_StatusWord().charAt(1)).equals("1")) // TDC1
+                if (this.hasValid(RawOrder.TDC1)) // TDC1
                 // is
                 // valid
                 {
@@ -714,7 +730,7 @@ public abstract class AHit implements Comparable<AHit> {
                             this.get_t1(), this.get_t1Unc(), v1, v1Unc, 0, 0, 0, 0,
                             pl));
                 }
-                if (Character.toString(this.get_StatusWord().charAt(3)).equals("1")) // TDC2
+                if (this.hasValid(RawOrder.TDC2)) // TDC2
                 // is
                 // valid
                 {
@@ -747,10 +763,10 @@ public abstract class AHit implements Comparable<AHit> {
 
                 break;
 
-            case "1100":
-            case "0011":
-            case "0110":
-            case "1001": // Good: TDC1, ADC1 Missing: TDC2, ADC2 or Good: TDC2, ADC2
+            case  101:
+            case 1010:
+            case 1001:
+            case  110: // Good: TDC1, ADC1 Missing: TDC2, ADC2 or Good: TDC2, ADC2
                 // Missing: TDC1, ADC1 or Good: TDC1, ADC2 Missing:
                 // TDC2, ADC1 or Good: TDC2, ADC1 Missing: TDC1, ADC2
                 // 1. get the hit coordinate from tracking:
@@ -775,7 +791,7 @@ public abstract class AHit implements Comparable<AHit> {
                 t12 = this.calc_t12(paddle2paddle, timeOffset, triggerPhase, LSBConv, RFPad);
                 this.set_t1(t12[0]);
                 this.set_t2(t12[1]);
-                if (Character.toString(this.get_StatusWord().charAt(1)).equals("1")) // TDC1
+                if (this.hasValid(RawOrder.TDC1)) // TDC1
                 // is
                 // valid
                 {
@@ -783,7 +799,7 @@ public abstract class AHit implements Comparable<AHit> {
                               + this.calc_TWpos(y, TW1P, TW2P) 
                               + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe, HPOSBIN));
                 }
-                if (Character.toString(this.get_StatusWord().charAt(3)).equals("1")) // TDC2
+                if (this.hasValid(RawOrder.TDC2)) // TDC2
                 // is
                 // valid
                 {
@@ -794,7 +810,7 @@ public abstract class AHit implements Comparable<AHit> {
                 tErr12 = this.calc_tErr12(TDC1Err, TDC2Err, LSBConv, LSBConvErr);
                 this.set_t1Unc(tErr12[0]);
                 this.set_t2Unc(tErr12[1]);
-                if (Character.toString(this.get_StatusWord().charAt(1)).equals("1")) // TDC1
+                if (this.hasValid(RawOrder.TDC1)) // TDC1
                 // is
                 // valid
                 {
@@ -802,7 +818,7 @@ public abstract class AHit implements Comparable<AHit> {
                             this.get_t1(), this.get_t1Unc(), v1, v1Unc, 0, 0, 0, 0,
                             pl));
                 }
-                if (Character.toString(this.get_StatusWord().charAt(3)).equals("1")) // TDC2
+                if (this.hasValid(RawOrder.TDC2)) // TDC2
                 // is
                 // valid
                 {
@@ -818,7 +834,7 @@ public abstract class AHit implements Comparable<AHit> {
                         ScinBarThickn, PED1Unc, PED2Unc, ADC1Err, ADC2Err);
                 // 6. Compute the energy deposited using the valid ADC only
                 // 6.1 And compute the uncertainty in the deposited energy
-                if (Character.toString(this.get_StatusWord().charAt(0)).equals("1")) { // ADC1
+                if (this.hasValid(RawOrder.ADC1)) { // ADC1
                     // is
                     // valid
                     this.set_Energy1Unc(ePMTErr12[0]); // PMT1 energy uncertainty
@@ -830,7 +846,7 @@ public abstract class AHit implements Comparable<AHit> {
                             this.get_lambda1Unc(), 0, 0, 0, 0);
                     this.set_EnergyUnc(eErr);
                 }
-                if (Character.toString(this.get_StatusWord().charAt(2)).equals("1")) { // ADC2
+                if (this.hasValid(RawOrder.ADC2)) { // ADC2
                     // is
                     // valid
                     this.set_Energy2Unc(ePMTErr12[1]); // PMT2 energy uncertainty
@@ -862,13 +878,13 @@ public abstract class AHit implements Comparable<AHit> {
      * @return uncertainty in y for cases 1) TDC1, TDC2, ADC1, ADC2 are all
      * good, 2) Good: ADC1, ADC2 Missing: TDC1 or TDC2
      */
-    private double calc_yUnc(String status, double v1, double v2, double v1Unc,
+    private double calc_yUnc(int status, double v1, double v2, double v1Unc,
             double v2Unc, double ADC1Err, double ADC2Err) {
         double err = 0;
 
         switch (status) {
 
-            case "1111": // Good: TDC1, TDC2, ADC1, ADC2
+            case 0: // Good: TDC1, TDC2, ADC1, ADC2
                 double iterm1 = v2 * this.get_y() * v1Unc / (v1 * (v1 + v2));
                 double iterm1Sq = iterm1 * iterm1;
                 double iterm2 = v1 * this.get_y() * v2Unc / (v2 * (v1 + v2));
@@ -881,8 +897,8 @@ public abstract class AHit implements Comparable<AHit> {
                 err = Math.sqrt(iterm1Sq + iterm2Sq + iterm3Sq + iterm4Sq);
                 break;
 
-            case "1011":
-            case "1110": // Good: ADC1, ADC2 Missing: TDC1 or TDC2
+            case  100:
+            case 1100: // Good: ADC1, ADC2 Missing: TDC1 or TDC2
                 double l1 = this.get_lambda1();
                 double l2 = this.get_lambda2();
                 double l1Err = this.get_lambda1Unc();
@@ -916,7 +932,7 @@ public abstract class AHit implements Comparable<AHit> {
      */
     private void setMissingADC(double y, double PED1, double PED2) {
         // if 1 ADC is missing
-        if (Character.toString(this.get_StatusWord().charAt(0)).equals("0")) { // ADC1
+        if (!this.hasValid(RawOrder.ADC1)) { // ADC1
             // is
             // missing
             // ==>
@@ -931,7 +947,7 @@ public abstract class AHit implements Comparable<AHit> {
             this.set_ADC1(ADC1); // now that the left adc is set the timewalk
             // will be calculated using this value
         }
-        if (Character.toString(this.get_StatusWord().charAt(2)).equals("0")) { // ADC2
+        if (!this.hasValid(RawOrder.ADC2)) { // ADC2
             // is
             // missing
             // ==>
@@ -962,7 +978,7 @@ public abstract class AHit implements Comparable<AHit> {
         double y = this.get_yTrk();
         double yErr = this.get_yTrkUnc();
 
-        if (Character.toString(this.get_StatusWord().charAt(0)).equals("0")) { // ADC1
+        if (!this.hasValid(RawOrder.ADC1)) { // ADC1
             // is
             // missing
             // ==>
@@ -990,8 +1006,8 @@ public abstract class AHit implements Comparable<AHit> {
                     .get_lambda2() * this.get_lambda2()));
             err = expVal * Math.sqrt(term1Sq + term2Sq + term3Sq);
         }
-        if (Character.toString(this.get_StatusWord().charAt(2)).equals("0")) { // ADC2
-            // is
+        if (!this.hasValid(RawOrder.ADC2)) { // ADC2
+            // i
             // missing
             // ==>
             // ADC1R
@@ -1043,14 +1059,14 @@ public abstract class AHit implements Comparable<AHit> {
         // to zero
         double t1 = 0;
         double t2 = 0;
-        if (Character.toString(this.get_StatusWord().charAt(1)).equals("1")) // TDC1
+        if (this.hasValid(RawOrder.TDC1)) // TDC1
         // is
         // valid
         {
             t1 = this.get_TDC1() * LSBConv[0] - triggerPhase - timeOffset / 2.
                     - this.get_timeWalk1() + paddle2paddle + RFPad;
         }
-        if (Character.toString(this.get_StatusWord().charAt(3)).equals("1")) // TDC2
+        if (this.hasValid(RawOrder.TDC2)) // TDC2
         // is
         // valid
         {
@@ -1088,7 +1104,7 @@ public abstract class AHit implements Comparable<AHit> {
         // to zero
         double tErr1 = 0;
         double tErr2 = 0;
-        if (Character.toString(this.get_StatusWord().charAt(1)).equals("1")) // TDC1
+        if (this.hasValid(RawOrder.TDC1)) // TDC1
         // is
         // valid
         {
@@ -1096,7 +1112,7 @@ public abstract class AHit implements Comparable<AHit> {
                     * (this.get_TDC1() * LSBConvErr) + (TDC1Err * LSBConv[0])
                     * (TDC1Err * LSBConv[0]));
         }
-        if (Character.toString(this.get_StatusWord().charAt(3)).equals("1")) // TDC2
+        if (this.hasValid(RawOrder.TDC2)) // TDC2
         // is
         // valid
         {
@@ -1202,7 +1218,7 @@ public abstract class AHit implements Comparable<AHit> {
         double K = DEDX_MIP * ScinBarThickn;
 
         // PMT errors
-        if (Character.toString(this.get_StatusWord().charAt(0)).equals("1")) // ADC1
+        if (this.hasValid(RawOrder.ADC1)) // ADC1
         // is
         // OK
         {
@@ -1214,7 +1230,7 @@ public abstract class AHit implements Comparable<AHit> {
                             * ADCErr1
                             + PEDErr1 * PEDErr1) / ADCMIP;
         }
-        if (Character.toString(this.get_StatusWord().charAt(2)).equals("1")) // ADC2
+        if (this.hasValid(RawOrder.ADC2)) // ADC2
         // is
         // OK
         {
