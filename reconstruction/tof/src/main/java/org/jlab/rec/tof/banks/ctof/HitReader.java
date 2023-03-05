@@ -121,7 +121,7 @@ public class HitReader implements IMatchedHit {
                 hit.set_Status(RawOrder.TDC1, 1);
             if(!this.passADC(hit.Status2(constants4), ADCD[i]))
                 hit.set_Status(RawOrder.ADC2, 1);
-            if(!this.passTDC(hit.Status2(constants4), TDCU[i]))
+            if(!this.passTDC(hit.Status2(constants4), TDCD[i]))
                 hit.set_Status(RawOrder.TDC2, 1);
             hit.setPaddleLine(geometry);
             // add this hit
