@@ -18,21 +18,38 @@ public class DetectorParticleTraj extends DetectorParticle {
 
     @Override
     public int getDetectorHit(List<DetectorResponse>  hitList, DetectorType type,
-            int detectorLayer,
-            double distanceThreshold){
-        
-        // Protect against odd tracks that don't have trajectory intersection:
-        if (detectorLayer<1) {
-            if (!detectorTrack.getTrajectory().contains(type.getDetectorId())) {
-                return -1;
+            int layer, double distanceThreshold){
+
+        int bestIndex = -1;
+        double  bestDistance = 500.0;
+
+        for(int loop = 0; loop < hitList.size(); loop++){
+
+            DetectorResponse response = hitList.get(loop);
+
+            // limit to responses with the requested type and layer:
+            if (response.getDescriptor().getType() != type)
+                continue;
+            if (layer >0 && response.getDescriptor().getLayer() != layer)
+                continue;
+
+            // same-sector requirement between hit and track:
+            if (response.getSector()>0 && this.detectorTrack.getSector()>0) {
+              if (response.getSector() != this.detectorTrack.getSector()) {
+                  continue;
+              }
+            }
+
+            Line3D distance = getDistance(response);
+            if (distance != null) {
+                if (distance.length() < distanceThreshold && 
+                    distance.length() < bestDistance) {
+                    bestDistance = distance.length();
+                    bestIndex = loop;
+                }
             }
         }
-        else if (detectorTrack.getTrajectoryPoint(type.getDetectorId(),detectorLayer)==null) {
-            return -1;
-        }
-
-        // FIXME:  replace with trajectory-based matching:
-        return super.getDetectorHit(hitList, type, detectorLayer, distanceThreshold);
+        return bestIndex;
     }
 
     @Override
