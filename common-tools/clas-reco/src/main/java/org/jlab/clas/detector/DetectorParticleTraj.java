@@ -1,7 +1,9 @@
 package org.jlab.clas.detector;
 
+import java.util.Arrays;
 import java.util.List;
 import org.jlab.clas.detector.DetectorTrack.TrajectoryPoint;
+import org.jlab.clas.detector.matching.MatchTrajDistance;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.clas.pdg.PhysicsConstants;
@@ -19,50 +21,9 @@ public class DetectorParticleTraj extends DetectorParticle {
     @Override
     public int getDetectorHit(List<DetectorResponse>  hitList, DetectorType type,
             int layer, double distanceThreshold){
-
-        boolean hitSharing=false;
-        for (int ii=0; ii<sharedDetectors.length && this.getCharge()!=0; ii++) {
-            if (type == sharedDetectors[ii]) {
-                hitSharing=true;
-                break;
-            }
-        }
-
-        int bestIndex = -1;
-        double  bestDistance = 500.0;
-
-        for(int loop = 0; loop < hitList.size(); loop++){
-
-            DetectorResponse response = hitList.get(loop);
-
-            // limit to responses with the requested type and layer:
-            if (response.getDescriptor().getType() != type)
-                continue;
-            if (layer >0 && response.getDescriptor().getLayer() != layer)
-                continue;
-
-            // reject if already taken and not shared:
-            if (!hitSharing && response.getAssociation()>=0)
-                continue;
-
-            // same-sector requirement between hit and track:
-            if (response.getSector()>0 && this.detectorTrack.getSector()>0) {
-              if (response.getSector() != this.detectorTrack.getSector()) {
-                  continue;
-              }
-            }
-
-            Line3D distance = getDistance(response);
-            if (distance != null) {
-                if (distance.length() < distanceThreshold && 
-                    distance.length() < bestDistance) {
-                    bestDistance = distance.length();
-                    bestIndex = loop;
-                }
-            }
-        }
-        return bestIndex;
-
+        MatchTrajDistance matcher = new MatchTrajDistance(distanceThreshold);
+        matcher.setSharing(Arrays.asList(sharedDetectors).contains(type));
+        return matcher.bestMatch(this, hitList, type, layer);
     }
 
     @Override
