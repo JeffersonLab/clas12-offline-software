@@ -11,7 +11,7 @@ import org.jlab.clas.pdg.PhysicsConstants;
  * @author baltzell
  */
 public class DetectorParticleTraj extends DetectorParticle {
-    
+
     public DetectorParticleTraj(DetectorTrack track){
         super(track);
     }
@@ -19,6 +19,14 @@ public class DetectorParticleTraj extends DetectorParticle {
     @Override
     public int getDetectorHit(List<DetectorResponse>  hitList, DetectorType type,
             int layer, double distanceThreshold){
+
+        boolean hitSharing=false;
+        for (int ii=0; ii<sharedDetectors.length && this.getCharge()!=0; ii++) {
+            if (type == sharedDetectors[ii]) {
+                hitSharing=true;
+                break;
+            }
+        }
 
         int bestIndex = -1;
         double  bestDistance = 500.0;
@@ -31,6 +39,10 @@ public class DetectorParticleTraj extends DetectorParticle {
             if (response.getDescriptor().getType() != type)
                 continue;
             if (layer >0 && response.getDescriptor().getLayer() != layer)
+                continue;
+
+            // reject if already taken and not shared:
+            if (!hitSharing && response.getAssociation()>=0)
                 continue;
 
             // same-sector requirement between hit and track:
@@ -50,6 +62,7 @@ public class DetectorParticleTraj extends DetectorParticle {
             }
         }
         return bestIndex;
+
     }
 
     @Override
