@@ -1,7 +1,6 @@
 package org.jlab.rec.tof.hit;
 
 import java.text.DecimalFormat;
-import org.jlab.detector.banks.RawOrder;
 import org.jlab.geom.prim.Line3D;
 
 import org.jlab.geom.prim.Point3D;

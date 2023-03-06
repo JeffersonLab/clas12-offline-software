@@ -3,7 +3,7 @@ package org.jlab.rec.tof.banks.ftof;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.jlab.detector.banks.RawOrder;
+import org.jlab.rec.tof.hit.RawOrder;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.FTOFDetHit;
