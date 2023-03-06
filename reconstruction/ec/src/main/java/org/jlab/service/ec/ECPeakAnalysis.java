@@ -65,7 +65,7 @@ public class ECPeakAnalysis {
         if(split[0]>=0) {
             
             int layer = peak.getDescriptor().getLayer();
-            if(layer==1||layer==2||layer==3) return split;
+            //if(layer==1||layer==2||layer==3) return split;
             
             List<ECPeak>  others = ECPeakAnalysis.getMatchingPeaks(peak, allPeaks);
             if(others.size()!=2) return split;
@@ -170,6 +170,55 @@ public class ECPeakAnalysis {
         }*/
     }
     
+    public static void splitPeaksAlternative3(List<ECPeak> peaks){
+        
+        List<ECPeak> current = new ArrayList<>();
+        List<ECPeak>   whole = new ArrayList<>();
+        
+        current.addAll(peaks);
+        whole.addAll(peaks);
+        
+        peaks.clear();
+        //System.out.printf("--- split peaks start current = %d, peaks = %d\n",current.size(), peaks.size());
+        
+        while(!current.isEmpty()){
+            ECPeak peak = current.get(0); current.remove(0);
+            int[] split = ECPeakAnalysis.getPeakSplitIndex(peak, whole);
+            if(split[0]>=0){
+                List<ECPeak> result = peak.splitPeak(split[0]);
+                double en1 = result.get(0).getMaxECStrip().getEnergy();
+                double en2 = result.get(1).getMaxECStrip().getEnergy();
+                
+                double en11 = Math.max(en1, en2);
+                double en22 = Math.min(en1, en2);
+                double ens = peak.getStripEnergy(split[0]);
+                
+                Renderer r = new Renderer(8,peak.getEnergies());
+                System.out.println(r);
+                System.out.printf(">>> SPLIT : %9.5f %9.5f %9.5f, RATIO = \"%.5f, %.5f %.5f\" %s\n",
+                            en11,en22,ens,en22/en11,ens/en11,ens/en22 ,peak.getString());
+               
+                
+                peaks.addAll(peak.splitPeak(split[0]));
+            } else {
+                peaks.add(peak);
+            }
+        }
+        //System.out.printf("--- split peaks  end current = %d, peaks = %d\n",current.size(), peaks.size());
+        /*
+        while(true){ //repeat processing all peaks until no split found
+        	if(ECCommon.debugSplit) System.out.println(" ");
+            int[] split = getPeakSplitIndex(peaks);
+        	if(ECCommon.debugSplit) System.out.println("New Iteration "+split[0]+" "+split[1]);
+            if(split[2]<0){
+                return; // no split was found in any peak.  Exit.
+            } else {
+                ECPeak  peak = peaks.get(split[2]); //retrieve tagged peak with split candidate
+                peaks.remove(split[2]); //tagged peak removed from list 
+                peaks.addAll(peak.splitPeak(split[0])); //two split peaks returned to list
+            }
+        }*/
+    }
     
     public static void splitPeaksAlternative2(List<ECPeak> peaks){
         
