@@ -90,6 +90,11 @@ public class Track extends Trajectory implements Comparable<Track> {
         this.setSeed(seed);
         this.addAll(seed.getCrosses());
         this.setKFTrajectories(kf.trajPoints);
+        if (kf.setFitFailed == false && kf.NDF>0 && kf.getHelix()!=null) { 
+            this.setStatus(1);
+        } else {
+            this.setStatus(-1);
+        }
     }
     
         
