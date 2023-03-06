@@ -12,6 +12,7 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.track.fit.basefit.LineFitPars;
 import org.jlab.rec.dc.track.fit.basefit.LineFitter;
+import org.jlab.rec.dc.Constants; 
 
 public class ClusterFitter {
 
@@ -26,7 +27,7 @@ public class ClusterFitter {
     private final List<Double> y = new ArrayList<Double>();
     private final List<Double> ex = new ArrayList<Double>();
     private final List<Double> ey = new ArrayList<Double>();
-    private final double stereo = FastMath.cos(Math.toRadians(6.));
+    private final double stereo = Constants.COS6;
     
     private String CoordinateSystem; // LC= local, TSC = tilted Sector
     public ClusterFitter() {
