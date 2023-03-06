@@ -1,7 +1,7 @@
 package org.jlab.rec.dc.trajectory;
 
 import Jama.*;
-import org.jlab.clas.clas.math.FastMath;
+import org.jlab.rec.dc.Constants;
 /**
  * Describes a track pars in the DC.  
  * @author ziegler
@@ -228,8 +228,8 @@ public class TrackVec extends Matrix {
      * @return 
      */
     public double[] tilt(double X, double Z, int t) {
-        double rz = (double)t *X * sin_tilt + Z * cos_tilt;
-        double rx = X * cos_tilt -(double)t* Z * sin_tilt;
+        double rz = (double)t *X * Constants.SIN25 + Z * Constants.COS25;
+        double rx = X * Constants.COS25 -(double)t* Z * Constants.SIN25;
         
         return new double[] {rx, rz};
     }
@@ -243,10 +243,16 @@ public class TrackVec extends Matrix {
      */
     public double[] rotateToSec(int sector, double x, double y, int t) {
         if(sector>0 && sector<7) {
-            double rx = x * FastMath.cos((sector - 1) * t*rad60) - y * FastMath.sin((sector - 1) * t*rad60);
-            double ry = x * FastMath.sin((sector - 1) * t*rad60) + y * FastMath.cos((sector - 1) * t*rad60);
-            
-            return new double[] {rx, ry};
+            if(t == 1){
+                double rx = x * Constants.COSSECTOR60[sector - 1] - y * Constants.SINSECTOR60[sector - 1];
+                double ry = x * Constants.SINSECTOR60[sector - 1] + y * Constants.COSSECTOR60[sector - 1];
+                return new double[] {rx, ry};
+            }
+            else{
+                double rx = x * Constants.COSSECTORNEG60[sector - 1] - y * Constants.SINSECTORNEG60[sector - 1];
+                double ry = x * Constants.SINSECTORNEG60[sector - 1] + y * Constants.COSSECTORNEG60[sector - 1];
+                return new double[] {rx, ry};
+            }
         } else {
             return null;
         }
@@ -283,26 +289,4 @@ public class TrackVec extends Matrix {
         }
         return sector;
     }
-    private final double cos_tilt = FastMath.cos(Math.toRadians(25.));
-    private final double sin_tilt = FastMath.sin(Math.toRadians(25.));
-    
-    private final double rad60 = Math.toRadians(60.);
-    /*
-    public Point3D getCoordsInLab(double X, double Y, double Z) {
-        Point3D PointInSec = this.getCoordsInSector(X, Y, Z);
-        double rx = PointInSec.x() * FastMath.cos((this.get_Sector() - 1) * Math.toRadians(60.)) - PointInSec.y() * FastMath.sin((this.get_Sector() - 1) * Math.toRadians(60.));
-        double ry = PointInSec.x() * FastMath.sin((this.get_Sector() - 1) * Math.toRadians(60.)) + PointInSec.y() * FastMath.cos((this.get_Sector() - 1) * Math.toRadians(60.));
-
-        return new Point3D(rx, ry, PointInSec.z());
-    }
-    
-    public Point3D getCoordsInTiltedSector(double X, double Y, double Z) {
-        double rx = X * FastMath.cos((this.get_Sector() - 1) * Math.toRadians(-60.)) - Y * FastMath.sin((this.get_Sector() - 1) * Math.toRadians(-60.));
-        double ry = X * FastMath.sin((this.get_Sector() - 1) * Math.toRadians(-60.)) + Y * FastMath.cos((this.get_Sector() - 1) * Math.toRadians(-60.));
-       
-        double rtz = rx * sin_tilt + Z * cos_tilt;
-        double rtx = rx * cos_tilt - Z * sin_tilt;
-         
-        return new Point3D(rtx, ry, rtz);
-    */
 }
