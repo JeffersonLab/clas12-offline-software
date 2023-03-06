@@ -122,7 +122,7 @@ public class Track extends Trajectory implements Comparable<Track>{
 
         int s[] = new int[6];//[slyr]-->0: OK; 1:missing layers; 2 missing
         int sm = this.get_MissingSuperlayer()-1;
-        if(sm>0) s[sm] = 2;
+        if(sm>-1) s[sm] = 2;
         int sl;
         for(int i =0; i< this.size(); i++) {
             if(this.get(i).get_Segment1()!=null && this.get(i).get_Segment1().get_Id()!=-1) {
