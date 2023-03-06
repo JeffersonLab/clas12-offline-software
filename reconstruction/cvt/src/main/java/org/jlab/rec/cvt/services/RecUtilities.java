@@ -927,10 +927,10 @@ public class RecUtilities {
                     c.getCluster2().setAssociatedTrackID(0);
                 }
             }
-            fittedTrack.setStatus(1); 
+            //fittedTrack.setStatus(1); 
         } else {
             if(fittedTrack!=null) {
-                fittedTrack.setStatus(-1); 
+                //fittedTrack.setStatus(-1); 
                 if(Constants.getInstance().seedingDebugMode) 
                     System.out.println("RECOVERED...with negative status "+fittedTrack.toString());
                 

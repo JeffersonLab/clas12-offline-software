@@ -292,7 +292,7 @@ public class TracksFromTargetRec {
                         }
                     }
                 }
-                fittedTrack.setStatus(1);
+                //fittedTrack.setStatus(1);
                 if(this.missingSVTCrosses(fittedTrack) == false)
                     tracks.add(fittedTrack);
             } else {
@@ -316,7 +316,7 @@ public class TracksFromTargetRec {
                             fittedTrack = new Track(seed, kf2, pid); 
                             if(Constants.getInstance().seedingDebugMode) 
                                 System.out.println("RECOVERED SEED..."+fittedTrack.toString());
-                            fittedTrack.setStatus(-1);
+                            //fittedTrack.setStatus(-1);
                             for(Cross c : fittedTrack) { 
                                 if(c.getDetector()==DetectorType.BST) {
                                     c.getCluster1().setAssociatedTrackID(0);
