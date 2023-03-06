@@ -1,4 +1,4 @@
-package org.jlab.detector.banks;
+package org.jlab.rec.tof.hit;
 
 /**
  * The order variable in raw banks encodes in two bits the information on the
