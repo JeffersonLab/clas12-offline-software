@@ -110,19 +110,36 @@
             {"name":"userVar",   "type":"F", "info":"user-defined variable"}
         ]
     },
-    {
-        "name": "MC::IsParticleMatched",
+        {
+        "name": "MC::GenMatch",
         "group": 40,
         "item" : 6,
-        "info": "MC Particle - Rec Track matching.",
+        "info": "MC::Particle -> REC::Particle matching",
         "entries": [
-            {"name":"mcTindex",      "type":"S",  "info":"MC Particle index, as in tid"},
-	    {"name":"pindex",	     "type":"S",  "info":"REC particle index"},
-	    {"name":"MCLayersTrk",   "type":"L",  "info":"layers of tracker (mostly)  detectors that a given MCParticle hit. Each layer corresponds to a specific bit in this variable"},
-	    {"name":"MCLayersNeut",  "type":"L",  "info":"layers of detectors (non tracker) that a givem MCParticle hit. Each layer corresponds to a specific bit in this variable"},
-	    {"name":"RecLayersTrk",  "type":"L",  "info":"layers of tracker detectors (mostly) that, the matched RecParticle picked hits from"},
-	    {"name":"RecLayersNeut", "type":"L",  "info":"layers of detectors (mostly) that, the matched RecParticle picked hits from"}
+            {"name":"mcindex",       "type":"S",  "info":"MC::Particle index"},
+            {"name":"pindex",        "type":"S",  "info":"REC::Particle index"},
+            {"name":"mclayer1",      "type":"L",  "info":"layers from the 1st set of detectors hit by MC particle"},
+            {"name":"mclayer2",      "type":"L",  "info":"layers from the 2nd set of detectors hit by MC particle"},
+            {"name":"player1",       "type":"L",  "info":"layers from the 1st set of detectors hit by Recon particle"},
+            {"name":"player2",       "type":"L",  "info":"layers from the 2nd set of detectors hit by Recon particle"},
+            {"name":"quality",       "type":"F",  "info":"matching quality parameter"}
+        ]
+    },
+        {
+        "name": "MC::RecMatch",
+        "group": 40,
+        "item" : 7,
+        "info": "Rec::Particle -> MC::Particle matching",
+        "entries": [
+            {"name":"pindex",        "type":"S",  "info":"REC::Particle index"},
+            {"name":"mcindex",       "type":"S",  "info":"MC::Particle index"},
+            {"name":"player1",       "type":"L",  "info":"layers from the 1st set of detectors hit by Recon particle"},
+            {"name":"player2",       "type":"L",  "info":"layers from the 1st set of detectors hit by Recon particle"},
+            {"name":"mclayer1",      "type":"L",  "info":"layers from the 1st set of detectors hit by MC particle"},
+            {"name":"mclayer2",      "type":"L",  "info":"layers from the 2nd set of detectors hit by MC particle"},
+            {"name":"quality",       "type":"F",  "info":"matching quality parameter"}
         ]
     }
+
     
 ]
