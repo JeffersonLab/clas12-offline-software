@@ -31,7 +31,12 @@ public class DetectorDescriptor implements Comparable<DetectorDescriptor> {
     public DetectorDescriptor(DetectorType type){
         this.detectorType = type;
     }
-    
+
+    public DetectorDescriptor(DetectorType type, int layer){
+        this.detectorType = type;
+        this.dt_LAYER = layer;
+    }
+
     public DetectorDescriptor(String name){
         this.detectorType = DetectorType.getType(name);
     }

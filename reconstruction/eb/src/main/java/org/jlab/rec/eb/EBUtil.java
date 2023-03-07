@@ -2,6 +2,9 @@ package org.jlab.rec.eb;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.pow;
+import java.util.List;
+import org.jlab.clas.detector.CalorimeterResponse;
+import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.ScintillatorResponse;
@@ -9,6 +12,34 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.DetectorLayer;
 
 public class EBUtil {
+
+    /**
+     * Redistribute energy between shared, neutral calorimeter clusters. 
+     * @param e the event
+     */
+    public void shareCalorimeterEnergies(DetectorEvent e) {
+        List<DetectorParticle> l = e.getParticles();
+        for (int i1=0; i1<l.size(); i1++) {
+            for (int i2=i1+1; i2<l.size(); i2++) {
+                // ignore charged particles:
+                if(l.get(i1).getCharge() != 0) continue;
+                if(l.get(i2).getCharge() != 0) continue;
+                // PCAL controls the sharing ratio, so both must have PCAL:
+                DetectorResponse p1 = l.get(i1).getHit(DetectorType.ECAL, DetectorLayer.PCAL);
+                DetectorResponse p2 = l.get(i2).getHit(DetectorType.ECAL, DetectorLayer.PCAL);
+                if (p1 == null || p2 == null) continue;
+                // If they share a ECAL cluster, redistribute their energies: 
+                for (int layer : List.of(DetectorLayer.EC_INNER,DetectorLayer.EC_OUTER)) {
+                    DetectorResponse e1 = l.get(i1).getHit(DetectorType.ECAL, layer);
+                    DetectorResponse e2 = l.get(i2).getHit(DetectorType.ECAL, layer);
+                    if (e1.getHitIndex() == e2.getHitIndex()) {
+                        ((CalorimeterResponse)e1).shareEnergy(e2,
+                            p2.getEnergy() / (p1.getEnergy()+p2.getEnergy()));
+                    }
+                }
+            }
+        } 
+    }
 
      /**
      * Central neutral veto logic from Adam Hobart.

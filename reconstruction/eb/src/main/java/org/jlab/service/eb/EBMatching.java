@@ -9,6 +9,7 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.rec.eb.EBCCDBEnum;
 import org.jlab.clas.detector.DetectorResponseComparators;
+import org.jlab.clas.detector.DetectorResponseFactory;
 import org.jlab.clas.detector.matching.MatchCND;
 
 /*
@@ -101,14 +102,19 @@ public class EBMatching {
                         throw new RuntimeException("Invalid ECAL Layer:  "+layer);
                 }
 
-                List<DetectorResponse> respECAL = eventBuilder.getUnmatchedResponses(null, DetectorType.ECAL, layer);
-
-                int index = part.getDetectorHit(respECAL, DetectorType.ECAL, layer, matching);
+                List<DetectorResponse> responses = eventBuilder.getSectorResponses(null, part.getTrack().getSector(), DetectorType.ECAL, layer);
+                int index = part.getDetectorHit(responses, DetectorType.ECAL, layer, matching);
                 if (index>=0) {
+                    if (responses.get(index).getAssociation() >= 0) {
+                        DetectorResponse copy = DetectorResponseFactory.create(responses.get(index));
+                        copy.clearAssociations();
+                        responses.add(copy);
+                        index = responses.size()-1;
+                    }
                     int pindex_offset = this.eventBuilder.getPindexMap().get(0)
                                       + this.eventBuilder.getPindexMap().get(1); //After FD/CD Charged Particles
-                    part.addResponse(respECAL.get(index), true); 
-                    respECAL.get(index).setAssociation(ii + pindex_offset);
+                    part.addResponse(responses.get(index), true); 
+                    responses.get(index).addAssociation(ii + pindex_offset);
                 }
             }
         }
@@ -130,10 +136,10 @@ public class EBMatching {
                 otherEcalLayers=new int[]{4,7};
                 break;
             case (4):
-                otherEcalLayers=new int[]{1,7};
+                otherEcalLayers=new int[]{7};
                 break;
             case (7):
-                otherEcalLayers=new int[]{1,4};
+                otherEcalLayers=new int[]{};
                 break;
             default:
                 throw new RuntimeException("Invalid ECAL Layer:  "+ecalLayer);
@@ -145,7 +151,7 @@ public class EBMatching {
             eventBuilder.getUnmatchedResponses(null, DetectorType.ECAL, ecalLayer);
 
         Vector3 vertex = new Vector3(0,0,0);
-        if (eventBuilder.getEvent().getParticles().size()>0) {
+        if (!eventBuilder.getEvent().getParticles().isEmpty()) {
             vertex.copy(eventBuilder.getEvent().getParticle(0).vertex());
         }
 

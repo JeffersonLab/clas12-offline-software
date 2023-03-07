@@ -199,31 +199,6 @@ public class EventBuilder {
         if (index>=0) {
             // if sharing hits between tracks, duplicate it:
             if (responses.get(index).getAssociation() >= 0) {
-                //System.out.println(responses.get(index).getClass());
-                //DetectorResponse copy = new DetectorResponse();
-                //copy.copy(responses.get(index));
-                DetectorResponse copy = DetectorResponseFactory.create(responses.get(index));
-                copy.clearAssociations();
-                responses.add(copy);
-                index = responses.size()-1;
-            }
-            particle.addResponse(responses.get(index),true);
-            responses.get(index).addAssociation(pindex);
-            return true;
-        }
-        return false;
-    }
-    
-    public boolean findMatchingHit(
-            final int pindex, DetectorParticle particle, List<DetectorResponse> responses,
-            DetectorType type, final int layer, IMatch matcher) {
-        int index = matcher.bestMatch(particle, responses, type, layer);
-        if (index>=0) {
-            // if sharing hits between tracks, duplicate it:
-            if (responses.get(index).getAssociation() >= 0) {
-                //System.out.println(responses.get(index).getClass());
-                //DetectorResponse copy = new DetectorResponse();
-                //copy.copy(responses.get(index));
                 DetectorResponse copy = DetectorResponseFactory.create(responses.get(index));
                 copy.clearAssociations();
                 responses.add(copy);
@@ -236,6 +211,24 @@ public class EventBuilder {
         return false;
     }
 
+    public boolean findMatchingHit(
+            final int pindex, DetectorParticle particle, List<DetectorResponse> responses,
+            DetectorType type, final int layer, IMatch matcher) {
+        int index = matcher.bestMatch(particle, responses, type, layer);
+        if (index>=0) {
+            // if sharing hits between tracks, duplicate it:
+            if (responses.get(index).getAssociation() >= 0) {
+                DetectorResponse copy = DetectorResponseFactory.create(responses.get(index));
+                copy.clearAssociations();
+                responses.add(copy);
+                index = responses.size()-1;
+            }
+            particle.addResponse(responses.get(index),true);
+            responses.get(index).addAssociation(pindex);
+            return true;
+        }
+        return false;
+    }
 
     public void forwardTaggerIDMatching() {
         int np = this.detectorEvent.getParticles().size();
@@ -394,9 +387,20 @@ public class EventBuilder {
         }
         return responses;
     }
-    
 
-        
+    public List<DetectorResponse> getSectorResponses(List<DetectorResponse> list, int sector, DetectorType type, int layer){
+        if (list==null) list=detectorResponses;
+        List<DetectorResponse>  responses = new ArrayList<>();
+        for(DetectorResponse r : list){
+            if(r.getDescriptor().getType()==type &&
+               (r.getDescriptor().getLayer()==layer || layer<=0) &&
+                r.getSector() == sector) {
+                responses.add(r);
+            }
+        }
+        return responses;
+    }
+
     public void assignTrigger()  {
         int i = 0;
         boolean hasTrigger=false;

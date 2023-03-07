@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataEvent;
+import org.jlab.detector.base.DetectorType;
 
 
 /**

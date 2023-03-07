@@ -16,6 +16,7 @@ import org.jlab.geom.prim.Vector3D;
 
 import org.jlab.clas.pdg.PDGDatabase;
 import org.jlab.clas.pdg.PhysicsConstants;
+import org.jlab.detector.base.DetectorLayer;
 
 /**
  *
@@ -41,8 +42,13 @@ public class DetectorParticle implements Comparable {
     private DetectorParticleStatus particleStatus = new DetectorParticleStatus();
 
     // let multiple particles share the same hit for these detectors:
-    private final DetectorType[] sharedDetectors = {DetectorType.FTOF,DetectorType.CTOF};
-    
+    private final List<DetectorType> sharedDetectors = List.of(DetectorType.FTOF,DetectorType.CTOF);
+
+    // special sharing treatment for calorimeters:
+    private final List<DetectorDescriptor> sharedDescriptors = List.of(
+        new DetectorDescriptor(DetectorType.ECAL, DetectorLayer.EC_INNER),
+        new DetectorDescriptor(DetectorType.ECAL, DetectorLayer.EC_OUTER));
+
     protected final List<DetectorResponse> responseStore = new ArrayList<>();
 
     protected DetectorTrack detectorTrack = null;
@@ -97,6 +103,7 @@ public class DetectorParticle implements Comparable {
                 resp.getPosition().z());
         resp.setPath(resp.getPosition().mag());
         particle.addResponse(resp);
+        particle.getTrack().setSector(resp.getSector());
         return particle;
     }
     
@@ -114,6 +121,7 @@ public class DetectorParticle implements Comparable {
         final double dz = resp.getPosition().z()-vertex.z();
         resp.setPath(Math.sqrt(dx*dx+dy*dy+dz*dz));
         particle.addResponse(resp);
+        particle.getTrack().setSector(resp.getSector());
         return particle;
     }
    
@@ -414,21 +422,12 @@ public class DetectorParticle implements Comparable {
     public void setCharge(int charge) { this.detectorTrack.setCharge(charge);}
     
     public int getDetectorHit(List<DetectorResponse>  hitList, DetectorType type,
-            int detectorLayer,
-            double distanceThreshold){
+            int layer, double distanceThreshold){
          
         Line3D   trajectory = this.detectorTrack.getLastCross();
         Point3D  hitPoint = new Point3D();
         double   minimumDistance = 500.0;
         int      bestIndex       = -1;
-
-        boolean hitSharing=false;
-        for (int ii=0; ii<sharedDetectors.length && this.getCharge()!=0; ii++) {
-            if (type == sharedDetectors[ii]) {
-                hitSharing=true;
-                break;
-            }
-        }
 
         for(int loop = 0; loop < hitList.size(); loop++){
            
@@ -440,23 +439,27 @@ public class DetectorParticle implements Comparable {
                   continue;
               }
             }
-            
-            if(response.getDescriptor().getType()==type &&
-               (detectorLayer<=0 || response.getDescriptor().getLayer()==detectorLayer) &&
-               (hitSharing || response.getAssociation()<0)) {
-                
-                hitPoint.set(
-                        response.getPosition().x(),
-                        response.getPosition().y(),
-                        response.getPosition().z()
-                        );
 
-                double hitdistance = trajectory.distance(hitPoint).length();
+            // limit to matching detector type/layer:
+            if (response.getDescriptor().getType() != type) continue;
+            if (layer>0 && response.getDescriptor().getLayer() != layer) continue;
 
-                if (hitdistance<distanceThreshold && hitdistance<minimumDistance) {
-                    minimumDistance = hitdistance;
-                    bestIndex       = loop;
-                }
+            // limit sharing to some detectors:
+            if (response.getAssociation()>=0 &&
+                !sharedDetectors.contains(type) &&
+                !sharedDescriptors.contains(new DetectorDescriptor(type,layer))) continue;
+
+            hitPoint.set(
+                response.getPosition().x(),
+                response.getPosition().y(),
+                response.getPosition().z()
+            );
+
+            double hitdistance = trajectory.distance(hitPoint).length();
+
+            if (hitdistance<distanceThreshold && hitdistance<minimumDistance) {
+                minimumDistance = hitdistance;
+                bestIndex       = loop;
             }
         }
         return bestIndex;

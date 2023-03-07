@@ -38,7 +38,7 @@ public class CalorimeterResponse extends DetectorResponse {
         this.getDescriptor().setSectorLayerComponent(sector, layer, component);
     }
 
-    public void copy(CalorimeterResponse r) {
+    public final void copy(CalorimeterResponse r) {
         super.copy(r);
         widthUVW.copy(r.widthUVW);
         coordUVW.copy(r.coordUVW);
@@ -51,6 +51,18 @@ public class CalorimeterResponse extends DetectorResponse {
         dbStatus[0] = r.dbStatus[0];
         dbStatus[1] = r.dbStatus[1];
         dbStatus[2] = r.dbStatus[2];
+    }
+
+    /**
+     * Share energy between this and another response.
+     * @param other The other response to share with
+     * @param ratio The fraction that goes to the other response
+     */
+    public void shareEnergy(DetectorResponse other, double ratio) {
+        double energyOther = other.getEnergy() * ratio;
+        double energyThis = this.getEnergy() * (1-ratio);
+        other.setEnergy(energyOther);
+        this.setEnergy(energyThis);
     }
 
     public void setWidthUVW(float u,float v,float w) {
