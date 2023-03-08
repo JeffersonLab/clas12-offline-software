@@ -22,11 +22,7 @@ public class DCURWellMCEngine extends DCEngine {
     private double[] pars = new double[6];
     private int charge = -999;
     private int sector = -1;
-    private Map<Integer, Double> ZMap = new HashMap<Integer, Double>();
-    
-    final private double cos_tilt = Math.cos(Math.toRadians(25.));
-    final private double sin_tilt = Math.sin(Math.toRadians(25.));
-    final private double rad60 = Math.toRadians(60.);
+    private Map<Integer, Double> ZMap = new HashMap<Integer, Double>();    
 
     public DCURWellMCEngine() {
         super("MC");
@@ -194,19 +190,17 @@ public class DCURWellMCEngine extends DCEngine {
         }
         return sec;
     }
-
+    
     private double[] TransformToTiltSectorFrame(int sector, double[] pos) {
         double x = pos[0];
         double y = pos[1];
         double Z = pos[2];
 
-        int t = -1;
-        double X = x * Math.cos((sector - 1) * t * rad60) - y * Math.sin((sector - 1) * t * rad60);
-        double ry = x * Math.sin((sector - 1) * t * rad60) + y * Math.cos((sector - 1) * t * rad60);
+        double X = x * Constants.COSSECTORNEG60[sector - 1] - y * Constants.SINSECTORNEG60[sector - 1];
+        double ry = x * Constants.SINSECTORNEG60[sector - 1] + y * Constants.COSSECTORNEG60[sector - 1];        
 
-        t = 1;
-        double rz = (double) t * X * sin_tilt + Z * cos_tilt;
-        double rx = X * cos_tilt - (double) t * Z * sin_tilt;
+        double rz = X * Constants.SIN25 + Z * Constants.COS25 ;
+        double rx = X * Constants.COS25 - Z * Constants.SIN25 ;
 
         double[] r = {rx, ry, rz};       
         return r;
