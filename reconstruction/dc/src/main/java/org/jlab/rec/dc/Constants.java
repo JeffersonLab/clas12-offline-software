@@ -15,6 +15,7 @@ import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.base.Detector;
 import org.jlab.rec.dc.trajectory.TrajectorySurfaces;
 import org.jlab.utils.groups.IndexedTable;
+import org.jlab.clas.clas.math.FastMath;
 
 /**
  * Constants used in the reconstruction
@@ -48,16 +49,18 @@ public class Constants {
     public static boolean DEBUG = false;
     
     // CONSTATNS for TRANSFORMATION
-    public static final double SIN25 = 0.42261826;
-    public static final double COS25 = 0.90630779;
-    public static final double COS30 = 0.86602540;  
-    public static final double SIN6 = 0.10452846;
-    public static final double COS6 = 0.99452190;
-    public static final double TAN6 = 0.10510424;
-    public static final double CTAN6 = 9.51436445;
-    public static final double[] SINSECTOR60 = {0, 0.86602540, 0.86602540, 0, -0.86602540, -0.86602540};
+    public static final double SIN25 = FastMath.sin(Math.toRadians(25.));
+    public static final double COS25 = FastMath.cos(Math.toRadians(25.));
+    public static final double COS30 = FastMath.cos(Math.toRadians(30.)); 
+    public static final double SIN6 = FastMath.sin(Math.toRadians(6.));
+    public static final double COS6 = FastMath.cos(Math.toRadians(6.));
+    public static final double TAN6 = Math.tan(Math.toRadians(6.));
+    public static final double CTAN6 = 1/TAN6;
+    public static final double[] SINSECTOR60 = {0, FastMath.sin(Math.toRadians(60.)), FastMath.sin(Math.toRadians(120.)), 0, 
+        FastMath.sin(Math.toRadians(240.)), FastMath.sin(Math.toRadians(300.))};
     public static final double[] COSSECTOR60 = {1, 0.5, -0.5, -1, -0.5, 0.5};
-    public static final double[] SINSECTORNEG60 = {0, -0.86602540, -0.86602540, 0, 0.86602540, 0.86602540};
+    public static final double[] SINSECTORNEG60 = {0, FastMath.sin(Math.toRadians(-60.)), FastMath.sin(Math.toRadians(-120.)), 0, 
+        FastMath.sin(Math.toRadians(-240.)), FastMath.sin(Math.toRadians(-300.))};
     public static final double[] COSSECTORNEG60 = {1, 0.5, -0.5, -1, -0.5, 0.5};
 
     // PHYSICS CONSTANTS
