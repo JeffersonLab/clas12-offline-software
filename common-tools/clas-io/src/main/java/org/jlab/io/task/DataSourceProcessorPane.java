@@ -30,10 +30,10 @@ import org.jlab.io.ui.DialogUtilities;
  * @author gavalian
  */
 public class DataSourceProcessorPane extends JPanel implements ActionListener {
-    
+
     public static int  TOOLBAR = 1;
     public static int  SQUARE  = 1;
-    
+
     private DataSourceProcessor  dataProcessor = new DataSourceProcessor();
     private String               dataFile      = null;
     private int                  dataPaneStyle = DataSourceProcessorPane.TOOLBAR;
@@ -49,19 +49,19 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
     public boolean               isHipo3Event  = false;          
     private String               defaultHost   = null;
     private String               defaultIp     = null;    
-    
+
     public DataSourceProcessorPane(){
         super();
         initUI();
     }
-    
+
     public DataSourceProcessorPane(String host, String ip){
         super();
         initUI();
         this.defaultHost = host;
         this.defaultIp   = ip;
     }
-    
+
     private void initUI(){
         
         setLayout(new BorderLayout());
@@ -120,7 +120,11 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         this.add(mediaPane,BorderLayout.LINE_START);
         this.add(sourcePane,BorderLayout.LINE_END);
     }
-    
+ 
+    public void setVerbose(boolean flag){
+        this.dataProcessor.setVerbose(flag);
+    }
+
     public void setDelay(int delay){
         this.dataProcessor.setDelay(delay);
         this.eventDelay = delay;
