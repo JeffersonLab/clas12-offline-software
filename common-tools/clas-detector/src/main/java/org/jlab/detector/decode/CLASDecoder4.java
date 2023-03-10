@@ -854,9 +854,17 @@ public class CLASDecoder4 {
                     
                     writer.addEvent(scalerEvent, 1);
                 }
-                
-                writer.addEvent(decodedEvent,0);
-                
+
+                final int URWELL_TRIGGER_WORD=2;
+                final int URWELL_TRIGGER_BIT=6;
+                for (int row=0; row<trigger.getRows(); row++) {
+                    if (trigger.getInt("id",row) == URWELL_TRIGGER_WORD) {
+                        if ((trigger.getInt("trigger",row) & URWELL_TRIGGER_BIT) != 0) {
+                            writer.addEvent(decodedEvent,0);
+                        }
+                    }
+                }
+
                 counter++;
                 progress.updateStatus();
                 if(counter%25000==0){
