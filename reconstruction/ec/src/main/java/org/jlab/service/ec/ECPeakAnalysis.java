@@ -6,6 +6,7 @@ import java.util.List;
 import org.jlab.display.ec.Renderer;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.service.ec.ECPeakSplitter.ECPeakSplitterMargin;
+import org.jlab.service.ec.ECPeakSplitter.ECPeakSplitterOriginal;
 
 /**
  *
@@ -143,11 +144,11 @@ public class ECPeakAnalysis {
                 double en22 = Math.min(en1, en2);
                 double ens = peak.getStripEnergy(split[0]);
                 
-                Renderer r = new Renderer(8,peak.getEnergies());
+                /*Renderer r = new Renderer(8,peak.getEnergies());
                 System.out.println(r);
                 System.out.printf(">>> SPLIT : %9.5f %9.5f %9.5f, RATIO = \"%.5f, %.5f %.5f\" %s\n",
                             en11,en22,ens,en22/en11,ens/en11,ens/en22 ,peak.getString());
-               
+               */
                 
                 peaks.addAll(peak.splitPeak(split[0]));
             } else {
@@ -220,6 +221,8 @@ public class ECPeakAnalysis {
         }*/
     }
     
+    
+    
     public static void splitPeaksAlternative2(List<ECPeak> peaks){
         
         ECPeakSplitterMargin m = new ECPeakSplitterMargin();
@@ -228,8 +231,7 @@ public class ECPeakAnalysis {
         List<ECPeak>   whole = new ArrayList<>();
         
         current.addAll(peaks);
-        whole.addAll(peaks);
-        
+        whole.addAll(peaks);        
         peaks.clear();
         //System.out.printf("--- split peaks start current = %d, peaks = %d\n",current.size(), peaks.size());
         
@@ -276,6 +278,137 @@ public class ECPeakAnalysis {
         }
        
     }
+    
+    
+        public static void splitPeaksAlternative4(List<ECPeak> peaks){
+        
+        ECPeakSplitterMargin   mm = new ECPeakSplitterMargin();
+        ECPeakSplitterOriginal mo = new ECPeakSplitterOriginal();
+        
+        List<ECPeak> current = new ArrayList<>();
+        List<ECPeak>   whole = new ArrayList<>();
+        
+        current.addAll(peaks);
+        whole.addAll(peaks);        
+        peaks.clear();
+        //System.out.printf("--- split peaks start current = %d, peaks = %d\n",current.size(), peaks.size());
+        
+        while(!current.isEmpty()){
+            ECPeak peak = current.get(0); current.remove(0);
+            
+            List<ECPeak> splitPeaks = mo.split(peak);
+            
+            
+            if(splitPeaks.size()==2){
+                
+                int sector   = peak.getDescriptor().getSector();
+                int  layer   = peak.getDescriptor().getLayer();
+                int[] layers = ECPeakAnalysis.otherLayers[layer];
+                
+                List<ECPeak> one = ECPeakAnalysis.getListForSectorLayer(whole, sector, layers[0]);
+                List<ECPeak> two = ECPeakAnalysis.getListForSectorLayer(whole, sector, layers[1]);
+                
+                //int[] cluster = ECPeakAnalysis.getBestCluster(peak, one, two);
+                
+                List<ECPeak> others = ECPeakAnalysis.getMatchingPeaks(peak, whole);
+                
+                if(others.size()==2){
+                    
+                    List<ECPeak>   oneView  = mo.split(others.get(0));
+                    List<ECPeak>   twoView  = mo.split(others.get(1));
+                    //Renderer  r = new Renderer(8,peak.getEnergies());
+                    //System.out.println(r);
+                    //System.out.printf(" >>> found splittable peak : others = %d %d (%d %d) \n",
+                    //        oneView.size(),twoView.size(), one.size(), two.size());
+                    int type = 0;
+                    List<ECPeak>  newMethod = mm.split(peak);
+                    
+                    /*System.out.printf(" M (%d) energy (%8.5f %8.5f) distance = %8.5f (%8.5f %8.5f) - others = %d %d  are splittable (%3d %3d)\n", 
+                            newMethod.size(), splitPeaks.get(0).getEnergy()/peak.getEnergy(),
+                            splitPeaks.get(1).getEnergy()/peak.getEnergy(),
+                            ECCluster.getDistance(peak, others.get(0),others.get(1)),
+                            ECCluster.getDistance(splitPeaks.get(0), 
+                                    others.get(0),others.get(1)),
+                            ECCluster.getDistance(splitPeaks.get(1), others.get(0),others.get(1))
+                            , one.size(),two.size(), oneView.size(), twoView.size());
+                    */
+                    int is_s_1 = oneView.size();
+                    int is_s_2 = twoView.size();
+                    
+                    int n_1 = one.size();
+                    int n_2 = two.size();
+                    
+                    double dist123 = ECCluster.getDistance(peak, others.get(0),others.get(1));
+                    
+                    double dist_12 = ECCluster.getDistance(splitPeaks.get(0), others.get(0),others.get(1));
+                    double dist_13 = ECCluster.getDistance(splitPeaks.get(1) ,others.get(0),others.get(1));
+                    //System.out.printf(">>>> %f %f %f\n",dist123,dist_12, dist_13);
+                    double best_dist_23 = Math.min(Math.abs(dist_13), Math.abs(dist_12));
+                    
+                    double best_dist = Math.min(Math.abs(dist123), best_dist_23);
+                    double best_ratio = best_dist/Math.abs(dist123);
+                    double best_ratio_23 = best_dist_23/Math.abs(dist123);
+                    
+                    
+                    int should_split = 0;
+                    
+                    if(is_s_1==1&&is_s_2==1){
+                        if(n_1==1&&n_2==1){
+                           if(best_ratio<0.8)  should_split = 1;
+                        } else {
+                            if(best_ratio_23<1.5) should_split = 1;
+                        }
+                    } else {
+                        if(n_1==1&&n_2==1){
+                            if(best_ratio<0.9) should_split = 1;
+                        } else {
+                            if(best_ratio_23<1.5) should_split = 1;
+                        }
+                    }
+                    
+                    Renderer r1 = new Renderer(8,peak.getEnergies());
+                    Renderer r2 = new Renderer(8,others.get(0).getEnergies());
+                    Renderer r3 = new Renderer(8,others.get(1).getEnergies());
+                   
+                    
+                    /*System.out.printf(" M (%d) energy (%8.5f %8.5f) distance = %8.5f (%8.5f %8.5f) - others = %d %d  are splittable (%3d %3d), best dist = %8.5f r = %8.5f, should split = %d\n", 
+                            newMethod.size(), splitPeaks.get(0).getEnergy()/peak.getEnergy(),
+                            splitPeaks.get(1).getEnergy()/peak.getEnergy(),
+                            ECCluster.getDistance(peak, others.get(0),others.get(1)),
+                            ECCluster.getDistance(splitPeaks.get(0), 
+                                    others.get(0),others.get(1)),
+                            ECCluster.getDistance(splitPeaks.get(1), others.get(0),others.get(1))
+                            , one.size(),two.size(), oneView.size(), twoView.size(),best_dist, best_ratio,should_split);
+                     System.out.println(r1);
+                    System.out.println(r2);
+                    System.out.println(r3);*/
+                    /*if(oneView.size()==1&&twoView.size()==1){
+                        if(one.size()>1&&two.size()>1){
+                            peaks.addAll(splitPeaks); 
+                        } else { peaks.add(peak);}
+                    } else {
+                        peaks.addAll(splitPeaks);
+                    }*/
+                    
+                    if(should_split>0){
+                        peaks.addAll(splitPeaks);
+                    } else {
+                        peaks.add(peak);
+                    }
+                    
+                } else {
+                    peaks.addAll(splitPeaks);
+                }
+                
+            } else {
+                peaks.add(peak);
+            }
+            
+           
+        }
+       
+    }
+    
     
     public static int  findMatchForCluster(ECCluster c, List<ECCluster> list){
         for(int i = 0; i < list.size(); i++){

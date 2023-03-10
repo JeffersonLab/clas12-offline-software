@@ -16,7 +16,21 @@ import org.jlab.display.ec.Renderer;
 public interface ECPeakSplitter {
     public List<ECPeak>  split(ECPeak peak);
     
-    public static class ECPeakPlitterClas6 implements ECPeakSplitter {
+    public static class ECPeakSplitterOriginal implements ECPeakSplitter {                
+       
+        @Override
+        public List<ECPeak> split(ECPeak peak) {
+            int index = peak.gg1_getSplitIndex();
+            if(index>0){
+                List<ECPeak> list = peak.splitPeak(index);
+                for(ECPeak p : list) p.redoPeakLine();
+                return list;
+            }
+            return Arrays.asList(peak);
+        }
+    }
+    
+    public static class ECPeakSplitterClas6 implements ECPeakSplitter {
 
         @Override
         public List<ECPeak> split(ECPeak peak) {
