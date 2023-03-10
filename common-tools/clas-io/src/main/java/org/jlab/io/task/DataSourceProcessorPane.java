@@ -195,9 +195,6 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         EvioETSource source = new EvioETSource(ip,port);
         source.open(file);
         this.dataProcessor.setSource(source);
-        mediaNext.setEnabled(true);
-        mediaPrev.setEnabled(true);
-        mediaPlay.setEnabled(true);
         this.setDataFile(null);
         mediaPlay.setEnabled(false);
         mediaPause.setEnabled(true);
