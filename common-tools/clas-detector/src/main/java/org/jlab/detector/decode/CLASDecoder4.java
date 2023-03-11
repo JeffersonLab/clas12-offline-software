@@ -933,8 +933,6 @@ public class CLASDecoder4 {
                     }
                 }
 
-                writer.addEvent(decodedEvent, 0);
-
                 counter++;
                 progress.updateStatus();
                 if (counter % 25000 == 0) {
