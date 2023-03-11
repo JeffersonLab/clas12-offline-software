@@ -162,8 +162,7 @@ public class ECEngine extends ReconstructionEngine {
             bankC.setShort("status", c, (short) clusters.get(c).getStatus());
             bankC.setByte("layer",   c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getLayer());
             bankC.setFloat("energy", c, (float) clusters.get(c).getEnergy());           
-            bankC.setFloat("time",   c, (float) clusters.get(c).getTime()); 
-            bankC.setFloat("size",   c, (float) clusters.get(c).getClusterSize());
+            bankC.setFloat("time",   c, (float) clusters.get(c).getTime());             
             bankC.setByte("idU",     c,  (byte) clusters.get(c).UVIEW_ID);
             bankC.setByte("idV",     c,  (byte) clusters.get(c).VVIEW_ID);
             bankC.setByte("idW",     c,  (byte) clusters.get(c).WVIEW_ID);
@@ -195,9 +194,14 @@ public class ECEngine extends ReconstructionEngine {
         }
          
          DataBank  bankD =  de.createBank("ECAL::calib", clusters.size());
+         
+         //String[] entries = bankD.getDescriptor().getEntryList();
+         //System.out.println(Arrays.toString(entries));
+         
          for(int c = 0; c < clusters.size(); c++){
             bankD.setByte("sector",  c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getSector());
             bankD.setByte("layer",   c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getLayer());
+            bankD.setFloat("size",   c, (float) clusters.get(c).getClusterSize());
             bankD.setShort("dbstU",  c, (short) clusters.get(c).clusterPeaks.get(0).getDBStatus());
             bankD.setShort("dbstV",  c, (short) clusters.get(c).clusterPeaks.get(1).getDBStatus());
             bankD.setShort("dbstW",  c, (short) clusters.get(c).clusterPeaks.get(2).getDBStatus());

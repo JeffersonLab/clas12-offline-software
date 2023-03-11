@@ -21,10 +21,12 @@ public interface ECPeakSplitter {
         @Override
         public List<ECPeak> split(ECPeak peak) {
             int index = peak.gg1_getSplitIndex();
-            if(index>0){
+            if(index>0){                
                 List<ECPeak> list = peak.splitPeak(index);
-                for(ECPeak p : list) p.redoPeakLine();
-                return list;
+                List<ECPeak> newList = new ArrayList<>();
+                for(ECPeak p : list) if(ECCommon.isGoodPeak(p)) newList.add(p);
+                for(ECPeak p : newList) p.redoPeakLine();                
+                return newList;
             }
             return Arrays.asList(peak);
         }
