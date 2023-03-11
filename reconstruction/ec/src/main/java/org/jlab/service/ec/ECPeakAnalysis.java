@@ -280,7 +280,26 @@ public class ECPeakAnalysis {
     }
     
     
-        public static void splitPeaksAlternative4(List<ECPeak> peaks){
+    public static void splitPeaksAlternative5(List<ECPeak> peaks){
+        
+        ECPeakSplitterOriginal mo = new ECPeakSplitterOriginal();
+        
+        List<ECPeak> current = new ArrayList<>();
+        List<ECPeak>   whole = new ArrayList<>();
+        
+        current.addAll(peaks);
+        whole.addAll(peaks);        
+        peaks.clear();
+        //System.out.printf("--- split peaks start current = %d, peaks = %d\n",current.size(), peaks.size());
+        
+        while(!current.isEmpty()){
+            ECPeak peak = current.get(0); current.remove(0);            
+            List<ECPeak> splitPeaks = mo.split(peak);
+            peaks.addAll(splitPeaks);
+        }
+    }
+    
+    public static void splitPeaksAlternative4(List<ECPeak> peaks){
         
         ECPeakSplitterMargin   mm = new ECPeakSplitterMargin();
         ECPeakSplitterOriginal mo = new ECPeakSplitterOriginal();

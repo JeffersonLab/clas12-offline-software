@@ -425,7 +425,7 @@ public class ECCommon {
         
         for(ECPeak p : peaks) if(isGoodPeak(p)) peakList.add(p);
         //ECPeakAnalysis.splitPeaks(peakList);       //Split peak if strip members have an adc valley   
-        ECPeakAnalysis.splitPeaksAlternative(peakList);    // new Way of splitting the peaks as of 2/20/2023 
+        ECPeakAnalysis.splitPeaksAlternative5(peakList);    // new Way of splitting the peaks as of 2/20/2023 
                                                 //Split peak if strip members have an adc valley
                                                 
         //ECPeakAnalysis.doPeakCleanup(peaks);
