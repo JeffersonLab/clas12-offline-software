@@ -188,10 +188,8 @@ public class TracksFromTargetRec {
         List<Track> tracks = new ArrayList<>();
         KFitter kf = new KFitter(kfFilterOn, kfIterations, Constants.KFDIR, swimmer, Constants.getInstance().KFMatrixLibrary);
         kf.polarity = (int) Math.signum(Constants.getSolenoidScale()); 
-        KFitter kf2 = new KFitter(kfFilterOn, kfIterations, Constants.KFDIR, swimmer, Constants.getInstance().KFMatrixLibrary);
+        KFitter kf2 = new KFitter(false, 1, Constants.KFDIR, swimmer, Constants.getInstance().KFMatrixLibrary);
         kf2.polarity = (int) Math.signum(Constants.getSolenoidScale());
-        kf2.filterOn = false;
-        kf2.numIter=1;
         Measurements measure = new Measurements(xb, yb, Constants.getInstance().kfBeamSpotConstraint());
         for (Seed seed : this.CVTseeds) { 
             if(seed.getId()<0) continue;
@@ -328,7 +326,7 @@ public class TracksFromTargetRec {
                     if(fittedTrack!=null && this.missingSVTCrosses(fittedTrack) == false)
                         tracks.add(fittedTrack);
 
-                } 
+                }
             }
         }
     
