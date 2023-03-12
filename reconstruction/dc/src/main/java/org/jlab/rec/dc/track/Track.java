@@ -6,6 +6,7 @@ import java.util.List;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
+import org.jlab.rec.dc.cross.Cross;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.trajectory.StateVec;
@@ -96,63 +97,31 @@ public class Track extends Trajectory implements Comparable<Track>{
     public void setSingleSuperlayer(Segment _singleSuperlayer) {
         this._singleSuperlayer = _singleSuperlayer;
     }
-    
-//    private int _Status=0;
-//
-//    public int get_Status() {
-//        return _Status;
-//    }
-//
-//    public void set_Status(int _Status) {
-//        this._Status = _Status;
-//    }
-    
-    private int _BitStatus=0;
-
-    public int getBitStatus() {
-        setBitStatus();
-        return _BitStatus;
-    }
-
-    public void setBitStatus(int bitStatus) {
-        this._BitStatus = bitStatus;
-    }
-    
-    private void setBitStatus() { 
-
-        int s[] = new int[6];//[slyr]-->0: OK; 1:missing layers; 2 missing
-        int sm = this.get_MissingSuperlayer()-1;
-        if(sm>-1) s[sm] = 2;
-        int sl;
-        for(int i =0; i< this.size(); i++) {
-            if(this.get(i).get_Segment1()!=null && this.get(i).get_Segment1().get_Id()!=-1) {
-                sl = this.get(i).get_Segment1().get_Superlayer()-1;
-                if(this.get(i).get_Segment1().MissingLayerCount()>0) {
-                    s[sl] = 1;
-                } else {
-                    s[sl] = 0;
-                }
-            } 
-            if(this.get(i).get_Segment2()!=null && this.get(i).get_Segment2().get_Id()!=-1) {
-                sl = this.get(i).get_Segment2().get_Superlayer()-1;
-                if(this.get(i).get_Segment2().MissingLayerCount()>0) {
-                    s[sl] = 1;
-                } else {
-                    s[sl] = 0;
-                }
-            } 
-        }
-        for(int sli = 0; sli <6; sli++) {
-            if(s[sli]==0) {
-            //    this._BitStatus|=0;
-            } else {
-                this._BitStatus|= 1 << (s[sli]+sli*2);
+        
+    public int getBitStatus() { 
+        int status = 0;
+        int[] segmentStatus = {2, 2, 2, 2, 2, 2};//[slyr]-->0: OK; 1:missing layers; 2 missing
+        for (Cross c : this) {
+            if (c.get_Segment1() != null && c.get_Segment1().get_Id()>0) {
+                int isl = c.get_Segment1().get_Superlayer() - 1;
+                segmentStatus[isl] = c.get_Segment1().get_Status();
             }
+            if (c.get_Segment2() != null && c.get_Segment2().get_Id()>0) {
+                int isl = c.get_Segment2().get_Superlayer() - 1;
+                segmentStatus[isl] = c.get_Segment2().get_Status();
+            } 
         }
-       //System.out.println(Integer.toBinaryString(this._BitStatus));
+        if(this.getSingleSuperlayer() !=null) {
+            int isl = this.getSingleSuperlayer().get_Superlayer()-1;
+            segmentStatus[isl] = this.getSingleSuperlayer().get_Status();
+        }
+        for(int isl = 0; isl <6; isl++) {
+            status |= segmentStatus[isl] << isl*2;
+        }
+        return status;
     }
     
-    
+        
     /**
      * 
      * @return id of the track
