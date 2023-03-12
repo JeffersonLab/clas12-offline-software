@@ -784,6 +784,7 @@ public class CLASDecoder4 {
         parser.addOption("-t", "-0.5", "torus current in the header bank");
         parser.addOption("-s", "0.5", "solenoid current in the header bank");
         parser.addOption("-x", null, "CCDB timestamp (MM/DD/YYYY-HH:MM:SS)");
+        parser.addOption("-l", "-1", "Decide only events with certain trgbit set. trgBit = 100*ID + bit in the ID-th word");
 
         parser.parse(args);
 
@@ -848,7 +849,25 @@ public class CLASDecoder4 {
             System.out.println("Using the Variation " + parser.getOption("-v").stringValue());
 
             decoder.detectorDecoder.setVariation(parser.getOption("-v").stringValue());
+        }
 
+        boolean TrgSkim = false;
+        int trg_id = -1;
+        int trg_bitWord = -1;
+        if (parser.getOption("-l").intValue() >= 0) {
+
+            trg_id = parser.getOption("-l").intValue() / 100 + 1;
+            int trg_bit = parser.getOption("-l").intValue() % 100;
+
+            if (trg_id >= 1 && trg_id <= 3 && trg_bit >= 0 && trg_bit <= 31) {
+                TrgSkim = true;
+                trg_bitWord = (int)(Math.pow(2, trg_bit));
+                System.out.println("Will decode only events from the bit " + trg_bit + " of the trg word " + trg_id);
+            } else {
+                System.out.println("Wrong value is provided for the -trBit argument.");
+                System.out.println("-l should be 100*trg_id(0,1 or 2) + trg_bit(0 to 31)");
+                System.exit(0);
+            }
         }
 
         for (String inputFile : inputList) {
@@ -923,14 +942,17 @@ public class CLASDecoder4 {
                     writer.addEvent(scalerEvent, 1);
                 }
 
-                final int URWELL_TRIGGER_WORD = 3;
-                final int URWELL_TRIGGER_BIT = 2097152; // This is the 21th bit
-                for (int row = 0; row < trigger.getRows(); row++) {
-                    if (trigger.getInt("id", row) == URWELL_TRIGGER_WORD) {
-                        if ((trigger.getInt("trigger", row) & URWELL_TRIGGER_BIT) != 0) {
-                            writer.addEvent(decodedEvent, 0);
+                if (TrgSkim) {
+
+                    for (int row = 0; row < trigger.getRows(); row++) {
+                        if (trigger.getInt("id", row) == trg_id) {
+                            if ((trigger.getInt("trigger", row) & trg_bitWord) != 0) {
+                                writer.addEvent(decodedEvent, 0);
+                            }
                         }
                     }
+                } else {
+                    writer.addEvent(decodedEvent, 0);
                 }
 
                 counter++;
