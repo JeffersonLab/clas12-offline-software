@@ -21,7 +21,7 @@ public class Constants {
     public static double CAANGLE3=30.;
     public static double CAANGLE4=19.;
     public static double CAANGLE5=3.5;
-    public boolean seedingDebugMode = true;
+    public boolean seedingDebugMode =false;
    
     
     
