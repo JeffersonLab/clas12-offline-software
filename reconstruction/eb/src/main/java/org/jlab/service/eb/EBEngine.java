@@ -158,7 +158,10 @@ public class EBEngine extends ReconstructionEngine {
 
         // Add BAND particles:
         eb.processBAND(responseBAND);
-        
+
+        // Set the statuses before particle identification:
+        eb.setParticleStatuses();
+
         // Do PID etc:
         EBAnalyzer analyzer = new EBAnalyzer(ccdb,rf);
         analyzer.processEvent(eb.getEvent());
@@ -334,6 +337,7 @@ public class EBEngine extends ReconstructionEngine {
         this.registerOutputBank(scintextrasBank);
         this.registerOutputBank(cherenkovBank);
         this.registerOutputBank(trackBank);
+        this.registerOutputBank(utrackBank);
         this.registerOutputBank(crossBank);
         this.registerOutputBank(ftBank);
         this.registerOutputBank(trajectoryBank);
