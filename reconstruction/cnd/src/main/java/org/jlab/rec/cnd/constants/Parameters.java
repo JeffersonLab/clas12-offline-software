@@ -52,6 +52,8 @@ public class Parameters {
 
 	public static double EThresh = 0.1 ;                                                       // Min reconstructed deposited energy threshold for a good event
 
+	//public static double DeltaZDH = 2;                                                         // in cm, maximum absolute value of difference between hit z and double hit Z
+	//public static double DeltaTDH = 0.5;                                                         //in ns, maximum absolute value between direct hit time of left and right paddle, both should be equal for double hits
 
 	public static void SetParameters() {
 

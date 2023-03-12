@@ -3,6 +3,7 @@ package org.jlab.rec.tof.banks.ftof;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.rec.tof.hit.RawOrder;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.FTOFDetHit;
@@ -96,18 +97,18 @@ public class HitReader implements IMatchedHit {
         IMatchedHit MH = this;
         List<BaseHit> hitList = hitReader.get_MatchedHits(event, MH, triggerPhase, constants6, constants10);
 
-        if (hitList.size() == 0) {
+        if (hitList.isEmpty()) {
             // System.err.println("there is no FTOF bank ");
 
-            _FTOF1AHits = new ArrayList<Hit>();
-            _FTOF1BHits = new ArrayList<Hit>();
-            _FTOF2Hits = new ArrayList<Hit>();
+            _FTOF1AHits = new ArrayList<>();
+            _FTOF1BHits = new ArrayList<>();
+            _FTOF2Hits = new ArrayList<>();
 
             return;
         }
         
         // Instantiates the lists of hits
-        List<Hit> hits = new ArrayList<Hit>();
+        List<Hit> hits = new ArrayList<>();
 
         int[] id = new int[hitList.size()];
         int[] sector = new int[hitList.size()];
@@ -144,18 +145,7 @@ public class HitReader implements IMatchedHit {
 			 * " ADCR "+ hitList.get(i).ADC2+ " TDCL "+ hitList.get(i).TDC1+
 			 * " TDCR "+ hitList.get(i).TDC2);
              */
-            if (passADC(ADCL[i]) == 0 || passADC(ADCR[i]) == 0
-                    || passTDC(TDCL[i]) == 0 || passTDC(TDCR[i]) == 0) {
-                continue;
-            }
-
-            // get the status
-            //int statusL = CCDBConstants.getSTATUSL()[sector[i] - 1][panel[i] - 1][paddle[i] - 1];
-            //int statusR = CCDBConstants.getSTATUSR()[sector[i] - 1][panel[i] - 1][paddle[i] - 1];
             
-            //String statusWord = this.set_StatusWord(statusL, statusR, ADCL[i],
-            //        TDCL[i], ADCR[i], TDCR[i]);
-
             // create the hit object
             Hit hit = new Hit(id[i], panel[i], sector[i], paddle[i], ADCL[i],
                     TDCL[i], ADCR[i], TDCR[i]);
@@ -163,17 +153,23 @@ public class HitReader implements IMatchedHit {
             hit.set_ADCbankHitIdx2(ADCRIdx[i]);
             hit.set_TDCbankHitIdx1(TDCLIdx[i]);
             hit.set_TDCbankHitIdx2(TDCRIdx[i]);
-            //hit.set_StatusWord(statusWord);
-            hit.set_StatusWord(this.set_StatusWord(hit.Status1(constants4), hit.Status2(constants4), ADCL[i], TDCL[i], ADCR[i], TDCR[i]));
+            if(!this.passADC(hit.Status1(constants4), ADCL[i]))
+                hit.set_Status(RawOrder.ADC1, 1);
+            if(!this.passTDC(hit.Status1(constants4), TDCL[i]))
+                hit.set_Status(RawOrder.TDC1, 1);
+            if(!this.passADC(hit.Status2(constants4), ADCR[i]))
+                hit.set_Status(RawOrder.ADC2, 1);
+            if(!this.passTDC(hit.Status2(constants4), TDCR[i]))
+                hit.set_Status(RawOrder.TDC2, 1);
             hit.setPaddleLine(geometry);
             // add this hit
             if(passHit(hit))hits.add(hit);
         }
         List<Hit> updated_hits = matchHitsToDCTrk(hits, geometry, tracks);
 
-        ArrayList<ArrayList<Hit>> DetHits = new ArrayList<ArrayList<Hit>>();
+        ArrayList<ArrayList<Hit>> DetHits = new ArrayList<>();
         for (int j = 0; j < 3; j++) {
-            DetHits.add(j, new ArrayList<Hit>());
+            DetHits.add(j, new ArrayList<>());
         }
 
         for (Hit hit : updated_hits) {
@@ -196,17 +192,17 @@ public class HitReader implements IMatchedHit {
         for (Hit hit : updated_hits) {
             DetHits.get(hit.get_Panel() - 1).add(hit);
         }
-        if (DetHits.get(0).size() > 0) {
+        if (!DetHits.get(0).isEmpty()) {
             Collections.sort(DetHits.get(0));
             // fill the list of TOF hits
             this.set_FTOF1AHits(DetHits.get(0));
         }
-        if (DetHits.get(1).size() > 0) {
+        if (!DetHits.get(1).isEmpty()) {
             Collections.sort(DetHits.get(1));
             // fill the list of TOF hits
             this.set_FTOF1BHits(DetHits.get(1));
         }
-        if (DetHits.get(2).size() > 0) {
+        if (!DetHits.get(2).isEmpty()) {
             Collections.sort(DetHits.get(2));
             // fill the list of TOF hits
             this.set_FTOF2Hits(DetHits.get(2));
@@ -215,11 +211,11 @@ public class HitReader implements IMatchedHit {
 
     private List<Hit> removeDuplicatedHits(List<Hit> updated_hits) {
 
-        List<Hit> unique_hits = new ArrayList<Hit>();
+        List<Hit> unique_hits = new ArrayList<>();
 
-        ArrayList<ArrayList<Hit>> lists = new ArrayList<ArrayList<Hit>>();
+        ArrayList<ArrayList<Hit>> lists = new ArrayList<>();
         for (int j = 0; j < this._numTrks; j++) {
-            lists.add(new ArrayList<Hit>());
+            lists.add(new ArrayList<>());
         }
 
         for (Hit h : updated_hits) {
@@ -231,7 +227,7 @@ public class HitReader implements IMatchedHit {
             }
         }
         for (int j = 0; j < this._numTrks; j++) {
-            if (lists.get(j).size() > 0) {
+            if (!lists.get(j).isEmpty()) {
                 Hit bestMatch = null;
                 double delta = Double.POSITIVE_INFINITY;
                 double delta_new = Double.POSITIVE_INFINITY;
@@ -251,97 +247,39 @@ public class HitReader implements IMatchedHit {
         return unique_hits;
     }
 
-    public String set_StatusWord(int statusL, int statusR, int ADCL, int TDCL,
-            int ADCR, int TDCR) {
-        String statusWord = new String(); // ADCL TDCL ADCR TDCR
-        // selected ranges TDC in [0,1000], ADC in [0, 8192] requirement given
-        // by passTDC and passADC methods
-
-        switch (statusL) {
-            case 0:
-                statusWord = ("" + 1 * passADC(ADCL) + "" + 1 * passTDC(TDCL) + "");// fully
-                // functioning
-                break;
-            case 1:
-                statusWord = ("0" + "" + 1 * passTDC(TDCL) + ""); // no ADC
-                break;
-            case 2:
-                statusWord = ("" + 1 * passADC(ADCL) + "" + "0"); // no TDC
-                break;
-            case 3:
-                statusWord = "00"; // no TDC, no ADC
-                break;
-        }
-        switch (statusR) {
-            case 0:
-                statusWord += ("" + 1 * passADC(ADCR) + "" + 1 * passTDC(TDCR) + "");// fully
-                // functioning
-                break;
-            case 1:
-                statusWord += ("0" + "" + 1 * passTDC(TDCR) + ""); // no ADC
-                break;
-            case 2:
-                statusWord += ("" + 1 * passADC(ADCR) + "" + "0"); // no TDC
-                break;
-            case 3:
-                statusWord += "00"; // no TDC, no ADC
-                break;
-
-        }
-        return statusWord;
-
-    }
-
     private boolean passHit(Hit hit) {
         // drop hits that miss both ADCs or both TDCs
-        boolean pass = false;
-        String status = hit.get_StatusWord();
-        if (status.equals("1111") ) {
-            pass = true;
-        }
-        return pass;
+        return hit.get_StatusWord()==0;
     }
 
-    private int passTDC(int tDC) {
-        // selected ranges TDC
-        int pass = 0;
-        // if(Constants.LSBCONVFAC*tDC>Constants.TDCMINSCALE &&
-        // Constants.LSBCONVFAC*tDC<Constants.TDCMAXSCALE)
-        // pass = 1;
-        if (tDC > 0) {
-            pass = 1;
-        }
-        return pass;
+    private boolean passTDC(int ccdbStatus, int tDC) {
+        // apply selection on CCDB status
+        // selected ranges TDC in [0, ? 1000] // what is the upper limit?
+        return (ccdbStatus & 2)==0 && tDC>0;
     }
 
-    private int passADC(int aDC) {
-        // selected ranges ADC
-        int pass = 0;
-        // if(aDC>Constants.ADCMIN && aDC<Constants.ADCMAX)
-        // pass = 1;
-        if (aDC > 0) {
-            pass = 1;
-        }
-        return pass;
+    private boolean passADC(int ccdbStatus, int aDC) {
+        // selected ranges  ADC in [0, ? 8192]
+        return (ccdbStatus & 1)==0 && aDC>0;
     }
 
     private List<Hit> matchHitsToDCTrk(List<Hit> FTOFhits,
             FTOFGeant4Factory ftofDetector, ArrayList<Track> tracks) {
-        if (tracks == null || tracks.size() == 0) {
+        if (tracks == null || tracks.isEmpty()) {
             return FTOFhits; // no hits were matched with DC tracks
         }
         
         // Instantiates the final list of hits
-        List<Hit> hitList = new ArrayList<Hit>();
+        List<Hit> hitList = new ArrayList<>();
         
         // Instantiates map of track intersections with the paddles
-        IndexedList<ArrayList<Track>> trkHitsMap = new IndexedList<ArrayList<Track>>(3);
+        IndexedList<ArrayList<Track>> trkHitsMap = new IndexedList<>(3);
         // calculate track intersections
         for (int i = 0; i < tracks.size(); i++) {
             Track trk = tracks.get(i);
 //            System.out.println(tracks.size() + " " + i + trk.toString());
             List<DetHit> trkHits = ftofDetector.getIntersections(trk.getLine());
-            if (trkHits != null && trkHits.size() > 0) {
+            if (trkHits != null && !trkHits.isEmpty()) {
                 for (DetHit hit : trkHits) {
                     FTOFDetHit trkHit = new FTOFDetHit(hit);
                     // check if intersection is in the "positive direction" and reject other intersections
@@ -353,7 +291,7 @@ public class HitReader implements IMatchedHit {
                         ftofTrkHit.setHit(trkHit);
                         // if map entry for the given paddle doesn't already exist, add it
                         if(!trkHitsMap.hasItem(trkHit.getSector(),trkHit.getLayer(),trkHit.getPaddle())) { 
-                            ArrayList<Track> list = new ArrayList<Track>();
+                            ArrayList<Track> list = new ArrayList<>();
                             trkHitsMap.add(list,trkHit.getSector(),trkHit.getLayer(),trkHit.getPaddle());
                         }
                         // add the track/intersection to the map
@@ -417,7 +355,7 @@ public class HitReader implements IMatchedHit {
 
     @Override
     public List<BaseHit> MatchHits(ArrayList<BaseHit> ADCandTDCLists, double timeJitter, IndexedTable tdcConv, IndexedTable ADCandTDCOffsets) {
-        ArrayList<BaseHit> matchLists = new ArrayList<BaseHit>();
+        ArrayList<BaseHit> matchLists = new ArrayList<>();
         int debug=0;
         if (ADCandTDCLists != null) {
             Collections.sort(ADCandTDCLists);
@@ -435,9 +373,9 @@ public class HitReader implements IMatchedHit {
             int tdc1 = -1;
             int tdc2 = -1;
 
-            List<ArrayList<BaseHit>> hitlists = new ArrayList<ArrayList<BaseHit>>();
-            for (int i = 0; i < ADCandTDCLists.size(); i++) {
-                hitlists.add(new ArrayList<BaseHit>());
+            List<ArrayList<BaseHit>> hitlists = new ArrayList<>();
+            for (BaseHit ADCandTDCList : ADCandTDCLists) {
+                hitlists.add(new ArrayList<>());
             }
             int index1 = 0;
             int index2 = 0;
@@ -523,7 +461,7 @@ public class HitReader implements IMatchedHit {
             }
             int hitNb = 0;
             for (int i = 0; i < hitlists.size(); i++) {
-                if (hitlists.get(i).size() > 0) {
+                if (!hitlists.get(i).isEmpty()) {
                     // Make the new hit
                     BaseHit hit = new BaseHit(hitlists.get(i).get(0)
                             .get_Sector(), hitlists.get(i).get(0).get_Layer(),
@@ -624,7 +562,7 @@ public class HitReader implements IMatchedHit {
     public static void main(String arg[]) {
         System.out.println(" TRYING TO MATCH HITS");
         HitReader hr = new HitReader();
-        ArrayList<BaseHit> ADCandTDCLists = new ArrayList<BaseHit>();
+        ArrayList<BaseHit> ADCandTDCLists = new ArrayList<>();
         BaseHit hit1 = new BaseHit(1,1,1);
         BaseHit hit2 = new BaseHit(1,1,1);
         BaseHit hit3 = new BaseHit(1,1,1);
