@@ -79,7 +79,7 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
             L[aThi.get_Layer() - 1]++;
         }
         for(int l = 0; l<6; l++) {
-            if(L[l]==0 || L[l]>2)
+            if(L[l]==0)
                 stat=1;
         }
         return stat;

@@ -3,7 +3,6 @@ electronkaon -pid 321
 electronpion -pid 211
 electrongamma -pid 22
 electronneutron -pid 2112
-electronFTgamma -pid -22 -ft
 electrongammaFT -pid 22 -ft
 electronprotonC -pid 2212 -cd
 electronkaonC -pid 321 -cd
