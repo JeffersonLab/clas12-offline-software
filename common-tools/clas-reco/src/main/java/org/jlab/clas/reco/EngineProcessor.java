@@ -1,5 +1,7 @@
 package org.jlab.clas.reco;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +51,10 @@ public class EngineProcessor {
     }
 
     private void setBanksToKeep(String schemaDirectory) {
+        if (!Files.isDirectory((new File(schemaDirectory)).toPath())) {
+            LOGGER.log(Level.SEVERE, "Invalid schema directory, aborting:  "+schemaDirectory);
+            System.exit(1);
+        }
         LOGGER.log(Level.INFO, "Using schema directory:  "+schemaDirectory);
         banksToKeep = new SchemaFactory();
         banksToKeep.initFromDirectory(schemaDirectory);
