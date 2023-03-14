@@ -279,6 +279,88 @@ public class Swim {
         return value;
 
     }
+    
+        public double[] SwimToPlaneTiltSecSysBdlXZPlane(int sector, double z_cm) {
+        double z = z_cm / 100; // the magfield method uses meters
+        double[] value = new double[8];
+
+        if (_pTot < MINTRKMOM || this.SwimUnPhys==true) // fiducial cut
+        {
+            return null;
+        }
+
+        // use a SwimZResult instead of a trajectory (dph)
+        SwimZResult szr = null;
+
+        SwimTrajectory traj = null;
+        double hdata[] = new double[3];
+
+        try {
+
+            if (_pTot > SWIMZMINMOM) {
+
+                // use the new z swimmer (dph)
+                // NOTE THE DISTANCE, UNITS FOR swimZ are cm, NOT m like the old
+                // swimmer (dph)
+
+                double stepSizeCM = stepSize * 100; // convert to cm
+
+                // create the starting SwimZ state vector
+                SwimZStateVector start = new SwimZStateVector(_x0 * 100, _y0 * 100, _z0 * 100, _pTot, _theta, _phi);
+
+                try {
+                        szr = PC.RCF_z.sectorAdaptiveRK(sector, _charge, _pTot, start, z_cm, stepSizeCM, hdata);
+                } catch (SwimZException e) {
+                        szr = null;
+                        //System.err.println("[WARNING] Tilted SwimZ Failed for p = " + _pTot);
+                }
+            }
+
+            if (szr != null) {
+                double bdl = szr.sectorGetBDLXZPlane(sector, PC.RCF_z.getProbe());
+                double pathLength = szr.getPathLength(); // already in cm
+
+                SwimZStateVector last = szr.last();
+                double p3[] = szr.getThreeMomentum(last);
+
+                value[0] = last.x; // xf in cm
+                value[1] = last.y; // yz in cm
+                value[2] = last.z; // zf in cm
+                value[3] = p3[0];
+                value[4] = p3[1];
+                value[5] = p3[2];
+                value[6] = pathLength;
+                value[7] = bdl / 10; // convert from kg*cm to T*cm
+            } else { // use old swimmer. Either low momentum or SwimZ failed.
+                                // (dph)
+
+                traj = PC.RCF.sectorSwim(sector, _charge, _x0, _y0, _z0, _pTot, _theta, _phi, z, accuracy, _rMax,
+                                _maxPathLength, stepSize, cnuphys.swim.Swimmer.CLAS_Tolerance, hdata);
+
+                // traj.computeBDL(sector, rprob);
+                if(traj==null)
+                    return null;
+                
+                traj.sectorComputeBDL(sector, PC.RCP);
+                // traj.computeBDL(rcompositeField);
+
+                double lastY[] = traj.lastElement();
+                value[0] = lastY[0] * 100; // convert back to cm
+                value[1] = lastY[1] * 100; // convert back to cm
+                value[2] = lastY[2] * 100; // convert back to cm
+                value[3] = lastY[3] * _pTot;
+                value[4] = lastY[4] * _pTot;
+                value[5] = lastY[5] * _pTot;
+                value[6] = lastY[6] * 100;
+                value[7] = lastY[7] * 10;
+            } // use old swimmer
+        } catch (Exception e) {
+                e.printStackTrace();
+        }
+        return value;
+
+    }
+        
     /**
      * 
      * @param z_cm

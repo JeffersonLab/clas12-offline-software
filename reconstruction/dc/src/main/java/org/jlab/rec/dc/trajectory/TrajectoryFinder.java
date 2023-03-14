@@ -8,6 +8,7 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.cross.Cross;
 import trackfitter.fitter.LineFitter;
+import Jama.Matrix;
 
 /**
  * A driver class to find the trajectory of a track candidate.  NOTE THAT THE PATH TO FIELD MAPS IS SET BY THE CLARA_SERVICES ENVIRONMENT VAR.
@@ -19,8 +20,6 @@ public class TrajectoryFinder {
 
 	private LineFitter lineFit;
 
-	private double[] tanTheta_x_fitCoeff;
-	private double[] tanTheta_y_fitCoeff;
 	private double[] x_fitCoeff;
 	private double[] y_fitCoeff;
 
@@ -41,7 +40,6 @@ public class TrajectoryFinder {
 	 */
 	int counter =0;
         public double TrajChisqProbFitXZ;
-        public double TrajChisqProbFitYZ;
 
     /**
      *
@@ -89,22 +87,27 @@ public class TrajectoryFinder {
         double z0 = z1;
 
 
-        while(z<=z3) {
+        while(z<z3) {
             counter++;
+            
+            if(z3 - z < mmStepSizeForIntBdl/10)
+                z+=mmStepSizeForIntBdl/10.;
+            else 
+                z = z3;
+            
             double x = x_fitCoeff[0]*z*z+x_fitCoeff[1]*z+x_fitCoeff[2];
             double y = y_fitCoeff[0]*z*z+y_fitCoeff[1]*z+y_fitCoeff[2];
  
             float[] result = new float[3];
             dcSwim.Bfield(sector, (x + x0) * 0.5, (y + y0) * 0.5, (z + z0) * 0.5, result);
-            Vector3D dl = new Vector3D(x-x0,0,z-z0);
+            Vector3D dl = new Vector3D(x-x0,y - y0,z-z0);
             Vector3D Bf = new Vector3D(result[0], result[1], result[2]);
-            intBdl+= dl.cross(Bf).mag();
+            Vector3D Bdl = dl.cross(Bf);
+            intBdl+= (new Vector3D(Bdl.x(), 0, Bdl.z())).mag();
             pathLen+= dl.mag();
             x0 = x;
             y0 = y;
             z0 = z;
-
-            z+=mmStepSizeForIntBdl/10.;
         }
         PathLength = pathLen;
 
@@ -206,21 +209,14 @@ public class TrajectoryFinder {
      * @param candCrossList list of crosses used in the fit
      */
     public void fitTrajectory(List<Cross> candCrossList) {
-        tanTheta_x_fitCoeff = new double[2];
-        tanTheta_y_fitCoeff = new double[2];
         x_fitCoeff = new double[3];
         y_fitCoeff = new double[3];
 
-
         double[] theta_x = new double[3];
         double[] theta_x_err = new double[3];
-        double[] theta_y = new double[3];
-        double[] theta_y_err = new double[3];
 
         double[] x = new double[3];
-        double[] x_err = new double[3];
         double[] y = new double[3];
-        double[] y_err = new double[3];
         double[] z = new double[3];
 
         for (int i =0; i<3; i++) {
@@ -230,83 +226,42 @@ public class TrajectoryFinder {
             }
 
             x[i] = candCrossList.get(i).get_Point().x();
-            x_err[i] = candCrossList.get(i).get_PointErr().x();
             y[i] = candCrossList.get(i).get_Point().y();
-            y_err[i] = candCrossList.get(i).get_PointErr().y();
             z[i] = candCrossList.get(i).get_Point().z();
 
             theta_x[i] = candCrossList.get(i).get_Dir().x()/candCrossList.get(i).get_Dir().z();
-            theta_x_err[i] = calcTanErr(candCrossList.get(i).get_Dir().x(),candCrossList.get(i).get_Dir().z(),candCrossList.get(i).get_DirErr().x(),candCrossList.get(i).get_DirErr().z());
-            theta_y[i] = candCrossList.get(i).get_Dir().y()/candCrossList.get(i).get_Dir().z();
-            theta_y_err[i] = calcTanErr(candCrossList.get(i).get_Dir().y(),candCrossList.get(i).get_Dir().z(),candCrossList.get(i).get_DirErr().y(),candCrossList.get(i).get_DirErr().z());
+            theta_x_err[i] = calcTanErr(candCrossList.get(i).get_Dir().x(),candCrossList.get(i).get_Dir().z(),candCrossList.get(i).get_DirErr().x(),candCrossList.get(i).get_DirErr().z());            
         }
-
+        
         lineFit = new LineFitter();
         boolean linefitstatusOK = lineFit.fitStatus(z, theta_x, new double[3], theta_x_err, 3);
-
-        // tan_thetax = alpha*z + beta;
-        // x = a*z^2 +b*z +c
-        if (linefitstatusOK) {
-            double alpha = lineFit.getFit().slope();
-            double beta = lineFit.getFit().intercept();
-
-
-            double a = alpha/2;
-            double b = beta;
-
-            double sum_inv_xerr = 0;
-            double sum_X_ov_errX = 0;
-            for (int i =0; i<3; i++) {
-                x[i]-=a*z[i]*z[i]+b*z[i];
-                sum_inv_xerr += 1./x_err[i];
-                sum_X_ov_errX += x[i]/x_err[i];
-            }
-            if(sum_inv_xerr==0) {
-                return;
-            }
-            double c = sum_X_ov_errX/sum_inv_xerr;
-
-            tanTheta_x_fitCoeff[0] = alpha;
-            tanTheta_x_fitCoeff[1] = beta;
-
-            x_fitCoeff[0] = a;
-            x_fitCoeff[1] = b;
-            x_fitCoeff[2] = c;
-        }
-        TrajChisqProbFitXZ = lineFit.getFit().getProb();
-
-        lineFit = new LineFitter();
-        linefitstatusOK = lineFit.fitStatus(z, theta_y, new double[3], theta_y_err, 3);
-
-        // tan_thetay = alpha*z + beta;
-        // y = a*z^2 +b*z +c
-        if (linefitstatusOK) {
-            double alpha = lineFit.getFit().slope();
-            double beta = lineFit.getFit().intercept();
-
-            double a = alpha/2;
-            double b = beta;
-
-            double sum_inv_yerr = 0;
-            double sum_Y_ov_errY = 0;
-            for (int i =0; i<3; i++) {
-                    y[i]-=a*z[i]*z[i]+b*z[i];
-                    sum_inv_yerr += 1./y_err[i];
-                    sum_Y_ov_errY += y[i]/y_err[i];
-            }
-            if(sum_inv_yerr==0) {
-                    return;
-            }
-            double c = sum_Y_ov_errY/sum_inv_yerr;
-
-            tanTheta_y_fitCoeff[0] = alpha;
-            tanTheta_y_fitCoeff[1] = beta;
-
-            y_fitCoeff[0] = a;
-            y_fitCoeff[1] = b;
-            y_fitCoeff[2] = c;
-        }
-        TrajChisqProbFitYZ = lineFit.getFit().getProb();
+        TrajChisqProbFitXZ = lineFit.getFit().getProb(); 
+        
+        
+        double[][] array = {{z[0]*z[0], z[0], 1}, {z[1]*z[1], z[1], 1}, {z[2]*z[2], z[2], 1}};
+        double[][] x_array0 = {{x[0], z[0], 1}, {x[1], z[1], 1}, {x[2], z[2], 1}};
+        double[][] x_array1 = {{z[0]*z[0], x[0], 1}, {z[1]*z[1], x[1], 1}, {z[2]*z[2], x[2], 1}};
+        double[][] x_array2 = {{z[0]*z[0], z[0], x[0]}, {z[1]*z[1], z[1], x[1]}, {z[2]*z[2], z[2], x[2]}};        
+        double[][] y_array0 = {{y[0], z[0], 1}, {y[1], z[1], 1}, {y[2], z[2], 1}};
+        double[][] y_array1 = {{z[0]*z[0], y[0], 1}, {z[1]*z[1], y[1], 1}, {z[2]*z[2], y[2], 1}};
+        double[][] y_array2 = {{z[0]*z[0], z[0], y[0]}, {z[1]*z[1], z[1], y[1]}, {z[2]*z[2], z[2], y[2]}};
+        
+        
+        Matrix D = new Matrix(array);
+        Matrix x_D0 = new Matrix(x_array0);
+        Matrix x_D1 = new Matrix(x_array1);     
+        Matrix x_D2 = new Matrix(x_array2);
+        Matrix y_D0 = new Matrix(y_array0);
+        Matrix y_D1 = new Matrix(y_array1);     
+        Matrix y_D2 = new Matrix(y_array2);
+        
+        x_fitCoeff[0] = x_D0.det()/D.det();
+        x_fitCoeff[1] = x_D1.det()/D.det();
+        x_fitCoeff[2] = x_D2.det()/D.det();
+        
+        y_fitCoeff[0] = y_D0.det()/D.det();
+        y_fitCoeff[1] = y_D1.det()/D.det();
+        y_fitCoeff[2] = y_D2.det()/D.det();                       
     }
     /**
      *

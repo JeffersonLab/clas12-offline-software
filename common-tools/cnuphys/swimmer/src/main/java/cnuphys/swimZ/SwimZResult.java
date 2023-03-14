@@ -209,6 +209,58 @@ public class SwimZResult {
 		
 		return _bdl;
 	}
+        
+    /**
+     * Get the approximate integral |B x dL|
+     *
+     * @param sector sector 1..6
+     * @param probe the probe use to compute this result trajectory
+     * @return the approximate integral |B x dL| in kG*cm
+     */
+    public double sectorGetBDLXZPlane(int sector, FieldProbe probe) {
+
+        // only compute if necessary
+        if (Double.isNaN(_bdl)) {
+            _bdl = 0;
+            _pathLength = 0;
+
+            int size = size();
+
+            SwimZStateVector prev = null;
+            if (size > 1) {
+
+                double dr[] = new double[3];
+
+                float b[] = new float[3];
+                double bxdl[] = new double[3];
+                double bxdlxz[] = new double[3];
+
+                for (SwimZStateVector next : _trajectory) {
+                    if (prev != null) {
+                        prev.dR(next, dr);
+                        _pathLength += vecmag(dr);
+
+                        //get the field at the midpoint
+                        float xmid = (float) ((prev.x + next.x) / 2);
+                        float ymid = (float) ((prev.y + next.y) / 2);
+                        float zmid = (float) ((prev.z + next.z) / 2);
+                        probe.field(sector, xmid, ymid, zmid, b);
+
+                        cross(b, dr, bxdl);
+                        bxdlxz[0] = bxdl[0]; 
+                        bxdlxz[1] = 0; 
+                        bxdlxz[2] = bxdl[2]; 
+                        
+                        _bdl += vecmag(bxdlxz);
+
+                    }
+                    prev = next;
+                }
+            }
+        }
+
+        return _bdl;
+    }
 	
 	// usual cross product c = a x b
 	private static void cross(float a[], double b[], double c[]) {
