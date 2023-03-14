@@ -20,6 +20,7 @@ public class MCHit {
     private double p;
     
     public MCHit(int id, int sector, int ssl, double[] pars, int status) {
+        this.id = id;
         this.status = status;
         this.sector = sector;
         point = new Point3D(pars[0], pars[1], pars[2]);
@@ -31,6 +32,7 @@ public class MCHit {
     }        
 
     public MCHit(int id, int sector, double[] xpars, double[] ppars, Map<Integer, Double> ZMap, int status) {
+        this.id = id;
         this.status = status;
         this.sector = sector;
         point = new Point3D(xpars[0], xpars[1], xpars[2]);
@@ -42,6 +44,7 @@ public class MCHit {
     }
     
     public MCHit(int id, int sector, double[] xpars, double[] ppars, int status) {
+        this.id = id;
         this.status = status;
         this.sector = sector;
         point = new Point3D(xpars[0], xpars[1], xpars[2]);
