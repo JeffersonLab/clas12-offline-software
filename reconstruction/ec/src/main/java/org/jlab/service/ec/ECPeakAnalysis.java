@@ -66,7 +66,7 @@ public class ECPeakAnalysis {
         if(split[0]>=0) {
             
             int layer = peak.getDescriptor().getLayer();
-            //if(layer==1||layer==2||layer==3) return split;
+            if(layer==1||layer==2||layer==3) return split;
             
             List<ECPeak>  others = ECPeakAnalysis.getMatchingPeaks(peak, allPeaks);
             if(others.size()!=2) return split;
