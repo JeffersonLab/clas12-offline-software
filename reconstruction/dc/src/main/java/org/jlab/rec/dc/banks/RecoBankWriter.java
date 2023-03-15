@@ -1256,9 +1256,14 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
                 for (int site : candlist.get(i).get_SVMap().get(iter).trackTrajT.keySet()) {
                     if (candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site) != null) {
                         bank.setShort("trkCand_id", index, trkCand_id);
-                        bank.setShort("iter_index", index, (short) iter);
                         bank.setByte("sector", index, (byte) candlist.get(i).getSector());
+                        bank.setShort("iter_index", index, (short) iter);
                         bank.setByte("category", index, (byte) 1);
+                        bank.setByte("region", index, (byte) candlist.get(i).get_MeasVecs().measurements.get(site).region);
+                        if(candlist.get(i).get_MeasVecs().measurements.get(site).surface.type == Type.LINEDOCA)
+                            bank.setByte("layer", index, (byte) ((candlist.get(i).get_MeasVecs().measurements.get(site).superlayer -1 ) * 6 + candlist.get(i).get_MeasVecs().measurements.get(site).layer));
+                        else if(candlist.get(i).get_MeasVecs().measurements.get(site).surface.type == Type.PLANEURWELL)    
+                            bank.setByte("layer", index, (byte) candlist.get(i).get_MeasVecs().measurements.get(site).layer);    
                         bank.setFloat("x", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).x);
                         bank.setFloat("y", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).y);
                         bank.setFloat("z", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajT.get(site).z);
@@ -1290,6 +1295,11 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
                         bank.setShort("trkCand_id", index, trkCand_id);
                         bank.setShort("iter_index", index, (short) iter);
                         bank.setByte("sector", index, (byte) candlist.get(i).getSector());
+                        bank.setByte("region", index, (byte) candlist.get(i).get_MeasVecs().measurements.get(site).region);
+                        if(candlist.get(i).get_MeasVecs().measurements.get(site).surface.type == Type.LINEDOCA)
+                            bank.setByte("layer", index, (byte) ((candlist.get(i).get_MeasVecs().measurements.get(site).superlayer -1 ) * 6 + candlist.get(i).get_MeasVecs().measurements.get(site).layer));
+                        else if(candlist.get(i).get_MeasVecs().measurements.get(site).surface.type == Type.PLANEURWELL)    
+                            bank.setByte("layer", index, (byte) candlist.get(i).get_MeasVecs().measurements.get(site).layer); 
                         bank.setByte("category", index, (byte) 2);
                         bank.setFloat("x", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).x);
                         bank.setFloat("y", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajF.get(site).y);
@@ -1323,6 +1333,11 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
                         bank.setShort("trkCand_id", index, trkCand_id);
                         bank.setShort("iter_index", index, (short) iter);
                         bank.setByte("sector", index, (byte) candlist.get(i).getSector());
+                        bank.setByte("region", index, (byte) candlist.get(i).get_MeasVecs().measurements.get(site).region);
+                        if(candlist.get(i).get_MeasVecs().measurements.get(site).surface.type == Type.LINEDOCA)
+                            bank.setByte("layer", index, (byte) ((candlist.get(i).get_MeasVecs().measurements.get(site).superlayer -1 ) * 6 + candlist.get(i).get_MeasVecs().measurements.get(site).layer));
+                        else if(candlist.get(i).get_MeasVecs().measurements.get(site).surface.type == Type.PLANEURWELL)    
+                            bank.setByte("layer", index, (byte) candlist.get(i).get_MeasVecs().measurements.get(site).layer); 
                         bank.setByte("category", index, (byte) 3);
                         bank.setFloat("x", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).x);
                         bank.setFloat("y", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajP.get(site).y);
@@ -1356,6 +1371,11 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
                         bank.setShort("trkCand_id", index, trkCand_id);
                         bank.setShort("iter_index", index, (short) iter);
                         bank.setByte("sector", index, (byte) candlist.get(i).getSector());
+                        bank.setByte("region", index, (byte) candlist.get(i).get_MeasVecs().measurements.get(site).region);
+                        if(candlist.get(i).get_MeasVecs().measurements.get(site).surface.type == Type.LINEDOCA)
+                            bank.setByte("layer", index, (byte) ((candlist.get(i).get_MeasVecs().measurements.get(site).superlayer -1 ) * 6 + candlist.get(i).get_MeasVecs().measurements.get(site).layer));
+                        else if(candlist.get(i).get_MeasVecs().measurements.get(site).surface.type == Type.PLANEURWELL)    
+                            bank.setByte("layer", index, (byte) candlist.get(i).get_MeasVecs().measurements.get(site).layer); 
                         bank.setByte("category", index, (byte) 4);
                         bank.setFloat("x", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).x);
                         bank.setFloat("y", index, (float) candlist.get(i).get_SVMap().get(iter).trackTrajB.get(site).y);
