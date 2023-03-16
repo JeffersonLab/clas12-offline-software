@@ -26,6 +26,8 @@ public final class URWellGeant4Factory extends Geant4Factory {
     /**
      * Create the URWELL full geometry
      * @param cp
+     * @param isProto
+     * @param number of regions
      */
     public URWellGeant4Factory( DatabaseConstantProvider cp, boolean isProto, int Nregions) {
         URWellConstants.connect(cp );
@@ -38,7 +40,7 @@ public final class URWellGeant4Factory extends Geant4Factory {
         Proto = isProto;
         if(isProto == false)
         {
-          //  Nregions = URWellConstants.NREGIONS;
+            if(Nregions > URWellConstants.NMAXREGIONS) Nregions=2;
             Nsectors = URWellConstants.NSECTORS;
             Nchambers = URWellConstants.NCHAMBERS;
         } else

@@ -41,9 +41,17 @@ public final class URWellStripFactory {
      * @param cp database provide
      */
     public URWellStripFactory(DatabaseConstantProvider cp) {
-        this.init(cp, false, 1);
+        this.init(cp);
     }
     
+    /**
+     * Initialize the factory by the strip maps
+     * @param cp
+     */
+    public void init(DatabaseConstantProvider cp) {
+        this.init(cp, false, 1);
+    }
+   
         /**
      * Create the strip factory based on constants from CCDB.
      * Currently constants are defined in the URWellConstants class. 

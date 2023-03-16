@@ -13,7 +13,7 @@ public class URWellConstants {
 
     private final static String CCDBPATH = "/geometry/urwell/";
     
-    public final static int NREGIONS  = 2;    //number of regions 
+    public final static int NMAXREGIONS  = 2;    //number of regions 
     public final static int NSECTORS  = 6;    //number of sectors
     public final static int NLAYERS   = 2;    //number of layers
     public final static int NCHAMBERS = 3;    //number of chambers in a sector
@@ -48,11 +48,11 @@ public class URWellConstants {
     // URWELL position in the CLAS12 frame 
     public final static double TGT2DC0    = 228.078; // cm            
    // public final static double URWELL2DC0 = 2;       // cm
-    public final static double URWELL2DC0[] = new double[NREGIONS];
-    public final static double DIST2TGT[] = new double[NREGIONS];
-    public final static double W2TGT[] = new double[NREGIONS];; 
-    public final static double YMIN[] = new double[NREGIONS];
-    public final static double ZMIN[] = new double[NREGIONS];
+    public final static double URWELL2DC0[] = new double[NMAXREGIONS];
+    public final static double DIST2TGT[] = new double[NMAXREGIONS];
+    public final static double W2TGT[] = new double[NMAXREGIONS];; 
+    public final static double YMIN[] = new double[NMAXREGIONS];
+    public final static double ZMIN[] = new double[NMAXREGIONS];
     
   //  public final static double DIST2TGT   = (TGT2DC0-URWELL2DC0);
    // public final static double W2TGT = DIST2TGT/Math.cos(Math.toRadians(THTILT-THMIN));
@@ -117,13 +117,13 @@ public class URWellConstants {
             // read constants from svt table
 //            NREGIONS = cp.getInteger( CCDBPATH+"svt/nRegions", 0 );
 
-             for (int i=0; i<NREGIONS; i++){
+             for (int i=0; i<NMAXREGIONS; i++){
                  
-                URWELL2DC0[NREGIONS-i-1] =  2+i*2;
-                DIST2TGT[NREGIONS-i-1]   = (TGT2DC0-URWELL2DC0[NREGIONS-i-1]);
-                W2TGT[NREGIONS-i-1] = DIST2TGT[NREGIONS-i-1]/Math.cos(Math.toRadians(THTILT-THMIN));
-                YMIN[NREGIONS-i-1]= W2TGT[NREGIONS-i-1]*Math.sin(Math.toRadians(THMIN)); // distance from the base chamber1 and beamline
-                ZMIN[NREGIONS-i-1] = W2TGT[NREGIONS-i-1]*Math.cos(Math.toRadians(THMIN));  
+                URWELL2DC0[NMAXREGIONS-i-1] =  2+i*2;
+                DIST2TGT[NMAXREGIONS-i-1]   = (TGT2DC0-URWELL2DC0[NMAXREGIONS-i-1]);
+                W2TGT[NMAXREGIONS-i-1] = DIST2TGT[NMAXREGIONS-i-1]/Math.cos(Math.toRadians(THTILT-THMIN));
+                YMIN[NMAXREGIONS-i-1]= W2TGT[NMAXREGIONS-i-1]*Math.sin(Math.toRadians(THMIN)); // distance from the base chamber1 and beamline
+                ZMIN[NMAXREGIONS-i-1] = W2TGT[NMAXREGIONS-i-1]*Math.cos(Math.toRadians(THMIN));  
 
                 }
 
