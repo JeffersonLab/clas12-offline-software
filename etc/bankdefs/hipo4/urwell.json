@@ -55,5 +55,14 @@
        {"name":"cluster2",    "type":"S", "info":"id of the cluster in the W layer"},
        {"name":"status",      "type":"S", "info":"status of the cluster"}
     ]
+  },
+  {
+    "name": "URWELL::match",
+    "group": 22300,
+    "item" : 31,
+    "info": "DC TDCs match status",
+    "entries": [
+       {"name":"status",     "type":"B", "info":"match status (0 if matched, 1 if unmatched"}
+    ]
   }
 ]

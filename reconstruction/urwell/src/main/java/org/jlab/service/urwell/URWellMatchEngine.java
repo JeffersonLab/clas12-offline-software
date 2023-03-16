@@ -105,8 +105,11 @@ public class URWellMatchEngine extends ReconstructionEngine {
  
         }
                 
-        this.rewriteDCBank(event, hits);
-                                    
+        if(this.dropHits)
+            this.rewriteDCBank(event, hits);
+        else
+            this.writeMatchBank(event, hits);
+        
         return true;
     }
 
@@ -162,29 +165,41 @@ public class URWellMatchEngine extends ReconstructionEngine {
         String name = "DC::tdc";
         event.removeBank(name);
         
-        List<DCHit> selectedHits = null;
-        if(this.dropHits) {
-            selectedHits = new ArrayList<>();
-            for(DCHit hit : hits) {
-                if(hit.isMatched()) selectedHits.add(hit);
-            }
-        }
-        else {
-            selectedHits = hits;
+        List<DCHit> selectedHits = new ArrayList<>();
+        for(DCHit hit : hits) {
+            if(hit.isMatched()) selectedHits.add(hit);
         }
         
-        if(selectedHits!=null && !selectedHits.isEmpty()) {
+        if(!selectedHits.isEmpty()) {
             DataBank bank = event.createBank(name, selectedHits.size());
             for(int i=0; i<selectedHits.size(); i++) {
 
                 bank.setByte("sector",     i, (byte)  selectedHits.get(i).sector());
                 bank.setByte("layer",      i, (byte)  selectedHits.get(i).layer());
                 bank.setShort("component", i, (short) selectedHits.get(i).component());
-                if(selectedHits.get(i).isMatched()) 
-                    bank.setByte("order",  i, (byte)  selectedHits.get(i).order());
-                else 
-                    bank.setByte("order",  i, (byte) (selectedHits.get(i).order()%10 + RawOrderType.USER1.getTypeId())); 
+                bank.setByte("order",      i, (byte)  selectedHits.get(i).order());
                 bank.setInt("TDC",         i, selectedHits.get(i).tdc());
+            }
+            event.appendBank(bank);
+        }
+        
+        return event;
+    }
+
+    private DataEvent writeMatchBank(DataEvent event, List<DCHit> hits) {
+
+        String name = "URWELL::match";
+        event.removeBank(name);
+        
+        if(hits.isEmpty()) {
+            DataBank bank = event.createBank(name, hits.size());
+            for(int i=0; i<hits.size(); i++) {
+
+                if(hits.get(i).isMatched()) 
+                    bank.setByte("status", i, (byte) 0);
+                else
+                    bank.setByte("status", i, (byte) 1);
+                
             }
             event.appendBank(bank);
         }
