@@ -231,6 +231,12 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         }
 
         if(e.getActionCommand().compareTo("OpenFileET")==0){
+
+            if(this.processTimer!=null){
+                this.processTimer.cancel();
+                this.processTimer = null;
+            }
+
             ConnectionDialog dialog = new ConnectionDialog(this.defaultHost, this.defaultIp);
             dialog.setVisible(true);
             if(dialog.reason()==DialogUtilities.OK_RESPONSE){
@@ -254,7 +260,7 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
                 this.processTimer.cancel();
                 this.processTimer = null;
             }
-            
+
             JFileChooser fc = new JFileChooser();
             fc.setCurrentDirectory(null);
             int returnVal = fc.showOpenDialog(this);
@@ -285,6 +291,12 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         }
 
         if(e.getActionCommand().compareTo("OpenFileRing")==0){
+
+            if(this.processTimer!=null){
+                this.processTimer.cancel();
+                this.processTimer = null;
+            }
+
             HipoRingSource source = HipoRingSource.createSource();
             
             this.dataProcessor.setSource(source);
@@ -350,7 +362,6 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
     }
     
     private void startProcessorTimer(){
-        //System.out.println(" starting timer ");
         class CrunchifyReminder extends TimerTask {
             boolean hasFinished = false;
             public void run() {
