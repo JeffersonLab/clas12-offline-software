@@ -15,12 +15,14 @@ public class MCHit {
     private int superlayer = -1;
     private int layer = -1;
     private int id = -1;
+    private int charge = -999;
     private Point3D point;
     private Point3D dir;
     private double p;
     
-    public MCHit(int id, int sector, int ssl, double[] pars, int status) {
+    public MCHit(int id, int charge, int sector, int ssl, double[] pars, int status) {
         this.id = id;
+        this.charge = charge;
         this.status = status;
         this.sector = sector;
         point = new Point3D(pars[0], pars[1], pars[2]);
@@ -31,8 +33,9 @@ public class MCHit {
 
     }        
 
-    public MCHit(int id, int sector, double[] xpars, double[] ppars, Map<Integer, Double> ZMap, int status) {
+    public MCHit(int id, int charge, int sector, double[] xpars, double[] ppars, Map<Integer, Double> ZMap, int status) {
         this.id = id;
+        this.charge = charge;
         this.status = status;
         this.sector = sector;
         point = new Point3D(xpars[0], xpars[1], xpars[2]);
@@ -43,8 +46,9 @@ public class MCHit {
 
     }
     
-    public MCHit(int id, int sector, double[] xpars, double[] ppars, int status) {
+    public MCHit(int id, int charge, int sector, double[] xpars, double[] ppars, int status) {
         this.id = id;
+        this.charge = charge;
         this.status = status;
         this.sector = sector;
         point = new Point3D(xpars[0], xpars[1], xpars[2]);
@@ -88,6 +92,10 @@ public class MCHit {
         return id;
     }
 
+    public int getCharge() {
+        return charge;
+    }
+    
     public Point3D getPoint() {
         return point;
     }

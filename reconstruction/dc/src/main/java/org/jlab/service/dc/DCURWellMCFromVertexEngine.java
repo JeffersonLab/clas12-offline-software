@@ -73,7 +73,7 @@ public class DCURWellMCFromVertexEngine extends DCEngine {
                     swim.SetSwimParameters(xpars[0], xpars[1], xpars[2], ppars[0], ppars[1], ppars[2], charge);
                     for (int key : ZMap.keySet()) {
                         double paras[] = swim.SwimToPlaneTiltSecSys(sector, ZMap.get(key));
-                        MCHit dcHit = new MCHit(key + 1, sector, key, paras, 1);
+                        MCHit dcHit = new MCHit(key + 1, charge, sector, key, paras, 1);
                         if (key != ZMap.keySet().size() - 1) {
                             swim.SetSwimParameters(paras[0], paras[1], paras[2], paras[3], paras[4], paras[5], charge);
                         }
@@ -83,14 +83,14 @@ public class DCURWellMCFromVertexEngine extends DCEngine {
                     // uRWell cross
                     swim.SetSwimParameters(xpars[0], xpars[1], xpars[2], ppars[0], ppars[1], ppars[2], charge);
                     double paras[] = swim.SwimToPlaneTiltSecSys(sector, Constants.URWELLLOCALZ);
-                    MCCross uRWELLCross = new MCCross(1, sector, 0, paras, 1);
+                    MCCross uRWELLCross = new MCCross(1, charge, sector, 0, paras, 1);
                     uRWELLCrosses.add(uRWELLCross);
                     
                     // DC crosses
                     for(int i = 0; i < 3; i++){
                         swim.SetSwimParameters(paras[0], paras[1], paras[2], paras[3], paras[4], paras[5], charge);
                         paras = swim.SwimToPlaneTiltSecSys(sector, Constants.getInstance().dcDetector.getRegionMidpoint(i).z);
-                        MCCross dcCross = new MCCross(i + 1, sector, i + 1, paras, 1);
+                        MCCross dcCross = new MCCross(i + 1, charge, sector, i + 1, paras, 1);
                         dcCrosses.add(dcCross);
                     }
 

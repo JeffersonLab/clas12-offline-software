@@ -1417,6 +1417,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
         int index=0;
         for (MCHit hit : hitlist) {
             bank.setShort("id", index, (short) hit.getId());
+            bank.setShort("charge", index, (short) hit.getCharge());
             bank.setShort("status", index, (short) hit.getStatus());    
             bank.setByte("sector", index, (byte) hit.getSector());
             bank.setFloat("x", index, (float) hit.getPoint().x());
@@ -1439,6 +1440,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
         int index=0;
         for (MCHit hit : hitlist) {
             bank.setShort("id", index, (short) hit.getId());
+            bank.setShort("charge", index, (short) hit.getCharge());
             bank.setShort("status", index, (short) hit.getStatus());    
             bank.setByte("sector", index, (byte) hit.getSector());
             bank.setByte("superlayer", index, (byte) hit.getSuperlayer());
@@ -1463,6 +1465,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
         int index=0;
         for (MCCross cross : crosslist) {
             bank.setShort("id", index, (short) cross.getId());
+            bank.setShort("charge", index, (short) cross.getCharge());
             bank.setShort("status", index, (short) cross.getStatus()); 
             bank.setByte("sector", index, (byte) cross.getSector());
             bank.setByte("region", index, (byte) cross.getRegion());
@@ -1486,6 +1489,7 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
         int index=0;
         for (MCCross cross : crosslist) {
             bank.setShort("id", index, (short) cross.getId());
+            bank.setShort("charge", index, (short) cross.getCharge());
             bank.setShort("status", index, (short) cross.getStatus()); 
             bank.setByte("sector", index, (byte) cross.getSector());
             bank.setByte("region", index, (byte) cross.getRegion());

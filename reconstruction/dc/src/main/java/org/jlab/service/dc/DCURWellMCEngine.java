@@ -73,12 +73,12 @@ public class DCURWellMCEngine extends DCEngine {
                     if (sector != -1) {
                         //DC hits
                         if (detector == 6) {
-                            MCHit mcHit = new MCHit(dcHits_id++, sector, xpars, ppars, ZMap, 1);
+                            MCHit mcHit = new MCHit(dcHits_id++, charge, sector, xpars, ppars, ZMap, 1);
                             dcHits.add(mcHit);
                         }
 
                         if (detector == 23) {
-                            MCHit mcHit = new MCHit(uRWellHits_id++, sector, xpars, ppars, 1);
+                            MCHit mcHit = new MCHit(uRWellHits_id++, charge, sector, xpars, ppars, 1);
                             uRWellHits.add(mcHit);
                         }
                     }
@@ -98,7 +98,7 @@ public class DCURWellMCEngine extends DCEngine {
                     if (spars != null) {
                         double xpars[] = {spars[0], spars[1], spars[2]};
                         double ppars[] = {spars[3], spars[4], spars[5]};
-                        MCCross mcCross = new MCCross(1, hit.getSector(), 0, xpars, ppars, -1);
+                        MCCross mcCross = new MCCross(1, charge, hit.getSector(), 0, xpars, ppars, -1);
                         uRWellCrosses.add(mcCross);
                     }
                 } else {
@@ -107,7 +107,7 @@ public class DCURWellMCEngine extends DCEngine {
                     if (spars != null) {
                         double xpars[] = {spars[0], spars[1], spars[2]};
                         double ppars[] = {-spars[3], -spars[4], -spars[5]};
-                        MCCross mcCross = new MCCross(1, hit.getSector(), 0, xpars, ppars, -1);
+                        MCCross mcCross = new MCCross(1, charge, hit.getSector(), 0, xpars, ppars, -1);
                         uRWellCrosses.add(mcCross);
                     }
                 }
@@ -140,7 +140,7 @@ public class DCURWellMCEngine extends DCEngine {
                             if (hit_index == dcHits.size() - 1) {
                                 status = -1;
                             }
-                            MCCross mcCross = new MCCross(i + 1, hit.getSector(), i + 1, xpars, ppars, status);
+                            MCCross mcCross = new MCCross(i + 1, charge, hit.getSector(), i + 1, xpars, ppars, status);
                             dcCrosses.add(mcCross);
                         }
                     } else { // For very special case, no hit is ahead of the cross, then the first hit behind the cross is picked
@@ -153,7 +153,7 @@ public class DCURWellMCEngine extends DCEngine {
                         if (spars != null) {
                             double xpars[] = {spars[0], spars[1], spars[2]};
                             double ppars[] = {-spars[3], -spars[4], -spars[5]};
-                            MCCross mcCross = new MCCross(i + 1, hit.getSector(), i + 1, xpars, ppars, -1);
+                            MCCross mcCross = new MCCross(i + 1, charge, hit.getSector(), i + 1, xpars, ppars, -1);
                             dcCrosses.add(mcCross);
                         }
                     }

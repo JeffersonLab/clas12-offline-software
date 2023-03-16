@@ -20,12 +20,14 @@ public class MCCross {
     private int sector;
     private int region;
     private int id;
+    private int charge = -999;
     private Point3D point;
     private Point3D dir;
     private double p;
     
-    public MCCross(int id, int sector, int region, double[] pars, int status) {
+    public MCCross(int id, int charge, int sector, int region, double[] pars, int status) {
         this.id = id;
+        this.charge = charge;
         this.status = status;
         this.sector = sector;
         this.region = region;
@@ -35,8 +37,9 @@ public class MCCross {
         dir = p3D.asUnit().toPoint3D();    
     }
 
-    public MCCross(int id, int sector, int region, double[] xpars, double[] ppars, int status) {
+    public MCCross(int id, int charge, int sector, int region, double[] xpars, double[] ppars, int status) {
         this.id = id;
+        this.charge = charge;
         this.status = status;
         this.sector = sector;
         this.region = region;
@@ -60,6 +63,10 @@ public class MCCross {
 
     public int getId() {
         return id;
+    }
+    
+    public int getCharge() {
+        return charge;
     }
 
     public Point3D getPoint() {

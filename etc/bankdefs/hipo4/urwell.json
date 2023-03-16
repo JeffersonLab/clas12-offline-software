@@ -143,6 +143,7 @@
     "info": "MC hits",
     "entries": [
         {"name":"id",            "type":"S", "info":"id of the hit"},
+        {"name":"charge",        "type":"S", "info":"charge of the hit"},
         {"name":"status",        "type":"S", "info":"status of the hit"},
         {"name":"sector",        "type":"B", "info":"sector of the hit"},
         {"name":"x",             "type":"F", "info":"hit x-coordinate (in the tilted sector coordinate system)"},
@@ -161,6 +162,7 @@
     "info": "MC crosses",
     "entries": [
         {"name":"id",            "type":"S", "info":"id of the cross"},
+        {"name":"charge",        "type":"S", "info":"charge of the cross"},
         {"name":"status",        "type":"S", "info":"status of the cross"},        
         {"name":"sector",        "type":"B", "info":"sector of the cross"},
         {"name":"region",        "type":"B", "info":"region of the cross"},
