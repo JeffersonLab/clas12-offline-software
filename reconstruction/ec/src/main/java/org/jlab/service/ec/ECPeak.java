@@ -79,6 +79,12 @@ public class ECPeak implements Comparable {
         return data;
     }
     
+    public double[] getEnergiesLog(){
+        double[] data = new double[peakStrips.size()];
+        for(int k = 0; k < data.length; k++) data[k] = Math.log(peakStrips.get(k).getEnergy()*1000);
+        return data;
+    }
+    
     public double getEnergy(){
         double energy = 0.0;
         for(ECStrip strip : peakStrips) energy += strip.getEnergy();
