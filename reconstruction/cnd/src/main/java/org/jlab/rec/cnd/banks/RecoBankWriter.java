@@ -22,6 +22,7 @@ public class RecoBankWriter {
         // the bank use cm as distance units -> need to convert from mm
         for(int i =0; i< hitlist.size(); i++) {
             bank.setShort("id",i, (short)(i+1));
+            bank.setShort("status",i, (short)hitlist.get(i).get_status());
             bank.setByte("sector",i, (byte) hitlist.get(i).Sector());
             bank.setByte("layer",i, (byte) hitlist.get(i).Layer());
             bank.setShort("component",i, (short) hitlist.get(i).Component());

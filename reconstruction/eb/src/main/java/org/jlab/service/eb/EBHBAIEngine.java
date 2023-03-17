@@ -8,15 +8,15 @@ import org.jlab.io.base.DataEvent;
  * @author baltzell
  */
 public class EBHBAIEngine extends EBEngine {
-    
+
     // static to store across events:
     static EBScalers ebScalers = new EBScalers();
-    
+
     public EBHBAIEngine(){
         super("EBHBAI");
-        setUsePOCA(true);
+        setUsePOCA(false);
     }
-   
+
     @Override
     public boolean processDataEvent(DataEvent de) {
         return super.processDataEvent(de,ebScalers);
@@ -24,12 +24,13 @@ public class EBHBAIEngine extends EBEngine {
 
     @Override
     public void initBankNames() {
-	this.setOutputBankPrefix("RECHBAI");
+	    this.setOutputBankPrefix("RECHBAI");
 
-	this.setTrackType("HitBasedTrkg::AITracks");
-         this.setFTOFHitsType("FTOF::hbclusters");
+	    this.setTrackType("HitBasedTrkg::AITracks");
+        this.setFTOFHitsType("FTOF::hbclusters");
         this.setCvtTrackType("CVT::Tracks");
         this.setCvtTrajType("CVT::Trajectory");
+        this.setTrajectoryType("HitBasedTrkg::AITrajectory");
     }
     
 }

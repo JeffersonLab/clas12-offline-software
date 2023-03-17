@@ -13,91 +13,113 @@ import org.jlab.io.base.DataEvent;
  */
 public class RingCherenkovResponse extends DetectorResponse {
 
-    private int cluster=0;
-    private int xtalk=0;
+    private int cluster = 0;
+    private int xtalk   = 0;
     
-    public RingCherenkovResponse(){
-        super();
-    }
+    //public RingCherenkovResponse(){
+    //    super();
+    //}
     
-    public RingCherenkovResponse(RingCherenkovResponse r) {
-        super();
-        this.copy(r);
+    public RingCherenkovResponse(int sector, int layer, int component){
+        this.getDescriptor().setSectorLayerComponent(sector, layer, component);
     }
 
-    public RingCherenkovResponse(int sector, int layer, int pmt){
-        this.getDescriptor().setSectorLayerComponent(sector, layer, pmt);
+    public RingCherenkovResponse(RingCherenkovResponse r){
+        this.getDescriptor().setSectorLayerComponent(r.getDescriptor().getSector(), r.getDescriptor().getLayer(), r.getDescriptor().getComponent());
     }
 
-    public void copy(RingCherenkovResponse r) {
-        super.copy(r);
-        cluster = r.cluster;
-        xtalk = r.xtalk;
-    }
+    public int get_cluster(){ return this.cluster;}
+    public int get_xtalk(){ return this.xtalk;}
 
-    public int getCluster(){ return this.cluster;}
-    public int getXtalk(){ return this.xtalk;}
-
-    public void   setCluster(int clu){ this.cluster = clu;}
-    public void   setXtalk(int xt){ this.xtalk = xt;}
+    public void   set_cluster(int cluster){ this.cluster = cluster;}
+    public void   set_xtalk(int xtalk){ this.xtalk = xtalk;}
     
     // ----------------
     public static ArrayList<DetectorResponse>  readHipoEvent(DataEvent event, 
-            String bankName, DetectorType type){        
+            String bankName, DetectorType type, int signal_type){        
     // ----------------
 
         int debugMode = 0;
         ArrayList<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
 
-        if(debugMode==1)System.out.print(" reading bank "+bankName);
+        if(debugMode==1){
+            if(signal_type==0)System.out.format(" reading bank %s for single hits \n", bankName);
+            if(signal_type==1)System.out.format(" reading bank %s for clusters \n", bankName);
+        } 
+
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
             int nrows = bank.rows();
             for(int row = 0; row < nrows; row++){
 
-                int good = 0;
+                int id        = 0;
+                int anode     = 0;
+                int good      = 0;
+                int status    = 0;
                 double energy = 0.0;
-                double time = 0.0;
-                double x = 0.0;
-                double y = 0.0;
-                double z = 0.0;
-                if(bankName.equals("RICH::clusters")){
+                double time   = 0.0;
+                double x      = 0.0;
+                double y      = 0.0;
+                double z      = 0.0;
+
+                if(bankName.equals("RICH::Cluster")){
                     good=1;
-                    if(debugMode>=1)System.out.print(" ---> use clusters and charge \n");
-                    energy = bank.getFloat("charge", row);
-                    time = bank.getFloat("time", row);
-                    x = bank.getFloat("x", row);
-                    y = bank.getFloat("y", row);
-                    z = bank.getFloat("z", row);
+                    id          = bank.getShort("id", row); 
+                    energy      = bank.getFloat("charge", row);
+                    time        = bank.getFloat("time", row);
+                    x           = bank.getFloat("x", row);
+                    y           = bank.getFloat("y", row);
+                    z           = bank.getFloat("z", row);
+                    if(debugMode>=1)System.out.format(" ---> read cluster %4d %4d  %8.2f %8.2f ",row,id,energy,time);
                 }
 
-                if(bankName.equals("RICH::hits")){
-                    int id   = bank.getShort("id", row); 
+                if(bankName.equals("RICH::Hit")){
+                    id          = bank.getShort("id", row); 
                     int cluster = bank.getShort("cluster", row); 
-                    int xtalk = bank.getShort("xtalk", row);
-                    if(cluster==0 && xtalk==0)good=1;
-                    energy = (double) bank.getShort("duration", row);
-                    time = (double) bank.getFloat("time", row);
+                    int xtalk   = bank.getShort("xtalk", row);
+                    status      = bank.getShort("status", row);
+                    anode       = bank.getShort("anode", row);
+                    if((status==0 || status==5) && cluster==0 && xtalk==0)good=1;
+                    energy      = (double) bank.getShort("duration", row);
+                    time        = bank.getFloat("time", row);
+                    x           = bank.getFloat("x", row);
+                    y           = bank.getFloat("y", row);
+                    z           = bank.getFloat("z", row);
+                    if(debugMode>=1)System.out.format(" ---> read hit %4d %4d (%3d %3d %5d --> %3d) %8.2f %8.2f ",
+                        row,id,status,cluster,xtalk,good,energy,time);
+                }
+                if(bankName.equals("RICH::Signal")){
+                    id         = bank.getShort("id", row); 
+                    int hindex = bank.getShort("hindex", row); 
+                    int size   = bank.getShort("size", row); 
+                    status     = bank.getShort("status", row);
+                    if(signal_type == 0 && size==1 ) good=1;
+                    if(signal_type == 1 && size>1 ) good=1;
+                    anode      = bank.getShort("anode", row);
+                    energy     = bank.getFloat("charge", row);
+                    time       = bank.getFloat("time", row);
                     x = bank.getFloat("x", row);
                     y = bank.getFloat("y", row);
                     z = bank.getFloat("z", row);
-                    if(debugMode>=1)System.out.format(" ---> use hits and duration %4d %4d %4d %4d %4d %8.2f %8.2f \n",row,id,cluster,xtalk,good,energy,time);
+                    if(debugMode>=1)System.out.format(" ---> read signal %4d %4d (%3d %5d --> %3d) %8.2f %8.2f ", row,id,hindex,size,good,energy,time);
                 }
 
                 if(good==1){
+
                     int sector = bank.getShort("sector", row);
-                    int layer= 1;  // only one layer used in matching
                     int pmt = bank.getShort("pmt", row);
-                    RingCherenkovResponse  response = new RingCherenkovResponse(sector,layer,pmt);
-                    //response.setHitIndex((int) bank.getShort("id", row));
+                    RingCherenkovResponse  response = new RingCherenkovResponse(sector,pmt,anode);
                     response.setHitIndex(row);
                     response.getDescriptor().setType(type);
                     response.setPosition(x, y, z);
                     response.setTime(time);
                     response.setEnergy(energy);
-                    response.setStatus(1);
+                    response.setStatus(status);
 
                     responseList.add((DetectorResponse) response);
+                    if(debugMode>=1)System.out.format(" save with id %3d \n",response.getHitIndex());
+                }else{
+                    if(debugMode>=1)System.out.format(" ---> rejected \n");
                 }
             }
             return responseList;

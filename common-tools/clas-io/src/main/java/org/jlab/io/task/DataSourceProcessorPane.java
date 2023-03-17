@@ -2,21 +2,18 @@ package org.jlab.io.task;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.TimerTask;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventType;
@@ -33,10 +30,10 @@ import org.jlab.io.ui.DialogUtilities;
  * @author gavalian
  */
 public class DataSourceProcessorPane extends JPanel implements ActionListener {
-    
+
     public static int  TOOLBAR = 1;
     public static int  SQUARE  = 1;
-    
+
     private DataSourceProcessor  dataProcessor = new DataSourceProcessor();
     private String               dataFile      = null;
     private int                  dataPaneStyle = DataSourceProcessorPane.TOOLBAR;
@@ -48,57 +45,44 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
     private JButton              mediaPrev     = null;
     private JButton              mediaEject    = null;
     private JButton              sourceFile    = null;
-    private JButton              sourceEt      = null;
     private int                  eventDelay    = 0;
-    private Color paneBackground               = Color.GRAY;
     public boolean               isHipo3Event  = false;          
     private String               defaultHost   = null;
     private String               defaultIp     = null;    
-    
+
     public DataSourceProcessorPane(){
         super();
         initUI();
     }
-    
+
     public DataSourceProcessorPane(String host, String ip){
         super();
         initUI();
         this.defaultHost = host;
         this.defaultIp   = ip;
     }
-    
+
     private void initUI(){
         
-        ImageIcon playIcon  = new ImageIcon(DataSourceProcessorPane.class.getClassLoader().getResource("icons/media/themes/default/play-20x20.png"));
-        ImageIcon pauseIcon = new ImageIcon(DataSourceProcessorPane.class.getClassLoader().getResource("icons/media/pause_24px.png"));
-        ImageIcon fileIcon  = new ImageIcon(DataSourceProcessorPane.class.getClassLoader().getResource("icons/media/themes/default/etring-20x20.png"));
-
-        //setLayout(new FlowLayout());
         setLayout(new BorderLayout());
         this.setBorder(BorderFactory.createSoftBevelBorder(SoftBevelBorder.RAISED));
         
         sourceFile = new JButton("E");
-        //sourceFile.setIcon(fileIcon);
-        //sourceFile.setPreferredSize(new Dimension(35, 35));
         sourceFile.setActionCommand("OpenFile"); 
         sourceFile.setToolTipText("Open EVIO file.");        
         sourceFile.addActionListener(this);
         
         JButton sourceFileEt = new JButton("Et");
-        //sourceFile.setIcon(fileIcon);
-        //sourceFileEt.setPreferredSize(new Dimension(35, 35));
         sourceFileEt.setActionCommand("OpenFileET");
         sourceFileEt.setToolTipText("Connect to ET ring");        
         sourceFileEt.addActionListener(this);
         
         JButton sourceFileHipo3 = new JButton("H3");
-        //sourceFileHipo.setPreferredSize(new Dimension(35, 35));
         sourceFileHipo3.setActionCommand("OpenFileHipo3");
         sourceFileHipo3.setToolTipText("Open Hipo3 file");
         sourceFileHipo3.addActionListener(this);
         
         JButton sourceFileHipo4 = new JButton("H4");
-        //sourceFileHipo.setPreferredSize(new Dimension(35, 35));
         sourceFileHipo4.setActionCommand("OpenFileHipo4");
         sourceFileHipo4.setToolTipText("Open Hipo4 file");
         sourceFileHipo4.addActionListener(this);        
@@ -106,13 +90,10 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         JButton sourceFileRing = new JButton("HR");
         sourceFileRing.setActionCommand("OpenFileRing");
         sourceFileRing.setToolTipText("Connect to xMsg Hipo ring");
-        //sourceFileRing.setPreferredSize(new Dimension(35, 35));
         sourceFileRing.addActionListener(this);
-        //sourceFile.setBackground(this.paneBackground);
         
         JButton resetListeners = new JButton("Reset");
         resetListeners.setActionCommand("ResetListeners");
-        //resetListeners.setPreferredSize(new Dimension(55, 35));
         resetListeners.setToolTipText("Reset data listeners");
         resetListeners.addActionListener(this);
         
@@ -121,23 +102,15 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
                         
         
         sourcePane.setBorder(BorderFactory.createSoftBevelBorder(SoftBevelBorder.LOWERED));
-        //sourcePane.setBackground(Color.LIGHT_GRAY);
         sourcePane.add(sourceFile);
         sourcePane.add(sourceFileEt);
         sourcePane.add(sourceFileHipo3);
         sourcePane.add(sourceFileHipo4);
-//        sourcePane.add(sourceFileRing);
         sourcePane.add(resetListeners);
-        //this.add(openFile);
-        //this.add(Box.createHorizontalStrut(30));
-        //this.add(mediaPane);
-        
-        //this.add(Box.createHorizontalStrut(30));
         
         statusLabel = new JLabel(dataProcessor.getStatusString());
         statusLabel.setFont(new Font("Avenir",Font.PLAIN,14));
         JPanel  statusLabelPane = new JPanel();
-        //statusLabelPane.setBackground(Color.LIGHT_GRAY);
         statusLabelPane.setLayout(new BorderLayout());
         statusLabelPane.setBorder(BorderFactory.createSoftBevelBorder(SoftBevelBorder.LOWERED));
         statusLabelPane.add(statusLabel,BorderLayout.CENTER);
@@ -147,7 +120,11 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         this.add(mediaPane,BorderLayout.LINE_START);
         this.add(sourcePane,BorderLayout.LINE_END);
     }
-    
+ 
+    public void setVerbose(boolean flag){
+        this.dataProcessor.setVerbose(flag);
+    }
+
     public void setDelay(int delay){
         this.dataProcessor.setDelay(delay);
         this.eventDelay = delay;
@@ -177,8 +154,6 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         mediaPause = new JButton();
         
         mediaPause.setIcon(pauseIcon);        
-        //mediaPause.setContentAreaFilled(false);
-        //mediaPause.setOpaque(true);
         mediaPause.setActionCommand("PauseFile");
         mediaPause.addActionListener(this);
         mediaPause.setEnabled(false);
@@ -190,10 +165,8 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         mediaPlay.addActionListener(this);
         mediaPlay.setEnabled(false);
         
-        //mediaPlay.setBorderPainted(false); 
         mediaPlay.setContentAreaFilled(false); 
         mediaPlay.setFocusPainted(false); 
-        //mediaPlay.setOpaque(false);
         
         mediaNext = new JButton();
         mediaNext.setIcon(nextIcon);
@@ -221,7 +194,19 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
 
         return mediaPane;
     }
-    
+
+    public void connectAndRun(String ip,String port,String file) {
+        EvioETSource source = new EvioETSource(ip,port);
+        source.open(file);
+        this.dataProcessor.setSource(source);
+        this.setDataFile(null);
+        mediaPlay.setEnabled(false);
+        mediaPause.setEnabled(true);
+        mediaNext.setEnabled(true);
+        mediaPrev.setEnabled(true);
+        this.startProcessorTimer();
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         System.out.println("[action] --> " + e.getActionCommand());
@@ -244,7 +229,14 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         if(e.getActionCommand().compareTo("PlayNext")==0){
             this.dataProcessor.processNextEvent();
         }
+
         if(e.getActionCommand().compareTo("OpenFileET")==0){
+
+            if(this.processTimer!=null){
+                this.processTimer.cancel();
+                this.processTimer = null;
+            }
+
             ConnectionDialog dialog = new ConnectionDialog(this.defaultHost, this.defaultIp);
             dialog.setVisible(true);
             if(dialog.reason()==DialogUtilities.OK_RESPONSE){
@@ -268,7 +260,7 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
                 this.processTimer.cancel();
                 this.processTimer = null;
             }
-            
+
             JFileChooser fc = new JFileChooser();
             fc.setCurrentDirectory(null);
             int returnVal = fc.showOpenDialog(this);
@@ -284,12 +276,9 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
                 mediaPrev.setEnabled(true);
                 mediaPlay.setEnabled(true);
                 this.setDataFile(fileName);
-            } else {
-                
             }
         }
-        
-        
+
         if(e.getActionCommand().compareTo("ResetListeners")==0){
             System.out.println("\n   >>>> resetting all listeners");
             for(IDataEventListener listener : this.dataProcessor.getEventListeners()){
@@ -300,7 +289,14 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
                 }
             }
         }
+
         if(e.getActionCommand().compareTo("OpenFileRing")==0){
+
+            if(this.processTimer!=null){
+                this.processTimer.cancel();
+                this.processTimer = null;
+            }
+
             HipoRingSource source = HipoRingSource.createSource();
             
             this.dataProcessor.setSource(source);
@@ -366,16 +362,9 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
     }
     
     private void startProcessorTimer(){
-        //System.out.println(" starting timer ");
         class CrunchifyReminder extends TimerTask {
             boolean hasFinished = false;
             public void run() {
-                //dataProcessor.processNextEvent(0, DataEventType.EVENT_START);
-                /*if(hasFinished==true){
-                    dataProcessor.processNextEvent(0, DataEventType.EVENT_STOP);
-                    return;
-                }*/
-                //System.out.println("running");
                 for (int i=1 ; i<=50 ; i++) {
                     boolean status = dataProcessor.processNextEvent(eventDelay,DataEventType.EVENT_ACCUMULATE);
                     if(status==false&&hasFinished==false){

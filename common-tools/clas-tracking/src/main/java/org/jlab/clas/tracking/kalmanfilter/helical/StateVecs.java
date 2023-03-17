@@ -102,7 +102,7 @@ public class StateVecs extends AStateVecs {
             else {
                 swim.SetSwimParameters(sv.x/units.value(), sv.y/units.value(), sv.z/units.value(), 
                                    dir*sv.px, dir*sv.py, dir*sv.pz, 
-                                   KFitter.polarity*(int) Math.signum(sv.kappa)*dir);
+                                   KFitter.polarity*(int) Math.signum(sv.kappa)*dir); 
                 if(mv.surface.plane!=null) {
                     Vector3D norm = mv.surface.plane.normal();
                     Point3D point = new Point3D(mv.surface.plane.point().x()/units.value(),

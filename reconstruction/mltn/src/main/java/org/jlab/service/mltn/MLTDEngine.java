@@ -4,8 +4,6 @@ import j4ml.clas12.ejml.ArchiveProvider;
 import j4ml.clas12.ejml.EJMLTrackNeuralNetwork;
 import j4ml.clas12.network.Clas12TrackFinder;
 import j4ml.clas12.tracking.ClusterCombinations;
-import java.io.File;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +23,10 @@ public class MLTDEngine extends ReconstructionEngine {
     EJMLTrackNeuralNetwork       network = null;
     private String         networkFlavor = "default";
     private Integer           networkRun = 5038;
+    private String       inputBankPrefix = "";
+    private String      outputBankPrefix = "ai";
+    private String             inputBank = null;
+    private String            outputBank = null;
     
     public MLTDEngine(){
         super("MLTD","gavalian","1.0");
@@ -32,6 +34,12 @@ public class MLTDEngine extends ReconstructionEngine {
     
     @Override
     public boolean init() {
+        
+        //Set bank names
+        inputBankPrefix  = Optional.ofNullable(this.getEngineConfigString("inputBankPrefix")).orElse("");
+        outputBankPrefix = Optional.ofNullable(this.getEngineConfigString("outputBankPrefix")).orElse("ai");
+        inputBank  = "HitBasedTrkg::"+inputBankPrefix+"Clusters";
+        outputBank = outputBankPrefix+"::tracks";
         
         networkFlavor = Optional.ofNullable(this.getEngineConfigString("flavor")).orElse("default");
         String runNumber = Optional.ofNullable(this.getEngineConfigString("run")).orElse("5038");
@@ -73,8 +81,8 @@ public class MLTDEngine extends ReconstructionEngine {
 
     @Override
     public boolean processDataEvent(DataEvent de) {
-        if(de.hasBank("HitBasedTrkg::Clusters")==true){
-            DataBank bank = de.getBank("HitBasedTrkg::Clusters");
+        if(de.hasBank(inputBank)==true){
+            DataBank bank = de.getBank(inputBank);
                         
             HipoDataBank hipoBank = (HipoDataBank) bank;
                         
@@ -100,7 +108,7 @@ public class MLTDEngine extends ReconstructionEngine {
     public void writeBank(DataEvent event, ClusterCombinations combi){
         //ClusterCombinations combi = cl.getTracks();
         //System.out.println(">>> writing ai bank with entries = " + combi.getSize());        
-        DataBank bank = event.createBank("ai::tracks", combi.getSize());
+        DataBank bank = event.createBank(outputBank, combi.getSize());
         for(int i = 0; i < combi.getSize(); i++){
             bank.setByte("id", i, (byte) (i+1));
             bank.setByte("sector", i, (byte) 1);
@@ -113,7 +121,7 @@ public class MLTDEngine extends ReconstructionEngine {
             }
         }
         //System.out.println("appending bank");
-        event.removeBank("ai::tracks");
+        event.removeBank(outputBank);
         event.appendBank(bank);
     }
 

@@ -10,6 +10,7 @@ import org.jlab.detector.base.DetectorType;
 
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
+import org.jlab.detector.geom.RICH.RICHGeoFactory;
 import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
@@ -20,6 +21,7 @@ import org.jlab.geom.detector.ec.ECLayer;
 import org.jlab.geom.detector.ec.ECSuperlayer;
 import org.jlab.geom.detector.fmt.FMTLayer;
 import org.jlab.geom.prim.Plane3D;
+import org.jlab.geom.prim.Trap3D;
 import org.jlab.geom.prim.Triangle3D;
 
 /**
@@ -44,7 +46,7 @@ public class TrajectorySurfaces {
     }
 
     public void loadSurface(double targetPosition, double targetLength, DCGeant4Factory dcDetector,
-            FTOFGeant4Factory ftofDetector, Detector ecalDetector, Detector fmtDetector) {
+            FTOFGeant4Factory ftofDetector, Detector ecalDetector, Detector fmtDetector, RICHGeoFactory richDetector) {
         // creating Boundaries for MS
         Constants.getInstance().Z[0]= targetPosition;
         Constants.getInstance().Z[1]= dcDetector.getWireMidpoint(0, 0, 0, 0).z;
@@ -108,6 +110,17 @@ public class TrajectorySurfaces {
                 ECLayer      ecalLayer      = (ECLayer) ecalSuperlayer.getLayer(layer);
                 this.detectorPlanes.get(isector).add(new Surface(DetectorType.ECAL, sector, id, (Triangle3D) ecalLayer.getTrajectorySurface(), ecalSuperlayer.getThickness()));
             }
+
+            // Add RICH
+            int[] richLayers = {DetectorLayer.RICH_MAPMT, DetectorLayer.RICH_AEROGEL_B1, DetectorLayer.RICH_AEROGEL_B2, DetectorLayer.RICH_AEROGEL_L1};
+            for(int i=0; i<richLayers.length; i++) {
+                Trap3D surf = richDetector.get_TrajectorySurface(sector, richLayers[i]);
+                double thick = richDetector.get_TrajectoryThickness(sector,richLayers[i]);
+                if(surf!=null) {
+                    this.detectorPlanes.get(isector).add(new Surface(DetectorType.RICH, sector, richLayers[i], surf, thick));
+                }
+            }
+
         }
     }
     

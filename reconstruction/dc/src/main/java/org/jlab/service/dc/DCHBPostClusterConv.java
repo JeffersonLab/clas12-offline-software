@@ -231,6 +231,7 @@ public class DCHBPostClusterConv extends DCEngine {
         }
         
         //gather all the hits for pointer bank creation
+        trkId=1;
         for (Track trk : trkcands) {
             trk.calcTrajectory(trk.getId(), dcSwim, trk.get_Vtx0(), trk.get_pAtOrig(), trk.get_Q());
             for (Cross c : trk) {
@@ -240,14 +241,19 @@ public class DCHBPostClusterConv extends DCEngine {
                 for (FittedHit h1 : c.get_Segment1()) {
 //                        h1.setSignalPropagTimeAlongWire(dcDetector); //PASS1, not necessary because hits were already updated in trkcandFinder.matchHits
 //                        h1.setSignalTimeOfFlight();                  //PASS1
-                    if(h1.get_AssociatedHBTrackID()>0) fhits.add(h1);
+                    h1.set_AssociatedHBTrackID(trkId);
+                    if(h1.get_AssociatedHBTrackID()>0) 
+                    fhits.add(h1); 
                 }
                 for (FittedHit h2 : c.get_Segment2()) {
 //                        h2.setSignalPropagTimeAlongWire(dcDetector); //PASS1
 //                        h2.setSignalTimeOfFlight();                  //PASS1
-                    if(h2.get_AssociatedHBTrackID()>0) fhits.add(h2);
+                    h2.set_AssociatedHBTrackID(trkId);
+                    //if(h2.get_AssociatedHBTrackID()>0) 
+                    fhits.add(h2); 
                 }
             }
+            trkId++;
         }
         
         // no candidate found, stop here and save the hits,

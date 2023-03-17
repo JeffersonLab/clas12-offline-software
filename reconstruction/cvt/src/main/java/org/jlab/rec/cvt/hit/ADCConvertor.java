@@ -36,29 +36,10 @@ public class ADCConvertor {
         Random random = new Random();
         random.setSeed(42);
 
-        int daq = returnRandomInteger(START[adc], END[adc], random);
+        //int daq = returnRandomInteger(START[adc], END[adc], random);
+        //double value = (double) daq;
+        double value = (double) 0.5*(END[adc]+START[adc]);
         
-        double value = (double) daq;
-        /* 
-        if(event.hasBank("MC::Particle")==true) {
-        	//This is how GEMC sets the adc:
-        	// the energy deposited from a mip is 80 KeV
-        	// The max value of the ADC is 2.5V
-        	// We set for now 3 values of mip inside the 2.5V.
-        	// So ~250 KeV = 2.5V, or 0.10 MeV = 1 Volt.
-        	//double maxV = 2.5;
-        	//double etoV = 0.1;
-        	//double vout = tInfos.eTot/etoV;
-        	//double vrat = vout / maxV;
-        	//int adc     = floor(vrat*8);
-        	//if(adc >7) adc = 7;
-        	double maxV = 2.5;
-        	double etoV = 0.1;
-        	
-        	value = ((double)(adc+0.5)*etoV*maxV/8); // center of bin to avoid zero value
-                
-        }  */
-      
         return value;
     }
 

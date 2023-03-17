@@ -331,7 +331,8 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
             bank.setShort("id", i, (short) candlist.get(i).get_Id());
             bank.setByte("sector", i, (byte) candlist.get(i).getSector());
             bank.setByte("q", i, (byte) candlist.get(i).get_Q());
-            bank.setShort("status", i, (short) (100+candlist.get(i).get_Status()*10+candlist.get(i).get_MissingSuperlayer()));
+            //bank.setShort("status", i, (short) (100+candlist.get(i).get_Status()*10+candlist.get(i).get_MissingSuperlayer()));
+            bank.setShort("status", i, (short) candlist.get(i).getBitStatus());
             if(candlist.get(i).get_PreRegion1CrossPoint()!=null) {
                 bank.setFloat("c1_x", i, (float) candlist.get(i).get_PreRegion1CrossPoint().x());
                 bank.setFloat("c1_y", i, (float) candlist.get(i).get_PreRegion1CrossPoint().y());
@@ -701,7 +702,8 @@ public DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist
         DataBank bank = event.createBank(name, candlist.size());
         for (int i = 0; i < candlist.size(); i++) {
             bank.setShort("id", i, (short) candlist.get(i).get_Id());
-            bank.setShort("status", i, (short) (100+candlist.get(i).get_Status()*10+candlist.get(i).get_MissingSuperlayer()));
+            //bank.setShort("status", i, (short) (100+candlist.get(i).get_Status()*10+candlist.get(i).get_MissingSuperlayer()));
+            bank.setShort("status", i, (short) candlist.get(i).getBitStatus());
             bank.setByte("sector", i, (byte) candlist.get(i).getSector());
             bank.setByte("q", i, (byte) candlist.get(i).get_Q());
             //bank.setFloat("p", i, (float) candlist.get(i).get_P());

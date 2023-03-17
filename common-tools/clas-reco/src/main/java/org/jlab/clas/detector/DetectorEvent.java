@@ -25,7 +25,6 @@ public class DetectorEvent {
     }
    
     public void sort() {
-        System.err.println("DetectorEvent:  Not ready for sorting!!!!!!!!!");
         Collections.sort(particleList);
         setAssociation();
     }
@@ -75,7 +74,8 @@ public class DetectorEvent {
         this.eventHeader = eventHeader;
     }
     
-    public void addParticle(DetectorParticle particle){        
+    public void addParticle(DetectorParticle particle){
+        particle.getTrack().setAssociation(this.particleList.size());
         this.particleList.add(particle);
     }
     
@@ -176,6 +176,7 @@ public class DetectorEvent {
                     r.addAssociation(index);
                 }
             }
+            particleList.get(index).getTrack().setAssociation(index);
         }
     }
 
@@ -195,7 +196,7 @@ public class DetectorEvent {
         }
         return null;
     }
-    
+
     @Override
     public String toString(){
         StringBuilder str = new StringBuilder();

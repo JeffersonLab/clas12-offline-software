@@ -10,6 +10,7 @@ import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
+import org.jlab.rec.dc.Constants;
 
 /**
  * The crosses are objects used to find tracks and are characterized by a 3-D
@@ -46,10 +47,7 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
     private Segment _seg1;
     private Segment _seg2;
     public boolean isPseudoCross = false;
-    
-    private final double cos_tilt = FastMath.cos(Math.toRadians(25.));
-    private final double sin_tilt = FastMath.sin(Math.toRadians(25.));
-    
+       
     public int recalc;
     /**
      *
@@ -261,7 +259,7 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
         //double z = GeometryLoader.dcDetector.getSector(0).getRegionMiddlePlane(this.get_Region()-1).point().z();
         double z = DcDetector.getRegionMidpoint(this.get_Region() - 1).z;
 
-        double wy_over_wx = (Math.cos(Math.toRadians(6.)) / Math.sin(Math.toRadians(6.)));
+        double wy_over_wx = Constants.CTAN6;
         double val_sl1 = this._seg1.get_fittedCluster().get_clusterLineFitSlope();
         double val_sl2 = this._seg2.get_fittedCluster().get_clusterLineFitSlope();
         double val_it1 = this._seg1.get_fittedCluster().get_clusterLineFitIntercept();
@@ -344,9 +342,9 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
      * @return rotated coords from tilted sector coordinate system to the sector
      * coordinate system
      */
-    public Point3D getCoordsInSector(double X, double Y, double Z) {
-        double rz = -X * sin_tilt + Z * cos_tilt;
-        double rx = X * cos_tilt + Z * sin_tilt;
+    public Point3D getCoordsInSector(double X, double Y, double Z) {        
+        double rz = -X * Constants.SIN25 + Z * Constants.COS25;
+        double rx = X * Constants.COS25 + Z * Constants.SIN25;
 
         return new Point3D(rx, Y, rz);
     }
@@ -360,19 +358,19 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
      * frame
      */
     public Point3D getCoordsInLab(double X, double Y, double Z) {
-        Point3D PointInSec = this.getCoordsInSector(X, Y, Z);
-        double rx = PointInSec.x() * FastMath.cos((this.get_Sector() - 1) * Math.toRadians(60.)) - PointInSec.y() * FastMath.sin((this.get_Sector() - 1) * Math.toRadians(60.));
-        double ry = PointInSec.x() * FastMath.sin((this.get_Sector() - 1) * Math.toRadians(60.)) + PointInSec.y() * FastMath.cos((this.get_Sector() - 1) * Math.toRadians(60.));
+        Point3D PointInSec = this.getCoordsInSector(X, Y, Z);                
+        double rx = PointInSec.x() * Constants.COSSECTOR60[this.get_Sector() - 1] - PointInSec.y() * Constants.SINSECTOR60[this.get_Sector() - 1];
+        double ry = PointInSec.x() * Constants.SINSECTOR60[this.get_Sector() - 1] + PointInSec.y() * Constants.COSSECTOR60[this.get_Sector() - 1];
 
         return new Point3D(rx, ry, PointInSec.z());
     }
     
-    public Point3D getCoordsInTiltedSector(double X, double Y, double Z) {
-        double rx = X * FastMath.cos((this.get_Sector() - 1) * Math.toRadians(-60.)) - Y * FastMath.sin((this.get_Sector() - 1) * Math.toRadians(-60.));
-        double ry = X * FastMath.sin((this.get_Sector() - 1) * Math.toRadians(-60.)) + Y * FastMath.cos((this.get_Sector() - 1) * Math.toRadians(-60.));
-       
-        double rtz = rx * sin_tilt + Z * cos_tilt;
-        double rtx = rx * cos_tilt - Z * sin_tilt;
+    public Point3D getCoordsInTiltedSector(double X, double Y, double Z) {        
+        double rx = X * Constants.COSSECTORNEG60[this.get_Sector() - 1] - Y * Constants.SINSECTORNEG60[this.get_Sector() - 1];
+        double ry = X * Constants.SINSECTORNEG60[this.get_Sector() - 1] + Y * Constants.COSSECTORNEG60[this.get_Sector() - 1];
+               
+        double rtz = rx * Constants.SIN25 + Z * Constants.COS25;
+        double rtx = rx * Constants.COS25 - Z * Constants.SIN25;
          
         return new Point3D(rtx, ry, rtz);
     }
@@ -405,7 +403,7 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
      */
 
     public void set_CrossDirIntersSegWires() {
-        double wy_over_wx = (FastMath.cos(Math.toRadians(6.)) / FastMath.sin(Math.toRadians(6.)));
+        double wy_over_wx = Constants.CTAN6;
         double val_sl1 = this._seg1.get_fittedCluster().get_clusterLineFitSlope();
         double val_sl2 = this._seg2.get_fittedCluster().get_clusterLineFitSlope();
         double val_it1 = this._seg1.get_fittedCluster().get_clusterLineFitIntercept();

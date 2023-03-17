@@ -2,7 +2,7 @@ package org.jlab.rec.cvt.services;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import org.jlab.clas.pdg.PDGDatabase;
 import java.util.Map;
 import java.util.HashMap;
 import org.jlab.rec.cvt.trajectory.Helix;
@@ -21,11 +21,16 @@ import org.jlab.rec.cvt.track.StraightTrack;
 import org.jlab.rec.cvt.track.StraightTrackSeeder;
 import org.jlab.rec.cvt.track.StraightTrackCandListFinder;
 import org.jlab.rec.cvt.track.TrackSeeder;
-import org.jlab.rec.cvt.track.TrackSeederCA;
+//import org.jlab.rec.cvt.track.TrackSeederCA;
+import org.jlab.rec.cvt.track.TrackSeederSVTLinker;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map.Entry;
+import org.jlab.clas.tracking.kalmanfilter.AKFitter;
+import org.jlab.clas.tracking.kalmanfilter.Surface;
+import org.jlab.clas.tracking.kalmanfilter.Units;
+import org.jlab.clas.tracking.kalmanfilter.helical.KFitter;
 import org.jlab.detector.base.DetectorType;
 
 import org.jlab.io.base.DataBank;
@@ -35,6 +40,7 @@ import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.cross.CrossMaker;
 import org.jlab.rec.cvt.fit.CircleFitPars;
 import org.jlab.rec.cvt.fit.CircleFitter;
+import org.jlab.rec.cvt.measurement.Measurements;
 import org.jlab.rec.cvt.svt.SVTGeometry;
 import org.jlab.rec.cvt.svt.SVTParameters;
 import org.jlab.rec.cvt.trajectory.Ray;
@@ -47,6 +53,41 @@ import org.jlab.rec.cvt.trajectory.Ray;
  */
 public class RecUtilities {
 
+     public void CleanupSpuriousSVTCrosses(List<Cross> crosses, List<Track> trks) {
+        List<Cross> rmCrosses = new ArrayList<>();
+        
+        for(Cross c : crosses) {
+            if(!Geometry.getInstance().getSVT().isInFiducial(c.getCluster1().getLayer(), c.getSector(), c.getPoint()))
+                rmCrosses.add(c);
+        }
+       
+        
+        for(int j = 0; j<crosses.size(); j++) {
+            for(Cross c : rmCrosses) {
+                if(crosses.get(j).getId()==c.getId())
+                    crosses.remove(j);
+            }
+        } 
+        
+       
+//        if(trks!=null && rmCrosses!=null) {
+//            List<Cross> rmFromTrk = new ArrayList<>();
+//            for(Track t:trks) {
+//                //boolean rmFlag=false;
+//                for(Cross c: rmCrosses) {
+//                    if(c!=null && t!=null && c.getAssociatedTrackID()==t.getId())
+//                        rmFromTrk.add(c);
+//                }
+//                t.removeAll(rmFromTrk);
+//                //if(rmFlag==true)
+//                //    rmFromTrk.add(t);
+//            }
+//            // RDV why removing the whole track?
+//           // trks.removeAll(rmFromTrk);
+//        }
+    }
+    
+    
     public void CleanupSpuriousCrosses(List<ArrayList<Cross>> crosses, List<Track> trks) {
         List<Cross> rmCrosses = new ArrayList<>();
         
@@ -108,7 +149,8 @@ public class RecUtilities {
         
         
         for(Cluster cluster : clsList) {
-            clusterMap.put(SVTGeometry.getModuleId(cluster.getLayer(), cluster.getSector()), cluster);
+            if(cluster.size()<=Constants.getInstance().getSvtmaxclussize()) 
+                clusterMap.put(SVTGeometry.getModuleId(cluster.getLayer(), cluster.getSector()), cluster);
         }  
         
         // for each layer
@@ -157,68 +199,61 @@ public class RecUtilities {
     }
     
     public List<Cluster> findClustersOnTrk(List<Cluster> allClusters, 
-            List<Cluster> seedCluster, Helix helix, double P, int Q, Swim swimmer) { 
-        // initialize swimmer starting from the track vertex
-        double maxPathLength = 1; 
-        Point3D vertex = helix.getVertex();
-        swimmer.SetSwimParameters(vertex.x()/10, vertex.y()/10, vertex.z()/10, 
-                     Math.toDegrees(helix.getPhiAtDCA()), Math.toDegrees(Math.acos(helix.cosTheta())),
-                     P, Q, maxPathLength) ;
-        double[] inters = null;
-
+            List<Cluster> seedCluster, Track trk, Swim swimmer) { 
+        Map<Integer, AKFitter.HitOnTrack> trj = trk.getKFTrajectories();
+        //make a map to get the traj at the layers
+        Map<Integer, AKFitter.HitOnTrack> trj2 = new HashMap<>();
+        for (Map.Entry<Integer, AKFitter.HitOnTrack> entry : trj.entrySet()) {
+            if(entry.getKey()>3 && entry.getKey()<10) {
+                if(entry.getValue().layer!=0) {
+                    trj2.put(entry.getValue().layer, entry.getValue());
+                   
+                }
+            }
+        }
         // load SVT clusters that are in the seed
         Map<Integer,Cluster> clusterMap = new HashMap<>();
         for(Cluster cluster : seedCluster) {
             if(cluster.getDetector() == DetectorType.BMT)
                 continue;
-            clusterMap.put(SVTGeometry.getModuleId(cluster.getLayer(), cluster.getSector()), cluster);
+            if(cluster.size()<=Constants.getInstance().getSvtmaxclussize()) 
+                clusterMap.put(SVTGeometry.getModuleId(cluster.getLayer(), cluster.getSector()), cluster);
         }   
         
         // for each layer
         for (int ilayer = 0; ilayer < SVTGeometry.NLAYERS; ilayer++) {
             int layer = ilayer + 1;
-
-            // identify the sector the track may be going through (this doesn't account for misalignments
-            Point3D helixPoint = helix.getPointAtRadius(SVTGeometry.getLayerRadius(layer));
-            
-            // reinitilize swimmer from last surface
-            if(inters!=null) {
-                swimmer.SetSwimParameters(inters[0], inters[1], inters[2], inters[3], inters[4], inters[5], Q);
-            }
             
             for(int isector=0; isector<SVTGeometry.NSECTORS[ilayer]; isector++) {
                 int sector = isector+1;
                 
-                // check the angle between the trajectory point and the sector 
-                // and skip sectors that are too far (more than the sector angular coverage)
-                Vector3D n = Geometry.getInstance().getSVT().getNormal(layer, sector);
-                double deltaPhi = Math.acos(helixPoint.toVector3D().asUnit().dot(n));
-                double buffer = Math.toRadians(1.);
-                if(Math.abs(deltaPhi)>2*Math.PI/SVTGeometry.NSECTORS[ilayer]+buffer) continue;
+                // calculate trajectory
+                Point3D trajPoint = null;
+                
+                
+                if(trj2.containsKey(layer))  {
+                    if(trj2.get(layer).sector == sector) {
+                        trajPoint = new Point3D(trj2.get(layer).x,trj2.get(layer).y,trj2.get(layer).z);
+                    }
+                }
                 
                 int key = SVTGeometry.getModuleId(layer, sector);
                 
-                // calculate trajectory
-                Point3D traj = null;
-                Point3D  p = Geometry.getInstance().getSVT().getModule(layer, sector).origin();
-                Point3D pm = new Point3D(p.x()/10, p.y()/10, p.z()/10);
-                inters = swimmer.SwimPlane(n, pm, Constants.DEFAULTSWIMACC/10);
-                if(inters!=null) {
-                    traj = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
-                } 
+                
+                 
                 // if trajectory is valid, look for missing clusters
-                if(traj!=null && Geometry.getInstance().getSVT().isInFiducial(layer, sector, traj)) {
+                if(trajPoint!=null && Geometry.getInstance().getSVT().isInFiducial(layer, sector, trajPoint)) {
                     double  doca    = Double.POSITIVE_INFINITY; 
                     //if(clusterMap.containsKey(key)) {
                     //    Cluster cluster = clusterMap.get(key);
-                    //    doca = cluster.residual(traj); 
+                    //    doca = cluster.residual(trajPoint); 
                     //}
                     // loop over all clusters in the same sector and layer that are noy associated to s track
-                    for(Cluster cls : allClusters) {
-                        if(cls.getAssociatedTrackID()==-1 && cls.getSector()==sector && cls.getLayer()==layer) {
-                            double clsDoca = cls.residual(traj); 
-                            // save the ones that have better doca
-                            if(Math.abs(clsDoca)<Math.abs(doca) && Math.abs(clsDoca)<10*cls.size()*cls.getSeedStrip().getPitch()/Math.sqrt(12)) {
+                    for(Cluster cls : allClusters) { 
+                        if(cls.getAssociatedTrackID()==-1 && cls.getSector()==sector && cls.getLayer()==layer) { 
+                            double clsDoca = cls.residual(trajPoint); 
+                            // save the ones that have better doca 
+                            if(Math.abs(clsDoca)<Math.abs(doca) && Math.abs(clsDoca)<SVTParameters.TOCLUSN*cls.getSeedStrip().getPitch()/Math.sqrt(12)) {
                                 if(clusterMap.containsKey(key) && clusterMap.get(key).getAssociatedTrackID()==-1) {
                                     clusterMap.replace(key, cls); 
                                 } else {
@@ -470,8 +505,8 @@ public class RecUtilities {
     
     //RDV: to be checked: causes track crosses to be overwritten
     @Deprecated
-    public List<Seed> reFit(List<Seed> seedlist, Swim swimmer,  TrackSeederCA trseed,  TrackSeeder trseed2, double xb, double yb) {
-        trseed = new TrackSeederCA(swimmer, xb, yb);
+    public List<Seed> reFit(List<Seed> seedlist, Swim swimmer,  TrackSeederSVTLinker trseed,  TrackSeeder trseed2, double xb, double yb) {
+        trseed = new TrackSeederSVTLinker(swimmer, xb, yb);
         trseed2 = new TrackSeeder(swimmer, xb, yb);
         List<Seed> filtlist = new ArrayList<>();
         if(seedlist==null)
@@ -487,7 +522,7 @@ public class RecUtilities {
         return filtlist;
     }
     
-    public List<Seed> reFitSeed(Seed bseed, Swim swimmer,  TrackSeederCA trseed,  TrackSeeder trseed2) {
+    public List<Seed> reFitSeed(Seed bseed, Swim swimmer,  TrackSeederSVTLinker trseed,  TrackSeeder trseed2) {
         boolean pass = true;
 
         List<Cross> refib = new ArrayList<>();
@@ -747,7 +782,7 @@ public class RecUtilities {
                             this_cross = c;
                     }
                     if(this_cross==null) {
-                        System.out.print("Found NNNNNNNNNNNNNNNNNNNNNNew cross");
+                        //System.out.print("Found NNNNNNNNNNNNNNNNNNNNNNew cross");
                         // define new cross 
                         this_cross = new Cross(DetectorType.BST, BMTType.UNDEFINED, cl1.getSector(), cl1.getRegion(), allCrosses.size()+1);
                         this_cross.setOrderedRegion(cl1.getRegion());
@@ -769,13 +804,138 @@ public class RecUtilities {
                         this_cross.setAssociatedTrackID(track.getSeed().getClusters().get(0).getAssociatedTrackID());
                     }
                     this_cross.setAssociatedTrackID(track.getSeed().getClusters().get(0).getAssociatedTrackID());
-                    crosses.add(this_cross);
+                    crosses.add(this_cross); 
                 }
             }
         }
         return crosses;
     }
+
+    public static void getUniqueSeedList(List<Seed> seeds) {
+        List<Seed> dupl = new ArrayList<>();
+        Map<Double, Seed> seedmap = new HashMap<>();
+        for(Seed s : seeds) {
+            double key = getTrackKey(s); 
+            if(Double.isNaN(key)) {
+                dupl.add(s);
+            } else {
+                if(seedmap.containsKey(key)) {
+                    dupl.add(s); 
+                } else {
+                    seedmap.put(key, s);
+                }
+            }
+        }
+        seeds.removeAll(dupl);
+    }
+
+    public static List<Seed> getOverlappingSeedList(List<Seed> seeds) {
+        List<Seed> dupl = new ArrayList<>();
+        Map<Double, Seed> seedmap = new HashMap<>();
+        for(Seed s : seeds) {
+            double key = getTrackKey(s); 
+            if(Double.isNaN(key)) {
+                dupl.add(s);
+            } else {
+                if(seedmap.containsKey(key)) {
+                    dupl.add(s); 
+                } else {
+                    seedmap.put(key, s);
+                }
+            }
+        }
+        return dupl;
+    }
     
-    
-    
+    static double getTrackKey(Seed s) {
+        List<Cross> crs = s.getCrosses();
+        double x = 0;
+        double y = 0;
+        double z = 0;
+        for(Cross c : crs) {
+            if(!Double.isNaN(c.getPoint0().x()))
+                x+=c.getPoint0().x();
+            if(!Double.isNaN(c.getPoint0().y()))
+                y+=c.getPoint0().y();
+            if(!Double.isNaN(c.getPoint0().z()))
+                z+=c.getPoint0().z();
+        }
+        x/=crs.size();
+        y/=crs.size();
+        z/=crs.size();
+        return new Vector3D(x,y,z).mag();
+    }
+
+    Track recovTrkMisClusSearch(Seed seed, org.jlab.clas.tracking.trackrep.Helix hlx, double[][] cov, KFitter kf2, KFitter kf, int pid, 
+            List<Surface> surfaces, double xb, double yb, List<Cluster> SVTclusters, List<Cross> SVTcrosses, 
+            Swim swimmer, double solenoidScale, double solenoidValue, Measurements measure) {
+
+        if(Constants.getInstance().seedingDebugMode) System.out.println("TRACK RECOVERY");
+        kf2.init(hlx, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid));
+        kf2.runFitter();
+        if(kf2.getHelix()==null)  
+            return null;
+        Track fittedTrack = new Track(seed, kf2, pid); 
+//        fittedTrack.setStatus(-1);
+        if(Constants.getInstance().seedingDebugMode) System.out.println("RECOVERED..."+fittedTrack.toString());
+        for(Cross c : fittedTrack) { 
+            if(c.getDetector()==DetectorType.BST) {
+                c.getCluster1().setAssociatedTrackID(0);
+                c.getCluster2().setAssociatedTrackID(0);
+            }
+        }
+        //refit adding missing clusters
+        List<Cluster> clsOnTrack = this.findClustersOnTrk(SVTclusters, seed.getClusters(), fittedTrack, swimmer); //VZ: finds missing clusters; RDV fix 0 error
+        List<Cross> crsOnTrack = this.findCrossesFromClustersOnTrk(SVTcrosses, clsOnTrack, fittedTrack);
+
+        if(clsOnTrack.size()>0) {
+            seed.add_Clusters(clsOnTrack);
+        }
+        seed.getClusters().sort(Comparator.comparing(Cluster::getTlayer));
+        if(crsOnTrack.size()>0) {
+            seed.add_Crosses(crsOnTrack);
+        }
+
+        //Collections.sort(seed.getClusters());
+        //Collections.sort(seed.getCrosses());
+
+        seed.fit(3, xb, yb, solenoidValue);
+
+        //reset pars
+        Point3D v = seed.getHelix().getVertex();
+        Vector3D p = seed.getHelix().getPXYZ(solenoidValue);
+
+        int charge = (int) (Math.signum(solenoidScale)*seed.getHelix().getCharge());
+        if(solenoidValue<0.001)
+            charge = 1;
+
+        org.jlab.clas.tracking.trackrep.Helix hlx2 = new org.jlab.clas.tracking.trackrep.Helix(v.x(),v.y(),v.z(),p.x(),p.y(),p.z(), charge,
+                        solenoidValue, xb, yb, Units.MM);
+        surfaces.clear();
+        surfaces = measure.getMeasurements(seed); 
+        kf.init(hlx2, cov, xb, yb, 0, surfaces, PDGDatabase.getParticleMass(pid)) ;
+        kf.runFitter();
+        if(Constants.getInstance().seedingDebugMode) System.out.println("Seed with searched clusters "+seed.toString());
+        if(Constants.getInstance().seedingDebugMode)
+        System.out.println("KF status ... failed "+kf.setFitFailed+" ndf "+kf.NDF+" helix "+kf.getHelix());
+        if (kf.setFitFailed == false && kf.NDF>0 && kf.getHelix()!=null) { 
+            fittedTrack = new Track(seed, kf, pid);
+            if(Constants.getInstance().seedingDebugMode) System.out.println("RECOVERED..."+fittedTrack.toString());
+            for(Cross c : fittedTrack) { 
+                if(c.getDetector()==DetectorType.BST) {
+                    c.getCluster1().setAssociatedTrackID(0);
+                    c.getCluster2().setAssociatedTrackID(0);
+                }
+            }
+            //fittedTrack.setStatus(1); 
+        } else {
+            if(fittedTrack!=null) {
+                //fittedTrack.setStatus(-1); 
+                if(Constants.getInstance().seedingDebugMode) 
+                    System.out.println("RECOVERED...with negative status "+fittedTrack.toString());
+                
+            }
+        }
+        return fittedTrack;
+    }
 }

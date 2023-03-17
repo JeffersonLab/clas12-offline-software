@@ -37,7 +37,9 @@
         {"name":"Cross8_ID",      "type":"S", "info":"ID of cross in the track"},
         {"name":"Cross9_ID",      "type":"S", "info":"ID of cross in the track"},
         {"name":"xb",             "type":"F", "info":"x offset  "},
-        {"name":"yb",             "type":"F", "info":"y offset  "}
+        {"name":"yb",             "type":"F", "info":"y offset  "},
+        {"name":"fracmctru",      "type":"F", "info":"percentage of hits on track truth matched  "},
+        {"name":"fracmcmatch",      "type":"F", "info":"percentage of hits on track truth matched over total nb true hits "}
     ]
   },
   {
@@ -47,7 +49,7 @@
     "info": "reconstructed CVT tracks",
     "entries": [
         {"name":"ID",             "type":"S", "info":"ID"},
-        {"name":"fittingMethod",  "type":"B", "info":"fitting method (1 for global fit, 2 for Kalman Filter)"},
+        {"name":"nKFIters",       "type":"B", "info":"number of kalman filter iterations"},
         {"name":"c_x",            "type":"F", "info":"x-coordinate of a helical trk point extrapolated to a cylinder at 25 cm radius from the lab origin (cm unit)"},
         {"name":"c_y",            "type":"F", "info":"y-coordinate of a helical trk point extrapolated to a cylinder at 25 cm radius from the lab origin (cm unit)"},
         {"name":"c_z",            "type":"F", "info":"z-coordinate of a helical trk point extrapolated to a cylinder at 25 cm radius from the lab origin (cm unit)b"},
@@ -96,7 +98,7 @@
     "info": "reconstructed CVT tracks",
     "entries": [
         {"name":"ID",             "type":"S", "info":"ID"},
-        {"name":"fittingMethod",  "type":"B", "info":"fitting method (1 for global fit, 2 for Kalman Filter)"},
+        {"name":"nKFIters",       "type":"B", "info":"number of kalman filter iterations"},
         {"name":"c_x",            "type":"F", "info":"x-coordinate of a helical trk point extrapolated to a cylinder at 25 cm radius from the lab origin (cm unit)"},
         {"name":"c_y",            "type":"F", "info":"y-coordinate of a helical trk point extrapolated to a cylinder at 25 cm radius from the lab origin (cm unit)"},
         {"name":"c_z",            "type":"F", "info":"z-coordinate of a helical trk point extrapolated to a cylinder at 25 cm radius from the lab origin (cm unit)b"},
@@ -355,7 +357,9 @@
         {"name":"Cross8_ID",      "type":"S", "info":"ID of cross in the track"},
         {"name":"Cross9_ID",      "type":"S", "info":"ID of cross in the track"},
         {"name":"xb",             "type":"F", "info":"x offset  "},
-        {"name":"yb",             "type":"F", "info":"y offset  "}
+        {"name":"yb",             "type":"F", "info":"y offset  "},
+        {"name":"fracmctru",      "type":"F", "info":"percentage of hits on track truth matched  "},
+        {"name":"fracmcmatch",      "type":"F", "info":"percentage of hits on track truth matched over total nb true hits "}
     ]
   },
   {
@@ -365,7 +369,7 @@
     "info": "reconstructed CVT tracks",
     "entries": [
         {"name":"ID",             "type":"S", "info":"ID"},
-        {"name":"fittingMethod",  "type":"B", "info":"fitting method (1 for global fit, 2 for Kalman Filter)"},
+        {"name":"nKFIters",       "type":"B", "info":"fitting method (1 for global fit, 2 for Kalman Filter)"},
         {"name":"c_x",            "type":"F", "info":"x-coordinate of a helical trk point extrapolated to a cylinder at 25 cm radius from the lab origin (cm unit)"},
         {"name":"c_y",            "type":"F", "info":"y-coordinate of a helical trk point extrapolated to a cylinder at 25 cm radius from the lab origin (cm unit)"},
         {"name":"c_z",            "type":"F", "info":"z-coordinate of a helical trk point extrapolated to a cylinder at 25 cm radius from the lab origin (cm unit)b"},
@@ -489,6 +493,50 @@
         {"name":"filteredRes",    "type":"F", "info":"filtered residual (-999 for passive layer)"},
         {"name":"smoothedRes",    "type":"F", "info":"smoothed residual (-999 for passive layer)"}
     ]
+  },
+  {
+    "name": "CVT::SeedClusters",
+    "group": 20500,
+    "item" : 43,   
+    "info": "Ids of clusters on track for 12 layers of CVT",
+    "entries": [
+        {"name":"id",             "type":"S", "info":"id of the track"},
+        {"name":"Clus1_ID",       "type":"S", "info":"ID of cluster on track in layer 1"},
+        {"name":"Clus2_ID",       "type":"S", "info":"ID of cluster on track in layer 2"},
+        {"name":"Clus3_ID",       "type":"S", "info":"ID of cluster on track in layer 3"},
+        {"name":"Clus4_ID",       "type":"S", "info":"ID of cluster on track in layer 4"},
+        {"name":"Clus5_ID",       "type":"S", "info":"ID of cluster on track in layer 5"},
+        {"name":"Clus6_ID",       "type":"S", "info":"ID of cluster on track in layer 6"},
+        {"name":"Clus7_ID",       "type":"S", "info":"ID of cluster on track in layer 7"},
+        {"name":"Clus8_ID",       "type":"S", "info":"ID of cluster on track in layer 8"},
+        {"name":"Clus9_ID",       "type":"S", "info":"ID of cluster on track in layer 9"},
+        {"name":"Clus10_ID",      "type":"S", "info":"ID of cluster on track in layer 10"},
+        {"name":"Clus11_ID",      "type":"S", "info":"ID of cluster on track in layer 11"},
+        {"name":"Clus12_ID",      "type":"S", "info":"ID of cluster on track in layer 12"},
+        {"name":"prob",           "type":"F", "info":"AI seed probability"}
+    ]
+  },
+  {
+    "name": "CVTRec::SeedClusters",
+    "group": 20500,
+    "item" : 44,   
+    "info": "Ids of clusters on track for 12 layers of CVT",
+    "entries": [
+        {"name":"id",             "type":"S", "info":"id of the track"},
+        {"name":"Clus1_ID",       "type":"S", "info":"ID of cluster on track in layer 1"},
+        {"name":"Clus2_ID",       "type":"S", "info":"ID of cluster on track in layer 2"},
+        {"name":"Clus3_ID",       "type":"S", "info":"ID of cluster on track in layer 3"},
+        {"name":"Clus4_ID",       "type":"S", "info":"ID of cluster on track in layer 4"},
+        {"name":"Clus5_ID",       "type":"S", "info":"ID of cluster on track in layer 5"},
+        {"name":"Clus6_ID",       "type":"S", "info":"ID of cluster on track in layer 6"},
+        {"name":"Clus7_ID",       "type":"S", "info":"ID of cluster on track in layer 7"},
+        {"name":"Clus8_ID",       "type":"S", "info":"ID of cluster on track in layer 8"},
+        {"name":"Clus9_ID",       "type":"S", "info":"ID of cluster on track in layer 9"},
+        {"name":"Clus10_ID",      "type":"S", "info":"ID of cluster on track in layer 10"},
+        {"name":"Clus11_ID",      "type":"S", "info":"ID of cluster on track in layer 11"},
+        {"name":"Clus12_ID",      "type":"S", "info":"ID of cluster on track in layer 12"},
+        {"name":"prob",           "type":"F", "info":"AI seed probability"}
+    ]
   }
-
-]
+  
+ ]

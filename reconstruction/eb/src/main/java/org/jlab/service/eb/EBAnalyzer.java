@@ -12,6 +12,7 @@ import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.DetectorLayer;
 
 import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.pdg.PDGDatabase;
@@ -170,6 +171,14 @@ public class EBAnalyzer {
                 event.getEventHeader().setStartTimeFT(startTime);
                 assignParticleStartTimes(event,DetectorType.FTCAL,-1);
 
+                // reassign neutrals' vertices:
+                for (DetectorParticle p : event.getParticles()) {
+                    if (p.getCharge()==0) {
+                        p.getTrack().setNeutralPath(
+                                event.getTriggerParticle().vertex(),p.getTrack().getTrackEnd());
+                    }
+                }
+
                 // recalculate betas, pids, etc:
                 this.assignBetas(event,true);
                 this.assignPids(event,true);
@@ -177,7 +186,7 @@ public class EBAnalyzer {
         }
         this.assignNeutralMomenta(event);
     }
-    
+   
     /**
      *
      * Determine event start time from trigger particle, assign particles'
@@ -460,7 +469,10 @@ public class EBAnalyzer {
                     break;
                 case 22:
                     if (pidFromTimingCheck) {
-                        this.finalizePID(p,pid);
+                        if (!p.getStatus().isForward() ||
+                             p.hasHit(DetectorType.ECAL, DetectorLayer.PCAL)) {
+                            this.finalizePID(p,pid);
+                        }
                     }
                     break;
             }

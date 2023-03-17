@@ -24,7 +24,7 @@ public class Strip {
     private int _Strip;    	//     strip read from daq 
     private double _Edep;      	//     for simulation this corresponds to the energy deposited on the strip, in data it should be an ADC converted value
     private double _Time;
-    private int _Status;        //     0=good, 1=bad edep, 2=bad tim, 3=dead                
+    private int _Status;        //     0=good, 1=bad edep, 2=bad tim, 3=dead, 4=inefficiency HV, 5=low efficient HV  Hv1 to HV2, 6=low efficient HV2 to HV3              
     
     private int _LCStrip;	//     strip number taking into account Lorentz angle correction (for MM Z detectors)
     private double _Phi;  	//     for MM Z-detectors, the azimuth angle at the strip midwidth after LC

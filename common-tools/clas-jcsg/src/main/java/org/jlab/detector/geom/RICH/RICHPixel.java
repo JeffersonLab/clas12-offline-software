@@ -1,4 +1,4 @@
-package org.jlab.rec.rich;
+package org.jlab.detector.geom.RICH;
 
 import java.util.ArrayList;
 import java.util.List;

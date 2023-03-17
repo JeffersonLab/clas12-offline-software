@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.jlab.clas.reco.DummyEngine;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;

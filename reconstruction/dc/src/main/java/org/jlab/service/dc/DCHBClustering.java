@@ -64,7 +64,7 @@ public class DCHBClustering extends DCEngine {
         /* 8 */
         HitReader hitRead = new HitReader(this.getBanks(), super.getConstantsManager(), Constants.getInstance().dcDetector);
         /* 9 */
-        hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results);
+        hitRead.fetch_DCHits(event, this.doDenoise(), noiseAnalysis, parameters, results);
         /* 10 */
         //I) get the hits
         List<Hit> hits = hitRead.get_DCHits(Constants.getInstance().SECTORSELECT);

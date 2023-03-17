@@ -12,7 +12,7 @@ then
 fi
 
 run=11
-nEvents=100
+nEvents=1000
 gcard=$GEMC/../config/clas12-default.gcard 
 
 gemc \

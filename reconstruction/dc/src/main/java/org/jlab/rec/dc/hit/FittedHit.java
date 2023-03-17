@@ -666,7 +666,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                 throw new RuntimeException("invalid region");
         }    
         
-        double MaxSag = Constants.getInstance().getWIREDIST()*A*C*wire*wire*FastMath.cos(Math.toRadians(25.))*FastMath.cos(Math.toRadians(30.));
+        double MaxSag = Constants.getInstance().getWIREDIST()*A*C*wire*wire*Constants.COS25*Constants.COS30;
 
         double delta_x = MaxSag*(1.-Math.abs(y)/(0.5*wireLen))*(1.-Math.abs(y)/(0.5*wireLen));
         

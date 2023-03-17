@@ -1,6 +1,10 @@
 package org.jlab.rec.cvt.track;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.jlab.clas.pdg.PDGDatabase;
@@ -20,6 +24,7 @@ import org.jlab.rec.cvt.measurement.MLayer;
 import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.rec.cvt.trajectory.StateVec;
 import org.jlab.rec.cvt.trajectory.Trajectory;
+import trackfitter.fitter.utilities.ProbChi2perNDF;
 
 /**
  * A class representing track candidates in the CVT. A track has a trajectory
@@ -55,6 +60,7 @@ public class Track extends Trajectory implements Comparable<Track> {
     private Helix secondaryHelix;                  // for track with no beamSpot information
     private double secondaryChi2;                  // for track with no beamSpot information
     private int    secondaryNDF;                   // for track with no beamSpot information
+    private int _status = 0;
 
 
     public Track(Helix helix) {
@@ -85,6 +91,11 @@ public class Track extends Trajectory implements Comparable<Track> {
         this.setSeed(seed);
         this.addAll(seed.getCrosses());
         this.setKFTrajectories(kf.trajPoints);
+        if (kf.filterOn && kf.setFitFailed == false && kf.NDF>0 && kf.getHelix()!=null) { 
+            this.setStatus(1);
+        } else {
+            this.setStatus(-1);
+        }
     }
     
         
@@ -293,7 +304,15 @@ public class Track extends Trajectory implements Comparable<Track> {
 
     @Override
     public int compareTo(Track tr) {
-        return (tr.getP() > this.getP()) ? 1 : -1;
+       
+        if(this.getNDF()>1 && tr.getNDF()>1) {
+            int ProbComp  = this.getChi2() < tr.getChi2() ? -1 : this.getChi2() == tr.getChi2() ? 0 : 1;
+            int OtherComp = this.getNDF() > tr.getNDF() ? -1 : this.getNDF() == tr.getNDF() ? 0 : 1;
+            return ((OtherComp == 0) ? ProbComp : OtherComp);
+        } else {
+            return this.getChi2() < tr.getChi2() ? -1 : this.getChi2() == tr.getChi2() ? 0 : 1;
+        }
+       
     }
     
     /**
@@ -305,11 +324,11 @@ public class Track extends Trajectory implements Comparable<Track> {
             return false;
         else if(this.getChi2() > Constants.CHI2CUT * (this.getNDF() + 5)) 
             return false;
-        else if(this.getNDF() < Constants.NDFCUT) 
+        if(this.getNDF() < Constants.NDFCUT) 
             return false;
-        else if(this.getPt() < Constants.PTCUT) 
+        if(this.getHelix().radius() < Constants.getInstance().getRCUT()) 
             return false;
-        else if(Math.abs(this.getHelix().getZ0()) > Constants.ZRANGE) 
+        if(Math.abs(Geometry.getInstance().getZoffset()-this.getHelix().getZ0()) > Geometry.getInstance().getZlength()+Constants.getInstance().getZRANGE()) 
             return false;
         else 
             return true;
@@ -323,9 +342,9 @@ public class Track extends Trajectory implements Comparable<Track> {
      */    
     public boolean betterThan(Track o) {
         if(this.getNDF()>o.getNDF()) 
-            return true;
-        else if(this.getNDF()==o.getNDF()) {
             return this.getChi2()/this.getNDF() < o.getChi2()/o.getNDF();
+        else if(this.getNDF()==o.getNDF()) {
+            return this.getChi2() < o.getChi2();
         }
         else
             return false;
@@ -338,13 +357,13 @@ public class Track extends Trajectory implements Comparable<Track> {
      * @return true if this track overlaps with the given track, false otherwise
      */
     public boolean overlapWith(Track o) {
-        int nc = 0;
-        for(Cross c : this) {
-            if(c.getType()==BMTType.C) continue; //skim BMTC
-            if(o.contains(c)) nc++;
+        int[] t1id = getTrackKey(this);
+        int[] t2id = getTrackKey(o);   
+        for(int i =0; i<9; i++){
+            if(t1id[i]==-1 || t2id[i]==-1) continue;
+            if(t1id[i]==t2id[i]) return true;
         }
-        if(nc >1) return true;
-        else      return false;
+        return false;
     }
 
     public Point3D getTrackPosAtCTOF() {
@@ -390,11 +409,21 @@ public class Track extends Trajectory implements Comparable<Track> {
     public double getChi2() {
         return _Chi2;
     }
+    
 
     public final void setChi2(double _Chi2) {
         this._Chi2 = _Chi2;
+        
     }
 
+    private double _Chi2Prob;
+    public double getChi2Prob() {
+        double prob = ProbChi2perNDF.prob(_Chi2, _NDF);
+        _Chi2Prob = prob;
+        return _Chi2Prob;
+    }
+    
+    
     public int getKFIterations() {
         return kfIterations;
     }
@@ -410,8 +439,11 @@ public class Track extends Trajectory implements Comparable<Track> {
     public final void setKFTrajectories(Map<Integer, HitOnTrack> trajectory) {
         this.trajs = trajectory;
     }
-    
+
     public int getStatus() {
+        return _status;
+    }
+    public void setStatus(int passKFFlag) {
         //for status word:
         int nSVT  = 0;
         int nBMTZ = 0;
@@ -431,7 +463,7 @@ public class Track extends Trajectory implements Comparable<Track> {
                 nBMTC++;
             }
         }
-        return 1000*this.kfIterations+nSVT*100+nBMTZ*10+nBMTC;
+        _status = passKFFlag*(nSVT*1000+nBMTZ*100+nBMTC*10+this.getSeed().getStatus());
     }
     
     /**
@@ -460,7 +492,9 @@ public class Track extends Trajectory implements Comparable<Track> {
         HitOnTrack traj = null;       
         for(int index=1; index<trajs.size(); index++) {
             traj = this.trajs.get(index);            
-            
+            if(traj==null) {
+                return;
+            }
             Vector3D mom = new Vector3D(traj.px, traj.py, traj.pz);
             Vector3D dir = mom.asUnit();
             Point3D  pos = new Point3D(traj.x, traj.y, traj.z);
@@ -519,33 +553,86 @@ public class Track extends Trajectory implements Comparable<Track> {
                     this.setTrackDirAtCTOF(mom.asUnit());
                     this.setPathToCTOF(path);
                 }
-                
-                surface.getEloss(mom, mass, 1);
+                // do not appy Eloss to CTOF and CND to avoid overcorrecting if pid is wrong
+                //surface.getEloss(mom, mass, 1);
                 if(mom.mag()==0) break;
             }
         }
         this.setTrajectory((ArrayList<StateVec>) stateVecs);
     }
     
+    private  static int[]  getTrackKey(Track track) {
+        int[] cids  = new int[9];
+        for (int i = 0; i < track.size(); i++) {
+            Cross c =  track.get(i);
+            if(c.getDetector()==DetectorType.BST) {
+                cids[c.getRegion()-1] = c.getId();
+            } else {
+                if(c.getDetector()==DetectorType.BMT) {
+                    int lyr = c.getCluster1().getLayer()+3;
+                    cids[lyr-1] = c.getId();
+                }
+            }                
+        }
+        return cids;
+        
+    }
+    private int _tempId; //pattern rec id
+    public int getTempId() {
+        return _tempId;
+    }
+
+    public void setTempId(int _tempId) {
+        this._tempId = _tempId;
+    }
+    private List<Integer> overlapsIds= new ArrayList<>();
     public static void removeOverlappingTracks(List<Track> tracks) {
             if(tracks==null)
                 return;
-            
-        List<Track> selectedTracks =  new ArrayList<>();
+        Map<Integer, Track>  map = new HashMap<>();    
+        Map<Integer, Track>  selectedTracks = new HashMap<>();  
         for (int i = 0; i < tracks.size(); i++) {
-            boolean overlap = false;
             Track t1 = tracks.get(i);
-            for(int j=0; j<tracks.size(); j++ ) {
+            t1.setTempId(i+1);
+            map.put(i+1, t1);
+        }
+        for (int i = 0; i < tracks.size(); i++) {
+            Track t1 = tracks.get(i);
+            int[] cids = getTrackKey(t1);
+            for (int j = 0;j < tracks.size(); j++) {
+                boolean ov = false;
+                if(i==j) continue;
                 Track t2 = tracks.get(j);
-                if(i!=j && t1.overlapWith(t2) && !t1.betterThan(t2)) {
-                    overlap=true;
+                int[] cids2 = getTrackKey(t2);
+                for(int k  =  0; k<9; k++) {
+                    if(cids[k]!=-1) {
+                        if(cids[k]==cids2[k]) {
+                            ov=true;
+                        }
+                    }
+                }
+                if(ov==true)  {
+                    t1.overlapsIds.add(t2.getTempId()); 
                 }
             }
-            if(!overlap) selectedTracks.add(t1);
         }
-
+        for (int i = 0; i < tracks.size(); i++) {
+            List<Track> ovlTracks =  new ArrayList<>();
+            Track t1 = tracks.get(i);
+            ovlTracks.add(t1); 
+            for(int ii =0; ii< t1.overlapsIds.size(); ii++) { 
+                ovlTracks.add(map.get(t1.overlapsIds.get(ii))); 
+            }
+           
+            Collections.sort(ovlTracks);
+            selectedTracks.put(ovlTracks.get(0).getTempId(),ovlTracks.get(0));
+            
+        }
+            
+        Collection<Track> values = selectedTracks.values();
+            
         tracks.removeAll(tracks);
-        tracks.addAll(selectedTracks);
+        tracks.addAll(new ArrayList<>(values));
     }
     
     public static void checkForOverlaps(List<Track> tracks, String msg) {
@@ -563,14 +650,16 @@ public class Track extends Trajectory implements Comparable<Track> {
 
     @Override
     public String toString() {
-        String str = String.format("Track id=%d, q=%d, p=%.3f GeV pt=%.3f GeV, d0=%.3f deg, phi=%.3f deg, z0=%.3f deg, tandip=%.3f deg, NDF=%d, chi2=%.3f, seed method=%d\n", 
+        String str = String.format("Track id=%d, q=%d, p=%.3f GeV pt=%.3f GeV, d0=%.3f deg, phi=%.3f deg, z0=%.3f deg, tandip=%.3f deg, NDF=%d, chi2=%.3f, seed method=%d, KF iterations=%d, status=%d\n", 
                      this.getId(), this.getQ(), this.getP(), this.getPt(), this.getHelix().getDCA(),
                      Math.toDegrees(this.getHelix().getPhiAtDCA()), this.getHelix().getZ0(), this.getHelix().getTanDip(),
-                     this.getNDF(), this.getChi2(), this.getSeed().getStatus());
+                     this.getNDF(), this.getChi2(), this.getSeed().getStatus(), this.getKFIterations(), this.getStatus());
         for(Cross c: this) str = str + c.toString() + "\n";
         for(Cluster c: this.getSeed().getClusters()) str = str + c.toString() + "\n";
         return str;
     }
+
+    
 
     
 

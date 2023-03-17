@@ -15,6 +15,7 @@ public class CndHit extends ArrayList<HalfHit> implements Comparable<CndHit>{
 
 	private int _pad_d;   				  // index, to the half-hit array list, of the "direct" half-hit 
 	private int _pad_n;			          // index, to the half-hit array list, of the "indirect", neighbour half-hit 
+	private int _status;                  //status of hit, 1 means possible double hit
 	private double _T;       	          // reconstructed time of hit
 	private double _Z;       	          // z co-ordinate of hit (wrt target center)
 	private double _X;       	          // x co-ordinate of hit (wrt target center)
@@ -67,6 +68,10 @@ public class CndHit extends ArrayList<HalfHit> implements Comparable<CndHit>{
 		return _X;
 	}
 
+	public int get_status() {
+		return _status;
+	}
+
 	public double Y() {
 		return _Y;
 	}
@@ -85,6 +90,10 @@ public class CndHit extends ArrayList<HalfHit> implements Comparable<CndHit>{
 
 	public void set_X(double xpos) {
 		this._X = xpos;
+	}
+
+	public void set_status(int hitstatus) {
+		this._status = hitstatus;
 	}
 
 	public void set_Y(double ypos) {

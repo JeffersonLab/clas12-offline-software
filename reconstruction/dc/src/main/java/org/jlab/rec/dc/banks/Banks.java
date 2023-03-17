@@ -10,7 +10,7 @@ public class Banks {
     private final String tsBank     = "DC::jitter";
     private final String docaBank   = "DC::doca";
     
-    private final String aiBank     = "ai::tracks";
+    private String aiBank     = "ai::tracks";
     
     private final String inBankType = "HitBasedTrkg";
     private String outBankType      = "HitBasedTrkg";
@@ -40,6 +40,15 @@ public class Banks {
         }
     }
 
+    public final void init(String inputBankPrefix, String outputBankPrefix) {
+        this.inPrefix    = inputBankPrefix;
+        this.outPrefix   = outputBankPrefix;
+        if(!outBankType.equals("HitBasedTrkg")) {
+            if(outputBankPrefix.equals("TB")) 
+                this.inPrefix = "HB";
+        }
+    }
+
     public String getPrefix() {
         return outPrefix;
     }
@@ -57,6 +66,8 @@ public class Banks {
     }
 
     public String getAiBank() {
+        if(inPrefix!=null && !inPrefix.isBlank())
+            aiBank = "ai" + inPrefix.toLowerCase() +"::tracks";
         return aiBank;
     }
     

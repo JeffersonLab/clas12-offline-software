@@ -61,6 +61,7 @@ public class Trajectory extends ArrayList<Cross> {
     public void setId(int _Id) {
         this._Id = _Id;
     }
+    
 
     public ArrayList<StateVec> getTrajectory() {
         return _Trajectory;

@@ -59,7 +59,7 @@ public class ECDisplay extends JPanel implements IDataEventListener {
 
 
 
-        List<ECStrip>  ecStrips = ECCommon.initEC(de, ecDetector, detectorEngine.getConstantsManager(), 10);
+        List<ECStrip>  ecStrips = ECCommon.initEC(de, detectorEngine.getConstantsManager());
         List<ECPeak> ecPeaksALL = ECCommon.createPeaks(ecStrips);
         List<ECPeak> ecPeaks    = ECCommon.processPeaks(ecPeaksALL);
         
