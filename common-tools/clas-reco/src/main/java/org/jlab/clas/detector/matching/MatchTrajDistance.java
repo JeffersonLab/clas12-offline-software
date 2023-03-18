@@ -2,7 +2,6 @@ package org.jlab.clas.detector.matching;
 
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.DetectorResponse;
-import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 
 /**
