@@ -237,7 +237,6 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
                 String ip   = dialog.getIpAddress();
                 String file = dialog.getFileName();
                 Integer port = dialog.getPort();
-                
                 EvioETSource source = new EvioETSource(ip,port);
                 source.open(file);
                 this.dataProcessor.setSource(source);
