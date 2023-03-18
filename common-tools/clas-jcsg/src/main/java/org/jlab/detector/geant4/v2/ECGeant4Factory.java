@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.detector.geant4.v2;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
@@ -13,7 +8,11 @@ import org.jlab.detector.volume.G4Trap;
 import org.jlab.detector.volume.G4World;
 import org.jlab.detector.volume.Geant4Basic;
 import org.jlab.geom.base.ConstantProvider;
+import org.jlab.geom.base.Detector;
+import org.jlab.geom.detector.ec.ECLayer;
+import org.jlab.geom.detector.ec.ECSuperlayer;
 import org.jlab.geom.prim.Plane3D;
+import org.jlab.geom.prim.Point3D;
 
 /**
  *
@@ -240,7 +239,7 @@ public final class ECGeant4Factory extends Geant4Factory {
 
     private final class ECSector {
 
-        private final double dfoam = 5.08, dsteel = 0.15875;
+        private final double dfoam = 7.62, dsteel = 0.15875;
 
         private final double extrathickness = 0.05;
         //G4Trap dimensions for sector volume (mother volume)
@@ -248,6 +247,7 @@ public final class ECGeant4Factory extends Geant4Factory {
                 + (nviews * nlayers - 1) * dlead
                 + (2 * nviews * nlayers + 3) * microgap;
         private final double dist2midplane = dist2tgt
+                - dfoam/2 - dsteel
                 + (nviews * nlayers * dstrip
                 + (nviews * nlayers - 1) * dlead
                 + (2 * nviews * nlayers - 2) * microgap) / 2.0;
@@ -384,12 +384,44 @@ public final class ECGeant4Factory extends Geant4Factory {
     }
     
         
-        public static void main(String[] args) {
-        ConstantProvider cp = GeometryFactory.getConstants(DetectorType.ECAL, 11, "default");
+    public static void main(String[] args) {
+        String variation = "default";
+        ConstantProvider cp = GeometryFactory.getConstants(DetectorType.ECAL, 11, variation);
         ECGeant4Factory factory = new ECGeant4Factory(cp);
             
         for (int sector = 1; sector <= 6; sector++) {
             System.out.println(factory.getFrontalFace(sector).point().toString() + " " + factory.getPaddle(sector, 1, 1).getGlobalPosition().toString());
+        }
+        
+        Detector geometry = GeometryFactory.getDetector(DetectorType.ECAL, 11, variation);
+
+        // compare position in tilted frame to clas-geometry
+        int sector = 1;
+        for(int ilayer=0; ilayer<factory.getNumberOfLayers(); ilayer++) {
+            int layer = ilayer+1;
+            int superlayer = 2;
+            
+            int nlayers = geometry.getSector(sector-1).getSuperlayer(superlayer-1).getNumLayers();
+            if(ilayer>=nlayers) 
+                superlayer += 1;
+                        
+            for(int ic=0; ic<2; ic++) {
+                int component = 1;
+                if(ic==1) component =factory.getNumberOfPaddles();
+                
+                Vector3d vec = factory.getPaddle(sector, layer, component).getGlobalPosition();
+                Point3D jcsg = new Point3D(vec.x, vec.y, vec.z);
+                jcsg.rotateY(Math.toRadians(-25));
+
+                ECSuperlayer ecalSuperlayer = (ECSuperlayer) geometry.getSector(sector-1).getSuperlayer(superlayer-1);
+                ECLayer      ecalLayer      = (ECLayer) ecalSuperlayer.getLayer(layer>nlayers ? layer-nlayers-1 : layer-1);
+                Point3D geom = ecalLayer.getComponent(component-1).getMidpoint();
+                geom.rotateY(Math.toRadians(-25)); 
+
+                System.out.println(String.format("s/sl/l/c: %d/%d/%d/%d JCSG=%s", sector, superlayer, layer, component, jcsg.toString()));
+                System.out.println(String.format("s/sl/l/c: %d/%d/%d/%d GEOM=%s", sector, superlayer, layer, component, geom.toString()));
+                System.out.println(String.format("s/sl/l/c: %d/%d/%d/%d DIFF=%s\n", sector, superlayer, layer, component, jcsg.toVector3D().sub(geom.toVector3D()).toPoint3D().toString()));
+            }
         }
     }
 
