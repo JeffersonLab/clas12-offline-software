@@ -99,8 +99,7 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         
         JPanel mediaPane = this.createMediaPane();
         JPanel sourcePane = new JPanel();
-                        
-        
+
         sourcePane.setBorder(BorderFactory.createSoftBevelBorder(SoftBevelBorder.LOWERED));
         sourcePane.add(sourceFile);
         sourcePane.add(sourceFileEt);
@@ -196,6 +195,7 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
     }
 
     public void connectAndRun(String ip,String port,String file) {
+        this.stopProcessorTimer();
         EvioETSource source = new EvioETSource(ip,port);
         source.open(file);
         this.dataProcessor.setSource(source);
@@ -210,7 +210,6 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         System.out.println("[action] --> " + e.getActionCommand());
-        
         if(e.getActionCommand().compareTo("PlayFile")==0){
             mediaPlay.setEnabled(false);
             mediaPause.setEnabled(true);
@@ -231,19 +230,13 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         }
 
         if(e.getActionCommand().compareTo("OpenFileET")==0){
-
-            if(this.processTimer!=null){
-                this.processTimer.cancel();
-                this.processTimer = null;
-            }
-
+            this.stopProcessorTimer();
             ConnectionDialog dialog = new ConnectionDialog(this.defaultHost, this.defaultIp);
             dialog.setVisible(true);
             if(dialog.reason()==DialogUtilities.OK_RESPONSE){
                 String ip   = dialog.getIpAddress();
                 String file = dialog.getFileName();
                 Integer port = dialog.getPort();
-                
                 EvioETSource source = new EvioETSource(ip,port);
                 source.open(file);
                 this.dataProcessor.setSource(source);
@@ -255,16 +248,10 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         }
         
         if(e.getActionCommand().compareTo("OpenFile")==0){
-
-            if(this.processTimer!=null){
-                this.processTimer.cancel();
-                this.processTimer = null;
-            }
-
+            this.stopProcessorTimer();
             JFileChooser fc = new JFileChooser();
             fc.setCurrentDirectory(null);
             int returnVal = fc.showOpenDialog(this);
-            
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 String fileName = fc.getSelectedFile().getAbsolutePath();
                 System.out.println("file -> " + fileName);
@@ -291,14 +278,8 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         }
 
         if(e.getActionCommand().compareTo("OpenFileRing")==0){
-
-            if(this.processTimer!=null){
-                this.processTimer.cancel();
-                this.processTimer = null;
-            }
-
+            this.stopProcessorTimer();
             HipoRingSource source = HipoRingSource.createSource();
-            
             this.dataProcessor.setSource(source);
             statusLabel.setText(dataProcessor.getStatusString());
             mediaNext.setEnabled(true);
@@ -308,15 +289,11 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         }
         
         if(e.getActionCommand().compareTo("OpenFileHipo3")==0){
-            if(this.processTimer!=null){
-                this.processTimer.cancel();
-                this.processTimer = null;
-            }
+            this.stopProcessorTimer();
             isHipo3Event = true;
             JFileChooser fc = new JFileChooser();
             fc.setCurrentDirectory(null);
             int returnVal = fc.showOpenDialog(this);
-            
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 String fileName = fc.getSelectedFile().getAbsolutePath();
                 System.out.println("file -> " + fileName);
@@ -334,21 +311,16 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         }
         
         if(e.getActionCommand().compareTo("OpenFileHipo4")==0){
-            if(this.processTimer!=null){
-                this.processTimer.cancel();
-                this.processTimer = null;
-            }
+            this.stopProcessorTimer();
             isHipo3Event = false;
             JFileChooser fc = new JFileChooser();
             fc.setCurrentDirectory(null);
             int returnVal = fc.showOpenDialog(this);
-            
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 String fileName = fc.getSelectedFile().getAbsolutePath();
                 System.out.println("file -> " + fileName);
                 HipoDataSource source = new HipoDataSource();
                 source.open(fileName);
-
                 //This is where a real application would open the file.
                 this.dataProcessor.setSource(source);
                 statusLabel.setText(dataProcessor.getStatusString());
@@ -360,7 +332,14 @@ public class DataSourceProcessorPane extends JPanel implements ActionListener {
         }
         
     }
-    
+
+    private void stopProcessorTimer() {
+        if(this.processTimer!=null){
+            this.processTimer.cancel();
+            this.processTimer = null;
+        }
+    }
+
     private void startProcessorTimer(){
         class CrunchifyReminder extends TimerTask {
             boolean hasFinished = false;
