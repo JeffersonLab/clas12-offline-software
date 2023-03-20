@@ -1,4 +1,4 @@
-    package org.jlab.clas.tracking.kalmanfilter.zReference;
+package org.jlab.clas.tracking.kalmanfilter.zReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,10 +50,10 @@ public class KFitter extends AKFitter {
     private boolean TBT = false;
 
     private Map<Integer, Boolean> setFitFailedMap = new HashMap<>();
-    private Map<Integer, Boolean> stopIterationMap = new HashMap<>(); 
+    private Map<Integer, Boolean> stopIterationMap = new HashMap<>();
     private Map<Integer, StateVecs> svMap = new HashMap<>();
-    private Map<Integer, Double> chi2KFMap = new HashMap<>(); 
-    
+    private Map<Integer, Double> chi2KFMap = new HashMap<>();
+
     Matrix first_inverse = new Matrix();
     Matrix addition = new Matrix();
     Matrix result = new Matrix();
@@ -143,7 +143,20 @@ public class KFitter extends AKFitter {
                             if (!sv.transport(sector, k, k - 2, this.sv.trackTrajF.get(k), mv, this.getSwimmer(), forward)) {
                                 setFitFailedMap.put(i, this.setFitFailed);
                                 stopIterationMap.put(i, this.stopIteration);
-                                svMap.put(i, this.sv);
+                                StateVecs statevects = new StateVecs();
+                                for (int key : this.sv.trackTrajT.keySet()) {
+                                    statevects.trackTrajT.put(key, this.sv.trackTrajT.get(key).clone());
+                                }
+                                for (int key : this.sv.trackTrajF.keySet()) {
+                                    statevects.trackTrajF.put(key, this.sv.trackTrajF.get(key).clone());
+                                }
+                                for (int key : this.sv.trackTrajP.keySet()) {
+                                    statevects.trackTrajP.put(key, this.sv.trackTrajP.get(key).clone());
+                                }
+                                for (int key : this.sv.trackTrajB.keySet()) {
+                                    statevects.trackTrajB.put(key, this.sv.trackTrajB.get(key).clone());
+                                }
+                                svMap.put(i, statevects);
                                 chi2KFMap.put(i, this.chi2kf);
                                 this.stopIteration = true;
                                 break;
@@ -153,7 +166,20 @@ public class KFitter extends AKFitter {
                                 this.stopIteration = true;
                                 setFitFailedMap.put(i, this.setFitFailed);
                                 stopIterationMap.put(i, this.stopIteration);
-                                svMap.put(i, this.sv);
+                                StateVecs statevects = new StateVecs();
+                                for (int key : this.sv.trackTrajT.keySet()) {
+                                    statevects.trackTrajT.put(key, this.sv.trackTrajT.get(key).clone());
+                                }
+                                for (int key : this.sv.trackTrajF.keySet()) {
+                                    statevects.trackTrajF.put(key, this.sv.trackTrajF.get(key).clone());
+                                }
+                                for (int key : this.sv.trackTrajP.keySet()) {
+                                    statevects.trackTrajP.put(key, this.sv.trackTrajP.get(key).clone());
+                                }
+                                for (int key : this.sv.trackTrajB.keySet()) {
+                                    statevects.trackTrajB.put(key, this.sv.trackTrajB.get(key).clone());
+                                }
+                                svMap.put(i, statevects);
                                 chi2KFMap.put(i, this.chi2kf);
                                 break;
                             }
@@ -163,7 +189,20 @@ public class KFitter extends AKFitter {
                             this.stopIteration = true;
                             setFitFailedMap.put(i, this.setFitFailed);
                             stopIterationMap.put(i, this.stopIteration);
-                            svMap.put(i, this.sv);
+                            StateVecs statevects = new StateVecs();
+                            for (int key : this.sv.trackTrajT.keySet()) {
+                                statevects.trackTrajT.put(key, this.sv.trackTrajT.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajF.keySet()) {
+                                statevects.trackTrajF.put(key, this.sv.trackTrajF.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajP.keySet()) {
+                                statevects.trackTrajP.put(key, this.sv.trackTrajP.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajB.keySet()) {
+                                statevects.trackTrajB.put(key, this.sv.trackTrajB.get(key).clone());
+                            }
+                            svMap.put(i, statevects);
                             chi2KFMap.put(i, this.chi2kf);
                             break;
                         }
@@ -172,7 +211,20 @@ public class KFitter extends AKFitter {
                             this.stopIteration = true;
                             setFitFailedMap.put(i, this.setFitFailed);
                             stopIterationMap.put(i, this.stopIteration);
-                            svMap.put(i, this.sv);
+                            StateVecs statevects = new StateVecs();
+                            for (int key : this.sv.trackTrajT.keySet()) {
+                                statevects.trackTrajT.put(key, this.sv.trackTrajT.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajF.keySet()) {
+                                statevects.trackTrajF.put(key, this.sv.trackTrajF.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajP.keySet()) {
+                                statevects.trackTrajP.put(key, this.sv.trackTrajP.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajB.keySet()) {
+                                statevects.trackTrajB.put(key, this.sv.trackTrajB.get(key).clone());
+                            }
+                            svMap.put(i, statevects);
                             chi2KFMap.put(i, this.chi2kf);
                             break;
                         }
@@ -181,7 +233,20 @@ public class KFitter extends AKFitter {
                             this.stopIteration = true;
                             setFitFailedMap.put(i, this.setFitFailed);
                             stopIterationMap.put(i, this.stopIteration);
-                            svMap.put(i, this.sv);
+                            StateVecs statevects = new StateVecs();
+                            for (int key : this.sv.trackTrajT.keySet()) {
+                                statevects.trackTrajT.put(key, this.sv.trackTrajT.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajF.keySet()) {
+                                statevects.trackTrajF.put(key, this.sv.trackTrajF.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajP.keySet()) {
+                                statevects.trackTrajP.put(key, this.sv.trackTrajP.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajB.keySet()) {
+                                statevects.trackTrajB.put(key, this.sv.trackTrajB.get(key).clone());
+                            }
+                            svMap.put(i, statevects);
                             chi2KFMap.put(i, this.chi2kf);
                             break;
                         }
@@ -190,7 +255,20 @@ public class KFitter extends AKFitter {
                             this.stopIteration = true;
                             setFitFailedMap.put(i, this.setFitFailed);
                             stopIterationMap.put(i, this.stopIteration);
-                            svMap.put(i, this.sv);
+                            StateVecs statevects = new StateVecs();
+                            for (int key : this.sv.trackTrajT.keySet()) {
+                                statevects.trackTrajT.put(key, this.sv.trackTrajT.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajF.keySet()) {
+                                statevects.trackTrajF.put(key, this.sv.trackTrajF.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajP.keySet()) {
+                                statevects.trackTrajP.put(key, this.sv.trackTrajP.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajB.keySet()) {
+                                statevects.trackTrajB.put(key, this.sv.trackTrajB.get(key).clone());
+                            }
+                            svMap.put(i, statevects);
                             chi2KFMap.put(i, this.chi2kf);
                             break;
                         }
@@ -199,7 +277,20 @@ public class KFitter extends AKFitter {
                             this.stopIteration = true;
                             setFitFailedMap.put(i, this.setFitFailed);
                             stopIterationMap.put(i, this.stopIteration);
-                            svMap.put(i, this.sv);
+                            StateVecs statevects = new StateVecs();
+                            for (int key : this.sv.trackTrajT.keySet()) {
+                                statevects.trackTrajT.put(key, this.sv.trackTrajT.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajF.keySet()) {
+                                statevects.trackTrajF.put(key, this.sv.trackTrajF.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajP.keySet()) {
+                                statevects.trackTrajP.put(key, this.sv.trackTrajP.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajB.keySet()) {
+                                statevects.trackTrajB.put(key, this.sv.trackTrajB.get(key).clone());
+                            }
+                            svMap.put(i, statevects);
                             chi2KFMap.put(i, this.chi2kf);
                             break;
                         }
@@ -210,7 +301,20 @@ public class KFitter extends AKFitter {
             if (this.stopIteration) {
                 setFitFailedMap.put(i, this.setFitFailed);
                 stopIterationMap.put(i, this.stopIteration);
-                svMap.put(i, this.sv);
+                StateVecs statevects = new StateVecs();
+                for (int key : this.sv.trackTrajT.keySet()) {
+                    statevects.trackTrajT.put(key, this.sv.trackTrajT.get(key).clone());
+                }
+                for (int key : this.sv.trackTrajF.keySet()) {
+                    statevects.trackTrajF.put(key, this.sv.trackTrajF.get(key).clone());
+                }
+                for (int key : this.sv.trackTrajP.keySet()) {
+                    statevects.trackTrajP.put(key, this.sv.trackTrajP.get(key).clone());
+                }
+                for (int key : this.sv.trackTrajB.keySet()) {
+                    statevects.trackTrajB.put(key, this.sv.trackTrajB.get(key).clone());
+                }
+                svMap.put(i, statevects);
                 chi2KFMap.put(i, this.chi2kf);
                 break;
             }
@@ -230,7 +334,20 @@ public class KFitter extends AKFitter {
                             this.stopIteration = true;
                             setFitFailedMap.put(i, this.setFitFailed);
                             stopIterationMap.put(i, this.stopIteration);
-                            svMap.put(i, this.sv);
+                            StateVecs statevects = new StateVecs();
+                            for (int key : this.sv.trackTrajT.keySet()) {
+                                statevects.trackTrajT.put(key, this.sv.trackTrajT.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajF.keySet()) {
+                                statevects.trackTrajF.put(key, this.sv.trackTrajF.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajP.keySet()) {
+                                statevects.trackTrajP.put(key, this.sv.trackTrajP.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajB.keySet()) {
+                                statevects.trackTrajB.put(key, this.sv.trackTrajB.get(key).clone());
+                            }
+                            svMap.put(i, statevects);
                             chi2KFMap.put(i, this.chi2kf);
                             break;
                         }
@@ -239,7 +356,20 @@ public class KFitter extends AKFitter {
                             this.stopIteration = true;
                             setFitFailedMap.put(i, this.setFitFailed);
                             stopIterationMap.put(i, this.stopIteration);
-                            svMap.put(i, this.sv);
+                            StateVecs statevects = new StateVecs();
+                            for (int key : this.sv.trackTrajT.keySet()) {
+                                statevects.trackTrajT.put(key, this.sv.trackTrajT.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajF.keySet()) {
+                                statevects.trackTrajF.put(key, this.sv.trackTrajF.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajP.keySet()) {
+                                statevects.trackTrajP.put(key, this.sv.trackTrajP.get(key).clone());
+                            }
+                            for (int key : this.sv.trackTrajB.keySet()) {
+                                statevects.trackTrajB.put(key, this.sv.trackTrajB.get(key).clone());
+                            }
+                            svMap.put(i, statevects);
                             chi2KFMap.put(i, this.chi2kf);
                             break;
                         }
@@ -249,7 +379,20 @@ public class KFitter extends AKFitter {
                         this.stopIteration = true;
                         setFitFailedMap.put(i, this.setFitFailed);
                         stopIterationMap.put(i, this.stopIteration);
-                        svMap.put(i, this.sv);
+                        StateVecs statevects = new StateVecs();
+                        for (int key : this.sv.trackTrajT.keySet()) {
+                            statevects.trackTrajT.put(key, this.sv.trackTrajT.get(key).clone());
+                        }
+                        for (int key : this.sv.trackTrajF.keySet()) {
+                            statevects.trackTrajF.put(key, this.sv.trackTrajF.get(key).clone());
+                        }
+                        for (int key : this.sv.trackTrajP.keySet()) {
+                            statevects.trackTrajP.put(key, this.sv.trackTrajP.get(key).clone());
+                        }
+                        for (int key : this.sv.trackTrajB.keySet()) {
+                            statevects.trackTrajB.put(key, this.sv.trackTrajB.get(key).clone());
+                        }
+                        svMap.put(i, statevects);
                         chi2KFMap.put(i, this.chi2kf);
                         break;
                     }
@@ -260,7 +403,20 @@ public class KFitter extends AKFitter {
                     this.stopIteration = true;
                     setFitFailedMap.put(i, this.setFitFailed);
                     stopIterationMap.put(i, this.stopIteration);
-                    svMap.put(i, this.sv);
+                    StateVecs statevects = new StateVecs();
+                    for (int key : this.sv.trackTrajT.keySet()) {
+                        statevects.trackTrajT.put(key, this.sv.trackTrajT.get(key).clone());
+                    }
+                    for (int key : this.sv.trackTrajF.keySet()) {
+                        statevects.trackTrajF.put(key, this.sv.trackTrajF.get(key).clone());
+                    }
+                    for (int key : this.sv.trackTrajP.keySet()) {
+                        statevects.trackTrajP.put(key, this.sv.trackTrajP.get(key).clone());
+                    }
+                    for (int key : this.sv.trackTrajB.keySet()) {
+                        statevects.trackTrajB.put(key, this.sv.trackTrajB.get(key).clone());
+                    }
+                    svMap.put(i, statevects);
                     chi2KFMap.put(i, this.chi2kf);
                     break;
                 }
@@ -269,15 +425,40 @@ public class KFitter extends AKFitter {
             if (this.stopIteration) {
                 setFitFailedMap.put(i, this.setFitFailed);
                 stopIterationMap.put(i, this.stopIteration);
-                svMap.put(i, this.sv);
+                StateVecs statevects = new StateVecs();
+                for (int key : this.sv.trackTrajT.keySet()) {
+                    statevects.trackTrajT.put(key, this.sv.trackTrajT.get(key).clone());
+                }
+                for (int key : this.sv.trackTrajF.keySet()) {
+                    statevects.trackTrajF.put(key, this.sv.trackTrajF.get(key).clone());
+                }
+                for (int key : this.sv.trackTrajP.keySet()) {
+                    statevects.trackTrajP.put(key, this.sv.trackTrajP.get(key).clone());
+                }
+                for (int key : this.sv.trackTrajB.keySet()) {
+                    statevects.trackTrajB.put(key, this.sv.trackTrajB.get(key).clone());
+                }
+                svMap.put(i, statevects);
                 chi2KFMap.put(i, this.chi2kf);
                 break;
-            }
-            else{
+            } else {
                 setFitFailedMap.put(i, this.setFitFailed);
                 stopIterationMap.put(i, this.stopIteration);
-                svMap.put(i, this.sv);
-                chi2KFMap.put(i, this.chi2kf); 
+                StateVecs statevects = new StateVecs();
+                for (int key : this.sv.trackTrajT.keySet()) {
+                    statevects.trackTrajT.put(key, this.sv.trackTrajT.get(key).clone());
+                }
+                for (int key : this.sv.trackTrajF.keySet()) {
+                    statevects.trackTrajF.put(key, this.sv.trackTrajF.get(key).clone());
+                }
+                for (int key : this.sv.trackTrajP.keySet()) {
+                    statevects.trackTrajP.put(key, this.sv.trackTrajP.get(key).clone());
+                }
+                for (int key : this.sv.trackTrajB.keySet()) {
+                    statevects.trackTrajB.put(key, this.sv.trackTrajB.get(key).clone());
+                }
+                svMap.put(i, statevects);
+                chi2KFMap.put(i, this.chi2kf);
             }
 
             if (i > 1) {
@@ -591,28 +772,28 @@ public class KFitter extends AKFitter {
     public StateVecs getStateVecs() {
         return sv;
     }
-    
-    public boolean getStopIteration(){
+
+    public boolean getStopIteration() {
         return stopIteration;
     }
 
-    public double getKFChi2(){
+    public double getKFChi2() {
         return chi2kf;
     }
 
-    public Map<Integer, Boolean> getSetFitFailedMap(){
+    public Map<Integer, Boolean> getSetFitFailedMap() {
         return setFitFailedMap;
     }
 
-    public Map<Integer, Boolean> getStopIterationMap(){
+    public Map<Integer, Boolean> getStopIterationMap() {
         return stopIterationMap;
     }
 
-    public Map<Integer, StateVecs> getSVMap(){
+    public Map<Integer, StateVecs> getSVMap() {
         return svMap;
     }
 
-    public Map<Integer, Double> getChi2KFMap(){
+    public Map<Integer, Double> getChi2KFMap() {
         return chi2KFMap;
     }
 
