@@ -16,30 +16,30 @@ import org.jlab.rec.vtx.Vertex;
  */
 public class Writer {
     
-    public static DataBank VtxBank(DataEvent event, List<Vertex> vtx) { 
+    public  DataBank VtxBank(DataEvent event, List<Vertex> vtx) { 
         DataBank bank = event.createBank("REC::VertDoca", vtx.size());
-        if(vtx!=null) {
-            for (int i = 0; i < vtx.size(); i++) {
-                bank.setShort("index1", i, (short) vtx.get(i).get_HelixPair().get(0).getId());
-                bank.setShort("index2", i, (short) vtx.get(i).get_HelixPair().get(1).getId());
-                bank.setFloat("x", i, (float) vtx.get(i).get_Vertex().x());
-                bank.setFloat("y", i, (float) vtx.get(i).get_Vertex().y());
-                bank.setFloat("z", i, (float) vtx.get(i).get_Vertex().z());
-                bank.setFloat("x1", i, (float) vtx.get(i).getTrack1POCA().x());
-                bank.setFloat("y1", i, (float) vtx.get(i).getTrack1POCA().y());
-                bank.setFloat("z1", i, (float) vtx.get(i).getTrack1POCA().z());
-                bank.setFloat("cx1", i, (float) vtx.get(i).getTrack1POCADir().x());
-                bank.setFloat("cy1", i, (float) vtx.get(i).getTrack1POCADir().y());
-                bank.setFloat("cz1", i, (float) vtx.get(i).getTrack1POCADir().z());
-                bank.setFloat("x2", i, (float) vtx.get(i).getTrack2POCA().x());
-                bank.setFloat("y2", i, (float) vtx.get(i).getTrack2POCA().y());
-                bank.setFloat("z2", i, (float) vtx.get(i).getTrack2POCA().z());
-                bank.setFloat("cx2", i, (float) vtx.get(i).getTrack2POCADir().x());
-                bank.setFloat("cy2", i, (float) vtx.get(i).getTrack2POCADir().y());
-                bank.setFloat("cz2", i, (float) vtx.get(i).getTrack2POCADir().z());
-                bank.setFloat("r", i, (float) vtx.get(i).getDoca()); 
-            }
+       
+        for (int i = 0; i < vtx.size(); i++) {
+            bank.setShort("index1", i, (short) vtx.get(i).getP1().getIndex());
+            bank.setShort("index2", i, (short) vtx.get(i).getP2().getIndex());
+            bank.setFloat("x", i, (float) vtx.get(i).getP0().getVx());
+            bank.setFloat("y", i, (float) vtx.get(i).getP0().getVy());
+            bank.setFloat("z", i, (float) vtx.get(i).getP0().getVz());
+            bank.setFloat("x1", i, (float) vtx.get(i).getP1().getVx());
+            bank.setFloat("y1", i, (float) vtx.get(i).getP1().getVy());
+            bank.setFloat("z1", i, (float) vtx.get(i).getP1().getVz());
+            bank.setFloat("cx1", i, (float) vtx.get(i).getP1().getPx());
+            bank.setFloat("cy1", i, (float) vtx.get(i).getP1().getPy());
+            bank.setFloat("cz1", i, (float) vtx.get(i).getP1().getPz());
+            bank.setFloat("x2", i, (float) vtx.get(i).getP2().getVx());
+            bank.setFloat("y2", i, (float) vtx.get(i).getP2().getVy());
+            bank.setFloat("z2", i, (float) vtx.get(i).getP2().getVz());
+            bank.setFloat("cx2", i, (float) vtx.get(i).getP2().getPx());
+            bank.setFloat("cy2", i, (float) vtx.get(i).getP2().getPy());
+            bank.setFloat("cz2", i, (float) vtx.get(i).getP2().getPz());
+            bank.setFloat("r", i, (float) vtx.get(i).getR()); 
         }
+        
         //bank.show();
         return bank;
     }
