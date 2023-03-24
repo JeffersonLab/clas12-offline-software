@@ -4,6 +4,8 @@
  */
 package org.jlab.rec.vtx;
 
+import org.jlab.geom.prim.Point3D;
+
 /**
  *
  * @author veronique
@@ -170,4 +172,10 @@ public class Particle {
     private double _pz;
     
     
+    @Override
+    public String toString() {
+        String o = "[("+_index+") pid = "+_pid+" q = "+_charge+" X = "+new Point3D(_vx, _vy, _vz).toString()
+                                            +" P = "+new Point3D(_px, _py, _pz).toString();   
+        return o;
+    }
 }

@@ -85,11 +85,38 @@ public class DoubleSwim  extends Swim {
         swim1.SwimToZ(finZ+buffer, 1); 
         swim2.SwimToZ(finZ+buffer, 1);
         
+        if(swim1.getSwimTraj()==null || swim2.getSwimTraj()==null ) {
+            if(Constants.DEBUGMODE) {
+                System.out.println("Failed Swim");
+                if(swim1.getSwimTraj()==null) {
+                    System.out.println("for Particle 1");
+                } 
+                if(swim2.getSwimTraj()==null) {
+                    System.out.println("for Particle 2");
+                }
+            }
+            return null;
+        }
         SwimTrajectory[] swts = new SwimTrajectory[2];
         swts[0] = swim1.getSwimTraj();
         swts[1] = swim2.getSwimTraj();
+        
         double[] vtx1 = swim1.SwimToDCA(swts[1]);
         double[] vtx2 = swim2.SwimToDCA(swts[0]);
+        
+        if(vtx1==null || vtx2==null ) {
+            if(Constants.DEBUGMODE) {
+                System.out.println("Failed Double-Swim");
+                if(vtx1==null) {
+                    System.out.println("for Particle 1");
+                } 
+                if(vtx2==null) {
+                    System.out.println("for Particle 2");
+                }
+            }
+            return null;
+        }
+        
         vtxx[0]=vtx1;
         vtxx[1]=vtx2;
         

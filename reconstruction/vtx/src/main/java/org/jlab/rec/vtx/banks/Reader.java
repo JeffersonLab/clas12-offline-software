@@ -47,6 +47,8 @@ public class Reader {
         
         Map<Integer, double[]> uTrkMap = new HashMap<>();
         Map<Integer, double[]> pTrkMap = new HashMap<>();
+        Map<Integer, Integer> qMap = new HashMap<>();
+        
         if(utrkBankEB!=null) {
             int nrows2 = utrkBankEB.rows();
             for(int loop = 0; loop < nrows2; loop++){
@@ -77,28 +79,26 @@ public class Reader {
         if(trkBankEB!=null) {
             int nrows2 = trkBankEB.rows();
             for(int loop = 0; loop < nrows2; loop++){
+                int pindex = trkBankEB.getInt("pindex", loop);
                 int detector = trkBankEB.getInt("detector", loop);
+                qMap.put(pindex, trkBankEB.getInt("q", loop));
+                
                 if(detector!=5) 
                     continue;
                 int index = trkBankEB.getInt("index", loop);
-                int pindex = trkBankEB.getInt("pindex", loop);
                 if(uTrkMap.containsKey(index) && pTrkMap.containsKey(pindex)) {
                     pTrkMap.put(pindex, uTrkMap.get(index));
                 }
             }
         }
-        if(recBankEB!=null) {
+        if(recBankEB!=null && trkBankEB!=null) {
             int nrows = recBankEB.rows();
             for(int loop = 0; loop < nrows; loop++){
-                int pidCode = recBankEB.getInt("pid", loop);
-                if(pidCode==0 || pidCode==22 || pidCode==2112) continue;
+                int pid = recBankEB.getInt("pid", loop);
                 int q = 0;
-                if((int) (pidCode/1000)==0) {
-                    q = (int) -Math.signum(pidCode);
-                } else {
-                    q = (int) Math.signum(pidCode);
-                }
-                
+                if(qMap.containsKey(loop))
+                    q = qMap.get(loop);
+                if(q==0) continue;
                 double px = recBankEB.getFloat("px", loop);
                 double py = recBankEB.getFloat("py", loop);
                 double pz = recBankEB.getFloat("pz", loop);
@@ -114,7 +114,7 @@ public class Reader {
                     vy = t[4];
                     vz = t[5];
                 } 
-                _particles.add(new Particle(loop,pidCode, vx, vy, vz, px, py, pz, q));
+                 _particles.add(new Particle(loop,pid, vx, vy, vz, px, py, pz, q));
             }
         }
     }

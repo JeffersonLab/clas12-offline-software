@@ -19,7 +19,7 @@ import org.jlab.rec.vtx.banks.Writer;
  */
 public class VTXEngine extends ReconstructionEngine {
 
-    private double docaCut = 3.0; //cut on variable r
+    private double docaCut = 5.0; //cut on variable r
 
     public VTXEngine() {
         super("VTX", "ziegler", "2.0");
@@ -56,9 +56,11 @@ public class VTXEngine extends ReconstructionEngine {
 
         int newRun = event.getBank("RUN::config").getInt("run", 0); 
         if (Run != newRun)  this.setRun(newRun); 
-        
         this.Run = this.getRun();
         
+        if(Constants.DEBUGMODE) 
+            System.out.println("EVENT "+event.getBank("RUN::config").getInt("event", 0));
+            
         VertexFinder vtf = new VertexFinder();
         List<Vertex> verteces = new ArrayList<>();
         // set parameters for all helixes
@@ -66,6 +68,7 @@ public class VTXEngine extends ReconstructionEngine {
     	trkReader.readDataBanks(event);
         for(int i = 0; i < trkReader.getParticles().size()-1; i++) {
             for (int j = i+1; j < trkReader.getParticles().size(); j++) {
+                
                 Vertex vt = vtf.computeVertex(trkReader.getParticles().get(i), 
                         trkReader.getParticles().get(j));
                 if(vt!=null)
