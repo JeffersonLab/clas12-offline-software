@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package org.jlab.io.task;
 
 import java.util.ArrayList;
@@ -25,7 +19,7 @@ public class DataSourceProcessor {
     
     DataSource dataSource = null;
     
-    List<IDataEventListener>  eventListeners = new ArrayList<IDataEventListener>();
+    List<IDataEventListener>  eventListeners = new ArrayList<>();
     
     private boolean      verboseMode = false;
     private int  eventProcessorDelay = 0;
@@ -94,6 +88,7 @@ public class DataSourceProcessor {
         }
         System.out.println("[DataSourceProcessor] >>>>> error : file extension is not known for : " + file);
     }
+
     /**
      * updating listeners. Calls timerUpdate() method for all listeners.
      */
@@ -141,13 +136,9 @@ public class DataSourceProcessor {
         }
     }
     
-    public void processPlay(){
-        
-    }
+    public void processPlay(){}
     
-    public void processPause(){
-        
-    }
+    public void processPause(){}
     
     public int  getProgress(){
         return this.eventsProcessed;
@@ -168,9 +159,7 @@ public class DataSourceProcessor {
     
     public void processSource(int delay){
         eventsProcessed = 0;
-        while(processNextEvent()==true){
-            //eventsProcessed++;
-        }
+        while(processNextEvent()==true){}
     }
     
     public boolean processNextEvent(){
@@ -178,23 +167,12 @@ public class DataSourceProcessor {
     }
     
     public boolean processNextEvent(int delay, DataEventType type){
-        
-        /*if(type==DataEventType.EVENT_STOP){
-            DataEvent event = EvioFactory.createEvioEvent();
-            event.setType(type);
-            for(IDataEventListener processor : eventListeners){
-                processor.dataEventAction(event);
-            }
-            return true;
-        }*/
-        
+
         if(dataSource==null) {
-            //System.out.println("[DataSourceProcessor] error ---> data source is not set");
             return false;
         }
         
-        if(dataSource.hasEvent()==false&&dataSource.getType()==DataSourceType.FILE){
-            //System.out.println("[DataSourceProcessor] error ---> data source has no events");
+        if(dataSource.hasEvent()==false && dataSource.getType()==DataSourceType.FILE){
             return false;
         }
         
@@ -213,10 +191,10 @@ public class DataSourceProcessor {
         }
         
         Long st = System.currentTimeMillis();
-        DataEvent event = dataSource.getNextEvent(); 
-        if(event==null){
-            return false;
-        }
+        DataEvent event = dataSource.getNextEvent();
+
+        if(event==null) return false;
+
         event.setType(type);
         
         if(this.eventsProcessed==0){
@@ -228,29 +206,25 @@ public class DataSourceProcessor {
         this.eventsProcessed++;
         Long et = System.currentTimeMillis();
         this.timeSpendOnReading += (et-st);
-        //System.out.println(" processing next event ---> " + this.eventsProcessed);
-        if(event!=null){
-            st = System.currentTimeMillis();
-            for(IDataEventListener processor : eventListeners){
-                try {
-                    processor.dataEventAction(event);
-                    if(eventsProcessed%this.listenerUpdateRate==0){
-                        processor.timerUpdate();
-                    }
-                } catch (Exception e){
-                    
+        st = System.currentTimeMillis();
+        for(IDataEventListener processor : eventListeners){
+            try {
+                processor.dataEventAction(event);
+                if(eventsProcessed%this.listenerUpdateRate==0){
+                    processor.timerUpdate();
                 }
+            } catch (Exception e){
             }
-            et = System.currentTimeMillis();
-            this.timeSpendOnProcessing += (et-st);
-            if(delay>0){
-                try {
-                    Thread.sleep(delay);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(DataSourceProcessor.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }                
         }
+        et = System.currentTimeMillis();
+        this.timeSpendOnProcessing += (et-st);
+        if(delay>0){
+            try {
+                Thread.sleep(delay);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(DataSourceProcessor.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }                
         
         return true;
     }        
