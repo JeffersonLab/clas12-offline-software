@@ -270,7 +270,7 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
 
         this.set_Point(new Point3D(x, y, z));
 
-        double tanThX = val_sl2;
+        double tanThX = 0.5 * (val_sl1 + val_sl2);
         double tanThY = FastMath.atan2(y, z);
         double uz = 1. / Math.sqrt(1 + tanThX * tanThX + tanThY * tanThY);
         double ux = uz * tanThX;
@@ -293,8 +293,8 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
 
         //double err_x = 0.5*Math.sqrt(err_it1*err_it1+err_it2*err_it2 + z*z*(err_sl1*err_sl1+err_sl2*err_sl2) );
         //double err_y = 0.5*wy_over_wx*Math.sqrt(err_it1*err_it1+err_it2*err_it2 +z*z*(err_sl1*err_sl1+err_sl2*err_sl2) );
-        double err_x_fix = 0.5 * Math.sqrt(err_it1 * err_it1 + err_it2 * err_it2 + z * z * (err_sl1 * err_sl1 + err_sl2 * err_sl2) + 2 * z * err_cov1 + 2 * z * err_cov2);
-        double err_y_fix = 0.5 * wy_over_wx * Math.sqrt(err_it1 * err_it1 + err_it2 * err_it2 + z * z * (err_sl1 * err_sl1 + err_sl2 * err_sl2) + 2 * z * err_cov1 + 2 * z * err_cov2);
+        double err_x_fix = 0.5 * Math.sqrt(err_it1 * err_it1 + err_it2 * err_it2 + z * z * (err_sl1 * err_sl1 + err_sl2 * err_sl2));
+        double err_y_fix = 0.5 * wy_over_wx * Math.sqrt(err_it1 * err_it1 + err_it2 * err_it2 + z * z * (err_sl1 * err_sl1 + err_sl2 * err_sl2));
 
         this.set_PointErr(new Point3D(err_x_fix, err_y_fix, 0));
 

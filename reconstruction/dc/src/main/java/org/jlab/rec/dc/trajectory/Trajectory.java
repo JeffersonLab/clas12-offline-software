@@ -31,9 +31,19 @@ public class Trajectory extends ArrayList<Cross> {
     private double pathLength;
     private List<StateVec> stateVecs;
     private List<TrajectoryStateVec> trajStateVecs = new ArrayList<>();
-
+    
     private final static double TOLERANCE = 0.1; // trajectory toleerance (cm)
+    
+    private double a; // Parameter a for fitting function in xz plane: f(x) = a*z^2 + b*z + c
+    
+    public void setA(double a){
+        this.a = a;
+    }
    
+    public double getA(){
+        return a;
+    }
+    
     public List<StateVec> getStateVecs() {
         return stateVecs;
     }

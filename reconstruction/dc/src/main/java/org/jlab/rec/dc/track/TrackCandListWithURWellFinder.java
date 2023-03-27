@@ -137,7 +137,7 @@ public class TrackCandListWithURWellFinder {
     private double[] getTrackInitFit(int sector, double x1, double y1, double z1,
             double x2, double y2, double z2, double x3, double y3, double z3,
             double ux, double uy, double uz, double thX, double thY,
-            double theta1, double theta3,
+            double theta1, double theta3, double a,
             double iBdl, double TORSCALE, Swim dcSwim) {
         if (theta1 < -998 || theta3 < -998) {
             return new double[]{Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
@@ -147,17 +147,15 @@ public class TrackCandListWithURWellFinder {
         double chi2 = 0; // assume err =1 on points 
         double intBdl = 0;
 
-        double p = calcInitTrkP(ux, uy, uz, thX, thY,
-                theta1, theta3,
-                iBdl, TORSCALE);
+        double p = calcInitTrkP(thX, thY, theta1, theta3, iBdl);
         double p_x = ux * p;
         double p_y = uy * p;
         double p_z = uz * p;
 
-        int q = calcInitTrkQ(theta1, theta3, TORSCALE);
+        int q = calcInitTrkQ(a, TORSCALE);
 
         dcSwim.SetSwimParameters(x1, y1, z1, p_x, p_y, p_z, q);
-        double[] R = dcSwim.SwimToPlaneTiltSecSys(sector, z2);
+        double[] R = dcSwim.SwimToPlaneTiltSecSysBdlXZPlane(sector, z2);
         if (R == null) {
             return new double[]{Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
         }
@@ -167,7 +165,7 @@ public class TrackCandListWithURWellFinder {
         dcSwim.SetSwimParameters(R[0], R[1], R[2],
                 R[3], R[4], R[5],
                 q);
-        R = dcSwim.SwimToPlaneTiltSecSys(sector, z3);
+        R = dcSwim.SwimToPlaneTiltSecSysBdlXZPlane(sector, z3);
         if (R == null) {
             return new double[]{Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
         }
@@ -181,9 +179,7 @@ public class TrackCandListWithURWellFinder {
         return pars;
     }
 
-    private double calcInitTrkP(double ux, double uy, double uz, double thX, double thY,
-            double theta1, double theta3,
-            double iBdl, double TORSCALE) {
+    private double calcInitTrkP(double thX, double thY, double theta1, double theta3, double iBdl) {
         double deltaTheta = theta3 - theta1;
         if (deltaTheta == 0) {
             return Double.POSITIVE_INFINITY;
@@ -197,12 +193,9 @@ public class TrackCandListWithURWellFinder {
         return p;
     }
 
-    private int calcInitTrkQ(double theta1, double theta3,
-            double TORSCALE) {
-        double deltaTheta = theta3 - theta1;
-
+    private int calcInitTrkQ(double a, double TORSCALE) {
         //positive charges bend outward for nominal GEMC field configuration
-        int q = (int) Math.signum(deltaTheta);
+        int q = (int) Math.signum(a);
         q *= (int) -1 * Math.signum(TORSCALE); // flip the charge according to the field scale
 
         return q;
@@ -1039,95 +1032,16 @@ public class TrackCandListWithURWellFinder {
                     double theta3s1 = Math.atan(cand.get(2).get_Segment1().get_fittedCluster().get_clusterLineFitSlope());
                     double theta1s1 = Math.atan(cand.get(0).get_Segment1().get_fittedCluster().get_clusterLineFitSlope());
 
-                    if (cand.get(0).get_Segment2().get_Id() == -1) {
-                        theta1s2 = theta1s1; //do not use
-                    }                    //theta1s2=-999; //do not use
-                    if (cand.get(0).get_Segment1().get_Id() == -1) {
-                        theta1s1 = theta1s2;
-                    }
-                    //theta1s1=-999;
-                    if (cand.get(2).get_Segment2().get_Id() == -1) {
-                        theta3s2 = theta3s1;
-                    }
-                    //theta3s2=-999;
-                    if (cand.get(2).get_Segment1().get_Id() == -1) {
-                        theta3s1 = theta3s2;
-                    }
-                    //theta3s1=-999;
-                    double theta3 = 0;
-                    double theta1 = 0;
+                    double theta1 = 0.5 * (theta1s1 + theta1s2);
+                    double theta3 = 0.5 * (theta3s1 + theta3s2);                     
 
-                    double chisq = Double.POSITIVE_INFINITY;
-                    double chi2;
-                    double iBdl = traj.getIntegralBdl();
-                    double[] pars;
-
-                    if(LOGGER.getLevel()==Level.FINE) {
-                        startTime = System.currentTimeMillis();
-                    }
-                    pars = getTrackInitFit(cand.get(0).get_Sector(), x1, y1, z1, x2, y2, z2, x3, y3, z3,
+                    double[] pars = getTrackInitFit(cand.get(0).get_Sector(), x1, y1, z1, x2, y2, z2, x3, y3, z3,
                             ux, uy, uz, thX, thY,
-                            theta1s1, theta3s1,
+                            theta1, theta3, traj.getA(), 
                             traj.getIntegralBdl(), TORSCALE, dcSwim);
-                    chi2 = pars[0];
-                    if (chi2 < chisq) {
-                        chisq = chi2;
-                        theta1 = theta1s1;
-                        theta3 = theta3s1;
-                        iBdl = pars[1];
-                    }
                     
-                    LOGGER.log(Level.FINE, "TrackInitFit-1 = " + (System.currentTimeMillis() - startTime));
-
-                    if(LOGGER.getLevel()==Level.FINE) {
-                        startTime = System.currentTimeMillis();
-                    }
-                    pars = getTrackInitFit(cand.get(0).get_Sector(), x1, y1, z1, x2, y2, z2, x3, y3, z3,
-                            ux, uy, uz, thX, thY,
-                            theta1s1, theta3s2,
-                            traj.getIntegralBdl(), TORSCALE, dcSwim);
-                    chi2 = pars[0];
-                    if (chi2 < chisq) {
-                        chisq = chi2;
-                        theta1 = theta1s1;
-                        theta3 = theta3s2;
-                        iBdl = pars[1];
-                    }
-                    
-                    LOGGER.log(Level.FINE, "TrackInitFit-2 = " + (System.currentTimeMillis() - startTime));
-
-                    if(LOGGER.getLevel()==Level.FINE) {
-                        startTime = System.currentTimeMillis();
-                    }
-                    pars = getTrackInitFit(cand.get(0).get_Sector(), x1, y1, z1, x2, y2, z2, x3, y3, z3,
-                            ux, uy, uz, thX, thY,
-                            theta1s2, theta3s1,
-                            traj.getIntegralBdl(), TORSCALE, dcSwim);
-                    chi2 = pars[0];
-                    if (chi2 < chisq) {
-                        chisq = chi2;
-                        theta1 = theta1s2;
-                        theta3 = theta3s1;
-                        iBdl = pars[1];
-                    }
-                    
-                    LOGGER.log(Level.FINE, "TrackInitFit-3 = " + (System.currentTimeMillis() - startTime));
-
-                    if(LOGGER.getLevel()==Level.FINE) {
-                        startTime = System.currentTimeMillis();
-                    }
-                    pars = getTrackInitFit(cand.get(0).get_Sector(), x1, y1, z1, x2, y2, z2, x3, y3, z3,
-                            ux, uy, uz, thX, thY,
-                            theta1s2, theta3s2,
-                            traj.getIntegralBdl(), TORSCALE, dcSwim);
-                    chi2 = pars[0];
-                    if (chi2 < chisq) {
-                        theta1 = theta1s2;
-                        theta3 = theta3s2;
-                        iBdl = pars[1];
-                    }
-                    
-                    LOGGER.log(Level.FINE, "TrackInitFit-4 = " + (System.currentTimeMillis() - startTime));
+                    double chi2 = pars[0];
+                    double iBdl = pars[1];  
 
                     if (chi2 > Constants.SEEDCUT && donotapplyCuts == false) {
                         continue;
@@ -1138,13 +1052,11 @@ public class TrackCandListWithURWellFinder {
                     //double iBdl = traj.getIntegralBdl(); 
                     if (iBdl != 0) {
                         // momentum estimate if Bdl is non zero and the track has curvature  
-                        double p = calcInitTrkP(ux, uy, uz, thX, thY,
-                                theta1, theta3,
-                                iBdl, TORSCALE);
+                        double p = calcInitTrkP(thX, thY, theta1, theta3, iBdl);
                         if(LOGGER.getLevel()==Level.FINE) {
                             startTime = System.currentTimeMillis();
                         }
-                        int q = this.calcInitTrkQ(theta1, theta3, TORSCALE);
+                        int q = this.calcInitTrkQ(traj.getA(), TORSCALE);
                         
                         LOGGER.log(Level.FINE, "calcInitTrkQ = " + (System.currentTimeMillis() - startTime));
 
