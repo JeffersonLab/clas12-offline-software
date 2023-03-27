@@ -60,8 +60,29 @@ public class ECPeak implements Comparable {
     public Line3D getLine()       {return peakLine;}
     
   
+    public String getString(){
+        StringBuilder str = new StringBuilder();
+        for(int i = 0; i < this.peakStrips.size(); i++){
+            if(i!=0); str.append(",");
+            str.append(String.format("%.5f",peakStrips.get(i).getEnergy()));
+        }
+        return str.toString();
+    }
     public void setPeakId(int id){
         for(ECStrip strip : peakStrips) strip.setPeakId(id);
+    }
+    public double getStripEnergy(int strip){ return this.peakStrips.get(strip).getEnergy();}
+    
+    public double[] getEnergies(){
+        double[] data = new double[peakStrips.size()];
+        for(int k = 0; k < data.length; k++) data[k] = peakStrips.get(k).getEnergy();
+        return data;
+    }
+    
+    public double[] getEnergiesLog(){
+        double[] data = new double[peakStrips.size()];
+        for(int k = 0; k < data.length; k++) data[k] = Math.log(peakStrips.get(k).getEnergy()*1000);
+        return data;
     }
     
     public double getEnergy(){
@@ -189,6 +210,8 @@ public class ECPeak implements Comparable {
                 pointEnd.z()/logSumm
         );
         
+        logSumm = 0.0; // added according to issue 1057
+        
         // Shower peak moments
         for(int i = 0; i < peakStrips.size(); i++){            
             double stripDistance = peakStrips.get(i).getDistanceEdge();
@@ -198,6 +221,7 @@ public class ECPeak implements Comparable {
             peakMoment  += dist*dist*dist*dist*energyLog;           
             peakMoment2 += dist*dist*energyLog;
             peakMoment3 += dist*dist*dist*energyLog;
+            logSumm += energyLog;
         }
         
         peakMoment = peakMoment/logSumm;
@@ -342,6 +366,22 @@ public class ECPeak implements Comparable {
 	    return out;
     }
     
+    public int isGood(){
+        int maxStrip = this.getMaxStrip();
+        int  nStrips = this.peakStrips.size();
+        if(maxStrip==0&&nStrips>2){
+            if(this.getStripEnergy(maxStrip+1)>this.getStripEnergy(maxStrip+2)) return 1;
+        } 
+        
+        if(maxStrip==nStrips-1&&nStrips>2){
+            if(this.getStripEnergy(maxStrip-1)>this.getStripEnergy(maxStrip-2)) return 1;
+        }
+        
+        if(nStrips>2) return 2;
+        
+        return 0;
+    }
+    
     int getDipIndex(int[] in) {
     	int i0=in[0], i1=in[1];
     	switch (i1-i0) {
@@ -372,6 +412,7 @@ public class ECPeak implements Comparable {
     	return (Math.abs((e1-e2)/(e1+e2)))<0.80;
     }
    
+    
     int MinMax1() { //finds peak with _- or -_ or  _-_ pattern
         List<ECStrip> mxs = new ArrayList<ECStrip>();
         List<Integer> mns = new ArrayList<Integer>();
