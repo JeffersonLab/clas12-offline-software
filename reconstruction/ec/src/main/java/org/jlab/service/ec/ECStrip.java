@@ -499,7 +499,7 @@ public class ECStrip implements Comparable {
         StringBuilder str = new StringBuilder();
         str.append(String.format("----> strip (%3d %3d %3d) ADC/TDC/FTDC  %5d %5d %5.1f  ENERGY=%6.4f TIME=%6.2f DTIME=%6.2f FTIME=%6.2f FDIST=%6.2f S/P/C=(%2d %2d %2d)", 
                 desc.getSector(),desc.getLayer(),desc.getComponent(),
-                iADC,iTDC,iTADC,getEnergy(),getDTime(),getFTime(),getTdist(),stripId,peakID,clusterId));
+                iADC,iTDC,iTADC,getEnergy(),getTime(),getDTime(),getFTime(),getTdist(),stripId,peakID,clusterId));
         str.append(String.format("  GAIN (%5.3f) ATT (%5.1f)", 
                 iGain,iAttenB));
         return str.toString();
