@@ -277,6 +277,7 @@ public class DetectorData {
             bank.setFloat("recFTU", row, (float)r.getPeakFADCTime().x() );
             bank.setFloat("recFTV", row, (float)r.getPeakFADCTime().y() );
             bank.setFloat("recFTW", row, (float)r.getPeakFADCTime().z() );
+            bank.setFloat("size", row, (float)r.getSize() );
         }
         return bank;
     }

@@ -36,12 +36,35 @@ public class ECEngine extends ReconstructionEngine {
         List<ECPeak>       ecPeaks = ECCommon.processPeaks(ECCommon.createPeaks(ecStrips)); // thresholds, split peaks -> update peak-lines          
         List<ECCluster> ecClusters = new ArrayList<ECCluster>();  
         
-        ecClusters.addAll(ECCommon.createClusters(ecPeaks,1)); //PCAL
-        ecClusters.addAll(ECCommon.createClusters(ecPeaks,4)); //ECinner 
-        ecClusters.addAll(ECCommon.createClusters(ecPeaks,7)); //ECouter
+        List<ECCluster> tmpPCAL  = ECCommon.createClusters(ecPeaks,1);
+        List<ECCluster> tmpECIN  = ECCommon.createClusters(ecPeaks,4);
+        List<ECCluster> tmpECOUT = ECCommon.createClusters(ecPeaks,7);
+        
+        // - Thsi is the part that identifies clusters with 2 views shared,
+        // - and picks the one with best cluster size.
+        
+        
+        //ECPeakAnalysis.doPeakCleanup(ecPeaks);
+        
+        ECPeakAnalysis.doClusterCleanup(tmpPCAL);
+        ECPeakAnalysis.doClusterCleanup(tmpECIN);
+        ECPeakAnalysis.doClusterCleanup(tmpECOUT);
+        
+        
+        // - commented by Gagik - now created clusters for each of sub-modules
+        // - will be analyzed to eliminate clusters that share two views with 
+        // - another cluster. The best matrching cluster will be left 
+        // - after this procedure.
+        //ecClusters.addAll(ECCommon.createClusters(ecPeaks,1)); //PCAL
+        //ecClusters.addAll(ECCommon.createClusters(ecPeaks,4)); //ECinner 
+        //ecClusters.addAll(ECCommon.createClusters(ecPeaks,7)); //ECouter
+        
+        ecClusters.addAll(tmpPCAL); //PCAL
+        ecClusters.addAll(tmpECIN); //ECinner 
+        ecClusters.addAll(tmpECOUT); //ECouter
         
         ECCommon.shareClustersEnergy(ecClusters);  // Repair 2 clusters which share the same peaks
-       
+        
         for (int iCl = 0; iCl < ecClusters.size(); iCl++) {
             // As clusters are already defined at this point, we can fill the clusterID of ECStrips belonging to the given cluster
             // === U strips ===
@@ -139,7 +162,7 @@ public class ECEngine extends ReconstructionEngine {
             bankC.setShort("status", c, (short) clusters.get(c).getStatus());
             bankC.setByte("layer",   c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getLayer());
             bankC.setFloat("energy", c, (float) clusters.get(c).getEnergy());           
-            bankC.setFloat("time",   c, (float) clusters.get(c).getTime()); 
+            bankC.setFloat("time",   c, (float) clusters.get(c).getTime());             
             bankC.setByte("idU",     c,  (byte) clusters.get(c).UVIEW_ID);
             bankC.setByte("idV",     c,  (byte) clusters.get(c).VVIEW_ID);
             bankC.setByte("idW",     c,  (byte) clusters.get(c).WVIEW_ID);
@@ -171,9 +194,14 @@ public class ECEngine extends ReconstructionEngine {
         }
          
          DataBank  bankD =  de.createBank("ECAL::calib", clusters.size());
+         
+         //String[] entries = bankD.getDescriptor().getEntryList();
+         //System.out.println(Arrays.toString(entries));
+         
          for(int c = 0; c < clusters.size(); c++){
             bankD.setByte("sector",  c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getSector());
             bankD.setByte("layer",   c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getLayer());
+            bankD.setFloat("size",   c, (float) clusters.get(c).getClusterSize());
             bankD.setShort("dbstU",  c, (short) clusters.get(c).clusterPeaks.get(0).getDBStatus());
             bankD.setShort("dbstV",  c, (short) clusters.get(c).clusterPeaks.get(1).getDBStatus());
             bankD.setShort("dbstW",  c, (short) clusters.get(c).clusterPeaks.get(2).getDBStatus());

@@ -41,7 +41,7 @@ public class DetectorParticle implements Comparable {
     private DetectorParticleStatus particleStatus = new DetectorParticleStatus();
 
     // let multiple particles share the same hit for these detectors:
-    private final DetectorType[] sharedDetectors = {DetectorType.FTOF,DetectorType.CTOF};
+    protected final DetectorType[] sharedDetectors = {DetectorType.FTOF,DetectorType.CTOF};
     
     protected final List<DetectorResponse> responseStore = new ArrayList<>();
 
