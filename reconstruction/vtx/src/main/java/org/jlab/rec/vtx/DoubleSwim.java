@@ -30,8 +30,18 @@ public class DoubleSwim  extends Swim {
     private Swim swim2;
     
     private double r = 99999;
-   
-    public DoubleSwim(double x01, double y01, double z01, double px01, double py01, double pz01, int charge1,
+    
+    public DoubleSwim() {
+        swim1 = new Swim();
+        swim2 = new Swim();
+        
+        swim1.stepSize= 500.00* 1.e-6; // 500 microns
+        swim2.stepSize= 500.00* 1.e-6; // 500 microns
+        swim1.distanceBetweenSaves=500.00 * 1.e-6; // 500 microns
+        swim2.distanceBetweenSaves=500.00 * 1.e-6; // 500 microns
+    }
+    
+    public void init(double x01, double y01, double z01, double px01, double py01, double pz01, int charge1,
             double x02, double y02, double z02, double px02, double py02, double pz02, int charge2) {
         _x01 = x01;
         _y01 = y01;
@@ -47,14 +57,6 @@ public class DoubleSwim  extends Swim {
         _py02 = py02;
         _pz02 = pz02;
         _charge2 = charge2;
-        
-        swim1 = new Swim();
-        swim2 = new Swim();
-        
-        swim1.stepSize= 500.00* 1.e-6; // 500 microns
-        swim2.stepSize= 500.00* 1.e-6; // 500 microns
-        swim1.distanceBetweenSaves=500.00 * 1.e-6; // 500 microns
-        swim2.distanceBetweenSaves=500.00 * 1.e-6; // 500 microns
         
     }
     

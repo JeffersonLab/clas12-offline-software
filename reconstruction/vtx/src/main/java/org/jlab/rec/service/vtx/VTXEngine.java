@@ -2,10 +2,13 @@ package org.jlab.rec.service.vtx;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.vtx.Constants;
+import org.jlab.rec.vtx.DoubleSwim;
 import org.jlab.rec.vtx.Vertex;
 import org.jlab.rec.vtx.VertexFinder;
 import org.jlab.rec.vtx.banks.Reader;
@@ -60,8 +63,8 @@ public class VTXEngine extends ReconstructionEngine {
         
         if(Constants.DEBUGMODE) 
             System.out.println("EVENT "+event.getBank("RUN::config").getInt("event", 0));
-            
-        VertexFinder vtf = new VertexFinder();
+        DoubleSwim ds = new DoubleSwim();    
+        VertexFinder vtf = new VertexFinder(ds);
         List<Vertex> verteces = new ArrayList<>();
         // set parameters for all helixes
     	Reader trkReader = new Reader();  	
@@ -69,8 +72,13 @@ public class VTXEngine extends ReconstructionEngine {
         for(int i = 0; i < trkReader.getParticles().size()-1; i++) {
             for (int j = i+1; j < trkReader.getParticles().size(); j++) {
                 
-                Vertex vt = vtf.computeVertex(trkReader.getParticles().get(i), 
-                        trkReader.getParticles().get(j));
+                Vertex vt = null;
+                try {
+                    vt = vtf.computeVertex(trkReader.getParticles().get(i), 
+                            trkReader.getParticles().get(j));
+                } catch (CloneNotSupportedException ex) {
+                    Logger.getLogger(VTXEngine.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 if(vt!=null)
                     verteces.add(vt);
                 

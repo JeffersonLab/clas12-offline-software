@@ -1,12 +1,16 @@
 package org.jlab.rec.vtx;
 
 public class VertexFinder {
-	
-    public VertexFinder() {
-            // TODO Auto-generated constructor stub
+    private DoubleSwim _ds;
+    public VertexFinder(DoubleSwim ds) {
+        _ds = ds;
     }
 
-    public Vertex computeVertex(Particle p1, Particle p2) {
+    public Vertex computeVertex(Particle _p1, Particle _p2) throws CloneNotSupportedException {
+        
+        Particle p1 = (Particle) _p1.clone();
+        Particle p2 = (Particle) _p2.clone();
+        
         if(Constants.DEBUGMODE)
             System.out.println("Looking for common vertex for particles \n"+
                             p1.toString()+"\n and "+p2.toString());
@@ -17,12 +21,12 @@ public class VertexFinder {
                 return vtx;
         }
 
-        DoubleSwim ds = new DoubleSwim(p1.getVx(),  p1.getVy(), p1.getVz(),
+        _ds.init(p1.getVx(), p1.getVy(), p1.getVz(),
                                     p1.getPx(), p1.getPy(), p1.getPz(), p1.getCharge(),
                                     p2.getVx(), p2.getVy(), p2.getVz(),
                                     p2.getPx(), p2.getPy(), p2.getPz(), p2.getCharge());
 
-        double[][] t = ds.getDoubleSwimVertexes();
+        double[][] t = _ds.getDoubleSwimVertexes();
         
         if(t==null) return vtx;
             

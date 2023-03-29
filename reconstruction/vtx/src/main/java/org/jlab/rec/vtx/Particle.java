@@ -5,12 +5,12 @@
 package org.jlab.rec.vtx;
 
 import org.jlab.geom.prim.Point3D;
-
+import java.lang.Cloneable;
 /**
  *
  * @author veronique
  */
-public class Particle {
+public class Particle implements Cloneable {
 
     public Particle(int pid, double x, double y, double z, double px, double py, double pz, int q) {
         _pid = pid;
@@ -36,6 +36,12 @@ public class Particle {
         
     }
 
+    @Override
+    protected Object clone()
+        throws CloneNotSupportedException
+    {
+        return super.clone();
+    }
     /**
      * @return the _index
      */
