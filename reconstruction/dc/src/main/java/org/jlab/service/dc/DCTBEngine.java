@@ -358,7 +358,6 @@ public class DCTBEngine extends DCEngine {
                     0, 0, 0, 0, eQ * eQ
             );
             initStateVec.CM = initCMatrix;
-
             
         } else {
             kf.setFitFailed = true;

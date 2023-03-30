@@ -1150,7 +1150,6 @@ public class TrackCandListFinder {
         double etx = Constants.HBINITIALSTATEUNCSCALE * Constants.HBINITIALSTATETXUNC;
         double ety = Constants.HBINITIALSTATEUNCSCALE * Constants.HBINITIALSTATETYUNC;
         double eQ = Constants.HBINITIALSTATEUNCSCALE * Constants.HBINITIALSTATEQUNC;
-
     	
         Matrix initCMatrix = new Matrix();
         initCMatrix.set(ex * ex, 0, 0, 0, 0,
