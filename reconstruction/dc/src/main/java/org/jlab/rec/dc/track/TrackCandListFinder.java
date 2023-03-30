@@ -1158,9 +1158,7 @@ public class TrackCandListFinder {
             0, 0, etx * etx, 0, 0,
             0, 0, 0, ety * ety, 0,
             0, 0, 0, 0, eQ * eQ
-        );
-                       
-
+        );                       
     	initStateVec.CM = initCMatrix;          
     }    
 
