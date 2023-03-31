@@ -35,7 +35,8 @@ public enum DetectorType {
     ECTOT     (112, "ECTOT"),
     LAC       (113, "LAC"),
     SC        (114, "SC"),
-    CC        (115, "CC");
+    CC        (115, "CC"),
+    ECALTEST  (99, "ECALTEST");
     
     private final int detectorId;
     private final String detectorName;

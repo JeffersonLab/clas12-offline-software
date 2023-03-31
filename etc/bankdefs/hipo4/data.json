@@ -154,6 +154,21 @@
     ]
   },
   {
+    "name" : "ECALTEST::adc",
+    "group": 20700,
+    "item" : 13,
+    "info": "ADC bank for the Electromagnetic Calorimeter",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (1-6)"},
+      { "name":"layer"     , "type":"B", "info":"layer (1..9)"},
+      { "name":"component" , "type":"S", "info":"strip"},
+      { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
+      { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
+      { "name":"time"      , "type":"F", "info":"time from pulse fit"},
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
+    ]
+  },
+  {
     "name" : "FMT::adc",
     "group": 20800,
     "item" : 11,
