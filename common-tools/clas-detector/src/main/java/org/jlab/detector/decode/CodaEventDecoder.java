@@ -938,8 +938,16 @@ public class CodaEventDecoder {
                     if (m_APV.containsKey(HybridID) && m_APV.get(HybridID).size() > APV_MIN_LENGTH) {
                         System.err.println("Duplicate entry for the same Hybrid #" + HybridID);
                     }
-
-                    m_APV.put(HybridID, new ArrayList<>());
+			
+		    /**
+		     * VERY Bad way of doing this, but this is just a temp solution
+		     * to ignore GEM data from slots #12 and #13, as we don't have
+		     * these data in the TT
+		     * */
+		     
+		    if( HybridID <= 11){
+                    	m_APV.put(HybridID, new ArrayList<>());
+		    }
 
                     idata += 2;
 
@@ -957,8 +965,10 @@ public class CodaEventDecoder {
                     Short word16bit2 = (short) (intBuff[idata] & 0xffff);
                     word16bit2 = Short.reverseBytes(word16bit2);
                     
-                    m_APV.get(HybridID).add(word16bit1);
-                    m_APV.get(HybridID).add(word16bit2);
+		    if( HybridID <= 11){
+                    	m_APV.get(HybridID).add(word16bit1);
+                    	m_APV.get(HybridID).add(word16bit2);
+		    }
 
                     idata += 1;
                 } else {
@@ -972,8 +982,10 @@ public class CodaEventDecoder {
                     Short word16bit2 = (short) (intBuff[idata] & 0xffff);
                     word16bit2 = Short.reverseBytes(word16bit2);
 
-                    m_APV.get(HybridID).add(word16bit1);
-                    m_APV.get(HybridID).add(word16bit2);
+		    if( HybridID <= 11){
+                    	m_APV.get(HybridID).add(word16bit1);
+                    	m_APV.get(HybridID).add(word16bit2);
+		    }
                 }
             }
 
@@ -1011,11 +1023,29 @@ public class CodaEventDecoder {
 
                         i_apv = i_apv + 12; // Note 12 = 3 words < HEADED + 8 address word + 1 Error word // Details should be in APV documentation.
 
+                        /**
+                         * Will determine the common mode here
+                         * Will used the i_apvTmp to loop over cur_APV elements, and determine the common mode.
+                         */
+                        
+                        int i_apvTmp = i_apv;
+                        
+                        double cmnMode = 0;
+                        
+                        /**
+                         * Will skip first and last 10 channels in the cmnMode determination
+                         */
+                        for( int ich = 10; ich < n_APV_CH - 10; ich++ ){
+                            cmnMode = cmnMode + (double)cur_APV.get(i_apvTmp);
+                            i_apvTmp = i_apvTmp + 1;
+                        }
+                        cmnMode = cmnMode/( (double)( n_APV_CH - 20 ) );
+                                                
                         for (int ich = 0; ich < n_APV_CH; ich++) {
                             DetectorDataDgtz bank = new DetectorDataDgtz(crate, slot.intValue(), ich);
                             ADCData adcData = new ADCData();
 
-                            adcData.setIntegral((int) (cur_APV.get(i_apv)));
+                            adcData.setIntegral((int) (cur_APV.get(i_apv) - cmnMode ));
                             adcData.setPedestal(ts);
                             bank.addADC(adcData);
                             entries.add(bank);
@@ -1428,7 +1458,7 @@ public class CodaEventDecoder {
         EvioSource reader = new EvioSource();
         //reader.open("/Users/devita/clas_004013.evio.1000");
         //reader.open("/work/clas12/rafopar/uRWELL/Readout/APV25/urwell_001142.evio.00000");
-        reader.open("/work/clas12/rafopar/uRWELL/Readout/APV25/urwell_001164.evio.00000");
+        reader.open("/work/clas12/rafopar/uRWELL/Readout/APV25/urwell_001326.evio.00000");
         CodaEventDecoder decoder = new CodaEventDecoder();
         DetectorEventDecoder detectorDecoder = new DetectorEventDecoder();
 
