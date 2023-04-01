@@ -41,8 +41,10 @@ public class ExtendedFADCFitter implements IFADCFitter {
         rms = Math.sqrt(noise / (maxBin - minBin + 1) - ped*ped);
     }
 
-    public boolean fit(int nsa, int nsb, int tet, int pedr, short[] waveform) {
+    public boolean fit(int nsa, int nsb, int tet, int userped, short[] waveform) {
 
+        ped=0;
+        rms=0;
         t0=0;
         adc=0;
         thresholdCrossingBin=0;
@@ -53,7 +55,7 @@ public class ExtendedFADCFitter implements IFADCFitter {
         tfine=0;
 
         // if user-supplied pedestal is nonzero, use it:
-        if (pedr!=0) ped = pedr;
+        if (userped!=0) ped = userped;
 
         // not enough samples, just use the whole window for pedestal and abort:
         else if (waveform.length < pedestalMaxBin+1) {
@@ -92,13 +94,13 @@ public class ExtendedFADCFitter implements IFADCFitter {
 
         // calculating mode 7 pulse time:
         final double halfMax = (pulsePeakValue+ped)/2;
-        int s0 = -1;
-        int s1 = -1;
+        int leadingBin = -1;
+        int trailingBin = -1;
 
         // find the leading-edge bin at half-height: 
         for (int bin=thresholdCrossingBin-1; bin<Math.min(waveform.length-1,pulsePeakBin+1); bin++) {
             if (waveform[bin]<=halfMax && waveform[bin+1]>halfMax) {
-                s0 = bin;
+                leadingBin = bin;
                 break;
             }
         }
@@ -106,21 +108,21 @@ public class ExtendedFADCFitter implements IFADCFitter {
         // find the trailing-edge bin at half-height:
         for (int bin=pulsePeakBin; bin<Math.min(waveform.length-1,thresholdCrossingBin+nsa); bin++) {
             if (waveform[bin]>halfMax && waveform[bin+1]<=halfMax) {
-                s1 = bin;
+                trailingBin = bin;
                 break;
             }
         }
 
         // set the leading-edge times: 
-        if(s0 > 0) {
+        if(leadingBin > 0) {
             // set coarse time to be the sample before the 50% crossing
-            tcoarse = s0;
+            tcoarse = leadingBin;
             // set the fine time from interpolation between the two samples before and after the 50% crossing (6 bits resolution)
-            tfine   = ((int) ((halfMax - waveform[s0])/(waveform[s0+1]-waveform[s0]) * 64));
+            tfine   = ((int) ((halfMax - waveform[leadingBin])/(waveform[leadingBin+1]-waveform[leadingBin]) * 64));
             t0      = (tcoarse << 6) + tfine;
             // set the width based on trailing-edge time:
-            if (s1 > 0) {
-                pulseWidth  = s1 - s0;
+            if (trailingBin > leadingBin) {
+                pulseWidth  = trailingBin - leadingBin;
             }
         }
  
