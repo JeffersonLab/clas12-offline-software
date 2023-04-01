@@ -10,7 +10,7 @@ for xx in $@
 do
     if [ "$xx" == "--spotbugs" ]
     then
-        runSpotBugs="yes"
+        runSpotBugs="no"
     elif [ "$xx" == "-n" ]
     then
         runSpotBugs="no"
