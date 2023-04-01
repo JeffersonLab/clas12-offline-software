@@ -9,6 +9,7 @@ public class ExtendedFADCFitter implements IFADCFitter {
 
     private int pedestalMinBin = 1;
     private int pedestalMaxBin = 15;
+    public int t0;
     public int adc;
     public int ped;
     public int thresholdCrossingBin;
@@ -44,6 +45,7 @@ public class ExtendedFADCFitter implements IFADCFitter {
 
         ped=0;
         rms=0;
+        t0=0;
         adc=0;
         thresholdCrossingBin=0;
         pulsePeakValue=0;
@@ -117,6 +119,7 @@ public class ExtendedFADCFitter implements IFADCFitter {
             tcoarse = leadingBin;
             // set the fine time from interpolation between the two samples before and after the 50% crossing (6 bits resolution)
             tfine   = ((int) ((halfMax - waveform[leadingBin])/(waveform[leadingBin+1]-waveform[leadingBin]) * 64));
+            t0      = (tcoarse << 6) + tfine;
             // set the width based on trailing-edge time:
             if (trailingBin > leadingBin) {
                 pulseWidth  = trailingBin - leadingBin;
