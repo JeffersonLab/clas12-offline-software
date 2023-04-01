@@ -6,8 +6,8 @@ package org.jlab.detector.decode;
  */
 public class ExtendedFADCFitter implements IFADCFitter {
 
-    private int pedistalMinBin = 1;
-    private int pedistalMaxBin = 5;
+    private int pedistalMinBin = 0;
+    private int pedistalMaxBin = 3;
 
     int p1=1,p2=15;
     int mmsum,summing_in_progress;
