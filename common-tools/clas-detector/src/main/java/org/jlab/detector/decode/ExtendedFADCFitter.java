@@ -9,7 +9,7 @@ public class ExtendedFADCFitter implements IFADCFitter {
     private int pedistalMinBin = 0;
     private int pedistalMaxBin = 3;
 
-    int p1=1,p2=15;
+    int p1=-1,p2=5;
     int mmsum,summing_in_progress;
 
     public int     t0,adc,ped,pedsum;
@@ -18,7 +18,7 @@ public class ExtendedFADCFitter implements IFADCFitter {
     private int    tcourse, tfine;
 
     public ExtendedFADCFitter(){
-        
+
     }
 
     public void fitCourseTime(int nsa, int nsb, int tet, int pedr, short[] pulse) {
