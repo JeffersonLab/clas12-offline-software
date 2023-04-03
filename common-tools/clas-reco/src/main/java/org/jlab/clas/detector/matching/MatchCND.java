@@ -3,7 +3,6 @@ package org.jlab.clas.detector.matching;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorTrack.TrajectoryPoint;
-import org.jlab.clas.physics.Vector3;
 
 /**
  * 
