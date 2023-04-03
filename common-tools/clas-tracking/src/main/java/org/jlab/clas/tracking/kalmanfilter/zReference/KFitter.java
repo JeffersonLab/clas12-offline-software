@@ -221,12 +221,22 @@ public class KFitter extends AKFitter {
                 }
                 if (this.setFitFailed == false) {
                     if (this.finalStateVec != null) {
-                        if (Math.abs(sv.trackTrajF.get(svzLength - 1).Q - this.finalStateVec.Q) < 5.e-4
-                                && Math.abs(sv.trackTrajF.get(svzLength - 1).x - this.finalStateVec.x) < 1.e-4
-                                && Math.abs(sv.trackTrajF.get(svzLength - 1).y - this.finalStateVec.y) < 1.e-4
-                                && Math.abs(sv.trackTrajF.get(svzLength - 1).tx - this.finalStateVec.tx) < 1.e-6
-                                && Math.abs(sv.trackTrajF.get(svzLength - 1).ty - this.finalStateVec.ty) < 1.e-6) {
-                            i = totNumIter;
+                        if (!TBT) {
+                            if (Math.abs(sv.trackTrajF.get(svzLength - 1).Q - this.finalStateVec.Q) < 3.3e-3
+                                    && Math.abs(sv.trackTrajF.get(svzLength - 1).x - this.finalStateVec.x) < 7.3e-2
+                                    && Math.abs(sv.trackTrajF.get(svzLength - 1).y - this.finalStateVec.y) < 4.3e-1
+                                    && Math.abs(sv.trackTrajF.get(svzLength - 1).tx - this.finalStateVec.tx) < 9.2e-4
+                                    && Math.abs(sv.trackTrajF.get(svzLength - 1).ty - this.finalStateVec.ty) < 2.1e-3) {
+                                i = totNumIter;
+                            }
+                        } else {
+                            if (Math.abs(sv.trackTrajF.get(svzLength - 1).Q - this.finalStateVec.Q) < 5.5e-5
+                                    && Math.abs(sv.trackTrajF.get(svzLength - 1).x - this.finalStateVec.x) < 5.0e-4
+                                    && Math.abs(sv.trackTrajF.get(svzLength - 1).y - this.finalStateVec.y) < 2.1e-3
+                                    && Math.abs(sv.trackTrajF.get(svzLength - 1).tx - this.finalStateVec.tx) < 8.8e-6
+                                    && Math.abs(sv.trackTrajF.get(svzLength - 1).ty - this.finalStateVec.ty) < 1.4e-5) {
+                                i = totNumIter;
+                            }
                         }
                     }
                     this.finalStateVec = sv.trackTrajF.get(svzLength - 1);
