@@ -62,6 +62,21 @@ public class Constants {
     public static final double[] SINSECTORNEG60 = {0, FastMath.sin(Math.toRadians(-60.)), FastMath.sin(Math.toRadians(-120.)), 0, 
         FastMath.sin(Math.toRadians(-240.)), FastMath.sin(Math.toRadians(-300.))};
     public static final double[] COSSECTORNEG60 = {1, 0.5, -0.5, -1, -0.5, 0.5};
+    
+    // Uncertainties for initial state
+    public static final double HBINITIALSTATEUNCSCALE = 1.5;
+    public static final double HBINITIALSTATEXUNC = 7.8;
+    public static final double HBINITIALSTATEYUNC = 5.7;
+    public static final double HBINITIALSTATETXUNC = 0.063;
+    public static final double HBINITIALSTATETYUNC = 0.036;
+    public static final double HBINITIALSTATEQUNC = 0.13;
+    
+    public static final double TBINITIALSTATEUNCSCALE = 1.5;
+    public static final double TBINITIALSTATEXUNC = 0.11;
+    public static final double TBINITIALSTATEYUNC = 0.98;
+    public static final double TBINITIALSTATETXUNC = 0.0024;
+    public static final double TBINITIALSTATETYUNC = 0.0091;
+    public static final double TBINITIALSTATEQUNC = 0.0085;
 
     // PHYSICS CONSTANTS
     public static final double SPEEDLIGHT = 29.97924580;

@@ -395,26 +395,20 @@ public class DCURWellTBEngine extends DCEngine {
             RungeKuttaDoca rk = new RungeKuttaDoca();
             rk.SwimToZ(trkcand.get(0).get_Sector(), initStateVec, dcSwim, z0, bf);
 
-            //initCM.covMat = trkcand.get_CovMat();
-            //test
-            StateVecs svs = new StateVecs();
-            org.jlab.clas.tracking.kalmanfilter.AStateVecs.StateVec rinitSV = svs.new StateVec(0);
-            rinitSV.x = trkcand.getFinalStateVec().x();
-            rinitSV.y = trkcand.getFinalStateVec().y();
-            rinitSV.z = trkcand.getFinalStateVec().getZ();
-            rinitSV.tx = trkcand.getFinalStateVec().tanThetaX();
-            rinitSV.ty = trkcand.getFinalStateVec().tanThetaY();
-            rinitSV.Q = ((double) trkcand.get_Q())/trkcand.get_P();
-            double[] FTF = new double[25];
-            double[] F = this.F(trkcand.get(0).get_Sector(), z0, rinitSV, rk, dcSwim, bf);
-            for(int i = 0; i<5; i++) {
-                FTF[i*5+i]=F[i]*F[i];
-
-            }
+            double ex = Constants.TBINITIALSTATEUNCSCALE * Constants.TBINITIALSTATEXUNC;
+            double ey = Constants.TBINITIALSTATEUNCSCALE * Constants.TBINITIALSTATEYUNC;
+            double etx = Constants.TBINITIALSTATEUNCSCALE * Constants.TBINITIALSTATETXUNC;
+            double ety = Constants.TBINITIALSTATEUNCSCALE * Constants.TBINITIALSTATETYUNC;
+            double eQ = Constants.TBINITIALSTATEUNCSCALE * Constants.TBINITIALSTATEQUNC;
 
             //Matrix initCMatrix = new Matrix(FTF);
             Matrix initCMatrix = new Matrix();
-            initCMatrix.set(FTF);
+            initCMatrix.set(ex * ex, 0, 0, 0, 0,
+                    0, ey * ey, 0, 0, 0,
+                    0, 0, etx * etx, 0, 0,
+                    0, 0, 0, ety * ety, 0,
+                    0, 0, 0, 0, eQ * eQ
+            );
             initStateVec.CM = initCMatrix;
             
         } else {

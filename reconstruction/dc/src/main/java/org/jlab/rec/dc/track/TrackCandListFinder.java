@@ -1183,31 +1183,19 @@ public class TrackCandListFinder {
     	RungeKuttaDoca rk = new RungeKuttaDoca();
     	rk.SwimToZ(trkcand.get(0).get_Sector(), initStateVec, dcSwim, z0, bf);        
 
-    	//LOGGER.log(Level.FINE, (0)+"] init "+this.trackTraj.get(0).x+","+this.trackTraj.get(0).y+","+
-    	//             this.trackTraj.get(0).z+","+this.trackTraj.get(0).tx+","+this.trackTraj.get(0).ty+" "+1/this.trackTraj.get(0).Q); 
-    	double err_sl1 = trkcand.get(0).get_Segment1().get_fittedCluster().get_clusterLineFitSlopeErr();
-    	double err_sl2 = trkcand.get(0).get_Segment2().get_fittedCluster().get_clusterLineFitSlopeErr();
-    	double err_it1 = trkcand.get(0).get_Segment1().get_fittedCluster().get_clusterLineFitInterceptErr();
-    	double err_it2 = trkcand.get(0).get_Segment2().get_fittedCluster().get_clusterLineFitInterceptErr();
-    	double wy_over_wx = (FastMath.cos(Math.toRadians(6.)) / FastMath.sin(Math.toRadians(6.)));
-
-    	double eux = 0.5 * Math.sqrt(err_sl1 * err_sl1 + err_sl2 * err_sl2);
-    	double euy = 0.5 * wy_over_wx * Math.sqrt(err_sl1 * err_sl1 + err_sl2 * err_sl2);
-    	double z = trkcand.get(0).get_Point().z();
-    	double ex = 0.5 * Math.sqrt(err_it1 * err_it1 + err_it2 * err_it2 + z * z * (err_sl1 * err_sl1 + err_sl2 * err_sl2));
-    	double ey = 0.5 * wy_over_wx * Math.sqrt(err_it1 * err_it1 + err_it2 * err_it2 + z * z * (err_sl1 * err_sl1 + err_sl2 * err_sl2));
-    	double epSq = 0.001 * trkcand.get_P() * trkcand.get_P();
-
+        double ex = Constants.HBINITIALSTATEUNCSCALE * Constants.HBINITIALSTATEXUNC;
+        double ey = Constants.HBINITIALSTATEUNCSCALE * Constants.HBINITIALSTATEYUNC;
+        double etx = Constants.HBINITIALSTATEUNCSCALE * Constants.HBINITIALSTATETXUNC;
+        double ety = Constants.HBINITIALSTATEUNCSCALE * Constants.HBINITIALSTATETYUNC;
+        double eQ = Constants.HBINITIALSTATEUNCSCALE * Constants.HBINITIALSTATEQUNC;
     	
         Matrix initCMatrix = new Matrix();
         initCMatrix.set(ex * ex, 0, 0, 0, 0,
             0, ey * ey, 0, 0, 0,
-            0, 0, eux * eux, 0, 0,
-            0, 0, 0, euy * euy, 0,
-            0, 0, 0, 0, epSq
+            0, 0, etx * etx, 0, 0,
+            0, 0, 0, ety * ety, 0,
+            0, 0, 0, 0, eQ * eQ
         );
-                       
-
     	initStateVec.CM = initCMatrix;          
     }    
 
