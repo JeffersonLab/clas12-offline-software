@@ -68,6 +68,8 @@ services:
     name: EBTAI
   - class: org.jlab.rec.rich.RICHEBEngine
     name: RICH
+  - class: org.jlab.service.rtpc.RTPCEngine
+    name: RTPC
 configuration:
 #  io-services:
 #    writer:

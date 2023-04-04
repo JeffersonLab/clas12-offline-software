@@ -55,6 +55,8 @@ services:
     name: EBTB
   - class: org.jlab.rec.rich.RICHEBEngine
     name: RICH
+  - class: org.jlab.service.rtpc.RTPCEngine
+    name: RTPC
 configuration:
 #  global:
 #    variation: rga_fall2018_bg
