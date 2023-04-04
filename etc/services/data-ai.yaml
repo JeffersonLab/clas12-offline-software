@@ -63,9 +63,8 @@ configuration:
   global:
     variation: rgb_spring2019
 #      timestamp: 12/31/2020-00:00:00
-  io-services:
-    writer:
-      compression: 2
+#  io-services:
+#    writer:
 #      schema_dir: "absolute-path-to-schema-folder"
 #      for example:
 #      schema_dir: "/home/clas12-1/chef/myClara/plugins/clas12/etc/bankdefs/dst"
