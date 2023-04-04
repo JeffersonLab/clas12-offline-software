@@ -11,9 +11,6 @@ services:
   - class: org.jlab.service.swaps.SwapEngine
     name: SWAPS
 configuration:
-  io-services:
-    writer:
-      compression: 2
   services:
     SWAPS:
       timestamp: 10/13/2020

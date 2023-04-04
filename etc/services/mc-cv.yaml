@@ -58,9 +58,9 @@ services:
 configuration:
 #  global:
 #    variation: rga_fall2018_bg
-  io-services:
-    writer:
-      compression: 2
+#  io-services:
+#    writer:
+#      schema_dir: "absolute-path-to-schema-folder"
   services:
     MAGFIELDS:
       magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
