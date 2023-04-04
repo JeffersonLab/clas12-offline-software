@@ -11,7 +11,7 @@
     * both conventional and AI track finding in parallel with separate output banks
 * Simulation
   * Main difference from "data" is field maps, plus CCDB variation is not set by default. 
-  * [mc-ai.yaml](mc-ai.yaml) (to be added)
+  * [mc-ai.yaml](mc-ai.yaml)
   * [mc-cv.yaml](mc-cv.yaml)
   * [mc-aicv.yaml](mc-aicv.yaml)
 * Validation
