@@ -96,7 +96,7 @@ configuration:
     MLTAI:
       run: "6302"
       inputBankPrefix:  "DN"
-      outputBankPrefix:  "DN"
+      outputBankPrefix:  "aidn"
     DCHB:
       outputBankPrefix: "HB"
     DCHAI:
