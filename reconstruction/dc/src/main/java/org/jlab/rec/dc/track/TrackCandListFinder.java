@@ -1021,7 +1021,7 @@ public class TrackCandListFinder {
                     double theta1s2 = Math.atan(cand.get(0).get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
                     double theta3s1 = Math.atan(cand.get(2).get_Segment1().get_fittedCluster().get_clusterLineFitSlope());
                     double theta1s1 = Math.atan(cand.get(0).get_Segment1().get_fittedCluster().get_clusterLineFitSlope());
-                    
+
                     double theta1 = 0.5 * (theta1s1 + theta1s2);
                     double theta3 = 0.5 * (theta3s1 + theta3s2);                     
 

@@ -178,7 +178,7 @@ public class TrackCandListWithURWellFinder {
 
         return pars;
     }
-        
+
     private double calcInitTrkP(double thX, double thY, double theta1, double theta3, double iBdl) {
         double deltaTheta = theta3 - theta1;
         if (deltaTheta == 0) {
@@ -1061,7 +1061,7 @@ public class TrackCandListWithURWellFinder {
                     
                     double chi2 = pars[0];
                     double iBdl = pars[1];                       
-                    
+
                     if (chi2 > Constants.SEEDCUT && donotapplyCuts == false) {
                         continue;
                     }
