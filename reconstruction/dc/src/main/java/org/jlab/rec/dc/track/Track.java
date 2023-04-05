@@ -487,6 +487,9 @@ public class Track extends Trajectory implements Comparable<Track>{
             int co = o.get(i).get_Id();
             if(ct!=-1 && ct==co) value = true;
         }
+        if(!value && this.get_URWellCross() != null && o.get_URWellCross() != null){
+            if(this.get_URWellCross().id() == o.get_URWellCross().id()) value = true;
+        }
         return value;
     }
     
