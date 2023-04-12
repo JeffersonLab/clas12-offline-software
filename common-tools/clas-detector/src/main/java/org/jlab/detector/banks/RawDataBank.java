@@ -21,7 +21,7 @@ public class RawDataBank extends FilteredBank {
         OrderType.NOISE0, OrderType.BGADDED_NOISE0
     };
 
-    public enum OrderType {
+    public static enum OrderType {
         NOISE0          (  0),  // normal hits retained by denoising level-0
         BGADDED_NOISE0  ( 10),  // hits added by background merging and retained by level-0
         BGREMOVED       ( 20),  // hits removed during background merging 
