@@ -456,8 +456,6 @@ public class RICHio {
 
         int debugMode = 0;
 
-        int SELE = 11;
-
         int NPHO = richevent.get_nPho();
         if(debugMode>=1)System.out.format("Creating Ring Bank from %5d Photons\n", NPHO);
         
@@ -472,7 +470,7 @@ public class RICHio {
                 if(!pho.is_real()) continue;
                 if(richpar.RING_ONLY_USED==1 && !pho.traced.is_used())continue;
                 if(richpar.RING_ONLY_BEST==1 && hypo_pid!=had.traced.get_BestH(had.charge()))continue;
-                if(pho.analytic.get_OK()==SELE || pho.traced.is_OK()) Nring++;
+                if(pho.traced.get_OK()>=110) Nring++;
             }
 
             if(debugMode>=1)System.out.format(" --> Creating the RICH::Ring Bank for Npho %5d Nring %5d \n",NPHO,Nring);
@@ -505,17 +503,19 @@ public class RICHio {
                 int hypo_pid  = pho.traced.get_hypo(had.charge());
 
                 if(!pho.is_real())continue;
-                if(debugMode>=1)System.out.format(" phot %3d (%3d %3d) pmt %4d [%6d] ",i,pho.get_ParentIndex(),had.get_ParentIndex(),pmt,pho.traced.get_RefleLayers());
+                if(debugMode>=1)System.out.format(" phot %3d (%3d %3d) pmt %4d [%6d] ok %6d ",i,pho.get_ParentIndex(),had.get_ParentIndex(),pmt,pho.traced.get_RefleLayers(),pho.traced.get_OK());
 
                 // skip no real Cherenkov solution
                 boolean reject=false;
                 if(richpar.RING_ONLY_USED==1 && !pho.traced.is_used())reject=true;
                 if(richpar.RING_ONLY_BEST==1 && hypo_pid!=had.traced.get_BestH(had.charge()))reject=true;
-                if(ientry<Nring && pho.traced.is_OK() && !reject){
+                if(ientry<Nring && pho.traced.get_OK()>=110 && !reject){  //by default, all good reconstructions regardeless of status
                     //double htime  = pho.get_HitTime() + pho.chtime();
                     double htime    = pho.get_HitTime();
+                    int use = pho.traced.get_OK();
+                    if(use>=1000)use=-1*(use-1000);
 
-                    if(had.get_ParentIndex()<255 && pho.get_HitAnode()<255 && pho.traced.get_nrefle()<255 && pho.traced.get_OK()<255){
+                    if(had.get_ParentIndex()<255 && pho.get_HitAnode()<255 && pho.traced.get_nrefle()<255){
 
                         //bankRing.setShort("id",      ientry, (short) pho.get_id());
                         bankRing.setShort("id",      ientry, (short) ientry);
@@ -534,9 +534,9 @@ public class RICHio {
                         if(Math.abs(hypo_pid)==211) prob = pho.traced.get_PiProb();
                         if(Math.abs(hypo_pid)==321) prob = pho.traced.get_KProb();
                         if(Math.abs(hypo_pid)==2212) prob = pho.traced.get_PrProb();
-                        bankRing.setFloat("prob", ientry, (float) prob);
+                        bankRing.setFloat("prob",   ientry, (float) prob);
 
-                        bankRing.setByte( "use",      ientry, (byte) pho.traced.get_OK());
+                        bankRing.setByte("use",    ientry, (byte) use);
                         bankRing.setInt("layers",   ientry, (int) pho.traced.get_RefleLayers());
                         bankRing.setInt("compos",   ientry, (int) pho.traced.get_RefleCompos());
 
@@ -559,7 +559,7 @@ public class RICHio {
                         bankRefe.setFloat("etac_rms",  ientry, (float) had.schangle(irefle));*/
 
                         if(debugMode>=1)System.out.format(" --> ring %3d %5d %7.2f %7.2f (%3d) %7.2f %7.2f \n",
-                            ientry,hypo_pid,t_time,t_etaC*MRAD,pho.traced.get_OK(),htime-t_time,prob);
+                            ientry,hypo_pid,t_time,t_etaC*MRAD,use,htime-t_time,prob);
                         ientry++;
                     }else{
                         if(debugMode>=1)System.out.format(" \n");
@@ -608,6 +608,8 @@ public class RICHio {
                 RICHParticle had = richevent.get_Hadron( pho.get_ParentIndex() );
                 int hypo_pid  = pho.traced.get_hypo(had.charge());
                 if(debugMode>=1)System.out.format(" phot %3d (%3d %3d) %3d %5d ",i,pho.get_ParentIndex(),had.get_ParentIndex(),pho.get_type(),hypo_pid);
+                int use = pho.traced.get_OK();
+                if(use>=1000)use=-1*(use-1000);
 
                 if((pho.is_real() && richpar.SAVE_PHOTONS==1) || (!pho.is_real() && richpar.SAVE_THROWS==1)){
                     if(ientry<Nrow){
@@ -621,7 +623,7 @@ public class RICHio {
                         bankPhos.setShort("hindex",         ientry,(short) pho.get_HitIndex());
 
                         bankPhos.setShort("type",           ientry,(short) pho.get_type());
-                        bankPhos.setByte( "used",           ientry,(byte)  pho.traced.get_OK());
+                        bankPhos.setByte( "used",           ientry,(byte)  use);
                         bankPhos.setFloat("start_time",     ientry,(float) pho.get_StartTime());
 
                         bankPhos.setFloat("eff",            ientry,(float) pho.cheff());

@@ -299,7 +299,6 @@ public class RICHEvent {
     // ----------------
 
         int debugMode = 0;
-        int SELE = 11;
 
         if(hypo<0 || hypo>=RICHConstants.N_HYPO ) return; 
         if(debugMode>=1)System.out.format("Hypo %s: Ch Mean calc for reco %d \n",RICHConstants.HYPO_LUND[hypo], recotype);
@@ -321,7 +320,7 @@ public class RICHEvent {
                     if(recotype==1) reco = pho.traced;
                     double etac = reco.get_EtaC();
 
-                    if(reco.get_OK()==SELE){
+                    if(reco.is_OK()){
                         if(debugMode>=1)System.out.format(" etac %7.2f \n",etac*MRAD);
                         nea++;
                         mea += etac;
@@ -349,7 +348,7 @@ public class RICHEvent {
                     double chi = mea - 3 *sea;
                     double cha = mea + 3 *sea;
 
-                    if(reco.get_OK()==SELE && ( etac < chi || etac > cha )) {
+                    if(reco.is_OK() && ( etac < chi || etac > cha )) {
                         //reco.set_OK(1);
                         update = 1;
                         if(debugMode>=1)System.out.format(" reject photon %d  with etac %7.2f vs [%7.2f : %7.2f] \n",pho.get_id(),etac*MRAD,chi*MRAD,cha*MRAD);
@@ -378,7 +377,7 @@ public class RICHEvent {
                 RICHSolution reco = new RICHSolution();
                 if(recotype==0) reco = pho.analytic;
                 if(recotype==1) reco = pho.traced;
-                if(reco.get_OK()!=SELE) continue;
+                if(!reco.is_OK()) continue;
 
                 double etac = reco.get_EtaC();
 
@@ -575,7 +574,7 @@ public class RICHEvent {
                     RICHSolution reco = pho.traced;
                     if(recotype==0) reco = pho.analytic;
 
-                    if(!reco.is_used()) {
+                    if(!reco.is_used()){
                         if(debugMode>=2)System.out.format("pho %4d %3d %3d rejected %3d %3d \n",pho.get_id(),pho.get_ParentIndex(), pho.get_HitIndex(), reco.get_OK(), reco.status()); 
                         continue;
                     }
@@ -588,7 +587,7 @@ public class RICHEvent {
                     double htime   = pho.get_HitTime();
                     double t_time  = pho.get_StartTime() + pho.traced.get_time();
 
-                    if(debugMode>=2)System.out.format("pho %4d %3d %3d (%3d) %8.4f [%8.4f]  %7.2f [%7.2f] %4d %7.2f %7.2f ",pho.get_id(), 
+                    if(debugMode>=2)System.out.format("pho %4d %3d %3d (%4d) %8.4f [%8.4f]  %7.2f [%7.2f] %4d %7.2f %7.2f ",pho.get_id(), 
                         pho.get_ParentIndex(), pho.get_HitIndex(), reco.get_OK(), etac*MRAD, 
                         hadron.changle(hypo_pid,irefle)*MRAD, htime, t_time, irefle, NphoEle, Npho);
 
@@ -610,7 +609,7 @@ public class RICHEvent {
                     lh_sig[hypo] += 2*Math.log(1./prob);
                     lh_ref[hypo] += 2*Math.log(prob_ref);
                     c2_sig[hypo] += c2;
-                    if(reco.get_OK()==11){
+                    if(reco.is_OK()){
                         ch_sig[hypo] += 1.*etac;
                         n_sig[hypo]  += 1.;
                         if(irefle==0){
@@ -630,7 +629,7 @@ public class RICHEvent {
                         }
                     }
                     n_tot[hypo]++;
-                    if(reco.get_OK()>=100)n_bck[hypo]++;
+                    if(!reco.is_OK())n_bck[hypo]++;
                     if(debugMode>=2)System.out.format(" --> %10.4g %10.4g %10.4g %10.4g %10.4g %7.2f\n", 
                         prob, prob_ref, Math.log(1./prob), Math.log(prob_ref), Math.log(prob_ref/prob),c2);
 
@@ -1030,18 +1029,19 @@ public class RICHEvent {
 
                 // select acceptable Cherenkov solution
                 int SELE = 0;
-                if(etaC>0 && etaC>CHMI && etaC<CHMA) SELE=10;
-                if(dtime > DTMI && dtime < DTMA) SELE=1;
-                if((etaC>0 && etaC>CHMI && etaC<CHMA) && (dtime > DTMI && dtime < DTMA)) SELE=11;
+                if(etaC>0 && reco.status()==0) SELE+=1;
+                if(dtime > DTMI && dtime < DTMA) SELE+=10;
+                if(etaC>0 && etaC>CHMI && etaC<CHMA) SELE+=100;
+                //if((etaC>0 && etaC>CHMI && etaC<CHMA) && (dtime > DTMI && dtime < DTMA)) SELE=11;
 
                 reco.set_OK(SELE);
 
                 if(debugMode>=2){
-                    if(SELE==11){
+                    if(reco.is_OK()){
                         System.out.format(" --> %4d  (%5d %8d  %8d  %8d)\n",
                             reco.get_OK(), reco.get_Nrefle(),reco.get_FirstRefle(), reco.get_RefleLayers(), reco.get_RefleCompos());
                     }else{
-                        System.out.format(" --> rejected\n");
+                        System.out.format(" --> %4d  (rejected) \n",reco.get_OK());
                     }
                } 
             }
@@ -1058,13 +1058,13 @@ public class RICHEvent {
                 RICHSolution reco = pho.traced;
                 if(recotype==0) reco = pho.analytic;
 
-                if(reco.get_OK()<11){
+                if(reco.get_OK()<111){  // to avoid adding flags
                     for( RICHParticle oth: photons) {
                         if(oth.get_id()!=pho.get_id() && oth.get_ParentIndex()==hadron.get_id() && oth.get_HitIndex()==pho.get_HitIndex()){
                             RICHSolution roth = oth.traced;
                             if(recotype==0) roth = oth.analytic;
-                            if(roth.get_OK()==11 && roth.status()==0){
-                                reco.set_OK( reco.get_OK()+100 );
+                            if(roth.is_OK()){
+                                reco.set_OK( reco.get_OK()+1000 );
                                 // take elemets for likelihood calculation
                                 // ATT: take first working hypo as most probable (to be refined)
                                 reco.set_dthe_res( roth.get_dthe_res());
@@ -1085,7 +1085,7 @@ public class RICHEvent {
                 RICHSolution reco = pho.traced;
                 if(recotype==0)reco = pho.analytic;
 
-                if(reco.get_OK()<11)continue;
+                if(!reco.is_used())continue;
 
                 System.out.format("sele pixel %4d for %s pho %4d %3d %7.2f OK  %3d  [%6d : %6d %6d ] %3d\n",
                     pho.get_HitIndex(), stype, pho.get_id(), pho.get_type(), reco.get_EtaC()*MRAD, reco.get_OK(),reco.get_FirstRefle(), reco.get_RefleLayers(), reco.get_RefleCompos(), reco.status());
@@ -1136,13 +1136,14 @@ public class RICHEvent {
                 int pmt = hits.get(photon.get_HitIndex()).get_pmt();
                 if(debugMode>=1){
                     System.out.format(" --------------------------------- \n");
-                    System.out.format(" Hypo %s: Trace Photon %4d %4d  from  Hadron %3d  meas hit %4d %s  pmt %4d \n",
-                        RICHConstants.HYPO_LUND[hypo],jj,photon.get_id(),hadron.get_id(),photon.get_HitIndex(),photon.get_HitPos().toStringBrief(2), pmt);
+                    System.out.format(" Hypo %s: Trace Photon %4d %4d  from  Hadron %3d  aero [%3d %3d %3d %4d]  meas hit %4d %s  pmt %4d \n",
+                        RICHConstants.HYPO_LUND[hypo],jj,photon.get_id(),hadron.get_id(),photon.get_sector(), photon.ilay_emission, photon.ico_emission, 
+                           photon.iqua_emission, photon.get_HitIndex(),photon.get_HitPos().toStringBrief(2), pmt);
                 }
                 //RICHParticle richhadron = get_Hadron( photon.get_ParentIndex() );
                 richtrace.find_EtaC_raytrace_steps(hadron, photon, hypo);
                 if(photon.traced.exist()){
-                    photon.traced.set_status(photon.get_sector(), richcal);
+                    photon.traced.set_status(photon.get_sector(), photon.ilay_emission, photon.ico_emission, photon.iqua_emission, richcal);
                     if(debugMode>=1){
                         System.out.format(" FOUND with status = %3d \n",photon.traced.status());
                         photon.traced.dump_raytrack(" RAY ");
@@ -1229,7 +1230,11 @@ public class RICHEvent {
                 IOFF = 20;
             }
 
-            if(debugMode>=1)System.out.format("TTT %3d %3d %3d %7.2f \n",hypo,NTHE,ithe,theta*MRAD);
+            if(debugMode>=1)System.out.format("theta %5d %5d %3d  %7.2f  %4d %3d %7.2f %7.2f %7.2f ",
+                                                            eventID,hypo_pid,hadron.charge(),hadron.get_momentum(),hadron.ilay_emission+201,hadron.ico_emission+1,
+                                                            hadron.changle(hypo_pid,0)*MRAD,hadron.changle(hypo_pid,1)*MRAD,hadron.changle(hypo_pid,2)*MRAD);
+            if(theta==0){if(debugMode>=1)System.out.format(" -> below threshold "); continue;}
+            if(debugMode>=1)System.out.format("\n TTT %3d %3d %3d %7.2f \n",hypo,NTHE,ithe,theta*MRAD);
 
             // Define Cherenkov rotation
             Vector3D X_ONE = new Vector3D(1., 0., 0.);

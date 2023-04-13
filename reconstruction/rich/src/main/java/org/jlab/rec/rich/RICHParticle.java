@@ -758,10 +758,11 @@ public class RICHParticle {
             if(entrance.get_layer()!=ilay_emission || entrance.get_component()!=ico_emission)
                 System.out.format(" AERO CROSS ilay %4d %4d  ico %4d %4d \n",entrance.get_layer(),ilay_emission,entrance.get_component(),ico_emission);
         }
-        if(richcal.get_AeroStatus(sector, ilay_emission, ico_emission)>0){
+        // perform photon reconstruction, to be saved in RICH::Ring
+        /*if(richcal.get_AeroStatus(sector, ilay_emission, ico_emission)>0){
             if(debugMode>=1)System.out.format(" AERO bad status: disregard \n");
             return false;
-        }
+        }*/
        
         if(richpar.USE_ELECTRON_ANGLES==1){
             for(int iref=0; iref<3; iref++){
