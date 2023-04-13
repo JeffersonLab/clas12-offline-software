@@ -27,6 +27,7 @@ public class DCEngine extends ReconstructionEngine {
     private int        nSuperLayer    = 5;
     private String     geoVariation   = "default";
     private boolean    denoise        = false;
+    private boolean    urwmatch       = false;
     private String     bankType       = "HitBasedTrkg";
     private String     inBankPrefix   = null;
     private String     outBankPrefix  = null;
@@ -92,6 +93,10 @@ public class DCEngine extends ReconstructionEngine {
         // set flag for denoise support (Engine dependent)
         if(this.getEngineConfigString("denoise")!=null)       
             denoise = Boolean.valueOf(this.getEngineConfigString("denoise"));
+
+        // set flag for Urwell match support (Engine dependent)
+        if(this.getEngineConfigString("urwmatch")!=null)       
+            urwmatch = Boolean.valueOf(this.getEngineConfigString("urwmatch"));
 
         //Set input bank names
         if(this.getEngineConfigString("inputBankPrefix")!=null) {
@@ -188,6 +193,10 @@ public class DCEngine extends ReconstructionEngine {
     
     public boolean doDenoise() {
         return this.denoise;
+    }
+    
+    public boolean matchToUrwell() {
+        return this.urwmatch;
     }
     
     public int getRun(DataEvent event) {

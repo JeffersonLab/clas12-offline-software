@@ -9,9 +9,10 @@ public class Banks {
     private final String tdcBank    = "DC::tdc";
     private final String tsBank     = "DC::jitter";
     private final String docaBank   = "DC::doca";
+    private final String urwBank    = "URWELL::match";
     
     private String aiBank     = "ai::tracks";
-    
+        
     private final String inBankType = "HitBasedTrkg";
     private String outBankType      = "HitBasedTrkg";
     private String inPrefix         = "";
@@ -63,6 +64,10 @@ public class Banks {
 
     public String getDocaBank() {
         return docaBank;
+    }
+
+    public String getUrwellMatchBank() {
+        return urwBank;
     }
 
     public String getAiBank() {

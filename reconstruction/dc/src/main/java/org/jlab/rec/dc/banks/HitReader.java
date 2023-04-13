@@ -203,14 +203,14 @@ public class HitReader {
                              NoiseReductionParameters parameters,
                              Clas12NoiseResult results) {
         this.initialize(event);
-        this.fetch_DCHits(false, noiseAnalysis, parameters, results);
+        this.fetch_DCHits(false, false, noiseAnalysis, parameters, results);
     }
         
-    public void fetch_DCHits(DataEvent event, boolean filterOnOrder, Clas12NoiseAnalysis noiseAnalysis,
+    public void fetch_DCHits(DataEvent event, boolean filterOnOrder, boolean filterOnUrwell, Clas12NoiseAnalysis noiseAnalysis,
                              NoiseReductionParameters parameters,
                              Clas12NoiseResult results) {
         this.initialize(event);
-        this.fetch_DCHits(filterOnOrder, noiseAnalysis, parameters, results);
+        this.fetch_DCHits(filterOnOrder, filterOnUrwell, noiseAnalysis, parameters, results);
     }
      /**
      * reads the hits using clas-io methods to get the EvioBank for the DC and
@@ -221,7 +221,7 @@ public class HitReader {
      * @param parameters
      * @param results
      */
-    private void fetch_DCHits(boolean filterOnOrder, Clas12NoiseAnalysis noiseAnalysis,
+    private void fetch_DCHits(boolean filterOnOrder, boolean filterOnUrwell, Clas12NoiseAnalysis noiseAnalysis,
                              NoiseReductionParameters parameters,
                              Clas12NoiseResult results) {
 
@@ -247,6 +247,7 @@ public class HitReader {
         int[] order = new int[rows];
         int[] tdc = new int[rows];
         int[] jitter = new int[rows];
+        int[] urwmatch = new int[rows];
         int[] useMChit = new int[rows];
 
         for (int i = 0; i < rows; i++) {
@@ -259,7 +260,18 @@ public class HitReader {
             tdc[i]        = bankDGTZ.getInt("TDC", i) - jitter[i];
         }
 
-
+        if(event.hasBank(bankNames.getUrwellMatchBank())) {
+            DataBank bankMATCH = event.getBank(bankNames.getUrwellMatchBank());
+            if(bankMATCH.rows()==urwmatch.length) {
+                for(int i=0; i<bankMATCH.rows(); i++)
+                    urwmatch[i] = bankMATCH.getByte("status",i);
+            }
+            else {
+                LOGGER.log(Level.SEVERE, String.format("Mismatch between number of entries in %s(%d) and %s(%d)", 
+                        bankNames.getTdcBank(), bankDGTZ.rows(), bankNames.getUrwellMatchBank(), bankMATCH.rows()));
+            }
+        }
+        
         if (event.hasBank(bankNames.getDocaBank())) {
             DataBank bankD = event.getBank(bankNames.getDocaBank());
             int bd_rows = bankD.rows();
@@ -279,6 +291,8 @@ public class HitReader {
         for (int i = 0; i < rows; i++) {
             boolean passHit = true;
             if(filterOnOrder && order[i]!=0)
+                passHit = false;
+            if(filterOnUrwell && urwmatch[i]!=0)
                 passHit = false;
             if (wirestat != null) {
                 if (wirestat.getIntValue("status", sector[i], layer[i]+(superlayer[i]-1)*6, wire[i]) != 0)
