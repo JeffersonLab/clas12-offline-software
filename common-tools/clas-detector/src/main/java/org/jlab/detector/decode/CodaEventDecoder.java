@@ -638,7 +638,7 @@ public class CodaEventDecoder {
                             Short sample = (Short) cdataitems.get(position + 2 + loop);
                             shortbuffer[loop] = sample;
                         }
-                        
+
                         bank.addPulse(shortbuffer);
                         bank.setTimeStamp(time);
                         entries.add(bank);
@@ -907,10 +907,18 @@ public class CodaEventDecoder {
              * is used. We will use this assumption, and make the code easier.
              * In case there will be more than one FEC and/or crate, then this
              * getDataEntries_57631 method will not work.
-             * 
-             * The decoding algorithm was borrowed from the repository below, and in particular from the given file
+             *
+             * The decoding algorithm was borrowed from the repository below,
+             * and in particular from the given file
              * https://github.com/xbai0624/mpd_baseline_evaluation/blob/hb_quick_check/src/SRSRawEventDecoder.cpp
              */
+            double time_OF_DetectorDataDgtz = 0;
+            double time_OF_ADCData = 0;
+            double time_OF_setIntegral = 0;
+            double time_OF_setPedestal = 0;
+            double time_OF_addADC = 0;
+            double time_OF_add = 0;
+
             Map<Short, ArrayList<Short>> m_APV = new HashMap<>();
 
             Short HybridID = -1;
@@ -923,13 +931,17 @@ public class CodaEventDecoder {
                 intBuff[iBuf] = Integer.reverseBytes(intBuff[iBuf]);
             }
 
+            //System.out.println("Data length = " + intBuff.length);
             for (int idata = 0; idata < intBuff.length; idata++) {
 
                 /**
-                 * When we meet 0x414443, then the least significant byte will represent the Hybrid ID, and
-                 * the most significant 2 bytes of the next word represents the FEC ID. In our case we use only one 1 FEC, so it will
-                 * always be 0. We also don't plan to use/store this variable in the output data file.
+                 * When we meet 0x414443, then the least significant byte will
+                 * represent the Hybrid ID, and the most significant 2 bytes of
+                 * the next word represents the FEC ID. In our case we use only
+                 * one 1 FEC, so it will always be 0. We also don't plan to
+                 * use/store this variable in the output data file.
                  */
+                //System.out.println("idata = " + idata);
                 if (((intBuff[idata + 1] >> 8) & 0xffffff) == 0x414443) {
 
                     HybridID = (short) (intBuff[idata + 1] & 0xff);
@@ -938,117 +950,114 @@ public class CodaEventDecoder {
                     if (m_APV.containsKey(HybridID) && m_APV.get(HybridID).size() > APV_MIN_LENGTH) {
                         System.err.println("Duplicate entry for the same Hybrid #" + HybridID);
                     }
-			
-		    /**
-		     * VERY Bad way of doing this, but this is just a temp solution
-		     * to ignore GEM data from slots #12 and #13, as we don't have
-		     * these data in the TT
-		     * */
-		     
-		    if( HybridID <= 11){
-                    	m_APV.put(HybridID, new ArrayList<>());
-		    }
 
+                    /**
+                     * VERY Bad way of doing this, but this is just a temp
+                     * solution to ignore GEM data from slots #12 and #13, as we
+                     * don't have these data in the TT
+                     *
+                     */
+                    m_APV.put(HybridID, new ArrayList<>());
+//                    if (HybridID <= 11) {
+//                    }
                     idata += 2;
 
                     /**
                      * The 0xfafafafa means the end of SRS data
                      */
                 } else if (intBuff[idata + 1] == 0xfafafafa) {
-                    
+
                     /**
-                     * One word (32 bit) here represents 2 APV data (each actually has least significant 12 bits only).
-                     * Below we split the word into 2 Shorts, and then switch endiannes of it one more time
+                     * One word (32 bit) here represents 2 APV data (each
+                     * actually has least significant 12 bits only). Below we
+                     * split the word into 2 Shorts, and then switch endiannes
+                     * of it one more time
                      */
                     Short word16bit1 = (short) ((intBuff[idata] >> 16) & 0xffff);
                     word16bit1 = Short.reverseBytes(word16bit1);
                     Short word16bit2 = (short) (intBuff[idata] & 0xffff);
                     word16bit2 = Short.reverseBytes(word16bit2);
-                    
-		    if( HybridID <= 11){
-                    	m_APV.get(HybridID).add(word16bit1);
-                    	m_APV.get(HybridID).add(word16bit2);
-		    }
+
+                    m_APV.get(HybridID).add(word16bit1);
+                    m_APV.get(HybridID).add(word16bit2);
+//                    if (HybridID <= 11) {
+//                    }
 
                     idata += 1;
                 } else {
                     /**
-                     * In all other cases the data is just APV data, so will will fill
-                     * the APV buffer, again after splitting it into two words and
-                     * switching the endianness.
+                     * In all other cases the data is just APV data, so will
+                     * will fill the APV buffer, again after splitting it into
+                     * two words and switching the endianness.
                      */
                     Short word16bit1 = (short) ((intBuff[idata] >> 16) & 0xffff);
                     word16bit1 = Short.reverseBytes(word16bit1);
                     Short word16bit2 = (short) (intBuff[idata] & 0xffff);
                     word16bit2 = Short.reverseBytes(word16bit2);
 
-		    if( HybridID <= 11){
-                    	m_APV.get(HybridID).add(word16bit1);
-                    	m_APV.get(HybridID).add(word16bit2);
-		    }
+                    m_APV.get(HybridID).add(word16bit1);
+                    m_APV.get(HybridID).add(word16bit2);
+//                    if (HybridID <= 11) {
+//                    }
                 }
             }
 
             /**
-             * All data is already read from the SRS crate.
-             * Now for each Hybrid, will loop over APV data and from it will extract ADC data for each
-             * channel and time sample. Then for each (Channel, time sample) will
-             * create DetectorDataDgtz bank, and fill corresponding ts and ADC.
-             * 
-             * Here we don't use pedestal. The time sample will be assigned to pedestal
+             * All data is already read from the SRS crate. Now for each Hybrid,
+             * will loop over APV data and from it will extract ADC data for
+             * each channel and time sample. Then for each (Channel, time
+             * sample) will create DetectorDataDgtz bank, and fill corresponding
+             * ts and ADC.
+             *
+             * Here we don't use pedestal. The time sample will be assigned to
+             * pedestal
              */
-
-            
             /**
-             * Loop over data for all Hybrids.
-             * The key of the map represents the HybridID, and the value of the map is anr ArrayList representing the 
-             * APV data of the given Hybrid
+             * Loop over data for all Hybrids. The key of the map represents the
+             * HybridID, and the value of the map is anr ArrayList representing
+             * the APV data of the given Hybrid
              */
             for (Map.Entry<Short, ArrayList<Short>> entry : m_APV.entrySet()) {
 
                 ArrayList<Short> cur_APV = entry.getValue();
                 Short slot = entry.getKey(); // Here slot is the same as the HybridID
-                
-                
+
+                DetectorDataDgtz[] bank = new DetectorDataDgtz[n_APV_CH];
+                for (int ich = 0; ich < n_APV_CH; ich++) {
+                    bank[ich] = new DetectorDataDgtz(crate, slot.intValue(), ich);
+                }
+
                 Short ts = 0; // ts = Time Sample
                 for (int i_apv = 0; i_apv < cur_APV.size() - 3; i_apv++) {
-                    
-                    /**
-                     * In APV the ADC starts when three consecutive entries have values less than the HEADER (value=1500).
-                     * After those three samples we also should skip 9 additional data representing 8 (address) and 1 (error), then the next 128 channels should
-                     * represent ADC values of the given timesample of the given APV. Then the pattern repeats itself 
-                     * 
-                     */
+
+                    // In APV the ADC starts when three consecutive entries have values less than the HEADER (value=1500).
+                    // After those three samples we also should skip 9 additional data representing 8 (address) and 1 (error), then the next 128 channels should
+                    // represent ADC values of the given timesample of the given APV. Then the pattern repeats itself 
                     if ((Short) (cur_APV.get(i_apv)) < HEADER && (Short) (cur_APV.get(i_apv + 1)) < HEADER && (Short) (cur_APV.get(i_apv + 2)) < HEADER && i_apv + 138 < cur_APV.size() + 1) {
 
                         i_apv = i_apv + 12; // Note 12 = 3 words < HEADED + 8 address word + 1 Error word // Details should be in APV documentation.
 
-                        /**
-                         * Will determine the common mode here
-                         * Will used the i_apvTmp to loop over cur_APV elements, and determine the common mode.
-                         */
-                        
+                        // Will determine the common mode here
+                        // Will used the i_apvTmp to loop over cur_APV elements, and determine the common mode.
                         int i_apvTmp = i_apv;
-                        
+
                         double cmnMode = 0;
-                        
-                        /**
-                         * Will skip first and last 10 channels in the cmnMode determination
-                         */
-                        for( int ich = 10; ich < n_APV_CH - 10; ich++ ){
-                            cmnMode = cmnMode + (double)cur_APV.get(i_apvTmp);
+
+                        // * Will skip first and last 10 channels in the cmnMode determination
+                        for (int ich = 10; ich < n_APV_CH - 10; ich++) {
+                            cmnMode = cmnMode + (double) cur_APV.get(i_apvTmp);
                             i_apvTmp = i_apvTmp + 1;
                         }
-                        cmnMode = cmnMode/( (double)( n_APV_CH - 20 ) );
-                                                
-                        for (int ich = 0; ich < n_APV_CH; ich++) {
-                            DetectorDataDgtz bank = new DetectorDataDgtz(crate, slot.intValue(), ich);
-                            ADCData adcData = new ADCData();
+                        cmnMode = cmnMode / ((double) (n_APV_CH - 20));
 
-                            adcData.setIntegral((int) (cur_APV.get(i_apv) - cmnMode ));
+                        for (int ich = 0; ich < n_APV_CH; ich++) {
+                            //DetectorDataDgtz bank = new DetectorDataDgtz(crate, slot.intValue(), ich);
+
+                            ADCData adcData = new ADCData();
+                            adcData.setIntegral((int) (cur_APV.get(i_apv) - cmnMode));
                             adcData.setPedestal(ts);
-                            bank.addADC(adcData);
-                            entries.add(bank);
+                            bank[ich].addADC(adcData);
+
                             i_apv = i_apv + 1;
                         }
                         i_apv = i_apv - 1;
@@ -1056,8 +1065,15 @@ public class CodaEventDecoder {
 
                     }
                 }
+                for (int ich = 0; ich < n_APV_CH; ich++) {
+                    entries.add(bank[ich]);
+                }
 
             }
+
+//            if (time_OF_DetectorDataDgtz + time_OF_ADCData + time_OF_setIntegral + time_OF_setPedestal + time_OF_addADC + time_OF_add > 5) {
+//                System.out.println(time_OF_DetectorDataDgtz + "    " + time_OF_ADCData + "    " + time_OF_setIntegral + "    " + time_OF_setPedestal + "    " + time_OF_addADC + "    " + time_OF_add);
+//            }
         }
         return entries;
     }
@@ -1457,8 +1473,8 @@ public class CodaEventDecoder {
     public static void main(String[] args) {
         EvioSource reader = new EvioSource();
         //reader.open("/Users/devita/clas_004013.evio.1000");
-        //reader.open("/work/clas12/rafopar/uRWELL/Readout/APV25/urwell_001142.evio.00000");
-        reader.open("/work/clas12/rafopar/uRWELL/Readout/APV25/urwell_001326.evio.00000");
+        reader.open("/work/clas12/rafopar/uRWELL/Readout/APV25/urwell_001534.evio.00000");
+        //reader.open("/work/clas12/rafopar/uRWELL/Readout/APV25/urwell_001326.evio.00000");
         CodaEventDecoder decoder = new CodaEventDecoder();
         DetectorEventDecoder detectorDecoder = new DetectorEventDecoder();
 

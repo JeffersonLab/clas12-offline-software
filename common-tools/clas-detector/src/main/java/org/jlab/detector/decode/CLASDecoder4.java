@@ -105,7 +105,11 @@ public class CLASDecoder4 {
             if (evioEvent.getHandler().getStructure() != null) {
                 try {
 
+                    Long startTime = System.nanoTime();
                     dataList = codaDecoder.getDataEntries((EvioDataEvent) event);
+                    Long endTime = System.nanoTime();
+                    double time_OF_getDataEntries = (endTime - startTime) / 1000000.;
+                    //System.out.println("The time_OF_getDataEntries = " + time_OF_getDataEntries);
 
                     //-----------------------------------------------------------------------------
                     // This part reads the BITPACKED FADC data from tag=57638 Format (cmcms)
@@ -257,16 +261,32 @@ public class CLASDecoder4 {
             return null;
         }
 
-        Bank adcBANK = new Bank(schemaFactory.getSchema(name), adcDGTZ.size());
-        for (int i = 0; i < adcDGTZ.size(); i++) {
-            adcBANK.putByte("sector", i, (byte) adcDGTZ.get(i).getDescriptor().getSector());
-            adcBANK.putByte("layer", i, (byte) adcDGTZ.get(i).getDescriptor().getLayer());
-            adcBANK.putShort("component", i, (short) adcDGTZ.get(i).getDescriptor().getComponent());
-            adcBANK.putByte("order", i, (byte) adcDGTZ.get(i).getDescriptor().getOrder());
-            adcBANK.putInt("ADC", i, adcDGTZ.get(i).getADCData(0).getADC());
+        double time_OF_putInt_uRWELL = 0;
+        double time_OF_putFloat_uRWELL = 0;
 
-            adcBANK.putFloat("time", i, (float) adcDGTZ.get(i).getADCData(0).getTime());
-            adcBANK.putShort("ped", i, (short) adcDGTZ.get(i).getADCData(0).getPedestal());
+        // Defining the bank size this way is not a good way!!! Though not sure how else I can define it.
+        // It will work here, as every entry should have 12 samples.
+        int bankSize = adcDGTZ.size();
+        if (name == "URWELL::adc" && adcDGTZ.size() > 0) {
+            bankSize = adcDGTZ.size() * adcDGTZ.get(0).getADCSize();
+        }
+
+        Bank adcBANK = new Bank(schemaFactory.getSchema(name), bankSize);
+
+        int uRwell_ind = 0;
+        for (int i = 0; i < adcDGTZ.size(); i++) {
+
+            if (name != "URWELL::adc") {
+                adcBANK.putByte("sector", i, (byte) adcDGTZ.get(i).getDescriptor().getSector());
+                adcBANK.putByte("layer", i, (byte) adcDGTZ.get(i).getDescriptor().getLayer());
+                adcBANK.putShort("component", i, (short) adcDGTZ.get(i).getDescriptor().getComponent());
+                adcBANK.putByte("order", i, (byte) adcDGTZ.get(i).getDescriptor().getOrder());
+                adcBANK.putInt("ADC", i, adcDGTZ.get(i).getADCData(0).getADC());
+
+                adcBANK.putFloat("time", i, (float) adcDGTZ.get(i).getADCData(0).getTime());
+                adcBANK.putShort("ped", i, (short) adcDGTZ.get(i).getADCData(0).getPedestal());
+            }
+            
             if (name == "BST::adc") {
                 adcBANK.putLong("timestamp", i, adcDGTZ.get(i).getADCData(0).getTimeStamp());
             }
@@ -279,10 +299,30 @@ public class CLASDecoder4 {
                 adcBANK.putInt("amplitude", i, adcDGTZ.get(i).getADCData(0).getHeight());
             }
             if (name == "URWELL::adc") {
-                adcBANK.putInt("ADC", i, adcDGTZ.get(i).getADCData(0).getIntegral());
-                adcBANK.putFloat("time", i, 1000 * (adcDGTZ.get(i).getDescriptor().getLayer() - 1) + adcDGTZ.get(i).getDescriptor().getComponent());
+
+                //System.out.println("The Size of getADCSize() = " + adcDGTZ.get(i).getADCSize());
+                for (int iADC = 0; iADC < adcDGTZ.get(i).getADCSize(); iADC++) {
+
+//                    System.out.println("Sec = " + adcDGTZ.get(i).getDescriptor().getSector() + "   layer = " + adcDGTZ.get(i).getDescriptor().getLayer() + "    Comp = " + adcDGTZ.get(i).getDescriptor().getComponent() +
+//                            "  Order = " + adcDGTZ.get(i).getDescriptor().getOrder() + "   ped = " + adcDGTZ.get(i).getADCData(iADC).getPedestal() );
+                    adcBANK.putByte("sector", uRwell_ind, (byte) adcDGTZ.get(i).getDescriptor().getSector());
+                    adcBANK.putByte("layer", uRwell_ind, (byte) adcDGTZ.get(i).getDescriptor().getLayer());
+                    adcBANK.putShort("component", uRwell_ind, (short) adcDGTZ.get(i).getDescriptor().getComponent());
+                    adcBANK.putByte("order", uRwell_ind, (byte) adcDGTZ.get(i).getDescriptor().getOrder());
+                    adcBANK.putShort("ped", uRwell_ind, (short) adcDGTZ.get(i).getADCData(iADC).getPedestal());
+                    adcBANK.putInt("ADC", uRwell_ind, adcDGTZ.get(i).getADCData(iADC).getIntegral());
+                    adcBANK.putFloat("time", uRwell_ind, 1000 * (adcDGTZ.get(i).getDescriptor().getLayer() - 1) + adcDGTZ.get(i).getDescriptor().getComponent());
+
+                    uRwell_ind = uRwell_ind + 1;
+                }
             }
         }
+
+        if (name == "URWELL::adc") {
+            // adcBANK.show();
+            // System.out.println(name + "   " + time_OF_putInt_uRWELL + "    " + time_OF_putFloat_uRWELL);
+        }
+
         return adcBANK;
     }
 
@@ -413,7 +453,12 @@ public class CLASDecoder4 {
     }
 
     public Event getDataEvent(DataEvent rawEvent) {
+        Long startTime = System.nanoTime();
         this.initEvent(rawEvent);
+        Long endTime = System.nanoTime();
+        double time_OF_initEvent = (endTime - startTime) / 1000000.;
+        //System.out.println("The InitEvent time is " + time_OF_initEvent);
+
         return getDataEvent();
     }
 
@@ -436,7 +481,12 @@ public class CLASDecoder4 {
             Bank adcBank = getDataBankADC(adcBankNames[i], adcBankTypes[i]);
             if (adcBank != null) {
                 if (adcBank.getRows() > 0) {
+                    long startTime = System.nanoTime();
                     event.write(adcBank);
+                    long endTime = System.nanoTime();
+
+                    double writeTime = (endTime - startTime) / 1000000.;
+                    //System.out.println("Writetime for " + adcBankNames[i] + " banks is " + writeTime);
                 }
             }
         }
@@ -861,7 +911,7 @@ public class CLASDecoder4 {
 
             if (trg_id >= 1 && trg_id <= 3 && trg_bit >= 0 && trg_bit <= 31) {
                 TrgSkim = true;
-                trg_bitWord = (int)(Math.pow(2, trg_bit));
+                trg_bitWord = (int) (Math.pow(2, trg_bit));
                 System.out.println("Will decode only events from the bit " + trg_bit + " of the trg word " + trg_id);
             } else {
                 System.out.println("Wrong value is provided for the -trBit argument.");
