@@ -28,6 +28,7 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriterSorte
     private final List<Bank> schemaBankList = new ArrayList<Bank>();
     private final StringSubstitutor envSubstitutor = new StringSubstitutor(System.getenv());
 
+    private int compression = 2;
 
     @Override
     protected HipoWriterSorted createWriter(Path file, JSONObject opts) throws EventWriterException {
@@ -44,10 +45,10 @@ public class HipoToHipoWriter extends AbstractEventWriterService<HipoWriterSorte
     private void configure(HipoWriterSorted writer, JSONObject opts) {
         schemaBankList.clear();
         if (opts.has(CONF_COMPRESSION)) {
-            int compression = opts.getInt(CONF_COMPRESSION);
+            compression = opts.getInt(CONF_COMPRESSION);
             System.out.printf("%s service: compression level = %d%n", getName(), compression);
-            writer.setCompressionType(compression);
         }
+        writer.setCompressionType(compression);
 
         String schemaDir = FileUtils.getEnvironmentPath("CLAS12DIR", "etc/bankdefs/hipo4");
         if (opts.has(CONF_SCHEMA_DIR)) {

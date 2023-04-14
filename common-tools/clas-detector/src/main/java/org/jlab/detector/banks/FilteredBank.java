@@ -18,6 +18,8 @@ import org.jlab.jnp.hipo4.io.HipoReader;
  */
 public class FilteredBank {
 
+    public static final int DEFAULT_ALLOC = 40;
+
     private final String filterVar;
     private Bank dataBank = null;
     private final List<Integer> indexList = new ArrayList<>();
@@ -30,6 +32,16 @@ public class FilteredBank {
      */
     public FilteredBank(Schema schema, int allocate, String variableName){
         dataBank = new Bank(schema, allocate);
+        filterVar = variableName;
+    }
+
+
+    /**
+     * @param schema schema for the bank to filter
+     * @param variableName name of the variable to filter on 
+     */
+    public FilteredBank(Schema schema, String variableName){
+        dataBank = new Bank(schema, DEFAULT_ALLOC);
         filterVar = variableName;
     }
 

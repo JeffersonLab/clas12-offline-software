@@ -419,10 +419,16 @@ public class ECCommon {
        
     public static List<ECPeak>  processPeaks(List<ECPeak> peaks){
     	
+        //System.out.println("processing peaks");
+        
         List<ECPeak> peakList = new ArrayList<ECPeak>();
         
         for(ECPeak p : peaks) if(isGoodPeak(p)) peakList.add(p);
-        ECPeakAnalysis.splitPeaks(peakList);       //Split peak if strip members have an adc valley       
+        //ECPeakAnalysis.splitPeaks(peakList);       //Split peak if strip members have an adc valley   
+        ECPeakAnalysis.splitPeaksAlternative5(peakList);    // new Way of splitting the peaks as of 2/20/2023 
+                                                //Split peak if strip members have an adc valley
+                                                
+        //ECPeakAnalysis.doPeakCleanup(peaks);
         for(ECPeak p : peakList) p.redoPeakLine(); //Find new peak lines after splitPeaks
                 
         return peakList;

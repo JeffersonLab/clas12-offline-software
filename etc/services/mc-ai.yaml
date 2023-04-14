@@ -24,9 +24,6 @@ services:
 # This is where the AI plugin would go.  THe AI code reads the HB clusters.  
   - class: org.jlab.service.mltn.MLTDEngine
     name: MLTD
-# DC using clustering: regular HB tracking
-  - class: org.jlab.service.dc.DCHBPostClusterConv
-    name: DCHB
 # DC using clustering on AI hits: NN assisted HB tracking
   - class: org.jlab.service.dc.DCHBPostClusterAI
     name: DCHAI
@@ -48,14 +45,8 @@ services:
     name: LTCC
   - class: org.jlab.service.eb.EBHBEngine
     name: EBHB
-  - class: org.jlab.service.eb.EBHBAIEngine
-    name: EBHAI
-# DC regular TB tracking    
   - class: org.jlab.service.dc.DCTBEngine
     name: DCTB
-# DC AI assisted TB tracking    
-  - class: org.jlab.service.dc.DCTBEngineAI
-    name: DCTAI  
   - class: org.jlab.service.fmt.FMTEngine
     name: FMT
   - class: org.jlab.rec.cvt.services.CVTSecondPassEngine
@@ -64,18 +55,27 @@ services:
     name: FTOFTB
   - class: org.jlab.service.eb.EBTBEngine
     name: EBTB
-  - class: org.jlab.service.eb.EBTBAIEngine
-    name: EBTAI
   - class: org.jlab.rec.rich.RICHEBEngine
     name: RICH
+  - class: org.jlab.service.rtpc.RTPCEngine
+    name: RTPC
 configuration:
-  io-services:
-    writer:
-      compression: 2
+#  global:
+#    variation: rgb_spring2019
+#      timestamp: 12/31/2020-00:00:00
+#  io-services:
+#    writer:
+#      schema_dir: "absolute-path-to-schema-folder"
+#      for example:
+#      schema_dir: "/home/clas12-1/chef/myClara/plugins/clas12/etc/bankdefs/dst"
   services:
     MAGFIELDS:
       magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
       magfieldTorusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
+    MLTD:
+      run: "6302"
+    DCHAI:
+      outputBankPrefix: "HB"
     RTPC:
       rtpcSimulation: "true"
       

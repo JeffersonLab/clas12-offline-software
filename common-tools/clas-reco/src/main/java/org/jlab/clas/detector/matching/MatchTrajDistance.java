@@ -2,14 +2,15 @@ package org.jlab.clas.detector.matching;
 
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.DetectorResponse;
-import org.jlab.geom.prim.Line3D;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.geom.prim.Point3D;
 
 /**
  *
  * @author baltzell
  */
 public class MatchTrajDistance extends AMatch {
-   
+
     private final double distanceLimit;
 
     public MatchTrajDistance(double distanceLimit) {
@@ -23,9 +24,14 @@ public class MatchTrajDistance extends AMatch {
 
     @Override
     public double quality(DetectorParticle p, DetectorResponse r) {
+        if (p.getTrack().getDetectorID() == DetectorType.DC.getDetectorId()) {
+            if (p.getTrack().getSector() != r.getSector()) {
+                return Double.POSITIVE_INFINITY;
+            }
+        }
         if (p.getTrackTrajectory().contains(r.getDescriptor())) { 
-            Line3D traj = p.getTrackTrajectory().get(r.getDescriptor()).getCross();
-            return traj.distance(r.getPosition().toPoint3D()).length();
+            Point3D traj = p.getTrackTrajectory().get(r.getDescriptor()).getCross().origin();
+            return traj.distance(r.getPosition().toPoint3D());
         }
         return Double.POSITIVE_INFINITY;
     }

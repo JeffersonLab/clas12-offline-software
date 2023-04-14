@@ -19,6 +19,7 @@ public class CalorimeterResponse extends DetectorResponse {
     private final Vector3 secondMomentUVW = new Vector3(0,0,0);
     private final Vector3 thirdMomentUVW = new Vector3(0,0,0);
 
+    private float size = 0;
     private final int[] dbStatus = {-1,-1,-1};
     private final Vector3 rawPeakEnergy = new Vector3(0,0,0);
     private final Vector3 reconPeakEnergy = new Vector3(0,0,0);
@@ -51,6 +52,7 @@ public class CalorimeterResponse extends DetectorResponse {
         dbStatus[0] = r.dbStatus[0];
         dbStatus[1] = r.dbStatus[1];
         dbStatus[2] = r.dbStatus[2];
+        size = r.size;
     }
 
     public void setWidthUVW(float u,float v,float w) {
@@ -97,7 +99,6 @@ public class CalorimeterResponse extends DetectorResponse {
     public Vector3 getPeakFADCTime() {
         return this.peakFADCTime;
     }
-
     public void setRawPeakEnergy(float u,float v,float w) {
         this.rawPeakEnergy.setXYZ(u,v,w);
     }
@@ -110,6 +111,13 @@ public class CalorimeterResponse extends DetectorResponse {
     public void setPeakFADCTime(float u,float v,float w) {
         this.peakFADCTime.setXYZ(u,v,w);
     }
+    public void setSize(float s) {
+        size = s;
+    }
+    public float getSize() {
+        return size;
+    }
+
 
     /**
      * Read just the main calorimeter cluster bank.
@@ -217,6 +225,8 @@ public class CalorimeterResponse extends DetectorResponse {
             v = extrasBank.getFloat("recFTV",row);
             w = extrasBank.getFloat("recFTW",row);
             ((CalorimeterResponse)responseList.get(row)).setPeakFADCTime(u,v,w);
+            u = extrasBank.getFloat("size", row);
+            ((CalorimeterResponse)responseList.get(row)).setSize(u);
         }
         return responseList;
     } 
