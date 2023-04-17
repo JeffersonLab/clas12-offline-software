@@ -2,6 +2,7 @@ package org.jlab.rec.htcc;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.detector.banks.RawDataBank;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 
@@ -78,7 +79,13 @@ public class HTCCReconstruction {
         if (!event.hasBank("HTCC::adc")) {
             return;
         }
-        DataBank bankDGTZ = event.getBank("HTCC::adc");
+
+        // OLD: accessing raw banks directly
+        //DataBank bankDGTZ = event.getBank("HTCC::adc");
+
+        // NEW: accessing raw banks via RawDataBank
+        RawDataBank bankDGTZ = new RawDataBank("HTCC::adc");
+        bankDGTZ.read(event);
 
         if (bankDGTZ.rows() == 0) {
             return;
@@ -93,7 +100,6 @@ public class HTCCReconstruction {
         ithetaArray = new int[rows];
         iphiArray = new int[rows];
         for (int i = 0; i < bankDGTZ.rows(); i++) {
-            //      hitnArray[i]   = bankDGTZ.getInt("hitn", i);
             sectorArray[i] = bankDGTZ.getByte("sector", i);
             ringArray[i] = bankDGTZ.getShort("component", i);
             halfArray[i] = bankDGTZ.getByte("layer", i);
