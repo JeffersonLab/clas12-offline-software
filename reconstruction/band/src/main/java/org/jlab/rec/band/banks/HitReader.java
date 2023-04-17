@@ -46,6 +46,8 @@ public class HitReader {
         // NEW:  accessing raw banks via RawDataBank
         RawDataBank bankADC = new RawDataBank("BAND::adc");
         RawDataBank bankTDC = new RawDataBank("BAND::tdc");
+        bankADC.read(event);
+        bankTDC.read(event);
 
 		ArrayList<BandHitCandidate> candidates = new ArrayList<>();
 
