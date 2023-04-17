@@ -79,8 +79,15 @@ public class FilteredBank {
     /**
      * @return number of bank rows that satisfy filtering criteria
      */
-    public int size(){ 
+    public int rows(){ 
         return this.indexList.size();
+    }
+
+    /**
+     * @return number of bank rows that satisfy filtering criteria
+     */
+    public int getRows(){ 
+        return this.rows();
     }
 
     /**
@@ -88,7 +95,25 @@ public class FilteredBank {
      * @param index filtered index to retrieve
      * @return value for the filtered index
      */
-    public int intValue(String varName, int index ){
+    public int getByte(String varName, int index ){
+        return bank.getByte(varName, indexList.get(index));
+    }
+
+    /**
+     * @param varName name of the bank variable
+     * @param index filtered index to retrieve
+     * @return value for the filtered index
+     */
+    public int getShort(String varName, int index ){
+        return bank.getShort(varName, indexList.get(index));
+    }
+
+    /**
+     * @param varName name of the bank variable
+     * @param index filtered index to retrieve
+     * @return value for the filtered index
+     */
+    public int getInt(String varName, int index ){
         return bank.getInt(varName, indexList.get(index));
     }
 
@@ -97,7 +122,7 @@ public class FilteredBank {
      * @param index filtered index to retrieve
      * @return value for the filtered index
      */
-    public long longValue(String varName, int index ){
+    public long getLong(String varName, int index ){
         return bank.getLong(varName, indexList.get(index));
     }
 
@@ -106,7 +131,7 @@ public class FilteredBank {
      * @param index filtered index to retrieve
      * @return value for the filtered index
      */
-    public float floatValue(String varName, int index ){
+    public float getFloat(String varName, int index ){
         return bank.getFloat(varName, indexList.get(index));
     }
 
@@ -117,7 +142,7 @@ public class FilteredBank {
     public int trueIndex(int index){
         return this.indexList.get(index);
     }
-    
+
     public static void main(String[] args){
 
         String file = "/Users/gavalian/Work/DataSpace/rga/rec_005988.00005.00009.hipo";
@@ -136,14 +161,14 @@ public class FilteredBank {
             // bank has to read initialize
             ftof.read(e);
 	        System.out.println("\n============================= event");
-            System.out.printf("FTOF ADC size %8d, filtered size = %8d\n",fadc.getRows(),ftof.size());
+            System.out.printf("FTOF ADC size %8d, filtered size = %8d\n",fadc.getRows(),ftof.rows());
 	        fadc.show();
-	        for(int j = 0; j < ftof.size(); j++){
+	        for(int j = 0; j < ftof.rows(); j++){
 		        System.out.printf("%3d %3d %3d %4d, order = %5d, true index = %4d\n",j,
-				  ftof.intValue("sector",j),
-                  ftof.intValue("layer",j),
-                  ftof.intValue("component",j),
-                  ftof.intValue("order",j),
+				  ftof.getInt("sector",j),
+                  ftof.getInt("layer",j),
+                  ftof.getInt("component",j),
+                  ftof.getInt("order",j),
                   ftof.trueIndex(j));
 	        }
         }

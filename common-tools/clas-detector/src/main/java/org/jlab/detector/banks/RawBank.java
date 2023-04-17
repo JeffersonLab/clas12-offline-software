@@ -75,7 +75,7 @@ public class RawBank extends FilteredBank {
      * @return raw/true order, the first digit
      */
     public int trueOrder(int index){
-        return this.intValue("order", index)%10;
+        return this.getInt("order", index)%10;
     }
 
     /**
@@ -83,7 +83,7 @@ public class RawBank extends FilteredBank {
      * @return sector value
      */
     public int sector(int index){
-        return this.intValue("sector", index);
+        return this.getInt("sector", index);
     }
     
     /**
@@ -91,7 +91,7 @@ public class RawBank extends FilteredBank {
      * @return layer value
      */
     public int layer(int index){
-        return this.intValue("layer", index);
+        return this.getInt("layer", index);
     }
     
     /**
@@ -99,7 +99,7 @@ public class RawBank extends FilteredBank {
      * @return component value
      */
     public int component(int index){
-        return this.intValue("component", index);
+        return this.getInt("component", index);
     }
     
     /**
@@ -107,7 +107,7 @@ public class RawBank extends FilteredBank {
      * @return adc value
      */
     public int adc(int index){
-        return this.intValue("ADC", index);
+        return this.getInt("ADC", index);
     }
     
     /**
@@ -115,7 +115,7 @@ public class RawBank extends FilteredBank {
      * @return tdc value
      */
     public int tdc(int index){
-        return this.intValue("TDC", index);
+        return this.getInt("TDC", index);
     }
 
     public static void main(String[] args){
@@ -134,9 +134,9 @@ public class RawBank extends FilteredBank {
             e.read(fadc);
             ftof.read(e);
 	        System.out.println("\n============================= event");
-            System.out.printf("FTOF ADC size %8d, filtered size = %8d\n",fadc.getRows(),ftof.size());
+            System.out.printf("FTOF ADC size %8d, filtered size = %8d\n",fadc.getRows(),ftof.rows());
 	        fadc.show();
-	        for(int j = 0; j < ftof.size(); j++){
+	        for(int j = 0; j < ftof.rows(); j++){
 		        System.out.printf("%3d %3d %3d %4d, order = %5d, true index = %4d\n",j,
 				  ftof.sector(j),
                   ftof.layer(j),

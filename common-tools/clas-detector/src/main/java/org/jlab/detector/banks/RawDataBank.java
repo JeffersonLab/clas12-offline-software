@@ -54,7 +54,7 @@ public class RawDataBank extends RawBank {
      * @return value for the filtered index
      */
     @Override
-    public int intValue(String varName, int index ){
+    public int getInt(String varName, int index ){
         return dataBank.getInt(varName, indexList.get(index));
     }
 
@@ -64,7 +64,7 @@ public class RawDataBank extends RawBank {
      * @return value for the filtered index
      */
     @Override
-    public long longValue(String varName, int index ){
+    public long getLong(String varName, int index ){
         return dataBank.getLong(varName, indexList.get(index));
     }
 
@@ -74,7 +74,7 @@ public class RawDataBank extends RawBank {
      * @return value for the filtered index
      */
     @Override
-    public float floatValue(String varName, int index ){
+    public float getFloat(String varName, int index ){
         return dataBank.getFloat(varName, indexList.get(index));
     }
 
@@ -93,14 +93,14 @@ public class RawDataBank extends RawBank {
             ftof.read(e);
 
 	        System.out.println("\n============================= event");
-            System.out.printf("FTOF ADC size %8d, filtered size = %8d\n",fadc.rows(),ftof.size());
+            System.out.printf("FTOF ADC size %8d, filtered size = %8d\n",fadc.rows(),ftof.rows());
 	        //fadc.show();
-	        for(int j = 0; j < ftof.size(); j++){
+	        for(int j = 0; j < ftof.rows(); j++){
 		        System.out.printf("%3d %3d %3d %4d, order = %5d, true index = %4d\n",j,
                         ftof.sector(j),
-                  ftof.intValue("layer",j),
-                  ftof.intValue("component",j),
-                  ftof.intValue("order",j),
+                  ftof.getInt("layer",j),
+                  ftof.getInt("component",j),
+                  ftof.getInt("order",j),
                   ftof.trueIndex(j));
 	        }
 
