@@ -1,7 +1,6 @@
 package org.jlab.rec.htcc;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -27,7 +26,6 @@ public class HTCCReconstruction {
     public IndexedTable geometry;
 
     // Raw HTCC data from the bank
-    private int[] hitnArray;
     private int[] sectorArray;
     private int[] ringArray;
     private int[] halfArray;
@@ -63,7 +61,7 @@ public class HTCCReconstruction {
         // Place all of the hits into clusters
         List<HTCCCluster> clusters = new ArrayList();
         HTCCCluster cluster;
-        while (remainingHits.size() > 0 && (cluster = findCluster(remainingHits)) != null) {
+        while (!remainingHits.isEmpty() && (cluster = findCluster(remainingHits)) != null) {
             clusters.add(cluster);
         }
 
@@ -87,11 +85,10 @@ public class HTCCReconstruction {
         }
         int rows = bankDGTZ.rows();
 
-        hitnArray = new int[rows];
-        sectorArray = new int[rows];;
-        ringArray = new int[rows];;
-        halfArray = new int[rows];;
-        npheArray = new double[rows];;
+        sectorArray = new int[rows];
+        ringArray = new int[rows];
+        halfArray = new int[rows];
+        npheArray = new double[rows];
         timeArray = new double[rows];
         ithetaArray = new int[rows];
         iphiArray = new int[rows];
@@ -271,7 +268,6 @@ public class HTCCReconstruction {
                 double time = timeArray[testHit] - ring_time.getDoubleValue("offset", 0,0,ithetaTest+1);
                 double timeDiff = Math.abs(time - clusterTime);
 
-                double npheTest = npheArray[testHit];
                 // If the test hit is close enough in space and time
                 if ((ithetaDiff == 1 || iphiDiff == 1)
                         && (ithetaDiff + iphiDiff <= 2)
@@ -279,7 +275,7 @@ public class HTCCReconstruction {
                     // Remove the hit from the remaining hits list
                     remainingHits.remove(hit);
                     // Get the Numeber of Photoelectrons
-                    npheTest = npheArray[testHit];
+                    double npheTest = npheArray[testHit];
                     // Get the Detector Coordinates (polar)
                     double thetaTest = Math.toRadians(geometry.getDoubleValue("theta0", 0,0,0)+2*geometry.getDoubleValue("dtheta", 0,0,0)*ithetaTest);
                     double phiTest   = Math.toRadians(geometry.getDoubleValue("phi0", 0,0,0)  +2*geometry.getDoubleValue("dphi", 0,0,0)*iphiTest);
@@ -340,65 +336,7 @@ public class HTCCReconstruction {
 
         // Push the results into the bank
         event.appendBanks(bankClusters);
-        // Display the results
-//        System.out.printSystef("\n[Detector-HTCC] >>>> Input hits %8d Output Clusters %8d\n", numHits, clusters.size());
-//        bankClusters.show();
     }
-
-//    /**
-//     * Contains the HTCC reconstruction parameters.
-//     */
-//    class ReconstructionParameters {
-//
-//        double theta0[];
-//        double dtheta0[];
-//        double phi0;
-//        double dphi0;
-//        int npeminclst;
-//        int npheminmax;
-//        int npheminhit;
-//        int nhitmaxclst;
-//        int nthetamaxclst;
-//        int nphimaxclst;
-//        double maxtimediff;
-//        double t0[];
-//
-//        /**
-//         * Initialize reconstruction parameters with sensible defaults.
-//         */
-//        ReconstructionParameters() {
-//            theta0 = new double[]{8.75, 16.25, 23.75, 31.25};
-//            dtheta0 = new double[]{3.75, 3.75, 3.75, 3.75};
-//            for (int i = 0; i < 4; ++i) {
-//                theta0[i] = Math.toRadians(theta0[i]);
-//                dtheta0[i] = Math.toRadians(dtheta0[i]);
-//            }
-//            phi0 = Math.toRadians(15.0);
-//            dphi0 = Math.toRadians(15.0);
-//            npeminclst = 1;
-//            npheminmax = 1;
-//            npheminhit = 1;
-//            nhitmaxclst = 4;
-//            nthetamaxclst = 2;
-//            nphimaxclst = 2;
-//            //defaul value
-//            //maxtimediff = 2;
-//            maxtimediff = 8;
-//
-//            t0 = new double[]{11.54, 11.93, 12.33, 12.75};
-//        }
-//
-//        /**
-//         * Initialize reconstruction parameters from a packed string.
-//         *
-//         * @param packed_string the packed string
-//         * @throws UnsupportedOperationException
-//         */
-//        ReconstructionParameters(String packed_string) {
-//            // TODO if necessary
-//            throw new UnsupportedOperationException();
-//        }
-//    }
 
     /**
      * Main routine for testing.
