@@ -20,9 +20,9 @@ public class FilteredBank {
 
     public static final int DEFAULT_ALLOC = 40;
 
-    private final String filterVar;
-    private Bank dataBank = null;
-    private final List<Integer> indexList = new ArrayList<>();
+    protected final String filterVar;
+    protected Bank bank = null;
+    protected final List<Integer> indexList = new ArrayList<>();
     protected final Set<Integer> filterList = new HashSet<>();
 
     /**
@@ -31,7 +31,7 @@ public class FilteredBank {
      * @param variableName name of the variable to filter on 
      */
     public FilteredBank(Schema schema, int allocate, String variableName){
-        dataBank = new Bank(schema, allocate);
+        if (schema != null) bank = new Bank(schema, allocate);
         filterVar = variableName;
     }
 
@@ -41,7 +41,7 @@ public class FilteredBank {
      * @param variableName name of the variable to filter on 
      */
     public FilteredBank(Schema schema, String variableName){
-        dataBank = new Bank(schema, DEFAULT_ALLOC);
+        if (schema != null) bank = new Bank(schema, DEFAULT_ALLOC);
         filterVar = variableName;
     }
 
@@ -59,7 +59,7 @@ public class FilteredBank {
      * Read the bank and prepare filtering
      */ 
     public void read(Event evt){
-        evt.read(dataBank);        
+        evt.read(bank);        
         this.notifyRead();
     }
 
@@ -68,9 +68,9 @@ public class FilteredBank {
      */
     protected void notifyRead(){
         indexList.clear();
-        int rows = dataBank.getRows();
+        int rows = bank.getRows();
         for(int i = 0; i < rows; i++){
-            int value = dataBank.getInt(filterVar, i);
+            int value = bank.getInt(filterVar, i);
             if (filterList.contains(value)) indexList.add(i);
         }
     }
@@ -88,7 +88,7 @@ public class FilteredBank {
      * @return value for the filtered index
      */
     public int intValue(String varName, int index ){
-        return dataBank.getInt(varName, indexList.get(index));
+        return bank.getInt(varName, indexList.get(index));
     }
 
     /**
@@ -97,7 +97,7 @@ public class FilteredBank {
      * @return value for the filtered index
      */
     public long longValue(String varName, int index ){
-        return dataBank.getLong(varName, indexList.get(index));
+        return bank.getLong(varName, indexList.get(index));
     }
 
     /**
@@ -106,7 +106,7 @@ public class FilteredBank {
      * @return value for the filtered index
      */
     public float floatValue(String varName, int index ){
-        return dataBank.getFloat(varName, indexList.get(index));
+        return bank.getFloat(varName, indexList.get(index));
     }
 
     /**
