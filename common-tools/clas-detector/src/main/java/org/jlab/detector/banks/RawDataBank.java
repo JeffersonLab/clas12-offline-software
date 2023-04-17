@@ -25,7 +25,7 @@ public class RawDataBank extends RawBank {
     }
 
     public RawDataBank(String bankName, int allocate, OrderType... types) {
-        super(null, allocate);
+        super(null, allocate, types);
         this.bankName = bankName;
     }
 
@@ -34,6 +34,10 @@ public class RawDataBank extends RawBank {
         this.bankName = bankName;
     }
 
+    /**
+     * Read the bank and prepare filtering
+     * @param event
+     */ 
     public void read(DataEvent event) {
         indexList.clear();
         dataBank = event.getBank(bankName);
@@ -93,7 +97,7 @@ public class RawDataBank extends RawBank {
 	        //fadc.show();
 	        for(int j = 0; j < ftof.size(); j++){
 		        System.out.printf("%3d %3d %3d %4d, order = %5d, true index = %4d\n",j,
-				  ftof.intValue("sector",j),
+                        ftof.sector(j),
                   ftof.intValue("layer",j),
                   ftof.intValue("component",j),
                   ftof.intValue("order",j),

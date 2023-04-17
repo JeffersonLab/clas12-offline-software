@@ -57,6 +57,7 @@ public class FilteredBank {
 
     /**
      * Read the bank and prepare filtering
+     * @param evt
      */ 
     public void read(Event evt){
         evt.read(bank);        
