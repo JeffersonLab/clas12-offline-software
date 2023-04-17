@@ -6,23 +6,65 @@ import org.jlab.jnp.hipo4.data.Schema;
 import org.jlab.jnp.hipo4.io.HipoReader;
 
 /**
- * FilterBank specific to raw ADC/TDC banks, filtered on order by decades.  This
- * is to leverage hijacking the higher digits of order to encode additional
- * information, and avoid reconstruction engines or others from manually
- * interpreting order.  See RawOrderType for conventions.
+ * A FilteredBank specific to raw ADC/TDC banks, filtered on order by decades.
+ * This is to leverage hijacking the higher decimal digits of order to encode
+ * additional information, and avoid reconstruction engines or others from
+ * manually interpreting order.
  * 
  * @author baltzell
  */
 public class RawDataBank extends FilteredBank {
 
-    public RawDataBank(Schema sch, int allocate){
-        super(sch, allocate, "order");
+    public static final String FILTER_VAR_NAME = "order"; 
+
+    public static final OrderType[] DEFAULT_ORDERS = new OrderType[] {
+        OrderType.NOISE0, OrderType.BGADDED_NOISE0
+    };
+
+    public static enum OrderType {
+        NOISE0          (  0),  // normal hits retained by denoising level-0
+        BGADDED_NOISE0  ( 10),  // hits added by background merging and retained by level-0
+        BGREMOVED       ( 20),  // hits removed during background merging 
+        RESERVED        ( 30),  // reserved for later use
+        NOISE1          ( 40),  // normal hits retained by level-1 denoising
+        NOISE2          ( 50),  // normal hits retained by level-2 denoising
+        NOISE3          ( 60),  // normal hits retained by level-3 denoising
+        BGADDED_NOISE1  ( 70),  // background hits retained by level-1 denoising
+        BGADDED_NOISE2  ( 80),  // background hits retained by level-2 denoising
+        BGADDED_NOISE3  ( 90),  // background hits retained by level-3 denoising
+        USER1           (100),
+        USER2           (110),
+        USER3           (120);
+        private final int rawOrderId;
+        private OrderType(int id){ rawOrderId = id; }
+        public int getTypeId() { return rawOrderId; }
     }
 
-    public final void setFilter(RawOrderType... types) {
-        for (int i=0; i<types.length; i++) {
+    public RawDataBank(Schema sch){
+        super(sch, DEFAULT_ALLOC, FILTER_VAR_NAME);
+        setFilter(DEFAULT_ORDERS);
+    }
+
+    public RawDataBank(Schema sch, int allocate){
+        super(sch, allocate, FILTER_VAR_NAME);
+        setFilter(DEFAULT_ORDERS);
+    }
+
+    public RawDataBank(Schema sch, int allocate, OrderType... types) {
+        super(sch, allocate, FILTER_VAR_NAME);
+        setFilter(types);
+    }
+
+    public RawDataBank(Schema sch, OrderType... types) {
+        super(sch, DEFAULT_ALLOC, FILTER_VAR_NAME);
+        setFilter(types);
+    }
+
+    public final void setFilter(OrderType... types) {
+        filterList.clear();
+        for (OrderType type : types) {
             for (int j = 0; j<10; j++) {
-                filterList.add(j + types[i].getTypeId());
+                filterList.add(j + type.getTypeId());
             }
         }
     }
@@ -85,7 +127,7 @@ public class RawDataBank extends FilteredBank {
         RawDataBank ftof = new RawDataBank(r.getSchemaFactory().getSchema("FTOF::adc"),40);
         Bank        fadc = new Bank(r.getSchemaFactory().getSchema("FTOF::adc"));
         
-        ftof.setFilter(RawOrderType.NOISE0,RawOrderType.BGREMOVED);
+        ftof.setFilter(OrderType.NOISE0,OrderType.BGREMOVED);
         
         for(int i = 0; i < 10; i++){
             r.nextEvent(e);
