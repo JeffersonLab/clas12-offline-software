@@ -3,6 +3,7 @@ package org.jlab.rec.band.banks;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import org.jlab.detector.banks.RawDataBank;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -38,8 +39,13 @@ public class HitReader {
 			return new ArrayList<>();
 		} 
 
-		DataBank bankADC = event.getBank("BAND::adc");
-		DataBank bankTDC = event.getBank("BAND::tdc");
+        // OLD:  directly accessing raw banks
+		//DataBank bankADC = event.getBank("BAND::adc");
+		//DataBank bankTDC = event.getBank("BAND::tdc");
+
+        // NEW:  accessing raw banks via RawDataBank
+        RawDataBank bankADC = new RawDataBank("BAND::adc");
+        RawDataBank bankTDC = new RawDataBank("BAND::adc");
 
 		ArrayList<BandHitCandidate> candidates = new ArrayList<>();
 
@@ -51,7 +57,7 @@ public class HitReader {
 			int s	= bankADC.getByte("sector",i);  // one of the 5 sectors
 			int l	= bankADC.getByte("layer",i);  // one of the 6 layers
 			int c 	= bankADC.getShort("component", i);
-			int o	= bankADC.getByte("order",i);
+			int o	= bankADC.trueOrder(i);
 
 			int adc = bankADC.getInt("ADC",i); 
 			int ampl= bankADC.getInt("amplitude", i);
@@ -71,14 +77,14 @@ public class HitReader {
 					fadcInt.put(key, adc);
 					fadcAmpl.put(key,  ampl);
 					fadcTimes.put(key, ftdc);
-					fadcIndex.put(key, i);
+					fadcIndex.put(key, bankADC.trueIndex(i));
 				}
 			}
 			else {
 				fadcInt.put(key, adc);
 				fadcAmpl.put(key, ampl);
 				fadcTimes.put(key, ftdc);
-				fadcIndex.put(key, i);
+				fadcIndex.put(key, bankADC.trueIndex(i));
 			}	
 		}
 
@@ -87,7 +93,7 @@ public class HitReader {
 			int s = bankTDC.getByte("sector", j);
 			int l = bankTDC.getByte("layer", j);
 			int c = bankTDC.getShort("component", j);
-			int o = bankTDC.getByte("order", j);
+			int o = bankTDC.trueOrder(j);
 
 			int key = s*1000 + l*100 + c*10 + (o-2);
 
