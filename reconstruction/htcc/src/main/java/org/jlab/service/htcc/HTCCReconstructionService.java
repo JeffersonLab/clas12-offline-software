@@ -1,14 +1,10 @@
 package org.jlab.service.htcc;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jlab.clas.reco.ReconstructionEngine;
-import org.jlab.io.base.DataEvent;
-import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.rec.htcc.HTCCReconstruction;
-import org.jlab.utils.groups.IndexedTable;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 /**
