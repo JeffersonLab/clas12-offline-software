@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jlab.clas.swimtools.Swimmer;
+import org.jlab.detector.banks.RawDataBank;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.Constants;
@@ -236,8 +237,10 @@ public class HitReader {
         }
         
         this.getDCRBJitters(Constants.getInstance().isSWAPDCRBBITS());
-        
-        DataBank bankDGTZ = event.getBank(bankNames.getTdcBank());
+       
+        RawDataBank bankDGTZ = new RawDataBank(bankNames.getTdcBank());
+        bankDGTZ.read(event);
+        //DataBank bankDGTZ = event.getBank(bankNames.getTdcBank());
 
         int rows = bankDGTZ.rows();
         int[] sector = new int[rows];
@@ -254,7 +257,7 @@ public class HitReader {
             layer[i]      = (bankDGTZ.getByte("layer", i)-1)%6 + 1;
             superlayer[i] = (bankDGTZ.getByte("layer", i)-1)/6 + 1;
             wire[i]       = bankDGTZ.getShort("component", i);
-            order[i]      = bankDGTZ.getByte("order", i);
+            order[i]      = bankDGTZ.trueOrder(i);
             jitter[i]     = this.getJitter(sector[i], bankDGTZ.getByte("layer", i), wire[i], order[i]);
             tdc[i]        = bankDGTZ.getInt("TDC", i) - jitter[i];
         }
