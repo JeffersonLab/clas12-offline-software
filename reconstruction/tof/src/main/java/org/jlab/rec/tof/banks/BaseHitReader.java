@@ -6,8 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.jlab.io.base.DataBank;
+import org.jlab.detector.banks.RawDataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.utils.groups.IndexedTable;
 
@@ -80,7 +79,11 @@ public class BaseHitReader {
         int[] TDCIdx2 = null;
 
         if (event.hasBank(detADC) == true) {
-            DataBank bank = event.getBank(detADC);
+            
+            RawDataBank bank = new RawDataBank(detADC);
+            bank.read(event);
+            //DataBank bank = event.getBank(detADC);
+            
             int bankSize = bank.rows();
 
             sectorADC = new int[bankSize];
@@ -99,7 +102,7 @@ public class BaseHitReader {
                 sectorADC[i] = bank.getByte("sector", i);
                 layerADC[i] = bank.getByte("layer", i);
                 componentADC[i] = bank.getShort("component", i);
-                int order = bank.getByte("order", i);
+                int order = bank.trueOrder(i);
                 int ADC = bank.getInt("ADC", i);
                 double time = bank.getFloat("time", i);
                 int pedestalADC = bank.getShort("ped", i);
@@ -144,7 +147,11 @@ public class BaseHitReader {
             }
         }
         if (event.hasBank(detTDC) == true) {
-            DataBank bank = event.getBank(detTDC);
+            
+            RawDataBank bank = new RawDataBank(detTDC);
+            bank.read(event);
+            //DataBank bank = event.getBank(detTDC);
+            
             int bankSize = bank.rows();
 
             sectorTDC = new int[bankSize];
@@ -159,7 +166,7 @@ public class BaseHitReader {
                 sectorTDC[i] = bank.getByte("sector", i);
                 layerTDC[i] = bank.getByte("layer", i);
                 componentTDC[i] = bank.getShort("component", i);
-                int order = bank.getByte("order", i);
+                int order = bank.trueOrder(i);
                 int TDC = bank.getInt("TDC", i);
 
                 TDC1[i] = -1;
