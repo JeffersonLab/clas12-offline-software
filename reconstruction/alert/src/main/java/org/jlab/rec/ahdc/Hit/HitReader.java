@@ -1,9 +1,10 @@
 package org.jlab.rec.ahdc.Hit;
 
+import java.util.ArrayList;
+
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-
-import java.util.ArrayList;
+import org.jlab.detector.banks.RawDataBank;
 
 public class HitReader {
 
@@ -18,7 +19,9 @@ public class HitReader {
 	public void fetch_AHDCHits(DataEvent event) {
 		ArrayList<Hit> hits = new ArrayList<>();
 
-		DataBank bankDGTZ = event.getBank("ALRTDC::adc");
+		RawDataBank bankDGTZ = new RawDataBank("ALRTDC::adc");
+        bankDGTZ.read(event);
+		//DataBank bankDGTZ = event.getBank("ALRTDC::adc");
 
 		if (event.hasBank("ALRTDC::adc")) {
 			for (int i = 0; i < bankDGTZ.rows(); i++) {
