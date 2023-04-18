@@ -3,6 +3,7 @@ package org.jlab.service.ec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.detector.banks.RawDataBank;
 
 import org.jlab.detector.base.DetectorCollection;
 import org.jlab.detector.base.DetectorLayer;
@@ -335,7 +336,9 @@ public class ECCommon {
         }
 
         if(event.hasBank("ECAL::tdc")==true){
-            DataBank  bank = event.getBank("ECAL::tdc");
+            RawDataBank  bank = new RawDataBank("ECAL::tdc");
+            bank.read(event);
+            //DataBank  bank = event.getBank("ECAL::tdc");
             for(int i = 0; i < bank.rows(); i++){
                 int  is = bank.getByte("sector",i);
                 int  il = bank.getByte("layer",i);
@@ -352,7 +355,9 @@ public class ECCommon {
         }        
         
         if(event.hasBank("ECAL::adc")==true){
-            DataBank bank = event.getBank("ECAL::adc");
+            RawDataBank bank = new RawDataBank("ECAL::adc");
+            bank.read(event);
+            //DataBank bank = event.getBank("ECAL::adc");
             for(int i = 0; i < bank.rows(); i++){
                 int  is = bank.getByte("sector", i);
                 int  il = bank.getByte("layer", i); 
