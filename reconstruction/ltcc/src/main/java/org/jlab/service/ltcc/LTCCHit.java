@@ -1,18 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.service.ltcc;
 
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.utils.groups.IndexedTable;
-//import org.jMath.Vector.threeVec;
 
 import java.util.LinkedList;
 import java.util.List;
+import org.jlab.detector.banks.RawDataBank;
 import org.jlab.geom.prim.Vector3D;
 
 
@@ -71,7 +66,9 @@ public final class LTCCHit {
             stat = ccdb.getConstants(run, "/calibration/ltcc/status");
             //timing_offset = ccdb.getConstants(run, "/calibration/ltcc/timing_offset");
         }
-        DataBank bank = event.getBank("LTCC::adc");
+        RawDataBank bank = new RawDataBank("LTCC::adc");
+        bank.read(event);
+        //DataBank bank = event.getBank("LTCC::adc");
         
         List<LTCCHit> hits = new LinkedList<>();
         for (int i = 0; i < bank.rows(); ++i) {
@@ -86,14 +83,14 @@ public final class LTCCHit {
         return loadHits(event, null);
     }
     
-    LTCCHit(DataBank bank, 
+    LTCCHit(RawDataBank bank, 
             int index, 
             IndexedTable spe, 
             IndexedTable timing_offset,
             IndexedTable status_table) {
        this.sector = bank.getByte("sector", index);
        this.segment = bank.getShort("component", index);
-       this.side = bank.getByte("order", index) + 1;
+       this.side = bank.trueOrder(index) + 1;
        this.adc = bank.getInt("ADC", index);
        this.rawTime = bank.getFloat("time", index);
        //this.pedestal = bank.getShort("ped", index);
@@ -102,7 +99,7 @@ public final class LTCCHit {
        this.iLTCCPhi = calcLTCCPhiIndex();
        this.status = calcStatus(status_table);
     }        
-    LTCCHit(DataBank bank, int index) {
+    LTCCHit(RawDataBank bank, int index) {
         this(bank, index, null, null, null);
     }
    
