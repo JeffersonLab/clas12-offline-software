@@ -3,6 +3,7 @@ package org.jlab.rec.ft.hodo;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.detector.banks.RawDataBank;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -171,8 +172,9 @@ public class FTHODOReconstruction {
 	if(debugMode>=1) System.out.println("Getting raw hits from FTHODO:adc bank");
 
         List<FTHODOHit>  hits = new ArrayList<>();
-	if(event.hasBank("FTHODO::adc")==true) {
-            DataBank bankDGTZ = event.getBank("FTHODO::adc");
+        if(event.hasBank("FTHODO::adc")==true) {
+            RawDataBank bankDGTZ = new RawDataBank("FTHODO::adc");
+            bankDGTZ.read(event);
             int nrows = bankDGTZ.rows();
             for(int row = 0; row < nrows; row++){
                 int isector     = bankDGTZ.getByte("sector",row);

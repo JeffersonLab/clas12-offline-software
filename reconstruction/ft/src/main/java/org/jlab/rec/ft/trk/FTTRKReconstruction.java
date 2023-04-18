@@ -2,6 +2,7 @@ package org.jlab.rec.ft.trk;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.detector.banks.RawDataBank;
 import org.jlab.detector.base.DetectorLayer;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.io.base.DataBank;
@@ -399,7 +400,8 @@ public class FTTRKReconstruction {
         
         List<FTTRKHit> hits = new ArrayList<>();
         if (event.hasBank("FTTRK::adc") == true) {
-            DataBank bankDGTZ = event.getBank("FTTRK::adc");
+            RawDataBank bankDGTZ = new RawDataBank("FTTRK::adc");
+            bankDGTZ.read(event);
             int nrows = bankDGTZ.rows();
             if (nrows > FTConstants.TRK_MAXNUMBEROFHITS) {
                 return hits;   // if too many hits skip the event
