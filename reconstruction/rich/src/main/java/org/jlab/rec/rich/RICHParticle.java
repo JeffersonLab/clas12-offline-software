@@ -535,6 +535,7 @@ public class RICHParticle {
         for (int ip=0; ip<RICHConstants.N_HYPO; ip++)if(Math.abs(pid) == RICHConstants.HYPO_LUND[ip])ok=1;
         if(ok==0) return 0.0;
 
+        if(changle(11,0)==0)return 0.0;
         double ratio = Math.pow(Math.sin(changle(pid,0)),2)/Math.pow(Math.sin(changle(11,0)),2);
         double nele  = richpar.RICH_NOMINAL_NELE;
 
@@ -591,6 +592,7 @@ public class RICHParticle {
         for (int ip=0; ip<RICHConstants.N_HYPO; ip++)if(Math.abs(pid) == RICHConstants.HYPO_LUND[ip])ok=1;
         if(ok==0 || irefle<0 || irefle>RICHConstants.N_PATH) return 0.0;
 
+        if(changle(11,0)==0)return 0.0;
         double ratio = Math.pow(Math.sin(changle(pid,0)),2)/Math.pow(Math.sin(changle(11,0)),2);
         double nele  = nchele_emission[irefle];
 
