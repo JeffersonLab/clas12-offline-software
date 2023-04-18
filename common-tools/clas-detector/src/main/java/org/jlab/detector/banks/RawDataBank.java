@@ -54,6 +54,26 @@ public class RawDataBank extends RawBank {
      * @return value for the filtered index
      */
     @Override
+    public int getByte(String varName, int index ){
+        return dataBank.getByte(varName, indexList.get(index));
+    }
+
+    /**
+     * @param varName name of the bank variable
+     * @param index filtered index to retrieve
+     * @return value for the filtered index
+     */
+    @Override
+    public int getShort(String varName, int index ){
+        return dataBank.getShort(varName, indexList.get(index));
+    }
+
+    /**
+     * @param varName name of the bank variable
+     * @param index filtered index to retrieve
+     * @return value for the filtered index
+     */
+    @Override
     public int getInt(String varName, int index ){
         return dataBank.getInt(varName, indexList.get(index));
     }
