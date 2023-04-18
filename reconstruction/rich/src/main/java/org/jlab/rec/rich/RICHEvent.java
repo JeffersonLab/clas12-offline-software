@@ -706,9 +706,15 @@ public class RICHEvent {
         if(debugMode>=1){
             for (int hypo=0; hypo<RICHConstants.N_HYPO; hypo++){
                 int hypo_pid = RICHConstants.HYPO_LUND[hypo];
+                double tmp_rl = 0.0;
+                double tmp_c2 = 0.0;
+                if(n_tot[hypo]>0){
+                    tmp_rl = (lh_all[hypo]+lh_ref[hypo])/(2*n_tot[hypo]);
+                    tmp_c2 = c2_sig[hypo]/(2*n_tot[hypo]);
+                }
                 System.out.format(" [%5d] %5d [%7.2f] %4d %4d %4d %4d [%10.4g %10.4g %10.4g] --> %10.4f %10.4g (%10.4g %7.2f)\n",
                         hypo_pid, hreco.get_BestH(), n_exp[hypo], n_tot[hypo], n_sig[hypo], n_bck[hypo], n_spe[hypo],
-                        lh_sig[hypo], lh_ref[hypo], lh_dnn[hypo], lh_all[hypo], (lh_all[hypo]+lh_ref[hypo]), (lh_all[hypo]+lh_ref[hypo])/(2*n_tot[hypo]), c2_sig[hypo]/(2*n_tot[hypo]));
+                        lh_sig[hypo], lh_ref[hypo], lh_dnn[hypo], lh_all[hypo], (lh_all[hypo]+lh_ref[hypo]), tmp_rl, tmp_c2);
             }
 
             String hstri = "Traced PID";
