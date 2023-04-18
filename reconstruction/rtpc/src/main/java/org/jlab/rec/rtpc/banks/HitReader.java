@@ -3,6 +3,7 @@ package org.jlab.rec.rtpc.banks;
 import java.util.ArrayList;
 import java.util.List;
 import java.lang.Math;
+import org.jlab.detector.banks.RawDataBank;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -32,9 +33,6 @@ public class HitReader {
             this._Hits = RTPCHits;
     }
 
-
-
-
     /**
      * reads the hits using clas-io methods to get the EvioBank for the RTPC and fill the values to instanciate the RTPChit and MChit classes.
      * This methods fills the RTPChit and MChit list of hits.  If the data is not MC, the MChit list remains empty
@@ -44,20 +42,20 @@ public class HitReader {
 
         List<Hit> hits = new ArrayList<>();
 
-        DataBank bankDGTZ = null;
-        if(event.hasBank("RTPC::adc")==true)
-            bankDGTZ=event.getBank("RTPC::adc");
         DataBank bankTrue = null;
-        if(simulation){
-            if(event.hasBank("MC::True")==true)
-                bankTrue=event.getBank("MC::True");
-            if(bankDGTZ==null || bankTrue==null)
-                return ;
-        }else{
-            if(bankDGTZ==null) return;
-        }
-        int rows = bankDGTZ.rows();
+        RawDataBank bankDGTZ = new RawDataBank("RTPC::adc");
+        bankDGTZ.read(event);
 
+        if (!event.hasBank("RTPC::adc")) return;
+        if (simulation) {
+            if (event.hasBank("MC::True"))
+                bankTrue = event.getBank("MC::True");
+            else
+                return;
+        }
+            
+        int rows = bankDGTZ.rows();
+        if (rows <= 0) return;
 
         int[] hitnb 	= new int[rows];
         int[] cellID 	= new int[rows];
