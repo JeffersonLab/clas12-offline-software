@@ -6,13 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.banks.RawDataBank;
 import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.Geometry;
-import org.jlab.rec.cvt.bmt.BMTConstants;
 import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.hit.ADCConvertor;
@@ -98,7 +97,8 @@ public class HitReader {
         List<Hit> hits50c = new ArrayList<>();
         List<Hit> hits50z = new ArrayList<>();
         // gets the BMT dgtz bank
-        DataBank bankDGTZ = event.getBank("BMT::adc");
+        RawDataBank bankDGTZ = new RawDataBank("BMT::adc");
+        bankDGTZ.read(event);
         // fills the arrays corresponding to the hit variables
         int rows = bankDGTZ.rows();
 
@@ -116,8 +116,8 @@ public class HitReader {
                 int layer   = bankDGTZ.getByte("layer", i);
                 int strip   = bankDGTZ.getShort("component", i);
                 double ADCtoEdep = bankDGTZ.getInt("ADC", i);
-                double time      = bankDGTZ.getFloat("time", i);
-                int order   = bankDGTZ.getByte("order", i);
+                double time = bankDGTZ.getFloat("time", i);
+                int order   = bankDGTZ.trueOrder(i);
                 //if (order == 1) {
                 //    continue;
                 //}
@@ -234,7 +234,8 @@ public class HitReader {
 
         List<Hit> hits = new ArrayList<>();
 
-        DataBank bankDGTZ = event.getBank("BST::adc");
+        RawDataBank bankDGTZ = new RawDataBank("BST::adc");
+        bankDGTZ.read(event);
         int rows = bankDGTZ.rows();
         
         if (event.hasBank("BST::adc") == true) {
@@ -243,9 +244,9 @@ public class HitReader {
             Map<Integer, Double> tdcs = new HashMap<>();
             for (int i = 0; i < rows; i++) {                
                 if(bankDGTZ.getInt("ADC", i) < 0) {
-                    byte sector = bankDGTZ.getByte("sector", i);
-                    byte layer  = bankDGTZ.getByte("layer", i);
-                    short strip = bankDGTZ.getShort("component", i);
+                    int sector = bankDGTZ.getByte("sector", i);
+                    int layer  = bankDGTZ.getByte("layer", i);
+                    int strip = bankDGTZ.getShort("component", i);
                     double time = bankDGTZ.getFloat("time", i);
                     
                     //if (order == 1) {
@@ -271,9 +272,9 @@ public class HitReader {
                 }
                 int order   = bankDGTZ.getByte("order", i);
                 int id      = i + 1;
-                byte sector = bankDGTZ.getByte("sector", i);
-                byte layer  = bankDGTZ.getByte("layer", i);
-                short strip = bankDGTZ.getShort("component", i);
+                int sector  = bankDGTZ.getByte("sector", i);
+                int layer   = bankDGTZ.getByte("layer", i);
+                int strip   = bankDGTZ.getShort("component", i);
                 int ADC     = bankDGTZ.getInt("ADC", i);
                 double time = 0;//bankDGTZ.getFloat("time", i);
                 int tdcstrip = 1;
