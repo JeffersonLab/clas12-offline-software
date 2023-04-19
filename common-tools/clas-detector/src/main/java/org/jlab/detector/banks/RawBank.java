@@ -16,17 +16,17 @@ import org.jlab.jnp.hipo4.io.HipoReader;
 public class RawBank extends FilteredBank {
 
     public static final class OrderGroups {
-        public static final OrderType[] DENOISING0 = new OrderType[] {
+        public static final OrderType[] NOISE0 = new OrderType[] {
             OrderType.NOISE0,
             OrderType.BGADDED_NOISE0
         };
-        public static final OrderType[] DENOISING1 = new OrderType[] {
+        public static final OrderType[] NOISE1 = new OrderType[] {
             OrderType.NOISE0,
             OrderType.NOISE1,
             OrderType.BGADDED_NOISE0,
             OrderType.BGADDED_NOISE1
         };
-        public static final OrderType[] DENOISING2 = new OrderType[] {
+        public static final OrderType[] NOISE2 = new OrderType[] {
             OrderType.NOISE0,
             OrderType.NOISE1,
             OrderType.NOISE2,
@@ -34,7 +34,7 @@ public class RawBank extends FilteredBank {
             OrderType.BGADDED_NOISE1,
             OrderType.BGADDED_NOISE2,
         };
-        public static final OrderType[] DENOISING3 = new OrderType[] {
+        public static final OrderType[] NOISE3 = new OrderType[] {
             OrderType.NOISE0,
             OrderType.NOISE1,
             OrderType.NOISE2,
@@ -44,14 +44,14 @@ public class RawBank extends FilteredBank {
             OrderType.BGADDED_NOISE2,
             OrderType.BGADDED_NOISE3
         };
-        public static final OrderType[] NODENOISING_NOBG = new OrderType[] {
+        public static final OrderType[] NODENOISE_NOBG = new OrderType[] {
             OrderType.NOISE0,
             OrderType.NOISE1,
             OrderType.NOISE2,
             OrderType.NOISE3
         };
-        public static final OrderType[] DEFAULT = DENOISING0;
-        public static final OrderType[] NODENOISING = DENOISING3;
+        public static final OrderType[] DEFAULT = NOISE0;
+        public static final OrderType[] NODENOISE = NOISE3;
     }
 
     public static enum OrderType {
