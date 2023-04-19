@@ -15,11 +15,44 @@ import org.jlab.jnp.hipo4.io.HipoReader;
  */
 public class RawBank extends FilteredBank {
 
-    public static final String FILTER_VAR_NAME = "order"; 
-
-    public static final OrderType[] DEFAULT_ORDERS = new OrderType[] {
-        OrderType.NOISE0, OrderType.BGADDED_NOISE0
-    };
+    public static final class OrderGroups {
+        public static final OrderType[] DENOISING0 = new OrderType[] {
+            OrderType.NOISE0,
+            OrderType.BGADDED_NOISE0
+        };
+        public static final OrderType[] DENOISING1 = new OrderType[] {
+            OrderType.NOISE0,
+            OrderType.NOISE1,
+            OrderType.BGADDED_NOISE0,
+            OrderType.BGADDED_NOISE1
+        };
+        public static final OrderType[] DENOISING2 = new OrderType[] {
+            OrderType.NOISE0,
+            OrderType.NOISE1,
+            OrderType.NOISE2,
+            OrderType.BGADDED_NOISE0,
+            OrderType.BGADDED_NOISE1,
+            OrderType.BGADDED_NOISE2,
+        };
+        public static final OrderType[] DENOISING3 = new OrderType[] {
+            OrderType.NOISE0,
+            OrderType.NOISE1,
+            OrderType.NOISE2,
+            OrderType.NOISE3,
+            OrderType.BGADDED_NOISE0,
+            OrderType.BGADDED_NOISE1,
+            OrderType.BGADDED_NOISE2,
+            OrderType.BGADDED_NOISE3
+        };
+        public static final OrderType[] NODENOISING_NOBG = new OrderType[] {
+            OrderType.NOISE0,
+            OrderType.NOISE1,
+            OrderType.NOISE2,
+            OrderType.NOISE3
+        };
+        public static final OrderType[] DEFAULT = DENOISING0;
+        public static final OrderType[] NODENOISING = DENOISING3;
+    }
 
     public static enum OrderType {
         NOISE0          (  0),  // normal hits retained by denoising level-0
@@ -40,14 +73,16 @@ public class RawBank extends FilteredBank {
         public int getTypeId() { return rawOrderId; }
     }
 
+    public static final String FILTER_VAR_NAME = "order"; 
+
     public RawBank(Schema sch){
         super(sch, DEFAULT_ALLOC, FILTER_VAR_NAME);
-        setFilter(DEFAULT_ORDERS);
+        setFilter(OrderGroups.DEFAULT);
     }
 
     public RawBank(Schema sch, int allocate){
         super(sch, allocate, FILTER_VAR_NAME);
-        setFilter(DEFAULT_ORDERS);
+        setFilter(OrderGroups.DEFAULT);
     }
 
     public RawBank(Schema sch, int allocate, OrderType... types) {
