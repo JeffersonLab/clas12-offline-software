@@ -100,6 +100,10 @@ public abstract class ReconstructionEngine implements Engine {
         return new RawDataBank(bankName, this.rawBankOrders);
     }
 
+    protected RawBank getRawBankReader(String bankName, OrderType... order) {
+        return new RawDataBank(bankName, order);
+    }
+
     abstract public boolean processDataEvent(DataEvent event);
     abstract public boolean init();
    
