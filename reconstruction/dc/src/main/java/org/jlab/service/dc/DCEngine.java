@@ -163,7 +163,8 @@ public class DCEngine extends ReconstructionEngine {
                                            swapDCRBBits,
                                            nSuperLayer, 
                                            selectedSector,
-                                           shifts);
+                                           shifts,
+                                           rawBankOrders);
         this.LoadTables();
         this.initBanks();
         this.setDropBanks();
