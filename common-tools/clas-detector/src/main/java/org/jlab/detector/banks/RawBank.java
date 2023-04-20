@@ -1,5 +1,7 @@
 package org.jlab.detector.banks;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.Event;
 import org.jlab.jnp.hipo4.data.Schema;
@@ -9,7 +11,7 @@ import org.jlab.jnp.hipo4.io.HipoReader;
  * A FilteredBank specific to raw ADC/TDC banks, filtered on order by decades.
  * This is to leverage hijacking the higher decimal digits of order to encode
  * additional information, and avoid reconstruction engines or others from
- * manually interpreting order.
+ * having to manually interpret order, although they still can if necessary.
  * 
  * @author baltzell
  */
@@ -104,9 +106,32 @@ public class RawBank extends FilteredBank {
         }
     }
 
+    /**
+     * Get one of the standard OrderGroups from its string name.
+     * @param group string name of one of the OrderGroups
+     * @return the corresponding list of orders 
+     * @throws java.lang.NoSuchFieldException 
+     * @throws java.lang.IllegalAccessException 
+     */
     public static final OrderType[] getFilterGroup(String group)
         throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
         return (OrderType[])OrderGroups.class.getField(group).get(null);
+    }
+
+    /**
+     * Create a custom order group from OrderType's string names 
+     * @param type string names of OrderTypes
+     * @return the corresponding list of orders
+     * @throws java.lang.NoSuchFieldException
+     * @throws java.lang.IllegalAccessException
+     */
+    public static final OrderType[] createFilterGroup(String... type)
+        throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+        OrderType[] ret = new OrderType[type.length];
+        for (int i=0; i<type.length; i++) {
+            ret[i] = (OrderType)OrderType.class.getField(type[i]).get(null);
+        }
+        return ret;
     }
 
     /**
@@ -160,6 +185,18 @@ public class RawBank extends FilteredBank {
 
     public static void main(String[] args){
 
+        try {
+            for (OrderType ot : getFilterGroup("DEFAULT")) {
+                System.out.println(ot);
+            }
+            for (OrderType ot : createFilterGroup("NOISE0","BGREMOVED")) {
+                System.out.println(ot);
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(RawBank.class.getName()).log(Level.SEVERE, null, ex);
+            System.exit(1);
+        }
+        
         HipoReader r = new HipoReader();
         r.open("/Users/baltzell/data/decoded/clas_006676.evio.00170-00174.hipo");
         Event e = new Event();
@@ -169,7 +206,7 @@ public class RawBank extends FilteredBank {
         
         ftof.setFilter(OrderType.NOISE0,OrderType.BGREMOVED);
         
-        for(int i = 0; i < 10; i++){
+        for(int i = 0; i < 5; i++){
             r.nextEvent(e);
             e.read(fadc);
             ftof.read(e);
