@@ -2,6 +2,7 @@ package org.jlab.detector.decode;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
@@ -1042,14 +1043,39 @@ public class CodaEventDecoder {
                         int i_apvTmp = i_apv;
 
                         double cmnMode = 0;
+                        boolean specialSlot = (slot == 0 || slot == 6);
 
                         // * Will skip first and last 10 channels in the cmnMode determination
-                        for (int ich = 10; ich < n_APV_CH - 10; ich++) {
-                            cmnMode = cmnMode + (double) cur_APV.get(i_apvTmp);
+                        ArrayList<Integer> tmpList = new ArrayList<Integer>();
+                        for (int ich = 0; ich < n_APV_CH; ich++) {
+
+                            if (specialSlot) {
+                                if (slot == 0) {
+                                    if (32 * (ich % 4) + 8 * (ich / 4) - 31 * (ich / 16) >= 64) {
+                                        //cmnMode = cmnMode + (double) cur_APV.get(i_apvTmp);
+                                        tmpList.add((int) cur_APV.get(i_apvTmp));
+                                    }
+                                } else if (slot == 6) {
+                                    if (32 * (ich % 4) + 8 * (ich / 4) - 31 * (ich / 16) < 64) {
+                                        //cmnMode = cmnMode + (double) cur_APV.get(i_apvTmp);
+                                        tmpList.add((int) cur_APV.get(i_apvTmp));
+                                    }
+                                }
+
+                            } else {
+                                //cmnMode = cmnMode + (double) cur_APV.get(i_apvTmp);
+                                tmpList.add((int) cur_APV.get(i_apvTmp));
+                            }
                             i_apvTmp = i_apvTmp + 1;
                         }
-                        cmnMode = cmnMode / ((double) (n_APV_CH - 20));
 
+
+                        Collections.sort(tmpList);
+                        for (int ich = 5; ich < tmpList.size(); ich++) {
+                            cmnMode = cmnMode + tmpList.get(ich);
+                        }
+                        cmnMode = cmnMode / ((double) (tmpList.size() - 5));                        
+                        
                         for (int ich = 0; ich < n_APV_CH; ich++) {
                             //DetectorDataDgtz bank = new DetectorDataDgtz(crate, slot.intValue(), ich);
 
