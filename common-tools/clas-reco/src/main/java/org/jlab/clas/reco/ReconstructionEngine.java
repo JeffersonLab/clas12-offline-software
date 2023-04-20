@@ -17,6 +17,10 @@ import org.jlab.clara.engine.Engine;
 import org.jlab.clara.engine.EngineData;
 import org.jlab.clara.engine.EngineDataType;
 import org.jlab.clara.engine.EngineStatus;
+import org.jlab.detector.banks.RawBank;
+import org.jlab.detector.banks.RawDataBank;
+import org.jlab.detector.banks.RawBank.OrderGroups;
+import org.jlab.detector.banks.RawBank.OrderType;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.io.base.DataBank;
 
@@ -46,7 +50,9 @@ public abstract class ReconstructionEngine implements Engine {
 
     volatile ConcurrentMap<String,String>           engineConfigMap;
     volatile String                                 engineConfiguration = null;
-  
+ 
+    OrderType[] rawBankOrders = OrderGroups.DEFAULT;
+    
     volatile private boolean fatalError = false;
     
     volatile boolean wroteConfig = false;
@@ -88,6 +94,10 @@ public abstract class ReconstructionEngine implements Engine {
         if (this.dropOutputBanks) {
             LOGGER.log(Level.INFO, String.format("[%s]  dropping banks:  %s",this.getName(), Arrays.toString(bankName)));
         }
+    }
+
+    protected RawBank getRawBankReader(String bankName) {
+        return new RawDataBank(bankName, this.rawBankOrders);
     }
 
     abstract public boolean processDataEvent(DataEvent event);
@@ -165,6 +175,9 @@ public abstract class ReconstructionEngine implements Engine {
           engineDictionary = new SchemaFactory();
       LOGGER.log(Level.INFO,"--- engine configuration is called " + this.getDescription());
       try {
+          if (this.getEngineConfigString("rawBankGroup")!=null) {
+              this.rawBankOrders = RawBank.getFilterGroup(this.getEngineConfigString("rawBankGroup"));
+          }
           if (this.getEngineConfigString("dropBanks")!=null &&
                   this.getEngineConfigString("dropBanks").equals("true")) {
               dropOutputBanks=true;
