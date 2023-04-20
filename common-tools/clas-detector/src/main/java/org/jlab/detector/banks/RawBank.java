@@ -104,6 +104,11 @@ public class RawBank extends FilteredBank {
         }
     }
 
+    public static final OrderType[] getFilterGroup(String group)
+        throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+        return (OrderType[])OrderGroups.class.getField(group).get(null);
+    }
+
     /**
      * Maybe we should name this something else?
      * @param index filtered index
@@ -181,4 +186,5 @@ public class RawBank extends FilteredBank {
 	        }
         }
     }
+
 }
