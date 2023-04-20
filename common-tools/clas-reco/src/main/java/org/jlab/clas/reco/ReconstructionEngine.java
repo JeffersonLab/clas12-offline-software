@@ -51,7 +51,7 @@ public abstract class ReconstructionEngine implements Engine {
     volatile ConcurrentMap<String,String>           engineConfigMap;
     volatile String                                 engineConfiguration = null;
  
-    OrderType[] rawBankOrders = OrderGroups.DEFAULT;
+    protected OrderType[] rawBankOrders = OrderGroups.DEFAULT;
     
     volatile private boolean fatalError = false;
     

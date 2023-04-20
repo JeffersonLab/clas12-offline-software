@@ -238,7 +238,7 @@ public class HitReader {
         
         this.getDCRBJitters(Constants.getInstance().isSWAPDCRBBITS());
        
-        RawDataBank bankDGTZ = new RawDataBank(bankNames.getTdcBank());
+        RawDataBank bankDGTZ = new RawDataBank(bankNames.getTdcBank(),Constants.getInstance().getRawBankOrders());
         bankDGTZ.read(event);
         //DataBank bankDGTZ = event.getBank(bankNames.getTdcBank());
 

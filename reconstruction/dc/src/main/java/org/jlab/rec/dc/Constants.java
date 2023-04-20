@@ -18,6 +18,8 @@ import org.jlab.geom.base.Detector;
 import org.jlab.rec.dc.trajectory.TrajectorySurfaces;
 import org.jlab.utils.groups.IndexedTable;
 import org.jlab.clas.clas.math.FastMath;
+import org.jlab.detector.banks.RawBank.OrderGroups;
+import org.jlab.detector.banks.RawBank.OrderType;
 
 /**
  * Constants used in the reconstruction
@@ -82,6 +84,7 @@ public class Constants {
     private boolean USEDOUBLETS = false;
     private boolean DCRBJITTER = false;
     private boolean SWAPDCRBBITS = false;
+    private OrderType[] RAWBANKORDERS = OrderGroups.DEFAULT;
     
     // DATABASE TABLES
     public static final String TT             = "/daq/tt/dc";
@@ -348,7 +351,11 @@ public class Constants {
     public void setSWAPDCRBBITS(boolean SWAPDCRBBITS) {
         this.SWAPDCRBBITS = SWAPDCRBBITS;
     }
-    
+   
+    public OrderType[] getRawBankOrders() {
+        return this.RAWBANKORDERS;
+    }
+
     public synchronized void initialize(String engine,
                                         String variation, 
                                         boolean wireDistortion,
@@ -360,7 +367,8 @@ public class Constants {
                                         boolean swapDCRBBits,
                                         int nSuperLayer,
                                         int selectedSector,
-                                        double[][] shifts) {
+                                        double[][] shifts,
+                                        OrderType[] rawBankOrders) {
         if (ConstantsLoaded) {
             printConfig(engine);
         }
@@ -375,6 +383,7 @@ public class Constants {
             SWAPDCRBBITS    = swapDCRBBits;
             NSUPERLAYERTRACKING = nSuperLayer;
             SECTORSELECT    = selectedSector;
+            RAWBANKORDERS   = rawBankOrders;
 
             LoadConstants();
 
