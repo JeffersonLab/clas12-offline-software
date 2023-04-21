@@ -62,7 +62,7 @@ public class RICHGeoFactory{
     /* generate the tracking layers (FactoryMode=0 only Aerogel and MaPMT for trajectory, FactoryMode=1  all)
     */
     //------------------------------
-    public RICHGeoFactory(int FactoryMode, ConstantsManager manager, int run){
+    public RICHGeoFactory(int FactoryMode, ConstantsManager manager, int run, String engineDebug){
     //------------------------------
 
         int debugMode = 0;
@@ -83,7 +83,7 @@ public class RICHGeoFactory{
         if(debugMode>=1)System.out.format("RICHGeoFactory: Load geometry constants from CCDB \n");
      
         int Ncalls = 0;
-        geopar.load_CCDB(manager, run, Ncalls);
+        geopar.load_CCDB(manager, run, Ncalls, engineDebug);
         geocal.load_CCDB(manager, run, Ncalls, geopar);
 
         if(FactoryMode>0){
