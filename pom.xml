@@ -2,14 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jlab.clas</groupId>
   <artifactId>clas12</artifactId>
-  <version>8.4.0-SNAPSHOT</version>
+  <version>8.7.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <parent>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>parent/pom.xml</relativePath>
-    <version>8.4.0-SNAPSHOT</version>
+    <version>8.7.1-SNAPSHOT</version>
   </parent>
 
   <modules>
