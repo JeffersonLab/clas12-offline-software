@@ -28,6 +28,7 @@ public class RICHEBEngine extends ReconstructionEngine {
     
     private RICHGeoFactory       richgeo;
     private RICHTime             richtime = new RICHTime();
+    private String engineDebug;
 
 
     // ----------------
@@ -78,11 +79,12 @@ public class RICHEBEngine extends ReconstructionEngine {
         // Get the constants for the correct variation
         String engineVariation = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");         
         this.getConstantsManager().setVariation(engineVariation);
+        engineDebug = Optional.ofNullable(this.getEngineConfigString("debug")).orElse("turn_OFF");         
 
         // Get the constant tables for reconstruction parameters, geometry and optical characterization
         int run = 11;
 
-        richgeo   = new RICHGeoFactory(1, this.getConstantsManager(), run);
+        richgeo   = new RICHGeoFactory(1, this.getConstantsManager(), run, engineDebug);
         richtime.init_ProcessTime();
 
         return true;
@@ -119,10 +121,10 @@ public class RICHEBEngine extends ReconstructionEngine {
         if(debugMode>=1)System.out.println("----- Load CCDB data \n");
         int run = richevent.get_RunID(); 
         if(run>0){
-            richpar.load_CCDB(this.getConstantsManager(), run, Ncalls);
+            richpar.load_CCDB(this.getConstantsManager(), run, Ncalls, engineDebug);
             richcal.load_CCDB(this.getConstantsManager(), run, Ncalls, richgeo, richpar);
         }else{
-            richpar.load_CCDB(this.getConstantsManager(),  11, Ncalls);
+            richpar.load_CCDB(this.getConstantsManager(),  11, Ncalls, engineDebug);
             richcal.load_CCDB(this.getConstantsManager(),  11, Ncalls, richgeo, richpar);
         }
         Ncalls++;
