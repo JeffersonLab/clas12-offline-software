@@ -60,6 +60,7 @@ public class Track extends Trajectory implements Comparable<Track> {
     private Helix secondaryHelix;                  // for track with no beamSpot information
     private double secondaryChi2;                  // for track with no beamSpot information
     private int    secondaryNDF;                   // for track with no beamSpot information
+    private int _status = 0;
 
 
     public Track(Helix helix) {
@@ -90,6 +91,11 @@ public class Track extends Trajectory implements Comparable<Track> {
         this.setSeed(seed);
         this.addAll(seed.getCrosses());
         this.setKFTrajectories(kf.trajPoints);
+        if (kf.filterOn && kf.setFitFailed == false && kf.NDF>0 && kf.getHelix()!=null) { 
+            this.setStatus(1);
+        } else {
+            this.setStatus(-1);
+        }
     }
     
         
@@ -433,7 +439,7 @@ public class Track extends Trajectory implements Comparable<Track> {
     public final void setKFTrajectories(Map<Integer, HitOnTrack> trajectory) {
         this.trajs = trajectory;
     }
-    private int _status;
+
     public int getStatus() {
         return _status;
     }
@@ -547,8 +553,8 @@ public class Track extends Trajectory implements Comparable<Track> {
                     this.setTrackDirAtCTOF(mom.asUnit());
                     this.setPathToCTOF(path);
                 }
-                
-                surface.getEloss(mom, mass, 1);
+                // do not appy Eloss to CTOF and CND to avoid overcorrecting if pid is wrong
+                //surface.getEloss(mom, mass, 1);
                 if(mom.mag()==0) break;
             }
         }
@@ -644,10 +650,10 @@ public class Track extends Trajectory implements Comparable<Track> {
 
     @Override
     public String toString() {
-        String str = String.format("Track id=%d, q=%d, p=%.3f GeV pt=%.3f GeV, d0=%.3f deg, phi=%.3f deg, z0=%.3f deg, tandip=%.3f deg, NDF=%d, chi2=%.3f, seed method=%d\n", 
+        String str = String.format("Track id=%d, q=%d, p=%.3f GeV pt=%.3f GeV, d0=%.3f deg, phi=%.3f deg, z0=%.3f deg, tandip=%.3f deg, NDF=%d, chi2=%.3f, seed method=%d, KF iterations=%d, status=%d\n", 
                      this.getId(), this.getQ(), this.getP(), this.getPt(), this.getHelix().getDCA(),
                      Math.toDegrees(this.getHelix().getPhiAtDCA()), this.getHelix().getZ0(), this.getHelix().getTanDip(),
-                     this.getNDF(), this.getChi2(), this.getSeed().getStatus());
+                     this.getNDF(), this.getChi2(), this.getSeed().getStatus(), this.getKFIterations(), this.getStatus());
         for(Cross c: this) str = str + c.toString() + "\n";
         for(Cluster c: this.getSeed().getClusters()) str = str + c.toString() + "\n";
         return str;

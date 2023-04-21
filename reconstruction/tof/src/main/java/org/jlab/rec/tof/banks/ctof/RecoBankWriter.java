@@ -23,7 +23,7 @@ public class RecoBankWriter {
         if (hitlist == null) {
             return null;
         }
-        if (hitlist.size() == 0) {
+        if (hitlist.isEmpty()) {
             return null;
         }
 
@@ -36,11 +36,7 @@ public class RecoBankWriter {
         for (int i = 0; i < hitlist.size(); i++) {
             bank.setShort("id", i, (short) hitlist.get(i).get_Id());
             bank.setShort("component", i, (short) hitlist.get(i).get_Paddle());
-            int status = 0;
-            if (Integer.parseInt(hitlist.get(i).get_StatusWord()) == 1111) {
-                status = 1;
-            }
-            bank.setShort("status", i, (short) status);
+            bank.setShort("status", i, (short) hitlist.get(i).getStatus());
             bank.setFloat("energy_up", i, (float) hitlist.get(i).get_Energy1());
             bank.setFloat("energy_down", i, (float) hitlist.get(i).get_Energy2());
             bank.setFloat("energy_up_unc", i, (float) hitlist.get(i).get_Energy1Unc());
@@ -59,7 +55,7 @@ public class RecoBankWriter {
         if (hitlist == null) {
             return null;
         }
-        if (hitlist.size() == 0) {
+        if (hitlist.isEmpty()) {
             return null;
         }
 
@@ -73,12 +69,7 @@ public class RecoBankWriter {
             bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
             bank.setByte("layer", i, (byte) hitlist.get(i).get_Panel());
             bank.setShort("component", i, (short) hitlist.get(i).get_Paddle());
-            int status = 0;
-//            if (Integer.parseInt(hitlist.get(i).get_StatusWord()) == 1111) {
-//                status = 1;
-//            }
-            status = Integer.parseInt(hitlist.get(i).get_StatusWord());
-            bank.setShort("status", i, (short) status);
+            bank.setShort("status", i, (short) hitlist.get(i).getStatus());
             bank.setFloat("energy", i, (float) hitlist.get(i).get_Energy());
             bank.setFloat("energy_unc", i, (float) hitlist.get(i).get_EnergyUnc());
             bank.setFloat("time", i, (float) hitlist.get(i).get_t());
@@ -116,7 +107,7 @@ public class RecoBankWriter {
         if (cluslist == null) {
             return null;
         }
-        if (cluslist.size() == 0) {
+        if (cluslist.isEmpty()) {
             return null;
         }
 
@@ -132,11 +123,7 @@ public class RecoBankWriter {
             bank.setByte("sector", i, (byte) cluslist.get(i).get_Sector());
             bank.setByte("layer", i, (byte) cluslist.get(i).get_Panel());
             bank.setShort("component", i, (short) cluslist.get(i).get(0).get_Paddle()); // paddle id of cluster seed
-            int status = 0;
-            if (Integer.parseInt(cluslist.get(i).get_StatusWord()) == 1111) {
-                status = 1;
-            }
-            bank.setShort("status", i, (short) status);
+            bank.setShort("status", i, (short) cluslist.get(i).get(0).getStatus());
             bank.setFloat("energy", i, (float) cluslist.get(i).get_Energy());
             bank.setFloat("energy_unc", i, (float) cluslist.get(i).get_EnergyUnc());
             bank.setFloat("time", i, (float) cluslist.get(i).get(0).get_t());
@@ -151,9 +138,8 @@ public class RecoBankWriter {
 
     }
 
-    public void appendCTOFBanks(DataEvent event,
-            List<Hit> hits, List<Cluster> clusters) {
-        List<DataBank> cTOFBanks = new ArrayList<DataBank>();
+    public void appendCTOFBanks(DataEvent event, List<Hit> hits, List<Cluster> clusters) {
+        List<DataBank> cTOFBanks = new ArrayList<>();
 
         DataBank bank1 = this.fillRawHitsBank((DataEvent) event, hits);
         if (bank1 != null) {

@@ -84,7 +84,7 @@ public class SegmentFinder {
                     int trjWire = trj.getWireOnTrajectory(seg.get_Sector(), seg.get_Superlayer(), l + 1, trkXMP, DcDetector);
                     //double x = GeometryLoader.dcDetector.getSector(0).getSuperlayer(seg.get_Superlayer()-1).getLayer(l).getComponent(trjWire-1).getMidpoint().x();
                     double x = DcDetector.getWireMidpoint(seg.get_Sector() - 1, seg.get_Superlayer() - 1, l, trjWire - 1).x;
-                    double cosTkAng = FastMath.cos(Math.toRadians(6.)) * Math.sqrt(1. + seg.get_fittedCluster().get_clusterLineFitSlope() * seg.get_fittedCluster().get_clusterLineFitSlope());
+                    double cosTkAng = Constants.COS6 * Math.sqrt(1. + seg.get_fittedCluster().get_clusterLineFitSlope() * seg.get_fittedCluster().get_clusterLineFitSlope());
                     double calc_doca = (x - trkX) * cosTkAng;
                     trkDocas[l] = calc_doca;
 

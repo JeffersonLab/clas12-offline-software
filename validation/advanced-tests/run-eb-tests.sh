@@ -76,6 +76,8 @@ case $webFileStub in
         ;;
     electronneutronC)
         ;;
+    electrondeuteronC)
+        ;;
     *)
       echo Invalid input evio file:  $webFileStub
       exit 1

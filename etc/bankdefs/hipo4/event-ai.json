@@ -174,7 +174,8 @@
             {"name":"recDTW",      "id":12, "type":"F", "info":"recon W peak TDC time (ns)"},
             {"name":"recFTU",      "id":13, "type":"F", "info":"recon U peak FADC time (ns)"},
             {"name":"recFTV",      "id":14, "type":"F", "info":"recon V peak FADC time (ns)"},
-            {"name":"recFTW",      "id":15, "type":"F", "info":"recon W peak FADC time (ns)"}
+            {"name":"recFTW",      "id":15, "type":"F", "info":"recon W peak FADC time (ns)"},
+            {"name":"size",        "id":16, "type":"F", "info":"cluster size"}
         ]
     },
     {
@@ -408,7 +409,8 @@
             {"name":"recDTW",      "id":12, "type":"F", "info":"recon W peak TDC time (ns)"},
             {"name":"recFTU",      "id":13, "type":"F", "info":"recon U peak FADC time (ns)"},
             {"name":"recFTV",      "id":14, "type":"F", "info":"recon V peak FADC time (ns)"},
-            {"name":"recFTW",      "id":15, "type":"F", "info":"recon W peak FADC time (ns)"}
+            {"name":"recFTW",      "id":15, "type":"F", "info":"recon W peak FADC time (ns)"},
+            {"name":"size",        "id":16, "type":"F", "info":"cluster size"}
         ]
     },
     {

@@ -1,7 +1,9 @@
 package org.jlab.clas.detector;
 
+import java.util.Arrays;
 import java.util.List;
 import org.jlab.clas.detector.DetectorTrack.TrajectoryPoint;
+import org.jlab.clas.detector.matching.MatchTrajDistance;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.clas.pdg.PhysicsConstants;
@@ -11,28 +13,17 @@ import org.jlab.clas.pdg.PhysicsConstants;
  * @author baltzell
  */
 public class DetectorParticleTraj extends DetectorParticle {
-    
+
     public DetectorParticleTraj(DetectorTrack track){
         super(track);
     }
 
     @Override
     public int getDetectorHit(List<DetectorResponse>  hitList, DetectorType type,
-            int detectorLayer,
-            double distanceThreshold){
-        
-        // Protect against odd tracks that don't have trajectory intersection:
-        if (detectorLayer<1) {
-            if (!detectorTrack.getTrajectory().contains(type.getDetectorId())) {
-                return -1;
-            }
-        }
-        else if (detectorTrack.getTrajectoryPoint(type.getDetectorId(),detectorLayer)==null) {
-            return -1;
-        }
-
-        // FIXME:  replace with trajectory-based matching:
-        return super.getDetectorHit(hitList, type, detectorLayer, distanceThreshold);
+            int layer, double distanceThreshold){
+        MatchTrajDistance matcher = new MatchTrajDistance(distanceThreshold);
+        matcher.setSharing(Arrays.asList(sharedDetectors).contains(type));
+        return matcher.bestMatch(this, hitList, type, layer);
     }
 
     @Override

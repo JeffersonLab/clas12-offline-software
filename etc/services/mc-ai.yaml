@@ -21,9 +21,12 @@ services:
 # DC clustering: nominal algoritm, filled the cluster bank for ai and conventional tracking
   - class: org.jlab.service.dc.DCHBClustering
     name: DCCR
-# DC using clustering: regular HB tracking
-  - class: org.jlab.service.dc.DCHBPostClusterConv
-    name: DCHB
+# This is where the AI plugin would go.  THe AI code reads the HB clusters.  
+  - class: org.jlab.service.mltn.MLTDEngine
+    name: MLTD
+# DC using clustering on AI hits: NN assisted HB tracking
+  - class: org.jlab.service.dc.DCHBPostClusterAI
+    name: DCHAI
   - class: org.jlab.service.ftof.FTOFHBEngine
     name: FTOFHB
   - class: org.jlab.service.ec.ECEngine
@@ -42,7 +45,6 @@ services:
     name: LTCC
   - class: org.jlab.service.eb.EBHBEngine
     name: EBHB
-# DC regular TB tracking    
   - class: org.jlab.service.dc.DCTBEngine
     name: DCTB
   - class: org.jlab.service.fmt.FMTEngine
@@ -58,20 +60,24 @@ services:
   - class: org.jlab.service.rtpc.RTPCEngine
     name: RTPC
 configuration:
-  global:
-    variation: rgb_spring2019
+#  global:
+#    variation: rgb_spring2019
 #      timestamp: 12/31/2020-00:00:00
-#      triggerMask: "0x1"
-  io-services:
-    writer:
-      compression: 2
+#  io-services:
+#    writer:
 #      schema_dir: "absolute-path-to-schema-folder"
 #      for example:
 #      schema_dir: "/home/clas12-1/chef/myClara/plugins/clas12/etc/bankdefs/dst"
   services:
     MAGFIELDS:
       magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
-      magfieldTorusMap: Full_torus_r251_phi181_z251_25Jan2021.dat
+      magfieldTorusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
+    MLTD:
+      run: "6302"
+    DCHAI:
+      outputBankPrefix: "HB"
+    RTPC:
+      rtpcSimulation: "true"
       
 mime-types:
   - binary/data-hipo

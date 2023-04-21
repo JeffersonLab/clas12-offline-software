@@ -162,12 +162,14 @@ public class CNDClusterFinder {
         
         double energy_cluster;
         double pathlengththroughbar;
+        double cluster_status; //1 is at least one hit is possibly a double hit
         
         for(int k =0; k<j/*clustered_hits.size()*/; k++)
         {
             
             energy_cluster=0;
             pathlengththroughbar=0;
+            cluster_status = 0;
             CndHit seedHit = (CndHit) clustered_hits.getItem(k).get(0);
             
             CNDCluster acluster = new CNDCluster(k+1, seedHit.Sector(), seedHit.Layer() );
@@ -179,6 +181,7 @@ public class CNDClusterFinder {
                 theHit.set_AssociatedClusterID(k+1);
                 
                 energy_cluster += theHit.Edep();
+                cluster_status += theHit.get_status();
                 pathlengththroughbar += theHit.tLength()/10.0;
                 
                 
@@ -202,7 +205,14 @@ public class CNDClusterFinder {
                 acluster.set_time(seedHit.Time());
                 acluster.set_nhits(clustered_hits.getItem(k).size());
                 acluster.set_energysum(energy_cluster);
-                acluster.set_status(0);
+                if(cluster_status>0)
+                {
+                    acluster.set_status(1);
+                }
+                else
+                {
+                    acluster.set_status(0);
+                }
                 acluster.set_pathLengthThruBar(pathlengththroughbar);
                 
                 
