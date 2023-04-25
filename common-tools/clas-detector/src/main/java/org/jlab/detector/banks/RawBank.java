@@ -18,7 +18,7 @@ import org.jlab.jnp.hipo4.io.HipoReader;
 public class RawBank extends FilteredBank {
 
     public static final class OrderGroups {
-        public static final OrderType[] NOISE0 = new OrderType[] {
+        public static final OrderType[] NOMINAL = new OrderType[] {
             OrderType.NOMINAL,
             OrderType.BGADDED_NOMINAL
         };
@@ -52,7 +52,7 @@ public class RawBank extends FilteredBank {
             OrderType.NOISE2,
             OrderType.NOISE3
         };
-        public static final OrderType[] DEFAULT = NOISE0;
+        public static final OrderType[] DEFAULT = NOMINAL;
         public static final OrderType[] NODENOISE = NOISE3;
     }
 
