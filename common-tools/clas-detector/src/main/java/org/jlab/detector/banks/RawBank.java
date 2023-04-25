@@ -19,35 +19,35 @@ public class RawBank extends FilteredBank {
 
     public static final class OrderGroups {
         public static final OrderType[] NOISE0 = new OrderType[] {
-            OrderType.NOISE0,
-            OrderType.BGADDED_NOISE0
+            OrderType.NOMINAL,
+            OrderType.BGADDED_NOMINAL
         };
         public static final OrderType[] NOISE1 = new OrderType[] {
-            OrderType.NOISE0,
+            OrderType.NOMINAL,
             OrderType.NOISE1,
-            OrderType.BGADDED_NOISE0,
+            OrderType.BGADDED_NOMINAL,
             OrderType.BGADDED_NOISE1
         };
         public static final OrderType[] NOISE2 = new OrderType[] {
-            OrderType.NOISE0,
+            OrderType.NOMINAL,
             OrderType.NOISE1,
             OrderType.NOISE2,
-            OrderType.BGADDED_NOISE0,
+            OrderType.BGADDED_NOMINAL,
             OrderType.BGADDED_NOISE1,
             OrderType.BGADDED_NOISE2,
         };
         public static final OrderType[] NOISE3 = new OrderType[] {
-            OrderType.NOISE0,
+            OrderType.NOMINAL,
             OrderType.NOISE1,
             OrderType.NOISE2,
             OrderType.NOISE3,
-            OrderType.BGADDED_NOISE0,
+            OrderType.BGADDED_NOMINAL,
             OrderType.BGADDED_NOISE1,
             OrderType.BGADDED_NOISE2,
             OrderType.BGADDED_NOISE3
         };
         public static final OrderType[] NODENOISE_NOBG = new OrderType[] {
-            OrderType.NOISE0,
+            OrderType.NOMINAL,
             OrderType.NOISE1,
             OrderType.NOISE2,
             OrderType.NOISE3
@@ -57,8 +57,8 @@ public class RawBank extends FilteredBank {
     }
 
     public static enum OrderType {
-        NOISE0          (  0),  // normal hits retained by denoising level-0
-        BGADDED_NOISE0  ( 10),  // hits added by background merging and retained by level-0
+        NOMINAL         (  0),  // normal hits retained by denoising level-0
+        BGADDED_NOMINAL ( 10),  // hits added by background merging and retained by level-0
         BGREMOVED       ( 20),  // hits removed during background merging 
         RESERVED        ( 30),  // reserved for later use
         NOISE1          ( 40),  // normal hits retained by level-1 denoising
@@ -204,7 +204,7 @@ public class RawBank extends FilteredBank {
         RawBank ftof = new RawBank(r.getSchemaFactory().getSchema("FTOF::adc"),40);
         Bank    fadc = new Bank(r.getSchemaFactory().getSchema("FTOF::adc"));
         
-        ftof.setFilter(OrderType.NOISE0,OrderType.BGREMOVED);
+        ftof.setFilter(OrderType.NOMINAL,OrderType.BGREMOVED);
         
         for(int i = 0; i < 5; i++){
             r.nextEvent(e);
