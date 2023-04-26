@@ -79,7 +79,7 @@ public class HitReader {
 					if(s==sector && l == layer  && o == order+2 ){
 					//System.out.println("s "+ s+" sector "+sector+" l "+l+" layer "+layer+" o "+o+" order "+order);
 					tdc = bankTDC.getInt("TDC",j);
-					indextdc=j;
+					indextdc = bankTDC.trueIndex(j);
 					break;
 					}
 				}
@@ -91,7 +91,7 @@ public class HitReader {
 			// First, carry out checks on the quality of the signals:	    	  
 			if (adc == 0 || tdc == 0 || tdc == Parameters.NullTDC || indextdc==-1 || ccdb.Status_LR[sector-1][layer-1][order]!=0) continue; // require good ADC and TDC values
 
-			newhit = new HalfHit(sector, layer, component, triggerPhase, adc, tdc, i,indextdc, ccdb); 
+			newhit = new HalfHit(sector, layer, component, triggerPhase, adc, tdc, bankADC.trueIndex(i), indextdc, ccdb); 
 
 			halfhits.add(newhit);
 		}

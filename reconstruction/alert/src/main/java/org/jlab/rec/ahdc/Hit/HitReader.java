@@ -25,7 +25,7 @@ public class HitReader {
 
 		if (event.hasBank("ALRTDC::adc")) {
 			for (int i = 0; i < bankDGTZ.rows(); i++) {
-				int    id         = i + 1;
+				int    id         = bankDGTZ.trueIndex(i) + 1;
 				int    number     = bankDGTZ.getByte("layer", i);
 				int    layer      = number % 10;
 				int    superlayer = (int) (number % 100) / 10;

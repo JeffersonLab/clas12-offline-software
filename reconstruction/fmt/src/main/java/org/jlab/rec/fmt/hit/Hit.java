@@ -3,6 +3,7 @@ package org.jlab.rec.fmt.hit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.detector.banks.RawDataBank;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.io.base.DataBank;
@@ -265,7 +266,8 @@ public class Hit implements Comparable<Hit> {
             double tmax = timecuts.getDoubleValue("hit_max", 0, 0, 0);
 
             if (event.hasBank("FMT::adc")) {
-                DataBank bankDGTZ = event.getBank("FMT::adc");
+                RawDataBank bankDGTZ = new RawDataBank("FMT::adc");
+                bankDGTZ.read(event);
                 int rows = bankDGTZ.rows();
                 for (int i = 0; i < rows; i++) {
                     int sector  = bankDGTZ.getByte("sector", i);
@@ -276,7 +278,7 @@ public class Hit implements Comparable<Hit> {
 
                     if (strip == -1 || ADC == 0) continue;
                     
-                    Hit hit = new Hit(i, layer, strip, (double) ADC, time);
+                    Hit hit = new Hit(bankDGTZ.trueIndex(i), layer, strip, (double) ADC, time);
                     
                     hit.setStatus(statuses.getIntValue("status", sector, layer, strip));
                     

@@ -183,7 +183,7 @@ public class FTHODOReconstruction {
                 int adc         = bankDGTZ.getInt("ADC",row);
                 float time      = bankDGTZ.getFloat("time",row);
                 if(adc!=-1 && time!=-1 && status.getIntValue("status", isector, ilayer, icomponent)==0){
-                    FTHODOHit hit = new FTHODOHit(row,isector,ilayer,icomponent, adc, time, charge2Energy,timeOffsets,geometry);
+                    FTHODOHit hit = new FTHODOHit(bankDGTZ.trueIndex(row),isector,ilayer,icomponent, adc, time, charge2Energy,timeOffsets,geometry);
 	             hits.add(hit); 
 	        }	          
             }

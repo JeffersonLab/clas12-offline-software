@@ -373,7 +373,7 @@ public class ECCommon {
                 strip.setStatus(status.getIntValue("status",is,il,ip));                
                 strip.setADC(adc);
                 strip.setTriggerPhase(triggerPhase);
-                strip.setID(i+1);
+                strip.setID(bank.trueIndex(i)+1);
 
                 if(!isGoodStrip(strip)) continue;
                 

@@ -10,6 +10,7 @@ import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.hipo.HipoDataEvent;
 
 import javax.swing.JFrame;
+import org.jlab.detector.banks.RawDataBank;
 import org.jlab.groot.graphics.EmbeddedCanvas;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.data.H2F;
@@ -177,18 +178,19 @@ public class RICHPMTReconstruction {
 
         ArrayList<RICHEdge>  edges = new ArrayList<RICHEdge>();
         if(event.hasBank("RICH::tdc")==true) {
-            DataBank bankDGTZ = event.getBank("RICH::tdc");
+            RawDataBank bankDGTZ = new RawDataBank("RICH::tdc");
+            bankDGTZ.read(event);
             int nrows = bankDGTZ.rows();
             for(int row = 0; row < nrows; row++){
                 int isector     = bankDGTZ.getByte("sector",row);
                 int ilayer      = bankDGTZ.getByte("layer",row);
                 int icomponent  = bankDGTZ.getShort("component",row);
-                int iorder      = bankDGTZ.getByte("order",row);
+                int iorder      = bankDGTZ.trueOrder(row);
                 int itdc        = bankDGTZ.getInt("TDC",row);
                 if(ilayer<0)ilayer=ilayer+256;
 		if(debugMode>=2)System.out.print(" --> Edge "+row+" sec "+isector+" lay "+ilayer+" comp "+icomponent+" order "+iorder+" tdc "+itdc+"\n");
                 if(itdc!=-1){
-                    RICHEdge edge = new RICHEdge(row, isector, ilayer, icomponent, iorder, itdc);
+                    RICHEdge edge = new RICHEdge(bankDGTZ.trueIndex(row), isector, ilayer, icomponent, iorder, itdc);
                     edges.add(edge); 
                 }                
             }

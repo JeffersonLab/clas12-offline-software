@@ -114,12 +114,12 @@ public class HitReader {
 
 				if( Math.abs(thisDiff) < Math.abs(prevDiff) ) {
 					tdcTimes.put(key, tdc);
-					tdcIndex.put(key, j);
+					tdcIndex.put(key, bankTDC.trueIndex(j));
 				}
 			}
 			else {
 				tdcTimes.put(key, tdc);
-				tdcIndex.put(key, j);
+				tdcIndex.put(key, bankTDC.trueIndex(j));
 			}
 		}
 
