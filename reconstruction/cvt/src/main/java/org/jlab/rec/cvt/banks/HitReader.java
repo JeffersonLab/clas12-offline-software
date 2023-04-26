@@ -1,15 +1,25 @@
 package org.jlab.rec.cvt.banks;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-
-import org.jlab.geom.prim.Point3D;
-import org.jlab.geom.prim.Vector3D;
+import java.util.Map;
+import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorDescriptor;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.Geometry;
+import org.jlab.rec.cvt.bmt.BMTConstants;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
+import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.hit.ADCConvertor;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.hit.Strip;
+import org.jlab.rec.cvt.svt.SVTGeometry;
+import org.jlab.utils.groups.IndexedTable;
 
 /**
  * A class to fill in lists of hits corresponding to reconstructed hits
@@ -22,7 +32,7 @@ import org.jlab.rec.cvt.hit.Strip;
 public class HitReader {
 
     public HitReader() {
-
+        
     }
 
     // the list of BMT hits
@@ -32,7 +42,7 @@ public class HitReader {
      *
      * @return a list of BMT hits
      */
-    public List<Hit> get_BMTHits() {
+    public List<Hit> getBMTHits() {
         return _BMTHits;
     }
 
@@ -41,7 +51,7 @@ public class HitReader {
      *
      * @param _BMTHits list of BMT hits
      */
-    public void set_BMTHits(List<Hit> _BMTHits) {
+    public void setBMTHits(List<Hit> _BMTHits) {
         this._BMTHits = _BMTHits;
     }
     // the list of SVT hits
@@ -51,7 +61,7 @@ public class HitReader {
      *
      * @return a list of SVT hits
      */
-    public List<Hit> get_SVTHits() {
+    public List<Hit> getSVTHits() {
         return _SVTHits;
     }
 
@@ -60,66 +70,148 @@ public class HitReader {
      *
      * @param _SVTHits list of SVT hits
      */
-    public void set_SVTHits(List<Hit> _SVTHits) {
+    public void setSVTHits(List<Hit> _SVTHits) {
         this._SVTHits = _SVTHits;
     }
-
+    
     /**
      * Gets the BMT hits from the BMT dgtz bank
      *
      * @param event the data event
-     * @param adcConv converter from adc to values used in the analysis (i.e.
-     * Edep for gemc, adc for cosmics)
-     * @param geo the BMT geometry
+     * @param swim
+     * @param status
+     * @param timeCuts
      */
-    public void fetch_BMTHits(DataEvent event, ADCConvertor adcConv, org.jlab.rec.cvt.bmt.Geometry geo) {
+    public void fetch_BMTHits(DataEvent event, Swim swim, IndexedTable status, 
+            IndexedTable timeCuts, IndexedTable bmtStripVoltage, IndexedTable bmtStripVoltageThresh) {
 
         // return if there is no BMT bank
         if (event.hasBank("BMT::adc") == false) {
             //System.err.println("there is no BMT bank ");
-            _BMTHits = new ArrayList<Hit>();
+            _BMTHits = new ArrayList<>();
 
             return;
         }
-
+        
         // instanciates the list of hits
-        List<Hit> hits = new ArrayList<Hit>();
+        List<Hit> hits = new ArrayList<>();
+        List<Hit> hits50c = new ArrayList<>();
+        List<Hit> hits50z = new ArrayList<>();
         // gets the BMT dgtz bank
         DataBank bankDGTZ = event.getBank("BMT::adc");
         // fills the arrays corresponding to the hit variables
         int rows = bankDGTZ.rows();
 
         if (event.hasBank("BMT::adc") == true) {
-
+            
+            double tmin = timeCuts.getDoubleValue("hit_min", 0,0,0);
+            double tmax = timeCuts.getDoubleValue("hit_max", 0,0,0);
+            
             for (int i = 0; i < rows; i++) {
 
-                if (bankDGTZ.getInt("ADC", i) < 1) {
-                    continue; // gemc assigns strip value -1 for inefficiencies, we only consider strips with values between 1 to the maximum strip number for a given detector
-                }
+                //if (bankDGTZ.getInt("ADC", i) < 1) {
+                    //continue; // gemc assigns strip value -1 for inefficiencies, we only consider strips with values between 1 to the maximum strip number for a given detector
+                //}                
+                int sector  = bankDGTZ.getByte("sector", i);
+                int layer   = bankDGTZ.getByte("layer", i);
+                int strip   = bankDGTZ.getShort("component", i);
                 double ADCtoEdep = bankDGTZ.getInt("ADC", i);
+                double time      = bankDGTZ.getFloat("time", i);
+                int order   = bankDGTZ.getByte("order", i);
+                //if (order == 1) {
+                //    continue;
+                //}
                 //fix for now... no adc in GEMC
-                if (ADCtoEdep < 1) {
+                if(Constants.getInstance().gemcIgnBMT0ADC==false) {
+                    if (ADCtoEdep < 1) {
+                        continue;
+                    }
+                }
+                if(strip<1) {
                     continue;
                 }
                 // create the strip object for the BMT
-                Strip BmtStrip = new Strip((int) bankDGTZ.getShort("component", i), ADCtoEdep);
-                // calculate the strip parameters for the BMT hit
-                BmtStrip.calc_BMTStripParams(geo,(int) bankDGTZ.getByte("sector", i),(int) bankDGTZ.getByte("layer", i)); // for Z detectors the Lorentz angle shifts the strip measurement; calc_Strip corrects for this effect
+                Strip BmtStrip = new Strip(strip, ADCtoEdep, time);
+                BmtStrip.setStatus(status.getIntValue("status", sector, layer, strip));
+                if(Constants.getInstance().timeCuts) {
+                    if(time!=0 && (time<tmin || time>tmax))
+                        BmtStrip.setStatus(2);// calculate the strip parameters for the BMT hit
+                }
+                if(Constants.getInstance().bmtHVCuts) {
+                    if(bmtStripVoltage!=null && bmtStripVoltage.hasEntry(sector,layer,0) && 
+                            bmtStripVoltageThresh!=null && bmtStripVoltageThresh.hasEntry(sector,layer,0)) {
+                        double hv  = bmtStripVoltage.getDoubleValue("HV", sector,layer,0); 
+                        double hv1 = bmtStripVoltageThresh.getDoubleValue("HV1", sector,layer,0); 
+                        double hv2 = bmtStripVoltageThresh.getDoubleValue("HV2", sector,layer,0); 
+                        double hv3 = bmtStripVoltageThresh.getDoubleValue("HV3", sector,layer,0); 
+                        
+                        if(hv<hv1) 
+                            BmtStrip.setStatus(4);
+                        if(hv>=hv1 && hv<hv2) 
+                            BmtStrip.setStatus(5);
+                        if(hv>=hv2 && hv<hv3) 
+                            BmtStrip.setStatus(6);
+                    }
+                }
+                BmtStrip.calcBMTStripParams(sector, layer, swim); // for Z detectors the Lorentz angle shifts the strip measurement; calc_Strip corrects for this effect
                 // create the hit object for detector type BMT
                 
-                Hit hit = new Hit(1, this.getZorC((int) bankDGTZ.getByte("layer", i)),(int) bankDGTZ.getByte("sector", i),(int) bankDGTZ.getByte("layer", i), BmtStrip);
-                // a place holder to set the status of the hit, for simulated data if the strip number is in range and the Edep is above threshold the hit has status 1, useable
-                hit.set_Status(1);
-                //if(BmtStrip.get_Edep()==0)
-                //	hit.set_Status(-1);
-                hit.set_Id(i+1);
+                Hit hit = new Hit(DetectorType.BMT, BMTGeometry.getDetectorType(layer), sector, layer, BmtStrip);                
+                hit.setId(i+1);
+                if (Constants.getInstance().flagSeeds)
+                    hit.MCstatus = order;
+                
                 // add this hit
-                if(hit.get_Layer()+3!=org.jlab.rec.cvt.Constants.getRmReg())
-                    hits.add(hit);
-
+                if(hit.getLayer()+3!=Constants.getInstance().getRmReg()) {
+                    if(Constants.getInstance().useOnlyMCTruthHits() ) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                    } 
+                    else if(Constants.getInstance().useOnlyBMTTruthHits ) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                    }
+                    else if(Constants.getInstance().useOnlyBMTCTruthHits && hit.getType()==BMTType.C) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                    }
+                    else if(Constants.getInstance().useOnlyBMTZTruthHits && hit.getType()==BMTType.Z) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                    }
+                    else if(Constants.getInstance().useOnlyBMTC50PercTruthHits && hit.getType()==BMTType.C) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                        if(hit.MCstatus==1)
+                            hits50c.add(hit);
+                    }
+                    else if(Constants.getInstance().useOnlyBMTC50PercTruthHits && hit.getType()==BMTType.Z) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                        if(hit.MCstatus==1)
+                            hits50z.add(hit);
+                    }
+                    else {
+                        hits.add(hit);
+                    }
+                }
+            }
+            if(Constants.getInstance().useOnlyBMTC50PercTruthHits) {
+                int s = hits50c.size()/2;
+                for(int i = 0; i<s; i++) {
+                    hits.add(hits50c.get(i));
+                }
+            }
+            if(Constants.getInstance().useOnlyBMTZ50PercTruthHits) {
+                int s = hits50z.size()/2;
+                for(int i = 0; i<s; i++) {
+                    hits.add(hits50z.get(i));
+                }
             }
             // fills the list of BMT hits
-            this.set_BMTHits(hits);
+            Collections.sort(hits);
+            
+            this.setBMTHits(hits);
         }
     }
 
@@ -127,126 +219,162 @@ public class HitReader {
      * Gets the SVT hits from the BMT dgtz bank
      *
      * @param event the data event
-     * @param adcConv converter from adc to daq values
-     * @param geo the SVT geometry
+     * @param omitLayer
+     * @param omitHemisphere
+     * @param status
      */
-    public void fetch_SVTHits(DataEvent event, ADCConvertor adcConv, int omitLayer, int omitHemisphere, org.jlab.rec.cvt.svt.Geometry geo) {
+    public void fetch_SVTHits(DataEvent event, int omitLayer, int omitHemisphere, IndexedTable status) {
 
         if (event.hasBank("BST::adc") == false) {
             //System.err.println("there is no BST bank ");
-            _SVTHits = new ArrayList<Hit>();
+            _SVTHits = new ArrayList<>();
 
             return;
         }
 
-        List<Hit> hits = new ArrayList<Hit>();
+        List<Hit> hits = new ArrayList<>();
 
         DataBank bankDGTZ = event.getBank("BST::adc");
-
-        int rows = bankDGTZ.rows();;
-
-        int[] id = new int[rows];
-        int[] sector = new int[rows];
-        int[] layer = new int[rows];
-        int[] strip = new int[rows];
-        int[] ADC = new int[rows];
-
+        int rows = bankDGTZ.rows();
+        
         if (event.hasBank("BST::adc") == true) {
             //bankDGTZ.show();
+            // first get tdcs
+            Map<Integer, Double> tdcs = new HashMap<>();
+            for (int i = 0; i < rows; i++) {                
+                if(bankDGTZ.getInt("ADC", i) < 0) {
+                    byte sector = bankDGTZ.getByte("sector", i);
+                    byte layer  = bankDGTZ.getByte("layer", i);
+                    short strip = bankDGTZ.getShort("component", i);
+                    double time = bankDGTZ.getFloat("time", i);
+                    
+                    //if (order == 1) {
+                    //    continue;
+                    //}
+                    //if(time<SVTParameters.TIMECUTLOW) 
+                    //    continue;
+                    
+                    int key = DetectorDescriptor.generateHashCode(sector, layer, strip);
+                    if(tdcs.containsKey(key)) {
+                        if(time<tdcs.get(key))
+                            tdcs.replace(key, time);
+                    }
+                    else 
+                        tdcs.put(key, time);
+                }
+            }
+                
+            // then get real hits
             for (int i = 0; i < rows; i++) {
-
                 if (bankDGTZ.getInt("ADC", i) < 0) {
                     continue; // ignore hits TDC hits with ADC==-1 
                 }
+                int order   = bankDGTZ.getByte("order", i);
+                int id      = i + 1;
+                byte sector = bankDGTZ.getByte("sector", i);
+                byte layer  = bankDGTZ.getByte("layer", i);
+                short strip = bankDGTZ.getShort("component", i);
+                int ADC     = bankDGTZ.getInt("ADC", i);
+                double time = 0;//bankDGTZ.getFloat("time", i);
+                int tdcstrip = 1;
+                if(strip>128) tdcstrip = 129;
+                int key = DetectorDescriptor.generateHashCode(sector, layer, tdcstrip);
+                if(tdcs.containsKey(key)) {
+                    time = tdcs.get(key);
+                    //time tag
+                    if(Constants.getInstance().useSVTTimingCuts) {
+                        if(this.passTimingCuts(ADC, time)==false) 
+                            continue;
+                        }
+                }
+//                else {
+//                    System.out.println("missing time for " + sector + " " + layer + " " + strip);
+//                    for(int ii : tdcs.keySet()) {
+//                        int s = (ii&0xFF000000)>>24;
+//                        int l = (ii&0x00FF0000)>>16;
+//                        int c = (ii&0x0000FFFF);
+//                        System.out.println("\t"+s+"/"+l+"/"+c);
+//                    }
+//                    bankDGTZ.show();
+//                }
                 
-                id[i] = i + 1;
-                sector[i] = bankDGTZ.getByte("sector", i);
-                layer[i] = bankDGTZ.getByte("layer", i);
-                
-                strip[i] = bankDGTZ.getShort("component", i);
-                ADC[i] = bankDGTZ.getInt("ADC", i);
-                
-                double angle = 2. * Math.PI * ((double) (sector[i] - 1) / (double) org.jlab.rec.cvt.svt.Constants.NSECT[layer[i] - 1]) + org.jlab.rec.cvt.svt.Constants.PHI0[layer[i] - 1];
+                double angle = SVTGeometry.getSectorPhi(layer, sector);
                 int hemisphere = (int) Math.signum(Math.sin(angle));
-                if (sector[i] == 7 && layer[i] > 6) {
+                if (sector == 7 && layer > 6) {
                     hemisphere = 1;
                 }
-                if (sector[i] == 19 && layer[i] > 6) {
+                if (sector == 19 && layer > 6) {
                     hemisphere = -1;
                 }
                 if (omitHemisphere == -2) {
-                    if (layer[i] == omitLayer) {
+                    if(layer == omitLayer) {
                         continue;
                     }
                 } else {
-                    if (hemisphere == omitHemisphere && layer[i] == omitLayer) {
+                    if (hemisphere == omitHemisphere && layer == omitLayer) {
                         continue;
                     }
 
                 }
                 // if the strip is out of range skip
-                if (strip[i] < 1) {
+                if (strip < 1) {
                     continue;
                 }
-                if (layer[i] > 6) {
+                if (layer > 6) {
                     continue;
                 }
                 
                 //if(adcConv.SVTADCtoDAQ(ADC[i], event)<50)
                 //    continue;
                 // create the strip object with the adc value converted to daq value used for cluster-centroid estimate
-                Strip SvtStrip = new Strip(strip[i], adcConv.SVTADCtoDAQ(ADC[i], event)); 
-                // get the strip endPoints
-                 double[][] X = geo.getStripEndPoints(SvtStrip.get_Strip(), (layer[i] - 1) % 2);
-                Point3D EP1 = geo.transformToFrame(sector[i], layer[i], X[0][0], 0, X[0][1], "lab", "");
-                Point3D EP2 = geo.transformToFrame(sector[i], layer[i], X[1][0], 0, X[1][1], "lab", "");
-                Point3D MP = new Point3D((EP1.x() + EP2.x()) / 2., (EP1.y() + EP2.y()) / 2., (EP1.z() + EP2.z()) / 2.);
-                Vector3D Dir = new Vector3D((-EP1.x() + EP2.x()), (-EP1.y() + EP2.y()), (-EP1.z() + EP2.z()));
-                SvtStrip.set_ImplantPoint(EP1); 
-                // Geometry implementation using the geometry package:  Charles Platt
-//                Line3d shiftedStrip   = geo.getStrip(layer[i]-1, sector[i]-1, strip[i]-1);
-//
- //               Vector3d o1            = shiftedStrip.origin();
- //               Vector3d e1            = shiftedStrip.end();
-
-//                Point3D  MP  = new  Point3D(( o1.x + e1.x ) /2.,
- //                                           ( o1.y + e1.y ) /2.,
- //                                           ( o1.z + e1.z ) /2. );
- //               Vector3D Dir = new Vector3D((-o1.x + e1.x ),
- //                                           (-o1.y + e1.y ),
- //                                           (-o1.z + e1.z )     );
-
-//                Point3D passVals = new Point3D(o1.x, o1.y, o1.z); //switch from Vector3d to Point3D
-//                SvtStrip.set_ImplantPoint(passVals);
-                SvtStrip.set_MidPoint(MP);
-                SvtStrip.set_StripDir(Dir);
-
-                // create the hit object
-                Hit hit = new Hit(0, -1, sector[i], layer[i], SvtStrip);
-                // if the hit is useable in the analysis its status is 1
-                hit.set_Status(1);
-                if (SvtStrip.get_Edep() == 0) {
-                    hit.set_Status(-1);
+                Strip SvtStrip = new Strip(strip, ADCConvertor.SVTADCtoDAQ(ADC), time); 
+                SvtStrip.setPitch(SVTGeometry.getPitch());
+                // get the strip line
+                SvtStrip.setLine(Geometry.getInstance().getSVT().getStrip(layer, sector, strip));
+                SvtStrip.setModule(Geometry.getInstance().getSVT().getModule(layer, sector));
+                SvtStrip.setNormal(Geometry.getInstance().getSVT().getNormal(layer, sector)); 
+                // if the hit is useable in the analysis its status is =0
+                if (SvtStrip.getEdep() == 0) {
+                    SvtStrip.setStatus(1);
                 }
-                //System.out.println("SVT e "+SvtStrip.get_Edep());
+                //get status from ccdb
+                SvtStrip.setStatus(status.getIntValue("status", sector, layer, strip));
+                // create the hit object
+                Hit hit = new Hit(DetectorType.BST, BMTType.UNDEFINED, sector, layer, SvtStrip);
+                hit.setId(id);
+                if (Constants.getInstance().flagSeeds)
+                    hit.MCstatus = order;
                 
-                hit.set_Id(id[i]);
                 // add this hit
-                if(SvtStrip.get_Edep()>0 && hit.get_Region()!=org.jlab.rec.cvt.Constants.getRmReg())      
-                    hits.add(hit);
+                if(hit.getRegion()!=Constants.getInstance().getRmReg()) {     
+                    if(Constants.getInstance().useOnlyMCTruthHits() ) {
+                        if(hit.MCstatus==0)
+                            hits.add(hit);
+                    } else {
+                        hits.add(hit); 
+                    }
+                }
             }
         }
         // fill the list of SVT hits
-        this.set_SVTHits(hits);
+        Collections.sort(hits);
+        this.setSVTHits(hits);
 
     }
-    // moved this method from geometry here... check for duplicate usages
-    private int getZorC(int layer) { // 1=Z detector, 0=Cdetector
-        int axis = 0;
-        if (layer == 2 || layer == 3 || layer == 5) {
-            axis = 1;
-        }
-        return axis;
+
+    private boolean passTimingCuts(int adc, double time) {
+        int tdc = (int) time;
+        boolean pass = true;
+        if(adc == 0 && ((tdc > 0 && tdc < 160) || tdc > 400)) pass = false;
+        else if(adc == 1 && ((tdc > 0 && tdc < 160) || tdc > 340)) pass = false;
+        else if(adc == 2 && ((tdc > 0 && tdc < 160) || tdc > 320)) pass = false;
+        else if(adc == 3 && ((tdc > 0 && tdc < 160) || tdc > 300)) pass = false;
+        else if(adc == 4 && ((tdc > 0 && tdc < 160) || tdc > 290)) pass = false;
+        else if(adc == 5 && ((tdc > 0 && tdc < 170) || tdc > 280)) pass = false;
+        else if(adc == 6 && ((tdc > 0 && tdc < 180) || tdc > 280)) pass = false;
+        else if(adc == 7 && ((tdc > 0 && tdc < 170) || tdc > 280)) pass = false;
+    
+        return pass;   
     }
 
 }

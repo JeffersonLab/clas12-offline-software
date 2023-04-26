@@ -2,16 +2,13 @@ package org.jlab.rec.tof.banks.ctof;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import org.jlab.rec.tof.hit.RawOrder;
 
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.CTOFDetHit;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.geometry.prim.Line3d;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.tof.banks.BaseHit;
 import org.jlab.rec.tof.banks.BaseHitReader;
@@ -58,7 +55,8 @@ public class HitReader implements IMatchedHit {
             IndexedTable constants5, 
             IndexedTable constants6, 
             IndexedTable constants7, 
-            IndexedTable constants8) {
+            IndexedTable constants8, 
+            IndexedTable constants9) {
         /*
         0: "/calibration/ctof/attenuation"),
         1: "/calibration/ctof/effective_velocity"),
@@ -68,7 +66,8 @@ public class HitReader implements IMatchedHit {
         5: "/calibration/ctof/gain_balance"),
         6: "/calibration/ctof/time_jitter"),
         7: "/calibration/ctof/fadc_offset"),
-        7: "/calibration/ctof/hpos"));
+        7: "/calibration/ctof/hpos"),
+        7: "/calibration/ctof/hposbin"));
         */
 
         double triggerPhase = this.getTriggerPhase(timeStamp, constants6);
@@ -77,14 +76,14 @@ public class HitReader implements IMatchedHit {
         IMatchedHit MH = this;
         List<BaseHit> hitList = hitReader.get_MatchedHits(event, MH, triggerPhase, constants3, constants7);
 
-        if (hitList.size() == 0) {
+        if (hitList.isEmpty()) {
             // System.err.println("there is no FTOF bank ");
-            _CTOFHits = new ArrayList<Hit>();
+            _CTOFHits = new ArrayList<>();
             return;
         }
 
         // Instantiates the lists of hits
-        List<Hit> hits = new ArrayList<Hit>();
+        List<Hit> hits = new ArrayList<>();
 
         int[] id = new int[hitList.size()];
         int[] paddle = new int[hitList.size()];
@@ -109,12 +108,6 @@ public class HitReader implements IMatchedHit {
             TDCUIdx[i] = hitList.get(i).TDCbankHitIdx1;
             TDCDIdx[i] = hitList.get(i).TDCbankHitIdx2;
 
-            // get the status
-            //int statusU = CCDBConstants.getSTATUSU()[0][0][paddle[i] - 1];
-            //int statusD = CCDBConstants.getSTATUSD()[0][0][paddle[i] - 1];
-           // String statusWord = this.set_StatusWord(statusU, statusD, ADCU[i],
-            //        TDCU[i], ADCD[i], TDCD[i]);
-
             // create the hit object
             Hit hit = new Hit(id[i], 1, 1, paddle[i], ADCU[i], TDCU[i],
                     ADCD[i], TDCD[i]);
@@ -122,17 +115,23 @@ public class HitReader implements IMatchedHit {
             hit.set_ADCbankHitIdx2(ADCDIdx[i]);
             hit.set_TDCbankHitIdx1(TDCUIdx[i]);
             hit.set_TDCbankHitIdx2(TDCDIdx[i]);
-            //hit.set_StatusWord(statusWord);
-            hit.set_StatusWord(this.set_StatusWord(hit.Status1(constants4), hit.Status2(constants4), ADCU[i], TDCU[i], ADCD[i], TDCD[i]));
+            if(!this.passADC(hit.Status1(constants4), ADCU[i]))
+                hit.set_Status(RawOrder.ADC1, 1);
+            if(!this.passTDC(hit.Status1(constants4), TDCU[i]))
+                hit.set_Status(RawOrder.TDC1, 1);
+            if(!this.passADC(hit.Status2(constants4), ADCD[i]))
+                hit.set_Status(RawOrder.ADC2, 1);
+            if(!this.passTDC(hit.Status2(constants4), TDCD[i]))
+                hit.set_Status(RawOrder.TDC2, 1);
             hit.setPaddleLine(geometry);
             // add this hit
             if(passHit(hit))hits.add(hit);
         }
         List<Hit> updated_hits = matchHitsToCVTTrk(hits, geometry, tracks);
 
-        ArrayList<ArrayList<Hit>> DetHits = new ArrayList<ArrayList<Hit>>();
+        ArrayList<ArrayList<Hit>> DetHits = new ArrayList<>();
         for (int j = 0; j < 3; j++) {
-            DetHits.add(j, new ArrayList<Hit>());
+            DetHits.add(j, new ArrayList<>());
         }
 
         for (Hit hit : updated_hits) {
@@ -144,7 +143,8 @@ public class HitReader implements IMatchedHit {
              constants2, 
              constants3, 
              constants5, 
-             constants8);
+             constants8, 
+             constants9);
             // DetHits.get(hit.get_Panel()-1).add(hit);
         }
         // List<Hit> unique_hits = this.removeDuplicatedHits(updated_hits);
@@ -156,83 +156,37 @@ public class HitReader implements IMatchedHit {
         this.set_CTOFHits(updated_hits);
     }
 
-    public String set_StatusWord(int statusU, int statusD, int ADCU, int TDCU, int ADCD, int TDCD) {
-        String statusWord = new String(); //ADCLU TDCU ADCD TDCD
-        // selected ranges TDC in [0,1000], ADC in [0, 8192] requirement given by passTDC and passADC methods
-
-        switch (statusU) {
-            case 0:
-                statusWord = ("" + 1 * passADC(ADCU) + "" + 1 * passTDC(TDCU) + "");// fully functioning
-                break;
-            case 1:
-                statusWord = ("0" + "" + 1 * passTDC(TDCU) + ""); 				// no ADC
-                break;
-            case 2:
-                statusWord = ("" + 1 * passADC(ADCU) + "" + "0"); 				// no TDC
-                break;
-            case 3:
-                statusWord = "00";										// no TDC, no ADC
-                break;
-        }
-        switch (statusD) {
-            case 0:
-                statusWord += ("" + 1 * passADC(ADCD) + "" + 1 * passTDC(TDCD) + "");// fully functioning
-                break;
-            case 1:
-                statusWord += ("0" + "" + 1 * passTDC(TDCD) + ""); 				// no ADC
-                break;
-            case 2:
-                statusWord += ("" + 1 * passADC(ADCD) + "" + "0"); 				// no TDC
-                break;
-            case 3:
-                statusWord += "00";										// no TDC, no ADC
-                break;
-
-        }
-
-        return statusWord;
-
-    }
-
     private boolean passHit(Hit hit) {
         // drop hits that miss both ADCs or both TDCs
-        boolean pass = false;
-        String status = hit.get_StatusWord();
-        if (status.equals("1111") ) {
-            pass = true;
-        }
-        return pass;
+        return hit.get_StatusWord()==0;
     }
 
-    private int passTDC(int tDC) {
+    private boolean passTDC(int ccdbStatus, int tDC) {
+        // apply selection on CCDB status
         // selected ranges TDC in [0, ? 1000] // what is the upper limit?
-        int pass = 0;
-        if (tDC > 0) pass = 1;
-        return pass;
+        return (ccdbStatus & 2)==0 && tDC>0;
     }
 
-    private int passADC(int aDC) {
+    private boolean passADC(int ccdbStatus, int aDC) {
         // selected ranges  ADC in [0, ? 8192]
-        int pass = 0;
-        if(aDC>0) pass = 1;
-        return pass;
+        return (ccdbStatus & 1)==0 && aDC>0;
     }
     
     private List<Hit> matchHitsToCVTTrk(List<Hit> CTOFhits, CTOFGeant4Factory ctofDetector, ArrayList<Track> tracks) {
-        if (tracks == null || tracks.size() == 0) {
+        if (tracks == null || tracks.isEmpty()) {
             return CTOFhits; // no hits were matched with DC tracks
         }
         // Instantiates the final list of hits
-        List<Hit> hitList = new ArrayList<Hit>();
+        List<Hit> hitList = new ArrayList<>();
         
         // Instantiates map of track intersections with the paddles
-        IndexedList<ArrayList<Track>> trkHitsMap = new IndexedList<ArrayList<Track>>(1);
+        IndexedList<ArrayList<Track>> trkHitsMap = new IndexedList<>(1);
         // calculate track intersections
         for (int i = 0; i < tracks.size(); i++) {
             Track trk = tracks.get(i);
 //            System.out.println(tracks.size() + " " + i + trk.toString());
             List<DetHit> trkHits = ctofDetector.getIntersections(trk.getLine());
-            if (trkHits != null && trkHits.size() > 0) {
+            if (trkHits != null && !trkHits.isEmpty()) {
                 for (DetHit hit : trkHits) {
                     CTOFDetHit trkHit = new CTOFDetHit(hit);
                     // check if intersection is in the "positive direction" and reject other intersections
@@ -244,7 +198,7 @@ public class HitReader implements IMatchedHit {
                         ctofTrkHit.setHit(trkHit);
                         // if map entry for the given paddle doesn't already exist, add it
                         if(!trkHitsMap.hasItem(trkHit.getPaddle())) { 
-                            ArrayList<Track> list = new ArrayList<Track>();
+                            ArrayList<Track> list = new ArrayList<>();
                             trkHitsMap.add(list, trkHit.getPaddle());
                         }
                         // add the track/intersection to the map

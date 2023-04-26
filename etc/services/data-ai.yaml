@@ -12,8 +12,12 @@ services:
     name: FTCAL
   - class: org.jlab.rec.ft.hodo.FTHODOEngine
     name: FTHODO
+  - class: org.jlab.rec.ft.trk.FTTRKEngine
+    name: FTTRK
   - class: org.jlab.rec.ft.FTEBEngine
     name: FTEB
+  - class: org.jlab.service.raster.RasterEngine
+    name: RASTER
 # DC clustering: nominal algoritm, filled the cluster bank for ai and conventional tracking
   - class: org.jlab.service.dc.DCHBClustering
     name: DCCR
@@ -27,8 +31,8 @@ services:
     name: FTOFHB
   - class: org.jlab.service.ec.ECEngine
     name: EC
-  - class: org.jlab.rec.cvt.services.CVTReconstruction
-    name: CVT
+  - class: org.jlab.rec.cvt.services.CVTEngine
+    name: CVTFP
   - class: org.jlab.service.ctof.CTOFEngine
     name: CTOF
   - class: org.jlab.service.cnd.CNDCalibrationEngine
@@ -45,6 +49,8 @@ services:
     name: DCTB
   - class: org.jlab.service.fmt.FMTEngine
     name: FMT
+  - class: org.jlab.rec.cvt.services.CVTSecondPassEngine
+    name: CVTSP
   - class: org.jlab.service.ftof.FTOFTBEngine
     name: FTOFTB
   - class: org.jlab.service.eb.EBTBEngine
@@ -55,30 +61,21 @@ services:
     name: RTPC
 configuration:
   global:
-    variation: rga_fall2018
+    variation: rgb_spring2019
 #      timestamp: 12/31/2020-00:00:00
-  io-services:
-    writer:
-      compression: 2
+#  io-services:
+#    writer:
 #      schema_dir: "absolute-path-to-schema-folder"
 #      for example:
 #      schema_dir: "/home/clas12-1/chef/myClara/plugins/clas12/etc/bankdefs/dst"
   services:
     MAGFIELDS:
       magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
-      magfieldTorusMap: Full_torus_r251_phi181_z251_08May2018.dat
-    DCCR:
-      dcT2DFunc: "Polynomial"
-      dcWireDistortion: "true"  
-    DCHAI:
-      dcT2DFunc: "Polynomial"
-      dcWireDistortion: "true" 
-      outputBankPrefix: "HB"
-    DCTB:
-      dcT2DFunc: "Polynomial"
-      dcWireDistortion: "true" 
+      magfieldTorusMap: Full_torus_r251_phi181_z251_25Jan2021.dat
     MLTD:
-      run: "5038"
+      run: "6302"
+    DCHAI:
+      outputBankPrefix: "HB"
       
 mime-types:
   - binary/data-hipo

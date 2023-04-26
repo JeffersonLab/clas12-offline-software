@@ -83,11 +83,6 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
                 ArrayList<HalfHit> halfhits = new ArrayList<HalfHit>();   
 		ArrayList<CndHit> hits = new ArrayList<CndHit>();
 
-		//test
-//		if(event.hasBank("CVTRec::Tracks")){
-//			hcvt++;
-//		}
-
 		halfhits = HitReader.getCndHalfHits(event, constantsLoader);		
 		//1) exit if halfhit list is empty
 		if(halfhits.size()==0 ){
@@ -130,7 +125,7 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 		//			//System.out.println("event after process : ");
 		//			//event.show();
 		//			ecnd++;
-		//			if(event.hasBank("CVTRec::Tracks")){
+		//			if(event.hasBank("CVT::Tracks")){
 		//				posmatch++;
 		//				//event.getBank("MC::Particle").show();
 		//				//outbank.show();
@@ -147,7 +142,7 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 
         //// clustering of the CND hits
         CNDClusterFinder cndclusterFinder = new CNDClusterFinder();
-        ArrayList<CNDCluster> cndclusters = cndclusterFinder.findClusters(hits);
+        ArrayList<CNDCluster> cndclusters = cndclusterFinder.findClusters(hits,constantsLoader);
             
         
         
@@ -160,7 +155,7 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 		//	System.out.println("in process event ");
 			rbc.appendCNDBanks(event,hits,cndclusters);
 			//      ecnd++;
-			//      if(event.hasBank("CVTRec::Tracks")){
+			//      if(event.hasBank("CVT::Tracks")){
 			//              posmatch++;
 			//event.getBank("MC::Particle").show();
 			//outbank.show();
@@ -224,7 +219,7 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 			//			event.show();
 
 			//event.getBank("MC::Particle").show();
-			//if(event.hasBank("CVTRec::Tracks")){event.getBank("CVTRec::Tracks").show();};
+			//if(event.hasBank("CVT::Tracks")){event.getBank("CVT::Tracks").show();};
 			en.processDataEvent(event);
 
 			//			System.out.println("event après process ");

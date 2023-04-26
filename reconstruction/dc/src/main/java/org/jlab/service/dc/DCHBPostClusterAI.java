@@ -53,7 +53,8 @@ public class DCHBPostClusterAI extends DCEngine {
         }
         
         /* IO */
-        HitReader reader      = new HitReader(this.getBanks());
+        HitReader reader      = new HitReader(this.getBanks(), Constants.getInstance().dcDetector);
+        reader.initialize(event);
         RecoBankWriter writer = new RecoBankWriter(this.getBanks());
         // get Field
         Swim dcSwim = new Swim();
@@ -70,7 +71,7 @@ public class DCHBPostClusterAI extends DCEngine {
         List<Segment> segments = null;
         List<FittedHit> fhits = null;
 
-        reader.read_NNHits(event, Constants.getInstance().dcDetector);
+        reader.read_NNHits(event);
 
         //I) get the lists
         List<Hit> hits = reader.get_DCHits();
@@ -129,7 +130,7 @@ public class DCHBPostClusterAI extends DCEngine {
             for (Track trk : trkcands) {
                 // reset the id
                 trk.set_Id(trkId);
-                trkcandFinder.matchHits(trk.get_Trajectory(),
+                trkcandFinder.matchHits(trk.getStateVecs(),
                         trk,
                         Constants.getInstance().dcDetector,
                         dcSwim);
@@ -140,12 +141,17 @@ public class DCHBPostClusterAI extends DCEngine {
                     trkcandFinder.setHitDoubletsInfo(c.get_Segment1());
                     trkcandFinder.setHitDoubletsInfo(c.get_Segment2());
                     for (FittedHit h1 : c.get_Segment1()) {
-                        if(h1.get_AssociatedHBTrackID()>0) fhits.add(h1);
+                        h1.set_AssociatedHBTrackID(trkId);
+                        //if(h1.get_AssociatedHBTrackID()>0) 
+                        fhits.add(h1); 
                     }
                     for (FittedHit h2 : c.get_Segment2()) {
-                        if(h2.get_AssociatedHBTrackID()>0) fhits.add(h2);
+                        h2.set_AssociatedHBTrackID(trkId);
+                        //if(h2.get_AssociatedHBTrackID()>0) 
+                        fhits.add(h2); 
                     }
                 }
+                trk.calcTrajectory(trk.getId(), dcSwim, trk.get_Vtx0(), trk.get_pAtOrig(), trk.get_Q());
                 trkId++;
             }
         }
@@ -165,7 +171,8 @@ public class DCHBPostClusterAI extends DCEngine {
                     writer.fillHBSegmentsBank(event, segments),
                     writer.fillHBCrossesBank(event, crosses),
                     writer.fillHBTracksBank(event, trkcands),
-                    writer.fillHBHitsTrkIdBank(event, fhits) );
+                    writer.fillHBHitsTrkIdBank(event, fhits),
+                    writer.fillHBTrajectoryBank(event, trkcands));
         } 
         return true;
     }

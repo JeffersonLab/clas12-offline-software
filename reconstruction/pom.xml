@@ -3,14 +3,14 @@
 
   <groupId>org.jlab.clas</groupId>
   <artifactId>reconstruction</artifactId>
-  <version>7c.1.1-SNAPSHOT</version>
+  <version>8.7.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <parent>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../parent/pom.xml</relativePath>
-    <version>7c.1.1-SNAPSHOT</version>
+    <version>8.7.1-SNAPSHOT</version>
   </parent>
 
   <modules>
@@ -30,5 +30,9 @@
     <module>rtpc</module>
     <module>mltn</module>
     <module>swaps</module>
+    <module>raster</module>
+    <module>vtx</module>
+    <module>urwell</module>
+    <module>alert</module>
   </modules>
 </project>

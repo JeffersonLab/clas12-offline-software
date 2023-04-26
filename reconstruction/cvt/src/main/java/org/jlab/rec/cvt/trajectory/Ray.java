@@ -1,5 +1,6 @@
 package org.jlab.rec.cvt.trajectory;
 
+import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
@@ -16,91 +17,134 @@ public class Ray {
     private double _yzslopeErr;
     private double _yxintercErr;
     private double _yzintercErr;
-
+    public double chi2;
+    
     public Ray(Point3D refPoint, Vector3D dirVec) {
-        set_refPoint(refPoint);
-        set_dirVec(dirVec);
-
+        if(dirVec.y()!=0) {
+            double t = -refPoint.y()/dirVec.y();
+            refPoint.translateXYZ(t*dirVec.x(), t*dirVec.y(), t*dirVec.z());
+            dirVec = dirVec.multiply(1/dirVec.y());
+            this._refPoint = refPoint;
+            this._dirVec   = dirVec.asUnit();
+            this._yxinterc = refPoint.x();
+            this._yzinterc = refPoint.z();
+            this._yxslope  = dirVec.x();
+            this._yzslope  = dirVec.z();
+        }
     }
 
-    public Point3D get_refPoint() {
+    public Ray(double yxSlope, double yxInterc, double yzSlope, double yzInterc) {
+        this(yxSlope, 0, yxInterc, 0, yzSlope, 0, yzInterc,0);       
+    }
+    
+    public Ray(double yxSlope, double yxSlopeErr, double yxInterc, double yxIntercErr,
+               double yzSlope, double yzSlopeErr, double yzInterc, double yzIntercErr) {
+        
+        this._yxslope     = yxSlope;
+        this._yxslopeErr  = yxSlopeErr;
+        this._yxinterc    = yxInterc;
+        this._yxintercErr = yxIntercErr;
+        this._yzslope     = yzSlope;
+        this._yzslopeErr  = yzSlopeErr;
+        this._yzinterc    = yzInterc;
+        this._yzintercErr = yzIntercErr;
+
+        this._refPoint = new Point3D(yxInterc, 0, yzInterc);
+        this._dirVec   = new Vector3D(yxSlope, 1, yzSlope).asUnit();
+
+    }
+        
+    public Point3D getRefPoint() {
         return _refPoint;
     }
 
-    public void set_refPoint(Point3D _refPoint) {
+    public void setRefPoint(Point3D _refPoint) {
         this._refPoint = _refPoint;
     }
 
-    public Vector3D get_dirVec() {
+    public Vector3D getDirVec() {
         return _dirVec;
     }
 
-    public void set_dirVec(Vector3D _dirVec) {
+    public void setDirVec(Vector3D _dirVec) {
         this._dirVec = _dirVec;
     }
 
-    public double get_yxslope() {
+    public double getYXSlope() {
         return _yxslope;
     }
 
-    public void set_yxslope(double _yxslope) {
+    public void setYXSlope(double _yxslope) {
         this._yxslope = _yxslope;
     }
 
-    public double get_yzslope() {
+    public double getYZSlope() {
         return _yzslope;
     }
 
-    public void set_yzslope(double _yzslope) {
+    public void setYZSlope(double _yzslope) {
         this._yzslope = _yzslope;
     }
 
-    public double get_yxinterc() {
+    public double getYXInterc() {
         return _yxinterc;
     }
 
-    public void set_yxinterc(double _yxinterc) {
+    public void setYXInterc(double _yxinterc) {
         this._yxinterc = _yxinterc;
     }
 
-    public double get_yzinterc() {
+    public double getYZInterc() {
         return _yzinterc;
     }
 
-    public void set_yzinterc(double _yzinterc) {
+    public void setYZInterc(double _yzinterc) {
         this._yzinterc = _yzinterc;
     }
 
-    public double get_yxslopeErr() {
+    public double getYXSlopeErr() {
         return _yxslopeErr;
     }
 
-    public void set_yxslopeErr(double _yxslopeErr) {
+    public void setYXSlopeErr(double _yxslopeErr) {
         this._yxslopeErr = _yxslopeErr;
     }
 
-    public double get_yzslopeErr() {
+    public double getYZSlopeErr() {
         return _yzslopeErr;
     }
 
-    public void set_yzslopeErr(double _yzslopeErr) {
+    public void setYZSlopeErr(double _yzslopeErr) {
         this._yzslopeErr = _yzslopeErr;
     }
 
-    public double get_yxintercErr() {
+    public double getYXIntercErr() {
         return _yxintercErr;
     }
 
-    public void set_yxintercErr(double _yxintercErr) {
+    public void setYXInterErr(double _yxintercErr) {
         this._yxintercErr = _yxintercErr;
     }
 
-    public double get_yzintercErr() {
+    public double getYZIntercErr() {
         return _yzintercErr;
     }
 
-    public void set_yzintercErr(double _yzintercErr) {
+    public void setYZIntercErr(double _yzintercErr) {
         this._yzintercErr = _yzintercErr;
     }
+    
+    public double[][] getCovMat() {
+        double[][] cov = new double[5][5];
+        cov[0][0] = this.getYXIntercErr()*this.getYXIntercErr();
+        cov[1][1] = this.getYZIntercErr()*this.getYZIntercErr();
+        cov[2][2] = this.getYXSlopeErr()*this.getYXSlopeErr();
+        cov[3][3] = this.getYZSlopeErr()*this.getYZSlopeErr();
+        cov[4][4] = 1;
+        return cov;
+    }
 
+    public Line3D toLine() {
+        return new Line3D(this.getRefPoint(), this.getDirVec());
+    }
 }

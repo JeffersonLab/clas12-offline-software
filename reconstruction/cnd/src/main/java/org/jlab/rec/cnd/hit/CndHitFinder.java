@@ -58,6 +58,9 @@ public class CndHitFinder {
 			double Eup = 0.;      // Energy at upstream end of hit paddle
 			double Edown = 0.;    // Energy at downstream end of hit paddle
 
+			double Z_dh_av = 0.;    // Z of the hit position (local co-ordinates, wrt the centre of the paddle) as supposed for a double hit
+			double z_dh_hit = 0.;   // Reconstructed position of the particle hit in the paddle (global co-ordinates, wrt to centre of the Central Detector) as supposed for a double hit
+
 			double Z_av = 0.;    // Z of the hit position (local co-ordinates, wrt the centre of the paddle)
 			double T_hit = 0.;   // Reconstructed time of particle hit in the paddle
 			double z_hit = 0.;   // Reconstructed position of the particle hit in the paddle (global co-ordinates, wrt to centre of the Central Detector)
@@ -210,6 +213,11 @@ public class CndHitFinder {
 
 					totrec++;  // count number of "good" reconstructions
 
+					// coordinates of a possible double hit (corner clippers)
+					Z_dh_av = ((ccdb.LENGTH[lay-1]/(10.*ccdb.EFFVEL[block-1][lay-1][hit_n.Component()-1])+ccdb.UTURNTLOSS[block-1][lay-1])*10.*ccdb.EFFVEL[block-1][lay-1][hit_d.Component()-1])/2.;
+					z_dh_hit = (((-1.*ccdb.ZOFFSET[lay-1]) + (ccdb.LENGTH[lay-1]/2.)) + Z_dh_av) +(ccdb.ZTARGET[0]*10);
+					// 
+
 					// Create a new CndHit and fill it with the relevant info:
 
 					CndHit GoodHit = new CndHit(pad_d,pad_n);  // Takes as index the halfhits array indices of the two half-hits involved.
@@ -243,6 +251,18 @@ public class CndHitFinder {
 					GoodHit.set_indexLtdc(indextdcL);
 					GoodHit.set_indexRadc(indexadcR);
 					GoodHit.set_indexRtdc(indextdcR);
+
+
+					//from silvia
+
+                    if(Math.abs(z_dh_hit - z_hit) / 10 < ccdb.DeltaZDH[lay -1] && Math.abs(hit_d.Tprop() - hit_n.Tprop()) < ccdb.DeltaTDH[lay -1])
+                    {
+                    	GoodHit.set_status(1);
+                    }
+                    else
+                    {
+                    	GoodHit.set_status(0);
+                    }
 
 					HitArray.add(GoodHit);
 
@@ -354,8 +374,12 @@ public class CndHitFinder {
 
 			//	if(Math.abs(xi-xj)<(3.*incx)  && Math.abs(yi-yj)<(3.*incy)  && Math.abs(zi-zj)<(3.*incz)) { // CUT are set to x,y,z incertainty
 			double zjAv = zj - ((-1.*ccdb.ZOFFSET[lay-1]) + (ccdb.LENGTH[lay-1]/2.))-(ccdb.ZTARGET[0]*10);
-			if((flag==0 && Math.abs(xi-xj)<(5.*incx)  && Math.abs(yi-yj)<(5.*incy)  && zjAv>(ccdb.LENGTH[lay-1]/-2.)-10*Parameters.Zres[0] && zjAv<(ccdb.LENGTH[lay-1]/2.)+10*Parameters.Zres[0]) || 
-					(flag==1 && Math.abs(xi-xj)<(5.*incx)  && Math.abs(yi-yj)<(5.*incy)  && Math.abs(zi-zj)<(5.*incz))){ // CUT are set to x,y incertainty and zj in the paddle length
+			if((flag==0 && Math.abs(xi-xj)<(5.*incx)  && 
+                                       Math.abs(yi-yj)<(5.*incy)  && 
+                                       zjAv>(ccdb.LENGTH[lay-1]/-2.)-10*Parameters.Zres[0] && 
+                                       zjAv<(ccdb.LENGTH[lay-1]/2.)+10*Parameters.Zres[0]) || 
+			   (flag==1 && Math.abs(xi-xj)<(5.*incx)  && Math.abs(yi-yj)<(5.*incy)  && 
+                                       Math.abs(zi-zj)<(5.*incz))){ // CUT are set to x,y incertainty and zj in the paddle length
 
 				hit.set_AssociatedTrkId(helices.get(i).get_Id());
 				hit.set_pathlength(helices.get(i).get_TrkLengths().get(lay-1));

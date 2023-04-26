@@ -8,6 +8,8 @@ import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.rec.eb.EBCCDBEnum;
+import org.jlab.clas.detector.DetectorResponseComparators;
+import org.jlab.clas.detector.matching.MatchCND;
 
 /*
  *
@@ -163,60 +165,81 @@ public class EBMatching {
 
     /**
      * find CD neutrals and append to particle list
+	 * @param de
+	 * @return whether any neutrals were added 
      */
     public boolean addCentralNeutrals(DetectorEvent de) {
 
-        int newneuts=0;
+        int newNeutrals = 0;
         
         Vector3 vertex = new Vector3(0,0,0);
-        if (de.getParticles().size()>0) {
+        if (!de.getParticles().isEmpty()) {
             vertex.copy(eventBuilder.getEvent().getParticle(0).vertex());
         }
 
-        List<DetectorResponse> respsCND =
-            eventBuilder.getUnmatchedResponses(null, DetectorType.CND, 0);
+        //
+        // This is the new case where CND only does intralayer clustering,
+        // and EB does CND's interlayer matching:
+        //
+        MatchCND matcher = new MatchCND(
+                eventBuilder.ccdb.getDouble(EBCCDBEnum.CND_DZ),
+                eventBuilder.ccdb.getDouble(EBCCDBEnum.CND_DPHI),
+                eventBuilder.ccdb.getDouble(EBCCDBEnum.CND_DT));
 
-        // make a new neutral particle for each unmatched CND cluster:
-        for (DetectorResponse respCND : respsCND) {
+        List<DetectorResponse> cnds =
+                eventBuilder.getUnmatchedResponses(null, DetectorType.CND, 0);
 
-            // haven't appended the particle yet, but this will be its index:
+        List<DetectorResponse> ctofs =
+                eventBuilder.getUnmatchedResponses(null, DetectorType.CTOF, 0);
+
+        // Layer-based ordering, with energy-ordering within layers:
+        cnds.sort(DetectorResponseComparators.layerEnergy);
+
+        while (!cnds.isEmpty()) {
+            // CND clusters are already sorted such that the first one will
+            // always seed a new neutral:
+            DetectorResponse seed = cnds.remove(0);
             final int pindex = de.getParticles().size();
+            DetectorParticle neutral = DetectorParticle.createNeutral(seed,vertex);
+            seed.setAssociation(pindex);
+            newNeutrals++;
 
-            // make neutral particle from CND:
-            DetectorParticle neutral = DetectorParticle.createNeutral(respCND,vertex);
-            respCND.setAssociation(pindex);
-
-            // find and associate matching CTOF hits:
-            List<DetectorResponse> respCTOF =
-                    eventBuilder.getUnmatchedResponses(null, DetectorType.CTOF, 0);
-            final int indx=neutral.getDetectorHit(respCTOF,DetectorType.CTOF,0,
-                    eventBuilder.ccdb.getDouble(EBCCDBEnum.CTOF_DZ));
-            if (indx >= 0) {
-                neutral.addResponse(respCTOF.get(indx),true);
-                respCTOF.get(indx).setAssociation(pindex);
-                // FIXME:  stop mixing Vector3 and Vector3D
-                final double dx = respCTOF.get(indx).getPosition().x()-vertex.x();
-                final double dy = respCTOF.get(indx).getPosition().y()-vertex.y();
-                final double dz = respCTOF.get(indx).getPosition().z()-vertex.z();
-                respCTOF.get(indx).setPath(Math.sqrt(dx*dx+dy*dy+dz*dz));
+            // Associate any remaining CND clusters to this neutral:
+            for (int i=0; i<cnds.size(); i++) {
+                if (matcher.matches(neutral, cnds.get(i), true)) {
+                    DetectorResponse hit = cnds.remove(i);
+                    neutral.addResponse(hit, true);
+                    hit.setAssociation(pindex);
+                    i--;
+                }
             }
 
+            // Associate any remaining CTOF clusters to this neutral:
+            final int indx=neutral.getDetectorHit(ctofs,DetectorType.CTOF,0,
+                    eventBuilder.ccdb.getDouble(EBCCDBEnum.CTOF_DZ));
+            if (indx >= 0) {
+                neutral.addResponse(ctofs.get(indx),true);
+                ctofs.get(indx).setAssociation(pindex);
+                // FIXME:  stop mixing Vector3 and Vector3D
+                final double dx = ctofs.get(indx).getPosition().x()-vertex.x();
+                final double dy = ctofs.get(indx).getPosition().y()-vertex.y();
+                final double dz = ctofs.get(indx).getPosition().z()-vertex.z();
+                ctofs.get(indx).setPath(Math.sqrt(dx*dx+dy*dy+dz*dz));
+                ctofs.remove(indx);
+            }
+	    
             de.addParticle(neutral);
-            newneuts++;
         }
-
+        
         // make a new neutral particle for each unmatched CTOF cluster:
-        List<DetectorResponse> respsCTOF =
-            eventBuilder.getUnmatchedResponses(null, DetectorType.CTOF, 0);
-        for (DetectorResponse respCTOF : respsCTOF) {
-            // make neutral particle from CTOF:
+        for (DetectorResponse respCTOF : ctofs) {
             DetectorParticle neutral = DetectorParticle.createNeutral(respCTOF,vertex);
             respCTOF.setAssociation(de.getParticles().size());
             de.addParticle(neutral);
-            newneuts++;
+            newNeutrals++;
         }
 
-        return newneuts>0;
+        return newNeutrals>0;
     }
 
 }

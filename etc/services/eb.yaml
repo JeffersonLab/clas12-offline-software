@@ -9,9 +9,9 @@ services:
   - class: org.jlab.service.eb.EBTBEngine
     name: EBTB
 configuration:
-  io-services:
-    writer:
-      compression: 2
+#  io-services:
+#    writer:
+#      schema_dir: "absolute-path-to-schema-folder"
   services:
     EBTB:
       dropBanks: 'true'

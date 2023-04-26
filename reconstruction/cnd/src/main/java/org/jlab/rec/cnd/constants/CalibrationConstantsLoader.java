@@ -26,7 +26,8 @@ public class CalibrationConstantsLoader {
                 "/calibration/cnd/Energy",
                 "/calibration/cnd/time_jitter",
 		"/geometry/cnd/cndgeom",
-		"/geometry/target"
+		"/geometry/target", "/calibration/cnd/cluster",
+        "/calibration/cnd/double_hits"
             };
 
         public CalibrationConstantsLoader(int run, ConstantsManager ccdb) {
@@ -53,6 +54,15 @@ public class CalibrationConstantsLoader {
 	public double[] THICKNESS                = new double[1];
 	public double[] INNERRADIUS              = new double[1];
 	public double[] ZTARGET                  = new double[1];
+
+    public double DX = 0;
+    public double DY = 0;
+    public double DZ = 0;
+    public double DT = 0;
+
+    public double[] DeltaZDH                 = new double[3];    // in cm, maximum absolute value of difference between hit z and double hit Z
+    public double[] DeltaTDH                 = new double[3];    //in ns, maximum absolute value between direct hit time of left and right paddle, both should be equal for double hits
+
 	//Calibration and geometry parameters from DB    
 
         public static String[] getCndTables() {
@@ -109,6 +119,10 @@ public class CalibrationConstantsLoader {
             for(int iLay = 1; iLay <=3; iLay++) {
                 LENGTH[iLay-1]  = 10.*tabJs.get(10).getDoubleValue("Length", 1, iLay, 1);
                 ZOFFSET[iLay-1] = 10.*tabJs.get(10).getDoubleValue("UpstreamZOffset", 1, iLay, 1);// not right structure for common tools
+
+                DeltaZDH[iLay-1] = tabJs.get(13).getDoubleValue("deltaZ", 0, iLay, 0);
+                DeltaTDH[iLay-1] = tabJs.get(13).getDoubleValue("deltaT", 0, iLay, 0);
+
             }
 
             //LENGTH = new double[]{665.72, 700.0, 734.28};
@@ -124,6 +138,10 @@ public class CalibrationConstantsLoader {
 //            for(int iLay = 1; iLay <=3; iLay++) {
 //              System.out.println("Length and Zoff "+LENGTH[iLay-1]+" "+ZOFFSET[iLay-1]);
 //            }
+             DX = tabJs.get(12).getDoubleValue("deltax", 0, 0, 0);
+             DY = tabJs.get(12).getDoubleValue("deltay", 0, 0, 0);
+             DZ = tabJs.get(12).getDoubleValue("deltaz", 0, 0, 0);
+             DT = tabJs.get(12).getDoubleValue("deltat", 0, 0, 0);
 
     } 
 

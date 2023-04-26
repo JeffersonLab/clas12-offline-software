@@ -12,8 +12,12 @@ services:
     name: FTCAL
   - class: org.jlab.rec.ft.hodo.FTHODOEngine
     name: FTHODO
+  - class: org.jlab.rec.ft.trk.FTTRKEngine
+    name: FTTRK
   - class: org.jlab.rec.ft.FTEBEngine
     name: FTEB
+  - class: org.jlab.service.raster.RasterEngine
+    name: RASTER
 # DC clustering: nominal algoritm, filled the cluster bank for ai and conventional tracking
   - class: org.jlab.service.dc.DCHBClustering
     name: DCCR
@@ -30,8 +34,8 @@ services:
     name: FTOFHB
   - class: org.jlab.service.ec.ECEngine
     name: EC
-  - class: org.jlab.rec.cvt.services.CVTReconstruction
-    name: CVT
+  - class: org.jlab.rec.cvt.services.CVTEngine
+    name: CVTFP
   - class: org.jlab.service.ctof.CTOFEngine
     name: CTOF
   - class: org.jlab.service.cnd.CNDCalibrationEngine
@@ -54,6 +58,8 @@ services:
     name: DCTAI  
   - class: org.jlab.service.fmt.FMTEngine
     name: FMT
+  - class: org.jlab.rec.cvt.services.CVTSecondPassEngine
+    name: CVTSP
   - class: org.jlab.service.ftof.FTOFTBEngine
     name: FTOFTB
   - class: org.jlab.service.eb.EBTBEngine
@@ -65,9 +71,6 @@ services:
   - class: org.jlab.service.rtpc.RTPCEngine
     name: RTPC
 configuration:
-  io-services:
-    writer:
-      compression: 2
   services:
     MAGFIELDS:
       magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
@@ -86,5 +89,15 @@ configuration:
 #    EBTB:
 #      variation: default
 #      timestamp: 08/22/2018
+    DCCR:
+      dcT2DFunc: "Exponential"  
+    DCHB:
+      dcT2DFunc: "Exponential"  
+    DCHAI:
+      dcT2DFunc: "Exponential"  
+    DCTB:
+      dcT2DFunc: "Exponential"  
+    DCTAI:
+      dcT2DFunc: "Exponential"  
 mime-types:
   - binary/data-hipo

@@ -76,8 +76,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * @param id
      */
     public FittedHit(int sector, int superlayer, int layer, int wire,
-            int TDC, int id) {
-        super(sector, superlayer, layer, wire, TDC, id);
+            int TDC, int jitter, int id) {
+        super(sector, superlayer, layer, wire, TDC, jitter, id);
         
         this.set_lX(layer);
         this.set_lY(layer, wire);
@@ -371,8 +371,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             double alpha = Math.atan(trkAngle);
             
             // correct alpha with theta0, the angle corresponding to the isochrone lines twist due to the electric field
-            if(event.hasBank("MC::Particle")==false)
-                alpha-=Swimmer.getTorScale()*theta0;
+            alpha-=Math.signum(Swimmer.getTorScale())*theta0;
             
             this.setAlpha(Math.toDegrees(alpha));
             //reduce the corrected angle 
@@ -381,29 +380,29 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             double x = this.get_ClusFitDoca();
            
             double deltatime_beta = 0;
-            double deltatime_beta2 = 0;
+            double deltadoca_beta = 0;
             
-            if (x != -1) {
-                if(Constants.getInstance().useUSETIMETBETA()==true) {
-                    deltatime_beta = calcDeltaTimeBetaTFCN(this.get_Time(), tab, beta);
-                    deltatime_beta2 = calcDeltaTimeBeta(this.get_Time(), tab, beta);
-                } else {
-                    deltatime_beta = calcDeltaTimeBeta(x, tab, beta);
-                }
-            }
+            if(Constants.getInstance().useUSETIMETBETA()==true) {
+                deltatime_beta = calcDeltaTimeBetaTFCN(this.get_Time(), tab, beta);
+            } 
+            
             if(event.hasBank("MC::Particle")==false) {
                 distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), 
-                        this.getCorrectedTime(this.get_Time(), deltatime_beta+deltatime_beta2), 
-                        secIdx, slIdx) ;
+                        this.getCorrectedTime(this.get_Time(), deltatime_beta), 
+                        secIdx, slIdx);
             } else {
                 distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), 
                         this.getCorrectedTime(this.get_Time(), 0), 
                         secIdx, slIdx) ;
             }
-            //deltatime_beta = calcDeltaTimeBeta(distance, tab, beta);
-            //deltatime_beta = calcDeltaTimeBeta(distance, this.get_Superlayer(), beta);
+            //get deltadoca
+            if(Constants.getInstance().useUSETIMETBETA()==false) {
+                deltadoca_beta = calcDeltaDocaBeta(distance, tab, beta);
+            }
+            
+            distance -=deltadoca_beta;
             this.set_DeltaTimeBeta(deltatime_beta);
-            //distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.getCorrectedTime(this.get_Time(), deltatime_beta), secIdx, slIdx) ;
+            this.set_DeltaDocaBeta(deltadoca_beta);
             
         }
      
@@ -416,12 +415,13 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             correctedTime=0.01; // fixes edge effects ... to be improved
         return correctedTime;
     }
-    
-    public double calcDeltaTimeBeta(double x, IndexedTable tab, double beta){
-        return (Math.sqrt(x * x + (tab.getDoubleValue("distbeta", this.get_Sector(), 
-                this.get_Superlayer(),0) * beta * beta) * 
-                (tab.getDoubleValue("distbeta", this.get_Sector(), 
-                        this.get_Superlayer(),0) * beta * beta)) - x) / Constants.V0AVERAGED;
+   
+    public double calcDeltaDocaBeta(double doca, IndexedTable tab, double beta){
+        double distbeta = tab.getDoubleValue("distbeta", this.get_Sector(), this.get_Superlayer(), 0);
+        double delta_doca = 0.5 * (distbeta *beta*beta) *(distbeta *beta*beta) *(distbeta *beta*beta) * doca / 
+                ( (distbeta *beta*beta) *(distbeta *beta*beta)*(distbeta *beta*beta) + doca *doca *doca );
+        
+        return delta_doca;
     }
     
     public double calcDeltaTimeBetaTFCN(double t,IndexedTable tab, double beta){
@@ -666,8 +666,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                 throw new RuntimeException("invalid region");
         }    
         
-        double MaxSag = Constants.getInstance().getWIREDIST()*A*C*wire*wire*FastMath.cos(Math.toRadians(25.))*FastMath.cos(Math.toRadians(30.));
-        
+        double MaxSag = Constants.getInstance().getWIREDIST()*A*C*wire*wire*Constants.COS25*Constants.COS30;
+
         double delta_x = MaxSag*(1.-Math.abs(y)/(0.5*wireLen))*(1.-Math.abs(y)/(0.5*wireLen));
         
         //x+=delta_x;
@@ -1000,6 +1000,14 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     public double get_DeltaTimeBeta() {
         return _deltatime_beta ;
     }
+    private double _deltadoca_beta;
+    public void set_DeltaDocaBeta(double deltadoca_beta) {
+        _deltadoca_beta = deltadoca_beta;
+    }
+
+    public double get_DeltaDocaBeta() {
+        return _deltadoca_beta ;
+    }
     
     // local angle 
     private double _alpha;
@@ -1060,13 +1068,14 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     @Override
     public FittedHit clone() throws CloneNotSupportedException {
         FittedHit hitClone = new FittedHit(this.get_Sector(), this.get_Superlayer(), this.get_Layer(), this.get_Wire(),
-                    this.get_TDC(), this.get_Id());
+                    this.get_TDC(), this.getJitter(), this.get_Id());
             hitClone.set_Doca(this.get_Doca());
             hitClone.set_DocaErr(this.get_DocaErr());
             hitClone.setT0(this.getT0()); 
             hitClone.set_Beta(this.get_Beta());  
             hitClone.setB(this.getB());  
             hitClone.set_DeltaTimeBeta(this.get_DeltaTimeBeta());
+            hitClone.set_DeltaDocaBeta(this.get_DeltaDocaBeta());
             hitClone.setTStart(this.getTStart());
             hitClone.setTProp(this.getTProp());
             hitClone.setTFlight(this.getTFlight());

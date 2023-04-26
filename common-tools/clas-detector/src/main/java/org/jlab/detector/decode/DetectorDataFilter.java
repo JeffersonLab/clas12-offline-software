@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.detector.decode;
 
 import java.awt.FlowLayout;
@@ -22,25 +17,25 @@ import org.jlab.detector.base.DetectorType;
  */
 public class DetectorDataFilter {
     
-    private List<Integer>         detectorCRATES = new ArrayList<Integer>();
-    private List<DetectorType>     detectorTypes = new ArrayList<DetectorType>();
+    private List<Integer>         detectorCRATES = new ArrayList<>();
+    private List<DetectorType>     detectorTypes = new ArrayList<>();
     
     public DetectorDataFilter(){
         
     }
-    
+
     public DetectorDataFilter addCrate(int crate){ this.detectorCRATES.add(crate);  return this; }
-    
+
     public DetectorDataFilter addDetector( DetectorType type) { 
         this.detectorTypes.add(type);
         return this;
     }
-    
+
     public List<DetectorDataDgtz>  filter(List<DetectorDataDgtz> data){
-        List<DetectorDataDgtz> filtered = new ArrayList<DetectorDataDgtz>();        
+        List<DetectorDataDgtz> filtered = new ArrayList<>();        
         for(DetectorDataDgtz dgtz : data){
             boolean add_data = true;
-            if(this.detectorTypes.size()>0){
+            if(!this.detectorTypes.isEmpty()){
                 boolean type_pass = false;
                 for(DetectorType type : detectorTypes){
                     if(dgtz.getDescriptor().getType()==type){
@@ -49,8 +44,8 @@ public class DetectorDataFilter {
                 }
                 if(type_pass!=true) add_data = false;
             }
-            
-            if(detectorCRATES.size()>0){
+
+            if(!detectorCRATES.isEmpty()){
                 boolean crate_pass = false;
                 for(Integer crate : detectorCRATES){
                     if(dgtz.getDescriptor().getCrate()==crate){
@@ -59,18 +54,17 @@ public class DetectorDataFilter {
                 }
                 if(crate_pass!=true) add_data = false;
             }
-            
+
             if(add_data == true ) filtered.add(dgtz);
         }
         return filtered;
     }
-    
+
     public void reset(){
         this.detectorTypes.clear();
         this.detectorCRATES.clear();
     }
-    
-    
+
     @Override
     public String toString(){
        StringBuilder str = new StringBuilder();
@@ -92,18 +86,18 @@ public class DetectorDataFilter {
        str.append("]");
        return str.toString();
     }
-    
+
     public static class DetectorDataFilterPane extends JPanel implements ActionListener {
-        
+
         DetectorDataFilter filter = new DetectorDataFilter();
         JLabel             filterText = null;
-        
+
         public DetectorDataFilterPane(){
             super();
             setLayout(new FlowLayout());
             initUI();
         }
-        
+
         private void initUI(){
             this.add(new JLabel("Detector Type : "));
             JButton buttonAddDetector = new JButton("+");
@@ -115,17 +109,17 @@ public class DetectorDataFilter {
             buttonAddCrate.setActionCommand("add_crate");
             buttonAddCrate.addActionListener(this);
             this.add(buttonAddCrate);
-            
+
             JButton buttonAddReset = new JButton("Reset");
             buttonAddReset.addActionListener(this);
             this.add(buttonAddReset);
-            
+
             filterText = new JLabel();
             filterText.setText(filter.toString());
-            
+
             this.add(filterText);
         }
-        
+
         public DetectorDataFilter getFilter(){return this.filter;}
 
         @Override
@@ -166,14 +160,13 @@ public class DetectorDataFilter {
                     this.filter.addCrate(crate);
                 }
             }
-            
+
             if(e.getActionCommand().compareTo("Reset")==0){
                 this.filter.reset();
             }
-            
+
             this.filterText.setText(filter.toString());
         }
-        
-        
+
     }
 }

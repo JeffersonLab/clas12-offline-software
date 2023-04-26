@@ -48,15 +48,19 @@ public class CVTReconstructionTest {
         enf.init();
         enf.processDataEvent(testEvent);
         
-        CVTReconstruction CVTengine = new CVTReconstruction();
+        CVTEngine CVTengine = new CVTEngine();
         CVTengine.init();
         
         testEvent.show();
         CVTengine.processDataEvent(testEvent);
-        testEvent.show();
         EBHBEngine EBHBengine = new EBHBEngine();
         EBHBengine.init();
         EBHBengine.processDataEvent(testEvent);
+
+        CVTSecondPassEngine CVTSPengine = new CVTSecondPassEngine();
+        CVTSPengine.init();
+        CVTSPengine.processDataEvent(testEvent);
+        testEvent.show();
 
         EBTBEngine EBTBengine = new EBTBEngine();
         EBTBengine.init();

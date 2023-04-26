@@ -41,12 +41,12 @@ public class DetectorParticle implements Comparable {
     private DetectorParticleStatus particleStatus = new DetectorParticleStatus();
 
     // let multiple particles share the same hit for these detectors:
-    private final DetectorType[] sharedDetectors = {DetectorType.FTOF,DetectorType.CTOF};
+    protected final DetectorType[] sharedDetectors = {DetectorType.FTOF,DetectorType.CTOF};
     
     protected final List<DetectorResponse> responseStore = new ArrayList<>();
 
     protected DetectorTrack detectorTrack = null;
-    
+   
     public DetectorParticle(){
         detectorTrack = new DetectorTrack(-1);
     }
@@ -264,31 +264,39 @@ public class DetectorParticle implements Comparable {
             if(res.getDescriptor().getType()==type) hits++;
         }
         if(hits==0) return false;
-        if(hits>1 && type!=DetectorType.CTOF && type!=DetectorType.ECAL){
-            // don't warn for CTOF, since it currently doesn't do clustering
-            // don't warn for ECAL, since it has multiple layers
+        if(hits>1 && type!=DetectorType.ECAL && type!=DetectorType.CND){
+            // don't warn for ECAL or CND, since they have multiple layers
             System.out.println("[Warning] DetectorParticle.hasHit(type): Too many hits for detector type = " + type);
         }
         return true;
     }
-    
+
     public boolean hasHit(DetectorType type, int layer){
         int hits = 0;
         for( DetectorResponse res : this.responseStore){
             if(res.getDescriptor().getType()==type&&res.getDescriptor().getLayer()==layer) hits++;
         }
         if(hits==0) return false;
-        if(hits>1 && type!=DetectorType.CTOF){
-            // don't warn for CTOF, since it currently doesn't do clustering
+        if(hits>1){
             System.out.println("[Warning] DetectorParticle.hasHit(type,layer): Too many hits for detector type = " + type);
         }
         return true;
     }
-    
+
     public List<DetectorResponse>  getDetectorResponses(){
         return this.responseStore;
     }
-    
+
+    public List<DetectorResponse> getDetectorResponses(DetectorType type) {
+        List <DetectorResponse> ret = new ArrayList<>();
+        for (DetectorResponse r : this.responseStore) {
+            if (r.getDescriptor().getType() == type) {
+                ret.add(r);
+            }
+        }
+        return ret;
+    }
+
     public DetectorResponse getHit(DetectorType type){
         return getHit(type,-1);
     }
@@ -578,6 +586,21 @@ public class DetectorParticle implements Comparable {
         return beta;
     }
 
+    /**
+     * For charged particles with scintillator responses, use dx from its track's
+     * trajectory to calculate dedx.  This overrides the dx provided from the
+     * scintillator services.
+     */
+    public void setDedx() {
+        if (this.getCharge()==0) return;
+        for (DetectorResponse r : responseStore) {
+            if (!(r instanceof ScintillatorResponse)) continue;
+            if (!detectorTrack.getTrajectory().contains(r)) continue;
+            final float dx = detectorTrack.getTrajectoryPoint(r).getDx();
+            final float pl = detectorTrack.getTrajectoryPoint(r).getPathLength();
+            if (dx>0) ((ScintillatorResponse)r).setDedx((float)r.getEnergy() / dx);
+        }
+    }
 
     @Override
     public int compareTo(Object o) {

@@ -6,6 +6,7 @@ import java.util.List;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
+import org.jlab.rec.dc.cross.Cross;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.trajectory.StateVec;
@@ -96,17 +97,31 @@ public class Track extends Trajectory implements Comparable<Track>{
     public void setSingleSuperlayer(Segment _singleSuperlayer) {
         this._singleSuperlayer = _singleSuperlayer;
     }
-    
-    private int _Status=0;
-
-    public int get_Status() {
-        return _Status;
+        
+    public int getBitStatus() { 
+        int status = 0;
+        int[] segmentStatus = {2, 2, 2, 2, 2, 2};//[slyr]-->0: OK; 1:missing layers; 2 missing
+        for (Cross c : this) {
+            if (c.get_Segment1() != null && c.get_Segment1().get_Id()>0) {
+                int isl = c.get_Segment1().get_Superlayer() - 1;
+                segmentStatus[isl] = c.get_Segment1().get_Status();
+            }
+            if (c.get_Segment2() != null && c.get_Segment2().get_Id()>0) {
+                int isl = c.get_Segment2().get_Superlayer() - 1;
+                segmentStatus[isl] = c.get_Segment2().get_Status();
+            } 
+        }
+        if(this.getSingleSuperlayer() !=null) {
+            int isl = this.getSingleSuperlayer().get_Superlayer()-1;
+            segmentStatus[isl] = this.getSingleSuperlayer().get_Status();
+        }
+        for(int isl = 0; isl <6; isl++) {
+            status |= segmentStatus[isl] << isl*2;
+        }
+        return status;
     }
-
-    public void set_Status(int _Status) {
-        this._Status = _Status;
-    }
     
+        
     /**
      * 
      * @return id of the track
@@ -411,15 +426,15 @@ public class Track extends Trajectory implements Comparable<Track>{
     }
     
     public boolean isGood() {
-        boolean isGood=true;
-        if(this._trakOrig.distance(0, 0, 0)>Constants.HTCCRADIUS) isGood=false;
-        return isGood;
+        if(this._trakOrig==null) return false;
+        if(this._trakOrig.distance(0, 0, 0)>Constants.HTCCRADIUS && this._trakOrig.z()>0) return false;
+        return true;
     }
     /**
      * Basic track info
      */
     public void printInfo() {
-        String str = "Track "+this._Id+" Sector= "+this.get_Sector()+" Q= "+this._Q+" P= "+this._P+" chi2="+this.get_FitChi2();
+        String str = "Track "+this._Id+" Sector= "+this.getSector()+" Q= "+this._Q+" P= "+this._P+" chi2="+this.get_FitChi2();
         for(int i=0; i<this.size(); i++) str += " cross" + (i+1) + "= " + this.get(i).get_Id();
         System.out.println(str);
     }
@@ -464,7 +479,7 @@ public class Track extends Trajectory implements Comparable<Track>{
             int return_val_a5 = ((return_val5 ==0) ? return_val_a4 : return_val5);
             int return_val_a6 = ((return_val6 ==0) ? return_val_a5 : return_val6);
 
-            int returnSec = this.get_Sector() < arg.get_Sector() ? -1 : this.get_Sector() == arg.get_Sector() ? 0 : 1; 
+            int returnSec = this.getSector() < arg.getSector() ? -1 : this.getSector() == arg.getSector() ? 0 : 1; 
 
             return ((returnSec ==0) ? return_val_a6 : returnSec);
     }

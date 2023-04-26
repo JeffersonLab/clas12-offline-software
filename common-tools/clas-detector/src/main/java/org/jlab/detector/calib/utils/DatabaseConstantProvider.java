@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jlab.ccdb.CcdbPackage;
+import org.jlab.ccdb.CCDB;
 import javax.swing.JFrame;
 import org.jlab.ccdb.Assignment;
 
@@ -137,7 +137,7 @@ public class DatabaseConstantProvider implements ConstantProvider {
     }
     
     private void initialize(String address){
-        provider = CcdbPackage.createProvider(address);
+        provider = CCDB.createProvider(address);
 
         LOGGER.log(Level.INFO, "[DB] --->  open connection with : " + address);
         LOGGER.log(Level.INFO, "[DB] --->  database variation   : " + this.variation);

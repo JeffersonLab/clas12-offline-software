@@ -80,8 +80,13 @@ public class DCTBEngine extends DCEngine {
         Swim dcSwim = new Swim();        
        
         // fill T2D table
-        TableLoader.Fill(this.getConstantsManager().getConstants(run, Constants.TIME2DIST));
-
+        if(Constants.getInstance().getT2D()==0) {
+            TableLoader.Fill(this.getConstantsManager().getConstants(run, Constants.TIME2DIST));
+        } else {
+        TableLoader.Fill(this.getConstantsManager().getConstants(run, Constants.T2DPRESSURE),
+                this.getConstantsManager().getConstants(run, Constants.T2DPRESSUREREF),
+                this.getConstantsManager().getConstants(run, Constants.PRESSURE));
+        }
         ClusterFitter cf = new ClusterFitter();
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
 
@@ -95,12 +100,8 @@ public class DCTBEngine extends DCEngine {
         //instantiate bank writer
         RecoBankWriter rbc = new RecoBankWriter(this.getBanks());
 
-        HitReader hitRead = new HitReader(this.getBanks()); //vz; modified reader to read regular or ai hits
-        hitRead.read_HBHits(event, 
-            this.getConstantsManager().getConstants(run, Constants.DOCARES),
-            this.getConstantsManager().getConstants(run, Constants.TIME2DIST),
-            this.getConstantsManager().getConstants(run, Constants.T0CORRECTION),
-            Constants.getInstance().dcDetector, tde);
+        HitReader hitRead = new HitReader(this.getBanks(), super.getConstantsManager(), Constants.getInstance().dcDetector); //vz; modified reader to read regular or ai hits
+        hitRead.read_HBHits(event, tde);
         //I) get the hits
         List<FittedHit> hits = hitRead.get_HBHits();
         //II) process the hits
@@ -171,7 +172,7 @@ public class DCTBEngine extends DCEngine {
         for (int i = 0; i < trkrows; i++) {
             Track HBtrk = new Track();
             HBtrk.set_Id(trkbank.getShort("id", i));
-            HBtrk.set_Sector(trkbank.getByte("sector", i));
+            HBtrk.setSector(trkbank.getByte("sector", i));
             HBtrk.set_Q(trkbank.getByte("q", i));
             HBtrk.set_pAtOrig(new Vector3D(trkbank.getFloat("p0_x", i), trkbank.getFloat("p0_y", i), trkbank.getFloat("p0_z", i)));
             HBtrk.set_P(HBtrk.get_pAtOrig().mag());
@@ -191,7 +192,7 @@ public class DCTBEngine extends DCEngine {
 //            });
 //            HBtrk.set_CovMat(initCMatrix);
             TrackArray[HBtrk.get_Id()-1] = HBtrk; 
-            TrackArray[HBtrk.get_Id()-1].set_Status(0);
+//            TrackArray[HBtrk.get_Id()-1].set_Status(0);
         }
         if(TrackArray==null) {
             return true; // HB tracks not saved correctly
@@ -199,17 +200,23 @@ public class DCTBEngine extends DCEngine {
         for(Segment seg : segments) {
             if(seg.get(0).get_AssociatedHBTrackID()>0) {
                     TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].get_ListOfHBSegments().add(seg); 
-                    if(seg.get_Status()==1)
-                        TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].set_Status(1);
+                    //if(seg.get_Status()==1)
+                    //    TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].set_Status(1);
             }
         }
         
         //6) find the list of  track candidates
         // read beam offsets from database
-        IndexedTable beamOffset = this.getConstantsManager().getConstants(run, Constants.BEAMPOS);
-        double beamXoffset = beamOffset.getDoubleValue("x_offset", 0,0,0);
-        double beamYoffset = beamOffset.getDoubleValue("y_offset", 0,0,0);
-        TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
+        double beamXoffset, beamYoffset;
+	IndexedTable beamOffset = this.getConstantsManager().getConstants(run, Constants.BEAMPOS);
+        beamXoffset = beamOffset.getDoubleValue("x_offset", 0, 0, 0);
+        beamYoffset = beamOffset.getDoubleValue("y_offset", 0, 0, 0);
+        if(event.hasBank("RASTER::position")){
+            DataBank raster_bank = event.getBank("RASTER::position");
+            beamXoffset += raster_bank.getFloat("x", 0);
+            beamYoffset += raster_bank.getFloat("y", 0);
+        }
+	TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
         TrajectoryFinder trjFind = new TrajectoryFinder();
         for (Track TrackArray1 : TrackArray) {
             if (TrackArray1 == null || TrackArray1.get_ListOfHBSegments() == null || TrackArray1.get_ListOfHBSegments().size() < 5) {
@@ -240,7 +247,7 @@ public class DCTBEngine extends DCEngine {
                 }
                 TrackArray1.set_FitChi2(kFit.chi2);
                 TrackArray1.set_FitNDF(kFit.NDF);
-                TrackArray1.set_Trajectory(kFit.kfStateVecsAlongTrajectory);
+                TrackArray1.setStateVecs(kFit.kfStateVecsAlongTrajectory);
                 TrackArray1.set_FitConvergenceStatus(kFit.ConvStatus);
                 //TrackArray[i].set_Id(TrackArray[i].size()+1);
                 //TrackArray[i].set_CovMat(kFit.finalCovMat.covMat);
@@ -256,35 +263,16 @@ public class DCTBEngine extends DCEngine {
             }
         }
         
-        
-        //for(int i = 0; i < crosses.size(); i++) {
-        //    crosses.get(i).set_Id(i+1);
-        //}
-        // track found	
-        //int trkId = 1;
 
-        if(trkcands.size()>0) {
+        if(!trkcands.isEmpty()) {
             //trkcandFinder.removeOverlappingTracks(trkcands);		// remove overlaps
             for(Track trk: trkcands) {
                 int trkId = trk.get_Id();
                 // reset the id
                 //trk.set_Id(trkId);
-                trkcandFinder.matchHits(trk.get_Trajectory(), trk, Constants.getInstance().dcDetector, dcSwim);
-                trk.calcTrajectory(trkId, dcSwim, trk.get_Vtx0().x(), trk.get_Vtx0().y(), trk.get_Vtx0().z(), 
-                        trk.get_pAtOrig().x(), trk.get_pAtOrig().y(), trk.get_pAtOrig().z(), trk.get_Q(), 
-                        Constants.getInstance().tSurf);
-//                for(int j = 0; j< trk.trajectory.size(); j++) {
-//                LOGGER.log(Level.FINE, trk.get_Id()+" "+trk.trajectory.size()+" ("+trk.trajectory.get(j).getDetId()+") ["+
-//                            trk.trajectory.get(j).getDetName()+"] "+
-//                            (float)trk.trajectory.get(j).getX()/trk.get_P()+", "+
-//                            (float)trk.trajectory.get(j).getY()/trk.get_P()+", "+
-//                            (float)trk.trajectory.get(j).getZ()/trk.get_P()+", "+
-//                            (float)trk.trajectory.get(j).getpX()/trk.get_P()+", "+
-//                            (float)trk.trajectory.get(j).getpY()/trk.get_P()+", "+
-//                            (float)trk.trajectory.get(j).getpZ()/trk.get_P()+", "+
-//                            (float)trk.trajectory.get(j).getPathLen()+" "
-//                            );               
-//                }
+                trkcandFinder.matchHits(trk.getStateVecs(), trk, Constants.getInstance().dcDetector, dcSwim);
+                trk.calcTrajectory(trkId, dcSwim, trk.get_Vtx0(), trk.get_pAtOrig(), trk.get_Q());
+                LOGGER.log(Level.FINE, trk.toString());               
 
                 for(Cross c : trk) { 
                     c.set_CrossDirIntersSegWires();

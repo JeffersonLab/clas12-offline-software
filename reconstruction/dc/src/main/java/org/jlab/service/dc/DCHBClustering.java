@@ -41,9 +41,6 @@ public class DCHBClustering extends DCEngine {
         int run = this.getRun(event);
         if(run==0) return true;
         
-        double triggerPhase = 0;
-        this.getTriggerPhase(event);
-
         /* 1 */
         // get Field
         Swim dcSwim = new Swim();
@@ -65,17 +62,9 @@ public class DCHBClustering extends DCEngine {
         /* 7 */
         RecoBankWriter rbc = new RecoBankWriter(this.getBanks());
         /* 8 */
-        HitReader hitRead = new HitReader(this.getBanks());
+        HitReader hitRead = new HitReader(this.getBanks(), super.getConstantsManager(), Constants.getInstance().dcDetector);
         /* 9 */
-        hitRead.fetch_DCHits(event,
-                noiseAnalysis,
-                parameters,
-                results,
-                super.getConstantsManager().getConstants(run, Constants.TIME2DIST),
-                super.getConstantsManager().getConstants(run, Constants.TDCTCUTS),
-                super.getConstantsManager().getConstants(run, Constants.WIRESTAT),
-                Constants.getInstance().dcDetector,
-                triggerPhase);
+        hitRead.fetch_DCHits(event, this.doDenoise(), noiseAnalysis, parameters, results);
         /* 10 */
         //I) get the hits
         List<Hit> hits = hitRead.get_DCHits(Constants.getInstance().SECTORSELECT);

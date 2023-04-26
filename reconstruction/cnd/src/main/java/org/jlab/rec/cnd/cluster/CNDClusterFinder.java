@@ -13,6 +13,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cnd.hit.CndHit;
 
 import org.jlab.rec.cnd.cluster.CNDCluster;
+import org.jlab.rec.cnd.constants.CalibrationConstantsLoader;
 
 import java.lang.String;
 import java.lang.Double;
@@ -41,7 +42,7 @@ public class CNDClusterFinder {
     }
     
     
-    public ArrayList<CNDCluster> findClusters(ArrayList<CndHit> hits) {
+    public ArrayList<CNDCluster> findClusters(ArrayList<CndHit> hits, CalibrationConstantsLoader ccdb) {
         
         
         
@@ -65,6 +66,12 @@ public class CNDClusterFinder {
         int j=0;
         double closest_distance = 1.0e15;
         int good_index = -1;
+
+        double dX = ccdb.DX;
+        double dY = ccdb.DY;
+        double dZ = ccdb.DZ;
+        double dT = ccdb.DT;
+
         int size = hits.size();
         
         
@@ -84,36 +91,26 @@ public class CNDClusterFinder {
                 {
                     //l is always 0, check with seed hit!!
                     CndHit otherHit = (CndHit) clustered_hits.getItem(k).get(l);
-                    
-                    double x1 = thisHit.X()    /10.0;
-                    double y1 = thisHit.Y()    /10.0;
-                    double z1 = thisHit.Z()    /10.0;
-                    double t1 = thisHit.Time() ;
-                    
-                    double x2 = otherHit.X()    /10.0;
-                    double y2 = otherHit.Y()    /10.0;
-                    double z2 = otherHit.Z()    /10.0;
-                    double t2 = otherHit.Time() ;
-                    
-                    double distance = sqrt( (x1-x2)*(x1-x2)/sigmaX(x1)/sigmaX(x2)
-                                           +(y1-y2)*(y1-y2)/sigmaY(y1)/sigmaY(y2)
-                                           +(z1-z2)*(z1-z2)/sigmaZ(z1)/sigmaZ(z2)
-                                           +(t1-t2)*(t1-t2)/sigmaTime(t1)/sigmaTime(t2) );
-                    
-                    if(distance > cluster_size_)
-                    {
-                        
+
+                    double deltaX = Math.abs(thisHit.X() - otherHit.X());
+                    double deltaY = Math.abs(thisHit.Y() - otherHit.Y());
+                    double deltaZ = Math.abs(thisHit.Z() - otherHit.Z());
+                    double deltaT = Math.abs(thisHit.Time() - otherHit.Time());
+                    double deltaLayer = Math.abs(thisHit.Layer() - otherHit.Layer());
+                    double deltaSector = thisHit.Sector() - otherHit.Sector();
+
+                    if (deltaZ / 10.0 < dZ && deltaT < dT && deltaLayer == 0
+                            && ((thisHit.Sector() != 1 && thisHit.Sector() != 24 && Math.abs(deltaSector) < 2)
+                                    || (thisHit.Sector() == 1
+                                            && (deltaSector == -1 || deltaSector == 0 || deltaSector == -23))
+                                    || (thisHit.Sector() == 24
+                                            && (deltaSector == 1 || deltaSector == 0 || deltaSector == 23)))) {
+                        good_index = k;
+
+                    } else {
                         continue;
-                        
                     }
-                    else
-                    {
-                        if(distance<closest_distance)
-                        {
-                            closest_distance = distance;
-                            good_index = k;
-                        }
-                    }
+                    
                 }
                 
                 
@@ -165,12 +162,14 @@ public class CNDClusterFinder {
         
         double energy_cluster;
         double pathlengththroughbar;
+        double cluster_status; //1 is at least one hit is possibly a double hit
         
         for(int k =0; k<j/*clustered_hits.size()*/; k++)
         {
             
             energy_cluster=0;
             pathlengththroughbar=0;
+            cluster_status = 0;
             CndHit seedHit = (CndHit) clustered_hits.getItem(k).get(0);
             
             CNDCluster acluster = new CNDCluster(k+1, seedHit.Sector(), seedHit.Layer() );
@@ -182,6 +181,7 @@ public class CNDClusterFinder {
                 theHit.set_AssociatedClusterID(k+1);
                 
                 energy_cluster += theHit.Edep();
+                cluster_status += theHit.get_status();
                 pathlengththroughbar += theHit.tLength()/10.0;
                 
                 
@@ -205,7 +205,14 @@ public class CNDClusterFinder {
                 acluster.set_time(seedHit.Time());
                 acluster.set_nhits(clustered_hits.getItem(k).size());
                 acluster.set_energysum(energy_cluster);
-                acluster.set_status(0);
+                if(cluster_status>0)
+                {
+                    acluster.set_status(1);
+                }
+                else
+                {
+                    acluster.set_status(0);
+                }
                 acluster.set_pathLengthThruBar(pathlengththroughbar);
                 
                 

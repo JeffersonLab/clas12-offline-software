@@ -204,6 +204,12 @@ public final class Arc3D implements Transformable, Showable {
         return new Point3D(center, v);
     }
     
+    public Vector3D bisect() {
+        Point3D  midpoint = this.point(theta/2);
+        Vector3D bisect   = center.vectorTo(midpoint).asUnit();
+        return bisect;
+    }
+    
     @Override
     public void translateXYZ(double dx, double dy, double dz) {
         origin.translateXYZ(dx, dy, dz);
@@ -219,16 +225,16 @@ public final class Arc3D implements Transformable, Showable {
 
     @Override
     public void rotateY(double angle) {
-        origin.rotateX(angle);
-        center.rotateX(angle);
-        normal.rotateX(angle);
+        origin.rotateY(angle);
+        center.rotateY(angle);
+        normal.rotateY(angle);
     }
 
     @Override
     public void rotateZ(double angle) {
-        origin.rotateX(angle);
-        center.rotateX(angle);
-        normal.rotateX(angle);
+        origin.rotateZ(angle);
+        center.rotateZ(angle);
+        normal.rotateZ(angle);
     }
     
     /**

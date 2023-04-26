@@ -7,11 +7,15 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
 import org.jlab.clas.reco.EngineProcessor;
 
 import org.jlab.clas.reco.ReconstructionEngine;
+import org.jlab.clas.tracking.kalmanfilter.Units;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.rec.rtpc.KalmanFilter.KalmanFitter;
+import org.jlab.rec.rtpc.KalmanFilter.KalmanFitterInfo;
 import org.jlab.rec.rtpc.banks.HitReader;
 import org.jlab.rec.rtpc.banks.RecoBankWriter;
 import org.jlab.rec.rtpc.hit.Hit;
@@ -25,6 +29,7 @@ import org.jlab.rec.rtpc.hit.HelixFitTest;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.utils.groups.IndexedTable;
 
+import org.jlab.clas.tracking.kalmanfilter.Material;
 
 
 
@@ -40,6 +45,8 @@ public class RTPCEngine extends ReconstructionEngine{
     private int fitToBeamline = 1;
     private boolean disentangle = true;
     private boolean chi2culling = true; 
+    private boolean kfStatus = true;
+    private HashMap<String, Material> materialMap;
 
     @Override
     public boolean init() {
@@ -49,6 +56,7 @@ public class RTPCEngine extends ReconstructionEngine{
         String disentangler = this.getEngineConfigString("rtpcDisentangler");
 	String chi2cull = this.getEngineConfigString("rtpcChi2Cull");
         //System.out.println(sim + " " + cosm + " " + beamfit);
+        String kfstatus = this.getEngineConfigString("rtpcKF");
 
         if(sim != null){
             simulation = Boolean.valueOf(sim);
@@ -66,20 +74,27 @@ public class RTPCEngine extends ReconstructionEngine{
             disentangle = Boolean.valueOf(disentangler);
         }
 
-	if(chi2cull != null){
-	    chi2culling = Boolean.valueOf(chi2cull);
-	}
+        if(chi2cull != null){
+           chi2culling = Boolean.valueOf(chi2cull);
+        }
+        if (kfstatus != null) {
+			kfStatus = Boolean.parseBoolean(kfstatus);
+		}
 
         String[] rtpcTables = new String[]{
             "/calibration/rtpc/time_offsets",
             "/calibration/rtpc/gain_balance",
             "/calibration/rtpc/time_parms",
-            "/calibration/rtpc/recon_parms"
+            "/calibration/rtpc/recon_parms",
+            "/calibration/rtpc/global_parms",
+            "/geometry/rtpc/alignment"
         };
 
         requireConstants(Arrays.asList(rtpcTables));
 
-        this.registerOutputBank("RTPC::hits","RTPC::tracks");
+        if (materialMap == null) {
+            materialMap = generateMaterials();
+        }
 
         return true;
     }
@@ -102,26 +117,28 @@ public class RTPCEngine extends ReconstructionEngine{
             return true;
         }
 
-         int runNo = 10;
+        int runNo = 10;
+        int eventNo = 777;
         double magfield = 50.0;
         double magfieldfactor = 1;
 
         if(event.hasBank("RUN::config")==true){
             DataBank bank = event.getBank("RUN::config");
             runNo = bank.getInt("run", 0);
+            eventNo = bank.getInt("event",0);
             magfieldfactor = bank.getFloat("solenoid",0);
-            if (runNo<=0) {
-                System.err.println("RTPCEngine:  got run <= 0 in RUN::config, skipping event.");
-                return false;
-            }
         }
 	
         magfield = 50 * magfieldfactor;
-	IndexedTable time_offsets = this.getConstantsManager().getConstants(runNo, "/calibration/rtpc/time_offsets");
-	int hitsbound = 15000;
-	hitsbound = (int) time_offsets.getDoubleValue("tl",1,1,4);
-	if(hitsbound < 1) hitsbound = 15000; 
-	if(hits.size() > hitsbound) return true; 
+        IndexedTable global_parms = this.getConstantsManager().getConstants(runNo, "/calibration/rtpc/global_parms");
+        int hitsbound;
+        hitsbound = (int) global_parms.getDoubleValue("MaxHitsEvent",0,0,0);
+        if(hits.size() > hitsbound) return true;
+
+       // reading the central detectors z shift with respect to the FD 
+       IndexedTable rtpc_alignment = this.getConstantsManager().getConstants(runNo, "/geometry/rtpc/alignment");
+       float rtpc_vz_shift;
+       rtpc_vz_shift = (float) rtpc_alignment.getDoubleValue("deltaZ",0,0,0);
 
         if(event.hasBank("RTPC::adc")){
             params.init(this.getConstantsManager(), runNo);
@@ -133,7 +150,7 @@ public class RTPCEngine extends ReconstructionEngine{
             //Calculate Average Time of Hit Signals
             TimeAverage TA = new TimeAverage(this.getConstantsManager(),params,runNo);
             //Disentangle Crossed Tracks
-            TrackDisentangler TD = new TrackDisentangler(params,disentangle);
+            TrackDisentangler TD = new TrackDisentangler(params,disentangle,eventNo);
             //Reconstruct Hits in Drift Region
             TrackHitReco TR = new TrackHitReco(params,hits,cosmic,magfield);
             //Helix Fit Tracks to calculate Track Parameters
@@ -141,10 +158,17 @@ public class RTPCEngine extends ReconstructionEngine{
 
             RecoBankWriter writer = new RecoBankWriter();
             DataBank recoBank = writer.fillRTPCHitsBank(event,params);
-            DataBank trackBank = writer.fillRTPCTrackBank(event,params);
+            DataBank trackBank = writer.fillRTPCTrackBank(event,params,rtpc_vz_shift);
 
             event.appendBank(recoBank);
             event.appendBank(trackBank);
+
+            if (kfStatus) {
+                HashMap<Integer, KalmanFitterInfo> KFTrackMap = new HashMap<>();
+                new KalmanFitter(params, KFTrackMap, magfield, materialMap);
+                DataBank KFBank = writer.fillRTPCKFBank(event, KFTrackMap);
+                event.appendBank(KFBank);
+            }
 
 
         }
@@ -215,5 +239,58 @@ public class RTPCEngine extends ReconstructionEngine{
         writer.close();
         */
         System.out.println("finished " + (System.nanoTime() - starttime)*Math.pow(10,-9));
+    }
+
+    private static HashMap<String, Material> generateMaterials() {
+        Units units = Units.CM;
+
+        String name_De = "deuteriumGas";
+        double thickness_De = 1;
+        double density_De = 9.37E-4;
+        double ZoverA_De = 0.496499;
+        double X0_De = 0;
+        double IeV_De = 19.2;
+        org.jlab.clas.tracking.kalmanfilter.Material deuteriumGas =
+                new org.jlab.clas.tracking.kalmanfilter.Material(
+                        name_De, thickness_De, density_De, ZoverA_De, X0_De, IeV_De, units);
+
+        String name_Bo = "BONuS12Gas";
+        double thickness_Bo = 1;
+        double density_Bo = 4.9778E-4;
+        double ZoverA_Bo = 0.49989;
+        double X0_Bo = 0;
+        double IeV_Bo = 73.8871;
+        org.jlab.clas.tracking.kalmanfilter.Material BONuS12 =
+                new org.jlab.clas.tracking.kalmanfilter.Material(
+                        name_Bo, thickness_Bo, density_Bo, ZoverA_Bo, X0_Bo, IeV_Bo, units);
+
+        String name_My = "Mylar";
+        double thickness_My = 1;
+        double density_My = 1.4;
+        double ZoverA_My = 0.501363;
+        double X0_My = 0;
+        double IeV_My = 78.7;
+        org.jlab.clas.tracking.kalmanfilter.Material Mylar =
+                new org.jlab.clas.tracking.kalmanfilter.Material(
+                        name_My, thickness_My, density_My, ZoverA_My, X0_My, IeV_My, units);
+
+        String name_Ka = "Kapton";
+        double thickness_Ka = 1;
+        double density_Ka = 1.42;
+        double ZoverA_Ka = 0.500722;
+        double X0_Ka = 0;
+        double IeV_Ka = 79.6;
+        org.jlab.clas.tracking.kalmanfilter.Material Kapton =
+                new org.jlab.clas.tracking.kalmanfilter.Material(
+                        name_Ka, thickness_Ka, density_Ka, ZoverA_Ka, X0_Ka, IeV_Ka, units);
+
+        return new HashMap<>() {
+            {
+                put("deuteriumGas", deuteriumGas);
+                put("Kapton", Kapton);
+                put("Mylar", Mylar);
+                put("BONuS12Gas", BONuS12);
+            }
+        };
     }
 }

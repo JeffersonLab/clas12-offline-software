@@ -12,6 +12,7 @@
        {"name":"layer",       "type":"B", "info":"DC layer in superlayer (1...6)"},
        {"name":"wire",        "type":"S", "info":"wire id of DC"},
        {"name":"TDC",         "type":"I", "info":"raw time of the hit"},
+       {"name":"jitter",      "type":"B", "info":"time jitter (ns)"},
        {"name":"trkDoca",     "type":"F", "info":"track doca of the hit (in cm)"},
        {"name":"docaError",   "type":"F", "info":"error on track doca of the hit"},
        {"name":"LR",          "type":"B", "info":"Left/Right ambiguity of the hit"},
@@ -54,6 +55,61 @@
        ]
   },
  {
+    "name": "HitBasedTrkg::DNHits",
+    "group": 20600,
+    "item" : 48,
+    "info": "reconstructed hits using DC wire positions",
+    "entries": [
+       {"name":"id",          "type":"S", "info":"id of the hit"},
+       {"name":"status",      "type":"S", "info":"id of the hit"},       
+       {"name":"sector",      "type":"B", "info":"DC sector"},
+       {"name":"superlayer",  "type":"B", "info":"DC superlayer (1...6)"},
+       {"name":"layer",       "type":"B", "info":"DC layer in superlayer (1...6)"},
+       {"name":"wire",        "type":"S", "info":"wire id of DC"},
+       {"name":"TDC",         "type":"I", "info":"raw time of the hit"},
+       {"name":"jitter",      "type":"B", "info":"time jitter (ns)"},
+       {"name":"trkDoca",     "type":"F", "info":"track doca of the hit (in cm)"},
+       {"name":"docaError",   "type":"F", "info":"error on track doca of the hit"},
+       {"name":"LR",          "type":"B", "info":"Left/Right ambiguity of the hit"},
+       {"name":"LocX",        "type":"F", "info":"x in planar local coordinate system"},
+       {"name":"LocY",        "type":"F", "info":"y in planar local coordinate system"},
+       {"name":"X",           "type":"F", "info":"wire x-coordinate  in tilted-sector"},
+       {"name":"Z",           "type":"F", "info":"wire z-coordinate  in tilted-sector"},
+       {"name":"clusterID",   "type":"S", "info":"ID of associated cluster"}
+    ]
+  },
+ {
+    "name": "HitBasedTrkg::DNClusters",
+    "group": 20600,
+    "item" : 49,
+    "info": "reconstructed clusters using DC wire positions",
+    "entries": [
+       {"name":"id",           "type":"S", "info":"id of the cluster"},
+       {"name":"status",       "type":"S", "info":"status of the cluster"},
+       {"name":"sector",       "type":"B", "info":"sector of the cluster"},
+       {"name":"superlayer",   "type":"B", "info":"superlayer of the cluster"},
+       {"name":"Hit1_ID",      "type":"S", "info":"id of hit1 in cluster"},
+       {"name":"Hit2_ID",      "type":"S", "info":"id of hit2 in cluster"},
+       {"name":"Hit3_ID",      "type":"S", "info":"id of hit3 in cluster"},
+       {"name":"Hit4_ID",      "type":"S", "info":"id of hit4 in cluster"},
+       {"name":"Hit5_ID",      "type":"S", "info":"id of hit5 in cluster"},
+       {"name":"Hit6_ID",      "type":"S", "info":"id of hit6 in cluster"},
+       {"name":"Hit7_ID",      "type":"S", "info":"id of hit7 in cluster"},
+       {"name":"Hit8_ID",      "type":"S", "info":"id of hit8 in cluster"},
+       {"name":"Hit9_ID",      "type":"S", "info":"id of hit9 in cluster"},
+       {"name":"Hit10_ID",     "type":"S", "info":"id of hit10 in cluster"},
+       {"name":"Hit11_ID",     "type":"S", "info":"id of hit11 in cluster"},
+       {"name":"Hit12_ID",     "type":"S", "info":"id of hit12 in cluster"},
+       {"name":"avgWire",      "type":"F", "info":"average wire number"},
+       {"name":"fitChisqProb", "type":"F", "info":"fit chisq prob."},
+       {"name":"fitSlope",     "type":"F", "info":"line fit slope"},
+       {"name":"fitSlopeErr",  "type":"F", "info":"error on slope"},
+       {"name":"fitInterc",    "type":"F", "info":"line fit intercept"},
+       {"name":"fitIntercErr", "type":"F", "info":"error on the intercept"},
+       {"name":"size",         "type":"B", "info":"cluster size"}
+       ]
+  },
+  {
     "name": "HitBasedTrkg::HBHits",
     "group": 20600,
     "item" : 21,
@@ -66,6 +122,7 @@
        {"name":"layer",       "type":"B", "info":"DC layer in superlayer (1...6)"},
        {"name":"wire",        "type":"S", "info":"wire id of DC"},
        {"name":"TDC",         "type":"I", "info":"raw time of the hit"},
+       {"name":"jitter",      "type":"B", "info":"time jitter (ns)"},
        {"name":"trkDoca",     "type":"F", "info":"track doca of the hit (in cm)"},
        {"name":"docaError",   "type":"F", "info":"error on track doca of the hit"},
        {"name":"LR",          "type":"B", "info":"Left/Right ambiguity of the hit"},
@@ -250,6 +307,28 @@
     ]
   },
   {
+    "name": "HitBasedTrkg::Trajectory",
+    "group": 20600,
+    "item" : 30,
+    "info": "Trajectory bank",
+    "entries": [
+        {"name":"id",       "type":"S", "info":"id of the track"},
+        {"name":"detector", "type":"B", "info":"id of the detector"},
+        {"name":"sector",   "type":"B", "info":"id of the sector"},
+        {"name":"layer",    "type":"B", "info":"id of the layer"},
+        {"name":"x",        "type":"F", "info":"track x position at detector surface (cm)"},
+        {"name":"y",        "type":"F", "info":"track y position at detector surface (cm)"},
+        {"name":"z",        "type":"F", "info":"track z position at detector surface (cm)"},
+        {"name":"tx",       "type":"F", "info":"track unit direction vector x component at detector surface"},
+        {"name":"ty",       "type":"F", "info":"track unit direction vector y component at detector surface"},
+        {"name":"tz",       "type":"F", "info":"track unit direction vector z component at detector surface"},
+        {"name":"B",        "type":"F", "info":"B-field magnitude at detector surface (cm)"},
+        {"name":"path",     "type":"F", "info":"pathlength of the track from the track vertex to the detector surface (cm)"},
+        {"name":"dx",       "type":"F", "info":"pathlength of the track through the detector element (cm)"},
+        {"name":"edge",     "type":"F", "info":"distance to the closest detector edge (cm), -1 if edge is not defined, 0 if outside, >0 if inside"}
+    ]
+  },
+  {
     "name": "TimeBasedTrkg::TBHits",
     "group": 20600,
     "item" : 31,
@@ -262,6 +341,7 @@
         {"name":"layer",        "type":"B", "info":"DC layer in superlayer (1...6)"},
         {"name":"wire",         "type":"S", "info":"wire id of DC"},
         {"name":"TDC",          "type":"I", "info":"raw time of the hit"},
+       {"name":"jitter",        "type":"B", "info":"time jitter (ns)"},
         {"name":"doca",         "type":"F", "info":"doca of the hit calculated from TDC (in cm)"},
         {"name":"docaError",    "type":"F", "info":"uncertainty on doca of the hit calculated from TDC (in cm)"},
         {"name":"trkDoca",      "type":"F", "info":"track doca of the hit (in cm)"},
@@ -276,6 +356,7 @@
         {"name":"TFlight",      "type":"F", "info":"time of flight correction (ns)"},      
         {"name":"T0",           "type":"F", "info":"T0 (ns)"},
         {"name":"TStart",       "type":"F", "info":"event start time used (ns)"},
+        {"name":"dDoca",        "type":"F", "info":"delta Doca correction (cm)"},
         {"name":"clusterID",    "type":"S", "info":"ID of associated cluster"},
         {"name":"trkID",        "type":"B", "info":"ID of associated track"},
         {"name":"time",         "type":"F", "info":"time used in tracking (ns)"},
@@ -482,6 +563,7 @@
     "entries": [
         {"name":"id",       "type":"S", "info":"id of the track"},
         {"name":"detector", "type":"B", "info":"id of the detector"},
+        {"name":"sector",   "type":"B", "info":"id of the sector"},
         {"name":"layer",    "type":"B", "info":"id of the layer"},
         {"name":"x",        "type":"F", "info":"track x position at detector surface (cm)"},
         {"name":"y",        "type":"F", "info":"track y position at detector surface (cm)"},
@@ -490,7 +572,9 @@
         {"name":"ty",       "type":"F", "info":"track unit direction vector y component at detector surface"},
         {"name":"tz",       "type":"F", "info":"track unit direction vector z component at detector surface"},
         {"name":"B",        "type":"F", "info":"B-field magnitude at detector surface (cm)"},
-        {"name":"path",     "type":"F", "info":"pathlength of the track from the track vertex to the detector surface (cm)"}
+        {"name":"path",     "type":"F", "info":"pathlength of the track from the track vertex to the detector surface (cm)"},
+        {"name":"dx",       "type":"F", "info":"pathlength of the track through the detector element (cm)"},
+        {"name":"edge",     "type":"F", "info":"distance to the closest detector edge (cm), -1 if edge is not defined, 0 if outside, >0 if inside"}
     ]
   }
  

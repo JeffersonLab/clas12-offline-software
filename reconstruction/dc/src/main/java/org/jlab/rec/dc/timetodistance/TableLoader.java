@@ -93,34 +93,89 @@ public class TableLoader {
         AlphaBounds[0][0] = 0;
         AlphaBounds[5][1] = 30;
     }
-    
+    public static synchronized void Fill(IndexedTable t2dPressure, IndexedTable t2dPressRef, IndexedTable pressure) {
+        if (T2DLOADED) return;
+        
+        
+        double p_ref = t2dPressRef.getDoubleValue("pressure", 0,0,0);
+        double p = pressure.getDoubleValue("value", 0,0,3);
+        double dp = p - p_ref;
+        
+        for(int s = 0; s<6; s++ ){ // loop over sectors
+            for(int r = 0; r<6; r++ ){ //loop over slys
+                // Fill constants
+                FracDmaxAtMinVel[s][r] = t2dPressure.getDoubleValue("c1_a0", s+1,r+1,0)
+                        +t2dPressure.getDoubleValue("c1_a1", s+1,r+1,0)*dp;
+                v0[s][r] = t2dPressure.getDoubleValue("v0_a0", s+1,r+1,0)
+                        +t2dPressure.getDoubleValue("v0_a1", s+1,r+1,0)*dp
+                        +t2dPressure.getDoubleValue("v0_a2", s+1,r+1,0)*dp*dp;
+                vmid[s][r] = t2dPressure.getDoubleValue("vmid_a0", s+1,r+1,0)
+                        +t2dPressure.getDoubleValue("vmid_a1", s+1,r+1,0)*dp
+                        +t2dPressure.getDoubleValue("vmid_a2", s+1,r+1,0)*dp*dp;
+                delta_bfield_coefficient[s][r] = t2dPressure.getDoubleValue("delta_bfield_a0", s+1,r+1,0)
+                        +t2dPressure.getDoubleValue("delta_bfield_a1", s+1,r+1,0)*dp
+                        +t2dPressure.getDoubleValue("delta_bfield_a2", s+1,r+1,0)*dp*dp;
+                b1[s][r] = t2dPressure.getDoubleValue("b1_a0", s+1,r+1,0)
+                        +t2dPressure.getDoubleValue("b1_a1", s+1,r+1,0)*dp
+                        +t2dPressure.getDoubleValue("b1_a2", s+1,r+1,0)*dp*dp;
+                b2[s][r] = t2dPressure.getDoubleValue("b2_a0", s+1,r+1,0)
+                        +t2dPressure.getDoubleValue("b2_a1", s+1,r+1,0)*dp
+                        +t2dPressure.getDoubleValue("b2_a2", s+1,r+1,0)*dp*dp;
+                b3[s][r] = t2dPressure.getDoubleValue("b3_a0", s+1,r+1,0)
+                        +t2dPressure.getDoubleValue("b3_a1", s+1,r+1,0)*dp
+                        +t2dPressure.getDoubleValue("b3_a2", s+1,r+1,0)*dp*dp;
+                b4[s][r] = t2dPressure.getDoubleValue("b4_a0", s+1,r+1,0)
+                        +t2dPressure.getDoubleValue("b4_a1", s+1,r+1,0)*dp
+                        +t2dPressure.getDoubleValue("b4_a2", s+1,r+1,0)*dp*dp;
+                Tmax[s][r] = t2dPressure.getDoubleValue("tmax_a0", s+1,r+1,0)
+                        +t2dPressure.getDoubleValue("tmax_a1", s+1,r+1,0)*dp
+                        +t2dPressure.getDoubleValue("tmax_a2", s+1,r+1,0)*dp*dp;
+                
+            }
+        }
+        Fill();
+    }
     public static synchronized void Fill(IndexedTable tab) {
         //CCDBTables 0 =  "/calibration/dc/signal_generation/doca_resolution";
         //CCDBTables 1 =  "/calibration/dc/time_to_distance/t2d";
         //CCDBTables 2 =  "/calibration/dc/time_corrections/T0_correction";	
         if (T2DLOADED) return;
         
+        for(int s = 0; s<6; s++ ){ // loop over sectors
+
+            for(int r = 0; r<6; r++ ){ //loop over slys
+                // Fill constants
+                delta_T0[s][r] = tab.getDoubleValue("delta_T0", s+1,r+1,0);
+                FracDmaxAtMinVel[s][r] = tab.getDoubleValue("c1", s+1,r+1,0);//use same table. names strings 
+                deltanm[s][r] = tab.getDoubleValue("deltanm", s+1,r+1,0);
+                v0[s][r] = tab.getDoubleValue("v0", s+1,r+1,0);
+                vmid[s][r] = tab.getDoubleValue("c2", s+1,r+1,0);
+                delta_bfield_coefficient[s][r] = tab.getDoubleValue("delta_bfield_coefficient", s+1,r+1,0); 
+                b1[s][r] = tab.getDoubleValue("b1", s+1,r+1,0);
+                b2[s][r] = tab.getDoubleValue("b2", s+1,r+1,0);
+                b3[s][r] = tab.getDoubleValue("b3", s+1,r+1,0);
+                b4[s][r] = tab.getDoubleValue("b4", s+1,r+1,0);
+                Tmax[s][r] = tab.getDoubleValue("tmax", s+1,r+1,0);
+                // end fill constants
+            }
+        }
+        Fill();
+        
+     }
+    public static synchronized void Fill() {
+        //CCDBTables 0 =  "/calibration/dc/signal_generation/doca_resolution";
+        //CCDBTables 1 =  "/calibration/dc/time_to_distance/t2d";
+        //CCDBTables 2 =  "/calibration/dc/time_corrections/T0_correction";	
+        
         double stepSize = 0.0010;
-        DecimalFormat df = new DecimalFormat("#");
-        df.setRoundingMode(RoundingMode.CEILING);
         
         FillAlpha();
+        
         for(int s = 0; s<6; s++ ){ // loop over sectors
 
                 for(int r = 0; r<6; r++ ){ //loop over slys
-                    // Fill constants
-                    delta_T0[s][r] = tab.getDoubleValue("delta_T0", s+1,r+1,0);
-                    FracDmaxAtMinVel[s][r] = tab.getDoubleValue("c1", s+1,r+1,0);//use same table. names strings 
-                    deltanm[s][r] = tab.getDoubleValue("deltanm", s+1,r+1,0);
-                    v0[s][r] = tab.getDoubleValue("v0", s+1,r+1,0);
-                    vmid[s][r] = tab.getDoubleValue("c2", s+1,r+1,0);
-                    delta_bfield_coefficient[s][r] = tab.getDoubleValue("delta_bfield_coefficient", s+1,r+1,0); 
-                    b1[s][r] = tab.getDoubleValue("b1", s+1,r+1,0);
-                    b2[s][r] = tab.getDoubleValue("b2", s+1,r+1,0);
-                    b3[s][r] = tab.getDoubleValue("b3", s+1,r+1,0);
-                    b4[s][r] = tab.getDoubleValue("b4", s+1,r+1,0);
-                    Tmax[s][r] = tab.getDoubleValue("tmax", s+1,r+1,0);
-                    // end fill constants
+                    
+                    //   constants filled
                     //LOGGER.log(Level.FINE, v0[s][r]+" "+vmid[s][r]+" "+FracDmaxAtMinVel[s][r]);
                     double dmax = 2.*Constants.getInstance().wpdist[r]; 
                     //double tmax = CCDBConstants.getTMAXSUPERLAYER()[s][r];
@@ -128,7 +183,7 @@ public class TableLoader {
                         double bfield = BfieldValues[ibfield];
 
                         for(int icosalpha =0; icosalpha<maxBinIdxAlpha+1; icosalpha++) {
-
+                                maxBinIdxT[s][r][ibfield][icosalpha] = NBINST; 
                                 double cos30minusalpha = Math.cos(Math.toRadians(30.)) + (double) (icosalpha)*(1. - Math.cos(Math.toRadians(30.)))/5.;
                                 double alpha = -(Math.toDegrees(Math.acos(cos30minusalpha)) - 30);
                                 int nxmax = (int) (dmax*cos30minusalpha/stepSize); 
@@ -137,8 +192,8 @@ public class TableLoader {
 
                                     double x = (double)(idist+1)*stepSize;
                                     double timebfield = calc_Time( x,  alpha, bfield, s+1, r+1) ;
-                                    
-                                    int tbin = Integer.parseInt(df.format(timebfield/2.) ) -1;
+
+                                    int tbin = (int) Math.floor(timebfield/2);
                                     
                                     if(tbin<0 || tbin>NBINST-1) {
                                         //System.err.println("Problem with tbin");
@@ -147,7 +202,7 @@ public class TableLoader {
                                     if(tbin>maxTBin)
                                         maxTBin = tbin;
                                     //if(tbin>maxBinIdxT[s][r][ibfield][icosalpha]) {
-                                        //maxBinIdxT[s][r][ibfield][icosalpha] = NBINST; 
+                                    //maxBinIdxT[s][r][ibfield][icosalpha] = NBINST; 
                                     //} //LOGGER.log(Level.FINE, "tbin "+tbin+" tmax "+tmax+ "s "+s+" sl "+r );
                                     if(DISTFROMTIME[s][r][ibfield][icosalpha][tbin]==0) {
                                         // firstbin = bi
@@ -177,8 +232,8 @@ public class TableLoader {
         TableLoader.fillMissingTableBins();
         //TableLoader.test();
         T2DLOADED = true;
-     }
-
+    }
+    
     private static synchronized void fillMissingTableBins() {
         
         for(int s = 0; s<6; s++ ){ // loop over sectors
