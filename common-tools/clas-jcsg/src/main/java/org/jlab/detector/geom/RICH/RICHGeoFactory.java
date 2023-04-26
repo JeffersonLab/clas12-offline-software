@@ -62,7 +62,7 @@ public class RICHGeoFactory{
     /* generate the tracking layers (FactoryMode=0 only Aerogel and MaPMT for trajectory, FactoryMode=1  all)
     */
     //------------------------------
-    public RICHGeoFactory(int FactoryMode, ConstantsManager manager, int run, String engineDebug){
+    public RICHGeoFactory(int FactoryMode, ConstantsManager manager, int run, boolean engineDebug){
     //------------------------------
 
         int debugMode = 0;
