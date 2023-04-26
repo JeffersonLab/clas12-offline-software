@@ -731,7 +731,6 @@ public class CLASDecoder4 {
         parser.addOption("-c", "2", "compression type (0-NONE, 1-LZ4 Fast, 2-LZ4 Best, 3-GZIP)");
         parser.addOption("-d", "0","debug mode, set >0 for more verbose output");
         parser.addOption("-m", "run","translation tables source (use -m devel for development tables)");
-        parser.addOption("-v", "default","CCDB variation");
         parser.addOption("-b", "16","record buffer size in MB");
         parser.addRequired("-o","output.hipo");
 
