@@ -82,10 +82,6 @@ public class CLASDecoder4 {
         this.decoderDebugMode = mode;
     }
 
-    public void setVariation(String variation){
-        this.detectorDecoder.setVariation(variation);
-    }
-
     public void setRunNumber(int run){
         if(this.isRunNumberFixed==false){
             this.detectorDecoder.setRunNumber(run);
