@@ -179,7 +179,7 @@ public class URWellStrip implements Comparable {
                 URWellStrip  strip = new URWellStrip(sector,  layer,   comp); 
                 
 //                strip.setTriggerPhase(triggerPhase);
-                strip.setId(i+1);
+                strip.setId(bank.trueIndex(i)+1);
                 strip.setADC(adc);
                 strip.setTDC((int) time);
                 strip.setEnergy(strip.ADC*URWellConstants.ADCTOENERGY);

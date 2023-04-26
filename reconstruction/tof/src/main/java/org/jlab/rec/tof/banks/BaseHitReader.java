@@ -174,11 +174,11 @@ public class BaseHitReader {
 
                 if (order == 2) {
                     TDC1[i] = TDC;
-                    TDCIdx1[i] = i;
+                    TDCIdx1[i] = bank.trueIndex(i);
                 }
                 if (order == 3) {
                     TDC2[i] = TDC;
-                    TDCIdx2[i] = i;
+                    TDCIdx2[i] = bank.trueIndex(i);
                 }
 
                 BaseHit newHit = new BaseHit(sectorTDC[i], layerTDC[i],

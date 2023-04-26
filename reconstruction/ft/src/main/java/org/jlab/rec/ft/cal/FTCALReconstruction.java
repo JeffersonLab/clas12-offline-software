@@ -217,7 +217,7 @@ public class FTCALReconstruction {
                 float time      = bankDGTZ.getFloat("time",row);
                 if(ilayer==0) ilayer=1; // fix for wrong layer in TT
                 if(adc!=-1 && time!=-1 && status.getIntValue("status", isector, ilayer, icomponent)==0){
-                    FTCALHit hit = new FTCALHit(row,icomponent, adc, time, charge2Energy, timeOffsets, timeWalk, cluster);
+                    FTCALHit hit = new FTCALHit(bankDGTZ.trueIndex(row),icomponent, adc, time, charge2Energy, timeOffsets, timeWalk, cluster);
                     
                     ////////////////////////////////////////////////////////////////////////////////////////////////////
                     // select here single/groups of crystals for debugging purposes

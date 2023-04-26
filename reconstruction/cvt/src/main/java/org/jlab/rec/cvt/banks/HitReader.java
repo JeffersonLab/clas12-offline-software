@@ -157,7 +157,7 @@ public class HitReader {
                 // create the hit object for detector type BMT
                 
                 Hit hit = new Hit(DetectorType.BMT, BMTGeometry.getDetectorType(layer), sector, layer, BmtStrip);                
-                hit.setId(i+1);
+                hit.setId(bankDGTZ.trueIndex(i)+1);
                 if (Constants.getInstance().flagSeeds)
                     hit.MCstatus = order;
                 
