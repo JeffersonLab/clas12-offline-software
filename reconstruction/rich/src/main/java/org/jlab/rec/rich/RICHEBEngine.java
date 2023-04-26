@@ -28,7 +28,7 @@ public class RICHEBEngine extends ReconstructionEngine {
     
     private RICHGeoFactory       richgeo;
     private RICHTime             richtime = new RICHTime();
-    private String engineDebug;
+    private boolean engineDebug = false;
 
 
     // ----------------
@@ -79,7 +79,9 @@ public class RICHEBEngine extends ReconstructionEngine {
         // Get the constants for the correct variation
         String engineVariation = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");         
         this.getConstantsManager().setVariation(engineVariation);
-        engineDebug = Optional.ofNullable(this.getEngineConfigString("debug")).orElse("turn_OFF");         
+
+        if(this.getEngineConfigString("debug")!=null) 
+            this.engineDebug = Boolean.parseBoolean(this.getEngineConfigString("debug"));
 
         // Get the constant tables for reconstruction parameters, geometry and optical characterization
         int run = 11;

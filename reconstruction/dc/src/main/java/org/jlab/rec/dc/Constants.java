@@ -523,7 +523,7 @@ public class Constants {
         ecalDetector =  GeometryFactory.getDetector(DetectorType.ECAL, 11, geoVariation);
         fmtDetector =  GeometryFactory.getDetector(DetectorType.FMT, 11, geoVariation);
         ConstantsManager managerRICH = new ConstantsManager(geoVariation);;
-        richDetector = new RICHGeoFactory(0, managerRICH, 11, "debug_OFF");
+        richDetector = new RICHGeoFactory(0, managerRICH, 11, false);
         // create the surfaces
         trajSurfaces = new TrajectorySurfaces();
         trajSurfaces.loadSurface(targetPosition, targetLength, dcDetector, ftofDetector, ecalDetector, fmtDetector, richDetector);        

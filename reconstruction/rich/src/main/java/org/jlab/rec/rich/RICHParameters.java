@@ -85,7 +85,7 @@ public class RICHParameters{
 
 
     //------------------------------
-    public void load_CCDB(ConstantsManager manager, int run, int ncalls, String engineDebug){
+    public void load_CCDB(ConstantsManager manager, int run, int ncalls, boolean engineDebug){
     //------------------------------
 
         int debugMode = 0;
@@ -121,7 +121,7 @@ public class RICHParameters{
 
 
     //------------------------------
-    public void init_FlagCCDB(IndexedTable flagConstants, String engineDebug) {
+    public void init_FlagCCDB(IndexedTable flagConstants, boolean engineDebug) {
     //------------------------------
 
         int debugMode = 0;
@@ -166,7 +166,7 @@ public class RICHParameters{
         RING_ONLY_BEST              =  flagConstants.getIntValue("ring_only_best", 0, 0, 0);
         RING_ONLY_USED              =  flagConstants.getIntValue("ring_only_used", 0, 0, 0);
 
-        if(!engineDebug.equals("turn_ON")){
+        if(!engineDebug){
             if(debugMode>=1)System.out.format("RICH RECO debugging set to OFF \n");
             DEBUG_RECO_FLAG             =  0;
             DEBUG_RECO_PAR              =  0;

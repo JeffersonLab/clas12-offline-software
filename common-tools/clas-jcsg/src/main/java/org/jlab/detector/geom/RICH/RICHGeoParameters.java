@@ -44,7 +44,7 @@ public class RICHGeoParameters {
 
 
     //------------------------------
-    public void load_CCDB(ConstantsManager manager, int run, int ncalls, String engineDebug){
+    public void load_CCDB(ConstantsManager manager, int run, int ncalls, boolean engineDebug){
     //------------------------------
 
         int debugMode = 0;
@@ -76,7 +76,7 @@ public class RICHGeoParameters {
     }
 
     //------------------------------
-    public void init_ParametersCCDB(IndexedTable paraConstants, String engineDebug) {
+    public void init_ParametersCCDB(IndexedTable paraConstants, boolean engineDebug) {
     //------------------------------
 
         int debugMode = 0;
@@ -108,7 +108,7 @@ public class RICHGeoParameters {
         CENTER_SPHE_MIR1.set(XC_SPHE_MIR1,YC_SPHE_MIR1,ZC_SPHE_MIR1);
         CENTER_SPHE_MIR2.set(XC_SPHE_MIR2,YC_SPHE_MIR2,ZC_SPHE_MIR2);
 
-        if(!engineDebug.equals("turn_ON")){
+        if(!engineDebug){
             if(debugMode>=1)System.out.format("RICH GEO  debugging set to OFF \n");
             DEBUG_GEO_PARAMS            =  0;
             DEBUG_GEO_CONSTS            =  0;
