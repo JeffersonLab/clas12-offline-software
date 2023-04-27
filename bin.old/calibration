@@ -1,5 +1,0 @@
-#!/bin/sh -f
-
-source `dirname $0`/env.sh 
-
-java -XX:+UseSerialGC -Xmx2048m -Xms2048m -cp "$CLAS12DIR/lib/clas/*:$CLAS12DIR/lib/plugins/*" org.jlab.calib.services.TOFCalibration $*
