@@ -36,7 +36,8 @@
         {"name":"theta2",         "type":"F", "info":"theta2"},
         {"name":"phi2",           "type":"F", "info":"phi2"},
         {"name":"tstatus",        "type":"B", "info":"mc truth status (1=right track )"},
-        {"name":"rstatus",        "type":"B", "info":"rec status (1=right hit on track reconstructed)"}
+        {"name":"rstatus",        "type":"B", "info":"rec status (1=right hit on track reconstructed)"},
+        {"name":"tlevel",         "type":"B", "info":"rec tracking stage)"}
         ]
   },
   {
