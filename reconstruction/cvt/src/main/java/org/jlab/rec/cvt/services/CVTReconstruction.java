@@ -15,6 +15,9 @@ import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.CrossMaker;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.svt.SVTParameters;
+import org.jlab.rec.cvt.track.Seed;
+import org.jlab.rec.cvt.track.StraightTrack;
+import org.jlab.rec.cvt.track.Track;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -37,6 +40,12 @@ public class CVTReconstruction {
         this.swimmer = swimmer;
     }
 
+    public void setSametLevel(int level, List<Hit> hits) {
+        for(Hit h : hits) {
+            h.getStrip().settLevel(level);
+        }
+    }
+    
     
     public List<ArrayList<Hit>> readHits(DataEvent event, IndexedTable svtStatus, 
             IndexedTable bmtStatus, IndexedTable bmtTime, 
@@ -200,5 +209,46 @@ public class CVTReconstruction {
     }
 
 
+    public void setHitsTlevel(List<StraightTrack> seeds, int level) {
+        if(seeds!=null) {
+           for (int k = 0; k < seeds.size(); k++) {
+               if (seeds.get(k).getClusters() != null) {
+                   for(Cluster cl : seeds.get(k).getClusters()) {
+                       for(Hit h : cl)
+                           h.settLevel(level);
+                   }
+               }
+           }
+        }   
+    }
+
+    public void setHitsTlevel(List<Seed> seeds) {
+        if(seeds!=null) {
+           for (int k = 0; k < seeds.size(); k++) {
+               if (seeds.get(k).getClusters() != null) {
+                   for(Cluster cl : seeds.get(k).getClusters()) {
+                       for(Hit h : cl)
+                           h.settLevel(2);
+                   }
+               }
+           }
+        }  
+    }
+
+    public void setHitsTlevel2(List<Track> tracks) {
+    if(tracks!=null) {
+           for (int k = 0; k < tracks.size(); k++) {
+               if (tracks.get(k).getSeed().getClusters() != null) {
+                   for(Cluster cl : tracks.get(k).getSeed().getClusters()) {
+                       for(Hit h : cl) {
+                           h.printInfo();
+                           h.settLevel(2);
+                       }
+                   }
+               }
+           }
+        }  
+    }
+    
     
 }

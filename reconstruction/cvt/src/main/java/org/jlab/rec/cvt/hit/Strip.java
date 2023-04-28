@@ -46,6 +46,10 @@ public class Strip {
     private Transformation3D toGlobal;
     
     private int[] mcStat = new int[2];
+    private int tLevel =-1; //stage of tracking the hit successfully passed: 0=not in cluster; 
+                                                                      // 1=in cluster, failed pattern recognition;
+                                                                      // 2=passed pattern recognition, rejected by track fitting;
+                                                                      // 3=passed  track fitting.
     
     public int getStrip() {
         return _Strip;
@@ -76,11 +80,73 @@ public class Strip {
         return this.getLine().end().toVector3D().phi();
     }
 
+    public double getBMTStripR1() {
+        if(this.getArc()!=null) {
+            return this.getArc().origin().toVector3D().mag();
+        } else {
+            return this.getLine().origin().toVector3D().r();
+        }
+    }
+    
+    public double getBMTStripTheta1() {
+        if(this.getArc()!=null) {
+            return this.getArc().origin().toVector3D().theta();
+        } else {
+            return this.getLine().origin().toVector3D().theta();
+        }
+    }
+
+    public double getBMTStripPhi1() {
+        if(this.getArc()!=null) {
+            return this.getArc().origin().toVector3D().phi();
+        } else {
+            return this.getLine().origin().toVector3D().phi();
+        }
+    }
+
+    public double getBMTStripR2() {
+        if(this.getArc()!=null) {
+            return this.getArc().end().toVector3D().mag();
+        } else {
+            return this.getLine().end().toVector3D().r();
+        }
+    }
+    
+    public double getBMTStripTheta2() {
+        if(this.getArc()!=null) {
+            return this.getArc().end().toVector3D().theta();
+        } else {
+            return this.getLine().end().toVector3D().theta();
+        }
+    }
+
+    public double getBMTStripPhi2() {
+        if(this.getArc()!=null) {
+            return this.getArc().end().toVector3D().phi();
+        } else {
+            return this.getLine().end().toVector3D().phi();
+        }
+    }
+    
     /**
      * @return the mcStat
      */
     public int[] getMcStat() {
         return mcStat;
+    }
+
+    /**
+     * @return the tLevel
+     */
+    public int gettLevel() {
+        return tLevel;
+    }
+
+    /**
+     * @param tLevel the tLevel to set
+     */
+    public void settLevel(int tLevel) {
+        this.tLevel = tLevel;
     }
 
     /**

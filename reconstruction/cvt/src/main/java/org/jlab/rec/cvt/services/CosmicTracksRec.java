@@ -14,6 +14,7 @@ import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.CrossList;
 import org.jlab.rec.cvt.cross.StraightTrackCrossListFinder;
+import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.measurement.Measurements;
 import org.jlab.rec.cvt.track.StraightTrack;
 import org.jlab.rec.cvt.track.StraightTrackCandListFinder;
@@ -78,7 +79,7 @@ public class CosmicTracksRec {
                         seeds.get(k1).get(k2).getCluster1().setAssociatedTrackID(seeds.get(k1).getId()); // associate cluster1 in cross
                     }
                     if (seeds.get(k1).get(k2).getCluster2() != null) {
-                        seeds.get(k1).get(k2).getCluster2().setAssociatedTrackID(seeds.get(k1).getId()); // associate cluster2 in cross	
+                        seeds.get(k1).get(k2).getCluster2().setAssociatedTrackID(seeds.get(k1).getId()); // associate cluster2 in cross
                     }
                 }
                 trkcandFinder.matchClusters(SVTclusters, new TrajectoryFinder(), true,
@@ -145,6 +146,11 @@ public class CosmicTracksRec {
                     kf.runFitter();
                     if (kf.setFitFailed == false && kf.NDF>0 && kf.finalStateVec!=null) { 
                         cosmic.update(kf);
+                    }
+                }
+                for (Cluster cl : cosmic.getClusters()) {
+                    for(Hit h : cl) {
+                        h.settLevel(3);
                     }
                 }
                 cosmics.add(cosmic);                    

@@ -40,6 +40,7 @@ public class CVTEngine extends ReconstructionEngine {
 
     private String svtHitBank;
     private String svtHitPosBank;
+    private String bmtHitPosBank;
     private String svtClusterBank;
     private String svtCrossBank;
     private String bmtHitBank;
@@ -150,6 +151,7 @@ public class CVTEngine extends ReconstructionEngine {
         this.setBmtCrossBank("BMT" + prefix + "::Crosses");
         this.setSvtHitBank("BST" + prefix + "::Hits");
         this.setSvtHitPosBank("BST" + prefix + "::HitsPos");
+        this.setBmtHitPosBank("BMT" + prefix + "::HitsPos");
         this.setSvtClusterBank("BST" + prefix + "::Clusters");
         this.setSvtCrossBank("BST" + prefix + "::Crosses");
         this.setSeedBank("CVT" + prefix + "::Seeds");
@@ -164,6 +166,7 @@ public class CVTEngine extends ReconstructionEngine {
         super.registerOutputBank(this.bmtCrossBank);
         super.registerOutputBank(this.svtHitBank);
         super.registerOutputBank(this.svtHitPosBank);
+        super.registerOutputBank(this.bmtHitPosBank);
         super.registerOutputBank(this.svtClusterBank);
         super.registerOutputBank(this.svtCrossBank);
         super.registerOutputBank(this.cvtSeedBank);
@@ -309,9 +312,12 @@ public class CVTEngine extends ReconstructionEngine {
             if(Constants.getInstance().isCosmics) {
                 CosmicTracksRec trackFinder = new CosmicTracksRec();
                 List<StraightTrack>  seeds = trackFinder.getSeeds(event, clusters.get(0), clusters.get(1), crosses);
+                reco.setHitsTlevel(seeds,2);
+                
                 List<StraightTrack> tracks = trackFinder.getTracks(event, this.isInitFromMc(), 
                                                                           this.isKfFilterOn(), 
                                                                           this.getKfIterations());
+                reco.setHitsTlevel(tracks,3);
                 if(seeds!=null) banks.add(RecoBankWriter.fillStraightSeedsBank(event, seeds, "CVTRec::CosmicSeeds"));
                 if(tracks!=null) {
                     banks.add(RecoBankWriter.fillStraightTracksBank(event, tracks, "CVTRec::Cosmics"));
@@ -324,13 +330,13 @@ public class CVTEngine extends ReconstructionEngine {
                 TracksFromTargetRec  trackFinder = new TracksFromTargetRec(swimmer, xyBeam);
                 trackFinder.totTruthHits = reco.getTotalNbTruHits();
                 List<Seed>   seeds = trackFinder.getSeeds(clusters, crosses);
-                
+                reco.setHitsTlevel(seeds);
                 
                 List<Track> tracks = trackFinder.getTracks(event, this.isInitFromMc(), 
                                                                   this.isKfFilterOn(), 
                                                                   this.getKfIterations(), 
                                                                   true, this.getPid());
-                
+                reco.setHitsTlevel2(tracks);
                 if(seeds!=null) {
                     banks.add(RecoBankWriter.fillSeedBank(event, seeds, this.getSeedBank()));
                     banks.add(RecoBankWriter.fillSeedClusBank(event, seeds, this.getSeedClusBank()));
@@ -346,6 +352,7 @@ public class CVTEngine extends ReconstructionEngine {
         banks.add(RecoBankWriter.fillSVTHitBank(event, hits.get(0), this.getSvtHitBank()));
         banks.add(RecoBankWriter.fillSVTHitPosBank(event, hits.get(0), this.getSvtHitPosBank()));
         banks.add(RecoBankWriter.fillBMTHitBank(event, hits.get(1), this.getBmtHitBank()));
+        banks.add(RecoBankWriter.fillBMTHitPosBank(event, hits.get(1), this.getBmtHitPosBank()));
         banks.add(RecoBankWriter.fillSVTClusterBank(event, clusters.get(0), this.getSvtClusterBank()));
         banks.add(RecoBankWriter.fillBMTClusterBank(event, clusters.get(1), this.getBmtClusterBank()));
         banks.add(RecoBankWriter.fillSVTCrossBank(event, crosses.get(0), this.getSvtCrossBank()));
@@ -484,6 +491,10 @@ public class CVTEngine extends ReconstructionEngine {
         this.svtHitPosBank = bstHitPosBank;
     }
 
+    public void setBmtHitPosBank(String bmtHitPosBank) {
+        this.bmtHitPosBank = bmtHitPosBank;
+    }
+    
     public void setSvtClusterBank(String bstClusterBank) {
         this.svtClusterBank = bstClusterBank;
     }
@@ -540,6 +551,10 @@ public class CVTEngine extends ReconstructionEngine {
         return svtHitPosBank;
     }
 
+    public String getBmtHitPosBank() {
+        return bmtHitPosBank;
+    }
+        
     public String getSvtClusterBank() {
         return svtClusterBank;
     }
@@ -621,6 +636,5 @@ public class CVTEngine extends ReconstructionEngine {
         
     }
 
-    
 
 }

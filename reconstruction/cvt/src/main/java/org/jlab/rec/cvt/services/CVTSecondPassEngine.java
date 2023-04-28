@@ -38,7 +38,7 @@ public class CVTSecondPassEngine extends CVTEngine {
             System.out.println("SECOND PASS TRACKING...................");
         
         Swim swimmer = new Swim();
-
+        CVTReconstruction reco = new CVTReconstruction();
         IndexedTable svtLorentz = this.getConstantsManager().getConstants(run, "/calibration/svt/lorentz_angle");
         IndexedTable bmtVoltage = this.getConstantsManager().getConstants(run, "/calibration/mvt/bmt_voltage");
         IndexedTable beamPos    = this.getConstantsManager().getConstants(run, "/geometry/beam/position");
@@ -51,6 +51,7 @@ public class CVTSecondPassEngine extends CVTEngine {
             double[] xyBeam = CVTReconstruction.getBeamSpot(event, beamPos);
             TracksFromTargetRec  trackFinder = new TracksFromTargetRec(swimmer, xyBeam);
             List<Seed>  seeds  = trackFinder.getSeedsFromBanks(event);
+            reco.setHitsTlevel(seeds);
             List<Track> tracks = null;
             if(seeds!=null) {
                 tracks = trackFinder.getTracks(event, this.isInitFromMc(), 
@@ -58,7 +59,7 @@ public class CVTSecondPassEngine extends CVTEngine {
                                                       this.getKfIterations(), 
                                                       false, this.getPid());
             }
-            
+            reco.setHitsTlevel2(tracks);
             if(tracks!=null) {
                 for(Track t : tracks) {
                     // keep track id from first to second pass
@@ -78,6 +79,7 @@ public class CVTSecondPassEngine extends CVTEngine {
             if(trackFinder.getSVThits()!=null) banks.add(RecoBankWriter.fillSVTHitBank(event, trackFinder.getSVThits(), this.getSvtHitBank()));
             if(trackFinder.getSVThits()!=null) banks.add(RecoBankWriter.fillSVTHitPosBank(event, trackFinder.getSVThits(), this.getSvtHitPosBank()));
             if(trackFinder.getBMThits()!=null) banks.add(RecoBankWriter.fillBMTHitBank(event, trackFinder.getBMThits(), this.getBmtHitBank()));
+            if(trackFinder.getBMThits()!=null) banks.add(RecoBankWriter.fillBMTHitPosBank(event, trackFinder.getBMThits(), this.getBmtHitPosBank()));
             if(trackFinder.getSVTclusters()!=null) banks.add(RecoBankWriter.fillSVTClusterBank(event, trackFinder.getSVTclusters(), this.getSvtClusterBank()));
             if(trackFinder.getBMTclusters()!=null) banks.add(RecoBankWriter.fillBMTClusterBank(event, trackFinder.getBMTclusters(), this.getBmtClusterBank()));
             if(trackFinder.getSVTcrosses()!=null) banks.add(RecoBankWriter.fillSVTCrossBank(event, trackFinder.getSVTcrosses(), this.getSvtCrossBank()));

@@ -250,6 +250,7 @@ public class StraightTrackCandListFinder {
             candMap.forEach((key,value) -> cands.add(value));
         }
         ArrayList<StraightTrack> passedcands = this.rmStraightTrkClones(true, cands);
+        
         return passedcands;
     }
 

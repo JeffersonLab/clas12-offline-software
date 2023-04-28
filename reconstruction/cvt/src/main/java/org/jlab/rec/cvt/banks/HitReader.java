@@ -348,12 +348,15 @@ public class HitReader {
                 // add this hit
                 if(hit.getRegion()!=Constants.getInstance().getRmReg()) {     
                     if(Constants.getInstance().useOnlyMCTruthHits() ) {
-                        if(hit.MCstatus==0)
+                        if(hit.MCstatus==0) {
+                            hit.settLevel(0);
                             hits.add(hit);
+                        }
                     } else {
+                        hit.settLevel(0);
                         hits.add(hit); 
                     }
-                }
+                } 
             }
         }
         // fill the list of SVT hits

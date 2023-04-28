@@ -152,8 +152,10 @@ public class RecoBankReader {
                 Hit seedHit = null;
                 double seedE = -1;
                 for(Hit h : svthits) {
+                    h.settLevel(0);
                     if(h.getAssociatedClusterID()==id) {
                         cls.add(h);
+                        h.settLevel(1);
                         if(h.getStrip().getEdep()>seedE) {
                             seedE = h.getStrip().getEdep();
                             seedHit = h;
@@ -242,7 +244,9 @@ public class RecoBankReader {
                 Hit seedHit = null;
                 double seedE = -1;
                 for(Hit h : bmthits) {
+                    h.settLevel(0);
                     if(h.getAssociatedClusterID()==id) {
+                        h.settLevel(1);
                         cls.add(h);
                         if(h.getStrip().getEdep()>seedE) {
                             seedE = h.getStrip().getEdep();

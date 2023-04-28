@@ -1,5 +1,6 @@
 package org.jlab.rec.cvt.hit;
 
+import java.util.List;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
@@ -285,6 +286,17 @@ public class Hit implements Comparable<Hit> {
         AssociatedTrackID = associatedTrackID;
     }
 
+    
+    
+    public void settLevel(int level) {
+        this.getStrip().settLevel(level);
+    }
+    
+    public void settLevel(int level, Hit h) {
+        h.getStrip().settLevel(level);
+    }
+    
+    
     public String toString() {
         String str = String.format("Hit id=%d, layer=%d, sector=%d, strip=%d, energy=%.3f, time=%.3f, residual=%.3f, clusterID=%d, trackID=%d", 
                      this.getId(), this.getLayer(), this.getSector(), 
