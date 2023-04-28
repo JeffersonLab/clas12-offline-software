@@ -15,7 +15,8 @@
         {"name":"trkingStat",     "type":"B", "info":"tracking status"},
         {"name":"clusterID",      "type":"S", "info":"associated cluster ID"},
         {"name":"trkID",          "type":"S", "info":"associated track ID"},
-        {"name":"status",         "type":"B", "info":"status (0=good)"}
+        {"name":"status",         "type":"B", "info":"status (0=good)"},
+        {"name":"tlevel",         "type":"B", "info":"rec tracking stage)"}
         ]
   },
   {
@@ -160,7 +161,8 @@
         {"name":"theta2",         "type":"F", "info":"theta2"},
         {"name":"phi2",           "type":"F", "info":"phi2"},
         {"name":"tstatus",        "type":"B", "info":"mc truth status (1=good)"},
-        {"name":"rstatus",        "type":"B", "info":"rec status (1=good)"}
+        {"name":"rstatus",        "type":"B", "info":"rec status (1=good)"},
+        {"name":"tlevel",         "type":"B", "info":"rec tracking stage)"}
         ]
   },
   {
