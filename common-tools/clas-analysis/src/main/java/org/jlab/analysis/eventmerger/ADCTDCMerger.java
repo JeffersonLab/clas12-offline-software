@@ -1,17 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.analysis.eventmerger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.hipo.HipoDataEvent;
 
 /**
  * Class for merging of ADC and TDC banks from two events
@@ -23,68 +19,46 @@ import org.jlab.io.hipo.HipoDataEvent;
 
 public class ADCTDCMerger {
     
-    private boolean debug = false;
-    private boolean suppressDoubleHits = true;
-    private String[] detectors;
-    private EventMergerConstants constants = new EventMergerConstants();
-            
-    public ADCTDCMerger() {
-        detectors = new String[]{"DC","FTOF"};
-        printDetectors();
-    }
-        
-    public ADCTDCMerger(String[] dets, boolean dhits) {
-        suppressDoubleHits = dhits;
-        System.out.println("Double hits suppression flag set to " + suppressDoubleHits);
-        detectors = dets;
-        printDetectors();
-    }
+    private final boolean debug = false;
     
+    private boolean suppressDoubleHits = true;
+    private EventMergerConstants constants;
+            
+    private DataEvent       event;
+    private List<DataEvent> bgEvents;
+    private int run;
+    
+    public ADCTDCMerger(EventMergerConstants constants, DataEvent signal, DataEvent... bgs) {
+        this.constants = constants;
+        this.event = signal;
+        this.bgEvents = new ArrayList<>();
+        this.bgEvents.addAll(Arrays.asList(bgs));
+        if(!bgEvents.isEmpty() && bgEvents.get(0).hasBank("RUN::config"))
+            run = bgEvents.get(0).getBank("RUN::config").getInt("run", 0);                
+    }
+
+    public void setSuppressDoubleHits(boolean value) {
+        this.suppressDoubleHits = value;
+    }
+            
+      
     /**
      * Reads  ADC bank and returns corresponding information
      * 
-     * @param detector: detector identifier string
+     * @param detector: detector identifier
      * @param bankDGTZ: selected DataBank
      * @return 
      */
-    public List<ADC> ADCbank(String detector,DataBank bankDGTZ) {
-        List<ADC> adcStore   = new ArrayList<ADC>();
-        
+    public List<DGTZ> ADCbank(DetectorType detector,DataBank bankDGTZ) {
+        List<DGTZ> adcStore   = new ArrayList<>();
+                        
         for (int i = 0; i < bankDGTZ.rows(); i++) {
-            ADC adcData = null;
-            byte sector     = bankDGTZ.getByte("sector", i);
-            byte layer      = bankDGTZ.getByte("layer", i);
-            short component = bankDGTZ.getShort("component", i);
-            byte order      = bankDGTZ.getByte("order", i);
-            int adc         = bankDGTZ.getInt("ADC", i);
-            float time      = bankDGTZ.getFloat("time", i);
-            short ped       = bankDGTZ.getShort("ped", i);
+            ADC adcData = new ADC(detector);
+            adcData.readFromBank(bankDGTZ, i);
             
-            if(adc<=0) 
-                if(!detector.equals(DetectorType.BST.getName()) && !detector.equals(DetectorType.BMT.getName())) 
-                    continue;
-            
-            if(detector.equals(DetectorType.BST.getName())) {
-                long timestamp = (int)bankDGTZ.getLong("timestamp", i);
-                adcData = new ADC(sector,layer,component,order,adc,time,ped,timestamp);
-            }
-            else if(detector.equals(DetectorType.BMT.getName()) || 
-                    detector.equals(DetectorType.FMT.getName()) || 
-                    detector.equals(DetectorType.FTTRK.getName())) {
-                long timestamp = (int)bankDGTZ.getLong("timestamp", i);
-                int  integral   = bankDGTZ.getInt("integral", i);
-                adcData = new ADC(sector,layer,component,order,adc,time,ped,timestamp,integral);
-            }
-            else if(detector.equals(DetectorType.BAND.getName())) {
-                int  amplitude   = bankDGTZ.getInt("amplitude", i);
-                adcData = new ADC(sector,layer,component,order,adc,time,ped,amplitude);
-            }
-            else {
-                adcData = new ADC(sector,layer,component,order,adc,time,ped);
-            }
-            adcStore.add(adcData);
+            if(adcData.isGood()) adcStore.add(adcData);
         }
-        if(debug) System.out.println("Reading bank " + detector + "::adc with " + bankDGTZ.rows() + ", collected " + adcStore.size() + " hits");
+        if(debug) System.out.println("Reading bank " + detector.getName() + "::adc with " + bankDGTZ.rows() + ", collected " + adcStore.size() + " hits");
         
         return adcStore;
     }
@@ -92,102 +66,20 @@ public class ADCTDCMerger {
     /**
      * Read TDC bank and return corresponding information
      * 
-     * @param bankDGTZ: selected DataBank
-     * @param offset:   offset to be applied to TDC values to compensate for jitter  
+     * @param detector: detector identifier
+     * @param bankDGTZ: selected DataBank  
      * @return
      */
-    public List<TDC> TDCbank(DataBank bankDGTZ, int offset) {
-        List<TDC> tdcStore   = new ArrayList<TDC>();
+    public List<DGTZ> TDCbank(DetectorType detector, DataBank bankDGTZ) {
+        List<DGTZ> tdcStore   = new ArrayList<>();
+                        
         for (int i = 0; i < bankDGTZ.rows(); i++) {
-            byte sector     = bankDGTZ.getByte("sector", i);
-            byte layer      = bankDGTZ.getByte("layer", i);
-            short component = bankDGTZ.getShort("component", i);
-            byte order      = bankDGTZ.getByte("order", i);
-            int tdc         = bankDGTZ.getInt("TDC", i);
-            if(tdc<=0) continue;
-            TDC tdcData = new TDC(sector,layer,component,order,tdc+offset);
-            tdcStore.add(tdcData);
+            TDC tdcData = new TDC(detector);
+            tdcData.readFromBank(bankDGTZ, i);
+        
+            if(tdcData.isGood()) tdcStore.add(tdcData);
         }
         return tdcStore;
-    }
-    
-    /**
-     * Merge TDC banks for data (signal) and background events for selected detector
-     * In case of multiple hit on same detector element, only first hit in time is kept 
-     * unless the double-hit suppression flag, suppressDoubleHits, is set to false
-     * 
-     * @param Det
-     * @param event
-     * @param bg
-     * @return
-     */
-    public DataBank getTDCBank(String Det, DataEvent event, DataEvent bg){
-        
-        int offset = getTDCOffset(Det, event, bg);
-        
-        String TDCString = Det+"::tdc";
-        DataBank bank = null;
-        if(event.hasBank(TDCString)==true && (bg==null || bg.hasBank(TDCString)==false)) {
-            bank = event.getBank(TDCString);
-            if(event.hasBank(TDCString)) { 
-                HipoDataEvent de = (HipoDataEvent) event;
-                de.removeBank(TDCString);
-            }
-        }
-        else if(event.hasBank(TDCString)==false && bg.hasBank(TDCString)==true) {
-            bank = bg.getBank(TDCString);
-        }  
-        else if(event.hasBank(TDCString)==true && bg.hasBank(TDCString)==true) {
-            List<TDC> bgTDCs  = TDCbank(bg.getBank(TDCString), offset);
-            List<TDC> TDCs    = TDCbank(event.getBank(TDCString), 0);
-
-            List<TDC> allTDCs = new ArrayList<TDC>();
-            for(TDC tdc : TDCs)   allTDCs.add(tdc);
-            for(TDC tdc : bgTDCs) allTDCs.add(tdc);
-            Collections.sort(allTDCs);
-            
-            List<TDC> mergedTDCs = new ArrayList<TDC>();
-            for(int i = 0; i < allTDCs.size(); i++) {
-                TDC tdc = allTDCs.get(i);
-                if(mergedTDCs.size()==0) {
-                    if(debug) {
-                        System.out.println("Keeping TDC " + i);
-                        tdc.show();
-                    }
-                    mergedTDCs.add(tdc);
-                }
-                else {
-                    TDC tdcOld = mergedTDCs.get(mergedTDCs.size()-1);
-                    if(!tdc.equalTo(tdcOld) || !suppressDoubleHits) {
-                        if(debug) {
-                            System.out.println("Keeping TDC " + i);
-                            tdc.show();
-                        }
-                        mergedTDCs.add(tdc);
-                    }
-                    else {
-                        if(debug) {
-                            System.out.println("\tSkipping TDC " + i +"\t");
-                            tdc.show();
-                        }
-                    }
-                }
-            } 
-
-            if(event.hasBank(TDCString)) { 
-                HipoDataEvent de = (HipoDataEvent) event;
-                de.removeBank(TDCString);
-            }
-            bank = event.createBank(TDCString, mergedTDCs.size());
-            for (int i = 0; i < mergedTDCs.size(); i++) {
-                bank.setByte("sector",     i, mergedTDCs.get(i).getSector());
-                bank.setByte("layer",      i, mergedTDCs.get(i).getLayer());
-                bank.setShort("component", i, mergedTDCs.get(i).getComponent());
-                bank.setInt("TDC",         i, mergedTDCs.get(i).getTdc());
-                bank.setByte("order",      i, mergedTDCs.get(i).getOrder());
-            }
-        }
-        return bank;
     }
     
     /**
@@ -195,119 +87,60 @@ public class ADCTDCMerger {
      * Use two background events shifted in time to extend the time range of the backgrounds
      * Multiple hits on the same components are kept if time distance exceed the holdoff time
      * 
-     * @param Det
-     * @param event
-     * @param bg1: primary background event
-     * @param bg2: secondary background event that will be shifted to negative times
+     * @param detector
      * @return
      */
-    public DataBank getTDCBank(String Det, DataEvent event, DataEvent bg1, DataEvent bg2){
+    public DataBank getTDCBank(DetectorType detector){
         
-        int offset1 = getTDCOffset(Det, event, bg1);
-        int offset2 = getTDCOffset(Det, event, bg2);
+        String TDCString = detector+"::tdc";
         
-        int run = bg2.getBank("RUN::config").getInt("run", 0);
-
-        String TDCString = Det+"::tdc";
-        DataBank bank = null;
-        // if no detector bank is found in the background events then keep the event bank
-        if(event.hasBank(TDCString)==true && bg1.hasBank(TDCString)==false && bg2.hasBank(TDCString)==false) {
-            bank = event.getBank(TDCString);
-            if(event.hasBank(TDCString)) { 
-                HipoDataEvent de = (HipoDataEvent) event;
-                de.removeBank(TDCString);
-            }
+        // if the primary background event has no detector bank then keep the event bank
+        if(!bgEvents.get(0).hasBank(TDCString)) {
+            return event.getBank(TDCString);
         }
-        // if no detector bank is found in the phyics event, then keep the bank from the primary background event
-        else if(event.hasBank(TDCString)==false && bg1.hasBank(TDCString)==true) {
-            bank = bg1.getBank(TDCString);
+        // if no detector bank is found in the physics event, then keep the bank from the primary background event
+        else if(!event.hasBank(TDCString)) {
+            return bgEvents.get(0).getBank(TDCString);
         }  
         // if both physics and primary background events have the detector bank, then proceed with merging
-        else if(event.hasBank(TDCString)==true && bg1.hasBank(TDCString)==true) {
-            List<TDC> bgTDCs  = TDCbank(bg1.getBank(TDCString), offset1);
-            // if secondary background event has the relevant detector bank, add the hits shifted in time
-            if(bg2.hasBank(TDCString)) {
-                List<TDC> bg2TDCs  = TDCbank(bg2.getBank(TDCString), offset2);
-                for(TDC tdc : bg2TDCs) {
-                    int value  = tdc.getTdc();
-                    int layer  = tdc.getLayer();
-                    int comp   = tdc.getComponent();
-                    int offset = constants.getInt(run, Det, EventMergerEnum.READOUT_WINDOW, 0, layer, comp);
-                    tdc.setTdc(value-offset);
-                    bgTDCs.add(tdc);
+        else {
+                    
+            // get background hits
+            List<DGTZ> bgTDCs = new ArrayList<>();
+            // use multiple events depending on detector 
+            int bgSize = constants.getInt(detector, EventMergerEnum.MERGE_SIZE);
+
+            for(int i=0; i<Math.min(bgSize, bgEvents.size()); i++) {
+
+                DataEvent bg = bgEvents.get(i);
+
+                if(bg.hasBank(TDCString)) {
+
+                    int jitter = this.getTDCJitter(detector, bg);
+
+                    // get TDCs, correct them for jitter and shift them in time
+                    for(DGTZ dgtz : TDCbank(detector, bg.getBank(TDCString))) {
+                        TDC tdc = (TDC) dgtz;
+                        int value  = tdc.getTdc();
+                        int layer  = tdc.getLayer();
+                        int comp   = tdc.getComponent();
+                        int offset = constants.getInt(run, detector, EventMergerEnum.READOUT_WINDOW, 0, layer, comp);
+                        tdc.setTdc(value+jitter-i*offset);
+                        bgTDCs.add(tdc);
+                    } 
                 }
             }
-            List<TDC> TDCs    = TDCbank(event.getBank(TDCString), 0);
+        
+            List<DGTZ> TDCs    = TDCbank(detector, event.getBank(TDCString));
 
-            List<TDC> allTDCs = new ArrayList<TDC>();
-            for(TDC tdc : TDCs)   allTDCs.add(tdc);
-            for(TDC tdc : bgTDCs) allTDCs.add(tdc);
+            List<DGTZ> allTDCs = new ArrayList<>();
+            allTDCs.addAll(TDCs);
+            allTDCs.addAll(bgTDCs);
             Collections.sort(allTDCs);
             
-            List<TDC> mergedTDCs = new ArrayList<TDC>();
-            for(int i = 0; i < allTDCs.size(); i++) {
-                TDC tdc = allTDCs.get(i);
-                if(mergedTDCs.size()==0) {
-                    if(debug) {
-                        System.out.println("Keeping TDC " + i);
-                        tdc.show();
-                    }
-                    mergedTDCs.add(tdc);
-                }
-                else {
-                    TDC tdcOld = mergedTDCs.get(mergedTDCs.size()-1);
-                    if(!tdc.equalTo(tdcOld) || !suppressDoubleHits) {
-                        if(debug) {
-                            System.out.println("Keeping TDC " + i);
-                            tdc.show();
-                        }
-                        mergedTDCs.add(tdc);
-                    }
-                    else {
-                        double delta = constants.getInt(run, Det, EventMergerEnum.READOUT_HOLDOFF, 0, tdc.getLayer(), tdc.getComponent())
-                                     / constants.getDouble(Det, EventMergerEnum.TDC_CONV);
-                         if(tdc.getTdc()-tdcOld.getTdc()<delta) {
-                            if(debug) {
-                                System.out.println("\tSkipping TDC " + i +"\t");
-                                tdc.show();
-                            }                            
-                        }
-                        else {
-                            if(debug) {
-                                System.out.println("Keeping TDC " + i);
-                                tdc.show();
-                            }
-                            mergedTDCs.add(tdc);
-                        }
-                    }
-                }
-            } 
-                
-            List<TDC> filteredTDCs = new ArrayList<TDC>();
-            for(int i = 0; i < mergedTDCs.size(); i++) {
-                TDC tdc = mergedTDCs.get(i);
-                int value = tdc.getTdc();
-                int layer  = tdc.getLayer();
-                int comp   = tdc.getComponent();
-                if(value>0 && value<constants.getInt(run, Det, EventMergerEnum.READOUT_WINDOW, 0, layer, comp)) {
-                    filteredTDCs.add(tdc);
-                }
-            }
-            if(event.hasBank(TDCString)) { 
-                HipoDataEvent de = (HipoDataEvent) event;
-                de.removeBank(TDCString);
-            }
-            bank = event.createBank(TDCString, filteredTDCs.size());
-            for (int i = 0; i < filteredTDCs.size(); i++) {
-                bank.setByte("sector",     i, filteredTDCs.get(i).getSector());
-                bank.setByte("layer",      i, filteredTDCs.get(i).getLayer());
-                bank.setShort("component", i, filteredTDCs.get(i).getComponent());
-                bank.setInt("TDC",         i, filteredTDCs.get(i).getTdc());
-                bank.setByte("order",      i, filteredTDCs.get(i).getOrder());
-            }
+            return DGTZ.writeBank(event, TDCString, this.merge(TDCs, bgTDCs));
         }
-        return bank;
-    }
+    }    
 
     /**
      * Merge ADC banks for data (signal) and background events for selected detector
@@ -315,101 +148,85 @@ public class ADCTDCMerger {
      * unless the double-hit suppression flag, suppressDoubleHits, is set to false
      *
      * @param detector
-     * @param event
-     * @param bg
      * @return
      */
-    public DataBank getADCBank(String detector, DataEvent event, DataEvent bg){
+    public DataBank getADCBank(DetectorType detector){
         
-        String ADCString = detector+"::adc";
-        DataBank bank = null;
-        if(event.hasBank(ADCString)==true && (bg==null || bg.hasBank(ADCString)==false)) {
-            bank = event.getBank(ADCString);
-            if(event.hasBank(ADCString)) { 
-                HipoDataEvent de = (HipoDataEvent) event;
-                de.removeBank(ADCString);
-            }
+        DataEvent bg = bgEvents.get(0);
+
+        String ADCString = detector.getName()+"::adc";
+        if(!bg.hasBank(ADCString)) {
+            return event.getBank(ADCString);
         }
-        else if(event.hasBank(ADCString)==false && bg.hasBank(ADCString)==true) {
-            bank = bg.getBank(ADCString);
+        else if(!event.hasBank(ADCString)) {
+            return bg.getBank(ADCString);
         }  
-        else if(event.hasBank(ADCString)==true && bg.hasBank(ADCString)==true) {
-            List<ADC> bgADCs  = ADCbank(detector,bg.getBank(ADCString));
-            List<ADC> ADCs    = ADCbank(detector,event.getBank(ADCString));
+        else if(event.hasBank(ADCString) && bg.hasBank(ADCString)) {
+            List<DGTZ> bgADCs  = ADCbank(detector,bg.getBank(ADCString));
+            List<DGTZ> ADCs    = ADCbank(detector,event.getBank(ADCString));
 
-            List<ADC> allADCs = new ArrayList<ADC>();
-            for(ADC adc : ADCs)   allADCs.add(adc);
-            for(ADC adc : bgADCs) allADCs.add(adc);
-            Collections.sort(allADCs);
-            
-            List<ADC> mergedADCs = new ArrayList<>();
+            DataBank bank = DGTZ.writeBank(event, ADCString, this.merge(ADCs, bgADCs));
 
-            for(int i = 0; i < allADCs.size(); i++) {
-                ADC adc = allADCs.get(i);
-                if(mergedADCs.isEmpty()) {
-                    if(debug) {
-                        System.out.println("\tSkipping ADC " + i +"\t");
-                        adc.show();
-                    }
-                    mergedADCs.add(adc);
-                }
-                else {
-                    ADC adcOld = mergedADCs.get(mergedADCs.size()-1);
-                    if(!adc.equalTo(adcOld)) {
-                        if(debug) {
-                            System.out.println("Keeping ADC " + i);
-                            adc.show();
-                        }
-                        mergedADCs.add(adc);
-                    }
-                    else {
-                        if(debug) {
-                            System.out.println("\tSkipping ADC " + i +"\t");
-                            adc.show();
-                        }
-                    }
-                }
-            } 
-
-            if(event.hasBank(ADCString)) { 
-                HipoDataEvent de = (HipoDataEvent) event;
-                de.removeBank(ADCString);
-            }
-
-            bank = event.createBank(ADCString, mergedADCs.size());
-
-            for (int i = 0; i < mergedADCs.size(); i++) {
-                bank.setByte("sector",     i, mergedADCs.get(i).getSector());
-                bank.setByte("layer",      i, mergedADCs.get(i).getLayer());
-                bank.setShort("component", i, mergedADCs.get(i).getComponent());
-                bank.setInt("ADC",         i, mergedADCs.get(i).getAdc()); 
-                bank.setByte("order",      i, mergedADCs.get(i).getOrder());
-                bank.setFloat("time",      i, mergedADCs.get(i).getTime());
-                bank.setShort("ped",       i, mergedADCs.get(i).getPedestal());
-
-                if(detector==DetectorType.BST.getName()) {
-                    bank.setLong("timestamp", i, mergedADCs.get(i).getTimestamp());
-                }
-                if(detector == DetectorType.BMT.getName() || detector==DetectorType.FMT.getName() || detector==DetectorType.FTTRK.getName()) {
-                    bank.setLong("timestamp", i, mergedADCs.get(i).getTimestamp());
-                    bank.setInt("integral",   i, mergedADCs.get(i).getIntegral());
-                }
-                if(detector == DetectorType.BAND.getName()) {
-                    bank.setInt("amplitude",  1, mergedADCs.get(i).getAmplitude());
-                }
-            } 
+            return bank;
         }
-        //bank.show();
-        return bank;
+        return null;
     }
     
-    private int getTDCOffset(String detector, DataEvent event, DataEvent bg) {
+    public final List<DGTZ> merge(List<DGTZ> signal, List<DGTZ> background) {
+        
+        for(DGTZ b : background) b.markAsBackground();
+        
+        List<DGTZ> all = new ArrayList<>();
+        all.addAll(signal);
+        all.addAll(background);
+        Collections.sort(all);
+        
+        List<DGTZ> merged = new ArrayList<>();
+        
+        for(int i = 0; i < all.size(); i++) {
+            DGTZ dgtz = all.get(i);
+            if(merged.isEmpty()) {
+                if(debug) {
+                    System.out.println("\tSkipping DGTZ " + i +"\t");
+                    System.out.println(dgtz);
+                }
+                merged.add(dgtz);
+            }
+            else {
+                DGTZ dgtzOld = merged.get(merged.size()-1);
+                if(!dgtz.pilesUp(dgtzOld)) {
+                    if(debug) {
+                        System.out.println("Keeping DGTZ " + i);
+                        System.out.println(dgtz);
+                    }
+                    merged.add(dgtz);
+                }
+                else {
+                    if(debug) {
+                        System.out.println("\tSkipping DGTZ " + i +"\t");
+                        System.out.println(dgtz);
+                    }
+                    dgtz.remove();
+                }
+            }
+        }
+        
+        all.clear();
+        all.addAll(signal);
+        all.addAll(background);
+        for(DGTZ dgtz : all) {
+            if(!dgtz.inWindow()) dgtz.markAsOutOfTime();
+        }
+        return all;
+    }
+
+    private int getTDCJitter(DetectorType detector, DataEvent bg) {
         int offset = getJitterCorrection(event, detector)
                    - getJitterCorrection(bg, detector);
         return offset;
     }
     
-    private int getJitterCorrection(DataEvent event, String detector) {
+    private int getJitterCorrection(DataEvent event, DetectorType detector) {
         // calculate the trigger time jitter correction
         int run = event.getBank("RUN::config").getInt("run", 0);        
         double tdcconv     = constants.getDouble(detector, EventMergerEnum.TDC_CONV);
@@ -424,49 +241,8 @@ public class ADCTDCMerger {
         return tdcjitter;
     }
 
-    private void printDetectors() {
-        System.out.print("\nMerging activated for detectors: ");
-        for(String det:detectors) System.out.print(det + " ");
-        System.out.println("\n");
-    }
-    
-    /**
-     * Append merged banks to hipo event
-     * 
-     * @param event
-     * @param bg1
-     * @param bg2
-     */
-    public void updateEventWithMergedBanks(DataEvent event, DataEvent bg1, DataEvent bg2) {
-        
-        if(!event.hasBank("RUN::config") || !bg1.hasBank("RUN::config") || !bg2.hasBank("RUN::config")) {
-            System.out.println("Missing RUN::config bank");
-            return;
-        }
-        
-        if(event.hasBank("DC::doca")) event.removeBank("DC::doca");
-        
-        for(String det:detectors) {
-            if("BMT".equals(det) || "BST".equals(det) || "FTCAL".equals(det) || "FTHODO".equals(det) || "FMT".equals(det) || "FTTRK".equals(det) || "HTCC".equals(det) || "LTCC".equals(det)) {
-                event.appendBanks(this.getADCBank(det, event, bg1));
-            }
-            else if("DC".equals(det)) {
-                event.appendBanks(this.getTDCBank(det, event, bg1, bg2));
-            }
-            else if("BAND".equals(det) || "CND".equals(det) || "CTOF".equals(det) || "ECAL".equals(det) || "FTOF".equals(det)) {
-                event.appendBanks(this.getADCBank(det, event, bg1),this.getTDCBank(det, event, bg1));
-            }
-            else {
-                System.out.println("Unknown detector:" + det);
-            }
-        }
-    }
-    
-    private class ADC implements Comparable<ADC> {
-        private byte sector;
-        private byte layer;
-        private short component;
-        private byte order;
+    public class ADC extends DGTZ {
+ 
         private int adc;
         private float time;
         private short pedestal;
@@ -474,66 +250,10 @@ public class ADCTDCMerger {
         private int integral;
         private int amplitude;
         
-        public ADC(byte sector, byte layer, short component, byte order, int adc, float time, short ped) {
-            this.sector    = sector;
-            this.layer     = layer;
-            this.component = component;
-            this.order     = order;
-            this.adc       = adc;
-            this.time      = time;
-            this.pedestal  = ped;            
+        public ADC(DetectorType detector) {
+            super(detector);
         }
         
-        public ADC(byte sector, byte layer, short component, byte order, int adc, float time, short ped, int amplitude) {
-            this.sector    = sector;
-            this.layer     = layer;
-            this.component = component;
-            this.order     = order;
-            this.adc       = adc;
-            this.time      = time;
-            this.pedestal  = ped;   
-            this.amplitude = amplitude;
-        }
-        
-        public ADC(byte sector, byte layer, short component, byte order, int adc, float time, short ped, long timestamp) {
-            this.sector    = sector;
-            this.layer     = layer;
-            this.component = component;
-            this.order     = order;
-            this.adc       = adc;
-            this.time      = time;
-            this.pedestal  = ped;            
-            this.timestamp = timestamp;
-        }
-        
-        public ADC(byte sector, byte layer, short component, byte order, int adc, float time, short ped, long timestamp, int integral) {
-            this.sector    = sector;
-            this.layer     = layer;
-            this.component = component;
-            this.order     = order;
-            this.adc       = adc;
-            this.time      = time;
-            this.pedestal  = ped;            
-            this.timestamp = timestamp;
-            this.integral  = integral;
-        }  
-
-        public byte getSector() {
-            return sector;
-        }
-
-        public byte getLayer() {
-            return layer;
-        }
-
-        public short getComponent() {
-            return component;
-        }
-
-        public byte getOrder() {
-            return order;
-        }
-
         public int getAdc() {
             return adc;
         }
@@ -558,18 +278,49 @@ public class ADCTDCMerger {
             return amplitude;
         }
         
-        public boolean equalTo(ADC o){
-            if(this.getSector()    == o.getSector() &&
-               this.getLayer()     == o.getLayer()&&
-               this.getComponent() == o.getComponent() &&
-               this.getOrder()     == o.getOrder())
-                 return true;
-            else return false;
+        @Override
+        public boolean isGood() {
+            if(this.getType()==DetectorType.BST || this.getType()==DetectorType.BMT) 
+                return true;
+            else
+                return this.adc>0;          
         }
 
         @Override
-        public int compareTo(ADC o) {
-            int value = 0;
+        public void addToBank(DataBank bank, int row) {
+            super.addToBank(bank, row);
+            bank.setInt("ADC",    row, adc);
+            bank.setFloat("time", row, time);
+            bank.setShort("ped",  row, pedestal);
+            if(this.getType()==DetectorType.BST)
+                bank.setLong("timestamp", row, timestamp);
+            else if(this.getType()==DetectorType.BMT || this.getType()==DetectorType.FMT || this.getType()==DetectorType.FTTRK) {
+                bank.setLong("timestamp", row, timestamp);
+                bank.setInt("integral",   row, integral);
+            }
+            else if(this.getType()==DetectorType.BAND)
+                bank.setInt("amplitude",  row, amplitude);
+        }
+
+        @Override
+        public void readFromBank(DataBank bank, int row) {
+            super.readFromBank(bank, row);
+            this.adc      = bank.getInt("ADC",    row);
+            this.time     = bank.getFloat("time", row);
+            this.pedestal = bank.getShort("ped",  row);  
+            if(this.getType()==DetectorType.BST)
+                this.timestamp = bank.getLong("timestamp", row);
+            else if(this.getType()==DetectorType.BMT || this.getType()==DetectorType.FMT || this.getType()==DetectorType.FTTRK) {
+                this.timestamp = bank.getLong("timestamp", row);
+                this.integral  = bank.getInt("integral", row);
+            }
+            else if(this.getType()==DetectorType.BAND)
+                this.amplitude = bank.getInt("amplitude", row);            
+        }
+
+        @Override
+        public int compareTo(DetectorDescriptor other) {
+            ADC o = (ADC) other;
             int CompSec = this.getSector()    < o.getSector()    ? -1 : this.getSector()   == o.getSector() ? 0 : 1;
             int CompLay = this.getLayer()     < o.getLayer()     ? -1 : this.getLayer()    == o.getLayer() ? 0 : 1;
             int CompCom = this.getComponent() < o.getComponent() ? -1 : this.getComponent()== o.getComponent()? 0 : 1;
@@ -579,45 +330,22 @@ public class ADCTDCMerger {
             int value3 = ((CompOrd == 0) ? CompTim : CompOrd);
             int value2 = ((CompCom == 0) ? value3 : CompCom);
             int value1 = ((CompLay == 0) ? value2 : CompLay);
-            value = ((CompSec == 0) ? value1 : CompSec);
+            int value = ((CompSec == 0) ? value1 : CompSec);
 
             return value;
         }
         
         public void show() {
-            System.out.println("Sector/Layer/Component/Order: " + sector + "/"+ layer + "/" + component + "/" + order + " ADC: " + adc + " time: " + time);
+            System.out.println(this.toString() + " ADC: " + adc + " time: " + time);
         }
     }
     
-    private class TDC implements Comparable<TDC>{
-        private byte sector;
-        private byte layer;
-        private short component;
-        private byte order;
+    public class TDC extends DGTZ {
+        
         private int tdc;
         
-        public TDC(byte sector, byte layer, short component, byte order, int tdc) {
-            this.sector    = sector;
-            this.layer     = layer;
-            this.component = component;
-            this.order     = order;
-            this.tdc       = tdc;          
-        }
-
-        public byte getSector() {
-            return sector;
-        }
-
-        public byte getLayer() {
-            return layer;
-        }
-
-        public short getComponent() {
-            return component;
-        }
-
-        public byte getOrder() {
-            return order;
+        public TDC(DetectorType detector) {
+            super(detector);
         }
 
         public int getTdc() {
@@ -628,18 +356,51 @@ public class ADCTDCMerger {
             this.tdc = tdc;
         }
         
-        public boolean equalTo(TDC o){
-            if(this.getSector()    == o.getSector() &&
-               this.getLayer()     == o.getLayer()&&
-               this.getComponent() == o.getComponent() &&
-               this.getOrder()     == o.getOrder())
-                 return true;
-            else return false;
+        public void shift(int offset) {
+            this.tdc += offset;
+        }
+        
+        @Override
+        public boolean isGood() {
+            return this.tdc>0;
         }
 
         @Override
-        public int compareTo(TDC o) {
-            int value = 0;
+        public void addToBank(DataBank bank, int row) {
+            super.addToBank(bank, row);
+            bank.setInt("TDC", row, tdc);
+        }
+        
+        @Override
+        public void readFromBank(DataBank bank, int row) {
+            super.readFromBank(bank, row);
+            this.tdc = bank.getInt("TDC", row);
+        }
+        
+        
+        @Override
+        public boolean pilesUp(DGTZ other){
+            TDC o = (TDC) other;
+            double delta = constants.getInt(run, this.getType(), EventMergerEnum.READOUT_HOLDOFF, 0, this.getLayer(), this.getComponent())
+                         / constants.getDouble(this.getType(), EventMergerEnum.TDC_CONV);                                   
+            if(delta==0) delta = Double.MAX_VALUE;
+                
+            return  this.getSector()    == o.getSector()    &&
+                    this.getLayer()     == o.getLayer()     &&
+                    this.getComponent() == o.getComponent() &&
+                    this.getOrder()     == o.getOrder()     &&
+                    this.tdc-o.tdc<delta;
+        }
+        
+        @Override
+        public boolean inWindow() {
+            double delta = constants.getInt(run, this.getType(), EventMergerEnum.READOUT_WINDOW, 0, this.getLayer(), this.getComponent());
+            return (delta==0 || (this.tdc>0 && this.tdc<delta));
+        }
+        
+        @Override
+        public int compareTo(DetectorDescriptor other) {
+            TDC o = (TDC) other;
             int CompSec = this.getSector()    < o.getSector()    ? -1 : this.getSector()   == o.getSector() ? 0 : 1;
             int CompLay = this.getLayer()     < o.getLayer()     ? -1 : this.getLayer()    == o.getLayer() ? 0 : 1;
             int CompCom = this.getComponent() < o.getComponent() ? -1 : this.getComponent()== o.getComponent()? 0 : 1;
@@ -649,14 +410,14 @@ public class ADCTDCMerger {
             int value3 = ((CompOrd == 0) ? CompTim : CompOrd);
             int value2 = ((CompCom == 0) ? value3 : CompCom);
             int value1 = ((CompLay == 0) ? value2 : CompLay);
-            value = ((CompSec == 0) ? value1 : CompSec);
+            int value = ((CompSec == 0) ? value1 : CompSec);
 
             return value;
         }
         
         public void show() {
-            System.out.println("Sector/Layer/Component/Order: " + sector + "/"+ layer + "/" + component + "/" + order + " TDC: " + tdc);
+            System.out.println(this.toString() + " TDC: " + tdc);
         }
     }
-    
+ 
 }

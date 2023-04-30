@@ -1,4 +1,9 @@
 package org.jlab.analysis.eventmerger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
@@ -22,9 +27,72 @@ import org.jlab.utils.options.OptionParser;
 
 public class EventMerger {
    
+    private boolean suppressDoubleHits = true;
+    private EventMergerConstants constants = new EventMergerConstants();
+    
+    private List<DetectorType> detectors;
+    
+
     public EventMerger() {
+        detectors = Arrays.asList(DetectorType.DC, DetectorType.FTOF);
+        printDetectors();
     }
 
+    public EventMerger(String[] dets, boolean dhits) {
+        suppressDoubleHits = dhits;
+        System.out.println("Double hits suppression flag set to " + suppressDoubleHits);
+        detectors = new ArrayList<>();
+        for(String d : dets) detectors.add(DetectorType.getType(d));
+        printDetectors();
+    }
+
+    private void printDetectors() {
+        System.out.print("\nMerging activated for detectors: ");
+        for(DetectorType det : detectors) System.out.print(det.getName() + " ");
+        System.out.println("\n");
+    }
+    
+    /**
+     * Append merged banks to hipo event
+     * 
+     * @param event
+     * @param bg1
+     * @param bg2
+     */
+    public void mergeEvents(DataEvent event, DataEvent bg1, DataEvent bg2) {
+        
+        if(!event.hasBank("RUN::config") || !bg1.hasBank("RUN::config") || !bg2.hasBank("RUN::config")) {
+            System.out.println("Missing RUN::config bank");
+            return;
+        }
+        
+        if(event.hasBank("DC::doca")) event.removeBank("DC::doca");
+        
+        ADCTDCMerger merger = new ADCTDCMerger(constants, event, bg1, bg2);
+        merger.setSuppressDoubleHits(suppressDoubleHits);
+        
+        for(DetectorType det : detectors) {
+            
+            List<DataBank> banks = new ArrayList<>();
+            List<String>   names = new ArrayList<>();
+            
+            if(EventMergerConstants.ADCs.contains(det)) {
+                names.add(det.getName()+"::adc");
+                banks.add(merger.getADCBank(det)); 
+            }
+            if(EventMergerConstants.TDCs.contains(det)) {
+                names.add(det.getName()+"::tdc");
+                banks.add(merger.getTDCBank(det));
+            }
+            if(banks.isEmpty())
+                System.out.println("Unknown detector:" + det);
+            else {
+                event.removeBanks(names.toArray(String[]::new));
+                event.appendBanks(banks.toArray(DataBank[]::new));
+            }
+        }
+    }
+    
     public static void main(String[] args)  {
 
         DefaultLogger.debug();
@@ -50,8 +118,7 @@ public class EventMerger {
             boolean doubleHits = true;
             if(parser.getOption("-s").intValue()==0) doubleHits = false;
             
-            EventMerger en = new EventMerger();
-            ADCTDCMerger adctdcMerger = new ADCTDCMerger(detectors.split(","),doubleHits);
+            EventMerger merger = new EventMerger(detectors.split(","),doubleHits);
 
             int counter = 0;
 
@@ -77,7 +144,7 @@ public class EventMerger {
                 if(!readerBg.hasEvent()) break;
                 DataEvent eventBg2  = readerBg.getNextEvent();
                 
-                adctdcMerger.updateEventWithMergedBanks(eventData, eventBg1, eventBg2);
+                merger.mergeEvents(eventData, eventBg1, eventBg2);
                 writer.writeEvent(eventData);
                 progress.updateStatus();
                 if(maxEvents>0){
