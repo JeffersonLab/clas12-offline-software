@@ -21,15 +21,15 @@ import org.jlab.utils.groups.IndexedList;
  */
 public final class URWellStripFactory {
 
-    URWellGeant4Factory factory;
-    IndexedList<Line3D> globalStrips = new IndexedList(3);
-    IndexedList<Line3D> localStrips  = new IndexedList(3);
-    IndexedList<Plane3D> planeStrips  = new IndexedList(3);
-    int NRegions;
-    int NSectors;
-    int NChambers;
-    int NLayers;
-    boolean Proto;
+    private URWellGeant4Factory factory;
+    private IndexedList<Line3D>  globalStrips = new IndexedList(3);
+    private IndexedList<Line3D>  localStrips  = new IndexedList(3);
+    private IndexedList<Plane3D> planeStrips  = new IndexedList(3);
+    private int nRegions;
+    private int nSectors;
+    private int nChambers;
+    private int nLayers;
+    private boolean isProto;
     
     public URWellStripFactory() {
     }
@@ -52,36 +52,39 @@ public final class URWellStripFactory {
         this.init(cp, false, 1);
     }
    
-        /**
+    /**
      * Create the strip factory based on constants from CCDB.
-     * Currently constants are defined in the URWellConstants class. 
+     * Currently constants are defined in the URWellConstants class.
      * They will be moved to CCDB when finalized).
      * @param cp database provide
+     * @param prototype
+     * @param regions
      */
-    public URWellStripFactory(DatabaseConstantProvider cp, boolean isProto, int Nregions) {
-        this.init(cp, isProto, Nregions);
+    public URWellStripFactory(DatabaseConstantProvider cp, boolean prototype, int regions) {
+        this.init(cp, prototype, regions);
     }
     
     /**
      * Initialize the factory by the strip maps
      * @param cp
+     * @param prototype
+     * @param regions
      */
-    public void init(DatabaseConstantProvider cp, boolean isProto, int Nregions) {
-        factory = new URWellGeant4Factory(cp, isProto, Nregions);
-        Proto = isProto;
-        if(isProto == false){
-         //   NRegions = URWellConstants.NREGIONS;
-            NSectors = URWellConstants.NSECTORS;
-            NChambers= URWellConstants.NCHAMBERS;
-            NLayers = URWellConstants.NLAYERS;
-
-        }else{
-            NRegions = URWellConstants.NREGIONS_PROTO;
-            NSectors = URWellConstants.NSECTORS_PROTO;
-            NChambers= URWellConstants.NCHAMBERS_PROTO;
-            NLayers = URWellConstants.NLAYERS;
+    public void init(DatabaseConstantProvider cp, boolean prototype, int regions) {
+        factory = new URWellGeant4Factory(cp, prototype, regions);
+        isProto = prototype;
+        if(!isProto){
+            nRegions  = URWellConstants.NREGIONS;
+            nSectors  = URWellConstants.NSECTORS;
+            nChambers = URWellConstants.NCHAMBERS;
+            nLayers   = URWellConstants.NLAYERS;
         }
-        
+        else {
+            nRegions  = URWellConstants.NREGIONS_PROTO;
+            nSectors  = URWellConstants.NSECTORS_PROTO;
+            nChambers = URWellConstants.NCHAMBERS_PROTO;
+            nLayers   = URWellConstants.NLAYERS;
+        }
         this.fillStripLists();
         this.fillPlaneLists();
     }
@@ -93,7 +96,7 @@ public final class URWellStripFactory {
      */
     public int getNStripSector() {
         int nStrips = 0;
-        for (int i = 0; i < NChambers; i++) {
+        for (int i = 0; i < nChambers; i++) {
             nStrips += getNStripChamber(i);
         }
         return nStrips;
@@ -142,7 +145,7 @@ public final class URWellStripFactory {
     public int getChamberIndex(int strip) {
         int nStripTotal = 0;
 
-        for(int i=0; i<NChambers; i++) {
+        for(int i=0; i<nChambers; i++) {
             nStripTotal += this.getNStripChamber(i);
             
             if(strip <= nStripTotal){
@@ -223,7 +226,7 @@ public final class URWellStripFactory {
         Vector3d end = new Vector3d(eX, eY, eZ);
 
         // Get Chamber Volume
-        Geant4Basic chamberVolume = factory.getChamberVolume(sector, chamberIndex+1, layer, Proto);
+        Geant4Basic chamberVolume = factory.getChamberVolume(sector, chamberIndex+1, layer, isProto);
             
         // 2 point defined before wrt the GLOBAL frame     
         Vector3d globalOrigin = chamberVolume.getGlobalTransform().transform(origin);
@@ -272,12 +275,12 @@ public final class URWellStripFactory {
     
     private void fillStripLists() {
         
-        for(int ir=0; ir<NRegions; ir++) {
+        for(int ir=0; ir<nRegions; ir++) {
             int region = ir+1;
-            for(int is=0; is<NSectors; is++) {
+            for(int is=0; is<nSectors; is++) {
                 int sector = is+1;
-                if(Proto==true) sector =6;
-                for(int il=0; il<NLayers; il++) {
+                if(isProto==true) sector =6;
+                for(int il=0; il<nLayers; il++) {
                     int layer = (2*region-1) + il;
 
                     for(int ic=0; ic<this.getNStripSector(); ic++) {
@@ -319,12 +322,12 @@ public final class URWellStripFactory {
     
     private void fillPlaneLists() {
 
-        for(int ir=0; ir<NRegions; ir++) {
+        for(int ir=0; ir<nRegions; ir++) {
             int region = ir+1;
-            for(int is=0; is<NSectors; is++) {
+            for(int is=0; is<nSectors; is++) {
                 int sector = is+1;
-                if(Proto==true) sector =6;
-                for(int il=0; il<NLayers; il++) {
+                if(isProto==true) sector =6;
+                for(int il=0; il<nLayers; il++) {
  
                     int layer = (2*region-1) + il;
 
@@ -393,7 +396,7 @@ public final class URWellStripFactory {
         Vector3D Dir_line = line.originDir();
 
         Vector3D normal_plane = Dir_strip_test.cross(Dir_line);
-        if(Proto ==true) normal_plane = Dir_line.cross(Dir_strip_test);
+        if(isProto ==true) normal_plane = Dir_line.cross(Dir_strip_test);
         
         Plane3D plane = new Plane3D(First_strip.origin(), normal_plane);
 
@@ -408,9 +411,10 @@ public final class URWellStripFactory {
 
         URWellGeant4Factory factory = new URWellGeant4Factory(cp,true,2);
 
-        URWellStripFactory factory2 = new URWellStripFactory(cp,true,2);
+        URWellStripFactory factory2 = new URWellStripFactory(cp,false,1);
   
         Plane3D plane = factory2.getPlane(6, 1, 200);
+        System.out.println(plane.toString());
 
         
     }
