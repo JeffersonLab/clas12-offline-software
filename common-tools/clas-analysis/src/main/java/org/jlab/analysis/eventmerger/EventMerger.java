@@ -2,6 +2,10 @@ package org.jlab.analysis.eventmerger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.jlab.detector.banks.RawBank;
+import org.jlab.detector.banks.RawBank.OrderType;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -28,27 +32,70 @@ import org.jlab.utils.options.OptionParser;
 public class EventMerger {
    
     private boolean suppressDoubleHits = true;
+    private boolean preserveHitOrder = true;
     private EventMergerConstants constants = new EventMergerConstants();
     
     private List<DetectorType> detectors;
+    private OrderType[] orders;
     
 
     public EventMerger() {
         detectors = Arrays.asList(DetectorType.DC, DetectorType.FTOF);
-        printDetectors();
+        orders = this.getOrders(OrderType.NOMINAL.name(),OrderType.BGADDED_NOMINAL.name(),OrderType.BGREMOVED.name());
+        printConfiguration();
     }
 
-    public EventMerger(String[] dets, boolean dhits) {
+    public EventMerger(String[] dets, String[] types, boolean dhits, boolean ohits) {
         suppressDoubleHits = dhits;
+        preserveHitOrder = ohits;
+        detectors = this.getDetectors(dets);
+        orders = this.getOrders(types);
+        printConfiguration();
+    }
+    
+    private List<DetectorType> getDetectors(String[] dets) {
+        List<DetectorType> all = new ArrayList<>();
+        if(dets.length==1 && dets[0].equals("ALL")) {
+            all.addAll(EventMergerConstants.ADCs);
+            for(DetectorType t : EventMergerConstants.TDCs) {
+                if(!all.contains(t)) all.add(t);
+            }
+        }
+        else {
+            for(String d : dets) all.add(DetectorType.getType(d));
+        }
+        return all;
+    }
+    
+    private OrderType[] getOrders(String... type) {
+        try {
+            return RawBank.createFilterGroup(type);
+        } catch (NoSuchFieldException ex) {
+            Logger.getLogger(EventMerger.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalArgumentException ex) {
+            Logger.getLogger(EventMerger.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(EventMerger.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+    
+    private void printConfiguration() {
         System.out.println("Double hits suppression flag set to " + suppressDoubleHits);
-        detectors = new ArrayList<>();
-        for(String d : dets) detectors.add(DetectorType.getType(d));
-        printDetectors();
+        System.out.println("Preserve hit list order flag set to " + preserveHitOrder);
+        this.printDetectors();
+        this.printOrders();
     }
 
     private void printDetectors() {
         System.out.print("\nMerging activated for detectors: ");
         for(DetectorType det : detectors) System.out.print(det.getName() + " ");
+        System.out.println("\n");
+    }
+    
+    private void printOrders() {
+        System.out.print("\nSAving hits for the following categories: ");
+        for(OrderType order : orders) System.out.print(order.name()+ " ");
         System.out.println("\n");
     }
     
@@ -70,6 +117,8 @@ public class EventMerger {
         
         ADCTDCMerger merger = new ADCTDCMerger(constants, event, bg1, bg2);
         merger.setSuppressDoubleHits(suppressDoubleHits);
+        merger.setPreserveHitOrder(preserveHitOrder);
+        merger.setSelectedOrders(orders);
         
         for(DetectorType det : detectors) {
             
@@ -78,11 +127,11 @@ public class EventMerger {
             
             if(EventMergerConstants.ADCs.contains(det)) {
                 names.add(det.getName()+"::adc");
-                banks.add(merger.getADCBank(det)); 
+                banks.add(merger.mergeADCs(det)); 
             }
             if(EventMergerConstants.TDCs.contains(det)) {
                 names.add(det.getName()+"::tdc");
-                banks.add(merger.getTDCBank(det));
+                banks.add(merger.mergeTDCs(det));
             }
             if(banks.isEmpty())
                 System.out.println("Unknown detector:" + det);
@@ -103,22 +152,25 @@ public class EventMerger {
         parser.addRequired("-b"    ,"background file");
         parser.setRequiresInputList(false);
         parser.addOption("-n"    ,"-1", "maximum number of events to process");
-        parser.addOption("-d"    ,"DC,FTOF", "list of detectors, for example \"DC,FTOF,HTCC\"");
+        parser.addOption("-d"    ,"DC,FTOF", "list of detectors, for example \"DC,FTOF,HTCC\" or \"ALL\" for all available detectors");
         parser.addOption("-s"    ,"1", "suppress double TDC hits on the same component, 0-no suppression, 1-suppression");
+        parser.addOption("-l"    ,"1", "preserve initial hit order (for compatibility with truth matching, 0-false, 1-true");
+        parser.addOption("-t"    ,"NOMINAL,BGADDED_NOMINAL,BGREMOVED", "list of hit OrderTypes to be saved");
         parser.parse(args);
         
-        if(parser.hasOption("-i")==true&&parser.hasOption("-o")==true&&parser.hasOption("-b")==true){
+        if(parser.hasOption("-i") && parser.hasOption("-o")){
 
             String dataFile   = parser.getOption("-i").stringValue();
             String outputFile = parser.getOption("-o").stringValue();
             String bgFile     = parser.getOption("-b").stringValue();
             
-            int     maxEvents  = parser.getOption("-n").intValue();
-            String  detectors  = parser.getOption("-d").stringValue();
-            boolean doubleHits = true;
-            if(parser.getOption("-s").intValue()==0) doubleHits = false;
+            int     maxEvents   = parser.getOption("-n").intValue();
+            String  detectors   = parser.getOption("-d").stringValue();
+            String  ordertypes  = parser.getOption("-t").stringValue();
+            boolean doubleHits  = (parser.getOption("-s").intValue()==1);
+            boolean hitOrder    = (parser.getOption("-l").intValue()==1);
             
-            EventMerger merger = new EventMerger(detectors.split(","),doubleHits);
+            EventMerger merger = new EventMerger(detectors.split(","),ordertypes.split(","),doubleHits,hitOrder);
 
             int counter = 0;
 
