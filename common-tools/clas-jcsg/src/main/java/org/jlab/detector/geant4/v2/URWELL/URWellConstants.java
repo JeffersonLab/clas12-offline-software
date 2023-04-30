@@ -2,21 +2,18 @@ package org.jlab.detector.geant4.v2.URWELL;
 
 
 import org.jlab.detector.calib.utils.DatabaseConstantProvider; 
-import eu.mihosoft.vrl.v3d.Vector3d;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.geom.prim.Line3D;
-import org.jlab.geom.prim.Point3D;
-import org.jlab.geom.prim.Vector3D;
 
 
 public class URWellConstants {
 
     private final static String CCDBPATH = "/geometry/urwell/";
     
-    public final static int NMAXREGIONS  = 2;    //number of regions 
-    public final static int NSECTORS  = 6;    //number of sectors
-    public final static int NLAYERS   = 2;    //number of layers
-    public final static int NCHAMBERS = 3;    //number of chambers in a sector
+    public final static int NMAXREGIONS = 2;    //max number of regions 
+    public final static int NREGIONS    = 1;    //number of regions 
+    public final static int NSECTORS    = 6;    //number of sectors
+    public final static int NLAYERS     = 2;    //number of layers
+    public final static int NCHAMBERS   = 3;    //number of chambers in a sector
 
     public final static double XENLARGEMENT = 0.5; // cm
     public final static double YENLARGEMENT = 1.;  // cm
