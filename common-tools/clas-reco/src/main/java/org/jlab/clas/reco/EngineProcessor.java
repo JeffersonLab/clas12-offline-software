@@ -237,16 +237,7 @@ public class EngineProcessor {
     public void processEvent(DataEvent event){
         for(Map.Entry<String,ReconstructionEngine> engine : this.processorEngines.entrySet()){
             try {
-                if (!engine.getValue().wroteConfig) {
-                    engine.getValue().wroteConfig = true;
-                    JsonUtils.extend(event, ReconstructionEngine.CONFIG_BANK_NAME, "json",
-                            engine.getValue().generateConfig());
-                }
-                if (engine.getValue().dropOutputBanks) {
-                    engine.getValue().dropBanks(event);
-                }
-                if(engine.getValue().applyTriggerMask(event))
-                    engine.getValue().processDataEvent(event);
+                engine.getValue().filterEvent(event);
             } catch (Exception e){
                 LOGGER.log(Level.SEVERE, "[Exception] >>>>> engine : {0}\n\n", engine.getKey());
                 e.printStackTrace();
