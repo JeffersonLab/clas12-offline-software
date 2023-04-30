@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jlab.clas.reco.ReconstructionEngine;
+import org.jlab.detector.banks.RawBank.OrderType;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
@@ -26,7 +27,6 @@ public class DCEngine extends ReconstructionEngine {
     private int        t2d            = 1;
     private int        nSuperLayer    = 5;
     private String     geoVariation   = "default";
-    private boolean    denoise        = false;
     private String     bankType       = "HitBasedTrkg";
     private String     inBankPrefix   = null;
     private String     outBankPrefix  = null;
@@ -89,10 +89,6 @@ public class DCEngine extends ReconstructionEngine {
                 nSuperLayer =6;
             }    
                         
-        // set flag for denoise support (Engine dependent)
-        if(this.getEngineConfigString("denoise")!=null)       
-            denoise = Boolean.valueOf(this.getEngineConfigString("denoise"));
-
         //Set input bank names
         if(this.getEngineConfigString("inputBankPrefix")!=null) {
             inBankPrefix = this.getEngineConfigString("inputBankPrefix");
@@ -163,8 +159,7 @@ public class DCEngine extends ReconstructionEngine {
                                            swapDCRBBits,
                                            nSuperLayer, 
                                            selectedSector,
-                                           shifts,
-                                           rawBankOrders);
+                                           shifts);
         this.LoadTables();
         this.initBanks();
         this.setDropBanks();
@@ -187,8 +182,8 @@ public class DCEngine extends ReconstructionEngine {
         
     }
     
-    public boolean doDenoise() {
-        return this.denoise;
+    public OrderType[] getRawBankOrders() {
+        return this.rawBankOrders;
     }
     
     public int getRun(DataEvent event) {

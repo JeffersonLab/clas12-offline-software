@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jlab.clas.swimtools.Swimmer;
+import org.jlab.detector.banks.RawBank.OrderGroups;
+import org.jlab.detector.banks.RawBank.OrderType;
 import org.jlab.detector.banks.RawDataBank;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
@@ -33,9 +35,10 @@ import org.jlab.utils.groups.IndexedTable;
  */
 public class HitReader {
 
-    private Banks bankNames          = null;
-    private DCGeant4Factory detector = null;
-    private ConstantsManager manager = null;
+    private Banks bankNames           = null;
+    private DCGeant4Factory detector  = null;
+    private ConstantsManager manager  = null;
+    private OrderType[] rawBankOrders = null;
     
     private int run = 0;
     private long tiTimeStamp = 0;
@@ -66,10 +69,11 @@ public class HitReader {
         this.detector = detector;            
     }
     
-    public HitReader(Banks names, ConstantsManager manager, DCGeant4Factory detector) {
+    public HitReader(Banks names, OrderType[] rawBankOrders, ConstantsManager manager, DCGeant4Factory detector) {
         this.bankNames= names;
         this.manager = manager;
         this.detector = detector;            
+        this.rawBankOrders = rawBankOrders;        
     }
     
    public void initialize(DataEvent event) {
@@ -204,15 +208,9 @@ public class HitReader {
                              NoiseReductionParameters parameters,
                              Clas12NoiseResult results) {
         this.initialize(event);
-        this.fetch_DCHits(false, noiseAnalysis, parameters, results);
+        this.fetch_DCHits(noiseAnalysis, parameters, results);
     }
         
-    public void fetch_DCHits(DataEvent event, boolean filterOnOrder, Clas12NoiseAnalysis noiseAnalysis,
-                             NoiseReductionParameters parameters,
-                             Clas12NoiseResult results) {
-        this.initialize(event);
-        this.fetch_DCHits(filterOnOrder, noiseAnalysis, parameters, results);
-    }
      /**
      * reads the hits using clas-io methods to get the EvioBank for the DC and
      * fill the values to instantiate the DChit and MChit classes.This methods
@@ -222,25 +220,25 @@ public class HitReader {
      * @param parameters
      * @param results
      */
-    private void fetch_DCHits(boolean filterOnOrder, Clas12NoiseAnalysis noiseAnalysis,
+    private void fetch_DCHits(Clas12NoiseAnalysis noiseAnalysis,
                              NoiseReductionParameters parameters,
                              Clas12NoiseResult results) {
 
         _DCHits = new ArrayList<>();
 
+        RawDataBank bankDGTZ = new RawDataBank(bankNames.getTdcBank(), OrderGroups.NODENOISE);
+        bankDGTZ.read(event);
+
         // event selection, including cut on max number of hits
         if( run <= 0 ||
             tiTimeStamp < 0 ||
-            !event.hasBank(bankNames.getTdcBank()) ||
-            event.getBank(bankNames.getTdcBank()).rows()>Constants.MAXHITS ) {
+            bankDGTZ.rows()==0 || bankDGTZ.rows()>Constants.MAXHITS ) {
             return;
         }
         
         this.getDCRBJitters(Constants.getInstance().isSWAPDCRBBITS());
        
-        RawDataBank bankDGTZ = new RawDataBank(bankNames.getTdcBank(),Constants.getInstance().getRawBankOrders());
-        bankDGTZ.read(event);
-        //DataBank bankDGTZ = event.getBank(bankNames.getTdcBank());
+//        DataBank bankDGTZ = event.getBank(bankNames.getTdcBank());
 
         int rows = bankDGTZ.rows();
         int[] sector = new int[rows];
@@ -252,6 +250,8 @@ public class HitReader {
         int[] jitter = new int[rows];
         int[] useMChit = new int[rows];
 
+        Map<Integer, Integer> trueIndices = new HashMap<>();
+
         for (int i = 0; i < rows; i++) {
             sector[i]     = bankDGTZ.getByte("sector", i);
             layer[i]      = (bankDGTZ.getByte("layer", i)-1)%6 + 1;
@@ -260,6 +260,7 @@ public class HitReader {
             order[i]      = bankDGTZ.trueOrder(i);
             jitter[i]     = this.getJitter(sector[i], bankDGTZ.getByte("layer", i), wire[i], order[i]);
             tdc[i]        = bankDGTZ.getInt("TDC", i) - jitter[i];
+            trueIndices.put(bankDGTZ.trueIndex(i), i);
         }
 
 
@@ -279,10 +280,11 @@ public class HitReader {
 
         noiseAnalysis.findNoise(sector, superlayer, layer, wire, results);
 
-        for (int i = 0; i < rows; i++) {
+        RawDataBank bankFiltered = new RawDataBank(bankNames.getTdcBank(), rawBankOrders);
+        bankFiltered.read(event);
+        for (int row = 0; row < bankFiltered.rows(); row++) {
+            int i = trueIndices.get(bankFiltered.trueIndex(row));
             boolean passHit = true;
-            if(filterOnOrder && order[i]!=0)
-                passHit = false;
             if (wirestat != null) {
                 if (wirestat.getIntValue("status", sector[i], layer[i]+(superlayer[i]-1)*6, wire[i]) != 0)
                     passHit = false;
