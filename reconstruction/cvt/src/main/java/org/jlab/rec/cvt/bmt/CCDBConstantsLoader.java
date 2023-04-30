@@ -18,15 +18,7 @@ public class CCDBConstantsLoader {
 
     public static Logger LOGGER = Logger.getLogger(CCDBConstantsLoader.class.getName());
 
-    public CCDBConstantsLoader() {
-        // TODO Auto-generated constructor stub
-    }
-
-    static boolean CSTLOADED = false;
-
-   
-    //private static DatabaseConstantProvider DB;
-    
+    public CCDBConstantsLoader() {}
 
     public static final synchronized void Load(DatabaseConstantProvider dbprovider) {
         // initialize the constants
@@ -294,7 +286,6 @@ public class CCDBConstantsLoader {
         BMTConstants.setB_grid(MAG_grid);
         BMTConstants.setPar_grid();
         dbprovider.disconnect();
-        CSTLOADED = true;
     }
 
 }

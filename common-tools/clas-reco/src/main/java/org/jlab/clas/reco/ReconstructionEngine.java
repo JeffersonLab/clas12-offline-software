@@ -347,6 +347,21 @@ public abstract class ReconstructionEngine implements Engine {
         return run>0;
     }
     
+    public void filterEvent(DataEvent dataEvent) {
+        if (!this.wroteConfig) {
+            this.wroteConfig = true;
+            JsonUtils.extend(dataEvent, CONFIG_BANK_NAME, "json", this.generateConfig());
+        }
+        if (this.dropOutputBanks) {
+            this.dropBanks(dataEvent);
+        }
+        if(this.applyTriggerMask(dataEvent)) {
+            if (this.checkRunNumber(dataEvent)) {
+                this.processDataEvent(dataEvent);
+            }
+        }        
+    }
+    
     @Override
     public EngineData execute(EngineData input) {
 
@@ -381,18 +396,7 @@ public abstract class ReconstructionEngine implements Engine {
             }
                     
             try {
-                if (!this.wroteConfig) {
-                    this.wroteConfig = true;
-                    JsonUtils.extend(dataEventHipo, CONFIG_BANK_NAME, "json", this.generateConfig());
-                }
-                if (this.dropOutputBanks) {
-                    this.dropBanks(dataEventHipo);
-                }
-                if(this.applyTriggerMask(dataEventHipo)) {
-                    if (this.checkRunNumber(dataEventHipo)) {
-                        this.processDataEvent(dataEventHipo);
-                    }
-                }
+                this.filterEvent(dataEventHipo);
                 output.setData(mt, dataEventHipo.getHipoEvent());
             } catch (Exception e) {
                 String msg = String.format("Error processing input event%n%n%s", ClaraUtil.reportException(e));

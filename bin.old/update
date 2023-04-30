@@ -1,9 +1,0 @@
-#!/bin/sh -f
-
-source `dirname $0`/env.sh 
-
-java -cp "$CLAS12DIR/lib/clas/*:$CLAS12DIR/lib/utils/*:$CLAS12DIR/lib/plugins/*" org.jlab.clas.update.UpdateManager link http://clasweb.jlab.org/clas12maven/org/jlab/coat/coat-libs/3.0-SNAPSHOT/ coat-libs-3.0-SNAPSHOT.jar $CLAS12DIR/lib/clas
-
-java -cp "$CLAS12DIR/lib/clas/*:$CLAS12DIR/lib/utils/*:$CLAS12DIR/lib/plugins/*" org.jlab.clas.update.UpdateManager link https://userweb.jlab.org/~devita/kpp/ KPP-Plots-1.0.jar  $CLAS12DIR/lib/utils
-
-java -cp "$CLAS12DIR/lib/clas/*:$CLAS12DIR/lib/utils/*:$CLAS12DIR/lib/plugins/*" org.jlab.clas.update.UpdateManager link https://userweb.jlab.org/~devita/kpp/ KPP-Monitoring-1.0.jar  $CLAS12DIR/lib/utils
