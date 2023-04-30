@@ -535,6 +535,7 @@ public class RICHParticle {
         for (int ip=0; ip<RICHConstants.N_HYPO; ip++)if(Math.abs(pid) == RICHConstants.HYPO_LUND[ip])ok=1;
         if(ok==0) return 0.0;
 
+        if(changle(11,0)==0)return 0.0;
         double ratio = Math.pow(Math.sin(changle(pid,0)),2)/Math.pow(Math.sin(changle(11,0)),2);
         double nele  = richpar.RICH_NOMINAL_NELE;
 
@@ -591,6 +592,7 @@ public class RICHParticle {
         for (int ip=0; ip<RICHConstants.N_HYPO; ip++)if(Math.abs(pid) == RICHConstants.HYPO_LUND[ip])ok=1;
         if(ok==0 || irefle<0 || irefle>RICHConstants.N_PATH) return 0.0;
 
+        if(changle(11,0)==0)return 0.0;
         double ratio = Math.pow(Math.sin(changle(pid,0)),2)/Math.pow(Math.sin(changle(11,0)),2);
         double nele  = nchele_emission[irefle];
 
@@ -758,10 +760,11 @@ public class RICHParticle {
             if(entrance.get_layer()!=ilay_emission || entrance.get_component()!=ico_emission)
                 System.out.format(" AERO CROSS ilay %4d %4d  ico %4d %4d \n",entrance.get_layer(),ilay_emission,entrance.get_component(),ico_emission);
         }
-        if(richcal.get_AeroStatus(sector, ilay_emission, ico_emission)>0){
+        // perform photon reconstruction, to be saved in RICH::Ring
+        /*if(richcal.get_AeroStatus(sector, ilay_emission, ico_emission)>0){
             if(debugMode>=1)System.out.format(" AERO bad status: disregard \n");
             return false;
-        }
+        }*/
        
         if(richpar.USE_ELECTRON_ANGLES==1){
             for(int iref=0; iref<3; iref++){

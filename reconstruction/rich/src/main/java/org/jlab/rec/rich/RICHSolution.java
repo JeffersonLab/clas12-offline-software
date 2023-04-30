@@ -99,11 +99,12 @@ public class RICHSolution {
     // ----------------
 
     // ----------------
-    public boolean is_used() { if(OK>10 && status==0)return true; return false;} 
+    // good for the current hypo (111) or other (+1000)
+    public boolean is_used() { if(OK>110)return true; return false;} 
     // ----------------
 
     // ----------------
-    public boolean is_OK() { if(OK>10)return true; return false;} 
+    public boolean is_OK() { if(OK==111)return true; return false;} 
     // ----------------
 
     // ----------------
@@ -298,13 +299,14 @@ public class RICHSolution {
     // ----------------
     
     // ----------------
-    public void set_status(int isec, RICHCalibration richcal) {
+    public void set_status(int isec, int lai, int ico, int iqua, RICHCalibration richcal) {
     // ----------------
     // record if there is a bad-status mirror on the photon path
 
         int debugMode = 0;
 
         if(!exist()) return;
+        if(richcal.get_AeroStatus(isec, lai, ico, iqua)>0){status=1; return;} 
         if(raytracks.size()>2){
             for(int i=2; i<raytracks.size(); i++){
                 double off = Math.pow(10,i-2);
