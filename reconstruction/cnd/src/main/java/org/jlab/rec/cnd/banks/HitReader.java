@@ -74,7 +74,7 @@ public class HitReader {
 				for(int j=0; j<ntdc; j++){
 					int s = bankTDC.getByte("sector", j);
                    			int l = bankTDC.getByte("layer", j);
-                 			int o = bankTDC.getByte("order", j);
+                 			int o = bankTDC.trueOrder(j);
 
 					if(s==sector && l == layer  && o == order+2 ){
 					//System.out.println("s "+ s+" sector "+sector+" l "+l+" layer "+layer+" o "+o+" order "+order);

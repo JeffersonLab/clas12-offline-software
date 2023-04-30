@@ -86,7 +86,7 @@ public class DCHBEngine extends DCEngine {
         /* 7 */
         RecoBankWriter rbc = new RecoBankWriter(this.getBanks());
         /* 8 */
-        HitReader hitRead = new HitReader(this.getBanks(), super.getConstantsManager(), Constants.getInstance().dcDetector);
+        HitReader hitRead = new HitReader(this.getBanks(), this.getRawBankOrders(), super.getConstantsManager(), Constants.getInstance().dcDetector);
         /* 9 */
         hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results);
         

@@ -72,7 +72,7 @@ public final class LTCCHit {
         
         List<LTCCHit> hits = new LinkedList<>();
         for (int i = 0; i < bank.rows(); ++i) {
-            LTCCHit hit = new LTCCHit(bank, bank.trueIndex(i), spe, timing_offset, stat);
+            LTCCHit hit = new LTCCHit(bank, i, spe, timing_offset, stat);
             if (hit.isGood()) {
                 hits.add(hit);
             }
