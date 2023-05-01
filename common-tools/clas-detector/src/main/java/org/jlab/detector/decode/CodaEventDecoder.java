@@ -913,17 +913,10 @@ public class CodaEventDecoder {
              * and in particular from the given file
              * https://github.com/xbai0624/mpd_baseline_evaluation/blob/hb_quick_check/src/SRSRawEventDecoder.cpp
              */
-            double time_OF_DetectorDataDgtz = 0;
-            double time_OF_ADCData = 0;
-            double time_OF_setIntegral = 0;
-            double time_OF_setPedestal = 0;
-            double time_OF_addADC = 0;
-            double time_OF_add = 0;
 
             Map<Short, ArrayList<Short>> m_APV = new HashMap<>();
 
             Short HybridID = -1;
-            int FECID = -1;
 
             int[] intBuff = node.getIntData();
 
@@ -1069,7 +1062,6 @@ public class CodaEventDecoder {
                             i_apvTmp = i_apvTmp + 1;
                         }
 
-
                         Collections.sort(tmpList);
                         for (int ich = 5; ich < tmpList.size(); ich++) {
                             cmnMode = cmnMode + tmpList.get(ich);
@@ -1078,7 +1070,7 @@ public class CodaEventDecoder {
                         
                         for (int ich = 0; ich < n_APV_CH; ich++) {
                             //DetectorDataDgtz bank = new DetectorDataDgtz(crate, slot.intValue(), ich);
-
+                            
                             ADCData adcData = new ADCData();
                             adcData.setIntegral((int) (cur_APV.get(i_apv) - cmnMode));
                             adcData.setPedestal(ts);
