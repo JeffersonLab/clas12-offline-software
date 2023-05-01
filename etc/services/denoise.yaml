@@ -87,10 +87,11 @@ configuration:
     MAGFIELDS:
       magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
       magfieldTorusMap: Full_torus_r251_phi181_z251_25Jan2021.dat
+    DCCR:
+      rawBankGroup: "NODENOISE"
     DCRAI:
       #rawBankGroup: "DEFAULT"
       #rawBankGroup: "NODENOISE"
-      denoise: "true"
       outputBankPrefix: "DN"
     MLTD:
       run: "6302"
