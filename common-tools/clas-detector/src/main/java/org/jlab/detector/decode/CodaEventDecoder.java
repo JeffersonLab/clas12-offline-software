@@ -917,6 +917,7 @@ public class CodaEventDecoder {
             Map<Short, ArrayList<Short>> m_APV = new HashMap<>();
 
             Short HybridID = -1;
+            int FECID = -1;
 
             int[] intBuff = node.getIntData();
 
