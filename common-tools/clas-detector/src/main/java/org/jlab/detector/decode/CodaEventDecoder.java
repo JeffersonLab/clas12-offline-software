@@ -913,7 +913,6 @@ public class CodaEventDecoder {
              * and in particular from the given file
              * https://github.com/xbai0624/mpd_baseline_evaluation/blob/hb_quick_check/src/SRSRawEventDecoder.cpp
              */
-
             Map<Short, ArrayList<Short>> m_APV = new HashMap<>();
 
             Short HybridID = -1;
@@ -1067,11 +1066,13 @@ public class CodaEventDecoder {
                         for (int ich = 5; ich < tmpList.size(); ich++) {
                             cmnMode = cmnMode + tmpList.get(ich);
                         }
-                        cmnMode = cmnMode / ((double) (tmpList.size() - 5));                        
+                        cmnMode = cmnMode / ((double) (tmpList.size() - 5));
+
+                        System.out.println(slot + "    " + cmnMode);
                         
                         for (int ich = 0; ich < n_APV_CH; ich++) {
                             //DetectorDataDgtz bank = new DetectorDataDgtz(crate, slot.intValue(), ich);
-                            
+
                             ADCData adcData = new ADCData();
                             adcData.setIntegral((int) (cur_APV.get(i_apv) - cmnMode));
                             adcData.setPedestal(ts);
@@ -1492,7 +1493,8 @@ public class CodaEventDecoder {
     public static void main(String[] args) {
         EvioSource reader = new EvioSource();
         //reader.open("/Users/devita/clas_004013.evio.1000");
-        reader.open("/work/clas12/rafopar/uRWELL/Readout/APV25/urwell_001534.evio.00000");
+        //reader.open("/work/clas12/rafopar/uRWELL/Readout/APV25/urwell_001534.evio.00000");
+        reader.open("/work/clas12/rafopar/uRWELL/Readout/APV25/urwell_001576.evio.00000");
         //reader.open("/work/clas12/rafopar/uRWELL/Readout/APV25/urwell_001326.evio.00000");
         CodaEventDecoder decoder = new CodaEventDecoder();
         DetectorEventDecoder detectorDecoder = new DetectorEventDecoder();
