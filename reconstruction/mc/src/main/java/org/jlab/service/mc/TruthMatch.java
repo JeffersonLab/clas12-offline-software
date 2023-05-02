@@ -246,7 +246,6 @@ public class TruthMatch extends ReconstructionEngine {
 //            DataBank dbdcBank = event.getBank("DC::tdc");
 //            DataBank dbHitsBank = event.getBank("TimeBasedTrkg::TBHits");
 //            DataBank dbMCTrue = event.getBank("MC::True");
-
 //            System.out.println("=========                     DEBUGGING                      =========");
 //
 //            System.out.println("========= MC::Particle Bank =========");
@@ -666,8 +665,12 @@ public class TruthMatch extends ReconstructionEngine {
         }
 
         /**
-         * Check if two necessary banks exist otherwise will return null
+         * Check if three necessary banks exist otherwise will return null
          */
+        if (event.hasBank("ECAL::adc") == false) {
+            return null;
+        }
+
         if (event.hasBank("ECAL::hits") == false) {
             return null;
         }
@@ -687,12 +690,19 @@ public class TruthMatch extends ReconstructionEngine {
             clId2Pindex.put(index, pindex);
         }
 
+        DataBank adcBank = event.getBank("ECAL::adc");
         DataBank hitsBank = event.getBank("ECAL::hits");
 
         for (int ihit = 0; ihit < hitsBank.rows(); ihit++) {
             RecHit curHit = new RecHit();
 
             curHit.id = hitsBank.getShort("id", ihit) - 1;   // -1 for starting from 0
+
+            // Now let's make sure the hit is not removed by the background merging
+            if (adcBank.getByte("order", curHit.id) >= (byte) 10) {
+                continue;
+            }
+
             curHit.cid = (short) (hitsBank.getShort("clusterId", ihit) - 1);  // -1 for starting from 0
 
             int layer = (hitsBank.getInt("layer", ihit) - 1) / 3;  // PCAL 1(U)2(V)3(W), ECIN 4(U)5(V)6(W). ECOut 7(U)8(V)9(W)
@@ -750,8 +760,12 @@ public class TruthMatch extends ReconstructionEngine {
         }
 
         /**
-         * Check if two necessary banks exist otherwise will return null
+         * Check if three necessary banks exist otherwise will return null
          */
+        if (event.hasBank("FTCAL::adc") == false) {
+            return null;
+        }
+
         if (event.hasBank("FTCAL::hits") == false) {
             return null;
         }
@@ -774,12 +788,18 @@ public class TruthMatch extends ReconstructionEngine {
             }
         }
 
+        DataBank adcBank = event.getBank("FTCAL::adc");
         DataBank hitsBank = event.getBank("FTCAL::hits");
 
         for (int ihit = 0; ihit < hitsBank.rows(); ihit++) {
             RecHit curHit = new RecHit();
 
             curHit.id = hitsBank.getShort("hitID", ihit);   // Not removing 1, as hitID start from 0
+            // Now let's make sure the hit is not removed by the background merging
+            if (adcBank.getByte("order", curHit.id) >= (byte) 10) {
+                continue;
+            }
+
             curHit.cid = (short) (hitsBank.getShort("clusterID", ihit) - 1);  // -1 for starting from 0
 
             mcp.get((short) mchitsInFTCal.get(curHit.id).otid).MCLayersNeut |= 1L << FTCalBit;
@@ -845,8 +865,11 @@ public class TruthMatch extends ReconstructionEngine {
         }
 
         /**
-         * Check if two necessary banks exist otherwise will return null
+         * Check if three necessary banks exist otherwise will return null
          */
+        if (event.hasBank("FTHODO::adc") == false) {
+            return null;
+        }
         if (event.hasBank("FTHODO::hits") == false) {
             return null;
         }
@@ -869,12 +892,18 @@ public class TruthMatch extends ReconstructionEngine {
             }
         }
 
+        DataBank adcBank = event.getBank("FTHODO::adc");
         DataBank hitsBank = event.getBank("FTHODO::hits");
 
         for (int ihit = 0; ihit < hitsBank.rows(); ihit++) {
             RecHit curHit = new RecHit();
 
             curHit.id = hitsBank.getShort("hitID", ihit);   // Not removing 1, as hitID start from 0
+            // Now let's make sure the hit is not removed by the background merging
+            if (adcBank.getByte("order", curHit.id) >= (byte) 10) {
+                continue;
+            }
+
             curHit.cid = (short) (hitsBank.getShort("clusterID", ihit) - 1);  // -1 for starting from 0
             int layer = (int) hitsBank.getByte("layer", ihit) - 1; // 0 would correspond to the layer 1, and 1 would correspond to the layer 2
             int HodoLayerBit = FTHodoStartBit + layer;
@@ -946,7 +975,7 @@ public class TruthMatch extends ReconstructionEngine {
          * Check if three necessary banks exist otherwise will return null
          */
         if ((event.hasBank("CND::hits") == false) || (event.hasBank("CND::clusters") == false)
-                || (event.hasBank("REC::Scintillator") == false)) {
+                || (event.hasBank("REC::Scintillator") == false) || (event.hasBank("CND::adc") == false)) {
             // System.out.println("There is No CND cluster or there is No CND::hit or there is no REC::Scintillator bank present");
             return null;
         }
@@ -967,6 +996,7 @@ public class TruthMatch extends ReconstructionEngine {
             clId2Pindex.put(index, pindex);
         }
 
+        DataBank adcBank = event.getBank("CND::adc");
         DataBank hitsBank = event.getBank("CND::hits");
 
         for (int ihit = 0; ihit < hitsBank.rows(); ihit++) {
@@ -978,6 +1008,11 @@ public class TruthMatch extends ReconstructionEngine {
              * hitsBank.getShort("id", ihit) - 1; // -1, as id start from 1***
              */
             curHit.id = (int) hitsBank.getShort("indexLtdc", ihit) / 2;   // We should devide to 2, as each MC::True hit is digitized into two ADC/TDC hits.
+            // Now let's make sure the hit is not removed by the background merging
+            if (adcBank.getByte("order", curHit.id) >= (byte) 10) {
+                continue;
+            }
+
             curHit.cid = (short) (hitsBank.getShort("clusterid", ihit) - 1);  // -1 for starting from 0
 
             int layer = hitsBank.getInt("layer", ihit) - 1;
@@ -1333,8 +1368,8 @@ public class TruthMatch extends ReconstructionEngine {
             //tbHitIDs.put(tbHitsBank.getInt("id", itbHit) - 1, (short)tbHitsBank.getShort("trkID", itbHit) - 1);
             //tbHitIDs.put(tbHitsBank.getInt("id", itbHit) - 1, (short)(tbHitsBank.getByte("trkID", itbHit) - 1));
 
-            if (tbTrkID2RecTrInd.containsKey((short) tbHitsBank.getByte("trkID", itbHit) ) ) {
-                tbHitIDs.put(tbHitsBank.getInt("id", itbHit) - 1, (short) tbTrkID2RecTrInd.get((short) tbHitsBank.getByte("trkID", itbHit) ));
+            if (tbTrkID2RecTrInd.containsKey((short) tbHitsBank.getByte("trkID", itbHit))) {
+                tbHitIDs.put(tbHitsBank.getInt("id", itbHit) - 1, (short) tbTrkID2RecTrInd.get((short) tbHitsBank.getByte("trkID", itbHit)));
             }
         }
 
@@ -1691,7 +1726,7 @@ public class TruthMatch extends ReconstructionEngine {
         if ((event.hasBank("TimeBasedTrkg::TBHits") == false) || (event.hasBank("REC::Track") == false)) {
             return null;
         }
-        
+
         DataBank trkBank = event.getBank("REC::Track");
 
         /**
@@ -1699,10 +1734,10 @@ public class TruthMatch extends ReconstructionEngine {
          */
         DataBank clBank = event.getBank("TimeBasedTrkg::TBHits");
         DataBank tbtrkBank = event.getBank("TimeBasedTrkg::TBTracks");
-        
+
         /*
         * We need to get a conversion from HitID to Rec::Track Ind
-        */
+         */
         Map<Short, Short> tbTrkID2RecTrInd = new HashMap();
         for (short iRec = 0; iRec < trkBank.rows(); iRec++) {
             Byte det = trkBank.getByte("detector", iRec);
@@ -1712,20 +1747,18 @@ public class TruthMatch extends ReconstructionEngine {
                 tbTrkID2RecTrInd.put(tbtrkBank.getShort("id", index), iRec);
             }
         }
-        
-        
 
         for (int iCL = 0; iCL < clBank.rows(); iCL++) {
 
             short clID = (short) iCL;
-            short trkID = (short) (clBank.getByte("trkID", iCL) );
+            short trkID = (short) (clBank.getByte("trkID", iCL));
 
             if (trkID < 0) {
                 // This should not happen, just in case
                 continue;
             }
             //System.out.println("trkID = " + trkID);
-            int trInd = tbTrkID2RecTrInd.get(trkID );
+            int trInd = tbTrkID2RecTrInd.get(trkID);
             short pindex = trkBank.getShort("pindex", trInd);
             RecCluster curCl = new RecCluster();
             curCl.id = (short) (clBank.getShort("id", iCL) - 1);
