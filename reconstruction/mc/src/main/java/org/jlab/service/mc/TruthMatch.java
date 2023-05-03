@@ -39,6 +39,9 @@ public class TruthMatch extends ReconstructionEngine {
 
     @Override
     public boolean init() {
+        this.registerOutputBank("MC::RecMatch");
+        this.registerOutputBank("MC::GenMatch");
+
         return true;
     }
 
@@ -65,7 +68,7 @@ public class TruthMatch extends ReconstructionEngine {
         if (event.hasBank("REC::Particle") == false) {
             return false;
         }
-        
+
         /**
          * ********************************************************
          * The 1st thing, let's load MC particles
@@ -699,7 +702,11 @@ public class TruthMatch extends ReconstructionEngine {
             curHit.id = hitsBank.getShort("id", ihit) - 1;   // -1 for starting from 0
 
             // Now let's make sure the hit is not removed by the background merging
-            if (adcBank.getByte("order", curHit.id) >= (byte) 10) {
+//            if (adcBank.getByte("order", curHit.id) >= (byte) 10) {
+//                continue;
+//            }
+
+            if (!mchitsInECal.containsKey(curHit.id)) {
                 continue;
             }
 
@@ -796,7 +803,11 @@ public class TruthMatch extends ReconstructionEngine {
 
             curHit.id = hitsBank.getShort("hitID", ihit);   // Not removing 1, as hitID start from 0
             // Now let's make sure the hit is not removed by the background merging
-            if (adcBank.getByte("order", curHit.id) >= (byte) 10) {
+//            if (adcBank.getByte("order", curHit.id) >= (byte) 10) {
+//                continue;
+//            }
+
+            if (!mchitsInFTCal.containsKey(curHit.id)) {
                 continue;
             }
 
@@ -900,7 +911,11 @@ public class TruthMatch extends ReconstructionEngine {
 
             curHit.id = hitsBank.getShort("hitID", ihit);   // Not removing 1, as hitID start from 0
             // Now let's make sure the hit is not removed by the background merging
-            if (adcBank.getByte("order", curHit.id) >= (byte) 10) {
+//            if (adcBank.getByte("order", curHit.id) >= (byte) 10) {
+//                continue;
+//            }
+
+            if (!mchitsInFTHodo.containsKey(curHit.id)) {
                 continue;
             }
 
@@ -1009,7 +1024,11 @@ public class TruthMatch extends ReconstructionEngine {
              */
             curHit.id = (int) hitsBank.getShort("indexLtdc", ihit) / 2;   // We should devide to 2, as each MC::True hit is digitized into two ADC/TDC hits.
             // Now let's make sure the hit is not removed by the background merging
-            if (tdcBank.getByte("order", curHit.id) >= (byte) 10) {
+
+//            if (tdcBank.getByte("order", curHit.id) >= (byte) 10) {
+//                continue;
+//            }
+            if (!mchitsInCND.containsKey(curHit.id)) {
                 continue;
             }
 
@@ -1105,10 +1124,13 @@ public class TruthMatch extends ReconstructionEngine {
             curHit.id = (int) hitsBank.getShort("tdc_idx1", ihit);
 
             // Now let's make sure the hit is not removed by the background merging
-            if (tdcBank.getByte("order", curHit.id) >= (byte) 10) {
+//            if (tdcBank.getByte("order", curHit.id) >= (byte) 10) {
+//                continue;
+//            }
+            if (!mchitsInCTOF.containsKey(curHit.id)) {
                 continue;
             }
-            
+
             mcp.get((short) mchitsInCTOF.get(curHit.id).otid).MCLayersNeut |= 1L << CTOFBit;
 
             curHit.cid = (short) (hitsBank.getShort("clusterid", ihit) - 1);  // -1 for starting from 0
@@ -1204,12 +1226,16 @@ public class TruthMatch extends ReconstructionEngine {
                 int hitID = clBank.getInt(String.format("Hit%d_ID", iHit + 1), iCL) - 1;
 
                 // Now let's make sure the hit is not removed by the background merging
-                if (adcBank.getByte("order", hitID) >= (byte) 10) {
-                    continue;
-                }
+//                if (adcBank.getByte("order", hitID) >= (byte) 10) {
+//                    continue;
+//                }
 
                 if (hitID < 0) {
                     break;
+                }
+
+                if (!mchitsInBST.containsKey(hitID)) {
+                    continue;
                 }
 
                 int layerBit = BSTStartBit + adcBank.getInt("layer", hitID) - 1;
@@ -1262,6 +1288,16 @@ public class TruthMatch extends ReconstructionEngine {
     Map< Short, List<RecHit>> getBMTHits(DataEvent event, Map<Integer, MCHit> mchitsInBMT, Map<Integer, Map<Short, Integer>> trkID2Index, Map<Short, MCPart> mcp, Map<Short, RecPart> recp) {
         Map< Short, List<RecHit>> recHits = new HashMap<>();
 
+        if( mchitsInBMT == null) {
+            /**
+             * If no MC hits present in the BMT, then we stop here! no need to
+             * collect hits, as wee need only hits that are matched to an MChit
+             */
+            //System.out.println("No MC hits in BST");
+            return recHits;
+        }
+
+        
         /**
          * Check if three necessary banks exist otherwise will return null
          */
@@ -1287,12 +1323,17 @@ public class TruthMatch extends ReconstructionEngine {
                 int hitID = clBank.getInt(String.format("Hit%d_ID", iHit + 1), iCL) - 1;
 
                 // Now let's make sure the hit is not removed by the background merging
-                if (adcBank.getByte("order", hitID) >= (byte) 10) {
-                    continue;
-                }
+//                if (adcBank.getByte("order", hitID) >= (byte) 10) {
+//                    continue;
+//                }
+
 
                 if (hitID < 0) {
                     break;
+                }
+
+                if (!mchitsInBMT.containsKey(hitID)) {
+                    continue;
                 }
 
                 int layerBit = BMTStartBit + adcBank.getInt("layer", hitID) - 1;
@@ -1408,6 +1449,10 @@ public class TruthMatch extends ReconstructionEngine {
 
             // Now let's make sure the hit is not removed by the background merging
             if (tdcBank.getByte("order", curHit.id) >= (byte) 10) {
+                continue;
+            }
+
+            if (!mchitsInDC.containsKey(curHit.id)) {
                 continue;
             }
 
