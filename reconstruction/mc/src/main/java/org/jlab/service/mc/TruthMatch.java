@@ -65,7 +65,7 @@ public class TruthMatch extends ReconstructionEngine {
         if (event.hasBank("REC::Particle") == false) {
             return false;
         }
-
+        
         /**
          * ********************************************************
          * The 1st thing, let's load MC particles
@@ -975,7 +975,7 @@ public class TruthMatch extends ReconstructionEngine {
          * Check if three necessary banks exist otherwise will return null
          */
         if ((event.hasBank("CND::hits") == false) || (event.hasBank("CND::clusters") == false)
-                || (event.hasBank("REC::Scintillator") == false) || (event.hasBank("CND::adc") == false)) {
+                || (event.hasBank("REC::Scintillator") == false) || (event.hasBank("CND::tdc") == false)) {
             // System.out.println("There is No CND cluster or there is No CND::hit or there is no REC::Scintillator bank present");
             return null;
         }
@@ -996,7 +996,7 @@ public class TruthMatch extends ReconstructionEngine {
             clId2Pindex.put(index, pindex);
         }
 
-        DataBank adcBank = event.getBank("CND::adc");
+        DataBank tdcBank = event.getBank("CND::tdc");
         DataBank hitsBank = event.getBank("CND::hits");
 
         for (int ihit = 0; ihit < hitsBank.rows(); ihit++) {
@@ -1009,7 +1009,7 @@ public class TruthMatch extends ReconstructionEngine {
              */
             curHit.id = (int) hitsBank.getShort("indexLtdc", ihit) / 2;   // We should devide to 2, as each MC::True hit is digitized into two ADC/TDC hits.
             // Now let's make sure the hit is not removed by the background merging
-            if (adcBank.getByte("order", curHit.id) >= (byte) 10) {
+            if (tdcBank.getByte("order", curHit.id) >= (byte) 10) {
                 continue;
             }
 
@@ -1075,7 +1075,7 @@ public class TruthMatch extends ReconstructionEngine {
          * Check if three necessary banks exist otherwise will return null
          */
         if ((event.hasBank("CTOF::hits") == false) || (event.hasBank("CTOF::clusters") == false)
-                || (event.hasBank("REC::Scintillator") == false)) {
+                || (event.hasBank("REC::Scintillator") == false) || (event.hasBank("CTOF::tdc") == false)) {
             //System.out.println("There is No CTOF::cluster or there is No CTOF::hit or there is no REC::Scintillator bank present");
             return null;
         }
@@ -1097,12 +1097,18 @@ public class TruthMatch extends ReconstructionEngine {
         }
 
         DataBank hitsBank = event.getBank("CTOF::hits");
+        DataBank tdcBank = event.getBank("CTOF::tdc");
 
         for (int ihit = 0; ihit < hitsBank.rows(); ihit++) {
             RecHit curHit = new RecHit();
 
             curHit.id = (int) hitsBank.getShort("tdc_idx1", ihit);
 
+            // Now let's make sure the hit is not removed by the background merging
+            if (tdcBank.getByte("order", curHit.id) >= (byte) 10) {
+                continue;
+            }
+            
             mcp.get((short) mchitsInCTOF.get(curHit.id).otid).MCLayersNeut |= 1L << CTOFBit;
 
             curHit.cid = (short) (hitsBank.getShort("clusterid", ihit) - 1);  // -1 for starting from 0
@@ -1197,6 +1203,11 @@ public class TruthMatch extends ReconstructionEngine {
 
                 int hitID = clBank.getInt(String.format("Hit%d_ID", iHit + 1), iCL) - 1;
 
+                // Now let's make sure the hit is not removed by the background merging
+                if (adcBank.getByte("order", hitID) >= (byte) 10) {
+                    continue;
+                }
+
                 if (hitID < 0) {
                     break;
                 }
@@ -1235,7 +1246,7 @@ public class TruthMatch extends ReconstructionEngine {
                 curHit.pindex = pindex;
                 curHit.detector = (byte) DetectorType.BST.getDetectorId();
 
-                if (iHit == 0) {
+                if (recHits.get(curHit.cid) == null) {
                     recHits.put(curHit.cid, new ArrayList<>());
                 }
 
@@ -1274,6 +1285,11 @@ public class TruthMatch extends ReconstructionEngine {
             for (int iHit = 0; iHit < 5; iHit++) {
 
                 int hitID = clBank.getInt(String.format("Hit%d_ID", iHit + 1), iCL) - 1;
+
+                // Now let's make sure the hit is not removed by the background merging
+                if (adcBank.getByte("order", hitID) >= (byte) 10) {
+                    continue;
+                }
 
                 if (hitID < 0) {
                     break;
@@ -1318,7 +1334,7 @@ public class TruthMatch extends ReconstructionEngine {
                 curHit.pindex = pindex;
                 curHit.detector = (byte) DetectorType.BMT.getDetectorId();
 
-                if (iHit == 0) {
+                if (recHits.get(curHit.cid) == null) {
                     recHits.put(curHit.cid, new ArrayList<>());
                 }
 
@@ -1389,6 +1405,12 @@ public class TruthMatch extends ReconstructionEngine {
             int layerBit = DCStartBit + layer - 1;
 
             curHit.id = iHit;
+
+            // Now let's make sure the hit is not removed by the background merging
+            if (tdcBank.getByte("order", curHit.id) >= (byte) 10) {
+                continue;
+            }
+
             curHit.detector = (byte) DetectorType.DC.getDetectorId();
             curHit.cid = (short) iHit;
 
