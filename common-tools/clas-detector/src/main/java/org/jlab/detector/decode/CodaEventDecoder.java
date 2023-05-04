@@ -1068,7 +1068,7 @@ public class CodaEventDecoder {
                         }
                         cmnMode = cmnMode / ((double) (tmpList.size() - 5));
 
-                        System.out.println(slot + "    " + cmnMode);
+                        //System.out.println(slot + "    " + cmnMode);
                         
                         for (int ich = 0; ich < n_APV_CH; ich++) {
                             //DetectorDataDgtz bank = new DetectorDataDgtz(crate, slot.intValue(), ich);
