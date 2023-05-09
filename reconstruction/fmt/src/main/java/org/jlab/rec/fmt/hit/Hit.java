@@ -258,7 +258,8 @@ public class Hit implements Comparable<Hit> {
             this._ClusterIndex = _AssociatedClusterIndex;
         }
 
-        public static List<Hit> fetchHits(DataEvent event, IndexedTable timecuts, IndexedTable statuses) {
+        public static List<Hit> fetchHits(DataEvent event, IndexedTable timecuts, IndexedTable statuses,
+                IndexedTable fmtStripVoltage,  IndexedTable fmtStripVoltageThresh) {
 
             List<Hit> hits = new ArrayList<>();
 
@@ -283,6 +284,21 @@ public class Hit implements Comparable<Hit> {
                     hit.setStatus(statuses.getIntValue("status", sector, layer, strip));
                     
                     if(time!=0 && (time<tmin || time>tmax)) hit.setStatus(2); // exclude time==0 hits for MC
+                    int r = regionInOut(strip);
+                    if(fmtStripVoltage!=null && fmtStripVoltage.hasEntry(r,layer,0) && 
+                            fmtStripVoltageThresh!=null && fmtStripVoltageThresh.hasEntry(r,layer,0)) {
+                        double hv  = fmtStripVoltage.getDoubleValue("HV", r,layer,0); 
+                        double hv1 = fmtStripVoltageThresh.getDoubleValue("HV1", r,layer,0); 
+                        double hv2 = fmtStripVoltageThresh.getDoubleValue("HV2", r,layer,0); 
+                        double hv3 = fmtStripVoltageThresh.getDoubleValue("HV3", r,layer,0); 
+
+                        if(hv<hv1) 
+                            hit.setStatus(4);
+                        if(hv>=hv1 && hv<hv2) 
+                            hit.setStatus(5);
+                        if(hv>=hv2 && hv<hv3) 
+                            hit.setStatus(6);
+                    }
                     
                     hits.add(hit);
                 }
@@ -292,6 +308,25 @@ public class Hit implements Comparable<Hit> {
             return hits;
         }
         
+        private static int regionInOut(int strip_number) { 
+            int i = strip_number -1;
+            // To represent the geometry we divide the barrel micromega disk into 3 regions according to the strip numbering system.
+            // Here i = strip_number -1;
+            // Region 1 is the region in the negative x part of reg region: the strips range is from   1 to 320  (   0 <= i < 320)
+            // Region 2 is the region in the negative y part of outer region: the strips range is from 321 to 512  ( 320 <= i < 512)
+            // Region 3 is the region in the positive x part of reg region: the strips range is from 513 to 832  ( 512 <= i < 832)
+            // Region 4 is the region in the positive y part of outer region: the strips range is from 833 to 1024 ( 832 <= i < 1024)
+            int reg =0; //2=outer region; true=1 region
+
+            if((i>=0 && i<320) || (i>=512 && i<832) ) {
+                reg = 1;
+            }
+            if((i>=320 && i<512) || (i>=832 && i<1024) ) {
+                reg = 2;
+            }
+        
+            return reg;
+	}
         /**
          *
          * @return print statement with hit information

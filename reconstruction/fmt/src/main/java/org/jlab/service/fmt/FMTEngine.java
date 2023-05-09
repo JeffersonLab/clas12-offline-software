@@ -50,7 +50,10 @@ public class FMTEngine extends ReconstructionEngine {
         String[] tables = new String[]{
             "/geometry/beam/position",
             "/calibration/mvt/fmt_time",
-            "/calibration/mvt/fmt_status"
+            "/calibration/mvt/fmt_status",
+            "/calibration/mvt/fmt_voltage_drift",
+            "/calibration/mvt/fmt_voltage_strip_inout",
+            "/calibration/mvt/fmt_strip_voltage_thresholds"
         };
         requireConstants(Arrays.asList(tables));
         this.getConstantsManager().setVariation(variation);
@@ -94,8 +97,12 @@ public class FMTEngine extends ReconstructionEngine {
         // get time table
         IndexedTable timecuts = this.getConstantsManager().getConstants(run, "/calibration/mvt/fmt_time");
 
+        // get voltage tables
+        IndexedTable fmtStripVoltage    = this.getConstantsManager().getConstants(run, "/calibration/mvt/fmt_voltage_strip_inout");
+        IndexedTable fmtStripThreshold  = this.getConstantsManager().getConstants(run, "/calibration/mvt/fmt_strip_voltage_thresholds");
+        
         // === HITS ================================================================================
-        List<Hit> hits = Hit.fetchHits(event, timecuts, status);
+        List<Hit> hits = Hit.fetchHits(event, timecuts, status, fmtStripVoltage, fmtStripThreshold);
         if (hits.isEmpty()) return true;
         
         // === CLUSTERS ============================================================================
