@@ -162,6 +162,9 @@ public class SwapManager {
         final int sector = bank.getByte("sector", row);
         final int layer = bank.getByte("layer", row);
         final int comp = bank.getShort("component", row);
+        // Get the order that would be in the translation tables:
+        // FIXME:  could use RawDataBank instead of modulus, but this service
+        // should never filter rows and always needs all of them.
         final int order = bank.getByte("order", row) % 10;
         return this.get(run,banksToTables.get(bank.getDescriptor().getName()),sector,layer,comp,order);
     }
