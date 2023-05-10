@@ -1,6 +1,5 @@
 package org.jlab.detector.swaps;
 
-import org.jlab.detector.swaps.SwapTable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -163,7 +162,7 @@ public class SwapManager {
         final int sector = bank.getByte("sector", row);
         final int layer = bank.getByte("layer", row);
         final int comp = bank.getShort("component", row);
-        final int order = bank.getByte("order", row);
+        final int order = bank.getByte("order", row) % 10;
         return this.get(run,banksToTables.get(bank.getDescriptor().getName()),sector,layer,comp,order);
     }
 
