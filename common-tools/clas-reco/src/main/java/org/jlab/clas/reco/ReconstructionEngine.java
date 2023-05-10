@@ -279,7 +279,7 @@ public abstract class ReconstructionEngine implements Engine {
     
     public void setTimeStamp(String timestamp){
         for(Map.Entry<String,ConstantsManager> entry : constManagerMap.entrySet()){
-            LOGGER.log(Level.INFO,"[MAP MANAGER][" + this.getName() + "] ---> Setting " + entry.getKey() + " : variation = "
+            LOGGER.log(Level.INFO,"[MAP MANAGER][" + this.getName() + "] ---> Setting " + entry.getKey() + " : timestamp = "
                    + timestamp );
            entry.getValue().setTimeStamp(timestamp);
        }
