@@ -29,7 +29,9 @@ public class SwapEngine extends ReconstructionEngine {
             bank.setByte("sector",irow,(byte)slco[0]);
             bank.setByte("layer",irow,(byte)slco[1]);
             bank.setShort("component",irow,(short)slco[2]);
-            bank.setByte("order",irow,(byte)slco[3]);
+            final byte decade = (byte) (bank.getByte("order", irow)/10);
+            final byte order = (byte) (10*decade + (byte)slco[3]);
+            bank.setByte("order",irow, order);
         }
     }
 
