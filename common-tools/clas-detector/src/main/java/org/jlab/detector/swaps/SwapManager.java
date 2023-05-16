@@ -46,7 +46,8 @@ public class SwapManager {
         "RTPC"
     };
 
-    private final HashMap<Integer,HashMap<String,SwapTable>> swaps = new HashMap<>();
+    private volatile HashMap<Integer,HashMap<String,SwapTable>> swaps = new HashMap<>();
+
     private final Map<String,String> banksToTables = new HashMap<>();
     private final Map<String,List<String>> detsToBanks = new HashMap<>();
     private final Map<String,String> detsToTables = new HashMap<>();
@@ -189,12 +190,15 @@ public class SwapManager {
      * Initialize the swaps for a given run number.
      * @param run 
      */
-    private void add(int run) {
-        this.swaps.put(run,new HashMap<>());
-        for (String tableName : this.banksToTables.values()) {
-            IndexedTable prev = prevConman.getConstants(run, tableName);
-            IndexedTable curr = currConman.getConstants(run, tableName);
-            this.swaps.get(run).put(tableName,new SwapTable(prev,curr));
+    synchronized private void add(int run) {
+        if (!this.swaps.containsKey(run)) {
+            HashMap<String, SwapTable> x = new HashMap<>();
+            for (String tableName : this.banksToTables.values()) {
+                IndexedTable prev = prevConman.getConstants(run, tableName);
+                IndexedTable curr = currConman.getConstants(run, tableName);
+                x.put(tableName,new SwapTable(prev,curr));
+            }
+            this.swaps.put(run, x);
         }
     }
 
