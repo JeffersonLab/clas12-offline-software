@@ -20,9 +20,15 @@ import org.jlab.detector.scalers.StruckScaler.Input;
  */
 public class StruckScalers extends ArrayList<StruckScaler> {
 
-    IndexedTable fcupTable;
-    IndexedTable slmTable;
-    IndexedTable helTable;
+    public static final int DISEN = 0b1;    // disentangle non-contiguous bank intervals 
+    public static final int STRIP = 0b10;   // remove tsettle intervals
+    public static final int MERGE = 0b100;  // merge tstable intervals generated from false advances
+    public static final int CALIB = 0b1000; // calibrate raw scaler into beam charge
+    public static final int ALL = DISEN | STRIP | MERGE | CALIB;
+
+    private final IndexedTable fcupTable;
+    private final IndexedTable slmTable;
+    private final IndexedTable helTable;
 
     /**
      * @param fcupTable CCDB's /runcontrol/fcup
@@ -32,11 +38,35 @@ public class StruckScalers extends ArrayList<StruckScaler> {
      * @return
      */
     public static StruckScalers read(Bank bank, IndexedTable fcupTable, IndexedTable slmTable, IndexedTable helTable) {
+        return read(ALL, bank, fcupTable, slmTable, helTable);
+    }
+    
+    /**
+     * @param fcupTable CCDB's /runcontrol/fcup
+     * @param slmTable CCDB's /runcontrol/slm
+     * @param helTable CCDB's /runcontrol/helicity
+     */
+    public StruckScalers(IndexedTable fcupTable, IndexedTable slmTable, IndexedTable helTable) {
+        this.fcupTable = fcupTable;
+        this.slmTable = slmTable;
+        this.helTable = helTable;
+    }
+
+    /**
+     * @param ops a mask of the operations to perform
+     * @param fcupTable CCDB's /runcontrol/fcup
+     * @param slmTable CCDB's /runcontrol/slm
+     * @param helTable CCDB's /runcontrol/helicity
+     * @param bank a RAW::scaler bank
+     * @return
+     */
+    public static StruckScalers read(int ops, Bank bank, IndexedTable fcupTable, IndexedTable slmTable, IndexedTable helTable) {
         StruckScalers ss = new StruckScalers(fcupTable, slmTable, helTable);
         ss.read(bank);
-        ss.disentangle();
-        ss.strip(HelicityInterval.TSTABLE);
-        ss.calibrate();
+        if ((ops & DISEN) != 0) ss.disentangle();
+        if ((ops & STRIP) != 0) ss.strip(HelicityInterval.TSTABLE);
+        if ((ops & MERGE) != 0) ss.merge();
+        if ((ops & CALIB) != 0) ss.calibrate();
         return ss;        
     }
 
@@ -51,21 +81,10 @@ public class StruckScalers extends ArrayList<StruckScaler> {
     }
 
     /**
-     * @param fcupTable CCDB's /runcontrol/fcup
-     * @param slmTable CCDB's /runcontrol/slm
-     * @param helTable CCDB's /runcontrol/helicity
-     */
-    public StruckScalers(IndexedTable fcupTable, IndexedTable slmTable, IndexedTable helTable) {
-        this.fcupTable = fcupTable;
-        this.slmTable = slmTable;
-        this.helTable = helTable;
-    }
-
-    /**
      * Get all intervals readout in one RAW::scaler bank.
      * @param bank a RAW::scaler bank
      */
-    private void read(Bank bank) {
+    public void read(Bank bank) {
 
         StruckScaler reading = new StruckScaler();
 
@@ -120,9 +139,21 @@ public class StruckScalers extends ArrayList<StruckScaler> {
     /**
      * Convert raw scaler counts into beam charge:
      */
-    private void calibrate() {
+    public void calibrate() {
         for (StruckScaler ss : this) {
             ss.calibrate(this.fcupTable, this.slmTable);
+        }
+    }
+
+    /**
+     * Remove all intervals whose clock doesn't look like the given interval.
+     * @param interval the type of helicity interval to preserve
+     */
+    public void strip(HelicityInterval interval) {
+        for (int ii=0; ii<this.size(); ii++) {
+            if (this.get(ii).getHelicityInterval(this.helTable) != interval) {
+                this.remove(ii);
+            }
         }
     }
 
@@ -131,7 +162,7 @@ public class StruckScalers extends ArrayList<StruckScaler> {
      * @param source the interval to remove after copying its ungated scalers
      * @param destination the interval to update and keep
      */
-    private void copyGate(StruckScaler source, StruckScaler destination) {
+    public void copyGate(StruckScaler source, StruckScaler destination) {
         destination.clock = source.clock;
         destination.fcup = source.fcup;
         destination.slm = source.slm;
@@ -143,17 +174,18 @@ public class StruckScalers extends ArrayList<StruckScaler> {
      * @param source the interval to remove after copying its ungated scalers
      * @param destination the interval to update and keep
      */
-    private void copyGate(int source, int destination) {
+    public void copyGate(int source, int destination) {
         this.copyGate(this.get(source), this.get(destination));
     }
 
     /**
      * When there's one interval in a RAW::scaler bank, that interval is 
      * represented by (6) contiguous bank rows.  But when there's multiple
-     * intervals, the gated/ungated are interspersed with another interval
-     * (and the ungated doesn't contain the helicity bit).  Here we fix.
+     * intervals, the gated/ungated are interspersed with another interval in
+     * between.  Here we disentangle that.  Note, this should be called *before*
+     * any of the other manipulations.
      */
-    private void disentangle() {
+    public void disentangle() {
         HashMap<StruckScaler,StruckScaler> d = new HashMap<>();
         for (int ii=0; ii<this.size()-2; ii++) {
             if (this.get(ii).interval != this.get(ii+2).interval) continue;
@@ -169,34 +201,73 @@ public class StruckScalers extends ArrayList<StruckScaler> {
     }
 
     /**
-     * Merge two intervals into one by adding their contents.
+     * Merge two intervals into one by adding their raw scaler values.
      * @param source the interval to remove after adding it to the other one
      * @param destination the interval to update and keep 
      */
-    private void add(int source, int destination) {
+    public void add(int source, int destination) {
         this.get(destination).add(this.get(source));
         this.remove(source);
     }
 
     /**
-     * Identify intervals created by false advances, remove them, and add them
-     * to the previous interval.  False intervals must have the same helicity as
-     * the previous one and have an odd clock value.  Hmm, on further thought,
-     * there's not much point in doing this, and it's better to just strip out
-     * things that look like tsettle and keep everything else as is.
+     * Identify intervals created by false advances and merge their raw scaler
+     * values into one full tstable interval.  False advances must have the same
+     * helicity as the previous one and odd clock values.  Note, this requires
+     * tsettle intervals were already removed.
      */
-    private void add() {
-        throw new UnsupportedOperationException();
-    }
+    public void merge() {
 
-    /**
-     * Remove all intervals that don't look like the given interval.
-     * @param interval the type of helicity interval to preserve
-     */
-    private void strip(HelicityInterval interval) {
-        for (int ii=0; ii<this.size(); ii++) {
-            if (this.get(ii).getHelicityInterval(this.helTable) != interval) {
-                this.remove(ii);
+        // clock must be with in 1% of the expected for tstable:
+        final double tolerance = 0.01;
+
+        final double tsettle = 1E-6 * helTable.getDoubleValue("tsettle",0,0,0);
+        final double tstable = 1E-6 * helTable.getDoubleValue("tstable",0,0,0);
+
+        // Loop over the starting interval:
+        for (int i0=0; i0<this.size()-1; ++i0) {
+
+            // Initialize the sum of the intervals' clocks:
+            double clockSum = (double)this.get(i0).clock / this.get(i0).clockFreq;
+
+            // The ending interval's index:
+            int i1 = i0;
+
+            // Whether we already found a good, summed interval:
+            boolean found = false;
+
+            // loop over subsequent intervals:
+            for (int jj=i0+1; jj<this.size(); ++jj) {
+
+                // Stop if it's not the same helicity as the starting interval:
+                if (this.get(i0).helicity != this.get(jj).helicity) break;
+
+                // The summed interval:
+                clockSum += (double)this.get(jj).clock / this.get(jj).clockFreq;
+                HelicityInterval intvl = HelicityInterval.createStrict(tolerance, clockSum, tsettle, tstable);
+
+                // The summed interval looks like a full tstable, so update the
+                // ending interval:
+                if (intvl == HelicityInterval.TSTABLE) {
+                    i1 = jj;
+                    found = true;
+                }
+
+                // If the summed interval doesn't look like a full tstable, but
+                // we already found one that did, then there's no point in
+                // continuing with this starting interval:
+                else if (found) {
+                    break;
+                }
+            }
+
+            // Finally, add the intervals to the starting interval.
+            // Note, we walk backwards here because we'll be removing elements
+            // and leaving i0+1 as the next starting interval.
+            if (i1 > i0) {
+                for (int kk=i1; kk>=i0; --kk) {
+                    this.add(kk, i0);
+                }
             }
         }
     }

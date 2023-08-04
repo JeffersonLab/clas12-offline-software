@@ -129,9 +129,9 @@ public class StruckScaler extends DaqScaler {
         // these guys are in microseconds in CCDB, convert them to seconds:
         final double tsettleSeconds = 1E-6 * helTable.getDoubleValue("tsettle",0,0,0);
         final double tstableSeconds = 1E-6 * helTable.getDoubleValue("tstable",0,0,0);
-        return HelicityInterval.createLoose(clockSeconds, tsettleSeconds, tstableSeconds);
+        return HelicityInterval.createLoose(0.1, clockSeconds, tsettleSeconds, tstableSeconds);
     }
-    
+
     /**
      * Determine whether the clock looks more like tsettle or tstable periods.
      * @param helTable /runcontrol/helicity CCDB table
