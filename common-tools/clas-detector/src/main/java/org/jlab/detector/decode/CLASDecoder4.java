@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import java.sql.Time;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.jlab.detector.base.DetectorDescriptor;
@@ -46,8 +45,8 @@ public class CLASDecoder4 {
     private HipoDataEvent               hipoEvent = null;
     private boolean              isRunNumberFixed = false;
     private int                  decoderDebugMode = 0;
-    private SchemaFactory        schemaFactory = new SchemaFactory();
-
+    private SchemaFactory           schemaFactory = new SchemaFactory();
+    
     public CLASDecoder4(boolean development){
         codaDecoder = new CodaEventDecoder();
         detectorDecoder = new DetectorEventDecoder(development);
@@ -617,8 +616,8 @@ public class CLASDecoder4 {
         IndexedTable helTable = this.detectorDecoder.scalerManager.
                 getConstants(this.detectorDecoder.getRunNumber(),"/runcontrol/helicity");
 
-        // get unix event time (in seconds), and convert to Java's date (via milliseconds):
-        Date uet=new Date(configBank.getInt("unixtime",0)*1000L);
+        // get unix event time (in seconds):
+        long uet = configBank.getInt("unixtime",0);
 
         // retrieve RCDB run start time:
         Time rst;
